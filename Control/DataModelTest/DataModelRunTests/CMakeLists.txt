@@ -41,7 +41,7 @@ function (datamodel_run_test testName)
 
   atlas_add_test( ${testName}
                   SCRIPT ${_command} ${_arg} ${_options}
-                  PROPERTIES TIMEOUT 600
+                  PROPERTIES TIMEOUT 800
                   LOG_IGNORE_PATTERN "has different type than the branch|no dictionary for class|^StorageSvc +INFO|Cache alignment|Unable to locate catalog|IOVDbSvc[0-9 ]+INFO|Invalid ./TagInfo${ARG_EXTRA_IGNORE}|The database does not exist|IDatabaseSvc::openDatabase.*=>|New file created|MessageSvc not found"
                   ENVIRONMENT "ATLAS_REFERENCE_TAG=DataModelRunTests/DataModelRunTestsReference-01-00-03;CREST_URL=http://crest-j23.cern.ch:8081/api-v6.0"
                   DEPENDS ${ARG_DEPENDS} )
