@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkSurfaces/SurfaceBounds.h"
 
@@ -16,30 +15,30 @@
 #include <format>
 namespace ActsTrk::detail {
 
-  template <typename trajectory_t>
+  template <Acts::TrackStateProxyConcept proxy_t>
   void TrkMeasurementCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
                                            const Acts::CalibrationContext& /*cctx*/,
                                            const Acts::SourceLink& sl,
-                                           TrackState_t<trajectory_t> trackState) const {
-    const SourceLink_t sourceLink = unpack(sl);
+                                           proxy_t trackState) const {
+    const Trk::MeasurementBase* sourceLink = unpack(sl);
 
     auto detEl = dynamic_cast<const InDetDD::SiDetectorElement *>(sourceLink->associatedSurface().associatedDetectorElement()); 
 
     if(auto pixelCluster = dynamic_cast<const InDet::PixelClusterOnTrack *>(sourceLink); pixelCluster != nullptr) {
       auto [locPos, locCov] = TrackingUtilities::convertPix_LocalPosCov(*pixelCluster->prepRawData());
-      setState<2, trajectory_t>(ProjectorType::e2DimNoTime, locPos, locCov, sl, trackState);
+      setState<2>(ProjectorType::e2DimNoTime, locPos, locCov, sl, trackState);
     } else if(auto stripCluster = dynamic_cast<const InDet::SCT_ClusterOnTrack *>(sourceLink); stripCluster != nullptr) {
       auto [locPos, locCov] = TrackingUtilities::convertSCT_LocalPosCov(*stripCluster->prepRawData());
       if( detEl->isBarrel() ) {
-        setState<1, trajectory_t>(ProjectorType::e1DimNoTime, locPos, locCov,
+        setState<1>(ProjectorType::e1DimNoTime, locPos, locCov,
                                   sl, trackState);
       } else {
-        setState<1, trajectory_t>(ProjectorType::e1DimRotNoTime, locPos, locCov,
+        setState<1>(ProjectorType::e1DimRotNoTime, locPos, locCov,
                                   sl, trackState);
       }
     } else if(auto hgtdCluster = dynamic_cast<const HGTD_ClusterOnTrack*>(sourceLink); hgtdCluster != nullptr ) {
       auto [locPos, locCov] = TrackingUtilities::convertHGTD_LocalPosCov(*hgtdCluster->prepRawData());
-      setState<3, trajectory_t>(ProjectorType::e2DimWithTime, locPos, locCov, sl, trackState);
+      setState<3>(ProjectorType::e2DimWithTime, locPos, locCov, sl, trackState);
      } else {
       std::stringstream linkDump{};
       sourceLink->dump(linkDump); 

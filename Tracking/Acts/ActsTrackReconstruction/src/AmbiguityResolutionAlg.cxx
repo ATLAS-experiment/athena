@@ -18,35 +18,14 @@
 
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 
 #include "src/detail/MeasurementIndex.h"
 #include "src/detail/SharedHitCounter.h"
 #include "src/detail/Definitions.h"
 
-namespace {
-   static std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
-      const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
-      const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
-      return uncalibMeas.identifier();
-   }
+#include "ActsCalibrators/SourceLinkHash.h"
 
-   static bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
-      const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
-      const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
-
-      return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
-   }
-}
-
-namespace ActsTrk
-{
-
-  AmbiguityResolutionAlg::AmbiguityResolutionAlg(const std::string &name,
-                                   ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
-  {
-  }
+namespace ActsTrk {
 
   StatusCode AmbiguityResolutionAlg::initialize()
   {
@@ -62,6 +41,8 @@ namespace ActsTrk
      ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
      ATH_CHECK(m_tracksKey.initialize());
      ATH_CHECK(m_resolvedTracksKey.initialize());
+
+
      return StatusCode::SUCCESS;
   }
 
@@ -80,15 +61,15 @@ namespace ActsTrk
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto mon = Monitored::Group( m_monTool, timer );
 
-    SG::ReadHandle<ActsTrk::TrackContainer> trackHandle = SG::makeHandle(m_tracksKey, ctx);
-    ATH_CHECK(trackHandle.isValid());
-    const ActsTrk::TrackContainer* trackContainer = trackHandle.cptr();
+    const ActsTrk::TrackContainer* trackContainer{};
+    ATH_CHECK(SG::get(trackContainer, m_tracksKey, ctx));
     m_stat[kNInputTracks] += trackContainer->size();
 
     Acts::GreedyAmbiguityResolution::State state;
-    m_ambi->computeInitialState(*trackContainer, state, &sourceLinkHash,
-                                &sourceLinkEquality);
 
+   
+    m_ambi->computeInitialState(*trackContainer, state, &detail::sourceLinkHash,
+                                &detail::sourceLinkEquality);
     m_ambi->resolve(state);
 
     ATH_MSG_DEBUG("Resolved to " << state.selectedTracks.size() << " tracks from "
@@ -108,9 +89,12 @@ namespace ActsTrk
     detail::SharedHitCounter sharedHits;
 
     std::size_t totalShared = 0;
+    /** Validation of the sharedhit counts for the algorithm is only available if the
+     *  source link type is xAOD::Uncalibrated measurement */
+
     for (auto iTrack : state.selectedTracks) {
       auto destProxy = resolvedTracksContainer.getTrack(resolvedTracksContainer.addTrack());
-      destProxy.copyFrom(trackHandle->getTrack(state.trackTips.at(iTrack)));
+      destProxy.copyFrom(trackContainer->getTrack(state.trackTips.at(iTrack)));
       
       if (m_countSharedHits) {
         auto [nShared, nBadTrackMeasurements] = sharedHits.computeSharedHitsDynamic(destProxy, resolvedTracksContainer, measurementIndex);
@@ -130,11 +114,8 @@ namespace ActsTrk
     Acts::ConstVectorMultiTrajectory storableTrackStateBackend( std::move(resolvedTrackStateBackend) );
     std::unique_ptr< ActsTrk::TrackContainer > storableTracksContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(storableTrackBackend),
                                                                                                                       std::move(storableTrackStateBackend) );
-    SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle = SG::makeHandle( m_resolvedTracksKey, ctx );
-    if (resolvedTrackHandle.record( std::move(storableTracksContainer)).isFailure()) {
-      ATH_MSG_ERROR("Failed to record resolved ACTS tracks with key " << m_resolvedTracksKey.key() );
-      return StatusCode::FAILURE;
-    }
+    SG::WriteHandle resolvedTrackHandle{m_resolvedTracksKey, ctx };
+    ATH_CHECK(resolvedTrackHandle.record( std::move(storableTracksContainer)));
     
     return StatusCode::SUCCESS;
   }

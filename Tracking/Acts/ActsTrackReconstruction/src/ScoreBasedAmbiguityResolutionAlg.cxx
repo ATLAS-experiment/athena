@@ -19,40 +19,16 @@
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "ActsPlugins/Json/AmbiguityConfigJsonConverter.hpp"
 #include "Acts/Utilities/Logger.hpp"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
 #include "ActsInterop/TableUtils.h"
 #include "src/detail/MeasurementIndex.h"
 #include "src/detail/SharedHitCounter.h"
 #include "src/detail/Definitions.h"
 
-namespace {
-static std::size_t sourceLinkHash(const Acts::SourceLink &slink) {
-  const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink =
-      slink.get<ActsTrk::ATLASUncalibSourceLink>();
-  const xAOD::UncalibratedMeasurement &uncalibMeas =
-      ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
-  return uncalibMeas.identifier();
-}
+#include "ActsCalibrators/SourceLinkHash.h"
 
-static bool sourceLinkEquality(const Acts::SourceLink &a, const Acts::SourceLink &b) {
-  const xAOD::UncalibratedMeasurement &uncalibMeas_a =
-      ActsTrk::getUncalibratedMeasurement(
-          a.get<ActsTrk::ATLASUncalibSourceLink>());
-  const xAOD::UncalibratedMeasurement &uncalibMeas_b =
-      ActsTrk::getUncalibratedMeasurement(
-          b.get<ActsTrk::ATLASUncalibSourceLink>());
-
-  return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
-}
-
-}  // namespace
 
 namespace ActsTrk {
-
-ScoreBasedAmbiguityResolutionAlg::ScoreBasedAmbiguityResolutionAlg(
-    const std::string &name, ISvcLocator *pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode ScoreBasedAmbiguityResolutionAlg::initialize() {
   {
@@ -138,7 +114,7 @@ StatusCode ScoreBasedAmbiguityResolutionAlg::execute(
   // Call the ambiguity resolution algorithm with the optional cuts on the
   // updated tracks
   std::vector<int> goodTracks = m_ambi->solveAmbiguity(
-      updatedTracks, &sourceLinkHash, &sourceLinkEquality, Optionals);
+      updatedTracks, &detail::sourceLinkHash, &detail::sourceLinkEquality, Optionals);
 
   ATH_MSG_DEBUG("Resolved to " << goodTracks.size() << " tracks from "
                 << updatedTracks.size());

@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/MeasurementToTrackParticleDecorationAlg.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -16,6 +15,7 @@
 #include "Acts/Surfaces/AnnulusBounds.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
 #include "ActsEvent/Decoration.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 
 using namespace Acts::UnitLiterals;
@@ -270,15 +270,14 @@ namespace ActsTrk {
                     type = MeasurementType::UNBIASED;
                     // if unbiased, access the associated uncalibrated measurement and store the size
                     if (state.hasUncalibratedSourceLink()) {
-		      ATLASUncalibSourceLink sourceLink = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-		      const xAOD::UncalibratedMeasurement &uncalibratedMeasurement = getUncalibratedMeasurement(sourceLink);
-		      const xAOD::UncalibMeasType measurementType = uncalibratedMeasurement.type();
+		      const xAOD::UncalibratedMeasurement* uncalibratedMeasurement = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
+		      const xAOD::UncalibMeasType measurementType = uncalibratedMeasurement->type();
 		      if (measurementType == xAOD::UncalibMeasType::PixelClusterType) {
-			auto pixelCluster = static_cast<const xAOD::PixelCluster *>(&uncalibratedMeasurement);
+			auto pixelCluster = static_cast<const xAOD::PixelCluster *>(uncalibratedMeasurement);
 			sizePhi = pixelCluster->channelsInPhi();
 			sizeEta = pixelCluster->channelsInEta();
 		      } else if (measurementType == xAOD::UncalibMeasType::StripClusterType) {
-			auto stripCluster = static_cast<const xAOD::StripCluster *>(&uncalibratedMeasurement);
+			auto stripCluster = static_cast<const xAOD::StripCluster *>(uncalibratedMeasurement);
 			sizePhi = stripCluster->channelsInPhi();
 		      } else {
 			ATH_MSG_DEBUG("xAOD::UncalibratedMeasurement is neither xAOD::PixelCluster nor xAOD::StripCluster");

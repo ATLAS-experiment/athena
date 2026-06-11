@@ -40,6 +40,8 @@ def prepare_acts_rdo2aod(pipeline : str):
                      'Acts.GsfDirectNavigation=True',
                      'Tracking.doITkFastTracking=True',
                      'Trigger.doRuntimeNaviVal=True',
+                     'Scheduler.ShowDataDeps = True',
+                     'Scheduler.ShowDataFlow = True',
                      f'IOVDb.GlobalTag=\'{defaultConditionsTags.RUN4_MC}\'',
                      ]
 

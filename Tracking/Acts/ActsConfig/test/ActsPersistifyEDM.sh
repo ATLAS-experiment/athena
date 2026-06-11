@@ -13,6 +13,7 @@ Reco_tf.py \
   	     flags.Acts.EDM.PersistifySpacePoints=True; \
 	     flags.Acts.EDM.PersistifyTracks=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
+  --postExec "cfg.printConfig(withDetails=True, summariseProps=True);" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events} \

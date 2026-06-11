@@ -19,6 +19,7 @@ atlas_add_component( ActsMonitoring
                 ActsToolInterfacesLib
                 AthenaMonitoringLib
                 AthenaMonitoringKernelLib
+                ActsCalibratorsLib
                 BeamSpotConditionsData
                 GaudiKernel
                 GeoPrimitives

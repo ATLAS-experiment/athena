@@ -3,7 +3,6 @@
 */
 #include "TrackTruthMatchingBaseAlg.h"
 
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthParticle.h"
 

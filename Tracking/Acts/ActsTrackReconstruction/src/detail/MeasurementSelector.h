@@ -26,6 +26,7 @@
 #include "Acts/EventData/TrackStateProxy.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
 
 // for MeasurementSizeMax
 #include "Acts/EventData/MultiTrajectory.hpp"
@@ -631,7 +632,7 @@ protected:
          assert( state_i < result->size());
          TrackStateProxy trackState( trajectory.getTrackState( (*result)[state_i] ) );
          TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
-         trackState.setUncalibratedSourceLink(derived().makeSourceLink(std::move(a_selected_measurement.m_sourceLink.value())));
+         trackState.setUncalibratedSourceLink(ActsTrk::detail::MeasurementCalibratorBase::pack(std::move(a_selected_measurement.m_sourceLink.value())));
          // flag outliers accordingly, so that they are handled correctly by the post processing
          if (a_selected_measurement.m_isOutLier) {
             trackState.typeFlags().setIsOutlier();
@@ -827,12 +828,6 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
    // get the accumulated path length of the bound state
    static double pathLength(const T_BoundState &boundState)  {
       return std::get<2>(boundState);
-   }
-
-   // create a source link from the measurement
-   template <typename T_Value>
-   static Acts::SourceLink makeSourceLink(T_Value &&value) {
-      return Acts::SourceLink{value};
    }
 
    // perform simple transformation to cerate the type

@@ -17,6 +17,7 @@
 #include "Acts/TrackFitting/MbfSmoother.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsInterop/Logger.h"
+#include "ActsCalibrators/SourceLinkHash.h"
 
 // ActsTrk
 #include "ActsCalibBase/CalibrationContext.h"
@@ -37,18 +38,7 @@
 #include <variant>
 
 namespace {
-  static std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
-    const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
-    const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
-    return uncalibMeas.identifier();
-  }
-
-  static bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
-    const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
-    const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
-    return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
-  }
-
+ 
   static std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> getFirstMeasurementFromTrack(typename ActsTrk::detail::RecoTrackContainer::TrackProxy trackProxy) {
     std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> firstMeasurement {std::nullopt};
     for (auto st : trackProxy.trackStatesReversed()) {
@@ -366,8 +356,8 @@ namespace ActsTrk
 
     // Start ambiguity resolution
     Acts::GreedyAmbiguityResolution::State state;
-    m_ambi->computeInitialState(actsTracksContainer, state, &sourceLinkHash,
-                                &sourceLinkEquality);
+    m_ambi->computeInitialState(actsTracksContainer, state, &detail::sourceLinkHash,
+                                &detail::sourceLinkEquality);
     m_ambi->resolve(state);
 
     // Copy the resolved tracks into the output container
@@ -756,7 +746,7 @@ namespace ActsTrk
                                                              return;
 
                                                            // Fill the duplicate selector
-                                                           auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+                                                           auto sl = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
                                                            duplicateSeedDetector.addMeasurement(sl, measurementIndex);
                                                          }); // end visitBackwards
   }

@@ -16,8 +16,7 @@ namespace ActsTrk {
 class PrdAssociationAlg
   : public AthReentrantAlgorithm {
 public:
-  PrdAssociationAlg(const std::string& name,
-		    ISvcLocator* pSvcLocator);
+ using AthReentrantAlgorithm::AthReentrantAlgorithm;
   virtual ~PrdAssociationAlg() override = default;
 
   virtual StatusCode initialize() override;

@@ -11,28 +11,50 @@
 
 namespace ActsTrk::detail {
 
-void RefittingCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
-                                    const Acts::CalibrationContext& /*cctx*/,
+RefittingCalibrator::RefittingCalibrator(const ActsTrk::IActsToTrkConverterTool* convTool,
+                                          const Trk::IRIO_OnTrackCreator* rotCreator):
+    m_prdCalibrator{convTool, rotCreator}{}
+
+void RefittingCalibrator::calibrate(const Acts::GeometryContext& gctx,
+                                    const Acts::CalibrationContext& cctx,
                                     const Acts::SourceLink& sourceLink,
                                     MutableTrackStateProxy trackState) const {
-  const auto& sl = sourceLink.get<RefittingSourceLink>();
 
-  // Reset the original uncalibrated source link on this track state
-  trackState.setUncalibratedSourceLink(sl.state.getUncalibratedSourceLink());
-
-  // Here we construct a measurement by extracting the information available
-  // in the state
-  Acts::visit_measurement(sl.state.calibratedSize(), [&](auto N) {
-    constexpr int Size = decltype(N)::value;
-
-    trackState.allocateCalibrated(
-        sl.state.template calibrated<Size>().eval(),
-        sl.state.template calibratedCovariance<Size>().eval());
-  });
-
-  if (!sl.state.projectorSubspaceIndices().empty()) {
-    trackState.setProjectorSubspaceIndices(sl.state.projectorSubspaceIndices());
-  }
+    switch (MeasurementCalibratorBase::getType(sourceLink)) {
+        using enum SourceLinkType;
+        case TrkMeasurement:  
+            m_measCalibrator.calibrate(gctx, cctx, sourceLink, trackState);
+            break;
+        case TrkPrepRawData:
+            m_prdCalibrator.calibrate(gctx, cctx, sourceLink, trackState);
+            break;
+        case xAODUnCalibMeas:
+            m_xAODCalibrator.calibrate(gctx, cctx, sourceLink, trackState);
+            break;
+        default:
+          THROW_EXCEPTION("Unsupported source link type "<<MeasurementCalibratorBase::getType(sourceLink));
+    }               
 }
+
+
+//##########################################################################
+//                      RefittingSurfaceAccesor
+//##########################################################################
+RefittingSurfaceAccesor::RefittingSurfaceAccesor(const IActsToTrkConverterTool* trkConvTool,
+                                                 const ITrackingGeometryTool* trackGeoTool):
+      m_xAODAcc{trackGeoTool}, m_prdAcc{trkConvTool}, m_rotAcc{trkConvTool} {}
+
+const Acts::Surface* RefittingSurfaceAccesor::operator()(const Acts::SourceLink& sourceLink) const {
+      switch (MeasurementCalibratorBase::getType(sourceLink)) {
+        using enum SourceLinkType;
+        case TrkMeasurement: return m_rotAcc(sourceLink);
+        case TrkPrepRawData: return m_prdAcc(sourceLink);
+        case xAODUnCalibMeas: return m_xAODAcc(sourceLink);
+        default:
+          THROW_EXCEPTION("Unsupported source link type "<<MeasurementCalibratorBase::getType(sourceLink));
+    }
+    return nullptr;
+  }
+
 
 }  // namespace ActsTrk::detail

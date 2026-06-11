@@ -16,6 +16,7 @@ atlas_add_library( ActsEventLib
    Acts::Core
    ActsGeometryLib
    ActsGeometryInterfacesLib
+   ActsCalibBase
    AthContainers
    AthContainersInterfaces
    AthenaKernel

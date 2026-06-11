@@ -72,7 +72,8 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
     }
 
     // Now loop over the pixel and strip container and make collectiong
-    std::map<HepMC::ConstGenParticlePtr, std::vector<ActsTrk::ATLASUncalibSourceLink>> trackCollections;
+    std::map<HepMC::ConstGenParticlePtr,
+            std::vector<const xAOD::UncalibratedMeasurement*>> trackCollections;
 
     for(const auto cluster: pixelContainer)
     {
@@ -87,7 +88,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {
                 auto truthParticle = identToHepMCMap.at(id);
-                trackCollections[truthParticle].emplace_back(makeATLASUncalibSourceLink(&pixelContainer, cluster, ctx));
+                trackCollections[truthParticle].emplace_back(cluster);
             }
         }
     }
@@ -105,7 +106,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {
                 auto truthParticle = identToHepMCMap.at(id);
-                trackCollections[truthParticle].emplace_back(makeATLASUncalibSourceLink(&stripContainer, cluster, ctx));
+                trackCollections[truthParticle].emplace_back(cluster);
             }
         }
     }

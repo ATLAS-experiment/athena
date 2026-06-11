@@ -5,7 +5,6 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "xAODMeasurementBase/MeasurementDefs.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 
 #include "xAODTracking/TrackingPrimitives.h"
 #include "src/detail/HitSummaryDataUtils.h"

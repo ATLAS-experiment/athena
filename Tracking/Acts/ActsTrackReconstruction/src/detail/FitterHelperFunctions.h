@@ -14,7 +14,6 @@
 #include "Acts/TrackFitting/MbfSmoother.hpp"
 
 // PACKAGE  
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 
 namespace ActsTrk::detail::FitterHelperFunctions {

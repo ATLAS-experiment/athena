@@ -18,11 +18,12 @@ namespace ActsTrk::detail {
     std::fill(beg, m_nUsedMeasurements.end(), 0u);
   }
 
-  inline void DuplicateSeedDetector::addMeasurement(const ActsTrk::ATLASUncalibSourceLink &sl, const MeasurementIndex& measurementIndex) {
+  inline void DuplicateSeedDetector::addMeasurement(const xAOD::UncalibratedMeasurement* sl, 
+                                                    const MeasurementIndex& measurementIndex) {
     if (m_disabled || m_nextSeed == m_nUsedMeasurements.size())
       return;
 
-    std::size_t hitIndex = measurementIndex.index(ActsTrk::getUncalibratedMeasurement(sl));
+    std::size_t hitIndex = measurementIndex.index(*sl);
     if (!(hitIndex < m_seedIndex.size()))
       return;
 

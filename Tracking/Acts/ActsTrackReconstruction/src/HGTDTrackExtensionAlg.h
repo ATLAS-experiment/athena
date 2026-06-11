@@ -46,7 +46,6 @@
 #include "Acts/EventData/TrackContainer.hpp"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsToolInterfaces/IPixelOnTrackCalibratorTool.h"
 #include "ActsToolInterfaces/IStripOnTrackCalibratorTool.h"
 #include "ActsToolInterfaces/IHGTDOnTrackCalibratorTool.h"

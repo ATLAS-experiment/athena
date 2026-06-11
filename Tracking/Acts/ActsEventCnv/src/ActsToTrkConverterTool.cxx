@@ -122,6 +122,10 @@ std::unique_ptr<Trk::TrackParameters> rotateParams(const Trk::TrackParameters& i
 
 StatusCode ActsToTrkConverterTool::initialize() {
   ATH_MSG_DEBUG("Initializing ACTS to ATLAS converter tool");
+  if (parent() != toolSvc()) {
+        ATH_MSG_ERROR("The tool is initialized as a private tool but should be public");
+        return StatusCode::FAILURE;
+  }
   if (!m_trackingGeometryTool.empty()) {
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
@@ -154,7 +158,6 @@ StatusCode ActsToTrkConverterTool::initialize() {
   ATH_CHECK(m_trkSummaryTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve());
   m_prdCalib = detail::TrkPrepRawDataCalibrator{this, m_ROTcreator.get()};
-  m_slType = static_cast<detail::SourceLinkType>(m_sourceLinkType.value());
   ATH_CHECK(m_muonMgrKey.initialize(m_extractMuonSurfaces));
   ATH_CHECK(m_keyMdt.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyRpc.initialize(SG::AllowEmpty));
@@ -289,7 +292,7 @@ void ActsToTrkConverterTool::toSourceLinks(const std::vector<const Trk::Measurem
       sourceLinks.reserve(sourceLinks.size() + measSet.size());
     }
     std::ranges::transform(measSet, std::back_inserter(sourceLinks), [](const Trk::MeasurementBase* meas) {
-                             return detail::TrkMeasurementCalibrator::pack(meas);
+                             return detail::MeasurementCalibratorBase::pack(meas);
                           });
 }
 void ActsToTrkConverterTool::toSourceLinks(const std::vector<const Trk::PrepRawData*>& prdSet,
@@ -298,7 +301,7 @@ void ActsToTrkConverterTool::toSourceLinks(const std::vector<const Trk::PrepRawD
       links.reserve(links.size() + prdSet.size());
     }
     std::ranges::transform(prdSet, std::back_inserter(links), [](const Trk::PrepRawData* prd) {
-                            return detail::TrkPrepRawDataCalibrator::pack(prd);
+                            return detail::MeasurementCalibratorBase::pack(prd);
                           });
 }
 
@@ -572,6 +575,7 @@ void ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(MutableTrack
       }
       if (tsos->measurementOnTrack()) {
         auto &measurement = *(tsos->measurementOnTrack());
+        actsTSOS.typeFlags().setIsMeasurement();
 
         measurementsCount++;
         // const Acts::Surface &surface =
@@ -848,22 +852,20 @@ void ActsTrackParameterCheck(
 
 std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const EventContext& ctx,
                                                                      TrackFitResult_t& fitResult,
-                                                                     const Trk::TrackInfo::TrackFitter fitAuthor,
-                                                                     const detail::SourceLinkType slType) const {
+                                                                     const Trk::TrackInfo::TrackFitter fitAuthor) const {
 
     if (not fitResult.ok()) {
       ATH_MSG_VERBOSE("Fit did not converge");  
       return nullptr;    
     }
-    return convertActsTrack(ctx, fitResult.value(), fitAuthor, slType);
+    return convertActsTrack(ctx, fitResult.value(), fitAuthor);
 }
 
 template <typename Proxy_t>
   std::unique_ptr<Trk::Track> 
     ActsToTrkConverterTool::convertActsTrack(const EventContext& ctx,
                                              const Proxy_t& acts_track,
-                                             const Trk::TrackInfo::TrackFitter fitAuthor,
-                                             const detail::SourceLinkType slType) const{
+                                             const Trk::TrackInfo::TrackFitter fitAuthor) const{
 
 
     const Acts::CalibrationContext cctx{getCalibrationContext(ctx)};
@@ -892,13 +894,17 @@ template <typename Proxy_t>
         }
 
         auto flag = state.typeFlags();
-    
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<", hole: "<<flag.isHole()
+                      <<", outlier: "<<flag.isOutlier()<<", measurement: "<<flag.isMeasurement()<<"/"
+                      <<flag.hasMeasurement()<<", "<<m_convertOutliers<<", "<<m_convertHoles
+                      <<", has SL: "<<state.hasUncalibratedSourceLink());
         // We need to determine the type of state 
         TrkTSOSMask typePattern;
         std::unique_ptr<Trk::TrackParameters> trkPars = actsTrackParametersToTrkParameters(ctx, 
                                                               acts_track.createParametersFromState(state), gctx);
         std::unique_ptr<Trk::MeasurementBase> trkMeasurement{};
-    
+
+
         // State is a hole (no associated measurement), use predicted parameters   
         if (flag.isHole()) {
           if (!m_convertHoles) { return; }
@@ -906,10 +912,12 @@ template <typename Proxy_t>
         } if (flag.isOutlier()) {
           if (!m_convertOutliers) { return; }
           typePattern.set(Trk::TrackStateOnSurface::Outlier);
-        } if (flag.hasMeasurement()) {
+        } 
+        if (flag.hasMeasurement()) {
           typePattern.set(Trk::TrackStateOnSurface::Measurement);
           nDoF = state.calibratedSize();
           chi2 = state.chi2();
+          const auto slType = detail::MeasurementCalibratorBase::getType(state.getUncalibratedSourceLink());
           switch (slType) {
               using enum detail::SourceLinkType;
               case TrkMeasurement: 
@@ -940,12 +948,12 @@ template <typename Proxy_t>
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       finalTrajectory->insert(finalTrajectory->begin(), 
                               std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(per), nullptr, typePattern));
-    
       // Create the track using the states
       Trk::TrackInfo newInfo{fitAuthor, ParticleHypothesis::convertTrk(acts_track.particleHypothesis())};
       auto newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
       constexpr bool suppressHoleSearch = false;
       m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, suppressHoleSearch);
+      ATH_MSG_VERBOSE("Created new track "<<(*newtrack->trackSummary()));
       return newtrack;
   }
 
@@ -954,7 +962,7 @@ template <typename Proxy_t>
                                                       const ActsTrk::TrackContainer& trackCont) const {
       auto outColl = std::make_unique<TrackCollection>();
       for (const ActsTrk::TrackContainer::ConstTrackProxy& trk : trackCont) {
-          outColl->push_back(convertActsTrack(ctx, trk, m_fitAuthor, m_slType));
+          outColl->push_back(convertActsTrack(ctx, trk, m_fitAuthor));
       }
       return outColl;
   }
@@ -968,19 +976,23 @@ template <typename Proxy_t>
     switch (meas->type()) {
         using enum xAOD::UncalibMeasType;
         case PixelClusterType: {
-          static const SG::AuxElement::ConstAccessor<ElementLink<InDet::PixelClusterCollection>> acc_pixelLink("pixelClusterLink");
-          if (acc_pixelLink.isAvailable(*meas) && acc_pixelLink(*meas).isValid()) {
-              rot.reset(m_ROTcreator->correct(**acc_pixelLink(*meas), *trkPars, ctx));
+          static const SG::AuxElement::ConstAccessor<ElementLink<InDet::PixelClusterCollection>> acc_prdLink("pixelClusterLink");
+          if (acc_prdLink.isAvailable(*meas) && acc_prdLink(*meas).isValid()) {
+              rot.reset(m_ROTcreator->correct(**acc_prdLink(*meas), *trkPars, ctx));
+          } else {
+              ATH_MSG_WARNING(__func__<<" () "<<__LINE__<<" - The pixel xAOD -> prd accessor is invalid");
           }
           break;
         } case StripClusterType: {
-          static const SG::AuxElement::ConstAccessor<ElementLink<InDet::SCT_ClusterCollection>> acc_stripLink("sctClusterLink");
-          if (acc_stripLink.isAvailable(*meas) && acc_stripLink(*meas).isValid()) {
-              rot.reset(m_ROTcreator->correct(**acc_stripLink(*meas), *trkPars, ctx));
+          static const SG::AuxElement::ConstAccessor<ElementLink<InDet::SCT_ClusterCollection>> acc_prdLink("sctClusterLink");
+          if (acc_prdLink.isAvailable(*meas) && acc_prdLink(*meas).isValid()) {
+              rot.reset(m_ROTcreator->correct(**acc_prdLink(*meas), *trkPars, ctx));
+          } else {
+              ATH_MSG_WARNING(__func__<<" () "<<__LINE__<<" - The strip xAOD -> prd accessor is invalid");
           }
           break;
         } case MdtDriftCircleType:
-        case MMClusterType: {
+          case MMClusterType: {
             const Identifier& id = static_cast<const xAOD::MuonMeasurement*>(meas)->identify();
             const IdentifierHash modHash = m_idHelperSvc->moduleHash(id);
             const auto* prd =  meas->type() == MdtDriftCircleType ?  fetchPrd(ctx, m_keyMdt, id, modHash) 

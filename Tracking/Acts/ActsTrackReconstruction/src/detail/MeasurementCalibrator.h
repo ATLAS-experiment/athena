@@ -22,7 +22,6 @@
 #include "Acts/Utilities/AlgebraHelpers.hpp"
 #include <Eigen/Core>
 
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsToolInterfaces/IPixelOnBoundStateCalibratorTool.h"
 #include "ActsToolInterfaces/IStripOnBoundStateCalibratorTool.h"
 #include "ActsToolInterfaces/IHGTDOnBoundStateCalibratorTool.h"
