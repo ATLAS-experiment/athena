@@ -18,7 +18,7 @@ public:
   LUCID_DigiTop(const std::string& name, ISvcLocator* svcLoc);
   virtual ~LUCID_DigiTop() = default;
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual bool isClonable() const override final { return true; }
 private:
   ToolHandle<IPileUpTool> m_mergeTool{this, "LUCID_PileUpTool", "LUCID_PileUpTool", ""};
