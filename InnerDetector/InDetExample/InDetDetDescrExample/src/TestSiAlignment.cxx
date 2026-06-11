@@ -177,7 +177,7 @@ void  TestSiAlignment::extractAlphaBetaGamma(const Amg::Transform3D & trans, dou
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode TestSiAlignment::execute() {
+StatusCode TestSiAlignment::execute(const EventContext& /*ctx*/) {
   printAlignmentShifts(false);
   return StatusCode::SUCCESS;
 }
