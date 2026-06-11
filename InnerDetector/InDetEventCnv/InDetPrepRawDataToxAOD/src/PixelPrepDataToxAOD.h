@@ -69,7 +69,7 @@ public:
 
   // Basic algorithm methods:
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
 private:
