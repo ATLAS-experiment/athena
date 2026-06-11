@@ -321,9 +321,8 @@ StatusCode AdaptiveMultiVertexFitterTestAlg::initialize()
 /**
  * @brief Standard Gaudi execute method.
  */
-StatusCode AdaptiveMultiVertexFitterTestAlg::execute()
+StatusCode AdaptiveMultiVertexFitterTestAlg::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_VERBOSE ("execute");
 
   ATH_CHECK( test1(ctx) );
