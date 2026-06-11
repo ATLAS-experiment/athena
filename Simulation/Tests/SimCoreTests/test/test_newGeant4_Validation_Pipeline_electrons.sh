@@ -4,7 +4,6 @@
 # art-include: main/Athena
 # art-memory: 8192
 # art-cores: 8
-# art-runtime: 86400
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
