@@ -76,7 +76,7 @@ StatusCode ZdcMCTruthAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ZdcMCTruthAlg::execute()
+StatusCode ZdcMCTruthAlg::execute(const EventContext& ctx)
 {
 
   /******************************************
@@ -127,15 +127,15 @@ StatusCode ZdcMCTruthAlg::execute()
    * per module sums and add the per module
    * sums to the per side sums
   ******************************************/
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthTotalEnergy(m_zdcModuleTruthTotalEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthInvisEnergy(m_zdcModuleTruthInvisEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthEMEnergy   (m_zdcModuleTruthEMEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthNonEMEnergy(m_zdcModuleTruthNonEMEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthEscEnergy  (m_zdcModuleTruthEscEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdTileXpositionRelative (m_rpdTileXpositionRelative);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdTileYpositionRelative (m_rpdTileYpositionRelative);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,uint16_t> rpdTileRowNumber      (m_rpdTileRowNumber);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,uint16_t> rpdTileColumnNumber   (m_rpdTileColumnNumber);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthTotalEnergy(m_zdcModuleTruthTotalEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthInvisEnergy(m_zdcModuleTruthInvisEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthEMEnergy   (m_zdcModuleTruthEMEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthNonEMEnergy(m_zdcModuleTruthNonEMEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTruthEscEnergy  (m_zdcModuleTruthEscEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdTileXpositionRelative (m_rpdTileXpositionRelative, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdTileYpositionRelative (m_rpdTileYpositionRelative, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,uint16_t> rpdTileRowNumber      (m_rpdTileRowNumber, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,uint16_t> rpdTileColumnNumber   (m_rpdTileColumnNumber, ctx);
   for (const auto zdcModule : *moduleContainer){
     if(zdcModule->zdcSide() == 0) continue;
     int side = (zdcModule->zdcSide() > 0) ? 1 : 0;
@@ -207,11 +207,11 @@ StatusCode ZdcMCTruthAlg::execute()
    * Decorate the Sums container with the
    * per side sums
   ******************************************/
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthTotalEnergy(m_zdcSumTruthTotalEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthInvisEnergy(m_zdcSumTruthInvisEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthEMEnergy   (m_zdcSumTruthEMEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthNonEMEnergy(m_zdcSumTruthNonEMEnergy);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthEscEnergy  (m_zdcSumTruthEscEnergy);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthTotalEnergy(m_zdcSumTruthTotalEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthInvisEnergy(m_zdcSumTruthInvisEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthEMEnergy   (m_zdcSumTruthEMEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthNonEMEnergy(m_zdcSumTruthNonEMEnergy, ctx);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumTruthEscEnergy  (m_zdcSumTruthEscEnergy, ctx);
   for (const auto zdcSum : *moduleSumContainer){
     if (zdcSum->zdcSide() == 0) continue;
     int side = (zdcSum->zdcSide()==-1) ? 0 : 1;

@@ -53,7 +53,7 @@ public:
 	~ZdcRecV2();
 
 	StatusCode initialize();
-	StatusCode execute();
+	StatusCode execute(const EventContext& ctx);
 	StatusCode finalize();
 
 private:
