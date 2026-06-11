@@ -201,13 +201,13 @@ void fillTrackPars(TH1I* const hists[FPGATrackSimTrackPars::NPARS], FPGATrackSim
 ///////////////////////////////////////////////////////////////////////////////
 
 
-StatusCode FPGATrackSimMatrixGenAlgo::execute()
+StatusCode FPGATrackSimMatrixGenAlgo::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("execute()");
   m_eventHeader->clearHits();
   m_eventHeader->reset();
   // Get hits and training tracks from this event
-  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, Gaudi::Hive::currentContext()));
+  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, ctx));
 
   std::vector<FPGATrackSimHit> hits = getLogicalHits();
 

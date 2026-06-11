@@ -27,7 +27,7 @@ StatusCode FPGATrackSimRawHitsWrapperAlg::BookHistograms(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimRawHitsWrapperAlg::execute() {
+StatusCode FPGATrackSimRawHitsWrapperAlg::execute(const EventContext& /*ctx*/) {
   ATH_MSG_DEBUG ("Running on event ");   
   FPGATrackSimEventInputHeader  eventHeader;
   bool last=false;

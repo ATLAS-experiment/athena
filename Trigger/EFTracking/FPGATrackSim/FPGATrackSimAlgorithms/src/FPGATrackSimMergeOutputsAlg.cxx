@@ -105,10 +105,9 @@ StatusCode FPGATrackSimMergeOutputsAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimMergeOutputsAlg::execute() {
+StatusCode FPGATrackSimMergeOutputsAlg::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG ("Running on event ");
 
-  const EventContext& ctx = getContext();
   SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_Handle (m_FPGAHitKey, ctx); // all the clusters across the regions
 
   SG::WriteHandle<FPGATrackSimTrackCollection> FPGATracks_Handle (m_FPGATrackKey, ctx); // all the tracks across the regions
