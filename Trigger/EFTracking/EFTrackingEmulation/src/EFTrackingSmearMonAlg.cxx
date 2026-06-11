@@ -22,8 +22,7 @@ StatusCode EFTrackingSmearMonAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode EFTrackingSmearMonAlg::execute() {
-  auto ctx = getContext() ;
+StatusCode EFTrackingSmearMonAlg::execute(const EventContext& ctx) {
 
   SG::ReadHandle<xAOD::TrackParticleContainer> inputTracks_handle( m_inputTrackParticleKey, ctx );
   const xAOD::TrackParticleContainer* inputTracks = inputTracks_handle.cptr();
