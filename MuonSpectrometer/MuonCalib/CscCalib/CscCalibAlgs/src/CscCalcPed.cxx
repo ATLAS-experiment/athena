@@ -273,7 +273,7 @@ namespace MuonCalib {
   }
 
   //Execute loops through all strips and fills histograms
-  StatusCode CscCalcPed::execute()
+  StatusCode CscCalcPed::execute(const EventContext& /*ctx*/)
   {
     ATH_MSG_DEBUG("Begin execute");	
     //collectEventInfo collects infomation about each event by filling ampHistCollection and peaktHist.

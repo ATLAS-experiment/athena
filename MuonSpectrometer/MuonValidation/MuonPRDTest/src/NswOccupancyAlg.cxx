@@ -30,8 +30,7 @@ StatusCode NswOccupancyAlg::initialize() {
     
     return StatusCode::SUCCESS;
 }
-StatusCode NswOccupancyAlg::execute() { 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode NswOccupancyAlg::execute(const EventContext& ctx) { 
     SG::ReadHandle<MuonPatternCombinationCollection> pattCol{m_patternCollKey, ctx};
     if (!pattCol.isValid()){
         ATH_MSG_FATAL("Failed to retrieve the pattern collection "<<m_patternCollKey.fullKey());

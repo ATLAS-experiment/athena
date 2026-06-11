@@ -22,7 +22,7 @@ StatusCode CscDigitBuilder::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CscDigitBuilder::execute() {
+StatusCode CscDigitBuilder::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG ( "in execute()" );
-  return m_digTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_digTool->processAllSubEvents(ctx);
 }

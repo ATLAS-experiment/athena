@@ -75,7 +75,7 @@ StatusCode MuonPrdSelectorAlg::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonPrdSelectorAlg::execute()
+StatusCode MuonPrdSelectorAlg::execute(const EventContext& /*ctx*/)
 { 
   ATH_MSG_DEBUG( "execute() called"  );
   ATH_CHECK( retrieveContainers() );

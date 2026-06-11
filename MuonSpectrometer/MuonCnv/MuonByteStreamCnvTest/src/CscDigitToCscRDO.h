@@ -25,7 +25,7 @@ public:
     ~CscDigitToCscRDO() = default;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual bool isClonable() const override final { return true; }
 
 private:

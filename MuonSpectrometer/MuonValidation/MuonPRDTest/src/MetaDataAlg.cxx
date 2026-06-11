@@ -58,8 +58,7 @@ StatusCode MetaDataAlg::finalize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MetaDataAlg::execute() {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode MetaDataAlg::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG("Executing " << name() << "...");
     setFilterPassed(true);
 

@@ -18,8 +18,7 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode RpcCablingTestAlg::execute() {
-        const EventContext &ctx = Gaudi::Hive::currentContext();
+    StatusCode RpcCablingTestAlg::execute(const EventContext& ctx) {
         ATH_MSG_INFO("Start validation of the Rpc cabling");
         {
             RpcFlatCableTranslator flatCable{0};

@@ -23,8 +23,7 @@ StatusCode AlignmentErrorTestAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode AlignmentErrorTestAlg::execute() {
-  const EventContext& ctx = getContext();
+StatusCode AlignmentErrorTestAlg::execute(const EventContext& ctx) {
   SG::ReadHandle<::TrackCollection> trackCollection{m_trackCollection, ctx};
   if (!trackCollection.isValid()) {
     throw std::runtime_error("Cannot retrieve track collection");

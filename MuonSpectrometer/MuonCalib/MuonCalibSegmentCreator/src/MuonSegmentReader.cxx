@@ -43,11 +43,10 @@ StatusCode MuonSegmentReader::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode MuonSegmentReader::execute()
+StatusCode MuonSegmentReader::execute(const EventContext& ctx)
 {
 
   // fill eventInfo branches
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtKey,ctx);
   if (!eventInfo.isValid()) {
     ATH_MSG_ERROR("Did not find xAOD::EventInfo");

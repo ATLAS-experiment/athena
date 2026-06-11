@@ -140,7 +140,7 @@ namespace MuonCalib {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CoolInserter::execute() {
+    StatusCode CoolInserter::execute(const EventContext& /*ctx*/) {
         for (unsigned int i = 0; i < m_calibration_sources.size(); i++) {
             ATH_MSG_INFO("Now running " << m_calibration_sources[i]);
             if (!m_calibration_sources[i]->InstertCalibration(this, static_cast<bool>(m_t0_folder.size()),
