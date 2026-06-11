@@ -198,7 +198,7 @@ namespace xAODMaker {
           if (cntr==0) {
             isSignalProcess=true;
 #ifdef HEPMC3
-            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>(HepMC::Str::BunchCrossingTime);
+            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
             if (bunchCrossingTime) {
               newAttributesPresent = true;
               ATH_MSG_VERBOSE("New attributes present.");
@@ -215,7 +215,7 @@ namespace xAODMaker {
             if (!m_doInTimePileUp && !m_doAllPileUp) break;
             isSignalProcess=false;
 #ifdef HEPMC3
-            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>(HepMC::Str::BunchCrossingTime);
+            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
             if (bunchCrossingTime) {
               // New approach based on checking the bunch crossing
               // time directly.
@@ -360,7 +360,7 @@ namespace xAODMaker {
 
             // Handle LHE particles, only supported for HEPMC3
 #ifdef HEPMC3
-            auto lhe_record_attribute = genEvt->attribute<HepMC::ShortEventAttribute>(HepMC::Str::LHERecord);
+            auto lhe_record_attribute = genEvt->attribute<HepMC::ShortEventAttribute>(HepMCStr::LHERecord);
 
             if (lhe_record_attribute && !hadLHERecord && !m_lheTruthParticleContainerKey.empty()){
               hadLHERecord=true;
@@ -426,7 +426,7 @@ namespace xAODMaker {
         genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
         if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
         // We want to process particles in barcode order.
-        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>(HepMC::Str::barcodes); // FIXME barcode-based
+        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>(HepMCStr::barcodes); // FIXME barcode-based
         if (!bcmapatt) {
           ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
           return StatusCode::FAILURE;

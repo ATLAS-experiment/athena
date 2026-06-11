@@ -48,14 +48,14 @@ public:
       NUP=e->particles().size();
       resize();
       XWGTUP = e->weights().size() ? e->weights()[0] : 1.0;
-      auto A_signal_process_id = e->attribute<HepMC3::IntAttribute>(HepMC::Str::signal_process_id);
+      auto A_signal_process_id = e->attribute<HepMC3::IntAttribute>(HepMCStr::signal_process_id);
       IDPRUP = A_signal_process_id ? A_signal_process_id->value() : 0;
-      auto A_event_scale = e->attribute<HepMC3::DoubleAttribute>(HepMC::Str::event_scale);
-      SCALUP = A_event_scale ? A_event_scale->value():0;
-      auto A_alphaQCD = e->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQCD);
-      AQCDUP = A_alphaQCD ? A_alphaQCD->value():0;
-      auto A_alphaQED = e->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQED);
-      AQEDUP = A_alphaQED ? A_alphaQED->value():0;
+      auto A_event_scale = e->attribute<HepMC3::DoubleAttribute>(HepMCStr::event_scale);
+      SCALUP = A_event_scale ? A_event_scale->value() : 0;
+      auto A_alphaQCD = e->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQCD);
+      AQCDUP = A_alphaQCD ? A_alphaQCD->value() : 0;
+      auto A_alphaQED = e->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQED);
+      AQEDUP = A_alphaQED ? A_alphaQED->value() : 0;
       for ( int i = 0; i < NUP; ++i ){
         const auto & thisParticle = e->particles().at(i);
         PUP[i][0] = thisParticle->momentum().px();
@@ -69,8 +69,8 @@ public:
         if (pv && ev ) ISTUP[i] = 2;
         if (pv && !ev ) ISTUP[i] = 1;
         if (thisParticle->status() == 4 || !pv ) ISTUP[i] = -1;
-        const auto flow1 = thisParticle->attribute<HepMC3::IntAttribute>(HepMC::Str::flow1);
-        const auto flow2 = thisParticle->attribute<HepMC3::IntAttribute>(HepMC::Str::flow2);
+        const auto flow1 = thisParticle->attribute<HepMC3::IntAttribute>(HepMCStr::flow1);
+        const auto flow2 = thisParticle->attribute<HepMC3::IntAttribute>(HepMCStr::flow2);
         ICOLUP[i].first = flow1 ? flow1->value() : 0;
         ICOLUP[i].second = flow2 ? flow2->value() : 0;
         int l = 0;
@@ -204,7 +204,7 @@ public:
 
   void add (GenVertexPtr p) {
     if (!p) return;
-    auto barcode = p->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode);
+    auto barcode = p->attribute<HepMC3::IntAttribute>(HepMCStr::barcode);
     if (barcode) {
       m_vertexBC[barcode->value()] = std::move(p);
     }
@@ -212,7 +212,7 @@ public:
 
   void remove (GenVertexPtr p) {
     if (!p) return;
-    auto barcode = p->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode);
+    auto barcode = p->attribute<HepMC3::IntAttribute>(HepMCStr::barcode);
     if (barcode) {
       const auto it = m_vertexBC.find (barcode->value());
       if (it != m_vertexBC.end()) {
@@ -223,7 +223,7 @@ public:
 
   void add (GenParticlePtr p) {
     if (!p) return;
-    auto barcode = p->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode);
+    auto barcode = p->attribute<HepMC3::IntAttribute>(HepMCStr::barcode);
     if (barcode) {
       m_particleBC[barcode->value()] = std::move(p);
     }
@@ -231,7 +231,7 @@ public:
 
   void remove (GenParticlePtr p) {
     if (!p) return;
-    auto barcode = p->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode);
+    auto barcode = p->attribute<HepMC3::IntAttribute>(HepMCStr::barcode);
     if (barcode) {
       const auto it = m_particleBC.find (barcode->value());
       if (it != m_particleBC.end()) {
@@ -262,7 +262,7 @@ public:
 
   void fillAttribute(GenEvent* e) {
     const auto eventAttributes = e->attributes(); // this makes a copy
-    const auto barcodeAttributeIt = eventAttributes.find(HepMC::Str::barcode);
+    const auto barcodeAttributeIt = eventAttributes.find(HepMCStr::barcode);
     const bool hasBarcodeAttribute = barcodeAttributeIt != eventAttributes.end();
 
     const auto &particles = e->particles();
@@ -336,11 +336,11 @@ private:
 };
 
 inline bool set_ll_event_number(HepMC3::GenEvent* e, long long int num){
-  e->add_attribute(HepMC::Str::long_long_event_number, std::make_shared<HepMC3::LongLongAttribute>(num));
+  e->add_attribute(HepMCStr::long_long_event_number, std::make_shared<HepMC3::LongLongAttribute>(num));
   return true;
 }
 inline long long int get_ll_event_number(const HepMC3::GenEvent* e){
-  auto at = e->attribute<HepMC3::LongLongAttribute>(HepMC::Str::long_long_event_number);
+  auto at = e->attribute<HepMC3::LongLongAttribute>(HepMCStr::long_long_event_number);
   return at ? at->value() : e->event_number();
 }
 
@@ -361,8 +361,8 @@ inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  end(const HepMC
 inline GenEvent* newGenEvent(const int signal_process_id, const int event_number) { // TODO Update event_number to long long int?
     GenEvent* e = new GenEvent();
     std::shared_ptr<HepMC3::IntAttribute> signal_process_id_A = std::make_shared<HepMC3::IntAttribute>(signal_process_id);
-    e->add_attribute(HepMC::Str::signal_process_id, signal_process_id_A);
-    e->add_attribute(HepMC::Str::barcodes, std::make_shared<GenEventBarcodes>());
+    e->add_attribute(HepMCStr::signal_process_id, signal_process_id_A);
+    e->add_attribute(HepMCStr::barcodes, std::make_shared<GenEventBarcodes>());
     e->set_event_number(event_number);
     return e;
 }
@@ -371,31 +371,31 @@ inline GenEvent* copyemptyGenEvent(const GenEvent* inEvt) {
   GenEvent* e = new GenEvent();
   e->set_event_number(inEvt->event_number());
   e->weights() = inEvt->weights();
-  auto a_mpi = inEvt->attribute<HepMC3::IntAttribute>(HepMC::Str::mpi); 
-  if (a_mpi) e->add_attribute(HepMC::Str::mpi, std::make_shared<HepMC3::IntAttribute>(*a_mpi));
-  auto a_signal_process_id = inEvt->attribute<HepMC3::IntAttribute>(HepMC::Str::signal_process_id);
-  if (a_signal_process_id) e->add_attribute(HepMC::Str::signal_process_id, std::make_shared<HepMC3::IntAttribute>(*a_signal_process_id));
-  auto a_event_scale = inEvt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::event_scale);
-  if (a_event_scale) e->add_attribute(HepMC::Str::event_scale, std::make_shared<HepMC3::DoubleAttribute>(*a_event_scale));
-  auto a_alphaQCD = inEvt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQCD);
-  if (a_alphaQCD) e->add_attribute(HepMC::Str::alphaQCD, std::make_shared<HepMC3::DoubleAttribute>(*a_alphaQCD));
-  auto a_alphaQED = inEvt->attribute<HepMC3::DoubleAttribute>(HepMC::Str::alphaQED);
-  if (a_alphaQED) e->add_attribute(HepMC::Str::alphaQED, std::make_shared<HepMC3::DoubleAttribute>(*a_alphaQED));
+  auto a_mpi = inEvt->attribute<HepMC3::IntAttribute>(HepMCStr::mpi); 
+  if (a_mpi) e->add_attribute(HepMCStr::mpi, std::make_shared<HepMC3::IntAttribute>(*a_mpi));
+  auto a_signal_process_id = inEvt->attribute<HepMC3::IntAttribute>(HepMCStr::signal_process_id);
+  if (a_signal_process_id) e->add_attribute(HepMCStr::signal_process_id, std::make_shared<HepMC3::IntAttribute>(*a_signal_process_id));
+  auto a_event_scale = inEvt->attribute<HepMC3::DoubleAttribute>(HepMCStr::event_scale);
+  if (a_event_scale) e->add_attribute(HepMCStr::event_scale, std::make_shared<HepMC3::DoubleAttribute>(*a_event_scale));
+  auto a_alphaQCD = inEvt->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQCD);
+  if (a_alphaQCD) e->add_attribute(HepMCStr::alphaQCD, std::make_shared<HepMC3::DoubleAttribute>(*a_alphaQCD));
+  auto a_alphaQED = inEvt->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQED);
+  if (a_alphaQED) e->add_attribute(HepMCStr::alphaQED, std::make_shared<HepMC3::DoubleAttribute>(*a_alphaQED));
   auto a_pi = inEvt->pdf_info(); 
   if (a_pi) e->set_pdf_info(std::make_shared<HepMC3::GenPdfInfo>(*a_pi));
   auto a_hi = inEvt->heavy_ion(); 
   if (a_hi) e->set_heavy_ion(std::make_shared<HepMC3::GenHeavyIon>(*a_hi));
-  auto a_random_states = inEvt->attribute<HepMC3::VectorLongIntAttribute>(HepMC::Str::random_states);
-  if (a_random_states) e->add_attribute(HepMC::Str::random_states, std::make_shared<HepMC3::VectorLongIntAttribute>(*a_random_states));
-  e->add_attribute(HepMC::Str::barcodes, std::make_shared<GenEventBarcodes>());
+  auto a_random_states = inEvt->attribute<HepMC3::VectorLongIntAttribute>(HepMCStr::random_states);
+  if (a_random_states) e->add_attribute(HepMCStr::random_states, std::make_shared<HepMC3::VectorLongIntAttribute>(*a_random_states));
+  e->add_attribute(HepMCStr::barcodes, std::make_shared<GenEventBarcodes>());
   return e;
 }
 
 inline void fillBarcodesAttribute(GenEvent* e) {
-  auto barcodes = e->attribute<GenEventBarcodes> (HepMC::Str::barcodes);
+  auto barcodes = e->attribute<GenEventBarcodes> (HepMCStr::barcodes);
   if (!barcodes) {
     barcodes = std::make_shared<GenEventBarcodes>();
-    e->add_attribute(HepMC::Str::barcodes, barcodes);
+    e->add_attribute(HepMCStr::barcodes, barcodes);
   }
   // force re-parsing as calling barcodes->is_parsed() returns true here
   barcodes->fillAttribute(e);
@@ -403,14 +403,14 @@ inline void fillBarcodesAttribute(GenEvent* e) {
 
 inline ConstGenVertexPtr  barcode_to_vertex(const GenEvent* e, int id) {
   // Prefer to use optimized GenEvent barcodes attribute
-  const auto &barcodes = e->attribute<GenEventBarcodes> (HepMC::Str::barcodes);
+  const auto &barcodes = e->attribute<GenEventBarcodes> (HepMCStr::barcodes);
   if (barcodes) {
     ConstGenVertexPtr ptr = barcodes->barcode_to_vertex (id);
     if (ptr) return ptr;
   }
   // Fallback to unoptimized GenVertex barcode attribute
   const auto eventAttributes = e->attributes(); // this makes a copy
-  const auto barcodeAttributeIt = eventAttributes.find(HepMC::Str::barcode);
+  const auto barcodeAttributeIt = eventAttributes.find(HepMCStr::barcode);
   const bool hasBarcodeAttribute = barcodeAttributeIt != eventAttributes.end();
 
   const auto &vertices = e->vertices();
@@ -434,7 +434,7 @@ inline ConstGenVertexPtr  barcode_to_vertex(const GenEvent* e, int id) {
   }
   // No barcodes attribute, so assume that we are passing the id member variable instead of a barcode
   if (-id > 0 && -id <= static_cast<int>(vertices.size())) {
-    if (!vertices[-id-1]->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode)) {
+    if (!vertices[-id-1]->attribute<HepMC3::IntAttribute>(HepMCStr::barcode)) {
       return vertices[-id-1];
     }
   }
@@ -443,14 +443,14 @@ inline ConstGenVertexPtr  barcode_to_vertex(const GenEvent* e, int id) {
 
 inline ConstGenParticlePtr  barcode_to_particle(const GenEvent* e, int id) {
   // Prefer to use optimized GenEvent barcodes attribute
-  const auto &barcodes = e->attribute<GenEventBarcodes> (HepMC::Str::barcodes);
+  const auto &barcodes = e->attribute<GenEventBarcodes> (HepMCStr::barcodes);
   if (barcodes) {
     ConstGenParticlePtr ptr = barcodes->barcode_to_particle (id);
     if (ptr) return ptr;
   }
   // Fallback to unoptimized GenParticle barcode attribute
   const auto eventAttributes = e->attributes(); // this makes a copy
-  const auto barcodeAttributeIt = eventAttributes.find(HepMC::Str::barcode);
+  const auto barcodeAttributeIt = eventAttributes.find(HepMCStr::barcode);
   const bool hasBarcodeAttribute = barcodeAttributeIt != eventAttributes.end();
 
   const auto &particles = e->particles();
@@ -474,7 +474,7 @@ inline ConstGenParticlePtr  barcode_to_particle(const GenEvent* e, int id) {
   }
   // No barcodes attribute, so assume that we are passing the id member variable instead of a barcode
   if (id > 0 && id <= static_cast<int>(particles.size())) {
-    if (!particles[id-1]->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode)) {
+    if (!particles[id-1]->attribute<HepMC3::IntAttribute>(HepMCStr::barcode)) {
       return particles[id-1];
     }
   }
@@ -483,14 +483,14 @@ inline ConstGenParticlePtr  barcode_to_particle(const GenEvent* e, int id) {
 
 inline GenVertexPtr  barcode_to_vertex(GenEvent* e, int id) {
   // Prefer to use optimized GenEvent barcodes attribute
-  const auto &barcodes = e->attribute<GenEventBarcodes> (HepMC::Str::barcodes);
+  const auto &barcodes = e->attribute<GenEventBarcodes> (HepMCStr::barcodes);
   if (barcodes) {
     GenVertexPtr ptr = barcodes->barcode_to_vertex (id);
     if (ptr) return ptr;
   }
   // Fallback to unoptimized GenVertex barcode attribute
   const auto eventAttributes = e->attributes(); // this makes a copy
-  const auto barcodeAttributeIt = eventAttributes.find(HepMC::Str::barcode);
+  const auto barcodeAttributeIt = eventAttributes.find(HepMCStr::barcode);
   const bool hasBarcodeAttribute = barcodeAttributeIt != eventAttributes.end();
 
   const auto &vertices = e->vertices();
@@ -514,7 +514,7 @@ inline GenVertexPtr  barcode_to_vertex(GenEvent* e, int id) {
   }
   // No barcodes attribute, so assume that we are passing the id member variable instead of a barcode
   if (-id > 0 && -id <= static_cast<int>(vertices.size())) {
-    if (!vertices[-id-1]->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode)) {
+    if (!vertices[-id-1]->attribute<HepMC3::IntAttribute>(HepMCStr::barcode)) {
       return vertices[-id-1];
     }
   }
@@ -523,14 +523,14 @@ inline GenVertexPtr  barcode_to_vertex(GenEvent* e, int id) {
 
 inline GenParticlePtr  barcode_to_particle(GenEvent* e, int id) {
   // Prefer to use optimized GenEvent barcodes attribute
-  const auto &barcodes = e->attribute<GenEventBarcodes> (HepMC::Str::barcodes);
+  const auto &barcodes = e->attribute<GenEventBarcodes> (HepMCStr::barcodes);
   if (barcodes) {
     GenParticlePtr ptr = barcodes->barcode_to_particle (id);
     if (ptr) return ptr;
   }
   // Fallback to unoptimized GenParticle barcode attribute
   const auto eventAttributes = e->attributes(); // this makes a copy
-  const auto barcodeAttributeIt = eventAttributes.find(HepMC::Str::barcode);
+  const auto barcodeAttributeIt = eventAttributes.find(HepMCStr::barcode);
   const bool hasBarcodeAttribute = barcodeAttributeIt != eventAttributes.end();
 
   const auto &particles = e->particles();
@@ -554,7 +554,7 @@ inline GenParticlePtr  barcode_to_particle(GenEvent* e, int id) {
   }
   // No barcodes attribute, so assume that we are passing the id member variable instead of a barcode
   if (id > 0 && id <= static_cast<int>(particles.size())) {
-    if (!particles[id-1]->attribute<HepMC3::IntAttribute>(HepMC::Str::barcode)) {
+    if (!particles[id-1]->attribute<HepMC3::IntAttribute>(HepMCStr::barcode)) {
       return particles[id-1];
     }
   }
@@ -562,41 +562,41 @@ inline GenParticlePtr  barcode_to_particle(GenEvent* e, int id) {
 }
 
 inline int mpi(const GenEvent& evt) {
-    std::shared_ptr<HepMC3::IntAttribute> A_mpi = evt.attribute<HepMC3::IntAttribute>(HepMC::Str::mpi);
+    std::shared_ptr<HepMC3::IntAttribute> A_mpi = evt.attribute<HepMC3::IntAttribute>(HepMCStr::mpi);
     return A_mpi ? (A_mpi->value()) : 0;
 }
 inline int mpi(const GenEvent* evt) {
-    std::shared_ptr<HepMC3::IntAttribute> A_mpi = evt->attribute<HepMC3::IntAttribute>(HepMC::Str::mpi);
+    std::shared_ptr<HepMC3::IntAttribute> A_mpi = evt->attribute<HepMC3::IntAttribute>(HepMCStr::mpi);
     return A_mpi ? (A_mpi->value()) : 0;
 }
 
 inline int signal_process_id(const GenEvent& evt) {
-    std::shared_ptr<HepMC3::IntAttribute> A_signal_process_id = evt.attribute<HepMC3::IntAttribute>(HepMC::Str::signal_process_id);
+    std::shared_ptr<HepMC3::IntAttribute> A_signal_process_id = evt.attribute<HepMC3::IntAttribute>(HepMCStr::signal_process_id);
     return A_signal_process_id ? (A_signal_process_id->value()) : 0;
 }
 inline int signal_process_id(const GenEvent* evt) {
-    std::shared_ptr<HepMC3::IntAttribute> A_signal_process_id = evt->attribute<HepMC3::IntAttribute>(HepMC::Str::signal_process_id);
+    std::shared_ptr<HepMC3::IntAttribute> A_signal_process_id = evt->attribute<HepMC3::IntAttribute>(HepMCStr::signal_process_id);
     return A_signal_process_id ? (A_signal_process_id->value()) : 0;
 }
 inline void set_signal_process_id(GenEvent* e, const int i = 0) {
     std::shared_ptr<HepMC3::IntAttribute> signal_process_id = std::make_shared<HepMC3::IntAttribute>(i);
-    e->add_attribute(HepMC::Str::signal_process_id, std::move(signal_process_id));
+    e->add_attribute(HepMCStr::signal_process_id, std::move(signal_process_id));
 }
 inline void set_mpi(GenEvent* e, const int i = 0) {
     std::shared_ptr<HepMC3::IntAttribute> mpi = std::make_shared<HepMC3::IntAttribute>(i);
-    e->add_attribute(HepMC::Str::mpi, std::move(mpi));
+    e->add_attribute(HepMCStr::mpi, std::move(mpi));
 }
 inline void set_random_states(GenEvent* e, std::vector<long int>& a) {
-    e->add_attribute(HepMC::Str::random_states, std::make_shared<HepMC3::VectorLongIntAttribute>(a));
+    e->add_attribute(HepMCStr::random_states, std::make_shared<HepMC3::VectorLongIntAttribute>(a));
 }
 template <class T> void set_signal_process_vertex(GenEvent* e, T& v) {
     if (!v || !e) return;
 /* AV: HepMC2 adds the vertex to event */
     e->add_vertex(v);
-    v->add_attribute(HepMC::Str::signal_process_vertex, std::make_shared<HepMC3::IntAttribute>(1));
+    v->add_attribute(HepMCStr::signal_process_vertex, std::make_shared<HepMC3::IntAttribute>(1));
 }
-inline ConstGenVertexPtr signal_process_vertex(const GenEvent* e) { for (auto& v: e->vertices()) if (v->attribute<HepMC3::IntAttribute>(HepMC::Str::signal_process_vertex)) return v; return nullptr; }
-inline      GenVertexPtr signal_process_vertex(GenEvent* e) { for (auto& v: e->vertices()) if (v->attribute<HepMC3::IntAttribute>(HepMC::Str::signal_process_vertex)) return v; return nullptr; }
+inline ConstGenVertexPtr signal_process_vertex(const GenEvent* e) { for (auto& v: e->vertices()) if (v->attribute<HepMC3::IntAttribute>(HepMCStr::signal_process_vertex)) return v; return nullptr; }
+inline      GenVertexPtr signal_process_vertex(GenEvent* e) { for (auto& v: e->vertices()) if (v->attribute<HepMC3::IntAttribute>(HepMCStr::signal_process_vertex)) return v; return nullptr; }
 inline bool valid_beam_particles(const GenEvent* e) { 
   if (!e) return false; 
   size_t nBeams = 0;
@@ -607,13 +607,13 @@ inline bool valid_beam_particles(const GenEvent* e) {
 
 template <class T> bool suggest_barcode(T& p, int i) {
   if (!p->parent_event()) return false;
-  auto barcodes = p->parent_event()->template attribute<GenEventBarcodes> (HepMC::Str::barcodes);
+  auto barcodes = p->parent_event()->template attribute<GenEventBarcodes> (HepMCStr::barcodes);
   if (!barcodes) {
     barcodes = std::make_shared<GenEventBarcodes>();
-    p->parent_event()->add_attribute(HepMC::Str::barcodes, barcodes);
+    p->parent_event()->add_attribute(HepMCStr::barcodes, barcodes);
   }
   barcodes->remove(p);
-  const bool ret = p->add_attribute(HepMC::Str::barcode, std::make_shared<HepMC3::IntAttribute>(i));
+  const bool ret = p->add_attribute(HepMCStr::barcode, std::make_shared<HepMC3::IntAttribute>(i));
   if (ret) barcodes->add(p);
   return ret;
 }

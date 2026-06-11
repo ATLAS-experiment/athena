@@ -176,8 +176,8 @@ StatusCode SimpleMergeMcEventCollTool::processEvent(const McEventCollection *pMc
   }
   HepMC::fillBarcodesAttribute(copiedEvent);
 #ifdef HEPMC3
-  copiedEvent->add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
-  copiedEvent->add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
+  copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
 #endif
    outputMcEventCollection->push_back(copiedEvent);
   ATH_CHECK(this->saveHeavyIonInfo(pMcEvtColl, outputMcEventCollection));
