@@ -13,8 +13,7 @@ atlas_add_library( ITkPixelByteStreamCnvLib
    INTERFACE
    PUBLIC_HEADERS ITkPixelByteStreamCnv
    INCLUDE_DIRS src
-   LINK_LIBRARIES GaudiKernel ByteStreamData InDetByteStreamErrors InDetRawData )
-
+   LINK_LIBRARIES GaudiKernel PathResolver ByteStreamData InDetByteStreamErrors InDetRawData )
 
 atlas_add_component( ITkPixelByteStreamCnv
    src/*.h src/*.cxx src/components/*.cxx
@@ -44,6 +43,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif()
 # Install files from the package:
 atlas_install_joboptions( share/*.txt )
+atlas_install_runtime( share/*.csv )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
