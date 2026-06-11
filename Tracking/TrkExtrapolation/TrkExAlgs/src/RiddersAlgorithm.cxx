@@ -134,9 +134,8 @@ StatusCode Trk::RiddersAlgorithm::finalize()
 
 //================ Execution ====================================================
 
-StatusCode Trk::RiddersAlgorithm::execute()
+StatusCode Trk::RiddersAlgorithm::execute(const EventContext& ctx)
 {
-   const EventContext& ctx = Gaudi::Hive::currentContext();
    // this is fine
    double p = m_minP + m_flatDist->shoot()*(m_maxP-m_minP);
    double charge = (m_flatDist->shoot() > 0.5 ) ? -1. : 1.;

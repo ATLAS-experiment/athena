@@ -79,11 +79,11 @@ StatusCode GaussianDensityTestAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode GaussianDensityTestAlg::execute()
+StatusCode GaussianDensityTestAlg::execute(const EventContext& ctx)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  SG::ReadHandle<xAOD::TrackParticleContainer> trackParticles(m_trackParticlesKey);
+  SG::ReadHandle<xAOD::TrackParticleContainer> trackParticles(m_trackParticlesKey, ctx);
 
   ATH_MSG_VERBOSE("Selecting tracks");
   std::vector<Trk::ITrackLink*> trackVector;

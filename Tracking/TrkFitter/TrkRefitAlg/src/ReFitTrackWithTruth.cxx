@@ -109,11 +109,10 @@ StatusCode Trk::ReFitTrackWithTruth::initialize()
 }
 
 // Execute method:
-StatusCode Trk::ReFitTrackWithTruth::execute()
+StatusCode Trk::ReFitTrackWithTruth::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("ReFitTrackWithTruth::execute()");
   std::unique_ptr<Trk::PRDtoTrackMap> prd_to_track_map(m_assoTool->createPRDtoTrackMap());
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadHandle<TrackCollection> tracks(m_inputTrackColName, ctx);
   if (!tracks.isValid()) {
@@ -395,7 +394,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
   }
 
   ATH_MSG_VERBOSE ("Save tracks");
-  ATH_CHECK(SG::WriteHandle<TrackCollection>(m_outputTrackCollectionName).record(std::move(new_track_collection)));
+  ATH_CHECK(SG::WriteHandle<TrackCollection>(m_outputTrackCollectionName, ctx).record(std::move(new_track_collection)));
 
   ATH_MSG_INFO ("ReFitTrackWithTruth::execute() completed");
   return StatusCode::SUCCESS;

@@ -178,11 +178,10 @@ StatusCode AlignAlg::start()
 }
 
 //___________________________________________________________________________
-StatusCode AlignAlg::execute() 
+StatusCode AlignAlg::execute(const EventContext& ctx) 
 {
   ATH_MSG_DEBUG("AlignAlg::execute()");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // increment number of events
   m_nevents++;

@@ -45,7 +45,7 @@ StatusCode Trk::TrkDetDescrUnitTestBase::initialize()
     return StatusCode::SUCCESS;
 }
  
-StatusCode Trk::TrkDetDescrUnitTestBase::execute()
+StatusCode Trk::TrkDetDescrUnitTestBase::execute(const EventContext& /*ctx*/)
 {
     return runTest();
 }
