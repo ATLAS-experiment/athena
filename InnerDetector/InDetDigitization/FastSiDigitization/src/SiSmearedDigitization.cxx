@@ -29,11 +29,11 @@ StatusCode SiSmearedDigitization::initialize() {
 // Execute method:
 //----------------------------------------------------------------------
 
-StatusCode SiSmearedDigitization::execute() {
+StatusCode SiSmearedDigitization::execute(const EventContext& ctx) {
 
   ATH_MSG_INFO ( " SiSmearedDigitization : execute()" );
 
-  ATH_CHECK (m_smearTool->processAllSubEvents(Gaudi::Hive::currentContext()));
+  ATH_CHECK (m_smearTool->processAllSubEvents(ctx));
 
   ATH_MSG_INFO ( " SiSmearedDigitization : m_smearTool->processAllSubEvents()" );
 

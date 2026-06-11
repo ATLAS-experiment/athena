@@ -25,7 +25,7 @@ StatusCode TRTDigitization::initialize() {
 //----------------------------------------------------------------------
 // Execute method:
 //----------------------------------------------------------------------
-StatusCode TRTDigitization::execute() {
+StatusCode TRTDigitization::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG ( "execute()" );
-  return m_digTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_digTool->processAllSubEvents(ctx);
 }
