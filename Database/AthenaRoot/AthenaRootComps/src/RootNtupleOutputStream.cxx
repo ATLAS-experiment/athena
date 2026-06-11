@@ -209,7 +209,7 @@ RootNtupleOutputStream::finalize()
 }
 
 StatusCode
-RootNtupleOutputStream::execute() 
+RootNtupleOutputStream::execute(const EventContext& /*ctx*/) 
 {
   bool failed = false;
   for (std::vector<ToolHandle<IAthenaOutputTool> >::iterator 

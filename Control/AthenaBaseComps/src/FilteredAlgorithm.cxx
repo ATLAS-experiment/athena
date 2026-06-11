@@ -104,7 +104,7 @@ FilteredAlgorithm::finalize()
 }
 
 StatusCode
-FilteredAlgorithm::execute() 
+FilteredAlgorithm::execute(const EventContext& /*ctx*/) 
 {
   return StatusCode::SUCCESS;
 }

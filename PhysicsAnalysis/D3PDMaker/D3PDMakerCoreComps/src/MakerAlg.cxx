@@ -105,7 +105,7 @@ StatusCode MakerAlg::finalize()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode MakerAlg::execute()
+StatusCode MakerAlg::execute(const EventContext& /*ctx*/)
 {
   if (!m_booked) {
     m_booked = true;

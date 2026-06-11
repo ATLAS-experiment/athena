@@ -112,9 +112,9 @@ public:
 
   /// \name implement IAlgorithm
   //@{
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
-  virtual StatusCode execute();
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   //@}
   /// Stream the data
   virtual StatusCode write();
@@ -129,7 +129,7 @@ private:
     return &m_objects;
   }
   /// Incident service handle listening for MetaDataStop
-  void handle(const Incident& incident);
+  virtual void handle(const Incident& incident) override;
 };
 
 } //> ns Athena

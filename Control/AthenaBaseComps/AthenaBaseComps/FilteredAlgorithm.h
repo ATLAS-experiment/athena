@@ -53,7 +53,7 @@ public:
   //@{
   virtual StatusCode initialize();
   virtual StatusCode finalize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   //@}
 
   /// Test whether this event should be output
