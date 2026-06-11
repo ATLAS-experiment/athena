@@ -311,9 +311,8 @@ namespace VKalVrtAthena {
 
 
   //__________________________________________________________________________
-  StatusCode VrtSecInclusive::execute()
+  StatusCode VrtSecInclusive::execute(const EventContext& ctx)
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     //
     ATH_MSG_DEBUG("VrtSecInclusive execute()");
