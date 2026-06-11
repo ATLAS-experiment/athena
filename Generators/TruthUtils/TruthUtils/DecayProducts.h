@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTHUTILS_DECAYPRODUCTS_H
 #define TRUTHUTILS_DECAYPRODUCTS_H
@@ -23,7 +23,7 @@ public:
     int apply(bool (*func)(const int&)) const { int ret = 0; for ( auto & a: m_pids) if (func(a.first)) ret+=a.second; return ret;  }
     std::map<int,int>  m_pids;
     std::map<int,int> m_apids;
-    size_t m_size;
+    size_t m_size = 0;
 };
 #ifdef ATLASHEPMC_GENEVENT_H
 #ifdef ATLASHEPMC_GENPARTICLE_H
