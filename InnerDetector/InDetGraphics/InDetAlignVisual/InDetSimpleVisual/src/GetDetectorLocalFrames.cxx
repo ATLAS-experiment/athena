@@ -86,7 +86,7 @@ StatusCode GetDetectorLocalFrames::initialize(){
 }
 
 /** execute */
-StatusCode GetDetectorLocalFrames::execute() {
+StatusCode GetDetectorLocalFrames::execute(const EventContext& /*ctx*/) {
   
   if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "execute() check global position" << endmsg;
   
