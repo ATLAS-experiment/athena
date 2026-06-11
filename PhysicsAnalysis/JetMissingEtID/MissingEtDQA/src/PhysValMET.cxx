@@ -796,7 +796,7 @@ namespace MissingEtDQA
       met_MetMaker->setStore(aux.get());
 
       // Build the hard terms. The string argument is arbitrary, it's the name you're giving to the term for later lookup.
-      ATH_CHECK((*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met_MetMaker.get(), metElectrons.asDataVector(), metHelper));
+      ATH_CHECK((*m_metmaker)->rebuildMET(str_ele.c_str(), xAOD::Type::Electron, met_MetMaker.get(), metElectrons.asDataVector(), metHelper));
       //ATH_CHECK((*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met_MetMaker.get(), metPhotons.asDataVector(), metHelper));
       //ATH_CHECK((*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met_MetMaker.get(), metTaus.asDataVector(),metHelper));
       //ATH_CHECK((*m_metmaker)->rebuildMET("Muons", xAOD::Type::Muon, met_MetMaker.get(), metMuons.asDataVector(), metHelper));
@@ -808,7 +808,7 @@ namespace MissingEtDQA
       }
 
       // If the specific object interfaces are needed
-      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*met_MetMaker["RefEle"]);
+      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*met_MetMaker[str_ele.c_str()]);
       //std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(met_MetMaker["RefGamma"]);
       //std::vector<const xAOD::Tau*> ta_elems = met::getMETElements<xAOD::Tau>(met_MetMaker["RefTau"]);
       //std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(met_MetMaker["Muons"]);
