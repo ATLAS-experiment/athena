@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FCS_Cell
@@ -21,35 +21,35 @@ then the last class could be saved in to the TTree
 
 struct FCS_cell
 {
-  Long64_t cell_identifier;
-  int   sampling;
-  float energy;
-  float center_x;
-  float center_y;
-  float center_z; //to be updated later      
+  Long64_t cell_identifier{};
+  int   sampling{};
+  float energy{};
+  float center_x{};
+  float center_y{};
+  float center_z{}; //to be updated later      
   bool operator<(const FCS_cell &rhs) const { return energy > rhs.energy;};                                                                   
 };
 
 struct FCS_hit //this is the FCS detailed hit
 {
-  Long64_t identifier; //hit in the same tile cell can have two identifiers (for two PMTs)
-  Long64_t cell_identifier;
-  int    sampling; //calorimeter layer
-  float  hit_energy; //energy is already scaled for the sampling fraction
-  float  hit_time;
-  float  hit_x;
-  float  hit_y;
-  float  hit_z;
+  Long64_t identifier{}; //hit in the same tile cell can have two identifiers (for two PMTs)
+  Long64_t cell_identifier{};
+  int    sampling{}; //calorimeter layer
+  float  hit_energy{}; //energy is already scaled for the sampling fraction
+  float  hit_time{};
+  float  hit_x{};
+  float  hit_y{};
+  float  hit_z{};
   bool operator<(const FCS_hit &rhs) const { return hit_energy > rhs.hit_energy;};
 };
 
 struct FCS_g4hit //this is the standard G4Hit
 {
-  Long64_t identifier;
-  Long64_t cell_identifier;
-  int    sampling;
-  float  hit_energy;
-  float  hit_time;
+  Long64_t identifier{};
+  Long64_t cell_identifier{};
+  int    sampling{};
+  float  hit_energy{};
+  float  hit_time{};
   bool operator<(const FCS_g4hit &rhs) const { return hit_energy > rhs.hit_energy;};
 };
 

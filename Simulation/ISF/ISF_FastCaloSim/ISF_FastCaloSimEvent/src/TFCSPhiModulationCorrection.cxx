@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -11,16 +11,11 @@
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
 
 // External includes
-#include <RtypesCore.h>
 #include <TFile.h>
 #include <TH2F.h>
-#include <TMath.h>
 #include <TParameter.h>
 
-// Standard includes
-#include <fstream>
-#include <tuple>
-#include <vector>
+
 
 //=============================================
 //======= TFCSPhiModulationCorrection =========
@@ -33,7 +28,7 @@ TFCSPhiModulationCorrection::TFCSPhiModulationCorrection(const char *name,
 TFCSPhiModulationCorrection::~TFCSPhiModulationCorrection() {}
 
 void TFCSPhiModulationCorrection::load_phi_modulation(
-    std::string filename, long unsigned int layer_index, float eta_min,
+    const std::string & filename, long unsigned int layer_index, float eta_min,
     float eta_max, float energy_shift) {
   if (m_min_eta.size() <= layer_index) {
     m_min_eta.resize(layer_index + 1);
