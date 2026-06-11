@@ -50,7 +50,7 @@ StatusCode OutputConditionsAlg::initialize() {
 }
 
 
-StatusCode OutputConditionsAlg::execute() {
+StatusCode OutputConditionsAlg::execute(const EventContext& /*ctx*/) {
 
   return StatusCode::SUCCESS;
 }

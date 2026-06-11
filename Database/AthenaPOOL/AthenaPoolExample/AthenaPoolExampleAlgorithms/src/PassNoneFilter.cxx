@@ -15,7 +15,7 @@ PassNoneFilter::PassNoneFilter(const std::string& name, ISvcLocator* pSvcLocator
 
 StatusCode PassNoneFilter::initialize() { return StatusCode::SUCCESS; }
 
-StatusCode PassNoneFilter::execute() {
+StatusCode PassNoneFilter::execute(const EventContext& /*ctx*/) {
    setFilterPassed(false);
    return StatusCode::SUCCESS;
 }
