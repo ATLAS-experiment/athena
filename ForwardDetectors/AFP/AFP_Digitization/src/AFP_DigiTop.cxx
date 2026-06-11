@@ -18,10 +18,10 @@ StatusCode AFP_DigiTop::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode AFP_DigiTop::execute()
+StatusCode AFP_DigiTop::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "AFP_DigiTop::execute" );
-  CHECK ( m_digTool->processAllSubEvents(Gaudi::Hive::currentContext()) );
+  CHECK ( m_digTool->processAllSubEvents(ctx) );
   return StatusCode::SUCCESS;
 
 }
