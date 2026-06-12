@@ -28,7 +28,7 @@ StatusCode AthAsgExUnittestAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode AthAsgExUnittestAlg::execute() {  
+StatusCode AthAsgExUnittestAlg::execute(const EventContext& /*ctx*/) {  
   ATH_MSG_DEBUG( "Executing " << name() << "..." );
   setFilterPassed(false); //optional: start with algorithm not passed
 
