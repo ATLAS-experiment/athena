@@ -89,17 +89,7 @@ namespace {
 } //end of unnamed namespace
 
 // Default Constructor
-DataProxy::DataProxy():
-  m_refCount(0),
-  m_resetFlag(true),
-  m_boundHandles(false),
-  m_const(false),
-  m_origConst(false),
-  m_dObject(nullptr), 
-  m_dataLoader(nullptr),
-  m_t2p(nullptr),
-  m_store(nullptr),
-  m_errno(ALLOK)
+DataProxy::DataProxy()
 { 
 }
 
@@ -128,17 +118,11 @@ DataProxy::DataProxy(std::unique_ptr<TransientAddress> tAddr,
 DataProxy::DataProxy(TransientAddress&& tAddr, 
 		     IConverter* svc,
 		     bool constFlag, bool resetOnly):
-  m_refCount(0),
   m_resetFlag(resetOnly),
-  m_boundHandles(false),
   m_const(constFlag),
   m_origConst(constFlag),
-  m_dObject(0), 
   m_tAddress(std::move(tAddr)),
-  m_dataLoader(svc),
-  m_t2p(nullptr),
-  m_store(nullptr),
-  m_errno(ALLOK)
+  m_dataLoader(svc)
 {
   //assert( tAddr->clID() != 0 );
   if (svc) svc->addRef();
@@ -149,17 +133,10 @@ DataProxy::DataProxy(TransientAddress&& tAddr,
 DataProxy::DataProxy(DataObject* dObject, 
 		     TransientAddress* tAddr,
 		     bool constFlag, bool resetOnly):
-  m_refCount(0),
   m_resetFlag(resetOnly),
-  m_boundHandles(false),
   m_const(constFlag),
   m_origConst(constFlag),
-  m_dObject(0), 
-  m_tAddress(std::move(*tAddr)),
-  m_dataLoader(nullptr),
-  m_t2p(nullptr),
-  m_store(nullptr),
-  m_errno(ALLOK)
+  m_tAddress(std::move(*tAddr))
 {
   setObject(dObject);
   delete tAddr;
@@ -168,17 +145,10 @@ DataProxy::DataProxy(DataObject* dObject,
 DataProxy::DataProxy(DataObject* dObject, 
 		     TransientAddress&& tAddr,
 		     bool constFlag, bool resetOnly):
-  m_refCount(0),
   m_resetFlag(resetOnly),
-  m_boundHandles(false),
   m_const(constFlag),
   m_origConst(constFlag),
-  m_dObject(0), 
-  m_tAddress(std::move(tAddr)),
-  m_dataLoader(nullptr),
-  m_t2p(nullptr),
-  m_store(nullptr),
-  m_errno(ALLOK)
+  m_tAddress(std::move(tAddr))
 {
   setObject(dObject);
 }
