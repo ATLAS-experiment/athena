@@ -122,10 +122,10 @@ private:
     }
   }
 
-  uint32_t m_hash;
-  uint32_t m_tail;
-  uint32_t m_count;
-  uint32_t m_size;
+  uint32_t m_hash = 0;
+  uint32_t m_tail = 0;
+  uint32_t m_count = 0;
+  uint32_t m_size = 0;
 };
 
 

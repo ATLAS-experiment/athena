@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: PackedArray.h,v 1.2 2007-06-14 22:38:48 ssnyder Exp $
 /**
  * @file CxxUtils/PackedArray.h
  * @author scott snyder <snyder@bnl.gov>
@@ -273,13 +270,13 @@ public:
 
 private:
   /// The current bitsize of the container.
-  int m_bitsize;
+  int m_bitsize = 0;
 
   /// The current number of entries in the container.
-  size_type m_size;
+  size_type m_size = 0;
 
   /// Mask with m_bitsize bits set.
-  value_type m_mask;
+  value_type m_mask = 0;
 
   /// Underlying vector holding the data.
   basetype m_vec;
