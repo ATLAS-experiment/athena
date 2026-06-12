@@ -63,11 +63,7 @@ LArFastShower::LArFastShower(const std::string& name, G4Region* region, const Fa
 	ss << threadId;
 	hepmcFileName += "."+ss.str();
       }
-#ifdef HEPMC3
     m_starting_points_file  = std::make_shared<HepMC3::WriterAscii>(hepmcFileName);
-#else
-    m_starting_points_file  = std::make_shared<HepMC::IO_GenEvent> (hepmcFileName,std::ios::out);
-#endif
   }
 
   enum DETECTOR { EMB=100000, EMEC=200000, FCAL1=300000, FCAL2=400000,
@@ -364,13 +360,8 @@ std::unique_ptr<const HepMC::GenEvent> LArFastShower::GetGenEvent(const G4FastTr
   G4int pdgcode = fastTrack.GetPrimaryTrack()->GetDefinition()->GetPDGEncoding();
   if (pdgcode < 0) pdgcode = -pdgcode; // hack for positrons. let it be electrons.
 
-#ifdef HEPMC3
   HepMC3::Units::MomentumUnit momentumUnit = HepMC3::Units::MEV;
   HepMC3::Units::LengthUnit lengthUnit = HepMC3::Units::MM;
-#else
-  HepMC::Units::MomentumUnit momentumUnit = HepMC::Units::MEV;
-  HepMC::Units::LengthUnit lengthUnit = HepMC::Units::MM;
-#endif
   // new event. Signal processing = 0, event number "next"
   std::unique_ptr<HepMC::GenEvent> ge = std::make_unique<HepMC::GenEvent>(momentumUnit,lengthUnit);
 
@@ -449,11 +440,7 @@ bool LArFastShower::generateFSStartingPoint( std::unique_ptr<const HepMC::GenEve
 {
   if (!m_generate_starting_points)
     return false;
-#ifdef HEPMC3
   m_starting_points_file->write_event(*ge);
-#else
-  m_starting_points_file->write_event(ge.get());
-#endif
   return true;
 }
 G4bool LArFastShower::ForcedAccept(const G4FastTrack & fastTrack)
