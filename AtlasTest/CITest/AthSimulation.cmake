@@ -57,3 +57,16 @@ atlas_add_citest( SimulationRun3HitsMergeWithSort
 
 atlas_add_citest( SimulationRun3HitsFilter
    SCRIPT RunWorkflowTests_Run3.py --CI -s -w HitsFilter -e '--maxEvents 10')
+
+#########################################
+##    Muon Phase II simulation test    ##
+#########################################
+atlas_add_citest( MuonPhaseII_SimR3
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/Simulation_MuonPhaseII.sh R3
+   LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
+   PROPERTIES PROCESSORS 8)
+
+atlas_add_citest( MuonPhaseII_SimR4
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/Simulation_MuonPhaseII.sh R4
+   LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
+   PROPERTIES PROCESSORS 8)
