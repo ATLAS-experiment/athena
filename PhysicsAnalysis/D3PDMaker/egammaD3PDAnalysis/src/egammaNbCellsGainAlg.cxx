@@ -52,7 +52,7 @@ StatusCode egammaNbCellsGainAlg::initialize()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode egammaNbCellsGainAlg::execute()
+StatusCode egammaNbCellsGainAlg::execute(const EventContext& /*ctx*/)
 {
   StatusCode sc = StatusCode::SUCCESS;
 

@@ -50,7 +50,7 @@ StatusCode egammaDeltaEmax2Alg::initialize()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode egammaDeltaEmax2Alg::execute()
+StatusCode egammaDeltaEmax2Alg::execute(const EventContext& /*ctx*/)
 {
   xAOD::Egamma::Decorator<float> deltaemax2 (m_auxPrefix + "deltaEmax2");
 

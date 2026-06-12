@@ -52,7 +52,7 @@ StatusCode TileMuonFilterAlg::initialize(){
 } 
 
 //=======================================
-StatusCode TileMuonFilterAlg::execute(){
+StatusCode TileMuonFilterAlg::execute(const EventContext& /*ctx*/){
 //=======================================
    switch(m_trackType)
    {

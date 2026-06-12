@@ -42,7 +42,7 @@ StatusCode TileTrackFilterAlg::initialize(){
 } // TileTrackFilterAlg::initialize()
 
 //=======================================
-StatusCode TileTrackFilterAlg::execute(){
+StatusCode TileTrackFilterAlg::execute(const EventContext& /*ctx*/){
 //=======================================
 
     // TRACKPARTICLE OUTPUT CONTAINER
