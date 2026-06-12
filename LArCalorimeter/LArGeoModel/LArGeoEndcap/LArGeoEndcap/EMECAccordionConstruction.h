@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2024-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2024-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -49,7 +49,7 @@ namespace LArGeo {
   private:
     struct CutPlane { // plane equation: n.dot(p) + d = 0
       GeoThreeVector m_n;
-      double m_d;
+      double m_d = 0;
     };
 
     void setInnerWheelSlices();
