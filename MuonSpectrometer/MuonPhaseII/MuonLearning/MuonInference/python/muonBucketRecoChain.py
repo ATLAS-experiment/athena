@@ -48,9 +48,8 @@ if __name__=="__main__":
     parser.add_argument("--LegacyChain", default = False, action = 'store_true', help="If set to true, the legacy chain is not scheduled",)
     parser.add_argument("--use-cpu", default = False, action = 'store_true', help="Use CPU for ONNX inference")
     parser.add_argument("--skip-onnx", action="store_true", default=False, help="Skip ONNX inference step")
-    parser.add_argument("--bucket-model-path", dest="bucket_model_path",
-                        default="/eos/project-i01/f/fcc-ml/ddicroce/ATLAS_MuonSpectrometer/KubeFlow/Inference_EdgeClassifier/athena/MuonSpectrometer/MuonPhaseII/MuonLearning/MuonInference/models/edgecnn_bucket_sparse_best.onnx")
-    parser.add_argument("--score-threshold", type=float, default=0.0, dest="score_threshold")
+    parser.add_argument("--bucket-model-path", dest="bucket_model_path", default="dev/MuonRecRTT/edgecnn_mu200.onnx")
+    parser.add_argument("--score-threshold", type=float, default=0.160, dest="score_threshold")
     parser.add_argument("--output-name", default="logits", dest="output_name")
     parser.add_argument("--graph-bucket-output-level", type=int, default=3, dest="graph_bucket_output_level", help="OutputLevel for GraphBucketFilterTool")
     parser.add_argument("--is-logit", dest="is_logit", default=False, action="store_true", help="Interpret the single output directly and do not apply sigmoid")
