@@ -33,8 +33,7 @@ StatusCode CalibratedEgammaProvider::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CalibratedEgammaProvider::execute() {
-   const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode CalibratedEgammaProvider::execute(const EventContext& ctx) {
 
    SG::ReadHandle<xAOD::EventInfo> event_info{m_evtInfoKey,ctx};
    if (!event_info.isValid()) {
