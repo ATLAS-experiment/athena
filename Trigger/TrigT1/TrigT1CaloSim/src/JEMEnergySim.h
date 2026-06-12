@@ -66,7 +66,7 @@
    //------------------------------------------------------
 
    StatusCode initialize() ;
-   StatusCode execute() ;
+   StatusCode execute(const EventContext& ctx) ;
 
 private: // Private attributes
   ToolHandle<LVL1::IL1EtTools> m_EtTool;
@@ -86,8 +86,8 @@ private: // Private attributes
 private: // Private methods
   
   /** put results into SG */
-  void storeJEMEtSums();
-  void storeBackplaneData();
+  void storeJEMEtSums(const EventContext& ctx);
+  void storeBackplaneData(const EventContext& ctx);
 
   /** delete pointers etc. */
   void cleanup();

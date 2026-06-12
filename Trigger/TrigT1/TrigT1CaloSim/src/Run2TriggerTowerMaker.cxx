@@ -39,7 +39,6 @@
 // AthenaMT
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/Randomize.h"
@@ -305,23 +304,23 @@ namespace LVL1 {
   /** Checks that the Cell Type is supported (terminates with errors if not)
       and calls relevant routine to look for the cells.
   */
-  StatusCode Run2TriggerTowerMaker::execute() {
+  StatusCode Run2TriggerTowerMaker::execute(const EventContext& ctx) {
     ATH_MSG_VERBOSE("Executing");
 
     if (m_isReco && m_doOverlay) return StatusCode::SUCCESS; // nothing to to, since we did overlay and made towers during digi
 
 
     // retrieve conditions
-    SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprCalibCont(m_chanCalibKey);
+    SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprCalibCont(m_chanCalibKey, ctx);
     CHECK(pprCalibCont.isValid());
     m_chanCalibContainer = (*pprCalibCont);
-    SG::ReadCondHandle<L1CaloDisabledTowersContainer> pprDisabledTowers(m_disabledTowersKey);
+    SG::ReadCondHandle<L1CaloDisabledTowersContainer> pprDisabledTowers(m_disabledTowersKey, ctx);
     CHECK(pprDisabledTowers.isValid());
     m_disabledTowersContainer = (*pprDisabledTowers);
-    SG::ReadCondHandle<L1CaloPpmDeadChannelsContainer> pprDeadTowers(m_deadChannelsKey);
+    SG::ReadCondHandle<L1CaloPpmDeadChannelsContainer> pprDeadTowers(m_deadChannelsKey, ctx);
     CHECK(pprDeadTowers.isValid());
     m_deadChannelsContainer = (*pprDeadTowers);
-    SG::ReadCondHandle<L1CaloPprChanDefaultsContainer> pprChanDefaults(m_chanDefaultsKey);
+    SG::ReadCondHandle<L1CaloPprChanDefaultsContainer> pprChanDefaults(m_chanDefaultsKey, ctx);
     CHECK(pprChanDefaults.isValid());
     auto* defaults = pprChanDefaults->pprChanDefaults(0); // non-owning ptr
     if(!defaults) {
@@ -330,7 +329,6 @@ namespace LVL1 {
     }
     m_chanDefaults = *defaults;
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     m_rndmADCs->setSeed (m_digiEngine, ctx);
 
     m_xaodTowers.reset(new xAOD::TriggerTowerContainer);
