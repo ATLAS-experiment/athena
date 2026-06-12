@@ -123,6 +123,9 @@ class SortedCollectionCreator:
 
    def executeInSubprocess(self, *args, **kwargs):
       import multiprocessing
+      # Default start method changed from fork to spawn in python 3.14.
+      # Need to force it back.
+      multiprocessing.set_start_method('fork')
       process = multiprocessing.Process( target=self.execute, args=args, kwargs=kwargs)
       self.debug("Sorting Events in a subprocess")
       process.start()
