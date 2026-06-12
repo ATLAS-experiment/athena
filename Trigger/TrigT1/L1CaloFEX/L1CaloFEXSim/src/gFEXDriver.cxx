@@ -39,7 +39,7 @@ StatusCode gFEXDriver::initialize()
 }
 
 
-  StatusCode gFEXDriver::execute() //const
+  StatusCode gFEXDriver::execute(const EventContext& ctx) //const
 {
   // STEP 1 - Do some monitoring
   gFEXOutputCollection* my_gFEXOutputCollection = new gFEXOutputCollection();
@@ -53,7 +53,7 @@ StatusCode gFEXDriver::initialize()
 
   // STEP 4 - Write the completed gFEXOutputCollection into StoreGate (move the local copy in memory)
   std::unique_ptr<gFEXOutputCollection> local_gFEXOutputCollection = std::unique_ptr<gFEXOutputCollection>(my_gFEXOutputCollection);
-  SG::WriteHandle<LVL1::gFEXOutputCollection> gFEXOutputCollectionSG(m_gFEXOutputCollectionSGKey);
+  SG::WriteHandle<LVL1::gFEXOutputCollection> gFEXOutputCollectionSG(m_gFEXOutputCollectionSGKey, ctx);
   ATH_CHECK(gFEXOutputCollectionSG.record(std::move(local_gFEXOutputCollection)));
 
   return StatusCode::SUCCESS;

@@ -96,7 +96,7 @@ StatusCode LVL1::eFakeTower::loadnext()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LVL1::eFakeTower::execute() {
+StatusCode LVL1::eFakeTower::execute(const EventContext& /*ctx*/) {
     int FPGAtowerids[10][6];
 
   // set the Et of all towers to zero first
