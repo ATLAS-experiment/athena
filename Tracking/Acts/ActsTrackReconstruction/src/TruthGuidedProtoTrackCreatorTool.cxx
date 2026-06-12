@@ -54,12 +54,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
         for ( ; prdMtCIter != prdMtCIterE; ++ prdMtCIter ){
 
             // check if entry exists and if   
-#ifdef HEPMC3
             HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second.scptr();
-#else
-//AV Looks like an implicit conversion
-            HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second;
-#endif
             Identifier                curIdentifier = (*prdMtCIter).first;
 
             // Min pT cut

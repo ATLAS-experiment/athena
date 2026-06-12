@@ -599,11 +599,7 @@ StatusCode Trk::TrackValidationNtupleWriter::writeTrackData(unsigned int trackCo
                     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Link to generated particle information is not there - assuming a lost G4 particle ('fake fake')." << endmsg;
                     genParticle = m_visibleParticleWithoutTruth; // with pdg_id 0
                   } else {
-#ifdef HEPMC3
                     genParticle = trackTruth->particleLink().scptr();
-#else
-                    genParticle = trackTruth->particleLink().cptr();
-#endif
                     if ( genParticle!=nullptr && genParticle->pdg_id() == 0 ) {
                       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Associated Particle ID " << genParticle->pdg_id()
                             << " does not conform to PDG requirements... ignore it!" << endmsg;
@@ -733,11 +729,6 @@ StatusCode Trk::TrackValidationNtupleWriter::finalize() {
 
     msg(MSG::INFO)  << "TrackValidationNtupleWriter finalize()" << endmsg;
 
-#ifdef HEPMC3
-    //This is smart pointer in HepMC3
-#else
-    delete m_visibleParticleWithoutTruth;
-#endif
     for (unsigned int toolIndex = 0 ; toolIndex < m_eventPropertyNtupleTools.size(); ++toolIndex ){
       if (m_eventPropertyNtupleTools[toolIndex]->resetVariables( ).isFailure()){};
     }

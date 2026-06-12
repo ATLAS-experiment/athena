@@ -142,11 +142,7 @@ StatusCode Trk::RecMomentumQualityValidation::execute(const EventContext& /*ctx*
           if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Link to generated particle information is not there - assuming a lost G4 particle ('fake fake')." << endmsg;
           //        genParticle = m_visibleParticleWithoutTruth; // with pdg_id 0
         } else {
-#ifdef HEPMC3
           genParticle = trackTruth->particleLink().scptr();
-#else
-          genParticle = trackTruth->particleLink().cptr();
-#endif
           if ( genParticle && genParticle->pdg_id() == 0 ) {
             if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Associated Particle ID " << genParticle->pdg_id()
                                                     << " does not conform to PDG requirements... ignore it!" << endmsg;

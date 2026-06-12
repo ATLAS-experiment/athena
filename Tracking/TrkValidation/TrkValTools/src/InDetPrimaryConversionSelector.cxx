@@ -81,14 +81,7 @@ Trk::InDetPrimaryConversionSelector::selectGenSignal (const McEventCollection* S
         auto  prodVertex = particle->production_vertex();
 	if ( std::abs(pdgCode) == 11 ) {
 	  ATH_MSG_DEBUG ("Electron/Positron detected -- checking for production process ...");
-#ifdef HEPMC3
 	  for ( const auto&  inParticle: prodVertex->particles_in()) {
-#else
-	  HepMC::GenVertex::particles_in_const_iterator ItinParticle     = prodVertex->particles_in_const_begin();
-	  HepMC::GenVertex::particles_out_const_iterator ItinParticleEnd = prodVertex->particles_in_const_end();
-	  for ( ; ItinParticle != ItinParticleEnd; ++ItinParticle) {
-            auto inParticle=*ItinParticle;
-#endif
 	    ATH_MSG_DEBUG(" --> checking morther: " << inParticle );
 	    if ( MC::isPhoton(inParticle) || MC::isElectron(inParticle) ){
 	      if (std::fabs(particle->momentum().perp()) >  m_minPt  &&  std::fabs(particle->momentum().pseudoRapidity()) < m_maxEta ) {
