@@ -56,6 +56,9 @@ namespace TauScalarVars{
     bool ClustersMeanPresamplerFrac(const xAOD::TauJet &tau, float &out);
     bool ClustersMeanSecondLambda  (const xAOD::TauJet &tau, float &out);
     bool EMPOverTrkSysP            (const xAOD::TauJet &tau, float &out);
+    // Extension - Variables for GNTau-eVeto
+    bool TauChargedTrk_eProbNN     (const xAOD::TauJet &tau, float &out);
+
 }//namespace TauScalarVars
 
 class TauGNNDataLoader : public FlavorTagInference::SaltModelEDMLoaderBase, public asg::AsgMessaging {
@@ -103,6 +106,16 @@ class TauGNNDataLoader : public FlavorTagInference::SaltModelEDMLoaderBase, publ
             {"pt",                        TauScalarVars::pt},
             {"eta",                       TauScalarVars::eta},
             {"ptJetSeed",                 TauScalarVars::ptJetSeed},
-            {"etaJetSeed",                TauScalarVars::etaJetSeed}
+            {"etaJetSeed",                TauScalarVars::etaJetSeed},
+            // Extension - Variables for GNTau-eVeto
+            {"TauJetsAuxDyn.pt_tau_log",                 TauScalarVars::pt_tau_log},
+            {"TauJetsAuxDyn.ABS_ETA_LEAD_TRACK",         TauScalarVars::absleadTrackEta},
+            {"TauJetsAuxDyn.etHotShotWinOverPtLeadTrk",  TauScalarVars::etHotShotWinOverPtLeadTrk},
+            {"TauJetsAuxDyn.etOverPtLeadTrk",            TauScalarVars::etOverPtLeadTrk},
+            {"TauJetsAuxDyn.PSSFraction",                TauScalarVars::PSFrac},
+            {"TauJetsAuxDyn.ClustersMeanFirstEngDens",   TauScalarVars::ClustersMeanFirstEngDens},
+            {"TauJetsAuxDyn.ClustersMeanPresamplerFrac", TauScalarVars::ClustersMeanPresamplerFrac},
+            {"TauJetsAuxDyn.EMPOverTrkSysP",             TauScalarVars::EMPOverTrkSysP},
+            {"TauJetsAuxDyn.TauChargedTrk_eProbNN",      TauScalarVars::TauChargedTrk_eProbNN}
         };
 };

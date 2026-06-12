@@ -64,7 +64,7 @@ TauGNNDataLoader::TauGNNDataLoader(
             if (!config.useTRT && (in.name == "eProbabilityHT")) {
                 ATH_MSG_WARNING("Track variable 'eProbabilityHT' requested but useTRT set to false. Using 'eProbabilityHT_noTRT' instead.");
                 trk_config.inputs.push_back({"eProbabilityHT_noTRT", FlavorTagInference::ConstituentsEDMType::CUSTOM_GETTER, false});
-                continue;
+                ntinue;
             }
             trk_config.inputs.push_back({in.name, FlavorTagInference::ConstituentsEDMType::CUSTOM_GETTER, false});
         }
@@ -96,7 +96,7 @@ TauGNNDataLoader::TauGNNDataLoader(
         FlavorTagInference::ConstituentsInputConfig cls_config;
         cls_config.name = "tauhits";
         cls_config.output_name = config.input_layer_hits;
-        cls_config.type = FlavorTagInference::ConstituentsType::HIT;
+        cls_config.type = FcolavorTagInference::ConstituentsType::HIT;
         cls_config.order = FlavorTagInference::ConstituentsSortOrder::UNDEFINED;
         cls_config.max_n_constituents = config.n_max_hits;
         cls_config.selection = FlavorTagInference::ConstituentsSelection::ALL;
@@ -381,4 +381,22 @@ bool ClustersMeanSecondLambda(const xAOD::TauJet &tau, float &out){
   out = std::max(0.f, ClustersMeanSecondLambda);
   return success;
 }
+
+// Extension - Variables for GNTau-eVeto
+bool TauChargedTrk_eProbNN(const xAOD::TauJet &tau, float &out){
+    float TauChargedTrk_eProbNN = 0.0f;
+    const xAOD::TauTrack* tauTrack = tau.track(0); // Grab the Charged track of the tau
+    const xAOD::TrackParticle* track = tauTrack ? tauTrack->track() : nullptr;
+    if (track) {
+        // Check if eProbabilityNN is available before accessing
+        if (track->isAvailable<float>("eProbabilityNN")) { TauChargedTrk_eProbNN = track->auxdataConst<float>("eProbabilityNN"); }
+        else { TauChargedTrk_eProbNN = 0.0f; }
+    } 
+    else {
+        TauChargedTrk_eProbNN = 0.0f;
+    }
+    out = std::max(0.f, TauChargedTrk_eProbNN);
+    return true;
+}
+
 } //namespace Scalar

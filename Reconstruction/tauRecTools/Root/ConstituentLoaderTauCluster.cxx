@@ -220,4 +220,10 @@ bool CENTER_MAG(const xAOD::TauJet& /*tau*/, const xAOD::CaloVertexedTopoCluster
     return status;
 }
 
+// Extension - Variables for GNTau-eVeto
+bool Eta(const xAOD::TauJet& /*tau*/, const xAOD::CaloVertexedTopoCluster &cluster, float &out) {
+    out = cluster.eta();
+    return true;
+}
+
 } // namespace Cluster

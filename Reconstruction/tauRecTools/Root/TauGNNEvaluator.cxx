@@ -16,7 +16,7 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
 TauGNNEvaluator::~TauGNNEvaluator() {}
 
 StatusCode TauGNNEvaluator::initialize() {
-  if(m_output_discriminant < Discriminant::Disabled || m_output_discriminant > Discriminant::PTau) {
+  if(m_output_discriminant < Discriminant::Disabled || m_output_discriminant > Discriminant::NegLogPJet_True) {
     ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
   }
 
@@ -184,6 +184,10 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
         output(tau) = std::log10(1/(1-out_f.at(m_outnode_tau)));
     } else if(m_output_discriminant == Discriminant::PTau) {
         output(tau) = out_f.at(m_outnode_tau);
+    } else if (m_output_discriminant == Discriminant::PJet) {
+        output(tau) = out_f.at(m_outnode_jet);
+    } else if (m_output_discriminant == Discriminant::NegLogPJet_True) {
+        output(tau) = -1.0*std::log10(out_f.at(m_outnode_jet));
     }
 
     out_ptau(tau) = out_f.at(m_outnode_tau);
