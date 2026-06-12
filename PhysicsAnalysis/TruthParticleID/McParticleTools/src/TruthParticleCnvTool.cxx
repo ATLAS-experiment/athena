@@ -261,7 +261,6 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   TruthParticleContainer::Map_t bcToMcPart = container->m_particles;
 
   
-#ifdef HEPMC3
   // Process particles in barcode order.
   auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>(HepMCStr::barcodes);
   if (!bcmapatt){
@@ -270,10 +269,6 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   } 
   std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
   for (const auto &[bc,hepMcPart]: bcmap) {
-#else
-  for (auto hepMcPart: *evt) {
-    int bc = HepMC::barcode(hepMcPart);
-#endif
 
     TruthParticle * mcPart = new TruthParticle( hepMcPart, container );
     container->push_back( mcPart );
