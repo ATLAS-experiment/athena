@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -16,7 +16,7 @@ class CaloCellLinkContainer_p2 {
   std::vector<float> m_linkW;
   std::vector<unsigned> m_vISizes; // contains number of indices written in each cluster
   std::vector<unsigned> m_vWSizes; // contains number of weights written in each cluster
-  unsigned m_nClusters;
+  unsigned m_nClusters{};
   std::string m_contName;
 };
 

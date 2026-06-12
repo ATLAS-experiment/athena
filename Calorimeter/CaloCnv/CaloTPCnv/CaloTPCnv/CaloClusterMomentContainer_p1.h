@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -12,8 +12,8 @@ public:
   CaloClusterMomentContainer_p1() : m_nMoments() {}
   
   struct ClusterMoment_p {
-    short key;
-    float value;
+    short key{};
+    float value{};
   };
   std::vector<ClusterMoment_p> m_store;  
   unsigned short m_nMoments; 
