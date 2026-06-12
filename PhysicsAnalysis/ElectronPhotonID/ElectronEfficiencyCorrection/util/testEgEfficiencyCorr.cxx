@@ -69,7 +69,7 @@ test1(int argc, char* argv[])
   asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool>
     ElEffCorrectionTool(
       "AsgElectronEfficiencyCorrectionTool/ElEffCorrectionTool");
-  ANA_CHECK(ElEffCorrectionTool.setProperty("IdKey", "Medium"));
+  ANA_CHECK(ElEffCorrectionTool.setProperty("IdKey", "MediumLH"));
   ANA_CHECK(ElEffCorrectionTool.setProperty("ForceDataType", 1));
   ANA_CHECK(ElEffCorrectionTool.setProperty("OutputLevel", mylevel));
   ANA_CHECK(ElEffCorrectionTool.setProperty("CorrelationModel", "FULL"));
