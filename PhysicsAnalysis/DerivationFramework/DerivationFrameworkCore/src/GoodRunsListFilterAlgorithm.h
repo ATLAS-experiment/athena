@@ -16,7 +16,7 @@ class GoodRunsListFilterAlgorithm: public ::AthAlgorithm {
 
                                         //IS EXECUTED:
   virtual StatusCode  initialize();     //once, before any input is loaded
-  virtual StatusCode  execute();        //per event
+  virtual StatusCode  execute(const EventContext& ctx);        //per event
   virtual StatusCode  finalize();       //once, after all events processed
   
 

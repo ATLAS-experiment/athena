@@ -34,7 +34,7 @@ namespace DerivationFramework {
     virtual ~METRemappingAlg() = default;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     
   private:
     typedef std::map<const xAOD::IParticle*, ElementLink<xAOD::IParticleContainer>> linkMap_t;

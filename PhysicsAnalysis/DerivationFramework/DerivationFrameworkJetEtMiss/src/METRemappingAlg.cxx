@@ -34,11 +34,10 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METRemappingAlg::execute()
+  StatusCode METRemappingAlg::execute(const EventContext& ctx)
   {
     ATH_MSG_VERBOSE("METRemappingAlg::execute()");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::ReadHandle<xAOD::JetContainer> jetContHandle(m_jetContKey, ctx);
     if( !jetContHandle.isValid() ) {
