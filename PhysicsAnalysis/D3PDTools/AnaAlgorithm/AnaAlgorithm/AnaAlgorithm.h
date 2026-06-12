@@ -313,12 +313,29 @@ namespace EL
   protected:
     virtual ::StatusCode initialize ();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
     /// \brief execute this algorithm
+    ///
+    /// \deprecated Prefer method with EventContext.
+    /// \warn Override only one of the two execute methods.
     ///
     /// This gets called once on every event and is where the bulk of
     /// the processing ought to be happening.
   protected:
     virtual ::StatusCode execute ();
+
+    /// \brief execute this algorithm
+    ///
+    /// \warn Override only one of the two execute methods.
+    ///
+    /// This gets called once on every event and is where the bulk of
+    /// the processing ought to be happening.
+  protected:
+    virtual ::StatusCode execute (const EventContext& ctx);
+
+#pragma GCC diagnostic pop
 
     /// \brief finalize this algorithm
     ///
