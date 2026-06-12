@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_HITSUMMARYDATAUTILS_H
@@ -231,10 +231,10 @@ namespace ActsTrk::detail {
  
    private:
       std::vector< std::tuple<unsigned short, uint8_t, uint8_t, uint8_t> > m_stat;
-      std::array<uint8_t, Total+1>                                m_hits;
-      std::array<uint8_t, Total+1>                                m_outlierHits;
-      std::array<uint8_t, Total+1>                                m_sharedHits;
-      std::array<uint8_t, Total+1>                                m_layers;
+      std::array<uint8_t, Total+1>                                m_hits{};
+      std::array<uint8_t, Total+1>                                m_outlierHits{};
+      std::array<uint8_t, Total+1>                                m_sharedHits{};
+      std::array<uint8_t, Total+1>                                m_layers{};
       static constexpr std::array<uint8_t, unknown+1>             s_type
         { pixelTotal, pixelTotal, pixelTotal, stripTotal, stripTotal, unknownTotal};
    };
