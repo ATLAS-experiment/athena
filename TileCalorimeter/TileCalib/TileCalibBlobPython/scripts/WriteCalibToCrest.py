@@ -222,6 +222,8 @@ else:
 
 #=== set database
 folderTag = tag
+if folderTag.upper().startswith("TILE") or folderTag.upper().startswith("CALO"):
+    folderPath=""
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 
 iovAll = []
@@ -231,17 +233,7 @@ iovListMOD = []
 iovListCMT = []
 iovUntilCMT = []
 
-inRun=run
-inLumi=lumi
-if inRun<0:
-    if "UPD4" in outtag:
-        inRun=TileCalibTools.getPromptCalibRunNumber()
-    else:
-        inRun=TileCalibTools.getNextRunNumber()
-    if inRun<0:
-        log.error( "Bad run number" )
-        sys.exit(2)
-blobReader = TileCalibCrest.TileBlobReaderCrest(inSchema,folderPath, folderTag, inRun, inLumi,
+blobReader = TileCalibCrest.TileBlobReaderCrest(inSchema,folderPath, folderTag, None, None,
     TileCalibUtils.getDrawerIdx(max(rosmin,0),max(modmin,0)),
     TileCalibUtils.getDrawerIdx(min(rosmax-1,4),max(0,min(modmax-1,TileCalibUtils.getMaxDrawer(min(rosmax-1,4))-1))))
 if outtag=='UPD5':
@@ -249,6 +241,8 @@ if outtag=='UPD5':
     tag2=folderTag.split('-')
     tag2[len(tag2)-1]="%02d"%(int(tag2[len(tag2)-1])+1)
     outfolderTag="-".join(tag2)
+elif outtag.upper().startswith("TILE") or outtag.upper().startswith("CALO"):
+    outfolderTag = outtag
 else:
     outfolderTag = blobReader.getFolderTag(outfolderPath,None,outtag)
 
