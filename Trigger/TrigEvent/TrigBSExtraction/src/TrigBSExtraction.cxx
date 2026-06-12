@@ -53,9 +53,8 @@ StatusCode TrigBSExtraction::initialize() {
 }
 
 
-StatusCode TrigBSExtraction::execute() {
+StatusCode TrigBSExtraction::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const bool isRun1 = m_navToolL2.isEnabled();
   if ( isRun1 ) {
     if ( repackFeaturesToSG(ctx, *m_navToolL2, m_l2ResultKeyIn, m_l2ResultKeyOut, false, false).isFailure() )
