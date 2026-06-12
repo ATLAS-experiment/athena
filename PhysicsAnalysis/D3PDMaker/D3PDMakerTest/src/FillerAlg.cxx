@@ -196,7 +196,7 @@ StatusCode FillerAlg::fillObj5Collections()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode FillerAlg::execute()
+StatusCode FillerAlg::execute(const EventContext& /*ctx*/)
 {
   CHECK( fillObj1Collections() );
   CHECK( fillObj3Collections() );

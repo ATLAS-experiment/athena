@@ -95,7 +95,7 @@ StatusCode DummyInitAlg::initialize ATLAS_NOT_THREAD_SAFE()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode DummyInitAlg::execute()
+StatusCode DummyInitAlg::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

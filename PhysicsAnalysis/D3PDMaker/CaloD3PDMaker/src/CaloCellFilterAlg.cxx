@@ -130,7 +130,7 @@ StatusCode CaloCellFilterAlg::initialize() {
 }
 
 
-StatusCode CaloCellFilterAlg::execute() {
+StatusCode CaloCellFilterAlg::execute(const EventContext& ctx) {
 
    REPORT_MESSAGE( MSG::VERBOSE ) << " in execute";
 
@@ -194,7 +194,7 @@ StatusCode CaloCellFilterAlg::execute() {
             }
 
             if( useNoiseCut ) {
-               SG::ReadCondHandle<CaloNoise> caloNoise{m_caloNoiseKey};
+               SG::ReadCondHandle<CaloNoise> caloNoise{m_caloNoiseKey, ctx};
                float sigma = caloNoise->getNoise( cell->ID(), cell->gain() );
                if( std::abs( e ) < sigma * m_sigmaCut ) continue;
             }

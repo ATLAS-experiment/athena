@@ -50,7 +50,7 @@ StatusCode egammaSumCellsGainAlg::initialize()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode egammaSumCellsGainAlg::execute()
+StatusCode egammaSumCellsGainAlg::execute(const EventContext& /*ctx*/)
 {
   StatusCode sc = StatusCode::SUCCESS;
 

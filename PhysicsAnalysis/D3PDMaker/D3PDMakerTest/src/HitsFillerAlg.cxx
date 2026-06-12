@@ -119,7 +119,7 @@ StatusCode HitsFillerAlg::fillTrackRecordCollection()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode HitsFillerAlg::execute()
+StatusCode HitsFillerAlg::execute(const EventContext& /*ctx*/)
 {
   CHECK( fillMDTSimHitCollection() );
   CHECK( fillTrackRecordCollection() );
