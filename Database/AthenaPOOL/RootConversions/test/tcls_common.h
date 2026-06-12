@@ -163,14 +163,14 @@ class XX
 {
 public:
   std::vector<T1> t1;
-  int ix;
+  int ix = 0;
 };
 
 
 class YY
 {
 public:
-  int iy;
+  int iy = 0;
   std::vector<I> vi;
 };
 
@@ -178,7 +178,7 @@ public:
 class ZZ
 {
 public:
-  int iz;
+  int iz = 0;
   YY yy;
 };
 
@@ -186,7 +186,7 @@ public:
 class AA
 {
 public:
-  int iaa;
+  int iaa = 0;
   std::vector<YY> vy;
 };
 
@@ -194,7 +194,7 @@ public:
 class BB
 {
 public:
-  int ibb;
+  int ibb = 0;
   std::vector<V> vv;
 };
 
@@ -209,7 +209,7 @@ public:
 class DD
 {
 public:
-  int idd;
+  int idd = 0;
   std::vector<CC> vcc;
 };
 
@@ -224,7 +224,7 @@ public:
 class FF
 {
 public:
-  int iff;
+  int iff = 0;
   std::vector<EE> vee;
 };
 
@@ -232,7 +232,7 @@ public:
 class GG
 {
 public:
-  int igg;
+  int igg = 0;
   std::vector<T8> vt8;
 };
 
@@ -240,7 +240,7 @@ public:
 class HH
 {
 public:
-  int ihh;
+  int ihh = 0;
   std::list<T8> lt8;
 };
 // Needed to make dict for list<T8>
@@ -251,7 +251,7 @@ inline bool operator== (const T8&, const T8&) { return false; }
 class II
 {
 public:
-  int iii;
+  int iii = 0;
   std::set<T1> st1;
 };
 
@@ -259,7 +259,7 @@ public:
 class JJ
 {
 public:
-  int ijj;
+  int ijj = 0;
   std::set<V> sv;
 };
 
@@ -267,7 +267,7 @@ public:
 class KK
 {
 public:
-  int ikk;
+  int ikk = 0;
   std::map<int, T1> mt1;
 };
 
@@ -343,7 +343,7 @@ class SS
 public:
   ~SS();
   void clear();
-  int iss;
+  int iss = 0;
   std::vector<T1*> vt1;
 };
 
