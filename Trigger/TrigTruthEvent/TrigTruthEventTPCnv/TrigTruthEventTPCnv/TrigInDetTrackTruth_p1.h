@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -23,9 +23,9 @@
 class TrigInDetTrackTruth_p1 
 {
  public:
-  int best_match_hits;
-  int best_Si_match_hits;
-  int best_TRT_match_hits;
+  int best_match_hits = 0;
+  int best_Si_match_hits = 0;
+  int best_TRT_match_hits = 0;
 
   std::vector<TPObjRef> m_true_part_vec;  //actual type std::vector<HepMcParticleLink> 
   std::vector<TPObjRef> m_nr_common_hits; //actual type std::vector<TrigIDHitStats>
