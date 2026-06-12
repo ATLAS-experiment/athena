@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigEgammaHypo )
@@ -16,12 +16,12 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --exten
 # Unit tests:
 atlas_add_test( TrigEgammaFastCaloHypoToolConfig
    SCRIPT python -m TrigEgammaHypo.TrigEgammaFastCaloHypoTool
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TrigEgammaFastElectronHypoToolConfig
    SCRIPT python -m TrigEgammaHypo.TrigEgammaFastElectronHypoTool
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TrigEgammaFastPhotonHypoToolConfig
    SCRIPT python -m TrigEgammaHypo.TrigEgammaFastPhotonHypoTool
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
