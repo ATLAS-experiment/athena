@@ -30,7 +30,6 @@ StatusCode  ISF::GenParticleFinalStateFilter::initialize()
 
 
 /** returns true if the the particle is considered stable */
-#ifdef HEPMC3
 bool ISF::GenParticleFinalStateFilter::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
   bool passFilter = true;
@@ -40,14 +39,3 @@ bool ISF::GenParticleFinalStateFilter::pass(const HepMC::ConstGenParticlePtr& pa
   return passFilter;
 }
 
-#else
-bool ISF::GenParticleFinalStateFilter::pass(const HepMC::GenParticle& particle) const
-{
-  bool passFilter = true;
-  passFilter &= MC::isFinalState(&particle);
-  passFilter &= (!m_checkGenSimStable)   || MC::isSimStable(&particle);
-  passFilter &= (!m_checkGenInteracting) || MC::isSimInteracting(&particle);
-
-  return passFilter;
-}
-#endif

@@ -37,13 +37,8 @@ namespace ISF {
     /** Athena algtool's Hooks */
     virtual StatusCode  initialize() override final;
 
-#ifdef HEPMC3
     /** Returns the Particle Stack, should register truth */
     virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const override final;
-#else
-    /** Returns the Particle Stack, should register truth */
-    virtual bool pass(const HepMC::GenParticle& particle) const override final;
-#endif
 
     Gaudi::Property<double> m_checkGenSimStable{this, "CheckGenSimStable", true};    //!< boolean switch to check on sim stable
     Gaudi::Property<double> m_checkGenInteracting{this, "CheckGenInteracting", true};  //!< boolean switch to check on gen interacting

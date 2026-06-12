@@ -154,11 +154,7 @@ StatusCode TruthTestTool::processEvent()
     if (currentGenEventIter!=mcCollection->end() ) {
       {
         auto  vtx = HepMC::signal_process_vertex(*currentGenEventIter);
-#ifdef HEPMC3
         if (!vtx && (*currentGenEventIter)->vertices().size()>0) vtx=((*currentGenEventIter)->vertices()).front();
-#else
-        if (!vtx && (*currentGenEventIter)->vertices_size()>0) vtx=*((*currentGenEventIter)->vertices_begin());
-#endif
         if ( vtx )
         {  
           m_x_vert->Fill( vtx->position().x() );
@@ -170,14 +166,7 @@ StatusCode TruthTestTool::processEvent()
       int nvtx=0;
       int nvtx_sec=0;
       float mx=0.,my=0.,mz=0.;
-#ifdef HEPMC3
       for (const auto& vtx: (*currentGenEventIter)->vertices()) {
-#else      
-      for (HepMC::GenEvent::vertex_const_iterator vtxit=(*currentGenEventIter)->vertices_begin(); 
-           vtxit!=(*currentGenEventIter)->vertices_end();++vtxit) {
-        auto vtx=*vtxit;
-#endif
-
         double x = vtx->position().x();
         double y = vtx->position().y();
         double z = vtx->position().z();

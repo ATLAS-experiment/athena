@@ -376,18 +376,10 @@ DECLARE_COMPONENT( MockEntryLayerTool )
   // checks if the two given HepMC::GenEvent instances are equal.
   // returns true if they are equal, false otherwise
   bool GenEventsEq(const HepMC::GenEvent& a, const HepMC::GenEvent& b) {
-#ifdef HEPMC3
     auto aVertexIterator = a.vertices().begin();
     auto bVertexIterator = b.vertices().begin();
     auto aVertexIteratorEnd = a.vertices().end();
     auto bVertexIteratorEnd = b.vertices().end();
-#else
-    HepMC::GenEvent::vertex_const_iterator aVertexIterator = a.vertices_begin();
-    HepMC::GenEvent::vertex_const_iterator bVertexIterator = b.vertices_begin();
-    const auto& aVertexIteratorEnd = a.vertices_end();
-    const auto& bVertexIteratorEnd = b.vertices_end();
-#endif
-
     bool eventsAreEqual = true;
 
     do {
