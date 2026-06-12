@@ -262,11 +262,7 @@ void InDet::TrackStatHelper::addEvent(const EventContext& ctx,
 	}
 	else {
 	  //classify track as coming from primary, secondary or truncated gen particle
-#ifdef HEPMC3
 	  HepMC::ConstGenParticlePtr particle = HMPL.scptr();
-#else
-	  const HepMC::GenParticle *particle = HMPL.cptr();
-#endif
 	  recoClassification = ClassifyParticle(particle, trprob);
 	    
 	  if (trprob < m_cuts.fakeTrackCut)
