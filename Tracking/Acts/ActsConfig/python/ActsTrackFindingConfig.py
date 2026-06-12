@@ -363,6 +363,61 @@ def ActsTrackFindingCfg(flags,
     return acc
 
 
+def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # This is added in the seeding step of the CKF chain...
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc.merge(BeamSpotCondAlgCfg(flags))
+    
+    # Adopt standard convention
+    kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
+
+    kwargs.setdefault("moduleMapPath", flags.Acts.GNN.ModuleMapPath)
+    kwargs.setdefault("gnnPath", flags.Acts.GNN.ModelPath)
+    kwargs.setdefault("numTrtContexts", flags.Acts.GNN.NumTrtContexts)
+    kwargs.setdefault("maxGpuInstances", flags.Acts.GNN.MaxGpuInstances)
+    kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
+    kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)
+    kwargs.setdefault("edgeCut", flags.Acts.GNN.EdgeCut)
+    kwargs.setdefault("minCandidateMeasurements", flags.Acts.GNN.MinCandidateMeasurements)
+    kwargs.setdefault("minDeltaR", flags.Acts.GNN.MinDeltaR)
+    kwargs.setdefault("relaxCentralHoleSel", flags.Acts.GNN.RelaxCentralHoleSel)
+    kwargs.setdefault("relaxMeasurementSel", flags.Acts.GNN.RelaxMeasurementSel)
+    kwargs.setdefault("offlineZ0Sel", flags.Acts.GNN.OfflineZ0Sel)
+
+    # Wire parameter estimation and fitter tools like the main Acts path
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+    if 'FitterTool' not in kwargs:
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, ReverseFilteringPt=0, OutlierChi2Cut=float('inf'))))
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
+
+    if 'ExtrapolationTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault(
+            "ExtrapolationTool",
+            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
+        )
+
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TrackFindingGNNAlg("TrackFindingGNNAlg", **kwargs)
+    )
+
+    return acc
+
+
+
+
 def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
                                       name: str = "ActsScoreBasedAmbiguityResolutionAlg",
                                       **kwargs) -> ComponentAccumulator:

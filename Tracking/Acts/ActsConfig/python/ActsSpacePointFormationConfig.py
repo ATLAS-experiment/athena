@@ -273,7 +273,9 @@ def ActsSpacePointFormationCfg(flags,
     # For conversion and LRT pass we do not process pixels since we assume
     # they have been processed on the primary pass.
     from InDetConfig.ITkActsHelpers import isPrimaryPass
-    if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
+    if flags.Acts.GNN.Enable and isPrimaryPass(flags):
+        processStrips = True
+    elif flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
         processPixels = False
     elif isPrimaryPass(flags) and flags.Tracking.doITkFastTracking:
         processStrips = reconstructStripSpacePointsInPrimaryPass(flags)

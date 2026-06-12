@@ -1,23 +1,30 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from InDetConfig.ITkActsHelpers import isPrimaryPass
 
 def ITkActsTrackReconstructionCfg(flags,
                                   *,
                                   previousExtension: str = None) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    # Seeding
-    from ActsConfig.ActsSeedingConfig import ActsSeedingCfg
-    acc.merge(ActsSeedingCfg(flags))
+    # GNN replaces the seeding+CKF+ambiguity chain only for the primary pass.
+    # Secondary passes (LargeD0, conversion, ...) fall back to the standard chain.
+    if flags.Acts.GNN.Enable and isPrimaryPass(flags):
+        from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingGNNCfg
+        acc.merge(ActsTrackFindingGNNCfg(flags))
+    else:
+        # Seeding
+        from ActsConfig.ActsSeedingConfig import ActsSeedingCfg
+        acc.merge(ActsSeedingCfg(flags))
 
-    # CKF
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
-    acc.merge(ActsTrackFindingCfg(flags))
-    
-    # Ambiguity Resolution
-    if flags.Acts.doAmbiguityResolution:
-        from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
-        acc.merge(ActsAmbiguityResolutionCfg(flags))
+        # CKF
+        from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
+        acc.merge(ActsTrackFindingCfg(flags))
+        
+        # Ambiguity Resolution
+        if flags.Acts.doAmbiguityResolution:
+            from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
+            acc.merge(ActsAmbiguityResolutionCfg(flags))
 
     # PRD association
     from ActsConfig.ActsPrdAssociationConfig import ActsPrdAssociationAlgCfg
@@ -31,7 +38,7 @@ def ITkActsTrackReconstructionCfg(flags,
         # This is only necessary if we are asking for these tracks to be persistified with the
         # - flag: Tracking.ActiveConfig.storeSiSPSeededTracks set to True OR
         # - flag: flags.Acts.doAmbiguityResolution set to False
-        if flags.Tracking.ActiveConfig.storeSiSPSeededTracks or not flags.Acts.doAmbiguityResolution:
+        if flags.Tracking.ActiveConfig.storeSiSPSeededTracks or not flags.Acts.doAmbiguityResolution or (flags.Acts.GNN.Enable and isPrimaryPass(flags)):
             from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
             acts_tracks = f"{flags.Tracking.ActiveConfig.extension}Tracks"
             acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
