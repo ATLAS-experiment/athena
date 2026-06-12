@@ -19,7 +19,7 @@ class MuSAVtxJPsiValidationAlg : public AthAlgorithm {
 public:
   MuSAVtxJPsiValidationAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   const xAOD::Muon* findMuonFromTrack(const xAOD::TrackParticle* tp, const xAOD::MuonContainer* muons);
 

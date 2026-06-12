@@ -57,7 +57,7 @@ StatusCode CaloRingerAlgorithm::finalize()
 }
 
 // =================================================================================
-StatusCode CaloRingerAlgorithm::execute()
+StatusCode CaloRingerAlgorithm::execute(const EventContext& /*ctx*/)
 {
 
   ATH_MSG_DEBUG ("Executing " << name() << ".");

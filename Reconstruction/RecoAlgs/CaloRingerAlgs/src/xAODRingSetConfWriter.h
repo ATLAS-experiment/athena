@@ -55,7 +55,7 @@ class xAODRingSetConfWriter : public ::AthAlgorithm
     StatusCode initialize();
 
     /// Method executing the algorithm
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
 
     /// Method executing the algorithm
     StatusCode finalize();
