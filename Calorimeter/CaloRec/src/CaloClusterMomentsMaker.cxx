@@ -322,17 +322,17 @@ namespace CaloClusterMomentsMaker_detail {
 
 
 struct cellinfo {
-  double x;
-  double y;
-  double z;
-  double energy;
-  double eta;
-  double phi;
-  double r;
-  double lambda;
-  double volume;
-  CaloCell_ID::CaloSample sample;
-  unsigned int identifier;
+  double x{};
+  double y{};
+  double z{};
+  double energy{};
+  double eta{};
+  double phi{};
+  double r{};
+  double lambda{};
+  double volume{};
+  CaloCell_ID::CaloSample sample{};
+  unsigned int identifier{};
 };
 
 } // namespace CaloClusterMomentsMaker_detail
