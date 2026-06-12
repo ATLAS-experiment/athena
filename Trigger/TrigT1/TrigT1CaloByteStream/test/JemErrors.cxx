@@ -148,7 +148,7 @@ StatusCode JemErrors::initialize()
 
 // Execute
 
-StatusCode JemErrors::execute()
+StatusCode JemErrors::execute(const EventContext& ctx)
 {
   if ( !msgLvl(MSG::INFO) ) return StatusCode::SUCCESS;
   msg(MSG::INFO);
@@ -625,7 +625,6 @@ void JemErrors::cmxHitsErrors(const CmxJetHitsCollection* hitCollection,
 
 void JemErrors::errorMessage(const std::string& errmsg)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   int eventNumber = ctx.eventID().event_number();
   msg(MSG::INFO) << "Event " << eventNumber
                  << " has error " << errmsg << endmsg;

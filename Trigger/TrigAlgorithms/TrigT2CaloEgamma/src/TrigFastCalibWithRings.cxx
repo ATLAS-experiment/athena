@@ -23,7 +23,7 @@ StatusCode TrigFastCalibWithRings::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode TrigFastCalibWithRings::execute() const {
+StatusCode TrigFastCalibWithRings::execute(const EventContext& /*ctx*/) const {
 
     return StatusCode::SUCCESS;
 }

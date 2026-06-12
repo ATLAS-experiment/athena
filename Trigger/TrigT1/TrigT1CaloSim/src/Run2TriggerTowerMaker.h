@@ -103,7 +103,7 @@ public:
   // Methods used by Athena to run the algorithm
   //------------------------------------------------------
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
   void handle(const Incident&);

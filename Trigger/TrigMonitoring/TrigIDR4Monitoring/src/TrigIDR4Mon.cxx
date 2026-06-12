@@ -283,7 +283,7 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 
 
 
-//StatusCode TrigIDR4Mon::execute() {
+//StatusCode TrigIDR4Mon::execute(const EventContext& ctx) {
 StatusCode TrigIDR4Mon::fillHistograms(const EventContext &/*context*/) const {
 
   ATH_MSG_DEBUG( " ----- enter fill() ----- " );

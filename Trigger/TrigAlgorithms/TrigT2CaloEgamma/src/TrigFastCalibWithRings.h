@@ -30,7 +30,7 @@ class TrigFastCalibWithRings: public asg::AsgTool
         TrigFastCalibWithRings(const std::string& type, const std::string& myname, const IInterface* parent);
         ~TrigFastCalibWithRings();
         StatusCode initialize() final;
-        StatusCode execute() const;
+        StatusCode execute(const EventContext& ctx) const;
         float makeCalibWRings(const EventContext& ctx) const;
         StatusCode setupBDTFastCalo(const std::string& fileName); 
         static const TString& getString(TObject* obj);

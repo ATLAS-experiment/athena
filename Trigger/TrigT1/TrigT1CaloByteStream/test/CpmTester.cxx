@@ -69,7 +69,7 @@ StatusCode CpmTester::initialize()
 
 // Execute
 
-StatusCode CpmTester::execute()
+StatusCode CpmTester::execute(const EventContext& ctx)
 {
   if ( !msgLvl(MSG::INFO) ) return StatusCode::SUCCESS;
   msg(MSG::INFO);

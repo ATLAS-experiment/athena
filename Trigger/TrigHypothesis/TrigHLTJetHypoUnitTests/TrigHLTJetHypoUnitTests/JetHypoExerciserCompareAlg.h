@@ -19,7 +19,7 @@ public:
   JetHypoExerciserCompareAlg( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~JetHypoExerciserCompareAlg();
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
 

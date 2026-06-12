@@ -99,7 +99,7 @@ namespace Trig{
         else ATH_MSG_DEBUG("REGTEST: eg pointer null!");
     }
 
-    StatusCode TrigEgammaMatchingToolTest::execute() {   
+    StatusCode TrigEgammaMatchingToolTest::execute(const EventContext& /*ctx*/) {   
         ATH_MSG_INFO ("Executing " << name() << "...");
         ATH_MSG_VERBOSE( "L1: " << m_trigdec->isPassed( "L1_.*" )
                 << ", L2: " << m_trigdec->isPassed( "L2_.*" )

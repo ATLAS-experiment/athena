@@ -63,13 +63,13 @@ namespace LVL1 {
       //------------------------------------------------------
 
       StatusCode initialize() ;
-      StatusCode execute() ;
+      StatusCode execute(const EventContext& ctx) ;
 
     private:
       /** Store TOB RoI objects in the TES. */
-      void storeModuleRoIs();
+      void storeModuleRoIs(const EventContext& ctx);
       /** Store module outputs in TES as inputs to CMX simulation */
-      void storeBackplaneTOBs();
+      void storeBackplaneTOBs(const EventContext& ctx);
 
       /** TOB RoIs for RoIB input and DAQ output simulation */
       DataVector<JEMTobRoI>* m_allTOBs;

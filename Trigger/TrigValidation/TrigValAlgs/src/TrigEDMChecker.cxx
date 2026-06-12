@@ -240,7 +240,7 @@ StatusCode TrigEDMChecker::initialize() {
 }
 
 
-StatusCode TrigEDMChecker::execute() {
+StatusCode TrigEDMChecker::execute(const EventContext& /*ctx*/) {
 
   /* fwinkl, Mar 20222:
      Some attempt was made to make the code pass the thread-checker. Methods that
