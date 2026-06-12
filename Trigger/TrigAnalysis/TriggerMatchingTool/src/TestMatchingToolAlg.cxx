@@ -15,7 +15,7 @@ StatusCode TestMatchingToolAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TestMatchingToolAlg::execute() {  
+StatusCode TestMatchingToolAlg::execute(const EventContext& /*ctx*/) {  
 
   //For more documentation on the tool, see: https://twiki.cern.ch/twiki/bin/view/Atlas/XAODMatchingTool
   //As of Feb 2016:

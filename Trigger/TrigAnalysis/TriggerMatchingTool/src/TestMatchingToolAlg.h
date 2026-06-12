@@ -17,7 +17,7 @@ class TestMatchingToolAlg: public ::AthAnalysisAlgorithm {
   virtual ~TestMatchingToolAlg() {}
 
   virtual StatusCode  initialize();
-  virtual StatusCode  execute();
+  virtual StatusCode  execute(const EventContext& ctx);
   virtual StatusCode  finalize();
 
  private: 
