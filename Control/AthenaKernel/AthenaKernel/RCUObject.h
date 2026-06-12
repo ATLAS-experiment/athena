@@ -297,7 +297,7 @@ private:
 
   /// True if there are any objects pending deletion.
   /// Used to avoid taking the lock in quiescent() if there's nothing to do.
-  std::atomic<bool> m_dirty;
+  std::atomic<bool> m_dirty{};
 };
 
 
@@ -495,7 +495,7 @@ public:
   
 private:
   /// The data object we're reading.
-  const T* m_obj;
+  const T* m_obj{};
 };
 
 

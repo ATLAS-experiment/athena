@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAINTERPROCESS_PROCESSGROUP_H
@@ -16,12 +16,12 @@ class IMessageDecoder;
 
 struct ProcessStatus {
    pid_t pid;
-   int   exitcode;
+   int   exitcode{};
 };
 
 struct ProcessResult {
    pid_t pid;
-   ScheduledWork output;
+   ScheduledWork output{};
 };
 
 class ProcessGroup {

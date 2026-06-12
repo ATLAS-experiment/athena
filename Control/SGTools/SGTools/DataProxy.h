@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_DATAPROXY_H
@@ -303,30 +303,30 @@ class DataStore;
     // the first cache line.  See the layout at the end of this file.
     // Be aware of this when making changes to the layout of this class.
 
-    unsigned int m_refCount;
+    unsigned int m_refCount{};
 
     ///reset and not delete: default is true
-    bool m_resetFlag;        
+    bool m_resetFlag{};        
 
     /// True if there are any bound handles.
     // Strictly redundant with m_handles below, but put here to speed up the
     // test for m_handles.empty() --- both by eliminating the pointer
     // comparison and by moving the data into the part of DataProxy covered
     // by the first cache line.
-    bool m_boundHandles;
+    bool m_boundHandles{};
 
     /// Is the proxy currently const?
-    std::atomic<bool> m_const;
+    std::atomic<bool> m_const{};
     /// Was the proxy created as const?
-    bool m_origConst;
+    bool m_origConst{};
 
     std::atomic<DataObject*> m_dObject;
 
     TransientAddress m_tAddress;
 
-    IConverter* m_dataLoader;
+    IConverter* m_dataLoader{};
 
-    T2pMap* m_t2p;
+    T2pMap* m_t2p{};
 
     /// list of bound DataHandles
     typedef std::vector<IResetable*> handleList_t;
@@ -344,10 +344,10 @@ class DataStore;
     Athena::IMessageSvcHolder m_ims;
     
     /// The store of which we are a part.
-    std::atomic<IProxyDict*> m_store;
+    std::atomic<IProxyDict*> m_store{};
 
     /// errno-style error code for accessData
-    enum ErrNo m_errno;  // protected by m_objMutex
+    enum ErrNo m_errno{};  // protected by m_objMutex
 
 
     // For m_dObject.
