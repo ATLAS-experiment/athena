@@ -65,7 +65,7 @@ StatusCode GoodRunsListFilterAlgorithm::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode GoodRunsListFilterAlgorithm::execute() {  
+StatusCode GoodRunsListFilterAlgorithm::execute(const EventContext& /*ctx*/) {  
   //This algorithm decorates EventInfo with passDFGRL to indicate if
   //GRL&&!BRL requirement has passed or failed
   //The algorithm is also marked as not passing if it failed
