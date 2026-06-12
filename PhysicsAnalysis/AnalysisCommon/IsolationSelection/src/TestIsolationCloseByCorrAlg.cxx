@@ -99,8 +99,7 @@ namespace CP {
                (m_photSelTool.empty() || m_photSelTool->accept(ctx, egamm));
     }
 
-    StatusCode TestIsolationCloseByCorrAlg::execute() {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    StatusCode TestIsolationCloseByCorrAlg::execute(const EventContext& ctx) {
         //
         xAOD::ElectronContainer* Electrons = nullptr;
         std::pair<std::unique_ptr<xAOD::ElectronContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> ElShallow;

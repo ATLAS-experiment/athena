@@ -65,7 +65,7 @@ StatusCode EventDecisionAlg::finalize()
 
 
 
-StatusCode EventDecisionAlg::execute()
+StatusCode EventDecisionAlg::execute(const EventContext& ctx)
 {
   // Simple status message at the beginning of each event execute,
   ATH_MSG_DEBUG ( "==> execute " << name() );
@@ -77,7 +77,7 @@ StatusCode EventDecisionAlg::execute()
   for ( const std::string& streamName : m_streamNames.value() ){
     // Ensure that the even passes if no stream name is given
     eventPasses = false;
-    eventPasses = m_decSvc->isEventAccepted(streamName);
+    eventPasses = m_decSvc->isEventAccepted(streamName, ctx);
     if (eventPasses){
       ATH_MSG_DEBUG("Got an event accept from stream name " << streamName);
       break;

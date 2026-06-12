@@ -13,7 +13,6 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace Prompt {
 //======================================================================================================
@@ -88,9 +87,8 @@ StatusCode PrimaryVertexReFitter::finalize()
 }
 
 //=============================================================================
-StatusCode PrimaryVertexReFitter::execute()
+StatusCode PrimaryVertexReFitter::execute(const EventContext& ctx)
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //
     // Start execute timer

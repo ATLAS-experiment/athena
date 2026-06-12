@@ -40,7 +40,7 @@ namespace FSR {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode ToolTester::execute() {
+   StatusCode ToolTester::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the muons:
       const xAOD::MuonContainer* muons = 0;

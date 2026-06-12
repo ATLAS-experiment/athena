@@ -23,7 +23,7 @@ class ParticleRemoverAlg: public ::AthAlgorithm {
   virtual StatusCode  initialize();
 
   /// Standard Gaudi execute method called once for every event
-  virtual StatusCode  execute();
+  virtual StatusCode  execute(const EventContext& ctx);
 
   /// Standard Gaudi finalize method called once after the event loop
   virtual StatusCode  finalize();

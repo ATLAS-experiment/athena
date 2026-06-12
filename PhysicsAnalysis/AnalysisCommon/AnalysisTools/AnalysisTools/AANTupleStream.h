@@ -47,7 +47,7 @@ public:
   virtual StatusCode finalize() override;
 
   /// Working entry point
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
 
