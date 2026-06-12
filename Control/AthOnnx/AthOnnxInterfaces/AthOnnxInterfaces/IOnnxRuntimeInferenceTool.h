@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #ifndef AthOnnx_IOnnxRuntimeInferenceTool_H
 #define AthOnnx_IOnnxRuntimeInferenceTool_H
 
@@ -99,8 +99,8 @@ namespace AthOnnx {
         virtual void printModelInfo() const = 0;
 
         protected:
-        unsigned m_numInputs;
-        unsigned m_numOutputs;
+        unsigned m_numInputs = 0;
+        unsigned m_numOutputs = 0;
         std::vector<std::vector<int64_t> > m_inputShapes;
         std::vector<std::vector<int64_t> > m_outputShapes;
 
