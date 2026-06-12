@@ -72,13 +72,7 @@ void HepMCTruthReader::printEvent(const HepMC::GenEvent* event, bool do4momPtEta
   if (do4momPtEtaPhi) cout << "        Barcode   PDG ID      ( pt,      eta,      phi,     E ) Stat  DecayVtx\n";
   else                cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";    
   cout << "--------------------------------------------------------------------------------\n";
-#ifdef HEPMC3
   for (const auto& iv: event->vertices()) {  printVertex(iv, do4momPtEtaPhi);  } 
-#else
-  for (HepMC::GenEvent::vertex_const_iterator iv = event->vertices_begin(); iv != event->vertices_end(); ++iv) {
-    printVertex(*iv, do4momPtEtaPhi);
-  }
-#endif
   cout << "--------------------------------------------------------------------------------\n";
 }
 
@@ -160,7 +154,6 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex, bool 
   }
 
   // Print out all the incoming, then outgoing particles
-#ifdef HEPMC3
   for (const auto&  iPIn: vertex->particles_in()) {       
     if ( iPIn == vertex->particles_in().front() ) {
       cout << " I: ";
@@ -177,27 +170,6 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex, bool 
     } else cout << "      ";
     printParticle(iPOut, do4momPtEtaPhi);
   }  
-#else  
-  for (HepMC::GenVertex::particles_in_const_iterator iPIn = vertex->particles_in_const_begin();
-       iPIn != vertex->particles_in_const_end(); ++iPIn) {       
-    if ( iPIn == vertex->particles_in_const_begin() ) {
-      cout << " I: ";
-      cout.width(2);
-      cout << vertex->particles_in_size();
-    } else cout << "      ";
-    printParticle(*iPIn, do4momPtEtaPhi);
-  }
-  for (HepMC::GenVertex::particles_out_const_iterator iPOut = vertex->particles_out_const_begin();
-       iPOut != vertex->particles_out_const_end(); ++iPOut) {
-    if ( iPOut == vertex->particles_out_const_begin() ) {
-      cout << " O: ";
-      cout.width(2);
-      cout << vertex->particles_out_size();
-    } else cout << "      ";
-    printParticle(*iPOut, do4momPtEtaPhi);
-  }
-
-#endif
   cout.flags(f); 
 }
 
