@@ -57,7 +57,7 @@ private:
     //  methods 
     //////////////////////////////////////////////
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
     StatusCode Truth_info();
     void InitHistos();

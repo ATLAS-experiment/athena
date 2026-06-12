@@ -20,7 +20,7 @@ StatusCode LUCID_DigiTop::initialize() {
  return StatusCode::SUCCESS;
 }
 
-StatusCode LUCID_DigiTop::execute() {
+StatusCode LUCID_DigiTop::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("execute()");
-  return m_mergeTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_mergeTool->processAllSubEvents(ctx);
 }

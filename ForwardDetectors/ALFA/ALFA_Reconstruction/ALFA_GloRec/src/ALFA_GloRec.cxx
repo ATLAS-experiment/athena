@@ -151,7 +151,7 @@ StatusCode ALFA_GloRec::initialize() {
 //      execute method
 //
 //////////////////////////////////////////////////////////
-StatusCode ALFA_GloRec::execute() {
+StatusCode ALFA_GloRec::execute(const EventContext& /*ctx*/) {
 
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GloRec::execute()");
 	LogStream << MSG::DEBUG << "begin ALFA_GloRec::execute()" << endmsg;

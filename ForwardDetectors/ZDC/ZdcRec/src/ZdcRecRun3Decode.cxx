@@ -91,12 +91,11 @@ StatusCode ZdcRecRun3Decode::initialize()
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRecRun3Decode::execute()
+StatusCode ZdcRecRun3Decode::execute(const EventContext& ctx)
 {
 
   ATH_MSG_DEBUG("In ZdRecRun3");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ATH_MSG_DEBUG ("--> ZDC: ZdcRecRun3Decode execute starting on "
                  << ctx.evt()
@@ -140,7 +139,7 @@ StatusCode ZdcRecRun3Decode::execute()
 	      ATH_MSG_WARNING("Unidentified LUCROD ID = " << lucrod_id);
 	    }
 	}
-      SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
+      SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
       if (!eventInfo->updateErrorState(xAOD::EventInfo::ForwardDet,xAOD::EventInfo::Error))
 	{
 	  ATH_MSG_WARNING( " cannot set EventInfo error state for ForwardDet "  );

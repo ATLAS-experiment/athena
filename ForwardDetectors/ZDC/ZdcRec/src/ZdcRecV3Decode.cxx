@@ -67,10 +67,9 @@ StatusCode ZdcRecV3Decode::initialize()
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRecV3Decode::execute()
+StatusCode ZdcRecV3Decode::execute(const EventContext& ctx)
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_DEBUG ("--> ZDC: ZdcRecV3Decode execute starting on "
                  << ctx.evt()
                  << "th event");

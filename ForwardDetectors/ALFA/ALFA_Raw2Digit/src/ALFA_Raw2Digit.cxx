@@ -169,7 +169,7 @@ StatusCode ALFA_Raw2Digit::initialize()
 	return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_Raw2Digit::execute()
+StatusCode ALFA_Raw2Digit::execute(const EventContext& /*ctx*/)
 {
 	ATH_MSG_DEBUG ("ALFA_Raw2Digit: BEGINING of execute");
 
