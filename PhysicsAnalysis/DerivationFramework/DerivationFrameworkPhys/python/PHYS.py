@@ -229,6 +229,11 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     # Compact b-jet trigger matching info
     PHYSSlimmingHelper.IncludeBJetTriggerByYearContent = True
 
+    #Trigger content for DarkJetPEB 
+    if flags.Input.TriggerStream=='physics_DarkJetPEBTLA':
+        PHYSSlimmingHelper.AllVariables += ['HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
+                                            'HLT_MET_pfopufit']
+
     # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:
