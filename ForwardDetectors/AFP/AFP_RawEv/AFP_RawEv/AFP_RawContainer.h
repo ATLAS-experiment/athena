@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_RAWCONTAINER_H
@@ -8,6 +8,7 @@
 #include "AFP_RawEv/AFP_SiRawCollection.h"
 #include "AFP_RawEv/AFP_ToFRawCollection.h"
 #include "AthenaKernel/CLASS_DEF.h"
+#include <list>
 
 class AFP_RawContainer
 {
@@ -36,11 +37,11 @@ public:
   void clear ();
   
 private:
-  uint32_t m_lvl1Id;
-  uint16_t m_bcId; 
-  uint32_t m_timeStamp;
-  uint32_t m_timeStampNS;
-  uint32_t m_lumiBlock;
+  uint32_t m_lvl1Id{};
+  uint16_t m_bcId{}; 
+  uint32_t m_timeStamp{};
+  uint32_t m_timeStampNS{};
+  uint32_t m_lumiBlock{};
 
   std::list<AFP_SiRawCollection> m_collectionSi;
   std::list<AFP_ToFRawCollection> m_collectionToF;
