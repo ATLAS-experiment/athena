@@ -39,7 +39,7 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    virtual ~TrigEDMChecker();
 
    virtual StatusCode initialize() override;
-   virtual StatusCode execute() override;
+   virtual StatusCode execute(const EventContext& ctx) override;
 
  private:
    StatusCode do_execute ATLAS_NOT_THREAD_SAFE();

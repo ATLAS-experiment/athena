@@ -245,7 +245,7 @@ StatusCode TrigDecisionChecker::finalize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TrigDecisionChecker::execute()
+StatusCode TrigDecisionChecker::execute(const EventContext& /*ctx*/)
 {
     m_eventNumber++;
     
