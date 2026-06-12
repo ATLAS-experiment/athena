@@ -35,7 +35,7 @@ StatusCode TrigBtagValidationTest::initialize() {
   return StatusCode::SUCCESS;
 }
   
-StatusCode TrigBtagValidationTest::execute() 
+StatusCode TrigBtagValidationTest::execute(const EventContext& /*ctx*/) 
 {
   ATH_MSG_DEBUG("Executing " << name() );
   const auto& emulCtx =  m_emulationTool->populateJetManagersTriggerObjects();
