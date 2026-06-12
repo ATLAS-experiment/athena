@@ -52,10 +52,8 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("Could not open wafer ID output file: " << m_outputFile.value());
         return StatusCode::FAILURE;
     }
-    int nrow = 0;
 
     for (const CsvRow& row : m_rows) {
-        nrow++;
         const std::pair< Identifier, int> w_and_fe_id =  waferId(row);
         const Identifier id = w_and_fe_id.first;
         const std::string waferId_str = id.get_identifier32().getString();
@@ -221,7 +219,7 @@ int ITkPixelCsvWaferIdAlg::barrel_ec(const std::vector<std::string>& spchain) co
 
 int ITkPixelCsvWaferIdAlg::layer_disk(const std::vector<std::string>& spchain) const {
     int b_ec = barrel_ec(spchain);
-    if( fabs(b_ec) == 0 ){ // flat barrel
+    if( b_ec == 0 ){ // flat barrel
         return spchain.at(2)[1] - '0';
     }
     else{ // endcap and barrel rings - all considered as 'endcap' disks
@@ -259,7 +257,7 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
     int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
     
-    if( fabs(b_ec) == 0 ){ // flat barrel
+    if( b_ec == 0 ){ // flat barrel
         std::string phi_str = (spchain.at(3)).substr(1,2);
         if(ld == 0 || ld ==1 ){ //inner system flat barrel
             return std::stoi(phi_str) - 1;
@@ -338,7 +336,7 @@ int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, c
     int ld = layer_disk(spchain);
     int side = (spchain[4] == "A") ? 1 : -1; // A for side pos, C for side neg
 
-    if( fabs(b_ec) == 0 ){ // flat barrel
+    if( b_ec == 0 ){ // flat barrel
         if(ld ==0){ //triplets, one front-end is considered as one module
             return side * (3 * (std::stoi(mod) -1) + fe );
         }
