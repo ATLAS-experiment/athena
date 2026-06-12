@@ -20,9 +20,7 @@ if __name__=="__main__":
                         help="Schedules the R4 pattern -> legacy segment -> legacy track chain")
     parser.add_argument("--use-cpu", action="store_true", default=False, help="Use CPU for ONNX inference")
     parser.add_argument("--skip-onnx", action="store_true", default=False, help="Skip ONNX inference step")
-    parser.add_argument("--bucket-model-path",
-                        default="/eos/project-f/fcc-ml/ddicroce/ATLAS_MuonSpectrometer/KubeFlow/Inference_EdgeClassifier/athena/MuonSpectrometer/MuonPhaseII/MuonLearning/MuonInference/models/edgecnn_bucket_sparse_best.onnx",
-                        dest="bucket_model_path")
+    parser.add_argument("--bucket-model-path", default="dev/MuonRecRTT/edgecnn_mu200.onnx",dest="bucket_model_path")
     parser.add_argument("--score-threshold", type=float, default=0.0, dest="score_threshold")
     parser.add_argument("--output-name", default="logits", dest="output_name")
     parser.add_argument("--is-logit", dest="is_logit", default=False, action="store_true", help="Interpret the single output directly and do not apply sigmoid")

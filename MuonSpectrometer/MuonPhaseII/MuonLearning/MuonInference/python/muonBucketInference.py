@@ -14,22 +14,17 @@ if __name__ == "__main__":
     parser = SetupArgParser()
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="InferenceHoughTest.root")
-    parser.set_defaults(noMM=True)
-    parser.set_defaults(noSTGC=True)
-    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.RDO_R4)
+    parser.set_defaults(defaultGeoFile="RUN4")
     
-    parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
+    parser.add_argument("--doPerfMon", help="If set to true, full perfmonMT is enabled",
                         default=False, action='store_true')
-    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=True,
-                       help="Use GPU for ONNX inference (default: True)")
-    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
-                       help="Use CPU for ONNX inference")
+    parser.add_argument("--use-cpu", action="store_true", default=False, help="Use CPU for ONNX inference")
     parser.add_argument("--athenaDebug", action="store_true", default=False,
                        help="Enable DEBUG verbosity for bucket inference components in MessageSvc")
     parser.add_argument("--athenaVerbose", action="store_true", default=False,
                        help="Enable VERBOSE verbosity for bucket inference components in MessageSvc")
-    parser.add_argument("--bucket-model-path", dest="bucket_model_path",
-                        default="/eos/project-i01/f/fcc-ml/ddicroce/ATLAS_MuonSpectrometer/KubeFlow/Inference_EdgeClassifier/athena/MuonSpectrometer/MuonPhaseII/MuonLearning/MuonInference/models/edgecnn_bucket_sparse_best.onnx",
+    parser.add_argument("--bucket-model-path", dest="bucket_model_path", default="dev/MuonRecRTT/edgecnn_mu200.onnx",
                         help="Absolute path (or PathResolver key) for the bucket ONNX model")
     parser.add_argument("--score-threshold", type=float, default=0.2, dest="score_threshold",
                         help="Keep bucket if single-output score > threshold (default: 0.2)")
@@ -51,15 +46,13 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     
     flags = initConfigFlags()
-    flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.PerfMon.doFullMonMT = getattr(args, "doPerfMon", False)
     if args.athenaDebug or args.athenaVerbose:
         flags.Common.MsgSuppression = False
 
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
     # Use command line argument if provided, otherwise default to True
-    use_gpu_requested = args.use_gpu if args.use_gpu is not None else True
-    # Runtime check for GPU availability. Prefer ONNXRuntime provider list,
-    # fall back to PyTorch if ONNX runtime isn't available.
+    use_gpu_requested = not args.use_cpu
     gpu_available = False
     try:
         import onnxruntime as ort
