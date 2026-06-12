@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_AlgToChainTool_h
@@ -27,10 +27,10 @@ namespace TrigCompositeUtils {
   public:
      // Helper struct to save chain info
     struct ChainInfo {
-        TrigCompositeUtils::DecisionID id;
+        TrigCompositeUtils::DecisionID id {};
         std::string name;
         std::vector<std::string> groups;
-        bool isPassRaw;
+        bool isPassRaw = false;
       };
 
       AlgToChainTool(const std::string& type, const std::string& name, const IInterface* parent);
