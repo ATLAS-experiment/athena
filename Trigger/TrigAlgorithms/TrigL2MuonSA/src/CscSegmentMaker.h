@@ -33,7 +33,7 @@ namespace TrigL2MuonSA{
   public:
 
 
-    typedef struct{
+    struct localCscHit {
       double loc_x{};
       double loc_y{};
       double loc_z{};
@@ -43,9 +43,9 @@ namespace TrigL2MuonSA{
       bool enabled{};
       int stationname{};
       bool isIP{};
-    } localCscHit;
+    };
 
-    typedef struct{
+    struct local2dSegment {
       double a{};
       double b{};
       double zshift{};
@@ -54,7 +54,7 @@ namespace TrigL2MuonSA{
       int stationname{};
       double residual{};
       std::vector<localCscHit> localHits;
-    }local2dSegment;
+    };
 
   public:
     CscSegmentMaker(const std::string& type, const std::string &name, const IInterface* parent);
