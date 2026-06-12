@@ -28,12 +28,6 @@ void NeutralPFOClusterMLCorrectionTool::correctContainer(xAOD::FlowElementContai
                              m_clusterMLCorrectedEnergyKey.key());
   }
 
-  if (!clusterMLReadHandle.isAvailable()) {
-    throw std::runtime_error("No ML energy decoration '" +
-                             m_clusterMLCorrectedEnergyKey.key() +
-                             "' available for container");
-  }
-
   for (xAOD::FlowElement *neutral_pfo : neutral_pfos)
   { correctNeutralFlowElement(*neutral_pfo, clusterMLReadHandle); }
 }
