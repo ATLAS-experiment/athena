@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SCT_CalibAlgs )
@@ -19,7 +19,7 @@ atlas_add_test( SCT_CalibUtilities_test
    SOURCES test/SCT_CalibUtilities_test.cxx src/SCT_CalibUtilities.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} InDetIdentifier
-   POST_EXEC_SCRIPT "nopost.sh"
+   POST_EXEC_SCRIPT noerror.sh
 )
 
 # Install files from the package:
