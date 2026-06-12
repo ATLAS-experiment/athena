@@ -46,11 +46,10 @@ StatusCode JpsiAlg::initialize(){
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode JpsiAlg::execute() {
+StatusCode JpsiAlg::execute(const EventContext& ctx) {
 
 
   ATH_MSG_DEBUG("in execute()");
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Increment counter
   ++m_eventCntr;

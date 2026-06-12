@@ -32,7 +32,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode TestIsolationAthenaAlg::execute() {
+    StatusCode TestIsolationAthenaAlg::execute(const EventContext& /*ctx*/) {
         const xAOD::PhotonContainer* photons(nullptr);
         ATH_CHECK(evtStore()->retrieve(photons, m_sgKeyPhotons));
         for (auto x : *photons) {

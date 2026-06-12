@@ -54,7 +54,7 @@ StatusCode TriggerSelectionAlg::finalize()
 }
 
 
-StatusCode TriggerSelectionAlg::execute()
+StatusCode TriggerSelectionAlg::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG("Executing " << name() << "...");
 

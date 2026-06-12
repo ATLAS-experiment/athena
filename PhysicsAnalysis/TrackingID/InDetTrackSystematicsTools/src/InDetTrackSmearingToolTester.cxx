@@ -58,7 +58,7 @@ namespace InDet {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode InDetTrackSmearingToolTester::execute() {
+   StatusCode InDetTrackSmearingToolTester::execute(const EventContext& /*ctx*/) {
 
       // Create a shallow container copy and then apply the smearingtool to impact parameters:
       const xAOD::TrackParticleContainer *IDParticles = nullptr;

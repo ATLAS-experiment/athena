@@ -34,7 +34,7 @@ class ORToolBoxTestAlg : public AthAlgorithm
     virtual StatusCode initialize();
 
     /// Execute the algorithm
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx);
 
   private:
 

@@ -33,7 +33,7 @@ public:
   /// Function initialising the algorithm
   virtual StatusCode initialize();
   /// Function executing the algorithm
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   
 private:
    SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EvtInfoKey","EventInfo", "Specify an Event info"};

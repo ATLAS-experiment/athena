@@ -11,7 +11,6 @@
 #include "xAODTracking/VertexAuxContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/DecorKeyHelpers.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // C/C++
 #include <cmath>
@@ -104,14 +103,13 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::finalize()
 }
 
 //=============================================================================
-StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
+StatusCode Prompt::NonPromptLeptonVertexingAlg::execute(const EventContext& ctx)
 {
   //
   // Start execute timer for new event
   //
   TimerScopeHelper timer(m_timerExec);
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   m_countEvents++;
 

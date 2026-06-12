@@ -21,8 +21,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CalibratedTracksProvider::execute() {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    StatusCode CalibratedTracksProvider::execute(const EventContext& ctx) {
         SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_inputKey, ctx};
         if (!tracks.isValid()) {
             ATH_MSG_FATAL("No muon container found");

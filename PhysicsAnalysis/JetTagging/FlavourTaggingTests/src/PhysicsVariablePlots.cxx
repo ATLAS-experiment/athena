@@ -48,7 +48,7 @@ namespace FTAGValidation {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PhysicsVariablePlots::execute() {
+  StatusCode PhysicsVariablePlots::execute(const EventContext& /*ctx*/) {
     ATH_MSG_DEBUG( "Executing " << name() << " ..." );
 
     const EventContext context = getContext();

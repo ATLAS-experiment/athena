@@ -24,8 +24,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CalibratedMuonsProvider::execute() {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    StatusCode CalibratedMuonsProvider::execute(const EventContext& ctx) {
         SG::ReadHandle<xAOD::MuonContainer> muons{m_inputKey, ctx};
         if (!muons.isValid()) {
             ATH_MSG_FATAL("No muon container found");

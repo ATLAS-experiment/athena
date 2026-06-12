@@ -40,7 +40,7 @@ namespace Analysis
        /** standard Athena-Algorithm method */
        StatusCode          initialize() override;
        /** standard Athena-Algorithm method */
-       StatusCode          execute() override;
+       StatusCode          execute(const EventContext& ctx) override;
 
     private:
       

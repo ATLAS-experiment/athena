@@ -43,9 +43,9 @@ namespace InDet {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode InDetTrackBiasingToolTester::execute() {
+   StatusCode InDetTrackBiasingToolTester::execute(const EventContext& ctx) {
 
-      SG::ReadHandle<xAOD::TrackParticleContainer> IDParticles(m_trackKey);
+      SG::ReadHandle<xAOD::TrackParticleContainer> IDParticles(m_trackKey, ctx);
       ATH_CHECK( IDParticles.isValid() );
 
       // --- Nominal: no systematics active, correction should be applied ---

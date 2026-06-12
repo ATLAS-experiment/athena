@@ -187,7 +187,7 @@ StatusCode DumpAllSystematics::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode DumpAllSystematics::execute()
+StatusCode DumpAllSystematics::execute(const EventContext& /*ctx*/)
 {
   const xAOD::EventInfo* eventInfo = nullptr;
   ATH_CHECK(evtStore()->retrieve(eventInfo));

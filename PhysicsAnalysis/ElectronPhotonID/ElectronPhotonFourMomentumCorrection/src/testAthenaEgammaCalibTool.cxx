@@ -39,7 +39,7 @@ StatusCode testAthenaEgammaCalibTool::initialize()
 }
 
 
-StatusCode testAthenaEgammaCalibTool::execute()
+StatusCode testAthenaEgammaCalibTool::execute(const EventContext& /*ctx*/)
 {
   const xAOD::EventInfo* event_info = nullptr;
   ATH_CHECK( evtStore()->retrieve( event_info) );

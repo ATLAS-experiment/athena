@@ -164,7 +164,7 @@ StatusCode AANTupleStream::finalize()
 
 
 // Work entry point
-StatusCode AANTupleStream::execute() 
+StatusCode AANTupleStream::execute(const EventContext& /*ctx*/) 
 {
   StatusCode sc;
 
