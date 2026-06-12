@@ -429,8 +429,8 @@ protected:
                                       typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurementCovariance<DIM> >;
       MeasCovPair      m_measurement;
       std::optional<T_SourceLink> m_sourceLink;
-      float            m_chi2;
-      bool             m_isOutLier;
+      float            m_chi2{};
+      bool             m_isOutLier{};
    };
 
    // type and dimension specific function to select measurements from the range defined by the source link iterators.

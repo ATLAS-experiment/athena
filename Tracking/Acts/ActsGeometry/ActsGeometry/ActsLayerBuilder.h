@@ -52,7 +52,7 @@ public:
     /// string based identification
     std::string                          configurationName = "undefined";
     Mode mode = Mode::Undefined;
-    const InDetDD::SiDetectorManager*   mng;
+    const InDetDD::SiDetectorManager*   mng{};
     std::shared_ptr<const Acts::LayerCreator> layerCreator = nullptr;
     /// the binning type of the contained surfaces in phi
     /// (equidistant/arbitrary)
