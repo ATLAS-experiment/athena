@@ -24,7 +24,7 @@ class JpsiExample : public AthAlgorithm {
 public:
   JpsiExample (const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize() override;
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) override;
   StatusCode finalize() override;
 
 private:
