@@ -114,7 +114,7 @@ StatusCode L1CaloRampMaker::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode L1CaloRampMaker::execute()
+StatusCode L1CaloRampMaker::execute(const EventContext& ctx)
 {
     // Skip spurious events
     unsigned int wantedEvents = m_nEventsPerStep*m_nSteps;
@@ -144,7 +144,6 @@ StatusCode L1CaloRampMaker::execute()
     }
 
   
-    const EventContext& ctx = getContext();
     
     SG::ReadHandle<CaloCellContainer> cells{ m_caloCellsKey,ctx};
   
@@ -248,8 +247,8 @@ StatusCode L1CaloRampMaker::execute()
     }
 
     // Reading L1Calo conditions 
-    SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel(m_pprDisabledChannelContainer);
-    SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprChanCalib( m_pprChanCalibContainer);
+    SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel(m_pprDisabledChannelContainer, ctx);
+    SG::ReadCondHandle<L1CaloPprChanCalibContainer> pprChanCalib( m_pprChanCalibContainer, ctx);
     
     auto specialChannelRangeEnd = m_specialChannelRange.end();
     bool nextStep = (m_nEvent % m_nEventsPerStep == 0);
