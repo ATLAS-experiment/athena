@@ -35,7 +35,7 @@ namespace CP {
             /// Function finalizing the algortihm
             StatusCode finalize() override;
             /// Function executing the algorithm
-            StatusCode execute() override;
+            StatusCode execute(const EventContext& ctx) override;
             virtual ~MuonScaleFactorTestAlg() = default;
 
         private:

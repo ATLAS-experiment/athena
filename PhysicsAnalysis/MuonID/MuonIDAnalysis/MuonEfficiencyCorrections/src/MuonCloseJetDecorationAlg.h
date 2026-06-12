@@ -22,7 +22,7 @@ namespace CP {
             /// Function initialising the algorithm
              StatusCode initialize() override;
             /// Function executing the algorithm
-             StatusCode execute() override;
+             StatusCode execute(const EventContext& ctx) override;
              ~MuonCloseJetDecorationAlg()= default;
 
         private:

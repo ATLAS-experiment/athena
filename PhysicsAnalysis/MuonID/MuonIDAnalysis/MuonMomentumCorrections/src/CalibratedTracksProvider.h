@@ -27,7 +27,7 @@ namespace CP {
         /// Function initialising the algorithm
         virtual StatusCode initialize() override;
         /// Function executing the algorithm
-        virtual StatusCode execute() override;
+        virtual StatusCode execute(const EventContext& ctx) override;
 
     private:
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
