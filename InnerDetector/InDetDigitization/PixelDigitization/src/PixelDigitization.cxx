@@ -19,7 +19,7 @@ StatusCode PixelDigitization::initialize() {
 }
 
 // Execute method:
-StatusCode PixelDigitization::execute() {
+StatusCode PixelDigitization::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("execute()");
-  return m_pixelDigitizationTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_pixelDigitizationTool->processAllSubEvents(ctx);
 }

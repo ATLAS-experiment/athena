@@ -25,7 +25,7 @@ StatusCode SCT_Digitization::initialize() {
 // Execute method:
 //----------------------------------------------------------------------
 
-StatusCode SCT_Digitization::execute() {
+StatusCode SCT_Digitization::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("execute()");
-  return m_sctDigitizationTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_sctDigitizationTool->processAllSubEvents(ctx);
 }

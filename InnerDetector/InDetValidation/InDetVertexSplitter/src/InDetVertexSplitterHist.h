@@ -39,7 +39,7 @@ namespace InDet {
     
     StatusCode initialize();
     StatusCode finalize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     
   private:
     

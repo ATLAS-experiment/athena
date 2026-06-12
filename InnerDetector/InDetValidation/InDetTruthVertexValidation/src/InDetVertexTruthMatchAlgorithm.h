@@ -21,7 +21,7 @@ class InDetVertexTruthMatchAlgorithm : public AthAlgorithm {
   /// Function initialising the algorithm
   virtual StatusCode initialize() override final;
   /// Function executing the algorithm
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
  private:
   /// StoreGate key for the muon container to investigate

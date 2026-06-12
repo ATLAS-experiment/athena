@@ -225,7 +225,7 @@ namespace InDetAlignment
 	}
 	
 	//__________________________________________________________________________
-	StatusCode CreateMisalignAlg::execute()
+	StatusCode CreateMisalignAlg::execute(const EventContext& /*ctx*/)
 	{
     ATH_MSG_DEBUG( "AlignAlg execute()" );
 		++m_nEvents;

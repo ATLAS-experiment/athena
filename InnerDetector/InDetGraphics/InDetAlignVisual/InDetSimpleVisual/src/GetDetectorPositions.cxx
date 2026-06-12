@@ -96,7 +96,7 @@ StatusCode GetDetectorPositions::initialize(){
 }
 
 /** execute */
-StatusCode GetDetectorPositions::execute() {
+StatusCode GetDetectorPositions::execute(const EventContext& /*ctx*/) {
   
   if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "execute() check global position" << endmsg;
   

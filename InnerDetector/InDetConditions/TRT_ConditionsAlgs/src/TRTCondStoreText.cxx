@@ -54,7 +54,7 @@ StatusCode TRTCondStoreText::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TRTCondStoreText::execute(){
+StatusCode TRTCondStoreText::execute(const EventContext& /*ctx*/){
 
   StatusCode sc = StatusCode::SUCCESS;
   return sc;

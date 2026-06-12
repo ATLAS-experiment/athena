@@ -61,7 +61,7 @@ StatusCode TRTStrawStatusWrite::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TRTStrawStatusWrite::execute()
+StatusCode TRTStrawStatusWrite::execute(const EventContext& /*ctx*/)
 {
     return StatusCode::SUCCESS;
 }

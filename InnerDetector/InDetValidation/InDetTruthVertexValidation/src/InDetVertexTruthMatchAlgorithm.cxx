@@ -29,7 +29,7 @@ StatusCode InDetVertexTruthMatchAlgorithm::initialize() {
    return StatusCode::SUCCESS;
 }
 
-StatusCode InDetVertexTruthMatchAlgorithm::execute() {
+StatusCode InDetVertexTruthMatchAlgorithm::execute(const EventContext& /*ctx*/) {
 
   //Retrieve the vertices:
   const xAOD::VertexContainer * vxContainer = nullptr;

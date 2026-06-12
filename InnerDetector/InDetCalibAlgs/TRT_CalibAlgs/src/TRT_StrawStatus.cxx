@@ -90,9 +90,9 @@ StatusCode InDet::TRT_StrawStatus::finalize(){
 
 //================ Execution ====================================================
 
-StatusCode InDet::TRT_StrawStatus::execute(){
+StatusCode InDet::TRT_StrawStatus::execute(const EventContext& ctx){
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     StatusCode sc = StatusCode::SUCCESS;
     if (not eventInfo.isValid()) {
       ATH_MSG_ERROR( "Unable to retrieve Event Info " );
@@ -104,13 +104,13 @@ StatusCode InDet::TRT_StrawStatus::execute(){
       m_runNumber = runNumber;
     }
     int lumiBlock0 =eventInfo->lumiBlock();
-    SG::ReadHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey);
+    SG::ReadHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey, ctx);
 
     if (not rdoContainer.isValid()) {
       ATH_MSG_ERROR( "no TRT_RDO container available " );
       return StatusCode::FAILURE;
     }
-    SG::ReadHandle<DataVector<Trk::Track>> trkCollection(m_tracksName);
+    SG::ReadHandle<DataVector<Trk::Track>> trkCollection(m_tracksName, ctx);
     if (not trkCollection.isValid()) {
       ATH_MSG_ERROR( "Could not find Tracks Collection: " << m_tracksName );
       return StatusCode::FAILURE;
@@ -118,7 +118,7 @@ StatusCode InDet::TRT_StrawStatus::execute(){
 
     //================ Event selection
 
-    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vxContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vxContainerKey, ctx);
     if (not vertices.isValid()) {
        ATH_MSG_DEBUG ("Couldn't retrieve VertexContainer with key: PrimaryVertices");
        return StatusCode::SUCCESS;   // just skip to next event in case of no vertexcontainer

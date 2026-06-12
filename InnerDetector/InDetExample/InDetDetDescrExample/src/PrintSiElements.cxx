@@ -177,7 +177,7 @@ PrintSiElements::printElements(const std::string & managerName){
   return StatusCode::SUCCESS;
 }
 
-StatusCode PrintSiElements::execute() {
+StatusCode PrintSiElements::execute(const EventContext& /*ctx*/) {
   if (m_firstEvent) {
     m_firstEvent = false;
     for(const std::string& detManagerName : m_detManagerNames){

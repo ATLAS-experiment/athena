@@ -127,9 +127,8 @@ StatusCode PixelPrepDataToxAOD::initialize()
 //        Execute method: 
 //
 /////////////////////////////////////////////////////////////////////
-StatusCode PixelPrepDataToxAOD::execute() 
+StatusCode PixelPrepDataToxAOD::execute(const EventContext& ctx) 
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   //Mandatory. Require if the algorithm is scheduled.
   SG::ReadHandle<InDet::PixelClusterContainer> PixelClusterContainer(m_clustercontainer_key,ctx);
   

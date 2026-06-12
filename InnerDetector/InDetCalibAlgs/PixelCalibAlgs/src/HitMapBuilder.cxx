@@ -331,10 +331,9 @@ StatusCode HitMapBuilder::registerHistograms() {
 // execute
 //
 //=========================================================
-StatusCode HitMapBuilder::execute() {
+StatusCode HitMapBuilder::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "Executing HitMapBuilder" );
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // check LB is in allowed range
   int LB =  static_cast<int>(ctx.eventID().lumi_block());

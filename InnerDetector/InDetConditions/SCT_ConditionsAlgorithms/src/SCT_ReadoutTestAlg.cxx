@@ -41,7 +41,7 @@ StatusCode SCT_ReadoutTestAlg::initialize() {
 }
 
 // Execute
-StatusCode SCT_ReadoutTestAlg::execute() {
+StatusCode SCT_ReadoutTestAlg::execute(const EventContext& /*ctx*/) {
   //This method is only used to test the readout tool, and only used within this package,
   // so the INFO level messages have no impact on performance of the tool when used by clients
 

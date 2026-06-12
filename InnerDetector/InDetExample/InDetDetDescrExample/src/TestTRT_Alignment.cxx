@@ -149,7 +149,7 @@ TestTRT_Alignment::addShift(int level, const Identifier & id, const Amg::Transfo
 } 
 
 
-StatusCode TestTRT_Alignment::execute() {
+StatusCode TestTRT_Alignment::execute(const EventContext& /*ctx*/) {
   // Part 1: Get the messaging service, print where you are
   msg(MSG::INFO) << "execute()" << endmsg;
   printAlignmentShifts();

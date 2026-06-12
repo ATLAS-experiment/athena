@@ -34,7 +34,7 @@ class ReadSiDetectorElements : public AthAlgorithm {
 public:
   ReadSiDetectorElements (const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
   void testElement(const Identifier & id, 

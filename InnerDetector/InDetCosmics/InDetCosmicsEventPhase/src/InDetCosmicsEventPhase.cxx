@@ -53,7 +53,7 @@ namespace InDet
   }
 
 
-  StatusCode InDetCosmicsEventPhase::execute() {
+  StatusCode InDetCosmicsEventPhase::execute(const EventContext& ctx) {
 
     m_phase = 0;
 
@@ -72,7 +72,7 @@ namespace InDet
     std::vector<double> EPforTracksWithBarrelHits;
 
     for (SG::ReadHandleKey<TrackCollection>& k : m_readKey_tracks) {
-      SG::ReadHandle<TrackCollection> MyTrackCollection(k);
+      SG::ReadHandle<TrackCollection> MyTrackCollection(k, ctx);
       if (MyTrackCollection.isValid()) {
         const TrackCollection* trtbarreltracks = MyTrackCollection.cptr();
         TrackCollection::const_iterator trackIt = trtbarreltracks->begin();
