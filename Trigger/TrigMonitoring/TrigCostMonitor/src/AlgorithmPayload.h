@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTMONITOR_TRIGCOSTALGORITHMPAYLOAD_H
@@ -16,8 +16,8 @@
 struct AlgorithmPayload {
   TrigTimeStamp m_algStartTime;
   std::thread::id m_algThreadID;
-  int32_t m_algROIID;
-  uint32_t m_slot;
+  int32_t m_algROIID = 0;
+  uint32_t m_slot = 0;
 };
 
 
