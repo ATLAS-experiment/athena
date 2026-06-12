@@ -68,7 +68,7 @@ StatusCode JetHypoExerciserAlg::initialize() {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode JetHypoExerciserAlg::execute() {
+StatusCode JetHypoExerciserAlg::execute(const EventContext& /*ctx*/) {
 
   // Part 1: print where you are
   ATH_MSG_INFO ("execute()");
