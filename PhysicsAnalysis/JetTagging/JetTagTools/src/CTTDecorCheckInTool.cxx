@@ -46,11 +46,9 @@ StatusCode CTTDecorCheckInTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode CTTDecorCheckInTool::execute()
+StatusCode CTTDecorCheckInTool::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG( "Executing..." );
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadDecorHandle< xAOD::JetContainer, float > jetReadDecorHandle (m_jetReadDecorKey, ctx);
 

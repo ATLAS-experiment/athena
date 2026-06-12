@@ -25,7 +25,7 @@ public:
   virtual ~SharedHitMapper();
 
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
   int numberSharedBLayer() const; // return info for current track

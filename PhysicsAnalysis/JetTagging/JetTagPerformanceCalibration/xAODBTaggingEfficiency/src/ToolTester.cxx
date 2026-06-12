@@ -23,7 +23,7 @@ StatusCode BTagToolTester::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode BTagToolTester::execute() {
+StatusCode BTagToolTester::execute(const EventContext& /*ctx*/) {
   const xAOD::JetContainer * jets = 0;
   ATH_CHECK( evtStore()->retrieve( jets, m_sgKey));
   ATH_MSG_INFO( "Number of jets: " << jets->size());
