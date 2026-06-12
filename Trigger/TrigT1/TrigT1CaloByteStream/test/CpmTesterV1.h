@@ -43,7 +43,7 @@ class CpmTesterV1 : public AthAlgorithm {
    virtual ~CpmTesterV1();
 
    virtual StatusCode initialize();
-   virtual StatusCode execute();
+   virtual StatusCode execute(const EventContext& ctx);
    virtual StatusCode finalize();
 
  private:

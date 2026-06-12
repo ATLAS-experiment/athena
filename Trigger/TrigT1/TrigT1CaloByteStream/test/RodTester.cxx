@@ -47,7 +47,7 @@ StatusCode RodTester::initialize()
 
 // Execute
 
-StatusCode RodTester::execute()
+StatusCode RodTester::execute(const EventContext& ctx)
 {
   if ( !msgLvl(MSG::INFO) ) return StatusCode::SUCCESS;
   msg(MSG::INFO);
