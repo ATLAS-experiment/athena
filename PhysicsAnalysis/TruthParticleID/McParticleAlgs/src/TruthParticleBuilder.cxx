@@ -103,7 +103,7 @@ StatusCode TruthParticleBuilder::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TruthParticleBuilder::execute()
+StatusCode TruthParticleBuilder::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
   

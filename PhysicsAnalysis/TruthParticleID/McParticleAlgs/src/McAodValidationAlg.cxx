@@ -119,7 +119,7 @@ StatusCode McAodValidationAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode McAodValidationAlg::execute()
+StatusCode McAodValidationAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
   //we don't care this is not crypto-strength random number generator
