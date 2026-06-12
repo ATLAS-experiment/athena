@@ -431,6 +431,10 @@ HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_UNPAIRED_ISO
 HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU80
 HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1jJ160
 HLT_j30_CLEANllp_momemfrac012_calratiovar_roiftf_preselj20emf12_L1jJ160
+HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU40HT
+HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60HM
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU40HT
+HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60HM
 
 
 ##############################################
