@@ -717,30 +717,12 @@ void AuxElement::copyAuxHelper (AuxVectorData& container,
     return;
   }
 
-#ifndef XAOD_STANDALONE
-  const SG::auxid_set_t& other_decors = ocont->getDecorIDs();
-#endif
-  SG::auxid_set_t other_ids = ocont->getAuxIDs();
+  SG::auxid_set_t other_ids = ocont->getCopyIDs (warnUnlocked);
 
   size_t oindex = other.index();
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
   for (SG::auxid_t auxid : other_ids) {
-#ifndef XAOD_STANDALONE
-    if (other_decors.test (auxid)) {
-      // Don't copy decorations --- another thread may be modifying them.
-      other_ids.reset (auxid);
-      // Warn if we skip a decoration (except for mcEventWeights,
-      // for which this is expected).
-      if (warnUnlocked && r.getName(auxid) != "mcEventWeights") {
-        std::ostringstream ss;
-        ss << "skipped unlocked decoration " << r.getName(auxid)
-           << " (" << auxid << ")";
-        ATHCONTAINERS_WARNING("copyAux", ss.str());
-      }
-    }
-    else
-#endif
     if (!r.isLinked (auxid)) {
       r.copy (auxid, container, index, *ocont, oindex, 1);
     }

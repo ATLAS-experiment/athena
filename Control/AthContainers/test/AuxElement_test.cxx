@@ -79,7 +79,11 @@ public:
   virtual const SG::auxid_set_t& getAuxIDs() const override { return m_set; }
   virtual const SG::auxid_set_t& getDecorIDs() const override { return m_decors; }
   virtual SG::auxid_set_t
-  getCopyIDs (bool /*warnUnlocked*/) const override { std::abort(); }
+  getCopyIDs (bool /*warnUnlocked*/) const override {
+    SG::auxid_set_t ids = m_set;
+    ids -= m_decors;
+    return ids;
+  }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
   virtual void* getDecoration (SG::auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) override { std::abort(); }
   virtual void lock() override { std::abort(); }
