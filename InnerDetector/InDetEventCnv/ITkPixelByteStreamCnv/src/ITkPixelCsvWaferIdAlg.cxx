@@ -391,7 +391,7 @@ int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe)
     if(ld < 2){ //triplets
         return 0;
     }
-    else{ // quads: need to calculate properly
+    else{ // quads: need to calculate properly TOCHECK
         return fe-1;
     }
     
