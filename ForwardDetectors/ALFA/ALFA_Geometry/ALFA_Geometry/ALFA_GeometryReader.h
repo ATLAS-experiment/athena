@@ -185,7 +185,7 @@ struct CFGRPPOSPARAMS {
 	} swcorr{};
 
 	struct {
-		bool bIsEnabledUserTranform;
+		bool bIsEnabledUserTranform = false;
 		HepGeom::Point3D<double> UserOriginOfDetTransInRPot;
 		HepGeom::Transform3D UserTransformOfDetInRPot;
 		HepGeom::Transform3D UserTransformOfRPInStation;
