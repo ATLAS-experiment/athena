@@ -380,7 +380,7 @@ StatusCode MuFastSteering::execute(const EventContext& ctx) const
         }
     }
 
-    ATH_MSG_DEBUG("StatusCode MuFastSteering::execute() success");
+    ATH_MSG_DEBUG("StatusCode MuFastSteering::execute(const EventContext& ctx) success");
     return StatusCode::SUCCESS;
 }
 
