@@ -15,7 +15,7 @@ if __name__=="__main__":
  
     parser.set_defaults(outRootFile="HoughTransformTester.root")
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
-    parser.set_defaults(inputFile = MuonPhaseIITestDefaults.HITS_PG_R3)
+    parser.set_defaults(inputFile = MuonPhaseIITestDefaults.RDO_R3)
     parser.set_defaults(eventPrintoutLevel = 50)
    
     args = parser.parse_args()
