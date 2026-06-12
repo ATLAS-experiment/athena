@@ -19,6 +19,9 @@ namespace {
             (vecs[idx].resize(size), ...);
         }
     };
+    double inDegrees(double angle) {
+        return angle / Gaudi::Units::deg;
+    }
 }
 
 namespace MuonValR4 {
@@ -135,8 +138,8 @@ namespace MuonValR4 {
         }
             
         ATH_MSG_DEBUG("Succesfully retrieved input collections: Global Patterns: "<<globPatterns->size()
-                    <<", truth segments: "<<(readTruthSegments? readTruthSegments->size() : -1)
-                    <<", Rois: "<<(roiCollection ? roiCollection->size() : -1));
+                    <<", truth segments: "<<(readTruthSegments? std::to_string(readTruthSegments->size()) : std::to_string(-1))
+                    <<", Rois: "<<(roiCollection ? std::to_string(roiCollection->size()) : std::to_string(-1)));
 
         const TruthParticleMap truthMap{fillTruthMap(readTruthSegments, roiCollection)};
         fillTruthInfo(truthMap, {spContainer, NSWspContainer});
@@ -216,12 +219,11 @@ namespace MuonValR4 {
 
             /* Check if we have already measurements in the same layer, except for precision hits */
             const unsigned layNum {m_spSorter.sectorLayerNum(*sp)};
-            ATH_MSG_VERBOSE("---> "<<(isPrec ? "Prec" : (type == NonPrec ? "Trig" : "Phi "))<< " " << *sp << " in sector "<<sp->msSector()->identString() << " lay "<<layNum);
+            
             if (sp->measuresEta()) {
                 const bool isSeenLayer {seenEtaLayers[sp->msSector()].count(layNum) > 0};
                 if (isSeenLayer && !sp->isStraw()) return;
                 if (!isSeenLayer) seenEtaLayers[sp->msSector()].insert(layNum);
-     
                 auto& measCounter = isPrec ? m_gen_nPrecMeas : m_gen_nNonPrecMeas;
                 ++measCounter[tpIdx][stIdx];
 
@@ -237,6 +239,7 @@ namespace MuonValR4 {
                 ++m_gen_nPhiMeas[tpIdx][stIdx];
             }
             outCont.push_back(sp);
+            ATH_MSG_VERBOSE("---> "<<(isPrec ? "Prec" : (type == NonPrec ? "Trig" : "Phi "))<< " " << *sp << " in sector "<<sp->msSector()->identString() << " lay "<<layNum);
         };
 
         int tpIdx{-1};
@@ -253,7 +256,7 @@ namespace MuonValR4 {
             const int side {tp->eta() > 0 ? 1 : -1};
             /** Filling truth hit counts. We cannot use directly the segments because we have sim hits 
              *  that haven't made it into spacepoints due to inefficiencies */
-            ATH_MSG_VERBOSE("tp: " << tpIdx << ", Eta: " << tp->eta() << ", Phi: " << tp->phi() << ", Pt [GeV]: " << tp->pt() * 1e-3 << ", Q: " << tp->charge());
+            ATH_MSG_VERBOSE("tp: " << tpIdx << ", Eta: " << tp->eta() << ", Phi: " << inDegrees(tp->phi()) << ", Pt [GeV]: " << tp->pt() * 1e-3 << ", Q: " << tp->charge());
             for (std::size_t stIdx = 0; stIdx < s_nStations; ++stIdx) {
                 ATH_MSG_VERBOSE("\tStation "<< stName(static_cast<StIndex>(stIdx)) << ": matched hits before layer deduplication: ");
                 // Clear the bookkeeping structures for the new station
@@ -282,10 +285,16 @@ namespace MuonValR4 {
                         } // End loop over containers
                     } // End loop over "process2Dmeas" flag
                 } // End loop over measurement types
-                ATH_MSG_VERBOSE("\t after deduplication: N trig/Prec/phi meas: " 
-                               << static_cast<std::size_t>(m_gen_nNonPrecMeas[tpIdx][stIdx]) << "/" 
-                               << static_cast<std::size_t>(m_gen_nPrecMeas[tpIdx][stIdx]) << "/" 
-                               << static_cast<std::size_t>(m_gen_nPhiMeas[tpIdx][stIdx]));
+                if (msgLevel(MSG::VERBOSE)) {
+                    const auto gen_nNonPrecHits {static_cast<unsigned>(m_gen_nNonPrecMeas[tpIdx][stIdx])};
+                    const auto gen_nPrecHits    {static_cast<unsigned>(m_gen_nPrecMeas[tpIdx][stIdx])};
+                    const auto gen_nPhiHits     {static_cast<unsigned>(m_gen_nPhiMeas[tpIdx][stIdx])};
+                    if (gen_nNonPrecHits + gen_nPrecHits + gen_nPhiHits > 0) {
+                        ATH_MSG_VERBOSE("\t after deduplication: N trig/Prec/phi meas: " 
+                               << gen_nNonPrecHits << "/" << gen_nPrecHits << "/" << gen_nPhiHits);
+                    }
+                }
+                 
             } // End loop over stations      
         } // End loop over truth particles
     }
@@ -437,8 +446,7 @@ namespace MuonValR4 {
                     <<", nTruthMatchedHits Trig: "<<nNonPrecHits<<" / "<<gen_nNonPrecHits<<", Prec: "<<nPrecHits<<" / "<<gen_nPrecHits<<", Phi: "<<nPhiHits<<" / "<<gen_nPhiHits);
             }
             patternIdx++;
-        }
-                                 
+        }                        
     }
 
     void MuonFastRecoTester::updatePatHitInfo(const ePatBranchType type, 

@@ -29,17 +29,14 @@ StatusCode FastReconstructionAlg::initialize() {
     patCfg.thetaSearchWindow = m_thetaSearchWindow;
     patCfg.baseRWindow = m_baseRWindow;
     patCfg.phiTolerance = m_phiTolerance;
-    patCfg.minBendingTriggerHits = m_minBendingTriggerHits;
-    patCfg.minBendingPrecisionHits = m_minBendingPrecisionHits;
-    patCfg.minPhiHits = m_minPhiHits;
+    patCfg.minTriggerLayers = m_minTriggerLayers;
+    patCfg.minPrecisionLayers = m_minPrecisionLayers;
+    patCfg.minPhiLayers = m_minPhiLayers;
+    patCfg.minStationLayers = m_minStationLayers;
     patCfg.meanNormRes2Cut = m_meanNormRes2Cut;
     patCfg.maxSeedAttempts = m_maxSeedAttempts;
-    patCfg.maxMissedLayerHits = m_maxMissedLayerHits;
+    patCfg.maxMissLayersInStation = m_maxMissLayersInStation;
     patCfg.minLayerSeparation = m_minLayerSeparation;
-    patCfg.precisionWeight = m_precisionWeight;
-    patCfg.hitScoreSaturation = m_hitScoreSaturation;
-    patCfg.residualPenalty = m_residualPenalty;
-    patCfg.phiBonusSaturation = m_phiBonusSaturation;
 
     if (m_seedFromInner) {
         patCfg.layerSeedings.push_back(LayerIndex::Inner);
@@ -52,19 +49,18 @@ StatusCode FastReconstructionAlg::initialize() {
     ATH_MSG_DEBUG(" Configuration:\n"
             << " Theta search window [rad]: " << m_thetaSearchWindow << "\n"
             << " Base R window [mm]: " << m_baseRWindow << "\n"
-            << " Max missed layer hits: " << m_maxMissedLayerHits << "\n"
+            << " Max missed layer hits in station: " << m_maxMissLayersInStation << "\n"
             << " Min layer separation [mm]: " << m_minLayerSeparation << "\n"
             << " Phi tolerance [rad]: " << m_phiTolerance << "\n"
-            << " Min bending trigger hits: " << m_minBendingTriggerHits << "\n"
-            << " Min bending precision hits: " << m_minBendingPrecisionHits << "\n"
-            << " Min phi hits: " << m_minPhiHits << "\n"
+            << " Min trigger layers: " << m_minTriggerLayers << "\n"
+            << " Min precision layers: " << m_minPrecisionLayers << "\n"
+            << " Min phi layers: " << m_minPhiLayers << "\n"
+            << " Min station layers: " << m_minStationLayers << "\n"
+            << " Mean norm residual^2 cut: " << m_meanNormRes2Cut << "\n"
             << " Seed from inner: " << m_seedFromInner << "\n"
             << " Use MDT hits: " << m_useMdtHits << "\n"
             << " Seed from MDT: " << m_seedFromMdt << "\n"
-            << " Max seed attempts: " << m_maxSeedAttempts << "\n"
-            << " Hit score saturation: " << m_hitScoreSaturation << "\n"
-            << " Residual penalty: " << m_residualPenalty << "\n"
-            << " Phi bonus saturation: " << m_phiBonusSaturation);
+            << " Max seed attempts: " << m_maxSeedAttempts << "\n");
 
     return StatusCode::SUCCESS;
 }
