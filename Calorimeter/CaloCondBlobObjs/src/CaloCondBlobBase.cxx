@@ -87,8 +87,8 @@ CaloCondBlobBase::createBlob(uint16_t objType,
 			     uint32_t nObjs,
 			     uint32_t nChans,
 			     uint16_t nGains,
-			     const std::string& author,
-			     const std::string& comment,
+			     std::string_view author,
+			     std::string_view comment,
 			     uint64_t timeStamp)
 {
   
@@ -124,7 +124,7 @@ CaloCondBlobBase::createBlob(uint16_t objType,
     if(!timeStamp) timeStamp = ::time(nullptr);
     uint8_t* pChar = reinterpret_cast<uint8_t*> (getBlobStart()+dataSizeByte/sizeof(uint32_t));
     CxxUtils::set_unaligned<uint64_t> (pChar, timeStamp);
-    std::string::const_iterator iStr = author.begin();
+    auto iStr = author.begin();
     for(; iStr!=author.end(); ++iStr){ *pChar = *iStr; ++pChar; }
     *pChar = 0; 
     for(iStr=comment.begin(); iStr!=comment.end(); ++iStr){ *(++pChar) = *iStr; }
