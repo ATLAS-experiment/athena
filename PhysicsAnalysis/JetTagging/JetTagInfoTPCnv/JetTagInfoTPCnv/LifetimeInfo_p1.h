@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_LifetimeInfo_P1_H
@@ -28,7 +28,7 @@ namespace Analysis {
     std::vector<float> m_trackSignificance;   //!< significance (= signedIP/sigD0)
 
     std::vector<float> m_vectorOfTrackProb;   //!< vector of track probabilities (calculated but not in use)
-    float m_nTrackProb;            //!< nTrack probability (calculated but not in use)
+    float m_nTrackProb = 0;            //!< nTrack probability (calculated but not in use)
 
   };
 }
