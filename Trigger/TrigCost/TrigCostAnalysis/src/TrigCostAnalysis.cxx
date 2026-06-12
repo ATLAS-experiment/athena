@@ -5,7 +5,6 @@
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS // silence Boost pragma message (fixed in Boost 1.76)
 #include <boost/property_tree/json_parser.hpp>
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrigConfHLTUtils/HLTUtils.h"
 
 #include "PathResolver/PathResolver.h"
@@ -181,8 +180,8 @@ TH1* TrigCostAnalysis::bookGetPointer(TH1* hist, const std::string& tDir) const 
 }
 
 
-StatusCode TrigCostAnalysis::execute() {
-  const EventContext& context = Gaudi::Hive::currentContext();
+StatusCode TrigCostAnalysis::execute(const EventContext& ctx) {
+  const EventContext& context = ctx;
 
   MonitoredRange* range = nullptr;
   ATH_CHECK(getRange(context, range));

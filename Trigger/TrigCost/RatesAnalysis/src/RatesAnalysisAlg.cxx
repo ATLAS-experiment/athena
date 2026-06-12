@@ -632,7 +632,7 @@ StatusCode RatesAnalysisAlg::pass_HstpFilter(bool &pass){
   return StatusCode::SUCCESS;
 }
 
-StatusCode RatesAnalysisAlg::execute() {  
+StatusCode RatesAnalysisAlg::execute(const EventContext& ctx) {  
   ATH_MSG_VERBOSE("Executing " << name() << " on event " << m_eventCounter << "...");
   if (m_eventCounter++ == 0) { // First time in execute loop - cannot access TDT before this.
     ATH_CHECK( populateTriggers() );
@@ -648,7 +648,6 @@ StatusCode RatesAnalysisAlg::execute() {
       m_metadataKeysCached = true;
     }    
   }
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Get event characteristics
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
   ATH_CHECK( eventInfo.isValid() );
