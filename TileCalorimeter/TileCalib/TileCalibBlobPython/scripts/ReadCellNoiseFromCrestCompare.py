@@ -26,13 +26,13 @@ Notes:
 
 Usage:
   # Compare two tags from same folder
-  python %(prog)s -f /TILE/OFL02/NOISE/CELL -t UPD4 -t2 UPD1 -r 497970
+  %(prog)s -f /TILE/OFL02/NOISE/CELL -t UPD4 -t2 UPD1 -r 497970
 
   # Compare specific cell/gain with thresholds
-  python %(prog)s -f /TILE/OFL02/NOISE/CELL -t UPD4 -c 123 -g 0 --maxdiff 0.001 --maxdiffpercent 5.0
+  %(prog)s -f /TILE/OFL02/NOISE/CELL -t UPD4 -r 500000 -r2 400000 -c 123 -g 0 --maxdiff 0.001 --maxdiffpercent 5.0
 
-  # Wide format, brief output, all cells
-  python %(prog)s -f /TILE/OFL02/NOISE/CELL -t UPD4 -w -b -r 497970
+  # Wide format, brief output, all cells, full tag name without folder name
+  %(prog)s -t TileOfl02NoiseCell-RUN2-UPD4-36 -w -b -r 497970 -r2 345678
     """
 )
 
@@ -113,6 +113,18 @@ print_to_stdout = args.stdout
 
 tile=(chan==48)
 
+if tag.upper().startswith('TILE') or tag.upper().startswith('CALO') or tag.upper().startswith('LAR'):
+    folderPath=''
+if tag2.upper().startswith('TILE') or tag2.upper().startswith('CALO') or tag2.upper().startswith('LAR'):
+    folderPath2=''
+
+if (schema != 'CREST' and os.path.isfile(schema)):
+    tag=''
+    folderPath=''
+if (schema2 != 'CREST' and os.path.isfile(schema2)):
+    tag2=''
+    folderPath2=''
+
 print("\n" + "="*65)
 print("  ReadCellNoiseFromCrestCompare - Configuration")
 print("="*65)
@@ -155,35 +167,31 @@ hashMgrBC=TileCellTools.TileCellHashMgr("UpgradeBC")
 hashMgrABC=TileCellTools.TileCellHashMgr("UpgradeABC")
 
 #=== Initialize blob reader for sources
-folderTag = tag
 tag_upper = tag.upper()
 tag1 = tag_upper.split('_')[1][:4] if '_' in tag_upper else tag_upper[:4]
 if tag1 == "TILE" or tag1 == "CALO" or tag1[:3] == "LAR" or tag.startswith("TILE") or tag.startswith("CALO") or tag.startswith("LAR"):
     folderPath1=""
 else:
     folderPath1=folderPath
-if not os.path.isfile(schema):
-    log.info("Initializing folder %s with tag %s (%s)", folderPath1, folderTag, tag1)
 
-folderTag2 = tag2
 tag2_upper = tag2.upper()
 tag2_1 = tag2_upper.split('_')[1][:4] if '_' in tag2_upper else tag2_upper[:4]
 if tag2_1 == "TILE" or tag2_1 == "CALO" or tag2_1[:3] == "LAR" or tag2.startswith("TILE") or tag2.startswith("CALO") or tag2.startswith("LAR"):
     folderPath2=""
 else:
     folderPath2=folderPath2
-if not os.path.isfile(schema2):
-    log.info("Initializing folder2 %s with tag2 %s (%s)", folderPath2, folderTag2, tag2_1)
     
 try:
-    blobReader = TileCalibCrest.TileBlobReaderCrest(schema, folderPath1, folderTag, run, lumi)
-    log.debug("Connecting to DB: schema=%s, folder=%s, tag=%s, run=%s, lumi=%s", 
-            schema, folderPath1, folderTag, run, lumi)
+    log.info("Connecting to DB1: schema=%s, folder=%s, tag=%s, run=%s, lumi=%s",
+             schema, folderPath1, tag, run, lumi)
+    blobReader = TileCalibCrest.TileBlobReaderCrest(schema, folderPath1, tag, run, lumi)
+    folderTag = blobReader.getTag()
     log.info("Comment1: %s", blobReader.getComment((run,lumi)))
-    blobReader2 = TileCalibCrest.TileBlobReaderCrest(schema2, folderPath2, folderTag2, run2, lumi2)
-    log.debug("Connecting to DB2: schema=%s, folder=%s, tag=%s, run=%s, lumi=%s", 
-            schema2, folderPath2, folderTag2, run2, lumi2)
-    log.info("Comment1: %s", blobReader2.getComment((run2,lumi2)))
+    log.info("Connecting to DB2: schema=%s, folder=%s, tag=%s, run=%s, lumi=%s",
+             schema2, folderPath2, tag2, run2, lumi2)
+    blobReader2 = TileCalibCrest.TileBlobReaderCrest(schema2, folderPath2, tag2, run2, lumi2)
+    folderTag2 = blobReader2.getTag()
+    log.info("Comment2: %s", blobReader2.getComment((run2,lumi2)))
 except Exception as e:
     log.error("Initialization failed: %s", e)
     sys.exit(1)

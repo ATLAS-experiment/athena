@@ -18,7 +18,10 @@
 #folderPath = "/TILE/ONL01/CALIB/CIS/LIN"
 #folderPath = "/TILE/ONL01/MUID"
 #folderPath = "/TILE/ONL01/FRAG1"
-#folderTag = ""
+#tag = ""
+#
+# if folder tag is full tag like TileOfl02CalibCisLin-RUN2-UPD4-23
+# or TILEONL01CALIBCES-HEAD folder path is not needed
 #==================================================
 
 from TileCalibBlobPython import TileCalibCrest
@@ -41,21 +44,30 @@ Notes:
 - For single-version folders, use empty tag: --tag=""
 
 Usage:
+  # Compare values in last IOV in two different tags
+  # tag name can be short, it'll be resolved to proper current tag
+  %(prog)s \\
+           --maxdiffpercent=0.01 \\
+           --folder=/TILE/OFL02/CALIB/CIS/LIN \\
+           --tag=UPD1 \\
+           --tag2=UPD4
+
   # Compare CREST server vs JSON file
-  python %(prog)s   --maxdiff=100 \\
-                    --run=100012 \\
-                    --folder=/TILE/ONL01/CALIB/CES \\
-                    --tag='' \\
-                    --tag2=TileOfl02CalibCes-RUN2-UPD4-26 \\
-                    --jsonfn2=tileCalib.json \\
-                    --folder2=/TILE/OFL02/CALIB/CES \\
+  # for JSON file folder name and tag are not needed
+  %(prog)s \\
+           --maxdiff=100 \\
+           --run=500000 \\
+           --folder=/TILE/ONL01/CALIB/CES \\
+           --tag='' \\
+           --jsonfn2=tileCalib.json
 
   # Compare two runs from same tag/schema
-  python %(prog)s   --folder=/TILE/OFL02/CALIB/CES \\
-                    --tag=TileOfl02CalibCes-RUN2-UPD4-26 \\
-                    --maxdiffpercent=5.5 \\
-                    --run=160000 \\
-                    --run2=999999999 \\
+  # folder name is not needed if tag is full tag
+  %(prog)s \\
+           --tag=TileOfl02CalibLasLin-RUN2-UPD4-26 \\
+           --maxdiffpercent=5.5 \\
+           --run=400000 \\
+           --run2=999999999
     """
 )
 
@@ -115,6 +127,26 @@ maxdiff = args.maxdiff
 maxdiffpercent = args.maxdiffpercent
 print_to_stdout = args.stdout
 
+if tag.upper().startswith('TILE'):
+    folderPath=''
+if tag2.upper().startswith('TILE'):
+    folderPath2=''
+
+if (jsonfn != 'none' and os.path.isfile(jsonfn)):
+    tag=''
+    folderPath=''
+    schema=''
+elif (schema != 'CREST' and os.path.isfile(schema)):
+    tag=''
+    folderPath=''
+if (jsonfn2 != 'none' and os.path.isfile(jsonfn2)):
+    tag2=''
+    folderPath2=''
+    schema2=''
+elif (schema2 != 'CREST' and os.path.isfile(schema2)):
+    tag2=''
+    folderPath2=''
+
 print("\n" + "="*65)
 print("  ReadFromCrestCompare - Configuration")
 print("="*65)
@@ -141,20 +173,6 @@ log = getLogger("ReadFromCrest")
 import logging
 log.setLevel(logging.DEBUG)
 
-if tag.startswith('TileO'):
-    folderTag = tag
-elif tag:
-    folderTag = TileCalibUtils.getFullTag(folderPath, tag)
-else:
-    folderTag = ""
-
-if tag2.startswith('TileO'):
-    folderTag2 = tag2
-elif tag2:
-    folderTag2 = TileCalibUtils.getFullTag(folderPath2, tag2)
-else:
-    folderTag2 = ""
-
 #==================================================
 
 if jsonfn != 'none' and os.path.isfile(jsonfn):
@@ -169,22 +187,19 @@ else:
     
 # f=open('output.ascii', 'w')
 f=open('output_crest.ascii', 'w')
-if run2!=run and tag2==tag and folderPath2==folderPath and folderPath.startswith("/TILE/OFL02/TIME"):
+if run2!=run and tag2==tag and folderPath2==folderPath and ("/TIME" in folderPath or "TIME" in tag.upper()):
     fd=open('from_%d_to_%d.dif'%(run2,run), 'w')
     writedif=True
 else:
     writedif=False
 
-log.info("Initializing folder %s with tag %s", folderPath, folderTag)
-log.info("Initializing folder %s with tag %s", folderPath2, folderTag2)
-
 try:
-    log.debug("Connecting to DB2: schema=%s, folder=%s, tag=%s, run=%s, lumi=%s", 
-              db2, folderPath2, folderTag2, run2, lumi2)
-    blobReader2 = TileCalibCrest.TileBlobReaderCrest(db2, folderPath2, folderTag2, run2, lumi2)
-    log.debug("Connecting to DB1: schema=%s, folder=%s, tag=%s, run=%s, lumi=%s", 
-              db, folderPath, folderTag, run, lumi)
-    blobReader = TileCalibCrest.TileBlobReaderCrest(db, folderPath, folderTag, run, lumi)
+    log.info("Connecting to DB1: schema=%s, folder=%s, tag=%s, run=%s, lumi=%s",
+             db, folderPath, tag, run, lumi)
+    blobReader = TileCalibCrest.TileBlobReaderCrest(db, folderPath, tag, run, lumi)
+    log.info("Connecting to DB2: schema=%s, folder=%s, tag=%s, run=%s, lumi=%s",
+             db2, folderPath2, tag2, run2, lumi2)
+    blobReader2 = TileCalibCrest.TileBlobReaderCrest(db2, folderPath2, tag2, run2, lumi2)
 except Exception as e:
     log.error("Initialization failed: %s", e)
     sys.exit(1)
