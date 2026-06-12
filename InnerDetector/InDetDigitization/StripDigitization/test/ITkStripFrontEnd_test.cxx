@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -90,9 +90,6 @@ class GaudiFixture {
  
    void 
    tearDownGaudi() {
-     m_svcMgr->finalize().ignore();
-     m_appMgr->finalize().ignore();
-     m_appMgr->terminate().ignore();
      m_svcLoc->release();
      m_svcMgr->release();
      Gaudi::setInstance( static_cast<IAppMgrUI*>(nullptr) );
@@ -136,10 +133,10 @@ BOOST_AUTO_TEST_SUITE(TEST_ITkStripFrontEnd)
     IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
     auto sctId = std::make_unique<SCT_ID>();
     BOOST_TEST(sctId->initialize_from_dictionary (idd) == 0);
-    //put the SCT_ID helper in Storegate, ready for the class to pick up
+    //put the SCT_ID helper in StoreGate, ready for the class to pick up
     BOOST_TEST ( pDetStore->record (std::move (sctId), "SCT_ID").isSuccess() );
     auto sctMgr = std::make_unique<InDetDD::SCT_DetectorManager>(pDetStore);
-    //put the SCT_DetectorManager in Storegate, ready for the class to pick up
+    //put the SCT_DetectorManager in StoreGate, ready for the class to pick up
     BOOST_TEST ( pDetStore->record (std::move (sctMgr), "SCT").isSuccess() );
     BOOST_TEST ( pToolSvc->retrieveTool("ITkStripFrontEnd", pToolInterface).isSuccess());
     BOOST_TEST(pToolInterface -> initialize());
