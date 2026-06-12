@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -190,7 +190,7 @@ namespace SG {
   {
     // Don't do this if don't have a valid thread state.
     // (With py3, the interpreter gets shut down before global dtors run...)
-    if (_PyThreadState_UncheckedGet())
+    if (PyThreadState_GetUnchecked())
     {
       Py_DECREF(m_aliases);
       Py_DECREF(m_clids);
