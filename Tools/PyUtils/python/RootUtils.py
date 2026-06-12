@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.RootUtils
 # @author Sebastien Binet
@@ -528,6 +528,7 @@ def _test_main():
         tmp.flush()
         no_raise("problem compiling a file",
                  fct=root_compile, fname=tmp.name)
+    dummy.close()
 
     print ("OK")
     return True
