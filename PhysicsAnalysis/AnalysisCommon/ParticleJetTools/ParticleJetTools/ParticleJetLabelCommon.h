@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,7 +35,7 @@ namespace ParticleJetTools {
     std::string childPositionDPhi;
     std::string childPositionDEta;
     // ATLASRECTS-8290: this is for backward compatability, remove eventually
-    bool useBarcode;
+    bool useBarcode = false;
     void check();
   };
 
