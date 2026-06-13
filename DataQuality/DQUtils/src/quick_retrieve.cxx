@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define likely(x)       __builtin_expect((x),1)
@@ -73,10 +73,10 @@ cool::IRecordSelection* make_fieldselection(
     MAKE_FS(Int64,     PyLong_AsLongLong)
     MAKE_FS(UInt63,    PyLong_AsUnsignedLongLong)
     
-    MAKE_FS(String255, _PyUnicode_AsString)
-    MAKE_FS(String4k,  _PyUnicode_AsString)
-    MAKE_FS(String64k, _PyUnicode_AsString)
-    MAKE_FS(String16M, _PyUnicode_AsString)
+    MAKE_FS(String255, PyUnicode_AsUTF8)
+    MAKE_FS(String4k,  PyUnicode_AsUTF8)
+    MAKE_FS(String64k, PyUnicode_AsUTF8)
+    MAKE_FS(String16M, PyUnicode_AsUTF8)
 
     //MAKE_FS(Blob16M,   PyString_AsString)
     //MAKE_FS(Blob64k,   PyString_AsString)
@@ -252,7 +252,7 @@ PyObject* quick_retrieve(const IObjectIteratorPtr& objects,
             for (Py_ssize_t i = 0; i < count; i++)
             {
                 PyObject *py_name = PySequence_GetItem(to_fetch, i);
-                const char *name = _PyUnicode_AsString(py_name);
+                const char *name = PyUnicode_AsUTF8(py_name);
                 const string type = (object.payload()
                                            .specification()[name]
                                            .storageType()
