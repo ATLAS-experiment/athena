@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_REGIONDATAFROMFILE_H
@@ -57,7 +57,7 @@ namespace MuonCalib {
         typedef std::vector<id_vec> id_vec_vec;
 
         /** map containing all identifiers for a given region id */
-        unsigned int m_nregions;
+        unsigned int m_nregions = 0;
         id_vec_vec m_identifiersPerRegions;
     };
 
