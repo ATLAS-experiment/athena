@@ -34,8 +34,9 @@ TrigConf::L1TopoAlgorithm::load()
             m_inputs.push_back(inp.getValue());
          }
       } else if( hasChild("fixedParameters.inputs") ) { // backwards compatibility, to be removed when we stop using DEV db
+         const std::string valueStr{"value"};
          for( auto & inp : getList("fixedParameters.inputs")) {
-            m_inputs.push_back(inp["value"]);
+            m_inputs.push_back(inp[valueStr]);
          }
       }
       for( auto & o : getList("output")) {
