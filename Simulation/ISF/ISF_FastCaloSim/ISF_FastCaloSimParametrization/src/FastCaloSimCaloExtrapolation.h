@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FastCaloSimCaloExtrapolation_H
@@ -23,7 +23,7 @@ struct CylinderIntersections
 {
   Amg::Vector3D first;
   Amg::Vector3D second;
-  unsigned int number;
+  unsigned int number = 0;
 
 };
 
