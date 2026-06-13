@@ -217,6 +217,16 @@ class ATLAS_NOT_THREAD_SAFE RootNtupleEventSelector :
   /// List of branches to activate in the @c TTree 
   StringArrayProperty m_activeBranchNames;
 
+  /// optional event number variable to propagate to EventInfo.
+  StringProperty m_eventNumberVar
+    { this, "EventNumberVar", "", "Optional event number variable to propagate to EventInfo" };
+  /// optional run number variable to propagate to EventInfo.
+  StringProperty m_runNumberVar
+    { this, "RunNumberVar", "", "Optional run number variable to propagate to EventInfo" };
+  /// optional LBN variable to propagate to EventInfo.
+  StringProperty m_lbnVar
+    { this, "LBNVar", "", "Optional LBN variable to propagate to EventInfo" };
+
   /// Number of events to skip at the beginning 
   long m_skipEvts;
 
