@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::BarrelCryostat::CalibrationCalculator
@@ -84,34 +84,34 @@ namespace LArG4 {
     //             region-specific values.
 
 
-    typedef struct {
-      G4int regionNumber;
-      G4double etaMin;
-      G4double etaMax;
-      G4double deltaEta;
-      G4double deltaPhi;
-    } RegionInfo_t;
+    struct RegionInfo_t {
+      G4int regionNumber = 0;
+      G4double etaMin = 0;
+      G4double etaMax = 0;
+      G4double deltaEta = 0;
+      G4double deltaPhi = 0;
+    };
 
-    typedef struct {
-      G4int detector;
-      G4int subdet;
-      G4int type;
-      G4int sampling;
-      G4int numberOfRegions;
-      const RegionInfo_t* regionInfoArray;
-    } IdentifierInfo_t;
+    struct IdentifierInfo_t {
+      G4int detector = 0;
+      G4int subdet = 0;
+      G4int type = 0;
+      G4int sampling = 0;
+      G4int numberOfRegions = 0;
+      const RegionInfo_t* regionInfoArray = nullptr;
+    };
 
-    typedef struct {
-      G4int copyNumberLow;
-      G4int copyNumberHigh;
-      IdentifierInfo_t identifierInfo;
-    } CopyNumberInfo_t;
+    struct CopyNumberInfo_t {
+      G4int copyNumberLow = 0;
+      G4int copyNumberHigh = 0;
+      IdentifierInfo_t identifierInfo {};
+    };
 
-    typedef struct {
+    struct VolumeInfo_t {
       G4String volumeName;
-      G4int numberOfCopies;
-      const CopyNumberInfo_t* copyInfo;
-    } VolumeInfo_t;
+      G4int numberOfCopies = 0;
+      const CopyNumberInfo_t* copyInfo = nullptr;
+    };
 
     // Please forgive the dull names, but it saves quite a lot on
     // typing.  Note how the structured hierarchy continues: there can
