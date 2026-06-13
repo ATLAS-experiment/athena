@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------------
@@ -17,15 +17,15 @@ class TBTrackInfo_p1
 public:
 
 	// variables from TB_tree
-	int		tb_Trigger;
-	int		tb_trk_nTracks;
-	int		tb_trk_nTracksTRT;
+	int		tb_Trigger = 0;
+	int		tb_trk_nTracks = 0;
+	int		tb_trk_nTracksTRT = 0;
 
-	float	tb_sADC_S1;
-	float	tb_sADC_muHalo;
-	float	tb_sADC_muTag;
-	float	tb_sADC_C2;
-	float	tb_sADC_TRTSci;
+	float	tb_sADC_S1 = 0;
+	float	tb_sADC_muHalo = 0;
+	float	tb_sADC_muTag = 0;
+	float	tb_sADC_C2 = 0;
+	float	tb_sADC_TRTSci = 0;
 
 	std::vector<int>	tb_trk_nPixelHits;  // max arrays size (see TBTrackInfoFromTag) = [60]
 	std::vector<int>	tb_trk_nSctHits;    // max arrays size (see TBTrackInfoFromTag) = [60]
@@ -35,10 +35,10 @@ public:
 
 
 	// variables from TileRec_h1000
-	float	tileRec_XchN1;
-	float	tileRec_XchN2;
-	float	tileRec_Xcha0;
-	float	tileRec_Xcha1;
+	float	tileRec_XchN1 = 0;
+	float	tileRec_XchN2 = 0;
+	float	tileRec_Xcha0 = 0;
+	float	tileRec_Xcha1 = 0;
 
 	std::vector<int>			tileRec_btdc1;  // max arrays size (see TBTrackInfoFromTag) = [16]
 	std::vector<int>			tileRec_GainC0; // max arrays size (see TBTrackInfoFromTag) = [48]
