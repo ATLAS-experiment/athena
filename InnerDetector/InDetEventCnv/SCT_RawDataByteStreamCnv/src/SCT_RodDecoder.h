@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETRAWDATABYTESTREAM_SCT_RODDECODER_H 
@@ -78,7 +78,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
   /** Temp object to help with trigger caching. */
   struct CacheHelper {
     IdentifierHash skipHash, lastHash;
-    const std::vector<IdentifierHash>* vecHash;
+    const std::vector<IdentifierHash>* vecHash = nullptr;
   };
 
  public: 
