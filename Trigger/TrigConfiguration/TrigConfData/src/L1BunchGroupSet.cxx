@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/L1BunchGroupSet.h"
@@ -26,9 +26,11 @@ TrigConf::L1BunchGroup::load()
    }
    m_name = getAttribute("name", true, m_name);
    m_id = getAttribute<size_t>("id");
+   const std::string firstStr{"first"};
+   const std::string lengthStr{"length"};
    for( auto & train : getList("bcids") ) {
-      size_t first = train.getAttribute<size_t>("first");
-      size_t length = train.getAttribute<size_t>("length");
+      size_t first = train.getAttribute<size_t>(firstStr);
+      size_t length = train.getAttribute<size_t>(lengthStr);
       m_bunchdef.emplace_back(first,length);
    }
 }

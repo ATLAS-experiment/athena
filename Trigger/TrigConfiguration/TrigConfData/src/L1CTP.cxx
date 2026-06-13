@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/L1CTP.h"
@@ -17,24 +17,31 @@ TrigConf::L1CTP::load()
       return;
    }
    auto inputs = data().get_child("inputs");
+   const std::string prefix{"ctpin.slot"};
+   const std::string suffix{".connector"};
+   const std::string emptyStr{};
    for(size_t slot = 7; slot<=9; ++slot) {
+      const std::string slotStr = std::to_string(slot);
       for(size_t conn=0; conn<4; ++conn) {
-         m_ctpin[slot-7][conn] = inputs.get_optional<std::string>("ctpin.slot" + std::to_string(slot) + ".connector" + std::to_string(conn)).get_value_or("");
+         m_ctpin[slot-7][conn] = inputs.get_optional<std::string>(prefix + slotStr + suffix + std::to_string(conn)).get_value_or(emptyStr);
       }
    }
    const auto & electrical = inputs.get_child("electrical");
+   const std::string connectorStr{"connector"};
    for(size_t i=0; i<3; ++i) {
-      m_electrical[i] = electrical.get_optional<std::string>("connector" + std::to_string(i)).get_value_or("");
+      m_electrical[i] = electrical.get_optional<std::string>(connectorStr + std::to_string(i)).get_value_or(emptyStr);
    }
    if(auto optical = inputs.get_child_optional("optical")) {
       for(size_t i=0; i<12; ++i) {
-         m_optical[i] = optical->get_optional<std::string>("connector" + std::to_string(i)).get_value_or("");
+         m_optical[i] = optical->get_optional<std::string>(connectorStr + std::to_string(i)).get_value_or(emptyStr);
       }
    }
+   const std::string multiplicityStr{"multiplicity"};
+   const std::string thrStr{"thr"};
    for( auto & mon : data().get_child("monitoring.ctpmon") ) {
       std::string monName = mon.first;
-      size_t multiplicity = mon.second.get_child("multiplicity").get_value<size_t>();
-      std::string thr = mon.second.get_child("thr").get_value<std::string>();
+      size_t multiplicity = mon.second.get_child(multiplicityStr).get_value<size_t>();
+      std::string thr = mon.second.get_child(thrStr).get_value<std::string>();
       m_ctpmon.emplace( std::piecewise_construct,
                         std::forward_as_tuple(monName),
                         std::forward_as_tuple(multiplicity, thr)
@@ -44,8 +51,8 @@ TrigConf::L1CTP::load()
    if(ctpinMon) {
       for( auto & mon : *ctpinMon ) {
          std::string monName = mon.first;
-         size_t multiplicity = mon.second.get_child("multiplicity").get_value<size_t>();
-         std::string thr = mon.second.get_child("thr").get_value<std::string>();
+         size_t multiplicity = mon.second.get_child(multiplicityStr).get_value<size_t>();
+         std::string thr = mon.second.get_child(thrStr).get_value<std::string>();
          m_ctpinMon.emplace( std::piecewise_construct,
                              std::forward_as_tuple(monName),
                              std::forward_as_tuple(multiplicity, thr)
