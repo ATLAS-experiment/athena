@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfHLTData/HLTUtils.h"
@@ -12,11 +12,14 @@
 #include "TrigConfL1Data/CTPConfig.h"
 #include "TrigConfL1Data/Menu.h"
 
+#include "CxxUtils/StringUtils.h"
+
 #include <iostream>
 #include <algorithm>
 #include <iterator>
 
 using namespace std;
+using CxxUtils::tokenize;
 
 TrigConf::HLTChainList::HLTChainList()
 {}
@@ -126,7 +129,7 @@ TrigConf::HLTChainList::setL2LowerChainCounter(const CTPConfig* ctpcfg) {
       if(ch->level() == "EF") continue;
       std::string low_chain_names = ch->lower_chain_name();
       std::erase(low_chain_names,' ');
-      vector<string> low_chain_names_V = split(low_chain_names,",");
+      vector<string> low_chain_names_V = tokenize(low_chain_names,",");
       std::vector<int> lccs;
       for(string lowerChainName : low_chain_names_V)
          lccs.push_back(ctpFromName[lowerChainName]);

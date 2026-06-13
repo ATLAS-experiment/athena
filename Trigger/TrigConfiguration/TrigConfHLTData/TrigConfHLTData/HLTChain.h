@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_HLTChain
@@ -93,7 +93,7 @@ namespace TrigConf {
       HLTChain& set_chain_name           ( const std::string&  chain_name);
       HLTChain& set_chain_counter        ( int chain_counter) { m_chain_counter = chain_counter; return *this; }
       HLTChain& set_chain_version        ( int chain_version) { m_chain_version = chain_version; return *this; }
-      HLTChain& set_level                ( const std::string&  level) { m_level = level; return *this; }
+      HLTChain& set_level                ( std::string_view  level) { m_level.assign(level); return *this; }
       HLTChain& set_lower_chain_name     ( const std::string&  lower_chain_name);
       HLTChain& set_lower_chain_counter  ( int lower_chain_counter) { m_lower_chain_counter = lower_chain_counter; return *this; }
       HLTChain& set_lower_chain_counters ( const std::vector<int>& low_ccs) { m_lower_chain_counters = low_ccs; return *this; }
