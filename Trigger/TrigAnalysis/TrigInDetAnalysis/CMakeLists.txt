@@ -1,12 +1,10 @@
-################################################################################
-# Package: TrigInDetAnalysis
-################################################################################
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigInDetAnalysis )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_root_dictionary( TrigInDetAnalysis
@@ -20,4 +18,3 @@ atlas_add_library( TrigInDetAnalysis
                    PUBLIC_HEADERS TrigInDetAnalysis
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} )
-
