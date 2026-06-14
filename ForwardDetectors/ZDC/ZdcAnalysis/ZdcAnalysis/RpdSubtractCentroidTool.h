@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_RPDSUBTRACTCENTROIDTOOL_H
@@ -108,7 +108,7 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   // results from RPD analysis needed for centroid calculation (read from AOD)
   //
   struct RPDChannelData {
-    unsigned int channel;
+    unsigned int channel = 0;
     float xposRel{};
     float yposRel{};
     unsigned short row{};
