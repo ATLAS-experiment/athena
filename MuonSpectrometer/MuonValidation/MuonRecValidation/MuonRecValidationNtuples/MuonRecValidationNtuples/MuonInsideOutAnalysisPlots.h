@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONINSIDEOUTANALYSISPLOTS_H
@@ -47,8 +47,8 @@ namespace Muon {
 
   /** hit plots */
   struct HitPlots {
-    ResPlots         all;
-    ResPlotsPt       all_p;
+    ResPlots         all{};
+    ResPlotsPt       all_p{};
     ChamberResPlots  chamber;
 
     void book( TDirectory* dir, const TString& prefix );
@@ -98,10 +98,10 @@ namespace Muon {
 
   /** hough plots */
   struct HoughPlots {
-    TH1* max;
-    TH2* max_pull;
+    TH1* max = nullptr;
+    TH2* max_pull = nullptr;
 
-    ResPlots         all;
+    ResPlots         all{};
     ChamberResPlots  chamber;
 
     void book( TDirectory* dir, const TString& prefix );
@@ -112,32 +112,32 @@ namespace Muon {
 
   /** segment plots */
   struct SegmentPlots {
-    TH1* t0;
-    TH1* t0Trig;
-    TH1* beta;
-    TH2* beta2;
-    TH1* betaTrig;
-    TH1* t0Res;
-    TH1* t0ResTrig;
-    TH1* betaRes;
-    TH1* betaResTrig;
-    TH1* quality;
-    TH2* quality_chIndex;
-    TH2* quality_sector;
+    TH1* t0 = nullptr;
+    TH1* t0Trig = nullptr;
+    TH1* beta = nullptr;
+    TH2* beta2 = nullptr;
+    TH1* betaTrig = nullptr;
+    TH1* t0Res = nullptr;
+    TH1* t0ResTrig = nullptr;
+    TH1* betaRes = nullptr;
+    TH1* betaResTrig = nullptr;
+    TH1* quality = nullptr;
+    TH2* quality_chIndex = nullptr;
+    TH2* quality_sector = nullptr;
     
-    ResPlots        allx;
+    ResPlots        allx{};
     ChamberResPlots chamberx;
 
-    ResPlots        ally;
+    ResPlots        ally{};
     ChamberResPlots chambery;
 
-    ResPlots        allxz;
+    ResPlots        allxz{};
     ChamberResPlots chamberxz;
 
-    ResPlots        allyz;
+    ResPlots        allyz{};
     ChamberResPlots chamberyz;
 
-    ResPlots        allcy;
+    ResPlots        allcy{};
     ChamberResPlots chambercy;
 
     void book( TDirectory* dir, const TString& prefix );
@@ -203,27 +203,27 @@ namespace Muon {
 
   /** track based plots */
   struct TrackPlots {
-    TH1* pt;
-    TH1* eta;
-    TH1* phi;
-    TH1* beta;
-    TH1* pdg;
-    TH1* ntruth;
-    TH1* nseg;
-    TH1* nseg1;
-    TH1* nseg2;
-    TH1* nseg3;
-    TH1* nhough;
-    TH2* ntruth_seg;
-    TH2* ntruth_seg1;
-    TH2* ntruth_hough;
-    
-    HitPlots     hits;
-    HoughPlots   hough;
-    SegmentPlots segments;
-    SegmentPlots segments1;
-    SegmentPlots segments2;
-    SegmentPlots segments3;
+    TH1* pt = nullptr;
+    TH1* eta = nullptr;
+    TH1* phi = nullptr;
+    TH1* beta = nullptr;
+    TH1* pdg = nullptr;
+    TH1* ntruth = nullptr;
+    TH1* nseg = nullptr;
+    TH1* nseg1 = nullptr;
+    TH1* nseg2 = nullptr;
+    TH1* nseg3 = nullptr;
+    TH1* nhough = nullptr;
+    TH2* ntruth_seg = nullptr;
+    TH2* ntruth_seg1 = nullptr;
+    TH2* ntruth_hough = nullptr;
+
+    HitPlots     hits{};
+    HoughPlots   hough{};
+    SegmentPlots segments{};
+    SegmentPlots segments1{};
+    SegmentPlots segments2{};
+    SegmentPlots segments3{};
 
     std::vector<TimePlots> timePlots;
     // get the plot for a given index
@@ -234,8 +234,8 @@ namespace Muon {
       return nullptr;
     }
 
-    BetaFitRegionPlots barrel;
-    BetaFitRegionPlots endcap;
+    BetaFitRegionPlots barrel{};
+    BetaFitRegionPlots endcap{};
     
     std::vector<StageSummaryPlots> candidateStages;
     
