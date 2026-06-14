@@ -388,7 +388,6 @@ class TrigEgammaMonAlgBuilder:
       tagList= treat_list_of_chains_by_name(self.tpZeegTagList,) 
       self.__logger.info( "Creating the Zeegamma monitor algorithm")
       self.zeegMonAlg = self.helper.addAlgorithm( CompFactory.TrigEgammaMonitorTagAndProbeAlgorithmZeeg, "TrigEgammaMonitorTagAndProbeZeeg" )
-      self.__logger.info( "HELP HERE 1")
       self.zeegMonAlg.Analysis='Zeeg'
       self.zeegMonAlg.MatchTool = EgammaMatchTool
       self.zeegMonAlg.TPTrigger=False
@@ -396,7 +395,6 @@ class TrigEgammaMonAlgBuilder:
       self.zeegMonAlg.PhotonKey = 'Photons'
       self.zeegMonAlg.PhotonIsolationKeys = ["Photons.topoetcone20", "Photons.topoetcone40"]
 
-      self.__logger.info( "HELP HERE 2")
       self.zeegMonAlg.isEMResultNames=self.isemnames
       self.zeegMonAlg.LHResultNames=self.lhnames
       self.zeegMonAlg.DNNResultNames=self.dnnnames
@@ -417,7 +415,6 @@ class TrigEgammaMonAlgBuilder:
       self.zeegMonAlg.DetailedHistograms=self.detailedHistograms
       self.zeegMonAlg.DoEmulation = False
       self.zeegMonAlg.ApplyJetNearProbeSelection = False
-      self.__logger.info( "HELP HERE 3")
 
       if self.emulator: # turn on emulator
         self.emulator.TriggerList += tpList
@@ -525,10 +522,8 @@ class TrigEgammaMonAlgBuilder:
 
   
   def configureHistograms(self):
-    self.__logger.warning("line 512") 
     self.setBinning()
 
-    self.__logger.warning("line 514") 
     if self.activate_zee:
 
       # LH plots
@@ -551,36 +546,14 @@ class TrigEgammaMonAlgBuilder:
     self.setBinning()
   
     if self.activate_zeeg:
-      self.__logger.warning("line 540")
-      self.__logger.warning("ZEEG TriggerList = %s", self.zeegMonAlg.ProbeTriggerList)
-      self.__logger.warning("ZEEG TagTriggerList = %s", self.zeegMonAlg.TagTriggerList) 
+      self.__logger.debug("ZEEG TriggerList = %s", self.zeegMonAlg.ProbeTriggerList)
+      self.__logger.debug("ZEEG TagTriggerList = %s", self.zeegMonAlg.TagTriggerList) 
       self.bookEvent( self.zeegMonAlg, self.zeegMonAlg.Analysis , True)
 
-      #self.zeegMonAlg.TagTriggerList=tagList # Tag triggers
-      #self.zeegMonAlg.ProbeTriggerList=probeList #Probe Triggers
-      #Saving list of Triggers (tag)
-      #triggers = self.zeegMonAlg.TagTriggerList;
-      #triggers = self.zeegMonAlg.TagTriggerList
-      #triggers = self.zeegMonAlg.ProbeTriggerList; triggers.extend( self.zeegMonAlg.TagTriggerList )
       triggers = self.zeegMonAlg.ProbeTriggerList[:]
       triggers.extend( self.zeegMonAlg.TagTriggerList )
-      print("QQQQQQQQQQQQQ")
-      print(triggers)
-
-      print()
-      print()
-      print()
-      print()
-      print()
-      print()
-      print()
-
 
       self.bookExpertHistograms( self.zeegMonAlg, triggers )
-
-
-
-      #self.bookExpertHistograms( self.zeegMonAlg, triggers )
 
     if self.activate_electron:
       self.bookExpertHistograms( self.elMonAlg, self.elMonAlg.TriggerList )
@@ -602,9 +575,9 @@ class TrigEgammaMonAlgBuilder:
       if monGroup is None:
           self.__logger.error("monGroup is None for hist %s", hist.name)
           return
-      self.__logger.warning("BOOKING HIST %s in group %s",
+      self.__logger.debug("BOOKING HIST %s in group %s",
                           hist.name, monGroup.name)
-      self.__logger.warning("kwargs = %s", hist.kwargs)
+      self.__logger.debug("kwargs = %s", hist.kwargs)
       monGroup.defineHistogram(hist.name, **hist.kwargs)
 
 
@@ -734,16 +707,6 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("Rhad"   , "Rhad; Rhad ; Count"  , 40, 0, 1))
     self.addHistogram(monGroup, TH1F("Reta"   , "Reta; Reta ; Count"  , 40, 0, 1 ))
     self.addHistogram(monGroup, TH1F("Wstot"  , "Wstot; Wstot ; Count", 40, 0, 4 ))
-
-   # else: # L1Calo Legacy
-   #   self.addHistogram(monGroup, TH1F("energy", "Cluster Energy; E [GeV] ; Count", 100, 0., 800.))
-   #   self.addHistogram(monGroup, TH1F("roi_et", "RoI word Cluster Energy; E [GeV] ; Count", 100, 0, 200))
-   #   self.addHistogram(monGroup, TH1F("emIso", "EM Isolation; E [GeV] ; Count", 50, -1., 20.))
-   #   self.addHistogram(monGroup, TH1F("hadCore", "HAD Isolation; E [GeV] ; Count", 50, -1., 20.))
-   #   self.addHistogram(monGroup, TH1F("eta", "eta; eta ; Count", 50, -2.5, 2.5))
-   #   self.addHistogram(monGroup, TH1F("phi", "phi; phi ; Count", 20, -3.2, 3.2))
-
-
 
   #
   # Book L2Calo distributions
@@ -891,18 +854,18 @@ class TrigEgammaMonAlgBuilder:
   # Book efficiencies
   #
   def bookEfficiencies(self, monAlg, trigger, level, subgroup=None, doEmulation=False ):
-    self.__logger.warning("booking trigger named = %s", trigger) 
-    self.__logger.warning("booking in dir named =  %s", self.basePath)
+    self.__logger.debug("booking trigger named = %s", trigger) 
+    self.__logger.debug("booking in dir named =  %s", self.basePath)
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F, TProfile
 
     dirname = 'Emulation' if doEmulation else 'Efficiency'
-    self.__logger.warning("Histogram path = %s", self.basePath+'/Shifter/'+trigger+'/'+dirname+'/'+level) 
+    self.__logger.debug("Histogram path = %s", self.basePath+'/Shifter/'+trigger+'/'+dirname+'/'+level) 
     if subgroup:
       monGroup = self.addGroup( monAlg, trigger+'_'+dirname+'_'+level+'_'+subgroup, self.basePath+'/Shifter/'+trigger+'/'+dirname+'/'+level+'/'+subgroup )
     else:
       monGroup = self.addGroup( monAlg, trigger+'_'+dirname+'_'+level, self.basePath+'/Shifter/'+trigger+'/'+dirname+'/'+level )
 
-    self.__logger.warning("Created monGroup = %s", monGroup)
+    self.__logger.debug("Created monGroup = %s", monGroup)
     # Numerator
     self.addHistogram(monGroup, TH1F("match_pt", "Trigger Matched Offline p_{T}; p_{T} [GeV] ; Count", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TH1F("match_et", "Trigger Matched Offline E_{T}; E_{T} [GeV]; Count", self._nEtbins, self._etbins))
@@ -1085,7 +1048,7 @@ class TrigEgammaMonAlgBuilder:
     
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TH2F
     monGroup = self.addGroup( monAlg, trigger+'_Resolutions_HLT', self.basePath+'/Shifter/'+trigger+'/Resolutions/'+level )
-    self.__logger.warning("inside the bookHLTResolutions def = %s", monGroup) 
+    self.__logger.debug("inside the bookHLTResolutions def = %s", monGroup) 
 
     # online values used to fill all 2d histograms
     self.addHistogram(monGroup, TH1F("et", "E_{T}; E_{T}[GeV] ; Count", 50, 0.0, 100.))
