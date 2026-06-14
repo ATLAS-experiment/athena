@@ -144,7 +144,7 @@ private:
   /// Avoids redundant per-event TDT calls (chain group resolution, config lookups)
   /// whose results are static after the first event.
   struct CachedChainInfo {
-    TrigCompositeUtils::DecisionID chainID;
+    TrigCompositeUtils::DecisionID chainID{};
     std::vector<TrigCompositeUtils::DecisionID> legIDs;
   };
   mutable std::once_flag m_chainIDsCacheFlag ATLAS_THREAD_SAFE;
