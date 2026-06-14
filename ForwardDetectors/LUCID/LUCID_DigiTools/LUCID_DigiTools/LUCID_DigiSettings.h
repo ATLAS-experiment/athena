@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_DIGISETTINGS_H
@@ -36,7 +36,7 @@ class LUCID_DigiSettings {
   
   void SetDefaultValues();
 
-  IMessageSvc* m_msgSvc;
+  IMessageSvc* m_msgSvc{};
 
   int    m_numTubes{};
   int    m_qdcChannelsPerPE{};
@@ -44,28 +44,28 @@ class LUCID_DigiSettings {
   double m_tdcPmtNoiseFactor{};
   double m_tdcFedNoiseFactor{};
 
-  double m_parValueNotSetByUserDouble;
-  int    m_parValueNotSetByUserInt;
+  double m_parValueNotSetByUserDouble{};
+  int    m_parValueNotSetByUserInt{};
 
   void DefNewParameterDouble(std::string, const std::string&, double*, double, double);
   void DefNewParameterInt   (std::string, const std::string&, int*,    int,    int); 
 
   struct parDouble {  
 
-    std::string parDescription;
-    double* par;
-    double  low;
-    double  high;   
-    double  overwriteVal;
+    std::string parDescription{};
+    double* par{};
+    double  low{};
+    double  high{};   
+    double  overwriteVal{};
   };
   
   struct parInt {  
     
     std::string parDescription;
-    int* par;
-    int  low;
-    int  high;
-    int  overwriteVal; 
+    int* par{};
+    int  low{};
+    int  high{};
+    int  overwriteVal{}; 
   };
   
   std::map <std::string, parDouble> m_doubleMap;
