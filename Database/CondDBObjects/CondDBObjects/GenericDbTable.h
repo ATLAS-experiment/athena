@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CONDDBOBJECTS_GENERICDBTABLE_H
@@ -662,9 +662,9 @@ std::string ToString( const TYPE & t ) const {
 
  struct CondDBColumn{
    virtual ~CondDBColumn() {}
-   bool initialized;
+   bool initialized{};
    std::string name;
-   dataTypes type;
+   dataTypes type{};
 
  };
 
