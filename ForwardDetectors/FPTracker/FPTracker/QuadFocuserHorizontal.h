@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_QUADFOCUSERHORIZONTAL_H
@@ -20,10 +20,10 @@ namespace FPTracker{
 
     static const std::string s_label;
 
-    double m_xe;
-    double m_xae;
-    double m_ye;
-    double m_yae;
+    double m_xe{};
+    double m_xae{};
+    double m_ye{};
+    double m_yae{};
   };
 }
 #endif
