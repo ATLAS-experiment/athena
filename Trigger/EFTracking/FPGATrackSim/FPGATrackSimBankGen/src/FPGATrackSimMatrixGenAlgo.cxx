@@ -347,6 +347,9 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute(const EventContext& ctx)
         std::vector<std::shared_ptr<const FPGATrackSimHit>> sector_hits_ptrs;
         sector_hits_ptrs.reserve(sector_hits.size());
         // Single control block representing "the lifetime of sector_hits" (non-owning)
+        //this is ugly, but harmless: multiple smart pointers hold the resource, but one
+        //has a no-op deleter
+        //coverity[MULTIPLE_INIT_SMART_PTRS]
         auto owner = std::shared_ptr<const std::vector<FPGATrackSimHit>>(
           &sector_hits,
           [](const std::vector<FPGATrackSimHit>*) {} // no-op deleter

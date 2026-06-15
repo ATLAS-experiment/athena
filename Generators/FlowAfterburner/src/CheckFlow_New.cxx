@@ -208,7 +208,7 @@ StatusCode CheckFlow_New::execute(const EventContext& ctx) {
 
   SG::ReadHandle<HijingEventParams> hijing_pars{m_hijingKey, ctx};
   float b = hijing_pars->get_b();
-  float Psi_n[6],Psi_n_reco[6];
+  float Psi_n[6]{},Psi_n_reco[6]{};
   float Psi_n_reco_pos[6]{},Psi_n_reco_neg[6]{};
   for(int ihar=0;ihar<6;ihar++){Psi_n[ihar]=hijing_pars->get_psi(ihar+1);}
   msg(MSG::INFO)<<"SOUMYA  "<<hijing_pars->get_psi(1)<<"   "<<hijing_pars->get_psi(2)<<"  "<<hijing_pars->get_psi(3)

@@ -9,11 +9,9 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "GaudiKernel/EventContext.h"
 #include "PathResolver/PathResolver.h"
 
-#include <arpa/inet.h>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <string>
 #include <bitset>
 
 
@@ -135,7 +133,7 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
         row.md = trim(fields[1]);
         row.fe = std::stoi(trim(fields[2]));
 
-        m_rows.push_back(row);
+        m_rows.push_back(std::move(row));
     }
 
     ATH_MSG_INFO("Loaded " << m_rows.size() << " CSV rows from " << resolvedCsv);

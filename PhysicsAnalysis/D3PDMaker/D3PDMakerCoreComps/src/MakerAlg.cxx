@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file D3PDMakerCoreComps/src/MakerAlg.h
@@ -112,9 +112,10 @@ StatusCode MakerAlg::execute(const EventContext& /*ctx*/)
     // This check also only has to be done once. So no reason to do it
     // in a more complicated way.
     if (m_audit) {
+       const std::string evtStr{"evt"};
        for (size_t i = 0; i < m_tools.size(); i++) {
           Gaudi::Guards::AuditorGuard auditor( m_tools[ i ]->name() +
-                                               ":book", auditorSvc(), "evt" );
+                                               ":book", auditorSvc(), evtStr );
           CHECK( m_tools[i]->book() );
        }
     } else {
