@@ -20,6 +20,9 @@ HGTD_DetectorElementCondAlg::HGTD_DetectorElementCondAlg(const std::string& name
 StatusCode HGTD_DetectorElementCondAlg::initialize()
 {
   ATH_MSG_DEBUG("initialize " << name());
+  
+  // Read Handle
+  ATH_CHECK(m_readKey.initialize());
 
   // Write Handle
   ATH_CHECK(m_writeKey.initialize());
@@ -54,8 +57,19 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
   // ____________ Construct new Write Cond Object ____________
   std::unique_ptr<InDetDD::HGTD_DetectorElementCollection> writeCdo{std::make_unique<InDetDD::HGTD_DetectorElementCollection>()};
 
+  // ____________ Get Read Cond Object ____________
+  SG::ReadCondHandle<GeoAlignmentStore> readHandle{m_readKey, ctx};
+  const GeoAlignmentStore* readCdo{*readHandle};
+
+  if (readCdo == nullptr) {
+    ATH_MSG_FATAL("Null pointer to the read conditions object of " << m_readKey.key());
+    return StatusCode::FAILURE;
+  }
+
   // Make sure we make a mixed IOV.
   writeHandle.addDependency (IOVInfiniteRange::infiniteMixed());
+
+  writeHandle.addDependency(readHandle);
 
   // ____________ Update writeCdo ____________
   std::map<const InDetDD::HGTD_DetectorElement*, const InDetDD::HGTD_DetectorElement*> oldToNewMap;
@@ -66,7 +80,8 @@ StatusCode HGTD_DetectorElementCondAlg::execute(const EventContext& ctx) const
     *newEl = new InDetDD::HGTD_DetectorElement(oldEl->identify(),
                                                &(oldEl->design()),
                                                oldEl->GeoVDetectorElement::getMaterialGeom(),
-                                               oldEl->getCommonItems());
+                                               oldEl->getCommonItems(),
+                                               readCdo);
     oldToNewMap[oldEl] = *newEl;
     ++newEl;
   }

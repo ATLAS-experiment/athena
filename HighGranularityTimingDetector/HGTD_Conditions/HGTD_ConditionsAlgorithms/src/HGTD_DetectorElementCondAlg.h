@@ -13,6 +13,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/CondHandleKeyArray.h"
+#include "GeoModelUtilities/GeoAlignmentStore.h"
 
 
 class HGTD_DetectorManager;
@@ -27,11 +28,15 @@ class HGTD_DetectorElementCondAlg : public AthCondAlgorithm
   virtual StatusCode execute(const EventContext& ctx) const override final;
 
  private:
+  SG::ReadCondHandleKey<GeoAlignmentStore> m_readKey
+  {this, "ReadKey", "HGTDAlignmentStore", "HGTDAlignmentStore data"};
+
   SG::WriteCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_writeKey
   {this, "WriteKey", "HGTD_DetectorElementCollection", "Key of output HGTD_DetectorElementCollection for HGTD"};
 
   StringProperty m_detManagerName{this, "DetManagerName", "HGTD", "Name of the DeterctorManager to retrieve"};
   const HGTD_DetectorManager* m_detManager{nullptr};
+
 };
 
 #endif // HGTD_CONDITIONSALGORITHMS_HGTD_DETECTORELEMENTCONDALG_H
