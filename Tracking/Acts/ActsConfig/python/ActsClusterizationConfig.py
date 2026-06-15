@@ -586,29 +586,12 @@ def ActsClusterizationCfg(flags,
 
     # Persistification
     if flags.Acts.EDM.PersistifyClusters and kwargs['runReconstruction']:
-        toAOD = []
-        if kwargs['processPixels']:
-            pixel_cluster_shortlist = ['-validationMeasurementLink']
-            pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
-            
-            pixelClusterCollection = kwargs['PixelClusterizationAlg.ClustersKey']
-            toAOD += [f'xAOD::PixelClusterContainer#{pixelClusterCollection}',
-                      f'xAOD::PixelClusterAuxContainer#{pixelClusterCollection}Aux.{pixel_cluster_variables}']
-            
-        if kwargs['processStrips']:
-            strip_cluster_shortlist = ['-validationMeasurementLink']
-            strip_cluster_variables = '.'.join(strip_cluster_shortlist)
-            
-            stripClusterCollection = kwargs['StripClusterizationAlg.ClustersKey']
-            toAOD += [f"xAOD::StripClusterContainer#{stripClusterCollection}",
-                      f"xAOD::StripClusterAuxContainer#{stripClusterCollection}Aux.{strip_cluster_variables}"]
-            
-        if kwargs['processHGTD']:
-            hgtdClusterCollection = kwargs['HgtdClusterizationAlg.ClusterContainerName']
-            toAOD += [f"xAOD::HGTDClusterContainer#{hgtdClusterCollection}",
-                      f"xAOD::HGTDClusterAuxContainer#{hgtdClusterCollection}Aux."]
-            
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
-        
+        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+        pixelClusterCollections = None if not kwargs['processPixels'] else [kwargs['PixelClusterizationAlg.ClustersKey']]
+        stripClusterCollections = None if not kwargs['processStrips'] else [kwargs['StripClusterizationAlg.ClustersKey']]
+        hgtdClusterCollections = None if not kwargs['processHGTD'] else [kwargs['HgtdClusterizationAlg.ClusterContainerName']]
+        acc.merge(PersistifyClusters(flags,
+                                     pixelClusterCollections=pixelClusterCollections,
+                                     stripClusterCollections=stripClusterCollections,
+                                     hgtdClusterCollections=hgtdClusterCollections))
     return acc

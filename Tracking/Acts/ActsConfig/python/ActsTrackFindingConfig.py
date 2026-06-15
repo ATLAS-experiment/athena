@@ -340,26 +340,12 @@ def ActsTrackFindingCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
                                                  OutputActsTracksLocation = trackColl))
-        
-        toAOD = []
+
         prefix = f"{flags.Tracking.ActiveConfig.extension}"
-        toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
-                  f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
-                  f"xAOD::TrackStateContainer#{prefix}TrackStates",
-                  f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
-                  f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
-                  f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
-                  f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
-                  f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
-                  f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
-                  f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-        acc.merge(addToAOD(flags, toAOD))
-        
+        from ActsConfig.ActsPersistificationConfig import PersistifyTracks
+        acc.merge(PersistifyTracks(flags,
+                                   extensions=[prefix]))
+
     return acc
 
 
@@ -494,25 +480,11 @@ def ActsAmbiguityResolutionCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
                                                  OutputActsTracksLocation = trackColl))
-        
-        toAOD = []
+
         prefix = f"{flags.Tracking.ActiveConfig.extension}Resolved"
-        toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
-                  f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
-                  f"xAOD::TrackStateContainer#{prefix}TrackStates",
-                  f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
-                  f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
-                  f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
-                  f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
-                  f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
-                  f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
-                  f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]        
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
+        from ActsConfig.ActsPersistificationConfig import PersistifyTracks
+        acc.merge(PersistifyTracks(flags,
+                                   extensions=[prefix]))
 
     return acc
 
