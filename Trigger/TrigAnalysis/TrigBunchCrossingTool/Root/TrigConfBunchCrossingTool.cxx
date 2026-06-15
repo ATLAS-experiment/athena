@@ -43,7 +43,7 @@ namespace Trig {
 
    TrigConfBunchCrossingTool::
    TrigConfBunchCrossingTool( const std::string& name )
-      : BunchCrossingToolBase( name ), m_bgId( -1 )
+      : BunchCrossingToolBase( name )
    {
    }
 

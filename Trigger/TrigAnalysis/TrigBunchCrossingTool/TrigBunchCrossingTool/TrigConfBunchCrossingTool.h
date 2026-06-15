@@ -79,7 +79,7 @@ namespace Trig {
       void printBunchGroups( const TrigConf::IILVL1ConfigSvc* svc ) const;
 
       /// DB ID of the BunchGroups settings which was loaded last
-      unsigned int m_bgId;
+      unsigned int m_bgId{0};
 
 #ifndef XAOD_STANDALONE
       /// The config service handle
