@@ -79,6 +79,8 @@ namespace columnar
         throw std::runtime_error("column " + columnInfo.name + " fixed dimensions mismatch");
       if (existingHeader.soleLinkTargetName != columnInfo.soleLinkTargetName)
         throw std::runtime_error("column " + columnInfo.name + " sole link target name mismatch");
+      if (existingHeader.soleLinkTargetClid != columnInfo.soleLinkTargetClid)
+        throw std::runtime_error("column " + columnInfo.name + " sole link target clid mismatch");
       if (existingHeader.isVariantLink != columnInfo.isVariantLink)
         throw std::runtime_error("column " + columnInfo.name + " isVariantLink mismatch");
       if (existingHeader.variantLinkTargetNames != columnInfo.variantLinkTargetNames)
@@ -105,6 +107,7 @@ namespace columnar
     header.accessMode = columnInfo.accessMode;
     header.offsetName = columnInfo.offsetName;
     header.soleLinkTargetName = columnInfo.soleLinkTargetName;
+    header.soleLinkTargetClid = columnInfo.soleLinkTargetClid;
     header.isVariantLink = columnInfo.isVariantLink;
     header.variantLinkTargetNames = columnInfo.variantLinkTargetNames;
     header.keyColumnForVariantLink = columnInfo.keyColumnForVariantLink;
@@ -343,6 +346,7 @@ namespace columnar
       info.isOffset = header.isOffset;
       info.isOptional = header.isOptional;
       info.soleLinkTargetName = header.soleLinkTargetName;
+      info.soleLinkTargetClid = header.soleLinkTargetClid;
       info.isVariantLink = header.isVariantLink;
       info.variantLinkTargetNames = header.variantLinkTargetNames;
       info.keyColumnForVariantLink = header.keyColumnForVariantLink;

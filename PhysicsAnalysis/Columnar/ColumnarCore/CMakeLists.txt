@@ -25,7 +25,8 @@ set (extra_libs ${extra_libs} ColumnarInterfacesLib)
 atlas_add_library (ColumnarCoreLib
   ColumnarCore/*.h Root/*.cxx
   PUBLIC_HEADERS ColumnarCore
-  LINK_LIBRARIES ${extra_libs})
+  LINK_LIBRARIES ${extra_libs} SGCoreLib
+  PRIVATE_LINK_LIBRARIES CxxUtils)
 
 target_compile_definitions (ColumnarCoreLib PUBLIC -DCOLUMNAR_DEFAULT_ACCESS_MODE=${COLUMNAR_DEFAULT_ACCESS_MODE})
 

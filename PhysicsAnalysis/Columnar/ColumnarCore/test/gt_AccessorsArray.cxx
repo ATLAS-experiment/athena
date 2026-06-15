@@ -16,6 +16,8 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <AsgTesting/UnitTest.h>
 #include <algorithm>
 #include <ColumnarCore/ColumnAccessor.h>
+#include <ColumnarCore/ColumnInfoHelpers.h>
+#include <ColumnarCore/LinkColumn.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
@@ -395,6 +397,38 @@ namespace columnar
       EXPECT_EQ (columns[0].name, "MyEventInfo");
       EXPECT_EQ (columns[0].index, 20);
     }
+  }
+
+
+
+  // Tests for link accessors and StoreGate key computation
+
+  TEST (LinkAccessorTest, linkColumnInfo)
+  {
+    MyTool tool;
+    MyAccessor<ObjectColumn> objectAccessor {tool, "Particles"};
+    MyAccessor<ObjectColumn,Particle1Def> targetAccessor {tool, "Targets"};
+    MyAccessor<OptObjectId<Particle1Def,ColumnarModeArray>> linkAccessor {tool, "targetLink"};
+    ASSERT_SUCCESS (tool.initializeColumns());
+
+    auto columns = tool.getColumnInfo();
+    auto linkColumn = std::find_if (columns.begin(), columns.end(), [] (auto& column) {return column.name == "Particles.targetLink";});
+    ASSERT_NE (linkColumn, columns.end());
+    EXPECT_EQ (linkColumn->soleLinkTargetName, "Targets");
+    EXPECT_EQ (linkColumn->soleLinkTargetClid, ClassID_traits<xAOD::IParticleContainer>::ID());
+  }
+
+
+  TEST (ComputeSgKeyTest, knownKeys)
+  {
+    // expected values read from a PHYSLITE input file (see also the
+    // knownKeys table in ColumnarTestFixtures), with the CLIDs from
+    // the CLASS_DEF macros of the corresponding container types
+    EXPECT_EQ (computeSgKey ("AnalysisMuons", 1178459224), 0x3a6b126fu);
+    EXPECT_EQ (computeSgKey ("InDetTrackParticles", 1287425431), 0x1d3890dbu);
+    EXPECT_EQ (computeSgKey ("egammaClusters", 1219821989), 0x15788d1fu);
+    // without the CLID the key differs
+    EXPECT_NE (computeSgKey ("InDetTrackParticles", 0), 0x1d3890dbu);
   }
 }
 

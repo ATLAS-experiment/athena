@@ -12,6 +12,7 @@
 
 #include <AsgTesting/UnitTest.h>
 #include <ColumnarTestFixtures/PerformanceData.h>
+#include <ColumnarCore/ColumnInfoHelpers.h>
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
@@ -325,7 +326,7 @@ namespace columnar
         std::vector<std::string> keyColumnNames;
         if (!columnInfo.soleLinkTargetName.empty())
         {
-          addTarget (columnInfo.soleLinkTargetName, offsetColumns);
+          addTarget (columnInfo.soleLinkTargetName, offsetColumns, columnInfo.soleLinkTargetClid);
         } else
         {
           for (auto& [requestedName, requestedInfo] : requestedColumns)
@@ -514,7 +515,7 @@ namespace columnar
 
 
 
-      void addTarget (const std::string& name, const std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns)
+      void addTarget (const std::string& name, const std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::uint32_t clid = 0)
       {
         unsigned targetIndex = 0;
         while (targetIndex < m_targetNames.size() && m_targetNames.at(targetIndex) != name)
@@ -526,7 +527,9 @@ namespace columnar
             m_targetOffsetColumns.push_back (offsetIter->second);
           else
             throw std::runtime_error ("missing offset column: " + name);
-          if (auto keyIter = knownKeys.find (name); keyIter != knownKeys.end())
+          if (clid != 0)
+            m_targetKeys.push_back (computeSgKey (name, clid));
+          else if (auto keyIter = knownKeys.find (name); keyIter != knownKeys.end())
             m_targetKeys.push_back (keyIter->second);
           else
             m_targetKeys.push_back (0);
