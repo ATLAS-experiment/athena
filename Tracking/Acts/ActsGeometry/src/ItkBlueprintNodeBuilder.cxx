@@ -44,10 +44,7 @@ using namespace Acts::UnitLiterals;
 
 namespace {
 
-constexpr std::size_t s_stripVolumeId = 20;
-constexpr std::size_t s_innerPixelVolumeId = 5;
-constexpr std::size_t s_outerPixelVolumeId = 10;
-constexpr std::size_t s_beamPipeVolumeId = 1;
+
 
 using enum Acts::CylinderVolumeBounds::Face;
 using enum Acts::AxisDirection;
@@ -55,6 +52,8 @@ using enum Acts::AxisBoundaryType;
 using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
 using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
+using namespace ActsTrk::detail::GeoVolIds;
+
 
 // Helper function to convert shared_ptr vector to const ptr vector
 std::vector<const Acts::Surface*> makeConstPtrVector(
@@ -278,6 +277,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                       {AxisZ, Bound, 20});
 
     auto& innerPixelContainer = mat.addCylinderContainer("InnerPixel", AxisZ);
+    
 
     // Add barrel container
     auto& barrelGeoId = innerPixelContainer.withGeometryIdentifier();

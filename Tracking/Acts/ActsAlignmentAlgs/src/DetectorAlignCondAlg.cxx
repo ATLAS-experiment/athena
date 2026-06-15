@@ -56,7 +56,7 @@ StatusCode DetectorAlignCondAlg::execute(const EventContext& ctx) const {
     /// Process using the tracking geometry
     if (m_fillAlignStoreCache) {        
         if(!m_trackingGeoSvc->populateAlignmentStore(*newAlignment)) {
-            ATH_MSG_WARNING("No detector elements of " << to_string(m_Type) << " are part of the tracking geometry");
+            ATH_MSG_WARNING("No detector elements of " << m_Type << " are part of the tracking geometry");
         }
         /// There's no need of the absolute transform cache anymore
         newAlignment->geoModelAlignment.reset();
