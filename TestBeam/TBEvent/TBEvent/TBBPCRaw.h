@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBBPCRAW_H
@@ -25,6 +25,7 @@
 #include "AthLinks/ElementLink.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 
@@ -57,10 +58,10 @@ class TBBPCRaw : public TBBeamDetector
 
   /// \brief standard constructor 
 
-  TBBPCRaw(const std::string& thisBPCName) : TBBeamDetector(thisBPCName) 
+  TBBPCRaw(std::string_view thisBPCName) : TBBeamDetector(thisBPCName) 
   {}
 
-  TBBPCRaw(const std::string& thisBPCName,
+  TBBPCRaw(std::string_view thisBPCName,
 	   const TBTDCRawCont* theTDCCont,
 	   const std::vector<const TBTDCRaw*>& theTDCs,
 	   const TBADCRawCont* theADCCont,

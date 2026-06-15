@@ -227,7 +227,11 @@ StatusCode TBEMECXTalkToyModel::processOnCellIterators(const CaloCellContainer::
 	  myId = m_calo_id->cell_id(mySubDet,nId);
 	  cellIt = cellMap.find(myId);
 	  if (cellIt!=cellMap.end()) {
-            theCellN3 = (*cellIt).second;
+      theCellN3 = (*cellIt).second;
+      if (!theCellN3){
+        ATH_MSG_ERROR ( "theCellN3 is nullptr" );
+        return StatusCode::FAILURE;
+      }
 	    cellItEng = energyMap.find(theCellN3->ID());
 	    if (cellItEng==energyMap.end()) {
 	      ATH_MSG_ERROR ( "Identifier not found in energyMap" );
