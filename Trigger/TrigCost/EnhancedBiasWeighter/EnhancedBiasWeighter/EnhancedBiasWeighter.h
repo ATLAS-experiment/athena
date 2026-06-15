@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ENHANCEDBIASWEIGHTER_ENHANCEDBIASWEIGHTER_H
@@ -26,19 +26,19 @@ struct ChainDetail {
   std::string m_name;
   std::string m_lowerName;
   std::string m_comment;
-  uint32_t m_counter;
-  double m_prescale;
-  double m_eventsPassed;
-  double m_eventsPassedWeighted;
-  double m_rate;
-  double m_rateErr;
-  double m_passthroughPrescale;
-  double m_rerunPrescale;
-  double m_expressPrescale;
-  double m_efficiency;
-  double m_efficiencyErr;
-  double m_prescaledEfficiency;
-  double m_prescaledEfficiencyErr;
+  uint32_t m_counter = 0;
+  double m_prescale = 0;
+  double m_eventsPassed = 0;
+  double m_eventsPassedWeighted = 0;
+  double m_rate = 0;
+  double m_rateErr = 0;
+  double m_passthroughPrescale = 0;
+  double m_rerunPrescale = 0;
+  double m_expressPrescale = 0;
+  double m_efficiency = 0;
+  double m_efficiencyErr = 0;
+  double m_prescaledEfficiency = 0;
+  double m_prescaledEfficiencyErr = 0;
 };
 
 /**
