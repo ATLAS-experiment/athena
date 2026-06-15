@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1CaloReadoutSystems/VP1CaloReadoutSystem.h"
@@ -196,7 +196,7 @@ public:
   std::map < SoNode *, const FCALHVLine*>      FCALHVMap;
   std::map < SoNode *, const HECHVSubgap*>     HECHVMap;
 
-  VP1CaloReadoutSystem::POSITION pos;
+  VP1CaloReadoutSystem::POSITION pos{};
 
   Ui::CaloReadoutSystemControllerForm ui{};
   bool hvInit = false;
