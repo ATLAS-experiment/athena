@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GeometrySystems/VolumeHandleSharedData.h"
@@ -31,7 +31,7 @@ public:
   std::map<SoSeparator*,VolumeHandle*>* sonodesep2volhandle = nullptr;
   GeoPVConstLink motherpV;
   PhiSectorManager* phisectormanager = nullptr;
-  VP1GeoFlags::SubSystemFlag subsysflag;
+  VP1GeoFlags::SubSystemFlag subsysflag{};
   SoMaterial * topMaterial = nullptr;
   MatVisAttributes *matVisAttributes = nullptr;
   VolVisAttributes *volVisAttributes = nullptr;
