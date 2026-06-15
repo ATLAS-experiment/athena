@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ public:
   Ui::missingEtControllerForm ui;
   Ui::missingEtPivotForm      uiPivot;
   VP1MissingEtCollWidget*     collWidget;
-  bool 						  last_changeShape;
+  bool 						  last_changeShape = false;
 };
 
 //____________________________________________________________________

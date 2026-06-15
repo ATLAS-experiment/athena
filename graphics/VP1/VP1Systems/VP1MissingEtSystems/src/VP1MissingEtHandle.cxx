@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -79,7 +79,7 @@ public:
   //Classification (purely for where/how the handle is displayed in
   //the collection widget and for the default colour):
   enum TYPE { NORMAL, OBJECTBASED, OTHER };
-  TYPE type;
+  TYPE type{};
 };
 
 
