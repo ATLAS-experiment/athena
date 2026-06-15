@@ -23,6 +23,12 @@ def HGTDInDetToXAODClusterConversionCfg(flags, name="HGTDInDetToXAODClusterConve
     acc = ComponentAccumulator()
     kwargs.setdefault('ProcessHgtd', True)
     acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
+
+    # persistification
+    if flags.Acts.EDM.PersistifyClusters:
+        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+        acc.merge(PersistifyClusters(flags,
+                                     hgtdClusterCollections=['HGTD_Clusters']))
     return acc
 
 def HGTDXAODToInDetClusterConversionCfg(flags, name="HGTDXAODToInDetClusterConversion", **kwargs):
@@ -37,6 +43,15 @@ def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConvers
     kwargs.setdefault('ProcessPixel', flags.Detector.EnableITkPixel)
     kwargs.setdefault('ProcessStrip', flags.Detector.EnableITkStrip)
     acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
+
+    # persistification
+    if flags.Acts.EDM.PersistifyClusters:
+        pixelClusterCollections = None if not kwargs['ProcessPixel'] else ['ITkPixelClusters']
+        stripClusterCollections = None if not kwargs['ProcessStrip'] else ['ITkStripClusters']
+        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+        acc.merge(PersistifyClusters(flags,
+                                     pixelClusterCollections=pixelClusterCollections,
+                                     stripClusterCollections=stripClusterCollections))
     return acc
 
 
@@ -56,6 +71,15 @@ def IDInDetToXAODClusterConversionCfg(flags, name="IDInDetToXAODClusterConversio
     kwargs.setdefault('OutputStripClustersName', "SCT_Clusters")
     
     acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
+
+    # persistification
+    if flags.Acts.EDM.PersistifyClusters:
+        pixelClusterCollections = None if not kwargs['ProcessPixel'] else ['PixelClusters']
+        stripClusterCollections = None if not kwargs['ProcessStrip'] else ['SCT_Clusters']
+        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+        acc.merge(PersistifyClusters(flags,
+                                     pixelClusterCollections=pixelClusterCollections,
+                                     stripClusterCollections=stripClusterCollections))
     return acc
 
 

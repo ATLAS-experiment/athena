@@ -452,37 +452,19 @@ def ActsSpacePointFormationCfg(flags,
 
 
     # Persistification
-    if flags.Acts.EDM.PersistifySpacePoints and kwargs['runReconstruction']:
-        toAOD = []
-        pixel_spacepoint_shortlist = ['-measurements']
-        strip_spacepoint_shortlist = ['topHalfStripLength', 
-                                      'bottomHalfStripLength', 
-                                      'topStripDirection',
-                                      'bottomStripDirection',
-                                      'stripCenterDistance',
-                                      'topStripCenter',
-                                      'measurementLink']
-
-        pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
-        strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
-
-        if kwargs['processPixels']:
-            pixelSpacePointCollection = kwargs['PixelSpacePointFormationAlg.PixelSpacePoints']
-            toAOD += [f'xAOD::SpacePointContainer#{pixelSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{pixelSpacePointCollection}Aux.{pixel_spacepoint_variables}"]
-
+    if flags.Acts.EDM.PersistifySpacePoints and kwargs['runReconstruction']:        
+        from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
+        pixelSpacePointCollections = None if not kwargs['processPixels'] else [kwargs['PixelSpacePointFormationAlg.PixelSpacePoints']]
+        stripSpacePointCollections = []
         if kwargs['processStrips']:
-            stripSpacePointCollection = kwargs['StripSpacePointFormationAlg.StripSpacePoints']
-            toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
-
+            stripSpacePointCollections.append(kwargs['StripSpacePointFormationAlg.StripSpacePoints'])
         if kwargs['processOverlapSpacePoints']:
-            stripSpacePointCollection = kwargs['StripSpacePointFormationAlg.StripOverlapSpacePoints']
-            toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
+            stripSpacePointCollections.append(kwargs['StripSpacePointFormationAlg.StripOverlapSpacePoints'])
+        if len(stripSpacePointCollections) == 0:
+            stripSpacePointCollections = None
 
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-        acc.merge(addToAOD(flags, toAOD))
-
+        acc.merge(PersistifySpacePoints(flags,
+                                        pixelSpacePointCollections=pixelSpacePointCollections,
+                                        stripSpacePointCollections=stripSpacePointCollections))
     return acc
 
