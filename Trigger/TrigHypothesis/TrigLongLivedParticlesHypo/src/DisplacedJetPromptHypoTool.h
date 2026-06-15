@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT2DJTRIG_PROMPT_HYPOTOOL_H
 #define TRIGT2DJTRIG_PROMPT_HYPOTOOL_H
@@ -27,12 +27,12 @@ public:
 
     struct Info {
       const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
-      TrigCompositeUtils::Decision* output_decision;
+      TrigCompositeUtils::Decision* output_decision = nullptr;
       
-      const xAOD::Jet* jet;
+      const xAOD::Jet* jet = nullptr;
       std::vector<const xAOD::TrackParticle_v1*> tracks;
-      const xAOD::Vertex* primary_vertex;
-      xAOD::TrigComposite* counts;
+      const xAOD::Vertex* primary_vertex = nullptr;
+      xAOD::TrigComposite* counts = nullptr;
       DisplacedJetBeamspotInfo beamspot;
     };
 

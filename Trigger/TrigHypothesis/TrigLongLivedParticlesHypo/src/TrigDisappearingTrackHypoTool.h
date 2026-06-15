@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGLONGLIVEDPARTICLESHYPO_TRIGDISTRACKHYPOTOOL_H
 #define TRIGLONGLIVEDPARTICLESHYPO_TRIGDISTRACKHYPOTOOL_H
@@ -28,8 +28,8 @@ public:
    virtual StatusCode initialize() override;
    
    struct DisTrkHypoInfo {
-      TrigCompositeUtils::Decision* decision;
-      const xAOD::TrigComposite*    disTrk;
+      TrigCompositeUtils::Decision* decision = nullptr;
+      const xAOD::TrigComposite*    disTrk = nullptr;
       const TrigCompositeUtils::DecisionIDContainer previousDecisionsIDs;
    };
    

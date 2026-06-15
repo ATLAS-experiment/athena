@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGLONGLIVEDPARTICLESHYPO_TRIGMUONHYPOTOOL_H
 #define TRIGLONGLIVEDPARTICLESHYPO_TRIGMUONHYPOTOOL_H
@@ -38,8 +38,8 @@ public:
     StatusCode initialize();
 
     struct DecisionInfo {
-        TrigCompositeUtils::Decision* decision;
-        const xAOD::TrigCompositeContainer* Composites;
+        TrigCompositeUtils::Decision* decision = nullptr;
+        const xAOD::TrigCompositeContainer* Composites = nullptr;
         const TrigCompositeUtils::DecisionIDContainer activeChainIDs;
     };
 
