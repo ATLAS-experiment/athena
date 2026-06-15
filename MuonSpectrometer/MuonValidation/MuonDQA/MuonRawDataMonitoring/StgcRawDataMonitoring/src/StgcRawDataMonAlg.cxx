@@ -239,6 +239,11 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
       const Muon::sTgcPrepData* prd = cluster -> prepRawData();
       if (!prd) continue;
 
+      const MuonGM::sTgcReadoutElement* rdoEl = prd->detectorElement();
+      if (!rdoEl) continue;
+
+      const Amg::Vector2D& localPos = prd->localPosition();
+
       int channelType = m_idHelperSvc  -> stgcIdHelper().channelType(rot_id);
       int stEta       = m_idHelperSvc -> stgcIdHelper().stationEta(rot_id);
       int multi       = m_idHelperSvc  -> stgcIdHelper().multilayer(rot_id);
@@ -249,12 +254,22 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
       int iside               = (stEta > 0) ? 1 : 0;
       std::string side        = GeometricSectors::sTgcSide[iside];
       std::string channelName = "";      
-      std::string sectorStr   = std::to_string(sector);   
+      std::string sectorStr   = std::to_string(sector);
+
+      std::string quadLabel = "";
+      bool isInner = false;
+      bool isQ1 = (std::abs(stEta) == 1);
+      if (isQ1) {
+        isInner = rdoEl->isEtaZero(rot_id, localPos);
+        quadLabel = isInner ? "Q1Inner" : "Q1Outer";
+      } else {
+        quadLabel = "Q" + std::to_string(std::abs(stEta));
+      }
 
       if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
 	float padCharge     = prd -> charge();
-	auto padChargeMon = Monitored::Scalar<float>("padTrackCharge_" + side + "_quad_" + std::to_string(std::abs(stEta)) + "_sector_" + std::to_string(sector)  + "_layer_" + std::to_string(layer), padCharge);
-	fill("padCharge_" + side + std::to_string(sector) + "_quad_" + std::to_string(std::abs(stEta)), padChargeMon);
+  auto padChargeMon = Monitored::Scalar<float>("padTrackCharge_" + side + "_quad_" + quadLabel + "_sector_" + std::to_string(sector) + "_layer_" + std::to_string(layer), padCharge);
+  fill("padCharge_" + side + std::to_string(sector) + "_quad_" + quadLabel, padChargeMon);
 
 	short int padTiming = prd -> time();
 	auto padSectorSidedMon = Monitored::Scalar<int>("padTrackSectorSided_layer_" + std::to_string(layer), sectorsTotal);
@@ -290,8 +305,9 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
 
 	stripClusterTimes /= stripTimesVec.size();
 
-	auto stripClusterChargesPerSideQuadMon = Monitored::Scalar<float>("stripTrackCharge_" + side  + "_quad_" + std::to_string(std::abs(stEta)) + "_sector_" + std::to_string(sector)  +  "_layer_" + std::to_string(layer), stripClusterCharges);
-	fill("stripCharge_" + side + std::to_string(sector) + "_quad_" + std::to_string(std::abs(stEta)), stripClusterChargesPerSideQuadMon);
+  auto stripClusterChargesPerSideQuadMon = Monitored::Scalar<float>("stripTrackCharge_" + side  + "_quad_" + quadLabel + "_sector_" + std::to_string(sector)  +  "_layer_" + std::to_string(layer), stripClusterCharges);
+  fill("stripCharge_" + side + std::to_string(sector) + "_quad_" + quadLabel, stripClusterChargesPerSideQuadMon);
+
 
 	auto stripClusterSectorSidedMon = Monitored::Scalar<int>("stripTrackSectorSided_layer_" + std::to_string(layer), sectorsTotal);
 	auto stripClusterTimesMon       = Monitored::Scalar<float>("stripTrackTiming_layer_" + std::to_string(layer), stripClusterTimes);
