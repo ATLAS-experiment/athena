@@ -138,34 +138,6 @@ def ManagedMemoryResourceToolCfg(flags, **kwargs):
     return result
 
 
-def CopyToolCfg(flags, **kwargs):
-    '''Synchronous copy object provider tool
-    '''
-
-    # Create an accumulator to hold the configuration.
-    result = ComponentAccumulator()
-
-    # Create the tool in a simple way.
-    result.setPrivateTools(CompFactory.AthCUDA.CopyTool(**kwargs))
-
-    # Return the CA.
-    return result
-
-
-def AsyncCopyToolCfg(flags, **kwargs):
-    '''Asynchronous copy object provider tool
-    '''
-
-    # Create an accumulator to hold the configuration.
-    result = ComponentAccumulator()
-
-    # Create the tool in a simple way.
-    result.setPrivateTools(CompFactory.AthCUDA.AsyncCopyTool(**kwargs))
-
-    # Return the CA.
-    return result
-
-
 def SingleStreamToolCfg(flags, **kwargs):
     '''Tool providing a single CUDA stream for all components in the entire job
     '''
@@ -222,6 +194,7 @@ def PerComponentStreamToolCfg(flags, **kwargs):
     # Return the CA.
     return result
 
+
 def PerEventAndComponentStreamToolCfg(flags, **kwargs):
     '''Tool providing one CUDA stream per component and event/slot
     '''
@@ -264,6 +237,38 @@ def StreamToolCfg(flags, **kwargs):
     else:
         raise ValueError(f"Invalid CUDA stream strategy: {flags.CUDA.Stream}")
         pass
+
+    # Return the CA.
+    return result
+
+
+def CopyToolCfg(flags, **kwargs):
+    '''Synchronous copy object provider tool
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the tool in a simple way.
+    result.setPrivateTools(CompFactory.AthCUDA.CopyTool(**kwargs))
+
+    # Return the CA.
+    return result
+
+
+def AsyncCopyToolCfg(flags, **kwargs):
+    '''Asynchronous copy object provider tool
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the tool. Attaching a stream tool to it.
+    copyTool = CompFactory.AthCUDA.AsyncCopyTool(**kwargs)
+    streamTool = StreamToolCfg(flags, **kwargs)
+    copyTool.StreamTool = streamTool.getPrimary()
+    result.merge(streamTool)
+    result.setPrivateTools(copyTool)
 
     # Return the CA.
     return result

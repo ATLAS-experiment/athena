@@ -6,13 +6,13 @@
 
 // Framework include(s).
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/SlotSpecificObj.h"
+#include "GaudiKernel/ToolHandle.h"
 
 // AthDevice include(s).
 #include "AthDeviceInterfaces/ICopyTool.h"
 
-// CUDA include(s).
-#include <cuda_runtime.h>
+// AthCUDA include(s).
+#include "AthCUDAInterfaces/IStreamTool.h"
 
 namespace AthCUDA {
 
@@ -41,18 +41,9 @@ class AsyncCopyTool : public extends<AthAlgTool, AthDevice::ICopyTool> {
   /// @}
 
  private:
-  /// Helper structure for managing a CUDA stream in memory
-  struct Stream {
-    /// Constructor, creating the CUDA stream
-    Stream();
-    /// Destructor, destroying the CUDA stream
-    ~Stream();
-    /// The CUDA stream to use for asynchronous copies
-    cudaStream_t m_stream{nullptr};
-  };  // struct Stream
-
-  /// Slot specific CUDA stream
-  std::unique_ptr<const SG::SlotSpecificObj<Stream>> m_streams;
+  /// Tool to get the current CUDA stream from
+  ToolHandle<IStreamTool> m_streamTool{
+      this, "StreamTool", "", "Tool to get the current CUDA stream from"};
 
 };  // class AsyncCopyTool
 
