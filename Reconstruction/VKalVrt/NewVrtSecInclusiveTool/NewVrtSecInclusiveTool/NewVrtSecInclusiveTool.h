@@ -109,7 +109,7 @@ namespace Rec {
       struct Hists {
         StatusCode book (ITHistSvc& histSvc, const std::string& histDir);
         TTree* m_tuple{};
-        DevTuple*  m_curTup;
+        DevTuple*  m_curTup{};
         TH1D* m_hb_massPiPi{};
         TH1D* m_hb_massPiPi1{};
         TH1D* m_hb_massPPi{};
@@ -229,66 +229,66 @@ namespace Rec {
      { 
        static constexpr int maxNTrk=100;
        static constexpr int maxNVrt=100;
-       int   nTrk;
-       float pttrk[maxNTrk];
-       float d0trk[maxNTrk];
-       float etatrk[maxNTrk];
-       float Sig3D[maxNTrk];     // Track-PV 3D significance
-       float dRdZrat[maxNTrk];   // Track dR_signicance/dZ_significance
-       int   idHF[maxNTrk];      // Track from ground state  B/C hadron
-       int   trkTRT[maxNTrk];    // TRT hits on track
-       int   displaced[maxNTrk]; // Track from displaced truth vertex
+       int   nTrk{};
+       float pttrk[maxNTrk]{};
+       float d0trk[maxNTrk]{};
+       float etatrk[maxNTrk]{};
+       float Sig3D[maxNTrk]{};     // Track-PV 3D significance
+       float dRdZrat[maxNTrk]{};   // Track dR_signicance/dZ_significance
+       int   idHF[maxNTrk]{};      // Track from ground state  B/C hadron
+       int   trkTRT[maxNTrk]{};    // TRT hits on track
+       int   displaced[maxNTrk]{}; // Track from displaced truth vertex
        //---
-       int   n2Vrt;
-       int   VrtTrkHF[maxNVrt];  // Number of HF track in this vertex
-       int   VrtTrkI[maxNVrt];   // Number of interaction tracks in this vertex
-       int   VrtCh[maxNVrt];     // Vertex charge
-       int   VrtIBL[maxNVrt];    // 2-track IBL hits sum
-       int   VrtBL[maxNVrt];     // 2-track BL hits sum
-       int   VrtDisk[maxNVrt];
-       int   VrtTrueBar[maxNVrt];  // Truth vertex barcode based identification
-       int   VrtTrueNear[maxNVrt]; // Truth vertex closeness based identification
-       float VrtDist2D[maxNVrt];
-       float VrtSig3D[maxNVrt];
-       float VrtSig2D[maxNVrt];
-       float VrtM[maxNVrt];
-       float VrtZ[maxNVrt];
-       float VrtPt[maxNVrt];
-       float VrtEta[maxNVrt];
-       float VrtBDT[maxNVrt];    // Vertex selection BDT value (B/C vs others)
-       float VrtProb[maxNVrt];   // 2-track vertex probability
-       float VrtHR1[maxNVrt];    // First measured point on track 1
-       float VrtHR2[maxNVrt];    // First measured point on track 2
-       float VrtDZ[maxNVrt];
-       float VrtCosSPM[maxNVrt];
-       float VMinPtT[maxNVrt];   // min(trk1_pt,trk2_pt) in 2-track vertex
-       float VMinS3DT[maxNVrt];  // min(trk1_signif,trk2_signif) in 2-track vertex
-       float VMaxS3DT[maxNVrt];  // min(trk1_signif,trk2_signif) in 2-track vertex
-       float VSigMat[maxNVrt];
-       int   VrtIT[maxNVrt];    // Reference to track 1 in the track list
-       int   VrtJT[maxNVrt];    // Reference to track 2 in the track list
+       int   n2Vrt{};
+       int   VrtTrkHF[maxNVrt]{};  // Number of HF track in this vertex
+       int   VrtTrkI[maxNVrt]{};   // Number of interaction tracks in this vertex
+       int   VrtCh[maxNVrt]{};     // Vertex charge
+       int   VrtIBL[maxNVrt]{};    // 2-track IBL hits sum
+       int   VrtBL[maxNVrt]{};     // 2-track BL hits sum
+       int   VrtDisk[maxNVrt]{};
+       int   VrtTrueBar[maxNVrt]{};  // Truth vertex barcode based identification
+       int   VrtTrueNear[maxNVrt]{}; // Truth vertex closeness based identification
+       float VrtDist2D[maxNVrt]{};
+       float VrtSig3D[maxNVrt]{};
+       float VrtSig2D[maxNVrt]{};
+       float VrtM[maxNVrt]{};
+       float VrtZ[maxNVrt]{};
+       float VrtPt[maxNVrt]{};
+       float VrtEta[maxNVrt]{};
+       float VrtBDT[maxNVrt]{};    // Vertex selection BDT value (B/C vs others)
+       float VrtProb[maxNVrt]{};   // 2-track vertex probability
+       float VrtHR1[maxNVrt]{};    // First measured point on track 1
+       float VrtHR2[maxNVrt]{};    // First measured point on track 2
+       float VrtDZ[maxNVrt]{};
+       float VrtCosSPM[maxNVrt]{};
+       float VMinPtT[maxNVrt]{};   // min(trk1_pt,trk2_pt) in 2-track vertex
+       float VMinS3DT[maxNVrt]{};  // min(trk1_signif,trk2_signif) in 2-track vertex
+       float VMaxS3DT[maxNVrt]{};  // min(trk1_signif,trk2_signif) in 2-track vertex
+       float VSigMat[maxNVrt]{};
+       int   VrtIT[maxNVrt]{};    // Reference to track 1 in the track list
+       int   VrtJT[maxNVrt]{};    // Reference to track 2 in the track list
        //---
-       int   nNVrt;
-       int   NVrtTrk[maxNVrt];
-       int   NVrtTrkHF[maxNVrt];
-       int   NVrtTrkI[maxNVrt];
-       int   NVrtCh[maxNVrt];
-       int   NVrtIBL[maxNVrt];
-       int   NVrtBL[maxNVrt];
-       float NVrtM[maxNVrt];
-       float NVrtPt[maxNVrt];
-       float NVrtEta[maxNVrt];
-       float NVrtCosSPM[maxNVrt];
-       float NVMinPtT[maxNVrt];
-       float NVMinS3DT[maxNVrt];
-       float NVMaxS3DT[maxNVrt];
-       float NVrtDist2D[maxNVrt];
-       float NVrtSig3D[maxNVrt];
-       float NVrtSig2D[maxNVrt];
-       float NVrtProb[maxNVrt];
-       float NVrtBDT[maxNVrt];
-       float NVrtHR1[maxNVrt];
-       float NVrtHR2[maxNVrt];
+       int   nNVrt{};
+       int   NVrtTrk[maxNVrt]{};
+       int   NVrtTrkHF[maxNVrt]{};
+       int   NVrtTrkI[maxNVrt]{};
+       int   NVrtCh[maxNVrt]{};
+       int   NVrtIBL[maxNVrt]{};
+       int   NVrtBL[maxNVrt]{};
+       float NVrtM[maxNVrt]{};
+       float NVrtPt[maxNVrt]{};
+       float NVrtEta[maxNVrt]{};
+       float NVrtCosSPM[maxNVrt]{};
+       float NVMinPtT[maxNVrt]{};
+       float NVMinS3DT[maxNVrt]{};
+       float NVMaxS3DT[maxNVrt]{};
+       float NVrtDist2D[maxNVrt]{};
+       float NVrtSig3D[maxNVrt]{};
+       float NVrtSig2D[maxNVrt]{};
+       float NVrtProb[maxNVrt]{};
+       float NVrtBDT[maxNVrt]{};
+       float NVrtHR1[maxNVrt]{};
+       float NVrtHR2[maxNVrt]{};
      };
 //
 // End of development stuff
@@ -299,7 +299,7 @@ namespace Rec {
      {
          Amg::Vector3D     fitVertex;
          TLorentzVector    momentum;
-         long int   vertexCharge;
+         long int   vertexCharge{};
          std::vector<double> errorMatrix;
          std::vector<double> chi2PerTrk;
          std::vector< std::vector<double> > trkAtVrt;
