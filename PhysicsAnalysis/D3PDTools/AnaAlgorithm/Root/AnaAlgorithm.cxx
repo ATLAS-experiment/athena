@@ -326,6 +326,15 @@ namespace EL
 
 
   ::StatusCode AnaAlgorithm ::
+  execute (const EventContext& /*ctx*/)
+  {
+    // By default we invoke the deprecated method:
+    return execute();
+  }
+
+
+
+  ::StatusCode AnaAlgorithm ::
   finalize ()
   {
     return StatusCode::SUCCESS;
