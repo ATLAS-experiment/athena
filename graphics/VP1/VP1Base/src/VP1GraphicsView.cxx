@@ -65,8 +65,8 @@ public:
   QGraphicsScene * scene{};
   VP1GraphicsView * view{};
 
-  Mode mode;
-  Mode lastmajormode;//To go back to the previous major mode when exiting a seek.
+  Mode mode{};
+  Mode lastmajormode{};//To go back to the previous major mode when exiting a seek.
 
   QList<VP1GraphicsItemCollection*> cols_act;//All item collections not inherently INERT
   QList<VP1GraphicsItemCollection*> cols_all;//Needed since event inactive collections might have movable items.
