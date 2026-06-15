@@ -209,7 +209,7 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
   std::vector<wsum_t> mean_feb_times(m_feb_hash_to_detector.size(), 0.);
   std::array<double, ::NDETECTORS> per_detector_total_energy{};
   int8_t lastdet{::UNDEF};
-  ToolHandle<GenericMonitoringTool> monitoring{nullptr};
+  const ToolHandle<GenericMonitoringTool>* monitoring{nullptr};
   SG::ReadCondHandle<CaloNoise> noiseH{m_noiseKey, ctx};
   SG::ReadCondHandle<LArBadChannelCont> bcContH{m_bcContKey, ctx};
   SG::ReadCondHandle<LArOnOffIdMapping> cablingH{m_cablingKey, ctx};
@@ -259,7 +259,7 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
       det = m_feb_hash_to_detector.at(feb_hash);
       if (det != lastdet) {
         if (det >= 0 && det < ::NDETECTORS) {
-          monitoring = m_tools[m_monitoring_tool_index[det]];
+          monitoring = &m_tools[m_monitoring_tool_index[det]];
         } else {
           monitoring = nullptr;
         }
@@ -315,7 +315,7 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
                         && noisy_neg && is_atlas_ready);
       dqm_qual = 100 * (bad_quality && is_atlas_ready
                         && !larNoisyROAlgInTimeW_flag);
-      fill(monitoring, dqm_superslot, dqm_channel,
+      fill(*monitoring, dqm_superslot, dqm_channel,
            dqmf_occ, dqmf_sig, dqm_energy, dqm_gain,
            dqm_posn, dqm_negn, dqm_qual);
 
