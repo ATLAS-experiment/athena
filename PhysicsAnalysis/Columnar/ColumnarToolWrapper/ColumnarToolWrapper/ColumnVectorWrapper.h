@@ -10,6 +10,7 @@
 
 #include <ColumnarInterfaces/ColumnInfo.h>
 
+#include <cstdint>
 #include <span>
 #include <string>
 #include <typeinfo>
@@ -94,6 +95,9 @@ namespace columnar
 
     /// @brief for simple link columns: the target container name
     std::string soleLinkTargetName;
+
+    /// @brief for simple link columns: the target container CLID (or 0)
+    std::uint32_t soleLinkTargetClid = 0;
 
     /// @brief whether this is a variant link column
     bool isVariantLink = false;
