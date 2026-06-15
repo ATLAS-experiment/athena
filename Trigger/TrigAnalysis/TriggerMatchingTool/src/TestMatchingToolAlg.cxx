@@ -49,6 +49,7 @@ StatusCode TestMatchingToolAlg::execute() {
       // here's an example of a combined trigger
       // e-mu
       if(muons){
+          
           for(uint j = 0; j < muons->size(); j++) {
               myParticles.clear();
               myParticles.push_back(electrons->at(i));

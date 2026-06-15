@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerMatchingTool/MatchingTool.h"
@@ -39,7 +39,7 @@ StatusCode MatchingTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-  bool MatchingTool::matchCombination(const std::vector<const xAOD::IParticle*>& recoObjects, Trig::Combination& comb, const std::string& chain, double threshold) const {
+  bool MatchingTool::matchCombination(const std::vector<const xAOD::IParticle*>& recoObjects, Trig::Combination& comb, std::string_view chain, double threshold) const {
   std::map<xAOD::Type::ObjectType,std::vector<const xAOD::IParticle*> > typeSeparated;
   
   for (const auto& obj : recoObjects){
@@ -67,7 +67,7 @@ StatusCode MatchingTool::initialize() {
   return overall_status;
 }
 
-  bool MatchingTool::matchSingleType(const std::vector<const xAOD::IParticle*>& recoObjects, Trig::Combination& comb, const std::string& chain, double threshold) const {
+  bool MatchingTool::matchSingleType(const std::vector<const xAOD::IParticle*>& recoObjects, Trig::Combination& comb, std::string_view chain, double threshold) const {
   ATH_MSG_DEBUG("matching combination with " << comb.tes().size() << " TEs");
   
   auto recoType = recoObjects.at(0)->type();
@@ -135,13 +135,13 @@ StatusCode MatchingTool::initialize() {
   return match_result;
 }
 
-  bool MatchingTool::match(const xAOD::IParticle& recoObject, const std::string& chain, double matchThreshold, bool rerun) const {
+  bool MatchingTool::match(const xAOD::IParticle& recoObject, std::string_view chain, double matchThreshold, bool rerun) const {
    std::vector<const xAOD::IParticle*> recoObjects(1,&recoObject);
    bool out = match(recoObjects, chain, matchThreshold, rerun);
    return out;
 }
 
-  bool MatchingTool::match(const std::vector<const xAOD::IParticle*>& recoObjects, const std::string& chain, double matchThreshold, bool rerun) const {
+  bool MatchingTool::match(const std::vector<const xAOD::IParticle*>& recoObjects, std::string_view chain, double matchThreshold, bool rerun) const {
   ATH_MSG_DEBUG("matching " << recoObjects.size() << " reco objects to chain: " << chain );
 
   auto chainGroup = impl()->tdt()->getChainGroup(chain);

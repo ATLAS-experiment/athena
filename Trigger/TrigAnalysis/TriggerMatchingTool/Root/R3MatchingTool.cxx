@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerMatchingTool/R3MatchingTool.h"
@@ -30,7 +30,7 @@ namespace Trig
 
   bool R3MatchingTool::match(
       const std::vector<const xAOD::IParticle *> &recoObjects,
-      const std::string &chain,
+      std::string_view chain,
       double matchThreshold,
       bool rerun) const
   {
@@ -126,7 +126,7 @@ namespace Trig
 
   bool R3MatchingTool::match(
       const xAOD::IParticle &recoObject,
-      const std::string &chain,
+      std::string_view chain,
       double matchThreshold,
       bool rerun) const
   {
