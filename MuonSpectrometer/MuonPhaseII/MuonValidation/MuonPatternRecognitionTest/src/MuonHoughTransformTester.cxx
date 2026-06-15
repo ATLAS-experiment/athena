@@ -33,6 +33,115 @@ namespace {
                 return MuonR4::getMatchedTruthSegment(*hit) == truthSeg;
              }) : 0;
     }
+
+    struct SimHitCounts {
+        unsigned short total{0};
+
+        unsigned short mdt{0};
+        unsigned short rpc{0};
+        unsigned short tgc{0};
+
+        unsigned short mmEta{0};
+        unsigned short mmStereo{0};
+
+        unsigned short stgcStrip{0};
+        unsigned short stgcWire{0};
+        unsigned short stgcPad{0};
+
+        unsigned short unknown{0};
+
+
+        //Unnecessary can do in the post processing
+        unsigned short mm() const {
+            return mmEta + mmStereo;
+        }
+
+        unsigned short stgc() const {
+            return stgcStrip + stgcWire + stgcPad;
+        }
+
+        unsigned short precision() const {
+            return mdt + mm() + stgcStrip;
+        }
+
+        unsigned short other() const {
+            return rpc + tgc + stgcWire + stgcPad;
+        }
+    };
+
+    void countSimHit(const Muon::IMuonIdHelperSvc& idHelperSvc,
+                     const xAOD::MuonSimHit& hit,
+                     SimHitCounts& counts) {
+
+        const Identifier id = hit.identify();
+
+        ++counts.total;
+
+        if (idHelperSvc.isMdt(id)) {
+            ++counts.mdt;
+            return;
+        }
+
+        if (idHelperSvc.isRpc(id)) {
+            ++counts.rpc;
+            return;
+        }
+
+        if (idHelperSvc.isTgc(id)) {
+            ++counts.tgc;
+            return;
+        }
+
+        if (idHelperSvc.isMM(id)) {
+            if (idHelperSvc.mmIdHelper().isStereo(id)) {
+                ++counts.mmStereo;
+            } else {
+                ++counts.mmEta;
+            }
+            return;
+        }
+
+        if (idHelperSvc.issTgc(id)) {
+            const int channelType =
+                idHelperSvc.stgcIdHelper().channelType(id);
+
+            switch (channelType) {
+                case sTgcIdHelper::Pad:
+                    ++counts.stgcPad;
+                    return;
+                case sTgcIdHelper::Strip:
+                    ++counts.stgcStrip;
+                    return;
+                case sTgcIdHelper::Wire:
+                    ++counts.stgcWire;
+                    return;
+                default:
+                    ++counts.unknown;
+                    return;
+            }
+        }
+
+        ++counts.unknown;
+    }
+
+
+    template <class SimHitRange>
+    SimHitCounts countSimHits(
+        const Muon::IMuonIdHelperSvc& idHelperSvc,
+        const SimHitRange& hits) {
+
+        SimHitCounts counts{};
+
+        for (const xAOD::MuonSimHit* hit : hits) {
+            if (!hit) {
+                continue;
+            }
+            countSimHit(idHelperSvc, *hit, counts);
+        }
+
+        return counts;
+    }
+
 }
 
 
@@ -265,6 +374,27 @@ namespace MuonValR4 {
         }
         m_out_hasTruth = true; 
 
+        //-----------------------
+        // SimHit based matching 
+        const TruthHitCol truthSimHits = MuonR4::getMatchingSimHits(*segment);
+        const SimHitCounts truthCounts = countSimHits(*m_idHelperSvc, truthSimHits);
+
+        //m_out_gen_nMatchedSimHits = truthCounts.total;
+        //m_out_gen_nMatchedPrecisionSimHits = truthCounts.precision();
+        //m_out_gen_nMatchedOtherSimHits = truthCounts.other();
+        m_out_gen_nMatchedMdtSimHits = truthCounts.mdt;
+        m_out_gen_nMatchedRpcSimHits = truthCounts.rpc;
+        m_out_gen_nMatchedTgcSimHits = truthCounts.tgc;
+        //m_out_gen_nMatchedMmSimHits = truthCounts.mm();
+        m_out_gen_nMatchedMmEtaSimHits = truthCounts.mmEta;
+        m_out_gen_nMatchedMmStereoSimHits = truthCounts.mmStereo;
+        //m_out_gen_nMatchedsTgcSimHits = truthCounts.stgc();
+        m_out_gen_nMatchedsTgcStripSimHits = truthCounts.stgcStrip;
+        m_out_gen_nMatchedsTgcWireSimHits = truthCounts.stgcWire;
+        m_out_gen_nMatchedsTgcPadSimHits = truthCounts.stgcPad;
+        //m_out_gen_nMatchedUnknownSimHits = truthCounts.unknown;
+        //-----------------------
+
         const Amg::Vector3D segDir{segment->direction()};
         static const SG::ConstAccessor<float> acc_pt{"pt"};
         static const SG::ConstAccessor<float> acc_charge{"charge"};
@@ -274,10 +404,9 @@ namespace MuonValR4 {
         m_out_gen_Pt  = acc_pt(*segment);
         m_out_gen_Q = acc_charge(*segment);
 
-        const auto [chamberPos, chamberDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(*segment));
-        m_out_gen_nHits = segment->nPrecisionHits()+segment->nPhiLayers() + segment->nTrigEtaLayers(); 
         using namespace Muon::MuonStationIndex;
 
+        //Obsolete?
         ATH_MSG_DEBUG("Number of precision Hits in the truth segment is "<<segment->nPrecisionHits()<<" and number of phi layers is "<<segment->nPhiLayers()<<" and number of trigger eta layers is "<<segment->nTrigEtaLayers());
 
         m_out_gen_nMDTHits = segment->nPrecisionHits() * (segment->technology() == TechnologyIndex::MDT); 
@@ -293,6 +422,11 @@ namespace MuonValR4 {
         }
         m_out_gen_nMmHits = nMMHits;
         m_out_gen_nSTGCHits = nSTGHits;
+        //----------------------------
+
+
+        const auto [chamberPos, chamberDir] = SegmentFit::makeLine(SegmentFit::localSegmentPars(*segment));
+        m_out_gen_nHits = segment->nPrecisionHits()+segment->nPhiLayers() + segment->nTrigEtaLayers(); 
 
         m_out_gen_tantheta = houghTanBeta(chamberDir); 
         m_out_gen_tanphi   = houghTanAlpha(chamberDir);
@@ -391,11 +525,45 @@ namespace MuonValR4 {
                 minYhit = std::min(hit->localPosition().y(),minYhit); 
                 maxYhit = std::max(hit->localPosition().y(),maxYhit); 
             }
+
+
+            const TruthHitCol seedSimHits = MuonR4::getMatchingSimHits(*seed);
+            SimHitCounts seedMatchedTruthCounts{};
+
+            for (const xAOD::MuonSimHit* simHit : seedSimHits) {
+                if (!simHit || !obj.truthSegment) { continue; }
+            
+                if (MuonR4::getMatchedTruthSegment(*simHit) != obj.truthSegment) { continue; }
+            
+                countSimHit(*m_idHelperSvc, *simHit, seedMatchedTruthCounts);
+            }
+
+            // All truth-associated sim hits reachable from the seed.
+            // This includes hits from other truth segments.
+            //const std::size_t nSeedSimHits = seedSimHits.size();
+            //m_out_seed_nMatchingSimHits.push_back( static_cast<unsigned short>( std::min<std::size_t>( nSeedSimHits, std::numeric_limits<unsigned short>::max())));
+            // Preserve the meaning of the existing branch.
+            //m_out_seed_nMatchedHits.push_back( seedMatchedTruthCounts.total);
+            //m_out_seed_truthMatchedPrecisionSimHits.push_back( seedMatchedTruthCounts.precision());
+            //m_out_seed_truthMatchedOtherSimHits.push_back( seedMatchedTruthCounts.other());
+            m_out_seed_truthMatchedMdtSimHits.push_back( seedMatchedTruthCounts.mdt);
+            m_out_seed_truthMatchedRpcSimHits.push_back( seedMatchedTruthCounts.rpc);
+            m_out_seed_truthMatchedTgcSimHits.push_back( seedMatchedTruthCounts.tgc);
+            //m_out_seed_truthMatchedMmSimHits.push_back( seedMatchedTruthCounts.mm());
+            m_out_seed_truthMatchedMmEtaSimHits.push_back( seedMatchedTruthCounts.mmEta);
+            m_out_seed_truthMatchedMmStereoSimHits.push_back( seedMatchedTruthCounts.mmStereo);
+            //m_out_seed_truthMatchedsTgcSimHits.push_back( seedMatchedTruthCounts.stgc());
+            m_out_seed_truthMatchedsTgcStripSimHits.push_back( seedMatchedTruthCounts.stgcStrip);
+            m_out_seed_truthMatchedsTgcWireSimHits.push_back( seedMatchedTruthCounts.stgcWire);
+            m_out_seed_truthMatchedsTgcPadSimHits.push_back( seedMatchedTruthCounts.stgcPad);
+            //m_out_seed_truthMatchedUnknownSimHits.push_back( seedMatchedTruthCounts.unknown);
+
+
             m_out_seed_minYhit.push_back(minYhit);
             m_out_seed_maxYhit.push_back(maxYhit);
 
             m_out_seed_hasPhiExtension.push_back(seed->hasPhiExtension()); 
-            m_out_seed_nMatchedHits.push_back(countMatched(obj.truthSegment, *seed));
+            //m_out_seed_nMatchedHits.push_back(countMatched(obj.truthSegment, *seed));
             m_out_seed_y0.push_back(seed->interceptY());
             m_out_seed_tantheta.push_back(seed->tanBeta());
             if (seed->hasPhiExtension()){
@@ -456,9 +624,9 @@ namespace MuonValR4 {
                         break;
                     } case xAOD::UncalibMeasType::MMClusterType:{
                         if (m_idHelperSvc->mmIdHelper().isStereo(houghSP->identify())) {
-                            ++nMmEtaSeed;
-                        } else {
                             ++nMmStereoSeed;
+                        } else {
+                            ++nMmEtaSeed;
                         }
                         break;
                     }default:
@@ -563,7 +731,7 @@ namespace MuonValR4 {
                     case xAOD::UncalibMeasType::MMClusterType:{
                         const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
                         nMmEtaHits += !idHelper.isStereo(meas->spacePoint()->identify());
-                        nMmStereoHits += !idHelper.isStereo(meas->spacePoint()->identify());
+                        nMmStereoHits += idHelper.isStereo(meas->spacePoint()->identify());
                         break;
                     } case xAOD::UncalibMeasType::sTgcStripType: {
                         const auto* prd = static_cast<const xAOD::sTgcMeasurement*>(meas->spacePoint()->primaryMeasurement());
