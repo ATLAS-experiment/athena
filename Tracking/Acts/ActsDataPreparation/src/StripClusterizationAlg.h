@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
+#ifndef ACTSTRK_STRIPCLUSTERIZATIONALG_H
+#define ACTSTRK_STRIPCLUSTERIZATIONALG_H
 #include <ActsToolInterfaces/IStripClusteringTool.h>
 #include "details/StripClusterCacheId.h"
 #include "details/ClusterizationAlg.h"
@@ -17,3 +18,4 @@ class StripCacheClusterizationAlg : public ClusterizationAlg<IStripClusteringToo
 };
 
 }
+#endif
