@@ -69,22 +69,12 @@ class AthAlgorithm
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
-  /** @brief Execute method without EventContext (deprecated)
+  /** @brief Execute method
    *
-   * Override this method if the EventContext is not needed.
+   * Provides access to the EventContext if needed but is non-const
+   * as opposed to AthReentrantAlgorithm.
    */
-  virtual StatusCode execute() {
-    throw GaudiException( "execute() or execute(const EventContext&) needs to be implemented", name(),
-                          StatusCode::FAILURE );
-  }
-
-  /** @brief Execute method with EventContext
-   *
-   * Override this method if acccess to the EventContext is needed.
-   */
-  virtual StatusCode execute(const EventContext& /*ctx*/) {
-    return execute();
-  }
+  virtual StatusCode execute(const EventContext& ctx) = 0;
 
  private:
   // This is the base-class execute method that gets called by the scheduler.
