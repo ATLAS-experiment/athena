@@ -27,6 +27,7 @@ StatusCode TrackParticleCalibratorExampleAlg::initialize() {
   ATH_CHECK(m_deviceMR.retrieve());
   ATH_CHECK(m_hostCopyTool.retrieve());
   ATH_CHECK(m_deviceCopyTool.retrieve());
+  ATH_CHECK(m_streamTool.retrieve());
 
   // Print some information about the configuration:
   ATH_MSG_INFO("Input container key: " << m_inputKey);
@@ -59,6 +60,9 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
     ATH_CHECK(outputHandle.record(std::move(output), std::move(outputAux)));
     return StatusCode::SUCCESS;
   }
+
+  // Get the CUDA stream to use.
+  cudaStream_t stream = m_streamTool->stream(ctx);
 
   // The object managing host memory copies.
   auto hostCopy = m_hostCopyTool->copy(ctx);
@@ -96,7 +100,7 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
       outputHostCollection(m_hostMR->mr());
 
   // Run the kernel.
-  ATH_CHECK(calibrateOnGPU(inputDeviceBuffer, outputDeviceBuffer));
+  ATH_CHECK(calibrateOnGPU(stream, inputDeviceBuffer, outputDeviceBuffer));
 
   // Get the output back to the host.
   (*deviceCopy)(outputDeviceBuffer, outputHostCollection)->wait();

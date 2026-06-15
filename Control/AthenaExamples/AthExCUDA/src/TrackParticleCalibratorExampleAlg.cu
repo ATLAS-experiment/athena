@@ -65,6 +65,7 @@ __global__ void trackParticleCalibrate(
 }  // namespace kernels
 
 StatusCode calibrateOnGPU(
+    cudaStream_t stream,
     const traccc::edm::track_collection<traccc::default_algebra>::const_view&
         input,
     traccc::edm::track_collection<traccc::default_algebra>::view& output) {
@@ -73,7 +74,8 @@ StatusCode calibrateOnGPU(
   static const unsigned int block_size = 256;
   const unsigned int num_blocks =
       (input.capacity() + block_size - 1) / block_size;
-  kernels::trackParticleCalibrate<<<num_blocks, block_size>>>(input, output);
+  kernels::trackParticleCalibrate<<<num_blocks, block_size, 0, stream>>>(
+      input, output);
 
   // Check for errors, and wait for the kernel to finish.
   CUDA_ERROR_CHECK(cudaGetLastError());
