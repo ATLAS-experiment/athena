@@ -4,6 +4,9 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
+# Local import(s).
+from AthCUDAServices.CUDAConfigFlags import CUDAStream
+
 
 def GPUSystemInfoSvcCfg(flags):
     acc = ComponentAccumulator()
@@ -158,6 +161,109 @@ def AsyncCopyToolCfg(flags, **kwargs):
 
     # Create the tool in a simple way.
     result.setPrivateTools(CompFactory.AthCUDA.AsyncCopyTool(**kwargs))
+
+    # Return the CA.
+    return result
+
+
+def SingleStreamToolCfg(flags, **kwargs):
+    '''Tool providing a single CUDA stream for all components in the entire job
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the stream service and add it to the accumulator.
+    streamSvc = CompFactory.AthCUDA.SingleStreamSvc(**kwargs)
+    result.addService(streamSvc)
+
+    # Create an adaptor tool on top of the service, and set that as the main
+    # component of the CA.
+    streamTool = CompFactory.AthCUDA.StreamSvcAdaptorTool(
+        'SingleStreamTool', StreamSvc=streamSvc)
+    result.setPrivateTools(streamTool)
+
+    # Return the CA.
+    return result
+
+
+def PerEventStreamToolCfg(flags, **kwargs):
+    '''Tool providing one CUDA stream per event/slot
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the stream service and add it to the accumulator.
+    streamSvc = CompFactory.AthCUDA.PerEventStreamSvc(**kwargs)
+    result.addService(streamSvc)
+
+    # Create an adaptor tool on top of the service, and set that as the main
+    # component of the CA.
+    streamTool = CompFactory.AthCUDA.StreamSvcAdaptorTool(
+        'PerEventStreamTool', StreamSvc=streamSvc)
+    result.setPrivateTools(streamTool)
+
+    # Return the CA.
+    return result
+
+
+def PerComponentStreamToolCfg(flags, **kwargs):
+    '''Tool providing one CUDA stream per component (algorithm/tool/service)
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create an tool that implements this behaviour.
+    streamTool = CompFactory.AthCUDA.PerComponentStreamTool(**kwargs)
+    result.setPrivateTools(streamTool)
+
+    # Return the CA.
+    return result
+
+def PerEventAndComponentStreamToolCfg(flags, **kwargs):
+    '''Tool providing one CUDA stream per component and event/slot
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create an tool that implements this behaviour.
+    streamTool = CompFactory.AthCUDA.PerEventAndComponentStreamTool(**kwargs)
+    result.setPrivateTools(streamTool)
+
+    # Return the CA.
+    return result
+
+
+def StreamToolCfg(flags, **kwargs):
+    '''Default CUDA stream provider tool to use
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the default stream tool, depending on the job's configuration.
+    if flags.CUDA.Stream == CUDAStream.Single:
+        cfg = SingleStreamToolCfg(flags, **kwargs)
+        result.setPrivateTools(cfg.getPrimary())
+        result.merge(cfg)
+    elif flags.CUDA.Stream == CUDAStream.PerEvent:
+        cfg = PerEventStreamToolCfg(flags, **kwargs)
+        result.setPrivateTools(cfg.getPrimary())
+        result.merge(cfg)
+    elif flags.CUDA.Stream == CUDAStream.PerComponent:
+        cfg = PerComponentStreamToolCfg(flags, **kwargs)
+        result.setPrivateTools(cfg.getPrimary())
+        result.merge(cfg)
+    elif flags.CUDA.Stream == CUDAStream.PerEventAndComponent:
+        cfg = PerEventAndComponentStreamToolCfg(flags, **kwargs)
+        result.setPrivateTools(cfg.getPrimary())
+        result.merge(cfg)
+    else:
+        raise ValueError(f"Invalid CUDA stream strategy: {flags.CUDA.Stream}")
+        pass
 
     # Return the CA.
     return result

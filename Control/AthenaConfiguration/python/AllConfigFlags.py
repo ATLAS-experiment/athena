@@ -561,6 +561,12 @@ def initConfigFlags():
         return createDeviceConfigFlags()
     _addFlagsCategory(acf, "Device", __device, 'AthDeviceComps')
 
+    # CUDA flags.
+    def __cuda():
+        from AthCUDAServices.CUDAConfigFlags import createCUDAConfigFlags
+        return createCUDAConfigFlags()
+    _addFlagsCategory(acf, "CUDA", __cuda, 'AthCUDAServices')
+
     #EFTracking fpga data prep (F100)
     def _eftracking_f100():
         from EFTrackingFPGAPipeline.IntegrationConfigFlag import addFPGADataPrepFlags
