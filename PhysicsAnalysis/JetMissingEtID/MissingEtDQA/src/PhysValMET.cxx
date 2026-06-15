@@ -224,6 +224,7 @@ namespace MissingEtDQA
 
         //Create and Register histograms for and Rebuilt
         std::vector <std::string> met_type = {"MET_Rebuilt_"};
+        ATH_MSG_INFO("****STARTING****");
         //loop for rebuilt
         for (const auto& type : met_type)
         {
@@ -435,7 +436,7 @@ namespace MissingEtDQA
         return StatusCode::FAILURE;
       }
     }
-
+     ATH_MSG_INFO("Physics objects");
     //Physics Objects
 
     //Muons
@@ -509,7 +510,7 @@ namespace MissingEtDQA
         metTaus.push_back(tau);
       }
     }
-
+     ATH_MSG_INFO("OR");
 //////////Overlap removal///////
     // Overlap removal
 
@@ -540,7 +541,7 @@ namespace MissingEtDQA
         is_photon = 1;
       }
     }
-  
+     ATH_MSG_INFO("Tau OR");
     //TauJets OR
     ConstDataVector<TauJetContainer> metTausOR(SG::VIEW_ELEMENTS);
     bool is_tau = 0;
@@ -608,7 +609,7 @@ namespace MissingEtDQA
       photon_tlv += (*pho_itr)->p4();
       sum_photon += (*pho_itr)->pt();
     }
-
+     ATH_MSG_INFO("JVT and OR for jets");
     //JVT and OR on jets
     for (const auto& jet_type : m_types)
     {
@@ -741,6 +742,7 @@ namespace MissingEtDQA
       if( jet_type.find("PFlow") != std::string::npos) m_metmaker = &m_metmakerPFlow;
       else m_metmaker = &m_metmakerTopo;
 
+       ATH_MSG_INFO("building terms");
       //See if we ca build terms
 
       // Electrons
@@ -784,42 +786,81 @@ namespace MissingEtDQA
       {
         ATH_MSG_WARNING("Building MET FinalClus sum failed.");
       }
-
+       ATH_MSG_INFO("Particle test");
 
       ///////
       //Testing Particles
       //doing METMaker particles
       std::string str_ele = "RefEle"; 
+      std::string str_gam = "RefGamma";
+      std::string str_tau = "RefTau";
+      std::string str_mu = "Muons";
+      std::string str_jet = "RefJet";
       // This will be the output MET.
       auto met_MetMaker = std::make_unique<xAOD::MissingETContainer>();
       auto aux = std::make_unique<xAOD::MissingETAuxContainer>();
       met_MetMaker->setStore(aux.get());
 
       // Build the hard terms. The string argument is arbitrary, it's the name you're giving to the term for later lookup.
-      ATH_CHECK((*m_metmaker)->rebuildMET(str_ele.c_str(), xAOD::Type::Electron, met_MetMaker.get(), metElectrons.asDataVector(), metHelper));
-      //ATH_CHECK((*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met_MetMaker.get(), metPhotons.asDataVector(), metHelper));
-      //ATH_CHECK((*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met_MetMaker.get(), metTaus.asDataVector(),metHelper));
-      //ATH_CHECK((*m_metmaker)->rebuildMET("Muons", xAOD::Type::Muon, met_MetMaker.get(), metMuons.asDataVector(), metHelper));
-      //ATH_CHECK((*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_MetMaker, jets, coreMet, metHelper, true));
+      ATH_CHECK((*m_metmaker)->rebuildMET(str_ele, xAOD::Type::Electron, met_MetMaker.get(), metElectrons.asDataVector(), metHelper));
+      ATH_CHECK((*m_metmaker)->rebuildMET(str_gam, xAOD::Type::Photon, met_MetMaker.get(), metPhotons.asDataVector(), metHelper));
+      ATH_CHECK((*m_metmaker)->rebuildMET(str_tau, xAOD::Type::Tau, met_MetMaker.get(), metTaus.asDataVector(),metHelper));
+      ATH_CHECK((*m_metmaker)->rebuildMET(str_mu, xAOD::Type::Muon, met_MetMaker.get(), metMuons.asDataVector(), metHelper));
+      ATH_CHECK((*m_metmaker)->rebuildJetMET(str_jet, "SoftClus", "PVSoftTrk", met_MetMaker.get(), jets, coreMet, metHelper, true));
 
       for (const xAOD::MissingET* met : *met_MetMaker) {
-        std::cout << "_W_W_W_W_W_W_W_W_W_W_W_W_W_W" << std::endl;
-        std::cout << met->name() << std::endl;
+        ATH_MSG_INFO("_W_W_W_W_W_W_W_W_W_W_W_W_W_W");
+        ATH_MSG_INFO( met->name());
       }
 
       // If the specific object interfaces are needed
-      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*met_MetMaker[str_ele.c_str()]);
-      //std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(met_MetMaker["RefGamma"]);
-      //std::vector<const xAOD::Tau*> ta_elems = met::getMETElements<xAOD::Tau>(met_MetMaker["RefTau"]);
-      //std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(met_MetMaker["Muons"]);
-      //std::vector<const xAOD::JetContainer*> jet_elems = met::getMETElements<xAOD::JetContainer>(met_MetMaker["RefJet"]);
-
-      std::cout << "Comparing particle numbers" << std::endl;
-      //std::cout << "Electrons - METMaker: " << el_elems.size() << " Current: " << metElectrons.size() << std::endl;
-      //std::cout << "Gamma - METMaker: " << ph_elems.size() << " Current: " << metPhotonsOR.size() << std::endl;
-      //std::cout << "Tau - METMaker: " << ta_elems.size() << " Current: " << metTausOR.size() << std::endl;
-      //std::cout << "Muon - METMaker: " << mu_elems.size() << " Current: " << metMuons.size() << std::endl;
-      //std::cout << "Jet - METMaker: " << jet_elems.size() << " Current: " << metJetsOR.size() << std::endl;
+      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met_MetMaker)[str_ele]);
+      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met_MetMaker)[str_gam]);
+      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met_MetMaker)[str_tau]);
+      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met_MetMaker)[str_mu]);
+      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met_MetMaker)[str_jet]);
+/*
+      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met_MetMaker)[str_ele]);
+      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met_MetMaker)[str_gam]);
+      std::vector<const xAOD::Tau*> ta_elems = met::getMETElements<xAOD::Tau>(*(*met_MetMaker)[str_tau]);
+      >std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met_MetMaker)[str_mu]);
+      std::vector<const xAOD::JetContainer*> jet_elems = met::getMETElements<xAOD::JetContainer>(*(*met_MetMaker)[str_jet]);
+*/
+      ATH_MSG_INFO("Comparing particle numbers" );
+      ATH_MSG_INFO("---METMaker---" );
+      for(const auto p : el_elems){
+        ATH_MSG_INFO("Electron " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      for(const auto p : ph_elems){
+        ATH_MSG_INFO("Photon " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      for(const auto p : ta_elems){
+        ATH_MSG_INFO("Tau " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      for(const auto p : mu_elems){
+        ATH_MSG_INFO("Muon " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      for(const auto p : jet_elems){
+        ATH_MSG_INFO("Jet " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      ATH_MSG_INFO("---MET PhysVal Default---" );
+      for(const auto p : metElectrons){
+        ATH_MSG_INFO("Electron " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      for(const auto p : metPhotonsOR){
+        ATH_MSG_INFO("Photon " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      for(const auto p : metTausOR){
+        ATH_MSG_INFO("Tau " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      for(const auto p : metMuons){
+        ATH_MSG_INFO("Muon " << p->pt() << " " << p->eta() << " " << p->phi());
+      }
+      for(const auto p : metJetsOR){
+        if(Accept(p, JvtCut, jvtTool)){
+          ATH_MSG_INFO("Jet " << p->pt() << " " << p->eta() << " " << p->phi());
+        }
+      }
       //////
 
       std::cout<<"___Fill MET Reb___"<<std::endl;
@@ -1278,4 +1319,5 @@ namespace MissingEtDQA
 
 }
 
-//  LocalWords:  str 
+//  LocalWords:  str
+ 
