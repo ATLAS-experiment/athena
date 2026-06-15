@@ -65,7 +65,7 @@ namespace MuonR4{
             case sTgc:
                 return m_idHelperSvc->stgcIdHelper();
             default:
-                THROW_EXCEPTION("Unknown detector type "<<ActsTrk::to_string(type));
+                THROW_EXCEPTION("Unknown detector type "<<type<<".");
         }
     }
 

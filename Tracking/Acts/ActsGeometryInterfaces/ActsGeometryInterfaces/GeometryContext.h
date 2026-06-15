@@ -5,7 +5,6 @@
 #ifndef ACTSGEOMETRYINTERFACES_GEOMETRYCONTEXT_H
 #define ACTSGEOMETRYINTERFACES_GEOMETRYCONTEXT_H
 
-#include <map>
 #include <memory>
 /// Include the GeoPrimitives which need to be put first
 #include "ActsGeometryInterfaces/GeometryDefs.h"

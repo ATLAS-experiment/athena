@@ -58,8 +58,7 @@ namespace MuonGMR4{
                                idHelperSvc()->toStringDetEl(readoutEles().front()->identify()));
         }
         return std::format("MS chamber {:} station {:} eta {:02} phi {:02}",
-                          ActsTrk::to_string(detectorType()),
-                          idHelperSvc()->stationNameString(readoutEles().front()->identify()),
+                          detectorType(),idHelperSvc()->stationNameString(readoutEles().front()->identify()),
                           stationEta(), stationPhi());        
     }
     bool Chamber::barrel() const {

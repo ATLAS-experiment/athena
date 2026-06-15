@@ -29,6 +29,10 @@ StatusCode ActsTrackingGeometryTool::initialize() {
 std::shared_ptr<const Acts::TrackingGeometry> ActsTrackingGeometryTool::trackingGeometry() const {
     return m_trackingGeometrySvc->trackingGeometry();
 }
+const Acts::TrackingVolume* ActsTrackingGeometryTool::getEnvelope(const ActsTrk::SystemEnvelope envType) const {
+    return m_trackingGeometrySvc->getEnvelope(envType);
+}
+
 const ActsTrk::DetectorElementToActsGeometryIdMap* ActsTrackingGeometryTool::surfaceIdMap() const {
     return m_detIdMap.get();
 }

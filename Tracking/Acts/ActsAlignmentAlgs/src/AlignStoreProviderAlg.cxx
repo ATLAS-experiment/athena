@@ -34,7 +34,7 @@ StatusCode AlignStoreProviderAlg::initialize() {
     }
     /// If the provider alg passes through the alignment from
     /// the conditions store, the detector type does not need to be specified
-    ATH_MSG_DEBUG("Configuration: "<<m_detType<<" ("<<to_string(static_cast<DetectorType>(m_detType.value()))
+    ATH_MSG_DEBUG("Configuration: "<<m_detType<<" ("<<static_cast<DetectorType>(m_detType.value())
                 <<"), "<<m_fillAlignStoreCache<<", "<<m_splitPhysVolCache<<", "
                 <<m_splitActsTrfCache<<", inKey: "<<m_inputKey.fullKey()<<", outKey: "<<m_outputKey.fullKey());
 
@@ -86,7 +86,7 @@ StatusCode AlignStoreProviderAlg::execute(const EventContext& ctx) const {
         newAlignment->geoModelAlignment.reset();
     }
     SG::WriteHandle writeHandle{m_outputKey, ctx};
-    ATH_MSG_DEBUG("Record alignment store for detector technology "<<to_string(newAlignment->detType)
+    ATH_MSG_DEBUG("Record alignment store for detector technology "<<newAlignment->detType
                 <<" with a capacity of "<<ActsTrk::detail::TrfStoreTicketCounter::distributedTickets(newAlignment->detType)<<". Already populated: "
                 <<countPopulated(*newAlignment->trackingAlignment, newAlignment->detType));
     ATH_CHECK(writeHandle.record(std::move(newAlignment)));
