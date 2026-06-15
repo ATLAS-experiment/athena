@@ -48,6 +48,7 @@
 #include "Acts/Surfaces/DiscBounds.hpp"
 #include "Acts/Surfaces/LineBounds.hpp"
 #include "Acts/Surfaces/RadialBounds.hpp"
+#include "Acts/Surfaces/DiamondBounds.hpp"
 
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
@@ -61,15 +62,13 @@
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 
-
-
-
 #include "TrkSurfaces/DiscBounds.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/StraightLineSurface.h"
 #include "TrkSurfaces/CylinderSurface.h"
+#include "TrkSurfaces/DiamondBounds.h"
 
 // STL
 #include <cmath>
@@ -649,6 +648,14 @@ std::shared_ptr<Trk::SurfaceBounds>
         const auto& cBounds = static_cast<const Acts::LineBounds&>(bounds);
         return std::make_shared<Trk::CylinderBounds>(cBounds.get(ParEnum_t::eR),
                                                      cBounds.get(ParEnum_t::eHalfLengthZ));
+      } case eDiamond: {
+        using ParEnum_t = Acts::DiamondBounds::BoundValues;
+        const auto& cBounds = static_cast<const Acts::DiamondBounds&>(bounds);
+        return std::make_shared<Trk::DiamondBounds>(cBounds.get(ParEnum_t::eHalfLengthXnegY),
+                                                    cBounds.get(ParEnum_t::eHalfLengthXzeroY),
+                                                    cBounds.get(ParEnum_t::eHalfLengthXposY),
+                                                    cBounds.get(ParEnum_t::eHalfLengthYneg),
+                                                    cBounds.get(ParEnum_t::eHalfLengthYpos));
       } default:
           break;
       
