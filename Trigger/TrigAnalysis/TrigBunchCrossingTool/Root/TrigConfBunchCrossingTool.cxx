@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,17 +43,8 @@ namespace Trig {
 
    TrigConfBunchCrossingTool::
    TrigConfBunchCrossingTool( const std::string& name )
-      : BunchCrossingToolBase( name ), m_bgId( -1 ),
-#ifndef XAOD_STANDALONE
-        m_configSvc( "TrigConf::xAODConfigSvc/xAODConfigSvc", name ),
-#endif // not XAOD_STANDALONE
-        m_configTool( "TrigConf::xAODConfigTool" ) {
-
-      // Declare the properties of the tool:
-#ifndef XAOD_STANDALONE
-      declareProperty( "ConfigSvc", m_configSvc );
-#endif // not XAOD_STANDALONE
-      declareProperty( "ConfigTool", m_configTool=nullptr );
+      : BunchCrossingToolBase( name ), m_bgId( -1 )
+   {
    }
 
    StatusCode TrigConfBunchCrossingTool::initialize() {
