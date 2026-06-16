@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -100,10 +100,9 @@ TBTrackInfoFromTag::initialize()
 }
 
 StatusCode
-TBTrackInfoFromTag::execute()
+TBTrackInfoFromTag::execute(const EventContext& ctx)
 {
 	ATH_MSG_DEBUG("Executing TBTrackInfoFromTag...");
-        const EventContext& ctx = Gaudi::Hive::currentContext();
 
 	int runNumber = ctx.eventID().run_number();
 	uint64_t evtNumber = ctx.eventID().event_number();
