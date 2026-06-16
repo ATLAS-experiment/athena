@@ -358,7 +358,7 @@ bool DataProxy::requestRelease(bool force, bool hard) {
   }
   bool canRelease = force;
   if (!m_resetFlag) canRelease = true;
-#ifndef NDEBUG
+#if 0
   MsgStream gLog(m_ims, "DataProxy");
   if (gLog.level() <= MSG::VERBOSE) {
     gLog << MSG::VERBOSE << "requestRelease(): "
@@ -368,7 +368,10 @@ bool DataProxy::requestRelease(bool force, bool hard) {
 	 << object() << MSG::dec << endmsg;
   }
 #endif
-  if (!canRelease) {
+  // The m_dObject test here is strictly redundant, but it speeds things
+  // up a bit if the proxy hasn't been dereferenced, which is common
+  // in some analysis workflows.
+  if (!canRelease && m_dObject) {
     resetRef();
   }
   return canRelease;
