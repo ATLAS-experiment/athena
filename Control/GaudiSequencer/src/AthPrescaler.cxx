@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthPrescaler.cxx
@@ -34,7 +34,7 @@ AthPrescaler::initialize()
 }
 
 StatusCode
-AthPrescaler::execute()
+AthPrescaler::execute(const EventContext& /*ctx*/)
 {
   ++m_seen;
   float fraction = (float(100.0) * (float)(m_pass+1)) / (float)m_seen;
