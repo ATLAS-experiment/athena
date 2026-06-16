@@ -29,12 +29,12 @@ class ScaleFactorTool: public asg::AsgTool,
   Gaudi::Property<std::string> m_obj_container {this, "ObjContainer", "", "object container"};
 
   ToolUtils::QuantileFunc m_sf_func;
-  ToolUtils::QuantileFunc m_pcbt_func;
+  ToolUtils::QuantileFunc m_pct_func;
 
   json m_json_config;
 
-  int m_n_pcbt_bins;
-  int inferPCBTBins(const json& cfg);
+  int m_n_pct_bins;
+  int inferPCTBins(const json& cfg);
 
   std::vector<float> m_sf_values;
 };

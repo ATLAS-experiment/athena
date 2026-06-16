@@ -3,6 +3,7 @@
 */
 #include "ScaleFactorTools/ToolUtils.h"
 #include "PathResolver/PathResolver.h"
+#include <iostream>
 
 ToolUtils::FloatFunc ToolUtils::floatVariableFactory(const json& cfg) {
 
@@ -105,6 +106,7 @@ ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
   };
 }
 
+// for 2-d tagging
 ToolUtils::QuantileFunc ToolUtils::makeNodes(const json& cfg) {
   ToolUtils::FloatFunc var = ToolUtils::floatVariableFactory(cfg.at("variable"));
   std::vector<float> edges = cfg.at("edges");
@@ -119,24 +121,30 @@ ToolUtils::QuantileFunc ToolUtils::makeNodes(const json& cfg) {
   std::vector<int> offsets(sub_nodes.size(), 0);
   if (numbering == "sequential") {
     for (size_t i = 1; i < sub_nodes.size(); ++i) {
-      int size = cfg.at("nodes")[i-1].at("edges").size() + 1;
+      int size = cfg.at("nodes")[i-1].at("edges").size() - 1;
       offsets[i] = offsets[i-1] + size;
     }
   }
 
-  return [var, edges, sub_nodes, numbering, offsets](const SG::AuxElement& el) -> int {
+  return [var, edges, sub_nodes, offsets, numbering]
+         (const SG::AuxElement& el) -> int {
     float v = var(el);
-    int region = 0;
-    while (region < (int)edges.size() && v > edges[region]) {
-      region++;
+
+    int region = -1;
+    for (int i = 0; i < (int) edges.size() - 1; ++i) {
+      if (v >= edges[i] && v < edges[i+1]) {
+        region = i;
+        break;
+      }
     }
+
     int local = sub_nodes[region](el);
+
     if (numbering == "sequential") {
       return offsets[region] + local;
     }
-    // overlapping
     return local;
-    };
+  };
 }
 
 // turn the already computed per-axis bin indices into a flattened index
@@ -203,3 +211,4 @@ ToolUtils::QuantileFunc ToolUtils::quantileFactory(const json& cfg) {
   throw std::runtime_error("Unknown quantile type: " + type);
 
 }
+

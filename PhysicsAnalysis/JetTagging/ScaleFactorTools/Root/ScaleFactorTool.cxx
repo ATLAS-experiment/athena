@@ -39,8 +39,8 @@ StatusCode ScaleFactorTool::initialize(){
   m_sf_values = m_json_config.at("scale_factors").get<std::vector<float>>();
 
   m_sf_func   = ToolUtils::quantileFactory(m_json_config.at("sf_bins"));
-  m_pcbt_func = ToolUtils::quantileFactory(m_json_config.at("pcbt_bins"));
-  m_n_pcbt_bins = inferPCBTBins(m_json_config.at("pcbt_bins"));
+  m_pct_func = ToolUtils::quantileFactory(m_json_config.at("pct_bins"));
+  m_n_pct_bins = inferPCTBins(m_json_config.at("pct_bins"));
 
   m_initialised = true;
 
@@ -52,18 +52,18 @@ float ScaleFactorTool::getSF(const xAOD::IParticle* p) const
   const SG::AuxElement& el = *p;
   int sf_bin = m_sf_func(el);
   std::cout << "sf_bin = " << sf_bin << std::endl;
-  int pcbt_bin = m_pcbt_func(el);
-  std::cout << " pcbt_bins total = " << m_n_pcbt_bins << std::endl;
-  std::cout << " pcbt_bin = " << pcbt_bin << std::endl;
-  int global = sf_bin * m_n_pcbt_bins + pcbt_bin;
+  int pct_bin = m_pct_func(el);
+  std::cout << " pct_bins total = " << m_n_pct_bins << std::endl;
+  std::cout << " pct_bin = " << pct_bin << std::endl;
+  int global = sf_bin * m_n_pct_bins + pct_bin;
   std::cout << " global = " << global << std::endl;
   return m_sf_values.at(global);
 }
 
 // ==========================
-// Infer PCT bins
+// Infer total number of PCT bins
 // ==========================
-int ScaleFactorTool::inferPCBTBins(const json& cfg)
+int ScaleFactorTool::inferPCTBins(const json& cfg)
 {
   if (cfg.at("type") == "enumerate"){
     return cfg.at("edges").size() - 1;
@@ -75,5 +75,5 @@ int ScaleFactorTool::inferPCBTBins(const json& cfg)
     }
     return total;
   }
-  throw std::runtime_error("Cannot infer pcbt bins");
+  throw std::runtime_error("Cannot infer pct bins");
 }
