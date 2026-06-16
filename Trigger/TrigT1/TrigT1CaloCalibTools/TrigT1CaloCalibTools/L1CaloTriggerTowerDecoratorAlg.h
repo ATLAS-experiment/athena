@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_TRIGT1_TRIGT1CALOXAODCALIBTOOLS_DECORATETRIGGERTOWERSALG_H
@@ -29,7 +29,7 @@ class L1CaloTriggerTowerDecoratorAlg : public AthAlgorithm {
   /// Function initialising the algorithm
   virtual StatusCode initialize() override;
   /// Function executing the algorithm
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
  private:
   SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_triggerTowerContainerKey
