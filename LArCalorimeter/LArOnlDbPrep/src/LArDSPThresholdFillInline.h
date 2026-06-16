@@ -22,7 +22,7 @@ class LArDSPThresholdFillInline:public AthAlgorithm {
   LArDSPThresholdFillInline(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~LArDSPThresholdFillInline();
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override;
 
  private:
