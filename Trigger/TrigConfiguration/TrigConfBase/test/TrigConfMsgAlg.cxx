@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -29,7 +29,7 @@ public:
       m_class(name)
   {}
 
-  virtual StatusCode execute() override
+  virtual StatusCode execute(const EventContext&) override
   {
     ATH_MSG_INFO("Next message is printed via TrigConfMessaging:");
     m_class.print();
