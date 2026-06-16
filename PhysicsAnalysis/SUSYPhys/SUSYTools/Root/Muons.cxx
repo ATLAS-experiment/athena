@@ -299,9 +299,8 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
     ATH_MSG_INFO( "MUON pt:   " << input.pt() );
     ATH_MSG_INFO( "MUON eta:  " << input.eta() );
     ATH_MSG_INFO( "MUON phi:  " << input.phi() );
-    ATH_MSG_INFO( "MUON comb: " << (input.muonType() == xAOD::Muon::Combined));
-    ATH_MSG_INFO( "MUON sTag: " << (input.muonType() == xAOD::Muon::SegmentTagged));
-    ATH_MSG_INFO( "MUON loose:" << (input.quality() == xAOD::Muon::Loose));
+    ATH_MSG_INFO( "MUON type: " << input.muonType());
+    ATH_MSG_INFO( "MUON quality:" << input.quality());
     ATH_MSG_INFO( "MUON bHit: " << static_cast<int>( nBLHits ));
     ATH_MSG_INFO( "MUON pHit: " << static_cast<int>( nPixHits ));
     ATH_MSG_INFO( "MUON pDead:" << static_cast<int>( nPixelDeadSensors ));
@@ -313,7 +312,7 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
     ATH_MSG_INFO( "MUON tOut: " << static_cast<int>( nTRTOutliers ));
 
     const xAOD::TrackParticle* idtrack =
-      input.trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+      input.trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
 
     if ( !idtrack) {
       ATH_MSG_VERBOSE( "No ID track!! " );
@@ -414,13 +413,13 @@ bool SUSYObjDef_xAOD::IsBadMuon(const xAOD::Muon& input, float qopcut) const
   const static SG::Decorator<char> dec_bad_highPt("bad_highPt");
   dec_bad_highPt(input) = false;
 
-  const xAOD::TrackParticle* track;
-  if (input.muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) {
-    track = input.trackParticle(xAOD::Muon::CombinedTrackParticle);
+  const xAOD::TrackParticle* track{nullptr};
+  if (input.muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon) {
+    track = input.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle);
     if (!track) return false; // don't treat SAF muons without CB track further
   }
   else{
-    track = input.primaryTrackParticle();
+    track = input.trackParticle(xAOD::Muon::TrackParticleType::Primary);
     if (!track){
       ATH_MSG_WARNING("Non-SAF muon without a track; cannot test IsBadMuon criteria");
       return false;
@@ -450,15 +449,15 @@ bool SUSYObjDef_xAOD::IsCosmicMuon(const xAOD::Muon& input, float z0cut, float d
   dec_cosmic(input) = false;
 
   const xAOD::TrackParticle* track(nullptr);
-  if (input.muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) {
-    track = input.trackParticle(xAOD::Muon::CombinedTrackParticle);
+  if (input.muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon) {
+    track = input.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle);
     if (!track){
       ATH_MSG_VERBOSE("WARNING: SAF muon without CB track found. Not possible to check cosmic muon criteria");
       return false; // don't treat SAF muons without CB track further
     }
   }
   else {
-    track = input.primaryTrackParticle();
+    track = input.trackParticle(xAOD::Muon::TrackParticleType::Primary);
     if (!track){
       ATH_MSG_WARNING("Non-SAF muon without primary track particle found. Not possible to check cosmic muon criteria");
       return false;
