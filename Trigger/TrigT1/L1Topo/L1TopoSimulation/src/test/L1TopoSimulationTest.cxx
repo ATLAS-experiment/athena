@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./L1TopoSimulationTest.h"
@@ -95,7 +95,7 @@ LVL1::L1TopoSimulationTest::initialize ATLAS_NOT_THREAD_SAFE() {
 }
 
 StatusCode
-LVL1::L1TopoSimulationTest::execute() {
+LVL1::L1TopoSimulationTest::execute(const EventContext& /*ctx*/) {
 
   cout << "Reseting TopoSteering" << endl;
 
