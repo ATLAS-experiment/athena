@@ -8,7 +8,7 @@ atlas_add_component( MuonCombinedAlgsR4
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps StoreGateLib GaudiKernel xAODMuon 
-                                    MuonTrackEvent xAODMuonViews ActsEventLib
-                                    MuonAnalysisInterfacesLib MuonRecToolInterfacesR4)
-
-atlas_install_python_modules( python/*.py)
+                                    MuonTrackEvent xAODMuonViews ActsEventLib xAODTracking
+                                    MuonAnalysisInterfacesLib MuonRecToolInterfacesR4
+                                    ActsToolInterfacesLib InDetTrackSelectionToolLib
+                                    FourMomUtils)

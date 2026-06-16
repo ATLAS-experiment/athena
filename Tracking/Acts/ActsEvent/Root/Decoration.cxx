@@ -8,8 +8,8 @@
 namespace ActsTrk{
   std::optional<TrackContainer::ConstTrackProxy> getActsTrack(const xAOD::TrackParticle& trkPart) {
     static const SG::AuxElement::ConstAccessor<ElementLink<TrackContainer> > acc("actsTrack");
-    static_assert( std::is_same<ElementLink<TrackContainer>::ElementConstReference,
-                                std::optional<TrackContainer::ConstTrackProxy> >::value);
+    static_assert(std::is_same<ElementLink<TrackContainer>::ElementConstReference,
+                               std::optional<TrackContainer::ConstTrackProxy> >::value);
 
     if (!acc.isAvailable(trkPart) || !acc(trkPart).isValid()) {
         return std::nullopt;
@@ -17,6 +17,45 @@ namespace ActsTrk{
     return(*acc(trkPart));
 
 }
+std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy> 
+    lastMeasurementState(const xAOD::TrackParticle& trkPart,
+                         const bool skipOutlier) {
+    auto actsTrk = getActsTrack(trkPart);
+    if (!actsTrk) {
+        return std::nullopt;
+    }
+    std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy>  retOpt{};
+    (*actsTrk).container().trackStateContainer().visitBackwards((*actsTrk).tipIndex(), 
+        [&](const auto& state) {
+            if ((state.typeFlags().isOutlier() && skipOutlier) ||
+                !state.hasUncalibratedSourceLink() || retOpt) {
+              return;
+            }
+            retOpt = state;
+        });
+    return retOpt;
+}
+
+std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy> 
+    firstMeasurementState(const xAOD::TrackParticle& trkPart,
+                          const bool skipOutlier) {
+    auto actsTrk = getActsTrack(trkPart);
+    if (!actsTrk) {
+        return std::nullopt;
+    }
+    std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy> retOpt{};
+    (*actsTrk).container().trackStateContainer().visitBackwards((*actsTrk).tipIndex(), 
+        [&](const auto& state) {
+            if ((state.typeFlags().isOutlier() && skipOutlier) ||
+                !state.hasUncalibratedSourceLink()) {
+              return;
+            }
+            retOpt = state;
+        });
+    return retOpt;
+
+}
+
 
 }
 

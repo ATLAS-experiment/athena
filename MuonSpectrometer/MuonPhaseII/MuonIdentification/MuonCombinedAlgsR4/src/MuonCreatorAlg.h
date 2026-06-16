@@ -13,7 +13,7 @@
 
 #include "xAODMuonViews/FillContainer.h"
 #include "xAODMuon/MuonContainer.h"
-#include "xAODMuon/MuonAuxContainer.h"
+#include "xAODMuon/MuonAuxContainerR4.h"
 
 #include "MuonTrackEvent/MuonTag.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
@@ -38,7 +38,7 @@ namespace MuonCombinedR4 {
             struct DataShip {
                 /** @brief Define the muon container type */
                 using MuonCont_t = xAOD::FillContainer<xAOD::MuonContainer,
-                                                       xAOD::MuonAuxContainer>;
+                                                       xAOD::MuonAuxContainerR4>;
                 
                 /** @brief The output muon container handle */
                 MuonCont_t muons{};
@@ -62,11 +62,11 @@ namespace MuonCombinedR4 {
             /** @brief The Muon selection tool to assess the muon quality */
             ToolHandle<CP::IMuonSelectionTool> m_selectionTool{this, "SelectionTool", ""};
             /** @brief Key name to store the primary muon container  */
-            SG::WriteHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonKey", "Muons"};
+            SG::WriteHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonKey", "MuonsR4"};
             /** @brief Key name under which the input tags can be found*/
             SG::ReadHandleKeyArray<MuonR4::MuonTagContainer> m_tagKeys{this, "TagKeys", {}};
            /** @brief Handle to the muon summary tool */
-            ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
+            ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "TrackSummaryTool" , ""};
             /** @brief Load all containers from store gate and setup the output containers  */
             StatusCode setupDataShip(const EventContext& ctx, DataShip& ship) const;
         

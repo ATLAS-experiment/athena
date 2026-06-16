@@ -3,9 +3,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, **kwargs):
+def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, 
+                     outFile="MsTrkTester.root", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    
+    result.merge(setupHistSvcCfg(flags, outFile=outFile,
+                                 outStream="MuonTrackTester"))
+
     from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
@@ -56,9 +62,7 @@ if __name__=="__main__":
 
     cfg.getService("MessageSvc").setVerbose= []
 
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonTrackTester"))
-
+ 
     from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
     cfg.merge(MuonReconstructionConfig(flags))
 
@@ -69,7 +73,8 @@ if __name__=="__main__":
     if not args.noLegacyChain:
         cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain))
+    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain,
+                                      outFile = args.outRootFile))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))

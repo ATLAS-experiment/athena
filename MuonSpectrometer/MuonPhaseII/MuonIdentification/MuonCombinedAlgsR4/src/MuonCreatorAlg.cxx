@@ -134,6 +134,26 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
         p4Set = true;
     }
     newMuon->setMuonSegmentLinks(segLinks);
+
+    switch(newMuon->author()){
+        using enum xAOD::Muon::Author;
+        case MuidCo:
+        case MuGirl:
+        case STACO:
+            newMuon->setMuonType(xAOD::Muon::MuonType::Combined);
+            break;
+        case MuidSA:
+            newMuon->setMuonType(xAOD::Muon::MuonType::MuonStandAlone);
+            break;
+        case MuTagIMO:
+            newMuon->setMuonType(xAOD::Muon::MuonType::SegmentTagged);
+            break;
+        default:
+            ATH_MSG_WARNING("Invalid muon author "<<newMuon->author()<<". Cannot determine the muon type");
+            ship.muons->pop_back();
+    }
+
+    return;
     m_selectionTool->setPassesIDCuts(*newMuon);
     m_selectionTool->setQuality(*newMuon);
 }

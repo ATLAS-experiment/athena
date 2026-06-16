@@ -12,7 +12,7 @@ atlas_add_library(  MuonTrackEvent
                    LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternEvent
                                   xAODMuon MuonSpacePoint
                    PRIVATE_LINK_LIBRARIES MuonStationIndexLib FourMomUtils MuonDetDescrUtils
-                                          MuonTruthHelpers )
+                                          MuonTruthHelpers ActsCalibratorsLib ActsEventLib )
 
 file(GLOB_RECURSE tests "test/*.cxx")
 
