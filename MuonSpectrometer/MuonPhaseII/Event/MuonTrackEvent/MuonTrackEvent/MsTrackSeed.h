@@ -8,8 +8,12 @@
 
 #include "AthContainers/DataVector.h"
 #include "MuonSpacePoint/SpacePointContainer.h"
+#include "MuonTrackEvent/ExpandedSector.h"
 #include "MuonPatternEvent/Segment.h"
+
 #include "xAODMuon/MuonSegment.h"
+
+#include "Acts/Utilities/OstreamFormatter.hpp"
 /** @brief MsTrackSeed represents the collection of segments that may be compatible with
  *         a muon track trajectory hypothesis. To construct a seed, the segments are projected
  *         onto a cylinder which is roughly intersecting the middle stations of the spectrometer.  */
@@ -23,13 +27,17 @@ namespace MuonR4{
                 Barrel,
                 Endcap
             };
+            static std::string toString(const Location loc);
+            friend std::ostream& operator<<(std::ostream& ostr, const Location loc) {
+                return ostr<<toString(loc);
+            }
             /** @brief Constructor with location defintion
              *  @param loc: Localtion definition whether the seed is constructed 
              *              on the barrel or on the endcap surface
              *  @param sector: In which tree sector is the seed constructed:
              *                    sector: 2*MS-sector +- Overlap */
             MsTrackSeed(const Location loc,
-                        const int sector);
+                        const ExpandedSector sector);
             /** @brief Returns the vector of associated segments */
             const std::vector<const xAOD::MuonSegment*>& segments() const;
             /** @brief Returns the list of detailed segments */
@@ -52,11 +60,11 @@ namespace MuonR4{
             /** @brief Returns the location of the seed */
             Location location() const;
             /** @brief Returns the seed's sector*/
-            int sector() const { return m_sector; }
+            ExpandedSector sector() const { return m_sector; }
         private:
             /** @brief Location variable */
             Location m_loc{Location::Undefined};
-            int m_sector{0};
+            ExpandedSector m_sector{static_cast<std::int8_t>(0)};
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
             std::vector<const xAOD::MuonSegment*> m_segments{};          
     };
@@ -65,4 +73,5 @@ namespace MuonR4{
 
 }
 CLASS_DEF( MuonR4::MsTrackSeedContainer , 1290595104 , 1 )
+ACTS_OSTREAM_FORMATTER (MuonR4::MsTrackSeed::Location);
 #endif

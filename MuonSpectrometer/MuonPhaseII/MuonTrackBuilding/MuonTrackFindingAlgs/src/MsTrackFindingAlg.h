@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRACKFINIDNGALGS_MSTRACKFINIDNGALG_H
 #define MUONTRACKFINIDNGALGS_MSTRACKFINIDNGALG_H

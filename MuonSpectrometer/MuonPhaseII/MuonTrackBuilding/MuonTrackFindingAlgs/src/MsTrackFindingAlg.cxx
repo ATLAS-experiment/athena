@@ -18,6 +18,7 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
+#include "MuonSpacePoint/SpacePointHelpers.h"
 
 #include "ActsInterop/UnitConverters.h"
 #include "GaudiKernel/PhysicalConstants.h"
@@ -31,9 +32,13 @@ using namespace Acts::PlanarHelper;
 
 namespace {
     bool isNswSegment(const xAOD::MuonSegment& seg) {
-        return seg.technology() == Muon::MuonStationIndex::TechnologyIndex::STGC || 
-               seg.technology() == Muon::MuonStationIndex::TechnologyIndex::MM;
+        using namespace Muon::MuonStationIndex;
+        
+        return seg.technology() == TechnologyIndex::STGC || 
+               seg.technology() == TechnologyIndex::MM ||
+               toStationIndex(seg.chamberIndex()) == StIndex::EE;
     }
+
 }
 
 namespace MuonR4{
@@ -146,7 +151,7 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                         <<", "<<m->numDimensions()<<", "
                         <<", "<<surf.geometryId()<<" @ "<<Amg::toString(surf.localToGlobalTransform(tgContext))<<std::endl;
                 }
-                ATH_MSG_VERBOSE("Fetch measurements from segment: "<<Amg::toString(segment->position())
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Fetch measurements from segment: "<<Amg::toString(segment->position())
                          <<", direction: "<<Amg::toString(segment->direction()) << " eta " << segment->direction().eta() << " phi " << segment->direction().phi() <<"\n"<<sstr.str());
             }
             measurements.insert(measurements.end(), 
@@ -154,17 +159,19 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                                 std::make_move_iterator(segMeasurements.end()));
 
             // Ususally we would like to take the first segment with a sufficient amount of phi hits to set the initial position and direction of the track fit. However in some cases the segment from the NSW has a missreconstructed phi direction which causes the track fit to loose all BW and OW hits in the first iteration. Therefore if the first segment is a NSW segment we first try use a non-NSW segments with enough phi hits. If we don't find any segment with enough phi hits we will use the NSW segment as reference as long as it passes the seeding quality criteria.   
-            if (!refSeg &&  !isNswSegment(*segment) &&  m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
+            if (!refSeg &&  !isNswSegment(*segment) &&  
+                m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
                 refSeg = segment;
-                ATH_MSG_VERBOSE("Set reference segment");
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Set reference segment");
             }
         }
         //if we did not find a reference segment let's try the NSW one before we give up on the track
         if(!refSeg){
             for (const xAOD::MuonSegment* segment : seed.segments()) {
-                if (isNswSegment(*segment) && m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
+                if (isNswSegment(*segment) && 
+                    m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
                     refSeg = segment;
-                    ATH_MSG_VERBOSE("Set reference segment from NSW");
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - NSW is the best what we have apparently....");
                     break;
                 }
             }
@@ -174,87 +181,134 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
             ATH_MSG_WARNING(__func__<<"() "<<__LINE__
                             <<" - No reference segment passing seeding quality "<<
                             (refSeg != nullptr)<<" was found. #"<<measurements.size()<<" measurements. ");
-            return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
+            return std::make_pair(OptBoundPars_t::failure(std::make_error_code(std::errc::invalid_argument)),
                                   std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
         }
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<measurements.size()<<" measurements");
-        Amg::Vector3D seedPos{refSeg->position()};
+        Amg::Vector3D seedPos{atFirstSurface(tgContext, *refSeg)};
         Amg::Vector3D seedDir{refSeg->direction()};
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Initial seed pos: "<<Amg::toString(seedPos)
-                        <<", dir: "<<Amg::toString(seedDir) << " eta " << seedDir.eta() << " phi " << seedDir.phi() /Gaudi::Units::degree );
-        /// The middle or outer segment provide the phi information. Not so easy becasue we want to
-        /// Take the y0 & precision direction from the inner segment but the phi & x0 from a straight
-        /// line extrapolation onto the plane
-        if (refSeg != seed.segments().front()) {
-            const MuonGMR4::SpectrometerSector* innerPlane = m_seeder->envelope(*seed.segments().front());
-            const Acts::PlaneSurface& surf = innerPlane->surface();
-            const Amg::Transform3D toInnerPlane = surf.localToGlobalTransform(tgContext).inverse();
-            const Amg::Vector3D locSeedPos = toInnerPlane * seedPos;
-            const Amg::Vector3D locSeedDir = toInnerPlane.linear() * seedDir;
-
-            auto seedOnInner = Acts::PlanarHelper::intersectPlane(locSeedPos, locSeedDir,
-                                                                  Amg::Vector3D::UnitZ(), 0.);
-
-            using enum SegmentFit::ParamDefs;
-            SegmentFit::Parameters innerPars = SegmentFit::localSegmentPars(*seed.segments().front());
-            innerPars[Acts::toUnderlying(x0)] = seedOnInner.position().x();
-            const Amg::Vector3D innerSegDir = 
-                    Acts::makeDirectionFromPhiTheta(innerPars[Acts::toUnderlying(phi)],
-                                                    innerPars[Acts::toUnderlying(theta)]);
-            const Amg::Vector3D combSegDir = 
-                    Acts::makeDirectionFromAxisTangents(houghTanAlpha(locSeedDir),
-                                                        houghTanBeta(innerSegDir));
-            seedPos = surf.localToGlobalTransform(tgContext) * Amg::Vector3D{innerPars[Acts::toUnderlying(x0)],
-                                                                             innerPars[Acts::toUnderlying(y0)], 0};
-            seedDir = surf.localToGlobalTransform(tgContext).linear() * combSegDir;
-        }
-        /// Create a surface shortly before the first measurement that belongs to a valid volume.
-        /// Trigger and phi layer hits may have surface geometry IDs that don't map to a named
-        /// tracking volume (e.g., they belong to a gap region), even though the measurements
-        /// are valid and used in the fit. We search for the first precision measurement whose
-        /// geometry ID successfully resolves to a named Acts::TrackingVolume so we can extract
-        /// a boundary surface to seed the track parameters.
-        const xAOD::UncalibratedMeasurement* firstVolumeMeas{nullptr};
-        const Acts::TrackingVolume* volume{nullptr};
-        for (const xAOD::UncalibratedMeasurement* meas : measurements) {
-            const Acts::GeometryIdentifier volId = volumeId(xAOD::muonSurface(meas));
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check measurement "
-                <<m_idHelperSvc->toString(xAOD::identify(meas))<<", "<<xAOD::muonSurface(meas).geometryId());
-            volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
-            if (volume) {
-                firstVolumeMeas = meas;
-                break;
-            }
-        }
-
+                        <<", dir: "<<Amg::toString(seedDir) << " eta " << seedDir.eta() << " phi " 
+                        << (seedDir.phi() /Gaudi::Units::degree) );
+        
+        const Acts::GeometryIdentifier volId = volumeId(xAOD::muonSurface(measurements.front()));
+        const Acts::TrackingVolume* volume = m_trackingGeometryTool->trackingGeometry()->findVolume(volId);
         if (!volume) {
             ATH_MSG_WARNING(__func__<<"() "<<__LINE__
                             <<" - Failed to find tracking volume for any seed measurement");
-            return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
+            return std::make_pair(OptBoundPars_t::failure(std::make_error_code(std::errc::invalid_argument)),
                                   std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
         }
+        if (volume->motherVolume() && volume->motherVolume()->isAlignable()) {
+            volume = volume->motherVolume();
+        }
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__
+                            <<" - Bounding volume "<<volume->volumeName()
+                            <<", trf: "<<Amg::toString(volume->localToGlobalTransform(tgContext))
+                            <<", bounds: "<<volume->volumeBounds());
+        /// The middle or outer segment provide the phi information. Not so easy becasue we want to
+        /// Take the y0 & precision direction from the inner segment but the phi & x0 from a straight
+        /// line extrapolation onto the plane
+        if (const xAOD::MuonSegment* frontSegment = seed.segments().front(); frontSegment != refSeg) {
+            const Amg::Vector3D frontSegPos = atFirstSurface(tgContext, *frontSegment);
+            const Acts::Surface& firstSurf = xAOD::muonSurface(firstMeasurement(*frontSegment));
+            const Amg::Transform3D toFirstTrf = firstSurf.localToGlobalTransform(tgContext).inverse();
+            const Amg::Vector3D locFrontSegPos = toFirstTrf * frontSegPos;
+            if (!volume->inside(tgContext, frontSegPos)) {
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Segment "<<printID(*frontSegment)
+                                <<" not inside mother volume: "<<volume->volumeName()<<", "
+                               <<Amg::toString(volume->globalToLocalTransform(tgContext)*frontSegPos)
+                                <<", bounds: "<<volume->volumeBounds()<<", "
+                                <<SegmentFit::localSegmentPars(*frontSegment)
+                                <<"\n"<<print(detailedSegment(*frontSegment)->measurements()));
+            }
+
+            /// Extrapolate the seed segment onto the inner plane. We want to take the precision 
+            /// intercept from the inner segment and the non-precision intercept from the extrapolated
+            /// segment
+            const Acts::MultiIntersection firstIsect = firstSurf.intersect(tgContext, seedPos, seedDir,
+                                                                           Acts::BoundaryTolerance::Infinite());
+            const Amg::Vector3D locAtFirst = toFirstTrf * firstIsect.at(0).position();
+            if (firstSurf.type() == Acts::Surface::SurfaceType::Straw) {
+                const auto& bounds = static_cast<const Acts::LineBounds&>(firstSurf.bounds());
+                using enum Acts::LineBounds::BoundValues;
+                // we want the drift radius coordinate from the segment and the coordinate along
+                /// the tube form the back extrapolated segment
+                const Amg::Vector3D locStartPos{locFrontSegPos.x(), locFrontSegPos.y(),
+                                                 std::clamp(locAtFirst.z(), -bounds.get(eHalfLengthZ), bounds.get(eHalfLengthZ))};
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - The first surface is a straw "
+                               <<bounds<<", "<<Amg::toString(locAtFirst)<<" vs. "<<Amg::toString(locFrontSegPos));
+                seedPos = firstSurf.localToGlobalTransform(tgContext) * locStartPos;
+            } else if (firstSurf.type() == Acts::Surface::SurfaceType::Plane) {
+                if (isNswSegment(*frontSegment)) {
+                    seedPos = frontSegPos;
+                }
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - The first surface is a straw "
+                               <<firstSurf.bounds()<<", "<<Amg::toString(locAtFirst)<<" vs. "<<Amg::toString(locFrontSegPos));
+            }
+            
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Updated seed position: "<<Amg::toString(seedPos));
+        }
+
+
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Using seed measurement " 
-                        << m_idHelperSvc->toString(xAOD::identify(firstVolumeMeas))
-                        << " with volume id " << volumeId(xAOD::muonSurface(firstVolumeMeas)));
+                        << m_idHelperSvc->toString(xAOD::identify(measurements.front()))
+                        << " with volume id " << volId);
 
         auto boundSurf = MuonGMR4::bottomBoundary(*volume);
         if (!boundSurf) {
             ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Failed to find boundary surface for tracking volume");
-            return std::make_pair(Acts::Result<Acts::BoundTrackParameters>::failure(std::make_error_code(std::errc::invalid_argument)),
+            return std::make_pair(OptBoundPars_t::failure(std::make_error_code(std::errc::invalid_argument)),
                                   std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
         }
-        auto targetSurf = boundSurf->getSharedPtr();
-        using namespace Acts::PlanarHelper;
+        std::shared_ptr<const Acts::Surface> targetSurf{};
 
-        auto pIsect = intersectPlane(seedPos, seedDir, 
-                                     targetSurf->localToGlobalTransform(tgContext).linear().col(2), 
-                                     targetSurf->center(tgContext));
+        auto propagteToBoundary = [&](const Acts::Surface& volBoundary) -> Acts::Result<Amg::Vector3D> {
+
+            const Amg::Transform3D& trf{volBoundary.localToGlobalTransform(tgContext)};
+            auto pIsect = intersectPlane(seedPos, seedDir, trf.linear().col(2), trf.translation());
+            /// The extrapolation needs to go backwards and stay within the surface boundaries
+            if (pIsect.pathLength() > Acts::s_epsilon || !pIsect.isValid()) {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Intersection @"<<Amg::toString(pIsect.position())
+                                <<" is forward "<<pIsect.pathLength()<<" or invalid "<<(!pIsect.isValid())
+                                <<" within volume "<<volume->inside(tgContext, pIsect.position()));
+                return Acts::Result<Amg::Vector3D>::failure(std::make_error_code(std::errc::invalid_argument));
+            }
+            Acts::Result<Amg::Vector2D> locPos = volBoundary.globalToLocal(tgContext, pIsect.position(), 
+                                                                           Amg::Vector3D::Zero());
+            if (!locPos.ok()){
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Intersection is not on surface "<<
+                                Amg::toString(trf.inverse()*pIsect.position()));
+                return Acts::Result<Amg::Vector3D>::failure(std::make_error_code(std::errc::invalid_argument));
+            }
+            if (!volBoundary.insideBounds(*locPos)) {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Intersection is outside the boundaries: "<<
+                                Amg::toString(*locPos)<<", bounds: "<<volBoundary.bounds());
+                return Acts::Result<Amg::Vector3D>::failure(std::make_error_code(std::errc::invalid_argument));
+            }
+            targetSurf = volBoundary.getSharedPtr();
+            return Acts::Result<Amg::Vector3D>::success(pIsect.position());
+        };
         
-        auto fourPos = ActsTrk::convertPosToActs(pIsect.position(), pIsect.position().mag() / Gaudi::Units::c_light);
-        const double qOverP = 1./ m_seeder->estimateQtimesP(*tgContext.get<const ActsTrk::GeometryContext*>(),
-                                                            *mfContext.get<const AtlasFieldCacheCondObj*>(), seed);
+        
+        auto pIsect = propagteToBoundary(*boundSurf);
+        if (!pIsect.ok() && volume->isAlignable()) {
+            const Acts::VolumePlacementBase* placement = volume->volumePlacement();
+            for (std::size_t portal = 0; !pIsect.ok()  && portal< placement->nPortalPlacements(); ++portal) {
+               pIsect = propagteToBoundary(placement->portalPlacement(portal)->surface());
+            }
+        }
+        if (!pIsect.ok()) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" Cannot create valid start parameters from seed "<<seed);
+            // THROW_EXCEPTION("DIese kacke");
+            return std::make_pair(OptBoundPars_t::failure(std::make_error_code(std::errc::invalid_argument)),
+                                  std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
+        }
+        auto fourPos = ActsTrk::convertPosToActs(*pIsect, (*pIsect).mag() / Gaudi::Units::c_light);
+        const double qOverP = 1./ ActsTrk::energyToActs(m_seeder->estimateQtimesP(*tgContext.get<const ActsTrk::GeometryContext*>(),
+                                                                                 *mfContext.get<const AtlasFieldCacheCondObj*>(), seed));
         auto initialPars = Acts::BoundTrackParameters::create(tgContext, targetSurf, fourPos, 
-                                                              seedDir, ActsTrk::energyToActs(qOverP),
+                                                              seedDir, qOverP,
                                                               Acts::BoundMatrix::Identity(), 
                                                               Acts::ParticleHypothesis::muon());
         return std::make_pair(std::move(initialPars),  std::move(measurements));

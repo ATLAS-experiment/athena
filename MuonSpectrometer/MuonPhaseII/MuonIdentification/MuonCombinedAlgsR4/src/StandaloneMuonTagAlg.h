@@ -26,11 +26,11 @@ namespace MuonCombinedR4{
             StatusCode execute(const EventContext& ctx) const override final;
         private:
             /** @brief Key of the input muon track container */
-            SG::ReadHandleKey<ActsTrk::TrackContainer> m_msTrackKey{this, "MsTracks", ""};
+            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrackKey{this, "MsTracks", "MsTrackParticlesR4"};
             /** @brief Key to write the tag output container */
-            SG::WriteHandleKey<MuonR4::MuonTagContainer> m_writeKey{this, "WriteKey" , "MuonTagSA"};
+            SG::WriteHandleKey<MuonR4::MuonTagContainer> m_tagKey{this, "TagKey" , "MuonTagsSA"};
             /** @brief Handle to the muon summary tool */
-            ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
+            ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "TrackSummaryTool" , ""};
    };
 }
 
