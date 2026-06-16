@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -42,7 +42,7 @@ StatusCode eFEXDriver::finalize()
 }
 
 
-  StatusCode eFEXDriver::execute(/*const EventContext& ctx*/) //const
+  StatusCode eFEXDriver::execute(const EventContext& ctx)
 {
 
   // STEP 2 - Do some monitoring
@@ -50,11 +50,11 @@ StatusCode eFEXDriver::finalize()
   my_eFEXOutputCollection->setdooutput(true);
 
   // STEP 3 - Run THE eFEXSysSim
-  ATH_CHECK(m_eFEXSysSimTool->execute(my_eFEXOutputCollection, Gaudi::Hive::currentContext()));
+  ATH_CHECK(m_eFEXSysSimTool->execute(my_eFEXOutputCollection, ctx));
 
   // STEP 5 - Write the completed eFEXOutputCollection into StoreGate (move the local copy in memory)
   std::unique_ptr<eFEXOutputCollection> local_eFEXOutputCollection = std::unique_ptr<eFEXOutputCollection>(my_eFEXOutputCollection);
-  SG::WriteHandle<LVL1::eFEXOutputCollection> eFEXOutputCollectionSG(m_eFEXOutputCollectionSGKey);
+  SG::WriteHandle<LVL1::eFEXOutputCollection> eFEXOutputCollectionSG(m_eFEXOutputCollectionSGKey, ctx);
   ATH_CHECK(eFEXOutputCollectionSG.record(std::move(local_eFEXOutputCollection)));
 
   return StatusCode::SUCCESS;
