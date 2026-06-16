@@ -29,7 +29,7 @@ class LArFlatFromFile: public AthAlgorithm
 
   // Athena algorithm's Hooks
   virtual StatusCode  initialize() override;
-  virtual StatusCode  execute() override {return StatusCode::SUCCESS;}
+  virtual StatusCode  execute(const EventContext&) override {return StatusCode::SUCCESS;}
   virtual StatusCode  finalize() override {return StatusCode::SUCCESS;}
   virtual StatusCode  stop() override;
 

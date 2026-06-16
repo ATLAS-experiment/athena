@@ -29,7 +29,7 @@ class LArPhysWaveShifter : public AthAlgorithm
 
   //standard algorithm methods
   StatusCode initialize() {return StatusCode::SUCCESS;} 
-  StatusCode execute() {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
   StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
  

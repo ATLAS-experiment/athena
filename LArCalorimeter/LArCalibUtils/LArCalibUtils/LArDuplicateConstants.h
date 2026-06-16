@@ -31,7 +31,7 @@ class ATLAS_NOT_THREAD_SAFE LArDuplicateConstants : public AthAlgorithm
   ~LArDuplicateConstants();
 
   StatusCode initialize();
-  StatusCode execute() {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
   StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
 

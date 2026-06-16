@@ -1,7 +1,7 @@
 //-*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,7 +44,7 @@ class LArCompleteToFlat: public AthAlgorithm
 
   // Athena algorithm's Hooks
   StatusCode  initialize();
-  StatusCode  execute() {return StatusCode::SUCCESS;}
+  StatusCode  execute(const EventContext&) {return StatusCode::SUCCESS;}
   StatusCode  finalize() {return StatusCode::SUCCESS;}
   virtual StatusCode  stop();
 
