@@ -64,7 +64,7 @@ TauGNNDataLoader::TauGNNDataLoader(
             if (!config.useTRT && (in.name == "eProbabilityHT")) {
                 ATH_MSG_WARNING("Track variable 'eProbabilityHT' requested but useTRT set to false. Using 'eProbabilityHT_noTRT' instead.");
                 trk_config.inputs.push_back({"eProbabilityHT_noTRT", FlavorTagInference::ConstituentsEDMType::CUSTOM_GETTER, false});
-                ntinue;
+                continue;
             }
             trk_config.inputs.push_back({in.name, FlavorTagInference::ConstituentsEDMType::CUSTOM_GETTER, false});
         }
