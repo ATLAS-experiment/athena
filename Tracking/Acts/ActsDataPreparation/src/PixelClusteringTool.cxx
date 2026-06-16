@@ -115,8 +115,9 @@ std::pair<unsigned int, unsigned int>
 PixelClusteringToolImpl<T_RDOContainer>::countCellsImpl(const T_RDOContainer& rdo_collection,
                                                         const std::vector<IdentifierHash> &listOfIds,
                                                         const InDetDD::SiDetectorElementCollection &detector_elements) const {
-   auto getNHits =[pixelID=m_pixelID](const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
-                     const InDetDD::SiDetectorElementCollection &detector_elements )
+   auto getNHits =[](const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
+                     const InDetDD::SiDetectorElementCollection &detector_elements,
+		     const PixelID* pixelID)
       -> unsigned int
    {
       unsigned int n_hits = RDOs.size();
@@ -138,7 +139,7 @@ PixelClusteringToolImpl<T_RDOContainer>::countCellsImpl(const T_RDOContainer& rd
    if (listOfIds.empty()) {
       for (const RDOCollectionAdapter<T_RDOContainer> RDOs : RDOCollectionAdapter<T_RDOContainer>::range(rdo_collection)) {
          assert( RDOs.isValid());
-         n_hits += getNHits(*RDOs, detector_elements);
+         n_hits += getNHits(*RDOs, detector_elements, m_pixelID);
       }
    }
    else {
@@ -146,7 +147,7 @@ PixelClusteringToolImpl<T_RDOContainer>::countCellsImpl(const T_RDOContainer& rd
          if (not id.is_valid()) continue;
          std::optional<RDOCollectionAdapter<T_RDOContainer> > RDOs = RDOCollectionAdapter<T_RDOContainer>::make(rdo_collection,id);
          if (RDOs.has_value()) {
-            n_hits += getNHits(*(RDOs.value()), detector_elements);
+	   n_hits += getNHits(*(RDOs.value()), detector_elements, m_pixelID);
          }
       }
    }
