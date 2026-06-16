@@ -25,7 +25,7 @@ public:
     return StatusCode::SUCCESS;
   }
 
-  virtual StatusCode execute() {
+  virtual StatusCode execute(const EventContext& /*ctx*/) {
     const xAOD::EventInfo* ei = 0;
     CHECK( evtStore()->retrieve( ei ) );
     ATH_MSG_INFO(" event num = " << ei->eventNumber());
@@ -57,9 +57,10 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   ANA_CHECK( alg->sysInitialize() ); //calling sysInitialize means incident listening set up
 
+  const EventContext ctx;
   for(int i=0;i<10;i++) {
     evt.getEntry(i);
-    ANA_CHECK(alg->execute());
+    ANA_CHECK(alg->execute(ctx));
   }
 
   return 0;
