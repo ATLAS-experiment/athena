@@ -77,7 +77,7 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
       inputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
                         m_deviceMR->mr(), &(m_hostMR->mr()));
   hostCopy->setup(inputHostBuffer)->wait();
-  deviceCopy->setup(inputDeviceBuffer)->wait();
+  deviceCopy->setup(inputDeviceBuffer)->ignore();
 
   // Copy the relevant data into the input buffer.
   traccc::edm::track_collection<traccc::default_algebra>::device inputHost{
@@ -89,13 +89,13 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   }
 
   // Copy the input buffer to the device.
-  (*deviceCopy)(inputHostBuffer, inputDeviceBuffer)->wait();
+  (*deviceCopy)(inputHostBuffer, inputDeviceBuffer)->ignore();
 
   // Construct output buffer(s).
   traccc::edm::track_collection<traccc::default_algebra>::buffer
       outputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
                          m_deviceMR->mr(), &(m_hostMR->mr()));
-  deviceCopy->setup(outputDeviceBuffer)->wait();
+  deviceCopy->setup(outputDeviceBuffer)->ignore();
   traccc::edm::track_collection<traccc::default_algebra>::host
       outputHostCollection(m_hostMR->mr());
 

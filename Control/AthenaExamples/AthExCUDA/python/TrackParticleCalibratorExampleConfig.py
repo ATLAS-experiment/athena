@@ -22,7 +22,7 @@ from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg
 from AthCUDAServices.AthCUDAServicesConfig import \
    HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, StreamToolCfg
-from AthCUDAServices.AthCUDAServicesConfig import CopyToolCfg as DeviceCopyToolCfg
+from AthCUDAServices.AthCUDAServicesConfig import AsyncCopyToolCfg as DeviceCopyToolCfg
 
 # System import(s).
 import sys
