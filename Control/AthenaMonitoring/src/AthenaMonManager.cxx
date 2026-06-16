@@ -463,10 +463,8 @@ initialize()
 
 StatusCode
 AthenaMonManager::
-execute()
+execute(const EventContext& ctx)
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
     m_d->m_forkedProcess=false;
     pid_t currPID=getpid();
     //m_lastPID 0 means the execute method was not called yet. 
@@ -539,13 +537,6 @@ execute()
     return StatusCode::SUCCESS;
 }
 
-
-StatusCode
-AthenaMonManager::
-finalize()
-{
-    return StatusCode::SUCCESS;
-}
 
 StatusCode
 AthenaMonManager::

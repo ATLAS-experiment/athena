@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonManager_H
@@ -94,11 +94,10 @@ class AthenaMonManager : public AthAlgorithm {
 
       bool forkedProcess();
 
-      virtual StatusCode initialize();
-      virtual StatusCode execute();
-      virtual StatusCode start();
-      virtual StatusCode stop();
-      virtual StatusCode finalize();
+      virtual StatusCode initialize() override;
+      virtual StatusCode execute(const EventContext& ctx) override;
+      virtual StatusCode start() override;
+      virtual StatusCode stop() override;
 
       virtual std::string fileKey() const;
 
