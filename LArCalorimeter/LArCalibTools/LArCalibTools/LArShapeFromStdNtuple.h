@@ -31,7 +31,7 @@ class LArShapeFromStdNtuple : public AthAlgorithm
   virtual StatusCode initialize() override;
 
   /// implements IAlgorithm::execute()  : Does nothing
-  virtual StatusCode execute() override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
 
   virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override;

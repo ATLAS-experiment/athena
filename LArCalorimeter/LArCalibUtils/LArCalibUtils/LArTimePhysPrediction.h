@@ -30,7 +30,7 @@ class LArTimePhysPrediction : public AthAlgorithm
 
   //standard algorithm methods
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override { return StatusCode::SUCCESS; }
+  virtual StatusCode execute(const EventContext&) override { return StatusCode::SUCCESS; }
   virtual StatusCode stop() override;
   
  private:
