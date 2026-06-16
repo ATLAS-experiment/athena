@@ -118,26 +118,25 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
       }
       nTools++;
       for (bool isSFTool : {true, false}) { // one tool instance for efficiencies, another for scale factors
-	auto t = m_electronToolsFactory.emplace(m_electronToolsFactory.end(),
-						"AsgElectronEfficiencyCorrectionTool/ElTrigEff_"
-						+ std::to_string(isSFTool) + "_" + std::to_string(nTools) + "_" + m_electronID.value() + "_" + m_electronIsol.value());
-	if (!m_isRun3Geo) {
-	  ANA_CHECK(t->setProperty("MapFilePath", "ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3/map1.txt"));
-	}
-	ANA_CHECK(t->setProperty("IdKey", m_electronID.value()));
-	ANA_CHECK(t->setProperty("IsoKey", m_electronIsol.value()));
-	ANA_CHECK(t->setProperty("TriggerKey", isSFTool ? trigKey : "Eff_" + trigKey ));
-	ANA_CHECK(t->setProperty("CorrelationModel", "TOTAL"));
-	ANA_CHECK(t->setProperty("ForceDataType", PATCore::ParticleDataType::Full));
-	ANA_CHECK(t->setProperty("OutputLevel", msg().level()));
-	ANA_CHECK(t->initialize());
-	// now record the handle
-	auto& handles = (isSFTool? electronSFTools : electronEffTools);
-	handles.push_back(t->getHandle());
-	std::string name = handles[handles.size()-1].name();
-	legsPerTool[name] = triggers;
-	// and add the systematics
-	ANA_CHECK(m_systematicsList.addSystematics( *handles[handles.size()-1] ));
+        auto t = m_electronToolsFactory.emplace(m_electronToolsFactory.end(),
+                                                "AsgElectronEfficiencyCorrectionTool/ElTrigEff_"
+                                                + std::to_string(isSFTool) + "_" + std::to_string(nTools) + "_" + m_electronID.value() + "_" + m_electronIsol.value());
+        ANA_CHECK(t->setProperty("MapFilePath", std::string("ElectronEfficiencyCorrection/2015_2025/rel22.2/") +
+                                 (m_isRun3Geo ? "2025_Run3_Consolidated_Recommendation_v4/map2.txt" : "2025_Run2Rel22_Recommendation_v3/map1.txt")));
+        ANA_CHECK(t->setProperty("IdKey", m_electronID.value()));
+        ANA_CHECK(t->setProperty("IsoKey", m_electronIsol.value()));
+        ANA_CHECK(t->setProperty("TriggerKey", isSFTool ? trigKey : "Eff_" + trigKey ));
+        ANA_CHECK(t->setProperty("CorrelationModel", "TOTAL"));
+        ANA_CHECK(t->setProperty("ForceDataType", PATCore::ParticleDataType::Full));
+        ANA_CHECK(t->setProperty("OutputLevel", msg().level()));
+        ANA_CHECK(t->initialize());
+        // now record the handle
+        auto& handles = (isSFTool? electronSFTools : electronEffTools);
+        handles.push_back(t->getHandle());
+        std::string name = handles[handles.size()-1].name();
+        legsPerTool[name] = triggers;
+        // and add the systematics
+        ANA_CHECK(m_systematicsList.addSystematics( *handles[handles.size()-1] ));
       }
     }
   }
