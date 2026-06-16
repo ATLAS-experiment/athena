@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCConnectionASDToPP_hh
 #define TrigT1TGC_TGCConnectionASDToPP_hh
 
 #include "TrigT1TGC/TGCNumbering.h"
-#include <sstream>
 
 namespace LVL1TGCTrigger {
 
