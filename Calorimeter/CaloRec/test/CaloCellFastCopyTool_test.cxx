@@ -47,7 +47,7 @@ class DummyAlgorithm: public AthAlgorithm {
         : AthAlgorithm(name, svcloc) {
     }
 
-    virtual StatusCode execute() {
+    virtual StatusCode execute(const EventContext&) {
       return StatusCode::SUCCESS;
     }
 
