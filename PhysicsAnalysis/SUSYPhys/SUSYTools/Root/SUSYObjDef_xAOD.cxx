@@ -176,8 +176,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_eleConfigBaseline(""),
     m_eleBaselineIso_WP(""),
     m_eleIdExpert(false),
-    m_muId(static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))),
-    m_muIdBaseline(static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))),
+    m_muId(static_cast<int>(xAOD::Muon::Quality::VeryLoose)),
+    m_muIdBaseline(static_cast<int>(xAOD::Muon::Quality::VeryLoose)),
     m_photonId(""),
     m_photonIdBaseline(""),
     m_tauTagger(""),
@@ -1366,14 +1366,14 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   // Remove the item from the table
   rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject("Jet.InputType") );
 
-  if (m_muId == static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))) {
+  if (m_muId == static_cast<int>(xAOD::Muon::Quality::VeryLoose)) {
     int muIdTmp = rEnv.GetValue("Muon.Id", 1);
     m_muId = (muIdTmp<4 ? static_cast<int>(xAOD::Muon::Quality(muIdTmp)) : muIdTmp);
     ATH_MSG_INFO( "readConfig(): Loaded property Muon.Id with value " << m_muId);
     // Remove the item from the table
     rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject("Muon.Id") );
   }
-  if (m_muIdBaseline == static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))) {
+  if (m_muIdBaseline == static_cast<int>(xAOD::Muon::Quality::VeryLoose)) {
     int muIdTmp = rEnv.GetValue("MuonBaseline.Id", 1);
     m_muIdBaseline = (muIdTmp<4 ? static_cast<int>(xAOD::Muon::Quality(muIdTmp)) : muIdTmp);
     ATH_MSG_INFO( "readConfig(): Loaded property MuonBaseline.Id with value " << m_muIdBaseline);
