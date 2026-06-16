@@ -162,7 +162,7 @@ namespace ZMassConstraint
         // Get the track particle according to the requested muon type for the covariance matrix
         const xAOD::TrackParticle* track = mu.primaryTrackParticle();
         bool set4vec = false;
-        if (((isMS_MCMT == muonType) || (isID_MCMT == muonType)) && xAOD::Muon::Combined == mu.muonType()) {
+        if (((isMS_MCMT == muonType) || (isID_MCMT == muonType)) && xAOD::Muon::MuonType::Combined == mu.muonType()) {
             if (isMS_MCMT  == muonType) { 
                 track = mu.trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
                 if (!muonSpectrometerPt.isAvailable(mu))
