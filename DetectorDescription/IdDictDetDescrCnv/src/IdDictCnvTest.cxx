@@ -191,7 +191,7 @@ IdDictCnvTest::initialize()
 
 /////////////////////////////////////////////////////////////////////
 StatusCode 
-IdDictCnvTest::execute()
+IdDictCnvTest::execute(const EventContext& /*ctx*/)
 {
     return StatusCode::SUCCESS;
 }
