@@ -51,12 +51,8 @@ float ScaleFactorTool::getSF(const xAOD::IParticle* p) const
 {
   const SG::AuxElement& el = *p;
   int sf_bin = m_sf_func(el);
-  std::cout << "sf_bin = " << sf_bin << std::endl;
   int pct_bin = m_pct_func(el);
-  std::cout << " pct_bins total = " << m_n_pct_bins << std::endl;
-  std::cout << " pct_bin = " << pct_bin << std::endl;
   int global = sf_bin * m_n_pct_bins + pct_bin;
-  std::cout << " global = " << global << std::endl;
   return m_sf_values.at(global);
 }
 
