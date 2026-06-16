@@ -230,7 +230,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.IncludeBJetTriggerByYearContent = True
 
     #Trigger content for DarkJetPEB 
-    if flags.Input.TriggerStream=='physics_DarkJetPEBTLA':
+    if flags.Input.TriggerStream=='physics_DarkJetPEBTLA' and not flags.Input.isMC:
         PHYSSlimmingHelper.AllVariables += ['HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
                                             'HLT_MET_pfopufit']
 
