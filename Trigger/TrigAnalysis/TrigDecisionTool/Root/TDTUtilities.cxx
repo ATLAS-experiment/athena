@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfHLTData/HLTTriggerElement.h"
@@ -39,7 +39,7 @@ namespace TDTUtilities_impl {
 
 
 std::vector< std::string >
-Trig::convertStringToVector(const std::string& triggerNames) {
+Trig::convertStringToVector(std::string_view triggerNames) {
   std::string temp(triggerNames);
   std::string::size_type pos;
   // new erase all spaces

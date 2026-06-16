@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerMatchingTool/MatchFromCompositeTool.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
 #include "CxxUtils/crc64.h"
+#include <format>
+#include <stdexcept>
 
 #ifdef XAOD_STANDALONE
 namespace {
@@ -69,7 +71,7 @@ namespace Trig {
 
   bool MatchFromCompositeTool::match  (
       const xAOD::IParticle& recoObject,
-      const std::string& chain,
+      std::string_view chain,
       double, bool) const
   {
     return match({&recoObject}, chain);
@@ -77,24 +79,24 @@ namespace Trig {
 
   bool MatchFromCompositeTool::match(
       const std::vector<const xAOD::IParticle*>& recoObjects,
-      const std::string& chain,
+      std::string_view chain,
       double, bool) const
   {
-    std::string containerName = m_inputPrefix+chain;
+    std::string containerName = m_inputPrefix;
+    containerName.append(chain);
     // We have to replace '.' characters with '_' characters so that these are
     // valid container names...
     std::replace(containerName.begin(), containerName.end(), '.', '_');
     const xAOD::TrigCompositeContainer* composites(nullptr);
     if (evtStore()->retrieve(composites, containerName).isFailure() ){
-      ATH_MSG_ERROR("Failed to retrieve composite container for chain "+chain);
+      ATH_MSG_ERROR("Failed to retrieve composite container for chain "<< chain);
       ATH_MSG_ERROR("Please check your derivation to see if the container is there");
       ATH_MSG_ERROR("This likely means the trigger is not in your file's menu");
       throw std::runtime_error(
-          "Failed to retrieve composite corresponding to chain " + chain);
+          std::format("Failed to retrieve composite corresponding to chain {}",chain));
     }
+    const constAcc_t<vecLink_t<xAOD::IParticleContainer>> accMatched("TrigMatchedObjects");
     for (const xAOD::TrigComposite* composite : *composites) {
-      static const constAcc_t<vecLink_t<xAOD::IParticleContainer>> accMatched(
-          "TrigMatchedObjects");
       if (testCombination(accMatched(*composite), recoObjects) )
         return true;
     }

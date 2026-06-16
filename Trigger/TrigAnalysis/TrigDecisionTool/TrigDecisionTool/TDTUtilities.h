@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_DECISION_TOOL_UTILITIES_H
@@ -14,6 +14,7 @@
  *
  ***********************************************************************************/
 #include <string>
+#include <string_view>
 #include <vector>
 
 class TTree;
@@ -27,7 +28,7 @@ namespace Trig {
   /**
    * @brief makes a split of list of chains into the vector of chains
    **/
-  std::vector< std::string > convertStringToVector(const std::string& triggerNames);
+  std::vector< std::string > convertStringToVector(std::string_view triggerNames);
 
   /**
    * @brief normalizes the list of triggers (patterns) by sorting and uniquing them
