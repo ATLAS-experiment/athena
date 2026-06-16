@@ -264,9 +264,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection, const 
          ieta < 5 ? m_eTowersIDs[iphi+1][ieta+1] : 0},
       };
       
-
+      m_eFEXtauAlgoTool->setAlgoVersion(tauAlgoVersion); // do before setup, part of setup relies AlgoVersion!
       m_eFEXtauAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
-      m_eFEXtauAlgoTool->setAlgoVersion(tauAlgoVersion);
       m_eFEXtauBDTAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
 
       if ( m_eFEXtauAlgoTool->isCentralTowerSeed() != m_eFEXtauBDTAlgoTool->isCentralTowerSeed() )
