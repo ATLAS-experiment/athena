@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1MBTS_H
@@ -25,8 +25,8 @@ namespace LVL1 {
   public:
     TrigT1MBTS(const std::string& name, ISvcLocator* pSvcLocator);
 
-    StatusCode initialize();
-    StatusCode execute();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     
   private:
     /** A data member to retain a pointer to the Tile Test Beam
