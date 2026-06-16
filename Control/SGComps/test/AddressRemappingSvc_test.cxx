@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SGComps/test/AddressRemappingSvc_test.cxx
@@ -43,7 +43,7 @@ class TestAlgorithm
 public:
   using AthAlgorithm::AthAlgorithm;
 
-  virtual StatusCode execute() override { std::abort(); }
+  virtual StatusCode execute(const EventContext&) override { std::abort(); }
 
   virtual const DataObjIDColl& outputDataObjs() const override;
 
