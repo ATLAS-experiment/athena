@@ -1803,7 +1803,7 @@ namespace VKalVrtAthena {
           p4wrtSV_electron.SetPtEtaPhiM( pt_wrtSV, eta_wrtSV, phi_wrtSV, PhysConsts::mass_electron    );
 
           // for selected tracks only
-          static const SG::ConstAccessor<char> is_associatedAcc("is_associated" + m_augVerString);
+          const SG::ConstAccessor<char> is_associatedAcc("is_associated" + m_augVerString);
           if( is_associatedAcc.isAvailable(*trk) ) {
             if( !is_associatedAcc(*trk) ) {
               sumP4_selected += p4wrtSV_pion;
