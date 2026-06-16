@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -111,9 +111,12 @@ BOOST_AUTO_TEST_SUITE(TrackCollectionMergerTest)
   }
   
   BOOST_AUTO_TEST_CASE(Execute){
+    EventContext ctx;
+    ctx.setExtension (Atlas::ExtendedEventContext());
+
     auto *pAlg = new PutTrackCollectionsInSG("PutCollectionsInSG",pSvcLoc);
     pAlg->addRef();
-    BOOST_TEST(pAlg->execute().isSuccess());
+    BOOST_TEST(pAlg->execute(ctx).isSuccess());
     std::string collectionKey1("StoreGateSvc+TrackCollectionKey1");
     SG::ReadHandle<TrackCollection> thisTrackCollection1 (collectionKey1);
     BOOST_TEST(thisTrackCollection1->size() == 1);
@@ -125,8 +128,6 @@ BOOST_AUTO_TEST_SUITE(TrackCollectionMergerTest)
     BOOST_TEST(pMergeAlg->setProperty("TracksLocation","['TrackCollectionKey1','TrackCollectionKey2']").isSuccess());
     //initialize() is necessary here
     BOOST_TEST(pMergeAlg->initialize().isSuccess());
-    EventContext ctx;
-    ctx.setExtension (Atlas::ExtendedEventContext());
     BOOST_TEST(pMergeAlg->execute(ctx).isSuccess());
     std::vector<std::string> keysPresent{};
     g.storeGateSvc()->keys<TrackCollection>(keysPresent);
