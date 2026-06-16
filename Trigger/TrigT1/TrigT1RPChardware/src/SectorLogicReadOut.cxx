@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/SectorLogicReadOut.h"
@@ -137,7 +137,7 @@ ubit16 SectorLogicReadOut::readSLHitCurrent() {
 }  // end-of-SectorLogicReadOut::readSLHitCurrent
 //----------------------------------------------------------------------------//
 ubit16 SectorLogicReadOut::readSLCounterCurrent() {
-    if (!m_BodyCounter) {
+    if (m_Body and !m_BodyCounter) {
         SLROData *temp = m_Body;
         for (ubit16 i = 0; i < numberOfHitWords(); i++) {
             if (temp->next) temp = temp->next;

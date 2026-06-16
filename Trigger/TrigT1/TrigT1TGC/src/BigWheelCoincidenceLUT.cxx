@@ -135,7 +135,11 @@ bool BigWheelCoincidenceLUT::readMap()
         }
         uint32_t modaddr = ((modulenumber[iModule] & TGCTriggerLUTs::MODULE_MASK)<<TGCTriggerLUTs::MODULE_SHIFT) +
                            ((phimod2 & TGCTriggerLUTs::PHIMOD2_MASK)<<TGCTriggerLUTs::PHIMOD2_SHIFT);
-
+        const std::string filePrefix = PathResolver::FindCalibDirectory("dev") + "/TrigT1TGC";
+        if( filePrefix.length() == 10 ) { // "/TrigT1TGC" length
+            log << MSG::ERROR << " Could not find calibration directory referred to by 'dev'."<< endmsg;
+            continue;
+        }
         for (int iCoinType=0; iCoinType != N_COIN_TYPE; iCoinType++) {
           std::string fn = "/BW/cm_";
           if (m_fullCW) {
@@ -147,15 +151,10 @@ bool BigWheelCoincidenceLUT::readMap()
 
           int type = -1;
           int lDR, hDR, lDPhi, hDPhi;
-          std::string fullName = PathResolver::FindCalibDirectory("dev")+"/TrigT1TGC"+fn;
-          if( fullName.length() == 0 ) {
-            log << MSG::ERROR << " Could not found " << fn.c_str() << endmsg;
-            continue;
-          }
-
-          std::ifstream file(fullName.c_str(),std::ios::in);
+          std::string fullName = filePrefix+fn;
+          std::ifstream file(fullName,std::ios::in);
           if(!file){
-            log << MSG::ERROR << " Could not found " << fullName.c_str() << endmsg;
+            log << MSG::ERROR << " Could not find " << fullName << endmsg;
             continue;
           }
 
