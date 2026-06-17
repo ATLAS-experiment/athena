@@ -1,17 +1,22 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrackSummaryTool.h"
 
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
-#include "xAODMuonPrepData/UtilFunctions.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
+#include "ActsGeoUtils/SurfaceCache.h"
+
 #include "xAODMuon/versions/MuonTrackSummaryAccessors_v1.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "Acts/Utilities/StringHelpers.hpp"
+
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
+
+#include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/CombinedMuonStrip.h"
+
 
 using namespace ActsTrk::detail;
 using namespace Muon::MuonStationIndex;
@@ -25,8 +30,71 @@ namespace MuonR4 {
         ATH_CHECK(m_idHelperSvc.retrieve());
         return StatusCode::SUCCESS;
     }
-    HitSummary TrackSummaryTool::makeSummary(const EventContext& /*ctx*/,
-                                             const ConstTrack_t trackProxy) const  {
+    void TrackSummaryTool::complementaryHole(const Identifier& gasGapId,
+                                           const MuonGMR4::MuonReadoutElement* reEle,
+                                           HitSummary& summary) const {
+        if (!reEle) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" No readout element associated "
+                            <<m_idHelperSvc->toString(gasGapId));
+            return;
+        }
+        const bool measPhi = m_idHelperSvc->measuresPhi(gasGapId);
+        switch(reEle->detectorType()) {
+            using enum ActsTrk::DetectorType;
+            case Rpc:{
+                const auto* castRE = static_cast<const MuonGMR4::RpcReadoutElement*>(reEle);
+                if (castRE->nPhiStrips() || measPhi) {
+                    const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
+                    const Identifier holeId = idHelper.panelID(gasGapId, idHelper.gasGap(gasGapId), !measPhi);
+                    incrementSummary(holeId, Stat_t::Hole, 1, summary);
+                }
+                break;
+            } case Tgc: {
+                const auto* castRE = static_cast<const MuonGMR4::TgcReadoutElement*>(reEle);
+                const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+                const Identifier holeId = idHelper.channelID(gasGapId, 
+                                                             idHelper.gasGap(gasGapId), !measPhi, 1);
+
+                if (castRE->numChannels(castRE->measurementHash(holeId))){
+                    incrementSummary(holeId, Stat_t::Hole, 1, summary);
+                }
+                break;
+            } case sTgc: {
+                const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+                switch (idHelper.channelType(gasGapId)) {
+                    using enum sTgcIdHelper::sTgcChannelTypes;
+                    case Strip:
+                        incrementSummary(idHelper.channelID(gasGapId, 
+                                                            idHelper.multilayer(gasGapId),
+                                                            idHelper.gasGap(gasGapId), Wire, 1), 
+                                         Stat_t::Hole, 1, summary);
+                        break;
+                    case Wire:
+                        incrementSummary(idHelper.channelID(gasGapId, 
+                                                            idHelper.multilayer(gasGapId),
+                                                            idHelper.gasGap(gasGapId), Strip, 1), 
+                                         Stat_t::Hole, 1, summary);
+                    default:
+                        break;
+                }
+            }
+            default: 
+                break;
+        }
+    }
+    HitSummary TrackSummaryTool::makeSummary(const EventContext& ctx,
+                                             const ConstTrack_t trackProxy) const {
+        return makeSummaryImpl(ctx, trackProxy);
+    }
+    HitSummary TrackSummaryTool::makeSummary(const EventContext& ctx,
+                                             const Track_t trackProxy) const {
+        return makeSummaryImpl(ctx, trackProxy);
+    }
+
+
+    template <Acts::TrackProxyConcept T>
+    HitSummary TrackSummaryTool::makeSummaryImpl(const EventContext& /*ctx*/,
+                                             const T& trackProxy) const  {
         HitSummary summary{};
         trackProxy.container().trackStateContainer().visitBackwards(trackProxy.tipIndex(), 
             [&](const auto& state){
@@ -39,22 +107,28 @@ namespace MuonR4 {
                 if (state.hasUncalibratedSourceLink()) {
                     const auto* uncalib = dynamic_cast<const xAOD::MuonMeasurement*>(xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
                     // for the combined sTgc space point we have to fill the primary and secondary measuremment seperately to resolve the strip/pad/wire combinations
-                    if(uncalib->type() == xAOD::UncalibMeasType::sTgcStripType && uncalib->numDimensions() == 0){
+                    if(uncalib->numDimensions() == 0) {
                         const auto* combinedMeas = dynamic_cast<const xAOD::CombinedMuonStrip*>(uncalib);
                         incrementSummary(combinedMeas->primaryStrip()->identify(), status, combinedMeas->primaryStrip()->numDimensions(), summary);
                         incrementSummary(combinedMeas->secondaryStrip()->identify(), status, combinedMeas->secondaryStrip()->numDimensions(), summary);
-                        
                     } else {
                         incrementSummary(uncalib->identify(), status, uncalib->numDimensions(), summary);
+                        complementaryHole(uncalib->identify(), uncalib->readoutElement(), summary);
                     }
                 } else if (state.hasReferenceSurface()) {
                     const Acts::Surface& surf{state.referenceSurface()};
                     /// Surface is not active
-                    const auto* detEl = dynamic_cast<const ActsTrk::IDetectorElementBase*>(surf.surfacePlacement());
+                    if (!surf.isSensitive() || !surf.isAlignable()) {
+                        return;
+                    }
+                    const auto* detEl = dynamic_cast<const ActsTrk::SurfaceCache*>(surf.surfacePlacement());
                     if (!detEl) {
                         return;
                     }
                     incrementSummary(detEl->identify(), status, 1, summary);
+                    complementaryHole(detEl->identify(), 
+                        dynamic_cast<const MuonGMR4::MuonReadoutElement*>(detEl->transformCache()->parent()), 
+                        summary);
                 }
         });
         ATH_MSG_DEBUG("Obtained track summary from track with "<<Acts::toString(trackProxy.fourMomentum())
@@ -113,18 +187,18 @@ namespace MuonR4 {
                 }
             }            
         } else {
-            ATH_MSG_ERROR(__FILE__ << ":" << __LINE__ << "  Unkown technology index "<<static_cast<int>(techIdx));
+            ATH_MSG_ERROR(__FILE__ << ":" << __LINE__ << "  Unkown technology index "<<techIdx);
             return;
         }
 
         if (cat1 != Cat_t::nCategories){
-            ATH_MSG_VERBOSE("Increment "<<summary.toString(cat1)<<", "<<summary.toString(status)<<", layer: "
-                <<Muon::MuonStationIndex::layerName(layer)<<", small: "<<(small ? "yes" : "no"));
+            ATH_MSG_VERBOSE("Increment "<<cat1<<", "<<status<<", layer: "
+                <<layer<<", small: "<<(small ? "yes" : "no"));
             ++summary.value(cat1, status, layer, small);
         }
         if (cat2 != Cat_t::nCategories) {
-            ATH_MSG_VERBOSE("Increment "<<summary.toString(cat2)<<", "<<summary.toString(status)<<", layer: "
-                    <<Muon::MuonStationIndex::layerName(layer)<<", small: "<<(small ? "yes" : "no"));
+            ATH_MSG_VERBOSE("Increment "<<cat2<<", "<<status<<", layer: "
+                    <<layer<<", small: "<<(small ? "yes" : "no"));
             ++summary.value(cat2, status, layer, small);
         }
     }
