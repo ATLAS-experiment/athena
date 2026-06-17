@@ -12,6 +12,6 @@ namespace xAOD {
 }
 
 #include "xAODCore/CLASS_DEF.h"
-CLASS_DEF(xAOD::MuonDVInferenceResult, 245900431, 1)
+CLASS_DEF(xAOD::MuonDVInferenceResult, 245900431, 1) // TODO : Change class id in the case of assigned/checked ATLAS conventions 
 
 #endif
