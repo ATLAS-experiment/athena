@@ -67,7 +67,7 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
     # Inner detector group recommendations for indet tracks in analysis
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
     HIGG1D1_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && \
-                                   abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && \
+                                   abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && \
                                    InDetTrackParticles.pt > 10*GeV"
     HIGG1D1TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,

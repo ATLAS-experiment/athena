@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #========================================================================
 # DAOD_SUSY20.py
 # This defines DAOD_SUSY20, a skimmed DAOD format for Run-2 and Run-3.
@@ -165,7 +165,7 @@ def SUSY20KernelCfg(flags, name = "SUSY20Kernel", **kwargs):
 	# Thinning tools
 	#
 	thinningTools = []
-	thinningExpression = "InDetTrackParticles.DFLoose && (InDetTrackParticles.pt > 0.5*GeV) && (abs( DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta) ) < 3.0*mm)"
+	thinningExpression = "InDetTrackParticles.DFLoose && (InDetTrackParticles.pt > 0.5*GeV) && (abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta) ) < 3.0*mm)"
 
 	# TrackParticles directly
 	from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
