@@ -1,0 +1,16 @@
+<!-- Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+
+  <!-- xAOD::MuonDVInferenceResult interface type(s). -->
+  <class name="xAOD::MuonDVInferenceResult_v1"
+         id="24181E3E-12DB-4737-8357-627D24E2A3AC" />
+  <class name="xAOD::MuonDVInferenceResultContainer_v1"
+         id="562D58BF-3C3A-4C06-92AA-AAC8C8E472B3" />
+  <class name="xAOD::MuonDVInferenceResultAuxContainer_v1"
+         id="46CD202A-CC7B-4D62-8228-F39C157C54D1" />
+
+  <typedef name="xAOD::MuonDVInferenceResult" />
+  <typedef name="xAOD::MuonDVInferenceResultContainer" />
+  <typedef name="xAOD::MuonDVInferenceResultAuxContainer" />
+
+</lcgdict>
