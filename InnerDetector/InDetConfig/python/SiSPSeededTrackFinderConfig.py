@@ -43,8 +43,8 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
 
     # Heavy-ion config
     kwargs.setdefault("useZvertexTool",
-                      flags.Tracking.ActiveConfig.extension in ["HeavyIon", "VtxLumiHeavyIon"])
-    if flags.Tracking.ActiveConfig.extension in ["HeavyIon", "VtxLumiHeavyIon"]:
+                      flags.Tracking.ActiveConfig.extension in ["HeavyIon", "VtxLumiHeavyIon", "HeavyIonLowPt"])
+    if flags.Tracking.ActiveConfig.extension in ["HeavyIon", "VtxLumiHeavyIon", "HeavyIonLowPt"]:
         # Optimization from Igor
         kwargs.setdefault("FreeClustersCut", 2)
         kwargs.setdefault("useMBTSTimeDiff", True)

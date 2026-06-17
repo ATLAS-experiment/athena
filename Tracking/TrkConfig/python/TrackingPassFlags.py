@@ -1011,7 +1011,7 @@ def createHeavyIonTrackingPassFlags():
 
 def createHeavyIonLowPtTrackingPassFlags():
     icf = createHeavyIonTrackingPassFlags()
-    icf.extension        = "LowPt"
+    icf.extension        = "HeavyIonLowPt"
     icf.maxPT            = lambda pcf: 0.6 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
     icf.minPT            = lambda pcf: 0.2 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
 
