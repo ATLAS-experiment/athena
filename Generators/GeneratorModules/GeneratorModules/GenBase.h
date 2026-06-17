@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_GENBASE_H
@@ -94,7 +94,7 @@ public:
 
   /// Access the current event's McEventCollection (const)
   const McEventCollection* events_const() const {
-    return events_const( getContext() );
+    return events_const( Gaudi::Hive::currentContext() );
   }
   const McEventCollection* events_const( const EventContext& ctx ) const {
     SG::ReadHandle<McEventCollection> ret = SG::makeHandle(m_mcevents_const, ctx);

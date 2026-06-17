@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -61,12 +61,12 @@ StatusCode EventInfoWriter::initialize()
 }
 
 // Execute method:
-StatusCode EventInfoWriter::execute(const EventContext& /*ctx*/) 
+StatusCode EventInfoWriter::execute(const EventContext& ctx)
 {
     // Get the messaging service, print where you are
     ATH_MSG_DEBUG("EventInfoWriter::execute()");
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, getContext());
+    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
     if(!eventInfo.isValid()) {
  	ATH_MSG_ERROR("  Could not get event info");      
  	return StatusCode::FAILURE;

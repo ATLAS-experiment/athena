@@ -1,4 +1,4 @@
-//Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  
 
 #include "FlavourTaggingTests/PhysicsTriggerVariablePlots.h"
@@ -56,24 +56,22 @@ namespace FTAGValidation {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PhysicsTriggerVariablePlots::execute(const EventContext& /*ctx*/) {
+  StatusCode PhysicsTriggerVariablePlots::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG( "Executing " << name() << " ..." );
     m_nTotal_events++;
-
-    const EventContext context = getContext();
 
     /* =========================================================================================================================================== */
     /* ==== Retrieve Collections */
     /* =========================================================================================================================================== */
 
     // Event Info
-    SG::ReadHandle< xAOD::EventInfo > eventInfoHandle = SG::makeHandle( m_eventInfoKey,context );
+    SG::ReadHandle< xAOD::EventInfo > eventInfoHandle = SG::makeHandle( m_eventInfoKey,ctx );
     ATH_CHECK( eventInfoHandle.isValid() );
     const xAOD::EventInfo *eventInfo = eventInfoHandle.get();
 
     // Retrieve Offline-Jet Collection
     const xAOD::JetContainer *offlineJetCollection = nullptr;
-    ATH_CHECK( retrieveCollectionfromStoreGate( context,offlineJetCollection,m_offJetKey ) );
+    ATH_CHECK( retrieveCollectionfromStoreGate( ctx,offlineJetCollection,m_offJetKey ) );
     
     std::vector< const xAOD::Jet* > qualityOfflineJetCollection;
     for ( const xAOD::Jet *jet : *offlineJetCollection ) {
@@ -97,7 +95,7 @@ namespace FTAGValidation {
       // ==== Primary Vertex =================
       // Chain is passed, only one PV per event, retrieve it in a standard way, filled once, doesnt matter how many jets
       const xAOD::VertexContainer *vertexCollection = nullptr;
-      ATH_CHECK( retrieveCollectionfromStoreGate( context,vertexCollection,m_trigVertexKey ) );
+      ATH_CHECK( retrieveCollectionfromStoreGate( ctx,vertexCollection,m_trigVertexKey ) );
       const xAOD::Vertex *primaryVertex = getPrimaryVertex( vertexCollection );
       if ( primaryVertex == nullptr ) {
         ATH_MSG_WARNING( "Could not retrieve Primary Vertex. Skip this event!" );
@@ -112,7 +110,7 @@ namespace FTAGValidation {
 
       // ==== Tracks =========================
       const xAOD::TrackParticleContainer *trackParticleCollection = nullptr;
-      ATH_CHECK( retrieveCollectionfromStoreGate( context,trackParticleCollection,m_trigTrackKey) );
+      ATH_CHECK( retrieveCollectionfromStoreGate( ctx,trackParticleCollection,m_trigTrackKey) );
       ATH_CHECK( fillHistogram( chain + "_nTracks",trackParticleCollection->size() ) );
 
       // ==== Jet ============================

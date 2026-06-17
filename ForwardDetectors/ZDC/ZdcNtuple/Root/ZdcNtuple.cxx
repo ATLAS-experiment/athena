@@ -1146,7 +1146,7 @@ void ZdcNtuple::processMCEventCollection(){
   /******************************************
    * Get the McEventCollection (input)
    ******************************************/
-  SG::ReadHandle<McEventCollection> mcEventCollection (m_mcEventCollectionName, getContext());
+  SG::ReadHandle<McEventCollection> mcEventCollection (m_mcEventCollectionName);
   if (!mcEventCollection.isValid()){
     ANA_MSG_ERROR("Could not retrieve HepMC with key:" << m_mcEventCollectionName.key());
     return;
