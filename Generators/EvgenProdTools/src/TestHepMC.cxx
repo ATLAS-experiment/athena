@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAOD_ANALYSIS
 
@@ -367,7 +367,7 @@ StatusCode TestHepMC::execute(const EventContext& /*ctx*/) {
 
       if (m_cm_energy > 0 && std::abs(cmenergy - m_cm_energy) > m_cme_diff) {
         ATH_MSG_FATAL("Beam particles have incorrect energy: " << m_cm_energy/Gaudi::Units::GeV << " GeV expected, vs. " << cmenergy/Gaudi::Units::GeV << " GeV found");
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         if (m_doHist){
           m_h_beamparticle1_Energy->Fill(beams.first->momentum().e()/Gaudi::Units::GeV);
           m_h_beamparticle2_Energy->Fill(beams.second->momentum().e()/Gaudi::Units::GeV);
@@ -815,7 +815,7 @@ StatusCode TestHepMC::execute(const EventContext& /*ctx*/) {
 
   // End of execution for each event - update filter value
   if (!filter_pass){
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ++m_nFail;
   } else {
     ++m_nPass;

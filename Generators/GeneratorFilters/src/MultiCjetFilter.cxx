@@ -72,7 +72,7 @@ StatusCode MultiCjetFilter::filterFinalize() {
 }
 
 
-StatusCode MultiCjetFilter::filterEvent() {
+StatusCode MultiCjetFilter::filterEvent(const EventContext& ctx) {
 
   bool pass = true;
   m_Nevt++;
@@ -181,6 +181,6 @@ StatusCode MultiCjetFilter::filterEvent() {
     m_SumOfWeights_Pass += weight;
   }
 
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
   return StatusCode::SUCCESS;
 }

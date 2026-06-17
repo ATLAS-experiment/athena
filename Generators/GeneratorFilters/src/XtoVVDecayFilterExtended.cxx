@@ -47,7 +47,7 @@ StatusCode XtoVVDecayFilterExtended::filterFinalize() {
 }
 
 
-StatusCode XtoVVDecayFilterExtended::filterEvent() {
+StatusCode XtoVVDecayFilterExtended::filterEvent(const EventContext& ctx) {
   bool okPDGChild1 = false;
   bool okPDGChild2 = false;
   int nGoodParent = 0;
@@ -77,7 +77,7 @@ StatusCode XtoVVDecayFilterExtended::filterEvent() {
   }
 
   // If we get here we have failed
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 

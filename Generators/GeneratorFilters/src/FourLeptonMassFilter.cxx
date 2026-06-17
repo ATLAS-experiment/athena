@@ -33,7 +33,7 @@ StatusCode FourLeptonMassFilter::filterInitialize() {
 }
 
 
-StatusCode FourLeptonMassFilter::filterEvent() {
+StatusCode FourLeptonMassFilter::filterEvent(const EventContext& ctx) {
   McEventCollection::const_iterator itr;
 
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
@@ -127,6 +127,6 @@ StatusCode FourLeptonMassFilter::filterEvent() {
       }
 	}
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

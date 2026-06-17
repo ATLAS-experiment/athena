@@ -123,7 +123,7 @@ StatusCode MuDstarFilter::filterFinalize() {
 }
 
 //---------------------------------------------------------------------------
-StatusCode MuDstarFilter::filterEvent() {
+StatusCode MuDstarFilter::filterEvent(const EventContext& ctx) {
   //---------------------------------------------------------------------------
 
   // Loop over all events in McEventCollection 
@@ -480,7 +480,7 @@ StatusCode MuDstarFilter::filterEvent() {
                       ATH_MSG_INFO("MuDstarFilter: NumChildD0neutrinos, NumChildD0gammas = " << NumChildD0neutrinos << " , " << NumChildD0gammas );
                       ATH_MSG_INFO("MuDstarFilter: pis_pdg, K_pdg, ChargeD0Child1, ChargeD0Child2 = " << pis_pdg << " , " << K_pdg << " , " << ChargeD0Child1 << " , " << ChargeD0Child2 );
 
-                      setFilterPassed(true);
+                      setFilterPassed(true, ctx);
                       return StatusCode::SUCCESS;
                     }
                   } // for i
@@ -497,7 +497,7 @@ StatusCode MuDstarFilter::filterEvent() {
   //
   // if we get here we have failed
   //
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 

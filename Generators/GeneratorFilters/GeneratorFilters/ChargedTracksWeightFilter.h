@@ -19,7 +19,7 @@ public:
 
   ChargedTracksWeightFilter(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode filterInitialize();
-  StatusCode filterEvent();
+  StatusCode filterEvent(const EventContext& ctx);
   StatusCode filterFinalize();
 
   struct Spline {

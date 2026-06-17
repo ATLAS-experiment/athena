@@ -42,7 +42,7 @@ StatusCode xAODDecaysFinalStateFilter::filterInitialize() {
 }
 
 
-StatusCode xAODDecaysFinalStateFilter::filterEvent() {
+StatusCode xAODDecaysFinalStateFilter::filterEvent(const EventContext& ctx) {
     int nElectrons = 0;
     int nMuons = 0;
     int nTaus = 0;
@@ -53,7 +53,7 @@ StatusCode xAODDecaysFinalStateFilter::filterEvent() {
 
     // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
     // duplicated barcode ones
-    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
     CHECK(xTruthParticleContainer.isValid());
 
 
@@ -85,28 +85,28 @@ StatusCode xAODDecaysFinalStateFilter::filterEvent() {
     
 
   if (nQuarks < m_MinNQuarks || (m_NQuarks != -1 && nQuarks != m_NQuarks)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   }
   else if (nElectrons < m_MinNElectrons || (m_NElectrons != -1 && nElectrons != m_NElectrons)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nMuons < m_MinNMuons || (m_NMuons != -1 && nMuons != m_NMuons)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nTaus < m_MinNTaus || (m_NTaus != -1 && nTaus != m_NTaus)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nChargedLeptons < m_MinNChargedLeptons || (m_NChargedLeptons != -1 && nChargedLeptons != m_NChargedLeptons)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nNeutrinos < m_MinNNeutrinos || (m_NNeutrinos != -1 && nNeutrinos != m_NNeutrinos)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nPhotons < m_MinNPhotons || (m_NPhotons != -1 && nPhotons != m_NPhotons)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else {
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
   }
   return StatusCode::SUCCESS;
 }

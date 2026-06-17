@@ -19,7 +19,7 @@ StatusCode SameParticleHardScatteringFilter::filterInitialize() {
  return StatusCode::SUCCESS;
 }
 
-StatusCode SameParticleHardScatteringFilter::filterEvent() {
+StatusCode SameParticleHardScatteringFilter::filterEvent(const EventContext& ctx) {
   ATH_MSG_DEBUG(" SameParticleHardScattering filtering for: Parent --> " << m_PDGParent[0]
 		<< " and parent " << -m_PDGParent[0]
                 << ", Child --> " << m_PDGChild[0]);
@@ -60,7 +60,7 @@ StatusCode SameParticleHardScatteringFilter::filterEvent() {
 	  }
 	}
     }
-  setFilterPassed(N_Parent[0] >= 1 && N_Parent[1] >= 1);
+  setFilterPassed(N_Parent[0] >= 1 && N_Parent[1] >= 1, ctx);
   return StatusCode::SUCCESS;
 }
 

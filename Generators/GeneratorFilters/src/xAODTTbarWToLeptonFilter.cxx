@@ -12,12 +12,12 @@ StatusCode xAODTTbarWToLeptonFilter::filterInitialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODTTbarWToLeptonFilter::filterEvent()
+StatusCode xAODTTbarWToLeptonFilter::filterEvent(const EventContext& ctx)
 {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
     int N_quark_t = 0;
@@ -162,7 +162,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
     {
 
         ATH_MSG_ERROR("No t or tbar quarks were found in a (presumably) ttbar event! Event is rejected.");
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::SUCCESS;
     }
 
@@ -191,7 +191,7 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                 }
             } // loop over TruthParticles
         
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::SUCCESS;
     }
 
@@ -206,19 +206,19 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
         {
             ATH_MSG_WARNING("More than one t -> W X or tbar -> W X decays found. Event is accepted anyway.");
         }
-        setFilterPassed(N_pt_above_cut > 0);
+        setFilterPassed(N_pt_above_cut > 0, ctx);
     }
     else
     {
         if (m_fourTopsFilter)
         {
             if (m_SSMLFilter)
-                setFilterPassed((N_pt_above_cut >= m_numLeptons) && (N_pt_above_cut_plus >= 2 || N_pt_above_cut_minus >= 2));
+                setFilterPassed((N_pt_above_cut >= m_numLeptons) && (N_pt_above_cut_plus >= 2 || N_pt_above_cut_minus >= 2), ctx);
             else
-                setFilterPassed(N_pt_above_cut >= m_numLeptons);
+                setFilterPassed(N_pt_above_cut >= m_numLeptons, ctx);
         }
         else
-            setFilterPassed(N_pt_above_cut == m_numLeptons);
+            setFilterPassed(N_pt_above_cut == m_numLeptons, ctx);
     }
 
     return StatusCode::SUCCESS;

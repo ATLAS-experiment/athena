@@ -22,11 +22,11 @@ StatusCode xAODParentChildFilter::filterInitialize() {
 }
 
 
-StatusCode xAODParentChildFilter::filterEvent() {
+StatusCode xAODParentChildFilter::filterEvent(const EventContext& ctx) {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event and build up the grid
@@ -60,6 +60,6 @@ StatusCode xAODParentChildFilter::filterEvent() {
       }
     }// TruthParticles loop
 
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

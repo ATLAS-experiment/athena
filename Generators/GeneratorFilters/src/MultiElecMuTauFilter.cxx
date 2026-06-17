@@ -19,7 +19,7 @@ declareProperty("TwoSameSignLightLeptonsOneHadTau",  m_TwoSameSignLightLeptonsOn
 }
 
 
-StatusCode MultiElecMuTauFilter::filterEvent() {
+StatusCode MultiElecMuTauFilter::filterEvent(const EventContext& ctx) {
   int numLeptons = 0;
   int numLightLeptons = 0;
   int numHadTaus = 0;
@@ -106,7 +106,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
       passed_event = true;
     }
   }
-  setFilterPassed(passed_event);
+  setFilterPassed(passed_event, ctx);
 
   return StatusCode::SUCCESS;
 }

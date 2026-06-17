@@ -37,14 +37,14 @@ StatusCode xAODXtoVVDecayFilterExtended::filterFinalize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODXtoVVDecayFilterExtended::filterEvent()
+StatusCode xAODXtoVVDecayFilterExtended::filterEvent(const EventContext& ctx)
 {
     bool okPDGChild1 = false;
     bool okPDGChild2 = false;
     int nGoodParent = 0;
 
     // Retrieve full TruthEventContainer container
-    SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_truthEventKey};
+    SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_truthEventKey, ctx};
     CHECK( xTruthEventContainer.isValid() );
 
     for (const xAOD::TruthEvent* event : *xTruthEventContainer)
@@ -78,7 +78,7 @@ StatusCode xAODXtoVVDecayFilterExtended::filterEvent()
     }
 
     // If we get here we have failed
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
 }
 

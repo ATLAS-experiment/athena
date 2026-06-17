@@ -13,7 +13,7 @@ ElectronFilter::ElectronFilter(const std::string& name, ISvcLocator* pSvcLocator
 }
 
 
-StatusCode ElectronFilter::filterEvent() {
+StatusCode ElectronFilter::filterEvent(const EventContext& ctx) {
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
     for (const auto& part: *genEvt) {
@@ -24,6 +24,6 @@ StatusCode ElectronFilter::filterEvent() {
       }
     }
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

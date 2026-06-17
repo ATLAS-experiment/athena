@@ -60,18 +60,17 @@ CLHEP::HepRandomEngine* xAODChargedTracksWeightFilter::getRandomEngine(const std
 }
 
 
-StatusCode xAODChargedTracksWeightFilter::filterEvent() {
+StatusCode xAODChargedTracksWeightFilter::filterEvent(const EventContext& ctx) {
 
     // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
     // duplicated barcode ones
-    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
     CHECK(xTruthParticleContainer.isValid());
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     CLHEP::HepRandomEngine* rndmGen = this->getRandomEngine(name(), ctx);
     if (!rndmGen) {
       ATH_MSG_WARNING("Failed to retrieve random number engine " << name());
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::FAILURE;
     }
 
@@ -114,7 +113,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
 
 
     if(!selection) {
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::SUCCESS;
     }
 
@@ -139,7 +138,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
 
         weight_event(weight);
 
-        setFilterPassed(true);
+        setFilterPassed(true, ctx);
 
         double final_event_weight = 1; 
         CHECK(event_weight(final_event_weight));
@@ -152,7 +151,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
         return StatusCode::SUCCESS;
     }
 
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
 }
 

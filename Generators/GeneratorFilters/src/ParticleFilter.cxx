@@ -23,7 +23,7 @@ StatusCode ParticleFilter::filterInitialize() {
 }
 
 
-StatusCode ParticleFilter::filterEvent() {
+StatusCode ParticleFilter::filterEvent(const EventContext& ctx) {
   int nParts = 0;
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
@@ -48,8 +48,8 @@ StatusCode ParticleFilter::filterEvent() {
     }
   }
    if (m_Exclusive)
-     {setFilterPassed(nParts == m_MinParts);}
+     {setFilterPassed(nParts == m_MinParts, ctx);}
    else
-     {setFilterPassed(nParts >= m_MinParts);}
+     {setFilterPassed(nParts >= m_MinParts, ctx);}
   return StatusCode::SUCCESS;
 }

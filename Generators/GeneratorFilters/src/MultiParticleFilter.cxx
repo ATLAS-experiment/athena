@@ -83,7 +83,7 @@ StatusCode MultiParticleFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode MultiParticleFilter::filterEvent() {
+StatusCode MultiParticleFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
     // Loop over all events in McEventCollection
@@ -108,7 +108,7 @@ StatusCode MultiParticleFilter::filterEvent() {
 
             // Test if we fulfilled all the requirements and return in that case.
             if (Np >= m_Np){
-                setFilterPassed(true);
+                setFilterPassed(true, ctx);
                 m_passed++;
                 return StatusCode::SUCCESS;
             }
@@ -116,7 +116,7 @@ StatusCode MultiParticleFilter::filterEvent() {
     }
     
     // if we got here, we failed
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
 
 }

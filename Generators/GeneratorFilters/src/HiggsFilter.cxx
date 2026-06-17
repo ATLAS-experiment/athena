@@ -36,7 +36,7 @@ HiggsFilter::HiggsFilter(const std::string& name,
 
 
 //---------------------------------------------------------------------------
-StatusCode HiggsFilter::filterEvent() {
+StatusCode HiggsFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
 
@@ -96,6 +96,6 @@ StatusCode HiggsFilter::filterEvent() {
   }
 
   // if we get here we have failed
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

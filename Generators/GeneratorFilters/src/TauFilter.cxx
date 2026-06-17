@@ -102,15 +102,14 @@ CLHEP::HepLorentzVector TauFilter::sumDaughterNeutrinos(const HepMC::ConstGenPar
 }
 
 
-StatusCode TauFilter::filterEvent() {
+StatusCode TauFilter::filterEvent(const EventContext& ctx) {
   // Get random number engine
   CLHEP::HepRandomEngine* rndm{};
   if(m_HasTightRegion) {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     rndm = this->getRandomEngine(name(), ctx);
     if (!rndm) {
       ATH_MSG_ERROR("Failed to retrieve random number engine for TauFilter");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
   }
@@ -134,11 +133,11 @@ StatusCode TauFilter::filterEvent() {
     int eventNumber = genEvt->event_number();
 
     if(m_filterEventNumber==1 && (eventNumber%2)==0) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     else if(m_filterEventNumber==2 && (eventNumber%2)==1) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     
@@ -309,7 +308,7 @@ StatusCode TauFilter::filterEvent() {
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::SUCCESS;
     }
@@ -331,7 +330,7 @@ StatusCode TauFilter::filterEvent() {
 	
 	if (m_ReverseFilter) pass = !pass; //If reverse filter is active, flip the truth value of pass
 	
-	setFilterPassed(pass);
+	setFilterPassed(pass, ctx);
   
   return StatusCode::SUCCESS;
 }

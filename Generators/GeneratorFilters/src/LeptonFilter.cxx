@@ -25,7 +25,7 @@ LeptonFilter::LeptonFilter(const std::string& name, ISvcLocator* pSvcLocator)
 }
 
 
-StatusCode LeptonFilter::filterEvent() {
+StatusCode LeptonFilter::filterEvent(const EventContext& ctx) {
   // Loop over all events in McEventCollection and extract the leading lepton pt
   double leading_lepton_pt = 0;
 
@@ -60,15 +60,15 @@ StatusCode LeptonFilter::filterEvent() {
   ATH_MSG_DEBUG ( "Leading lepton pt = " << leading_lepton_pt << "within |eta| <= " << m_EtaRange);
 
   if (leading_lepton_pt < m_Ptmin) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG( "Fail: no e or mu found "
 		   << " with pT >= " << m_Ptmin);
   } else if (leading_lepton_pt >= m_Ptmax) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG ( "Fail: high pt lepton veto "
 		    << " pT < " << m_Ptmax );
   } else {
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
     ATH_MSG_DEBUG ( "Within min and max pt cuts " << m_Ptmin << ", " 
 		    << m_Ptmax );
   }

@@ -19,7 +19,7 @@ SoftLeptonInJetFilter::SoftLeptonInJetFilter(const std::string& name, ISvcLocato
 }
 
 
-StatusCode SoftLeptonInJetFilter::filterEvent() {
+StatusCode SoftLeptonInJetFilter::filterEvent(const EventContext& ctx) {
   double eta_b[10];
   double phi_b[10];
   double eta_e[30];
@@ -113,7 +113,7 @@ StatusCode SoftLeptonInJetFilter::filterEvent() {
 
   // If we get here we have failed
   m_nFail++;
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 

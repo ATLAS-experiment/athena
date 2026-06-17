@@ -19,7 +19,7 @@ public:
   virtual ~M4MuIntervalFilter();
   virtual StatusCode filterInitialize();
   virtual StatusCode filterFinalize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

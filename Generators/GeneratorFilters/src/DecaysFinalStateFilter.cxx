@@ -52,7 +52,7 @@ DecaysFinalStateFilter::DecaysFinalStateFilter(const std::string& name, ISvcLoca
 }
 
 
-StatusCode DecaysFinalStateFilter::filterEvent() {
+StatusCode DecaysFinalStateFilter::filterEvent(const EventContext& ctx) {
   int nChargedLeptons = 0;
   int nQuarks = 0;
   int nbQuarks = 0;
@@ -86,22 +86,22 @@ StatusCode DecaysFinalStateFilter::filterEvent() {
   }
 
   if (nQuarks < m_MinNQuarks || (m_NQuarks != -1 && nQuarks != m_NQuarks)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   }
   else if (nbQuarks < m_MinNbQuarks || (m_NbQuarks != -1 && nbQuarks != m_NbQuarks)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   }
   else if (nChargedLeptons < m_MinNChargedLeptons || (m_NChargedLeptons != -1 && nChargedLeptons != m_NChargedLeptons)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nNeutrinos < m_MinNNeutrinos || (m_NNeutrinos != -1 && nNeutrinos != m_NNeutrinos)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nPhotons < m_MinNPhotons || (m_NPhotons != -1 && nPhotons != m_NPhotons)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else {
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
   }
   return StatusCode::SUCCESS;
 }

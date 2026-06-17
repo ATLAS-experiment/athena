@@ -30,7 +30,7 @@ StatusCode ParentTwoChildrenFilter::filterInitialize() {
 }
 
 
-StatusCode ParentTwoChildrenFilter::filterEvent() {
+StatusCode ParentTwoChildrenFilter::filterEvent(const EventContext& ctx) {
     ATH_MSG_DEBUG(" ParentTwoChildrenFilter filtering for: "
                 << "Parent (" << m_PDGParent[0] << ") --> Child (" << m_PDGChild[0] << ") + antiparticle and "
                 << "Parent (" << m_PDGParent[0] << ") --> Child (" << m_PDGChild[1] << ") + antiparticle." );
@@ -80,6 +80,6 @@ StatusCode ParentTwoChildrenFilter::filterEvent() {
       }
     }
   }
-  setFilterPassed(N_Child[0][0] >= 1 && N_Child[0][1] >= 1 && N_Child[1][0] >= 1 && N_Child[1][1] >= 1);
+  setFilterPassed(N_Child[0][0] >= 1 && N_Child[0][1] >= 1 && N_Child[1][0] >= 1 && N_Child[1][1] >= 1, ctx);
   return StatusCode::SUCCESS;
 }

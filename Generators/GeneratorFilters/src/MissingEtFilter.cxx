@@ -14,7 +14,7 @@ MissingEtFilter::MissingEtFilter(const std::string& name, ISvcLocator* pSvcLocat
 }
 
 
-StatusCode MissingEtFilter::filterEvent() {
+StatusCode MissingEtFilter::filterEvent(const EventContext& ctx) {
   double sumx(0), sumy(0);
 
 #ifdef HEPMC3
@@ -50,6 +50,6 @@ if (! m_allowOld) {
   // Now see what the total missing Et is and compare to minimum
   double met = std::hypot(sumx,sumy);
   ATH_MSG_DEBUG("Totals for event: EX = " << sumx << ", EY = "<< sumy << ", ET = " << met);
-  setFilterPassed(met >= m_METmin);
+  setFilterPassed(met >= m_METmin, ctx);
   return StatusCode::SUCCESS;
 }

@@ -14,7 +14,7 @@ SplitPhotonFilter::SplitPhotonFilter(const std::string& name, ISvcLocator* pSvcL
 }
 
 
-StatusCode SplitPhotonFilter::filterEvent() {
+StatusCode SplitPhotonFilter::filterEvent(const EventContext& ctx) {
   int NPhotons = 0;
   bool GoodFlav = m_dauPdg.size() == 0 ? true : false;
   McEventCollection::const_iterator itr;
@@ -76,6 +76,6 @@ StatusCode SplitPhotonFilter::filterEvent() {
   
 
   if (NPhotons >= m_NPhotons && GoodFlav) return StatusCode::SUCCESS;
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

@@ -88,7 +88,7 @@ StatusCode VBFForwardJetsFilter::filterInitialize() {
 }
 
 
-StatusCode VBFForwardJetsFilter::filterEvent() {
+StatusCode VBFForwardJetsFilter::filterEvent(const EventContext& ctx) {
   const xAOD::JetContainer* truthjetTES;
   CHECK(evtStore()->retrieve(truthjetTES, m_TruthJetContainerName));
   ATH_MSG_DEBUG("xAOD::JetContainer size = " << truthjetTES->size());
@@ -275,7 +275,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
   // cppcheck-suppress shiftNegative
   ATH_MSG_INFO("JJ     OK? : " << flagJJ);
 
-  setFilterPassed(flagNJets != 0 && flag1stJet != 0 && flag2ndJet != 0 && flagSign != 0 && flagJJ != 0);
+  setFilterPassed(flagNJets != 0 && flag1stJet != 0 && flag2ndJet != 0 && flagSign != 0 && flagJJ != 0, ctx);
   return StatusCode::SUCCESS;
 }
 

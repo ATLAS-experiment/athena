@@ -36,7 +36,7 @@ StatusCode TTbarWithJpsimumuFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode TTbarWithJpsimumuFilter::filterEvent() {
+StatusCode TTbarWithJpsimumuFilter::filterEvent(const EventContext& ctx) {
     //---------------------------------------------------------------------------
 
     bool pass = false;
@@ -58,7 +58,7 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
 
     if (m_selectJpsi && isjpsi) pass = true;
     
-    setFilterPassed(pass);
+    setFilterPassed(pass, ctx);
     return StatusCode::SUCCESS;
 }
 

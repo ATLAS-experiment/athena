@@ -70,16 +70,16 @@ StatusCode xAODVBFForwardJetsFilter::filterInitialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODVBFForwardJetsFilter::filterEvent()
+StatusCode xAODVBFForwardJetsFilter::filterEvent(const EventContext& ctx)
 {
   // Retrieve jet container
-  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName, ctx};
   CHECK(truthjetTES.isValid());
   ATH_MSG_DEBUG("xAOD::JetContainer size = " << truthjetTES->size());
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Get MCTruth Photon/Electon/Tau(HadronicDecay)
@@ -256,7 +256,7 @@ StatusCode xAODVBFForwardJetsFilter::filterEvent()
     // cppcheck-suppress shiftNegative
     ATH_MSG_INFO("JJ     OK? : " << flagJJ);
 
-    setFilterPassed(flagNJets != 0 && flag1stJet != 0 && flag2ndJet != 0 && flagSign != 0 && flagJJ != 0);
+    setFilterPassed(flagNJets != 0 && flag1stJet != 0 && flag2ndJet != 0 && flagSign != 0 && flagJJ != 0, ctx);
     return StatusCode::SUCCESS;
 }
 

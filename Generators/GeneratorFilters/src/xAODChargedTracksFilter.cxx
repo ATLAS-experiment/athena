@@ -13,11 +13,11 @@ StatusCode xAODChargedTracksFilter::filterInitialize()
 }
 
 
-StatusCode xAODChargedTracksFilter::filterEvent() {
+StatusCode xAODChargedTracksFilter::filterEvent(const EventContext& ctx) {
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
 
@@ -52,6 +52,6 @@ StatusCode xAODChargedTracksFilter::filterEvent() {
                 " minNTracks = " << m_NTracks);
 
     // Record passed status
-    setFilterPassed(nChargedTracks > m_NTracks);
+    setFilterPassed(nChargedTracks > m_NTracks, ctx);
     return StatusCode::SUCCESS;
 }
