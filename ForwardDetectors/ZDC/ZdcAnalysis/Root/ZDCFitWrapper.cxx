@@ -228,8 +228,8 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
   theTF1->SetParName(3, "#tau_{2}");
   theTF1->SetParName(4, "C");
   theTF1->SetParName(5, "period");
-  theTF1->SetParName(6, "Acos");
-  theTF1->SetParName(7, "Bsin");
+  theTF1->SetParName(6, "IndA");
+  theTF1->SetParName(7, "IndBFact");
   theTF1->SetParName(8, "delta");
 
   theTF1->SetParLimits(1, tmin, tmax);
@@ -794,7 +794,7 @@ ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, f
   theTF1->SetParName(4, "bsqrt_{pre}");
   theTF1->SetParName(5, "C");
   theTF1->SetParName(6, "IndA");
-  theTF1->SetParName(7, "IndB");
+  theTF1->SetParName(7, "IndBScale");
 
   theTF1->SetParLimits(1, tmin, tmax);
   theTF1->SetParLimits(2, -1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
@@ -816,7 +816,7 @@ void ZDCFitExpFermiInductPreExp::DoInitialize(float initialAmp, float initialT0,
   GetWrapperTF1()->SetParameter(2, 1);
   GetWrapperTF1()->SetParameter(3, std::max(getDefaultExpTau(), (float) 6.01));
   GetWrapperTF1()->SetParameter(6, 0.2);
-  GetWrapperTF1()->SetParameter(7, 0.2);
+  GetWrapperTF1()->SetParameter(7, 0.5);
 
   GetWrapperTF1()->SetParLimits(0, ampMin, ampMax);
 

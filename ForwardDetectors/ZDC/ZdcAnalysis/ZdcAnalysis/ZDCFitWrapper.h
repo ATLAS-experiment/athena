@@ -1460,7 +1460,7 @@ double ZDCFermiExpFitInduct(const double* xvec, const double* pvec)
   
   double period = pvec[5];
   double Acos = pvec[6];
-  double Bsin = pvec[7];
+  double Bsin = pvec[7]*Acos;
   double delta = pvec[8];
   
   double tauRatio = tau2 / tau1;
