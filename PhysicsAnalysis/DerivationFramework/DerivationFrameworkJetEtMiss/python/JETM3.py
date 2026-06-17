@@ -82,7 +82,7 @@ def JETM3KernelCfg(flags, name='JETM3Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
 
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    JETM3_thinning_expression = "( abs(InDetTrackParticles.d0) < 5*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5*mm )"
+    JETM3_thinning_expression = "( abs(InDetTrackParticles.d0) < 5*mm ) && ( abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5*mm )"
     JETM3TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "JETM3TrackParticleThinningTool",

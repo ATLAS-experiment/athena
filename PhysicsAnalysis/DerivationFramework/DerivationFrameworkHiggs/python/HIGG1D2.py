@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_HIGG1D2.py
@@ -33,7 +33,7 @@ def HIGG1D2KernelCfg(flags, name='HIGG1D2Kernel', **kwargs):
 
     # Inner detector group recommendations for indet tracks in analysis
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    HIGG1D2_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
+    HIGG1D2_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
 
     HIGG1D2TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,

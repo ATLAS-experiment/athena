@@ -33,7 +33,7 @@ def STDM17SkimmingToolCfg(flags):
     lepTriggers = elTriggers+muTriggers
 
     #xAODStringSkimmingTool cannot handle electron trigger names, therefore need to use TriggerSkimmingTool
-    tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
+    tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
 
     trackRequirements = '(InDetTrackParticles.pt > 9.*GeV && '+tracks+' )'
     #b-jet requirement FixedCutBEff_85 of GN2v01
@@ -159,7 +159,7 @@ def STDM17KernelCfg(flags, name='STDM17Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
 
     # Increased cut (w.r.t. R21) on abs(z0) for new TTVA working points
-    STDM17_thinning_expression = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    STDM17_thinning_expression = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     STDM17TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "STDM17TrackParticleThinningTool",
@@ -210,7 +210,7 @@ def STDM17KernelCfg(flags, name='STDM17Kernel', **kwargs):
 
     #CaloClusterThinning
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
-    selectionString = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    selectionString = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     STDM17CaloThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(flags,
                                                                            name                  = "STDM17CaloClusterThinning",
                                                                            StreamName            = kwargs['StreamName'],

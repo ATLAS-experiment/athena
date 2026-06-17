@@ -38,7 +38,7 @@ def STDM13KernelCfg(flags, name='STDM13Kernel', **kwargs):
     STDM13StringSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
         flags, name = "STDM13StringSkimmingTool", expression = lepton_skimming_expression))
 
-    tp_thinning_expression = "abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 6.0*mm"
+    tp_thinning_expression = "abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 6.0*mm"
     STDM13TPThinningTool =  acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "STDM13TPThinningTool",
