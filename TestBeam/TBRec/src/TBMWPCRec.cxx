@@ -38,7 +38,7 @@ TBMWPCRec::initialize()
 }
 
 StatusCode
-TBMWPCRec::execute(const EventContext& /*ctx*/)
+TBMWPCRec::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "In execute()" );
 
@@ -121,9 +121,9 @@ TBMWPCRec::execute(const EventContext& /*ctx*/)
   }
 
   if ( sc.isFailure( ) ) {
-     setFilterPassed(false);
+     setFilterPassed(false, ctx);
   } else {
-     setFilterPassed(true);
+     setFilterPassed(true, ctx);
   }
   return StatusCode::SUCCESS;
 
