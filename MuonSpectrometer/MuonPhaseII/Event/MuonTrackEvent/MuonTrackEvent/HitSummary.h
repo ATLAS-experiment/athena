@@ -79,6 +79,9 @@ namespace MuonR4{
                 sum.print(ostr);
                 return ostr;
             }
+            /** @brief Returns the number of precision stations with at least 3 precision hits */
+            value_type nPrecisionStations() const;
+
         private:
             /** @brief Translates the 4 classification indices to a unique consecutive number
              *         (used for storage access)
