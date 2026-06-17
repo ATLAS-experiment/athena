@@ -31,30 +31,21 @@ def getITkStripDAQConfigFolder(flags) :
 
 def ITkStripConfigurationCondAlgCfg(flags, name="ITkStripConfigurationCondAlg", **kwargs):
     acc = ComponentAccumulator()
-    folder_prefix = getITkStripDAQConfigFolder(flags)
-    channelFolder = folder_prefix + ("Chip" if flags.IOVDb.DatabaseInstance == "COMP200" else "ChipSlim")
-    kwargs.setdefault("ReadKeyChannel", channelFolder)
-    kwargs.setdefault("ReadKeyModule", f"{folder_prefix}Module")
-    kwargs.setdefault("ReadKeyMur", f"{folder_prefix}MUR")
 
-    acc.merge(addFoldersSplitOnline(flags,
-                                    detDb="ITkStrip",
-                                    onlineFolders=channelFolder,
-                                    offlineFolders=channelFolder,
-                                    className="CondAttrListVec",
-                                    splitMC=True))
-    acc.merge(addFoldersSplitOnline(flags,
-                                    detDb="ITkStrip",
-                                    onlineFolders=f"{folder_prefix}Module",
-                                    offlineFolders=f"{folder_prefix}Module",
-                                    className="CondAttrListVec",
-                                    splitMC=True))
-    acc.merge(addFoldersSplitOnline(flags,
-                                    detDb="ITkStrip",
-                                    onlineFolders=f"{folder_prefix}MUR",
-                                    offlineFolders=f"{folder_prefix}MUR",
-                                    className="CondAttrListVec",
-                                    splitMC=True))
+    #These folders do not exist for ITkStrip. Once they do exist, they should be added as below
+    
+    #folder_prefix = getITkStripDAQConfigFolder(flags)
+    #channelFolder = folder_prefix + "Chip"
+    #kwargs.setdefault("ReadKeyChannel", channelFolder)
+    #kwargs.setdefault("ReadKeyModule", f"{folder_prefix}Module")
+    #kwargs.setdefault("ReadKeyMur", f"{folder_prefix}MUR")
+
+    #acc.merge(addFoldersSplitOnline(flags,
+    #                                detDb="ITkStrip",
+    #                                onlineFolders=channelFolder,
+    #                                offlineFolders=channelFolder,
+    #                                className="CondAttrListVec",
+    #                                splitMC=True))
 
     from ITkStripCabling.ITkStripCablingConfig import ITkStripCablingToolCfg
     kwargs.setdefault("SCT_CablingTool", acc.popToolsAndMerge(ITkStripCablingToolCfg(flags)))
