@@ -74,6 +74,8 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
 
   declareProperty( "TrackSelectionTool", m_selTool );
 
+  trackLimitReject = false;
+
   m_zdcAnalysisTool.declarePropertyFor (this, "zdcAnalysisTool");
   
 }
