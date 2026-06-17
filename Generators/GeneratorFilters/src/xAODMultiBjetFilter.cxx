@@ -109,7 +109,7 @@ StatusCode xAODMultiBjetFilter::filterEvent(const EventContext& ctx) {
 
   // Bookkeeping
  double weight = 1;
- for(const HepMC::GenEvent* genEvt : *events_const()) {
+ for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
    weight = genEvt->weights().front();
  }
   m_SumOfWeights_Evt += weight;

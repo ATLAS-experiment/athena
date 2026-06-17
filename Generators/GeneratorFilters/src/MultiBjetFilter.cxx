@@ -121,7 +121,7 @@ StatusCode MultiBjetFilter::filterEvent(const EventContext& ctx) {
 
   int bJetCounter = 0;
   double weight = 1;
-  for(const HepMC::GenEvent* genEvt : *events_const()) {
+  for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     weight = genEvt->weights().front();
 
     // Make a vector containing all the event's b-hadrons

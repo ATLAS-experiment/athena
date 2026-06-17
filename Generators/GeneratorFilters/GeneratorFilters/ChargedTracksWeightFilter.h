@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORFILTERS_CHARGEDTRACKSWEIGHTFILTER_H
@@ -56,7 +56,7 @@ private:
   double get_nch_weight(int nch) const;
   
   /// read the event weight
-  StatusCode event_weight(double & event_weight) const;
+  StatusCode event_weight(double & event_weight, const EventContext& ctx) const;
 
   /// modify the event weight by weight
   void weight_event(double weight);

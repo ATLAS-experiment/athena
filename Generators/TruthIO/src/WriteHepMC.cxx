@@ -53,7 +53,7 @@ StatusCode WriteHepMC::initialize() {
 StatusCode WriteHepMC::execute(const EventContext& ctx) {
   // Just write out the first (i.e. signal) event in the collection
 #ifdef HEPMC3
-  HepMC3::GenEvent ev (*event_const());
+  HepMC3::GenEvent ev (*event_const(ctx));
   ev.set_units(m_momentumunit,m_lengthunit);
   if (ev.event_number()==1){
     // Get the event number. Full fall back - just set it to 1.
@@ -78,7 +78,7 @@ StatusCode WriteHepMC::execute(const EventContext& ctx) {
   }
   m_hepmcio->write_event(ev);
 #else
-  HepMC::GenEvent ev (*event_const());
+  HepMC::GenEvent ev (*event_const(ctx));
   ev.use_units(m_momentumunit,m_lengthunit);
   if (ev.event_number()==1){
     // Get the event number. Full fall back - just set it to 1.

@@ -18,7 +18,7 @@ StatusCode SplitPhotonFilter::filterEvent(const EventContext& ctx) {
   int NPhotons = 0;
   bool GoodFlav = m_dauPdg.size() == 0 ? true : false;
   McEventCollection::const_iterator itr;
-  for (itr = events_const()->begin(); itr!=events_const()->end(); ++itr) {
+  for (itr = events_const(ctx)->begin(); itr!=events_const(ctx)->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
 
 // ** Loop on all particles **

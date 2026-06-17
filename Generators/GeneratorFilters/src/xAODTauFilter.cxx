@@ -86,7 +86,7 @@ StatusCode xAODTauFilter::filterEvent(const EventContext& ctx) {
 
   //get the weight of the event from McEventCollection
   setFilterPassed(false, ctx);
-  for(const HepMC::GenEvent* genEvt : *events_const()) {
+  for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     int eventNumber = genEvt->event_number();
     if(m_filterEventNumber==1 && (eventNumber%2)==0) {
       setFilterPassed(false, ctx);

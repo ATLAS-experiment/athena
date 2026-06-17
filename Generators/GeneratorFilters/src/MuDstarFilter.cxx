@@ -131,7 +131,7 @@ StatusCode MuDstarFilter::filterEvent(const EventContext& ctx) {
 
   ATH_MSG_DEBUG(" MuDstarFilter filtering ");
 
-  for (itr = events_const() -> begin(); itr != events_const() -> end(); ++itr) {
+  for (itr = events_const(ctx) -> begin(); itr != events_const(ctx) -> end(); ++itr) {
 
     double primx = 0.;
     double primy = 0.;

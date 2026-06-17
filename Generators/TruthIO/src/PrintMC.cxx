@@ -57,7 +57,7 @@ StatusCode PrintMC::execute(const EventContext& ctx) {
 
   // Loop over all events in McEventCollection
 
-  for (const HepMC::GenEvent* evt : *events_const()) {
+  for (const HepMC::GenEvent* evt : *events_const(ctx)) {
 
     // Get event number from HepMC
     uint64_t evtnum = std::max(0,evt->event_number());

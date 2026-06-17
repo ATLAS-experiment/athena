@@ -58,7 +58,7 @@ StatusCode DirectPhotonFilter::filterEvent(const EventContext& ctx) {
   std::vector<HepMC::ConstGenParticlePtr> promptPhotonsInEta;
 
   int phot = 0;
-  for(const HepMC::GenEvent* genEvt : *events_const()) {
+  for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     // Find all prompt photons with within given eta range
     for (const auto& pitr: *genEvt) {
       if (MC::isPhoton(pitr) &&

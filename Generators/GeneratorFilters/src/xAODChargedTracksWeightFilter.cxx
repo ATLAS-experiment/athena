@@ -107,7 +107,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent(const EventContext& ctx) {
 
     // get event weight from the McEventCollection, used to determine efficiency of weight-filtering and cuts
     double orig_event_weight = 1;
-    CHECK(event_weight(orig_event_weight));
+    CHECK(event_weight(orig_event_weight, ctx));
 
     const auto selection = (((nChargedTracks <= m_nchmax)) && (nChargedTracks >= m_nchmin));
 
@@ -141,7 +141,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent(const EventContext& ctx) {
         setFilterPassed(true, ctx);
 
         double final_event_weight = 1; 
-        CHECK(event_weight(final_event_weight));
+        CHECK(event_weight(final_event_weight, ctx));
 
         ATH_MSG_DEBUG("Event accepted nch: " << nChargedTracks 
                 << " nch weight: " << weight 
@@ -276,11 +276,11 @@ StatusCode xAODChargedTracksWeightFilter::Spline::initialize( std::vector<double
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODChargedTracksWeightFilter::event_weight(double & event_weight) const {
+StatusCode xAODChargedTracksWeightFilter::event_weight(double & event_weight, const EventContext& ctx) const {
 
     event_weight = 1;
 
-    auto first_event = event_const();
+    auto first_event = event_const(ctx);
 
     if(!first_event){
         ATH_MSG_ERROR("No events in McEventCollection");

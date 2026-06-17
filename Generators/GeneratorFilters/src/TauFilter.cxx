@@ -129,7 +129,7 @@ StatusCode TauFilter::filterEvent(const EventContext& ctx) {
   int ntauhad_tight = 0;
   double weight = 1;
 
-  for (const HepMC::GenEvent* genEvt : *events_const()) {
+  for (const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     int eventNumber = genEvt->event_number();
 
     if(m_filterEventNumber==1 && (eventNumber%2)==0) {

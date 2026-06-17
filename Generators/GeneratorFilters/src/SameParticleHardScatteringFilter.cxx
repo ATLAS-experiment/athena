@@ -27,7 +27,7 @@ StatusCode SameParticleHardScatteringFilter::filterEvent(const EventContext& ctx
   N_Parent[0] = 0;
   N_Parent[1] = 0;
 
-  for (const HepMC::GenEvent* genEvt : *events_const()) {
+  for (const HepMC::GenEvent* genEvt : *events_const(ctx)) {
       for (const auto& pitr: *genEvt) 
 	{
 	  int id = pitr->pdg_id();

@@ -267,13 +267,13 @@ StatusCode TestHepMC::initialize() {
 }
 
 
-StatusCode TestHepMC::execute(const EventContext& /*ctx*/) {
+StatusCode TestHepMC::execute(const EventContext& ctx) {
 
   // Holder for filter outcome; allows us to check all filters on each event and diagnose multiple problems at once
   bool filter_pass = true;
 
   // Loop over all events in McEventCollection
-  for(const HepMC::GenEvent* evt : *events_const()) {
+  for(const HepMC::GenEvent* evt : *events_const(ctx)) {
     double totalPx = 0;
     double totalPy = 0;
     double totalPz = 0;

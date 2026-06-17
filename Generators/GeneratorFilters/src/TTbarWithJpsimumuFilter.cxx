@@ -42,7 +42,7 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent(const EventContext& ctx) {
     bool pass = false;
     bool isjpsi = false;
 
-    for (const HepMC::GenEvent* genEvt : *events_const()) {
+    for (const HepMC::GenEvent* genEvt : *events_const(ctx)) {
 
         // Loop over all truth particles in the event
         // ===========================================
