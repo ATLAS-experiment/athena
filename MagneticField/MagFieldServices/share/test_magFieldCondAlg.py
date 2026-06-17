@@ -42,6 +42,12 @@ flags = initConfigFlags()
 flags.Input.Files = []
 flags.Concurrency.NumThreads = 1
 flags.Exec.MaxEvents = currents[-1][0]+5   # 5 events per IOV
+
+#Run3 for now
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
+
 flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-RUN2-01'
 flags.IOVDb.SqliteInput = sqlite
 flags.IOVDb.SqliteFolders = (folder,)

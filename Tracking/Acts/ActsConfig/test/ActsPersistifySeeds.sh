@@ -3,6 +3,7 @@
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=1
 
 # Run Athena
@@ -11,6 +12,7 @@ Reco_tf.py \
     --inputRDOFile  ${input_rdo} \
     --outputAODFile AOD.athena.pool.root \
     --outputESDFile ESD.athena.pool.root \
+    --conditionsTag ${conditions_tag} \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Exec.FPE=-1; \
     	       flags.Tracking.doStoreTrackSeeds=True; \
@@ -43,6 +45,7 @@ Reco_tf.py \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; \
     	        toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
     	        cfg.merge(addToAOD(flags, toAOD));" \
+    --conditionsTag ${conditions_tag} \
     --maxEvents ${n_events} \
     --multithreaded
 
@@ -64,6 +67,7 @@ Reco_tf.py \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD; \
     	        toAOD = ['xAOD::TrackParticleContainer#SiSPSeedSegments*', 'xAOD::TrackParticleAuxContainer#SiSPSeedSegments*']; \
     	        cfg.merge(addToAOD(flags, toAOD));" \
+    --conditionsTag ${conditions_tag} \
     --maxEvents ${n_events} \
     --multithreaded
 

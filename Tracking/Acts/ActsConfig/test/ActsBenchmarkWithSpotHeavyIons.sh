@@ -4,6 +4,7 @@
 NTHREADS=${1}
 NEVENTS=${2}
 DATADIR="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO"
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 # Run the job
 export TRF_ECHO=1;
@@ -16,7 +17,7 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
 	     flags.Detector.EnableHGTD=False;" \
   --postExec "cfg.getService(\"AlgResourcePool\").CountAlgorithmInstanceMisses=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
-  --conditionsTag 'default:OFLCOND-MC21-SDR-RUN4-01' \
+  --conditionsTag ${conditions_tag} \
   --geometryVersion 'all:ATLAS-P2-RUN4-03-00-01' \
   --postInclude 'all:PyJobTransforms.UseFrontier' \
   --steering 'doRAWtoALL' \

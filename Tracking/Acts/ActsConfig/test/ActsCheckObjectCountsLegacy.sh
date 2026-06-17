@@ -3,6 +3,7 @@
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=5
 log_file="reco.log"
 
@@ -22,6 +23,7 @@ Reco_tf.py \
 	     flags.Acts.doLowPt=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
+  --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events} \

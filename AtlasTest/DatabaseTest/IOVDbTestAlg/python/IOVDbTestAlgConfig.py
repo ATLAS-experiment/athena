@@ -20,6 +20,10 @@ def IOVDbTestAlgFlags():
    flags.IOVDb.GlobalTag = ""
    flags.Output.DefaultContainerType = "ROOTTREE"
 
+   #Use Run3 for now...                                                                   
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
    return flags
 
 

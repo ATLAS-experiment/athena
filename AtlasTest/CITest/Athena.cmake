@@ -129,7 +129,7 @@ atlas_add_citest( RecoRun3Data_Overlay
    DEPENDS_SUCCESS OverlayRun3DataChain )
 
 atlas_add_citest( RecoRun4MC
-   SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root --conditionsTag OFLCOND-MC21-SDR-RUN4-03' --no-output-checks  # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root'  --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS SimulationRun4FullSim )
 
 #################################################################################
