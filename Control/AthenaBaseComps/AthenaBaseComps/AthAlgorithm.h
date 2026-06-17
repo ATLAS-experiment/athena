@@ -113,6 +113,9 @@ class AthAlgorithm
   void setFilterPassed(bool state) const;
   ///@}
 
+  bool filterPassed(const EventContext& ctx) const;
+  void setFilterPassed( bool state, const EventContext& ctx ) const;
+
  protected:
   /// Legacy algorithms are not thread-safe
   virtual bool isReEntrant() const override final { return false; }
