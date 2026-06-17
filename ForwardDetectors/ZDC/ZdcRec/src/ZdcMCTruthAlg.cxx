@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcRec/ZdcMCTruthAlg.h"
@@ -82,14 +82,14 @@ StatusCode ZdcMCTruthAlg::execute(const EventContext& ctx)
   /******************************************
    * Get the CaloCalibrationHitContainer (input)
   ******************************************/
-  SG::ReadHandle<CaloCalibrationHitContainer> calibHitContainer(m_CaloCalibrationHitContainerKey, getContext());
+  SG::ReadHandle<CaloCalibrationHitContainer> calibHitContainer(m_CaloCalibrationHitContainerKey, ctx);
   if (!calibHitContainer.isValid()) {
     ATH_MSG_ERROR("Could not get Calibration hit container " << calibHitContainer.name() << " from store " << calibHitContainer.store());
     return StatusCode::FAILURE;
   }
 
   ATH_MSG_DEBUG ("--> ZDC: ZdcMCTruthAlg execute starting on "
-                 << getContext().evt()
+                 << ctx.evt()
                  << "th event");
 
   /******************************************
