@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolExampleAlgorithms/src/PassNoneFilter.cxx
  *  @brief This file contains the implementation for the PassNoneFilter class.
- *  $Id: PassNoneFilter.cxx,v 1.2 2008-12-10 21:28:11 gemmeren Exp $
  **/
 
 #include "PassNoneFilter.h"
@@ -15,8 +14,8 @@ PassNoneFilter::PassNoneFilter(const std::string& name, ISvcLocator* pSvcLocator
 
 StatusCode PassNoneFilter::initialize() { return StatusCode::SUCCESS; }
 
-StatusCode PassNoneFilter::execute(const EventContext& /*ctx*/) {
-   setFilterPassed(false);
+StatusCode PassNoneFilter::execute(const EventContext& ctx) {
+   setFilterPassed(false, ctx);
    return StatusCode::SUCCESS;
 }
 

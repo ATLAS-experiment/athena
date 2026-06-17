@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -1996,9 +1996,9 @@ StatusCode TileCellSelector::execute(const EventContext& ctx) {
   }
 
   if (m_printOnly)
-    this->setFilterPassed (false);
+    this->setFilterPassed (false, ctx);
   else
-    this->setFilterPassed (statusOk);
+    this->setFilterPassed (statusOk, ctx);
 
   if (statusOk) {
     ++m_accept;

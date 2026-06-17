@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DigitizationAlg.h"
@@ -35,7 +35,7 @@ StatusCode DigitizationAlg::execute(const EventContext& ctx)
       if (!puToolHandle->filterPassed())
         {
           ATH_MSG_VERBOSE( "Filter " << puToolHandle->name() << " failed - will stop the event" );
-          this->setFilterPassed(false);
+          this->setFilterPassed(false, ctx);
           break;
         }
     }
