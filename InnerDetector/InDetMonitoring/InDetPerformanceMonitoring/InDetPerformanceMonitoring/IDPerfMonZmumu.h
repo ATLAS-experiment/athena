@@ -97,9 +97,9 @@ class IDPerfMonZmumu : public AthAlgorithm
   void                ResetCommonNtupleVectors ();
   const xAOD::Vertex* GetDiMuonVertex (const xAOD::TrackParticle*,const  xAOD::TrackParticle*);
   StatusCode          FillRecParameters       (const Trk::Track* track, const xAOD::TrackParticle* trackp_for_unbias, double charge,const xAOD::Vertex* vertex, const EventContext& ctx);
-  StatusCode          FillRecParametersSimple (const Trk::Track* track, float charge, const xAOD::Vertex* vertex);
-  StatusCode          FillRecParametersTP (const xAOD::TrackParticle* trackp, const xAOD::TrackParticle* trackp_for_unbias,double charge,const xAOD::Vertex* vertex = nullptr);
-  StatusCode          FillTruthParameters (const xAOD::TrackParticle* track);
+  StatusCode          FillRecParametersSimple (const Trk::Track* track, float charge, const xAOD::Vertex* vertex, const EventContext& ctx);
+  StatusCode          FillRecParametersTP (const xAOD::TrackParticle* trackp, const xAOD::TrackParticle* trackp_for_unbias, double charge, const xAOD::Vertex* vertex, const EventContext& ctx);
+  StatusCode          FillTruthParameters (const xAOD::TrackParticle* track, const EventContext& ctx);
   const xAOD::TruthParticle* getTruthParticle( const xAOD::IParticle& p );
   StatusCode          RunFourLeptonAnalysis ();
 
