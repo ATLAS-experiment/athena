@@ -8,6 +8,7 @@
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=1
 
 export ATHENA_CORE_NUMBER=1
@@ -15,6 +16,7 @@ Reco_tf.py \
   --preExec "flags.Exec.FPE=-1;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
   --postInclude "ActsConfig.ActsGeometryConfig.ActsWriteTrackingGeometryTransformsAlgCfg"\
+  --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile AOD.validateclusters.pool.root \
   --maxEvents ${n_events} \

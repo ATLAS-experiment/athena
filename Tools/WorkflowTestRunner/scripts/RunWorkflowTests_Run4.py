@@ -25,7 +25,7 @@ def main():
         dsid = "421356" if not options.dsid else options.dsid
         tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
     elif options.simulation:
-        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"{options.extra_args}  --geometryVersion {defaultGeometryTags.RUN4}") )
+        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"{options.extra_args}  --geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC}") )
     elif options.overlay:
         log.error("Overlay not supported yet")
         exit(1)
@@ -38,7 +38,7 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q456", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.reco:
-        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion {defaultGeometryTags.RUN4} --steering doRDO_TRIG"))
+        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} --steering doRDO_TRIG"))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"

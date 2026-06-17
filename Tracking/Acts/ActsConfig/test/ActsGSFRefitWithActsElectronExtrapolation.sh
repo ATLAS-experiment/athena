@@ -3,6 +3,7 @@
 
 # single electron pt 10 GeV
 input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.900494.PG_single_epm_Pt10_etaFlatnp0_43.recon.RDO.e8481_s4494_r16632/RDO.45451600._000028.pool.root.1
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=100
 
 ignore_pattern=""
@@ -11,6 +12,7 @@ export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
     --preExec "flags.Exec.FPE=-1; flags.Acts.TrackingGeometry.UseBlueprint=True;" \
     --preInclude "egammaConfig.ConfigurationHelpers.egammaOnlyFromRaw,ActsConfig.ActsCIFlags.actsGSFEgammaFlags" \
+   --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \

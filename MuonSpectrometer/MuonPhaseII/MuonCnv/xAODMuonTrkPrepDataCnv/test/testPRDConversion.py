@@ -19,6 +19,8 @@ def RunPRDConversion():
 
     flags.Input.Files = [
         '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/ESD/ATLAS-P2-RUN4-03-00-00/ESD.ttbar_mu0.pool.root']
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
     flags.Scheduler.ShowDataDeps = True
     flags.Scheduler.ShowDataFlow = True
     flags.Scheduler.CheckDependencies = True

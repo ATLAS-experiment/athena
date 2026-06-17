@@ -3,10 +3,10 @@
 from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata, getGeneratorsInfo
-from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project
+from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project, LHCPeriod
 from Campaigns.Utils import Campaign
 from PyUtils.moduleExists import moduleExists
-
+import os
 
 def _addFlagsCategory (acf, name, generator, modName = None):
     """Add flags category and return True/False on success/failure"""
@@ -359,15 +359,24 @@ def initConfigFlags():
         acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict(), help='runNumber to timestamp map')
 
         acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance, help='default DB connection string')
-        acf.addFlag("IOVDb.CrestServer", "https://crest.cern.ch", help="CREST server URL") # FIXME could this be merged with IOVDb.DBConnection?
-        acf.addFlag("IOVDb.UseCREST", False, help='Use CREST for conditions access')
-
+        
+        def __useCrest(flags):
+            if flags.Common.Project is Project.AthGeneration:
+                return False
+            elif flags.GeoModel.Run > LHCPeriod.Run3:
+                return False #To be set true when we make switch to CREST for Run4
+            else:
+                return False
+        
+        acf.addFlag("IOVDb.UseCREST", lambda prevFlags : __useCrest(prevFlags), help='Use CREST for conditions access')
+        acf.addFlag("IOVDb.CrestServer", lambda prevFlags : os.environ.get('CREST_SERVER') if prevFlags.IOVDb.UseCREST and os.environ.get('CREST_SERVER') else "https://crest.cern.ch",help="CREST server URL") # FIXME could this be merged with IOVDb.DBConnection?
+        
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')
         acf.addFlag("IOVDb.SqliteInput","",help="Folders found in this file will be used instead of the production db")
         acf.addFlag("IOVDb.SqliteFolders",(),help="Folders listed here will be taken from the IOVDb.SqliteInput file instead of the production db. If empty, all folders found in the file are used.")
-        acf.addFlag("IOVDb.WriteParametersAsMetaData", False, help="Write simulation/digitization parameters directly as in-file metadata (True) or via intermediate sqlite files (False)")
-
+        acf.addFlag("IOVDb.WriteParametersAsMetaData", True, help="Write simulation/digitization parameters directly as in-file metadata (True) or via intermediate sqlite files (False)")
+        
 #PoolSvc Flags:
     acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0, help='maximum number of open files')
     acf.addFlag("PoolSvc.PersSvcPerInputType", False, help='enable separate persistency service for each input type')

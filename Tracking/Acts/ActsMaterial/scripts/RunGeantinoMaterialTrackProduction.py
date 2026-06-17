@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-"""
-Run geantino processing for material track creation
+#!/usr/bin/env python                                                                  
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration      
+"""                                                                                                                                                                                                         
+Run geantino processing for material track creation                                                                                                                                                         
 """
 
 
@@ -11,7 +11,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 
 def setupArgParser():
-    # Argument parsing
+    # Argument parsing                                                                                                                                                                                      
     from argparse import ArgumentParser
     parser = ArgumentParser("RunGeantinoMaterialTrackProduction.py")
     parser.add_argument("--detectors", nargs="+",
@@ -30,11 +30,13 @@ def setupArgParser():
     parser.add_argument("--skipEvents",default=0, type=int,
                         help="The number of events to skip")
     parser.add_argument("--threads", default=1, type=int, help="The number of threads to run")
-    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
     parser.add_argument("--geometrytag",default=defaultGeometryTags.RUN4, type=str,
                         help="The geometry tag to use")
+    parser.add_argument("--conditionstag",default=defaultConditionsTags.RUN4_MC, type=str,
+                        help="The conditions tag to use")
     parser.add_argument("--inputevntfile",
-                        default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc15_14TeV.singlegeantino_E10GeV_etaFlatnp0_6.5M.evgen.EVNT.pool.root"], 
+                        default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc15_14TeV.singlegeantino_E10GeV_etaFlatnp0_6.5M.evgen.EVNT.pool.root"],
                         nargs="+",
                         help="The input EVNT file to use")
     parser.add_argument("--outputhitsfile",default="myHITS.pool.root", type=str,
@@ -45,7 +47,7 @@ def setupArgParser():
 
 if __name__ == "__main__":
     args = setupArgParser().parse_args()
-    # Some info about the job
+    # Some info about the job                                                                                                                                                                               
     print("----RunGeantinoMaterialTrackProduction for ITk geometry----")
     print()
     print("Using Geometry Tag: "+args.geometrytag)
@@ -56,11 +58,11 @@ if __name__ == "__main__":
     print("Input EVNT Files ")
     for f in args.inputevntfile:
         print (f" --- {f}")
-    
+
     print("Running with: {}".format(", ".join(args.detectors)))
     print()
 
-    # Configure
+    # Configure                                                                                                                                                                                             
     flags = initConfigFlags()
     if args.localgeo:
         flags.ITk.Geometry.AllLocal = True
@@ -82,7 +84,7 @@ if __name__ == "__main__":
 
 
     flags.GeoModel.AtlasVersion = args.geometrytag
-    flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+    flags.IOVDb.GlobalTag = args.conditionstag
     flags.GeoModel.Align.Dynamic = False
 
     from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors, setupDetectorFlags
@@ -104,7 +106,7 @@ if __name__ == "__main__":
             flags.Detector.SpecialGeometryToroid = True
     else:
         detectors = args.detectors
-        detectors.append('Bpipe')  # always run with beam pipe
+        detectors.append('Bpipe')  # always run with beam pipe                                                                                                                                              
         setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
     flags.Acts.TrackingGeometry.UseBlueprint = True
@@ -116,7 +118,7 @@ if __name__ == "__main__":
 
     print(flags.dump(evaluate=True))
 
-    # Construct our accumulator to run
+    # Construct our accumulator to run                                                                                                                                                                      
     acc = MainServicesCfg(flags)
 
     if args.verboseStoreGate:
@@ -128,7 +130,7 @@ if __name__ == "__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(flags))
 
-    # add BeamEffectsAlg
+    # add BeamEffectsAlg                                                                                                                                                                                    
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     acc.merge(BeamEffectsAlgCfg(flags))
 
@@ -153,7 +155,7 @@ if __name__ == "__main__":
     if args.storeHITS:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
-        acc.merge(OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), 
+        acc.merge(OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags),
                                   disableEventTag=True, AcceptAlgs=['ITkG4AtlasAlg']) )
 
 
@@ -162,6 +164,3 @@ if __name__ == "__main__":
 
     from MuonConfig.MuonConfigUtils import executeTest
     executeTest(acc)
-
-
-

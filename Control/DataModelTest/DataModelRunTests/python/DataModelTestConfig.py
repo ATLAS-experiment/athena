@@ -47,6 +47,9 @@ def DataModelTestFlags (infile = None, evtMax = 20, **kw):
     flags.Input.isMC = True
     flags.IOVDb.GlobalTag = ''
     flags.Input.MCCampaign = Campaign.Unknown
+    #Run3 for now
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.fillFromArgs()
 
     if flags.rntuple:
