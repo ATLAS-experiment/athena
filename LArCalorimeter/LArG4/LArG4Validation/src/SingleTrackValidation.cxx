@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SingleTrackValidation.h"
@@ -263,9 +263,8 @@ StatusCode SingleTrackValidation::execute(const EventContext& ctx) {
   m_c->cpuTime= getCpu()-m_c->cpuTime;
   m_histos[156]->Fill( m_c->cpuTime/100. , 1. );
 
-  const EventContext& context = getContext();
-  int RunNum=context.eventID().run_number();
-  int EvtNum=context.eventID().event_number();
+  int RunNum=ctx.eventID().run_number();
+  int EvtNum=ctx.eventID().event_number();
   double RunStr=double(RunNum);
   double EvtStr=double(EvtNum);
   m_c->EventNo=EvtStr;
