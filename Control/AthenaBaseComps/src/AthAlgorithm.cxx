@@ -87,20 +87,8 @@ StatusCode AthAlgorithm::sysInitialize() {
   return sc;
 }
 
-const EventContext& AthAlgorithm::getContext() const {
-  return Gaudi::Hive::currentContext();
-}
-
-bool AthAlgorithm::filterPassed() const {
-  return filterPassed( Gaudi::Hive::currentContext() );
-}
-
 bool AthAlgorithm::filterPassed(const EventContext& ctx) const {
   return execState( ctx ).filterPassed();
-}
-
-void AthAlgorithm::setFilterPassed( bool state ) const {
-  setFilterPassed( state, Gaudi::Hive::currentContext() );
 }
 
 void AthAlgorithm::setFilterPassed( bool state, const EventContext& ctx ) const {
