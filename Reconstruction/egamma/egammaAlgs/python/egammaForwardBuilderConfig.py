@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from ElectronPhotonSelectorTools.EgammaPIDdefs import egammaPID
 from egammaTools.EMTrackMatchBuilderConfig import EMTrackMatchBuilderCfg
@@ -23,7 +23,7 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         if flags.Reco.EnableHGTDExtension:
             extraInputs += [
                 ("xAOD::TrackParticleContainer",
-                 "StoreGateSvc+InDetTrackParticles.time")
+                 "StoreGateSvc+GSFTrackParticles.time")
             ]
             if "forwardelectronNNselectors" not in kwargs:
                 LooseFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
