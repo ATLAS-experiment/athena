@@ -504,11 +504,7 @@ bool TrigTrackSelector::selectTrack( HepMC::ConstGenParticlePtr track ) {
 
     /// set this so can use it as the identifier - don't forget to reset!!
 //AV Using memory to get some value is not a good idea. This is not a repruducible/portable way, but I leave it as is.
-#ifdef HEPMC3
     m_id = (unsigned long)(track.get());
-#else
-    m_id = (unsigned long)track;
-#endif
     bool sel;
     sel = selectTrack( TruthParticle(track) );
     m_id = 0;
@@ -687,11 +683,7 @@ bool TrigTrackSelector::selectTrack( const xAOD::TruthParticle* track, double x0
 // make a TIDA::Track from a GenParticle 
 TIDA::Track* TrigTrackSelector::makeTrack(HepMC::ConstGenParticlePtr track ) { 
 //AV Using memory to get some value is not a good idea. This is not a repruducible/portable way, but I leave it as is.
-#ifdef HEPMC3
     unsigned long id = (unsigned long)(track.get());
-#else
-    unsigned long id = (unsigned long)track;
-#endif
     TruthParticle t = TruthParticle(track); 
     return  makeTrack( &t, id );
 }
