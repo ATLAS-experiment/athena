@@ -140,7 +140,6 @@ unsigned int PFUnifiedMatchingTruthTool::matchAndCreateEflowCaloObj(const EventC
     nMatches++;
 
     //loop over the matched calorimeter clusters and associate tracks and clusters to each other as needed.
-    unsigned int linkIndex = 0;
     for (auto *trkClusLink : bestClusters){
 
       eflowRecCluster *thisEFRecCluster = trkClusLink->getCluster();
@@ -148,7 +147,6 @@ unsigned int PFUnifiedMatchingTruthTool::matchAndCreateEflowCaloObj(const EventC
       if (m_recoverSplitShowers){
         // Look up whether this cluster is intended for recovery
         if (std::find(data.clusters.begin(), data.clusters.end(), trkClusLink->getCluster()) == data.clusters.end()) {
-          linkIndex++;
           continue;       
         }
       }
@@ -158,7 +156,6 @@ unsigned int PFUnifiedMatchingTruthTool::matchAndCreateEflowCaloObj(const EventC
 
       thisEFRecCluster->addTrackMatch(trackClusterLink);
     }
-     linkIndex++;
   }
 
   /* Create 3 types eflowCaloObjects: track-only, cluster-only, track-cluster-link */
