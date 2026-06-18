@@ -225,7 +225,6 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
 	       << "Event: " << evtNbr
 	       << std::endl;
 
-#ifdef HEPMC3   
   std::map<int,int> ref_bc_to_id;
   const auto& refvertices = refMcEvts->vertices();
   for ( const auto&  vtx: refvertices) {
@@ -263,46 +262,6 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
    }
   }
   (*m_outFile) << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;  
-#else
-  std::set<int> ref_bc;
-  for ( auto vtxIt = refMcEvts->vertices_begin(); vtxIt != refMcEvts->vertices_end(); ++vtxIt ) {
-    auto vtx =*vtxIt;
-    int partonsin = 0;
-    int showerout = 0;
-#ifdef HEPMC3
-    for (auto p = vtx->particles_in_begin();p!=vtx->particles_in_end();++p ) if (MC::isQuark(*p) || MC::isGluon(*p)) partonsin++;
-#else
-    for (auto p = vtx->particles_in_const_begin();p!=vtx->particles_in_const_end();++p ) if (MC::isQuark(*p) || MC::isGluon(*p)) partonsin++;
-#endif
-    for (auto& p : *vtx) if (p->pdg_id() == 91||p->pdg_id() == 92||p->pdg_id() == 94)  showerout++;
-    if ( partonsin >= 2 &&  showerout == 0 ) {
-      ref_bc.insert(vtx->barcode());
-   }
-  }
-  std::set<int> che_bc;
-  for ( auto vtxIt = checkMcEvts->vertices_begin(); vtxIt != checkMcEvts->vertices_end(); ++vtxIt ) {
-    auto vtx =*vtxIt;
-    che_bc.insert(vtx->barcode());
-  }
-  std::set<int> allbarcodes;
-  for (const auto &bc: ref_bc) allbarcodes.insert(bc);
-  for (const auto &bc: che_bc) allbarcodes.insert(bc);
-  for (const auto &bc: allbarcodes){
-   auto ref_it = ref_bc.find(bc);
-   auto che_it = che_bc.find(bc);
-   if (ref_it == ref_bc.end()) {ATH_MSG_WARNING("In Event [" << evtNbr << "]: got null ref-vertex (barcode: " << bc << ")"); continue; }
-   if (che_it == che_bc.end()) {ATH_MSG_WARNING("Output GenEvent is missing the selected HardScattering Vtx !!"<< " (" << bc << ")"); continue; }
-   const auto refvtx = refMcEvts->barcode_to_vertex(bc);
-   const auto chevtx = checkMcEvts->barcode_to_vertex(bc);
-   (*m_outFile) << refvtx << std::endl;
-   (*m_outFile) << chevtx << std::endl;
-   (*m_outFile) << "---------" << std::endl;
-   if ( !compareVtx( refvtx, chevtx ) ) {
-     ATH_MSG_WARNING("Selected HardScattering vertices are NOT the same !!"<< " at Event [" << evtNbr << "]"<< " refVtx = " << refvtx<<" chevtx = " << chevtx);
-   }
-  }
-  (*m_outFile) << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
-#endif
 
   return StatusCode::SUCCESS;
 }
@@ -315,8 +274,6 @@ bool GenAodValidationTool::compareVtx( const HepMC::ConstGenVertexPtr& vtx1, con
 		  << " vtx2: " << vtx2);
     return false;
   }
-
-#ifdef HEPMC3 
   auto inVtx1 = vtx1->particles_in();
   auto inVtx2 = vtx2->particles_in();
   if (inVtx1.size() !=  inVtx2.size()) {
@@ -343,62 +300,6 @@ bool GenAodValidationTool::compareVtx( const HepMC::ConstGenVertexPtr& vtx1, con
      ATH_MSG_ERROR("Out-going particles are NOT matchiutg !!");
      return false;
   }
-#else
-  const int inVtx1 = vtx1->particles_in_size();
-  const int inVtx2 = vtx2->particles_in_size();
-
-  const int outVtx1 = vtx1->particles_out_size();
-  const int outVtx2 = vtx2->particles_out_size();
-  
-  if (  inVtx1 !=  inVtx2 || outVtx1 != outVtx2 ) {
-    ATH_MSG_ERROR("Not the same number of branches !!" << endmsg
-		  << " in:  " << inVtx1  << "\t" << inVtx2  << endmsg
-		  << " out: " << outVtx1 << "\t" << outVtx2);
-    return false;
-  }
-
-  for ( HepMC::GenVertex::particles_in_const_iterator inPart1 = vtx1->particles_in_const_begin();
-	inPart1 != vtx1->particles_in_const_end();
-	++inPart1 ) {
-    bool inParticleOK = false;
-    for ( HepMC::GenVertex::particles_in_const_iterator inPart2 = vtx2->particles_in_const_begin();
-	inPart2 != vtx2->particles_in_const_end();
-	++inPart2 ) {
-      if ( compareParts( *inPart1, *inPart2 ) ) {
-	inParticleOK = true;
-	break;
-      }
-    } //> end loop over in-part2
-
-    if ( !inParticleOK ) {
-      ATH_MSG_ERROR("In-going particles are NOT matching !!");
-      return false;
-    }
-
-  }//> end loop over in-part1
-
-
-  for ( HepMC::GenVertex::particles_out_const_iterator outPart1 = vtx1->particles_out_const_begin();
-	outPart1 != vtx1->particles_out_const_end();
-	++outPart1 ) {
-    bool outParticleOK = false;
-    for ( HepMC::GenVertex::particles_out_const_iterator outPart2 = vtx2->particles_out_const_begin();
-	outPart2 != vtx2->particles_out_const_end();
-	++outPart2 ) {
-      if ( compareParts( *outPart1, *outPart2 ) ) {
-	outParticleOK = true;
-	break;
-      }
-    } //> end loop over out-part2
-
-    if ( !outParticleOK ) {
-      ATH_MSG_ERROR("Out-going particles are NOT matching !!");
-      return false;
-    }
-
-  }//> end loop over out-part1
-#endif
-
   return true;
 }
 
