@@ -21,9 +21,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 
-#include "AthenaBaseComps/AthMessaging.h"
-#include "AthenaBaseComps/AthCheckMacros.h"
-
 #include "InDetSimEvent/SiHitCollection.h"
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"
 #include "GeoAdaptors/GeoTRTUncompressedHit.h"
@@ -65,8 +62,13 @@
 #include <Inventor/nodes/SoPointSet.h>
 #include <Inventor/SbColor.h>
 
+// Qt includes
 #include <QMap>
 #include <QSet>
+
+// C++ includes
+#include <string>
+
 
 class VP1SimHitSystem::Clockwork
 {
@@ -261,6 +263,25 @@ void VP1SimHitSystem::checkboxChanged()
   }
 }
 
+void VP1SimHitSystem::fillHitPositionsFromSiHitCollection(const std::string& collName, const StoreGateSvc* sg, SoVertexProperty* hitVtxProperty, unsigned int & hitCount)
+{
+  const char* collNameChar = collName.c_str();
+  const SiHitCollection *p_collection = nullptr;
+  if (sg->retrieve(p_collection, collName) == StatusCode::SUCCESS)
+  {
+    for (const SiHit &hit : *p_collection)
+    {
+      GeoSiHit ghit(hit);
+      if (!ghit)
+        continue;
+      HepGeom::Point3D<double> u = ghit.getGlobalPosition();
+      hitVtxProperty->vertex.set1Value(hitCount++, u.x(), u.y(), u.z());
+    }
+    message("Event contains " + str(p_collection->size()) + " entries in " + str(collNameChar) );
+  }
+  else
+    message("Unable to retrieve '" + str(collNameChar) + "' Hits");
+}
 
 void VP1SimHitSystem::buildHitTree(const QString& detector)
 {
@@ -295,82 +316,19 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
   // Take hits from SG
   if(detector=="ITkPixel")
   {
-    //
-    // ITkPixel:
-    //
-    const SiHitCollection* p_collection = nullptr;
-    if(sg->retrieve(p_collection,"ITkPixelHits")==StatusCode::SUCCESS)
-    {
-      for (const SiHit& hit : *p_collection)
-      {
-        GeoSiHit ghit(hit);
-        if(!ghit) continue;
-        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
-        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
-      }
-      message("Event contains " + str(p_collection->size()) + " entries in ITkPixelHits");
-    }
-    else
-      message("Unable to retrieve ITkPixel Hits");
-
+    fillHitPositionsFromSiHitCollection( "ITkPixelHits", sg, hitVtxProperty, hitCount);
   }
   else if(detector=="ITkStrip")
   {
-    //
-    // ITkStrip:
-    //
-    const SiHitCollection* p_collection = nullptr;
-    if(sg->retrieve(p_collection,"ITkStripHits")==StatusCode::SUCCESS)
-    {
-      for (const SiHit& hit : *p_collection)
-      {
-        GeoSiHit ghit(hit);
-        if(!ghit) continue;
-        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
-        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
-      }
-      message("Event contains " + str(p_collection->size()) + " entries in ITkStripHits");
-    }
-    else
-      message("Unable to retrieve ITkStrip Hits");
+    fillHitPositionsFromSiHitCollection("ITkStripHits", sg, hitVtxProperty, hitCount);
   }
   else if(detector=="Pixel")
   {
-    //
-    // Pixel:
-    //
-    const SiHitCollection* p_collection = nullptr;
-    if(sg->retrieve(p_collection,"PixelHits")==StatusCode::SUCCESS)
-    {
-      for (const SiHit& hit : *p_collection)
-      {
-        GeoSiHit ghit(hit);
-        if(!ghit) continue;
-        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
-        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
-      }
-    }
-    else
-      message("Unable to retrieve Pixel Hits");
+    fillHitPositionsFromSiHitCollection("PixelHits", sg, hitVtxProperty, hitCount);
   }
   else if(detector=="SCT")
   {
-    //
-    // SCT:
-    //
-    const SiHitCollection* s_collection = 0;
-    if(sg->retrieve(s_collection,"SCT_Hits")==StatusCode::SUCCESS)
-    {
-      for (const SiHit& hit : *s_collection)
-      {
-        GeoSiHit ghit(hit);
-        if (!ghit) continue;
-        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
-        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
-      }
-    }
-    else
-      message("Unable to retrieve SCT Hits");
+    fillHitPositionsFromSiHitCollection("SCT_Hits", sg, hitVtxProperty, hitCount);
   }
   else if(detector=="TRT")
   {
@@ -385,7 +343,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
         GeoTRTUncompressedHit ghit(hit);
         if(!ghit) continue;
         Amg::Vector3D u = Amg::Hep3VectorToEigen(ghit.getGlobalPosition(m_clockwork->trt_dd_man));
-        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(), u.z() );
+        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
       }
     }
     else
