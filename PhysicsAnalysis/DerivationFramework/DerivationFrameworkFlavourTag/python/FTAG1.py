@@ -73,6 +73,7 @@ def FTAG1CoreCfg(
     trigger_lists_helper: TriggerListsHelper | None = None,
     keep_truth_collections: bool = True,
     keep_track_covariance_offdiag: bool = True,
+    tau_as_smart_collection: bool = False,
 ) -> ComponentAccumulator:
     """Configure FTAG1 slimming and output content."""
     if extra_SmartCollections is None:
@@ -133,15 +134,21 @@ def FTAG1CoreCfg(
         "CSSKGChargedParticleFlowObjects",
         "CSSKGNeutralParticleFlowObjects",
         "CaloCalTopoClusters",
-        "TauJets",
-        "TauNeutralParticleFlowObjects",
-        "TauShotParticleFlowObjects",
-        "TauTracks",
         "JetAssociatedPixelClusters",
         "JetAssociatedSCTClusters",
         "PixelClusters",
         "SCT_Clusters",
     ]
+
+    if tau_as_smart_collection:
+        ftag1_slimming_helper.SmartCollections += ["TauJets"]
+    else:
+        ftag1_slimming_helper.AllVariables += [
+            "TauJets",
+            "TauNeutralParticleFlowObjects",
+            "TauShotParticleFlowObjects",
+            "TauTracks",
+        ]
     if keep_truth_collections:
         ftag1_slimming_helper.AllVariables += [
             "TruthEvents",
