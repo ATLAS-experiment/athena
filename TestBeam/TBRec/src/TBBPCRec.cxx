@@ -195,9 +195,9 @@ TBBPCRec::execute(const EventContext& ctx)
   }
 
   if ( sc.isFailure( ) ) {
-     setFilterPassed(false);
+     setFilterPassed(false, ctx);
   } else {
-     setFilterPassed(true);
+     setFilterPassed(true, ctx);
   }
 
   return StatusCode::SUCCESS;

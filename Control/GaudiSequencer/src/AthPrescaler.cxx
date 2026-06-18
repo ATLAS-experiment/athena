@@ -34,12 +34,12 @@ AthPrescaler::initialize()
 }
 
 StatusCode
-AthPrescaler::execute(const EventContext& /*ctx*/)
+AthPrescaler::execute(const EventContext& ctx)
 {
   ++m_seen;
   float fraction = (float(100.0) * (float)(m_pass+1)) / (float)m_seen;
   if ( fraction > m_percentPass ) {
-    setFilterPassed( false );
+    setFilterPassed( false, ctx );
     ATH_MSG_INFO ("execute ==> filter failed");
   } else {
     ATH_MSG_INFO ("execute ==> filter passed");

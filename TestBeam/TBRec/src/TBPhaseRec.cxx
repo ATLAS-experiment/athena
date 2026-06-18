@@ -138,7 +138,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
   if( thisrun != m_runnumber && m_calib_filename != "" ) {
      m_runnumber= thisrun;
      if ( getnewcalib() == StatusCode::FAILURE ) {
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::SUCCESS;
      }
   }
@@ -148,7 +148,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
   if (sc.isFailure()) {
     ATH_MSG_ERROR ( "TBObjectReco: Retrieval of TDCRawCont failed" );
     if (!m_neverReturnFailure) {
-       setFilterPassed(false);
+       setFilterPassed(false, ctx);
     }
     return StatusCode::SUCCESS;
   }
@@ -231,7 +231,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
     if ( checkOut.isFailure() )
       {
 	ATH_MSG_ERROR ( "cannot retrieve TBEventInfo from StoreGate" );
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
 	return StatusCode::SUCCESS;
       }
     else
@@ -248,7 +248,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
       sc = evtStore()->record(theTBPhase, m_TBPhaseKey);
       if (sc.isFailure( )) {
 	ATH_MSG_FATAL ( "Cannot record TBPhase" );
-        setFilterPassed(false); // always return failure for this one!
+        setFilterPassed(false, ctx); // always return failure for this one!
         return StatusCode::SUCCESS;
       }
       return StatusCode::SUCCESS;
@@ -259,7 +259,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
       ATH_MSG_ERROR ( "no valid TDC data found" );
     }
     if (!m_neverReturnFailure) {
-       setFilterPassed(false);
+       setFilterPassed(false, ctx);
     }
     return StatusCode::SUCCESS;
   }
@@ -305,7 +305,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
         << "has phase index " << phaseInd 
         << " outside of the bounds [0," << m_timeBins-1 << "]" );
     if (!m_neverReturnFailure) {
-       setFilterPassed(false);
+       setFilterPassed(false, ctx);
     }
     return StatusCode::SUCCESS;
   }
@@ -317,7 +317,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
         << "has TDC-WAC " << tdcdTtoWAC[tdcBestIndex]
         << " inside the guard region [0," << m_guardValue  << "]" );
     if (!m_neverReturnFailure) {
-       setFilterPassed(false);
+       setFilterPassed(false, ctx);
     }
     return StatusCode::SUCCESS;
   } 
@@ -333,7 +333,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
   sc = evtStore()->record(theTBPhase, m_TBPhaseKey);
   if (sc.isFailure( )) {
     ATH_MSG_FATAL ( "Cannot record TBPhase" );
-    setFilterPassed(false);  // always return failure for this one!
+    setFilterPassed(false, ctx);  // always return failure for this one!
     return StatusCode::SUCCESS;
   }
   

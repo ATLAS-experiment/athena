@@ -190,7 +190,7 @@ StatusCode PileUpMTAlg::execute(const EventContext& ctx) {
   const auto& evtID = ctx.eventID();
 
   ATH_CHECK(evtStore().retrieve());
-  setFilterPassed(false);  // optional: start with algorithm not passed
+  setFilterPassed(false, ctx);  // optional: start with algorithm not passed
 
   // Code based on PileUpEventLoopMgr and PileUpToolsAlg (trying to extract the
   // core merging code) Read hard scatter
@@ -426,7 +426,7 @@ StatusCode PileUpMTAlg::execute(const EventContext& ctx) {
     }
     // Propagate filter result
     if (!tool->filterPassed()) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
     }
   }
   ATH_MSG_DEBUG(std::format("***** Took {:%OMm %OSs} to process all subevents",
@@ -444,7 +444,7 @@ StatusCode PileUpMTAlg::execute(const EventContext& ctx) {
       PileUpHashHelper::uuidToPileUpMixtureId(pileUpHash));
   ATH_MSG_DEBUG("PileUpMixtureID = " << overlaidEvt->pileUpMixtureID());
 
-  setFilterPassed(true);  // if got here, assume that means algorithm passed
+  setFilterPassed(true, ctx);  // if got here, assume that means algorithm passed
   if (m_fracLowPt != 0) {
     ATH_CHECK(m_lowptMBSvc->endHardScatter(ctx));
   }

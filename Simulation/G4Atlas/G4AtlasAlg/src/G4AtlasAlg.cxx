@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -430,7 +430,7 @@ StatusCode G4AtlasAlg::execute(const EventContext& ctx)
       ATH_MSG_WARNING("Simulation will now go on to the next event ");
       if (m_killAbortedEvents) {
         ATH_MSG_WARNING("setFilterPassed is now False");
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
       }
       if (m_flagAbortedEvents) {
         SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);

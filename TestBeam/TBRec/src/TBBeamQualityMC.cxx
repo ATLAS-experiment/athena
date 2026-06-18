@@ -36,7 +36,7 @@ StatusCode TBBeamQualityMC::initialize() {
   return StatusCode::SUCCESS; 
 }
 
-StatusCode TBBeamQualityMC::execute(const EventContext& /*ctx*/) {
+StatusCode TBBeamQualityMC::execute(const EventContext& ctx) {
   /// Print an informatory message:
   ATH_MSG_DEBUG ( "in execute()" );
   
@@ -85,7 +85,7 @@ StatusCode TBBeamQualityMC::execute(const EventContext& /*ctx*/) {
        ATH_MSG_DEBUG ( "CheckTrackParams failed: "<<sx1<<" "<<sx2<<" "<<sx3<<" / "<<sy1<<" "<<sy2<<" "<<sy3);
         //return StatusCode::FAILURE;
         //return StatusCode::RECOVERABLE;
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::SUCCESS;
      }
   }
@@ -128,7 +128,7 @@ StatusCode TBBeamQualityMC::execute(const EventContext& /*ctx*/) {
        ATH_MSG_DEBUG ( "CheckPrimaryTrack failed, no energy deposit in all asked scint." );
         //return StatusCode::FAILURE;
         //return StatusCode::RECOVERABLE;
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::SUCCESS;
      }
   }
@@ -144,7 +144,7 @@ StatusCode TBBeamQualityMC::execute(const EventContext& /*ctx*/) {
             ATH_MSG_DEBUG ( "CheckVeto failed ");
             //return StatusCode::FAILURE;
             //return StatusCode::RECOVERABLE;
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             return StatusCode::SUCCESS;
           }
      }
@@ -165,7 +165,7 @@ StatusCode TBBeamQualityMC::execute(const EventContext& /*ctx*/) {
      }
      if (!haveit) {
         ATH_MSG_DEBUG ( "CheckClusters failed ");
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::SUCCESS;
      }
   }
@@ -180,19 +180,19 @@ StatusCode TBBeamQualityMC::execute(const EventContext& /*ctx*/) {
       if(chi2 <= 0 ||  std::log(chi2)<=-10 || chi2  == 1000 || mytrack->getUslope() == 0 || mytrack->getUintercept() == 0 || mytbeinfo->getCryoX() == mytrack->getCryoHitu()) {
         ATH_MSG_DEBUG ( "CheckTrackReco in X failed ");
         ATH_MSG_DEBUG ( chi2 << " / " << std::log(chi2) <<  " :: " << mytrack->getUslope() <<  " / " << mytrack->getUintercept()  <<  " / " << mytbeinfo->getCryoX()  <<  " / " << mytrack->getCryoHitu() );
-         setFilterPassed(false);
+         setFilterPassed(false, ctx);
          return StatusCode::SUCCESS;
       }       
       chi2 = mytrack->getChi2_v();
       if(chi2 <= 0 ||  std::log(chi2)<=-10 || chi2  == 1000 || mytrack->getVslope() == 0 || mytrack->getVintercept() == 0 || mytbeinfo->getTableY() == mytrack->getCryoHitv()) {
         ATH_MSG_DEBUG ( "CheckTrackReco in Y failed ");
         ATH_MSG_DEBUG ( chi2 << " / " << std::log(chi2) <<  " :: " << mytrack->getVslope() <<  " / " << mytrack->getVintercept()  <<  " / " << mytbeinfo->getTableY()  <<  " / " << mytrack->getCryoHitv() );
-         setFilterPassed(false);
+         setFilterPassed(false, ctx);
          return StatusCode::SUCCESS;
       }       
 
   }
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 }
 

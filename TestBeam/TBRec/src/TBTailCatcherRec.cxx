@@ -29,7 +29,7 @@ TBTailCatcherRec::initialize()
 }
 
 StatusCode
-TBTailCatcherRec::execute(const EventContext& /*ctx*/)
+TBTailCatcherRec::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "In execute()" );
 
@@ -37,14 +37,14 @@ TBTailCatcherRec::execute(const EventContext& /*ctx*/)
   StatusCode sc = evtStore()->retrieve(tailcatchraw, m_SGkey);
   if (sc.isFailure()){
     ATH_MSG_DEBUG ( "TBObjectReco: Retrieval of "<<m_SGkey<<" failed" );
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }else {
     
     if(m_tailcatch_calib.size()!=tailcatchraw->size()){
       ATH_MSG_ERROR ( "Calib factor number : "<<m_tailcatch_calib.size()
                       << " != "<<tailcatchraw->size()<<" = number of scints in TailCatcherRaw");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     
@@ -73,9 +73,9 @@ TBTailCatcherRec::execute(const EventContext& /*ctx*/)
     }
   }
   if ( sc.isFailure( ) ) {
-     setFilterPassed(false);
+     setFilterPassed(false, ctx);
   } else {
-     setFilterPassed(true);
+     setFilterPassed(true, ctx);
   }
   return StatusCode::SUCCESS;
 }
