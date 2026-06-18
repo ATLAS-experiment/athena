@@ -1,6 +1,6 @@
 """Define methods to construct configured ITk Pixel Digitization tools and algorithms
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -11,7 +11,7 @@ from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOu
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
     ITkPixelModuleConfigCondAlgCfg, ITkPixelChargeCalibCondAlgCfg,
-    ITkPixelDistortionAlgCfg
+    ITkPixelDistortionAlgCfg #, ITkPixFieldMapsAlgCfg
 )
 from PixelConditionsTools.ITkPixelConditionsSummaryConfig import ITkPixelConditionsSummaryCfg
 from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
@@ -96,7 +96,7 @@ def ITkSensorSimPlanarToolCfg(flags, name="ITkSensorSimPlanarTool", **kwargs):
     kwargs.setdefault("ChargeCorrectionHistos", ["layer_1_100_um_cce", "layer_2_150_um_cce", "layer_3_150_um_cce", "layer_4_150_um_cce"])
     kwargs.setdefault("DistanceCorrectionHistos", ["layer_1_100_um_dz", "layer_2_150_um_dz", "layer_3_150_um_dz", "layer_4_150_um_dz"])
     if flags.Digitization.PixelPlanarRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
-        # acc.merge(ITkPixelRadSimFluenceMapAlgCfg(flags))  # TODO: not supported yet
+        #acc.merge(ITkPixFieldMapsAlgCfg(flags))  # TODO: not supported yet
         pass
     acc.setPrivateTools(CompFactory.SensorSimPlanarTool(name, **kwargs))
     return acc
@@ -114,7 +114,7 @@ def ITkSensorSim3DToolCfg(flags, name="ITkSensorSim3DTool", **kwargs):
     kwargs.setdefault("TemplateCorrectionROOTfile", "maps_ITk_3D_100V_fl10e15.root")
     kwargs.setdefault("ChargeCorrectionHistos", ["barrel_25_um_cee", "ring_25_um_cee"])
     if flags.Digitization.Pixel3DRadiationDamageSimulationType is not PixelRadiationDamageSimulationType.NoRadiationDamage:
-        # acc.merge(ITkPixelRadSimFluenceMapAlgCfg(flags))  # TODO: not supported yet
+        #acc.merge(ITkPixFieldMapsAlgCfg(flags))  # TODO: not supported yet
         pass
     acc.setPrivateTools(CompFactory.SensorSim3DTool(name, **kwargs))
     return acc
