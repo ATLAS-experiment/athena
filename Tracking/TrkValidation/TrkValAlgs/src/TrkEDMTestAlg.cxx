@@ -37,7 +37,7 @@ TrkEDMTestAlg::initialize()
 
 //-------------------------------------------------------------------------
 StatusCode
-TrkEDMTestAlg::execute()
+TrkEDMTestAlg::execute(const EventContext& /*ctx*/)
 {
   ++m_eventNum;
   return runTest();

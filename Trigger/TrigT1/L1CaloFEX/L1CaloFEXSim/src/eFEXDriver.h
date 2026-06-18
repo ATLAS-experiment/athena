@@ -20,7 +20,7 @@ class eFEXDriver : public AthAlgorithm
   virtual ~eFEXDriver();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const EventContext& ctx);
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
  private:
