@@ -186,7 +186,7 @@ StatusCode DerivationFramework::DerivationKernel::execute(const EventContext& ct
   if (acceptEvent) ++m_acceptCntr;
 
   // Set the setFilterPassed flag
-  setFilterPassed(acceptEvent);
+  setFilterPassed(acceptEvent, ctx);
 
   // Return if event didn't pass
   if (!acceptEvent) return StatusCode::SUCCESS;
