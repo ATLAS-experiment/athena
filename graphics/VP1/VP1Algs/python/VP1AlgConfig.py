@@ -265,7 +265,7 @@ def SetupVP1():
     else:
 
         if args.phaseII:
-            _logger.error("VP1: The use of the `--phaseII` flag with input data file is not supported. When you run VP1 on input data file, metadata are taken from the data file itself. However, if needed, you can still steer Athena, by using the standard Athena flags and options. Exiting...")
+            _logger.error("VP1: The use of the `--phaseII` flag with input data file is not supported. When you run VP1 on input data file, metadata are taken from the data file itself. Please remove `--phaseII` and relaunch. However, if needed, you can still steer Athena by using the standard Athena flags and options. Exiting...\n")
             import sys
             sys.exit(2)
 
