@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventDecisionAlg.cxx
@@ -83,7 +83,7 @@ StatusCode EventDecisionAlg::execute(const EventContext& ctx)
       break;
     }
   }
-  this->setFilterPassed( eventPasses );
+  this->setFilterPassed( eventPasses, ctx );
   ATH_MSG_DEBUG("Event passes/fails: " << eventPasses );
 
   return StatusCode::SUCCESS;
