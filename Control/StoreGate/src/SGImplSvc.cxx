@@ -86,8 +86,8 @@ namespace SG {
     typedef IStringPool::sgkey_t sgkey_t;
 
     struct remap_t {
-      sgkey_t target;
-      off_t index_offset;
+      sgkey_t target = 0;
+      off_t index_offset = 0;
     };
     typedef SGKeyMap<remap_t> remap_map_t;
     remap_map_t m_remaps;

@@ -15,12 +15,12 @@ namespace AthenaInterprocess {
 class IMessageDecoder;
 
 struct ProcessStatus {
-   pid_t pid;
+   pid_t pid{};
    int   exitcode{};
 };
 
 struct ProcessResult {
-   pid_t pid;
+   pid_t pid {};
    ScheduledWork output{};
 };
 
