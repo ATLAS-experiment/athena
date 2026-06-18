@@ -109,7 +109,6 @@ namespace LVL1 {
     void makeRPCDecision(const std::string& rpcFlags, bool M) const;
 
     void parseFlags(const std::string& flags) const;
-    std::vector<std::string> parseString(const std::string& str, const std::string& sep) const;
     std::string getShapedFlags(const std::string& flags) const;
 
     ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_rpcTool{this, "RPCRecRoiTool", "LVL1::TrigT1RPCRecRoiTool/LVL1__TrigT1RPCRecRoiTool", "Tool to get the eta/phi coordinates in the RPC"};
