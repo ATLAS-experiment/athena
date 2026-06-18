@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -400,6 +400,7 @@ namespace SH
     ///   out of memory II
   public:
     virtual void Add (TObject *meta_swallow);
+    virtual void Add (TObject *meta_swallow, Option_t*);
 
 
     /// \brief clear out the content of the collection

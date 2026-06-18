@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -116,7 +116,7 @@ namespace SH
   private:
     typedef std::vector<std::string>::iterator FilesMIter;
 
-    ClassDef (SampleLocal, 1);
+    ClassDefOverride (SampleLocal, 1);
   };
 }
 
