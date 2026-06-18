@@ -135,7 +135,7 @@ bool BigWheelCoincidenceLUT::readMap()
         }
         uint32_t modaddr = ((modulenumber[iModule] & TGCTriggerLUTs::MODULE_MASK)<<TGCTriggerLUTs::MODULE_SHIFT) +
                            ((phimod2 & TGCTriggerLUTs::PHIMOD2_MASK)<<TGCTriggerLUTs::PHIMOD2_SHIFT);
-        const std::string filePrefix = PathResolver::FindCalibDirectory("dev") + "/TrigT1TGC";
+        static const std::string filePrefix = PathResolver::FindCalibDirectory("dev") + "/TrigT1TGC";
         if( filePrefix.length() == 10 ) { // "/TrigT1TGC" length
             log << MSG::ERROR << " Could not find calibration directory referred to by 'dev'."<< endmsg;
             continue;
