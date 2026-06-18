@@ -3,89 +3,138 @@ from Campaigns.Utils import Campaign, getMCCampaign
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
-def getLumicalcFiles(campaign):
-    """ Returns the list of lumicalc files for a given campaign """
-    ilumical_files = {
-        Campaign.MC16a: [
-            'GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root',
-            'GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root'
-        ],
-        Campaign.MC16d: [
-            'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root'
-        ],
-        Campaign.MC16e: [
-            'GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root'
-        ],
-        Campaign.MC20a: [
-            'GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root',
-            'GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root'
-        ],
-        Campaign.MC20d: [
-            'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root'
-        ],
-        Campaign.MC20e: [
-            'GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root'
-        ],
-        Campaign.MC21a: [
-            'GoodRunsLists/data22_13p6TeV/20230207/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-003.root'
-        ],
-        Campaign.MC23a: [
-            'GoodRunsLists/data22_13p6TeV/20250321/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-004.root'
-        ],
-        Campaign.MC23c: [
-            'GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root'
-        ],
-        Campaign.MC23d: [
-            'GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root'
-        ],
-        Campaign.MC23e: [
-            'GoodRunsLists/data24_13p6TeV/20260127/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-008.root'
-        ],
-        Campaign.MC23g: [
-            'GoodRunsLists/data25_13p6TeV/20260129/ilumicalc_histograms_None_497924-509849_OflLumi-Run3-006.root'
-        ],
-    }
-
-    try:
-        return ilumical_files[campaign]
-    except KeyError:
-        raise ValueError(f'Unsupported campaign {campaign} for lumicalc files')
-
-
-def actualMuFiles(campaign):
-    list = []
-
-    if campaign in [Campaign.MC16d, Campaign.MC20d]:
-        list.append(
-            'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root'
-        )
+def getYearsForCampaign(campaign):
+    if campaign in [Campaign.MC16a, Campaign.MC20a]:
+        return [2015, 2016]
+    elif campaign in [Campaign.MC16d, Campaign.MC20d]:
+        return [2017]
     elif campaign in [Campaign.MC16e, Campaign.MC20e]:
-        list.append(
-            'GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root'
-        )
+        return [2018]
     elif campaign in [Campaign.MC21a, Campaign.MC23a]:
-        list.append(
-            'GoodRunsLists/data22_13p6TeV/20250321/purw.actualMu.root'
-        )
+        return [2022]
     elif campaign in [Campaign.MC23c, Campaign.MC23d]:
-        list.append(
-            'GoodRunsLists/data23_13p6TeV/20250321/purw.actualMu.root'
-        )
+        return [2023]
     elif campaign in [Campaign.MC23e]:
-        list.append(
-            'GoodRunsLists/data24_13p6TeV/20260127/purw.actualMu.root'
-        )
+        return [2024]
     elif campaign in [Campaign.MC23g]:
-        list.append(
-            'GoodRunsLists/data25_13p6TeV/20260129/purw.actualMu.root'
-        )
+        return [2025]
+    else:
+        raise ValueError(f'Unsupported campaign {campaign}')
+
+
+def getLumicalcDict():
+    GRLDict={}
+    ## RUN 3
+    # 2025
+    GRLDict['GRL2025'] = ['GoodRunsLists/data25_13p6TeV/20260129/ilumicalc_histograms_None_497924-509849_OflLumi-Run3-006.root']
+
+    # 2024
+    GRLDict['GRL2024'] = ['GoodRunsLists/data24_13p6TeV/20260127/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-008.root']
+
+    # 2023
+    GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root']
+    GRLDict['GRL2023_ignoreTRIG_JETCTPIN'] = ['GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004_ignoreTRIGJETCTPIN.root']
+
+    # 2022
+    GRLDict['GRL2022'] = ['GoodRunsLists/data22_13p6TeV/20250321/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-004.root']
+    GRLDict['GRL2022_ignore_TRIGLAR'] = ['GoodRunsLists/data22_13p6TeV/20250321/ilumicalc_histograms_None_430536-440613_OflLumi-Run3-004_ignore_TRIGLAR.root']
+
+    ## RUN 2
+    # 2018
+    GRLDict['GRL2018_Triggerno17e33prim'] = ['GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root']
+    GRLDict['GRL2018_BjetHLT'] = ['GoodRunsLists/data18_13TeV/20200426/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010-2.root']
+
+    # 2017
+    GRLDict['GRL2017_Triggerno17e33prim'] = ['GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root']
+    GRLDict['GRL2017_BjetHLT_Normal2017'] = ['GoodRunsLists/data17_13TeV/20180619/physics_25ns_BjetHLT_Normal2017.lumicalc.OflLumi-13TeV-010.root']
+    GRLDict['GRL2017_JetHLT_Normal2017'] = ['GoodRunsLists/data17_13TeV/20180619/physics_25ns_JetHLT_Normal2017.lumicalc.OflLumi-13TeV-010.root']
+
+    # 2016
+    GRLDict['GRL2016'] = ['GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root']
+    GRLDict['GRL2016_ignore_TOROID_STATUS'] = ['GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_ignore_TOROID_STATUS_297730-311481_OflLumi-13TeV-009.root']
+    GRLDict['GRL2016_BjetHLT'] = ['GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_BjetHLT_297730-311481_OflLumi-13TeV-009.root']
+    GRLDict['GRL2016_BjetHLT_Tight'] = ['GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_BjetHLT_Tight_297730-311481_OflLumi-13TeV-009.root']
+
+    # 2015
+    GRLDict['GRL2015'] = ['GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root']
+
+    return GRLDict
+
+
+def getActualMuDict():
+    GRLDict={}
+    ## RUN 3
+    # 2025
+    GRLDict['GRL2025'] = ['GoodRunsLists/data25_13p6TeV/20260129/purw.actualMu.root']
+
+    # 2024
+    GRLDict['GRL2024'] = ['GoodRunsLists/data24_13p6TeV/20260127/purw.actualMu.root']
+
+    # 2023
+    GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20250321/purw.actualMu.root']
+    GRLDict['GRL2023_ignoreTRIG_JETCTPIN'] = ['GoodRunsLists/data23_13p6TeV/20250321/purw.actualMu.ignoreTRIGJETCTPIN.root']
+
+    # 2022
+    GRLDict['GRL2022'] = ['GoodRunsLists/data22_13p6TeV/20250321/purw.actualMu.root']
+    GRLDict['GRL2022_ignore_TRIGLAR'] = ['GoodRunsLists/data22_13p6TeV/20250321/purw.actualMu.ignore_TRIGLAR.root']
+
+    ## RUN 2
+    # 2018
+    GRLDict['GRL2018_Triggerno17e33prim'] = ['GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root']
+    GRLDict['GRL2018_BjetHLT'] = ['GoodRunsLists/data18_13TeV/20200426/purw.actualMu.root']
+
+    # 2017
+    GRLDict['GRL2017_Triggerno17e33prim'] = ['GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root']
+    GRLDict['GRL2017_BjetHLT_Normal2017'] = ['GoodRunsLists/data17_13TeV/20180619/physics_25ns_BjetHLT_Normal2017.actualMu.OflLumi-13TeV-010.root']
+    GRLDict['GRL2017_JetHLT_Normal2017'] = ['GoodRunsLists/data17_13TeV/20180619/physics_25ns_JetHLT_Normal2017.actualMu.OflLumi-13TeV-010.root']
+
+    # 2016
+    GRLDict['GRL2016'] = []
+    GRLDict['GRL2016_ignore_TOROID_STATUS'] = []
+    GRLDict['GRL2016_BjetHLT'] = []
+    GRLDict['GRL2016_BjetHLT_Tight'] = []
+
+    # 2015
+    GRLDict['GRL2015'] = []
+
+    return GRLDict
+
+
+def getLumicalcFiles(campaign, GRLSuffixDict={}):
+    """ Returns the list of lumicalc files for a given campaign """
+    lumicalcDict = getLumicalcDict()
+    data_years = getYearsForCampaign(campaign)
+
+    file_list = []
+    for data_year in data_years:
+        GRLKey = 'GRL' + str(data_year)
+        if data_year in GRLSuffixDict:
+            GRLKey = GRLKey + '_' + GRLSuffixDict[data_year]
+        elif data_year in [2017, 2018]:
+            GRLKey = GRLKey + '_Triggerno17e33prim'
+        file_list.extend(lumicalcDict[GRLKey])
+    return file_list
+
+
+def actualMuFiles(campaign, GRLSuffixDict={}):
+    actualMuDict = getActualMuDict()
+    data_years = getYearsForCampaign(campaign)
+
+    file_list = []
+    for data_year in data_years:
+        GRLKey = 'GRL' + str(data_year)
+        if data_year in GRLSuffixDict:
+            GRLKey = GRLKey + '_' + GRLSuffixDict[data_year]
+        elif data_year in [2017, 2018]:
+            GRLKey = GRLKey + '_Triggerno17e33prim'
+        file_list.extend(actualMuDict[GRLKey])
 
     if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d, Campaign.MC23e, Campaign.MC23g]:
-        assert(len(list) == 1)
+        assert(len(file_list) == 1)
     else:
-        assert(len(list) == 0)
+        assert(len(file_list) == 0)
 
-    return list
+    return file_list
 
 
 def defaultConfigFiles(campaign):
@@ -135,7 +184,7 @@ def defaultConfigFiles(campaign):
     return list
 
 
-def getConfigurationFiles(campaign=None, dsid=None, data_type=None, files=None, useDefaultConfig=False):
+def getConfigurationFiles(campaign=None, dsid=None, data_type=None, files=None, useDefaultConfig=False, GRLSuffixDict={}):
     # Attempt auto-configuration
     default_directory = 'dev/PileupReweighting/share'
     configuration_files = []
@@ -166,7 +215,7 @@ def getConfigurationFiles(campaign=None, dsid=None, data_type=None, files=None, 
     else:
         raise ValueError(f'Invalid data_type {data_type}')
 
-    configuration_files = actualMuFiles(campaign)
+    configuration_files = actualMuFiles(campaign, GRLSuffixDict)
     if useDefaultConfig:
         configuration_files += defaultConfigFiles(campaign)
         return configuration_files
