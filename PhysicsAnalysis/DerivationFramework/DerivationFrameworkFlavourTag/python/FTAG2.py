@@ -241,6 +241,7 @@ def FTAG2Cfg(
             trigger_lists_helper=trigger_lists_helper,
             keep_truth_collections=False,
             keep_track_covariance_offdiag=False,
+            tau_as_smart_collection=True,
         )
     )
 
