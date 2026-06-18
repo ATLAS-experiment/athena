@@ -82,7 +82,7 @@ def PFCfg(inputFlags,**kwargs):
     result.merge(PFTrackSelectorAlgCfg(inputFlags,"PFTrackSelector",useCaching))
 
     from eflowRec.PFCfg import getOfflinePFAlgorithm
-    result.merge(getOfflinePFAlgorithm(inputFlags))    
+    result.merge(getOfflinePFAlgorithm(inputFlags, **kwargs))    
 
     from eflowRec.PFCfg import getChargedFlowElementCreatorAlgorithm,getNeutralFlowElementCreatorAlgorithm,getLCNeutralFlowElementCreatorAlgorithm
     result.addEventAlgo(getChargedFlowElementCreatorAlgorithm(inputFlags,""))
