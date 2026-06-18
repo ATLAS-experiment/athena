@@ -1120,20 +1120,11 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
       truep[hitNumber]  = std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z());
       const auto vertex =  particle->production_vertex();
 //AV Please note that taking the first particle as a mother is ambiguous.
-#ifdef HEPMC3
       if ( vertex && !vertex->particles_in().empty()){
         const auto& mother_of_particle=vertex->particles_in().front();             
         motherUniqueID[hitNumber] =  HepMC::uniqueID(mother_of_particle);
         motherPdgid[hitNumber]    = mother_of_particle->pdg_id();
       }
-#else
-      if ( vertex ){
-        if( vertex->particles_in_const_begin() !=  vertex->particles_in_const_end() ){
-          motherUniqueID[hitNumber] =  HepMC::uniqueID(*vertex->particles_in_const_begin());
-          motherPdgid[hitNumber]    =  (*vertex->particles_in_const_begin())->pdg_id();
-        }
-      }
-#endif
     }
     chargeDep[hitNumber] = siHit.energyLoss() ;
     
