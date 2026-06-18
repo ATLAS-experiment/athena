@@ -22,7 +22,7 @@ def JetCalibrationDecoratorCfg(
     isData: bool = False,
     calibJetCollection: str | None = None,
     rhoKey: str | None = None,
-    originScale: str | None = None,
+    pvKey: str | None = None,
 ) -> ComponentAccumulator:
     """Decorate jets with calibrated four-momentum components."""
 
@@ -49,8 +49,8 @@ def JetCalibrationDecoratorCfg(
     )
     if rhoKey is not None:
         tool_kwargs['RhoKey'] = rhoKey
-    if originScale is not None:
-        tool_kwargs['OriginScale'] = originScale
+    if pvKey is not None:
+        tool_kwargs['PrimaryVerticesContainerName'] = pvKey
 
     jet_calib_tool = CompFactory.JetCalibrationTool(
         f"JetCalibrationTool_{safe_collection}_{safe_scale}",
