@@ -260,11 +260,7 @@ HepMC::ConstGenParticlePtr LArG4GenShowerLib::getParticleFromMC()
 
   // Return the last particle of the event.
   if (mcEvent)
-#ifdef HEPMC3
     return !mcEvent->at(0)->particles().empty() ? mcEvent->at(0)->particles().back() : nullptr;
-#else
-    return ( * (* mcEvent->begin())->particles_end());
-#endif
 
   return nullptr;
 }
