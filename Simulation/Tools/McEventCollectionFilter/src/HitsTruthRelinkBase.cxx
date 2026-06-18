@@ -36,7 +36,6 @@ StatusCode HitsTruthRelinkBase::getReferenceBarcode(const EventContext &ctx, int
     ATH_MSG_ERROR("Truth collection should have at least one vertex!");
     return StatusCode::FAILURE;
   }
-#ifdef HEPMC3
   const HepMC::ConstGenVertexPtr& genVtx = genEvt->vertices().back();
   size_t nParticles = genVtx->particles_out().size();
   if (nParticles == 0) {
@@ -44,16 +43,6 @@ StatusCode HitsTruthRelinkBase::getReferenceBarcode(const EventContext &ctx, int
     return StatusCode::FAILURE;
   }
   *barcode = HepMC::barcode(genVtx->particles_out().front());
-#else
-  auto genVtx = *(genEvt->vertices_end());
-  size_t nParticles = genVtx->particles_out_size();
-  if (nParticles == 0) {
-    ATH_MSG_ERROR("Truth vertex should have at least one particle!");
-    return StatusCode::FAILURE;
-  }
-  *barcode = HepMC::barcode(*(genVtx->particles_out_const_begin()));
-#endif
-
   ATH_MSG_DEBUG("Reference barcode: " << *barcode);
 
   return StatusCode::SUCCESS;
@@ -77,7 +66,6 @@ StatusCode HitsTruthRelinkBase::getReferenceId(const EventContext &ctx, int *id)
     ATH_MSG_ERROR("Truth collection should have at least one vertex!");
     return StatusCode::FAILURE;
   }
-#ifdef HEPMC3
   const HepMC::ConstGenVertexPtr& genVtx = genEvt->vertices().back();
   size_t nParticles = genVtx->particles_out().size();
   if (nParticles == 0) {
@@ -86,16 +74,6 @@ StatusCode HitsTruthRelinkBase::getReferenceId(const EventContext &ctx, int *id)
   }
   *id = HepMC::uniqueID(genVtx->particles_out().front());
   barcode = HepMC::barcode(genVtx->particles_out().front());
-#else
-  auto genVtx = *(genEvt->vertices_end());
-  size_t nParticles = genVtx->particles_out_size();
-  if (nParticles == 0) {
-    ATH_MSG_ERROR("Truth vertex should have at least one particle!");
-    return StatusCode::FAILURE;
-  }
-  *id = HepMC::uniqueID(*(genVtx->particles_out_const_begin()));
-  barcode = HepMC::barcode(*(genVtx->particles_out_const_begin()));
-#endif
 
   ATH_MSG_DEBUG("Reference id: " << *id);
   ATH_MSG_DEBUG("Reference barcode: " << barcode);

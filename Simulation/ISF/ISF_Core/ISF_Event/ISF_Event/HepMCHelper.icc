@@ -28,7 +28,6 @@ HepMC::IteratorRange ISF::HepMCHelper::convertIteratorRange( int intItRange ) {
   else                    return ( HepMC::parents   );
 }
 
-#ifdef HEPMC3
 HepMC::ConstGenParticlePtr ISF::HepMCHelper::findRealtiveWithPDG( HepMC::ConstGenParticlePtr& genParticle,
         const HepMC::IteratorRange &relation,
         const std::set<int> &relativesPDG     ) {
@@ -68,27 +67,5 @@ HepMC::ConstGenParticlePtr ISF::HepMCHelper::findRealtiveWithPDG( HepMC::ConstGe
 
     return nullptr;
 }
-#else
-HepMC::ConstGenParticlePtr ISF::HepMCHelper::findRealtiveWithPDG( HepMC::ConstGenParticlePtr& genParticle,
-                                                                  const HepMC::IteratorRange &relation,
-                                                                  const std::set<int> &relativesPDG     ) {
 
-  if (!genParticle) return 0;
-  // get range of relative particles
-  HepMC::ConstGenParticleProductionRange relativesRng = genParticle->particles_in( relation );
-
-  // loop over relatives
-  HepMC::GenVertex::particle_iterator       partIt  = relativesRng.begin();
-  const HepMC::GenVertex::particle_iterator partEnd = relativesRng.end();
-  HepMC::ConstGenParticlePtr curRelative{};
-  bool  found = false;
-  for ( ; (!found) && (partIt!=partEnd) ; ++partIt) {
-    curRelative = (*partIt) ;
-    // check if current relative particle PDG ID is found in the set
-    found = relativesPDG.count( curRelative->pdg_id() ) != 0;
-  }
-
-  return (found ? curRelative : 0);
-}
-#endif
 

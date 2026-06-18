@@ -67,7 +67,6 @@ StatusCode  ISF::GenParticleSimAcceptList::initialize()
 }
 
 /** passes through to the private version of the filter */
-#ifdef HEPMC3
 bool ISF::GenParticleSimAcceptList::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
 
@@ -93,36 +92,9 @@ bool ISF::GenParticleSimAcceptList::pass(const HepMC::ConstGenParticlePtr& parti
 
   return so_far_so_good;
 }
-#else
-bool ISF::GenParticleSimAcceptList::pass(const HepMC::GenParticle& particle) const
-{
 
-  ATH_MSG_VERBOSE( "Checking whether " << particle << " passes the filter." );
-
-  std::vector<int> vertices(500);
-  bool so_far_so_good = pass( particle , vertices );
-
-  // Test all parent particles
-  if (so_far_so_good && particle.production_vertex() && m_qs){
-    for (HepMC::GenVertex::particle_iterator it = particle.production_vertex()->particles_begin(HepMC::parents);
-                                             it != particle.production_vertex()->particles_end(HepMC::parents); ++it){
-      // Loop breaker
-      if ( HepMC::is_same_particle(*it,particle) ) continue;
-      // Check this particle
-      vertices.clear();
-      bool parent_all_clear = pass( **it , vertices );
-      ATH_MSG_VERBOSE( "Parent all clear: " << parent_all_clear <<
-         "\nIf true, will not pass the daughter because it should have been picked up through the parent already (to avoid multi-counting)." );
-      so_far_so_good = so_far_so_good && !parent_all_clear;
-    } // Loop over parents
-  } // particle had parents
-
-  return so_far_so_good;
-}
-#endif
 
 /** returns true if the the particle and all daughters are on the accept list */
-#ifdef HEPMC3
 bool ISF::GenParticleSimAcceptList::pass(const HepMC::ConstGenParticlePtr& particle , std::vector<int> & used_vertices ) const
 {
   // See if the particle is in the accept list
@@ -164,50 +136,7 @@ bool ISF::GenParticleSimAcceptList::pass(const HepMC::ConstGenParticlePtr& parti
 
   return passFilter;
 }
-#else
-bool ISF::GenParticleSimAcceptList::pass(const HepMC::GenParticle& particle , std::vector<int> & used_vertices ) const
-{
-  // See if the particle is in the accept list
-  bool passFilter = std::binary_search( m_pdgId.begin() , m_pdgId.end() , particle.pdg_id() ) || MC::isNucleus( particle.pdg_id() );
-  // Remove documentation particles
-  passFilter = passFilter && MC::isPhysical(&particle);
-  // Test all daughter particles
-  if (particle.end_vertex() && m_qs && passFilter){
-    // Primarily interested in passing particles decaying outside
-    // m_minDecayRadiusQS (nomimally the inner radius of the
-    // beampipe). However, it is also interesting to pass particles
-    // which start outside m_minDecayRadiusQS, but decay inside it.
-    passFilter = passFilter && ( (m_minDecayRadiusQS < particle.end_vertex()->position().perp()) || (m_minDecayRadiusQS < particle.production_vertex()->position().perp()) );
-    if (passFilter) {
-      // Break loops
-      if ( std::find( used_vertices.begin() , used_vertices.end() , HepMC::uniqueID(particle.end_vertex()) )==used_vertices.end() ){
-        used_vertices.push_back( HepMC::uniqueID(particle.end_vertex()) );
-        for (HepMC::GenVertex::particle_iterator it = particle.end_vertex()->particles_begin(HepMC::children);
-             it != particle.end_vertex()->particles_end(HepMC::children); ++it){
-          passFilter = passFilter && pass( **it , used_vertices );
-          if (!passFilter) {
-            ATH_MSG_VERBOSE( "Daughter particle " << **it << " does not pass." );
-            break;
-          }
-        } // Loop over daughters
-      } // Break loops
-    } // particle decayed before the min radius to be considered for simulation
-    else {
-      ATH_MSG_VERBOSE( "Particle " << particle << " was produced and decayed within a radius of " << m_minDecayRadiusQS << " mm.");
-    }
-  } // particle had daughters
-  if (!m_useShadowEvent && !particle.end_vertex() && MC::isDecayed(&particle)) { // no daughters... No end vertex... Check if this isn't trouble
-    ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the accept list." );
-    ATH_MSG_ERROR( "This is VERY likely pointing to a problem with either the configuration you ");
-    ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
-    ATH_MSG_ERROR( "particle will come next, and then we will throw.");
-    ATH_MSG_ERROR( particle );
-    throw std::runtime_error("GenParticleSimAcceptList: Particle with no end vertex and not in acceptlist");
-  }
 
-  return passFilter;
-}
-#endif
 
 StatusCode  ISF::GenParticleSimAcceptList::finalize()
 {

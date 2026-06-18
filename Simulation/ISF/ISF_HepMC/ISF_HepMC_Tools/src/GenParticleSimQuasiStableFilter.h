@@ -40,11 +40,7 @@ namespace ISF {
     virtual StatusCode  initialize() override final;
 
     /** passes through to the private version */
-#ifdef HEPMC3
     virtual bool pass(const HepMC::ConstGenParticlePtr& particle ) const override final;
-#else
-    virtual bool pass(const HepMC::GenParticle& particle ) const override final;
-#endif
 
   private:
     /** returns true if the the particle and all daughters are on the accept list */

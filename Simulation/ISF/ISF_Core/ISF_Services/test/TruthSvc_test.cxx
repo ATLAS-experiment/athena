@@ -224,17 +224,10 @@ namespace ISFTesting {
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
     ASSERT_EQ( -200001, HepMC::barcode(generated) );
-#ifdef HEPMC3
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( 0u, generated->particles_out().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
-#else
-    ASSERT_EQ( 21021, generated->id() );
-    ASSERT_EQ( 1, generated->particles_in_size());
-    ASSERT_EQ( 0, generated->particles_out_size());
-    ASSERT_EQ( inParticle3, *(generated->particles_in_const_begin()));
-#endif
     }
   }
 
@@ -280,15 +273,9 @@ namespace ISFTesting {
       .Times(2)
       .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3));
-#ifdef HEPMC3
     EXPECT_CALL(ti, parentParticleAfterIncident(1000003))
       .Times(1)
       .WillOnce(::testing::Return(nullptr));
-#else
-    EXPECT_CALL(ti, parentParticleAfterIncident(1010003))
-      .Times(1)
-      .WillOnce(::testing::Return(nullptr));
-#endif
 
     recordIncidentToMCTruth(ti,false);
     HepMC::GenVertexPtr  generated = HepMC::barcode_to_vertex(anEvent.get(),-200001); //Find a nicer way to get this.
@@ -296,17 +283,10 @@ namespace ISFTesting {
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
     ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
-#ifdef HEPMC3
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( 0u, generated->particles_out().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
-#else
-    ASSERT_EQ( 21021, generated->id() );
-    ASSERT_EQ( 1, generated->particles_in_size());
-    ASSERT_EQ( 0, generated->particles_out_size());
-    ASSERT_EQ( inParticle3, *(generated->particles_in_const_begin()));
-#endif
     }
   }
 
@@ -396,17 +376,10 @@ namespace ISFTesting {
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
     ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
-#ifdef HEPMC3
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( 0u, generated->particles_out().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
-#else
-    ASSERT_EQ( 21021, generated->id() );
-    ASSERT_EQ( 1, generated->particles_in_size());
-    ASSERT_EQ( 0, generated->particles_out_size());
-    ASSERT_EQ( inParticle3, *(generated->particles_in_const_begin()));
-#endif
     }
   }
 
@@ -476,17 +449,10 @@ namespace ISFTesting {
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
     ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
-#ifdef HEPMC3
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( 0u, generated->particles_out().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
-#else
-    ASSERT_EQ( 21021, generated->id() );
-    ASSERT_EQ( 1, generated->particles_in_size());
-    ASSERT_EQ( 0, generated->particles_out_size());
-    ASSERT_EQ( inParticle3, *(generated->particles_in_const_begin()));
-#endif
     }
   }
 
@@ -543,15 +509,9 @@ namespace ISFTesting {
       .Times(2)
       .WillOnce(::testing::Return(inParticle3))
       .WillOnce(::testing::Return(inParticle3));
-#ifdef HEPMC3
     EXPECT_CALL(ti, parentParticleAfterIncident(1000003))
       .Times(1)
       .WillOnce(::testing::Return(inParticle5));
-#else
-    EXPECT_CALL(ti, parentParticleAfterIncident(1010003))
-      .Times(1)
-      .WillOnce(::testing::Return(inParticle5));
-#endif
     // _ is a matcher where the argument can be any value of the
     // correct type. Needed because the argument to the pass method is
     // a reference to an abstract interface class (ITruthIncident).
@@ -565,19 +525,11 @@ namespace ISFTesting {
     if (generated) {
     ASSERT_EQ( vtxPosition, generated->position() );
     ASSERT_EQ( -200001, HepMC::barcode(generated) ); // by construction at the moment
-#ifdef HEPMC3
     ASSERT_EQ( 21021, generated->status() );
     ASSERT_EQ( 1u, generated->particles_in().size());
     ASSERT_EQ( inParticle3, *(generated->particles_in().cbegin()));
     ASSERT_EQ( 1u, generated->particles_out().size());
     ASSERT_EQ( inParticle5, *(generated->particles_out().cbegin()));
-#else
-    ASSERT_EQ( 21021, generated->id() );
-    ASSERT_EQ( 1, generated->particles_in_size());
-    ASSERT_EQ( inParticle3, *(generated->particles_in_const_begin()));
-    ASSERT_EQ( 1, generated->particles_out_size());
-    ASSERT_EQ( inParticle5, *(generated->particles_out_const_begin()));
-#endif
     }
   }
 

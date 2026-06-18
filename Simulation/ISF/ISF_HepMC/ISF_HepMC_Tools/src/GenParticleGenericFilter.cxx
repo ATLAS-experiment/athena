@@ -36,7 +36,6 @@ StatusCode  ISF::GenParticleGenericFilter::initialize()
 
 
 /** Returns whether the given particle passes all cuts or not */
-#ifdef HEPMC3
 bool ISF::GenParticleGenericFilter::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
   bool pass = true;
@@ -52,35 +51,11 @@ bool ISF::GenParticleGenericFilter::pass(const HepMC::ConstGenParticlePtr& parti
                    << "pass the cuts.");
   return pass;
 }
-#else
-bool ISF::GenParticleGenericFilter::pass(const HepMC::GenParticle& particle) const
-{
-  bool pass = true;
-  HepMC::ConstGenVertexPtr productionVertex = particle.production_vertex();
-  if (!productionVertex || productionVertex->position().perp()<=m_maxApplicableRadius) {
-      pass = check_cuts_passed(particle);
-  }
-  const auto momentum = particle.momentum();
-  ATH_MSG_VERBOSE( "GenParticle '" << particle << "' with "
-                   << (productionVertex ? "pos: r=" + std::to_string(productionVertex->position().perp()) : "")
-                   << ", mom: eta=" << momentum.eta() << " phi=" << momentum.phi()
-                   << " did " << (pass ? "" : "NOT ")
-                   << "pass the cuts.");
-  return pass;
-}
-#endif
-
 
 /** Check whether the given particle passes all configure cuts or not */
-#ifdef HEPMC3
 bool ISF::GenParticleGenericFilter::check_cuts_passed(const HepMC::ConstGenParticlePtr& particle) const {
   const auto momentum = particle?particle->momentum():HepMC::FourVector(0,0,0,0);
   int pdg = particle?particle->pdg_id():0;
-#else
-bool ISF::GenParticleGenericFilter::check_cuts_passed(const HepMC::GenParticle &particle) const {
-  const auto& momentum = particle.momentum();
-  int pdg = particle.pdg_id();
-#endif
   double mom = std::sqrt(momentum.x()*momentum.x()+momentum.y()*momentum.y()+momentum.z()*momentum.z());
   double eta = momentum.eta();
   double phi = momentum.phi();

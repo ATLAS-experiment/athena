@@ -62,13 +62,8 @@ StatusCode ISF::GenParticleInteractingFilter::initialize()
 }
 
 /** passes through to the private version of the filter */
-#ifdef HEPMC3
 bool ISF::GenParticleInteractingFilter::pass(const HepMC::ConstGenParticlePtr& particle) const {
   const int pdg_id = particle->pdg_id();
-#else
-bool ISF::GenParticleInteractingFilter::pass(const HepMC::GenParticle& particle) const {
-  const int pdg_id = particle.pdg_id();
-#endif
   const bool isInteracting = find(m_additionalInteractingParticleTypes.begin(),
                                 m_additionalInteractingParticleTypes.end(),
                                 pdg_id) != m_additionalInteractingParticleTypes.end();

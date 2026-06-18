@@ -33,18 +33,10 @@ namespace ISF {
     virtual std::unique_ptr<HepMC::GenEvent> filterGenEvent(const HepMC::GenEvent& inputEvent) const override final;
 
   private:
-#ifdef HEPMC3
     bool passesFilters(HepMC::ConstGenParticlePtr& part, const ToolHandleArray<IGenParticleFilter>& filters) const;
     bool identifiedQuasiStableParticleForSim(HepMC::ConstGenParticlePtr& part) const;
     bool hasQuasiStableAncestorParticle(HepMC::ConstGenParticlePtr& part) const;
     bool isPostQuasiStableParticleVertex(HepMC::ConstGenVertexPtr& vtx) const;
-#else
-    bool passesFilters(HepMC::ConstGenParticlePtr part, const ToolHandleArray<IGenParticleFilter>& filters) const;
-    bool identifiedQuasiStableParticleForSim(HepMC::ConstGenParticlePtr part) const;
-    bool hasQuasiStableAncestorParticle(HepMC::ConstGenParticlePtr part) const;
-    bool isPostQuasiStableParticleVertex(HepMC::ConstGenVertexPtr vtx) const;
-#endif
-
     /** Filter passes if a difference between the decision of m_genParticleOldFilters and m_genParticleNewFilters is found.
         m_genParticleCommonFilters is applied before to select relevant particles.
         If only m_genParticleCommonFilters is specified, filter passes if any particle passes this one

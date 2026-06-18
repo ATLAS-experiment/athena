@@ -71,16 +71,12 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
   genPart->set_pdg_id(m_pileUpParticlePDGID); //Geantino
   genPart->set_status(1); //!< set decay status
-#ifndef HEPMC3
-  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
-#endif
   HepMC::GenVertexPtr genVertex = HepMC::newGenVertexPtr();
   genVertex->add_particle_out(genPart);
 
   const HepMC::GenEvent* genEvt = *(inputCollection->begin());
   //......copy GenEvent to the new one and remove all vertex
   HepMC::GenEvent* evt = HepMC::copyemptyGenEvent(genEvt);
-#ifdef HEPMC3
   for (const auto &oldbp : genEvt->beams()) {
     // Would be good to have a helper function here like:
     // GenParticlePtr copyGenParticleToNewGenEvent(ConstGenParticlePtr particleToBeCopied, GenEvent* newGenEvent);
@@ -106,26 +102,6 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
       genPart->set_momentum(HepMC::FourVector(sum,0,0,sum));
     }
   }
-#else
-  evt->set_beam_particles(genEvt->beam_particles());
-  if (genEvt->cross_section()) {
-    evt->set_cross_section(*genEvt->cross_section());
-  }
-  // to set geantino vertex as a truth primary vertex
-  HepMC::ConstGenVertexPtr hScatVx = HepMC::barcode_to_vertex(genEvt,-3);
-  if (hScatVx != nullptr) {
-    HepMC::FourVector pmvxpos=hScatVx->position();
-    genVertex->set_position(pmvxpos);
-    // to set geantino kinematic phi=eta=0, E=p=E_hard_scat
-    HepMC::GenVertex::particles_in_const_iterator itrp =hScatVx->particles_in_const_begin();
-    if (hScatVx->particles_in_size()==2) {
-      HepMC::FourVector mom1=(*itrp)->momentum();
-      HepMC::FourVector mom2=(*(++itrp))->momentum();
-      double sum = mom1.e()+mom2.e();
-      genPart->set_momentum(HepMC::FourVector(sum,0,0,sum));
-    }
-  }
-#endif
 
 
   // electrons from TRT hits
@@ -144,24 +120,17 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
       HepMC::ConstGenParticlePtr particle = link.cptr();
       HepMC::ConstGenVertexPtr vx = particle->production_vertex();
       HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(particle->momentum(), particle->pdg_id(), particle->status());
-#ifndef HEPMC3
-      HepMC::suggest_barcode(newParticle, HepMC::barcode(link)); // HepMC2 still barcode-based
-#endif
       const HepMC::FourVector &position = vx->position();
       HepMC::GenVertexPtr newVertex = HepMC::newGenVertexPtr(position);
       newVertex->add_particle_out(newParticle);
       evt->add_vertex(std::move(newVertex));
-#ifdef HEPMC3
       HepMC::suggest_barcode(newParticle, HepMC::barcode(link)); // FIXME
-#endif
     }
   }
 
   //.....add new vertex with geantino
   evt->add_vertex(std::move(genVertex));
-#ifdef HEPMC3
   HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE ); // FIXME
-#endif
   int referenceBarcode = HepMC::barcode(genPart);
   ATH_MSG_DEBUG("Reference barcode: " << referenceBarcode);
 

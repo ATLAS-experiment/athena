@@ -312,9 +312,7 @@ namespace MCTesting {
     event->add_vertex(vertex);
     HepMC::GenParticlePtr gPP = m_truthIncident->childParticle(childIndex,childBarcode);
     vertex->add_particle_out(gPP);
-#ifdef HEPMC3
     HepMC::suggest_barcode( gPP, childBarcode);
-#endif
     //--------------------------------------------------------------------
     // run tests:
     // do gP properties match original child, apart from barcode?
