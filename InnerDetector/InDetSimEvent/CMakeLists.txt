@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetSimEvent )
@@ -25,14 +25,14 @@ atlas_add_test( SiTotalCharge_test
   SOURCES test/SiTotalCharge_test.cxx 
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools InDetSimEvent
-  POST_EXEC_SCRIPT "nopost.sh"
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( SiCharge_test
   SOURCES test/SiCharge_test.cxx 
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools InDetSimEvent
-  POST_EXEC_SCRIPT "nopost.sh"
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 
