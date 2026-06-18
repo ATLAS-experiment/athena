@@ -324,6 +324,8 @@ namespace MuonValR4 {
             using namespace xAOD::TruthHelpers;
             m_out_gen_truthType   = getParticleTruthType(*truthMuon);
             m_out_gen_truthOrigin = getParticleTruthOrigin(*truthMuon);
+            m_out_gen_truthBeta   = truthMuon->p4().Beta();
+            m_out_gen_truthPdgId  = truthMuon->pdgId();
         }
     }
     void MuonHoughTransformTester::fillBucketInfo(const SpacePointBucket& bucket) {
