@@ -407,10 +407,13 @@ class HistogramAdjustment:
             bin_low = max(1, min(ax.FindBin(self.xlow), ax.GetNbins()))
             bin_high = max(1, min(ax.FindBin(self.xhigh), ax.GetNbins()))
             nbins = bin_high - bin_low
-            h_out = ROOT.TH1D(new_name, hist.GetTitle(), nbins + 1, float(self.xlow), float(self.xhigh))
+            h_out = ROOT.TH1D(new_name, hist.GetTitle(), nbins, float(self.xlow), float(self.xhigh))
             for i in range(nbins + 1):
                 h_out.SetBinContent(i + 1, hist.GetBinContent(i + bin_low))
-
+                h_out.SetBinError(i + 1, hist.GetBinError(i + bin_low))
+            # let's retain entries in the full range -- more meaningful than default (number of bins)
+            h_out.SetEntries(hist.GetEntries())
+                
         if self.x_label:
             h_out.GetXaxis().SetTitle(self.x_label)
         if self.y_label:
