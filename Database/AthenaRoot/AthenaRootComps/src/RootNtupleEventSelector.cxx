@@ -544,11 +544,44 @@ RootNtupleEventSelector::next( IEvtSelector::Context& ctx ) const
     ++m_nbrEvts;
     m_curEvt = global_entry + 1;
 
+    unsigned long long eventNumber = global_entry;
+    if (!m_eventNumberVar.value().empty()) {
+      if (TLeaf* leaf = tree->GetLeaf (m_eventNumberVar.value().c_str())) {
+        leaf->GetBranch()->GetEntry(entry);
+        eventNumber = leaf->GetValueLong64();
+      }
+      else {
+        ATH_MSG_ERROR("Cannot find event number variable: " << m_eventNumberVar);
+      }
+    }
+
+    unsigned long runNumber = 0;
+    if (!m_runNumberVar.value().empty()) {
+      if (TLeaf* leaf = tree->GetLeaf (m_runNumberVar.value().c_str())) {
+        leaf->GetBranch()->GetEntry(entry);
+        runNumber = std::abs(leaf->GetValue());
+      }
+      else {
+        ATH_MSG_ERROR("Cannot find run number variable: " << m_runNumberVar);
+      }
+    }
+
+    EventIDBase::number_type lbn = EventIDBase::UNDEFNUM;
+    if (!m_lbnVar.value().empty()) {
+      if (TLeaf* leaf = tree->GetLeaf (m_lbnVar.value().c_str())) {
+        leaf->GetBranch()->GetEntry(entry);
+        lbn = std::abs(leaf->GetValue());
+      }
+      else {
+        ATH_MSG_ERROR("Cannot find LBN variable: " << m_lbnVar);
+      }
+    }
+
     // std::cout << "--event-info--" << std::endl;
     // event info
     EventType* evtType = new EventType;
-    const std::size_t runNbr = 0;
-    EventInfo* evtInfo = new EventInfo(new EventID(runNbr, m_curEvt-1, 0), evtType);
+    EventInfo* evtInfo = new EventInfo(new EventID(runNumber, eventNumber, 0), evtType);
+    evtInfo->event_ID()->set_lumi_block (lbn);
     if ( !m_dataStore->record( evtInfo, "TTreeEventInfo" ).isSuccess() ) {
       ATH_MSG_ERROR ("Could not record TTreeEventInfo !");
       delete evtInfo; evtInfo = 0;
@@ -559,8 +592,9 @@ RootNtupleEventSelector::next( IEvtSelector::Context& ctx ) const
       auto ei = std::make_unique<xAOD::EventInfo>();
       auto ei_store = std::make_unique<xAOD::EventAuxInfo>();
       ei->setStore (ei_store.get());
-      ei->setRunNumber (runNbr);
-      ei->setEventNumber (global_entry);
+      ei->setRunNumber (runNumber);
+      ei->setEventNumber (eventNumber);
+      ei->setLumiBlock (lbn);
 
       static const SG::AuxElement::Accessor<std::string> tupleName ("tupleName");
       static const SG::AuxElement::Accessor<std::string> collName ("collectionName");
@@ -1096,6 +1130,15 @@ RootNtupleEventSelector::fetchNtuple(const std::string& fname,
   // std::cout << "::TTree::SetBranchStatus()..." << std::endl;
   // disable all branches
   tree->SetBranchStatus("*", 0);
+  if (!m_eventNumberVar.value().empty()) {
+    tree->SetBranchStatus(m_eventNumberVar.value().c_str(), 1);
+  }
+  if (!m_runNumberVar.value().empty()) {
+    tree->SetBranchStatus(m_runNumberVar.value().c_str(), 1);
+  }
+  if (!m_lbnVar.value().empty()) {
+    tree->SetBranchStatus(m_lbnVar.value().c_str(), 1);
+  }
 
   if (!m_imetaStore->clearStore().isSuccess()) {
     ATH_MSG_INFO("could not clear store [" << m_imetaStore.typeAndName() << "]");
