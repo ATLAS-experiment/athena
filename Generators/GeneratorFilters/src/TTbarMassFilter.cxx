@@ -15,7 +15,7 @@ TTbarMassFilter::TTbarMassFilter(const std::string& name, ISvcLocator* pSvcLocat
 }
 
 
-StatusCode TTbarMassFilter::filterEvent() {
+StatusCode TTbarMassFilter::filterEvent(const EventContext& ctx) {
   int  top      = 0;
   int  topbar       = 0;
   bool isLastTop    = false;
@@ -278,19 +278,19 @@ StatusCode TTbarMassFilter::filterEvent() {
     // Check that the first top particle shares a production vertex with another top
     if (top_12 < 0) {
       ATH_MSG_ERROR("First top particle doesn't share the production vertex to any other top particles. Event failed the filter");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     if ((top_21 < 0) or (top_22 < 0)) {
       ATH_MSG_ERROR("Indexing error. Event failed the filter");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
 
     // Check that the second top-pair really has the same production vertex
     if (top_vtxs[top_21] != top_vtxs[top_22]) {
       ATH_MSG_ERROR("Production vertex for the second top-pair particles is not the same. Event failed the filter");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
 
@@ -334,7 +334,7 @@ StatusCode TTbarMassFilter::filterEvent() {
   }
 
   // Proper top-pair invariant mass is calculated. Check if it is in the range of the interest and accept the event if so.
-  setFilterPassed(topPairInvariantMass > m_massRangeLowThr && topPairInvariantMass <= m_massRangeHighThr);
+  setFilterPassed(topPairInvariantMass > m_massRangeLowThr && topPairInvariantMass <= m_massRangeHighThr, ctx);
   ATH_MSG_DEBUG("The top-pair invariant mass is " << topPairInvariantMass << " CLHEP::MeV");
   return StatusCode::SUCCESS;
 }

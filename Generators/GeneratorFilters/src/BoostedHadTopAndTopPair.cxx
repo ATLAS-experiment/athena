@@ -26,7 +26,7 @@ BoostedHadTopAndTopPair::BoostedHadTopAndTopPair(const std::string& name, ISvcLo
 }
 
 
-StatusCode BoostedHadTopAndTopPair::filterEvent() {
+StatusCode BoostedHadTopAndTopPair::filterEvent(const EventContext& ctx) {
   // if true, the event pass the filter :
   bool pass        = false;
   bool passTopHad  = false;
@@ -90,7 +90,7 @@ StatusCode BoostedHadTopAndTopPair::filterEvent() {
   }
 
   if ( passTopPair && passTopHad )  pass = true;
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
 
   return StatusCode::SUCCESS;
 }

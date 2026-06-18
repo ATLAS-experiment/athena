@@ -21,7 +21,7 @@ class TTbarWithJpsimumuFilter: public GenFilter {
   virtual ~TTbarWithJpsimumuFilter();
   virtual StatusCode filterInitialize();
   virtual StatusCode filterFinalize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
  private:
 

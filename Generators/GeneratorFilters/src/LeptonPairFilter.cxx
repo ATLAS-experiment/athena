@@ -101,7 +101,7 @@ StatusCode LeptonPairFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode LeptonPairFilter::filterEvent() {
+StatusCode LeptonPairFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
   // Loop over all events in McEventCollection
@@ -273,7 +273,7 @@ StatusCode LeptonPairFilter::filterEvent() {
   }
 
   // if we get here we have failed
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   ATH_MSG_INFO("Fail"  );
   return StatusCode::SUCCESS;
 }

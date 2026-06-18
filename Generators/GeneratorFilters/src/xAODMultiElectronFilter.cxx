@@ -10,9 +10,9 @@ StatusCode xAODMultiElectronFilter::filterInitialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODMultiElectronFilter::filterEvent() {
+StatusCode xAODMultiElectronFilter::filterEvent(const EventContext& ctx) {
   // Retrieve TruthElectron container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
   int numElectrons = 0;
 
@@ -22,13 +22,13 @@ StatusCode xAODMultiElectronFilter::filterEvent() {
         numElectrons++;
         if (numElectrons >= m_nElectrons)
         {
-          setFilterPassed(true);
+          setFilterPassed(true, ctx);
           return StatusCode::SUCCESS;
         }
       }
   }
 
 
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

@@ -14,11 +14,11 @@ SplitPhotonFilter::SplitPhotonFilter(const std::string& name, ISvcLocator* pSvcL
 }
 
 
-StatusCode SplitPhotonFilter::filterEvent() {
+StatusCode SplitPhotonFilter::filterEvent(const EventContext& ctx) {
   int NPhotons = 0;
   bool GoodFlav = m_dauPdg.size() == 0 ? true : false;
   McEventCollection::const_iterator itr;
-  for (itr = events_const()->begin(); itr!=events_const()->end(); ++itr) {
+  for (itr = events_const(ctx)->begin(); itr!=events_const(ctx)->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
 
 // ** Loop on all particles **
@@ -76,6 +76,6 @@ StatusCode SplitPhotonFilter::filterEvent() {
   
 
   if (NPhotons >= m_NPhotons && GoodFlav) return StatusCode::SUCCESS;
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

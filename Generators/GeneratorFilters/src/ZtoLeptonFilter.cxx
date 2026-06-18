@@ -13,7 +13,7 @@ ZtoLeptonFilter::ZtoLeptonFilter(const std::string& name, ISvcLocator* pSvcLocat
 }
 
 
-StatusCode ZtoLeptonFilter::filterEvent() {
+StatusCode ZtoLeptonFilter::filterEvent(const EventContext& ctx) {
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
@@ -54,6 +54,6 @@ StatusCode ZtoLeptonFilter::filterEvent() {
     }
 #endif
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

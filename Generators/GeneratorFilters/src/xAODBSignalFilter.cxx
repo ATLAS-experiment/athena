@@ -38,7 +38,7 @@ StatusCode xAODBSignalFilter::filterInitialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODBSignalFilter::filterEvent()
+StatusCode xAODBSignalFilter::filterEvent(const EventContext& ctx)
 {
     ATH_MSG_INFO("");
     ATH_MSG_INFO(" ---------------------------------- ");
@@ -57,7 +57,7 @@ StatusCode xAODBSignalFilter::filterEvent()
         }
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
     CHECK(xTruthParticleContainer.isValid());
 
 bool acceptEvent = true;
@@ -332,7 +332,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
         ATH_MSG_DEBUG("");
         if (!acceptEvent)
         {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             m_rejectedAll++;
             ATH_MSG_DEBUG(" ==========================");
             ATH_MSG_DEBUG("  Event REJECTED by Filter ");
@@ -340,7 +340,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
         }
         else
         {
-            setFilterPassed(true);
+            setFilterPassed(true, ctx);
             ATH_MSG_DEBUG(" ==========================");
             ATH_MSG_DEBUG("  Event ACCEPTED by Filter ");
             ATH_MSG_DEBUG(" ==========================");

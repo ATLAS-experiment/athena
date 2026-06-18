@@ -15,7 +15,7 @@ TTbarWToLeptonFilter::TTbarWToLeptonFilter(const std::string& name, ISvcLocator*
 }
 
 
-StatusCode TTbarWToLeptonFilter::filterEvent() {
+StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
   int N_quark_t    = 0;
   int N_quark_tbar = 0;
   int N_quark_t_all    = 0;
@@ -241,7 +241,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
   if (N_quark_t_all < count_tops || N_quark_tbar_all < count_tops) {
 
     ATH_MSG_ERROR("No t or tbar quarks were found in a (presumably) ttbar event! Event is rejected.");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -269,7 +269,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
           }
       }
     }
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -281,12 +281,12 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
     if ( (N_quark_t > 2 || N_quark_tbar > 2) && m_fourTopsFilter) {
       ATH_MSG_WARNING("More than one t -> W X or tbar -> W X decays found. Event is accepted anyway.");
     }
-    setFilterPassed(N_pt_above_cut > 0);
+    setFilterPassed(N_pt_above_cut > 0, ctx);
   } else {
     if(m_fourTopsFilter){
-      if(m_SSMLFilter) setFilterPassed( (N_pt_above_cut >= m_numLeptons) && (N_pt_above_cut_plus >= 2 || N_pt_above_cut_minus >= 2));
-      else setFilterPassed(N_pt_above_cut >= m_numLeptons);}
-    else setFilterPassed(N_pt_above_cut == m_numLeptons);
+      if(m_SSMLFilter) setFilterPassed( (N_pt_above_cut >= m_numLeptons) && (N_pt_above_cut_plus >= 2 || N_pt_above_cut_minus >= 2), ctx);
+      else setFilterPassed(N_pt_above_cut >= m_numLeptons, ctx);}
+    else setFilterPassed(N_pt_above_cut == m_numLeptons, ctx);
   }
 
   return StatusCode::SUCCESS;

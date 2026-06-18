@@ -14,7 +14,7 @@ class PhotonFilter : public GenFilter {
 public:
 
   PhotonFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

@@ -72,7 +72,7 @@ StatusCode MultiCjetFilter::filterFinalize() {
 }
 
 
-StatusCode MultiCjetFilter::filterEvent() {
+StatusCode MultiCjetFilter::filterEvent(const EventContext& ctx) {
 
   bool pass = true;
   m_Nevt++;
@@ -111,7 +111,7 @@ StatusCode MultiCjetFilter::filterEvent() {
   int cJetCounter = 0;
   double weight = 1;
   McEventCollection::const_iterator itr;
-  for(const HepMC::GenEvent* genEvt : *events_const()) {
+  for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     weight = genEvt->weights().front();
 
     // Make a vector containing all the event's b-hadrons
@@ -181,6 +181,6 @@ StatusCode MultiCjetFilter::filterEvent() {
     m_SumOfWeights_Pass += weight;
   }
 
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
   return StatusCode::SUCCESS;
 }

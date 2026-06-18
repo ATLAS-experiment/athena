@@ -12,7 +12,7 @@ MuonFilter::MuonFilter(const std::string& name, ISvcLocator* pSvcLocator)
 }
 
 
-StatusCode MuonFilter::filterEvent() {
+StatusCode MuonFilter::filterEvent(const EventContext& ctx) {
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
@@ -22,6 +22,6 @@ StatusCode MuonFilter::filterEvent() {
     return StatusCode::SUCCESS;
     }
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

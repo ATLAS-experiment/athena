@@ -27,7 +27,7 @@ public:
   virtual ~FourLeptonInvMassFilter();
   virtual StatusCode filterInitialize();
   virtual StatusCode filterFinalize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
   
 private:
   double m_minPt;

@@ -21,7 +21,7 @@ StatusCode xAODParentTwoChildrenFilter::filterInitialize() {
 }
 
 
-StatusCode xAODParentTwoChildrenFilter::filterEvent() {
+StatusCode xAODParentTwoChildrenFilter::filterEvent(const EventContext& ctx) {
     ATH_MSG_DEBUG(" ParentTwoChildrenFilter filtering for: "
                 << "Parent (" << m_PDGParent[0] << ") --> Child (" << m_PDGChild[0] << ") + antiparticle and "
                 << "Parent (" << m_PDGParent[0] << ") --> Child (" << m_PDGChild[1] << ") + antiparticle." );
@@ -33,7 +33,7 @@ StatusCode xAODParentTwoChildrenFilter::filterEvent() {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event and build up the grid
@@ -81,6 +81,6 @@ StatusCode xAODParentTwoChildrenFilter::filterEvent() {
       } 
     }  //lopp over TruthParticles
   
-  setFilterPassed(N_Child[0][0] >= 1 && N_Child[0][1] >= 1 && N_Child[1][0] >= 1 && N_Child[1][1] >= 1);
+  setFilterPassed(N_Child[0][0] >= 1 && N_Child[0][1] >= 1 && N_Child[1][0] >= 1 && N_Child[1][1] >= 1, ctx);
   return StatusCode::SUCCESS;
 }

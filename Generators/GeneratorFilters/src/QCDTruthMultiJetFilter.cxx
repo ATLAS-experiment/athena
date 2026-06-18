@@ -58,15 +58,14 @@ StatusCode QCDTruthMultiJetFilter::filterFinalize() {
 }
 
 
-StatusCode QCDTruthMultiJetFilter::filterEvent() {
+StatusCode QCDTruthMultiJetFilter::filterEvent(const EventContext& ctx) {
   m_total++; // Bookkeeping
 
   // Grab random number engine - this is kept with the QCDTruthJetFilter engine
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_WARNING("Failed to retrieve random number engine QCDTruthJetFilter");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -75,7 +74,7 @@ StatusCode QCDTruthMultiJetFilter::filterEvent() {
   if (!evtStore()->contains<xAOD::JetContainer>(m_TruthJetContainerName) ||
       evtStore()->retrieve(truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
-    setFilterPassed(m_MinLeadJetPt < 1);
+    setFilterPassed(m_MinLeadJetPt < 1, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -93,7 +92,7 @@ StatusCode QCDTruthMultiJetFilter::filterEvent() {
   // See if the leading jet is in the right range
   if (Njet < m_Njet && m_Njet > 0) {
     m_nJetsFailed++;
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG("Failed filter on: " << Njet << " jets found with pT>" << m_NjetMinPt << " GeV -> less than required " << m_Njet << " jets");
     return StatusCode::SUCCESS;
   }
@@ -101,7 +100,7 @@ StatusCode QCDTruthMultiJetFilter::filterEvent() {
   // See if the leading jet is in the right range
   if ((pt_lead<=m_MinLeadJetPt || (pt_lead>m_MaxLeadJetPt && m_MaxLeadJetPt>0)) && !(pt_lead<=m_MinLeadJetPt && m_MinLeadJetPt<1)) {
     m_ptfailed++;
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG("Failed filter on jet pT: " << pt_lead << " is not between " << m_MinLeadJetPt << " and " << m_MaxLeadJetPt);
     return StatusCode::SUCCESS;
   }
@@ -111,14 +110,14 @@ StatusCode QCDTruthMultiJetFilter::filterEvent() {
   if (m_doShape) w = fitFn(pt_lead);
   double rnd = rndm->flat();
   if (m_high/w < rnd) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG("Event failed weighting cut. Weight is " << w << " for pt_lead of " << pt_lead << " high end is " << m_high << " rnd is " << rnd);
     return StatusCode::SUCCESS;
   }
 
   // Made it to the end - success!
   m_passed++;
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
 
   // Get MC event collection for setting weight
   const McEventCollection* mecc = 0;

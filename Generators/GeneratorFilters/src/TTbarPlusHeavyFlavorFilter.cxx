@@ -46,7 +46,7 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
+StatusCode TTbarPlusHeavyFlavorFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
   bool pass = false;
@@ -149,7 +149,7 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
   if(m_selectC && 4 == flavortype) pass=true;
   if(m_selectL && 0 == flavortype) pass=true;
 
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
   return StatusCode::SUCCESS;
 
 }

@@ -46,9 +46,9 @@ StatusCode xAODDiLeptonMassFilter::filterFinalize() {
 }
 
 
-StatusCode xAODDiLeptonMassFilter::filterEvent() {
+StatusCode xAODDiLeptonMassFilter::filterEvent(const EventContext& ctx) {
   // Retrieve TruthLightLepton container from xAOD LightLepton slimmer, contains (electrons and muons ) particles
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   unsigned int nParticles = xTruthParticleContainer->size();
@@ -97,6 +97,6 @@ StatusCode xAODDiLeptonMassFilter::filterEvent() {
 
   }
 
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

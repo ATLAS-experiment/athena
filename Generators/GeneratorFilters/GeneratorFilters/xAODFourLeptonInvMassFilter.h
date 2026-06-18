@@ -28,7 +28,7 @@ public:
   xAODFourLeptonInvMassFilter(const std::string& name, ISvcLocator* pSvcLocator);
  
   virtual StatusCode filterInitialize() override;
-  virtual StatusCode filterEvent() override;
+  virtual StatusCode filterEvent(const EventContext& ctx) override;
   
 private:
  

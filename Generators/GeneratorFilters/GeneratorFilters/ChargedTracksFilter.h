@@ -12,7 +12,7 @@ class ChargedTracksFilter : public GenFilter {
 public:
 
   ChargedTracksFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode filterEvent();
+  StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

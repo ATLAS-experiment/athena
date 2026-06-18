@@ -56,7 +56,7 @@ StatusCode VBFHbbEtaSortingFilter::filterFinalize() {
 }
 
 //---------------------------------------------------------------------------
-StatusCode VBFHbbEtaSortingFilter::filterEvent() {
+StatusCode VBFHbbEtaSortingFilter::filterEvent(const EventContext& ctx) {
   if (m_debug) printf("dbg> event start %10ld / %10ld / %10ld @ %d \n", 
 		      m_passed_all, m_passed_multiplicity, m_total, __LINE__);
   
@@ -66,7 +66,7 @@ StatusCode VBFHbbEtaSortingFilter::filterEvent() {
   if (!evtStore()->contains<xAOD::JetContainer>(m_TruthJetContainerName) ||  
       evtStore()->retrieve(truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
   
@@ -84,7 +84,7 @@ StatusCode VBFHbbEtaSortingFilter::filterEvent() {
   if (m_debug) printf("dbg> %d @ %d \n", (int)jets_ptordering.size(), __LINE__);
   
   if (jets_ptordering.size() < 4) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
   
@@ -103,7 +103,7 @@ StatusCode VBFHbbEtaSortingFilter::filterEvent() {
     if (m_debug) printf("dbg> ijet=%2d %10.1f @ %d \n", iJet, (ite_c->second)->pt(), __LINE__);
   }
   if (four_jets_etaordering.size() < 4){
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
   ite_c = four_jets_etaordering.begin();
@@ -130,13 +130,13 @@ StatusCode VBFHbbEtaSortingFilter::filterEvent() {
 		      __LINE__);
   
   if ( not (TMath::Abs(central_jet_truth_label_1)==5 and TMath::Abs(central_jet_truth_label_2)==5) ) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
   
   if (m_debug) printf("dbg> pass all selection @ %d \n", __LINE__);
   m_passed_all++;
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 }
 

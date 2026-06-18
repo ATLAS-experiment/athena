@@ -14,7 +14,7 @@ StatusCode xAODMultiElecMuTauFilter::filterInitialize()
 }
 
 
-StatusCode xAODMultiElecMuTauFilter::filterEvent() {
+StatusCode xAODMultiElecMuTauFilter::filterEvent(const EventContext& ctx) {
   int numLeptons = 0;
   int numLightLeptons = 0;
   int numHadTaus = 0;
@@ -26,7 +26,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
 
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event and build up the grid
@@ -99,7 +99,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
       passed_event = true;
     }
   }
-  setFilterPassed(passed_event);
+  setFilterPassed(passed_event, ctx);
 
   return StatusCode::SUCCESS;
 }

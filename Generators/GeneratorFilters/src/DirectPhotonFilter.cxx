@@ -54,11 +54,11 @@ bool DirectPhotonFilterCmpByPt(const HepMC::ConstGenParticlePtr& p1, const HepMC
   return (p1->momentum().perp()>p2->momentum().perp());
 }
 
-StatusCode DirectPhotonFilter::filterEvent() {
+StatusCode DirectPhotonFilter::filterEvent(const EventContext& ctx) {
   std::vector<HepMC::ConstGenParticlePtr> promptPhotonsInEta;
 
   int phot = 0;
-  for(const HepMC::GenEvent* genEvt : *events_const()) {
+  for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
     // Find all prompt photons with within given eta range
     for (const auto& pitr: *genEvt) {
       if (MC::isPhoton(pitr) &&
@@ -91,7 +91,7 @@ StatusCode DirectPhotonFilter::filterEvent() {
   ATH_MSG_DEBUG("number of photons" << phot);
 
   if (promptPhotonsInEta.size()<m_NPhotons) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   }
   else {
     for (const auto& photon: promptPhotonsInEta) {
@@ -114,7 +114,7 @@ StatusCode DirectPhotonFilter::filterEvent() {
       if (pass) {
          ATH_MSG_DEBUG("Passed!");
          }
-      setFilterPassed(pass);
+      setFilterPassed(pass, ctx);
     }
     else { // just require NPhotons to pass m_Ptmin/max[0]
       size_t NPhotons=0;
@@ -124,7 +124,7 @@ StatusCode DirectPhotonFilter::filterEvent() {
       }
 
       if (NPhotons>=m_NPhotons) ATH_MSG_DEBUG("Passed!");
-      setFilterPassed(NPhotons>=m_NPhotons);
+      setFilterPassed(NPhotons>=m_NPhotons, ctx);
     }
   }
   return StatusCode::SUCCESS;

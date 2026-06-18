@@ -62,13 +62,12 @@ StatusCode VBFMjjIntervalFilter::filterInitialize() {
 }
 
 
-StatusCode VBFMjjIntervalFilter::filterEvent() {
+StatusCode VBFMjjIntervalFilter::filterEvent(const EventContext& ctx) {
   // Get random number engine
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_ERROR("Failed to retrieve random number engine VBFMjjIntervalFilter");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -78,7 +77,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
        evtStore()->retrieve( truthJetCollection, m_TruthJetContainerName).isFailure() ||
        !truthJetCollection ) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -163,7 +162,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
     eventWeight = getEventWeight(filteredJets.asDataVector());
     double rnd = rndm->flat();
     if (1.0/eventWeight < rnd) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_DEBUG("Event failed weighting. Weight is " << eventWeight);
       return StatusCode::SUCCESS;
     }
@@ -171,7 +170,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::SUCCESS;
     }
@@ -192,25 +191,25 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
     //just compute mjj, dphi etc 
     bool pass = ApplyMassDphi(filteredJets.asDataVector());
     if(!pass){
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_DEBUG("Event failed filter");
       return StatusCode::SUCCESS; 
     }
     if(m_ApplyNjet){
       if(filteredJets.size()<m_NJetsMin){
-	setFilterPassed(false);
+	setFilterPassed(false, ctx);
 	return StatusCode::SUCCESS;
       }
       if(m_NJetsMax>0){
 	if(filteredJets.size()>m_NJetsMax){
-	  setFilterPassed(false);
+	  setFilterPassed(false, ctx);
 	  return StatusCode::SUCCESS;
 	}
       }//Njets < 
     }//Apply Njets filter 
   }
   // Made it to the end - success!
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 }
 

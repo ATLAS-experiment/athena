@@ -85,7 +85,7 @@ BSignalFilter::BSignalFilter(const std::string& name, ISvcLocator* pSvcLocator) 
 }
 
 
-StatusCode BSignalFilter::filterEvent()
+StatusCode BSignalFilter::filterEvent(const EventContext& ctx)
 {
   ATH_MSG_INFO("");
   ATH_MSG_INFO(" ---------------------------------- ");
@@ -352,14 +352,14 @@ StatusCode BSignalFilter::filterEvent()
       ATH_MSG_DEBUG("");
       if( !acceptEvent )
         {
-	  setFilterPassed(false);
+	  setFilterPassed(false, ctx);
 	  m_rejectedAll++;
 	  ATH_MSG_DEBUG(" ==========================");
 	  ATH_MSG_DEBUG("  Event REJECTED by Filter ");
 	  ATH_MSG_DEBUG(" ==========================");
         }else
         {
-	  setFilterPassed(true);
+	  setFilterPassed(true, ctx);
 	  ATH_MSG_DEBUG(" ==========================");
 	  ATH_MSG_DEBUG("  Event ACCEPTED by Filter ");
 	  ATH_MSG_DEBUG(" ==========================");

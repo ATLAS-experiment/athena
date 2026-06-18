@@ -28,7 +28,7 @@ class BSignalFilter : public GenFilter
   BSignalFilter(const std::string& name, ISvcLocator* pSvcLocator);
   //
   virtual StatusCode filterFinalize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
  
  private:
 

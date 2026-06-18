@@ -93,7 +93,7 @@ StatusCode ParentChildwStatusFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode ParentChildwStatusFilter::filterEvent() {
+StatusCode ParentChildwStatusFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
 // Loop over all events in McEventCollection 
@@ -136,7 +136,7 @@ StatusCode ParentChildwStatusFilter::filterEvent() {
     }
   }
   // if we get here we have failed
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 
