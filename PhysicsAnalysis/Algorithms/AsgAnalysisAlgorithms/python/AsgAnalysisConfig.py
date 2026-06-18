@@ -679,6 +679,9 @@ class EventCutFlowBlock (ConfigBlock):
             "If provided, takes precedence over selectionName.")
         self.addOption('cutFlowHistograms', True, type=bool,
             info="whether to generate cutflow histograms for the selection cuts.")
+        self.addOption('cutFlowHistogramsWithSystematics', True, type=bool,
+            info="whether to generate cutflow histograms for the selection cuts"
+                "when running with systematics.")
         self.addOption ('streamName', None, type=str,
             info="name of the output stream to save the cut bookkeeper in.")
 
@@ -687,6 +690,9 @@ class EventCutFlowBlock (ConfigBlock):
 
     def makeAlgs(self, config):
         if not self.cutFlowHistograms:
+            return
+
+        if not config.noSystematics() and not self.cutFlowHistogramsWithSystematics:
             return
 
         # Setup stream name
