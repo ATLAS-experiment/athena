@@ -248,7 +248,7 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
   double primvertex_z = pv ? pv->z() : 0;
   //const xAOD::TrackParticle* track = input.primaryTrackParticle();
   const xAOD::TrackParticle* track;
-  if (input.muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) {
+  if (input.muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon) {
     track = input.trackParticle(xAOD::Muon::CombinedTrackParticle);
     if (!track) return StatusCode::SUCCESS; // don't treat SAF muons without CB track further
   }
