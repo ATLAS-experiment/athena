@@ -1,13 +1,13 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef JLJETTOB_H
 #define JLJETTOB_H
 
-#include <iostream>
+
 
 #include "L1TopoEvent/BaseTOB.h"
 #include "L1TopoEvent/Heap.h"
-
+#include <iosfwd>
 
 namespace TCS {
    
@@ -17,7 +17,7 @@ namespace TCS {
    public:
       
       // default constructor
-      jLJetTOB(uint32_t roiWord = 0, const std::string& tobName = "jLJetTOB");
+      jLJetTOB(uint32_t roiWord = 0, std::string_view tobName = "jLJetTOB");
 
       // copy constructor
       jLJetTOB(const jLJetTOB & jet);
