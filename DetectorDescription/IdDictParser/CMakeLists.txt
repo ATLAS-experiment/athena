@@ -3,6 +3,7 @@
 # Declare the package name:
 atlas_subdir( IdDictParser )
 find_package( Boost COMPONENTS unit_test_framework )
+find_package( LibXml2 )  # required for unit test
 
 # Component(s) in the package:
 atlas_add_library( IdDictParser
