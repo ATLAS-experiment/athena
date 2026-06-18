@@ -256,8 +256,7 @@ def SetupVP1():
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
-      else:
-          _logger.error("VP1: Run mode without input data file not defined!")
+        
         
     # Here we consider the use case where we launch VP1 
     # with input data files 
