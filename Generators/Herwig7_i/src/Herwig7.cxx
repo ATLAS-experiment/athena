@@ -24,6 +24,7 @@
 #include "ThePEG/PDF/PDF.h"
 
 #include "Herwig/API/HerwigAPI.h"
+#include "Herwig/Utilities/HerwigStrategy.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -142,7 +143,7 @@ StatusCode Herwig7::genInitialize() {
 #ifdef HEPMC3
   m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
   /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
-  struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Herwig7"), std::string("7"), std::string("Used generator")};
+  struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Herwig7"), Herwig::HerwigStrategy::version, std::string("Used generator")};
   m_runinfo->tools().push_back(std::move(generator));  
 #endif
   // read in a Herwig runfile and obtain the event generator
