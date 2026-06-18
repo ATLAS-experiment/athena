@@ -1,9 +1,12 @@
 /*                                                                                                                      
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigThresholdDecisionTool.h"
 #include "TrigT1Interfaces/Lvl1MuCTPIInputPhase1.h"
+#include "CxxUtils/StringUtils.h"
+
+using CxxUtils::tokenize;
 
 namespace LVL1
 {
@@ -413,50 +416,25 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     //save the 2D vector in a map so we don't have to parse it each time we want to check the flags.
     if (m_parsed_flags.find(flags) == m_parsed_flags.end())
     {
-      std::vector<std::string> vec_ors = parseString(flags, "|");
+      std::vector<std::string> vec_ors = tokenize(flags, "|");
       std::vector<std::vector<std::string> > vec_flags;
       for (unsigned ior=0;ior<vec_ors.size();ior++)
       {
-	vec_flags.push_back(parseString(vec_ors[ior],"&"));
+	vec_flags.push_back(tokenize(vec_ors[ior],"&"));
       }
       m_parsed_flags[flags] = std::move(vec_flags);
     }
   }
 
-  std::vector<std::string> TrigThresholdDecisionTool::parseString(const std::string& str, const std::string& sep) const
-  {
-    std::vector<std::string> parsed;
-    int pos = 0;
-    bool first = true;
-    if (str.size() == 0) return parsed;
-    if (str.find(sep) == std::string::npos)
-    {
-      parsed.push_back(str);
-      return parsed;
-    }
-    while (true)
-    {
-      int newPos = str.find(sep, pos);
-      if (str.find(sep, pos) == std::string::npos)
-      {
-	if (!first) parsed.push_back(str.substr(pos, newPos-pos));
-	break;
-      }
-      std::string sub = str.substr(pos, newPos-pos);
-      parsed.push_back(std::move(sub));
-      pos = newPos+1;
-      first = false;
-    }
-    return parsed;
-  }
+  
   std::string TrigThresholdDecisionTool::getShapedFlags(const std::string& flags) const
   {
     std::string shapedFlags = flags;
     shapedFlags.erase(std::remove_if(shapedFlags.begin(),shapedFlags.end(),::isspace),shapedFlags.end()); // remove spaces
-    std::vector<std::string> vec_ors = parseString(shapedFlags,"|");
+    std::vector<std::string> vec_ors = tokenize(shapedFlags,"|");
     std::set<std::string> set_ors;
     for(const auto& ors : vec_ors){
-      std::vector<std::string> vec_ands = parseString(ors,"&");
+      std::vector<std::string> vec_ands = tokenize(ors,"&");
       std::set<std::string> set_ands;
       for(const auto& ands : vec_ands){
 	set_ands.insert(ands);
