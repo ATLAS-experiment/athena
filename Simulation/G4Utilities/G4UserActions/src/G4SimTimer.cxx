@@ -4,6 +4,7 @@
 
 // Local includes
 #include "G4SimTimer.h"
+#include <G4Threading.hh>
 
 // Infrastructure includes
 
@@ -36,6 +37,26 @@ namespace G4UA
     : AthMessaging("G4SimTimer"),
       m_firstEvent(true)
   {}
+
+  //---------------------------------------------------------------------------
+  // Begin-run action
+  //---------------------------------------------------------------------------
+  void G4SimTimer::BeginOfRunAction(const G4Run*)
+  {
+    if(G4Threading::IsMasterThread()){
+      m_results.runtime.Start();
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  // End-run action
+  //---------------------------------------------------------------------------
+  void G4SimTimer::EndOfRunAction(const G4Run*)
+  {
+    if(G4Threading::IsMasterThread()){
+      m_results.runtime.Stop();
+    }
+  }
 
   //---------------------------------------------------------------------------
   // Begin-event action
