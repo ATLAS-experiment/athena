@@ -642,11 +642,7 @@ namespace Muon {
             if (HepMC::uniqueID(pit) == barcodeIn || foundBC) {
                 foundBC = true;
                 ATH_MSG_DEBUG("getMother() : " << pit );
-#ifdef HEPMC3
                 auto particle = pit.scptr();
-#else
-                auto particle = pit.cptr();
-#endif
                 if (particle->pdg_id() != pdgFinal) {  // the first case a track had a different flavour
                     break;
                 }
@@ -661,11 +657,7 @@ namespace Muon {
             if (!pit) continue;
             if (HepMC::uniqueID(pit) == barcodeIn || foundBC) {
                 foundBC = true;
-#ifdef HEPMC3
                 auto particle = pit.scptr();
-#else
-                auto particle = pit.cptr();
-#endif
                 if (!MC::isStable(particle)) {  // first non final state particle
                   return particle;
                 }
@@ -686,7 +678,6 @@ namespace Muon {
         for (auto pit = traj.begin(); pit != traj.end(); ++pit) {
            if (HepMC::uniqueID(*pit) == barcodeIn || foundBC) {
               auto particle = (*pit).scptr();
-#ifdef HEPMC3
                 if (!foundBC) {
                     foundBC = true;
                     theFirst = particle;
@@ -703,24 +694,6 @@ namespace Muon {
                         break;
                     }
                 }
-#else
-                if (!foundBC) {
-                    foundBC = true;
-                    theFirst = (*pit).cptr();
-                    pdgFinal = (*pit)->pdg_id();
-                } else {
-                    if ((*pit)->pdg_id() == pdgFinal) {
-                        auto pit_p = *pit;
-                        if ((theFirst != pit_p.cptr()) && ((*pit).cptr()->momentum().t() != ePrev))
-                            ++scat;  // if the particle has not changed pdgid after the first step count as scatter. also avoid counting
-                                     // pure interface changes as scatter
-                    } else {         // the first time this particle appears
-                        --pit;
-                        theFirst = (*pit).cptr();
-                        break;
-                    }
-                }
-#endif
                 ATH_MSG_DEBUG("getFirst() : pt = " << particle->momentum().perp() << " scat = " << scat);
                 ePrev = particle->momentum().t();  // prepare for comparing this entry with the next one
             }
