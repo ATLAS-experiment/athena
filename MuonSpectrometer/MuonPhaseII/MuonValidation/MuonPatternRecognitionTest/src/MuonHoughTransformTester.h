@@ -173,6 +173,8 @@ namespace MuonValR4{
 
     MuonVal::ScalarBranch<int>& m_out_gen_truthOrigin{m_tree.newScalar<int>("genTruthOrigin", -1)};
     MuonVal::ScalarBranch<int>& m_out_gen_truthType{m_tree.newScalar<int>("genTruthType", -1)};
+    MuonVal::ScalarBranch<float>& m_out_gen_truthBeta{m_tree.newScalar<float>("genTruthBeta", -1)};
+    MuonVal::ScalarBranch<int>& m_out_gen_truthPdgId{m_tree.newScalar<int>("genTruthPdgId", 0)};
     
     /** @brief Truth - hit count summary */
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nHits{m_tree.newScalar<unsigned short>("genNHits",0)};
