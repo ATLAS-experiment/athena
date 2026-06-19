@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkEGamma/BkgElectronClassification.h"
@@ -44,7 +44,7 @@ BkgElectronClassification::initialize()
 }
 
 StatusCode
-BkgElectronClassification::addBranches(const EventContext& ctx) const
+BkgElectronClassification::execute(const EventContext& ctx) const
 {
 
   SG::ReadHandle<xAOD::ElectronContainer> electrons{ m_electronContainer, ctx };

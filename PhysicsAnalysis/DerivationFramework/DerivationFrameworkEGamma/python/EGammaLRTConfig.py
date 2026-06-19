@@ -67,7 +67,7 @@ def EGammaLRTCfg(flags):
                 StoreGateEntryName="DFCommonElectronsECIDS",
                 ContainerName="LRTElectrons",
                 StoreTResult=True,
-            )
+            ) # TODO Migrate to AthReentrantAlgorithm
         ))
 
     # decorate some electrons with an additional ambiguity flag
@@ -81,7 +81,7 @@ def EGammaLRTCfg(flags):
             idCut="DFCommonElectronsLHLooseNoPix",
             ContainerName="LRTElectrons",
             isMC=flags.Input.isMC,
-        )
+        ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
     # list of all the decorators so far
@@ -98,7 +98,7 @@ def EGammaLRTCfg(flags):
             EgammaCoreCellRecoveryCfg(flags,
                                       name            = "LRTCoreCellRecoveryTool",
                                       SGKey_photons   = "",
-                                      SGKey_electrons = "LRTElectrons")
+                                      SGKey_electrons = "LRTElectrons") # TODO Migrate to AthReentrantAlgorithm
         ))
         LRTEGAugmentationTools.append(CoreCellRecoveryTool)
 
@@ -110,14 +110,13 @@ def EGammaLRTCfg(flags):
             BkgElectronClassificationCfg,
         )
 
-        BkgLRTElectronClassificationTool = acc.addPublicTool(acc.popToolsAndMerge(
+        acc.merge(
             BkgElectronClassificationCfg(
                 flags,
-                name="BkgLRTElectronClassificationTool",
+                name="BkgLRTElectronClassification",
                 ElectronContainerName="LRTElectrons"
             )
-        ))
-        LRTEGAugmentationTools.append(BkgLRTElectronClassificationTool)
+        )
 
     # =======================================
     # CREATE THE DERIVATION KERNEL ALGORITHM

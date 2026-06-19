@@ -851,13 +851,11 @@ def EGammaCommonCfg(flags):
             BkgElectronClassificationCfg,
         )
 
-        BkgElectronClassificationTool = acc.addPublicTool(acc.popToolsAndMerge(
-            BkgElectronClassificationCfg(
-                flags,
-                name="BkgElectronClassificationTool"
+        acc.merge(BkgElectronClassificationCfg(
+            flags,
+            name="BkgElectronClassification"
             )
-        ))
-        EGAugmentationTools.append(BkgElectronClassificationTool)
+        )
 
         # Decorate egammaTruthParticles with truth-particle-level etcone20,30,40
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import (

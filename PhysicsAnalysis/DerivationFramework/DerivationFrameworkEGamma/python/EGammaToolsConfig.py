@@ -105,7 +105,7 @@ def BkgElectronClassificationCfg(flags, name, **kwargs):
     from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
     kwargs.setdefault("MCTruthClassifierTool", acc.popToolsAndMerge(
         DFCommonMCTruthClassifierCfg(flags)))
-    acc.setPrivateTools(CompFactory.DerivationFramework.BkgElectronClassification(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.BkgElectronClassification(name, **kwargs))
     return acc
 
 
