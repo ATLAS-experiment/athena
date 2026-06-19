@@ -7,24 +7,6 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#ifdef HEPMC3
-// This form of ifdef is kept for convenience
-#else
-// The lines below I don't like. We should fix them when we update the
-// the metadata to handles (ATLASRECTS-4162).
-// Needs changes in HepMC to resolve.
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wkeyword-macro"
-#endif
-#define private public
-#include "AtlasHepMC/WeightContainer.h"
-#undef private
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-#endif
-
 #include "GeneratorObjects/xAODTruthParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
 
