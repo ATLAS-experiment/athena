@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: main/Athena
-# art-description: DAOD building PHYSLITE mc23
+# art-description: DAOD building PHYSLITE mc23a
 # art-type: grid
 # art-memory: 4096
 # art-output: *.pool.root

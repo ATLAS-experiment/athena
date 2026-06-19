@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: main/Athena
-# art-description: DAOD building PHYStoPHYSLITE mc23
+# art-description: DAOD building PHYStoPHYSLITE mc23a
 # art-type: grid
 # art-output: *.pool.root
 # art-output: checkFile*.txt
