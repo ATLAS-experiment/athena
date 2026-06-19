@@ -211,10 +211,6 @@ atlas_add_citest( DerivationRun3Data_Train
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
    PROPERTIES PROCESSORS 4 )
 
-atlas_add_citest( DerivationRun3Data_Train_RNTuple
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3Data_Train_RNTuple.sh
-   PROPERTIES PROCESSORS 4 )
-
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3Data_Train_SharedReader
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.MP.UseSharedReader=True"' --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
@@ -240,10 +236,6 @@ atlas_add_citest( DerivationRun3MC_PHYSLITE_from_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
    PROPERTIES PROCESSORS 4
    DEPENDS_SUCCESS DerivationRun3MC_PHYS )
-
-atlas_add_citest( DerivationRun3MC_Train_RNTuple
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh
-   PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3MC_Train_SharedReader
@@ -532,3 +524,19 @@ atlas_add_citest( EFTracking_FPGATrackSim_CI
 atlas_add_citest (TrigInDetValidationMenu 
                SCRIPT TrigInDetValidation_menu_test.py
                POST_EXEC_SCRIPT nopost.sh )
+
+#################################################################################
+# RNTuple
+#################################################################################
+
+atlas_add_citest( FullChainRun3MC_RNTuple
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/FullChainRun3MC_RNTuple.sh
+   PROPERTIES PROCESSORS 8 )
+
+atlas_add_citest( DerivationRun3Data_Train_RNTuple
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3Data_Train_RNTuple.sh
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3MC_Train_RNTuple
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh
+   PROPERTIES PROCESSORS 4 )
