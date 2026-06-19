@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "../AnalysisMuonThinningAlg.h"
@@ -7,7 +7,7 @@
 #include "../TrackIsolationDecorAlg.h"
 #include "../CaloIsolationDecorAlg.h"
 #include "../PflowIsolationDecorAlg.h"
-#include "../MuonJetDrTool.h"
+#include "../MuonJetDrAlg.h"
 #include "../MuonTPExtrapolationAlg.h"
 #include "../MuonTruthClassifierFallback.h"
 #include "../MuonTruthIsolationDecorAlg.h"
@@ -15,7 +15,7 @@
 
 DECLARE_COMPONENT(DerivationFramework::MuonTruthClassifierFallback)
 DECLARE_COMPONENT(DerivationFramework::MuonTruthIsolationDecorAlg)
-DECLARE_COMPONENT(DerivationFramework::MuonJetDrTool)
+DECLARE_COMPONENT(DerivationFramework::MuonJetDrAlg)
 DECLARE_COMPONENT(DerivationFramework::DiMuonTaggingAlg)
 DECLARE_COMPONENT(DerivationFramework::AnalysisMuonThinningAlg)
 DECLARE_COMPONENT(DerivationFramework::IDTrackCaloDepositsDecoratorAlg)

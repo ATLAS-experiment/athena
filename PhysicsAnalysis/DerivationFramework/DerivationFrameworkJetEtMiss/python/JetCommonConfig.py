@@ -126,10 +126,8 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
                                                 BJetLabel=bJetLabel)
     acc.addEventAlgo(algOR)
 
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrToolCfg
-    muonJetDrTool = acc.getPrimaryAndMerge(MuonJetDrToolCfg(ConfigFlags, "MuonJetDrTool"))
-    acc.addEventAlgo(CommonAugmentation("DFCommonMuonsKernel2", AugmentationTools = [muonJetDrTool])) # TODO Migrate public tool to AthReentrantAlgorithm
+    from DerivationFrameworkMuons.MuonsToolsConfig import MuonJetDrAlgCfg
+    acc.merge(MuonJetDrAlgCfg(ConfigFlags, "MuonJetDrTool"))
 
     from JetSelectorTools.JetSelectorToolsConfig import EventCleaningToolCfg,JetCleaningToolCfg
     
