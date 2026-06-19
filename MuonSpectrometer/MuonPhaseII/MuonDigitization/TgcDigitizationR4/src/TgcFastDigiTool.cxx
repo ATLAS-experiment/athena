@@ -21,6 +21,7 @@ namespace MuonR4 {
         ATH_CHECK(MuonDigitizationTool::initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_effiDataKey.initialize(!m_effiDataKey.empty()));
+        m_stationIndex_T4E = m_idHelperSvc->tgcIdHelper().stationNameIndex("T4E");
         return StatusCode::SUCCESS;
     }
     StatusCode TgcFastDigiTool::finalize() {
@@ -207,6 +208,12 @@ namespace MuonR4 {
             for (const TimedHit& simHit : viewer) {
                 /// ignore radiation for now
                 if (m_digitizeMuonOnly && !MC::isMuon(simHit)) {
+                    continue;
+                }
+                // let's skip the 3rd gap of T4E for now as the cabling map cannot handle it yet
+                if(idHelper.stationName(simHit->identify())==m_stationIndex_T4E && idHelper.gasGap(simHit->identify())==3)
+                {
+                    ATH_MSG_DEBUG("Skip digitization of T4E gas gap 3 hit" << m_idHelperSvc->toString(simHit->identify()));
                     continue;
                 }
                 TgcDigitCollection* outColl = fetchCollection(simHit->identify(), digitCache);
