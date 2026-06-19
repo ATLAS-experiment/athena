@@ -50,12 +50,12 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JetReclusteringAlg::execute() {
+  StatusCode JetReclusteringAlg::execute(const EventContext& ctx) {
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
 
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK(m_jetsHandle.retrieve(jets, sys));
+      ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
 
       auto rcJetAuxContainer = std::make_unique<xAOD::JetAuxContainer>();
       auto rcJetContainer = std::make_unique<xAOD::JetContainer>();
@@ -74,7 +74,7 @@ namespace CP {
 
       // no jets (clusters) - nothing to do
       if (clusters.empty()) {
-        ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys));
+        ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys, ctx));
         continue;
       }
 
@@ -95,7 +95,7 @@ namespace CP {
 
         if (indices.size() != constituents.size()) {
           ANA_MSG_ERROR("Size of the contituents does not match the size of the indices");
-          ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys));
+          ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys, ctx));
           return StatusCode::FAILURE;
         }
 
@@ -105,7 +105,7 @@ namespace CP {
         m_rcEnergyDecor.set(*(rcJetContainer->back()), irc.e(), sys);
       }
 
-      ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys));
+      ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys, ctx));
 
     }
     return StatusCode::SUCCESS;

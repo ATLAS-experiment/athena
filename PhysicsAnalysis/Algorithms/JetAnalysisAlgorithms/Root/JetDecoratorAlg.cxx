@@ -39,12 +39,12 @@ namespace CP
 
 
   StatusCode JetDecoratorAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.getCopy(jets, sys));
+      ANA_CHECK (m_jetHandle.getCopy(jets, sys, ctx));
       ANA_CHECK (m_decorator->decorate(*jets));
     }
 

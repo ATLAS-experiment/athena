@@ -32,7 +32,7 @@ namespace CP
                             ISvcLocator *pSvcLocator);
 
         StatusCode initialize() override;
-        StatusCode execute() override;
+        StatusCode execute(const EventContext& ctx) override;
 
     private:
 

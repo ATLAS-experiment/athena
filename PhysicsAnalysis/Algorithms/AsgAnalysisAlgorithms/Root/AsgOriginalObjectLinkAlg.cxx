@@ -41,7 +41,7 @@ namespace CP
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particleHandle.getCopy (particles, sys));
+      ANA_CHECK (m_particleHandle.getCopy (particles, sys, ctx));
 
       SG::ReadHandle<xAOD::IParticleContainer> baseParticles(m_baseContainerName, ctx);
 

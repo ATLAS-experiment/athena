@@ -34,13 +34,13 @@ namespace CP
 
 
   StatusCode EgammaIsolationCorrectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_isolationCorrectionTool->applySystematicVariation (sys));
       xAOD::EgammaContainer *egammas = nullptr;
-      ANA_CHECK (m_egammaHandle.getCopy (egammas, sys));
+      ANA_CHECK (m_egammaHandle.getCopy (egammas, sys, ctx));
       for (xAOD::Egamma *egamma : *egammas)
       {
         if (m_preselection.getBool (*egamma, sys))

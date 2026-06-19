@@ -39,12 +39,12 @@ namespace CP
 
 
   StatusCode JvtUpdateAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.getCopy (jets, sys));
+      ANA_CHECK (m_jetHandle.getCopy (jets, sys, ctx));
       for (xAOD::Jet *jet : *jets)
       {
         // Set default value for jets that fail preselection

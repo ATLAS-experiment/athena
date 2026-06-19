@@ -94,13 +94,13 @@ namespace EL
 
 
   StatusCode AlgorithmMemoryWrapper ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     using namespace msgEventLoop;
     RCU_CHANGE_INVARIANT (this);
 
     ANA_CHECK (recordPreMemory());
-    auto result = m_algorithm->execute ();
+    auto result = m_algorithm->execute (ctx);
     ANA_CHECK (recordPostMemory());
     return result;
   }

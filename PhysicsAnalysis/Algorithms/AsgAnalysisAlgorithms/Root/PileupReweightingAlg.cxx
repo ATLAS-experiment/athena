@@ -11,7 +11,6 @@
 #include "AsgAnalysisAlgorithms/PileupReweightingAlg.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AthContainers/ConstAccessor.h"
-#include "AsgTools/CurrentContext.h"
 
 /// Anonymous namespace for helpers
 namespace {
@@ -48,10 +47,8 @@ namespace CP
 
 
   StatusCode PileupReweightingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
-
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::EventInfo> evtInfo(m_baseEventInfoName, ctx);
 
     // Add additional decorations - these apply to data (and on MC just redecorate the same value as
@@ -108,7 +105,7 @@ namespace CP
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::EventInfo* systEvtInfo = nullptr;
-      ANA_CHECK( m_eventInfoHandle.retrieve(systEvtInfo, sys));
+      ANA_CHECK( m_eventInfoHandle.retrieve(systEvtInfo, sys, ctx));
       ANA_CHECK (m_pileupReweightingTool->applySystematicVariation (sys));
       if (m_weightDecorator) {
         // calculate and set the weight. The 'true' argument makes the tool treat unrepresented data

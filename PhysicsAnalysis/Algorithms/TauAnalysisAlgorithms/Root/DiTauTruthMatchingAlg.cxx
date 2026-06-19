@@ -32,12 +32,12 @@ namespace CP
 
 
   StatusCode DiTauTruthMatchingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::DiTauJetContainer *taus = nullptr;
-      ANA_CHECK (m_tauHandle.retrieve (taus, sys));
+      ANA_CHECK (m_tauHandle.retrieve (taus, sys, ctx));
       // all decorations done within the DiTauTruthMatchingTool and to be saved in output  
       static const SG::Decorator<float> accTruthVisLeadPt("TruthVisLeadPt");
       static const SG::Decorator<float> accTruthVisLeadEta("TruthVisLeadEta");

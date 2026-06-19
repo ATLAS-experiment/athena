@@ -66,15 +66,15 @@ namespace CP
 
 
   StatusCode MuonTriggerEfficiencyScaleFactorAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_efficiencyScaleFactorTool->applySystematicVariation (sys));
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK (m_muonHandle.retrieve (muons, sys));
+      ANA_CHECK (m_muonHandle.retrieve (muons, sys, ctx));
       const xAOD::EventInfo *eventInfo = nullptr;
-      ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys));
+      ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys, ctx));
 
       static const SG::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
       unsigned int randomRunNumber = acc_rnd(*eventInfo);

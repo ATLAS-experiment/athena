@@ -49,7 +49,7 @@ namespace CP
 
 
   StatusCode OverlapRemovalAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
@@ -58,42 +58,42 @@ namespace CP
       const xAOD::ElectronContainer *electrons {nullptr};
       if (m_electronsHandle)
       {
-        ANA_CHECK (m_electronsHandle.getCopy (electrons, sys));
+        ANA_CHECK (m_electronsHandle.getCopy (electrons, sys, ctx));
         if (m_electronsSelectionHandle)
           decorationsMap.emplace(electrons, &m_electronsSelectionHandle);
       }
       const xAOD::MuonContainer *muons {nullptr};
       if (m_muonsHandle)
       {
-        ANA_CHECK (m_muonsHandle.getCopy (muons, sys));
+        ANA_CHECK (m_muonsHandle.getCopy (muons, sys, ctx));
         if (m_muonsSelectionHandle)
           decorationsMap.emplace(muons, &m_muonsSelectionHandle);
       }
       const xAOD::JetContainer *jets {nullptr};
       if (m_jetsHandle)
       {
-        ANA_CHECK (m_jetsHandle.getCopy (jets, sys));
+        ANA_CHECK (m_jetsHandle.getCopy (jets, sys, ctx));
         if (m_jetsSelectionHandle)
           decorationsMap.emplace(jets, &m_jetsSelectionHandle);
       }
       const xAOD::TauJetContainer *taus {nullptr};
       if (m_tausHandle)
       {
-        ANA_CHECK (m_tausHandle.getCopy (taus, sys));
+        ANA_CHECK (m_tausHandle.getCopy (taus, sys, ctx));
         if (m_tausSelectionHandle)
           decorationsMap.emplace(taus, &m_tausSelectionHandle);
       }
       const xAOD::PhotonContainer *photons {nullptr};
       if (m_photonsHandle)
       {
-        ANA_CHECK (m_photonsHandle.getCopy (photons, sys));
+        ANA_CHECK (m_photonsHandle.getCopy (photons, sys, ctx));
         if (m_photonsSelectionHandle)
           decorationsMap.emplace(photons, &m_photonsSelectionHandle);
       }
       const xAOD::JetContainer *fatJets {nullptr};
       if (m_fatJetsHandle)
       {
-        ANA_CHECK (m_fatJetsHandle.getCopy (fatJets, sys));
+        ANA_CHECK (m_fatJetsHandle.getCopy (fatJets, sys, ctx));
         if (m_fatJetsSelectionHandle)
           decorationsMap.emplace(fatJets, &m_fatJetsSelectionHandle);
       }

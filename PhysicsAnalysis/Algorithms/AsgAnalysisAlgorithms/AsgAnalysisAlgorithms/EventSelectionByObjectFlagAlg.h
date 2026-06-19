@@ -26,7 +26,7 @@ class EventSelectionByObjectFlagAlg final : public EL::AnaAlgorithm {
     StatusCode initialize() override;
 
   public:
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
 
   public:
     StatusCode finalize() override;

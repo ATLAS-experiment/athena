@@ -19,12 +19,12 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode InDetTrackExtraVarDecoratorAlg::execute() {
+  StatusCode InDetTrackExtraVarDecoratorAlg::execute(const EventContext& ctx) {
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
 
       const xAOD::TrackParticleContainer *tracks = nullptr;
-      ANA_CHECK(m_tracksHandle.retrieve (tracks, sys));
+      ANA_CHECK(m_tracksHandle.retrieve (tracks, sys, ctx));
 
       for (const xAOD::TrackParticle *track : *tracks) {
         m_momentumDecor.set( *track, track->pt(),     sys );

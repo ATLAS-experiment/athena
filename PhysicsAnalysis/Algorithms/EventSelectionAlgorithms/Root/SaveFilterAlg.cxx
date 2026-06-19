@@ -28,7 +28,7 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SaveFilterAlg::execute() {
+  StatusCode SaveFilterAlg::execute(const EventContext& ctx) {
     // the event-level filter
     CP::SysFilterReporterCombiner filterCombiner(m_filterParams, m_noFilter.value());
 
@@ -38,7 +38,7 @@ namespace CP {
 
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo {nullptr};
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_outputselection.setBool(*evtInfo, 0, sys);

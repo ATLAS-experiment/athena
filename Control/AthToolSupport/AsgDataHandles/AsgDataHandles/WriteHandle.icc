@@ -48,6 +48,23 @@ WriteHandle<T>::WriteHandle (const std::string& sgkey)
 
 
 /**
+ * @brief Constructor specifying the key as a string, with context.
+ * @param sgkey StoreGate key of the referenced object.
+ * @param ctx The event context.
+ *
+ * In the standalone implementation the store is always taken from
+ * @c xAOD::TActiveStore, so the context is currently ignored.
+ */
+template <class T>
+inline
+WriteHandle<T>::WriteHandle (const std::string& sgkey,
+                             const EventContext& /*ctx*/)
+  : VarHandleBase (sgkey)
+{
+}
+
+
+/**
  * @brief Constructor from a WriteHandleKey.
  * @param key The key object holding the clid/key/store.
  *
@@ -252,18 +269,19 @@ WriteHandle<T>::WriteHandle::record (std::unique_ptr<T> data)
 }
 
 
-// /**
-//  * @brief Record a non-const object to the store.
-//  * @param data The object to record.
-//  * @param isConst If true, record the object as const.
-//  */
-// template <class T>
-// inline
-// StatusCode
-// WriteHandle<T>::WriteHandle::recordNonConst (std::unique_ptr<T> data)
-// {
-//   return this->doRecord (std::move(data), false, false);
-// }
+/**
+ * @brief Record a non-const object to the store.
+ * @param data The object to record.
+ */
+template <class T>
+inline
+StatusCode
+WriteHandle<T>::WriteHandle::recordNonConst (std::unique_ptr<T> data)
+{
+  // In standalone there is no const/non-const distinction for the store, so
+  // this simply forwards to @ref record.
+  return record (std::move (data));
+}
 
 
 /**
@@ -291,20 +309,22 @@ WriteHandle<T>::WriteHandle::record (std::unique_ptr<T> data,
 }
 
 
-// /**
-//  * @brief Record a non-const object and its auxiliary store to the store.
-//  * @param data The object to record.
-//  * @param auxstore Auxiliary store object.
-//  */
-// template <class T>
-// template <class AUXSTORE>
-// inline
-// StatusCode
-// WriteHandle<T>::WriteHandle::recordNonConst (std::unique_ptr<T> data,
-//                                              std::unique_ptr<AUXSTORE> auxstore)
-// {
-//   return record (std::move(data), std::move(auxstore), false);
-// }
+/**
+ * @brief Record a non-const object and its auxiliary store to the store.
+ * @param data The object to record.
+ * @param auxstore Auxiliary store object.
+ */
+template <class T>
+template <class AUXSTORE>
+inline
+StatusCode
+WriteHandle<T>::WriteHandle::recordNonConst (std::unique_ptr<T> data,
+                                             std::unique_ptr<AUXSTORE> auxstore)
+{
+  // In standalone there is no const/non-const distinction for the store, so
+  // this simply forwards to @ref record.
+  return record (std::move (data), std::move (auxstore));
+}
 
 
 // /**

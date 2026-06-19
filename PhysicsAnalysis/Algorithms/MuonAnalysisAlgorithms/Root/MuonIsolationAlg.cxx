@@ -45,12 +45,12 @@ namespace CP
 
 
   StatusCode MuonIsolationAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK (m_muonHandle.retrieve (muons, sys));
+      ANA_CHECK (m_muonHandle.retrieve (muons, sys, ctx));
       for (const xAOD::Muon *muon : *muons)
       {
         if (m_preselection.getBool (*muon, sys))

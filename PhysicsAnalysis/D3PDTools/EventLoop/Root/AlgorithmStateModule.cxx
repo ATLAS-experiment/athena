@@ -14,6 +14,7 @@
 
 #include <AnaAlgorithm/AlgorithmWorkerData.h>
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
+#include <AsgTools/CurrentContext.h>
 #include <AsgTools/SgEvent.h>
 #include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
@@ -136,6 +137,7 @@ namespace EL
     {
       data.m_skipEvent = false;
       bool sequenceSkip = false;
+      const EventContext& ctx = Gaudi::Hive::currentContext();
       for (auto& algData : data.m_algs)
       {
         try
@@ -149,7 +151,7 @@ namespace EL
           }
 
           algData.m_executeCount += 1;
-          if (algData.m_algorithm->execute() == StatusCode::FAILURE)
+          if (algData.m_algorithm->execute(ctx) == StatusCode::FAILURE)
           {
             ANA_MSG_ERROR ("while calling execute() on algorithm " << algData.m_algorithm->getName());
             return StatusCode::FAILURE;

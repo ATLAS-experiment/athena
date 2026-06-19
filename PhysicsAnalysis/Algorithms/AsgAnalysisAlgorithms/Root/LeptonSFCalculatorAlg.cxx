@@ -33,22 +33,22 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode LeptonSFCalculatorAlg::execute() {
+  StatusCode LeptonSFCalculatorAlg::execute(const EventContext& ctx) {
     for (const auto& syst : m_systematicsList.systematicsVector()) {
       const xAOD::EventInfo *evtInfo {nullptr};
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, syst));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, syst, ctx));
 
       const xAOD::ElectronContainer *electrons {nullptr};
-      if (m_electronsHandle) ANA_CHECK(m_electronsHandle.retrieve(electrons, syst));
+      if (m_electronsHandle) ANA_CHECK(m_electronsHandle.retrieve(electrons, syst, ctx));
 
       const xAOD::MuonContainer *muons {nullptr};
-      if (m_muonsHandle) ANA_CHECK(m_muonsHandle.retrieve(muons, syst));
+      if (m_muonsHandle) ANA_CHECK(m_muonsHandle.retrieve(muons, syst, ctx));
 
       const xAOD::PhotonContainer *photons {nullptr};
-      if (m_photonsHandle) ANA_CHECK(m_photonsHandle.retrieve(photons, syst));
+      if (m_photonsHandle) ANA_CHECK(m_photonsHandle.retrieve(photons, syst, ctx));
 
       const xAOD::TauJetContainer *taus {nullptr};
-      if (m_tausHandle) ANA_CHECK(m_tausHandle.retrieve(taus, syst));
+      if (m_tausHandle) ANA_CHECK(m_tausHandle.retrieve(taus, syst, ctx));
 
       double leptonSF {1.};
       if (m_electronsHandle){

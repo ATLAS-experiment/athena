@@ -27,7 +27,7 @@ namespace CP
 			   ISvcLocator *svcLoc = nullptr);
 
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
   private:
 

@@ -72,6 +72,18 @@ public:
 
 
   /**
+   * @brief Constructor specifying the key as a string, with context.
+   * @param sgkey StoreGate key of the referenced object.
+   * @param ctx The event context.
+   *
+   * In the standalone implementation the store is always taken from
+   * @c xAOD::TActiveStore, so the context is currently ignored.  The
+   * constructor exists to match the Athena interface.
+   */
+  explicit WriteHandle(const std::string& sgkey, const EventContext& ctx);
+
+
+  /**
    * @brief Constructor from a WriteHandleKey.
    * @param key The key object holding the clid/key/store.
    *
@@ -184,11 +196,11 @@ public:
   StatusCode record (std::unique_ptr<T> data);
 
 
-  // /**
-  //  * @brief Record a non-const object to the store.
-  //  * @param data The object to record.
-  //  */
-  // StatusCode recordNonConst (std::unique_ptr<T> data);
+  /**
+   * @brief Record a non-const object to the store.
+   * @param data The object to record.
+   */
+  StatusCode recordNonConst (std::unique_ptr<T> data);
 
   
   /**
@@ -201,14 +213,14 @@ public:
                      std::unique_ptr<AUXSTORE> store);
 
 
-  // /**
-  //  * @brief Record a non-const object and its auxiliary store to the store.
-  //  * @param data The object to record.
-  //  * @param auxstore Auxiliary store object.
-  //  */
-  // template <class AUXSTORE>
-  // StatusCode recordNonConst (std::unique_ptr<T> data,
-  //                            std::unique_ptr<AUXSTORE> store);
+  /**
+   * @brief Record a non-const object and its auxiliary store to the store.
+   * @param data The object to record.
+   * @param auxstore Auxiliary store object.
+   */
+  template <class AUXSTORE>
+  StatusCode recordNonConst (std::unique_ptr<T> data,
+                             std::unique_ptr<AUXSTORE> store);
 
 
   // /**

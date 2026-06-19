@@ -30,7 +30,7 @@ namespace CP
     StatusCode initialize () override;
 
   public:
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
     /// \brief the update tool
   private:

@@ -27,4 +27,10 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES xAODRootAccess AsgTools xAODBase xAODJet
       SystematicsHandlesLib
       POST_EXEC_SCRIPT nopost.sh )
+
+   atlas_add_test( gt_SystematicsHandles
+      SOURCES test/gt_SystematicsHandles.cxx
+      LINK_LIBRARIES xAODRootAccess AsgTools AsgServicesLib AsgTestingLib
+      xAODJet SystematicsHandlesLib
+      POST_EXEC_SCRIPT nopost.sh )
 endif()

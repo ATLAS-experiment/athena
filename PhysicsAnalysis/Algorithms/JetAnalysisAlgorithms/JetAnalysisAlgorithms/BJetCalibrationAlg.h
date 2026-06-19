@@ -31,7 +31,7 @@ namespace CP
     /// \brief the standard constructor
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
   private:
 

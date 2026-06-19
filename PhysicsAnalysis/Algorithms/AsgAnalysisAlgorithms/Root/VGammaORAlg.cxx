@@ -20,7 +20,7 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode VGammaORAlg::execute() {
+  StatusCode VGammaORAlg::execute(const EventContext& ctx) {
 
     // the event-level filter
     CP::SysFilterReporterCombiner filterCombiner(m_filterParams, m_noFilter.value());
@@ -30,7 +30,7 @@ namespace CP {
       CP::SysFilterReporter filter(filterCombiner, sys);
 
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       bool in_vgamma_overlap;
       ANA_CHECK(m_vgammaORTool->inOverlap(in_vgamma_overlap));

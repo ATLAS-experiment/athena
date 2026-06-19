@@ -124,7 +124,7 @@ namespace CP
 
 
   StatusCode InDetTrackSelectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
@@ -134,12 +134,12 @@ namespace CP
       const xAOD::Vertex *primary_vertex = nullptr;
       if (!m_vertexContainerKey.key().empty())
       {
-        SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainerKey);
+        SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainerKey, ctx);
         primary_vertex = vertices->at(0);
       }
 
       const xAOD::TrackParticleContainer *tracks = nullptr;
-      ANA_CHECK (m_tracksHandle.retrieve (tracks, sys));
+      ANA_CHECK (m_tracksHandle.retrieve (tracks, sys, ctx));
       for (const xAOD::TrackParticle *track : *tracks)
       {
         if (m_preselection.getBool (*track, sys))

@@ -40,7 +40,7 @@ namespace CP
 
 
   StatusCode AsgUnionSelectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     std::vector<bool> selections;
 
@@ -48,7 +48,7 @@ namespace CP
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *particles{};
-      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
 
       if (selections.empty())
       {
@@ -71,7 +71,7 @@ namespace CP
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *particles{};
-      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
 
       for (size_t i{}; i < particles->size(); i++)
       {

@@ -9,6 +9,7 @@
 #define SYSTEMATICS_HANDLES__COPY_HELPERS_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgDataHandles/WriteHandle.h>
 #include <AsgMessaging/MessageCheck.h>
 #include <AsgMessaging/MsgStream.h>
 #include <AsgMessaging/StatusCode.h>
@@ -70,15 +71,10 @@ namespace CP
     template<typename T>
     struct ShallowCopy<T,1>
     {
-      /// \brief the type of the event store we use
-    public:
-      typedef std::decay<decltype(
-      *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
-
       static StatusCode
-      getCopy (MsgStream& msgStream, StoreType& store,
+      getCopy (MsgStream& msgStream, const EventContext& ctx,
                T*& object, const T *inputObject,
-               const std::string& outputName, const std::string& auxName)
+               const std::string& outputName)
       {
         // Define the msg(...) function as a lambda.
         // Suppress thread-checker warning because this provides just a wrapper to MsgStream.
@@ -128,11 +124,11 @@ namespace CP
                  viewCopy->push_back( originCopy.first->at( element->index() ) );
               }
 
-              // ...and record it.
-              ANA_CHECK( store.record( std::move(originCopy.first),
-                                       outputName + ORIGIN_POSTFIX ) );
-              ANA_CHECK( store.record( std::move(originCopy.second),
-                                       outputName + ORIGIN_POSTFIX + "Aux." ) );
+              // ...and record it without locking, since the caller will
+              // typically still modify the copy.
+              SG::WriteHandle<T> originHandle( outputName + ORIGIN_POSTFIX, ctx );
+              ANA_CHECK( originHandle.recordNonConst( std::move(originCopy.first),
+                                                      std::move(originCopy.second) ) );
 
               // Set the origin links on it. Note that
               // xAOD::setOriginalObjectLink's "container version" doesn't work
@@ -145,7 +141,8 @@ namespace CP
                  }
               }
               // Finally, record the view container with the requested name.
-              ANA_CHECK( store.record( std::move(viewCopy), outputName ) );
+              SG::WriteHandle<T> viewHandle( outputName, ctx );
+              ANA_CHECK( viewHandle.recordNonConst( std::move(viewCopy) ) );
               // The copy is done.
               object = viewCopyPtr;
               return StatusCode::SUCCESS;
@@ -154,7 +151,8 @@ namespace CP
               // container, and that's that...
               auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
               auto viewCopyPtr = viewCopy.get();
-              ANA_CHECK( store.record( std::move(viewCopy), outputName ) );
+              SG::WriteHandle<T> viewHandle( outputName, ctx );
+              ANA_CHECK( viewHandle.recordNonConst( std::move(viewCopy) ) );
               // The copy is done.
               object = viewCopyPtr;
               return StatusCode::SUCCESS;
@@ -176,8 +174,10 @@ namespace CP
            }
            //coverity[WRAPPER_ESCAPE]
            object = copy.first.get();
-           ANA_CHECK (store.record (std::move(copy.second), auxName));
-           ANA_CHECK (store.record (std::move(copy.first), outputName));
+           // Record the copy and its aux store without locking, since the
+           // caller will typically still modify it.
+           SG::WriteHandle<T> handle (outputName, ctx);
+           ANA_CHECK (handle.recordNonConst (std::move(copy.first), std::move(copy.second)));
            return StatusCode::SUCCESS;
         }
       }
@@ -186,15 +186,10 @@ namespace CP
     template<typename T>
     struct ShallowCopy<T,2>
     {
-      /// \brief the type of the event store we use
-    public:
-      typedef std::decay<decltype(
-      *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
-
       static StatusCode
-      getCopy (MsgStream& msgStream, StoreType& store,
+      getCopy (MsgStream& msgStream, const EventContext& ctx,
                T*& object, const T *inputObject,
-               const std::string& outputName, const std::string& auxName)
+               const std::string& outputName)
       {
          // Define the msg(...) function as a lambda.
          // Suppress thread-checker warning because this provides just a wrapper to MsgStream.
@@ -244,15 +239,15 @@ namespace CP
                   viewCopy->push_back( originCopy.first->at( element->index() ) );
                }
 
-               // ...and record it.
-               ANA_CHECK( store.record( std::move(originCopy.first),
-                                        outputName + ORIGIN_POSTFIX ) );
-               ANA_CHECK( store.record( std::move(originCopy.second),
-                                        outputName + ORIGIN_POSTFIX +
-                                        "Aux." ) );
+               // ...and record it without locking, since the caller will
+               // typically still modify the copy.
+               SG::WriteHandle<T> originHandle( outputName + ORIGIN_POSTFIX, ctx );
+               ANA_CHECK( originHandle.recordNonConst( std::move(originCopy.first),
+                                                       std::move(originCopy.second) ) );
 
                // Finally, record the view container with the requested name.
-               ANA_CHECK( store.record( std::move(viewCopy), outputName ) );
+               SG::WriteHandle<T> viewHandle( outputName, ctx );
+               ANA_CHECK( viewHandle.recordNonConst( std::move(viewCopy) ) );
                // The copy is done.
                object = viewCopyPtr;
                return StatusCode::SUCCESS;
@@ -261,7 +256,8 @@ namespace CP
                // container, and that's that...
                auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
                auto viewCopyPtr = viewCopy.get();
-               ANA_CHECK( store.record( std::move(viewCopy), outputName ) );
+               SG::WriteHandle<T> viewHandle( outputName, ctx );
+               ANA_CHECK( viewHandle.recordNonConst( std::move(viewCopy) ) );
                // The copy is done.
                object = viewCopyPtr;
                return StatusCode::SUCCESS;
@@ -280,8 +276,10 @@ namespace CP
             //coverity warns about the bare pointer outliving the 'copy' object
             //coverity[WRAPPER_ESCAPE]
             object = copy.first.get();
-            ANA_CHECK (store.record (std::move(copy.second), auxName));
-            ANA_CHECK (store.record (std::move(copy.first), outputName));
+            // Record the copy and its aux store without locking, since the
+            // caller will typically still modify it.
+            SG::WriteHandle<T> handle (outputName, ctx);
+            ANA_CHECK (handle.recordNonConst (std::move(copy.first), std::move(copy.second)));
             return StatusCode::SUCCESS;
          }
       }
@@ -290,15 +288,10 @@ namespace CP
     template<typename T>
     struct ShallowCopy<T,3>
     {
-       /// \brief the type of the event store we use
-    public:
-       typedef std::decay<decltype(
-       *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
-
        static StatusCode
-       getCopy (MsgStream& msgStream, StoreType& store,
+       getCopy (MsgStream& msgStream, const EventContext& ctx,
                 T*& object, const T *inputObject,
-                const std::string& outputName, const std::string& auxName)
+                const std::string& outputName)
        {
           // Define the msg(...) function as a lambda.
           // Suppress thread-checker warning because this provides just a wrapper to MsgStream.
@@ -317,8 +310,10 @@ namespace CP
           }
           //coverity[WRAPPER_ESCAPE]
           object = copy.first.get();
-          ANA_CHECK (store.record (std::move(copy.second), auxName));
-          ANA_CHECK (store.record (std::move(copy.first), outputName));
+          // Record the copy and its aux store without locking, since the
+          // caller will typically still modify it.
+          SG::WriteHandle<T> handle (outputName, ctx);
+          ANA_CHECK (handle.recordNonConst (std::move(copy.first), std::move(copy.second)));
           return StatusCode::SUCCESS;
        }
     };
@@ -326,15 +321,11 @@ namespace CP
     template<>
     struct ShallowCopy<xAOD::IParticleContainer>
     {
-      /// \brief the type of the event store we use
-    public:
-      typedef std::decay<decltype(
-        *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
       static StatusCode
-      getCopy (MsgStream& msgStream, StoreType& store,
+      getCopy (MsgStream& msgStream, const EventContext& ctx,
                xAOD::IParticleContainer*& object,
                const xAOD::IParticleContainer *inputObject,
-               const std::string& outputName, const std::string& auxName);
+               const std::string& outputName);
     };
   }
 }

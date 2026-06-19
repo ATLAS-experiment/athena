@@ -57,7 +57,7 @@ namespace CP {
       /// @{
 
       /// Function executed once per event
-      StatusCode execute() override;
+      StatusCode execute(const EventContext& ctx) override;
 
       /// @}
 

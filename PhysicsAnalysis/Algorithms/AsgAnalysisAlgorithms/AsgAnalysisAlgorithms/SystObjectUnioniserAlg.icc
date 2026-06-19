@@ -33,7 +33,7 @@ namespace CP
   }
 
   template<class T, class C>
-  StatusCode SystObjectUnioniserAlg<T,C> ::execute(const EventContext&) const
+  StatusCode SystObjectUnioniserAlg<T,C> ::execute(const EventContext& ctx) const
   {
     static const SG::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
 
@@ -47,7 +47,7 @@ namespace CP
     // in case this ever changes...
     for (const auto& sys : m_systematicsList.systematicsVector()) {
         const C* sys_container = nullptr;
-        ATH_CHECK( m_inputHandle.retrieve(sys_container, sys) );
+        ATH_CHECK( m_inputHandle.retrieve(sys_container, sys, ctx) );
         systhash_to_container.insert({sys.hash(), sys_container});
     }
 
@@ -85,7 +85,7 @@ namespace CP
           SG::VIEW_ELEMENTS
           );
         ATH_MSG_DEBUG("Recording " << cdv_nom->size() << " objects in nominal container");
-        ATH_CHECK(m_outputHandle.record(std::move(cdv_nom),sys));
+        ATH_CHECK(m_outputHandle.record(std::move(cdv_nom),sys, ctx));
       } else {
         // Create a new CDV, and fill it with the variation objects
         // corresponding to each nominal object
@@ -97,7 +97,7 @@ namespace CP
           cdv_var->push_back(var_obj);
         }
         ATH_MSG_DEBUG("Recording " << cdv_var->size() << " objects in '" << sys.name() << "' container");
-        ATH_CHECK(m_outputHandle.record(std::move(cdv_var), sys));
+        ATH_CHECK(m_outputHandle.record(std::move(cdv_var), sys, ctx));
       }
     }
 

@@ -9,17 +9,20 @@
 #define SYSTEMATICS_HANDLES__SYS_COPY_HANDLE_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgDataHandles/VarHandleKey.h>
 #include <AsgMessaging/AsgMessagingForward.h>
+#include <AsgMessaging/MsgStream.h>
+#include <AsgMessaging/StatusCode.h>
+#include <AthContainers/CurrentContext.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <SystematicsHandles/ISysHandleBase.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
 #include <SystematicsHandles/SysListHandle.h>
+#include <functional>
 #include <string>
-#include <tuple>
+#include <type_traits>
 #include <unordered_map>
-
-class StatusCode;
 
 namespace CP
 {
@@ -60,75 +63,66 @@ namespace CP
   template<typename T> class SysCopyHandle final
     : public ISysObjectHandleBase, public asg::AsgMessagingForward
   {
-    //
-    // public interface
-    //
-
-    /**
-     * @brief Standard constructor
-     * @tparam T2 The type of the owner
-     * @param owner Used to declare the property and for its messaging
-     * @param propertyName The name of the property to declare. An additional
-     *        propertyName+"Out" property will be declared to set the output
-     *        name
-     * @param propertyValue The default value for the property
-     * @param propertyDescription The description of the property
-     *
-     * This version of the constructor declares a property on the parent object
-     * and should usually be preferred when the container to be copied should
-     * be configurable
-     */
+    /// Public Members
+    /// ==============
   public:
+
+    /// \brief Standard constructor
+    /// \tparam T2 The type of the owner
+    /// \param owner Used to declare the property and for its messaging
+    /// \param propertyName The name of the property to declare. An additional
+    ///        propertyName+"Out" property will be declared to set the output
+    ///        name
+    /// \param propertyValue The default value for the property
+    /// \param propertyDescription The description of the property
+    ///
+    /// This version of the constructor declares a property on the parent object
+    /// and should usually be preferred when the container to be copied should
+    /// be configurable
     template<typename T2>
     SysCopyHandle (T2 *owner, const std::string& propertyName,
                    const std::string& propertyValue,
                    const std::string& propertyDescription);
 
-    /**
-     * @brief Construct directly without declaring properties
-     * @tparam T2 The owner that provides the messaging and event store
-     * @param inputName The name of the input container
-     * @param outputName The name of the output container (acts like an update
-     *        handle if set to the empty string)
-     * @param owner The owner that provides the messaging and event store
-     */
+
+    /// \brief Construct directly without declaring properties
+    /// \tparam T2 The owner that provides the messaging and event store
+    /// \param inputName The name of the input container
+    /// \param outputName The name of the output container (acts like an update
+    ///        handle if set to the empty string)
+    /// \param owner The owner that provides the messaging and event store
     template<typename T2>
     SysCopyHandle (const std::string &inputName, const std::string &outputName, T2 *owner);
 
 
     /// \brief whether we have a name configured
-  public:
     virtual bool empty () const noexcept override;
 
     /// \brief !empty()
-  public:
     explicit operator bool () const noexcept;
 
     /// \brief get the name pattern before substitution
-  public:
     virtual std::string getNamePattern () const override;
 
 
     /// \brief initialize this handle
     /// \{
-  public:
     StatusCode initialize (SysListHandle& sysListHandle);
     StatusCode initialize (SysListHandle& sysListHandle, SG::AllowEmptyEnum);
     /// \}
 
 
     /// \brief retrieve the object for the given name
-  public:
     ::StatusCode getCopy (T*& object,
-                          const CP::SystematicSet& sys) const;
+                          const CP::SystematicSet& sys,
+                          const EventContext& ctx = Gaudi::Hive::currentContext()) const;
 
 
 
-    //
-    // inherited interface
-    //
-
+    /// Inherited Members
+    /// =================
   private:
+
     virtual CP::SystematicSet getInputAffecting (const ISystematicsSvc& svc) const override;
     virtual StatusCode
     fillSystematics (const ISystematicsSvc& svc,
@@ -139,37 +133,45 @@ namespace CP
 
 
 
-    //
-    // private interface
-    //
+    /// Private Members
+    /// ===============
+  private:
 
     /// \brief the input name we use
-  private:
     std::string m_inputName;
 
     /// \brief the (optional) name of the copy we create
-  private:
     std::string m_outputName;
 
     /// \brief the (optional) type of the container
     ///
     /// This is needed to declare outputs in AthenaMT with the correct
     /// type.
-  private:
     std::string m_typeName;
 
-    /// \brief the cache of names we use
-  private:
-    std::unordered_map<CP::SystematicSet,std::tuple<std::string,std::string,std::string> > m_nameCache;
+    /// \brief the data held per-systematic (filled in `initialize`)
+    struct SysData
+    {
+      /// \brief retrieve the (possibly copied) object for this systematic
+      ///
+      /// Depending on how the handle is configured this either does a
+      /// plain (update/read) retrieve of the input via the event store,
+      /// or reads the input through a read handle and (shallow) copies
+      /// it into the configured output.
+      std::function<StatusCode(MsgStream&, T*&, const EventContext&)> getCopy;
+    };
+    std::unordered_map<CP::SystematicSet,SysData> m_sysData;
 
 
     /// \brief the type of the event store we use
-  private:
     typedef std::decay<decltype(
       *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
 
     /// \brief the event store we use
-  private:
+    ///
+    /// This is only used in the update/read mode (no output name
+    /// configured), where we need a non-const retrieve of the input
+    /// object that a read handle can not provide.
     StoreType *m_evtStore = nullptr;
 
     /// \brief the function to retrieve the event store
@@ -179,7 +181,6 @@ namespace CP
     /// tools as parents when using \ref SysListHandle, so in
     /// principle this could be replaced with a pointer to the
     /// algorithm instead.
-  private:
     std::function<StoreType*()> m_evtStoreGetter;
 
 #ifndef XAOD_STANDALONE
@@ -187,7 +188,6 @@ namespace CP
     ///
     /// This wraps the owner's addDependency call and is used by
     /// addDecorationDependency to register MT dependencies.
-  private:
     std::function<void(const DataObjID&, Gaudi::DataHandle::Mode)> m_addAlgDependency;
 #endif
   };

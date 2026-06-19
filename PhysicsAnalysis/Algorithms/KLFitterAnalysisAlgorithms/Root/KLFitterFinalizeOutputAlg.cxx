@@ -20,19 +20,19 @@ StatusCode KLFitterFinalizeOutputAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode KLFitterFinalizeOutputAlg::execute() {
+StatusCode KLFitterFinalizeOutputAlg::execute(const EventContext& ctx) {
   for (const auto &sys : m_systematicsList.systematicsVector()) {
     // for events, where the KLFitterResultContainer was not created (e.g. event
     // didn't pass any of the regions' selections) we have to record an empty
     // container -- this ensures that every single event has at least empty
     // container (no KLFitter permutations)
-    if (!m_inHandle.isValid(sys)) {
+    if (!m_inHandle.isValid(sys, ctx)) {
       auto resultAuxContainer =
           std::make_unique<xAOD::KLFitterResultAuxContainer>();
       auto resultContainer = std::make_unique<xAOD::KLFitterResultContainer>();
       resultContainer->setStore(resultAuxContainer.get());
       ANA_CHECK(m_outHandle.record(std::move(resultContainer),
-                                   std::move(resultAuxContainer), sys));
+                                   std::move(resultAuxContainer), sys, ctx));
     }
   }
   return StatusCode::SUCCESS;
