@@ -79,11 +79,11 @@ namespace EL
 
 
   StatusCode AnaAlgorithmWrapper ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     using namespace msgAlgorithmConfig;
     RCU_READ_INVARIANT (this);
-    if (m_algorithm->sysExecute().isFailure())
+    if (m_algorithm->sysExecute(ctx).isFailure())
     {
       ANA_MSG_ERROR ("failed to call execute() on algorithm: " << m_config.name());
       return StatusCode::FAILURE;

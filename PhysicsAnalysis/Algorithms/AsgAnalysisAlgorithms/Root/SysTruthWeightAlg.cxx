@@ -47,7 +47,7 @@ StatusCode SysTruthWeightAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode SysTruthWeightAlg::execute()
+StatusCode SysTruthWeightAlg::execute(const EventContext& ctx)
 {
 
   // Retreive the truth particles container
@@ -57,7 +57,7 @@ StatusCode SysTruthWeightAlg::execute()
   for (const auto &sys : m_systematicsList.systematicsVector())
   {
     const xAOD::EventInfo *eventInfo = nullptr;
-    ANA_CHECK(m_eventInfoHandle.retrieve(eventInfo, sys));
+    ANA_CHECK(m_eventInfoHandle.retrieve(eventInfo, sys, ctx));
 
     m_decoration.set(*eventInfo, m_sysTruthWeightTool->getSysWeight(truthParticles, sys), sys);
   }

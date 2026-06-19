@@ -216,7 +216,7 @@ namespace CP
 
 
   StatusCode AsgViewFromSelectionAlg ::
-  execute ()
+  execute (const EventContext& /*ctx*/)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {

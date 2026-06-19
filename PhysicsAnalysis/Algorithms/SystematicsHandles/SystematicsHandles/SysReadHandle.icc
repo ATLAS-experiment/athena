@@ -9,6 +9,7 @@
 // includes
 //
 
+#include <AsgDataHandles/ReadHandle.h>
 #include <AsgMessaging/MessageCheck.h>
 #include <AsgMessaging/StatusCode.h>
 #include <SystematicsHandles/AthenaDependencyHelpers.h>
@@ -33,7 +34,6 @@ namespace CP
   template<typename T> template<typename T2> SysReadHandle<T> ::
   SysReadHandle (const std::string &inputName, T2 *owner)
     : AsgMessagingForward (owner), m_inputName(inputName)
-    , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
   {
 #ifndef XAOD_STANDALONE
     m_addAlgDependency = [owner](const DataObjID& id, Gaudi::DataHandle::Mode mode) {
@@ -89,35 +89,29 @@ namespace CP
   template<typename T> const std::string& SysReadHandle<T> ::
   getName (const CP::SystematicSet& sys) const
   {
-    auto cache = m_inputNameCache.find (sys);
-    if (cache == m_inputNameCache.end())
-    {
-      if (m_inputNameCache.empty())
-        throw std::logic_error ("uninitialized SysReadHandle (" + m_inputName + ")");
-      else
-        throw std::logic_error ("unsupported systematic in SysReadHandle (" + m_inputName + "): (" + sys.name() + ")");
-    }
-    return cache->second;
+    return getReadHandle (sys).key();
   }
 
 
 
   template<typename T> ::StatusCode SysReadHandle<T> ::
-  retrieve (const T*& object, const CP::SystematicSet& sys) const
+  retrieve (const T*& object, const CP::SystematicSet& sys,
+            const EventContext& ctx) const
   {
-    const std::string& name = getName (sys);
-    assert (m_evtStore);
-    return m_evtStore->retrieve (object, name);
+    SG::ReadHandle<T> handle (getReadHandle (sys), ctx);
+    object = handle.cptr();
+    if (object == nullptr)
+      return StatusCode::FAILURE;
+    return StatusCode::SUCCESS;
   }
 
 
 
   template<typename T> bool SysReadHandle<T> ::
-  isValid (const CP::SystematicSet& sys) const
+  isValid (const CP::SystematicSet& sys, const EventContext& ctx) const
   {
-    const std::string& name = getName (sys);
-    assert (m_evtStore);
-    return m_evtStore->contains<T> (name);
+    SG::ReadHandle<T> handle (getReadHandle (sys), ctx);
+    return handle.isPresent();
   }
 
 
@@ -142,12 +136,10 @@ namespace CP
       ANA_CHECK (SystematicSet::filterForAffectingSystematics (sys, affecting, inputSys));
       std::string inputName;
       ANA_CHECK (svc.makeSystematicsName (inputName, m_inputName, inputSys));
-      m_inputNameCache.emplace (sys, inputName);
+      SG::ReadHandleKey<T> readHandle (inputName);
+      ANA_CHECK (readHandle.initialize ());
+      m_sysData.emplace (sys, SysData{std::move (readHandle)});
     }
-
-    // retrieving this here, just so it exists
-    if (!m_evtStore)
-      m_evtStore = m_evtStoreGetter();
 
     ANA_CHECK (addDecorationDependency(svc, "", false));
 
@@ -169,5 +161,21 @@ namespace CP
     ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clid, m_inputName, Gaudi::DataHandle::Reader, decoName, decoWrite));
     return StatusCode::SUCCESS;
 #endif
+  }
+
+
+
+  template<typename T> const SG::ReadHandleKey<T>& SysReadHandle<T> ::
+  getReadHandle (const CP::SystematicSet& sys) const
+  {
+    auto cache = m_sysData.find (sys);
+    if (cache == m_sysData.end())
+    {
+      if (m_sysData.empty())
+        throw std::logic_error ("uninitialized SysReadHandle (" + m_inputName + ")");
+      else
+        throw std::logic_error ("unsupported systematic in SysReadHandle (" + m_inputName + "): (" + sys.name() + ")");
+    }
+    return cache->second.readHandle;
   }
 }

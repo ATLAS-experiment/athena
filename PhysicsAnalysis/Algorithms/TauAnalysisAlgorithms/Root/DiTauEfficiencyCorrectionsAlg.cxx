@@ -41,13 +41,13 @@ namespace CP
 
 
   StatusCode DiTauEfficiencyCorrectionsAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_efficiencyCorrectionsTool->applySystematicVariation (sys));
       const xAOD::DiTauJetContainer *taus = nullptr;
-      ANA_CHECK (m_tauHandle.retrieve (taus, sys));
+      ANA_CHECK (m_tauHandle.retrieve (taus, sys, ctx));
       for (const xAOD::DiTauJet *tau : *taus)
       {
         if (m_preselection.getBool (*tau, sys))

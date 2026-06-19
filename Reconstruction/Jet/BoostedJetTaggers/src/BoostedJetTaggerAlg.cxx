@@ -35,13 +35,13 @@ namespace BJT{
       return StatusCode::SUCCESS;
     }
 
-    StatusCode BoostedJetTaggerAlg::execute(const EventContext& /*ctx*/){
+    StatusCode BoostedJetTaggerAlg::execute(const EventContext& ctx){
 
       for (const auto& sys : m_systematicsList.systematicsVector()){
 
         // Retrieve inputs
         const xAOD::JetContainer *jets = nullptr;
-        ANA_CHECK(m_jets.retrieve(jets, sys));
+        ANA_CHECK(m_jets.retrieve(jets, sys, ctx));
 
         // jet tagger WP tool
         ATH_CHECK(m_tagger -> decorate(*jets));

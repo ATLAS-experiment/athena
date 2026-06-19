@@ -103,7 +103,7 @@ namespace EL
 
 
   StatusCode AlgorithmWrapper ::
-  execute ()
+  execute (const EventContext& /*ctx*/)
   {
     using namespace msgAlgorithmConfig;
     RCU_CHANGE_INVARIANT (this);

@@ -131,9 +131,17 @@ namespace CP
   private:
     ISysObjectHandleBase *m_objectHandle {nullptr};
 
-    /// \brief the cache of names we use
+    /// \brief the data held per-systematic (filled in `initialize`)
   private:
-    std::unordered_map<CP::SystematicSet,std::tuple<std::string,SG::Decorator<T> > > m_dataCache;
+    struct SysData
+    {
+      /// the expanded name of the decoration
+      std::string name;
+
+      /// the decorator for the decoration
+      SG::Decorator<T> decorator;
+    };
+    std::unordered_map<CP::SystematicSet,SysData> m_sysData;
 
     /// \brief get the data for the given systematics
   private:

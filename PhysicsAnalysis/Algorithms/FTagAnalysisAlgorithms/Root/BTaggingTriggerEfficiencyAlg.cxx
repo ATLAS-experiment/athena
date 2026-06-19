@@ -56,7 +56,7 @@ namespace CP
 
 
   StatusCode BTaggingTriggerEfficiencyAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
@@ -65,7 +65,7 @@ namespace CP
       ANA_CHECK (m_conditionalEfficiencyTool->applySystematicVariation (sys));
       
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.retrieve (jets, sys));
+      ANA_CHECK (m_jetHandle.retrieve (jets, sys, ctx));
 
       for (const xAOD::Jet *jet : *jets)
       {

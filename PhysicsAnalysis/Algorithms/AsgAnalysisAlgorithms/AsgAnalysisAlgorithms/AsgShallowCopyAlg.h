@@ -36,7 +36,7 @@ namespace CP
     StatusCode initialize () override;
 
   public:
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
     /// \brief the systematics list we run
@@ -61,14 +61,14 @@ namespace CP
     /// \brief the templated version of execute for a single systematic
   private:
     template<typename Type> StatusCode
-    executeTemplate (const CP::SystematicSet& sys);
+    executeTemplate (const EventContext& ctx, const CP::SystematicSet& sys);
 
     /// \brief the version of execute to find the type
   private:
-    StatusCode executeFindType (const CP::SystematicSet& sys);
+    StatusCode executeFindType (const EventContext& ctx, const CP::SystematicSet& sys);
 
   private:
-    StatusCode (AsgShallowCopyAlg::* m_function) (const CP::SystematicSet& sys) {&AsgShallowCopyAlg::executeFindType};
+    StatusCode (AsgShallowCopyAlg::* m_function) (const EventContext& ctx, const CP::SystematicSet& sys) {&AsgShallowCopyAlg::executeFindType};
   };
 }
 

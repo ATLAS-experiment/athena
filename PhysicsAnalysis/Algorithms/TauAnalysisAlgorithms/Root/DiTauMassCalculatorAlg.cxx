@@ -54,13 +54,13 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode DiTauMassCalculatorAlg::execute()
+  StatusCode DiTauMassCalculatorAlg::execute(const EventContext& ctx)
   {
     for (const auto &sys : m_systematicsList.systematicsVector())
       {
 	// retrieve the EventInfo
 	const xAOD::EventInfo *evtInfo = nullptr;
-	ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+	ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
 	// check the preselection
 	if (m_preselection && !m_preselection.getBool(*evtInfo, sys))
@@ -68,15 +68,15 @@ namespace CP {
 
 	// retrieve objects
 	const xAOD::ElectronContainer *electrons = nullptr;
-	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
 	const xAOD::MuonContainer *muons = nullptr;
-	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+	ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
 	const xAOD::TauJetContainer *taus = nullptr;
-	ANA_CHECK(m_tausHandle.retrieve(taus, sys));
+	ANA_CHECK(m_tausHandle.retrieve(taus, sys, ctx));
 	const xAOD::JetContainer *jets = nullptr;
-	ANA_CHECK(m_jetsHandle.retrieve(jets, sys));
+	ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
 	const xAOD::MissingETContainer *met = nullptr;
-	ANA_CHECK(m_metHandle.retrieve(met, sys));
+	ANA_CHECK(m_metHandle.retrieve(met, sys, ctx));
 
 	// apply object-wise selection
 	ConstDataVector<xAOD::ElectronContainer> selected_electrons(SG::VIEW_ELEMENTS);

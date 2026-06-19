@@ -54,7 +54,7 @@ namespace CP
     }
 
 
-    StatusCode ElectronSiHitDecAlg::execute()
+    StatusCode ElectronSiHitDecAlg::execute(const EventContext& ctx)
     {
 
         ATH_MSG_DEBUG("Entering execute");
@@ -67,12 +67,12 @@ namespace CP
 
             if (m_requireTwoLeptons) {
                 const xAOD::ElectronContainer* analEls = nullptr;
-                ANA_CHECK (m_analElectronContKey.retrieve (analEls, sys));
+                ANA_CHECK (m_analElectronContKey.retrieve (analEls, sys, ctx));
                 ATH_MSG_DEBUG("Retrieved electrons: " << analEls->size());
                 if (analEls->size() > 1) eventHasLeptonPair = true;
                 else {
                     const xAOD::MuonContainer* analMus = nullptr;
-                    ANA_CHECK (m_analMuonContKey.retrieve (analMus, sys));
+                    ANA_CHECK (m_analMuonContKey.retrieve (analMus, sys, ctx));
                     ATH_MSG_DEBUG("Retrieved muons: " << analMus->size());
                     if (analMus->size() > 1) eventHasLeptonPair = true;
                 }
@@ -83,17 +83,17 @@ namespace CP
 
             // Retrieve EventInfo
             const xAOD::EventInfo* ei = nullptr;
-            ANA_CHECK (m_eventInfoKey.retrieve (ei, sys));
+            ANA_CHECK (m_eventInfoKey.retrieve (ei, sys, ctx));
             ATH_MSG_DEBUG("Retrieved EventInfo");
 
             // Retrieve vertices
             const xAOD::VertexContainer* vtxs = nullptr;
-            ANA_CHECK (m_vertexKey.retrieve (vtxs, sys));
+            ANA_CHECK (m_vertexKey.retrieve (vtxs, sys, ctx));
             ATH_MSG_DEBUG("Retrieved primary vertex");
 
             // Retrieve electrons
             const xAOD::ElectronContainer* els = nullptr;
-            ANA_CHECK (m_electronContainerKey.retrieve (els, sys));
+            ANA_CHECK (m_electronContainerKey.retrieve (els, sys, ctx));
             ATH_MSG_DEBUG("Retrieved electrons: " << els->size());
 
             // get primary vertex

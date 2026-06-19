@@ -444,7 +444,7 @@ namespace EL
 
     /// \brief call \ref execute
   public:
-    ::StatusCode sysExecute ();
+    ::StatusCode sysExecute (const EventContext& ctx);
 
     /// \brief call \ref finalize
   public:

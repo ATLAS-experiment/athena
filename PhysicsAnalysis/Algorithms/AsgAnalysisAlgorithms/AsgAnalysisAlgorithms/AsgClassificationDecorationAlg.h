@@ -27,7 +27,7 @@ class AsgClassificationDecorationAlg final : public EL::AnaAlgorithm
   /// \brief the standard constructor
   using EL::AnaAlgorithm::AnaAlgorithm;
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
   /// \brief truth classifier tool handle

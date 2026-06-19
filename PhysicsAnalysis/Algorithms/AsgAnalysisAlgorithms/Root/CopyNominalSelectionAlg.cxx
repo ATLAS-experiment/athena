@@ -45,7 +45,7 @@ namespace CP
 
 
   StatusCode CopyNominalSelectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     static const SystematicSet emptySys;
     const xAOD::IParticleContainer *nominal = nullptr;
@@ -54,11 +54,11 @@ namespace CP
     {
       if (sys.empty())
       {
-        ANA_CHECK (m_particlesHandle.retrieve (nominal, sys));
+        ANA_CHECK (m_particlesHandle.retrieve (nominal, sys, ctx));
       } else
       {
         const xAOD::IParticleContainer *particles = nullptr;
-        ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+        ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
         for (std::size_t index = 0u; index != particles->size(); ++ index)
         {
           const xAOD::IParticle *particle = particles->at (index);

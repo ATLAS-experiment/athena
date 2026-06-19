@@ -25,11 +25,11 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode MissingETSelectorAlg::execute() {
+  StatusCode MissingETSelectorAlg::execute(const EventContext& ctx) {
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_decoration.setBool(*evtInfo, 0, sys);
@@ -40,7 +40,7 @@ namespace CP {
 
       // retrieve the MET container
       const xAOD::MissingETContainer *met = nullptr;
-      ANA_CHECK(m_metHandle.retrieve(met, sys));
+      ANA_CHECK(m_metHandle.retrieve(met, sys, ctx));
 
       // calculate decision
       if ((*met)[m_metTerm.value()] == nullptr) {

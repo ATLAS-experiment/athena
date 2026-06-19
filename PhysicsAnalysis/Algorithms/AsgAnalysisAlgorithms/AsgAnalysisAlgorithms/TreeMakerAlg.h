@@ -35,7 +35,7 @@ namespace CP {
       virtual StatusCode initialize() override;
 
       /// Function executed once per event
-      StatusCode execute() override { return StatusCode::SUCCESS; }
+      StatusCode execute(const EventContext& /*ctx*/) override { return StatusCode::SUCCESS; }
 
       /// @}
 

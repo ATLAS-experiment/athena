@@ -40,7 +40,7 @@ namespace CP
     TrigGlobalEfficiencyAlg(const std::string& name, ISvcLocator* pSvcLocator = nullptr);
 
     virtual StatusCode initialize() final override;
-    virtual StatusCode execute() final override;
+    virtual StatusCode execute(const EventContext& ctx) final override;
     virtual StatusCode finalize() final override;
 
   private:

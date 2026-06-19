@@ -38,12 +38,12 @@ namespace CP
 
 
   StatusCode PMGTruthWeightAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::EventInfo *eventInfo = nullptr;
-      ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys));
+      ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys, ctx));
 
       m_decoration.set (*eventInfo, m_truthWeightTool->getSysWeight(eventInfo,sys), sys);
     }

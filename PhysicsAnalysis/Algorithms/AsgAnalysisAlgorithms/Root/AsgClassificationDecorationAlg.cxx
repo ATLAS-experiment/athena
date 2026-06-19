@@ -25,7 +25,7 @@ StatusCode AsgClassificationDecorationAlg::initialize()
 
 
 
-StatusCode AsgClassificationDecorationAlg::execute()
+StatusCode AsgClassificationDecorationAlg::execute(const EventContext& ctx)
 {
 
   std::vector<unsigned int> classifications;
@@ -33,7 +33,7 @@ StatusCode AsgClassificationDecorationAlg::execute()
   for (const auto& sys : m_systematicsList.systematicsVector())
   {
     const xAOD::IParticleContainer *particles = nullptr;
-    ANA_CHECK(m_particlesHandle.retrieve(particles, sys));
+    ANA_CHECK(m_particlesHandle.retrieve(particles, sys, ctx));
 
     if (sys.empty()) {
       // we only run the IFF tool on the nominal calibration

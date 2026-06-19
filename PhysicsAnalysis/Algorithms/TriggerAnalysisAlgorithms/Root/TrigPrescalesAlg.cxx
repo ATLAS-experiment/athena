@@ -115,7 +115,7 @@ namespace CP
 
 
   StatusCode TrigPrescalesAlg ::
-  execute ()
+  execute (const EventContext& /*ctx*/)
   {
     const xAOD::EventInfo *evtInfo{};
     ANA_CHECK (evtStore()->retrieve(evtInfo, "EventInfo"));

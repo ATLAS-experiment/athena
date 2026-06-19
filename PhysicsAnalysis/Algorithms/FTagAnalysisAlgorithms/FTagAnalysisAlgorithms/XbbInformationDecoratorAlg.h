@@ -23,7 +23,7 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
   /// \brief the systematics list we run
   private:
