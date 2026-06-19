@@ -96,6 +96,7 @@ namespace MuonValR4 {
         ATH_CHECK(m_geoCtxKey.initialize());
         ATH_CHECK(m_fieldCacheKey.initialize());
 
+        ATH_CHECK(m_idTrackKey.initialize(SG::AllowEmpty));
         ATH_CHECK(m_legacyMuonKey.initialize(!m_legacyMuonKey.empty()));
         ATH_CHECK(m_legacyTrackKey.initialize(!m_legacyMuonKey.empty()));
         ATH_CHECK(m_legacySegmentKey.initialize(!m_legacyMuonKey.empty()));
@@ -177,6 +178,12 @@ namespace MuonValR4 {
             m_trkTruthLinks.emplace_back(m_truthSegmentKey, "truthParticleLink");
             m_trkTruthLinks.emplace_back(m_truthKey, "truthSegmentLinks");
             m_trkTruthLinks.emplace_back(m_recoSegmentKey, "truthSegmentLink");
+            m_trkTruthLinks.emplace_back(m_muonKey, "truthParticleLink");
+            
+            if (!m_idTrackKey.empty()) {
+                m_trkTruthLinks.emplace_back(m_idTrackKey, "truthParticleLink");
+            }
+            
         }
 
         m_tree.addBranch(m_recoSegs);
@@ -219,6 +226,16 @@ namespace MuonValR4 {
         m_seedSummary = std::make_shared<TrackSummaryModule>(m_tree, "MsTrkSeed", m_summaryTool.get());
         m_muonTrks = std::make_shared<IParticleFourMomBranch>(m_tree, "ActsMuons");
         m_muonTrks->addVariable(std::make_unique<TrackChi2Branch>(*m_muonTrks));
+        m_muonTrks->addVariable<uint16_t>("allAuthors");
+        m_muonTrks->addVariable<uint16_t>("author");
+
+        if (m_isMC && !m_idTrackKey.empty()) {
+            BilateralLinkerBranch::connectCollections(m_muonTrks, m_truthTrks, 
+                [](const xAOD::IParticle* trk) -> const xAOD::TruthParticle* { 
+                    return xAOD::TruthHelpers::getTruthParticle(*trk); 
+                }, "truth", "ActsMuon");
+        }
+
         for (const auto& summary : trackSummaries) {
              m_muonTrks->addVariable<uint8_t>(summary); 
         }
@@ -421,7 +438,12 @@ namespace MuonValR4 {
             for (unsigned seg = 0; seg  < muon->nMuonSegments(); ++seg){
                 m_MuonsToRecoSegLinks[index].push_back(m_recoSegs->push_back(*muon->muonSegment(seg)));
             }
-            auto actsTrk = ActsTrk::getActsTrack(*muon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle));
+            using enum xAOD::Muon::TrackParticleType;
+            const xAOD::TrackParticle* msTrack = muon->trackParticle(MuonSpectrometerTrackParticle);
+            if (!msTrack) {
+                continue;
+            }
+            auto actsTrk = ActsTrk::getActsTrack(*msTrack);
             if (!actsTrk) {
                 ATH_MSG_ERROR("Cannot find the associated ms track from the primary track");
                 return StatusCode::FAILURE;

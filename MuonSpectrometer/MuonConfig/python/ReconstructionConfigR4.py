@@ -64,16 +64,19 @@ def MuonReconstructionConfig(flags):
     result.merge(StandaloneTrackPartCnvCfg(flags))
     result.merge(MuidSaTagMakerAlg(flags))
 
-
+    MuonTags = ["MuonTagsSA"]
     ### Combined reconstruction chain
     if flags.Reco.EnableTracking:
         from MuonTrackFindingAlgs.TrackFindingConfig import MuonInDetTrackSelectionAlgCfg, MuonSegmentTaggingAlgCfg
         result.merge(MuonInDetTrackSelectionAlgCfg(flags))
         result.merge(MuonSegmentTaggingAlgCfg(flags))
+        MuonTags+= ["SegmentTags"]
 
     #### create the xAOD muons
     result.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg",
-                                          TagKeys=["MuonTagsSA"]))
+                                          TagKeys=MuonTags))
 
+    from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonToTruthAssocAlgCfg
+    result.merge(MuonToTruthAssocAlgCfg(flags))
     result.merge(MsTrkRecoChainConfig(flags))
     return result

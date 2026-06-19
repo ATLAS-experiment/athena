@@ -19,6 +19,8 @@ def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True,
         kwargs.setdefault("LegacySegmentKey", "")
         kwargs.setdefault("LegacyTrackKey", "")
         kwargs.setdefault("LegacyMuonKey" , "")
+    if not flags.Reco.EnableTracking:
+        kwargs.setdefault("IdTrkKey", "")
     the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

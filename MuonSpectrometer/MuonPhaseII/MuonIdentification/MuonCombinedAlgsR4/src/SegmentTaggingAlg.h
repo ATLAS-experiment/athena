@@ -24,10 +24,16 @@ namespace MuonCombinedR4 {
             virtual StatusCode execute(const EventContext& ctx) const override final; 
 
         private:
-            /** @brief */
+            /** @brief Calculates the chi2 deviation between the segment parameters and
+             *         the extrapolated ID track parameters
+             * @param segment: Segment for which the chi2 shall be evaluated
+             * @param extpIdPars: The ID track parameters on the same surface as the
+             *                    segment's surface */
             double matchingScore(const xAOD::MuonSegment& segment,
-                                 const Acts::BoundTrackParameters& boundPars) const;
-            /** @brief */
+                                 const Acts::BoundTrackParameters& extpIdPars) const;
+            /** @brief Returns the surface on which the local paramters of the segment
+             *         are expressed
+             * @param segment: The segment of interest*/
             const Acts::Surface& getSurface(const xAOD::MuonSegment& segment) const;
             /** @brief Retrieves the MS segment container from store gate and picks all
              *         segments that are not associated with a combined track in the reconstruction
