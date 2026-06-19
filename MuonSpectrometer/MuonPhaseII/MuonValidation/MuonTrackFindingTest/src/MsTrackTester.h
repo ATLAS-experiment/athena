@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRACKFINDINGTEST_MSTRACKTESTER_H
 #define MUONTRACKFINDINGTEST_MSTRACKTESTER_H
@@ -70,8 +70,11 @@ namespace MuonValR4{
 
 
         using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
-
+        /** @brief Abrivate the ReadHandleKey_t for the segment container */
         using SegmentKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
+        /** @brief Abrivate the key type for the track particle container */
+        using TrackKey_t = SG::ReadHandleKey<xAOD::TrackParticleContainer>;
+        /** @brief Abrivate the key type for the muon container */
         using MuonKey_t = SG::ReadHandleKey<xAOD::MuonContainer>;
         /** @brief Segment from the truth hits */
         SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "MuonTruthSegments"};
@@ -93,11 +96,12 @@ namespace MuonValR4{
         ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
         /** @brief Dependency on the R4 muon container */
         MuonKey_t m_muonKey{this, "MuonKey", "MuonsR4"};
-  
+        /** @brief Declare the dependency on the ID track particle container */
+        TrackKey_t m_idTrackKey{this, "IdTrkKey", "InDetTrackParticles"};  
         /** @brief Hit summary tool */
         ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" ,""};
         /** @brief Legacy track reconstruction chain */
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
+        TrackKey_t m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
 
         /** @brief Legacy muons  */
         MuonKey_t m_legacyMuonKey{this,"LegacyMuonKey", "Muons"};
