@@ -34,14 +34,14 @@ namespace CP
 
 
   StatusCode MuonCalibrationAndSmearingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       // always need to call `getCopy` first to ensure that the shallow copies
       // are all there if requested
       xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK (m_muonHandle.getCopy (muons, sys));
+      ANA_CHECK (m_muonHandle.getCopy (muons, sys, ctx));
 
       if (sys.empty() && m_skipNominal.value())
         continue;

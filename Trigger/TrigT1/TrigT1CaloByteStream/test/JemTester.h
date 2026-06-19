@@ -46,7 +46,7 @@ class JemTester : public AthAlgorithm {
    virtual ~JemTester();
 
    virtual StatusCode initialize();
-   virtual StatusCode execute();
+   virtual StatusCode execute(const EventContext& ctx);
    virtual StatusCode finalize();
 
  private:

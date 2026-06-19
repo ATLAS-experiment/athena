@@ -4,15 +4,26 @@
 atlas_subdir( ActsTrackReconstruction )
 
 # External dependencies:
-find_package( Acts COMPONENTS Core PluginJson )
+find_package( Acts COMPONENTS Core PluginJson OPTIONAL_COMPONENTS PluginGnn )
 find_package( Boost )
 
+# Component sources: GNN alg is only built when Acts::PluginGnn is available
+# so that no-CUDA configurations still compile (see !88460 / !88525).
+file( GLOB _sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+      src/*.cxx src/detail/*.cxx src/components/*.cxx )
+list( REMOVE_ITEM _sources src/TrackFindingGNNAlg.cxx )
+set( _extraLibs )
+if( TARGET Acts::PluginGnn )
+  list( APPEND _sources src/TrackFindingGNNAlg.cxx )
+  list( APPEND _extraLibs Acts::PluginGnn )
+endif()
+
 atlas_add_component( ActsTrackReconstruction
-                     src/*.h src/*.cxx src/detail/*.h src/detail/*.cxx
-                     src/components/*.cxx
+                     ${_sources}
              INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
             LINK_LIBRARIES ${Boost_LIBRARIES}
                Acts::Core
+               ${_extraLibs}
                ActsEventLib
                ActsGeometryLib
                ActsGeometryInterfacesLib
@@ -59,12 +70,12 @@ atlas_add_component( ActsTrackReconstruction
              
 atlas_add_test ( TrackFindingMeasurementsTest
   SOURCES test/TrackFindingMeasurementsTest.cxx src/detail/TrackFindingMeasurements.cxx
-  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
+  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement ActsCalibratorsLib
   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test ( DuplicateSeedDetectorTest
   SOURCES test/DuplicateSeedDetectorTest.cxx
-  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
+  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement ActsCalibratorsLib
   POST_EXEC_SCRIPT noerror.sh)
 
 

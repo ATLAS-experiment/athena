@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( HanConfigGenerator )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Graf Gpad Cint Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Graf Gpad Core Tree MathCore Hist RIO )
 
 # Component(s) in the package.
 atlas_add_executable( hcg

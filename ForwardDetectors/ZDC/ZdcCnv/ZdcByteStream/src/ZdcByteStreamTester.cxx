@@ -44,7 +44,7 @@ ZdcByteStreamTester::ZdcByteStreamTester(const std::string& name, ISvcLocator* p
 
 
 //==================================================================================================
-StatusCode ZdcByteStreamTester::execute()
+StatusCode ZdcByteStreamTester::execute(const EventContext& /*ctx*/)
 {
 	if (!msgLvl(MSG::INFO)) return StatusCode::SUCCESS;
 	msg(MSG::INFO);

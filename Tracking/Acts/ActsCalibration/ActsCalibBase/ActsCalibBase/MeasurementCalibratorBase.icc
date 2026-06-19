@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef ACTSCALIBBASE_MEASUREMENTCALIBRATORBASE_ICC
+#define ACTSCALIBBASE_MEASUREMENTCALIBRATORBASE_ICC
 
-#include <format>
 namespace ActsTrk::detail {
-
-template <std::size_t Dim, typename trajectory_t, typename pos_t, typename cov_t>
+template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t, typename pos_t, typename cov_t>
     inline void MeasurementCalibratorBase::setState(const ProjectorType projector,
                                                     const pos_t& locpos, const cov_t& cov,
                                                     Acts::SourceLink link,
-                                                    TrackState_t<trajectory_t>& trackState) const {
+                                                    proxy_t& trackState) const {
       static_assert(Dim>0 && Dim <= 3, "Wrong measurement dimension");
       trackState.setUncalibratedSourceLink(std::move(link));
       trackState.allocateCalibrated(Dim);
@@ -17,5 +17,36 @@ template <std::size_t Dim, typename trajectory_t, typename pos_t, typename cov_t
       trackState.template calibrated<Dim>() = locpos.template cast<double>();
       trackState.template calibratedCovariance<Dim>() = cov.template cast<double>();
   }
+template <Acts::PointerConcept Ptr_t>
+    inline Acts::SourceLink MeasurementCalibratorBase::pack(const Ptr_t& measurement) {
+        if (!measurement) {
+            return Acts::SourceLink{SourceLink_t{}};
+        }
+        return Acts::SourceLink{SourceLink_t{measurement}};
+    }
+
+  inline MeasurementCalibratorBase::SourceLink_t 
+      MeasurementCalibratorBase::unpackBase(const Acts::SourceLink& sl) {
+      return sl.template get<SourceLink_t>();
+  }
+  inline SourceLinkType MeasurementCalibratorBase::getType(const Acts::SourceLink& sl) {
+      const auto& atlasSL = sl.template get<SourceLink_t>();
+      return std::visit([](const auto& visitSl) -> SourceLinkType {
+          using SL_t = std::decay_t<decltype(visitSl)>;
+          if constexpr (std::is_same_v<SL_t, const xAOD::UncalibratedMeasurement*>) {
+              return SourceLinkType::xAODUnCalibMeas;
+          } else if constexpr(std::is_same_v<SL_t, const Trk::PrepRawData*>) {
+              return SourceLinkType::TrkPrepRawData;
+          } else if constexpr (std::is_same_v<SL_t, const Trk::MeasurementBase*>) {
+              return SourceLinkType::TrkMeasurement;
+          } else {
+              return SourceLinkType::nTypes;
+          }
+
+      }, atlasSL);
+    
+  }
 } // namespace ActsTrk::detail
+
+#endif
 

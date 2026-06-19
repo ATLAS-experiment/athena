@@ -98,7 +98,7 @@ namespace CP
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
       for (const xAOD::IParticle *particle : *particles)
       {
         asg::AcceptData acceptData (&m_accept);

@@ -85,7 +85,7 @@ class FPGATrackSimConstGenAlgo : public AthAlgorithm
         StatusCode finalize() override;
 
 	// Execute does not do anything for this alg. This class does not process events, everything is done in initalize
-	StatusCode execute() override;
+	StatusCode execute(const EventContext& ctx) override;
 
         StatusCode bookHistograms();
 

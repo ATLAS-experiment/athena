@@ -3,8 +3,7 @@
 # art-type: grid
 # art-include: main/Athena
 # art-memory: 8192
-# art-cores: 8
-# art-runtime: 86400
+# art-athena-mt: 8
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
@@ -17,7 +16,6 @@ set -e
 echo "$ArtInFile"
 fileList="${ArtInFile// /,}"
 echo $fileList
-
 DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/dcube_config_G4Validation.xml"
 INPUT_EVNT_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1"
 

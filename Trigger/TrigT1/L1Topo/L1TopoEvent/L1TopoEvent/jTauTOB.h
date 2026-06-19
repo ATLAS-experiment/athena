@@ -1,13 +1,16 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef JTAUTOB_H
 #define JTAUTOB_H
 
-#include <iostream>
 
 #include "L1TopoEvent/BaseTOB.h"
 #include "L1TopoEvent/Heap.h"
 
+#include <string>
+#include <string_view>
+#include <iosfwd>
+#include <cstdint>
 
 namespace TCS {
    
@@ -17,13 +20,13 @@ namespace TCS {
    public:
       
       // default constructor
-      jTauTOB(uint32_t roiWord = 0, const std::string& tobName = "jTauTOB");
+      jTauTOB(uint32_t roiWord = 0, std::string_view tobName = "jTauTOB");
 
       // copy constructor
       jTauTOB(const jTauTOB & jtau);
 
       // constructor with initial values
-      jTauTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, const std::string& tobName = "jTauTOB" );
+      jTauTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, std::string_view tobName = "jTauTOB" );
 
       // destructor
       virtual ~jTauTOB();

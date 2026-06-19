@@ -19,9 +19,9 @@ namespace fastjet{
 
 class DiTauCandidateData {
  public:
-  xAOD::DiTauJet* xAODDiTau;
-  xAOD::DiTauJetContainer* xAODDiTauContainer;
-  xAOD::DiTauJetAuxContainer* diTauAuxContainer;
+  xAOD::DiTauJet* xAODDiTau{};
+  xAOD::DiTauJetContainer* xAODDiTauContainer{};
+  xAOD::DiTauJetAuxContainer* diTauAuxContainer{};
 
   const xAOD::Jet* seed{};
   const xAOD::JetContainer* seedContainer{};

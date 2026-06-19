@@ -32,7 +32,6 @@
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsInterop/Logger.h"
 
@@ -84,24 +83,24 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
     m_trkMeasCalibrator = detail::TrkMeasurementCalibrator{};
     m_trkMeasSurfAcc = detail::TrkMeasSurfaceAccessor{m_ATLASConverterTool.get()};
 
-    Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::TrkMeasurement)];
+    Gx2FitterExtension_t& configureMe = m_gx2fExtensions[Acts::toUnderlying(detail::SourceLinkType::TrkMeasurement)];
     configureMe = extensionTemplate;
-    configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<MutableTrackStateBackend>>(&m_trkMeasCalibrator);
+    configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<TrackState_t>>(&m_trkMeasCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_trkMeasSurfAcc);
   }
   /// Configure the fit extensions for Trk::PrepRawData fits
   {
     m_prdCalibrator = detail::TrkPrepRawDataCalibrator{m_ATLASConverterTool.get(), m_ROTcreator.get()};
     m_prdSurfaceAcc = detail::TrkPrepRawDataSurfaceAcc{m_ATLASConverterTool.get()};
-    Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::TrkPrepRawData)];
+    Gx2FitterExtension_t& configureMe = m_gx2fExtensions[Acts::toUnderlying(detail::SourceLinkType::TrkPrepRawData)];
     configureMe = extensionTemplate;
-    configureMe.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<MutableTrackStateBackend>>(&m_prdCalibrator);
+    configureMe.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<TrackState_t>>(&m_prdCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&m_prdSurfaceAcc);
   }
   {
     m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()};
     /// Needs to be filled with live.
-    Gx2FitterExtension_t& configureMe = m_gx2fExtensions[static_cast<int>(detail::SourceLinkType::xAODUnCalibMeas)];
+    Gx2FitterExtension_t& configureMe = m_gx2fExtensions[Acts::toUnderlying(detail::SourceLinkType::xAODUnCalibMeas)];
     configureMe = extensionTemplate;
     configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
     configureMe.calibrator.connect<&detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
@@ -137,7 +136,7 @@ GlobalChiSquareFitterTool::Gx2FitterOptions_t
     propagationOption.maxTargetSkipping = m_option_maxNavSurfaces;
     // Set the Gx2Fitter options
     return Gx2FitterOptions_t{tgContext, mfContext, calContext, 
-                              m_gx2fExtensions[static_cast<int>(slType)], 
+                              m_gx2fExtensions[Acts::toUnderlying(slType)], 
                               std::move(propagationOption),
                               surface, m_option_includeScat, 
                               m_option_includeELoss,
@@ -201,8 +200,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   auto result = fit(trackSourceLinks, initialParamsWithHypothesis, gx2fOptions, tracks);
 
   return m_ATLASConverterTool->convertFitResult(ctx, result,
-                                                Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
-                                                detail::SourceLinkType::TrkMeasurement);
+                                                Trk::TrackInfo::TrackFitter::GlobalChi2Fitter);
 }
 
 // fit a set of MeasurementBase objects
@@ -251,8 +249,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
   return m_ATLASConverterTool->convertFitResult(ctx, result,
-                                                Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
-                                                detail::SourceLinkType::TrkMeasurement);
+                                                Trk::TrackInfo::TrackFitter::GlobalChi2Fitter);
 }
 
 // fit a set of PrepRawData objects
@@ -298,14 +295,13 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(const EventContext& c
   auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
 
   return m_ATLASConverterTool->convertFitResult(ctx, result,
-                                  Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
-                                  detail::SourceLinkType::TrkPrepRawData);
+                                  Trk::TrackInfo::TrackFitter::GlobalChi2Fitter);
 }
 
 // fit a set of PrepRawData objects
 // --------------------------------
 std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(    
-    const std::vector<ATLASUncalibSourceLink>& measList,
+    const std::vector<const xAOD::UncalibratedMeasurement*>& measList,
     const Acts::BoundTrackParameters& initialParams,
     const Acts::GeometryContext& tgContext,
     const Acts::MagneticFieldContext& mfContext,
@@ -327,7 +323,7 @@ std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
   sourceLinks.reserve(measList.size());
   std::ranges::transform(measList, std::back_inserter(sourceLinks), 
                          [](const xAOD::UncalibratedMeasurement* meas){
-                             return detail::xAODUncalibMeasCalibrator::pack(meas);
+                             return detail::MeasurementCalibratorBase::pack(meas);
                          });
 
   Gx2FitterOptions_t gx2fOptions = configureFit(tgContext, mfContext, calContext,
@@ -406,8 +402,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   // Perform the fit
   auto result = fit(trackSourceLinks, initialParams, gx2fOptions, tracks);
   return m_ATLASConverterTool->convertFitResult(ctx, result,
-                                Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
-                                detail::SourceLinkType::TrkMeasurement);
+                                Trk::TrackInfo::TrackFitter::GlobalChi2Fitter);
 }
 
 // extend a track fit to include an additional set of PrepRawData objects
@@ -489,8 +484,7 @@ std::unique_ptr<Trk::Track> GlobalChiSquareFitterTool::fit(
   auto result = fit(trackSourceLinks, initialParamsWithHypothesis, gx2fOptions, tracks);
       
   return m_ATLASConverterTool->convertFitResult(ctx, result,
-                                Trk::TrackInfo::TrackFitter::GlobalChi2Fitter,
-                                detail::SourceLinkType::TrkMeasurement);
+                                Trk::TrackInfo::TrackFitter::GlobalChi2Fitter);
 }
 
 std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
@@ -501,7 +495,7 @@ std::unique_ptr<MutableTrackContainer> GlobalChiSquareFitterTool::fit(
     const Acts::CalibrationContext& calContext,
     const Acts::Surface& targetSurface) const {
   
-  std::vector<ATLASUncalibSourceLink> sourceLinks;
+  std::vector<const xAOD::UncalibratedMeasurement*> sourceLinks;
   sourceLinks.reserve(6);
   
   for (const xAOD::SpacePoint* sp : seed.sp()) {

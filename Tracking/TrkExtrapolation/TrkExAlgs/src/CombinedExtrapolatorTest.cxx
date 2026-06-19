@@ -58,10 +58,9 @@ StatusCode Trk::CombinedExtrapolatorTest::finalize()
 
 //================ Execution ====================================================
 
-StatusCode Trk::CombinedExtrapolatorTest::execute()
+StatusCode Trk::CombinedExtrapolatorTest::execute(const EventContext& ctx)
 {
   msg(MSG::INFO) << " execute()" << endmsg;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // retrieve outer boundary
   if (!m_outerBoundary) {
     m_trackingGeometry = m_extrapolator->trackingGeometry();

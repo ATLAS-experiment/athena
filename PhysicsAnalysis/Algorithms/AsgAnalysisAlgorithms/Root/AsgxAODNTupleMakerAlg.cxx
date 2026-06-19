@@ -53,7 +53,7 @@ namespace CP {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode AsgxAODNTupleMakerAlg::execute() {
+   StatusCode AsgxAODNTupleMakerAlg::execute(const EventContext& /*ctx*/) {
 
       ATH_CHECK( m_processorList.process (*evtStore()) );
 

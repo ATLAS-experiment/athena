@@ -22,10 +22,10 @@ StatusCode FillFilterValues::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode FillFilterValues::execute(const EventContext& ctx) {
 #ifdef HEPMC3
+StatusCode FillFilterValues::execute(const EventContext& ctx) {
   // Check that the collection isn't empty
-  const size_t nEvents = events_const()->size();
+  const size_t nEvents = events_const(ctx)->size();
   if (nEvents == 0) {
     ATH_MSG_WARNING("McEventCollection is empty");
     return StatusCode::SUCCESS;
@@ -38,15 +38,15 @@ StatusCode FillFilterValues::execute(const EventContext& ctx) {
   // write filter values into xAOD::EventInfo
   
   SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtHT(m_mcFilterHTKey, ctx);
-  if (event_const()->attribute<HepMC3::DoubleAttribute>(HepMC::Str::filterHT) != NULL){
-     std::shared_ptr<HepMC3::DoubleAttribute>  fHT =   event_const()->attribute<HepMC3::DoubleAttribute>(HepMC::Str::filterHT); 
+  if (event_const(ctx)->attribute<HepMC3::DoubleAttribute>(HepMCStr::filterHT) != NULL){
+     std::shared_ptr<HepMC3::DoubleAttribute>  fHT =   event_const(ctx)->attribute<HepMC3::DoubleAttribute>(HepMCStr::filterHT); 
      double fHT_double = fHT->value();
      dec_filtHT(0) = fHT_double;
   }
 
   SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtMET(m_mcFilterMETKey, ctx);
-  if (event_const()->attribute<HepMC3::DoubleAttribute>(HepMC::Str::filterMET) != NULL){
-    std::shared_ptr<HepMC3::DoubleAttribute>  fMET =   event_const()->attribute<HepMC3::DoubleAttribute>(HepMC::Str::filterMET);
+  if (event_const(ctx)->attribute<HepMC3::DoubleAttribute>(HepMCStr::filterMET) != NULL){
+    std::shared_ptr<HepMC3::DoubleAttribute>  fMET =   event_const(ctx)->attribute<HepMC3::DoubleAttribute>(HepMCStr::filterMET);
     double fMET_double = fMET->value();
     dec_filtMET(0) = fMET_double;
   }
@@ -54,9 +54,13 @@ StatusCode FillFilterValues::execute(const EventContext& ctx) {
   // Post-hoc debug printouts
   ATH_MSG_DEBUG("Copied HepMC filter values to EventInfo");
 
-#endif
   return StatusCode::SUCCESS;
 }
+#else
+StatusCode FillFilterValues::execute(const EventContext& /*ctx*/) {
+  return StatusCode::SUCCESS;
+}
+#endif
 
 #endif
 

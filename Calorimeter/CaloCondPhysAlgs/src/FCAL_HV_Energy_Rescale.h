@@ -26,7 +26,7 @@ class FCAL_HV_Energy_Rescale: public AthAlgorithm
 
   // Athena algorithm's Hooks
   virtual StatusCode  initialize() override;
-  virtual StatusCode  execute() override;
+  virtual StatusCode  execute(const EventContext& ctx) override;
   virtual StatusCode  stop ATLAS_NOT_THREAD_SAFE() override;//due to AthenaAttributeList ctor  
 
 private:

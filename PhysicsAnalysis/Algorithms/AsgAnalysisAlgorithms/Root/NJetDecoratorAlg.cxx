@@ -29,15 +29,15 @@ namespace CP
 
 
   StatusCode NJetDecoratorAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     // Take care of the weight (which is the only thing depending on systematics)
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::EventInfo* systEvtInfo = nullptr;
-      ANA_CHECK( m_eventInfoHandle.retrieve(systEvtInfo, sys));
+      ANA_CHECK( m_eventInfoHandle.retrieve(systEvtInfo, sys, ctx));
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK(m_jetsHandle.retrieve(jets, sys));
+      ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
 
       int jet_n = 0;
       for (const xAOD::Jet *jet : *jets)

@@ -35,7 +35,7 @@ class ATLAS_NOT_THREAD_SAFE GetLCDeadMaterial : public AthAlgorithm {
     GetLCDeadMaterial(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~GetLCDeadMaterial();
     virtual StatusCode initialize();
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx);
     virtual StatusCode finalize();
 
   private:

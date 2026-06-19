@@ -30,7 +30,7 @@ class LArParamsFromStdNtuple : public AthAlgorithm
   StatusCode initialize() ; 
 
   /// implements IAlgorithm::execute()  : Does nothing
-  StatusCode execute() {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
 
   /// IAlgorithm::finalize() : Where the action takes place...
   StatusCode finalize(){return StatusCode::SUCCESS;}

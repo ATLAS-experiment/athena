@@ -64,7 +64,7 @@ StatusCode CaloCellEnergyCorr2Ntuple::initialize()
 
 }
 //__________________________________________________________________________
-StatusCode CaloCellEnergyCorr2Ntuple::execute()
+StatusCode CaloCellEnergyCorr2Ntuple::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloCellEnergyCorr2Ntuple execute()" );
 

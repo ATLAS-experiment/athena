@@ -30,14 +30,17 @@ class ActsTrackingGeometryTool : public extends<AthAlgTool, ActsTrk::ITrackingGe
       StatusCode initialize() override;
 
       using base_class::base_class;
-
+      /** @copydoc ActsTrk::ITrackingGeometryTool::trackingGeometry */
       virtual std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() const override;
-
+      /** @copydoc ActsTrk::ITrackingGeometryTool::getGeometryContext */
       virtual const ActsTrk::GeometryContext& getGeometryContext(const EventContext& ctx) const override;
-
+      /** @copydoc ActsTrk::ITrackingGeometryTool::getNominalGeometryContext */
       virtual const ActsTrk::GeometryContext& getNominalGeometryContext() const override;
-
+      /** @copydoc ActsTrk::ITrackingGeometryTool::surfaceIdMap */
       virtual const ActsTrk::DetectorElementToActsGeometryIdMap* surfaceIdMap() const override;
+      /** @copydoc ActsTrk::ITrackingGeometryTool::getEnvelope */
+      virtual const Acts::TrackingVolume* getEnvelope(const ActsTrk::SystemEnvelope envType) const override;
+
     private:
       /** @brief Creates and popules the DetectorElement -> Acts::Surface geo identifier map from the geometry service */
       std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> createDetectorElementToGeoIdMap() const;

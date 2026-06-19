@@ -37,7 +37,7 @@ namespace CP
 
 
   StatusCode SysListDumperAlg ::
-  execute ()
+  execute (const EventContext& /*ctx*/)
   {
     if (!m_firstEvent)
     {

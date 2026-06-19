@@ -137,11 +137,40 @@ for fn in unknown_args:
   if name:
     args.postInclude += [fn]
     unknown_args.remove(fn)
-
-
 args.postConfig += [x[4:] for x in unknown_args if x.startswith("cfg.")]
 if any([not x.startswith("cfg.") for x in unknown_args]):
   raise KeyError("Unknown flags: " + " ".join([x for x in unknown_args if not x.startswith("cfg.")]))
+
+if len(args.postInclude):
+  # call setup methods if any exist in the postIncludes
+  from AthenaCommon.Configurable import ConfigurableCABehavior
+  with ConfigurableCABehavior():
+    from AthenaCommon.Utils.unixtools import FindFile
+    import ast
+
+    def load_function(file_path, function_name):
+      with open(file_path, "r", encoding="utf-8") as f:
+        source = f.read()
+      tree = ast.parse(source, filename=file_path)
+      for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == function_name:
+          # Create a module containing only this function
+          mod = ast.Module(body=[node], type_ignores=[])
+          # Compile it
+          code = compile(mod, filename=file_path, mode="exec")
+          namespace = {}
+          # Execute only the function definition
+          exec(code, namespace)
+          return namespace[function_name]
+    for fn in args.postInclude:
+      name = FindFile( os.path.expanduser( os.path.expandvars( fn ) ), optionsPath, os.R_OK )
+      if not name:
+        name = FindFile( os.path.basename( fn ), optionsPath, os.R_OK )
+        if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
+      func = load_function(name,"setup")
+      if func:
+        func(flags)
+
 if not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
   log.info("No steering flags specified, turning on all phase 1 systems (trex,efex,jfex,gfex,topo)")
   flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
@@ -274,35 +303,7 @@ cfg = MainServicesCfg(flags)
 
 log.setLevel(logging.INFO)
 
-if len(args.postInclude):
-  # call setup methods if any exist in the postIncludes
-  from AthenaCommon.Configurable import ConfigurableCABehavior
-  with ConfigurableCABehavior():
-    from AthenaCommon.Utils.unixtools import FindFile
-    import ast
 
-    def load_function(file_path, function_name):
-      with open(file_path, "r", encoding="utf-8") as f:
-        source = f.read()
-      tree = ast.parse(source, filename=file_path)
-      for node in tree.body:
-        if isinstance(node, ast.FunctionDef) and node.name == function_name:
-          # Create a module containing only this function
-          mod = ast.Module(body=[node], type_ignores=[])
-          # Compile it
-          code = compile(mod, filename=file_path, mode="exec")
-          namespace = {}
-          # Execute only the function definition
-          exec(code, namespace)
-          return namespace[function_name]
-    for fn in args.postInclude:
-      name = FindFile( os.path.expanduser( os.path.expandvars( fn ) ), optionsPath, os.R_OK )
-      if not name:
-        name = FindFile( os.path.basename( fn ), optionsPath, os.R_OK )
-        if not name: raise RuntimeError( 'plugin file %s can not be found' % fn )
-      func = load_function(name,"setup")
-      if func:
-        func(flags)
 
 
 flags.lock()

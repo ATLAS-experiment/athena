@@ -92,9 +92,17 @@ const EventContext& AthAlgorithm::getContext() const {
 }
 
 bool AthAlgorithm::filterPassed() const {
-  return execState( Gaudi::Hive::currentContext() ).filterPassed();
+  return filterPassed( Gaudi::Hive::currentContext() );
+}
+
+bool AthAlgorithm::filterPassed(const EventContext& ctx) const {
+  return execState( ctx ).filterPassed();
 }
 
 void AthAlgorithm::setFilterPassed( bool state ) const {
-  execState( Gaudi::Hive::currentContext() ).setFilterPassed(state);
+  setFilterPassed( state, Gaudi::Hive::currentContext() );
+}
+
+void AthAlgorithm::setFilterPassed( bool state, const EventContext& ctx ) const {
+  execState( ctx ).setFilterPassed(state);
 }

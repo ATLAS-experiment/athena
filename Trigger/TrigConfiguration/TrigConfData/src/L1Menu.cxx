@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/L1Menu.h"
@@ -250,18 +250,17 @@ TrigConf::L1Menu::thresholdNames() const
 }
 
 
-const std::vector<std::shared_ptr<TrigConf::L1Threshold>> &
-TrigConf::L1Menu::thresholds(const std::string & typeName) const
+const std::vector<std::shared_ptr<TrigConf::L1Threshold>>&
+TrigConf::L1Menu::thresholds(std::string_view typeName) const
 {
-   try {
-      return m_thresholdsByType.at(typeName);
-   }
-   catch(std::exception & ex) {
-      std::cerr << "No threshold type '" << typeName << "' defined in the thresholds section of the L1 menu" << std::endl;
-      throw;
-   }
+  const auto it = m_thresholdsByType.find(typeName);
+  if (it == m_thresholdsByType.end()) {
+    std::cerr << "No threshold type '" << typeName
+              << "' defined in the thresholds section of the L1 menu" << std::endl;
+    throw std::out_of_range("No threshold type defined in the thresholds section of the L1 menu");
+  }
+  return it->second;
 }
-
 
 std::vector<std::shared_ptr<TrigConf::L1Threshold>> 
 TrigConf::L1Menu::thresholds() const
@@ -275,32 +274,39 @@ TrigConf::L1Menu::thresholds() const
 }
 
 
-const TrigConf::L1Threshold &
-TrigConf::L1Menu::threshold(const std::string & thresholdName) const
+const TrigConf::L1Threshold&
+TrigConf::L1Menu::threshold(std::string_view thresholdName) const
 {
-   try {
-      return * m_thresholdsByName.at(thresholdName);
-   }
-   catch(std::exception & ex) {
-      std::cerr << "No threshold '" << thresholdName << "' defined in the thresholds section of the L1 menu" << std::endl;
-      throw;
-   }
+  const auto it = m_thresholdsByName.find(thresholdName);
+  if (it == m_thresholdsByName.end()) {
+    std::cerr << "No threshold '" << thresholdName
+              << "' defined in the thresholds section of the L1 menu" << std::endl;
+    throw std::out_of_range("No threshold defined in the thresholds section of the L1 menu");
+  }
+
+  return *it->second;
 }
 
 /** Access to L1Threshold by type and mapping index */
-const TrigConf::L1Threshold &
-TrigConf::L1Menu::threshold(const std::string &typeName, unsigned int mapping) const
+const TrigConf::L1Threshold&
+TrigConf::L1Menu::threshold(std::string_view typeName, unsigned int mapping) const
 {
-   try
-   {
-      return *m_thresholdsByTypeAndMapping.at(typeName).at(mapping);
-   }
-   catch (std::exception &ex)
-   {
-      std::cerr << "No threshold of type '" << typeName << "' with mapping " << mapping
-                << " defined in the thresholds section of the L1 menu" << std::endl;
-      throw;
-   }
+  const auto typeIt = m_thresholdsByTypeAndMapping.find(typeName);
+  if (typeIt == m_thresholdsByTypeAndMapping.end()) {
+    std::cerr << "No threshold of type '" << typeName
+              << "' defined in the thresholds section of the L1 menu" << std::endl;
+    throw std::out_of_range("No threshold type defined in the thresholds section of the L1 menu");
+  }
+
+  const auto mappingIt = typeIt->second.find(mapping);
+  if (mappingIt == typeIt->second.end()) {
+    std::cerr << "No threshold of type '" << typeName
+              << "' with mapping " << mapping
+              << " defined in the thresholds section of the L1 menu" << std::endl;
+    throw std::out_of_range("No threshold mapping defined in the thresholds section of the L1 menu");
+  }
+
+  return *mappingIt->second;
 }
 
 const TrigConf::L1ThrExtraInfo &

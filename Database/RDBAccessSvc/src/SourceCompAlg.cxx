@@ -63,7 +63,7 @@ StatusCode SourceCompAlg::initialize()
   return result;
 }
 
-StatusCode SourceCompAlg::execute()
+StatusCode SourceCompAlg::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG(" in execute()");
   return StatusCode::SUCCESS;

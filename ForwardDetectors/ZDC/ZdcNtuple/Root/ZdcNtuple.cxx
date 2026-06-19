@@ -74,6 +74,8 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
 
   declareProperty( "TrackSelectionTool", m_selTool );
 
+  trackLimitReject = false;
+
   m_zdcAnalysisTool.declarePropertyFor (this, "zdcAnalysisTool");
   
 }
@@ -1146,7 +1148,7 @@ void ZdcNtuple::processMCEventCollection(){
   /******************************************
    * Get the McEventCollection (input)
    ******************************************/
-  SG::ReadHandle<McEventCollection> mcEventCollection (m_mcEventCollectionName, getContext());
+  SG::ReadHandle<McEventCollection> mcEventCollection (m_mcEventCollectionName);
   if (!mcEventCollection.isValid()){
     ANA_MSG_ERROR("Could not retrieve HepMC with key:" << m_mcEventCollectionName.key());
     return;
@@ -1174,16 +1176,8 @@ void ZdcNtuple::processMCEventCollection(){
   ******************************************/  
   for (unsigned int cntr = 0; cntr < mcEventCollection->size(); ++cntr){
     const HepMC::GenEvent *genEvt = (*mcEventCollection)[cntr];
-#ifdef HEPMC3
     for (const auto &vertex : genEvt->vertices()){
       for (const auto &particle : vertex->particles_in()){
-#else
-    for (const auto &vertex : genEvt->vertex_range()){
-      for (auto ip = vertex->particles_in_const_begin();
-           ip != vertex->particles_in_const_end();
-           ++ip) {
-        auto particle = *ip;
-#endif
         t_ZdcTruthParticlePosx.push_back(vertex->position().x());
         t_ZdcTruthParticlePosy.push_back(vertex->position().y());
         t_ZdcTruthParticlePosz.push_back(vertex->position().z());

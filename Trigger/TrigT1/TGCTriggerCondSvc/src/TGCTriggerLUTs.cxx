@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGCTriggerCondSvc/TGCTriggerLUTs.h"
@@ -15,7 +15,7 @@ TGCTriggerLUTs::~TGCTriggerLUTs()
 }
 
 
-std::string TGCTriggerLUTs::getData(int cwtype, std::string file) const {
+std::string TGCTriggerLUTs::getData(int cwtype, const std::string &file) const {
   auto itr = m_datamap[cwtype].find(file);
   if (itr == m_datamap[cwtype].end()) {
     return "";

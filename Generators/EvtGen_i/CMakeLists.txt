@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EvtGen_i )
@@ -17,7 +17,7 @@ endif()
 #The EvtGen 2.0+ is modern enough so the external libraries from EvtGen can be used as is.
 find_package( EvtGen  COMPONENTS EvtGen EvtGenExternal )
 find_package( Pythia8 )
-find_package( ROOT COMPONENTS Core PyROOT Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()

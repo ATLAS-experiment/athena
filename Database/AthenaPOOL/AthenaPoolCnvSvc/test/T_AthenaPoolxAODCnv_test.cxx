@@ -149,6 +149,7 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   taddr.setToken (std::move (token));
   pObj = nullptr;
   assert (cnv.createObj (&taddr, pObj).isFailure());
+  testsvc.m_pers1 = nullptr;
 }
 
 

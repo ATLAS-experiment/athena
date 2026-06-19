@@ -125,14 +125,14 @@ StatusCode JpsiExample::initialize(){
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode JpsiExample::execute() {
+StatusCode JpsiExample::execute(const EventContext& ctx) {
 
 
   ATH_MSG_DEBUG("in execute()");
 
   // Read in the Jpsis from StoreGate 
   const xAOD::VertexContainer*    jpsiContainer(0);
-  SG::ReadHandle<xAOD::VertexContainer> handle(m_JpsiCandidatesKey);
+  SG::ReadHandle<xAOD::VertexContainer> handle(m_JpsiCandidatesKey, ctx);
   jpsiContainer = handle.cptr();
 
   if (!jpsiContainer) {

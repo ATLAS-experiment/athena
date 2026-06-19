@@ -52,11 +52,7 @@ protected:
 TEST_F(GenParticleGenericFilter_test, allPropertiesUnset_expectParticlePass) {
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
-#ifdef HEPMC3
  HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr();
-#else
-  const HepMC::GenParticle part{};
-#endif
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
 
@@ -66,11 +62,7 @@ TEST_F(GenParticleGenericFilter_test, minEtaGreaterThanParticleEta_expectNoPass)
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*sin(150.*M_PI/180.), 0.0, 1.0*cos(150.*M_PI/180.), 1.0); // rho=1, eta=-1.32
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -81,12 +73,7 @@ TEST_F(GenParticleGenericFilter_test, minEtaSmallerThanParticleEta_expectPass) {
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*sin(135.*M_PI/180.), 0.0, 1.0*cos(135.*M_PI/180.), 1.0); // rho=1, eta=-0.88
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
-
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
 
@@ -96,11 +83,7 @@ TEST_F(GenParticleGenericFilter_test, maxEtaSmallerThanParticleEta_expectNoPass)
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*sin(30.*M_PI/180.), 0.0, 1.0*cos(30.*M_PI/180.), 1.0); // rho=1, eta=+1.32
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -111,11 +94,7 @@ TEST_F(GenParticleGenericFilter_test, maxEtaGreaterThanParticleEta_expectPass) {
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*sin(45.*M_PI/180.), 0.0, 1.0*cos(45.*M_PI/180.), 1.0); // rho=1, eta=+0.88
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
@@ -127,11 +106,7 @@ TEST_F(GenParticleGenericFilter_test, particlePositiveEtaWithinEtaRange_expectPa
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*sin(45.*M_PI/180.), 0.0, 1.0*cos(45.*M_PI/180.), 1.0); // rho=1, eta=+0.88
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
@@ -143,11 +118,7 @@ TEST_F(GenParticleGenericFilter_test, particleNegativeEtaWithinEtaRange_expectPa
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*sin(135.*M_PI/180.), 0.0, 1.0*cos(135.*M_PI/180.), 1.0); // rho=1, eta=-0.88
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
@@ -159,11 +130,7 @@ TEST_F(GenParticleGenericFilter_test, particlePositiveEtaOutsideEtaRange_expectN
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*sin(45.*M_PI/180.), 0.0, 1.0*cos(45.*M_PI/180.), 1.0); // rho=1, eta=+0.88
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -175,11 +142,7 @@ TEST_F(GenParticleGenericFilter_test, particleNegativeEtaOutsideEtaRange_expectN
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*sin(135.*M_PI/180.), 0.0, 1.0*cos(135.*M_PI/180.), 1.0); // rho=1, eta=-0.88
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -190,11 +153,7 @@ TEST_F(GenParticleGenericFilter_test, minPhiGreaterThanParticlePhi_expectNoPass)
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*cos(-1.1), 1.0*sin(-1.1), 0.0, 1.0); // rho=1, phi=-1.1
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -205,11 +164,7 @@ TEST_F(GenParticleGenericFilter_test, maxPhiSmallerThanParticlePhi_expectNoPass)
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(1.0*cos(1.1), 1.0*sin(1.1), 0.0, 1.0); // rho=1, phi=1.1
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -219,11 +174,7 @@ TEST_F(GenParticleGenericFilter_test, pdgDoesntMatchParticle_expectNoPass) {
   EXPECT_TRUE( m_filterTool->setProperty("ParticlePDG", "[123,34,5678]").isSuccess() );
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr();
-#else
-  const HepMC::GenParticle part{};
-#endif
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
 
@@ -233,11 +184,7 @@ TEST_F(GenParticleGenericFilter_test, pdgMatchesParticle_expectPass) {
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom(0, 0, 0, 0);
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom, /*pdg id=*/34);
-#else
-  const HepMC::GenParticle part(mom, /*pdg id=*/34);
-#endif
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
 
@@ -247,11 +194,7 @@ TEST_F(GenParticleGenericFilter_test, lastPdgMatchesParticle_expectPass) {
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom(0, 0, 0, 0);
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom, /*pdg id=*/5678);
-#else
-  const HepMC::GenParticle part(mom, /*pdg id=*/5678);
-#endif
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
 
@@ -261,11 +204,7 @@ TEST_F(GenParticleGenericFilter_test, minMomentumSmallerThanParticleMom_expectPa
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(100.1, 0., 0., 0.);
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
@@ -276,11 +215,7 @@ TEST_F(GenParticleGenericFilter_test, minMomentumGreaterThanParticleMom_expectNo
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(99.9, 0., 0., 0.);
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -291,11 +226,7 @@ TEST_F(GenParticleGenericFilter_test, maxMomentumGreaterThanParticleMom_expectPa
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(0.001, 0.001, 99.9, 0.);
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
@@ -306,12 +237,7 @@ TEST_F(GenParticleGenericFilter_test, maxMomentumSmallerThanParticleMom_expectNo
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(0.001, 0.001, 100.1, 0.);
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
-
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
 
@@ -322,11 +248,7 @@ TEST_F(GenParticleGenericFilter_test, particleMomentumWithinMomRange_expectPass)
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(0.001, 101., 0.001, 0.);
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_TRUE( m_filterTool->pass(part) );
 }
@@ -338,11 +260,7 @@ TEST_F(GenParticleGenericFilter_test, particleMomentumBelowMomRange_expectNoPass
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(0.001, 99.9, 0.001, 0.);
-#ifdef HEPMC3
   HepMC::ConstGenParticlePtr part=HepMC::newConstGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -354,11 +272,7 @@ TEST_F(GenParticleGenericFilter_test, particleMomentumAboveMomRange_expectNoPass
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector mom4(0.001, 0.001, 1000.1, 0.);
-#ifdef HEPMC3
   HepMC::GenParticlePtr part=HepMC::newGenParticlePtr(mom4, /*pdg id=*/11);
-#else
-  const HepMC::GenParticle part(mom4, /*pdg id=*/11);
-#endif
 
   ASSERT_FALSE( m_filterTool->pass(part) );
 }
@@ -369,19 +283,11 @@ TEST_F(GenParticleGenericFilter_test, productionVertexInsideApplicableRadius_exp
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
   const HepMC::FourVector pos(0.001, 0.001, 0.001, 0.);
-#ifdef HEPMC3
   HepMC3::GenVertexPtr vtx = HepMC::newGenVertexPtr(pos);
   auto part = HepMC::newGenParticlePtr(); 
   vtx->add_particle_out(part);
 
   ASSERT_TRUE( m_filterTool->pass(part) );
-#else
-  HepMC::GenVertex vtx(pos);
-  auto part = HepMC::newGenParticlePtr(); // need dynamic allocation as GenVertex takes ownership
-  vtx.add_particle_out(part);
-
-  ASSERT_TRUE( m_filterTool->pass(*part) );
-#endif
 }
 
 
@@ -394,17 +300,10 @@ TEST_F(GenParticleGenericFilter_test, productionVertexOutsideApplicableRadiusAnd
   auto part = HepMC::newGenParticlePtr(mom4, /*pdg id=*/11); // need dynamic allocation as GenVertex takes ownership
 
   const HepMC::FourVector pos(0.001, 100., 0.001, 0.);
-#ifdef HEPMC3
   HepMC3::GenVertexPtr vtx = HepMC::newGenVertexPtr(pos);
   vtx->add_particle_out(part);
 
   ASSERT_TRUE( m_filterTool->pass(part) );
-#else
-  HepMC::GenVertex vtx(pos);
-  vtx.add_particle_out(part);
-
-  ASSERT_TRUE( m_filterTool->pass(*part) );
-#endif
 }
 
 
@@ -417,17 +316,10 @@ TEST_F(GenParticleGenericFilter_test, productionVertexWithinApplicableRadiusAndU
   auto part = HepMC::newGenParticlePtr(mom4, /*pdg id=*/11); // need dynamic allocation as GenVertex takes ownership
 
   const HepMC::FourVector pos(0.001, 9.9, 0.001, 0.);
-#ifdef HEPMC3
   HepMC3::GenVertexPtr vtx = HepMC::newGenVertexPtr(pos);
   vtx->add_particle_out(part);
 
   ASSERT_FALSE( m_filterTool->pass(part) );
-#else
-  HepMC::GenVertex vtx(pos);
-  vtx.add_particle_out(part);
-
-  ASSERT_FALSE( m_filterTool->pass(*part) );
-#endif
 }
 
 
@@ -441,17 +333,9 @@ TEST_F(GenParticleGenericFilter_test, productionVertexFarForwardInsideApplicable
   auto part = HepMC::newGenParticlePtr(mom4, /*pdg id=*/11); // need dynamic allocation as GenVertex takes ownership
 
   const HepMC::FourVector pos(0.001, 0.001, 9999., 0.);
-#ifdef HEPMC3
   HepMC3::GenVertexPtr vtx = HepMC::newGenVertexPtr(pos);
   vtx->add_particle_out(part);
   ASSERT_FALSE( m_filterTool->pass(part) );
-#else
-  HepMC::GenVertex vtx(pos);
-  vtx.add_particle_out(part);
-
-
-  ASSERT_FALSE( m_filterTool->pass(*part) );
-#endif
 }
 
 
@@ -465,17 +349,10 @@ TEST_F(GenParticleGenericFilter_test, productionVertexFarForwardOutsideApplicabl
   auto part = HepMC::newGenParticlePtr(mom4, /*pdg id=*/11); // need dynamic allocation as GenVertex takes ownership
 
   const HepMC::FourVector pos(1.1, 0.001, 9999., 0.);
-#ifdef HEPMC3
   HepMC3::GenVertexPtr vtx = HepMC::newGenVertexPtr(pos);
   vtx->add_particle_out(part);
 
   ASSERT_TRUE( m_filterTool->pass(part) );
-#else
-  HepMC::GenVertex vtx(pos);
-  vtx.add_particle_out(part);
-
-  ASSERT_TRUE( m_filterTool->pass(*part) );
-#endif
 }
 
 } // namespace ISFTesting

@@ -66,7 +66,7 @@ StatusCode FPGATrackSimMapMakerAlg::initialize()
 //                          MAIN EXECUTE ROUTINE                             //
 ///////////////////////////////////////////////////////////////////////////////
 
-StatusCode FPGATrackSimMapMakerAlg::execute()
+StatusCode FPGATrackSimMapMakerAlg::execute(const EventContext& /*ctx*/)
 {
     // Read inputs
     bool done = false;

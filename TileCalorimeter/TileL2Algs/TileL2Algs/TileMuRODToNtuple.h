@@ -50,7 +50,7 @@ class TileMuRODToNtuple: public AthAlgorithm {
     virtual ~TileMuRODToNtuple();
 
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
   private:

@@ -60,8 +60,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonScaleFactorTestAlg::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};        
+    StatusCode MuonScaleFactorTestAlg::execute(const EventContext& ctx) {
         // Retrieve the muons:
         SG::ReadHandle<xAOD::MuonContainer> muons{m_sgKey, ctx};       
         // Retrieve the EventInfo:

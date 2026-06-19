@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TBEvent/TBBeamDetector.h"
 #include "TBEvent/TBMWPCRaw.h"
-
-
-#include <vector>
 
 
 //////////////////////////////////
@@ -23,7 +20,7 @@ TBMWPCRaw::TBMWPCRaw()
   //  this->setUpStores();
 }
 
-TBMWPCRaw::TBMWPCRaw(const std::string& thisBPCName)
+TBMWPCRaw::TBMWPCRaw(std::string_view thisBPCName)
   : TBBeamDetector(thisBPCName),
     m_isX(false)
 {

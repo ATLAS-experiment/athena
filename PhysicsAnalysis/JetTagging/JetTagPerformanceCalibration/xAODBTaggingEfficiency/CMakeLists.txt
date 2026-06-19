@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODBTaggingEfficiency )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
 find_package( onnxruntime )
 
 atlas_add_root_dictionary( xAODBTaggingEfficiencyLib xAODBTaggingEfficiencyLibDictSource ROOT_HEADERS xAODBTaggingEfficiency/TruthTagResults.h xAODBTaggingEfficiency/BTaggingToolUtil.h Root/LinkDef.h )
@@ -38,7 +38,7 @@ atlas_add_dictionary( xAODBTaggingEfficiencyDict
 # Add tests scripts for Athena, AthAnalysis and AnalysisBase
 atlas_add_executable(
   BTaggingToolsTester
-  util/BTaggingToolsTester.cxx 
+  util/BTaggingToolsTester.cxx
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib
 )

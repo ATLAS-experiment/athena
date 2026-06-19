@@ -20,7 +20,6 @@ namespace MuonPRDTest {
         unsigned int truth_vertices{0}, truth_parts{0};
         for (auto it : *truthContainer) {
             const HepMC::GenEvent* subEvent = it;
-#ifdef HEPMC3
             for (const auto& vertex : subEvent->vertices()) {
                 m_Truth_vertex.push_back(vertex->position());
                 m_Truth_vertexId.push_back(vertex->status());
@@ -37,30 +36,6 @@ namespace MuonPRDTest {
                 m_Truth_particleEnd_vertex_id.push_back(end_vertex ? end_vertex->status() : -1);
                 ++truth_parts;
             }            
-#else
-            // Vertex
-            HepMC::ConstGenEventVertexRange vertex_range = subEvent->vertex_range();
-            for (auto vit : vertex_range) {
-                const HepMC::GenVertex* vertex = vit;
-                m_Truth_vertex.push_back(vertex->position());
-                m_Truth_vertexId.push_back(vertex->id());
-                ++truth_vertices;
-            }
-            // Particle
-            HepMC::ConstGenEventParticleRange particle_range = subEvent->particle_range();
-            for (auto pit : particle_range) {
-                const HepMC::GenParticle* particle = pit;
-                m_truthParticleP4.push_back(particle->momentum());
-                m_Truth_particlePdg_id.push_back(particle->pdg_id());
-                m_Truth_particleStatus.push_back(particle->status());
-                m_Truth_particleBarcode.push_back(HepMC::barcode(particle));
-                auto production_vertex = particle->production_vertex();
-                m_Truth_particleProduction_vertex_id.push_back(production_vertex ? production_vertex->id() : -1);
-                auto end_vertex = particle->end_vertex();
-                m_Truth_particleEnd_vertex_id.push_back(end_vertex ? end_vertex->id() : -1);
-                ++truth_parts;
-            }
-#endif
 
         }
         m_Truth_nVertices = truth_vertices;

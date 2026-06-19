@@ -32,7 +32,7 @@ namespace Trig{
 
             /// Athena algorithm's Hooks
             StatusCode  initialize();
-            StatusCode  execute();
+            StatusCode  execute(const EventContext& ctx);
 
             StatusCode  finalize();
 

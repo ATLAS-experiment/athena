@@ -31,7 +31,7 @@ class ZdcByteStreamTester: public AthAlgorithm
 public:
 	ZdcByteStreamTester(const std::string& name, ISvcLocator* pSvcLocator);
 
-	virtual StatusCode execute() override;
+	virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
 	typedef std::map<unsigned int, const ZdcDigits*> ZdcDigitsMap;

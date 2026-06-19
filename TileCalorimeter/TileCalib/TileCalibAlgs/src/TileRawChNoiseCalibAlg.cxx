@@ -314,9 +314,8 @@ StatusCode TileRawChNoiseCalibAlg::FirstEvt_initialize() {
 }
 
 /// Main method
-StatusCode TileRawChNoiseCalibAlg::execute() {
+StatusCode TileRawChNoiseCalibAlg::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus* dqStatus = SG::makeHandle (m_dqStatusKey, ctx).get();
 
   bool empty(false); // to add all StatusCodes

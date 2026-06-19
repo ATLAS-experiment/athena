@@ -34,4 +34,7 @@ def createPFConfigFlags():
     #Toggle thinning on and off
     pfConfigFlags.addFlag("PF.doThinning",True)
 
+    #Toggle usage of new unified tools
+    pfConfigFlags.addFlag("PF.useUnified",False)
+
     return pfConfigFlags

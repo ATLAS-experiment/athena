@@ -33,7 +33,7 @@ StatusCode TRTCondRead::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TRTCondRead::execute()
+StatusCode TRTCondRead::execute(const EventContext& /*ctx*/)
 {
 
     // Write text file.

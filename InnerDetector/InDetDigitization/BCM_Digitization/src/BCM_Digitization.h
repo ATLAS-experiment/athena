@@ -22,7 +22,7 @@ class BCM_Digitization : public AthAlgorithm {
 
   /** Basic algorithm methods */
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual bool isClonable() const override final { return true; }
 
  private:

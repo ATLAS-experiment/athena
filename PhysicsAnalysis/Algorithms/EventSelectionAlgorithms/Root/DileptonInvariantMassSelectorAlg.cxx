@@ -31,7 +31,7 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode DileptonInvariantMassSelectorAlg::execute() {
+  StatusCode DileptonInvariantMassSelectorAlg::execute(const EventContext& ctx) {
     // accessors
     static const SG::ConstAccessor<float> acc_pt_dressed("pt_dressed");
     static const SG::ConstAccessor<float> acc_eta_dressed("eta_dressed");
@@ -41,7 +41,7 @@ namespace CP {
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_decoration.setBool(*evtInfo, 0, sys);
@@ -53,11 +53,11 @@ namespace CP {
       // retrieve the electron container
       const xAOD::IParticleContainer *electrons = nullptr;
       if (m_electronsHandle)
-	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
       // retrieve the electron container
       const xAOD::IParticleContainer *muons = nullptr;
       if (m_muonsHandle)
-	ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+	ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
 
       // apply the requested selection
       PtEtaPhiEVector lepton0, lepton1;

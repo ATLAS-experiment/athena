@@ -173,3 +173,35 @@ def MuonCombinedTrackSummaryToolCfg(
 
     result.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return result
+
+@AccumulatorCache
+def CombinedSummaryToolCfg(flags, name="CombinedTrackSummaryTool",**kwargs):
+    result = ComponentAccumulator()
+
+    kwargs.setdefault("doHolesInDet", flags.Detector.GeometryITk or flags.Detector.GeometryID)
+    if flags.Detector.GeometryITk:
+        if kwargs["doHolesInDet"]:
+            from InDetConfig.InDetTrackSummaryHelperToolConfig import ITkTrackSummaryHelperToolCfg
+            ITkSummaryHelperTool = result.popToolsAndMerge(ITkTrackSummaryHelperToolCfg(flags))
+        else:
+            from InDetConfig.InDetTrackSummaryHelperToolConfig import ITkSummaryHelperNoHoleSearchCfg
+            ITkSummaryHelperTool = result.popToolsAndMerge(ITkSummaryHelperNoHoleSearchCfg(flags))
+        kwargs.setdefault("InDetSummaryHelperTool", ITkSummaryHelperTool)
+    elif flags.Detector.GeometryID:
+        if kwargs["doHolesInDet"]:
+            from InDetConfig.InDetTrackSummaryHelperToolConfig import InDetTrackSummaryHelperToolCfg
+            InDetSummaryHelperTool = result.popToolsAndMerge(InDetTrackSummaryHelperToolCfg(flags))
+        else:
+            from InDetConfig.InDetTrackSummaryHelperToolConfig import InDetSummaryHelperNoHoleSearchCfg
+            InDetSummaryHelperTool = result.popToolsAndMerge(InDetSummaryHelperNoHoleSearchCfg(flags))
+        kwargs.setdefault("InDetSummaryHelperTool", InDetSummaryHelperTool)
+    #### muon configuration
+    if flags.Detector.GeometryMuon:
+        from MuonConfig.MuonRecToolsConfig import MuonTrackSummaryHelperToolCfg
+        kwargs.setdefault("MuonSummaryHelperTool", result.popToolsAndMerge(MuonTrackSummaryHelperToolCfg(flags)))
+
+    kwargs.setdefault("AddDetailedMuonSummary", flags.Detector.GeometryMuon)
+    
+    result.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
+
+    return result

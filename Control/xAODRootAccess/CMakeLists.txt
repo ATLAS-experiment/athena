@@ -10,7 +10,7 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 # External dependencies:
-find_package( ROOT COMPONENTS Core Tree RIO Net MathCore ROOTNTuple ROOTNTupleUtil VDT ROOTTPython )
+find_package( ROOT COMPONENTS Core Tree RIO Net MathCore ROOTNTuple ROOTNTupleUtil ROOTTPython )
 find_package( Python COMPONENTS Development )
 
 # Generate a CINT dictionary source file:

@@ -42,7 +42,7 @@ StatusCode jFEXDriver::finalize()
 }
 
 
-StatusCode jFEXDriver::execute() {
+StatusCode jFEXDriver::execute(const EventContext& ctx) {
     
     
     // STEP 1 - Set up the jFEXSysSim
@@ -60,7 +60,7 @@ StatusCode jFEXDriver::execute() {
     
     // STEP 5 - Write the completed jFEXOutputCollection into StoreGate (move the local copy in memory)
     std::unique_ptr<jFEXOutputCollection> local_jFEXOutputCollection = std::unique_ptr<jFEXOutputCollection>(my_jFEXOutputCollection);
-    SG::WriteHandle<LVL1::jFEXOutputCollection> jFEXOutputCollectionSG(m_jFEXOutputCollectionSGKey);
+    SG::WriteHandle<LVL1::jFEXOutputCollection> jFEXOutputCollectionSG(m_jFEXOutputCollectionSGKey, ctx);
     ATH_CHECK(jFEXOutputCollectionSG.record(std::move(local_jFEXOutputCollection)));
     
     return StatusCode::SUCCESS;

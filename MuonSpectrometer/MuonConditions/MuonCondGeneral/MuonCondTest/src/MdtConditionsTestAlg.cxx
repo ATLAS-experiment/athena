@@ -19,11 +19,11 @@ StatusCode MdtConditionsTestAlg::initialize() {
 }
 
 // Execute
-StatusCode MdtConditionsTestAlg::execute() {   
+StatusCode MdtConditionsTestAlg::execute(const EventContext& ctx) {   
 
     ATH_MSG_INFO("Calling execute");
    
-    SG::ReadCondHandle<MdtCondDbData> readHandle{m_readKey};
+    SG::ReadCondHandle<MdtCondDbData> readHandle{m_readKey, ctx};
     const MdtCondDbData* readCdo{*readHandle};
     if (!readCdo) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");

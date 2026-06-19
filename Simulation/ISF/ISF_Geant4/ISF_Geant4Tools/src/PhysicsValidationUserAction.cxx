@@ -233,16 +233,9 @@ namespace G4UA{
 	if (currentGenParticle)  { // mc truth known
 	  while (currentGenParticle && vtx ) {
 	    int pdgID=currentGenParticle->pdg_id();
-#ifdef HEPMC3
 	    const HepMC::GenParticlePtr  genmom = vtx->particles_in().size()>0 ? vtx->particles_in().front() : nullptr;
 	    if ( genmom && pdgID!=genmom->pdg_id() ) m_gen++;
 	    else if (vtx->particles_out().size()>0 && currentGenParticle!=vtx->particles_out().front()) m_gen++;
-
-#else
-	    HepMC::GenParticlePtr genmom = vtx->particles_in_size()>0 ? *(vtx->particles_in_const_begin()) : nullptr;
-	    if ( genmom && pdgID!=genmom->pdg_id() ) m_gen++;
-	    else if (vtx->particles_out_size()>0 && currentGenParticle!=*(vtx->particles_out_const_begin())) m_gen++;
-#endif
 	    vtx = genmom ? genmom->production_vertex() : nullptr;
 	    currentGenParticle = genmom;
 	  }

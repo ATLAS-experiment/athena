@@ -33,12 +33,12 @@ namespace CP
 
 
   StatusCode KinematicHistAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *input = nullptr;
-      ANA_CHECK (m_inputHandle.retrieve (input, sys));
+      ANA_CHECK (m_inputHandle.retrieve (input, sys, ctx));
 
       auto histIter = m_hist.find (sys);
       if (histIter == m_hist.end())

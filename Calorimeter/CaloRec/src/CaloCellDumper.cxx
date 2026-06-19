@@ -59,10 +59,9 @@ StatusCode CaloCellDumper::finalize() {
 
 
 
-StatusCode CaloCellDumper::execute() {
+StatusCode CaloCellDumper::execute(const EventContext& ctx) {
 
   bool badCompare = false;
-  const EventContext& ctx = getContext();
   
   SG::ReadHandle<CaloCellContainer> cells{m_key,ctx};
   

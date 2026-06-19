@@ -68,13 +68,13 @@ class TauGNNDataLoader : public FlavorTagInference::SaltModelEDMLoaderBase, publ
             std::string input_layer_hits;
             std::string output_node_tau;
             std::string output_node_jet;
-            size_t n_max_tracks;
-            size_t n_max_clusters; 
-            float max_dr_cluster;
-            size_t n_max_hits; 
-            bool doVertexCorrection; 
-            bool trackClassification; 
-            bool useTRT;
+            size_t n_max_tracks{};
+            size_t n_max_clusters{}; 
+            float max_dr_cluster{};
+            size_t n_max_hits{}; 
+            bool doVertexCorrection{}; 
+            bool trackClassification{}; 
+            bool useTRT{};
             std::string hits_decor_name;
         };
         TauGNNDataLoader(

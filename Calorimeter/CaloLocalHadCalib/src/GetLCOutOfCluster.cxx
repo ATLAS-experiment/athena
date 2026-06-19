@@ -273,9 +273,9 @@ StatusCode GetLCOutOfCluster::finalize()
 
 //###############################################################################
 
-StatusCode GetLCOutOfCluster::execute()
+StatusCode GetLCOutOfCluster::execute(const EventContext& ctx)
 {
-  SG::ReadHandle<xAOD::CaloClusterContainer> cc (m_clusterCollName);
+  SG::ReadHandle<xAOD::CaloClusterContainer> cc (m_clusterCollName, ctx);
 
   // total calib hit energy of all clusters 
   double eCalibTot(0.); 

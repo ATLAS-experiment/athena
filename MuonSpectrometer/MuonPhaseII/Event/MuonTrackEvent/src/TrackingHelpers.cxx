@@ -1,12 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonTrackEvent/TrackingHelpers.h"
+
 #include "MuonPatternEvent/MuonPatternContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
-
-
+#include "xAODMuonPrepData/UtilFunctions.h"
+#include "ActsEvent/Decoration.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "FourMomUtils/xAODP4Helpers.h"
+
 namespace{
   using PrdLink_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
   using PrdLinkVec_t = std::vector<PrdLink_t>;
@@ -72,6 +75,30 @@ namespace MuonR4{
        return surface.geometryId().withSensitive(0).withBoundary(0);
     }
 
+    const xAOD::UncalibratedMeasurement* firstMeasurement(const xAOD::MuonSegment& segment,
+                                                          const bool skipOutlier) {
+        const std::size_t n = nMeasurements(segment);
+        for (std::size_t i = 0; i < n ; ++i) {
+            if (!skipOutlier || !isOutlierMeasurement(segment, i)) {
+                return getMeasurement(segment, i);
+            }
+        }
+        return nullptr;
+    }
+
+    Amg::Vector3D atFirstSurface(const Acts::GeometryContext& gctx,
+                                 const xAOD::MuonSegment& segment,
+                                 const bool skipOutlier) {
+        const xAOD::UncalibratedMeasurement* meas{firstMeasurement(segment, skipOutlier)};
+        assert(meas != nullptr);
+        const Acts::Surface& surface = xAOD::muonSurface(meas);
+
+        const Acts::MultiIntersection isect = surface.intersect(gctx,
+                                                                segment.position(),
+                                                                segment.direction(),
+                                                                Acts::BoundaryTolerance::Infinite());
+        return isect.at(0).position();
+    }
 
     bool ParticleSorter::operator()(const xAOD::IParticle* a,
                                     const xAOD::IParticle* b) const {

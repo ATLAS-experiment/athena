@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -713,7 +713,7 @@ BOOST_AUTO_TEST_CASE( stringFromCollection ) {
   auto fill = [&]() {
     //! [stringFromCollection]
     struct StringInObject {
-      int layer;
+      int layer{};
       std::string name;
       const std::string& getName() const { return name; }
     };

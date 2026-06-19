@@ -115,7 +115,7 @@ StatusCode CpmErrors::initialize()
 
 // Execute
 
-StatusCode CpmErrors::execute()
+StatusCode CpmErrors::execute(const EventContext& ctx)
 {
   if ( !msgLvl(MSG::INFO) ) return StatusCode::SUCCESS;
   msg(MSG::INFO);
@@ -459,7 +459,6 @@ void CpmErrors::cpmTobRoiErrors(const CpmTobRoiCollection* /*crCollection*/,
 
 void CpmErrors::errorMessage(const std::string& errmsg)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   int eventNumber = ctx.eventID().event_number();
   msg(MSG::INFO) << "Event " << eventNumber
                  << " has error " << errmsg << endmsg;

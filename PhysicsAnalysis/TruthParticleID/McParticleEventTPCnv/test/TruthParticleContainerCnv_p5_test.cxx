@@ -91,7 +91,6 @@ void test1 (SGTest::TestStore& store)
   std::cout << "test1\n";
 
   auto evcoll = std::make_unique<McEventCollection>();
-#ifdef HEPMC3
   //Signal process id is obsolete in HepMC3
   evcoll->push_back (std::make_unique<HepMC::GenEvent>());
   evcoll->back()->set_event_number(4);
@@ -107,25 +106,6 @@ void test1 (SGTest::TestStore& store)
     gv->add_particle_out (gp);
   }
   ge->add_vertex (gv);
-#else
-  evcoll->push_back (std::make_unique<HepMC::GenEvent>(1000082, 4));
-  evcoll->push_back (std::make_unique<HepMC::GenEvent>(1000087, 5));
-
-  auto ge = std::make_unique<HepMC::GenEvent>(1000083, 7);
-  auto gv = std::make_unique<HepMC::GenVertex>();
-  std::vector<HepMC::GenParticle*> parts;
-  for (size_t i = 0; i < 5; i++) {
-    auto gp = std::make_unique<HepMC::GenParticle>
-      (HepMC::FourVector (i*10 + 1.5,
-                          i*10 + 2.5,
-                          i*10 + 3.5,
-                          i*10 + 4.5),
-       i+20);
-    parts.push_back (gp.get());
-    gv->add_particle_out (gp.release());
-  }
-  ge->add_vertex (gv.release());
-#endif
   evcoll->push_back (std::move(ge));
   store.record (std::move(evcoll), "GEN_AOD");
   // create a dummy EventContext

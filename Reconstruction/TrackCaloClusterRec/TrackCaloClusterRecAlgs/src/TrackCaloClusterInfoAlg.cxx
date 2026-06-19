@@ -27,17 +27,17 @@ StatusCode TrackCaloClusterInfoAlg::initialize() {
 }
   
 
-StatusCode TrackCaloClusterInfoAlg::execute()  {  
+StatusCode TrackCaloClusterInfoAlg::execute(const EventContext& ctx)  {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   // Prepare a TrackCaloClusterInfo map : 
-  SG::WriteHandle<TrackCaloClusterInfo> tccInfo(m_tccInfoHandle);    
+  SG::WriteHandle<TrackCaloClusterInfo> tccInfo(m_tccInfoHandle, ctx);    
   ATH_CHECK( tccInfo.record( std::make_unique<TrackCaloClusterInfo>() ) );
 
   // Retrieve the input containers 
-  SG::ReadHandle<xAOD::CaloClusterContainer> clusterContainer(m_inputClustersHandle);
-  SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_inputTracksHandle);
-  SG::ReadHandle<xAOD::VertexContainer> vertices(m_inputVertexHandle);
+  SG::ReadHandle<xAOD::CaloClusterContainer> clusterContainer(m_inputClustersHandle, ctx);
+  SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_inputTracksHandle, ctx);
+  SG::ReadHandle<xAOD::VertexContainer> vertices(m_inputVertexHandle, ctx);
 
   tccInfo->allClusters = &*clusterContainer;
   tccInfo->allTracks = &*tracks;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -47,7 +47,7 @@ int main() {
    xAOD::TEvent event1( xAOD::TEvent::kBranchAccess );
 
    // Set up slimming rules for some containers:
-   event1.setAuxItemList( "ElectronsAux.", "eta.phi.pt.m" );
+   event1.setAuxItemList( "ElectronsAux.", "eta.phi.pt" );
    event1.setAuxItemList( "MuonsAux.", "eta.phi" );
 
    // Connect an input file to the event:
@@ -107,7 +107,6 @@ int main() {
    static const std::set< std::string > expectedBranches1{
       "Electrons", "ElectronsAuxDyn.pt",
       "ElectronsAuxDyn.eta", "ElectronsAuxDyn.phi",
-      "ElectronsAuxDyn.m",
       "Muons", "MuonsAuxDyn.eta", "MuonsAuxDyn.phi" };
    if( static_cast< size_t >( branches->GetEntries() ) !=
        expectedBranches1.size() ) {

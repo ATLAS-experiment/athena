@@ -49,7 +49,7 @@ StatusCode OverlapRemovalTestAlg::initialize()
 //-----------------------------------------------------------------------------
 // Execute
 //-----------------------------------------------------------------------------
-StatusCode OverlapRemovalTestAlg::execute()
+StatusCode OverlapRemovalTestAlg::execute(const EventContext& /*ctx*/)
 {
   // Electrons
   const xAOD::ElectronContainer* electrons = 0;

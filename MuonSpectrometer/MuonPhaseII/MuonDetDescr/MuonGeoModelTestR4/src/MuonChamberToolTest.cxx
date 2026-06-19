@@ -269,8 +269,7 @@ namespace MuonGMR4 {
                     ATH_CHECK(testReadoutEle(gctx, *detEle, envelope, *boundVol));
                     break; 
                 } default: {
-                    ATH_MSG_ERROR("Who came up with putting "<<ActsTrk::to_string(readOut->detectorType())
-                                <<" into the MS");
+                    ATH_MSG_ERROR("Who came up with putting "<<readOut->detectorType()<<" into the MS");
                     return StatusCode::FAILURE;
                 }
             }
@@ -469,7 +468,7 @@ namespace MuonGMR4 {
             const Acts::Volume& chamberBounds = *chamberBoundsVec[chIdx];
             if (m_dumpObjs) {
                 saveEnvelope(gctx, std::format("Chamber_{:}{:}{:}{:}{:}", 
-                                                ActsTrk::to_string(chamber.detectorType()),
+                                                chamber.detectorType(),
                                                 chName(chamber.chamberIndex()),
                                                 Acts::abs(chamber.stationEta()),
                                                 chamber.stationEta() > 0 ? 'A' : 'C',

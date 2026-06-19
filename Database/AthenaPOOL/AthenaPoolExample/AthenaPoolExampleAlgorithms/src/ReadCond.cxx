@@ -24,7 +24,7 @@ StatusCode ReadCond::initialize() {
    return StatusCode::SUCCESS;
 }
 //___________________________________________________________________________
-StatusCode ReadCond::execute() {
+StatusCode ReadCond::execute(const EventContext& /*ctx*/) {
    ATH_MSG_DEBUG("in execute()");
 
    if (detStore()->contains<ExampleHitContainer>("PedestalWriteData")) {

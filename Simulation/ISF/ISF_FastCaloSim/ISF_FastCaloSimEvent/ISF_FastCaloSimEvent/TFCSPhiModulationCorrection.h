@@ -26,7 +26,7 @@ class TFCSPhiModulationCorrection
 
   virtual ~TFCSPhiModulationCorrection();
 
-  void load_phi_modulation(std::string filename, long unsigned int layer_index,
+  void load_phi_modulation(const std::string & filename, long unsigned int layer_index,
                            float eta_min, float eta_max,
                            float energy_shift = 1.0);
 

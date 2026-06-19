@@ -3,7 +3,7 @@ test2
 test_clear
 test_copy
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-copyAux           WARNING AthContainers/Root/AuxElement.cxx:587: skipped unlocked decoration idec (3)
+getCopyAuxIDs      WARNING AthContainers/Root/AuxStoreInternal.cxx:895: skipped unlocked decoration during copy idec (3)
 test_standalone
 test_decoration
 test_private_store

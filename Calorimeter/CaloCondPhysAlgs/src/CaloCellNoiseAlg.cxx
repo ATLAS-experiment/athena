@@ -123,7 +123,7 @@ StatusCode CaloCellNoiseAlg::stop()
 }
 
 //__________________________________________________________________________
-StatusCode CaloCellNoiseAlg::execute()
+StatusCode CaloCellNoiseAlg::execute(const EventContext& ctx)
 {
   if (m_readNtuple) return StatusCode::SUCCESS;
 
@@ -146,7 +146,6 @@ StatusCode CaloCellNoiseAlg::execute()
 
   }
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   unsigned int lumiblock = ctx.eventID().lumi_block();
 
   ATH_MSG_DEBUG ( " lumiblock " << lumiblock );
@@ -188,7 +187,7 @@ StatusCode CaloCellNoiseAlg::execute()
       totalNoise = noiseH.cptr();
     }
 
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
 
     for (int i=0;i<m_ncell;i++) {

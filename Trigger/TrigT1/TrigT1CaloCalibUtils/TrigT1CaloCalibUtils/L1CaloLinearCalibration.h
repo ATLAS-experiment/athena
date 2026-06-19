@@ -33,7 +33,7 @@ class L1CaloLinearCalibration : public AthAlgorithm
     virtual ~L1CaloLinearCalibration();
 
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
  private:

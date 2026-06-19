@@ -1,6 +1,8 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "L1TopoEvent/eTauTOB.h"
+
+#include <iostream>
 
 thread_local TCS::Heap<TCS::eTauTOB> TCS::eTauTOB::fg_heap("eTau");
 
@@ -9,12 +11,12 @@ const unsigned int TCS::eTauTOB::g_nBitsEta = 9;
 const unsigned int TCS::eTauTOB::g_nBitsPhi = 7;
 
 // default constructor
-TCS::eTauTOB::eTauTOB(uint32_t roiWord, const std::string& tobName) :
+TCS::eTauTOB::eTauTOB(uint32_t roiWord, std::string_view tobName) :
    BaseTOB( roiWord,tobName )
 {}
 
 // constructor with initial values
-TCS::eTauTOB::eTauTOB(unsigned int et, int eta, unsigned int phi, inputTOBType_t tobType, uint32_t roiWord, const std::string& tobName) :
+TCS::eTauTOB::eTauTOB(unsigned int et, int eta, unsigned int phi, inputTOBType_t tobType, uint32_t roiWord, std::string_view tobName) :
   BaseTOB( roiWord,tobName )
    , m_Et( sizeCheck(et, nBitsEt()) )
    , m_eta( sizeCheck(eta, nBitsEta()) )

@@ -50,7 +50,7 @@ class TrigDecisionChecker : public AthAlgorithm
   
   // IAlgorithm virtual methods to implement
   StatusCode initialize();//!< std Gaudi initialize method
-  StatusCode execute(); //!< std Gaudi execute method -> use TrigDecisionTool to 'look' at the trigger data
+  StatusCode execute(const EventContext& ctx); //!< std Gaudi execute method -> use TrigDecisionTool to 'look' at the trigger data
   StatusCode finalize();//!< std Gaudi finalize method
   
  private:

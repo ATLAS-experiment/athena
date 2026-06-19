@@ -52,11 +52,10 @@ namespace InDet
   }
 
 
-  StatusCode InDetSecVtxFinder::execute()
+  StatusCode InDetSecVtxFinder::execute(const EventContext& ctx)
   {
     m_numEventsProcessed++;
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::WriteHandle<xAOD::VertexContainer> outputVertices (m_outputSecondaryVertices, ctx);
 

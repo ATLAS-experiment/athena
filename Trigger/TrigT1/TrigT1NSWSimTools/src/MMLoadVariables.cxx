@@ -50,19 +50,7 @@ StatusCode MMLoadVariables::getTruthInfo(const EventContext& ctx,
               }
             }//muentry loop
             } // trackRecordCollection is not null
-#ifdef HEPMC3
             vertex_tmp = subEvent->vertices().front()->position();
-#else
-            int l=0;
-            for(const auto vit : subEvent->vertex_range())
-            {
-              if(l!=0){break;}//get first vertex of iteration, may want to change this
-              l++;
-              const HepMC::GenVertex *vertex1 = vit;
-              const HepMC::FourVector& position = vertex1->position();
-              vertex_tmp.SetXYZ(position.x(),position.y(),position.z());
-            }//end vertex loop
-#endif
           }
           j++;
 

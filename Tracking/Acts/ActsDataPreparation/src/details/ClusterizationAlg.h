@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_CLUSTERIZATIONALG_H
@@ -21,7 +21,6 @@ template <typename IClusteringTool, bool useCache>
 class ClusterizationAlg : public AthReentrantAlgorithm {
 public:
     using RDOContainer = typename IClusteringTool::RDOContainer;
-    using RawDataCollection = typename RDOContainer::base_value_type;
     using ClusterContainer = typename IClusteringTool::ClusterContainer;
     using ClusterAuxContainer = typename IClusteringTool::ClusterAuxContainer;
     using IDHelper = typename IClusteringTool::IDHelper;
@@ -82,7 +81,5 @@ private:
 };
 
 } // namespace ActsTrk
-
-#include "ClusterizationAlg.icc"
 
 #endif

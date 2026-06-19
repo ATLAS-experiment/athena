@@ -19,7 +19,7 @@ namespace CP {
         MuonSelectionAlg(const std::string& name, ISvcLocator* svcloc);
 
         virtual StatusCode initialize();
-        virtual StatusCode execute();
+        virtual StatusCode execute(const EventContext& ctx);
 
     private:
         std::string m_inputMuons;

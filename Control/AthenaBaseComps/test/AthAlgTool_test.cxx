@@ -39,7 +39,7 @@ class MyAlg
 {
 public:
   MyAlg (const std::string& name, ISvcLocator* svcLoc);
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 };
 
 
@@ -49,7 +49,7 @@ MyAlg::MyAlg  (const std::string& name, ISvcLocator* svcLoc)
 }
 
 
-StatusCode MyAlg::execute()
+StatusCode MyAlg::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

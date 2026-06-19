@@ -103,7 +103,7 @@ class GlobalChiSquareFitterTool
 
   //! fit a set of xAOD uncalibrated Measurements
   virtual std::unique_ptr<MutableTrackContainer> fit(
-      const std::vector<ATLASUncalibSourceLink>& clusterList,
+      const std::vector<const xAOD::UncalibratedMeasurement*>& clusterList,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
@@ -157,7 +157,10 @@ class GlobalChiSquareFitterTool
     using Gx2FitterExtension_t = Acts::Experimental::Gx2FitterExtensions<MutableTrackStateBackend>;
    
   private:
-   using TrackFitResult_t = IActsToTrkConverterTool::TrackFitResult_t;
+    /** @brief Abrivate the track state proxy */
+    using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
+    
+    using TrackFitResult_t = IActsToTrkConverterTool::TrackFitResult_t;
     /** @brief Calls the underlying Acts::Gx2Fitter for a given configuration of measurements
      *  @param sourceLinks: List of measurements to fit
      *  @param initialPars: Initial estimate of the track parameters 
@@ -183,7 +186,7 @@ class GlobalChiSquareFitterTool
    
     ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-    ToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
 
     ToolHandle<MuonR4::ISpacePointCalibrator> m_muonCalibrator{this, "MuonCalibrationTool", ""};
 

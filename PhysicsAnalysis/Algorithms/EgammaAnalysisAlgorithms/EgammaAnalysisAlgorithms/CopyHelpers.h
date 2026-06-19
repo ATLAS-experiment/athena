@@ -21,16 +21,11 @@ namespace CP
     template<>
     struct ShallowCopy<xAOD::EgammaContainer>
     {
-      /// \brief the type of the event store we use
-    public:
-      typedef std::decay<decltype(
-      *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
-
       static StatusCode
-      getCopy (MsgStream& msgStream, StoreType& store,
+      getCopy (MsgStream& msgStream, const EventContext& ctx,
                xAOD::EgammaContainer*& object,
                const xAOD::EgammaContainer *inputObject,
-               const std::string& outputName, const std::string& auxName)
+               const std::string& outputName)
       {
         // Set up a lambda for providing a msg(...) function.
         // Suppress thread-checker warning because this provides just a wrapper to MsgStream.
@@ -40,7 +35,7 @@ namespace CP
         };
 
         xAOD::IParticleContainer *subobject = nullptr;
-        if (!ShallowCopy<xAOD::IParticleContainer>::getCopy (msgStream, store, subobject, inputObject, outputName, auxName).isSuccess())
+        if (!ShallowCopy<xAOD::IParticleContainer>::getCopy (msgStream, ctx, subobject, inputObject, outputName).isSuccess())
           return StatusCode::FAILURE;
         if (!(object = dynamic_cast<xAOD::EgammaContainer*>(subobject)))
         {

@@ -10,7 +10,7 @@ find_package( xAODUtilities )
 atlas_add_library( xAODL0MuonCand
     xAODL0MuonCand/*.h xAODL0MuonCand/versions/*.h Root/*.cxx
     PUBLIC_HEADERS xAODL0MuonCand
-    LINK_LIBRARIES AthContainers AthLinks xAODBase xAODCore xAODMuonPrepData)
+    LINK_LIBRARIES AthContainers AthLinks xAODBase xAODCore xAODMuonPrepData CxxUtils)
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODL0MuonCand/selection.xml

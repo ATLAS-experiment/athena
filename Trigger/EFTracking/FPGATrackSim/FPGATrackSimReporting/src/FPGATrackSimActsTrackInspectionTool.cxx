@@ -1,10 +1,10 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "src/FPGATrackSimActsTrackInspectionTool.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include <format>
 
 FPGATrackSim::ActsTrackInspectionTool::ActsTrackInspectionTool(const std::string& algname,
@@ -26,44 +26,36 @@ FPGATrackSimActsEventTracks FPGATrackSim::ActsTrackInspectionTool::getActsTracks
         tracksContainer.trackStateContainer().visitBackwards(tp.tipIndex(), [&t_TrackMeasurements](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy& state) -> void
             {
                 if (state.hasUncalibratedSourceLink()) {
-                    try {
-                        std::reference_wrapper<const xAOD::UncalibratedMeasurement> measurementRef =
-                            std::cref(ActsTrk::getUncalibratedMeasurement(state.getUncalibratedSourceLink().get<ActsTrk::ATLASUncalibSourceLink>()));
-                        const xAOD::UncalibratedMeasurement& measurement = measurementRef.get();
-                        assert(static_cast<unsigned int>(measurement.type() < xAOD::UncalibMeasType::nTypes));
-
-                        if (measurement.type() == xAOD::UncalibMeasType::PixelClusterType) {
-                            const xAOD::PixelCluster* pixelCluster = static_cast<const xAOD::PixelCluster*>(&measurement);
-                            t_TrackMeasurements.emplace_front(std::make_unique<FpgaActsTrack::Measurement>(FpgaActsTrack::Measurement{
-                                pixelCluster->identifier(),
-                                "Pixel",
-                                {   pixelCluster->globalPosition().x(),
-                                    pixelCluster->globalPosition().y(),
-                                    pixelCluster->globalPosition().z() },
-                                state.typeFlags().test(Acts::TrackStateFlag::HasMeasurement),
-                                state.typeFlags().test(Acts::TrackStateFlag::IsOutlier),
-                                state.typeFlags().test(Acts::TrackStateFlag::IsHole),
-                                state.typeFlags().test(Acts::TrackStateFlag::HasMaterial),
-                                state.typeFlags().test(Acts::TrackStateFlag::IsSharedHit) }));
-                        }
-                        else if (measurement.type() == xAOD::UncalibMeasType::StripClusterType) {
-                            const xAOD::StripCluster* stripCluster = static_cast<const xAOD::StripCluster*>(&measurement);
-                            t_TrackMeasurements.emplace_front(std::make_unique<FpgaActsTrack::Measurement>(FpgaActsTrack::Measurement{
-                                stripCluster->identifier(),
-                                "Strip",
-                                {   stripCluster->globalPosition().x(),
-                                    stripCluster->globalPosition().y(),
-                                    stripCluster->globalPosition().z()},
-                                state.typeFlags().test(Acts::TrackStateFlag::HasMeasurement),
-                                state.typeFlags().test(Acts::TrackStateFlag::IsOutlier),
-                                state.typeFlags().test(Acts::TrackStateFlag::IsHole),
-                                state.typeFlags().test(Acts::TrackStateFlag::HasMaterial),
-                                state.typeFlags().test(Acts::TrackStateFlag::IsSharedHit) }));
-                        }
-
+                    const xAOD::UncalibratedMeasurement* measurement = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+                    if (measurement->type() == xAOD::UncalibMeasType::PixelClusterType) {
+                        const xAOD::PixelCluster* pixelCluster = static_cast<const xAOD::PixelCluster*>(measurement);
+                        t_TrackMeasurements.emplace_front(std::make_unique<FpgaActsTrack::Measurement>(FpgaActsTrack::Measurement{
+                            pixelCluster->identifier(),
+                            "Pixel",
+                            {   pixelCluster->globalPosition().x(),
+                                pixelCluster->globalPosition().y(),
+                                pixelCluster->globalPosition().z() },
+                            state.typeFlags().test(Acts::TrackStateFlag::HasMeasurement),
+                            state.typeFlags().test(Acts::TrackStateFlag::IsOutlier),
+                            state.typeFlags().test(Acts::TrackStateFlag::IsHole),
+                            state.typeFlags().test(Acts::TrackStateFlag::HasMaterial),
+                            state.typeFlags().test(Acts::TrackStateFlag::IsSharedHit) }));
                     }
-                    catch (const std::bad_any_cast&) {
+                    else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType) {
+                        const xAOD::StripCluster* stripCluster = static_cast<const xAOD::StripCluster*>(measurement);
+                        t_TrackMeasurements.emplace_front(std::make_unique<FpgaActsTrack::Measurement>(FpgaActsTrack::Measurement{
+                            stripCluster->identifier(),
+                            "Strip",
+                            {   stripCluster->globalPosition().x(),
+                                stripCluster->globalPosition().y(),
+                                stripCluster->globalPosition().z()},
+                            state.typeFlags().test(Acts::TrackStateFlag::HasMeasurement),
+                            state.typeFlags().test(Acts::TrackStateFlag::IsOutlier),
+                            state.typeFlags().test(Acts::TrackStateFlag::IsHole),
+                            state.typeFlags().test(Acts::TrackStateFlag::HasMaterial),
+                            state.typeFlags().test(Acts::TrackStateFlag::IsSharedHit) }));
                     }
+                    
                 }
             });
         t_actsTracks.emplace_back(std::make_unique<FpgaActsTrack>(FpgaActsTrack{ parameters, std::move(t_TrackMeasurements), tp.chi2(), tp.nDoF() }));

@@ -93,7 +93,7 @@ StatusCode ZdcRecV2::initialize()
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRecV2::execute()
+StatusCode ZdcRecV2::execute(const EventContext& /*ctx*/)
 {
 
   MsgStream mLog(msgSvc(), name());

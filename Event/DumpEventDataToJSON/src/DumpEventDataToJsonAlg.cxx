@@ -123,8 +123,8 @@ nlohmann::json DumpEventDataToJsonAlg::getActsData(const typename ActsTrk::Track
   return data;
 }
 
-StatusCode DumpEventDataToJsonAlg::execute() {
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+StatusCode DumpEventDataToJsonAlg::execute(const EventContext& ctx) {
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
   if (!eventInfo.isValid()) {
     ATH_MSG_WARNING("Did not find xAOD::EventInfo at " << m_eventInfoKey);
     return StatusCode::SUCCESS;
@@ -154,9 +154,9 @@ StatusCode DumpEventDataToJsonAlg::execute() {
 
   // ACTS
   if (!m_geometryContextKey.empty()){
-  auto tcHandles = m_trackContainerKeys.makeHandles();
+  auto tcHandles = m_trackContainerKeys.makeHandles(ctx);
   const ActsTrk::GeometryContext* gctx{};
-  ATH_CHECK(SG::get(gctx, m_geometryContextKey, Gaudi::Hive::currentContext()));
+  ATH_CHECK(SG::get(gctx, m_geometryContextKey, ctx));
 
   for ( SG::ReadHandle<ActsTrk::TrackContainer>& tcHandle: tcHandles ) {
     // Temporary debugging information

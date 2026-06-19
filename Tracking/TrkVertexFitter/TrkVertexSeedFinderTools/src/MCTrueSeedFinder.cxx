@@ -145,11 +145,7 @@ namespace Trk
       
       //get position of interaction from first non-zero vertex
       Amg::Vector3D vtxPosition;
-#ifdef HEPMC3
       auto Vert = myEvent->vertices().begin();
-#else
-      HepMC::GenEvent::vertex_const_iterator Vert = myEvent->vertices_begin();
-#endif
       msg(MSG::DEBUG) << "Retrieved position  x: " << (*Vert)->position().x()  << 
 	" y: " << (*Vert)->position().y() << 
 	" z: " << (*Vert)->position().z() << endmsg;

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -462,14 +462,14 @@ public:
   {
     static constexpr int s_numDoubleGaussianConstants = 4;
 
-    float noise[NCaloCells][NumGainStates];
+    float noise[NCaloCells][NumGainStates]{};
     //Given the low number of possible gain sates
 
-    float double_gaussian_constants[s_numDoubleGaussianConstants][NTileCells][NumGainStates];
+    float double_gaussian_constants[s_numDoubleGaussianConstants][NTileCells][NumGainStates]{};
 
-    CellNoiseProperties::carrier noise_properties;
+    CellNoiseProperties::carrier noise_properties{};
 
-    float luminosity;
+    float luminosity{};
 
     constexpr float get_noise(const int cell, const int gain) const
     {

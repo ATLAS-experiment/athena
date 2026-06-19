@@ -63,7 +63,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode TestMCASTTool::execute() {
+    StatusCode TestMCASTTool::execute(const EventContext& /*ctx*/) {
         //---\\---// Retrieving muons from container
         const xAOD::MuonContainer* muons = 0;
         ATH_CHECK(evtStore()->retrieve(muons, m_sgKey));

@@ -42,7 +42,7 @@ StatusCode ParentChildFilter::filterInitialize() {
 }
 
 
-StatusCode ParentChildFilter::filterEvent() {
+StatusCode ParentChildFilter::filterEvent(const EventContext& ctx) {
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto&  pitr: *genEvt) {
@@ -78,6 +78,6 @@ StatusCode ParentChildFilter::filterEvent() {
       }
     }
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

@@ -78,7 +78,7 @@ testBookTH1(TestHistogramming& hist){
 
 void
 testBookTH2(TestHistogramming& hist){
-  TH2F h2{"h2", "h2 title", 10, 0., 10., 10, 0., 10.};
+  const TH2F h2{"h2", "h2 title", 10, 0., 10., 10, 0., 10.};
 
   assert(hist.book(h2).isSuccess());
 
@@ -90,7 +90,7 @@ testBookTH2(TestHistogramming& hist){
 void
 testBookTH3(TestHistogramming& hist){
   std::cout << "testBookTH3\n";
-  TH3F h3{"h3", "h3 title", 10, 0., 10., 10, 0., 10., 10, 0., 10.};
+  const TH3F h3{"h3", "h3 title", 10, 0., 10., 10, 0., 10., 10, 0., 10.};
 
   assert(hist.book(h3).isSuccess());
 

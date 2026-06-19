@@ -478,7 +478,7 @@ StatusCode IDPerfMonEoverP::finalize()
 
 /////////////////////////////////////////////////////////////////
 // ATHENA EXECUTE METHOD:
-StatusCode IDPerfMonEoverP::execute()
+StatusCode IDPerfMonEoverP::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG( "Executing IDPerfMonEoverP" );
   StatusCode sc(StatusCode::SUCCESS);
@@ -492,7 +492,7 @@ StatusCode IDPerfMonEoverP::execute()
   }
 
   ATH_MSG_DEBUG("Retrieving event info.");
-  SG::ReadHandle<xAOD::EventInfo> evt(m_evt);
+  SG::ReadHandle<xAOD::EventInfo> evt(m_evt, ctx);
   if(evt.isValid()) {
     m_runNumber = evt->runNumber();
     m_evtNumber = evt->eventNumber();
@@ -609,7 +609,7 @@ StatusCode IDPerfMonEoverP::execute()
 	ATH_MSG_DEBUG(  "Refitting the track" );
 	
 	IegammaTrkRefitterTool::Cache cache1{};
-	StatusCode sc = m_TrackRefitter->refitTrack(Gaudi::Hive::currentContext(),
+	StatusCode sc = m_TrackRefitter->refitTrack(ctx,
 						    pThisElectron->trackParticle()->track(),
 						    cache1 );
 	
@@ -627,7 +627,7 @@ StatusCode IDPerfMonEoverP::execute()
 	ATH_MSG_DEBUG(  "Refitting the track again" );
 	
 	IegammaTrkRefitterTool::Cache cache2{};
-	sc = m_TrackRefitter_no2->refitTrack(Gaudi::Hive::currentContext(),
+	sc = m_TrackRefitter_no2->refitTrack(ctx,
 					     pThisElectron->trackParticle()->track(),
 					     cache2 );
 	
@@ -661,7 +661,7 @@ StatusCode IDPerfMonEoverP::execute()
 
   for( const auto & thisGoodElectron: goodElectrons){
     IegammaTrkRefitterTool::Cache cache{}; 
-    StatusCode sc = m_TrackRefitter->refitTrack(Gaudi::Hive::currentContext(),
+    StatusCode sc = m_TrackRefitter->refitTrack(ctx,
                                                 (*ElectronInput_container)[thisGoodElectron]->trackParticle()->track(),
                                                 cache );
     if (sc == StatusCode::SUCCESS){

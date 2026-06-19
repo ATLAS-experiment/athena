@@ -11,6 +11,7 @@
 #include "FTFP_BERT_ATL_newElastic.hh"
 #include "FTFP_BERT_ATL_rescattering.hh"
 #include "FTFP_BERP_ATL.hh"
+#include "FTFP_BERT_ATL_noExtraEm.hh"
 
 #include <algorithm>
 
@@ -26,7 +27,8 @@ AtlasPhysListFactory::AtlasPhysListFactory()
       "FTFP_BERT_ATL_rescattering", //(re-scattering of the final-state produced by FTF is simulated with the binary cascade model)
       "FTFP_BERP_ATL", // (office Geant4 Preco model is used instead of Bertini)
       "FTFP_BERT_ATL_chipsXS", //(different inelastic hadron-nucleus cros-sections)
-      "FTFP_BERT_ATL_HP" //(transportation of neutrons below 20 MeV is more accurate)
+      "FTFP_BERT_ATL_HP", //(transportation of neutrons below 20 MeV is more accurate)
+      "FTFP_BERT_ATL_noExtraEm" //(Synchrotron Radiation & GN Physics processes are disabled)
     }
 {
 }
@@ -68,6 +70,7 @@ AtlasPhysListFactory::GetReferencePhysList(const G4String& name)
   else if (name=="FTFP_BERP_ATL")               {p = new FTFP_BERP_ATL(m_verbose);}
   else if (name=="FTFP_BERT_ATL_chipsXS")       {p = new FTFP_BERT_ATL_chipsXS(m_verbose);}
   else if (name=="FTFP_BERT_ATL_HP")            {p = new FTFP_BERT_ATL_HP(m_verbose);}
+  else if (name=="FTFP_BERT_ATL_noExtraEm")     {p = new FTFP_BERT_ATL_noExtraEm(m_verbose);}
   else {
     G4cout << "### AtlasPhysListFactory WARNING: "
 	   << "PhysicsList " << name << " is not known"

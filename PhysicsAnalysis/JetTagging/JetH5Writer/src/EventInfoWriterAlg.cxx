@@ -35,8 +35,8 @@ StatusCode EventInfoWriterAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode EventInfoWriterAlg::execute() {
-  SG::ReadHandle event_info(m_infoKey);
+StatusCode EventInfoWriterAlg::execute(const EventContext& ctx) {
+  SG::ReadHandle event_info(m_infoKey, ctx);
   ATH_CHECK(event_info.isValid());
   m_writer->fill(*event_info);
   return StatusCode::SUCCESS;

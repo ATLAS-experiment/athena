@@ -1,17 +1,18 @@
-//  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "L1TopoEvent/gJetTOB.h"
+#include <iostream>
 
 thread_local TCS::Heap<TCS::gJetTOB> TCS::gJetTOB::fg_heap("gJet");
 
 // constructors
 // default constructor
-TCS::gJetTOB::gJetTOB(uint32_t roiWord, const std::string& tobName) :
+TCS::gJetTOB::gJetTOB(uint32_t roiWord, std::string_view tobName) :
    BaseTOB( roiWord,tobName )
 {}
 
 // constructor with initial values
-TCS::gJetTOB::gJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord, const std::string& tobName) :
+TCS::gJetTOB::gJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord, std::string_view tobName) :
    BaseTOB( roiWord,tobName )
    , m_Et(Et)
    , m_eta(eta)

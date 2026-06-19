@@ -62,8 +62,8 @@ StatusCode IParticleWriterAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode IParticleWriterAlg::execute() {
-  SG::ReadHandle ipc(m_partKey);
+StatusCode IParticleWriterAlg::execute(const EventContext& ctx) {
+  SG::ReadHandle ipc(m_partKey, ctx);
   std::vector<const xAOD::IParticle*> parts(ipc->begin(), ipc->end());
   m_writer->fill(parts);
   return StatusCode::SUCCESS;

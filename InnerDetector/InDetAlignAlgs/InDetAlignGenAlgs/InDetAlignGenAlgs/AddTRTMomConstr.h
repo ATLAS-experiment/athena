@@ -44,7 +44,7 @@ class AddTRTMomConstr: public AthAlgorithm {
   AddTRTMomConstr(const std::string& name, ISvcLocator* pSvcLocator) ;
   ~AddTRTMomConstr() ;
   StatusCode initialize() ; //!< initialize method of this algorithm.   
-  StatusCode execute()    ; //!< execute method of this algorithm that is called for each event  
+  StatusCode execute(const EventContext& ctx)    ; //!< execute method of this algorithm that is called for each event  
   StatusCode finalize()   ; //!< finalize method of this algorithm. Prints out a summary of all events
  
   MsgStream& dump( MsgStream& outst ) const ;

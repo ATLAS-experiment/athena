@@ -129,9 +129,8 @@ StatusCode Trk::ExtrapolationValidation::finalize()
 
 //================ Execution ====================================================
 
-StatusCode Trk::ExtrapolationValidation::execute()
+StatusCode Trk::ExtrapolationValidation::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // get the overall dimensions
   if (!m_highestVolume){
      // get TrackingGeometry and highest volume

@@ -49,13 +49,13 @@ namespace CP
 
 
   StatusCode BTaggingEfficiencyAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_efficiencyTool->applySystematicVariation (sys));
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.retrieve (jets, sys));
+      ANA_CHECK (m_jetHandle.retrieve (jets, sys, ctx));
       for (const xAOD::Jet *jet : *jets)
       {
         if (m_preselection.getBool (*jet, sys))

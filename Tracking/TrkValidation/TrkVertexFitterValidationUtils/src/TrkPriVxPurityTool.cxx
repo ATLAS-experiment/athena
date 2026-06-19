@@ -84,11 +84,7 @@ namespace Trk {
                   ATH_MSG_DEBUG( "No vertices found in first GenEvent" );
                   return nullptr;
                 }
-#ifdef HEPMC3
                auto pv = genEvent->vertices()[0];
-#else
-               auto pv = *(genEvent->vertices_begin());
-#endif
 
 //analysing the MC event to create PV candidate
 //first finding the vertex of primary pp interaction
@@ -101,19 +97,10 @@ namespace Trk {
 // storing all the ids of vertices reasonably close to the primary one.
 // here the region of interest is selected.
                 std::map<int,HepMC::ConstGenVertexPtr> vertex_ids;
-#ifdef HEPMC3
                 for (const auto& vtx: genEvent->vertices()){
                     const auto& lv_pos = vtx->position();
                     if ( std::abs ( lv_pos.perp() - pv_r ) <m_r_tol  && std::abs ( lv_pos.z() - pv_z ) <m_z_tol ) {vertex_ids[vtx->id()] = vtx;}
                 }//end  of loop over all the vertices
-#else
-                for ( HepMC::GenEvent::vertex_const_iterator i = genEvent->vertices_begin(); i != genEvent->vertices_end()  ;++i ) {
-                    auto vtx=*i;
-                    const auto& lv_pos = vtx->position();
-                    if ( std::abs ( lv_pos.perp() - pv_r ) <m_r_tol  && std::abs ( lv_pos.z() - pv_z ) <m_z_tol ) {vertex_ids[ HepMC::barcode(vtx) ]= vtx;}
-                }//end  of loop over all the vertices
-#endif
-
 
 //getting the track truth collection
                 const TrackParticleTruthCollection * trackParticleTruthCollection ( nullptr );
@@ -166,12 +153,7 @@ namespace Trk {
 
                                 if (ttItr != trackParticleTruthCollection->end() ) {
                                     const HepMcParticleLink& particleLink = ttItr->second.particleLink();
-#ifdef HEPMC3
                                     HepMC::ConstGenParticlePtr genParticle = particleLink.scptr();
-#else
-                                    HepMC::ConstGenParticlePtr genParticle = particleLink.cptr();
-#endif
-
                                     if(genParticle) {
                                         const auto *tpEvent = genParticle->parent_event();
                                         if(tpEvent==genEvent) { 
@@ -184,11 +166,7 @@ namespace Trk {
                   
 //loop over the particles until decision is really taken
                                                 do {
-#ifdef HEPMC3
                                                     auto idf_res = vertex_ids.find ( pVertex->id() );
-#else
-                                                    auto idf_res = vertex_ids.find ( HepMC::barcode(pVertex) );
-#endif
 
 //for the HepMcParticle Link, the signal event has an index 0.
 // tagging on it
@@ -202,11 +180,7 @@ namespace Trk {
 //if so, propagating track to its origin, otherwise rejecting it completely.
                                                         if ( pVertex->particles_in_size() == 1 ) {
 // one mother particle: is it a brem of some kind?
-#ifdef HEPMC3
                                                             auto inp = pVertex->particles_in()[0] ;
-#else
-                                                            auto inp =*(pVertex->particles_in_const_begin()) ;
-#endif
                                                             auto tmpVertex_loc = inp ->production_vertex();
                                                             if ( inp ->pdg_id() == link_pid  && tmpVertex_loc) {
 // seems like a brem (this can be generator/simulation dependent unfortunately)

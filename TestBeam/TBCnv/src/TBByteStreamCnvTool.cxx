@@ -1013,8 +1013,8 @@ StatusCode TBByteStreamCnvTool::H6BuildObjects(int unrec_code)
 	int nword = m_subfrag_size - 2;
 	logstr << MSG::DEBUG << " Found MWPC subfragment. Nword= "<<nword << endmsg;
 
-	std::string mwpcnames[8]= {"X2","Y2","X3","Y3","X4","Y4","X5","Y5"};
-	bool isX[9]={true,false,true,false,true,false,true,false};
+	constexpr std::string_view mwpcnames[8]= {"X2","Y2","X3","Y3","X4","Y4","X5","Y5"};
+	constexpr bool isX[9]={true,false,true,false,true,false,true,false};
 	TBMWPCRaw * mwpcraw[8];
 	for( int i=0;i<8;i++){
 	  mwpcraw[i] = new TBMWPCRaw(mwpcnames[i]);

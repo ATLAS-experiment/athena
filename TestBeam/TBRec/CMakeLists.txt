@@ -6,7 +6,7 @@ atlas_subdir( TBRec )
 # External dependencies:
 find_package( Boost )
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 
 # Component(s) in the package:
 atlas_add_root_dictionary( TBRecLib
@@ -31,4 +31,3 @@ atlas_add_component( TBRec
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/*.txt share/*.xml )
-

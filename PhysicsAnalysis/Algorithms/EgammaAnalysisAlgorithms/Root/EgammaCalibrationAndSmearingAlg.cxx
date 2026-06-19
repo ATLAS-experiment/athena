@@ -36,14 +36,14 @@ namespace CP
 
 
   StatusCode EgammaCalibrationAndSmearingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       // always need to call `getCopy` first to ensure that the shallow copies
       // are all there if requested
       xAOD::EgammaContainer *egammas = nullptr;
-      ANA_CHECK (m_egammaHandle.getCopy (egammas, sys));
+      ANA_CHECK (m_egammaHandle.getCopy (egammas, sys, ctx));
 
       if (sys.empty() && m_skipNominal.value())
         continue;

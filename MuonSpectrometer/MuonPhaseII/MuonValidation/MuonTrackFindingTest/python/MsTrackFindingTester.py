@@ -3,9 +3,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, **kwargs):
+def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, 
+                     outFile="MsTrkTester.root", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    
+    result.merge(setupHistSvcCfg(flags, outFile=outFile,
+                                 outStream="MuonTrackTester"))
+
     from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
@@ -13,6 +19,8 @@ def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, **kwa
         kwargs.setdefault("LegacySegmentKey", "")
         kwargs.setdefault("LegacyTrackKey", "")
         kwargs.setdefault("LegacyMuonKey" , "")
+    if not flags.Reco.EnableTracking:
+        kwargs.setdefault("IdTrkKey", "")
     the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -44,7 +52,7 @@ if __name__=="__main__":
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
-    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.RDO_R3)
    
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -56,9 +64,7 @@ if __name__=="__main__":
 
     cfg.getService("MessageSvc").setVerbose= []
 
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonTrackTester"))
-
+ 
     from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
     cfg.merge(MuonReconstructionConfig(flags))
 
@@ -69,7 +75,8 @@ if __name__=="__main__":
     if not args.noLegacyChain:
         cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain))
+    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain,
+                                      outFile = args.outRootFile))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))

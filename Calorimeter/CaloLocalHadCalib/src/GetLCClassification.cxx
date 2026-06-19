@@ -250,9 +250,9 @@ StatusCode GetLCClassification::finalize()
 
 //###############################################################################
 
-StatusCode GetLCClassification::execute()
+StatusCode GetLCClassification::execute(const EventContext& ctx)
 {
-  SG::ReadHandle<xAOD::CaloClusterContainer> cc (m_clusterCollName);
+  SG::ReadHandle<xAOD::CaloClusterContainer> cc (m_clusterCollName, ctx);
 
   // total calib hit energy of all clusters 
   double eCalibTot(0.); 

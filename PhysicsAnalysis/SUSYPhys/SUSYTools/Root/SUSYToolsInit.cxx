@@ -699,12 +699,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     std::string muQualBaseline = "";
     switch (m_muIdBaseline) {
-    case xAOD::Muon::VeryLoose: muQualBaseline = "VeryLoose";
+    case static_cast<int>(xAOD::Muon::Quality::VeryLoose): muQualBaseline = "VeryLoose";
       ATH_MSG_WARNING("No muon scale factors are available for VeryLoose working point.");
       break;
-    case xAOD::Muon::Loose:     muQualBaseline = "Loose";  break;
-    case xAOD::Muon::Medium:    muQualBaseline = "Medium"; break;
-    case xAOD::Muon::Tight:     muQualBaseline = "Tight";  break;
+    case static_cast<int>(xAOD::Muon::Quality::Loose):     muQualBaseline = "Loose";  break;
+    case static_cast<int>(xAOD::Muon::Quality::Medium):    muQualBaseline = "Medium"; break;
+    case static_cast<int>(xAOD::Muon::Quality::Tight):     muQualBaseline = "Tight";  break;
     case 4:                     muQualBaseline = "HighPt";  break;
     case 5:                     muQualBaseline = "LowPt";  break;
     case 6:                     muQualBaseline = "LowPtMVA"; break;
@@ -764,12 +764,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     std::string muQual = "";
     switch (m_muId) {
-    case xAOD::Muon::VeryLoose: muQual = "VeryLoose";
+    case static_cast<int>(xAOD::Muon::Quality::VeryLoose): muQual = "VeryLoose";
       ATH_MSG_WARNING("No muon scale factors are available for VeryLoose working point.");
       break;
-    case xAOD::Muon::Loose:     muQual = "Loose";  break;
-    case xAOD::Muon::Medium:    muQual = "Medium"; break;
-    case xAOD::Muon::Tight:     muQual = "Tight";  break;
+    case static_cast<int>(xAOD::Muon::Quality::Loose):     muQual = "Loose";  break;
+    case static_cast<int>(xAOD::Muon::Quality::Medium):    muQual = "Medium"; break;
+    case static_cast<int>(xAOD::Muon::Quality::Tight):     muQual = "Tight";  break;
     case 4:                     muQual = "HighPt";  break;
     case 5:                     muQual = "LowPt";  break;
     case 6:                     muQual = "LowPtMVA"; break;
@@ -826,9 +826,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Hotfix for the Run2 Muon Identiﬁcation SFs for the Tight WP
     std::string MuonCP_Run2_TightFix = "";
     if(!m_isRun3) {
-      MuonCP_Run2_TightFix = (m_muId == xAOD::Muon::Tight) ? "220725_Preliminary_r22run2" : "230213_Preliminary_r22run2_loosefix";
+      MuonCP_Run2_TightFix = (m_muId == xAOD::Muon::Quality::Tight) ? "220725_Preliminary_r22run2" : "230213_Preliminary_r22run2_loosefix";
     }
-    if (!m_muonEfficiencySFTool.isUserConfigured() && m_muId != xAOD::Muon::VeryLoose && !isData()) {
+    if (!m_muonEfficiencySFTool.isUserConfigured() && m_muId != static_cast<int>(xAOD::Muon::Quality::VeryLoose) && !isData()) {
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
       m_muonEfficiencySFTool.setTypeAndName("CP::MuonEfficiencyScaleFactors/"+toolName);
       ATH_CHECK( m_muonEfficiencySFTool.setProperty("WorkingPoint", muQual) );
@@ -1450,7 +1450,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonId << ", using Tight instead..." );
       }
 
-      ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt") );
+      ATH_CHECK( m_photonEfficiencySFTool.setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2026_Run3Consolidated_Recommendation_v1/map0.txt") );
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("ForceDataType", isAtlfast()? (m_isRun3? 1: 3) : 1) ); // Set data type: 1 for FULLSIM, 3 for AtlFast. For Run3 pre-rec only FullSim SFs are available
       ATH_CHECK( m_photonEfficiencySFTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_photonEfficiencySFTool.retrieve() );

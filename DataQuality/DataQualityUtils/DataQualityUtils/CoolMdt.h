@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 //*************************************************
@@ -58,7 +58,7 @@ namespace dqutils {
     cool::ValidityKey m_until;
     cool::IDatabasePtr m_coolDb;
     cool::IFolderPtr m_coolFolder;
-    bool m_fist_folder;
+    bool m_fist_folder{};
 #endif
   public:
     // Connects to the database. Throws a "DatabaseDoesNotExis" exception if database does not exist.

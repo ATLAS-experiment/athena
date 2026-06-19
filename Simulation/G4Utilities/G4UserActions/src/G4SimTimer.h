@@ -5,12 +5,15 @@
 #ifndef G4USERACTIONS_G4UA_G4SIMTIMER_H
 #define G4USERACTIONS_G4UA_G4SIMTIMER_H
 
+#include <cassert>
+
 // Infrastructure includes
 #include "AthenaBaseComps/AthMessaging.h"
 
 // Geant4 includes
 #include "G4Timer.hh"
 #include "G4UserEventAction.hh"
+#include <G4UserRunAction.hh>
 
 // Forward declarations
 class G4Event;
@@ -33,11 +36,10 @@ namespace G4UA
   /// by the number of threads, but this is only precise when averaged over
   /// all events.
   ///
-  /// @todo TODO: Enable the run timer using a run-action (now possible).
   ///
   /// @author Steve Farrell <Steven.Farrell>
   ///
-  class G4SimTimer : public G4UserEventAction, public AthMessaging
+  class G4SimTimer : public G4UserEventAction, public G4UserRunAction, public AthMessaging
   {
 
     public:
@@ -47,6 +49,9 @@ namespace G4UA
       {
         /// Initializes the variables
         Report();
+
+        // Total runtime
+        G4Timer runtime;
         /// Number of timed G4 events (we skip the first).
         /// Might want to use a larger int type.
         unsigned int nEvent;
@@ -57,15 +62,26 @@ namespace G4UA
         /// Calculate the mean and sample std dev
         std::pair<double, double> meanAndSigma();
 
-	void merge(const Report& rep){
-	  nEvent += rep.nEvent;
-	  eventTime += rep.eventTime;
-	  eventTimeSquared += rep.eventTimeSquared;
-	}
+        void merge(const Report& rep){
+          // only one of the report instance (the master run action) will have a valid runtime 
+          if(rep.runtime.IsValid()){
+            assert(!runtime.IsValid());
+            runtime = rep.runtime;
+          }
+          nEvent += rep.nEvent;
+          eventTime += rep.eventTime;
+          eventTimeSquared += rep.eventTimeSquared;
+        }
       };
 
       /// Constructor
       G4SimTimer();
+
+      /// Start timing this Geant4 run.
+      virtual void BeginOfRunAction(const G4Run* run) override final;
+
+      /// End timing this Geant4 run.
+      virtual void EndOfRunAction(const G4Run* run) override final;
 
       /// Start timing this Geant4 event.
       virtual void BeginOfEventAction(const G4Event* event) override final;

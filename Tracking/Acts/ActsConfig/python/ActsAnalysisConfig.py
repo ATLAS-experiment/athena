@@ -550,7 +550,7 @@ def ActsBaseSeedAnalysisAlgCfg(flags,
     
     # ATLAS Converter Tool
     from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    converterTool = acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags))
+    converterTool = acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags))
     
     # Track Param Estimation Tool
     from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
@@ -767,7 +767,7 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
 
     if 'ATLASConverterTool' not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+        kwargs.setdefault('ATLASConverterTool', acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg

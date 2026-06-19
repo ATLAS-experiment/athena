@@ -31,14 +31,14 @@ StatusCode TrackTruthSimilaritySelector::finalize() {
 }
 
 // -----------------------------------------------------------------------------------------------------
-StatusCode TrackTruthSimilaritySelector::execute() {
+StatusCode TrackTruthSimilaritySelector::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG ("TrackTruthSimilaritySelector::execute()");
 
   //----------------------------------------------------------------
   // Retrieve the input
 
-  auto detailedHandle = SG::makeHandle( m_detailed );
+  auto detailedHandle = SG::makeHandle( m_detailed , ctx);
   if (!detailedHandle.isValid()){
     ATH_MSG_ERROR ("DetailedTrackTruthCollection "<<m_detailed.key()<<" NOT found");
     return StatusCode::FAILURE;
@@ -49,7 +49,7 @@ StatusCode TrackTruthSimilaritySelector::execute() {
   //----------------------------------------------------------------
   // Produce and store the output.
 
-  auto outHandle = SG::makeHandle( m_out );
+  auto outHandle = SG::makeHandle( m_out , ctx);
   outHandle = std::make_unique<TrackTruthCollection>
                (detailedHandle->trackCollectionLink());
 

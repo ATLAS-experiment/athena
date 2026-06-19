@@ -86,7 +86,7 @@ public:  // methods
     StatusCode initialize();
 
     // Event processing.
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
 
 private:  // data
     // Strip fitter.

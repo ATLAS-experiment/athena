@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1MENU_H
@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <map>
+#include <string_view>
 
 namespace TrigConf {
 
@@ -85,13 +86,13 @@ namespace TrigConf {
       std::vector<std::shared_ptr<TrigConf::L1Threshold>> thresholds() const;
 
       /** Access to list of L1Thresholds by type */
-      const std::vector<std::shared_ptr<TrigConf::L1Threshold>> & thresholds(const std::string & typeName) const;
+      const std::vector<std::shared_ptr<TrigConf::L1Threshold>> & thresholds(std::string_view typeName) const;
 
       /** Access to L1Threshold by name */
-      const TrigConf::L1Threshold & threshold(const std::string & thresholdName) const;
+      const TrigConf::L1Threshold & threshold(std::string_view thresholdName) const;
 
       /** Access to L1Threshold by type and mapping index */
-      const TrigConf::L1Threshold & threshold(const std::string & typeName, unsigned int mapping) const;
+      const TrigConf::L1Threshold & threshold(std::string_view typeName, unsigned int mapping) const;
 
       /** Access to extra info for threshold types */
       const L1ThrExtraInfo & thrExtraInfo() const;
@@ -175,16 +176,16 @@ namespace TrigConf {
       std::map<std::string, TrigConf::L1Board> m_boards{};
 
       /** threshold maps */
-      std::map<std::string, std::vector<std::shared_ptr<TrigConf::L1Threshold>>> m_thresholdsByType{};
-      std::map<std::string, std::shared_ptr<TrigConf::L1Threshold>> m_thresholdsByName{};
-      std::map<std::string, std::map<unsigned int, std::shared_ptr<TrigConf::L1Threshold>>> m_thresholdsByTypeAndMapping{};
+      std::map<std::string, std::vector<std::shared_ptr<TrigConf::L1Threshold>>, std::less<> > m_thresholdsByType{};
+      std::map<std::string, std::shared_ptr<TrigConf::L1Threshold>, std::less<> > m_thresholdsByName{};
+      std::map<std::string, std::map<unsigned int, std::shared_ptr<TrigConf::L1Threshold>>, std::less<> > m_thresholdsByTypeAndMapping{};
 
       TrigConf::L1ThrExtraInfo m_thrExtraInfo;
 
       /** algorithm maps */
-      std::map<std::string, std::vector<TrigConf::L1TopoAlgorithm>> m_algorithmsByCategory{}; // primary set of vectors of algos, one per category (TOPO, R2TOPO, MUTOPO, MULTTOPO)
-      std::map<std::string, std::map<std::string, TrigConf::L1TopoAlgorithm*>> m_algorithmsByName{}; // map from category and algorithm name to algorithm 
-      std::map<std::string, std::map<std::string, TrigConf::L1TopoAlgorithm*>> m_algorithmsByOutput{}; // map from category and output name to algorithm
+      std::map<std::string, std::vector<TrigConf::L1TopoAlgorithm>, std::less<> > m_algorithmsByCategory{}; // primary set of vectors of algos, one per category (TOPO, R2TOPO, MUTOPO, MULTTOPO)
+      std::map<std::string, std::map<std::string, TrigConf::L1TopoAlgorithm*>, std::less<> > m_algorithmsByName{}; // map from category and algorithm name to algorithm 
+      std::map<std::string, std::map<std::string, TrigConf::L1TopoAlgorithm*>, std::less<> > m_algorithmsByOutput{}; // map from category and output name to algorithm
 
       TrigConf::L1CTP m_ctp;
 

@@ -13,10 +13,10 @@ StatusCode xAODPhotonFilter::filterInitialize()
 }
 
 
-StatusCode xAODPhotonFilter::filterEvent() {
+StatusCode xAODPhotonFilter::filterEvent(const EventContext& ctx) {
 
   // Retrieve Photon container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   int NPhotons = 0;
@@ -27,13 +27,13 @@ StatusCode xAODPhotonFilter::filterEvent() {
           NPhotons++;
           if (NPhotons >= m_NPhotons)
             {
-              setFilterPassed(true);
+              setFilterPassed(true, ctx);
               return StatusCode::SUCCESS;
             }
         }
 
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 
 }

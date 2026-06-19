@@ -8,6 +8,8 @@
 
 #include <ColumnarToolWrapperPython/PythonToolHandle.h>
 #include <ColumnarCore/ColumnarDef.h>
+#include <ColumnarCore/ColumnInfoHelpers.h>
+#include <CxxUtils/crc64.h>
 
 #ifdef XAOD_STANDALONE
 #include <AsgMessaging/IMessagePrinter.h>
@@ -199,6 +201,27 @@ NB_MODULE(python_tool_handle, module) {
     module.attr("numberOfEventsName") = &columnar::eventRangeColumnName;
     module.attr("eventRangeColumnName") = &columnar::eventRangeColumnName;
 
+    // the value used for an invalid (null/empty) element link in array mode
+    module.attr("invalid_link_value") = columnar::ColumnarModeArray::invalidLinkValue;
+
+    module.def("crc64",
+        [](const std::string& data) { return CxxUtils::crc64(data); },
+        "data"_a,
+        "CRC-64 of a string, using the Athena default polynomial "
+        "(CxxUtils::crc64).");
+
+    module.def("crc64addint", &CxxUtils::crc64addint,
+        "crc"_a, "x"_a,
+        "Extend a previously-calculated CRC-64 to include an integer "
+        "(CxxUtils::crc64addint).");
+
+    module.def("sg_key",
+        &columnar::computeSgKey,
+        "name"_a, "clid"_a = 0,
+        "StoreGate hash (sgkey) of a container name, optionally mixed with "
+        "its CLID. ElementLink m_persKey values in Athena-written files are "
+        "sg_key(container_name, container_clid).");
+
     // Install a Python callable as the global C++ message printer.
 #ifdef XAOD_STANDALONE
     // Overload 1: with callback function
@@ -259,6 +282,7 @@ NB_MODULE(python_tool_handle, module) {
         .def_ro("offset_name", &columnar::ColumnInfo::offsetName)
         .def_ro("fixed_dimensions", &columnar::ColumnInfo::fixedDimensions)
         .def_ro("sole_link_target_name", &columnar::ColumnInfo::soleLinkTargetName)
+        .def_ro("sole_link_target_clid", &columnar::ColumnInfo::soleLinkTargetClid)
         .def_ro("is_variant_link", &columnar::ColumnInfo::isVariantLink)
         .def_ro("variant_link_target_names", &columnar::ColumnInfo::variantLinkTargetNames)
         .def_ro("key_column_for_variant_link", &columnar::ColumnInfo::keyColumnForVariantLink)
@@ -297,6 +321,7 @@ NB_MODULE(python_tool_handle, module) {
             d["offset_name"] = self.offsetName;
             d["fixed_dimensions"] = self.fixedDimensions;
             d["sole_link_target_name"] = self.soleLinkTargetName;
+            d["sole_link_target_clid"] = self.soleLinkTargetClid;
             d["is_variant_link"] = self.isVariantLink;
             d["variant_link_target_names"] = self.variantLinkTargetNames;
             d["key_column_for_variant_link"] = self.keyColumnForVariantLink;

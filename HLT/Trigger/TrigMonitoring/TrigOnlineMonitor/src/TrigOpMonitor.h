@@ -40,7 +40,7 @@ public:
 
   virtual StatusCode initialize() override;
   virtual StatusCode start() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual void handle( const Incident& incident ) override;
 
   /* Ensure this algorithm is a singleton.

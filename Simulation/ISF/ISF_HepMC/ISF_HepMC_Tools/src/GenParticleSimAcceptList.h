@@ -42,19 +42,11 @@ namespace ISF {
     virtual StatusCode  finalize() override final;
 
     /** passes through to the private version */
-#ifdef HEPMC3
     virtual bool pass(const HepMC::ConstGenParticlePtr& particle ) const override;
-#else
-    virtual bool pass(const HepMC::GenParticle& particle ) const override;
-#endif
 
   private:
     /** returns true if the the particle and all daughters are on the accept list */
-#ifdef HEPMC3
     bool pass(const HepMC::ConstGenParticlePtr& particle , std::vector<int> & used_vertices ) const;
-#else
-    bool pass(const HepMC::GenParticle& particle , std::vector<int> & used_vertices ) const;
-#endif
     StringArrayProperty m_acceptLists{this, "AcceptLists", {"G4particle_acceptlist.txt"} }; //!< The location of the accept lists
     std::vector<long int>             m_pdgId;                //!< Allowed PDG IDs
     BooleanProperty m_qs{this, "QuasiStableSim", true}; //!< Switch for quasi-stable particle simulation

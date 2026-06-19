@@ -63,14 +63,14 @@ StatusCode JEMEnergySim::initialize()
 //----------------------------------------------
 //
 
-StatusCode JEMEnergySim::execute( )
+StatusCode JEMEnergySim::execute(const EventContext& ctx)
 {
    ATH_MSG_DEBUG ( "Executing" );
 
   // form module sums
   m_jemContainer = new DataVector<ModuleEnergy>;  
 
-  auto rh = SG::makeHandle(m_JetElementInputKey);
+  auto rh = SG::makeHandle(m_JetElementInputKey, ctx);
 
   if (rh.isValid()) {
     const DataVector<xAOD::JetElement>* jetelements = &(*rh);
@@ -86,10 +86,10 @@ StatusCode JEMEnergySim::execute( )
   // Done the processing. Now form & save the various output data
 
   // For CMX simulation
-  storeBackplaneData();
+  storeBackplaneData(ctx);
   
   // for Bytestream simulation
-  storeJEMEtSums();
+  storeJEMEtSums(ctx);
   
   cleanup();
  
@@ -106,7 +106,7 @@ void LVL1::JEMEnergySim::cleanup(){
 }
 
 /** Form JEMEtSums and put into SG */
-void LVL1::JEMEnergySim::storeJEMEtSums() {
+void LVL1::JEMEnergySim::storeJEMEtSums(const EventContext& ctx) {
   
   ATH_MSG_DEBUG("storeJEMEtSums running");
   
@@ -126,7 +126,6 @@ void LVL1::JEMEnergySim::storeJEMEtSums() {
 
   ATH_MSG_DEBUG( JEMRvector->size()<<" JEMEtSums objects are being saved");
   
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   StatusCode sc = SG::makeHandle(m_jemEtSumsOutputKey, ctx).record( std::unique_ptr<DataVector<JEMEtSums>>(JEMRvector) );
   if (sc != StatusCode::SUCCESS) {
     ATH_MSG_ERROR ( "Error registering JEMEtSums collection in TDS " );
@@ -135,7 +134,7 @@ void LVL1::JEMEnergySim::storeJEMEtSums() {
 }
 
 /** Form EnergyCMXData and put into SG */
-void LVL1::JEMEnergySim::storeBackplaneData() {
+void LVL1::JEMEnergySim::storeBackplaneData(const EventContext& ctx) {
   
   ATH_MSG_DEBUG("storeBackplaneData running");
   
@@ -150,7 +149,6 @@ void LVL1::JEMEnergySim::storeBackplaneData() {
 
   ATH_MSG_DEBUG( bpVector->size()<<" EnergyCMXData objects are being saved");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   StatusCode sc = SG::makeHandle(m_energyCMXDataOutputKey, ctx).record( std::unique_ptr<DataVector<EnergyCMXData>>(bpVector) );
   if (sc != StatusCode::SUCCESS) {
     ATH_MSG_ERROR ( "Error registering EnergyCMXData collection in TDS " );

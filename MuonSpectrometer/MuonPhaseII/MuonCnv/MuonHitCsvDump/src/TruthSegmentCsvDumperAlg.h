@@ -20,7 +20,7 @@ class TruthSegmentCsvDumperAlg: public AthAlgorithm {
       using AthAlgorithm::AthAlgorithm;
       ~TruthSegmentCsvDumperAlg() = default;
       StatusCode initialize() override;
-      StatusCode execute() override;
+      StatusCode execute(const EventContext& ctx) override;
   
   private:
     const MuonGMR4::SpectrometerSector* msSector(const xAOD::MuonSegment& segment) const;

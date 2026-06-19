@@ -54,11 +54,10 @@ StatusCode InDetV0Finder::initialize()
 }
 
 
-StatusCode InDetV0Finder::execute()
+StatusCode InDetV0Finder::execute(const EventContext& ctx)
 {
 
   m_events_processed++;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 // Get primary vertex from StoreGate
   const xAOD::Vertex* primaryVertex = nullptr;
   SG::ReadHandle<xAOD::VertexContainer> importedVxContainer( m_vertexKey, ctx );

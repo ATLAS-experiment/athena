@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventQualityFilterAlg.cxx
@@ -55,11 +55,10 @@ StatusCode EventQualityFilterAlg::initialize()
 }
 
 
-StatusCode EventQualityFilterAlg::execute()
+StatusCode EventQualityFilterAlg::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Get the EventInfo object
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo, ctx);
@@ -74,7 +73,7 @@ StatusCode EventQualityFilterAlg::execute()
   const bool isSim = eventInfo->eventType(xAOD::EventInfo::EventType::IS_SIMULATION);
   if ( isSim ) {
     ATH_MSG_DEBUG ("It is an MC event... not vetoing...");
-    this->setFilterPassed(true);
+    this->setFilterPassed(true, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -87,7 +86,7 @@ StatusCode EventQualityFilterAlg::execute()
   if ( m_useCoreError.value() && eventInfo->isEventFlagBitSet(xAOD::EventInfo::Core, 18)  ){ passEvent = false; }
 
   // Set the final decision
-  this->setFilterPassed(passEvent);
+  this->setFilterPassed(passEvent, ctx);
 
   return StatusCode::SUCCESS;
 }

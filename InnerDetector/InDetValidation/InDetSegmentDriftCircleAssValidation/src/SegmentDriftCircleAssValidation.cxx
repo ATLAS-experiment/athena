@@ -85,11 +85,11 @@ StatusCode InDet::SegmentDriftCircleAssValidation::initialize()
 // Execute
 ///////////////////////////////////////////////////////////////////
 
-StatusCode InDet::SegmentDriftCircleAssValidation::execute() 
+StatusCode InDet::SegmentDriftCircleAssValidation::execute(const EventContext& ctx) 
 { 
   msg(MSG::DEBUG)    << " InDetSegmentDriftCircleAssValidation execute()" << endmsg;
 
-  SG::ReadHandle<Trk::SegmentCollection> origColTracks( m_origtrackKey );
+  SG::ReadHandle<Trk::SegmentCollection> origColTracks( m_origtrackKey , ctx);
   
   if( !origColTracks.isValid() ){
     msg(MSG::FATAL) << "No TRT tracks with name " << m_origtrackKey.key() << " found in StoreGate!" << endmsg;
@@ -98,7 +98,7 @@ StatusCode InDet::SegmentDriftCircleAssValidation::execute()
     msg(MSG::DEBUG) << "Found TRT trak collection " << m_origtrackKey.key() << " in StoreGate!" << endmsg;
   }
 
-  SG::ReadHandle<PRD_MultiTruthCollection> prdCollection( m_PRDTruthTRTKey );
+  SG::ReadHandle<PRD_MultiTruthCollection> prdCollection( m_PRDTruthTRTKey , ctx);
 
   if ( !prdCollection.isValid() ){
     msg(MSG::FATAL) << "TRT PRD_MultiTruthCollection " << m_PRDTruthTRTKey.key() << " NOT found!" << endmsg;

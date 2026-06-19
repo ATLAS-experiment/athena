@@ -40,7 +40,7 @@ public:
     virtual StatusCode initialize() override;
 
     /// Athena execute hook (called once per event)
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
     /// Path to input file containing 256-bit TOBs as 64-character hex strings

@@ -33,17 +33,17 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode eFexTOBSuperCellDecorator::execute() {
+  StatusCode eFexTOBSuperCellDecorator::execute(const EventContext& ctx) {
     
     // read the TOB containers
-    SG::ReadHandle<xAOD::eFexEMRoIContainer> eFEXegEDMContainerObj{m_eFEXegEDMContainerKey};
+    SG::ReadHandle<xAOD::eFexEMRoIContainer> eFEXegEDMContainerObj{m_eFEXegEDMContainerKey, ctx};
     if (!eFEXegEDMContainerObj.isValid()) {
       ATH_MSG_ERROR("Failed to retrieve EDM collection: "<<m_eFEXegEDMContainerKey);
       return StatusCode::SUCCESS; 
     }
     const xAOD::eFexEMRoIContainer* emEDMConstPtr = eFEXegEDMContainerObj.cptr();
 
-    SG::ReadHandle<xAOD::eFexTauRoIContainer> eFEXtauEDMContainerObj{m_eFEXtauEDMContainerKey};
+    SG::ReadHandle<xAOD::eFexTauRoIContainer> eFEXtauEDMContainerObj{m_eFEXtauEDMContainerKey, ctx};
     if (!eFEXtauEDMContainerObj.isValid()) {
       ATH_MSG_ERROR("Failed to retrieve tau EDM collection: "<<m_eFEXtauEDMContainerKey);
       return StatusCode::SUCCESS; 
@@ -51,9 +51,9 @@ namespace LVL1 {
     const xAOD::eFexTauRoIContainer* tauEDMConstPtr = eFEXtauEDMContainerObj.cptr();
 
     //Setup EM Decorator Handlers
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, std::vector<unsigned int>>   SCEt_e  ( m_SCEtVec_ele);
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, std::vector<unsigned int>>   SCEt_e  ( m_SCEtVec_ele, ctx);
 	
-    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, std::vector<unsigned int>>   SCEt_t  ( m_SCEtVec_tau);
+    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, std::vector<unsigned int>>   SCEt_t  ( m_SCEtVec_tau, ctx);
     
     std::vector<unsigned int > ClusterCellETs;  //
     

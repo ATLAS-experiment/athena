@@ -96,7 +96,7 @@ StatusCode McAodFilter::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode McAodFilter::execute()
+StatusCode McAodFilter::execute(const EventContext& /*ctx*/)
 {  
   StatusCode sc = StatusCode::SUCCESS;
 

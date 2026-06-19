@@ -76,6 +76,7 @@ read_handles = {
     'GlobalCellTowerAlgTool': {'in0': 'GlobalLArCellsKey'},
     'GlobalJet1AlgTool': {'in0': 'GlobalCellTowersKey'},
     'eEmMultAlgTool': {'in0': 'eEmTOBs'},
+    'eEmEg1BDTMultAlgTool': {'in0': 'eEmEg1BDTTOBContainerKey'},
     'CommonMultAlgTool': {'in0': 'CommonTOBsKey'},
     }
 

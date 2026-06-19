@@ -11,6 +11,7 @@
 #include <ColumnarCore/ColumnarDef.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/ColumnarDef.h>
+#include <xAODCore/CLASS_DEF.h>
 
 class EventContext;
 
@@ -89,6 +90,25 @@ namespace columnar
   /// container ids in a single place — each package can define its own
   /// container id structs as needed.
 
+  namespace detail
+  {
+    /// the CLID of a container type, or 0 when it cannot be determined
+    ///
+    /// CLASS_DEF is a no-op when parsed by rootcling (see
+    /// xAODCore/CLASS_DEF.h), so the traits are unavailable there and
+    /// this returns 0 during dictionary generation.
+    template<typename T>
+    CLID clidForType ()
+    {
+#ifdef __CLING__
+      return 0;
+#else
+      return ClassID_traits<T>::ID();
+#endif
+    }
+  }
+
+
   /// @brief a template that provides a base definition of container id
   /// for a regular container
   ///
@@ -129,6 +149,16 @@ namespace columnar
 
     /// the xAOD type to use with ElementLink
     using xAODElementLinkType = ContainerType;
+
+    /// the CLID of the xAOD container type (from its CLASS_DEF)
+    ///
+    /// This is evaluated lazily, so container types without a
+    /// CLASS_DEF only fail to compile if this actually gets called
+    /// (e.g. when the container id is used as a link target).
+    static CLID containerClid ()
+    {
+      return detail::clidForType<ContainerType> ();
+    }
   };
 
   /// a template to define a mutable version of a given container id

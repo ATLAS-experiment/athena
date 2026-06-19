@@ -69,7 +69,7 @@ namespace CP
 
 
   StatusCode MetMakerAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     const xAOD::MissingETContainer* metcore {nullptr};
     ANA_CHECK (evtStore()->retrieve(metcore, m_metCoreName));
@@ -91,7 +91,7 @@ namespace CP
       ConstDataVector<xAOD::IParticleContainer> invisSelected(SG::VIEW_ELEMENTS);
       for (size_t i = 0; i < m_invisHandles.size(); ++i) {
         const xAOD::IParticleContainer* invisible = nullptr;
-        ATH_CHECK( m_invisHandles.at(i).retrieve(invisible, sys) );
+        ATH_CHECK( m_invisHandles.at(i).retrieve(invisible, sys, ctx) );
         for (const xAOD::IParticle *invisParticle : *invisible) {
           if (m_invisSelections.at(i).getBool(*invisParticle, sys))
             invisSelected.push_back(invisParticle);
@@ -142,7 +142,7 @@ namespace CP
 
 
       const xAOD::JetContainer *jets {nullptr};
-      ANA_CHECK (m_jetsHandle.retrieve (jets, sys));
+      ANA_CHECK (m_jetsHandle.retrieve (jets, sys, ctx));
 
       if (m_doTrackMet)
       {
@@ -174,7 +174,7 @@ namespace CP
         ANA_CHECK (m_systematicsTool->applyCorrection (*softTerm, metHelper));
       }
 
-      ANA_CHECK (m_metHandle.record (std::move (met), std::move (aux), sys));
+      ANA_CHECK (m_metHandle.record (std::move (met), std::move (aux), sys, ctx));
     }
 
     return StatusCode::SUCCESS;

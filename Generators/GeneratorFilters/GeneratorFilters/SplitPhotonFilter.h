@@ -11,7 +11,7 @@ class SplitPhotonFilter : public GenFilter {
 public:
 
   SplitPhotonFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent() override;
+  virtual StatusCode filterEvent(const EventContext& ctx) override;
 
 private:
 

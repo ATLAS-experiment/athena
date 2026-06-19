@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonThinningConfig
 # Contains the configuration for the thinning for PHYS(LITE)
@@ -22,9 +22,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
         acc.merge(TrackParticleThinningPHYSCfg(
             flags,
             name                    = kwargs['TrackParticleThinningToolName'],
-            StreamName              = StreamName,
-            Z0SGEntryName           = "DFCommonInDetTrackZ0AtPV",
-            InDetTrackParticlesKey  = "InDetTrackParticles"))
+            StreamName              = StreamName))
 
     # Include inner detector tracks associated with muons
     if "MuonTPThinningToolName" in kwargs:

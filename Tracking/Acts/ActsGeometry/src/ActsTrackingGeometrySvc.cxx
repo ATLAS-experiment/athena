@@ -1215,3 +1215,24 @@ ActsTrackingGeometrySvc::makeBeamPipeConfig(
 
   return cfg;
 }
+
+
+const Acts::TrackingVolume* 
+      ActsTrackingGeometrySvc::getEnvelope(const ActsTrk::SystemEnvelope envType) const {
+      const Acts::TrackingVolume* retVol{nullptr};
+      using namespace ActsTrk::detail::GeoVolIds;
+      switch (envType) {
+          using enum ActsTrk::SystemEnvelope;
+          case ITkExit:
+              break;
+          case CaloExit:
+              retVol = m_trackingGeometry->findVolume(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID));
+              break;
+          case MsExit:
+              break;
+      }
+      if(!retVol) {
+        THROW_EXCEPTION("There is no system envelope "<<envType);
+      }
+      return retVol;
+}

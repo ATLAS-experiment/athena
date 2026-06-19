@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAINTERPROCESS_PROCESSGROUP_H
@@ -15,13 +15,13 @@ namespace AthenaInterprocess {
 class IMessageDecoder;
 
 struct ProcessStatus {
-   pid_t pid;
-   int   exitcode;
+   pid_t pid{};
+   int   exitcode{};
 };
 
 struct ProcessResult {
-   pid_t pid;
-   ScheduledWork output;
+   pid_t pid {};
+   ScheduledWork output{};
 };
 
 class ProcessGroup {

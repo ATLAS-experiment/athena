@@ -100,7 +100,7 @@ StatusCode InDet::InDetVertexSplitter::finalize() {
 //////////////////////////////////////////////////////////////////////////////////
 /// Execute - on event by event
 
-StatusCode InDet::InDetVertexSplitter::execute() {
+StatusCode InDet::InDetVertexSplitter::execute(const EventContext& /*ctx*/) {
 
   ATH_MSG_DEBUG("in execute()");
 

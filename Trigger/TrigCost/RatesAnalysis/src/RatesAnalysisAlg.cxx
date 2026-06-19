@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RatesAnalysis includes
@@ -632,7 +632,7 @@ StatusCode RatesAnalysisAlg::pass_HstpFilter(bool &pass){
   return StatusCode::SUCCESS;
 }
 
-StatusCode RatesAnalysisAlg::execute() {  
+StatusCode RatesAnalysisAlg::execute(const EventContext& ctx) {  
   ATH_MSG_VERBOSE("Executing " << name() << " on event " << m_eventCounter << "...");
   if (m_eventCounter++ == 0) { // First time in execute loop - cannot access TDT before this.
     ATH_CHECK( populateTriggers() );
@@ -648,7 +648,6 @@ StatusCode RatesAnalysisAlg::execute() {
       m_metadataKeysCached = true;
     }    
   }
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Get event characteristics
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
   ATH_CHECK( eventInfo.isValid() );
@@ -731,7 +730,7 @@ StatusCode RatesAnalysisAlg::execute() {
     ATH_MSG_INFO( "Event " << m_eventCounter << " " << m_weightingValues.print() << " currentWallTime:" << m_ratesDenominator );
   }
 
-  setFilterPassed(true); //if got here, assume that means algorithm passed
+  setFilterPassed(true, ctx); //if got here, assume that means algorithm passed
   return StatusCode::SUCCESS;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DUMPEVENTDATATOJSONALG_H
@@ -55,7 +55,7 @@ public:
 
   /// inherited from Algorithm
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
 protected:

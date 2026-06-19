@@ -46,7 +46,7 @@ StatusCode Trk::MaterialManipulation::initialize()
 }
 
 
-StatusCode Trk::MaterialManipulation::execute()
+StatusCode Trk::MaterialManipulation::execute(const EventContext& /*ctx*/)
 {
     ATH_MSG_VERBOSE("MaterialManipulation execute() start");
 

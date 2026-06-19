@@ -107,7 +107,7 @@ protected:
       double atanh_check = newZ / std::sqrt( newR*newR + newZ*newZ);
       double epsilon = std::numeric_limits<double>::epsilon();
       if (std::abs(atanh_check) > 1.-epsilon){
-	atanh_check = 1.-epsilon*std::abs(atanh_check)/atanh_check;
+	atanh_check = (1.-epsilon)*std::abs(atanh_check)/atanh_check;
       }
       double newEta =  std::atanh(atanh_check);
 

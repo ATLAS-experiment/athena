@@ -156,15 +156,7 @@ def DQPostProcess( outFileName, isIncremental=False ):
             if not isIncremental:
                 import subprocess
                 print(f'New style postprocessing running for: {yamlfile}')
-                # ROOT >=6.40 changed the Python ownership heuristic, breaking
-                # histgrinder's TH1 detach pattern.
-                # Restore the legacy heuristic and invoke histgrinder's entry
-                # point directly, instead of via the bin script.
-                # TODO: remove once upstream histgrinder is updated to work with the new heuristic.
-                cmdline = [sys.executable, '-c',
-                           'import ROOT; ROOT.SetHeuristicMemoryPolicy(True);'
-                           ' from histgrinder.engine import go; go()',
-                           '--prefix', f'/{rundir(fname)}/', fname, fname, '-c', yamlfile]
+                cmdline = ['histgrinder', '--prefix', f'/{rundir(fname)}/', fname, fname, '-c', yamlfile]
                 subprocess.run(cmdline, check=True)
         newstyle_core.__name__ = os.path.splitext(os.path.basename(yamlfile))[0]
         return newstyle_core

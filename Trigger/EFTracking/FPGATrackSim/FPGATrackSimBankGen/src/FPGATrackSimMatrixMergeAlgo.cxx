@@ -215,7 +215,7 @@ void FPGATrackSimMatrixMergeAlgo::readFiles()
 ///////////////////////////////////////////////////////////////////////////////
 
 
-StatusCode FPGATrackSimMatrixMergeAlgo::execute()
+StatusCode FPGATrackSimMatrixMergeAlgo::execute(const EventContext& /*ctx*/)
 {
   // Do nothing; this class does not process events. The main algorithm is
   // called in initialize() and finalize().

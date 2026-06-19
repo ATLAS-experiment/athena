@@ -165,12 +165,7 @@ StatusCode EtaPtFilterTool::buildGenEvent( const HepMC::GenEvent* in, HepMC::Gen
   VertexMap_t vmap;
   ParticleMap_t pmap;
   auto spv =  HepMC::signal_process_vertex(in); //AV To be removed in the future
-#ifdef HEPMC3
   for ( auto vtx: in->vertices() ) {
-#else
-  for ( HepMC::GenEvent::vertex_const_iterator vtxit = in->vertices_begin(); vtxit != in->vertices_end();  ++vtxit ) {
-    auto vtx=*vtxit;
-#endif
     bool isSignalVertex = (vtx == spv);
     if ( !isAccepted(vtx) && !isSignalVertex ) {
       // no in-going nor out-going particles at this vertex matches 
@@ -262,25 +257,12 @@ bool EtaPtFilterTool::isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const
   // Now we check if at least one in- or out-going particle can be accepted.
   // If yes, then we accept the entire vertex
   //
-#ifdef HEPMC3
   // check the parent branch
   for ( const auto& p: vtx->particles_in() ) {
     if ( isAccepted(p) ) {
       return true;
     }
   }//> end loop over parents
-#else
-  // check the parent branch
-  for ( HepMC::GenVertex::particles_in_const_iterator 
-	  p    = vtx->particles_in_const_begin(),
-	  pEnd = vtx->particles_in_const_end();
-	p != pEnd;
-	++p ) {
-    if ( isAccepted(*p) ) {
-      return true;
-    }
-  }//> end loop over parents
-#endif  
   
   // check the child branch
   for ( auto p :  *vtx) {
@@ -301,7 +283,6 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
     ATH_MSG_ERROR("In addVertex(vtx,evt) : INVALID pointer given !!" << endmsg  << " vtx: " << srcVtx << endmsg << " evt: " << evt);
     return StatusCode::FAILURE;
   }
-#ifdef HEPMC3
   HepMC::GenVertexPtr& vtx = vmap[srcVtx.get()];
   if ( !vtx ) {
     vtx = HepMC::newGenVertexPtr();
@@ -309,7 +290,7 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
     vtx->set_position( srcVtx->position() );
     vtx->set_status( srcVtx->status() );
     HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx));
-    vtx->add_attribute(HepMC::Str::weights,srcVtx->attribute<HepMC3::VectorDoubleAttribute> (HepMC::Str::weights));
+    vtx->add_attribute(HepMCStr::weights,srcVtx->attribute<HepMC3::VectorDoubleAttribute> (HepMCStr::weights));
     if (isSignalVertex) HepMC::set_signal_process_vertex(evt,vtx);
   }
   ////////////////////////////
@@ -350,66 +331,7 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
     // set the daughter's production vertex to our new vertex
     vtx->add_particle_out( p );
   }//> loop over outgoing particles
-#else
 
-  HepMC::GenVertexPtr& vtx = vmap[srcVtx];
-  if ( !vtx ) {
-    vtx = new HepMC::GenVertex();
-    vtx->set_position( srcVtx->position() );
-    vtx->set_id( srcVtx->id() );
-    vtx->suggest_barcode( srcVtx->barcode() );
-    vtx->weights() = srcVtx->weights();
-    evt->add_vertex(vtx);
-    if (isSignalVertex) evt->set_signal_process_vertex(vtx);
-  }
-
-  ////////////////////////////
-  /// Fill the parent branch
-  for ( HepMC::GenVertex::particles_in_const_iterator 
-	  parent    = srcVtx->particles_in_const_begin(),
-	  parentEnd = srcVtx->particles_in_const_end();
-	parent != parentEnd;
-	++parent ) {
-    HepMC::GenParticlePtr& p = pmap[*parent];
-    if ( !p ) {
-      p = new HepMC::GenParticle;
-      p->set_momentum( (*parent)->momentum() );
-      p->set_generated_mass( (*parent)->generated_mass() );
-      p->set_pdg_id( (*parent)->pdg_id() );
-      p->set_status( (*parent)->status() );
-      p->set_flow( (*parent)->flow() );
-      p->set_polarization( (*parent)->polarization() );
-      p->suggest_barcode( (*parent)->barcode() );
-    }
-    // set the mother's decay to our (new) vertex
-    vtx->add_particle_in( p );
-    
-  }//> loop over ingoing particles
-  
-  //////////////////////////////
-  /// Fill the children branch
-  for ( HepMC::GenVertex::particles_out_const_iterator 
-	  child = srcVtx->particles_out_const_begin(),
-	  childEnd = srcVtx->particles_out_const_end();
-	child != childEnd;
-	++child ) {
-    HepMC::GenParticlePtr& p = pmap[*child];
-    if ( !p ) {
-      p = new HepMC::GenParticle;
-      p->set_momentum( (*child)->momentum() );
-      p->set_generated_mass( (*child)->generated_mass() );
-      p->set_pdg_id( (*child)->pdg_id() );
-      p->set_status( (*child)->status() );
-      p->set_flow( (*child)->flow() );
-      p->set_polarization( (*child)->polarization() );
-      p->suggest_barcode( (*child)->barcode() );
-    }
-
-    // set the daughter's production vertex to our new vertex
-    vtx->add_particle_out( p );
-
-  }//> loop over outgoing particles
-#endif
 
   return StatusCode::SUCCESS;
 }
@@ -417,7 +339,6 @@ StatusCode EtaPtFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, H
 bool EtaPtFilterTool::isPartonVertex( const HepMC::ConstGenVertexPtr& vtx ) const
 {
  if (!vtx) return false;
-#ifdef HEPMC3
  for (auto& p: vtx->particles_in()) {
    if (MC::isHadron(p)&&!MC::isBeam(p)) return false;
    auto pv = p->production_vertex();
@@ -426,27 +347,13 @@ bool EtaPtFilterTool::isPartonVertex( const HepMC::ConstGenVertexPtr& vtx ) cons
  for (auto& p: vtx->particles_out()) {
    if (MC::isHadron(p)&&!MC::isBeam(p)) return false;
  }
-#else
- for ( auto  p = vtx->particles_in_const_begin(), parentEnd = vtx->particles_in_const_end(); p != parentEnd; ++p ) {
-   if (MC::isHadron(*p)&&!MC::isBeam(*p)) return false;
-   auto pv = (*p)->production_vertex();
-   if (pv && !isPartonVertex(pv)) return false;
-}
-for ( auto  p = vtx->particles_out_const_begin(), parentEnd = vtx->particles_out_const_end(); p != parentEnd; ++p ) {
-   if (MC::isHadron(*p)&&!MC::isBeam(*p)) return false;
- }
-#endif 
  return true;
 }
 bool EtaPtFilterTool::isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const
 {
   int partonsin = 0;
   int showerout = 0;
-#ifdef HEPMC3  
   for (auto& p: vtx->particles_in()) if (MC::isQuark(p) || MC::isGluon(p)) partonsin++;
-#else
-  for (auto p = vtx->particles_in_const_begin();p!=vtx->particles_in_const_end();++p ) if (MC::isQuark(*p) || MC::isGluon(*p)) partonsin++;
-#endif
   for (auto& p: *vtx) if (p->pdg_id() == 91||p->pdg_id() == 92||p->pdg_id() == 94)  showerout++;
   
   return isPartonVertex(vtx) && (partonsin >= 2) &&  (showerout == 0);

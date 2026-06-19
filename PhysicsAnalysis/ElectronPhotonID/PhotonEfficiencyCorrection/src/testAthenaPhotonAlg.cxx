@@ -35,7 +35,7 @@ StatusCode testAthenaPhotonAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode testAthenaPhotonAlg::execute() {
+StatusCode testAthenaPhotonAlg::execute(const EventContext& /*ctx*/) {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
 //----------------------------

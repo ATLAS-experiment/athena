@@ -17,6 +17,13 @@
 
 namespace ActsTrk {
 
+class IPixelClusteringTool;
+template <>
+struct RDOContainerTraits<PixelRDO_Container> {
+   using PerModuleRDOs = PixelRDO_Container::base_value_type;
+   using IClusteringToolType = IPixelClusteringTool;
+};
+
 // forward declaration (defintion  Tracking/Acts/ActsDataPreparation/src/details/CellContainer.h)
 template <typename coordinates_t, std::size_t NDIM, std::unsigned_integral index_t>
 struct CellContainer;

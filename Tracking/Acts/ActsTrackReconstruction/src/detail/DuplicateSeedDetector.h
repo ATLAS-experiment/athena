@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_DUPLICATESEEDDETECTOR_H
@@ -7,7 +7,6 @@
 
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "ActsEvent/SeedContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 
 #include <unordered_map>
 #include <vector>
@@ -36,7 +35,7 @@ namespace ActsTrk::detail {
     void addSeeds(std::size_t typeIndex, const ActsTrk::SeedContainer &seeds, const MeasurementIndex &measurementIndex,
                   SpacePointIndicesFun_t spacePointIndicesFun, UseTopSpFun_t useTopSpFun);
     inline void newTrajectory();
-    inline void addMeasurement(const ActsTrk::ATLASUncalibSourceLink &sl, const MeasurementIndex &measurementIndex);
+    inline void addMeasurement(const xAOD::UncalibratedMeasurement* sl, const MeasurementIndex &measurementIndex);
 
     // For complete removal of duplicate seeds, assumes isDuplicate(typeIndex,iseed) is called for monotonically increasing typeIndex,iseed.
     inline bool isDuplicate(std::size_t typeIndex, index_t iseed);

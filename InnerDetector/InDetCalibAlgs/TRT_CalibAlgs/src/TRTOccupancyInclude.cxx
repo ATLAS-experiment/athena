@@ -45,11 +45,10 @@ StatusCode TRTOccupancyInclude::initialize()
 
 //---------------------------------------------------------------------
 
-StatusCode TRTOccupancyInclude::execute()
+StatusCode TRTOccupancyInclude::execute(const EventContext& ctx)
 {
   msg(MSG::DEBUG) << "execute()" << endmsg;
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfoKey, ctx);
   if (not evtInfo.isValid()) {

@@ -34,8 +34,7 @@ StatusCode MaterialTrackWriter::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MaterialTrackWriter::execute () {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode MaterialTrackWriter::execute (const EventContext& ctx) {
     // Get the collection from storegate
     const RecordedMaterialTrackCollection* materialTracks{nullptr};
     ATH_CHECK(SG::get(materialTracks, m_materialTrackCollectionKey, ctx));

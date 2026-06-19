@@ -359,14 +359,7 @@ bool TrackCollHandle_TruthTracks::Imp::loadGenParticles( std::map<SimBarCode,Hep
     const HepMC::GenEvent * evt = *itEvt;
     if (!evt)
       continue;
-#ifdef HEPMC3
    for(auto itVtx: evt->vertices()) loadGenParticles(genParticles,itVtx);
-#else
-    HepMC::GenEvent::vertex_const_iterator itVtx(evt->vertices_begin()), itVtxEnd(evt->vertices_end());
-    for(;itVtx!=itVtxEnd;++itVtx) {
-      loadGenParticles(genParticles,*itVtx);
-    }
-#endif
   }
 
   return true;

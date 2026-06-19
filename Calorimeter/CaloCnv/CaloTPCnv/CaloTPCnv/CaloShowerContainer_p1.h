@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -20,7 +20,7 @@ public:
 
   struct CaloShower {
     CaloClusterMomentStore_p1 m_momentStore;
-    CaloSamplingData_p1 m_samplingStore;
+    CaloSamplingData_p1 m_samplingStore{};
   };
 
   std::vector<CaloShower> m_container;

@@ -33,17 +33,10 @@ StatusCode  ISF::GenParticlePositionFilter::initialize()
 
 
 /** does the given particle pass the filter? */
-#ifdef HEPMC3
 bool ISF::GenParticlePositionFilter::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
   // the GenParticle production vertex
   auto  vtx = particle->production_vertex();
-#else
-bool ISF::GenParticlePositionFilter::pass(const HepMC::GenParticle& particle) const
-{
-  // the GenParticle production vertex
-  HepMC::GenVertexPtr vtx = particle.production_vertex();
-#endif
 
   // no production vertex?
   if (!vtx) {

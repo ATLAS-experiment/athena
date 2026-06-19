@@ -37,7 +37,7 @@ namespace{
             default:
                 THROW_EXCEPTION("Cannot deduce the sector overlap "<<expandSector);
         }
-        return std::make_tuple(0, SectorProjector::center);
+        //all cases have been addressed
     }
 
 }

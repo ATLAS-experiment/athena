@@ -153,9 +153,7 @@ namespace xAODMaker {
         ATH_MSG_DEBUG( "Recorded TruthVertexContainer with key: " << m_xaodTruthVertexContainerKey.key() );
 
         // To keep track of whether we wrote an LHE event already or not
-#ifdef HEPMC3
         bool hadLHERecord = false;
-#endif
 
         // ***********************************************************************************
         // Create the xAOD objects
@@ -189,16 +187,13 @@ namespace xAODMaker {
 
         // (1) Build TruthEvents
         ATH_MSG_DEBUG("Number of GenEvents in this Athena event = " << mcColl->size());
-#ifdef HEPMC3
         bool newAttributesPresent(false);
-#endif
         for (unsigned int cntr = 0; cntr < mcColl->size(); ++cntr) {
           const HepMC::GenEvent* genEvt = (*mcColl)[cntr];
           bool isSignalProcess(false);
           if (cntr==0) {
             isSignalProcess=true;
-#ifdef HEPMC3
-            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>(HepMC::Str::BunchCrossingTime);
+            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
             if (bunchCrossingTime) {
               newAttributesPresent = true;
               ATH_MSG_VERBOSE("New attributes present.");
@@ -206,16 +201,12 @@ namespace xAODMaker {
             else {
               ATH_MSG_VERBOSE("New attributes missing.");
             }
-#else
-              ATH_MSG_VERBOSE("New attributes missing.");
-#endif
           }
           if (cntr>0) {
             // Handle pile-up events
             if (!m_doInTimePileUp && !m_doAllPileUp) break;
             isSignalProcess=false;
-#ifdef HEPMC3
-            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>(HepMC::Str::BunchCrossingTime);
+            auto bunchCrossingTime = genEvt->attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
             if (bunchCrossingTime) {
               // New approach based on checking the bunch crossing
               // time directly.
@@ -241,17 +232,6 @@ namespace xAODMaker {
                 break;
               }
             }
-#else
-              // Old approach based on McEventCollection structure. If
-              // in-time pileup only is requested, loop stops when the
-              // separator GenEvent between out-of-time and in-time is
-              // reached
-              if (m_doInTimePileUp && isSeparatorGenEvent(genEvt)) {
-                // Old structure - stop at the first separator
-                // GenEvent.
-                break;
-              }
-#endif
           }
 
           xAOD::TruthEvent* xTruthEvent = nullptr;
@@ -262,13 +242,8 @@ namespace xAODMaker {
             xTruthEvent = xTruthEventContainer->push_back( std::make_unique<xAOD::TruthEvent>() );
             // Cross-section
             auto crossSection = genEvt->cross_section();
-#ifdef HEPMC3
             xTruthEvent->setCrossSection(crossSection ? (float)crossSection->xsec() : -1);
             xTruthEvent->setCrossSectionError(crossSection ? (float)crossSection->xsec_err() : -1);
-#else
-            xTruthEvent->setCrossSection(crossSection ? (float)crossSection->cross_section() : -1);
-            xTruthEvent->setCrossSectionError(crossSection ? (float)crossSection->cross_section_error() : -1);
-#endif
 
             if (m_writeMetaData) {
               //The mcChannelNumber is used as a unique identifier for which truth meta data belongs to
@@ -295,7 +270,6 @@ namespace xAODMaker {
             // Heavy ion info
             auto const hiInfo = genEvt->heavy_ion();
             if (hiInfo) {
-#ifdef HEPMC3
               /* Please note HepMC3 as well as more recent HePMC2 versions   have more Hi parameters */
               xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll_hard, xAOD::TruthEvent::NCOLLHARD);
               xTruthEvent->setHeavyIonParameter(hiInfo->Npart_proj, xAOD::TruthEvent::NPARTPROJ);
@@ -310,21 +284,6 @@ namespace xAODMaker {
               xTruthEvent->setHeavyIonParameter((float)hiInfo->event_plane_angle, xAOD::TruthEvent::EVENTPLANEANGLE);
               xTruthEvent->setHeavyIonParameter((float)hiInfo->eccentricity, xAOD::TruthEvent::ECCENTRICITY);
               xTruthEvent->setHeavyIonParameter((float)hiInfo->sigma_inel_NN, xAOD::TruthEvent::SIGMAINELNN);
-#else
-              xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll_hard(), xAOD::TruthEvent::NCOLLHARD);
-              xTruthEvent->setHeavyIonParameter(hiInfo->Npart_proj(), xAOD::TruthEvent::NPARTPROJ);
-              xTruthEvent->setHeavyIonParameter(hiInfo->Npart_targ(), xAOD::TruthEvent::NPARTTARG);
-              xTruthEvent->setHeavyIonParameter(hiInfo->Ncoll(), xAOD::TruthEvent::NCOLL);
-              xTruthEvent->setHeavyIonParameter(hiInfo->spectator_neutrons(), xAOD::TruthEvent::SPECTATORNEUTRONS);
-              xTruthEvent->setHeavyIonParameter(hiInfo->spectator_protons(), xAOD::TruthEvent::SPECTATORPROTONS);
-              xTruthEvent->setHeavyIonParameter(hiInfo->N_Nwounded_collisions(), xAOD::TruthEvent::NNWOUNDEDCOLLISIONS);
-              xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_N_collisions(), xAOD::TruthEvent::NWOUNDEDNCOLLISIONS);
-              xTruthEvent->setHeavyIonParameter(hiInfo->Nwounded_Nwounded_collisions(), xAOD::TruthEvent::NWOUNDEDNWOUNDEDCOLLISIONS);
-              xTruthEvent->setHeavyIonParameter(hiInfo->impact_parameter(), xAOD::TruthEvent::IMPACTPARAMETER);
-              xTruthEvent->setHeavyIonParameter(hiInfo->event_plane_angle(), xAOD::TruthEvent::EVENTPLANEANGLE);
-              xTruthEvent->setHeavyIonParameter(hiInfo->eccentricity(), xAOD::TruthEvent::ECCENTRICITY);
-              xTruthEvent->setHeavyIonParameter(hiInfo->sigma_inel_NN(), xAOD::TruthEvent::SIGMAINELNN);
-#endif
               // This doesn't yet exist in our version of HepMC
               // xTruthEvent->setHeavyIonParameter(hiInfo->centrality(),xAOD::TruthEvent::CENTRALITY);
             }
@@ -333,7 +292,6 @@ namespace xAODMaker {
             // This will exist 99% of the time, except for e.g. cosmic or particle gun simulation
             auto const pdfInfo = genEvt->pdf_info();
             if (pdfInfo) {
-#ifdef HEPMC3
               xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[0], xAOD::TruthEvent::PDGID1);
               xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[1], xAOD::TruthEvent::PDGID2);
               xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID1);
@@ -344,23 +302,10 @@ namespace xAODMaker {
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->scale, xAOD::TruthEvent::Q);
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->xf[0], xAOD::TruthEvent::XF1);
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->xf[1], xAOD::TruthEvent::XF2);
-#else
-              xTruthEvent->setPdfInfoParameter(pdfInfo->id1(), xAOD::TruthEvent::PDGID1);
-              xTruthEvent->setPdfInfoParameter(pdfInfo->id2(), xAOD::TruthEvent::PDGID2);
-              xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id1(), xAOD::TruthEvent::PDFID1);
-              xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id2(), xAOD::TruthEvent::PDFID2);
-
-              xTruthEvent->setPdfInfoParameter((float)pdfInfo->x1(), xAOD::TruthEvent::X1);
-              xTruthEvent->setPdfInfoParameter((float)pdfInfo->x2(), xAOD::TruthEvent::X2);
-              xTruthEvent->setPdfInfoParameter((float)pdfInfo->scalePDF(), xAOD::TruthEvent::Q);
-              xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf1(), xAOD::TruthEvent::XF1);
-              xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf2(), xAOD::TruthEvent::XF2);
-#endif
             }
 
             // Handle LHE particles, only supported for HEPMC3
-#ifdef HEPMC3
-            auto lhe_record_attribute = genEvt->attribute<HepMC::ShortEventAttribute>(HepMC::Str::LHERecord);
+            auto lhe_record_attribute = genEvt->attribute<HepMC::ShortEventAttribute>(HepMCStr::LHERecord);
 
             if (lhe_record_attribute && !hadLHERecord && !m_lheTruthParticleContainerKey.empty()){
               hadLHERecord=true;
@@ -389,11 +334,6 @@ namespace xAODMaker {
             else if (hadLHERecord){
               ATH_MSG_WARNING("Truth record appeared to have two LHE records; this should not be possible");
             }
-#else
-            if (!m_lheTruthParticleContainerKey.empty()){
-              ATH_MSG_WARNING("HEPMC2 does not support LHE truth record storage. Skipping.");
-            }
-#endif
           }else{//not isSignalProcess
             xTruthPileupEvent = xTruthPileupEventContainer->push_back( std::make_unique<xAOD::TruthPileupEvent>() );
           }
@@ -421,12 +361,11 @@ namespace xAODMaker {
           // Get the beam particles
           pair<HepMC::ConstGenParticlePtr,HepMC::ConstGenParticlePtr> beamParticles;
           bool genEvt_valid_beam_particles=false;
-#ifdef HEPMC3
         auto beamParticles_vec = genEvt->beams();
         genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
         if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
         // We want to process particles in barcode order.
-        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>(HepMC::Str::barcodes); // FIXME barcode-based
+        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>(HepMCStr::barcodes); // FIXME barcode-based
         if (!bcmapatt) {
           ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
           return StatusCode::FAILURE;
@@ -434,12 +373,6 @@ namespace xAODMaker {
         std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
         xTruthParticleContainer->reserve(bcmap.size());
         for (const auto &[genPartBarcode,part]: bcmap) {
-#else
-        genEvt_valid_beam_particles=genEvt->valid_beam_particles();
-        if ( genEvt_valid_beam_particles ) beamParticles = genEvt->beam_particles();
-        xTruthParticleContainer->reserve(genEvt->particles_size());
-        for (auto part: *genEvt) {
-#endif
           int genPartUniqueID = HepMC::uniqueID(part);
           // (a) create TruthParticle
           xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
@@ -638,7 +571,6 @@ namespace xAODMaker {
         m_tmd->push_back (std::make_unique <xAOD::TruthMetaData>());
         xAOD::TruthMetaData* md = m_tmd->back();
 
-#ifdef HEPMC3
         ///Here comes the fix. Note that HepMC2.06.11 also contains the fix
         md->setMcChannelNumber(mcChannelNumber);
         std::vector<std::string> orderedWeightNameVec;
@@ -653,25 +585,6 @@ namespace xAODMaker {
           }
         }
         md->setWeightNames(orderedWeightNameVec);
-#else
-        // FIXME: class member protection violation here.
-        // This appears to be because WeightContainer has no public methods
-        // to get information about the weight names.
-        const auto& weightNameMap = genEvt.weights().m_names;
-        std::vector<std::string> orderedWeightNameVec;
-        orderedWeightNameVec.reserve( weightNameMap.size() );
-        for (const auto& entry: weightNameMap) {
-          orderedWeightNameVec.push_back(entry.first);
-        }
-
-        //The map from the HepMC record pairs the weight names with a corresponding index,
-        //it is not guaranteed that the indices are ascending when iterating over the map
-        std::sort(orderedWeightNameVec.begin(), orderedWeightNameVec.end(),
-                  [&](const std::string& i, const std::string& j){return weightNameMap.at(i) < weightNameMap.at(j);});
-
-        md->setMcChannelNumber(mcChannelNumber);
-        md->setWeightNames( orderedWeightNameVec );
-#endif
 
         if(!metaFields.lhefGenerator.empty()) {
           md->setLhefGenerator(metaFields.lhefGenerator);

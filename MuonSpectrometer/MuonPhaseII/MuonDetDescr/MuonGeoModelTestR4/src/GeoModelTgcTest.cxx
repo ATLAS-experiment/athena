@@ -81,9 +81,8 @@ StatusCode GeoModelTgcTest::finalize() {
     ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
-StatusCode GeoModelTgcTest::execute() {
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
-
+StatusCode GeoModelTgcTest::execute(const EventContext& ctx) {
+    
     const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
     const ActsTrk::GeometryContext& gctx{*geoContextHandle};

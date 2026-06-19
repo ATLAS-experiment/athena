@@ -43,18 +43,18 @@ and calls relevant routine to look for the cells.
 */
 
 
-StatusCode Run2JetElementMaker::execute( )
+StatusCode Run2JetElementMaker::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "Executing" ) ;
 
   // Vectors to store JetElements in
-  auto jetElements = SG::makeHandle(m_jetElementKey);
+  auto jetElements = SG::makeHandle(m_jetElementKey, ctx);
   auto vectorOfJEs = std::make_unique<JECollection>();
   auto jeAuxVector = std::make_unique<JEAuxCollection>();
   vectorOfJEs->setStore(jeAuxVector.get());
 	
   // Retrieve TriggerTowers from StoreGate 
-  auto vectorOfTTs = SG::makeHandle(m_triggerTowerKey);
+  auto vectorOfTTs = SG::makeHandle(m_triggerTowerKey, ctx);
   ATH_CHECK(vectorOfTTs.isValid());
   // Fill a DataVector of JetElements using L1JetElementTools
   m_JetElementTool->makeJetElements(vectorOfTTs.get(), vectorOfJEs.get());

@@ -13,13 +13,13 @@ StatusCode xAODMultiLeptonFilter::filterInitialize()
 }
 
 
-StatusCode xAODMultiLeptonFilter::filterEvent() {
+StatusCode xAODMultiLeptonFilter::filterEvent(const EventContext& ctx) {
 
   // Retrieve TruthElectrons  container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerElectron{m_truthElectronContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerElectron{m_truthElectronContKey, ctx};
   CHECK(xTruthParticleContainerElectron.isValid());
   // Retrieve TruthMuons container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMuon{m_truthMuonContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMuon{m_truthMuonContKey, ctx};
   CHECK(xTruthParticleContainerMuon.isValid());
   int numLeptons = 0;
 
@@ -30,7 +30,7 @@ StatusCode xAODMultiLeptonFilter::filterEvent() {
           numLeptons += 1;
           if (numLeptons >= m_NLeptons)
           {
-            setFilterPassed(true);
+            setFilterPassed(true, ctx);
             return StatusCode::SUCCESS;
           }
         }       
@@ -43,13 +43,13 @@ StatusCode xAODMultiLeptonFilter::filterEvent() {
           numLeptons += 1;
           if (numLeptons >= m_NLeptons)
           {
-            setFilterPassed(true);
+            setFilterPassed(true, ctx);
             return StatusCode::SUCCESS;
           }
         }      
   }
   
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 
 }

@@ -63,55 +63,43 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Recorded output McEventCollection container " << outputContainer.name() << " in store " << outputContainer.store());
 
   unsigned int droppedSeparatorGenEvents{0};
-#ifdef HEPMC3
   int backupPileUpType{0};
   int backupBunchCrossingTime{0};
-#endif
   // Copy signal GenEvents
   for (McEventCollection::const_iterator it = signalContainer->begin(); it != signalContainer->end(); ++it) {
-#ifdef HEPMC3
     if ( (*it)->event_number() == -1 ) {
       ++droppedSeparatorGenEvents;
       ATH_MSG_VERBOSE("Signal: Skipping a separator GenEvent. " << droppedSeparatorGenEvents << " skipped so far.");
       backupBunchCrossingTime+=25; // NB This is a bit of a hack, but better than having everything in-time
       continue;
     }
-#endif
     HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
     HepMC::fillBarcodesAttribute(copiedEvent);
-#ifdef HEPMC3
-    auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>(HepMC::Str::BunchCrossingTime);
+    auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
     if (bunchCrossingTime) {
-      copiedEvent->add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
+      copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
     }
     else {
-      copiedEvent->add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
+      copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
     }
-    auto pileupType = (*it)->attribute<HepMC3::IntAttribute>(HepMC::Str::PileUpType);
+    auto pileupType = (*it)->attribute<HepMC3::IntAttribute>(HepMCStr::PileUpType);
     if (pileupType) {
-      copiedEvent->add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
+      copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
     }
     else {
-      copiedEvent->add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
+      copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
       if (backupPileUpType == 0) { backupPileUpType = 1; } // ignore the possibility for cavern background for this back-up case
     }
-#endif
     if (!copiedEvent->heavy_ion() && (*it)->heavy_ion()) {
       // It should be clarified if we want to get a copy or the
       // content.
-#ifdef HEPMC3
       HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*((*it)->heavy_ion()));
       copiedEvent->set_heavy_ion(std::move(hinew));
-#else
-      copiedEvent->set_heavy_ion(*((*it)->heavy_ion()));
-#endif
     }
     outputContainer->push_back(copiedEvent);
   }
 
-#ifdef HEPMC3
   backupBunchCrossingTime = 0;
-#endif
   // Copy background GenEvents if configured
   if (!m_bkgInputKey.key().empty()) {
     McEventCollection::const_iterator it = bkgContainerPtr->begin();
@@ -120,42 +108,34 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
       ++it;
     }
     for ( ; it != bkgContainerPtr->end(); ++it) {
-#ifdef HEPMC3
       if ( (*it)->event_number() == -1 ) {
         ++droppedSeparatorGenEvents;
         ATH_MSG_VERBOSE("Background: Skipping a separator GenEvent. " << droppedSeparatorGenEvents << " skipped so far.");
         backupBunchCrossingTime+=25; // NB This is a bit of a hack, but better than having everything in-time
         continue;
       }
-#endif
       HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
       HepMC::fillBarcodesAttribute(copiedEvent);
-#ifdef HEPMC3
-      auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>(HepMC::Str::BunchCrossingTime);
+      auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
       if (bunchCrossingTime) {
-        copiedEvent->add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
+        copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
       }
       else {
-        copiedEvent->add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
+        copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
       }
-      auto pileupType = (*it)->attribute<HepMC3::IntAttribute>(HepMC::Str::PileUpType);
+      auto pileupType = (*it)->attribute<HepMC3::IntAttribute>(HepMCStr::PileUpType);
       if (pileupType) {
-        copiedEvent->add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
+        copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
       }
       else {
-        copiedEvent->add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
+        copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
         if (backupPileUpType == 0) { backupPileUpType = 1; } // ignore the possibility for cavern background for this back-up case
       }
-#endif
       if (!copiedEvent->heavy_ion() && (*it)->heavy_ion()) {
         // It should be clarified if we want to get a copy or the
         // content.
-#ifdef HEPMC3
         HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*((*it)->heavy_ion()));
         copiedEvent->set_heavy_ion(std::move(hinew));
-#else
-        copiedEvent->set_heavy_ion(*((*it)->heavy_ion()));
-#endif
       }
       outputContainer->push_back(copiedEvent);
     }

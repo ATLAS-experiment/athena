@@ -52,6 +52,11 @@ flags.Input.isMC = True
 flags.IOVDb.GlobalTag = ''
 flags.Input.MCCampaign = Campaign.Unknown
 
+#Run3 for now
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
+
 parser = flags.getArgumentParser()
 parser.add_argument('--condDB', default='cool', help='source of conditions data')
 args, _ = parser.parse_known_args()

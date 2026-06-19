@@ -19,7 +19,7 @@ class MultiCjetFilter:public GenFilter {
     virtual ~MultiCjetFilter();
     virtual StatusCode filterInitialize();
     virtual StatusCode filterFinalize();
-    virtual StatusCode filterEvent();
+    virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

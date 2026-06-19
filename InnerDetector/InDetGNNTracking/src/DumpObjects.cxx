@@ -366,11 +366,9 @@ StatusCode InDet::DumpObjects::initialize() {
 }
 
 //-------------------------------
-StatusCode InDet::DumpObjects::execute() {
+StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
   //-------------------------------
   //
-  const EventContext &ctx = Gaudi::Hive::currentContext();
-
   m_event++;
 
   // map cluster ID to an index
@@ -1509,20 +1507,10 @@ bool InDet::DumpObjects::isPassed(HepMC::ConstGenParticlePtr particle, float &px
     vProdNout = particle->production_vertex()->particles_out_size();
     vProdStatus = particle->production_vertex()->id();
     vProdBarcode = HepMC::barcode(particle->production_vertex()); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
-#ifdef HEPMC3
     for (const auto &p : particle->production_vertex()->particles_in()) {
       vParentID.push_back(p->pdg_id());
       vParentBarcode.push_back(HepMC::barcode(p)); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
     }
-#else
-    for (auto ip = particle->production_vertex()->particles_in_const_begin();
-         ip != particle->production_vertex()->particles_in_const_end();
-         ++ip)
-    {
-      vParentID.push_back((*ip)->pdg_id());
-      vParentBarcode.push_back(HepMC::barcode(*ip)); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
-    }
-#endif
   } else {
     vProdNin = 0;
     vProdNout = 0;

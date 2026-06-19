@@ -140,7 +140,7 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode DerivationFramework::DerivationKernel::execute() {
+StatusCode DerivationFramework::DerivationKernel::execute(const EventContext& ctx) {
 
   IChronoSvc* cSvc=m_chronoSvc.get(); //Might be null ...
   // On your marks.... get set.... (but only if not in MT)
@@ -155,7 +155,6 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
   //=============================================================================
   // AUGMENTATION ===============================================================
   //=============================================================================
-  const EventContext &ctx = Gaudi::Hive::currentContext();
   if (!m_runSkimmingFirst) {
     for (const auto &  augmentationTool : m_augmentationTools) {
       ATH_MSG_DEBUG("Entering " << augmentationTool->name());
@@ -187,7 +186,7 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
   if (acceptEvent) ++m_acceptCntr;
 
   // Set the setFilterPassed flag
-  setFilterPassed(acceptEvent);
+  setFilterPassed(acceptEvent, ctx);
 
   // Return if event didn't pass
   if (!acceptEvent) return StatusCode::SUCCESS;

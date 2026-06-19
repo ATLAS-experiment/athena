@@ -54,7 +54,7 @@ class CompactHardTruth
 
   // Athena algorithm Hooks
   virtual StatusCode  initialize();
-  virtual StatusCode  execute();
+  virtual StatusCode  execute(const EventContext& ctx);
   virtual StatusCode  finalize();
 
   // Total in/out FourVector for vertex

@@ -47,18 +47,18 @@ namespace CP
     }
 
 
-    StatusCode EgammaFSRForMuonsCollectorAlg::execute()
+    StatusCode EgammaFSRForMuonsCollectorAlg::execute(const EventContext& ctx)
     {
         // Loop over systematics
         for (const auto& sys : m_systematicsList.systematicsVector()) {
 
             // Retrieve electrons or photons
             const xAOD::IParticleContainer* egammaCont = nullptr;
-            ANA_CHECK(m_egammaContKey.retrieve(egammaCont, sys));
+            ANA_CHECK(m_egammaContKey.retrieve(egammaCont, sys, ctx));
 
             // Retrieve muons
             const xAOD::MuonContainer* muonCont = nullptr;
-            ANA_CHECK(m_muonContKey.retrieve(muonCont, sys));
+            ANA_CHECK(m_muonContKey.retrieve(muonCont, sys, ctx));
 
             // Loop over each electron or photon and compute the combined selection
             for (const xAOD::IParticle* eg : *egammaCont) {

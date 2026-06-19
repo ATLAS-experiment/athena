@@ -22,7 +22,7 @@ model = 'TOTAL'
 pT = 41212.1
 eta = -0.94
 other = '| grep SF'
-eleid = 'Medium'
+eleid = 'MediumLH'
 
 rangeofsim = ['FullSim'] # ,'AtlFast2'] # to be added later
 rangeofrunno =  [runno] # 270000, 300000, 334320, 352183] # other runno to be added later
@@ -60,7 +60,7 @@ print('    ---> map looks good! ')
 
 # third check: print all ID levels
 print(' ==== CHECK III:  ID LVL ==== ')
-for thisid in ['Medium', 'LooseBLayer', 'Tight']:
+for thisid in ['MediumLH', 'LooseBLayerLH', 'TightLH']:
     getScalefactor(' -t %s -r %d -c %s -e %1.2f -p %1.2f -d %s %s ' %
                    (stype, runno, model, eta, pT, thisid, other))
 
@@ -83,17 +83,16 @@ for thissim in rangeofsim:
                         "are you sure it\'s supposed to be there?")
 
 # fifth check: also run a couple of reco, iso and trigger scale factors
-print(' ==== CHECK IV:  RECO+ISO+TRIGGER ==== ')
+print(' ==== CHECK IV:  RECO+ISO ==== ')
 getScalefactor(' -t %s -r %d -c %s -e %1.2f -p %1.2f -d %s %s ' %
                (stype, runno, model, eta, pT, 'Reconstruction', other))
 for thisother in [
-    '-i Tight_VarRad',
-    '-i Tight_VarRad -g 2022_e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI'
+    '-i Tight_VarRad'
 ]:
     for thissim in rangeofsim:
         for thisrunno in rangeofrunno :
             flags = (thissim, thisrunno, model, eta,
-                     pT, "Tight", thisother+other)
+                     pT, "TightLH", thisother+other)
             getScalefactor(
                 ' -t %s -r %d -c %s -e %1.2f -p %1.2f -d %s %s ' % flags)
 

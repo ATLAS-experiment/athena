@@ -19,7 +19,7 @@ class LArGeoWeightsFill:public AthAlgorithm {
   LArGeoWeightsFill(const std::string& name, ISvcLocator* pSvcLocator);
   ~LArGeoWeightsFill();
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override;
 
  private:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArROD includes
@@ -168,7 +168,7 @@ StatusCode SuperCellVsCaloCellTestAlg::execute(const EventContext& ctx) {
 
          //detect suspicious supercells .. where truth energy is greater than 1GeV and we measure less than 25% of it, or super cell ET is greater than 1GeV and truth ET < 25% of that
          if( (tscellEt>1. && scellEt/tscellEt<0.25) || (scellEt>1. && tscellEt/scellEt<0.25) ) {
-	    m_eventNumber = getContext().eventID().event_number();
+            m_eventNumber = ctx.eventID().event_number();
 
             HWIdentifier hwid = cabling->createSignalChannelID(scell->ID());
             m_treeChannel = hwid.get_identifier32().get_compact();

@@ -16,7 +16,6 @@
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "ActsEvent/TrackParameters.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "VP1Base/VP1Msg.h"

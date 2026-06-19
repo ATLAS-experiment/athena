@@ -40,7 +40,7 @@ StatusCode TBXCryYTableRead::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TBXCryYTableRead::execute(const EventContext& /*ctx*/)
+StatusCode TBXCryYTableRead::execute(const EventContext& ctx)
 {
   m_nEvent++;
   ATH_MSG_DEBUG ( "Executing TBXCryYTableRead " );
@@ -52,7 +52,7 @@ StatusCode TBXCryYTableRead::execute(const EventContext& /*ctx*/)
   if ( sc.isFailure() ) {
     ATH_MSG_ERROR
       ( "Cannot retrieve TBEventInfo from StoreGate" );
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -98,10 +98,10 @@ StatusCode TBXCryYTableRead::execute(const EventContext& /*ctx*/)
   //sc = m_eventStore->record(m_eventinfo,"TBEventInfo");
   //if ( sc.isFailure( ) ) {
   //   ATH_MSG_FATAL( "Cannot record new TBEventInfo " );
-  //   setFilterPassed(false);
+  //   setFilterPassed(false, ctx);
   //   return StatusCode::SUCCESS;
   //}
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 
 }

@@ -49,7 +49,7 @@ StatusCode L1CaloHVCorrectionsForDB::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode L1CaloHVCorrectionsForDB::execute()
+StatusCode L1CaloHVCorrectionsForDB::execute(const EventContext& /*ctx*/)
 {
     if (m_firstEvent) {
 

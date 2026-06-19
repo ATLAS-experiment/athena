@@ -33,7 +33,7 @@ namespace ActsTrk {
 
             using AthAlgorithm::AthAlgorithm;
             virtual StatusCode initialize() override;
-            virtual StatusCode execute () override;
+            virtual StatusCode execute (const EventContext& ctx) override;
             virtual StatusCode finalize() override;
             virtual unsigned cardinality() const override { return 1; }
             virtual ~MaterialTrackReader();

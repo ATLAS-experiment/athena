@@ -14,13 +14,13 @@ StatusCode xAODLeptonFilter::filterInitialize()
 }
 
 
-StatusCode xAODLeptonFilter::filterEvent() {
+StatusCode xAODLeptonFilter::filterEvent(const EventContext& ctx) {
 
   // Retrieve TruthElectrons  container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerElectron{m_truthElectronContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerElectron{m_truthElectronContKey, ctx};
   CHECK(xTruthParticleContainerElectron.isValid());
   // Retrieve TruthMuons container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMuon{m_truthMuonContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMuon{m_truthMuonContKey, ctx};
   CHECK(xTruthParticleContainerMuon.isValid());
 
     double leading_lepton_pt_e = 0;
@@ -60,15 +60,15 @@ StatusCode xAODLeptonFilter::filterEvent() {
   ATH_MSG_DEBUG ( "Leading lepton pt = " << leading_lepton_pt << "within |eta| <= " << m_EtaRange);
 
   if (leading_lepton_pt < m_Ptmin) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG( "Fail: no e or mu found "
 		   << " with pT >= " << m_Ptmin);
   } else if (leading_lepton_pt >= m_Ptmax) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG ( "Fail: high pt lepton veto "
 		    << " pT < " << m_Ptmax );
   } else {
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
     ATH_MSG_DEBUG ( "Within min and max pt cuts " << m_Ptmin << ", " 
 		    << m_Ptmax );
   }

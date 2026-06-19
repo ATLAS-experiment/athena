@@ -26,6 +26,7 @@ atlas_add_component( ActsTruth
 		       ActsTruthLib
 		       ActsGeometryLib
 		       ActsGeometryInterfacesLib
+			   ActsCalibratorsLib
 		       AthenaBaseComps
 		       CxxUtils
 		       GaudiKernel

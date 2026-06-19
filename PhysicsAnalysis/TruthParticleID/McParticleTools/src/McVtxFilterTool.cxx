@@ -273,7 +273,6 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
 				 const VtxType::Flag vtxType, bool isSignal ) const
 {
   ATH_MSG_VERBOSE("In McVtxFilterTool::addVertex( vtxType= "<<vtxType<< " )");
-#ifdef HEPMC3
   HepMC::GenVertexPtr vtx = (evt == srcVtx->parent_event()) ? std::const_pointer_cast<HepMC3::GenVertex>(srcVtx) : nullptr ;
   if ( !vtx ) {
     vtx = HepMC::newGenVertexPtr();
@@ -281,7 +280,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
     vtx->set_position( srcVtx->position() );
     vtx->set_status( srcVtx->status() );
     HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx) );
-    vtx->add_attribute(HepMC::Str::weights,srcVtx->attribute<HepMC3::VectorDoubleAttribute> (HepMC::Str::weights));
+    vtx->add_attribute(HepMCStr::weights,srcVtx->attribute<HepMC3::VectorDoubleAttribute> (HepMCStr::weights));
   }
   if (isSignal)  HepMC::set_signal_process_vertex(evt, vtx );
   /// Fill the parent branch
@@ -339,76 +338,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
       }
     }
   }//> loop over outgoing particles
-#else
-  HepMC::GenVertex * vtx = evt->barcode_to_vertex(srcVtx->barcode());
-  if ( 0 == vtx ) {
-    vtx = HepMC::newGenVertexPtr();
-    vtx->set_position( srcVtx->position() );
-    vtx->set_id( srcVtx->id() );
-    vtx->suggest_barcode( srcVtx->barcode() );
-    vtx->weights() = srcVtx->weights();
-    evt->add_vertex(vtx);
-  }
-  if (isSignal)  HepMC::set_signal_process_vertex(evt, vtx );
-  /// Fill the parent branch
-  for ( HepMC::GenVertex::particles_in_const_iterator parent = srcVtx->particles_in_const_begin();
-	parent != srcVtx->particles_in_const_end();
-	++parent ) {
-    HepMC::GenParticle * mother = evt->barcode_to_particle( (*parent)->barcode() );
-    if ( 0 == mother ) {
-      mother = HepMC::newGenParticlePtr();
-      mother->set_momentum( (*parent)->momentum() );
-      mother->set_generated_mass( (*parent)->generated_mass() );
-      mother->set_pdg_id( (*parent)->pdg_id() );
-      mother->set_status( (*parent)->status() );
-      mother->set_flow( (*parent)->flow() );
-      mother->set_polarization( (*parent)->polarization() );
-      mother->suggest_barcode( (*parent)->barcode() );
 
-    }
-    // set the mother's decay to our (new) vertex
-    vtx->add_particle_in( mother );
-    
-  }//> loop over ingoing particles
-  
-  /// Fill the children branch
-  for ( HepMC::GenVertex::particles_out_const_iterator child = srcVtx->particles_out_const_begin();
-	child != srcVtx->particles_out_const_end();
-	++child ) {
-    HepMC::GenParticle * daughter = evt->barcode_to_particle( (*child)->barcode() );
-    if ( 0 == daughter ) {
-      if ( !keepParticle( vtxType, *child ) ) {
-	// only include selected particles via the "ParticlesToKeep" property
-	ATH_MSG_VERBOSE("Skipping outgoing particle : "<< (*child));
-      } else {
-	daughter = HepMC::newGenParticlePtr();
-	daughter->set_momentum( (*child)->momentum() );
-   daughter->set_generated_mass( (*child)->generated_mass() );
-	daughter->set_pdg_id( (*child)->pdg_id() );
-	daughter->set_status( (*child)->status() );
-	daughter->set_flow( (*child)->flow() );
-	daughter->set_polarization( (*child)->polarization() );
-	daughter->suggest_barcode( (*child)->barcode() );
-
-      }
-    }
-    if ( daughter ) {
-      // set the daughter's production vertex to our new vertex
-      vtx->add_particle_out( daughter );
-    }
-
-    if ( m_fillTree && keepParticle( vtxType, *child ) ) {
-      const HepMC::GenVertex * decayVertex = (*child)->end_vertex();
-      if ( 0 != decayVertex ) {
-	// recursively fill the tree with all decay vertices and final state
-	// particles of selected outgoing particles lines
-	// => We are no longer sitting at the decay vertex so we tell it
-	// via the IsNotRootVertex flag
-	addVertex( decayVertex, evt, VtxType::IsNotRootVertex );
-      }
-    }
-  }//> loop over outgoing particles
-#endif
 
   }
 

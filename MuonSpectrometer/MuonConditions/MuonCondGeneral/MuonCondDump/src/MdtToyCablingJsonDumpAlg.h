@@ -24,7 +24,7 @@ public:
     MdtToyCablingJsonDumpAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~MdtToyCablingJsonDumpAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual unsigned int cardinality() const override final{return 1;}
 
 private:

@@ -40,7 +40,7 @@ namespace CP {
       StatusCode initialize() override;
 
       /// Function executing the algorithm
-      StatusCode execute() override;
+      StatusCode execute(const EventContext& ctx) override;
 
       /// Function finalising the algorithm
       StatusCode finalize() override;

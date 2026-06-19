@@ -5,6 +5,8 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
+import ROOT
+
 def _overrideTreeAutoFlush(logger, flags, stream, value):
     """Helper function to override TreeAutoFlush from flags."""
     if not flags.Output.TreeAutoFlush or not isinstance(flags.Output.TreeAutoFlush, dict):
@@ -51,6 +53,9 @@ def PoolWriteCfg(flags):
 
     # Set as default the member-wise streaming, ROOT default
     PoolAttributes += ["STREAM_MEMBER_WISE = '1'"]
+
+    # Set the default container type
+    PoolAttributes += [f"DEFAULT_CONTAINER_TYPE = '{ROOT.pool.DbType.getType(flags.Output.DefaultContainerType).type()}'"]
 
     # Increase default BasketSize to 32K, ROOT default (but overwritten by POOL)
     PoolAttributes += ["DEFAULT_BUFFERSIZE = '32000'"]
@@ -198,10 +203,10 @@ def PoolWriteCfg(flags):
                                            OutputMetadataContainers=OutputMetadataContainers,
                                            OneDataHeaderForm=oneDHForm,
                                            FileFlushSetting=fileFlushSetting,
-                                           PoolContainerNamingScheme=("Canonical" if "RNTUPLE" in flags.PoolSvc.DefaultContainerType else "Historical"))
+                                           PoolContainerNamingScheme=("Canonical" if "RNTUPLE" in flags.Output.DefaultContainerType else "Historical"))
     else:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
         return AthenaPoolCnvSvcCfg(flags,
                                    PoolAttributes=PoolAttributes,
                                    OneDataHeaderForm=oneDHForm,
-                                   PoolContainerNamingScheme=("Canonical" if "RNTUPLE" in flags.PoolSvc.DefaultContainerType else "Historical"))
+                                   PoolContainerNamingScheme=("Canonical" if "RNTUPLE" in flags.Output.DefaultContainerType else "Historical"))

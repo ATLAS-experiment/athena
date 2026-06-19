@@ -41,7 +41,7 @@ namespace InDet
     InDetV0Finder(const std::string &name, ISvcLocator *pSvcLocator);
     virtual ~InDetV0Finder();
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
     StatusCode resetStatistics();
     

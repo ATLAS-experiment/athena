@@ -64,7 +64,7 @@ StatusCode HeavyFlavorHadronFilter::filterFinalize() {
 }
 
 
-StatusCode HeavyFlavorHadronFilter::filterEvent() {
+StatusCode HeavyFlavorHadronFilter::filterEvent(const EventContext& ctx) {
   bool pass = false;
   bool bPass = false;
   bool cPass = false;
@@ -201,7 +201,7 @@ StatusCode HeavyFlavorHadronFilter::filterEvent() {
   if (BHadronPass) m_NBHadronPass++;
   if (DHadronPass) m_NDHadronPass++;
   if (PDGIDPass)   m_NPDGIDPass++;
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
 
   return StatusCode::SUCCESS;
 }

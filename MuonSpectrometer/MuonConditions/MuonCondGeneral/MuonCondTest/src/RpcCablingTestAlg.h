@@ -18,7 +18,7 @@ namespace Muon {
             using AthAlgorithm::AthAlgorithm;
             virtual ~RpcCablingTestAlg() = default;
             virtual StatusCode initialize() override;
-            virtual StatusCode execute() override;
+            virtual StatusCode execute(const EventContext& ctx) override;
             virtual unsigned int cardinality() const override final { return 1; }
         private:
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

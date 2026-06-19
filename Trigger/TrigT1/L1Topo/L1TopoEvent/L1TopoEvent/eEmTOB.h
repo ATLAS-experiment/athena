@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef L1TopoEvent_eEmTOB
 #define L1TopoEvent_eEmTOB
@@ -6,7 +6,7 @@
 #include "L1TopoEvent/Heap.h"
 #include "L1TopoEvent/BaseTOB.h"
 
-#include <iostream>
+#include <iosfwd>
 
 namespace TCS {
     
@@ -18,10 +18,10 @@ namespace TCS {
       static unsigned int nBitsPhi() { return g_nBitsPhi; }
 
       // default constructor
-      eEmTOB(uint32_t roiWord = 0, const std::string& tobName = "eEmTOB");
+      eEmTOB(uint32_t roiWord = 0, std::string_view tobName = "eEmTOB");
       
       // constructor with individual values
-      eEmTOB(unsigned int et, int eta, unsigned int phi, inputTOBType_t tobType = NONE, uint32_t roiWord = 0, const std::string& tobName = "eEmTOB");
+      eEmTOB(unsigned int et, int eta, unsigned int phi, inputTOBType_t tobType = NONE, uint32_t roiWord = 0, const std::string_view tobName = "eEmTOB");
 
       // constructor with initial values
       eEmTOB(const eEmTOB & eem);

@@ -23,7 +23,7 @@ public:
     virtual ~TgcDigtJitterTestAlg();
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
     SG::ReadCondHandleKey<TgcDigitJitterData> m_readKey{this, "ReadKey", "TgcJitterData", "Key of the Energy threshold data"};

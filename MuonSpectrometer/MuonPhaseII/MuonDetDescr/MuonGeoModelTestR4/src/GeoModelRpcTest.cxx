@@ -151,9 +151,8 @@ void GeoModelRpcTest::visualizeStripPanel(const EventContext& ctx,
                                       2.*design->halfWidth(),
                                       2.*design->shortHalfHeight()), 0.1, 0.015));
 }
-StatusCode GeoModelRpcTest::execute() {
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
-
+StatusCode GeoModelRpcTest::execute(const EventContext& ctx) {
+    
     const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
     const ActsTrk::GeometryContext& gctx{*geoContextHandle};

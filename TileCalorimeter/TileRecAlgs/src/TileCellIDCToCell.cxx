@@ -74,7 +74,7 @@ StatusCode TileCellIDCToCell::initialize()
 //* Execution
 //****************************************************************************
 
-StatusCode TileCellIDCToCell::execute()
+StatusCode TileCellIDCToCell::execute(const EventContext& /*ctx*/)
 {
 
   /* zero all counters and sums */

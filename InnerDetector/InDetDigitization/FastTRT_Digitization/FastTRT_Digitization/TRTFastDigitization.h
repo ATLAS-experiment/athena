@@ -20,7 +20,7 @@ class TRTFastDigitization : public AthAlgorithm {
 
   /** Basic algorithm methods */
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
  private:
   ToolHandle<IPileUpTool> m_digTool{this, "DigitizationTool", "TRTFastDigitizationTool", "AthAlgTool which performs the TRT digitization"};

@@ -260,10 +260,8 @@ StatusCode MergeMcEventCollTool::processFirstSubEvent(const McEventCollection *p
   m_pOvrlMcEvColl = new McEventCollection(*pMcEvtColl);
   m_signal_event_number = m_pOvrlMcEvColl->at(0)->event_number();
   m_pOvrlMcEvColl->at(0)->set_event_number(-2); //Set this to zero for the purposes of sorting. (restore after sorting).
-#ifdef HEPMC3
-  m_pOvrlMcEvColl->at(0)->add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(0));
-  m_pOvrlMcEvColl->at(0)->add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(0));
-#endif
+  m_pOvrlMcEvColl->at(0)->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(0));
+  m_pOvrlMcEvColl->at(0)->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(0));
   updateClassificationMap(HepMC::signal_process_id(m_pOvrlMcEvColl->at(0)), m_pOvrlMcEvColl->at(0)->event_number(), 0,- 1, true);
   m_newevent=false; //Now the McEventCollection and classification map are not empty this should be set to false.
   ATH_MSG_DEBUG( "execute: copied original event McEventCollection" );
@@ -307,13 +305,8 @@ StatusCode MergeMcEventCollTool::processFirstSubEvent(const McEventCollection *p
 
 bool MergeMcEventCollTool::isTruthFiltertedMcEventCollection(const McEventCollection *pMcEvtColl) const {
   const HepMC::GenEvent* currentBackgroundEvent = *(pMcEvtColl->begin());
-#ifdef HEPMC3
   if (currentBackgroundEvent->particles().size()!=1) return false;
   if (currentBackgroundEvent->particles().at(0)->pdg_id()==999) return true;
-#else
-  if (currentBackgroundEvent->particles_size()!=1) return false;
-  if ((*(currentBackgroundEvent->particles_begin()))->pdg_id()==999) return true;
-#endif
   return false;
 }
 
@@ -358,12 +351,8 @@ StatusCode MergeMcEventCollTool::saveHeavyIonInfo(const McEventCollection *pMcEv
   if (pMcEvtColl->at(0)->heavy_ion())
     {
 //It should be clarified if ne wants to get a copy or the content
-#ifdef HEPMC3
      HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*(pMcEvtColl->at(0)->heavy_ion()));
      m_pOvrlMcEvColl->at(0)->set_heavy_ion(std::move(hinew));
-#else
-      m_pOvrlMcEvColl->at(0)->set_heavy_ion(*(pMcEvtColl->at(0)->heavy_ion()));
-#endif
     }
   return StatusCode::SUCCESS;
 }
@@ -375,11 +364,9 @@ StatusCode MergeMcEventCollTool::processTruthFilteredEvent(const McEventCollecti
   m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)=new HepMC::GenEvent(**(pMcEvtColl->begin()));
   HepMC::GenEvent& currentBackgroundEvent(*(m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)));
   HepMC::fillBarcodesAttribute(&currentBackgroundEvent);
-#ifdef HEPMC3
   const int bunchCrossingTime=static_cast<int>(currentEventTime);
-  currentBackgroundEvent.add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
-  currentBackgroundEvent.add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
-#endif
+  currentBackgroundEvent.add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  currentBackgroundEvent.add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
 
   currentBackgroundEvent.set_event_number(currentBkgEventIndex);
   puType currentGenEventClassification(RESTOFMB);
@@ -399,14 +386,13 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   //handle the slimming case
   HepMC::GenVertexPtr  pCopyOfGenVertex{nullptr};
   int  spi = HepMC::signal_process_id(currentBackgroundEvent);
-#ifdef HEPMC3
   if ( HepMC::signal_process_vertex(&currentBackgroundEvent) ) pCopyOfGenVertex = std::make_shared<HepMC3::GenVertex> ( HepMC::signal_process_vertex(&currentBackgroundEvent)->data() );
   //insert the GenEvent into the overlay McEventCollection.
   //for configs with pile-up truth, also need to propagate barcodes to GenEvent
   HepMC::GenEvent* evt = m_onlySaveSignalTruth ? new HepMC::GenEvent() : new HepMC::GenEvent(currentBackgroundEvent);
   const int bunchCrossingTime=static_cast<int>(currentEventTime);
-  evt->add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
-  evt->add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
+  evt->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  evt->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
   //AV Not sure if one should add the vertex here
   evt->set_event_number(currentBkgEventIndex);
   evt->add_vertex(pCopyOfGenVertex);
@@ -420,18 +406,6 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   ATH_MSG_VERBOSE( "Starting a vertex loop ... " );
   auto currentVertexIter = currentBackgroundEvent.vertices().begin();
   auto endOfCurrentListOfVertices = currentBackgroundEvent.vertices().end();
-#else
-  if ( HepMC::signal_process_vertex(&currentBackgroundEvent) ) pCopyOfGenVertex = new HepMC::GenVertex ( *currentBackgroundEvent.signal_process_vertex() );
-  //insert the GenEvent into the overlay McEventCollection.
-  m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar) = new HepMC::GenEvent(spi, currentBkgEventIndex, pCopyOfGenVertex );
-  updateClassificationMap(spi, currentBkgEventIndex, 0, RESTOFMB, true);
-
-  unsigned int nCollisionVerticesFound(0);
-  //loop over vertices in Background GenEvent
-  ATH_MSG_VERBOSE( "Starting a vertex loop ... " );
-  auto currentVertexIter = currentBackgroundEvent.vertices_begin();
-  auto endOfCurrentListOfVertices = currentBackgroundEvent.vertices_end();
-#endif
   for (; currentVertexIter != endOfCurrentListOfVertices; ++currentVertexIter) {
     const auto&  pCurrentVertex=*currentVertexIter;
     HepMC::GenVertexPtr  pCopyOfVertexForClassification[NOPUTYPE];
@@ -460,27 +434,15 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
           pCopyOfVertexForClassification[particleClassification] =HepMC::newGenVertexPtr(pCurrentVertex->position());
           ATH_MSG_VERBOSE( "Added bkg vertex " << pCopyOfVertexForClassification[particleClassification] << " at position " <<  pCopyOfVertexForClassification[particleClassification] << " for pu type = " << particleClassification );
         }
-#ifdef HEPMC3
         pCopyOfVertexForClassification[particleClassification]->add_particle_out(std::make_shared<HepMC3::GenParticle>(currentVertexParticle->data()));
-#else
-        pCopyOfVertexForClassification[particleClassification]->add_particle_out( new HepMC::GenParticle(*currentVertexParticle) );
-#endif
         ATH_MSG_VERBOSE( "Added bkg particle at location " << std::hex << currentVertexParticle << std::dec << " with PDG ID = " << currentVertexParticle->pdg_id() );
       }
     } //particle loop
     /** add the in-coming particles to the in-time minbias vertex only */
     if (m_saveType[INTIME] && pCopyOfVertexForClassification[INTIME]) {
-#ifdef HEPMC3
  for (const auto& currentVertexParticle:  pCurrentVertex->particles_in()) {
         pCopyOfVertexForClassification[INTIME]->add_particle_in (std::make_shared<HepMC3::GenParticle>(currentVertexParticle->data()));
       }
-#else
-      HepMC::GenVertex::particles_in_const_iterator currentVertexParticleIter(pCurrentVertex->particles_in_const_begin());
-      const HepMC::GenVertex::particles_in_const_iterator endOfListOfParticlesFromCurrentVertex(pCurrentVertex->particles_in_const_end());
-      for (; currentVertexParticleIter != endOfListOfParticlesFromCurrentVertex; ++currentVertexParticleIter) {
-        pCopyOfVertexForClassification[INTIME]->add_particle_in ( new HepMC::GenParticle(**currentVertexParticleIter) );
-      }
-#endif
     }
     //keep vertices with outgoing particles
     for (int type(INTIME); type<NOPUTYPE; ++type) {
@@ -497,14 +459,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
 
 bool MergeMcEventCollTool::isInitialCollisionVertex(const HepMC::ConstGenVertexPtr&  pCurrentVertex) const {
 //AV: The olde version was too generator specific. 
-#ifdef HEPMC3
   for (const auto& pCurrentVertexParticle: pCurrentVertex->particles_in()) {
-#else
-  auto currentVertexParticleIter = pCurrentVertex->particles_in_const_begin();
-  auto  endOfListOfParticlesFromCurrentVertex = pCurrentVertex->particles_in_const_end();
-  for( ;currentVertexParticleIter != endOfListOfParticlesFromCurrentVertex; ++currentVertexParticleIter ) {
-    auto pCurrentVertexParticle = *currentVertexParticleIter;
-#endif
     if (MC::isBeam(pCurrentVertexParticle)) return true;
   }
   return false;

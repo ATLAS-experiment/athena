@@ -90,7 +90,7 @@ namespace ActsTrk {
     ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
-    ToolHandle<ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    PublicToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
     ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
     ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer>> m_stripCalibTool{this, "StripCalibrator", "", "Opt. strip measurement calibrator"};

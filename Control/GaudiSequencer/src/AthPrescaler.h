@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthPrescaler.h
@@ -34,9 +34,9 @@ public:
    ** Public Function Members **
    *****************************/
 
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
+  virtual StatusCode finalize() override;
 
 private:
 

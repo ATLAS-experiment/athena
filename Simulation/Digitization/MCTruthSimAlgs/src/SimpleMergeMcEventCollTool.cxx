@@ -139,12 +139,8 @@ StatusCode SimpleMergeMcEventCollTool::saveHeavyIonInfo(const McEventCollection 
   if (pMcEvtColl->at(0)->heavy_ion())
     {
 //It should be clarified if we want to get a copy or the content
-#ifdef HEPMC3
      HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*(pMcEvtColl->at(0)->heavy_ion()));
      outputMcEventCollection->at(0)->set_heavy_ion(std::move(hinew));
-#else
-      outputMcEventCollection->at(0)->set_heavy_ion(*(pMcEvtColl->at(0)->heavy_ion()));
-#endif
     }
   return StatusCode::SUCCESS;
 }
@@ -175,10 +171,8 @@ StatusCode SimpleMergeMcEventCollTool::processEvent(const McEventCollection *pMc
     copiedEvent->set_event_number(currentBkgEventIndex);
   }
   HepMC::fillBarcodesAttribute(copiedEvent);
-#ifdef HEPMC3
-  copiedEvent->add_attribute(HepMC::Str::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
-  copiedEvent->add_attribute(HepMC::Str::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
-#endif
+  copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
    outputMcEventCollection->push_back(copiedEvent);
   ATH_CHECK(this->saveHeavyIonInfo(pMcEvtColl, outputMcEventCollection));
    m_newevent = false;

@@ -78,7 +78,7 @@ def JETM1KernelCfg(flags, name='JETM1Kernel', **kwargs):
         SGKey                   = "Electrons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    JETM1_thinning_expression = "InDetTrackParticles.DFJETM1Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    JETM1_thinning_expression = "InDetTrackParticles.DFJETM1Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
 
     JETM1Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
         flags,

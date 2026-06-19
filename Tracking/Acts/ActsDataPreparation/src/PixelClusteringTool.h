@@ -17,38 +17,42 @@
 #include "details/CellContainer.h"
 #include "details/CellContainerProxy.h"
 #include "details/InPlaceClusterization.h"
+#include "details/PixelRDOContainerTraits.h"
 #include <string>
 
 
 namespace ActsTrk {
 
-class PixelClusteringTool : public extends<AthAlgTool,IPixelClusteringTool> {
+template <typename T_RDOContainer>
+class PixelClusteringToolImpl : public extends<AthAlgTool,typename ActsTrk::RDOContainerTraits<T_RDOContainer>::IClusteringToolType> {
 public:
-    PixelClusteringTool(const std::string& type,
-			const std::string& name,
-			const IInterface* parent);
+    using IClusteringToolType = typename ActsTrk::RDOContainerTraits<T_RDOContainer>::IClusteringToolType;
+   using base_class =extends<AthAlgTool,typename ActsTrk::RDOContainerTraits<T_RDOContainer>::IClusteringToolType>::base_class;
+    PixelClusteringToolImpl(const std::string& type,
+                            const std::string& name,
+                            const IInterface* parent);
 
     virtual StatusCode initialize() override;
 
     virtual std::pair<unsigned int, unsigned int>
-    countCells(const RDOContainer& rdo_collection,
+    countCells(const T_RDOContainer& rdo_collection,
                const std::vector<IdentifierHash> &listOfIds,
                const InDetDD::SiDetectorElementCollection &detector_elements) const override;
 
    virtual StatusCode
    clusterize(const EventContext& ctx,
-              const RawDataCollection& RDOs,
+              const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
               const InDet::SiDetectorElementStatus& pixelDetElStatus,
               const InDetDD::SiDetectorElement& element,
-              IPixelClusteringTool::CellContainer &cellContainer) const override;
+              typename IClusteringToolType::CellContainer &cellContainer) const override;
 
     virtual std::any createEventDataCache(xAOD::PixelClusterContainer& cont,
                                           std::size_t nClusterRDOs) const override;
 
    virtual StatusCode
    makeClusters(const EventContext& ctx,
-                const RDOContainer &rdo_container,
-                const IPixelClusteringTool::CellContainer& cellContainer,
+                const T_RDOContainer &rdo_container,
+                const typename IClusteringToolType::CellContainer& cellContainer,
                 unsigned int module_i,
                 const InDetDD::SiDetectorElement& element,
                 unsigned int icluster,
@@ -64,24 +68,24 @@ private:
    // RDOs of ganged pixels will be counted as two.
    template <bool GANGED>
    std::pair<unsigned int, unsigned int>
-   countCellsImpl(const RDOContainer& rdo_collection,
+   countCellsImpl(const T_RDOContainer& rdo_collection,
                   const std::vector<IdentifierHash> &listOfIds,
                   const InDetDD::SiDetectorElementCollection &detector_elements) const;
 
-   using ClusterProxy = InPlaceClusterization::ClusterProxy<const IPixelClusteringTool::CellContainer>;
-   using Cell = IPixelClusteringTool::CellContainer::Cell;
+   using ClusterProxy = InPlaceClusterization::ClusterProxy<const typename IClusteringToolType::CellContainer>;
+   using Cell = typename IClusteringToolType::CellContainer::Cell;
 
-   std::span<IPixelClusteringTool::CellContainer::Cell>
-   unpackRDOs(const RawDataCollection& RDOs,
+   std::span<typename IClusteringToolType::CellContainer::Cell>
+   unpackRDOs(const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
               const InDet::SiDetectorElementStatus& pixelDetElStatus,
               const InDetDD::SiDetectorElement& element,
-              IPixelClusteringTool::CellContainer &cellContainer) const;
+              typename IClusteringToolType::CellContainer &cellContainer) const;
 
    StatusCode makeCluster(size_t icluster,
-                          const PixelClusteringTool::ClusterProxy &cluster,
+                          const PixelClusteringToolImpl::ClusterProxy &cluster,
                           const InDetDD::SiDetectorElement& element,
                           const InDetDD::PixelModuleDesign& design,
-                          const InDetRawDataCollection<PixelRDORawData> &rdos,
+                          const ActsTrk::RDOContainerTraits<T_RDOContainer>::PerModuleRDOs &RDOs,
                           const PixelChargeCalibCondData *calibData,
                           const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
                           const double lorentz_shift,
@@ -101,7 +105,18 @@ private:
   Gaudi::Property<bool> m_isITk {this, "isITk", true, "True if running in ITk"};
   const PixelID* m_pixelID {nullptr};
 };
-  
+
+// to have simple component names
+class PixelClusteringTool : public PixelClusteringToolImpl<PixelRDO_Container> {
+public:
+   using PixelClusteringToolImpl<PixelRDO_Container>::PixelClusteringToolImpl;
+};
+// to have simple component names
+class PhaseIIPixelClusteringTool : public PixelClusteringToolImpl<PhaseIIPixelRawDataContainer> {
+public:
+   using PixelClusteringToolImpl<PhaseIIPixelRawDataContainer>::PixelClusteringToolImpl;
+};
+   
 } // namespace ActsTrk 
 
 #endif // ACTS_PIXEL_CLUSTERING_TOOL_H

@@ -533,7 +533,7 @@ They are demonstrated in the [PHYS format](https://gitlab.cern.ch/atlas/athena/-
 ```python
 from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
 
-PHYS_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
+PHYS_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
 
 PHYSTrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
     ConfigFlags,

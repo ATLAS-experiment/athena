@@ -29,7 +29,7 @@ public:
   ~SCT_ClusterAnalysis(){}
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual unsigned int cardinality() const override { return 1; }
 
 private:

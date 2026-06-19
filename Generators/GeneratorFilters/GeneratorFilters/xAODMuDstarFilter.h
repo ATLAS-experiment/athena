@@ -41,7 +41,7 @@ public:
         xAODMuDstarFilter(const std::string& name, ISvcLocator* pSvcLocator);
         virtual ~xAODMuDstarFilter();
         virtual StatusCode filterInitialize();
-        virtual StatusCode filterEvent();
+        virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 	// Setable Properties:-

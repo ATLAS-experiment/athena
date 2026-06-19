@@ -82,9 +82,8 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     
-    StatusCode BucketDumperAlg::execute(){
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-        SG::ReadHandleKey<xAOD::MuonSegmentContainer> emptyKey{};
+    StatusCode BucketDumperAlg::execute(const EventContext& ctx) {
+                SG::ReadHandleKey<xAOD::MuonSegmentContainer> emptyKey{};
         ATH_CHECK(emptyKey.initialize(SG::AllowEmpty));
         
         for (unsigned  keyNum = 0 ; keyNum < m_spacePointKeys.size(); ++keyNum) {

@@ -24,7 +24,7 @@ public:
     using AthAlgorithm::AthAlgorithm;
     virtual ~MdtCablingJsonDumpAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual unsigned int cardinality() const override final{return 1;}
 
     using CablingData = MuonMDT_CablingMap::CablingData;

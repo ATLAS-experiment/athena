@@ -4,6 +4,8 @@
 
 #include "CaloBlueprintNodeBuilder.h"
 
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+
 #include "Acts/Geometry/Blueprint.hpp"
 #include "Acts/Geometry/PortalShell.hpp"
 #include "Acts/Geometry/Volume.hpp"
@@ -32,16 +34,12 @@ using namespace Acts::UnitLiterals;
 using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
 
-namespace {
-  // Calo IDs 
-  constexpr std::size_t s_caloBarrelId = 40;
-}
+using namespace ActsTrk::detail::GeoVolIds;
 
 StatusCode ActsTrk::CaloBlueprintNodeBuilder::initialize() {
   ATH_MSG_DEBUG("Initializing CaloBlueprintNodeBuilder");
 
-  m_caloDetSecrMgr = buildCaloDetDescrNoAlign(serviceLocator()
-                                                                              , Athena::getMessageSvc());
+  m_caloDetSecrMgr = buildCaloDetDescrNoAlign(serviceLocator(), Athena::getMessageSvc());
   
   return StatusCode::SUCCESS;
 }
@@ -75,14 +73,18 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
   // that are supposed to carry material.
   // Take the itk+calo cylinder dimensions based from the previously evaluated map adding some tolerance.
   // Use 2.0 as a reasonable first guess at the tolerance needed.
-  auto itkCaloNode = std::make_shared<StaticBlueprintNode>( 
-      std::make_unique<TrackingVolume>(Transform3::Identity(),
-          std::make_shared<CylinderVolumeBounds>(0., 
-                                                 caloDimensionMap["CaloMaxR"] + 2.0, 
-                                                 caloDimensionMap["CaloHalfLengthZ"] + 2.0),"ITkCalo"));
-
-  if (childNode) itkCaloNode->addChild(std::move(childNode));
-
+  std::shared_ptr<StaticBlueprintNode> itkCaloNode{};
+  {
+    auto envelope = std::make_unique<TrackingVolume>(Amg::Transform3D::Identity(),
+                                                     std::make_shared<CylinderVolumeBounds>(0., 
+                                                            caloDimensionMap["CaloMaxR"] + 2.0, 
+                                                            caloDimensionMap["CaloHalfLengthZ"] + 2.0), "ITkCalo");
+    envelope->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID));
+    itkCaloNode = std::make_shared<StaticBlueprintNode>(std::move(envelope));
+  }
+  if (childNode) {
+    itkCaloNode->addChild(std::move(childNode));
+  }
   ATH_MSG_DEBUG("Top level calorimeter node created");
             
   auto caloNode = std::make_shared<CylinderContainerBlueprintNode>("CaloNode", AxisDirection::AxisZ);
@@ -391,9 +393,7 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateDiscSurfaces(caloSampleSurfaceMa
 std::shared_ptr<Acts::DiscSurface> ActsTrk::CaloBlueprintNodeBuilder::generateDiscSurface(const double& z, const double& maxLArBRadius, const double& minLArBRadius) const{
 
   ATH_MSG_DEBUG("DISC: Disc min and max radius are " << minLArBRadius << " and " << maxLArBRadius << " with z of " << z);
-
-  auto transform = Acts::Transform3(Acts::Translation3(0.0,0.0,z));
-  auto surface = Surface::makeShared<DiscSurface>(transform, minLArBRadius, maxLArBRadius);
+  auto surface = Surface::makeShared<DiscSurface>(Amg::getTranslateZ3D(z), minLArBRadius, maxLArBRadius);
 
   return surface;
 

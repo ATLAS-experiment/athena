@@ -403,8 +403,7 @@ StatusCode AthenaOutputStream::finalize()
 }
 
 // Execute data writer
-StatusCode AthenaOutputStream::execute() {
-   const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode AthenaOutputStream::execute(const EventContext& ctx) {
    bool failed = false;
    // Call tool preExecute prior to writing
    for (auto& tool : m_helperTools) {

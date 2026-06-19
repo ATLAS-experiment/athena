@@ -21,19 +21,13 @@ StatusCode DerivationFramework::TrackParticleThinningPHYS::initialize()
 std::vector<int> DerivationFramework::TrackParticleThinningPHYS::updateMask(const EventContext& ctx, const xAOD::TrackParticleContainer* trackParticles) const
 {
   SG::ReadDecorHandle<xAOD::TrackParticleContainer, bool> tightPrimaryHandle(m_tightPrimaryKey, ctx); // TODO CHECK TYPE
-  SG::ReadHandle<std::vector<float>> z0AtPV(m_trackZ0PVKey, ctx);
-  unsigned int index{0};
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, float> z0AtPVHandle(m_trackZ0PVKey, ctx);
   std::vector<int> entries;
-  if (z0AtPV->size() != trackParticles->size()) {
-    ATH_MSG_ERROR("z0AtPV->size() != trackParticles->size() - the job bail out now.");
-    return entries;
-  }
   entries.reserve(trackParticles->size());
   for (const auto* trackParticle : *trackParticles) {
     // Inner detector group recommendations for indet tracks in analysis
     // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    entries.push_back( (tightPrimaryHandle(*trackParticle) && (std::abs(z0AtPV->at(index)) * sin(trackParticle->theta()) < 3.0 * Gaudi::Units::mm) && (trackParticle->pt() > 10 * Gaudi::Units::GeV)) ? 1 : 0);
-    ++index;
+    entries.push_back( (tightPrimaryHandle(*trackParticle) && (std::abs(z0AtPVHandle(*trackParticle)) * sin(trackParticle->theta()) < 3.0 * Gaudi::Units::mm) && (trackParticle->pt() > 10 * Gaudi::Units::GeV)) ? 1 : 0);
   }
   return entries;
 }

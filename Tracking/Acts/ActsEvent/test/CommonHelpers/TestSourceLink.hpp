@@ -80,6 +80,7 @@ template <typename trajectory_t>
 void testSourceLinkCalibratorReturn(
     const GeometryContext& /*gctx*/,
     typename trajectory_t::TrackStateProxy trackState) {
+      return;
   const TestSourceLink& sl =
     trackState.uncalibrated().template get<TestSourceLink>();
 

@@ -35,7 +35,7 @@ StatusCode RunPartonHistoryAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode RunPartonHistoryAlg::execute() {
+StatusCode RunPartonHistoryAlg::execute(const EventContext& /*ctx*/) {
   ANA_CHECK(m_PartonHistory->execute());
   return StatusCode::SUCCESS;
 }

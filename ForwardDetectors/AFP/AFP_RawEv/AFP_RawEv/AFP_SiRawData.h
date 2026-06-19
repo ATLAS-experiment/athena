@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_SIRAWDATA_H
@@ -34,20 +34,20 @@ private:
   /// In the following record: `xxxx xxxx CCCC CCCx xxxx xxxx xxxx xxxx`
   /// it means bits marked with `C`. Contains column number of the fired
   /// pixel.
-  uint16_t m_column;
+  uint16_t m_column{};
 
   /// @brief Value of 16-24 most significant bits
   ///
   /// In the following record: `xxxx xxxx xxxx xxxR RRRR RRRR xxxx xxxx`
   /// it means bits marked with `R`. Contains row number of the fired
   /// pixel.
-  uint32_t m_row;
+  uint32_t m_row{};
 
   /// @brief Value of eight least significant bits
   ///
   /// In the following record: `xxxx xxxx xxxx xxxx xxxx xxxx TTTT TTTT`
   /// it means bits marked with `T`. Contains information about signal
   /// time over threshold.
-  uint16_t m_timeOverThreshold;
+  uint16_t m_timeOverThreshold{};
 };
 #endif

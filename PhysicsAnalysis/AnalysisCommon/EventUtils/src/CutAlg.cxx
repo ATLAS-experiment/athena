@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CutAlg.cxx
@@ -75,7 +75,7 @@ StatusCode CutAlg::finalize()
 
 
 
-StatusCode CutAlg::execute()
+StatusCode CutAlg::execute(const EventContext& ctx)
 {
   // Increase the event counter
   ++m_nEventsProcessed;
@@ -87,7 +87,7 @@ StatusCode CutAlg::execute()
   // Make the pass/fail decision
   bool eventPasses = true;
   if (m_parser) eventPasses = m_parser->evaluateAsBool();
-  this->setFilterPassed( eventPasses );
+  this->setFilterPassed( eventPasses, ctx );
   ATH_MSG_DEBUG("Event passes/fails: " << eventPasses );
 
   return StatusCode::SUCCESS;

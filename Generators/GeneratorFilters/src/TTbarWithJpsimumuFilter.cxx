@@ -36,13 +36,13 @@ StatusCode TTbarWithJpsimumuFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode TTbarWithJpsimumuFilter::filterEvent() {
+StatusCode TTbarWithJpsimumuFilter::filterEvent(const EventContext& ctx) {
     //---------------------------------------------------------------------------
 
     bool pass = false;
     bool isjpsi = false;
 
-    for (const HepMC::GenEvent* genEvt : *events_const()) {
+    for (const HepMC::GenEvent* genEvt : *events_const(ctx)) {
 
         // Loop over all truth particles in the event
         // ===========================================
@@ -58,7 +58,7 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
 
     if (m_selectJpsi && isjpsi) pass = true;
     
-    setFilterPassed(pass);
+    setFilterPassed(pass, ctx);
     return StatusCode::SUCCESS;
 }
 

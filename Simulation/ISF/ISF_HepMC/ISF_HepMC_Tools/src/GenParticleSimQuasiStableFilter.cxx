@@ -31,14 +31,8 @@ StatusCode  ISF::GenParticleSimQuasiStableFilter::initialize()
   return StatusCode::SUCCESS;
 }
 
-#ifdef HEPMC3
 bool ISF::GenParticleSimQuasiStableFilter::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
-#else
-  bool ISF::GenParticleSimQuasiStableFilter::pass(const HepMC::GenParticle& particleref) const
-  {
-    auto particle=&particleref;
-#endif
     ATH_MSG_VERBOSE( "Checking whether " << particle << " passes the filter." );
 
     bool passFilter = false;

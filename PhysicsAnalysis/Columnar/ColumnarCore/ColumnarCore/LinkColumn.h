@@ -10,6 +10,7 @@
 
 #include <AthLinks/ElementLink.h>
 #include <ColumnarCore/ColumnAccessor.h>
+#include <ColumnarCore/ContainerId.h>
 #include <ColumnarCore/OptObjectId.h>
 
 namespace columnar
@@ -28,6 +29,17 @@ namespace columnar
 
   namespace detail
   {
+    /// the CLID of the xAOD container a link column targets, or 0 if
+    /// the container id does not provide one
+    template<ContainerIdConcept LT>
+    CLID linkTargetClid ()
+    {
+      if constexpr (requires { LT::containerClid(); })
+        return LT::containerClid();
+      else
+        return 0;
+    }
+
     // if the columnar mode uses typed links, then the links with the
     // implicit types can simply redirect to the code for typed links
     template<ContainerIdConcept LT,ColumnarMode CM>
@@ -74,6 +86,9 @@ namespace columnar
       static void updateColumnInfo (ColumnInfo& info)
       {
         BaseAccessor::updateColumnInfo (info);
+        // the persistified links are typed on ELT, so that is the CLID
+        // entering the stored keys
+        info.soleLinkTargetClid = clidForType<ELT>();
       }
 
       [[nodiscard]] static auto makeViewer (void** dataArea)
@@ -132,6 +147,7 @@ namespace columnar
       static void updateColumnInfo (ColumnInfo& info)
       {
         info.soleLinkTargetName = LT::idName;
+        info.soleLinkTargetClid = linkTargetClid<LT>();
       }
 
       [[nodiscard]] static auto makeViewer (void** dataArea)
@@ -160,6 +176,7 @@ namespace columnar
       static void updateColumnInfo (ColumnInfo& info)
       {
         info.soleLinkTargetName = LT::idName;
+        info.soleLinkTargetClid = clidForType<ELT>();
       }
 
       static auto makeViewer (void** dataArea)

@@ -1,13 +1,13 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef JEMTOB_H
 #define JEMTOB_H
 
-#include <iostream>
+
 
 #include "L1TopoEvent/BaseTOB.h"
 #include "L1TopoEvent/Heap.h"
-
+#include <iosfwd>
 
 namespace TCS {
    
@@ -17,13 +17,13 @@ namespace TCS {
    public:
       
       // default constructor
-      jEmTOB(uint32_t roiWord = 0, const std::string& tobName = "jEm");
+      jEmTOB(uint32_t roiWord = 0, std::string_view tobName = "jEm");
 
       // copy constructor
       jEmTOB(const jEmTOB & cluster);
 
       // constructor with initial values
-      jEmTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, const std::string& tobName = "jEmTOB" );
+      jEmTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, std::string_view tobName = "jEmTOB" );
 
       // destructor
       virtual ~jEmTOB();

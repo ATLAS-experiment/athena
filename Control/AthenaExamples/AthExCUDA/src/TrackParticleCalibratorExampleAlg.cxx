@@ -27,6 +27,7 @@ StatusCode TrackParticleCalibratorExampleAlg::initialize() {
   ATH_CHECK(m_deviceMR.retrieve());
   ATH_CHECK(m_hostCopyTool.retrieve());
   ATH_CHECK(m_deviceCopyTool.retrieve());
+  ATH_CHECK(m_streamTool.retrieve());
 
   // Print some information about the configuration:
   ATH_MSG_INFO("Input container key: " << m_inputKey);
@@ -60,6 +61,9 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
     return StatusCode::SUCCESS;
   }
 
+  // Get the CUDA stream to use.
+  cudaStream_t stream = m_streamTool->stream(ctx);
+
   // The object managing host memory copies.
   auto hostCopy = m_hostCopyTool->copy(ctx);
   // The object managing device memory copies.
@@ -73,7 +77,7 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
       inputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
                         m_deviceMR->mr(), &(m_hostMR->mr()));
   hostCopy->setup(inputHostBuffer)->wait();
-  deviceCopy->setup(inputDeviceBuffer)->wait();
+  deviceCopy->setup(inputDeviceBuffer)->ignore();
 
   // Copy the relevant data into the input buffer.
   traccc::edm::track_collection<traccc::default_algebra>::device inputHost{
@@ -85,18 +89,18 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
   }
 
   // Copy the input buffer to the device.
-  (*deviceCopy)(inputHostBuffer, inputDeviceBuffer)->wait();
+  (*deviceCopy)(inputHostBuffer, inputDeviceBuffer)->ignore();
 
   // Construct output buffer(s).
   traccc::edm::track_collection<traccc::default_algebra>::buffer
       outputDeviceBuffer(std::vector<unsigned int>(input->size(), 0u),
                          m_deviceMR->mr(), &(m_hostMR->mr()));
-  deviceCopy->setup(outputDeviceBuffer)->wait();
+  deviceCopy->setup(outputDeviceBuffer)->ignore();
   traccc::edm::track_collection<traccc::default_algebra>::host
       outputHostCollection(m_hostMR->mr());
 
   // Run the kernel.
-  ATH_CHECK(calibrateOnGPU(inputDeviceBuffer, outputDeviceBuffer));
+  ATH_CHECK(calibrateOnGPU(stream, inputDeviceBuffer, outputDeviceBuffer));
 
   // Get the output back to the host.
   (*deviceCopy)(outputDeviceBuffer, outputHostCollection)->wait();

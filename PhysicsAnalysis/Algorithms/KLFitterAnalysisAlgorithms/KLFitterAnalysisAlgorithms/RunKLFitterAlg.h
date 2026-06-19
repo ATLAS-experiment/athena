@@ -48,7 +48,7 @@ class RunKLFitterAlg final : public EL::AnaAlgorithm {
  public:
   using EL::AnaAlgorithm::AnaAlgorithm;
   virtual StatusCode initialize() final;
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext& ctx) final;
 
  private:
   StatusCode execute_syst(const CP::SystematicSet &sys);

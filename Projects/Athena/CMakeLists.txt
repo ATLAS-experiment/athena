@@ -7,27 +7,6 @@ string( STRIP ${_version} _version )
 project( Athena VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
-# Turn on CUDA as an available compiler, if it's available.
-include( CheckLanguage )
-check_language( CUDA )
-if( CMAKE_CUDA_COMPILER )
-   enable_language( CUDA )
-endif()
-# Use C++20 with CUDA.
-set( CMAKE_CUDA_STANDARD 20 CACHE STRING "CUDA C++ standard to use" )
-# Force the compilation of CUDA code for only compute capability 5.2 for now.
-# Mainly to get rid of warnings from 11.0 about not supporting older compute
-# capabilities anymore.
-set( CMAKE_CUDA_ARCHITECTURES "all-major" CACHE STRING
-   "CUDA architectures to build code for" )
-
-set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" )
-
-# Turn on HIP as a compiler, if it's available.
-check_language( HIP )
-if( CMAKE_HIP_COMPILER )
-   enable_language( HIP )
-endif()
 # Use C++20 with HIP.
 set( CMAKE_HIP_STANDARD 20 CACHE STRING "HIP C++ standard to use" )
 
@@ -103,6 +82,19 @@ find_package( AthenaExternals REQUIRED )
 find_package( Gaudi )
 find_package( tdaq-common )
 find_package( tdaq )
+
+# Turn on CUDA as an available compiler, if it's available.
+include( CheckLanguage )
+check_language( CUDA )
+if( CMAKE_CUDA_COMPILER )
+   enable_language( CUDA )
+endif()
+
+# Turn on HIP as a compiler, if it's available.
+check_language( HIP )
+if( CMAKE_HIP_COMPILER )
+   enable_language( HIP )
+endif()
 
 # Set up CppCheck.
 if( ATLAS_USE_CPPCHECK )

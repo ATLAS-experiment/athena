@@ -53,6 +53,7 @@ if __name__=="__main__":
                                               default=False, action='store_true')
     parser.add_argument("--vTune", help="If set to true, the code is profiled with VTune (With the proper command!)",
                                               default=False, action='store_true')
+    parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify to select an evtNumber")
 
     parser.set_defaults(outRootFile="FastRecoTester.root")
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
@@ -68,7 +69,6 @@ if __name__=="__main__":
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
   
-    #cfg.getService("MessageSvc").setVerbose = ["MuonFastReconstructionAlg", "MuonFastRecoTester"]
     if args.vTune:
         from PerfMonVTune.PerfMonVTuneConfig import VTuneProfilerServiceCfg
         cfg.merge(VTuneProfilerServiceCfg(flags))
@@ -132,4 +132,19 @@ if __name__=="__main__":
                                                                                                 outSubDir="FastReconstructionValidPlots", 
                                                                                                 displayTruthOnly = False,
                                                                                                 saveSinglePDFs = True))
+    
+    if args.evtNumber is not None:
+        mainSeq = "AthAllAlgSeq"
+        topSeq = cfg.getSequence("AthAlgEvtSeq")
+        algSeq = cfg.getSequence(mainSeq)
+        mainSeq = "New" + mainSeq
+        # topSeq has three sub-sequencers ... preserve first and last
+        topSeq.Members = [topSeq.Members[0],
+                          CompFactory.AthSequencer(mainSeq, Sequential=True, ModeOR=False, StopOverride=False),
+                          topSeq.Members[-1]]
+        cfg.addEventAlgo(CompFactory.EventNumberFilterAlgorithm("EvtNumberFilter",EventNumbers=args.evtNumber),sequenceName=mainSeq)
+        cfg.getSequence(mainSeq).Members += [algSeq]
+
+        cfg.getService("MessageSvc").setVerbose = ["MuonFastReconstructionAlg", "MuonFastRecoTester"]
+    
     executeTest(cfg)

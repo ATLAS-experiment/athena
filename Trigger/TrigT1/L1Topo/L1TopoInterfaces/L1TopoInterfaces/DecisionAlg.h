@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  DecisionAlg.h
 //  TopoCore
@@ -13,7 +13,6 @@
 #include "L1TopoEvent/CompositeTOB.h"
 #include "L1TopoCommon/StatusCode.h"
 
-#include <iostream>
 
 namespace TCS {
 

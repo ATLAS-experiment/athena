@@ -62,7 +62,7 @@ StatusCode ComTimeRec::initialize()
 
 //----------------------------------------------------------------
 
-StatusCode ComTimeRec::execute()
+StatusCode ComTimeRec::execute(const EventContext& /*ctx*/)
 {
 
   ATH_MSG_DEBUG( "In execute()" );

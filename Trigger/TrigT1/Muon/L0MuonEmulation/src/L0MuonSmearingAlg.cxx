@@ -138,7 +138,7 @@ StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
 
     uint32_t extraword = (static_cast<uint32_t>(0x1)<<31) | (((ptword>>1) + 0x2) & 0xf);  // for the time being...
 
-    std::string emu_thr_name = "L0_MUx";
+    static const std::string emu_thr_name = "L0_MUx";
     float thrvalue = static_cast<float>(((ptword>>1) + 0x2) & 0xf);
     outputRoIs->back()->initialize(roiword, roi_eta, roi_phi, emu_thr_name, thrvalue, extraword);
     if (outputRoIs->back()->pt() == 0.){

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_CONFIGPARAMS_H
@@ -78,35 +78,35 @@ struct AFPTOF_LBARDIMENSIONS {
 //--------------------------------------------------------------------------------------------
 
 struct AFP_TDCONFIGURATION {
-    eLBarType eType;
-    double fAlpha;
-    int nX1PixCnt;
-    int nX2PixCnt;
-    double fPixelX1Dim;
-    double fPixelX2Dim;
-    bool bApplyBottomCut;
-    bool bEmulateImmersion;
-    bool bEmulateGlue;
+    eLBarType eType{};
+    double fAlpha{};
+    int nX1PixCnt{};
+    int nX2PixCnt{};
+    double fPixelX1Dim{};
+    double fPixelX2Dim{};
+    bool bApplyBottomCut{};
+    bool bEmulateImmersion{};
+    bool bEmulateGlue{};
 
-    double fSkinReflectivity;
-    eSkinReflectivityMode eSReflecMode;
-    std::map<int,AFPTOF_LBARDIMENSIONS> mapBarDims;
-    std::map<int,AFPTOF_TRAININFO> mapTrainInfo;
-    AFPTOF_LBARREFDIMENSIONS RefBarDims;
+    double fSkinReflectivity{};
+    eSkinReflectivityMode eSReflecMode{};
+    std::map<int,AFPTOF_LBARDIMENSIONS> mapBarDims{};
+    std::map<int,AFPTOF_TRAININFO> mapTrainInfo{};
+    AFPTOF_LBARREFDIMENSIONS RefBarDims{};
 
-    double fXFloorDistance;
-    double fYPosInRPot;
-    double fZPosInRPot;
+    double fXFloorDistance{};
+    double fYPosInRPot{};
+    double fZPosInRPot{};
 
     void setDefault();
 };
 
 struct AFP_SIDCONFIGURATION {
-    double fSlope;
-    double fLayerCount;
-    double fLayerSpacing;
-    double fZDistanceInRPot;
-    bool bAddVacuumSensors;
+    double fSlope{};
+    double fLayerCount{};
+    double fLayerSpacing{};
+    double fZDistanceInRPot{};
+    bool bAddVacuumSensors{};
 
     std::vector<double> vecXStaggering; //distance to floor
     std::vector<double> vecYStaggering; // zero for now

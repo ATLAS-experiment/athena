@@ -614,3 +614,115 @@ handle["Met.name.data"]   = np.array([ord(c) for c in "InvisibleFinal"], dtype=n
 ```
 
 **Note:** Nested-vector *outputs* (`std::vector<std::vector<T>>` written by the tool) are not yet supported by `Tool.__call__` — `allocate_outputs` raises `NotImplementedError` if it encounters one.
+
+---
+
+## Element Links
+
+Tools that read `ElementLink` columns (links from one container into another, e.g. a muon's `inDetTrackParticleLink` or a photon's `caloClusterLinks`) are fully supported by the high-level `Tool` API. No manual index manipulation is needed:
+
+```python
+import uproot
+from ColumnarToolWrapperPython import Tool
+
+tool = Tool(
+    "columnar::LinkColumnExampleTool/linkExample",
+    rename_containers={
+        "EventInfo": "EventInfoAuxDyn",
+        "AnalysisMuons": "AnalysisMuonsAuxDyn",
+        "InDetTrackParticles": "InDetTrackParticlesAuxDyn",
+    },
+)
+
+with uproot.open("DAOD_PHYSLITE.root") as f:
+    events = f["CollectionTree"].arrays(tool.required_input_branch_names, entry_stop=100)
+
+result = tool(events)
+print(result["AnalysisMuonsAuxDyn.selection"].to_list())
+```
+
+### How It Works
+
+A link column is identified by `ColumnInfo.sole_link_target_name`, which names the container the link points into (after any `rename_containers` mapping):
+
+```python
+for col in tool.input_columns:
+    if col.sole_link_target_name:
+        print(col.name, "->", col.sole_link_target_name)
+# AnalysisMuonsAuxDyn.inDetTrackParticleLink -> InDetTrackParticlesAuxDyn
+```
+
+PHYSLITE files store each link as a per-event index (`m_persIndex`) plus a hashed key naming the target container (`m_persKey`). On the columnar side a link is instead a single `uint64` *global* offset into the flattened target container. `Tool.__call__` converts automatically:
+
+- `global = target_offsets[event] + m_persIndex`
+- null links become `invalid_link_value` (`0xFFFFFFFFFFFFFFFF`). Both null encodings are recognized: `(m_persKey == 0, m_persIndex == 0)` (the Athena persistent encoding) and `m_persIndex == 0xFFFFFFFF` (the standalone `ElementLinkBase::isDefault` encoding)
+- valid links are bounds-checked against the per-event range of the target container; an out-of-range index raises `RuntimeError`
+
+`required_input_branch_names` returns the parent branch name (e.g. `"AnalysisMuonsAuxDyn.inDetTrackParticleLink"`), which uproot expands into the `m_persKey`/`m_persIndex` fields automatically. Both one-link-per-object columns and `vector<ElementLink<...>>` columns (e.g. `caloClusterLinks`, declared by the tool as a `.data`/`.offset` pair) are handled.
+
+The target container's offsets are taken from its own input columns, so the link target must have at least one readable input column (this is always the case when the tool declares accessors on the target). Variant links (links that can point into one of several containers) are not yet supported and raise `NotImplementedError`.
+
+### A Real Tool: EgammaCalibrationAndSmearingTool
+
+The configuration tested in C++ (`ElectronPhotonFourMomentumCorrection/test/gt_ColumnarToolTests.cxx`) works directly. Note that the tool's canonical container is named `"EGamma"`, so both `"EGamma"` and `"Electrons"` must be mapped to the electron branch prefix:
+
+```python
+tool = Tool(
+    "CP::EgammaCalibrationAndSmearingTool/egammaCalib",
+    properties={
+        "ESModel": "es2022_R22_PRE",
+        "decorrelationModel": "1NP_v1",
+        "useFastSim": 0,
+        "useMVACalibration": 0,
+        "useLayerCorrection": 0,
+        "onlyElectrons": 1,
+    },
+    rename_containers={
+        "EventInfo": "EventInfoAuxDyn",
+        "egammaClusters": "egammaClustersAuxDyn",
+        "EGamma": "AnalysisElectronsAuxDyn",
+        "Electrons": "AnalysisElectronsAuxDyn",
+    },
+)
+
+with uproot.open("DAOD_PHYSLITE.root") as f:
+    events = f["CollectionTree"].arrays(tool.required_input_branch_names, entry_stop=100)
+
+calibrated_pt = tool(events)["AnalysisElectronsAuxDyn.ptOut"]
+varied_pt = tool(events, systematic="EG_SCALE_ALL__1up")["AnalysisElectronsAuxDyn.ptOut"]
+```
+
+### Computing m_persKey Values: `sg_key`
+
+The `m_persKey` values stored in Athena-written files are StoreGate hashed keys, computed by `SG::StringPool::stringToKey`: a CRC-64 of the container name, extended with the container CLID, masked to 30 bits. The hash functions are exposed from `CxxUtils`:
+
+```python
+from ColumnarToolWrapperPython import sg_key, crc64, crc64addint
+
+# CLID from CLASS_DEF in xAODTracking/TrackParticleContainer.h
+CLID_TRACK_PARTICLE_CONTAINER = 1287425431
+
+sg_key("InDetTrackParticles", CLID_TRACK_PARTICLE_CONTAINER)  # 0x1D3890DB
+```
+
+The CLID is the class ID from the `CLASS_DEF` macro in the corresponding xAOD container header (e.g. `xAODMuon/MuonContainer.h`, `xAODEgamma/ElectronContainer.h`). Without the CLID the hash differs — this is why hashing just the container name never matches the values in the file.
+
+### Reverse-Resolving m_persKey: `link_key_map`
+
+You usually don't need to look up CLIDs yourself: each link column carries the CLID of its target container as `ColumnInfo.sole_link_target_clid`, so the expected key can be computed per column and the keys stored in a file can be resolved back to container names:
+
+```python
+from ColumnarToolWrapperPython import expected_link_key, link_key_map
+
+# expected m_persKey for one link column (None if the CLID is unknown)
+(link_col,) = [c for c in tool.input_columns if c.sole_link_target_name]
+expected_link_key(link_col)        # 0x1D3890DB
+
+# reverse map over all of a tool's link columns
+keys = link_key_map(tool.columns)  # {0x1D3890DB: "InDetTrackParticlesAuxDyn"}
+keys.get(490246363)                # "InDetTrackParticlesAuxDyn"
+```
+
+The StoreGate name entering the hash is recovered from the (possibly renamed) target container name by stripping a trailing `AuxDyn`/`Aux` branch-prefix suffix (`"InDetTrackParticlesAuxDyn"` → `"InDetTrackParticles"`).
+
+`Tool.__call__` itself does not validate `m_persKey` against the target container (matching the C++ test fixtures, which treat the key check as optional for single-target links); the bounds check catches gross mismatches, and its error message reports the offending keys alongside the expected one.

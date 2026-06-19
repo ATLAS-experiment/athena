@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaKernel/InputRenameMap.h
@@ -26,7 +26,7 @@ namespace Athena {
 /// Type of the input rename map: sgkey_t -> sgkey_t.
 struct InputRenameEntry
 {
-  SG::sgkey_t m_sgkey;
+  SG::sgkey_t m_sgkey = 0;
   std::string m_key;
 };
 using InputRenameMap_t = SG::SGKeyMap<InputRenameEntry>;

@@ -197,7 +197,7 @@ class CPBaseRunner(ABC):
                         raise FileNotFoundError(
                             f"The directory \"{path}\" is empty. Please provide a directory with .root files.")
                     for root_file in line_path.iterdir():
-                        if root_file.suffix == '.root':
+                        if  '.root' in root_file.suffixes:
                             files.append(str(root_file))
                 # This also catches grid input with only one file
                 else:
@@ -205,6 +205,9 @@ class CPBaseRunner(ABC):
 
             # Remove leading/trailing whitespaces from file names
             files = [file.strip() for file in files]
+        if not files:
+            raise FileNotFoundError(
+                f"No valid input files found in \"{path}\"! Please check the input file list.")
         return files
 
     def setup(self):

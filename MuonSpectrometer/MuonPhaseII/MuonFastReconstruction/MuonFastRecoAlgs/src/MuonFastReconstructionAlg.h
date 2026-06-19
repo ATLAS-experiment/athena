@@ -63,34 +63,28 @@ namespace MuonR4{
             /** @brief Activate the seeding from Inner station */
             BooleanProperty m_seedFromInner {this, "SeedFromInner", false, "Activate the seeding from Inner station"};
             /** @brief Size of theta window [rad] to search for compatible hits with a seed, tailored to the target pt cutoff */
-            DoubleProperty m_thetaSearchWindow {this, "ThetaWindowSearch", 0.045, "Size of the search window in theta to link hits to a pattern"};
+            DoubleProperty m_thetaSearchWindow {this, "ThetaWindowSearch", 0.06, "Size of the search window in theta to link hits to a pattern"};
             /** @brief Çonstant term [mm] of the acceptance window for the residual between a test hit and the pattern line. Represents the minimum window 
              *         size regardless of the geometry and absorbing unmodelled effects such as muon bending in the magnetic field and scattering */
-            DoubleProperty m_baseRWindow {this, "BaseRWindow", 140, "Çonstant term [mm] of the acceptance window for the residual between a test hit and the pattern line"};
+            DoubleProperty m_baseRWindow {this, "BaseRWindow", 60, "Çonstant term [mm] of the acceptance window for the residual between a test hit and the pattern line"};
             /** @brief Maximum phi difference [rad] allowed between two hits belonging to the same pattern */
-            DoubleProperty m_phiTolerance {this, "PhiTolerance", 0.1, "Maximum allowed phi difference between two hits to be considered compatible"};
-            /** @brief Requirement on trigger hits in the bending direction to accept a pattern  */
-            UnsignedIntegerProperty m_minBendingTriggerHits {this, "MinBendingTriggerHits", 2, "Minimum number of trigger hits in the bending direction required to accept a pattern"};
-            /** @brief Requirement on precision hits in the bending direction to accept a pattern  */
-            UnsignedIntegerProperty m_minBendingPrecisionHits {this, "MinBendingPrecisionHits", 8, "Minimum number of precision hits in the bending direction required to accept a pattern"};
-            /** @brief Minimum number of phi measurements required to accept a pattern */
-            UnsignedIntegerProperty m_minPhiHits {this, "MinPhiHits", 1, "Minimum number of phi measurements required to accept a pattern"};
+            DoubleProperty m_phiTolerance {this, "PhiTolerance", 0.05, "Maximum allowed phi difference between two hits to be considered compatible"};
+            /** @brief Requirement on trigger layers in the bending direction to accept a pattern  */
+            UnsignedIntegerProperty m_minTriggerLayers {this, "MinBendingTriggerLayers", 2, "Minimum number of trigger layers in the bending direction required to accept a pattern"};
+            /** @brief Requirement on precision layers in the bending direction to accept a pattern  */
+            UnsignedIntegerProperty m_minPrecisionLayers {this, "MinBendingPrecisionLayers", 8, "Minimum number of precision layers in the bending direction required to accept a pattern"};
+            /** @brief Minimum number of phi layers required to accept a pattern */
+            UnsignedIntegerProperty m_minPhiLayers {this, "MinPhiLayers", 1, "Minimum number of phi layers required to accept a pattern"};
+            /** @brief Minimum number of layers in a station to be considered a good station */
+            UnsignedIntegerProperty m_minStationLayers {this, "MinStationLayers", 5, "Minimum number of layers in a station to be considered a good station"};
             /** @brief Quality cut on pattern'mean squared normalized residual. Set to a large value to disable the cut, e.g. 10. */
-            DoubleProperty m_meanNormRes2Cut {this, "meanNormRes2Cut", 0.2, "Quality cut on pattern'mean squared normalized residual"};
+            DoubleProperty m_meanNormRes2Cut {this, "meanNormRes2Cut", 0.18, "Quality cut on pattern'mean squared normalized residual"};
             /** @brief Maximum number of attempts to build a pattern from hits already used in existing patterns */
-            UnsignedIntegerProperty m_maxSeedAttempts {this, "MaxSeedAttempts", 6, " Maximum number of attempts to build a pattern from hits already used in existing patterns"};
+            UnsignedIntegerProperty m_maxSeedAttempts {this, "MaxSeedAttempts", 3, " Maximum number of attempts to build a pattern from hits already used in existing patterns"};
             /** @brief Maximum number of missed candidate hits in different measurement layers during pattern building allowed for a pattern branch before it is discarded */
-            UnsignedIntegerProperty m_maxMissedLayerHits {this, "MaxMissedLayerHits", 3, "Maximum number of missed candidate hits in different measurement layers during pattern building allowed for a pattern branch before it is discarded"};
+            UnsignedIntegerProperty m_maxMissLayersInStation {this, "MaxMissedLayerHits", 3, "Maximum number of missed candidate hits in different measurement layers during pattern building allowed for a pattern branch before it is discarded"};
             /** @brief Minimum separation [mm] between the measurement layers of two hits for being used to compute a reliable pattern line. Use the beamspot otherwise. */
             DoubleProperty m_minLayerSeparation {this, "MinLayerSeparation",40, "Minimum separation (in mm) between the measurement layers of two hits for being used to compute a reliable pattern line. Use the beamspot otherwise."};
-            /** @brief Weight of precision hits in the score of a pattern, w.r.t trigger hits */
-            DoubleProperty m_precisionWeight {this, "PrecisionWeight", 0.75, "Weight of precision hits in the pattern score of a pattern"};
-            /** @brief number of eta hits per station at which the pattern score saturates */
-            DoubleProperty m_hitScoreSaturation {this, "HitScoreSaturation", 10.0, "Number of eta hits per station at which the pattern score saturates"};
-            /** @brief How strongly to penalize residual — higher = stricter quality requirement */
-            DoubleProperty m_residualPenalty {this, "ResidualPenalty", 2.0, "How strongly to penalize residual in the pattern score — higher = stricter quality requirement"};
-            /** @brief Saturation for phi bonus — beyond this many phi hits the bonus is maxed */
-            DoubleProperty m_phiBonusSaturation {this, "PhiBonusSaturation", 4.0, "Saturation for phi bonus — beyond this many phi hits the bonus is maxed"};
             
             /** @brief Pointer to the actual global pattern finder */
             std::unique_ptr<FastReco::GlobalPatternFinder> m_globPatFinder{};

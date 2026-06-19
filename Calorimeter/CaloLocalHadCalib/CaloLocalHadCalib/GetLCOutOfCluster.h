@@ -36,7 +36,7 @@ class GetLCOutOfCluster : public AthAlgorithm
   GetLCOutOfCluster(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~GetLCOutOfCluster();
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
  private:

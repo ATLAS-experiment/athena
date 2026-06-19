@@ -22,7 +22,6 @@
 
 // PACKAGE
 #include "src/detail/MeasurementIndex.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
@@ -82,7 +81,7 @@ namespace ActsTrk
                     bool newLine = true) const;
 
     using MeasurementInfo = std::tuple<size_t,
-                                       const ATLASUncalibSourceLink *,
+                                       const xAOD::UncalibratedMeasurement* *,
                                        std::vector<const xAOD::SpacePoint *>>;
 
   private:

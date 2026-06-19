@@ -53,13 +53,13 @@ namespace CP
 
 
   StatusCode JetUncertaintiesAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsVector)
       {
 	ANA_CHECK (m_uncertaintiesTool->applySystematicVariation (sys));
 	xAOD::JetContainer *jets = nullptr;
-	ANA_CHECK (m_jetHandle.getCopy (jets, sys));
+	ANA_CHECK (m_jetHandle.getCopy (jets, sys, ctx));
 	for (xAOD::Jet *jet : *jets)
 	  {
 	    // we need to tell the JES flavour uncertainty tool whether each jet is b-tagged at truth-level
@@ -76,7 +76,7 @@ namespace CP
     {
       ANA_CHECK (m_uncertaintiesToolPD->applySystematicVariation (sys));
       xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.getCopy (jets, sys));
+      ANA_CHECK (m_jetHandle.getCopy (jets, sys, ctx));
       for (xAOD::Jet *jet : *jets)
 	{
 	  if (m_preselection.getBool (*jet, sys))

@@ -63,9 +63,8 @@ StatusCode JetHitAssociation::initialize() {
 
 
 // Function for saving hits matched to jets
-StatusCode JetHitAssociation::execute() {
+StatusCode JetHitAssociation::execute(const EventContext& ctx) {
   
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   // All jets
   SG::ReadHandle<xAOD::JetContainer> jetReadHandle(m_jetCollectionName, ctx);

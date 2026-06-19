@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSBinnedShower_h
@@ -22,26 +22,26 @@ class ICaloGeometry;
 
 class TFCSBinnedShower : public TFCSBinnedShowerBase {
  public:
-  typedef struct {
+  struct layer_t{
     std::vector<unsigned int> bin_index_vector;
     std::vector<float> E_vector;
-  } layer_t;
+  };
 
-  typedef struct {
+  struct event_t{
     std::vector<layer_t> event_data;
-    float phi_mod;
-    float center_eta;
-    float e_init;  // Initial energy of the event
-  } event_t;
+    float phi_mod{};
+    float center_eta{};
+    float e_init{};  // Initial energy of the event
+  } ;
 
   typedef std::vector<event_t> eventvector_t;
 
-  typedef struct {
+  struct layer_bins_t{
     std::vector<float> R_lower;
     std::vector<float> R_size;
     std::vector<float> alpha_lower;
     std::vector<float> alpha_size;
-  } layer_bins_t;
+  } ;
 
   typedef std::vector<layer_bins_t> event_bins_t;
 

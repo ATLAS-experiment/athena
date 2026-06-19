@@ -54,7 +54,7 @@ public:
 
 
   /// Standard Gaudi @c execute method.
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
 
 
 private:

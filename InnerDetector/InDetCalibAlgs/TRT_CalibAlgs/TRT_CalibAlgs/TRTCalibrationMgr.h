@@ -65,7 +65,7 @@ public:
     typedef TRTCond::StrawT0MultChanContainer StrawT0Container;
 
     virtual StatusCode initialize(void) override;
-    virtual StatusCode execute(void) override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize(void) override;
     StatusCode streamOutCalibObjects();
 

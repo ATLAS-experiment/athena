@@ -28,7 +28,7 @@ MuCTPI_RDOToRoIBResult::MuCTPI_RDOToRoIBResult( const std::string& name,
    declareProperty( "RoIBOutputKey", m_roibOutputKey = "CorrectRoIBResult" );
 }
 
-StatusCode MuCTPI_RDOToRoIBResult::execute() {
+StatusCode MuCTPI_RDOToRoIBResult::execute(const EventContext& /*ctx*/) {
 
    ATH_MSG_DEBUG( "Executing the MuCTPI RoI fixer algorithm" );
 

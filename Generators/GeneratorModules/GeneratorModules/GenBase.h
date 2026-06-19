@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_GENBASE_H
@@ -80,10 +80,11 @@ public:
   }
 
   /// Access the current signal event (const)
-  const HepMC::GenEvent* event_const() const {
-    if (events_const()->empty())
+  const HepMC::GenEvent* event_const( const EventContext& ctx ) const {
+    const McEventCollection* coll = events_const(ctx);
+    if (coll->empty())
       ATH_MSG_ERROR("Const McEventCollection is empty during first event access");
-    return *(events_const()->begin());
+    return *(coll->begin());
   }
 
   /// @brief Access the current event's McEventCollection
@@ -93,9 +94,6 @@ public:
   McEventCollection* events ATLAS_NOT_CONST_THREAD_SAFE ();
 
   /// Access the current event's McEventCollection (const)
-  const McEventCollection* events_const() const {
-    return events_const( getContext() );
-  }
   const McEventCollection* events_const( const EventContext& ctx ) const {
     SG::ReadHandle<McEventCollection> ret = SG::makeHandle(m_mcevents_const, ctx);
     if (!ret.isValid())

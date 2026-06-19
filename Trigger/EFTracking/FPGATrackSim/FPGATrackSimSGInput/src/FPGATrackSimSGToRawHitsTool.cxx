@@ -871,11 +871,7 @@ const HepMcParticleLink* FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetS
       bestPt = genPt;
       bestTruthLink = &particleLink;
     }
- #ifdef HEPMC3
      parentMask |= FPGATrackSimInputUtils::construct_truth_bitmap(std::shared_ptr<const HepMC3::GenParticle>(particleLink.cptr()));
- #else
-     parentMask |= FPGATrackSimInputUtils::construct_truth_bitmap(particleLink.cptr());
- #endif
      // check SDO
   } // end for each contributing particle
   return bestTruthLink;

@@ -36,7 +36,7 @@ namespace InDet
     InDetSecVtxFinder(const std::string &name, ISvcLocator *pSvcLocator);
     virtual ~InDetSecVtxFinder() = default;
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
   private: 
 

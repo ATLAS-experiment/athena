@@ -29,14 +29,14 @@ namespace CP
     }
 
 
-    StatusCode TauCombineMuonRMTausAlg::execute ()
+    StatusCode TauCombineMuonRMTausAlg::execute (const EventContext& ctx)
     {
         for (const auto& sys : m_systematicsList.systematicsVector())
         {
             const xAOD::TauJetContainer *taus = nullptr;
             const xAOD::TauJetContainer *muonrm_taus = nullptr;
-            ANA_CHECK (m_tauHandle.retrieve (taus, sys));
-            ANA_CHECK (m_MuonRMtauHandle.retrieve (muonrm_taus, sys));
+            ANA_CHECK (m_tauHandle.retrieve (taus, sys, ctx));
+            ANA_CHECK (m_MuonRMtauHandle.retrieve (muonrm_taus, sys, ctx));
             for (const xAOD::TauJet* tau : *taus)         decSelection(*tau) = false;
             for (const xAOD::TauJet* tau : *muonrm_taus)  decSelection(*tau) = false;
             std::vector<const xAOD::TauJet*> combined_taus_vec = TauAnalysisTools::combineTauJetsWithMuonRM (taus, muonrm_taus);

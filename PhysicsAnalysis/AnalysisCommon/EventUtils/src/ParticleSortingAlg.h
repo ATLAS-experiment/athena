@@ -46,7 +46,7 @@ class ParticleSortingAlg
   virtual StatusCode initialize() override;
 
   /// Athena algorithm's execute hook
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   /// Athena algorithm's finalize hook
   virtual StatusCode finalize() override;

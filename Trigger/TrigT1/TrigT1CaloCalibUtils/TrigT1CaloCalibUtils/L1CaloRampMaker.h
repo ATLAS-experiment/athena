@@ -51,7 +51,7 @@ class L1CaloRampMaker : public AthAlgorithm
     virtual ~L1CaloRampMaker();
     
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
  private:

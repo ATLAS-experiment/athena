@@ -1,5 +1,3 @@
-
-
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
@@ -11,6 +9,7 @@
 #include "../SimHitToTruthPartAssocAlg.h"
 #include "../TruthSegConnectionAlg.h"
 #include "../TruthHitSummaryAlg.h"
+#include "../MuonToTruthAssocAlg.h"
 
 DECLARE_COMPONENT(MuonR4::TruthSegmentMaker)
 DECLARE_COMPONENT(MuonR4::PrepDataToSimHitAssocAlg)
@@ -20,3 +19,4 @@ DECLARE_COMPONENT(MuonR4::RecoSegToTruthAssocAlg)
 DECLARE_COMPONENT(MuonR4::SimHitToTruthPartAssocAlg)
 DECLARE_COMPONENT(MuonR4::TruthHitSummaryAlg)
 DECLARE_COMPONENT(MuonR4::TruthSegConnectionAlg)
+DECLARE_COMPONENT(MuonR4::MuonToTruthAssocAlg)

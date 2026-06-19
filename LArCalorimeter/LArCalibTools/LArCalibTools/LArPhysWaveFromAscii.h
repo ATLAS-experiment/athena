@@ -22,10 +22,8 @@ class LArPhysWaveFromAscii : public AthAlgorithm
   ~LArPhysWaveFromAscii();
 
   //standard algorithm methods
-  ///StatusCode initialize() = default;
-  virtual StatusCode execute() {return StatusCode::SUCCESS;}
-  //StatusCode finalize(){return StatusCode::SUCCESS;}
-  virtual StatusCode stop() final;
+  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
+  virtual StatusCode stop() override final;
  
  private:
   /// the first  m_skipPoints points of the waveform in the file are skipped

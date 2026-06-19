@@ -160,7 +160,7 @@ StatusCode CaloReadLCJetEnergyScaleFile::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode  CaloReadLCJetEnergyScaleFile::execute() 
+StatusCode  CaloReadLCJetEnergyScaleFile::execute(const EventContext& /*ctx*/) 
 { 
   return StatusCode::SUCCESS;
 }

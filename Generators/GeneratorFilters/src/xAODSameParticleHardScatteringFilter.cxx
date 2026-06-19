@@ -20,7 +20,7 @@ StatusCode xAODSameParticleHardScatteringFilter::filterInitialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODSameParticleHardScatteringFilter::filterEvent()
+StatusCode xAODSameParticleHardScatteringFilter::filterEvent(const EventContext& ctx)
 {
   ATH_MSG_DEBUG(" SameParticleHardScattering filtering for: Parent --> " << m_PDGParent[0]
                 << " and parent " << -m_PDGParent[0]
@@ -31,7 +31,7 @@ StatusCode xAODSameParticleHardScatteringFilter::filterEvent()
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event
@@ -65,6 +65,6 @@ StatusCode xAODSameParticleHardScatteringFilter::filterEvent()
       }
   } //loop over TruthParticles
 
-  setFilterPassed(N_Parent[0] >= 1 && N_Parent[1] >= 1);
+  setFilterPassed(N_Parent[0] >= 1 && N_Parent[1] >= 1, ctx);
   return StatusCode::SUCCESS;
 }

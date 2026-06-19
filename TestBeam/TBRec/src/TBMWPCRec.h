@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBMWPCREC
@@ -27,7 +27,7 @@ class TBMWPCRec : public AthAlgorithm
   virtual ~TBMWPCRec();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
 

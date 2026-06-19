@@ -48,7 +48,7 @@ StatusCode TileCosmicMuonFilterAlg::initialize(){
 } 
 
 //=======================================
-StatusCode TileCosmicMuonFilterAlg::execute(){
+StatusCode TileCosmicMuonFilterAlg::execute(const EventContext& /*ctx*/){
 //=======================================
    switch(m_trackType)
    {

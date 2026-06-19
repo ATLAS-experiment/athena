@@ -145,9 +145,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 //                          MAIN EXECUTE ROUTINE                             //
 ///////////////////////////////////////////////////////////////////////////////
 
-StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
+StatusCode FPGATrackSimLogicalHitsProcessAlg::execute(const EventContext& ctx)
 {
-    const EventContext& ctx = getContext();
 
     // Get reference to hits from StoreGate.
     SG::ReadHandle<FPGATrackSimHitCollection> FPGAHits(m_FPGAHitKey, ctx);

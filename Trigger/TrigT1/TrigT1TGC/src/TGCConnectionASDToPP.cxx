@@ -2,17 +2,18 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <ctype.h>
-#include <string>
+
 
 #include "TrigT1TGC/TGCConnectionASDToPP.h"
 #include "TrigT1TGC/TGCConnectionPPToSB.h"
 #include "TrigT1TGC/TGCDatabaseManager.h"
 
 #include "PathResolver/PathResolver.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <ctype.h>
+#include <string>
 
 
 namespace LVL1TGCTrigger {
@@ -108,14 +109,14 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
 	      // initialize array
 	      //coverity[TAINTED_SCALAR]
         for(int i=0; i<m_totalNumberOfChannel; i+=1){
-	  m_layerId[i]     = 0;
-	  m_chamberId[i]   = 0;
-	  m_lineId[i]      = 0;
-	  m_PPId[i]        = 0;
-	  m_connectorId[i] = 0;
-	  m_channelId[i]   = 0;
-	}
-	// read lines
+          m_layerId[i]     = 0;
+          m_chamberId[i]   = 0;
+          m_lineId[i]      = 0;
+          m_PPId[i]        = 0;
+          m_connectorId[i] = 0;
+          m_channelId[i]   = 0;
+        }
+        // read lines
         for(int i=0; i<m_totalNumberOfChannel; i+=1){
           file.getline(buf,BufferSize);
           std::istringstream line(buf);
@@ -126,6 +127,7 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
           if(PPType=="FST"||PPType=="FSD"||PPType=="EST"||PPType=="ESD"||PPType=="FSI"||PPType=="ESI"){
             if(forwardBackward==ForwardSector){
                //coverity[TAINTED_SCALAR]
+               //coverity[INTEGER_OVERFLOW]
                m_layerId[i] = s_forwardLayer[m_layerId[i]];
             }
           }

@@ -113,9 +113,8 @@ StatusCode ParticleSortingAlg::finalize()
 
 
 
-StatusCode ParticleSortingAlg::execute()
+StatusCode ParticleSortingAlg::execute(const EventContext& ctx)
 {
-  const EventContext &ctx = Gaudi::Hive::currentContext();
   // Increase the event counter
   ++m_nEventsProcessed;
 

@@ -263,8 +263,12 @@
 + MuonSpectrometer/MuonStationIndex
 + MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonReadoutGeometryR4
 + MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelR4
++ MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelTestR4
 + MuonSpectrometer/MuonPhaseII/MuonG4/MuonSensitiveDetectorsR4
++ MuonSpectrometer/MuonPhaseII/MuonG4/MuonG4TrfCache
++ MuonSpectrometer/MuonPhaseII/MuonG4/MuonSimHitSorting
 + MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHit
++ MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHitAthenaPool
 + Reconstruction/RecEvent
 + Reconstruction/RecEventAthenaPool
 + Reconstruction/RecEventTPCnv
@@ -285,7 +289,6 @@
 + Simulation/G4Extensions/Monopole
 + Simulation/G4Extensions/Quirks
 + Simulation/G4Extensions/Sleptons
-+ Simulation/G4Sim/G4HiveEx
 + Simulation/G4Sim/MCTruth
 + Simulation/G4Sim/MCTruthBase
 + Simulation/G4Sim/SimHelpers

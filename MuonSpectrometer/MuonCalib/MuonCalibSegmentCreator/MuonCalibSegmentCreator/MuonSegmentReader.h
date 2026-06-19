@@ -44,7 +44,7 @@ class MuonSegmentReader : public AthHistogramAlgorithm
    //virtual StatusCode initialize() override;
    virtual StatusCode initialize() override;
    // virtual StatusCode execute (const EventContext& ctx) const override;
-   virtual StatusCode execute () override;
+   virtual StatusCode execute (const EventContext& ctx) override;
    virtual StatusCode finalize () override;
    
    unsigned int cardinality() const override final { return 1; } ;

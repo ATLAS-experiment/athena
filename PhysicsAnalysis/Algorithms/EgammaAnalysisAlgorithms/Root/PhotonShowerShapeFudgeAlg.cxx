@@ -33,12 +33,12 @@ namespace CP
 
 
   StatusCode PhotonShowerShapeFudgeAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::PhotonContainer *photons = nullptr;
-      ANA_CHECK (m_photonHandle.getCopy (photons, sys));
+      ANA_CHECK (m_photonHandle.getCopy (photons, sys, ctx));
       for (xAOD::Photon *photon : *photons)
       {
         if (m_preselection.getBool (*photon, sys))

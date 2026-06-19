@@ -25,3 +25,10 @@ file(GLOB _MUONINF_MODELS_ONNX "${CMAKE_CURRENT_SOURCE_DIR}/models/*.onnx")
 if(_MUONINF_MODELS_ONNX)
   atlas_install_data(models/*.onnx)
 endif()
+
+atlas_add_test( testMuonBucketInference
+                SCRIPT python -m MuonInference.muonBucketInference --nEvents 5 --use-cpu
+                PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
+                LOG_IGNORE_PATTERN "PathResolver.*ERROR Locating dev file dev/MuonRecRTT/edgecnn_mu200\\.onnx\\. Do not let this propagate to a release!"
+                POST_EXEC_SCRIPT noerror.sh)

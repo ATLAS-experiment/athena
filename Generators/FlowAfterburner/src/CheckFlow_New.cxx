@@ -33,6 +33,7 @@
 
 #include "GeneratorObjects/HijingEventParams.h"
 #include <cmath>
+#include <array>
 
 /// @todo Migrate to a GenBase class or at least AthAlgorithm
 CheckFlow_New::CheckFlow_New(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -207,8 +208,8 @@ StatusCode CheckFlow_New::execute(const EventContext& ctx) {
 
   SG::ReadHandle<HijingEventParams> hijing_pars{m_hijingKey, ctx};
   float b = hijing_pars->get_b();
-  float Psi_n[6],Psi_n_reco[6];
-  float Psi_n_reco_pos[6],Psi_n_reco_neg[6];
+  float Psi_n[6]{},Psi_n_reco[6]{};
+  float Psi_n_reco_pos[6]{},Psi_n_reco_neg[6]{};
   for(int ihar=0;ihar<6;ihar++){Psi_n[ihar]=hijing_pars->get_psi(ihar+1);}
   msg(MSG::INFO)<<"SOUMYA  "<<hijing_pars->get_psi(1)<<"   "<<hijing_pars->get_psi(2)<<"  "<<hijing_pars->get_psi(3)
                                   <<hijing_pars->get_psi(4)<<"   "<<hijing_pars->get_psi(5)<<"  "<<hijing_pars->get_psi(6)<<"    "<<b  << endmsg;
@@ -217,13 +218,12 @@ StatusCode CheckFlow_New::execute(const EventContext& ctx) {
   // Check cut on impact parameter b
   if(b<m_bcut_min || b>m_bcut_max)  return StatusCode::SUCCESS;
 
-
+  using TrigArr = std::array<double, 6>;
   double ngenerated_pos = 0,ngenerated_pt_pos=0;
-  double cos_n_pos[6],sin_n_pos[6],cos_n_pt_pos[6],sin_n_pt_pos[6];
+  TrigArr cos_n_pos{},sin_n_pos{},cos_n_pt_pos{},sin_n_pt_pos{};
   double ngenerated_neg = 0,ngenerated_pt_neg=0;
-  double cos_n_neg[6],sin_n_neg[6],cos_n_pt_neg[6],sin_n_pt_neg[6];
-  for(int ihar=0;ihar<6;ihar++){cos_n_pos[ihar]=0;sin_n_pos[ihar]=0;   cos_n_pt_pos[ihar]=0;sin_n_pt_pos[ihar]=0;
-                                cos_n_neg[ihar]=0;sin_n_neg[ihar]=0;   cos_n_pt_neg[ihar]=0;sin_n_pt_neg[ihar]=0;}
+  TrigArr cos_n_neg{},sin_n_neg{},cos_n_pt_neg{},sin_n_pt_neg{};
+
 
   // Iterate over all MC particles
   std::vector<HepMC::ConstGenParticlePtr> particles;

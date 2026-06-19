@@ -26,7 +26,7 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
   virtual StatusCode execute(const EventContext& ctx) const override;
 
  protected:
-  ToolHandle<IActsToTrkConverterTool> m_convertorTool{this, "ConvertorTool",
+  PublicToolHandle<IActsToTrkConverterTool> m_convertorTool{this, "ConvertorTool",
                                                       ""};
   SG::ReadHandleKeyArray<TrackCollection> m_trackCollectionKeys{
       this,

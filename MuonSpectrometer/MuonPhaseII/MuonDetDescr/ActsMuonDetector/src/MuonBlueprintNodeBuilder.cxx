@@ -41,13 +41,6 @@ using namespace Acts::UnitLiterals;
 using namespace Muon::MuonStationIndex;
 namespace {
 
-  //Muon System IDs
-  constexpr std::size_t s_muonBarrelId = 80;
-  constexpr std::size_t s_muonEndcapAId = 81;
-  constexpr std::size_t s_muonEndcapCId = 82;
-  constexpr std::size_t s_muonEndcapMiddleAId = 83;
-  constexpr std::size_t s_muonEndcapMiddleCId = 84;
-
   //Helper function to configure a material node with the correct Faces of the chambers' tracking volumes
   void configureMaterialFaces(
     Acts::Experimental::MaterialDesignatorBlueprintNode& node,
@@ -149,6 +142,7 @@ std::visit([&](auto& elems) {
 auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("MuonNode", Acts::AxisDirection::AxisZ);
 
 Acts::VolumeBoundFactory boundsFactory{};
+using namespace ActsTrk::detail::GeoVolIds;
 auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI", Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory, {ChIdx::BIS, ChIdx::BML, ChIdx::BOL, 
                                                                                                                                                ChIdx::EIS, ChIdx::EIL});
 auto endcapANode = buildMuonNode(gctx, endcapOuterAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
@@ -451,7 +445,7 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           break;
 
         } default: 
-              THROW_EXCEPTION("Unknown detector type for readout element: " << ActsTrk::to_string(readoutEle->detectorType()));
+              THROW_EXCEPTION("Unknown detector type for readout element: " << readoutEle->detectorType());
               break;
      
     }

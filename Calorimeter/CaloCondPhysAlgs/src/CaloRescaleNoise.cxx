@@ -60,7 +60,7 @@ StatusCode CaloRescaleNoise::initialize()
   return StatusCode::SUCCESS; 
 }
 //__________________________________________________________________________
-StatusCode CaloRescaleNoise::execute()
+StatusCode CaloRescaleNoise::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloRescaleNoise execute()" );
   return StatusCode::SUCCESS; 

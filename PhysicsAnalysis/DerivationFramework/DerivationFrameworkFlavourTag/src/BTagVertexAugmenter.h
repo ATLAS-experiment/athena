@@ -14,7 +14,7 @@ public:
                       ISvcLocator* pSvcLocator );
 
   virtual StatusCode  initialize();
-  virtual StatusCode  execute();
+  virtual StatusCode  execute(const EventContext& ctx);
   virtual StatusCode  finalize();
 private:
 };

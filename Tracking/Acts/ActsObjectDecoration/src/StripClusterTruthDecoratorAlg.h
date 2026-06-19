@@ -37,7 +37,7 @@ namespace ActsTrk {
   
   class StripClusterTruthDecoratorAlg : public AthReentrantAlgorithm {
   public:
-    StripClusterTruthDecoratorAlg(const std::string &name,ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual ~StripClusterTruthDecoratorAlg() = default;
     
     virtual StatusCode initialize() override;

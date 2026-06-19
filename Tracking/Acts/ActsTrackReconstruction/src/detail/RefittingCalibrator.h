@@ -5,6 +5,8 @@
 #ifndef ACTSTRACKRECONSTRUCTION_REFITTINGCALIBRATOR_H
 #define ACTSTRACKRECONSTRUCTION_REFITTINGCALIBRATOR_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
@@ -14,37 +16,54 @@
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "ActsEvent/TrackContainer.h"
 
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+#include "ActsCalibrators/TrkMeasurementCalibrator.h"
+#include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
+
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
+#include "ActsCalibrators/TrkPrepRawDataSurfaceAcc.h"
+#include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
+
 namespace ActsTrk::detail {
 
-class RefittingCalibrator {
- public:
-  using MutableTrackStateProxy =
-      ActsTrk::MutableTrackStateBackend::TrackStateProxy;
-  using ConstTrackStateProxy=
-      ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy;
+    class RefittingCalibrator {
+      public:
+        RefittingCalibrator(const ActsTrk::IActsToTrkConverterTool* convTool,
+                            const Trk::IRIO_OnTrackCreator* rotCreator);
+        
+        using MutableTrackStateProxy = ActsTrk::MutableTrackStateBackend::TrackStateProxy;
+        using ConstTrackStateProxy = ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy;
 
-  struct RefittingSourceLink {
+        void calibrate(const Acts::GeometryContext& gctx,
+                       const Acts::CalibrationContext& cctx,
+                       const Acts::SourceLink& sourceLink,
+                       MutableTrackStateProxy trackState) const;
 
-    ActsTrk::TrackContainer::ConstTrackStateProxy state;
+        template <auto Callable, typename Type>
+        /** @copydoc xAODUncalibMeasCalibrator::connect */
+        void connect(const xAOD::UncalibMeasType type, const Type* instance) {
+          m_xAODCalibrator.connect<Callable>(type, instance);
+        }
+      private:
+        TrkPrepRawDataCalibrator m_prdCalibrator{};
+        TrkMeasurementCalibrator m_measCalibrator{};
+        xAODUncalibMeasCalibrator m_xAODCalibrator{};
+       
+    };
 
-    RefittingSourceLink() = delete;
+    class RefittingSurfaceAccesor {
+        public:
+            RefittingSurfaceAccesor(const IActsToTrkConverterTool* trkConvTool,
+                                    const ActsTrk::ITrackingGeometryTool* trackGeoTool); 
+             /** @brief Operator called by the Acts API to fetch the surface. */
+            const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
+          
+        private:
+          xAODUncalibMeasSurfAcc m_xAODAcc{};
+          TrkPrepRawDataSurfaceAcc m_prdAcc{};
+          TrkMeasSurfaceAccessor m_rotAcc{};
 
-    RefittingSourceLink(
-        const ActsTrk::TrackContainer::ConstTrackStateProxy& inputState)
-        : state(inputState) {}
-  };
-
-  static const Acts::Surface* accessSurface(
-      const Acts::SourceLink& sourceLink) {
-    const auto& refittingSl = sourceLink.get<RefittingSourceLink>();
-    return &refittingSl.state.referenceSurface();
-  }
-
-  void calibrate(const Acts::GeometryContext& gctx,
-                 const Acts::CalibrationContext& cctx,
-                 const Acts::SourceLink& sourceLink,
-                 MutableTrackStateProxy trackState) const;
-};
+    };
 
 }  // namespace ActsTrk::detail
 

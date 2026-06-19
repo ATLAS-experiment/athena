@@ -35,14 +35,13 @@ bool xAODFourLeptonInvMassFilter::passesLeptonSelection(
   return true;
 }
 
-StatusCode xAODFourLeptonInvMassFilter::filterEvent() {
+StatusCode xAODFourLeptonInvMassFilter::filterEvent(const EventContext& ctx) {
   // Retrieve TruthLightLepton container from xAOD LightLepton slimmer, contains
   // (electrons and muons ) particles
 
-  const EventContext & context = Gaudi::Hive::currentContext();
   SG::ReadHandle < xAOD::TruthParticleContainer >
     xTruthParticleContainerReadHandle(
-      m_xaodTruthParticleContainerNameLightLeptonKey, context);
+      m_xaodTruthParticleContainerNameLightLeptonKey, ctx);
   if (!xTruthParticleContainerReadHandle.isValid()) {
     ATH_MSG_ERROR("Could not retrieve xAOD::TruthParticleContainer with key:" <<
       m_xaodTruthParticleContainerNameLightLeptonKey.key());
@@ -59,7 +58,7 @@ StatusCode xAODFourLeptonInvMassFilter::filterEvent() {
       lightLeptonParticle.push_back(p);
 
   if (lightLeptonParticle.size() < 4) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -75,12 +74,12 @@ StatusCode xAODFourLeptonInvMassFilter::filterEvent() {
           double m = vec.M();
           if (m > m_minMass && m < m_maxMass) {
             ATH_MSG_DEBUG("PASSED FILTER: invariant mass = " << m);
-            setFilterPassed(true);
+            setFilterPassed(true, ctx);
             return StatusCode::SUCCESS;
           }
 
         }
 
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

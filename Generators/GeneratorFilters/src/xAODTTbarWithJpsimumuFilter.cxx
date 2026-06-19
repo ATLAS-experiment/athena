@@ -21,7 +21,7 @@ StatusCode xAODTTbarWithJpsimumuFilter::filterFinalize()
 }
 
 //---------------------------------------------------------------------------
-StatusCode xAODTTbarWithJpsimumuFilter::filterEvent()
+StatusCode xAODTTbarWithJpsimumuFilter::filterEvent(const EventContext& ctx)
 {
     //---------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ StatusCode xAODTTbarWithJpsimumuFilter::filterEvent()
     bool isjpsi = false;
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all truth particles in the container
@@ -46,7 +46,7 @@ StatusCode xAODTTbarWithJpsimumuFilter::filterEvent()
     if (m_selectJpsi && isjpsi)
         pass = true;
 
-    setFilterPassed(pass);
+    setFilterPassed(pass, ctx);
     return StatusCode::SUCCESS;
 }
 

@@ -242,7 +242,7 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
 
 template <class MuonDetectorType> void MuonDetectorManager::linkElements(ElementStorage_t<MuonDetectorType>& detStore,
                                                                          MuonDetectorType* reEle) {
-        ATH_MSG_VERBOSE("No inter-linking for "<<ActsTrk::to_string(reEle->detectorType())<<" "<<detStore.size());
+        ATH_MSG_VERBOSE("No inter-linking for "<<reEle->detectorType()<<" "<<detStore.size());
 }
 template <> void MuonDetectorManager::linkElements(ElementStorage_t<MdtReadoutElement>& detStore,
                                                    MdtReadoutElement* refEle) {

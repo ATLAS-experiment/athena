@@ -19,14 +19,14 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode RunNumberSelectorAlg::execute() {
+  StatusCode RunNumberSelectorAlg::execute(const EventContext& ctx) {
 
     static const SG::Accessor<unsigned int> acc_random("RandomRunNumber");
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_decoration.setBool(*evtInfo, 0, sys);

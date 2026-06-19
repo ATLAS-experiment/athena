@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -18,12 +18,12 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaKernel/ExtendedEventContext.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/setupStoreGate.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "CxxUtils/checker_macros.h"
-
 
 #include <algorithm>
 #include <cassert>
@@ -115,6 +115,9 @@ void test1() {
   assert(evtStore.retrieve().isSuccess());
   assert(detStore.retrieve().isSuccess());
 
+  EventContext ctx;
+  Atlas::setExtendedEventContext (ctx, Atlas::ExtendedEventContext( evtStore.get() ) );
+
   TileHWID* tileHWID(nullptr);
   assert( detStore->retrieve(tileHWID).isSuccess() );
 
@@ -152,7 +155,7 @@ void test1() {
     assert(digitsCnt.record(std::move(digitsContainer)).isSuccess());
   }
 
-  assert( (alg->execute()).isSuccess() );
+  assert( (alg->execute(ctx)).isSuccess() );
 
   SG::ReadHandle<TileDigitsContainer> inputContainer("TileDigitsCnt");
   assert( inputContainer.isValid() );

@@ -32,11 +32,11 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode JetNGhostSelectorAlg::execute() {
+  StatusCode JetNGhostSelectorAlg::execute(const EventContext& ctx) {
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_decoration.setBool(*evtInfo, 0, sys);
@@ -47,7 +47,7 @@ namespace CP {
 
       // retrieve the jet container
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK(m_jetsHandle.retrieve(jets, sys));
+      ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
 
       // apply and calculate the decision
       int count = 0;

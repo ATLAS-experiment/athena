@@ -168,8 +168,10 @@ class TileBlobReaderCrest(TileCalibLogger):
             tag=None
             if api:
                 tags=api.find_global_tag_map(globalTag)
-            else:
+            elif self.__api_instance:
                 tags=self.__api_instance.find_global_tag_map(globalTag)
+            else:
+                return globalTag
             if tags.size==0:
                 raise Exception( "globalTag %s not found" % (globalTag) )
             else:

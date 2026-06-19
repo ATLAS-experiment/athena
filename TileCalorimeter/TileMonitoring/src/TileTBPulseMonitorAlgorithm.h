@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILETBPULSEMONITORALGORITHM_H
@@ -54,7 +54,7 @@ class TileTBPulseMonitorAlgorithm : public AthMonitorAlgorithm {
 
     const TileHWID* m_tileHWID{nullptr};
     const TileInfo* m_tileInfo{nullptr};
-    int m_t0SamplePosition;
+    int m_t0SamplePosition{};
 };
 
 

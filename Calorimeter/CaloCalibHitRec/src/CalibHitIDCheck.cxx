@@ -47,7 +47,7 @@ StatusCode CalibHitIDCheck::initialize()
 
 
 ////////////////   EXECUTE   //////////////////////
-StatusCode CalibHitIDCheck::execute()
+StatusCode CalibHitIDCheck::execute(const EventContext& /*ctx*/)
 {
   ATH_CHECK( evtStore()->retrieve(m_LArDMHitCnt,        m_larDMHitContainer) );
   ATH_CHECK( evtStore()->retrieve(m_ActiveHitCnt,       m_larActiveHitContainer) );

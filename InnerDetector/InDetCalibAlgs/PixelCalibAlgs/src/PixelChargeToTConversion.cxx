@@ -43,8 +43,7 @@ StatusCode PixelChargeToTConversion::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode PixelChargeToTConversion::execute(){
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+StatusCode PixelChargeToTConversion::execute(const EventContext& ctx){
   SG::ReadHandle<InDet::PixelClusterContainer> pixel_container( m_pixelsClustersKey, ctx);
   if (!pixel_container.isValid())
     {

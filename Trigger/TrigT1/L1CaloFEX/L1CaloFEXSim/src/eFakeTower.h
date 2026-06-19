@@ -78,7 +78,7 @@ namespace LVL1 {
     virtual StatusCode loadnext();
 
     /// @brief replace the Tower Et with the ones stored in the test vector.
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx);
 
     /// @brief Define the eTowerContainer object for which the Et will be replaced
     virtual StatusCode seteTowers(eTowerContainer*);

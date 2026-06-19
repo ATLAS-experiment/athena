@@ -16,7 +16,7 @@ else()
     atlas_install_python_modules( python/*.py python/iconfTool
                                   POST_BUILD_CMD ${ATLAS_FLAKE8} )
     
-    atlas_install_scripts( share/confTool.py python/iconfTool/iconfTool
+    atlas_install_scripts( share/confTool.py python/iconfTool/iconfTool share/printTestDefaults.py
                            POST_BUILD_CMD ${ATLAS_FLAKE8} )
 endif()
 

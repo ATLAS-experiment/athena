@@ -58,11 +58,10 @@ StatusCode ALFA_CLinkAlg::initialize()
 	return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_CLinkAlg::execute()
+StatusCode ALFA_CLinkAlg::execute(const EventContext& ctx)
 {
 	ATH_MSG_DEBUG ("ALFA_CLinkAlg::execute()");
 
-        const EventContext& ctx = Gaudi::Hive::currentContext();
 
 	auto pDataEvent = std::make_unique<ALFA_CLinkEvent>();
 

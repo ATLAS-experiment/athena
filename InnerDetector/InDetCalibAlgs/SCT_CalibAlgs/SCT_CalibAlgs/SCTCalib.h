@@ -68,7 +68,7 @@ class SCTCalib : public AthAlgorithm {
       SCTCalib( const std::string &name, ISvcLocator* pSvcLocator ) ;
       ~SCTCalib() = default;
       virtual StatusCode initialize() override;
-      virtual StatusCode execute() override;
+      virtual StatusCode execute(const EventContext& ctx) override;
       virtual StatusCode stop ATLAS_NOT_THREAD_SAFE () override; // Thread unsafe getNoisyStrip, getDeadStrip, getNoiseOccupancy, getRawOccupancy, getEfficiency, getBSErrors, getLorentzAngle methods are used.
       virtual StatusCode finalize() override;
 

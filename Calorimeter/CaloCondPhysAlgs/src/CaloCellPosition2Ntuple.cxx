@@ -53,7 +53,7 @@ StatusCode CaloCellPosition2Ntuple::initialize()
 }
 
 //__________________________________________________________________________
-StatusCode CaloCellPosition2Ntuple::execute()
+StatusCode CaloCellPosition2Ntuple::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloCellPosition2Ntuple execute()" );
   return StatusCode::SUCCESS; 

@@ -24,7 +24,7 @@
 namespace CP
 {
   template<typename Type> StatusCode AsgShallowCopyAlg ::
-  executeTemplate (const CP::SystematicSet& sys)
+  executeTemplate (const EventContext& ctx, const CP::SystematicSet& sys)
   {
     const Type *input = nullptr;
     ANA_CHECK (evtStore()->retrieve (input, m_inputHandle.getName (sys)));
@@ -32,8 +32,7 @@ namespace CP
     const auto& name = m_outputHandle.getName(sys);
     [[maybe_unused]] Type *output = nullptr;
     ANA_CHECK (detail::ShallowCopy<Type>::getCopy
-               (msg(), *evtStore(), output, input,
-                name, name + "Aux."));
+               (msg(), ctx, output, input, name));
 
     return StatusCode::SUCCESS;
   }
@@ -41,12 +40,12 @@ namespace CP
 
 
   StatusCode AsgShallowCopyAlg ::
-  executeFindType (const CP::SystematicSet& sys)
+  executeFindType (const EventContext& ctx, const CP::SystematicSet& sys)
   {
     const xAOD::IParticleContainer *input = nullptr;
     if (evtStore()->contains<xAOD::IParticleContainer>(m_inputHandle.getName(sys)))
       {
-        ANA_CHECK (m_inputHandle.retrieve (input, sys));
+        ANA_CHECK (m_inputHandle.retrieve (input, sys, ctx));
       }
 
     if (dynamic_cast<const xAOD::ElectronContainer*> (input))
@@ -104,7 +103,7 @@ namespace CP
       return StatusCode::FAILURE;
     }
 
-    return (this->*m_function) (sys);
+    return (this->*m_function) (ctx, sys);
   }
 
 
@@ -147,11 +146,11 @@ namespace CP
 
 
   StatusCode AsgShallowCopyAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
-      ANA_CHECK ((this->*m_function) (sys));
+      ANA_CHECK ((this->*m_function) (ctx, sys));
     }
     return StatusCode::SUCCESS;
   }

@@ -19,10 +19,10 @@ StatusCode TgcCondDbTestAlg::initialize() {
 }
 
 // Execute
-StatusCode TgcCondDbTestAlg::execute() {  
+StatusCode TgcCondDbTestAlg::execute(const EventContext& ctx) {  
 
     ATH_MSG_INFO("Calling execute");   
-    SG::ReadCondHandle<TgcCondDbData> readHandle{m_readKey};
+    SG::ReadCondHandle<TgcCondDbData> readHandle{m_readKey, ctx};
     if (!readHandle.isValid()) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE;

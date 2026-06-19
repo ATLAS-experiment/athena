@@ -201,13 +201,13 @@ void fillTrackPars(TH1I* const hists[FPGATrackSimTrackPars::NPARS], FPGATrackSim
 ///////////////////////////////////////////////////////////////////////////////
 
 
-StatusCode FPGATrackSimMatrixGenAlgo::execute()
+StatusCode FPGATrackSimMatrixGenAlgo::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("execute()");
   m_eventHeader->clearHits();
   m_eventHeader->reset();
   // Get hits and training tracks from this event
-  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, Gaudi::Hive::currentContext()));
+  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, ctx));
 
   std::vector<FPGATrackSimHit> hits = getLogicalHits();
 
@@ -347,6 +347,9 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
         std::vector<std::shared_ptr<const FPGATrackSimHit>> sector_hits_ptrs;
         sector_hits_ptrs.reserve(sector_hits.size());
         // Single control block representing "the lifetime of sector_hits" (non-owning)
+        //this is ugly, but harmless: multiple smart pointers hold the resource, but one
+        //has a no-op deleter
+        //coverity[MULTIPLE_INIT_SMART_PTRS]
         auto owner = std::shared_ptr<const std::vector<FPGATrackSimHit>>(
           &sector_hits,
           [](const std::vector<FPGATrackSimHit>*) {} // no-op deleter

@@ -17,7 +17,7 @@ class TTbarWToLeptonFilter : public GenFilter {
 public:
 
   TTbarWToLeptonFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

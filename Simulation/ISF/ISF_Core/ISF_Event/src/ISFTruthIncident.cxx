@@ -24,9 +24,6 @@ static HepMC::GenParticlePtr ParticleHelper_convert( const ISF::ISFParticle &par
   HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
 
   auto hepParticle = HepMC::newGenParticlePtr( fourMomentum, particle.pdgCode(), particle.status() );
-#ifndef HEPMC3
-  HepMC::suggest_barcode(hepParticle, particle.barcode() );
-#endif
   // return a newly created GenParticle
   return hepParticle;
 }

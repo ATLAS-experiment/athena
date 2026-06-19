@@ -40,7 +40,7 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
 
     virtual StatusCode initialize() override final;
     virtual StatusCode finalize() override final;
-    virtual StatusCode execute() override final;
+    virtual StatusCode execute(const EventContext& ctx) override final;
 
    private:
       /** @brief Dumps the space point container with the associated muon segment container

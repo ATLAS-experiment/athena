@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_MUON5.py
 # This defines the component accumulator version of DAOD_MUON5 
@@ -208,7 +208,7 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     MUON5TrackThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(flags,
                                                                         name                    = "MUON5TrackThinningTool",
                                                                         StreamName              = stream_name,
-                                                                        SelectionString         = "abs(DFCommonInDetTrackZ0AtPV) < 35.0 && abs(InDetTrackParticles.eta) < 3.2",
+                                                                        SelectionString         = "abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV) < 35.0 && abs(InDetTrackParticles.eta) < 3.2",
                                                                         InDetTrackParticlesKey  = "InDetTrackParticles")
                                                     )
     

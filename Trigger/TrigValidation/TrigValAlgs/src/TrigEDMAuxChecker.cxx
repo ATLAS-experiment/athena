@@ -91,7 +91,7 @@ void TrigEDMAuxChecker::dumpDecorators(const xAOD::AuxContainerBase *x,const std
     m_dynauxmap[key]=std::move(dynauxvar);
 }
 
-StatusCode TrigEDMAuxChecker::execute() {
+StatusCode TrigEDMAuxChecker::execute(const EventContext& /*ctx*/) {
   const xAOD::AuxContainerBase* aux=0;
   StatusCode sc = StatusCode::SUCCESS;
   for(const auto& key:m_auxList){

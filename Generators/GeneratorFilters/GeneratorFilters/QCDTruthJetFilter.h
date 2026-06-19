@@ -22,7 +22,7 @@ public:
   QCDTruthJetFilter(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode filterInitialize();
   StatusCode filterFinalize();
-  StatusCode filterEvent();
+  StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

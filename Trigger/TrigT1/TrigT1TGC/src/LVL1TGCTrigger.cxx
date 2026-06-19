@@ -136,10 +136,9 @@ StatusCode LVL1TGCTrigger::finalize()
 }
 
 ////////////////////////////////////////////
-StatusCode LVL1TGCTrigger::execute()
+StatusCode LVL1TGCTrigger::execute(const EventContext& ctx)
 {
     ATH_MSG_DEBUG("execute() called");
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     const Muon::TgcCablingMap* cabling{nullptr};
     ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));

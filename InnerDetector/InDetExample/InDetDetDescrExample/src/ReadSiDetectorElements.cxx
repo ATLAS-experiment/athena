@@ -105,7 +105,7 @@ StatusCode ReadSiDetectorElements::initialize(){
 }
 
 
-StatusCode ReadSiDetectorElements::execute() {
+StatusCode ReadSiDetectorElements::execute(const EventContext& /*ctx*/) {
   // Only print out on first event
   if (m_first && m_doExec) {
     m_first = false;

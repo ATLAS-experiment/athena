@@ -240,7 +240,7 @@ namespace MuonCalib {
   }//end initialize
 
   //Execute loops through all strips and fills histograms
-  StatusCode CscCalcSlope::execute()
+  StatusCode CscCalcSlope::execute(const EventContext& /*ctx*/)
   {
     ATH_MSG_INFO("Begin execute");	
     //collectEventInfo collects infomation about each event by filling ampHistCollection and peaktHist.

@@ -6,9 +6,6 @@
 #include "LeptonTaggers/DecoratePromptLeptonImproved.h"
 #include "LeptonTaggers/PromptUtils.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
-
-
 // ROOT
 #include "TMVA/Config.h"
 #include "TH1.h"
@@ -141,14 +138,13 @@ StatusCode Prompt::DecoratePromptLeptonImproved::finalize()
 
 
 //=============================================================================
-StatusCode Prompt::DecoratePromptLeptonImproved::execute()
+StatusCode Prompt::DecoratePromptLeptonImproved::execute(const EventContext& ctx)
 {
   //
   // Start execute timer
   //
   TimerScopeHelper timer(m_timerExec);
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   //
   // Retrieve containers from evtStore

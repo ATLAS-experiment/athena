@@ -85,11 +85,7 @@ namespace Muon {
         if (vtx && msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " new vertex: nparticles in " << particles_in_size << endmsg;
         // only truth vertices with 1 incoming particle
         if (vtx && (particles_in_size == 1)) {
-#ifdef HEPMC3
             mother = vtx->particles_in().front();
-#else
-            mother = *vtx->particles_in_const_begin();
-#endif
 
             if (mother && msgLvl(MSG::DEBUG))
                 msg(MSG::DEBUG) << " new mother: " << mother->pdg_id() << " status " << mother->status() << " particles out "

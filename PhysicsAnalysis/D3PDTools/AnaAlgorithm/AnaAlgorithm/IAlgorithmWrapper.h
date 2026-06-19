@@ -15,6 +15,8 @@
 #include <memory>
 #include <string_view>
 
+class EventContext;
+
 namespace EL
 {
   class Algorithm;
@@ -67,7 +69,7 @@ namespace EL
     virtual StatusCode initialize (const AlgorithmWorkerData& workerData) = 0;
 
     /// \brief call execute on the algorithm
-    virtual StatusCode execute () = 0;
+    virtual StatusCode execute (const EventContext& ctx) = 0;
 
     /// \brief call postExecute on the algorithm
     virtual StatusCode postExecute () {return StatusCode::SUCCESS;};

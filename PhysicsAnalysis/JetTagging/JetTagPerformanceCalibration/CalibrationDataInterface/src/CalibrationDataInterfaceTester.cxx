@@ -65,7 +65,7 @@ StatusCode Analysis::CalibrationDataInterfaceTester::initialize()
 
 //================ Execution ====================================================
 
-StatusCode Analysis::CalibrationDataInterfaceTester::execute()
+StatusCode Analysis::CalibrationDataInterfaceTester::execute(const EventContext& ctx)
 {
   // Code entered here will be executed once per event
 

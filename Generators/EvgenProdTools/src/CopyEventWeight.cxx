@@ -24,7 +24,7 @@ StatusCode CopyEventWeight::initialize()
 StatusCode CopyEventWeight::execute(const EventContext& ctx) {
   // Check that the collection isn't empty
   /// @odo What is the best thing to do if it is?!
-  const size_t nEvents = events_const()->size();
+  const size_t nEvents = events_const(ctx)->size();
   if (nEvents == 0) {
     ATH_MSG_WARNING("McEventCollection is empty");
     return StatusCode::SUCCESS;
@@ -37,13 +37,13 @@ StatusCode CopyEventWeight::execute(const EventContext& ctx) {
   EventType* eventType = const_cast<EventType*>(pInputEvt->event_type());
 
   // Copy weights into EventInfo
-  const size_t nw = event_const()->weights().size();
+  const size_t nw = event_const(ctx)->weights().size();
   if (nw == 0) ATH_MSG_WARNING("EVENT WEIGHT ARRAY EMPTY");
   std::vector<float> weights;
   for (size_t iw = 0; iw < nw; ++iw) {
-    ATH_MSG_DEBUG("COPYING EVENT WEIGHT " << iw << "/" << nw << ": " << event_const()->weights()[iw]);
-    eventType->set_mc_event_weight(event_const()->weights()[iw], iw, nw);
-    weights.push_back(event_const()->weights()[iw]);
+    ATH_MSG_DEBUG("COPYING EVENT WEIGHT " << iw << "/" << nw << ": " << event_const(ctx)->weights()[iw]);
+    eventType->set_mc_event_weight(event_const(ctx)->weights()[iw], iw, nw);
+    weights.push_back(event_const(ctx)->weights()[iw]);
   }
 
   SG::WriteDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey, ctx);

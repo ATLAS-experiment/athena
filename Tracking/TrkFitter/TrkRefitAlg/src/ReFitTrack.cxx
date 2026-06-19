@@ -133,11 +133,10 @@ StatusCode Trk::ReFitTrack::initialize()
 }
 
 // Execute method:
-StatusCode Trk::ReFitTrack::execute()
+StatusCode Trk::ReFitTrack::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("ReFitTrack::execute()");
   std::unique_ptr<Trk::PRDtoTrackMap> prd_to_track_map(m_assoTool->createPRDtoTrackMap());
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<TrackCollection> tracks (m_trackName, ctx);
 
   if (!tracks.isValid()){
@@ -300,7 +299,7 @@ StatusCode Trk::ReFitTrack::execute()
   }
 
   ATH_MSG_VERBOSE ("Save tracks");
-  ATH_CHECK(SG::WriteHandle<TrackCollection>(m_newTrackName).record(std::move(new_track_collection)));
+  ATH_CHECK(SG::WriteHandle<TrackCollection>(m_newTrackName, ctx).record(std::move(new_track_collection)));
 
   return StatusCode::SUCCESS;
 }

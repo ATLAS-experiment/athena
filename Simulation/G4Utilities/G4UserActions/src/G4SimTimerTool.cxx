@@ -40,11 +40,15 @@ namespace G4UA
 
     // Report the results
     auto meanSigma = report.meanAndSigma();
-    ATH_MSG_INFO("Finalized timing results for " << report.nEvent <<
-                 " events (not all events used)");
+    ATH_MSG_INFO("=======================================================================================");
+    ATH_MSG_INFO("                                       G4SimTimer");
+    ATH_MSG_INFO("=======================================================================================");
+    ATH_MSG_INFO("Finalized timing results for " << report.nEvent << " events (not all events used)");
     ATH_MSG_INFO("Average time per event was " <<
-                 std::setprecision(4) << meanSigma.first << " +- " <<
-                 std::setprecision(4) << meanSigma.second);
+      std::setprecision(4) << meanSigma.first << " +- " <<
+      std::setprecision(4) << meanSigma.second);
+    ATH_MSG_INFO("G4Run timer: " << std::setprecision(4) << report.runtime);
+    ATH_MSG_INFO("=======================================================================================");
     return StatusCode::SUCCESS;
   }
 
@@ -57,6 +61,9 @@ namespace G4UA
     ATH_MSG_DEBUG("Making a G4SimTimer action");
     auto action = std::make_unique<G4SimTimer>();
     actionList.eventActions.push_back( action.get() );
+    actionList.runActionsMaster.push_back(action.get());
+    // added to runActions for single-thread runs
+    actionList.runActions.push_back(action.get());
     return action;
   }
 

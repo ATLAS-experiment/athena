@@ -34,15 +34,14 @@ namespace CP
   StatusCode ReclusteredJetCalibrationAlg ::
   execute (const EventContext &ctx) const
   {
-    (void) ctx;
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       // container we read in
       xAOD::JetContainer *reclusteredJets = nullptr;
-      ATH_CHECK(m_reclusteredJetHandle.getCopy(reclusteredJets, sys));
+      ATH_CHECK(m_reclusteredJetHandle.getCopy(reclusteredJets, sys, ctx));
 
       const xAOD::JetContainer *smallRJets = nullptr;
-      ATH_CHECK(m_smallRJetHandle.retrieve(smallRJets, sys));
+      ATH_CHECK(m_smallRJetHandle.retrieve(smallRJets, sys, ctx));
      
       // loop over jets
       // construct constant string before loops

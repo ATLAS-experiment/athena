@@ -14,11 +14,14 @@ jcslog = Logging.logging.getLogger('JetCalibStepsConfig')
 from JetToolHelpers.HelperConfig import VarToolCfg, HistoInputCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
+from AthenaConfiguration.Enums import LHCPeriod
 from PathResolver import PathResolver
 import json
 
 def smearingStep(flags, **configDict):
     """ Configuration of the Smearing step. """
+
+    configDict.setdefault('OutScale', 'JetSmearedMomentum')
 
     # HistoReaderMC and HistoReaderData can be specified simultaneously using a single "HistoReader" YAML block.
     # This should contain the common configuration for both and histNameMC/histNameData entries for the histogram names.
@@ -51,13 +54,15 @@ def smearingStep(flags, **configDict):
     return [smearStep]
 
 def puresidualStep(flags, **configDict):
-
+    configDict.setdefault('OutScale', 'JetPileupScaleMomentum')
     configDict.setdefault('IsData', not flags.Input.isMC)
     PU_step = CompFactory.Pileup1DResidualCalibStep("PUResid", **configDict)
     return [PU_step]
 
 
 def gscStep(flags, **configDict):
+
+    configDict.setdefault('OutScale', 'JetGSCScaleMomentum')
 
     defaultFileGSC = PathResolver.FindCalibFile(configDict.pop('fileGSC'))
 
@@ -107,7 +112,7 @@ def gscStep(flags, **configDict):
     return [GSCstep]
 
 def etajesStep(flags, **configDic):
-
+    configDic.setdefault('OutScale', 'JetEtaJESScaleMomentum')
     pVars = configDic.pop("ParametrizedVars")
 
     jesstep = CompFactory.EtaJESCalibStep("EtaJESCalib",
@@ -119,6 +124,7 @@ def etajesStep(flags, **configDic):
 
 def jmsStep(flags, **configDic):
 
+    configDic.setdefault('OutScale', 'JetJMSScaleMomentum')
     histoParams = configDic.pop('histoParams')
     histoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('HistoFile'))
 
@@ -132,7 +138,7 @@ def jmsStep(flags, **configDic):
     return [jmsstep]
 
 def insituStep(flags, **configDic):
-
+    configDic.setdefault('OutScale', 'JetInsituScaleMomentum')
     histEtaInterCalib = configDic.pop('histEtaInterCalib')
     histAbsCalib = configDic.pop('histAbsCalib')
 
@@ -167,7 +173,7 @@ def insituStep(flags, **configDic):
     return insituSteps
 
 def af3Step(flags, **configDic):
-
+    configDic.setdefault('OutScale','JetFastSimScaleMomentum')
     # Get the settings for the histograms:
     histoParams = configDic.pop('histoParams')
     histoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('CalibConstantFile'))
@@ -176,7 +182,7 @@ def af3Step(flags, **configDic):
     return [CompFactory.Generic4VecCorrectionStep("AF3", **configDic)]
 
 def ptResidualStep(flags, **configDic):
-
+    configDic.setdefault('OutScale','JetPtResidualScaleMomentum')
     # Get the settings for the histograms:
     histoParams = configDic.pop('histoParams')
 
@@ -192,7 +198,7 @@ def ptResidualStep(flags, **configDic):
     return [CompFactory.Generic4VecCorrectionStep("PtResidual", **configDic)]
 
 def mc2mcStep(flags, **configDic):
-
+    configDic.setdefault('OutScale','JetMC2MCScaleMomentum')
     # Generator and version are the first item
     for key, value in flags.Input.GeneratorsInfo.items():
         generator = key
@@ -276,49 +282,76 @@ generatorDic = {
     "Pythia8": ["Pythia", "dipole", "cluster"]
 }
 
-def calibConfigToToolList(flags, forceCalibSeq, calibSeq, **configDict):
+def calibConfigToToolList(flags, calibSeqOverride=None, **configDict):
     """
     Returns a list of instantiated tools for each of the calibration steps. 
-    The order of the steps is determined by the InScale and OutScale properties given in the config.
     Tools are instantiated by calling functions declared in the calibStepDic dictionary.
+    The order of the steps is determined by the Sequence block of the config. 
+    The calibSeqOverride argument can be set to a '_'-separated string of step names, 
+    which will override the step ordering set by the Sequence block.
     """
 
+    # Identify type of sample
     isFullSim = True
     if flags.Input.isMC:
         metaData = GetFileMD(flags.Input.Files[0])
         simFlavour = metaData.get('Simulator','') # ATLFAST3 or FullG4
         if 'ATLFAST3' in simFlavour:
             isFullSim = False
+            sampleKey = 'AF3'
+        else:
+            sampleKey = 'FullSim'
+    else:
+        sampleKey = 'Data'
 
-    # For fast simulation, we want to implement an additional calibration right after the GSC
-    if flags.Input.isMC and not isFullSim and 'AF3' in configDict:
-        # Change the input scale of the next calibration step to the output scale of the AF3 calibration:
-        for step in configDict:
-            if configDict.get(step)['InScale'] == 'JetGSCScaleMomentum' and step != 'Insitu' and step != 'AF3':
-                configDict.get(step)['InScale'] = 'JetFastSimScaleMomentum'
-                break
+    if flags.GeoModel.Run == LHCPeriod.Run2:
+        runKey = 'Run2'
+    elif flags.GeoModel.Run == LHCPeriod.Run3:
+        runKey = 'Run3'
+    elif flags.GeoModel.Run >= LHCPeriod.Run4:
+        runKey = 'Run4'
+    else:
+        jcslog.warning('LHCPeriod not recognised')
 
-    toolDic = {}
-    foundCS = False # check at least one of the steps starts from constituent scale
-    for step in configDict:
 
-        configDict.get(step).pop('prereqs',{}) # removes the 'prereqs' entry not refined in steps       
+    if calibSeqOverride:
+        # If calibSeqOverride is set, use this to determine ordering
+        sequence = calibSeqOverride.split('_')
+        jcslog.info('Expert option calibSeqOverride set - overriding step sequence')
+    else:
+        # Ordering of calib steps based on Sequence block and type of sample
+        try:
+            seqDict = configDict.pop('Sequence')
+            sequence = seqDict[runKey][sampleKey]
+        except KeyError:
+            raise JetCalibConfigError(f"{runKey} {sampleKey} sample identified. YAML should specify step ordering via the following block structure: \n \
+    Sequence:\n \
+        {runKey}: \n \
+            {sampleKey}: [list of steps] ")
+
+    toolList = []
+    jcslog.debug('Configuring jet calib steps:')
+    for step in sequence:
+
+        if step not in configDict:
+            raise JetCalibConfigError(f'Sequence includes step {step} but no YAML block is provided.')
+        configDict.get(step).pop('prereqs',{}) # removes the 'prereqs' entry not refined in steps    
+
         # expert option to skip a step
         if configDict.get(step).pop('noRun',False):
             jcslog.warning(f'Expert option: Skipping calib step {step}')
             continue
 
-        # Skip Insitu for MC
+        # Warning: Insitu for MC
         if step=="Insitu" and flags.Input.isMC and not configDict.get("Insitu").get("CalibrateMC",False):
-            jcslog.debug('Skipping Insitu for MC')
-            continue
+            jcslog.warning('Insitu step included for MC but CalibrateMC is False - no calibration will be run')
 
-        # Skip MC to MC calibration factors for data or Pythia8
         if step=="MC2MC":
+            # Print warning if running MC2MC calibration for data
             if not flags.Input.isMC:
-                jcslog.debug('Skipping MC2MC calibration for data')
-                continue
+                jcslog.warning('Running MC2MC calibration for data')
 
+            # Skip MC to MC calibration for Pythia8
             for key, value in flags.Input.GeneratorsInfo.items():
                 generator = key
                 break
@@ -326,65 +359,79 @@ def calibConfigToToolList(flags, forceCalibSeq, calibSeq, **configDict):
                 jcslog.debug('Skipping MC2MC calibration for Pythia8')
                 continue
 
-        # Skip additional fast simulation calibration steps for data or full simulation
+        # Warning if running AF3 calibration for data or FullSim
         if step=="AF3":
             if not flags.Input.isMC:
-                jcslog.debug('Skipping additional FastSimulation calibration for data')
-                continue
-            # Check if full simulation
+                jcslog.warning('Running FastSimulation calibration for data')
+
             if isFullSim:
-                jcslog.debug('Skipping additional FastSimulation calibration for full sim')
-                continue
+                jcslog.warning('Running FastSimulation calibration for full sim')
 
         calibFunc = calibStepDic.get(step,None)
+
         if calibFunc is None:
             raise NotImplementedError(f'Calibration step {step} is not found in calibStepDic')
 
         calibConfig = configDict.get(step)
 
+        # Config can contain run-specific settings in a 'RunX:' sub-block
+        for overrideKey in ['Run2', 'Run3', 'Run4']:
+            # All override blocks should be removed from the configDict
+            overrideDict = calibConfig.pop(overrideKey,{}) 
+            # Only apply the overrides for the relevant Run
+            if runKey!=overrideKey or not overrideDict:
+                continue
+            jcslog.debug(f'{step}: Applying {runKey} override settings')
+
+            for key in overrideDict:
+                if key in calibConfig:
+                    jcslog.warning(f'{key} will be overwritten by {overrideKey} settings')
+                calibConfig[key] = overrideDict[key]
+
+        # Start from ConstitScale. For subsequent steps set InScale to OutScale of previous step
+        if len(toolList)==0:
+            inScale = 'JetConstitScaleMomentum'
+        else:
+            inScale = toolList[-1].OutScale
+
+        calibConfig.setdefault('InScale', inScale)
+
+        if calibConfig['InScale']!=inScale:
+            jcslog.warning(f'InScale set to {calibConfig['InScale']} in YAML config, but expected {inScale} from Sequence ordering -- is this intentional?')
+        
         # each func returns a list (to allow one YAML block to configure multiple steps run in order)
-        toolList = calibFunc(flags, **calibConfig)
+        newToolList = calibFunc(flags, **calibConfig)
+        jcslog.debug(f'{step}: InScale = {newToolList[0].InScale}, OutScale = {newToolList[-1].OutScale}')
 
-        toolDic[step] = toolList
-        if toolList[0].InScale == "JetConstitScaleMomentum":
-            foundCS = True
+        toolList += newToolList
+
+    return toolList
+
+def calibToolFromConfigFile(flags, configFile, name = "jetcalib", calibSeqOverride = None):
+    """
+    Returns a list of instantiated tools for each of the calibration steps. 
+    The order of the steps is determined by the Sequence block of the config, unless calibSeqOverride is set.
+
+    Parameters:
+    -----------
+    configFile: str
+        Path to YAML configuration file
+    name: str
+        Internal name of the configured jet calib tool
     
-    if not foundCS:
-        raise JetCalibConfigError('At least one step must have InScale = JetConstitScaleMomentum')
-
-    def findNextSteps(ordered_tools=[], ordered_step_names=[], startScale = "JetConstitScaleMomentum", calibSeq = ""):
-        ''' Recursively add tools to ordered_tools based on in/out scale '''
-        for step in toolDic:
-            if forceCalibSeq:
-                if step not in calibSeq:
-                    continue
-            if toolDic[step][0].InScale == startScale:
-                ordered_tools += toolDic[step]
-                ordered_step_names.append(step)
-                ordered_tools, ordered_step_names = findNextSteps(ordered_tools, ordered_step_names, toolDic[step][-1].OutScale, calibSeq)
-
-        return ordered_tools, ordered_step_names
-
-    ordered_tools, ordered_step_names = findNextSteps([], [], "JetConstitScaleMomentum", calibSeq)
-
-    # Check we've got all the steps
-    for step in toolDic:
-        if step not in ordered_step_names and not forceCalibSeq:
-            raise JetCalibConfigError(f'Could not place calib step {step} - have you set InScale and OutScale correctly?')
-
-    jcslog.info(f'Ordered jet calib steps: {"->".join(ordered_step_names)}')
-
-    return ordered_tools
-
-def calibToolFromConfigFile(flags, configFile, name = "jetcalib", forceCalibSeq = False, calibSeq = ""):
-
-    jcslog.info(f'Configuring JetCalibTools with {configFile}')
+    Expert options:
+    ---------------
+    calibSeqOverride: str
+        Optional '_'-separated string of step names. If provided this will override the step ordering set by the Sequence block.
+    """
+    infoMsg = f'Configuring JetCalibTools with {configFile}'
+    jcslog.info(infoMsg)
 
     configDic = load_yaml_cfg(configFile)
 
     globalSettings = configDic.pop('Global',{})
 
-    calibTool = CompFactory.JetCalibTool(name, CalibSteps=calibConfigToToolList(flags, forceCalibSeq, calibSeq, **configDic), **globalSettings)
+    calibTool = CompFactory.JetCalibTool(name, CalibSteps=calibConfigToToolList(flags, calibSeqOverride, **configDic), **globalSettings)
     return calibTool
 
 def load_yaml_cfg(configFile):

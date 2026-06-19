@@ -68,8 +68,26 @@ StatusCode MuonCreatorAlg::setupDataShip(const EventContext& ctx, DataShip& ship
             if (muTag->idTrack() != nullptr) {
                 ship.combinedTags[muTag->idTrack()].emplace_back(muTag);
                 cmbMsTrks.insert(muTag->msTrack());
-            } else if (cmbMsTrks.insert(muTag->msTrack()).second) {
+                continue;
+            }
+            // Check whether the tag has an MS tag
+            if (!muTag->msTrack()) {
+                continue;
+            } 
+            // If there is no combined tag with MS track the 
+            // same MS track, then turn it into a standalone muon
+            if (cmbMsTrks.insert(muTag->msTrack()).second) {
                 ship.standaloneTags.emplace_back(muTag);
+            } else {
+                /** try to asociate the tag with the combined tag*/
+                for (auto& [trk, tags]: ship.combinedTags) {
+                    if (std::ranges::any_of(tags, [&muTag](const MuonR4::MuonTag* known){
+                        return known->msTrack() == muTag->msTrack();
+                    })) {
+                        tags.push_back(muTag);
+                        break;
+                    }
+                }
             }
         }        
     }
@@ -134,6 +152,26 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
         p4Set = true;
     }
     newMuon->setMuonSegmentLinks(segLinks);
+
+    switch(newMuon->author()){
+        using enum xAOD::Muon::Author;
+        case MuidCo:
+        case MuGirl:
+        case STACO:
+            newMuon->setMuonType(xAOD::Muon::MuonType::Combined);
+            break;
+        case MuidSA:
+            newMuon->setMuonType(xAOD::Muon::MuonType::MuonStandAlone);
+            break;
+        case MuTagIMO:
+            newMuon->setMuonType(xAOD::Muon::MuonType::SegmentTagged);
+            break;
+        default:
+            ATH_MSG_WARNING("Invalid muon author "<<newMuon->author()<<". Cannot determine the muon type");
+            ship.muons->pop_back();
+    }
+
+    return;
     m_selectionTool->setPassesIDCuts(*newMuon);
     m_selectionTool->setQuality(*newMuon);
 }

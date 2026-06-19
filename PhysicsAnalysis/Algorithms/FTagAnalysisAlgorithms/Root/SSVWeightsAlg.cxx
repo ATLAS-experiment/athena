@@ -151,14 +151,14 @@ namespace CP{
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SSVWeightsAlg::execute() {
-  
-    for (const auto &sys : m_systematicsList.systematicsVector()){ 
+  StatusCode SSVWeightsAlg::execute(const EventContext& ctx) {
+
+    for (const auto &sys : m_systematicsList.systematicsVector()){
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       const xAOD::VertexContainer* vertices = nullptr;
-      ANA_CHECK(m_ssvHandle.retrieve(vertices, sys));
+      ANA_CHECK(m_ssvHandle.retrieve(vertices, sys, ctx));
 
       // create SSVs
       std::vector<const xAOD::Vertex*> SSVs;
@@ -168,7 +168,7 @@ namespace CP{
 
       //create jets
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK(m_jetsHandle.retrieve(jets, sys));
+      ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
 
       std::vector<const xAOD::Jet*> jets_Selected;
       int b_jet_count=0;
@@ -188,7 +188,7 @@ namespace CP{
 
       // create electrons
       const xAOD::ElectronContainer *electrons = nullptr;
-      ANA_CHECK(m_electronsHandle.retrieve(electrons, sys));
+      ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
       
       std::vector<const xAOD::Electron*> electrons_Selected;
 
@@ -201,7 +201,7 @@ namespace CP{
 
       //create muons
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK(m_muonsHandle.retrieve(muons, sys));
+      ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
       std::vector<const xAOD::Muon*> muons_Selected;
 
       //create muons that pass your muon selection
@@ -218,7 +218,7 @@ namespace CP{
       std::vector<const xAOD::TruthParticle*> truthBhs;
 
       const xAOD::TruthParticleContainer *particles = nullptr;
-      ANA_CHECK(m_truthParticlesHandle.retrieve(particles, sys));
+      ANA_CHECK(m_truthParticlesHandle.retrieve(particles, sys, ctx));
 
       for (const xAOD::TruthParticle *part : *particles){
         if ( part->isBottomHadron() && isHFHadronFinalState(part, 5) ){ 

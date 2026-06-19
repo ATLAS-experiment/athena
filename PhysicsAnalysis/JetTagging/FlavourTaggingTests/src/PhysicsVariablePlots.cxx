@@ -1,4 +1,4 @@
-//Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  
 
 #include "FlavourTaggingTests/PhysicsVariablePlots.h"
@@ -48,27 +48,25 @@ namespace FTAGValidation {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PhysicsVariablePlots::execute() {
+  StatusCode PhysicsVariablePlots::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG( "Executing " << name() << " ..." );
-
-    const EventContext context = getContext();
 
     /* =========================================================================================================================================== */
     /* ==== Retrieve Collections */
     /* =========================================================================================================================================== */
 
     // Event Info
-    SG::ReadHandle< xAOD::EventInfo > eventInfoHandle = SG::makeHandle( m_eventInfoKey,context );
+    SG::ReadHandle< xAOD::EventInfo > eventInfoHandle = SG::makeHandle( m_eventInfoKey,ctx );
     ATH_CHECK( eventInfoHandle.isValid() );
     const xAOD::EventInfo *eventInfo = eventInfoHandle.get();
 
     // Retrieve Jet Collection
     const xAOD::JetContainer *jetCollection = nullptr;
-    ATH_CHECK( retrieveCollectionfromStoreGate( context,jetCollection,m_jetKey ) );
+    ATH_CHECK( retrieveCollectionfromStoreGate( ctx,jetCollection,m_jetKey ) );
 
     // Retrieve Vertex Collection
     const xAOD::VertexContainer *vertexCollection = nullptr;
-    ATH_CHECK( retrieveCollectionfromStoreGate( context,vertexCollection,m_vertexKey ) );
+    ATH_CHECK( retrieveCollectionfromStoreGate( ctx,vertexCollection,m_vertexKey ) );
     ATH_CHECK( fillHistogram( "nPrimVtx",vertexCollection->size() ) );
 
     const xAOD::Vertex *primaryVertex = getPrimaryVertex( vertexCollection );
@@ -84,7 +82,7 @@ namespace FTAGValidation {
 
     // Retrieve TrackParticleCollection
     const xAOD::TrackParticleContainer *trackParticleCollection = nullptr;
-    ATH_CHECK( retrieveCollectionfromStoreGate( context,trackParticleCollection,m_trackKey) );
+    ATH_CHECK( retrieveCollectionfromStoreGate( ctx,trackParticleCollection,m_trackKey) );
     ATH_CHECK( fillHistogram( "nTracks",trackParticleCollection->size() ) );
 
     /* =========================================================================================================================================== */

@@ -21,7 +21,7 @@ class NswGeoPlottingAlg : public AthHistogramAlgorithm {
   using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
   StatusCode initialize() override;
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) override;
   unsigned int cardinality() const override final { return 1; }
 
  private:

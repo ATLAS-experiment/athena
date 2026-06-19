@@ -12,6 +12,7 @@
 #include "StoreGate/WriteHandleKey.h"
 
 // Device include(s).
+#include "AthCUDAInterfaces/IStreamTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 
@@ -76,12 +77,17 @@ class TrackParticleCalibratorExampleAlg : public AthReentrantAlgorithm {
   ToolHandle<AthDevice::ICopyTool> m_deviceCopyTool{
       this, "DeviceCopyTool", "", "The device copy tool to use"};
 
+  /// Stream tool to use
+  ToolHandle<AthCUDA::IStreamTool> m_streamTool{this, "StreamTool", "",
+                                                "The stream tool to use"};
+
   /// @}
 
 };  // class LinearTransformTaskExampleAlg
 
 /// Perform the transformation on an NVIDIA GPU
 StatusCode calibrateOnGPU(
+    cudaStream_t stream,
     const traccc::edm::track_collection<traccc::default_algebra>::const_view&
         input,
     traccc::edm::track_collection<traccc::default_algebra>::view& output);

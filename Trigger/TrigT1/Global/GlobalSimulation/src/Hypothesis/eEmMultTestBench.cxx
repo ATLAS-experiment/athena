@@ -66,7 +66,7 @@ namespace GlobalSim {
   }
 
   
-  StatusCode eEmMultTestBench::execute() {
+  StatusCode eEmMultTestBench::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG("executing");
 
         
@@ -90,10 +90,10 @@ namespace GlobalSim {
     }
 
     using WH_TOB = SG::WriteHandle<GlobalSim::IOBitwise::eEmTOBContainer>;
-    auto h_write_tobs = WH_TOB(m_eEmTOBContainer_WriteKey);    
+    auto h_write_tobs = WH_TOB(m_eEmTOBContainer_WriteKey, ctx);    
     CHECK(h_write_tobs.record(std::move(tobs)));
 
-    auto h_write_TIPword = SG::WriteHandle<TIPword>(m_TIPword_WriteKey);
+    auto h_write_TIPword = SG::WriteHandle<TIPword>(m_TIPword_WriteKey, ctx);
     auto twp = TIPword_from_file();
     CHECK(h_write_TIPword.record(std::move(twp)));
     

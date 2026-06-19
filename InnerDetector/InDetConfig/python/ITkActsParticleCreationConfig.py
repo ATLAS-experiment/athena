@@ -71,31 +71,9 @@ def ITkActsTrackParticleCreationCfg(flags,
     # to Vertex we need to create a temporary track particle collection wrt the BeamLine
     # which does not need to be persistified
     if persistifyCollection:
-        # excluded track aux data
-        excludedAuxData = ('-clusterAssociation.-TTVA_AMVFVertices_forReco.-AssoClustersUFO'
-                           '.-TTVA_AMVFWeights_forReco')
-        # remove track decorations used internally by FTAG software
-        from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA
-        excludedAuxData += '.-'.join([''] + FTAG_AUXDATA)
-
-        # exclude TTVA decorations
-        excludedAuxData += '.-TTVA_AMVFVertices.-TTVA_AMVFWeights'
-
-        # exclude IDTIDE decorations
-        from DerivationFrameworkInDet.IDTIDE import IDTIDE_AOD_EXCLUDED_AUXDATA
-        excludedAuxData += '.-'.join([''] + IDTIDE_AOD_EXCLUDED_AUXDATA)
-        from DerivationFrameworkInDet.IDTRKVALID import IDTRKVALID_AOD_EXCLUDED_AUXDATA
-        excludedAuxData += '.-'.join([''] + IDTRKVALID_AOD_EXCLUDED_AUXDATA)
-        if not flags.Acts.EDM.PersistifyTracks:
-            excludedAuxData += '.-actsTrack'
-
-        toAOD = []
-        toAOD += [f"xAOD::TrackParticleContainer#{TrackParticleContainer}",
-                  f"xAOD::TrackParticleAuxContainer#{TrackParticleContainer}Aux.{excludedAuxData}"]
-        
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
-    
+        from ActsConfig.ActsPersistificationConfig import PersistifyTrackParticles
+        acc.merge(PersistifyTrackParticles(flags,
+                                           trackParticleCollections=[TrackParticleContainer]))
     return acc
 
 

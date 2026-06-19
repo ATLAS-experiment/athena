@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ISF_Algs includes
@@ -320,7 +320,7 @@ StatusCode ISF::SimKernel::initSimSvcs( SimSelectorToolArray &simSelectorTools)
 }
 
 
-StatusCode ISF::SimKernel::execute(const EventContext& /*ctx*/)
+StatusCode ISF::SimKernel::execute(const EventContext& ctx)
 {
 
   ATH_MSG_DEBUG ("Executing ...");
@@ -524,7 +524,7 @@ StatusCode ISF::SimKernel::execute(const EventContext& /*ctx*/)
   const ToolHandleArray<IEventFilterTool>::iterator endOfEventFilters(m_eventFilters.end());
   while (eventFilter != endOfEventFilters) {
     if (!((**eventFilter).eventPassesFilter())) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_INFO("This event failed the " << (**eventFilter).name() << " Filter. Therefore it will not be recorded.");
       break;
     }

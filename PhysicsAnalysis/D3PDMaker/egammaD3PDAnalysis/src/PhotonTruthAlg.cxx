@@ -54,7 +54,7 @@ StatusCode PhotonTruthAlg::initialize()
 /**
  * @brief Standard Gaudi @c execute method.
  */
-StatusCode PhotonTruthAlg::execute()
+StatusCode PhotonTruthAlg::execute(const EventContext& /*ctx*/)
 {
 #define DECOR(TYPE,N) xAOD::Photon::Decorator<TYPE> N (m_auxPrefix + #N)
   DECOR(bool,  truth_isConv);

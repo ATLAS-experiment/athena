@@ -204,12 +204,12 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SecVertexTruthMatchAlg::execute() {
+  StatusCode SecVertexTruthMatchAlg::execute(const EventContext& ctx) {
 
     //Retrieve the vertices:
-    SG::ReadHandle<xAOD::VertexContainer> recoVertexContainer(m_secVtxContainerKey);
-    SG::ReadHandle<xAOD::TruthVertexContainer> truthVertexContainer(m_truthVtxContainerKey);
-    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleContainer(m_trackParticleContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> recoVertexContainer(m_secVtxContainerKey, ctx);
+    SG::ReadHandle<xAOD::TruthVertexContainer> truthVertexContainer(m_truthVtxContainerKey, ctx);
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleContainer(m_trackParticleContainerKey, ctx);
 
     std::vector<const xAOD::Vertex*> recoVerticesToMatch;
     std::vector<const xAOD::TruthVertex*> truthVerticesToMatch;

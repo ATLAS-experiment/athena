@@ -185,7 +185,7 @@ public:
     std::string m_clsname;
 
     /// auxid of a linked variable, or null_auxid.
-    auxid_t m_linked;
+    auxid_t m_linked = 0;
 
     /// Additional type flags.
     Flags m_flags;

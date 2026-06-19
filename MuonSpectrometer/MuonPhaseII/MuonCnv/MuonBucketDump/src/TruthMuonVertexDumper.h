@@ -26,7 +26,7 @@ class TruthMuonVertexDumperAlg: public AthHistogramAlgorithm {
 
     virtual StatusCode initialize() override final;
     virtual StatusCode finalize() override final;
-    virtual StatusCode execute() override final;
+    virtual StatusCode execute(const EventContext& ctx) override final;
 
    private:
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuonsKey{this, "TruthMuonsKey", "MuonTruthParticles", "Key to the truth particle container"};

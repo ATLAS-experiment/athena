@@ -29,11 +29,11 @@ StatusCode DumpMC::initialize() {
 }
 
 
-StatusCode DumpMC::execute(const EventContext& /*ctx*/) {
+StatusCode DumpMC::execute(const EventContext& ctx) {
   if (m_DeepCopy) {
     McEventCollection* mcCollptra = new McEventCollection();
     // Fill the new McEventCollection with a copy of the initial HepMC::GenEvent
-    for(const HepMC::GenEvent* evt : *events_const()) {
+    for(const HepMC::GenEvent* evt : *events_const(ctx)) {
       mcCollptra->push_back(new HepMC::GenEvent(*evt));
     }
     // Loop over all events in McEventCollection
@@ -98,7 +98,7 @@ StatusCode DumpMC::execute(const EventContext& /*ctx*/) {
   }
 
   // Loop over all events in McEventCollection
-  for(const HepMC::GenEvent* evt : *events_const()) {
+  for(const HepMC::GenEvent* evt : *events_const(ctx)) {
     auto pdfinfo = evt->pdf_info();
     auto ion = evt->heavy_ion();
 #ifdef HEPMC3

@@ -28,7 +28,7 @@ class TrigBSExtraction : public AthAlgorithm {
 public:
   TrigBSExtraction(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
   /**

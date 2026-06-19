@@ -77,7 +77,7 @@ StatusCode SpacePointAnalysis::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode SpacePointAnalysis::execute() {
+StatusCode SpacePointAnalysis::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG(" In SpacePointAnalysis::execute()" );
 
     m_barrelEndcap->clear();
@@ -102,7 +102,6 @@ StatusCode SpacePointAnalysis::execute() {
     m_globalCovZX->clear();
     m_globalCovZY->clear();
 
-    const EventContext& ctx = getContext();
 
     SG::ReadHandle<SpacePointContainer> spContainer (m_inputKey, ctx);
     if(spContainer.isValid()) {

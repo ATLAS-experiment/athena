@@ -135,9 +135,8 @@ namespace pool {
          if( !db.containers(containerTokens, false).isSuccess() ) {
             throw std::runtime_error( "RootCollection: error reading " + m_fileName );
          }
-         m_containerPrefix = APRDefaults::ReadConfig::getEventTagName("");
+         m_containerPrefix = APRDefaults::ReadConfig::getEventTagName( m_fileDescr.FID() );
          ATH_MSG_DEBUG("Opening RootCollection '" << m_fileName << "' using container prefix: " << m_containerPrefix );
-
          std::string tagContName = m_containerPrefix + "(";
          for( const Token *t : containerTokens ) {
             Token token(t);      // need a non-const Token

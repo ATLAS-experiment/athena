@@ -77,7 +77,7 @@ StatusCode InDet::InDetVertexSplitterHist::finalize() {
 //////////////////////////////////////////////////////////////////////////////////
 /// Execute - on event by event
 
-StatusCode InDet::InDetVertexSplitterHist::execute() {
+StatusCode InDet::InDetVertexSplitterHist::execute(const EventContext& /*ctx*/) {
 
   ATH_MSG_DEBUG("in execute()");
 

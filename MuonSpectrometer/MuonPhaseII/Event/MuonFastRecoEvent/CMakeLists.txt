@@ -10,4 +10,4 @@ atlas_add_library( MuonFastRecoEvent
                    src/*.cxx 
                    PUBLIC_HEADERS MuonFastRecoEvent
                    LINK_LIBRARIES xAODMuonPrepData Acts::Core Identifier MuonReadoutGeometryR4 xAODMeasurementBase 
-                                  MuonDetDescrUtils xAODMuon MuonSpacePoint MuonStationIndexLib)
+                                  MuonDetDescrUtils xAODMuon MuonSpacePoint MuonStationIndexLib MuonTrackEvent)

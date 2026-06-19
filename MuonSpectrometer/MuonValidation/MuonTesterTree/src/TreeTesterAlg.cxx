@@ -19,8 +19,7 @@ namespace MuonVal{
             ATH_CHECK(m_tree.init(this));
             return StatusCode::SUCCESS;
         }
-        StatusCode TreeTestAlg::execute() {
-            const EventContext& ctx{Gaudi::Hive::currentContext()};
+        StatusCode TreeTestAlg::execute(const EventContext& ctx) {
             for (unsigned int n = 0; n < 100; ++n) {
                 m_scalarTest = n;
                 m_vectorTest[n] = n +1;

@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TrigConfBunchCrossingTool.h 748399 2016-05-19 14:55:47Z krasznaa $
 #ifndef TRIGBUNCHCROSSINGTOOL_TRIGCONFBUNCHCROSSINGTOOL_H
 #define TRIGBUNCHCROSSINGTOOL_TRIGCONFBUNCHCROSSINGTOOL_H
 
@@ -41,8 +40,6 @@ namespace Trig {
     *
     * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
     *
-    * $Revision: 748399 $
-    * $Date: 2016-05-19 16:55:47 +0200 (Thu, 19 May 2016) $
     */
    class TrigConfBunchCrossingTool : public BunchCrossingToolBase,
                                      public BunchCrossingConfProviderBase {
@@ -82,16 +79,17 @@ namespace Trig {
       void printBunchGroups( const TrigConf::IILVL1ConfigSvc* svc ) const;
 
       /// DB ID of the BunchGroups settings which was loaded last
-      unsigned int m_bgId;
+      unsigned int m_bgId{0};
 
 #ifndef XAOD_STANDALONE
       /// The config service handle
-      ServiceHandle< TrigConf::ILVL1ConfigSvc > m_configSvc;
+      ServiceHandle<TrigConf::ILVL1ConfigSvc> m_configSvc{
+        this, "ConfigSvc", "TrigConf::xAODConfigSvc/xAODConfigSvc"};
 #endif // not XAOD_STANDALONE
 
       /// The config tool handle
-      ToolHandle< TrigConf::ITrigConfigTool > m_configTool;
-
+      ToolHandle<TrigConf::ITrigConfigTool> m_configTool{
+        this, "ConfigTool", "TrigConf::xAODConfigTool"};
    }; // class TrigConfBunchCrossingTool
 
 } // namespace Trig

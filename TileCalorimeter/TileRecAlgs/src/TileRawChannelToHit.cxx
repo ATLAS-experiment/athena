@@ -88,7 +88,7 @@ StatusCode TileRawChannelToHit::initialize() {
 //* Execution
 //****************************************************************************
 
-StatusCode TileRawChannelToHit::execute() {
+StatusCode TileRawChannelToHit::execute(const EventContext& ctx) {
 
   /* zero all counters and sums */
   int nHit = 0;
@@ -98,12 +98,12 @@ StatusCode TileRawChannelToHit::execute() {
 
   const TileSamplingFraction* samplingFraction = nullptr;
   if (m_useSamplFract) {
-    SG::ReadCondHandle<TileSamplingFraction> samplingFractionHandle(m_samplingFractionKey);
+    SG::ReadCondHandle<TileSamplingFraction> samplingFractionHandle(m_samplingFractionKey, ctx);
     ATH_CHECK( samplingFractionHandle.isValid() );
     samplingFraction = samplingFractionHandle.cptr();
   }
 
-  SG::WriteHandle<TileHitVector> hitVector(m_hitVectorKey);
+  SG::WriteHandle<TileHitVector> hitVector(m_hitVectorKey, ctx);
 
   /* Register the set of TileHits to the event store. */
   ATH_CHECK( hitVector.record(std::make_unique<TileHitVector>()) );
@@ -111,7 +111,7 @@ StatusCode TileRawChannelToHit::execute() {
   //**
   //* Get TileRawChannels
   //**
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey);
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
 
   if (!rawChannelContainer.isValid()) {
     ATH_MSG_WARNING( " Could not find container " << m_rawChannelContainerKey.key() );

@@ -25,9 +25,9 @@ class TrkEDMTestAlg : public AthAlgorithm
 public:
   TrkEDMTestAlg(const std::string& name, ISvcLocator* pSvcLocator);
   ~TrkEDMTestAlg();
-  StatusCode	initialize();
-  StatusCode	execute();
-  StatusCode	finalize();
+  virtual StatusCode	initialize() override;
+  virtual StatusCode	execute(const EventContext& ctx) override;
+  virtual StatusCode	finalize() override;
 
 protected:
   virtual StatusCode runTest() = 0;

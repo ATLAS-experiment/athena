@@ -25,14 +25,14 @@ StatusCode TrackTruthSelector::initialize()
 }
 
 // -----------------------------------------------------------------------------------------------------
-StatusCode TrackTruthSelector::execute() {
+StatusCode TrackTruthSelector::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG ("TrackTruthSelector::execute()");
 
   //----------------------------------------------------------------
   // Retrieve the input
   const DetailedTrackTruthCollection *detailed = nullptr;
-  SG::ReadHandle<DetailedTrackTruthCollection> rh_detailed(m_detailedTrackTruthName);
-  SG::WriteHandle<TrackTruthCollection> wh_output(m_outputName);
+  SG::ReadHandle<DetailedTrackTruthCollection> rh_detailed(m_detailedTrackTruthName, ctx);
+  SG::WriteHandle<TrackTruthCollection> wh_output(m_outputName, ctx);
   if(!rh_detailed.isValid()){
     ATH_MSG_WARNING ("DetailedTrackTruthCollection "<<m_detailedTrackTruthName.key()<<" NOT found");
     return StatusCode::SUCCESS;

@@ -83,7 +83,7 @@ namespace MuonValR4 {
             auto testerBr = std::make_shared<SimHitTester>(m_tree, key, type, msgLevel());
             if (m_truthSegs) {
                 m_tree.addBranch(std::make_shared<MuonVal::GenericAuxEleBranch<xAOD::MuonSegment, std::vector<unsigned short>>>(m_tree,
-                    std::format("{:}_matched{:}Hits", m_truthSegs->name(), ActsTrk::to_string(type)),
+                    std::format("{:}_matched{:}Hits", m_truthSegs->name(), type),
                     [this, testerBr, type](const xAOD::MuonSegment&seg) -> std::vector<unsigned short>{
                         const auto hitSet = MuonR4::getMatchingSimHits(seg);
                         std::vector<const xAOD::MuonSimHit*> sortedHits{};
@@ -175,8 +175,7 @@ namespace MuonValR4 {
         ATH_CHECK(m_tree.write());
         return StatusCode::SUCCESS;
     }
-    StatusCode MuonHitTesterAlg::execute(){
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-        return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
+    StatusCode MuonHitTesterAlg::execute(const EventContext& ctx) {
+                return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
     }
 }

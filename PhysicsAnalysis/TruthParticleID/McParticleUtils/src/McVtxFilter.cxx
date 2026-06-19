@@ -138,11 +138,7 @@ bool McVtxFilter::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
   if ( m_childList.size()        == static_cast<unsigned int>( 1 ) &&
        m_parentList.size()       == static_cast<unsigned int>( 0 ) &&
        number_particles_out == static_cast<unsigned int>( 1 ) ) {
-#ifdef HEPMC3
     const HepMC::ConstGenParticlePtr& part = vtx->particles_out().front();
-#else
-    HepMC::ConstGenParticlePtr part = *(vtx->particles_out_const_begin());
-#endif
     const ParticleCandidateList * item = *( m_childList.begin() );
     if ( item->hasInList( part->pdg_id(),  m_matchSign ) ) {
       return true;
@@ -326,18 +322,9 @@ bool McVtxFilter::checkParentBranch( HepMC::ConstGenVertexPtr vtx ) const
   }
 
   std::vector<int> parentIds;
-#ifdef HEPMC3
   for ( const auto& Part: vtx->particles_in() ) {
     parentIds.push_back( Part->pdg_id() );
   }
-#else
-  for ( HepMC::GenVertex::particles_in_const_iterator itrPart = vtx->particles_in_const_begin();
-	itrPart != vtx->particles_in_const_end();
-	++itrPart ) {
-    parentIds.push_back( (*itrPart)->pdg_id() );
-  }
-#endif
-
   AnalysisUtils::Permutation<std::vector<int> > permute( &parentIds, m_parentList.size() );
   std::vector<int> parents;
 
@@ -432,15 +419,8 @@ bool McVtxFilter::checkTwoBodyDecay( HepMC::ConstGenVertexPtr vtx ) const
 
   /// Cache the id of the outgoing particles of the vertex being analysed
 //AV It would be a very good idea to have a chack of the number of output particles here.
-#ifdef HEPMC3
   const int pdgId1= vtx->particles_out().at(0)->pdg_id();
   const int pdgId2= vtx->particles_out().at(1)->pdg_id();
-#else
-  HepMC::GenVertex::particles_out_const_iterator itrPart = vtx->particles_out_const_begin();
-  const int pdgId1 = (*itrPart)->pdg_id();
-  ++itrPart;
-  const int pdgId2 = (*itrPart)->pdg_id();
-#endif
 
   /// Loop over candidates for the 1st child
   for( ParticleCandidateList::const_iterator itr1 = children1->begin();

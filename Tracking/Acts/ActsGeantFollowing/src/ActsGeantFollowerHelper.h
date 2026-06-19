@@ -14,7 +14,7 @@
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 
 #include "Acts/Surfaces/Surface.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Propagator/SurfaceCollector.hpp"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"

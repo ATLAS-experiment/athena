@@ -33,9 +33,8 @@ StatusCode NswGeoPlottingAlg::initialize() {
   if(m_plotTgc)  ATH_CHECK(initTgc());
   return StatusCode::SUCCESS;
 }
-StatusCode NswGeoPlottingAlg::execute() {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  const ActsTrk::GeometryContext* gctx{nullptr};
+StatusCode NswGeoPlottingAlg::execute(const EventContext& ctx) {
+    const ActsTrk::GeometryContext* gctx{nullptr};
   ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
   std::vector<const MmReadoutElement*> micromegas = m_detMgr->getAllMmReadoutElements();

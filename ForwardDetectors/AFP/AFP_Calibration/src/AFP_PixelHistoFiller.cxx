@@ -84,9 +84,8 @@ StatusCode AFP_PixelHistoFiller::initialize()
 }
 
 
-StatusCode AFP_PixelHistoFiller::execute()
+StatusCode AFP_PixelHistoFiller::execute(const EventContext& ctx)
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     // get event info
     SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);

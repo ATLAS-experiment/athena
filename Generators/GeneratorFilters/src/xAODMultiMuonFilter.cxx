@@ -12,9 +12,9 @@ StatusCode xAODMultiMuonFilter::filterInitialize()
 }
 
 
-StatusCode xAODMultiMuonFilter::filterEvent() {
+StatusCode xAODMultiMuonFilter::filterEvent(const EventContext& ctx) {
   // Retrieve TruthMuons container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
   int numMuons = 0;
   for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
@@ -24,13 +24,13 @@ StatusCode xAODMultiMuonFilter::filterEvent() {
         numMuons++;
         if (numMuons >= m_NMuons)
         {
-          setFilterPassed(true);
+          setFilterPassed(true, ctx);
           return StatusCode::SUCCESS;
         }
       }
   }
 
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 
 }

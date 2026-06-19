@@ -29,6 +29,7 @@ class EventCleaningBlock (ConfigBlock):
             info="list of booleans determining whether to invert the cut of the "
             "above selectionFlags. In AnalysisBase, use 0/1 values instead.")
         self.addOption ('GRLDict', {}, type=dict, info="a custom GRL dictionary with key some name and value a GRL file. Leaving it empty will use the recommended values.")
+        self.addOption ('GRLSuffixDict', {}, type=dict, info="a year-suffix dictionary to help with autoconfiguration of GRL selection, e.g. selecting 'BjetHLT'.")
         self.addOption ('noFilter', False, type=bool,
             info="whether to toggle off event filtering.")
         self.addOption ('useRandomRunNumber', False, type=bool,
@@ -47,7 +48,9 @@ class EventCleaningBlock (ConfigBlock):
         GRLDict = getGoodRunsLists()
 
         GRLKey = 'GRL' + str(data_year)
-        if data_year==2017 or data_year==2018:
+        if data_year in self.GRLSuffixDict:
+            GRLKey = GRLKey + '_' + self.GRLSuffixDict[data_year]
+        elif data_year in [2017, 2018]:
             GRLKey = GRLKey + '_Triggerno17e33prim'
         return GRLDict[GRLKey]
 

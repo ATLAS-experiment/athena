@@ -11,14 +11,17 @@ using CLHEP::GeV;
 namespace Egamma{
 
 
-PhotonPlots::PhotonPlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType):PlotBase(pParent, sDir), 
-											 m_oKinAllPlots(this, "All/KinPlots/", "Reco " + sParticleType +" Photon"), 
+PhotonPlots::PhotonPlots(PlotBase* pParent, const std::string& sDir, const std::string& sParticleType):PlotBase(pParent, sDir),
+											 // inclusive plots, no isolation , ID or truth-matching requirements 
+ 											 m_oKinAllPlots(this, "All/KinPlots/", "Reco " + sParticleType +" Photon"), 
 											 m_oShowerShapesAllPlots(this, "All/ShowerShapesPlots/", sParticleType  +" Photon"),
-                       m_oPhotonConversionAllPlots(this, "All/PhotonConversionPlots/", sParticleType  +" Photon"),
-//
+											 m_oShowerShapesAll10GeVPlots(this, "All/ShowerShapes10GeVPlots/", sParticleType  +" Photon"),
+											 m_oPhotonConversionAllPlots(this, "All/PhotonConversionPlots/", sParticleType  +" Photon"),
+											 // truth-matchint "Iso" requirement
 											 m_oKinIsoPlots(this, "Iso/KinPlots/", "Reco " + sParticleType +" Photon"),
 											 m_oShowerShapesIsoPlots(this, "Iso/ShowerShapesPlots/", sParticleType  +" Photon"),
-                       m_oPhotonConversionIsoPlots(this, "Iso/PhotonConversionPlots/", sParticleType  +" Photon"),
+											 m_oShowerShapesIso10GeVPlots(this, "Iso/ShowerShapes10GeVPlots/", sParticleType  +" Photon"),      
+											 m_oPhotonConversionIsoPlots(this, "Iso/PhotonConversionPlots/", sParticleType  +" Photon"),
 											 m_oKinIsoUncPlots(this, "Iso/KinPlotsUnc/", "Reco " + sParticleType +" Photon"),
 											 m_oKinIsoConvPlots(this, "Iso/KinPlotsConv/", "Reco " + sParticleType +" Photon"),
 											 //
@@ -42,12 +45,19 @@ void PhotonPlots::initializePlots(){
   void PhotonPlots::fill(const xAOD::Photon& photon, const xAOD::EventInfo& eventInfo, bool isPrompt) {
   m_oKinAllPlots.fill(photon,eventInfo);
   m_oShowerShapesAllPlots.fill(photon,eventInfo);
+  if (photon.pt() > 10 * Gaudi::Units::GeV) {
+    m_oShowerShapesAll10GeVPlots.fill(photon,eventInfo);
+  }
   m_oPhotonConversionAllPlots.fill(photon,eventInfo);
   
   if(!isPrompt) return;
 
   m_oKinIsoPlots.fill(photon,eventInfo);
   m_oShowerShapesIsoPlots.fill(photon,eventInfo);
+  if (photon.pt() > 10 * Gaudi::Units::GeV) {
+    m_oShowerShapesIso10GeVPlots.fill(photon,eventInfo);
+  }
+  
   m_oPhotonConversionIsoPlots.fill(photon,eventInfo);
   if (!xAOD::EgammaHelpers::isConvertedPhoton(&photon)) m_oKinIsoUncPlots.fill(photon,eventInfo);
   else m_oKinIsoConvPlots.fill(photon,eventInfo);

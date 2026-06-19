@@ -42,7 +42,7 @@ ZdcByteStreamRawData::ZdcByteStreamRawData(const std::string& name, ISvcLocator*
 
 
 //==================================================================================================
-StatusCode ZdcByteStreamRawData::execute()
+StatusCode ZdcByteStreamRawData::execute(const EventContext& /*ctx*/)
 {
 	if (!msgLvl(MSG::INFO)) return StatusCode::SUCCESS;
 	msg(MSG::INFO);

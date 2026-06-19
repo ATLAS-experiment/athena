@@ -267,11 +267,10 @@ StatusCode TileDigitsFromPulse::initialize() {
 //
 // Begin Execution Phase.
 //
-StatusCode TileDigitsFromPulse::execute() {
+StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
 	ATH_MSG_DEBUG("in execute()");
 
-	const EventContext& ctx = Gaudi::Hive::currentContext();
 
 	// Prepare RNG service
 	ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomStreamName);

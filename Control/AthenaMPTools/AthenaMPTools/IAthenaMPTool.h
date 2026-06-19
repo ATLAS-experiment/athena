@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAMPTOOLS_IATHENAMPTOOL_H
@@ -23,7 +23,7 @@ namespace AthenaMP {
     std::string technology;
     std::string description;
     std::string access_mode;
-    bool        shared;
+    bool        shared{};
   };
   typedef std::vector<WorkerOutput>                 SingleWorkerOutputs;
   typedef std::map<std::string,SingleWorkerOutputs> AllWorkerOutputs;

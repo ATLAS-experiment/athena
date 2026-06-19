@@ -26,7 +26,7 @@ public:
 
         virtual StatusCode filterInitialize() override final;
         virtual StatusCode filterFinalize() override final;
-        virtual StatusCode filterEvent() override final;
+        virtual StatusCode filterEvent(const EventContext& ctx) override final;
 
 private:
         // Setable Properties:-

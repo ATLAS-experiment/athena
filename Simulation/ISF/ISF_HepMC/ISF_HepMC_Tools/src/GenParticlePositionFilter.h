@@ -40,11 +40,7 @@ namespace ISF {
     virtual StatusCode  initialize() override final;
 
     /** does the given particle pass the filter? */
-#ifdef HEPMC3
     virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const override final;
-#else
-    virtual bool pass(const HepMC::GenParticle& particle) const override final;
-#endif
 
   private:
     ServiceHandle<IGeoIDSvc> m_geoIDSvc{this, "GeoIDService", "ISF_GeoIDSvc", "The GeoID Service"};

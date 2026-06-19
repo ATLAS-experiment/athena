@@ -16,7 +16,6 @@
 #include "StoreGate/WriteHandleKey.h"
 
 // PACKAGE
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 // STL
