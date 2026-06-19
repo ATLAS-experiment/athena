@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Author: Chris Young (christopher.young@cern.ch)
 ///////////////////////////////////////////////////////////////////
-#ifndef DERIVATIONFRAMEWORK_BCDISTANCEAUGMENTATIONTOOL_H
-#define DERIVATIONFRAMEWORK_BCDISTANCEAUGMENTATIONTOOL_H
+#ifndef DERIVATIONFRAMEWORK_BCDISTANCEAUGMENTATIONALG_H
+#define DERIVATIONFRAMEWORK_BCDISTANCEAUGMENTATIONALG_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
@@ -19,15 +18,15 @@
 
 namespace DerivationFramework {
 
-  class DistanceInTrainAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
+  class DistanceInTrainAugmentationAlg : public AthReentrantAlgorithm {
 
   public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode  initialize() override final;
 
-    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
     // Tool to get distance into bunch train

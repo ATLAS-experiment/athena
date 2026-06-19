@@ -130,10 +130,9 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                                                                     UnassociatedHitsGetter = unassociatedHitsGetterTool))
     augmentationTools.append(unassociatedHitsDecorator)
 
-    from DerivationFrameworkJetEtMiss.JetToolConfig import DistanceInTrainToolCfg
-    distanceInTrainTool = acc.getPrimaryAndMerge(DistanceInTrainToolCfg(flags))
-    augmentationTools.append(distanceInTrainTool)
-    
+    from DerivationFrameworkJetEtMiss.JetCommonConfig import AddDistanceInTrainCfg
+    acc.merge(AddDistanceInTrainCfg(flags))
+
     # thinning tools
     thinningTools=[]
 

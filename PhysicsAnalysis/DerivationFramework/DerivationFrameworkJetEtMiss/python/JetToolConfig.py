@@ -3,15 +3,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def DistanceInTrainToolCfg(ConfigFlags):
-    """Configure the distance in train augmentation tool"""
-    acc = ComponentAccumulator()
-    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg 
-    acc.merge(BunchCrossingCondAlgCfg(ConfigFlags))
-    distanceInTrainTool = CompFactory.DerivationFramework.DistanceInTrainAugmentationTool("DistanceInTrainAugmentationTool")
-    acc.addPublicTool(distanceInTrainTool, primary=True)
-    return acc
-
 def PFlowAugmentationToolCfg(ConfigFlags):
     """Configure the PFlow augmentation tool"""
     acc = ComponentAccumulator()
@@ -20,6 +11,7 @@ def PFlowAugmentationToolCfg(ConfigFlags):
                                                                        WeightPFOTool=wPFOTool)
     acc.addPublicTool(pfoAugTool, primary=True)
     return acc
+
 
 def TVAAugmentationToolCfg(ConfigFlags, preFix, workingPoint="Nominal"):
     """Configure the TVA augmentation tool"""

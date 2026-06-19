@@ -53,13 +53,10 @@ def AddBadBatmanCfg(flags):
 
 def AddDistanceInTrainCfg(ConfigFlags):
     """Add distance in train information to EventInfo"""
-    from DerivationFrameworkJetEtMiss.JetToolConfig import DistanceInTrainToolCfg
-
     acc = ComponentAccumulator()
-
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    distanceInTrainTool = acc.getPrimaryAndMerge(DistanceInTrainToolCfg(ConfigFlags))
-    acc.addEventAlgo(CommonAugmentation("DistanceInTrainAugmentation", AugmentationTools = [distanceInTrainTool])) # TODO Migrate public tool to AthReentrantAlgorithm
+    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
+    acc.merge(BunchCrossingCondAlgCfg(ConfigFlags))
+    acc.addEventAlgo(CompFactory.DerivationFramework.DistanceInTrainAugmentationAlg("DistanceInTrainAugmentation"))
 
     return acc
 
