@@ -1,5 +1,5 @@
-#include "../TriggerMatchingTool.h"
+#include "../TriggerMatchingAlg.h"
 #include "../TriggerGenericObjectThinningTool.h"
 
-DECLARE_COMPONENT( DerivationFramework::TriggerMatchingTool )
+DECLARE_COMPONENT( DerivationFramework::TriggerMatchingAlg )
 DECLARE_COMPONENT( DerivationFramework::TriggerGenericObjectThinningTool )

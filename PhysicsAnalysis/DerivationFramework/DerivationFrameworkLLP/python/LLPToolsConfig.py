@@ -146,6 +146,7 @@ def TrackParticleCaloCellDecoratorCfg(flags, name, **kwargs):
                       primary = True)
     return acc
 
+
 # high dE/dx and low pT track thinning
 def PixeldEdxTrackParticleThinningCfg(flags, name, **kwargs):
     """Confiure the lowpT + high dE/dx track thinniing tool"""    
@@ -154,6 +155,7 @@ def PixeldEdxTrackParticleThinningCfg(flags, name, **kwargs):
     acc.addPublicTool(PixeldEdxTrackParticleThinning(name, **kwargs),
                       primary = True)
     return acc
+
 
 def LLP1TriggerSkimmingToolCfg(flags, name, TriggerListsHelper, **kwargs):
 
@@ -222,36 +224,34 @@ def LLP1TriggerMatchingToolRun2Cfg(flags, name, **kwargs):
 
     triggerList = kwargs['TriggerList']
     outputContainerPrefix = kwargs['OutputContainerPrefix']
-    
+
     kwargs.setdefault('InputElectrons', 'LRTElectrons')
     kwargs.setdefault('InputMuons', 'MuonsLRT')
-    kwargs.setdefault('DRThreshold', None) 
+    kwargs.setdefault('DRThreshold', None)
 
     acc = ComponentAccumulator()
 
     # Create trigger matching decorations
-    from DerivationFrameworkTrigger.TriggerMatchingToolConfig import TriggerMatchingToolCfg
+    from DerivationFrameworkTrigger.TriggerMatchingAlgConfig import TriggerMatchingAlgCfg
     if kwargs['DRThreshold'] is None:
-        PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(
+        acc.merge(TriggerMatchingAlgCfg(
             flags,
-            name=name,
+            name=f"{outputContainerPrefix}TriggerMatchingKernel",
             ChainNames = triggerList,
             OutputContainerPrefix = outputContainerPrefix,
             InputElectrons = kwargs['InputElectrons'],
-            InputMuons =  kwargs['InputMuons'])) 
+            InputMuons =  kwargs['InputMuons']))
     else:
-        PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(
+        acc.merge(TriggerMatchingAlgCfg(
             flags,
-            name=name,
+            name=f"{outputContainerPrefix}TriggerMatchingKernel",
             ChainNames = triggerList,
-            OutputContainerPrefix = outputContainerPrefix,  
+            OutputContainerPrefix = outputContainerPrefix,
             DRThreshold = kwargs['DRThreshold'],
             InputElectrons = kwargs['InputElectrons'],
-            InputMuons =  kwargs['InputMuons'])) 
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    acc.addEventAlgo(CommonAugmentation(f"{outputContainerPrefix}TriggerMatchingKernel",
-                                        AugmentationTools=[PhysCommonTriggerMatchingTool])) # TODO Migrate public tool to AthReentrantAlgorithm
-    return(acc)
+            InputMuons =  kwargs['InputMuons']))
+    return acc
+
 
 def LRTMuonMergerAlg(flags, name="LLP1_MuonLRTMergingAlg", **kwargs):
     acc = ComponentAccumulator()
