@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EGAMMAALGS_ACTSEMBREMCOLLECTIONBUILDER_H
@@ -107,6 +107,11 @@ class ActsEMBremCollectionBuilder : public AthReentrantAlgorithm {
       "Decoration: link from xAOD particle back to Acts track"};
 
   SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
+
+  Gaudi::Property<bool> m_doTruth{this, "doTruth", false};
+  Gaudi::Property<bool> m_doPix{this, "usePixel", true};
+  Gaudi::Property<bool> m_doStrip{this, "useStrip", true};
+  Gaudi::Property<bool> m_doHGTD{this, "useHGTD", false};
   
   mutable std::atomic_uint m_nInputTracks{0};
   mutable std::atomic_uint m_nRefittedTracks{0};

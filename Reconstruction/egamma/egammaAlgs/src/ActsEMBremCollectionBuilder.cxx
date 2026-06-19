@@ -12,6 +12,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "egammaUtils/egammaCopyTrackParticleInfo.h"
 
 #include "ActsEMBremCollectionBuilder.h"
 
@@ -186,6 +187,18 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
 
     originalTPLink(*tp) = ElementLink<xAOD::TrackParticleContainer>(
         originalTPs, originalTP->index(), ctx);
+
+    // QoverPLM still to be added
+    // See https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/egamma/egammaAlgs/src/EMBremCollectionBuilder.cxx#L252
+
+    // isRefitted option should check the actual refit status
+    egammaCopyTrackParticleInfo::ToCopy toCopy{.isRefitted = true,
+                                               .doTruth = m_doTruth,
+                                               .doPix = m_doPix,
+                                               .doSCT = m_doStrip,
+                                               .doHGTD = m_doHGTD};
+    egammaCopyTrackParticleInfo::copy(*tp, *originalTP, toCopy);
+
   }
   return StatusCode::SUCCESS;
 }
