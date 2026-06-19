@@ -94,13 +94,12 @@ def EGammaLRTCfg(flags):
     if flags.Derivation.Egamma.addMissingCellInfo:
         from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import EgammaCoreCellRecoveryCfg
 
-        CoreCellRecoveryTool = acc.addPublicTool(acc.popToolsAndMerge(
+        acc.merge(
             EgammaCoreCellRecoveryCfg(flags,
                                       name            = "LRTCoreCellRecoveryTool",
                                       SGKey_photons   = "",
-                                      SGKey_electrons = "LRTElectrons") # TODO Migrate to AthReentrantAlgorithm
-        ))
-        LRTEGAugmentationTools.append(CoreCellRecoveryTool)
+                                      SGKey_electrons = "LRTElectrons")
+        )
 
     # ==================================================
     # Truth Related tools

@@ -827,11 +827,9 @@ def EGammaCommonCfg(flags):
                 EgammaCoreCellRecoveryCfg,
             )
 
-            CoreCellRecoveryTool = acc.popToolsAndMerge(
+            acc.merge(
                 EgammaCoreCellRecoveryCfg(flags)
             )
-            acc.addPublicTool(CoreCellRecoveryTool)
-            EGAugmentationTools.append(CoreCellRecoveryTool)
 
     if flags.Derivation.Egamma.addMissingCellInfo:
         from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
