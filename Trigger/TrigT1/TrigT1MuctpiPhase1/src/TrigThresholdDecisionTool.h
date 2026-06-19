@@ -23,9 +23,10 @@
 #include "xAODTrigger/MuonRoI.h"
 #include "xAODTrigger/MuonRoIContainer.h"
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <string>
+#include <string_view>
 #include <memory>
 #include <utility>
 
@@ -40,7 +41,7 @@ namespace LVL1 {
   class TrigThresholdDecisionTool : public extends<MURoIThresholdsToolParams::BaseClass, ITrigThresholdDecisionTool>
   {
   public:
-
+    using parsedFlagsMap = std::unordered_map<std::string, std::vector<std::vector<std::string_view> > >;
     TrigThresholdDecisionTool(const std::string& type, 
 			      const std::string& name, 
 			      const IInterface* parent);
@@ -71,30 +72,41 @@ namespace LVL1 {
     std::pair<std::string, double> getMinThresholdNameAndValue(const std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> >& decisions,
 							       const double& eta = 0) const override;
 
+    static std::string getShapedFlags(std::string_view flags);
+
   protected:
+
+    struct TgcDecisionMask {
+        uint8_t mask{0};
+
+        // Computes the 0-7 bit position from flags
+        static constexpr unsigned int bitPosition(bool F, bool C, bool H) {
+            return F + (2 * C) + (4 * H);
+        }
+
+        void setPassed(bool F, bool C, bool H) {
+            mask |= (1 << bitPosition(F, C, H));
+        }
+
+        bool isPassed(bool F, bool C, bool H) const {
+            return (mask & (1 << bitPosition(F, C, H))) != 0;
+        }
+    };
+
+    struct RpcDecisionMask {
+        uint8_t mask{0};
+
+        void setPassed(bool M) {
+            mask |= (1 << static_cast<unsigned int>(M));
+        }
+
+        bool isPassed(bool M) const {
+            return (mask & (1 << static_cast<unsigned int>(M))) != 0;
+        }
+    };
     //Function that performs the actual initialization of the tool. 
     StatusCode configureToolFromMenu(const TrigConf::L1Menu& l1Menu) const;
 
-    struct TGCFlagDecision
-    {
-      TGCFlagDecision(const bool& F, const bool& C, const bool& H) {word = F + 2*C + 4*H;pass=false;}
-
-      //implement < operator so we can store this type in a set
-      bool operator<(const TGCFlagDecision& rhs) const {return word < rhs.word;}
-
-      unsigned word;
-      bool pass;
-    };
-    struct RPCFlagDecision
-    {
-      RPCFlagDecision(const bool& M) {word = M;pass=false;}
-
-      //implement < operator so we can store this type in a set
-      bool operator<(const RPCFlagDecision& rhs) const {return word < rhs.word;}
-
-      unsigned word;
-      bool pass;
-    };
 
     bool isExcludedRPCROI(const TrigConf::L1ThrExtraInfo_MU& menuExtraInfo,
                           const std::string& rpcExclROIList,
@@ -103,23 +115,20 @@ namespace LVL1 {
                           bool isSideC) const;
 
     bool getTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H) const;
-    void makeTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H) const;
+    void makeTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H, const parsedFlagsMap& parsed_flags) const;
 
     bool getRPCDecision(const std::string& rpcFlags, bool M) const;
-    void makeRPCDecision(const std::string& rpcFlags, bool M) const;
+    void makeRPCDecision(const std::string& rpcFlags, bool M, const parsedFlagsMap& parsed_flags) const;
 
-    void parseFlags(const std::string& flags) const;
-    std::string getShapedFlags(const std::string& flags) const;
+    void parseFlags(const std::string& flags, parsedFlagsMap& parsed_flags) const;
 
     ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_rpcTool{this, "RPCRecRoiTool", "LVL1::TrigT1RPCRecRoiTool/LVL1__TrigT1RPCRecRoiTool", "Tool to get the eta/phi coordinates in the RPC"};
     ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_tgcTool{this, "TGCRecRoiTool", "LVL1::TrigT1TGCRecRoiTool/LVL1__TrigT1TGCRecRoiTool", "Tool to get the eta/phi coordinates in the TGC"};
 
-    //buffered parsed TGC/RPC flags
-    mutable std::map<std::string, std::vector<std::vector<std::string> > > m_parsed_flags ATLAS_THREAD_SAFE{};
 
     //buffered set of decisions for words that have been checked for each TGC/RPC flag
-    mutable std::map<std::string, std::set<TGCFlagDecision> > m_tgcFlag_decisions ATLAS_THREAD_SAFE{};
-    mutable std::map<std::string, std::set<RPCFlagDecision> > m_rpcFlag_decisions ATLAS_THREAD_SAFE{};
+    mutable std::unordered_map<std::string, TgcDecisionMask > m_tgcFlag_decisions ATLAS_THREAD_SAFE{};
+    mutable std::unordered_map<std::string, RpcDecisionMask > m_rpcFlag_decisions ATLAS_THREAD_SAFE{};
     
     //configuration that toddle the L1menu loading sfrom xAOD as metadata or from det store
     ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", "TrigConf::xAODConfigSvc"};
