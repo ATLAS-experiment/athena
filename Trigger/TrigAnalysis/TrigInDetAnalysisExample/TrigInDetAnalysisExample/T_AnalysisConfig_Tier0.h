@@ -946,7 +946,8 @@ protected:
 
           /// selectTracks<TruthParticleContainer>( &selectorTruth, "INav4MomTruthEvent" );
 
-          const McEventCollection* mcevent = nullptr;
+	  /// I'm oldschool and prefer the implicit  (T*)0 than the implicit (T*)nullptr 
+          const McEventCollection* mcevent = 0;
 
           /// now as a check go through the GenEvent collection
 
