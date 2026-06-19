@@ -33,6 +33,7 @@ from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
 )
 from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
 from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+from InDetConfig.InDetPoolReadConfig import InDetPoolReadCfg
 from JetRecConfig.JetRecConfig import JetRecCfg
 from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
@@ -196,7 +197,13 @@ def FTAG1CoreCfg(
             "AntiKt4TruthJets",
             "ITkPixelMeasurements",
             "ITkStripMeasurements",
+            "ITkPixelSpacePoints",
+            "ITkStripSpacePoints",
+            "ITkStripOverlapSpacePoints",
         ]
+
+        # Needed for ITk space points
+        acc.merge(InDetPoolReadCfg(flags))
 
     # User-provided extras
     for container in extra_SmartCollections:
