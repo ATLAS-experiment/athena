@@ -179,6 +179,7 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
 
     kwargs.setdefault("areInputClusters", flags.Tracking.GNN.useClusterTracks)
     kwargs.setdefault("doRecoTrackCuts", flags.Tracking.GNN.doRecoTrackCuts)
+    kwargs.setdefault("saveEdgeScore", flags.Tracking.GNN.ActsPipeline.saveEdgeScore)
 
     # add eta dependent cut service
     if "InDetEtaDependentCutSvc" not in kwargs:
