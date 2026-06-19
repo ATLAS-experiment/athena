@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # art-include: main/Athena
-# art-description: DAOD building PHYS mc23
+# art-description: DAOD building PHYS mc23a
 # art-type: grid
 # art-memory: 4096
 # art-output: *.pool.root
