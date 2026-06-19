@@ -586,57 +586,6 @@ def EGammaCommonCfg(flags):
         ) # TODO Migrate to AthReentrantAlgorithm
     ))
 
-    # decorate electrons with the output of ECIDS
-    if flags.Derivation.Egamma.addECIDS:
-        ElectronPassECIDS = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="ElectronPassECIDS",
-                EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
-                CutType="",
-                StoreGateEntryName="DFCommonElectronsECIDS",
-                ContainerName="Electrons",
-                StoreTResult=True,
-            ) # TODO Migrate to AthReentrantAlgorithm
-        ))
-
-    if includeFwdElectrons:
-        # decorate forward electrons with the output of LH loose
-        ForwardElectronPassLHLoose = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="ForwardElectronPassLHLoose",
-                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorLoose,
-                CutType="",
-                StoreGateEntryName="DFCommonForwardElectronsLHLoose",
-                ContainerName="ForwardElectrons",
-            ) # TODO Migrate to AthReentrantAlgorithm
-        ))
-
-        # decorate forward electrons with the output of LH medium
-        ForwardElectronPassLHMedium = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="ForwardElectronPassLHMedium",
-                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorMedium,
-                CutType="",
-                StoreGateEntryName="DFCommonForwardElectronsLHMedium",
-                ContainerName="ForwardElectrons",
-            ) # TODO Migrate to AthReentrantAlgorithm
-        ))
-
-        # decorate forward electrons with the output of LH tight
-        ForwardElectronPassLHTight = acc.addPublicTool(acc.popToolsAndMerge(
-            EGElectronLikelihoodToolWrapperCfg(
-                flags,
-                name="ForwardElectronPassLHTight",
-                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorTight,
-                CutType="",
-                StoreGateEntryName="DFCommonForwardElectronsLHTight",
-                ContainerName="ForwardElectrons",
-            ) # TODO Migrate to AthReentrantAlgorithm
-        ))
-
     # decorate photons with the output of IsEM loose
     # on MC, use fudged shower shapes to compute the ID (but the
     # original shower shapes are not overridden)
@@ -806,10 +755,54 @@ def EGammaCommonCfg(flags):
         ElectronAmbiguity,
     ]
 
+    # decorate electrons with the output of ECIDS
     if flags.Derivation.Egamma.addECIDS:
+        ElectronPassECIDS = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="ElectronPassECIDS",
+                EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
+                CutType="",
+                StoreGateEntryName="DFCommonElectronsECIDS",
+                ContainerName="Electrons",
+                StoreTResult=True,
+            ) # TODO Migrate to AthReentrantAlgorithm
+        ))
         EGAugmentationTools.extend([ElectronPassECIDS])
 
     if includeFwdElectrons:
+        # decorate forward electrons with the output of LH loose
+        ForwardElectronPassLHLoose = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="ForwardElectronPassLHLoose",
+                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorLoose,
+                CutType="",
+                StoreGateEntryName="DFCommonForwardElectronsLHLoose",
+                ContainerName="ForwardElectrons",
+            ) # TODO Migrate to AthReentrantAlgorithm
+        ))
+
+        # decorate forward electrons with the output of LH medium
+        ForwardElectronPassLHMedium = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="ForwardElectronPassLHMedium",
+                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorMedium,
+                CutType="",
+                StoreGateEntryName="DFCommonForwardElectronsLHMedium",
+                ContainerName="ForwardElectrons",
+            ) # TODO Migrate to AthReentrantAlgorithm
+        ))
+
+        # decorate forward electrons with the output of LH tight
+        ForwardElectronPassLHTight = acc.addPublicTool(acc.popToolsAndMerge(EGElectronLikelihoodToolWrapperCfg(
+                flags,
+                name="ForwardElectronPassLHTight",
+                EGammaElectronLikelihoodTool=ForwardElectronLHSelectorTight,
+                CutType="",
+                StoreGateEntryName="DFCommonForwardElectronsLHTight",
+                ContainerName="ForwardElectrons",
+            ) # TODO Migrate to AthReentrantAlgorithm
+        ))
+
         EGAugmentationTools.extend(
             [
                 ForwardElectronPassLHLoose,
