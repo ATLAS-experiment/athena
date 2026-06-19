@@ -29,7 +29,8 @@ namespace MuonCombinedR4 {
              * @param segment: Segment for which the chi2 shall be evaluated
              * @param extpIdPars: The ID track parameters on the same surface as the
              *                    segment's surface */
-            double matchingScore(const xAOD::MuonSegment& segment,
+            double matchingScore(const Acts::GeometryContext& tgContext,
+                                 const xAOD::MuonSegment& segment,
                                  const Acts::BoundTrackParameters& extpIdPars) const;
             /** @brief Returns the surface on which the local paramters of the segment
              *         are expressed

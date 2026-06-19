@@ -30,8 +30,9 @@ namespace MuonR4{
     /** @brief Abrivation of a collection of Prd links */
     using PrdLinkVec_t = std::vector<PrdLink_t>;
     /** @brief Abrivation of the decorated local segment parameters */
-    using SegPars_t = xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>;
-
+    using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(ParamDefs::nPars)>::element_type;
+    /** @brief Abrivation of the decorated local segment covariance */
+    using SegCov_t = xAOD::PosAccessor<Acts::sumUpToN(Acts::toUnderlying(ParamDefs::nPars))>::element_type;
     StatusCode xAODSegmentCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKeys.initialize());
@@ -39,6 +40,7 @@ namespace MuonR4{
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_prdLinkKey.initialize());
         ATH_CHECK(m_localSegParKey.initialize());
+        ATH_CHECK(m_localSegCovKey.initialize());
         ATH_CHECK(m_parentSegKey.initialize());
         ATH_CHECK(m_combMeasKey.initialize());
         ATH_CHECK(m_prdStateKey.initialize());
@@ -59,6 +61,8 @@ namespace MuonR4{
         
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegLink_t> dec_parentLink{m_parentSegKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t> dec_locPars{m_localSegParKey, ctx};
+        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegCov_t> dec_locCov{m_localSegCovKey, ctx};
+        
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec_t> dec_prdLinks{m_prdLinkKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, std::vector<char>> dec_prdStates{m_prdStateKey, ctx};
 
@@ -254,6 +258,14 @@ namespace MuonR4{
                 localPars[Acts::toUnderlying(theta)] = locDir.theta();
                 localPars[Acts::toUnderlying(phi)] = locDir.phi();
                 localPars[Acts::toUnderlying(t0)] = inSegment->segementT0();
+
+                SegCov_t& localCov{dec_locCov(*convertedSeg)};
+                constexpr std::size_t n = Acts::toUnderlying(ParamDefs::nPars);
+                for (std::size_t p = 1; p < n; ++p) {
+                    for (std::size_t p1 = 0 ; p1 <=p;++p1) {
+                        localCov[Acts::vecIdxFromSymMat<n>(p,p1)] = inSegment->covariance()(p, p1);
+                    }
+                }
                 ATH_CHECK(decorateLinks(*inSegment, *convertedSeg));
             }
         }  
