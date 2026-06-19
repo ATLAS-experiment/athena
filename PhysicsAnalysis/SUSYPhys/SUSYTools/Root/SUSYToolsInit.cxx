@@ -826,7 +826,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Hotfix for the Run2 Muon Identiﬁcation SFs for the Tight WP
     std::string MuonCP_Run2_TightFix = "";
     if(!m_isRun3) {
-      MuonCP_Run2_TightFix = (m_muId == xAOD::Muon::Quality::Tight) ? "220725_Preliminary_r22run2" : "230213_Preliminary_r22run2_loosefix";
+      MuonCP_Run2_TightFix = (m_muId == static_cast<int>(xAOD::Muon::Quality::Tight)) ? "220725_Preliminary_r22run2" : "230213_Preliminary_r22run2_loosefix";
     }
     if (!m_muonEfficiencySFTool.isUserConfigured() && m_muId != static_cast<int>(xAOD::Muon::Quality::VeryLoose) && !isData()) {
       toolName = "MuonEfficiencyScaleFactors_" + muQual;
