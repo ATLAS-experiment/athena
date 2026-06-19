@@ -20,11 +20,11 @@ def TauTruthMatchingWrapperCfg(flags, cont, **kwargs):
     """Configure the tau truth matching wrapper"""
     acc = ComponentAccumulator()
     name = "DFCommon"+cont+"TruthMatchingWrapper"
-    DFCommonTauTruthMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(
-        DFCommonTauTruthMatchingToolCfg(flags)))
-    kwargs.setdefault("TauTruthMatchingTool", DFCommonTauTruthMatchingTool)
+    kwargs.setdefault("TauTruthMatchingTool", acc.addPublicTool(acc.popToolsAndMerge(
+        DFCommonTauTruthMatchingToolCfg(flags))))
     kwargs.setdefault("TauContainerName", cont)
-    acc.setPrivateTools(
+    kwargs.setdefault("ExtraInputs", {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )})
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.TauTruthMatchingWrapper(name = name, **kwargs))
     return acc
 
@@ -48,8 +48,6 @@ def TauTruthToolsCfg(flags):
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     for i, cont in enumerate(["TauJets","TauJets_EleRM"]):
         if "xAOD::TauJetContainer#"+cont in flags.Input.TypedCollections:
-            acc.addEventAlgo(CommonAugmentation( f"TauTruthCommonKernel2_{cont}",
-                                                 AugmentationTools = [acc.addPublicTool(acc.popToolsAndMerge(TauTruthMatchingWrapperCfg(flags, cont)))],
-                                                 ExtraInputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' )} )) # TODO Migrate to N Algs in second pass
+            acc.merge(TauTruthMatchingWrapperCfg(flags, cont))
 
     return acc

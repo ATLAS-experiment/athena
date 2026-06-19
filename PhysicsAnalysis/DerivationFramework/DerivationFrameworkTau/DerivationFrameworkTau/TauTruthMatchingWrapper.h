@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,8 +12,7 @@
 
 #include <string>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TauAnalysisTools/ITauTruthMatchingTool.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -26,13 +25,13 @@
 
 namespace DerivationFramework {
 
-  class TauTruthMatchingWrapper : public extends<AthAlgTool, IAugmentationTool> {
+  class TauTruthMatchingWrapper : public AthReentrantAlgorithm {
     public:
 
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
       virtual StatusCode initialize() override final;
-      virtual StatusCode addBranches(const EventContext& ctx) const override final;
+      virtual StatusCode execute(const EventContext& ctx) const override final;
 
     private:
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauKey
