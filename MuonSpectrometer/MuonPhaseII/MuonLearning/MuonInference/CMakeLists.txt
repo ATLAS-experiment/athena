@@ -15,6 +15,7 @@ atlas_add_component(    MuonInference
                                         MuonSimEvent xAODMuonSimHit  MdtCalibInterfacesLib
                                         xAODMuonPrepData MuonSpacePoint xAODMuon MuonTesterTreeLib
                                         MuonPatternEvent MuonTrackEvent MuonPatternHelpers MuonPatternHelpers
+                                        CaloEvent FourMomUtils xAODEventInfo
                                         MuonInferenceInterfaces 
                                         AthOnnxInterfaces AthOnnxCompsLib  ${ONNXRUNTIME_LIBRARIES} ${FMT_LIBRARIES}
                     )
