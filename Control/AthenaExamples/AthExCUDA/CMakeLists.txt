@@ -12,11 +12,6 @@ endif()
 # External dependencies.
 find_package( vecmem )
 find_package( traccc )
-find_package( CUDAToolkit )
-
-# Using traccc::edm types in CUDA doesn't work (currently) without the
-# following.
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr")
 
 # Add a component library that has some CUDA code in it.
 atlas_add_component( AthExCUDA
