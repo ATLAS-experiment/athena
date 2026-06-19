@@ -41,17 +41,15 @@ def StandardJetsInDerivCfg(ConfigFlags):
 
     return acc
 
-def AddBadBatmanCfg(ConfigFlags):
+
+def AddBadBatmanCfg(flags):
     """Add bad batman decoration for events with large EMEC-IW noise"""
 
     acc = ComponentAccumulator()
-
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-    from DerivationFrameworkJetEtMiss.JetToolConfig import BadBatmanToolCfg
-    badBatmanTool = acc.getPrimaryAndMerge(BadBatmanToolCfg(ConfigFlags))
-    acc.addEventAlgo(CommonAugmentation("BadBatmanAugmentation", AugmentationTools = [badBatmanTool])) # TODO Migrate public tool to AthReentrantAlgorithm
+    acc.addEventAlgo(CompFactory.DerivationFramework.BadBatmanAugmentationAlg("BadBatmanAugmentationAlg"))
 
     return acc
+
 
 def AddDistanceInTrainCfg(ConfigFlags):
     """Add distance in train information to EventInfo"""
