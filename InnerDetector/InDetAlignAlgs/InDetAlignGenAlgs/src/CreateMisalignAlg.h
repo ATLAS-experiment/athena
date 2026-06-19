@@ -101,6 +101,12 @@ private:
     double                                 m_ScalePixelIBL;
     double                                 m_ScalePixelDBM;
     double                                 m_IBLBowingTshift;    //!< The relative temp shift of set point that intriduces bowing (sign is important)
+    int                                    m_targetLayer;         //!< ITk barrel layer selector for dedicated ITk modes (-1 means all layers)
+    int                                    m_targetLayerMax;      //!< Upper ITk barrel layer selector for layer-range modes (-999 means unused)
+    std::string                            m_endcapShiftConvention; //!< Endcap z-shift convention for mode 41
+    double                                 m_radialShift;        //!< Barrel radial shift for mode 43
+    std::string                            m_radialShiftConvention; //!< Barrel radial shift convention for mode 43
+    std::string                            m_radialSubdetector;  //!< Subdetector selector for mode 43: Pixel, Strip, or Both
     double                                 m_ScalePixelBarrel;
     double                                 m_ScalePixelEndcap;
     double                                 m_ScaleSCTBarrel;
