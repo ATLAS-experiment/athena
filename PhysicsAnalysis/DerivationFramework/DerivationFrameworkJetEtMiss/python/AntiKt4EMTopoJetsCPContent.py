@@ -8,7 +8,7 @@ AntiKt4EMTopoJetsCPContent = [
 "AntiKt4EMTopoJetsAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m",
 "AntiKt4EMTopoJetsAux.ActiveArea4vec_eta.ActiveArea4vec_m.ActiveArea4vec_phi.ActiveArea4vec_pt.DetectorEta.DetectorY",
 "AntiKt4EMTopoJetsAux.NumTrkPt500.SumPtTrkPt500.NumTrkPt1000.TrackWidthPt1000",
-"AntiKt4EMTopoJetsAux.GhostTrack.Jvt.JVFCorr.JvtRpt.GhostMuonSegmentCount",
+"AntiKt4EMTopoJetsAux.GhostTrack.Jvt.JVFCorr.JvtRpt.GhostMuonSegmentCount.GhostUnAssocMuonSegmentCount",
 "AntiKt4EMTopoJetsAux.EnergyPerSampling.FracSamplingMax.FracSamplingMaxIndex.Timing",
 "AntiKt4EMTopoJetsAux.PartonTruthLabelID.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID",
 "AntiKt4EMTopoJetsAux.DFCommonJets_jetClean_LooseBad.DFCommonJets_jetClean_TightBad",
