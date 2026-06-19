@@ -8,8 +8,6 @@
 
 #include <vector>
 #include <math.h>
-#include <functional> // for bind() 
-#include <boost/math/tools/roots.hpp>
 #include "Pythia8/PhaseSpace.h"
 #include "Pythia8/Basics.h"
 
