@@ -1,0 +1,82 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef ACTSGPUEVENT_RDOTOTRACCCCELLCONVERTERALG_H
+#define ACTSGPUEVENT_RDOTOTRACCCCELLCONVERTERALG_H
+
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "InDetRawData/PixelRDO_Container.h"
+#include "InDetRawData/SCT_RDO_Container.h"
+#include "ActsGPUEvent/TracccSiliconCellCollection.h"
+#include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
+#include "AthDeviceInterfaces/IMemoryResourceTool.h"
+#include "AthDeviceInterfaces/ICopyTool.h"
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "PixelReadoutGeometry/PixelDetectorManager.h"
+#include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
+#include "Identifier/Identifier.h"
+
+#include "ActsGPUInterfaces/IActsDeviceDetectorDescriptionProviderSvc.h"
+
+// vecmem
+#include "vecmem/memory/memory_resource.hpp"
+#include "vecmem/utils/cuda/copy.hpp"
+#include "traccc/cuda/utils/stream.hpp"
+
+#include <unordered_map>
+#include <cstdint>
+
+namespace ActsTrk {
+
+class RDOtoTracccCellConverterAlg : public AthReentrantAlgorithm
+{
+public:
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual StatusCode finalize() override;
+
+
+private:
+  SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{
+      this, "PixelRDO", "ITkPixelRDOs"};
+  SG::ReadHandleKey<SCT_RDO_Container> m_stripRDOKey{
+      this, "StripRDO", "ITkStripRDOs"};
+  SG::WriteHandleKey<traccc::edm::silicon_cell_collection::buffer> m_tracccCellsKey{
+      this, "TracccCells", "", "Output traccc cell collection buffer"};
+
+  // object counters
+  mutable std::atomic<int> m_nPix = 0;
+  mutable std::atomic<int> m_nStrip = 0;
+  mutable std::atomic<int> m_nCells = 0;
+
+  const PixelID* m_pixelID{nullptr};
+  const SCT_ID*  m_stripID{nullptr};
+  const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
+  const InDetDD::SCT_DetectorManager*  m_stripManager{nullptr};
+
+  ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
+      this, "HostMR", "", "The host memory resource tool to use"};
+  ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
+      this, "DeviceMR", "", "The device memory resource tool to use"};
+  ToolHandle<AthDevice::ICopyTool> m_copy{
+      this, "CopyProviderTool", "AthCUDA::CopyTool/CopyProviderTool", "Vecmem copy provider tool"};
+
+  ServiceHandle<ActsTrk::IActsDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
+    this, "DetectorDescriptionSvc", "ActsDeviceDetectorDescriptionProviderSvc"};
+
+  const traccc::detector_conditions_description::host* m_hostCond{nullptr};
+
+  // Geometry conversion maps
+  const std::unordered_map<Identifier, uint64_t>* m_athenaToDetray;
+  std::unordered_map<uint64_t, unsigned int> m_DetrayIdToDetDescrIndexMap;
+};
+
+} // namespace ActsTrk
+
+#endif // ACTSGPUEVENT_RDOTOTRACCCCELLCONVERTERALG_H
