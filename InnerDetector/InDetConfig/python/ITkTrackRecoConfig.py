@@ -671,15 +671,20 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
             if current_flags.Tracking.doStoreSiSPSeededTracks:
                 from InDetConfig.ITkPersistificationConfig import ITkSiSPSeededTracksFinalCfg
                 result.merge(ITkSiSPSeededTracksFinalCfg(current_flags))
-
+            
     if flags.Tracking.doStats:
         if _extensions_list:
             result.merge(ITkStatsCfg(
                 flags_set[0], # Use cuts from primary pass
                 StatTrackCollections=StatTrackCollections,
                 StatTrackTruthCollections=StatTrackTruthCollections))
-
-
+    
+    # GNN edges score decoration
+    if flags.Tracking.GNN.ActsPipeline.saveEdgeScore:
+        from ActsConfig.ActsObjectDecorationConfig import ActsGNNScoreDecoratorAlgCfg
+        result.merge(ActsGNNScoreDecoratorAlgCfg(flags,
+            name="ActsGNNScoreDecoratorAlg"))
+            
     ## ACTS Specific write PRDInfo
     if flags.Tracking.writeExtendedSi_PRDInfo:
         if _extensions_list:
@@ -688,7 +693,7 @@ def ITkTrackRecoCfg(flags) -> ComponentAccumulator:
             #Acts algorithm
         else:
             result.merge(ITkActsExtendedPRDInfoCfg(flags))
-            
+
     # output
     from InDetConfig.ITkTrackOutputConfig import ITkTrackRecoOutputCfg
     result.merge(ITkTrackRecoOutputCfg(flags, _outputExtensions))

@@ -44,7 +44,9 @@ class GNNTrackFinderTritonTool : public extends<AthAlgTool, IGNNTrackFinder> {
    */
   virtual StatusCode getTracks(
       const std::vector<const Trk::SpacePoint*>& spacepoints,
-      std::vector<std::vector<uint32_t> >& tracks) const override;
+      std::vector<std::vector<uint32_t> >& tracks,
+			std::unordered_map<int, std::unordered_map<int, float>>* edgeMap = nullptr) const override;
+
 
   virtual MsgStream&    dump(MsgStream&    out) const override;
   virtual std::ostream& dump(std::ostream& out) const override;
