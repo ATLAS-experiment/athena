@@ -20,7 +20,6 @@
 
 #include <algorithm>
 #include <string>
-#include <boost/algorithm/string.hpp>
 
 using std::string;
 
@@ -183,7 +182,7 @@ StatusCode BTaggingSelectionTool::initialize() {
         // See
         // https://root-forum.cern.ch/t/tkey-tobject-and-getlistofkeys-for-only-newest-ttrees/25928/3
         // https://root-forum.cern.ch/t/tkey-tobject-and-getlistofkeys-for-only-newest-ttrees/25928/7
-        if (boost::starts_with(keyName, fixedBCutPrefix) && 
+        if (keyName.starts_with(fixedBCutPrefix) && 
             std::find(workingpoints.begin(), workingpoints.end(), keyName) == workingpoints.end()){
             // Add efficiency working point to the vector 
             workingpoints.push_back( keyName );
