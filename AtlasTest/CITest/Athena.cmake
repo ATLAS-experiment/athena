@@ -496,7 +496,7 @@ atlas_add_citest( MuonR4_PatternRecognition
 #################################################################################
 
 atlas_add_citest( TriggerMC
-   SCRIPT test_trig_mc_v1Dev_Run4_ttbar200PU_build.py )
+   SCRIPT test_trigAna_RDOtoRDOTrig_v1Dev_Run4_build.py )
 
 atlas_add_citest( TriggerMC_Acts
    SCRIPT test_trig_mc_v1Dev_Run4_Acts_build.py )
@@ -509,8 +509,7 @@ atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
 atlas_add_citest( Trigger_athenaHLT_v1Dev
-   SCRIPT test_trigP1_v1Dev_decodeBS_build.py
-   LOG_IGNORE_PATTERN "chainComp ERROR.*Trigger counts differ from the reference" )
+   SCRIPT test_trigP1_v1Dev_decodeBS_build.py )
 
 atlas_add_citest( Trigger_athenaHLT_v1PhysP1
    SCRIPT test_trigP1_v1PhysP1_build.py )
