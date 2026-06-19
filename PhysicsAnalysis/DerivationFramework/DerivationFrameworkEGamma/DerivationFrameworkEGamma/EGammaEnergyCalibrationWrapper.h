@@ -6,8 +6,7 @@
 #ifndef DERIVATIONFRAMEWORK_EGAMMAENERGYCALIBRATIONWRAPPER_H
 #define DERIVATIONFRAMEWORK_EGAMMAENERGYCALIBRATIONWRAPPER_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 //
 #include "StoreGate/ReadHandleKey.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -22,15 +21,15 @@
 namespace DerivationFramework {
 
   class EGammaEnergyCalibrationWrapper :
-    public extends<AthAlgTool, IAugmentationTool>
+    public AthReentrantAlgorithm
   {
   public:
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     StatusCode initialize() override final;
-    StatusCode addBranches(const EventContext& ctx) const override final;
+    StatusCode execute(const EventContext& ctx) const override final;
 
   private:
-    
+
     SG::ReadHandleKey<xAOD::EgammaContainer> m_electronContainerKey{
       this, "ElectronContainerName", "Electrons", "Electron container"
     };

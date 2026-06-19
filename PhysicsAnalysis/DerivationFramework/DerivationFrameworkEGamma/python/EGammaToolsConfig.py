@@ -209,7 +209,7 @@ def EGammaEnergyCalibrationWrapperCfg(
     kwargs.setdefault("decoratorTransformerEnergyPhoton", "TransformerEnergy")
     kwargs.setdefault("TransformerCalibSvc", acc.getPrimaryAndMerge(egammaTransformerSvcCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.DerivationFramework.EGammaEnergyCalibrationWrapper(name, **kwargs))
+    acc.addEventAlgo(CompFactory.DerivationFramework.EGammaEnergyCalibrationWrapper(name, **kwargs))
 
     return acc
 

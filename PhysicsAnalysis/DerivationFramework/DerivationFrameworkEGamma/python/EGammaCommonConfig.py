@@ -835,13 +835,12 @@ def EGammaCommonCfg(flags):
 
     if flags.Derivation.Egamma.addMissingCellInfo:
         from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
-        TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
+        acc.merge(
             EGammaEnergyCalibrationWrapperCfg(
                 flags,
                 name="TransformerEnergyCalibration",
             )
-        ))
-        EGAugmentationTools.append(TransformerEnergyCalibration)
+        )
 
     # ==================================================
     # Truth Related tools
