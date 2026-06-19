@@ -8,7 +8,6 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <PathResolver/PathResolver.h>
-#include <boost/math/distributions/poisson.hpp>
 using json = nlohmann::json;
 
 namespace CP{
@@ -540,9 +539,9 @@ namespace CP{
   double SSVWeightsAlg::poisson_pmf(
     const int k,
     const double lambda){
-    // Returns $P(k;\lambda) = \frac{e^{-\lambda}\lambda^k}{k!}$ 
-    boost::math::poisson distrib(lambda);
-    return boost::math::pdf(distrib, k);
+	if (lambda == 0.0 ) return k == 0.0 ? 1.0 : 0.0;
+    if (lambda < 0 || k < 0) return 0.0;
+    return std::exp(-lambda + k * std::log(lambda) - std::lgamma(k + 1));
   }
 
   SSVWeightsAlg::EfficiencyMethodBhadronPtEtaBasedClass::EfficiencyMethodBhadronPtEtaBasedClass( const nlohmann::json & jsonConfig )
