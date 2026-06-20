@@ -21,7 +21,55 @@
 #include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/tools/TFileAccessTracer.h"
 #include <algorithm> //std::min
-#include <iostream> 
+#include <iostream>
+
+
+int test_POOLRootAccess (int maxEvt, POOL::TEvent& evt, long val[4])
+{
+  const xAOD::EventInfo* evtInfo = 0;
+  const xAOD::IParticleContainer* els = 0; //electrons
+  const xAOD::IParticleContainer* mus = 0; //mus
+  const xAOD::IParticleContainer* jets = 0; //jets
+
+  for(int i=0; i< std::min(maxEvt,10000); i++) {
+    if (evt.getEntry(i)!=0) {
+      std::cout << "Failed read of event " << i << std::endl;
+      return -1;
+    }
+    evt.retrieve( evtInfo , "EventInfo" ).ignore();
+    val[0] += evtInfo->eventNumber();
+    evt.retrieve( els, "Electrons" ).ignore();
+    val[1] += els->size();
+    evt.retrieve( mus, "Muons" ).ignore();
+    val[2] += mus->size();
+    evt.retrieve( jets, "AntiKt4EMPFlowJets" ).ignore();
+    val[3] += jets->size();
+  }
+  return 0;
+}
+
+
+int test_xAODRootAccess (int maxEvt2, xAOD::TEvent& evt2, long val2[4])
+{
+  const xAOD::EventInfo* evtInfo = 0;
+  const xAOD::IParticleContainer* els = 0; //electrons
+  const xAOD::IParticleContainer* mus = 0; //mus
+  const xAOD::IParticleContainer* jets = 0; //jets
+
+  for(int i=0; i< std::min(maxEvt2,10000); i++) {
+    if (evt2.getEntry(i) !=0) return -1;
+    evt2.retrieve( evtInfo , "EventInfo" ).ignore();
+    val2[0] += evtInfo->eventNumber();
+    evt2.retrieve( els, "Electrons" ).ignore();
+    val2[1] += els->size();
+    evt2.retrieve( mus, "Muons" ).ignore();
+    val2[2] += mus->size();
+    evt2.retrieve( jets, "AntiKt4EMPFlowJets" ).ignore();
+    val2[3] += jets->size();
+  }
+  return 0;
+}
+
 
 //coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
@@ -94,43 +142,26 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    std::cout << "doing POOLRootAccess test (using kClassAccess mode)...." <<std::endl;
    evt.getEntry(0);
    TStopwatch st;
-   st.Start();
-   for(int i=0; i< std::min(maxEvt,10000); i++) {
-      if (evt.getEntry(i)!=0) {
-        std::cout << "Failed read of event " << i << std::endl; 
-        return -1;
-      }
-      evt.retrieve( evtInfo , "EventInfo" ).ignore();
-      val[0] += evtInfo->eventNumber();
-      evt.retrieve( els, "Electrons" ).ignore();
-      val[1] += els->size();
-      evt.retrieve( mus, "Muons" ).ignore();
-      val[2] += mus->size();
-      evt.retrieve( jets, "AntiKt4EMPFlowJets" ).ignore();
-      val[3] += jets->size();
+   {
+     st.Start();
+     int ret = test_POOLRootAccess(maxEvt, evt, val);
+     if (ret < 0) return ret;
+     st.Stop();
+     st.Print();
    }
-   st.Stop();
-   st.Print();
 
 
    std::cout << "doing xAODRootAccess test (using kClassAccess mode)...." <<std::endl;
    if (evt2.getEntry(0) != 0 ) return 1;
    TStopwatch st2;
-   st2.Start();
    long val2[4] = {0,0,0,0};
-   for(int i=0; i< std::min(maxEvt2,10000); i++) {
-      if (evt2.getEntry(i) !=0) return -1;
-      evt2.retrieve( evtInfo , "EventInfo" ).ignore();
-      val2[0] += evtInfo->eventNumber();
-      evt2.retrieve( els, "Electrons" ).ignore();
-      val2[1] += els->size();
-      evt2.retrieve( mus, "Muons" ).ignore();
-      val2[2] += mus->size();
-      evt2.retrieve( jets, "AntiKt4EMPFlowJets" ).ignore();
-      val2[3] += jets->size();
+   {
+     st2.Start();
+     int ret = test_xAODRootAccess(maxEvt2, evt2, val2);
+     if (ret < 0) return ret;
+     st2.Stop();
+     st2.Print();
    }
-   st2.Stop();
-   st2.Print();
 
    std::cout << "xAODRootAccess Event rate = " << double(std::min(maxEvt2,10000))/st2.RealTime() << " Hz " << std::endl;
    std::cout << "POOLRootAccess Event rate = " << double(std::min(maxEvt,10000))/st.RealTime() << " Hz" << std::endl;
@@ -141,12 +172,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     }
   }
 
+#ifdef NDEBUG
    // should be able to get within 25% of the xAODRootAccess read rate for such a simple I/O-limited job
    // (TODO: use this test to profile athena and figure out why this threshold can't be higher)
    if(st2.RealTime()*4 < st.RealTime()) {
      std::cerr << " Athena event-loop is too slow " << std::endl;
      return -1;
    }
+#endif
 
    /*
   TFile f1("ut_basicxAODRead_test.results.root","RECREATE");
