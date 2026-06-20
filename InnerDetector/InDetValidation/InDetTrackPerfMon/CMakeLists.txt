@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetTrackPerfMon )
@@ -25,11 +25,11 @@ atlas_add_executable( postProcessIDTPMHistos util/postProcessIDTPMHistos.cxx
         LINK_LIBRARIES ${ROOT_LIBRARIES} InDetTrackPerfMonLib )
 
 atlas_add_test ( hdefXmlToJson_test SCRIPT test/xml2Json.sh
-                 POST_EXEC_SCRIPT nopost.sh )
+                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test ( validateJson_test
                  SCRIPT test/validateJson.sh ${CMAKE_DATA_OUTPUT_DIRECTORY}/InDetTrackPerfMon
-                 POST_EXEC_SCRIPT nopost.sh )
+                 POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
