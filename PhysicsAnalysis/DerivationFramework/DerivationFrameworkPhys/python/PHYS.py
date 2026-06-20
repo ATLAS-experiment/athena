@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYS.py
 # This defines DAOD_PHYS, an unskimmed DAOD format for Run 3.
@@ -132,7 +132,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
                                           "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
                                           "TruthPrimaryVertices.t.x.y.z",
-                                          "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
+                                          "InDetTrackParticles.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                           "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.HF_ClassificationC5J20.HF_ClassificationC5J25.HF_ClassificationC15J20.HF_ClassificationC15J25",
                                           "TauJets.dRmax.etOverPtLeadTrk",
                                           "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
