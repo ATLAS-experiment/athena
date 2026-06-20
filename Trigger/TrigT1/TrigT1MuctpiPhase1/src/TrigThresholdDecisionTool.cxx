@@ -4,7 +4,9 @@
 
 #include "TrigThresholdDecisionTool.h"
 #include "TrigT1Interfaces/Lvl1MuCTPIInputPhase1.h"
+#include "CxxUtils/StringUtils.h"
 
+using CxxUtils::tokenize;
 
 namespace LVL1
 {
@@ -57,8 +59,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
         return StatusCode::SUCCESS;
     }
 
-    //buffered parsed TGC/RPC flags
-    parsedFlagsMap parsed_flags;
+    m_parsed_flags.clear();
     m_tgcFlag_decisions.clear();
     m_rpcFlag_decisions.clear();
 
@@ -71,24 +72,24 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
 
         //parse the tgc flags and buffer them
         std::string tgcFlags = getShapedFlags( thr->tgcFlags() );
-        parseFlags(tgcFlags, parsed_flags);
+        parseFlags(tgcFlags);
 
         //loop over all 3-bit flag combinations
         for (unsigned flags=0;flags<8;flags++) {
             bool F=flags&0b100;
             bool C=flags&0b010;
             bool H=flags&0b001;
-            makeTGCDecision(tgcFlags, F, C, H, parsed_flags);
+            makeTGCDecision(tgcFlags, F, C, H);
         }
 
         //parse the rpc flags and buffer them
         std::string rpcFlags = getShapedFlags( thr->rpcFlags() );
-        parseFlags(rpcFlags, parsed_flags);
+        parseFlags(rpcFlags);
 
         //loop over all 2-bit flag combinations
         for (unsigned flags=0;flags<2;flags++){
             bool M=flags&0b1;
-            makeRPCDecision(rpcFlags, M, parsed_flags);
+            makeRPCDecision(rpcFlags, M);
         }
     }
     m_isInitialized = true;
@@ -268,12 +269,12 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     double thrValTmp=0;
     for (unsigned idec=0;idec<decisions.size();++idec) {
       if (!decisions[idec].second) continue;
-      const TrigConf::L1Threshold_MU* thr = static_cast<TrigConf::L1Threshold_MU*>(decisions[idec].first.get());
+      std::shared_ptr<TrigConf::L1Threshold_MU> thr = std::static_pointer_cast<TrigConf::L1Threshold_MU>(decisions[idec].first);
       if(std::abs(eta)<1.05){
-	  thrValTmp = thr->ptBarrel();
+	thrValTmp = thr->ptBarrel();
       }
       else{
-	 thrValTmp = thr->ptEndcap();
+	thrValTmp = thr->ptEndcap();
       }
       if (thrValTmp > thrVal)
 	{
@@ -281,7 +282,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
 	  thrName = thr->name();
 	}
     }
-    return std::make_pair(std::move(thrName), thrVal);
+    return std::make_pair(thrName, thrVal);
   }
 
   bool TrigThresholdDecisionTool::isExcludedRPCROI(const TrigConf::L1ThrExtraInfo_MU& menuExtraInfo,
@@ -289,20 +290,21 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
                                                    const unsigned roi,
                                                    const unsigned sectorID,
                                                    const bool isSideC) const {
-    if (!rpcExclROIList.empty())
+    if (rpcExclROIList != "")
     {
       const std::map<std::string, std::vector<unsigned int> >& exclList = menuExtraInfo.exclusionList(rpcExclROIList);
       if (exclList.size() != 0)
       {
 	//build the sector name of this ROI to compare against the exclusion list
-	std::string sectorName("B");
+	std::stringstream sectorName;
+	sectorName<<"B";
 	int sectorNumber=sectorID;
 	if (isSideC) sectorNumber += 32;
-	if (sectorNumber < 10) sectorName += '0';
-	sectorName += std::to_string(sectorNumber);
+	if (sectorNumber < 10) sectorName << "0";
+	sectorName << sectorNumber;
 	
 	//do the comparison
-	auto exclROIs = exclList.find(sectorName);
+	auto exclROIs = exclList.find(sectorName.str());
 	if (exclROIs != exclList.end())
 	{
 	  for (auto roi_itr=exclROIs->second.begin();roi_itr!=exclROIs->second.end();roi_itr++)
@@ -316,168 +318,141 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     return false;
   }
 
-bool TrigThresholdDecisionTool::getTGCDecision(const std::string& tgcFlags, const bool F, const bool C, const bool H) const
-{
-  auto it = m_tgcFlag_decisions.find(tgcFlags);
-  if (it == m_tgcFlag_decisions.end()) return false;
-
-  return it->second.isPassed(F, C, H);
-}
-
-void TrigThresholdDecisionTool::makeTGCDecision(const std::string& tgcFlags, const bool F, const bool C, const bool H, const parsedFlagsMap& parsed_flags) const
-{
-  // If no flags are specified, it automatically passes quality checks
-  if (tgcFlags.empty()) {
-    m_tgcFlag_decisions[tgcFlags].setPassed(F, C, H);
-    return;
-  }
-
-  // Check the quality based on the flags
-  bool passedFlags = false;
-  const auto* vec_flags = &parsed_flags.at(tgcFlags);
-  for (auto or_itr = vec_flags->begin(); or_itr != vec_flags->end(); or_itr++)
+  bool TrigThresholdDecisionTool::getTGCDecision(const std::string& tgcFlags, const bool F, const bool C, const bool H) const
   {
-    bool passedAnd = true;
-    for (auto and_itr = or_itr->begin(); and_itr != or_itr->end(); and_itr++)
-    {
-      if (*and_itr == "F") passedAnd = passedAnd && F;
-      else if (*and_itr == "C") passedAnd = passedAnd && C;
-      else if (*and_itr == "H") passedAnd = passedAnd && H;
-    }
-    passedFlags = passedFlags || passedAnd;
+    //check if the word has been checked before for this string of flags (it should always, as we've buffered them in 'start')
+    TGCFlagDecision decision(F,C,H);
+    auto previous_decisions = m_tgcFlag_decisions.find(tgcFlags);
+    if (previous_decisions == m_tgcFlag_decisions.end()) return false;
+
+    auto previous_decision_itr = previous_decisions->second.find(decision);
+    if (previous_decision_itr != previous_decisions->second.end()) return previous_decision_itr->pass;
+    return false;
   }
 
-  // Use the struct helper to register a passing combination
-  if (passedFlags) {
-    m_tgcFlag_decisions[tgcFlags].setPassed(F, C, H);
-  }
-}
-
-bool TrigThresholdDecisionTool::getRPCDecision(const std::string& rpcFlags, const bool M) const
-{
-  auto it = m_rpcFlag_decisions.find(rpcFlags);
-  if (it == m_rpcFlag_decisions.end()) return false;
-
-  return it->second.isPassed(M);;
-}
-
-void TrigThresholdDecisionTool::makeRPCDecision(const std::string& rpcFlags, const bool M, const parsedFlagsMap& parsed_flags) const
-{
-
-  if (rpcFlags.empty()) {
-    m_rpcFlag_decisions[rpcFlags].setPassed(M);
-    return;
-  }
-
-  bool passedFlags = false;
-  const auto* vec_flags = &parsed_flags.at(rpcFlags);
-  for (auto or_itr = vec_flags->begin(); or_itr != vec_flags->end(); or_itr++)
+  void TrigThresholdDecisionTool::makeTGCDecision(const std::string& tgcFlags, const bool F, const bool C, const bool H) const
   {
-    bool passedAnd = true;
-    for (auto and_itr = or_itr->begin(); and_itr != or_itr->end(); and_itr++)
-    {
-      if (*and_itr == "M") passedAnd = passedAnd && M;
+    //check if the word has been checked before for this string of flags
+    TGCFlagDecision decision(F,C,H);
+    auto previous_decisions = &m_tgcFlag_decisions[tgcFlags];
+    auto previous_decision_itr = previous_decisions->find(decision);
+    if (previous_decision_itr != previous_decisions->end()) return;
+    else if (tgcFlags == "") {
+      decision.pass=true;
+      previous_decisions->insert(decision);
     }
-    passedFlags = passedFlags || passedAnd;
+    else { // make the decision
+      
+      //check the quality based on the flags.
+      //loop over outer layer of "ors" and 'or' the results
+      bool passedFlags = false;
+      const std::vector<std::vector<std::string> >* vec_flags = &m_parsed_flags[tgcFlags];
+      for (auto or_itr = vec_flags->begin();or_itr!=vec_flags->end();or_itr++)
+      {
+	//loop over the inner layer of "ands" and 'and' the results
+	bool passedAnd = true;
+	for (auto and_itr = or_itr->begin();and_itr!=or_itr->end();and_itr++)
+	{
+	  if (*and_itr == "F") passedAnd = passedAnd && F;
+	  else if (*and_itr == "C") passedAnd = passedAnd && C;
+	  else if (*and_itr == "H") passedAnd = passedAnd && H;
+	}
+	passedFlags = passedFlags || passedAnd;
+      }
+      //buffer the decision
+      decision.pass = passedFlags;
+      previous_decisions->insert(decision);
+    }	  
   }
-  if (passedFlags) {
-    m_rpcFlag_decisions[rpcFlags].setPassed(M);
-  }
-}
 
-  void TrigThresholdDecisionTool::parseFlags(const std::string& flags, parsedFlagsMap& parsed_flags) const
+  bool TrigThresholdDecisionTool::getRPCDecision(const std::string& rpcFlags, const bool M) const
+  {
+    //check if the word has been checked before for this string of flags (it should always, as we've buffered them in 'start')
+    RPCFlagDecision decision(M);
+    auto previous_decisions = m_rpcFlag_decisions.find(rpcFlags);
+    if (previous_decisions == m_rpcFlag_decisions.end()) return false;
+
+    auto previous_decision_itr = previous_decisions->second.find(decision);
+    if (previous_decision_itr != previous_decisions->second.end()) return previous_decision_itr->pass;
+    return false;
+  }
+
+  void TrigThresholdDecisionTool::makeRPCDecision(const std::string& rpcFlags, const bool M) const
+  {
+    //check if the word has been checked before for this string of flags
+    RPCFlagDecision decision(M);
+    auto previous_decisions = &m_rpcFlag_decisions[rpcFlags];
+    auto previous_decision_itr = previous_decisions->find(decision);
+    if (previous_decision_itr != previous_decisions->end()) return;
+    else if (rpcFlags == "") {
+      decision.pass=true;
+      previous_decisions->insert(decision);
+    }
+    else { // make the decision
+      
+      //check the quality based on the flags.
+      //loop over outer layer of "ors" and 'or' the results
+      bool passedFlags = false;
+      const std::vector<std::vector<std::string> >* vec_flags = &m_parsed_flags[rpcFlags];
+      for (auto or_itr = vec_flags->begin();or_itr!=vec_flags->end();or_itr++)
+      {
+	//loop over the inner layer of "ands" and 'and' the results
+	bool passedAnd = true;
+	for (auto and_itr = or_itr->begin();and_itr!=or_itr->end();and_itr++)
+	{
+	  if (*and_itr == "M") passedAnd = passedAnd && M;
+	}
+	passedFlags = passedFlags || passedAnd;
+      }
+      //buffer the decision
+      decision.pass = passedFlags;
+      previous_decisions->insert(decision);
+    }	  
+  }
+
+  void TrigThresholdDecisionTool::parseFlags(const std::string& flags) const
   {
     //parse the logic of the quality flag into a 2D vector, where outer layer contains the logic |'s and inner layer contains the logical &'s.
     //save the 2D vector in a map so we don't have to parse it each time we want to check the flags.
-    // 1. Single-lookup insertion check using try_emplace.
-    // If the key exists, it returns immediately without doing any work.
-    auto [it, inserted] = parsed_flags.try_emplace(flags);
-    
-    if (!inserted) {
-        return; 
+    if (m_parsed_flags.find(flags) == m_parsed_flags.end())
+    {
+      std::vector<std::string> vec_ors = tokenize(flags, "|");
+      std::vector<std::vector<std::string> > vec_flags;
+      for (unsigned ior=0;ior<vec_ors.size();ior++)
+      {
+	vec_flags.push_back(tokenize(vec_ors[ior],"&"));
+      }
+      m_parsed_flags[flags] = std::move(vec_flags);
     }
-
-    // Grab a stable string_view referencing the map's internal persistent key
-    // This ensures the views remain valid as long as the key is in the map.
-    std::string_view stable_key = it->first;
-    std::vector<std::vector<std::string_view>> vec_flags;
-
-    // 2. C++20 lazy splitting for OR tokens
-    for (auto or_chunk : stable_key | std::views::split('|')) {
-        std::vector<std::string_view> and_tokens;
-        
-        // 3. C++20 lazy splitting for AND tokens
-        for (auto and_chunk : or_chunk | std::views::split('&')) {
-            // Reconstruct a string_view from the subrange without copying the underlying characters
-            and_tokens.emplace_back(and_chunk.begin(), and_chunk.end());
-        }
-        
-        vec_flags.push_back(std::move(and_tokens));
-    }
-
-    // Assign the completely parsed zero-allocation views back to the value slot
-    it->second = std::move(vec_flags);
   }
 
   
-std::string TrigThresholdDecisionTool::getShapedFlags( std::string_view flags) {
-    if (flags.empty()) return {};
-
-    // Helper lambda to strip spaces from a string_view range
-    auto drop_spaces = std::views::filter([](char c) { return !std::isspace(static_cast<unsigned char>(c)); });
-
-    // 1. Split by OR ('|') using ranges
-    auto or_splits = flags | std::views::split('|');
-    std::vector<std::string> unique_ors;
-
-    for (auto or_chunk : or_splits) {
-        // 2. Split by AND ('&') 
-        auto and_splits = or_chunk | std::views::split('&');
-        std::vector<std::string_view> and_tokens;
-
-        for (auto and_chunk : and_splits) {
-            // Reconstruct a clean string_view without whitespace bounds
-            auto clean_view = and_chunk | drop_spaces;
-            
-            // Converting a filtered range back to a contiguous string_view if needed.
-            // If sub-strings might have internal spaces, we need to instantiate a small string, 
-            // but if it's just stripping padding, we can grab the underlying bounds.
-            std::string token;
-            std::ranges::copy(clean_view, std::back_inserter(token));
-            if (!token.empty()) {
-                and_tokens.push_back(std::move(token)); 
-            }
-        }
-
-        if (and_tokens.empty()) continue;
-
-        // Deduplicate and sort AND tokens
-        std::ranges::sort(and_tokens);
-        auto [last, end] = std::ranges::unique(and_tokens);
-        and_tokens.erase(last, end);
-
-        // Reconstruct the normalized AND group
-        std::string stabilized_and;
-        for (size_t i = 0; i < and_tokens.size(); ++i) {
-            stabilized_and += and_tokens[i];
-            if (i < and_tokens.size() - 1) stabilized_and += '&';
-        }
-        unique_ors.push_back(std::move(stabilized_and));
+  std::string TrigThresholdDecisionTool::getShapedFlags(const std::string& flags) const
+  {
+    std::string shapedFlags = flags;
+    shapedFlags.erase(std::remove_if(shapedFlags.begin(),shapedFlags.end(),::isspace),shapedFlags.end()); // remove spaces
+    std::vector<std::string> vec_ors = tokenize(shapedFlags,"|");
+    std::set<std::string> set_ors;
+    for(const auto& ors : vec_ors){
+      std::vector<std::string> vec_ands = tokenize(ors,"&");
+      std::set<std::string> set_ands;
+      for(const auto& ands : vec_ands){
+	set_ands.insert(ands);
+      }
+      std::string aa = "";
+      for(const auto& ands : set_ands){
+	aa += ands;
+	aa += "&";
+      }
+      std::string bb = aa.substr(0,aa.size()-1); // remove the last "&"
+      set_ors.insert(std::move(bb));
     }
-
-    // Deduplicate and sort OR groups
-    std::ranges::sort(unique_ors);
-    auto [or_last, or_end] = std::ranges::unique(unique_ors);
-    unique_ors.erase(or_last, or_end);
-
-    // 3. Final Assembly
-    std::string result;
-    for (size_t i = 0; i < unique_ors.size(); ++i) {
-        result += unique_ors[i];
-        if (i < unique_ors.size() - 1) result += '|';
+    std::string aa = "";
+    for(const auto& ors : set_ors){
+      aa += ors;
+      aa += "|";
     }
-
-    return result;
-}
-
+    std::string bb = aa.substr(0,aa.size()-1); // remove the last "|"
+    return bb;
+  }
 }
