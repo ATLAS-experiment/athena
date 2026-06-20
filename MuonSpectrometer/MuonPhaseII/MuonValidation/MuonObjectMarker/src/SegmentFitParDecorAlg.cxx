@@ -29,7 +29,7 @@ namespace {
 
 namespace MuonR4 {
     using namespace SegmentFit;
-    using SegPars = xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>;
+    using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(ParamDefs::nPars)>::element_type;
 
     StatusCode SegmentFitParDecorAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -67,7 +67,7 @@ namespace MuonR4 {
         ATH_CHECK(SG::get(segmentContainer, m_segmentKey, ctx));
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
-        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars> parDecor{m_locParKey, ctx};
+        SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t> parDecor{m_locParKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec> prdLinkDecor{m_prdLinkKey, ctx};
         for (const xAOD::MuonSegment* seg : *segmentContainer) {
             PrdLinkVec& prdLinks{prdLinkDecor(*seg)};
@@ -142,7 +142,7 @@ namespace MuonR4 {
                                                                                       seg->etaIndex());
             const Amg::Transform3D globToLoc{chamber->globalToLocalTransform(*gctx)};
 
-            SegPars& locPars{parDecor(*seg)};
+            SegPars_t& locPars{parDecor(*seg)};
 
             const Amg::Vector3D locDir = globToLoc.linear() * seg->direction();
             const Amg::Vector3D locPos = globToLoc * seg->position();
