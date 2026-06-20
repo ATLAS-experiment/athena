@@ -492,7 +492,7 @@ def PHYSLITECfg(flags):
         'TruthPrimaryVertices.t.x.y.z',
         'MET_Core_AnalysisMET.name.mpx.mpy.sumet.source',
         'METAssoc_AnalysisMET.',
-        'InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.numberOfTRTHits.numberOfTRTOutliers',
+        'InDetTrackParticles.numberOfTRTHits.numberOfTRTOutliers',
         'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.{GRL_Deco_names}'.format(GRL_Deco_names='.'.join(str(key) for key in (getGoodRunsLists()).keys())),
         'Kt4EMPFlowEventShape.Density',
         'Kt4EMPFlowNeutEventShape.Density',
