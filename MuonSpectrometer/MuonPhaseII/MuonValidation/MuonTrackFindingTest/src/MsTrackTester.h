@@ -96,8 +96,6 @@ namespace MuonValR4{
         ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
         /** @brief Dependency on the R4 muon container */
         MuonKey_t m_muonKey{this, "MuonKey", "MuonsR4"};
-        /** @brief Declare the dependency on the ID track particle container */
-        TrackKey_t m_idTrackKey{this, "IdTrkKey", "InDetTrackParticles"};  
         /** @brief Hit summary tool */
         ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" ,""};
         /** @brief Legacy track reconstruction chain */
@@ -147,26 +145,8 @@ namespace MuonValR4{
         /** @brief Number of matched segments in the seed */
         MuonVal::MatrixBranch<unsigned short>& m_truthMuToSeedCounter{m_tree.newMatrix<unsigned short>("TruthMuons_seedNSeg")};
         /** @brief Links from the truth muon to the segments  */
-        MuonVal::MatrixBranch<unsigned short>& m_truthMuTruthSegLinks{m_tree.newMatrix<unsigned short>("TruthMuons_truthSegLinks")};
-        /** @brief Number of associated truth muon segments */
-        MuonVal::VectorBranch<unsigned short>& m_truthMuTruthNSegs{m_tree.newVector<unsigned short>("TruthMuons_nTruthSegments")};
-        /** @brief Links from the truth muon to the segments  */
         MuonVal::MatrixBranch<unsigned short>& m_truthMuRecoSegLinks{m_tree.newMatrix<unsigned short>("TruthMuons_recoSegLinks")};
-        /*** @brief Length of the true segment seed  */
-        MuonVal::VectorBranch<float>& m_truthMuonsSeedLength{m_tree.newVector<float>("TruthMuons_seedLength", -1)};
-        /** @brief Angular deviation of the true segment seed */
-        MuonVal::VectorBranch<float>& m_truthMuonsSeedCone{m_tree.newVector<float>("TruthMuons_seedThetaCone", -1)};
-        /** @brief The deflection angle from the */
-        MuonVal::VectorBranch<float>& m_truthMuonsQPAlpha{m_tree.newVector<float>("TruthMuons_qTimesPalpha", 0)};
-        /** @brief Estimated Q x P from the seeder algorithm class  */
-        MuonVal::VectorBranch<float>& m_truthMuonQP{m_tree.newVector<float>("TruthMuons_qTimesP", 0)};
-
-        /** @brief Link of the reconstructed muons -> muon segments */
-        MuonVal::MatrixBranch<unsigned short>& m_MuonsToRecoSegLinks{m_tree.newMatrix<unsigned short>("ActsMuons_segmentLinks")};
-        /** @brief Link of the reconstructed muons -> track seeds */
-        MuonVal::VectorBranch<unsigned short>& m_MuonsSeedLink{m_tree.newVector<unsigned short>("ActsMuons_seedLink")};
-
-
+ 
         /** @brief Output branches of the legacy MS tracks */
         ParticleBranchPtr_t m_legacyTrks{};
     };
