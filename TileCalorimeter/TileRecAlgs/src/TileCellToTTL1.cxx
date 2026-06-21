@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -93,25 +93,19 @@ StatusCode TileCellToTTL1::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "TileTTL1Container registered successfully (" << m_ttl1CellContainerKey.key() << ")");
 
   struct Arrays {
-    int ttNpmt[32][64];       // array of TT occupancy
-    Identifier ttId[32][64];  // array of TT identifiers
-    float ttAmp[32][64];      // array of all TT amplitudes
-    uint16_t ttStatusCells[32][64];   // array of TT status of cells
-    uint16_t ttStatusChans[32][64];   // array of TT status of channels
-    float ttTimeAve[32][64];      // array of TT time average
-    float ttCorrFact[32][64];     // array of TT correction factor
+    int ttNpmt[32][64] = {{0}};      // array of TT occupancy
+    Identifier ttId[32][64];         // array of TT identifiers
+    float ttAmp[32][64] = {{0}};     // array of all TT amplitudes
+    uint16_t ttStatusCells[32][64] = {{0}};   // array of TT status of cells
+    uint16_t ttStatusChans[32][64] = {{0}};   // array of TT status of channels
+    float ttTimeAve[32][64] = {{0}};      // array of TT time average
+    float ttCorrFact[32][64] = {{0}};     // array of TT correction factor
   };
   auto a = std::make_unique<Arrays>();
 
   // clear the arrays
   for (int i = 0; i < 32; i++) {
     for (int j = 0; j < 64; j++) {
-      a->ttNpmt[i][j] = 0;
-      a->ttId[i][j] = 0;
-      a->ttAmp[i][j] = 0.0;
-      a->ttStatusCells[i][j] = 0;
-      a->ttStatusChans[i][j] = 0;
-      a->ttTimeAve[i][j] = 0.0;
       a->ttCorrFact[i][j] = 1.0; // this is a place holder for now, set to 1.0
     }
   }

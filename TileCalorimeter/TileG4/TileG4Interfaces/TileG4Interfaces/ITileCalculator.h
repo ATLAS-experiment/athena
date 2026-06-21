@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -34,10 +34,10 @@ class TileSDOptions;
 struct TileMicroHit {
   Identifier pmt_up;
   Identifier pmt_down;
-  G4double e_up;
-  G4double e_down;
-  double time_up;
-  double time_down;
+  G4double e_up = 0;
+  G4double e_down = 0;
+  double time_up = 0;
+  double time_down = 0;
   //int         period,     tilerow; // prepared for future use
 };
 
