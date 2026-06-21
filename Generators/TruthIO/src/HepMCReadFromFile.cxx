@@ -27,11 +27,7 @@ StatusCode HepMCReadFromFile::initialize() {
   CHECK(GenBase::initialize());
   
   // Initialize input file and event number
-#ifdef HEPMC3
   m_hepmcio = HepMC3::deduce_reader(m_input_file);
-#else
-  m_hepmcio.reset( new HepMC::IO_GenEvent(m_input_file.c_str(), std::ios::in) );
-#endif
   m_event_number = 0;
   return StatusCode::SUCCESS;
 }
@@ -53,7 +49,6 @@ StatusCode HepMCReadFromFile::execute(const EventContext& /*ctx*/) {
       return status;
     }
   }
-#ifdef HEPMC3
   HepMC3::GenEvent* evt = new HepMC3::GenEvent();
   if (m_hepmcio) {
     m_hepmcio->read_event(*evt);
@@ -70,25 +65,6 @@ StatusCode HepMCReadFromFile::execute(const EventContext& /*ctx*/) {
     m_sum_xs = m_sum_xs+xs; 
 
   }
-
-#else
-  /// @todo Should be a do-while until the read is successful or end of file?
-  HepMC::GenEvent* evt = m_hepmcio->read_next_event();
-  if (evt) {
-    ++m_event_number;
-    evt->set_event_number(m_event_number);
-    evt->use_units(HepMC::Units::MEV,HepMC::Units::MM);
-    mcEvtColl->push_back(evt);
-
-    HepMC::GenCrossSection* cs=evt->cross_section();
-    double xs = 0;
-    if ( cs ){
-      xs=cs->cross_section();
-      }
-    m_sum_xs = m_sum_xs+xs; 
-
-  }
-#endif
   return StatusCode::SUCCESS;
 }
 

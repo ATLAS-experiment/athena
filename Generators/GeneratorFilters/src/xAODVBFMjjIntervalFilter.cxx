@@ -193,9 +193,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent(const EventContext& ctx)
                 (*mec)[i]->weights().push_back(eventWeight * m_norm * existingWeight);
             }
 
-#ifdef HEPMC3
       (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(eventWeight*m_norm));
-#endif
 
         }
     } // Apply weighting

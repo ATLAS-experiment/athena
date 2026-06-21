@@ -113,7 +113,6 @@ StatusCode LeptonPairFilter::filterEvent(const EventContext& ctx) {
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     // Loop over all particles in the event
     const HepMC::GenEvent* genEvt = (*itr);
-#ifdef HEPMC3
     for(const auto& pitr: genEvt->particles()) {
       if( !MC::isStable(pitr) ) continue;
 	// check stable particles only
@@ -150,52 +149,6 @@ StatusCode LeptonPairFilter::filterEvent(const EventContext& ctx) {
 			for (auto thisParent: pitr->production_vertex()->particles_in()) parentPDG_tmp.push_back(thisParent->pdg_id());
 			vLeptonParentPDGIDs.push_back(std::move(parentPDG_tmp));
        }
-#else
-    for(HepMC::GenEvent::particle_const_iterator pitr=genEvt->particles_begin();
-	pitr!=genEvt->particles_end(); ++pitr )
-      if( MC::isStable(*pitr) )
-	// check stable particles only
-	// We do not place requirements on their origins (updated: optionally rejecting hadron decays)
-	// save pdg ids of found leptons
-	// do not consider taus
-	{
-	  if( MC::isElectron(*pitr) || MC::isMuon(*pitr) ){
-	      	//only consider leptons which satisfy  pt and eta requirements
-	        if( ((*pitr)->momentum().perp() >= m_Ptmin) && std::abs((*pitr)->momentum().pseudoRapidity()) <=m_EtaRange){
-			  if(m_onlyMassiveParents)
-			  {
-				  auto p = *pitr;
-				  bool massiveParent = false;
-				  while(p)
-				  {
-					  auto vxp = p->production_vertex();
-					  if(!vxp) break;
-					  if(vxp->particles_in_size()!=1) break;
-					  p = *vxp->particles_in_const_begin();
-					  if(!MC::isSMLepton(p) || MC::isPhoton(p))
-					  {
-						  massiveParent = (p->generated_mass()>20000);
-						  break;
-					  }
-				  }
-				  if(!massiveParent) continue;
-			  }
-	      		vLeptonPDGIDs.push_back((*pitr)->pdg_id());
-			vLeptonPt.push_back((*pitr)->momentum().perp());
-			vLeptonEta.push_back((*pitr)->momentum().pseudoRapidity());
-			HepMC::GenVertex::particle_iterator firstParent =
-			  (*pitr)->production_vertex()->particles_begin(HepMC::parents);
-			HepMC::GenVertex::particle_iterator endParent =
-			  (*pitr)->production_vertex()->particles_end(HepMC::parents);
-			HepMC::GenVertex::particle_iterator thisParent = firstParent;
-			std::vector<int> parentPDG_tmp;
-			for(; thisParent != endParent; ++thisParent) parentPDG_tmp.push_back((*thisParent)->pdg_id());
-
-			vLeptonParentPDGIDs.push_back(parentPDG_tmp);
-		}
-	  }//end if pdg_id
-       }
-#endif
   }//end loop over collections
 
   int nLeptons = vLeptonPDGIDs.size();

@@ -30,7 +30,6 @@ StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
 
   for (McEventCollection::const_iterator itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-#ifdef HEPMC3
     for (const auto&  pitr: *genEvt) {
         if (std::abs(pitr->pdg_id()) != 6) continue;
         if ( pitr->pdg_id() ==  6 ) N_quark_t_all++;
@@ -115,119 +114,6 @@ StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
          }
       }
    }
-#else
-    for (HepMC::GenEvent::particle_const_iterator pitr = genEvt->particles_begin(); pitr != genEvt->particles_end(); ++pitr) {
-      if (std::abs((*pitr)->pdg_id()) == 6) {
-        if ( (*pitr)->pdg_id() ==  6 ) N_quark_t_all++;
-        if ( (*pitr)->pdg_id() == -6 ) N_quark_tbar_all++;
-
-        int n_daughters = 0;
-
-        HepMC::GenParticle * mcpart = (*pitr);
-        const HepMC::GenVertex * decayVtx = mcpart->end_vertex();
-
-        // Verify if we got a valid pointer and retrieve the number of daughters
-        if (decayVtx != 0) n_daughters = decayVtx->particles_out_size();
-
-        // For this analysis we are not interested in t->t MC structures, only in decays
-        if (n_daughters >= 2) {
-          HepMC::GenVertex::particles_in_const_iterator child_mcpartItr  = decayVtx->particles_out_const_begin();
-          HepMC::GenVertex::particles_in_const_iterator child_mcpartItrE = decayVtx->particles_out_const_end();
-          for (; child_mcpartItr != child_mcpartItrE; ++child_mcpartItr) {
-            HepMC::GenParticle * child_mcpart = (*child_mcpartItr);
-
-            //  Implicitly assume that tops always decay to W X
-            if (std::abs(child_mcpart->pdg_id()) == 24) {
-              if ( (*pitr)->pdg_id() ==  6 ) N_quark_t++;
-              if ( (*pitr)->pdg_id() == -6 ) N_quark_tbar++;
-
-              bool  useNextVertex = false;
-              const HepMC::GenVertex * w_decayVtx = child_mcpart->end_vertex();
-
-              while (w_decayVtx) {
-
-                useNextVertex = false;
-                int mcpart_n_particles_out = w_decayVtx->particles_out_size();
-
-                HepMC::GenVertex::particles_out_const_iterator grandchild_mcpartItr  = w_decayVtx->particles_out_const_begin();
-                HepMC::GenVertex::particles_out_const_iterator grandchild_mcpartItrE = w_decayVtx->particles_out_const_end();
-
-                for (; grandchild_mcpartItr != grandchild_mcpartItrE; ++grandchild_mcpartItr) {
-      HepMC::GenParticle * grandchild_mcpart = (*grandchild_mcpartItr);
-		  int grandchild_pid = grandchild_mcpart->pdg_id();
-
-		  ATH_MSG_DEBUG("W (t/tbar) has " << mcpart_n_particles_out << " children and the pdg_id of the next is " << grandchild_pid);
-
-		  // Check if the W's child is W again. If yes, then move to its next decay vertex in a decay tree
-		  if (std::abs(grandchild_pid) == 24) {
-		    w_decayVtx = grandchild_mcpart->end_vertex();
-
-		    // If something wrong comes from truth...
-		    if (!w_decayVtx) {
-		      ATH_MSG_ERROR("A stable W is found... ");
-		      break;
-		    }
-
-		    useNextVertex = true;
-		    break;
-		  }
-
-		  // use brute force to use only leptons that have not been found already 
-		  if (grandchild_pid == -11 && foundlepton[0] < count_found_leptons) {
-		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
-		      foundlepton[0]++;
-		      N_pt_above_cut++;
-                      N_pt_above_cut_minus++;
-		    }
-		  }
-		  if (grandchild_pid == 11 && foundlepton[1] < count_found_leptons) {
-		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
-		      foundlepton[1]++;
-		      N_pt_above_cut++;
-                      N_pt_above_cut_plus++;
-
-		    }
-		  }
-		  if (grandchild_pid == -13 && foundlepton[2] < count_found_leptons) {
-		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
-		      foundlepton[2]++;
-		      N_pt_above_cut++;
-                      N_pt_above_cut_minus++;
-		    }
-		  }
-		  if (grandchild_pid == 13 && foundlepton[3] < count_found_leptons) {
-		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
-		      foundlepton[3]++;
-		      N_pt_above_cut++;
-                      N_pt_above_cut_plus++;
-		    }
-		  }
-		  if (grandchild_pid == -15 && foundlepton[4] < count_found_leptons) {
-		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
-		      foundlepton[4]++;
-		      N_pt_above_cut++;
-                      N_pt_above_cut_minus++;
-		    }
-		  }
-		  if (grandchild_pid == 15 && foundlepton[5] < count_found_leptons) {
-		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
-		      foundlepton[5]++;
-		      N_pt_above_cut++;
-                      N_pt_above_cut_plus++;
-		    }
-		  }
-			      
-		}
-		
-                // If investigation of W's next decay vertex is not required then finish looking for leptons
-                if (!useNextVertex) break;
-              }
-            }
-          }
-        }
-      }
-    }
-#endif
   }
 
   ATH_MSG_INFO("Found " << N_quark_t_all    << " t    quarks in event record");

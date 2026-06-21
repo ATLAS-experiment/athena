@@ -12,11 +12,7 @@
 
 
 #include "ATOOLS/Org/CXXFLAGS_PACKAGES.H"
-#ifdef HEPMC3
 #undef USING__HEPMC2
-#else
-#undef USING__HEPMC3
-#endif
 #include "SHERPA/Main/Sherpa.H"
 #include "SHERPA/Initialization/Initialization_Handler.H"
 #ifdef IS_SHERPA_3
@@ -169,7 +165,6 @@ StatusCode Sherpa_i::genInitialize(){
     return StatusCode::FAILURE;
   }
 
-  #ifdef HEPMC3
   m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
   /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
   struct HepMC3::GenRunInfo::ToolInfo generator = {
@@ -178,7 +173,6 @@ StatusCode Sherpa_i::genInitialize(){
     std::string("Used generator")
   };
   m_runinfo->tools().push_back(std::move(generator));
-  #endif
   return StatusCode::SUCCESS;
 }
 
@@ -205,13 +199,10 @@ StatusCode Sherpa_i::callGenerator() {
 
 StatusCode Sherpa_i::fillEvt(HepMC::GenEvent* event) {
   ATH_MSG_DEBUG( "Sherpa_i Filling event");
-#ifdef HEPMC3
   if (!event->run_info()) event->set_run_info(m_runinfo);
-#endif
   p_sherpa->FillHepMCEvent(*event);
 
 
-#ifdef HEPMC3
 //Weight, MEWeight, WeightNormalisation, NTrials
   if (event->weights().size()>2) {
     double nominal = event->weight("Weight");
@@ -227,26 +218,8 @@ StatusCode Sherpa_i::fillEvt(HepMC::GenEvent* event) {
       ATH_MSG_DEBUG("Sherpa WEIGHT " << name << " value="<< event->weight(name));
     }
   }
-#else
-  if (event->weights().size()>2) {
-    for (size_t i=0; i<event->weights().size(); ++i) {
-      if (i>3) { // cap variation weights
-        // cap variation weights at m_variation_weight_cap*nominal to avoid spikes from numerical instability
-        if (std::abs(event->weights()[i]) > m_variation_weight_cap*std::abs(event->weights()[0])) {
-          ATH_MSG_INFO("Capping variation" << i << " = " << event->weights()[i]/event->weights()[0] << "*nominal");
-          event->weights()[i] *= m_variation_weight_cap*std::abs(event->weights()[0])/std::abs(event->weights()[i]);
-        }
-      }
-      ATH_MSG_DEBUG("Sherpa WEIGHT " << i << " value="<< event->weights()[i]);
-    }
-  }
-#endif
 
-#ifdef HEPMC3
   event->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
-#else
-  MC::GeVToMeV(event); //Only scales momenta and masses
-#endif
 
 
   return StatusCode::SUCCESS;

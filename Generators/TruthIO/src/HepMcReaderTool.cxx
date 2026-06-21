@@ -112,11 +112,7 @@ StatusCode HepMcReaderTool::execute()
 
 StatusCode HepMcReaderTool::read( HepMC::GenEvent* evt )
 {
-#ifdef HEPMC3
   m_ioFrontend->read_event(*evt);
-#else
-  m_ioFrontend->fill_next_event(evt);
-#endif
 
   return StatusCode::SUCCESS;
 }
@@ -149,7 +145,6 @@ void HepMcReaderTool::setupFrontend( Gaudi::Details::PropertyBase& /*prop*/ )
   // get the protocol name in lower cases
   std::transform( protocol.begin(), protocol.end(), protocol.begin(), [](unsigned char c){ return std::tolower(c); } );
 
-#ifdef HEPMC3
   if ( "ascii" == protocol ) {
     m_ioFrontend = new HepMC3::ReaderAsciiHepMC2( fileName.c_str());
 
@@ -158,16 +153,5 @@ void HepMcReaderTool::setupFrontend( Gaudi::Details::PropertyBase& /*prop*/ )
     protocol = "ascii";
     m_ioFrontend = new HepMC3::ReaderAsciiHepMC2( fileName.c_str());
   }    
-#else 
-  if ( "ascii" == protocol ) {
-    m_ioFrontend = new HepMC::IO_GenEvent( fileName.c_str(), std::ios::in );
-
-  } else {
-    msg(MSG::WARNING) << "UNKNOWN protocol [" << protocol << "] !!" << endmsg << "Will use [ascii] instead..."<< endmsg;
-    protocol = "ascii";
-    m_ioFrontend = new HepMC::IO_GenEvent( fileName.c_str(), std::ios::in );
-  }    
-#endif
-
   ATH_MSG_DEBUG("Using protocol [" << protocol << "] and write to ["<< fileName << "]");
 }

@@ -46,10 +46,8 @@ public:
                double alphaQCD,
                double alphaQED,
                double filterWeight,
-#ifdef HEPMC3
                double filterHT,
                double filterMET,
-#endif
                int signalProcessVtx,
                int beamParticle1,
                int beamParticle2,
@@ -103,10 +101,8 @@ protected:
   /** value of the extra weight introduced during reweighting events in filter and value of some variables we filter on
    */
   double m_filterWeight;
-#ifdef HEPMC3
   double m_filterHT;
   double m_filterMET;
-#endif
   /** Barcode of the GenVertex holding the signal process.
    *  0 means that no signal process vertex has been written out.
    *  This may come from upstream limitations (like HEPEVT)
@@ -186,10 +182,8 @@ inline GenEvent_p6::GenEvent_p6():
   m_alphaQCD         ( -1 ),
   m_alphaQED         ( -1 ),
   m_filterWeight     (  1 ),
-#ifdef HEPMC3
   m_filterHT         ( -13 ),
   m_filterMET        ( -13 ),
-#endif
   m_signalProcessVtx (  0 ),
   m_beamParticle1    (  0 ),
   m_beamParticle2    (  0 ),
@@ -218,10 +212,8 @@ inline GenEvent_p6::GenEvent_p6( int signalProcessId,
                                  double alphaQCD,
                                  double alphaQED,
                                  double filterWeight,
-#ifdef HEPMC3
                                  double filterHT,
                                  double filterMET,
-#endif
                                  int signalProcessVtx,
                                  int beamParticle1,
                                  int beamParticle2,
@@ -249,10 +241,8 @@ inline GenEvent_p6::GenEvent_p6( int signalProcessId,
   m_alphaQCD         ( alphaQCD ),
   m_alphaQED         ( alphaQED ),
   m_filterWeight     ( filterWeight ),
-#ifdef HEPMC3
   m_filterHT         ( filterHT ),
   m_filterMET        ( filterMET ),
-#endif
   m_signalProcessVtx ( signalProcessVtx ),
   m_beamParticle1    ( beamParticle1 ),
   m_beamParticle2    ( beamParticle2 ),

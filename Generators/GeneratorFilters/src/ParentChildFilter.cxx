@@ -55,13 +55,8 @@ StatusCode ParentChildFilter::filterEvent(const EventContext& ctx) {
 	   && (pitr->momentum().m() < m_MassMaxParent)
 	   && (std::abs(pitr->momentum().eta()) > m_EtaMinParent)
 	   && (std::abs(pitr->momentum().eta()) < m_EtaRangeParent)
-#ifdef HEPMC3     
 	   && (std::abs(pitr->momentum().rap()) > m_RapidityMinParent)
 	   && (std::abs(pitr->momentum().rap()) < m_RapidityRangeParent))) {
-#else
-       && (std::abs(getRapidity(pitr)) > m_RapidityMinParent)
-	   && (std::abs(getRapidity(pitr)) < m_RapidityRangeParent))) {
-#endif
         // Check if has end_vertex (skips initial protons)
         if (!pitr->end_vertex()) continue;
         // Child

@@ -136,11 +136,7 @@ StatusCode MuDstarFilter::filterEvent(const EventContext& ctx) {
     double primx = 0.;
     double primy = 0.;
 
-    #ifdef HEPMC3
     HepMC::ConstGenVertexPtr vprim = * (( * itr) -> vertices().begin());
-    #else
-    HepMC::GenVertexPtr vprim = * (( * itr) -> vertices_begin());
-    #endif
 
     primx = vprim -> position().x();
     primy = vprim -> position().y();
@@ -192,17 +188,9 @@ StatusCode MuDstarFilter::filterEvent(const EventContext& ctx) {
           if (Rxy < m_RxyMinDstar) continue;
 
           // Child
-          #ifdef HEPMC3
           auto firstChild = pitr -> end_vertex() -> particles_out().begin();
           auto endChild = pitr -> end_vertex() -> particles_out().end();
           auto thisChild = firstChild;
-          #else
-          HepMC::GenVertex::particle_iterator firstChild =
-            pitr -> end_vertex() -> particles_begin(HepMC::children);
-          HepMC::GenVertex::particle_iterator endChild =
-            pitr -> end_vertex() -> particles_end(HepMC::children);
-          HepMC::GenVertex::particle_iterator thisChild = firstChild;
-          #endif
 
           if (( * firstChild) -> pdg_id() == pitr -> pdg_id()) continue;
 
@@ -260,18 +248,9 @@ StatusCode MuDstarFilter::filterEvent(const EventContext& ctx) {
 
             if (std::abs(( * thisChild) -> pdg_id()) == MC::D0) {
               if ((( * thisChild) -> end_vertex())) {
-                #ifdef HEPMC3
                 auto firstChild1 = ( * thisChild) -> end_vertex() -> particles_out().begin();
                 auto endChild1 = ( * thisChild) -> end_vertex() -> particles_out().end();
                 auto thisChild1 = firstChild1;
-                #else
-                HepMC::GenVertex::particle_iterator firstChild1 =
-                  ( * thisChild) -> end_vertex() -> particles_begin(HepMC::children);
-                HepMC::GenVertex::particle_iterator endChild1 =
-                  ( * thisChild) -> end_vertex() -> particles_end(HepMC::children);
-                HepMC::GenVertex::particle_iterator thisChild1 = firstChild1;
-
-                #endif
 
                 for (; thisChild1 != endChild1; ++thisChild1) {
 
@@ -329,18 +308,9 @@ StatusCode MuDstarFilter::filterEvent(const EventContext& ctx) {
                   } else if ((( * thisChild1) -> end_vertex())) {
 
                     //
-                    #ifdef HEPMC3
                     auto firstChild2 = ( * thisChild1) -> end_vertex() -> particles_out().begin();
                     auto endChild2 = ( * thisChild1) -> end_vertex() -> particles_out().end();
                     auto thisChild2 = firstChild2;
-                    #else
-                    HepMC::GenVertex::particle_iterator firstChild2 =
-                      ( * thisChild1) -> end_vertex() -> particles_begin(HepMC::children);
-                    HepMC::GenVertex::particle_iterator endChild2 =
-                      ( * thisChild1) -> end_vertex() -> particles_end(HepMC::children);
-                    HepMC::GenVertex::particle_iterator thisChild2 = firstChild2;
-
-                    #endif
                     for (; thisChild2 != endChild2; ++thisChild2) {
 
                       if (!MC::isPhysical(*thisChild2)) continue; // photos history line
