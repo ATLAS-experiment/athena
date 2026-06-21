@@ -14,7 +14,7 @@ if [ ! -s "G-200/build/$CMTCONFIG/lib/libEFTrackingCUDA.so" ]; then
 
 #git clone https://:@gitlab.cern.ch:8443/atlas-tdaq-ph2upgrades/atlas-tdaq-eftracking/traccc-integration/G-200.git
 ## FIXME - temporary, until above repo is public
-cmd git clone https://:@gitlab.cern.ch:8443/maparo/G-200.git
+cmd git clone -b ART https://:@gitlab.cern.ch:8443/maparo/G-200.git
 if [ ! -d G-200 ]; then
   echo "Could not clone G-200 repository. Exiting."
   exit 1
