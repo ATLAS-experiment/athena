@@ -67,9 +67,7 @@ std::vector<HepMC::GenEvent> xAODtoHepMCTool ::getHepMCEvents(const xAOD::TruthE
     // Create GenEvent for each xAOD truth event
     ATH_MSG_DEBUG("Create new GenEvent");
     HepMC::GenEvent&& hepmcEvent = createHepMCEvent(xAODEvent, eventInfo);
-    #ifdef HEPMC3
     std::shared_ptr<HepMC3::GenRunInfo> runinfo = std::make_shared<HepMC3::GenRunInfo>(*(hepmcEvent.run_info().get()));
-    #endif
     //possibly print info, before moving the object
     if (doPrint){
       ATH_MSG_DEBUG("XXX Printing HepMC Event");
@@ -77,9 +75,7 @@ std::vector<HepMC::GenEvent> xAODtoHepMCTool ::getHepMCEvents(const xAOD::TruthE
     }
     // Insert into McEventCollection
     mcEventCollection.push_back(std::move(hepmcEvent));
-    #ifdef HEPMC3
     mcEventCollection[mcEventCollection.size()-1].set_run_info(std::move(runinfo));
-    #endif
     // Quit if signal only
     if (m_signalOnly)
       break;
@@ -92,9 +88,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 
   /// EVENT LEVEL
   HepMC::GenEvent genEvt;
-  #ifdef HEPMC3
   genEvt.set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
-  #endif
 
   long long int evtNum = eventInfo->eventNumber();
   genEvt.set_event_number(evtNum);
@@ -107,7 +101,6 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
   if (AthAnalysisHelper::retrieveMetadata("/Generation/Parameters","HepMCWeightNames", weightNameMap).isFailure()) {
     ATH_MSG_DEBUG("Couldn't find meta-data for weight names.");
   }
-  #ifdef HEPMC3
   std::shared_ptr<HepMC3::GenRunInfo> runinfo = std::make_shared<HepMC3::GenRunInfo>();
   genEvt.set_run_info(std::move(runinfo));
   std::vector<std::string> wnames;
@@ -124,25 +117,6 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
   for ( std::vector<float>::const_iterator wgt = weights.begin(); wgt != weights.end(); ++wgt ) {
     genEvt.weights().push_back(*wgt);
   }
-  #else
-  if (weightNameMap.size()) {
-    HepMC::WeightContainer& wc = genEvt.weights();
-    wc.clear();
-    for (int idx = 0; idx < int(weights.size()); ++idx) {
-      for (const auto& it : weightNameMap) {
-        if (it.second == idx) {
-          wc[ it.first ] = weights[idx];
-          break;
-        }
-      }
-    }
-  }
-  else {
-    for ( std::vector<float>::const_iterator wgt = weights.begin(); wgt != weights.end(); ++wgt ) {
-      genEvt.weights().push_back(*wgt);
-    }
-  }
-  #endif
   #endif
 
   // PARTICLES AND VERTICES
@@ -170,11 +144,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
 
       // Create GenParticle
       // presumably the GenEvent takes ownership of this, but creating a unique_ptr here as that will only happen if there's an associated vertex
-#ifdef HEPMC3
     auto hepmcParticle = createHepMCParticle(xPart);
-#else
-    std::unique_ptr<HepMC::GenParticle> hepmcParticle(createHepMCParticle(xPart));
-#endif
 
     // Get the production and decay vertices
     if (xPart->hasProdVtx()) {
@@ -184,11 +154,7 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       bool prodVtxSeenBefore(false); // is this new?
       auto hepmcProdVtx = vertexHelper(xAODProdVtx, vertexMap, prodVtxSeenBefore);
       // Set the decay/production links
-#ifdef HEPMC3
       hepmcProdVtx->add_particle_out(hepmcParticle);
-#else
-      hepmcProdVtx->add_particle_out(hepmcParticle.get());
-#endif
       // Insert into Event
       if (!prodVtxSeenBefore) {
         genEvt.add_vertex(std::move(hepmcProdVtx));
@@ -203,27 +169,17 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       // skip decay vertices which are Geant4 secondaries
       if (HepMC::is_simulation_vertex(xAODDecayVtx)) {
         /// Avoid double deletion
-#ifndef HEPMC3
-        if (xPart->hasProdVtx()) { (void)hepmcParticle.release(); }
-#endif
         continue;
       }
       bool decayVtxSeenBefore(false); // is this new?
       auto hepmcDecayVtx = vertexHelper(xAODDecayVtx, vertexMap, decayVtxSeenBefore);
       // Set the decay/production links
-#ifdef HEPMC3
       hepmcDecayVtx->add_particle_in(std::move(hepmcParticle));
-#else
-      hepmcDecayVtx->add_particle_in(hepmcParticle.get());
-#endif
       // Insert into Event
       if (!decayVtxSeenBefore) {
         genEvt.add_vertex(std::move(hepmcDecayVtx));
       }
     }
-#ifndef HEPMC3
-    (void)hepmcParticle.release();
-#endif
 
   } // end of particle loop
 

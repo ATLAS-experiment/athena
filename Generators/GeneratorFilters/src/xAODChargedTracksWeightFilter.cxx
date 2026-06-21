@@ -183,9 +183,7 @@ void xAODChargedTracksWeightFilter::weight_event(double weight) {
                 w /= weight;
             }
 
-#ifdef HEPMC3
       event->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(1/weight));
-#endif
         }
 
     }

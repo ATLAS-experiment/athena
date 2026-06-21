@@ -29,9 +29,7 @@ void compareGenParticle(const HepMC::ConstGenParticlePtr& p1,
 {
   assert (HepMC::barcode(p1) == HepMC::barcode(p2));
   assert (p1->status() == p2->status());
-#ifdef HEPMC3
   assert (p1->id() == p2->id());
-#endif
   assert (p1->pdg_id() == p2->pdg_id());
   assert ((p1->momentum().px()) == (p2->momentum().px()));
   assert ((p1->momentum().py()) == (p2->momentum().py()));
@@ -50,18 +48,11 @@ void compareGenVertex(const HepMC::ConstGenVertexPtr& v1,
   assert (v1->particles_in_size() == v2->particles_in_size());
   assert (v1->particles_out_size() == v2->particles_out_size());
 
-#ifdef HEPMC3
   assert (v1->id() == v2->id());
   std::vector<HepMC::ConstGenParticlePtr>::const_iterator originalPartInIter(v1->particles_in().begin());
   const std::vector<HepMC::ConstGenParticlePtr>::const_iterator endOfOriginalListOfParticlesIn(v1->particles_in().end());
   std::vector<HepMC::ConstGenParticlePtr>::const_iterator resetPartInIter(v2->particles_in().begin());
   const std::vector<HepMC::ConstGenParticlePtr>::const_iterator endOfResetListOfParticlesIn(v2->particles_in().end());
-#else
-  HepMC::GenVertex::particles_in_const_iterator originalPartInIter(v1->particles_in_const_begin());
-  const HepMC::GenVertex::particles_in_const_iterator endOfOriginalListOfParticlesIn(v1->particles_in_const_end());
-  HepMC::GenVertex::particles_in_const_iterator resetPartInIter(v2->particles_in_const_begin());
-  const HepMC::GenVertex::particles_in_const_iterator endOfResetListOfParticlesIn(v2->particles_in_const_end());
-#endif
   while( originalPartInIter!=endOfOriginalListOfParticlesIn &&
          resetPartInIter!=endOfResetListOfParticlesIn ) {
     compareGenParticle(*originalPartInIter,*resetPartInIter);
@@ -69,17 +60,10 @@ void compareGenVertex(const HepMC::ConstGenVertexPtr& v1,
     ++originalPartInIter;
   }
 
-#ifdef HEPMC3
 std::vector<HepMC::ConstGenParticlePtr>::const_iterator originalPartOutIter(v1->particles_out().begin());
 const std::vector<HepMC::ConstGenParticlePtr>::const_iterator endOfOriginalListOfParticlesOut(v1->particles_out().end());
 std::vector<HepMC::ConstGenParticlePtr>::const_iterator resetPartOutIter(v2->particles_out().begin());
 const std::vector<HepMC::ConstGenParticlePtr>::const_iterator endOfResetListOfParticlesOut(v2->particles_out().end());
-#else
-HepMC::GenVertex::particles_out_const_iterator originalPartOutIter(v1->particles_out_const_begin());
-const HepMC::GenVertex::particles_out_const_iterator endOfOriginalListOfParticlesOut(v1->particles_out_const_end());
-HepMC::GenVertex::particles_out_const_iterator resetPartOutIter(v2->particles_out_const_begin());
-const HepMC::GenVertex::particles_out_const_iterator endOfResetListOfParticlesOut(v2->particles_out_const_end());
-#endif
   while( originalPartOutIter!=endOfOriginalListOfParticlesOut &&
          resetPartOutIter!=endOfResetListOfParticlesOut ) {
     compareGenParticle(*originalPartOutIter,*resetPartOutIter);
@@ -98,7 +82,6 @@ void compare (const HepMC::GenEvent& e1,
 
   assert (HepMC::valid_beam_particles(&e1) == HepMC::valid_beam_particles(&e2));
   if ( HepMC::valid_beam_particles(&e1) && HepMC::valid_beam_particles(&e2) ) {
-#if HEPMC3
     const std::vector<HepMC::ConstGenParticlePtr> & originalBPs = e1.beams();
     const std::vector<HepMC::ConstGenParticlePtr> & resetBPs = e2.beams();
     compareGenParticle(originalBPs.at(0), resetBPs.at(0));
@@ -118,15 +101,8 @@ void compare (const HepMC::GenEvent& e1,
     auto stringProp2 = e2.attribute<HepMC3::StringAttribute>("MyStringProp");
     assert(stringProp2);
     assert(stringProp1->value() == stringProp2->value());
-#else
-    std::pair<HepMC::GenParticle*,HepMC::GenParticle*> originalBP = e1.beam_particles();
-    std::pair<HepMC::GenParticle*,HepMC::GenParticle*> resetBP = e2.beam_particles();
-    compareGenParticle(originalBP.first, resetBP.first);
-    compareGenParticle(originalBP.second, resetBP.second);
-#endif
   }
 
-#if HEPMC3
   assert (e1.particles().size() == e2.particles().size());
   assert (e1.vertices().size() == e2.vertices().size());
 
@@ -152,34 +128,6 @@ void compare (const HepMC::GenEvent& e1,
     ++origVertexIter;
     ++resetVertexIter;
   }
-#else
-  assert (e1.particles_size() == e2.particles_size());
-  assert (e1.vertices_size() == e2.vertices_size());
-
-  HepMC::GenEvent::particle_const_iterator origParticleIter(begin(e1));
-  const HepMC::GenEvent::particle_const_iterator endOfOriginalListOfParticles(end(e1));
-  HepMC::GenEvent::particle_const_iterator resetParticleIter(begin(e2));
-  const HepMC::GenEvent::particle_const_iterator endOfResetListOfParticles(end(e2));
-
-  while( origParticleIter!=endOfOriginalListOfParticles &&
-         resetParticleIter!=endOfResetListOfParticles ) {
-    compareGenParticle(*origParticleIter,*resetParticleIter);
-    ++origParticleIter;
-    ++resetParticleIter;
-  }
-
-  HepMC::GenEvent::vertex_const_iterator origVertexIter(e1.vertices_begin());
-  const HepMC::GenEvent::vertex_const_iterator endOfOriginalListOfVertices(e1.vertices_end());
-  HepMC::GenEvent::vertex_const_iterator resetVertexIter(e2.vertices_begin());
-  const HepMC::GenEvent::vertex_const_iterator endOfResetListOfVertices(e2.vertices_end());
-  while( origVertexIter!=endOfOriginalListOfVertices &&
-         resetVertexIter!=endOfResetListOfVertices ) {
-    compareGenVertex(*origVertexIter,*resetVertexIter);
-    ++origVertexIter;
-    ++resetVertexIter;
-  }
-  return;
-#endif
 }
 
 void compare (const McEventCollection& p1,
@@ -214,11 +162,9 @@ void populateGenEvent(HepMC::GenEvent & ge)
   HepMC::suggest_barcode(inParticle2,2);
   HepMC::suggest_barcode(inParticle3,3);
   HepMC::suggest_barcode(inParticle4,4);
-#if HEPMC3
   ge.add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(0));
   ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(0.5));
   ge.add_attribute("MyStringProp",std::make_shared<HepMC3::StringAttribute>("EventNumber1"));
-#endif
 }
 
 void populateGenEvent2(HepMC::GenEvent & ge)
@@ -244,11 +190,9 @@ void populateGenEvent2(HepMC::GenEvent & ge)
   HepMC::suggest_barcode(inParticle2,10002);
   HepMC::suggest_barcode(inParticle3,10003);
   HepMC::suggest_barcode(inParticle4,10004);
-#if HEPMC3
   ge.add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(25));
   ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(1.5));
   ge.add_attribute("MyStringProp",std::make_shared<HepMC3::StringAttribute>("EventNumber2"));
-#endif
 }
 
 void testit (const McEventCollection& trans1)
@@ -259,19 +203,7 @@ void testit (const McEventCollection& trans1)
   cnv.transToPers (&trans1, &pers, log);
   McEventCollection trans2;
   cnv.persToTrans (&pers, &trans2, log);
-#if HEPMC3
   compare (trans1, trans2);
-#else
-  // TP conversion of HepMC2::GenEvents has a feature where the order
-  // of GenParticles associated with each GenVertex is flipped, so
-  // agreement is only restored after running TP conversion twice...
-  McEventCollection_p7 pers2;
-  cnv.transToPers (&trans2, &pers2, log);
-  McEventCollection trans3;
-  cnv.persToTrans (&pers2, &trans3, log);
-
-  compare (trans1, trans3);
-#endif
 }
 
 void test1 (SGTest::TestStore& store)
@@ -284,28 +216,22 @@ void test1 (SGTest::TestStore& store)
   ctx.setExtension( Atlas::ExtendedEventContext( &store ) );
   Gaudi::Hive::setCurrentContext( ctx );
 
-#ifdef HEPMC3
   auto runInfo = std::make_shared<HepMC3::GenRunInfo>();
   runInfo->set_weight_names ({"weight1"});
-#endif
 
   McEventCollection trans1;
   // Add a dummy GenEvent
   const int process_id1(20);
   const int event_number1(17);
   trans1.push_back(HepMC::newGenEvent(process_id1, event_number1));
-#ifdef HEPMC3
   trans1.back()->set_run_info (runInfo);
-#endif
   HepMC::GenEvent& ge1 = *(trans1.at(0));
   populateGenEvent(ge1);
   // Add a second dummy GenEvent
   const int process_id2(20);
   const int event_number2(25);
   trans1.push_back(HepMC::newGenEvent(process_id2, event_number2));
-#ifdef HEPMC3
   trans1.back()->set_run_info (runInfo);
-#endif
   HepMC::GenEvent& ge2 = *(trans1.at(1));
   populateGenEvent2(ge2);
 

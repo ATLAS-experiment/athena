@@ -7,14 +7,10 @@
 
 #include "Photos/Photos.h"
 
-#ifdef HEPMC3
 #include "Photos/PhotosHepMC3Event.h"
 namespace Photospp {
 using PhotosHepMCEvent=PhotosHepMC3Event;
 }
-#else
-#include "Photos/PhotosHepMCEvent.h"
-#endif
 #include "Photos/Log.h"
 
 #include "GeneratorObjects/McEventCollection.h"
@@ -69,11 +65,7 @@ void Photospp_i::setupPhotos() {
     Photos::forceMass(11, ParticleConstants::electronMassInMeV); // The assumption that units are MEV will be checked later
     Photos::forceMassFromEventRecord(211);
     Photos::setTopProcessRadiation(false);
-#ifdef HEPMC3
     Photos::createHistoryEntries(m_createHistory, 0);
-#else
-    Photos::createHistoryEntries(m_createHistory, 3);
-#endif
 
     if(m_exponentiation) {
         Photos::setExponentiation(true);
@@ -162,7 +154,6 @@ StatusCode Photospp_i::execute(const EventContext& ctx) {
         return StatusCode::FAILURE;
     }
     switch(event->momentum_unit()) {
-#ifdef HEPMC3
     case HepMC3::Units::MomentumUnit::GEV:
         Photos::setMomentumUnit(Photos::GEV);
         Photos::forceMass(11, ParticleConstants::electronMassInMeV/1000.); // Convert MeV to GeV
@@ -171,16 +162,6 @@ StatusCode Photospp_i::execute(const EventContext& ctx) {
         Photos::setMomentumUnit(Photos::MEV);
         Photos::forceMass(11, ParticleConstants::electronMassInMeV);
         break;
-#else
-    case HepMC::Units::GEV:
-        Photos::setMomentumUnit(Photos::GEV);
-        Photos::forceMass(11, ParticleConstants::electronMassInMeV/1000.); // Convert MeV to GeV
-        break;
-    case HepMC::Units::MEV:
-        Photos::setMomentumUnit(Photos::MEV);
-        Photos::forceMass(11, ParticleConstants::electronMassInMeV);
-        break;
-#endif
     default:
         ATH_MSG_ERROR("Photospp_i received a event with unknown units.");
         Photos::setMomentumUnit(Photos::DEFAULT_MOMENTUM);

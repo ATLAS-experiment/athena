@@ -22,7 +22,6 @@ StatusCode FillFilterValues::initialize()
   return StatusCode::SUCCESS;
 }
 
-#ifdef HEPMC3
 StatusCode FillFilterValues::execute(const EventContext& ctx) {
   // Check that the collection isn't empty
   const size_t nEvents = events_const(ctx)->size();
@@ -56,11 +55,6 @@ StatusCode FillFilterValues::execute(const EventContext& ctx) {
 
   return StatusCode::SUCCESS;
 }
-#else
-StatusCode FillFilterValues::execute(const EventContext& /*ctx*/) {
-  return StatusCode::SUCCESS;
-}
-#endif
 
 #endif
 

@@ -22,10 +22,8 @@
 // Forward declaration
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/IO_BaseClass.h"
-#ifdef HEPMC3
 #include "HepMC3/Reader.h"
 #include "HepMC3/ReaderAsciiHepMC2.h"
-#endif 
 
 class HepMcReaderTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
@@ -88,11 +86,7 @@ class HepMcReaderTool : public extends<AthAlgTool, IIOHepMcTool>
 
   /** Abstract base class for the back-end
    */
-#ifdef HEPMC3
   HepMC3::Reader* m_ioFrontend;
-#else 
-  HepMC::IO_BaseClass* m_ioFrontend;
-#endif
 
 }; 
 #endif //> MCPARTICLETOOLS_HEPMCREADERTOOL_H

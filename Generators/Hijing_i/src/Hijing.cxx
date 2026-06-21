@@ -101,12 +101,6 @@ StatusCode Hijing::genInitialize()
     if( m_keepAllDecayVertices ) ATH_MSG_INFO( "===> Keeping all decay vertices" );
     else ATH_MSG_INFO( "===> NOT keeping all decay vertices" );
 
-#ifdef HEPMC3
-    ATH_MSG_INFO( "===> HEPMC3 is used" );
-#else
-    ATH_MSG_INFO( "===> HEPMC3 is not used" );
-#endif
-
     //CLHEP::HepRandomEngine* engine
     p_Engine = getRandomEngineDuringInitialize(hijing_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
     hijing_stream       =       "HIJING";
@@ -228,7 +222,6 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
 
     float sigmainel =  m_hiparnt.hint1(12);
 
- #ifdef HEPMC3
      HepMC::GenHeavyIonPtr ion= std::make_shared<HepMC::GenHeavyIon>();
                       ion->Ncoll_hard=static_cast<int>(jatt);
                       ion->Npart_proj=static_cast<int>(np);
@@ -244,26 +237,6 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
                       ion->event_plane_angle=-1;
                       ion->sigma_inel_NN=sigmainel;
     evt->set_heavy_ion(std::move(ion));                      
-#else
-    HepMC::HeavyIon ion
-      (
-       static_cast<int>(jatt), // Ncoll_hard
-       static_cast<int>(np),   // Npart_proj
-       static_cast<int>(nt),   // Npart_targ
-       static_cast<int>(n0+n10+n01+n11), // Ncoll
-       static_cast<int>(-1),   // spectator_neutrons
-       static_cast<int>(-1),   // spectator_protons
-       static_cast<int>(n01),  // N_Nwounded_collisions
-       static_cast<int>(n10),  // Nwounded_N_collisions
-       static_cast<int>(n11),  // Nwounded_Nwounded_collisions
-       b,                      // impact_parameter
-       bphi,                   // event_plane_angle
-       -1,                     // eccentricity
-       sigmainel     );        // sigma_inel_NN
-
-    evt->set_heavy_ion(std::move(ion));
-    std::cout << " heavy ion " << evt->heavy_ion() << std::endl;
-#endif
 
     //  Did we keep decay history?
     //
@@ -438,13 +411,8 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
                     << ", " << vertexPtrVec[parentDecayIndex]->position().z()
                     << ", associated daughter IDs = ";
 
-#ifdef HEPMC3
                 auto vertexPtrVec_particles_out_const_begin=vertexPtrVec[parentDecayIndex]->particles_out().begin();
                 auto vertexPtrVec_particles_out_const_end=vertexPtrVec[parentDecayIndex]->particles_out().end();
-#else
-                auto vertexPtrVec_particles_out_const_begin=vertexPtrVec[parentDecayIndex]->particles_out_const_begin();
-                auto vertexPtrVec_particles_out_const_end=vertexPtrVec[parentDecayIndex]->particles_out_const_end();
-#endif
                 for (auto iter = vertexPtrVec_particles_out_const_begin;
                      iter != vertexPtrVec_particles_out_const_end;
                      iter++)
@@ -714,10 +682,8 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
       }
     }
 
-#ifdef HEPMC3
     // Convert GeV ->  MeV to ensure correct units
     evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
-#endif
 
     //BPK-> Loop over the particles in the event, if p needs to be mirrored:
     if( m_prand ){

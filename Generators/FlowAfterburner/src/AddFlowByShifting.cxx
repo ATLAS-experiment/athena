@@ -282,19 +282,11 @@ StatusCode AddFlowByShifting::execute(const EventContext& ctx) {
 
 
 
-#ifdef HEPMC3
     auto mainvtx=(*itr)->vertices().front();
     if(m_flow_fluctuations) Set_EbE_Fluctuation_Multipliers(mainvtx,hijing_pars->get_b(),rndmEngine);
     int particles_in_event = (*itr)->particles().size();
     m_particles_processed = 0;
     for ( auto parent: mainvtx->particles_out())
-#else
-    auto mainvtx=*((*itr)->vertices_begin());
-    if(m_flow_fluctuations) Set_EbE_Fluctuation_Multipliers(mainvtx,hijing_pars->get_b(),rndmEngine);
-      int particles_in_event = (*itr)->particles_size();
-    m_particles_processed = 0;
-    for ( auto parent: *mainvtx)
-#endif
       {
         // Process particles from main vertex
         CLHEP::HepLorentzVector momentum(parent->momentum().px(),
@@ -409,11 +401,7 @@ void AddFlowByShifting::MoveDescendantsToParent
 
     //Added October 2025
     // --- Rotate the parent’s immediate daughters (outgoing of endvtx) ---
-    #ifdef HEPMC3
     for (auto child : endvtx->particles_out()) 
-    #else
-    for (auto child : *endvtx) 
-    #endif
     {
       CLHEP::HepLorentzVector p(child->momentum().px(),
                                 child->momentum().py(),
@@ -428,15 +416,7 @@ void AddFlowByShifting::MoveDescendantsToParent
 
 
     // now rotate descendant vertices
-    #ifdef HEPMC3
     for (HepMC::GenVertexPtr descvtx:  HepMC::descendant_vertices(endvtx)) { //}
-    #else
-    for ( HepMC::GenVertex::vertex_iterator
-            descvtxit = endvtx->vertices_begin(HepMC::descendants);
-            descvtxit != endvtx->vertices_end(HepMC::descendants);
-            ++descvtxit) {
-      auto descvtx = (*descvtxit);
-    #endif
 
       ATH_MSG_DEBUG("Processing vertex " << descvtx);
 
@@ -451,11 +431,7 @@ void AddFlowByShifting::MoveDescendantsToParent
       }
 
       // now rotate their associated particles
-      #ifdef HEPMC3
       for (auto descpart: descvtx->particles_out())
-      #else
-      for (auto descpart: *descvtx)
-      #endif
       {
         CLHEP::HepLorentzVector momentum(descpart->momentum().px(),
                                           descpart->momentum().py(),

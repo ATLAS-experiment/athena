@@ -15,14 +15,10 @@
 #include "Pythia8_i/IPythia8Custom.h"
 
 //#include "Pythia8/../Pythia8Plugins/HepMC2.h"
-#ifdef HEPMC3
 #include "Pythia8Plugins/HepMC3.h"
 namespace HepMC {
   typedef HepMC3::Pythia8ToHepMC3 Pythia8ToHepMC;
 }
-#else
-#include "Pythia8Plugins/HepMC2.h"
-#endif
 
 #include <stdexcept>
 

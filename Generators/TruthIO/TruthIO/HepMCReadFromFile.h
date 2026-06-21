@@ -25,11 +25,7 @@ private:
   int m_event_number;
   double m_sum_xs;
   
-#ifdef HEPMC3
   std::shared_ptr<HepMC3::Reader> m_hepmcio;
-#else
-  std::unique_ptr<HepMC::IO_GenEvent> m_hepmcio;
-#endif
 };
 
 #endif

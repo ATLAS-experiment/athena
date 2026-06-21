@@ -31,7 +31,6 @@ StatusCode SoftLeptonInJetFilter::filterEvent(const EventContext& ctx) {
   int NPartons = 0;
   for (McEventCollection::const_iterator itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-#ifdef HEPMC3
     for (const auto& pitr: *genEvt) {
       if ( m_NPartons == 0 ) continue;
         if (isParton(pitr)) {
@@ -50,30 +49,6 @@ StatusCode SoftLeptonInJetFilter::filterEvent(const EventContext& ctx) {
           }
         }
     }
-#else
-    for (HepMC::GenEvent::particle_const_iterator pitr=genEvt->particles_begin(); pitr != genEvt->particles_end(); ++pitr) {
-      if ( m_NPartons !=0 ) {
-        if (isParton(*pitr)) {
-          eta_b[NPartons] = (*pitr)->momentum().pseudoRapidity();
-          phi_b[NPartons] = (*pitr)->momentum().phi();
-          NPartons++;
-        }
-        if (isElectron(*pitr)) {
-          HepMC::GenVertex::particle_iterator firstParent, lastParent, thisParent;
-          firstParent = (*pitr)->production_vertex()->particles_begin(HepMC::parents);
-          lastParent  = (*pitr)->production_vertex()->particles_end(HepMC::parents);
-          for (thisParent = firstParent; thisParent != lastParent++; ++thisParent) {
-            int parentID = abs((*thisParent)->pdg_id());
-            if ( MC::isBottomMeson(parentID) || MC::isBottomBaryon(parentID) || MC::isCharmMeson(parentID) || MC::isCharmBaryon(parentID) ) {
-              eta_e[NLeptons] = (*pitr)->momentum().pseudoRapidity();
-              phi_e[NLeptons] = (*pitr)->momentum().phi();
-              NLeptons++;
-            }
-          }
-        }
-      }
-    }
-#endif    
   }
 
   if (NPartons == m_NPartons && NLeptons >= m_NLeptons) {

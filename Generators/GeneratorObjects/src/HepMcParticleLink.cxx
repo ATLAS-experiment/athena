@@ -247,7 +247,6 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
         }
         else {
           // id to GenParticle
-#ifdef HEPMC3
           const auto &particles = pEvt->particles();
           if (particle_id-1 < particles.size()) {
             const HepMC::ConstGenParticlePtr p = particles[particle_id-1];
@@ -256,13 +255,6 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
               return p;
             }
           }
-#else
-          const HepMC::ConstGenParticlePtr p = HepMC::barcode_to_particle(pEvt,int(particle_id)); // For HepMC2 "id" == barcode
-          if (p) {
-            m_ptr.set (p);
-            return p;
-          }
-#endif
         }
       }
     } else {

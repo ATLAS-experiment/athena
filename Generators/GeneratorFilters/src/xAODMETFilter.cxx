@@ -31,7 +31,6 @@ StatusCode xAODMETFilter::filterEvent(const EventContext& ctx) {
   }
 
   double met = std::sqrt(sumx*sumx + sumy*sumy);
-#ifdef HEPMC3
   const McEventCollection* mecc = 0;
   if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
       setFilterPassed(false, ctx);
@@ -47,9 +46,6 @@ StatusCode xAODMETFilter::filterEvent(const EventContext& ctx) {
   }
  
   setFilterPassed(met >= m_METmin || keepAll(), ctx);
-#else
-  setFilterPassed(met >= m_METmin, ctx);
-#endif
   return StatusCode::SUCCESS;
 }
 
