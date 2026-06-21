@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBRANCHAUXDYNREADER_H
@@ -36,7 +36,7 @@ public :
       bool          isPackedContainer = false;
       enum Status   status = NotInitialized;
 
-      SG::auxid_t   auxid;
+      SG::auxid_t   auxid = 0;
       std::string   attribName;
 
       void setAddress(void* data);
