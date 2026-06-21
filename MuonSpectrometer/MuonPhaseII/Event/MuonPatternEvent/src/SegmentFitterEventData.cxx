@@ -46,8 +46,8 @@ namespace MuonR4{
             const SeedingAux::Line_t line{locSegPars};
 
             Acts::Matrix<3,2> basisTrf{};
-            basisTrf.block<3,1>(0,0) = line.gradient(SeedingAux::Line_t::ParIndex::theta);
-            basisTrf.block<3,1>(0,1) = line.gradient(SeedingAux::Line_t::ParIndex::phi);
+            basisTrf.block<3,1>(0,1) = line.gradient(SeedingAux::Line_t::ParIndex::theta);
+            basisTrf.block<3,1>(0,0) = line.gradient(SeedingAux::Line_t::ParIndex::phi);
 
             BoundMatrix jacobian{BoundMatrix::Identity()};
             jacobian.block<2,2>(Acts::eBoundPhi, Acts::eBoundPhi) = basisTrf.transpose() * 
