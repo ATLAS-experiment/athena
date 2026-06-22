@@ -188,8 +188,16 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
     originalTPLink(*tp) = ElementLink<xAOD::TrackParticleContainer>(
         originalTPs, originalTP->index(), ctx);
 
-    // QoverPLM still to be added
-    // See https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/egamma/egammaAlgs/src/EMBremCollectionBuilder.cxx#L252
+    // Add qoverP from the last measurement
+    float QoverPLast(0);
+    for (const auto ts : track.trackStatesReversed()) {
+      if (ts.typeFlags().isMeasurement()) {
+        QoverPLast = ts.parameters()[Acts::eBoundQOverP];
+        break;
+      }
+    }
+    static const SG::AuxElement::Accessor<float> QoverPLM("QoverPLM");
+    QoverPLM(*tp) = QoverPLast;
 
     // isRefitted option should check the actual refit status
     egammaCopyTrackParticleInfo::ToCopy toCopy{.isRefitted = true,
