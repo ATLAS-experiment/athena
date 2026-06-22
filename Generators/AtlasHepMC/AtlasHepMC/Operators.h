@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
 #ifndef ATLASHEPMC_OPERATORS_H
 #define ATLASHEPMC_OPERATORS_H
-#ifdef HEPMC3
 // This suboptimal piece of code is here because of the googletest suite.
 // Include it only in the test suite.
 namespace HepMC3 {
@@ -53,5 +52,4 @@ bool operator != (const HepMC3::GenVertex a, const HepMC3::GenVertex b) {
     return a.id() != b.id();
 }
 }
-#endif
 #endif
