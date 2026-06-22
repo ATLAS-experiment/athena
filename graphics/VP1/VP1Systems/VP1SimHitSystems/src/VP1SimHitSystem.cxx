@@ -17,7 +17,6 @@
 #include "VP1Utils/VP1JobConfigInfo.h"
 #include "VP1Base/VP1Msg.h"
 #include "VP1UtilsCoinSoQt/VP1ColorUtils.h"
-
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 
@@ -115,6 +114,7 @@ QWidget* VP1SimHitSystem::buildController()
   ui.chbxPixelHits->setVisible(VP1JobConfigInfo::hasPixelGeometry());
   ui.chbxSCTHits->setVisible(VP1JobConfigInfo::hasSCTGeometry());
   ui.chbxTRTHits->setVisible(VP1JobConfigInfo::hasTRTGeometry());
+  ui.chbxHGTDHits->setVisible(VP1JobConfigInfo::hasHGTDGeometry());
 
   // Populate Check Box Names Map
   if (VP1JobConfigInfo::hasITkGeometry()) {
@@ -124,6 +124,9 @@ QWidget* VP1SimHitSystem::buildController()
     m_clockwork->checkBoxNamesMap.insert(ui.chbxPixelHits,"Pixel");
     m_clockwork->checkBoxNamesMap.insert(ui.chbxSCTHits,"SCT");
     m_clockwork->checkBoxNamesMap.insert(ui.chbxTRTHits,"TRT");
+  }
+  if (VP1JobConfigInfo::hasHGTDGeometry()) {
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxHGTDHits,"HGTD");
   }
   m_clockwork->checkBoxNamesMap.insert(ui.chbxMDTHits,"MDT");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxRPCHits,"RPC");
@@ -159,6 +162,9 @@ void VP1SimHitSystem::systemcreate(StoreGateSvc* detstore)
     m_clockwork->colorMap.insert("Pixel",SbColor(0,0,1));
     m_clockwork->colorMap.insert("SCT",SbColor(1,1,1)); // white
     m_clockwork->colorMap.insert("TRT",SbColor(1,0,0)); // red
+  }
+  if (VP1JobConfigInfo::hasHGTDGeometry()) {
+    m_clockwork->colorMap.insert("HGTD",SbColor(VP1ColorUtils::getSbColorFromRGB(255, 170, 0))); // amber
   }
   m_clockwork->colorMap.insert("MDT",SbColor(.98,.8,.21));
   m_clockwork->colorMap.insert("RPC",SbColor(0,.44,.28));
@@ -348,6 +354,25 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     }
     else
       message("Unable to retrieve TRT Hits");
+  }
+  else if(detector=="HGTD")
+  {
+    //
+    // HGTD:
+    //
+    const SiHitCollection* p_collection = nullptr;
+    if(sg->retrieve(p_collection,"HGTD_Hits")==StatusCode::SUCCESS)
+    {
+      for (const SiHit& hit : *p_collection)
+      {
+        GeoSiHit ghit(hit);
+        if(!ghit) continue;
+        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
+        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
+      }
+    }
+    else
+      message("Unable to retrieve HGTD Hits");
   }
   else if(detector=="LArEMB" || detector=="LArEMEC" || detector=="LArFCAL" || detector=="LArHEC" )
   {
@@ -595,4 +620,3 @@ void VP1SimHitSystem::handleDetDescrElementHit(const CaloDetDescrElement *hitEle
     double z = hitElement->z();
     hitVtxProperty->vertex.set1Value(hitCount++,x,y,z);
 }
-
