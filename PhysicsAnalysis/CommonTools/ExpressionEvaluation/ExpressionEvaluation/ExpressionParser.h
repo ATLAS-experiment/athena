@@ -24,7 +24,6 @@
 #include <stdexcept>
 
 namespace ExpressionParsing {
-  class VirtualMachine;
 
   class ExpressionParser
   {
@@ -53,7 +52,6 @@ namespace ExpressionParsing {
       IProxyLoader *m_proxyLoader;
       IUnitInterpreter *m_unitInterpreter;
       std::vector<StackElement> m_code;
-      VirtualMachine *m_vm;
   };
 }
 
