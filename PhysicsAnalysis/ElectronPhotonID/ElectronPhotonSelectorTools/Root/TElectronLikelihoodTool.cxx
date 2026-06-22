@@ -384,10 +384,32 @@ Root::TElectronLikelihoodTool::loadVarHistograms(const std::string& vstr,
             TH1F* hist = (TH1F*)(((TDirectory*)pdfFile->Get(pdfdir.c_str()))->Get(pdf.c_str()));
             m_fPDFbins[s_or_b][ip][et][eta][varIndex] =
               std::make_unique<EGSelectors::SafeTH1>(hist);
+
+            // HI UPC DEBUG: print successful loads 
+            std::cout << ">>> FOUND: [" << pdf << "] in [" << pdfdir << "]" << std::endl;
+            // 
+
           } else {
+            // HI UPC DEBUG: print misses with directory info
+            TDirectory* dbgDir = (TDirectory*)pdfFile->Get(pdfdir.c_str());
+            std::cout << ">>> MISS:  [" << pdf << "]" << std::endl;
+            std::cout << ">>> dir:   [" << pdfdir << "] has "
+                      << (dbgDir ? dbgDir->GetListOfKeys()->GetEntries() : -1)
+                      << " keys" << std::endl;
+            if (dbgDir && dbgDir->GetListOfKeys()->GetEntries() > 0) {
+              std::cout << ">>> first: ["
+                        << dbgDir->GetListOfKeys()->First()->GetName() << "]"
+                        << std::endl;
+            }
+
             ATH_MSG_INFO("Warning: Object " << pdf << " does not exist.");
             ATH_MSG_INFO("Skipping all other histograms with this variable.");
-            return 1;
+            continue;
+           //else {
+            //ATH_MSG_INFO("Warning: Object " << pdf << " does not exist.");
+            //ATH_MSG_INFO("Skipping all other histograms with this variable.");
+            //return 1;
+            //continue;
           }
         }
       }
@@ -514,11 +536,10 @@ Root::TElectronLikelihoodTool::accept(
   double cutDiscriminant;
   unsigned int ibin_combinedLH =
     etbinLH * s_fnEtaBins + etabin; // Must change if number of eta bins
-                                    // changes!. Also starts from 7-10 GeV bin.
+                                    // changes!. 
   unsigned int ibin_combinedOther =
     etbinOther * s_fnEtaBins +
-    etabin; // Must change if number of eta bins changes!. Also
-            // starts from 7-10 GeV bin.
+    etabin; // Must change if number of eta bins changes!.
 
   if (!m_cutLikelihood.empty()) {
     // To protect against a binning mismatch, which should never happen
@@ -541,21 +562,12 @@ Root::TElectronLikelihoodTool::accept(
                                            vars_struct.eT,
                                            vars_struct.eta);
     } else {
-      if (vars_struct.eT > 7000. || m_cutLikelihood4GeV.empty()) {
-        cutDiscriminant = m_cutLikelihood[ibin_combinedLH];
-        // If doPileupTransform, then correct the discriminant itself instead of
-        // the cut value
-        if (!m_doPileupTransform && !m_cutLikelihoodPileupCorrection.empty()) {
-          cutDiscriminant +=
-            vars_struct.ip * m_cutLikelihoodPileupCorrection[ibin_combinedLH];
-        }
+
+      if (vars_struct.eT > 3000. || m_cutLikelihood4GeV.empty()) {
+          cutDiscriminant = m_cutLikelihood[ibin_combinedLH];   // 3 GeV and above
       } else {
-        cutDiscriminant = m_cutLikelihood4GeV[etabin];
-        if (!m_doPileupTransform &&
-            !m_cutLikelihoodPileupCorrection4GeV.empty())
-          cutDiscriminant +=
-            vars_struct.ip * m_cutLikelihoodPileupCorrection4GeV[etabin];
-      }
+          cutDiscriminant = m_cutLikelihood4GeV[etabin];        // 2-3 GeV only
+        }
     }
 
     // Determine if the calculated likelihood value passes the cut
@@ -779,6 +791,18 @@ Root::TElectronLikelihoodTool::evaluateLikelihood(
       continue;
     }
     for (unsigned int s_or_b = 0; s_or_b < 2; s_or_b++) {
+      //HI UPC FIX: NULL histogram guard
+      if (m_fPDFbins[s_or_b][ipbin][etbin][etabin][var] == nullptr) {
+        ATH_MSG_WARNING("PDF histogram is NULL for"
+                        << " s_or_b=" << s_or_b
+                        << " ipbin="  << ipbin
+                        << " etbin="  << etbin
+                        << " etabin=" << etabin
+                        << " var="    << var
+                        << " eT="     << et << " MeV"
+                        << " — skipping this variable.");
+        continue;
+      }
 
       int bin =
         m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->FindBin(varVector[var]);
@@ -1005,8 +1029,19 @@ Root::TElectronLikelihoodTool::getLikelihoodEtHistBin(double eT)
   const double GeV = 1000;
 
   const unsigned int nEtBins = s_fnEtBinsHist;
-  const double eTBins[nEtBins] = { 7 * GeV,  10 * GeV, 15 * GeV, 20 * GeV,
-                                   30 * GeV, 40 * GeV, 50 * GeV };
+  // Change to 11 values — upper edge of each bin
+  const double eTBins[nEtBins] = { 3 * GeV,  4 * GeV,  5 * GeV,  6 * GeV,
+                                  8 * GeV,  10 * GeV, 15 * GeV, 20 * GeV,
+                                  30 * GeV, 40 * GeV, 50 * GeV };
+
+  // ── HI UPC FIX: clamp underflow to first bin ──────────────────────
+  if (eT < eTBins[0]) {
+    std::cerr << "TElectronLikelihoodTool WARNING: eT=" << eT
+              << " MeV is below minimum bin edge "
+              << eTBins[0]
+              << " MeV. Clamping to bin 0 (et2)." << std::endl; 
+    return 0;
+  }
 
   for (unsigned int eTBin = 0; eTBin < nEtBins; ++eTBin) {
     if (eT < eTBins[eTBin]) {
@@ -1028,12 +1063,18 @@ Root::TElectronLikelihoodTool::getLikelihoodEtDiscBin(
 
   if (m_useOneExtraHighETLHBin && isLHbinning) {
     const unsigned int nEtBins = s_fnDiscEtBinsOneExtra;
-    const double eTBins[nEtBins] = {
-      10 * GeV,  15 * GeV, 20 * GeV,
-      25 * GeV,  30 * GeV, 35 * GeV,
-      40 * GeV,  45 * GeV, m_highETBinThreshold * GeV,
-      6000 * GeV
-    };
+
+    const double eTBins[nEtBins] = { 4  * GeV,   // 3-4  GeV → bin 0
+                                  5  * GeV,   // 4-5  GeV → bin 1
+                                  6  * GeV,   // 5-6  GeV → bin 2
+                                  8  * GeV,   // 6-8  GeV → bin 3
+                                  10 * GeV,   // 8-10 GeV → bin 4
+                                  15 * GeV,   // 10-15 GeV → bin 5
+                                  20 * GeV,   // 15-20 GeV → bin 6
+                                  30 * GeV,   // 20-30 GeV → bin 7
+                                  40 * GeV, // >30  GeV → bin 8
+                                  m_highETBinThreshold * GeV   // extra high-ET bin
+                                  };
 
     for (unsigned int eTBin = 0; eTBin < nEtBins; ++eTBin) {
       if (eT < eTBins[eTBin])
@@ -1044,9 +1085,16 @@ Root::TElectronLikelihoodTool::getLikelihoodEtDiscBin(
   }
 
   const unsigned int nEtBins = s_fnDiscEtBins;
-  const double eTBins[nEtBins] = { 10 * GeV, 15 * GeV, 20 * GeV,
-                                   25 * GeV, 30 * GeV, 35 * GeV,
-                                   40 * GeV, 45 * GeV, 50 * GeV };
+
+  const double eTBins[nEtBins] = { 4  * GeV,    // 3-4   GeV → bin 0
+                                  5  * GeV,    // 4-5   GeV → bin 1
+                                  6  * GeV,    // 5-6   GeV → bin 2
+                                  8  * GeV,    // 6-8   GeV → bin 3
+                                  10 * GeV,    // 8-10  GeV → bin 4
+                                  15 * GeV,    // 10-15 GeV → bin 5
+                                  20 * GeV,    // 15-20 GeV → bin 6
+                                  30 * GeV,    // 20-30 GeV → bin 7
+                                  40 * GeV };  // >30   GeV → bin 8
 
   for (unsigned int eTBin = 0; eTBin < nEtBins; ++eTBin) {
     if (eT < eTBins[eTBin])
@@ -1065,7 +1113,7 @@ Root::TElectronLikelihoodTool::getBinName(int etbin,
                                           const std::string& iptype) 
 {
   const double eta_bounds[9] = { 0.0, 0.6, 0.8, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37 };
-  const int et_bounds[s_fnEtBinsHist] = { 4, 7, 10, 15, 20, 30, 40 };
+  const int et_bounds[s_fnEtBinsHist] = { 2, 3, 4, 5, 6, 8, 10, 15, 20, 30, 40};
   if (!iptype.empty()) {
     return std::format("{}{}et{:02}eta{:.2f}",
                        iptype, int(s_fIpBounds[ipbin]),
@@ -1110,42 +1158,54 @@ Root::TElectronLikelihoodTool::InterpolateCuts(
   unsigned int ibin_combinedLH = etbinLH * s_fnEtaBins + etabin;
   double cut = cuts.at(ibin_combinedLH);
 
-  //Special low pt cuts
+    //HI UPC FIX: CutLikelihoodGeV covers 2-3 GeV only
   if (!cuts_4gev.empty()) {
-    if (et < 7000.) {
-      cut = cuts_4gev.at(etabin);
+      if (et < 3000.) {              // ← changed from 7000 to 3000 MeV
+          cut = cuts_4gev.at(etabin);
+          return cut;
+      }
+  // ──────────────────────────────────────────────────────────────────
+
+        // HI UPC FIX: below 3 GeV we do not interpolate
+    } else {
+      if (et < 3000.) {
+        return cut;
+      }
     }
-    // Below 6 GeV we do not interpolate
-    if (et < 6000) {
-      return cut;
-    }
-  } else {// No special low Et cuts
-    // and below 8500 we do not interpolate
-    if (et < 8500.) {
-      return cut;
-    }
-  }
-  // We interpolate until 47500 (last bin)
-  // size of array is s_fnDiscEtBins
-  if (et > 47500. || !(etbinLH < s_fnDiscEtBins)) {
+
+  // Don't interpolate above the highest disc bin center (35 GeV)
+  if (et > 35000. || !(etbinLH < s_fnDiscEtBins)) {
     return cut;
   }
+
   // Interpolate
   double bin_width = 5000.;
-  if (7000. < et && et < 10000.) {
-    bin_width = 3000.;
-  }
-  if (et < 7000.) {
-    bin_width = 2000.;
-  }
+
+  // HI UPC FIX
+  if (et < 4000.)        bin_width = 1000.;   // 3-4 GeV
+  else if (et < 6000.)   bin_width = 1000.;   // 4-5, 5-6 GeV
+  else if (et < 8000.)   bin_width = 2000.;   // 6-8 GeV
+  else if (et < 10000.)  bin_width = 2000.;   // 8-10 GeV
+  else if (et < 15000.)  bin_width = 5000.;   // 10-15 GeV
+  else if (et < 20000.)  bin_width = 5000.;   // 15-20 GeV
+  else                   bin_width = 10000.;  // 20-30, >30 GeV
+  // ────────────────
   const double GeV = 1000;
-  const double eTBins[s_fnDiscEtBins] = { 8.5 * GeV,  12.5 * GeV, 17.5 * GeV,
-                                          22.5 * GeV, 27.5 * GeV, 32.5 * GeV,
-                                          37.5 * GeV, 42.5 * GeV, 47.5 * GeV };
+
+  const double eTBins[s_fnDiscEtBins] = { 3.5 * GeV,   // center of 3-4
+                                         4.5 * GeV,   // center of 4-5
+                                         5.5 * GeV,   // center of 5-6
+                                         7.0 * GeV,   // center of 6-8
+                                         9.0 * GeV,   // center of 8-10
+                                         12.5 * GeV,  // center of 10-15
+                                         17.5 * GeV,  // center of 15-20
+                                         25.0 * GeV,  // center of 20-30
+                                         35.0 * GeV }; // center of >30
   double bin_center = eTBins[etbinLH];
   if (et > bin_center) {
     double cut_next = cut;
-    if (etbinLH + 1 <= 8)
+    //if (etbinLH + 1 <= 8)
+    if (etbinLH + 1 <= s_fnDiscEtBins - 1)
       cut_next = cuts.at((etbinLH + 1) * s_fnEtaBins + etabin);
     return cut + (cut_next - cut) * (et - bin_center) / (bin_width);
   }
@@ -1171,93 +1231,99 @@ Root::TElectronLikelihoodTool::InterpolatePdfs(unsigned int s_or_b,
                                                int bin,
                                                unsigned int var) const
 {
-  // histograms exist for the following bins: 4, 7, 10, 15, 20, 30, 40.
+
   // Interpolation between histograms must follow fairly closely the
   // interpolation scheme between cuts - so be careful!
   int etbin = getLikelihoodEtHistBin(et); // hist binning
   int etabin = getLikelihoodEtaBin(eta);
+  // HI UPC FIX: NULL guard on current bin ──
+  if (m_fPDFbins[s_or_b][ipbin][etbin][etabin][var] == nullptr) {
+    return 0.;
+  }
   double integral =
     double(m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->Integral());
+  if (integral == 0.) return 0.;  
   double prob =
     double(m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetBinContent(bin)) /
     integral;
 
   int Nbins = m_fPDFbins[s_or_b][ipbin][etbin][etabin][var]->GetNbinsX();
-  if (et > 42500.) {
+  if (et > 35000.) {
     return prob; // interpolation stops here.
   }
-  if (et < 6000.) {
-    return prob; // interpolation stops here.
+
+  // HI UPC FIX
+  if (et < 2500.) {
+      return prob;  // no interpolation below 2.5 GeV (covered by CutLikelihoodGeV)
   }
-  if (22500. < et && et < 27500.) {
-    return prob; // region of non-interpolation for pdfs
-  }
-  if (32500. < et && et < 37500.) {
-    return prob; // region of non-interpolation for pdfs
-  }
+
   double bin_width = 5000.;
-  if (7000. < et && et < 10000.) {
-    bin_width = 3000.;
-  }
-  if (et < 7000.) {
-    bin_width = 2000.;
-  }
+
+  //HI UPC FIX
+  if (et < 3000.)        bin_width = 1000.;   // 2-3 GeV
+  else if (et < 4000.)   bin_width = 1000.;   // 3-4 GeV
+  else if (et < 6000.)   bin_width = 1000.;   // 4-5, 5-6 GeV
+  else if (et < 8000.)   bin_width = 2000.;   // 6-8 GeV
+  else if (et < 10000.)  bin_width = 2000.;   // 8-10 GeV
+  else if (et < 15000.)  bin_width = 5000.;   // 10-15 GeV
+  else if (et < 20000.)  bin_width = 5000.;   // 15-20 GeV
+  else                   bin_width = 10000.;  // 20-30, >30 GeV
+  // ────────────────
   const double GeV = 1000;
-  const double eTHistBins[s_fnEtBinsHist] = { 6. * GeV,   8.5 * GeV,
+  // Change to 11 values — centers of YOUR new bins
+  const double eTHistBins[s_fnEtBinsHist] = { 2.5 * GeV,  3.5 * GeV,
+                                              4.5 * GeV,  5.5 * GeV,
+                                              7. * GeV,   9. * GeV,
                                               12.5 * GeV, 17.5 * GeV,
-                                              22.5 * GeV, 32.5 * GeV,
-                                              42.5 * GeV };
+                                              25. * GeV,  35. * GeV,
+                                              45. * GeV };
   double bin_center = eTHistBins[etbin];
-  if (etbin == 4 && et >= 27500.) {
-    bin_center = 27500.; // special: interpolate starting from 27.5 here
-  }
-  if (etbin == 5 && et >= 37500.) {
-    bin_center = 37500.; // special: interpolate starting from 37.5 here
-  }
+
   if (et > bin_center) {
     double prob_next = prob;
-    if (etbin + 1 <= 6) {
-      // account for potential histogram bin inequalities
-      int NbinsPlus =
-        m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->GetNbinsX();
-      int binplus = bin;
-      if (Nbins < NbinsPlus) {
-        binplus = int(round(bin * (Nbins / NbinsPlus)));
-      } else if (Nbins > NbinsPlus) {
-        binplus = int(round(bin * (NbinsPlus / Nbins)));
+    // HI UPC FIX: was hardcoded as <= 6 (old s_fnEtBinsHist - 1)
+    if (etbin + 1 <= int(s_fnEtBinsHist) - 1) {
+      if (m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var] != nullptr) {
+        int NbinsPlus =
+          m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->GetNbinsX();
+        int binplus = bin;
+        if (Nbins != NbinsPlus) {
+          binplus = int(round(bin * (double(NbinsPlus) / double(Nbins))));
+        }
+        double integral_next =
+          double(m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->Integral());
+        if (integral_next > 0.) {
+          prob_next =
+            double(m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]
+                      ->GetBinContent(binplus)) / integral_next;
+          return prob + (prob_next - prob) * (et - bin_center) / bin_width;
+        }
       }
-      // do interpolation
-      double integral_next =
-        double(m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->Integral());
-      prob_next =
-        double(m_fPDFbins[s_or_b][ipbin][etbin + 1][etabin][var]->GetBinContent(
-          binplus)) /
-        integral_next;
-      return prob + (prob_next - prob) * (et - bin_center) / (bin_width);
     }
-  }
-  // or else if et < bin_center :
-  double prob_before = prob;
-  if (etbin - 1 >= 0) {
-    // account for potential histogram bin inequalities
-    int NbinsMinus =
-      m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->GetNbinsX();
-    int binminus = bin;
-    if (Nbins < NbinsMinus) {
-      binminus = int(round(bin * (Nbins / NbinsMinus)));
-    } else if (Nbins > NbinsMinus) {
-      binminus = int(round(bin * (NbinsMinus / Nbins)));
+    return prob;
     }
-    double integral_before =
-      double(m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->Integral());
-    prob_before =
-      double(m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->GetBinContent(
-        binminus)) /
-      integral_before;
-  }
-  return prob - (prob - prob_before) * (bin_center - et) / (bin_width);
-}
 
+    // et < bin_center
+    double prob_before = prob;
+    if (etbin - 1 >= 0) {
+    if (m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var] != nullptr) {
+      int NbinsMinus =
+        m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->GetNbinsX();
+      int binminus = bin;
+      if (Nbins != NbinsMinus) {
+        binminus = int(round(bin * (double(NbinsMinus) / double(Nbins))));
+      }
+      double integral_before =
+        double(m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]->Integral());
+      if (integral_before > 0.) {
+        prob_before =
+          double(m_fPDFbins[s_or_b][ipbin][etbin - 1][etabin][var]
+                    ->GetBinContent(binminus)) / integral_before;
+      }
+    }
+    }
+    return prob - (prob - prob_before) * (bin_center - et) / bin_width;
+    }
 //----------------------------------------------------------------------------------------
 
 // These are the variables availalble in the likelihood.

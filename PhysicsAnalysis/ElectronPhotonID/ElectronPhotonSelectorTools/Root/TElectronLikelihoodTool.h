@@ -322,7 +322,7 @@ private:
 
   // number of hists stored for original LH, including 4GeV bin (for backwards
   // compatibility)
-  static constexpr unsigned int s_fnEtBinsHist = 7;
+  static constexpr unsigned int s_fnEtBinsHist = 11; // 7 for standard pp bins 
   // number of discs stored for original LH, excluding 4GeV bin (for
   // backwards compatibility)
   static constexpr unsigned int s_fnDiscEtBins = 9;
