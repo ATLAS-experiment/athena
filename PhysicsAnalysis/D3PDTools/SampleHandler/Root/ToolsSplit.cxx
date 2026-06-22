@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -99,6 +99,7 @@ namespace SH
       if (num > 0 && num + nentries->value[file] > nevt)
       {
 	result.add (std::move (res));
+	res.reset();
 	num = 0;
       }
       if (res.get() == 0)

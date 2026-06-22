@@ -163,6 +163,7 @@ void test1 (ISvcLocator* svcloc,
   }
   pers1.setClearOnPersistent();
   pers1.toPersistent();
+  // cppcheck-suppress danglingLifetime
   testsvc.m_pers = &pers1;
   token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v1_guid));
