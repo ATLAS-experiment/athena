@@ -171,7 +171,14 @@ void VisAttributes::setColorFromRGB(SoMaterial* mat, const std::string& type, co
 //////////////////////////////// Attributes for detectors ////////////////////////////////
 
 DetVisAttributes::DetVisAttributes() {
-
+  {
+    SoMaterial *material = new SoMaterial;
+    material->ambientColor.setValue(0.18, 0.08, 0.20);
+    material->diffuseColor.setValue(0.72, 0.30, 0.78);
+    material->specularColor.setValue(0.9, 0.9, 0.9);
+    material->shininess.setValue(0.4);
+    add("HGTD", material);
+  }
   {
     SoMaterial *material = new SoMaterial;
     material->ambientColor.setValue(0, .157811, .187004);
@@ -392,8 +399,97 @@ MatVisAttributes::MatVisAttributes() {
     add("Ether",m);
   }
   */
- 
+      // HGTD materials
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 70, 190, 255);
+    setColorFromRGB(m, "ambient", 0, 30, 50);
+    setColorFromRGB(m, "specular", 255, 255, 255);
+    setColorFromRGB(m, "emissive", 20, 40, 60);
+    m->shininess.setValue(0.45);
+    add("Silicon_Ma", m);
+  }
 
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 245, 160, 70);
+    setColorFromRGB(m, "ambient", 60, 30, 0);
+    setColorFromRGB(m, "specular", 255, 220, 180);
+    m->shininess.setValue(0.35);
+    add("CuKapton", m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 255, 220, 120);
+    setColorFromRGB(m, "ambient", 70, 60, 20);
+    m->shininess.setValue(0.20);
+    add("Epoxy", m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 155, 160, 170);
+    setColorFromRGB(m, "ambient", 45, 50, 60);
+    setColorFromRGB(m, "specular", 235, 235, 235);
+    m->shininess.setValue(0.50);
+    add("Aluminium_Ma", m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 185, 190, 200);
+    setColorFromRGB(m, "ambient", 55, 60, 70);
+    setColorFromRGB(m, "specular", 245, 245, 245);
+    m->shininess.setValue(0.60);
+    add("Titanium_Ma", m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 90, 230, 255);
+    setColorFromRGB(m, "ambient", 0, 40, 55);
+    setColorFromRGB(m, "emissive", 0, 35, 45);
+    m->transparency.setValue(0.45);
+    add("CO2CoolantMix", m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 110, 115, 120);
+    setColorFromRGB(m, "ambient", 35, 40, 45);
+    setColorFromRGB(m, "specular", 210, 210, 210);
+    m->shininess.setValue(0.30);
+    add("CFiberSupport", m);
+    add("CFRP", m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 170, 210, 140);
+    setColorFromRGB(m, "ambient", 40, 55, 30);
+    add("FEBoards", m);
+    add("PowerBlock_Ma", m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 130, 200, 215);
+    setColorFromRGB(m, "ambient", 20, 45, 50);
+    m->transparency.setValue(0.25);
+    add("Peek", m);
+    add("AerogelAndHoneycomb", m);
+    add("BoratedPolyethelyne", m);
+  }
+
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 125, 130, 140);
+    setColorFromRGB(m, "ambient", 35, 40, 45);
+    setColorFromRGB(m, "specular", 200, 200, 200);
+    m->shininess.setValue(0.35);
+    add("SSteel", m);
+  }
   {
     // C02:
     SoMaterial *m = new SoMaterial;
@@ -1726,7 +1822,119 @@ VolVisAttributes::VolVisAttributes() {
     m->transparency.setValue(0.7);
     add( "SealPlate",m);
   }
+    // HGTD sensors
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 70, 190, 255);
+    setColorFromRGB(m, "ambient", 0, 30, 50);
+    setColorFromRGB(m, "specular", 255, 255, 255);
+    setColorFromRGB(m, "emissive", 20, 40, 60);
+    m->shininess.setValue(0.45);
 
-  
+    add("HGTDSiSensorPosL0", m);
+    add("HGTDSiSensorPosL1", m);
+    add("HGTDSiSensorPosL2", m);
+    add("HGTDSiSensorPosL3", m);
+    add("HGTDSiSensorNegL0", m);
+    add("HGTDSiSensorNegL1", m);
+    add("HGTDSiSensorNegL2", m);
+    add("HGTDSiSensorNegL3", m);
+    add("HGTDLGADInactive", m);
+    add("HGTDASIC", m);
+  }
+
+  // HGTD flex and hybrid
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 245, 160, 70);
+    setColorFromRGB(m, "ambient", 60, 30, 0);
+    setColorFromRGB(m, "specular", 255, 220, 180);
+    m->shininess.setValue(0.35);
+
+    add("HGTDFlexPackage", m);
+    add("HGTDHybrid", m);
+    for (int i = 0; i <= 7; ++i) {
+      add("HGTDFlexTube" + std::to_string(i), m);
+    }
+  }
+
+  // HGTD glue
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 255, 220, 120);
+    setColorFromRGB(m, "ambient", 70, 60, 20);
+    m->shininess.setValue(0.2);
+
+    add("HGTDGlueSensor", m);
+    add("HGTDGlueAsic", m);
+  }
+
+  // HGTD covers and support structures
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 140, 145, 150);
+    setColorFromRGB(m, "ambient", 40, 45, 50);
+    setColorFromRGB(m, "specular", 220, 220, 220);
+    m->transparency.setValue(0.20);
+    m->shininess.setValue(0.30);
+
+    add("HGTDSupportPlate", m);
+    add("HGTDCoolingPlate", m);
+    add("HGTDFrontCover", m);
+    add("HGTDBackCover", m);
+    add("HGTDOuterRCover", m);
+    add("HGTDInnerRCover1", m);
+    add("HGTDInnerRCover2", m);
+    add("HGTDInnerRCover3", m);
+  }
+
+  // HGTD cooling tubes
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 180, 185, 195);
+    setColorFromRGB(m, "ambient", 50, 55, 65);
+    setColorFromRGB(m, "specular", 245, 245, 245);
+    m->shininess.setValue(0.55);
+
+    for (int i = 0; i <= 41; ++i) {
+      add("HGTDCoolingTube_" + std::to_string(i), m);
+    }
+  }
+
+  // HGTD coolant
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 90, 230, 255);
+    setColorFromRGB(m, "ambient", 0, 40, 55);
+    setColorFromRGB(m, "emissive", 0, 35, 45);
+    m->transparency.setValue(0.45);
+
+    for (int i = 0; i <= 41; ++i) {
+      add("HGTDCoolingTubeFluid_" + std::to_string(i), m);
+    }
+  }
+
+  // HGTD services and electronics
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 145, 200, 120);
+    setColorFromRGB(m, "ambient", 30, 50, 20);
+    setColorFromRGB(m, "specular", 210, 210, 210);
+    m->shininess.setValue(0.25);
+
+    add("HGTDPeripheralCoolingLines", m);
+    add("support_F_vol", m);
+    add("support_B_vol", m);
+    add("PowerBlock_F1_vol", m);
+    add("PowerBlock_F2_vol", m);
+    add("PowerBlock_F3_vol", m);
+    add("PowerBlock_B1_vol", m);
+    add("PowerBlock_B2_vol", m);
+    add("PowerBlock_B3_vol", m);
+    add("VTRx_F1_vol", m);
+    add("VTRx_F21_vol", m);
+    add("VTRx_F22_vol", m);
+  }
+
   init();
 }
