@@ -31,12 +31,7 @@ ToolsPhys ToolsMath ToolsYaml ToolsOrg
 YFSCEEX YFSMain YFSNLO YFSTools
 )
 
-if (HEPMC3_USE)
 find_package( hepmc3 )
-else()
-find_package( HepMC )
-endif()
-
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
 
