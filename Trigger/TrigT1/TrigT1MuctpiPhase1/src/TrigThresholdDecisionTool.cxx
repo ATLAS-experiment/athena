@@ -5,7 +5,7 @@
 #include "TrigThresholdDecisionTool.h"
 #include "TrigT1Interfaces/Lvl1MuCTPIInputPhase1.h"
 #include "CxxUtils/StringUtils.h"
-
+#include "CxxUtils/StringUtilsTemplates.h"
 using CxxUtils::tokenize;
 
 namespace LVL1
@@ -59,7 +59,8 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
         return StatusCode::SUCCESS;
     }
 
-    m_parsed_flags.clear();
+    //buffered parsed TGC/RPC flags
+    parsedFlagsMap parsed_flags;
     m_tgcFlag_decisions.clear();
     m_rpcFlag_decisions.clear();
 
@@ -72,24 +73,24 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
 
         //parse the tgc flags and buffer them
         std::string tgcFlags = getShapedFlags( thr->tgcFlags() );
-        parseFlags(tgcFlags);
+        parseFlags(tgcFlags, parsed_flags);
 
         //loop over all 3-bit flag combinations
         for (unsigned flags=0;flags<8;flags++) {
             bool F=flags&0b100;
             bool C=flags&0b010;
             bool H=flags&0b001;
-            makeTGCDecision(tgcFlags, F, C, H);
+            makeTGCDecision(tgcFlags, F, C, H, parsed_flags);
         }
 
         //parse the rpc flags and buffer them
         std::string rpcFlags = getShapedFlags( thr->rpcFlags() );
-        parseFlags(rpcFlags);
+        parseFlags(rpcFlags, parsed_flags);
 
         //loop over all 2-bit flag combinations
         for (unsigned flags=0;flags<2;flags++){
             bool M=flags&0b1;
-            makeRPCDecision(rpcFlags, M);
+            makeRPCDecision(rpcFlags, M, parsed_flags);
         }
     }
     m_isInitialized = true;
@@ -269,7 +270,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     double thrValTmp=0;
     for (unsigned idec=0;idec<decisions.size();++idec) {
       if (!decisions[idec].second) continue;
-      auto thr = static_cast<TrigConf::L1Threshold_MU*>(decisions[idec].first.get());
+      const TrigConf::L1Threshold_MU* thr = static_cast<TrigConf::L1Threshold_MU*>(decisions[idec].first.get());
       if(std::abs(eta)<1.05){
 	thrValTmp = thr->ptBarrel();
       }
@@ -296,15 +297,15 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
       if (exclList.size() != 0)
       {
 	//build the sector name of this ROI to compare against the exclusion list
-	std::stringstream sectorName;
-	sectorName<<"B";
+	std::string sectorName("B");
+
 	int sectorNumber=sectorID;
 	if (isSideC) sectorNumber += 32;
-	if (sectorNumber < 10) sectorName << "0";
-	sectorName << sectorNumber;
+        if (sectorNumber < 10) sectorName += '0';
+        sectorName += std::to_string(sectorNumber);
 	
 	//do the comparison
-	auto exclROIs = exclList.find(sectorName.str());
+	auto exclROIs = exclList.find(sectorName);
 	if (exclROIs != exclList.end())
 	{
 	  for (auto roi_itr=exclROIs->second.begin();roi_itr!=exclROIs->second.end();roi_itr++)
@@ -330,7 +331,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     return false;
   }
 
-  void TrigThresholdDecisionTool::makeTGCDecision(const std::string& tgcFlags, const bool F, const bool C, const bool H) const
+  void TrigThresholdDecisionTool::makeTGCDecision(const std::string& tgcFlags, const bool F, const bool C, const bool H, const parsedFlagsMap& parsed_flags) const
   {
     //check if the word has been checked before for this string of flags
     TGCFlagDecision decision(F,C,H);
@@ -346,7 +347,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
       //check the quality based on the flags.
       //loop over outer layer of "ors" and 'or' the results
       bool passedFlags = false;
-      const std::vector<std::vector<std::string> >* vec_flags = &m_parsed_flags[tgcFlags];
+      const auto* vec_flags = &parsed_flags.at(tgcFlags);
       for (auto or_itr = vec_flags->begin();or_itr!=vec_flags->end();or_itr++)
       {
 	//loop over the inner layer of "ands" and 'and' the results
@@ -377,7 +378,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     return false;
   }
 
-  void TrigThresholdDecisionTool::makeRPCDecision(const std::string& rpcFlags, const bool M) const
+  void TrigThresholdDecisionTool::makeRPCDecision(const std::string& rpcFlags, const bool M,  const parsedFlagsMap& parsed_flags) const
   {
     //check if the word has been checked before for this string of flags
     RPCFlagDecision decision(M);
@@ -393,7 +394,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
       //check the quality based on the flags.
       //loop over outer layer of "ors" and 'or' the results
       bool passedFlags = false;
-      const std::vector<std::vector<std::string> >* vec_flags = &m_parsed_flags[rpcFlags];
+      const auto* vec_flags = &parsed_flags.at(rpcFlags);
       for (auto or_itr = vec_flags->begin();or_itr!=vec_flags->end();or_itr++)
       {
 	//loop over the inner layer of "ands" and 'and' the results
@@ -410,49 +411,56 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     }	  
   }
 
-  void TrigThresholdDecisionTool::parseFlags(const std::string& flags) const
+  void TrigThresholdDecisionTool::parseFlags(const std::string& flags, parsedFlagsMap& parsed_flags) const
   {
     //parse the logic of the quality flag into a 2D vector, where outer layer contains the logic |'s and inner layer contains the logical &'s.
     //save the 2D vector in a map so we don't have to parse it each time we want to check the flags.
-    if (m_parsed_flags.find(flags) == m_parsed_flags.end())
-    {
-      std::vector<std::string> vec_ors = tokenize(flags, "|");
-      std::vector<std::vector<std::string> > vec_flags;
-      for (unsigned ior=0;ior<vec_ors.size();ior++)
-      {
-	vec_flags.push_back(tokenize(vec_ors[ior],"&"));
-      }
-      m_parsed_flags[flags] = std::move(vec_flags);
+
+    // 1. Single-lookup insertion check using try_emplace.
+    // If the key exists, it returns immediately without doing any work.
+    auto [it, inserted] = parsed_flags.try_emplace(flags);
+    
+    if (!inserted) {
+        return; 
     }
+    std::string_view stable_key = it->first;
+    std::vector<std::string_view> vec_ors = tokenize<std::string_view>(stable_key, '|');
+    std::vector<std::vector<std::string_view> > vec_flags;
+    for (unsigned ior=0;ior<vec_ors.size();ior++)
+      {
+	vec_flags.push_back(tokenize<std::string_view>(vec_ors[ior],'&'));
+      }
+      it->second = std::move(vec_flags);
   }
 
   
   std::string TrigThresholdDecisionTool::getShapedFlags(const std::string& flags) const
   {
     std::string shapedFlags = flags;
-    shapedFlags.erase(std::remove_if(shapedFlags.begin(),shapedFlags.end(),::isspace),shapedFlags.end()); // remove spaces
-    std::vector<std::string> vec_ors = tokenize(shapedFlags,"|");
+    shapedFlags.erase(std::remove_if(shapedFlags.begin(), shapedFlags.end(), 
+         [](unsigned char c) { return std::isspace(c); }), shapedFlags.end());
+    std::vector<std::string_view> vec_ors = tokenize<std::string_view>(shapedFlags,'|');
     std::set<std::string> set_ors;
     for(const auto& ors : vec_ors){
-      std::vector<std::string> vec_ands = tokenize(ors,"&");
-      std::set<std::string> set_ands;
+      std::vector<std::string_view> vec_ands = tokenize<std::string_view>(ors,'&');
+      std::set<std::string_view> set_ands;
       for(const auto& ands : vec_ands){
 	set_ands.insert(ands);
       }
       std::string aa = "";
       for(const auto& ands : set_ands){
 	aa += ands;
-	aa += "&";
+	aa += '&';
       }
-      std::string bb = aa.substr(0,aa.size()-1); // remove the last "&"
-      set_ors.insert(std::move(bb));
+      if(!aa.empty()) aa.pop_back(); // remove the last "&"
+      set_ors.insert(std::move(aa));
     }
     std::string aa = "";
     for(const auto& ors : set_ors){
       aa += ors;
-      aa += "|";
+      aa += '|';
     }
-    std::string bb = aa.substr(0,aa.size()-1); // remove the last "|"
-    return bb;
+    if(!aa.empty()) aa.pop_back();// remove the last "|"
+    return aa;
   }
 }
