@@ -634,7 +634,7 @@ namespace Muon {
         Trk::PerigeeSurface persurf(pars.position());
         std::shared_ptr<Trk::TrackParameters> exPars {
                     m_muonExtrapolator->extrapolateDirectly(ctx, pars, persurf)};
-        std::shared_ptr<Trk::Perigee> pp = std::dynamic_pointer_cast<Trk::Perigee>(exPars);
+        std::shared_ptr<Trk::Perigee> pp = std::dynamic_pointer_cast<Trk::Perigee>(std::move(exPars));
         if (!pp) {
             ATH_MSG_WARNING(" Extrapolation to Perigee surface did not return a perigee!! ");
         }

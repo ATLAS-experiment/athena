@@ -16,7 +16,7 @@ uint64_t MURoIThresholdsTool::getPattern(const EventContext& /*ctx*/,
 
   // Iterate through thresholds and see which ones are passed
   for (const std::shared_ptr<TrigConf::L1Threshold>& thrBase : menuThresholds) {
-    std::shared_ptr<TrigConf::L1Threshold_MU> thr = std::static_pointer_cast<TrigConf::L1Threshold_MU>(thrBase);
+    TrigConf::L1Threshold_MU* thr = static_cast<TrigConf::L1Threshold_MU*>(thrBase.get());
 
     bool passed{false};
 

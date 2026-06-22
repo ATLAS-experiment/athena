@@ -269,7 +269,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
     double thrValTmp=0;
     for (unsigned idec=0;idec<decisions.size();++idec) {
       if (!decisions[idec].second) continue;
-      std::shared_ptr<TrigConf::L1Threshold_MU> thr = std::static_pointer_cast<TrigConf::L1Threshold_MU>(decisions[idec].first);
+      auto thr = static_cast<TrigConf::L1Threshold_MU*>(decisions[idec].first.get());
       if(std::abs(eta)<1.05){
 	thrValTmp = thr->ptBarrel();
       }
