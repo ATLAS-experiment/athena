@@ -11,10 +11,6 @@ if (NOT EPOS4_FOUND)
     message(STATUS "EPOS4 not available, not building package")
     return()
 endif()
-if (NOT HEPMC3_USE)
-    message(STATUS "EPOS4 not compatible with HepMC2, not building package")
-    return()
-endif()
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
