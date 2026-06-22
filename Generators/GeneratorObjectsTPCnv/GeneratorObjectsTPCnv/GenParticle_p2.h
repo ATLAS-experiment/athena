@@ -69,7 +69,7 @@ class GenParticle_p2
    */
   int m_pdgId;
 
-  /** Status of this particle, as defined for HEPEVT
+  /** Status of this particle
    */
   int m_status;
 

@@ -311,7 +311,7 @@ StatusCode FixHepMC::finalize() {
 /// @name Classifiers for identifying particles to be removed
 //@{
 
-// Identify PDG ID = 0 particles, usually from HEPEVT padding
+// Identify PDG ID = 0 particles
 bool FixHepMC::isPID0(const HepMC::ConstGenParticlePtr& p) const {
   return p->pdg_id() == 0;
 }
