@@ -5,7 +5,6 @@
 
 #ifndef ATLASHEPMC_GENVERTEX_H
 #define ATLASHEPMC_GENVERTEX_H
-#ifdef HEPMC3
 #include "HepMC3/GenVertex.h"
 #include "HepMC3/PrintStreams.h"
 #include "AtlasHepMC/Barcode.h"
@@ -31,24 +30,4 @@ inline GenVertexPtr newGenVertexPtr(const HepMC3::FourVector& pos = HepMC3::Four
 inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->id();}
 using HepMC3::GenVertex;
 }
-#else
-#include "HepMC/GenVertex.h"
-#include "AtlasHepMC/Barcode.h"
-namespace HepMC {
-typedef HepMC::GenVertex* GenVertexPtr;
-typedef const HepMC::GenVertex* ConstGenVertexPtr;
-inline GenVertex::particles_out_const_iterator  begin(const HepMC::GenVertex& v) { return v.particles_out_const_begin(); }
-inline GenVertex::particles_out_const_iterator  end(const HepMC::GenVertex& v) { return v.particles_out_const_end(); }
-
-inline GenVertexPtr newGenVertexPtr(const HepMC::FourVector &pos = HepMC::FourVector(0.0, 0.0, 0.0, 0.0), const int i = 0) {
-    return new HepMC::GenVertex(pos, i);
-}
-namespace Print {
-inline void line(std::ostream& os, const GenVertex& v) {v.print(os);}
-inline void line(std::ostream& os, const GenVertex* v) {v->print(os);}
-}
-inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->barcode();}
-inline std::ostream& operator << ( std::ostream& os, const GenVertex* v) { if (v) return os << (*v); else return os;}
-}
-#endif
 #endif

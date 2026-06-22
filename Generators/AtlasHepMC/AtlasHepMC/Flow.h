@@ -5,7 +5,6 @@
 
 #ifndef ATLASHEPMC_FLOW_H
 #define ATLASHEPMC_FLOW_H
-#ifdef HEPMC3
 #include "HepMC3/Attribute.h"
 #include "HepMC3/GenParticle.h"
 #include "AtlasHepMC/AttributeNames.h"
@@ -46,11 +45,4 @@ template<class T> void  set_flow(T& a,  Flow fl) {
 }
 
 }
-#else
-#include "HepMC/Flow.h"
-namespace HepMC {
-template <class T> int flow(const T& a, int i) {return a->flow(i);}
-template <class T> Flow flow(const T& a) {return a->flow();}
-}
-#endif
 #endif

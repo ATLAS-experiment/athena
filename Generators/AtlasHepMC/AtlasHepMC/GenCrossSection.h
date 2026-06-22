@@ -5,9 +5,5 @@
 
 #ifndef ATLASHEPMC_CROSSECTION_H
 #define ATLASHEPMC_CROSSECTION_H
-#ifdef HEPMC3
 #include "HepMC3/GenCrossSection.h"
-#else
-#include "HepMC/GenCrossSection.h"
-#endif
 #endif
