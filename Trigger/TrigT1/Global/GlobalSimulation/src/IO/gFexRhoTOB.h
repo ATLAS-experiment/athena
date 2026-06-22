@@ -23,8 +23,11 @@ namespace GlobalSim::IOBitwise{
 
   class gFexRhoTOB {
 
-    /// Count: Size of hadronic thresholds satisfied bitset
-    static constexpr std::size_t s_rho_width{15};
+    /// Count: Size of Rho bitset
+    static constexpr std::size_t s_rho_width{16};
+
+    /// Count: Size of Rho scale bitset
+    static constexpr std::size_t s_rho_scale{10};
 
   public:
 
@@ -46,6 +49,14 @@ namespace GlobalSim::IOBitwise{
      */
     gFexRhoTOB(const gFexRhoTOB& gFexRhoTOB);
 
+    /** 
+     * @brief Constructor taking an rho bits to initialise common bits
+     * @param[in] rho_bits The input bits defining the rho bits.
+     *
+     * To be used to create and initilaise a gFexRhoTOB from incoming rho bits
+     */
+    gFexRhoTOB(const uint& rho_bits, const uint& rho_scale);
+
     /**
      * @brief Constructor taking raw bitsets to initialise common bits
      *
@@ -59,12 +70,19 @@ namespace GlobalSim::IOBitwise{
     //! @copydoc IeEmTOB::Rho_bits()
     virtual std::bitset<s_rho_width> rho_bits() const;
     
+    virtual std::bitset<s_rho_scale> rho_scale() const;
+    
     virtual std::string to_string() const;
   private:
     
     /// Property: Rho bitset within the gFexRhoTOB word
     std::bitset<s_rho_width> m_rho_bits;
-  };
+
+    /// Property: Rho bitset eT scale within the gFexRhoTOB word
+    // The scale of the eT bits, in MeV
+    // I don't believe this will be stored in the final TOB.
+    std::bitset<s_rho_scale> m_rho_scale;
+};
 
 } //End of namespace
 
