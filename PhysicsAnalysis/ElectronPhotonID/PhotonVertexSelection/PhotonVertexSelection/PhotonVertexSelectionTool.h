@@ -10,6 +10,7 @@
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/CurrentContext.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 
 // EDM includes
@@ -69,6 +70,12 @@ namespace CP {
 
     // ONNX
     // ==================================================
+    /// ONNX Runtime logging level (0=VERBOSE, 1=INFO, 2=WARNING, 3=ERROR, 4=FATAL)
+    Gaudi::Property<int> m_ONNXLogLevel{this, "LogLevel", 2, "ONNX Runtime logging level (0=VERBOSE, 1=INFO, 2=WARNING, 3=ERROR, 4=FATAL)"};
+      
+    /// Global runtime environment for Onnx Runtime
+    std::unique_ptr< Ort::Env > m_env;
+
     // Name of the ONNX model file to load
     std::string m_ONNXModelFilePath1; //converted case
     std::string m_ONNXModelFilePath2; //unconverted case
@@ -134,6 +141,7 @@ namespace CP {
 
     /// Function initialising the tool
     virtual StatusCode initialize();
+    virtual StatusCode finalize();
 
     /// @}
 
