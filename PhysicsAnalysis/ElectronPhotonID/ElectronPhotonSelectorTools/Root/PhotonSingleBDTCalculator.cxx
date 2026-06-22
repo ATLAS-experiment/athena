@@ -40,22 +40,25 @@ StatusCode PhotonSingleBDTCalculator::loadBDT() {
     ATH_MSG_ERROR("Could not resolve model file: " << m_modelFile);
     return StatusCode::FAILURE;
   }
-
-  m_file.reset(TFile::Open(resolved.c_str(), "READ"));
-  if (!m_file || m_file->IsZombie()) {
+  std::unique_ptr<TFile> file;
+  file.reset(TFile::Open(resolved.c_str(), "READ"));
+  if (!file || file->IsZombie()) {
     ATH_MSG_ERROR("Failed to open model file: " << resolved);
     return StatusCode::FAILURE;
   }
 
-  m_tree = dynamic_cast<TTree*>(m_file->Get(m_bdtTreeName.value().c_str()));
-  if (!m_tree) {
+  TTree* tree = dynamic_cast<TTree*>(file->Get(m_bdtTreeName.value().c_str()));
+  if (!tree) {
     ATH_MSG_ERROR("Could not find TTree '" << m_bdtTreeName << "' in file " << resolved);
     return StatusCode::FAILURE;
   }
-  m_tree->SetCacheSize(0);
-  m_bdt = std::make_unique<MVAUtils::BDT>(m_tree);
+  tree->SetCacheSize(0);
+  m_bdt = std::make_unique<MVAUtils::BDT>(tree);
 
   ATH_MSG_DEBUG("Loaded BDT from " << resolved << " tree=" << m_bdtTreeName);
+  // --- MEMORY OPTIMIZATION ---
+  // Close the TFile and cleanly destroy the TTree since MVAUtils has copied the data.
+  file.reset();
   return StatusCode::SUCCESS;
 }
 
