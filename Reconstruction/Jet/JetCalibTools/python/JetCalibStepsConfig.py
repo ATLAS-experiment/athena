@@ -59,6 +59,24 @@ def puresidualStep(flags, **configDict):
     PU_step = CompFactory.Pileup1DResidualCalibStep("PUResid", **configDict)
     return [PU_step]
 
+def newpuresidualStep(flags, **configDict):
+    configDict.setdefault('OutScale', 'JetPileupScaleMomentum')
+    configDict.setdefault('IsData', not flags.Input.isMC)
+
+    histoParamsMu = configDict.pop('histoParamsMu')
+    inputFile = PathResolver.FindCalibFile(configDict.pop('calibFile'))
+    histoParamsMu['inputFile'] = inputFile
+
+    histoParamsNPV = configDict.pop('histoParamsNPV')
+    histoParamsNPV['inputFile'] = inputFile
+
+    histToolMu = HistoInputCfg(flags, "HistToolMu", **histoParamsMu)
+    histToolNPV = HistoInputCfg(flags, "HistToolNPV", **histoParamsNPV)
+    configDict["histTool_mu"] = histToolMu
+    configDict["histTool_NPV"] = histToolNPV
+
+    PU_step = CompFactory.PileupAreaResidualCalibStep("PUAreaResidual", **configDict)
+    return [PU_step]
 
 def gscStep(flags, **configDict):
 
@@ -262,6 +280,7 @@ def mc2mcStep(flags, **configDic):
 calibStepDic = dict(
     JetArea = None,
     Residual = puresidualStep,
+    ResidualNew = newpuresidualStep,
     EtaJES = etajesStep,
     JMS = jmsStep,
     GSC = gscStep,
