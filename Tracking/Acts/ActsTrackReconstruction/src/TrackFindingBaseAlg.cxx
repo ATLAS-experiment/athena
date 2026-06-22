@@ -262,7 +262,7 @@ namespace ActsTrk {
       auto surfacePtr = const_cast<Acts::Surface&>(origSurface).shared_from_this();
 
       Acts::BoundTrackParameters newParams(
-          std::static_pointer_cast<const Acts::Surface>(surfacePtr),
+          std::static_pointer_cast<const Acts::Surface>(std::move(surfacePtr)),
           secondInitialParameters.parameters(), 
           std::make_optional(inflatedCovariance),
           secondInitialParameters.particleHypothesis());

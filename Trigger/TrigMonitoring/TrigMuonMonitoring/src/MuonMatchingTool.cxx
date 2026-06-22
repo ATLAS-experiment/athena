@@ -347,8 +347,7 @@ const xAOD::MuonRoI* MuonMatchingTool :: matchL1( const EventContext& ctx, doubl
         // check the L1 threshold we are looking for
         bool L1thr_isMatch = false;
         for(const std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool>&  L1thr : L1thr_list){
-            std::shared_ptr<TrigConf::L1Threshold_MU> thr = std::static_pointer_cast<TrigConf::L1Threshold_MU>(L1thr.first);
-            if (L1toMatch == thr->name()){
+            if (L1toMatch == L1thr.first->name()){
                 L1thr_isMatch = L1thr.second;
                 break;
             }
