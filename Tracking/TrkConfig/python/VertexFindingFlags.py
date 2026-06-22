@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import AthenaCommon.SystemOfUnits as Units
 from AthenaConfiguration.Enums import FlagEnum
@@ -63,6 +63,7 @@ def createPriVertexingFlags():
 
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
     flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, type=VertexSortingSetup)
+    flags.addFlag("HSGNN.nnFile", "InDetGNNHardScatterSelection/v2.0/network.onnx")
     flags.addFlag("useBeamConstraint", lambda pcf:
                   not(pcf.Tracking.PrimaryPassConfig in [
                       PrimaryPassConfig.VtxLumi,
