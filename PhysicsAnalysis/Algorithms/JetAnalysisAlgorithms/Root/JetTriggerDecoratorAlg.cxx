@@ -212,7 +212,7 @@ namespace CP
                   // Start adding missing HLT jets -- only for buggy triggers
 		  if (std::find(m_triggerNavBug.begin(),
 				m_triggerNavBug.end(),
-				m_trigger) != m_triggerNavBug.end()) {
+                    m_trigger.value()) != m_triggerNavBug.end()) {
                     for (const xAOD::Jet* jetFromCont : *hltJetsFromCont) {
                       bool alreadyIn = false;
                       for (const xAOD::IParticle* seenJet : allHLTJets) {
