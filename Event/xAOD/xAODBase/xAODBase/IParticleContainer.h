@@ -34,9 +34,7 @@ namespace xAOD {
 } // namespace xAOD
 
 // To make it possible to put IParticleContainers into StoreGate:
-#ifndef XAOD_STANDALONE
-#include "AthenaKernel/CLASS_DEF.h"
+#include "xAODCore/CLASS_DEF.h"
 CLASS_DEF( xAOD::IParticleContainer, 1241842700, 1 )
-#endif // not XAOD_STANDALONE
 
 #endif // XAODBASE_IPARTICLECONTAINER_H
