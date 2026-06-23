@@ -29,7 +29,7 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("forced_momentum", m_forced_momentum = "MEV", "Forced momentum unit");
   declareProperty("forced_length", m_forced_length = "MM", "Forced length unit");
   declareProperty("ApplyUnitsFix", m_unitsFix = true, "Attempt to identify momentum units problems and fix them");
-  declareProperty("SetHasCycles", m_setHasCycles = false, "Inform HEPMC3 that this event has cycles (loops)");
+  declareProperty("SetHasCycles", m_setHasCycles = false, "Note hat this event has cycles (loops)");
 }
 
 StatusCode FixHepMC::execute(const EventContext& /*ctx*/) {

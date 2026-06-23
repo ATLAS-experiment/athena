@@ -448,7 +448,7 @@ StatusCode Pythia8_i::fillEvt(HepMC::GenEvent *evt){
 
   m_pythiaToHepMC.fill_next_event(*m_pythia, evt, m_internal_event_number);
 
-  // In case we're asked, save the LHE event as an attribute. This only works in HEPMC3.
+  // In case we're asked, save the LHE event as an attribute.
   if(m_saveLHE){
     auto evtlhe = std::make_shared<HepMC::GenEvent>();
     m_pythiaToHepMC.fill_next_event(m_pythia->process, evtlhe.get(), m_internal_event_number, &m_pythia->info, &m_pythia->settings);

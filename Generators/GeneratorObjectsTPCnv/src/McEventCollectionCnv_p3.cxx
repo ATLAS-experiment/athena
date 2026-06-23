@@ -146,7 +146,6 @@ McEventCollectionCnv_p3::createGenVertex( const McEventCollection_p3& persEvt,
   vtx->add_attribute(HepMCStr::weights,std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
   HepMC::suggest_barcode(vtx,persVtx.m_barcode);
   // handle the in-going (orphans) particles
-  //Is this needed for HEPMC3?
   const unsigned int nPartsIn = persVtx.m_particlesIn.size();
   for ( unsigned int i = 0; i != nPartsIn; ++i ) {
     createGenParticle( persEvt.m_genParticles[persVtx.m_particlesIn[i]], partToEndVtx, datapools, vtx, false );

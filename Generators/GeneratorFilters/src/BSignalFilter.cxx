@@ -469,9 +469,9 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
     }
 
   // ** Main loop: iterate over all children, call method recursively.
-  //Note: Iterators changed between HEPMC2 and HEPMC3; the previous version
+  //Note: Iterators changed between HEPMC v2 and HEPMC v3; the previous version
   //was a custom iterator which could be incremented indefinitely, always returning
-  //'end' when necessary. In HEPMC3, these are standard library iterators
+  //'end' when necessary. In HEPMC v3, these are standard library iterators
   for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
     {
       childCnt++;
