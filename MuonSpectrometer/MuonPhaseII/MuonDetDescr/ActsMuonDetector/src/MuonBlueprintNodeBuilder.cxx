@@ -670,7 +670,7 @@ std::shared_ptr<Acts::ISurfaceMaterial>
        using enum Acts::SurfaceBounds::BoundsType;
       case eCylinder: {
           pmBinning = {{Acts::AxisDirection::AxisZ, Acts::AxisBoundaryType::Bound, nBins1},
-                       {Acts::AxisDirection::AxisPhi, Acts::AxisBoundaryType::Bound, nBins2}};        
+                       {Acts::AxisDirection::AxisRPhi, Acts::AxisBoundaryType::Bound, nBins2}};        
           break;
       } case eDisc: {
           pmBinning = {{Acts::AxisDirection::AxisR, Acts::AxisBoundaryType::Bound, nBins1},
