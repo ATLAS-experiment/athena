@@ -16,14 +16,14 @@ atlas_add_library( ElectronPhotonSelectorToolsLib
   INCLUDE_DIRS ${LWTNN_INCLUDE_DIRS}  ${EIGEN_INCLUDE_DIRS}
   LINK_LIBRARIES EgammaAnalysisInterfacesLib AsgTools xAODEgamma
   xAODTracking xAODEventInfo MVAUtils
-  xAODHIEvent PATCoreAcceptLib AsgDataHandlesLib
+  xAODHIEvent PATCoreAcceptLib AsgDataHandlesLib AnaAlgorithmLib
   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib FourMomUtils 
-  xAODCaloEvent PathResolver EgammaAnalysisHelpersLib
+  xAODCaloEvent PathResolver EgammaAnalysisHelpersLib 
   ${LWTNN_LIBRARIES} ${EIGEN_LIBRARIES} EventPrimitives )
 
   atlas_add_component( ElectronPhotonSelectorTools
     src/components/*.cxx
-    LINK_LIBRARIES ElectronPhotonSelectorToolsLib )
+    LINK_LIBRARIES ElectronPhotonSelectorToolsLib)
 
 atlas_add_dictionary( ElectronPhotonSelectorToolsDict
   ElectronPhotonSelectorTools/ElectronPhotonSelectorToolsCoreDict.h
@@ -55,4 +55,4 @@ endif()
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_data( data/*.conf )
+atlas_install_data( data/*.conf  )
