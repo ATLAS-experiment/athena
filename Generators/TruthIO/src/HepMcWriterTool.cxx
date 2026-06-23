@@ -15,6 +15,8 @@
 // HepMC includes
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/IO_GenEvent.h"
+#include "HepMC3/WriterAscii.h"
+#include "HepMC3/WriterAsciiHepMC2.h"
 
 // McParticleTools includes
 #include "HepMcWriterTool.h"
@@ -32,16 +34,9 @@ HepMcWriterTool::HepMcWriterTool( const std::string& type,   const std::string& 
   // Property declaration
   // 
 
-  declareProperty( "Output", 
-		   m_ioBackendURL = "ascii:hepmc.genevent.txt", 
-		   "Name of the back-end we'll use to write out the HepMC::GenEvent."
-		   "\nEx: ascii:hepmc.genevent.txt" );
-  m_ioBackendURL.declareUpdateHandler( &HepMcWriterTool::setupBackend,
-				       this );
-
-  declareProperty( "McEvents",
-		   m_mcEventsName = "GEN_EVENT",
-		   "Input location of the McEventCollection to write out" );
+  declareProperty( "Output",  m_ioBackendURL = "ascii:hepmc.genevent.txt", "Name of the back-end we'll use to write out the HepMC::GenEvent.\nEx: ascii:hepmc.genevent.txt" );
+  m_ioBackendURL.declareUpdateHandler( &HepMcWriterTool::setupBackend, this );
+  declareProperty( "McEvents", m_mcEventsName = "GEN_EVENT", "Input location of the McEventCollection to write out" );
 }
 
 /// Destructor
@@ -49,11 +44,6 @@ HepMcWriterTool::HepMcWriterTool( const std::string& type,   const std::string& 
 HepMcWriterTool::~HepMcWriterTool()
 { 
   ATH_MSG_DEBUG("Calling destructor");
-
-  if ( m_ioBackend ) {
-    delete m_ioBackend;
-    m_ioBackend = nullptr;
-  }
 }
 
 /// Athena Algorithm's Hooks
@@ -69,7 +59,7 @@ StatusCode HepMcWriterTool::initialize()
   }
 
   // setup backend
-  if ( nullptr == m_ioBackend ) {
+  if (!m_ioBackend ) {
     setupBackend(m_ioBackendURL);
   }
 
@@ -118,14 +108,11 @@ StatusCode HepMcWriterTool::write( const HepMC::GenEvent* evt )
 void HepMcWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ )
 {
   // defaults
-  std::string protocol = "ascii";
+  std::string protocol = "asciiv3";
   std::string fileName = "hepmc.genevent.txt";
 
   // reset internal state
-  if ( m_ioBackend ) {
-    delete m_ioBackend;
-    m_ioBackend = nullptr;
-  }
+  m_ioBackend = nullptr;
 
   // caching URL
   const std::string& url = m_ioBackendURL.value();
@@ -134,21 +121,21 @@ void HepMcWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ )
 
   if ( std::string::npos != protocolPos ) {
     protocol = url.substr( 0, protocolPos );
-    fileName = url.substr( protocolPos+1, std::string::npos );
+    fileName = url.substr( protocolPos + 1, std::string::npos );
   } else {
-    //protocol = "ascii";
     fileName = url;
   }
 
   // get the protocol name in lower cases
   std::transform( protocol.begin(), protocol.end(), protocol.begin(), [](unsigned char c){ return std::tolower(c); } );
   if ( "ascii" == protocol ) {
-    m_ioBackend = new HepMC3::WriterAsciiHepMC2( fileName.c_str());
-
+    m_ioBackend = std::make_shared<HepMC3::WriterAsciiHepMC2>( fileName.c_str());
+  } else  if ( "asciiv3" == protocol ) {
+    m_ioBackend = std::make_shared<HepMC3::WriterAscii>( fileName.c_str());
   } else {
     ATH_MSG_WARNING("UNKNOWN protocol [" << protocol << "] !!" << endmsg  << "Will use [ascii] instead...");
-    protocol = "ascii";
-    m_ioBackend = new HepMC3::WriterAsciiHepMC2( fileName.c_str());
+    protocol = "asciiv3";
+    m_ioBackend = std::make_shared<HepMC3::WriterAscii>( fileName.c_str());
   }    
   ATH_MSG_DEBUG("Using protocol [" << protocol << "] and write to ["<< fileName << "]");
 }

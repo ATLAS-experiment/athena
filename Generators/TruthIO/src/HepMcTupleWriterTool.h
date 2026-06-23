@@ -30,12 +30,7 @@ class TTree;
 class HepMcTupleWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
  public: 
-
-  // Copy constructor: 
 
   /// Constructor with parameters: 
   HepMcTupleWriterTool( const std::string& type, const std::string& name, const IInterface* parent );
@@ -48,17 +43,11 @@ class HepMcTupleWriterTool : public extends<AthAlgTool, IIOHepMcTool>
   StatusCode  execute();
   StatusCode  finalize();
 
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
 
   /** Process the @c HepMC::GenEvent through the I/O backend.
    */
   StatusCode write( const HepMC::GenEvent* evt );
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected methods: 
-  /////////////////////////////////////////////////////////////////// 
  protected: 
 
   /** Default constructor: 
@@ -75,9 +64,6 @@ class HepMcTupleWriterTool : public extends<AthAlgTool, IIOHepMcTool>
    */
   void bookTuple();
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
  protected: 
 
   /// maximum number of particles per event

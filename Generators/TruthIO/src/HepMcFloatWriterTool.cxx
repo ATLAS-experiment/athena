@@ -27,9 +27,6 @@
 #include "AtlasHepMC/Polarization.h"
 static const char * const s_protocolSep = ":";
 
-/////////////////////////////////////////////////////////////////// 
-/// Constructors
-////////////////
 HepMcFloatWriterTool::HepMcFloatWriterTool( const std::string& type, 
 					    const std::string& name, 
 					    const IInterface* parent ) : 
@@ -115,10 +112,6 @@ StatusCode HepMcFloatWriterTool::execute()
 
   return write(evt);
 }
-
-/////////////////////////////////////////////////////////////////// 
-/// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
 
 StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
 {

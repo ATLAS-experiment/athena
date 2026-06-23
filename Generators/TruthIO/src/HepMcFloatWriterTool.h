@@ -26,9 +26,6 @@
 class HepMcFloatWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
  public: 
 
   /// Constructor with parameters:
@@ -42,17 +39,10 @@ class HepMcFloatWriterTool : public extends<AthAlgTool, IIOHepMcTool>
   StatusCode  execute();
   StatusCode  finalize();
 
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
   /** Process the @c HepMC::GenEvent through the I/O backend.
    */
   StatusCode write( const HepMC::GenEvent* evt );
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected methods: 
-  /////////////////////////////////////////////////////////////////// 
  protected: 
 
   /** Default constructor: 
@@ -64,9 +54,6 @@ class HepMcFloatWriterTool : public extends<AthAlgTool, IIOHepMcTool>
    */
   void setupBackend( Gaudi::Details::PropertyBase& ioBackendURL );
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
  protected: 
 
   /** URL of the I/O back-end (only "ASCII" for now...) glued with
