@@ -58,7 +58,7 @@ def TrigHLTMonTopConfig(inputFlags):
     result = ComponentAccumulator()
 
     # do not run in RAWtoESD, if we have two-step reco
-    if inputFlags.DQ.Environment in ('online', 'tier0', 'tier0ESD', 'AOD'):
+    if inputFlags.DQ.Environment in ('online', 'tier0', 'tier0Raw', 'tier0ESD', 'AOD'):
 
         # Verify signature settings in case of AOD input, as content monitored by some signatures not available in AOD.
         # Will raise exception to prevent signature monitoring crashing during running.
