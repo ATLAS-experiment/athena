@@ -356,7 +356,6 @@ StatusCode Epos4::fillEvt(HepMC::GenEvent *evt) {
   ATH_MSG_DEBUG("Event #" << m_events 
               << " | particles: " << e.particles().size()
               << " | vertices: " << e.vertices().size());
-  
   *evt = e;
   return StatusCode::SUCCESS;
 }
