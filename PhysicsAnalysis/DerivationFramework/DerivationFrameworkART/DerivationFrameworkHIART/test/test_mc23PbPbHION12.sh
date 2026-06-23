@@ -12,7 +12,7 @@
 set -e
 
 Derivation_tf.py \
---inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/data_hi/mc23_5p36TeV.601589.PhPy8EG_A14_ttbar_hdamp258p75_nonallhadron.recon.AOD.e8599_s4576_s4483_r16930_skim.root \
+--inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/data_hi/AOD.47311601._002261.pool.root.1 \
 --outputDAODFile art.pool.root \
 --formats HION12 \
 --maxEvents -1 \
