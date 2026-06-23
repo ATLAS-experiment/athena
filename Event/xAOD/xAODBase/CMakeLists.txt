@@ -18,7 +18,7 @@ atlas_add_library( xAODBase
    xAODBase/*.h Root/*.cxx
    PUBLIC_HEADERS xAODBase
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks ${extra_libs} )
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks xAODCore ${extra_libs} )
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODBase/selection.xml

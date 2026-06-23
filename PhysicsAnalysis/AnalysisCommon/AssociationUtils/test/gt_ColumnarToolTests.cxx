@@ -204,9 +204,7 @@ namespace ORUtils
     if (!columnar::ColumnarModeDefault::isXAOD)
     {
       ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
-      // setting this to a jet causes it to read the mass for the photon
-      // instead of using a hardcoded mass
-      ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Jet));
+      ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Photon));
     }
     ASSERT_SUCCESS (tool->setProperty ("OutputPassValue", true));
     ASSERT_SUCCESS (tool->setProperty ("InputLabel", ""));
@@ -260,9 +258,7 @@ namespace ORUtils
     if (!columnar::ColumnarModeDefault::isXAOD)
     {
       ASSERT_SUCCESS (tool->setProperty ("ObjectType1", xAODType::ObjectType::Jet));
-      // setting this to a jet causes it to read the mass for the electron
-      // instead of using a hardcoded mass
-      ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Jet));
+      ASSERT_SUCCESS (tool->setProperty ("ObjectType2", xAODType::ObjectType::Electron));
     }
     ASSERT_SUCCESS (tool->setProperty ("OutputPassValue", true));
     ASSERT_SUCCESS (tool->setProperty ("InputLabel", ""));
