@@ -17,6 +17,16 @@ template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t, typename pos_t,
       trackState.template calibrated<Dim>() = locpos.template cast<double>();
       trackState.template calibratedCovariance<Dim>() = cov.template cast<double>();
   }
+
+template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t>
+    void MeasurementCalibratorBase::prepareCalibratedState(const ProjectorType projector,
+                                                           Acts::SourceLink link,
+                                                           proxy_t& trackState) const {
+      static_assert(Dim>0 && Dim <= 3, "Wrong measurement dimension");
+      trackState.setUncalibratedSourceLink(std::move(link));
+      trackState.setProjectorSubspaceIndices(s_boundSpaceIndices[static_cast<int>(projector)]);
+  }
+
 template <Acts::PointerConcept Ptr_t>
     inline Acts::SourceLink MeasurementCalibratorBase::pack(const Ptr_t& measurement) {
         if (!measurement) {

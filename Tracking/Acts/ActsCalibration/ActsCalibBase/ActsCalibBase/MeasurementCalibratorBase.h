@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSCALIBBASE_DETAIL_MEASUREMENTCALIBRATORBASE_H
 #define ACTSCALIBBASE_DETAIL_MEASUREMENTCALIBRATORBASE_H
@@ -91,6 +91,13 @@ namespace ActsTrk::detail {
                     const cov_t& cov,
                     Acts::SourceLink link,
                     proxy_t& trackState) const;
+
+  protected:
+    template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t>
+    void prepareCalibratedState(const ProjectorType projector,
+                                Acts::SourceLink link,
+                                proxy_t& trackState) const;
+
   private:
     /** @brief Array to map the Projector types to the bound index configurations  used
      *         by the ATLAS detector measurements */

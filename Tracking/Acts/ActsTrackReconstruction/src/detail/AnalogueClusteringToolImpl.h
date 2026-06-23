@@ -53,8 +53,9 @@ namespace ActsTrk::detail {
         return m_options.m_errorData;
      }
 
-     std::pair<typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Pos,
-               typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Cov>
+     std::tuple<typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Pos,
+                typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Cov,
+                unsigned int>
      calibrate(const EventContext& ctx,
                const Acts::GeometryContext& gctx,
                const Acts::CalibrationContext& cctx,
