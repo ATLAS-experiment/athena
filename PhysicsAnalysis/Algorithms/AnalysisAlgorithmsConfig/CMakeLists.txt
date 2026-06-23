@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -30,13 +30,11 @@ if (NOT COLUMNAR_ANALYSIS)
 
    atlas_add_test( ConfigTextCompareBuilder
       SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-builder --check-order
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 30 )
+      POST_EXEC_SCRIPT nopost.sh )
 
    atlas_add_test( ConfigTextCompareBlock
       SCRIPT python/ConfigText_unitTest.py --text-config AnalysisAlgorithmsConfig/test_configuration_Run2.yaml --compare-block --check-order
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 30 )
+      POST_EXEC_SCRIPT nopost.sh )
 
 
    # Isolated structure is needed to avoid two CPRun test simultaneously creating workDir symlink and replace the other one
