@@ -26,7 +26,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TObjArray.h"
-#include "TRandom3.h"
+#include "TRandom2.h"
 // Core includes
 #include "AsgMessaging/AsgMessaging.h"
 #include "PATCore/PATCoreEnums.h"
@@ -201,7 +201,7 @@ private:
     std::vector<std::vector<HistEdge>> m_fastHistEdges;
     std::vector<std::vector<HistArray>> m_fastSysList;
     // The Random generator class
-    TRandom3 m_Rndm;
+    TRandom2 m_Rndm;
   };  // End: class definition
 } // End: namespace Root
 

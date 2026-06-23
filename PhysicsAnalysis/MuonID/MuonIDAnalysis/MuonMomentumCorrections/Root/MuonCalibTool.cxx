@@ -9,7 +9,7 @@
 
 // Local include(s):
 #include <cmath>
-#include "TRandom3.h"
+#include "TRandom2.h"
 
 #include "MuonMomentumCorrections/MuonCalibTool.h"
 
@@ -526,7 +526,7 @@ namespace CP
     {
         auto& acc = *m_acc;
         // Random number generation for smearing
-        TRandom3 loc_random3;
+        TRandom2 loc_random3;
         // Get Event Number, Retrieve the event information:
         unsigned long long eventNumber = 0;
         if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();

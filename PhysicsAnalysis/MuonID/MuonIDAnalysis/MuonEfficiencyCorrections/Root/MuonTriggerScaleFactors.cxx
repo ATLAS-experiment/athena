@@ -2,7 +2,7 @@
  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "TRandom3.h"
+#include "TRandom2.h"
 #include "TROOT.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -336,7 +336,7 @@ namespace CP {
     // Generate replicas of h for Toys with each bin of h varied with Gaussian distribution
     // with mean from bin content and sigma from bin error
     std::vector<TH1_Ptr> MuonTriggerScaleFactors::generateReplicas(TH1_Ptr h, int nrep, int seed) const {
-        TRandom3 Rndm(seed);
+        TRandom2 Rndm(seed);
         std::vector<TH1_Ptr> replica_v;
         const int xbins = h->GetNbinsX(), ybins = h->GetNbinsY();
 
