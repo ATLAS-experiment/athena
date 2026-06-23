@@ -19,7 +19,7 @@ atlas_add_library( Hijing_iLib
    PRIVATE_DEFINITIONS HIJINGVERSION=\"${HIJING_VERSION}\"
                        FVOIDP=INTEGER*${CMAKE_SIZEOF_VOID_P}
    LINK_LIBRARIES ${HIJING_LIBRARIES} ${CLHEP_LIBRARIES}
-   GeneratorFortranCommonLib GeneratorModulesLib StoreGateLib
+   GeneratorModulesLib StoreGateLib
    PRIVATE_LINK_LIBRARIES AtlasHepMCLib AthenaKernel GaudiKernel
    GeneratorObjects CxxUtils TruthUtils )
 
