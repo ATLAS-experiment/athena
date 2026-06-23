@@ -1110,7 +1110,7 @@ void MatrixReadOut::makeTestPattern(ubit16 mode, ubit16 ktimes, int eventNum) {
         int NBunch = 0;
         int run = 0;
         vhdlinput << " RUN " << run << " EVENT " << eventNum << " CMID " << cmid << " WINDOW " << NBunch;
-        vhdlinput << " LINES " << (ntimes + ktimes) << std::endl;
+        vhdlinput << " LINES " << (ntimes + ktimes) << '\n';
     }  // end-of-if(mode
     for (ubit16 l = 0; l < ntimes; l++) {
         vhdlinput << " TIME " << times[l] << " ";
@@ -1118,7 +1118,7 @@ void MatrixReadOut::makeTestPattern(ubit16 mode, ubit16 ktimes, int eventNum) {
             vhdlinput << plane[i][0] << plane[i][1] << " " << IJ[l][i] << " ";
             for (ubit16 j = 0; j < IJ[l][i]; j++) { vhdlinput << channels[l][i][j] << " "; }  // end-of-for(j
         }                                                                                     // end-of-for(i
-        vhdlinput << std::endl;
+        vhdlinput << '\n';
     }  // end-of-for(l
     //
     vhdlinput.close();

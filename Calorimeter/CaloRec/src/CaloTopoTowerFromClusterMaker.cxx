@@ -545,13 +545,13 @@ bool CaloTopoTowerFromClusterMaker::checkCellIndices(const CaloTowerGeometry* to
     ATH_MSG_WARNING( CaloRec::Helpers::fmtMsg("Cannot open log file \042%s\042 - no hash index checking",logname.c_str()) ); 
     return false;
   }
-  logstream << "##########################################################################" << std::endl;
-  logstream << "### This file contains a list of CaloCell indices in CaloCellContainer ###" << std::endl;
-  logstream << "### for which this index is not the same as the calorimeter cell hash  ###" << std::endl;
-  logstream << "### identifier. An empty list indicates full consistency between this  ###" << std::endl;
-  logstream << "### index and the hash identifier for all cells.                       ###" << std::endl;
-  logstream << "##########################################################################" << std::endl;
-  logstream << "<begin list>--------------------------------------------------------------" << std::endl;
+  logstream << "##########################################################################\n";
+  logstream << "### This file contains a list of CaloCell indices in CaloCellContainer ###\n";
+  logstream << "### for which this index is not the same as the calorimeter cell hash  ###\n";
+  logstream << "### identifier. An empty list indicates full consistency between this  ###\n";
+  logstream << "### index and the hash identifier for all cells.                       ###\n";
+  logstream << "##########################################################################\n";
+  logstream << "<begin list>--------------------------------------------------------------\n";
 
   /////////////////////////
   // loop cell container //
@@ -583,12 +583,12 @@ bool CaloTopoTowerFromClusterMaker::checkCellIndices(const CaloTowerGeometry* to
 	}
 	size_t cidx(pCellCont->findIndex(chash));
 	logstream << CaloRec::Helpers::fmtMsg("[%06zu] Cell %6zu [%12.12s %5.3f %5.3f] non-matching id %6zu [%12.12s %5.3f %5.3f] findCell() index %6zu",
-					      ++ifc,i,cni.c_str(),etai,phii,chash,cnc.c_str(),etac,phic,cidx) << std::endl; 
+					      ++ifc,i,cni.c_str(),etai,phii,chash,cnc.c_str(),etac,phic,cidx) << '\n'; 
       }
       chkflg->set(chash);
     }
   }
-  logstream << "<end list>----------------------------------------------------------------" << std::endl;
+  logstream << "<end list>----------------------------------------------------------------\n";
   logstream.close();
 
   /////////////////////////
