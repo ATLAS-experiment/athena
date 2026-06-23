@@ -97,7 +97,7 @@ private:
   /** @brief Flag to assign active material on the chambers */
   Gaudi::Property<bool> m_assignActiveMaterial{this, "AssignActiveMaterial", false};
   /** @brief Flag to construct the passive material surfaces */
-  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", true};
+  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", false};
   /** @brief Number of bins in phi direction on the BI cylinder surface */
   Gaudi::Property<std::size_t> m_nPhiBinsBI{this, "nPhiBinsBI", 16};
   /** @brief Number of bins in Z direction on the BI cylinder surface */
