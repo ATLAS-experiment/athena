@@ -18,6 +18,7 @@
 
 #include <cassert>
 #include <string>
+#include <memory>
 
 class TestHistogramming : public AthHistogramming{
 public:
@@ -142,6 +143,98 @@ testBookEfficiency(TestHistogramming& hist){
   assert(std::string{retrieved->GetTitle()} == "title eff title postfix");
 }
 
+void
+testTH1NamePrefixMismatch(TestHistogramming& hist, const ServiceHandle<ITHistSvc>& histSvc){
+  std::cout << "testTH1NamePrefixMismatch\n";
+
+  const TH1F h{"prefixMismatch", "prefix mismatch title", 10, 0., 10.};
+
+  TH1* booked = hist.bookGetPointer(h);
+  assert(booked != nullptr);
+
+  TH1* retrieved = hist.hist("prefixMismatch");
+  assert(retrieved != nullptr);
+  assert(retrieved == booked);
+
+  /*
+    The histogram is registered under the prefixed/postfixed THistSvc path,
+    but the actual ROOT object name is currently not prefixed/postfixed.
+
+    This documents the inconsistency:
+      path/object lookup name: test_prefixMismatch_suffix
+      ROOT object name:        prefixMismatch
+  */
+  TH1* retrievedFromSvc = nullptr;
+  assert(histSvc->getHist("/AANT/test_prefixMismatch_suffix", retrievedFromSvc).isSuccess());
+  assert(retrievedFromSvc != nullptr);
+  assert(retrievedFromSvc == booked);
+
+  assert(std::string{retrievedFromSvc->GetName()} == "test_prefixMismatch_suffix");
+}
+
+
+void
+testTEfficiencyNamePrefixMismatch(TestHistogramming& hist,
+                                  const ServiceHandle<ITHistSvc>& histSvc){
+  std::cout << "testTEfficiencyNamePrefixMismatch\n";
+
+  TEfficiency eff{"effPrefixMismatch", "eff prefix mismatch title", 10, 0., 10.};
+
+  TEfficiency* booked = hist.bookGetPointer(eff);
+  assert(booked != nullptr);
+
+  TEfficiency* retrieved = hist.efficiency("effPrefixMismatch");
+  assert(retrieved != nullptr);
+  assert(retrieved == booked);
+
+  /*
+    As for TH1, the THistSvc registration path uses prefix/postfix,
+    while the actual TEfficiency object name currently does not.
+  */
+  TEfficiency* retrievedFromSvc = nullptr;
+  assert(histSvc->getEfficiency("/AANT/test_effPrefixMismatch_suffix", retrievedFromSvc).isSuccess());
+  assert(retrievedFromSvc != nullptr);
+  assert(retrievedFromSvc == booked);
+
+  assert(std::string{retrievedFromSvc->GetName()} == "test_effPrefixMismatch_suffix");
+}
+
+
+void
+testTH1DirectoryNameCacheMismatch(TestHistogramming& hist){
+  std::cout << "testTH1DirectoryNameCacheMismatch\n";
+
+  const TH1F h{"dir/cacheMismatch", "cache mismatch title", 10, 0., 10.};
+
+  TH1* booked = hist.bookGetPointer(h);
+  assert(booked != nullptr);
+
+  /*
+    During booking, buildBookingString strips "dir/" from the histogram name
+    before computing the hash. So the local cache entry is under:
+
+      hash("cacheMismatch")
+
+    A lookup by the stripped name therefore hits the cache.
+  */
+  TH1* retrievedByBareName = hist.hist("cacheMismatch");
+  assert(retrievedByBareName != nullptr);
+  assert(retrievedByBareName == booked);
+
+  /*
+    But hist("dir/cacheMismatch") computes its hash before normalising the
+    name, so it does not query the same cache key. With the current code this
+    will only work by falling through to THistSvc and then inserting another
+    cache entry under hash("dir/cacheMismatch").
+
+    This assertion documents the desired behaviour: the directory-qualified
+    lookup should be equivalent to the normalised lookup.
+  */
+  TH1* retrievedByQualifiedName = hist.hist("dir/cacheMismatch");
+  assert(retrievedByQualifiedName != nullptr);
+  assert(retrievedByQualifiedName == booked);
+}
+
 int
 main(){
   ISvcLocator* svcLoc = nullptr;
@@ -151,13 +244,7 @@ main(){
   assert(histSvc.retrieve().isSuccess());
 
   TestHistogramming hist{"AthHistogramming_test"};
-  assert(hist.config(histSvc,
-                     "AANT",
-                     "/",
-                     "test_",
-                     "_suffix",
-                     "title ",
-                     " postfix").isSuccess());
+  assert(hist.config(histSvc,"AANT","/","test_","_suffix","title "," postfix").isSuccess());
 
   testNullPointers(hist);
   testBookTH1(hist);
@@ -166,6 +253,10 @@ main(){
   testBookTree(hist);
   testBookGraph(hist);
   testBookEfficiency(hist);
+  //These document desired behaviour, but currently fail
+  //testTH1NamePrefixMismatch(hist, histSvc);
+  //testTEfficiencyNamePrefixMismatch(hist, histSvc);
+  //testTH1DirectoryNameCacheMismatch(hist);
 
   assert(histSvc.release().isSuccess());
 
