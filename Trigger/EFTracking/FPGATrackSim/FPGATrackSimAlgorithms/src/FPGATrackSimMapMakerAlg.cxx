@@ -157,11 +157,7 @@ StatusCode FPGATrackSimMapMakerAlg::readInputs(bool & done)
 
          // keep track of all etamods on the key layer for slicing
         if (isOnKeyLayer(1,det,bec,lyr)) {
-            if (m_key_etamods.count(eta) == 0) {
-                m_key_etamods.insert(std::pair<int, int>(eta, 1));
-            } else {
-                m_key_etamods[eta] += 1;
-            }
+            m_key_etamods[eta] += 1;
         }
 
         if (m_key2) // if doing 2D slicing
@@ -169,10 +165,8 @@ StatusCode FPGATrackSimMapMakerAlg::readInputs(bool & done)
 
         // Keep a global record of all modules as we see them, indexed by the ID tuple.
         Module mod = Module(det, bec, lyr, eta, phi);
-        if (m_modules.count(mod.moduleId()) == 0) {
-            m_modules.insert(std::pair<FPGATrackSimModuleId, Module>(mod.moduleId(), mod));
-        }
-        Module* modref = &(m_modules[mod.moduleId()]);
+        auto [it, inserted] = m_modules.try_emplace(mod.moduleId(), mod);
+        Module* modref = &(it->second);
 
         if (std::find(m_track2modules[hit.getEventIndex()].begin(), m_track2modules[hit.getEventIndex()].end(), modref) == m_track2modules[hit.getEventIndex()].end())
             m_track2modules[hit.getEventIndex()].push_back(modref);
@@ -202,92 +196,75 @@ StatusCode FPGATrackSimMapMakerAlg::writePmapAndRmap(std::vector<FPGATrackSimHit
 
     std::string pmap_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".pmap";
     ATH_MSG_INFO("Creating pmap: " << pmap_path);
-    m_pmap.open(pmap_path, std::ofstream::out);
+    std::ostringstream buffer;
  
-    m_pmap << m_geoTag.value() << "\n" << m_planes->size() << " logical_s1\n" << m_planes2->size() << " logical_s2\n";
-    m_pmap << m_pbmax+1 << " pixel barrel \n" << m_pemax[0]+1 << " pixel endcap+ \n" << m_pemax[1]+1 << " pixel endcap- \n";
-    m_pmap << m_sbmax+1 << " SCT barrel \n" << m_semax[0]+1 << " SCT endcap+\n" << m_semax[1]+1 << " SCT endcap-\n";
-    m_pmap << "! silicon endCap physDisk physLayer ['stereo' stripSide <strip only>] 'plane1' logiLayer1 'plane2' logiLayer2\n";
-    m_pmap << "\nregion " << reg << "\n";
+    buffer << m_geoTag.value() << "\n" << m_planes->size() << " logical_s1\n" << m_planes2->size() << " logical_s2\n";
+    buffer << m_pbmax+1 << " pixel barrel \n" << m_pemax[0]+1 << " pixel endcap+ \n" << m_pemax[1]+1 << " pixel endcap- \n";
+    buffer << m_sbmax+1 << " SCT barrel \n" << m_semax[0]+1 << " SCT endcap+\n" << m_semax[1]+1 << " SCT endcap-\n";
+    buffer << "! silicon endCap physDisk physLayer ['stereo' stripSide <strip only>] 'plane1' logiLayer1 'plane2' logiLayer2\n";
+    buffer << "\nregion " << reg << "\n";
 
     int p1,p2;
     for (int lyr = 0; lyr <= m_pbmax; lyr++) { // Pixel Barrel
         p1 = findPlane(m_planes, "pb" + std::to_string(lyr));
         p2 = findPlane(m_planes2, "pb" + std::to_string(lyr));
-        m_pmap << "pixel 0    -1    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
+        buffer << "pixel 0    -1    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_pemax[0]; lyr++) { // Pixel Postive Endap
         p1 = findPlane(m_planes, "pe" + std::to_string(lyr) + "+");
         p2 = findPlane(m_planes2, "pe" + std::to_string(lyr) + "+");
-        m_pmap << "pixel 1    " << lyr << "    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
+        buffer << "pixel 1    " << lyr << "    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_pemax[1]; lyr++) { // Pixel Negative Endcap
         p1 = findPlane(m_planes, "pe" + std::to_string(lyr) + "-");
         p2 = findPlane(m_planes2, "pe" + std::to_string(lyr) + "-");
-        m_pmap << "pixel 2    " << lyr << "    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
+        buffer << "pixel 2    " << lyr << "    " << lyr << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_sbmax; lyr++) { // Strip Barrel
         p1 = findPlane(m_planes, "sb" + std::to_string(lyr));
         p2 = findPlane(m_planes2, "sb" + std::to_string(lyr));
-        m_pmap << "SCT 0    -1    " << lyr << " stereo " <<  lyr % 2 << " plane1 "  << p1 << "    plane2 " << p2 << "\n";
+        buffer << "SCT 0    -1    " << lyr << " stereo " <<  lyr % 2 << " plane1 "  << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_semax[0]; lyr++) { // Strip Positive Endcap
         p1 = findPlane(m_planes, "se" + std::to_string(lyr) + "+");
         p2 = findPlane(m_planes2, "se" + std::to_string(lyr) + "+");
-        m_pmap << "SCT 1    "  << lyr/2 << "    " << lyr << " stereo " <<  lyr % 2 << " plane1 " << p1 << "    plane2 " << p2 << "\n";
+        buffer << "SCT 1    "  << lyr/2 << "    " << lyr << " stereo " <<  lyr % 2 << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
     for (int lyr = 0; lyr <= m_semax[1]; lyr++) { // Strip Negative Endcap
         p1 = findPlane(m_planes, "se" + std::to_string(lyr) + "-");
         p2 = findPlane(m_planes2, "se" + std::to_string(lyr) + "-");
-        m_pmap << "SCT 2    "  << lyr/2 << "    " << lyr << " stereo " <<  lyr % 2 << " plane1 " << p1 << "    plane2 " << p2 << "\n";
+        buffer << "SCT 2    "  << lyr/2 << "    " << lyr << " stereo " <<  lyr % 2 << " plane1 " << p1 << "    plane2 " << p2 << "\n";
     }
 
     // Region Map
     std::string rmap_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".rmap";
     ATH_MSG_INFO("Creating rmap: " << rmap_path);
-    m_rmap.open(rmap_path, std::ofstream::out);
-    m_rmap << "towers 1 phi 16\n\n0\n";
+    std::ofstream rmap(rmap_path, std::ofstream::out);
+    rmap << "towers 1 phi 16\n\n0\n";
 
-    m_rmap << makeRmapLines(pbHits, SiliconTech::pixel, DetectorZone::barrel, m_pbmax);
-    m_rmap << makeRmapLines(peHits, SiliconTech::pixel, DetectorZone::posEndcap, m_pemax[0]);
-    m_rmap << makeRmapLines(peHits, SiliconTech::pixel, DetectorZone::negEndcap, m_pemax[1]);
+    rmap << makeRmapLines(pbHits, SiliconTech::pixel, DetectorZone::barrel, m_pbmax);
+    rmap << makeRmapLines(peHits, SiliconTech::pixel, DetectorZone::posEndcap, m_pemax[0]);
+    rmap << makeRmapLines(peHits, SiliconTech::pixel, DetectorZone::negEndcap, m_pemax[1]);
 
-    m_rmap << makeRmapLines(sbHits, SiliconTech::strip, DetectorZone::barrel, m_sbmax);
-    m_rmap << makeRmapLines(seHits, SiliconTech::strip, DetectorZone::posEndcap, m_semax[0]);
-    m_rmap << makeRmapLines(seHits, SiliconTech::strip, DetectorZone::negEndcap, m_semax[1]);
+    rmap << makeRmapLines(sbHits, SiliconTech::strip, DetectorZone::barrel, m_sbmax);
+    rmap << makeRmapLines(seHits, SiliconTech::strip, DetectorZone::posEndcap, m_semax[0]);
+    rmap << makeRmapLines(seHits, SiliconTech::strip, DetectorZone::negEndcap, m_semax[1]);
 
-    m_pmap.close();
-    m_rmap.close();
+    rmap.close();
 
-    // Step 1: Read the entire contents of the file
-    std::ifstream inputFile(pmap_path);
-    if (!inputFile) {
-        ATH_MSG_ERROR("Error: Unable to open file for reading: " << pmap_path);
-        return StatusCode::FAILURE;
-    }
 
-    std::ostringstream buffer;
-    buffer << inputFile.rdbuf();  // Reading the entire file into the stringstream
-    std::string fileContent = buffer.str();
-    inputFile.close();
-
-    // Step 2: Concatenate the content n times
-    std::string newContent;
-    for (int i = 0; i < m_nSlices; ++i) {
-        newContent += fileContent;
-        newContent += '\n';
-    }
-
-    // Step 3: Write the new content back to the same file
+// Now write out to disk directly without reopening
     std::ofstream outputFile(pmap_path);
     if (!outputFile) {
         ATH_MSG_ERROR("Error: Unable to open file for writing: " << pmap_path);
         return StatusCode::FAILURE;
     }
 
-    outputFile << newContent;
+    std::string fileContent = buffer.str();
+    for (int i = 0; i < m_nSlices; ++i) {
+        outputFile << fileContent << '\n';
+    }
     outputFile.close();
-
     return StatusCode::SUCCESS;
 }
 
@@ -431,8 +408,8 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
     std::string subrmap_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".subrmap";
 
     ATH_MSG_INFO("Creating subrmap: " << subrmap_path);
-    m_subrmap.open(subrmap_path, std::ofstream::out);
-    m_subrmap << "towers " << m_nSlices.value() << " phi 16\n\n";
+    std::ofstream subrmap(subrmap_path, std::ofstream::out);
+    subrmap << "towers " << m_nSlices.value() << " phi 16\n\n";
 
     // Resize numTracks vector to be equal to the number of slices
     // Now that this just stores module pointers we could loop over m_modules instead.
@@ -490,18 +467,18 @@ StatusCode FPGATrackSimMapMakerAlg::writeSubrmap(std::vector<FPGATrackSimHit> co
 
     for (int s = 0; s < m_nSlices.value(); s++)
     {
-        m_subrmap << s << "\n";
-        m_subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::pixel, DetectorZone::barrel, m_pbmax);
-        m_subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::pixel, DetectorZone::posEndcap, m_pemax[0]);
-        m_subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::pixel, DetectorZone::negEndcap, m_pemax[1]);
+        subrmap << s << "\n";
+        subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::pixel, DetectorZone::barrel, m_pbmax);
+        subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::pixel, DetectorZone::posEndcap, m_pemax[0]);
+        subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::pixel, DetectorZone::negEndcap, m_pemax[1]);
 
-        m_subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::strip, DetectorZone::barrel, m_sbmax);
-        m_subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::strip, DetectorZone::posEndcap, m_semax[0]);
-        m_subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::strip, DetectorZone::negEndcap, m_semax[1]);
-        m_subrmap << "\n\n";
+        subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::strip, DetectorZone::barrel, m_sbmax);
+        subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::strip, DetectorZone::posEndcap, m_semax[0]);
+        subrmap << makeSubrmapLines(m_slice2modules[s], SiliconTech::strip, DetectorZone::negEndcap, m_semax[1]);
+        subrmap << "\n\n";
     }
 
-    m_subrmap.close();
+    subrmap.close();
     return StatusCode::SUCCESS;
 }
 
@@ -513,7 +490,7 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
     std::string etapat_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".patt";
 
     ATH_MSG_INFO("Creating eta patterns file: " << etapat_path);
-    m_etapat.open(etapat_path, std::ofstream::out);
+    std::ofstream etapat(etapat_path, std::ofstream::out);
 
     // assign logical layer to each module
     for (auto& pair: m_track2modules) {
@@ -545,10 +522,10 @@ StatusCode FPGATrackSimMapMakerAlg::writeEtaPatterns()
             }
         }
         if (planesDone == (m_planes)->size())
-            m_etapat << track_etapatts.str() << "\n";
+            etapat << track_etapatts.str() << "\n";
 
     }
-    m_etapat.close();
+    etapat.close();
     return StatusCode::SUCCESS;
 }
 
@@ -579,26 +556,26 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
     std::string radii_path = m_outFileName.value() + "region" + std::to_string(m_region) + "_radii.txt";
 
     ATH_MSG_INFO("Creating radii file: " << radii_path);
-    m_radfile.open(radii_path, std::ofstream::out);
+    std::ofstream radfile(radii_path, std::ofstream::out);
     for (int s = 0; s < m_nSlices.value(); s++){
-        m_radfile << std::to_string(s) << " ";
+        radfile << std::to_string(s) << " ";
         for (unsigned p = 0; p < (m_planes2)->size(); p++){
             if (m_radii[s][p].size() != 0){
                 // "If left to type inference, op operates on values of the same type as
                 // init which can result in unwanted casting of the iterator elements."
                 // https://en.cppreference.com/w/cpp/algorithm/accumulate
                 float avg = std::accumulate(m_radii[s][p].begin(), m_radii[s][p].end(), 0.0f) / float(m_radii[s][p].size());
-                m_radfile << std::setprecision(3) << std::fixed << avg << " ";
+                radfile << std::setprecision(3) << std::fixed << avg << " ";
             } else {
                 int avg = -1;
-                m_radfile << avg << " ";
+                radfile << avg << " ";
             }
         }
-        m_radfile << "\n";
+        radfile << "\n";
     }
 
     // Calculate global mean radii by reversing the order of the above two loops.
-    m_radfile << -1 << " ";
+    radfile << -1 << " ";
     for (unsigned p = 0; p < (m_planes2)->size(); p++) {
         float avg = 0;
         int count = 0;
@@ -610,14 +587,14 @@ StatusCode FPGATrackSimMapMakerAlg::writeRadiiFile(std::vector<FPGATrackSimHit> 
         }
         if (count > 0) {
             avg /= float(count);
-            m_radfile << std::setprecision(3) << std::fixed << avg << " ";
+            radfile << std::setprecision(3) << std::fixed << avg << " ";
         } else {
-            m_radfile << -1 << " ";
+            radfile << -1 << " ";
         }
     }
-    m_radfile << std::endl;
+    radfile << '\n';
 
-    m_radfile.close();
+    radfile.close();
 
     return StatusCode::SUCCESS;
 }
@@ -649,25 +626,25 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
     std::string zed_path = m_outFileName.value() + "region" + std::to_string(m_region) + "_z.txt";
 
     ATH_MSG_INFO("Creating median z file: " << zed_path);
-    m_zedfile.open(zed_path, std::ofstream::out);
+    std::ofstream zedfile(zed_path, std::ofstream::out);
     for (int s = 0; s < m_nSlices.value(); s++){
-        m_zedfile << std::to_string(s) << " ";
+        zedfile << std::to_string(s) << " ";
         for (unsigned p = 0; p < (m_planes2)->size(); p++){
             if (m_z[s][p].size() != 0){
                 float minZ = *std::min_element(m_z[s][p].begin(), m_z[s][p].end());
                 float maxZ = *std::max_element(m_z[s][p].begin(), m_z[s][p].end());
                 float median = (minZ + maxZ)/2;
-                m_zedfile << std::setprecision(3) << std::fixed << median << " ";
+                zedfile << std::setprecision(3) << std::fixed << median << " ";
             } else {
                 int median = -1;
-                m_zedfile << median << " ";
+                zedfile << median << " ";
             }
         }
-        m_zedfile << std::endl;
+        zedfile << '\n';
     }
 
     // Now do this globally. Note: should this be meanZ instead of medianZ in the forward region?
-    m_zedfile << -1 << " ";
+    zedfile << -1 << " ";
     for (unsigned p = 0; p < (m_planes2)->size(); p++) {
         float minZ = 0;
         float maxZ = 0;
@@ -689,15 +666,15 @@ StatusCode FPGATrackSimMapMakerAlg::writeMedianZFile(std::vector<FPGATrackSimHit
         }
         if (doneInitial) {
             float median = (minZ + maxZ)/2;
-            m_zedfile << std::setprecision(3) << std::fixed << median << " ";
+            zedfile << std::setprecision(3) << std::fixed << median << " ";
         } else {
             int median = -1;
-            m_zedfile << median << " ";
+            zedfile << median << " ";
         }
     }
-    m_zedfile << std::endl;
+    zedfile << '\n';
 
-    m_zedfile.close();
+    zedfile.close();
 
     return StatusCode::SUCCESS;
 }
@@ -726,7 +703,7 @@ void FPGATrackSimMapMakerAlg::drawSlices(std::vector<FPGATrackSimHit> const & al
     m_monitorFile->cd();
 
     std::vector<TH2F*> h_slicemap;
-    char *hname = new char[20];
+    char hname[20];
 
     for (unsigned i = 0; i < (unsigned)m_nSlices.value(); i++)
     {
@@ -747,7 +724,6 @@ void FPGATrackSimMapMakerAlg::drawSlices(std::vector<FPGATrackSimHit> const & al
     for (int i = 0; i < m_nSlices.value(); i++)
         h_slicemap[i]->Write();
 
-    delete [] hname;
 }
 
 bool FPGATrackSimMapMakerAlg::isOnKeyLayer(int keynum, SiliconTech t_det, DetectorZone t_bec, int lyr)
