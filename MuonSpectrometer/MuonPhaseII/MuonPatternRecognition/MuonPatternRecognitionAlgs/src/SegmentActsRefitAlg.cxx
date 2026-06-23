@@ -151,8 +151,9 @@ namespace MuonR4{
         auto& auxMeasHandle{*handleCreation};
         using Link_t = ElementLink<xAOD::MuonSegmentContainer>;
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, Link_t> dec_segLink{m_linkKey, ctx};
-        using ParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, 
-                                                xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>>;
+
+        using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(ParamDefs::nPars)>::element_type;
+        using ParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer,  SegPars_t>;
         
         ParDecor_t dec_locPars{m_localParsKey, ctx};
         ParDecor_t dec_seedPars{m_seedParsKey, ctx};

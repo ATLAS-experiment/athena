@@ -31,12 +31,12 @@ namespace CP
 
 
   StatusCode JetModifierAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.getCopy (jets, sys));
+      ANA_CHECK (m_jetHandle.getCopy (jets, sys, ctx));
       ANA_CHECK (m_modifierTool->modify (*jets));
     }
 

@@ -23,7 +23,7 @@ public:
   TauFilter(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode filterInitialize();
   StatusCode filterFinalize();
-  StatusCode filterEvent();
+  StatusCode filterEvent(const EventContext& ctx);
 
   CLHEP::HepLorentzVector sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& tau );
 

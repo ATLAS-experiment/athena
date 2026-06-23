@@ -122,9 +122,7 @@ public:
     m_deta2(deta*deta),
     m_dphi2(dphi*dphi),
     m_dzed2(dzed*dzed)
-  {
-    std::cout << "Associator: Best RZ Matcher" << std::endl;
-  } 
+  {  } 
 
   virtual ~Associator_BestDeltaRZMatcher() { } 
 
@@ -169,7 +167,7 @@ public:
     m_dphi2(dphi*dphi),
     m_dzed2(dzed*dzed)
   {
-    std::cout << "Associator: Best RZ Matcher" << std::endl;
+    //    std::cout << "Associator: Best RZ Matcher" << std::endl;
   } 
 
   virtual ~Associator_BestDeltaRZSinThetaMatcher() { } 
@@ -212,9 +210,7 @@ class Associator_BestSigmaMatcher : public Associator_BestMatcher {
 public:
 
   Associator_BestSigmaMatcher(const std::string& name, double dsigma=1) : 
-    Associator_BestMatcher(name, dsigma) 
-  { 
-    std::cout << "Associator: Best Sigma Matcher" << std::endl;
+    Associator_BestMatcher(name, dsigma)   { 
   } 
 
   virtual ~Associator_BestSigmaMatcher() { } 
@@ -244,12 +240,6 @@ public:
 
     return dr;
   }
-
-protected: 
-
-  double m_deta2;
-  double m_dphi2;
-  double m_dzed2;
 
 };
 

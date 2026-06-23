@@ -6,6 +6,7 @@ ignore_pattern=$2
 
 n_events=1
 input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-01/RDO_HIJING_ITk_lowstat.pool.root
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 echo "*** Running ACTS reconstruction with extra args: "${extraArgs}
 
@@ -20,6 +21,7 @@ Reco_tf.py \
 	       ${extraArgs}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsHeavyIonFlags" \
     --ignorePatterns "${ignore_pattern}" \
+    --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \

@@ -113,6 +113,20 @@ namespace CP {
     // check if input is of type tensor
     assert(input_tensor.IsTensor());
 
+    // debug block for ctests
+    if (msgLvl(MSG::DEBUG)) {
+      for (const auto* name : input_node_names) {
+        ATH_MSG_DEBUG("INPUT NAME = " << name);
+      }
+      for (const auto* name : output_node_names) {
+        ATH_MSG_DEBUG("OUTPUT NAME = " << name);
+      }
+      ATH_MSG_DEBUG("input tensor size = " << input_tensor_size);
+      for (auto dim : input_node_dims) {
+        ATH_MSG_DEBUG("input dim = " << dim);
+      }
+    }
+
     // run the inference
     auto output_tensors =
         sessionHandle->Run(Ort::RunOptions{nullptr}, input_node_names.data(),
@@ -245,15 +259,28 @@ namespace CP {
       m_mva2 = std::unique_ptr<TMVA::Reader>( std::move(mva2) );
     }
     else{ // assume only ONNX for now
+      // get the ONNX Runtime version in initialization
+      ATH_MSG_INFO("ONNX Runtime version: " << Ort::GetVersionString());
+
+      // create the environment object.
+      Ort::ThreadingOptions tp_options;
+      tp_options.SetGlobalIntraOpNumThreads(1);
+      tp_options.SetGlobalInterOpNumThreads(1);
+
       // create onnx environment
-      Ort::Env env;
+      m_env = std::make_unique< Ort::Env >(
+        tp_options, 
+        static_cast<OrtLoggingLevel>(m_ONNXLogLevel.value()), 
+        "PhotonVertexSelectionTool");
+      ATH_MSG_DEBUG( "Ort::Env object created" );
+
       // converted
-      std::tie(m_sessionHandle1, m_allocator1) = setONNXSession(env, m_ONNXModelFilePath1);
+      std::tie(m_sessionHandle1, m_allocator1) = setONNXSession(*m_env, m_ONNXModelFilePath1);
       std::tie(m_input_node_dims1,  m_input_node_names1 ) = getInputNodes( m_sessionHandle1, m_allocator1);
       std::tie(m_output_node_dims1, m_output_node_names1) = getOutputNodes(m_sessionHandle1, m_allocator1);
 
       // unconverted
-      std::tie(m_sessionHandle2, m_allocator2) = setONNXSession(env, m_ONNXModelFilePath2);
+      std::tie(m_sessionHandle2, m_allocator2) = setONNXSession(*m_env, m_ONNXModelFilePath2);
       std::tie(m_input_node_dims2,  m_input_node_names2 ) = getInputNodes( m_sessionHandle2, m_allocator2);
       std::tie(m_output_node_dims2, m_output_node_names2) = getOutputNodes(m_sessionHandle2, m_allocator2);
     }
@@ -275,6 +302,16 @@ namespace CP {
     renounce (m_sumPtKey);
 #endif
 
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode PhotonVertexSelectionTool::finalize() {
+
+    // Delete the environment object.
+    m_env.reset();
+    ATH_MSG_DEBUG( "Ort::Env object deleted" );
+
+    // Return gracefully.
     return StatusCode::SUCCESS;
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RatesAnalysis includes
@@ -730,7 +730,7 @@ StatusCode RatesAnalysisAlg::execute(const EventContext& ctx) {
     ATH_MSG_INFO( "Event " << m_eventCounter << " " << m_weightingValues.print() << " currentWallTime:" << m_ratesDenominator );
   }
 
-  setFilterPassed(true); //if got here, assume that means algorithm passed
+  setFilterPassed(true, ctx); //if got here, assume that means algorithm passed
   return StatusCode::SUCCESS;
 }
 

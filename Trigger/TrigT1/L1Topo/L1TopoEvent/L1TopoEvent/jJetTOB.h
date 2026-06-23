@@ -3,10 +3,10 @@
 #ifndef JJETTOB_H
 #define JJETTOB_H
 
-#include <iostream>
 
 #include "L1TopoEvent/BaseTOB.h"
 #include "L1TopoEvent/Heap.h"
+#include <iosfwd>
 
 
 namespace TCS {
@@ -17,13 +17,13 @@ namespace TCS {
    public:
       
       // default constructor
-      jJetTOB(uint32_t roiWord = 0, const std::string& tobName = "jJetTOB");
+      jJetTOB(uint32_t roiWord = 0, std::string_view tobName = "jJetTOB");
 
       // copy constructor
       jJetTOB(const jJetTOB & jet);
 
       // constructor with initial values
-      jJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, const std::string& tobName = "jJetTOB" );
+      jJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, std::string_view tobName = "jJetTOB" );
 
       // destructor
       virtual ~jJetTOB();

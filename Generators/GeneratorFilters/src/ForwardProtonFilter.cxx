@@ -30,7 +30,7 @@ ForwardProtonFilter::ForwardProtonFilter(const std::string& name, ISvcLocator* p
 }
 
 
-StatusCode ForwardProtonFilter::filterEvent() {
+StatusCode ForwardProtonFilter::filterEvent(const EventContext& ctx) {
   bool accepted_A = false;
   bool accepted_C = false;
 
@@ -72,6 +72,6 @@ StatusCode ForwardProtonFilter::filterEvent() {
   }
 
   // If we get here the event doesn't pass the criteria
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

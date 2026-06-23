@@ -57,7 +57,7 @@ StatusCode PrintMC::execute(const EventContext& ctx) {
 
   // Loop over all events in McEventCollection
 
-  for (const HepMC::GenEvent* evt : *events_const()) {
+  for (const HepMC::GenEvent* evt : *events_const(ctx)) {
 
     // Get event number from HepMC
     uint64_t evtnum = std::max(0,evt->event_number());
@@ -96,7 +96,6 @@ StatusCode PrintMC::execute(const EventContext& ctx) {
                 << ( HepMC::signal_process_vertex(evt) ? HepMC::barcode(HepMC::signal_process_vertex(evt)) : 0 ) << "\n";
       std::cout << " Entries this event: " << evt->vertices_size() << " vertices, "
                 << evt->particles_size() << " particles.\n";
-#ifdef HEPMC3
       if (evt->heavy_ion()) {
         std::cout << " HeavyIon: jatt=" << evt->heavy_ion()->Ncoll_hard
                   << " np=" << evt->heavy_ion()->Npart_proj
@@ -142,54 +141,6 @@ StatusCode PrintMC::execute(const EventContext& ctx) {
         std::cout << "PdfInfo: EMPTY"
 		  << std::endl;
       }
-#else
-      if (evt->heavy_ion()) {
-        std::cout << " HeavyIon: jatt=" << evt->heavy_ion()->Ncoll_hard()
-                  << " np=" << evt->heavy_ion()->Npart_proj()
-                  << " nt=" << evt->heavy_ion()->Npart_targ()
-                  << " ncoll=" << evt->heavy_ion()->Ncoll()
-                  << " specn=" << evt->heavy_ion()->spectator_neutrons()
-                  << " specp=" << evt->heavy_ion()->spectator_protons()
-                  << " n01=" << evt->heavy_ion()->N_Nwounded_collisions()
-                  << " n10=" << evt->heavy_ion()->Nwounded_N_collisions()
-                  << " n11=" << evt->heavy_ion()->Nwounded_Nwounded_collisions()
-                  << " impact=" << evt->heavy_ion()->impact_parameter()
-                  << " evplane=" << evt->heavy_ion()->event_plane_angle()
-                  << " ecc=" << evt->heavy_ion()->eccentricity()
-                  << " sigmaNNinel=" << evt->heavy_ion()->sigma_inel_NN()
-		  << std::endl;
-      }
-      else {
-        std::cout << "HeavyIon: EMPTY"
-		  << std::endl;
-      }
-
-
-      // Weights
-      std::cout << " Weights(" << evt->weights().size() << ")=";
-      for (double w :  evt->weights()) {
-        std::cout << w << " ";
-      }
-      std::cout << "\n";
-      std::cout << " EventScale " << evt->event_scale()
-                << " [energy] \t alphaQCD=" << evt->alphaQCD()
-                << "\t alphaQED=" << evt->alphaQED() << std::endl;
-
-      if (evt->pdf_info()) {
-        std::cout << "PdfInfo: id1=" << evt->pdf_info()->id1()
-                  << " id2=" << evt->pdf_info()->id2()
-                  << " x1=" << evt->pdf_info()->x1()
-                  << " x2=" << evt->pdf_info()->x2()
-                  << " q=" << evt->pdf_info()->scalePDF()
-                  << " xpdf1=" << evt->pdf_info()->pdf1()
-                  << " xpdf2=" << evt->pdf_info()->pdf2()
-		  << std::endl;
-      }
-      else {
-        std::cout << "PdfInfo: EMPTY"
-		  << std::endl;
-      }
-#endif
 
       // Print a legend to describe the particle info
       char particle_legend[120];

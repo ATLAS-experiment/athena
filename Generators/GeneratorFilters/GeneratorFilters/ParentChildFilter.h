@@ -13,7 +13,7 @@ public:
 
   ParentChildFilter(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode filterInitialize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 
@@ -30,19 +30,6 @@ private:
   double m_PtMinChild;
   double m_EtaRangeChild;
 
-#ifdef HEPMC3
-
-#else
-  /** calculate the rapidity of a particle */
-  inline double getRapidity(const HepMC::GenParticle* p) const {
-    double e = (p)->momentum().e();
-    double pz = (p)->momentum().pz();
-    if (e == pz) return 9999.;
-    if (e == -pz) return -9999.;
-    double rapidity = 0.5 * log((e + pz) / (e - pz));
-    return rapidity;
-  };
-#endif
 };
 
 #endif

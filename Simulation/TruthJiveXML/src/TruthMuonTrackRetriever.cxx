@@ -9,8 +9,6 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "TrackRecord/TrackRecord.h"
 #include "TrackRecord/TrackRecordCollection.h"
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
 #include "CLHEP/Geometry/Point3D.h"
 #include "CLHEP/Geometry/Vector3D.h"
 #include "CLHEP/Units/SystemOfUnits.h"

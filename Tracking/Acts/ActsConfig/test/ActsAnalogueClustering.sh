@@ -3,12 +3,14 @@
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 n_events=2
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
   --preExec 'flags.Exec.FPE=-1;' 'from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.AnalogueClustering' \
+  --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
   --outputAODFile test.AOD.pool.root  \
   --maxEvents ${n_events} \

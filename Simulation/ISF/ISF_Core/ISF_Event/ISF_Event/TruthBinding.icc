@@ -31,33 +31,21 @@ namespace ISF {
 
     const auto rhsTruth = rhs.getCurrentGenParticle();
     if (m_truthParticle && rhsTruth) {
-#ifdef HEPMC3
       pass &= (m_truthParticle == rhsTruth);
-#else
-      pass &= *m_truthParticle == *rhsTruth;
-#endif
     } else {
       return false;
     }
 
     const auto rhsPrimary = rhs.getPrimaryGenParticle();
     if (m_primaryGenParticle && rhsPrimary) {
-#ifdef HEPMC3
       pass &= (m_primaryGenParticle == rhsPrimary);
-#else
-      pass &= *m_primaryGenParticle == *rhsPrimary;
-#endif
     } else {
       return false;
     }
 
     const auto rhsGenZero = rhs.getGenerationZeroGenParticle();
     if (m_generationZeroGenParticle && rhsGenZero) {
-#ifdef HEPMC3
       pass &= (m_generationZeroGenParticle == rhsGenZero);
-#else
-      pass &= *m_generationZeroGenParticle == *rhsGenZero;
-#endif
     } else {
       return false;
     }

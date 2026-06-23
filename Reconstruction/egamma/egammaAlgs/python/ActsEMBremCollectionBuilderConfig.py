@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -33,6 +33,11 @@ def ActsEMBremCollectionBuilderCfg(flags,
                       flags.Egamma.Keys.Output.TrkPartContainerName)
     kwargs.setdefault("TrackParticleContainerName", "InDetTrackParticles")
     kwargs.setdefault("TrackParticlesOutKey", "GSFTrackParticles")
+
+    kwargs.setdefault("doTruth", flags.Input.isMC)
+    kwargs.setdefault("usePixel", flags.Detector.GeometryITkPixel)
+    kwargs.setdefault("useStrip", flags.Detector.GeometryITkStrip)
+    kwargs.setdefault("useHGTD", flags.Reco.EnableHGTDExtension)
 
     alg = CompFactory.ActsEMBremCollectionBuilder(name, **kwargs)
     acc.addEventAlgo(alg)

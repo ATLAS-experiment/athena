@@ -62,14 +62,14 @@ namespace CP
 
 
 
-  StatusCode TrigMatchingAlg::execute()
+  StatusCode TrigMatchingAlg::execute(const EventContext& ctx)
   {
 
   for (const auto & syst : m_systematicsList.systematicsVector())
     {
     const xAOD::IParticleContainer* particles(nullptr);
 
-      if (m_particlesHandle)  ANA_CHECK(m_particlesHandle.retrieve(particles, syst));
+      if (m_particlesHandle)  ANA_CHECK(m_particlesHandle.retrieve(particles, syst, ctx));
 
       ATH_MSG_DEBUG("Retrieving " << m_particlesHandle.getName(syst));
 

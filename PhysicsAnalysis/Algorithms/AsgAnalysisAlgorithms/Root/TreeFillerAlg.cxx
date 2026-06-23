@@ -23,7 +23,7 @@
 
 namespace CP {
 
-   StatusCode TreeFillerAlg::execute() {
+   StatusCode TreeFillerAlg::execute(const EventContext& /*ctx*/) {
       // get the output tree for the first time
       if( ! m_tree ) {
          m_tree = tree( m_treeName );

@@ -26,11 +26,11 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode NLargeRJetMassWindowSelectorAlg::execute() {
+  StatusCode NLargeRJetMassWindowSelectorAlg::execute(const EventContext& ctx) {
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_decoration.setBool(*evtInfo, 0, sys);
@@ -41,7 +41,7 @@ namespace CP {
 
       // retrieve the large-R jet container
       const xAOD::IParticleContainer *ljets = nullptr;
-      ANA_CHECK(m_ljetsHandle.retrieve(ljets, sys));
+      ANA_CHECK(m_ljetsHandle.retrieve(ljets, sys, ctx));
 
       // apply selection and calculate the jet-wise decision
       int count = 0;

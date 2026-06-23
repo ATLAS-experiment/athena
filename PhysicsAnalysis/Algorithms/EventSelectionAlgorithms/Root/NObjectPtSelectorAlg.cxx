@@ -26,14 +26,14 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode NObjectPtSelectorAlg::execute() {
+  StatusCode NObjectPtSelectorAlg::execute(const EventContext& ctx) {
     // accessors
     static const SG::ConstAccessor<float> acc_pt_dressed("pt_dressed");
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
       // retrieve the EventInfo
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys));
+      ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, sys, ctx));
 
       // default-decorate EventInfo
       m_decoration.setBool(*evtInfo, 0, sys);
@@ -44,7 +44,7 @@ namespace CP {
 
       // retrieve the object container
       const xAOD::IParticleContainer *objects = nullptr;
-      ANA_CHECK(m_objectsHandle.retrieve(objects, sys));
+      ANA_CHECK(m_objectsHandle.retrieve(objects, sys, ctx));
 
       // apply and calculate the decision
       int count = 0;

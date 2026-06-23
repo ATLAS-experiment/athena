@@ -4,7 +4,7 @@
 */
 #include "BucketInferenceToolBase.h"
 
-#include "AthOnnxComps/OnnxRuntimeSessionToolCUDA.h"
+#include "InferenceUtils.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -71,15 +71,13 @@ StatusCode BucketInferenceToolBase::setupModel() {
   ATH_CHECK(m_readKey.initialize());
   ATH_CHECK(m_geoCtxKey.initialize());
 
-  // Detect CUDA provider by dynamic-casting the concrete session tool.
-  if (const auto* cudaTool = dynamic_cast<const AthOnnx::OnnxRuntimeSessionToolCUDA*>(
-          m_onnxSessionTool.get())) {
-    m_isCuda       = true;
-    m_cudaDeviceId = cudaTool->deviceId();
+  const InferenceUtils::SessionBackend backend = InferenceUtils::sessionBackend(m_onnxSessionTool);
+  m_isCuda = backend.isCuda;
+  m_cudaDeviceId = backend.cudaDeviceId;
+  if (m_isCuda) {
     ATH_MSG_INFO("ONNX session is running on CUDA device " << m_cudaDeviceId
                  << ". I/O binding will be used.");
   } else {
-    m_isCuda = false;
     ATH_MSG_INFO("ONNX session is running on CPU.");
   }
 

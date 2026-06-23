@@ -668,7 +668,7 @@ protected:
 
     /// clone the asociator
 
-    TrackAssociator* associator = m_associator->clone();
+    std::unique_ptr<TrackAssociator> associator = m_associator->uclone();
 
     //    std::cout << "\tloop() loop over chains proper ..." << std::endl;
 
@@ -1042,7 +1042,7 @@ protected:
 	  /// match test and reference tracks
 	  associator->match( test_tracks, ref_tracks );
 	  
-	  m_manalysis->execute( test_tracks, ref_tracks, associator, eventp, beamline );
+	  m_manalysis->execute( test_tracks, ref_tracks, associator.get(), eventp, beamline );
 
 	}
 	else { 
@@ -1071,7 +1071,7 @@ protected:
 	  /// we can do without this functionality, so leave the code in place until we either 
 	  /// fix it properly in the future, or determine that it is not needed 
 	  //	  m_manalysis->setroi( &rois.at(iroi)->roi() );  
-	  m_manalysis->execute( ref_tracks, test_tracks, associator, eventp, beamline, &(rois.at(iroi)->roi()) );
+	  m_manalysis->execute( ref_tracks, test_tracks, associator.get(), eventp, beamline, &(rois.at(iroi)->roi()) );
 
 	  if ( vtx_name!="" ) { 
 	    /// get vertices for this roi - have to copy to a vector<Vertex*>
@@ -1103,7 +1103,7 @@ protected:
 
     }
     
-    delete associator;
+    //    delete associator;
 
     if ( m_provider->msg().level() <= MSG::VERBOSE ) {
       m_provider->msg(MSG::VERBOSE) << "\n\nEvent " << *eventp << endmsg;

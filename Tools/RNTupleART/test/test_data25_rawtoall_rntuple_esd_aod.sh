@@ -9,21 +9,20 @@
 # art-output: log.*
 # art-athena-mt: 8
 
-NEVENTS="540"
-
-conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA23)")
+RAW_File=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RAW_RUN3_DATA25[0])")
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA25)")
+geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
 
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Reco_tf.py \
-  --maxEvents="${NEVENTS}" \
-  --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/RAW/data23_13p6TeV.00452463.physics_Main.daq.RAW/540events.data23_13p6TeV.00452463.physics_Main.daq.RAW._lb0514._SFO-16._0004.data" \
+  --inputBSFile="${RAW_File}" \
   --outputAODFile="myAOD.pool.root" \
   --outputESDFile="myESD.pool.root" \
   --multithreaded="True" \
   --autoConfiguration="everything" \
-  --conditionsTag="all:${conditionsTag}" \
-  --geometryVersion="all:ATLAS-R3S-2021-03-02-00" \
+  --conditionsTag="all:${conditions}" \
+  --geometryVersion="all:${geometry}" \
   --steering="doRAWtoALL" \
   --preExec="flags.Output.DefaultContainerType=\"ROOTRNTUPLE\";";
 

@@ -32,7 +32,7 @@ namespace CP
         BTaggingTriggerMatchingAlg(const std::string &name,
                     ISvcLocator *svcLoc = nullptr);
         StatusCode initialize () override;
-        StatusCode execute () override;
+        StatusCode execute (const EventContext& ctx) override;
 
     private:
         #ifndef XAOD_STANDALONE

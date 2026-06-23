@@ -60,18 +60,17 @@ CLHEP::HepRandomEngine* xAODChargedTracksWeightFilter::getRandomEngine(const std
 }
 
 
-StatusCode xAODChargedTracksWeightFilter::filterEvent() {
+StatusCode xAODChargedTracksWeightFilter::filterEvent(const EventContext& ctx) {
 
     // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
     // duplicated barcode ones
-    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
     CHECK(xTruthParticleContainer.isValid());
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     CLHEP::HepRandomEngine* rndmGen = this->getRandomEngine(name(), ctx);
     if (!rndmGen) {
       ATH_MSG_WARNING("Failed to retrieve random number engine " << name());
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::FAILURE;
     }
 
@@ -108,13 +107,13 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
 
     // get event weight from the McEventCollection, used to determine efficiency of weight-filtering and cuts
     double orig_event_weight = 1;
-    CHECK(event_weight(orig_event_weight));
+    CHECK(event_weight(orig_event_weight, ctx));
 
     const auto selection = (((nChargedTracks <= m_nchmax)) && (nChargedTracks >= m_nchmin));
 
 
     if(!selection) {
-        setFilterPassed(false);
+        setFilterPassed(false, ctx);
         return StatusCode::SUCCESS;
     }
 
@@ -139,10 +138,10 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
 
         weight_event(weight);
 
-        setFilterPassed(true);
+        setFilterPassed(true, ctx);
 
         double final_event_weight = 1; 
-        CHECK(event_weight(final_event_weight));
+        CHECK(event_weight(final_event_weight, ctx));
 
         ATH_MSG_DEBUG("Event accepted nch: " << nChargedTracks 
                 << " nch weight: " << weight 
@@ -152,7 +151,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
         return StatusCode::SUCCESS;
     }
 
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
 }
 
@@ -184,9 +183,7 @@ void xAODChargedTracksWeightFilter::weight_event(double weight) {
                 w /= weight;
             }
 
-#ifdef HEPMC3
       event->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(1/weight));
-#endif
         }
 
     }
@@ -277,11 +274,11 @@ StatusCode xAODChargedTracksWeightFilter::Spline::initialize( std::vector<double
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODChargedTracksWeightFilter::event_weight(double & event_weight) const {
+StatusCode xAODChargedTracksWeightFilter::event_weight(double & event_weight, const EventContext& ctx) const {
 
     event_weight = 1;
 
-    auto first_event = event_const();
+    auto first_event = event_const(ctx);
 
     if(!first_event){
         ATH_MSG_ERROR("No events in McEventCollection");

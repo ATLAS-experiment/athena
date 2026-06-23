@@ -31,7 +31,7 @@ StatusCode MassRangeFilter::filterInitialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode MassRangeFilter::filterEvent() {
+StatusCode MassRangeFilter::filterEvent(const EventContext& ctx) {
   double invMassMax = 0.;
   bool samePDGID = (std::abs(m_PartId) == std::abs(m_PartId2));
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
@@ -65,6 +65,6 @@ StatusCode MassRangeFilter::filterEvent() {
     } //pitr1
   } //McEventCollection
 
-  setFilterPassed(m_InvMassMin <= invMassMax && invMassMax < m_InvMassMax);
+  setFilterPassed(m_InvMassMin <= invMassMax && invMassMax < m_InvMassMax, ctx);
   return StatusCode::SUCCESS;
 }

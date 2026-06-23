@@ -92,6 +92,12 @@ namespace InDetAlignment
     m_ScalePixelIBL(1.),
     m_ScalePixelDBM(1.),
 	m_IBLBowingTshift(0.),
+	m_targetLayer(0),
+	m_targetLayerMax(-999),
+	m_endcapShiftConvention("outward"),
+	m_radialShift(0.),
+	m_radialShiftConvention("outward"),
+	m_radialSubdetector("Pixel"),
 	m_ScalePixelBarrel(1.),
 	m_ScalePixelEndcap(1.),
 	m_ScaleSCTBarrel(1.),
@@ -121,6 +127,12 @@ namespace InDetAlignment
         declareProperty("ScalePixelIBL"                 ,     m_ScalePixelIBL);
         declareProperty("ScalePixelDBM"                 ,     m_ScalePixelDBM);
 		declareProperty("IBLBowingTshift"               ,     m_IBLBowingTshift);
+		declareProperty("TargetLayer"                   ,     m_targetLayer);
+		declareProperty("TargetLayerMax"                ,     m_targetLayerMax);
+		declareProperty("EndcapShiftConvention"         ,     m_endcapShiftConvention);
+		declareProperty("RadialShift"                   ,     m_radialShift);
+		declareProperty("RadialShiftConvention"         ,     m_radialShiftConvention);
+		declareProperty("RadialSubdetector"             ,     m_radialSubdetector);
 		declareProperty("ScalePixelBarrel"              ,     m_ScalePixelBarrel);
 		declareProperty("ScalePixelEndcap"              ,     m_ScalePixelEndcap);
 		declareProperty("ScaleSCTBarrel"                ,     m_ScaleSCTBarrel);
@@ -463,6 +475,9 @@ namespace InDetAlignment
 		 1: Misalignment of whole InDet by 6 parameters
 		 2: random misalignment
                  3: IBL-stave temperature dependent bowing		 
+                 41: ITk endcap beam-pipe z shift
+                 42: ITk pixel barrel layer bowing
+                 43: ITk barrel radial expansion/contraction
 
 		 ====================================================
 		 Global Distortions according to David Brown (LHC Detector Alignment Workshop 2006-09-04, slides page 11)
@@ -507,6 +522,22 @@ namespace InDetAlignment
                         ATH_MSG_FATAL(m_SCTDetEleCollKey.fullKey() << " is not available.");
                         return StatusCode::FAILURE;
                     }
+                }
+
+                double mode42BowingAnchorAbsZ = 0.;
+                if (m_MisalignmentMode == 42) {
+                  for (std::map<Identifier, HepGeom::Point3D<double> >::const_iterator anchorIter = m_ModuleList.begin();
+                       anchorIter != m_ModuleList.end(); ++anchorIter) {
+                    const Identifier& anchorModuleID = anchorIter->first;
+                    if (m_idHelper->is_pixel(anchorModuleID) &&
+                        m_pixelIdHelper->is_barrel(anchorModuleID) &&
+                        m_pixelIdHelper->layer_disk(anchorModuleID) == m_targetLayer) {
+                      const double absZ = std::abs(anchorIter->second.z());
+                      if (absZ > mode42BowingAnchorAbsZ) mode42BowingAnchorAbsZ = absZ;
+                    }
+                  }
+                  ATH_MSG_INFO( "Mode 42 bowing endpoint anchor |z| = "
+                                << mode42BowingAnchorAbsZ / CLHEP::mm << " mm" );
                 }
 		
 		for (std::map<Identifier, HepGeom::Point3D<double> >::const_iterator iter = m_ModuleList.begin(); iter != m_ModuleList.end(); ++iter) {
@@ -688,6 +719,115 @@ namespace InDetAlignment
                           parameterizedTrafo = HepGeom::Translate3D(deltaX,0,0); // translation in x direction                                          
                         }
 
+                        else if (m_MisalignmentMode == 41) {
+                          // ITk endcap shift along the beam pipe. This is a global z translation;
+                          // it is converted to the local module frame later with the other global modes.
+                          int barrelEC = 0;
+                          if (m_idHelper->is_pixel(ModuleID)) barrelEC = m_pixelIdHelper->barrel_ec(ModuleID);
+                          if (m_idHelper->is_sct(ModuleID))   barrelEC = m_sctIdHelper->barrel_ec(ModuleID);
+
+                          double deltaZ = 0.;
+                          if ((m_idHelper->is_pixel(ModuleID) || m_idHelper->is_sct(ModuleID)) && barrelEC != 0) {
+                            const double inputZ = m_local_translation.size() > 2 ? m_local_translation[2] : 0.;
+                            const double sideSign = barrelEC > 0 ? 1. : -1.;
+
+                            if (m_endcapShiftConvention == "outward") {
+                              deltaZ = sideSign * inputZ;
+                            } else if (m_endcapShiftConvention == "inward") {
+                              deltaZ = -sideSign * inputZ;
+                            } else if (m_endcapShiftConvention == "plusZ") {
+                              deltaZ = inputZ;
+                            } else if (m_endcapShiftConvention == "minusZ") {
+                              deltaZ = -inputZ;
+                            } else {
+                              ATH_MSG_WARNING( "Unknown EndcapShiftConvention " << m_endcapShiftConvention
+                                               << "; using outward" );
+                              deltaZ = sideSign * inputZ;
+                            }
+                          } else {
+                            ATH_MSG_DEBUG( "will not move this module for ITk endcap z shift " );
+                          }
+
+                          ATH_MSG_DEBUG( "deltaZ for this module: " << deltaZ / CLHEP::micrometer << " um" );
+                          parameterizedTrafo = HepGeom::Translate3D(0, 0, deltaZ);
+                        }
+
+                        else if (m_MisalignmentMode == 42) {
+                          // ITk pixel barrel layer bowing. The bowing function is parameterized in global z.
+                          double deltaX = 0.;
+
+                          if (m_idHelper->is_pixel(ModuleID) &&
+                              m_pixelIdHelper->is_barrel(ModuleID) &&
+                              m_pixelIdHelper->layer_disk(ModuleID) == m_targetLayer) {
+                            const double bowingP1 = getBowingMagParam(m_IBLBowingTshift);
+                            const double rawDeltaX = getBowingTx(bowingP1, z);
+                            const double anchorZ = (z >= 0.) ? mode42BowingAnchorAbsZ : -mode42BowingAnchorAbsZ;
+                            const double edgeDeltaX = getBowingTx(bowingP1, anchorZ);
+                            deltaX = rawDeltaX - edgeDeltaX;
+                          } else {
+                            ATH_MSG_DEBUG( "will not move this module for ITk pixel barrel bowing " );
+                          }
+
+                          ATH_MSG_DEBUG( "deltaX for this module: " << deltaX / CLHEP::micrometer << " um" );
+                          parameterizedTrafo = HepGeom::Translate3D(deltaX, 0, 0);
+                        }
+
+                        else if (m_MisalignmentMode == 43) {
+                          // ITk barrel radial expansion/contraction. This is a global radial translation;
+                          // it is converted to the local module frame later with the other global modes.
+                          const bool isPixelBarrel = m_idHelper->is_pixel(ModuleID) && m_pixelIdHelper->is_barrel(ModuleID);
+                          const bool isStripBarrel = m_idHelper->is_sct(ModuleID) && m_sctIdHelper->is_barrel(ModuleID);
+
+                          const bool selectPixel = (m_radialSubdetector == "Pixel" || m_radialSubdetector == "pixel" ||
+                                                    m_radialSubdetector == "Both"  || m_radialSubdetector == "both");
+                          const bool selectStrip = (m_radialSubdetector == "Strip" || m_radialSubdetector == "strip" ||
+                                                    m_radialSubdetector == "Both"  || m_radialSubdetector == "both");
+
+                          int layer = -999;
+                          if (isPixelBarrel) layer = m_pixelIdHelper->layer_disk(ModuleID);
+                          if (isStripBarrel) layer = m_sctIdHelper->layer_disk(ModuleID);
+
+                          const bool selectedSubdetector = (isPixelBarrel && selectPixel) || (isStripBarrel && selectStrip);
+
+                          bool selectedLayer = false;
+                          if (m_targetLayer < 0) {
+                            // TargetLayer=-1 means all barrel layers.
+                            selectedLayer = true;
+                          } else if (m_targetLayerMax >= m_targetLayer) {
+                            // Layer range, e.g. TargetLayer=0 TargetLayerMax=1.
+                            selectedLayer = (layer >= m_targetLayer && layer <= m_targetLayerMax);
+                          } else {
+                            // Default behaviour: one layer only.
+                            selectedLayer = (layer == m_targetLayer);
+                          }
+
+                          double deltaR = 0.;
+                          double deltaX = 0.;
+                          double deltaY = 0.;
+
+                          if (selectedSubdetector && selectedLayer && r > 0.) {
+                            if (m_radialShiftConvention == "outward") {
+                              deltaR = m_radialShift;
+                            } else if (m_radialShiftConvention == "inward") {
+                              deltaR = -m_radialShift;
+                            } else if (m_radialShiftConvention == "signed") {
+                              deltaR = m_radialShift;
+                            } else {
+                              ATH_MSG_WARNING( "Unknown RadialShiftConvention " << m_radialShiftConvention
+                                               << "; using outward" );
+                              deltaR = m_radialShift;
+                            }
+
+                            deltaX = deltaR * center.x() / r;
+                            deltaY = deltaR * center.y() / r;
+                          } else {
+                            ATH_MSG_DEBUG( "will not move this module for ITk barrel radial shift " );
+                          }
+
+                          ATH_MSG_DEBUG( "deltaR for this module: " << deltaR / CLHEP::micrometer << " um" );
+                          parameterizedTrafo = HepGeom::Translate3D(deltaX, deltaY, 0);
+                        }
+
  		else if (m_MisalignmentMode == 7) {
                  
 		  std::string module_str;
@@ -859,7 +999,7 @@ namespace InDetAlignment
 				
 				
 				
-			} else if (m_MisalignmentMode==2 || m_MisalignmentMode==3 || m_MisalignmentMode==7) //random misalignment in local frame
+			} else if (m_MisalignmentMode==2 || m_MisalignmentMode==3 || m_MisalignmentMode==7 || m_MisalignmentMode==42) //random misalignment in local frame
 			{
 				alignmentTrafo = parameterizedTrafo;
 			}

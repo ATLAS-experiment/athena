@@ -212,7 +212,7 @@ AsgElectronEfficiencyCorrectionTool::initialize()
     if (ifile.find("efficiencySF.offline.Fwd") != std::string::npos) {
       m_sysSubstring = "FwdID_";
     }
-    if (ifile.find("efficiencySF.Isolation") != std::string::npos) {
+    if (ifile.find("efficiencySF.Isolation") != std::string::npos || ifile.find("efficiencySF.isolation") != std::string::npos) {
       m_sysSubstring = "Iso_";
     }
     if (ifile.find("efficiency.") != std::string::npos) {

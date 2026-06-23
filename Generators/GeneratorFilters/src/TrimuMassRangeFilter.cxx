@@ -68,7 +68,7 @@ StatusCode TrimuMassRangeFilter::filterFinalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrimuMassRangeFilter::filterEvent() {
+StatusCode TrimuMassRangeFilter::filterEvent(const EventContext& ctx) {
 
   ATH_MSG_INFO( " TEST MESSAGE "  );
 
@@ -156,6 +156,6 @@ StatusCode TrimuMassRangeFilter::filterEvent() {
   ATH_MSG_INFO( "TrimuMassRangeFilter not passed at all"  );
 
   //Haven't found anything...
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

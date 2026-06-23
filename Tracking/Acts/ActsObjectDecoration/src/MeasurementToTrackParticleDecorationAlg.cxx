@@ -153,7 +153,7 @@ namespace ActsTrk {
 
                 auto flag = state.typeFlags();
 		// consider holes and measurements (also outliers)
-                bool anyHit = flag.isHole() or flag.hasMeasurement();
+                bool anyHit = flag.isHole() or flag.hasMeasurement() or state.hasUncalibratedSourceLink();
 		if (not anyHit) {
                     ATH_MSG_DEBUG("--- This is not a hit measurement, skipping...");
                     continue;
@@ -190,7 +190,7 @@ namespace ActsTrk {
                 } else if (flag.isOutlier()) {
 		  type = MeasurementType::OUTLIER;
 		  ATH_MSG_DEBUG("--- This is an outlier");
-                } else {
+                } else if (flag.hasMeasurement()) {
 		  type = MeasurementType::HIT;
 		  ATH_MSG_DEBUG("--- This is a hit");
                 }
@@ -235,9 +235,9 @@ namespace ActsTrk {
                         } else ATH_MSG_WARNING("--- Unknown detector type - It is not pixel nor strip detecor element!");
                     } else ATH_MSG_WARNING("--- Missing silicon detector element!");
                 } else ATH_MSG_WARNING("--- Missing reference surface or associated detector element!");
+                
 
-
-		
+			
 		// If I have a measurement (hit or outlier) then proceed with computing the residuals / pulls
 		
 		if (type == MeasurementType::OUTLIER || type == MeasurementType::HIT) {
@@ -251,10 +251,10 @@ namespace ActsTrk {
 		  if (state.hasUncalibratedSourceLink()) {
 		    chi2_hit_predicted = getChi2Contribution(state);
 		  }
-		  		  
+
 		  // Skip all states without smoothed parameters or without projector
-		  if (!state.hasSmoothed() || !state.hasProjector())
-		    continue;
+                  if (!state.hasSmoothed() || !state.hasProjector())
+                    continue;
 		  
 		  // Calling effective Calibrated has some runtime overhead
 		  const auto &calibratedParameters = state.effectiveCalibrated();
@@ -336,7 +336,12 @@ namespace ActsTrk {
 		  auto pred = state.predicted();
 		  trackParameterLocX = pred[Acts::eBoundLoc0];
 		  trackParameterLocY = pred[Acts::eBoundLoc1];
-		}
+		} // holes
+
+		else {
+		  ATH_MSG_DEBUG("--- This is a seed hit");
+		  type = MeasurementType::HIT;
+		} // seed hits
 		
 		// Always fill with this information
 		

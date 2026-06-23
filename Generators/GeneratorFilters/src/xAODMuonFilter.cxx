@@ -11,9 +11,9 @@ StatusCode xAODMuonFilter::filterInitialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODMuonFilter::filterEvent() {
+StatusCode xAODMuonFilter::filterEvent(const EventContext& ctx) {
   // Retrieve TruthMuons container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   for (const xAOD::TruthParticle* part : *xTruthParticleContainer) {
@@ -21,6 +21,6 @@ StatusCode xAODMuonFilter::filterEvent() {
         if(  part->pt()>= m_Ptmin && part->abseta() <= m_EtaRange )
             return StatusCode::SUCCESS;
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

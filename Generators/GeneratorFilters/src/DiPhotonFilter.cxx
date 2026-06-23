@@ -57,7 +57,7 @@ StatusCode DiPhotonFilter::filterInitialize() {
 }
 
 
-StatusCode DiPhotonFilter::filterEvent() {
+StatusCode DiPhotonFilter::filterEvent(const EventContext& ctx) {
   // get min pt
   double ptcut = m_Ptmin_1st > m_Ptmin_2nd ? m_Ptmin_2nd : m_Ptmin_1st;
   if (ptcut > m_Ptmin_others) ptcut = m_Ptmin_others;
@@ -132,11 +132,11 @@ StatusCode DiPhotonFilter::filterEvent() {
 
         // apply diphoton pT cut
         if (m_diphoton_PtMin >= 0. && diphotonPt < m_diphoton_PtMin) {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             return StatusCode::SUCCESS;
         }
         if (m_diphoton_PtMax >= 0. && diphotonPt > m_diphoton_PtMax) {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             return StatusCode::SUCCESS;
         }
 
@@ -218,6 +218,6 @@ StatusCode DiPhotonFilter::filterEvent() {
   }
 
   ATH_MSG_DEBUG("flag(final decision) = " << isOK);
-  setFilterPassed(isOK);
+  setFilterPassed(isOK, ctx);
   return StatusCode::SUCCESS;
 }

@@ -91,7 +91,7 @@ StatusCode TBPlaneTrackingAlgo::execute(const EventContext& ctx)
   
   if(sc1.isFailure()){
     ATH_MSG_WARNING ("TBPlaneTrackingAlgo: Retrieval of HitPlane failed");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   } else {
 
@@ -104,7 +104,7 @@ StatusCode TBPlaneTrackingAlgo::execute(const EventContext& ctx)
                        << "Not enough hits in one or both planes, " 
                        << "Cannot make track.");
       
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
 
@@ -121,14 +121,14 @@ StatusCode TBPlaneTrackingAlgo::execute(const EventContext& ctx)
     check = fitPlane(&m_hitPlaneCont_u, a1_u, a2_u, chi2_u, residual_u);
     if(check == false){
       ATH_MSG_ERROR ("TBPlaneTrackingAlgo: " << "Fit failure.");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     }
     
     check = fitPlane(&m_hitPlaneCont_v, a1_v, a2_v, chi2_v, residual_v);
     if(check == false){
       ATH_MSG_ERROR ("TBPlaneTrackingAlgo: " << "Fit failure.");
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;
     } 
  
@@ -166,7 +166,7 @@ StatusCode TBPlaneTrackingAlgo::execute(const EventContext& ctx)
     }
   }
   
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 }
 

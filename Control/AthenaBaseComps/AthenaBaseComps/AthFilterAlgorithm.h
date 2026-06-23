@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthFilterAlgorithm.h 
@@ -53,7 +53,7 @@ class AthFilterAlgorithm
   virtual StatusCode sysInitialize() override;
   
   /// Set the filter passed flag to the specified state
-  virtual void setFilterPassed( bool state ) const;
+  void setFilterPassed( bool state, const EventContext& ctx ) const;
 
   /// @brief helper method to ease the setting of this filter's description
   /// in derived classes

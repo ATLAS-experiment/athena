@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LAR_FCAL_SAMPLING_FRACTION_H
@@ -47,7 +47,7 @@ public:
     virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode initEvent();
-    StatusCode doFCal();
+    StatusCode doFCal(const EventContext& ctx);
     void TruthImpactPosition(const HepMC::GenEvent *e);
 
     void FCalCalibAnalysis(const std::string& name, const CaloCalibrationHit *CalibHit);
@@ -63,7 +63,7 @@ private:
     /** methods called by execute() */
 
     // To add event info to new ntuple (used to go by default in CollectionTree)
-    StatusCode addEventInfo();
+    StatusCode addEventInfo(const EventContext& ctx);
 
 private:
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfoKey", "EventInfo"};

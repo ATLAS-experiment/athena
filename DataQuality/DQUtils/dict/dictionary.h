@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file intentionally sparse on comments
@@ -7,9 +7,16 @@
 // Please see quick_retrieve.cxx for detailed information on these functions.
 
 
+#ifdef _POSIX_C_SOURCE
+#undef _POSIX_C_SOURCE
+#endif
+#ifdef _XOPEN_SOURCE
+#undef _XOPEN_SOURCE
+#endif
+#include <Python.h>
+
 #include <string>
 #include <vector>
-#include <Python.h>
 
 #include <CoolKernel/ChannelSelection.h>
 #include <CoolKernel/IObject.h>

@@ -26,10 +26,12 @@
 #include "Acts/EventData/TrackStateProxy.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
-#include "ActsCalibBase/MeasurementCalibratorBase.h"
 
 // for MeasurementSizeMax
 #include "Acts/EventData/MultiTrajectory.hpp"
+
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
+#include "TrackStateFlagHelper.h"
 
 #include <utility>
 #include <type_traits>
@@ -422,15 +424,34 @@ protected:
    }
 
 
+   struct Flags {
+      bool isSplitHit()   const { return ActsTrk::detail::testTrackStateFlag(Acts::TrackStateFlag::IsSplitHit, flags);}
+      bool isOutlier()   const { return ActsTrk::detail::testTrackStateFlag(Acts::TrackStateFlag::IsOutlier, flags);}
+      operator unsigned int() { return flags; }
+      unsigned int flags;
+   };
+
+   template <typename T1, typename T2>
+   struct PairWithFlags : std::tuple<T1,T2,unsigned int> {
+      PairWithFlags<T1,T2> &operator=(std::tuple<T1,T2,unsigned int> &&a) {
+         std::tuple<T1,T2,unsigned int>::operator=(std::move(a));
+         return *this;
+      }
+
+      const T1 &position() const { return std::get<0>(*this); }
+      const T2 &covariance() const { return std::get<1>(*this); }
+      Flags flags() const { return Flags{ std::get<2>(*this) }; }
+   };
+
+   unsigned int makeOutlierFlag(bool value) { return static_cast<unsigned int>(value)<<2u; }
    // utility struct to temporarily store data about the best measurements
    template <std::size_t DIM, typename T_SourceLink>
    struct MatchingMeasurement {
-      using MeasCovPair = std::pair < typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurement<DIM>,
-                                      typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurementCovariance<DIM> >;
+      using MeasCovPair = PairWithFlags < typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurement<DIM>,
+                                          typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurementCovariance<DIM> >;
       MeasCovPair      m_measurement;
-      std::optional<T_SourceLink> m_sourceLink;
       float            m_chi2{};
-      bool             m_isOutLier{};
+      std::optional<T_SourceLink> m_sourceLink;
    };
 
    // type and dimension specific function to select measurements from the range defined by the source link iterators.
@@ -485,7 +506,7 @@ protected:
          if (forced && postCalibrator) {
             // skip preCalibrator and computeChi2, by doing everything else. We start with what's done if no preCalibrator.
             const auto &m = derived().forwardToCalibrator(measurement);
-            matching_measurement.m_measurement = std::make_pair( m.template localPosition<DIM>(), m.template localCovariance<DIM>() );
+            matching_measurement.m_measurement = std::make_tuple( m.template localPosition<DIM>(), m.template localCovariance<DIM>(), 0u );
             matching_measurement.m_chi2 = 0.0f;
             matching_measurement.m_sourceLink=measurement;
             if (!selected_measurements.acceptNoSort()) break;
@@ -495,8 +516,8 @@ protected:
                                                                surface,
                                                                derived().forwardToCalibrator(measurement),
                                                                derived().boundParams(boundState));
-            matching_measurement.m_chi2 = computeChi2(matching_measurement.m_measurement.first,
-                                                      matching_measurement.m_measurement.second,
+            matching_measurement.m_chi2 = computeChi2(matching_measurement.m_measurement.position(),
+                                                      matching_measurement.m_measurement.covariance(),
                                                       predicted.first,
                                                       predicted.second);
             // only consider measurements which pass the outlier chi2 cut
@@ -509,107 +530,6 @@ protected:
             }
          }
       }
-
-      // apply final calibration to n-best measurements
-      using post_calib_meas_cov_pair_t
-         = std::pair<typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurement<DIM>,
-                     typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurementCovariance<DIM> >;
-
-      // need extra temporary buffer if the types to store "measurements" during measurement selection
-      // and calibrated measurements after the measurement selection are not identical
-      static constexpr bool pre_and_post_calib_types_agree
-         = std::is_same< typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurement<DIM>,
-                         typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurement<DIM> >::value
-          && std::is_same< typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurementCovariance<DIM>,
-                           typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurementCovariance<DIM> >::value;
-
-      using Empty = struct {};
-      typename std::conditional< !pre_and_post_calib_types_agree,
-                                 std::array< post_calib_meas_cov_pair_t, NMeasMax>, // @TODO could use boost static_vector instead
-                                 Empty>::type calibrated;
-      if (postCalibrator) {
-         typename std::conditional<!pre_and_post_calib_types_agree, unsigned int, Empty>::type calibrated_meas_cov_i{};
-
-         // apply final calibration, recompute chi2
-         for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
-                 idx: selected_measurements) {
-            TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
-
-            // helper to select the destination storage which is the extra temporary buffer
-            // if the measurement storage types during and after selection are different.
-            post_calib_meas_cov_pair_t &calibrated_measurement
-               = [&calibrated, &a_selected_measurement, calibrated_meas_cov_i]() -> post_calib_meas_cov_pair_t & {
-                  if constexpr(pre_and_post_calib_types_agree) {
-                     (void) calibrated;
-                     (void) calibrated_meas_cov_i;
-                     return a_selected_measurement.m_measurement;
-                  }
-                  else {
-                     (void) a_selected_measurement;
-                     assert(calibrated_meas_cov_i < calibrated.size());
-                     return calibrated[calibrated_meas_cov_i];
-                  }
-               }();
-
-            // apply the calibration
-            calibrated_measurement = postCalibrator(geometryContext,
-                                                    calibrationContext,
-                                                    surface,
-                                                    derived().forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
-                                                    derived().boundParams(boundState));
-            // update chi2 using calibrated measurement
-            a_selected_measurement.m_chi2 = computeChi2(calibrated_measurement.first,
-                                                         calibrated_measurement.second,
-                                                         predicted.first,
-                                                         predicted.second);
-            // ... and set outlier flag
-            a_selected_measurement.m_isOutLier =  (!forced && a_selected_measurement.m_chi2 >= maxChi2Cut.first);
-            if constexpr(!pre_and_post_calib_types_agree) {
-               ++calibrated_meas_cov_i;
-            }
-         }
-      }
-      else {
-         // if no final calibration is performed only the outlier flag still needs to be set
-         for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
-                 idx: selected_measurements) {
-            TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
-            a_selected_measurement.m_isOutLier =  (!forced && a_selected_measurement.m_chi2 >= maxChi2Cut.first);
-         }
-      }
-
-      // First Create states without setting information about the calibrated measurement for the selected measurements
-      // @TODO first create state then copy measurements, or crete state by state and set measurements ?
-      //       the lastter has the "advantage" that the outlier flag can be set individually
-      //       the former has the advantage that part of the state creation code is independent of the
-      //       the measurement.
-      
-      Acts::BoundSubspaceIndices boundSubspaceIndices;
-      std::copy(parameter_map.begin(), parameter_map.end(), boundSubspaceIndices.begin());
-      createStates( selected_measurements.size(),
-                    boundState,
-                    prevTip,
-                    trajectory,
-                    boundSubspaceIndices,
-                    *result,
-                    logger,
-                    (!selected_measurements.empty()
-                     ? selected_measurements.getSlot( *(selected_measurements.begin())).m_isOutLier
-                     : false) );
-      assert( result->size() == selected_measurements.size() );
-
-      // helper to determine whether calibrated storeage is to be used
-      auto use_calibrated_storage = [&postCalibrator]() -> bool {
-         if constexpr(pre_and_post_calib_types_agree) {
-            (void) postCalibrator;
-            return false;
-         }
-         else {
-            // this is only known during runtime
-            // but it should not be tested if the types agree.
-            return postCalibrator;
-         }
-      };
 
       if (selected_measurements.empty()) {
          auto config_for_surface = m_config.find(surface.geometryId());
@@ -625,44 +545,112 @@ protected:
          }
       }
       else {
-      // copy selected measurements to pre-created states
-      unsigned int state_i=0;
-      for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
-              idx: selected_measurements) {
-         assert( state_i < result->size());
-         TrackStateProxy trackState( trajectory.getTrackState( (*result)[state_i] ) );
-         TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
-         trackState.setUncalibratedSourceLink(ActsTrk::detail::MeasurementCalibratorBase::pack(std::move(a_selected_measurement.m_sourceLink.value())));
-         // flag outliers accordingly, so that they are handled correctly by the post processing
-         if (a_selected_measurement.m_isOutLier) {
-            trackState.typeFlags().setIsOutlier();
-         } else {
-            trackState.typeFlags().setIsMeasurement();
-         }
-         trackState.allocateCalibrated(DIM);
-         if (use_calibrated_storage()) {
-            // if the final clibration is performed after the selection then
-            // copy these measurements and covariances to the track states
-            assert( use_calibrated_storage() == !pre_and_post_calib_types_agree);
-            if constexpr(!pre_and_post_calib_types_agree) {
-               assert( state_i < calibrated.size());
-               trackState.template calibrated<DIM>()
-                  = MeasurementSelectorMatrixTraits::matrixTypeCast<typename MeasurementSelectorTraits<derived_t>::MatrixFloatType>(calibrated[state_i].first);
-               trackState.template calibratedCovariance<DIM>()
-                  = MeasurementSelectorMatrixTraits::matrixTypeCast<typename MeasurementSelectorTraits<derived_t>::MatrixFloatType>(calibrated[state_i].second);
-               trackState.chi2() = a_selected_measurement.m_chi2;
+
+         // apply final calibration to n-best measurements
+         using post_calib_meas_cov_pair_t
+            = PairWithFlags<typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurement<DIM>,
+                            typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurementCovariance<DIM> >;
+
+         // First Create states without setting information about the calibrated measurement for the selected measurements
+         // @TODO first create state then copy measurements, or crete state by state and set measurements ?
+         //       the lastter has the "advantage" that the outlier flag can be set individually
+         //       the former has the advantage that part of the state creation code is independent of the
+         //       the measurement.
+
+         Acts::BoundSubspaceIndices boundSubspaceIndices;
+         std::copy(parameter_map.begin(), parameter_map.end(), boundSubspaceIndices.begin());
+         createStates( selected_measurements.size(),
+                       boundState,
+                       prevTip,
+                       trajectory,
+                       boundSubspaceIndices,
+                       *result,
+                       logger,
+                       (!selected_measurements.empty()
+                        ? selected_measurements.getSlot( *(selected_measurements.begin())).m_measurement.flags().isOutlier() || postCalibrator
+                        : false) );
+         assert( result->size() == selected_measurements.size() );
+
+         if (postCalibrator) {
+            // either run post selection calibrator which will set the calibrated position and covariance
+            // directly to the state.
+            auto predicted_pos_dbl = predicted.first.template cast<double>();
+            auto predicted_cov_dbl = predicted.second.template cast<double>();
+            unsigned int state_i=0u;
+            for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
+                    idx: selected_measurements) {
+               assert( state_i < result->size());
+               TrackStateProxy trackState( trajectory.getTrackState( (*result)[state_i] ) );
+               TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
+               trackState.setUncalibratedSourceLink(ActsTrk::detail::MeasurementCalibratorBase::pack(std::move(a_selected_measurement.m_sourceLink.value())));
+
+               // apply the calibration
+               postCalibrator(geometryContext,
+                              calibrationContext,
+                              derived().forwardToCalibrator(a_selected_measurement.m_sourceLink.value()),
+                              trackState
+                              );
+               // update chi2 using calibrated measurement
+               trackState.chi2() = computeChi2(trackState.template calibrated<DIM>(),
+                                               trackState.template calibratedCovariance<DIM>(),
+                                               predicted_pos_dbl,
+                                               predicted_cov_dbl);
+               // ... and set outlier flag
+               // and share or create storage for filtered.
+               bool is_outlier = !forced && trackState.chi2() >= maxChi2Cut.first;
+               if (is_outlier) {
+                  trackState.typeFlags().setIsOutlier();
+                  trackState.shareFrom(trackState, Acts::TrackStatePropMask::Predicted,
+                                       Acts::TrackStatePropMask::Filtered);
+               } else {
+                  trackState.typeFlags().setIsMeasurement();
+                  trackState.addComponents(Acts::TrackStatePropMask::Filtered);
+               }
+               ++state_i;
             }
          }
          else {
-            trackState.template calibrated<DIM>()
-               = MeasurementSelectorMatrixTraits::matrixTypeCast<typename MeasurementSelectorTraits<derived_t>::MatrixFloatType>(a_selected_measurement.m_measurement.first);
-            trackState.template calibratedCovariance<DIM>()
-               = MeasurementSelectorMatrixTraits::matrixTypeCast<typename MeasurementSelectorTraits<derived_t>::MatrixFloatType>(a_selected_measurement.m_measurement.second);
-            trackState.chi2() = a_selected_measurement.m_chi2;
+            // or copy the pre-selection calibrated position and covariance to the
+            // track states and adjust the flags.
+            unsigned int state_i=0u;
+            for (typename TopCollection<NMeasMax, MeasCovPair >::IndexType
+                    idx: selected_measurements) {
+               assert( state_i < result->size());
+               TrackStateProxy trackState( trajectory.getTrackState( (*result)[state_i] ) );
+               TheMatchingMeasurement &a_selected_measurement = selected_measurements.getSlot(idx);
+
+               bool is_outlier = !forced && a_selected_measurement.m_chi2 >= maxChi2Cut.first;
+               auto type_flags = trackState.typeFlags();
+               if (is_outlier) {
+                  // the filtered parameters will not be computed for outliers, so has to be shared from the prediction.
+                  type_flags.setIsOutlier();
+                  trackState.shareFrom(trackState, Acts::TrackStatePropMask::Predicted,
+                                       Acts::TrackStatePropMask::Filtered);
+               } else {
+                  // for measurements the filtered parameters will be computed, so space needs to be allocated.
+                  type_flags.setIsMeasurement();
+                  trackState.addComponents(Acts::TrackStatePropMask::Filtered);
+               }
+               if (a_selected_measurement.m_measurement.flags().isSplitHit()) {
+                  type_flags.setIsSplitHit();
+               }
+
+               trackState.setUncalibratedSourceLink(ActsTrk::detail::MeasurementCalibratorBase
+                                                        ::pack(std::move(a_selected_measurement.m_sourceLink.value())));
+
+               trackState.allocateCalibrated(DIM);
+               trackState.template calibrated<DIM>()
+                  = MeasurementSelectorMatrixTraits::matrixTypeCast<typename MeasurementSelectorTraits<derived_t>
+                                                                    ::MatrixFloatType>(a_selected_measurement.m_measurement.position());
+               trackState.template calibratedCovariance<DIM>()
+                  = MeasurementSelectorMatrixTraits::matrixTypeCast<typename MeasurementSelectorTraits<derived_t>
+                                                                    ::MatrixFloatType>(a_selected_measurement.m_measurement.covariance());
+               trackState.chi2() = a_selected_measurement.m_chi2;
+               ++state_i;
+            }
          }
-         ++state_i;
       }
-      }
+
       return result;
    }
 
@@ -814,6 +802,7 @@ template <std::size_t NMeasMax,
           typename measurement_container_variant_t>
 struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMeasMax, derived_t, measurement_container_variant_t> {
    using T_BoundState = MeasurementSelectorTraits<derived_t>::BoundState;
+   using TrackStateProxy = MeasurementSelectorTraits<derived_t>::TrackStateProxy;
    using abstract_measurement_range_t = MeasurementSelectorTraits<derived_t>::abstract_measurement_range_t;
 
    // get the bound parameters and covariance of the bound state
@@ -856,11 +845,20 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
       return ParameterMapping::identity<DIM>();
    }
 
+   struct CalibratedMeasurementTraits {
+      // the types used for the calibrated measurement and covariance
+      template <std::size_t DIM>
+      using Measurement = typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurement<DIM>;
+      template <std::size_t DIM>
+      using MeasurementCovariance = typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurementCovariance<DIM>;
+   };
+
    // By default the methods postCalibrator and preCalibrator return delegates:
    template <std::size_t DIM, typename measurement_t>
    using PreCalibrator = Acts::Delegate<
-      std::pair < typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurement<DIM>,
-                  typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurementCovariance<DIM> >
+      std::tuple < typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurement<DIM>,
+                   typename MeasurementSelectorTraits<derived_t>::template PreSelectionMeasurementCovariance<DIM>,
+                   unsigned int>
                 (const Acts::GeometryContext&,
                  const Acts::CalibrationContext&,
                  const Acts::Surface&,
@@ -871,13 +869,11 @@ struct MeasurementSelectorBaseImpl : public MeasurementSelectorWithDispatch<NMea
    // might be different so are the types of the calibrator delegates
    template <std::size_t DIM, typename measurement_t>
    using PostCalibrator = Acts::Delegate<
-      std::pair < typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurement<DIM>,
-                  typename MeasurementSelectorTraits<derived_t>::template CalibratedMeasurementCovariance<DIM> >
+                void
                 (const Acts::GeometryContext&,
                  const Acts::CalibrationContext&,
-                 const Acts::Surface&,
                  const measurement_t &,
-                 const typename MeasurementSelectorTraits<derived_t>::BoundTrackParameters &)>;
+                 TrackStateProxy &)>;
 
    /// the calibrator used after the measurement selection which does not have to be "connected"
    /// @note The return value does not have to be a delegate, it can be an arbitrary functor/lambda,

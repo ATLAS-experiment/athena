@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_GENFILTER_H
@@ -21,7 +21,7 @@
 ///
 /// The following virtual methods should be overloaded in the child class:
 ///   StatusCode filterInitialize() (optional)
-///   StatusCode filterEvent()
+///   StatusCode filterEvent(const EventContext& ctx)
 ///   StatusCode filterFinalize() (optional)
 ///
 /// LeptonFilter or ElectronFilter are good templates for learning to implement
@@ -43,7 +43,7 @@ public:
   /// @name Gen-specific event loop methods: to be overloaded!
   //@{
   virtual StatusCode filterInitialize() { return StatusCode::SUCCESS; }
-  virtual StatusCode filterEvent() = 0;
+  virtual StatusCode filterEvent(const EventContext& ctx) = 0;
   virtual StatusCode filterFinalize() { return StatusCode::SUCCESS; }
   //@}
 
@@ -52,9 +52,7 @@ public:
   int nPassed() const { return m_nPass; }
   int nFailed() const { return m_nFail; }
   int nNeeded() const { return m_nNeeded; }
-#ifdef HEPMC3
   bool keepAll() const {return m_keepAll; }
-#endif
   //@}
 
 
@@ -65,9 +63,7 @@ protected:
   int m_nPass;
   int m_nFail;
   int m_nNeeded;
-#ifdef HEPMC3
   bool m_keepAll;
-#endif
   //@}
 
 };

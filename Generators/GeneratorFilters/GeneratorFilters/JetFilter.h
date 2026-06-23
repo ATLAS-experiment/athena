@@ -17,7 +17,7 @@ public:
 
   JetFilter(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode filterInitialize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 
   struct McObj {

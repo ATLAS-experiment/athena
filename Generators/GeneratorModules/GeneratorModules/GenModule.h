@@ -86,10 +86,8 @@ protected:
   /// Flag for normal vs. afterburner generators
   BooleanProperty m_isAfterburner{this, "IsAfterburner", false, "Set true if generator modifies existing events rather than creating new ones"};
 
-#ifdef HEPMC3
   /// The run info for HepMC3
   std::shared_ptr<HepMC3::GenRunInfo> m_runinfo{};
-#endif
 
 private:
 

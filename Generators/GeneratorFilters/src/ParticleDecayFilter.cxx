@@ -27,9 +27,9 @@ StatusCode ParticleDecayFilter::filterFinalize()
 }
 
 
-StatusCode ParticleDecayFilter::filterEvent(){
+StatusCode ParticleDecayFilter::filterEvent(const EventContext& ctx){
 
-    ATH_MSG_DEBUG("ParticleDecayFilter::filterEvent()");
+    ATH_MSG_DEBUG("ParticleDecayFilter::filterEvent(const EventContext& ctx)");
 
     //Create child targets - a map of pdgId along with how many particles
     //with that pdgId that we want
@@ -79,7 +79,7 @@ StatusCode ParticleDecayFilter::filterEvent(){
                 //check if the targeted number of children of each type have been found
                 if (std::all_of(childTargets.begin(), childTargets.end(), [&](const std::pair<unsigned int, unsigned int>& p) { return p.second == childCounters[p.first]; }) && childCounters[nonListValue] == 0){
                     ATH_MSG_DEBUG("Filter passed");
-                    setFilterPassed(true);
+                    setFilterPassed(true, ctx);
                     return StatusCode::SUCCESS;
                 }
             }// end if particle has parent pdg id  
@@ -87,6 +87,6 @@ StatusCode ParticleDecayFilter::filterEvent(){
     }//loop over truth events
 
     // if we get here, no particle was found with the required set of children
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
 }

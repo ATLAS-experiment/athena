@@ -58,7 +58,7 @@ namespace MuonR4{
           using LinkDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec_t>;
           using FloatDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float>;
 
-          using SegPars_t = xAOD::MeasVector<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>;
+          using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>::element_type;
           using SegParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t>;
         
           /** @brief Helper struct to ship the write DecorHandles and the reference to the output
@@ -68,7 +68,7 @@ namespace MuonR4{
               *         the truth segments, the refefrence to the TruthSegmentMaker to initialize the
               *         WriteDecorHandles and the event context */
               WriteDecorHolder(xAOD::MuonSegmentContainer& outContainer,
-                                const TruthSegmentMaker& parent,
+                               const TruthSegmentMaker& parent,
                                const EventContext& ctx):
                   segments{outContainer},
                   paramDecor{parent.m_locParKey, ctx},

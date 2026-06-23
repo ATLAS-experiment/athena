@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -147,9 +147,9 @@ class TileTBStat: public AthAlgorithm {
 
     /* the ROD data sub-fragment */
     typedef struct T_RobRodFragMap {
-        uint32_t L1type;
-        uint32_t ROBid;
-        uint32_t RODid;
+        uint32_t L1type = 0;
+        uint32_t ROBid = 0;
+        uint32_t RODid = 0;
         std::vector<uint32_t> fragID;
     } T_RobRodFragMap;
 

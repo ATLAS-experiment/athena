@@ -40,7 +40,7 @@ namespace CP
 
   public:
     virtual StatusCode initialize() final override;
-    virtual StatusCode execute() final override;
+    virtual StatusCode execute(const EventContext& ctx) final override;
 
     /// \brief trigger decision tool handle
   private:

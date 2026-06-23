@@ -36,11 +36,13 @@ namespace InDet {
      * @brief Get track candidates from a list of space points.
      * @param spacepoints a list of spacepoints as inputs to the GNN-based track finder.
      * @param tracks a list of track candidates in terms of spacepoint indices.
+     * @param edgeMap a map containing scores for each edge.
      * @return 
     */
     virtual StatusCode getTracks(
       const std::vector<const Trk::SpacePoint*>& spacepoints,
-      std::vector<std::vector<uint32_t> >& tracks) const=0;
+      std::vector<std::vector<uint32_t> >& tracks,
+      std::unordered_map<int, std::unordered_map<int, float>>* edgeMap = nullptr) const=0;
 
     ///////////////////////////////////////////////////////////////////
     // Print internal tool parameters and status

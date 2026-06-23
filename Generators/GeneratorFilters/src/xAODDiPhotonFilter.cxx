@@ -42,7 +42,7 @@ StatusCode xAODDiPhotonFilter::filterInitialize() {
 }
 
 
-StatusCode xAODDiPhotonFilter::filterEvent() {
+StatusCode xAODDiPhotonFilter::filterEvent(const EventContext& ctx) {
   // get min pt
   double ptcut = m_Ptmin_1st > m_Ptmin_2nd ? m_Ptmin_2nd : m_Ptmin_1st;
   if (ptcut > m_Ptmin_others) ptcut = m_Ptmin_others;
@@ -51,7 +51,7 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
 
  
  // Retrieve Photon container
- SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+ SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
  CHECK(xTruthParticleContainer.isValid());
  // find truth photons
  std::vector<const xAOD::TruthParticle *> MCTruthPhotonList;
@@ -119,11 +119,11 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
 
         // apply diphoton pT cut
         if (m_diphoton_PtMin >= 0. && diphotonPt < m_diphoton_PtMin) {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             return StatusCode::SUCCESS;
         }
         if (m_diphoton_PtMax >= 0. && diphotonPt > m_diphoton_PtMax) {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             return StatusCode::SUCCESS;
         }
 
@@ -203,6 +203,6 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
   }
 
   ATH_MSG_DEBUG("flag(final decision) = " << isOK);
-  setFilterPassed(isOK);
+  setFilterPassed(isOK, ctx);
   return StatusCode::SUCCESS;
 }

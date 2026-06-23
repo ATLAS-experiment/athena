@@ -119,6 +119,8 @@ VolumeTreeModel::VolumeTreeModel( QObject * parent )
     Imp::defineSubSystem(VP1GeoFlags::ITkStrip,"ITkStrip",Imp::INDET);
     Imp::defineSubSystem(VP1GeoFlags::TRT,"TRT",Imp::INDET);
     Imp::defineSubSystem(VP1GeoFlags::InDetServMat,"Services",Imp::INDET);
+    //HGTD
+    Imp::defineSubSystem(VP1GeoFlags::HGTD,"HGTD",Imp::INDET);
     // Calorimeters
     Imp::defineSubSystem(VP1GeoFlags::LAr,"LAr",Imp::CALO);
     Imp::defineSubSystem(VP1GeoFlags::Tile,"Tile",Imp::CALO);

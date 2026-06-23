@@ -34,7 +34,7 @@ namespace MuonR4{
             /** @brief Declare the interface  */
             DeclareInterfaceID(MuonR4::ITrackSummaryTool, 1, 0);
            
-            /** @brief Abrivation of the Track proxy */
+            /** @brief Abrivation of the const Track proxy */
             using ConstTrack_t = ActsTrk::TrackContainer::ConstTrackProxy;
             /** @brief Creates a summary from the passed track
              *  @param ctx: EventContext to fetch conditions such that holes
@@ -43,6 +43,15 @@ namespace MuonR4{
              *                    shall be made. */
             virtual HitSummary makeSummary(const EventContext& ctx,
                                            const ConstTrack_t trackProxy) const = 0;
+            /** @brief Abrivation of the Track proxy */
+            using Track_t = ActsTrk::MutableTrackContainer::TrackProxy;
+            /** @brief Creates a summary from the passed track
+             *  @param ctx: EventContext to fetch conditions such that holes
+             *              associated to dead modules are ignored
+             * @param trackProxy: Reconstructed MS track for which the summary
+             *                    shall be made. */
+            virtual HitSummary makeSummary(const EventContext& ctx,
+                                           const Track_t trackProxy) const = 0;
             /** @brief Creates a summary from a list of passed segments that are associated
              *         to a track seed, a truth particle or a reconstructed track
              *  @param ctx: EventContext to fetch conditions such that holes

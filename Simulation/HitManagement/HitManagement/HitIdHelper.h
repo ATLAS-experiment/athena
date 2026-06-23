@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HITMANAGEMENT_HitIdHelper_H
@@ -12,10 +12,10 @@ typedef int HitID;
 
 struct IdField {
   std::string fieldName;
-  int vMin;
-  int vMax;
-  int nBits;
-  int firstBit;
+  int vMin = 0;
+  int vMax = 0;
+  int nBits = 0;
+  int firstBit = 0;
 };
 
 typedef std::vector<IdField> IdFields;

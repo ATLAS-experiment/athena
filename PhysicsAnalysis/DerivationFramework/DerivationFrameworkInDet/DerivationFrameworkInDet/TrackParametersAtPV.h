@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRACKPARAMETERSATPV_H
@@ -15,6 +15,7 @@
 
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
+#include <StoreGate/WriteDecorHandleKey.h>
 
 // DerivationFramework includes
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
@@ -42,12 +43,12 @@ namespace DerivationFramework {
 
   private:
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_collTrackKey
-    { this, "TrackParticleContainerName", "InDetTrackParticles", ""};
+      { this, "TrackParticleContainerName", "InDetTrackParticles", ""};
     SG::ReadHandleKey<xAOD::VertexContainer>        m_collVertexKey
       { this, "VertexContainerName", "PrimaryVertices", ""};
 
-    SG::WriteHandleKey< std::vector<float> > m_trackZ0PVKey
-      { this, "Z0SGEntryName", "", "" };
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackZ0PVDecoKey
+      { this, "Z0SGEntryName", m_collTrackKey, "DFCommonInDetTrackZ0AtPV"};
 
   };
 

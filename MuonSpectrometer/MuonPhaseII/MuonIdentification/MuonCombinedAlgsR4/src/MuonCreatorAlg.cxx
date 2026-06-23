@@ -68,8 +68,26 @@ StatusCode MuonCreatorAlg::setupDataShip(const EventContext& ctx, DataShip& ship
             if (muTag->idTrack() != nullptr) {
                 ship.combinedTags[muTag->idTrack()].emplace_back(muTag);
                 cmbMsTrks.insert(muTag->msTrack());
-            } else if (cmbMsTrks.insert(muTag->msTrack()).second) {
+                continue;
+            }
+            // Check whether the tag has an MS tag
+            if (!muTag->msTrack()) {
+                continue;
+            } 
+            // If there is no combined tag with MS track the 
+            // same MS track, then turn it into a standalone muon
+            if (cmbMsTrks.insert(muTag->msTrack()).second) {
                 ship.standaloneTags.emplace_back(muTag);
+            } else {
+                /** try to asociate the tag with the combined tag*/
+                for (auto& [trk, tags]: ship.combinedTags) {
+                    if (std::ranges::any_of(tags, [&muTag](const MuonR4::MuonTag* known){
+                        return known->msTrack() == muTag->msTrack();
+                    })) {
+                        tags.push_back(muTag);
+                        break;
+                    }
+                }
             }
         }        
     }

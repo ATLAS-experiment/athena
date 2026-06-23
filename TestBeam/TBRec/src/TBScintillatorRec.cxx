@@ -36,7 +36,7 @@ TBScintillatorRec::initialize()
 }
 
 StatusCode
-TBScintillatorRec::execute(const EventContext& /*ctx*/)
+TBScintillatorRec::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "In execute()" );
 
@@ -87,9 +87,9 @@ TBScintillatorRec::execute(const EventContext& /*ctx*/)
   }
 
   if ( sc.isFailure( ) ) {
-     setFilterPassed(false);
+     setFilterPassed(false, ctx);
   } else {
-     setFilterPassed(true);
+     setFilterPassed(true, ctx);
   }
 
   return StatusCode::SUCCESS;

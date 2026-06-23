@@ -20,7 +20,7 @@ StatusCode CP::EventStatusSelectionAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CP::EventStatusSelectionAlg::execute()
+StatusCode CP::EventStatusSelectionAlg::execute(const EventContext& /*ctx*/)
 {
   FilterReporter filter (m_filterParams, false);
 

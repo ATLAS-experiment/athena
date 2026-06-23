@@ -34,6 +34,15 @@ class VP1SimHitSystem: public IVP13DSystemSimple
   void buildHitTree(const QString& detector);
   void handleDetDescrElementHit(const CaloDetDescrElement *hitElement, SoVertexProperty* hitVtxProperty, unsigned int &hitCount);
 
+  /**
+   * @brief Helper function to get the global position of a SiHit item
+   * @param[in] collName The name of the specific SiHit collection
+   * @param[in] sg A pointer to the StoreGate
+   * @param[in,out] hitVtxProperty To store the hit's positions in X,Y,Z
+   * @param[in,out] hitCount A counter, which gets incremented according to the number of hits stored in the SiHit collection
+   */
+  void fillHitPositionsFromSiHitCollection(const std::string& collName, const StoreGateSvc* sg, SoVertexProperty* hitVtxProperty, unsigned int& hitCount);
+
 };
 
 #endif

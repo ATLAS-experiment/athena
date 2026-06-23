@@ -88,7 +88,6 @@ set( AtlasGeant4Component_TARGET_OBJECTS
     Monopole
     Quirks
     Sleptons
-    G4HiveEx
     G4DebuggingTools
     G4FastSimulation
     G4ProfilingTools

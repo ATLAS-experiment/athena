@@ -51,6 +51,13 @@ unset( _defaultParentProject )
 # we use the QUIET keyword.
 find_package( AtlasCMake QUIET )
 
+# Check for the availability of extra compilers/languages. So that the Acts
+# override could make use of them if needed.
+include( CheckLanguage )
+check_language( Fortran )
+check_language( CUDA )
+check_language( HIP )
+
 # Potentially override the Acts package to use a local checkout.
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ActsOverride.cmake)
 
@@ -60,17 +67,14 @@ find_package( ${ATLAS_PROJECT} REQUIRED )
 # Set up the project with its version and baseline languages.
 project( WorkDir VERSION ${${ATLAS_PROJECT}_VERSION} LANGUAGES C CXX )
 
-# Set up any additional languages that may be available.
-include( CheckLanguage )
-check_language( Fortran )
+# Set up all additional languages that are available.
 if( CMAKE_Fortran_COMPILER )
    enable_language( Fortran )
 endif()
-check_language( CUDA )
 if( CMAKE_CUDA_COMPILER )
    enable_language( CUDA )
+   find_package( CUDAToolkit )
 endif()
-check_language( HIP )
 if( CMAKE_HIP_COMPILER )
    enable_language( HIP )
 endif()

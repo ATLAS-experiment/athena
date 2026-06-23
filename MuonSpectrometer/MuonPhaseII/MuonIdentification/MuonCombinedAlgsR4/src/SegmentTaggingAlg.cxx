@@ -98,10 +98,11 @@ namespace MuonCombinedR4  {
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Found "<<matches.size()<<" candidates.");
         return matches; 
     }
-    double SegmentTaggingAlg::matchingScore(const xAOD::MuonSegment& segment,
+    double SegmentTaggingAlg::matchingScore(const Acts::GeometryContext& tgContext,
+                                            const xAOD::MuonSegment& segment,
                                             const Acts::BoundTrackParameters& extpIdPars) const  {
         
-        Acts::BoundTrackParameters segmentPars{MuonR4::SegmentFit::boundSegmentPars(*m_detMgr, segment)};
+        Acts::BoundTrackParameters segmentPars{MuonR4::SegmentFit::boundSegmentPars(tgContext, *m_detMgr, segment)};
         Acts::BoundVector dPars = segmentPars.parameters() - extpIdPars.parameters();
         /** The segment does not measure phi. Reset anything in loc0 and non-precision direction */
         if (!segment.nPhiLayers()) {
@@ -133,6 +134,7 @@ namespace MuonCombinedR4  {
         std::optional<Acts::BoundTrackParameters> currentPars = idTag->extrapolatedParsID(caloExitParKey);
         
         const Acts::Surface* currentSurface{nullptr};
+        const Acts::GeometryContext tgContext{m_trackingGeometryTool->getGeometryContext(ctx).context()};
 
         const xAOD::MuonSegment* bestMatch{nullptr};
         double bestChi2{std::numeric_limits<double>::max()};
@@ -147,7 +149,7 @@ namespace MuonCombinedR4  {
             /// Attempt to extrapolate onto the target
             if (&target != currentSurface) {
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Atempt to extrapolate to associated surface "
-                    <<target.toString(m_trackingGeometryTool->getGeometryContext(ctx).context()));
+                    <<target.toString(tgContext));
                 auto surfPars = m_extrapolationTool->propagate(ctx, *currentPars, target);
                 /** Extrapolation failed */
                 if (!surfPars.ok()) {
@@ -171,7 +173,7 @@ namespace MuonCombinedR4  {
             }
             ++segIter;
             /// Now apply the matching
-            const double chi2 = matchingScore(*matchMe, *currentPars);
+            const double chi2 = matchingScore(tgContext, *matchMe, *currentPars);
             if (chi2 < bestChi2) {
                 bestChi2 = chi2;
                 bestMatch = matchMe;

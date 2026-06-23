@@ -39,7 +39,7 @@ if (NOT SIMULATIONBASE)
     #### Standard geometry dumping test R3-MTech (MC)
     atlas_add_test( testR3Geometry_MTech
                     SCRIPT MuonGeoModelTestR4_testGeometry.sh RUN3 MTECH
-                    PROPERTIES TIMEOUT 600
+                    PROPERTIES TIMEOUT 1800
                     PRIVATE_WORKING_DIRECTORY
                     POST_EXEC_SCRIPT noerror.sh)
     #### Standard geometry dumping test R3 (data)

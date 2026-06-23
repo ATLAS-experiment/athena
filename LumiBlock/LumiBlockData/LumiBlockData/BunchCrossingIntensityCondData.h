@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockData/BunchCrossingIntensityCondData.h
@@ -96,12 +96,12 @@ private:
   std::vector<float> m_beam1Intensity_fBCT = std::vector<float> (m_MAX_BCID);
   std::vector<float> m_beam2Intensity_fBCT = std::vector<float> (m_MAX_BCID);
 
-  float m_beam1IntensityAll;
-  float m_beam2IntensityAll;
-  float m_beam1IntensityAll_fBCT;
-  float m_beam2IntensityAll_fBCT;
+  float m_beam1IntensityAll = 0;
+  float m_beam2IntensityAll = 0;
+  float m_beam1IntensityAll_fBCT = 0;
+  float m_beam2IntensityAll_fBCT = 0;
 
-  unsigned long long m_RunLB;
+  unsigned long long m_RunLB = 0;
   const static int m_headTailLength = 300; // magic number 300 ns from Run 2 tool
 
 };  

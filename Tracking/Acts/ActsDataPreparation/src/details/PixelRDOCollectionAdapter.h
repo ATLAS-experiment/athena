@@ -109,6 +109,7 @@ namespace ActsTrk {
    class RDOAdapter<PhaseIIPixelRawDataContainer> {
       PhaseII::PixelRawDataTypeTraits<>::RawDataProxy m_rdoProxy;
    public:
+      using index_t = typename PhaseII::PixelRawDataTypeTraits<>::RawDataProxy::index_t;
       RDOAdapter(PhaseII::PixelRawDataTypeTraits<>::RawDataProxy &&rdo_proxy)
          : m_rdoProxy(std::move(rdo_proxy))
       {}
@@ -124,6 +125,10 @@ namespace ActsTrk {
       // get the time-over-threshold which is a measure of the collected charge.
       int getToT() const {
          return m_rdoProxy.getToT();
+      }
+      // Return the  "index" which identifies the element this proxy refers to
+      index_t index() const {
+         return m_rdoProxy.index();
       }
       // get the pixel coordinates
       // @return return the pixel coordinates in a format that can be passed to the PixelModuleDesign.

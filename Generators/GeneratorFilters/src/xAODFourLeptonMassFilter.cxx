@@ -25,14 +25,13 @@ StatusCode xAODFourLeptonMassFilter::filterInitialize() {
   ATH_CHECK(m_xaodTruthParticleContainerNameLightLeptonKey.initialize());
   return StatusCode::SUCCESS;
 }
-StatusCode xAODFourLeptonMassFilter::filterEvent() {
+StatusCode xAODFourLeptonMassFilter::filterEvent(const EventContext& ctx) {
   // Retrieve TruthLightLepton container from xAOD LightLepton slimmer, contains
   // (electrons and muons ) particles
 
-  const EventContext& context = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::TruthParticleContainer>
       xTruthParticleContainerReadHandle(
-          m_xaodTruthParticleContainerNameLightLeptonKey, context);
+          m_xaodTruthParticleContainerNameLightLeptonKey, ctx);
   if (!xTruthParticleContainerReadHandle.isValid()) {
     ATH_MSG_ERROR("Could not retrieve xAOD::TruthParticleContainer with key:"
                   << m_xaodTruthParticleContainerNameLightLeptonKey.key());
@@ -149,6 +148,6 @@ StatusCode xAODFourLeptonMassFilter::filterEvent() {
       }
     }
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

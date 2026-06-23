@@ -1,12 +1,13 @@
-//  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "L1TopoEvent/jLJetTOB.h"
+#include <iostream>
 
 thread_local TCS::Heap<TCS::jLJetTOB> TCS::jLJetTOB::fg_heap("Jet");
 
 // constructors
 // default constructor
-TCS::jLJetTOB::jLJetTOB(uint32_t roiWord, const std::string& tobName) :
+TCS::jLJetTOB::jLJetTOB(uint32_t roiWord, std::string_view tobName) :
    BaseTOB( roiWord,tobName )
 {}
 

@@ -42,7 +42,7 @@ StatusCode ParentChildFilter::filterInitialize() {
 }
 
 
-StatusCode ParentChildFilter::filterEvent() {
+StatusCode ParentChildFilter::filterEvent(const EventContext& ctx) {
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto&  pitr: *genEvt) {
@@ -55,13 +55,8 @@ StatusCode ParentChildFilter::filterEvent() {
 	   && (pitr->momentum().m() < m_MassMaxParent)
 	   && (std::abs(pitr->momentum().eta()) > m_EtaMinParent)
 	   && (std::abs(pitr->momentum().eta()) < m_EtaRangeParent)
-#ifdef HEPMC3     
 	   && (std::abs(pitr->momentum().rap()) > m_RapidityMinParent)
 	   && (std::abs(pitr->momentum().rap()) < m_RapidityRangeParent))) {
-#else
-       && (std::abs(getRapidity(pitr)) > m_RapidityMinParent)
-	   && (std::abs(getRapidity(pitr)) < m_RapidityRangeParent))) {
-#endif
         // Check if has end_vertex (skips initial protons)
         if (!pitr->end_vertex()) continue;
         // Child
@@ -78,6 +73,6 @@ StatusCode ParentChildFilter::filterEvent() {
       }
     }
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

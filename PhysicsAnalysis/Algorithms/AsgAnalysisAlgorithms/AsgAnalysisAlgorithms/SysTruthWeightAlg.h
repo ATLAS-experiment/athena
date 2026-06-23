@@ -27,7 +27,7 @@ namespace CP
     StatusCode initialize() override;
 
   public:
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
 
     /// \brief the truth particle container to use for the calculation
   private:

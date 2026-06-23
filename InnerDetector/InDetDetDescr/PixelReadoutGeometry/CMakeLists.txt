@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelReadoutGeometry )
@@ -38,7 +38,7 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 # Test(s) in the package:
 atlas_add_test( PixelReadoutGeometryConfig_test
                 SCRIPT test/PixelReadoutGeometryConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 if( NOT SIMULATIONBASE )
   # disabled in AthSimulation
@@ -46,7 +46,7 @@ if( NOT SIMULATIONBASE )
                   SOURCES test/ITkPixelReadoutManager_test.cxx src/ITkPixelReadoutManager.cxx
                   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS}
                   LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel PixelReadoutGeometryLib
-                  POST_EXEC_SCRIPT nopost.sh
+                  POST_EXEC_SCRIPT noerror.sh
                   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test" )
   # Needed for the dynamic_cast to work properly with clang.
   set_target_properties( PixelReadoutGeometry_ITkPixelReadoutManager_test PROPERTIES ENABLE_EXPORTS True )

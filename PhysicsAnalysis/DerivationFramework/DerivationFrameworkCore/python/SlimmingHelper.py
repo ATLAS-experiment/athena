@@ -274,6 +274,8 @@ class SlimmingHelper:
                                         entry = "xAOD::JetTrigAuxContainer#"+item+"."
                                 elif ("AuxInfo" in theDictionary[item]):
                                         entry = "xAOD::AuxInfoBase!#"+item+"."
+                                elif (theDictionary[item]=='xAOD::SpacePointAuxContainer'):
+                                        entry = "xAOD::SpacePointAuxContainer#"+item+"."
                                 else:
                                         entry = "xAOD::AuxContainerBase!#"+item+"."
                                 for element in auxEntries[item]:
@@ -289,6 +291,8 @@ class SlimmingHelper:
                                         entry+=excludedAuxData
                                 if ('xAOD::JetAuxContainer' in theDictionary[item] and auxEntries[item]=="" and self.CheckDoubleTrigAuxInstruction(item)):
                                         entry+=excludedAuxData
+                                if (theDictionary[item]=='xAOD::SpacePointAuxContainer' and auxEntries[item]==""):
+                                        entry+="-measurements.-measurementLink"
                                 self.FinalItemList.append(entry)
 
                 # Add compulsory items not covered by smart slimming (so no expansion)

@@ -85,7 +85,7 @@ BSignalFilter::BSignalFilter(const std::string& name, ISvcLocator* pSvcLocator) 
 }
 
 
-StatusCode BSignalFilter::filterEvent()
+StatusCode BSignalFilter::filterEvent(const EventContext& ctx)
 {
   ATH_MSG_INFO("");
   ATH_MSG_INFO(" ---------------------------------- ");
@@ -199,13 +199,8 @@ StatusCode BSignalFilter::filterEvent()
 		  // ** Reject whole event if any of B-hadrons in the event is not decayed **
 		  if( MC::isStable(part)) { acceptEvent = false; }
 
-#ifdef HEPMC3
 		  auto  firstParent = part->production_vertex()->particles_in().begin();
 		  auto lastParent  = part->production_vertex()->particles_in().end();
-#else
-		  auto  firstParent = part->production_vertex()->particles_begin(HepMC::parents);
-		  auto lastParent  = part->production_vertex()->particles_end(HepMC::parents);
-#endif
           for (auto  thisParent = firstParent; thisParent != lastParent; ++thisParent ) {
             if (MC::isBottomMeson(*thisParent) || MC::isBottomBaryon(*thisParent) ) motherIsB = true;
           }
@@ -352,14 +347,14 @@ StatusCode BSignalFilter::filterEvent()
       ATH_MSG_DEBUG("");
       if( !acceptEvent )
         {
-	  setFilterPassed(false);
+	  setFilterPassed(false, ctx);
 	  m_rejectedAll++;
 	  ATH_MSG_DEBUG(" ==========================");
 	  ATH_MSG_DEBUG("  Event REJECTED by Filter ");
 	  ATH_MSG_DEBUG(" ==========================");
         }else
         {
-	  setFilterPassed(true);
+	  setFilterPassed(true, ctx);
 	  ATH_MSG_DEBUG(" ==========================");
 	  ATH_MSG_DEBUG("  Event ACCEPTED by Filter ");
 	  ATH_MSG_DEBUG(" ==========================");
@@ -454,13 +449,8 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
 	return;
       }
   }
-#ifdef HEPMC3
  auto firstChild = mother->end_vertex()->particles_out().begin();
  auto lastChild  = mother->end_vertex()->particles_out().end();
-#else
- auto firstChild = mother->end_vertex()->particles_begin(HepMC::children);
- auto lastChild  = mother->end_vertex()->particles_end(HepMC::children);
-#endif
 
   int childCnt = 0;
   std::string childIDStr;
@@ -479,9 +469,9 @@ void BSignalFilter::FindAllChildren(const HepMC::ConstGenParticlePtr& mother,std
     }
 
   // ** Main loop: iterate over all children, call method recursively.
-  //Note: Iterators changed between HEPMC2 and HEPMC3; the previous version
+  //Note: Iterators changed between HEPMC v2 and HEPMC v3; the previous version
   //was a custom iterator which could be incremented indefinitely, always returning
-  //'end' when necessary. In HEPMC3, these are standard library iterators
+  //'end' when necessary. In HEPMC v3, these are standard library iterators
   for (auto thisChild = firstChild; thisChild != lastChild; ++thisChild)
     {
       childCnt++;

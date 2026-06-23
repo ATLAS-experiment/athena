@@ -90,6 +90,7 @@
 #include <QFileInfo>
 
 #include <map>
+#include <ranges>
 
 class VP1GeometrySystem::Imp {
 public:
@@ -408,6 +409,7 @@ QWidget * VP1GeometrySystem::buildController()
   connect(m_d->controller,SIGNAL(actionOnAllNonStandardVolumes(bool)),this,SLOT(actionOnAllNonStandardVolumes(bool)));
   connect(m_d->controller,SIGNAL(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(autoAdaptMuonNSW(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptMuonNSW(bool, bool,bool,bool,bool,bool)));
+  connect(m_d->controller,SIGNAL(autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(resetSubSystems(VP1GeoFlags::SubSystemFlags)),this,SLOT(resetSubSystems(VP1GeoFlags::SubSystemFlags)));
 
   connect(m_d->controller,SIGNAL(labelsChanged(int)),this,SLOT(setLabels(int)));
@@ -435,8 +437,11 @@ QWidget * VP1GeometrySystem::buildController()
   } else {
     m_d->addSubSystem( VP1GeoFlags::Pixel,"Pixel");
     m_d->addSubSystem( VP1GeoFlags::SCT,"SCT");
+    m_d->addSubSystem( VP1GeoFlags::TRT,"TRT");
   }
-  m_d->addSubSystem( VP1GeoFlags::TRT,"TRT");
+  if (VP1JobConfigInfo::hasHGTDGeometry()) {
+    m_d->addSubSystem(VP1GeoFlags::HGTD, "HGTD", "", "HGTD");
+  }
   m_d->addSubSystem( VP1GeoFlags::InDetServMat,"InDetServMat");
   m_d->addSubSystem( VP1GeoFlags::LAr, ".*LAr.*");
   m_d->addSubSystem( VP1GeoFlags::Tile,"Tile");
@@ -1422,6 +1427,12 @@ void VP1GeometrySystem::Imp::createPathExtras(const VolumeHandle* volhandle, QSt
       entries.push("ITkStrip::ITkStrip");
     else
       entries.push("SCT::SCT");
+    return;
+  }
+  case VP1GeoFlags::HGTD: {
+    prefix = QString("HGTD::");
+    entries.push("IDET::IDET");
+    entries.push("HGTD::HGTD");
     return;
   }
   case VP1GeoFlags::TRT:{
@@ -2431,6 +2442,120 @@ void VP1GeometrySystem::autoAdaptMuonNSW(bool reset, bool stgc, bool mm, bool pa
   m_d->phisectormanager->updateRepresentationsOfVolsAroundZAxis();
   m_d->phisectormanager->largeChangesEnd();
   
+  if (save) {
+    m_d->sceneroot->enableNotify(true);
+    m_d->sceneroot->touch();
+  }
+}
+
+
+//_____________________________________________________________________________________
+void VP1GeometrySystem::autoAdaptHGTD(bool reset, bool flex, bool hybrid, bool glue, bool sensors, bool inactive, bool asic, bool supportPlate, bool frontCover, bool backCover, bool moderatorIn, bool moderatorOut, bool outerRCover, bool coolingLines)
+{
+  VP1Msg::messageDebug("VP1GeometrySystem::autoAdaptHGTD()");
+
+    #ifndef BUILDVP1LIGHT
+      if (!VP1JobConfigInfo::hasHGTDGeometry())
+        return;
+    #endif
+
+  if( reset )
+    VP1Msg::messageDebug("resetting to full HGTD...");
+
+  VP1GeoFlags::SubSystemFlag subSysFlag(VP1GeoFlags::HGTD);
+
+  ////////////////////////////////////////////////////////////////
+  //Find subsystem:
+  Imp::SubSystemInfo* subsys(0);
+  for (Imp::SubSystemInfo*si : m_d->subsysInfoList) {
+    if (si->flag == subSysFlag) {
+      subsys = si;
+      break;
+    }
+  }
+  if (!subsys) {
+    message("autoAdaptHGTD Error: Could not find subsystem");
+    return;
+  }
+
+  ////////////////////////////////////////////////////////////////
+  //Abort if corresponding subsystem is not built:
+  if (!subsys->isbuilt) {
+    VP1Msg::messageDebug("autoAdaptHGTD: Aborting since subsystem geometry not built yet");
+    return;
+  }
+
+  bool save = m_d->sceneroot->enableNotify(false);
+  m_d->phisectormanager->largeChangesBegin();
+
+  for (VolumeHandle* volume : subsys->vollist) {
+    if (reset) {
+      volume->reset();
+      volume->setState(VP1GeoFlags::EXPANDED);
+    } else {
+      VolumeHandle::VolumeHandleList handles;
+      handles.push_back(volume);
+
+      for (unsigned i = 0; i < handles.size(); ++i) {
+        handles.at(i)->initialiseChildren();
+        for (VolumeHandle* child : std::ranges::subrange(
+               handles.at(i)->childrenBegin(), handles.at(i)->childrenEnd()))
+          handles.push_back(child);
+      }
+
+      for (VolumeHandle* handle : handles)
+        handle->setState(VP1GeoFlags::ZAPPED);
+
+      bool unzap(false);
+      for (VolumeHandle* handle : handles) {
+        const QString name = handle->getName();
+        bool selected(false);
+        if (flex && (name=="HGTDFlexPackage" || name.startsWith("HGTDFlexTube"))) {
+          selected = true;
+        } else if (hybrid && name=="HGTDHybrid") {
+          selected = true;
+        } else if (glue && (name=="HGTDGlueSensor" || name=="HGTDGlueAsic")) {
+          selected = true;
+        } else if (sensors && name.startsWith("HGTDSiSensor")) {
+          selected = true;
+        } else if (inactive && name=="HGTDLGADInactive") {
+          selected = true;
+        } else if (asic && name=="HGTDASIC") {
+          selected = true;
+        } else if (supportPlate && name=="HGTDSupportPlate") {
+          selected = true;
+        } else if (frontCover && name=="HGTDFrontCover") {
+          selected = true;
+        } else if (backCover && name=="HGTDBackCover") {
+          selected = true;
+        } else if (moderatorIn && name=="HGTDModeratorIn") {
+          selected = true;
+        } else if (moderatorOut && name=="HGTDModeratorOut") {
+          selected = true;
+        } else if (outerRCover && name=="HGTDOuterRCover") {
+          selected = true;
+        } else if (coolingLines && name=="HGTDPeripheralCoolingLines") {
+          selected = true;
+        }
+
+        if (selected) {
+          unzap = true;
+          handle->setState(VP1GeoFlags::CONTRACTED);
+          VolumeHandle* parent = handle->parent();
+          while (parent) {
+            parent->setState(VP1GeoFlags::EXPANDED);
+            parent = parent->parent();
+          }
+        }
+      }
+      if (!unzap)
+        volume->setState(VP1GeoFlags::ZAPPED);
+    }
+  }
+
+  m_d->phisectormanager->updateRepresentationsOfVolsAroundZAxis();
+  m_d->phisectormanager->largeChangesEnd();
+
   if (save) {
     m_d->sceneroot->enableNotify(true);
     m_d->sceneroot->touch();

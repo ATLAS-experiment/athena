@@ -33,7 +33,7 @@ StatusCode EventSelectionByObjectFlagAlg ::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode EventSelectionByObjectFlagAlg ::execute() {
+StatusCode EventSelectionByObjectFlagAlg ::execute(const EventContext& ctx) {
 
     SysFilterReporterCombiner filterCombiner (m_filterParams, true);
 
@@ -44,7 +44,7 @@ StatusCode EventSelectionByObjectFlagAlg ::execute() {
 
         // particle container
         const xAOD::IParticleContainer *particles = nullptr;
-        ANA_CHECK(m_particleHandle.retrieve(particles, sys));
+        ANA_CHECK(m_particleHandle.retrieve(particles, sys, ctx));
 
         // reject events with any particle passing the input selection
         for (const xAOD::IParticle *particle : *particles) {

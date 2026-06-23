@@ -13,8 +13,10 @@
 #include "ActsPlugins/Gnn/TensorRTEdgeClassifier.hpp"
 #include "ActsPlugins/Gnn/TorchEdgeClassifier.hpp"
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "ActsGnnHookTool.h"
 
 #include <algorithm>
 #include <numeric>
@@ -98,7 +100,8 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::initialize() {
 
 StatusCode InDet::ActsGnnModuleMapFinderTool::getTracks(
     const std::vector<const Trk::SpacePoint*>& spacepoints,
-    std::vector<std::vector<uint32_t>>& tracks) const {
+    std::vector<std::vector<uint32_t>>& tracks,
+    std::unordered_map<int, std::unordered_map<int, float>>* edgeMap) const {
 
   const std::size_t nSP = spacepoints.size();
 
@@ -131,7 +134,26 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::getTracks(
   auto candidates = [&] {
     std::unique_lock<std::mutex> lock;
     if (m_runMutex) lock = std::unique_lock<std::mutex>(*m_runMutex);
-    return m_gnnPipeline->run(features, moduleIds, ids, ActsPlugins::Device::Cuda(0));
+    
+    if (edgeMap != nullptr) {
+      ScoredGraphHook hook;
+      auto result = m_gnnPipeline->run(features, moduleIds, ids, ActsPlugins::Device::Cuda(0), hook);
+
+      // Retrieve edgeScores and edgeIndex from hook
+      const std::vector<float>& edgeScores = hook.getEdgeScores();
+      const std::vector<std::int64_t>& edgeIndex = hook.getEdgeIndex();
+      const std::size_t nEdges = edgeScores.size();
+
+      // Create a map to acces edge score (sorted indices back to original spacepoint indices)
+      for (std::size_t i = 0; i < nEdges; ++i) {
+          std::int64_t src = edgeIndex[i];
+          std::int64_t dst = edgeIndex[nEdges + i];
+          (*edgeMap)[sortIdx[src]][sortIdx[dst]] = edgeScores[i];
+      }
+      return result;
+    }
+
+    return m_gnnPipeline->run(features, moduleIds, ids, ActsPlugins::Device::Cuda(0));;
   }();
 
   ATH_MSG_DEBUG("GNN pipeline returned " << candidates.size() << " candidates");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //  includes
@@ -54,7 +54,7 @@ StatusCode TriggerSelectionAlg::finalize()
 }
 
 
-StatusCode TriggerSelectionAlg::execute(const EventContext& /*ctx*/)
+StatusCode TriggerSelectionAlg::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("Executing " << name() << "...");
 
@@ -108,7 +108,7 @@ StatusCode TriggerSelectionAlg::execute(const EventContext& /*ctx*/)
   }
 
   // Say if this event should be accepted or not
-  this->setFilterPassed( eventPasses );
+  this->setFilterPassed( eventPasses, ctx );
   ATH_MSG_DEBUG("Event passes trigger selection: " << eventPasses );
 
   return StatusCode::SUCCESS;

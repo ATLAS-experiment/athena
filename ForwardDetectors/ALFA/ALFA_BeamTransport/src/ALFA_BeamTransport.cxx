@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ StatusCode ALFA_BeamTransport::finalize()
 
 //================ Execution ====================================================
 
-StatusCode ALFA_BeamTransport::execute(const EventContext& /*ctx*/)
+StatusCode ALFA_BeamTransport::execute(const EventContext& ctx)
 {
        // Code entered here will be executed once per event
      ATH_MSG_DEBUG ("Executing " << name() << "...");
@@ -120,7 +120,7 @@ StatusCode ALFA_BeamTransport::execute(const EventContext& /*ctx*/)
      m_pint=0;
 
      //Load event info
-     SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey,getContext());
+     SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
      if(!eventInfo.isValid()) {
        ATH_MSG_ERROR("Could not retrieve EventInfo");
        return StatusCode::FAILURE;
@@ -132,7 +132,7 @@ StatusCode ALFA_BeamTransport::execute(const EventContext& /*ctx*/)
        ATH_MSG_DEBUG("run: " << run_number << " event: " << evt_number);
      }
 
-     SG::ReadHandle<McEventCollection> mcColl(m_MCKey, getContext());
+     SG::ReadHandle<McEventCollection> mcColl(m_MCKey, ctx);
      if (!mcColl.isValid()) {
        ATH_MSG_WARNING("Could not retrieve McEventCollection: " << m_MCKey);
        return StatusCode::SUCCESS;

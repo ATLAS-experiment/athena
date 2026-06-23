@@ -271,7 +271,7 @@ def generate_block_markdown(block_info: Dict[str, Any]) -> str:
             name = opt["label"]
 
             # Skip these settings unless they are True
-            if name in ["skipOnData", "skipOnMC"]:
+            if name in ["skipOnData", "skipOnMC", "skipWithSystematics"]:
                 if not opt["default"] is True:
                     continue
             # Skip these settings unless they are set

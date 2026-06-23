@@ -120,11 +120,6 @@ namespace SimTesting {
     ASSERT_TRUE( m_alg->setProperty( "ISFRun", false).isSuccess()  );
     ASSERT_TRUE( patchSignalProcessVertex(ge).isSuccess() );
     ASSERT_TRUE( HepMC::signal_process_vertex(&ge)==myVertex );
-#ifdef HEPMC3
-//Not needed for HepMC3
-#else
-    ASSERT_EQ( *HepMC::signal_process_vertex(&ge), *myVertex );
-#endif
   }
 
   TEST_F(BeamEffectsAlg_test, add_signal_process_vertex_isfG4) {
@@ -137,11 +132,6 @@ namespace SimTesting {
     ASSERT_TRUE( m_alg->setProperty( "ISFRun", true).isSuccess()  );
     ASSERT_TRUE( patchSignalProcessVertex(ge).isSuccess() );
     ASSERT_TRUE( HepMC::signal_process_vertex(&ge)!=myVertex );
-#ifdef HEPMC3
-//Not needed for HepMC3
-#else
-    ASSERT_EQ( *HepMC::signal_process_vertex(&ge), *dummyVertex );
-#endif
   }
 
   TEST_F(BeamEffectsAlg_test, execute_pass_through) {
@@ -178,18 +168,10 @@ namespace SimTesting {
     ASSERT_TRUE( outputTestDataKey.initialize().isSuccess() );
     SG::ReadHandle<McEventCollection>     outputTestDataHandle{outputTestDataKey,ctx};
     ASSERT_TRUE( outputTestDataHandle.isValid() );
-#ifdef HEPMC3
-//This should compare the content 
     ASSERT_EQ(*(HepMC::signal_process_vertex(outputTestDataHandle->at(0))), *(HepMC::signal_process_vertex((const HepMC::GenEvent*)inputTestDataHandle->at(0))));
     ASSERT_EQ(**(outputTestDataHandle->at(0)->vertices().begin()), **(((const HepMC::GenEvent*)inputTestDataHandle->at(0))->vertices().begin()));
     ASSERT_EQ(*(outputTestDataHandle->at(0)->beams().at(0)),*(inputTestDataHandle->at(0)->beams().at(0)));
     ASSERT_EQ(*(outputTestDataHandle->at(0)->beams().at(1)),*(inputTestDataHandle->at(0)->beams().at(1)));
-#else
-    ASSERT_EQ(*(outputTestDataHandle->at(0)->signal_process_vertex()), *(inputTestDataHandle->at(0)->signal_process_vertex()));
-    ASSERT_EQ(**(outputTestDataHandle->at(0)->vertices_begin()), **(inputTestDataHandle->at(0)->vertices_begin()));
-    ASSERT_EQ(*(outputTestDataHandle->at(0)->beam_particles().first), *(inputTestDataHandle->at(0)->beam_particles().first));
-    ASSERT_EQ(*(outputTestDataHandle->at(0)->beam_particles().second), *(inputTestDataHandle->at(0)->beam_particles().second));
-#endif
   }
 
 } // <-- namespace SimTesting

@@ -59,7 +59,7 @@ namespace EL
 
     virtual StatusCode initialize (const AlgorithmWorkerData& workerData) override;
 
-    virtual StatusCode execute () override;
+    virtual StatusCode execute (const EventContext& ctx) override;
 
     virtual StatusCode postExecute () override;
 

@@ -33,11 +33,11 @@ namespace ActsTrk {
       using Pos = xAOD::MeasVector<DIM>;
       using Cov = xAOD::MeasMatrix<DIM>;
       using Calibrator = Acts::Delegate<
-         std::pair<Pos, Cov>(const Acts::GeometryContext&,
-                             const Acts::CalibrationContext&,
-                             const Acts::Surface&,
-                             const cluster_t &,
-                             const Acts::BoundTrackParameters &)>;
+         std::tuple<Pos, Cov, unsigned int>(const Acts::GeometryContext&,
+                                            const Acts::CalibrationContext&,
+                                            const Acts::Surface&,
+                                            const cluster_t &,
+                                            const Acts::BoundTrackParameters &)>;
 
       /// Connect this calibrator to the provided delegate.
       virtual void connectCalibrator(Calibrator &calibrator) const =0;

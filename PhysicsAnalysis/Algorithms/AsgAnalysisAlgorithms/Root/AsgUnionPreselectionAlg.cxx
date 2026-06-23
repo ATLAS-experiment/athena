@@ -45,13 +45,13 @@ namespace CP
 
 
   StatusCode AsgUnionPreselectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     // first loop through systematics and set the default selection
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
       for (auto *particle : *particles)
       {
         (*m_decorator) (*particle) = false;
@@ -63,7 +63,7 @@ namespace CP
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
       for (auto *particle : *particles)
       {
         if (!(*m_decorator) (*particle) && m_preselection.getBool (*particle, sys))

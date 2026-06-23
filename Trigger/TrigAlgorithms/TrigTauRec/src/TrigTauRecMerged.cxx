@@ -111,6 +111,17 @@ StatusCode TrigTauRecMerged::initialize()
     }
 
 
+    // Setup coordinate transformation for HitZ inferences
+    ATH_CHECK(m_beamSpotKey.initialize());
+    for(const auto& [in_key, out_key] : m_shiftToDetectorCoordinates) {
+        m_shiftToDetectorCoordinatesInDecorKeysArray.push_back(in_key);
+        ATH_CHECK(m_shiftToDetectorCoordinatesInDecorKeysArray.back().initialize());
+
+        m_shiftToDetectorCoordinatesOutDecorKeysArray.push_back(out_key);
+        ATH_CHECK(m_shiftToDetectorCoordinatesOutDecorKeysArray.back().initialize());
+    }
+
+
     // Set up the monitoring accessors
     for(const auto& [key, p] : m_monitoredIdScores) {
         m_monitoredInferenceAccessors.emplace(
@@ -458,6 +469,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
             }
         }
 
+
         // Retrieve input TauTrack container
         if(!m_tauTrackInputKey.key().empty()) {
             SG::ReadHandle<xAOD::TauTrackContainer> tauTrackInputHandle(m_tauTrackInputKey, ctx);
@@ -625,6 +637,26 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
             tau->setP4(tau->pt(), roiDescriptor->eta(), roiDescriptor->phi(), tau->m());
 	        
             ATH_MSG_DEBUG("Roi: " << roiDescriptor->roiId() << ", Tau eta: " << tau->eta() << ", phi: " << tau->phi() << ", pT: " << tau->pt());
+        }
+
+
+        // Shift HitZ regression decorations to detector coordinates, if requested
+        if(!m_shiftToDetectorCoordinates.empty()) {
+            // Get BeamSpot vertex
+            SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle(m_beamSpotKey, ctx);
+            ATH_CHECK(beamSpotHandle.isValid());
+            const InDet::BeamSpotData* beamSpot = *beamSpotHandle;
+            const float vtx_z = beamSpot->beamPos()[Amg::z];
+
+            for(size_t i = 0; i < m_shiftToDetectorCoordinatesInDecorKeysArray.size(); ++i) {
+                SG::ReadDecorHandle<xAOD::TauJetContainer, float> inputDecorHandle(m_shiftToDetectorCoordinatesInDecorKeysArray[i], ctx);
+                ATH_CHECK(inputDecorHandle.isValid());
+
+                SG::WriteDecorHandle<xAOD::TauJetContainer, float> outputDecorHandle(m_shiftToDetectorCoordinatesOutDecorKeysArray[i], ctx);
+                ATH_CHECK(outputDecorHandle.isValid());
+
+                outputDecorHandle(*tau) = inputDecorHandle(*tau) + vtx_z;
+            }
         }
 
 

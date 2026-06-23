@@ -25,13 +25,12 @@ StatusCode xAODM4MuIntervalFilter::filterInitialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODM4MuIntervalFilter::filterEvent() {
+StatusCode xAODM4MuIntervalFilter::filterEvent(const EventContext& ctx) {
   // Get random number engine
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_ERROR("Failed to retrieve random number engine xAODM4MuIntervalFilter");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::FAILURE;
   }
 
@@ -40,7 +39,7 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
   
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
 // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
@@ -58,7 +57,7 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
  std::sort(MCTruthMuonList.begin(), MCTruthMuonList.end(), High2LowByPt());
 
   if(MCTruthMuonList.size()<4){
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG("Less than 4 muons. The muon number is " << MCTruthMuonList.size());
     return StatusCode::SUCCESS;
   }
@@ -74,7 +73,7 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
     eventWeight = getEventWeight(m4mu);
     double rnd = rndm->flat();
     if (1.0/eventWeight < rnd) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_DEBUG("Event failed weighting. Weight is " << eventWeight);
       return StatusCode::SUCCESS;
     }
@@ -82,7 +81,7 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::FAILURE;
     }
@@ -102,14 +101,12 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
         (*mec)[i]->weights().push_back( eventWeight*existingWeight );
       }
 
-#ifdef HEPMC3
       (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(eventWeight));
-#endif
 
     }
   }
   // Made it to the end - success!
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 }
 

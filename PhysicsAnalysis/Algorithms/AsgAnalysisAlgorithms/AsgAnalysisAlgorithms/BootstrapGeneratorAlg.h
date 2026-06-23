@@ -63,7 +63,7 @@ namespace CP
     StatusCode initialize() override;
 
   public:
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
 
     /// \brief the systematics list we run
   private:

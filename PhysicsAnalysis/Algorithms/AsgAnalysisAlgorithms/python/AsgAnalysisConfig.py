@@ -206,6 +206,9 @@ class PileupReweightingBlock (ConfigBlock):
             "Alternative to auto-configuration.")
         self.addOption ('useDefaultConfig', True, type=bool,
             info="whether to use the central PRW files.")
+        self.addOption ('GRLSuffixDict', {}, type=dict,
+            info="a year-suffix dictionary to help with autoconfiguration of "
+            "GRL-specific PRW configuration, e.g. selecting 'BjetHLT'.")
         self.addOption ('userLumicalcFiles', None, type=list,
             info="user-provided lumicalc files (list of strings). Alternative "
             "to auto-configuration.")
@@ -325,7 +328,8 @@ class PileupReweightingBlock (ConfigBlock):
                     toolConfigFiles = getConfigurationFiles(campaign=campaign,
                                                             files=self.files,
                                                             useDefaultConfig=self.useDefaultConfig,
-                                                            data_type=config.dataType())
+                                                            data_type=config.dataType(),
+                                                            GRLSuffixDict=self.GRLSuffixDict)
                     if self.useDefaultConfig:
                         log.info('Auto-configuring universal/default PRW config')
                     else:
@@ -349,7 +353,7 @@ class PileupReweightingBlock (ConfigBlock):
             else:
                 if campaign and campaign is not Campaign.Unknown:
                     from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
-                    toolLumicalcFiles = getLumicalcFiles(campaign)
+                    toolLumicalcFiles = getLumicalcFiles(campaign, self.GRLSuffixDict)
                     log.info('Using auto-configured lumicalc files')
                 else:
                     log.info('No campaign specified, no lumicalc files configured for PRW')
@@ -675,6 +679,9 @@ class EventCutFlowBlock (ConfigBlock):
             "If provided, takes precedence over selectionName.")
         self.addOption('cutFlowHistograms', True, type=bool,
             info="whether to generate cutflow histograms for the selection cuts.")
+        self.addOption('cutFlowHistogramsWithSystematics', True, type=bool,
+            info="whether to generate cutflow histograms for the selection cuts"
+                "when running with systematics.")
         self.addOption ('streamName', None, type=str,
             info="name of the output stream to save the cut bookkeeper in.")
 
@@ -683,6 +690,9 @@ class EventCutFlowBlock (ConfigBlock):
 
     def makeAlgs(self, config):
         if not self.cutFlowHistograms:
+            return
+
+        if not config.noSystematics() and not self.cutFlowHistogramsWithSystematics:
             return
 
         # Setup stream name

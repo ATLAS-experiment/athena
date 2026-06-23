@@ -26,7 +26,7 @@ namespace CP {
         }
         for (const auto& sys : m_systematicsList.systematicsVector()) {
             const xAOD::JetContainer *jets{nullptr};
-            ANA_CHECK(m_jets.retrieve(jets, sys));
+            ANA_CHECK(m_jets.retrieve(jets, sys, ctx));
 
             for (const xAOD::Jet *jet : *jets) {
                 bool isHS = false;

@@ -28,17 +28,11 @@
 
 #include "EvtGenModels/EvtAbsExternalGen.hh"
 
-#ifdef HEPMC3
 #include "HepMC3/Relatives.h"
 #include "HepMC3/Units.h"
 
 #include "Tauola/TauolaHepMC3Event.h"
 #include "Tauola/TauolaHepMC3Particle.h"
-#else
-#include "Tauola/TauolaHepMCEvent.h"
-#include "Tauola/TauolaHepMCParticle.h"
-#include "Tauola/TauolaParticle.h"
-#endif
 #include "EvtGenBase/EvtHepMCEvent.hh"
 
 #include <map>

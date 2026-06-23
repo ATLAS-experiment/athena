@@ -42,13 +42,13 @@ namespace CP
 
 
   StatusCode ElectronEfficiencyCorrectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_efficiencyCorrectionTool->applySystematicVariation (sys));
       const xAOD::ElectronContainer *electrons = nullptr;
-      ANA_CHECK (m_electronHandle.retrieve (electrons, sys));
+      ANA_CHECK (m_electronHandle.retrieve (electrons, sys, ctx));
       for (const xAOD::Electron *electron : *electrons)
       {
         if (m_preselection.getBool (*electron, sys))

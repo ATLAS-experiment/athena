@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthenaServices/src/AthReadAlg.h
@@ -68,7 +68,7 @@ private:
   { this, "Aliases", {}, "Aliases to create for this object." };
 
   /// Cache sgkey of proxy corresponding to the original object.
-  SG::sgkey_t m_sgkey;
+  SG::sgkey_t m_sgkey = 0;
 };
 
 

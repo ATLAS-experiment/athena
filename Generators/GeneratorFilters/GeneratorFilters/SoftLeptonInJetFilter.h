@@ -13,7 +13,7 @@ class SoftLeptonInJetFilter : public GenFilter {
 public:
 
   SoftLeptonInJetFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 protected:
 

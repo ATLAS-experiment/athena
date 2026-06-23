@@ -26,7 +26,7 @@ BoostedHadTopAndTopPair::BoostedHadTopAndTopPair(const std::string& name, ISvcLo
 }
 
 
-StatusCode BoostedHadTopAndTopPair::filterEvent() {
+StatusCode BoostedHadTopAndTopPair::filterEvent(const EventContext& ctx) {
   // if true, the event pass the filter :
   bool pass        = false;
   bool passTopHad  = false;
@@ -90,7 +90,7 @@ StatusCode BoostedHadTopAndTopPair::filterEvent() {
   }
 
   if ( passTopPair && passTopHad )  pass = true;
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
 
   return StatusCode::SUCCESS;
 }
@@ -103,15 +103,7 @@ bool BoostedHadTopAndTopPair::isFromTop(const HepMC::ConstGenParticlePtr& part) 
 
   if(!prod) return false;
 
-#ifdef HEPMC3
    for (const auto& p: prod->particles_in()) if (std::abs(p->pdg_id()) == 6) return true;
-#else
-  HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
-  HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
-  for(;firstParent!=endParent; ++firstParent){
-    if( std::abs( (*firstParent)->pdg_id() ) == 6 ) return true;
-  }
-#endif
   return false;
 }
 
@@ -122,15 +114,7 @@ HepMC::ConstGenParticlePtr   BoostedHadTopAndTopPair::findInitial(const HepMC::C
 
   if(!prod) return part;
 
-#ifdef HEPMC3
    for (const auto& p: prod->particles_in()) if (part->pdg_id() == p->pdg_id()) return findInitial(part);
-#else
-  HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
-  HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
-  for(;firstParent!=endParent; ++firstParent){
-    if( part->pdg_id() == (*firstParent)->pdg_id() )  return findInitial(*firstParent);
-  }
-#endif  
   return part;
 }
 

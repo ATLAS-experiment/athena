@@ -43,6 +43,37 @@
 #include <bitset>
 #include <type_traits>
 #include <system_error>
+#include <fstream>
+
+#include "PathResolver/PathResolver.h"
+
+namespace {
+// Read an ATLAS Bethe-Heitler .par file (format: "n_cmps  degree\n[data]").
+Acts::AtlasBetheHeitlerApprox::Data readBHParFile(const std::string& path) {
+  std::ifstream fin(path);
+  if (!fin) {
+    throw std::invalid_argument("Could not open BH par file: " + path);
+  }
+  std::size_t n_cmps = 0, degree = 0;
+  fin >> n_cmps >> degree;
+  if (!fin || n_cmps == 0 || degree == 0) {
+    throw std::invalid_argument("Bad header in BH par file: " + path);
+  }
+  Acts::AtlasBetheHeitlerApprox::Data data(n_cmps);
+  for (auto& cmp : data) {
+    cmp.weightCoeffs.resize(degree + 1);
+    cmp.meanCoeffs.resize(degree + 1);
+    cmp.varCoeffs.resize(degree + 1);
+    for (double& c : cmp.weightCoeffs) { fin >> c; }
+    for (double& c : cmp.meanCoeffs)   { fin >> c; }
+    for (double& c : cmp.varCoeffs)    { fin >> c; }
+  }
+  if (!fin) {
+    throw std::invalid_argument("Truncated data in BH par file: " + path);
+  }
+  return data;
+}
+} // anonymous namespace
 
 namespace ActsTrk {
 
@@ -69,10 +100,21 @@ StatusCode GaussianSumFitterTool::initialize() {
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));
 
-  auto bha = std::make_shared<Acts::AtlasBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
-  m_fitter = std::make_unique<Fitter>(std::move(propagator), std::move(bha),
+  // Use the GeantSim Bethe-Heitler parameterisation, which clamps at X/X0=0.20
+  // matching the behaviour in Trk::ElectronCombinedMaterialEffects. The files
+  // store coefficients in logit(z) space; transform=true applies sigmoid/exp to
+  // recover physical z in (0,1).
+  const std::string bhLow  = PathResolver::find_file("GeantSim_LT01_cdf_nC6_O5.par", "DATAPATH");
+  const std::string bhHigh = PathResolver::find_file("GeantSim_GT01_cdf_nC6_O5.par", "DATAPATH");
+  ATH_MSG_INFO("ACTS GSF: loading GeantSim BH parameterisation (" << bhLow << ", " << bhHigh << ")");
+  auto bha = std::make_shared<Acts::AtlasBetheHeitlerApprox>(
+      readBHParFile(bhLow), readBHParFile(bhHigh),
+      /*lowTransform=*/true, /*highTransform=*/true,
+      /*lowLimit=*/0.1, /*highLimit=*/0.2, /*clampToRange=*/true,
+      /*noChangeLimit=*/0.0001, /*singleGaussianLimit=*/0.002);
+  m_fitter = std::make_unique<Fitter>(std::move(propagator), bha,
               logger().cloneWithSuffix("GaussianSumFitter"));
-  
+
   // Direct Fitter
   if( m_useDirectNavigation ){
     Acts::DirectNavigator directNavigator( logger().cloneWithSuffix("DirectNavigator") );
@@ -80,8 +122,7 @@ StatusCode GaussianSumFitterTool::initialize() {
     Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator> directPropagator(std::move(stepperDirect),
 											    std::move(directNavigator),
 											    logger().cloneWithSuffix("DirectPropagator"));
-    auto bhaDirect = std::make_shared<Acts::AtlasBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
-    m_directFitter = std::make_unique<DirectFitter>(std::move(directPropagator),std::move(bhaDirect),
+    m_directFitter = std::make_unique<DirectFitter>(std::move(directPropagator), bha,
 						    logger().cloneWithSuffix("DirectGaussianSumFitter"));
 
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ITkPixelCablingData_h
 #define ITkPixelCablingData_h
@@ -48,8 +48,8 @@ namespace ITkPixelCabling {
     template <class ID>
     struct ModuleInfo {
         ID id;
-        ModuleType type;
-        TransformType transform;
+        ModuleType type {};
+        TransformType transform {};
     };
 
     //define transforms, assuming

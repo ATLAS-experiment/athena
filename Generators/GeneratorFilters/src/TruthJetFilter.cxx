@@ -32,7 +32,7 @@ StatusCode TruthJetFilter::filterInitialize() {
 }
 
 
-StatusCode TruthJetFilter::filterEvent() {
+StatusCode TruthJetFilter::filterEvent(const EventContext& ctx) {
   const xAOD::JetContainer* truthjetTES = nullptr;
   CHECK(evtStore()->retrieve(truthjetTES, m_TruthJetContainerName));
   ATH_MSG_DEBUG("xAOD::JetContainer size = " << (*truthjetTES).size());
@@ -76,6 +76,6 @@ StatusCode TruthJetFilter::filterEvent() {
       return StatusCode::SUCCESS;
     }
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

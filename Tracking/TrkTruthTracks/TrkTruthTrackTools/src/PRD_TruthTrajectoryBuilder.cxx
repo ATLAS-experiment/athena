@@ -91,12 +91,7 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
         for ( ; prdMtCIter != prdMtCIterE; ++ prdMtCIter ){
 
             // check if entry exists and if   
-#ifdef HEPMC3
             HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second.scptr();
-#else
-//AV Looks like an implicit conversion
-            HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second;
-#endif
             Identifier                curIdentifier = (*prdMtCIter).first;
             // apply the min pT cut 
             if ( curGenP->momentum().perp() < m_minPt ) continue;

@@ -24,12 +24,7 @@ namespace GeneratorObjectsMcEventDict {
     std::set<HepMC::GenParticle*>::iterator m_pseti;
     std::set<HepMC::GenVertex*>::iterator m_vseti;
 
-#ifdef HEPMC3 
     RootUtils::PyROOTIteratorFuncs<std::vector<HepMC::GenVertex>::const_iterator> m_it;
-#else    
-    RootUtils::PyROOTIteratorFuncs<
-      HepMC::GenVertex::particles_out_const_iterator> m_it;
-#endif
   };
 
 }

@@ -58,11 +58,7 @@ class MockFilterTool : public extends<AthAlgTool, ISF::IGenParticleFilter> {
   virtual ~MockFilterTool() {};
 
   // mock method which will be called by tested code
-#ifdef HEPMC3
   MOCK_CONST_METHOD1(pass, bool(const HepMC::ConstGenParticlePtr&));
-#else
-  MOCK_CONST_METHOD1(pass, bool(const HepMC::GenParticle&));
-#endif
 };
 
 DECLARE_COMPONENT( MockFilterTool )
@@ -125,11 +121,6 @@ TEST_F(InputConverter_test, convertParticle_without_production_vertex) {
                                                       );
   ISF::ISFParticle* expected = nullptr;
   ASSERT_EQ( expected, convertParticle(genPart) );
-#ifdef HEPMC3
-  //When compiled with HepMC3, genPart is smart pointer
-#else
-  delete genPart;
-#endif
 }
 
 
@@ -309,11 +300,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
 TEST_F(InputConverter_test, passesFilters_empty_filters_defaultconstructed_genpart) {
   ASSERT_TRUE( m_svc->initialize().isSuccess() );
 
-#ifdef HEPMC3
   auto genPart=HepMC::newGenParticlePtr();
-#else
-  const HepMC::GenParticle genPart{};
-#endif
   ASSERT_TRUE( passesFilters(genPart) );
 }
 
@@ -322,25 +309,12 @@ TEST_F(InputConverter_test, passesFilters_empty_filters) {
   ASSERT_TRUE( m_svc->initialize().isSuccess() );
 
   HepMC::FourVector mom(12.3, 45.6, 78.9, 0.12);
-#ifdef HEPMC3
   //It seems this test makes no sense for HepMC3
   HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr(mom,
                               11, // pdg id (e-)
                               1 // status
                              );
   ASSERT_TRUE( true );
-#else
-  const int particleBarcode(546);
-  HepMC::GenParticle genPart(mom,
-                              11, // pdg id (e-)
-                              1 // status
-                             );
-  genPart.set_generated_mass(1234.56);
-  HepMC::suggest_barcode( genPart,particleBarcode);
-  const HepMC::GenParticle constGenPart(std::move(genPart));
-
-  ASSERT_TRUE( passesFilters(constGenPart) );
-#endif
 }
 
 
@@ -353,11 +327,7 @@ TEST_F(InputConverter_test, passesFilters_one_pass_filter) {
   ASSERT_EQ (genParticleFilters.size(), expectedSize);
   MockFilterTool* filterTool = dynamic_cast<MockFilterTool*>(&*(genParticleFilters[0]));
   ASSERT_TRUE( filterTool );
-#ifdef  HEPMC3
   HepMC::ConstGenParticlePtr genPart{};
-#else
-  const HepMC::GenParticle genPart{};
-#endif
   HepMC::FourVector mom(12.3, 45.6, 78.9, 0.12);
   HepMC::GenParticle genPart2(mom,
                               11, // pdg id (e-)
@@ -381,11 +351,7 @@ TEST_F(InputConverter_test, passesFilters_one_nonpass_filter) {
   MockFilterTool* filterTool = dynamic_cast<MockFilterTool*>(&*(genParticleFilters[0]));
   ASSERT_TRUE( filterTool );
 
-#ifdef  HEPMC3
   HepMC::ConstGenParticlePtr genPart{};
-#else
-  const HepMC::GenParticle genPart{};
-#endif
   HepMC::FourVector mom(12.3, 45.6, 78.9, 0.12);
   HepMC::GenParticle genPart2(mom,
                               11, // pdg id (e-)
@@ -411,11 +377,7 @@ TEST_F(InputConverter_test, passesFilters_two_filters) {
   MockFilterTool* filterTool2 = dynamic_cast<MockFilterTool*>(&*(genParticleFilters[1]));
   ASSERT_TRUE( filterTool2 );
 
-#ifdef  HEPMC3
   HepMC::ConstGenParticlePtr genPart{};
-#else
-  const HepMC::GenParticle genPart{};
-#endif
   HepMC::FourVector mom(12.3, 45.6, 78.9, 0.12);
   HepMC::GenParticle genPart2(mom,
                               11, // pdg id (e-)

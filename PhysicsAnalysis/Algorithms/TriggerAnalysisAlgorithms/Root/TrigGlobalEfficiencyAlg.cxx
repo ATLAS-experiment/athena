@@ -222,7 +222,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CP::TrigGlobalEfficiencyAlg::execute()
+StatusCode CP::TrigGlobalEfficiencyAlg::execute(const EventContext& ctx)
 {
 
   CP::SysFilterReporterCombiner filterCombiner (m_filterParams, m_noFilter.value());
@@ -239,19 +239,19 @@ StatusCode CP::TrigGlobalEfficiencyAlg::execute()
     std::vector<const xAOD::Muon*> selectedMuons;
 
     if (!m_electronsHandle.empty()) {
-      ANA_CHECK(m_electronsHandle.retrieve(electrons, syst));
+      ANA_CHECK(m_electronsHandle.retrieve(electrons, syst, ctx));
       for (const xAOD::Electron *el: *electrons) {
 	if (m_electronSelection.getBool(*el, syst)) selectedElectrons.push_back(el);
       }
     }
     if (!m_photonsHandle.empty()) {
-      ANA_CHECK(m_photonsHandle.retrieve(photons, syst));
+      ANA_CHECK(m_photonsHandle.retrieve(photons, syst, ctx));
       for (const xAOD::Photon *ph: *photons) {
 	if (m_photonSelection.getBool(*ph, syst)) selectedPhotons.push_back(ph);
       }
     }
     if (!m_muonsHandle.empty()) {
-      ANA_CHECK(m_muonsHandle.retrieve(muons, syst));
+      ANA_CHECK(m_muonsHandle.retrieve(muons, syst, ctx));
       for (const xAOD::Muon *mu: *muons) {
 	if (m_muonSelection.getBool(*mu, syst)) selectedMuons.push_back(mu);
       }
@@ -271,7 +271,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::execute()
 
     // Retrieve EventInfo
     const xAOD::EventInfo *evtInfo {nullptr};
-    ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, syst));
+    ANA_CHECK(m_eventInfoHandle.retrieve(evtInfo, syst, ctx));
 
     // Check if we have trigger matching
     bool matched = false;

@@ -456,11 +456,11 @@ StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
       bool passed = isPassed(p, px, py, pz, pt, eta, vx, vy, vz, radius, status, charge, vParentID, vParentBarcode,
                              vProdNin, vProdNout, vProdStatus, vProdBarcode);
       allTruthParticles.insert(std::make_pair(std::make_pair(genEvt->event_number(), HepMC::barcode(p)),
-                                              std::make_pair(passed, 0))); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
+                                              std::make_pair(passed, 0)));
       // subevent, barcode, px, py, pz, pt, eta, vx, vy, vz, radius, status, charge
       if (m_rootFile) {
         m_Part_event_number[m_nPartEVT] = genEvt->event_number();
-        m_Part_barcode[m_nPartEVT] = HepMC::barcode(p); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
+        m_Part_barcode[m_nPartEVT] = HepMC::barcode(p);
         m_Part_px[m_nPartEVT] = px;
         m_Part_py[m_nPartEVT] = py;
         m_Part_pz[m_nPartEVT] = pz;
@@ -1506,21 +1506,11 @@ bool InDet::DumpObjects::isPassed(HepMC::ConstGenParticlePtr particle, float &px
     vProdNin = particle->production_vertex()->particles_in_size();
     vProdNout = particle->production_vertex()->particles_out_size();
     vProdStatus = particle->production_vertex()->id();
-    vProdBarcode = HepMC::barcode(particle->production_vertex()); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
-#ifdef HEPMC3
+    vProdBarcode = HepMC::barcode(particle->production_vertex());
     for (const auto &p : particle->production_vertex()->particles_in()) {
       vParentID.push_back(p->pdg_id());
-      vParentBarcode.push_back(HepMC::barcode(p)); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
+      vParentBarcode.push_back(HepMC::barcode(p));
     }
-#else
-    for (auto ip = particle->production_vertex()->particles_in_const_begin();
-         ip != particle->production_vertex()->particles_in_const_end();
-         ++ip)
-    {
-      vParentID.push_back((*ip)->pdg_id());
-      vParentBarcode.push_back(HepMC::barcode(*ip)); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
-    }
-#endif
   } else {
     vProdNin = 0;
     vProdNout = 0;
@@ -1536,7 +1526,7 @@ bool InDet::DumpObjects::isPassed(HepMC::ConstGenParticlePtr particle, float &px
   if (not passPt)
     return false;
 
-  bool passBarcode = (HepMC::barcode(particle) < m_max_barcode); // JB: HEPMC3 barcode() -> HepMC::barcode(p)
+  bool passBarcode = (HepMC::barcode(particle) < m_max_barcode);
   if (not passBarcode)
     return false;
 

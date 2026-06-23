@@ -5,7 +5,6 @@
 
 #ifndef ATLASHEPMC_GENEVENT_H
 #define ATLASHEPMC_GENEVENT_H
-#ifdef HEPMC3
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenHeavyIon.h"
 #include "HepMC3/GenPdfInfo.h"
@@ -619,86 +618,4 @@ template <class T> bool suggest_barcode(T& p, int i) {
 }
 
 }
-
-#else
-
-#include "HepMC/GenEvent.h"
-#include "HepMC/GenVertex.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/Barcode.h"
-#include <memory>
-namespace HepMC {
-inline bool set_ll_event_number(HepMC::GenEvent* e, long long int num){
-  if (num > std::numeric_limits<int>::max()) return false;
-  e->set_event_number((int)num);
-  return true;
-}
-inline long long int get_ll_event_number(const HepMC::GenEvent* e){
-  return e->event_number();
-}
-inline GenEvent::particle_iterator  begin(HepMC::GenEvent& e) { return e.particles_begin(); }
-inline GenEvent::particle_iterator  end(HepMC::GenEvent& e) { return e.particles_end(); }
-inline GenEvent::particle_const_iterator  begin(const HepMC::GenEvent& e) { return e.particles_begin(); }
-inline GenEvent::particle_const_iterator  end(const HepMC::GenEvent& e) { return e.particles_end(); }
-inline GenEvent* newGenEvent(const int a, const int b) { return new GenEvent(a,b); }
-inline GenVertex* signal_process_vertex(const GenEvent* e) { return e->signal_process_vertex(); }
-inline void fillBarcodesAttribute(GenEvent* ) { }
-inline GenVertex* barcode_to_vertex(const GenEvent* e, int id) {return  e->barcode_to_vertex(id);}
-inline GenParticle* barcode_to_particle(const GenEvent* e, int id) {return  e->barcode_to_particle(id);}
-inline int mpi(const GenEvent& e) {
-    return e.mpi();
-}
-inline int mpi(const GenEvent* e) {
-    return e->mpi();
-}
-inline int signal_process_id(const GenEvent& e) {
-    return e.signal_process_id();
-}
-inline int signal_process_id(const GenEvent* e) {
-    return e->signal_process_id();
-}
-inline void set_signal_process_id(GenEvent* e, const int i) {
-    e->set_signal_process_id(i);
-}
-inline void set_mpi(GenEvent* e, const int i) {
-    e->set_mpi(i);
-}
-template <class T> void set_random_states(GenEvent* e, std::vector<T> a) {
-    e->set_random_states(a);
-}
-template <class T> void set_signal_process_vertex(GenEvent* e, T v) {
-    e->set_signal_process_vertex(v);
-}
-inline GenEvent* copyemptyGenEvent(const GenEvent* inEvt) {
-    HepMC::GenEvent* outEvt = new HepMC::GenEvent( inEvt->signal_process_id(),  inEvt->event_number() );
-    outEvt->set_mpi  ( inEvt->mpi() );
-    outEvt->set_event_scale  ( inEvt->event_scale() );
-    outEvt->set_alphaQCD     ( inEvt->alphaQCD() );
-    outEvt->set_alphaQED     ( inEvt->alphaQED() );
-    outEvt->weights() =        inEvt->weights();
-    outEvt->set_random_states( inEvt->random_states() );
-    if ( nullptr != inEvt->heavy_ion() ) {
-      outEvt->set_heavy_ion    ( *inEvt->heavy_ion() );
-    }
-    if ( nullptr != inEvt->pdf_info() ) {
-      outEvt->set_pdf_info     ( *inEvt->pdf_info() );
-    }
-    return outEvt;
-}
-
-template <class T> bool suggest_barcode(T& p, int i) {return p.suggest_barcode(i);}
-template <class T> bool suggest_barcode(T* p, int i) {return p->suggest_barcode(i);}
-//Smart pointers should not be used with HepMC2. But it happens.
-template <> inline  bool suggest_barcode<std::unique_ptr<HepMC::GenParticle> >(std::unique_ptr<HepMC::GenParticle>& p, int i) {return p->suggest_barcode(i);}
-
-namespace Print {
-inline void line(std::ostream& os,const GenEvent& e) {e.print(os);}
-inline void line(std::ostream& os,const GenEvent* e) {e->print(os);}
-inline void content(std::ostream& os,const GenEvent& e) {e.print(os);}
-inline void content(std::ostream& os,const GenEvent* e) {e->print(os);}
-}
-inline bool valid_beam_particles(const GenEvent* e) {return e->valid_beam_particles();}
-}
-#include "AtlasHepMC/SimpleVector.h"
-#endif
 #endif

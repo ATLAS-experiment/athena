@@ -5,7 +5,6 @@
 
 #ifndef ATLASHEPMC_GENPARTICLE_H
 #define ATLASHEPMC_GENPARTICLE_H
-#ifdef HEPMC3
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/PrintStreams.h"
 #include "AtlasHepMC/Barcode.h"
@@ -29,22 +28,4 @@ inline int barcode_or_id(const ConstGenParticlePtr& p) { return p->id(); }
 
 using HepMC3::GenParticle;
 }
-#else
-#include "HepMC/GenParticle.h"
-#include "AtlasHepMC/Barcode.h"
-#include <memory>
-namespace HepMC {
-typedef GenParticle* GenParticlePtr;
-typedef const GenParticle* ConstGenParticlePtr;
-inline GenParticlePtr newGenParticlePtr(const HepMC::FourVector &mom = HepMC::FourVector(0.0, 0.0, 0.0, 0.0), int pid = 0, int status = 0) {
-    return new HepMC::GenParticle(mom, pid, status);
-}
-inline int barcode_or_id(const ConstGenParticlePtr& p) { return p->barcode();}
-namespace Print {
-inline void line(std::ostream& os, const GenParticle& p) {p.print(os);}
-inline void line(std::ostream& os, const GenParticle* p) {p->print(os);}
-}
-inline std::ostream& operator << ( std::ostream& os, const GenParticle* p) { if (p) return os << (*p); else return os;}
-}
-#endif
 #endif

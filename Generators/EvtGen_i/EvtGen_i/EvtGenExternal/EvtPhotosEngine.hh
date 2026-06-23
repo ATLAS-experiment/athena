@@ -27,16 +27,10 @@
 #include "EvtGenBase/EvtVector4R.hh"
 
 #include "EvtGenModels/EvtAbsExternalGen.hh"
-#ifdef HEPMC3
 #include "HepMC3/Units.h"
 
 #include "Photos/PhotosHepMC3Event.h"
 #include "Photos/PhotosHepMC3Particle.h"
-#else
-#include "Photos/PhotosHepMCEvent.h"
-#include "Photos/PhotosHepMCParticle.h"
-#include "Photos/PhotosParticle.h"
-#endif
 
 #include <string>
 

@@ -1,4 +1,5 @@
 #include "SegmentEdgeClassifierTool.h"
+#include "InferenceUtils.h"
 #include "MuonInferenceInterfaces/GraphData.h"
 #include "xAODMuon/MuonSegment.h"
 #include "CxxUtils/checker_macros.h"
@@ -32,11 +33,6 @@ int segmentLayerCount(const xAOD::MuonSegment& seg) {
 inline int sectorDistance(int a, int b, int mod) {
   int d = std::abs(a - b);
   return mod > 0 ? std::min(d, mod - d) : d;
-}
-
-/// Sigmoid activation function: 1 / (1 + exp(-x))
-inline float sigmoid(float x) {
-  return 1.f / (1.f + std::exp(-x));
 }
 
 std::optional<MuonML::SegmentNodeFeatureId> nodeFeatureIdFromName(const std::string& name) {
@@ -368,7 +364,10 @@ StatusCode SegmentEdgeClassifierTool::classifyEdges(const EventContext&, const S
   scores.reserve(graph.nEdges);
   for (std::size_t e=0; e<graph.nEdges; ++e) {
     const float l = logits[e];
-    scores.push_back({std::size_t(graph.edgeIndex[2 * e]), std::size_t(graph.edgeIndex[2 * e + 1]), l, sigmoid(l)});
+    scores.push_back({std::size_t(graph.edgeIndex[2 * e]),
+                      std::size_t(graph.edgeIndex[2 * e + 1]),
+                      l,
+                      InferenceUtils::sigmoid(l)});
   }
   return StatusCode::SUCCESS;
 }

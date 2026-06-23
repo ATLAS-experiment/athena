@@ -289,7 +289,6 @@
 + Simulation/G4Extensions/Monopole
 + Simulation/G4Extensions/Quirks
 + Simulation/G4Extensions/Sleptons
-+ Simulation/G4Sim/G4HiveEx
 + Simulation/G4Sim/MCTruth
 + Simulation/G4Sim/MCTruthBase
 + Simulation/G4Sim/SimHelpers

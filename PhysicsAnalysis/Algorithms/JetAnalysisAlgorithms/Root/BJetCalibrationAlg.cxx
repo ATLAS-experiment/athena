@@ -46,15 +46,15 @@ namespace CP
   }
 
   StatusCode BJetCalibrationAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
-    { 
+    {
       xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK (m_jetHandle.getCopy (jets, sys));
+      ANA_CHECK (m_jetHandle.getCopy (jets, sys, ctx));
 
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK (m_muonHandle.retrieve (muons, sys));
+      ANA_CHECK (m_muonHandle.retrieve (muons, sys, ctx));
 
       std::vector<const xAOD::Muon*> muons_for_correction;
       muons_for_correction.reserve(muons->size());

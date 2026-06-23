@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -96,7 +96,7 @@ namespace SH
   private:
     std::string m_file;
 
-    ClassDef (SampleHist, 1);
+    ClassDefOverride (SampleHist, 1);
   };
 }
 

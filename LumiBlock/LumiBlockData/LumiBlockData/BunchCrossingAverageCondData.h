@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockData/BunchCrossingAverageCondData.h
@@ -102,43 +102,43 @@ private:
   // Data
 
 
-  float m_beam1IntensityAll;
-  float m_beam2IntensityAll;
-  float m_beam1IntensityAll_fBCT;
-  float m_beam2IntensityAll_fBCT;
-  float m_beam1IntensityAll_DCCT;
-  float m_beam2IntensityAll_DCCT;
-  float m_beam1IntensityAll_DCCT24;
-  float m_beam2IntensityAll_DCCT24;
+  float m_beam1IntensityAll = 0;
+  float m_beam2IntensityAll = 0;
+  float m_beam1IntensityAll_fBCT = 0;
+  float m_beam2IntensityAll_fBCT = 0;
+  float m_beam1IntensityAll_DCCT = 0;
+  float m_beam2IntensityAll_DCCT = 0;
+  float m_beam1IntensityAll_DCCT24 = 0;
+  float m_beam2IntensityAll_DCCT24 = 0;
 
-  float m_beam1Intensity;
-  float m_beam2Intensity;
-  float m_beam1Intensity_fBCT;
-  float m_beam2Intensity_fBCT;
-  float m_beam1Intensity_DCCT;
-  float m_beam2Intensity_DCCT;
-  float m_beam1Intensity_DCCT24;
-  float m_beam2Intensity_DCCT24;
+  float m_beam1Intensity = 0;
+  float m_beam2Intensity = 0;
+  float m_beam1Intensity_fBCT = 0;
+  float m_beam2Intensity_fBCT = 0;
+  float m_beam1Intensity_DCCT = 0;
+  float m_beam2Intensity_DCCT = 0;
+  float m_beam1Intensity_DCCT24 = 0;
+  float m_beam2Intensity_DCCT24 = 0;
 
 
-  float m_beam1IntensityAllSTD;
-  float m_beam2IntensityAllSTD;
-  float m_beam1IntensityAllSTD_fBCT;
-  float m_beam2IntensityAllSTD_fBCT;
-  float m_beam1IntensityAllSTD_DCCT;
-  float m_beam2IntensityAllSTD_DCCT;
-  float m_beam1IntensityAllSTD_DCCT24;
-  float m_beam2IntensityAllSTD_DCCT24;
+  float m_beam1IntensityAllSTD = 0;
+  float m_beam2IntensityAllSTD = 0;
+  float m_beam1IntensityAllSTD_fBCT = 0;
+  float m_beam2IntensityAllSTD_fBCT = 0;
+  float m_beam1IntensityAllSTD_DCCT = 0;
+  float m_beam2IntensityAllSTD_DCCT = 0;
+  float m_beam1IntensityAllSTD_DCCT24 = 0;
+  float m_beam2IntensityAllSTD_DCCT24 = 0;
 
-  float m_beam1IntensitySTD;
-  float m_beam2IntensitySTD;
-  float m_beam1IntensitySTD_fBCT;
-  float m_beam2IntensitySTD_fBCT;
-  float m_beam1IntensitySTD_DCCT;
-  float m_beam2IntensitySTD_DCCT;
-  float m_beam1IntensitySTD_DCCT24;
-  float m_beam2IntensitySTD_DCCT24;
-  unsigned long long m_RunLB;
+  float m_beam1IntensitySTD = 0;
+  float m_beam2IntensitySTD = 0;
+  float m_beam1IntensitySTD_fBCT = 0;
+  float m_beam2IntensitySTD_fBCT = 0;
+  float m_beam1IntensitySTD_DCCT = 0;
+  float m_beam2IntensitySTD_DCCT = 0;
+  float m_beam1IntensitySTD_DCCT24 = 0;
+  float m_beam2IntensitySTD_DCCT24 = 0;
+  unsigned long long m_RunLB = 0;
   const static int m_headTailLength = 300; // magic number 300 ns from Run 2 tool
 
 

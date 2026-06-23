@@ -30,24 +30,25 @@ namespace ActsTrk::detail {
      using Cov = xAOD::MeasMatrix<1>;
      using TrackStateProxy=BASE::TrackStateProxy;
 
-     std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
-                                   const Acts::CalibrationContext&,
-                                   const xAOD::StripCluster&,
-                                   const TrackStateProxy&) const;
+     void calibrate(const Acts::GeometryContext&,
+                    const Acts::CalibrationContext&,
+                    const xAOD::StripCluster&,
+                    TrackStateProxy&) const;
 
-     std::pair<Pos, Cov> calibrate(const Acts::GeometryContext&,
-                                   const Acts::CalibrationContext&,
-                                   const Acts::Surface&,
-                                   const xAOD::StripCluster&,
-                                   const Acts::BoundTrackParameters&) const;
+     std::tuple<Pos, Cov, unsigned int> calibrate(const Acts::GeometryContext&,
+                                                  const Acts::CalibrationContext&,
+                                                  const Acts::Surface&,
+                                                  const xAOD::StripCluster&,
+                                                  const Acts::BoundTrackParameters&) const;
 
      virtual void connectOnTrackCalibrator(BASE::OnTrackCalibrator &calibrator) const override;
      virtual void connectCalibrator(StripOnBoundStateCalibratorBase::Calibrator &calibrator) const override;
   protected:
     const InDetDD::SiDetectorElement& getDetectorElement(const Acts::Surface &surface) const;
 
-    std::pair<Pos,
-              Cov>
+    std::tuple<Pos,
+               Cov,
+               unsigned int>
     calibrate(const Acts::GeometryContext&,
               const Acts::CalibrationContext&,
               const xAOD::StripCluster&) const;

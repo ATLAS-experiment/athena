@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include files
@@ -113,7 +113,7 @@ bool
 FilteredAlgorithm::isEventAccepted( ) const
 {
   bool result = true;
-  const EventContext& ctx = this->getContext();
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   if (ctx.valid()) {
     result = m_decSvc->isEventAccepted(this->name(),ctx);
     //ATH_MSG_DEBUG("res=" << result << " n=" << this->name() << " sl=" << ctx.slot() << " evt=" << ctx.eventID().event_number());

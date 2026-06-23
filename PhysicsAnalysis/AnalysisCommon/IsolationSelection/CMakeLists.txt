@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( IsolationSelection )
@@ -50,7 +50,7 @@ endif()
 # Test(s) in the package:
 if( XAOD_STANDALONE OR XAOD_ANALYSIS )
    atlas_add_test( ut_reflex SCRIPT test/ut_reflex.py
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # Install files from the package:

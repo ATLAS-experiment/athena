@@ -42,13 +42,13 @@ StatusCode xAODMultiBjetFilter::filterFinalize() {
 }
 
 
-StatusCode xAODMultiBjetFilter::filterEvent() {
+StatusCode xAODMultiBjetFilter::filterEvent(const EventContext& ctx) {
 
   bool pass = true;
   m_Nevt++;
 
   // Retrieve truth jets
-  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName, ctx};
   if (!truthjetTES.isValid()) {
     ATH_MSG_WARNING("No xAOD::JetContainer with name " << m_TruthJetContainerName.key() << " found in StoreGate!");
     return StatusCode::SUCCESS;
@@ -68,7 +68,7 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Apply leading jet pt cut
@@ -109,7 +109,7 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
 
   // Bookkeeping
  double weight = 1;
- for(const HepMC::GenEvent* genEvt : *events_const()) {
+ for(const HepMC::GenEvent* genEvt : *events_const(ctx)) {
    weight = genEvt->weights().front();
  }
   m_SumOfWeights_Evt += weight;
@@ -118,6 +118,6 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
     m_SumOfWeights_Pass += weight;
   }
 
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
   return StatusCode::SUCCESS;
 }

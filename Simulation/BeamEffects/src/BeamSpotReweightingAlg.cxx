@@ -134,7 +134,6 @@ namespace Simulation
   HepMC::ConstGenVertexPtr BeamSpotReweightingAlg::GetSignalProcessVertex(const HepMC::GenEvent& ge) const
   {
     //Ensure that we have a valid signal_process_vertex
-#ifdef HEPMC3
     if( !HepMC::signal_process_vertex(&ge) ) {
       if (!ge.vertices().empty()) {
         ATH_MSG_DEBUG("No signal_process_vertex found - using the first GenVertex in the event.");
@@ -154,27 +153,6 @@ namespace Simulation
       ATH_MSG_DEBUG("signal_process_vertex set by Generator.");
       return HepMC::signal_process_vertex(&ge);
     }
-#else    
-    if( !ge.signal_process_vertex() ) {
-      if (!ge.vertices_empty()) {
-        ATH_MSG_DEBUG("No signal_process_vertex found - using the first GenVertex in the event.");
-        HepMC::GenVertex *signalVertex = *(ge.vertices_begin());
-        return signalVertex;
-      }
-      if( !ge.signal_process_vertex() ) { // Insanity check
-        if (!ge.vertices_empty()) {
-          ATH_MSG_ERROR("Failed to set signal_process_vertex for GenEvent!!");
-          return nullptr;
-        }
-        ATH_MSG_WARNING("No signal_process_vertex found. Empty GenEvent!");
-        return nullptr;
-      }
-    }
-    else {
-      ATH_MSG_DEBUG("signal_process_vertex set by Generator.");
-      return ge.signal_process_vertex();
-    }
-#endif
     return nullptr;
   }
 

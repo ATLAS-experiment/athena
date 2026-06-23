@@ -82,6 +82,12 @@ def run():
     if args.check_l1 or args.check_CPS or args.dump_dicts:
         args.parse_names = True
 
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    if "run4" in args.menu:
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+    else:
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
     flags.Trigger.triggerConfig='FILE'
     flags.Input.Files=[]
     flags.Trigger.triggerMenuSetup=menu_name

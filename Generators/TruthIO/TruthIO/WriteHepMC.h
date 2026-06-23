@@ -22,15 +22,9 @@ public:
   std::string m_format;
   std::string m_units;
 
-#ifdef HEPMC3
   std::unique_ptr<HepMC3::Writer> m_hepmcio;
   HepMC3::Units::MomentumUnit m_momentumunit{};
   HepMC3::Units::LengthUnit m_lengthunit{};
-#else
-  std::unique_ptr<HepMC::IO_GenEvent> m_hepmcio;
-  HepMC::Units::MomentumUnit m_momentumunit{};
-  HepMC::Units::LengthUnit m_lengthunit{};
-#endif
 };
 
 #endif

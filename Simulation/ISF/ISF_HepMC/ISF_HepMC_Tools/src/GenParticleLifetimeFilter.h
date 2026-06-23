@@ -30,11 +30,7 @@ namespace ISF {
     ~GenParticleLifetimeFilter() = default;
 
     /** does the given particle pass the filter? */
-#ifdef HEPMC3
     virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const override final;
-#else
-    virtual bool pass(const HepMC::GenParticle& particle) const override final;
-#endif
 
   private:
     Gaudi::Property<double> m_minLifetime{this, "MinimumLifetime", 0.000001}; //units of c*ns

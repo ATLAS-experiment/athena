@@ -161,6 +161,8 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
             info=('User option to prevent the block from running'
                   ' on MC. This only affects blocks that are'
                   ' intended to run on MC.'))
+        self.addOption('skipWithSystematics', False, type=bool,
+            info=('User option to prevent the block from running with systematics.'))
         self.addOption('onlyForDSIDs', [], type=list,
             info=('Used to specify which MC DSIDs to allow this'
                   ' block to run on. Each element of the list'
@@ -255,6 +257,8 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
         This is used by `ConfigSequence` to determine whether this block
         should be included in the configuration.
         """
+        if self.skipWithSystematics and not config.noSystematics():
+            return False
         if self.skipOnData and config.dataType() is DataType.Data:
             return False
         if self.skipOnMC and config.dataType() is not DataType.Data:

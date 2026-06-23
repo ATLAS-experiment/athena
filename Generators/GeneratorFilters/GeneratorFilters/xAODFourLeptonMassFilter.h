@@ -24,7 +24,7 @@ class xAODFourLeptonMassFilter : public GenFilter {
  public:
   xAODFourLeptonMassFilter(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode filterInitialize() override;
-  virtual StatusCode filterEvent() override;
+  virtual StatusCode filterEvent(const EventContext& ctx) override;
 
  private:
   Gaudi::Property<double> m_minPt{this, "MinPt", 5000., " "};

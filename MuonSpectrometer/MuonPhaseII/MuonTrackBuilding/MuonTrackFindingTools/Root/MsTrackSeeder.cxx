@@ -523,7 +523,7 @@ namespace MuonR4{
         auto outputSeeds = std::make_unique<MsTrackSeedContainer>();
         outputSeeds->reserve(unresolved.size());
         std::ranges::copy_if(std::move(unresolved), std::back_inserter(*outputSeeds),
-            [this, &outputSeeds](const MsTrackSeed& testMe) {
+            [&outputSeeds](const MsTrackSeed& testMe) {
                 for (const MsTrackSeed&  good : *outputSeeds){
                     if (!testMe.sector().isNeighbour(good.sector())) {
                         continue;

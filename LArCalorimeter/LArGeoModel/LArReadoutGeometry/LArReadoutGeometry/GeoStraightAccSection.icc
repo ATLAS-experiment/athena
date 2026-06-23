@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/CachedUniquePtr.h"
@@ -33,7 +33,7 @@ public:
   public:
 
     std::unique_ptr<GeoXF::Function> transfunction[14];
-    double           halfLength[14];
+    double           halfLength[14] = {0};
   };
 
   CxxUtils::CachedUniquePtrT<Rep1> r1;

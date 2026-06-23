@@ -32,14 +32,14 @@ namespace CP
 
 
   StatusCode InDetTrackSmearingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       // always need to call `getCopy` first to ensure that the shallow copies
       // are all there if requested
       xAOD::TrackParticleContainer *inDetTracks = nullptr;
-      ANA_CHECK (m_tracksHandle.getCopy (inDetTracks, sys));
+      ANA_CHECK (m_tracksHandle.getCopy (inDetTracks, sys, ctx));
 
       ANA_CHECK (m_smearingTool->applySystematicVariation (sys));
       for (xAOD::TrackParticle *track : *inDetTracks)

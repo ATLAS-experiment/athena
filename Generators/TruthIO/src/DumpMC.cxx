@@ -29,16 +29,15 @@ StatusCode DumpMC::initialize() {
 }
 
 
-StatusCode DumpMC::execute(const EventContext& /*ctx*/) {
+StatusCode DumpMC::execute(const EventContext& ctx) {
   if (m_DeepCopy) {
     McEventCollection* mcCollptra = new McEventCollection();
     // Fill the new McEventCollection with a copy of the initial HepMC::GenEvent
-    for(const HepMC::GenEvent* evt : *events_const()) {
+    for(const HepMC::GenEvent* evt : *events_const(ctx)) {
       mcCollptra->push_back(new HepMC::GenEvent(*evt));
     }
     // Loop over all events in McEventCollection
     for (McEventCollection::iterator evt = mcCollptra->begin(); evt != mcCollptra->end(); ++evt) {
-#ifdef HEPMC3
     std::vector<HepMC::GenVertexPtr> lambda_vertices_to_remove;
     for (auto part: **evt){
     const int abspid = std::abs(part->pdg_id());
@@ -48,47 +47,6 @@ StatusCode DumpMC::execute(const EventContext& /*ctx*/) {
      part->set_status(1);
     }
     for (auto v: lambda_vertices_to_remove)  (*evt)->remove_vertex(std::move(v));
-#else
-      // Loop over the vertices of the event
-      std::set<int> Lambdas;
-      std::set<int> vtx_to_delete;
-      for (HepMC::GenEvent::vertex_const_iterator vtx = (*evt)->vertices_begin(); vtx != (*evt)->vertices_end(); ++vtx) {
-        // Loop over the particles that produced the vertex
-        if ( vtx_to_delete.find((*vtx)->barcode()) == vtx_to_delete.end() &&
-             (*vtx)->particles_in_const_begin() != (*vtx)->particles_in_const_end() ) {
-          HepMC::GenVertex::particles_in_const_iterator part = (*vtx)->particles_in_const_begin();
-          bool lambda_not_found = true;
-          const int abspid = std::abs((*part)->pdg_id());
-          do {
-            if (abspid == 310 || abspid == 3122 || abspid == 3222 || abspid == 3112 ||
-                abspid == 3322 || abspid == 3312 || abspid == 3334 ) {
-              lambda_not_found = false;
-              Lambdas.insert((*part)->barcode());
-              vtx_to_delete.insert((*vtx)->barcode());
-              // In case a lambda was found, store in vertices to be deleted all the vertices
-              // that the products of Lambda created
-              for (HepMC::GenVertex::vertex_iterator desc = (*vtx)->vertices_begin(HepMC::descendants);
-                   desc != (*vtx)->vertices_end(HepMC::descendants); ++desc) {
-                vtx_to_delete.insert((*desc)->barcode());
-              }
-            }
-            ++part;
-          } while (part != (*vtx)->particles_in_const_end() && lambda_not_found);
-        }
-      }
-
-      // Set Lambda's status to stable
-      for (std::set<int>::iterator l = Lambdas.begin(); l != Lambdas.end(); ++l) {
-        HepMC::GenParticle* lam = (*evt)->barcode_to_particle(*l);
-        lam->set_status(1);
-      }
-      // Delete all Lambda vertices from the event
-      for (std::set<int>::iterator v = vtx_to_delete.begin(); v != vtx_to_delete.end(); ++v) {
-        HepMC::GenVertex* vdel = (*evt)->barcode_to_vertex(*v);
-        (*evt)->remove_vertex(vdel);
-        delete vdel;
-      }
-#endif
     }
 
     if (evtStore()->record(mcCollptra, m_keyout).isFailure()){
@@ -98,10 +56,9 @@ StatusCode DumpMC::execute(const EventContext& /*ctx*/) {
   }
 
   // Loop over all events in McEventCollection
-  for(const HepMC::GenEvent* evt : *events_const()) {
+  for(const HepMC::GenEvent* evt : *events_const(ctx)) {
     auto pdfinfo = evt->pdf_info();
     auto ion = evt->heavy_ion();
-#ifdef HEPMC3
     if (pdfinfo) {
       std::cout << "PdfInfo: "
                 << pdfinfo->parton_id[0] << ", "
@@ -134,40 +91,6 @@ StatusCode DumpMC::execute(const EventContext& /*ctx*/) {
                 << ion->sigma_inel_NN 
                 << std::endl;
                                                }
-#else
-    if (pdfinfo) {
-      std::cout << "PdfInfo: "
-                << pdfinfo->id1() << ", "
-                << pdfinfo->id2() << ", "
-                << pdfinfo->x1() << ", "
-                << pdfinfo->x2() << ", "
-                << pdfinfo->scalePDF() << ", "
-                << pdfinfo->pdf1() << ", "
-                << pdfinfo->pdf2() << ", "
-                << pdfinfo->pdf_id1() << ", "
-                << pdfinfo->pdf_id2()
-                <<      std::endl;
-    }
-
-    if (ion) {
-      std::cout << std::endl;
-      std::cout << "Heavy Ion: "
-                << ion->Ncoll_hard() <<", "
-                << ion->Npart_proj() <<" , "
-                << ion->Npart_targ()<< ", "
-                << ion->Ncoll()<< ", "
-                << ion->spectator_neutrons() << ", "
-                << ion->spectator_protons() << ", " 
-                << ion->N_Nwounded_collisions() << ", "
-                << ion->Nwounded_N_collisions() << ", "
-                << ion->Nwounded_Nwounded_collisions() << ", "
-                << ion->impact_parameter() << ", "
-                << ion->event_plane_angle() << ", "
-                << ion->eccentricity() << ", "
-                << ion->sigma_inel_NN() 
-                << std::endl;
-                                               }
-#endif
     if (m_VerboseOutput) {
       if (!m_EtaPhi) {
         HepMC::Print::line(std::cout,*evt); // standard HepMc dump

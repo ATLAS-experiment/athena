@@ -103,8 +103,7 @@ def _addDepsByTagger(flags, tagger_name: str, jetCollection: str) -> ComponentAc
         if 'EMPFlowCustomVtx' in jetCollection:
             calib_kwargs['calibJetCollection'] = 'AntiKt4EMPFlow'
             calib_kwargs['rhoKey'] = 'Kt4EMPFlowCustomVtxEventShape'
-            calib_kwargs['originScale'] = 'Hgg_JetOriginConstitScaleMomentum'
-            calib_sequence = calib_sequence.replace('Residual', 'Residual_Origin')
+            calib_kwargs['pvKey'] = 'HggPrimaryVertices'
         acc.merge(JetCalibrationDecoratorCfg(
             flags,
             jetCollection=jetCollection,

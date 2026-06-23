@@ -64,19 +64,15 @@ StatusCode xAODHTFilter::filterFinalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODHTFilter::filterEvent()
+StatusCode xAODHTFilter::filterEvent(const EventContext& ctx)
 {
   m_total++; // Book keeping
 
   // Get jet container out
-  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName, ctx};
   if (!truthjetTES.isValid()) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName.key());
-#ifdef HEPMC3
-    setFilterPassed(m_MinHT < 1. || keepAll());
-#else
-    setFilterPassed(m_MinHT < 1.);
-#endif
+    setFilterPassed(m_MinHT < 1. || keepAll(), ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -102,7 +98,7 @@ StatusCode xAODHTFilter::filterEvent()
 
     // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
     // duplicated barcode ones
-    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
     CHECK(xTruthParticleContainer.isValid());
 
     std::vector<const xAOD::TruthParticle *> WZleptons;
@@ -130,13 +126,12 @@ StatusCode xAODHTFilter::filterEvent()
   HT /= Gaudi::Units::GeV; // Make sure we're in GeV
   ATH_MSG_DEBUG("HT: " << HT);
 
-#ifdef HEPMC3
     // fill the HT value
     // Event passed.  Will add HT to xAOD::EventInfo
     // Get MC event collection for setting weight
   const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - might not work");
       return StatusCode::SUCCESS;
     } 
@@ -149,18 +144,15 @@ StatusCode xAODHTFilter::filterEvent()
     }
 
   if ((HT < m_MinHT || HT >= m_MaxHT) && (!keepAll()))
-#else
-  if ((HT < m_MinHT || HT >= m_MaxHT) )
-#endif
   {
     ATH_MSG_DEBUG("Failed filter on HT: " << HT << " is not between " << m_MinHT << " and " << m_MaxHT);
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   }
   else
   {
    // Made it to the end - success! 
     m_passed++;
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
    }
   return StatusCode::SUCCESS;
 }

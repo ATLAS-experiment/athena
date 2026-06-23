@@ -306,7 +306,7 @@ class DataStore;
     unsigned int m_refCount{};
 
     ///reset and not delete: default is true
-    bool m_resetFlag{};        
+    bool m_resetFlag = true;
 
     /// True if there are any bound handles.
     // Strictly redundant with m_handles below, but put here to speed up the
@@ -320,7 +320,7 @@ class DataStore;
     /// Was the proxy created as const?
     bool m_origConst{};
 
-    std::atomic<DataObject*> m_dObject;
+    std::atomic<DataObject*> m_dObject = nullptr;
 
     TransientAddress m_tAddress;
 
@@ -347,7 +347,7 @@ class DataStore;
     std::atomic<IProxyDict*> m_store{};
 
     /// errno-style error code for accessData
-    enum ErrNo m_errno{};  // protected by m_objMutex
+    enum ErrNo m_errno { ALLOK };  // protected by m_objMutex
 
 
     // For m_dObject.

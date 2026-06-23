@@ -1,20 +1,24 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
  * Major updates:
  * - 2022 Jan, Riccardo Maria Bianchi <riccardo.maria.bianchi@cern.ch>
  *             Added visualization for Calorimeters' sim hits
+ * - 2026 Apr, Riccardo Maria Bianchi <riccardo.maria.bianchi@cern.ch>
+ *             Added ITk simHits
  *
  */
 #include "VP1SimHitSystems/VP1SimHitSystem.h"
 #include "ui_simhitcontrollerform.h"
 
 #include "VP1Utils/VP1SGContentsHelper.h"
+#include "VP1Utils/VP1JobConfigInfo.h"
+#include "VP1Base/VP1Msg.h"
 #include "VP1UtilsCoinSoQt/VP1ColorUtils.h"
-
 #include "StoreGate/StoreGateSvc.h"
+#include "StoreGate/ReadHandleKey.h"
 
 #include "InDetSimEvent/SiHitCollection.h"
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"
@@ -57,8 +61,13 @@
 #include <Inventor/nodes/SoPointSet.h>
 #include <Inventor/SbColor.h>
 
+// Qt includes
 #include <QMap>
 #include <QSet>
+
+// C++ includes
+#include <string>
+
 
 class VP1SimHitSystem::Clockwork
 {
@@ -98,10 +107,27 @@ QWidget* VP1SimHitSystem::buildController()
   Ui::SimHitControllerForm ui;
   ui.setupUi(controller);
 
+  // Show/Hide checkboxes
+  // based on geometry being used
+  ui.chbxITkPixelHits->setVisible(VP1JobConfigInfo::hasITkGeometry());
+  ui.chbxITkStripHits->setVisible(VP1JobConfigInfo::hasITkGeometry());
+  ui.chbxPixelHits->setVisible(VP1JobConfigInfo::hasPixelGeometry());
+  ui.chbxSCTHits->setVisible(VP1JobConfigInfo::hasSCTGeometry());
+  ui.chbxTRTHits->setVisible(VP1JobConfigInfo::hasTRTGeometry());
+  ui.chbxHGTDHits->setVisible(VP1JobConfigInfo::hasHGTDGeometry());
+
   // Populate Check Box Names Map
-  m_clockwork->checkBoxNamesMap.insert(ui.chbxPixelHits,"Pixel");
-  m_clockwork->checkBoxNamesMap.insert(ui.chbxSCTHits,"SCT");
-  m_clockwork->checkBoxNamesMap.insert(ui.chbxTRTHits,"TRT");
+  if (VP1JobConfigInfo::hasITkGeometry()) {
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxITkPixelHits,"ITkPixel");
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxITkStripHits,"ITkStrip");
+  } else {
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxPixelHits,"Pixel");
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxSCTHits,"SCT");
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxTRTHits,"TRT");
+  }
+  if (VP1JobConfigInfo::hasHGTDGeometry()) {
+    m_clockwork->checkBoxNamesMap.insert(ui.chbxHGTDHits,"HGTD");
+  }
   m_clockwork->checkBoxNamesMap.insert(ui.chbxMDTHits,"MDT");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxRPCHits,"RPC");
   m_clockwork->checkBoxNamesMap.insert(ui.chbxTGCHits,"TGC");
@@ -129,9 +155,17 @@ QWidget* VP1SimHitSystem::buildController()
 void VP1SimHitSystem::systemcreate(StoreGateSvc* detstore)
 {
   // Populate Color Map
-  m_clockwork->colorMap.insert("Pixel",SbColor(0,0,1));
-  m_clockwork->colorMap.insert("SCT",SbColor(1,1,1)); // white
-  m_clockwork->colorMap.insert("TRT",SbColor(1,0,0)); // red
+  if (VP1JobConfigInfo::hasITkGeometry()) {
+    m_clockwork->colorMap.insert("ITkPixel",SbColor(1,1,1)); // white
+    m_clockwork->colorMap.insert("ITkStrip",SbColor(VP1ColorUtils::getSbColorFromRGB(28, 162, 230))); // Carolina Blue
+  } else {
+    m_clockwork->colorMap.insert("Pixel",SbColor(0,0,1));
+    m_clockwork->colorMap.insert("SCT",SbColor(1,1,1)); // white
+    m_clockwork->colorMap.insert("TRT",SbColor(1,0,0)); // red
+  }
+  if (VP1JobConfigInfo::hasHGTDGeometry()) {
+    m_clockwork->colorMap.insert("HGTD",SbColor(VP1ColorUtils::getSbColorFromRGB(255, 170, 0))); // amber
+  }
   m_clockwork->colorMap.insert("MDT",SbColor(.98,.8,.21));
   m_clockwork->colorMap.insert("RPC",SbColor(0,.44,.28));
   m_clockwork->colorMap.insert("TGC",SbColor(0,.631244,.748016));
@@ -235,6 +269,25 @@ void VP1SimHitSystem::checkboxChanged()
   }
 }
 
+void VP1SimHitSystem::fillHitPositionsFromSiHitCollection(const std::string& collName, const StoreGateSvc* sg, SoVertexProperty* hitVtxProperty, unsigned int & hitCount)
+{
+  const char* collNameChar = collName.c_str();
+  const SiHitCollection *p_collection = nullptr;
+  if (sg->retrieve(p_collection, collName) == StatusCode::SUCCESS)
+  {
+    for (const SiHit &hit : *p_collection)
+    {
+      GeoSiHit ghit(hit);
+      if (!ghit)
+        continue;
+      HepGeom::Point3D<double> u = ghit.getGlobalPosition();
+      hitVtxProperty->vertex.set1Value(hitCount++, u.x(), u.y(), u.z());
+    }
+    message("Event contains " + str(p_collection->size()) + " entries in " + str(collNameChar) );
+  }
+  else
+    message("Unable to retrieve '" + str(collNameChar) + "' Hits");
+}
 
 void VP1SimHitSystem::buildHitTree(const QString& detector)
 {
@@ -267,43 +320,21 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
   sw->addChild(material);
 
   // Take hits from SG
-  if(detector=="Pixel")
+  if(detector=="ITkPixel")
   {
-    //
-    // Pixel:
-    //
-    const SiHitCollection* p_collection = nullptr;
-    if(sg->retrieve(p_collection,"PixelHits")==StatusCode::SUCCESS)
-    {
-      for (const SiHit& hit : *p_collection)
-      {
-        GeoSiHit ghit(hit);
-        if(!ghit) continue;
-        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
-        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
-      }
-    }
-    else
-      message("Unable to retrieve Pixel Hits");
+    fillHitPositionsFromSiHitCollection( "ITkPixelHits", sg, hitVtxProperty, hitCount);
+  }
+  else if(detector=="ITkStrip")
+  {
+    fillHitPositionsFromSiHitCollection("ITkStripHits", sg, hitVtxProperty, hitCount);
+  }
+  else if(detector=="Pixel")
+  {
+    fillHitPositionsFromSiHitCollection("PixelHits", sg, hitVtxProperty, hitCount);
   }
   else if(detector=="SCT")
   {
-    //
-    // SCT:
-    //
-    const SiHitCollection* s_collection = 0;
-    if(sg->retrieve(s_collection,"SCT_Hits")==StatusCode::SUCCESS)
-    {
-      for (const SiHit& hit : *s_collection)
-      {
-        GeoSiHit ghit(hit);
-        if (!ghit) continue;
-        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
-        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
-      }
-    }
-    else
-      message("Unable to retrieve SCT Hits");
+    fillHitPositionsFromSiHitCollection("SCT_Hits", sg, hitVtxProperty, hitCount);
   }
   else if(detector=="TRT")
   {
@@ -318,11 +349,30 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
         GeoTRTUncompressedHit ghit(hit);
         if(!ghit) continue;
         Amg::Vector3D u = Amg::Hep3VectorToEigen(ghit.getGlobalPosition(m_clockwork->trt_dd_man));
-        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(), u.z() );
+        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
       }
     }
     else
       message("Unable to retrieve TRT Hits");
+  }
+  else if(detector=="HGTD")
+  {
+    //
+    // HGTD:
+    //
+    const SiHitCollection* p_collection = nullptr;
+    if(sg->retrieve(p_collection,"HGTD_Hits")==StatusCode::SUCCESS)
+    {
+      for (const SiHit& hit : *p_collection)
+      {
+        GeoSiHit ghit(hit);
+        if(!ghit) continue;
+        HepGeom::Point3D<double> u = ghit.getGlobalPosition();
+        hitVtxProperty->vertex.set1Value(hitCount++,u.x(),u.y(),u.z());
+      }
+    }
+    else
+      message("Unable to retrieve HGTD Hits");
   }
   else if(detector=="LArEMB" || detector=="LArEMEC" || detector=="LArFCAL" || detector=="LArHEC" )
   {
@@ -550,6 +600,8 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
         else
           message("Unable to retrieve Simulation Hits from "+key);
         }
+  } else {
+      VP1Msg::messageWarningRed("WARNING! Retrieval of Sim Hits not defined for the detector: " + detector, this);
   }
 
   // Add to the switch
@@ -568,4 +620,3 @@ void VP1SimHitSystem::handleDetDescrElementHit(const CaloDetDescrElement *hitEle
     double z = hitElement->z();
     hitVtxProperty->vertex.set1Value(hitCount++,x,y,z);
 }
-

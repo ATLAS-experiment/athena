@@ -566,12 +566,10 @@ def IDTIDEThinningToolCfg(flags, name="IDTIDEThinningTool", **kwargs):
         kwargs.setdefault("InDetTrackStatesTrtKey", "")
         kwargs.setdefault("InDetTrackMeasurementsTrtKey", "")
 
-    kwargs.setdefault("SelectionString", "abs(IDTIDEInDetTrackZ0AtPV) < 5.0")
+    kwargs.setdefault("SelectionString", "abs(InDetTrackParticles.IDTIDEInDetTrackZ0AtPV) < 5.0")
     # If true, Complains about missing PixelMSOSs
     kwargs.setdefault("ThinHitsOnTrack", False)
 
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        TrackParticleThinningCfg)
     return TrackParticleThinningCfg(flags, name, **kwargs)
 
 def ITkTrackParticleThinningCfg(flags, name, **kwargs):
@@ -620,12 +618,10 @@ def ITkTIDEThinningToolCfg(flags, name="ITkTIDEThinningTool", **kwargs):
         kwargs.setdefault("InDetTrackStatesSctKey", "")
         kwargs.setdefault("InDetTrackMeasurementsSctKey", "")
 
-    kwargs.setdefault("SelectionString", "abs(IDTIDEInDetTrackZ0AtPV) < 5.0")
+    kwargs.setdefault("SelectionString", "abs(InDetTrackParticles.IDTIDEInDetTrackZ0AtPV) < 5.0")
     # If true, Complains about missing PixelMSOSs
     kwargs.setdefault("ThinHitsOnTrack", False)
 
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        ITkTrackParticleThinningCfg)
     return ITkTrackParticleThinningCfg(flags, name, **kwargs)
 
 # Tool for thinning TrackParticles that aren't associated with muons
@@ -797,8 +793,6 @@ def UnassociatedHitsDecoratorCfg(
     acc = ComponentAccumulator()
 
     if "UnassociatedHitsGetter" not in kwargs:
-        from DerivationFrameworkInDet.InDetToolsConfig import (
-            UnassociatedHitsGetterToolCfg)
         kwargs.setdefault("UnassociatedHitsGetter", acc.popToolsAndMerge(
             UnassociatedHitsGetterToolCfg(flags)))
 

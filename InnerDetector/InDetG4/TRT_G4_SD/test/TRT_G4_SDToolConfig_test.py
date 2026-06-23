@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run tests on TRT_G4_SD configuration
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 
@@ -39,3 +39,4 @@ if __name__ == '__main__':
 
   print(cfg._privateTools)
   print("-----------------finished----------------------")
+  cfg.popPrivateTools()

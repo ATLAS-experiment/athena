@@ -112,7 +112,6 @@ namespace Athena_test {
       HepMC::FourVector pmvxpos=hScatVx->position();
       genVertex->set_position(pmvxpos);
       //to set geantino kinematic phi=eta=0, E=p=E_hard_scat
-#ifdef HEPMC3
       auto itrp =hScatVx->particles_in().cbegin();
       if (hScatVx->particles_in().size()==2) {
         HepMC::FourVector mom1=(*itrp)->momentum();
@@ -124,22 +123,8 @@ namespace Athena_test {
         vxmom.setE(mom1.e()+mom2.e());
         genPart->set_momentum(vxmom);
       }
-#else
-      HepMC::GenVertex::particles_in_const_iterator itrp =hScatVx->particles_in_const_begin();
-      if (hScatVx->particles_in_size()==2) {
-        HepMC::FourVector mom1=(*itrp)->momentum();
-        HepMC::FourVector mom2=(*(++itrp))->momentum();
-        HepMC::FourVector vxmom;
-        vxmom.setPx(mom1.e()+mom2.e());
-        vxmom.setPy(0.);
-        vxmom.setPz(0.);
-        vxmom.setE(mom1.e()+mom2.e());
-        genPart->set_momentum(vxmom);
-      }
-#endif
     }
 
-#ifdef HEPMC3
     if (!ge.vertices().empty()) {
       std::vector<HepMC::GenVertexPtr> vtxvec;
       for (const auto& vtx: ge.vertices()) {
@@ -148,17 +133,6 @@ namespace Athena_test {
       }
       vtxvec.clear();
     }
-#else
-    if (!ge.vertices_empty()) {
-      HepMC::GenEvent::vertex_iterator itvtx = ge.vertices_begin();
-      while (itvtx != ge.vertices_end()) {
-        HepMC::GenVertexPtr pvtx = *itvtx;
-        ++itvtx;
-        ge.remove_vertex(pvtx);
-        delete pvtx;
-      }
-    }
-#endif
 
     //.....add new vertex with geantino
     ge.add_vertex(std::move(genVertex));

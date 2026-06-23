@@ -11,13 +11,13 @@
 # Set calibration step ordering
 Sequence:
   Run2: 
-    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
-    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
-    Data: [Residual, EtaJES, GSC, Insitu]
+    FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
+    AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+    Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
   Run3: 
-    FullSim: [Residual, EtaJES, GSC, Smear, PtResidual, MC2MC]
-    AF3: [Residual, EtaJES, GSC, Smear, AF3, PtResidual, MC2MC]
-    Data: [Residual, EtaJES, GSC, Insitu]
+    FullSim: [Residual, EtaJES, GSC, PtResidual, MC2MC, Smear]
+    AF3: [Residual, EtaJES, GSC, PtResidual, AF3, MC2MC, Smear]
+    Data: [Residual, EtaJES, GSC, PtResidual, Insitu]
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Pile-up correction (area + residual)

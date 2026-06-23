@@ -145,7 +145,7 @@ def SetupVP1():
     )
     # Phase-II
     group.add_argument(
-        "--phaseII", action="store_true", help="Use this flag for running VP1 with PhaseII setup."
+        "--phaseII", action="store_true", help="Launch VP1 with the current default Run4 geometry tag for Phase-II [that is, it sets 'flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4']. It cannot be used when running VP1 on a data file, otherwise it interferes with the auto-configuration from the metadata stored in the file."
     )
     # Batch
     group.add_argument(
@@ -218,9 +218,8 @@ def SetupVP1():
     vp1_empty_input = False
     # This covers the use case where we launch VP1
     # without input files; e.g., to check the detector description
-    if (flags.Input.Files == [] or flags.Input.Files == [
-        "_ATHENA_GENERIC_INPUTFILE_NAME_"
-    ]) and not args.phaseII:
+    if (flags.Input.Files == [] or flags.Input.Files == ["_ATHENA_GENERIC_INPUTFILE_NAME_"]):
+      if not args.phaseII:
         from Campaigns.Utils import Campaign
         from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
@@ -242,15 +241,13 @@ def SetupVP1():
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
-    elif args.phaseII:
+      elif args.phaseII:
         _logger.verbose("Phase-II mode!")
         from Campaigns.Utils import Campaign
         from AthenaConfiguration.TestDefaults import defaultGeometryTags
         vp1_empty_input = True
         flags.Input.ProjectName = "mc21_14TeV"
         flags.Input.RunNumbers = [601229]
-        #flags.Input.ProjectName = "mc20_13TeV"
-        #flags.Input.RunNumbers = [330000]
         flags.Input.TimeStamps = [1]
         flags.Input.TypedCollections = []
 
@@ -260,7 +257,17 @@ def SetupVP1():
         flags.Input.MCCampaign = Campaign.Unknown
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
         
+        
+    # Here we consider the use case where we launch VP1 
+    # with input data files 
+    # (such as ESD, HITS, RDO, or any other pool.root file)
     else:
+
+        if args.phaseII:
+            _logger.error("VP1: The use of the `--phaseII` flag with input data file is not supported. When you run VP1 on input data file, metadata are taken from the data file itself. Please remove `--phaseII` and relaunch. However, if needed, you can still steer Athena by using the standard Athena flags and options. Exiting...\n")
+            import sys
+            sys.exit(2)
+
         # Now just check file exists, or fail gracefully
         from os import path
 
@@ -270,7 +277,7 @@ def SetupVP1():
                 import sys
                 sys.exit(1)
     
-        # Set the online flag if we are running at P1
+    # Set the online flag if we are running at P1
     if args.online:
         flags.Common.isOnline = args.online
     elif "HLTP" in flags.IOVDb.GlobalTag:

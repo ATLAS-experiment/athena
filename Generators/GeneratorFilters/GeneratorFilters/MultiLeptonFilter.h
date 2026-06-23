@@ -11,7 +11,7 @@ class MultiLeptonFilter : public GenFilter {
 public:
 
   MultiLeptonFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

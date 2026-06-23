@@ -15,8 +15,6 @@ atlas_install_generic( share/file/*.dat
                        EXECUTABLE )
 
 # Set up and install the lhapdf-config script.
-string( REPLACE "${LCG_RELEASE_BASE}" "\${LCG_RELEASE_BASE}"
-   Boost_INCLUDE_PATH "${Boost_INCLUDE_DIR}" )
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/lhapdf-config.in"
    "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/lhapdf-config" @ONLY )
 atlas_install_generic(

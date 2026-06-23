@@ -38,6 +38,10 @@ def fromRunArgs(runArgs):
     # This is ISF
     flags.Sim.ISFRun = True
 
+    #Force old-style simulation parameters via sqlite until CI tests are updated
+    # See ATLASSIM-7742
+    flags.IOVDb.WriteParametersAsMetaData=False
+
     # Set input files
     if hasattr(runArgs, 'inputRDO_BKGFile'):
         # Set inputs for Overlay

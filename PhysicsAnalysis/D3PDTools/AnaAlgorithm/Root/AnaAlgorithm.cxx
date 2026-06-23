@@ -382,9 +382,9 @@ namespace EL
 
 
   ::StatusCode AnaAlgorithm ::
-  sysExecute ()
+  sysExecute (const EventContext& ctx)
   {
-    return execute ();
+    return execute (ctx);
   }
 
 

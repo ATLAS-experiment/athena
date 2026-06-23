@@ -19,7 +19,6 @@
 // FrameWork includes
 
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPDT/ParticleDataTable.hh"
 
 // McParticleTools includes
 #include "HepMcFloatWriterTool.h"
@@ -131,8 +130,6 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
   out.setf(std::ios::dec,std::ios::basefield);
   out.setf(std::ios::scientific,std::ios::floatfield);
 
-
-#ifdef HEPMC3
   long evt_vertices_size=evt->vertices().size();
   std::shared_ptr<HepMC3::DoubleAttribute> A_alphaQCD=evt->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQCD);
   double  evt_alphaQCD=(A_alphaQCD?(A_alphaQCD->value()):0.0);
@@ -143,14 +140,6 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
   std::shared_ptr<HepMC3::VectorLongIntAttribute> A_random_states=evt->attribute<HepMC3::VectorLongIntAttribute>(HepMCStr::random_states);
   std::vector<long int> random_states=(A_random_states?(A_random_states->value()):std::vector<long int>());
   long random_states_size=random_states.size();
-#else 
-  long evt_vertices_size=evt->vertices_size();
-  double  evt_alphaQCD=evt->alphaQCD();
-  double  evt_alphaQED=evt->alphaQED();
-  double  evt_event_scale=evt->event_scale();
-  std::vector<long int> random_states=evt->random_states();
-  long random_states_size=random_states.size();
-#endif
   out << "# -- GenEvent -->\n";
   out << "#" << evt->event_number() 
       << " " << evt_event_scale 
@@ -199,7 +188,6 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
   }
 
   out << "#-- vertices -- \n";
-#ifdef HEPMC3
   for (const auto& v: evt->vertices()) {
     if ( v ) { 
       out << "# " << HepMC::barcode(v) << " " << v->status() << "\n";
@@ -219,30 +207,6 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
       out << svertexeights;
       out << '\n';
     }
-#else
-  for ( HepMC::GenEvent::vertex_const_iterator 
-	  i    = evt->vertices_begin(),
-	  iEnd = evt->vertices_end();
-	i != iEnd;
-	++i ) {
-    const HepMC::GenVertex * v = *i;
-    if ( v ) {
-      out << "# " << v->barcode() << " " << v->id() << "\n";
-
-      const HepMC::FourVector pos = v->position();
-      std::ostringstream buf;
-      buf.precision( std::numeric_limits<float>::digits10 + 1 );
-      buf.setf(std::ios::dec,std::ios::basefield);
-      buf.setf(std::ios::scientific,std::ios::floatfield);
-      
-      buf << pos.x() << " " << pos.y() << " " << pos.z() << " "  << pos.t() << "\n";
-
-      out << buf.str();
-      out << "#";
-      std::copy( v->weights().begin(), v->weights().end(), std::ostream_iterator<double>(out, " ") );
-      out << '\n';
-    }
-#endif
   }
   out << "#<-- GenEvent --\n";
 

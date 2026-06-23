@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # Slimmed DAOD_PHYSLITE.py for Run 3 trigger-object level analyses (TLAs)
 # It contains minimal variables needed for the Run 3 ISR+DiJet TLA searches
@@ -70,7 +70,7 @@ def TLA1KernelCfg(flags, name='TLA1Kernel', **kwargs):
         SGKey                   = "Electrons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    TLA1_thinning_expression = "InDetTrackParticles.DFTLA1Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    TLA1_thinning_expression = "InDetTrackParticles.DFTLA1Loose && ( abs(InDetTrackParticles.d0) < 5.0*mm ) && ( abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
 
     TLA1Akt4JetTPThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
         flags,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILECELLBUILDER_H
@@ -248,22 +248,22 @@ private:
     struct VecParams
     {
       // Type of TileRawChannels (Fit, OF2, etc.)
-      TileFragHash::TYPE m_RChType;      
+      TileFragHash::TYPE m_RChType {};
  
       // Unit for TileRawChannels (ADC, pCb, etc.)
-      TileRawChannelUnit::UNIT m_RChUnit;
+      TileRawChannelUnit::UNIT m_RChUnit {};
 
       // max possible time when time correction is applied
       float m_maxTimeCorr = 75.0;
 
       // If true, amplitude is corrected by parabolic function (needed for OF without iterations)
-      bool m_correctAmplitude; 
+      bool m_correctAmplitude = false;
 
       // should time be corrected (deltat added from CondDB)
-      bool m_correctTime;          
+      bool m_correctTime = false;
 
       // If true, assume OF2 method for amplitude correction, otherwise - OF1
-      bool m_of2;
+      bool m_of2 = false;
     };
  
     /// < method to process raw channels from a given vector and store them in collection

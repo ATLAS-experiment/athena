@@ -41,50 +41,34 @@ def ITkStripDetectorElementStatusAddByteStreamErrorsToolCfg(flags, name="ITkStri
 def ITkStripConfigurationConditionsToolCfg(flags, name="ITkStripConfigurationConditionsTool", **kwargs):
     # Load conditions configuration service and load folders and algorithm for it
     # Load folders that have to exist for both MC and Data
-    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import getITkStripDAQConfigFolder, ITkStripConfigurationCondAlgCfg
-    folder_path = getITkStripDAQConfigFolder(flags)
+    from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import ITkStripConfigurationCondAlgCfg
 
-    cond_kwargs = {}
-    cond_kwargs["ChannelFolder"] = folder_path + ("Chip" if flags.IOVDb.DatabaseInstance == "COMP200" else "ChipSlim")
-    cond_kwargs["ModuleFolder"] = f"{folder_path}Module"
-    cond_kwargs["MurFolder"] = f"{folder_path}MUR"
-    cond_kwargs["dbInstance"] = "ITkStrip"
-    cond_kwargs["SCT_ConfigurationCondAlgName"] = "ITkStripConfigurationCondAlg"
+    #For the SCT, folders are added for the following items and passed to the tools as below. None of these folders exist for ITkStrip
+    #Once equivalent folders exist, these should be added here
+    
+    #cond_kwargs = {}
+    #folder_path = getITkStripDAQConfigFolder(flags)
+    #cond_kwargs["ChannelFolder"] = f"{folder_path}Chip"
+    #cond_kwargs["ModuleFolder"] = f"{folder_path}Module"
+    #cond_kwargs["MurFolder"] = f"{folder_path}MUR"
+    #cond_kwargs["dbInstance"] = "ITkStrip"
 
     acc = ITkStripReadoutGeometryCfg(flags)
 
-    if "ChannelFolderDB" not in cond_kwargs:
-        acc.merge(addFoldersSplitOnline(flags,
-                                        detDb=cond_kwargs["dbInstance"],
-                                        onlineFolders=cond_kwargs["ChannelFolder"],
-                                        offlineFolders=cond_kwargs["ChannelFolder"],
-                                        className="CondAttrListVec",
-                                        splitMC=True))
-    else:
-        acc.merge(addFolders(flags, [cond_kwargs["ChannelFolderDB"]], detDb=cond_kwargs["dbInstance"], className="CondAttrListVec"))
-    if "ModuleFolderDB" not in cond_kwargs:
-        acc.merge(addFoldersSplitOnline(flags,
-                                        detDb=cond_kwargs["dbInstance"],
-                                        onlineFolders=cond_kwargs["ModuleFolder"],
-                                        offlineFolders=cond_kwargs["ModuleFolder"],
-                                        className="CondAttrListVec",
-                                        splitMC=True))
-    else:
-        acc.merge(addFolders(flags, [cond_kwargs["ModuleFolderDB"]], detDb=cond_kwargs["dbInstance"], className="CondAttrListVec"))
-    if "MurFolderDB" not in cond_kwargs:
-        acc.merge(addFoldersSplitOnline(flags,
-                                        detDb=cond_kwargs["dbInstance"],
-                                        onlineFolders=cond_kwargs["MurFolder"],
-                                        offlineFolders=cond_kwargs["MurFolder"],
-                                        className="CondAttrListVec",
-                                        splitMC=True))
-    else:
-        acc.merge(addFolders(flags, [cond_kwargs["MurFolderDB"]], detDb=cond_kwargs["dbInstance"],  className="CondAttrListVec"))
+    #if "ChannelFolderDB" not in cond_kwargs:
+    #    acc.merge(addFoldersSplitOnline(flags,
+    #                                    detDb=cond_kwargs["dbInstance"],
+    #                                    onlineFolders=cond_kwargs["ChannelFolder"],
+    #                                    offlineFolders=cond_kwargs["ChannelFolder"],
+    #                                    className="CondAttrListVec",
+    #                                    splitMC=True))
+    #else:
+    #    acc.merge(addFolders(flags, [cond_kwargs["ChannelFolderDB"]], detDb=cond_kwargs["dbInstance"], className="CondAttrListVec"))
 
     ConfigCondAlg_kwargs = {}
-    ConfigCondAlg_kwargs["ReadKeyChannel"] = cond_kwargs["ChannelFolder"]
-    ConfigCondAlg_kwargs["ReadKeyModule"]  = cond_kwargs["ModuleFolder"]
-    ConfigCondAlg_kwargs["ReadKeyMur"]     = cond_kwargs["MurFolder"]
+    #ConfigCondAlg_kwargs["ReadKeyChannel"] = cond_kwargs["ChannelFolder"]
+    #ConfigCondAlg_kwargs["ReadKeyModule"]  = cond_kwargs["ModuleFolder"]
+    #ConfigCondAlg_kwargs["ReadKeyMur"]     = cond_kwargs["MurFolder"]
     acc.merge(ITkStripConfigurationCondAlgCfg(flags, name="ITkStripConfigurationCondAlg", **ConfigCondAlg_kwargs))
 
     acc.setPrivateTools(CompFactory.SCT_ConfigurationConditionsTool(name, **kwargs))

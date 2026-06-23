@@ -68,7 +68,7 @@ class GenEvent_p1
 
   /** Barcode of the GenVertex holding the signal process.
    *  0 means that no signal process vertex has been written out.
-   *  This may come from upstream limitations (like HEPEVT)
+   *  This may come from upstream limitations, e.g. an absence of this information in the input file.
    */
   int m_signalProcessVtx;
 

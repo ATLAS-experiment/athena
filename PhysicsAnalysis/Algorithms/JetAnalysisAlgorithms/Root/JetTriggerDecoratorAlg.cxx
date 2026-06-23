@@ -49,10 +49,10 @@ namespace CP
 
 
 
-  StatusCode JetTriggerDecoratorAlg::execute() {
+  StatusCode JetTriggerDecoratorAlg::execute(const EventContext& ctx) {
     SG::ReadHandle<xAOD::JetRoIContainer> l1Jets;
     if(m_doL1Matching){
-      l1Jets = SG::makeHandle(m_L1JetsInKey);
+      l1Jets = SG::makeHandle(m_L1JetsInKey, ctx);
       ANA_CHECK(l1Jets.isValid());
     }
     std::regex l1NameParser("(\\d*)(J)(\\d*)((p|\\.)(\\d*)ETA(\\d*))?");
@@ -62,7 +62,7 @@ namespace CP
       if(m_useEmulationTool)
         ANA_MSG_DEBUG(m_trigger << " isPassed "<<m_emulationTool->isPassed(m_trigger));
       else {
-        hltJetsFromCont = SG::makeHandle(m_HLTJetsInKey);
+        hltJetsFromCont = SG::makeHandle(m_HLTJetsInKey, ctx);
         ANA_CHECK(hltJetsFromCont.isValid());
       }
     }
@@ -80,7 +80,7 @@ namespace CP
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::JetContainer *jets = nullptr;
-      ANA_CHECK(m_jetsHandle.retrieve(jets, sys));
+      ANA_CHECK(m_jetsHandle.retrieve(jets, sys, ctx));
 
       for (const xAOD::Jet *jet : *jets)
       {

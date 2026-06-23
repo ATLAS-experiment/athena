@@ -123,7 +123,7 @@ PixelClusteringToolImpl<T_RDOContainer>::countCellsImpl(const T_RDOContainer& rd
       unsigned int n_hits = RDOs.size();
       if constexpr(GANGED) {
          assert(detector_elements.at(RDOs.identifyHash()));
-         assert(dynamic_cast<const InDetDD::PixelModuleDesign *>(&detector_elements.at(RDOs.identifyHash()).design()) != nullptr);
+         assert(dynamic_cast<const InDetDD::PixelModuleDesign *>(&detector_elements.at(RDOs.identifyHash())->design()) != nullptr);
          const InDetDD::PixelModuleDesign &design = static_cast<const InDetDD::PixelModuleDesign &>(detector_elements.at(RDOs.identifyHash())->design());
          if (isFEI3(design)) {
             for(RDOAdapter<T_RDOContainer> rdo : RDOs) {

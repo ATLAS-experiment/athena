@@ -13,10 +13,10 @@ StatusCode xAODMETFilter::filterInitialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODMETFilter::filterEvent() {
+StatusCode xAODMETFilter::filterEvent(const EventContext& ctx) {
     
   // Retrieve TruthMET container from xAOD MET slimmer, contains (MC::isGenStable() && !MC::isInteracting()) particles
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   double sumx(0), sumy(0);
@@ -31,10 +31,9 @@ StatusCode xAODMETFilter::filterEvent() {
   }
 
   double met = std::sqrt(sumx*sumx + sumy*sumy);
-#ifdef HEPMC3
   const McEventCollection* mecc = 0;
   if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){ // FIXME keyless retrieve
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - might not work");
       return StatusCode::SUCCESS;
     }
@@ -46,10 +45,7 @@ StatusCode xAODMETFilter::filterEvent() {
       (*mec)[i]->add_attribute(HepMCStr::filterMET, std::make_shared<HepMC3::DoubleAttribute>(met/1000.));
   }
  
-  setFilterPassed(met >= m_METmin || keepAll());
-#else
-  setFilterPassed(met >= m_METmin);
-#endif
+  setFilterPassed(met >= m_METmin || keepAll(), ctx);
   return StatusCode::SUCCESS;
 }
 

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IoSvc.h 
@@ -92,7 +92,7 @@ class IoSvc
 
   struct FdInfos {
     std::string fname;
-    IIoSvc::IoType mode;
+    IIoSvc::IoType mode {};
   };
 
   typedef std::unordered_map<Fd, FdInfos> FdMap_t;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  TeATIME.h
 //  TopoCore
@@ -8,8 +8,8 @@
 #ifndef __TopoCore__TeATIME__
 #define __TopoCore__TeATIME__
 
-#include <iostream>
 #include "L1TopoInterfaces/DecisionAlg.h"
+#include <vector>
 
 class TH2;
 

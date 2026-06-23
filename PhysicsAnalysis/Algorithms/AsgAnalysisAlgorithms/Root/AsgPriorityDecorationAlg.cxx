@@ -42,12 +42,12 @@ StatusCode AsgPriorityDecorationAlg::initialize()
 
 
 
-StatusCode AsgPriorityDecorationAlg::execute()
+StatusCode AsgPriorityDecorationAlg::execute(const EventContext& ctx)
 {
   for (const auto& sys : m_systematicsList.systematicsVector())
   {
     const xAOD::IParticleContainer *particles{};
-    ANA_CHECK(m_particlesHandle.retrieve(particles, sys));
+    ANA_CHECK(m_particlesHandle.retrieve(particles, sys, ctx));
 
     for (const xAOD::IParticle *particle : *particles)
     {

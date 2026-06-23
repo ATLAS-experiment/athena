@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for thple benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for thple benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ITkStripCabling )
@@ -25,7 +25,7 @@ atlas_add_test( ITkStripOnlineId_test
   test/ITkStripOnlineId_test.cxx
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} ITkStripCablingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( ITkStripCablingData_test
@@ -33,7 +33,7 @@ atlas_add_test( ITkStripCablingData_test
   test/ITkStripCablingData_test.cxx
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} ITkStripCablingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( OnlineIdGenerator_test
@@ -42,7 +42,7 @@ atlas_add_test( OnlineIdGenerator_test
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} ITkStripCablingLib IdDict IdDictParser
     Identifier InDetIdentifier
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( ITkStripCablingAlg_test
@@ -52,7 +52,7 @@ atlas_add_test( ITkStripCablingAlg_test
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel
     PathResolver StoreGateLib Identifier IdDictParser ITkStripCablingLib
     InDetIdentifier
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_executable( ProduceDummyStripCabling

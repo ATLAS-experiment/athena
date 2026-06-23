@@ -72,21 +72,28 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  std::pair<typename StripCalibrator<traj_t>::Pos,
-            typename StripCalibrator<traj_t>::Cov>
+  void
   StripCalibrator<traj_t>::calibrate(
       const Acts::GeometryContext& gctx,
       const Acts::CalibrationContext& cctx,
       const xAOD::StripCluster& cluster,
-      const StripCalibrator<traj_t>::TrackStateProxy& /*state*/) const
+      StripCalibrator<traj_t>::TrackStateProxy& trackState) const
   {
      //      const InDetDD::SiDetectorElement &detElement = getDetectorElement(state.referenceSurface());
-      return calibrate(gctx, cctx, cluster);
+     auto [pos,cov,flags] = calibrate(gctx, cctx, cluster);
+     assert( !trackState.hasCalibrated());
+     trackState.allocateCalibrated(1);
+     trackState.template calibrated<1>() = pos.template cast<double>();
+     trackState.template calibratedCovariance<1>() = cov.template cast<double>();
+     if (flags & 1u<<6) {
+        trackState.typeFlags().setIsSplitHit();
+     }
   }
 
   template <typename traj_t>
-  std::pair<typename StripCalibrator<traj_t>::Pos,
-            typename StripCalibrator<traj_t>::Cov>
+  std::tuple<typename StripCalibrator<traj_t>::Pos,
+             typename StripCalibrator<traj_t>::Cov,
+             unsigned int>
   StripCalibrator<traj_t>::calibrate(
       const Acts::GeometryContext& gctx,
       const Acts::CalibrationContext& cctx,
@@ -99,8 +106,9 @@ namespace ActsTrk::detail{
   }
 
   template <typename traj_t>
-  std::pair<typename StripCalibrator<traj_t>::Pos,
-            typename StripCalibrator<traj_t>::Cov>
+  std::tuple<typename StripCalibrator<traj_t>::Pos,
+             typename StripCalibrator<traj_t>::Cov,
+             unsigned int>
   StripCalibrator<traj_t>::calibrate(
       const Acts::GeometryContext& /*gctx*/,
       const Acts::CalibrationContext& /*cctx*/,
@@ -115,18 +123,17 @@ namespace ActsTrk::detail{
         cov(0, 0) = newErr * newErr;
       }
 
-      return std::make_pair(pos, cov);
+      return std::make_tuple(pos, cov,0u);
   }
 
   template <typename traj_t>
   void StripCalibrator<traj_t>::connectOnTrackCalibrator(typename StripCalibrator<traj_t>::BASE::OnTrackCalibrator& stripCalibrator) const
   {
     using CalibFuncPtr_t =
-      std::pair<typename StripCalibrator<traj_t>::Pos, typename StripCalibrator<traj_t>::Cov>
-        (StripCalibrator<traj_t>:: *)(const Acts::GeometryContext&,
-                                      const Acts::CalibrationContext&,
-                                      const xAOD::StripCluster&,
-                                      const StripCalibrator<traj_t>::TrackStateProxy&) const;
+       void(StripCalibrator<traj_t>:: *)(const Acts::GeometryContext&,
+                                         const Acts::CalibrationContext&,
+                                         const xAOD::StripCluster&,
+                                         StripCalibrator<traj_t>::TrackStateProxy&) const;
 
     stripCalibrator. template connect<static_cast<CalibFuncPtr_t>(&StripCalibrator<traj_t>::calibrate)>(this);
   }
@@ -135,8 +142,9 @@ namespace ActsTrk::detail{
   void StripCalibrator<traj_t>::connectCalibrator(StripOnBoundStateCalibratorBase::Calibrator& stripCalibrator) const
   {
     using CalibFuncPtr_t =
-      std::pair<typename StripCalibrator<traj_t>::Pos,
-                typename StripCalibrator<traj_t>::Cov>
+      std::tuple<typename StripCalibrator<traj_t>::Pos,
+                 typename StripCalibrator<traj_t>::Cov,
+                 unsigned int>
         (StripCalibrator<traj_t>:: *)(const Acts::GeometryContext&,
                                       const Acts::CalibrationContext&,
                                       const Acts::Surface &,

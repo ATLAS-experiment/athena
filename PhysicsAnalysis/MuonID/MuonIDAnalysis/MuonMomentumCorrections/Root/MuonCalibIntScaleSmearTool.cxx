@@ -102,12 +102,12 @@ namespace CP
            mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
 	}
 	else if(m_calibMode == MuonCalibTool::correctData_IDonly) {
-	   mu.CB.calib_pt = mu.ME.calib_pt;
-           mu.CB.calib_charge = mu.ME.calib_charge;
-	}
-	else if(m_calibMode == MuonCalibTool::correctData_MSonly) {
 	   mu.CB.calib_pt = mu.ID.calib_pt;
            mu.CB.calib_charge = mu.ID.calib_charge;
+	}
+	else if(m_calibMode == MuonCalibTool::correctData_MSonly) {
+	   mu.CB.calib_pt = mu.ME.calib_pt;
+           mu.CB.calib_charge = mu.ME.calib_charge;
 	}
 
         // Return gracefully:

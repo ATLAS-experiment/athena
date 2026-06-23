@@ -81,7 +81,7 @@ namespace EL
 
 
   StatusCode AsgServiceWrapper ::
-  execute ()
+  execute (const EventContext& /*ctx*/)
   {
     RCU_READ_INVARIANT (this);
     return StatusCode::SUCCESS;

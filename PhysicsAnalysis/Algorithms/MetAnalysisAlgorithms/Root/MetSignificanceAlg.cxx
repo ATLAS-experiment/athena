@@ -41,14 +41,14 @@ namespace CP
 
 
   StatusCode MetSignificanceAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       // I'm not sure why this can't be const, but the interface
       // requires a non-const object
       xAOD::MissingETContainer *met {};
-      ANA_CHECK (m_metHandle.getCopy (met, sys));
+      ANA_CHECK (m_metHandle.getCopy (met, sys, ctx));
 
       const xAOD::EventInfo* evtInfo = 0;
       ANA_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );

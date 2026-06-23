@@ -48,7 +48,7 @@ namespace CP {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode xAODWriterAlg::execute() {
+   StatusCode xAODWriterAlg::execute(const EventContext& /*ctx*/) {
 
       // If this is the first event, figure out which objects can actually be
       // written out.

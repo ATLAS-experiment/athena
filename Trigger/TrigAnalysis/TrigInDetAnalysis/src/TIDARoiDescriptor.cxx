@@ -28,14 +28,15 @@ static const float  M_PIF = float(M_PI);
 const double TIDARoiDescriptor::maxRadius = 1000;
 const double TIDARoiDescriptor::maxZed    = 2700;
 
-
+/// returns the tantheta for the limits and the r and z exit
+/// points from the ID volume
 double  TIDARoiDescriptor::exitpoint( double tz0, double teta, double& zexit, double& rexit ) { 
 
   if      ( teta<0 ) zexit = -maxZed;
   else if ( teta>0 ) zexit =  maxZed;
   else { 
     zexit = tz0;
-    rexit = maxRadius; 
+    rexit = maxRadius;
     return 1e16; // don't really want to use nan
   }
   
@@ -150,14 +151,14 @@ TIDARoiDescriptor& TIDARoiDescriptor::operator= (const TIDARoiDescriptor& a)
 {
   if (this != &a) {
     TObject::operator= (a);
-    m_params = a.m_params;
+    m_params   = a.m_params;
     m_fullscan = a.m_fullscan;
-    m_l1Id = a.m_l1Id;
-    m_roiId = a.m_roiId;
-    m_roiWord = a.m_roiWord;
-    m_rois = a.m_rois;
-    m_cached = a.m_cached;
-    m_dphi = a.m_dphi;
+    m_l1Id     = a.m_l1Id;
+    m_roiId    = a.m_roiId;
+    m_roiWord  = a.m_roiWord;
+    m_rois     = a.m_rois;
+    m_cached   = a.m_cached;
+    m_dphi     = a.m_dphi;
     m_tanthetaPlus  = exitpoint( this->zedPlus(),  this->etaPlus(),  m_zedPlusR,  m_rPlusZed );
     m_tanthetaMinus = exitpoint( this->zedMinus(), this->etaMinus(), m_zedMinusR, m_rMinusZed );
   }

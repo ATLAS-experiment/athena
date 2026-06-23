@@ -33,12 +33,7 @@ std::vector<HepMC::GenParticlePtr> findChildren(const HepMC::GenParticlePtr& p) 
   if (!p) return std::vector<HepMC::GenParticlePtr>();
   const auto& v = p->end_vertex();
   if (!v) return std::vector<HepMC::GenParticlePtr>();
-#ifdef HEPMC3
   std::vector<HepMC::GenParticlePtr> ret = v->particles_out();
-#else
-  std::vector<HepMC::GenParticlePtr> ret;
-  for (auto pp=v->particles_out_const_begin();pp!=v->particles_out_const_end();++pp) ret.push_back(*pp);
-#endif
   if (ret.size()==1) if (ret.at(0)->pdg_id()==p->pdg_id()) ret = findChildren(ret.at(0));
   return ret;
 }
@@ -247,9 +242,7 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
       }
     }
     vtxFromTI->add_particle_out( parentAfterIncident );
-#ifdef HEPMC3
     HepMC::suggest_barcode( parentAfterIncident, newPrimaryBC ); // TODO check this works correctly
-#endif
     // NB For ISFTruthIncident the m_parent ISFParticle still needs
     // its id and particleLink properties to be properly updated at
     // this point.
@@ -278,13 +271,11 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
       if (p) {
         // add particle to vertex
         vtxFromTI->add_particle_out( p);
-#ifdef HEPMC3
         int secondaryParticleBCFromTI = ti.childBarcode(i);
         HepMC::suggest_barcode( p, secondaryParticleBCFromTI ? secondaryParticleBCFromTI : secondaryParticleBC );
         // NB For ISFTruthIncident the current child ISFParticle still needs
         // its id and particleLink properties to be properly updated at
         // this point.
-#endif
       }
       ATH_MSG_VERBOSE ( "Writing out " << i << "th child particle: " << p << ", barcode: " << HepMC::barcode(p));
     } // <-- if write out child particle
@@ -332,13 +323,7 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
     }
   }
   const int vtxStatus = 1000 + static_cast<int>(processCode) + HepMC::SIM_STATUS_THRESHOLD;
-#ifdef HEPMC3
   auto newVtx = HepMC::newGenVertexPtr( ti.position(),vtxStatus);
-#else
-  // NB In HepMC2 there is no GenVertex status, so we set the GenVertex ID.
-  std::unique_ptr<HepMC::GenVertex> newVtx = std::make_unique<HepMC::GenVertex>( ti.position(), vtxStatus, weights );
-  HepMC::suggest_barcode( newVtx.get(), vtxbcode );
-#endif
 
   if (parent->end_vertex()){
       ATH_MSG_ERROR ("createGVfromTI: Parent particle found with an end vertex attached.  This should not happen!");
@@ -355,13 +340,9 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
     ATH_MSG_VERBOSE ( "createGVfromTI End Vertex representing process: " << processCode << ", for parent with barcode "<<parentBC<<". Creating." );
     ATH_MSG_VERBOSE ( "createGVfromTI Parent 2: " << parent << ", barcode: " << HepMC::barcode(parent));
 #endif
-#ifdef HEPMC3
     mcEvent->add_vertex(newVtx);
     HepMC::suggest_barcode( newVtx, vtxbcode );
     newVtx->add_attribute(HepMCStr::weights,std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
-#else
-    mcEvent->add_vertex( newVtx.release() );
-#endif
   }
 
   return parent->end_vertex();

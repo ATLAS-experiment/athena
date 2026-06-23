@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AnaAlgorithm.DualUseConfig import isAthena
 from AnaAlgorithm.Logging import logging
 import argparse
@@ -10,20 +10,22 @@ import os
 logCPGridRun = logging.getLogger('CPGridRun')
 class CPGridRun:
     def __init__(self):
-        self.gridParser = self._parseGridArguments()
-        self.prunArgsDict = self._createPrunArgsDict()
+        self._errorCollector = {} # Delay the error collection until the end of the script for better user experience
         self._runscript = None
-        if self.args.help:
-            self._initRunscript()
-            self.printHelp()
-            sys.exit(0)
         self._tarfile = 'cpgrid.tar.gz'
         self._isFirstRun = True
         self._tarballRecreated = False
         self._inputList = None 
-        self._errorCollector = {} # Delay the error collection until the end of the script for better user experience
         self._yamlPath = None
         self.cmd = {} # sample name -> command
+
+        self.gridParser = self._parseGridArguments()
+        self.prunArgsDict = self._createPrunArgsDict()
+
+        if self.args.help:
+            self._initRunscript()
+            self.printHelp()
+            sys.exit(0)
 
     def _initRunscript(self):
         if self._runscript is not None:

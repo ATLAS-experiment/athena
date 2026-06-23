@@ -43,8 +43,10 @@ namespace MuonR4{
             DecorKey_t m_prdLinkKey{this, "PrdLinkKey",  m_writeKey, "prdLinks" };
             /** @brief Decoration to the PrdLink state (I.e. outlier or valid) */
             DecorKey_t m_prdStateKey{this, "PrdStateKey", m_writeKey, "prdState"};
-            /** @brief Decoration to the local segment parameters */
+            /** @brief Decoration of the local segment parameters */
             DecorKey_t m_localSegParKey{this, "LocalSegParKey", m_writeKey, "localSegPars"};
+            /** @brief Decoration of the local fit covariance parameters */
+            DecorKey_t m_localSegCovKey{this, "LocalCovParKey", m_writeKey, "localSegCov"};
             /** @brief Decoration of the original segment */
             DecorKey_t m_parentSegKey{this, "ParentSegmentKey", m_writeKey, "parentSegment"};
             /** @brief Auxiliary container to model two measurements in the same gas gap as a single track state */

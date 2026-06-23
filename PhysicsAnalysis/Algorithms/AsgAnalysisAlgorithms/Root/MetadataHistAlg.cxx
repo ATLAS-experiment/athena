@@ -58,7 +58,7 @@ namespace CP
 
 
   StatusCode MetadataHistAlg ::
-  execute ()
+  execute (const EventContext& /*ctx*/)
   {
     if (!m_firstEvent)
     {

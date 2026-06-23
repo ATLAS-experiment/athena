@@ -72,7 +72,7 @@ class TGCTriggerLUTs {
   TGCTriggerLUTs();
   virtual ~TGCTriggerLUTs();
 
-  std::string getData(int cwtype, std::string file) const;
+  std::string getData(int cwtype, const std::string & file) const;
   std::string getData(int cwtype, int channel) const;
   std::string getFile(int cwtype, int channel) const;
   std::string getVersion(int cwtype, int channel = 0) const;
