@@ -15,7 +15,6 @@
 
 //Forward declarations
 namespace Trk{ class IExtrapolator; }
-namespace HepPDT{ class ParticleDataTable; }
 
 namespace JiveXML{
 
