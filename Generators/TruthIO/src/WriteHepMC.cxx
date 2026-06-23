@@ -4,6 +4,8 @@
 
 #include "TruthIO/WriteHepMC.h"
 #include "HepMC3/WriterAscii.h"
+#include "HepMC3/WriterAsciiHepMC2.h"
+#include "HepMC3/ReaderFactory.h"
 // Additional includes for dealing with event numbers
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -15,7 +17,7 @@ WriteHepMC::WriteHepMC(const std::string& name, ISvcLocator* pSvcLocator)
 {
   declareProperty("OutputFile", m_outfile="events.hepmc");
   declareProperty("Precision", m_precision=8);
-  declareProperty("Format", m_format="hepmc2");
+  declareProperty("Format", m_format="hepmc3");
   declareProperty("Units", m_units="MEVMM");
 }
 
@@ -27,15 +29,16 @@ StatusCode WriteHepMC::initialize() {
   }
   m_momentumunit = HepMC3::Units::momentum_unit(m_units.substr(0,3));
   m_lengthunit = HepMC3::Units::length_unit(m_units.substr(3,2));
-  if (m_format == "hepmc2") {
-    auto writer = new HepMC3::WriterAsciiHepMC2(m_outfile);
+  if (m_format == "hepmc2" || m_format == "ascii") {
+    auto writer = std::make_shared<HepMC3::WriterAsciiHepMC2>(m_outfile);
     writer->set_precision(m_precision);
-    m_hepmcio.reset(writer);
+    m_hepmcio = writer;
+    
   }
-  if (m_format == "hepmc3") {
-    auto writer = new HepMC3::WriterAscii(m_outfile);
+  if (m_format == "hepmc3"  || m_format == "asciiv3") {
+    auto writer = std::make_shared<HepMC3::WriterAscii>(m_outfile);
     writer->set_precision(m_precision);
-    m_hepmcio.reset(writer);
+    m_hepmcio = writer;
   }
   return StatusCode::SUCCESS;
 }
