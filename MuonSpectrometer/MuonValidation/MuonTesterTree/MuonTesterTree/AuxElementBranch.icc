@@ -31,7 +31,7 @@ AuxElementBranch<T>::AuxElementBranch(TTree* t, const std::string& var_name, con
     VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc) {}
 template <class T>
 AuxElementBranch<T>::AuxElementBranch(MuonTesterTree& t, const std::string& var_name, const std::string& acc) :
-    VectorBranch<T>(t, var_name), m_acc(acc.empty() ? var_name : acc) {}
+    VectorBranch<T>(t.tree(), var_name), m_acc(acc.empty() ? var_name : acc) {}
 
 //########################################################################################
 //                      GenericAuxDecorationBranch
@@ -42,7 +42,7 @@ template <class T>
         m_func{func}{}
 template <class T>
     GenericAuxDecorationBranch<T>::GenericAuxDecorationBranch(MuonTesterTree& t, const std::string& var_name, const FuncType_t& func):
-        VectorBranch<T>(t, var_name),
+        VectorBranch<T>(t.tree(), var_name),
         m_func{func}{}
 
 template <class T> void GenericAuxDecorationBranch<T>::push_back(const SG::AuxElement* p) { push_back(m_func(p)); }
