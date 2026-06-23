@@ -21,13 +21,6 @@ namespace TruthHelper {
 void copyBeamParticles (const HepMC::GenEvent& inEvt [[maybe_unused]],
                         HepMC::GenEvent& outEvt [[maybe_unused]])
 {
-#ifndef HEPMC3
-  if (inEvt.valid_beam_particles()) {
-    std::pair<HepMC::GenParticle*,HepMC::GenParticle*> bp = inEvt.beam_particles();
-    outEvt.set_beam_particles (outEvt.barcode_to_particle (bp.first->barcode()),
-                               outEvt.barcode_to_particle (bp.second->barcode()));
-  }
-#endif
 }
 
 

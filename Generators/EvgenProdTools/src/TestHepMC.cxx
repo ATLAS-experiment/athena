@@ -413,12 +413,7 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
         ATH_MSG_WARNING("Found vertex position displaced by less than " << m_min_dist_trans
                         << "mm in transverse distance: " << dist_trans << "mm");
 
-#ifdef HEPMC3
         for (const auto& part: vtx->particles_in()) {
-#else
-        for (auto part_it = vtx->particles_in_const_begin(); part_it != vtx->particles_in_const_end(); ++part_it) {
-          auto part = (*part_it);
-#endif
           if (m_dumpEvent){
             ATH_MSG_WARNING("Incoming particle : ");
             HepMC::Print::line(msg( MSG::WARNING ).stream(), part);

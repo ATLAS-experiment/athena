@@ -86,7 +86,6 @@ namespace HepMC {
   template <>  inline int barcode(const int& p){ return p;}
 #endif
   // Temporarily specialize uniqueID for xAOD::Truth classes ahead of the barcode migration - TODO remove this
-#if defined(HEPMC3)
   template <typename T> inline int uniqueID(const T&  p) {
     if constexpr (std::is_integral_v<T>) {
       return p;
@@ -113,34 +112,6 @@ namespace HepMC {
       return p.id();
     }
   }
-#else
-  template <typename T> inline int uniqueID(const T&  p) {
-    if constexpr (std::is_integral_v<T>) {
-      return p;
-    }
-    else if constexpr (std::is_integral_v<std::remove_pointer_t<T>>) {
-      return *p;
-    }
-    else if constexpr (std::is_same_v<T, xAOD::TruthParticle_v1> || std::is_same_v<T, xAOD::TruthVertex_v1>) {
-      return p.uid();
-    }
-    else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthParticle_v1> || std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, xAOD::TruthVertex_v1>) {
-      return p->uid();
-    }
-    else if constexpr (std::is_same_v<T, CaloCalibrationHit>) {
-      return p.particleUID();
-    }
-    else if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T>>>, CaloCalibrationHit>) {
-      return p->particleUID();
-    }
-    else if constexpr (std::is_pointer_v<T> || is_smart_ptr_v<T>){ //T is ptr
-      return p->barcode();
-    }
-    else {
-      return p.barcode();
-    }
-  }
-#endif
   template <typename T> inline int status(const T&  p) {
     if constexpr (std::is_integral_v<T>) {
       return p;
