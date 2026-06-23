@@ -64,7 +64,7 @@ StatusCode SiDistWriteAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SiDistWriteAlg::execute() {
+StatusCode SiDistWriteAlg::execute(const EventContext& /*ctx*/) {
   if (m_first) {
     if (!m_par_readfile.empty()) readFile();
     if (m_par_print) print();

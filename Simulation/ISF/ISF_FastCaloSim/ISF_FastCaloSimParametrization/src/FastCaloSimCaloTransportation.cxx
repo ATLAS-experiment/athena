@@ -6,6 +6,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IPartPropSvc.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "CxxUtils/inline_hints.h"
 /* Header include */
@@ -14,6 +15,7 @@
 /* ISF includes */
 #include "ISF_FastCaloSimEvent/FastCaloSim_CaloCell_ID.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 
 /* Tracking includes */
 #include "TrkGeometry/TrackingGeometry.h"
@@ -57,6 +59,10 @@ StatusCode FastCaloSimCaloTransportation::finalize(){
 
 
 std::vector<G4FieldTrack> FastCaloSimCaloTransportation::transport(const TFCSTruthState* truth, bool forceNeutral) const{
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    Gaudi::Hive::setCurrentContext(eventInfo->GetEventContext());
+  }
+
   // Start calo extrapolation
   ATH_MSG_DEBUG ("[ fastCaloSim transport ] processing particle "<<truth->pdgid() );
 

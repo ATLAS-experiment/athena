@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloEvent/src/CaloTester.cxx
@@ -42,10 +42,11 @@ StatusCode CaloTester::record_mgr()
 {
   //Mock ConditonStore-infrastructure 
   Athena_test::DummyRCUSvc rcu;
+  EventContext ctx(0, 0);
   DataObjID id1 ("testDetDescr");
   ServiceHandle<StoreGateSvc> condStore ("ConditionStore", "test");
   auto mgr_cc=std::make_unique<CondCont<CaloDetDescrManager> >(rcu, id1);
-  CHECK_WITH_CONTEXT(mgr_cc->insert(IOVInfiniteRange::infiniteTime(),std::move(m_mgr_up)),"CaloTester");
+  CHECK_WITH_CONTEXT(mgr_cc->insert(IOVInfiniteRange::infiniteTime(),std::move(m_mgr_up),ctx),"CaloTester");
   CHECK_WITH_CONTEXT(condStore->record(std::move(mgr_cc),"CaloDetDescrManager"),"CaloTester");
 
   return StatusCode::SUCCESS;

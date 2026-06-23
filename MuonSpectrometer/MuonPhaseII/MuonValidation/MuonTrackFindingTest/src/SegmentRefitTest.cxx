@@ -31,9 +31,8 @@ namespace MuonValR4{
         return StatusCode::SUCCESS;
     }
 
-    StatusCode SegmentRefitTest::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-        const xAOD::MuonSegmentContainer* postFitSegments{nullptr};
+    StatusCode SegmentRefitTest::execute(const EventContext& ctx) {
+                const xAOD::MuonSegmentContainer* postFitSegments{nullptr};
         ATH_CHECK(SG::get(postFitSegments, m_postFitKey, ctx));
 
         using Link_t = ElementLink<xAOD::MuonSegmentContainer>;

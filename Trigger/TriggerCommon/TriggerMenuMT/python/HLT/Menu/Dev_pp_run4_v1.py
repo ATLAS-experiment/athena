@@ -9,6 +9,7 @@
 # ['name', 'L1chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
 
 import TriggerMenuMT.HLT.Menu.MC_pp_run4_v1 as mc_menu
+from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 
 
 DevGroup = ['Development']
@@ -34,5 +35,7 @@ def setupMenu():
     chains['MinBias'] += []
     chains['Calib'] += []
     chains['Streaming'] += []
-    chains['Monitor'] += []
+    chains['Monitor'] += [
+        ChainProp(name='HLT_timeburnerprocessing_L1All', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoHLTRepro','RATE:Monitoring','BW:Other']+DevGroup),
+    ]
     return chains

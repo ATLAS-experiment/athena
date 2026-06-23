@@ -52,7 +52,7 @@ GlobalSequentialCorrection::GlobalSequentialCorrection(const std::string& name, 
 
 StatusCode GlobalSequentialCorrection::initialize() {
 
-  ATH_MSG_INFO("Initializing the Global Sequential Calibration tool");
+  ATH_MSG_DEBUG("Initializing the Global Sequential Calibration tool");
 
   if(!m_config){
     ATH_MSG_ERROR("GSC tool received a null config pointer.");

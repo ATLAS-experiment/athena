@@ -17,6 +17,8 @@
 #include <cstdint>
 #include <memory>
 
+#include "xAODTrigger/TrigCompositeContainer.h"
+
 /**
  * @class IL1TriggerByteStreamTool
  * @brief Interface for AlgTools converting ByteStream to xAOD RoI objects and vice versa
@@ -38,16 +40,19 @@ public:
   /**
    * @brief Convert xAOD -> BS
    *
-   * The implementation should take the xAOD RoI object from the event store using a ReadHandle it declares,
-   * convert it to raw data, and fill the vrobf vector. The function is not const, as it needs to rely on
-   * the internal cache to track data allocated for BS representation. The provided helpers clearCache,
-   * newRodData, newRobFragment should be used to allocate memory for the BS representation.
+   * The implementation should fill the vrobf vector with raw data converted from the xAOD object(s).
+   * The TrigCompositeContainer pointer carries any input the Cnv has already retrieved on behalf of
+   * the tool; tools that retrieve their inputs via ReadHandle may ignore it, and callers in that
+   * case may pass nullptr. The function is not const, as it needs to rely on the internal cache
+   * to track data allocated for BS representation. The provided helpers clearCache, newRodData,
+   * newRobFragment should be used to allocate memory for the BS representation.
    *
    * The caller should set LVL1 ID and TriggerType in all ROBs created by this function after it returns,
    * because it already has a handle on the FullEventFragment (RawEvent). The LVL1 ID and TriggerType set
    * for the ROBs inside this function should not matter.
    **/
   virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                 const xAOD::TrigCompositeContainer* tc,
                                  const EventContext& eventContext) = 0;
 
   /**

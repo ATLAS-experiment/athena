@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
@@ -165,7 +165,8 @@ namespace ActsTrk
      * @param event_stat - stats, just for this event
      */
     StatusCode
-    findTracks(const DetectorContextHolder& detContext,
+    findTracks(const EventContext &ctx,
+               const DetectorContextHolder& detContext,
                const detail::TrackFindingMeasurements &measurements,
                const detail::MeasurementIndex &measurementIndex,
                detail::SharedHitCounter &sharedHits,

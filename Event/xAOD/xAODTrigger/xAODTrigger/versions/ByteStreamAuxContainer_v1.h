@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_H
 #define XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_H
@@ -74,6 +74,9 @@ namespace xAOD {
       /// Get a pointer to a given array, as a decoration.
       virtual void* getDecoration (auxid_t auxid, size_t size, size_t capacity) override;
 
+      /// Get the set of variables that we should deep copy.
+      virtual SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const override;
+
       /// Test if a variable is a decoration.
       virtual bool isDecoration (auxid_t auxid) const override;
 
@@ -141,6 +144,13 @@ namespace xAOD {
       template< typename T >
       void regAuxVar( auxid_t auxid, const std::string& name,
                       std::vector< T >& vec );
+
+     /**
+      * @brief Perform post-read processing on this store.
+      * @param ctx The current event context.
+      */
+      virtual void toTransient (const EventContext& ctx) override;
+
 
    private:
       /// Internal method: return size without taking out the lock.

@@ -18,12 +18,7 @@
 #include <iostream>
 
 
-namespace {
-union ShortLong {
-  uint16_t s[2];
-  uint32_t l;
-};
-}
+
 
 LArRodBlockPhysicsV5::LArRodBlockPhysicsV5(IMessageSvc* msgSvc)
   : LArRodBlockStructure(msgSvc, BlockType()),
@@ -793,15 +788,14 @@ void LArRodBlockPhysicsV5::finalizeFEB()
   // Magic numbers (3 or 6) for Ex, Ey and Ez
   n = m_TimeQualityBlock.size();
   //Check if Time and Quality Block exists and is not yet part of the fragment
-  if (n)
-  {
+  if (n){
     unsigned int imax = n/2;
-    for(unsigned int i=0;i<imax;i++){
-      ShortLong to_push{};
-      to_push.s[0] = m_TimeQualityBlock[i*2];
-      to_push.s[1] = m_TimeQualityBlock[i*2+1];
-      m_vFragment->push_back(to_push.l);
-      sum+=to_push.l;
+    for (unsigned int i=0;i<imax;i++) {
+      const auto low = static_cast<std::uint32_t>(m_TimeQualityBlock[i * 2]);
+      const auto high = static_cast<std::uint32_t>(m_TimeQualityBlock[i * 2 + 1]);
+      const std::uint32_t to_push = low | (high << 16);
+      m_vFragment->push_back(to_push);
+      sum += to_push;
     }
   }
   // Now include digits
@@ -810,14 +804,13 @@ void LArRodBlockPhysicsV5::finalizeFEB()
     // First make sure it is not and odd number to store
     if ( m_DigitsEncode.size() & 0x1 ) m_DigitsEncode.push_back(0x0);
     unsigned int imax=m_DigitsEncode.size()/2;
-    for(unsigned int i=0;i<imax;i++){
-      // Better by-swap
-      ShortLong to_push{};
-      to_push.s[1]=m_DigitsEncode[i*2];
-      to_push.s[0]=m_DigitsEncode[i*2+1];
-      m_vFragment->push_back(to_push.l);
-      sum+=to_push.l;
-    }
+    for (unsigned int i=0;i<imax;i++) {
+      const auto low = static_cast<std::uint32_t>(m_DigitsEncode[i * 2 + 1]);
+      const auto high = static_cast<std::uint32_t>(m_DigitsEncode[i * 2]);
+      const std::uint32_t to_push = low | (high << 16);
+      m_vFragment->push_back(to_push);
+      sum += to_push;
+    } 
     setHeader16(ResultsDim2,m_DigitsEncode.size()/2);
     setHeader16(ResultsOff2,18+size_of_block);
   } // End of check for format

@@ -42,7 +42,7 @@ def PatternRecognitionFromFastRecoCfg(flags, suffix = ""):
         
     from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
     result.merge(xAODSegmentCnvAlgCfg(flags, name = f"MuonR4xAODSegmentCnvAlg{suffix}", InSegmentKeys = segmentContainers))
-    if flags.Input.isMC:
+    if flags.Muon.setupTruthAlgorithms:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
         result.merge(RecoSegmentTruthAssocCfg(flags,
                                               name=f"MuonSegmentsFromR4TruthMatching{suffix}",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveExSvc.h"
@@ -74,7 +74,7 @@ HiveExSvc::finalize() {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 void
-HiveExSvc::add(const std::string& algName, const unsigned int& time) {
+HiveExSvc::add(const EventContext& ctx, const std::string& algName, const unsigned int& time) {
 
   // even though we have separate data structures per concurrent
   // event (slot), we can't be sure that multiple threads aren't
@@ -86,7 +86,7 @@ HiveExSvc::add(const std::string& algName, const unsigned int& time) {
   // for a true lock-free design, we would need a separate container for
   // each Algorithm in each slot
 
-  EventContext::ContextID_t slot = Gaudi::Hive::currentContextId();
+  const EventContext::ContextID_t slot = ctx.slot();
   std::lock_guard<std::mutex> lock ( *m_locks[slot] );
   m_times[slot].push_back( tDat(algName, time) );
 }

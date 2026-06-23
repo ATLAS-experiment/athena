@@ -35,7 +35,7 @@ namespace DerivationFramework {
 
 
 
-  bool TriggerSkimmingTool::eventPassesFilter() const
+  bool TriggerSkimmingTool::eventPassesFilter(const EventContext& /*ctx*/) const
   {
 
     if (msgLvl(MSG::VERBOSE)){

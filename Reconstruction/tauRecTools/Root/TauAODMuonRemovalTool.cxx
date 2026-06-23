@@ -82,9 +82,9 @@ std::vector<std::pair<const xAOD::TrackParticle*, const xAOD::Muon*>> TauAODMuon
     std::vector<std::pair<const xAOD::TrackParticle*, const xAOD::Muon*>> ret;
     std::for_each(muon_container.cbegin(), muon_container.cend(),
         [&](auto muon) -> void {
-            if(tau.p4().DeltaR(muon->p4()) < m_lepRemovalConeSize && muon->quality() <= m_muonWpUi) {
-                if(const auto & muon_ID_tracks_link = muon->inDetTrackParticleLink();  muon_ID_tracks_link.isValid())
-                    ret.push_back(std::make_pair(std::move(*muon_ID_tracks_link), muon));
+            if(tau.p4().DeltaR(muon->p4()) < m_lepRemovalConeSize && static_cast<unsigned>(muon->quality()) <= m_muonWpUi) {
+                if(const xAOD::TrackParticle* idTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle); idTrk != nullptr)
+                    ret.push_back(std::make_pair(idTrk, muon));
             }
         }
     );
@@ -94,12 +94,12 @@ std::vector<std::pair<const xAOD::TrackParticle*, const xAOD::Muon*>> TauAODMuon
 std::vector<std::pair<const xAOD::CaloCluster*, const xAOD::Muon*>> TauAODMuonRemovalTool::getMuonAndCls(const xAOD::TauJet& tau, const xAOD::MuonContainer& muon_container) const {
     std::vector<std::pair<const xAOD::CaloCluster*, const xAOD::Muon*>> ret;
     std::for_each(muon_container.cbegin(), muon_container.cend(),
-        [&](auto muon) -> void {
-            if(tau.p4().DeltaR(muon->p4()) < m_lepRemovalConeSize && muon->quality() <= m_muonWpUi) {
-                if(const auto & muon_cluster_link = muon->clusterLink();  muon_cluster_link.isValid()) {
-                    auto muon_cluster = std::move(*muon_cluster_link);
+        [&](const xAOD::Muon* muon) {
+            if(tau.p4().DeltaR(muon->p4()) < m_lepRemovalConeSize && 
+               static_cast<unsigned>(muon->quality()) <= m_muonWpUi) {
+                if( const xAOD::CaloCluster* muon_cluster = muon->cluster(); muon_cluster != nullptr) {
                     auto muon_e = muon->e();
-                    auto loss_e = muon->floatParameter(xAOD::Muon::ParamEnergyLoss);
+                    auto loss_e = muon->floatParameter(xAOD::Muon::ParamDef::ParamEnergyLoss);
                     auto cls_e = muon_cluster->e();
                     auto loss_diff = ((cls_e - loss_e) / (cls_e + loss_e));
                     if (muon_e > cls_e && loss_diff < 0.1 && loss_diff > -0.3) {

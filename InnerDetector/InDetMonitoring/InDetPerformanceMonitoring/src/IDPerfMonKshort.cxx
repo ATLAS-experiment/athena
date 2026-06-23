@@ -364,7 +364,7 @@ void IDPerfMonKshort::RegisterHisto(MonGroup& mon, TGraph* graph) {
 }
 
 
-StatusCode IDPerfMonKshort::fillHistograms()
+StatusCode IDPerfMonKshort::fillHistograms(const EventContext& /*ctx*/)
 {
   ATH_MSG_VERBOSE( "IDPerfMonKshort fillHistogram() started");
   const xAOD::TrackParticleContainer* tracks(nullptr);

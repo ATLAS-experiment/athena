@@ -5,7 +5,6 @@
 #include "CscRdoToCscPrepDataToolMT.h"
 
 #include "EventPrimitives/EventPrimitives.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "MuonIdHelpers/CscIdHelper.h"
 #include "MuonRDO/CscRawData.h"
 #include "MuonRDO/CscRawDataCollection.h"

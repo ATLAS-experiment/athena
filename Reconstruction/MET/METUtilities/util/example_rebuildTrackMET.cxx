@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Author: Russell Smith
@@ -121,7 +121,7 @@ int main( int argc, char* argv[]) {std::cout << __PRETTY_FUNCTION__ << std::endl
   asg::StandaloneToolHandle<IMETMaker> metMaker;
   metMaker.setTypeAndName("met::METMaker/metMaker");
   ANA_CHECK( metMaker.setProperty("DoMuonEloss", true) );
-  ANA_CHECK( metMaker.retrieve() );  
+  ANA_CHECK( metMaker.retrieve() );
 
   for(Long64_t ievent = 0;  ievent < std::min(int(event->getEntries()), 100); ++ievent){
     if(ievent % 10 == 0) std::cout << "event number: " << ievent << std::endl;
@@ -144,8 +144,8 @@ int main( int argc, char* argv[]) {std::cout << __PRETTY_FUNCTION__ << std::endl
     //this should probably be a calibrated jet container.  See the METUtilities twiki for more info
     const xAOD::JetContainer* uncalibJets = nullptr;
     ANA_CHECK( event->retrieve(uncalibJets, jetType+"Jets"));//this retrieves and applies the correction
-    std::pair< xAOD::JetContainer*, xAOD::ShallowAuxContainer* > calibJetsPair = xAOD::shallowCopyContainer( *uncalibJets );//make a shallow copy to calibrate
-    xAOD::JetContainer *& calibJets = calibJetsPair.first;//create a reference to the first element of the pair (i.e. the JetContainer)
+    xAOD::ShallowCopyResult_t<xAOD::JetContainer> calibJetsPair = xAOD::shallowCopy( *uncalibJets );//make a shallow copy to calibrate
+    xAOD::JetContainer * calibJets = calibJetsPair.first.get();//create a reference to the first element of the pair (i.e. the JetContainer)
     //Shallow copy is needed (see links below)
     if(jetCalibrationTool->applyCalibration(*calibJets).isFailure())//apply the calibration
       return 1;
@@ -170,7 +170,7 @@ int main( int argc, char* argv[]) {std::cout << __PRETTY_FUNCTION__ << std::endl
 	isys != recSysList.end();
 	++isys) {	// print the systematics on the first event
       // When only using the METSystematicsTool, this will be the list of recommended systematics for that tool
-      //      if(ievent == 0) 
+      //      if(ievent == 0)
 
       // Create a MissingETContainer with its aux store for each systematic
       xAOD::MissingETContainer*    newMetContainer    = new xAOD::MissingETContainer();

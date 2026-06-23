@@ -20,22 +20,21 @@ def BPHY4Cfg(flags):
     acc.addPublicTool(V0Tools)
     trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     BPHY4FourMuonTool = CompFactory.DerivationFramework.FourMuonTool(
             name                        = "BPHY4FourMuonTool",
             ptCut                       = 2500.0,
             etaCut                      = 2.5,
             muonCollectionKey           = "Muons",
             TrackParticleCollection     = "InDetTrackParticles",
-            V0VertexFitterTool          = None,             # V0 vertex fitter
-            useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
             TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
             TrackSelectorTool           = trackselect)
     BPHY4_Reco_4mu = CompFactory.DerivationFramework.Reco_4mu(
             name                    = "BPHY4_Reco_4mu",
             FourMuonTool            = BPHY4FourMuonTool,
             V0Tools                 = V0Tools,
-            PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+            PVRefitter              = PVrefit,
             PairContainerName       = "BPHY4Pairs",
             QuadrupletContainerName = "BPHY4Quads",
             PVContainerName         = "PrimaryVertices",

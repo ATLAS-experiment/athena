@@ -105,7 +105,7 @@ StatusCode ALFA_BeamTransport::finalize()
 
 //================ Execution ====================================================
 
-StatusCode ALFA_BeamTransport::execute()
+StatusCode ALFA_BeamTransport::execute(const EventContext& /*ctx*/)
 {
        // Code entered here will be executed once per event
      ATH_MSG_DEBUG ("Executing " << name() << "...");

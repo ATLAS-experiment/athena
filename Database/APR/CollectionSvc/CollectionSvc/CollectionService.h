@@ -15,9 +15,8 @@
 namespace pool {
 
   class CollectionDescription;
-  namespace PersistencySvc { class ISession; }
-  using PersistencySvc::ISession;
-  
+  class ISession;
+
   /**
    * @class CollectionService CollectionService.h CollectionSvc/CollectionService.h
    *
@@ -37,9 +36,8 @@ namespace pool {
      */
     CollectionService() = default;
 
-
     /// Default destructor.
-    virtual ~CollectionService() = default;
+    ~CollectionService() = default;
 
     /**
      * Creates or overwrites a collection or collection fragment, given a description of 
@@ -47,7 +45,7 @@ namespace pool {
      *
      * @param description Specification of collection or collection fragment properties.
      */
-    virtual ICollection* create( const CollectionDescription& description );
+    static ICollection* create ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description );
 
 
     /**
@@ -62,19 +60,19 @@ namespace pool {
      * @param connection Connection to database containing collection or collection fragment.
      * @param session Reference to database session (need only be set for implicit collections).
      */
-    virtual ICollection* open( const std::string & name,
+    static ICollection* open ATLAS_NOT_THREAD_SAFE ( const std::string & name,
                                const DbType& type,
                                const std::string & connection = "",
-                               ISession* session = 0 ) const;
+                               ISession* session = 0 );
 
     /**
      * suppress (or enable) warning about a missing MessageSvc (logging)
      */
     static void setMessageSvcQuiet( bool quiet=true );
 
-    pool::ICollection* plugin( const CollectionDescription& description,
+    static ICollection* plugin ATLAS_NOT_THREAD_SAFE ( const CollectionDescription& description,
                                  ICollection::OpenMode openMode,
-                                 ISession* session = 0 ) const;
+                                 ISession* session = 0 );
 
   };
 }

@@ -15,6 +15,8 @@ from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactor
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
 from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
+from FlavorTagDiscriminants.FTagMuonAssociationConfig import FTagMuonAssociationCfg
+from FlavorTagDiscriminants.JetCalibrationDecoratorConfig import JetCalibrationDecoratorCfg
 from JetTagDerivationUtils.CopyJetParentInfoConfig import (
     CopyJetParentInfoCfg
 )
@@ -28,16 +30,37 @@ _parent_collections = {
 }
 
 
-def _addDepsByDirname(flags, dirname: str, jetCollection: str) -> ComponentAccumulator:
+def _resolve_tagger_name(dirname: str, networks: dict) -> str:
     """
-    Add additional algorithms based on the dirname of the network files.
+    Resolve a canonical tagger name for dependency bookkeeping.
+
+    Uses an explicit override from ``networks`` when present, otherwise
+    falls back to path-based inference. For CalibArea regressions this
+    extracts names like ``bJR4v01`` from the model filename.
+    """
+    if tagger_name := networks.get("tagger_name"):
+        return tagger_name
+
+    calibarea_match = re.compile('.*/CalibArea(-[0-9]{2}){3}/.*').match(dirname)
+    if calibarea_match:
+        for fold_path in networks['folds']:
+            match = re.search(r'(bJR\d+v\d+(?:Ext)?)', fold_path)
+            if match:
+                return match.group(1)
+
+    return dirname.split('/')[-2]
+
+
+def _addDepsByTagger(flags, tagger_name: str, jetCollection: str) -> ComponentAccumulator:
+    """
+    Add additional algorithms based on the resolved tagger name.
 
     Parameters
     ----------
     flags : ConfigFlags
         The configuration flags for.
-    dirname : str
-        The directory name where the network files are located.
+    tagger_name : str
+        Canonical tagger name used by ``getDependencySet``.
     jetCollection : str
         The name of the jet collection to which the additional algorithms will be applied.
 
@@ -48,7 +71,7 @@ def _addDepsByDirname(flags, dirname: str, jetCollection: str) -> ComponentAccum
     """
     acc = ComponentAccumulator()
 
-    modset = getDependencySet(dirname.split('/')[-2])
+    modset = getDependencySet(tagger_name)
 
     if "L" in modset:
         acc.merge(TrackLeptonDecorationCfg(flags))
@@ -57,7 +80,41 @@ def _addDepsByDirname(flags, dirname: str, jetCollection: str) -> ComponentAccum
             flags,
             jetCollection=jetCollection,
         ))
-    # TODO: Need to add "M" here
+    if "M" in modset:
+        acc.merge(FTagMuonAssociationCfg(
+            flags,
+            jetCollection=jetCollection,
+        ))
+    if "MC" in modset:
+        acc.merge(FTagMuonAssociationCfg(
+            flags,
+            jetCollection=jetCollection,
+            doConeMatching=True,
+        ))
+    if "R" in modset:
+        is_data = not flags.Input.isMC
+        calib_sequence = (
+            'JetArea_Residual_EtaJES_GSC_Insitu' if is_data
+            else 'JetArea_Residual_EtaJES_GSC'
+        )
+        config_file = 'PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config'
+        calib_kwargs = {}
+        # Assume CustomVtx jets only used in Hgamma context
+        if 'EMPFlowCustomVtx' in jetCollection:
+            calib_kwargs['calibJetCollection'] = 'AntiKt4EMPFlow'
+            calib_kwargs['rhoKey'] = 'Kt4EMPFlowCustomVtxEventShape'
+            calib_kwargs['originScale'] = 'Hgg_JetOriginConstitScaleMomentum'
+            calib_sequence = calib_sequence.replace('Residual', 'Residual_Origin')
+        acc.merge(JetCalibrationDecoratorCfg(
+            flags,
+            jetCollection=jetCollection,
+            configFile=config_file,
+            calibSequence=calib_sequence,
+            calibArea='00-04-83',
+            calibrationScale='EtaJES_GSC', # For labeling the decorator
+            isData=is_data,
+            **calib_kwargs,
+        ))
     if "X" in modset:
         acc.merge(
             CopyJetParentInfoCfg(
@@ -139,13 +196,17 @@ def FlavorTaggingCfg(
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
+        tagger_name = _resolve_tagger_name(dirname, networks)
 
-        # assume there are no special dependencies for jetmet regression
-        if re.compile('.*/CalibArea(-[0-9]{2}){3}/.*').match(dirname):
+        # Keep the no-dependency shortcut only for bJR10 large-R regression.
+        # bJR4 regression requires lepton inputs and must resolve deps.
+        is_calibarea = re.compile('.*/CalibArea(-[0-9]{2}){3}/.*').match(dirname)
+        is_bjr10 = tagger_name.startswith('bJR10')
+        if is_calibarea and is_bjr10:
             modset = set()
         else:
-            acc.merge(_addDepsByDirname(flags, dirname, JetCollection))
-            modset = getDependencySet(dirname.split('/')[-2])
+            acc.merge(_addDepsByTagger(flags, tagger_name, JetCollection))
+            modset = getDependencySet(tagger_name)
 
         args = dict(
              flags=flags,
@@ -212,7 +273,8 @@ def JetBTagginglessByVertexAlgCfg(
         dirnames = [Path(path).parent for path in networks['folds']]
         assert len(set(dirnames)) == 1, 'Different folds should be located in the same dir'
         dirname = str(dirnames[0])
-        acc.merge(_addDepsByDirname(flags, dirname, JetCollection))
+        tagger_name = _resolve_tagger_name(dirname, networks)
+        acc.merge(_addDepsByTagger(flags, tagger_name, JetCollection))
 
         args = dict(
              flags=flags,

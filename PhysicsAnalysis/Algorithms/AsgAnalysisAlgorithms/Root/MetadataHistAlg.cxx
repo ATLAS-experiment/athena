@@ -9,7 +9,6 @@
 // includes
 //
 
-#include <regex>
 #include <AsgAnalysisAlgorithms/MetadataHistAlg.h>
 #include <TH1.h>
 

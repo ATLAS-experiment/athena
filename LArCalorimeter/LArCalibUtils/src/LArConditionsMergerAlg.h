@@ -21,7 +21,7 @@ class LArConditionsMergerAlg: public AthAlgorithm {
   ~LArConditionsMergerAlg() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   
   SG::ReadCondHandleKeyArray<T> m_readKeys{this, "ReadKeys",{},"Input keys" };
   Gaudi::Property<std::string> m_writeKey{this,"WriteKey","output","Output key" };

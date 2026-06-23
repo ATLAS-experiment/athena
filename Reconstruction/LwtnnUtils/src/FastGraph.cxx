@@ -107,7 +107,7 @@ namespace lwt::atlas {
 
   typedef FastGraph::NodeVec NodeVec;
   FastGraph::FastGraph(const GraphConfig& config, const InputOrder& order,
-                       std::string default_output):
+                       const std::string & default_output):
     m_graph(new Graph(config.nodes, config.layers))
   {
 
@@ -131,11 +131,12 @@ namespace lwt::atlas {
       m_vec_preprocs.emplace_back(
         new FastInputVectorPreprocessor(node.variables, varorder));
     }
-    if (default_output.size() > 0) {
-      if (!config.outputs.count(default_output)) {
+    if (!default_output.empty()) {
+      auto it = config.outputs.find(default_output);
+      if (it == config.outputs.end()) {
         throw NNConfigurationException("no output node" + default_output);
       }
-      m_default_output = config.outputs.at(default_output).node_index;
+      m_default_output = it->second.node_index;
     } else if (config.outputs.size() == 1) {
       m_default_output = config.outputs.begin()->second.node_index;
     } else {

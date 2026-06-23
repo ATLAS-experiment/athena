@@ -28,11 +28,15 @@ namespace Trk
 
   // uploading the corresponding tools
   // extrapolator
-  if (m_extrapolator.retrieve().isFailure()) {
-    ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
-    return StatusCode::FAILURE;
+  if ( m_extrapolator.empty() ) {
+      ATH_MSG_DEBUG("Extrapolator is None/Empty. Tool-dependent features will be disabled.");
+  } else {
+      // Only try to retrieve if a name was actually provided
+      if ( m_extrapolator.retrieve().isFailure() ) {
+          ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
+          return StatusCode::FAILURE;
+      }
   }
-
   // updator
   if (m_Updator.retrieve().isFailure()) {
     ATH_MSG_FATAL("Failed to retrieve tool " << m_Updator);
@@ -50,22 +54,22 @@ namespace Trk
  }//end of initialize method
 
 
- std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track, const xAOD::Vertex * vtx, bool doRemoval) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const EventContext &ctx, const xAOD::TrackParticle * track, const xAOD::Vertex * vtx, bool doRemoval) const
  {
   if(track && vtx)
   {
-   return estimate(&(track->perigeeParameters()),&(track->perigeeParameters()),vtx,doRemoval);
+   return estimate(ctx, &(track->perigeeParameters()),&(track->perigeeParameters()),vtx,doRemoval);
   }
   ATH_MSG_INFO( "Empty TrackParticle or Vertex pointer passed. Returning zero " );
   return nullptr;
   //end of track particle validity check
  }//end of method using track particles
 
- std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track, const xAOD::TrackParticle * newtrack, const xAOD::Vertex * vtx, bool doRemoval) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const EventContext &ctx, const xAOD::TrackParticle * track, const xAOD::TrackParticle * newtrack, const xAOD::Vertex * vtx, bool doRemoval) const
  {
   if(track && vtx)
   {
-    return estimate(&(track->perigeeParameters()),&(newtrack->perigeeParameters()),vtx,doRemoval);
+    return estimate(ctx, &(track->perigeeParameters()),&(newtrack->perigeeParameters()),vtx,doRemoval);
   }
    ATH_MSG_INFO( "Empty TrackParticle or Vertex pointer passed. Returning zero " );
    return nullptr;
@@ -75,10 +79,12 @@ namespace Trk
 
 
 
- std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const TrackParameters * track, const xAOD::Vertex * vtx, bool doRemoval) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(
+        const EventContext &ctx,
+        const TrackParameters * track, const xAOD::Vertex * vtx, bool doRemoval) const
  {
    if(track && vtx){
-     return estimate(track,track,vtx,doRemoval);
+     return estimate(ctx, track,track,vtx,doRemoval);
    }
    ATH_MSG_INFO( "Empty TrackParticle or Vertex pointer passed. Returning zero " );
    return nullptr;
@@ -86,7 +92,9 @@ namespace Trk
 
  }//end of parameterBase estimate method
 
- std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const TrackParameters * track, const TrackParameters * newtrack, const xAOD::Vertex * vtx, bool doRemoval) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(
+             const EventContext &ctx,
+             const TrackParameters * track, const TrackParameters * newtrack, const xAOD::Vertex * vtx, bool doRemoval) const
  {
 
    if (vtx==nullptr)
@@ -105,7 +113,7 @@ namespace Trk
      }
    }
 
-   std::unique_ptr<ImpactParametersAndSigma>  IPandSigma=calculate(newtrack,*newVertex);
+   std::unique_ptr<ImpactParametersAndSigma>  IPandSigma=calculate(ctx, newtrack,*newVertex);
 
    if (doRemoval)
    {
@@ -118,7 +126,7 @@ namespace Trk
  }//end of parameterBase estimate method
 
 
- std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::calculate(const TrackParameters * track, const xAOD::Vertex& vtx) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::calculate(const EventContext &ctx, const TrackParameters * track, const xAOD::Vertex& vtx) const
  {
   //estimating the d0 and its significance by propagating the trajectory state towards
   //the vertex position. By this time the vertex should NOT contain this trajectory anymore
@@ -129,7 +137,7 @@ namespace Trk
   const Trk::Perigee* extrapolatedParameters =
     dynamic_cast<const Trk::Perigee*>(
       m_extrapolator
-        ->extrapolate(Gaudi::Hive::currentContext(), *track, perigeeSurface)
+        ->extrapolate(ctx, *track, perigeeSurface)
         .release());
   if (extrapolatedParameters && extrapolatedParameters->covariance()) {
 
@@ -207,18 +215,7 @@ namespace Trk
 
 
 
-
-
-
-  double TrackToVertexIPEstimator::get3DLifetimeSignOfTrack(const TrackParameters & track,
-                                                            const CLHEP::Hep3Vector & jetMomentum,
-                                                            const xAOD::Vertex & primaryVertex) const
-  {
-    Amg::Vector3D eigenJetMomentum(jetMomentum.x(), jetMomentum.y(), jetMomentum.z());
-    return get3DLifetimeSignOfTrack(track, eigenJetMomentum, primaryVertex);
-  }
-
-  double TrackToVertexIPEstimator::get3DLifetimeSignOfTrack(const TrackParameters & track,
+  double TrackToVertexIPEstimator::get3DLifetimeSignOfTrack(const EventContext &ctx, const TrackParameters & track,
                                                             const Amg::Vector3D & jetMomentum,
                                                             const xAOD::Vertex & primaryVertex) const
   {
@@ -227,7 +224,7 @@ namespace Trk
 
     std::unique_ptr<const Trk::TrackParameters> extrapolatedParameters =
       m_extrapolator->extrapolate(
-        Gaudi::Hive::currentContext(), track, perigeeSurface);
+        ctx, track, perigeeSurface);
 
     if (!extrapolatedParameters) return 0.;
 
@@ -240,17 +237,8 @@ namespace Trk
     return sign>=0.?1.:-1;
   }
 
-
-
-  double TrackToVertexIPEstimator::get2DLifetimeSignOfTrack(const TrackParameters & track,
-                                                            const CLHEP::Hep3Vector & jetMomentum,
-                                                            const xAOD::Vertex & primaryVertex) const
-  {
-    Amg::Vector3D eigenJetMomentum(jetMomentum.x(), jetMomentum.y(), jetMomentum.z());
-    return get2DLifetimeSignOfTrack(track, eigenJetMomentum, primaryVertex);
-  }
-
-  double TrackToVertexIPEstimator::get2DLifetimeSignOfTrack(const TrackParameters & track,
+  double TrackToVertexIPEstimator::get2DLifetimeSignOfTrack(const EventContext &ctx,
+                                                            const TrackParameters & track,
                                                             const Amg::Vector3D & jetMomentum,
                                                             const xAOD::Vertex & primaryVertex) const
   {
@@ -259,7 +247,7 @@ namespace Trk
 
     std::unique_ptr<const Trk::TrackParameters> extrapolatedParameters =
       m_extrapolator->extrapolate(
-        Gaudi::Hive::currentContext(), track, perigeeSurface);
+        ctx, track, perigeeSurface);
 
     if (!extrapolatedParameters) return 0.;
 
@@ -271,17 +259,8 @@ namespace Trk
   }
 
 
-
-
-  double TrackToVertexIPEstimator::getZLifetimeSignOfTrack(const TrackParameters & track,
-                                                           const CLHEP::Hep3Vector & jetMomentum,
-                                                           const xAOD::Vertex & primaryVertex) const
-  {
-    Amg::Vector3D eigenJetMomentum(jetMomentum.x(), jetMomentum.y(), jetMomentum.z());
-    return getZLifetimeSignOfTrack(track, eigenJetMomentum, primaryVertex);
-  }
-
-  double TrackToVertexIPEstimator::getZLifetimeSignOfTrack(const TrackParameters & track,
+  double TrackToVertexIPEstimator::getZLifetimeSignOfTrack(const EventContext &ctx,
+                                                           const TrackParameters & track,
                                                            const Amg::Vector3D & jetMomentum,
                                                            const xAOD::Vertex & primaryVertex) const
   {
@@ -291,7 +270,7 @@ namespace Trk
 
     std::unique_ptr<const Trk::TrackParameters> extrapolatedParameters =
       m_extrapolator->extrapolate(
-        Gaudi::Hive::currentContext(), track, perigeeSurface);
+        ctx, track, perigeeSurface);
 
     if (!extrapolatedParameters) return 0.;
 
@@ -405,23 +384,26 @@ xAOD::Vertex * TrackToVertexIPEstimator::getUnbiasedVertex(const TrackParameters
 
 
 
- std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track,
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const EventContext &ctx,
+                                                                      const xAOD::TrackParticle * track,
                                                                       const xAOD::Vertex* vtx)const
  {
 
    if(track && vtx ){
-     return estimate( &(track->perigeeParameters()), vtx);
+     return estimate(ctx, &(track->perigeeParameters()), vtx);
    }
    return nullptr;
 
  }
 
- std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const TrackParameters * track,
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(
+                                                                      const EventContext &ctx,
+                                                                      const TrackParameters * track,
                                                                       const xAOD::Vertex* vtx)const
  {
 
    if(track && vtx ){
-     return calculate( track , *vtx);
+     return calculate(ctx, track , *vtx);
    }
    return nullptr;
 

@@ -199,14 +199,6 @@
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
-        <TDirectory name="Unlinked">
-         <graph name="fakerate_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_offl_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        </TDirectory>
         <graph name="fakerate_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
@@ -371,14 +363,6 @@
         <graph name="eff_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
        </TDirectory>
        <TDirectory name="FakeRates">
-        <TDirectory name="Unlinked">
-         <graph name="fakerate_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_offl_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
-         <graph name="fakerate_vs_actualMu" type="TEfficiency" plotopts="" tests="KSnorm"/>
-        </TDirectory>
         <graph name="fakerate_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
         <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>

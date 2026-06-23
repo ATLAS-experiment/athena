@@ -168,13 +168,13 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     if 'ATLASConverterTool' not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+        kwargs.setdefault('ATLASConverterTool', acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
 
         tpe_tool_kwargs = {}
-        if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+        if flags.Tracking.ActiveConfig.isLargeD0:
             tpe_tool_kwargs["allowPropagatorFailure"] = True
 
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags, **tpe_tool_kwargs)))
@@ -265,7 +265,7 @@ def ActsTrackFindingCfg(flags,
     stripSeedLabels = ['SSS']
     # Conversion and LRT do not process pixel seeds
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ['ActsConversion', 'ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+    if flags.Tracking.ActiveConfig.extension == 'ActsConversion' or flags.Tracking.ActiveConfig.isLargeD0:
         pixelSeedLabels = None
     # Main pass does not process strip seeds in the fast tracking configuration
     elif isFastPrimaryPass(flags):
@@ -279,7 +279,7 @@ def ActsTrackFindingCfg(flags,
 
     pixelRefit = [False]
     stripRefit = [False]
-    if flags.Tracking.ActiveConfig.extension in ['ActsLargeRadius', 'ActsValidateLargeRadiusStandalone']:
+    if flags.Tracking.ActiveConfig.isLargeD0:
         stripRefit = [True]
 
     if pixelSeedLabels is None:
@@ -340,27 +340,68 @@ def ActsTrackFindingCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
                                                  OutputActsTracksLocation = trackColl))
-        
-        toAOD = []
+
         prefix = f"{flags.Tracking.ActiveConfig.extension}"
-        toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
-                  f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
-                  f"xAOD::TrackStateContainer#{prefix}TrackStates",
-                  f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
-                  f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
-                  f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
-                  f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
-                  f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
-                  f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
-                  f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-        acc.merge(addToAOD(flags, toAOD))
-        
+        from ActsConfig.ActsPersistificationConfig import PersistifyTracks
+        acc.merge(PersistifyTracks(flags,
+                                   extensions=[prefix]))
+
     return acc
+
+
+def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # This is added in the seeding step of the CKF chain...
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc.merge(BeamSpotCondAlgCfg(flags))
+    
+    # Adopt standard convention
+    kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
+
+    kwargs.setdefault("moduleMapPath", flags.Acts.GNN.ModuleMapPath)
+    kwargs.setdefault("gnnPath", flags.Acts.GNN.ModelPath)
+    kwargs.setdefault("numTrtContexts", flags.Acts.GNN.NumTrtContexts)
+    kwargs.setdefault("maxGpuInstances", flags.Acts.GNN.MaxGpuInstances)
+    kwargs.setdefault("varianceInflation", flags.Acts.GNN.VarianceInflation)
+    kwargs.setdefault("tightSeeds", flags.Acts.GNN.TightSeeds)
+    kwargs.setdefault("edgeCut", flags.Acts.GNN.EdgeCut)
+    kwargs.setdefault("minCandidateMeasurements", flags.Acts.GNN.MinCandidateMeasurements)
+    kwargs.setdefault("minDeltaR", flags.Acts.GNN.MinDeltaR)
+    kwargs.setdefault("relaxCentralHoleSel", flags.Acts.GNN.RelaxCentralHoleSel)
+    kwargs.setdefault("relaxMeasurementSel", flags.Acts.GNN.RelaxMeasurementSel)
+    kwargs.setdefault("offlineZ0Sel", flags.Acts.GNN.OfflineZ0Sel)
+
+    # Wire parameter estimation and fitter tools like the main Acts path
+    if 'TrackParamsEstimationTool' not in kwargs:
+        from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+
+    if 'FitterTool' not in kwargs:
+        from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, ReverseFilteringPt=0, OutlierChi2Cut=float('inf'))))
+
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
+
+    if 'ExtrapolationTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault(
+            "ExtrapolationTool",
+            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
+        )
+
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TrackFindingGNNAlg("TrackFindingGNNAlg", **kwargs)
+    )
+
+    return acc
+
+
 
 
 def ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
@@ -439,25 +480,11 @@ def ActsAmbiguityResolutionCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
                                                  OutputActsTracksLocation = trackColl))
-        
-        toAOD = []
+
         prefix = f"{flags.Tracking.ActiveConfig.extension}Resolved"
-        toAOD += [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
-                  f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
-                  f"xAOD::TrackStateContainer#{prefix}TrackStates",
-                  f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.-uncalibratedMeasurement",
-                  f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
-                  f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
-                  f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
-                  f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
-                  f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
-                  f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
-                  f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
-                  f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]        
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
+        from ActsConfig.ActsPersistificationConfig import PersistifyTracks
+        acc.merge(PersistifyTracks(flags,
+                                   extensions=[prefix]))
 
     return acc
 
@@ -471,38 +498,13 @@ def ActsTrackToTrackParticleCnvToolCfg(flags,
         AtlasFieldCacheCondAlgCfg)
     acc.merge(AtlasFieldCacheCondAlgCfg(flags))
 
-    if 'ExtrapolationTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
-
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault('FirstAndLastParameterOnly',True)
     kwargs.setdefault('ComputeExpectedLayerPattern',True)
 
-    det_elements=[]
-    element_types=[]
-    if flags.Detector.EnableITkPixel:
-        from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        acc.merge(ITkPixelReadoutGeometryCfg(flags))
-        det_elements += ['ITkPixelDetectorElementCollection']
-        element_types += [1]
-    if flags.Detector.EnableITkStrip:
-        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        acc.merge(ITkStripReadoutGeometryCfg(flags))
-        det_elements += ['ITkStripDetectorElementCollection']
-        element_types += [2]
-    if flags.Detector.EnablePixel:
-        from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
-        acc.merge(PixelReadoutGeometryCfg(flags))
-        det_elements += ['PixelDetectorElementCollection']
-        element_types += [1]
-    if flags.Detector.EnableSCT:
-        from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-        acc.merge(SCT_ReadoutGeometryCfg(flags))
-        det_elements += ['SCT_DetectorElementCollection']
-        element_types += [2]
-
-    kwargs.setdefault('SiDetectorElementCollections',det_elements)
-    kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
 
     acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
     return acc
@@ -525,11 +527,8 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
         tool_kwargs["FirstAndLastParameterOnly"] = kwargs.pop("FirstAndLastParameterOnly")
     if "ComputeExpectedLayerPattern" in kwargs:
         tool_kwargs["ComputeExpectedLayerPattern"] = kwargs.pop("ComputeExpectedLayerPattern")
-    if "SiDetectorElementCollections" in kwargs:
-        tool_kwargs["SiDetectorElementCollections"] = kwargs.pop("SiDetectorElementCollections")
-    if "SiDetEleCollToMeasurementType" in kwargs:
-        tool_kwargs["SiDetEleCollToMeasurementType"] = kwargs.pop("SiDetEleCollToMeasurementType")
-
+    if "MuonSummaryTool" in kwargs:
+        tool_kwargs["MuonSummaryTool"] = kwargs.pop("MuonSummaryTool")
     if 'TrackToTrackParticleCnvTool' not in kwargs:
         kwargs['TrackToTrackParticleCnvTool'] = acc.popToolsAndMerge(
             ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))

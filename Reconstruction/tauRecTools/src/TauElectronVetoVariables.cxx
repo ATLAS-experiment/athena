@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -55,6 +55,8 @@ StatusCode TauElectronVetoVariables::execute(xAOD::TauJet& pTau) const {
     const CaloCell *pCell;
     int trackIndex = -1;
 
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     //---------------------------------------------------------------------
     // Calculate eta, phi impact point of leading track at calorimeter layers EM 0,1,2,3
     //---------------------------------------------------------------------
@@ -75,19 +77,17 @@ StatusCode TauElectronVetoVariables::execute(xAOD::TauJet& pTau) const {
     if (m_useOldCalo) {
       /* If CaloExtensionBuilder is unavailable, use the calo extension tool */
       ATH_MSG_VERBOSE("Using the CaloExtensionTool");
-      uniqueExtension = m_caloExtensionTool->caloExtension(
-        Gaudi::Hive::currentContext(), *orgTrack);
+      uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
       caloExtension = uniqueExtension.get();
     } else {
       /*get the CaloExtension object*/
       ATH_MSG_VERBOSE("Using the CaloExtensionBuilder Cache");
-      SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey};
+      SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey, ctx};
       caloExtension = (*particleCache)[trackIndex];
       ATH_MSG_VERBOSE("Getting element " << trackIndex << " from the particleCache");
       if( not caloExtension ){
         ATH_MSG_VERBOSE("Cache does not contain a calo extension -> Calculating with the a CaloExtensionTool" );
-        uniqueExtension = m_caloExtensionTool->caloExtension(
-          Gaudi::Hive::currentContext(), *orgTrack);
+        uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
         caloExtension = uniqueExtension.get();
       }
     }

@@ -210,6 +210,23 @@ const SG::auxid_set_t& AuxVectorData::getAuxIDs() const
 
 
 /**
+ * @brief Return the set of variables to copy in a deep copy.
+ * @param warnUnlocked If true, we warn about variables skipped on account
+ *                     of being decorations.
+ *
+ * This is usually getAuxIDs()-getDecorIDs(), but may be different
+ * for some special cases.
+ */
+SG::auxid_set_t AuxVectorData::getCopyIDs (bool warnUnlocked /*= false*/) const
+{
+  const SG::IConstAuxStore* store = getConstStore();
+  if (store)
+    return store->getCopyIDs (warnUnlocked);
+  return SG::auxid_set_t();
+}
+
+
+/**
  * @brief Return a set of identifiers for decorations for this object.
  */
 const SG::auxid_set_t& AuxVectorData::getDecorIDs() const

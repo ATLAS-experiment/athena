@@ -21,7 +21,8 @@
 #include <utility>
 #include <vector>
 
-
+namespace IDTPM {
+  
 class ITrackAnalysisDefinitionSvc :
     virtual public asg::IAsgService {
 
@@ -85,5 +86,7 @@ public:
   virtual bool isITk() const = 0;
   
 };
+
+}
 
 #endif // > ! INDETTRACKPERFMON_ITRACKANALYSISDEFINITIONSVC_H

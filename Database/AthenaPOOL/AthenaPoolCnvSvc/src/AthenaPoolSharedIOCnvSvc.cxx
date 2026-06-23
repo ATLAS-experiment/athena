@@ -87,8 +87,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::finalize() {
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConnectionSpec,
-               const std::string& /*openMode*/) {
-   return(connectOutput(outputConnectionSpec));
+                                                   const std::string& openMode) {
+   return AthenaPoolCnvSvc::connectOutput(outputConnectionSpec, openMode);
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
@@ -120,6 +120,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConn
    std::size_t apend = outputConnectionSpec.find('[');
    if (apend != std::string::npos) {
       outputConnection += outputConnectionSpec.substr(apend);
+   }
+   if (outputConnectionSpec.find("[PoolContainerPrefix=" + m_metadataContainerProp.value() + "]") != std::string::npos) {
+      return AthenaPoolCnvSvc::connectOutput(outputConnection, "APPEND");
    }
    return AthenaPoolCnvSvc::connectOutput(outputConnection);
 }
@@ -525,13 +528,16 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
          tempToken->setClassID(pool::DbReflex::guid(classDesc));
          token = tempToken; tempToken = nullptr;
       } else if (!m_outputStreamingTool.empty() && !m_outputStreamingTool->isClient() && !m_streamServerActive) {
+         if(placement->technology() == 0) { // No technology specified, use the default
+            placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
+         }
          ATH_MSG_DEBUG("Requested write object for: " << placement->toString());
          token = getPoolSvc()->registerForWrite(placement, obj, classDesc);
       } else {
          if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient() && m_parallelCompression) {
             placement->setFileName(placement->fileName() + m_streamPortString.value());
          }
-	 token = AthenaPoolCnvSvc::registerForWrite(placement, obj, classDesc);
+         token = AthenaPoolCnvSvc::registerForWrite(placement, obj, classDesc);
       }
    }
    return(token);

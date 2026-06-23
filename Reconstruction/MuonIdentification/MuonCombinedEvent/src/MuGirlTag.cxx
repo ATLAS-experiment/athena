@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedEvent/MuGirlTag.h"
@@ -33,7 +33,4 @@ namespace MuonCombined {
         if (t1FQ && t2FQ) { return t1FQ->chiSquared() < t2FQ->chiSquared(); }
         return t1.associatedSegments().size() < t2.associatedSegments().size();
     }
-    void MuGirlTag::setCommissioning(bool b) { m_isCommissioning = b; }
-    bool MuGirlTag::isCommissioning() const { return m_isCommissioning; }
-
 }  // namespace MuonCombined

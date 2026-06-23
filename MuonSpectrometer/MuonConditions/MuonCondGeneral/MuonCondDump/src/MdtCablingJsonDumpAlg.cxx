@@ -42,8 +42,7 @@ StatusCode MdtCablingJsonDumpAlg::initialize(){
 } 
 
 
-StatusCode MdtCablingJsonDumpAlg::execute() {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode MdtCablingJsonDumpAlg::execute(const EventContext& ctx) {
   ATH_MSG_INFO("Dump cabling & mezzanines into JSON file");
 
   const MuonGM::MuonDetectorManager* detectorMgr{nullptr};

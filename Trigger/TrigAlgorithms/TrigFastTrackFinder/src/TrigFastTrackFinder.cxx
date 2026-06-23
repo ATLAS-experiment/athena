@@ -240,7 +240,6 @@ StatusCode TrigFastTrackFinder::initialize() {
 
   if(m_useGPU) {//for GPU acceleration
     ATH_CHECK(m_accelSvc.retrieve());
-    ATH_CHECK(m_accelSvc->isReady());
     ATH_CHECK(m_accelTool.retrieve());
   }
 
@@ -613,7 +612,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   }
   else {
     //GPU offloading begins ...
-
+    ATH_CHECK(m_accelSvc->isReady()); // or remake it into afterfork incident
     makeSeedsOnGPU(m_tcs, tmpRoi.get(), convertedSpacePoints, triplets);
 
     //GPU offloading ends ...

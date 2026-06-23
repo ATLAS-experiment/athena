@@ -13,12 +13,6 @@
 // Athena includes
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 
-// Gaudi includes
-#include "GaudiKernel/IIncidentSvc.h"
-#include "GaudiKernel/Incident.h"
-#include "GaudiKernel/GaudiException.h" 
-#include "GaudiKernel/IToolSvc.h"
-
 // AttributeList
 #include "CoralBase/Attribute.h"
 #include "CoralBase/Blob.h"
@@ -92,33 +86,10 @@ StatusCode IOVDbTestAlg::initialize(){
         ATH_MSG_INFO( "Tag to be used: " << m_tagID.value() );
     }
 
-    if (m_readInInit) {
-        ATH_CHECK( readWithBeginRun() );
-        ATH_MSG_DEBUG( "Read with BeginRun " );
-    }
-
     return StatusCode::SUCCESS;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-
-StatusCode IOVDbTestAlg::readWithBeginRun(){
-    ATH_MSG_INFO( "in readWithBeginRun()" );
-
-    // As a result of the restructuring the EventIncident class (dropping the reference to EventInfo)
-    // the old mechanism of overriding run&event&time is no longer working.
-    // If we need this functionality, then we need to find a new way of implementing it.
-    // For the time being this function simply fires a BeginRun incident using the EventContext, without overriding anything
-
-    ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name() );
-    ATH_CHECK( incSvc.retrieve() );
-
-    incSvc->fireIncident( Incident(name(), IncidentType::BeginRun, Gaudi::Hive::currentContext()) );
-
-    return StatusCode::SUCCESS;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode IOVDbTestAlg::createCondObjects(const EventContext& ctx) const
 {

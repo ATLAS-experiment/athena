@@ -4,9 +4,30 @@
 Run material mapping
 """
 from AthenaCommon.Logging import log
+from argparse import ArgumentParser
+
+def dict_from_key_value(arg : str) -> dict:
+    """Convert a 'key1=val1,key2=val2' string into a dictionary with typed values."""
+    import argparse
+    dict = {}
+    items = arg.split(',')
+    for item in items:
+        if '=' not in item:
+            raise argparse.ArgumentTypeError(
+                f"Invalid key=value pair: '{item}'. Use format 'key=value'."
+            )
+        key, value = item.split('=', 1)
+
+        
+        if type(key) != str:
+             raise argparse.ArgumentTypeError(f"Key should be a string '{key}'")     
+             
+        dict[key.strip()] = int(value)
+    return dict
 
 def SetupArgParser():
     from argparse import ArgumentParser
+   
     import sys
     # Argument parsing
     parser = ArgumentParser("RunMaterialMapping.py")
@@ -18,6 +39,10 @@ def SetupArgParser():
     parser.add_argument("-V", "--verboseAccumulators", default=False,
                         action="store_true",
                         help="Print full details of the AlgSequence")
+    parser.add_argument("--storeTracks", default = False, action="store_true", 
+                        help="Store the mapped and unmapped geantino tracks" )
+    parser.add_argument("--storeSurface", default = False, action="store_true", 
+                        help="Store the surface info on the mapped/unmapped tracks" )
     parser.add_argument("-S", "--verboseStoreGate", default=False,
                         action="store_true",
                         help="Dump the StoreGate(s) each event iteration")
@@ -35,6 +60,9 @@ def SetupArgParser():
     parser.add_argument("--inputFiles", type=str, nargs="+",
                         default=[],
                         help="Input files to be used for the mapping procedure. They must contain the material track information, which was previously produced with the 'RunGeantinoMaterialTrackProduction.py'")
+    
+    parser.add_argument("--materialBins", default=[], help = "Binning on the surfaces for the material map as key value pairs in a single str (e.g --materialBins 'nPhiBIns=12 nZBins=10')",
+                         type=dict_from_key_value)
     return parser
 
 def assembleFiles(fileArgs):
@@ -72,6 +100,10 @@ if __name__ == "__main__":
     else:
         print("Running with: {}".format(", ".join(args.detectors)))
     print()
+
+    if args.storeSurface and not args.storeTracks:
+        print("Wrong configuration- I cannot store surface info without storing the geantino tracks!")
+        exit()
 
     # Configure
     flags = initConfigFlags()
@@ -136,6 +168,7 @@ if __name__ == "__main__":
     flags.dump()
 
     from ActsConfig.ActsMaterialConfig import MaterialTrackReaderCfg, MaterialMappingCfg
+    import sys
 
     acc.merge(MaterialTrackReaderCfg(flags, 
                                      maxEvents =  args.maxEvents if args.maxEvents > 0 else sys.maxsize,
@@ -145,9 +178,18 @@ if __name__ == "__main__":
                                      TreeName=args.treeName))
 
     acc.merge(MaterialMappingCfg(flags, 
-                                 StoreTracks=False))
+                                 StoreTracks=args.storeTracks,
+                                 StoreSurfInfo=args.storeSurface))
 
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
+    if flags.Detector.GeometryMuon:
+        builder = acc.getService("ActsTrackingGeometrySvc").BlueprintNodeBuilders["MuonBlueprintNodeBuilder"]
+        if args.materialBins:
+            bins_dict = args.materialBins
+            for key,value in bins_dict.items():
+                setattr(builder, key, value)
+
+    
     executeTest(acc)    
 
 

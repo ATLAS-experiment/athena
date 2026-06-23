@@ -68,7 +68,7 @@ StatusCode LArConditionsTestAlg::initialize()
 // EXECUTE:
 /////////////////////////////////////////////////////////////////////
 
-StatusCode LArConditionsTestAlg::execute()
+StatusCode LArConditionsTestAlg::execute(const EventContext& /*ctx*/)
 {
     if(m_testCondObjs){ 
 

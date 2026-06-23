@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IForwardRegionProperties_H
@@ -12,7 +12,7 @@
 typedef struct _FWDMg_CONFIGURATION
 {
     std::string twissFileB1, twissFileB2;
-    double momentum;
+    double momentum{};
 
     std::vector<double> pointQ1Start;
     std::vector<double> pointQ2aStart;
@@ -65,7 +65,7 @@ typedef struct _FWDMg_CONFIGURATION
     std::vector<double> fD1fRotZ;
     std::vector<double> fD2RotZ;
 
-    bool bUseFLUKAMapsForInnerTriplet;
+    bool bUseFLUKAMapsForInnerTriplet{};
 
 
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 #include "TrigT1MBTS.h"
@@ -178,7 +178,7 @@ LVL1::TrigT1MBTS::initialize()
 }
 
 StatusCode
-LVL1::TrigT1MBTS::execute()
+LVL1::TrigT1MBTS::execute(const EventContext& /*ctx*/)
 {
    // Retrieve the TileTTL1 container that contains the input MBTS information.
    const TileTTL1Container* tileTTL1MBTSContainer{nullptr};

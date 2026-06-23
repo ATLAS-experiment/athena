@@ -44,11 +44,11 @@ StatusCode L1CaloHVDummyContainers::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode L1CaloHVDummyContainers::execute()
+StatusCode L1CaloHVDummyContainers::execute(const EventContext& ctx)
 {
     if (m_firstEvent) {
 
-      SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+      SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
       ATH_CHECK(caloMgrHandle.isValid());
       const CaloDetDescrManager* caloDetDescrMgr = *caloMgrHandle;
 

@@ -86,6 +86,21 @@ def GNNTrackFinderTritonToolCfg(flags, name='GNNTrackFinderTritonTool', **kwargs
     return acc
 
 
+def ActsGnnModuleMapFinderToolCfg(flags, name='ActsGnnModuleMapFinderTool', **kwargs):
+    """Sets up an ActsGnnModuleMapFinderTool and returns it."""
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("moduleMapPath", flags.Tracking.GNN.ActsPipeline.moduleMapPath)
+    kwargs.setdefault("gnnPath", flags.Tracking.GNN.ActsPipeline.gnnPath)
+    kwargs.setdefault("edgeCut", flags.Tracking.GNN.ActsPipeline.edgeCut)
+    kwargs.setdefault("numTrtContexts", flags.Tracking.GNN.ActsPipeline.numTrtContexts)
+    kwargs.setdefault("minCandidateMeasurements", flags.Tracking.GNN.ActsPipeline.minCandidateMeasurements)
+    kwargs.setdefault("SpacepointFeatureTool", acc.popToolsAndMerge(SpacepointFeatureToolCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.InDet.ActsGnnModuleMapFinderTool(name, **kwargs))
+    return acc
+
+
 def SeedFitterToolCfg(flags, name="SeedFitterTool", **kwargs):
     """Sets up a SeedFitter tool and returns it."""
     acc = ComponentAccumulator()
@@ -153,6 +168,10 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
         kwargs.setdefault("GNNTrackFinderTool", None)
     elif flags.Tracking.GNN.ToolType == GNNTrackFinderToolType.Triton:
         InDetGNNTrackFinderTool = acc.popToolsAndMerge(GNNTrackFinderTritonToolCfg(flags))
+        kwargs.setdefault("GNNTrackReaderTool", None)
+        kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
+    elif flags.Tracking.GNN.ToolType == GNNTrackFinderToolType.ActsPipeline:
+        InDetGNNTrackFinderTool = acc.popToolsAndMerge(ActsGnnModuleMapFinderToolCfg(flags))
         kwargs.setdefault("GNNTrackReaderTool", None)
         kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
     else:

@@ -37,7 +37,7 @@ class MuonPrdSelectorAlg : public AthAlgorithm  {
 
   // Basic algorithm methods:
   virtual StatusCode initialize();   //!< Algorithm initialization: retrieves StoreGate/DetectorStore/MuonIdHelpers/MuonPrepDataContainers
-  virtual StatusCode execute();      //!< Retrieves and records containers, performs selection
+  virtual StatusCode execute(const EventContext& ctx);      //!< Retrieves and records containers, performs selection
 
  private:
   void print();                      //!< method for DEBUG purposes: prints the content of input and output MuonPrepDataContainer

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 //////////////////////////////////////////////////////////////////////////
@@ -165,9 +165,9 @@ StatusCode InDetAlignFillTrack::FillTrack() {
   }
 
   ATH_MSG_DEBUG("Printing input track collection");
-  m_totaltrks += dumpTrackCol(tracks);
-  if (m_inputUpCol != "") m_totalUptrks += dumpTrackCol(Uptracks, "Up");
-  if (m_inputLowCol != "") m_totalLowtrks += dumpTrackCol(Lowtracks, "Low");
+  m_totaltrks += dumpTrackCol(ctx, tracks);
+  if (m_inputUpCol != "") m_totalUptrks += dumpTrackCol(ctx, Uptracks, "Up");
+  if (m_inputLowCol != "") m_totalLowtrks += dumpTrackCol(ctx, Lowtracks, "Low");
 
   // matching
   if (m_doMatching && m_inputUpCol != "" && m_inputLowCol != "")
@@ -737,14 +737,15 @@ void InDetAlignFillTrack::bookMatchingNtuple() {
 //=====================================================================
 //  InDetAlignFillTrack::dumpTrackCol()
 //=====================================================================
-int InDetAlignFillTrack::dumpTrackCol(const TrackCollection* tracks) {
-  return dumpTrackCol(tracks, "");
+int InDetAlignFillTrack::dumpTrackCol(const EventContext& ctx, const TrackCollection* tracks) {
+  return dumpTrackCol(ctx, tracks, "");
 }
 
 //=====================================================================
 //  InDetAlignFillTrack::dumpTrackCol()
 //=====================================================================
-int InDetAlignFillTrack::dumpTrackCol(const TrackCollection* tracks,
+int InDetAlignFillTrack::dumpTrackCol(const EventContext& ctx,
+                                      const TrackCollection* tracks,
                                       const std::string& TrkColName) {
   ATH_MSG_DEBUG("In dump" << TrkColName << "TrackCol()");
 
@@ -755,7 +756,7 @@ int InDetAlignFillTrack::dumpTrackCol(const TrackCollection* tracks,
 
   //looping over tracks
   for (; trackItr != trackItrE && itrk < maxTracks; ++trackItr) {
-    if (*trackItr != nullptr) dumpTrack(itrk, (*trackItr), TrkColName);
+    if (*trackItr != nullptr) dumpTrack(ctx, itrk, (*trackItr), TrkColName);
 
     itrk++;
   }
@@ -766,7 +767,8 @@ int InDetAlignFillTrack::dumpTrackCol(const TrackCollection* tracks,
 //=====================================================================
 //  InDetAlignFillTrack::dumpTrack()
 //=====================================================================
-void InDetAlignFillTrack::dumpTrack(int itrk, const Trk::Track* trk,
+void InDetAlignFillTrack::dumpTrack(const EventContext& ctx,
+                                    int itrk, const Trk::Track* trk,
                                     const std::string& TrkColName) {
   ATH_MSG_VERBOSE("In dump" << TrkColName << "Track()");
 
@@ -808,7 +810,7 @@ void InDetAlignFillTrack::dumpTrack(int itrk, const Trk::Track* trk,
     int nshared = 0, nshpix = 0, nshsct = 0;
     int nholes = 0, nhpix = 0, nhsct = 0;
 
-    xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(*trk);
+    xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(ctx, *trk);
     uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
 
     if (not trackPart) ATH_MSG_ERROR("Could not get xAOD::TrackParticle");

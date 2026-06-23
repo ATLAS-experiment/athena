@@ -49,7 +49,7 @@ public:
   MyAthAlgorithm (const std::string& name, ISvcLocator* svcLoc);
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   virtual void declare(Gaudi::DataHandle& hnd) override;
   virtual void addDependency (const DataObjID& obj, const Gaudi::DataHandle::Mode& mode) override;
@@ -107,7 +107,7 @@ StatusCode MyAthAlgorithm::initialize()
 }
 
 
-StatusCode MyAthAlgorithm::execute()
+StatusCode MyAthAlgorithm::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

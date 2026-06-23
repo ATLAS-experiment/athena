@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictRegion_H
@@ -9,6 +9,7 @@
 #include "IdDict/IdDictFieldImplementation.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <memory>
 
@@ -117,7 +118,7 @@ public:
                                      IdDictDictionary& dictionary) override;
     virtual void generate_implementation (const IdDictMgr& idd,
                                           IdDictDictionary& dictionary,
-                                          const std::string& tag = "") override;
+                                          std::string_view tag = "") override;
     virtual void reset_implementation () override;
     virtual bool verify () const override;
     virtual void clear () override;

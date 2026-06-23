@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUON_MOOTRACKFITTER_H
 #define MUON_MOOTRACKFITTER_H
@@ -224,7 +224,7 @@ namespace Muon {
         unsigned int hasPhiConstrain(FitterData& inputData) const;
 
         /** check whether data has sufficient phi constraints */
-        unsigned int hasPhiConstrain(Trk::Track* track) const;
+        unsigned int hasPhiConstrain(const EventContext& ctx, Trk::Track* track) const;
 
         /** create fake phi hit on the surface of the give measurement */
         std::unique_ptr<Trk::MeasurementBase> createFakePhiForMeasurement(const Trk::MeasurementBase& measurement, const Amg::Vector3D* overlapPos,

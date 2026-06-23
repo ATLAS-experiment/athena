@@ -15,6 +15,10 @@
 #include "IPFClusterSelectorTool.h"
 #include "IPFBaseTool.h"
 #include "IPFSubtractionTool.h"
+#include "IPFUnifiedBaseTool.h"
+
+#include "PFData.h"
+
 
 class eflowRecClusterContainer;
 
@@ -44,6 +48,9 @@ private:
 
   /** List of PFBaseAlgTool, which will be executed by this algorithm */
   ToolHandleArray<IPFBaseTool> m_IPFBaseTools;
+
+  /** List of IPFUnifiedBaseTool, which will be executed by this algorithm */
+  ToolHandleArray<IPFUnifiedBaseTool> m_IPFUnifiedBaseTools;
 
   /** ReadHandleKey for the eflowRecTrackContainer to be read in */
   SG::ReadHandleKey<eflowRecTrackContainer> m_eflowRecTracksReadHandleKey{
@@ -85,6 +92,8 @@ private:
 
   /** Funciton to print out list of tools if in VERBOSE mode */
   void printTools();
-  
+
+  Gaudi::Property<bool> m_useUnified{this, "useUnified", false, "Toggle to use standard PFA or unified PFA setup"};
+
 };
 #endif

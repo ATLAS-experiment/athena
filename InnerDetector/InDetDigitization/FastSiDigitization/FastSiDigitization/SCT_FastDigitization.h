@@ -20,7 +20,7 @@ class SCT_FastDigitization : public AthAlgorithm {
 
   /** Basic algorithm methods */
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
  private:
   ToolHandle<IPileUpTool> m_digTool{this, "DigitizationTool", "SCT_FastDigitizationTool", "AthAlgTool which performs the SCT digitization"};

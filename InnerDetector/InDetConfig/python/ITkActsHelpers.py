@@ -74,7 +74,7 @@ def extractTrackingPasses(flags) -> list:
             "Tracking.ITkActsConversionPass")]
 
     # Large Radius pass
-    if flags.Acts.doLargeRadius:
+    if flags.Acts.doLargeRadius and primaryPassUsesActs(flags):
         trackingPasses += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsLargeRadiusPass")]
@@ -113,7 +113,7 @@ def getListOfGeneratedTrackParticles(flags) -> list[str]:
             generateStripSegments = currentFlags.Detector.EnableITkStrip
             
             # For conversion pass we do not process pixels
-            if currentFlags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius"]:
+            if currentFlags.Tracking.ActiveConfig.extension == "ActsConversion" or currentFlags.Tracking.ActiveConfig.isLargeD0:
                 generatePixelSegments = False
                 # For main pass disable strips if fast tracking configuration
             elif isFastPrimaryPass(currentFlags):

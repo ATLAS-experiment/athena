@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/IConstAuxStore.h
@@ -16,6 +16,8 @@
 
 #include "AthContainersInterfaces/AuxTypes.h"
 #include <cstddef>
+#include <string>
+#include <span>
 
 
 namespace SG {
@@ -127,6 +129,17 @@ public:
    * @brief Return a set of identifiers for decorations in this store.
    */
   virtual const SG::auxid_set_t& getDecorIDs() const = 0;
+
+
+  /**
+   * @brief Return the set of variables to copy in a deep copy.
+   * @param warnUnlocked If true, we warn about variables skipped on account
+   *                     of being decorations.
+   *
+   * Usually this will be getAuxIDs()-getDecorIDs(), but can be different
+   * for special cases (such as shallow copies).
+   */
+  virtual SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const = 0;
 
 
   /**

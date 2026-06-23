@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVSLIMMINGMT_TRIGNAVSLIMMINGMTALG_H
@@ -19,6 +19,9 @@
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "TrigDecisionTool/TrigDecisionTool.h"
+
+#include "CxxUtils/checker_macros.h"
+#include <mutex>
 
 /**
  * @brief Consumes a set of Run 3 trigger navigation collection(s), applies slimming/thinning,
@@ -137,13 +140,23 @@ private:
 
   std::set<std::string> m_allOutputContainersSet; //!< Processed form of m_allOutputContainers
 
+  /// Cached chain configuration from TrigDecisionTool (populated once on first event).
+  /// Avoids redundant per-event TDT calls (chain group resolution, config lookups)
+  /// whose results are static after the first event.
+  struct CachedChainInfo {
+    TrigCompositeUtils::DecisionID chainID;
+    std::vector<TrigCompositeUtils::DecisionID> legIDs;
+  };
+  mutable std::once_flag m_chainIDsCacheFlag ATLAS_THREAD_SAFE;
+  mutable std::vector<CachedChainInfo> m_cachedChainInfo ATLAS_THREAD_SAFE; // protected by m_chainIDsCacheFlag
+  mutable bool m_chainIDsCacheOK ATLAS_THREAD_SAFE {false}; // protected by m_chainIDsCacheFlag
+
   /**
-   * @brief Convert the ChainsFilter into the set of chain-IDd and chain-leg-IDs which comprises 
-   * all of the DecisionIDs used by the members of the ChainsFilter.
-   * @param[out] chainIDs The set to be populated from m_chainsFilter and, optionally, the navigation terminus node
-   * @param[in] applyPassingChainsFilter Set to the terminus node to additionally filter on per-event passing chains. Or set to nullptr to skip this filter.
+   * @brief One-time cache of chain+leg IDs from TrigDecisionTool configuration.
+   * Called once on first event via std::call_once.
    **/
-  StatusCode fillChainIDs(TrigCompositeUtils::DecisionIDContainer& chainIDs, const TrigCompositeUtils::Decision* applyPassingChainsFilter) const;
+  StatusCode cacheChainInfo() const;
+
 
   /**
    * @brief Creates a new graph node from scratch, populates it with the Chain IDs of all HLT chains which

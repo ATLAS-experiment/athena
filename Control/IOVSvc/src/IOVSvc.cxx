@@ -623,7 +623,9 @@ IOVSvc::resetAllProxies() {
 StatusCode 
 IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id, 
                       const EventIDBase& now) {
-  
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   ATH_MSG_DEBUG("createCondObj:  id: " << id << "  t: " << now << "  valid: "
                 << ccb->valid(now));
 
@@ -672,7 +674,7 @@ IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id,
   if (ccb->range (eidRange.start(), r) &&
       eventIDMatch (r.start(), eidRange.start()))
   {
-    if (ccb->extendLastRange (eidRange).isSuccess()) {
+    if (ccb->extendLastRange (eidRange, ctx).isSuccess()) {
       return StatusCode::SUCCESS;
     }
   }
@@ -721,7 +723,7 @@ IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id,
   
   ATH_MSG_DEBUG( " SG::Storable_cast to obj: " << v );
 
-  StatusCode sc = ccb->typelessInsert (eidRange, v);
+  StatusCode sc = ccb->typelessInsert (eidRange, v, ctx);
   if (!sc.isSuccess()) {
     ATH_MSG_ERROR("unable to insert Object at " << v << " into CondCont " 
                   << ccb->id() << " for range " << eidRange );

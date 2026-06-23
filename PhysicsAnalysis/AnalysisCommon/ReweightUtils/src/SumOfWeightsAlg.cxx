@@ -62,7 +62,7 @@ StatusCode SumOfWeightsAlg::initialize ATLAS_NOT_THREAD_SAFE () {
 
 //**********************************************************************
 
-StatusCode SumOfWeightsAlg::execute() {  
+StatusCode SumOfWeightsAlg::execute(const EventContext& /*ctx*/) {  
   ATH_MSG_DEBUG ("Executing " << name() << ", will loop over WeightTools...");
   setFilterPassed(true);
 

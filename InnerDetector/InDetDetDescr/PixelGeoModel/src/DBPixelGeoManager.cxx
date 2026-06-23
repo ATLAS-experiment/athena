@@ -730,7 +730,7 @@ int DBPixelGeoManager::PixelServiceElements(const std::string & type) {
 }
 
 // Name used when naming G4/Geo volumes 
-std::string DBPixelGeoManager::PixelServiceName(const std::string & type, int index) {
+std::string DBPixelGeoManager::PixelServiceName(std::string_view type, int index) {
 
   if (useLegacy() || !getPixelServiceRecordTestField("VOLNAME",type,index)) {
     return "";
@@ -833,7 +833,7 @@ int DBPixelGeoManager::PixelServiceRepeat(const std::string & type, int index) {
   }
 }
 
-std::string DBPixelGeoManager::PixelServiceShape(const std::string & type, int index) {
+std::string DBPixelGeoManager::PixelServiceShape(std::string_view type, int index) {
   if (type == "simple") return "TUBE";
   if (!getPixelServiceRecordTestField("SHAPE",type,index)) {
     return "TUBE";
@@ -856,7 +856,7 @@ int DBPixelGeoManager::PixelServiceLD(const std::string & type, int index) {
   return getPixelServiceRecordInt("LAYERNUM",type,index)-1;
 }
 
-string DBPixelGeoManager::PixelServiceMaterial(const std::string & type, int index) {
+string DBPixelGeoManager::PixelServiceMaterial(const std::string_view type, int index) {
 
   int imat = 0;
   if (type != "simple") {
@@ -963,23 +963,23 @@ int DBPixelGeoManager::PixelServiceParentEnvelopeNum(const std::string & type, i
   return 0;
 }
 
-std::string DBPixelGeoManager::getPixelServiceRecordString(const std::string & name, const std::string & type, int index) {
+std::string DBPixelGeoManager::getPixelServiceRecordString(std::string_view name, std::string_view type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
   return (*recordSet)[index]->getString(name);
 }
 
-int DBPixelGeoManager::getPixelServiceRecordInt(const std::string & name, const std::string & type, int index) {
+int DBPixelGeoManager::getPixelServiceRecordInt(std::string_view name, std::string_view type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
   return (*recordSet)[index]->getInt(name);
 }
 
 
-double DBPixelGeoManager::getPixelServiceRecordDouble(const std::string & name, const std::string & type, int index) {
+double DBPixelGeoManager::getPixelServiceRecordDouble(std::string_view name, std::string_view type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
   return (*recordSet)[index]->getDouble(name);
 }
 
-bool DBPixelGeoManager::getPixelServiceRecordTestField(const std::string & name, const std::string & type, int index) {
+bool DBPixelGeoManager::getPixelServiceRecordTestField(std::string_view name, std::string_view type, int index) {
   try {
     IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
     return !((*recordSet)[index]->isFieldNull(name));
@@ -990,7 +990,7 @@ bool DBPixelGeoManager::getPixelServiceRecordTestField(const std::string & name,
 
 
 // Returns IRDBRecordset
-IRDBRecordset_ptr  DBPixelGeoManager::getPixelServiceRecordset(const std::string & type) {
+IRDBRecordset_ptr  DBPixelGeoManager::getPixelServiceRecordset(std::string_view type) {
   // m_barrelInFrames and m_endcapInFrames should be zero in dbVersion >= 3
   IRDBRecordset_ptr recordSet;
   if (type == "simple") {
@@ -1111,7 +1111,7 @@ int DBPixelGeoManager::determineDbVersion() {
 
 
 
-std::string DBPixelGeoManager::getMaterialName(const std::string & volumeName, int layerdisk, int typenum) {
+std::string DBPixelGeoManager::getMaterialName(std::string_view volumeName, int layerdisk, int typenum) {
   return m_materialMap->getMaterial(layerdisk, typenum, volumeName);
 }
 

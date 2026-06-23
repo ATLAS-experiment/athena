@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+namespace IDTPM { 
+
 class TrackAnalysisDefinitionSvc final :
     public extends<asg::AsgService, ITrackAnalysisDefinitionSvc> {
 
@@ -139,4 +141,6 @@ private:
   BooleanProperty m_isITk { this, "isITk", true, "Use ITk configuration for plots, etc." };
 };
 
+}
+  
 #endif // > !INDETTRACKPERFMON_TRACKANALYSISDEFINITIONSVC_H

@@ -25,11 +25,9 @@ atlas_add_library( JetSubStructureMomentToolsLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${FASTJETCONTRIB_LIBRARIES} ${FASTJET_LIBRARIES} xAODMuon CxxUtils
    JetEDM JetSubStructureUtils ${extra_libs} )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( JetSubStructureMomentTools
-      src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel JetSubStructureMomentToolsLib )
-endif()
+atlas_add_component( JetSubStructureMomentTools
+   src/components/*.cxx
+   LINK_LIBRARIES JetSubStructureMomentToolsLib )
 
 atlas_add_dictionary( JetSubStructureMomentToolsDict
    JetSubStructureMomentTools/JetSubStructureMomentToolsDict.h

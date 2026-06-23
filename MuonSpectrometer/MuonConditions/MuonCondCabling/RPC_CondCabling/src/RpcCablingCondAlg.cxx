@@ -4,10 +4,13 @@
 
 #include "RPC_CondCabling/RpcCablingCondAlg.h"
 #include "RPC_CondCabling/RPCofflineId.h"
+#include "RPC_CondCabling/SectorLogicSetup.h"
 
 #include <sstream>
 
 #include "PathResolver/PathResolver.h"
+
+using TrigRoadsMap = RPC_CondCabling::SectorLogicSetup::TrigRoadsMap;
 
 RpcCablingCondAlg::RpcCablingCondAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthCondAlgorithm(name, pSvcLocator) {}
 
@@ -97,7 +100,7 @@ StatusCode RpcCablingCondAlg::setup(const CondAttrListCollection* readCdoMap, co
     sectorMap_t sectorMap;
     RpcCablingCondData::STvec sectorType;
     std::vector<unsigned short int> feedPadThresholds;
-    std::map<std::string, std::string> trigroads;
+    TrigRoadsMap trigroads;
     SLmap_t sectorLogic;
 
     // ------------------------------
@@ -544,7 +547,7 @@ StatusCode RpcCablingCondAlg::setup(const CondAttrListCollection* readCdoMap, co
         }
 
         // Trigger Roads Header
-        std::map<std::string, std::string>::const_iterator it;
+        TrigRoadsMap::const_iterator it;
         it = trigroads.find("infos.txt");
         if (it == trigroads.end()) {
             ATH_MSG_WARNING("Missing HEADER FILE infos.txt");

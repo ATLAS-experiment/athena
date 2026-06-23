@@ -56,7 +56,7 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                 chain_out = chain_out.replace('-', '_').replace('.', 'p')
 
                 alg = config.createAlgorithm( 'CP::BTaggingTriggerMatchingAlg',
-                                              'FTagTriggerMatchingAlg' + chain )
+                                              'FTagTriggerMatchingAlg' + chain_out )
                 alg.TrigDecisionTool = f"{decisionTool.getType()}/{decisionTool.getName()}"
                 alg.trigger = chain
                 alg.useRun3TriggerEDM = config.geometry() is LHCPeriod.Run3

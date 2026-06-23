@@ -7,10 +7,6 @@
 
 #include "PartonHistory/PartonHistoryUtils.h"
 
-#include <xAODEventInfo/EventInfo.h>
-
-#include "VectorHelpers/LorentzHelper.h"
-
 namespace CP {
 namespace PartonHistoryUtils {
 

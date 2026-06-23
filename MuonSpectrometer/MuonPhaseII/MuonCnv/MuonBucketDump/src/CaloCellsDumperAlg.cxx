@@ -40,9 +40,8 @@ StatusCode CaloCellsDumperAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CaloCellsDumperAlg::execute() {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
+StatusCode CaloCellsDumperAlg::execute(const EventContext& ctx) {
+  
   // -----------------------------
   // Cells
   // -----------------------------

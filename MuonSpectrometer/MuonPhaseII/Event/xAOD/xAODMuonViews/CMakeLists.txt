@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODMuonViews )
@@ -7,10 +7,9 @@ atlas_subdir( xAODMuonViews )
 find_package(Acts CONFIG COMPONENTS Core)
 
 atlas_add_library( xAODMuonViews
-    xAODMuonViews/*.h
-    INTERFACE
+     src/*.cxx
     PUBLIC_HEADERS xAODMuonViews
-    LINK_LIBRARIES xAODMeasurementBase Identifier MuonIdHelpersLib Acts::Core)
+    LINK_LIBRARIES xAODMuonPrepData Identifier MuonIdHelpersLib Acts::Core)
 
 
    
@@ -20,7 +19,7 @@ foreach(_theTestSource ${tests})
     get_filename_component(_theTest ${_theTestSource} NAME_WE)
     atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
                     LINK_LIBRARIES xAODMuonViews AthenaBaseComps TestTools
-                    POST_EXEC_SCRIPT nopost.sh)
+                    POST_EXEC_SCRIPT noerror.sh)
     
 
 endforeach()

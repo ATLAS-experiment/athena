@@ -29,6 +29,8 @@ def BPHY2Cfg(flags):
     acc.addPublicTool(trackselect)
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     BPHY2JpsiFinder = CompFactory.Analysis.JpsiFinder(name           = "BPHY2JpsiFinder",
                                          muAndMu                     = True,
                                          muAndTrack                  = False,
@@ -54,7 +56,7 @@ def BPHY2Cfg(flags):
                                                         PVContainerName        = "PrimaryVertices",
                                                         RefPVContainerName     = "SHOULDNOTBEUSED",
                                                         V0Tools                = V0Tools,
-                                                        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                                        PVRefitter             = PVrefit,
                                                         DoVertexType           =1)
  
     BPHY2BsJpsiKK = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY2BsJpsiKK",
@@ -84,7 +86,7 @@ def BPHY2Cfg(flags):
                                                            RefPVContainerName       = "BPHY2RefittedPrimaryVertices",
                                                            RefitPV                  = True,
                                                            V0Tools                  = V0Tools,
-                                                           PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                                           PVRefitter               = PVrefit,
                                                            MaxPVrefit               = 10000, DoVertexType = 7)
 
     BPHY2_Select_Psi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(

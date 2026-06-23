@@ -13,6 +13,8 @@
 #ifndef POOL_POOL_H
 #define POOL_POOL_H 1
 
+#include "GaudiKernel/IFileMgr.h"
+
 // STL include files
 #include <string>
 #include <utility>
@@ -28,21 +30,9 @@
 namespace pool   {
   // Type definitions
   typedef void DbObject;
-  typedef int  DbAccessMode;
   typedef std::pair< long long, long long > DbLink;
 
   static const long long int INVALID = ~0x0LL;
-
-  /// Definition of access modes
-  enum AccessMode {
-    NONE        =  0,
-    NOT_OPEN    =  1<<0,
-    READ        =  1<<1, 
-    UPDATE      =  1<<2, 
-    CREATE      =  1<<3, 
-    RECREATE    = (1<<4)+(1<<3),
-    WRITE       =  1<<3
-  };
 
   namespace Transaction {
     enum Action { TRANSACT_COMMIT, TRANSACT_FLUSH };
@@ -66,7 +56,7 @@ namespace pool   {
   bool      doTrace();
 
   /// Translate access mode to string
-  const char* accessMode(pool::DbAccessMode access_mode);
+  const char* accessMode(Io::IoFlag access_mode);
 
   /// Delete a pointer
   template<class T> inline void deletePtr(T*& p)  {

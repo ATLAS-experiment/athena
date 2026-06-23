@@ -38,13 +38,12 @@ StatusCode xAODMETFilter::filterEvent() {
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - might not work");
       return StatusCode::SUCCESS;
     }
-
   McEventCollection* mec = const_cast<McEventCollection*> (&(*mecc));
   for (unsigned int i = 0; i < mec->size(); ++i) {
       if (!(*mec)[i]) continue;
     
       //for test filterHT->filterWeight
-      (*mec)[i]->add_attribute("filterMET", std::make_shared<HepMC3::DoubleAttribute>(met/1000.));
+      (*mec)[i]->add_attribute(HepMCStr::filterMET, std::make_shared<HepMC3::DoubleAttribute>(met/1000.));
   }
  
   setFilterPassed(met >= m_METmin || keepAll());

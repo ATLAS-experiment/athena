@@ -15,7 +15,6 @@
 #include "TestTools/leakcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
 #include <iostream>
@@ -54,7 +53,6 @@ void testit (const MissingETComposition& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   ElementLink<INavigable4MomentumCollection> el1 ("foo", 1);
   ElementLink<INavigable4MomentumCollection> el2 ("bar", 2);
   Athena_test::Leakcheck check;

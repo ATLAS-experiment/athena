@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -36,7 +36,7 @@ TBScintillatorRec::initialize()
 }
 
 StatusCode
-TBScintillatorRec::execute()
+TBScintillatorRec::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ( "In execute()" );
 

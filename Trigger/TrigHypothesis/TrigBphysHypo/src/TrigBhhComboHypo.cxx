@@ -151,7 +151,7 @@ StatusCode TrigBhhComboHypo::mergeMuonsFromDecisions(TrigBhhState& state) const 
     ATH_MSG_DEBUG( "Dump found muons before vertex fit: " << muons.size() << " candidates" );
     for (const auto& item : muons) {
       const xAOD::Muon* muon = *item.link;
-      const xAOD::TrackParticle* track = *muon->inDetTrackParticleLink();
+      const xAOD::TrackParticle* track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       ATH_MSG_DEBUG( " -- muon InDetTrackParticle pt/eta/phi/q: " << track->pt() << " / " << track->eta() << " / " << track->phi() << " / " << track->charge() );
       ATH_MSG_DEBUG( "    muon CombinedTrackParticle pt: " << muon->pt() );
       ATH_MSG_DEBUG( "    allowed decisions:" );
@@ -227,7 +227,7 @@ StatusCode TrigBhhComboHypo::mergeTracksFromViews(TrigBhhState& state) const {
   if (m_applyMuonRemoval) {
     for (size_t i = 0; i < muons.size(); ++i) {
       const xAOD::Muon* muon = *muons[i].link;
-      const xAOD::TrackParticle* track = *muon->inDetTrackParticleLink();
+      const xAOD::TrackParticle* track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       std::sort(tracks.begin(), tracks.end(), [p_mu=track->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
       if (isIdenticalTracks(track, *tracks.back())) tracks.pop_back();
     }
@@ -468,7 +468,8 @@ bool TrigBhhComboHypo::isIdenticalTracks(const xAOD::TrackParticle* lhs, const x
 
 bool TrigBhhComboHypo::isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const {
 
-  return isIdenticalTracks(*lhs->inDetTrackParticleLink(), *rhs->inDetTrackParticleLink());
+  return isIdenticalTracks(lhs->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
+                           rhs->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
 }
 
 

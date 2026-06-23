@@ -10,12 +10,11 @@
 //---------------------------------------------------------------
 #ifndef TRKVKALVRTFITTER_ITRKVKALVRTFITTER_H
 #define TRKVKALVRTFITTER_ITRKVKALVRTFITTER_H
-//Pphysical vectors
+
+#include "GaudiKernel/IAlgTool.h"
+
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "EventPrimitives/EventPrimitives.h"
-// Gaudi includes
-#include "AthenaBaseComps/AthAlgTool.h"
-//
 #include  "xAODTracking/TrackParticleFwd.h"
 #include  "xAODTracking/NeutralParticleFwd.h"
 #include  "TrkVKalVrtFitter/IVKalState.h"
@@ -32,27 +31,11 @@ class IExtrapolator;
 class IVKalState;
 class Track;
 
-//------------------------------------------------------------------------
-  static const InterfaceID IID_ITrkVKalVrtFitter("ITrkVKalVrtFitter", 1, 0);
-
   class ITrkVKalVrtFitter : virtual public IAlgTool {
     public:
-      static const InterfaceID& interfaceID() { return IID_ITrkVKalVrtFitter;}
-//---------------------------------------------------------------------------
-//Interface itself
+      DeclareInterfaceID(ITrkVKalVrtFitter, 1, 0);
 
-     /*
-      * Context aware method
-      */
       virtual std::unique_ptr<IVKalState> makeState(const EventContext& ctx) const = 0;
-
-     /*
-      * For non-migrated clients which should always use the context aware method
-      */
-      virtual std::unique_ptr<IVKalState> makeState() const
-      {
-        return makeState(Gaudi::Hive::currentContext());
-      }
 
       virtual StatusCode VKalVrtFit(
         const std::vector<const xAOD::TrackParticle*>& listC,
@@ -168,13 +151,15 @@ class Track;
                                    std::vector<double>& ImpactError,
                                    IVKalState& istate) const = 0;
 
-      virtual double VKalGetImpact(const xAOD::TrackParticle*,
+      virtual double VKalGetImpact(const EventContext& ctx,
+                                   const xAOD::TrackParticle*,
                                    const Amg::Vector3D& Vertex,
                                    const long int Charge,
                                    std::vector<double>& Impact,
                                    std::vector<double>& ImpactError) const = 0;
 
-      virtual double VKalGetImpact(const Perigee*,
+      virtual double VKalGetImpact(const EventContext& ctx,
+                                   const Perigee*,
                                    const Amg::Vector3D& Vertex,
                                    const long int Charge,
                                    std::vector<double>& Impact,

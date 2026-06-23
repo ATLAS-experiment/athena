@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,11 +18,10 @@
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackParticleContainerFwd.h"
 
+class EventContext;
+
 namespace Trk
 {
-
-  static const InterfaceID IID_IVertexMergingTool("IVertexMergingTool", 1, 0);
-
   /**
    @class IVertexMergingTool
    @brief Interface class for merging compatible vertices in a single collection.
@@ -42,15 +41,15 @@ namespace Trk
   class IVertexMergingTool : virtual public IAlgTool {
 
   public:
+    /** Interface declaration */
+    DeclareInterfaceID(IVertexMergingTool, 1, 0);
+
     /** Virtual destructor */
     virtual ~IVertexMergingTool(){};
 
-    /** AlgTool interface methods */
-    static const InterfaceID& interfaceID() { return IID_IVertexMergingTool; };
-
     /** Interface for xAOD vertices **/
     virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
-    mergeVertexContainer(const xAOD::VertexContainer& MyVxCont) const = 0;
+    mergeVertexContainer(const EventContext& ctx, const xAOD::VertexContainer& MyVxCont) const = 0;
   };
 }
 

@@ -56,7 +56,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode BunchConfCnvAlg::execute() {
+   StatusCode BunchConfCnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Create and record the configuration identifier object for the
       // event data:

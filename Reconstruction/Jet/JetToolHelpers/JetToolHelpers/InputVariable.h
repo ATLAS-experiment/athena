@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTOOLHELPERS_INPUTVARIABLE_H
@@ -25,15 +25,16 @@ namespace JetHelper {
 
 class InputVariable : public IInputVariable
 {
-
-    public:
-        
-        /// This function specialize the variable to the one choose by the user
-        static std::unique_ptr<InputVariable> createVariable(
-            const std::string& name, 
-            const std::string& type, 
-            const bool isJetVar
-        );
+  
+public:
+  
+  /// This function specialize the variable to the one choose by the user
+  static std::unique_ptr<InputVariable> createVariable(
+						       const std::string& name, 
+						       const std::string& type, 
+						       bool isJetVar,
+						       float scale);
+						       
 
         /// Constructors
         InputVariable(const std::string& name): m_name{name}, m_scale{1.} {}
@@ -47,7 +48,7 @@ class InputVariable : public IInputVariable
 
         /// return the value of the variable choose by the user
         [[nodiscard]] float getValue(const xAOD::Jet& jet, const JetContext& jc) const override {
-            return m_scale * getValue_prot(jet, jc);
+            return getValue_prot(jet, jc);
         }
 
         /// This function return the name of the variable

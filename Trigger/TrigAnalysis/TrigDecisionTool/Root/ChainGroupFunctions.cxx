@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -40,7 +40,7 @@ const Trig::ChainGroup* Trig::ChainGroupFunctions::getChainGroup(const std::vect
   return cgm()->getChainGroup (triggerNames, props);
 }
 
-const Trig::ChainGroup* Trig::ChainGroupFunctions::getChainGroup(const std::string& triggerNames,
+const Trig::ChainGroup* Trig::ChainGroupFunctions::getChainGroup(std::string_view triggerNames,
                                                                  TrigDefs::Group props) const {
   return getChainGroup(Trig::convertStringToVector(triggerNames), props);
 }

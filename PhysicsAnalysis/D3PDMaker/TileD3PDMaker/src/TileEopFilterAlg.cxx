@@ -49,7 +49,7 @@ StatusCode TileEopFilterAlg::initialize(){
 } 
 
 //=======================================
-StatusCode TileEopFilterAlg::execute(){
+StatusCode TileEopFilterAlg::execute(const EventContext& /*ctx*/){
 //=======================================
 
   //Get the input tracks

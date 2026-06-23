@@ -108,8 +108,7 @@ def toJson(fileName, metadata, L1Triggers, HLTTriggers):
   ]
   for k,v in metadata.items():
     if k.startswith("n_evts"):
-      metajsonData+={jsonDict[k] : v} 
-
+      metajsonData.append({k: v})
 
   metajsonDict = {}
   metajsonDict['text'] = 'metadata'

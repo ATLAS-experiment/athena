@@ -19,6 +19,7 @@
 #include <memory>
 #include <AsgTools/ToolHandle.h>
 #include <AsgTools/AsgTool.h>
+#include "xAODRootAccess/Event.h"
 
 // xAOD EDM classes
 #include <xAODEventInfo/EventInfo.h>
@@ -53,7 +54,7 @@
   } while( false )
 
 // Help message if the --help option is given by the user
-void usage(){    
+void usage(){
   std::cout << "Running options:" << std::endl;
   std::cout << "YOU HAVE TO ADAPT THE OPTIONS TO FFJETSMEARINGCORRECTION" << std::endl;
   std::cout << "        --help : To get the help you're reading" << std::endl;
@@ -62,7 +63,7 @@ void usage(){
   std::cout << "        --MCType= : Specify the MC campaign (e.g. MC20, MC21, MC23, MC20AF3, MC23AF3)" << std::endl;
   std::cout << "        --sample= : Specify input xAOD" << std::endl;
   std::cout << "        Example: FFJetSmearingTool_MyExample --truth_jetColl=AntiKt10TruthSoftDropBeta100Zcut10Jets --reco_jetColl=AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets --MassDef=UFO --MCType=MC23 --eventsMax=30000 --sample=/eos/atlas/atlascerngroupdisk/perf-jets/INSITU/TestFiles/dcamarer/DAOD_PHYS_MC_Zqqjets/mc20_13TeV/DAOD_PHYS.40038344._000011.pool.root.1 --output=.root --ConfigFile=/afs/cern.ch/user/d/dcamarer/private/PostDoc/JETM/JMRcombination_PhaseILargeR/test-jetcalibtools-configs/R22/source/JetUncertainties/share/DCM_240502_new/R10_FullJMR_Phase1.config --DebugTool=false" << std::endl;
-}   
+}
 
 ///////////////////
 // Main Function //
@@ -85,7 +86,7 @@ int main(int argc, char* argv[]){
 
   //// Decoding the user settings
   for (int i=1; i< argc; i++){
-  
+
     std::string opt(argv[i]); std::vector< std::string > v;
     std::istringstream iss(opt);
     std::string item;
@@ -96,7 +97,7 @@ int main(int argc, char* argv[]){
     }
 
     if ( opt.find("--help") != std::string::npos ){
-      usage(); 
+      usage();
       return 0;
     }
 
@@ -155,18 +156,20 @@ int main(int argc, char* argv[]){
   }else if (string_debugtool == "false"){
     want_to_debug = false;
   }
-    
+
   ////// Opening input file
 
   std::unique_ptr< TFile > ifile( TFile::Open( sample.c_str(), "READ" ) );
 
-  // Create a TEvent object
-  xAOD::TEvent event(xAOD::TEvent::kClassAccess);
-
-  CHECK( event.readFrom( ifile.get() ) );
+  // Create a Event object
+  auto event = xAOD::Event::createAndReadFrom(*ifile);
+  if (!event) {
+    std::cout << "Failed to open file " << std::endl;
+    return 1;
+  }
 
   ////// Initialization of FFJetSmearingTool
-        
+
   const std::string name_FFJetSmearingTool = "FFJetSmearing_Example";
   CP::FFJetSmearingTool ffjetsmearingtool(name_FFJetSmearingTool.c_str());
   CHECK(ffjetsmearingtool.setProperty("MassDef", kindofmass));
@@ -185,18 +188,8 @@ int main(int argc, char* argv[]){
   for (auto sysItr = recommendedSysts.begin(); sysItr != recommendedSysts.end(); ++sysItr){
     std::cout << sysItr->name().c_str() << std::endl;
   }
-    
-  std::vector<CP::SystematicSet> sysList;
 
-  ////// Initialize the tool to set the truth tagging
-  // Note: in principle not needed for most of the derivation formats, as we save this information in DAODs
-  /*
-    JetTruthLabelingTool m_JetTruthLabelingTool("JetTruthLabelingTool");
-    CHECK(m_JetTruthLabelingTool.setProperty("TruthLabelName", "R10TruthLabel_R22v1"));
-    CHECK(m_JetTruthLabelingTool.setProperty("UseTRUTH3",  false)); // Set this to false only if you have the FULL !TruthParticles container in your input file
-    CHECK(m_JetTruthLabelingTool.setProperty("TruthParticleContainerName", "TruthParticles")); // Set this if you have the FULL !TruthParticles container but have named it something else
-    CHECK(m_JetTruthLabelingTool.initialize());
-  */
+  std::vector<CP::SystematicSet> sysList;
 
   ////// Calibrate jets
 
@@ -222,8 +215,8 @@ int main(int argc, char* argv[]){
     sysList.back().insert(nullVar);
   */
 
-  for (auto sys : recommendedSysts){ 
-    sysList.push_back(CP::SystematicSet({sys})); 
+  for (auto sys : recommendedSysts){
+    sysList.push_back(CP::SystematicSet({sys}));
   }
 
   std::cout << "\n=============SYSTEMATICS CHECK NOW" << std::endl;
@@ -232,7 +225,7 @@ int main(int argc, char* argv[]){
     std::cout << "\nRunning over the systematic " << sys.name().c_str() << std::endl;
     static constexpr float MeVtoGeV = 1.e-3;
 
-    // Tell the calibration tool which variation to apply    
+    // Tell the calibration tool which variation to apply
     if (ffjetsmearingtool.applySystematicVariation(sys) != StatusCode::SUCCESS){
       std::cout << "Error, Cannot configure calibration tool for systematics" << std::endl;
     }
@@ -280,7 +273,7 @@ int main(int argc, char* argv[]){
 
     ////// Loop over events
 
-    Long64_t nevents = event.getEntries();
+    Long64_t nevents = event->getEntries();
     
     if (eventsMax < nevents){
       nevents = eventsMax;
@@ -289,7 +282,7 @@ int main(int argc, char* argv[]){
     for (Long64_t ievent = 0;  ievent < nevents; ++ievent){
 
       // Load the event:
-      if ( event.getEntry( ievent ) < 0 ){
+      if ( event->getEntry( ievent ) < 0 ){
         std::cout << "Failed to load entry " << ievent << std::endl;
         return 1;
       }
@@ -302,24 +295,24 @@ int main(int argc, char* argv[]){
       // Print some event information for fun
       if (want_to_debug){
         const xAOD::EventInfo* ei = nullptr;
-        CHECK( event.retrieve(ei, "EventInfo") );
+        CHECK( event->retrieve(ei, "EventInfo") );
 
         std::cout << "===>>>  start processing event " << ei->eventNumber() << ", run " << ei->runNumber() << " - Events processed so far: " << ievent << std::endl;
 
         // Get the truth jets from the event
         const xAOD::JetContainer* jets_truth = nullptr;
-        CHECK( event.retrieve(jets_truth, truth_jetColl) );
+        CHECK( event->retrieve(jets_truth, truth_jetColl) );
         std::cout << "Number of truth jets: " << jets_truth->size() << std::endl;
 
         // Loop over the truth jets in the event
         for (const xAOD::Jet* jet_truth : *jets_truth){
-          // Print basic info about this jet                    
+          // Print basic info about this jet
           std::cout << "Truth Jet: pt = " << jet_truth->pt()*MeVtoGeV << ", mass = " << jet_truth->m()*MeVtoGeV << ", eta = " << jet_truth->eta() << std::endl;
         }
 
         // Get the reco jets from the event
         const xAOD::JetContainer* jets_reco = nullptr;
-        CHECK( event.retrieve(jets_reco, reco_jetColl) ); 
+        CHECK( event->retrieve(jets_reco, reco_jetColl) ); 
         std::cout << "Number of reco jets: " << jets_reco->size() << std::endl;
 
         //Loop over the reco jets in the event
@@ -328,16 +321,16 @@ int main(int argc, char* argv[]){
           std::cout << "Reco Jet: pt = " << jet_reco->pt()*MeVtoGeV << ", mass = " << jet_reco->m()*MeVtoGeV << ", eta = " << jet_reco->eta() << std::endl;
         }
       }
-          
+
       xAOD::Jet jet_truth_matched;
       jet_truth_matched.makePrivateStore();
 
       // Retrieve jet container
       const xAOD::JetContainer* jets = nullptr;
-      CHECK( event.retrieve( jets, reco_jetColl ) );
+      CHECK( event->retrieve( jets, reco_jetColl ) );
 
-      // Shallow copy 
-      auto jets_shallowCopy = xAOD::shallowCopyContainer( *jets );
+      // Shallow copy
+      auto jets_shallowCopy = xAOD::shallowCopy( *jets );
 
       ////// Give a TruthLabel to the jets. Needed in the FFSmearingTool to apply the uncertainties of one jet topology or another.
       // Note: in principle not needed for most of the derivaiton formats, as we save this information in DAODs
@@ -369,32 +362,32 @@ int main(int argc, char* argv[]){
         // Jet rapidity cut
         if (abs(jetrapidity) > 2) continue;
 
-        if ( ffjetsmearingtool.getMatchedTruthJet(*jet_reco, jet_truth_matched) != StatusCode::SUCCESS ){ 
+        if ( ffjetsmearingtool.getMatchedTruthJet(*jet_reco, jet_truth_matched) != StatusCode::SUCCESS ){
           continue;
         }
 
         double aux_original_jet_mass = jet_reco->m() * MeVtoGeV;
 
         if (lead_jet == true && aux_original_jet_mass > 0){
-          
-          reco_jet_mass_hist->Fill(jet_reco->m() * MeVtoGeV); 
-          reco_jet_pt_hist->Fill(jet_reco->pt() * MeVtoGeV); 
-          reco_jet_rapidity_hist->Fill(jet_reco->rapidity()); 
+
+          reco_jet_mass_hist->Fill(jet_reco->m() * MeVtoGeV);
+          reco_jet_pt_hist->Fill(jet_reco->pt() * MeVtoGeV);
+          reco_jet_rapidity_hist->Fill(jet_reco->rapidity());
           //
           matched_truth_jet_mass_hist->Fill(jet_truth_matched.m() * MeVtoGeV);
           matched_truth_jet_pt_hist->Fill(jet_truth_matched.pt() * MeVtoGeV);
-          matched_truth_jet_rapidity_hist->Fill(jet_truth_matched.rapidity());                    
-                      
+          matched_truth_jet_rapidity_hist->Fill(jet_truth_matched.rapidity());
+
           // Smear the jets for each systematic variation
           if ( ffjetsmearingtool.applyCorrection(*jet_reco) == CP::CorrectionCode::Error ) {
             std::cout << "FFJetSmearingTool reported a EL::StatusCode::FAILURE" << std::endl;
             return 1;
           }
-      
-          smeared_reco_jet_mass_hist->Fill(jet_reco->m() * MeVtoGeV); 
-          smeared_reco_jet_pt_hist->Fill(jet_reco->pt() * MeVtoGeV); 
-          smeared_reco_jet_rapidity_hist->Fill(jet_reco->rapidity()); 
-          
+
+          smeared_reco_jet_mass_hist->Fill(jet_reco->m() * MeVtoGeV);
+          smeared_reco_jet_pt_hist->Fill(jet_reco->pt() * MeVtoGeV);
+          smeared_reco_jet_rapidity_hist->Fill(jet_reco->rapidity());
+
           hist_jet_mass_scale_change_3D->Fill(jet_reco->pt() * MeVtoGeV, aux_original_jet_mass, jet_reco->m() * MeVtoGeV);
           hist_jet_mass_resolution_change_3D->Fill(jet_reco->pt() * MeVtoGeV, aux_original_jet_mass, TMath::Abs( (jet_reco->m()*MeVtoGeV) - (aux_original_jet_mass) )/aux_original_jet_mass);
 
@@ -403,9 +396,6 @@ int main(int argc, char* argv[]){
         }
 
       } // Loop over reco jets
-
-      delete jets_shallowCopy.first;
-      delete jets_shallowCopy.second;
 
     } // Loop over number of events
 
@@ -476,7 +466,7 @@ int main(int argc, char* argv[]){
     hist_jet_mass_scale_change_2D->GetZaxis()->SetLabelSize(0.035);
     hist_jet_mass_scale_change_2D->Draw("colz");
     gPad->RedrawAxis();
-    
+
     TString output_path_scale_debug = "output/debug_plots/scale_variations/" + sys.name() + "_scaleDebug.pdf"  ;
     c1->Print(output_path_scale_debug);
 
@@ -517,7 +507,7 @@ int main(int argc, char* argv[]){
     delete reco_jet_mass_hist;
     delete matched_truth_jet_mass_hist;
     delete smeared_reco_jet_mass_hist;
-    
+
     delete reco_jet_pt_hist;
     delete matched_truth_jet_pt_hist;
     delete smeared_reco_jet_pt_hist;
@@ -525,7 +515,7 @@ int main(int argc, char* argv[]){
     delete reco_jet_rapidity_hist;
     delete matched_truth_jet_rapidity_hist;
     delete smeared_reco_jet_rapidity_hist;
-  
+
   } // Loop over systematic uncertainties
 
   return 0;

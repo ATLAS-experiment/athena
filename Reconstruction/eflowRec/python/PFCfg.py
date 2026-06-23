@@ -231,10 +231,9 @@ def getPFOClusterMLCorrectionAlgorithmCfg(inputFlags, inputNameBase = "JetETMiss
 
     return alg
 
-def getNeutralPFOClusterMLCorrectionToolCfg(inputFlags, toolName="NeutralPFOClusterMLCorrectionTool", clusterMLCorrectedEnergyDecorationKey="clusterE_ML"):
+def getNeutralPFOClusterMLCorrectionToolCfg(inputFlags, toolName="NeutralPFOClusterMLCorrectionTool", **kwargs):
     if toolName == "NeutralPFOClusterMLCorrectionTool":
-        tool = CompFactory.NeutralPFOClusterMLCorrectionTool(toolName)
-        tool.ClusterMLCorrectedEnergyDecorationKey = clusterMLCorrectedEnergyDecorationKey
+        tool = CompFactory.NeutralPFOClusterMLCorrectionTool(toolName, **kwargs)
     else:
         raise ValueError(f"Unknown tool name: {toolName}")
 

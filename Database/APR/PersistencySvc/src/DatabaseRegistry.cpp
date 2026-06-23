@@ -6,17 +6,17 @@
 #include "DatabaseRegistry.h"
 #include "DatabaseHandler.h"
 
-pool::PersistencySvc::DatabaseRegistry::DatabaseRegistry()
+pool::DatabaseRegistry::DatabaseRegistry()
 {}
 
 
-pool::PersistencySvc::DatabaseRegistry::~DatabaseRegistry()
+pool::DatabaseRegistry::~DatabaseRegistry()
 {}
 
-std::set< pool::PersistencySvc::DatabaseHandler* >::iterator
-pool::PersistencySvc::DatabaseRegistry::registerDbHandler( pool::PersistencySvc::DatabaseHandler* dbHandler )
+std::set< pool::DatabaseHandler* >::iterator
+pool::DatabaseRegistry::registerDbHandler( pool::DatabaseHandler* dbHandler )
 {
-  std::set< pool::PersistencySvc::DatabaseHandler* >::iterator iDatabase = m_databases.find( dbHandler );
+  std::set< pool::DatabaseHandler* >::iterator iDatabase = m_databases.find( dbHandler );
   if ( iDatabase == m_databases.end() ) {
     iDatabase = m_databases.insert( dbHandler ).first;
     m_fidToDb.insert( std::make_pair( dbHandler->fid(), dbHandler ) );
@@ -28,17 +28,17 @@ pool::PersistencySvc::DatabaseRegistry::registerDbHandler( pool::PersistencySvc:
 }
 
 void
-pool::PersistencySvc::DatabaseRegistry::registerDatabaseHandler( pool::PersistencySvc::DatabaseHandler* dbHandler )
+pool::DatabaseRegistry::registerDatabaseHandler( pool::DatabaseHandler* dbHandler )
 {
   this->registerDbHandler( dbHandler );
 }
 
 
 void
-pool::PersistencySvc::DatabaseRegistry::registerDatabaseHandler( pool::PersistencySvc::DatabaseHandler* dbHandler,
+pool::DatabaseRegistry::registerDatabaseHandler( pool::DatabaseHandler* dbHandler,
                                                                  const std::string& lfn )
 {
-  std::set< pool::PersistencySvc::DatabaseHandler* >::iterator iDatabase = this->registerDbHandler( dbHandler );
+  std::set< pool::DatabaseHandler* >::iterator iDatabase = this->registerDbHandler( dbHandler );
   const std::string& fid = (*iDatabase)->fid();
   m_fidToLfns.find( fid )->second.insert( lfn );
   m_lfnToDb.insert ( std::make_pair( lfn, *iDatabase ) );
@@ -46,9 +46,9 @@ pool::PersistencySvc::DatabaseRegistry::registerDatabaseHandler( pool::Persisten
 
 
 void
-pool::PersistencySvc::DatabaseRegistry::deregisterDatabaseHandler( pool::PersistencySvc::DatabaseHandler* dbHandler )
+pool::DatabaseRegistry::deregisterDatabaseHandler( pool::DatabaseHandler* dbHandler )
 {
-  std::set< pool::PersistencySvc::DatabaseHandler* >::iterator idb = m_databases.find( dbHandler );
+  std::set< pool::DatabaseHandler* >::iterator idb = m_databases.find( dbHandler );
   if ( idb != m_databases.end() ) {
     m_fidToDb.erase( (*idb)->fid() );
     m_pfnToDb.erase( (*idb)->pfn() );

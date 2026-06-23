@@ -11,6 +11,7 @@
   <class name="pool::DbString" id="DA8F479C-09BC-49D4-94BC-99D025A23A3B"/>
   <class name="pool::SimpleUtilityBase"/>
   <class name="pool::Utils"/>
+  <class name="pool::DbType"/>
 
  </selection>
 

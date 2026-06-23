@@ -221,6 +221,8 @@ protected: // properties
    /// Flag to control SG alias filtering when writing out DataHeader (see DataHeaderCnv_p6)
    Gaudi::Property<bool> m_DHFilterAliases { this, "doFilterDHAliases", true };
 
+   /// Default container type
+   Gaudi::Property<std::string> m_defaultContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
 };
 
 #endif

@@ -23,9 +23,7 @@
 #include "CoolKernel/StorageType.h"
 #include "CoolKernel/ConstRecordAdapter.h"
 
-#include <sstream>
-#include <fstream>
-#include <string>
+
 #include <TCanvas.h>
 #include <TDirectory.h>
 #include <TFile.h>
@@ -43,6 +41,9 @@
 #include <TMath.h>
 #include <TColor.h>
 #include <TTree.h>
+#include <iostream>
+#include <fstream>
+
 
 ClassImp(dqutils::HistogramDataCOOL)
 
@@ -225,7 +226,7 @@ namespace dqutils {
 
   void
   HistogramDataCOOL::
-   dump(cool::ChannelSelection selection, std::string tag_name) {
+   dump(cool::ChannelSelection selection, const std::string & tag_name) {
     try {
       //        cool::IObjectIteratorPtr objects = m_coolFolder->browseObjects(m_since, m_until,
       // selection,"DetStatusDQMFOFLH-FDR2-01");
@@ -256,7 +257,7 @@ namespace dqutils {
   // Monica 4/6/2208
   std::string
   HistogramDataCOOL::
-   dumpHisto(cool::ChannelId channelId, std::string field, std::string tag_name) {
+   dumpHisto(cool::ChannelId channelId, const std::string & field, const std::string & tag_name) {
     std::string result = "";
     try {
       cool::ChannelSelection selection = cool::ChannelSelection(channelId);
@@ -297,8 +298,8 @@ namespace dqutils {
 
   void
   HistogramDataCOOL::
-   insertH(std::string channelName, int code, std::string algo, int entries, float par1, float par2, float par3,
-           float par4, float par5, std::string tag_name) {
+   insertH(const std::string & channelName, int code, const std::string & algo, int entries, float par1, float par2, float par3,
+           float par4, float par5, const std::string & tag_name) {
     try {
       this->insertH(this->getCoolFolderH()->channelId(
                       channelName), code, algo, entries, par1, par2, par3, par4, par5, tag_name);

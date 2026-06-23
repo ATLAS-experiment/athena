@@ -15,14 +15,14 @@
 #ifndef  TRIGINDETEVENTTPCNV_TRIGVERTEXCOUNTSCOLLECTION_CNV_TLP1_H
 #define  TRIGINDETEVENTTPCNV_TRIGVERTEXCOUNTSCOLLECTION_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigInDetEventTPCnv/TrigVertexCountsCollection_tlp1.h"
  
 #include "TrigInDetEventTPCnv/TrigVertexCountsCollectionCnv_p1.h"
 #include "TrigInDetEventTPCnv/TrigVertexCountsCnv_p1.h"
   
  
-class TrigVertexCountsCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigVertexCountsCollectionCnv_p1, TrigVertexCountsCollection_tlp1 >
+class TrigVertexCountsCollectionCnv_tlp1 : public TopLevelTPConverter< TrigVertexCountsCollectionCnv_p1, TrigVertexCountsCollection_tlp1 >
 {
  
  public:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # STDM16.py for c-fragmentation analysi 
@@ -142,15 +142,17 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
 
     acc.addPublicTool(STDM16_Finder_D0)
 
+    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     
-    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg   
     STDM16_Reco_D0 = CompFactory.DerivationFramework.Reco_Vertex(
         name                   = "STDM16_Reco_D0",
         VertexSearchTool       = STDM16_Finder_D0,
         OutputVtxContainerName = "STDM16_D0Candidates",
         PVContainerName        = "PrimaryVertices",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 7, #ES not sure how this actually works, it only takes 7(all) and 1 but what does it mean ?????
         RefPVContainerName     = "SHOULDNOTBEUSED",
         RefitPV                = False)

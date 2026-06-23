@@ -34,7 +34,7 @@ namespace TrigConf {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode xAODMenuReader::execute() {
+   StatusCode xAODMenuReader::execute(const EventContext& /*ctx*/) {
 
       // Check if we want to do anything:
       ++m_eventCounter;

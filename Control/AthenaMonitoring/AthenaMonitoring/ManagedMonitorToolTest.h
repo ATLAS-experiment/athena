@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ManagedMonitorToolTest_H
@@ -25,10 +25,10 @@ class ManagedMonitorToolTest : public ManagedMonitorToolBase
 
       virtual ~ManagedMonitorToolTest();
 
-      virtual StatusCode bookHistogramsRecurrent();
-      virtual StatusCode bookHistograms();
-      virtual StatusCode fillHistograms();
-      virtual StatusCode procHistograms();
+      virtual StatusCode bookHistogramsRecurrent() override;
+      virtual StatusCode bookHistograms() override;
+      virtual StatusCode fillHistograms(const EventContext& ctx) override;
+      virtual StatusCode procHistograms() override;
 
    protected:
 

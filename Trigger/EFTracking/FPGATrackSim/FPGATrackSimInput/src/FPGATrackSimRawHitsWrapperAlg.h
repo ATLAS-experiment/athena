@@ -16,7 +16,7 @@ public:
   FPGATrackSimRawHitsWrapperAlg (const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~FPGATrackSimRawHitsWrapperAlg () = default;
   virtual StatusCode initialize() override;
-  virtual StatusCode execute()    override;
+  virtual StatusCode execute(const EventContext& ctx)    override;
   virtual StatusCode finalize()   override;
   StatusCode BookHistograms();
 

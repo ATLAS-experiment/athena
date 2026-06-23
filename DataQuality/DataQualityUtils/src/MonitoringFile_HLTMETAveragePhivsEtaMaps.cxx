@@ -50,20 +50,12 @@ namespace dqutils {
         continue;
       }
 
-
-      std::string run_dir2 = run_dir;
-
-      // all merged root files have the structure "rootfile.root:/run_NNNNNNN"
-      // use that to extract run number
-      //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
-      //run_number=run_number;
-
       // begin HLTMET
       // note 1: prefix all dirs and hists with '/'
       // note 2: missing dir => return
       // note 3: missing hist => continue
       std::string hlt_top = run_dir + "/HLT"; // toplevel
-      std::string met_efdir = "/EFMissingET_Fex"; // EF dir
+      static const std::string met_efdir = "/EFMissingET_Fex"; // EF dir
 
       std::vector<std::string> met_fexs, hist_numr;
 
@@ -96,10 +88,10 @@ namespace dqutils {
       hist_numr.push_back("/compSumE_lin_"); // need to plot SumE on linear scale (todo)
 
       // components N (denominator)
-      std::string hist_denr = "/compN_";
+      static const std::string hist_denr = "/compN_";
 
       // type (eta,phi map)
-      std::string hist_suffix = "EtaPhi_"; // phi vs. eta map
+      static const std::string hist_suffix = "EtaPhi_"; // phi vs. eta map
 
       // each component a 2d hist. get all components
       unsigned int comp_num = 25; // 25 components

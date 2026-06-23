@@ -193,11 +193,10 @@ StatusCode MMHitAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode MMHitAnalysis::execute() {
+StatusCode MMHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In MMHitAnalysis::execute()" );
 
   
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const MMSimHitCollection* p_collection{nullptr};
   ATH_CHECK(SG::get(p_collection, m_readKey, ctx));
   for (MMSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit){

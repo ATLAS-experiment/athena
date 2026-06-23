@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #ifndef XAODROOTACCESS_TOOLS_AUXSTOREBASE_H
 #define XAODROOTACCESS_TOOLS_AUXSTOREBASE_H
 
@@ -73,6 +73,9 @@ class AuxStoreBase : public SG::IAuxStore, public SG::IAuxStoreIO {
   virtual void* getDecoration(SG::auxid_t auxid, std::size_t size,
                               std::size_t capacity) override;
 
+  /// Get the set of variables that we should deep copy.
+  virtual SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const override;
+
   /// Test if a variable is a decoration.
   virtual bool isDecoration(SG::auxid_t auxid) const override;
 
@@ -93,6 +96,9 @@ class AuxStoreBase : public SG::IAuxStore, public SG::IAuxStoreIO {
       SG::auxid_t auxid) const override;
   /// Return (non-const) interface for a linked variable.
   virtual SG::IAuxTypeVector* linkedVector(SG::auxid_t auxid) override;
+
+  /// Call toTransient on contained variables.
+  virtual void toTransient( const EventContext& ctx ) override;
 
   /// @}
 

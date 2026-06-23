@@ -1,14 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelChargeInterpolationPlot_h
 #define PixelChargeInterpolationPlot_h
 
 #include "CxxUtils/checker_macros.h"
-
-class string;
-template < class T, class Allocator > class vector;
+#include <string>
+#include <vector>
 class TH1F;
 class TCanvas;
 class TGaxis;
@@ -48,18 +47,20 @@ private:
 	static const int m_nlayers; // = 3;
 	std::vector <std::string> *m_referenceDrawOpt;
 	bool m_oneconst;
-
+  inline static const std::string s_options{"P0same"};
+  inline static const std::string s_direction{"phi"};
+  inline static const std::string s_title{""};
 	// utility methods!
-	void PlotDirection(const std::string& filename, const std::string& direction = "phi");
+	void PlotDirection(const std::string& filename, const std::string& direction = s_direction);
 
-	void DrawOneHisto(TH1F *histo, const std::string& direction = "phi",float maximum = 0);
-	void DrawHistoMarkers(TH1F* histo, const std::string& options  = "P0same",  int goodj = 0);
+	void DrawOneHisto(TH1F *histo, const std::string& direction = s_direction,float maximum = 0);
+	void DrawHistoMarkers(TH1F* histo, const std::string& options  = s_options,  int goodj = 0);
 	void DrawLayerLegend(float xlegend, float ylegend);
-	void DrawAxis(float y1, float y2, float x1, float x2, const std::string& direction = "phi");
+	void DrawAxis(float y1, float y2, float x1, float x2, const std::string& direction = s_direction);
 
 	std::vector < TH1F*> *HistogramsFromConstants(
 			const PixelChargeInterpolationParameters &parameters,
-			const std::string& direction = "phi", int color = 1, const std::string& title = "");
+			const std::string& direction = s_direction, int color = 1, const std::string& title = s_title);
 };
 
 }

@@ -55,7 +55,7 @@ namespace G4UA
   StatusCode MCTruthSteppingActionTool::EndOfAthenaEvent(HitCollectionMap& hitCollections)
   {
     for(const auto& volCollPair : m_volumeCollectionMap) {
-      hitCollections.Record<TrackRecordCollection>(volCollPair.second);
+      CHECK(hitCollections.Record<TrackRecordCollection>(volCollPair.second));
     }
     return StatusCode::SUCCESS;
   }

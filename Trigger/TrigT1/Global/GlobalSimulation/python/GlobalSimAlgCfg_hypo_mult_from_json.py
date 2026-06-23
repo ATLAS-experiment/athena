@@ -33,7 +33,7 @@ def GlobalSimulationAlgCfg(flags,
         itool += 1
 
         tool.TIPposition = params['startbit']
-        tool.n_multbits = params['nbits']        
+        tool.TIPwidth = params['nbits']        
         tool.et_low = str(params['etmin'])
         tool.eta_low = str(params['etaMin'])
         tool.eta_high = str(params['etaMax'])

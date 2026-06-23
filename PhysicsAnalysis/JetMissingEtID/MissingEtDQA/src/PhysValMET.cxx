@@ -563,7 +563,7 @@ namespace MissingEtDQA {
     return StatusCode::SUCCESS;      
   }
 
-  StatusCode PhysValMET::fillHistograms()
+  StatusCode PhysValMET::fillHistograms(const EventContext& /*ctx*/)
   {
     ATH_MSG_DEBUG ("Filling hists " << name() << "...");
 

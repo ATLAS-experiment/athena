@@ -80,8 +80,8 @@ namespace DerivationFramework {
     double m_chi2cut;
 
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
-    ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
-    ToolHandle < Trk::V0Tools >                      m_V0Tools;
+    PublicToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
+    PublicToolHandle < Trk::V0Tools >                      m_V0Tools;
     ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     bool        m_refitPV;

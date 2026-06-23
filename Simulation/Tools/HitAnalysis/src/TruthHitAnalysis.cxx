@@ -195,7 +195,7 @@ StatusCode TruthHitAnalysis::initialize() {
 }
 
 
-StatusCode TruthHitAnalysis::execute() {
+StatusCode TruthHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In TruthHitAnalysis::execute()" );
 
   m_vtx_x->clear();
@@ -223,7 +223,6 @@ StatusCode TruthHitAnalysis::execute() {
   m_status->clear();
   m_pdgid->clear();
   
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const McEventCollection* mcCollection{nullptr};
   ATH_CHECK(SG::get(mcCollection, m_readKey, ctx));
   
@@ -235,7 +234,7 @@ StatusCode TruthHitAnalysis::execute() {
 
       const auto &procVtx = HepMC::signal_process_vertex(*currentGenEventIter);
 #ifdef HEPMC3
-    const auto &barcodes = (*currentGenEventIter)->attribute<HepMC::GenEventBarcodes> ("barcodes");
+    const auto &barcodes = (*currentGenEventIter)->attribute<HepMC::GenEventBarcodes> (HepMCStr::barcodes);
     std::map<int,int> id_to_barcode_map;
     if (barcodes) id_to_barcode_map = barcodes->id_to_barcode_map();
     for (const auto& vtx: (*currentGenEventIter)->vertices()) {

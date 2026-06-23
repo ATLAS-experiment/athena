@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
@@ -301,6 +301,16 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
        return    (expected_innermost_pixel_layer_hit >  0  && getSummary(helper, msgHelper, xAOD::numberOfInnermostPixelLayerHits)>=1)
               || (expected_innermost_pixel_layer_hit == 0  && (   getSummary(helper, msgHelper, xAOD::expectNextToInnermostPixelLayerHit)==0
                                                                || getSummary(helper, msgHelper, xAOD::numberOfNextToInnermostPixelLayerHits)>=1));
+    });
+  }
+  if (m_useHILoosePixModInnermostLayersCut) {
+    if constexpr(VERBOSE>0) ATH_MSG_INFO( "  An innermost layer hit or next-to-innermost layer hit is required. If there are" );
+    if constexpr(VERBOSE>0) ATH_MSG_INFO( "    no innermost layer or next-to-innermost layer hits, then zero expected" );
+    if constexpr(VERBOSE>0) ATH_MSG_INFO( "    next-to-innermost layer hits is required." );
+    trackCuts["InnermostLayersHits"].push_back([](Trk_Helper helper, const asg::AsgMessaging &msgHelper) {
+       return    (getSummary(helper, msgHelper, xAOD::numberOfInnermostPixelLayerHits)>=1)
+              || (getSummary(helper, msgHelper, xAOD::numberOfNextToInnermostPixelLayerHits)>=1)
+              || (getSummary(helper, msgHelper, xAOD::expectNextToInnermostPixelLayerHit)==0);
     });
   }
   if (maxIntIsSet(m_maxNInnermostLayerSharedHits)) {
@@ -1194,6 +1204,7 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, b
       m_minNBothInnermostLayersHits = -1;
       m_maxNInnermostLayerSharedHits = LOCAL_MAX_INT;
       m_useMinBiasInnermostLayersCut = 0;
+      m_useHILoosePixModInnermostLayersCut = false;
       m_minNPixelHits = -1;
       m_minNPixelHitsPhysical = -1;
       m_maxNPixelSharedHits = LOCAL_MAX_INT;
@@ -1437,6 +1448,17 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, b
 					  {7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}});
     }
     break;
+  case CutLevel::HILoosePixMod:
+    // HILoosePixMod is similar to HILoose, but with a modified hit cut on the innermost layers
+    setCutLevelPrivate(CutLevel::NoCut, overwrite);
+    if (overwrite || m_maxAbsEta >= LOCAL_MAX_DOUBLE) m_maxAbsEta = 2.5;
+    if (overwrite) m_useHILoosePixModInnermostLayersCut = true;
+    if (overwrite || m_minNPixelHits < 0) m_minNPixelHits = 1;
+    if (overwrite || m_vecPtCutoffsForSctHitsCut.empty()) m_vecPtCutoffsForSctHitsCut = std::vector<double>({0.0, 300.0, 400.0});
+    if (overwrite || m_vecMinNSctHitsAbovePt.empty()) m_vecMinNSctHitsAbovePt = std::vector<int>({2, 4, 6});
+    if (overwrite || m_maxD0 >= LOCAL_MAX_DOUBLE) m_maxD0 = 1.5;
+    if (overwrite || m_maxZ0SinTheta >= LOCAL_MAX_DOUBLE) m_maxZ0SinTheta = 1.5;
+    break;
   default:
     ATH_MSG_ERROR("CutLevel not recognized. Cut selection will remain unchanged.");
     break;
@@ -1458,5 +1480,6 @@ InDet::InDetTrackSelectionTool::s_mapCutLevel =
     {"HILoose", InDet::CutLevel::HILoose},
     {"HITight", InDet::CutLevel::HITight},
     {"HILooseOptimized", InDet::CutLevel::HILooseOptimized},
-    {"HITightOptimized", InDet::CutLevel::HITightOptimized}
+    {"HITightOptimized", InDet::CutLevel::HITightOptimized},
+    {"HILoosePixMod", InDet::CutLevel::HILoosePixMod}
   };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,7 +10,6 @@
  * @author RD Schaffer <R.D.Schaffer@cern.ch>, M.Nowak
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "TagInfoMgr.h"
 
@@ -21,19 +20,19 @@
 
 #include "EventInfoUtils/EventIDFromStore.h"
 
-// IOVDbSvc
-#include "AthenaKernel/IIOVDbSvc.h"
 
 // TES include
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/IIOVSvc.h"
 #include "AthenaKernel/IOVTime.h"
-#include "AthenaKernel/IOVRange.h"
+
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaPoolUtilities/CondAttrListCollAddress.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 
 // Gaudi includes
+#include "GaudiKernel/Service.h"
+#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/GaudiException.h"
 
@@ -322,8 +321,9 @@ TagInfoMgr::fillMetaData(const CondAttrListCollection* tagInfoCond)
     EventType::NameTagPairVec pairs;
     m_tagInfo.getTags(pairs);
     ATH_MSG_DEBUG( "fillMetaData: Adding value/tag pairs to file meta data: ");
+    static const std::string stringStr{"string"};
     for (unsigned int i = 0; i < pairs.size(); ++i) {
-        attrList.extend(pairs[i].first, "string");
+        attrList.extend(pairs[i].first, stringStr);
         attrList[pairs[i].first].setValue(pairs[i].second);
         ATH_MSG_DEBUG( pairs[i].first << " " << pairs[i].second);
     }

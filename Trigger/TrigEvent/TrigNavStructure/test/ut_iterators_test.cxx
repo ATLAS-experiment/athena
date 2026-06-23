@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#undef NDEBUG
 
 #include <stdint.h>
 
@@ -13,6 +15,9 @@
 #include "TrigNavStructure/StandaloneNavigation.h"
 #include "TrigNavStructure/ComboIterator.h"
 #include "testutils.h"
+
+#include <cassert>
+
 using namespace HLT;
 namespace ID {
   const te_id_type trk=22;

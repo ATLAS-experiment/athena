@@ -30,7 +30,7 @@ class ZdcByteStreamLucrodData: public AthAlgorithm {
   ~ZdcByteStreamLucrodData() = default;
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
   StatusCode fillContainer(std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>, ZdcLucrodDataContainer* zdcLucrodDataContainer); 

@@ -497,7 +497,10 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
   // first select the muons: Combined, Medium, pT > 10 GeV, |eta| < 2.5
   std::vector<const xAOD::Muon*> preselected_muons(muons->size(), nullptr);
   // [Next line: selection for muon matching. IF PROBLEMS with getQuality, disable muon matching temporarily by using the second line below instead]
-  auto it = std::copy_if(muons->begin(), muons->end(), preselected_muons.begin(), [this](const xAOD::Muon* muon) -> bool { return (muon->pt()/1.e3 > 10.0 && m_muonSelectionTool->getQuality(*muon) <= xAOD::Muon::Medium && fabs(muon->eta()) < 2.5); });
+  auto it = std::copy_if(muons->begin(), muons->end(), preselected_muons.begin(), [this](const xAOD::Muon* muon) -> bool { 
+                        return (muon->pt()/1.e3 > 10.0 && 
+                                m_muonSelectionTool->getQuality(*muon) <= xAOD::Muon::Quality::Medium && 
+                                std::abs(muon->eta()) < 2.5); });
   //auto it = std::copy_if(muons->begin(), muons->end(), preselected_muons.begin(), [this](const xAOD::Muon* muon) -> bool { return false; });
   preselected_muons.resize(std::distance(preselected_muons.begin(), it)); // shrink container to new size
   if(preselected_muons.empty()){
@@ -530,7 +533,7 @@ int BoostedXbbTag::result(const xAOD::Jet& jet, const std::string& algorithm_nam
   std::vector<ElementLink<xAOD::IParticleContainer> > matched_muons_links;
   for(const auto *muon : matched_muons) {
     float eLoss(0.0);
-    muon->parameter(eLoss,xAOD::Muon::EnergyLoss);
+    muon->parameter(eLoss,xAOD::Muon::ParamDef::EnergyLoss);
     if(m_debug) printf("<%s>: getELossTLV xAOD::Muon eLoss= %0.2f\r\n", APP_NAME, eLoss);
     auto mTLV = muon->p4();
     double eLossX = eLoss*sin(mTLV.Theta())*cos(mTLV.Phi());

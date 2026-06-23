@@ -165,9 +165,16 @@ StatusCode FCS_StepInfoSDTool::initializeCalculators() {
 //---------------------------------------------------------------------------
 // Collect hits for this event
 //---------------------------------------------------------------------------
-StatusCode FCS_StepInfoSDTool::Gather() {
+StatusCode FCS_StepInfoSDTool::Gather(HitCollectionMap&) {
   ATH_MSG_DEBUG("Gathering hits to write out in " << name());
-  auto* sdWrapper = dynamic_cast<FCS_StepInfoSDWrapper*>(getSD());
+
+  // Retrieve it from the SD map
+  auto sdPair = m_sdThreadMap.find(std::this_thread::get_id());
+  if(sdPair == m_sdThreadMap.end()) {
+    ATH_MSG_ERROR("No FCS_StepInfoSDWrapper instance not found");
+    return StatusCode::FAILURE;
+  }
+  auto* sdWrapper = dynamic_cast<FCS_StepInfoSDWrapper*>(sdPair->second);
   if (!sdWrapper) {
     ATH_MSG_ERROR("Failed to cast SD to FCS_StepInfoSDWrapper");
     return StatusCode::FAILURE;
@@ -214,6 +221,7 @@ G4VSensitiveDetector* FCS_StepInfoSDTool::makeSD() const {
   sdWrapper->addSD(makeOneTileSD("Tile::Scintillator::StepInfo",
                                  &*m_tileCalculator, m_tileVolumes));
 
+  m_sdThreadMap.insert( std::make_pair(std::this_thread::get_id(), sdWrapper) );
   return sdWrapper;
 }
 

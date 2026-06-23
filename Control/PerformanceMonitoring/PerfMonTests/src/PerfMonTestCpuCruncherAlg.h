@@ -32,7 +32,7 @@ class CpuCruncherAlg : public AthAlgorithm
 
   // Athena algorithm's Hooks
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   // Perform math operations to burn CPU for a number of iterations
   double burn(unsigned long nIterations);

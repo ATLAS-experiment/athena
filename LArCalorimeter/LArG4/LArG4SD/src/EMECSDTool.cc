@@ -3,7 +3,6 @@
 */
 
 #include "EMECSDTool.h"
-#include "LArG4Code/SDWrapper.h"
 
 namespace LArG4
 {
@@ -34,44 +33,18 @@ namespace LArG4
   }
 
   //---------------------------------------------------------------------------
-  // Create the SD wrapper for current worker thread
+  // Create the SDs for current worker thread
   //---------------------------------------------------------------------------
   G4VSensitiveDetector* EMECSDTool::makeSD() const
   {
-    // Create the wrapper
-    auto *sdWrapper = new SimpleSDWrapper("LArEMECSDWrapper", m_outputCollectionNames[0]);
-
-    // Add the SDs
-    sdWrapper->addSD(
-      makeOneSD( "LAr::EMEC::Pos::InnerWheel", &*m_emepiwcalc, m_posIWVolumes )
-    );
-    sdWrapper->addSD(
-      makeOneSD( "LAr::EMEC::Neg::InnerWheel", &*m_emeniwcalc, m_negIWVolumes )
-    );
-    sdWrapper->addSD(
-      makeOneSD( "LAr::EMEC::Pos::OuterWheel", &*m_emepowcalc, m_posOWVolumes )
-    );
-    sdWrapper->addSD(
-      makeOneSD( "LAr::EMEC::Neg::OuterWheel", &*m_emenowcalc, m_negOWVolumes )
-    );
-    sdWrapper->addSD(
-      makeOneSD( "LAr::Endcap::Presampler::LiquidArgon", &*m_emepscalc, m_presVolumes )
-    );
-    sdWrapper->addSD(
-      makeOneSD( "LAr::EMEC::Pos::BackOuterBarrette::Module::Phidiv", &*m_emepobarcalc, m_posBOBVolumes )
-    );
-    sdWrapper->addSD(
-      makeOneSD( "LAr::EMEC::Neg::BackOuterBarrette::Module::Phidiv", &*m_emenobarcalc, m_negBOBVolumes )
-    );
-
-    // Setup frozen shower SD
-    if(useFrozenShowers())
-      {
-        sdWrapper->addFastSimSD("EndcapFastSimDedicatedSD");
-      }
-
-    // Return the wrapper as my SD
-    return sdWrapper;
+    makeOneSD( "LAr::EMEC::Pos::InnerWheel", &*m_emepiwcalc, m_posIWVolumes );
+    makeOneSD( "LAr::EMEC::Neg::InnerWheel", &*m_emeniwcalc, m_negIWVolumes );
+    makeOneSD( "LAr::EMEC::Pos::OuterWheel", &*m_emepowcalc, m_posOWVolumes );
+    makeOneSD( "LAr::EMEC::Neg::OuterWheel", &*m_emenowcalc, m_negOWVolumes );
+    makeOneSD( "LAr::Endcap::Presampler::LiquidArgon", &*m_emepscalc, m_presVolumes );
+    makeOneSD( "LAr::EMEC::Pos::BackOuterBarrette::Module::Phidiv", &*m_emepobarcalc, m_posBOBVolumes );
+    makeOneSD( "LAr::EMEC::Neg::BackOuterBarrette::Module::Phidiv", &*m_emenobarcalc, m_negBOBVolumes );
+    return nullptr;
   }
 
 }

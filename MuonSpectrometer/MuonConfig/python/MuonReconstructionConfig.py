@@ -20,8 +20,6 @@ def StandaloneMuonOutputCfg(flags):
 
     aod_items = []
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
-        aod_items += ["xAOD::TrackParticleContainer#EMEO_MuonSpectrometerTrackParticles"]
-        aod_items += ["xAOD::TrackParticleAuxContainer#EMEO_MuonSpectrometerTrackParticlesAux."]
         aod_items += ["xAOD::MuonSegmentContainer#xAODNSWSegments"]
         aod_items += ["xAOD::MuonSegmentAuxContainer#xAODNSWSegmentsAux."]
 
@@ -107,8 +105,6 @@ def StandaloneMuonOutputCfg(flags):
 
     # Tracks
     esd_items += ["TrackCollection#MuonSpectrometerTracks"]
-    if flags.Muon.runCommissioningChain:
-        esd_items += ["TrackCollection#EMEO_MuonSpectrometerTracks"]
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
         esd_items += ["Trk::SegmentCollection#TrackMuonNSWSegments"]
 
@@ -167,11 +163,6 @@ def MuonReconstructionCfg(flags):
     result.merge(MuonSegmentFindingCfg(flags))
     result.merge(MuonTrackBuildingCfg(flags))
     result.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags))
-    if flags.Muon.runCommissioningChain:
-        result.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags,
-                                                          "MuonStandaloneTrackParticleCnvAlg_EMEO",
-                                                          TrackContainerName="EMEO_MuonSpectrometerTracks",
-                                                          xAODTrackParticlesFromTracksContainerName="EMEO_MuonSpectrometerTrackParticles"))
 
     # FIXME - this is copied from the old configuration, but I'm not sure it really belongs here.
     # It's probably better to have as part of TrackBuilding, or Segment building...
@@ -190,9 +181,6 @@ def MuonReconstructionCfg(flags):
         # Now tracks
         track_cols = ["MuonSpectrometerTracks"]
         track_colstp = ["MuonSpectrometerTrackParticles"]
-        if flags.Muon.runCommissioningChain:
-            track_cols += ["EMEO_MuonSpectrometerTracks"]
-            track_colstp += ["EMEO_MuonSpectrometerTrackParticles"]
 
         from MuonConfig.MuonTruthAlgsConfig import MuonDetailedTrackTruthMakerCfg
         result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonStandaloneDetailedTrackTruthMaker",
@@ -237,6 +225,9 @@ def MuonReconstructionCfg(flags):
     # Setup output
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         result.merge(StandaloneMuonOutputCfg(flags))
+    if flags.Muon.scheduleActsReco:
+        from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
+        result.merge(MuonReconstructionConfig(flags))
     return result
 
 # Run with python -m MuonConfig.MuonReconstructionConfig

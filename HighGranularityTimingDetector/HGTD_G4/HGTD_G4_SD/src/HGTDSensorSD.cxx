@@ -10,6 +10,8 @@
 #include "HGTDSensorSD.h"
 
 // Athena headers
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 // Geant4 headers
@@ -28,7 +30,7 @@
 
 HGTDSensorSD::HGTDSensorSD(const std::string& name, const std::string& hitCollectionName)
     : G4VSensitiveDetector( name ), 
-      m_HitColl( hitCollectionName )
+      m_hitCollectionName( hitCollectionName )
 {
 
 }
@@ -36,11 +38,18 @@ HGTDSensorSD::HGTDSensorSD(const std::string& name, const std::string& hitCollec
 // Initialize from G4
 void HGTDSensorSD::Initialize(G4HCofThisEvent *)
 {
-    if (!m_HitColl.isValid()) m_HitColl = std::make_unique<SiHitCollection>();
+    m_hitColl = getHitCollection();
 }
 
 G4bool HGTDSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
 {
+    if (!m_hitColl) {
+        m_hitColl = getHitCollection();
+        if (!m_hitColl) {
+            return false;
+        }
+    }
+
     if (verboseLevel>5) G4cout << "Process Hit" << G4endl;
 
     G4double edep = aStep->GetTotalEnergyDeposit();
@@ -170,7 +179,7 @@ G4bool HGTDSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
     int endcap_side = 2*posNegEndcap;
 
     TrackHelper trHelp(aStep->GetTrack());
-    m_HitColl->Emplace(lP1,
+    m_hitColl->Emplace(lP1,
                        lP2,
                        edep,
                        aStep->GetPreStepPoint()->GetGlobalTime(),
@@ -179,4 +188,15 @@ G4bool HGTDSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
                        2,endcap_side,layer,eta,phi,0);
 
     return true;
+}
+
+SiHitCollection* HGTDSensorSD::getHitCollection() const
+{
+    auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo();
+    if (!eventInfo) {
+        return nullptr;
+    }
+
+    auto hitCollections = eventInfo->GetHitCollectionMap();
+    return hitCollections ? hitCollections->Find<SiHitCollection>(m_hitCollectionName) : nullptr;
 }

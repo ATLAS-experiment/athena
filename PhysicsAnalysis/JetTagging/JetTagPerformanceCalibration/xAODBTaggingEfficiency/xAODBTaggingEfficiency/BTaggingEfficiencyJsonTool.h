@@ -32,7 +32,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   private:
   bool m_initialised;
 
-  Gaudi::Property<std::string> m_taggerName {this, "TaggerName", "", "Tagging algorithm name"};
+  Gaudi::Property<std::string> m_outputName {this, "OutputName", "", "Output name of the tagger"};
   Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "Operating point"};
   Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", "", "Jet collection"};
   Gaudi::Property<std::string> m_json_config_path {this, "JsonConfigFile", "", "Path to JSON config file"};

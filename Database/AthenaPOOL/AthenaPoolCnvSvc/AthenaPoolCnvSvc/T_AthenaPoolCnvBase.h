@@ -20,6 +20,9 @@ class StatusCode;
 
 /** @class T_AthenaPoolCnvBase
  *  @brief This templated class provides the converter to translate an object to/from its persistent POOL representation.
+ *
+ * After reading, we also call SG::ToTransient<T>::toTransient (without
+ * an EventContext) on the object we read.
  **/
 template <class T>
 class T_AthenaPoolCnvBase : public AthenaPoolConverter {

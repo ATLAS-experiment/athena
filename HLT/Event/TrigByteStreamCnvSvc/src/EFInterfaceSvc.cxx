@@ -168,6 +168,11 @@ EFInterfaceSvc::Status EFInterfaceSvc::getNext(std::unique_ptr<uint32_t[]>& rawE
     ATH_MSG_DEBUG("NoMoreEvents, returning");
     return Status::STOP;
   }
+  //Added to handle the EB closure case, see ATR-31291
+  catch (daq::df_ef_interface::EventHandlerInvalid&){
+    ATH_MSG_DEBUG("EventHandlerInvalid received from EB interface, returning");
+    return Status::STOP;
+  }
   catch (daq::df_ef_interface::CommunicationError &ex){
     ATH_MSG_DEBUG("CommunicationError received from EFInterface, returning NO_EVENT");
     return Status::NO_EVENT;

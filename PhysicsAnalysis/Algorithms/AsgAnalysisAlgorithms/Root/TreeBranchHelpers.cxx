@@ -84,7 +84,7 @@ namespace {
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxVectorBase* getVector( const std::string& key,
-                                       asg::SgTEvent& evtStore,
+                                       asg::SgEvent& evtStore,
                                        bool allowMissing,
                                        const TClass*& cl,
                                        MsgStream& msg ) {
@@ -133,7 +133,7 @@ namespace {
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxElement* getElement( const std::string& key,
-                                     asg::SgTEvent& evtStore,
+                                     asg::SgEvent& evtStore,
                                      bool allowMissing,
                                      MsgStream& msg ) {
       if( allowMissing &&
@@ -376,12 +376,16 @@ namespace CP
           SG::ConstAccessor<char> {nominalAuxName};
         else if (typeName == "float")
           SG::ConstAccessor<float> {nominalAuxName};
+        else if (typeName == "double")
+          SG::ConstAccessor<double> {nominalAuxName};
         else if (typeName == "int")
           SG::ConstAccessor<int> {nominalAuxName};
         else if (typeName == "unsigned")
           SG::ConstAccessor<unsigned> {nominalAuxName};
         else if (typeName == "unsigned_char")
           SG::ConstAccessor<unsigned char> {nominalAuxName};
+        else if (typeName == "unsigned_long")
+          SG::ConstAccessor<unsigned long> {nominalAuxName};
         else if (typeName == "unsigned_long_long")
           SG::ConstAccessor<unsigned long long> {nominalAuxName};
         else if (typeName == "int8")
@@ -424,6 +428,14 @@ namespace CP
           SG::ConstAccessor<std::vector<PxPyPzEVector>> {nominalAuxName};
         else if (typeName == "vector_PxPyPzMVector")
           SG::ConstAccessor<std::vector<PxPyPzMVector>> {nominalAuxName};
+        else if (typeName == "vector_vector_PtEtaPhiEVector")
+          SG::ConstAccessor<std::vector<std::vector<PtEtaPhiEVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PtEtaPhiMVector")
+          SG::ConstAccessor<std::vector<std::vector<PtEtaPhiMVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PxPyPzEVector")
+          SG::ConstAccessor<std::vector<std::vector<PxPyPzEVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PxPyPzMVector")
+          SG::ConstAccessor<std::vector<std::vector<PxPyPzMVector>>> {nominalAuxName};
         else
         {
           unsigned line = __LINE__ - 2;

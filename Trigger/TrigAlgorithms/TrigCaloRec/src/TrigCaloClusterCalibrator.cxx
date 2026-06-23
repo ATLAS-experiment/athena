@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -57,7 +57,7 @@ StatusCode TrigCaloClusterCalibrator::execute(const EventContext& ctx) const
     // Make a temporary scope - this means that the unique pointers die at the
     // end of the scope (so don't hang around after the move call)
     SG::ReadHandle<xAOD::CaloClusterContainer> inputClusters(m_inputClustersKey, ctx);
-    auto [clusters, clustersAux] = xAOD::shallowCopyContainer(*inputClusters,ctx);
+    auto [clusters, clustersAux] = xAOD::shallowCopy(*inputClusters,ctx);
     // And record
     ATH_CHECK( outputClusters.record(std::move(clusters), std::move(clustersAux)));
     // We also need to copy across the cell links information.

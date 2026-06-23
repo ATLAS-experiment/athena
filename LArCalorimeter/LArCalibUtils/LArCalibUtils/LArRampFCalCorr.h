@@ -31,7 +31,7 @@ class ATLAS_NOT_THREAD_SAFE LArRampFCalCorr : public AthAlgorithm
   typedef LArRampComplete::ConstConditionsMapIterator LArRampIt;
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
 

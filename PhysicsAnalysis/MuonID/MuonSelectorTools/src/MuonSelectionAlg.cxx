@@ -29,7 +29,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonSelectionAlg::execute() {
+    StatusCode MuonSelectionAlg::execute(const EventContext& /*ctx*/) {
         // fetch input collection
         const xAOD::MuonContainer* muons = nullptr;
         CHECK(evtStore()->retrieve(muons, m_inputMuons));

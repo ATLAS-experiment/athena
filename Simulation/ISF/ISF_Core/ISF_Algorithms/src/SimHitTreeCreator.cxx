@@ -94,7 +94,7 @@ StatusCode ISF::SimHitTreeCreator::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::SimHitTreeCreator::execute() {
+StatusCode ISF::SimHitTreeCreator::execute(const EventContext& /*ctx*/) {
   ATH_CHECK(this->fillSimHitsTree());
   return StatusCode::SUCCESS;
 }

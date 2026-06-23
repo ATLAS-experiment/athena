@@ -41,7 +41,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadCondHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // Gaudi includes
 

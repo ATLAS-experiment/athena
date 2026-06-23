@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "AsgTools/AsgTool.h"
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgMessaging/MsgStream.h"

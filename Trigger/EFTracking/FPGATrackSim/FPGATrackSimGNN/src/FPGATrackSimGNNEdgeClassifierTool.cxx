@@ -3,6 +3,7 @@
 #include "FPGATrackSimGNNEdgeClassifierTool.h"
 
 #include "FourMomUtils/P4Helpers.h"
+#include <cmath>
 
 ///////////////////////////////////////////////////////////////////////////////
 // AthAlgTool
@@ -15,6 +16,7 @@ StatusCode FPGATrackSimGNNEdgeClassifierTool::initialize()
     ATH_CHECK( m_GNNInferenceTool.retrieve() );
     m_GNNInferenceTool->printModelInfo();
     assert(m_gnnFeatureNamesVec.size() == m_gnnFeatureScalesVec.size());
+    assert(m_gnnFeatureNamesVec_pixelOnly.size() == m_gnnFeatureScalesVec_pixelOnly.size());
     
     return StatusCode::SUCCESS;
 }
@@ -55,25 +57,44 @@ StatusCode FPGATrackSimGNNEdgeClassifierTool::scoreEdges(const std::vector<std::
 std::vector<float> FPGATrackSimGNNEdgeClassifierTool::getNodeFeatures(const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & hits)
 {
     std::vector<float> gNodeFeatures;
+
+    // For GNN model, we use phi-folding to [2pi/16,3pi/16], so all hit.phi needs to be rotated to the right region
+    const float phi_binSize = M_PI / 16.0;
+    int phiBin = m_regionNum & 0x1f;
+    float regionMin = phi_binSize * phiBin;
+    float referenceMin = 2.0 * M_PI / 16.0;
+    float deltaPhi = referenceMin - regionMin;
+
+    // For GNN model, I am going to assume eta symmetry for testing purposes, so negative eta should be flipped to positive eta
+    int etaSide = (m_regionNum >> 5) & 0x1; // 1 is positive side, 0 negative side
+    bool flipEta = (etaSide == 0);
     
     for(const auto& hit : hits) {
         std::map<std::string, float> features;
         features["r"] = hit->getR();
-        features["phi"] = hit->getPhi();
-        features["z"] = hit->getZ();
-        features["eta"] = hit->getEta();
-        features["cluster_r_1"] = hit->getCluster1R();
-        features["cluster_phi_1"] = hit->getCluster1Phi();
-        features["cluster_z_1"] = hit->getCluster1Z();
-        features["cluster_eta_1"] = hit->getCluster1Eta();
-        features["cluster_r_2"] = hit->getCluster2R();
-        features["cluster_phi_2"] = hit->getCluster2Phi();
-        features["cluster_z_2"] = hit->getCluster2Z();
-        features["cluster_eta_2"] = hit->getCluster2Eta();
+        features["phi"] = std::remainder(hit->getPhi() + deltaPhi, 2*M_PI); // Add the deltaPhi to shift the phi to the trained-region
+        features["z"] = flipEta ? -hit->getZ() : hit->getZ();
+        features["eta"] = flipEta ? -hit->getEta() : hit->getEta();
+        if (m_doGNNPixelSeeding) { // Do not use cluster features for pixelOnly
+            for(size_t i = 0; i < m_gnnFeatureNamesVec_pixelOnly.size(); i++){
+                gNodeFeatures.push_back(
+                features[m_gnnFeatureNamesVec_pixelOnly[i]] / m_gnnFeatureScalesVec_pixelOnly[i]);
+            }
+        }
+        else { // Use cluster features and the standard feature vectors and scales
+            features["cluster_r_1"] = hit->getCluster1R();
+            features["cluster_phi_1"] = std::remainder(hit->getCluster1Phi() + deltaPhi, 2*M_PI);
+            features["cluster_z_1"]   = flipEta ? -hit->getCluster1Z()   : hit->getCluster1Z();
+            features["cluster_eta_1"] = flipEta ? -hit->getCluster1Eta() : hit->getCluster1Eta();
+            features["cluster_r_2"] = hit->getCluster2R();
+            features["cluster_phi_2"] = std::remainder(hit->getCluster2Phi() + deltaPhi, 2*M_PI);
+            features["cluster_z_2"]   = flipEta ? -hit->getCluster2Z()   : hit->getCluster2Z();
+            features["cluster_eta_2"] = flipEta ? -hit->getCluster2Eta() : hit->getCluster2Eta();
 
-        for(size_t i = 0; i < m_gnnFeatureNamesVec.size(); i++){
-            gNodeFeatures.push_back(
-            features[m_gnnFeatureNamesVec[i]] / m_gnnFeatureScalesVec[i]);
+            for(size_t i = 0; i < m_gnnFeatureNamesVec.size(); i++){
+                gNodeFeatures.push_back(
+                features[m_gnnFeatureNamesVec[i]] / m_gnnFeatureScalesVec[i]);
+            }
         }
     }
      
@@ -115,25 +136,35 @@ std::vector<float> FPGATrackSimGNNEdgeClassifierTool::getEdgeFeatures(std::vecto
     return gEdgeFeatures;
 }
 
-void FPGATrackSimGNNEdgeClassifierTool::computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge, const int& hit1_index, const int& hit2_index, const std::vector<float>& gNodeFeatures)
+void FPGATrackSimGNNEdgeClassifierTool::computeEdgeFeatures(std::shared_ptr<FPGATrackSimGNNEdge>& edge,const int& hit1_index, const int& hit2_index,const std::vector<float>& gNodeFeatures)
 {
-    size_t num_features = m_gnnFeatureNamesVec.size();
+    size_t num_features = m_doGNNPixelSeeding ? m_gnnFeatureNamesVec_pixelOnly.size() : m_gnnFeatureNamesVec.size();
 
     std::map<std::string, float> hit1_features;
     std::map<std::string, float> hit2_features;
 
-    for(size_t i = 0; i < num_features; i++){
-        hit1_features[m_gnnFeatureNamesVec[i]] = gNodeFeatures[hit1_index * num_features + i];
-        hit2_features[m_gnnFeatureNamesVec[i]] = gNodeFeatures[hit2_index * num_features + i];
+    if (m_doGNNPixelSeeding) {
+        // Fill only pixel-only features
+        for (size_t i = 0; i < m_gnnFeatureNamesVec_pixelOnly.size(); i++) {
+            hit1_features[m_gnnFeatureNamesVec_pixelOnly[i]] = gNodeFeatures[hit1_index * num_features + i];
+            hit2_features[m_gnnFeatureNamesVec_pixelOnly[i]] = gNodeFeatures[hit2_index * num_features + i];
+        }
+    } else {
+        // Fill full feature set (including clusters)
+        for (size_t i = 0; i < m_gnnFeatureNamesVec.size(); i++) {
+            hit1_features[m_gnnFeatureNamesVec[i]] = gNodeFeatures[hit1_index * num_features + i];
+            hit2_features[m_gnnFeatureNamesVec[i]] = gNodeFeatures[hit2_index * num_features + i];
+        }
     }
 
+    // Now compute differences using only the common "physics" features
     float deta = hit2_features["eta"] - hit1_features["eta"];
     float dz = hit2_features["z"] - hit1_features["z"];
     float dr = hit2_features["r"] - hit1_features["r"];
-    float dphi = P4Helpers::deltaPhi(hit2_features["phi"],hit1_features["phi"]);
-    float phislope = dr==0. ? 0. : dphi / dr;
+    float dphi = P4Helpers::deltaPhi(hit2_features["phi"], hit1_features["phi"]);
+    float phislope = dr == 0. ? 0. : dphi / dr;
     float rphislope = 0.5 * (hit2_features["r"] + hit1_features["r"]) * phislope;
-    
+
     edge->setEdgeDR(dr);
     edge->setEdgeDPhi(dphi);
     edge->setEdgeDZ(dz);

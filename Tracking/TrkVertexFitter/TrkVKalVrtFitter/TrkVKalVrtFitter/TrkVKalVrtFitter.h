@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrkVKalVrtFitter.h
 //
 #ifndef TRKVKALVRTFITTER_VKALVRTFITTER_H
 #define TRKVKALVRTFITTER_VKALVRTFITTER_H
-// Normal STL and physical vectors
-// Gaudi includes
+
 #include "GaudiKernel/ToolHandle.h"
-//
+#include "AthenaBaseComps/AthAlgTool.h"
+
 // Interfaces
 #include  "TrkVertexFitterInterfaces/IVertexFitter.h" //base class
 #include  "TrkVKalVrtFitter/ITrkVKalVrtFitter.h" //base class
@@ -68,10 +68,6 @@ namespace Trk{
     friend class VKalExtPropagator;
     public:
 
-      // The following 'using' can be removed when IVertexFitter::fit has been fully migrated to the one with the EventContext
-      using Trk::IVertexFitter::fit;
-      using Trk::ITrkVKalVrtFitter::makeState;
-
         virtual StatusCode initialize() override final;
         virtual StatusCode finalize() override final;
 
@@ -82,20 +78,24 @@ namespace Trk{
         // IVertexFitter interface
         //
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>& perigeeList,
           const Amg::Vector3D& startingPoint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>& perigeeList,
           const std::vector<const NeutralParameters*>& /*neutralPerigeeList*/,
           const Amg::Vector3D& startingPoint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>& perigeeList,
           const xAOD::Vertex& constraint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>& perigeeList,
           const std::vector<const NeutralParameters*>& /*neutralPerigeeList*/,
           const xAOD::Vertex& constraint) const override final;
@@ -105,35 +105,41 @@ namespace Trk{
           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
           const Amg::Vector3D& startingPoint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
           const xAOD::Vertex& constraint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
           const std::vector<const xAOD::NeutralParticle*>& vectorNeu,
           const Amg::Vector3D& startingPoint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const xAOD::TrackParticle*>& vectorTrk,
           const std::vector<const xAOD::NeutralParticle*>& vectorNeu,
           const xAOD::Vertex& constraint) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>&) const override final;
 
-        virtual xAOD::Vertex* fit(
+        virtual std::unique_ptr<xAOD::Vertex> fit(
+          const EventContext& ctx,
           const std::vector<const TrackParameters*>&,
           const std::vector<const Trk::NeutralParameters*>&) const override final;
 
 
         /*--------------  Additional  xAOD  interfaces -------------*/
-        xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+        std::unique_ptr<xAOD::Vertex> fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                            const Amg::Vector3D& constraint,
                            IVKalState& istate) const;
-        xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+        std::unique_ptr<xAOD::Vertex> fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                            const xAOD::Vertex& constraint,
                            IVKalState& istate) const;
+
 //
 //  Cascade fitter interface
 //
@@ -301,13 +307,15 @@ namespace Trk{
                                      dvect& ImpactError,
                                      IVKalState& istate) const override final;
 
-        virtual double VKalGetImpact(const xAOD::TrackParticle*,
+        virtual double VKalGetImpact(const EventContext& ctx,
+                                     const xAOD::TrackParticle*,
                                      const Amg::Vector3D& Vertex,
                                      const long int Charge,
                                      dvect& Impact,
                                      dvect& ImpactError) const override final;
 
-        virtual double VKalGetImpact(const Trk::Perigee*,
+        virtual double VKalGetImpact(const EventContext& ctx,
+                                     const Trk::Perigee*,
                                      const Amg::Vector3D& Vertex,
                                      const long int Charge,
                                      dvect& Impact,
@@ -488,14 +496,8 @@ namespace Trk{
 //  Private technical functions
 //
         void setAthenaPropagator(const Trk::IExtrapolator*);
-        // context-aware init of state
         void initState (const EventContext& ctx, State& state) const;
-        // init of state for backwards compartibility - calls context-aware version. Can be removed
-        // when fully migrated to EventContext
-        void initState (State& state) const;
 
-//
-//
         static void FillMatrixP(AmgSymMatrix(5)& , std::vector<double>& ) ;
         static void FillMatrixP(int iTrk, AmgSymMatrix(5)& , std::vector<double>& ) ;
         static Amg::MatrixX * GiveFullMatrix(int NTrk, std::vector<double>&) ;
@@ -512,7 +514,7 @@ namespace Trk{
                            double[5],
                            double[15]) const;
 
-        xAOD::Vertex* makeXAODVertex(int,
+        std::unique_ptr<xAOD::Vertex> makeXAODVertex(int,
                                      const Amg::Vector3D&,
                                      const dvect&,
                                      const dvect&,

@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <iostream>
+#include <format>
  
 namespace{ 
   class XMLCoreParserDebugger{ 
@@ -213,14 +214,14 @@ class DummyFactory : public XMLCoreFactory{
 
  
 std::unique_ptr<XMLCoreNode>
-XMLCoreParser::parse (const std::string& file_name) {
+XMLCoreParser::parse (std::string_view file_name) {
   m_level = 0;
   std::unique_ptr<XMLCoreNode> doc = ExpatCoreParser::parse (file_name);
   if (XMLCoreParserDebugger::debug ()){
     if (doc != nullptr) doc->print ("============ ALL =============");
   }
   if (not doc){
-    throw std::runtime_error("XMLCoreParser: no such file ["+file_name+"]");
+    throw std::runtime_error(std::format("XMLCoreParser: no such file [{}]", file_name));
   }
   return doc;
 }
@@ -239,10 +240,9 @@ XMLCoreParser::parse_string (const std::string& text) {
 }
 
 void 
-XMLCoreParser::visit (const std::string& file_name) { 
+XMLCoreParser::visit (std::string_view file_name) { 
   if (XMLCoreParserDebugger::debug ()){
-      std::cout << "XMLCoreParser::visit file_name " 
-                << file_name << std::endl; 
+      std::cout << std::format("XMLCoreParser::visit file_name {}\n", file_name); 
   }
   std::unique_ptr<XMLCoreNode> n = parse (file_name);
   if (XMLCoreParserDebugger::debug ()){

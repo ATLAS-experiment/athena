@@ -90,7 +90,7 @@ StatusCode Trk::RecMomentumQualityValidation::finalize()
 
 //================ Execution ====================================================
 
-StatusCode Trk::RecMomentumQualityValidation::execute()
+StatusCode Trk::RecMomentumQualityValidation::execute(const EventContext& /*ctx*/)
 {
 
   // Retrieving the Trackcollection specified via m_inputTrackCollection

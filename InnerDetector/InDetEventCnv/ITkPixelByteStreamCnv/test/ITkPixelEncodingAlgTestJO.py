@@ -64,5 +64,5 @@ if __name__=="__main__":
    sg.Dump = True
 
    # loop over 1 events
-   cfg.run(1)
+   cfg.run(20)
 

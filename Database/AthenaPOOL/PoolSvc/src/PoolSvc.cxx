@@ -26,8 +26,8 @@
 #include "PersistencySvc/IContainer.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
 #include "PersistencySvc/ITokenIterator.h"
-#include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IFileCatalog.h"
+
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbPrint.h"
 
@@ -182,30 +182,19 @@ StatusCode PoolSvc::setupPersistencySvc() {
       return(StatusCode::FAILURE);
    }
    // Setup a persistency services
-   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release()); // Read Service
+   m_dbSessionVec.push_back(pool::createSession(*m_catalog).release()); // Read Service
    m_pers_mut.push_back(new CallMutex);
    if (!m_dbSessionVec[IPoolSvc::kInputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<bool>("ENABLE_THREADSAFETY", true)) {
       ATH_MSG_FATAL("Failed to enable thread safety in ROOT via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
    m_contextMaxFile.insert(std::pair<unsigned int, int>(IPoolSvc::kInputStream, m_dbAgeLimit));
-   if (!connect(pool::ITransaction::READ, IPoolSvc::kInputStream).isSuccess()) {
+   if (!connect(Io::READ, IPoolSvc::kInputStream).isSuccess()) {
       ATH_MSG_FATAL("Failed to connect Input PersistencySvc.");
       return(StatusCode::FAILURE);
    }
-   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release()); // Write Service
+   m_dbSessionVec.push_back(pool::createSession(*m_catalog).release()); // Write Service
    m_pers_mut.push_back(new CallMutex);
-   pool::DatabaseConnectionPolicy policy;
-   policy.setWriteModeForNonExisting(pool::DatabaseConnectionPolicy::CREATE);
-   policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::OVERWRITE);
-   if (m_fileOpen.value() == "update") {
-      policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
-   }
-   m_dbSessionVec[IPoolSvc::kOutputStream]->setDefaultConnectionPolicy(policy);
-   if (!m_dbSessionVec[IPoolSvc::kOutputStream]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
-      ATH_MSG_FATAL("Failed to set ROOT default container type via PersistencySvc.");
-      return(StatusCode::FAILURE);
-   }
 
    return(StatusCode::SUCCESS);
 }
@@ -263,7 +252,7 @@ StatusCode PoolSvc::finalize() {
 StatusCode PoolSvc::io_finalize() {
    ATH_MSG_INFO("I/O finalization...");
    for (size_t i = 0; i < m_dbSessionVec.size(); i++) {
-      if (m_dbSessionVec[i]->defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR &&
+      if ((m_dbSessionVec[i]->transaction().type() == Io::WRITE || m_dbSessionVec[i]->transaction().type() == Io::APPEND) &&
 	      !disconnect(i).isSuccess()) {
          ATH_MSG_WARNING("Cannot disconnect output Stream " << i);
       }
@@ -338,19 +327,8 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
       return(contextIter->second);
    }
    const unsigned int id = m_dbSessionVec.size();
-   m_dbSessionVec.push_back(pool::PersistencySvc::createSession(*m_catalog).release());
+   m_dbSessionVec.push_back(pool::createSession(*m_catalog).release());
    m_pers_mut.push_back(new CallMutex);
-   pool::DatabaseConnectionPolicy policy;
-   policy.setWriteModeForNonExisting(pool::DatabaseConnectionPolicy::CREATE);
-   policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::OVERWRITE);
-   if (m_fileOpen.value() == "update") {
-      policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
-   }
-   m_dbSessionVec[id]->setDefaultConnectionPolicy(policy);
-   if (!m_dbSessionVec[id]->technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
-      ATH_MSG_WARNING("Failed to set ROOT default container type via PersistencySvc for id " << id);
-      return(IPoolSvc::kOutputStream);
-   }
    m_outputContextLabel.insert(std::pair<std::string, unsigned int>(label, id));
    return(id);
 }
@@ -367,9 +345,9 @@ unsigned int PoolSvc::getInputContext(const std::string& label, unsigned int max
       }
    }
    const unsigned int id = m_dbSessionVec.size();
-   m_dbSessionVec.push_back( pool::PersistencySvc::createSession(*m_catalog).release() );
+   m_dbSessionVec.push_back( pool::createSession(*m_catalog, maxFile).release() );
    m_pers_mut.push_back(new CallMutex);
-   if (!connect(pool::ITransaction::READ, id).isSuccess()) {
+   if (!connect(Io::READ, id).isSuccess()) {
       ATH_MSG_WARNING("Failed to connect Input PersistencySvc: " << id);
       return(IPoolSvc::kInputStream);
    }
@@ -468,7 +446,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& connection,
          return(nullptr);
       }
       try {
-         if (dbH->openMode() == pool::IDatabase::CLOSED) {
+         if (dbH->openMode() == Io::INVALID) {
             dbH->connectForRead();
          }
          std::map<unsigned int, unsigned int>::const_iterator maxFileIter = m_contextMaxFile.find(contextId);
@@ -543,7 +521,7 @@ Token* PoolSvc::getToken(const std::string& connection,
    if (dbH == nullptr) {
       return(nullptr);
    }
-   if (dbH->openMode() == pool::IDatabase::CLOSED) {
+   if (dbH->openMode() == Io::INVALID) {
       dbH->connectForRead();
    }
    std::unique_ptr<pool::IContainer> contH = getContainerHandle(dbH.get(), collection);
@@ -555,8 +533,8 @@ Token* PoolSvc::getToken(const std::string& connection,
    return tokenIter->seek(ientry)? tokenIter->next() : nullptr;
 }
 //__________________________________________________________________________
-StatusCode PoolSvc::connect(pool::ITransaction::Type type, unsigned int contextId) {
-   if (type != pool::ITransaction::READ) {
+StatusCode PoolSvc::connect(Io::IoFlag type, unsigned int contextId) {
+   if (type != Io::READ) {
       if (contextId >= m_dbSessionVec.size()) {
          ATH_MSG_WARNING("connect: Using default output Stream instead of id = " << contextId);
          contextId = IPoolSvc::kOutputStream;
@@ -598,7 +576,7 @@ StatusCode PoolSvc::commit(unsigned int contextId) const {
          ATH_MSG_ERROR("POOL commit failed " << session);
          return(StatusCode::FAILURE);
       }
-      if (session->transaction().type() == pool::ITransaction::READ) {
+      if (session->transaction().type() == Io::READ) {
          session->disconnectAll();
       }
    }
@@ -610,7 +588,7 @@ StatusCode PoolSvc::commitAndHold(unsigned int contextId) const {
       return(StatusCode::FAILURE);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::PersistencySvc::ISession* session = m_dbSessionVec[contextId];
+   pool::ISession* session = m_dbSessionVec[contextId];
    if (session != nullptr && session->transaction().isActive()) {
       if (!session->commitAndHold()) {
          ATH_MSG_ERROR("POOL commitAndHold failed " << session);
@@ -626,7 +604,7 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
       return(StatusCode::SUCCESS);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   pool::PersistencySvc::ISession* session = m_dbSessionVec[contextId];
+   pool::ISession* session = m_dbSessionVec[contextId];
    if (session != nullptr && session->transaction().isActive()) {
       if (!commit(contextId).isSuccess()) {
          ATH_MSG_ERROR("disconnect failed to commit " << session);
@@ -695,8 +673,8 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
       ATH_MSG_DEBUG("getAttribute: Failed to get Session/DatabaseHandle to get POOL property.");
       return(StatusCode::FAILURE);
    }
-   if (dbH->openMode() == pool::IDatabase::CLOSED) {
-      if (m_dbSessionVec[contextId]->defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
+   if (dbH->openMode() == Io::INVALID) {
+      if (m_dbSessionVec[contextId]->transaction().type() == Io::WRITE || m_dbSessionVec[contextId]->transaction().type() == Io::APPEND) {
          dbH->setTechnology(tech);
          dbH->connectForWrite();
       } else {
@@ -774,8 +752,8 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
       ATH_MSG_DEBUG("Failed to get Session/DatabaseHandle to set POOL property.");
       return(StatusCode::FAILURE);
    }
-   if (dbH->openMode() == pool::IDatabase::CLOSED) {
-      if (m_dbSessionVec[contextId]->defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
+   if (dbH->openMode() == Io::INVALID) {
+      if (m_dbSessionVec[contextId]->transaction().type() == Io::WRITE || m_dbSessionVec[contextId]->transaction().type() == Io::APPEND) {
          dbH->setTechnology(tech);
          dbH->connectForWrite();
       } else {
@@ -785,7 +763,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    bool retError = false;
    std::string objName;
    bool hasTTreeName = (contName.length() > 6 && contName.compare(0, 6, "TTree=") == 0);
-   if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->defaultConnectionPolicy().writeModeForNonExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR) {
+   if (contName.empty() || hasTTreeName || m_dbSessionVec[contextId]->transaction().type() == Io::READ) {
       objName = hasTTreeName ? contName.substr(6) : contName;
       if( !isNumber(data) ) {
          retError = dbH->technologySpecificAttributes().setAttribute(optName, data.c_str(), objName);
@@ -938,10 +916,7 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
    }
    pool::ISession* sesH = m_dbSessionVec[contextId];
    if (!sesH->transaction().isActive()) {
-      pool::ITransaction::Type transMode = pool::ITransaction::READ;
-      if (m_dbSessionVec[contextId]->defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
-         transMode = pool::ITransaction::UPDATE;
-      }
+      Io::IoFlag transMode = Io::READ;
       ATH_MSG_DEBUG("Start transaction, type = " << transMode);
       if (!sesH->transaction().start(transMode)) {
          ATH_MSG_WARNING("Failed to start transaction, type = " << transMode);
@@ -954,7 +929,7 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
    } else if (dbName.compare(0, 4,"FID:") == 0) {
       return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
-   } 
+   }
    return sesH->databaseHandle(dbName, pool::DatabaseSpecification::PFN);
 }
 //__________________________________________________________________________
@@ -963,9 +938,6 @@ std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* d
    if (dbH == nullptr) {
       ATH_MSG_DEBUG("No DatabaseHandle to get Container.");
       return(nullptr);
-   }
-   if (dbH->openMode() == pool::IDatabase::CLOSED) {
-      dbH->connectForRead();
    }
    if (contName.find("DataHeader") != std::string::npos) {
       contH = dbH->containerHandle(contName.substr(0, contName.find("_p")));

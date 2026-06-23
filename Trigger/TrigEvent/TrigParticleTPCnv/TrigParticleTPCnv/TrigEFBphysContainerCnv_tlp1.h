@@ -18,7 +18,7 @@
 #ifndef  TRIGPARTICLETPCNV_TRIGEFBPHYSCONTAINER_CNV_TLP1_H
 #define  TRIGPARTICLETPCNV_TRIGEFBPHYSCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
  
 #include "TrigParticleTPCnv/TrigEFBphysContainerCnv_p1.h"   
@@ -28,7 +28,7 @@
  
 #include "TrigParticleTPCnv/TrigEFBphysContainer_tlp1.h"
 
-class TrigEFBphysContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigEFBphysContainerCnv_p1, TrigEFBphysContainer_tlp1 >
+class TrigEFBphysContainerCnv_tlp1 : public TopLevelTPConverter< TrigEFBphysContainerCnv_p1, TrigEFBphysContainer_tlp1 >
 {
  
  public:

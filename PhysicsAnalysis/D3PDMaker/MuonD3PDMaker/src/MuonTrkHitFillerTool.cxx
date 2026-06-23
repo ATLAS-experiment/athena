@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////
@@ -20,9 +20,9 @@ const int MS = 2;
 
 struct Var
 {
-  const char* name;
+  const char* name{};
   xAOD::SummaryType type;
-  int which;
+  int which{};
 };
 const Var  vars[] =
 {

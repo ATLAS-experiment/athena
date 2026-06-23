@@ -67,7 +67,7 @@ StatusCode TBBeamQuality::initialize()
 }//init
 
 /*---------------EXECUTE---------------*/
-StatusCode TBBeamQuality::execute()
+StatusCode TBBeamQuality::execute(const EventContext& /*ctx*/)
 { // execute
   ATH_MSG_DEBUG ("Execute" );
   

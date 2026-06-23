@@ -17,9 +17,9 @@ StatusCode ZDC_DigiTop::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ZDC_DigiTop::execute()
+StatusCode ZDC_DigiTop::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "ZDC_DigiTop::execute" );
 
-  return m_digTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_digTool->processAllSubEvents(ctx);
 }

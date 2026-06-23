@@ -1,6 +1,5 @@
-
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONMEASVIEWALGS_STGCMEASVIEWALG_H
 #define XAODMUONMEASVIEWALGS_STGCMEASVIEWALG_H
@@ -11,7 +10,6 @@
 #include <xAODMuonPrepData/sTgcStripContainer.h>
 #include <xAODMuonPrepData/sTgcPadContainer.h>
 #include <xAODMuonPrepData/sTgcMeasContainer.h>
-
 
 #include <StoreGate/WriteHandleKey.h>
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM2.py
 #====================================================================
@@ -140,10 +140,10 @@ def JETM2Cfg(flags):
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables, UFOVariables, TrackingVariables,  TrackingVariablesHGTD, FELinks
     JETM2SlimmingHelper.ExtraVariables += [".".join(["CaloCalTopoClusters"] + ClusterVariables + ["clusterE_ML.clusterE_ML_unc"])]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["EMOriginTopoClusters"] + ['calM'])]
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables)]
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedChargedParticleFlowObjects"] + FlowElementVariables)]
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedNeutralParticleFlowObjects"] + FlowElementVariables)]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"])]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"])]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedChargedParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"])]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedNeutralParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"])]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["UFO"] + UFOVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["UFOCSSK"] + UFOVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["InDetTrackParticles"] + TrackingVariables)]
@@ -242,7 +242,7 @@ def JETM2Cfg(flags):
     # Output stream
     JETM2ItemList = JETM2SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_JETM2", ItemList=JETM2ItemList, AcceptAlgs=["JETM2Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM2", AcceptAlgs=["JETM2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM2", AcceptAlgs=["JETM2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TruthMetaData]))
 
     return acc
 

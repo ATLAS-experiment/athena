@@ -24,7 +24,6 @@
 
 // FrameWork includes
 #include "Gaudi/Property.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ThinningHandle.h"
 
@@ -117,11 +116,10 @@ ThinInDetForwardTrackParticlesAlg::execute(const EventContext& ctx) const
     m_nMuons.fetch_add(muons->size(), std::memory_order_relaxed);
 
     for (const auto* muon : *muons) {
-      if (muon->muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) {
+      if (muon->muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon) {
 	++nSiFwdMuons;
-	const xAOD::TrackParticle* muTrk(nullptr);
-	if (muon->inDetTrackParticleLink().isValid())
-	  muTrk = *(muon->inDetTrackParticleLink());
+	const xAOD::TrackParticle* muTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+	
 	if (muTrk != nullptr) {
 	  auto search = std::find(tracks->begin(), tracks->end(), muTrk);
 	  if (search != tracks->end()) {

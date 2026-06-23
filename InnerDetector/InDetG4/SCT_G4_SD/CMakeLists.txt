@@ -26,19 +26,19 @@ atlas_add_library( SCT_G4_SD
 # Test(s) in the package:
 atlas_add_test( SCT_G4_SDToolConfig_test
                 SCRIPT test/SCT_G4_SDToolConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( SctSensorSD_gtest
                 SOURCES test/SctSensorSD_gtest.cxx
                 INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib TestTools SCT_G4_SDLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( SctSensor_CTB_gtest
                 SOURCES test/SctSensor_CTB_gtest.cxx
                 INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib TestTools SCT_G4_SDLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Turn on/off LTO for all targets in the package.
 set_target_properties(

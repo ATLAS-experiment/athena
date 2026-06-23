@@ -3,6 +3,7 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-architecture: '#&nvidia'
+# art-pathena-flags-add: --site=BNL_GPU,OU_OSCER_GPU,FZK-LCG2_GPU,SLAC_GPU
 # art-memory: 4095
 # art-output: IDTPM.*.root
 # art-output: *.json
@@ -43,13 +44,18 @@ run () {
     chmod 777 step_${name}.sh
     time $(pwd)/step_${name}.sh
     rc=$?
+    ## if _diffOK is in name, then we expect dcube differences, so don't flag as an error
+    if [[ $rc == 1 && "${name}" =~ "_diffOK" ]]; then
+      rc=0
+    fi
     rm step_${name}.sh
     echo "art-result: $rc ${name}"
     ## if _skipRC is in name skip exit condition
     if [[ "${name}" =~ "_skipRC" ]]; then
       return 0
     fi
-    if [ $rc != 0 ]; then
+    # don't exit only for ERRORs detected in reco logfile (rc=68)
+    if [ $rc != 0 -a $rc != 68 ]; then
         exit $rc
     fi
     return $rc
@@ -78,8 +84,7 @@ fi
 ## Copying json config in the output directory
 echo "Running IDTPM with the following json config:"
 ## change the name of the track collection to monitor and copy json config in work dir
-## FIXME - temporarily not producing teachnical efficiencies plots
-cat $IDTPMjsonConfig_absPath | sed "s|_TRKCOLLNAME_|${TrkCollName}|g" | grep -v "plotTechnicalEfficiencies" | tee ${cwd}/IDTPMconfig.json
+cat $IDTPMjsonConfig_absPath | sed "s|_TRKCOLLNAME_|${TrkCollName}|g" | tee ${cwd}/IDTPMconfig.json
 
 ## IDTPM step
 run "IDTPM" \
@@ -101,7 +106,7 @@ if [ ! -f "$referenceName_absPath" ]; then
 fi
 
 ## dcube step
-run "dcube_skipRC" \
+run "dcube_diffOK" \
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_cmp \
     -c ${dcubeXmlIDTPMconfig_absPath} \

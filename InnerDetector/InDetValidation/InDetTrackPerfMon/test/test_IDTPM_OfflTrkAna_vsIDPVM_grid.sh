@@ -4,25 +4,11 @@
 # art-include: main/Athena
 # art-output: *.root
 # art-output: *.xml
+# art-output: *.json
 # art-output: dcube*
 # art-html: dcube_last
 
 input_AOD=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/inputs/ttbar_mu0_forIDTPM.AOD.root
-
-dcubeXml_IDTPM_OfflTrkAna=dcube_config_IDTPM_OfflTrkAna.xml
-IDPVMtoIDTPMcnv=IDPVMtoIDTPMcnv.txt
-dcubeXml_IDTPMcmp=dcube_config_IDTPMcmp.xml
-
-# search in $DATAPATH for matching files
-dcubeXml_IDTPM_OfflTrkAna_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXml_IDTPM_OfflTrkAna -print -quit 2>/dev/null )
-IDPVMtoIDTPMcnv_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $IDPVMtoIDTPMcnv -print -quit 2>/dev/null )
-dcubeXml_IDTPMcmp_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXml_IDTPMcmp -print -quit 2>/dev/null )
-
-# Don't run if dcube config for nightly cmp is not found
-if [ -z "$dcubeXml_IDTPM_OfflTrkAna_absPath" ]; then
-    echo "art-result: 1 $dcubeXml_IDTPM_OfflTrkAna not found"
-    exit 1
-fi
 
 run () {
     name="${1}"
@@ -32,6 +18,10 @@ run () {
     echo "${cmd}" >> "${cwd}/commands.log"
     time ${cmd}
     rc=$?
+    ## if _diffOK is in name, then we expect dcube differences, so don't flag as an error
+    if [[ $rc == 1 && "${name}" =~ "_diffOK" ]]; then
+      rc=0
+    fi
     echo "art-result: $rc ${name}"
     ## if _skipRC is in name skip exit condition
     if [[ "${name}" =~ "_skipRC" ]]; then
@@ -44,16 +34,16 @@ run () {
 }
 
 run "IDTPM" \
-    runIDTPM.py \
-    --inputFileNames ${input_AOD} \
-    --outputFilePrefix IDTPM \
-    --trkAnaCfgFile InDetTrackPerfMon/offlTrkAnaConfig.json
+    runIDTPM_Offl.py \
+      --inputFileNames ${input_AOD} \
+      --outputFilePrefix IDTPM \
+      --doTightPrimary
 
 run "IDPVM" \
     runIDPVM.py \
-    --filesInput ${input_AOD} \
-    --outputFile idpvm.root \
-    --doTightPrimary
+      --filesInput ${input_AOD} \
+      --outputFile idpvm.root \
+      --doTightPrimary
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -65,35 +55,29 @@ lastref_dir=last_results
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
 ls -la "$lastref_dir"
 
+## making Dcube XML config on-the-fly for test against last
+makeDcubeConfig.py -i IDTPM.HIST.root -c config_dcube_last.xml
+
 run "dcube-last_skipRC" \
     $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_last \
     --plotopts=ratio \
-    -c ${dcubeXml_IDTPM_OfflTrkAna_absPath} \
+    -c config_dcube_last.xml \
     -r ${lastref_dir}/IDTPM.HIST.root \
     IDTPM.HIST.root
 
-# Don't run IDTPM vs IDPVM comparison if conversion config is not found
-if [ -z "$IDPVMtoIDTPMcnv_absPath" ]; then
-    echo "art-result: 1 $IDPVMtoIDTPMcnv not found"
-    exit 1
-fi
-
 # convert IDPVM output to IDTPM's format
 echo "Converting IDPVM output for comparison..."
-IDTPMcnv.py -i idpvm.root -c ${IDPVMtoIDTPMcnv_absPath} -o IDTPMcnv
+IDPVMtoIDTPMConverter.py -i idpvm.root -o idpvm.IDTPMcnv.root --doTightPrimary
 
-# Don't run IDTPM vs IDPVM comparison if dcube config is not found
-if [ -z "$dcubeXml_IDTPMcmp_absPath" ]; then
-    echo "art-result: 1 $dcubeXml_IDTPMcmp not found"
-    exit 1
-fi
+## making Dcube XML config on-the-fly for comparison IDPVM-vs-IDTPM
+makeDcubeConfig.py -i idpvm.IDTPMcnv.root -c config_dcube_cmp.xml
 
-run "dcube-IDTPMvsIDPVM_skipRC" \
+run "dcube-IDTPMvsIDPVM_diffOK" \
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_cmp \
     --plotopts=ratio \
-    -c ${dcubeXml_IDTPMcmp_absPath} \
+    -c config_dcube_cmp.xml \
     -r idpvm.IDTPMcnv.root \
     -R 'ref=IDPVM' -M 'mon=IDTPM' \
     IDTPM.HIST.root

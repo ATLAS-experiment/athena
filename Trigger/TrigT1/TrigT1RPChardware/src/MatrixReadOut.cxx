@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/MatrixReadOut.h"
@@ -672,9 +672,9 @@ ubit16 MatrixReadOut::readCMABodyCurrent() {
 //----------------------------------------------------------------------------//
 void MatrixReadOut::readCMABody(ubit16 *Body) {
     ubit16 i = 0;
-    CMROData *p;
-    if (m_numberOfWordsInBody) {
-        p = m_Body;
+
+    if (m_Body and m_numberOfWordsInBody!=0) {
+        CMROData *p = m_Body;
         for (i = 0; i < m_numberOfWordsInBody; i++) {
             *(Body + i) = p->hit;
             p = p->next;
@@ -698,14 +698,9 @@ ubit16 MatrixReadOut::readCMAWord() {
 //----------------------------------------------------------------------------//
 MatrixReadOutStructure MatrixReadOut::getCMAHit(int index) {
     MatrixReadOutStructure theStruct;
-    ubit16 theHit;
-    if ((m_numberOfWordsInBody <= index) || (m_numberOfWordsInBody == 0)) {
-        // cout<<" getCMAHit: Wrong index given;"
-        //<<" numberOfWordsInBody= "<<m_numberOfWordsInBody
-        //<<" index = "<<index<<endl;
-    } else {
-        CMROData *p;
-        p = m_Body;
+    ubit16 theHit{};
+    if (m_Body and (m_numberOfWordsInBody > index) and (m_numberOfWordsInBody != 0)) {
+        CMROData *p = m_Body;
         for (int i = 0; i < m_numberOfWordsInBody; i++) {
             theHit = p->hit;
             if (index == i) { theStruct = MatrixReadOutStructure(theHit); }

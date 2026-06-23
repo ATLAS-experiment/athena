@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDBASETOOLS_MUONCANDIDATETOOL_H
@@ -53,8 +53,6 @@ namespace MuonCombined {
 
         Gaudi::Property<unsigned int> m_extrapolationStrategy{this, "ExtrapolationStrategy", 0};
 
-        Gaudi::Property<bool> m_commissioning{this, "Commissioning", false,
-                                              "Flag deciding whether the candidate belongs to the comissioning."};
     };
 
 }  // namespace MuonCombined

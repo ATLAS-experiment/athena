@@ -20,7 +20,9 @@
 
  - For each subdetector in {FCAL, EMB, EMEC}, a separate class contains special sensitive
     detectors for frozen shower library application (FastSimDedicatedSD) which inherit from
-    a base class
+    a base class.  Their hits are written into the same event-owned LAr hit builders as
+    the regular SDs, using the direct builder bucket that is finalized after regular SD
+    partitions.
 
  - TestActionTimer: a class for recording simulation time divided by subdetector and by particle type
 

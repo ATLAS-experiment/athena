@@ -45,7 +45,7 @@ namespace LVL1 {
     /** standard Athena-Algorithm method */
     virtual StatusCode finalize();
 
-    virtual StatusCode execute();
+    virtual StatusCode execute(const EventContext& ctx);
 
     /** Create and fill a new fillEmEDM object (corresponding to this window), and return a pointer to it */
     virtual void fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXegTOB> &tobObject, bool xTOB=false) const;

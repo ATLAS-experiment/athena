@@ -1,18 +1,14 @@
 <?xml version = "1.0" encoding="UTF-8"?>
 <GlobalSimAlgConfig>
   <desc>AlgTool propertys to run the hypo Count with eFexRoIs</desc>
-  <!-- TIP Writers-->
+  <!-- TOB Writers-->
   <TOBWriters>
-    <AlgTool>
-      <class>eFexCvtrAlgTool</class>
-      <name>eFexCvtrAlgTool</name>
+    <AlgTool class="eFexCvtrAlgTool" name="eFexCvtrAlgTool">
     </AlgTool>
   </TOBWriters>
-  <!-- TOB Writers-->
+  <!-- TIP Writers-->
   <TIPWriters>
-    <AlgTool>
-      <class>eEmMultAlgTool</class>
-      <name>eEmMultAlgTool</name>
+    <AlgTool class="eEmMultAlgTool" name="eEmMultAlgTool">
       <!-- rhad-->
       <property name="rhad" value="0"/>
       <property name="rhad_op" value="&lt;="/>
@@ -24,10 +20,4 @@
       <property name="wstot_op" value="&lt;="/>
     </AlgTool>
   </TIPWriters>
-  <!-- Connectivity-->
-  <Connectivity>
-    <Connection parentClass="eEmMultAlgTool">
-      <Child childClass="eFexCvtrAlgTool"/>
-    </Connection>
-  </Connectivity>
 </GlobalSimAlgConfig>

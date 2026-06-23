@@ -26,14 +26,14 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
   virtual StatusCode execute(const EventContext& ctx) const override;
 
  protected:
-  ToolHandle<IActsToTrkConverterTool> m_convertorTool{this, "ConvertorTool",
+  PublicToolHandle<IActsToTrkConverterTool> m_convertorTool{this, "ConvertorTool",
                                                       ""};
   SG::ReadHandleKeyArray<TrackCollection> m_trackCollectionKeys{
       this,
       "TrackCollectionKeys",
       {"CombinedInDetTracks", "CombinedMuonTracks", "MuonSpectrometerTracks"},
       "Keys for Track Containers"};
-  SG::ReadHandleKey<GeometryContext> m_geometryContextKey {
+  ActsTrk::GeoContextReadKey_t m_geometryContextKey {
       this, "ActsAlignmentKey", "ActsAlignment", "Cond read key for the alignment"};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey {this, "TrackContainerLocation", "ConvertedTracks", "Location of the converted TrackContainer"};
   ActsTrk::MutableTrackContainerHandlesHelper m_trackContainerBackendsHelper{this};

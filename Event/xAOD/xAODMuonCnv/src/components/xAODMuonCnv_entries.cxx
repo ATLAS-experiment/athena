@@ -1,8 +1,7 @@
-#include "../MuonCnvAlg.h"
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include "../MuonSegmentCnvAlg.h"
-#include "../MuonAODFixAlg.h"
 
-DECLARE_COMPONENT( xAODMaker::MuonCnvAlg )
 DECLARE_COMPONENT( xAODMaker::MuonSegmentCnvAlg )
-DECLARE_COMPONENT( xAOD::MuonAODFixAlg )
 

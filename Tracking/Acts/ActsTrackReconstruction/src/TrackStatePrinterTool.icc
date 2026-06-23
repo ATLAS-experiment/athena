@@ -4,7 +4,7 @@
 
 // ATHENA
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
+ #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 // ACTS CORE
 #include "Acts/Geometry/TrackingGeometry.hpp"
@@ -100,9 +100,8 @@ namespace ActsTrk
 
     if (state.hasUncalibratedSourceLink())
     {
-      ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-      const xAOD::UncalibratedMeasurement &umeas = getUncalibratedMeasurement(sl);
-      index = measurementIndexer.index(umeas);
+      const xAOD::UncalibratedMeasurement* umeas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
+      index = measurementIndexer.index(*umeas);
     }
 
     std::cout << std::setw(5) << state.index() << ' ';

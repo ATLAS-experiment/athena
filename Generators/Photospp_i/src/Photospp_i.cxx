@@ -132,7 +132,7 @@ CLHEP::HepRandomEngine* Photospp_i::getRandomEngineDuringInitialize(const std::s
 }
 
 
-StatusCode Photospp_i::execute() {
+StatusCode Photospp_i::execute(const EventContext& ctx) {
 
     // initialise if not done already
 
@@ -142,7 +142,6 @@ StatusCode Photospp_i::execute() {
     }
 
     //Re-seed the random number stream
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     reseedRandomEngine("PHOTOSPP", ctx);
 
     // Get the event collection

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_BRANModule.h"
@@ -81,7 +81,9 @@ void ZDC_BRANModule::create(GeoFullPhysVol* mother, StoredMaterialManager *mater
     Air_Channel_Pyisical->add(new GeoFullPhysVol(Silica_Rod_Logical));
 
     GeoFullPhysVol *Al_Plate_Physical = new GeoFullPhysVol(Al_Plate_Logical);
-
+    
+    static const std::string airNameStr{airName};
+    static const std::string aluNameStr{aluName};
     /*This is a strange loop but the arrangement of the rods is
      *   ----------------------------------
      *   |  {-1,-1}     {-1,0}     {-1,1} |
@@ -93,7 +95,7 @@ void ZDC_BRANModule::create(GeoFullPhysVol* mother, StoredMaterialManager *mater
         /*************************************************
          * Place the inner air channels with silica included
          **************************************************/
-        Cu_Body_Physical->add(new GeoNameTag(airName));
+        Cu_Body_Physical->add(new GeoNameTag(airNameStr));
         Cu_Body_Physical->add(new GeoIdentifierTag(airID.get_identifier32().get_compact()));
         Cu_Body_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateX3D( i * channelSide * Gaudi::Units::mm)));
         Cu_Body_Physical->add(Air_Channel_Pyisical);
@@ -101,16 +103,16 @@ void ZDC_BRANModule::create(GeoFullPhysVol* mother, StoredMaterialManager *mater
         /*************************************************
          * Place the aluminum plates
          **************************************************/
-        Cu_Body_Physical->add(new GeoNameTag(aluName));
+        Cu_Body_Physical->add(new GeoNameTag(aluNameStr));
         Cu_Body_Physical->add(new GeoIdentifierTag(aluID.get_identifier32().get_compact()));
         Cu_Body_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D( i * (innerPlateDepth + alPlateDepth * 0.5) * Gaudi::Units::mm)));
         Cu_Body_Physical->add(Al_Plate_Physical);
 
         for(int j : {-1,0,1}){
             /*************************************************
-             * Place the outter air channels
+             * Place the outer air channels
              **************************************************/
-            Cu_Body_Physical->add(new GeoNameTag(airName));
+            Cu_Body_Physical->add(new GeoNameTag(airNameStr));
             Cu_Body_Physical->add(new GeoIdentifierTag(airID.get_identifier32().get_compact()));
             Cu_Body_Physical->add(new GeoAlignableTransform(GeoTrf::Translate3D( j * pitch * Gaudi::Units::mm, 0.0, i * (innerPlateDepth - channelSide) * Gaudi::Units::mm )));
             Cu_Body_Physical->add(Air_Channel_Pyisical);

@@ -261,8 +261,8 @@ StatusCode MergeMcEventCollTool::processFirstSubEvent(const McEventCollection *p
   m_signal_event_number = m_pOvrlMcEvColl->at(0)->event_number();
   m_pOvrlMcEvColl->at(0)->set_event_number(-2); //Set this to zero for the purposes of sorting. (restore after sorting).
 #ifdef HEPMC3
-  m_pOvrlMcEvColl->at(0)->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(0));
-  m_pOvrlMcEvColl->at(0)->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(0));
+  m_pOvrlMcEvColl->at(0)->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(0));
+  m_pOvrlMcEvColl->at(0)->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(0));
 #endif
   updateClassificationMap(HepMC::signal_process_id(m_pOvrlMcEvColl->at(0)), m_pOvrlMcEvColl->at(0)->event_number(), 0,- 1, true);
   m_newevent=false; //Now the McEventCollection and classification map are not empty this should be set to false.
@@ -377,8 +377,8 @@ StatusCode MergeMcEventCollTool::processTruthFilteredEvent(const McEventCollecti
   HepMC::fillBarcodesAttribute(&currentBackgroundEvent);
 #ifdef HEPMC3
   const int bunchCrossingTime=static_cast<int>(currentEventTime);
-  currentBackgroundEvent.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
-  currentBackgroundEvent.add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType));
+  currentBackgroundEvent.add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  currentBackgroundEvent.add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
 #endif
 
   currentBackgroundEvent.set_event_number(currentBkgEventIndex);
@@ -405,8 +405,8 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   //for configs with pile-up truth, also need to propagate barcodes to GenEvent
   HepMC::GenEvent* evt = m_onlySaveSignalTruth ? new HepMC::GenEvent() : new HepMC::GenEvent(currentBackgroundEvent);
   const int bunchCrossingTime=static_cast<int>(currentEventTime);
-  evt->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
-  evt->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType));
+  evt->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+  evt->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
   //AV Not sure if one should add the vertex here
   evt->set_event_number(currentBkgEventIndex);
   evt->add_vertex(pCopyOfGenVertex);

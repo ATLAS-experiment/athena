@@ -45,7 +45,7 @@ namespace DerivationFramework {
     void ProcessVertex(xAOD::BPhysHypoHelper&, xAOD::BPhysHelper::pv_type, std::vector<double> trackMasses) const;
     PublicToolHandle<Trk::V0Tools> m_v0Tools{this, "V0Tools", "Trk::V0Tools"};
     ToolHandle<DerivationFramework::FourMuonTool> m_fourMuonTool{this, "FourMuonTool", "DerivationFramework::FourMuonTool"};
-    ToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter{this, "PVRefitter", "Analysis::PrimaryVertexRefitter"};
+    PublicToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter{this, "PVRefitter", "Analysis::PrimaryVertexRefitter"};
 
     /** job options
      */

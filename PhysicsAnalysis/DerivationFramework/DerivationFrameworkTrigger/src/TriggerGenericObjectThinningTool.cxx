@@ -1,6 +1,5 @@
 #include "TriggerGenericObjectThinningTool.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace DerivationFramework{
     bool TriggerGenericObjectThinningTool::eventPassedFilter() const
@@ -65,9 +64,8 @@ namespace DerivationFramework{
     }
 
     // The thinning itself
-    StatusCode TriggerGenericObjectThinningTool::doThinning() const
+    StatusCode TriggerGenericObjectThinningTool::doThinning(const EventContext& ctx) const
     {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
         
         // Retrieve main object collection
         SG::ThinningHandle<xAOD::IParticleContainer> particles (m_SGKey, ctx);

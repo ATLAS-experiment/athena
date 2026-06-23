@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/TrackTimeDefAndQualityAlg.h
  * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -47,6 +47,12 @@
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
+
+#include <array>
+#include <cstdint>
+#include <utility>
+#include <vector>
+#include <cmath>
 
 namespace {
 static constexpr unsigned short s_hgtd_layers = 4; // two double sided layers
@@ -115,11 +121,11 @@ private:
   };
 
   struct CleaningResult {
-    std::array<Hit, s_hgtd_layers> m_hits;
+    std::array<Hit, s_hgtd_layers> m_hits{};
     uint32_t m_field = 0x0;
-    float m_time;
-    float m_resolution;
-    uint8_t m_hasValidTime;
+    float m_time{};
+    float m_resolution{};
+    uint8_t m_hasValidTime{};
   };
 
   FloatProperty m_chi2_threshold{
@@ -139,12 +145,12 @@ private:
 
   CleaningResult
   runTimeConsistencyCuts(const std::vector<float>& times,
-			 const std::vector<bool>& has_clusters,
+			 const std::vector<char>& has_clusters,
 			 const std::vector<int>& hit_classification) const;
 
   std::array<Hit, s_hgtd_layers>
   getValidHits(const std::vector<float>& times,
-	       const std::vector<bool>& has_clusters,
+	       const std::vector<char>& has_clusters,
 	       const std::vector<int>& hit_classification) const;
 
   /**

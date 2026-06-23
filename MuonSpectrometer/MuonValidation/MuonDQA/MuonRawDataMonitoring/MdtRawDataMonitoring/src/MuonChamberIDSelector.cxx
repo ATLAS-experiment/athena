@@ -20,7 +20,7 @@ StatusCode MuonChamberIDSelector::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonChamberIDSelector::execute() {
+StatusCode MuonChamberIDSelector::execute(const EventContext& /*ctx*/) {
     ATH_MSG_DEBUG("execute() called");
 
     StatusCode sc = ChamberperformSelection();

@@ -23,9 +23,11 @@ class PhotonPlots:public PlotBase {
       // Reco only information
       Egamma::KinematicsPlots         m_oKinAllPlots;
       Egamma::ShowerShapesPlots       m_oShowerShapesAllPlots;
+      Egamma::ShowerShapesPlots       m_oShowerShapesAll10GeVPlots;
       Egamma::PhotonConversionPlots   m_oPhotonConversionAllPlots;
       Egamma::KinematicsPlots         m_oKinIsoPlots;
       Egamma::ShowerShapesPlots       m_oShowerShapesIsoPlots;
+      Egamma::ShowerShapesPlots       m_oShowerShapesIso10GeVPlots;
       Egamma::PhotonConversionPlots   m_oPhotonConversionIsoPlots;
       Egamma::KinematicsPlots         m_oKinIsoUncPlots;
       Egamma::KinematicsPlots         m_oKinIsoConvPlots;

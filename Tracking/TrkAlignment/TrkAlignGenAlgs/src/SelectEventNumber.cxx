@@ -30,7 +30,7 @@ StatusCode SelectEventNumber::initialize()
 }
 
 //___________________________________________________________________________
-StatusCode SelectEventNumber::execute() 
+StatusCode SelectEventNumber::execute(const EventContext& /*ctx*/) 
 {
   ATH_MSG_DEBUG("in SelectEventNumber::execute()");
 

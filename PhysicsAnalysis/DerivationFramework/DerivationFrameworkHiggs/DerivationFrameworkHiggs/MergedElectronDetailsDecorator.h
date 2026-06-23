@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tool to decorate the Electrons object with additional information for merged electron ID
@@ -40,12 +40,12 @@ namespace DerivationFramework {
 
   private:
 
-    void fillMatchDetails( std::vector<float>& trkMatchTrk, const  xAOD::TrackParticle* tp, const xAOD::CaloCluster* cluster) const;
+    void fillMatchDetails( const EventContext& ctx, std::vector<float>& trkMatchTrk, const  xAOD::TrackParticle* tp, const xAOD::CaloCluster* cluster) const;
     static int  nSiHits( const xAOD::TrackParticle * tp ) ;
-    void fillTrackDetails(const xAOD::Electron* el, bool isMC) const;
-    void fillVertexDetails(const xAOD::Electron* el) const;
+    void fillTrackDetails(const EventContext& ctx, const xAOD::Electron* el, bool isMC) const;
+    void fillVertexDetails(const EventContext& ctx, const xAOD::Electron* el) const;
     static void fillClusterDetails(const xAOD::Electron* el) ;
-    void fillTruthDetails( std::vector<float>& trkMatchTrk, const xAOD::TrackParticle* tp, const xAOD::CaloCluster* cluster) const;
+    void fillTruthDetails( const EventContext& ctx, std::vector<float>& trkMatchTrk, const xAOD::TrackParticle* tp, const xAOD::CaloCluster* cluster) const;
 
     PublicToolHandle<IEMExtrapolationTools> m_emExtrapolationTool{this, "EMExtrapolationTool", "EMExtrapolationTools"};
     PublicToolHandle<Trk::IVertexFitter> m_VertexFitter{this, "VertexFitterTool", "Trk::TrkVkalVrtFitter"};

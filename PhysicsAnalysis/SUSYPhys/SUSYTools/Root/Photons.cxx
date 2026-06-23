@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Photons
@@ -50,27 +50,30 @@ StatusCode SUSYObjDef_xAOD::GetPhotons(xAOD::PhotonContainer*& copy, xAOD::Shall
     else {
       ATH_CHECK( evtStore()->retrieve(photons, photonkey) );
     }
-    std::pair<xAOD::PhotonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*photons);
-    copy = shallowcopy.first;
-    copyaux = shallowcopy.second;
+    xAOD::ShallowCopyResult_t<xAOD::PhotonContainer> shallowcopy = xAOD::shallowCopy(*photons);
+    copy = shallowcopy.first.get();
+    copyaux = shallowcopy.second.get();
     bool setLinks = xAOD::setOriginalObjectLink(*photons, *copy);
     if (!setLinks) {
       ATH_MSG_WARNING("Failed to set original object links on " << photonkey);
     }
-  } else { // use the user-supplied collection instead 
+    if (recordSG) {
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "STCalib" + photonkey + m_currentSyst.name()) );
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.second), "STCalib" + photonkey + m_currentSyst.name() + "Aux.") );
+    } else {
+      ATH_MSG_ERROR("Shallow copy not recorded in StoreGate!");
+      return StatusCode::FAILURE;
+    }
+  } else { // use the user-supplied collection instead
     ATH_MSG_DEBUG("Not retrieving photon collecton, using existing one provided by user");
     photons=copy;
-  }  
+  }
 
   for (const auto photon : *copy) {
     ATH_CHECK( this->FillPhoton(*photon, m_photonBaselinePt, m_photonBaselineEta) );
     this->IsSignalPhoton(*photon, m_photonPt, m_photonEta);
   }
 
-  if (recordSG) {
-    ATH_CHECK( evtStore()->record(copy, "STCalib" + photonkey + m_currentSyst.name()) );
-    ATH_CHECK( evtStore()->record(copyaux, "STCalib" + photonkey + m_currentSyst.name() + "Aux.") );
-  }
   return StatusCode::SUCCESS;
 }
 
@@ -103,7 +106,7 @@ StatusCode SUSYObjDef_xAOD::FillPhoton(xAOD::Photon& input, float ptcut, float e
   dec_isol(input) = false;
   dec_isEM(input) = 0;
 
-  if (!pass_deadHVTool) return StatusCode::SUCCESS; 
+  if (!pass_deadHVTool) return StatusCode::SUCCESS;
 
   // Author cuts needed according to https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EGammaIdentificationRun2#Photon_authors
   if ( !(input.author() & (xAOD::EgammaParameters::AuthorPhoton + xAOD::EgammaParameters::AuthorAmbiguous)) )
@@ -138,7 +141,7 @@ StatusCode SUSYObjDef_xAOD::FillPhoton(xAOD::Photon& input, float ptcut, float e
     if ( (!m_photonAllowLate && acc_passPhCleaning(input)) || (m_photonAllowLate && acc_passPhCleaningNoTime(input)) ) passPhCleaning = true;
   } else {
     ATH_MSG_VERBOSE ("DFCommonPhotonsCleaning is not found in DAOD..");
-    if ( (!m_photonAllowLate && PhotonHelpers::passOQquality(input)) || 
+    if ( (!m_photonAllowLate && PhotonHelpers::passOQquality(input)) ||
          ( m_photonAllowLate && PhotonHelpers::passOQqualityDelayed(input)) ) passPhCleaning = true;
   }
   if (!passPhCleaning) return StatusCode::SUCCESS;
@@ -180,7 +183,7 @@ bool SUSYObjDef_xAOD::IsSignalPhoton(const xAOD::Photon& input, float ptcut, flo
 
   if (m_photonCrackVeto){
     if  ( std::abs( input.caloCluster()->etaBE(2) ) >1.37 &&  std::abs( input.caloCluster()->etaBE(2) ) <1.52) {
-      return false; 
+      return false;
     }
   }
 
@@ -196,7 +199,7 @@ bool SUSYObjDef_xAOD::IsSignalPhoton(const xAOD::Photon& input, float ptcut, flo
     passID = bool(m_photonSelIsEM->accept(&input));
   }
   if ( !passID ) return false;
-  
+
   dec_signal(input) = true;
 
   return true;

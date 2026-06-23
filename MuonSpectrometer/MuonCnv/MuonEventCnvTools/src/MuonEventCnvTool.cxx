@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonEventCnvTool.h"
@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "EventPrimitives/EventPrimitives.h"
-#include "GaudiKernel/MsgStream.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "MuonRIO_OnTrack/CscClusterOnTrack.h"
@@ -28,7 +27,6 @@
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 
-Muon::MuonEventCnvTool::MuonEventCnvTool(const std::string& t, const std::string& n, const IInterface* p) : base_class(t, n, p) {}
 
 StatusCode Muon::MuonEventCnvTool::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -44,26 +42,13 @@ StatusCode Muon::MuonEventCnvTool::initialize() {
 }
 
 void Muon::MuonEventCnvTool::checkRoT(const Trk::RIO_OnTrack& rioOnTrack) const {
-    MuonConcreteType type = TypeUnknown;
     const Identifier& id = rioOnTrack.identify();
-    if (m_idHelperSvc->isRpc(id))
-        type = RPC;
-    else if (m_idHelperSvc->isTgc(id))
-        type = TGC;
-    else if (m_idHelperSvc->isMdt(id))
-        type = MDT;
-    else if (m_idHelperSvc->isMM(id))
-        type = MM;
-    else if (m_idHelperSvc->issTgc(id))
-        type = STGC;
-    else if (m_idHelperSvc->isCsc(id))
-        type = CSC;
+    using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex;
+    const TechIdx_t techIdx = m_idHelperSvc->technologyIndex(id);
 
-    if (type == TypeUnknown) {
+    if (techIdx == TechIdx_t::TechnologyUnknown  ||
+        techIdx == TechIdx_t::TechnologyIndexMax) {
         ATH_MSG_ERROR("Type does not match known concrete type of MuonSpectrometer! Dumping RoT:" << rioOnTrack);
-    } else {
-        ATH_MSG_VERBOSE("Type = " << type << "(RPC=" << RPC << ", CSC=" << CSC << ", TGC=" << TGC << "MDT=" << MDT << ", STGC=" << STGC
-                                  << "MM=" << MM << ")");
     }
 }
 
@@ -168,45 +153,38 @@ const Trk::TrkDetElementBase* Muon::MuonEventCnvTool::getDetectorElement(const I
 
 const Trk::TrkDetElementBase* Muon::MuonEventCnvTool::getDetectorElement(const Identifier& id) const {
     const EventContext& ctx = Gaudi::Hive::currentContext();    
-    const MuonGM::MuonDetectorManager* muonMgr{nullptr};    
-    SG::ReadCondHandle muonMgrHandle{m_detectorManagerKey, ctx};
-    if (!muonMgrHandle.isValid()) {
+    const MuonGM::MuonDetectorManager* muonMgr{nullptr};  
+    if (!SG::get(muonMgr, m_detectorManagerKey, ctx).isSuccess()) {
         ATH_MSG_ERROR("Failed to retrieve the Muon detector manager from the conditions store");
         return nullptr;
     }
-    muonMgr = muonMgrHandle.cptr();
-    
-    const Trk::TrkDetElementBase* detEl = nullptr;
-    // TODO Check that these are in the most likely ordering, for speed. EJWM.
-    if (m_idHelperSvc->isRpc(id)) {
-        detEl = muonMgr->getRpcReadoutElement(id);
-    } else if (m_idHelperSvc->isCsc(id)) {
-        detEl = muonMgr->getCscReadoutElement(id);
-    } else if (m_idHelperSvc->isTgc(id)) {
-        detEl = muonMgr->getTgcReadoutElement(id);
-    } else if (m_idHelperSvc->isMdt(id)) {
-        detEl = muonMgr->getMdtReadoutElement(id);
-    } else if (m_idHelperSvc->issTgc(id)) {
-        detEl = muonMgr->getsTgcReadoutElement(id);
-    } else if (m_idHelperSvc->isMM(id)) {
-        detEl = muonMgr->getMMReadoutElement(id);
+      
+    const Trk::TrkDetElementBase* detEl = muonMgr->getReadoutElement(id);
+   
+    if (!detEl) {
+        ATH_MSG_ERROR("Could not find detector element for Identifier: " << m_idHelperSvc->toString(id));
     }
-    if (!detEl) ATH_MSG_ERROR("Could not find detector element for Identifier: " << m_idHelperSvc->toString(id));
     return detEl;
 }
 
 const Trk::PrepRawData* Muon::MuonEventCnvTool::getLink(const Identifier& id, const IdentifierHash& idHash) const {
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    if (m_idHelperSvc->isMdt(id)) {
-        return getLink(id, idHash, m_mdtPrdKey, ctx);
-    } else if (m_idHelperSvc->isRpc(id)) {
-        return getLink(id, idHash, m_rpcPrdKey, ctx);
-    } else if (m_idHelperSvc->isTgc(id)) {
-        return getLink(id, idHash, m_tgcPrdKey, ctx);
-    } else if (m_idHelperSvc->isMM(id)) {
-        return getLink(id, idHash, m_mmPrdKey, ctx);
-    } else if (m_idHelperSvc->issTgc(id)) {
-        return getLink(id, idHash, m_stgcPrdKey, ctx);
+    switch (m_idHelperSvc->technologyIndex(id)) {
+        using enum Muon::MuonStationIndex::TechnologyIndex;
+        case MDT:
+            return getLink(id, idHash, m_mdtPrdKey, ctx);
+        case RPC:
+            return getLink(id, idHash, m_rpcPrdKey, ctx);
+        case TGC:
+            return getLink(id, idHash, m_tgcPrdKey, ctx);
+        case MM:
+            return getLink(id, idHash, m_mmPrdKey, ctx);
+        case STGC:
+            return getLink(id, idHash, m_stgcPrdKey, ctx);
+        case CSC:
+             return getLink(id, idHash, m_cscPrdKey, ctx);
+        default:
+            break;
     }
     ATH_MSG_ERROR("The given Identifier is not a muon one " << m_idHelperSvc->toString(id));
     return nullptr;

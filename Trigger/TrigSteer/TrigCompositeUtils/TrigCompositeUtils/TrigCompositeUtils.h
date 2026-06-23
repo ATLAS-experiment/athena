@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_TrigCompositeUtils_h
@@ -21,7 +21,7 @@
 
 
 #ifdef XAOD_STANDALONE
-#include "AsgTools/SgTEvent.h"
+#include "AsgTools/SgEvent.h"
 #endif
 
 #include "AthContainers/AuxElement.h"

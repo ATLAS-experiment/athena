@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonInsideOutRecoTool.h"
@@ -178,7 +178,7 @@ namespace MuonCombined {
             selectedTrack = tracks.front();
         } else {
             // more than 1 track call ambiguity solver and select first track
-            std::unique_ptr<const TrackCollection> resolvedTracks(m_trackAmbiguityResolver->process(&tracks));
+            std::unique_ptr<const TrackCollection> resolvedTracks(m_trackAmbiguityResolver->process(ctx, &tracks));
             if (!resolvedTracks || resolvedTracks->empty()) {
                 ATH_MSG_WARNING("Ambiguity resolver returned no tracks. Arbitrarily using the first track of initial collection.");
                 selectedTrack = tracks.front();
@@ -202,7 +202,7 @@ namespace MuonCombined {
             return {nullptr, nullptr};
         }
         // generate a track summary for this candidate
-        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*selectedTrack, false); }
+        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *selectedTrack, false); }
 
         return std::make_pair(std::move(look_itr->second), std::move(look_itr->first));
     }

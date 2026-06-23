@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_MIXINGEVENTSELECTOR_H
@@ -17,7 +17,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventSelector
 
 #include <cassert>
 #include <memory>
-#include <ostream>
 #include <vector>
 
 #include "AthenaBaseComps/AthService.h"
@@ -140,7 +139,7 @@ public:
   /// and store them alongside fractions in m_trigList
   void setUpTriggerList(Gaudi::Details::PropertyBase& trigList); 
   /// functor that creates a Trigger object and adds it to m_trigList
-  void decodeTrigger(std::string triggDescr);
+  void decodeTrigger(const std::string & triggDescr);
 
   /// \name structors
   //@{

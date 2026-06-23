@@ -60,12 +60,12 @@ StatusCode Hist::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode Hist::execute()
+StatusCode Hist::execute(const EventContext& ctx)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   // get event data...
-  SG::ReadHandle<xAOD::EventInfo> evt( m_evt );
+  SG::ReadHandle<xAOD::EventInfo> evt( m_evt , ctx);
   if (!evt.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve EventInfo obj");
     return StatusCode::FAILURE;

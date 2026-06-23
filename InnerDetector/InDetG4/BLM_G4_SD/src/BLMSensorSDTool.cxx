@@ -29,8 +29,7 @@ StatusCode BLMSensorSDTool::SetupEvent(HitCollectionMap& hitCollections)
 
 StatusCode BLMSensorSDTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
 }
 
 G4VSensitiveDetector* BLMSensorSDTool::makeSD() const

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef ATHLINKS_ELEMENTLINK_H
 #define ATHLINKS_ELEMENTLINK_H
@@ -24,6 +24,7 @@ namespace ROOT { namespace Meta { namespace Selection {
 namespace xAOD {
    class TVirtualEvent;
 }
+class EventContext;
 
 /// @short ElementLink implementation for ROOT usage
 ///
@@ -106,6 +107,21 @@ public:
 
    /// Copy-constructor
    ElementLink( const ElementLink& parent );
+
+   /// Versions of the above constructors with dummy EventContext arguments.
+   /// For compatibility with MT code.
+   ElementLink( const ID_type& key, index_type index,
+                const EventContext& ctx );
+   ElementLink( sgkey_t id, index_type index,
+                const EventContext& ctx );
+   ElementLink( const ID_type& key, index_type index, ElementType element,
+                const EventContext& ctx );
+   ElementLink( sgkey_t id, index_type index, ElementType element,
+                const EventContext& ctx );
+   ElementLink( BaseConstReference container, index_type index,
+                const EventContext& ctx );
+   ElementLink( ElementType element, BaseConstReference container,
+                const EventContext& ctx );
 
    /// @}
 

@@ -49,7 +49,7 @@ namespace MuonCalib{
 
       /**basic required functions*/
       StatusCode initialize(void);
-      StatusCode execute(void);
+      StatusCode execute(const EventContext& ctx);
       StatusCode finalize(void); 
 
     private:

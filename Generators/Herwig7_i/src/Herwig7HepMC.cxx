@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,6 +17,7 @@
 #include "ThePEG/PDF/PDF.h"
 
 #include "Herwig/API/HerwigAPI.h"
+#include "AtlasHepMC/AttributeNames.h"
 
 /// AV: We have those defined since HepMC2.05 or so.
 /// These are so old that are seldomly used. ThePeg is an exception.
@@ -51,27 +52,27 @@ namespace ThePEG {
       unit before given to the GenEvent. */
   static void setScaleAndAlphas(HepMC3::GenEvent & e, Energy2 scale,
 				double aS,  double aEM, Energy unit) {
-    e.add_attribute("event_scale",std::make_shared<HepMC3::DoubleAttribute>(sqrt(scale)/unit));
-    e.add_attribute("alphaQCD",std::make_shared<HepMC3::DoubleAttribute>(aS));
-    e.add_attribute("alphaQED",std::make_shared<HepMC3::DoubleAttribute>(aEM));
+    e.add_attribute(HepMCStr::event_scale,std::make_shared<HepMC3::DoubleAttribute>(sqrt(scale)/unit));
+    e.add_attribute(HepMCStr::alphaQCD,std::make_shared<HepMC3::DoubleAttribute>(aS));
+    e.add_attribute(HepMCStr::alphaQED,std::make_shared<HepMC3::DoubleAttribute>(aEM));
   }
 
   /** Set the primary vertex, \a v, for the event \a e. */
   static void setSignalProcessVertex(HepMC3::GenEvent & e, HepMC3::GenVertexPtr v) {
-  e.add_attribute("signal_process_vertex",std::make_shared<HepMC3::IntAttribute>(v->id()));
+  e.add_attribute(HepMCStr::signal_process_vertex,std::make_shared<HepMC3::IntAttribute>(v->id()));
   }
 
   /** Set the polarization directions, \a the and \a phi, for particle
       \a p. */
   static void setPolarization(HepMC3::GenParticle & genp, double the, double phi) {
-    genp.add_attribute("theta",std::make_shared<HepMC3::DoubleAttribute>(the));
-    genp.add_attribute("phi",std::make_shared<HepMC3::DoubleAttribute>(phi));
+    genp.add_attribute(HepMCStr::theta,std::make_shared<HepMC3::DoubleAttribute>(the));
+    genp.add_attribute(HepMCStr::phi,std::make_shared<HepMC3::DoubleAttribute>(phi));
   }
 
   /** Set the colour line (with index \a indx) to \a coline for
       particle \a p. */
   static void setColourLine(HepMC3::GenParticle & p, int indx, int coline) {
-	  p.add_attribute("flow"+std::to_string(indx),std::make_shared<HepMC3::IntAttribute>(coline));
+	  p.add_attribute(HepMCStr::flow + std::to_string(indx),std::make_shared<HepMC3::IntAttribute>(coline));
   }
     /** Set the beam particles for the event.*/
   static void setBeamParticles(HepMC3::GenEvent & e, HepMC3::GenParticlePtr p1, HepMC3::GenParticlePtr p2) {

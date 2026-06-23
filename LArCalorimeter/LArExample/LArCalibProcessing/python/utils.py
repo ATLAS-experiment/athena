@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from PyCool import cool
 from AthenaCommon.Logging import logging
-
+import os
 
 class FolderTagResolver:
 
@@ -11,6 +11,10 @@ class FolderTagResolver:
     _defaultSuffix="-RUN2-UPD3-00"
 
     def __init__(self,dbname="COOLOFL_LAR/CONDBR2"):
+        if dbname == "LAR_OFL":
+            dbname = "COOLOFL_LAR/CONDBR2"
+        elif os.path.isfile(dbname):
+           dbname = f"sqlite://;schema={dbname};dbname=CONDBR2"
         dbSvc = cool.DatabaseSvcFactory.databaseService()
         self._db = dbSvc.openDatabase(dbname)
         self._msg=logging.getLogger('FolderTagResolver')

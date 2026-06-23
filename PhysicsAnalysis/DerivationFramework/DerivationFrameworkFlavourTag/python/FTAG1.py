@@ -71,6 +71,8 @@ def FTAG1CoreCfg(
     extra_SmartCollections: list[str] | None = None,
     extra_AllVariables: list[str] | None = None,
     trigger_lists_helper: TriggerListsHelper | None = None,
+    keep_truth_collections: bool = True,
+    keep_track_covariance_offdiag: bool = True,
 ) -> ComponentAccumulator:
     """Configure FTAG1 slimming and output content."""
     if extra_SmartCollections is None:
@@ -119,7 +121,6 @@ def FTAG1CoreCfg(
 
     # FTAG1-specific all-variable content
     ftag1_slimming_helper.AllVariables += [
-        "InDetLargeD0TrackParticles",
         "AntiKt4EMPFlowJets",
         "AntiKt4LCTopoJets",
         "CaloCalFwdTopoTowers",
@@ -136,14 +137,17 @@ def FTAG1CoreCfg(
         "TauNeutralParticleFlowObjects",
         "TauShotParticleFlowObjects",
         "TauTracks",
-        "TruthEvents",
-        "TruthParticles",
-        "TruthVertices",
         "JetAssociatedPixelClusters",
         "JetAssociatedSCTClusters",
         "PixelClusters",
         "SCT_Clusters",
     ]
+    if keep_truth_collections:
+        ftag1_slimming_helper.AllVariables += [
+            "TruthEvents",
+            "TruthParticles",
+            "TruthVertices",
+        ]
 
     # Extra variables from e/gamma and common FTAG content
     ftag1_slimming_helper.ExtraVariables += ElectronsCPDetailedContent
@@ -228,6 +232,18 @@ def FTAG1CoreCfg(
     # Output stream
     ftag1_item_list = ftag1_slimming_helper.GetItemList()
 
+    # Drop the off-diagonal track covariance matrix from InDetTrackParticles.
+    if not keep_track_covariance_offdiag:
+        _cov_vars = "-definingParametersCovMatrixOffDiag"
+
+        def _drop_cov(item: str) -> str:
+            if "#InDetTrackParticlesAux." not in item:
+                return item
+            sep = "" if item.endswith("Aux.") else "."
+            return item + sep + _cov_vars
+
+        ftag1_item_list = [_drop_cov(item) for item in ftag1_item_list]
+
     acc.merge(
         OutputStreamCfg(
             flags=flags,
@@ -263,7 +279,11 @@ def FTAG1ExtraContentCfg(flags: AthConfigFlags) -> ComponentAccumulator:
     return acc
 
 
-def FTAG1Cfg(flags: AthConfigFlags, name_tag: str = "FTAG1") -> ComponentAccumulator:
+def FTAG1Cfg(
+    flags: AthConfigFlags,
+    name_tag: str = "FTAG1",
+    keep_truth_collections: bool = True,
+) -> ComponentAccumulator:
     """Configure the full FTAG1 derivation."""
     acc = ComponentAccumulator()
 

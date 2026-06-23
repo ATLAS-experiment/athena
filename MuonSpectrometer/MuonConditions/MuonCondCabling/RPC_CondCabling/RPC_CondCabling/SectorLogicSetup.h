@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SECTORLOGICSETUP_H
 #define SECTORLOGICSETUP_H
 
-#include <algorithm>
-#include <list>
-#include <map>
+
 
 #include "MuonCablingTools/BaseObject.h"
 #include "MuonCablingTools/RPCdecoder.h"
@@ -18,18 +16,24 @@
 #include "RPC_CondCabling/RPCchamberdata.h"
 #include "RPC_CondCabling/WiredORdata.h"
 
+#include <list>
+#include <map>
+#include <string>
+#include <iosfwd>
+
+
 namespace RPC_CondCabling {
 
     class SectorLogicSetup : public BaseObject {
     public:
-        typedef std::multimap<CMAinput, int, std::less<CMAinput> > StationMap;
-        typedef std::map<int, RPCchamber, std::less<int> > RPCmap;
-        typedef std::map<int, WiredOR, std::less<int> > WORmap;
-        typedef std::map<CMAidentity, EtaCMA, std::less<CMAidentity> > EtaCMAmap;
-        typedef std::map<CMAidentity, EvenPhiCMA, std::less<CMAidentity> > EvenPhiCMAmap;
-        typedef std::map<CMAidentity, OddPhiCMA, std::less<CMAidentity> > OddPhiCMAmap;
-
+        typedef std::multimap<CMAinput, int> StationMap;
+        typedef std::map<int, RPCchamber> RPCmap;
+        typedef std::map<int, WiredOR> WORmap;
+        typedef std::map<CMAidentity, EtaCMA> EtaCMAmap;
+        typedef std::map<CMAidentity, EvenPhiCMA> EvenPhiCMAmap;
+        typedef std::map<CMAidentity, OddPhiCMA> OddPhiCMAmap;
         typedef std::list<int> SECTORlist;
+        typedef std::map<std::string, std::string, std::less<>> TrigRoadsMap;
 
     private:
         std::string m_positive_sector;
@@ -61,7 +65,7 @@ namespace RPC_CondCabling {
         EvenPhiCMAmap::iterator find_evenphiCMA(int Eta, int Phi);
         OddPhiCMAmap::iterator find_oddphiCMA(int Eta, int Phi);
 
-        const std::map<std::string, std::string>* m_trigroads = nullptr;
+        const std::map<std::string, std::string, std::less<>>* m_trigroads = nullptr;
 
     public:
         SectorLogicSetup(int, const std::string&, const std::string&, bool);
@@ -156,8 +160,8 @@ namespace RPC_CondCabling {
         void PrintElement(std::ostream&, int, const std::string&, int, bool) const;
         friend std::ostream& operator<<(std::ostream&, const SectorLogicSetup&);
 
-        void SetPtoTrigRoads(const std::map<std::string, std::string>*);
-        const std::map<std::string, std::string>* GetPtoTrigRoads() const { return m_trigroads; }  // LBTAG
+        void SetPtoTrigRoads(const TrigRoadsMap *);
+        const TrigRoadsMap * GetPtoTrigRoads() const { return m_trigroads; }  // LBTAG
     };
 
 }  // namespace RPC_CondCabling

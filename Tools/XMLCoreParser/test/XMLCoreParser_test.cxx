@@ -32,12 +32,12 @@ BOOST_AUTO_TEST_SUITE(XMLCoreParserTest)
     const std::string fName= "XMLCoreParser/WellFormed.xml";
     std::string file = PathResolver::find_file (fName, "DATAPATH");
     BOOST_TEST_MESSAGE("Filename: "+ file);
-    BOOST_CHECK_NO_THROW( [[maybe_unused]] std::unique_ptr<XMLCoreNode> n = p.parse(file));
-    std::unique_ptr<XMLCoreNode> n{p.parse(file)};
+    std::unique_ptr<XMLCoreNode> n;
+    BOOST_CHECK_NO_THROW( n = p.parse(file));
     BOOST_TEST(n->get_type() ==  XMLCoreNode::DOCUMENT_NODE);
   }
   
-  BOOST_AUTO_TEST_CASE(XMLCoreParserErrorCondition, *utf::expected_failures(1)){
+  BOOST_AUTO_TEST_CASE(XMLCoreParserErrorCondition){
     XMLCoreParser s;
     const std::string noFile= "Inexistent.xml";
     BOOST_CHECK_THROW( [[maybe_unused]] std::unique_ptr<XMLCoreNode> n = s.parse(noFile), std::runtime_error);
@@ -46,12 +46,9 @@ BOOST_AUTO_TEST_SUITE(XMLCoreParserTest)
     const std::string fName= "XMLCoreParser/IllFormed.xml";
     std::string file = PathResolver::find_file (fName, "DATAPATH");
     BOOST_TEST_MESSAGE("Filename: "+ file);
-    BOOST_CHECK_THROW( [[maybe_unused]] std::unique_ptr<XMLCoreNode> n = p.parse(file), std::runtime_error);
-    //the following should not work, as the xml file is ill-formed
-    //but expat is a *stream* parser, so might not fail until it explicitly tries
-    //to parse the ill-formed element
-    std::unique_ptr<XMLCoreNode> n{p.parse(file)};
-    BOOST_TEST(n->get_type() ==  XMLCoreNode::DOCUMENT_NODE);
+    std::unique_ptr<XMLCoreNode> n;
+    BOOST_CHECK_THROW( n = p.parse(file), std::runtime_error);
+    BOOST_TEST( n == nullptr);
   }
   
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_UNASSOCIATEDHITSGETTERTOOL_H
@@ -36,19 +36,19 @@ public:
 		     const IInterface* parent);
   virtual ~UnassociatedHitsGetterTool();
 
-  StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   /**
      get method:
       compute the number of unassociated his
       wrap the info in a MinBiasPRDAssociation object
   */
-  virtual const MinBiasPRDAssociation* get (bool allowMissing = false) const;
+  virtual const MinBiasPRDAssociation* get (const EventContext& ctx, bool allowMissing = false) const override;
 
   /**
      delete the pointer created by get
    */
-  virtual void releaseObject (const MinBiasPRDAssociation* p) const;
+  virtual void releaseObject (const MinBiasPRDAssociation* p) const override;
 
 private:
 

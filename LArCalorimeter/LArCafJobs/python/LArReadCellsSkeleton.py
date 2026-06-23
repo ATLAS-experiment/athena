@@ -26,6 +26,8 @@ def fromRunArgs(runArgs):
     flags.Input.Files=runArgs.inputBSFile
     flags.LArShapeDump.outputNtup="CELLS"
     flags.LArShapeDump.doSCReco=runArgs.doReco
+    flags.LArShapeDump.energyCut=runArgs.etCut
+    flags.LArShapeDump.energySCCut=runArgs.etCut2
 
     #protection for LArPEB event:
     flags.Trigger.triggerConfig = 'DB'

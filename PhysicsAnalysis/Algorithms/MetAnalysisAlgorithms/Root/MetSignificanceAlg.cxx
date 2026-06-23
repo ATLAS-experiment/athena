@@ -11,8 +11,6 @@
 //
 
 #include <MetAnalysisAlgorithms/MetSignificanceAlg.h>
-
-#include <xAODMissingET/MissingETAuxContainer.h>
 #include "xAODEventInfo/EventInfo.h"
 
 //

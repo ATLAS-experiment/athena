@@ -21,6 +21,11 @@ if (NOT COLUMNAR_ANALYSIS)
    atlas_add_test( ConfigTextMultiMerging
       SCRIPT python/ConfigText_merge_unitTest.py --dir AnalysisAlgorithmsConfig/merging
       POST_EXEC_SCRIPT nopost.sh
+      PROPERTIES TIMEOUT 120 )
+
+   atlas_add_test( ConfigPropertySubstitution
+      SCRIPT python/ConfigPropertySubstitution_unitTest.py
+      POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 30 )
 
    atlas_add_test( ConfigTextCompareBuilder

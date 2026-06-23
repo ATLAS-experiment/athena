@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 //*************************************************
@@ -22,6 +22,8 @@
 #include "CoolKernel/IDatabaseSvc.h"
 #include "CoolKernel/StorageType.h"
 #include "CoolKernel/ConstRecordAdapter.h"
+
+#include <iostream>
 
 ClassImp(dqutils::CoolTgc)
 

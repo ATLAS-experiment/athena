@@ -26,5 +26,5 @@ foreach(_theTestSource ${tests})
                    LINK_LIBRARIES  ${ROOT_LIBRARIES} MuonCalibMath MdtCalibData
                    PROPERTIES TIMEOUT 900
                    PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT nopost.sh)
+                   POST_EXEC_SCRIPT noerror.sh)
 endforeach()

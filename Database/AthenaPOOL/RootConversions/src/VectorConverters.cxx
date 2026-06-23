@@ -31,8 +31,9 @@ namespace RootConversions {
 void VectorConverters::initialize()
 {
 #ifdef XAOD_ANALYSIS
+// initialize() is called once during single-threaded job setup.
 long tmpError = gErrorIgnoreLevel;
-gErrorIgnoreLevel=kError; //silences the warnings about duplicate entries from vector.dll and vector-bool.dll
+gErrorIgnoreLevel = kError; //silences warnings about duplicate entries from vector.dll and vector-bool.dll
 #endif
   TConverterRegistry::Instance()->AddStreamerConverter
     ("vector<double>", "vector<float>",
@@ -68,7 +69,7 @@ gErrorIgnoreLevel=kError; //silences the warnings about duplicate entries from v
      new RootConversions::VectorConverter<unsigned int,ULong64_t>
        ("unsigned int"));
 #ifdef XAOD_ANALYSIS
-gErrorIgnoreLevel=tmpError;
+gErrorIgnoreLevel = tmpError;
 #endif
 }
 

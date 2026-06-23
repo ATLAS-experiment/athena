@@ -147,7 +147,7 @@ class CommonServicesConfig (ConfigBlock) :
                 etag = str(amiTags.split("_")[0])
             metadataHistAlg.etag = etag
 
-        if self.enableExpertMode and config._pass == 0:
+        if self.enableExpertMode:
             # set any expert-mode errors to be ignored instead
             warnings.simplefilter('ignore', ExpertModeWarning)
             # just warning users they might be doing something dangerous
@@ -242,25 +242,28 @@ class PileupReweightingBlock (ConfigBlock):
 
         log = logging.getLogger('makePileupAnalysisSequence')
 
-        eventInfoVar = ['runNumber', 'eventNumber', 'actualInteractionsPerCrossing', 'averageInteractionsPerCrossing']
+        eventInfoVar = [('runNumber','unsigned'),
+                        ('eventNumber','unsigned_long'),
+                        ('actualInteractionsPerCrossing','float'),
+                        ('averageInteractionsPerCrossing','float')]
         if config.dataType() is not DataType.Data:
-            eventInfoVar += ['mcChannelNumber']
+            eventInfoVar += [('mcChannelNumber','unsigned')]
         if self.writeColumnarToolVariables:
             # This is not strictly necessary, as the columnar users
             # could recreate this, but it is also a single constant int,
             # that should compress exceedingly well.
-            eventInfoVar += ['eventTypeBitmask']
+            eventInfoVar += [('eventTypeBitmask','int')]
 
         if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output
             log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite}')
-            for var in eventInfoVar:
-                config.addOutputVar ('EventInfo', var, var, noSys=True)
+            for var_name,var_type in eventInfoVar:
+                config.addOutputVar ('EventInfo', var_name, var_name, noSys=True, auxType=var_type)
 
             if config.dataType() is not DataType.Data:
                 config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup', auxType='float')
                 if config.geometry() is LHCPeriod.Run2:
-                    config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
+                    config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True, auxType='float')
             return
 
         # check files from flags
@@ -378,15 +381,15 @@ class PileupReweightingBlock (ConfigBlock):
                 self.unrepresentedDataWarningThreshold)
 
         if not self.alternativeConfig:
-            for var in eventInfoVar:
-                config.addOutputVar ('EventInfo', var, var, noSys=True)
+            for var_name,var_type in eventInfoVar:
+                config.addOutputVar ('EventInfo', var_name, var_name, noSys=True, auxType=var_type)
 
             if config.dataType() is not DataType.Data and config.geometry() is LHCPeriod.Run2:
-                config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
+                config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True, auxType='float')
 
         if config.dataType() is not DataType.Data and toolConfigFiles:
             config.addOutputVar ('EventInfo', 'PileupWeight' + self.postfix + '_%SYS%',
-                                 'weight_pileup'+self.postfix)
+                                 'weight_pileup'+self.postfix, auxType='float')
 
 
 class GeneratorAnalysisBlock (ConfigBlock):
@@ -672,18 +675,23 @@ class EventCutFlowBlock (ConfigBlock):
             "If provided, takes precedence over selectionName.")
         self.addOption('cutFlowHistograms', True, type=bool,
             info="whether to generate cutflow histograms for the selection cuts.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save the cut bookkeeper in.")
 
     def instanceName(self):
         return 'EventInfo_' + self.selectionName
 
     def makeAlgs(self, config):
-
         if not self.cutFlowHistograms:
             return
+
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
 
         postfix = ('_' + self.selectionName) if self.selectionName else ''
 
         alg = config.createAlgorithm('CP::EventCutFlowHistAlg', 'CutFlowDumperAlg')
+        alg.RootStreamName = streamName
         alg.histPattern = 'cflow_EventInfo' + postfix + '_%SYS%'
         alg.eventInfo = config.readName('EventInfo')
         alg.histTitle = 'Event Cutflow: EventInfo.' + self.selectionName

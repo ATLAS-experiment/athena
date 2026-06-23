@@ -5,16 +5,26 @@
 #ifndef MUONCONDDATA_NSWCALIBDBTHRESHOLDDATA_H
 #define MUONCONDDATA_NSWCALIBDBTHRESHOLDDATA_H
 
-// STL includes
-#include <vector>
-#include <unordered_map>
 
 // Athena includes
-#include "MuonCondData/Defs.h"
-#include "AthenaKernel/CondCont.h" 
-#include "AthenaKernel/BaseInfo.h" 
+#include "MuonCondData/Defs.h" //CalibTechType
+#include "MuonStationIndex/MuonStationIndex.h" //enum
+#include "AthenaKernel/CondCont.h"  
 #include "AthenaBaseComps/AthMessaging.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "Identifier/Identifier.h"
+// STL includes
+#include <string>
+#include <string_view>
+#include <vector>
+#include <array>
+#include <optional>
+#include <unordered_map>
+
+
+
+namespace Muon{
+  class IMuonIdHelperSvc;
+}
 
 
 /** @brief Conditions data to model a channel dependent energy deposit threshold such that
@@ -35,7 +45,7 @@ public:
 	  void setZero(const ThrsldTechType tech  , const float);
 
 	  // retrieval functions
-	  std::vector<Identifier> getChannelIds(const std::string="", const std::string="") const;
+	  std::vector<Identifier> getChannelIds(std::string_view = {}, std::string_view = {}) const;
 	  std::optional<float> getThreshold (const Identifier& channelId) const;
 
  

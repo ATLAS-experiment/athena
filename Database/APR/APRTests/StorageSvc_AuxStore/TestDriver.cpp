@@ -75,13 +75,13 @@ std::string TestDriver::testWriting()
    }
    storSvc->addRef();
    std::cout << "startSession" << std::endl;
-   if( !storSvc->startSession( CREATE, m_storageType.type() ).isSuccess() ) {
+   if( !storSvc->startSession( Io::WRITE, m_storageType.type() ).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    std::cout << "Session connect" << std::endl;
    FileDescriptor fd( m_fileName, m_fileName );
-   if ( ! ( storSvc->connect( RECREATE, fd ).isSuccess() ) ) {
+   if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
    DbOption opt("TREE_AUTO_FLUSH", "CollectionTree", 10);
@@ -189,12 +189,12 @@ TestDriver::testReading(const std::string& testTypeID)
   SG::auxid_t dict_type = SG::AuxTypeRegistry::instance().getAuxID<AClassWithDict>("withdict");
   SG::auxid_t nodict_type = SG::AuxTypeRegistry::instance().getAuxID<TestClassNoDict>("nodict");
 
-  if( !storSvc->startSession( READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
+  if( !storSvc->startSession( Io::READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   FileDescriptor* fd = new FileDescriptor( m_fileName, m_fileName );
-  if( !storSvc->connect( READ, *fd ).isSuccess() ) {
+  if( !storSvc->connect( Io::READ, *fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
   DbDatabase dbH( fd->dbc()->handle() );
@@ -215,7 +215,7 @@ TestDriver::testReading(const std::string& testTypeID)
   // Fetch the objects in the container.
   DbContainer cntH(containerToken->technology());
   Token::OID_t linkH(containerToken->oid());
-  StatusCode sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), READ);
+  StatusCode sc = cntH.open(dbH, containerToken->contID(), 0, containerToken->technology(), Io::READ);
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());

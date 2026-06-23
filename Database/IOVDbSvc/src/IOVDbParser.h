@@ -56,8 +56,8 @@ public:
   void clean();
 
 private:
-  bool m_valid;
-  typedef std::map<std::string, std::string> KeyValMap;
+  bool m_valid{};
+  typedef std::map<std::string, std::string, std::less<>> KeyValMap;
   KeyValMap m_keys;
   ///implementation of overridesIov, with or without check on folder compatibility
   bool overridesIovImpl(MsgStream& msg, const bool performFolderCheck,const bool folderIs_nsOfEpoch=true) const;

@@ -60,9 +60,9 @@ StatusCode MagField::SolenoidTest::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode MagField::SolenoidTest::execute() {
+StatusCode MagField::SolenoidTest::execute(const EventContext& ctx) {
   SG::ReadCondHandle<AtlasFieldCacheCondObj> rh{m_fieldCacheKey,
-                                                Gaudi::Hive::currentContext()};
+                                                ctx};
   const AtlasFieldCacheCondObj* fieldCondObj{*rh};
   if (fieldCondObj == nullptr) {
     ATH_MSG_ERROR("Failed to retrieve AtlasFieldCacheCondObj with key "

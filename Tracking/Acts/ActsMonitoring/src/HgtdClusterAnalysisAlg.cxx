@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HgtdClusterAnalysisAlg.h"
@@ -93,8 +93,7 @@ namespace ActsTrk {
     auto monitor_localT = Monitored::Collection("localT", *inputHgtdClusterContainer,
                                                 [] (const auto cluster) -> float
                                                 {
-                                                  const auto& localPos = cluster->template localPosition<3>();
-                                                  return localPos(2,0);
+                                                  return cluster->time();
                                                 });
 
     // Local Covariance
@@ -107,7 +106,7 @@ namespace ActsTrk {
 
     auto monitor_localCovTT = Monitored::Collection("localCovTT", *inputHgtdClusterContainer,
                                                     [] (const auto* cluster) -> float
-                                                    { return cluster->template localCovariance<3>()(2, 2); });
+                                                    { return cluster->timeCovariance(); });
 
     auto monitor_globalX = Monitored::Collection("globalX", global_x);
     auto monitor_globalY = Monitored::Collection("globalY", global_y);

@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRYINTERFACES_ITrackingGeometrySvc_H
 #define ACTSGEOMETRYINTERFACES_ITrackingGeometrySvc_H
 
 #include "GaudiKernel/IService.h"
+
+#include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
 #include <memory>
@@ -13,9 +15,15 @@
 
 namespace Acts {
     class TrackingGeometry;
+    class TrackingVolume;
 }
 
 namespace ActsTrk{
+
+/** @brief Interface class for the ATLAS service providing the 
+           ActsTrackingGeometry. The tracking geometry is built at
+           the initialization stage of the Athena job and owned
+           by the tracking geometry service */
 class ITrackingGeometrySvc : virtual public IService {
 public:
     DeclareInterfaceID(ActsTrk::ITrackingGeometrySvc, 1, 0);
@@ -27,6 +35,9 @@ public:
     virtual const GeometryContext& getNominalContext() const = 0;
     /// Loops through the volumes of the tracking geometry and caches the aligned transforms in the store
     virtual unsigned int populateAlignmentStore(DetectorAlignStore& store) const = 0;
+    /** @brief Returns the envelope volume from the tracking geometry that's 
+               containing all volumes of the subsystem  */
+    virtual const Acts::TrackingVolume* getEnvelope(const SystemEnvelope envType) const = 0;
 };
 }
 

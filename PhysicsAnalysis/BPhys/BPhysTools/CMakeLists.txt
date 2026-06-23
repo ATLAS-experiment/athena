@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 # $Id: CMakeLists.txt 805745 2017-05-31 17:23:48Z wwalko $
@@ -33,6 +33,7 @@ atlas_subdir( BPhysTools )
 
 # Used external(s):
 find_package( ROOT COMPONENTS Core Physics Matrix )
+find_package( Boost COMPONENTS unit_test_framework )
 
 # Build the main library of the package: 
 atlas_add_library( BPhysToolsLib
@@ -67,6 +68,13 @@ atlas_add_dictionary( BPhysToolsDict
   BPhysTools/selection.xml
   LINK_LIBRARIES BPhysToolsLib
   )  
+  
+atlas_add_test( SimpleEncrypter_test
+  SOURCES test/SimpleEncrypter_test.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  LINK_LIBRARIES BPhysToolsLib ${Boost_LIBRARIES}
+  POST_EXEC_SCRIPT nopost.sh 
+)
 
 
 # Executables in util subdirectory

@@ -81,13 +81,15 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints)
     actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
     actscf.addFlag('Acts.EDM.PersistifyTracks', False)
+    # set to True to use the PhaseII pixel and strip RAW data EDM
+    actscf.addFlag('Acts.EDM.PhaseII', False)
     actscf.addFlag('Acts.useCache', False)
     
     # Scheduling
     from InDetConfig.ITkActsHelpers import primaryPassUsesActs
     actscf.addFlag('Acts.doITkConversion', lambda pcf: (
         pcf.Detector.EnableCalo and primaryPassUsesActs(pcf)))
-    actscf.addFlag('Acts.doLargeRadius', False)
+    actscf.addFlag('Acts.doLargeRadius', True)
     actscf.addFlag('Acts.doLowPt', False)
     
     # Geometry Flags
@@ -113,7 +115,6 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerRadii', [480., 665., 880.])
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerHalflengthZ', [1370., 1370., 1370.])
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerThickness', [1., 1., 1.])
-
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)
@@ -176,5 +177,20 @@ def createActsConfigFlags():
 
     # Decorations
     actscf.addFlag('Acts.decoratePRD.sdoSiHit', lambda pcf: pcf.Tracking.doTIDE_AmbiTrackMonitoring)
-    
+
+    # GNN specific flags (scoped)
+    actscf.addFlag("Acts.GNN.Enable", False)
+    actscf.addFlag("Acts.GNN.ModuleMapPath", "<default>")
+    actscf.addFlag("Acts.GNN.ModelPath", "<default>")
+    actscf.addFlag("Acts.GNN.NumTrtContexts", 1)
+    actscf.addFlag("Acts.GNN.MaxGpuInstances", 1)
+    actscf.addFlag("Acts.GNN.VarianceInflation", 1.0)
+    actscf.addFlag("Acts.GNN.TightSeeds", False)
+    actscf.addFlag("Acts.GNN.MinCandidateMeasurements", 7)
+    actscf.addFlag("Acts.GNN.MinDeltaR", 15.0)
+    actscf.addFlag("Acts.GNN.EdgeCut", 0.5)
+    actscf.addFlag("Acts.GNN.RelaxCentralHoleSel", False)
+    actscf.addFlag("Acts.GNN.RelaxMeasurementSel", True)
+    actscf.addFlag("Acts.GNN.OfflineZ0Sel", False)
+
     return actscf

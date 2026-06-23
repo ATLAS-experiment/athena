@@ -223,9 +223,7 @@ bool Muon::TgcRODReadOut::isMatched(const TgcRawData& rdo1,
             if (rdo1.subMatrix() != rdo2.subMatrix()) {
                 return false;
             }
-            if (rdo1.segment() != rdo2.segment()) {
-                return false;
-            }
+            
             if (rdo1.position() != rdo2.position()) {
                 return false;
             }

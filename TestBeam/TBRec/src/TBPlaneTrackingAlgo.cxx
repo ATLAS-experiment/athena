@@ -46,11 +46,10 @@ StatusCode TBPlaneTrackingAlgo::initialize()
 }
 
 /////////////////////////////////////////
-StatusCode TBPlaneTrackingAlgo::execute()
+StatusCode TBPlaneTrackingAlgo::execute(const EventContext& ctx)
 /////////////////////////////////////////
 {
   ATH_MSG_DEBUG ("Executing TBPlaneTracking algorithm");
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   if(m_testAlgo == true){
     ATH_MSG_WARNING ("TBPlaneTrackingAlgo: " <<

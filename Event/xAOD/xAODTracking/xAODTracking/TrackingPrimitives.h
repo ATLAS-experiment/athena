@@ -419,7 +419,10 @@ namespace xAOD {
     etaLayer2TGCHoles = 74,  //!< number of eta holes in the second TGC trigger layer (T1)
     etaLayer3TGCHoles = 75,  //!< number of eta holes in the third  TGC trigger layer (T2)
     etaLayer4TGCHoles = 76,  //!< number of eta holes in the fourth TGC trigger layer (T3)
-
+    //CSC debugging
+    cscEtaHits = 77,           //!<number of CSC eta clusters on the track
+    cscUnspoiledEtaHits = 78,  //!<number of unspoiled CSC eta clusters on track
+    
     // New Small Wheel
     //STGC
     phiLayer1STGCHits  = 79,  //!< number of phi hits  in the first  STGC trigger layer (STGC1)
@@ -437,21 +440,31 @@ namespace xAOD {
     //MM
     MMHits = 87,
     MMHoles = 88,
-    // Note: there is currently no MuonStationIndex for the two MM layers
-    // In the future it might be needed to add them in order to have 
-    // separate counters as follows
-    // Layer1MMHits  = 87,  //!< number of eta hits  in the first  MM layer
-    // Layer2MMHits  = 88,  //!< number of eta hits  in the second MM layer
-    // Layer1MMHoles = 89,  //!< number of eta holes in the first  MM layer
-    // Layer2MMHoles = 90,  //!< number of eta holes in the second MM layer
+    
+    /** @brief These summary values are only used by the Phase-II 
+     *         tracking software */
+    innerTriggerEtaHits = 89,
+    innerTriggerPhiHits = 90,
 
+    middleTriggerEtaHits = 91,
+    middleTriggerPhiHits = 92,
+  
+    outerTriggerEtaHits = 93,
+    outerTriggerPhiHits = 94,
+  
+    innerTriggerEtaHoles = 95,
+    innerTriggerPhiHoles = 96,
 
-    //CSC debugging
-    cscEtaHits = 77,           //!<number of CSC eta clusters on the track
-    cscUnspoiledEtaHits = 78,  //!<number of unspoiled CSC eta clusters on track
+    middleTriggerEtaHoles = 97,
+    middleTriggerPhiHoles = 98,
+  
+    outerTriggerEtaHoles = 99,
+    outerTriggerPhiHoles = 100,
 
+    sTgcPadHits = 101,
+    
     // -- numbers...
-    numberOfMuonSummaryTypes       = 89
+    numberOfMuonSummaryTypes  
   };
 
   // Enums for rejection locations

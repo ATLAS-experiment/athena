@@ -469,7 +469,7 @@ def BPHY15Cfg(flags):
             flags, name = "BPHY15_SelectBcJpsipiEvent",
             expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc) > 0)"))
 
-      BPHY15_AnyVertexSkimmingTool = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY15_AnyVertexSkimmingTool", UseHandles = True,
+      BPHY15_AnyVertexSkimmingTool = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY15_AnyVertexSkimmingTool",
                                                                         VertexContainerNames =CascadeCollections )
       acc.addPublicTool(BPHY15_AnyVertexSkimmingTool)
       #====================================================================

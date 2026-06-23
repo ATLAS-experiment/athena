@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -29,7 +29,7 @@ class LArFlatFromFile: public AthAlgorithm
 
   // Athena algorithm's Hooks
   virtual StatusCode  initialize() override;
-  virtual StatusCode  execute() override {return StatusCode::SUCCESS;}
+  virtual StatusCode  execute(const EventContext&) override {return StatusCode::SUCCESS;}
   virtual StatusCode  finalize() override {return StatusCode::SUCCESS;}
   virtual StatusCode  stop() override;
 
@@ -43,7 +43,7 @@ class LArFlatFromFile: public AthAlgorithm
   void ofcFlat(const std::string& input, const std::string& outputName);
 
 
-  void errIfConnected(const HWIdentifier chid, const int gain, const std::string& objName, const std::string& message="") const;
+  void errIfConnected(const HWIdentifier chid, const int gain, std::string_view objName, std::string_view message={}) const;
 
   unsigned m_hashMax{};
   const LArOnlineID* m_onlineID{};

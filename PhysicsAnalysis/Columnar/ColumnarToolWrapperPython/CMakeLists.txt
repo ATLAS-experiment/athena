@@ -121,7 +121,7 @@ target_include_directories(
   PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/ColumnarToolWrapperPython"
 )
-target_link_libraries(python_tool_handle PRIVATE ColumnarToolWrapperPythonLib ColumnarCoreLib Python::Python)
+target_link_libraries(python_tool_handle PRIVATE ColumnarToolWrapperPythonLib ColumnarCoreLib CxxUtils Python::Python)
 
 # ATLAS CMake needs to be told about the Python libraries at link time.
 # This is NOT required for normal CMake.

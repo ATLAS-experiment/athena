@@ -75,7 +75,7 @@ StatusCode CutAlg::finalize()
 
 
 
-StatusCode CutAlg::execute()
+StatusCode CutAlg::execute(const EventContext& /*ctx*/)
 {
   // Increase the event counter
   ++m_nEventsProcessed;

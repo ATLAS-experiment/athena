@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -25,7 +25,7 @@ IdDictSubRegion& IdDictSubRegion::operator= (IdDictSubRegion&&) = default;
 void
 IdDictSubRegion::generate_implementation(const IdDictMgr& /*idd*/,
                                          IdDictDictionary& /*dictionary*/,
-                                         const std::string& /*tag*/) {
+                                         std::string_view /*tag*/) {
   std::cout << "IdDictSubRegion::generate_implementation - SHOULD NEVER BE CALLED " << std::endl;
 }
 
@@ -33,7 +33,7 @@ void
 IdDictSubRegion::generate_implementation(const IdDictMgr& idd,
                                          IdDictDictionary& dictionary,
                                          IdDictRegion& region,
-                                         const std::string& tag) {
+                                         std::string_view tag) {
   if (Debugger::debug()) {
     std::cout << "IdDictSubRegion::generate_implementation>" << std::endl;
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IMONITORTOOLBASE_H
@@ -8,6 +8,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include <vector>
 
+class EventContext;
 
 // Declaration of the interface ID ( interface id, major version, minor version) 
 static const InterfaceID IID_IMonitorToolBase("IMonitorToolBase", 1 , 0); 
@@ -36,7 +37,7 @@ class IMonitorToolBase : virtual public IAlgTool
   
   // book & fill (pure virtual)
   virtual StatusCode bookHists() = 0;
-  virtual StatusCode fillHists() = 0;
+  virtual StatusCode fillHists(const EventContext& ctx) = 0;
   virtual StatusCode finalHists() = 0;
   virtual StatusCode runStat() = 0;
   virtual StatusCode checkHists(bool fromFinalize) = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoEndcap/MbtsReadoutBuilder.h"
@@ -23,7 +23,7 @@ StatusCode LArGeo::buildMbtsReadout(StoreGateSvc* detStore
 				    , IRDBAccessSvc* paramSvc
 				    , IMessageSvc* msgSvc
 				    , double zposMM
-				    , const std::map<std::string,unsigned>& trdMap
+				    , const std::map<std::string,unsigned, std::less<>>& trdMap
 				    , const std::string& detKey
 				    , const std::string& detNode)
 {

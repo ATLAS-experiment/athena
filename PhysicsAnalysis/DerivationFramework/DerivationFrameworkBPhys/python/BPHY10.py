@@ -18,9 +18,10 @@ def BPHY10Cfg(flags):
         BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
         AugOriginalCountsCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
-
     acc = ComponentAccumulator()
     acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     isSimulation = flags.Input.isMC
 
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
@@ -57,7 +58,7 @@ def BPHY10Cfg(flags):
                               OutputVtxContainerName = "BPHY10JpsiCandidates",
                               PVContainerName        = "PrimaryVertices",
                               V0Tools                = V0Tools,
-                              PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                              PVRefitter             = PVrefit,
                               RefPVContainerName     = "SHOULDNOTBEUSED",
                               DoVertexType = 1)
     BPHY10_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
@@ -104,7 +105,7 @@ def BPHY10Cfg(flags):
                                     OutputVtxContainerName = "BPHY10BdJpsiKstCandidates",
                                     PVContainerName        = "PrimaryVertices",
                                     V0Tools                = V0Tools,
-                                    PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                    PVRefitter             = PVrefit,
                                     RefPVContainerName     = "BPHY10RefittedPrimaryVertices1",
                                     RefitPV                = True,
                                     MaxPVrefit             = 10000,
@@ -151,7 +152,7 @@ def BPHY10Cfg(flags):
                                   HypothesisName          = "Bd",
                                   TrkVertexFitterTool     = JpsiV0VertexFit,
                                   V0Hypothesis            = 310,
-                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                  PVRefitter             = PVrefit,
                                   JpsiMassLowerCut        = 2800.,
                                   JpsiMassUpperCut        = 4000.,
                                   V0MassLowerCut          = 400.,
@@ -169,7 +170,7 @@ def BPHY10Cfg(flags):
                                   V0Tools                 = V0Tools,
                                   HypothesisName          = "Lambda_b",
                                   TrkVertexFitterTool     = JpsiV0VertexFit,
-                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                  PVRefitter             = PVrefit,
                                   V0Hypothesis            = 3122,
                                   JpsiMassLowerCut        = 2800.,
                                   JpsiMassUpperCut        = 4000.,
@@ -188,7 +189,7 @@ def BPHY10Cfg(flags):
                                   HypothesisName          = "Lambda_bbar",
                                   V0Tools                 = V0Tools,
                                   TrkVertexFitterTool     = JpsiV0VertexFit,
-                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                  PVRefitter             = PVrefit,
                                   V0Hypothesis            = -3122,
                                   JpsiMassLowerCut        = 2800.,
                                   JpsiMassUpperCut        = 4000.,
@@ -219,8 +220,7 @@ def BPHY10Cfg(flags):
 
         BPHY10_cascadeCheck = CompFactory.DerivationFramework.AnyVertexSkimmingTool(
             "BPHY10_AnyVertexSkimmingTool",
-            VertexContainerNames =CascadeCollections,
-            UseHandles = True )
+            VertexContainerNames =CascadeCollections )
         BPHY10SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
             "BPHY10SkimmingOR",
             FilterList = [BPHY10_cascadeCheck, BPHY10_SelectBdJpsiKstEvent])

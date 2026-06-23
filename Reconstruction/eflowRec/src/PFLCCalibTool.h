@@ -28,7 +28,7 @@ class PFLCCalibTool : public extends<AthAlgTool, IPFBaseTool> {
   ~PFLCCalibTool() {}
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
+  virtual StatusCode execute(const EventContext& ctx, eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
   virtual StatusCode finalize() override;
 
  private:

@@ -67,7 +67,7 @@ namespace DerivationFramework {
     Gaudi::Property<bool> m_constrJpsi{this, "ApplyJpsiMassConstraint", true};
 
     PublicToolHandle < Trk::TrkVKalVrtFitter > m_iVertexFitter{this, "TrkVertexFitterTool", "Trk::TrkVKalVrtFitter"};
-    ToolHandle < Analysis::PrimaryVertexRefitter > m_pvRefitter{this, "PVRefitter", "Analysis::PrimaryVertexRefitter"}; // private tool
+    PublicToolHandle < Analysis::PrimaryVertexRefitter > m_pvRefitter{this, "PVRefitter", "Analysis::PrimaryVertexRefitter"}; // private tool
     PublicToolHandle < Trk::V0Tools > m_V0Tools{this, "V0Tools", "Trk::V0Tools"};
     PublicToolHandle < DerivationFramework::CascadeTools > m_CascadeTools{this, "CascadeTools", "DerivationFramework::CascadeTools"};
     ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///
@@ -108,12 +108,13 @@ namespace InDet {
       virtual ~InDetVKalVxInJetTool();
 
 
-      StatusCode initialize();
-      StatusCode finalize();
+      virtual StatusCode initialize() override;
+      virtual StatusCode finalize() override;
 
-      Trk::VxSecVertexInfo* findSecVertex(const xAOD::Vertex & primaryVertex,
-                                                const TLorentzVector & jetMomentum,
-                                                const std::vector<const xAOD::IParticle*> & inputTracks) const;
+      virtual Trk::VxSecVertexInfo* findSecVertex(const EventContext& ctx,
+                                          const xAOD::Vertex & primaryVertex,
+                                          const TLorentzVector & jetMomentum,
+                                          const std::vector<const xAOD::IParticle*> & inputTracks) const override;
 
 //------------------------------------------------------------------------------------------------------------------
 // Private data and functions
@@ -471,7 +472,8 @@ namespace InDet {
 
 
       template <class Trk>
-      double fitCommonVrt(std::vector<const Trk*>& listSecondTracks,
+      double fitCommonVrt(const EventContext& ctx,
+                          std::vector<const Trk*>& listSecondTracks,
                           std::vector<float>   & trkRank,
                           const xAOD::Vertex   & primVrt,
                           const TLorentzVector & jetDir,
@@ -519,7 +521,8 @@ namespace InDet {
 
 
       template <class Trk>
-      int select2TrVrt(std::vector<const Trk*>  & SelectedTracks,
+      int select2TrVrt(const EventContext& ctx,
+                        std::vector<const Trk*>  & SelectedTracks,
                         std::vector<const Trk*>  & TracksForFit,
                         const xAOD::Vertex       & primVrt,
                         const TLorentzVector     & JetDir,

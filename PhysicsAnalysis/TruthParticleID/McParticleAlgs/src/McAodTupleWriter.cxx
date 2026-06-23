@@ -62,7 +62,7 @@ StatusCode McAodTupleWriter::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode McAodTupleWriter::execute()
+StatusCode McAodTupleWriter::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 

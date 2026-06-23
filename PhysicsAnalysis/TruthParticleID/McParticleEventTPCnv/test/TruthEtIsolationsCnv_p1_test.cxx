@@ -17,7 +17,6 @@
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
 #include <iostream>
 
@@ -53,7 +52,6 @@ void testit (const TruthEtIsolations& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE (SGTest::TestStore& store)
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
 
   auto evcoll = std::make_unique<McEventCollection>();
   evcoll->push_back (std::make_unique<HepMC::GenEvent>());

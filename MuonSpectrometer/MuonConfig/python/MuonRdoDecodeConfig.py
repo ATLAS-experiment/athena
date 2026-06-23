@@ -288,27 +288,28 @@ def MdtRDODecodeCfg(flags, name="MuonMdtRdoToPrdConv", RDOContainer = None, **kw
     if tool_kwargs['UseTwin']:
         acc.merge(MdtTwinTubeMapCondAlgCfg(flags))
 
-    writexAOD = flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup
-    tool_kwargs["xAODKey"] =  "xMdtDriftCircles" if writexAOD else ""
-    tool_kwargs["xAODTwinKey"] =  "xMdtTwinDriftCircles" if writexAOD else ""
-    
-    tool_kwargs["UseR4DetMgr"]  = flags.Muon.usePhaseIIGeoSetup
     tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, 
                                                                                 DoPropagationCorrection = False))
     if RDOContainer: tool_kwargs["RDOContainer"] = RDOContainer
-    # Get the RDO -> PRD tool
-    kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool", **tool_kwargs))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg
     kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags)))
     
-    # Add the RDO -> PRD alorithm
-    acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
-    if writexAOD:
+    # Add RDO -> PRD algorithm for Phase II
+    if flags.Muon.usePhaseIIGeoSetup:
+        kwargs["DecodingTool"] = CompFactory.MuonR4.MdtRdoToMdtPrepDataTool(name="MdtRdoToMdtPrepDataTool", **tool_kwargs)
+        acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
         suffix = name[name.find("_") :] if name.find("_") != -1 else ""
         from xAODMuonViewAlgs.ViewAlgsConfig import MdtMeasViewAlgCfg
         acc.merge(MdtMeasViewAlgCfg(flags, name=f"MdtMeasViewAlg{suffix}"))
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xMdtToPrepDataCnvAlgCfg
+        acc.merge(xMdtToPrepDataCnvAlgCfg(flags, name=f"xAODMdtToPrepDataCnvAlg{suffix}"))
+    # else, use legacy
+    else: 
+        kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool", **tool_kwargs))
+        acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
+
     return acc
 
 

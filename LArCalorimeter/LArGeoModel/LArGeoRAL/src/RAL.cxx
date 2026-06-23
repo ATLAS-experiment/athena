@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArGeoRAL/RAL.h"
@@ -20,7 +20,7 @@
 
 namespace LArGeo {
 
-  double RAL::GetValue(const std::string& a_name,
+  double RAL::GetValue(std::string_view a_name,
 			   const int a0,
 			   const int a1,
 			   const int a2,
@@ -49,7 +49,8 @@ namespace LArGeo {
 
     // We didn't find a match.  Throw an exception
     MsgStream log(Athena::getMessageSvc(),"RAL");
-    std::string errMessage = "RAL::GetValue: could not find a match for the key '" + a_name;
+    std::string errMessage = "RAL::GetValue: could not find a match for the key '";
+    errMessage.append(a_name);
     log << MSG::FATAL << errMessage << endmsg;
     throw std::runtime_error(errMessage);
 

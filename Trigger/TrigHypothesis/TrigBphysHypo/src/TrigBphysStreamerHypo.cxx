@@ -95,9 +95,8 @@ StatusCode TrigBphysStreamerHypo::execute( const EventContext& context ) const {
       if (msgLvl(MSG::DEBUG)) {
         const xAOD::Muon* muon = *(muonLinkInfo.link);
         if (muon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) {
-          const ElementLink<xAOD::TrackParticleContainer> trackEL = muon->inDetTrackParticleLink();
-          ATH_CHECK( trackEL.isValid() );
-          const xAOD::TrackParticle* track = *trackEL;
+          const xAOD::TrackParticle* track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+          ATH_CHECK( track != nullptr );
           ATH_MSG_DEBUG( " -- muon pt/eta/phi/q: " << track->pt() << " / " << track->eta() << " / " << track->phi() << " / " << track->charge() );
           ATH_MSG_DEBUG( " Allowed decisions:" );
           DecisionIDContainer IDs;

@@ -21,7 +21,7 @@
 
 #include "TriggerEDMSerialiserTool.h"
 #include "TriggerEDMCLIDs.h"
-
+#include <CxxUtils/StringUtilsTemplates.h>
 #include <numeric>
 
 namespace {
@@ -90,17 +90,16 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
   ATH_MSG_DEBUG("Parsing " << typeKeyAuxIDs);
 
   // Syntax: 'collectionKeyType;module1,module2,...[;allowTruncation]'
-  std::vector<std::string> def;
-  boost::split( def, typeKeyAuxIDs, boost::is_any_of(";") );
+  std::vector<std::string_view> def = CxxUtils::tokenize<std::string_view, char>(typeKeyAuxIDs, ';');
 
   if ( def.size() < 2 ) {
     ATH_MSG_ERROR("Invalid EDM collection specification: " << typeKeyAuxIDs);
     return StatusCode::FAILURE;
   }
 
-  const std::string typeKeyAux = def[0];
-  const std::string configuredType = typeKeyAux.substr( 0, typeKeyAux.find('#') );
-  const std::string key = typeKeyAux.substr( typeKeyAux.find('#')+1, typeKeyAux.find('.')-typeKeyAux.find('#') );
+  const std::string_view typeKeyAux = def[0];
+  const std::string_view configuredType = typeKeyAux.substr( 0, typeKeyAux.find('#') );
+  const std::string_view key = typeKeyAux.substr( typeKeyAux.find('#')+1, typeKeyAux.find('.')-typeKeyAux.find('#') );
 
   std::string transientType;
   std::string persistentType;
@@ -143,10 +142,7 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
     truncationMode = Address::Truncation::Allowed;
   }
 
-  std::vector<std::string> splitModuleIDs;
-  boost::split( splitModuleIDs, def[1], boost::is_any_of(",") );
-  std::vector<uint16_t> moduleIdVec;
-  for ( const auto& module: splitModuleIDs ) moduleIdVec.push_back( std::stoi( module ) );
+  std::vector<uint16_t> moduleIdVec = CxxUtils::tokenize<uint16_t, char>(def[1], ',');
   std::sort(moduleIdVec.begin(), moduleIdVec.end());
 
   if (moduleIdVec.empty()) {
@@ -161,7 +157,7 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
     xAOD::AuxSelection sel;
     if ( typeKeyAux.find('.') != std::string::npos ) { // Aux, possibly with selection of variables
       ATH_MSG_DEBUG( "with aux content: "  );
-      const std::string allVars = typeKeyAux.substr( typeKeyAux.find('.')+1 );
+      const std::string allVars = std::string(typeKeyAux.substr( typeKeyAux.find('.')+1 ));
       if (!allVars.empty()) {
         std::set<std::string> variableNames;
         boost::split( variableNames, allVars, [](const char c){ return c == '.'; } );
@@ -172,12 +168,12 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
         }
         sel.selectAux( variableNames );
       }
-      addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::xAODAux, truncationMode, sel} );
+      addressVec.push_back( {transientType, persistentType, clid, std::string(key), moduleIdVec, Address::Category::xAODAux, truncationMode, sel} );
     } else {
-      addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::xAODInterface, truncationMode} );
+      addressVec.push_back( {transientType, persistentType, clid, std::string(key), moduleIdVec, Address::Category::xAODInterface, truncationMode} );
     }
   } else { // an old T/P type
-    addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::OldTP, truncationMode} );
+    addressVec.push_back( {transientType, persistentType, clid, std::string(key), moduleIdVec, Address::Category::OldTP, truncationMode} );
   }
   return StatusCode::SUCCESS;
 }

@@ -58,7 +58,7 @@ CLHEP::HepLorentzVector xAODTruthParticleSlimmerTau::sumDaughterNeutrinos(const 
   return nu;
 }
 
-StatusCode xAODTruthParticleSlimmerTau::execute()
+StatusCode xAODTruthParticleSlimmerTau::execute(const EventContext& ctx)
 {
 
   CLHEP::HepLorentzVector nutau;
@@ -71,12 +71,12 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
   }
 
   // Create new output container
-  SG::WriteHandle<xAOD::TruthParticleContainer> xTruthTauParticleContainer(m_xaodTruthTauParticleContainerName);
+  SG::WriteHandle<xAOD::TruthParticleContainer> xTruthTauParticleContainer(m_xaodTruthTauParticleContainerName, ctx);
   ATH_CHECK(xTruthTauParticleContainer.record(std::make_unique<xAOD::TruthParticleContainer>(), std::make_unique<xAOD::TruthParticleAuxContainer>()));
   ATH_MSG_INFO("Recorded TruthTauParticleContainer with key: " << m_xaodTruthTauParticleContainerName.key());
 
   // Retrieve full TruthParticle container
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_xaodTruthParticleContainerName};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_xaodTruthParticleContainerName, ctx};
   if ( !xTruthParticleContainer.isValid() )
     {
       ATH_MSG_ERROR("No TruthParticle collection with name " << m_xaodTruthParticleContainerName.key() << " found in StoreGate!");

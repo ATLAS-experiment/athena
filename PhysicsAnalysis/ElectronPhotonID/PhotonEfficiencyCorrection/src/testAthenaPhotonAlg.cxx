@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhotonEfficiencyCorrection includes
@@ -35,47 +35,48 @@ StatusCode testAthenaPhotonAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode testAthenaPhotonAlg::execute() {  
+StatusCode testAthenaPhotonAlg::execute(const EventContext& /*ctx*/) {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
 //----------------------------
  // Event information
- //--------------------------- 
+ //---------------------------
  const xAOD::EventInfo* eventInfo = nullptr; //NOTE: Everything that comes from the storegate direct from the input files is const!
 
  // ask the event store to retrieve the xAOD EventInfo container
  //ATH_CHECK( evtStore()->retrieve( eventInfo, "EventInfo") );  // the second argument ("EventInfo") is the key name
  ATH_CHECK( evtStore()->retrieve( eventInfo) );
  // if there is only one container of that type in the xAOD (as with the EventInfo container), you do not need to pass
- // the key name, the default will be taken as the only key name in the xAOD 
- 
+ // the key name, the default will be taken as the only key name in the xAOD
+
  // check if data or MC
  bool isMC = true;
  if(!eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION ) ){
    isMC = false;
  }
  if(!isMC) ATH_MSG_ERROR("This is data, no scale factors should be used on the data!");
- 
+
  //---------
  // photons
  //---------
  const xAOD::PhotonContainer* photons = nullptr;
  ATH_CHECK( evtStore()->retrieve( photons, "Photons") );
  ATH_MSG_DEBUG("Found "<<photons->size() <<" photons in event, itterate....");
- 
+
 // Let's create a shallow copy of the const photon container, and decorate it with the obtained SF
-auto inContShallowCopy = xAOD::shallowCopyContainer( *photons );
+auto inContShallowCopy = xAOD::shallowCopy( *photons );
 
 //creates a new photon container to hold the subset as well as the needed auxiliary container
-  xAOD::PhotonContainer* myphotons = new xAOD::PhotonContainer;
-  xAOD::PhotonAuxContainer* myphotonsAux = new xAOD::PhotonAuxContainer;
+  auto umyphotons = std::make_unique<xAOD::PhotonContainer>();
+  auto myphotonsAux = std::make_unique<xAOD::PhotonAuxContainer>();
   // You need to tell the photon container in which auxiliary container it should write its member variables
-  myphotons->setStore( myphotonsAux ); //gives it a new associated aux container
+  umyphotons->setStore( myphotonsAux.get() ); //gives it a new associated aux container
 
   // Also record to storegate: you must record both the container and the auxcontainer.
   // Note that storegate takes ownership of these objects, i.e., you must not try to delete them yourself.
-  ATH_CHECK( evtStore()->record(myphotons,  "MyPhotons" ) );
-  ATH_CHECK( evtStore()->record(myphotonsAux, "MyPhotonsAux" ) );
+  xAOD::PhotonContainer* myphotons = umyphotons.get();
+  ATH_CHECK( evtStore()->record(std::move(umyphotons),  "MyPhotons" ) );
+  ATH_CHECK( evtStore()->record(std::move(myphotonsAux), "MyPhotonsAux" ) );
 
 // Loop over all Photons in the shallow-copy container, decorate it with SF, and store in new xAOD file, in addition print out all SF (with get* function)
 for ( xAOD::Photon* ph : *(inContShallowCopy.first) ) {
@@ -94,17 +95,17 @@ for ( xAOD::Photon* ph : *(inContShallowCopy.first) ) {
 	continue;
   }
   ATH_MSG_DEBUG( "  photon SF = " << SF <<", photon SF sys error = " << SFerr );
-  
+
   // applyEfficiencyScaleFactor - decorate the object (*photon)
   if ( m_photonSF->applyEfficiencyScaleFactor(*ph) == CP::CorrectionCode::Error ) {
     ATH_MSG_ERROR("PhotonEfficiencyCorrectionTool reported a CP::CorrectionCode::Error");
     return StatusCode::FAILURE;
   }
 
-  myphotons->push_back(ph); // add it to a new photon container which will be writed to a new file
+  // add it to a new photon container which will be writed to a new file
+  myphotons->push_back(std::make_unique<xAOD::Photon>());
+  *(myphotons->back()) = *ph;
 } // and loop on photons
 
   return StatusCode::SUCCESS;
 }
-
-

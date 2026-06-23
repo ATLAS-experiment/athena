@@ -214,7 +214,7 @@ StatusCode ALFA_LocRecCorr::initialize()
 	return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_LocRecCorr::execute()
+StatusCode ALFA_LocRecCorr::execute(const EventContext& /*ctx*/)
 {
 	ATH_MSG_DEBUG("begin ALFA_LocRecCorr::Execute()");
 

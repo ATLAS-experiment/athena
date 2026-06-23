@@ -6,7 +6,6 @@
 
 // EtaJESCalibStep.cxx 
 // Implementation file for class EtaJESCalibStep
-// Author: Max Swiatlowski <mswiatlo@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
 #include "JetCalibTools/EtaJESCalibStep.h"
@@ -44,7 +43,7 @@ StatusCode EtaJESCalibStep::initialize(){
 }
 
 StatusCode EtaJESCalibStep::calibrate(xAOD::JetContainer& jets) const {
-  ATH_MSG_DEBUG("Calibrating jet collection.");
+  ATH_MSG_DEBUG("Calibrating jet collection with EtaJES.");
 
 
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> jesScaleMomAcc(m_jetOutScale); 
@@ -116,7 +115,7 @@ bool EtaJESCalibStep::readMCJESFromText()
       ATH_MSG_VERBOSE("reading: " << key << " = "<< config.GetValue(key,""));
       std::vector<double> params = VectorizeD(config.GetValue(key,"")," ");
       m_nPar = params.size();	
-      ATH_MSG_VERBOSE("Number of parameters: " << m_nPar);      
+      ATH_MSG_VERBOSE("Number of parameters: " << m_nPar);
       for (uint ipar=0;ipar<m_nPar;++ipar) m_JESFactors[ieta][ipar] = params[ipar];
       if(m_lowPtExtrap > 0) {
 	//Calculate the slope of the response curve at the minPt for each eta bin

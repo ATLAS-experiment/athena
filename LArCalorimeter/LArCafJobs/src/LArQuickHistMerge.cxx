@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Standalone compilation:
@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <fstream>
 
@@ -78,7 +79,7 @@ private:
 
 private:
   bool isExcluded(const std::string& dir);
-  std::map<std::string,histDir_t> m_data;
+  std::map<std::string,histDir_t, std::less<>> m_data;
   bool m_dbg;
   std::vector<std::string> m_exclusion;
   
@@ -110,8 +111,8 @@ bool histCollection::isExcluded(const std::string& dir) {
 
 
 void histCollection::print() {
-  std::map<std::string,histDir_t>::const_iterator it=m_data.begin();
-  std::map<std::string,histDir_t>::const_iterator it_e=m_data.end();
+  auto it=m_data.begin();
+  auto it_e=m_data.end();
   for(;it!=it_e;++it) {
     const histDir_t& hd=it->second;
     std::cout << "Dir: " << it->first <<" has "<<hd.histos.size()<<" histos"<<std::endl;
@@ -308,7 +309,7 @@ void histCollection::addDirectory(TDirectory* dir, const std::string& dirName) {
     }
 
     if (!strncmp(classname,"TH1",3) || !strncmp(classname,"TH2",3) || !strncmp(classname,"TProfile",8)) {
-      std::map<std::string,histDir_t>::iterator mIt=m_data.find("dirName");
+      auto mIt=m_data.find("dirName");
       
       if (mIt==m_data.end()) { // New top-level directory
 	TTree* md=(TTree*)dir->Get("metadata");
@@ -349,8 +350,8 @@ void histCollection::addDirectory(TDirectory* dir, const std::string& dirName) {
 
 
 void histCollection::addFile(TFile* in) {
-  std::map<std::string,histDir_t>::const_iterator it=m_data.begin();
-  std::map<std::string,histDir_t>::const_iterator it_e=m_data.end();
+  auto it=m_data.begin();
+  auto it_e=m_data.end();
   for(;it!=it_e;++it) {
     const std::string& dirName=it->first;
     const histDir_t& hd=it->second;
@@ -378,8 +379,8 @@ void histCollection::write(TFile* out) {
   unsigned nIgnored=0;
   TDirectory* histDir=nullptr;
   std::string lastDir;
-  std::map<std::string,histDir_t>::const_iterator it=m_data.begin();
-  std::map<std::string,histDir_t>::const_iterator it_e=m_data.end();
+  auto it=m_data.begin();
+  auto it_e=m_data.end();
   for(;it!=it_e;++it) {
     const std::string fulldir=it->first + "/";
     //Create dirs if necessary
@@ -425,7 +426,7 @@ void histCollection::write(TFile* out) {
   return;
 }
 
-std::vector<std::string> splitString(const std::string& in, const std::string& delim) {
+std::vector<std::string> splitString(const std::string& in, std::string_view delim) {
   std::vector<std::string> retvec;
   size_t pos1=0,pos2=0;
   while (pos2!=std::string::npos) {
@@ -539,9 +540,9 @@ int main(int argc, char** argv) {
 
   }
   else {
-    //clean superfluos slash characters
+    //clean superfluous slash characters
     for (size_t i=0;i<baseDirs.size();++i) {
-      std::vector<std::string> dirtok=splitString(baseDirs[i],std::string("/"));
+      const std::vector<std::string> & dirtok=splitString(baseDirs[i],"/");
       if (dirtok.empty()) {
 	baseDirs[i].clear();
 	continue;

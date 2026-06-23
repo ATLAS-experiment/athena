@@ -114,12 +114,12 @@ StatusCode LarEMSamplingFraction::finalize()
 
 //###############################################################################
 
-StatusCode LarEMSamplingFraction::execute()
+StatusCode LarEMSamplingFraction::execute(const EventContext& ctx)
 {
-  SG::ReadCondHandle<ILArfSampl> fSamplHdl(m_fSamplKey);
+  SG::ReadCondHandle<ILArfSampl> fSamplHdl(m_fSamplKey, ctx);
   const ILArfSampl* fSampl=*fSamplHdl;
 
-  SG::ReadCondHandle<TileSamplingFraction> tileSamplingFraction(m_tileSamplingFractionKey);
+  SG::ReadCondHandle<TileSamplingFraction> tileSamplingFraction(m_tileSamplingFractionKey, ctx);
   ATH_CHECK( tileSamplingFraction.isValid() );
 
   const CaloCalibrationHitContainer* cchc;
@@ -162,7 +162,7 @@ StatusCode LarEMSamplingFraction::execute()
   //see https://gitlab.cern.ch/atlas/athena/blob/master/Calorimeter/CaloCalibHitRec/src/CalibHitToCaloCell.cxx
   //and https://gitlab.cern.ch/atlas/athena/blob/master/Calorimeter/CaloCalibHitRec/src/CaloDmEnergy.cxx
   
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* caloMgr = *caloMgrHandle;
 	

@@ -47,7 +47,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;
   }
   
-  StatusCode MuonFeatureCnvAlg::execute() {
+  StatusCode MuonFeatureCnvAlg::execute(const EventContext& /*ctx*/) {
     
     // Retrieve the AOD container:
     // MuonFeature

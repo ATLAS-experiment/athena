@@ -73,9 +73,9 @@ StatusCode IDPerfMuonRefitter::initialize()
 
 
 
-StatusCode IDPerfMuonRefitter::execute()
+StatusCode IDPerfMuonRefitter::execute(const EventContext& ctx)
 {
-  SG::ReadHandle<xAOD::MuonContainer> pxMuonContainer (m_muonContainerKey);
+  SG::ReadHandle<xAOD::MuonContainer> pxMuonContainer (m_muonContainerKey, ctx);
   TrackCollection* muonTrks  = new TrackCollection(SG::OWN_ELEMENTS);
   TrackCollection* muonTrksRefit1  = new TrackCollection(SG::OWN_ELEMENTS);
   TrackCollection* muonTrksRefit2  = new TrackCollection(SG::OWN_ELEMENTS);
@@ -85,7 +85,7 @@ StatusCode IDPerfMuonRefitter::execute()
       continue;
     }
 	  ++m_N_Muons;
-    const xAOD::TrackParticle* idTP =   muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+    const xAOD::TrackParticle* idTP =   muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
     if (!idTP) {
        ATH_MSG_DEBUG("ID TrackParticles missing!  Skipping Muon");
        continue;
@@ -102,7 +102,7 @@ StatusCode IDPerfMuonRefitter::execute()
       muonTrks->push_back(defaultMuonTrk);
       IegammaTrkRefitterTool::Cache cache1{}; 
       cache1.electron=eg; 
-      fitStatus = m_TrackRefitter1->refitTrack( Gaudi::Hive::currentContext(),idTP->track(), cache1 );
+      fitStatus = m_TrackRefitter1->refitTrack( ctx,idTP->track(), cache1 );
       ++m_N_MuonsRefit;
       if (fitStatus == StatusCode::SUCCESS) {
         refit1MuonTrk = cache1.refittedTrack.release();
@@ -114,7 +114,7 @@ StatusCode IDPerfMuonRefitter::execute()
       }
       IegammaTrkRefitterTool::Cache cache2{}; 
       cache2.electron=eg; 
-      fitStatus = m_TrackRefitter2->refitTrack(Gaudi::Hive::currentContext(),idTP->track(), cache2 );
+      fitStatus = m_TrackRefitter2->refitTrack(ctx,idTP->track(), cache2 );
       if (fitStatus == StatusCode::SUCCESS) {
         refit2MuonTrk = cache2.refittedTrack.release();
         muonTrksRefit2->push_back(refit2MuonTrk);

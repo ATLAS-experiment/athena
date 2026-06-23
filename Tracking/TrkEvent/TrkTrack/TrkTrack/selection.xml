@@ -16,6 +16,11 @@
   <!-- This is also TrackViewVector::Pers_t -->
   <class name="std::vector<ElementLink<TrackCollection > >" id="FBAE722E-DF5B-4811-8132-4D80DBB2688C"/>
 
+  <!-- Extra dictionaries needed to avoid cling assertion failures in the
+       dbg build with ROOT 6.38.04. See ATEAM-1143. -->
+  <class name="std::allocator<ElementLink<TrackCollection > >" />
+  <class name="std::_Vector_base<ElementLink<TrackCollection >, std::allocator<ElementLink<TrackCollection > > >" />
+
   <!-- TSoS --> 
   <class name="Trk::TrackStateOnSurface" />
   <class name="DataVector<const Trk::TrackStateOnSurface>" />

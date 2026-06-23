@@ -87,8 +87,8 @@ namespace DerivationFramework {
         if (foundVertex) break;
       }
       if ( foundVertex ) {
-        iPandSigma= m_tool->estimate(trItr,foundVertex,true);
-        iPandSigmaBiased = m_tool->estimate(trItr,foundVertex,false);
+        iPandSigma= m_tool->estimate(ctx,trItr,foundVertex,true);
+        iPandSigmaBiased = m_tool->estimate(ctx,trItr,foundVertex,false);
         if( !iPandSigma )       ATH_MSG_WARNING ("trackToVertexIPEstimator failed !");
         if( !iPandSigmaBiased ) ATH_MSG_WARNING ("trackToVertexIPEstimator biased IP failed !");
       }

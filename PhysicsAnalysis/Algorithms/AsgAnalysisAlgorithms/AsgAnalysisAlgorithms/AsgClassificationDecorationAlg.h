@@ -10,7 +10,6 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
-#include <xAODBase/IParticle.h>
 #include <xAODBase/IParticleContainer.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 

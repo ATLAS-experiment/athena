@@ -1,19 +1,13 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcSensitiveDetector.h"
 #include "MuonSensitiveDetectorsR4/Utils.h"
 #include "G4ThreeVector.hh"
 #include "G4Trd.hh"
-#include "G4Geantino.hh"
-#include "G4ChargedGeantino.hh"
-
-#include "MCTruth/TrackHelper.h"
-#include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
-#include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GeoModelKernel/throwExcept.h"
 
@@ -38,6 +32,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
   const ActsTrk::GeometryContext gctx{getGeoContext()};
 
+
   const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);
   ATH_MSG_VERBOSE(" Track is inside volume "
                  <<touchHist->GetHistory()->GetTopVolume()->GetName()
@@ -50,7 +45,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   const Amg::Vector3D locStepDir = (locPostStep - locPreStep).unit();
   const std::optional<double> lambda = Amg::intersect<3>(locPreStep, locStepDir, Amg::Vector3D::UnitX(), 0.);
   Amg::Vector3D gapCentreCross =  localToGlobal * ( (lambda ? 1. : 0.) *locPreStep + lambda.value_or(0.) * locStepDir);
-  const Identifier etaHitID = getIdentifier(gctx, readOutEle, gapCentreCross, false);
+  const Identifier etaHitID = getIdentifier(gctx, readOutEle, gapCentreCross);
   if (!etaHitID.is_valid()) {
       ATH_MSG_VERBOSE("No valid hit found");
       return true;
@@ -63,9 +58,9 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
 Identifier RpcSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                                const MuonGMR4::RpcReadoutElement* readOutEle, 
-                                               const Amg::Vector3D& hitAtGapPlane, bool phiGap) const {
+                                               const Amg::Vector3D& hitAtGapPlane) const {
   const RpcIdHelper& idHelper{m_detMgr->idHelperSvc()->rpcIdHelper()};
-
+  constexpr bool phiGap = false;
   const Identifier firstChan = idHelper.channelID(readOutEle->identify(),
                                                   readOutEle->doubletZ(),
                                                   readOutEle->doubletPhi(), 1, phiGap, 1);

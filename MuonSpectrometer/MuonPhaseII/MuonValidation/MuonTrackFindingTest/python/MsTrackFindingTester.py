@@ -3,9 +3,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, **kwargs):
+def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, 
+                     outFile="MsTrkTester.root", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    
+    result.merge(setupHistSvcCfg(flags, outFile=outFile,
+                                 outStream="MuonTrackTester"))
+
     from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
@@ -44,30 +50,22 @@ if __name__=="__main__":
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
-    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.RDO_R3)
    
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     flags.Trigger.Muon.useNewRegionSelector = False
+    flags.Muon.includePileUpTruth = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonTrackTester"))
+    cfg.getService("MessageSvc").setVerbose= []
 
-    # cfg.getService("MessageSvc").setVerbose = ["MsTrackTester", "MSTrackFinderAlg", "MuonSegmentFittingAlg"]
-    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
-    cfg.merge(xAODUncalibMeasPrepCfg(flags))
-    
-    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
-    cfg.merge(MuonSpacePointFormationCfg(flags))
+ 
+    from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
+    cfg.merge(MuonReconstructionConfig(flags))
 
-    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-    cfg.merge(MuonPatternRecognitionCfg(flags))
-
-    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
-    cfg.merge(MSTrackFinderAlgCfg(flags))
     
     #### Schedule the legacy MS track building to compare the two reconstruction chains
     from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
@@ -75,7 +73,8 @@ if __name__=="__main__":
     if not args.noLegacyChain:
         cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain))
+    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain,
+                                      outFile = args.outRootFile))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))

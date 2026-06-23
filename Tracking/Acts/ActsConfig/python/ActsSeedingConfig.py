@@ -19,7 +19,7 @@ def ActsGbtsFtfSeedingTrigToolCfg(flags,name: str = "GbtsFtfActsSeedingTool", **
   kwargs.setdefault("DoPhiFiltering", False) #no phi-filtering for full-scan tracking
   kwargs.setdefault("UseBeamTilt", False)
 
-  isLargeD0 = flags.Tracking.ActiveConfig.extension in ["LargeD0", "ActsLargeRadius"]
+  isLargeD0 = flags.Tracking.ActiveConfig.isLargeD0
   
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
   kwargs.setdefault("MaxGraphEdges", 3000000)
@@ -181,9 +181,9 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
     kwargs.setdefault("deltaRMinBottomSP", 50. * ActsUnits.mm)
     kwargs.setdefault("deltaRMaxBottomSP", 250. * ActsUnits.mm)
     kwargs.setdefault("deltaZMax", 850. * ActsUnits.mm)
-    kwargs.setdefault("cotThetaMax", 6.0)
+    kwargs.setdefault("cotThetaMax", 5.0)
     kwargs.setdefault("maxSeedsPerSpM", 1)
-    kwargs.setdefault("maxStripDeltaCotTheta", 0.5)
+    kwargs.setdefault("maxStripDeltaCotTheta", 0.3)
     kwargs.setdefault("absDeltaEtaWeightFactor", 10.)
     kwargs.setdefault("absDeltaEtaMinImpact", 2.)
     kwargs.setdefault("zBinEdges", [-3000., -2500, -1400., -910., -500., -250.,  250., 500., 910., 1400., 2500, 3000.])
@@ -229,10 +229,32 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
       [0.0, 0.0]        # 2500, 3000
     ])
 
+    kwargs.setdefault("seedConfirmation", True)
+    kwargs.setdefault("seedConfirmationInFilter", True)
+    kwargs.setdefault("zOriginWeightFactor", 1.)
+    kwargs.setdefault("maxSeedsPerSpMConf", 1)
+    kwargs.setdefault("maxQualitySeedsPerSpMConf", 1)
+    kwargs.setdefault("seedConfCentralZMin",              -1400. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralZMax",               1400. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralRMax",                140. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralNTopLargeR",         1)
+    kwargs.setdefault("seedConfCentralNTopSmallR",         0)
+    kwargs.setdefault("seedConfCentralMinBottomRadius",      0. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralMaxZOrigin",        1500. * ActsUnits.mm)
+    kwargs.setdefault("seedConfCentralMinImpact",          200. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardZMin",              -3000. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardZMax",               3000. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardRMax",                140. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardNTopLargeR",         1)
+    kwargs.setdefault("seedConfForwardNTopSmallR",         0)
+    kwargs.setdefault("seedConfForwardMinBottomRadius",    350. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardMaxZOrigin",        1500. * ActsUnits.mm)
+    kwargs.setdefault("seedConfForwardMinImpact",          200. * ActsUnits.mm)
+
     return ActsStripSeedingToolCfg(flags, name, **kwargs)
 
 def ActsPixelGbtsSeedingToolCfg(flags,
-                                name: str = "ActsPixelGbtsSeedingTool", 
+                                name: str = "ActsPixelGbtsSeedingTool",
                                 **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     if "layerNumberTool" not in kwargs:
@@ -248,6 +270,34 @@ def ActsPixelGbtsSeedingToolCfg(flags,
     kwargs.setdefault("minPt" , flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
 
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name = name, **kwargs))
+    return acc
+
+def ActsStripGbtsSeedingToolCfg(flags,
+                                name: str = "ActsStripGbtsSeedingTool",
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    if "layerNumberTool" not in kwargs:
+        from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
+        ntargs = {"UseNewLayerScheme": True}
+        kwargs.setdefault(
+            "layerNumberTool",
+            acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
+        )
+    ## For ITkStrip LRT, enable LRT mode and use the LRT connector file
+    kwargs.setdefault("LRTmode", True)
+    kwargs.setdefault("useML", False)
+    kwargs.setdefault("connectorInputFile", find_datafile("binTables_ITK_RUN4_LRT.txt"))
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
+    kwargs.setdefault("d0Max", 300. * ActsUnits.mm)
+    kwargs.setdefault("filterMaxZ0", 500. * ActsUnits.mm)
+    kwargs.setdefault("cutDPhiMax", 0.07)
+    kwargs.setdefault("cutDCurvMax", 0.015)
+    kwargs.setdefault("tauRatioCut", 0.015)
+    kwargs.setdefault("minZ0", -600.0)
+    kwargs.setdefault("maxZ0", 600.0)
+    kwargs.setdefault("minDeltaPhi", 0.01)
+    kwargs.setdefault("maxOuterRadius", 1050.0)
+    acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name=name, **kwargs))
     return acc
 
 # ACTS algorithm using Athena objects upstream
@@ -310,7 +360,10 @@ def ActsStripSeedingAlgCfg(flags,
 
     if "SeedTool" not in kwargs:
         if flags.Tracking.ActiveConfig.isLargeD0:
-            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags)))
+            if flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
+                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripGbtsSeedingToolCfg(flags)))
+            else:
+                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags)))
         else:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags)))
 
@@ -371,7 +424,7 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
 
     # For conversion pass we do not process pixels
     from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius", "ActsValidateLargeRadiusStandalone"]:
+    if flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
         processPixels = False
     # For main pass disable strips if fast tracking configuration
     elif isFastPrimaryPass(flags):
@@ -386,7 +439,10 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
         kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags,
                                                                                                    name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool')))
 
-    if processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
+    if processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.Gbts and flags.Tracking.ActiveConfig.isLargeD0:
+        kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsStripGbtsSeedingToolCfg(flags,
+                                                                                                        name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
+    elif processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
         if flags.Tracking.ActiveConfig.isLargeD0:
             kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags,
                                                                                                                    name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
@@ -430,10 +486,11 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
         # Space Point naming is not yet fully connected to tracking passes - this will change
         if flags.Tracking.ActiveConfig.extension == 'ActsConversion':
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkConversionStripSpacePoints_Cached'] if flags.Acts.useCache else ['ITkConversionStripSpacePoints'])
-        elif flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
-            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLargeRadiusStripSpacePoints_Cached',
-                                                                   'ITkLargeRadiusStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLargeRadiusStripSpacePoints',
-                                                                                                                                                'ITkLargeRadiusStripOverlapSpacePoints'])
+        elif flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
+            ext_suffix = flags.Tracking.ActiveConfig.extension.replace("Acts", "")
+            kwargs.setdefault('StripSeedingAlg.InputSpacePoints', [f'ITk{ext_suffix}StripSpacePoints_Cached',
+                                                                   f'ITk{ext_suffix}StripOverlapSpacePoints_Cached'] if flags.Acts.useCache else [f'ITk{ext_suffix}StripSpacePoints',
+                                                                                                                                                   f'ITk{ext_suffix}StripOverlapSpacePoints'])
         elif flags.Tracking.ActiveConfig.extension == 'ActsLowPt':
             kwargs.setdefault('StripSeedingAlg.InputSpacePoints', ['ITkLowPtStripSpacePoints_Cached',
                                                                    'ITkLowPtStripOverlapSpacePoints_Cached'] if flags.Acts.useCache else ['ITkLowPtStripSpacePoints',

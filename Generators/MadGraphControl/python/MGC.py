@@ -10,6 +10,7 @@
 
 import os,time,subprocess,glob,re,sys # noqa: F401 
 from AthenaCommon import Logging
+from AthenaCommon.SystemOfUnits import GeV
 from MadGraphControl.MadGraphUtilsHelpers import error_check,modify_param_card # noqa: F401
 from MadGraphControl.MadGraphParamHelpers import do_PMG_updates # noqa: F401
 from MadGraphControl.MadGraphSystematicsUtils import convertSysCalcArguments,get_pdf_and_systematic_settings,parse_systematics_arguments,SYSTEMATICS_WEIGHT_INFO_ALTDYNSCALES,SYSTEMATICS_WEIGHT_INFO,write_systematics_arguments # noqa: F401
@@ -24,7 +25,7 @@ MADGRAPH_GRIDPACK_LOCATION = 'madevent'
 MADGRAPH_RUN_NAME = 'run_01'
 # For error handling
 MADGRAPH_CATCH_ERRORS = True
-# PDF setting (global setting)
+# PDF setting (legacy module-level setting)
 MADGRAPH_PDFSETTING = None
 
 ## Options:
@@ -34,7 +35,7 @@ MADGRAPH_PDFSETTING = None
 MADGRAPH_DEVICES = None
 
 class MGControl:
-    def __init__(self, process='generate p p > t t~\noutput -f', plugin=None, keepJpegs=False, usePMGSettings=False):
+    def __init__(self, process='generate p p > t t~\noutput -f', plugin=None, keepJpegs=False, usePMGSettings=False, pdf_setting=None, devices=None, catch_errors=MADGRAPH_CATCH_ERRORS):
         """ Generate a new process in madgraph.
         Pass a process string.
         Optionally request JPEGs to be kept and request for PMG settings to be used in the param card
@@ -45,6 +46,9 @@ class MGControl:
         self.plugin = plugin
         self.keepJpegs = keepJpegs
         self.usePMGSettings = usePMGSettings
+        self.pdf_setting = MADGRAPH_PDFSETTING if pdf_setting is None else pdf_setting
+        self.devices = MADGRAPH_DEVICES if devices is None else devices
+        self.catch_errors = MADGRAPH_CATCH_ERRORS if catch_errors is None else catch_errors
         self.run_card_params = []
         self.beamEnergy = 0
         #is_gen_from gridpack
@@ -70,10 +74,10 @@ class MGControl:
                     else:
                         outline = outline + ' -nojpeg'
                 # Special handling for devises
-                if MADGRAPH_DEVICES is not None:
-                    if MADGRAPH_DEVICES.lower() in ['madevent_simd','madevent_gpu']:
-                        outline = 'output '+MADGRAPH_DEVICES.lower()+' '+outline.split('output')[1]
-                    elif MADGRAPH_DEVICES.lower() == 'max':
+                if self.devices is not None:
+                    if self.devices.lower() in ['madevent_simd','madevent_gpu']:
+                        outline = 'output '+self.devices.lower()+' '+outline.split('output')[1]
+                    elif self.devices.lower() == 'max':
                         self.mglog.warning('Not fully implemented yet; setting avx')
                         outline = 'output madevent_simd '+outline.split('output')[1]
                 a_card.write(outline+'\n')
@@ -111,7 +115,7 @@ class MGControl:
         self.MADGRAPH_COMMAND_STACK += ['# All jobs should start in a clean directory']
         self.MADGRAPH_COMMAND_STACK += ['mkdir standalone_test; cd standalone_test']
         self.MADGRAPH_COMMAND_STACK += [' '.join([python,madpath+'/bin/mg5_aMC '+plugin_cmd+' << EOF\n'+process+'\nEOF\n'])]
-        generate = subprocess.Popen([python,madpath+'/bin/mg5_aMC',plugin_cmd,card_loc],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+        generate = subprocess.Popen([python,madpath+'/bin/mg5_aMC',plugin_cmd,card_loc],stdin=subprocess.PIPE,stderr=subprocess.PIPE if self.catch_errors else None)
         (out,err) = generate.communicate()
         error_check(err,generate.returncode)
 
@@ -151,15 +155,15 @@ class MGControl:
         self.configCardDict.update({'notification_center':'False'})
 
         # Add some custom settings based on the device requests
-        if MADGRAPH_DEVICES is not None:
-            if MADGRAPH_DEVICES.lower()=='madevent_simd':
+        if self.devices is not None:
+            if self.devices.lower()=='madevent_simd':
                 self.runCardDict['cudacpp_backend'] = 'cppauto'
-            elif MADGRAPH_DEVICES.lower()=='madevent_gpu':
+            elif self.devices.lower()=='madevent_gpu':
                 self.runCardDict['cudacpp_backend'] = 'cuda'
                 # In case we have "too new" a gcc version for the nvcc version on the node, which should be ok
                 # This patch should be temporary, but is fine while we are validating things at least
                 os.environ['ALLOW_UNSUPPORTED_COMPILER_IN_CUDA'] = 'Y'
-            elif MADGRAPH_DEVICES.lower() == 'max':
+            elif self.devices.lower() == 'max':
                 self.mglog.warning('Not fully implemented yet; setting avx')
                 self.runCardDict['cudacpp_backend'] = 'cppauto'
 
@@ -281,6 +285,39 @@ class MGControl:
         else:
             raise RuntimeError("No random seed found in runArgs.")
 
+
+    def get_flags_info(self, flags):
+        """This function gets the beam energy and random seed from the configuration flags."""
+        if flags is None:
+            raise RuntimeError('flags must be provided!')
+
+        # Beam energy is stored in Athena units (MeV). Convert back to GeV for MadGraph run cards.
+        try:
+            self.beamEnergy = float(flags.Beam.Energy) / GeV
+        except AttributeError as e:
+            raise RuntimeError("No beam energy found in flags (expected flags.Beam.Energy).") from e
+
+        try:
+            self.random_seed = flags.Random.SeedOffset
+        except AttributeError as e:
+            raise RuntimeError("No random seed found in flags (expected flags.Random.SeedOffset).") from e
+
+
+    def _add_seed_and_beam_settings(self):
+        """Add seed and beam settings to runCardDict."""
+        # Check if the run arguments are already implemented.
+        if 'iseed' not in self.runCardDict: #if there is no setting in self.runCardDict for iseed
+            self.runCardDict['iseed'] = self.random_seed
+        if not self.isNLO and 'python_seed' not in self.runCardDict: #If the process is LO and there is no 'python_seed' setting in self.runCardDict
+            self.runCardDict['python_seed'] = self.random_seed
+        if 'beamenergy' in self.runCardDict: #if the beam energy is defined in self.runCardDict
+            raise RuntimeError('Do not set beamenergy in the run card. Use flags (or runArgs during migration) instead.')
+
+        if 'ebeam1' not in self.runCardDict or self.beamEnergy != self.runCardDict['ebeam1']: # if there is no setting 'ebeam1' in self.runCardDict
+            self.runCardDict['ebeam1'] = self.beamEnergy
+        if 'ebeam2' not in self.runCardDict or self.beamEnergy != self.runCardDict['ebeam2']: #if there is no setting 'ebeam2' in self.runCardDict
+            self.runCardDict['ebeam2'] = self.beamEnergy
+
         
     def add_runArgs(self, runArgs=None):
         """This function adds run arguments to the self.runCardDict.
@@ -289,28 +326,30 @@ class MGControl:
         if runArgs is not None:
             self.get_runArgs_info(runArgs) # Use get_runArgs_info function to retrieve runArgs
 
-        # Check if the runArgs are already implemented.
-        if 'iseed' not in self.runCardDict: #if there is no setting in self.runCardDict for iseed
-            self.runCardDict['iseed'] = self.random_seed
-        if not self.isNLO and 'python_seed' not in self.runCardDict: #If the process is LO and there is no 'python_seed' setting in self.runCardDict
-            self.runCardDict['python_seed'] = self.random_seed
-        if 'beamenergy' in self.runCardDict: #if the beam energy is defined in self.runCardDict
-            raise RuntimeError('Do not set beamenergy in the run card. Use runArgs instead.')
-        
-        if 'ebeam1' not in self.runCardDict or self.beamEnergy != self.runCardDict['ebeam1']: # if there is no setting 'ebeam1' in self.runCardDict 
-            self.runCardDict['ebeam1'] = self.beamEnergy
-        if 'ebeam2' not in self.runCardDict or self.beamEnergy != self.runCardDict['ebeam2']: #if there is no setting 'ebeam2' in self.runCardDict
-            self.runCardDict['ebeam2'] = self.beamEnergy
+        self._add_seed_and_beam_settings()
 
 
-    def write_runCard(self, runArgs=None):
+    def add_flags(self, flags=None):
+        """This function adds flag-derived seed and beam settings to self.runCardDict."""
+        if flags is not None:
+            self.get_flags_info(flags)
+
+        self._add_seed_and_beam_settings()
+
+
+    def write_runCard(self, runArgs=None, flags=None):
         """Build a new run_card.dat from a run card dictionary.
         This function can get a fresh run card from the runCardDict object.
         Before writing the dictionary to the run card, we require to check a few things first
         """
 
-        # Get info from runArgs
-        self.add_runArgs(runArgs)
+        # Get seed and beam information from either runArgs or flags.
+        if flags is not None:
+            if runArgs is not None:
+                mglog.warning('Both runArgs and flags were provided to write_runCard. Using flags.')
+            self.add_flags(flags)
+        else:
+            self.add_runArgs(runArgs)
 
         # Make sure that nevents is integer
         if 'nevents' in self.runCardDict:
@@ -320,8 +359,15 @@ class MGControl:
         if 'custom_fcts' in self.runCardDict and self.runCardDict['custom_fcts']:
             raw_name = str(self.runCardDict['custom_fcts']).split()[0]
             # Determine jobConfig directory
-            if runArgs is not None and hasattr(runArgs, 'jobConfig'):
+            cfgdir = None
+            if flags is not None and hasattr(flags, 'Generator') and hasattr(flags.Generator, 'jobConfig') and flags.Generator.jobConfig:
+                cfgdir = flags.Generator.jobConfig[0] if isinstance(flags.Generator.jobConfig, (list, tuple)) else flags.Generator.jobConfig
+            elif runArgs is not None and hasattr(runArgs, 'jobConfig'):
                 cfgdir = runArgs.jobConfig[0] if isinstance(runArgs.jobConfig, (list, tuple)) else runArgs.jobConfig
+            elif flags is not None and 'JOBOPTSEARCHPATH' in os.environ:
+                cfgdir = os.environ['JOBOPTSEARCHPATH'].split(':')[0]
+
+            if cfgdir:
                 # Build full path and make absolute
                 full_path = os.path.join(cfgdir, raw_name)
                 self.runCardDict['custom_fcts'] = os.path.abspath(full_path)
@@ -479,9 +525,9 @@ class MGControl:
 
         # Check pdf and systematics
         mglog.info('Checking PDF and systematics settings')
-        if not self.base_fragment_setup_check(MADGRAPH_PDFSETTING,self.runCardDict,self.isNLO): #if the base fragment has not been setup
+        if not self.base_fragment_setup_check(self.pdf_setting,self.runCardDict,self.isNLO): #if the base fragment has not been setup
             # still need to set pdf and systematics
-            syst_settings = get_pdf_and_systematic_settings(MADGRAPH_PDFSETTING,self.isNLO) # get the pdf and systemetatic settings as a dictionary
+            syst_settings = get_pdf_and_systematic_settings(self.pdf_setting,self.isNLO) # get the pdf and systemetatic settings as a dictionary
             self.runCardDict.update(syst_settings) # update the settings in self.runCardDict
 
         if 'systematics_arguments' in self.runCardDict:# if there are systematics set in the dictionary
@@ -582,7 +628,16 @@ class MGControl:
                     self.runCardDict.update( run_card_updates )
                     modify_param_card(process_dir=self.process_dir, params={'MASS': {'5': '0.000000e+00'}})
 
-            mglog.info('Finished checking run card - All OK!')
+        # Check scale consistency
+        if '91.188' not in self.runCardDict.get('scale','91.188') and self.runCardDict.get('fixed_ren_scale','f').lower() in ['f','false']:
+            mglog.error('Seems you set "scale" in the run card without setting "fixed_ren_scale" to True. Not sure what to do here, throwing an error.')
+            raise ValueError("Renormalization scale setting incorrect")
+        if ('91.188' not in self.runCardDict.get('dsqrt_q2fact1','91.188') or '91.188' not in self.runCardDict.get('dsqrt_q2fact2','91.188')) \
+           and self.runCardDict.get('fixed_fac_scale','f').lower() in ['f','false']:
+            mglog.error('Seems you set "dsqrt_q2fact1" or "dsqrt_q2fact2" in the run card without setting "fixed_fac_scale" to True. Not sure what to do here, throwing an error.')
+            raise ValueError("Factorization scale setting incorrect")
+
+        mglog.info('Finished checking run card - All OK!')
 
 
     #==================================================================================
@@ -596,9 +651,8 @@ class MGControl:
         if the_base_fragment is None:
             mglog.warning('!!! No pdf base fragment was included in your job options. PDFs should be set with an include file. You might be unable to follow the PDF4LHC uncertainty prescription. Let\'s hope you know what you doing !!!')
             if not extras.get('pdlabel', None) == 'lhapdf'  or 'lhaid' not in extras:
-                mglog.warning('!!! No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself -- in the future, this will cause an error !!!')
-                #TODO: in the future this should be an error
-                #raise RuntimeError('No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself')
+                mglog.error('!!! No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself')
+                raise RuntimeError('No pdf base fragment was included in your job options and you did not specify a LHAPDF yourself')
             return True
         else:
             # if setting is already exactly as it should be -- great!
@@ -616,3 +670,14 @@ class MGControl:
                 return True
         # no error but also nothing set
         return False
+
+
+    def getCA(self, flags=None):
+        """Boilerplate code that returns a bare CA fragment.
+        To be used in MadGraphConfig.py"""
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
+
+        ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
+        
+        return ca

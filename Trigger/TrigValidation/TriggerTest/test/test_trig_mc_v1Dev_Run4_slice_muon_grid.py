@@ -5,10 +5,7 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-architecture: '#x86_64-intel'
-# FIXME: no detail about this file but metadata looks suspicious (MC23a campaign and conditions run number, mixed with Run4 geometry and global tag)
-# /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R4.pool.root
-# for now uploaded it to rucio dataset, replace at next occasion!
-# art-input: group.trig-hlt.MuonGeomRTT.myRDO.R4
+# art-input: group.trig-hlt.group.det-muon.999992.PG_DiMuon_Pt10to100.RDO_MU0.R4-250226.v1_EXT0
 # art-input-nfiles: 1
 # art-athena-mt: 8
 # art-output: *.txt
@@ -34,19 +31,19 @@ from TrigValTools.TrigValSteering import Test, CheckSteps
 from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
 from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
 
-ex = MCGridStep(menu='Dev_pp_run4_v1', signatures=['Muon'])
+ex = MCGridStep(menu='Dev_pp_run4_v1', signatures=['Muon'], global_tag=defaultConditionsTags.RUN4_MC, mc_campaign='Campaigns.PhaseIIPileUp200')
 
-# FIXME: MC inputs should be on EOS, not cvmfs
 ex.input = f'{MuonPhaseIITestDefaults.RDO_R4[0]}'
 
 ex.flags+=[ 'GeoModel.SQLiteDB=True',
            f'GeoModel.SQLiteDBFullPath={MuonPhaseIITestDefaults.GEODB_R4}',
            f'GeoModel.AtlasVersion={defaultGeometryTags.RUN4}',
-           f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}',
             'Trigger.Offline.SA.Muon.scheduleActsReco=True',
             'ITk.doTruth=False',
             'Tracking.doTruth=False',
             'Trigger.enableL1CaloPhase1=True',
+            'Acts.TrackingGeometry.UseBlueprint=True',
+            'Common.MsgSuppression=False',
             'Trigger.enableL1CaloLegacy=False']
 ex.imf = False
 

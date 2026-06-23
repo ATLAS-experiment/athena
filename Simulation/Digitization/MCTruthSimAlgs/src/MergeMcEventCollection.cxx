@@ -19,8 +19,8 @@ StatusCode MergeMcEventCollection::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode MergeMcEventCollection::execute()
+StatusCode MergeMcEventCollection::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("execute()");
-  return m_mergeTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_mergeTool->processAllSubEvents(ctx);
 }

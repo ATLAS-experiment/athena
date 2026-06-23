@@ -19,7 +19,7 @@ def Muon5MumuSelectionCfg(flags,
     from DerivationFrameworkMuons.MuonsToolsConfig import DiMuonTaggingAlgCfg
     ### Z mumu OC events
     acc.merge(DiMuonTaggingAlgCfg(flags,
-                                  name                    = "DiMuonTaggingZmumuOC",
+                                  name                    = "DiMuonTaggingZmumuOC5",
                                   Mu1PtMin                = 24*Units.GeV,
                                   Mu1AbsEtaMax            = 2.5,
                                   Mu1RequireQual          = True,
@@ -31,11 +31,11 @@ def Muon5MumuSelectionCfg(flags,
                                   InvariantMassLow        = 60*Units.GeV,
                                   IDTrackThinningConeSize = 0.4,
                                   applyTrigger            = applyTrigger, 
-                                  BranchPrefix            = "Muon1ZmumuOC"))
+                                  BranchPrefix            = "Muon5ZmumuOC"))
     
     ### Z mumu SC events
     acc.merge(DiMuonTaggingAlgCfg(flags,
-                                  name                    = "DiMuonTaggingZmumuSC",
+                                  name                    = "DiMuonTaggingZmumuSC5",
                                   Mu1PtMin                = 24*Units.GeV,
                                   Mu1AbsEtaMax            = 2.5,
                                   Mu1RequireQual          = True,
@@ -47,7 +47,7 @@ def Muon5MumuSelectionCfg(flags,
                                   OppositeCharge          = False,
                                   applyTrigger            = applyTrigger,
                                   InvariantMassLow        = 60*Units.GeV,
-                                  BranchPrefix            = "Muon1ZmumuSC")) 
+                                  BranchPrefix            = "Muon5ZmumuSC")) 
     return acc
 
 def Muon5ElElSelectionCfg(flags):
@@ -96,6 +96,8 @@ def Muon5ElElSelectionCfg(flags):
 def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for MUON5"""
     acc = ComponentAccumulator()
+
+    stream_name= 'StreamDAOD_MUON5'
     
     kwargs.setdefault("MuonContainer", "Muons")
     kwargs.setdefault("IdTrkContainer", "InDetTrackParticles")
@@ -137,19 +139,20 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     
     ### isolation decorations
     from DerivationFrameworkMuons.TrackIsolationDecoratorConfig import TrackIsolationCfg
-    acc.merge(TrackIsolationCfg(flags,TrackCollection="InDetTrackParticles", TrackSelections = trkThinFlags))
-    acc.merge(TrackIsolationCfg(flags,TrackCollection="ExtrapolatedMuonTrackParticles"))
+    acc.merge(TrackIsolationCfg(flags, TrackCollection="InDetTrackParticles"))
+    acc.merge(TrackIsolationCfg(flags, TrackCollection="ExtrapolatedMuonTrackParticles"))
 
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
     contNames = [ "Muons", "Electrons", "Photons" ]
-    acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = kwargs['StreamName']))
+    acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = stream_name))
 
     ### Calo deposits 
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonCaloDepositAlgCfg
     acc.merge(MuonCaloDepositAlgCfg(flags,
+                                    name = "MuonCaloDepositAlg",
                                     ContainerKey="Muons")) ### Decorate directly the muons
     acc.merge(MuonCaloDepositAlgCfg(flags, 
-                                    name = "IdTrkCaloDepsitDecorator",
+                                    name = "IdTrkCaloDepositDecorator",
                                     ContainerKey="InDetTrackParticles")) ### Decorate the ID tracks
     ### Flavour tagging impact parameter decorators
     from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
@@ -204,7 +207,7 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
     MUON5TrackThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(flags,
                                                                         name                    = "MUON5TrackThinningTool",
-                                                                        StreamName              = kwargs['StreamName'],
+                                                                        StreamName              = stream_name,
                                                                         SelectionString         = "abs(DFCommonInDetTrackZ0AtPV) < 35.0 && abs(InDetTrackParticles.eta) < 3.2",
                                                                         InDetTrackParticlesKey  = "InDetTrackParticles")
                                                     )
@@ -213,7 +216,6 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
 
     # Thinning tools
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
-    from DerivationFrameworkCalo.CaloCellDFGetterConfig import thinCaloCellsForDFCfg
     from DerivationFrameworkMuons.MuonsToolsConfig import AnalysisMuonThinningAlgCfg
     
     # protect against missing forward tracks in Upgrade 
@@ -221,16 +223,17 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     if fwdTracks not in flags.Input.Collections:
         fwdTracks = "" 
     acc.merge(AnalysisMuonThinningAlgCfg(flags,
+                                         name = "AnalysisMuonThinningAlgMUON5",
                                          MuonPassFlags = muonThinFlags,
                                          TrkPassFlags = trkThinFlags,
-                                         StreamName = kwargs['StreamName'], 
+                                         StreamName = stream_name, 
                                          IdTrkFwdThinning=fwdTracks))
     
 
     # keep topoclusters around muons
     MUON5ThinningTool1 = acc.getPrimaryAndMerge(CaloClusterThinningCfg(flags,
                                                                        name                    = "MUON5ThinningTool1",
-                                                                       StreamName              = kwargs['StreamName'],
+                                                                       StreamName              = stream_name,
                                                                        SGKey                   = "Muons",
                                                                        SelectionString         = "Muons.pt>4*GeV",
                                                                        TopoClCollectionSGKey   = "CaloCalTopoClusters",
@@ -240,7 +243,7 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     # keep egammaclusters around electrons
     MUON5ThinningTool2 = acc.getPrimaryAndMerge(CaloClusterThinningCfg(flags,
                                                                        name                    = "MUON5ThinningTool2",
-                                                                       StreamName              = kwargs['StreamName'],
+                                                                       StreamName              = stream_name,
                                                                        SGKey                   = "Electrons",
                                                                        SelectionString         = "Electrons.pt>4*GeV",
                                                                        CaloClCollectionSGKey   = "egammaClusters",
@@ -250,7 +253,7 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     # keep egammaclusters around photons
     MUON5ThinningTool3 = acc.getPrimaryAndMerge(CaloClusterThinningCfg(flags,
                                                                        name                    = "MUON5ThinningTool3",
-                                                                       StreamName              = kwargs['StreamName'],
+                                                                       StreamName              = stream_name,
                                                                        SGKey                   = "Photons",
                                                                        SelectionString         = "Photons.pt>4*GeV",
                                                                        CaloClCollectionSGKey   = "egammaClusters",
@@ -258,17 +261,19 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     MUON5ThinningTools.append(MUON5ThinningTool3)
     
     ### cell thinning
-    acc.merge(thinCaloCellsForDFCfg(flags,
-                                    inputClusterKeys = ["MuonClusterCollection"],
-                                    streamName       = kwargs['StreamName'],
-                                    outputCellKey    = "DFMUONCellContainer"))
+    muon5CellThinAlg = CompFactory.CaloThinCellsByClusterAlg(
+        'MUON5_CaloThinCellsByClusterAlg_MuonClusterCollection',
+        StreamName = stream_name,
+        Clusters   = 'MuonClusterCollection',
+        Cells      = 'AllCalo')
+    acc.addEventAlgo(muon5CellThinAlg)
   
     ### Truth thinning
     if flags.Input.isMC:        
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import MenuTruthThinningCfg
         MUON5TruthThinningTool = acc.getPrimaryAndMerge(MenuTruthThinningCfg(flags,
                                                                              name                            = "MUON5TruthThinningTool",
-                                                                             StreamName                      = kwargs['StreamName'],
+                                                                             StreamName                      = stream_name,
                                                                              WritePartons                    = False,
                                                                              WriteHadrons                    = False,
                                                                              WriteCHadrons                   = True,

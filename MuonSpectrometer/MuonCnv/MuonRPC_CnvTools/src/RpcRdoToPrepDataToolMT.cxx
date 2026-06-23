@@ -4,7 +4,6 @@
 
 #include "RpcRdoToPrepDataToolMT.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "MuonCnvToolInterfaces/IDC_Helper.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonRPC_CnvTools/IRPC_RDO_Decoder.h"
@@ -12,7 +11,7 @@
 #include "MuonTrigCoinData/RpcCoinDataContainer.h"
 #include "TrkSurfaces/Surface.h"
 #include "MuonIdHelpers/IdentifierByDetElSorter.h"
-#include "GeoModelKernel/throwExcept.h"
+
 using namespace MuonGM;
 using namespace Trk;
 namespace Muon{

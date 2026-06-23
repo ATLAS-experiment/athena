@@ -222,7 +222,10 @@ auto
 Accessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getDataSpan (AuxVectorData& container) const
   -> span
 {
-  return span (getEltSpan(container),
+  // Need to make sure getEltSpan() gets called before creating the
+  // Converter_t --- that's what will create the variable if needed.
+  Elt_span eltSpan = getEltSpan(container);
+  return span (eltSpan,
                Converter_t (container, this->auxid(), this->linkedAuxid()));
 }
 

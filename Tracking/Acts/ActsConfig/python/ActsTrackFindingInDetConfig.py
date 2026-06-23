@@ -100,8 +100,9 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
-    kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)
-    # kwargs.setdefault("autoReverseSearch", True)
+    kwargs.setdefault("inflateCovarianceTwoWay", True)
+    kwargs.setdefault("twoWayinflateCovarianceFactor", 100.0)
+    kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
     # kwargs.setdefault("useTopSpRZboundary",[ 229.0 * UnitConstants.mm, 450.0 * UnitConstants.mm])
     
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
@@ -149,7 +150,7 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     ### kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
 
     # GBTS produces much purer seeds, so the branch stopper selections aren't needed with GBTS seeds.
-    if flags.Acts.SeedingStrategy is not SeedingStrategy.Gbts2:
+    if flags.Acts.SeedingStrategy is not SeedingStrategy.Gbts:
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 
@@ -162,7 +163,7 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
 
     if 'ATLASConverterTool' not in kwargs:
         from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+        kwargs.setdefault('ATLASConverterTool', acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg

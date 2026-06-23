@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,6 +19,8 @@
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "CxxUtils/checker_macros.h"
 #include <map>
+#include <string>
+#include <string_view>
 #include <iosfwd>
 
 namespace coral
@@ -46,32 +48,32 @@ class RDBRecord final : public IRDBRecord
   /// Check if the field value is NULL
   /// @param fieldName [IN] field name
   /// @retun TRUE if the field is NULL, FALSE otherwise
-  bool isFieldNull(const std::string& fieldName) const override;
+  bool isFieldNull(std::string_view fieldName) const override;
 
   /// Get int field value
   /// @param fieldName [IN] field name
   /// @return field value
-  int getInt(const std::string& fieldName) const override;
+  int getInt(std::string_view fieldName) const override;
 
   /// Get long field value
   /// @param fieldName [IN] field name
   /// @return field value
-  long getLong(const std::string& fieldName) const override;
+  long getLong(std::string_view fieldName) const override;
 
   /// Get double field value
   /// @param fieldName [IN] field name
   /// @return field value
-  double getDouble(const std::string& fieldName) const override;
+  double getDouble(std::string_view fieldName) const override;
 
   /// Get float field value
   /// @param fieldName [IN] field name
   /// @return field value
-  float getFloat(const std::string& fieldName) const override;
+  float getFloat(std::string_view fieldName) const override;
 
   /// Get string field value
   /// @param fieldName [IN] field name
   /// @return field value
-  virtual const std::string& getString(const std::string& fieldName) const override;
+  virtual const std::string& getString(std::string_view string_view) const override;
 
   // Access array values by index
   // arrays are implemented using the field with names like NAME_0, NAME_1 etc.
@@ -80,31 +82,31 @@ class RDBRecord final : public IRDBRecord
   /// @param fieldName [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  int getInt(const std::string& fieldName, unsigned int index) const override;
+  int getInt(std::string_view fieldName, unsigned int index) const override;
 
   /// Get array long field value
   /// @param fieldName [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  long getLong(const std::string& fieldName, unsigned int index) const override;
+  long getLong(std::string_view fieldName, unsigned int index) const override;
 
   /// Get array double field value
   /// @param fieldName [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  double getDouble(const std::string& fieldName, unsigned int index) const override;
+  double getDouble(std::string_view fieldName, unsigned int index) const override;
 
   /// Get array float field value
   /// @param fieldName [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  float getFloat(const std::string& fieldName, unsigned int index) const override;
+  float getFloat(std::string_view fieldName, unsigned int index) const override;
 
   /// Get array string field value
   /// @param fieldName [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  virtual const std::string& getString(const std::string& fieldName, unsigned int index) const override;
+  virtual const std::string& getString(std::string_view fieldName, unsigned int index) const override;
 
   // Comparison operator
   bool operator!=(const RDBRecord& rhs) const;
@@ -120,7 +122,7 @@ class RDBRecord final : public IRDBRecord
   RDBRecord(const coral::AttributeList& attList, const std::string& tableName);
 
  private:
-  typedef std::map<std::string, unsigned int> FieldName2ListIndex;
+  typedef std::map<std::string, unsigned int, std::less<>> FieldName2ListIndex;
 
   /// Empty private constructor
   RDBRecord(){}
@@ -131,9 +133,9 @@ class RDBRecord final : public IRDBRecord
   std::string   m_tableName;
 
   template<typename T>
-  const T& getGeneric(const std::string& fieldName) const;
-  FieldName2ListIndex::const_iterator getItr(const std::string& fieldName) const;
-  FieldName2ListIndex::const_iterator getItr(const std::string& fieldName, int) const;
+  const T& getGeneric(std::string_view fieldName) const;
+  FieldName2ListIndex::const_iterator getItr(std::string_view fieldName) const;
+  FieldName2ListIndex::const_iterator getItr(std::string_view fieldName, int) const;
 
 };
 

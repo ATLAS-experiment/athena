@@ -44,7 +44,7 @@ class ITHistSvc;
     ~LArMinBiasAlg();
     
     virtual StatusCode  initialize() override;
-    virtual StatusCode  execute() override;
+    virtual StatusCode  execute(const EventContext& ctx) override;
     virtual StatusCode  stop() override;
 
     
@@ -100,16 +100,16 @@ class ITHistSvc;
 
 
   struct CellInfo {
-      int layer;
-      int region;
-      int ieta;
-      float eta;
-      float phi;
-      Identifier identifier;
-      double nevt;
-      double average;
-      double rms;
-      double offset;
+      int layer{};
+      int region{};
+      int ieta{};
+      float eta{};
+      float phi{};
+      Identifier identifier{};
+      double nevt{};
+      double average{};
+      double rms{};
+      double offset{};
   };
   std::vector<CellInfo> m_CellList;
   std::vector<int> m_symCellIndex;

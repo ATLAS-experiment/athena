@@ -4,7 +4,6 @@
 
 #include "LUCID_RawDataByteStreamCnv/LUCID_DigitRawDataCnv.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 LUCID_DigitRawDataCnv::LUCID_DigitRawDataCnv(const std::string& name,

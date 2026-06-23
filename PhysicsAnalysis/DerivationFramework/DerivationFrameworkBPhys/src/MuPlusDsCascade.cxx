@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // MuPlusDsCascade.cxx, (c) ATLAS Detector software
@@ -256,7 +256,7 @@ namespace DerivationFramework {
         MuonBag selectedMuons; selectedMuons.clear();
 
         for(const xAOD::Muon * mu : *muonContainer){
-            const xAOD::TrackParticle* muonTrk = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle );
+            const xAOD::TrackParticle* muonTrk = mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
             if (muonTrk == cascadeVertices[1]->trackParticle(0)) selectedMuons.push_back(mu); //there is always only one muon
         }
         ATH_MSG_DEBUG("selectedMuon size "<<selectedMuons.size()); //always only one muon
@@ -533,7 +533,7 @@ namespace DerivationFramework {
     m_constrDx(true),
     m_chi2cut(-1.0),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter",this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools"),
     m_CascadeTools("DerivationFramework::CascadeTools"),
     m_muonCollectionKey("StacoMuonCollection"),
@@ -579,7 +579,7 @@ namespace DerivationFramework {
 
     MuPlusDsCascade::~MuPlusDsCascade(){ }
 
-    StatusCode MuPlusDsCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext&) const
+    StatusCode MuPlusDsCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, const EventContext& ctx) const
     {
         ATH_MSG_DEBUG( "MuPlusDsCascade::performSearch" );
         assert(cascadeinfoContainer!=nullptr);
@@ -631,14 +631,13 @@ namespace DerivationFramework {
         MuonBag theMuonsAfterSelection;
         for (auto mu : *importedMuonCollection) {
             if ( !mu ) continue;
-            if (!mu->inDetTrackParticleLink().isValid()) continue; // No muons without ID tracks
-            const xAOD::TrackParticle* muonTrk = *(mu->inDetTrackParticleLink());
+            const xAOD::TrackParticle* muonTrk = mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
             if ( !muonTrk) continue;
             if ( !m_trkSelector->decision(*muonTrk, vx) ) continue; // all ID tracks must pass basic tracking cuts
             if ( std::fabs(muonTrk->pt())<m_thresholdPt ) continue; // higher pt cut if needed
             if ( m_mcpCuts && !mu->passesIDCuts()) continue; // cuts of the MCP group recommendation
-            if ( m_combOnly && mu->muonType() != xAOD::Muon::Combined ) continue; // require combined muons
-            if ( mu->muonType() == xAOD::Muon::SiliconAssociatedForwardMuon && !m_useCombMeasurement) continue;
+            if ( m_combOnly && mu->muonType() != xAOD::Muon::MuonType::Combined ) continue; // require combined muons
+            if ( mu->muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon && !m_useCombMeasurement) continue;
                 
             theMuonsAfterSelection.push_back(mu);
         }
@@ -759,7 +758,7 @@ namespace DerivationFramework {
         for(auto muItr : theMuonsAfterSelection){
             tracksMu.clear();
             //Convert to trackParticle base
-            auto TrkMuon = muItr->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+            auto TrkMuon = muItr->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
             tracksMu.push_back(TrkMuon);
             if (tracksMu.size() != 1 || massesMu.size() != 1 ) {
               ATH_MSG_WARNING("Problems with muon input");
@@ -784,7 +783,7 @@ namespace DerivationFramework {
               ATH_MSG_DEBUG("Using tracks" << tracksMu[0] << ", " << tracksDx[0] << ", " << tracksDx[1] << ", " << tracksDx[2]);
                // Apply the user's settings to the fitter
               // Reset
-              std::unique_ptr<Trk::IVKalState> state (m_iVertexFitter->makeState());
+              std::unique_ptr<Trk::IVKalState> state (m_iVertexFitter->makeState(ctx));
               // Robustness
               int robustness = 0;
               m_iVertexFitter->setRobustness(robustness, *state);

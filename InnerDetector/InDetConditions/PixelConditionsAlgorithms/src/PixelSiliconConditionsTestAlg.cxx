@@ -27,18 +27,18 @@ StatusCode PixelSiliconConditionsTestAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode PixelSiliconConditionsTestAlg::execute(){
+StatusCode PixelSiliconConditionsTestAlg::execute(const EventContext& ctx){
 
-  SG::ReadCondHandle<PixelDCSHVData> hv(m_readKeyHV);
-  SG::ReadCondHandle<PixelDCSTempData> temp(m_readKeyTemp);
-  SG::ReadCondHandle<PixelChargeCalibCondData> calib(m_chargeDataKey);
-  SG::ReadCondHandle<PixelDistortionData> distortion(m_distortionKey);
+  SG::ReadCondHandle<PixelDCSHVData> hv(m_readKeyHV, ctx);
+  SG::ReadCondHandle<PixelDCSTempData> temp(m_readKeyTemp, ctx);
+  SG::ReadCondHandle<PixelChargeCalibCondData> calib(m_chargeDataKey, ctx);
+  SG::ReadCondHandle<PixelDistortionData> distortion(m_distortionKey, ctx);
 
   for (int i=0; i<2048; i++) { 
     ATH_MSG_INFO("Module " << i << " "
                  << hv->getBiasVoltage(i) << " " 
                  << temp->getTemperature(i) << " " 
-                 << m_lorentzAngleTool->getLorentzShift(IdentifierHash(i), Gaudi::Hive::currentContext()));
+                 << m_lorentzAngleTool->getLorentzShift(IdentifierHash(i), ctx));
     for (int j=0; j<16; j++) {
       try {
         // ignore invalid FEs

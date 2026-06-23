@@ -17,6 +17,8 @@
 #include "xAODTrigL1Calo/eFexTowerAuxContainer.h"
 #include "xAODTrigger/eFexEMRoIAuxContainer.h"
 #include "xAODTrigger/eFexTauRoIAuxContainer.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
+
 #include "bytestreamDecoder/L1CaloRdoEfexTob.h"
 #include "bytestreamDecoder/L1CaloRdoEfexTower.h"
 #include "bytestreamDecoder/L1CaloBsDecoderUtil.h"
@@ -50,11 +52,9 @@ eFexByteStreamTool::eFexByteStreamTool(const std::string& type,
 StatusCode eFexByteStreamTool::initialize() {
 
     // Initialise eEM data handle keys
-    ATH_CHECK(m_eEMReadKeys.initialize());
     ATH_CHECK(m_eEMWriteKey.initialize(!m_eEMWriteKey.empty()));
 
     // Initialise eTAU data handle keys
-    ATH_CHECK(m_eTAUReadKeys.initialize(!m_eTAUReadKeys.empty()));
     ATH_CHECK(m_eTAUWriteKey.initialize(!m_eTAUWriteKey.empty()));
 
     // write keys for xTOBs
@@ -387,27 +387,38 @@ namespace Decoder {
     };
 }
 
-StatusCode eFexByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf , const EventContext& eventContext) {
+StatusCode eFexByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                           const xAOD::TrigCompositeContainer* tc,
+                                           const EventContext& eventContext) {
 
     // multislice encoding is not yet implemented
     // to do would need to decide how many slices have been read out (not guaranteed determinable from the out-of-time tobs)
     // then need to set the sliceNumber appropriately for central TOBs
 
-    Decoder::Fragment f{.numSlices=1}; 
+    Decoder::Fragment f{.numSlices=1};
+    const int centralSlice = f.numSlices / 2; // central slice index; integer division, evaluates to 0 when numSlices=1
 
-
-    for(auto& key : m_eEMReadKeys) {
-        SG::ReadHandle emTobs(key, eventContext);
-        CHECK(emTobs.isValid());
-        for (const auto &tob: *emTobs) {
-            f.addTob(*tob, f.numSlices / 2 /*sliceNumber .. central is always "half"*/);
+    if (tc && !tc->empty()) {
+        const xAOD::TrigComposite* l1 = tc->at(0);
+        for (const std::string& name : l1->getObjectNames<xAOD::eFexEMRoIContainer>()) {
+            auto link = l1->objectLink<xAOD::eFexEMRoIContainer>(name);
+            if (link.isValid()) {
+                if (const xAOD::eFexEMRoIContainer* cont = link.getStorableObjectPointer()) {
+                    for (const xAOD::eFexEMRoI_v1* tob : *cont) {
+                        f.addTob(*tob, centralSlice);
+                    }
+                }
+            }
         }
-    }
-    for(auto& key : m_eTAUReadKeys) {
-        SG::ReadHandle tauTobs(key,eventContext);
-        CHECK( tauTobs.isValid() );    
-        for(const auto& tob : *tauTobs) {
-            f.addTob(*tob, f.numSlices/2 /*sliceNumber .. central is always "half"*/);
+        for (const std::string& name : l1->getObjectNames<xAOD::eFexTauRoIContainer>()) {
+            auto link = l1->objectLink<xAOD::eFexTauRoIContainer>(name);
+            if (link.isValid()) {
+                if (const xAOD::eFexTauRoIContainer* cont = link.getStorableObjectPointer()) {
+                    for (const xAOD::eFexTauRoI_v1* tob : *cont) {
+                        f.addTob(*tob, centralSlice);
+                    }
+                }
+            }
         }
     }
 
@@ -416,7 +427,7 @@ StatusCode eFexByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPA
     clearCache(eventContext);
 
     static const std::vector<uint32_t> mids = {0x1000,0x1100}; // 0x1000,0x1100 are the two shelves
-    for(uint32_t i=0;i<2;i++) { 
+    for(uint32_t i=0;i<2;i++) {
         auto words = f.getWords(i);
         uint32_t* data = newRodData(eventContext, words.size());
         std::copy( words.begin(), words.end(), data); // transfer words to cache/reserved array

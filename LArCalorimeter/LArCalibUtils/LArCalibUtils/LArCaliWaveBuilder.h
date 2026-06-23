@@ -32,7 +32,7 @@ class LArCaliWaveBuilder : public AthAlgorithm
   ~LArCaliWaveBuilder();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   virtual StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
     
@@ -78,7 +78,7 @@ class LArCaliWaveBuilder : public AthAlgorithm
 
   const LArOnlineID_Base*   m_onlineID;
   
-  unsigned m_event_counter; 
+  unsigned m_event_counter;
   int      m_NStep;
   float    m_SamplingPeriod;
   float    m_dt;
@@ -87,6 +87,8 @@ class LArCaliWaveBuilder : public AthAlgorithm
 
   int      m_usePatt;
   bool     m_useParams;
+  bool     m_useParamsSel;
+  int      m_NSubStep;
 };  
 
 #endif

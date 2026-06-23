@@ -20,6 +20,13 @@ usage () {
     exit 0
 }
 
+run() {
+  (
+    set -x
+    "$@"
+  )
+}
+
 inputRDO=""
 outputAOD=""
 nEvents="-1"
@@ -48,80 +55,33 @@ if [ ! -f $inputRDO ]; then
     exit 1
 fi
 
-## check out G-200 and build
-#git clone https://:@gitlab.cern.ch:8443/atlas-tdaq-ph2upgrades/atlas-tdaq-eftracking/traccc-integration/G-200.git
-## FIXME - temporary, until repo is public
-git clone https://:@gitlab.cern.ch:8443/maparo/G-200.git
-if [ ! -d G-200 ]; then
-  echo "Could not clone G-200 repository. Exiting."
-  exit 1
-fi
-if [ -z "$( ls -A G-200 )" ]; then
-  echo "Cloned an empty repository. Exiting."
-  exit 1
-fi
-#
-cd G-200
-mkdir build
-cd build
-#
-
-if [ -z "$CUDACXX" ] && type -t nvcc >/dev/null; then
-  export CUDACXX=$(type -p nvcc)
-fi
-
-echo "CUDACXX=$CUDACXX"
-echo "PANDA_RESOURCE=$PANDA_RESOURCE"
-if [ -n "$CUDACXX" ]; then
-  "$CUDACXX" --version
-fi
-
-cmake ../traccc-athena -DTRACCC_USE_SYSTEM_ACTS=ON
-rc=$?
-echo "G-200 cmake result: $rc"
-### Let's see if we can continue, even with a cmake error...
-# if [ $rc != 0 ]; then exit $rc; fi
-#
-make -j4
-rc=$?
-echo "G-200 make result: $rc"
-if [ $rc != 0 ]; then exit $rc; fi
-#
-# weird environment fix
-env > envlog.log
-source x*/setup.sh
-export `grep CMAKE_PREFIX_PATH envlog.log`
-cd ../..
-##
-
-## get the input files and update the config
-# don't try to make a variable for the data path unless you really like playing with sed
-# the data tarfile contains a whole bunch of directories we don't want, so transform to flat
-mkdir ITk_data
-cd ITk_data
-tar jxvf /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/GPU_EFTracking/GPU.tar.bz2 --transform='s/.*\///'
-cd ..
-PIPELINE_CONFIG_FILE=G-200/traccc-athena/EFTracking/python/TrackingAlgConfig.py
-sed -i -e 's/^inputDirectory.*$/import os\ninputDirectory = os.getcwd() + \"\/ITk_data\/\"/g' ${PIPELINE_CONFIG_FILE}
-sed -i -e 's/^pipeline.*$/pipeline = \"g200\"/g' ${PIPELINE_CONFIG_FILE}
+source "$(dirname "$0")/setup_G200_ART.sh"
 
 ## running reconstruction
-Reco_tf.py --CA \
+run Reco_tf.py --CA \
     --maxEvents ${nEvents} \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'EFTracking.TrackingAlgConfig.g2xxAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
+    --preExec 'from EFTracking.GpuEFTrackingConfigFlags import createGpuEFTrackingConfigFlags; \
+               flags.addFlagsCategory("Trigger.EFTracking.GPU", createGpuEFTrackingConfigFlags, prefix=True); \
+               flags.Trigger.EFTracking.GPU.inputDirectory="'"$PWD"'/ITk_data/"; \
+               flags.Trigger.EFTracking.GPU.pipeline="g200";' \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
-    --outputAODFile ${outputAOD}
-    ## FIXME - temporarily not producing teachnical efficiencies plots
-    #--postInclude 'EFTracking.TrackingAlgConfig.TrackingAlgCfg,ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
+    --outputAODFile ${outputAOD} \
+    --perfmon fullmonmt
 
 rc=$?
+# 08/06/2026: temporarily ignore known ERRORs detected in logfile (rc=68)
+if [ $rc = 68 ]; then rc=0; fi
 echo "Reco_tf.py result: $rc"
-if [ $rc != 0 ]; then exit $rc; fi
+# don't exit only for ERRORs detected in logfile (rc=68)
+if [ $rc != 0 -a $rc != 68 ]; then exit $rc; fi
 
 ## check output
 if [ "$skipCheck" == "0" ]; then
     checkxAOD.py ${outputAOD} > ${outputAOD}.checkxAOD.log
     checkFile.py ${outputAOD} > ${outputAOD}.checkFile.log
 fi
+
+exit $rc

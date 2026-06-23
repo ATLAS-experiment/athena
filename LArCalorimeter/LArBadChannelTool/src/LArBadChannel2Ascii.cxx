@@ -26,22 +26,22 @@ StatusCode LArBadChannel2Ascii::initialize() {
 }
 
 
-StatusCode LArBadChannel2Ascii::execute() {
+StatusCode LArBadChannel2Ascii::execute(const EventContext& ctx) {
 
   const bool doExecSummary=(!m_executiveSummaryFile.empty());
 
-  SG::ReadCondHandle<LArBadChannelCont> bch{m_BCKey};
+  SG::ReadCondHandle<LArBadChannelCont> bch{m_BCKey, ctx};
   const LArBadChannelCont* badChannelCont{*bch};
 
   const LArOnOffIdMapping* cabling=nullptr;
   if (m_skipDisconnected) {
-    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
     cabling=(*cablingHdl);
   }
 
   const LArBadFebCont* badFebCont=nullptr;
   if (doExecSummary && !m_isSC) {
-    SG::ReadCondHandle<LArBadFebCont> badFebHdl{m_BFKey};
+    SG::ReadCondHandle<LArBadFebCont> badFebHdl{m_BFKey, ctx};
     badFebCont=(*badFebHdl);
   }
 

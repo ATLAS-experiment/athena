@@ -40,7 +40,7 @@ StatusCode TBXCryYTableRead::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TBXCryYTableRead::execute()
+StatusCode TBXCryYTableRead::execute(const EventContext& /*ctx*/)
 {
   m_nEvent++;
   ATH_MSG_DEBUG ( "Executing TBXCryYTableRead " );

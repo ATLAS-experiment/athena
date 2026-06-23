@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODInDetMeasurement/versions/StripClusterAuxContainer_v1.h"
@@ -12,7 +12,6 @@ StripClusterAuxContainer_v1::StripClusterAuxContainer_v1()
     AUX_MEASUREMENTVAR(localPosition, 1);
     AUX_MEASUREMENTVAR(localCovariance, 1);
     AUX_VARIABLE(globalPosition);
-    AUX_VARIABLE(rdoList);
     AUX_VARIABLE(channelsInPhi);
 }
 }  // namespace xAOD

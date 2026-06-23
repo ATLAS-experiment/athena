@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSim_LAYERSTUDYALG_H
 #define FPGATrackSim_LAYERSTUDYALG_H
@@ -50,8 +50,8 @@ class FPGATrackSimLayerStudyAlg : public AthAlgorithm
         FPGATrackSimLayerStudyAlg(const std::string& name, ISvcLocator* pSvcLocator);
         virtual ~FPGATrackSimLayerStudyAlg() = default;
 
-        virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE() override;
-        virtual StatusCode execute ATLAS_NOT_THREAD_SAFE() override;
+        virtual StatusCode initialize() override;
+        virtual StatusCode execute(const EventContext& ctx) override;
         virtual StatusCode finalize() override;
 
     private:

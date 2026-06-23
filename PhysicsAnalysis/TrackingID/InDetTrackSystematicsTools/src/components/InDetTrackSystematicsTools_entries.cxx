@@ -9,6 +9,8 @@
 #include "../InDetTrackSmearingToolTester.h"
 #include "../InDetTrackBiasingToolTester.h"
 #include "../TrackSystematicsAlg.h"
+#include "../TrackSmearingAlg.h"
+#include "../JetTrackFilteringAlg.h"
 #endif
 
 // Project include(s).
@@ -25,4 +27,6 @@ DECLARE_COMPONENT( InDet::InclusiveTrackFilterTool )
 DECLARE_COMPONENT( InDet::InDetTrackSmearingToolTester )
 DECLARE_COMPONENT( InDet::InDetTrackBiasingToolTester )
 DECLARE_COMPONENT( InDet::TrackSystematicsAlg )
+DECLARE_COMPONENT( InDet::TrackSmearingAlg )
+DECLARE_COMPONENT( InDet::JetTrackFilteringAlg )
 #endif

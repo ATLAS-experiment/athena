@@ -49,37 +49,42 @@ namespace MuonR4{
             /** @brief Write handle key for the output global patterns */ 
             SG::WriteHandleKey<GlobalPatternContainer> m_outPatterns{this, "OutPatternContainer", "R4MuonGlobalPatterns"};
             /** @brief Geometry context key */              
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Handle to the MuonIdHelper service */        
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Handle to the visualization tool */
             ToolHandle<MuonValR4::IFastRecoVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
 
             /** ----------------- Configuration options for the global pattern finder ----------------- */
-            /** @brief Size of theta window in radiants to search for comapatible hits with a pattern, tailored to the target pt cutoff */
-            DoubleProperty m_thetaSearchWindow {this, "ThetaWindowSearch", 0.04, "Size of the search window in theta to link hits to a pattern"};
-            /** @brief Maximum number of missed candidate hits in different measurement layers during pattern building */
-            UnsignedIntegerProperty m_maxMissedLayerHits {this, "MaxMissedLayerHits", 2, "Maximum number of missed candidate hits in different measurement layers during pattern building"};
-            /** @brief Base radial compatibility window (in mm). This is the minimum allowed |R residual| between a test hit and the extrapolated line from the seed, evaluated at ΔZ = 0. */
-            DoubleProperty m_baseRWindow {this, "BaseRWindow", 70, "Minimum allowed |R residual| between a test hit and the extrapolated line from the seed, evaluated at ΔZ = 0"};
-            /** @brief Minumum difference in global Z between the seed and the pattern hit to be used to compute the pattern line */
-            DoubleProperty m_minZDiff4Line {this, "MinZDiff4Line",10, "Minimum difference in global Z between the seed and the pattern hit to be used to compute the pattern line"};
-            /** @brief Minumum difference in global R between the seed and the pattern hit to be used to compute the pattern line */
-            DoubleProperty m_minRDiff4Line {this, "MinRDiff4Line",40, "Minimum difference in global R between the seed and the pattern hit to be used to compute the pattern line"};
-            /** @brief Maximum phi difference in radiants allowed between two hits */
-            DoubleProperty m_phiTolerance {this, "PhiTolerance", 0.1, "Maximum allowed phi difference between two hits to be considered compatible"};
-            /** @brief Requirement on trigger hits in the bending direction to accept a pattern  */
-            UnsignedIntegerProperty m_minBendingTriggerHits {this, "MinBendingTriggerHits", 3, "Minimum number of trigger hits in the bending direction required to accept a pattern"};
-            /** @brief Requirement on precision hits in the bending direction to accept a pattern  */
-            UnsignedIntegerProperty m_minBendingPrecisionHits {this, "MinBendingPrecisionHits", 0, "Minimum number of precision hits in the bending direction required to accept a pattern"};
-            /** @brief Activate the seeding from Inner stations outward*/
-            BooleanProperty m_seedFromInner {this, "SeedFromInner", false, "Activate the seeding from Inner stations outward"};
             /** @brief Toggle the utilization of MDT hits to build patterns */
             BooleanProperty m_useMdtHits {this, "UseMdtHits", true, "Activate the utilization of MDT hits to build patterns"};
             /** @brief Toggle the seeding from MDT hits */
             BooleanProperty m_seedFromMdt {this, "SeedFromMdt", false, "Activate the seeding from MDT hits"};
+            /** @brief Activate the seeding from Inner station */
+            BooleanProperty m_seedFromInner {this, "SeedFromInner", false, "Activate the seeding from Inner station"};
+            /** @brief Size of theta window [rad] to search for compatible hits with a seed, tailored to the target pt cutoff */
+            DoubleProperty m_thetaSearchWindow {this, "ThetaWindowSearch", 0.06, "Size of the search window in theta to link hits to a pattern"};
+            /** @brief Çonstant term [mm] of the acceptance window for the residual between a test hit and the pattern line. Represents the minimum window 
+             *         size regardless of the geometry and absorbing unmodelled effects such as muon bending in the magnetic field and scattering */
+            DoubleProperty m_baseRWindow {this, "BaseRWindow", 60, "Çonstant term [mm] of the acceptance window for the residual between a test hit and the pattern line"};
+            /** @brief Maximum phi difference [rad] allowed between two hits belonging to the same pattern */
+            DoubleProperty m_phiTolerance {this, "PhiTolerance", 0.05, "Maximum allowed phi difference between two hits to be considered compatible"};
+            /** @brief Requirement on trigger layers in the bending direction to accept a pattern  */
+            UnsignedIntegerProperty m_minTriggerLayers {this, "MinBendingTriggerLayers", 2, "Minimum number of trigger layers in the bending direction required to accept a pattern"};
+            /** @brief Requirement on precision layers in the bending direction to accept a pattern  */
+            UnsignedIntegerProperty m_minPrecisionLayers {this, "MinBendingPrecisionLayers", 8, "Minimum number of precision layers in the bending direction required to accept a pattern"};
+            /** @brief Minimum number of phi layers required to accept a pattern */
+            UnsignedIntegerProperty m_minPhiLayers {this, "MinPhiLayers", 1, "Minimum number of phi layers required to accept a pattern"};
+            /** @brief Minimum number of layers in a station to be considered a good station */
+            UnsignedIntegerProperty m_minStationLayers {this, "MinStationLayers", 5, "Minimum number of layers in a station to be considered a good station"};
+            /** @brief Quality cut on pattern'mean squared normalized residual. Set to a large value to disable the cut, e.g. 10. */
+            DoubleProperty m_meanNormRes2Cut {this, "meanNormRes2Cut", 0.18, "Quality cut on pattern'mean squared normalized residual"};
             /** @brief Maximum number of attempts to build a pattern from hits already used in existing patterns */
-            UnsignedIntegerProperty m_maxSeedAttempts {this, "MaxSeedAttempts", 2, " Maximum number of attempts to build a pattern from hits already used in existing patterns"};
+            UnsignedIntegerProperty m_maxSeedAttempts {this, "MaxSeedAttempts", 3, " Maximum number of attempts to build a pattern from hits already used in existing patterns"};
+            /** @brief Maximum number of missed candidate hits in different measurement layers during pattern building allowed for a pattern branch before it is discarded */
+            UnsignedIntegerProperty m_maxMissLayersInStation {this, "MaxMissedLayerHits", 3, "Maximum number of missed candidate hits in different measurement layers during pattern building allowed for a pattern branch before it is discarded"};
+            /** @brief Minimum separation [mm] between the measurement layers of two hits for being used to compute a reliable pattern line. Use the beamspot otherwise. */
+            DoubleProperty m_minLayerSeparation {this, "MinLayerSeparation",40, "Minimum separation (in mm) between the measurement layers of two hits for being used to compute a reliable pattern line. Use the beamspot otherwise."};
             
             /** @brief Pointer to the actual global pattern finder */
             std::unique_ptr<FastReco::GlobalPatternFinder> m_globPatFinder{};

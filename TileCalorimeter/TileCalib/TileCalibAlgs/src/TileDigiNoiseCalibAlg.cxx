@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -20,6 +20,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandle.h"
 #include "AthenaKernel/errorcheck.h"
+#include "CxxUtils/trapping_fp.h"
 
 // Tile includes
 #include "TileDigiNoiseCalibAlg.h"
@@ -192,9 +193,8 @@ StatusCode TileDigiNoiseCalibAlg::FirstEvt_initialize() {
 }
 
 /// Main method
-StatusCode TileDigiNoiseCalibAlg::execute() {
+StatusCode TileDigiNoiseCalibAlg::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus * dqStatus = SG::makeHandle (m_dqStatusKey, ctx).get();
 
   StatusCode sc;
@@ -570,6 +570,8 @@ void TileDigiNoiseCalibAlg::finalDigits() {
 
         //Calculate covariance loop over chan_i, chan_j
         if (m_evtNr * m_nSamples > 0) {
+          // Avoid a spurious FPE from clang.
+          CXXUTILS_TRAPPING_FP;
           //replace m_evtNr with sqrt(m_evt[ch_i]*m_evt[ch_j])
 
           for (unsigned int chan_i = 0; chan_i < TileCalibUtils::MAX_CHAN; ++chan_i) {

@@ -1,5 +1,5 @@
  /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -43,14 +43,14 @@ namespace InDet {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode InDetTrackBiasingToolTester::execute() {
+   StatusCode InDetTrackBiasingToolTester::execute(const EventContext& ctx) {
 
-      SG::ReadHandle<xAOD::TrackParticleContainer> IDParticles(m_trackKey);
+      SG::ReadHandle<xAOD::TrackParticleContainer> IDParticles(m_trackKey, ctx);
       ATH_CHECK( IDParticles.isValid() );
 
       // --- Nominal: no systematics active, correction should be applied ---
       ATH_CHECK( m_biasTool->applySystematicVariation( {} ) );
-      auto nominalCopy = xAOD::shallowCopyContainer( *IDParticles );
+      auto nominalCopy = xAOD::shallowCopy( *IDParticles );
       for ( xAOD::TrackParticle* track : *nominalCopy.first ) {
          const double d0_orig = track->d0();
          const double z0_orig = track->z0();
@@ -64,12 +64,10 @@ namespace InDet {
          hist("d0_nominal_delta")->Fill( track->d0() - d0_orig );
          hist("z0_nominal_delta")->Fill( track->z0() - z0_orig );
       }
-      delete nominalCopy.first;
-      delete nominalCopy.second;
 
       // --- Systematic: all biasing systematics active, correction should be undone ---
       ATH_CHECK( m_biasTool->applySystematicVariation( m_biasTool->affectingSystematics() ) );
-      auto systematicCopy = xAOD::shallowCopyContainer( *IDParticles );
+      auto systematicCopy = xAOD::shallowCopy( *IDParticles );
       for ( xAOD::TrackParticle* track : *systematicCopy.first ) {
          const double d0_orig = track->d0();
          const double z0_orig = track->z0();
@@ -81,8 +79,6 @@ namespace InDet {
          hist("d0_systematic_delta")->Fill( track->d0() - d0_orig );
          hist("z0_systematic_delta")->Fill( track->z0() - z0_orig );
       }
-      delete systematicCopy.first;
-      delete systematicCopy.second;
 
       return StatusCode::SUCCESS;
 

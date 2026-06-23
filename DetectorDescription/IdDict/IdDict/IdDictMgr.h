@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IDDICTMGR_H
@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <memory>
 
@@ -54,7 +55,7 @@ public:
     
     ///  Construct dictionary after parsing
     void                  resolve_references      ();  
-    void                  generate_implementation (const std::string& tag = "");  
+    void                  generate_implementation (std::string_view tag = "");  
 
     ///  Reset of implementation
     void                  reset_implementation    ();  

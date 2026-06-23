@@ -30,6 +30,7 @@ if __name__ == "__main__":
 
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
+    flags.Scheduler.ShowDataDeps = True
     flags.Exec.MaxEvents = -1
     flags.Exec.OutputLevel = 3
     
@@ -96,7 +97,7 @@ if __name__ == "__main__":
                                                       ExtraInputs={ ('ActsTrk::TrackContainer', el) for el in allTracks },
                                                       MonGroupName=f"{tp}Analysis"))
             
-    acc.printConfig()
+    acc.printConfig(withDetails=True, summariseProps=True)
     status = acc.run()
     if status.isFailure():
         print("Problem while reading Acts EDM objects from AOD input file ...")

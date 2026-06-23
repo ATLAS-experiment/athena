@@ -21,7 +21,7 @@ class VxCandidateCnv_p2 : public T_AthenaPoolTPCnvBase< Trk::VxCandidate, Trk::V
     void  persToTrans(const Trk::VxCandidate_p1 * persObj, Trk::VxCandidate * transObj, MsgStream &log);
     void  transToPers(const Trk::VxCandidate * transObj, Trk::VxCandidate_p1 * persObj, MsgStream &log); 
     
-    virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv ) {
+    virtual void initPrivateConverters( TopLevelTPCnvBase *topCnv ) {
        m_vxTrkAtVrtCnv.setTopConverter( topCnv, 0 );
     }
     

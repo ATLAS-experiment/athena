@@ -9,9 +9,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "gtest/gtest.h"
 
+#include <vector>
+
 #include "TestTools/initGaudi.h"
 
-#include "G4HCofThisEvent.hh"
 #include "G4Step.hh"
 #include "G4TouchableHistory.hh"
 
@@ -30,6 +31,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "G4AtlasTools/DerivedG4PhysicalVolume.h"
 #include "G4AtlasTools/DerivedG4SensitiveDetectorTestSetting.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
+#include "src/ZDC_HitCollectionBuilders.h"
 
 //set environment
 class GaudiEnvironment : public ::testing::Environment {
@@ -51,58 +53,20 @@ class ZDC_G4CalibSDtest : public ::testing::Test {
 
 TEST_F( ZDC_G4CalibSDtest, ProcessHits )
 {
-  G4Step* aStep = new G4Step();
-  G4TouchableHistory* th = new G4TouchableHistory();
+  ZDC_CalibrationHitContainerBuilder hitCollection("name1");
+  G4Step aStep;
+  G4TouchableHistory th;
 
   ZDC_G4CalibSD sd1("name1", "name1", false);
-  sd1.ProcessHits(aStep, th);
+  sd1.m_HitColl = &hitCollection;
+  sd1.ProcessHits(&aStep, &th);
   
-  //TODO: Create the actual tests
-}
-
-TEST_F( ZDC_G4CalibSDtest, EndOfAthenaEvent )
-{
-
-// define aStep and energies as the actual parameters of the member function SpecialHit 
-  G4Step aStep;
-  std::vector<G4double> energies = {1., 2., 3., 4.};
-
-  G4double totalenergydeposit = 0.8;
-  std::vector<G4String> physicalname = {"ZDC::Strip 0x-13DFA800"};
-  G4String logicalname = "ZDC::Strip_Logical";
-  std::vector<G4int> copynos = {-333424640};
-  G4ThreeVector preStepPos = G4ThreeVector(0,0,1);
-  G4ThreeVector postStepPos = G4ThreeVector(0,0,2);
-  G4double globaltime0 = 0.5;
-  G4double kineticenergy0 = 1.5;
-  G4double velocity0 = 2500;
-  G4double globaltime = 5.0;
-  G4double kineticenergy = 0.5;
-  G4double globaltime1 = 0.5;
-  G4double kineticenergy1 = 0.5;
-  G4double velocity1 = 2500;
-  G4double steplength = 1.0;
-  G4double charge = 1.0;
-  G4int encoding = 22;
-  G4int antiencoding = 22;
-  G4String astring = "Cerenkov";
-  G4ProcessType atype = (G4ProcessType)0;
-  G4String nop1 = "opticalphoton";
-  G4String nop2 = "opticalphoton";
-  G4String nop3 = "photon";
-  DerivedG4SensitiveDetectorTestSetting(aStep, totalenergydeposit, physicalname, logicalname, copynos, preStepPos, postStepPos, globaltime0, kineticenergy0, velocity0, globaltime, kineticenergy, globaltime1, kineticenergy1, velocity1, steplength, charge, encoding, antiencoding, astring, atype, nop1, nop2, nop3);
-
-  ZDC_G4CalibSD sd2("name2", "name2", false);
-  sd2.SpecialHit(&aStep, energies);//this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
-
-  //so far the newly-generated hit has already been stored in the object m_calibrationHits, so I can invoke the member function EndOfAthenaEvent to move the hits into the object hitContainer that was just defined
-  sd2.EndOfAthenaEvent();
-
   //TODO: Create the actual tests
 }
 
 TEST_F( ZDC_G4CalibSDtest, SpecialHit )
 {
+  ZDC_CalibrationHitContainerBuilder hitCollection("name2");
 
 // define aStep and energies as the actual parameters of the member function SpecialHit 
   G4Step aStep;
@@ -135,6 +99,7 @@ TEST_F( ZDC_G4CalibSDtest, SpecialHit )
 
 
   ZDC_G4CalibSD sd2("name2", "name2", false);
+  sd2.m_HitColl = &hitCollection;
   sd2.SpecialHit(&aStep, energies);//this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
 
   //TODO: Create the actual tests
@@ -142,6 +107,7 @@ TEST_F( ZDC_G4CalibSDtest, SpecialHit )
 
 TEST_F( ZDC_G4CalibSDtest, SimpleHit )
 {
+  ZDC_CalibrationHitContainerBuilder hitCollection("name4");
 // the member function SimpleHit aims to generate a hit and store it in a hit container
 // Add a bunch of numbers into the object a_ident and this kind of number setting is intented to run the "if(a_ident[0]==4) {if(a_ident[1]==1) ...}" block
 
@@ -150,6 +116,7 @@ TEST_F( ZDC_G4CalibSDtest, SimpleHit )
   Identifier a_ident;
 
   ZDC_G4CalibSD sd6("name4", "name4", false);
+  sd6.m_HitColl = &hitCollection;
   sd6.SimpleHit(a_ident, energies); //this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
 
   //TODO: Create the actual tests
@@ -163,4 +130,3 @@ int main( int argc, char** argv ) {
   return RUN_ALL_TESTS();
 
 }
-

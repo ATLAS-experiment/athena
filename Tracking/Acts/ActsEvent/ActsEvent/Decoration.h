@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsEvent_Decoration_h
 #define ActsEvent_Decoration_h
@@ -7,7 +7,9 @@
 #include "AthContainersInterfaces/AuxTypes.h"
 #include "AthContainersInterfaces/IAuxStore.h"
 #include "AthContainersInterfaces/IConstAuxStore.h"
+#include "ActsEvent/TrackContainer.h"
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODTracking/TrackParticleFwd.h"
 #include <any>
 
 namespace ActsTrk {
@@ -105,6 +107,29 @@ std::vector<Decoration> restoreDecorations(
     const std::set<std::string>& staticVariables);
 
 }  // namespace detail
+
+/** @brief Return the proxy to the Acts track from which the track particle
+ *         was made frome
+ * @param trkPart: The track particle containing a link to the Acts::Track */
+std::optional<ActsTrk::TrackContainer::ConstTrackProxy> getActsTrack(const xAOD::TrackParticle& trkPart);
+
+/** @brief Returns the track state proxy corresponding to the last measurement on track.
+  *        The method retrieves the Acts track and returns the last measurement along the track
+  *        which is not an outlier if toggled
+  * @param trkPart: Reference to the track particle made from the Acts chain
+    @param skipOutlier: Flag to ignore the outlier states */
+std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy> 
+    lastMeasurementState(const xAOD::TrackParticle& trkPart,
+                         const bool skipOutlier = true);
+/** @brief Returns the track state proxy corresponding to the measurement that is closest to
+           the defining track parameter. The method retrieves the Acts track and returns the last measurement along the track
+  *        which is not an outlier if toggled
+  * @param trkPart: Reference to the track particle made from the Acts chain
+    @param skipOutlier: Flag to ignore the outlier states */
+std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy> 
+    firstMeasurementState(const xAOD::TrackParticle& trkPart,
+                         const bool skipOutlier = true);               
+
 }  // namespace ActsTrk
 
 #endif

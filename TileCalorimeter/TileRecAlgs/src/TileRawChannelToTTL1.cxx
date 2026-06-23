@@ -125,7 +125,7 @@ StatusCode TileRawChannelToTTL1::initialize() {
 //
 // Begin Execution Phase.
 //
-StatusCode TileRawChannelToTTL1::execute() {
+StatusCode TileRawChannelToTTL1::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "Executing TileRawChannelToTTL1");
 
@@ -150,13 +150,13 @@ StatusCode TileRawChannelToTTL1::execute() {
   // step 3:  Get rawChannel container from TES and create TTL1 container
   /* Note that rawChannel container has 256 collections (one for each drawer),
    but TTL1 container has no collections and no structure. */
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey);
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
   ATH_CHECK( rawChannelContainer.isValid() );
 
   TileRawChannelUnit::UNIT rChUnit = rawChannelContainer->get_unit();
   //TileFragHash::TYPE rChType = rawChannelContainer->get_type();
 
-  SG::WriteHandle<TileTTL1Container> ttl1Container(m_ttl1ContainerKey);
+  SG::WriteHandle<TileTTL1Container> ttl1Container(m_ttl1ContainerKey, ctx);
   ATH_CHECK( ttl1Container.record(std::make_unique<TileTTL1Container>()) );
   ATH_MSG_DEBUG( "TileTTL1Container registered successfully (" << m_ttl1ContainerKey.key() << ")" );
 

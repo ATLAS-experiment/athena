@@ -24,6 +24,6 @@ foreach(_theTestSource ${tests})
    get_filename_component(_theTest ${_theTestSource} NAME_WE)
    atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
                     LINK_LIBRARIES MuonStationIndexLib 
-                    POST_EXEC_SCRIPT nopost.sh)
+                    POST_EXEC_SCRIPT noerror.sh)
 endforeach()
 

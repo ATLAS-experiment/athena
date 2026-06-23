@@ -140,7 +140,7 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode DerivationFramework::DerivationKernel::execute() {
+StatusCode DerivationFramework::DerivationKernel::execute(const EventContext& ctx) {
 
   IChronoSvc* cSvc=m_chronoSvc.get(); //Might be null ...
   // On your marks.... get set.... (but only if not in MT)
@@ -155,7 +155,6 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
   //=============================================================================
   // AUGMENTATION ===============================================================
   //=============================================================================
-  const EventContext &ctx = Gaudi::Hive::currentContext();
   if (!m_runSkimmingFirst) {
     for (const auto &  augmentationTool : m_augmentationTools) {
       ATH_MSG_DEBUG("Entering " << augmentationTool->name());
@@ -176,7 +175,7 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
   // Loop over the filters
   for (const auto &  skimmingTool : m_skimmingTools) {
     ATH_MSG_DEBUG("Entering " << skimmingTool->name());
-    if (!(skimmingTool->eventPassesFilter())) {
+    if (!(skimmingTool->eventPassesFilter(ctx))) {
       acceptEvent=false;
       ATH_MSG_DEBUG("This event failed the " << skimmingTool->name() << " filter. Therefore it will not be recorded.");
       break;
@@ -209,7 +208,7 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
 
   for (const auto &  thinningTool : m_thinningTools) {
     ATH_MSG_DEBUG("Entering " << thinningTool->name());
-    if ( thinningTool->doThinning().isFailure() ) {
+    if ( thinningTool->doThinning(ctx).isFailure() ) {
       ATH_MSG_ERROR("Thinning failed!");
       return StatusCode::FAILURE;
     }

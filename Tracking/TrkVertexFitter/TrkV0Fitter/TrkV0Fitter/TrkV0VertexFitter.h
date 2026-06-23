@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -39,10 +39,10 @@ namespace Trk
   class TrkV0VertexFitter : public extends<AthAlgTool, IVertexFitter>
   {
   public:
-    // The following 'using' can be removed when IVertexFitter::fit 
+    // The following 'using' can be removed when IVertexFitter::fit
     // has been fully migrated to the one with the EventContext
     using Trk::IVertexFitter::fit;
-  
+
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
 
@@ -51,10 +51,12 @@ namespace Trk
     virtual ~TrkV0VertexFitter(); //!< standard destructor
 
     /** Interface for xAOD::TrackParticle with Amg::Vector3D starting point */
-    virtual xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+    virtual std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+                               const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                                const Amg::Vector3D& startingPoint) const override;
 
-    virtual xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+    virtual std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+                               const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                                const std::vector<const xAOD::NeutralParticle*>& /*vectorNeut*/, 
                                const Amg::Vector3D& startingPoint) const override
     {
@@ -63,14 +65,16 @@ namespace Trk
            "TrackParticle*>&,const std::vector<const "
            "Trk::NeutralParticle*>&,const Amg::Vector3D&) ignoring neutrals"
         << endmsg;
-      return fit(vectorTrk, startingPoint);
+      return fit(ctx, vectorTrk, startingPoint);
     };
 
     /** Interface for xAOD::TrackParticle with xAOD::Vertex starting point */
-    virtual xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+    virtual std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+                               const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                                const xAOD::Vertex& constraint) const override;
 
-    virtual xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk, 
+    virtual std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+                               const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                                const std::vector<const xAOD::NeutralParticle*>& /*vectorNeut*/, 
                                const xAOD::Vertex& constraint) const override
     {
@@ -79,22 +83,25 @@ namespace Trk
            "TrackParticle*>&,const std::vector<const "
            "Trk::NeutralParticle*>&,const xAOD::Vertex&) ignoring neutrals"
         << endmsg;
-      return fit(vectorTrk, constraint);
+      return fit(ctx, vectorTrk, constraint);
     };
 
     /** Fit interface for xAOD::TrackParticle with no starting point. (0,0,0)
      * will be assumed */
-    virtual xAOD::Vertex* fit(
+    virtual std::unique_ptr<xAOD::Vertex> fit(
+      const EventContext& ctx,
       const std::vector<const xAOD::TrackParticle*>& vectorTrk) const;
 
     /** Interface for Trk::TrackParameters with Amg::Vector3D starting point */
-    virtual xAOD::Vertex* fit(
+    virtual std::unique_ptr<xAOD::Vertex> fit(
+      const EventContext& ctx,
       const std::vector<const Trk::TrackParameters*>& perigeeList,
       const Amg::Vector3D& startingPoint) const override;
 
     /** Interface for Trk::TrackParameters and NeutralParameters with
      * Amg::Vector3D starting point */
-    virtual xAOD::Vertex* fit(
+    virtual std::unique_ptr<xAOD::Vertex> fit(
+      const EventContext& ctx,
       const std::vector<const Trk::TrackParameters*>& perigeeList,
       const std::vector<const Trk::NeutralParameters*>& /*neutralPerigeeList*/,
       const Amg::Vector3D& startingPoint) const override
@@ -104,17 +111,19 @@ namespace Trk
            "Trk::TrackParameters*>&,const std::vector<const "
            "Trk::NeutralParameters*>&,const Amg::Vector3D&) ignoring neutrals"
         << endmsg;
-      return fit(perigeeList, startingPoint);
+      return fit(ctx, perigeeList, startingPoint);
     };
 
     /** Interface for TrackParameters with xAOD::Vertex starting point */
-    virtual xAOD::Vertex* fit(
+    virtual std::unique_ptr<xAOD::Vertex> fit(
+      const EventContext& ctx,
       const std::vector<const Trk::TrackParameters*>& perigeeList,
       const xAOD::Vertex& constraint) const override;
 
     /** Interface for TrackParameters and NeutralParameters with xAOD::Vertex
      * starting point */
-    virtual xAOD::Vertex* fit(
+    virtual std::unique_ptr<xAOD::Vertex> fit(
+      const EventContext& ctx,
       const std::vector<const Trk::TrackParameters*>& perigeeList,
       const std::vector<const Trk::NeutralParameters*>& /*neutralPerigeeList*/,
       const xAOD::Vertex& constraint) const override
@@ -124,15 +133,17 @@ namespace Trk
            "Trk::TrackParameters*>&,const std::vector<const "
            "Trk::NeutralParameters*>&,const xAOD::Vertex&) ignoring neutrals"
         << endmsg;
-      return fit(perigeeList, constraint);
+      return fit(ctx, perigeeList, constraint);
     };
 
     /** Fit interface for TrackParameters with no starting point. (0,0,0) will
      * be assumed. */
-    virtual xAOD::Vertex* fit(const std::vector<const Trk::TrackParameters*>&
-                                perigeeList) const override;
+    virtual std::unique_ptr<xAOD::Vertex> fit(
+      const EventContext& ctx,
+      const std::vector<const Trk::TrackParameters*>& perigeeList) const override;
 
-    virtual xAOD::Vertex* fit(
+    virtual std::unique_ptr<xAOD::Vertex> fit(
+      const EventContext& ctx,
       const std::vector<const Trk::TrackParameters*>& perigeeList,
       const std::vector<const Trk::NeutralParameters*>& /*neutralPerigeeList*/)
       const override
@@ -141,7 +152,7 @@ namespace Trk
                            "Trk::TrackParameters*>&,const std::vector<const "
                            "Trk::NeutralParameters*>&) ignoring neutrals"
                         << endmsg;
-      return fit(perigeeList);
+      return fit(ctx, perigeeList);
     };
 
    /**
@@ -153,13 +164,15 @@ namespace Trk
     * no pointing constraint applied.
     */
       
-    virtual xAOD::Vertex * fit(const std::vector<const xAOD::TrackParticle*> & vectorTrk,
+    virtual std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+                               const std::vector<const xAOD::TrackParticle*> & vectorTrk,
                                const std::vector<double>& masses,
                                const double& constraintMass,
                                const xAOD::Vertex* pointingVertex,
                                const Amg::Vector3D& startingPoint) const;
 
-    virtual xAOD::Vertex * fit(const std::vector<const Trk::TrackParameters*> & perigeeList,
+    virtual std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx,
+                               const std::vector<const Trk::TrackParameters*> & perigeeList,
                                const std::vector<double>& masses,
                                const double& constraintMass,
                                const xAOD::Vertex* pointingVertex,

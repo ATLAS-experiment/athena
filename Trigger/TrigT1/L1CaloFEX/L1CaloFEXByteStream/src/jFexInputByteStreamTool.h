@@ -43,7 +43,9 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         virtual StatusCode convertFromBS(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vrobf, const EventContext& eventContext)const override;
 
         /// xAOD->BS conversion
-        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf, const EventContext& eventContext) override;
+        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                       const xAOD::TrigCompositeContainer* tc,
+                                       const EventContext& eventContext) override;
 
         /// Declare ROB IDs for conversion
         virtual const std::vector<uint32_t>& robIds() const override {

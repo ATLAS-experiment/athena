@@ -60,7 +60,7 @@ StatusCode PixelClusterAnalysis::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode PixelClusterAnalysis::execute() {
+StatusCode PixelClusterAnalysis::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG(" In PixelClusterAnalysis::execute()" );
 
     m_barrelEndcap->clear();
@@ -80,7 +80,6 @@ StatusCode PixelClusterAnalysis::execute() {
     m_sizeX->clear();
     m_sizeY->clear();
 
-    const EventContext& ctx = Algorithm::getContext();
 
     SG::ReadHandle<InDet::PixelClusterContainer> pixelContainer (m_inputKey, ctx);
     if(pixelContainer.isValid()) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NrpcDigitToNrpcRDO.h"
@@ -98,7 +98,7 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
                 const float rdo_time = rpcDigit->time();
 
                 const float the_timeoverthr = rpcDigit->ToT();
-                uint32_t the_bcid= rdo_time / 25.;
+                uint32_t the_bcid= rdo_time > 0 ? rdo_time / 25. : 0;
 
                 xAOD::NRPCRDO* NrpcRdo = nrpcRdoData->push_back(std::make_unique<xAOD::NRPCRDO>());
                 NrpcRdo->setBcid(the_bcid);

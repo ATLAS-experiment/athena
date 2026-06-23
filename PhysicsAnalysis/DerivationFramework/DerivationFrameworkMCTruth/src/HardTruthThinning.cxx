@@ -19,7 +19,6 @@
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TruthUtils/HepMCHelpers.h"
 #include <vector>
@@ -124,9 +123,8 @@ StatusCode DerivationFramework::HardTruthThinning::finalize()
 // doThinning
 ////////////////////////////////////////////////////////////
 
-StatusCode DerivationFramework::HardTruthThinning::doThinning() const
+StatusCode DerivationFramework::HardTruthThinning::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ++m_evtCount;
   bool doPrint = m_evtCount < m_maxCount;

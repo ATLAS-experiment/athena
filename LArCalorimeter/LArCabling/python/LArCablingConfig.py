@@ -90,11 +90,13 @@ def LArCalibIdMappingSCCfg(configFlags):
        result.getCondAlgo("LArCalibLineMappingAlgSC").WriteKey="LArCalibIdMapSC"
        result.getCondAlgo("LArCalibLineMappingAlgSC").isSuperCell=True
        result.getCondAlgo("LArCalibLineMappingAlgSC").MaxCL=16
-       return result
+    return result
 
 def LArLATOMEMappingCfg(configFlags):
+    result = ComponentAccumulator()
     if not configFlags.Input.isMC:
-       return _larLatomeCfg(configFlags,LArLATOMEMappingAlg,"/LAR/Identifier/LatomeMapping","LArLATOMEMap")
+       result.merge(_larLatomeCfg(configFlags,LArLATOMEMappingAlg,"/LAR/Identifier/LatomeMapping","LArLATOMEMap"))
+    return result
 
 def LArIdMapCfg(configFlags):
     """Return ComponentAccumulator configured with Identifier Map in POOL/COOL"""

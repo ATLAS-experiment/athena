@@ -36,7 +36,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  bool NTUPStringSkimmingTool::eventPassesFilter() const
+  bool NTUPStringSkimmingTool::eventPassesFilter(const EventContext& /*ctx*/) const
   {
     return m_parser->evaluateAsBool();
     return true;

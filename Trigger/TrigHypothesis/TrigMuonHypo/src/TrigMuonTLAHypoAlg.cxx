@@ -96,7 +96,7 @@ StatusCode TrigMuonTLAHypoAlg::execute(const EventContext &ctx) const
     auto muonPtMon  = Monitored::Collection("Pt", *h_TLAMuons, []( const auto& t ) { return t->pt() * t->charge() / Gaudi::Units::GeV; });
     auto muonEtaMon = Monitored::Collection("Eta", *h_TLAMuons, &xAOD::Muon::eta);
     auto muonPhiMon = Monitored::Collection("Phi", *h_TLAMuons, &xAOD::Muon::phi);
-    auto muonAuthor	= Monitored::Collection("Author", *h_TLAMuons, &xAOD::Muon::author);
+    auto muonAuthor	= Monitored::Collection("Author", *h_TLAMuons, [](const auto* m){return static_cast<int>(m->author());});
     auto monitorIt  = Monitored::Group(m_monTool, Nmuons, muonPtMon, muonAuthor, muonEtaMon, muonPhiMon);
 
 

@@ -115,7 +115,7 @@ namespace CP
               // Postfix for the shallow-copy container of the origin container.
               static const char* const ORIGIN_POSTFIX = "_ShallowCopyOrigin";
               // Make a shallow copy of the origin container.
-              auto originCopy = xAOD::shallowCopyContainer( *originContainer, Gaudi::Hive::currentContext() );
+              auto originCopy = xAOD::shallowCopy( *originContainer );
               if( ( ! originCopy.first ) || ( ! originCopy.second ) ) {
                  ANA_MSG_ERROR( "Failed to shallow copy the origin of a view "
                                 << "container, meant for: " << outputName );
@@ -163,7 +163,7 @@ namespace CP
         } else {
 
            // We can just copy the container as is.
-           auto copy = xAOD::shallowCopyContainer( *inputObject, Gaudi::Hive::currentContext() );
+           auto copy = xAOD::shallowCopy( *inputObject );
            if (!copy.first || !copy.second)
            {
               ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);
@@ -230,7 +230,7 @@ namespace CP
                // Postfix for the shallow-copy container of the origin container.
                static const char* const ORIGIN_POSTFIX = "_ShallowCopyOrigin";
                // Make a shallow copy of the origin container.
-               auto originCopy = xAOD::shallowCopyContainer( *originContainer, Gaudi::Hive::currentContext() );
+               auto originCopy = xAOD::shallowCopy( *originContainer );
                if( ( ! originCopy.first ) || ( ! originCopy.second ) ) {
                   ANA_MSG_ERROR( "Failed to shallow copy the origin of a view "
                                  << "container, meant for: " << outputName );
@@ -270,7 +270,7 @@ namespace CP
          } else {
 
             // We can just copy the container as is.
-            auto copy = xAOD::shallowCopyContainer( *inputObject, Gaudi::Hive::currentContext() );
+            auto copy = xAOD::shallowCopy( *inputObject );
             if (!copy.first || !copy.second)
             {
                ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);
@@ -308,7 +308,7 @@ namespace CP
           };
 
           // We can just copy the object as is.
-          auto copy = xAOD::shallowCopyObject( *inputObject, Gaudi::Hive::currentContext() );
+          auto copy = xAOD::shallowCopy( *inputObject );
           if (!copy.first || !copy.second)
           {
              ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);

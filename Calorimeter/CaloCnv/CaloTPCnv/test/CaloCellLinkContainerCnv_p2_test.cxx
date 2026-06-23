@@ -453,7 +453,6 @@ void test_thinning()
 void tests ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   Athena::getMessageSvc();
   // Get proxies created outside of leak checking.
   ElementLink<CaloCellContainer> dum1 (cont_name, 0);

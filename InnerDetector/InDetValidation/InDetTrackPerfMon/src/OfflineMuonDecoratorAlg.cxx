@@ -101,12 +101,12 @@ StatusCode IDTPM::OfflineMuonDecoratorAlg::decorateMuonTrack(
   for( const xAOD::Muon* muon : muons ) {
 
     /// Exclude non-Combined muons
-    if( muon->muonType() != xAOD::Muon::Combined ) continue;
+    if( muon->muonType() != xAOD::Muon::MuonType::Combined ) continue;
 
     /// retrieve ID TrackParticle from muon
-    const xAOD::TrackParticle* muTrack = m_useCombinedMuonTracks.value() ?
-                          *( muon->combinedTrackParticleLink() ) : // Combined track
-                          *( muon->inDetTrackParticleLink() );  // ID track
+    using enum xAOD::Muon::TrackParticleType;
+    const xAOD::TrackParticle* muTrack = muon->trackParticle(m_useCombinedMuonTracks.value() ? 
+                                                             CombinedTrackParticle : InnerDetectorTrackParticle);
 
     if( not muTrack ) {
       ATH_MSG_ERROR( "Corrupted matched muon ID track" );
@@ -124,22 +124,22 @@ StatusCode IDTPM::OfflineMuonDecoratorAlg::decorateMuonTrack(
       IDTPM::decorateOrRejectQuietly( track, mu_decor[All], muLink );
 
       /// Decoration for Tight muon
-      if( muon->quality() <= xAOD::Muon::Tight ) {
+      if( muon->quality() <= xAOD::Muon::Quality::Tight ) {
         IDTPM::decorateOrRejectQuietly( track, mu_decor[Tight], muLink );
       }
 
       /// Decoration for Medium muon
-      if( muon->quality() <= xAOD::Muon::Medium ) {
+      if( muon->quality() <= xAOD::Muon::Quality::Medium ) {
         IDTPM::decorateOrRejectQuietly( track, mu_decor[Medium], muLink );
       }
 
       /// Decoration for Loose muon
-      if( muon->quality() <= xAOD::Muon::Loose ) {
+      if( muon->quality() <= xAOD::Muon::Quality::Loose ) {
         IDTPM::decorateOrRejectQuietly( track, mu_decor[Loose], muLink );
       }
 
       /// Decoration for VeryLoose muon
-      if( muon->quality() <= xAOD::Muon::VeryLoose ) {
+      if( muon->quality() <= xAOD::Muon::Quality::VeryLoose ) {
         IDTPM::decorateOrRejectQuietly( track, mu_decor[VeryLoose], muLink );
       }
 

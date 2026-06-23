@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSCATTERINGANGLESIGNIFICANCETOOL_H
 #define MUONSCATTERINGANGLESIGNIFICANCETOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MuonCombinedToolInterfaces/IMuonScatteringAngleSignificance.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumesSvc.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
+#include "TrkGeometry/TrackingVolume.h"
+
 
 namespace Trk {
     class Volume;
@@ -23,9 +23,9 @@ namespace Rec {
                information (parameters, scattering angles) of a track fit.
       */
 
-    class MuonScatteringAngleSignificanceTool : public AthAlgTool, virtual public IMuonScatteringAngleSignificance {
+    class MuonScatteringAngleSignificanceTool : public extends<AthAlgTool, IMuonScatteringAngleSignificance> {
     public:
-        MuonScatteringAngleSignificanceTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         ~MuonScatteringAngleSignificanceTool() = default;
 
         StatusCode initialize();
@@ -49,12 +49,14 @@ namespace Rec {
                                                                      "geometry for analysing track lengths"};
 
         // constants
-        const Trk::Volume* m_calorimeterVolume;  //!< cache the calo volume pointer
-        const Trk::Volume* m_indetVolume;        //!< cache the ID volume pointer
+        std::unique_ptr<const Trk::Volume> m_calorimeterVolume{nullptr};  //!< cache the calo volume pointer
+        std::unique_ptr<const Trk::Volume> m_indetVolume{nullptr};        //!< cache the ID volume pointer
 
         // steering flags
-        bool m_inDetOnly;       //!< scatterers from ID only (or ID + calo)
-        bool m_refitInDetOnly;  //!< steer if to unslim only ID
+
+      
+        Gaudi::Property<bool> m_inDetOnly{this, "InDetOnly", true};       //!< scatterers from ID only (or ID + calo)
+        Gaudi::Property<bool> m_refitInDetOnly{this, "RefitInDetOnly", true};  //!< steer if to unslim only ID
     };
 
 }  // namespace Rec

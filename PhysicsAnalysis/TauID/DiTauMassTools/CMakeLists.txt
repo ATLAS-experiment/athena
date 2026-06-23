@@ -1,3 +1,4 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare a name for the package:
 atlas_subdir( DiTauMassTools )
@@ -13,7 +14,7 @@ else()
 endif()
 
 # Find the external(s):
-find_package( ROOT COMPONENTS Core RIO Math Physics )
+find_package( ROOT COMPONENTS Core RIO MathCore Physics )
 
 # Component(s) in the package:
 atlas_add_library( DiTauMassToolsLib
@@ -42,4 +43,3 @@ if( XAOD_STANDALONE )
       POST_EXEC_SCRIPT nopost.sh )
 
 endif()
-

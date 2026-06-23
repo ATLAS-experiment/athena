@@ -12,7 +12,6 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODJet/Jet.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ThinningHandle.h"
 #include "xAODJet/JetConstituentVector.h"
 
@@ -82,9 +81,8 @@ DerivationFramework::JetCaloClusterThinning::finalize()
 
 // The thinning itself
 StatusCode
-DerivationFramework::JetCaloClusterThinning::doThinning() const
+DerivationFramework::JetCaloClusterThinning::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve CalCaloTopo collection if required
   SG::ThinningHandle<xAOD::CaloClusterContainer> importedTopoCaloCluster(

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -150,5 +150,6 @@ PileUpEventInfo::SubEvent::SubEvent(time_type t, unsigned int BCID,
 unsigned int
 PileUpEventInfo::SubEvent::BCID() const {
   // Be sure to call const methods to avoid checker warnings.
-  return(0 == pSubEvt ? 0 :  std::as_const(*pSubEvt).event_ID()->bunch_crossing_id());
+  if (!pSubEvt) return 0;
+  return std::as_const(*pSubEvt).event_ID()->bunch_crossing_id();
 }

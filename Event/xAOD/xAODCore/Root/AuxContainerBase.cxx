@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -290,6 +290,11 @@ namespace xAOD {
       return empty;
    }
 
+   SG::auxid_set_t AuxContainerBase::getCopyIDs (bool warnUnlocked) const
+   {
+     return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, {});
+   }
+
    bool AuxContainerBase::isDecoration (auxid_t auxid) const
    {
      guard_t guard( m_mutex );
@@ -426,6 +431,24 @@ namespace xAOD {
          }
       }
       return nullptr;
+   }
+
+
+   void AuxContainerBase::toTransient (const EventContext& ctx)
+   {
+      // Guard against multi-threaded execution:
+      guard_t guard (m_mutex);
+
+      for (SG::IAuxTypeVector* v : m_vecs) {
+         if(v) {
+           v->toTransient( ctx );
+         }
+      }
+
+      // Do the operation on the dynamic variables:
+      if( m_store ) {
+        m_store->toTransient( ctx );
+      }
    }
 
 
@@ -707,7 +730,7 @@ namespace xAOD {
 
       // All the variables handled by the internal store are dynamic
       // if such a store exists:
-      if( m_storeIO ) {
+      if( m_storeIO && m_store) {
          // I mean, all the variables. Not just the ones reported as dynamic
          // by the internal object. Because the internal object may be something
          // that was put into this one in order to achieve data slimming.
@@ -727,7 +750,7 @@ namespace xAOD {
 
       // All the variables handled by the internal store are dynamic
       // if such a store exists:
-      if( m_storeIO ) {
+      if( m_storeIO && m_store) {
          // I mean, all the variables. Not just the ones reported as dynamic
          // by the internal object. Because the internal object may be something
          // that was put into this one in order to achieve data slimming.

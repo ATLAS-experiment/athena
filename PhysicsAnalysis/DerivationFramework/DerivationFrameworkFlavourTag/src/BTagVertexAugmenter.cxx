@@ -24,7 +24,7 @@ StatusCode BTagVertexAugmenter::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode BTagVertexAugmenter::execute() {
+StatusCode BTagVertexAugmenter::execute(const EventContext& /*ctx*/) {
   const xAOD::VertexContainer *vertices = 0;
   CHECK( evtStore()->retrieve(vertices, "PrimaryVertices") );
   int npv = 0;

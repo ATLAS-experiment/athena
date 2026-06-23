@@ -1,7 +1,7 @@
 //  -*- c++ -*- 
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMONITORING_HISTOGROUPBASE_H
@@ -44,9 +44,9 @@ class HistoGroupBase :  public asg::AsgTool {
 
   /// Simply a histo and its path in the hiearchy 
   struct HistData {
-    TH1* hist;
+    TH1* hist{};
     std::string path; 
-    Interval_t interval;
+    Interval_t interval{};
   };
 
   HistoGroupBase(const std::string & t);

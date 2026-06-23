@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -16,7 +16,7 @@ class StoreGateSvc;
 namespace asg
 {
 #ifdef XAOD_STANDALONE
-  class SgTEvent;
+  class SgEvent;
 #endif
 
   /// \brief the type returned by \ref AsgTool::evtStore
@@ -26,7 +26,7 @@ namespace asg
 #ifndef XAOD_STANDALONE
    typedef StoreGateSvc EventStoreType;
 #else
-   typedef SgTEvent EventStoreType;
+   typedef SgEvent EventStoreType;
 #endif
 }
 

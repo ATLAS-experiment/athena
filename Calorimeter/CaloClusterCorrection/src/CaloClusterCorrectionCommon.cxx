@@ -19,7 +19,6 @@
 #include <cassert>
 
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 using xAOD::CaloCluster;
 using CaloClusterCorr::interpolate;

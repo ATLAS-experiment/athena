@@ -25,7 +25,7 @@ namespace MuonVal{
 
 
             virtual StatusCode initialize() override final;
-            virtual StatusCode execute() override final;
+            virtual StatusCode execute(const EventContext& ctx) override final;
 
         private:
             SG::ReadHandleKey<RpcPadContainer> m_inputKeyPad{this, "InputPadKey", "RPCPAD"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -37,7 +37,7 @@ TEST_F (ColumnarMemoryTest, AsgPhotonEfficiencyCorrectionTool)
     return;
 
   auto tool = std::make_unique<AsgPhotonEfficiencyCorrectionTool> (makeUniqueName());
-  ASSERT_SUCCESS (tool->setProperty ("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt"));
+  ASSERT_SUCCESS (tool->setProperty ("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2026_Run3Consolidated_Recommendation_v1/map0.txt"));
   ASSERT_SUCCESS (tool->setProperty ("ForceDataType", unsigned (PATCore::ParticleDataType::Full)));
   ASSERT_SUCCESS (tool->initialize ());
   ColumnarTestToolHandle toolHandle (*tool);
@@ -106,10 +106,10 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [photonsCopy, photonsAuxCopy] = xAOD::shallowCopyContainer (*m_photons);
-    m_photons = photonsCopy;
-    ANA_CHECK (evtStore.record (photonsCopy, m_name + postfix));
-    ANA_CHECK (evtStore.record (photonsAuxCopy, m_name + postfix + "Aux."));
+    auto [photonsCopy, photonsAuxCopy] = xAOD::shallowCopy (*m_photons);
+    m_photons = photonsCopy.get();
+    ANA_CHECK (evtStore.record (std::move(photonsCopy), m_name + postfix));
+    ANA_CHECK (evtStore.record (std::move(photonsAuxCopy), m_name + postfix + "Aux."));
     return StatusCode::SUCCESS;
   }
 
@@ -132,7 +132,7 @@ private:
 TEST_F (ColumnarPhysLiteTest, AsgPhotonEfficiencyCorrectionTool)
 {
   auto tool = std::make_unique<AsgPhotonEfficiencyCorrectionTool> (makeUniqueName());
-  ASSERT_SUCCESS (tool->setProperty ("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2024_FinalRun2_Recommendation_v1/map1.txt"));
+  ASSERT_SUCCESS (tool->setProperty ("MapFilePath", "PhotonEfficiencyCorrection/2015_2025/rel22.2/2026_Run3Consolidated_Recommendation_v1/map0.txt"));
   ASSERT_SUCCESS (tool->setProperty ("ForceDataType", unsigned (PATCore::ParticleDataType::Full)));
 
   // add a dummy column for the test

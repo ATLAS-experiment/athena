@@ -73,7 +73,7 @@ StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int Un
   location(etaTOB,phiTOB, eFEX, FPGA, fpgaEta);
 
   // Set up e/g algorithm for this location
-  ATH_CHECK( m_eFEXegAlgoTool->safetyTest() );
+  ATH_CHECK( m_eFEXegAlgoTool->safetyTest(Gaudi::Hive::currentContext()) );
   m_eFEXegAlgoTool->setup(tobtable, eFEX, FPGA, fpgaEta);
 
   // Get ETs of cells making up the ET clusters
@@ -185,7 +185,7 @@ StatusCode eFEXTOBEtTool::gettauSums(float etaTOB, float phiTOB, int seed, int U
   location(etaTOB,phiTOB, eFEX, FPGA, fpgaEta);
 
   // Set up e/g algorithm for this location
-  ATH_CHECK( m_eFEXtauAlgoTool->safetyTest() );
+  ATH_CHECK( m_eFEXtauAlgoTool->safetyTest(Gaudi::Hive::currentContext()) );
   m_eFEXtauAlgoTool->setup(tobtable, eFEX, FPGA, fpgaEta);
 
   // Get sums from algorithm

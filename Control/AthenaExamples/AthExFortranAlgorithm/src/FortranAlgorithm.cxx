@@ -46,7 +46,7 @@ StatusCode FortranAlgorithm::initialize(){
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode FortranAlgorithm::execute() {
+StatusCode FortranAlgorithm::execute(const EventContext& /*ctx*/) {
   ATH_MSG_INFO ("calling execute_()");
   execute_(m_lun);
   fortran_flush();

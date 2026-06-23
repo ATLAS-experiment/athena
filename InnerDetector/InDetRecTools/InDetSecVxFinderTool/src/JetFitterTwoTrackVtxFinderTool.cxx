@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSecVxFinderTool/JetFitterTwoTrackVtxFinderTool.h"
@@ -44,7 +44,8 @@ StatusCode JetFitterTwoTrackVtxFinderTool::finalize() {
 }
 
 
-const Trk::TwoTrackVerticesInJet* JetFitterTwoTrackVtxFinderTool::doVertexFinding( const xAOD::Vertex& primaryVertex,
+const Trk::TwoTrackVerticesInJet* JetFitterTwoTrackVtxFinderTool::doVertexFinding(const EventContext& ctx,
+										   const xAOD::Vertex& primaryVertex,
 										   const TLorentzVector& jetMomentum,
 										   std::vector< const Trk::ITrackLink* >& inputTracks) const {
 
@@ -60,7 +61,7 @@ const Trk::TwoTrackVerticesInJet* JetFitterTwoTrackVtxFinderTool::doVertexFindin
       const Trk::ITrackLink* trackB = inputTracks.at( indexB );
       
       // Computing the Vertex candidate
-      xAOD::Vertex *myCandidate = computeVtxcandidate( primaryVertex,jetMomentum,trackA,trackB );
+      xAOD::Vertex *myCandidate = computeVtxcandidate( ctx,primaryVertex,jetMomentum,trackA,trackB );
       if ( myCandidate == nullptr ) continue;
 
       // Attaching tracks to vertex candidate
@@ -81,7 +82,8 @@ const Trk::TwoTrackVerticesInJet* JetFitterTwoTrackVtxFinderTool::doVertexFindin
   return twoTrackVerticesInJet;
 }
 
-xAOD::Vertex* JetFitterTwoTrackVtxFinderTool::computeVtxcandidate( const xAOD::Vertex& primaryVertex,
+xAOD::Vertex* JetFitterTwoTrackVtxFinderTool::computeVtxcandidate( const EventContext& ctx,
+								   const xAOD::Vertex& primaryVertex,
 								   const TLorentzVector& jetMomentum,
 								   const Trk::ITrackLink* trackA,
 								   const Trk::ITrackLink* trackB ) const {
@@ -114,7 +116,7 @@ xAOD::Vertex* JetFitterTwoTrackVtxFinderTool::computeVtxcandidate( const xAOD::V
   
 
   // Compute V0 candidate
-  std::unique_ptr< xAOD::Vertex > myCandidate( m_SequentialVertexFitter->fit(perigeeToFit,seedVertex) );
+  std::unique_ptr< xAOD::Vertex > myCandidate( m_SequentialVertexFitter->fit(ctx,perigeeToFit,seedVertex) );
 
   // Check fit completed with success
   if ( myCandidate == nullptr ) {

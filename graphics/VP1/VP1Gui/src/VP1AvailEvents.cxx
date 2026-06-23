@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,10 +26,10 @@
 //____________________________________________________________________
 class VP1AvailEvents::Imp {
 public:
-  VP1AvailEvents*theclass;
-  int timeCutForNew;
+  VP1AvailEvents* theclass{};
+  int timeCutForNew{};
   QString tmpDir;
-  int maxLocalFilesToKeep;
+  int maxLocalFilesToKeep{};
   //subdirs in tmpDir, generated on the fly:
   QString tmpLocalFileDir;
   QString tmpActiveRetrievalDir;
@@ -40,8 +40,8 @@ public:
   class EventID {
   public:
     EventID(int r, unsigned long long e) : eventNumber(e), runNumber(r) {}
-    unsigned long long eventNumber;
-    int runNumber;
+    unsigned long long eventNumber{};
+    int runNumber{};
     bool operator==(const EventID & o) const{
       return eventNumber==o.eventNumber && runNumber==o.runNumber;
     }

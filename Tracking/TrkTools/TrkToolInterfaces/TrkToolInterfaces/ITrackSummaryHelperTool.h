@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRACKSUMMARYHELPERTOOL
@@ -21,7 +21,6 @@ namespace Trk {
   class TrackStateOnSurface;
   class CompetingRIOsOnTrack;
 
-  static const InterfaceID IID_ITrackSummaryHelperTool("Trk::ITrackSummaryHelperTool", 1, 0);
 
 /** @class ITrackSummaryHelperTool
   @brief Interface for structuring the summary creation into sub-detector
@@ -36,13 +35,14 @@ namespace Trk {
 */
   class ITrackSummaryHelperTool : virtual public IAlgTool {
   public:
-    static const InterfaceID& interfaceID();
+    DeclareInterfaceID(ITrackSummaryHelperTool, 1, 0);
 
   /** fill 'information' and 'hitpattern' using information from 'rot'. Should be overloaded by concrete
     TrackSummaryHelperTools. It is mandatory that the RIO_OnTrack* points to exactly the object contained
       inside the TrackStateOnSurface. This is to avoid that the RTTI from the TrackSummaryTool is done twice.
         */
     virtual void analyse(
+      const EventContext& ctx,
       const Trk::Track& track,
       const RIO_OnTrack* rot,
       const TrackStateOnSurface* tsos,
@@ -50,6 +50,7 @@ namespace Trk {
       std::bitset<Trk::numberOfDetectorTypes>& hitPattern) const = 0;
 
     virtual void analyse(
+      const EventContext& ctx,
       const Trk::Track& track,
       const CompetingRIOsOnTrack* crot,
       const TrackStateOnSurface* tsos,
@@ -61,16 +62,12 @@ namespace Trk {
       std::vector<int>& information,
       const Trk::ParticleHypothesis partHyp = Trk::pion) const = 0;
 
-    virtual void addDetailedTrackSummary(const Trk::Track& track,
-                                         Trk::TrackSummary& summary) const = 0;
+    virtual void addDetailedTrackSummary(
+      const EventContext& ctx,
+      const Trk::Track& track,
+      Trk::TrackSummary& summary) const = 0;
 
   };
-  
-  inline const InterfaceID& Trk::ITrackSummaryHelperTool::interfaceID()
-  { 
-    return IID_ITrackSummaryHelperTool; 
-  }
-
 
 }
 #endif

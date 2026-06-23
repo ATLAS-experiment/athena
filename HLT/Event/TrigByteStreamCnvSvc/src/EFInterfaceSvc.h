@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EFINTERFACESVC_H
@@ -73,7 +73,7 @@ private:
     "Number of events to skip"};
   Gaudi::Property<bool> m_loopOverFiles {this, "LoopOverFiles", true,
     "Flag to enable looping over files"};
-  Gaudi::Property<std::string> m_outputFileName {this, "OutputFileName", "athenaEF_output.data",
+  Gaudi::Property<std::string> m_outputFileName {this, "OutputFileName", "",
     "Name of the output file"};
   Gaudi::Property<std::vector<std::string>> m_files {this, "Files", {""},
     "List of input files"};

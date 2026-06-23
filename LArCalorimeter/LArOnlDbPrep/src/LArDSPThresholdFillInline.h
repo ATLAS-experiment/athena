@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDSPTHRESHOLDSFILLINGINLINE_H
@@ -22,7 +22,7 @@ class LArDSPThresholdFillInline:public AthAlgorithm {
   LArDSPThresholdFillInline(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~LArDSPThresholdFillInline();
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
   virtual StatusCode stop() override;
 
  private:
@@ -35,13 +35,13 @@ class LArDSPThresholdFillInline:public AthAlgorithm {
   std::string m_key;
   std::string m_mode;
   std::vector<std::string> m_cellGroupStr;
-  float m_tqThrsh, m_samplesThrsh;
-  float m_maskedtqThrsh, m_maskedsamplesThrsh;
+  float m_tqThrsh{}, m_samplesThrsh{};
+  float m_maskedtqThrsh{}, m_maskedsamplesThrsh{};
   float m_sigmaNoiseSamples = 0.0F, m_sigmaNoiseQt = 0.0F;
   bool m_usePileupNoiseSamples = false, m_usePileupNoiseQt = false;
-  bool m_dump, m_maskBadChannels;
+  bool m_dump{}, m_maskBadChannels{};
   std::string m_outFileName, m_inFileName;
-  bool m_fill;
+  bool m_fill{};
 
   SG::ReadCondHandleKey<CaloNoise> m_totalNoiseKey
     { this, "TotalNoiseKey", "totalNoise", "SG key for total noise" };
@@ -59,7 +59,7 @@ class LArDSPThresholdFillInline:public AthAlgorithm {
     FIXED,GROUP,NOISE
   };
 
-  mode_t m_workmode;
+  mode_t m_workmode{FIXED};
 
   CaloCellGroupList m_thrPerCell;
 };

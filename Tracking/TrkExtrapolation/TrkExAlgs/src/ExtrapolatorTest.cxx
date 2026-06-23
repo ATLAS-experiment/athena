@@ -110,16 +110,16 @@ Trk::Perigee Trk::ExtrapolatorTest::generatePerigee() {
 
 //================ Execution ====================================================
 
-StatusCode Trk::ExtrapolatorTest::execute()
+StatusCode Trk::ExtrapolatorTest::execute(const EventContext& ctx)
 {
   
-  if( m_eventsPerExecute <= 0 ) runTest(generatePerigee());
-  else                          for( int i=0;i<m_eventsPerExecute;++i ) runTest(m_perigees[i]);
+  if( m_eventsPerExecute <= 0 ) runTest(ctx, generatePerigee());
+  else                          for( int i=0;i<m_eventsPerExecute;++i ) runTest(ctx, m_perigees[i]);
   return StatusCode::SUCCESS;
 }
 
 
-void Trk::ExtrapolatorTest::runTest( const Trk::Perigee& initialPerigee ) {
+void Trk::ExtrapolatorTest::runTest( const EventContext& ctx, const Trk::Perigee& initialPerigee ) {
    Trk::PropDirection propagationDirection = m_direction > 0 ? Trk::alongMomentum : oppositeMomentum;
   
    ATH_MSG_VERBOSE("Starting from : "       << initialPerigee );
@@ -135,7 +135,6 @@ void Trk::ExtrapolatorTest::runTest( const Trk::Perigee& initialPerigee ) {
 
    double theta = initialPerigee.parameters()[Trk::theta];
 
-   const EventContext& ctx = Gaudi::Hive::currentContext();
    for (int refSurface = 0 ; surfaceTripleIter != surfaceTripleIterEnd; ++surfaceTripleIter, ++negRefIter, ++posRefIter ){
        // decide which reference surface to take
        refSurface = theta < (*posRefIter) ? 2 : 1;

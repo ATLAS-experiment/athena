@@ -83,13 +83,13 @@ void test(const DbType storageType, const std::string& filename) {
    }
    storSvc->addRef();
    cout << "Start WRITE session" << endl;
-   if( !storSvc->startSession( pool::RECREATE, storageType.type() ).isSuccess() ) {
+   if( !storSvc->startSession( Io::WRITE, storageType.type() ).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    cout << "Session connect" << endl;
    pool::FileDescriptor fd( filename, filename );
-   if ( ! ( storSvc->connect( pool::RECREATE, fd ).isSuccess() ) ) {
+   if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
    // Retrieve DbString dictionary
@@ -184,10 +184,10 @@ void test(const DbType storageType, const std::string& filename) {
 
    // ===============    READ back
    cout << endl << "Starting READ" << endl;
-   if( !storSvc->startSession( pool::READ, storageType.type()).isSuccess() ) {
+   if( !storSvc->startSession( Io::READ, storageType.type()).isSuccess() ) {
       throw std::runtime_error( "Could not start the read session." );
    }
-   if( !storSvc->connect( pool::READ, fd ).isSuccess() ) {
+   if( !storSvc->connect( Io::READ, fd ).isSuccess() ) {
       throw std::runtime_error( "Could not start a read connection." );
    }
    // get shape again

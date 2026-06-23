@@ -366,11 +366,9 @@ StatusCode InDet::DumpObjects::initialize() {
 }
 
 //-------------------------------
-StatusCode InDet::DumpObjects::execute() {
+StatusCode InDet::DumpObjects::execute(const EventContext& ctx) {
   //-------------------------------
   //
-  const EventContext &ctx = Gaudi::Hive::currentContext();
-
   m_event++;
 
   // map cluster ID to an index

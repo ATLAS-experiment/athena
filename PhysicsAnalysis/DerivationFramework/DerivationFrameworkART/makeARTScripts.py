@@ -4,10 +4,11 @@ makeDataDAODs=True
 makeMCDAODs=True
 makeTruthDAODs=True
 makeTrains=True
+makePHYStoPHYSLITE=True
 
 formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "LLP1","LLJ1","HIGG1D1","HIGG1D2", "HIGG9D1"
-              "JETM1","JETM2","JETM3","JETM4","JETM5","JETM12",
+              "JETM1","JETM2","JETM3","JETM4","JETM5","JETM7","JETM12","JETM42",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
               "FTAG1","FTAG1LITE","FTAG2","FTAG3","FTAG4","FTAG5","FTAGPU","FTAGXBB",
@@ -41,7 +42,13 @@ data23File = com_dir+"data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.
 data23CosFile = com_dir+"data23_cos/AOD/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195/data23_cos.00459152.physics_CosmicMuons.merge.AOD.f1383_m2195._lb0124-lb0126._0001.1"
 data24File = com_dir+"data24/AOD/data24_13p6TeV.00486658.physics_Main.recon.AOD.f1522_m2262_r16385_r16377/AOD.43718985._000221.pool.root.1"
 
-def generateText(formatName,label,inputFile,isTruth,isMC,nEvents):
+import os
+mc20PHYSFile = os.getenv('ASG_TEST_FILE_MC')
+mc23PHYSFile = os.getenv('ASG_TEST_FILE_RUN3_MC')
+data18PHYSFile = os.getenv('ASG_TEST_FILE_DATA')
+data23PHYSFile = os.getenv('ASG_TEST_FILE_RUN3_DATA')
+
+def generateText(formatName,label,inputFile,isTruth,nEvents):
    add_str = ""
    outputFileName = "test_"+label+formatName+add_str+".sh"
    outputFile = open(outputFileName,"w")
@@ -87,7 +94,7 @@ def generateText(formatName,label,inputFile,isTruth,isMC,nEvents):
    outputFile.close()
    os.system("chmod +x "+outputFileName)
 
-def generateTrains(formatList,label,inputFile,isMC,nEvents):
+def generateTrains(formatList,label,inputFile,nEvents):
    add_str = ""
    outputFileName = "test_"+label+"_".join(formatList)+add_str+".sh"
    outputFile = open(outputFileName,"w")
@@ -126,30 +133,94 @@ def generateTrains(formatList,label,inputFile,isMC,nEvents):
    outputFile.close()
    os.system("chmod +x "+outputFileName)
 
+def generatePHYStoPHYSLITE(label,inputFile,nEvents):
+   add_str = "PHYStoPHYSLITE"
+   outputFileName = "test_"+label+"_"+add_str+".sh"
+   outputFile = open(outputFileName,"w")
+   outputFile.write("#!/bin/sh"+"\n")
+   outputFile.write("\n")
+   outputFile.write("# art-include: main/Athena"+"\n")
+   outputFile.write("# art-description: DAOD building PHYStoPHYSLITE "+label+"\n")
+   outputFile.write("# art-type: grid"+"\n")
+   outputFile.write("# art-output: *.pool.root"+"\n")
+   outputFile.write("# art-output: checkFile*.txt"+"\n")
+   outputFile.write("# art-output: checkxAOD*.txt"+"\n")
+   outputFile.write("# art-output: checkIndexRefs*.txt"+"\n")
+   outputFile.write("\n")
+   outputFile.write("set -e"+"\n")
+   outputFile.write("\n")
+   outputFile.write("Derivation_tf.py \\\n")
+   outputFile.write("--inputDAOD_PHYSFile "+inputFile+" \\\n")
+   outputFile.write("--outputD2AODFile art.pool.root \\\n")
+   outputFile.write("--formats PHYSLITE \\\n")
+   outputFile.write("--maxEvents "+nEvents+" \\\n")
+   outputFile.write("\n")
+   outputFile.write("echo \"art-result: $? reco\""+"\n")
+   outputFile.write("\n")
+   outputFile.write("checkFile.py D2AOD_PHYSLITE.art.pool.root > checkFile_PHYSLITE.txt"+"\n")
+   outputFile.write("\n")
+   outputFile.write("echo \"art-result: $?  checkfile\""+'\n')
+   outputFile.write("\n")
+   outputFile.write("checkxAOD.py D2AOD_PHYSLITE.art.pool.root > checkxAOD_PHYSLITE.txt"+"\n")
+   outputFile.write("\n")
+   outputFile.write("echo \"art-result: $?  checkxAOD\""+'\n')
+   outputFile.write("\n")
+   outputFile.write("checkIndexRefs.py D2AOD_PHYSLITE.art.pool.root > checkIndexRefs_PHYSLITE.txt 2>&1"+"\n")
+   outputFile.write("\n")
+   outputFile.write("echo \"art-result: $?  checkIndexRefs\""+'\n')
+   outputFile.close()
+   os.system("chmod +x "+outputFileName)
+
 if (makeDataDAODs or makeMCDAODs):
    for formatName in formatList:
+      # Special cases
+      if formatName == "JETM7":
+         # JETM7 requires per-vertex jet reconstruction, therefore running only over 100 events
+         if makeDataDAODs:
+            generateText(formatName,"data18",data18File,False,"100")
+            generateText(formatName,"data24",data24File,False,"100")
+         if makeMCDAODs:
+            generateText(formatName,"mc20",mc20File,False,"100")
+            generateText(formatName,"mc23",mc23File,False,"100")
+            generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,"100")
+         continue
+      if formatName == "JETM42":
+         # JETM42 currently only used for upgrade studies
+         if makeMCDAODs:
+            generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,"-1")
+         continue
+      # End special cases
       if makeDataDAODs: 
-         generateText(formatName,"data18",data18File,False,False,"-1")
-         generateText(formatName,"data22",data22File,False,False,"-1")
-         generateText(formatName,"data23",data23File,False,False,"-1")
-         generateText(formatName,"data24",data24File,False,False,"-1")
+         generateText(formatName,"data18",data18File,False,"-1")
+         generateText(formatName,"data22",data22File,False,"-1")
+         generateText(formatName,"data23",data23File,False,"-1")
+         generateText(formatName,"data24",data24File,False,"-1")
       if makeMCDAODs:
-         generateText(formatName,"mc20",mc20File,False,True,"-1")
-         generateText(formatName,"mc23",mc23File,False,True,"-1")
-         generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,True,"-1")  
-      generateText("NCB1","data23cos",data23CosFile,False,False,"-1")
+         generateText(formatName,"mc20",mc20File,False,"-1")
+         generateText(formatName,"mc23",mc23File,False,"-1")
+         generateText(formatName,"mc21_14TeV_",mc21_14TeV_File,False,"-1")
+      generateText("NCB1","data23cos",data23CosFile,False,"-1")
+
 if makeTruthDAODs:
    for formatName in truthFormatList:
-      generateText(formatName,"mc23",truthFile,True,False,"1000")
+      generateText(formatName,"mc23",truthFile,True,"1000")
 
 if makeTrains:
    for train in trainList:
-      if makeDataDAODs: 
-         generateTrains(train,"data18",data18File,False,"-1")
-         generateTrains(train,"data22",data22File,False,"-1")
-         generateTrains(train,"data23",data23File,False,"-1")
-         generateTrains(train,"data24",data24File,False,"-1")
+      if makeDataDAODs:
+         generateTrains(train,"data18",data18File,"-1")
+         generateTrains(train,"data22",data22File,"-1")
+         generateTrains(train,"data23",data23File,"-1")
+         generateTrains(train,"data24",data24File,"-1")
       if makeMCDAODs:
-         generateTrains(train,"mc20",mc20File,True,"-1")
-         generateTrains(train,"mc23",mc23File,True,"-1")
-         generateTrains(train,"mc21_14TeV_",mc21_14TeV_File,True,"-1")
+         generateTrains(train,"mc20",mc20File,"-1")
+         generateTrains(train,"mc23",mc23File,"-1")
+         generateTrains(train,"mc21_14TeV_",mc21_14TeV_File,"-1")
+
+if makePHYStoPHYSLITE:
+   if makeDataDAODs: 
+      generatePHYStoPHYSLITE("data18",data18PHYSFile,"-1")
+      generatePHYStoPHYSLITE("data23",data23PHYSFile,"-1")
+   if makeMCDAODs:
+      generatePHYStoPHYSLITE("mc20",mc20PHYSFile,"-1")
+      generatePHYStoPHYSLITE("mc23",mc23PHYSFile,"-1")

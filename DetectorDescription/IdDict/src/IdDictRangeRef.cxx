@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictRangeRef.h"
@@ -24,7 +24,7 @@ void
 IdDictRangeRef::generate_implementation(const IdDictMgr& idd,
                                         IdDictDictionary& dictionary,
                                         IdDictRegion& region,
-                                        const std::string& tag) {
+                                        std::string_view tag) {
   m_range.generate_implementation(idd, dictionary, region, tag);
 }
 

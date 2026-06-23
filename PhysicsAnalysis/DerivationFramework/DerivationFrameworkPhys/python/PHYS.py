@@ -143,6 +143,11 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     if addExtraVariables:
         PHYSSlimmingHelper.ExtraVariables += addExtraVariables
 
+    # HSGNN Score
+    from TrkConfig.VertexFindingFlags import VertexSortingSetup
+    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
+        PHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
+
     if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
 
@@ -223,6 +228,11 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.IncludeMinBiasTriggerContent = False
     # Compact b-jet trigger matching info
     PHYSSlimmingHelper.IncludeBJetTriggerByYearContent = True
+
+    #Trigger content for DarkJetPEB 
+    if flags.Input.TriggerStream=='physics_DarkJetPEBTLA' and not flags.Input.isMC:
+        PHYSSlimmingHelper.AllVariables += ['HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
+                                            'HLT_MET_pfopufit']
 
     # Trigger matching
     # Run 2

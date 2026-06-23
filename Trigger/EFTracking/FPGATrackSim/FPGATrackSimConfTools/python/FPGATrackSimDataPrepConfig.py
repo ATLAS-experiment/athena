@@ -18,7 +18,7 @@ def getRegionNumber(nPiOver16Min, minAbsEta, isPositiveEta, verbosePrint=True):
         if (nPiOver16Min >= 32 or nPiOver16Min < 0):
             print("You are asking for nPiOver16 = ",nPiOver16Min," but we only have 32 phi bins! Returning -1")
             return -1
-        if (minAbsEta > 3.8 or minAbsEta < 0):
+        if (minAbsEta > 3.81 or minAbsEta < 0):
             print("You are asking for minAbsEta = ",minAbsEta," but we only have 20 abs eta bins! Returning -1")
             return -1
         if not (isPositiveEta == 0 or isPositiveEta == 1):
@@ -430,8 +430,6 @@ def FPGATrackSimDataPrepAlgCfg(inputFlags):
         theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleShift = flags.Trigger.FPGATrackSim.LorentzAngleShift
     else:
         theFPGATrackSimDataPrepAlg.ClusteringTool.LorentzAngleShift = -1 # should be set to False by default in the tool class but just in case...
-        
-
     
     theFPGATrackSimDataPrepAlg.OutputTool = result.getPrimaryAndMerge(FPGATrackSimDataPrepOutputCfg(flags))
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -137,7 +137,8 @@ namespace InDet {
     /** Sets the cuts such as the eta regions (barrel, transition,endcap) and the hit fraction fake cuts and the track matching cut*/
     void     SetCuts(const struct cuts&);
     /** Adds hit, track and matching information for each event.  Called at each event*/
-    void     addEvent   (const TrackCollection *, 
+    void     addEvent   (const EventContext& ctx,
+                   const TrackCollection *,
 			       std::vector<const Trk::Track *> &, 
 			       const std::vector <std::pair<HepMC::ConstGenParticlePtr,int> > &,   
 			       const TrackTruthCollection *, 

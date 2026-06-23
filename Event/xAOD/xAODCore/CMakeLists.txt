@@ -9,6 +9,11 @@ if( NOT XAOD_STANDALONE )
    set( extra_libs AthenaKernel GaudiKernel)
 endif()
 
+set( EXTRA_PATTERNS )
+if( XAOD_STANDALONE )
+   set( EXTRA_PATTERNS "|skipped unlocked decoration" )
+endif()
+
 # External dependencies.
 find_package( ROOT COMPONENTS Core Hist Tree RIO )
 
@@ -74,11 +79,15 @@ atlas_add_test( ut_xaodcore_safedeepcopy_test
 
 atlas_add_test( ut_xaodcore_auxcontainerbase_test
    SOURCES test/ut_xaodcore_auxcontainerbase_test.cxx
-   LINK_LIBRARIES AthContainers xAODCore TestTools )
+   LINK_LIBRARIES AthContainers xAODCore TestTools
+   LOG_IGNORE_PATTERN "will use std::${EXTRA_PATTERNS}"
+ )
 
 atlas_add_test( ut_xaodcore_auxinfobase_test
    SOURCES test/ut_xaodcore_auxinfobase_test.cxx
-   LINK_LIBRARIES AthContainers xAODCore TestTools )
+   LINK_LIBRARIES AthContainers xAODCore TestTools
+   LOG_IGNORE_PATTERN "will use std::${EXTRA_PATTERNS}"
+ )
 
 set(_ignoreArgs)
 if (XAOD_STANDALONE)
@@ -113,5 +122,5 @@ foreach( header AddDVProxy AuxContainerBase AuxSelection AuxCompression BaseInfo
    atlas_add_test( inc_${header}
       SOURCES test/inc_${header}.cxx
       LINK_LIBRARIES xAODCore
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endforeach()

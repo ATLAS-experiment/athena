@@ -76,8 +76,7 @@ StatusCode DerivationFramework::JetConstituentThinning::finalize() {
 }
 
 // The thinning itself
-StatusCode DerivationFramework::JetConstituentThinning::doThinning() const {
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+StatusCode DerivationFramework::JetConstituentThinning::doThinning(const EventContext& ctx) const {
 
   // Retrieve jet collection
   SG::ReadHandle<xAOD::JetContainer> jets(m_jetSGKey, ctx);

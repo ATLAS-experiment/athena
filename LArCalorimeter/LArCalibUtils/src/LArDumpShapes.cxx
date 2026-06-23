@@ -51,7 +51,7 @@ StatusCode LArDumpShapes::initialize()
 /**
  * @brief Standard Gaudi execute method.
  */
-StatusCode LArDumpShapes::execute()
+StatusCode LArDumpShapes::execute(const EventContext& ctx)
 {
   // Only do this for the first event.
   if (!m_first)
@@ -61,7 +61,7 @@ StatusCode LArDumpShapes::execute()
   const ILArShape* dd_shape = nullptr;
   CHECK( detStore()->retrieve (dd_shape) );
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
   if(!cabling){
      ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key() );

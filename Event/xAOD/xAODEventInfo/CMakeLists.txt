@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODEventInfo )
@@ -32,6 +32,11 @@ atlas_add_dictionary( xAODEventInfoDict
    LINK_LIBRARIES xAODCore xAODEventInfo
    EXTRA_FILES Root/dict/*.cxx )
 
+set( EXTRA_PATTERNS )
+if( XAOD_STANDALONE )
+   set( EXTRA_PATTERNS "|skipped unlocked decoration" )
+endif()
+
 # Test(s) in the package.
 atlas_add_test( ut_xaodeventinfo_evtstore_test
    SOURCES test/ut_xaodeventinfo_evtstore_test.cxx
@@ -50,7 +55,9 @@ atlas_add_test( ut_xaodeventinfo_subevent_test
 
 atlas_add_test( ut_xaodeventinfo_eventauxinfo_test
    SOURCES test/ut_xaodeventinfo_eventauxinfo_test.cxx
-   LINK_LIBRARIES AthContainers TestTools xAODEventInfo )
+   LINK_LIBRARIES AthContainers TestTools xAODEventInfo
+   LOG_IGNORE_PATTERN "will use std::${EXTRA_PATTERNS}"
+   )
 
 atlas_add_test( ut_xaodeventinfo_eventinfoauxcontainer_v1_test
    SOURCES test/ut_xaodeventinfo_eventinfoauxcontainer_v1_test.cxx

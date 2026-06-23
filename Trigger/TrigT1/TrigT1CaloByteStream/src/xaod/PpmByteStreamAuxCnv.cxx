@@ -71,6 +71,7 @@ StatusCode PpmByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   ByteStreamAddress *pBS_Addr = dynamic_cast<ByteStreamAddress *>(pAddr);
   if (not pBS_Addr) return StatusCode::FAILURE;
   // -------------------------------------------------------------------------
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *(pBS_Addr->par());
   ATH_MSG_DEBUG("Creating Objects " << nm);
 
@@ -82,7 +83,7 @@ StatusCode PpmByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   if (nm.substr(0,3) != "Zdc")
     {
       ATH_MSG_DEBUG("converting for L1Calo: " << nm );
-      sc = m_readTool->convert(nm, &ttCollection);
+      sc = m_readTool->convert(ctx, nm, &ttCollection);
     }
   else
     { 

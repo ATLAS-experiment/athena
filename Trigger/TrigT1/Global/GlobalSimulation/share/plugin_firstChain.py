@@ -1,3 +1,4 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Constants import DEBUG
 
 # Add algorithms to run tower building from GlobalLArCells
@@ -25,3 +26,10 @@ cfg.merge(GlobalCellTowerAlgToolCfg(flags,
                                     GlobalLArCellsKey = gblLArCellContainerKey,
                                     GlobalCellTowersKey = "GlobalCellTowers",
                                     OutputLevel=DEBUG))
+
+# Algorithm to build Jet1 jets
+from  GlobalSimulation.GlobalJet1AlgToolConfig import GlobalJet1AlgToolCfg
+acc.merge(GlobalJet1AlgToolCfg(flags,
+                               gblCellTowersKey = "GlobalCellTowers",
+                               gblSRJetsKey = "GlobalJet1Jets",
+                               OutputLevel=DEBUG))

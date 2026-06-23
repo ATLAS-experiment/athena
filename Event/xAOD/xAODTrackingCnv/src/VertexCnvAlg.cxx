@@ -48,7 +48,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode VertexCnvAlg::execute() {
+  StatusCode VertexCnvAlg::execute(const EventContext& /*ctx*/) {
     // Retrieve the AOD vertexes:
 
     if (!m_aod.isValid()) {

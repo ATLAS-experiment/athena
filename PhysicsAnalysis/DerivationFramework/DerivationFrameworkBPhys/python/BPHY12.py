@@ -32,6 +32,8 @@ def BPHY12Cfg(flags):
     acc.addPublicTool(trackselect)
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     BPHY12_Finder_DiMuon = CompFactory.Analysis.JpsiFinder(
                              name                        = "BPHY12_Finder_DiMuon",
                              muAndMu                     = True,
@@ -64,7 +66,7 @@ def BPHY12Cfg(flags):
                              OutputVtxContainerName = "BPHY12_DiMuon_Candidates",
                              PVContainerName        = "PrimaryVertices",
                              V0Tools                = V0Tools,  
-                             PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                             PVRefitter             = PVrefit,
                              RefPVContainerName     = "SHOULDNOTBEUSED",
                              DoVertexType           = 7)
 
@@ -115,7 +117,7 @@ def BPHY12Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "BPHY12_BdKstarKpiMuMu_refitPV",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         RefitPV                = True,
         MaxPVrefit             = 10000,
         DoVertexType           = 7
@@ -147,7 +149,7 @@ def BPHY12Cfg(flags):
                            name                   = "BPHY12_ReVertex_Kstar",
                            InputVtxContainerName  = "BPHY12_BdKstarKpiMuMu_Candidates",
                            V0Tools                = V0Tools,
-                           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                           PVRefitter             = PVrefit,
                            TrackIndices           = [ 2, 3 ],
                            TrkVertexFitterTool    = vkalvrt,
                            OutputVtxContainerName = "BPHY12_Kstar_ReVertexCandidates"

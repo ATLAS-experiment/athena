@@ -40,13 +40,13 @@ StatusCode DbContainer::open( DbDatabase&  dbH,
                             const string& nam, 
                             const DbTypeInfo*  typ, 
                             const DbType&      dbtyp,
-                            DbAccessMode mod)
+                            Io::IoFlag mod)
 {
   if ( dbH.isValid() )  {
-    if ( !(dbH.openMode() == pool::READ && mod != pool::READ) ) {
+    if ( !(dbH.openMode() == Io::READ && mod != Io::READ) ) {
       DbContainerObj* q = dbH.find(nam);
       switchPtr(q ? q : new DbContainerObj(dbH, nam, dbtyp, mod));
-      if ( mod == pool::READ || mod == pool::UPDATE )  {
+      if ( mod == Io::READ )  {
         if ( 0 == typ )  {
           typ = dbH.contShape(nam);
         }
@@ -66,10 +66,10 @@ StatusCode DbContainer::checkAccess(DbDatabase&  dbH,
                                   const DbType& dbtyp)
 {
   StatusCode result = StatusCode::FAILURE;
-  if ( dbH.isValid() && dbH.openMode() == pool::READ ) {
+  if ( dbH.isValid() && dbH.openMode() == Io::READ ) {
     // ASM: Double check this implementation...
     DbContainerObj* q = dbH.find(nam);
-    switchPtr(q ? q : new DbContainerObj(dbH, nam, dbtyp, pool::READ));
+    switchPtr(q ? q : new DbContainerObj(dbH, nam, dbtyp, Io::READ));
     result = ptr()->checkAccess();
     close().ignore();
   }
@@ -97,8 +97,8 @@ uint64_t DbContainer::size() {
 }
 
 /// Access to access mode member
-DbAccessMode DbContainer::openMode() const {
-  return isValid() ? m_ptr->mode() : DbAccessMode(pool::NOT_OPEN);
+Io::IoFlag DbContainer::openMode() const {
+  return isValid() ? m_ptr->mode() : Io::IoFlag(Io::INVALID);
 }
 
 /// Access to db name

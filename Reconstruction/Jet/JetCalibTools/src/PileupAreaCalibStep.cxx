@@ -46,7 +46,7 @@ StatusCode PileupAreaCalibStep::calibrate(xAOD::JetContainer& jetCont) const {
 
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> areaAcc("ActiveArea4vec");  
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> outScaleMomAcc(m_jetOutScale);  
-  SG::AuxElement::Accessor<int> puCorrectedAcc("PileupCorrected");
+
   for(xAOD::Jet *jet : jetCont){
 
     const xAOD::JetFourMom_t jetStartP4 = jet->getAttribute<xAOD::JetFourMom_t>(m_jetInScale);
@@ -68,8 +68,6 @@ StatusCode PileupAreaCalibStep::calibrate(xAOD::JetContainer& jetCont) const {
       calibP4 = jetStartP4*area_SF;      
     }
 
-    //Attribute to track if a jet has received the pileup subtraction (always true if this code was run)
-    puCorrectedAcc(*jet) = 1 ;    
     //Transfer calibrated jet properties to the Jet object
     outScaleMomAcc.setAttribute(*jet, calibP4 );
     jet->setJetP4( calibP4 );    

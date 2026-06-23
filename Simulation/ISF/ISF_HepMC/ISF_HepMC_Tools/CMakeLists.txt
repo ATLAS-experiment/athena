@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_HepMC_Tools )
@@ -19,14 +19,14 @@ atlas_add_test( GenParticleGenericFilter_test
                 SOURCES test/GenParticleGenericFilter_test.cxx src/GenParticleGenericFilter.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} AtlasHepMCLib AthenaBaseComps GoogleTestTools ISF_HepMC_Interfaces
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Tests
 atlas_add_test( GenParticleInteractingFilter_test
                 SOURCES test/GenParticleInteractingFilter_test.cxx src/GenParticleInteractingFilter.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} AtlasHepMCLib AthenaBaseComps GaudiKernel GoogleTestTools TruthUtils ISF_HepMC_Interfaces
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
   # Needed for the dynamic_cast to work properly with clang.
 set_target_properties( ISF_HepMC_Tools_GenParticleInteractingFilter_test PROPERTIES ENABLE_EXPORTS True )
 
@@ -35,7 +35,7 @@ atlas_add_test( GenParticleLifetimeFilter_test
                 SOURCES test/GenParticleLifetimeFilter_test.cxx src/GenParticleLifetimeFilter.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GTEST_LIBRARIES} AtlasHepMCLib AthenaBaseComps GoogleTestTools ISF_HepMC_Interfaces
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

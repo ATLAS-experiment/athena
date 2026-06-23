@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/src/CondCont.cpp
@@ -372,7 +372,7 @@ void CondContBase::clear()
  * Defined here for purposes of testing.
  */
 void
-CondContBase::quiescent (const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+CondContBase::quiescent (const EventContext& ctx)
 {
   m_condSet.quiescent (ctx);
 }
@@ -445,7 +445,7 @@ CondContBase::CondContBase (Athena::IRCUSvc& rcusvc,
 StatusCode
 CondContBase::insertBase (const EventIDRange& r,
                           CondContSet::payload_unique_ptr t,
-                          const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                          const EventContext& ctx)
 {
   EventIDBase start = r.start();
   EventIDBase stop = r.stop();
@@ -537,7 +537,7 @@ CondContBase::insertBase (const EventIDRange& r,
  */
 StatusCode
 CondContBase::eraseBase (const EventIDBase& t,
-                         const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                         const EventContext& ctx)
 {
   switch (m_keyType) {
   case KeyType::RUNLBN:
@@ -581,7 +581,7 @@ CondContBase::eraseBase (const EventIDBase& t,
  */
 StatusCode
 CondContBase::extendLastRangeBase (const EventIDRange& newRange,
-                                   const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                                   const EventContext& ctx)
 {
   key_type start;
   key_type stop;
@@ -807,7 +807,7 @@ CondContSingleBase::ranges() const
 StatusCode
 CondContSingleBase::typelessInsert (const EventIDRange& r,
                                     void* obj,
-                                    const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                                    const EventContext& ctx)
 {
   return insertBase (r,
                      CondContSet::payload_unique_ptr (obj, delfcn()),
@@ -841,7 +841,7 @@ CondContSingleBase::range (const EventIDBase& t, EventIDRange& r) const
  */
 StatusCode
 CondContSingleBase::erase (const EventIDBase& t,
-                           const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                           const EventContext& ctx)
 {
   return CondContBase::eraseBase (t, ctx);
 }
@@ -859,7 +859,7 @@ CondContSingleBase::erase (const EventIDBase& t,
  */
 StatusCode
 CondContSingleBase::extendLastRange (const EventIDRange& newRange,
-                                     const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                                     const EventContext& ctx)
 {
   return CondContBase::extendLastRangeBase (newRange, ctx);
 }
@@ -995,7 +995,7 @@ CondContMixedBase::ranges() const
 StatusCode
 CondContMixedBase::typelessInsert (const EventIDRange& r,
                                    void* obj,
-                                   const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                                   const EventContext& ctx)
 {
   return insertMixed (r,
                       CondContSet::payload_unique_ptr (obj, payloadDelfcn()),
@@ -1031,7 +1031,7 @@ CondContMixedBase::range (const EventIDBase& t, EventIDRange& r) const
  */
 StatusCode
 CondContMixedBase::erase (const EventIDBase& /*t*/,
-                          const EventContext& /*ctx = Gaudi::Hive::currentContext()*/)
+                          const EventContext& /*ctx*/)
 {
   MsgStream msg (Athena::getMessageSvc(), title());
   msg << MSG::ERROR << "CondContMixedBase::erase: "
@@ -1055,7 +1055,7 @@ CondContMixedBase::erase (const EventIDBase& /*t*/,
  */
 StatusCode
 CondContMixedBase::extendLastRange (const EventIDRange& /*newRange*/,
-                                    const EventContext& /*ctx = Gaudi::Hive::currentContext()*/)
+                                    const EventContext& /*ctx*/)
 {
   MsgStream msg (Athena::getMessageSvc(), title());
   msg << MSG::ERROR << "CondContMixedBase::extendLastRange: "
@@ -1083,7 +1083,7 @@ CondContMixedBase::extendLastRange (const EventIDRange& /*newRange*/,
 StatusCode
 CondContMixedBase::insertMixed (const EventIDRange& r,
                                 CondContBase::CondContSet::payload_unique_ptr t,
-                                const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
+                                const EventContext& ctx)
 {
   // Serialize insertions.
   std::lock_guard<std::mutex> lock (m_mutex);

@@ -42,7 +42,7 @@ namespace DerivationFramework {
     StatusCode  finalize() override;
     
     /** Check that the current event passes this filter */
-    bool eventPassesFilter() const override;
+    bool eventPassesFilter(const EventContext& ctx) const override;
     
   private:
     mutable std::atomic<unsigned int> m_ntot{0};

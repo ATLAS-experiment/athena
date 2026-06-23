@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALYSISTRUTHTAGRESULTS_H
@@ -8,6 +8,8 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <string_view>
+#include <stdexcept>
 
 namespace Analysis {
 
@@ -18,14 +20,14 @@ namespace Analysis {
     //map from systematic name to vector of event weights for different number of tagged jets
     // for examples: map_trf_weight_ex["Nominal"].at(3) is the event weight for exactly 3 tagged jets
     // map_trf_weight_in["Nominal"].at(2) is the event weight for 2 or more tagged jets
-    std::map<std::string,std::vector<float> > map_trf_weight_ex;
-    std::map<std::string,std::vector<float> > map_trf_weight_in;
+    std::map<std::string,std::vector<float>, std::less<> > map_trf_weight_ex;
+    std::map<std::string,std::vector<float>, std::less<> > map_trf_weight_in;
 
     //map from systematic name to vector of SF weights for different number of tagged jets
     // for examples: map_SF_ex["Nominal"].at(3) is the SF event weight for exactly 3 tagged jets
     // map_SF_ex["Nominal"].at(2) is the SF event weight for 2 or more tagged jets
-    std::map<std::string,std::vector<float> > map_SF_ex;
-    std::map<std::string,std::vector<float> > map_SF_in;
+    std::map<std::string,std::vector<float>, std::less<> > map_SF_ex;
+    std::map<std::string,std::vector<float>, std::less<> > map_SF_in;
 
     //chosen permutation (does not depend on the systematic variation)
     // trf_chosen_perm_ex.at(3) is the chosen permutation for exactly 3 tagged jets
@@ -46,7 +48,7 @@ namespace Analysis {
 
     //direct tagging results
     std::vector<bool> is_tagged;
-    std::map<std::string,float > map_SF;
+    std::map<std::string,float, std::less<> > map_SF;
 
     std::vector<std::string> syst_names;
 
@@ -61,9 +63,13 @@ namespace Analysis {
 
     }
 
-    float getEvtDirectTagSF(const std::string& syst_name="Nominal")
-    {
-        return(map_SF[syst_name]);
+    float
+    getEvtDirectTagSF(std::string_view syst_name = "Nominal") const {
+      const auto itr = map_SF.find(syst_name);
+      if (itr == map_SF.end()) {
+        throw std::out_of_range{"Unknown systematic name"};
+      }
+      return itr->second;
     }
 
     const std::vector<bool>& getDirectTaggedJets()
@@ -72,16 +78,16 @@ namespace Analysis {
 
     }
 
-    float getEventWeight(int nbtag,bool Ex,const std::string& syst_name="Nominal")
-    {
-        if(Ex)
-        {
-            return map_trf_weight_ex[syst_name].at(nbtag);
-        }
-        else
-        {
-            return map_trf_weight_in[syst_name].at(nbtag);
-        }
+    float
+    getEventWeight(int nbtag, bool Ex, std::string_view syst_name = "Nominal") const {
+      const auto& weights = Ex ? map_trf_weight_ex : map_trf_weight_in;
+    
+      const auto itr = weights.find(syst_name);
+      if (itr == weights.end()) {
+        throw std::out_of_range{"Unknown systematic name"};
+      }
+    
+      return itr->second.at(nbtag);
     }
 
     std::vector<bool> getEventPermutation(int nbtag,bool Ex )

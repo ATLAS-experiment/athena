@@ -31,7 +31,7 @@ public:
 
   /** Basic algorithm methods */
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual bool isClonable() const override final { return true; }
 private:
   ToolHandle<IPileUpTool> m_digTool{this, "DigitizationTool", "CscDigitizationTool", "CscDigitizationTool name"};

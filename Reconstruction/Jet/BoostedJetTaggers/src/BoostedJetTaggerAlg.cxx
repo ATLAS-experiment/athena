@@ -35,7 +35,7 @@ namespace BJT{
       return StatusCode::SUCCESS;
     }
 
-    StatusCode BoostedJetTaggerAlg::execute(){
+    StatusCode BoostedJetTaggerAlg::execute(const EventContext& /*ctx*/){
 
       for (const auto& sys : m_systematicsList.systematicsVector()){
 

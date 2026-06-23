@@ -60,13 +60,13 @@ StatusCode TileGeoG4CalibSDTool::SetupEvent(HitCollectionMap& hitCollections) {
 
 StatusCode TileGeoG4CalibSDTool::Gather(HitCollectionMap& hitCollections) {
 
-  hitCollections.TransformAndRecord<TileHitVector>(m_tileHits, [](TileHitVector& hits) {
+  CHECK(hitCollections.TransformAndRecord<TileHitVector>(m_tileHits, [](TileHitVector& hits) {
     static_cast<TileHitVectorDMBuilder&>(hits).ResetCells();
-  });
+  }));
 
-  hitCollections.Record<CaloCalibrationHitContainer>(m_tileActiveCellCalibHits);
-  hitCollections.Record<CaloCalibrationHitContainer>(m_tileInactiveCellCalibHits);
-  hitCollections.Record<CaloCalibrationHitContainer>(m_tileDeadMaterialCalibHits);
+  CHECK(hitCollections.Record<CaloCalibrationHitContainer>(m_tileActiveCellCalibHits));
+  CHECK(hitCollections.Record<CaloCalibrationHitContainer>(m_tileInactiveCellCalibHits));
+  CHECK(hitCollections.Record<CaloCalibrationHitContainer>(m_tileDeadMaterialCalibHits));
   return StatusCode::SUCCESS;
 }
 

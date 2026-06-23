@@ -45,7 +45,7 @@ JetSmearingCorrection::~JetSmearingCorrection()
 
 StatusCode JetSmearingCorrection::initialize()
 {
-    ATH_MSG_INFO("Initializing the jet smearing correction tool");
+    ATH_MSG_DEBUG("Initializing the jet smearing correction tool");
 
     if (!m_config)
     {
@@ -61,7 +61,7 @@ StatusCode JetSmearingCorrection::initialize()
     // Get the starting and ending jet scales
     m_jetStartScale = m_config->GetValue("JSCStartingScale","JetGSCScaleMomentum");
     m_jetOutScale   = m_config->GetValue("JSCOutScale","JetSmearedMomentum");
-    ATH_MSG_INFO("Reading from " << m_jetStartScale.c_str() << " and writing to " << m_jetOutScale.Data());
+    ATH_MSG_DEBUG("Reading from " << m_jetStartScale.c_str() << " and writing to " << m_jetOutScale.Data());
 
     // Get information about how to smear
     TString smearType = m_config->GetValue("SmearType","");

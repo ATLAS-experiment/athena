@@ -171,26 +171,21 @@ namespace FlavorTagDiscriminants {
   StatusCode JetLeptonDecayLabelAlg::execute(const EventContext& ctx) const {
     SG::ReadHandle<xAOD::JetContainer> jets(m_jetContainerKey, ctx);
     if (!jets.isValid()) {
-      ATH_MSG_ERROR("Could not retrieve jet container "
-                    << m_jetContainerKey.key());
+      ATH_MSG_ERROR("Could not retrieve jet container "<< m_jetContainerKey.key());
       return StatusCode::FAILURE;
     }
 
-    SG::WriteDecorHandle<xAOD::JetContainer, int> decDecay(
-        m_dec_leptonDecayLabel, ctx);
-    SG::WriteDecorHandle<xAOD::JetContainer, int> decTau(
-        m_dec_tauDecayLabel, ctx);
-
+    SG::WriteDecorHandle<xAOD::JetContainer, int> decDecay(m_dec_leptonDecayLabel, ctx);
+    SG::WriteDecorHandle<xAOD::JetContainer, int> decTau(m_dec_tauDecayLabel, ctx);
+    const std::string bHadronsStr{"ConeExclBHadronsFinal"};
+    const std::string cHadronsStr{"ConeExclCHadronsFinal"};
     for (const xAOD::Jet* jet : *jets) {
-
       std::vector<const xAOD::TruthParticle*> bHadrons;
-      jet->getAssociatedObjects<xAOD::TruthParticle>(
-          "ConeExclBHadronsFinal", bHadrons);
+      jet->getAssociatedObjects<xAOD::TruthParticle>(bHadronsStr, bHadrons);
 
       std::vector<const xAOD::TruthParticle*> cHadrons;
-      jet->getAssociatedObjects<xAOD::TruthParticle>(
-          "ConeExclCHadronsFinal", cHadrons);
-
+      jet->getAssociatedObjects<xAOD::TruthParticle>(cHadronsStr, cHadrons);
+      //
       decDecay(*jet) = -999;
       decTau(*jet) = -999;
 

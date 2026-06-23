@@ -133,15 +133,15 @@ void FPGATrackSimTrackMonitor::fillTrack(const std::vector<const FPGATrackSimTra
   float chi2Phi_best_5 = chi2Cut;
 
   // lambda function to monitor chi2 (all) and keep track of the best one
-  auto monitorChi2 = [&](const std::string& chi2_name, float chi2_value, float& best_value, const std::string& suffix="") {
-    if (chi2_value < chi2Cut) {
-      // monitor all chi2
-      auto mon = Monitored::Scalar<float>(chi2_name + suffix, chi2_value);
-      Monitored::Group(m_monTool, mon);
-      // update best chi2
-      if (chi2_value < best_value) best_value = chi2_value;
-    }
-  };
+  auto monitorChi2 = [&](const std::string& chi2_name, float chi2_value, float& best_value, std::string_view suffix = {}) {
+  if (chi2_value < chi2Cut) {
+    // monitor all chi2
+    auto mon = Monitored::Scalar<float>(chi2_name + std::string{suffix}, chi2_value);
+    Monitored::Group(m_monTool, mon);
+    // update best chi2
+    if (chi2_value < best_value) best_value = chi2_value;
+  }
+};
 
 
   // overall number of tracks

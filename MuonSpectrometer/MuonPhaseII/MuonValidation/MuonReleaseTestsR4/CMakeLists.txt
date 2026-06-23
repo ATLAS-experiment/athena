@@ -18,4 +18,4 @@ atlas_add_test( SpotIntegrationTest
                 SCRIPT test_MuonR4Reco_spot.sh 1 ${NEVENTS} --noPerfMon
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)

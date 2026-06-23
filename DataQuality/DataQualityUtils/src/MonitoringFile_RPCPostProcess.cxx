@@ -23,6 +23,8 @@
 #include "CxxUtils/StringUtils.h"
 
 namespace {
+  const std::string dbConnectionStr{"sqlite://;schema=RPCDQMFOFFLINE.db;dbname=RPC_DQA"};
+  const std::string dbFolderStr{ "/OFFLINE/OFFLINE_DQMF"};
   void
   writeIfValid(TH1F* pH) {
     if (pH) pH->Write("", TObject::kOverwrite);
@@ -1062,7 +1064,7 @@ namespace dqutils {
 
 
 
-            coolrpc.coolDbFolder("sqlite://;schema=RPCDQMFOFFLINE.db;dbname=RPC_DQA", "/OFFLINE/OFFLINE_DQMF");
+            coolrpc.coolDbFolder(dbConnectionStr, dbFolderStr);
             int nbin = 0;
             if (h_Eff) nbin = h_Eff->GetNbinsX();
             auto writeToCString = [](float val, char* array0) -> void {

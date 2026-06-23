@@ -35,7 +35,6 @@
 #define InDetRecToolInterfaces_IVertexFinder_H
 #include "GaudiKernel/AlgTool.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkParticleBase/TrackParticleBaseCollection.h"
 #include "TrkTrack/TrackCollection.h"
 

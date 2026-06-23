@@ -18,7 +18,7 @@ class CaloReadLCClassificationFile : public AthAlgorithm
   ~CaloReadLCClassificationFile();
 
   StatusCode initialize(); 
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
   StatusCode initDataFromFile(const std::string& theLCClassificationFileName,
                               CaloLocalHadCoeff& data);

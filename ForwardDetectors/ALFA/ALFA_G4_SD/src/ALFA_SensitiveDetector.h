@@ -11,7 +11,6 @@
 // use of the hits
 #include "ALFA_SimEv/ALFA_HitCollection.h"
 #include "ALFA_SimEv/ALFA_ODHitCollection.h"
-#include "StoreGate/WriteHandle.h"
 #include <gtest/gtest_prod.h>
 
 // STL header
@@ -22,12 +21,9 @@ class G4TouchableHistory;
 
 class ALFA_SensitiveDetector : public G4VSensitiveDetector
 {
- FRIEND_TEST( ALFA_SensitiveDetectortest, Initialize );
  FRIEND_TEST( ALFA_SensitiveDetectortest, ProcessHits1 );
  FRIEND_TEST( ALFA_SensitiveDetectortest, ProcessHits2 );
  FRIEND_TEST( ALFA_SensitiveDetectortest, ProcessHits3 );
- FRIEND_TEST( ALFA_SensitiveDetectortest, StartOfAthenaEvent );
- FRIEND_TEST( ALFA_SensitiveDetectortest, EndOfAthenaEvent );
 
 public:
   // Constructor
@@ -37,11 +33,7 @@ public:
 
   // Called from G4 at the start of each G4 event
   void Initialize(G4HCofThisEvent *) override final;
-  // Called from ALFA_SensitiveDetectorTool::SetupEvent
-  void StartOfAthenaEvent ();
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
-  // Called from ALFA_SensitiveDetectorTool::Gather
-  void EndOfAthenaEvent();
 
   /** Templated method to stuff a single hit into the sensitive detector class.  This
    could get rather tricky, but the idea is to allow fast simulations to use the very
@@ -49,15 +41,17 @@ public:
   //template <class... Args> void AddHit(Args&&... args){ m_HitColl->Emplace( args... ); }
 
 private:
+  ALFA_HitCollection* getHitCollection() const;
+  ALFA_ODHitCollection* getODHitCollection() const;
+
   int m_hitID{};
 
-  int m_eventNumber{};
-  int m_numberOfHits{};
-  int m_numberOfODHits{};
-
   // The hits collections
-  SG::WriteHandle<ALFA_HitCollection> m_HitCollection;
-  SG::WriteHandle<ALFA_ODHitCollection> m_ODHitCollection;
+  std::string m_hitCollectionName;
+  std::string m_ODHitCollectionName;
+  // Non-owning caches set by Initialize; HitCollectionMap owns the collections.
+  ALFA_HitCollection* m_HitCollection{};
+  ALFA_ODHitCollection* m_ODHitCollection{};
 
   int m_pos1{}, m_pos2{};
 

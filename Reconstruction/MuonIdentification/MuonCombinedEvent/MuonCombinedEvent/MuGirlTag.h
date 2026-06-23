@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDEVENT_MUGIRLTAG_H
@@ -61,9 +61,6 @@ namespace MuonCombined {
 
         /** Sets ths comissioning flag */
         void setCommissioning(bool b);
-        /** Returns whether the muon belongs to the comissioning chain **/
-        bool isCommissioning() const override;
-
     private:
         /** block copy and assignment */
         MuGirlTag(const MuGirlTag&) = delete;
@@ -74,7 +71,6 @@ namespace MuonCombined {
         ElementLink<TrackCollection> m_meLink{};
         std::vector<const Muon::MuonSegment*> m_segments{};  /// list of segments
 
-        bool m_isCommissioning{false};
     };
     bool operator<(const MuGirlTag& t1, const MuGirlTag& t2);
 }  // namespace MuonCombined

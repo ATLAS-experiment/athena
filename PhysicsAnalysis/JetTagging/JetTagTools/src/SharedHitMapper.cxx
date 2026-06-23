@@ -99,7 +99,7 @@ StatusCode SharedHitMapper::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SharedHitMapper::execute() {
+StatusCode SharedHitMapper::execute(const EventContext& ctx) {
 
   MsgStream mlog(msgSvc(), name()); 
 

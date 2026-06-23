@@ -12,7 +12,6 @@
 #include "xAODTracking/TrackParticlexAODHelpers.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "StoreGate/DecorKeyHelpers.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // ROOT
 #include "TH1.h"
@@ -58,8 +57,7 @@ StatusCode Prompt::DecoratePromptLeptonRNN::initialize()
   //
   // Instantiate Muon quality accessors
   //
-  m_accessQuality = std::make_unique<SG::AuxElement::ConstAccessor<unsigned char> >("quality");
-
+  
   m_timerEvent.Reset();
 
   ATH_MSG_DEBUG("DecoratePromptLeptonRNN initialized successfully.");
@@ -69,14 +67,13 @@ StatusCode Prompt::DecoratePromptLeptonRNN::initialize()
 }
 
 //=============================================================================
-StatusCode Prompt::DecoratePromptLeptonRNN::execute()
+StatusCode Prompt::DecoratePromptLeptonRNN::execute(const EventContext& ctx)
 {
   //
   // Process current event
   //
   TimerScopeHelper timer(m_timerEvent);
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ATH_MSG_DEBUG("execute() - begin...");
 
@@ -218,23 +215,15 @@ StatusCode Prompt::DecoratePromptLeptonRNN::finalize()
 }
 
 //=============================================================================
-const xAOD::TrackParticle* Prompt::DecoratePromptLeptonRNN::findMuonTrack(const xAOD::Muon *muon)
-{
+const xAOD::TrackParticle* Prompt::DecoratePromptLeptonRNN::findMuonTrack(const xAOD::Muon *muon) {
   //
   // Process muon - return true if all information present for RNN
   //
-  if(muon->muonType() != xAOD::Muon::Combined || !muon->inDetTrackParticleLink().isValid()) {
-    return 0;
-  }
+  ATH_MSG_DEBUG("muon pT=" << muon->pt() << " quality=" << muon->quality());
 
-  const unsigned char quality = (*m_accessQuality)(*muon);
-
-  ATH_MSG_DEBUG("muon pT=" << muon->pt() << " quality=" << int(quality) << " medium=" << int(xAOD::Muon::Medium));
-
-  const xAOD::TrackParticle *trackLep = *(muon->inDetTrackParticleLink());
-
-  return trackLep;
-}
+  return muon->muonType() == xAOD::Muon::MuonType::Combined ? 
+         muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) : nullptr;
+ }
 
 //=============================================================================
 const xAOD::Jet* Prompt::DecoratePromptLeptonRNN::findClosestTrackJet(const xAOD::TrackParticle *particle,

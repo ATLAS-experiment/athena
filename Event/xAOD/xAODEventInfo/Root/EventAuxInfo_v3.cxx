@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
 #include "xAODEventInfo/versions/EventAuxInfo_v3.h"
+#include "AthContainers/AuxStoreInternal.h" // for SG::getAuxIDs
 
 namespace xAOD {
 
@@ -105,6 +106,21 @@ namespace xAOD {
 
 
    /**
+    * @brief Return the set of variables to copy in a deep copy.
+    * @param warnUnlocked If true, we warn about variables skipped on account
+    *                     of being decorations.
+    *
+    * Special case to avoid warning about skipping mcEventWeights.
+    */
+   SG::auxid_set_t
+   EventAuxInfo_v3::getCopyIDs (bool warnUnlocked) const
+   {
+     static const std::string ignored[1] = { "mcEventWeights" };
+     return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, ignored);
+   }
+
+
+   /**
     * @brief Test if a particular variable is tagged as a decoration.
     * @param auxid The identifier of the desired aux data item.
     */
@@ -135,10 +151,18 @@ namespace xAOD {
 
    /**
     * @brief Called after one of these objects is read.
-    *        Locks any detector flag words that appear to have already
+    * @param ctx Current event context.
+    *        Make contained variables usable after reading.
+    *        Also locks any detector flag words that appear to have already
     *        been set.
     */
-   void EventAuxInfo_v3::toTransient()
+   void EventAuxInfo_v3::toTransient( const EventContext& ctx )
+   {
+     AuxInfoBase::toTransient( ctx );
+     toTransient( );
+   }
+
+   void EventAuxInfo_v3::toTransient(  )
    {
      /// List of all detector flag aux IDs.
      static const std::vector<SG::auxid_t> flagIds (m_decorFlags.begin(),

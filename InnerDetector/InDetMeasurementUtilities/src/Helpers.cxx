@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMeasurementUtilities/Helpers.h"
@@ -9,10 +9,11 @@ namespace TrackingUtilities {
   std::pair<float, float> computeOmegas(const xAOD::PixelCluster& cluster,
 					const PixelID& pixelID)
   {    
-    const std::vector<Identifier>& rod_list_cluster = cluster.rdoList();
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+       rdo_list_cluster = cluster.rdoList();
     const std::vector<float>& charge_list_cluster = cluster.chargeList();
     
-    if (rod_list_cluster.size() != charge_list_cluster.size()) {
+    if (rdo_list_cluster.size() != charge_list_cluster.size()) {
       return {-1.f, -1.f};
     }
 
@@ -26,8 +27,8 @@ namespace TrackingUtilities {
     float qColMin = 0.f;
     float qColMax = 0.f;
     
-    for (std::size_t i(0); i<rod_list_cluster.size(); ++i) {
-      const Identifier& this_rdo = rod_list_cluster.at(i);
+    for (std::size_t i(0); i<rdo_list_cluster.size(); ++i) {
+      Identifier this_rdo(rdo_list_cluster.at(i));
       const float this_charge = charge_list_cluster.at(i);
       
       const int row = pixelID.phi_index(this_rdo);

@@ -428,7 +428,7 @@ namespace HepMC {
 inline int  maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) {
   int maxBarcode = 0;
 #ifdef HEPMC3
-  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
+  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>(HepMCStr::barcodes);
   for (const auto& bp: allbarcodes->barcode_to_particle_map()) {
     if (!HepMC::BarcodeBased::is_simulation_particle(bp.first)) { maxBarcode=std::max(maxBarcode,bp.first); }
   }
@@ -445,7 +445,7 @@ inline int  maxGeneratedParticleBarcode(const HepMC::GenEvent *genEvent) {
 inline int maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) {
   int maxBarcode=0;
 #ifdef HEPMC3
-  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("barcodes");
+  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>(HepMCStr::barcodes);
   for (const auto& bp: allbarcodes->barcode_to_vertex_map()) {
     if (!HepMC::BarcodeBased::is_simulation_vertex(bp.first)) { maxBarcode=std::min(maxBarcode,bp.first); }
   }

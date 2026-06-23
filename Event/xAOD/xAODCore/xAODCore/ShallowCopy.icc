@@ -11,8 +11,7 @@
 namespace xAOD {
 
 template <SG::IsAuxDataVector T>
-std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>> shallowCopy(
-    const T& cont, const EventContext& ctx) {
+ShallowCopyResult_t<T> shallowCopy(const T& cont, const EventContext& ctx) {
 
   // Create the new interface container.
   auto newCont = std::make_unique<T>();
@@ -35,15 +34,13 @@ std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>> shallowCopy(
 }
 
 template <SG::IsAuxDataVector T>
-std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>> shallowCopy(
-    const T& cont) {
+ShallowCopyResult_t<T> shallowCopy(const T& cont) {
 
   return shallowCopy(cont, Gaudi::Hive::currentContext());
 }
 
 template <SG::IsConstAuxElement T>
-std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
-    const T& obj, const EventContext& ctx) {
+ShallowCopyResult_t<T> shallowCopy(const T& obj, const EventContext& ctx) {
 
   // Create the new interface object.
   auto newObj = prepareElementForShallowCopy(&obj);
@@ -62,8 +59,7 @@ std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
 }
 
 template <SG::IsConstAuxElement T>
-std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
-    const T& obj) {
+ShallowCopyResult_t<T> shallowCopy(const T& obj) {
 
   return shallowCopy(obj, Gaudi::Hive::currentContext());
 }

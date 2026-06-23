@@ -15,7 +15,7 @@ public:
 
   WriteHepMC(const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize() override;
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) override;
 
   std::string m_outfile;
   int m_precision{8};

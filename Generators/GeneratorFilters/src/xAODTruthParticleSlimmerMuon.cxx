@@ -32,7 +32,7 @@ StatusCode xAODTruthParticleSlimmerMuon::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODTruthParticleSlimmerMuon::execute()
+StatusCode xAODTruthParticleSlimmerMuon::execute(const EventContext& ctx)
 {
   // If the containers already exists then assume that nothing needs to be done
   if (evtStore()->contains<xAOD::TruthParticleContainer>(m_xaodTruthParticleContainerNameMuon.key()))
@@ -42,12 +42,12 @@ StatusCode xAODTruthParticleSlimmerMuon::execute()
     }
 
     // Create new output container
-    SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMuon(m_xaodTruthParticleContainerNameMuon);
+    SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerMuon(m_xaodTruthParticleContainerNameMuon, ctx);
     ATH_CHECK(xTruthParticleContainerMuon.record(std::make_unique<xAOD::TruthParticleContainer>(), std::make_unique<xAOD::TruthParticleAuxContainer>()));
     ATH_MSG_INFO("Recorded TruthParticleContainerMuon with key: " << m_xaodTruthParticleContainerNameMuon.key());
 
     // Retrieve full TruthEventContainer container
-    SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer(m_xaodTruthEventContainerName);
+    SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer(m_xaodTruthEventContainerName, ctx);
     if (!xTruthEventContainer.isValid()) {
       ATH_MSG_ERROR("Could not retrieve xAOD::TruthEventContainer with key:" <<
                     m_xaodTruthEventContainerName.key());

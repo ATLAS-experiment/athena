@@ -42,7 +42,7 @@ StatusCode L1CaloTriggerTowerSelector::initialize()
 //----------------------------------------
 // Execute
 //----------------------------------------
-StatusCode L1CaloTriggerTowerSelector::execute()
+StatusCode L1CaloTriggerTowerSelector::execute(const EventContext& /*ctx*/)
 {
     StatusCode sc;
 

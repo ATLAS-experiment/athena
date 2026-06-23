@@ -38,6 +38,7 @@ namespace DerivationFramework {
     ATH_CHECK(m_ksKey.initialize());
     ATH_CHECK(m_laKey.initialize());
     ATH_CHECK(m_lbKey.initialize());
+    ATH_CHECK(m_eventInfo_key.initialize());
 
     return StatusCode::SUCCESS;
     
@@ -116,6 +117,16 @@ namespace DerivationFramework {
        ATH_MSG_DEBUG("Reco_V0Finder lbContainer->size() " << lbContainer->size());
 
 
+       SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfo_key, ctx);
+       if(v0Container->size() > 500){
+          ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " v0Container container size " << v0Container->size());
+       }
+       if(ksContainer->size() > 500){
+         ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " ksContainer container size " << ksContainer->size());
+       }
+       if(laContainer->size() > 500){
+         ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " laContainer container size " << laContainer->size());
+       }
        ATH_CHECK(m_v0DecoTool->decorateV0(h_V0.ptr(), ctx));
        ATH_CHECK(m_v0DecoTool->decorateks(h_Ks.ptr() ,ctx));
        ATH_CHECK(m_v0DecoTool->decoratela(h_La.ptr(), ctx));

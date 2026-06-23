@@ -187,7 +187,7 @@ int handleHisto(TDirectory *hanDir, TKey *histoKey)
   //it's the alg we are interested in
   {
     //Get the name of the histo and its path in the file
-    string histoName = GetPathInFile(hanDir->GetPath()).c_str();
+    string histoName = GetPathInFile(hanDir->GetPath());
     histoName.erase(histoName.length()-1, histoName.length()); //configdir = histoname + _ 
     
     overviewMap.try_emplace(histoName, new overviewMapT());

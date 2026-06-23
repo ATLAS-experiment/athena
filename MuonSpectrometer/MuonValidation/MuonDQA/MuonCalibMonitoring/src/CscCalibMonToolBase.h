@@ -88,7 +88,7 @@ class CscCalibMonToolBase: public ManagedMonitorToolBase
           Not used. For most @c ManagedMonitorToolBase classes, this would do event-by-event filling
           of histograms. However we let algorithms in @c CscCalibAlgs do this for us.
          */
-        virtual StatusCode fillHistograms();
+        virtual StatusCode fillHistograms(const EventContext& ctx);
 
         /**
           @brief At end of run this processes the calibration results and fills the histograms

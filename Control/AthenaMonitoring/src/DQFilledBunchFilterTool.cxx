@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DQFilledBunchFilterTool.h"
@@ -25,14 +25,13 @@ StatusCode DQFilledBunchFilterTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-bool DQFilledBunchFilterTool::accept() const {
+bool DQFilledBunchFilterTool::accept(const EventContext& ctx) const {
   if (m_alwaysReturnTrue) {
     return true;
   } else {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    EventIDBase::number_type bcid = ctx.eventID().bunch_crossing_id();
     SG::ReadCondHandle<BunchCrossingCondData> bcData(m_bcDataKey, ctx);
-    bool value = bcData->isFilled(bcid) ^ m_invert;
+    const EventIDBase::number_type bcid = ctx.eventID().bunch_crossing_id();
+    const bool value = bcData->isFilled(bcid) ^ m_invert;
     ATH_MSG_VERBOSE("Filled bunch DQ tool accept called, value " << value);
     return value;
   }

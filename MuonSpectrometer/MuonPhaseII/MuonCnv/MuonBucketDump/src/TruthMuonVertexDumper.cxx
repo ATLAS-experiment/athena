@@ -28,9 +28,8 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     
-    StatusCode TruthMuonVertexDumperAlg::execute(){
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-        
+    StatusCode TruthMuonVertexDumperAlg::execute(const EventContext& ctx) {
+                
         const xAOD::TruthParticleContainer* truthMuons{nullptr};
         ATH_CHECK(SG::get(truthMuons, m_truthMuonsKey, ctx));
         const xAOD::TruthVertexContainer* truthVertices{nullptr};

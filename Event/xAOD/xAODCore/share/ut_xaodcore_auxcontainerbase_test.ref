@@ -2,3 +2,8 @@ ut_xaodcore_auxcontainerbase_test
 test1
 test2
 test_linked
+test_copyIDs
+Expect a warning here (except in standalone):
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+getCopyAuxIDs      WARNING AthContainers/Root/AuxStoreInternal.cxx:895: skipped unlocked decoration during copy i2 (1)
+test_toTransient

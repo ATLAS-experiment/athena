@@ -71,9 +71,10 @@ namespace PixelCallbacks{
     class RDOCallback {
 
         public:
-            explicit RDOCallback(PixelRDO_Container* rdoContainer, const PixelID* idHelper) :
+            explicit RDOCallback(PixelRDO_Container* rdoContainer, const PixelID* idHelper, MsgStream& msg_source) :
             m_rdoContainer(rdoContainer),
-            m_idHelper(idHelper)
+            m_idHelper(idHelper),
+            m_msg_source(msg_source)
             {};
 
             ~RDOCallback() = default;
@@ -97,12 +98,14 @@ namespace PixelCallbacks{
 
             inline void evt_done() {
                 m_rdoContainer->addCollection(m_rdoCollection.release(), m_idHelper->wafer_hash(m_identifier)).ignore();
+                m_msg_source << MSG::DEBUG << "evt_done nRDOs=" << m_n_rdos << endmsg;
             };
 
             inline void add_hit(uint16_t col, uint16_t row, uint16_t tot){
                 //Translate the col, row into module coordinates
                 ITkPixelCabling::chipToModuleTransform(m_transform, m_chipID, col, row);
                 m_rdoCollection->emplace_back(new Pixel1RawData(m_idHelper->pixel_id(m_identifier, row, col), tot, 0, 0, 0));                
+                ++m_n_rdos;
             };
 
             inline void add_hmap([[maybe_unused]] uint8_t qcol, [[maybe_unused]] uint8_t qrow, [[maybe_unused]] uint16_t hmap, [[maybe_unused]] uint64_t tots) {};
@@ -136,7 +139,9 @@ namespace PixelCallbacks{
             Identifier m_identifier{};
             ITkPixelCabling::TransformType m_transform{ITkPixelCabling::TransformType::UndefinedTransform};
             std::unique_ptr<PixelRDO_Collection> m_rdoCollection;
+            uint32_t m_n_rdos = 0;
             const PixelID* m_idHelper{};
+            MsgStream& m_msg_source;
     };
 
     //This prints the decoded hits on the screen,

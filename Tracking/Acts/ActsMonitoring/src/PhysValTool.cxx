@@ -232,12 +232,10 @@ namespace ActsTrk {
   }
   
   
-  StatusCode PhysValTool::fillHistograms() 
+  StatusCode PhysValTool::fillHistograms(const EventContext& ctx) 
   {
     ATH_MSG_DEBUG("Filling histograms for " << name() << " ... ");
     
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
     // Get Event Info
     SG::ReadHandle<xAOD::EventInfo> eventInfoHandle = SG::makeHandle(m_eventInfo, ctx);
     if (not eventInfoHandle.isValid()) {

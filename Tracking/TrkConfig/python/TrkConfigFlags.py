@@ -133,6 +133,9 @@ def createTrackingConfigFlags():
     # Guaranteed not-subtracted topo clusters even in heavy ions
     icf.addFlag("Tracking.TopoClusters", "CaloTopoClusters")
     icf.addFlag("Tracking.EgammaTopoClusters", "egammaTopoClusters")
+    icf.addFlag("Tracking.ForwardTopoClusters",
+                lambda prevFlags: (
+                     prevFlags.Egamma.Keys.Internal.EgammaTopoClusters + 'Fwd'))
 
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:

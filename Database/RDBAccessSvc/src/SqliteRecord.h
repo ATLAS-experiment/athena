@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,8 +17,8 @@
 #include <memory>
 #include <variant>
 #include <string>
+#include <string_view>
 #include <tuple>
-#include <stdexcept>
 
 enum SqliteInpType
 {
@@ -36,7 +36,7 @@ typedef std::variant<int
                      , double
                      , std::string> SqliteInp;
 
-typedef std::map<std::string,SqliteInpType> SqliteInpDef;
+typedef std::map<std::string,SqliteInpType, std::less<>> SqliteInpDef;
 typedef std::shared_ptr<SqliteInpDef> SqliteInpDef_ptr;
 
 /**
@@ -59,32 +59,32 @@ class SqliteRecord final : public IRDBRecord
   /// Check if the field value is NULL
   /// @param field [IN] field name
   /// @retun TRUE if the field is NULL, FALSE otherwise
-  bool isFieldNull(const std::string& field) const override;
+  bool isFieldNull(std::string_view  field) const override;
 
   /// Get int field value
   /// @param field [IN] field name
   /// @return field value
-  int getInt(const std::string& field) const override;
+  int getInt(std::string_view  field) const override;
 
   /// Get long field value
   /// @param field [IN] field name
   /// @return field value
-  long getLong(const std::string& field) const override;
+  long getLong(std::string_view  field) const override;
 
   /// Get double field value
   /// @param field [IN] field name
   /// @return field value
-  double getDouble(const std::string& field) const override;
+  double getDouble(std::string_view  field) const override;
 
   /// Get float field value
   /// @param field [IN] field name
   /// @return field value
-  float getFloat(const std::string& field) const override;
+  float getFloat(std::string_view  field) const override;
 
   /// Get string field value
   /// @param field [IN] field name
   /// @return field value
-  virtual const std::string& getString(const std::string& field) const override;
+  virtual const std::string&  getString(std::string_view  field) const override;
 
   // Access array values by index
   // arrays are implemented using the field with names like NAME_0, NAME_1 etc.
@@ -93,40 +93,39 @@ class SqliteRecord final : public IRDBRecord
   /// @param field [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  int getInt(const std::string& field, unsigned int index) const override;
+  int getInt(std::string_view  field, unsigned int index) const override;
 
   /// Get array long field value
   /// @param field [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  long getLong(const std::string& field, unsigned int index) const override;
+  long getLong(std::string_view  field, unsigned int index) const override;
 
   /// Get array double field value
   /// @param field [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  double getDouble(const std::string& field, unsigned int index) const override;
+  double getDouble(std::string_view  field, unsigned int index) const override;
 
   /// Get array float field value
   /// @param field [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  float getFloat(const std::string& field, unsigned int index) const override;
+  float getFloat(std::string_view  field, unsigned int index) const override;
 
   /// Get array string field value
   /// @param field [IN] field name
   /// @param index [IN] index in the array
   /// @return field value
-  virtual const std::string& getString(const std::string& field, unsigned int index) const override;
+  virtual const std::string&  getString(std::string_view  field, unsigned int index) const override;
 
   /// Dump to cout
   void dump() const;
 
-  void addValue(const std::string& field
-		, SqliteInp value);
+  void addValue(std::string_view  field, SqliteInp value);
 
  private:
-  typedef std::map<std::string,SqliteInp> Record;
+  typedef std::map<std::string,SqliteInp, std::less<>> Record;
   typedef Record::const_iterator RecordCIterator;
   enum FieldCheckCode
   {
@@ -140,13 +139,11 @@ class SqliteRecord final : public IRDBRecord
   SqliteInpDef_ptr m_def;
   Record           m_record;
 
-  FieldCheckResult checkField(const std::string& field
-			      , SqliteInpType fieldType) const;
-  void             handleError(const std::string& field
-			       ,FieldCheckCode checkCode) const;
+  FieldCheckResult checkField(std::string_view  field, SqliteInpType fieldType) const;
+  void handleError(std::string_view  field, FieldCheckCode checkCode) const;
 };
 
-inline SqliteRecord::FieldCheckResult SqliteRecord::checkField(const std::string& field
+inline SqliteRecord::FieldCheckResult SqliteRecord::checkField(std::string_view  field
 							       , SqliteInpType fieldType) const
 {
   FieldCheckCode checkCode{FIELD_CHECK_OK};
@@ -163,22 +160,6 @@ inline SqliteRecord::FieldCheckResult SqliteRecord::checkField(const std::string
     }
   }
   return std::make_tuple(checkIt,checkCode);
-}
-
-inline void SqliteRecord::handleError(const std::string& field
-				      ,FieldCheckCode checkCode) const
-{
-  switch(checkCode) {
-  case FIELD_CHECK_BAD_NAME:
-    throw std::runtime_error( "Wrong name for the field " + field);
-  case FIELD_CHECK_BAD_TYPE:
-    throw std::runtime_error( "Wrong data type requested for the field " + field);
-  case FIELD_CHECK_NULL_VAL:
-    throw std::runtime_error( field + " is NULL");
-  default:
-    break;
-  }
-  return;
 }
 
 #endif

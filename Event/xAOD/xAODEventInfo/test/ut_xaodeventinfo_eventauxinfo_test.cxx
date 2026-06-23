@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file xAODEventInfo/test/ut_xoadeventinfo_eventauxinfo_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -17,6 +15,12 @@
 #include "TestTools/expect_exception.h"
 #include <cassert>
 #include <iostream>
+
+#ifndef XAOD_STANDALONE
+#include "GaudiKernel/EventContext.h"
+#else
+class EventContext{};
+#endif
 
 
 void test1()
@@ -61,14 +65,41 @@ void test1()
   assert (pix == eai.getDecoration(pixid, 1, 1));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, eai.getDecoration(sctid, 1, 1));
 
-  eai.toTransient();
+  EventContext ctx;
+  eai.toTransient(ctx);
   assert (trt == eai.getDecoration(trtid, 1, 1));
   assert (lar == eai.getDecoration(larid, 1, 1));
 
   *lar = 1;
-  eai.toTransient();
+  eai.toTransient(ctx);
   assert (trt == eai.getDecoration(trtid, 1, 1));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, eai.getDecoration(larid, 1, 1));
+}
+
+
+void test_copyIDs()
+{
+  std::cout << "test_copyIDs\n";
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  xAOD::EventAuxInfo eai;
+  eai.lock();
+  SG::auxid_t runid = r.findAuxID ("runNumber");
+  SG::auxid_t ewid = r.getAuxID<std::vector<float> > ("mcEventWeights");
+  SG::auxid_t fooid = r.getAuxID<int> ("foo");
+  
+  (void)eai.getDecoration (ewid, 1, 1);
+  (void)eai.getDecoration (fooid, 1, 1);
+  {
+    SG::auxid_set_t out = eai.getCopyIDs();
+    assert (!out.test(ewid)); 
+    assert (!out.test(fooid));
+    assert (out.test(runid));
+  }
+
+  {
+    std::cout << "Expect warning here (except in standalone):\n";
+    SG::auxid_set_t out = eai.getCopyIDs (true);
+  }
 }
 
 
@@ -76,6 +107,7 @@ int main()
 {
   std::cout << "ut_xaodeventinfo_eventauxinfo_test\n";
   test1();
+  test_copyIDs();
   return 0;
 }
 

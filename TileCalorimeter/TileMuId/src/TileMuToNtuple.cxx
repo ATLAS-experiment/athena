@@ -73,10 +73,10 @@ StatusCode TileMuToNtuple::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileMuToNtuple::execute() {
+StatusCode TileMuToNtuple::execute(const EventContext& ctx) {
 
   // step1: read  from TDS
-  SG::ReadHandle<TileMuContainer> muContainer(m_muContainerKey);
+  SG::ReadHandle<TileMuContainer> muContainer(m_muContainerKey, ctx);
   ATH_CHECK( muContainer.isValid() );
 
   m_ntag = 0;

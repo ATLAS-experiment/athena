@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSELECTORTOOLS_MUONSELECTIONTOOL_H
@@ -180,7 +180,7 @@ namespace CP {
         bool passedBMVmimicCut(const xAOD::Muon&) const;
 
         /// Store selection information.
-        asg::AcceptInfo m_acceptInfo;
+        asg::AcceptInfo m_acceptInfo{"MuonSelection"};
 
         Gaudi::Property<double> m_maxEta{this, "MaxEta", 2.7, "Maximum eta range to select the muons"};
         Gaudi::Property<int>  m_quality{this, "MuQuality", 1,"Quality to select. Values correspond to 0=Tight, 1=Medium, 2=Loose, 3=VeryLoose (only for debug, not supported), 4=HighPt, 5=LowPtEfficiency"};
@@ -206,7 +206,6 @@ namespace CP {
         Gaudi::Property<bool> m_useSegmentTaggedLowPt{this, "UseSegmentTaggedLowPt", false, "Use MVA low-pt WP. In development phase"};
         Gaudi::Property<bool> m_geoOnTheFly{this, "AllowSettingGeometryOnTheFly", false,"avoids crash if run2/run3 geo is wrongly set"};
         Gaudi::Property<bool> m_doBadMuonVetoMimic{this, "DoBadMuonVetoMimic", false}; // switch to cut away the tail of very large smearing in MC to mimic the effect of the bad muon veto for 2-station muons in the high-pT selection
-        Gaudi::Property<bool> m_allowComm{this, "AcceptCommChain", true, "Accepts muons from the EMEO chain if set to true"};
         Gaudi::Property<bool> m_useBEEBISInHighPtRun3{this, "UseBEEBISInHighPtRun3", true, "Include BEE and BIS7/8 in high-pT WP in Run3"};        
 
         Gaudi::Property<int> m_expertMode_RunNumber{this, "expertMode_RunNumber", 0, "Expert only option. Overwrites RunNumber"};

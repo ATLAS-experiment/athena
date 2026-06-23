@@ -697,7 +697,7 @@ StatusCode CscCalibMonToolBase::bookHistograms()
   return StatusCode::SUCCESS;
 }//end bookHistograms
 
-StatusCode CscCalibMonToolBase::fillHistograms()
+StatusCode CscCalibMonToolBase::fillHistograms(const EventContext& /*ctx*/)
 {
 
   ATH_MSG_DEBUG( "CscCalibMonToolBase :: in fillHistograms()"  );

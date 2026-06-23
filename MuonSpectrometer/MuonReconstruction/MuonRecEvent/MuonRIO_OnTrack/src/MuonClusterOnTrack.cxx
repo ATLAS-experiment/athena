@@ -1,19 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// MuonClusterOnTrack.cxx
-//   Implementation file for class MuonClusterOnTrack
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-// Version 1.0 06/07/2004  Ketevi A. Assamagan
-// adapted from  Veronique Boisvert
-///////////////////////////////////////////////////////////////////
-
-#include <new>
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include <iostream>
 
 namespace Muon {
@@ -65,10 +55,7 @@ MsgStream& MuonClusterOnTrack::dump( MsgStream&    stream) const
 
   Trk::RIO_OnTrack::dump(stream);
 
-  stream << "Global position (x,y,z) = (";
-  stream  <<this->globalPosition().x()<<", "
-          <<this->globalPosition().y()<<", "
-          <<this->globalPosition().z()<<")"<<std::endl;
+  stream << "Global position (x,y,z) = "<<Amg::toString(globalPosition())<<std::endl;
   stream << "Position along strip: "<<m_positionAlongStrip<<std::endl;
   stream<<"}"<<endmsg;
   return stream;
@@ -82,8 +69,9 @@ std::ostream& MuonClusterOnTrack::dump( std::ostream&    stream) const
   Trk::RIO_OnTrack::dump(stream);
 
   stream << std::setiosflags(std::ios::fixed)<< std::setprecision(3);
-
   stream << "Position along strip: "<<m_positionAlongStrip<<std::endl;
+  stream << "Global position (x,y,z) = "<<Amg::toString(globalPosition())<<std::endl;
+ 
   stream<<"}"<<std::endl;
   stream.flags( originalFormat );
 

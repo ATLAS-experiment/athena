@@ -1,25 +1,16 @@
-################################################################################
-# Package: MuonCnvToolInterfaces
-################################################################################
+# Copyright (C) 2002-2026 by CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonCnvToolInterfaces )
 
-# External dependencies:
-find_package( tdaq-common )
-find_package( ROOT )
-
+# Component(s) in the package:
 atlas_add_library( MuonCnvToolInterfacesLib
                    MuonCnvToolInterfaces/*.h
                    INTERFACE
                    PUBLIC_HEADERS MuonCnvToolInterfaces
-                   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
-                   LINK_LIBRARIES GaudiKernel ByteStreamCnvSvcBaseLib Identifier AthContainers AthenaKernel ByteStreamData ${TDAQ-COMMON_LIBRARIES} )
-
+                   LINK_LIBRARIES GaudiKernel ByteStreamCnvSvcBaseLib Identifier AthContainers AthenaKernel ByteStreamData CxxUtils )
 
 atlas_add_dictionary( MuonCnvToolInterfacesDict
                       MuonCnvToolInterfaces/MuonCnvToolInterfacesDict.h
                       MuonCnvToolInterfaces/selection.xml
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES MuonCnvToolInterfacesLib ${ROOT_LIBRARIES})
-
+                      LINK_LIBRARIES MuonCnvToolInterfacesLib )

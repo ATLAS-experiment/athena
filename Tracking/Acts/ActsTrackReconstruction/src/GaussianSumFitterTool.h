@@ -11,7 +11,7 @@
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IBoundaryCheckTool.h"
-
+#include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 // ACTS
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
@@ -47,7 +47,7 @@ class GaussianSumFitterTool
   : public extends<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> {
 public:
   
-  GaussianSumFitterTool(const std::string&, const std::string&, const IInterface*);
+  using base_class::base_class;
   virtual ~GaussianSumFitterTool() = default;
 
   // standard Athena methods
@@ -112,7 +112,7 @@ public:
 
   virtual
   std::unique_ptr< ActsTrk::MutableTrackContainer >
-  fit(const std::vector< ActsTrk::ATLASUncalibSourceLink> & clusterList,
+  fit(const std::vector< const xAOD::UncalibratedMeasurement*> & clusterList,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
@@ -159,16 +159,18 @@ private:
   const Acts::Logger& logger() const;
 
  private:
+  /** @brief Abrivate the track state proxy */
+  using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
   ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-  ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+  PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 
                                                            "BoundaryCheckTool", 
                                                            "",
                                                            "Boundary checking tool for detector sensitivities"};
-  
-    // the settable job options
+  ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator{this, "RotCreatorTool", ""};
+  // the settable job options
   Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
       "Chi2 cut used by the outlier finder" };
   Gaudi::Property< int > m_option_maxPropagationStep {this, "MaxPropagationStep", 5000, 

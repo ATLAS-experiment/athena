@@ -39,7 +39,7 @@ StatusCode LArBadChannelDBAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArBadChannelDBAlg::execute() 
+StatusCode LArBadChannelDBAlg::execute(const EventContext& /*ctx*/) 
 {return StatusCode::SUCCESS;}
 
 StatusCode LArBadChannelDBAlg::finalize() {

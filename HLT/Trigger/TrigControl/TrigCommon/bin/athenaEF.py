@@ -823,8 +823,8 @@ def check_args(parser, args):
    if not args.jobOptions and not args.use_database:
       parser.error("No job options file specified")
 
-   if not args.file and not args.dump_config_exit:
-      parser.error("--file is required unless using --dump-config-exit")
+   if (not args.file and not args.dump_config_exit and args.efdf_interface_library == 'TrigDFEmulator'):
+      parser.error("--file is required unless using --dump-config-exit or online efdf-interface-library")
 
    if args.use_crest and not args.use_database:
       parser.error("--use-crest requires --use-database")
@@ -909,6 +909,9 @@ def update_run_params(args, flags):
          dmask = hex(dmask)
       args.detector_mask = arg_detector_mask(dmask)
    
+   if args.dump_config_exit and not args.run_number:
+      args.run_number = 0
+
    # Apply defaults for magnet currents if not set (offline mode only)
    # In online mode, magnets must come from IS or command line (handled above)
    if getattr(args, 'solenoid_current', None) is None:
@@ -1106,6 +1109,10 @@ def main():
    from PyUtils.Helpers import ROOTSetup
    ROOTSetup(batch=True)
 
+   # Enable ROOT thread safety
+   import ROOT
+   ROOT.ROOT.EnableThreadSafety()
+
    # set default OutputLevels and file inclusion
    import AthenaCommon.Logging
    AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level[0]))
@@ -1188,7 +1195,8 @@ def main():
    flags.Trigger.Online.useEFByteStreamSvc = True
    ef = flags.Trigger.Online.EFInterface
    ef_files = args.file if args.file else []
-   ef.Files        = ef_files
+   ef.Files          = ef_files
+   ef.OutputFileName = f"athenaEF_{args.save_output}" if args.save_output else ""
    ef.LoopFiles    = args.loop_files
    ef.NumEvents    = args.number_of_events
    ef.SkipEvents   = args.skip_events
@@ -1294,7 +1302,7 @@ def main():
          args.postcommand = []  # Clear so we don't run them again later
       
       # Dump configuration to JSON (like TrigPSCPythonCASetup)
-      fname = "HLTJobOptions_EF"
+      fname = "HLTJobOptions"
       log.info("Dumping configuration to %s.pkl and %s.json", fname, fname)
       with open(f"{fname}.pkl", "wb") as f:
          cfg.store(f)
@@ -1326,7 +1334,7 @@ def main():
 
    # Dump configuration if requested
    if args.dump_config or args.dump_config_exit:
-      fname = "HLTJobOptions_EF"
+      fname = "HLTJobOptions"
       
       if is_database:
          # For DB mode, fetch properties via Python API

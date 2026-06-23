@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONEVENTCNVTOOL_H
@@ -8,7 +8,6 @@
 #include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPrepRawData/CscPrepDataContainer.h"
 #include "MuonPrepRawData/MMPrepDataContainer.h"
@@ -17,6 +16,7 @@
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
 #include "MuonPrepRawData/sTgcPrepDataContainer.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+
 #include "TrkEventCnvTools/ITrkEventCnvTool.h"
 
 
@@ -29,10 +29,7 @@ namespace Muon {
     /**Tool used in the persisency convertors to help rebuild EDM objects*/
     class MuonEventCnvTool : public extends<AthAlgTool, Trk::ITrkEventCnvTool> {
     public:
-        enum MuonConcreteType { MDT, RPC, CSC, TGC, MM, STGC, TypeUnknown };
-
-        MuonEventCnvTool(const std::string&, const std::string&, const IInterface*);
-
+        using base_class::base_class;
         virtual StatusCode initialize() override;
 
         /** check that the RoT is correctly filled*/

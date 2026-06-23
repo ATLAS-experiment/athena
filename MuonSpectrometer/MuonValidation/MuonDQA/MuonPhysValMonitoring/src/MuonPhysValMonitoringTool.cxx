@@ -23,7 +23,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "TString.h"
-
+#include <CxxUtils/StringUtils.h>
 #include <cmath>
 #include <limits>
 #include <format>
@@ -295,7 +295,7 @@ namespace MuonPhysValMonitoring {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonPhysValMonitoringTool::fillHistograms() {
+    StatusCode MuonPhysValMonitoringTool::fillHistograms(const EventContext& ctx) {
         ATH_MSG_DEBUG("Filling hists " << name() << "...");
         m_vMatchedTruthMuons.clear();
         m_vMatchedMuons.clear();
@@ -316,7 +316,6 @@ namespace MuonPhysValMonitoring {
         m_vRecoMuons_EffDen_CB.clear();
         m_vRecoMuons_EffDen_MS.clear();
 
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
         const xAOD::EventInfo* eventInfo{nullptr};
         ATH_CHECK(retrieveContainer(ctx, m_eventInfo, eventInfo));
 
@@ -552,11 +551,9 @@ namespace MuonPhysValMonitoring {
                     TString muonItem_str = (TString)muonItem;
                     if (muonItem_str.Contains("_OR_")) {
                         muonItem_str.ReplaceAll("_OR_", " ");
-                        TString delim = " ";
-                        std::vector<TString> v_subchains;
-                        SplitString(muonItem_str, delim, v_subchains);
+                        std::vector<std::string> v_subchains = CxxUtils::tokenize(muonItem_str, ' ');
                         for (int i = 0; i < (int)v_subchains.size(); i++) {
-                            Trig::FeatureContainer fc1 = m_trigDec->features((std::string)v_subchains.at(i));
+                            Trig::FeatureContainer fc1 = m_trigDec->features(v_subchains.at(i));
                             std::vector<Trig::Feature<xAOD::L2StandAloneMuonContainer> > vec_muons_1 =
                                 fc1.get<xAOD::L2StandAloneMuonContainer>();
                             for (const auto& mufeat : vec_muons_1) { vec_muons.emplace_back(mufeat); }
@@ -612,11 +609,9 @@ namespace MuonPhysValMonitoring {
                     TString muonItem_str = (TString)muonItem;
                     if (muonItem_str.Contains("_OR_")) {
                         muonItem_str.ReplaceAll("_OR_", " ");
-                        TString delim = " ";
-                        std::vector<TString> v_subchains;
-                        SplitString(muonItem_str, delim, v_subchains);
+                        auto v_subchains = CxxUtils::tokenize(muonItem_str, ' ');
                         for (int i = 0; i < (int)v_subchains.size(); i++) {
-                            Trig::FeatureContainer fc1 = m_trigDec->features((std::string)v_subchains.at(i));
+                            Trig::FeatureContainer fc1 = m_trigDec->features(v_subchains.at(i));
                             std::vector<Trig::Feature<xAOD::L2CombinedMuonContainer> > vec_muons_1 =
                                 fc1.get<xAOD::L2CombinedMuonContainer>();
                             for (const auto& mufeat : vec_muons_1) { vec_muons.emplace_back(mufeat); }
@@ -685,11 +680,9 @@ namespace MuonPhysValMonitoring {
                     TString muonItem_str = (TString)muonItem;
                     if (muonItem_str.Contains("_OR_")) {
                         muonItem_str.ReplaceAll("_OR_", " ");
-                        TString delim = " ";
-                        std::vector<TString> v_subchains;
-                        SplitString(muonItem_str, delim, v_subchains);
+                        auto v_subchains = CxxUtils::tokenize(muonItem_str, ' ');
                         for (int i = 0; i < (int)v_subchains.size(); i++) {
-                            Trig::FeatureContainer fc1 = m_trigDec->features((std::string)v_subchains.at(i));
+                            Trig::FeatureContainer fc1 = m_trigDec->features(v_subchains.at(i));
                             std::vector<Trig::Feature<xAOD::MuonContainer> > vec_muons_1 = fc1.get<xAOD::MuonContainer>();
                             for (const auto& mufeat : vec_muons_1) { vec_muons.emplace_back(mufeat); }
                         }
@@ -801,11 +794,9 @@ namespace MuonPhysValMonitoring {
                     TString muonItem_str = (TString)m_muonItems[m];
                     if (muonItem_str.Contains("_OR_")) {
                         muonItem_str.ReplaceAll("_OR_", " ");
-                        TString delim = " ";
-                        std::vector<TString> v_subchains;
-                        SplitString(muonItem_str, delim, v_subchains);
+                        auto v_subchains = CxxUtils::tokenize(muonItem_str, ' ');
                         for (int i = 0; i < (int)v_subchains.size(); i++) {
-                            Trig::FeatureContainer fc1 = m_trigDec->features((std::string)v_subchains.at(i));
+                            Trig::FeatureContainer fc1 = m_trigDec->features(v_subchains.at(i));
                             std::vector<Trig::Feature<xAOD::MuonContainer> > vec_muons_1 = fc1.get<xAOD::MuonContainer>();
                             for (const auto& mufeat : vec_muons_1) { vec_muons.emplace_back(mufeat); }
                         }
@@ -1676,30 +1667,6 @@ namespace MuonPhysValMonitoring {
         if (prt->pt() < 2000.) return false;
         if (std::abs(prt->eta()) > 2.7) return false;
         return true;
-    }
-
-    void MuonPhysValMonitoringTool::SplitString(TString x, const TString& delim, std::vector<TString>& v) {
-        v.clear();
-        int stringLength = x.Length();
-        int delimLength = delim.Length();
-
-        int stop = 1;
-        TString temp = "---";
-        while (stop != -1) {
-            stop = x.First(delim);
-
-            if (stop != -1) {
-                temp = x(0, stop);
-                TSubString newString = x(stop + delimLength, stringLength);
-                x = newString;
-                stringLength = x.Length();
-            } else {
-                stringLength = x.Length();
-                temp = x(0, stringLength);
-            }
-
-            v.emplace_back(temp);
-        }
     }
 
 }  // namespace MuonPhysValMonitoring

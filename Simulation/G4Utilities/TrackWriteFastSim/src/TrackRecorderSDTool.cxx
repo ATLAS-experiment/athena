@@ -11,6 +11,10 @@
 // package includes
 #include "TrackWriteFastSim/TrackFastSimSD.h"
 
+// Athena includes
+#include "HitManagement/HitCollectionMap.h"
+#include "TrackRecord/TrackRecordCollection.h"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 TrackRecorderSDTool::TrackRecorderSDTool(const std::string& type, const std::string& name, const IInterface* parent)
@@ -18,6 +22,21 @@ TrackRecorderSDTool::TrackRecorderSDTool(const std::string& type, const std::str
   , m_SD_type(1)
 {
   declareProperty("SD_type", m_SD_type);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+StatusCode TrackRecorderSDTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<TrackRecordCollection>(m_outputCollectionNames[0],
+                                                m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode TrackRecorderSDTool::Gather(HitCollectionMap& hitCollections)
+{
+  CHECK(hitCollections.Record<TrackRecordCollection>(m_outputCollectionNames[0]));
+  return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

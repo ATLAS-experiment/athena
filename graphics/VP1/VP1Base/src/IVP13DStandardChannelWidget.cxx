@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -45,11 +45,11 @@
 
 class IVP13DStandardChannelWidget::Imp {
 public:
-  IVP13DStandardChannelWidget*channel;
-  bool detectorViewButtons;
-  SoSeparator * root;
-  VP1ExaminerViewer * viewer;
-  bool need_initial_viewall;
+  IVP13DStandardChannelWidget* channel{};
+  bool detectorViewButtons{};
+  SoSeparator * root{};
+  VP1ExaminerViewer * viewer{};
+  bool need_initial_viewall{};
   QMap<IVP13DSystem*,SoSeparator*> system2rootNodes;
 
   QMap<QCheckBox*,IVP1System*> checkbox2system;
@@ -72,9 +72,9 @@ public:
 
 
   QMap<IVP1System*,QWidget*> sys2tabpage;
-  VP1TabWidget* tabwidget;
+  VP1TabWidget* tabwidget{};
 
-  QSplitter * extradisplaywidget_splitter;
+  QSplitter * extradisplaywidget_splitter{};
 
   // restoreFromState versions
   void restoreFromState_v7(QDataStream& state);

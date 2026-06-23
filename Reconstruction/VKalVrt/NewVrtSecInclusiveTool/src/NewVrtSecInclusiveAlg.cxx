@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
  
  ///////////////////////////////////////////////////////////////////
@@ -91,7 +91,7 @@ namespace Rec {
      bVertexContainer->setStore(bVertexAuxContainer.get());
 
      if( pv &&  trkparticles.size()>1 ){
-       std::unique_ptr<Trk::VxSecVertexInfo> foundVrts = m_bvertextool->findAllVertices(trkparticles,*pv);      
+       std::unique_ptr<Trk::VxSecVertexInfo> foundVrts = m_bvertextool->findAllVertices(ctx,trkparticles,*pv);
        if(foundVrts && !foundVrts->vertices().empty()){
          const std::vector<xAOD::Vertex*> vtmp=foundVrts->vertices();
          double mindRSVPV=1.e3;  // Check coincidence with existing SV1 vertex

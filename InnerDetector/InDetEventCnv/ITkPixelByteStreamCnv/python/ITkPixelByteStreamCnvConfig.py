@@ -43,6 +43,23 @@ def ITkPixelDecodingAlgCfg(flags, name = "ITkPixelDecodingAlg", **kwargs) -> Com
 
     return acc
 
+def ITkPixelDecodingPhaseIIRDOAlgCfg(flags,
+                                    name = "ITkPixelDecodingPhaseIIRDOAlg",
+                                    nRDOs = 1300000,
+                                    **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+
+    from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
+    acc.merge(ITkPixelCablingAlgCfg(flags))
+    kwargs.setdefault("nRDOs", nRDOs)
+
+    acc.addEventAlgo(CompFactory.ITkPixelDecodingPhaseIIRDOAlg(name, **kwargs))
+
+    return acc
+
 
 def ITkPixelEncodingAlgCfg(flags, name = "ITkPixelEncodingAlg",
                            doMonitoring = False,
@@ -95,4 +112,18 @@ def ITkPixelCnvToolCfg(flags, name = "ITkPixelCnvTool",
     kwargs.setdefault("PixelCablingKey", "ITkPixelCablingData")
 
     acc.addPublicTool(CompFactory.ITkPixelCnvTool(name, **kwargs), primary=True)
+    return acc
+
+
+def ITkPixelCsvWaferIdAlgCfg(flags,
+                               name = "ITkPixelCsvWaferIdAlg",
+                               OutputFile: str = "ITkPixelWaferIds.txt",
+                               **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+
+    kwargs.setdefault("OutputFile", OutputFile)
+    acc.addEventAlgo(CompFactory.ITkPixelCsvWaferIdAlg(name, **kwargs))
     return acc

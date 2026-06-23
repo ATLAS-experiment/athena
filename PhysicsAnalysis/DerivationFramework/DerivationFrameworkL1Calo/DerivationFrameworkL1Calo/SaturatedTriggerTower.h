@@ -22,7 +22,7 @@ namespace DerivationFramework {
 
       StatusCode initialize();
       StatusCode finalize();
-      virtual bool eventPassesFilter() const;
+      virtual bool eventPassesFilter(const EventContext& ctx) const;
 
     private:
       int m_adcThreshold;

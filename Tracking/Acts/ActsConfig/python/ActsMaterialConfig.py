@@ -74,9 +74,11 @@ def RootMaterialWriterToolCfg(configFlags, name="RootMaterialWriterTool", **kwar
 def MaterialMappingCfg(configFlags,
                        name="MaterialMapping",
                        StoreTracks=False,
+                       StoreSurfInfo=False,
                        OutputMappedMaterialTracks="OuputMappedMaterialTracks",
                        OutputUnmappedMaterialTracks="OutputUnmappedMaterialTracks",
                        **kwargs) :
+  
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   from AthenaConfiguration.ComponentFactory import CompFactory
   acc = ComponentAccumulator()
@@ -92,6 +94,7 @@ def MaterialMappingCfg(configFlags,
   kwargs.setdefault("UnmappedMaterialTrackCollectionKey", OutputUnmappedMaterialTracks)
 
 
+
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialMapping(name, **kwargs), primary = True)
 
   if StoreTracks:
@@ -100,11 +103,13 @@ def MaterialMappingCfg(configFlags,
                                        name="MappedMaterialTrackWriter",
                                        FileName="material-tracks-mapped.root",
                                        OutStream="ACTSMAPPEDMATERIALWRITER",
+                                       StoreSurface=StoreSurfInfo,
                                        MaterialTrackCollectionKey=OutputMappedMaterialTracks))
       acc.merge(MaterialTrackWriterCfg(configFlags,
                                        name="UnmappedMaterialTrackWriter",
                                        FileName="material-tracks-unmapped.root",
                                        OutStream="ACTSUNMAPPEDMATERIALWRITER",
+                                       StoreSurface=StoreSurfInfo,
                                        MaterialTrackCollectionKey=OutputUnmappedMaterialTracks))
 
   return acc

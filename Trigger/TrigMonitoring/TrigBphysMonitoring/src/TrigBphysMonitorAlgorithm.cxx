@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBphysMonitorAlgorithm.h"
@@ -491,9 +491,8 @@ StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std:
   std::vector<const xAOD::Muon*> selectedMuons;
   for (const auto mu : *muonContainer) {
     if ( mu == nullptr ) continue;
-    if ( mu->muonType() != xAOD::Muon::Combined ) continue; // require combined muons
-    if (!mu->inDetTrackParticleLink()) continue; // No muons without ID tracks
-    if (!mu->inDetTrackParticleLink().isValid()) continue; // No muons without ID tracks
+    if ( mu->muonType() != xAOD::Muon::MuonType::Combined ) continue; // require combined muons
+    if (!mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) continue; // No muons without ID tracks
     selectedMuons.push_back(mu);
   }
   if(selectedMuons.size() < 2) {
@@ -507,8 +506,8 @@ StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std:
     for(auto innerItr=(outerItr+1); innerItr!=selectedMuons.end(); ++innerItr){
       const auto muon1 = *outerItr;
       const auto muon2 = *innerItr;
-      const auto trackParticle1 = muon1->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
-      const auto trackParticle2 = muon2->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+      const auto trackParticle1 = muon1->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
+      const auto trackParticle2 = muon2->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
       // Charge selection
       if(trackParticle1->qOverP() * trackParticle2->qOverP() > 0.) 
         continue;
@@ -517,7 +516,7 @@ StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std:
       if( !(dimu_momentum_prefit > m_dimuMassLower_prefit && dimu_momentum_prefit < m_dimuMassUpper_prefit) ) 
         continue;
       // Fit
-      std::unique_ptr<xAOD::Vertex> dimuon = dimuonFit(trackParticle1, trackParticle2);
+      std::unique_ptr<xAOD::Vertex> dimuon = dimuonFit(ctx, trackParticle1, trackParticle2);
       if(!dimuon) continue;
       if(dimuon->chiSquared() > m_dimuChi2Cut) continue;
       vxContainer.push_back(std::move(dimuon));
@@ -548,7 +547,7 @@ StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std:
   return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<xAOD::Vertex> TrigBphysMonitorAlgorithm::dimuonFit(const xAOD::TrackParticle* mu1, const xAOD::TrackParticle* mu2) const {
+std::unique_ptr<xAOD::Vertex> TrigBphysMonitorAlgorithm::dimuonFit(const EventContext& ctx, const xAOD::TrackParticle* mu1, const xAOD::TrackParticle* mu2) const {
   
   const Trk::Perigee& mu1Perigee = mu1->perigeeParameters();
   const Trk::Perigee& mu2Perigee = mu2->perigeeParameters();
@@ -556,9 +555,8 @@ std::unique_ptr<xAOD::Vertex> TrigBphysMonitorAlgorithm::dimuonFit(const xAOD::T
   Amg::Vector3D startingPoint = m_vertexPointEstimator->getCirclesIntersectionPoint(&mu1Perigee,&mu2Perigee,sflag,errorcode);
   if (errorcode != 0) {startingPoint(0) = 0.0; startingPoint(1) = 0.0; startingPoint(2) = 0.0;}
   const std::vector<const xAOD::TrackParticle*> trackPair = {mu1, mu2};
-  std::unique_ptr<xAOD::Vertex> myVxCandidate(m_vertexFitter->fit(trackPair, startingPoint)); 
 
-  return myVxCandidate;
+  return m_vertexFitter->fit(ctx, trackPair, startingPoint);
 }
 
 bool TrigBphysMonitorAlgorithm::matchDimuon(const xAOD::Vertex* dimuonVertex, const std::string& chainName) const {

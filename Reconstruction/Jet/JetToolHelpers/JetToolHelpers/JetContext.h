@@ -1,6 +1,5 @@
 /*
  * @file JetContext.h
- * @author A. Freeman (swissarthurfreeman@gmail.com)
  * @brief a class for storing arbitrary event data.
  * @date 2022-06-01
  *

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoSimulation.h"
@@ -180,8 +180,7 @@ L1TopoSimulation::start() {
 
 
 StatusCode
-L1TopoSimulation::execute() {
-   const EventContext& ctx = Gaudi::Hive::currentContext();
+L1TopoSimulation::execute(const EventContext& ctx) {
 
    if (m_prescale>1 && not m_scaler->decision(m_prescale)){
       ATH_MSG_DEBUG( "This event not processed due to prescale");
@@ -287,8 +286,8 @@ L1TopoSimulation::execute() {
        // topoOverflow2CTP->setCableWord2( clock, dec.overflow( 1, clock) );  // TOPO 1
      }    
     
-     CHECK(SG::makeHandle(m_legacyTopoCTPLocation)        .record(std::move(topoOutput2CTP)));
-     CHECK(SG::makeHandle(m_legacyTopoOverflowCTPLocation).record(std::move(topoOverflow2CTP)));
+     CHECK(SG::makeHandle(m_legacyTopoCTPLocation, ctx)        .record(std::move(topoOutput2CTP)));
+     CHECK(SG::makeHandle(m_legacyTopoOverflowCTPLocation, ctx).record(std::move(topoOverflow2CTP)));
      
    } else {
      // set electrical connectors 
@@ -322,8 +321,8 @@ L1TopoSimulation::execute() {
        WriteEDM(outputHandle,connOpt,0,outputOpt_2.to_ulong());
      }
     
-     CHECK(SG::makeHandle(m_topoCTPLocation)        .record(std::move(topoOutput2CTP)));
-     CHECK(SG::makeHandle(m_topoOverflowCTPLocation).record(std::move(topoOverflow2CTP)));
+     CHECK(SG::makeHandle(m_topoCTPLocation, ctx)        .record(std::move(topoOutput2CTP)));
+     CHECK(SG::makeHandle(m_topoOverflowCTPLocation, ctx).record(std::move(topoOverflow2CTP)));
    }
 
    return StatusCode::SUCCESS;

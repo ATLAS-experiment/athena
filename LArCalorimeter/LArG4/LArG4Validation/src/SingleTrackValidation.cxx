@@ -254,7 +254,7 @@ StatusCode SingleTrackValidation::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode SingleTrackValidation::execute() {
+StatusCode SingleTrackValidation::execute(const EventContext& ctx) {
 
   if (m_c->cpuTime==0) {
     m_c->cpuTime=getCpu();
@@ -275,7 +275,7 @@ StatusCode SingleTrackValidation::execute() {
 
   MagField::AtlasFieldCache    fieldCache;
   // Get field cache object
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey};
+  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
   const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
   if (fieldCondObj == nullptr) {
     ATH_MSG_ERROR("Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
@@ -284,7 +284,7 @@ StatusCode SingleTrackValidation::execute() {
   fieldCondObj->getInitializedCache (fieldCache);
 
   // Get the MC Truth Information
-  SG::ReadHandle<McEventCollection> mcEvent{m_truthKey};
+  SG::ReadHandle<McEventCollection> mcEvent{m_truthKey, ctx};
   for (const HepMC::GenEvent* e : *mcEvent) {
 
     // Get just the primary, call it "theParticle"
@@ -366,7 +366,7 @@ StatusCode SingleTrackValidation::execute() {
     double thetaImpact = std::acos(z/radImpact);
     double etaImpact   = -std::log(std::tan(thetaImpact/2));
 
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
     const CaloDetDescrManager* caloMgr = *caloMgrHandle;
     const CaloDetDescrElement *element[15]={nullptr};

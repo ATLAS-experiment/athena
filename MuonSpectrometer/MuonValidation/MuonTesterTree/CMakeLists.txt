@@ -31,7 +31,7 @@ if ( NOT XAOD_STANDALONE)
                         SCRIPT python -m MuonTesterTree.TesterTreeConfig                
                         PROPERTIES TIMEOUT 900
                         PRIVATE_WORKING_DIRECTORY
-                        POST_EXEC_SCRIPT nopost.sh)
+                        POST_EXEC_SCRIPT noerror.sh)
     endif()
 endif()
  

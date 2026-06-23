@@ -135,7 +135,7 @@ StatusCode LArHitMerger::initialize()
 
 }
 
-StatusCode LArHitMerger::execute()
+StatusCode LArHitMerger::execute(const EventContext& /*ctx*/)
 {
 
   std::vector<double> eCells_EM;

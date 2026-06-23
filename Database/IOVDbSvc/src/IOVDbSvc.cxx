@@ -129,7 +129,7 @@ int IOVDbSvc::poolSvcContext()
       } else {
          m_poolSvcContext=m_h_poolSvc->getInputContext("Conditions");
       }
-      if( m_h_poolSvc->connect(pool::ITransaction::READ, m_poolSvcContext).isSuccess() ) {
+      if( m_h_poolSvc->connect(Io::READ, m_poolSvcContext).isSuccess() ) {
          ATH_MSG_INFO( "Opened read transaction for POOL PersistencySvc");
       } else {
          // We only emit info for failure to connect (for the moment? RDS 01/2008)
@@ -661,7 +661,7 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
     const_cast<pool::IFileCatalog*>(m_h_poolSvc->catalog());
   catalog->commit();
   catalog->start(); 
-
+  static const std::string preLoadProxyStr{"preLoadProxy"};
   for (const auto & pThisConnection : m_connections){
     // only access connections which are actually in use - avoids waking up
     // the default DB connection if it is not being used
@@ -677,7 +677,7 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
         folder->printCache();
         cool::ValidityKey vkey=folder->iovTime(m_iovTime);
         {
-          Gaudi::Guards::AuditorGuard auditor(std::string("FldrCache:")+folder->folderName(), auditorSvc(), "preLoadProxy");
+          Gaudi::Guards::AuditorGuard auditor(std::string("FldrCache:")+folder->folderName(), auditorSvc(), preLoadProxyStr);
           if (!folder->loadCacheIfDbChanged(vkey, m_globalTag, dbconn, m_h_IOVSvc)) {
             ATH_MSG_ERROR( "Problem RELOADING: " << folder->folderName());
             return StatusCode::FAILURE;
@@ -713,7 +713,7 @@ void IOVDbSvc::postConditionsLoad() {
             ATH_MSG_WARNING( "Unable to close input POOL connections" );
          }
          // reopen transaction
-         if (m_h_poolSvc->connect(pool::ITransaction::READ, m_poolSvcContext).isSuccess()) {
+         if (m_h_poolSvc->connect(Io::READ, m_poolSvcContext).isSuccess()) {
             ATH_MSG_DEBUG("Reopend read transaction for POOL conditions input files" );
          } else {
             ATH_MSG_WARNING("Cannot reopen read transaction for POOL conditions input files");

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TruthParticleMomentum.h 
@@ -11,16 +11,16 @@
 #ifndef MCPARTICLEEVENT_TRUTHPARTICLEMOMENTUM_H 
 #define MCPARTICLEEVENT_TRUTHPARTICLEMOMENTUM_H 
 
-// STL includes
-#include <iosfwd>
-#include <limits>
 
 // HepMC / CLHEP includes
 #include "CLHEP/Vector/LorentzVector.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "AtlasHepMC/SimpleVector.h"
 #include "EventKernel/I4Momentum.h"
-
+// STL includes
+#include <iostream>
+#include <limits>
+#include <cmath>
 // Forward declaration
 class I4MomentumError;
 
@@ -268,6 +268,10 @@ inline double TruthParticleMomentum::cotTh() const
 
 inline CLHEP::HepLorentzVector TruthParticleMomentum::hlv() const
 { 
+  if(!m_hlv)[[unlikely]]{
+    std::cout << " FATAL ERROR : TruthParticleMomentum::hlv called with m_hlv = nullptr. " << std::endl ;
+    std::abort();
+  }
   return CLHEP::HepLorentzVector(m_hlv->px(), m_hlv->py(),
 				 m_hlv->pz(), m_hlv->e() );
 }

@@ -15,7 +15,6 @@
 #include "SGTools/TestStore.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include <cassert>
 #include <iostream>
@@ -71,7 +70,6 @@ void testit (const Neutrino& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   ElementLink<VxContainer> origlink ("orig", 10);
   AthenaBarCodeImpl dum; // Get services created.
   dum.getVersion();

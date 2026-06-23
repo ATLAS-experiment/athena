@@ -799,7 +799,7 @@ StatusCode FPGAClusterConverter::getRdoList(std::vector<Identifier> &rdoList, co
 
 StatusCode FPGAClusterConverter::getStripsInfo(const xAOD::StripCluster& cl, float& halfStripLength, Amg::Vector3D& stripDirection, Amg::Vector3D& stripCenter) const {
 
-  const int &strip = m_SCTId->strip(cl.rdoList().front());
+  const int &strip = m_SCTId->strip(Identifier(cl.rdoList().front()));
   const IdentifierHash &hash = cl.identifierHash();
 
   const InDetDD::SiDetectorElement* sDE = m_SCTManager->getDetectorElement(hash);

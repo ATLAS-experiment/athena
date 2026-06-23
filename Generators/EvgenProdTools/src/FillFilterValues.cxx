@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -22,8 +22,8 @@ StatusCode FillFilterValues::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode FillFilterValues::execute() {
 #ifdef HEPMC3
+StatusCode FillFilterValues::execute(const EventContext& ctx) {
   // Check that the collection isn't empty
   const size_t nEvents = events_const()->size();
   if (nEvents == 0) {
@@ -37,16 +37,16 @@ StatusCode FillFilterValues::execute() {
 
   // write filter values into xAOD::EventInfo
   
-  SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtHT(m_mcFilterHTKey);
-  if (event_const()->attribute<HepMC3::DoubleAttribute>("filterHT") != NULL){
-     std::shared_ptr<HepMC3::DoubleAttribute>  fHT =   event_const()->attribute<HepMC3::DoubleAttribute>("filterHT"); 
+  SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtHT(m_mcFilterHTKey, ctx);
+  if (event_const()->attribute<HepMC3::DoubleAttribute>(HepMCStr::filterHT) != NULL){
+     std::shared_ptr<HepMC3::DoubleAttribute>  fHT =   event_const()->attribute<HepMC3::DoubleAttribute>(HepMCStr::filterHT); 
      double fHT_double = fHT->value();
      dec_filtHT(0) = fHT_double;
   }
 
-  SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtMET(m_mcFilterMETKey);
-  if (event_const()->attribute<HepMC3::DoubleAttribute>("filterMET") != NULL){
-    std::shared_ptr<HepMC3::DoubleAttribute>  fMET =   event_const()->attribute<HepMC3::DoubleAttribute>("filterMET");
+  SG::WriteDecorHandle<xAOD::EventInfo,float> dec_filtMET(m_mcFilterMETKey, ctx);
+  if (event_const()->attribute<HepMC3::DoubleAttribute>(HepMCStr::filterMET) != NULL){
+    std::shared_ptr<HepMC3::DoubleAttribute>  fMET =   event_const()->attribute<HepMC3::DoubleAttribute>(HepMCStr::filterMET);
     double fMET_double = fMET->value();
     dec_filtMET(0) = fMET_double;
   }
@@ -54,9 +54,13 @@ StatusCode FillFilterValues::execute() {
   // Post-hoc debug printouts
   ATH_MSG_DEBUG("Copied HepMC filter values to EventInfo");
 
-#endif
   return StatusCode::SUCCESS;
 }
+#else
+StatusCode FillFilterValues::execute(const EventContext& /*ctx*/) {
+  return StatusCode::SUCCESS;
+}
+#endif
 
 #endif
 

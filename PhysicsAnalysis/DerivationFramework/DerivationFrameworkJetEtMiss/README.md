@@ -1,25 +1,30 @@
 # DerivationFrameworkJetEtMiss
 
-This package contains the derivation formats (JETMX) needed for Jet/Etmiss performance studies. 
+This package contains the JETMX derivation formats needed for Jet/Etmiss performance studies.
 
-In Run 3 the derivation framework moved to the component accumulator. The config files can now be found in the python directory, not the share directory anymore!
+## How to run:
 
-## How to run: 
+```
+Derivation_tf.py --inputAODFile aod.pool.root --outputDAODFile test.pool.root --formats JETM1
+```
 
-`Derivation_tf.py --inputAODFile aod.pool.root --outputDAODFile test.pool.root --formats JETM1 JETM2 ...`
-
-Test file: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/mc20\_13TeV.410470.PhPy8EG\_A14\_ttbar\_hdamp258p75\_nonallhad.recon.AOD.e6337\_s3681\_r13167/AOD.27162646.\_000001.pool.root.1
+Test files can be found	in the relevant	[ART test scripts](https://gitlab.cern.ch/atlas/athena/-/tree/main/PhysicsAnalysis/DerivationFramework/DerivationFrameworkART/DerivationFrameworkJetEtMissART/test?ref_type=heads).
 
 ## JETMX formats
 
-* `JETM1.py`:  MC calibrations (MC-JES, GSC) and in situ calibrations (eta-intercalibration, MJB, JER), trigger jet studies
-* `JETM2.py`: MC only for tagger developments, JetDef R&D (rho, towers, ...), this is a merged format of JETM8 and JETM13  
-* `JETM3.py`: *in situ* Z+jets calibration
-* `JETM4.py`: *in situ* gamma+jets
-* `JETM5.py`: random cones in zero bias data
-* `JETM6.py`: tagging scale factors
-* `JETM7.py`: by-vertex jet reconstruction
-* `JETM10.py`: MET trigger studies
-* `JETM11.py`: MET trigger studies in e+mu events
-* `JETM12.py` : E/p studies in W to tau + nu events
-* `JETM14.py`: MET trigger studies in single lepton events
+* `JETM1`: MC calibrations (MC-JES, GSC) and in situ calibrations (eta-intercalibration, MJB, JER), trigger jet studies
+* `JETM2`: MC only for tagger developments and JetDef R&D
+* `JETM3`: *in situ* Z+jets calibration
+* `JETM4`: *in situ* gamma+jets
+* `JETM5`: random cones in zero bias data
+* `JETM7`: per-vertex jet reconstruction
+* `JETM12`: E/p studies in W to tau + nu events
+* `JETM42`: PHYS + clusters and towers, mostly for upgrade TDAQ studies
+
+## Contacts
+
+For questions regarding the derivation formats, feel free to reach out to the JSV conveners: atlas-cp-jetetmiss-jsv-conveners(at)cern.ch
+
+Responsibles for specific derivation formats: 
+- `JETM7`: Steven Schramm 
+- `JETM42`: Dylan Rankin 

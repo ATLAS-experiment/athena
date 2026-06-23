@@ -201,7 +201,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
   rttConfig.doTrkInJetPlots = m_doTrackInJetPlots;
   rttConfig.doTrkInJetPlots_fake = m_doTrackInJetPlots;
   rttConfig.doTrkInJetPlots_matched = m_doTrackInJetPlots;
-  rttConfig.doTrkInJetPlots_unlinked = m_doTrackInJetPlots;
 
   rttConfig.doHitResidualPlot = m_doHitLevelPlots; 
   rttConfig.doHitEffPlot = m_doHitLevelPlots; 
@@ -209,7 +208,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
   rttConfig.doTrkInJetPlots_bjets = m_doBjetPlots;
   rttConfig.doTrkInJetPlots_fake_bjets = m_doBjetPlots;
   rttConfig.doTrkInJetPlots_matched_bjets = m_doBjetPlots;
-  rttConfig.doTrkInJetPlots_unlinked_bjets = m_doBjetPlots;
 
   rttConfig.doTrkInJetPlots_truthFromB = m_doTruthOriginPlots && m_doTrackInJetPlots; 
   rttConfig.doResolutionPlotPrim_truthFromB = m_doTruthOriginPlots; 
@@ -230,9 +228,7 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
   /// turn off truth if none is present
   if (m_truthParticleName.key().empty()){
     rttConfig.doFakePlots = false; 
-    rttConfig.doMissingTruthFakePlots = false; 
-    rttConfig.doHitsFakeTracksPlots = false; 
-    rttConfig.doHitsUnlinkedTracksPlots = false; 
+    rttConfig.doHitsFakeTracksPlots = false;
     rttConfig.doEffPlots = false; 
     rttConfig.doResolutionPlotPrim = false; 
     rttConfig.doResolutionPlotPrim_truthFromB = false; 
@@ -246,7 +242,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doNtupleTruthToReco = false; 
     rttConfig.doTrkInJetPlots_fake_bjets = false;
     rttConfig.doTrkInJetPlots_matched_bjets = false;
-    rttConfig.doTrkInJetPlots_unlinked_bjets = false;
     rttConfig.doTrkInJetPlots_truthFromB = false;
     rttConfig.doResolutionPlotPrim_truthFromB = false;
   }
@@ -260,9 +255,7 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doHitsRecoTracksPlots = false;
     rttConfig.doTrtExtensionPlots = false;
     rttConfig.doFakePlots = false;
-    rttConfig.doMissingTruthFakePlots = false;
     rttConfig.doHitsFakeTracksPlots = false;
-    rttConfig.doHitsUnlinkedTracksPlots = false;
     rttConfig.doVertexPlots = false;
     rttConfig.doVerticesVsMuPlots = false;
     rttConfig.doHardScatterVertexPlots = false;
@@ -274,8 +267,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doTrkInJetPlots_matched_bjets = false;
     rttConfig.doTrkInJetPlots_fake = false;
     rttConfig.doTrkInJetPlots_fake_bjets = false;
-    rttConfig.doTrkInJetPlots_unlinked = false;
-    rttConfig.doTrkInJetPlots_unlinked_bjets = false;
     rttConfig.doTrkInJetPlots_truthFromB = false;
   }
 
@@ -293,8 +284,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doTrkInJetPlots_matched_bjets = true;
     rttConfig.doTrkInJetPlots_fake = true;
     rttConfig.doTrkInJetPlots_fake_bjets = true;
-    rttConfig.doTrkInJetPlots_unlinked = true;
-    rttConfig.doTrkInJetPlots_unlinked_bjets = true;
     rttConfig.doTrkInJetPlots_truthFromB = true;
   }
 
@@ -303,7 +292,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doResolutionPlotSecd = false;
     rttConfig.doHitsMatchedTracksPlots = false;
     rttConfig.doHitsFakeTracksPlots = false; 
-    rttConfig.doHitsUnlinkedTracksPlots = false; 
     rttConfig.doVertexTruthMatchingPlots = false; 
     rttConfig.doFakesPerAuthor = false;
     rttConfig.doTrackParametersPerAuthor = false;
@@ -311,23 +299,18 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doResolutionsPerAuthor = false;
     rttConfig.doTrkInJetPlots_matched = false;  
     rttConfig.doTrkInJetPlots_fake = false;  
-    rttConfig.doTrkInJetPlots_unlinked = false;  
     rttConfig.doTrkInJetPlots_matched_bjets = false;  
-    rttConfig.doTrkInJetPlots_fake_bjets = false;  
-    rttConfig.doTrkInJetPlots_unlinked_bjets = false;  
+    rttConfig.doTrkInJetPlots_fake_bjets = false;    
   }
 
   return rttConfig; 
 }
 
 StatusCode
-InDetPhysValMonitoringTool::fillHistograms() {
+InDetPhysValMonitoringTool::fillHistograms(const EventContext& ctx) {
   ATH_MSG_DEBUG("Filling hists " << name() << "...");
   // function object could be used to retrieve truth: IDPVM::CachedGetAssocTruth getTruth;
 
-  // Get the Event Context
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  
   // retrieve trackParticle container
   SG::ReadHandle<xAOD::TrackParticleContainer> trackHandle(m_trkParticleName, ctx);
   if (not trackHandle.isValid()) {
@@ -513,7 +496,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
     const bool isFake = not std::isnan(prob) ? (prob < m_lowProb) : true;
 
     if(!isAssociatedTruth) nMissingAssociatedTruth++;
-    m_monPlots->fillFakeRate(*thisTrack, isFake, isAssociatedTruth, puEvents, beamSpotWeight);
+    m_monPlots->fillFakeRate(*thisTrack, isFake, puEvents, beamSpotWeight);
 
     if (m_fillTruthToRecoNtuple || m_doDuplicatePlots) {
       // Decorate track particle with extra flags
@@ -1045,13 +1028,12 @@ StatusCode InDetPhysValMonitoringTool::fillHistogramsTrackingInDenseEnvironment(
       if(std::isnan(prob)) prob = 0.0;
       
       const xAOD::TruthParticle* associatedTruth = getAsTruth.getTruth(thisTrack); 
-      const bool unlinked = (associatedTruth==nullptr);
       const bool isFake = (associatedTruth && prob < m_lowProb);
       bool truthIsFromB = false;
       if ( m_doTruthOriginPlots and m_trackTruthOriginTool->isFrom(associatedTruth, 5) ) {
 	truthIsFromB = true;
       }
-      m_monPlots->fill(*thisTrack, *thisJet, isBjet, isFake, unlinked, truthIsFromB, beamSpotWeight);                                   
+      m_monPlots->fill(*thisTrack, *thisJet, isBjet, isFake, truthIsFromB, beamSpotWeight);                                   
       if (associatedTruth){
 	m_monPlots->fillFakeRate(*thisTrack, *thisJet, isFake, isBjet, truthIsFromB, beamSpotWeight);
       }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenTools/TrackCollectionProvider.h"
@@ -12,15 +12,8 @@ namespace Trk {
 						   const IInterface* parent)
     
     : AthAlgTool(type,name,parent)
-    , m_nRetrievalErrors(0)
   {
-
     declareInterface<ITrackCollectionProvider>(this);
-
-    declareProperty("InputTrkCol",        m_inputCol="MooreTracks");
-    
-    declareProperty("MaxRetrievalErrors", m_maxRetrievalErrors = 10);
-
   }
 
   //________________________________________________________________________

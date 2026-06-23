@@ -6,7 +6,7 @@
 #define VXCONTAINER_CNV_TLP2_TRK_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "VxContainer_tlp2.h"
 
@@ -56,7 +56,7 @@
 #include "AthLinks/ElementLink.h" 
 #include "TrkTrack/TrackCollection.h"
 
-class VxContainerCnv_tlp2 : public AthenaPoolTopLevelTPConverter< VxContainerCnv_p1, Trk::VxContainer_tlp2 >
+class VxContainerCnv_tlp2 : public TopLevelTPConverter< VxContainerCnv_p1, Trk::VxContainer_tlp2 >
 {
 
  public:

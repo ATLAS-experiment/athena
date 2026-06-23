@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/DQBadLBFilterTool.h"
@@ -33,11 +33,11 @@ StatusCode DQBadLBFilterTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-bool DQBadLBFilterTool::accept() const {
+bool DQBadLBFilterTool::accept(const EventContext& ctx) const {
   if (m_alwaysReturnTrue) {
     return true;
   } else {
-    SG::ReadCondHandle<AthenaAttributeList> rch(m_key);
+    SG::ReadCondHandle<AthenaAttributeList> rch(m_key, ctx);
     const AthenaAttributeList* attrList{*rch};
     if (attrList == 0) {
       ATH_MSG_WARNING("Unable to retrieve DataTakingMode information; falling back to" << m_fallbackValue);

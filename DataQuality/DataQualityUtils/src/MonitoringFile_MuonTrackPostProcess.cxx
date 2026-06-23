@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -458,6 +458,9 @@ namespace dqutils {
       if (!f->cd(mDir_phys.c_str())) return;
 
       TIter nextcd_phys(gDirectory->GetListOfKeys());
+      static const std::string det_region[4] = {
+          "EC", "BC", "BA", "EA"
+      };
       while (TKey* key1 = dynamic_cast<TKey*>(nextcd_phys())) {
         //While in the segments
         std::string recalg_path = key1->GetName();
@@ -469,9 +472,7 @@ namespace dqutils {
         TH1* h_Mass_Mean = (TH1F*) dir1->Get(Form("m_%s_M_Mean", recalg_path.c_str()));
         TH1* h_Mass_Sigma = (TH1F*) dir1->Get(Form("m_%s_M_Sigma", recalg_path.c_str()));
         // Get each of the mass histograms
-        std::string det_region[4] = {
-          "EC", "BC", "BA", "EA"
-        };
+        
         for (int i = 0; i < 4; i++) {
           for (int j = 0; j < 4; j++) {
             TH1* h_Mass_region = (TH1F*) dir1->Get(Form("m_%s_M_%s_%s", recalg_path.c_str(),

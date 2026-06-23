@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -14,6 +14,8 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
         self.addDependency('FTag', required=False)
         self.addDependency('Muons', required=True)
         self.addDependency('MuonsWorkingPoint', required=False)
+        self.addDependency('FTagJetSF', required=False)
+        self.addDependency('JvtWorkingPointEfficiencyConfig', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input jet container.")

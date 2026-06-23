@@ -6,6 +6,7 @@
 
 #include "MuonPatternEvent/Segment.h"
 #include "xAODMuon/MuonSegment.h"
+#include "xAODTracking/TrackParticle.h"
 
 namespace MuonR4{
     /** @brief Helper function to navigate from the xAOD::MuonSegment to the MuonR4::Segment.
@@ -22,7 +23,6 @@ namespace MuonR4{
      *         segment is in the first BMS eta station on the A-side in sector 12
      *  @param seg: Reference to the segment from which the id should be printed */
     std::string printID(const xAOD::MuonSegment& seg);
-
     /** @brief Returns the number of associated Uncalibrated measurements
      *  @param segment: Reference to the segment of interest */
     std::size_t nMeasurements(const xAOD::MuonSegment& segment);
@@ -36,6 +36,33 @@ namespace MuonR4{
      *  @param n: Index of the measurement to retrieve */
     bool isOutlierMeasurement(const xAOD::MuonSegment& segment,
                               const std::size_t n);
+    
+    
+    
+    /** @brief Expresses the segment position on the surface of the first
+     *         measurement 
+     *  @param gctx: Geometry context to align the measurment surfaces
+     *  @param segment: Reference to the segment to be expressed
+     *  @param skipOutlier: Allow the first surface to be an outlier*/
+    Amg::Vector3D atFirstSurface(const Acts::GeometryContext& gctx,
+                                 const xAOD::MuonSegment& segment,
+                                 const bool skipOutlier = true);
+    /** @brief Retrieves the first measurement associated with the segment
+     *  @param segment: Refernece to the segment for which the measurement
+     *                  shall be returned
+     * @param skipOutlier: If true, it is ensured that the first measurement is
+     *                     not an outlier */
+    const xAOD::UncalibratedMeasurement* firstMeasurement(const xAOD::MuonSegment& segment,
+                                                          const bool skipOutlier =true);
+    /** @brief Returns the identifier of the volume in which the surface is embedded
+     *  @param surface: Reference to the surface of interest */
+    Acts::GeometryIdentifier volumeId(const Acts::Surface& surface);
+    /** @brief Auxiliary class to sort the particles by momentum
+     *         First sorting is by pt, then eta and finally by phi */
+    struct ParticleSorter{
+        bool operator()(const xAOD::IParticle* a,
+                        const xAOD::IParticle* b) const;
+    }; 
 
 }
 

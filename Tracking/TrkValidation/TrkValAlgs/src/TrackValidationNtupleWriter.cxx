@@ -315,7 +315,7 @@ StatusCode Trk::TrackValidationNtupleWriter::initialize() {
 
 
 
-StatusCode Trk::TrackValidationNtupleWriter::execute() {
+StatusCode Trk::TrackValidationNtupleWriter::execute(const EventContext& /*ctx*/) {
 
 //    std::cout<< "TrackValidationNtupleWriter execute() start" <<std::endl;
     

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -195,7 +195,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
             }
 
 #ifdef HEPMC3
-      (*mec)[i]->add_attribute("filterWeight", std::make_shared<HepMC3::DoubleAttribute>(eventWeight*m_norm));
+      (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(eventWeight*m_norm));
 #endif
 
         }

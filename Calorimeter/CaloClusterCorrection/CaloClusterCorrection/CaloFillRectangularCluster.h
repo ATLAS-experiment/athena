@@ -41,7 +41,6 @@
 #include "CaloInterface/ISetCaloCellContainerName.h"
 #include <string>
 #include "StoreGate/ReadHandleKey.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DQUtils )
@@ -32,5 +32,7 @@ atlas_install_python_modules( python/*.py python/ext python/sugar
    POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select E11,E402,W1 --extend-ignore E731 )
 
 foreach( _test coracool events iovset_pickle read iovtype oracle )
-   atlas_add_test( ${_test} SCRIPT tests/test_${_test}.py POST_EXEC_SCRIPT nopost.sh )
+   atlas_add_test( ${_test} SCRIPT tests/test_${_test}.py
+                   PROPERTIES TIMEOUT 900
+                   POST_EXEC_SCRIPT noerror.sh )
 endforeach()

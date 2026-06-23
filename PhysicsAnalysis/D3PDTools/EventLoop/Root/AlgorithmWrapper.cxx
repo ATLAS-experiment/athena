@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,7 +18,7 @@
 #include <EventLoop/IWorker.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ThrowMsg.h>
-#include <TTree.h>
+#include <xAODRootAccess/Event.h>
 
 //
 // method implementations
@@ -186,9 +186,7 @@ namespace EL
       return StatusCode::FAILURE;
     }
     m_firstFile = false;
-    if (m_isInitialized == false &&
-        m_algorithm->m_wk->tree() != nullptr &&
-        m_algorithm->m_wk->tree()->GetEntries() > 0)
+    if (m_isInitialized == false && m_algorithm->m_wk->hasInputEvents())
     {
       if (m_algorithm->initialize().isFailure())
       {

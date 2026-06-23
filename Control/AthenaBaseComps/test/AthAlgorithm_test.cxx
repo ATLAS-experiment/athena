@@ -43,7 +43,7 @@ public:
   MyAlg (const std::string& name, ISvcLocator* svcLoc);
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   virtual void declare(Gaudi::DataHandle& hnd) override;
   virtual void addDependency (const DataObjID& obj, const Gaudi::DataHandle::Mode& mode) override;
@@ -86,7 +86,7 @@ StatusCode MyAlg::initialize()
 }
 
 
-StatusCode MyAlg::execute()
+StatusCode MyAlg::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }
@@ -161,7 +161,7 @@ void test1 (ISvcLocator* svcLoc)
   ctx.setExtension( Atlas::ExtendedEventContext(xdict) );
   Gaudi::Hive::setCurrentContext (ctx);
 
-  assert (alg.execute().isSuccess());
+  assert (alg.execute(ctx).isSuccess());
 
   DataObjIDColl exp = {
     { ClassID_traits<AthenaBaseCompsTest::MyObj>::ID(), "BarSvc+eee" },
@@ -182,7 +182,7 @@ class MyArrAlg : public AthAlgorithm
 public:
   MyArrAlg (const std::string& name, ISvcLocator* svcLoc);
 
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   SG::ReadHandleKey<MyObj> rkey;
   SG::WriteHandleKey<MyObj> wkey;
@@ -204,7 +204,7 @@ MyArrAlg::MyArrAlg  (const std::string& name, ISvcLocator* svcLoc)
 }
 
 
-StatusCode MyArrAlg::execute()
+StatusCode MyArrAlg::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

@@ -117,6 +117,20 @@ const SG::auxid_set_t& AuxStoreConstMem::getDecorIDs() const
 
 
 /**
+ * @brief Return the set of variables to copy in a deep copy.
+ * @param warnUnlocked If true, we warn about variables skipped on account
+ *                     of being decorations.
+ *
+ * This just returns getAuxIDs().
+ */
+SG::auxid_set_t
+AuxStoreConstMem::getCopyIDs (bool /*warnUnlocked*/) const
+{
+  return m_auxids;
+}
+
+
+/**
  * @brief Test if a particular variable is tagged as a decoration.
  * @param auxid The identifier of the desired aux data item.
  *

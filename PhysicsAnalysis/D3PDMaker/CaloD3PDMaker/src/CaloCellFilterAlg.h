@@ -41,7 +41,7 @@ public:
    /// Function executed before the event loop starts
    virtual StatusCode initialize();
    /// Function executed for each event
-   virtual StatusCode execute();
+   virtual StatusCode execute(const EventContext& ctx);
 
 private:
 

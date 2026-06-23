@@ -18,9 +18,8 @@ StatusCode DerivationFramework::TrackParticleThinningPHYS::initialize()
 }
 
 
-std::vector<int> DerivationFramework::TrackParticleThinningPHYS::updateMask(const xAOD::TrackParticleContainer* trackParticles) const
+std::vector<int> DerivationFramework::TrackParticleThinningPHYS::updateMask(const EventContext& ctx, const xAOD::TrackParticleContainer* trackParticles) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadDecorHandle<xAOD::TrackParticleContainer, bool> tightPrimaryHandle(m_tightPrimaryKey, ctx); // TODO CHECK TYPE
   SG::ReadHandle<std::vector<float>> z0AtPV(m_trackZ0PVKey, ctx);
   unsigned int index{0};

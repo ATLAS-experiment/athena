@@ -26,16 +26,16 @@ JetMonitoringAlg::~JetMonitoringAlg() = default;
 
 
 StatusCode JetMonitoringAlg::initialize() {
-  
+
   ATH_CHECK( m_jetContainerKey.initialize() );
   ATH_CHECK( m_jetFillerTools.retrieve() );
 
-  // print out what we have 
+  // print out what we have
   ATH_MSG_DEBUG( "Scheduled Histo fillers/selectors : ");
   for(const auto& t: m_jetFillerTools){
     ATH_MSG_DEBUG( "--> "<< t->name() );
   }
-  
+
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -71,7 +71,7 @@ StatusCode JetMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
     }
   } else {
     // retrieve the jet container
-    SG::ReadHandle<xAOD::JetContainer> jets(m_jetContainerKey, ctx);    
+    SG::ReadHandle<xAOD::JetContainer> jets(m_jetContainerKey, ctx);
     if (! jets.isValid() ) {
       if (m_failureOnMissingContainer){
         ATH_MSG_ERROR("evtStore() does not contain jet Collection with name "<< m_jetContainerKey);
@@ -81,18 +81,18 @@ StatusCode JetMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
         return StatusCode::SUCCESS;
       }
     }
- 
+
     if (m_eventFiresAnyJetChain && m_triggerChainString == "") { //this option makes sure to check if any jet trigger was fired in the event
       bool eventFiresAnyJetChain = false;
       const Trig::ChainGroup* cg = getTrigDecisionTool()->getChainGroup( "HLT_[1-9]?0?j[0-9]+.*" ); //retrieve or create chaingroup using regular expression
       for (const std::string& trig : cg->getListOfTriggers()) {
-        if (isPassed(trig)) { eventFiresAnyJetChain = true; break; } 
+        if (isPassed(trig)) { eventFiresAnyJetChain = true; break; }
       }
       if (!eventFiresAnyJetChain) return StatusCode::SUCCESS;
     }
 
     // Apply more up-to-date jet calibrations for offline jet DQ monitoring
-    auto [shallowCont, shallowContAux] = xAOD::shallowCopyContainer( *jets, ctx );
+    auto [shallowCont, shallowContAux] = xAOD::shallowCopy( *jets, ctx );
     if(!m_calibrationTool.empty()){
       ANA_CHECK (m_calibrationTool->applyCalibration(*shallowCont.get()));
     }

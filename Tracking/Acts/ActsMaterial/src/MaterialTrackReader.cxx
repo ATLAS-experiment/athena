@@ -79,8 +79,7 @@ StatusCode ActsTrk::MaterialTrackReader::finalize() {
 }
 
 StatusCode
-ActsTrk::MaterialTrackReader::execute () {
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
+ActsTrk::MaterialTrackReader::execute (const EventContext& ctx) {
     // Write to the collection to the EventStore
     SG::WriteHandle materialTracks{m_materialTrackCollectionKey, ctx};
 
@@ -104,11 +103,9 @@ ActsTrk::MaterialTrackReader::execute () {
         Acts::RecordedMaterialTrack rmTrack = m_accessor.read();
         m_accessor.eventId();
 
-        ATH_MSG_VERBOSE("Track vertex:  " << Amg::toString(rmTrack.first.first)
+       ATH_MSG_VERBOSE("Track vertex:  " << Amg::toString(rmTrack.first.first)
                     <<", momentum:" << Amg::toString(rmTrack.first.second));
 
-        // filling the collection
-        materialTracks->push_back(std::move(rmTrack));
         if (nCurrentEvt != m_accessor.eventId()) {
             ++nProcEvents;
             ++m_procEvents;
@@ -125,6 +122,9 @@ ActsTrk::MaterialTrackReader::execute () {
             ATH_MSG_DEBUG("Batch processing "<<nProcEvents<<" completed. ");
             break;
         }
+      
+        // filling the collection
+        materialTracks->push_back(std::move(rmTrack));
  
     }
     return StatusCode::SUCCESS;

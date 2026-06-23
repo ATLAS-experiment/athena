@@ -64,3 +64,10 @@ atlas_add_test( AthCheckedComponent_test
 atlas_add_test( AthCommonDataStore_test
    SOURCES test/AthCommonDataStore_test.cxx
    LINK_LIBRARIES GaudiKernel TestTools AthenaBaseComps )
+   
+atlas_add_test( AthHistogramming_test
+  SOURCES test/AthHistogramming_test.cxx
+  LINK_LIBRARIES AthenaBaseComps TestTools
+  ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
+  #ERROR messages are expected in the log
+  POST_EXEC_SCRIPT nopost.sh )

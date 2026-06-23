@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,22 +47,22 @@
 //____________________________________________________________________
 class VP1MaterialButton::Imp {
 public:
-  VP1MaterialButton * theclass;
+  VP1MaterialButton * theclass{};
 
   QPoint dragStartPosition;
 
-  bool simplemode;
+  bool simplemode{};
 
-  int dim;
+  int dim{};
 
   QString materialtext;
-  QWidget * editwindow;
-  SoMaterial * preview_material;
+  QWidget * editwindow{};
+  SoMaterial * preview_material{};
   Ui::VP1MaterialButtonForm editwindow_ui;
   void initEditWindow();
 
-  SoQtRenderArea * renderarea;
-  SoSwitch * previewswitch;
+  SoQtRenderArea * renderarea{};
+  SoSwitch * previewswitch{};
 
   void applyValuesToMaterial(SoMaterial*, bool preview = false);
   QList<SoMaterial*> handledmaterials;
@@ -85,9 +85,9 @@ public:
   QColor lastapplied_diffuse;
   QColor lastapplied_specular;
   QColor lastapplied_emissive;
-  int lastapplied_shininess;
-  int lastapplied_transparency;
-  int lastapplied_brightness;//redundant but we use it to give exact
+  int lastapplied_shininess{};
+  int lastapplied_transparency{};
+  int lastapplied_brightness{};//redundant but we use it to give exact
 			     //reset functionality to simple mode.
 
   QString printFloat(const double& d) {
@@ -112,7 +112,7 @@ public:
   QColor emissiveColourFromSimpleParameters(const QColor& simpleColour, const double& brightness) const;
   double brightnessEstimateFromDetailedParameters( const QColor& diffuseColour, const QColor& emissiveColour ) const;
 
-  int blockcount;
+  int blockcount{};
   void blockGuiSignals(bool);
 
   static QColor simpleAmbient() { return QColor::fromRgbF(0.2,0.2,0.2); }

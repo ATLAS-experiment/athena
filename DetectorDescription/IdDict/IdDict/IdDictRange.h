@@ -1,5 +1,5 @@
  /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictRange_H
@@ -7,6 +7,7 @@
 
 #include "IdDict/IdDictRegionEntry.h"
 #include <string>
+#include <string_view>
 #include <vector>
 
 class IdDictMgr;
@@ -111,7 +112,7 @@ public:
     virtual void generate_implementation (const IdDictMgr& idd,
                                           IdDictDictionary& dictionary,
                                           IdDictRegion& region,
-                                          const std::string& tag = "") override;
+                                          std::string_view tag = "") override;
     virtual Range build_range () const override;
 
 

@@ -13,7 +13,6 @@
 #include "PersistencySvc/IFileCatalog.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IDatabase.h"
 
 #include "StorageSvc/DbType.h"
@@ -47,16 +46,10 @@ pool::TestDriver::write()
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::PersistencySvc::createSession(catalog);
-
-  // Set up the policy.
-  pool::DatabaseConnectionPolicy policy;
-  policy.setWriteModeForNonExisting( pool::DatabaseConnectionPolicy::CREATE );
-  policy.setWriteModeForExisting( pool::DatabaseConnectionPolicy::OVERWRITE );
-  dbsession->setDefaultConnectionPolicy( policy );
+  auto dbsession = pool::createSession(catalog);
 
   // Start an update transaction
-  if( !dbsession->start( pool::ITransaction::UPDATE ) ) {
+  if( !dbsession->start( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -86,10 +79,10 @@ pool::TestDriver::read()
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::PersistencySvc::createSession(catalog);
+  auto dbsession = pool::createSession(catalog);
 
   // Starting a read transaction
-  if( !dbsession->start( pool::ITransaction::READ ) ) {
+  if( !dbsession->start( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 

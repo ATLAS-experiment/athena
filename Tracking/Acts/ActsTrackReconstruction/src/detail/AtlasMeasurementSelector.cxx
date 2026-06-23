@@ -6,7 +6,6 @@
 
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
@@ -235,15 +234,6 @@ struct AtlasMeasurementSelector
       m_preCalibrators.template setCalibrator<DIM, T_ValueType>(calibrator);
    }
 
-   // helper to create a Acts::SourceLink from an uncalibrated measurement pointer
-   template <typename T_Value>
-   static Acts::SourceLink makeSourceLink(T_Value &&value) {
-      // value is pointer
-      static_assert( !std::is_same<std::remove_pointer_t<T_Value>, T_Value>::value );
-      // ... and pointer to xAOD::UncalibgratedMeasurement
-      static_assert(std::is_base_of_v< xAOD::UncalibratedMeasurement, std::remove_cv_t<std::remove_pointer_t<T_Value> > > );
-      return Acts::SourceLink{ ActsTrk::makeATLASUncalibSourceLink(value) };
-   }
 
    // helper to provide a map from bound parameters to coordinates
    template <std::size_t DIM>
@@ -403,9 +393,10 @@ namespace {
 
 namespace ActsTrk::detail {
 // return a configured, wrapper for the measurement selector
-std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *pixelOnTrackCalibratorTool,
-                                                                       const ActsTrk::IOnBoundStateCalibratorTool *stripOnTrackCalibratorTool,
-                                                                       const ActsTrk::IOnBoundStateCalibratorTool *hgtdOnTrackCalibratorTool,
+std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const EventContext &ctx,
+                                                                       const ActsTrk::IPixelOnBoundStateCalibratorTool *pixelOnTrackCalibratorTool,
+                                                                       const ActsTrk::IStripOnBoundStateCalibratorTool *stripOnTrackCalibratorTool,
+                                                                       const ActsTrk::IHGTDOnBoundStateCalibratorTool *hgtdOnTrackCalibratorTool,
                                                                        const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                                                        const std::vector<float> &etaBinsf,
                                                                        const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
@@ -413,7 +404,8 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Act
                                                                        double edge_hole_border_width) {
 
     // set calibrators per measurement container type (order does not matter);
-    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(pixelOnTrackCalibratorTool,
+    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(ctx,
+                                                              pixelOnTrackCalibratorTool,
                                                               stripOnTrackCalibratorTool,
                                                               hgtdOnTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;

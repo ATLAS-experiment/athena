@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -69,7 +69,7 @@ namespace InDet {
   std::vector<double> TruthClusterizationFactory::estimateNumberOfParticles(const InDet::PixelCluster& pCluster) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    if (ctx.evt() != m_rndmEngine->evtSeeded()) {
+    if (ctx.evt() != m_rndmEngine->evtSeeded(ctx)) {
        ATHRNG::RNGWrapper* wrapper ATLAS_THREAD_SAFE = m_rndmEngine;
        wrapper->setSeed (this->name(), ctx);
     }

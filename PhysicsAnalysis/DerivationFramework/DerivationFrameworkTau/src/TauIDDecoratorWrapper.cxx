@@ -75,7 +75,7 @@ namespace DerivationFramework {
     }
 
     // create shallow copy
-    auto shallowCopy = xAOD::shallowCopyContainer (*tauContainer, ctx);
+    auto shallowCopy = xAOD::shallowCopy (*tauContainer, ctx);
 
     for (auto tau : *shallowCopy.first) {
 
@@ -119,7 +119,7 @@ namespace DerivationFramework {
       bool bTauMuonOLR = true;
       for (auto muon : *muonContainer){
         if(muon->pt() < 2000.) continue; // pt > 2 GeV
-        if(muon->muonType() == xAOD::Muon::CaloTagged) continue; // not calo-tagged
+        if(muon->muonType() == xAOD::Muon::MuonType::CaloTagged) continue; // not calo-tagged
         if(muon->p4().DeltaR( tau->p4() ) > 0.2 ) continue; // delta R < 0.2
         bTauMuonOLR = false; // muon-tau overlapped
         break;

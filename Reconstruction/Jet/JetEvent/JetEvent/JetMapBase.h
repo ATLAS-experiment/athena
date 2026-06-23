@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETEVENT_JETMAPBASE_H
@@ -173,7 +173,7 @@ public:
 protected:
   void reset(){m_counter=0;}
 
-  size_t m_counter;
+  size_t m_counter{};
   
 
 };

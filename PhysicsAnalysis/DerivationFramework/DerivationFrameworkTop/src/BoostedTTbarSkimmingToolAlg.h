@@ -25,7 +25,7 @@ namespace DerivationFramework {
       virtual StatusCode finalize() override;
 
       /** Returns true if event passes the filter */
-      virtual bool eventPassesFilter() const override;
+      virtual bool eventPassesFilter(const EventContext& ctx) const override;
 
       /** Property: m_ttbar cut in MeV */
       Gaudi::Property<double> m_ttbarCut{this, "ttbarCut", 0.0, "ttbar mass cut"};

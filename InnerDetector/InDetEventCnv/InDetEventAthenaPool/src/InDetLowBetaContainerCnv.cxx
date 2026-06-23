@@ -43,7 +43,7 @@ InDet::InDetLowBetaContainer *InDetLowBetaContainerCnv::createTransient(const To
 }
 
 
-AthenaPoolTopLevelTPCnvBase*
+TopLevelTPCnvBase*
 InDetLowBetaContainerCnv::getTopLevelTPCnv()
 {
   return m_TPConverter_tlp1;

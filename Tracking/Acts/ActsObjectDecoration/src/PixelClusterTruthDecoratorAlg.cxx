@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/PixelClusterTruthDecoratorAlg.h"
@@ -9,7 +9,8 @@
 #include "InDetMeasurementUtilities/Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsEvent/Decoration.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 namespace ActsTrk {
   
@@ -57,7 +58,7 @@ namespace ActsTrk {
     ATH_CHECK(m_measurement_tots.initialize());
     
     ATH_CHECK( m_lorentzAngleTool.retrieve() );
-    ATH_CHECK( detStore()->retrieve(m_PixelHelper, "PixelID") );
+    ATH_CHECK( detStore()->retrieve(m_PixelHelper, m_idHelperName) );
     
     return StatusCode::SUCCESS;
   }
@@ -136,14 +137,16 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
 
-    const std::vector<Identifier> rdoList = cluster->rdoList();
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+       rdoList = cluster->rdoList();
     std::vector< std::uint64_t > rdoIdentifierList;
     rdoIdentifierList.reserve(rdoList.size());
     int rowmin = std::numeric_limits<int>::max();
     int rowmax = std::numeric_limits<int>::min();
     int colmin = std::numeric_limits<int>::max();
     int colmax = std::numeric_limits<int>::min();
-    for( const Identifier& hitIdentifier : rdoList ){
+    for( const Identifier::value_type& hitIdentifierValue : rdoList ){
+      Identifier hitIdentifier(hitIdentifierValue);
       rdoIdentifierList.push_back( hitIdentifier.get_compact() );
       //May want to addinformation about the individual hits here
       int row = m_PixelHelper->phi_index(hitIdentifier);
@@ -260,7 +263,6 @@ StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
   }
   labels.resize(clusters.size(), false);
 
-  static const SG::ConstAccessor< ElementLink<ActsTrk::TrackContainer> > decorator_trackLink("actsTrack");
   
   // get the tracks
   for (const SG::ReadHandleKey<xAOD::TrackParticleContainer>& trackParticleKey : m_trackParticlesKey) {
@@ -269,12 +271,8 @@ StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
     const xAOD::TrackParticleContainer* trackParticles = trackParticleHandle.cptr();
     
     for (const xAOD::TrackParticle* trackParticle : *trackParticles) {
-      // Get the ACTS track object
-      ATH_CHECK( decorator_trackLink.isAvailable(*trackParticle) );
-      ElementLink<ActsTrk::TrackContainer> trackLink = decorator_trackLink(*trackParticle);
-      ATH_CHECK(trackLink.isValid());
       
-      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *trackLink;
+      std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*trackParticle);
       if ( not optional_track.has_value() ) {
 	ATH_MSG_ERROR("Invalid track link for particle  " << trackParticle->index());
 	return StatusCode::FAILURE;
@@ -290,12 +288,12 @@ StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
 			  auto flags = state.typeFlags();
 			  if (not flags.hasMeasurement()) return;
 			  
-			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-			  if (sl == nullptr) return;
-			  
-			  const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);    
-			  if (cluster.type() != xAOD::UncalibMeasType::PixelClusterType) return;
-			  labels.at(cluster.index()) = true;
+			  auto cluster = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
+			  if (cluster == nullptr) {
+          return;
+        }
+			  if (cluster->type() != xAOD::UncalibMeasType::PixelClusterType) return;
+			  labels.at(cluster->index()) = true;
 			});
     } // loop on tracks
   } // loop on read handle keys
@@ -304,5 +302,4 @@ StatusCode PixelClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
 }
   
 }
-
 

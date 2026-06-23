@@ -1,20 +1,22 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-StatusCode Muon::RpcROD_Decoder::fillCollection_v302new(BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId,
+StatusCode Muon::RpcROD_Decoder::fillCollection_v302new(const EventContext& ctx,
+                                                        BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId,
                                                         RpcSectorLogicContainer* sectorLogicContainer, const bool& decodeSL) const
 
 {
     ATH_MSG_VERBOSE("in fillCollection_v302new");
     std::map<Identifier, RpcPad*> vmap;
     vmap[v.identify()] = &v;
-    StatusCode cnvsc = fillCollectionsFromRob_v302(data, data_size, vmap, sourceId, sectorLogicContainer, decodeSL);
+    StatusCode cnvsc = fillCollectionsFromRob_v302(ctx, data, data_size, vmap, sourceId, sectorLogicContainer, decodeSL);
     if (cnvsc != StatusCode::SUCCESS) { ATH_MSG_DEBUG("Some decoding problem observed"); }
     return cnvsc;
 }
 
-StatusCode Muon::RpcROD_Decoder::fillCollectionsFromRob_v302(BS data, const uint32_t data_size, std::map<Identifier, RpcPad*>& vmap,
+StatusCode Muon::RpcROD_Decoder::fillCollectionsFromRob_v302(const EventContext& ctx,
+                                                             BS data, const uint32_t data_size, std::map<Identifier, RpcPad*>& vmap,
                                                              const uint32_t& sourceId, RpcSectorLogicContainer* sectorLogicContainer,
                                                              const bool& decodeSL) const {
     bool skipSectorLogicDecoding = (sectorLogicContainer == nullptr);
@@ -462,7 +464,7 @@ StatusCode Muon::RpcROD_Decoder::fillCollectionsFromRob_v302(BS data, const uint
                                                                                << "/" << sector
                                                                                << " need to get from cabling padOfflineId");
 
-                SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, Gaudi::Hive::currentContext()};
+                SG::ReadCondHandle<RpcCablingCondData> cablingCondData{m_rpcReadKey, ctx};
                 const RpcCablingCondData* rpcCabling{*cablingCondData};
                 // get the offline ID of the pad
                 if (!rpcCabling->giveOfflineId(side, sectorLogic, PadID, padOfflineId)) {

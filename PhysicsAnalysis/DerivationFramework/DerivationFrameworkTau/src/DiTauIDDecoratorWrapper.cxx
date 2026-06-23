@@ -46,7 +46,7 @@ namespace DerivationFramework {
     }
 
     // create shallow copy
-    auto shallowCopy = xAOD::shallowCopyContainer (*ditauContainer, ctx);
+    auto shallowCopy = xAOD::shallowCopy (*ditauContainer, ctx);
 
     for (auto ditau : *shallowCopy.first) {
 

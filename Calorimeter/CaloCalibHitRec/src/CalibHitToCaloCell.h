@@ -32,7 +32,7 @@ public:
   virtual ~CalibHitToCaloCell();                         
   
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   
 private:
   std::string m_tileActiveHitCnt{"TileCalibHitActiveCell"};

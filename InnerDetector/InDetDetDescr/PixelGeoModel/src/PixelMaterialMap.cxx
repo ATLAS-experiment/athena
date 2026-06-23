@@ -6,20 +6,19 @@
 #include "RDBAccessSvc/IRDBRecordset.h"
 
 #include <iostream>
+#include <tuple>
 
-PixelMaterialMap::Key::Key(int layerdisk_in, int typenum_in, const std::string & volumeName_in):
+PixelMaterialMap::Key::Key(int layerdisk_in, int typenum_in, std::string_view volumeName_in):
   layerdisk(layerdisk_in),
   typenum(typenum_in),
   volumeName(volumeName_in)
 {}      
 
 bool
-PixelMaterialMap::Key::operator<(const PixelMaterialMap::Key &rhs) const
+PixelMaterialMap::Key::operator<(const PixelMaterialMap::Key& rhs) const
 {
-  return 
-    ((volumeName < rhs.volumeName) ||
-     (volumeName == rhs.volumeName && layerdisk < rhs.layerdisk) ||
-     (volumeName == rhs.volumeName && layerdisk == rhs.layerdisk && typenum < rhs.typenum));
+  return std::tie(volumeName, layerdisk, typenum) <
+    std::tie(rhs.volumeName, rhs.layerdisk, rhs.typenum);
 }
 
 
@@ -28,18 +27,17 @@ PixelMaterialMap::PixelMaterialMap(const IRDBRecordset_ptr& mapTable)
   for (const auto& rec : *mapTable) {
     int layerdisk = rec->getInt("LAYERDISK");
     int typenum    = rec->getInt("TYPENUM");
-    std::string volumeName = rec->getString("VOLUMENAME");
-    std::string material   = rec->getString("MATERIAL");
+    const std::string & volumeName = rec->getString("VOLUMENAME");
+    const std::string & material   = rec->getString("MATERIAL");
     addMaterial(layerdisk, typenum, volumeName, material);
   }
 }
 
 std::string
-PixelMaterialMap::getMaterial(int layerdisk, int typenum, const std::string & volumeName) const
+PixelMaterialMap::getMaterial(int layerdisk, int typenum, std::string_view volumeName) const
 {
   // If not found try (layerdisk, 0) then (0, typenum), then (0,0)
-  mapType::const_iterator iter;
-  iter = m_matmap.find(Key(layerdisk, typenum, volumeName));
+  auto iter = m_matmap.find(Key(layerdisk, typenum, volumeName));
   if (iter == m_matmap.end() && typenum) {
     iter = m_matmap.find(Key(layerdisk, 0, volumeName));
   }
@@ -59,7 +57,7 @@ PixelMaterialMap::getMaterial(int layerdisk, int typenum, const std::string & vo
 
 
 void
-PixelMaterialMap::addMaterial(int layerdisk, int typenum, const std::string & volumeName, const std::string & materialName) 
+PixelMaterialMap::addMaterial(int layerdisk, int typenum, std::string_view volumeName, std::string_view materialName) 
 {
   m_matmap[Key(layerdisk, typenum, volumeName)] = materialName;
 }

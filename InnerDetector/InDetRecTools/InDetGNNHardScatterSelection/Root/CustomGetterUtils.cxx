@@ -153,6 +153,27 @@ namespace {
         return p.phi();
       });
     }
+
+    if (name == "d0") {
+      return CJGetter<T>([](const T& p, const Vertex&) {
+        if constexpr (std::is_same_v<T, xAOD::TrackParticle>) {
+          const xAOD::TrackParticle* trackParticle = dynamic_cast<const xAOD::TrackParticle*>(&p);
+          return trackParticle->d0();
+        }
+        return (float)0.;
+      });
+    }
+
+    if (name == "z0") {
+      return CJGetter<T>([](const T& p, const Vertex&) {
+        if constexpr (std::is_same_v<T, xAOD::TrackParticle>) {
+          const xAOD::TrackParticle* trackParticle = dynamic_cast<const xAOD::TrackParticle*>(&p);
+          return trackParticle->z0();
+        }
+        return (float)0.;
+      });
+    }
+
     if (name == "vertexWeight") {
       return CJGetter<T>([](const T& p, const xAOD::Vertex& vertex) {
         for (size_t i = 0; i < vertex.nTrackParticles(); i++) {
@@ -177,6 +198,11 @@ namespace {
           auto tp = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
           if (tp) {
             return tp->z0() + tp->vz() - vertex.z();
+          }
+        } else if constexpr (std::is_same_v<T, xAOD::TrackParticle>) {
+          const xAOD::TrackParticle* trackParticle = dynamic_cast<const xAOD::TrackParticle*>(&p);
+          if (trackParticle) {
+            return trackParticle->z0() + trackParticle->vz() - vertex.z();
           }
         }
         return (float)0.;

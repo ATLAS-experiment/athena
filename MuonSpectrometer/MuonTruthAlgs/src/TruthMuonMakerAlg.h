@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   * @brief This algorithm retrieves the container of all the truth particles coming from the MC generator and copies
   *        the truth muons in a new container. Muons'properties include PDG, MC BARCODE, status, momentum components, 
@@ -19,7 +19,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-
+#include "StoreGate/ReadHandleKeyArray.h"
 namespace Muon {
 
     class TruthMuonMakerAlg : public AthReentrantAlgorithm {
@@ -34,17 +34,17 @@ namespace Muon {
 
     private:
         // ReadHandleKey for the truth particles'container and WriteHandleKeys for the truth muons'container and muon origin decorators
-        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthRecordKey{this, "TruthParticleContainerName", "TruthParticles"};
+        SG::ReadHandleKeyArray<xAOD::TruthParticleContainer> m_truthRecordKeys{this, "InContainers", {"TruthParticles"}};
 
-        SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outTruthMuonKey{this, "MuonTruthParticleContainerName","MuonTruthParticles"};
+        SG::WriteHandleKey<xAOD::TruthParticleContainer> m_writeKey{this, "OutContainer","MuonTruthParticles"};
         /// FIXME WriteDecorHandle should not be used for additional
         /// dynamic variables applied by the same algorithm which
         /// created the container, instead SG::AuxElement::Accessor
         /// should be used.
-        SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthOriginKey{this, "truthOriginKey", m_outTruthMuonKey, "truthOrigin"};
-        SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthTypeKey{this, "truthTypeKey", m_outTruthMuonKey, "truthType"};
-        SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthClassificationKey{this, "truthClassificationKey", m_outTruthMuonKey, "truthClassification"};
-        SG:: WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthLinkKey{this, "truthLinkKey", m_outTruthMuonKey, "truthParticleLink"};
+        SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthOriginKey{this, "truthOriginKey", m_writeKey, "truthOrigin"};
+        SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthTypeKey{this, "truthTypeKey", m_writeKey, "truthType"};
+        SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthClassificationKey{this, "truthClassificationKey", m_writeKey, "truthClassification"};
+        SG:: WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthLinkKey{this, "truthLinkKey", m_writeKey, "truthParticleLink"};
         Gaudi::Property<float> m_pt{this, "ptCut", 1000.};
 
         Gaudi::Property<std::set<int>> m_pdgIds{this, "pdgIds", {13,}};

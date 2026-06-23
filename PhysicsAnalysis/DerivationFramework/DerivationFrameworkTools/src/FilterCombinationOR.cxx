@@ -38,14 +38,14 @@ StatusCode DerivationFramework::FilterCombinationOR::finalize()
 }
 
 // The filter itself
-bool DerivationFramework::FilterCombinationOR::eventPassesFilter() const
+bool DerivationFramework::FilterCombinationOR::eventPassesFilter(const EventContext& ctx) const
 {
   ++m_ntot;
   bool passesEvent=false;
 
   ToolHandleArray<DerivationFramework::ISkimmingTool>::const_iterator filterIter = m_filtersToCombine.begin();
   for (; filterIter != m_filtersToCombine.end(); ++filterIter) {
-    bool thisFilterPasses = (*filterIter)->eventPassesFilter();
+    bool thisFilterPasses = (*filterIter)->eventPassesFilter(ctx);
    
     msg(MSG::DEBUG)<<" Filter "<<filterIter->name()<<" passes? "<<thisFilterPasses<<endmsg;
     passesEvent = passesEvent || thisFilterPasses ;

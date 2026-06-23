@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -33,11 +33,11 @@ namespace xAODMaker {
     virtual StatusCode initialize() override;
     
     /// Function that fills an existing xAOD::TrackParticleContainer
-    virtual StatusCode convert( const Rec::TrackParticleContainer* aod,
+    virtual StatusCode convert( const EventContext& ctx, const Rec::TrackParticleContainer* aod,
 			       xAOD::TrackParticleContainer* xaod, const xAOD::Vertex* vtx = nullptr ) const override;
 
     /// Function that fills an existing xAOD::TrackParticleContainer and augments track particles
-    virtual StatusCode convertAndAugment( const Rec::TrackParticleContainer* aod,
+    virtual StatusCode convertAndAugment( const EventContext& ctx, const Rec::TrackParticleContainer* aod,
 						 xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map, const xAOD::Vertex* vtx = nullptr ) const override;
 
     /// allow other algorithms to pass the tool in order to preserve initialisation
@@ -46,7 +46,7 @@ namespace xAODMaker {
   private:
     ToolHandle<Trk::ITrackParticleCreatorTool> m_particleCreator;
     
-    inline xAOD::TrackParticle* createParticle(xAOD::TrackParticleContainer* xaod, const Rec::TrackParticleContainer* container, const Rec::TrackParticle* tp) const;
+    inline xAOD::TrackParticle* createParticle(const EventContext& ctx, xAOD::TrackParticleContainer* xaod, const Rec::TrackParticleContainer* container, const Rec::TrackParticle* tp) const;
     
     
   }; // class RecTrackParticleContainerCnvTool definition

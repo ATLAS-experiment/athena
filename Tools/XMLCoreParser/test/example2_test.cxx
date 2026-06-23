@@ -33,7 +33,7 @@ public:
         std::cout << "<!--" << comment << "-->" << std::endl;
       }
 };
- 
+//coverity[UNCAUGHT_EXCEPT]
 int main (int argc, char* argv[]) 
 { 
   XMLCoreParser p;

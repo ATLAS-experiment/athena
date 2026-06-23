@@ -151,7 +151,7 @@ StatusCode CBNT_TBRecBase::pre_execute() {
 }
 
 
-StatusCode CBNT_TBRecBase::execute() {
+StatusCode CBNT_TBRecBase::execute(const EventContext& /*ctx*/) {
 
   StatusCode sc;
 

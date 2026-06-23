@@ -26,7 +26,7 @@ class LArCablingTest : public AthAlgorithm
 
   //standard algorithm methods
   StatusCode initialize();
-  StatusCode execute() ;
+  StatusCode execute(const EventContext& ctx) ;
   StatusCode finalize(){return StatusCode::SUCCESS;}
  private:
 

@@ -13,6 +13,7 @@
 #include <EventLoop/JobConfig.h>
 
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
+#include <EventLoop/AlgorithmData.h>
 #include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ThrowMsg.h>
@@ -44,7 +45,8 @@ namespace EL
   JobConfig ::
   JobConfig (const JobConfig& that)
     : TObject (that),
-      m_algorithmCount (that.m_algorithmCount)
+      m_algorithmCount (that.m_algorithmCount),
+      m_algSequenceStartIndices (that.m_algSequenceStartIndices)
   {
     RCU_READ_INVARIANT (&that);
 
@@ -113,6 +115,7 @@ namespace EL
     RCU_CHANGE_INVARIANT (&that);
     std::swap (m_algorithmCount, that.m_algorithmCount);
     m_algorithms.swap (that.m_algorithms);
+    m_algSequenceStartIndices.swap (that.m_algSequenceStartIndices);
   }
 
 
@@ -152,7 +155,7 @@ namespace EL
 
 
 
-  std::vector<std::unique_ptr<EL::IAlgorithmWrapper>> JobConfig ::
+  std::vector<Detail::AlgorithmData> JobConfig ::
   extractAlgorithms ()
   {
     RCU_CHANGE_INVARIANT (this);
@@ -164,7 +167,20 @@ namespace EL
         RCU_THROW_MSG ("algorithm null.  streaming error?");
     }
     m_algorithmCount = 0;
-    return std::move (m_algorithms);
+    std::vector<Detail::AlgorithmData> result;
+    result.reserve (m_algorithms.size());
+    for (auto& algorithm : m_algorithms)
+      result.emplace_back (std::move (algorithm));
+    m_algorithms.clear();
+    for (auto sequenceStartIndex : m_algSequenceStartIndices)
+    {
+      // need to check here, since the user could have added a new
+      // sequence start at the end of the list, without adding an
+      // algorithm for it.
+      if (sequenceStartIndex < result.size())
+        result[sequenceStartIndex].m_sequenceStart = true;
+    }
+    return result;
   }
 
 
@@ -174,5 +190,15 @@ namespace EL
   {
     RCU_READ_INVARIANT (this);
     return m_algorithms.size();
+  }
+
+
+
+  void 
+  JobConfig ::
+  startNewAlgSequence ()
+  {
+    RCU_CHANGE_INVARIANT (this);
+    m_algSequenceStartIndices.push_back (m_algorithms.size());
   }
 }

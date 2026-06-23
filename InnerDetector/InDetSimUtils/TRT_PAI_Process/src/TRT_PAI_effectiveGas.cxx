@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_PAI_Process.h"
@@ -16,7 +16,7 @@
 #include <complex>
 #include <cmath>
 #include <algorithm> //for std::max, std::clamp
-
+#include <limits> 
 #include "CLHEP/Units/SystemOfUnits.h"
 
 //____________________________________________________________________________
@@ -108,7 +108,7 @@ TRT_PAI_effectiveGas::TRT_PAI_effectiveGas(TRT_PAI_gasMixture * gm,
   // create array of effective cross sections (Fosc).
 
   for ( int i=0; i<NLvls; i++ ) {
-    double fosc = 0.;
+    double fosc = std::numeric_limits<double>::min();
     // all atoms with an absorbtion energylevel low enough contribute.
     for ( int k=0; k<Nelem; k++ ) {
       pe = gm->getElement(k);
@@ -298,8 +298,7 @@ void TRT_PAI_effectiveGas::GasTab(const std::vector<float> & gamvec,
     lnEo = lnEi;
     lnEi = m_lnELvls[ie];
     for ( int ig=0; ig<nGamVals; ++ig ) {
-      double ds =
-	XGInt( &TRT_PAI_effectiveGas::dndedx, lnEi, lnEo, m_eps, gamvec[ig]);
+      double ds = XGInt( &TRT_PAI_effectiveGas::dndedx, lnEi, lnEo, m_eps, gamvec[ig]);
       fnArray[ig][nEVals] += ds;
     }
     if ( std::abs(lnEs-lnEi) > Rener || ie==0 ) {
@@ -313,11 +312,14 @@ void TRT_PAI_effectiveGas::GasTab(const std::vector<float> & gamvec,
       nEVals++;
     }
   }
-
+  if (nEVals == 0) {
+    return;
+  }
+  const auto lastEval = nEVals - 1;
   // Copy the total integral into auxillary vector
   dndx.resize(nGamVals);
   for ( int ig = 0; ig < nGamVals; ++ig ) {
-    dndx[ig] = fnArray[ig][nEVals-1];
+    dndx[ig] = fnArray[ig][lastEval];
   }
 
   return;

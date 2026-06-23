@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ViewTestAlg.h 
@@ -12,30 +12,22 @@
 #define ATHVIEWS_VIEWTESTALG_H 1
 
 #include <string>
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteHandleKey.h"
 
 namespace AthViews {
 
-class ViewTestAlg : public AthAlgorithm
+class ViewTestAlg : public AthReentrantAlgorithm
 {
   public:
-
-    // Constructor with parameters
-    ViewTestAlg( const std::string& name, ISvcLocator* pSvcLocator );
-
-    // Destructor
-    virtual ~ViewTestAlg(); 
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     // Athena algorithm hooks
-    virtual StatusCode initialize();
-    virtual StatusCode execute();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
+    virtual StatusCode finalize() override;
 
   private:
-
-    // Default constructor
-    ViewTestAlg();
 
     SG::WriteHandleKey< int > m_output{ this, "Output", "", "Optional output object" };
 };

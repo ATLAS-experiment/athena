@@ -119,6 +119,10 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
+
+        config.setContainerMeta (self.containerName, 'ESModel', alg.calibrationAndSmearingTool.ESModel)
+        config.setContainerMeta (self.containerName, 'decorrelationModel', alg.calibrationAndSmearingTool.decorrelationModel)
+
         return alg
 
 
@@ -713,9 +717,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             postfix = '_' + postfix
 
         correlationModels = ["SIMPLIFIED", "FULL", "TOTAL", "TOYS"]
-        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3/map1.txt' \
-                   if config.geometry() is LHCPeriod.Run2 else \
-                   'ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt'
+        map_file = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2026_Run2Run3_Recommendation_v1/map1.txt'
         sfList = []
         # Set up the RECO electron efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
@@ -767,7 +769,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.MapFilePath = map_file
-            alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
+            alg.efficiencyCorrectionTool.IdKey = self.identificationWP
             if self.correlationModelId not in correlationModels:
                 raise ValueError('Invalid correlation model for identification efficiency, '
                                  f'has to be one of: {", ".join(correlationModels)}')
@@ -796,7 +798,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
                                    'AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.MapFilePath = map_file
-            alg.efficiencyCorrectionTool.IdKey = self.identificationWP.replace("LH","")
+            alg.efficiencyCorrectionTool.IdKey = self.identificationWP
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP
             if self.correlationModelIso not in correlationModels:
                 raise ValueError('Invalid correlation model for isolation efficiency, '
@@ -821,7 +823,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             if self.saveDetailedSF:
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'isol_effSF' + postfix)
+                                     'isol_effSF' + postfix, auxType='float')
             sfList += [alg.scaleFactorDecoration]
 
         if (self.chargeIDSelectionRun2 and config.geometry() < LHCPeriod.Run3 and

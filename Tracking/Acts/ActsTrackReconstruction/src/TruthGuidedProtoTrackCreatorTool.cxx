@@ -72,7 +72,8 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
     }
 
     // Now loop over the pixel and strip container and make collectiong
-    std::map<HepMC::ConstGenParticlePtr, std::vector<ActsTrk::ATLASUncalibSourceLink>> trackCollections;
+    std::map<HepMC::ConstGenParticlePtr,
+            std::vector<const xAOD::UncalibratedMeasurement*>> trackCollections;
 
     for(const auto cluster: pixelContainer)
     {
@@ -80,13 +81,14 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
         auto identifierList = cluster->rdoList();
 
         // Loop and push back the cluster in the corresponding trith particle
-        for(auto& id: identifierList)
+        for(auto& id_value: identifierList)
         {
+            Identifier id(id_value);
             // Found a match, so push it into the track collection
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {
                 auto truthParticle = identToHepMCMap.at(id);
-                trackCollections[truthParticle].emplace_back(makeATLASUncalibSourceLink(&pixelContainer, cluster, ctx));
+                trackCollections[truthParticle].emplace_back(cluster);
             }
         }
     }
@@ -97,13 +99,14 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
         auto identifierList = cluster->rdoList();
 
         // Loop and push back the cluster in the corresponding trith particle
-        for(auto& id: identifierList)
+        for(auto& id_value: identifierList)
         {
+           Identifier id(id_value);
             // Found a match, so push it into the track collection
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {
                 auto truthParticle = identToHepMCMap.at(id);
-                trackCollections[truthParticle].emplace_back(makeATLASUncalibSourceLink(&stripContainer, cluster, ctx));
+                trackCollections[truthParticle].emplace_back(cluster);
             }
         }
     }

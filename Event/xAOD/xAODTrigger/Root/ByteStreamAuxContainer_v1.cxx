@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -9,10 +9,14 @@
 // EDM include(s):
 #include "xAODCore/tools/AuxPersVector.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/AuxStoreInternal.h" // for getCopyIDs
 #include "AthContainers/exceptions.h"
 
 // Local include(s):
 #include "xAODTrigger/versions/ByteStreamAuxContainer_v1.h"
+namespace {
+  const std::string emptyStr{};
+}
 
 namespace xAOD {
 
@@ -177,6 +181,11 @@ namespace xAOD {
       return ret;
    }
 
+
+   SG::auxid_set_t ByteStreamAuxContainer_v1::getCopyIDs (bool warnUnlocked) const
+   {
+     return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, {});
+   }
 
    /// Test if a variable is a decoration.
    bool ByteStreamAuxContainer_v1::isDecoration (auxid_t auxid) const
@@ -437,7 +446,7 @@ namespace xAOD {
 #define ADD_IDS(VAR, TYP) \
       do { typedef std::map< std::string, std::vector< TYP > > CONT; \
           for (CONT::value_type& p : VAR)                                 \
-             m_auxids.insert (r.getAuxID< TYP > (p.first, "", SG::AuxVarFlags::SkipNameCheck)); } while(0)
+             m_auxids.insert (r.getAuxID< TYP > (p.first, emptyStr, SG::AuxVarFlags::SkipNameCheck)); } while(0)
       ADD_IDS(m_int, int);
       ADD_IDS(m_float, float);
       ADD_IDS(m_vecInt, std::vector<int>);
@@ -565,10 +574,29 @@ namespace xAOD {
       // The object can't handle this variable type...
       std::cerr << "ERROR xAOD::ByteStreamAuxContainer_v1::getData "
                 << "Unknown variable type ("
-                << SG::AuxTypeRegistry::instance().getType( auxid )->name()
-                << ") requested" << std::endl;
+                << SG::AuxTypeRegistry::instance().getTypeName( auxid )
+                << ") requested for variable "
+                << SG::AuxTypeRegistry::instance().getName( auxid )
+                << " (" << auxid << ")"
+                << std::endl;
 
       return nullptr;
    }
+
+   void ByteStreamAuxContainer_v1::toTransient( const EventContext& ctx)
+   {
+      guard_t guard (m_mutex);
+      for (SG::IAuxTypeVector* v : m_staticVecs) {
+         if(v) {
+           v->toTransient( ctx );
+         }
+      }
+      for (SG::IAuxTypeVector* v : m_dynamicVecs) {
+         if(v) {
+           v->toTransient( ctx );
+         }
+      }
+   }
+
 
 } // namespace xAOD

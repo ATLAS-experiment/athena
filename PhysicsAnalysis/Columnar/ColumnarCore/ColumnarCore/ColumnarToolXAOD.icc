@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -76,7 +76,7 @@ namespace columnar
     struct SharedData final
     {
 #ifdef XAOD_STANDALONE
-      mutable asg::SgTEvent m_event;
+      mutable asg::SgEvent m_event;
 #else
       using StoreGateSvc_t = ServiceHandle<StoreGateSvc>;
       /// Pointer to StoreGate (event store by default)

@@ -4,7 +4,6 @@
 
 #include "DerivationFrameworkLLP/TauLRTThinningTool.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <string>
 
@@ -42,9 +41,8 @@ StatusCode DerivationFramework::TauLRTThinningTool::finalize()
 }
 
 
-StatusCode DerivationFramework::TauLRTThinningTool::doThinning() const
+StatusCode DerivationFramework::TauLRTThinningTool::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // retrieve containers and thin them
   SG::ThinningHandle<xAOD::TauJetContainer> taus(m_taus, ctx);

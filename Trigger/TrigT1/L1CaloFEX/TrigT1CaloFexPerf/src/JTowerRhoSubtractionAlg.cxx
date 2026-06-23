@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JTowerRhoSubtractionAlg.h"
@@ -175,7 +175,7 @@ namespace LVL1
       ATH_MSG_ERROR("Failed to retrieve " << m_inputKey.key());
       return StatusCode::FAILURE;
     }
-    auto [outputTowers,outputTowersAux] = xAOD::shallowCopyContainer(*inputTowers,ctx);
+    auto [outputTowers,outputTowersAux] = xAOD::shallowCopy(*inputTowers,ctx);
     xAOD::setOriginalObjectLink(*inputTowers, *outputTowers);
 
     static const JFEXBins jFEXBins = buildFexBins (inputTowers.cptr());

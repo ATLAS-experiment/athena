@@ -23,8 +23,8 @@ class ZDC_G4CalibSDTool : public SensitiveDetectorBase
   ZDC_G4CalibSDTool(const std::string& type, const std::string& name, const IInterface *parent);
   // Destructor
   virtual ~ZDC_G4CalibSDTool() {}
-  // Calls down to all the SDs to get them to pack their hits into a central collection
-  StatusCode Gather() override final;
+  StatusCode SetupEvent(HitCollectionMap&) override final;
+  StatusCode Gather(HitCollectionMap&) override final;
 
  protected:
   //Make an SD

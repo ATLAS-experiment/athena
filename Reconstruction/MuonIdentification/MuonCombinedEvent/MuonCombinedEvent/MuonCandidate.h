@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDEVENT_MUONCANDIDATE_H
@@ -62,11 +62,6 @@ namespace MuonCombined {
         /** print candidate to string */
         std::string toString() const;
 
-        /** Sets ths comissioning flag */
-        void setCommissioning(bool b);
-        /** Returns whether the muon belongs to the comissioning chain **/
-        bool isCommissioning() const;
-
         /** set the vector of associated segments to the candidate **/
         void setSegments(std::vector<const Muon::MuonSegment*>&& segments);
         /** returns the vector of associated muon segments **/
@@ -82,9 +77,6 @@ namespace MuonCombined {
 
         /** pointer to spectrometer track, not owned */
         const Trk::Track* m_muonSpectrometerTrack{nullptr};
-
-        /** flag whether the track belongs to the comissioning stream **/
-        bool m_isCommissioning{false};
 
         /** Segments associated with the candidate **/
         std::vector<const Muon::MuonSegment*> m_assoc_segments;

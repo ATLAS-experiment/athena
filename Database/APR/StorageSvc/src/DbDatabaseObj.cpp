@@ -28,6 +28,8 @@
 
 #include <memory>
 #include <cstdio>
+#include <string_view>
+#include <cstdint>
 
 using namespace pool;
 
@@ -55,12 +57,11 @@ void makeKey(const Token* tok, Guid& guid)  {
 DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
                               const std::string&   pfn,
                               const std::string&   fid,
-                              DbAccessMode    mod)
+                              Io::IoFlag    mod)
 : Base(fid, mod, dom.type(), dom.db()),
   APRMessaging( pfn ),
-  m_dom(dom), m_info(0), m_string_t(0), m_fileAge(0)
+  m_dom(dom), m_info(0), m_string_t(0), m_logon(pfn), m_fileAge(0)
 {
-  m_logon = pfn;
   std::unique_ptr<Token> tok(new Token());
   tok->setTechnology(dom.type().type());
   tok->setClassID(Guid::null());
@@ -106,11 +107,8 @@ DbDatabaseObj::~DbDatabaseObj()  {
 }
 
 /// Access the size of the database: May be undefined for some technologies
-long long int DbDatabaseObj::size() {
-  if ( 0 == m_info )    {  // Re-open the database if it was retired
-     open().ignore();
-  }
-  return 0==m_info ? -1 : m_info->size();
+long long int DbDatabaseObj::size() const {
+  return (m_info) ? m_info->size() : -1 ;
 }
 
 // Perform cleanup of internal structures.
@@ -147,7 +145,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
       refLnk.second = pTok->oid().second;
       return StatusCode::SUCCESS;
     }
-    else if ( mode() != pool::READ ) {
+    else if ( mode() != Io::READ ) {
       const Guid& dbn = pTok->dbID();
       std::unique_ptr<Token> link(new Token());
       link->fromString(pTok->toString());
@@ -173,7 +171,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
         // Update the transient list of links
         Guid tmp_key;
         makeKey(link.get(), tmp_key);
-    m_linkMap.insert( LinkMap::value_type(tmp_key, link.get()));
+        m_linkMap.insert( LinkMap::value_type(tmp_key, link.get()));
         m_indexMap.insert( IndexMap::value_type(link->oid().first, m_linkVec.size()));
         m_linkVec.push_back( link.release() );
         return StatusCode::SUCCESS;
@@ -184,8 +182,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
 }
 
 // Retrieve shape information for a specified object by shape ID
-const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id)  {
-  if ( 0 == m_info ) open().ignore();
+const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id) const {
   ShapeMap::const_iterator i = m_shapeMap.find(id);
   if( i != m_shapeMap.end() ) return (*i).second;
   if( id == m_string_t->shapeID() ) return m_string_t;
@@ -193,8 +190,7 @@ const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id)  {
 }
 
 // Retrieve shape information for a specified object by reflection handle
-const DbTypeInfo* DbDatabaseObj::objectShape(const TypeH& id)  {
-  if ( 0 == m_info ) open().ignore();
+const DbTypeInfo* DbDatabaseObj::objectShape(const TypeH& id) const {
   std::map<TypeH, const DbTypeInfo*>::const_iterator i = m_classMap.find(id);
   if( i != m_classMap.end() ) return i->second;
   if( id == m_string_t->clazz() or id.Name() == "string" ) {
@@ -205,10 +201,7 @@ const DbTypeInfo* DbDatabaseObj::objectShape(const TypeH& id)  {
 }
 
 // Retrieve shape information for a specified object by container name
-const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) {
-  if ( 0 == m_info )    {
-    open().ignore();
-  }
+const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) const {
   LinkVector::const_iterator j=m_linkVec.begin();
   for(; j != m_linkVec.end(); ++j ) {
     Token* t = (*j);
@@ -220,7 +213,7 @@ const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) {
 }
 
 // Add persistent shape to the Database
-StatusCode DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
+StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
   if ( pShape )    {
     const Guid& id = pShape->shapeID();
     ShapeMap::iterator i = m_shapeMap.find(id);
@@ -233,7 +226,7 @@ StatusCode DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
     else if ( m_string_t and (id == m_string_t->shapeID()) )  {
       return StatusCode::SUCCESS;
     }
-    else if ( mode() != pool::READ )  {
+    else if ( mode() != Io::READ )  {
       const std::string& dsc = pShape->toString();
       // Add the persistent entry to the links container
       if ( 0 != m_string_t )   {
@@ -287,7 +280,7 @@ StatusCode DbDatabaseObj::open()   {
       // is applied, because it is assumed, that objects
       // with pending connections may still be written.
       setAge(0);
-      if ( 0==(mode()&pool::CREATE) && 0==(mode()&pool::UPDATE) )  {
+      if ( mode() == Io::READ )  {
         m_dom.ageOpenDbs().ignore();
         setAge(0);
         m_dom.closeAgedDbs().ignore();
@@ -298,7 +291,7 @@ StatusCode DbDatabaseObj::open()   {
 
         // If we're reading, try to deduce the correct type of the POOL internal containers
         auto containerType = type();
-        if (mode() == pool::READ) {
+        if (mode() == Io::READ) {
           DbContainer testCont;
           int majorTypeValue = containerType.majorType() >> 8;
           for(int minorTypeValue = 0; minorTypeValue < pool::DbType::MINOR_MASK; ++minorTypeValue) {
@@ -416,15 +409,15 @@ StatusCode DbDatabaseObj::open()   {
           while (static_cast<uint64_t>(oid.second) <= m_params.size()) {
             auto result = m_params.ptr()->load(&ptr, m_string_t, oid, oid, true);
             if (!result.isSuccess() || !ptr) break;
-            std::string dsc = param_str;
+            std::string_view dsc{param_str};
             size_t id1 = dsc.find("[NAME=");
             size_t id2 = dsc.find("[VALUE=");
             if ( id1 != std::string::npos && id2 != std::string::npos )  {
               size_t id11 = dsc.find(']', id1+6);
               size_t id22 = dsc.find(']', id2+7);
               if ( id11 != std::string::npos && id22 != std::string::npos )  {
-                std::string n = dsc.substr(id1+6, id11-id1-6);
-                std::string v = dsc.substr(id2+7, id22-id2-7);
+                std::string n{dsc.substr(id1+6, id11-id1-6)};
+                std::string v{dsc.substr(id2+7, id22-id2-7)};
                 // ParamMap::value_type val(n, v);
                 ATH_MSG_DEBUG("--->Reading Param:" << n << "=[" << v << ']');
                 m_paramMap[n] = v;
@@ -444,8 +437,21 @@ StatusCode DbDatabaseObj::open()   {
               m_paramMap[num] = fid;
             }
           }
+          // Now set the DataHeader and EventTag container names if we're in read mode
+          if ( mode() == Io::READ )  {
+            ParamMap::const_iterator it = m_paramMap.find(APRDefaults::ParamsKeyDataHeader);
+            if ( it != m_paramMap.end() )  {
+              APRDefaults::ReadConfig::setDataHeaderName(name(), (*it).second);
+              ATH_MSG_DEBUG("Set DataHeader name for FID " << name() << " to " << (*it).second);
+            }
+            it = m_paramMap.find(APRDefaults::ParamsKeyEventTag);
+            if ( it != m_paramMap.end() )  {
+              APRDefaults::ReadConfig::setEventTagName(name(), (*it).second);
+              ATH_MSG_DEBUG("Set EventTag name for FID " << name() << " to " << (*it).second);
+            }
+          }
         }
-        if ( mode()&pool::CREATE || mode()&pool::UPDATE)  {
+        if ( mode() == Io::WRITE  || mode() == Io::APPEND )  {
           std::string par_val;
           if ( !param("FID", par_val).isSuccess() )  {
             if ( !addParam("FID", name()).isSuccess() )  {
@@ -462,24 +468,16 @@ StatusCode DbDatabaseObj::open()   {
               ATH_MSG_ERROR("Failed to write parameter POOL_VSN.");
             }
           }
-          if ( !param("POOL_CONTAINERNAME_EVENTDATA", par_val).isSuccess() )  {
-            if ( !addParam("POOL_CONTAINERNAME_EVENTDATA", APRDefaults::getEventDataName()).isSuccess() )  {
-              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_EVENTDATA.");
+          if ( !param(APRDefaults::ParamsKeyEventTag, par_val).isSuccess() )  {
+            if ( !addParam(APRDefaults::ParamsKeyEventTag, APRDefaults::WriteConfig::getEventTagName()).isSuccess() )  {
+              ATH_MSG_ERROR("Failed to write parameter " << APRDefaults::ParamsKeyEventTag);
+              return StatusCode::FAILURE;
             }
           }
-          if ( !param("POOL_CONTAINERNAME_EVENTTAG", par_val).isSuccess() )  {
-            if ( !addParam("POOL_CONTAINERNAME_EVENTTAG", APRDefaults::getEventTagName()).isSuccess() )  {
-              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_EVENTTAG.");
-            }
-          }
-          if ( !param("POOL_CONTAINERNAME_DATAHEADER", par_val).isSuccess() )  {
-            if ( !addParam("POOL_CONTAINERNAME_DATAHEADER", APRDefaults::getDataHeaderName()).isSuccess() )  {
-              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_DATAHEADER.");
-            }
-          }
-          if ( !param("POOL_CONTAINERNAME_METADATA", par_val).isSuccess() )  {
-            if ( !addParam("POOL_CONTAINERNAME_METADATA", APRDefaults::getMetaDataName()).isSuccess() )  {
-              ATH_MSG_ERROR("Failed to write parameter POOL_CONTAINERNAME_METADATA.");
+          if ( !param(APRDefaults::ParamsKeyDataHeader, par_val).isSuccess() )  {
+            if ( !addParam(APRDefaults::ParamsKeyDataHeader, APRDefaults::WriteConfig::getDataHeaderName()).isSuccess() )  {
+              ATH_MSG_ERROR("Failed to write parameter " << APRDefaults::ParamsKeyDataHeader);
+              return StatusCode::FAILURE;
             }
           }
         }
@@ -507,6 +505,7 @@ StatusCode DbDatabaseObj::close()  {
     remove(curr).ignore();
   }
   clearEntries();
+  APRDefaults::ReadConfig::clearDatabase(name());
   m_dom.remove(this).ignore();
   return sc;
 }
@@ -531,18 +530,9 @@ StatusCode DbDatabaseObj::retire()  {
   return ret;
 }
 
-/// Retrieve the number of user parameters
-int DbDatabaseObj::nParam() {
-  if ( 0 == m_info )    {  // Re-open the database if it was retired
-    open().ignore();
-  }
-  return 0 == m_info ? -1 : int(m_paramMap.size());
-}
-
 /// Add a persistent parameter to the file
 StatusCode DbDatabaseObj::addParam(const std::string& nam, const std::string& val) {
   if ( !nam.empty() && !val.empty() ) {
-    if ( 0 == m_info ) open().ignore();
     if ( m_info )  {
       ParamMap::const_iterator i = m_paramMap.find(nam);
       if ( i == m_paramMap.end() )  {
@@ -560,8 +550,7 @@ StatusCode DbDatabaseObj::addParam(const std::string& nam, const std::string& va
 }
 
 /// Retrieve existing parameter by name
-StatusCode DbDatabaseObj::param(const std::string& nam, std::string& val)  {
-  if ( 0 == m_info ) open().ignore();
+StatusCode DbDatabaseObj::param(const std::string& nam, std::string& val) const {
   if ( m_info ) {
     ParamMap::const_iterator i = m_paramMap.find(nam);
     if ( i == m_paramMap.end() )  {
@@ -573,40 +562,12 @@ StatusCode DbDatabaseObj::param(const std::string& nam, std::string& val)  {
   return StatusCode::FAILURE;
 }
 
-/// Retrieve all parameters
-StatusCode DbDatabaseObj::params(Parameters& vals)   {
-  vals.clear();
-  if ( 0 == m_info ) open().ignore();
-  if ( m_info ) {
-    ParamMap::const_iterator i = m_paramMap.begin();
-    for ( ; i != m_paramMap.end(); ++i )  {
-      vals.push_back(*i);
-    }
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
-}
-
-/// Expand OID into a full Token, based on the Links table.
-StatusCode DbDatabaseObj::getLink(const Token::OID_t& oid, Token* pTok)
-{
-   if ( 0 == m_info ) open().ignore();
-   if ( 0 != m_info && 0 != pTok && oid.first >= 0 ) {
-      pTok->oid() = oid;
-      m_linkVec[ oid.first ]->set(pTok);
-      return StatusCode::SUCCESS;
-   }
-   return StatusCode::FAILURE;
-}
-
-
-std::string DbDatabaseObj::cntName(Token& token) {
-  if ( 0 == m_info ) open().ignore();
+std::string DbDatabaseObj::cntName(Token& token) const {
   if ( 0 != m_info )    {
-    int lnk = m_indexMap[token.oid().first]; // Map link to index
+    int lnk = m_indexMap.at(token.oid().first); // Map link to index
     if ( lnk >= 0 )  {
       if ( lnk < int(m_linkVec.size()) )   {
-        Token* link = m_linkVec[lnk];
+        Token* link = m_linkVec.at(lnk);
         if ( link != 0 ) {
           if ( token.contID().empty() ) {
             token.setCont(link->contID());
@@ -663,7 +624,7 @@ StatusCode DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
 
 
 /// Allow access to all known containers
-StatusCode DbDatabaseObj::containers(std::vector<const Token*>& conts,bool with_internals)  {
+StatusCode DbDatabaseObj::containers(std::vector<const Token*>& conts, bool with_internals)  {
   conts.clear();
   if ( 0 == m_info ) open().ignore();
   if ( 0 != m_info )    {
@@ -681,7 +642,7 @@ StatusCode DbDatabaseObj::containers(std::vector<const Token*>& conts,bool with_
 }
 
 /// Allow access to all known containers
-StatusCode DbDatabaseObj::containers(std::vector<IDbContainer*>& conts,bool with_internals)  {
+StatusCode DbDatabaseObj::containers(std::vector<IDbContainer*>& conts, bool with_internals)  {
   conts.clear();
   if ( 0 == m_info ) open().ignore();
   if ( 0 != m_info )    {
@@ -710,22 +671,9 @@ const Token* DbDatabaseObj::cntToken(const std::string& cntName)  {
   return 0;
 }
 
-/// Allow access to all known shapes used by the database
-StatusCode DbDatabaseObj::shapes(std::vector<const DbTypeInfo*>& shaps)  {
-  if ( 0 == m_info ) open().ignore();
-  if ( 0 != m_info )    {
-    shaps.clear();
-    for(ShapeMap::iterator j=m_shapeMap.begin(); j != m_shapeMap.end(); ++j) {
-      shaps.push_back((*j).second);
-    }
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
-}
-
 /// Execute Database Transaction action
 StatusCode DbDatabaseObj::transAct(Transaction::Action action)  {
-  bool upda = (0 != (mode()&pool::CREATE) || 0 != (mode()&pool::UPDATE));
+  bool upda = (0 != (mode() == Io::WRITE || mode() == Io::APPEND));
   if ( 0 != m_info )  {
     StatusCode iret, status = StatusCode::SUCCESS;
     for (iterator i=begin(); i != end(); ++i )    {

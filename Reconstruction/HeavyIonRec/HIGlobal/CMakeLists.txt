@@ -21,4 +21,4 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( HIGlobal
    SCRIPT python -m HIGlobal.HIGlobalConfig
    PROPERTIES TIMEOUT 1800
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 // InDetTrkInJetType.h - Description
@@ -57,10 +57,10 @@ namespace InDet {
 //---------------------------------------------------------------------------
 //Interface itself
 
-      virtual std::vector<float> trkTypeWgts( const xAOD::TrackParticle *, const xAOD::Vertex &, const TLorentzVector &) const =0;
+      virtual std::vector<float> trkTypeWgts( const EventContext& ctx, const xAOD::TrackParticle *, const xAOD::Vertex &, const TLorentzVector &) const =0;
       virtual bool usesFivePtJetBinVersion() const=0;
-      virtual void decorateTrack(const xAOD::TrackParticle* , const xAOD::Vertex & , const xAOD::JetContainer & , const xAOD::Jet* ) const =0;
-      virtual void decorateJet(const std::vector<const xAOD::TrackParticle*> & , const xAOD::TrackParticleContainer& , const xAOD::Vertex & , const xAOD::Jet* ) const =0;
+      virtual void decorateTrack(const EventContext& ctx, const xAOD::TrackParticle* , const xAOD::Vertex & , const xAOD::JetContainer & , const xAOD::Jet* ) const =0;
+      virtual void decorateJet(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*> & , const xAOD::TrackParticleContainer& , const xAOD::Vertex & , const xAOD::Jet* ) const =0;
 
 
   };
@@ -81,13 +81,13 @@ namespace InDet {
       virtual StatusCode initialize() override;
       virtual StatusCode finalize() override;
 
-      virtual std::vector<float> trkTypeWgts(const xAOD::TrackParticle *, const xAOD::Vertex &, const TLorentzVector &) const override;
+      virtual std::vector<float> trkTypeWgts(const EventContext& ctx, const xAOD::TrackParticle *, const xAOD::Vertex &, const TLorentzVector &) const override;
       /* return the five ptjet bin mode: if true, the retrained FivePtJetBin TCT BDT is used; if false, the default TCT BDT is used */
       virtual bool usesFivePtJetBinVersion() const override {return m_useFivePtJetBinVersion; }
       /* decorates a TrackParticle associated to the given Jet (element from the passed JetContainer)*/
-      virtual void decorateTrack(const xAOD::TrackParticle* , const xAOD::Vertex & , const xAOD::JetContainer & , const xAOD::Jet* ) const override;
+      virtual void decorateTrack(const EventContext& ctx, const xAOD::TrackParticle* , const xAOD::Vertex & , const xAOD::JetContainer & , const xAOD::Jet* ) const override;
       /* decorates a Jet with the TCT scores and TrackParticleLinks of the tracks passed through the std::vector*/
-      virtual void decorateJet(const std::vector<const xAOD::TrackParticle*> & , const xAOD::TrackParticleContainer& , const xAOD::Vertex & , const xAOD::Jet* ) const override;
+      virtual void decorateJet(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*> & , const xAOD::TrackParticleContainer& , const xAOD::Vertex & , const xAOD::Jet* ) const override;
 
 
 //------------------------------------------------------------------------------------------------------------------

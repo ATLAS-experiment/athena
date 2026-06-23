@@ -40,6 +40,32 @@ def timeBurnerCfg(flags):
     return msca
 
 
+def timeBurnerProcessingCfg(flags):
+    # Variant of TimeBurner for dataflow tests: Landau-distributed CPU burn with non-zero AcceptFraction
+    inputMaker = CompFactory.InputMakerForRoI("IM_TimeBurnerProcessing",
+                                              RoITool=CompFactory.ViewCreatorInitialROITool(),
+                                              RoIs="TimeBurnerProcessingInputRoIs",
+    )
+    reco = InEventRecoCA('TimeBurnerProcessing_reco',inputMaker=inputMaker)
+    selAcc = SelectionCA('TimeBurnerProcessingSequence')
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(
+        TimeBurnerCfg(flags,
+                      name="TimeBurnerProcessingHypo",
+                      TimeDistribution="landau",
+                      LandauMPV=105.0,
+                      LandauSigma=66.0,
+                      BurnCPU=True,
+                      AcceptFraction=0.10,
+                      MaxTimeMs=450000.0,
+        )
+    )
+
+    msca = MenuSequence(flags, selAcc,
+                          HypoToolGen=TimeBurnerHypoToolGen)
+    return msca
+
+
 #----------------------------------------------------------------
 def LArSuperCellMonitoringGenCfg(flags,appendName=""):
    from LArMonitoring.LArSuperCellMonAlg import LArSuperCellMonConfigHLT
@@ -150,6 +176,8 @@ class MonitorChainConfiguration(ChainConfigurationBase):
 
         if monType == 'timeburner':
             chainSteps.append(self.getTimeBurnerStep(flags))
+        elif monType == 'timeburnerprocessing':
+            chainSteps.append(self.getTimeBurnerProcessingStep(flags))
         elif monType == 'larsupercellmon':
             chainSteps.append(self.getLArSuperCellMonitoringGenCfg(flags))
         elif monType == 'l1topoPh1debug':
@@ -168,6 +196,12 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getTimeBurnerStep(self, flags):
         return self.getStep(flags, 'TimeBurner',[timeBurnerCfg])
+
+    # --------------------
+    # TimeBurnerProcessing configuration
+    # --------------------
+    def getTimeBurnerProcessingStep(self, flags):
+        return self.getStep(flags, 'TimeBurnerProcessing',[timeBurnerProcessingCfg])
 
     # --------------------
     # LArSuperCellMon configuration

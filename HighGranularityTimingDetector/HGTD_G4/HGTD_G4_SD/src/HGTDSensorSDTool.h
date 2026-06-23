@@ -29,6 +29,10 @@ public:
   virtual ~HGTDSensorSDTool() {}
 
 protected:
+  // Create the event-owned hit collection.
+  virtual StatusCode SetupEvent(HitCollectionMap&) override final;
+  // Record the event-owned hit collection to StoreGate.
+  virtual StatusCode Gather(HitCollectionMap&) override final;
   // Make me an SD!
   virtual G4VSensitiveDetector* makeSD() const override final;
   // property to toggle GeoModelXML 

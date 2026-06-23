@@ -3,9 +3,12 @@
 */
 
 #include "MuonCondData/NswCalibDbThresholdData.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+
 #include "MuonIdHelpers/MmIdHelper.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
-#include "Identifier/Identifier.h"
+#include <algorithm>
+#include <iterator>
 
 using namespace Muon::MuonStationIndex;
 // general functions ---------------------------------
@@ -36,7 +39,7 @@ void NswCalibDbThresholdData::setZero(ThrsldTechType tech, const float threshold
 
 // getChannelIds
 std::vector<Identifier>
-NswCalibDbThresholdData::getChannelIds(const std::string tech, const std::string side) const {
+NswCalibDbThresholdData::getChannelIds(std::string_view tech, std::string_view side) const {
     std::vector<Identifier> keys;
     keys.reserve(m_data.size());
     for (const auto& p : m_data) {

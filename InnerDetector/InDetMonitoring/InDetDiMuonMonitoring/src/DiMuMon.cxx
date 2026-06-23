@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -56,9 +56,7 @@ DiMuMon::DiMuMon( const std::string & type, const std::string & name, const IInt
 }
 
 
-DiMuMon::~DiMuMon()
-{
-}
+DiMuMon::~DiMuMon() = default;
 
 StatusCode DiMuMon::initialize(){
 
@@ -242,12 +240,12 @@ StatusCode DiMuMon::bookHistograms()
 }
 
 
-StatusCode DiMuMon::fillHistograms()
+StatusCode DiMuMon::fillHistograms(const EventContext& ctx)
 {
 
   const double muonMass = ParticleConstants::muonMassInMeV;
   //retrieve all muons
-  SG::ReadHandle<xAOD::MuonContainer> muons{m_muonCollection};
+  SG::ReadHandle<xAOD::MuonContainer> muons{m_muonCollection, ctx};
   if(!muons.isValid()){
     ATH_MSG_WARNING("Could not retrieve muon container");
     return StatusCode::FAILURE;
@@ -258,8 +256,7 @@ StatusCode DiMuMon::fillHistograms()
 
   //pick out the good muon tracks and store in the new container
   for(const auto* muon : *muons ) {
-
-    const xAOD::TrackParticle *idTrk = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+    const xAOD::TrackParticle *idTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
     if (!idTrk) continue;
     m_stat->Fill("MuonIdTrk",1);
     double idTrkPt(0),ptSum(0);
@@ -273,7 +270,7 @@ StatusCode DiMuMon::fillHistograms()
     }
     if(m_resonName=="Zmumu" && ptSum/idTrkPt > m_isolationCut) continue;
     m_stat->Fill("TrkIsoPt40/Pt<.2",1);
-    if (!muon->trackParticle(xAOD::Muon::CombinedTrackParticle)) continue;
+    if (!muon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) continue;
     m_stat->Fill("CombMuon",1);
 
     if (!trackQuality(idTrk)) continue;
@@ -296,10 +293,10 @@ StatusCode DiMuMon::fillHistograms()
     xAOD::MuonContainer::const_iterator mu1 = goodMuons.begin();
     xAOD::MuonContainer::const_iterator muEnd = goodMuons.end();
     for (; mu1!=muEnd;++mu1){
-      const xAOD::TrackParticle *id1 = (*mu1)->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      const xAOD::TrackParticle *id1 = (*mu1)->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       xAOD::MuonContainer::const_iterator mu2 = mu1+1;
       for (; mu2!=muEnd; ++mu2){
-	const xAOD::TrackParticle *id2 = (*mu2)->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+	const xAOD::TrackParticle *id2 = (*mu2)->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
 	//consider only opposite sign muons
 	double q1 = id1->charge();
 	double q2 = id2->charge();

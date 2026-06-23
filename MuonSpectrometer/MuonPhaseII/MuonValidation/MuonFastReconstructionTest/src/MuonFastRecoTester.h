@@ -18,6 +18,7 @@
 // muon includes
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPRDTestR4/SpacePointTesterModule.h"
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
 
 namespace MuonValR4{
 
@@ -27,10 +28,12 @@ namespace MuonValR4{
     virtual ~MuonFastRecoTester()  = default;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
 
   private:
+    /** Enum for measurement types */
+    enum class measType {Prec, NonPrec, Phi, nTypes};
     using simHitSet = std::unordered_set<const xAOD::MuonSimHit*>;
     using TruthParticleMap = std::map<const xAOD::TruthParticle*, std::vector<simHitSet>>;
     /** @brief Fill the truth particle map
@@ -63,29 +66,32 @@ namespace MuonValR4{
                              const std::vector<const MuonR4::SpacePointContainer*>& spContainers);
     /** @brief Fill the truth particle information into the tree
     *  @param truthHits: Map of truth particle hits
-    *  @param truthSegments: Truth segments needed for truth hit counts */
+    *  @param spContainers: Vector of pointers to space point containers, needed for truth hit counts */
     void fillTruthInfo(const TruthParticleMap& truthHits,
-                       const xAOD::MuonSegmentContainer* truthSegments);
+                       const std::vector<const MuonR4::SpacePointContainer*>& spContainers);
     /** @brief Fill the RoI information into the tree
     *  @param roiCollection: Pointer to the RoI collection */
     void fillRoIInfo(const TrigRoiDescriptorCollection* roiCollection);
 
     /** @brief Enum for different types of pattern hit content branches */
     enum class ePatBranchType : std::uint8_t {
-        eReco = 0,    // Counts of pattern hits
-        eTruth = 1,   // Counts of pattern hits matched to truth
-        ePileup = 3,  // Counts of pattern hits matched to pileup truth
-        eAll = 2,     // Counts of all hits in the buckets crossed by the pattern
-        eAllTruth = 4 // Counts of all truth hits in the buckets crossed by the pattern
+        eReco,    // Counts of pattern hits
+        eTruth,   // Counts of pattern hits matched to truth
+        ePileup,  // Counts of pattern hits matched to pileup truth
+        eMismatched, // Counts of pattern hits matched to truth but not to the main truth particle of the pattern
+        eAll,     // Counts of all hits in the buckets crossed by the pattern
     };
     /** @brief Update the hit counts for a given pattern branch type
      *  @param type: The pattern branch type
+     *  @param patIdx: Index of the pattern
+     *  @param hitSt: Station index of the hit
      *  @param sp: Pointer to the space point
-     *  @param patIdx: Index of the pattern */
-    void updatePatHitInfo (ePatBranchType type, 
+     *  @param isSecondaryMatched: if the spacepoint has a secondary measurement and it is matched to truth */
+    void updatePatHitInfo (const ePatBranchType type, 
                            const std::size_t patIdx,
                            const Muon::MuonStationIndex::StIndex hitSt,
-                           const MuonR4::SpacePoint* sp);
+                           const MuonR4::SpacePoint* sp,
+                           const bool isSecondaryMatched = false);
                          
     // // output tree 
     MuonVal::MuonTesterTree m_tree{"MuonFastRecoTest","FastRecoTester"}; 
@@ -103,7 +109,7 @@ namespace MuonValR4{
     // HLT seeding RoIs
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "MuRoIs", "EFMuMSReco_RoI", "Name of the input data from HLTSeeding"};
     
-    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     
     BooleanProperty m_isMC{this, "isMC", false, "Toggle whether the job is ran on MC or not"};
@@ -172,6 +178,13 @@ namespace MuonValR4{
     /// @brief Number of truth phi measurements per station
     MuonVal::MatrixBranch<unsigned char>& m_pat_nTruthPhiMeas{m_tree.newMatrix<unsigned char>("pat_NTruthPhiMeas", 0)};
 
+    /// @brief Number of mismatched truth trigger eta measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nMisTruthNonPrecMeas{m_tree.newMatrix<unsigned char>("pat_NMisTruthNonPrecMeas", 0)};
+    /// @brief Number of mismatched truth precision measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nMisTruthPrecMeas{m_tree.newMatrix<unsigned char>("pat_NMisTruthPrecMeas", 0)};
+    /// @brief Number of mismatched truth phi measurements per station
+    MuonVal::MatrixBranch<unsigned char>& m_pat_nMisTruthPhiMeas{m_tree.newMatrix<unsigned char>("pat_NMisTruthPhiMeas", 0)};
+
     /// @brief Number of pileup trigger eta measurements per station
     MuonVal::MatrixBranch<unsigned char>& m_pat_nPileupNonPrecMeas{m_tree.newMatrix<unsigned char>("pat_NPileupNonPrecMeas", 0)};
     /// @brief Number of pileup precision measurements per station
@@ -186,20 +199,9 @@ namespace MuonValR4{
     /// @brief Number of phi measurements in the buckets crossed by the pattern, grouped by station
     MuonVal::MatrixBranch<unsigned char>& m_pat_nAllPhiMeas{m_tree.newMatrix<unsigned char>("pat_NAllPhiMeas", 0)};
 
-    /// @brief Number of truth trigger eta measurements in the buckets crossed by the pattern, grouped by station
-    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllTruthNonPrecMeas{m_tree.newMatrix<unsigned char>("pat_NAllTruthNonPrecMeas", 0)};
-    /// @brief Number of truth precision measurements in the buckets crossed by the pattern, grouped by station
-    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllTruthPrecMeas{m_tree.newMatrix<unsigned char>("pat_NAllTruthPrecMeas", 0)};
-    /// @brief Number of truth phi measurements in the buckets crossed by the pattern, grouped by station
-    MuonVal::MatrixBranch<unsigned char>& m_pat_nAllTruthPhiMeas{m_tree.newMatrix<unsigned char>("pat_NAllTruthPhiMeas", 0)};
-
     /// @brief Branch indicating which truth particles in the tree are associated to the i-th pattern. We can have in principle
-    /// multiple truth particles associated to the same pattern or patterns matched to both a signal and a pileup muon. Since the
-    /// pattern can be matched to pile-up particles as well, in this case the tpIdx has been chosen to be the size of truth particle 
-    /// map, so it is bigger than any index of a signal truth particle in the tree.
+    /// multiple truth particles associated to the same pattern.
     MuonVal::MatrixBranch<unsigned char>& m_pat_MatchedToTruth{m_tree.newMatrix<unsigned char>("pat_truthMatched")};
-    /// number of matched truth particles (no Pileup truth particles)
-    MuonVal::VectorBranch<unsigned char> & m_pat_nTruthparticles{m_tree.newVector<unsigned char>("pat_NTruthParticles", 0)};
 
   /// ====== RoI info  =========== 
     MuonVal::VectorBranch<float>& m_roi_EtaMin{m_tree.newVector<float>("roi_EtaMin",-10.)};
@@ -207,7 +209,9 @@ namespace MuonValR4{
     MuonVal::VectorBranch<float>& m_roi_PhiMin{m_tree.newVector<float>("roi_PhiMin",-10.)};
     MuonVal::VectorBranch<float>& m_roi_PhiMax{m_tree.newVector<float>("roi_PhiMax",-10.)};
     MuonVal::VectorBranch<float>& m_roi_ZMin{m_tree.newVector<float>("roi_ZMin",-10.)}; 
-    MuonVal::VectorBranch<float>& m_roi_ZMax{m_tree.newVector<float>("roi_ZMax",-10.)}; 
+    MuonVal::VectorBranch<float>& m_roi_ZMax{m_tree.newVector<float>("roi_ZMax",-10.)};
+
+    MuonR4::SpacePointPerLayerSorter m_spSorter{};
 
   };
 }

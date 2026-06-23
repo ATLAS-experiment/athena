@@ -111,7 +111,7 @@ namespace Analysis {
 
     // now decorate the tracks
     for (const xAOD::TrackParticle *track: *tracks) {
-      std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary ) );
+      std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( ctx, track, primary ) );
       if ( ip ) {
         decor_d0(*track) = ip->IPd0;
         decor_z0(*track) = ip->IPz0SinTheta;

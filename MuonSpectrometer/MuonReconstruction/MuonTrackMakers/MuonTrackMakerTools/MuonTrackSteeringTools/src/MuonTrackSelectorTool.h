@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONTRACKSELECTOR_H
@@ -54,7 +54,7 @@ namespace Muon {
                                                const std::set<Identifier>& tubeIds) const;
 
         /** @brief returns true if the track satisfies the selection criteria else false */
-        bool decision(Trk::Track& track) const;
+        bool decision(const EventContext& ctx, Trk::Track& track) const;
 
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

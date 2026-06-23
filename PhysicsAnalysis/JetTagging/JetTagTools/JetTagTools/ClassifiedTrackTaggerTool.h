@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 // ClassifiedTrackTaggerTool.h - Description
@@ -43,8 +43,8 @@ namespace Analysis {
 //---------------------------------------------------------------------------
 //Interface
 
-      virtual float bJetWgts( const std::vector<const xAOD::TrackParticle*> & , const xAOD::Vertex &, const TLorentzVector &) const =0;
-      virtual void decorateJets(const std::vector<const xAOD::TrackParticle*> & , const xAOD::Vertex &, const xAOD::JetContainer & ) const =0;
+      virtual float bJetWgts(const EventContext &, const std::vector<const xAOD::TrackParticle*> & , const xAOD::Vertex &, const TLorentzVector &) const =0;
+      virtual void decorateJets(const EventContext &, const std::vector<const xAOD::TrackParticle*> & , const xAOD::Vertex &, const xAOD::JetContainer & ) const =0;
 
   };
 
@@ -63,9 +63,9 @@ namespace Analysis {
       virtual StatusCode finalize() override;
 
       /** Method to retrieve the classifier score of the ClassifiedTrackTagger (CTT) */
-      virtual float bJetWgts( const std::vector<const xAOD::TrackParticle*> & , const xAOD::Vertex &, const TLorentzVector &) const override;
+      virtual float bJetWgts(const EventContext &, const std::vector<const xAOD::TrackParticle*> & , const xAOD::Vertex &, const TLorentzVector &) const override;
       /** Method to decorate the xAOD::Jet object with the CTT score */
-      virtual void decorateJets(const std::vector<const xAOD::TrackParticle*> & , const xAOD::Vertex &, const xAOD::JetContainer & ) const override;
+      virtual void decorateJets(const EventContext & , const std::vector<const xAOD::TrackParticle*> & , const xAOD::Vertex &, const xAOD::JetContainer & ) const override;
 
 //------------------------------------------------------------------------------------------------------------------
 // Private data and functions

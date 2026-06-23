@@ -12,8 +12,6 @@
 
 #include <MuonAnalysisAlgorithms/MuonCalibrationAndSmearingAlg.h>
 
-#include <RootCoreUtils/Assert.h>
-
 //
 // method implementations
 //

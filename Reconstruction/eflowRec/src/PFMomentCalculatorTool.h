@@ -26,7 +26,7 @@ class PFMomentCalculatorTool : public extends<AthAlgTool, IPFBaseTool> {
   ~PFMomentCalculatorTool() {}
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
+  virtual StatusCode execute(const EventContext& ctx, eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
   virtual StatusCode finalize() override;
 
  private:

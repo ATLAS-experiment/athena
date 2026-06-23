@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/ClassifiedTrackTaggerTool.h"
@@ -91,16 +91,16 @@ namespace Analysis {
     return StatusCode::SUCCESS; 
   }
 
-  float ClassifiedTrackTaggerTool::bJetWgts(const std::vector<const xAOD::TrackParticle*> & InpTrk, const xAOD::Vertex & PV, const TLorentzVector & Jet) const
+  float ClassifiedTrackTaggerTool::bJetWgts(const EventContext & ctx, const std::vector<const xAOD::TrackParticle*> & InpTrk, const xAOD::Vertex & PV, const TLorentzVector & Jet) const
    {
      std::vector<std::vector<float>> TCTweights;
      //for each track inside a cone of deltaR around the jet direction save the TCT output (wgtB, wgtL,wgtG)
      //if it was not rejected by the TCT track quality cuts
      for (const auto &itrk : InpTrk) {
        if((itrk->p4()).DeltaR(Jet)<=m_deltaRConeSize) {
-	 std::vector<float> v_tctScore = m_trackClassificator->trkTypeWgts(itrk, PV, Jet);
-	 bool b_zeroTCTScore = std::all_of(v_tctScore.begin(), v_tctScore.end(), [](float i) { return i==0; });
-	 if(!b_zeroTCTScore) { TCTweights.push_back(v_tctScore); }
+         std::vector<float> v_tctScore = m_trackClassificator->trkTypeWgts(ctx, itrk, PV, Jet);
+         bool b_zeroTCTScore = std::all_of(v_tctScore.begin(), v_tctScore.end(), [](float i) { return i==0; });
+         if(!b_zeroTCTScore) { TCTweights.push_back(v_tctScore); }
        }
      }
       
@@ -138,12 +138,12 @@ namespace Analysis {
    }
 
 
-  void ClassifiedTrackTaggerTool::decorateJets(const std::vector<const xAOD::TrackParticle*> & InpTrk, const xAOD::Vertex & primVertex, const xAOD::JetContainer & jets) const
+  void ClassifiedTrackTaggerTool::decorateJets(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*> & InpTrk, const xAOD::Vertex & primVertex, const xAOD::JetContainer & jets) const
   {
-    SG::WriteDecorHandle< xAOD::JetContainer, float > jetWriteDecorHandle (m_jetWriteDecorKey);
+    SG::WriteDecorHandle< xAOD::JetContainer, float > jetWriteDecorHandle (m_jetWriteDecorKey, ctx);
     for(const auto curjet : jets){
       ATH_MSG_DEBUG( " Jet  pt: " << curjet->pt()<<" eta: "<<curjet->eta()<<" phi: "<< curjet->phi() );
-      float CTTScore = bJetWgts(InpTrk, primVertex, curjet->p4());
+      float CTTScore = bJetWgts(ctx, InpTrk, primVertex, curjet->p4());
       jetWriteDecorHandle(*curjet) = CTTScore;
     }
   }

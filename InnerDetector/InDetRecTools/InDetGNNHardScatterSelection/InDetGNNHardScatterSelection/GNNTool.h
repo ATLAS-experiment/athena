@@ -44,7 +44,7 @@ namespace InDetGNNHardScatterSelection {
 
       StatusCode initialize() override;
 
-      virtual void decorate(const xAOD::Vertex& vertex) const override;
+      virtual float decorate(const xAOD::Vertex& vertex) const override;
 
     private:
       Gaudi::Property<std::string> m_nn_file {

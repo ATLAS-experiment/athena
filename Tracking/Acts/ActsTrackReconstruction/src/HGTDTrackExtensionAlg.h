@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTDTrackExtensionAlg.h
  *
@@ -46,8 +46,9 @@
 #include "Acts/EventData/TrackContainer.hpp"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IPixelOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IStripOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IHGTDOnTrackCalibratorTool.h"
 
 // Tools
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
@@ -101,11 +102,11 @@ private:
   ToolHandle<ActsTrk::IExtrapolationTool> 
       m_extrapolationTool{this, "ExtrapolationTool", ""};
   
-  ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
+  ToolHandle<ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_pixelCalibTool{this, "PixelCalibrator", "", "Opt. pixel measurement calibrator"};
-  ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
+  ToolHandle<ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_stripCalibTool{this, "StripCalibrator", "", "Opt. strip measurement calibrator"};
-  ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
+  ToolHandle<ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_hgtdCalibTool{this, "HGTDCalibrator", "", "Opt. HGTD measurement calibrator"}; 
 
   ToolHandle<ActsTrk::TrackStatePrinterTool> 
@@ -128,7 +129,7 @@ private:
   /// @brief Data structure to hold HGTD track extension results
   /// Contains information about hits, timing, and extrapolation for each HGTD layer
   struct TrackExtensionData {
-    std::vector<bool> hasClusterVec = {false, false, false, false};  ///< Whether track has cluster in each HGTD layer
+    std::vector<char> hasClusterVec = {false, false, false, false};  ///< Whether track has cluster in each HGTD layer
     std::vector<float> chi2Vec = {0.0, 0.0, 0.0, 0.0};             ///< Chi2 contribution per HGTD layer
     std::vector<float> rawTimeVec = {0.0, 0.0, 0.0, 0.0};          ///< Raw measured time per HGTD layer
     std::vector<float> timeVec = {0.0, 0.0, 0.0, 0.0};             ///< TOF-corrected time per HGTD layer
@@ -151,7 +152,7 @@ private:
     const Acts::TrackingGeometry* trackingGeometry,
     const Acts::GeometryContext& geoContext) const;
 
-    const xAOD::HGTDCluster* getHGTDClusterFromState(const ActsTrk::detail::RecoConstTrackStateContainerProxy& state) const;
+    const xAOD::HGTDCluster* getHGTDClusterFromState(const EventContext& ctx, const ActsTrk::detail::RecoConstTrackStateContainerProxy& state) const;
 
   Acts::CalibrationContext m_calibrationContext; 
 

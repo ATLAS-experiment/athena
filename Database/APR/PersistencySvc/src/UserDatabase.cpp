@@ -7,7 +7,6 @@
 #include "DatabaseHandler.h"
 #include "MicroSessionManager.h"
 #include "DatabaseRegistry.h"
-#include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/ITransaction.h"
 #include "PersistencySvc/IFileCatalog.h"
 #include "StorageSvc/DbType.h"
@@ -17,12 +16,11 @@
 
 static const std::string& emptyString = "";
 
-pool::PersistencySvc::UserDatabase::UserDatabase( pool::PersistencySvc::UserSession& session,
+pool::UserDatabase::UserDatabase( pool::UserSession& session,
                                                   const std::string& name,
                                                   const pool::DatabaseSpecification::NameType nameType ):
   APRMessaging("PersistencySvc::UserDB"),                                                  
   m_session( session ),
-  m_policy( session.defaultConnectionPolicy() ),
   m_catalog( session.fileCatalog() ),
   m_transactionType( session.transactionType() ),
   m_registry( session.registry() ),
@@ -31,7 +29,7 @@ pool::PersistencySvc::UserDatabase::UserDatabase( pool::PersistencySvc::UserSess
   m_technology( 0 ),
   m_technologySet( false ),
   m_databaseHandler( 0 ),
-  m_openMode( pool::IDatabase::CLOSED ),
+  m_openMode( Io::INVALID ),
   m_alreadyConnected( false ),
   m_the_fid( "" ),
   m_the_pfn( "" )
@@ -40,20 +38,20 @@ pool::PersistencySvc::UserDatabase::UserDatabase( pool::PersistencySvc::UserSess
 }
 
 
-pool::PersistencySvc::UserDatabase::~UserDatabase()
+pool::UserDatabase::~UserDatabase()
 {}
 
 
-pool::PersistencySvc::DatabaseHandler&
-pool::PersistencySvc::UserDatabase::databaseHandler()
+pool::DatabaseHandler&
+pool::UserDatabase::databaseHandler()
 {
   return *m_databaseHandler;
 }
 
 void
-pool::PersistencySvc::UserDatabase::connectForRead()
+pool::UserDatabase::connectForRead()
 {
-  if( !m_databaseHandler && m_transactionType != pool::ITransaction::INACTIVE ) {
+  if( !m_databaseHandler && m_transactionType != Io::INVALID ) {
     // Check if the database is already connected
     if( !checkInRegistry() ) {
       // It is not. Connect !
@@ -85,20 +83,15 @@ pool::PersistencySvc::UserDatabase::connectForRead()
       };
 
       // Now we have all the usefull information to open the file.
-      pool::PersistencySvc::MicroSessionManager& sessionManager = m_session.microSessionManager( m_technology );
-      long accessMode = pool::READ;
-      if ( m_transactionType == pool::ITransaction::UPDATE &&
-           m_policy.readMode() == pool::DatabaseConnectionPolicy::UPDATE ) {
-        accessMode = pool::UPDATE;
-      }
+      pool::MicroSessionManager& sessionManager = m_session.microSessionManager( m_technology );
       // Check the registry now that we have the FID (in case of ambiguous PFNs)
       m_databaseHandler = m_registry.lookupByFID( m_the_fid );
       if( !m_databaseHandler ) {
          // still no luck - make a new connection
-         m_databaseHandler = sessionManager.connect( m_transactionType, m_the_fid, m_the_pfn, accessMode );
+         m_databaseHandler = sessionManager.connect( m_transactionType, m_the_fid, m_the_pfn );
       }
       if( m_databaseHandler ) {
-        m_openMode = ( ( accessMode == pool::READ ) ? pool::IDatabase::READ : pool::IDatabase::UPDATE );
+        m_openMode = Io::READ;
       }
       else {
         throw std::runtime_error( "Could not connect to the file (APR: \" UserDatabase::connectForRead \" from \" PersistencySvc \")" );
@@ -109,28 +102,24 @@ pool::PersistencySvc::UserDatabase::connectForRead()
 
 
 void
-pool::PersistencySvc::UserDatabase::connectForWrite()
+pool::UserDatabase::connectForWrite()
 {
-  if( !m_databaseHandler && m_transactionType != pool::ITransaction::INACTIVE ) {
-    if ( m_transactionType != pool::ITransaction::UPDATE ) {
+  if( !m_databaseHandler && m_transactionType != Io::INVALID ) {
+    if ( m_transactionType != Io::WRITE && m_transactionType != Io::APPEND ) {
       throw std::runtime_error( "Could not open a database for write outside an update transaction. (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
     }
 
     if ( this->checkInRegistry() ) {
-      if ( m_openMode == pool::IDatabase::READ ) {
+      if ( m_openMode == Io::READ ) {
         throw std::runtime_error( "Could not open a database for write that is already connected for read. (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
       }
     }
     else { // The database is not yet connected.
-      long accessMode = pool::UPDATE;
       bool dbRegistered = false;
       switch( m_nameType ) {
       case pool::DatabaseSpecification::PFN:
         m_the_pfn = m_name;
         if ( this->fid().empty() ) {
-          if( m_policy.writeModeForNonExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-            throw std::runtime_error( "Could not find the PFN \"" + m_name + "\" in the file catalog (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
-          }
 	  // Check if the technology is already set
 	  if( ! m_technologySet ) {
 	     throw std::runtime_error( "The back end technology has not been specified (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
@@ -141,30 +130,12 @@ pool::PersistencySvc::UserDatabase::connectForWrite()
 	  m_catalog.registerPFN( m_the_pfn.substr(0, m_the_pfn.find('?')), dbTypeMajor.storageName(), m_the_fid );
     ATH_MSG_DEBUG("registered PFN: " << m_the_pfn << " with FID:" << m_the_fid);
 	  dbRegistered = true;
-	  if( m_policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::OVERWRITE ) {
-	     accessMode = pool::CREATE;
-	  }
         }
-        else {
-	   if( m_policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-	      throw std::runtime_error( "The PFN \"" + m_name + "\" already exists (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
-	   }
-	}
-	// MN: change - set overwrite mode even if it the databas was not registered in a catalog
-	if( m_policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::OVERWRITE ) {
-	   accessMode = pool::RECREATE;
-	}
         break;
       case pool::DatabaseSpecification::FID:
         m_the_fid = m_name;
         if ( this->pfn().empty() ) {
           throw std::runtime_error( "Could not find the FID \"" + m_name + "\" in the file catalog (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
-        }
-        if ( m_policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-          throw std::runtime_error( "The FID \"" + m_name + "\" already exists (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
-        }
-        else if ( m_policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::OVERWRITE ) {
-          accessMode = pool::RECREATE;
         }
         break;
       case pool::DatabaseSpecification::LFN:
@@ -172,9 +143,6 @@ pool::PersistencySvc::UserDatabase::connectForWrite()
           std::string lfn = m_name;
           if ( this->fid().empty() ) {
             throw std::runtime_error( "Could not find the LFN \"" + m_name  + "\" in the file catalog (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
-          }
-          if ( m_policy.writeModeForExisting() == pool::DatabaseConnectionPolicy::RAISE_ERROR ) {
-            throw std::runtime_error( "The LFN \"" + m_name + "\" already exists (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
           }
           this->connectForWrite();
           m_registry.registerDatabaseHandler( m_databaseHandler, lfn );
@@ -185,44 +153,40 @@ pool::PersistencySvc::UserDatabase::connectForWrite()
         throw std::runtime_error( "Unknown database name type (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
       };
 
-      if( accessMode == pool::UPDATE
-        && m_policy.writeModeForNonExisting() == pool::DatabaseConnectionPolicy::CREATE ) {
-          accessMode = pool::UPDATE | pool::CREATE;
+      m_databaseHandler = m_session.microSessionManager( m_technology ).connect( m_transactionType, m_the_fid, m_the_pfn );
+      if( !m_databaseHandler ) {
+        if( dbRegistered ) {
+          // creation failed, remove entry from the in-memory catalog
+          m_catalog.deleteFID( m_the_fid );
         }
-        m_databaseHandler = m_session.microSessionManager( m_technology ).connect( m_transactionType, m_the_fid, m_the_pfn, accessMode );
-        if( !m_databaseHandler ) {
-          if( dbRegistered ) {
-            // creation failed, remove entry from the in-memory catalog
-            m_catalog.deleteFID( m_the_fid );
-          }
-          throw std::runtime_error( "Could not connect to the file (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
-        }
-        m_openMode = pool::IDatabase::UPDATE;
-      } // Connection established
+        throw std::runtime_error( "Could not connect to the file (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
+      }
+      m_openMode = m_transactionType == Io::WRITE ? Io::WRITE : Io::APPEND;
+    } // Connection established
 
   } // Database handler retrieved
 }
 
 
 void
-pool::PersistencySvc::UserDatabase::disconnect()
+pool::UserDatabase::disconnect()
 {
   if ( m_databaseHandler ) {
     m_session.microSessionManager( m_technology ).disconnect( m_databaseHandler );
-    m_openMode = pool::IDatabase::CLOSED;
+    m_openMode = Io::INVALID;
   }
 }
 
 
-pool::IDatabase::OpenMode
-pool::PersistencySvc::UserDatabase::openMode() const
+Io::IoFlag
+pool::UserDatabase::openMode() const
 {
   return m_openMode;
 }
 
 
 const std::string&
-pool::PersistencySvc::UserDatabase::fid()
+pool::UserDatabase::fid()
 {
   if ( m_databaseHandler ) return m_databaseHandler->fid();
   else {
@@ -244,7 +208,7 @@ pool::PersistencySvc::UserDatabase::fid()
             m_alreadyConnected = true;
          }
          else {
-           if( m_transactionType != pool::ITransaction::UPDATE ) { // Fetch the FID from the db itself !
+           if( m_transactionType != Io::WRITE ) { // Fetch the FID from the db itself !
               if( !m_technologySet ) {
                  ATH_MSG_DEBUG("Opening database '" << m_name << "' with no technology set");
                  m_technology = pool::ROOT_StorageType.type();
@@ -280,7 +244,7 @@ pool::PersistencySvc::UserDatabase::fid()
 
 
 const std::string&
-pool::PersistencySvc::UserDatabase::pfn()
+pool::UserDatabase::pfn()
 {
   if( m_databaseHandler )  return m_databaseHandler->pfn();
   if( m_nameType == pool::DatabaseSpecification::PFN )  return m_name;
@@ -309,7 +273,7 @@ pool::PersistencySvc::UserDatabase::pfn()
 
 
 bool
-pool::PersistencySvc::UserDatabase::setTechnology( long technology )
+pool::UserDatabase::setTechnology( long technology )
 {
   if ( m_alreadyConnected ) return false;
   else {
@@ -322,14 +286,14 @@ pool::PersistencySvc::UserDatabase::setTechnology( long technology )
 
 
 long
-pool::PersistencySvc::UserDatabase::technology() const
+pool::UserDatabase::technology() const
 {
   return m_technology;
 }
 
 
 std::vector< std::string >
-pool::PersistencySvc::UserDatabase::containers()
+pool::UserDatabase::containers()
 {
   std::vector< std::string > containers;
   if ( m_databaseHandler ) {
@@ -340,7 +304,7 @@ pool::PersistencySvc::UserDatabase::containers()
 
 
 pool::IContainer*
-pool::PersistencySvc::UserDatabase::containerHandle( const std::string& name )
+pool::UserDatabase::containerHandle( const std::string& name )
 {
   pool::IContainer* container = 0;
   if ( m_databaseHandler ) {
@@ -351,7 +315,7 @@ pool::PersistencySvc::UserDatabase::containerHandle( const std::string& name )
 
 
 bool
-pool::PersistencySvc::UserDatabase::checkInRegistry()
+pool::UserDatabase::checkInRegistry()
 {
   // Check first if the database is already connected.
   switch( m_nameType ) {
@@ -370,11 +334,14 @@ pool::PersistencySvc::UserDatabase::checkInRegistry()
   if ( m_databaseHandler ) {
     m_alreadyConnected = true;
     m_technology = m_databaseHandler->technology();
-    if ( m_databaseHandler->accessMode() == pool::READ ) {
-      m_openMode = pool::IDatabase::READ;
+    if ( m_databaseHandler->accessMode() == Io::APPEND ) {
+      m_openMode = Io::APPEND;
+    }
+    else if ( m_databaseHandler->accessMode() == Io::WRITE ) {
+      m_openMode = Io::WRITE;
     }
     else {
-      m_openMode = pool::IDatabase::UPDATE;
+      m_openMode = Io::READ;
     }
     m_the_fid = m_name = m_databaseHandler->fid();
     m_the_pfn = m_databaseHandler->pfn();
@@ -386,28 +353,28 @@ pool::PersistencySvc::UserDatabase::checkInRegistry()
 
 
 void
-pool::PersistencySvc::UserDatabase::setTechnologyIdentifier( const std::string& sTechnology )
+pool::UserDatabase::setTechnologyIdentifier( const std::string& sTechnology )
 {
   m_technology = pool::DbType::getType( sTechnology ).majorType();
 }
 
 
 const pool::ITechnologySpecificAttributes&
-pool::PersistencySvc::UserDatabase::technologySpecificAttributes() const
+pool::UserDatabase::technologySpecificAttributes() const
 {
   return static_cast< const pool::ITechnologySpecificAttributes& >( *this );
 }
 
 
 pool::ITechnologySpecificAttributes&
-pool::PersistencySvc::UserDatabase::technologySpecificAttributes()
+pool::UserDatabase::technologySpecificAttributes()
 {
   return static_cast< pool::ITechnologySpecificAttributes& >( *this );
 }
 
 
 bool
-pool::PersistencySvc::UserDatabase::attributeOfType( const std::string& attributeName,
+pool::UserDatabase::attributeOfType( const std::string& attributeName,
                                                      void* data,
                                                      const std::type_info& typeInfo,
                                                      const std::string& option )
@@ -418,7 +385,7 @@ pool::PersistencySvc::UserDatabase::attributeOfType( const std::string& attribut
 
 
 bool
-pool::PersistencySvc::UserDatabase::setAttributeOfType( const std::string& attributeName,
+pool::UserDatabase::setAttributeOfType( const std::string& attributeName,
                                                         const void* data,
                                                         const std::type_info& typeInfo,
                                                         const std::string& option )

@@ -17,10 +17,8 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "PersistentDataModel/Guid.h"
 
-#include "AthenaKernel/IAthenaIPCTool.h"
 #include "AthenaKernel/IAthenaSelectorTool.h"
 #include "AthenaKernel/IEvtSelectorSeek.h"
-#include "AthenaKernel/IEventShare.h"
 #include "AthenaKernel/ISecondaryEventSelector.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
@@ -49,7 +47,7 @@ namespace pool {
  *  @brief This class is the EventSelector for event data.
  **/
 class EventSelectorAthenaPool :
-  public extends<::AthService, IEvtSelector, IEvtSelectorSeek, IEventShare, IIoComponent, IIncidentListener, ISecondaryEventSelector>
+  public extends<::AthService, IEvtSelector, IEvtSelectorSeek, IIoComponent, IIncidentListener, ISecondaryEventSelector>
 {
 
 public: // Constructor and Destructor
@@ -115,22 +113,6 @@ public: // Constructor and Destructor
    virtual int size (Context& ctxt) const override;
 
    //-------------------------------------------------
-   // IEventShare
-   /// Make this a server.
-   virtual StatusCode makeServer(int num) override;
-
-   /// Make this a client.
-   virtual StatusCode makeClient(int num) override;
-
-   /// Request to share a given event number.
-   /// @param evtnum [IN]  The event number to share.
-   virtual StatusCode share(int evtnum) override;
-
-   /// Read the next maxevt events.
-   /// @param evtnum [IN]  The number of events to read.
-   virtual StatusCode readEvent(int maxevt) override;
-
-   //-------------------------------------------------
    // IIoComponent
    /// Callback method to reinitialize the internal state of the component for I/O purposes (e.g. upon @c fork(2))
    virtual StatusCode io_reinit() override;
@@ -153,7 +135,7 @@ protected:
    virtual StatusCode recordAttributeList() const override;
    /// Fill AttributeList with specific items from the selector and a suffix
    virtual StatusCode fillAttributeList(coral::AttributeList *attrList, const std::string &suffix, bool copySource) const override;
-   // Disconnect DB if all events from the source FID were processed and the Selector moved to another file
+   /// Disconnect DB if all events from the source FID were processed and the Selector moved to another file
    virtual bool disconnectIfFinished(const SG::SourceID &fid) const override;
 
 private: // internal member functions
@@ -168,7 +150,6 @@ private: // internal member functions
 
 private: // data
    EventContextAthenaPool*         m_endIter{};
-
    mutable std::unique_ptr<PoolCollectionConverter> m_poolCollectionConverter ATLAS_THREAD_SAFE {};
    mutable pool::ICollectionCursor* m_headerIterator ATLAS_THREAD_SAFE {};
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
@@ -204,9 +185,6 @@ private: // properties
    /// HelperTools, vector of names of AlgTools that are executed by the EventSelector
    mutable ToolHandleArray<IAthenaSelectorTool> m_helperTools ATLAS_THREAD_SAFE {this, "HelperTools", {}, ""};
    ToolHandle<IAthenaSelectorTool> m_counterTool{this, "CounterTool", "", ""};
-   ToolHandle<IAthenaIPCTool> m_eventStreamingTool{this, "SharedMemoryTool", "", ""};
-   /// Make this instance a Streaming Client during first iteration automatically
-   Gaudi::Property<int> m_makeStreamingToolClient{this, "MakeStreamingToolClient",0};
 
    /// The following are included for compatibility with McEventSelector and are not really used.
    /// However runNo, oldRunNo and overrideRunNumberFromInput are used to reset run number for
@@ -243,9 +221,13 @@ private: // properties
 
    SG::SlotSpecificObj<SG::SourceID> m_sourceID;
 
-   /// @brief make the @c DoubleEventSelectorAthenaPool a friend so it can access the 
+   /// @brief make the @c DoubleEventSelectorAthenaPool a friend so it can access the
    ///        internal @c EventSelectorAthenaPool methods and members
    friend class DoubleEventSelectorAthenaPool;
+
+   /// @brief make the @c EventSelectorAthenaPoolSharedIO a friend so it can access the
+   ///        internal @c EventSelectorAthenaPool methods and members
+   friend class EventSelectorAthenaPoolSharedIO;
 };
 
 #endif

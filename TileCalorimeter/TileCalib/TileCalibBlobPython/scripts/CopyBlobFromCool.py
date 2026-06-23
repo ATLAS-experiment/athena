@@ -106,7 +106,10 @@ else:
     log.info("File %s was not found, assuming it's full schema string" , schema)
 
 db = TileCalibTools.openDbConn(schema,server)
-folderTag = TileCalibTools.getFolderTag(db if 'CONDBR2' in schema else schema, folderPath, tag)
+if tag.upper().startswith("TILE") or tag.upper().startswith("CALO") or tag.upper().startswith("LAR"):
+    folderTag = tag
+else:
+    folderTag = TileCalibTools.getFolderTag(db if 'CONDBR2' in schema else schema, folderPath, tag)
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 
 folder = db.getFolder(folderPath)

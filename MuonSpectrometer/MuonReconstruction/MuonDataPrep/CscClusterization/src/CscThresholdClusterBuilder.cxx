@@ -39,7 +39,7 @@ StatusCode CscThresholdClusterBuilder::initialize() {
 
 //******************************************************************************
 
-StatusCode CscThresholdClusterBuilder::execute() {
+StatusCode CscThresholdClusterBuilder::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG("Processing event ");
 
     // Cleanup the cluster container - ready for filling
@@ -48,7 +48,7 @@ StatusCode CscThresholdClusterBuilder::execute() {
         std::vector<IdentifierHash> decodedIDs;
 
         // prepare output
-        SG::WriteHandle<Muon::CscPrepDataContainer> wh_pclusters(m_pclusters);
+        SG::WriteHandle<Muon::CscPrepDataContainer> wh_pclusters(m_pclusters, ctx);
         Muon::CscPrepDataContainer* object = new Muon::CscPrepDataContainer(m_idHelperSvc->cscIdHelper().module_hash_max());
         /// record the container in storeGate
         if (wh_pclusters.record(std::unique_ptr<Muon::CscPrepDataContainer>(object)).isFailure()) {

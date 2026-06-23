@@ -13,6 +13,9 @@ if (NOT XAOD_STANDALONE)
                          src/components/*.cxx
                          NO_PUBLIC_HEADERS
                          LINK_LIBRARIES AthenaBaseComps GaudiKernel )
+    atlas_add_test( GeneratorSettingsSemantics
+                    SCRIPT test/GeneratorSettingsSemanticsTest.py
+                    POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 atlas_install_data( data/* )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -103,7 +103,7 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
       }
 
 #ifdef HEPMC3
-      (*mec)[i]->add_attribute("filterWeight", std::make_shared<HepMC3::DoubleAttribute>(eventWeight));
+      (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(eventWeight));
 #endif
 
     }

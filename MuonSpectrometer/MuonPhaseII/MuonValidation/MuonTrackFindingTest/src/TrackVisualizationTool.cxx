@@ -339,21 +339,20 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
             const int mColor = msSector->barrel() ? ColorBarrel : (msSector->side() > 0 ? ColorEndcapA : ColorEndcapC);
 
             for (const auto secProj : {leftOverlap, center, rightOverlap}) {
-                if (!sectorMap.insideSector(segment->sector() + Acts::toUnderlying(secProj),
-                                            segment->position().phi())){
+                const ExpandedSector sector{static_cast<unsigned>(segment->sector()), secProj};
+                if (ExpandedSector{segment->position().phi()} != sector){
                     continue;
                 }
 
                 for (const Location loc : {Barrel, Endcap}) {
-                    const Amg::Vector2D projPos{seeder.expressOnCylinder(*gctx, *segment, loc, secProj)};
+                    const Amg::Vector2D projPos{seeder.expressOnCylinder(*gctx, *segment, loc, sector)};
                     if (!seeder.withinBounds(projPos, loc)) {
                         continue;
                     }
                     drawnPoint = true;
                     const bool isGood = onSeed(segment, loc);
                     const int mStyle = stationMarkerSyle(chIdx, true, isGood);
-                    const double phi = seeder.projectedPhi(segment->sector(), secProj);
-                    const Amg::Vector2D markerPos{viewVector(phi, projPos, view)};
+                    const Amg::Vector2D markerPos{viewVector(sector.phi(), projPos, view)};
                     extPrimitives.emplace_back( drawMarker(markerPos, mStyle, mColor)); //Is this necessary?
                     canvas->add( drawMarker(markerPos, mStyle, mColor));
 
@@ -431,21 +430,15 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
 
             using enum Location;
             using enum MsTrackSeeder::SectorProjector;
-            for (const auto secProj : {leftOverlap, center, rightOverlap}) {
-                if (!sectorMap.insideSector(segment->sector() + Acts::toUnderlying(secProj),
-                                            segment->position().phi())){
+            ExpandedSector sector{segment->position().phi()};
+            for (const Location loc : {Barrel, Endcap}) {
+                const Amg::Vector2D projected{seeder.expressOnCylinder(*gctx, *segment, loc, sector)};
+                if (!seeder.withinBounds(projected, loc)) {
                     continue;
                 }
-                for (const Location loc : {Barrel, Endcap}) {
-                    const Amg::Vector2D projected{seeder.expressOnCylinder(*gctx, *segment, loc, secProj)};
-                    if (!seeder.withinBounds(projected, loc)) {
-                        continue;
-                    }
-                    const double phi = MsTrackSeeder::projectedPhi(segment->sector(), secProj);
-                    canvas.add(drawMarker(viewVector(phi, projected, view), mStyle, truthColor, 3));
-                    legend.addMarker(mStyle, Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx)), truthColor);
-                    addedEntry = true;
-                }
+                canvas.add(drawMarker(viewVector(sector.phi(), projected, view), mStyle, truthColor, 3));
+                legend.addMarker(mStyle, Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx)), truthColor);
+                addedEntry = true;
             }
         }
         if (addedEntry) {

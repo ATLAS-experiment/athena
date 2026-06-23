@@ -217,7 +217,7 @@ TrigDec::TrigDecisionMakerMT::execute(const EventContext &context) const
   ATH_MSG_DEBUG ( "Run '" << eventInfo->runNumber()
                   << "'; Event '" << eventInfo->eventNumber()
                   << "'; BCID '" << eventInfo->bcid()
-                  << "'; BG Code '" << trigDec->bgCode() << "'" ) ;
+                  << "'; BG Code '" << static_cast<int>(trigDec->bgCode()) << "'" ) ;
 
   ATH_MSG_DEBUG ("Decision object dump: " << *(trigDec.get()));
   auto trigDecWriteHandle = SG::makeHandle( m_trigDecisionKeyOut, context );

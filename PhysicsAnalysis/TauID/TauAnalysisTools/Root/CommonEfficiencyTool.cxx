@@ -76,6 +76,7 @@ CommonEfficiencyTool::CommonEfficiencyTool(const std::string& sName)
   , m_eCheckTruth(TauAnalysisTools::Unknown)
   , m_bSFIsAvailable(false)
   , m_bSFIsAvailableChecked(false)
+  , m_accessors{std::make_unique<Accessors>(*this)}	
 {
 }
 
@@ -129,6 +130,8 @@ StatusCode CommonEfficiencyTool::initialize()
   if (applySystematicVariation(CP::SystematicSet()) != StatusCode::SUCCESS )
     return StatusCode::FAILURE;
 
+  ATH_CHECK (initializeColumns());
+
   return StatusCode::SUCCESS;
 }
 
@@ -139,17 +142,29 @@ StatusCode CommonEfficiencyTool::initialize()
 
 //______________________________________________________________________________
 CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::TauJet& xTau,
-    double& dEfficiencyScaleFactor, unsigned int /*iRunNumber*/)
+    double& dEfficiencyScaleFactor, unsigned int iRunNumber)
 {
+    return getEfficiencyScaleFactor(columnar::TauJetId(xTau), dEfficiencyScaleFactor, iRunNumber);
+}
+
+CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(columnar::TauJetId tau, double& dEfficiencyScaleFactor,
+    unsigned int /*iRunNumber*/) const
+{
+  const Accessors& acc = *m_accessors;
+
   // check which true state is requested
-  if (!m_bSkipTruthMatchCheck and getTruthParticleType(xTau) != m_eCheckTruth)
+  // need columnar migration
+  if (!m_bSkipTruthMatchCheck and acc.m_truthParticleType(tau) != m_eCheckTruth)
   {
     dEfficiencyScaleFactor = 1.;
     return CP::CorrectionCode::Ok;
   }
 
+  // need columnar migration
+  int ntracks = tau.getXAODObject().nTracks(); 
+
   // check if 1 prong
-  if (m_bNoMultiprong && xTau.nTracks() != 1)
+  if (m_bNoMultiprong && ntracks != 1)
   {
     dEfficiencyScaleFactor = 1.;
     return CP::CorrectionCode::Ok;
@@ -159,8 +174,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
   std::string sMode;
   if (m_bUseTauSubstructure)
   {
-    int iDecayMode = -1;
-    xTau.panTauDetail(xAOD::TauJetParameters::PanTau_DecayMode, iDecayMode);
+    int iDecayMode = acc.m_decayMode(tau);
     sMode = ConvertDecayModeToString(iDecayMode);
     if (sMode.empty())
     {
@@ -171,12 +185,12 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
   else
   {
      // skip taus which are not 1 or 3 prong
-     if( xTau.nTracks() != 1 && xTau.nTracks() != 3) {
+     if( ntracks != 1 && ntracks != 3) {
         dEfficiencyScaleFactor = 1.;
         return CP::CorrectionCode::Ok;
      } 
         
-     sMode = ConvertProngToString(xTau.nTracks());
+     sMode = ConvertProngToString(ntracks);
   }
 
   std::string sHistName;
@@ -188,7 +202,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
 
   // get standard scale factor
   CP::CorrectionCode tmpCorrectionCode = getValue(sHistName,
-                                                  xTau,
+                                                  tau,
                                                   dEfficiencyScaleFactor);
   // return correction code if histogram is not available
   if (tmpCorrectionCode != CP::CorrectionCode::Ok)
@@ -234,7 +248,7 @@ CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::Ta
 
     // get the uncertainty from the histogram
     tmpCorrectionCode = getValue(sHistName,
-                                 xTau,
+                                 tau,
                                  dUncertaintySyst);
 
     // return correction code if histogram is not available
@@ -293,6 +307,8 @@ CP::CorrectionCode CommonEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::
 
   return tmpCorrectionCode;
 }
+
+
 
 /*
   standard check if a systematic is available
@@ -611,9 +627,11 @@ void CommonEfficiencyTool::generateSystematicSets()
 */
 //______________________________________________________________________________
 CP::CorrectionCode CommonEfficiencyTool::getValue(const std::string& sHistName,
-    const xAOD::TauJet& xTau,
+    columnar::TauJetId tau,
     double& dEfficiencyScaleFactor) const
 {
+  
+
   const tSFMAP& mSF = *m_mSF;
   auto it = mSF.find (sHistName);
   if (it == mSF.end())
@@ -629,8 +647,9 @@ CP::CorrectionCode CommonEfficiencyTool::getValue(const std::string& sHistName,
   tTupleObjectFunc tTuple = it->second;
 
   // get pt and eta (for x and y axis respectively)
-  double dPt = m_fX(xTau);
-  double dEta = m_fY(xTau);
+  // need columnar migration
+  double dPt = m_fX(tau.getXAODObject()); 
+  double dEta = m_fY(tau.getXAODObject()); 
 
   double dVars[2] = {dPt, dEta};
 
@@ -725,3 +744,49 @@ CP::CorrectionCode CommonEfficiencyTool::getValueTF1(const TObject* oObject,
   dEfficiencyScaleFactor = fFunc->Eval(dPt, dEta);
   return CP::CorrectionCode::Ok;
 }
+
+void CommonEfficiencyTool::callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId event) const
+{
+
+  const Accessors& acc = *m_accessors;	
+  unsigned int runNumber = 0;
+  if (!acc.randomrunnumber.isAvailable(event)) {
+      ATH_MSG_WARNING(
+        "Pileup tool not run before using ElectronEfficiencyTool! SFs do not "
+        "reflect PU distribution in data");
+      return;
+  } 
+  runNumber = acc.randomrunnumber(event);
+
+  for (columnar::TauJetId tau : taus)
+  {
+    double sf = 0;
+    switch (getEfficiencyScaleFactor(tau, sf, runNumber).code())
+    {
+      case CP::CorrectionCode::Ok:
+        acc.m_sfDec(tau) = sf;
+        acc.m_validDec(tau) = true;
+        break;
+      case CP::CorrectionCode::OutOfValidityRange:
+        acc.m_sfDec(tau) = sf;
+        acc.m_validDec(tau) = false;
+        break;
+      default:
+        throw std::runtime_error("Error in getEfficiencyScaleFactor");
+    }
+  }
+}
+
+void CommonEfficiencyTool::callEvents (columnar::EventContextRange events) const
+{
+  const Accessors& acc = *m_accessors;
+  for (columnar::EventContextId event : events)
+  {
+    auto eventInfo = acc.m_eventInfo(event);
+    callSingleEvent (acc.m_taus(event), eventInfo);
+  }
+}
+
+
+
+

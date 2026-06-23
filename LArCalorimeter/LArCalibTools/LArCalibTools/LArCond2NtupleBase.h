@@ -18,6 +18,7 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloIdentifier/CaloGain.h"
 
 class HWIdentifier;
 class LArOnlineID_Base;
@@ -37,7 +38,7 @@ class LArCond2NtupleBase : public AthAlgorithm {
 
   //Standard algo methods
   StatusCode initialize();
-  StatusCode execute()    {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&)    {return StatusCode::SUCCESS;}
   //Finalize needs to be implemented by the deriving class
 
 
@@ -59,6 +60,7 @@ class LArCond2NtupleBase : public AthAlgorithm {
   Gaudi::Property< bool > m_addCalib{this, "AddCalib", false, "add also calib line info info ?"};
   Gaudi::Property< bool > m_realgeom{this, "RealGeometry", false, "add real geometry values ?"};
   Gaudi::Property< bool > m_expandId{this,"ExpandId", true ,"add online Id decoded fields ?"}; 
+  Gaudi::Property< int  > m_NGains{this,"nGains", CaloGain::LARNGAIN,"Number of gains"};
 
   enum {NOT_VALID = -999};
 

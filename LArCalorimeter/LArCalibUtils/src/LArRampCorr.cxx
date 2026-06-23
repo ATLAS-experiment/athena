@@ -32,7 +32,7 @@ StatusCode LArRampCorr::initialize()
 
 
 // ********************** EXECUTE ****************************
-StatusCode LArRampCorr::execute()
+StatusCode LArRampCorr::execute(const EventContext& /*ctx*/)
 { 
   return StatusCode::SUCCESS;
 } 

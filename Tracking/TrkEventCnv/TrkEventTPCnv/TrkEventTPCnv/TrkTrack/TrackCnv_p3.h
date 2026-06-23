@@ -32,7 +32,7 @@ public:
   virtual void persToTrans( const Trk::Track_p2 *, Trk::Track *, MsgStream& );
   virtual void transToPers( const Trk::Track *, Trk::Track_p2 *, MsgStream& );
 
-  virtual void	initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv )
+  virtual void	initPrivateConverters( TopLevelTPCnvBase *topCnv )
   {
       // std::cout<<"initPrivateConverters for TrackCnv_p3="<<this<<" with topCnv="<<topCnv<<" and tscnv="<<m_trackSummaryCnv<<std::endl;
    m_trackStateVectorCnv.setTopConverter( topCnv, 0 );

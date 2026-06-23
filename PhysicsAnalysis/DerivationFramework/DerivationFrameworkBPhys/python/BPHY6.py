@@ -31,6 +31,8 @@ def BPHY6Cfg(flags):
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
     extrap = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
     acc.addPublicTool(extrap)
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     BPHY6_Extrap_Tool = CompFactory.DerivationFramework.MuonExtrapolationTool(name = "BPHY6_ExtrapolationTool", Extrapolator = extrap)
     BPHY6JpsiFinder = CompFactory.Analysis.JpsiFinder(
                 name                        = "BPHY6JpsiFinder",
@@ -56,7 +58,7 @@ def BPHY6Cfg(flags):
                 VertexSearchTool             = BPHY6JpsiFinder,
                 OutputVtxContainerName = "BPHY6OniaCandidates",
                 V0Tools                = V0Tools,
-                PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                PVRefitter             = PVrefit,
                 PVContainerName        = "PrimaryVertices",
                 RefPVContainerName     = "BPHY6RefittedPrimaryVertices")
 

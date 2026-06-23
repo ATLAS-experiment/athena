@@ -274,13 +274,12 @@ public:
   { std::cout << "TestAlgorithm::initialize\n"; return StatusCode::SUCCESS; }
   virtual StatusCode finalize() override
   { std::cout << "TestAlgorithm::finalize\n"; return StatusCode::SUCCESS; }
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 };
 
 
-StatusCode TestAlgorithm::execute()
+StatusCode TestAlgorithm::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = getContext();
   std::cout << "TestAlgorithm::execute "
             << ctx.eventID().event_number() << " "
             << ctx.evt() << "\n";

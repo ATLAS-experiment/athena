@@ -10,7 +10,7 @@
 #include "StorageSvc/DbConnection.h"
 #include "TokenIterator.h"
 
-pool::PersistencySvc::Container::Container( FileDescriptor& fileDescriptor,
+pool::Container::Container( FileDescriptor& fileDescriptor,
                                             long technology,
                                             const std::string& name ):
   m_name( name ),
@@ -19,14 +19,14 @@ pool::PersistencySvc::Container::Container( FileDescriptor& fileDescriptor,
 {}
 
 pool::ITokenIterator*
-pool::PersistencySvc::Container::tokens()
+pool::Container::tokens()
 {
-  return new pool::PersistencySvc::TokenIterator( m_fileDescriptor,
+  return new pool::TokenIterator( m_fileDescriptor,
                                                   this->name() );
 }
 
 bool
-pool::PersistencySvc::Container::attributeOfType( const std::string& attributeName,
+pool::Container::attributeOfType( const std::string& attributeName,
                                                   void* data,
                                                   const std::type_info& typeInfo,
                                                   const std::string& option )
@@ -37,7 +37,7 @@ pool::PersistencySvc::Container::attributeOfType( const std::string& attributeNa
   
   DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
   DbContainer cntH( dbH.find(name()) );
-  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), pool::READ).isSuccess() ) {
+  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
     return false;
   }
   if( !cntH.getOption(containerOption).isSuccess() ) return false;
@@ -46,7 +46,7 @@ pool::PersistencySvc::Container::attributeOfType( const std::string& attributeNa
 
 
 bool
-pool::PersistencySvc::Container::setAttributeOfType( const std::string& attributeName,
+pool::Container::setAttributeOfType( const std::string& attributeName,
                                                      const void* data,
                                                      const std::type_info& typeInfo,
                                                      const std::string& option )
@@ -58,7 +58,7 @@ pool::PersistencySvc::Container::setAttributeOfType( const std::string& attribut
   
   DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
   DbContainer cntH( dbH.find(name()) );
-  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), pool::READ).isSuccess() ) {
+  if( !cntH.isValid() and !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
     return false;
   }
   return cntH.setOption(containerOption).isSuccess();

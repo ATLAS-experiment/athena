@@ -51,7 +51,7 @@ TEST (UnitTestAlgXAODTest, all_tests)
   sample->add (ASG_TEST_FILE_DATA);
   sample->add (ASG_TEST_FILE_MC);
   SH::SampleHandler sh;
-  sh.add (sample.release());
+  sh.add (std::move (sample));
 
   {
     Job job;

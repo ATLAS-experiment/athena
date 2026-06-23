@@ -145,9 +145,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 //                          MAIN EXECUTE ROUTINE                             //
 ///////////////////////////////////////////////////////////////////////////////
 
-StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
+StatusCode FPGATrackSimLogicalHitsProcessAlg::execute(const EventContext& ctx)
 {
-    const EventContext& ctx = getContext();
 
     // Get reference to hits from StoreGate.
     SG::ReadHandle<FPGATrackSimHitCollection> FPGAHits(m_FPGAHitKey, ctx);
@@ -227,12 +226,21 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         phits_1st.reserve(FPGAHits->size());
         phits_2nd.reserve(FPGAHits->size());
         ATH_MSG_DEBUG("Incoming Hits: " << FPGAHits->size());
+        auto noDelete = [](const FPGATrackSimHit*) {};
         for (const FPGATrackSimHit* hit : *(FPGAHits.cptr())) {
-            phits_all.emplace_back(hit, [](const FPGATrackSimHit*) {});
+            //vectors are non-owning due to no-op deleter. 
+            //should use some mechanism other than shared_ptr here (std::reference_wrapper? bare pointer?)
+            auto sharedHit = std::shared_ptr<const FPGATrackSimHit>{hit, noDelete};
+            phits_all.push_back(sharedHit);
+            if(m_noHitFilter) {
+                phits_1st.push_back(sharedHit);
+                phits_2nd.push_back(std::move(sharedHit));
+                if(hit->isStrip()) phits_strips.push_back(hit);
+            }
         }
 
         // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
-        m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd, phits_strips);
+        if(!m_noHitFilter) m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd, phits_strips);
     }
 
     // record 1st stage hits in SG (VIEW_ELEMENTS - no copy, just store pointers)

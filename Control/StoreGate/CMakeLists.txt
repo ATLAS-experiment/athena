@@ -34,7 +34,7 @@ function( _add_test name )
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-      LINK_LIBRARIES ${Boost_LIBRARIES} StoreGateLib SGCoreLib SGtests TestTools
+      LINK_LIBRARIES Boost::timer StoreGateLib SGCoreLib SGtests TestTools
       ${extra_arg} )
 endfunction( _add_test )
 

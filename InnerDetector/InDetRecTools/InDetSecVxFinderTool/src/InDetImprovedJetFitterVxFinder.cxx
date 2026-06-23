@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -120,7 +120,8 @@ namespace InDet
   }
   
 
-  Trk::VxSecVertexInfo* InDetImprovedJetFitterVxFinder::findSecVertex(const xAOD::Vertex & primaryVertex,
+  Trk::VxSecVertexInfo* InDetImprovedJetFitterVxFinder::findSecVertex(const EventContext& ctx,
+								      const xAOD::Vertex & primaryVertex,
 								      const TLorentzVector & jetMomentum,
 								      const std::vector<const xAOD::IParticle*> & inputTracks) const
   {
@@ -138,7 +139,7 @@ namespace InDet
     std::vector< const Trk::ITrackLink* > secondaryTracks  = mySelectedTracksInJet->getSecondaryTrackLinks();
 
     // Two track vertex candidates
-    const Trk::TwoTrackVerticesInJet* twoTrackVertexCandidates = m_theTwoTrackVtxFinderTool->doVertexFinding( primaryVertex, jetMomentum, secondaryTracks );
+    const Trk::TwoTrackVerticesInJet* twoTrackVertexCandidates = m_theTwoTrackVtxFinderTool->doVertexFinding( ctx, primaryVertex, jetMomentum, secondaryTracks );
     const std::vector< const xAOD::Vertex* > vertexCandidates = twoTrackVertexCandidates->getTwoTrackVertice();
 
 //    // V0 finding AND further track selection, these could even be further separated

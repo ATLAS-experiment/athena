@@ -25,7 +25,7 @@ public:
   ~LArBadChannel2Ascii() =default;
 
   virtual StatusCode initialize() final;
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext& ctx) final;
 
 private:
 

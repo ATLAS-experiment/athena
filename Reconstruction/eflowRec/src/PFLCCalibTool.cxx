@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFLCCalibTool.h"
@@ -43,12 +43,12 @@ StatusCode PFLCCalibTool::initialize() {
 
 }
 
-StatusCode PFLCCalibTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) {
+StatusCode PFLCCalibTool::execute(const EventContext& ctx, eflowCaloObjectContainer& theEflowCaloObjectContainer) {
 
   if (m_useLocalWeight) {
     std::unique_ptr<eflowRecClusterContainer> theEFRecClusterContainer = m_clusterCollectionTool->retrieve(theEflowCaloObjectContainer, true);
     /* Calibrate each cluster */
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     if (caloMgrHandle.isValid()){
       for (auto thisEFlowRecCluster : *theEFRecClusterContainer) applyLocalWeight(thisEFlowRecCluster,**caloMgrHandle);
     }
@@ -56,7 +56,7 @@ StatusCode PFLCCalibTool::execute(eflowCaloObjectContainer& theEflowCaloObjectCo
   } else {
     /* Collect all the clusters in a temporary container (with VIEW_ELEMENTS!) */
     std::unique_ptr<xAOD::CaloClusterContainer> tempClusterContainer = m_clusterCollectionTool->execute(theEflowCaloObjectContainer, true);
-    const EventContext& ctx=Gaudi::Hive::currentContext();
+
     /* Calibrate each cluster */
     for (auto thisCaloCluster : *tempClusterContainer){
       /* Subsequently apply all ClusterLocalCalibTools, print debug output at each stage, if DEBUG it set */

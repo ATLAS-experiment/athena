@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -67,6 +67,7 @@ StatusCode Prompt::VertexFittingTool::finalize()
 
 //=============================================================================
 std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithPrimarySeed(
+  const EventContext& ctx,
   const FittingInput &input,
   const std::vector<const xAOD::TrackParticle* > &tracks,
   VtxType vtxType
@@ -85,7 +86,7 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithPrimarySee
 
   // Fit a new secondary vertex
   std::unique_ptr<xAOD::Vertex> secondaryVtx = getSecondaryVertexWithSeed(
-    tracks, input.inDetTracks, input.priVtx->position()
+    ctx, tracks, input.inDetTracks, input.priVtx->position()
   );
 
   if(!secondaryVtx) {
@@ -117,6 +118,7 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithPrimarySee
 
 //=============================================================================
 std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithSeed(
+  const EventContext& ctx,
   const FittingInput &input,
   const std::vector<const xAOD::TrackParticle* > &tracks,
   const Amg::Vector3D& seed,
@@ -130,7 +132,7 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithSeed(
   m_countNumberOfFits++;
 
   std::unique_ptr<xAOD::Vertex> secondaryVtx = getSecondaryVertexWithSeed(
-    tracks, input.inDetTracks, seed
+    ctx, tracks, input.inDetTracks, seed
   );
 
   if(!secondaryVtx) {
@@ -273,6 +275,7 @@ bool Prompt::VertexFittingTool::decorateNewSecondaryVertex(
 
 //=============================================================================
 std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::getSecondaryVertexWithSeed(
+  const EventContext& ctx,
   const std::vector<const xAOD::TrackParticle*> &tracks,
   const xAOD::TrackParticleContainer *inDetTracks,
   const Amg::Vector3D& seed
@@ -304,11 +307,11 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::getSecondaryVertexWithS
     ATH_MSG_DEBUG( name() << "::getSecondaryVertexWithSeed -- track chi2    = " << track->chiSquared());
   }
 
-  xAOD::Vertex *newVertex = 0;
+  std::unique_ptr<xAOD::Vertex> newVertex;
   std::unique_ptr<xAOD::Vertex> seedVertex;
 
   if(m_doSeedVertexFit) {
-    seedVertex = std::unique_ptr<xAOD::Vertex>(m_seedVertexFitter->fit(tracksForFit, seed));
+    seedVertex = m_seedVertexFitter->fit(ctx, tracksForFit, seed);
 
     if(seedVertex.get() && !isValidVertex(seedVertex.get())) {
       ATH_MSG_DEBUG("getSecondaryVertexWithSeed -- failed to fit seed vertex");
@@ -318,10 +321,10 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::getSecondaryVertexWithS
   }
 
   if(seedVertex.get()) {
-    newVertex = m_vertexFitter->fit(tracksForFit, seedVertex->position());
+    newVertex = m_vertexFitter->fit(ctx, tracksForFit, seedVertex->position());
   }
   else {
-    newVertex = m_vertexFitter->fit(tracksForFit, seed);
+    newVertex = m_vertexFitter->fit(ctx, tracksForFit, seed);
   }
 
   if(!newVertex) {
@@ -354,15 +357,9 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::getSecondaryVertexWithS
     Momentum += static_cast<TLorentzVector>(track->p4());
   }
 
-  xAOD::SecVtxHelper::setVertexMass(newVertex, Momentum.M()); // "mass"
+  xAOD::SecVtxHelper::setVertexMass(newVertex.get(), Momentum.M()); // "mass"
 
-  // newVertex was returned from the vertex fitter as a raw pointer
-  // It looks like Trk::IVertexFitter::fit function expects
-  // memory management to be done by the caller.
-  // Therefore, we take ownership by casting to a unique_ptr
-
-  std::unique_ptr<xAOD::Vertex> returnPtr(newVertex);
-
-  return returnPtr;
+  return newVertex
+;
 }
 

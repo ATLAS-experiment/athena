@@ -25,6 +25,6 @@ atlas_add_test( SimHitTester
                 SCRIPT python -m MuonPRDTestR4.MuonHitTestConfig --nEvents 1 --noMM --noSTGC
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 

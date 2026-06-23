@@ -22,9 +22,9 @@ namespace DerivationFramework {
       const std::string& n,
       const IInterface* p) : 
     base_class(t,n,p),
-    m_v0Tools("Trk::V0Tools", this),
+    m_v0Tools("Trk::V0Tools"),
     m_SearchTool("",this),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this)
+    m_pvRefitter("Analysis::PrimaryVertexRefitter")
   {
     
     // Declare tools    
@@ -134,7 +134,7 @@ namespace DerivationFramework {
     if(m_refitPV){ 
        if(vtxContainer->size() >0){
         if(vtxContainer->size() > 10000){
-          ATH_MSG_WARNING("Number of candidates is very high N=" << vtxContainer->size() << " this may crash the sharedwriter");
+          ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " Number of candidates is very high N=" << vtxContainer->size() << " this may crash the sharedwriter");
         }
         StatusCode SC = helper.FillCandwithRefittedVertices(vtxContainer.get(),  pvContainer.cptr(), refPvContainer.get(), &(*m_pvRefitter) , m_PV_max, m_DoVertexType);
         if(SC.isFailure()){
@@ -142,7 +142,7 @@ namespace DerivationFramework {
             return SC;
         }
         if(refPvContainer->size() > 10000){
-          ATH_MSG_WARNING("Number of refitted vertices is very high N=" << refPvContainer->size() << " this may crash the sharedwriter");
+          ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " Number of refitted vertices is very high N=" << refPvContainer->size() << " this may crash the sharedwriter");
         }
         }
     }else{

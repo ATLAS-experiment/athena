@@ -49,7 +49,7 @@ main()
       "AsgElectronEfficiencyCorrectionTool/ElectronEffCorrection");
     ANA_CHECK(tool.setProperty("CorrelationModel", "FULL") &&
               tool.setProperty("ForceDataType", 1) &&
-              tool.setProperty("IdKey", "Medium") && tool.retrieve());
+              tool.setProperty("IdKey", "MediumLH") && tool.retrieve());
 
     asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool> eccTool;
     eccTool.setTypeAndName(

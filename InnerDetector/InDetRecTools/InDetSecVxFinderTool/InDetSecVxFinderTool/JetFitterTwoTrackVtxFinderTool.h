@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETFITTER_TWOTRACKVTX_FINDER_TOOL_H
@@ -29,13 +29,15 @@ namespace InDet {
         StatusCode initialize();
         StatusCode finalize();
 
-	const Trk::TwoTrackVerticesInJet* doVertexFinding( const xAOD::Vertex&,
+	const Trk::TwoTrackVerticesInJet* doVertexFinding( const EventContext& ctx,
+							   const xAOD::Vertex&,
 							   const TLorentzVector&,
 							   std::vector< const Trk::ITrackLink* >& ) const;
 
 
     private:
-	xAOD::Vertex* computeVtxcandidate( const xAOD::Vertex&,
+	xAOD::Vertex* computeVtxcandidate( const EventContext& ctx,
+					   const xAOD::Vertex&,
 					   const TLorentzVector&,
 					   const Trk::ITrackLink* trackA,
 					   const Trk::ITrackLink* trackB ) const;

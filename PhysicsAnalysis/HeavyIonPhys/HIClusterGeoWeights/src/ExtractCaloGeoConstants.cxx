@@ -29,17 +29,17 @@ StatusCode ExtractCaloGeoConstants::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ExtractCaloGeoConstants::execute()
+StatusCode ExtractCaloGeoConstants::execute(const EventContext& ctx)
 {
   // retrieve the tower container
-  SG::ReadHandle<CaloTowerContainer> navInColl(m_tower_container_key);
+  SG::ReadHandle<CaloTowerContainer> navInColl(m_tower_container_key, ctx);
   if (!navInColl.isValid()) {
     ATH_MSG_ERROR("Could not find CaloTowerContainer " << m_tower_container_key);
     return(StatusCode::FAILURE);
   }
 
   // retrieve cell container
-  SG::ReadHandle<CaloCellContainer> cellColl(m_cell_container_key);
+  SG::ReadHandle<CaloCellContainer> cellColl(m_cell_container_key, ctx);
   if (!cellColl.isValid()) {
     ATH_MSG_ERROR("Could not find CaloCellContainer " << m_cell_container_key);
     return(StatusCode::FAILURE);

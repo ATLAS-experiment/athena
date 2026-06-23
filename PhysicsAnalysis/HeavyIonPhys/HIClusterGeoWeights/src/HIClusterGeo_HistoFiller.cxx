@@ -46,9 +46,8 @@ StatusCode HIClusterGeo_HistoFiller::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode HIClusterGeo_HistoFiller::execute()
+StatusCode HIClusterGeo_HistoFiller::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadHandle<xAOD::EventInfo> eventInfo{m_eventInfoKey, ctx};
   if (!eventInfo.isValid())

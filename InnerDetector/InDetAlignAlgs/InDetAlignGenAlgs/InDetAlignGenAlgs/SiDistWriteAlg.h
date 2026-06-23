@@ -19,7 +19,7 @@ class SiDistWriteAlg : public AthAlgorithm {
   ~SiDistWriteAlg();
 
   StatusCode  initialize();    
-  StatusCode  execute();
+  StatusCode  execute(const EventContext& ctx);
   StatusCode  finalize();  
 
 private:

@@ -47,7 +47,7 @@ namespace xAODMaker {
       /// Function initialising the algorithm
       StatusCode initialize() override;
       /// Function executing the algorithm
-      StatusCode execute() override;
+      StatusCode execute(const EventContext& ctx) override;
 
    private:
       /// Get the dictionary describing an auxiliary vector variable

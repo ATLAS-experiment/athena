@@ -82,7 +82,7 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::selectCandidates(const EventContex
     }
 
     for (const auto& combined_tags : *tag_map) {
-        if (combined_tags.second->author() != xAOD::Muon::MuidCo) {
+        if (combined_tags.second->author() != xAOD::Muon::Author::MuidCo) {
             ATH_MSG_WARNING("Found a non MuidCo tag.... Please check " << combined_tags.second->toString());
             continue;
         }

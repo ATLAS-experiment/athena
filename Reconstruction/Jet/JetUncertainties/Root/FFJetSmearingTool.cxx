@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*************************************************************************************\
@@ -374,14 +374,14 @@ namespace CP {
                 m_Syst_HistPath_map[Syst_Name] = settings.GetValue(prefix+"Hist","");
                 
                 // Processing the input histogram name
-                m_Syst_Hist_map[Syst_Name] = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get(m_Syst_HistPath_map[Syst_Name].c_str())));
+                m_Syst_Hist_map[Syst_Name] = std::unique_ptr<TH2>(static_cast<TH2*>(data_file->Get(m_Syst_HistPath_map[Syst_Name].c_str())));
                 m_Syst_Hist_map[Syst_Name]->SetDirectory(nullptr);
                 
                 // For Comb mass we need to read two histograms
                 if (m_MassDef == JetTools::FFJetAllowedMassDefEnum::Comb){
                     m_Syst_HistTAPath_map[Syst_Name] = settings.GetValue(prefix+"HistTA","");
                     if (!m_Syst_HistTAPath_map[Syst_Name].empty()){
-                        m_Syst_HistTA_map[Syst_Name] = std::unique_ptr<TH2>(dynamic_cast<TH2*>(data_file->Get(m_Syst_HistTAPath_map[Syst_Name].c_str())));
+                        m_Syst_HistTA_map[Syst_Name] = std::unique_ptr<TH2>(static_cast<TH2*>(data_file->Get(m_Syst_HistTAPath_map[Syst_Name].c_str())));
                         m_Syst_HistTA_map[Syst_Name]->SetDirectory(nullptr);
                     }
                 }
@@ -390,13 +390,11 @@ namespace CP {
         }
 
         // JMR Systematics
+        const std::string to_find = "MCTYPE";
+        const std::string to_replace = m_MCType_string;
         for (size_t iComp = 0; iComp < 999; ++iComp){
-
             const TString prefix = Form("JMRComponent.%zu.",iComp);
             std::string Syst_Name = settings.GetValue(prefix+"Name","");
-
-            std::string to_find = "MCTYPE";
-            std::string to_replace = m_MCType_string;
             replaceAllOccurrences(Syst_Name, to_find, to_replace);
 
             if (!Syst_Name.empty()){

@@ -16,6 +16,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "TileGeoModel/TileSwitches.h"
 #include "GeoModelKernel/GeoPhysVol.h" //PVLink typedef
+#include <string_view>
 
 // Definition for regions
 #define TILE_REGION_CENTRAL 1
@@ -185,7 +186,7 @@ class TileGeoSectionBuilder
       @param level       volume level and printig level
       @param XYZ         checking variables
   */
-  void checking(const std::string& VolumeName, bool print, int level,
+  void checking(std::string_view VolumeName, bool print, int level,
                 double X1, double X2, double Y1, double Y2, double Z);
 
   // These methods should be used when section contents are not built

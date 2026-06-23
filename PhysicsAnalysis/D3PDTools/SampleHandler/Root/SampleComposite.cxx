@@ -2,14 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -19,7 +12,7 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ThrowMsg.h>
-#include <SampleHandler/SamplePtr.h>
+#include <SampleHandler/SampleLocal.h>
 
 //
 // method implementations
@@ -35,7 +28,7 @@ namespace SH
     for (SamplesIter sample = m_samples.begin(),
 	   end = m_samples.end(); sample != end; ++ sample)
     {
-      RCU_INVARIANT (!sample->empty());
+      RCU_INVARIANT (*sample != nullptr);
     };
   }
 
@@ -60,13 +53,13 @@ namespace SH
 
 
   void SampleComposite ::
-  add (const SamplePtr& sample)
+  add (std::shared_ptr<Sample> sample)
   {
     RCU_CHANGE_INVARIANT (this);
-    RCU_REQUIRE_SOFT (!sample.empty());
+    RCU_REQUIRE_SOFT (sample != nullptr);
     if (contains (sample->name()))
       RCU_THROW_MSG ("trying to add sample " + sample->name() + " to sample " + name() + ", which already contains a sample " + sample->name());
-    m_samples.push_back (sample);
+    m_samples.push_back (std::move (sample));
   }
 
 
@@ -108,12 +101,12 @@ namespace SH
 
 
 
-  SamplePtr SampleComposite ::
+  std::unique_ptr<SampleLocal> SampleComposite ::
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
     RCU_THROW_MSG ("Sample::makeLocal not supported for SampleComposite");
-    return 0; // compiler dummy
+    return {}; // compiler dummy
   }
 
 
@@ -122,7 +115,7 @@ namespace SH
   doUpdateLocation (const std::string& from, const std::string& to)
   {
     RCU_READ_INVARIANT (this);
-    for (std::vector<SamplePtr>::iterator sample = m_samples.begin(),
+    for (auto sample = m_samples.begin(),
 	   end = m_samples.end(); sample != end; ++ sample)
     {
       (*sample)->updateLocation (from, to);
@@ -147,13 +140,12 @@ namespace SH
 
 
   void SampleComposite ::
-  doAddSamples (SampleHandler& result)
+  doAddSamples (SampleHandler& result, const std::shared_ptr<Sample>& /*self*/)
   {
     RCU_READ_INVARIANT (this);
-    for (std::vector<SamplePtr>::iterator sample = m_samples.begin(),
-	   end = m_samples.end(); sample != end; ++ sample)
+    for (auto& sample : m_samples)
     {
-      (*sample)->addSamples (result);
+      sample->addSamples (result, sample);
     };
   }
 }

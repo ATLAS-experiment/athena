@@ -45,7 +45,7 @@ AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr       INFO Application Manager Started successfully
 EventP...stencySvc   INFO Added successfully Conversion service ByteStreamCnvSvc
-EventI...eamAuxCnv   INFO IsSimulation : 0
+EventI...eamAuxCnv   INFO IsSimulation : 1
 EventI...eamAuxCnv   INFO IsTestbeam : 0
 EventI...eamAuxCnv   INFO IsCalibration : 0
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===

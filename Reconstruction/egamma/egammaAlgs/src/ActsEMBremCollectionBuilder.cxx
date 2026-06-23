@@ -178,10 +178,9 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
       originalTPLink("originalTrackParticle");
 
   for (const auto [track, originalTP] : Acts::zip(actsContainer, originals)) {
-    xAOD::TrackParticle* tp = new xAOD::TrackParticle();
-    outputTPs.push_back(tp);
+    xAOD::TrackParticle* tp = outputTPs.push_back(std::make_unique<xAOD::TrackParticle>());
 
-    ATH_CHECK(m_cnvTool->convert(*tp, ctx, track, nullptr, beamSpotData));
+    ATH_CHECK(m_cnvTool->convert(*tp, ctx, track, track.referenceSurface(), beamSpotData));
 
     actsTrackLink(*tp) = ElementLink<ActsTrk::TrackContainer>(&actsContainer, track.index());
 

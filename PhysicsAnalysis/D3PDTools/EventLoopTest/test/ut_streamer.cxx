@@ -2,14 +2,7 @@
   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -34,7 +27,7 @@ int main ()
 {
   {
     SH::SampleHandler sh;
-    sh.add (new SH::SampleLocal ("test1"));
+    sh.add (std::make_unique<SH::SampleLocal> ("test1"));
     Job job;
     job.sampleHandler (sh);
     std::unique_ptr<BatchJob> batch_job (new BatchJob);

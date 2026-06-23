@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecConversions_test.cxx
@@ -161,6 +161,41 @@ void test_JaggedVecProxyBase()
   assert (linkedVec->size() == 4);
   payload = reinterpret_cast<Payload_t*> (linkedVec->toPtr());
   comparePayload (payload, {1, 0, 0, 5});
+
+  // ----- Tests related to trailing 0 handling.
+  std::fill_n (elt, 10, Elt_t{0});
+  linkedVec->resize(0);
+  payload = reinterpret_cast<Payload_t*> (linkedVec->toPtr());
+  pb.resize1 (0, 1);
+  compareElts (elt, 10, {{1}, {0}, {0}});
+  assert (linkedVec->size() == 1);
+  pb.resize1 (1, 1);
+  compareElts (elt, 10, {{1}, {2}, {0}});
+  assert (linkedVec->size() == 2);
+
+  pb.resize1 (3, 1);
+  compareElts (elt, 10, {{1}, {2}, {2}, {3}, {0}});
+  assert (linkedVec->size() == 3);
+
+  std::fill_n (elt, 10, Elt_t{0});
+  linkedVec->resize(0);
+  payload = reinterpret_cast<Payload_t*> (linkedVec->toPtr());
+
+  pb.resize1 (4, 1);
+  compareElts (elt, 10, {{0}, {0}, {0}, {0}, {1}, {0}});
+  assert (linkedVec->size() == 1);
+
+  pb.resize1 (2, 1);
+  compareElts (elt, 10, {{0}, {0}, {1}, {1}, {2}, {0}});
+  assert (linkedVec->size() == 2);
+
+  pb.resize1 (2, 0);
+  compareElts (elt, 10, {{0}, {0}, {0}, {0}, {1}, {0}});
+  assert (linkedVec->size() == 1);
+
+  pb.resize1 (4, 0);
+  compareElts (elt, 10, {{0}, {0}, {0}, {0}, {0}, {0}});
+  assert (linkedVec->size() == 0);
 }
 
 

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthHistogramming.cxx
@@ -13,22 +13,7 @@
 #include "AthenaBaseComps/AthHistogramming.h"
 
 // Framework includes
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "AthenaKernel/getMessageSvc.h"
-
-// STL includes
-#include <string>
-#include <map>
-
-// ROOT includes
-#include "TH1.h"
-#include "TH2.h"
-#include "TH3.h"
-#include "TEfficiency.h"
-#include "TTree.h"
-#include "TGraph.h"
-
 
 
 

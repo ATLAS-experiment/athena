@@ -129,7 +129,7 @@ namespace MuonR4{
           /** @brief List of sim hit containers from which the truth segments shall be retrieved */
           SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_readKeys{this, "SimHitKeys", {}};
           /** @brief Key to the geometry context. Needed to align the hits inside ATLAS */
-          SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+          ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
           /** @brief Key under which the segment Container will be recorded in StoreGate */
           SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "WriteKey", "MuonTruthSegments"};
           /** @brief Decoration key of the associated sim hit links */
@@ -151,11 +151,9 @@ namespace MuonR4{
           /** @brief Minimum energy threshold for pile up hits to be converted  */
           Gaudi::Property<float> m_pileUpHitMinE{this, "energyThresholdPileUp", 1.*Gaudi::Units::GeV};
           /** @brief Maximum energy loss between two pile-up hits */
-          Gaudi::Property<float> m_pileUpHitELoss{this, "pileUpHitELoss", 5.*Gaudi::Units::MeV};
+          Gaudi::Property<float> m_pileUpHitELoss{this, "pileUpHitELoss", 50.*Gaudi::Units::MeV};
           /** @brief Maximum scattering angle between two pile-up hits */
           Gaudi::Property<float> m_pileUpHitAngleCone{this, "pileUpHitAngleCone", 1.*Gaudi::Units::deg};
-          /** @brief Maximum separation between two pile-up hits */
-          Gaudi::Property<float> m_pileUpHitDistance{this, "pileUpHitDistance", 2.*Gaudi::Units::m};
           /** @brief ID / ITk cylinder radius */
           Gaudi::Property<float> m_idCylinderR{this, "IdCylinderR", 1.1*Gaudi::Units::m};
           /**  @brief ID / Itk cylinder half length */

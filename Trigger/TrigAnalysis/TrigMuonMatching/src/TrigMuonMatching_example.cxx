@@ -27,7 +27,7 @@ namespace Trig {
    }
 
 
-  StatusCode TrigMuonMatching_example::execute()
+  StatusCode TrigMuonMatching_example::execute(const EventContext& /*ctx*/)
   {
 
     const xAOD::MuonContainer* muons = 0;

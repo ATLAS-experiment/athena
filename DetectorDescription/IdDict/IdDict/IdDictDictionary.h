@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 #include <memory>
 #include <map>
 
@@ -119,7 +120,7 @@ public:
     void                set_dict_tag     (const std::string& tag);
 
     void resolve_references (IdDictMgr& idd);
-    void generate_implementation (const IdDictMgr& idd, const std::string& tag = "");  
+    void generate_implementation (const IdDictMgr& idd, std::string_view tag = "");  
     void reset_implementation ();  
     bool verify   () const;
     void sort     ();

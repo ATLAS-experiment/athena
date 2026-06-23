@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODEVENTINFO_VERSIONS_EVENTAUXINFO_V3_H
@@ -46,6 +46,16 @@ namespace xAOD {
 
 
      /**
+      * @brief Return the set of variables to copy in a deep copy.
+      * @param warnUnlocked If true, we warn about variables skipped on account
+      *                     of being decorations.
+      *
+      * Special case to avoid warning about skipping mcEventWeights.
+      */
+     virtual SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const override;
+
+
+     /**
       * @brief Test if a particular variable is tagged as a decoration.
       * @param auxid The identifier of the desired aux data item.
       */
@@ -61,10 +71,13 @@ namespace xAOD {
 
      /**
       * @brief Called after one of these objects is read.
-      *        Locks any detector flag words that appear to have already
+      * @param ctx Current event context.
+      *        Make contained variables usable after reading.
+      *        Also locks any detector flag words that appear to have already
       *        been set.
       */
-     void toTransient();
+     virtual void toTransient( const EventContext& ctx ) override;
+             void toTransient(  ); // temporary; for use from read rules
 
 
       /// @name Basic event information

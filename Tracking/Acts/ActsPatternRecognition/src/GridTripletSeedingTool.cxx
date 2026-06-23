@@ -226,7 +226,7 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_topDoubletFinderCfg.deltaRMax = m_deltaRMaxTopSP;
 
   m_tripletFinderCfg.useStripInfo = m_useDetailedDoubleMeasurementInfo;
-  m_tripletFinderCfg.sortedByCotTheta = !m_useDetailedDoubleMeasurementInfo;
+  m_tripletFinderCfg.sortedByCotTheta = true;
   m_tripletFinderCfg.minPt = m_minPt;
   m_tripletFinderCfg.sigmaScattering = m_sigmaScattering;
   m_tripletFinderCfg.radLengthPerSeed = m_radLengthPerSeed;

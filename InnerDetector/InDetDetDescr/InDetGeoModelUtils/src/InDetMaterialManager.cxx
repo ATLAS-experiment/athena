@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <cmath> //for std::abs
 #include <stdexcept>
+#include <format> 
 
 //for checking whether a value is a reliable denominator
 using CxxUtils::close_to_zero;
@@ -95,7 +96,7 @@ InDetMaterialManager::getElement(const std::string& elementName) {
 }
 
 const GeoMaterial*
-InDetMaterialManager::getMaterial(const std::string& materialName) {
+InDetMaterialManager::getMaterial(std::string_view materialName) {
   return extraScaledMaterial(materialName, getMaterialInternal(materialName));
 }
 
@@ -105,7 +106,7 @@ InDetMaterialManager::hasMaterial(const std::string& materialName) const {
 }
 
 const GeoMaterial*
-InDetMaterialManager::getMaterialInternal(const std::string& materialName) {
+InDetMaterialManager::getMaterialInternal(std::string_view materialName) {
   // First check local store of materials. If not found then get it from the GeoModel
   // manager.
   const GeoMaterial* material = getAdditionalMaterial(materialName);
@@ -123,7 +124,7 @@ InDetMaterialManager::getMaterialInternal(const std::string& materialName) {
 }
 
 const GeoMaterial*
-InDetMaterialManager::getAdditionalMaterial(const std::string& materialName) const {
+InDetMaterialManager::getAdditionalMaterial(std::string_view materialName) const {
   MaterialStore::const_iterator iter;
   if ((iter = m_store.find(materialName)) != m_store.end()) {
     return iter->second;
@@ -205,21 +206,21 @@ InDetMaterialManager::getCompositeMaterialForVolume(const std::string& newMatNam
 
 
 const GeoMaterial*
-InDetMaterialManager::getMaterial(const std::string& origMaterialName,
+InDetMaterialManager::getMaterial(std::string_view origMaterialName,
                                   double density,
-                                  const std::string& newName) {
+                                  std::string_view newName) {
   return extraScaledMaterial(origMaterialName, newName,
                              getMaterialInternal(origMaterialName, density, newName));
 }
 
 const GeoMaterial*
-InDetMaterialManager::getMaterialInternal(const std::string& origMaterialName,
+InDetMaterialManager::getMaterialInternal(std::string_view origMaterialName,
                                           double density,
-                                          const std::string& newName) {
-  std::string newName2 = newName;
+                                          std::string_view newName) {
+  std::string newName2{newName};
   bool newNameProvided = !newName2.empty();
   if (!newNameProvided) {
-    newName2 = origMaterialName + "Modified";
+    newName2 = std::string{origMaterialName} + "Modified";
   }
 
   const GeoMaterial* newMaterial = nullptr;
@@ -428,7 +429,7 @@ InDetMaterialManager::addScalingTable(const IRDBRecordset_ptr& scalingTable) {
 }
 
 const GeoMaterial*
-InDetMaterialManager::getMaterialForVolume(const std::string& materialName, double volume, const std::string& newName) {
+InDetMaterialManager::getMaterialForVolume(std::string_view materialName, double volume, std::string_view newName) {
   // Make sure we have a valid volume size.
   if (volume <= 0) {
     ATH_MSG_ERROR("Invalid volume : " << volume);
@@ -446,7 +447,7 @@ InDetMaterialManager::getMaterialForVolume(const std::string& materialName, doub
   // with the string "Modified" added to the material name.
 
   MaterialWeightMap::const_iterator iter;
-  if ((iter = m_weightMap.find(materialName)) != m_weightMap.end()) {
+  if (iter = m_weightMap.find(materialName); iter != m_weightMap.end()) {
     const std::string& materialBase = iter->second.name;
     double weight = iter->second.weight;
     double density = weight / volume;
@@ -802,8 +803,8 @@ InDetMaterialManager::MaterialDef::totalFraction() const {
 // one that is used.
 
 const GeoMaterial*
-InDetMaterialManager::extraScaledMaterial(const std::string& materialName,
-                                          const std::string& newName,
+InDetMaterialManager::extraScaledMaterial(std::string_view materialName,
+                                          std::string_view newName,
                                           const GeoMaterial* origMaterial) {
   if (newName.empty()) {
     return extraScaledMaterial(materialName, origMaterial);
@@ -813,8 +814,8 @@ InDetMaterialManager::extraScaledMaterial(const std::string& materialName,
 }
 
 const GeoMaterial*
-InDetMaterialManager::extraScaledMaterial(const std::string& materialName, const GeoMaterial* origMaterial) {
-  if (!origMaterial) throw std::runtime_error(std::string("Invalid material: ") + materialName);
+InDetMaterialManager::extraScaledMaterial(std::string_view materialName, const GeoMaterial* origMaterial) {
+  if (!origMaterial) throw std::runtime_error(std::format("Invalid material: {}",materialName));
 
   double scaleFactor = getExtraScaleFactor(materialName);
   // -1 (or any -ve number) indicates material is not scaled. And if the scale factor
@@ -823,7 +824,7 @@ InDetMaterialManager::extraScaledMaterial(const std::string& materialName, const
 
   if (scaleFactor == 0) return getMaterialInternal("std::Vacuum");
 
-  std::string newName = materialName + "_ExtraScaling";
+  std::string newName = std::string{materialName} + "_ExtraScaling";
 
   // Check if it is already made.
   const GeoMaterial* newMaterial = getAdditionalMaterial(newName);
@@ -844,7 +845,7 @@ InDetMaterialManager::extraScaledMaterial(const std::string& materialName, const
 }
 
 double
-InDetMaterialManager::getExtraScaleFactor(const std::string& materialName) {
+InDetMaterialManager::getExtraScaleFactor(std::string_view materialName) {
   // If name is found in map we return the corresponding scale factor.
   // The special name "ALL" indicates all materials are scaled.
   // Individual materials can be excluded from scaling by giving either

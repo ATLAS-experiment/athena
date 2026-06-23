@@ -36,11 +36,9 @@ StatusCode PhysValSecVtx::bookHistograms()
   return StatusCode::SUCCESS;      
 }
 
-StatusCode PhysValSecVtx::fillHistograms()
+StatusCode PhysValSecVtx::fillHistograms(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("Filling hists " << name() << "...");
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadHandle< xAOD::VertexContainer > inputVertexContainer = SG::makeHandle( m_vertexContainerKey, ctx );
   if (not inputVertexContainer.isValid()) {

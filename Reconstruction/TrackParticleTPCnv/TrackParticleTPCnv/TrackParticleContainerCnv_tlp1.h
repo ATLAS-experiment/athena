@@ -11,7 +11,7 @@
 // @brief  Top Level converter for persistent Vertex Collection
 //
 //-----------------------------------------------------------------------------
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrackParticleContainer_tlp1.h"
 
@@ -103,7 +103,7 @@
 
 #include "TrackParticleTPCnv/DummyDetElementSurfaceCnv_p1.h"
 
-class TrackParticleContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrackParticleContainerCnv_p1, Rec::TrackParticleContainer_tlp1 >
+class TrackParticleContainerCnv_tlp1 : public TopLevelTPConverter< TrackParticleContainerCnv_p1, Rec::TrackParticleContainer_tlp1 >
 {
 
 public:
@@ -194,7 +194,7 @@ class T_TPCnv<Rec::TrackParticleContainer, Rec::TrackParticleContainer_tlp1 >
   : public TrackParticleContainerCnv_tlp1
 {
 public:
-  // ??? Maybe this should be moved up to AthenaPoolTopLevelTPConverter...
+  // ??? Maybe this should be moved up to TopLevelTPConverter...
   virtual void persToTrans (const Rec::TrackParticleContainer_tlp1* pers,
                             Rec::TrackParticleContainer* trans,
                             MsgStream& msg);

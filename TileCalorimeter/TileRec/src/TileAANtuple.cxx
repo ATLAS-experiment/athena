@@ -329,8 +329,7 @@ StatusCode TileAANtuple::ntuple_initialize(const EventContext& ctx,
 }
 
 
-StatusCode TileAANtuple::execute() {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode TileAANtuple::execute(const EventContext& ctx) {
   const TileDQstatus* DQstatus = SG::makeHandle (m_DQstatusKey, ctx).get();
 
   if (m_evtNr < 0) {

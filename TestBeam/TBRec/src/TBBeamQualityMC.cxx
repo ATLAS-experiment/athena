@@ -36,7 +36,7 @@ StatusCode TBBeamQualityMC::initialize() {
   return StatusCode::SUCCESS; 
 }
 
-StatusCode TBBeamQualityMC::execute() {
+StatusCode TBBeamQualityMC::execute(const EventContext& /*ctx*/) {
   /// Print an informatory message:
   ATH_MSG_DEBUG ( "in execute()" );
   

@@ -9,7 +9,7 @@
 #include "Identifier/IdentifierHash.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 
-#include "AthenaPoolCnvSvc/Compressor.h"
+#include "CxxUtils/Compressor.h"
 
 // LArHitFloatContainerCnv_p2, used for T/P separation
 // author Ilija Vukotic

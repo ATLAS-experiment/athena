@@ -57,7 +57,7 @@ class TileDigitsThresholdFilter: public AthAlgorithm {
 
     //Gaudi Hooks
     StatusCode initialize(); //!< initialize method
-    StatusCode execute();    //!< execute method
+    StatusCode execute(const EventContext& ctx);    //!< execute method
     StatusCode finalize();   //!< finalize method
 
   private:

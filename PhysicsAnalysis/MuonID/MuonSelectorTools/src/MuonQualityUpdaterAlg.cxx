@@ -29,13 +29,13 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonQualityUpdaterAlg::execute() {
+    StatusCode MuonQualityUpdaterAlg::execute(const EventContext& /*ctx*/) {
         // fetch input collection
         const xAOD::MuonContainer* muons = 0;
         CHECK(evtStore()->retrieve(muons, m_input_muons));
 
         // create a shallow copy container for the outputs
-        auto OutMuons = xAOD::shallowCopyContainer(*muons, Gaudi::Hive::currentContext());
+        auto OutMuons = xAOD::shallowCopy(*muons);
 
         for (xAOD::Muon* muon : *OutMuons.first) {
             m_tool->setQuality(*muon);

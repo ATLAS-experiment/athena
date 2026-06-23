@@ -165,9 +165,8 @@ StatusCode HitValAlg::finalize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode HitValAlg::execute() {
+StatusCode HitValAlg::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG("execute()");
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     ATH_MSG_DEBUG("Fill TTree");
     if (!m_tree.fill(ctx)) return StatusCode::FAILURE;
 

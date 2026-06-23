@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //===================================================================
@@ -325,8 +325,7 @@ bool ByteStreamEmonInputSvc::getIterator()
         }
 
 	try {
-            m_eventIt.reset(0);
-            m_eventIt.reset(new emon::EventIterator(partition, *address, criteria, m_buffer_size, m_groupName));
+            m_eventIt = std::make_unique<emon::EventIterator>(partition, *address, criteria, m_buffer_size, m_groupName);
             if(m_readDetectorMask) {
                 get_runparams();
             }

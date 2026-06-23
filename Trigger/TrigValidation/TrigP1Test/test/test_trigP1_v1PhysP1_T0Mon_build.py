@@ -8,6 +8,7 @@
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
+from TrigP1Test.TrigP1TestSteps import filterBS
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
@@ -28,11 +29,7 @@ hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
 hlt.args = '-o output'
 
 # Extract the physics_Main stream out of the BS file with many streams
-filter_bs = ExecStep.ExecStep('FilterBS')
-filter_bs.type = 'other'
-filter_bs.executable = 'trigbs_extractStream.py'
-filter_bs.input = ''
-filter_bs.args = '-s Main ' + find_file('*_HLTMPPy_output.*.data')
+filter_bs = filterBS('Main')
 
 # Tier-0 reco step (BS->AOD)
 tzrecoPreExec = ' '.join([
@@ -67,7 +64,7 @@ tzreco.concurrent_events = 4
 tzreco.input = ''
 tzreco.explicit_input = True
 tzreco.max_events = 50
-tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
+tzreco.args = '--inputBSFile=' + find_file('data*.physics_Main.*.data')  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
 tzreco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA25}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''

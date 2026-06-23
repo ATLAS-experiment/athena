@@ -181,10 +181,12 @@ namespace ActsTrk {
   }
 
   std::unique_ptr<ActsTrk::IMeasurementSelector> TrackFindingBaseAlg::setMeasurementSelector(
+      const EventContext &ctx,
       const detail::TrackFindingMeasurements &measurements,
       TrackFinderOptions &options) const {
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = ActsTrk::detail::getMeasurementSelector(
+        ctx,
         m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
         m_stripCalibTool.isEnabled() ? &(*m_stripCalibTool) : nullptr,
         m_hgtdCalibTool.isEnabled() ? &(*m_hgtdCalibTool) : nullptr,
@@ -200,6 +202,7 @@ namespace ActsTrk {
   }
 
   TrackFindingBaseAlg::TrackFindingDefaultOptions TrackFindingBaseAlg::getDefaultOptions(
+      const EventContext &ctx,
       const DetectorContextHolder &detContext,
       const detail::TrackFindingMeasurements &measurements,
       const Acts::PerigeeSurface* pSurface) const {
@@ -212,7 +215,7 @@ namespace ActsTrk {
     TrackFinderOptions options(detContext.geometry, detContext.magField, detContext.calib,
                                trackFinder().ckfExtensions, plainOptions, pSurface);
 
-    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(measurements, options);
+    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(ctx, measurements, options);
 
     Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
     plainSecondOptions.maxSteps = m_maxPropagationStep;
@@ -245,6 +248,27 @@ namespace ActsTrk {
     Acts::BoundTrackParameters secondInitialParameters = trackProxy.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
     if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
       return {};
+    }
+
+    // First, inflate the covariance matrix if configured
+    if (m_inflateCovarianceTwoWay) {
+      ATH_MSG_DEBUG("Inflating covariance matrix for second track finding with factor = " << m_twoWayinflateCovarianceFactor.value());
+      ATH_MSG_VERBOSE("Original parameters before inflation: \n" << secondInitialParameters);
+
+      auto inflatedCovariance = secondInitialParameters.covariance().value();
+      inflatedCovariance *= m_twoWayinflateCovarianceFactor;
+
+      const auto& origSurface = secondInitialParameters.referenceSurface();
+      auto surfacePtr = const_cast<Acts::Surface&>(origSurface).shared_from_this();
+
+      Acts::BoundTrackParameters newParams(
+          std::static_pointer_cast<const Acts::Surface>(surfacePtr),
+          secondInitialParameters.parameters(), 
+          std::make_optional(inflatedCovariance),
+          secondInitialParameters.particleHypothesis());
+      secondInitialParameters = std::move(newParams);
+      
+      ATH_MSG_VERBOSE("Inflated covariance matrix : \n" << secondInitialParameters.covariance().value());
     }
 
     auto rootBranch = tracksContainerTemp.makeTrack();

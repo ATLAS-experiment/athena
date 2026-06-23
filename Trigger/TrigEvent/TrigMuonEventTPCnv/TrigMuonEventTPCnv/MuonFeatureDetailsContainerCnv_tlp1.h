@@ -5,12 +5,12 @@
 #ifndef  TRIGMUONEVENTTPCNV_MUONFEATUREDETAILSCONTAINER_CNV_TLP1_H
 #define  TRIGMUONEVENTTPCNV_MUONFEATUREDETAILSCONTAINER_CNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigMuonEventTPCnv/MuonFeatureDetailsContainer_tlp1.h"
 
 #include "TrigMuonEventTPCnv/MuonFeatureDetailsContainerCnv_p1.h"
 
-class MuonFeatureDetailsContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< MuonFeatureDetailsContainerCnv_p1, MuonFeatureDetailsContainer_tlp1 >
+class MuonFeatureDetailsContainerCnv_tlp1 : public TopLevelTPConverter< MuonFeatureDetailsContainerCnv_p1, MuonFeatureDetailsContainer_tlp1 >
 {
 
  public:

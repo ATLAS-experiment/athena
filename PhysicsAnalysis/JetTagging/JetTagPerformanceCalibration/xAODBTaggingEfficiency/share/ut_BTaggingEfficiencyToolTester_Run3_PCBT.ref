@@ -44,8 +44,8 @@ Package.BtaggingEffici...INFO
 --- Reading Event: 1 ---
 Package.BtaggingEffici...INFO    --- Jet 0 ---
 Package.BtaggingEffici...INFO    pt = 71581.9 eta = 1.85564 truthlabel = 4
-Package.BtaggingEffici...INFO    Jet Efficiency: 0.0106482
-Package.BtaggingEffici...INFO    Jet get scale factor succeeded: 1.0414
+Package.BtaggingEffici...INFO    Jet Efficiency: 0.0106983
+Package.BtaggingEffici...INFO    Jet get scale factor succeeded: 1.0463
 Package.BtaggingEffici...INFO    --- Jet 1 ---
 Package.BtaggingEffici...INFO    pt = 26038.9 eta = -2.19753 truthlabel = 0
 Package.BtaggingEffici...INFO    Jet Efficiency: 0.934879
@@ -76,8 +76,8 @@ Package.BtaggingEffici...INFO    Jet Efficiency: 0.700518
 Package.BtaggingEffici...INFO    Jet get scale factor succeeded: 0.98
 Package.BtaggingEffici...INFO    --- Jet 1 ---
 Package.BtaggingEffici...INFO    pt = 42648 eta = -0.169029 truthlabel = 4
-Package.BtaggingEffici...INFO    Jet Efficiency: 0.165335
-Package.BtaggingEffici...INFO    Jet get scale factor succeeded: 0.986
+Package.BtaggingEffici...INFO    Jet Efficiency: 0.164849
+Package.BtaggingEffici...INFO    Jet get scale factor succeeded: 0.9831
 Package.BtaggingEffici...INFO    --- Jet 2 ---
 Package.BtaggingEffici...INFO    pt = 40370.5 eta = 1.07091 truthlabel = 0
 Package.BtaggingEffici...INFO    Jet Efficiency: 0.94814

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ASGANALYSISALGORITHMS_TREEBRANCHHELPERS_H
 #define ASGANALYSISALGORITHMS_TREEBRANCHHELPERS_H
@@ -54,7 +54,7 @@ namespace CP
   {
     /// the type of the event store in the current environment
 #ifdef XAOD_STANDALONE
-    using StoreType = asg::SgTEvent;
+    using StoreType = asg::SgEvent;
 #else
     using StoreType = StoreGateSvc;
 #endif

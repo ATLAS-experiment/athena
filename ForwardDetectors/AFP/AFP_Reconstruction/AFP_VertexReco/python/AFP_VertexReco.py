@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_VertexReco package
@@ -18,7 +18,7 @@ def AFP_VertexReco_Cfg(flags, kwargs={}):
 		acc.merge(addFolders(flags, "/FWD/AFP/ToFParameters/Vertex<tag>AFPMCToFVtx-ideal-01</tag>", 'FWD_OFL', className='CondAttrListCollection', db='OFLP200'))
 		tofVtxParamTool  = CompFactory.getComp("AFP::ToFVtxParamDBTool")("ToFVtxParamDBTool", vtx_param_key="/FWD/AFP/ToFParameters/Vertex")
 	else:
-		acc.merge(addFolders(flags, "/FWD/Onl/AFP/ToFParameters/Vertex<tag>AFPToFVtx-01</tag>", 'FWD_ONL', className='CondAttrListCollection', db='CONDBR2'))
+		acc.merge(addFolders(flags, "/FWD/Onl/AFP/ToFParameters/Vertex",'FWD_ONL', className='CondAttrListCollection', db='CONDBR2'))
 		tofVtxParamTool  = CompFactory.getComp("AFP::ToFVtxParamDBTool")("ToFVtxParamDBTool", vtx_param_key="/FWD/Onl/AFP/ToFParameters/Vertex")
 	
 	afpVertexRecoTool = CompFactory.AFP_VertexRecoBasic("AFP_VertexRecoBasic", TrackDistance=0.5, tofVtxParamDBTool=tofVtxParamTool, **kwargs)

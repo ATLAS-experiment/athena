@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigDecisionTool )
@@ -8,11 +8,11 @@ find_package( Boost )
 find_package( ROOT COMPONENTS Core )
 set( ROOT_LIBRARIES_NOPYTHON ${ROOT_LIBRARIES} )
 unset( ROOT_FOUND )
-find_package( ROOT COMPONENTS Core PyROOT ROOTTPython )
+find_package( ROOT COMPONENTS Core ROOTTPython )
 
 set( COMMON_LIBRARIES
-    ${Boost_LIBRARIES} AsgTools CxxUtils xAODBase xAODTrigger 
-    TrigConfHLTData TrigConfL1Data TrigNavStructure TrigRoiConversionLib 
+    ${Boost_LIBRARIES} AsgTools CxxUtils xAODBase xAODTrigger
+    TrigConfHLTData TrigConfL1Data TrigNavStructure TrigRoiConversionLib
     TrigConfInterfaces TrigDecisionInterface TrigCompositeUtilsLib
     TrigConfHLTUtilsLib AsgDataHandlesLib TrigAnalysisHelpersLib)
 set (COMMON_PRIVATE_LIBRARIES
@@ -34,7 +34,7 @@ else()
          PUBLIC_HEADERS TrigDecisionTool
          INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
          PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-         LINK_LIBRARIES ${COMMON_LIBRARIES} EventInfo GaudiKernel StoreGateLib 
+         LINK_LIBRARIES ${COMMON_LIBRARIES} EventInfo GaudiKernel StoreGateLib
          PRIVATE_LINK_LIBRARIES ${COMMON_PRIVATE_LIBRARIES} AthenaBaseComps AthenaKernel )
    else()
       atlas_add_library( TrigDecisionToolLib
@@ -64,11 +64,11 @@ if( NOT XAOD_STANDALONE AND NOT XAOD_ANALYSIS )
       LINK_LIBRARIES TrigNavigationLib AthenaKernel GaudiKernel AthContainers
       AnalysisTriggerEvent TrigSteeringEvent TrigMuonEvent
       TrigDecisionToolLib
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 if (NOT XAOD_ANALYSIS )
-   atlas_add_test( Run2TrigDecisionToolOnRAW_test 
+   atlas_add_test( Run2TrigDecisionToolOnRAW_test
       SCRIPT python -m TrigDecisionTool.TrigDecisionToolConfig --RAWRUN2
       POST_EXEC_SCRIPT noerror.sh )
 

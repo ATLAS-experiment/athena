@@ -38,7 +38,7 @@ class LArHVPathologyDbAlg : public AthAlgorithm
   ~LArHVPathologyDbAlg() =default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
  private:
   std::optional<LArHVPathologiesDb> createCondObjects (const EventContext& ctx, const CaloDetDescrManager* calodetdescrmgr) const;

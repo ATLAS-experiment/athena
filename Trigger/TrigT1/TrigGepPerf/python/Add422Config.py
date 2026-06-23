@@ -16,6 +16,14 @@ def fixMakerTool422(alg):
         if tool.name == 'TopoMaker':
             assert tool.CellThresholdOnEorAbsEinSigma == 0
             tool.CellThresholdOnEorAbsEinSigma = 2.0
+            assert tool.SeedCutsInAbsE is True
+            tool.SeedCutsInAbsE = False
+            assert tool.NeighborCutsInAbsE is True
+            tool.NeighborCutsInAbsE = False
+            assert tool.CellCutsInAbsE is True
+            tool.CellCutsInAbsE = False
+            assert tool.SeedCutsInT is True
+            tool.SeedCutsInT = False
             return True
 
     return False

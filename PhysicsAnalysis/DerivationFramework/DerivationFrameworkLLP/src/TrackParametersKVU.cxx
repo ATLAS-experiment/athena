@@ -85,7 +85,7 @@ StatusCode DerivationFramework::TrackParametersKVU::addBranches(const EventConte
               auto vtxSurface = std::make_unique<Trk::PerigeeSurface>(vtxPos);
               trackParams = m_extrapolator->extrapolate(ctx,*tPerigee,*vtxSurface);
               std::unique_ptr<const Trk::ImpactParametersAndSigma> iPandSigma = nullptr;
-              iPandSigma = m_IPEstimator->estimate(trackParams.get(), vtx);
+              iPandSigma = m_IPEstimator->estimate(ctx, trackParams.get(), vtx);
               if(sqrt(iPandSigma->IPd0*iPandSigma->IPd0+iPandSigma->IPz0*iPandSigma->IPz0) < minIP){
                 minIP = sqrt(iPandSigma->IPd0*iPandSigma->IPd0+iPandSigma->IPz0*iPandSigma->IPz0);
                 closestVertex = vtx;

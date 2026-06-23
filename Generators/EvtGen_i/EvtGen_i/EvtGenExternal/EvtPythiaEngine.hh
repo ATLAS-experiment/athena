@@ -41,7 +41,7 @@
 
 class EvtPythiaEngine : public EvtAbsExternalGen {
   public:
-    EvtPythiaEngine( std::string xmlDir = "./xmldoc",
+    EvtPythiaEngine( const std::string & xmlDir = "./xmldoc",
                      bool convertPhysCodes = false, bool useEvtGenRandom = true );
 
     virtual ~EvtPythiaEngine();

@@ -331,7 +331,7 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
 		    } 
 		    if ( foundVertex )
 		      {
-			std::unique_ptr<const Trk::ImpactParametersAndSigma>myIPandSigma(m_trackToVertexIPEstimator->estimate(trackPart,foundVertex));
+			std::unique_ptr<const Trk::ImpactParametersAndSigma>myIPandSigma(m_trackToVertexIPEstimator->estimate(ctx, trackPart,foundVertex));
 			
 			if ( myIPandSigma )
 			  {

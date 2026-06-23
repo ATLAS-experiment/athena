@@ -6,7 +6,7 @@ atlas_add_component (L0MuonMDT
         src/*.cxx src/components/*.cxx
 
         LINK_LIBRARIES AthenaKernel xAODMuonRDO MuonRDO MuonDigitContainer xAODTrigger AthenaMonitoringKernelLib IRegionSelector 
-  MuonReadoutGeometryR4 L0MuonInterface  L0MuonMDTToolsLib TrigSteeringEvent xAODMuonViews xAODMuonPrepData MdtCalibSvcLib MuonCalibEventBase MuonCalibITools xAODMuonSimHit)
+  MuonReadoutGeometryR4 L0MuonInterface  L0MuonMDTToolsLib TrigSteeringEvent xAODMuonViews xAODMuonPrepData xAODL0MuonCand MdtCalibSvcLib MuonCalibEventBase MuonCalibITools xAODMuonSimHit)
 
 
 

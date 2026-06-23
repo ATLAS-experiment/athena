@@ -21,14 +21,16 @@ public:
   // Destructor
   ~CaloCellContainerSDTool() {}
 
+  StatusCode initialize() override final;
   /** Beginning of an athena event.  This is where collection initialization should happen. **/
-  StatusCode SetupEvent() override final;
+  StatusCode SetupEvent(HitCollectionMap&) override final;
   /** End of an athena event **/
-  StatusCode Gather() override final;
+  StatusCode Gather(HitCollectionMap&) override final;
 
 protected:
   // Make me an SD!
   G4VSensitiveDetector* makeSD() const override final;
+  PublicToolHandle<ICaloCellMakerTool> m_EmptyCellBuilderTool;
   PublicToolHandle<ICaloCellMakerTool> m_FastHitConvertTool;
 
 };

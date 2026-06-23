@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -9,13 +9,9 @@
 #ifndef ANALYSISCDIREADER_H
 #define ANALYSISCDIREADER_H
 
-#include <string>
-#include <vector>
-#include <map>
-#include <set>
-#include <iostream>
-#include <unordered_map>
-#include <algorithm>
+#include "CalibrationDataInterface/CalibrationDataVariables.h"
+#include "CalibrationDataInterface/CalibrationDataInterfaceBase.h"
+#include "CalibrationDataInterface/CalibrationDataContainer.h"
 
 #include "TFile.h"
 #include "TDirectoryFile.h"
@@ -23,12 +19,16 @@
 #include "TEnv.h"
 #include "TObjString.h"
 
-#include "CalibrationDataInterface/CalibrationDataVariables.h"
-#include "CalibrationDataInterface/CalibrationDataInterfaceBase.h"
-#include "CalibrationDataInterface/CalibrationDataContainer.h"
-
+#include "CxxUtils/StringUtils.h"
+#include <string>
 #include <filesystem>
 #include <fstream>
+#include <vector>
+#include <map>
+#include <set>
+#include <iostream>
+#include <unordered_map>
+#include <algorithm>
 
 class TH1;
 class TFile;
@@ -151,17 +151,6 @@ namespace Analysis
       }
       return false;
     }
-
-    // local utility function: trim leading and trailing whitespace in the property strings
-    std::string trim(const std::string& str, const std::string& whitespace = " \t") {
-      const auto strBegin = str.find_first_not_of(whitespace);
-      if (strBegin == std::string::npos){
-        return ""; // no content
-      }
-      const auto strEnd = str.find_last_not_of(whitespace);
-      const auto strRange = strEnd - strBegin + 1;
-      return str.substr(strBegin, strRange);
-    }
  
     // local utility function: split string into a vector of substrings separated by a specified separator
     std::vector<std::string> split(const std::string& str, char token = ';') {
@@ -171,7 +160,7 @@ namespace Analysis
         std::string tmp(str);
         do {
           end = tmp.find(token);
-          std::string entry = trim(tmp.substr(0,end));
+          std::string entry{CxxUtils::trimWhiteSpaces(tmp.substr(0,end))};
           if (!entry.empty()) result.push_back(std::move(entry)); 
           if (end != std::string::npos) tmp = tmp.substr(end+1);
         } while (end != std::string::npos);

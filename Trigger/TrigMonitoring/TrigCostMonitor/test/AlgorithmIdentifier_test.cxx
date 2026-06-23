@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "SGTools/TestStore.h"
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect.h"
@@ -30,20 +29,19 @@ int main ATLAS_NOT_THREAD_SAFE () {
   xdict = pSG->hiveProxyDict();
   EventContext ctx(0,0);
   ctx.setExtension( Atlas::ExtendedEventContext(xdict) );
-  Gaudi::Hive::setCurrentContext (ctx);
 
   // Create a log
   MsgStream log(nullptr, "AlgorithmIdentifier");
   log.setLevel( MSG::DEBUG );
 
   // Test slot override
-  AlgorithmIdentifier ai = AlgorithmIdentifierMaker::make(Gaudi::Hive::currentContext(), "ALG_A", log, 10);
+  AlgorithmIdentifier ai = AlgorithmIdentifierMaker::make(ctx, "ALG_A", log, 10);
 
   ai.dump(log);
 
   // Test hash collision. These two strings are known to collide.
-  AlgorithmIdentifier collision_a = AlgorithmIdentifierMaker::make(Gaudi::Hive::currentContext(), "APP_HLT:HLTMPPU-36:HLT-36:tpu-rack-73:pc-tdq-tpu-73012-30", log);
-  AlgorithmIdentifier collision_b = AlgorithmIdentifierMaker::make(Gaudi::Hive::currentContext(), "APP_HLT:HLTMPPU-36:HLT-36:tpu-rack-75:pc-tdq-tpu-75033-11", log);
+  AlgorithmIdentifier collision_a = AlgorithmIdentifierMaker::make(ctx, "APP_HLT:HLTMPPU-36:HLT-36:tpu-rack-73:pc-tdq-tpu-73012-30", log);
+  AlgorithmIdentifier collision_b = AlgorithmIdentifierMaker::make(ctx, "APP_HLT:HLTMPPU-36:HLT-36:tpu-rack-75:pc-tdq-tpu-75033-11", log);
 
   collision_a.dump(log);
   collision_b.dump(log);

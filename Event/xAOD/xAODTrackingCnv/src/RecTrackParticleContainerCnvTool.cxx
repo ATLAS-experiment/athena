@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -35,7 +35,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode RecTrackParticleContainerCnvTool::convert( const Rec::TrackParticleContainer* aod,
+  StatusCode RecTrackParticleContainerCnvTool::convert( const EventContext& ctx, const Rec::TrackParticleContainer* aod,
 							xAOD::TrackParticleContainer* xaod, const xAOD::Vertex* /*vtx*/ ) const {
     
     ATH_MSG_DEBUG( "Sizes of containers before conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
@@ -48,7 +48,7 @@ namespace xAODMaker {
         ATH_MSG_WARNING("Empty element in container!");
         continue;
       }
-      xAOD::TrackParticle* particle = createParticle(xaod, aod, *itr);
+      xAOD::TrackParticle* particle = createParticle(ctx, xaod, aod, *itr);
 
       if(!particle){
       	ATH_MSG_WARNING("Failed to create a TrackParticle");
@@ -61,7 +61,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;    
   }
 
-  StatusCode RecTrackParticleContainerCnvTool::convertAndAugment( const Rec::TrackParticleContainer* aod,
+  StatusCode RecTrackParticleContainerCnvTool::convertAndAugment( const EventContext& /*ctx*/, const Rec::TrackParticleContainer* aod,
 							xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map, const xAOD::Vertex* /*vtx*/ ) const {
     
     ATH_MSG_DEBUG( "Sizes of containers before conversion: aod, xaod, trk_map: " << aod->size() << ", " << xaod->size() << ", "<< trk_map->size() );
@@ -69,12 +69,13 @@ namespace xAODMaker {
     return StatusCode::FAILURE;    
   }
 
-  xAOD::TrackParticle* RecTrackParticleContainerCnvTool::createParticle( xAOD::TrackParticleContainer* xaod, 
+  xAOD::TrackParticle* RecTrackParticleContainerCnvTool::createParticle( const EventContext& ctx,
+                                     xAOD::TrackParticleContainer* xaod,
 									 const Rec::TrackParticleContainer* /**container*/, 
 									 const Rec::TrackParticle* tp) const
   {
     // create the xAOD::TrackParticle, the pointer is added to the container in the function
-    return m_particleCreator->createParticle( *tp, xaod );
+    return m_particleCreator->createParticle( ctx, *tp, xaod );
   } // createParticleAndTruth
 
   StatusCode RecTrackParticleContainerCnvTool::setParticleCreatorTool(ToolHandle<Trk::ITrackParticleCreatorTool> *tool)

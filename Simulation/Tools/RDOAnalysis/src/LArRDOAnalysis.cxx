@@ -104,7 +104,7 @@ StatusCode LArRDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArRDOAnalysis::execute() {
+StatusCode LArRDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In LArRDOAnalysis::execute()" );
   
   if(m_tree){
@@ -125,7 +125,6 @@ StatusCode LArRDOAnalysis::execute() {
     m_digiSamples->clear();
   }
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const LArRawChannelContainer* p_larRawCont{nullptr};
   ATH_CHECK(SG::get(p_larRawCont, m_inputRawChannelKey, ctx));
 
@@ -151,7 +150,7 @@ StatusCode LArRDOAnalysis::execute() {
           const uint16_t rawProv(lar_itr->provenance());
           CaloGain::CaloGain larGain(lar_itr->gain());
 
-          const unsigned long long larID_int = larID.get_compact();
+          const unsigned long long larID_int = larID.get_identifier32().get_compact();
           const int larGain_int = (int)larGain;
           if(m_tree){
             m_larID->push_back(larID_int);

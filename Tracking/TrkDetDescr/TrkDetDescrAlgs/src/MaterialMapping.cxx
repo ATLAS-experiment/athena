@@ -114,7 +114,7 @@ StatusCode Trk::MaterialMapping::initialize()
 }
 
 
-StatusCode Trk::MaterialMapping::execute()
+StatusCode Trk::MaterialMapping::execute(const EventContext& ctx)
 {
     ATH_MSG_VERBOSE("MaterialMapping execute() start");
 
@@ -130,12 +130,12 @@ StatusCode Trk::MaterialMapping::execute()
       ATH_MSG_VERBOSE("Mapping volume correctly retrieved from tracking geometry");
 
 
-    SG::ReadHandle<MaterialStepCollection> materialStepCollection(m_inputMaterialStepCollection);
+    SG::ReadHandle<MaterialStepCollection> materialStepCollection(m_inputMaterialStepCollection, ctx);
 
         // --------- prepare the element table ---------------------------------------------------
 
     if (m_mapComposition) {
-      SG::ReadHandle<Trk::ElementTable> eTableEvent(m_inputEventElementTable);
+      SG::ReadHandle<Trk::ElementTable> eTableEvent(m_inputEventElementTable, ctx);
       (*m_elementTable) += (*eTableEvent);  // accummulate the table
     }
 

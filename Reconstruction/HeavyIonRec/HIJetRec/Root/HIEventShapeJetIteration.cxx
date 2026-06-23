@@ -231,10 +231,10 @@ StatusCode HIEventShapeJetIteration::fillModulatorShape(xAOD::HIEventShape* ms, 
     summary_container = read_handle_cont.cptr();
 
     const xAOD::HIEventShape* s_fcal=0;
+    const SG::ConstAccessor<std::string> SummaryAcc("Summary");
     for(const auto *sh : *summary_container)
     {
       std::string summary;
-      static const SG::ConstAccessor<std::string> SummaryAcc("Summary");
       if(SummaryAcc.isAvailable(*sh)) summary=SummaryAcc(*sh);
       if(summary.compare("FCal")==0)
       {
@@ -311,7 +311,7 @@ StatusCode HIEventShapeJetIteration::getShapes(const xAOD::HIEventShapeContainer
 
   if(m_shallowCopy)
   {
-    auto shape_copy=xAOD::shallowCopyContainer(*input_shape, ctx);
+    auto shape_copy=xAOD::shallowCopy(*input_shape, ctx);
     output_shape=shape_copy.first.get();
     if(record)
     {

@@ -130,6 +130,16 @@ namespace dqutils {
       //loop over directories
       TIter next_trig(taumonDir->GetListOfKeys());
       TKey* key_trig(0);
+      static const std::string relEffStr{"/RelativeEfficiency"};
+      static const std::string relEffPathStr{"/RelativeEfficiency/Efficiency"};
+      //
+      static const std::string offlineRatStr{"/OfflineRatio"};
+      static const std::string offlineRatPathStr{"/OfflineRatio/Ratio"};
+      //
+      static const std::string bdtMedStr{"/OfflineRatio/BDTMedium"};
+      static const std::string bdtMedPathStr{"/OfflineRatio/Ratio/BDTMedium"};
+      static const std::string bdtMed2Str{"BDTMedium"};
+      //
       while ((key_trig = dynamic_cast<TKey*>(next_trig())) != 0) {
         TObject* obj_trig = key_trig->ReadObj();
         TDirectory* dir_trig = dynamic_cast<TDirectory*>(obj_trig);
@@ -137,12 +147,12 @@ namespace dqutils {
         //std::cout<<"--> HLTTauPostProcess: calling functions for " <<  dir_trig->GetName() << endl;
         // "<<runDirName<<" and trigger item="<<dir_trig->GetName()<<endl;
 
-        HLTTauPostProcess(f, dir_trig, "/RelativeEfficiency", "/RelativeEfficiency/Efficiency",
+        HLTTauPostProcess(f, dir_trig, relEffStr, relEffPathStr,
                           lvlName, varName, ratioIndex, 1);//name style : 1 (relative eff)
-        HLTTauPostProcess(f, dir_trig, "/OfflineRatio", "/OfflineRatio/Ratio",
+        HLTTauPostProcess(f, dir_trig, offlineRatStr, offlineRatPathStr,
                           lvlNameO, varName0, ratioIndexO, 2);//name style : 2 (offline eff)
-        HLTTauPostProcess(f, dir_trig, "/OfflineRatio/BDTMedium", "/OfflineRatio/Ratio/BDTMedium",
-                          lvlNameO, varName0, ratioIndexO, 2, "BDTMedium");//name style : 2 (offline eff)
+        HLTTauPostProcess(f, dir_trig, bdtMedStr, bdtMedPathStr,
+                          lvlNameO, varName0, ratioIndexO, 2, bdtMed2Str);//name style : 2 (offline eff)
       }
     }
 

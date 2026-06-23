@@ -90,9 +90,6 @@ JET_COLLECTIONS = {
         "passthrough_json": PASSTHROUGH_JSON_SMALL,
         "ghost_muons": True,
         "soft_electron_selection": True,
-        # FlavorTaggingCfg schedules electron association for small-R when the
-        # NN modset contains "E" — no need to schedule it again here.
-        "needs_electron_association": False,
     },
     "large": {
         "name": "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -103,10 +100,6 @@ JET_COLLECTIONS = {
         "passthrough_json": PASSTHROUGH_JSON_LARGE,
         "ghost_muons": True,
         "soft_electron_selection": True,
-        # FlavorTaggingCfg does NOT schedule electron association for large-R
-        # (GN3x modset lacks "E"). We must schedule it explicitly so that
-        # FTagElectrons is available for SoftElectronSelectionAlg.
-        "needs_electron_association": True,
     },
 }
 
@@ -303,19 +296,13 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     )
 
     # ── Soft electron selection (per-collection) ──
-    # Apply TDD's 14 selection cuts at derivation time using the ftag_
-    # decorations from SoftElectronDecoratorAlg (not caloCluster).
-    # Writes GhostFTagSelectedElectrons on each jet.  TDD reads these
-    # pre-selected links directly, so egammaClusters can be dropped.
-    # For large-R, FlavorTaggingCfg doesn't schedule electron association
-    # (no "E" modset), so we schedule FTagElectronAssociationCfg first.
+    # This module gets added automatically if we have any taggers which use
+    # electron inputs. For upgrade samples, this is not currently the case,
+    # and so the module is scheduled here.
     from FlavorTagDiscriminants.FTagElectronAssociationConfig import FTagElectronAssociationCfg
     for cfg in JET_COLLECTIONS.values():
-        if cfg["needs_electron_association"]:
-            # Only needed when FlavorTaggingCfg didn't already schedule electron
-            # association (i.e. large-R GN3x without "E" modset).
-            acc.merge(FTagElectronAssociationCfg(flags, cfg["name"]))
         if cfg["soft_electron_selection"]:
+            acc.merge(FTagElectronAssociationCfg(flags, cfg["name"]))
             acc.addEventAlgo(
                 CompFactory.FlavorTagJetDecorators.SoftElectronSelectionAlg(
                     f"SoftElectronSelectionAlg_{cfg['name']}",
@@ -355,8 +342,7 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
 
     # ── Jet calibrated pT decorator ──
     # Apply TDD-compatible calibration (JetArea_Residual_EtaJES_GSC) and
-    # decorate each jet with pt_calibrated. Used for the thinning selection
-    # to match TDD's 20 GeV calibrated pT cut exactly.
+    # decorate each jet with pt_calibrated. Used for the thinning selection.
     # Calibration config differs between Run 2 and Run 3 — must match
     # JetAnalysisConfig.py (JetCalibrationBlock) to share the tool.
     if flags.GeoModel.Run is LHCPeriod.Run2:
@@ -430,9 +416,10 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     # vectors.  Each entry in _CALO_SAMPLING_NAMES corresponds to one index
     # in the 28-element EnergyPerSampling / EnergyPerSamplingCaloBased aux
     # vectors.  The resulting scalar decorations (e_<layer> / e_<layer>_CaloBased)
-    # are then picked up by the JetScalarCastAlg loop below (via jet_vars in
-    # the JSON) and stored as bf16.  Scheduling lives here in Python — the JSON
-    # is the persistence spec only.
+    # are kept as float32 jet decorations (no longer cast to bf16 — the
+    # JetScalarCastAlg cast layer was removed due to a thread-safety bug
+    # surfacing in AthenaMP runs).  VectorExploderAlg remains because TDD's
+    # energy_per_sampling.json fragment (used by GN3_dev.json) still needs it.
     _eps_scalar_names = [f"e_{s}" for s in _CALO_SAMPLING_NAMES]
     acc.addEventAlgo(
         CompFactory.FlavorTagJetDecorators.VectorExploderAlg(
@@ -451,27 +438,6 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
             OutputNamesMap={i: name for i, name in enumerate(_epscb_scalar_names)},
         )
     )
-
-    # ── JetScalarCastAlg: cast exploded scalars to bf16 ──
-    # For each entry in `jet_vars`, run one JetScalarCastAlg per jet
-    # collection.  Reads a bare scalar decoration and writes a bf16-truncated
-    # copy.  Only small-R uses jet_vars (large-R JSON has no such section).
-    for cfg in JET_COLLECTIONS.values():
-        pt_cfg_jv = _load_passthrough_json(cfg["passthrough_json"])
-        collection = cfg["name"]
-        for jvar in pt_cfg_jv.get("jet_vars", []):
-            alg_name = f"JetScalarCastAlg_{collection}_{jvar['output']}"
-            cast = jvar.get("cast", {"exp": 8, "man": 7})
-            acc.addEventAlgo(
-                CompFactory.FlavorTagJetDecorators.JetScalarCastAlg(
-                    alg_name,
-                    Collection=collection,
-                    InputDecor=jvar["input"],
-                    OutputDecor=jvar["output"],
-                    ExpBits=cast.get("exp", 8),
-                    ManBits=cast.get("man", 7),
-                )
-            )
 
     # ── Primary vertex decorator ──
     # Pre-compute nPrimaryVertices (int) and primaryVertexZ (float) as
@@ -601,9 +567,6 @@ def FTAG1LITECoreCfg(flags, name_tag='FTAG1LITE'):
         extras = list(pt_config.get("copy_vars", []))
         # jet_variables: GNN-computed scalar outputs (C++ PassThrough reads this key)
         extras.extend(_output_name(v) for v in pt_config.get("jet_variables", []))
-        # jet_vars: exploded+cast scalar outputs from VectorExploderAlg+JetScalarCastAlg
-        # (Python-only key; C++ PassThrough ignores it)
-        extras.extend(_output_name(v) for v in pt_config.get("jet_vars", []))
         for cnode in pt_config.get("constituents", []):
             extras.extend(_output_name(v) for v in cnode.get("variables", []))
         helper.ExtraVariables.append(

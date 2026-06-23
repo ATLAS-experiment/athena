@@ -16,12 +16,12 @@
 #ifndef  TRIGMUONEVENTTPCNV_TILEMUFEATURECONTAINER_CNV_TLP1_H
 #define  TRIGMUONEVENTTPCNV_TILEMUFEATURECONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigMuonEventTPCnv/TileMuFeatureContainer_tlp1.h"
 #include "TrigMuonEventTPCnv/TileMuFeatureContainerCnv_p1.h"   
  
-class TileMuFeatureContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TileMuFeatureContainerCnv_p1, TileMuFeatureContainer_tlp1 >
+class TileMuFeatureContainerCnv_tlp1 : public TopLevelTPConverter< TileMuFeatureContainerCnv_p1, TileMuFeatureContainer_tlp1 >
 {
  
  public:

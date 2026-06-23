@@ -103,9 +103,9 @@ void compare (const HepMC::GenEvent& e1,
     const std::vector<HepMC::ConstGenParticlePtr> & resetBPs = e2.beams();
     compareGenParticle(originalBPs.at(0), resetBPs.at(0));
     compareGenParticle(originalBPs.at(1), resetBPs.at(1));
-    auto bcTime1 = e1.attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+    auto bcTime1 = e1.attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
     assert(bcTime1);
-    auto bcTime2 = e2.attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+    auto bcTime2 = e2.attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
     assert(bcTime2);
     assert(bcTime1->value() == bcTime2->value());
     auto floatProp1 = e1.attribute<HepMC3::FloatAttribute>("MyFloatProp");
@@ -215,7 +215,7 @@ void populateGenEvent(HepMC::GenEvent & ge)
   HepMC::suggest_barcode(inParticle3,3);
   HepMC::suggest_barcode(inParticle4,4);
 #if HEPMC3
-  ge.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(0));
+  ge.add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(0));
   ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(0.5));
   ge.add_attribute("MyStringProp",std::make_shared<HepMC3::StringAttribute>("EventNumber1"));
 #endif
@@ -245,7 +245,7 @@ void populateGenEvent2(HepMC::GenEvent & ge)
   HepMC::suggest_barcode(inParticle3,10003);
   HepMC::suggest_barcode(inParticle4,10004);
 #if HEPMC3
-  ge.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(25));
+  ge.add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(25));
   ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(1.5));
   ge.add_attribute("MyStringProp",std::make_shared<HepMC3::StringAttribute>("EventNumber2"));
 #endif

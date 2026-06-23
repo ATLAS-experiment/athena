@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file JetTileCorrectionTester.cxx
@@ -102,11 +102,11 @@ int main( int argc, char* argv[] )
   // Initialize the tool
   asg::StandaloneToolHandle<CP::IJetTileCorrectionTool> tool_jtc;
   tool_jtc.setTypeAndName("CP::JetTileCorrectionTool/JetTileCorrectionTool");
-  
+
   //Set properties if needed
   CHECK( tool_jtc.setProperty("CorrectionFileName", "JetTileCorrection/JetTile_pFile_010216.root") ); //default anyway
   // std::vector<std::string> dead_modules = {"1 04","1 05","1 06","1 07","1 08","1 09",
-  // 					   "2 04","2 05","2 06","2 07","2 08","2 09"  }; // LBA/C5-10 :  NOT REAL SCENARIO !! just trying to get some magnified effect for testing! 
+  // 					   "2 04","2 05","2 06","2 07","2 08","2 09"  }; // LBA/C5-10 :  NOT REAL SCENARIO !! just trying to get some magnified effect for testing!
   // CHECK( tool_jtc.setProperty("UserMaskedRegions", dead_modules));
 
   CHECK( tool_jtc.retrieve() );
@@ -124,16 +124,12 @@ int main( int argc, char* argv[] )
       Info(APP_NAME, "===>>>  Processing entry %lli, run %u, event %lu  <<<===",
 	   entry, evtInfo->runNumber(), evtInfo->eventNumber());
     }
-    
+
     // Get jets
     const xAOD::JetContainer* jets = 0;
     CHECK( event.retrieve(jets, "AntiKt4EMTopoJets") );
 
-    std::pair<xAOD::JetContainer*, xAOD::ShallowAuxContainer*> shallowcopy =
-       xAOD::shallowCopyContainer(*jets);
-    std::unique_ptr< xAOD::JetContainer > jets_sc( shallowcopy.first );
-    std::unique_ptr< xAOD::ShallowAuxContainer >
-       jets_scaux( shallowcopy.second );
+    auto [jets_sc, jets_scaux] = xAOD::shallowCopy( *jets );
 
     for( xAOD::Jet* jet : *jets_sc ){
 
@@ -147,7 +143,7 @@ int main( int argc, char* argv[] )
       }
       else if( retCode != CP::CorrectionCode::Ok ){
 	Error("JetTileCorrectionTester","Failed to apply JetTileCorrection!");
-	//return StatusCode::FAILURE;  
+	//return StatusCode::FAILURE;
       }
 
       unsigned int j_status = acc_tileok(*jet);
@@ -167,7 +163,7 @@ int main( int argc, char* argv[] )
 
 
 
-    // //Check status only 
+    // //Check status only
     // tool_jtc->setRJET(0.1); //change jet radius (for tile status checks only!)
     // for( xAOD::Jet* jet : *jets_sc ){
 
@@ -188,11 +184,11 @@ int main( int argc, char* argv[] )
     // 	str_status = "Unknown";
 
     //   Info(APP_NAME, "Jet status : %s, Pt raw = %.3f GeV, Pt corrected %.3f GeV", str_status.c_str(), acc_ptraw(*jet)*0.001, jet->pt()*0.001);
-      
-    // }    
+
+    // }
     // //back to default
     // tool_jtc->setRJET(0.4);
-    
+
   }
 
   Info(APP_NAME, "Application finished successfully");

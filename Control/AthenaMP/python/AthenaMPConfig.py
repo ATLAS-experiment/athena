@@ -87,6 +87,18 @@ def AthenaMPCfg(flags):
     if chunk_size < 1:
         msg.warning('Nonpositive ChunkSize (%i) caught, setting it to 1', chunk_size)
         chunk_size = 1
+    elif chunk_size > 1:
+        # Check whether there are enough events to distribute across workers;
+        # if not, set the chunk size to 1.
+        # Ensuring that each worker processes at least some events is important
+        # for maintaining the integrity of the metadata produced by each worker.
+        requested_events = flags.Exec.MaxEvents
+        available_events = max(0, flags.Input.FileNentries - flags.Exec.SkipEvents)
+        total_entries = available_events if requested_events == -1 else min(available_events, requested_events)
+        if 0 < total_entries <= (flags.Concurrency.NumProcs-1) * chunk_size:
+            chunk_size = 1
+            msg.warning('Not enough events (%d) to fill all workers (%d) with chunk size %d. Chunk size is set to 1',
+                        total_entries, flags.Concurrency.NumProcs, chunk_size)
 
     # Configure Strategy
     debug_worker = flags.Concurrency.DebugWorkers
@@ -106,7 +118,7 @@ def AthenaMPCfg(flags):
                 bscfg = ByteStreamReadCfg(flags)
                 result.merge(bscfg)
             else:
-                evSel = CompFactory.EventSelectorAthenaPool("EventSelector")
+                evSel = CompFactory.EventSelectorAthenaPoolSharedIO("EventSelector")
 
                 inputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool",
                                                             SharedMemoryName=f"InputStream{unique_id}")

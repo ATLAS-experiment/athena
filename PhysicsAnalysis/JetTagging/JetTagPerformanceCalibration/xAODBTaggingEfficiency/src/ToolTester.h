@@ -15,7 +15,7 @@
   public:
     BTagToolTester(const std::string & name, ISvcLocator * svcLoc );
     StatusCode initialize();
-    StatusCode execute(); 
+    StatusCode execute(const EventContext& ctx); 
 
   private:
     Gaudi::Property<std::string>  m_sgKey {this, "SGKey", "AntiKt4LCTopoJets", "Jet collection name"}; // StoreGate key for the jets

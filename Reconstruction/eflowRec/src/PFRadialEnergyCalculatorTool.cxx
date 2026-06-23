@@ -12,7 +12,7 @@
 #include "eflowTrackClusterLink.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
-StatusCode PFRadialEnergyCalculatorTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer){
+StatusCode PFRadialEnergyCalculatorTool::execute(const EventContext& /*ctx*/, eflowCaloObjectContainer& theEflowCaloObjectContainer){
 
   ATH_MSG_DEBUG("Accessed radial energy profile function");
 

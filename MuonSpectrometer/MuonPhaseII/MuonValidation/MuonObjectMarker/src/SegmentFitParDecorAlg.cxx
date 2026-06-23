@@ -12,6 +12,21 @@
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
 #include "xAODMuonViews/ChamberViewer.h"
 
+namespace {
+    std::string print(const xAOD::MuonMeasurementContainer& container) {
+        if (container.empty()) {
+            return "empty container";
+        }
+        const Muon::IMuonIdHelperSvc* idHelperSvc = container.at(0)->readoutElement()->idHelperSvc();
+        std::stringstream sstr{};
+        for (const xAOD::MuonMeasurement* m : container) {
+            sstr<<" --- "<<idHelperSvc->toString(m->identify())<<", hash: "<<m->identifierHash()<<", dim:"<<m->numDimensions()<<std::endl;
+        }
+        return sstr.str();
+    }
+}
+
+
 namespace MuonR4 {
     using namespace SegmentFit;
     using SegPars = xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>;
@@ -81,30 +96,41 @@ namespace MuonR4 {
                 });
                 const MeasKey_t& key = fetchKey(m_idHelperSvc->technologyIndex(ids.front()));
                 if (key.empty()) {
-                    ATH_MSG_ERROR("The key for technology "<<m_idHelperSvc->technologyIndex(ids.front())
-                                <<" is empty");
+                    ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The key for technology "
+                        <<m_idHelperSvc->technologyIndex(ids.front())<<" is empty.");
                     return StatusCode::FAILURE;
                 }
                 const xAOD::MuonMeasurementContainer* container{nullptr};
                 ATH_CHECK(SG::get(container, key, ctx));
+                ATH_MSG_VERBOSE("Retrieve container "<<container->size()<<"\n\n"<<print(*container));
                 xAOD::ChamberViewer viewer{*container};
                 if (!viewer.loadView(m_idHelperSvc->detElementHash(ids.front()))){
-                    ATH_MSG_ERROR("Cannot find a xAOD view for "<<m_idHelperSvc->toStringDetEl(ids.front()));
+                    ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Cannot find a xAOD view for "
+                        <<m_idHelperSvc->toStringDetEl(ids.front())<<"\n\n"<<print(*container));
                     return StatusCode::FAILURE;
                 }
                 for (const Identifier& id : ids) {
                     const IdentifierHash dHash = m_idHelperSvc->detElementHash(id);
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Search for view "
+                        <<m_idHelperSvc->toStringDetEl(id)<<", hash: "<<dHash);
                     while(viewer.at(0)->identifierHash() != dHash) {
                         if (!viewer.next()) {
-                            ATH_MSG_ERROR("Cannot find a xAOD view for "
-                                <<m_idHelperSvc->toStringDetEl(id));
+                            if (viewer.loadView(dHash)) {
+                                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Container is not sorted "
+                                    <<m_idHelperSvc->toStringDetEl(id)<<".");
+                                break;
+                            }
+                            ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Cannot find a xAOD view for "
+                                <<m_idHelperSvc->toStringDetEl(id)<<"\n\n"<<print(*container));
+                            return StatusCode::FAILURE;
                         }
                     }
                     const auto itr = std::ranges::find_if(viewer,[&id](const xAOD::MuonMeasurement* meas){
                         return meas->identify() == id;
                     });
                     if (itr == viewer.end()) {
-                        ATH_MSG_ERROR("Cannot find measurement "<<m_idHelperSvc->toString(id));
+                        ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - Cannot find measurement "<<m_idHelperSvc->toString(id)
+                                    <<"\n\n"<<print(*container));
                         return StatusCode::FAILURE;
                     }
                     const auto* m{*itr};

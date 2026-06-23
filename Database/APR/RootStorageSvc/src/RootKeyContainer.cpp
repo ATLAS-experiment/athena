@@ -239,7 +239,7 @@ StatusCode RootKeyContainer::close()   {
 StatusCode RootKeyContainer::open(DbDatabase&           dbH,
                                   const std::string&    dir_nam,
                                   const DbTypeInfo*  /* info */,
-                                  DbAccessMode          mode)
+                                  Io::IoFlag          mode)
 {
   m_name = dir_nam;
 
@@ -281,7 +281,7 @@ StatusCode RootKeyContainer::open(DbDatabase&           dbH,
       std::string s = nam.substr(idx1, idx2-idx1); 
       m_dir->cd();
       TDirectory* dir = (TDirectory*)m_dir->Get(s.c_str());
-      if ( 0==dir && mode&pool::CREATE && !s.empty() ) {
+      if ( 0==dir && mode == Io::WRITE && !s.empty() ) {
         dir = m_dir->mkdir(s.c_str());
       }
       else if ( 0==dir ) {

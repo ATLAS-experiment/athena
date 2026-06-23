@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DenseEnvironmentsAmbiguityScoreProcessorTool_H
@@ -60,7 +60,7 @@ namespace Trk {
       virtual StatusCode initialize() override final;
       virtual StatusCode finalize  () override final;
 
-      virtual void process(const TrackCollection & tracks, TracksScores* trackScoreTrackMap) const override final;
+      virtual void process(const EventContext& ctx, const TrackCollection & tracks, TracksScores* trackScoreTrackMap) const override final;
 
       /** statistics output to be called by algorithm during finalize. */
       void statistics() override;

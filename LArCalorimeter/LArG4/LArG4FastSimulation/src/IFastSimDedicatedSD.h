@@ -6,6 +6,9 @@
 #define LARG4FASTSIMULATION_IFASTSIMDEDICATEDSD_H
 
 #include "LArG4Code/LArG4SimpleSD.h"
+
+#include <utility>
+
 class EnergySpot;
 class StoreGateSvc;
 
@@ -15,7 +18,9 @@ class IFastSimDedicatedSD : public LArG4SimpleSD {
  public:
 
   /// Simple constructor and destructor
-  IFastSimDedicatedSD( const std::string& name , StoreGateSvc * detStore ) : LArG4SimpleSD( name , detStore ) {}
+  IFastSimDedicatedSD(const std::string& name, StoreGateSvc* detStore,
+                     std::string hitCollectionName)
+    : LArG4SimpleSD(name, detStore, std::move(hitCollectionName)) {}
 
   ~IFastSimDedicatedSD() {}
 

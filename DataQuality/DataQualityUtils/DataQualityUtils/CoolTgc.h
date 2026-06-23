@@ -24,9 +24,7 @@ namespace cool {
 #endif
 
 
-#include <iostream>
-#include <string>
-#include <cstdlib>
+
 
 #include <TObject.h>
 
@@ -42,26 +40,7 @@ namespace cool {
 #include "CoolKernel/RecordSpecification.h"
 #include "CoolKernel/ChannelSelection.h"
 
-
-
-#include <sstream>
-#include <fstream>
-#include <TCanvas.h>
-#include <TDirectory.h>
-#include <TFile.h>
-#include <TGraph.h>
-#include <TGraphErrors.h>
-#include <TH1.h>
-#include <TH2.h>
-#include <TIterator.h>
-#include <TKey.h>
-#include <TLegend.h>
-#include <TProfile.h>
-#include <TROOT.h>
-#include <TStyle.h>
-#include <TLatex.h>
-#include <TMath.h>
-#include <TTree.h>
+#include <string>
 
 
 namespace coral {

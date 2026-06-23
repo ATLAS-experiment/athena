@@ -8,5 +8,13 @@ atlas_subdir( ColumnarTau )
 atlas_add_library (ColumnarTauLib
 ColumnarTau/*.h
   INTERFACE
-  PUBLIC_HEADERS ColumnarTau
+  PUBLIC_HEADERS ColumnarTau 
   LINK_LIBRARIES ColumnarCoreLib xAODTau)
+
+atlas_add_library (ColumnarDiTauLib
+ColumnarDiTau/*.h
+  INTERFACE
+  PUBLIC_HEADERS ColumnarDiTau
+  LINK_LIBRARIES ColumnarDiCoreLib xAODDiTau)
+
+

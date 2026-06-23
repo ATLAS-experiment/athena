@@ -21,6 +21,7 @@
 #include "GaudiKernel/StatusCode.h"
 
 #include <exception>
+#include <stdexcept>
 #include <format>
 
 //______________________________________________________________________________
@@ -78,6 +79,9 @@ StatusCode PoolCollectionConverter::isValid() const {
 }
 //______________________________________________________________________________
 pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
+   if (m_poolCollection == nullptr)[[unlikely]] {
+     throw std::runtime_error("PoolCollectionConverter::selectAll: m_poolCollection is nullptr.");
+   }
    m_collectionCursor = m_poolCollection->cursor();
    return *m_collectionCursor;
 }

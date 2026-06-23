@@ -36,7 +36,7 @@ class GetLCClassification : public AthAlgorithm
   GetLCClassification(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~GetLCClassification();
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
  private:

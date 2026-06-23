@@ -39,7 +39,6 @@ OnDemandMinbiasSvc::OnDemandMinbiasSvc(const std::string& name,
 OnDemandMinbiasSvc::~OnDemandMinbiasSvc() {}
 
 StatusCode OnDemandMinbiasSvc::initialize() {
-  m_stores.clear();
   ATH_CHECK(m_bkgEventSelector.retrieve());
   ATH_CHECK(m_activeStoreSvc.retrieve());
   ATH_CHECK(m_skipEventIdxSvc.retrieve());
@@ -87,21 +86,10 @@ StatusCode OnDemandMinbiasSvc::initialize() {
     m_proxyProviderSvc->addProvider(addRemapAP);
   }
 
-  const std::size_t n_concurrent =
-      Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents();
-  m_idx_lists.clear();
-  m_idx_lists.resize(n_concurrent);
-
-  m_num_mb_by_bunch.clear();
-  m_num_mb_by_bunch.resize(n_concurrent);
-
-  m_stores.clear();
-  m_stores.resize(n_concurrent);
-
   const int n_stores = 50;  // Start with 50 stores per event
+  std::size_t i = 0;
   // setup n_concurrent vectors of n_stores StoreGates in m_stores
-  for (std::size_t i = 0; i < n_concurrent; ++i) {
-    auto& sgs = m_stores[i];
+  for (auto& sgs : m_stores) {
     sgs.reserve(n_stores);
     for (int j = 0; j < n_stores; ++j) {
       // creates / retrieves a different StoreGateSvc for each slot
@@ -111,6 +99,7 @@ StatusCode OnDemandMinbiasSvc::initialize() {
       sg->setStoreID(StoreID::PILEUP_STORE);
       sg->setProxyProviderSvc(m_proxyProviderSvc.get());
     }
+    ++i;
   }
 
   // setup spare store for event skipping
@@ -126,8 +115,13 @@ StatusCode OnDemandMinbiasSvc::initialize() {
     ATH_MSG_INFO("Skipping " << end - begin << " HS events. ");
     for (auto iter = begin; iter < end; ++iter) {
       const auto& evt = *iter;
-      const std::size_t n_to_skip = calcMBRequired(
-          evt.evtIdx, s_NoSlot, evt.runNum, evt.lbNum, evt.evtNum);
+      EventContext ctx;
+      EventIDBase eid;
+      eid.set_run_number(evt.runNum);
+      eid.set_lumi_block(evt.lbNum);
+      eid.set_event_number(evt.evtNum);
+      ctx.setEventID(eid);
+      const std::size_t n_to_skip = calcMBRequired(evt.evtIdx, ctx);
       ATH_MSG_DEBUG("Skipping HS_ID " << evt.evtIdx << " --> skipping "
                                       << n_to_skip << " pileup events");
       for (std::size_t i = 0; i < n_to_skip; ++i) {
@@ -147,17 +141,14 @@ StatusCode OnDemandMinbiasSvc::initialize() {
 }
 
 std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
-                                               std::size_t slot,
-                                               unsigned int run,
-                                               unsigned int lumi,
-                                               std::uint64_t event) {
-  ATH_MSG_DEBUG("Run " << run << ", lumi " << lumi << ", event " << event
+                                               const EventContext& ctx) {
+  ATH_MSG_DEBUG("Run " << ctx.eventID().run_number()
+                       << ", lumi " << ctx.eventID().lumi_block()
+                       << ", event " << ctx.eventID().event_number()
                        << "| hs_id " << hs_id);
   const int n_bunches = m_latestDeltaBC.value() - m_earliestDeltaBC.value() + 1;
-  // vector on stack for use if slot == s_NoSlot
-  std::vector<std::uint64_t> stack_num_mb_by_bunch{};
-  std::vector<std::uint64_t>& num_mb_by_bunch =
-      slot == s_NoSlot ? stack_num_mb_by_bunch : m_num_mb_by_bunch[slot];
+
+  std::vector<std::uint64_t>& num_mb_by_bunch = *m_num_mb_by_bunch.get(ctx);
   num_mb_by_bunch.clear();
   num_mb_by_bunch.resize(n_bunches);
   FastReseededPRNG prng{m_seed.value(), hs_id};
@@ -165,7 +156,9 @@ std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   // First apply the beam luminosity SF
   bool sf_updated_throwaway;
   const float beam_lumi_sf =
-      m_useBeamLumi ? m_beamLumi->scaleFactor(run, lumi, sf_updated_throwaway)
+      m_useBeamLumi ? m_beamLumi->scaleFactor(ctx.eventID().run_number(),
+                                              ctx.eventID().lumi_block(),
+                                              sf_updated_throwaway)
                     : 1.F;
   const float beam_lumi = beam_lumi_sf * m_nPerBunch.value();
   std::vector<float> avg_num_mb_by_bunch(n_bunches, beam_lumi);
@@ -173,7 +166,7 @@ std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   if (m_useBeamInt) {
     // Supposed to be once per event, but ends up running once per minbias type
     // per event now
-    m_beamInt->selectT0(run, event);
+    m_beamInt->selectT0(ctx);
     for (int bunch = m_earliestDeltaBC.value();
          bunch <= m_latestDeltaBC.value(); ++bunch) {
       std::size_t idx = bunch - m_earliestDeltaBC.value();
@@ -194,12 +187,12 @@ std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
   }
 
   std::uint64_t num_mb = ranges::accumulate(num_mb_by_bunch, 0UL);
-  if (slot == s_NoSlot) {
+  if (!ctx.valid()) {
     return num_mb;
   }
-  // Won't go past here if slot == s_NoSlot
+  // Won't go past here for an invalid slot (during initialize()
 
-  std::vector<std::uint64_t>& index_array = m_idx_lists[slot];
+  std::vector<std::uint64_t>& index_array = *m_idx_lists.get(ctx);
   index_array.clear();
   index_array.resize(num_mb);
   std::iota(index_array.begin(), index_array.end(), 0);
@@ -219,10 +212,8 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
 
   const std::int64_t hs_id = get_hs_id(ctx);
   const std::size_t slot = ctx.slot();
-  const std::size_t num_to_load =
-      calcMBRequired(hs_id, slot, ctx.eventID().run_number(),
-                     ctx.eventID().lumi_block(), ctx.eventID().event_number());
-  auto& stores = m_stores[slot];
+  const std::size_t num_to_load = calcMBRequired(hs_id, ctx);
+  auto& stores = *m_stores.get(ctx);
   // If we don't have enough stores, make more
   if (stores.size() < num_to_load) {
     ATH_MSG_INFO("Adding " << num_to_load - stores.size() << " stores");
@@ -295,9 +286,8 @@ StatusCode OnDemandMinbiasSvc::beginHardScatter(const EventContext& ctx) {
 
 StoreGateSvc* OnDemandMinbiasSvc::getMinbias(const EventContext& ctx,
                                              std::uint64_t mb_id) {
-  const std::size_t slot = ctx.slot();
-  const std::size_t index = m_idx_lists.at(slot).at(mb_id);
-  return m_stores.at(ctx.slot()).at(index).get();
+  const std::size_t index = m_idx_lists.get(ctx)->at(mb_id);
+  return m_stores.get(ctx)->at(index).get();
 }
 
 std::size_t OnDemandMinbiasSvc::getNumForBunch(const EventContext& ctx,
@@ -307,12 +297,12 @@ std::size_t OnDemandMinbiasSvc::getNumForBunch(const EventContext& ctx,
         "Tried to request bunch {} which is outside the range [{}, {}]", bunch,
         m_earliestDeltaBC.value(), m_latestDeltaBC.value()));
   }
-  return m_num_mb_by_bunch.at(ctx.slot()).at(bunch - m_earliestDeltaBC.value());
+  return m_num_mb_by_bunch.get(ctx)->at(bunch - m_earliestDeltaBC.value());
 }
 
 StatusCode OnDemandMinbiasSvc::endHardScatter(const EventContext& ctx) {
   // clear all stores
-  for (auto&& sg : m_stores[ctx.slot()]) {
+  for (SGHandle& sg : *m_stores.get(ctx)) {
     ATH_CHECK(sg->clearStore());
   }
   return StatusCode::SUCCESS;

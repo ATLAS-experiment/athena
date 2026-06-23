@@ -195,10 +195,8 @@ def EGammaEnergyCalibrationWrapperCfg(
         **kwargs):
     acc = ComponentAccumulator()
 
-    from egammaTransformerCalib.egammaTransformerCalibConfig import egammaTransformerSvcCfg
+    from egammaMVACalib.egammaMVACalibConfig import egammaTransformerSvcCfg
 
-    kwargs.setdefault("ElectronContainerName", "Electrons")
-    kwargs.setdefault("PhotonContainerName", "Photons")
     kwargs.setdefault("decoratorTransformerEnergy", "TransformerEnergy")
     kwargs.setdefault("decoratorTransformerEnergyPhoton", "TransformerEnergy")
     kwargs.setdefault("TransformerCalibSvc", acc.getPrimaryAndMerge(egammaTransformerSvcCfg(flags)))

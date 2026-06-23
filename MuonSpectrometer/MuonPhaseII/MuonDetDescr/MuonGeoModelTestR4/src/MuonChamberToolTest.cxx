@@ -86,6 +86,74 @@ namespace{
         const auto* detEl = dynamic_cast<const ActsTrk::IDetectorElementBase*>(surface.surfacePlacement());
         return detEl ? detEl->identify(): Identifier{};
     }
+
+    bool checkOverlapWithCylinder(const Acts::GeometryContext& gctx,
+                                   const Acts::Surface* testSurf, 
+                                   const Amg::Vector3D& center, double radius, double halfZ){
+
+        //cylinder-cylinder overlap check
+        if (testSurf->type() == Acts::Surface::SurfaceType::Cylinder) {
+            const auto& testBounds = static_cast<const Acts::CylinderBounds&>(testSurf->bounds());
+            using BoundEnum = Acts::CylinderBounds::BoundValues;
+            const double testR = testBounds.get(BoundEnum::eR);
+            const auto& testCenter = testSurf->center(gctx);
+            double dr = std::abs(testCenter.perp() - center.perp());
+            double dz = std::abs(testCenter.z() - center.z());
+            //the cylinders do not overlap 
+            if (dr > testR + radius || 
+                (dr <= Acts::s_epsilon && std::abs(testR-radius) > Acts::s_epsilon) ||
+                (dz > halfZ + testBounds.get(BoundEnum::eHalfLengthZ))) {
+                return false;
+            }
+        } else if (testSurf->type() == Acts::Surface::SurfaceType::Disc) {
+            // Handle disc overlap logic
+                using BoundEnum = Acts::RadialBounds::BoundValues;
+                const auto& bounds = static_cast<const Acts::RadialBounds&>(testSurf->bounds());
+                const auto& testCenter = testSurf->center(gctx);
+                double dz = std::abs(testCenter.z() - center.z());
+                //cylinder and disc do not overlap
+                if (dz > halfZ ||
+                    (dz < halfZ &&  bounds.get(BoundEnum::eMaxR) < (radius))) {
+                    return false;                            
+                }    
+        } else {
+            std::cerr << "Overlap check with surface type " << testSurf->type() << " is not implemented yet\n";
+            return false;
+        }
+        return true;
+    }
+
+    bool checkOverlapWithDisc(const Acts::GeometryContext& gctx,
+                               const Acts::Surface* testSurf, 
+                               const Amg::Vector3D& center, double radius){
+        if (testSurf->type() == Acts::Surface::SurfaceType::Cylinder) {
+            const auto& testBounds = static_cast<const Acts::CylinderBounds&>(testSurf->bounds());
+            using BoundEnum = Acts::CylinderBounds::BoundValues;
+            const double testR = testBounds.get(BoundEnum::eR);
+            const auto& testCenter = testSurf->center(gctx);
+            double dz = std::abs(testCenter.z() - center.z());
+            //the cylinder and the disc do not overlap
+            if (dz > testBounds.get(BoundEnum::eHalfLengthZ) || 
+                (dz < testBounds.get(BoundEnum::eHalfLengthZ) && radius < testR)) {
+                return false;
+            }
+        } else if (testSurf->type() == Acts::Surface::SurfaceType::Disc) {    
+                using BoundEnum = Acts::RadialBounds::BoundValues;
+                const auto& bounds = static_cast<const Acts::RadialBounds&>(testSurf->bounds());
+                const auto& testCenter = testSurf->center(gctx);
+                double dz = std::abs(testCenter.z() - center.z());
+                double dr = std::abs(testCenter.perp() - center.perp());
+                //the discs do not overlap
+                if (dz > Acts::s_epsilon || 
+                    dr > (radius+bounds.get(BoundEnum::eMaxR))){
+                    return false;                            
+                }    
+        } else {
+            std::cerr << "Overlap check with surface type " << testSurf->type() << " is not implemented yet\n";
+            return false;
+        }
+        return true;
+    }
 }
 
 namespace MuonGMR4 {
@@ -201,8 +269,7 @@ namespace MuonGMR4 {
                     ATH_CHECK(testReadoutEle(gctx, *detEle, envelope, *boundVol));
                     break; 
                 } default: {
-                    ATH_MSG_ERROR("Who came up with putting "<<ActsTrk::to_string(readOut->detectorType())
-                                <<" into the MS");
+                    ATH_MSG_ERROR("Who came up with putting "<<readOut->detectorType()<<" into the MS");
                     return StatusCode::FAILURE;
                 }
             }
@@ -401,7 +468,7 @@ namespace MuonGMR4 {
             const Acts::Volume& chamberBounds = *chamberBoundsVec[chIdx];
             if (m_dumpObjs) {
                 saveEnvelope(gctx, std::format("Chamber_{:}{:}{:}{:}{:}", 
-                                                ActsTrk::to_string(chamber.detectorType()),
+                                                chamber.detectorType(),
                                                 chName(chamber.chamberIndex()),
                                                 Acts::abs(chamber.stationEta()),
                                                 chamber.stationEta() > 0 ? 'A' : 'C',
@@ -702,11 +769,11 @@ namespace MuonGMR4 {
                 }
             }  
 
-            for(const Acts::Surface* surf : passiveSurfaces) {
+            for(std::size_t i = 0; i < passiveSurfaces.size(); ++i) {
 
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check "<<surf->type()
-                                <<" surface "<<surf->name()<< " , "<<surf->geometryId());
-                const Amg::Vector3D center = surf->center(gctx.context());
+                const Acts::Surface* surf = passiveSurfaces[i];
+        
+                const Amg::Vector3D center = surf->center(gctx.context());                
                 if(surf->type() == Acts::Surface::SurfaceType::Cylinder) {
                     using BoundEnum = Acts::CylinderBounds::BoundValues;
                     const auto& bounds = static_cast<const Acts::CylinderBounds&>(surf->bounds());
@@ -746,6 +813,8 @@ namespace MuonGMR4 {
                 }
                 overlapSurfaces.insert(surf);
                 overlapVolumes.insert(testVol);
+
+            
             }
 
             if(overlaps.empty()) {
@@ -765,6 +834,55 @@ namespace MuonGMR4 {
                              <<", "<<Amg::toString(overlap->localToGlobalTransform(gctx.context()))<<std::endl;;
             }
             ATH_MSG_ALWAYS(overlapStream.str());
+        }
+
+         //check passive surfaces overlaps with each other 
+        for(std::size_t i = 0; i < passiveSurfaces.size(); ++i) {
+            const Acts::Surface* surf = passiveSurfaces[i];
+            const Amg::Vector3D center = surf->center(gctx.context());
+            for(std::size_t j = i+1; j < passiveSurfaces.size(); ++j) {
+                const Acts::Surface* testSurf = passiveSurfaces[j];
+                ATH_MSG_INFO(__func__<<"() "<<__LINE__<<" - Checking passive surface "<<surf->name()<<" geo id "<<surf->geometryId()
+                                <<" with passive surface "<<testSurf->name()<<" geo id "<<testSurf->geometryId());
+                if(testSurf->geometryId().volume() != surf->geometryId().volume()){
+                    continue;
+                }
+                if(surf->type() == Acts::Surface::SurfaceType::Cylinder){
+                    using BoundEnum = Acts::CylinderBounds::BoundValues;
+                    const auto& bounds = static_cast<const Acts::CylinderBounds&>(surf->bounds());
+                    double passiveR = bounds.get(BoundEnum::eR);
+                    double passiveZ = bounds.get(BoundEnum:: eHalfLengthZ);
+                    bool overlap = checkOverlapWithCylinder(gctx.context(), testSurf, center, passiveR, passiveZ);
+                    if(overlap) {
+                        ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The surface "<<surf->name()<<"geo id "<<surf->geometryId()
+                                            <<" overlaps with surface "<<testSurf->name()<<"geo id "<<testSurf->geometryId()
+                                            <<" in the same volume "<<surf->geometryId().volume());
+                        overlapSurfaces.insert(surf);
+                        overlapSurfaces.insert(testSurf);
+                        if (!m_ignoreOutsideSurf) {
+                            retCode = StatusCode::FAILURE;
+                        }
+                    }
+                }else if(surf->type() == Acts::Surface::SurfaceType::Disc){
+                    using BoundEnum = Acts::RadialBounds::BoundValues;
+                    const auto& bounds = static_cast<const Acts::RadialBounds&>(surf->bounds());
+                    bool overlap = checkOverlapWithDisc(gctx.context(), testSurf, center, bounds.get(BoundEnum::eMaxR));
+                    if(overlap) {
+                        ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The surface "<<surf->name()<<"geo id "<<surf->geometryId()
+                                        <<" overlaps with surface "<<testSurf->name()<<"geo id "<<testSurf->geometryId()
+                                        <<" in the same volume "<<surf->geometryId().volume());
+                        overlapSurfaces.insert(surf);
+                        overlapSurfaces.insert(testSurf);
+                        if (!m_ignoreOutsideSurf) {
+                            retCode = StatusCode::FAILURE;
+                        }
+                    }
+                } else {
+                    ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The surface "<< surf->geometryId()
+                                    <<", "<< surf->name() <<" is not a cylinder surface or disc");
+                    return StatusCode::FAILURE;
+                }
+            }
         }
 
         if (overlapVolumes.size() || overlapSurfaces.size()) {

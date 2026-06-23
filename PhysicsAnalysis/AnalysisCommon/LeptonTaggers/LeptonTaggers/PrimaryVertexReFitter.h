@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PROMPT_PRIMARYVERTEXREFITTER_H
@@ -48,7 +48,7 @@ namespace Prompt
         PrimaryVertexReFitter(const std::string& name, ISvcLocator* pSvcLocator);
 
         virtual StatusCode initialize() override;
-        virtual StatusCode execute() override;
+        virtual StatusCode execute(const EventContext& ctx) override;
         virtual StatusCode finalize() override;
 
     private:
@@ -56,7 +56,8 @@ namespace Prompt
         using accessorFloat_t = SG::Accessor<float>;
 
 
-        bool decorateLepWithReFitPrimaryVertex(const FittingInput &input,
+        bool decorateLepWithReFitPrimaryVertex(const EventContext& ctx,
+            const FittingInput &input,
             const xAOD::TrackParticle* tracklep,
             const std::vector<const xAOD::TrackParticle*> &tracks,
             xAOD::VertexContainer &refitVtxContainer);

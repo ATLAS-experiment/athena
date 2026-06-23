@@ -126,7 +126,7 @@ StatusCode L1CaloDumpRampData::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode L1CaloDumpRampData::execute()
+StatusCode L1CaloDumpRampData::execute(const EventContext& /*ctx*/)
 {  
   return StatusCode::SUCCESS;
 }

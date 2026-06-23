@@ -33,10 +33,12 @@ StatusCode FPGATrackSimGNNPatternRecoTool::getRoads(const std::vector<std::share
     
     ATH_CHECK(m_GNNGraphHitSelectorTool->selectHits(hits, graph_hits)); // Go from FPGATrackSimHits to FPGATrackSimGNNHit -> get information needed for GNNPipeline
     ATH_CHECK(m_GNNGraphConstructionTool->getEdges(graph_hits, graph_edges)); // Build edges using module map (or metric learning)
-    ATH_CHECK(m_selectedGNNEdgeClassifierTool->scoreEdges(graph_hits, graph_edges)); // Score edges using IN GNN
-    ATH_CHECK(m_GNNRoadMakerTool->makeRoads(hits, graph_hits, graph_edges, roads)); // Build road candidates using connected components (need to make a C++ version of it)
+    if(graph_edges.size() > 0){
+        ATH_CHECK(m_selectedGNNEdgeClassifierTool->scoreEdges(graph_hits, graph_edges)); // Score edges using IN GNN
+        ATH_CHECK(m_GNNRoadMakerTool->makeRoads(hits, graph_hits, graph_edges, roads)); // Build road candidates using connected components (need to make a C++ version of it)
+    }
     if(m_doGNNRootOutput) ATH_CHECK(m_GNNRootOutputTool->fillTree(hits, graph_hits, graph_edges, roads)); // Output the hit/edge/road information into a ROOT file
-    
+
     graph_hits.clear();
     graph_edges.clear();
     return StatusCode::SUCCESS;

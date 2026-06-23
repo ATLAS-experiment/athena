@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/IAuxStore.h
@@ -32,6 +32,9 @@
 
 #include "AthContainersInterfaces/IConstAuxStore.h"
 #include <cstddef>
+
+
+class EventContext;
 
 
 namespace SG {
@@ -159,7 +162,20 @@ public:
                            const SG::auxid_set_t& ignore = SG::auxid_set_t())
     = 0;
 
-  
+
+  /**
+   * @brief Perform post-read processing on this store.
+   * @param ctx The current event context.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method for all contained variables for which this
+   * is required.
+   */
+  virtual void toTransient (const EventContext& ctx) = 0;
+
+
   /**
    * @brief Set an option for a given auxiliary variable.
    * @param auxid The identifier of the desired aux data item.
@@ -186,6 +202,7 @@ public:
   using IConstAuxStore::linkedVector;
   virtual IAuxTypeVector* linkedVector (SG::auxid_t /*auxid*/)
   { return nullptr; }
+
 
   /// Mark that this type supports thinning operations.
   /// See AthContainers/supportsThinning.h and

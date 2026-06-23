@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -43,13 +43,14 @@ namespace DerivationFramework{
     
     enum class GEN_id { Pythia6=0, Pythia8=1, HerwigPP=2, Sherpa=3 };
         
-    std::map<const xAOD::TruthParticle*, HF_id> GetOriginMap() const;
+    std::map<const xAOD::TruthParticle*, HF_id> GetOriginMap(const EventContext& ctx) const;
     
   private:
 
     void fillHadronMap(std::set<const xAOD::TruthParticle*>& usedHadron, std::map<const xAOD::TruthParticle*,int>& mainHadronMap, const xAOD::TruthParticle* mainhad, const xAOD::TruthParticle* ihad, bool decayed=false) const;
 
-    void buildPartonsHadronsMaps(std::map<const xAOD::TruthParticle*,int>& mainHadronMap,
+    void buildPartonsHadronsMaps(const EventContext& ctx,
+                                 std::map<const xAOD::TruthParticle*,int>& mainHadronMap,
                                  std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const;
 
     bool isCHadronFromB(const xAOD::TruthParticle* part, std::shared_ptr<std::set<const xAOD::TruthParticle*>> checked = nullptr) const;

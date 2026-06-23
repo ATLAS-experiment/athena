@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -97,21 +97,23 @@ namespace Trk
 	/** Interface for Track with vertex constraint */
 	/** the position of the constraint is ALWAYS the starting point */
 	/** Interface for MeasuredPerigee with starting point */
-	xAOD::Vertex * FastVertexFitter::fit ( const std::vector<const Trk::TrackParameters*> & originalPerigees,
-	                                       const Amg::Vector3D& firstStartingPoint ) const
+	std::unique_ptr<xAOD::Vertex> FastVertexFitter::fit ( const EventContext& ctx,
+	                                                      const std::vector<const Trk::TrackParameters*> & originalPerigees,
+	                                                      const Amg::Vector3D& firstStartingPoint ) const
 	{
                 xAOD::Vertex constraint;
                 constraint.makePrivateStore();
                 constraint.setPosition( firstStartingPoint );
                 constraint.setCovariancePosition( AmgSymMatrix(3)::Zero(3,3) );
                 constraint.setFitQuality( 0.,0.);
-		return fit ( originalPerigees, constraint );
+                return fit ( ctx, originalPerigees, constraint );
 	}
 
 	/** Interface for MeasuredPerigee with vertex constraint */
 	/** the position of the constraint is ALWAYS the starting point */
-	xAOD::Vertex * FastVertexFitter::fit ( const std::vector<const Trk::TrackParameters*> & originalPerigees,
-	                                       const xAOD::Vertex& firstStartingPoint ) const
+	std::unique_ptr<xAOD::Vertex> FastVertexFitter::fit ( const EventContext& ctx,
+	                                                      const std::vector<const Trk::TrackParameters*> & originalPerigees,
+	                                                      const xAOD::Vertex& firstStartingPoint ) const
 	{
 		if ( originalPerigees.empty() )
 		{
@@ -305,7 +307,7 @@ namespace Trk
 					// found vertex. The first propagation above is only to the starting point. But here we
 					// want to store it wrt. to the last fitted vertex
 					auto extrapolatedPerigee = std::unique_ptr<const Trk::TrackParameters> ( m_extrapolator->extrapolate ( 
-              Gaudi::Hive::currentContext(), 
+              ctx,
               * ( *BTIter ).originalPerigee, 
               perigeeSurface ) );
 					if ( extrapolatedPerigee==nullptr )
@@ -329,29 +331,30 @@ namespace Trk
 		} // end of iteration
 		fittedVertex->vxTrackAtVertex() = tracksAtVertex;
 		//ATH_MSG_VERBOSE("Final Vertex Fitted: " << fittedVxCandidate->recVertex()); // TODO: can no longer print vertex after converting to xAOD
-		return fittedVertex.release();
+		return fittedVertex;
 	}
 
-	xAOD::Vertex * FastVertexFitter::fit ( const std::vector<const Trk::TrackParameters*>& perigeeList ) const
+	std::unique_ptr<xAOD::Vertex> FastVertexFitter::fit ( const EventContext& ctx,
+                                                          const std::vector<const Trk::TrackParameters*>& perigeeList ) const
 	{
 		Amg::Vector3D tmpVtx(0.,0.,0.);
-		return fit ( perigeeList, tmpVtx );
+		return fit ( ctx, perigeeList, tmpVtx );
 	}
 
   		//xAOD interfaced methods. Required to un-block the current situation  
  		// with the xAOD tracking design. 
- 		 xAOD::Vertex * FastVertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,const Amg::Vector3D& startingPoint)  const
+  		 std::unique_ptr<xAOD::Vertex> FastVertexFitter::fit(const EventContext& ctx,const std::vector<const xAOD::TrackParticle*>& vectorTrk,const Amg::Vector3D& startingPoint)  const
  		 {
                   xAOD::Vertex constraint;
                   constraint.makePrivateStore();
                   constraint.setPosition( startingPoint );
                   constraint.setCovariancePosition( AmgSymMatrix(3)::Zero(3,3) );
                   constraint.setFitQuality( 0.,0.);
- 		  return fit(vectorTrk, constraint);                                
+                  return fit(ctx, vectorTrk, constraint);
  		 }//end of the xAOD starting point fit method 
  		 
  		     
- 		 xAOD::Vertex * FastVertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk, const xAOD::Vertex& constraint) const
+  		 std::unique_ptr<xAOD::Vertex> FastVertexFitter::fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>& vectorTrk, const xAOD::Vertex& constraint) const
  		 { 
  		   if(vectorTrk.empty()) 
  		   { 
@@ -371,7 +374,7 @@ namespace Trk
  		   } 
  		    
  		    
- 		   xAOD::Vertex* fittedVertex = fit( measuredPerigees, constraint ); 
+ 		   std::unique_ptr<xAOD::Vertex> fittedVertex = fit( ctx, measuredPerigees, constraint );
  		   // fit() may return nullptr, need to protect 
 		   if (fittedVertex == nullptr){
 				ATH_MSG_WARNING("Failed fit, returning null vertex"); 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
@@ -26,14 +26,6 @@ TrackSummaryTool::updateTrackSummary(const EventContext& ctx,
   UpdateSummary(ctx, track, suppress_hole_search);
 }
 
-inline void
-TrackSummaryTool::updateAdditionalInfo(Track& track) const
-{
-  if (!track.trackSummary()) {
-    computeAndReplaceTrackSummary(
-      track, false /*DO NOT suppress hole search*/);
-  }
-}
 inline void
 TrackSummaryTool::UpdateSummary(const EventContext& ctx,
                                 Track& track,

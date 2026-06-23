@@ -94,10 +94,9 @@ StatusCode sTGCHitAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode sTGCHitAnalysis::execute() {
+StatusCode sTGCHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In sTGCHitAnalysis::execute()" );
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const sTGCSimHitCollection* p_collection{nullptr};
   ATH_CHECK(SG::get(p_collection, m_readKey, ctx));
   for (sTGCSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit){

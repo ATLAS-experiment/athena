@@ -64,10 +64,9 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning() const
+StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning(const EventContext& ctx) const
 {
     
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve main TrackParticle collection
   SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles(m_inDetSGKey, ctx);
@@ -77,7 +76,7 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning() const
   SG::ThinningHandle<xAOD::FlowElementContainer> importedPFOCharged(m_PFOChargedSGKey, ctx);
 
   // Retrieve main jet collection
-  SG::ReadHandle<xAOD::JetContainer> importedJets(m_jetSGKey);
+  SG::ReadHandle<xAOD::JetContainer> importedJets(m_jetSGKey, ctx);
   unsigned int nJets(importedJets->size());
   std::vector<const xAOD::Jet*> jetToCheck; jetToCheck.clear();
 

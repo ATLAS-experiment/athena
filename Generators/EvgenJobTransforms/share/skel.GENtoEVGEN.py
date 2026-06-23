@@ -230,10 +230,8 @@ if len(jofiles) !=1:
 jofile = jofiles[0]
 
 joparts = (os.path.basename(jofile)).split(".")
-## Perform some consistency checks if this appears to be an "official" production JO
-officialJO = False
+## Perform some consistency checks
 if joparts[0].startswith("mc") and all(c in string.digits for c in joparts[0][2:]):
-    officialJO = True
     ## Check that there are exactly 4 name parts separated by '.': MCxx, DSID, physicsShort, .py
     if len(joparts) != 3:
         evgenLog.error(jofile + " name format is wrong: must be of the form mc.<physicsShort>.py: please rename.")
@@ -250,13 +248,15 @@ if joparts[0].startswith("mc") and all(c in string.digits for c in joparts[0][2:
         evgenLog.error(jofile + " has too few physicsShort fields separated by '_': should contain <generators>(_<tune+PDF_if_available>)_<process>. Please rename.")
         sys.exit(1)
     ## NOTE: a further check on physicsShort consistency is done below, after fragment loading
-    check_jofiles="/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/scripts/check_jo_consistency.py"
+    check_jofiles="/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/scripts/check_jo_consistency.py"
     if os.path.exists(check_jofiles):
         include(check_jofiles)
         check_naming(os.path.basename(jofile))
     else:
         evgenLog.waring("check_jo_consistency.py not found, will proceed without JOs check.")
-#        sys.exit(1)
+else:
+    
+    sys.exit(1)
 
 ## Include the JO fragment
 include(jofile)
@@ -381,7 +381,7 @@ else:
 ## Check that the keywords are in the list of allowed words (and exit if processing an official JO)
 if evgenConfig.keywords:
     from GeneratorConfig.GenConfigHelpers import checkKeywords
-    checkKeywords(evgenConfig, evgenLog, officialJO)
+    checkKeywords(evgenConfig, evgenLog)
 
 ## Check that the L1 and L2 keywords pairs are in the list of allowed words pairs (and exit if processing an official JO)
 if evgenConfig.categories:
@@ -419,8 +419,7 @@ if evgenConfig.categories:
                msg = "evgenConfig.categories contains non-standard category: %s. " % ", ".join(bad_cat)
                msg += "Please check the allowed categories list and fix."
                evgenLog.error(msg)
-               if officialJO:
-                   sys.exit(1)
+               sys.exit(1)
     else:
         evgenLog.warning("Could not find CategoryList.txt file %s in $DATAPATH" % lkwfile)
 
@@ -546,7 +545,7 @@ if hasattr(testSeq, "TestHepMC") and not gens_testhepmc(evgenConfig.generators):
 # Function to check blocklist (from Spyros'es logParser.py)
 def checkBlockList(relFlavour,cache,generatorName) :
     isError = None
-    with open('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common/BlackList_caches.txt') as bfile:
+    with open('/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common/BlackList_caches.txt') as bfile:
         for line in bfile.readlines():
             if not line.strip():
                 continue
@@ -567,7 +566,7 @@ def checkBlockList(relFlavour,cache,generatorName) :
 
 def checkPurpleList(relFlavour,cache,generatorName) :
     isError = None
-    with open('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common/PurpleList_generators.txt') as bfile:
+    with open('/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common/PurpleList_generators.txt') as bfile:
         for line in bfile.readlines():
             if not line.strip():
                 continue
@@ -589,7 +588,7 @@ def checkPurpleList(relFlavour,cache,generatorName) :
 
 ## Announce start of JO checkingrelease number checking
 evgenLog.debug("****************** CHECKING RELEASE IS NOT BLACKLISTED *****************")
-if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/common'):
+if os.path.exists('/cvmfs/atlas.cern.ch/repo/sw/Generators/MCJobOptions/common'):
    errorBL = checkBlockList("AthGeneration",rel,gennames)
    if (errorBL):
      if (hasattr( runArgs, "ignoreBlackList") and runArgs.ignoreBlackList): 

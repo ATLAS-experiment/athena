@@ -42,7 +42,6 @@ private:
     StatusCode printCondObjects() const;
     StatusCode streamOutCondObjects();
     StatusCode registerCondObjects();
-    StatusCode readWithBeginRun();
     void       waitForSecond() const;
     StatusCode registerIOV(const CLID& clid);
 
@@ -52,7 +51,6 @@ private:
     BooleanProperty           m_twoStepWriteReg{this, "TwoStepWriteReg", false};
     BooleanProperty           m_createExtraChans{this, "CreateExtraChanns", false};
     BooleanProperty           m_nameChans{this, "NameChanns", false};
-    BooleanProperty           m_readInInit{this, "ReadInInit", false};
     BooleanProperty           m_writeOnlyCool{this, "WriteOnlyCool", false};
     BooleanProperty           m_fancylist{this, "FancyList", false};
     BooleanProperty           m_printLB{this, "PrintLB", false};

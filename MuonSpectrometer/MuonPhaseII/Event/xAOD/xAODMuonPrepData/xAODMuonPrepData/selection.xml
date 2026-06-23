@@ -1,5 +1,15 @@
-<!-- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
+   <!-- generic measurement-->
+   <class name="xAOD::MuonMeasurement_v1" >
+       <field name="m_readoutEle" transient="true" />
+       <field name="m_identifier" transient="true" />
+   </class>
+   <class name="xAOD::MuonMeasurementContainer_v1"
+          id="E16D1889-95C6-4DB5-A98B-BDB8CF3A2B31" />
+   <typedef name="xAOD::MuonMeasurement" />
+   <typedef name="xAOD::MuonMeasurementContainer" />
+
     <!-- Mdt Drift Circle -->
     <class name="xAOD::MdtDriftCircle_v1" >
         <field name="m_readoutEle" transient="true" />

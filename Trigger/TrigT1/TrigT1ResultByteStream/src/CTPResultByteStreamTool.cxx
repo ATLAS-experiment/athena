@@ -120,8 +120,9 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
       dataStatus.status_info = static_cast<uint32_t>(*status);
   }
 
-  uint32_t errStatus = dataStatus.status_word;  // error status
-  uint32_t statInfo = dataStatus.status_info;   // status info
+  uint32_t errStatus = dataStatus.status_word;   // error status
+  uint32_t statInfo = dataStatus.status_info;    // status info
+  uint32_t statPos = rob->rod_status_position(); // status info position
 
   //
   // Payload information
@@ -152,9 +153,18 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
   
   // Initialize the remaining words
   result->setHeader(headerMarker, formatVersion, sourceID, L1ID, runNum, bcid, trigType, evtType);  // Header words
-  result->setTrailer(ndata, errStatus, statInfo);                                                   // Trailer words
+  result->setTrailer(ndata, errStatus, statInfo, nstatus, statPos);                                 // Trailer words
   result->setL1AcceptBunchPosition(CTPfragment::lvl1AcceptBunch(rob));                              // L1A bunch position
   result->setTurnCounter(CTPfragment::turnCounter(rob));                                            // Turn counter
+
+  // Check status and print warning message if issue is seen
+  std::vector<std::string> ctpResultIssues = result->checkForIssues();
+  if (!ctpResultIssues.empty()) {
+    ATH_MSG_WARNING("Found " << ctpResultIssues.size() << " CTPResult issues");
+    for (const auto& issue : ctpResultIssues) {
+      ATH_MSG_WARNING(issue);
+    }
+  }
 
   // Record result
   ATH_MSG_DEBUG(CTPResultUtils::print(*result));
@@ -169,10 +179,22 @@ StatusCode CTPResultByteStreamTool::convertFromBS(const std::vector<const ROBF*>
 // -----------------------------------------------------------------------------
 // xAOD->BS conversion
 // -----------------------------------------------------------------------------
-StatusCode CTPResultByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf, const EventContext& eventContext) {
+StatusCode CTPResultByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
+                                                const xAOD::TrigCompositeContainer* tc,
+                                                const EventContext& eventContext) {
 
-  // Retrieve the xAOD::CTPResult object
-  SG::ReadHandle<xAOD::CTPResult> result = SG::makeHandle<xAOD::CTPResult>(m_inKeyCTPResult, eventContext);
+  // Skip if TrigCompositeContainer is not provided or empty
+  if (!tc || tc->empty()) {
+    return StatusCode::SUCCESS;
+  }
+
+  // Extract the CTPResult SG key stored as a detail of the TrigComposite
+  const xAOD::TrigComposite* l1tr = tc->at(0);
+  std::string ctpKey;
+  l1tr->getDetail<std::string>("CTPResultKey", ctpKey);
+
+  // Use the retrieved key to read the CTPResult from the event store
+  SG::ReadHandle<xAOD::CTPResult> result(ctpKey, eventContext);
   ATH_CHECK(result.isValid());
 
   // Get CTP version

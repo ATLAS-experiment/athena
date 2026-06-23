@@ -7,6 +7,8 @@
 #include "../HLTCaloCellMaker.h"
 #include "../HLTCaloCellSumMaker.h"
 #include "../HLTCaloCellCorrector.h"
+#include "../HLTCaloGlobalCellMaker.h"
+#include "../HLTCaloGlobalCellMonitor.h"
 
 #include "../TrigCaloClusterMonitor.h"
 
@@ -16,6 +18,8 @@ DECLARE_COMPONENT( CaloGlobalRoIBuilder )
 DECLARE_COMPONENT( HLTCaloCellMaker )
 DECLARE_COMPONENT( HLTCaloCellSumMaker )
 DECLARE_COMPONENT( HLTCaloCellCorrector )
+DECLARE_COMPONENT( HLTCaloGlobalCellMaker )
+DECLARE_COMPONENT( HLTCaloGlobalCellMonitor )
 
 DECLARE_COMPONENT( TrigCaloClusterMonitor )
 

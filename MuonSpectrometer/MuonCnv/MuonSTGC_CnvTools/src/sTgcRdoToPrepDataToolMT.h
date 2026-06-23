@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_sTgcRdoToPrepDataToolMT
@@ -21,6 +21,10 @@
 #include "xAODMuonPrepData/sTgcStripContainer.h"
 #include "xAODMuonPrepData/sTgcWireContainer.h"
 #include "xAODMuonPrepData/sTgcPadContainer.h"
+#include "xAODMuonPrepData/sTgcStripAuxContainer.h"
+#include "xAODMuonPrepData/sTgcWireAuxContainer.h"
+#include "xAODMuonPrepData/sTgcPadAuxContainer.h"
+#include "xAODMuonViews/FillContainer.h"
 
 namespace MuonGMR4{
   class MuonDetectorManager;
@@ -55,35 +59,59 @@ namespace Muon
       StatusCode provideEmptyContainer(const EventContext& ctx) const override;
 
     protected:
-      struct outputCache {
-        SG::WriteHandle<xAOD::sTgcStripContainer> strip{};
-        SG::WriteHandle<xAOD::sTgcWireContainer> wire{};
-        SG::WriteHandle<xAOD::sTgcPadContainer> pad{};
-        SG::WriteHandle<Muon::sTgcPrepDataContainer> prd{};
+      using PrdKey_t =  SG::WriteHandleKey<sTgcPrepDataContainer>;
+      /** @brief Data cache to hold the translated prd & xAOD containers */
+      struct DataCache {
+        using StripCont_t = xAOD::FillContainer<xAOD::sTgcStripContainer,
+                                                xAOD::sTgcStripAuxContainer>;
+        using WireCont_t = xAOD::FillContainer<xAOD::sTgcWireContainer,
+                                               xAOD::sTgcWireAuxContainer>;
+        using PadCont_t = xAOD::FillContainer<xAOD::sTgcPadContainer,
+                                              xAOD::sTgcPadAuxContainer>;
+        StripCont_t strips{};
+        WireCont_t  wires{};
+        PadCont_t   pads{};
+
+        DataCache(const std::size_t hashMax,
+                  const PrdKey_t& key,
+                  const EventContext& ctx);
+        
+        SG::WriteHandle<sTgcPrepDataContainer> prdWriteHandle{};
+
+        std::vector<std::unique_ptr<sTgcPrepDataCollection>> collections{};
+
+        const MuonGMR4::MuonDetectorManager* detMgr{nullptr};
+
         bool isValid{false};
+
+        ~DataCache();
+        DataCache& operator=(DataCache&& other) = default;
+        DataCache(DataCache&& other) = default;
+
+        void translateAndSort(sTgcPrepDataCollection& coll);
       };
       
       StatusCode processCollection(const EventContext& ctx, 
-                                   outputCache& xAODcontainers,
+                                   DataCache& xAODcontainers,
                                    const STGC_RawDataCollection *rdoColl) const;
             
-      outputCache setupOutputContainers(const EventContext& ctx) const;
+      DataCache setupOutputContainers(const EventContext& ctx) const;
       const STGC_RawDataContainer* getRdoContainer(const EventContext& ctx) const;
 
       void processRDOContainer(const EventContext& ctx,
-                               outputCache& xAODcontainers,
+                               DataCache& xAODcontainers,
                                const std::vector<IdentifierHash>& idsToDecode) const;
 
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 
 
-      ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+      ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "MuonIdHelperSvc/MuonIdHelperSvc"};
 
     
       SG::ReadHandleKey<STGC_RawDataContainer> m_rdoContainerKey{this, "InputCollection", "sTGCRDO", "RDO container to read"};
-      SG::WriteHandleKey<sTgcPrepDataContainer> m_stgcPrepDataContainerKey{this, "OutputCollection", "STGC_Measurements", "Muon::sTgcPrepDataContainer to record"};
+      PrdKey_t m_stgcPrepDataContainerKey{this, "OutputCollection", "STGC_Measurements", "sTgcPrepDataContainer to record"};
       Gaudi::Property<bool> m_merge{this, "Merge", true}; // merge Prds
 
-      ToolHandle<ISTgcClusterBuilderTool> m_clusterBuilderTool{this,"ClusterBuilderTool","Muon::SimpleSTgcClusterBuilderTool/SimpleSTgcClusterBuilderTool"};
+      ToolHandle<ISTgcClusterBuilderTool> m_clusterBuilderTool{this,"ClusterBuilderTool","SimpleSTgcClusterBuilderTool/SimpleSTgcClusterBuilderTool"};
       ToolHandle<INSWCalibTool> m_calibTool{this,"NSWCalibTool", ""};
 
       /// This is the key for the cache for the sTGC PRD containers, can be empty

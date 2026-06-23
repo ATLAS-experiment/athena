@@ -26,7 +26,7 @@ public:
   virtual void persToTrans( const Trk::Track_p4 *, Trk::Track *, MsgStream& );
   virtual void transToPers( const Trk::Track *, Trk::Track_p4 *, MsgStream& );
 
-  virtual void  initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv )
+  virtual void  initPrivateConverters( TopLevelTPCnvBase *topCnv )
   {
    m_trackStateVectorCnv.setTopConverter( topCnv, 0 );
    m_multiStateVectorCnv.setTopConverter( topCnv, 0 );
@@ -48,7 +48,7 @@ public:
 
   MultiStateOSVectorCnv_p1 m_multiStateVectorCnv;
 
-  AthenaPoolTopLevelTPCnvBase *m_topCnv{};
+  TopLevelTPCnvBase *m_topCnv{};
 };
 
 #endif // TRACK_CNV_P3_H

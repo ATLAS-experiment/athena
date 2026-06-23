@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -30,7 +30,7 @@ PutTrackCollectionsInSG::initialize() {
 
 //Execute
 StatusCode 
-PutTrackCollectionsInSG::execute()  {
+PutTrackCollectionsInSG::execute(const EventContext& ctx)  {
   auto collection1 = std::make_unique<TrackCollection>(SG::VIEW_ELEMENTS);
   //note that the default c'tor should normally *not* be used and results in an invalid Track
   //however, it suffices for unit testing purposes
@@ -41,12 +41,12 @@ PutTrackCollectionsInSG::execute()  {
   collection2->push_back(t2);
   //
   std::string collectionKey1("StoreGateSvc+TrackCollectionKey1");
-  SG::WriteHandle<TrackCollection> sgTrackCollectionWriter1(collectionKey1);
+  SG::WriteHandle<TrackCollection> sgTrackCollectionWriter1(collectionKey1, ctx);
   ATH_MSG_INFO("Record track collection1 in SG");
   ATH_CHECK(sgTrackCollectionWriter1.record(std::move(collection1)));	
   //
   std::string collectionKey2("StoreGateSvc+TrackCollectionKey2");
-  SG::WriteHandle<TrackCollection> sgTrackCollectionWriter2(collectionKey2);
+  SG::WriteHandle<TrackCollection> sgTrackCollectionWriter2(collectionKey2, ctx);
   ATH_MSG_INFO("Record track collection2 in SG");
   ATH_CHECK(sgTrackCollectionWriter2.record(std::move(collection2)));
   //

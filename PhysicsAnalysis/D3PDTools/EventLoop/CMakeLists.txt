@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( EventLoop )
@@ -62,6 +62,17 @@ atlas_add_test (EventLoop_gt_DirectInputModule
 
 atlas_add_test (EventLoop_gt_MemoryMonitorModule
       SOURCES test/gt_MemoryMonitorModule.cxx
+      LINK_LIBRARIES EventLoop AsgTestingLib
+      POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test (EventLoop_gt_EventModule
+      SOURCES test/gt_EventModule.cxx
+      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib
+      POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test (EventLoop_gt_AlgorithmStateModule
+      SOURCES test/gt_AlgorithmStateModule.cxx
       LINK_LIBRARIES EventLoop AsgTestingLib
       POST_EXEC_SCRIPT nopost.sh)
 

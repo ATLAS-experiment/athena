@@ -12,7 +12,6 @@ class EventContext;
 // Includes for Gaudi
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 class ICaloCellMakerTool

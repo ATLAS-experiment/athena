@@ -3,7 +3,7 @@
 # Declare the package name:
 atlas_subdir( PyUtils )
 
-find_package( ROOT COMPONENTS Core PyROOT Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO ROOTTPython )
 
 # Define an interface library that can be used by other packages to declare a
 # depdendency. Only required in case code from this package is executed during the build.
@@ -30,7 +30,7 @@ else()
     find_package( graphviz )
     find_package( pygraphviz )
     find_package( requests )
-    
+
     # Install files from the package:
     atlas_install_python_modules( python/*.py python/scripts POST_BUILD_CMD ${ATLAS_FLAKE8} )
     atlas_install_scripts( bin/acmd.py bin/checkFile.py bin/checkPlugins.py
@@ -43,7 +43,7 @@ else()
        bin/pool_insertFileToCatalog.py bin/print_auditor_callgraph.py bin/pyroot.py
        bin/vmem-sz.py bin/meta-reader.py bin/meta-diff.py bin/dump-event-from-file.py
        POST_BUILD_CMD ${ATLAS_FLAKE8} )
-    
+
     # Aliases:
     atlas_add_alias( checkFile "checkFile.py" )
     atlas_add_alias( checkMetaSG "checkMetaSG.py" )
@@ -61,7 +61,7 @@ else()
     atlas_add_alias( getMetadata "getMetadata.py" )
     atlas_add_alias( meta-reader "meta-reader.py" )
     atlas_add_alias( meta-diff   "meta-diff.py" )
-    
+
     # Tests:
     atlas_add_test( RootUtils
        SCRIPT test/test_RootUtils.py
@@ -70,9 +70,9 @@ else()
 
     atlas_add_test( Decorators
        SCRIPT test/test_Decorators.py
-       POST_EXEC_SCRIPT nopost.sh
+       POST_EXEC_SCRIPT noerror.sh
     )
-    
+
     atlas_add_test( fprint_test
                     SCRIPT python -m PyUtils.fprint )
 
@@ -80,7 +80,7 @@ else()
     if( NOT GENERATIONBASE AND NOT SIMULATIONBASE AND NOT XAOD_ANALYSIS )
         atlas_add_test( filter_files_raw_run3_data22
                         SCRIPT test/filter_files_raw_run3_data22.sh "${CMAKE_CURRENT_SOURCE_DIR}"
-                        POST_EXEC_SCRIPT nopost.sh
+                        POST_EXEC_SCRIPT noerror.sh
                         PRIVATE_WORKING_DIRECTORY
                         PROPERTIES TIMEOUT 900 )
     endif()
@@ -88,14 +88,14 @@ else()
     # Create python package dependencies in release building mode.
     # Used as input for `acmd.py cmake depends`:
     if( NOT "${CMAKE_PROJECT_NAME}" STREQUAL "WorkDir" )
-    
+
        set( _pydot ${CMAKE_CURRENT_BINARY_DIR}/packages.py.dot )
        add_custom_command( OUTPUT ${_pydot}
           COMMAND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/atlas_build_run.sh
           ${CMAKE_CURRENT_SOURCE_DIR}/bin/apydep.py -o ${_pydot} -p ${CMAKE_BINARY_DIR}/${ATLAS_PLATFORM}/packages.txt ${CMAKE_SOURCE_DIR}/../../ )
-    
+
        add_custom_target( build_pydeps ALL DEPENDS ${_pydot} )
-    
+
        # Install output if available:
        install( FILES ${_pydot} DESTINATION . OPTIONAL )
     endif()

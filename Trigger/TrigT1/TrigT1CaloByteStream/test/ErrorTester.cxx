@@ -34,7 +34,7 @@ StatusCode ErrorTester::initialize()
 
 // Execute
 
-StatusCode ErrorTester::execute()
+StatusCode ErrorTester::execute(const EventContext& ctx)
 {
   if ( !msgLvl(MSG::INFO) ) return StatusCode::SUCCESS;
   msg(MSG::INFO);

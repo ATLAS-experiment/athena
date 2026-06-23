@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // VDetectorParameters
@@ -21,7 +21,7 @@
 
 #include "CxxUtils/CachedUniquePtr.h"
 #include "CxxUtils/checker_macros.h"
-#include <string>
+#include <string_view>
 #include <limits.h>
 
 namespace LArGeo {
@@ -50,7 +50,7 @@ namespace LArGeo {
     // minimum possible integer value that can be represented on the
     // computer.
 
-    virtual double GetValue(const std::string&, 
+    virtual double GetValue(std::string_view, 
 			    const int i0 = INT_MIN,
 			    const int i1 = INT_MIN,
 			    const int i2 = INT_MIN,

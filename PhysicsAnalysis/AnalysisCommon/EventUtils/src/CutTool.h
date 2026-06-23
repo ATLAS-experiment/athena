@@ -47,7 +47,7 @@ class CutTool
 
 
   /// Implement the method from the ISkimmingTool interface
-  virtual bool eventPassesFilter() const final override;
+  virtual bool eventPassesFilter(const EventContext& ctx) const final override;
 
   ///////////////////////////////////////////////////////////////////
   // Private data:

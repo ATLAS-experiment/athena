@@ -39,7 +39,7 @@ public:
   /** 
    * @brief Standard Gaudi execute method.
    */
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
   typedef std::vector<std::pair<unsigned, double> > test_tow_t;

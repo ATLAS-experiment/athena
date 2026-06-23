@@ -239,9 +239,10 @@ StatusCode TileMuonFillerTool::fill(const xAOD::Muon& p){
         *m_charge                           = muonPointer->charge();
         *m_eta                              = muonPointer->eta();
         *m_phi                              = muonPointer->phi();
-        *m_muonAuthor = muonPointer->author();
-        *m_muonType = muonPointer->muonType();
-        *m_muonQuality = muonPointer->quality();
+        using namespace Muon::MuonStationIndex;
+        *m_muonAuthor  = toInt(muonPointer->author());
+        *m_muonType    = toInt(muonPointer->muonType());
+        *m_muonQuality = toInt(muonPointer->quality());
     } // IF
 
 

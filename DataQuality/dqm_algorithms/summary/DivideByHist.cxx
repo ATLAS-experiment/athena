@@ -28,6 +28,11 @@
 static dqm_algorithms::summary::DivideByHist myInstance;
 #endif //#ifndef DQM_ALGORITHMS_MULTIALGORITHMTEST
 
+namespace{
+  const std::string numeratorStr{"Numerator"};
+  const std::string confParamRoleStr{"ConfParameter--Role--"};
+}
+
 
 dqm_algorithms::summary::DivideByHist::DivideByHist()
 {
@@ -78,10 +83,9 @@ dqm_algorithms::summary::DivideByHist::execute( const std::string & name,
       for (std::map<std::string,double>::const_iterator tagIter=iter->second->getResult().get()->tags_.begin();  
 	   tagIter != iter->second->getResult().get()->tags_.end(); ++tagIter ) {
 	std::string tag = tagIter->first;
-	size_t stringPos;
-	std::string tagType = "ConfParameter--Role--";
-	if ( (stringPos = tag.find(tagType)) != std::string::npos) {
-	  stringPos += tagType.length();
+	size_t stringPos{};
+	if ( stringPos = tag.find(confParamRoleStr); stringPos != std::string::npos) {
+	  stringPos += confParamRoleStr.length();
 	  role = tag.substr(stringPos);
 	  break;
 	}
@@ -110,14 +114,11 @@ dqm_algorithms::summary::DivideByHist::execute( const std::string & name,
 	 tagIter != rIter->second->getResult().get()->tags_.end(); ++tagIter ) {
       std::string tag = tagIter->first;
       size_t stringPos;
-      std::string tagType;
-
-      tagType = "ConfParameter--Role--";
-      if ( tag.find(tagType) != std::string::npos ){
+      if ( tag.find(confParamRoleStr) != std::string::npos ){
 	//Already dealt with,
 	continue;
       }
-      tagType = "ConfParameter--OverWrite";
+      std::string tagType = "ConfParameter--OverWrite";
       if ( tag.find(tagType) != std::string::npos ){
 	//This parameter wants to be overwriten, remember this for later and continue:
 	overWriteResult = rIter->second->getResult().get();
@@ -212,7 +213,7 @@ dqm_algorithms::summary::DivideByHist::execute(const std::string & name,
   //Retrieve the Histograms to be divided, using their specified roles:
   std::multimap<std::string,TObject*>::const_iterator mmItr;
 
-  mmItr = inputs.find("Numerator");
+  mmItr = inputs.find(numeratorStr);
   if ( mmItr != inputs.end() ) {
     numero = mmItr->second;
   }

@@ -14,7 +14,7 @@ typedef I_InternalIDC::InternalConstItr InternalConstItr;
 
 
 InternalOnline::InternalOnline(EventContainers::IdentifiableCacheBase *cache) : m_cacheLink(cache),
-    m_mask(cache->fullSize(), false), m_waitNeeded(false) {}
+    m_mask(cache->fullSize()), m_waitNeeded(false) {}
 
 const std::vector < I_InternalIDC::hashPair >& InternalOnline::getAllHashPtrPair() const{
   if(m_waitNeeded.load(std::memory_order_acquire)) wait();
@@ -52,14 +52,15 @@ void InternalOnline::wait() const {
         EventContainers::IdentifiableCacheBase* cacheLink ATLAS_THREAD_SAFE = m_cacheLink;
         const void* ptr = cacheLink->waitFor(hash);
         if(ptr == ABORTstate) {
-          m_mask[hash] = false;
+          m_mask.unset(hash);
         }
         m_waitlist.pop_back();
     }
     m_map.clear();
-    for(size_t i =0;i<m_mask.size();i++){
-        if(m_mask[i]) m_map.emplace_back(i, m_cacheLink->m_vec[i].load(std::memory_order_relaxed));//acquire sync is done by  m_waitNeeded
-    }
+    m_mask.forEachSetBit([this](size_t index) {
+        const void* ptr = m_cacheLink->m_vec[index].load(std::memory_order_relaxed);//acquire sync is done by  m_waitNeeded
+        m_map.emplace_back(index, ptr);
+    });
     //Full sync to release m_map and acquire pointers retrieved
     //Probably done by the lock descoping but this is easier to read.
     m_waitNeeded.store(false, std::memory_order_seq_cst);
@@ -71,7 +72,7 @@ bool InternalOnline::tryAddFromCache(IdentifierHash hashId, EventContainers::IDC
     if(!m_waitlist.empty()) m_waitNeeded.store(true, std::memory_order_relaxed);
     if(flag > 0) {
         if(flag!=3){
-           m_mask[hashId] = true;
+           m_mask.set(hashId);
            m_waitNeeded.store(true, std::memory_order_relaxed);
         }
         return true;
@@ -85,7 +86,7 @@ bool InternalOnline::tryAddFromCache(IdentifierHash hashId)
     if(ptr==nullptr) {
         return false;
     }
-    m_mask[hashId] = true;
+    m_mask.set(hashId);
     m_waitNeeded.store(true, std::memory_order_relaxed);
     return true;
 }
@@ -107,7 +108,7 @@ size_t InternalOnline::numberOfCollections() const {
 
 void InternalOnline::resetMask() {
     if(m_waitNeeded.load(std::memory_order_relaxed)) wait();
-    m_mask.assign(m_cacheLink->fullSize(), false);
+    m_mask.clear();
     m_map.clear();
     m_waitNeeded.store(true, std::memory_order_relaxed);
 }
@@ -115,7 +116,7 @@ void InternalOnline::resetMask() {
 StatusCode InternalOnline::fetchOrCreate(IdentifierHash hashId) {
     if(ATH_UNLIKELY(!m_cacheLink->IMakerPresent())) return StatusCode::FAILURE;
     auto ptr = m_cacheLink->get(hashId);
-    if(ptr) { m_mask[hashId] =true; m_waitNeeded.store(true, std::memory_order_relaxed); }
+    if(ptr) { m_mask.set(hashId); m_waitNeeded.store(true, std::memory_order_relaxed); }
     return StatusCode::SUCCESS;
 }
 
@@ -129,13 +130,13 @@ StatusCode InternalOnline::fetchOrCreate(const std::vector<IdentifierHash> &/*ha
 
 bool InternalOnline::insert(IdentifierHash hashId, const void* ptr) {
     std::pair<bool, const void*> cacheinserted = m_cacheLink->add(hashId, ptr);
-    m_mask[hashId] = true; //it wasn't added it is already present therefore mask could be true
+    m_mask.set(hashId); //it wasn't added it is already present therefore mask could be true
     m_waitNeeded.store(true, std::memory_order_relaxed);
     return ptr == cacheinserted.second;
 }
 
 const void* InternalOnline::findIndexPtr(IdentifierHash hashId) const noexcept {
-    if(hashId < m_mask.size() and m_mask[hashId]) {
+    if(hashId < m_mask.size() and m_mask.test(hashId)) {
       EventContainers::IdentifiableCacheBase* cacheLink ATLAS_THREAD_SAFE = m_cacheLink;
       return cacheLink->findWait(hashId);
     }
@@ -147,7 +148,7 @@ StatusCode InternalOnline::addLock(IdentifierHash hashId, const void* ptr) {
     if(ATH_UNLIKELY(!added.first)) {
       throw std::runtime_error("IDC WARNING Deletion shouldn't occur in addLock paradigm");
     }
-    m_mask[hashId] = true; //it wasn't added it is already present therefore mask could be true
+    m_mask.set(hashId); //it wasn't added it is already present therefore mask could be true
     m_waitNeeded.store(true, std::memory_order_relaxed);
     return StatusCode::SUCCESS;
 }

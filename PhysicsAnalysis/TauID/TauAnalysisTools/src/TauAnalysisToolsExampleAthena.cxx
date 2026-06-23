@@ -37,7 +37,7 @@ StatusCode TauAnalysisToolsExampleAthena::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TauAnalysisToolsExampleAthena::execute()
+StatusCode TauAnalysisToolsExampleAthena::execute(const EventContext& /*ctx*/)
 {
   // Retrieve the taus:
   std::vector<const xAOD::TauJet*> taus_to_calibrate;

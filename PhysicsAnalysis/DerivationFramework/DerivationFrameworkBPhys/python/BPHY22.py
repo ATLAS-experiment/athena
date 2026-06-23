@@ -62,7 +62,7 @@ def BPHY22Cfg(flags):
               VertexSearchTool       = BPHY22MuPiFinder,
               OutputVtxContainerName = "BPHY22MuPiCandidates",
               V0Tools                = V0Tools,
-              PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+              PVRefitter             = PVrefit,
               PVContainerName        = "PrimaryVertices",
               RefPVContainerName     = "SHOULDNOTBEUSED")
 
@@ -95,7 +95,7 @@ def BPHY22Cfg(flags):
            OutputVtxContainerName = "BPHY22DiTrkCandidates",
            PVContainerName        = "PrimaryVertices",
            V0Tools                = V0Tools,
-           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+           PVRefitter             = PVrefit,
            RefPVContainerName     = "SHOULDNOTBEUSED",
            CheckCollections       = True,
            CheckVertexContainers  = ['BPHY22MuPiCandidates'])
@@ -154,7 +154,7 @@ def BPHY22Cfg(flags):
            name                   = "BPHY22Dh3SelectAndWrite",
            VertexSearchTool     = BPHY22Dh3Finder,
            V0Tools                = V0Tools,
-           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+           PVRefitter             = PVrefit,
            OutputVtxContainerName = "BPHY22Dh3Candidates",
            PVContainerName        = "PrimaryVertices",
            RefPVContainerName     = "SHOULDNOTBEUSED",
@@ -245,8 +245,7 @@ def BPHY22Cfg(flags):
     
     if not isSimulation: #Only Skim Data
         BPHY22_SelectBMuDxEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY22_AnyVertexSkimmingTool",
-                                                                        VertexContainerNames =CascadeCollections,
-                                                                        UseHandles = True )
+                                                                        VertexContainerNames =CascadeCollections )
         acc.addPublicTool(BPHY22_SelectBMuDxEvent)
 
         #====================================================================

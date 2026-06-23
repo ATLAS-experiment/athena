@@ -69,7 +69,7 @@ namespace MuonPhysValMonitoring {
         // Athena algtool's Hooks
         virtual StatusCode initialize() override;       
         virtual StatusCode bookHistograms() override;
-        virtual StatusCode fillHistograms() override;
+        virtual StatusCode fillHistograms(const EventContext& ctx) override;
         virtual StatusCode procHistograms() override;
 
         ///////////////////////////////////////////////////////////////////
@@ -176,7 +176,6 @@ namespace MuonPhysValMonitoring {
                                                                           const xAOD::TruthParticleContainer* muonTruthContainer);
         MuonPhysValMonitoringTool::MUCATEGORY getMuonTruthCategory(const xAOD::IParticle* prt);
         bool passesAcceptanceCuts(const xAOD::IParticle* prt);
-        void SplitString(TString x, const TString& delim, std::vector<TString>& v);
 
         // Hists
         std::vector<std::unique_ptr<MuonValidationPlots>> m_muonValidationPlots;

@@ -19,13 +19,13 @@
 #ifndef TRIGPARTICLETPCNV_TRIGELECTRONCONTAINERCNV_TLP2_H
 #define TRIGPARTICLETPCNV_TRIGELECTRONCONTAINERCNV_TLP2_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigParticleTPCnv/TrigElectronContainerCnv_p2.h"
 #include "TrigParticleTPCnv/TrigElectronContainer_tlp2.h"
 #include "EventCommonTPCnv/P4PtEtaPhiMCnv_p1.h"
 
-class TrigElectronContainerCnv_tlp2 : public AthenaPoolTopLevelTPConverter<TrigElectronContainerCnv_p2, TrigElectronContainer_tlp2 >
+class TrigElectronContainerCnv_tlp2 : public TopLevelTPConverter<TrigElectronContainerCnv_p2, TrigElectronContainer_tlp2 >
 {
 
  public:

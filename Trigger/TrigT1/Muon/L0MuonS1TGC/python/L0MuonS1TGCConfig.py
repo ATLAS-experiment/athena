@@ -24,7 +24,8 @@ def L0MuonTGCSimCfg(flags, name = "L0Muon.TGCSimulation", **kwargs):
 
 if __name__ == "__main__":
     
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest, MuonPhaseIITestDefaults
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.set_defaults(inputFile= MuonPhaseIITestDefaults.RDO_R3)
     parser.set_defaults(nEvents = 20)

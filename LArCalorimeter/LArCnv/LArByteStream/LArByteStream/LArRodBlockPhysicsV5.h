@@ -19,6 +19,7 @@
 #include "CaloIdentifier/CaloGain.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "LArIdentifier/LArOnlineID.h"
+#include <cstdint>
 class IMessageSvc;
 
 
@@ -309,23 +310,16 @@ inline int LArRodBlockPhysicsV5::FebToRodChannel(int ch) const
   return ( (ch&0x7) << 4) | ( (ch&0x38) >>2 ) | ((ch&0x40)>>6);
 }
 
-inline void LArRodBlockPhysicsV5::setE(unsigned index, double E){ 
-
-  union {
-    int32_t i;
-    uint16_t us[2];
-  } conv;
-  conv.i = static_cast<int32_t>(E);
-  // Write as multiplication, not as left shift, since left-shifting
-  // a negative number is undefined in C++.
-  // Compiles to the same code on x86_64.
-  conv.i *= (1<<9);
-  if ( m_TimeQualityBlock.size()>=6 ){
-    m_TimeQualityBlock[index]=conv.us[0];
-    m_TimeQualityBlock[index+1]=conv.us[1];
+inline void
+LArRodBlockPhysicsV5::setE(unsigned index, double E){
+  if (m_TimeQualityBlock.size() < index + 2) {
+    return;
   }
+  const auto scaled = static_cast<std::int32_t>(E) * (1 << 9);
+  const auto bits = static_cast<std::uint32_t>(scaled);
+  m_TimeQualityBlock[index] = static_cast<std::uint16_t>(bits & 0xffffu);
+  m_TimeQualityBlock[index + 1] = static_cast<std::uint16_t>((bits >> 16) & 0xffffu);
 }
-
 
 inline void LArRodBlockPhysicsV5::setEx(double Ex){ 
   setE (0, Ex);

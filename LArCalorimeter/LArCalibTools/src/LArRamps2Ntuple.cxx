@@ -399,7 +399,7 @@ StatusCode LArRamps2Ntuple::stop() {
 
  //Iterate over gains and cells
  // check if cell was already filled in rawRamp loop
- unsigned nGain = m_isSC ? 1 : CaloGain::LARNGAIN;
+ unsigned nGain = m_isSC ? 1 : m_NGains.value();
  for ( unsigned igain=CaloGain::LARHIGHGAIN; igain<nGain ; ++igain )
  {
    for (HWIdentifier chid : m_onlineId->channel_range()) {
@@ -429,7 +429,7 @@ StatusCode LArRamps2Ntuple::stop() {
  if (ramp && m_addCorrUndo) {
    //Now loop over undoCorrections:
    for ( unsigned igain=CaloGain::LARHIGHGAIN; 
-	 igain<CaloGain::LARNGAIN ; ++igain ) {
+	 igain<nGain ; ++igain ) {
      LArRampComplete::ConstCorrectionIt itUndo,itUndo_e;
      itUndo_e = itUndo;
      const LArRampComplete *rampComplete=dynamic_cast<const LArRampComplete *>(ramp);

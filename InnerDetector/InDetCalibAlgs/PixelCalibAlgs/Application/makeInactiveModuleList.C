@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -39,7 +39,7 @@ using FrontEndIdVector = std::vector<std::string>;
 using FrontEndCodeVector = std::vector<std::string>;
 //
 static constexpr Position invalidPosition{-100,-100,-100,-100};
-std::map<std::string, Position> pixelMapping;
+std::map<std::string, Position, std::less<>> pixelMapping;
 std::map<Position, int> hashMapping;
 std::map<int, int> channelMapping;
 

@@ -26,7 +26,7 @@ class TileLaserCalibAlg: public AthAlgorithm {
 
     // Functions
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
   private:

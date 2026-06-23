@@ -52,7 +52,7 @@ class LArHECNoise : public AthAlgorithm  {
 
    virtual StatusCode initialize() override;
    virtual StatusCode finalize() override;
-   virtual StatusCode execute() override;
+   virtual StatusCode execute(const EventContext& ctx) override;
 
  private:
 

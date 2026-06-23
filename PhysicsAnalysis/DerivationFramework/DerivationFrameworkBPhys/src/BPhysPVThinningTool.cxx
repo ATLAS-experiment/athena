@@ -61,9 +61,8 @@ StatusCode DerivationFramework::BPhysPVThinningTool::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::BPhysPVThinningTool::doThinning() const
+StatusCode DerivationFramework::BPhysPVThinningTool::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Get the track container
     SG::ThinningHandle<xAOD::VertexContainer> PV_col(m_PVContainerName, ctx);
     if(!PV_col.isValid()) {

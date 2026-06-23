@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,11 +15,14 @@
 #define RDBACCESSSVC_IRDBACCESSSVC_H
 
 #include "GaudiKernel/IInterface.h"
-#include <string>
-#include <memory>
+
 
 #include "CoralBase/AttributeList.h"
 #include "CoralBase/Attribute.h"
+
+#include <string>
+#include <string_view>
+#include <memory>
 
 class IRDBRecordset;
 class IRDBQuery;
@@ -56,10 +59,10 @@ class IRDBAccessSvc : virtual public IInterface
   /// tag of the HVS branch node specified by tag2node otherwise
   /// @param tag2node [IN] some parent of the HVS leaf node specified by node parameter
   /// @return pointer to the recordset object
-  virtual IRDBRecordset_ptr getRecordsetPtr(const std::string& node,
-					    const std::string& tag,
-					    const std::string& tag2node="",
-					    const std::string& connName = "ATLASDD") = 0;
+  virtual IRDBRecordset_ptr getRecordsetPtr(std::string_view node,
+					    std::string_view tag,
+					    std::string_view tag2node="",
+					    std::string_view connName = "ATLASDD") = 0;
 
   /// Gets the tag name for the node by giving its parent node tag
   /// @param childNode [IN] name of the child node
@@ -103,16 +106,16 @@ class IRDBAccessSvc : virtual public IInterface
   /// If this method is called for already open connection the connection
   /// counter is incremented.
   /// @return success/failure
-  virtual bool connect(const std::string& connName = "ATLASDD") = 0;
+  virtual bool connect(std::string_view connName = "ATLASDD") = 0;
 
   /// If the counnection counter==1 closes the connection.
   /// Decrements the connection counter value otherwise.
   /// @return success/failure
-  virtual bool disconnect(const std::string& connName = "ATLASDD") = 0;
+  virtual bool disconnect(std::string_view connName = "ATLASDD") = 0;
 
   /// Closes the connection regardless of the counter value.
   /// @return success/failure
-  virtual bool shutdown(const std::string& connName = "ATLASDD") = 0;
+  virtual bool shutdown(std::string_view connName = "ATLASDD") = 0;
 
 };
 

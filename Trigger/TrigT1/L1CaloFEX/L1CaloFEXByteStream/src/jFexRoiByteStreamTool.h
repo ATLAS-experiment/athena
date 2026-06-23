@@ -57,7 +57,9 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         virtual StatusCode convertFromBS(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vrobf, const EventContext& eventContext)const override;
 
         /// xAOD->BS conversion
-        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf, const EventContext& eventContext) override;
+        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                       const xAOD::TrigCompositeContainer* tc,
+                                       const EventContext& eventContext) override;
 
         /// Declare ROB IDs for conversion
         virtual const std::vector<uint32_t>& robIds() const override {
@@ -89,19 +91,20 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         SG::WriteHandleKey< xAOD::jFexMETRoIContainer  > m_jXEWriteKey  {this,"jXERoIContainerWriteKey" ,"L1_jFexMETRoI"  ,"Write jFexEDM Met container"};
         SG::WriteHandleKey< xAOD::jFexFwdElRoIContainer> m_jEMWriteKey  {this,"jEMRoIContainerWriteKey" ,"L1_jFexFwdElRoI","Write jFexEDM fwdEl container"};
         
-        // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
-        SG::ReadHandleKey< xAOD::jFexSRJetRoIContainer> m_jJReadKey   {this,"jJRoIContainerReadKey"  ,"L1_jFexSRJetRoI","Read jFexEDM SRjet container"};
-        SG::ReadHandleKey< xAOD::jFexLRJetRoIContainer> m_jLJReadKey  {this,"jLJRoIContainerReadKey" ,"L1_jFexLRJetRoI","Read jFexEDM LRjet container"};
-        SG::ReadHandleKey< xAOD::jFexTauRoIContainer  > m_jTauReadKey {this,"jTauRoIContainerReadKey","L1_jFexTauRoI"  ,"Read jFexEDM tau container"};
-        SG::ReadHandleKey< xAOD::jFexSumETRoIContainer> m_jTEReadKey  {this,"jTERoIContainerReadKey" ,"L1_jFexSumETRoI","Read jFexEDM SumET container"};
-        SG::ReadHandleKey< xAOD::jFexMETRoIContainer  > m_jXEReadKey  {this,"jXERoIContainerReadKey" ,"L1_jFexMETRoI"  ,"Read jFexEDM Met container"}; 
-        SG::ReadHandleKey< xAOD::jFexFwdElRoIContainer> m_jEMReadKey  {this,"jEMRoIContainerReadKey" ,"L1_jFexFwdElRoI","Read jFexEDM fwdEl container"};       
-
+        // Decoder-side trailer parsers (BS word -> fields)
         std::array<uint32_t,6> TOBCounterTrailer (uint32_t word) const;
         std::array<uint32_t,4> xTOBCounterTrailer(uint32_t word) const;
         std::array<uint32_t,4> jFEXtoRODTrailer  (uint32_t word0, uint32_t word1) const;
         std::array<uint32_t,1> RODTrailer  (uint32_t word0, uint32_t word1) const;
         void     jFEXtoRODHeader   (uint32_t word0, uint32_t word1) const;
+
+        // Encoder-side trailer builders (fields -> BS word)
+        uint32_t buildTOBCounterTrailer (uint32_t n_jJ, uint32_t n_jLJ, uint32_t n_jTau,
+                                         uint32_t n_jEM, uint32_t has_jTE, uint32_t has_jXE) const;
+        uint32_t buildxTOBCounterTrailer(uint32_t n_xjJ, uint32_t n_xjLJ,
+                                         uint32_t n_xjTau, uint32_t n_xjEM) const;
+        std::array<uint32_t,2> buildjFEXtoRODTrailer(uint32_t payload, uint32_t fpga,
+                                                    uint32_t jfex) const;
         
         
         //unpacking internal coordinates

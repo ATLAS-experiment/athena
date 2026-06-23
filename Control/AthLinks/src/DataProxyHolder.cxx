@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,9 +21,7 @@
 #include "AthenaKernel/ThinningDecisionBase.h"
 #include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/errorcheck.h"
-#include "AthenaKernel/ExtendedEventContext.h"
 #include "CxxUtils/checker_macros.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 namespace {

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGERMATCHINGTOOL_MATCHINGTOOL_H
@@ -29,15 +29,15 @@ public:
   ~MatchingTool();
   StatusCode initialize() override;
 
-  bool match(const std::vector<const xAOD::IParticle*>& recoObjects, const std::string& chain, double matchTreshold, bool rerun) const override;
-  bool match(const xAOD::IParticle& recoObjects, const std::string& chain, double matchTreshold, bool rerun) const override;
+  bool match(const std::vector<const xAOD::IParticle*>& recoObjects,std::string_view chain, double matchTreshold, bool rerun) const override;
+  bool match(const xAOD::IParticle& recoObjects, std::string_view chain, double matchTreshold, bool rerun) const override;
 
 protected:
   const MatchingImplementation* impl() const override;
 
-  bool matchSingleType(const std::vector<const xAOD::IParticle*>& subRecoObjects, Trig::Combination& comb, const std::string& chain, double threshold) const;
+  bool matchSingleType(const std::vector<const xAOD::IParticle*>& subRecoObjects, Trig::Combination& comb, std::string_view chain, double threshold) const;
 
-  bool matchCombination(const std::vector<const xAOD::IParticle*>& recoObjects, Trig::Combination& comb, const std::string& chain, double threshold) const;
+  bool matchCombination(const std::vector<const xAOD::IParticle*>& recoObjects, Trig::Combination& comb, std::string_view chain, double threshold) const;
 
 
 #ifndef XAOD_STANDALONE

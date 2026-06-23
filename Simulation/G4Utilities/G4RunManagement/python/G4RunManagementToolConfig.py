@@ -23,5 +23,8 @@ def G4RunToolCfg(flags, name="G4RunTool", **kwargs):
     kwargs.setdefault("NG4threads", max(1, flags.Concurrency.NumThreads))
     kwargs.setdefault("NG4eventsPerRun", 100000)
 
+    # Properties
+    kwargs.setdefault("G4Commands", flags.Sim.G4Commands)
+
     result.setPrivateTools(CompFactory.G4RunTool(name, **kwargs))
     return result

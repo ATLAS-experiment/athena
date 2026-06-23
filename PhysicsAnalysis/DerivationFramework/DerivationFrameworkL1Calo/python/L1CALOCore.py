@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#!/usr/bin/env python
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # L1CALOCore.py
 # Define the list of containers for the L1Calo derivations
@@ -636,7 +637,9 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
             "AntiKt4TruthJets",
             "AntiKt4TruthWZJets",
             "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
-            "AntiKt10TruthSoftDropBeta100Zcut10Jets"
+            "AntiKt10TruthSoftDropBeta100Zcut10Jets",
+            "InTimeAntiKt4TruthJets", 
+            "OutOfTimeAntiKt4TruthJets",
         ]
 
     L1CaloSlimmingHelper.AllVariables = AllVariables
@@ -753,7 +756,9 @@ def addGfexTOBs(slimminghelper, allVariables, postFix = ""):
          "L1_gMHTComponentsJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
          "L1_gMHTComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
          "L1_gMSTComponentsJwoj"+postFix : "xAOD::gFexGlobalRoIContainer",
-         "L1_gMSTComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer"})
+         "L1_gMSTComponentsJwoj"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer",
+         "L1_gMETComponentsNoiseCut"+postFix : "xAOD::gFexGlobalRoIContainer",
+         "L1_gMETComponentsNoiseCut"+postFix+"Aux" : "xAOD::gFexGlobalRoIAuxContainer"})
 
     allVariables += ["L1_gFexRhoRoI" + postFix,
                      "L1_gFexSRJetRoI" + postFix,
@@ -762,6 +767,7 @@ def addGfexTOBs(slimminghelper, allVariables, postFix = ""):
                      "L1_gMETComponentsJwoj" + postFix,
                      "L1_gMHTComponentsJwoj" + postFix,
                      "L1_gMSTComponentsJwoj" + postFix,
+                     "L1_gMETComponentsNoiseCut" + postFix,
                      "L1_gEspresso" + postFix,
                      "L1_gRistretto" + postFix,
                      "L1_gScalarEJwojOutOfTime" + postFix]

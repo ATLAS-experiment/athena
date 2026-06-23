@@ -61,7 +61,7 @@ class TrigCostAnalysis: public ::AthAlgorithm {
     /**
      * @brief Monitor event, unless max range limit reached and event outside of all ranges.
      */
-    virtual StatusCode execute() final;
+    virtual StatusCode execute(const EventContext& ctx) final;
 
     /**
      * @brief Currently a noop for this algorithm.

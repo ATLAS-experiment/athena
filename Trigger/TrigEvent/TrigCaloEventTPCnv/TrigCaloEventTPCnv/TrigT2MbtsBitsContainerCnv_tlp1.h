@@ -15,7 +15,7 @@
 #ifndef  TRIGCALOEVENTTPCNV_TRIGT2MBTSBITSCONTAINER_CNV_TLP1_H
 #define  TRIGCALOEVENTTPCNV_TRIGT2MBTSBITSCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsContainer_tlp1.h"
  
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsContainerCnv_p1.h"
@@ -23,7 +23,7 @@
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsCnv_p2.h"
   
  
-class TrigT2MbtsBitsContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigT2MbtsBitsContainerCnv_p1, TrigT2MbtsBitsContainer_tlp1 >
+class TrigT2MbtsBitsContainerCnv_tlp1 : public TopLevelTPConverter< TrigT2MbtsBitsContainerCnv_p1, TrigT2MbtsBitsContainer_tlp1 >
 {
  
  public:

@@ -252,16 +252,23 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
      bool hasRead(false);
      for( auto& dsc : m_branches ) {
         const int typ = dsc.column->typeID();
-        // cout << "LOAD object, typ=" << typ << ",  col offset=" << dsc.column->offset() << endl;
+        // cout << "LOAD object, column: " << dsc.column->toString() << ",  col offset=" << dsc.column->offset() << endl;
+        // cout << "   branch: " << dsc.branch->GetName() << ", leaf: " << (dsc.leaf ? dsc.leaf->GetName() : "null") << endl;
         // associate branch with an object
         switch ( typ )    {
          case DbColumn::STRING:
          case DbColumn::LONG_STRING:
+         case DbColumn::TOKEN:
             // For these types we copy to destination without TBranch::SetAddress
             break;
-         default:
-            // For other types we simply set the branch address
+         case DbColumn::POINTER:
+         case DbColumn::ANY:
+            // For objects one needs to use a pointer to a pointer
             dsc.branch->SetAddress( obj_p );
+            break;
+         default:
+            // For built-in types we use a direct pointer
+            dsc.branch->SetAddress( *obj_p );
             break;
         }
         // read the object
@@ -280,6 +287,7 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
            switch ( typ ) {
             case DbColumn::STRING:
             case DbColumn::LONG_STRING:
+            case DbColumn::TOKEN:
                {
                   // copy as std::string
                   auto* ptr = std::launder(reinterpret_cast<std::string*>(static_cast<char*>(*obj_p) + dsc.column->offset()));
@@ -342,7 +350,7 @@ StatusCode RootTreeContainer::close()   {
 StatusCode RootTreeContainer::open( DbDatabase& dbH, 
                                   const std::string& nam, 
                                   const DbTypeInfo* info, 
-                                  DbAccessMode mode)  
+                                  Io::IoFlag mode)  
 {
    m_branches.clear();
    m_name = nam;
@@ -381,7 +389,7 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
       bool hasBeenCreated = (m_branchName.empty()
                              ? m_tree != nullptr
                              : (m_tree && m_tree->GetBranch(m_branchName.c_str()) != nullptr));
-      if ( hasBeenCreated && (mode&pool::READ || mode&pool::UPDATE) )   {
+      if ( hasBeenCreated && ( mode == Io::READ || mode == Io::APPEND ) )   {
          if (treeName.substr(0, 2) == "##") {
             m_tree->SetCacheSize(0);
          }
@@ -408,8 +416,8 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
                const DbColumn* c = *i;
                BranchDesc& dsc = m_branches[count];
                TClass* cl = nullptr;
-               TLeaf* leaf = pBranch->GetLeaf( (*i)->name().c_str() );
-               switch ( (*i)->typeID() )    {
+               TLeaf* leaf = pBranch->GetLeaf( c->name().c_str() );
+               switch ( c->typeID() )    {
                 case DbColumn::POINTER:
                    cl = TClass::GetClass(pBranch->GetClassName());
                    if ( nullptr == cl )  {
@@ -470,12 +478,9 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
              << ROOTTREE_StorageType.storageName());
          m_dbH = dbH;
          m_type = info;
-         if( mode&pool::UPDATE ) {
-            m_rootDb->registerBranchContainer(this);
-         }
          return SUCCESS;
       }
-      else if ( !hasBeenCreated && mode&pool::CREATE )    {
+      else if ( !hasBeenCreated && ( mode == Io::WRITE || mode == Io::APPEND ) )   {
          int count, defSplitLevel=99,
             defAutoSave=16*1024*1024, defBufferSize=16*1024,
             branchOffsetTabLen=0, containerSplitLevel=defSplitLevel, auxSplitLevel=defSplitLevel;
@@ -669,10 +674,11 @@ StatusCode  RootTreeContainer::addObject(DbDatabase& dbH,
 
 
 StatusCode
-RootTreeContainer::addBranch(const DbColumn* col,BranchDesc& dsc,const std::string& desc) {
+RootTreeContainer::addBranch(const DbColumn* col,BranchDesc& dsc,std::string_view desc) {
   dsc.column = col;
   const char* nam  = (m_branchName.empty() ? col->name().c_str() : m_branchName.c_str());
-  std::string  coldesc = col->name() + desc;
+  std::string  coldesc{col->name()};
+  coldesc.append(desc);
   char buff[32];
   dsc.branch = m_tree->Branch(nam, buff, coldesc.c_str(), 4096);
   if( dsc.branch )  {

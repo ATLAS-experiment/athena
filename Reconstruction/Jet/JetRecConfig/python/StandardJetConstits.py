@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """
  StandardJetConstits: A module containing standard definitions for jet inputs : external container and 
@@ -78,7 +78,10 @@ def standardReco(input):
                 return None            
             from eflowRec.PFRun3Config import PFCfg
             return PFCfg(jetdef._cflags)
-        
+    elif input=="DressedWZ":
+        def f(jetdef,spec):
+            from DerivationFrameworkMCTruth.MCTruthCommonConfig import PreJetMCTruthAugmentationsCfg
+            return PreJetMCTruthAugmentationsCfg(jetdef._cflags,decorationDressing='dressedPhoton')
     else:
         f = doNothingFunc
         
@@ -311,7 +314,11 @@ _stdInputList = [
     # Similar configuration as for JetInputTruthParticlesNoWZ but with slightly
     # different photon dressing option
     JetInputExternal("JetInputTruthParticlesDressedWZ", xAODType.TruthParticle,
+                     prereqs = ["input:DressedObjects"],
                      algoBuilder = inputcfg.buildJetInputTruth, filterfn=isMC,specs="DressedWZ"),
+
+    # If jets are reconstructed standalone, the dressing decoration needs to be added
+    JetInputExternal("DressedObjects", "DressedObjects", algoBuilder = standardReco("DressedWZ")),
 
     # Truth particles from the hard scatter vertex prior to Geant4 simulation.
     # Only charged truth particles are used
@@ -436,7 +443,7 @@ _stdSeqList = [
     JetInputConstitSeq("EMPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'JetETMissParticleFlowObjects', 'CHSParticleFlowObjects'),
 
     # EM-scale particle flow objects with correction to ML cluster scale, with charged hadron subtraction
-    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
+    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
     JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
@@ -547,14 +554,13 @@ for jc in _stdSeqList:
 ########################################################################
 ## List of standard constituent modifiers 
 
-def _getPFOTool(*l):
+def _getWeightPFOToolDefault(*l):
     """One Property of the CorrectPFO constit modifier is a tool. 
-    we use this function as a placeholder, allowing to delay the intantiation of this property tool
+    we use this function as a placeholder, allowing to delay the instantiation of this property tool
     to the time the modifier itself is instantiated.
     """
     from AthenaConfiguration.ComponentFactory import CompFactory
     return CompFactory.getComp("CP::WeightPFOTool")("weightPFO")
-    
 
 
 vtxKey = "PrimaryVertices"
@@ -574,9 +580,8 @@ _stdModList = [
                        # See StandardJetContext.py for the default values.
                        prereqs=[inputsFromContext("Vertices")],
                        properties=dict(VertexContainerKey=propFromContext("Vertices"),
-                                       WeightPFOTool= _getPFOTool,
-                                       DoByVertex = lambda jdef, _: jdef.byVertex) ), 
-          
+                                       WeightPFOTool= _getWeightPFOToolDefault,
+                                       DoByVertex = lambda jdef, _: jdef.byVertex) ),    
     JetConstitModifier("CHS",    "ChargedHadronSubtractionTool",
                        # get the track properties from the context with wich jet will be configured with propFromContext
                        # See StandardJetContext.py for the default values.

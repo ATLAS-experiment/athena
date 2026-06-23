@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnaAlgorithm.Logging import logging
 logCPAlgCfgSeq = logging.getLogger('CPAlgCfgSeq')
 
@@ -61,6 +62,7 @@ class ConfigSequence:
             block.checkExpertSettings (config)
             block.makeAlgs (config)
         config.setAlgPostfix('')  # reset algPostfix after all blocks are configured
+        ConfigBlock.instance_counts.clear()  # reset for a possible next config run
 
 
     def applyConfigOverrides(self, config):
@@ -134,9 +136,8 @@ class ConfigSequence:
 
         self.reorderAlgs()
         self.makeAlgs (config)
-        config.nextPass ()
-        self.makeAlgs (config)
         self.applyConfigOverrides(config)
+        config.renameFinalContainers()
 
 
     def setOptionValue (self, name, value, **kwargs) :
@@ -238,7 +239,8 @@ class ConfigSequence:
                 if name != 'groupName':
                     options[name] = defaultVal
                 logCPAlgCfgSeq.debug(f"    {name}: {defaultVal}")
-        return algOptions
+        # refresh and return options
+        return self.getOptions()
 
 
     def groupBlocks(self, groupName=''):

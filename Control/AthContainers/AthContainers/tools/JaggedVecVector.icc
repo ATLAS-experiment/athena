@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/JaggedVecVector.icc
@@ -13,6 +13,26 @@
 
 
 namespace SG {
+
+
+/**
+ * @brief Fill in any trailing zeros at the end of this vector.
+ */
+template <class T, class ALLOC>
+void JaggedVecVectorHolder<T, ALLOC>::fillTrailingZeros()
+{
+  vector_type& vec = this->vec();
+  if (vec.empty()) return;
+  if (vec.back().end() == 0) {
+    if (size_t n_payload = m_linkedVec->getDataSpan().size) {
+      Shift shift (n_payload);
+      for (size_t index = vec.size()-1; vec[index].end() == 0; --index) {
+        shift (vec[index]);
+        if (index == 0) break;
+      }
+    }
+  }
+}
 
 
 /**
@@ -47,11 +67,39 @@ bool JaggedVecVectorHolder<T, ALLOC>::resize (size_t sz)
   bool valid = true;
   vector_type& vec = this->vec();
   Elt zero;
-  if (sz < vec.size()) {
+  size_t vec_sz = vec.size();
+  if (sz == vec_sz) return true;
+  if (sz < vec_sz) {
     size_t payload_sz = sz > 0 ? vec[sz-1].end() : 0;
+    if (payload_sz == 0 && vec.back().end() == 0) {
+      payload_sz = m_linkedVec->getDataSpan().size;
+      if (sz > 0 && payload_sz > 0) {
+        // At this point, we're dealing with trailing zeros, and we can have
+        // one of two cases:
+        //
+        //   0 0 0 1 2 3 0 0 0
+        //     a         b
+        //
+        // If we try to resize to b, then we're just removing trailing zeros
+        // and shouldn't touch the payload.  But if we're resizing to a,
+        // then we also need to free the entire payload.
+        // There's no way to distinguish between these by looking
+        // just at the resize point, end, and total payload size.
+        // We need to scan from the resize point to the end to see if
+        // there's anything nonzero.  If so, then we remove the entire
+        // payload; other wise, we leave it alone.
+        for (size_t i = sz; i < vec_sz; ++i) {
+          if (vec[i].end() != 0) {
+            payload_sz = 0;
+            break;
+          }
+        }
+      }
+    }
     valid = m_linkedVec->resize (payload_sz);
   }
-  else if (vec.size() > 0) {
+  else if (vec_sz > 0) {
+    fillTrailingZeros();
     size_t payload_sz = vec.back().end();
     zero = Elt (payload_sz);
   }
@@ -91,6 +139,7 @@ bool JaggedVecVectorHolder<T, ALLOC>::resize (size_t sz)
 template <class T, class ALLOC>
 bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
 {
+  fillTrailingZeros();
   vector_type& vec = this->vec();
   if (offs < 0) {
     if (-offs > static_cast<ptrdiff_t>(pos)) offs = -pos;
@@ -142,12 +191,8 @@ bool JaggedVecVectorHolder<T, ALLOC>::shift (size_t pos, ptrdiff_t offs)
  * @param src_n Number of elements to insert.
  * @param srcStore The source store.
  *
- * @c beg and @c end define a range of container elements, with length
- * @c len defined by the difference of the pointers divided by the
- * element size.
- *
- * The size of the container will be increased by @c len, with the elements
- * starting at @c pos copied to @c pos+len.
+ * The size of the container will be increased by @c src_n, with the elements
+ * starting at @c pos copied to @c pos+src_n.
  *
  * The contents of the source range will then be moved to our vector
  * starting at @c pos.  This will be done via move semantics if possible;
@@ -161,17 +206,55 @@ bool JaggedVecVectorHolder<T, ALLOC>::insertMove
   (size_t pos, void* src, size_t src_pos, size_t src_n, IAuxStore& srcStore)
 {
   if (src_n <= 0) return true;
+  fillTrailingZeros();
   element_type* srcp = reinterpret_cast<element_type*> (src);
   element_type* beg = srcp + src_pos;
   element_type* end = beg + src_n;
 
   vector_type& vec = this->vec();
   const element_type* orig = vec.data();
+  const size_t ppos = vec[pos].begin(pos);
   vec.insert (vec.begin() + pos, beg, end);
-  size_t begidx = srcp[src_pos].begin(src_pos);
-  size_t npayload = beg[src_n-1].end() - begidx;
-  size_t ppos = vec[pos].begin(pos);
+
   IAuxTypeVector* srcPayloadVec = srcStore.linkedVector (this->auxid());
+
+  // Fill trailing zeros in the copied elements.
+  if (vec[pos + src_n - 1].end() == 0) {
+    size_t src_sz = srcStore.size();
+    if (srcp[src_sz-1].end() == 0) {
+      if (size_t src_nPayload = srcPayloadVec->getDataSpan().size) {
+        // Similarly to the case in resize() above, we have two possibilities
+        // here.  Suppose the vector from which we're inserting looks like:
+        //
+        //  0 0 1 2 0 0
+        //
+        // If we insert 1 element starting from index 0, then we don't
+        // want to do this adjustment.  But if we insert 5 elements,
+        // then we do.  Again, we can't tell the difference looking
+        // at the insertion position; we need to look at the elements
+        // between the insertion position and the end.
+        bool adjust = false;
+        for (size_t i = src_pos+src_n-1; ; --i) {
+          if (srcp[i].end() != 0) {
+            adjust = true;
+            break;
+          }
+          if (i == 0) break;
+        }
+        if (adjust) {
+          Shift shift (src_nPayload);
+          for (size_t i = pos + src_n - 1; vec[i].end() == 0; --i)
+          {
+            shift (vec[i]);
+            if (i == pos) break;
+          }
+        }
+      }
+    }
+  }
+
+  size_t begidx = src_pos > 0 ? srcp[src_pos-1].end() : 0;
+  size_t npayload = vec[pos+src_n-1].end() - begidx;
   T* srcPayload = reinterpret_cast<T*> (srcPayloadVec->toPtr());
   bool pflag = m_linkedVec->insertMove (ppos,
                                         srcPayload,

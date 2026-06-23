@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableInSLB.h"
@@ -38,7 +38,7 @@ std::unique_ptr<TGCChannelId> TGCCableInSLB::getChannelIn(
     int channelInSLB = -1;
     TGCChannelSLBIn::CellType cellType = TGCChannelSLBIn::NoCellType;
     switch (moduleType) {
-        case TGCId::WD:
+        case TGCId::ModuleType::WD:
             //  channel        SLBIn
             //   2*n           CellB    n+block*16
             //   2*n+1         CellA    n+block*16
@@ -79,7 +79,7 @@ std::unique_ptr<TGCChannelId> TGCCableInSLB::getChannelIn(
                 }
             }
             break;
-        case TGCId::SD:
+        case TGCId::ModuleType::SD:
             //  channel        SLBIn
             //   2*n           CellB    n+block*16
             //   2*n+1         CellA    n+block*16
@@ -120,7 +120,7 @@ std::unique_ptr<TGCChannelId> TGCCableInSLB::getChannelIn(
                 }
             }
             break;
-        case TGCId::WT:
+        case TGCId::ModuleType::WT:
             //  channel        SLBIn
             //   3*n           CellC    n+block*16
             //   3*n+1         CellB    n+block*16
@@ -150,9 +150,9 @@ std::unique_ptr<TGCChannelId> TGCCableInSLB::getChannelIn(
                     adjacentOfSLB;
             }
             break;
-        case TGCId::ST:
-        case TGCId::WI:
-        case TGCId::SI:
+        case TGCId::ModuleType::ST:
+        case TGCId::ModuleType::WI:
+        case TGCId::ModuleType::SI:
             //  channel        SLBIn
             //   2*n           CellB    n+block*16
             //   2*n+1         CellA    n+block*16
@@ -234,7 +234,7 @@ std::unique_ptr<TGCChannelId> TGCCableInSLB::getChannelOut(
     int channel = -1;
     int block = -1;
     switch (moduleType) {
-        case TGCId::WD:
+        case TGCId::ModuleType::WD:
             if (orChannel == false) {
                 if (cellType == TGCChannelSLBIn::CellA) {
                     channel =
@@ -258,7 +258,7 @@ std::unique_ptr<TGCChannelId> TGCCableInSLB::getChannelOut(
                 channel = channel % channelInBlock;
             }
             break;
-        case TGCId::SD:
+        case TGCId::ModuleType::SD:
             if (orChannel == false) {
                 if (cellType == TGCChannelSLBIn::CellA) {
                     channel =
@@ -282,7 +282,7 @@ std::unique_ptr<TGCChannelId> TGCCableInSLB::getChannelOut(
                 channel = channel % channelInBlock;
             }
             break;
-        case TGCId::WT:
+        case TGCId::ModuleType::WT:
             if (cellType == TGCChannelSLBIn::CellA) {
                 channel = (channelInSLB - adjacentOfSLB) * numberOfLayer + 2;
             }
@@ -295,9 +295,9 @@ std::unique_ptr<TGCChannelId> TGCCableInSLB::getChannelOut(
             block = channel / channelInBlock;
             channel = channel % channelInBlock;
             break;
-        case TGCId::ST:
-        case TGCId::WI:
-        case TGCId::SI:
+        case TGCId::ModuleType::ST:
+        case TGCId::ModuleType::WI:
+        case TGCId::ModuleType::SI:
             if (cellType == TGCChannelSLBIn::CellA ||
                 cellType == TGCChannelSLBIn::CellB) {
                 if (cellType == TGCChannelSLBIn::CellA) {

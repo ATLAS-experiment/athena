@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ----------------------------------------------
@@ -16,18 +16,10 @@
 #define GENERATORFILTERSXAODBSIGNALFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
-#include "GaudiKernel/NTuple.h"
-#include <vector>
 
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "TTree.h"
-#include "TLorentzVector.h"
-
-#include "xAODTruth/TruthEvent.h"
-#include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthParticleContainer.h"
+class TLorentzVector;
 
 class xAODBSignalFilter : public GenFilter
 {

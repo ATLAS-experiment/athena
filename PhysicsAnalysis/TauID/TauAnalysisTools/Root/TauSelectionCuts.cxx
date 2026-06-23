@@ -651,7 +651,7 @@ bool TauSelectionCutMuonOLR::accept(const xAOD::TauJet& xTau,
     for( auto xMuon : *muonContainer )
     {
       if(xMuon->pt() < 2000.) continue; // pt > 2 GeV
-      if(xMuon->muonType() == xAOD::Muon::CaloTagged) continue; // not calo-tagged
+      if(xMuon->muonType() == xAOD::Muon::MuonType::CaloTagged) continue; // not calo-tagged
       if(xMuon->p4().DeltaR( xTau.p4() ) > 0.2 ) continue; // delta R < 0.2
       m_bTauMuonOLR = false; // muon-tau overlapped
       break;

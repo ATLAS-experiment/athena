@@ -6,7 +6,7 @@
 #define TRACK_COLLECTION_CNV_TLP5_TRK_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrackCollection_tlp5.h"
 
@@ -36,7 +36,7 @@
 
 
 class TrackCollectionCnv_tlp5
- : public AthenaPoolTopLevelTPConverter< TrackCollectionCnv_p4, Trk::TrackCollection_tlp5 >
+ : public TopLevelTPConverter< TrackCollectionCnv_p4, Trk::TrackCollection_tlp5 >
 {
  public:
  

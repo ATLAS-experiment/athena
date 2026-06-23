@@ -76,7 +76,7 @@ public:
   StatusCode finalize() override;
 
   /// @brief Simulate one Athena event.
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) override;
 
   /// Poorly named possibly unused method which sets some verbosities.
   void initializeG4();

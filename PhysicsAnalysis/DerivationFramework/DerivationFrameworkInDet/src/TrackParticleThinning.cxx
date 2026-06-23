@@ -13,7 +13,6 @@
 #include "xAODTracking/TrackStateValidationContainer.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <string>
 #include "ExpressionEvaluation/ExpressionParserUser.icc"
@@ -116,9 +115,8 @@ StatusCode DerivationFramework::TrackParticleThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::TrackParticleThinning::doThinning() const
+StatusCode DerivationFramework::TrackParticleThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     // Retrieve main TrackParticle collection
     SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles

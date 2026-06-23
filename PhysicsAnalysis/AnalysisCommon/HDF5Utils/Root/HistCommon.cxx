@@ -4,17 +4,14 @@
 
 #include "HDF5Utils/HistCommon.h"
 
-#include <cstdint>
 #include <stdexcept>
-#include <string>
-#include <utility>
 #include <variant>
-#include <vector>
+#include <format>
 
 namespace H5Utils::hist::detail {
 
-void chkerr(herr_t code, const std::string& error) {
-  if (code < 0) throw std::runtime_error("error setting " + error);
+void chkerr(herr_t code, std::string_view error) {
+  if (code < 0) throw std::runtime_error(std::format("error setting {}",error));
 }
 
 void write_str_attr(H5::H5Object& obj,
@@ -29,7 +26,7 @@ void write_str_attr(H5::H5Object& obj,
 }
 
 void write_bool_attr(H5::H5Object& obj,
-                     const std::string& key,
+                     const char * key,
                      bool val)
 {
   H5::DataSpace scalar(H5S_SCALAR);
@@ -134,7 +131,6 @@ void write_axis_edges(H5::Group& ax_grp, const std::vector<std::string>& labels)
 void write_axes(H5::Group& hist_grp, const std::vector<Axis>& axes)
 {
   H5::Group ref_axes_grp = hist_grp.createGroup("ref_axes");
-
   for (size_t ax_n = 0; ax_n < axes.size(); ++ax_n) {
     const auto& ax = axes.at(ax_n);
     H5::Group ax_grp = ref_axes_grp.createGroup("axis_" + std::to_string(ax_n));
@@ -160,7 +156,7 @@ void write_axes(H5::Group& hist_grp, const std::vector<Axis>& axes)
     std::string ax_path = "ref_axes/axis_" + std::to_string(ax_n);
     chkerr(H5Rcreate(&axis_refs.at(ax_n), hist_grp.getId(),
                      ax_path.c_str(), H5R_OBJECT, -1),
-           "axis object reference");
+                     "axis object reference");
   }
   hsize_t ref_dim = axes.size();
   H5::DataSpace ref_space(1, &ref_dim);

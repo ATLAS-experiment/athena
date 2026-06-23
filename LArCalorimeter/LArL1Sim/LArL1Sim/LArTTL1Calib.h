@@ -40,7 +40,7 @@ class LArTTL1Calib : public AthAlgorithm
 // ..... Gaudi algorithm hooks
 //
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
 
  private:

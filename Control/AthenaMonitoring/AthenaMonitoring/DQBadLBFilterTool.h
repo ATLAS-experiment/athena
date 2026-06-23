@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DQBadLBFILTERTOOL_H
@@ -25,7 +25,7 @@ class DQBadLBFilterTool :  public AthAlgTool, virtual public IDQFilterTool   {
   
   virtual StatusCode initialize() override;
         
-  virtual bool accept() const override;
+  virtual bool accept(const EventContext& ctx) const override;
 
  private:
   bool m_fallbackValue;

@@ -45,7 +45,7 @@ typedef Pythia8::ParticleDataEntryPtr ParticleDataEntryPtr;
 
 using std::endl;
 
-EvtPythiaEngine::EvtPythiaEngine( std::string xmlDir, bool convertPhysCodes,
+EvtPythiaEngine::EvtPythiaEngine( const std::string & xmlDir, bool convertPhysCodes,
                                   bool useEvtGenRandom )
 {
     // Create two Pythia generators. One will be for generic

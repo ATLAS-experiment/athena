@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
    Tool to match a track to a Primary Vertex obtained with other leptons/tracks
@@ -50,13 +50,13 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
    }
 
 
-   std::unique_ptr<xAOD::Vertex>  TrkToLeptonPVTool::matchTrkToPV( const xAOD::TrackParticle *trk, const xAOD::Vertex * PV,
-                                                                         const xAOD::EventInfo * eventINFO) const
+   std::unique_ptr<xAOD::Vertex>  TrkToLeptonPVTool::matchTrkToPV( const EventContext& ctx, const xAOD::TrackParticle *trk, const xAOD::Vertex * PV,
+                                                                   const xAOD::EventInfo * eventINFO) const
    {
      static const SG::ConstAccessor<float> vyAcc("vy");
      if(vyAcc.isAvailable(*trk)) {
        std::vector<const xAOD::TrackParticle *> tpv(1,trk);
-       return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(tpv,(*PV)));
+       return m_fitterSvc->fit(ctx,tpv,(*PV));
      }
 
      //---DAOD case     
@@ -69,20 +69,21 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
      TPC.reserve( 1 );
      TPC.push_back(new (std::nothrow) xAOD::TrackParticle(*trk));
      if(!TPC[0])return {nullptr};
-     const EventContext& ctx = Gaudi::Hive::currentContext();
+
      const float mvx= (eventINFO) ? eventINFO->beamPosX() : 0.;
      const float mvy= (eventINFO) ? eventINFO->beamPosY() : 0.;
      static const SG::ConstAccessor<float> vzAcc("vz");
      const float mvz= (vzAcc.isAvailable(*trk)) ? trk->vz() : 0.;
      TPC[0]->setParametersOrigin( mvx, mvy, mvz);
      wrkTrkC[0]=TPC[0];
-     return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(ctx,wrkTrkC,(*PV)));
+     return m_fitterSvc->fit(ctx,wrkTrkC,(*PV));
 
    }
 
 
-   std::unique_ptr<xAOD::Vertex>TrkToLeptonPVTool::npartVertex( const std::vector<const xAOD::TrackParticle*> & particles,
-                                                                      const xAOD::EventInfo * eventINFO) const
+   std::unique_ptr<xAOD::Vertex>TrkToLeptonPVTool::npartVertex( const EventContext& ctx,
+                                                                const std::vector<const xAOD::TrackParticle*> & particles,
+                                                                const xAOD::EventInfo * eventINFO) const
    {
      if(particles.empty()) return {nullptr};
 
@@ -119,7 +120,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
           beamtiltX= eventINFO->beamTiltXZ();
           beamtiltY= eventINFO->beamTiltYZ();
      }
-     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
+     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
      
      if(beamSpotHandle.isValid() && fullxAOD ){
           ATH_MSG_DEBUG("Beam service is present");
@@ -137,8 +138,6 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
                                 <<","<<BEAM.covariance()[3]<<","<<BEAM.covariance()[4]<<","<<BEAM.covariance()[5]);
      ATH_MSG_DEBUG("BEAM  tiltX,Y="<<beamtiltX<<","<<beamtiltY);
 
-     const EventContext& ctx = Gaudi::Hive::currentContext();
-
      if(fullxAOD){
        //---If beam is tilted -> make pre-fit and translate beam constraint to pre-fitted position
        if( beamtiltX!=0. || beamtiltY!=0.) { 
@@ -147,7 +146,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
           BEAM.setX(BEAM.x()+beamtiltX*iniVertex->z());
           BEAM.setY(BEAM.y()+beamtiltY*iniVertex->z());
        }
-       return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(ctx,particles,BEAM));
+       return m_fitterSvc->fit(ctx,particles,BEAM);
      }
  
      //
@@ -178,7 +177,7 @@ TrkToLeptonPVTool::TrkToLeptonPVTool(const std::string& type,
         BEAM.setX(BEAM.x()+beamtiltX*iniVertex->z());
         BEAM.setY(BEAM.y()+beamtiltY*iniVertex->z());
      }
-     return std::unique_ptr<xAOD::Vertex>(m_fitterSvc->fit(ctx,wrkTrkC,BEAM));
+     return m_fitterSvc->fit(ctx,wrkTrkC,BEAM);
    } 
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloLocalHadCalib/CaloReadLCWeightsFile.h"
@@ -38,7 +38,8 @@ StatusCode CaloReadLCWeightsFile::initDataFromFile(const std::string& theLCWeigh
     CaloLocalHadCoeff::LocalHadArea theArea(CaloSamplingHelper::getSamplingName((CaloSampling::CaloSample)iArea).c_str(),0,3);
     theAreas.push_back(std::move(theArea));
   }
-
+   // first the Sampling
+  static const std::string key("_isamp_");
   for (int iread=0;iread<2;iread++) {
     // first parse to define Areas; second to fill all data
     TFile* theLCWeightFile = new TFile(file.c_str());
@@ -51,7 +52,6 @@ StatusCode CaloReadLCWeightsFile::initDataFromFile(const std::string& theLCWeigh
       // parse histogram title to find sampling and bins
       std::string sTitle(prof->GetTitle());
       // first the Sampling
-      std::string key("_isamp_");
       size_t found = sTitle.find(key);
       if ( found == std::string::npos ) {
 	ATH_MSG_ERROR( "Could not find key " << key << " in current histogram."  );
@@ -183,7 +183,7 @@ StatusCode CaloReadLCWeightsFile::initialize() {
 }
 
 
-StatusCode  CaloReadLCWeightsFile::execute() 
+StatusCode  CaloReadLCWeightsFile::execute(const EventContext& /*ctx*/) 
 { 
   return StatusCode::SUCCESS;
 }

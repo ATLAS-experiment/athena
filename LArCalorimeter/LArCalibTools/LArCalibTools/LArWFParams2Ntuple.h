@@ -29,7 +29,7 @@ class LArWFParams2Ntuple : public LArCond2NtupleBase
 
   //standard algorithm methods
   StatusCode  initialize();
-  StatusCode execute() {return StatusCode::SUCCESS;}
+  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
   virtual StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
 

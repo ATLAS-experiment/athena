@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -32,6 +32,7 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CxxUtils/prefetch.h"
+#include "CxxUtils/trapping_fp.h"
 #include <Eigen/Dense>
 #include <cmath>
 #include <cstdint>
@@ -321,17 +322,17 @@ namespace CaloClusterMomentsMaker_detail {
 
 
 struct cellinfo {
-  double x;
-  double y;
-  double z;
-  double energy;
-  double eta;
-  double phi;
-  double r;
-  double lambda;
-  double volume;
-  CaloCell_ID::CaloSample sample;
-  unsigned int identifier;
+  double x{};
+  double y{};
+  double z{};
+  double energy{};
+  double eta{};
+  double phi{};
+  double r{};
+  double lambda{};
+  double volume{};
+  CaloCell_ID::CaloSample sample{};
+  unsigned int identifier{};
 };
 
 } // namespace CaloClusterMomentsMaker_detail
@@ -495,6 +496,9 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	}
       
 	if ( m_calculateSignificance ) {
+          // Avoid a spurious FPE from clang.
+          CXXUTILS_TRAPPING_FP;
+
 	  const float sigma = m_twoGaussianNoise ?\
 	    noise->getEffectiveSigma(pCell->ID(),pCell->gain(),pCell->energy()) : \
 	    noise->getNoise(pCell->ID(),pCell->gain());

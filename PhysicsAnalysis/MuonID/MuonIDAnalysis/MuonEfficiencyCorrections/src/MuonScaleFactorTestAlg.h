@@ -35,7 +35,7 @@ namespace CP {
             /// Function finalizing the algortihm
             StatusCode finalize() override;
             /// Function executing the algorithm
-            StatusCode execute() override;
+            StatusCode execute(const EventContext& ctx) override;
             virtual ~MuonScaleFactorTestAlg() = default;
 
         private:
@@ -58,7 +58,8 @@ namespace CP {
             
             Gaudi::Property<float> m_pt_cut{this, "MinPt", -1.};
             Gaudi::Property<float> m_eta_cut{this, "MaxEta", -1.};
-            Gaudi::Property<int> m_muon_quality{this, "MinQuality", xAOD::Muon::Loose};
+            Gaudi::Property<int> m_muon_quality{this, "MinQuality", 
+                                                static_cast<int>(xAOD::Muon::Quality::Loose)};
 
             MuonVal::MuonTesterTree m_tree{"MuonSFTester", "MUONEFFTESTER"};
 

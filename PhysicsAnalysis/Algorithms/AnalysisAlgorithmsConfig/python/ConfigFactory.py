@@ -248,6 +248,10 @@ class ConfigFactory():
         from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import TriggerAnalysisSFBlock
         self.addAlgConfigBlock(algName="TriggerMatching", alg=TriggerAnalysisSFBlock)
 
+        # HSTP filter for dijet MC
+        from AsgAnalysisAlgorithms.HSTPFilterConfig import HSTPFilterBlock
+        self.addAlgConfigBlock(algName="HSTPFilter", alg=HSTPFilterBlock)
+
         # jets
         from JetAnalysisAlgorithms.JetAnalysisConfig import Jets
         self.addAlgConfigBlock(algName="Jets", alg=Jets)
@@ -263,15 +267,15 @@ class ConfigFactory():
         from JetAnalysisAlgorithms.BJetCalibAnalysisConfig import BJetCalibAnalysisConfig
         self.addAlgConfigBlock(algName="BJetCalib", alg=BJetCalibAnalysisConfig,
                                superBlocks="Jets")
+        from JetAnalysisAlgorithms.JetTriggerAnalysisConfig import JetTriggerMatchingBlock
+        self.addAlgConfigBlock(algName="TriggerMatching", alg=JetTriggerMatchingBlock,
+                               superBlocks="Jets")
         from FTagAnalysisAlgorithms.FTagTrigMatchAnalysisConfig import FTagJetTrigMatchingBlock
         self.addAlgConfigBlock(algName="FTagTriggerMatching", alg=FTagJetTrigMatchingBlock,
                                superBlocks="Jets")
         from FTagAnalysisAlgorithms.FTagAnalysisConfig import FTagConfig
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
-            superBlocks="Jets")
-        from JetAnalysisAlgorithms.JetUncertaintiesConfig import JetUncertaintiesConfig
-        self.addAlgConfigBlock(algName="Uncertainties", alg=JetUncertaintiesConfig,
             superBlocks="Jets")
         from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
         self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
@@ -459,6 +463,10 @@ class ConfigFactory():
         # VGamma overlap removal
         from AsgAnalysisAlgorithms.VGammaORConfig import VGammaORBlock
         self.addAlgConfigBlock(algName='VGammaOR', alg=VGammaORBlock)
+
+        # Event shape density
+        from AsgAnalysisAlgorithms.EventShapeDensityDumperConfig import EventShapeDensityDumperBlock
+        self.addAlgConfigBlock(algName='EventShape', alg=EventShapeDensityDumperBlock)
 
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig

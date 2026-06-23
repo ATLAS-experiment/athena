@@ -27,7 +27,8 @@ def BPHY21Cfg(flags):
     acc.addPublicTool(trackselect)
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
-
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     #====================================================================
     # TriggerCounting for Kernel1
     #====================================================================
@@ -75,7 +76,7 @@ def BPHY21Cfg(flags):
         VertexSearchTool       = BPHY21_JpsiFinder,
         OutputVtxContainerName = "BPHY21_JpsiCandidates",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         DoVertexType           = 1)

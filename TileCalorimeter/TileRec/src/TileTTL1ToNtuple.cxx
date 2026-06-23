@@ -107,7 +107,7 @@ StatusCode TileTTL1ToNtuple::initialize()
 //* Execution
 //****************************************************************************
 
-StatusCode TileTTL1ToNtuple::execute()
+StatusCode TileTTL1ToNtuple::execute(const EventContext& /*ctx*/)
 {
 
   // step1: read TileTTL1s from TDS

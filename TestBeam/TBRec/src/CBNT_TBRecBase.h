@@ -26,7 +26,7 @@ class CBNT_TBRecBase : public AthAlgorithm {
 
   //Standard algo methods
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
   virtual StatusCode pre_execute();
 

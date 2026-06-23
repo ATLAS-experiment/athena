@@ -58,26 +58,60 @@ def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
 
     return result
 
+
+def StandaloneTrackPartCnvCfg(flags, name="MuonMsTrackParticleCnvR4", **kwargs):
+    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    kwargs.setdefault("BeamSpotKey", "")
+    kwargs.setdefault("VertexContainerKey", "")
+    kwargs.setdefault("ACTSTracksLocation" ,["MsTracks"])
+    kwargs.setdefault("TrackParticlesOutKey", "MsTrackParticlesR4")
+    kwargs.setdefault("PerigeeExpression", "DontRecalculate")    
+    return ActsTrackToTrackParticleCnvAlgCfg(flags, name=name, **kwargs)
+
 def MuonActsToTrkConvCfg(flags, name="MuonActsToTrkConverterAlg", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault('ACTSTracksLocation', "MsTracks")
-    kwargs.setdefault('TracksLocation', 'MsTracksConv')
-    
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, ConvertMuonTracks=True)))
-    from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
-    kwargs.setdefault("SummaryTool", result.popToolsAndMerge(MuonTrackSummaryToolCfg(flags)))
-    kwargs.setdefault("BoundaryCheckTool", "")
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg
-    kwargs.setdefault('RotCreatorTool', result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
-    kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags, RestrictWarnings=True)))
-    kwargs.setdefault("MdtKey", "MDT_DriftCircles" if flags.Detector.EnableMDT else "")
-    kwargs.setdefault("RpcKey", "RPC_Measurements" if flags.Detector.EnableRPC else "")
-    kwargs.setdefault("TgcKey", "TGC_MeasurementsAllBCs" if flags.Detector.EnableTGC else "")
-    kwargs.setdefault("MmKey", "MM_Measurements" if flags.Detector.EnableMM else "")
-    kwargs.setdefault("sTgcKey", "STGC_Measurements" if flags.Detector.EnablesTGC else "")
-    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    kwargs.setdefault("MuonIdHelperSvc",result.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)))
-    
-    result.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, **kwargs))
+    kwargs.setdefault('TracksLocation', 'MsTracksTrkCnv')
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
+    result.merge(ActsToTrkConvertorAlgCfg(flags, name=name, **kwargs))
+    return result 
+
+def MuidSaTagMakerAlg(flags, name="MuonMuidTagSaAlg", **kwargs):
+    result = ComponentAccumulator()
+    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
+    kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    the_alg = CompFactory.MuonCombinedR4.StandaloneMuonTagAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
     return result
+
+
+def MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4", **kwargs):
+    result = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    the_alg = CompFactory.MuonCombinedR4.InDetTrackSelectionAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def MuonSegmentTaggingAlgCfg(flags, name="MuonCombinedSegmentTaggingAlgR4", **kwargs):
+    result = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    the_alg = CompFactory.MuonCombinedR4.SegmentTaggingAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def MuonCreatorAlgCfg(flags, name="MuonCreatorAlgR4", **kwargs):
+    result = ComponentAccumulator()
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    kwargs.setdefault("SelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags)))
+    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
+    kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    the_alg = CompFactory.MuonCombinedR4.MuonCreatorAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+

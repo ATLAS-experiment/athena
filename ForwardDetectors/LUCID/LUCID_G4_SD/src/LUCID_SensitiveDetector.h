@@ -6,12 +6,13 @@
 #define LUCID_G4_SD_LUCID_SensitiveDetector_h
 
 // Base class
-#include "G4AtlasTools/SensitiveDetectorBase.h"
+#include "G4VSensitiveDetector.hh"
 
 // Athena headers
 #include "LUCID_SimEvent/LUCID_SimHitCollection.h"
-#include "StoreGate/WriteHandle.h"
 #include <gtest/gtest_prod.h>
+
+#include <utility>
 
 class LUCID_HitHelper;
 
@@ -20,7 +21,6 @@ class G4TouchableHistory;
 
 class LUCID_SensitiveDetector : public G4VSensitiveDetector
 {
- FRIEND_TEST( LUCID_SensitiveDetectortest, Initialize );
  FRIEND_TEST( LUCID_SensitiveDetectortest, ProcessHits );
  FRIEND_TEST( LUCID_SensitiveDetectortest, AddHit );
 public:
@@ -39,14 +39,22 @@ public:
   /** Templated method to stuff a single hit into the sensitive detector class.  This
    could get rather tricky, but the idea is to allow fast simulations to use the very
    same SD classes as the standard simulation. */
-  template <class... Args> void AddHit(Args&&... args){ m_HitColl->Emplace( args... ); }
+  template <class... Args> void AddHit(Args&&... args)
+  {
+    if (m_HitColl) {
+      m_HitColl->Emplace(std::forward<Args>(args)...);
+    }
+  }
 
  private:
+  LUCID_SimHitCollection* getHitCollection() const;
 
   LUCID_SensitiveDetector            (const LUCID_SensitiveDetector&);
   LUCID_SensitiveDetector& operator= (const LUCID_SensitiveDetector&);
 
-  SG::WriteHandle<LUCID_SimHitCollection> m_HitColl;
+  std::string m_hitCollectionName;
+  // Non-owning cache set by Initialize; HitCollectionMap owns the collection.
+  LUCID_SimHitCollection* m_HitColl{};
   LUCID_HitHelper*           m_hit;
 };
 

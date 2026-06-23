@@ -51,12 +51,12 @@ TestDriver::testWriting()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-  if( !storSvc->startSession( pool::RECREATE, pool::ROOT_StorageType.type() ).isSuccess() ) {
+  if( !storSvc->startSession( Io::WRITE, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor fd( file, file );
-  if( !storSvc->connect(pool::RECREATE, fd ).isSuccess() ) {
+  if( !storSvc->connect(Io::WRITE, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
   // Retrieve the dictionary
@@ -145,12 +145,12 @@ TestDriver::testReadingParallelSameContainer()
   }
   storSvc->addRef();
 
-  if( !storSvc->startSession( pool::READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
+  if( !storSvc->startSession( Io::READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor* fd = new pool::FileDescriptor( file, file );
-  if( !storSvc->connect( READ, *fd ).isSuccess() ) {
+  if( !storSvc->connect( Io::READ, *fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
@@ -172,12 +172,12 @@ TestDriver::testReadingParallelSameContainer()
   // Fetch the objects in the container (Initialize the iterators)
   DbContainer cnt1H(containerToken->technology());
   Token::OID_t link1H(containerToken->oid());
-  if ( ! cnt1H.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ).isSuccess() && cnt1H.isValid() ) {
+  if ( ! cnt1H.open(dbH, containerToken->contID(), 0, containerToken->technology(), Io::READ).isSuccess() && cnt1H.isValid() ) {
     throw std::runtime_error( "Could not start an implicit collection iteration" );
   }
   DbContainer cnt2H(containerToken->technology());
   Token::OID_t link2H(containerToken->oid());
-  if ( ! cnt2H.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ).isSuccess() && cnt2H.isValid() ) {
+  if ( ! cnt2H.open(dbH, containerToken->contID(), 0, containerToken->technology(), Io::READ).isSuccess() && cnt2H.isValid() ) {
     throw std::runtime_error( "Could not start an implicit collection iteration" );
   }
 

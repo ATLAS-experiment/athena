@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_AODJETRETRIEVER_H
 #define JIVEXML_AODJETRETRIEVER_H
 
-#include <string>
-#include <vector>
-#include <map>
+
 
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include <string>
+#include <vector>
 
 class JetCollection;
 

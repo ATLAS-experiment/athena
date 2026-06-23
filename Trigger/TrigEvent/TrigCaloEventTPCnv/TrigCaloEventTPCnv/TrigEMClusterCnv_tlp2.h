@@ -19,14 +19,14 @@
 #define TRIGCALOEVENTTPCNV_TRIGEMCLUSTERCNV_TLP2_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigCaloEventTPCnv/TrigEMCluster_tlp2.h"
 #include "TrigCaloEventTPCnv/TrigEMClusterCnv_p2.h"
 #include "TrigCaloEventTPCnv/TrigCaloClusterCnv_p1.h"
 #include "TrigCaloEventTPCnv/RingerRingsCnv_p1.h"
 
-class TrigEMClusterCnv_tlp2 : public AthenaPoolTopLevelTPConverter<TrigEMClusterCnv_p2, TrigEMCluster_tlp2>
+class TrigEMClusterCnv_tlp2 : public TopLevelTPConverter<TrigEMClusterCnv_p2, TrigEMCluster_tlp2>
 {
 
  public:

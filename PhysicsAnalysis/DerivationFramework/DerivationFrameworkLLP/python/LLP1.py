@@ -276,12 +276,11 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                            
     # Reclustered jets definitions
     from JetRecConfig.JetRecConfig import registerAsInputConstit, JetRecCfg
-    from JetRecConfig.StandardSmallRJets import AntiKt4Truth, AntiKt4EMTopo
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo
     from JetRecConfig.JetDefinition import JetDefinition
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 
     registerAsInputConstit(AntiKt4EMTopo)
-    registerAsInputConstit(AntiKt4Truth)
     cst.AntiKt4EMTopoJets.label = "EMTopoRC"
     cst.AntiKt4TruthJets.label = "TruthRC"
 
@@ -1054,7 +1053,8 @@ def LLP1Cfg(flags):
                                         "DisappearingSCT_MSOSs",
                                         "LowPtRoISCT_MSOSs",
                                         "LVL1MuonRoIs",
-                                        "NCB_MuonSegments"]
+                                        "NCB_MuonSegments",
+                                        "HLT_MuRoICluster_Composites"]
     if flags.Tracking.doLargeD0:
         LLP1SlimmingHelper.AllVariables += ["MuonSegments_LRT",
                                            "CombinedMuonsLRTTrackParticles",

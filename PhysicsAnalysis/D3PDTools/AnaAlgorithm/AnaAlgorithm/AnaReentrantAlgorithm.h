@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -12,7 +12,7 @@
 
 #ifdef XAOD_STANDALONE
 #include <AsgTools/AsgComponent.h>
-#include <AsgTools/SgTEvent.h>
+#include <AsgTools/SgEvent.h>
 #include <memory>
 #include <vector>
 #else
@@ -187,7 +187,7 @@ namespace EL
     /// * change the implementation of all data handles to no longer require
     ///   this function, which would be quite an intrusive change
   public:
-    asg::SgTEvent *evtStore() const;
+    asg::SgEvent *evtStore() const;
 
     /// \brief set the value of \ref evtStore
     /// \par Guarantee
@@ -195,7 +195,7 @@ namespace EL
     /// \par Failures
     ///   service already configured
   public:
-    void setEvtStore (asg::SgTEvent *val_evtStore);
+    void setEvtStore (asg::SgEvent *val_evtStore);
 
     /// \brief set the value of \ref filterWorker
     /// \par Guarantee
@@ -223,7 +223,7 @@ namespace EL
 #ifdef XAOD_STANDALONE
     /// \brief the value of \ref evtStore
   private:
-    asg::SgTEvent *m_evtStore = nullptr;
+    asg::SgEvent *m_evtStore = nullptr;
 #endif
 
 #ifdef XAOD_STANDALONE

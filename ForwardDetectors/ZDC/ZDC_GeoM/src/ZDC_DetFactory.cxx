@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_DetFactory.h"
@@ -82,10 +82,12 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
     * Create TAN/TAXN slots
     **************************************************/
     std::array<GeoFullPhysVol*, 2> Envelope_Physical;
+    static const std::string airStr{"std::Air"};
+    static const std::string envStr{"Envelope_Logical"};
     for(uint side : {0,1}){
-        const GeoMaterial *Air = theMaterialManager->getMaterial("std::Air");
+        const GeoMaterial *Air = theMaterialManager->getMaterial(airStr);
         GeoBox *Envelope_Box = new GeoBox(m_tanW.at(side) * Gaudi::Units::mm * 0.5, m_tanH.at(side) * Gaudi::Units::mm * 0.5, m_tanD.at(side) * Gaudi::Units::mm * 0.5);
-        GeoLogVol *Envelope_Logical = new GeoLogVol("Envelope_Logical", Envelope_Box, Air);
+        GeoLogVol *Envelope_Logical = new GeoLogVol(envStr, Envelope_Box, Air);
         Envelope_Physical.at(side) = new GeoFullPhysVol(Envelope_Logical);
 
         LogStream << MSG::INFO << "Creating " << m_tanSlotName.at(side) << " with dimensions (x,y,z) (" << m_tanW.at(side) << ", " << m_tanH.at(side) << ", " << m_tanD.at(side) << ") at ATLAS coordinates (x,y,z) (" << m_tanSlotTransform.at(side).translation().x() << ", " << m_tanSlotTransform.at(side).translation().y() << ", " << m_tanSlotTransform.at(side).translation().z() << ")" << endmsg;

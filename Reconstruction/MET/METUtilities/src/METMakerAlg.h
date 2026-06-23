@@ -9,7 +9,7 @@
 #ifndef METMakerAlg_H
 #define METMakerAlg_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "xAODEgamma/Electron.h"
@@ -38,7 +38,7 @@ namespace TauAnalysisTools {
 }
 
 namespace met {
-  class METMakerAlg : public AthAlgorithm {
+  class METMakerAlg : public AthReentrantAlgorithm {
 
   public: 
 
@@ -46,22 +46,19 @@ namespace met {
     METMakerAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     /// Destructor:
-    virtual ~METMakerAlg(); 
+    virtual ~METMakerAlg();
 
     /// Athena algorithm's Hooks
     virtual StatusCode  initialize() override;
-    virtual StatusCode  execute() override;
+    virtual StatusCode  execute(const EventContext& ctx) const override;
     virtual StatusCode  finalize() override;
 
   protected: // was private childORMETMaker
 
-    /// Default constructor:
-    METMakerAlg();
-
-    virtual bool accept(const xAOD::Electron* el);
-    virtual bool accept(const xAOD::Photon* ph);
-    virtual bool accept(const xAOD::TauJet* tau);
-    virtual bool accept(const xAOD::Muon* muon);
+    virtual bool accept(const xAOD::Electron* el) const;
+    virtual bool accept(const xAOD::Photon* ph) const;
+    virtual bool accept(const xAOD::TauJet* tau) const;
+    virtual bool accept(const xAOD::Muon* muon) const;
 
     std::string m_softclname;
     std::string m_softtrkname;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFlatFromFile.h"
@@ -288,7 +288,7 @@ StatusCode LArFlatFromFile::stop() {
 
 
 
-void LArFlatFromFile::errIfConnected(const HWIdentifier chid, const int gain, const std::string& objName, const std::string& message) const{
+void LArFlatFromFile::errIfConnected(const HWIdentifier chid, const int gain, std::string_view objName, std::string_view message) const{
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
   const LArOnOffIdMapping* cabling{*cablingHdl};

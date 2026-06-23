@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthenaPoolCnvSvcTestDict.h
  * @author scott snyder <snyder@bnl.gov>
@@ -21,8 +18,10 @@
 #include "AthContainers/ViewVector.h"
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainersInterfaces/ToTransient.h"
 #include "AthLinks/ElementLink.h"
 #include "AthenaKernel/CLASS_DEF.h"
+#include "GaudiKernel/EventContext.h"
 #include <vector>
 
 
@@ -75,6 +74,7 @@ struct Y_v2
   Y_v2(int a) : m_a(a) {}
   ~Y_v2() {}
   int m_a;
+  size_t m_yy = 0;
 };
 
 
@@ -87,6 +87,12 @@ struct YAuxCont_v1
 struct YAuxCont_v2
   : public SG::AuxStoreInternal
 {
+public:
+  virtual void toTransient (const EventContext& ctx) override
+  {
+    m_evt = ctx.evt();
+  }
+  size_t m_evt = 0;
 };
 
 
@@ -111,6 +117,19 @@ typedef std::vector<ElementLink<DataVector<Y_v2> > > YCont_v2_pers2;
 
 
 } // namespace AthenaPoolCnvSvcTest
+
+
+namespace SG {
+template <> class ToTransient<DataVector<AthenaPoolCnvSvcTest::Y_v2> > {
+public:
+  static void toTransient (DataVector<AthenaPoolCnvSvcTest::Y_v2>& v)
+  {
+    for (AthenaPoolCnvSvcTest::Y_v2* y : v) {
+      y->m_yy = 1234;
+    }
+  }
+};
+}
 
 
 #endif // not ATHENAPOOLCNVSVC_ATHENAPOOLCNVSVCTESTDICT_H

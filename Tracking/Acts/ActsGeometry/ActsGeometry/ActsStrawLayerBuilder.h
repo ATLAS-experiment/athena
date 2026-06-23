@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSSTRAWLAYERBUILDER_H
@@ -40,7 +40,7 @@ public:
   {
     /// string based identification
     std::string                          configurationName = "undefined";
-    const InDetDD::TRT_DetectorManager*   mng;
+    const InDetDD::TRT_DetectorManager*   mng{};
     std::shared_ptr<const Acts::LayerCreator> layerCreator = nullptr;
     std::shared_ptr<ElementVector> elementStore;
     const TRT_ID* idHelper = nullptr;

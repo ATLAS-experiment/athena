@@ -28,6 +28,7 @@
 #include <iostream>
 #include <cmath>
 #include <ctime>
+#include "CxxUtils/checker_macros.h"
 
 #include "IsolationSelection/IsolationSelectionTool.h"
 #include "IsolationSelection/IsolationLowPtPLVTool.h"
@@ -36,12 +37,18 @@ ANA_MSG_HEADER(Test)
 ANA_MSG_SOURCE(Test, "testIsolationSelectionTool")
 using namespace Test;
 
-std::string MuonIso(""), ElectronIso(""), PhotonIso("");
+std::string MuonIso ATLAS_THREAD_SAFE = "";
+std::string ElectronIso ATLAS_THREAD_SAFE = "";
+std::string PhotonIso ATLAS_THREAD_SAFE = "";
 
-float MuonPt(0),  ElectronPt(0),  PhotonPt(0);
-float MuonEta(0), ElectronEta(0), PhotonEta(0);
+float MuonPt ATLAS_THREAD_SAFE = 0;
+float ElectronPt ATLAS_THREAD_SAFE = 0;
+float PhotonPt ATLAS_THREAD_SAFE = 0;
+float MuonEta ATLAS_THREAD_SAFE = 0;
+float ElectronEta ATLAS_THREAD_SAFE = 0;
+float PhotonEta ATLAS_THREAD_SAFE = 0;
 
-StatusCode setConfigWP(TString conf){
+StatusCode setConfigWP(TString conf) ATLAS_NOT_THREAD_SAFE {
   TEnv env;
   if(env.ReadFile(conf, kEnvAll) != 0){
     ANA_MSG_INFO("Cannot read config file " << conf);
@@ -64,7 +71,7 @@ StatusCode setConfigWP(TString conf){
   return StatusCode::SUCCESS;
 }
 
-int main( int argc, char* argv[] ){
+int main( int argc, char* argv[] ) ATLAS_NOT_THREAD_SAFE {
   ANA_CHECK_SET_TYPE (int);
 
   // The application's name:
@@ -79,7 +86,8 @@ int main( int argc, char* argv[] ){
   // Initialize the application:
   ANA_CHECK( xAOD::Init( APP_NAME ) );
   auto start = std::time(nullptr);
-  ANA_MSG_INFO("Initialized " << std::ctime(&start));
+  char tbuf_start[26]; ::ctime_r(&start, tbuf_start);
+  ANA_MSG_INFO("Initialized " << tbuf_start);
 
   // Open the input file:
   const TString fileName = argv[ 2 ];
@@ -124,9 +132,9 @@ int main( int argc, char* argv[] ){
   ANA_CHECK( IsoSelectionTool_lowPt.setProperty("OutputLevel", MSG::DEBUG) );
   ANA_CHECK( IsoSelectionTool_lowPt.initialize() );
 
-  std::string m_sgKeyPhotons("Photons");
-  std::string m_sgKeyElectrons("Electrons");
-  std::string m_sgKeyMuons("Muons");
+  std::string sgKeyPhotons("Photons");
+  std::string sgKeyElectrons("Electrons");
+  std::string sgKeyMuons("Muons");
 
   // Loop over the events:
   for( Long64_t entry(0); entry<entries; entry++ ) {
@@ -134,7 +142,7 @@ int main( int argc, char* argv[] ){
     event.getEntry( entry );
 
     const xAOD::PhotonContainer* photons(nullptr);
-    ANA_CHECK( event.retrieve(photons,m_sgKeyPhotons) );
+    ANA_CHECK( event.retrieve(photons,sgKeyPhotons) );
     ANA_MSG_INFO(" Number of pre-selected photons: " << (int)photons->size());
 
     for (auto ph : *photons) {
@@ -149,7 +157,7 @@ int main( int argc, char* argv[] ){
     }
 
     const xAOD::ElectronContainer* electrons(nullptr);
-    ANA_CHECK( event.retrieve(electrons,m_sgKeyElectrons) );
+    ANA_CHECK( event.retrieve(electrons,sgKeyElectrons) );
     ANA_MSG_INFO(" Number of pre-selected electrons: " << (int)electrons->size());
 
     for (auto el : *electrons) {
@@ -165,7 +173,7 @@ int main( int argc, char* argv[] ){
     }
 
     const xAOD::MuonContainer* muons(nullptr);
-    ANA_CHECK( event.retrieve(muons,m_sgKeyMuons) );
+    ANA_CHECK( event.retrieve(muons,sgKeyMuons) );
     ANA_MSG_INFO(" Number of pre-selected muons: " << (int)muons->size());
 
     for (auto mu : *muons) {
@@ -183,7 +191,8 @@ int main( int argc, char* argv[] ){
   } // end loop over events
 
   auto end = std::time(nullptr);
-  ANA_MSG_INFO(Form("Ran on %i event for testing %s",(int)entries, std::ctime(&end)));
+  char tbuf_end[26]; ::ctime_r(&end, tbuf_end);
+  ANA_MSG_INFO(Form("Ran on %i event for testing %s",(int)entries, tbuf_end));
 
   return EXIT_SUCCESS;
 }

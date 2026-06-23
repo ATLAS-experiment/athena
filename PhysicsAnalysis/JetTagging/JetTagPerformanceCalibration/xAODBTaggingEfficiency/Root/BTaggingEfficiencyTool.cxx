@@ -463,7 +463,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   std::vector<std::string> suffixes;
   if (m_using_conventional_labels){
     for (int i = 0; i < 4; ++i) { // four flavours in conventional label scheme
-      std::string flav = flavours[i]; if (flav == "T") flav = "C";
+      std::string flav = flavours[i]; if(!m_splitTauCharmEff && flav == "T") { flav = "C";} //if tau and charm uncertainties are not split, use the charm flavour uncertainties in the CDI
       // add an underscore to any specified suffix (if specified and if not already starting with a suffix)
       std::string test = trim(m_uncertaintySuffixes[flav]);
       if (test.length() > 0 && test[0] != '_') test.insert(0,"_");
@@ -518,7 +518,8 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       // -   The tau SF are identical to the c-jet ones, with merely one additional uncertainty assigned due to the extrapolation.
       //
       unsigned int flavourIDRef;
-      if (m_using_conventional_labels){
+      //if we don't split the tau and charm efficiencies, then we use the same flavour ID for both charm and tau, the c-jet one. If we do split them, then we need to use the different flavour ID for taus (15) and charm (4) to get separate entries.
+      if (m_using_conventional_labels && !m_splitTauCharmEff){
         flavourIDRef = (flavourID == 15) ? 4 : flavourID;
       } else {
         flavourIDRef = flavourID;
@@ -612,7 +613,14 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       // -   The "total" uncertainty is always expected to be available; the code will bomb if this is not the case.
       //     Also, the "total" uncertainties for different flavours are assumed to be uncorrelated.
       //
-      unsigned int flavourIDRef = (flavourID == 15) ? 4 : flavourID;
+      unsigned int flavourIDRef;
+      if (!m_splitTauCharmEff) {
+        // If not splitting the charm and tau efficiencies, we use the same flavour ID for both, since the tau SFs are just copied from the c-jets ones.
+        flavourIDRef = (flavourID == 15) ? 4 : flavourID;
+      } else {
+        // If splitting the charm and tau efficiencies, then we can treat them as separate flavours to get separate SFs and uncertainties entries for each.
+        flavourIDRef = flavourID;
+      }
       int idRef = m_SFIndices.find(flavourIDRef)->second;
       // First, handle the Total variations; these need different prefixes to reflect them being uncorrelated
       std::vector<std::string> all_ref_systematics = m_CDI->listScaleFactorUncertainties(idRef,getLabel(flavourID),false);

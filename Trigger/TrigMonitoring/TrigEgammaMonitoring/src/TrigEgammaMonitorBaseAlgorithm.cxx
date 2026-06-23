@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaMonitorBaseAlgorithm.h"
@@ -9,7 +9,9 @@
 TrigEgammaMonitorBaseAlgorithm::TrigEgammaMonitorBaseAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator),
     m_trigdec("Trig::TrigDecisionTool/TrigDecisionTool"),
-    m_matchTool("Trig::TrigEgammaMatchingToolMT/TrigEgammaMatchingToolMT")
+    //m_matchTool("Trig::TrigEgammaMatchingToolMT/TrigEgammaMatchingToolMT")
+    m_matchTool("Trig::R3MatchingTool/TrigR3MatchingTool")
+
 {
   declareProperty( "MatchTool" , m_matchTool );
   declareProperty( "EmulationTool" , m_emulatorTool );
@@ -23,8 +25,9 @@ TrigEgammaMonitorBaseAlgorithm::~TrigEgammaMonitorBaseAlgorithm() {}
 
 StatusCode TrigEgammaMonitorBaseAlgorithm::initialize() 
 {
-
+  ATH_MSG_INFO("TrigEgammaMonitorBaseAlgorithm::initialize()...");
   ATH_CHECK(AthMonitorAlgorithm::initialize());
+  ATH_MSG_INFO("TrigEgammaMonitorBaseAlgorithm DONE INITIALIZING...");
   ATH_CHECK(m_trigdec.retrieve());
   ATH_CHECK(m_photonIsEMTool.retrieve());
   ATH_CHECK(m_electronIsEMTool.retrieve());
@@ -43,12 +46,8 @@ StatusCode TrigEgammaMonitorBaseAlgorithm::initialize()
 
 // ************************************************************************************************
 
-
-
-
-bool TrigEgammaMonitorBaseAlgorithm::ApplyElectronPid( const xAOD::Electron *eg, const std::string& pidname) const
+bool TrigEgammaMonitorBaseAlgorithm::ApplyElectronPid(const EventContext& ctx, const xAOD::Electron *eg, const std::string& pidname) const
 {
-    const auto& ctx = Gaudi::Hive::currentContext() ;
     if (pidname == "tight"){
         return (bool) this->m_electronIsEMTool[0]->accept(ctx,eg);
     }
@@ -94,9 +93,8 @@ bool TrigEgammaMonitorBaseAlgorithm::ApplyElectronPid( const xAOD::Electron *eg,
 // ************************************************************************************************
 
 
-bool TrigEgammaMonitorBaseAlgorithm::ApplyPhotonPid( const xAOD::Photon *eg, const std::string& pidname) const
+bool TrigEgammaMonitorBaseAlgorithm::ApplyPhotonPid(const EventContext& ctx, const xAOD::Photon *eg, const std::string& pidname) const
 {
-    const auto& ctx = Gaudi::Hive::currentContext() ;
     if (pidname == "tight"){
         return (bool) this->m_photonIsEMTool[0]->accept(ctx,eg);
     }
@@ -208,11 +206,11 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                 if(passedL2Calo){
 
                     // Step 3
-                    if(info.signature == "Electron"){
+                    if(info.signature == "Electron" or info.signature == "e"){
                         std::string key = match()->key("FastElectrons");
                         if(info.lrt)  key = match()->key("FastElectrons_LRT");
                         passedL2 = match()->ancestorPassed<xAOD::TrigElectronContainer>(dec, trigger, key, condition);
-                    }else if(info.signature == "Photon"){
+                    }else if(info.signature == "Photon" or info.signature == "g"){
                         passedL2 = match()->ancestorPassed<xAOD::TrigPhotonContainer>(dec, trigger, match()->key("FastPhotons"), condition);
                     }
 
@@ -220,7 +218,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
 
                         // Step 4
                         std::string key = match()->key("PrecisionCalo_Electron");
-                        if(info.signature == "Photon") key = match()->key("PrecisionCalo_Photon");
+                        if(info.signature == "Photon" or info.signature == "g") key = match()->key("PrecisionCalo_Photon");
                         if(info.lrt) key = match()->key("PrecisionCalo_LRT");
                         if(info.ion) key = match()->key("PrecisionCalo_HI");
 
@@ -232,7 +230,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                             passedEFTrk=true;// Assume true for photons
 
                             // Step 6
-                            if(info.signature == "Electron"){
+                            if(info.signature == "Electron" or info.signature == "e"){
                                 if( info.etcut || info.idperf){// etcut or idperf
                                     passedEF = true; // since we dont run the preciseElectron step
                                 }else{
@@ -242,7 +240,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                                     passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
                                 }
     
-                            }else if(info.signature == "Photon"){
+                            }else if(info.signature == "Photon" or info.signature == "g"){
                                 if (info.etcut){
                                     passedEF = true; // since we dont run the precisePhoton step
                                 }else{
@@ -256,7 +254,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
 
         }
         else{
-            if(info.signature == "Electron"){
+            if(info.signature == "Electron" or info.signature == "e"){
                 if( info.etcut || info.idperf){// etcut or idperf
                     passedEF = true; // since we dont run the preciseElectron step
                 }else{
@@ -266,7 +264,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                     passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
                 }
 
-            }else if(info.signature == "Photon"){
+            }else if(info.signature == "Photon" or info.signature == "g"){
                 if (info.etcut){
                     passedEF = true; // since we dont run the precisePhoton step
                 }else{
@@ -610,6 +608,10 @@ TrigInfo TrigEgammaMonitorBaseAlgorithm::getTrigInfo(const std::string& trigger)
   return m_trigInfo.at(trigger); 
 }
 
+TrigInfo TrigEgammaMonitorBaseAlgorithm::getTrigInfoR3(const std::string& trigger) const{
+  return m_trigInfoR3.at(trigger); 
+}
+
 
 
 // This is not const function and can not be used in execute mode (not thread safe)
@@ -748,6 +750,185 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     m_trigInfo[trigger] = info;
 
 }
+
+std::vector<ChainNameParser::LegInfo>
+TrigEgammaMonitorBaseAlgorithm::getProbeTriggerLeg(const std::string& triggerName) const
+{
+    std::vector<ChainNameParser::LegInfo> result;
+
+    for (const ChainNameParser::LegInfo& legInfo : ChainNameParser::HLTChainInfo(triggerName))
+    {
+        ATH_MSG_DEBUG("Full trigger name = " << triggerName
+                     << ", multiplicity = " << legInfo.multiplicity
+                     << ", signature    = " << legInfo.signature
+                     << ", threshold    = " << legInfo.threshold
+		     << ", leg parts    = "<< legInfo.legParts); //Gives the pidname
+
+        result.push_back(legInfo); 
+    }
+
+    return result; 
+}
+
+
+// This is not const function and can not be used in execute mode (not thread safe)
+// adds entry in TrigInfo map to retrieve later via trigger name
+void TrigEgammaMonitorBaseAlgorithm::setTrigInfoR3(const std::string& trigger){
+
+    ATH_MSG_DEBUG("Entering function");
+    /********************************************
+    // Trigger Information struct
+    typedef struct _triginfo
+    {
+        // L1 information
+        bool L1Legacy; (done)
+        std::string L1Threshold; //EM22VHI
+        // HLT information
+        std::string trigger; //Trigger Name (done)
+        std::string signature; //Electron or Photon (done)
+        float etthr; // HLT Et threshold (done)
+        // if trigger is etcut OR idperf, pidname should be default (usually lhloose)
+        std::string pidname; // Offline loose, medium, tight, etc...(done)
+        // extra HLT information
+        bool idperf; // Performance chain
+        bool etcut; // Et cut only chain
+        bool nogsf; // chain without gsf reconstruction
+        bool lrt; // LRT chain
+        bool ion; // Heavy Ion chain
+        std::string isolation;
+        bool isolated;
+    } TrigInfo;
+     *******************************************/
+
+    std::map<std::string, std::string> pidMap   = { {"vloose"   , "loose"    },
+                                                    {"loose"    , "loose"    },
+                                                    {"medium"   , "medium"   },
+                                                    {"tight"    , "tight"    },
+                                                    {"loose1"   , "loose"    },
+                                                    {"medium1"  , "medium"   },
+                                                    {"tight1"   , "tight"    },
+                                                    {"lhvloose" , "lhvloose" },
+                                                    {"lhloose"  , "lhloose"  },
+                                                    {"lhmedium" , "lhmedium" },
+                                                    {"lhtight"  , "lhtight"  },
+                                                    {"dnnloose" , "dnnloose" },
+                                                    {"dnnmedium", "dnnmedium"},
+                                                    {"dnntight" , "dnntight" },
+                                                    {"nopid"    , "nopid"    } };
+
+    //Get information about each signature of the trigger
+    //Each signature counts as a leg
+    //HLT_2e17_medium_g22_medium_probe_L12eEM24H
+    //Leg 1 : 2e17_medium
+    //Leg2: g22_medium_probe
+
+    float threshold = 0;
+    std::string signature = "";
+    std::string etthr = "";
+    std::string pidname = "";
+
+
+    auto LegParts = getProbeTriggerLeg(trigger);
+
+    //Get the probe leg
+    if(!LegParts.empty())
+    {
+      //Looping over signatures
+      for( const auto& leg: LegParts)
+      {
+        //Grab the requested signature
+        if (leg.signature != "g") continue;
+        
+        //Building the probe trigger name
+        signature = leg.signature;
+	if (signature == "g"){
+		signature = "Photon";
+	}
+	threshold = leg.threshold;
+	//threshold = std::to_string(leg.threshold);
+        pidname = leg.legParts[0];
+      }
+    }
+
+    
+    bool l1legacy=true;
+    // L1EMXX
+    std::string l1seed = getL1Item(trigger);
+    l1legacy = !boost::contains(l1seed, "eEM");
+
+
+    std::vector<std::string> isoNames = {"ivarloose","ivarmedium","ivartight","icaloloose","icalomedium","icalotight"};
+
+    bool nogsf = false;
+    bool lrt = false;
+    bool ion = false;
+    bool etcut = false;
+    bool idperf = false;
+    bool isolated = false;
+    
+    std::string isolation="";
+
+    // extra information
+    nogsf   = boost::contains(trigger,"nogsf");
+    lrt     = boost::contains(trigger,"lrt");
+    ion     = boost::contains(trigger,"ion");
+
+    for(auto& iso : isoNames){
+        if(boost::contains(trigger, iso)){
+            isolation=iso; isolated=true; break;
+        }
+    }
+
+    std::vector<std::string> parts;
+    boost::split(parts, trigger, boost::is_any_of("_"));
+
+    if(boost::contains(trigger, "idperf")){
+        ATH_MSG_DEBUG("This is idperf");
+        idperf=true;
+    }
+    else if(boost::contains(trigger, "etcut")){
+        ATH_MSG_DEBUG("This is etcut");
+        etcut=true;
+    }
+    else { // remap online pidname to offline pidname
+    //ATH_MSG_DEBUG("Problem: 3");
+    //    ATH_MSG_DEBUG("This is nominal");
+    //    if (pidMap.count(parts.at(4)) != 4) {
+    //      ATH_MSG_DEBUG("Unknown trigger type: " << parts.at(4) << " (" << trigger << ")");
+    //    }
+    //    pidname = pidMap.at(parts.at(4));
+    }
+
+
+    ATH_MSG_DEBUG("Problem: 5");
+    ATH_MSG_DEBUG("=================== R3 Chain Parser R3 =======================");
+    ATH_MSG_DEBUG( "trigger     : " << trigger );
+    ATH_MSG_DEBUG( "threshold   : " << threshold);
+    ATH_MSG_DEBUG( "Pidname     : " << pidname );
+    ATH_MSG_DEBUG( "signature   : " << signature);
+    ATH_MSG_DEBUG( "etcut       : " << (etcut?"Yes":"No"));
+    ATH_MSG_DEBUG( "idperf      : " << (idperf?"Yes":"No"));
+    ATH_MSG_DEBUG( "nogsf       : " << (nogsf?"Yes":"No"));
+    ATH_MSG_DEBUG( "lrt         : " << (lrt?"Yes":"No"));
+    ATH_MSG_DEBUG( "HeavyIon    : " << (ion?"Yes":"No"));
+    ATH_MSG_DEBUG( "Isolation   : " << isolation);
+    ATH_MSG_DEBUG( "Isolated    : " << (isolated?"Yes":"No"));
+    ATH_MSG_DEBUG( "L1Seed      : " << l1seed << " (Is Legacy? " << (l1legacy?"Yes":"No") << ")");
+    ATH_MSG_DEBUG("========================================================");
+
+    TrigInfo info{l1legacy,l1seed,trigger,signature,threshold,pidname,idperf,etcut,nogsf,lrt,ion,isolation,isolated};
+    m_trigInfoR3[trigger] = info;
+
+}
+
+
+
+
+
+
+
+
+
 
 
 // For Run-3, all triggers must have the L1 seed in name (last part)

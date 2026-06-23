@@ -41,7 +41,7 @@ namespace DerivationFramework {
     virtual StatusCode finalize() override;
 
     // Check current event passes filter
-    virtual StatusCode doThinning() const override;
+    virtual StatusCode doThinning(const EventContext& ctx) const override;
 
   private:
     StringProperty m_streamName

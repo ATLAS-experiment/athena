@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -67,7 +67,7 @@ AdaptiveMultiVertexFitter::finalize()
 }
 
 void
-AdaptiveMultiVertexFitter::fit(std::vector<xAOD::Vertex*>& allVertices) const
+AdaptiveMultiVertexFitter::fit(const EventContext& ctx, std::vector<xAOD::Vertex*>& allVertices) const
 {
   // TODO: put this in a better place
   // Prepare objects needed to add MVF auxdata  to the xAOD::Vertex 
@@ -121,7 +121,7 @@ AdaptiveMultiVertexFitter::fit(std::vector<xAOD::Vertex*>& allVertices) const
             .perp() > m_maxDistToLinPoint) {
         ATH_MSG_DEBUG("Candidate has to be relinearized ");
         relinearizations[pThisVertex] = true;
-        prepareCompatibility(pThisVertex);
+        prepareCompatibility(ctx, pThisVertex);
       }
       ATH_MSG_DEBUG("Setting the Vertex to the initial constraint");
       // reput everything to the constraint level
@@ -146,7 +146,7 @@ AdaptiveMultiVertexFitter::fit(std::vector<xAOD::Vertex*>& allVertices) const
         // you added more tracks later on...
         if (not pThisTrack->ImpactPoint3dAtaPlane()) {
           const bool success = m_ImpactPoint3dEstimator->addIP3dAtaPlane(
-            *pThisTrack, *MvfFitInfo(*pThisVertex)->linearizationVertex());
+            ctx, *pThisTrack, *MvfFitInfo(*pThisVertex)->linearizationVertex());
           if (!success) {
             ATH_MSG_DEBUG(
               "Adding compatibility to vertex information failed. Newton "
@@ -311,7 +311,7 @@ AdaptiveMultiVertexFitter::collectWeights(
 }
 
 void
-AdaptiveMultiVertexFitter::addVtxToFit(xAOD::Vertex* newvertex) const
+AdaptiveMultiVertexFitter::addVtxToFit(const EventContext& ctx, xAOD::Vertex* newvertex) const
 {
   ATH_MSG_VERBOSE(" Now entered addVtxToFit ");
   // TODO: put this in a better place
@@ -327,7 +327,7 @@ AdaptiveMultiVertexFitter::addVtxToFit(xAOD::Vertex* newvertex) const
   std::vector<xAOD::Vertex*>
     allVerticesToFit;           // how many vertices do you expect?
   allVerticesToFit.reserve(10); // try 10
-  prepareCompatibility(newvertex);
+  prepareCompatibility(ctx, newvertex);
   //
   ATH_MSG_VERBOSE("Iterating on tracks");
   std::vector<xAOD::Vertex*> addedVerticesLastIteration;
@@ -360,11 +360,11 @@ AdaptiveMultiVertexFitter::addVtxToFit(xAOD::Vertex* newvertex) const
   } while (not addedVerticesLastIteration.empty());
   //
   // now fitting everything together
-  fit(allVerticesToFit);
+  fit(ctx, allVerticesToFit);
 }
 
 void
-AdaptiveMultiVertexFitter::prepareCompatibility(xAOD::Vertex* newvertex) const
+AdaptiveMultiVertexFitter::prepareCompatibility(const EventContext& ctx, xAOD::Vertex* newvertex) const
 {
   ATH_MSG_VERBOSE("Entered prepareCompatibility() ");
   // TODO: put this in a better place
@@ -376,8 +376,9 @@ AdaptiveMultiVertexFitter::prepareCompatibility(xAOD::Vertex* newvertex) const
   const Amg::Vector3D* seedPoint = MvfFitInfo(*newvertex)->seedVertex();
   ATH_MSG_VERBOSE("Now adding compatibility info to the track");
   // lambda adds impact point and 'ANDs' with previous success result
-  auto addImpactPoint = [this, seedPoint](const auto& thisVxTrack) {
-    return this->m_ImpactPoint3dEstimator->addIP3dAtaPlane(*thisVxTrack,
+  auto addImpactPoint = [this, &ctx, seedPoint](const auto& thisVxTrack) {
+    return this->m_ImpactPoint3dEstimator->addIP3dAtaPlane(ctx,
+                                                           *thisVxTrack,
                                                            *seedPoint);
   };
   const auto& vertexTracksAtVertex = VTAV(*newvertex);

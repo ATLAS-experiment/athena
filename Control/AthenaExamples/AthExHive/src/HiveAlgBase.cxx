@@ -37,9 +37,8 @@ StatusCode HiveAlgBase::initialize() {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 unsigned int
-HiveAlgBase::sleep() const {
+HiveAlgBase::sleep(const EventContext& ctx) const {
 
-  const auto& ctx = Gaudi::Hive::currentContext();
   ATHRNG::RNGWrapper* rngWrapper = m_rngSvc->getEngine(this);
   rngWrapper->setSeed( name(), ctx );
 
@@ -55,7 +54,7 @@ HiveAlgBase::sleep() const {
   }
 
   // accumulate data in the HiveExSvc
-  m_hes->add( name(),sleep );
+  m_hes->add( ctx, name(), sleep );
 
   return sleep;
 

@@ -18,5 +18,5 @@ atlas_install_python_modules( python/*.py )
 
 atlas_add_test(egammaCaloToolsConfig
                SCRIPT python -m egammaCaloTools.egammaCaloToolsConfig
-               POST_EXEC_SCRIPT nopost.sh)
+               POST_EXEC_SCRIPT noerror.sh)
 

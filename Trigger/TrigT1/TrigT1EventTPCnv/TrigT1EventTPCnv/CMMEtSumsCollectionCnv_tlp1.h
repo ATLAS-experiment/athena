@@ -5,7 +5,7 @@
 #define CMMEtSumsCollectionCNV_TLP1_H
 
 // Gaudi/Athena include(s):
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigT1EventTPCnv/CMMEtSumsCollection_tlp1.h"
 #include "TrigT1EventTPCnv/CMMEtSumsCollectionCnv_p1.h"
@@ -20,7 +20,7 @@
  *          to do the T/P conversion before/after writing/reading the CMMEtSums
  *          object.
  */
-class CMMEtSumsCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< CMMEtSumsCollectionCnv_p1, CMMEtSumsCollection_tlp1 > {
+class CMMEtSumsCollectionCnv_tlp1 : public TopLevelTPConverter< CMMEtSumsCollectionCnv_p1, CMMEtSumsCollection_tlp1 > {
 
 public:
   CMMEtSumsCollectionCnv_tlp1();

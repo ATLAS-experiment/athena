@@ -156,11 +156,11 @@ StatusCode CalibrationNtupleMakerTool::bookTree()
   
 }
 
-StatusCode CalibrationNtupleMakerTool::execute()
+StatusCode CalibrationNtupleMakerTool::execute(const EventContext& ctx)
 {
   m_h_events->Fill(0);
   
-  SG::ReadHandle<xAOD::EventInfo> evt(m_evt);
+  SG::ReadHandle<xAOD::EventInfo> evt(m_evt, ctx);
   if(!evt.isValid()) {
     ATH_MSG_FATAL( "Unable to retrieve Event Info" );
   } 

@@ -246,7 +246,7 @@ StatusCode CSC_RDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CSC_RDOAnalysis::execute() {
+StatusCode CSC_RDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In CSC_RDOAnalysis::execute()" );
 
   m_collID->clear();
@@ -291,7 +291,7 @@ StatusCode CSC_RDOAnalysis::execute() {
   m_zpos_vec->clear();
   m_charge_vec->clear();
 
-  SG::ReadHandle<CscRawDataContainer> p_CSCcont (m_inputKey);
+  SG::ReadHandle<CscRawDataContainer> p_CSCcont (m_inputKey, ctx);
   if(p_CSCcont.isValid()) {
     CscRawDataContainer::const_iterator cscCont_itr(p_CSCcont->begin());
     const CscRawDataContainer::const_iterator cscCont_end(p_CSCcont->end());
@@ -377,7 +377,7 @@ StatusCode CSC_RDOAnalysis::execute() {
   }
 
   // SimData
-  SG::ReadHandle<CscSimDataCollection> simDataMapCSC (m_inputTruthKey);
+  SG::ReadHandle<CscSimDataCollection> simDataMapCSC (m_inputTruthKey, ctx);
   if(simDataMapCSC.isValid()) {
     CscSimDataCollection::const_iterator sdo_itr(simDataMapCSC->begin());
     const CscSimDataCollection::const_iterator sdo_end(simDataMapCSC->end());

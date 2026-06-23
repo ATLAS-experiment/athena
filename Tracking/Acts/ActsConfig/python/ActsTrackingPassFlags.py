@@ -88,7 +88,7 @@ def createActsHeavyIonTrackingPassFlags():
 # Secondary ACTS Tracking pass for Large Radius Tracking
 def createActsLargeRadiusTrackingPassFlags():
     icf = createITkLargeD0TrackingPassFlags()
-    icf.extension = "ActsLargeRadius"
+    icf.extension = "LargeD0"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
@@ -236,11 +236,11 @@ def createEFValidateF150TrackingPassFlags():
 def createACTSInnerDetectorTrackingPassFlags():
     # flags for ACTS based InnerDetector silicon tracking
     icf = createTrackingPassFlags()
+    setActsDefaultTunings(icf)
     icf.extension               = ""
     icf.Xi2max = 25.0
     icf.Xi2maxNoAdd = 25.0
     # ACTS components
-    icf.addFlag("isSecondaryPass", False)
     icf.addFlag("doActsCluster", True)
     icf.addFlag("doActsSpacePoint", True)
     icf.addFlag("doActsSeed", True)

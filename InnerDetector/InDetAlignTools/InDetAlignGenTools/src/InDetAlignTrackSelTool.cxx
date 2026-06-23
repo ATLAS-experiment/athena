@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetAlignTrackSelTool.h
@@ -118,12 +118,12 @@ double InDetAlignTrackSelTool::Pt(const Trk::Track& track) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-int InDetAlignTrackSelTool::nShared(const Trk::Track& track) const {
+int InDetAlignTrackSelTool::nShared(const EventContext& ctx, const Trk::Track& track) const {
   ////////////////////////////////////////////////////////////////////////////////////////
   ATH_MSG_DEBUG( "in nShared()" ) ;
   int nshared=0, nshpix, nshsct;
 
-  xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(track);
+  xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(ctx, track);
   uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
 
   if (not trackPart){
@@ -146,12 +146,12 @@ int InDetAlignTrackSelTool::nShared(const Trk::Track& track) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-int InDetAlignTrackSelTool::nHoles(const Trk::Track& track) const {
+int InDetAlignTrackSelTool::nHoles(const EventContext& ctx, const Trk::Track& track) const {
   ////////////////////////////////////////////////////////////////////////////////////////
   ATH_MSG_DEBUG( "in nHoles() " ) ;
   int nholes=0, nhpix, nhsct;
 
-  xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(track);
+  xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(ctx, track);
   uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
 
   if (not trackPart){
@@ -198,7 +198,7 @@ double InDetAlignTrackSelTool::chi2Prob(const Trk::Track& track) const {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-int InDetAlignTrackSelTool::getStatus(const Trk::Track& track) const {
+int InDetAlignTrackSelTool::getStatus(const EventContext& ctx, const Trk::Track& track) const {
   ////////////////////////////////////////////////////////////////////////////////////////
   ATH_MSG_DEBUG( "in getStatus()" ) ;
   int stat=1, nholes, nshared;
@@ -217,13 +217,13 @@ int InDetAlignTrackSelTool::getStatus(const Trk::Track& track) const {
   }
 
   // number of holes
-  nholes = nHoles(track);
+  nholes = nHoles(ctx, track);
   if (nholes > m_maxHoles) {
     stat=0; 
   }
 
   // number of shared hits
-  nshared = nShared(track);
+  nshared = nShared(ctx, track);
   if (nshared > m_maxShared) {
     stat=0; 
   }

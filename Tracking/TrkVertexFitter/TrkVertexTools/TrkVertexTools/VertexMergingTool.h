@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
  #ifndef TrkVertexTools_VertexMergingTool_H
@@ -57,7 +57,7 @@
      *Merging  
      */
     virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
-    mergeVertexContainer(const xAOD::VertexContainer& MyVxCont) const override;
+    mergeVertexContainer(const EventContext& ctx, const xAOD::VertexContainer& MyVxCont) const override;
 
   private:
     

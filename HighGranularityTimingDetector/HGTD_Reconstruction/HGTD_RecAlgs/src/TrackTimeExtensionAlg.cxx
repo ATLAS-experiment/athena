@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TrackTimeExtensionAlg.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -169,7 +169,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
     const InDetSimDataCollection* sdo_collection,
     const HepMC::GenEvent* hs_event, bool skip_deco) const {
 
-  std::vector<bool> has_cluster_vec;
+  std::vector<char> has_cluster_vec;
   has_cluster_vec.reserve(n_hgtd_layers);
   std::vector<float> chi2_vec;
   chi2_vec.reserve(n_hgtd_layers);
@@ -179,11 +179,11 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
   time_vec.reserve(n_hgtd_layers);
   std::vector<int> truth_vec;
   truth_vec.reserve(n_hgtd_layers);
-  std::vector<bool> is_shadowed_vec;
+  std::vector<char> is_shadowed_vec;
   is_shadowed_vec.reserve(n_hgtd_layers);
-  std::vector<bool> is_merged_vec;
+  std::vector<char> is_merged_vec;
   is_merged_vec.reserve(n_hgtd_layers);
-  std::vector<bool> primary_exists_vec;
+  std::vector<char> primary_exists_vec;
   primary_exists_vec.reserve(n_hgtd_layers);
 
   for (unsigned short i = 0; i < n_hgtd_layers; i++) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENT_LOOP_ALGORITHM_HH
@@ -10,7 +10,7 @@
 
 #include <TNamed.h>
 #include <AsgMessaging/INamedInterface.h>
-#include <AsgTools/SgTEvent.h>
+#include <AsgTools/SgEvent.h>
 #include <EventLoop/StatusCode.h>
 
 class TH1;
@@ -79,7 +79,7 @@ namespace EL
     ///   out of memory I\n
     ///   job not configured for xAODs
   public:
-    asg::SgTEvent *evtStore() const;
+    asg::SgEvent *evtStore() const;
 
 
 
@@ -322,11 +322,11 @@ namespace EL
 
     /// \brief the value of \ref evtStore
   private:
-    mutable asg::SgTEvent *m_evtStorePtr = nullptr; //!
+    mutable asg::SgEvent *m_evtStorePtr = nullptr; //!
 
     /// \brief when configured, the object returned by \ref evtStore
   private:
-    mutable asg::SgTEvent m_evtStore; //!
+    mutable asg::SgEvent m_evtStore; //!
 
     /// \brief the message stream, if it has been instantiated
   private:

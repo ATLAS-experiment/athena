@@ -17,13 +17,14 @@
 #include "Acts/TrackFitting/MbfSmoother.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsInterop/Logger.h"
+#include "ActsCalibrators/SourceLinkHash.h"
 
 // ActsTrk
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "src/detail/ExpectedHitUtils.h"
+#include "ActsEvent/ExpectedHitUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
 
@@ -37,18 +38,7 @@
 #include <variant>
 
 namespace {
-  static std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
-    const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
-    const xAOD::UncalibratedMeasurement &uncalibMeas = ActsTrk::getUncalibratedMeasurement(atlasSourceLink);
-    return uncalibMeas.identifier();
-  }
-
-  static bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
-    const xAOD::UncalibratedMeasurement &uncalibMeas_a = ActsTrk::getUncalibratedMeasurement(a.get<ActsTrk::ATLASUncalibSourceLink>());
-    const xAOD::UncalibratedMeasurement &uncalibMeas_b = ActsTrk::getUncalibratedMeasurement(b.get<ActsTrk::ATLASUncalibSourceLink>());
-    return uncalibMeas_a.identifier() == uncalibMeas_b.identifier();
-  }
-
+ 
   static std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> getFirstMeasurementFromTrack(typename ActsTrk::detail::RecoTrackContainer::TrackProxy trackProxy) {
     std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> firstMeasurement {std::nullopt};
     for (auto st : trackProxy.trackStatesReversed()) {
@@ -292,7 +282,8 @@ namespace ActsTrk
     // Perform the track finding for all initial parameters.
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
       {
-        ATH_CHECK(findTracks(detContext,
+        ATH_CHECK(findTracks(ctx,
+                             detContext,
                              measurements,
                              measurementIndex,
                              sharedHits,
@@ -365,8 +356,8 @@ namespace ActsTrk
 
     // Start ambiguity resolution
     Acts::GreedyAmbiguityResolution::State state;
-    m_ambi->computeInitialState(actsTracksContainer, state, &sourceLinkHash,
-                                &sourceLinkEquality);
+    m_ambi->computeInitialState(actsTracksContainer, state, &detail::sourceLinkHash,
+                                &detail::sourceLinkEquality);
     m_ambi->resolve(state);
 
     // Copy the resolved tracks into the output container
@@ -431,7 +422,8 @@ namespace ActsTrk
   // === findTracks ==========================================================
 
   StatusCode
-  TrackFindingAlg::findTracks(const DetectorContextHolder& detContext,
+  TrackFindingAlg::findTracks(const EventContext &ctx,
+                              const DetectorContextHolder& detContext,
                               const detail::TrackFindingMeasurements &measurements,
                               const detail::MeasurementIndex &measurementIndex,
                               detail::SharedHitCounter &sharedHits,
@@ -448,7 +440,7 @@ namespace ActsTrk
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
-    auto [options, secondOptions, measurementSelector] = getDefaultOptions(detContext, measurements, &pSurface);
+    auto [options, secondOptions, measurementSelector] = getDefaultOptions(ctx, detContext, measurements, &pSurface);
 
     // ActsTrk::MutableTrackContainer tracksContainerTemp;
     Acts::VectorTrackContainer trackBackend;
@@ -489,7 +481,7 @@ namespace ActsTrk
         const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(useTopSp ? sp->elementIdList().back()
                                                                                    : sp->elementIdList().front());
         const Trk::Surface& atlas_surface = element->surface();
-        return m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+        return *m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
       };
 
 
@@ -754,7 +746,7 @@ namespace ActsTrk
                                                              return;
 
                                                            // Fill the duplicate selector
-                                                           auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+                                                           auto sl = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
                                                            duplicateSeedDetector.addMeasurement(sl, measurementIndex);
                                                          }); // end visitBackwards
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackSelectionProcessorTool.h"
@@ -58,7 +58,8 @@ Trk::TrackSelectionProcessorTool::finalize(){
     and then returns the tracks which have been selected*/
 
 const TrackCollection*  
-Trk::TrackSelectionProcessorTool::process(const TrackCollection* tracksCol,
+Trk::TrackSelectionProcessorTool::process(const EventContext& ctx,
+                                          const TrackCollection* tracksCol,
                                           Trk::PRDtoTrackMap *pPrdToTrackMap) const{
   //TODO: make sure the ownership; delete origin tracks from map?
   std::vector<const Track*> tracks;
@@ -71,7 +72,7 @@ Trk::TrackSelectionProcessorTool::process(const TrackCollection* tracksCol,
   if (!pPrdToTrackMap) {
      tmpPrdToTrackMap = m_assoTool->createPRDtoTrackMap();
      if (!m_assoMapName.key().empty()) {
-        SG::ReadHandle<Trk::PRDtoTrackMap> inputPrdMap(m_assoMapName);
+        SG::ReadHandle<Trk::PRDtoTrackMap> inputPrdMap(m_assoMapName, ctx);
         if (!inputPrdMap.isValid()) {
            ATH_MSG_ERROR("Failed to retrieve prd to track map " << m_assoMapName.key() );
         } else {
@@ -88,7 +89,7 @@ Trk::TrackSelectionProcessorTool::process(const TrackCollection* tracksCol,
   // - remove shared hits from all other tracks
   // - take next highest scoring tracks, and repeat 
   std::unique_ptr<ConstDataVector<TrackCollection> > result(std::make_unique<ConstDataVector<TrackCollection> >(SG::VIEW_ELEMENTS)); //TODO, old or new
-  solveTracks(trackScoreTrackMap, *pPrdToTrackMap, *result);
+  solveTracks(ctx, trackScoreTrackMap, *pPrdToTrackMap, *result);
   if (msgLvl(MSG::DEBUG)) dumpTracks(*result->asDataVector());
   return result.release()->asDataVector();
 }
@@ -140,13 +141,13 @@ Trk::TrackSelectionProcessorTool::addNewTracks(TrackScoreMap &trackScoreTrackMap
 }
 
 void
-Trk::TrackSelectionProcessorTool::solveTracks(TrackScoreMap &trackScoreTrackMap,
+Trk::TrackSelectionProcessorTool::solveTracks(const EventContext& ctx,
+                                              TrackScoreMap &trackScoreTrackMap,
                                               Trk::PRDtoTrackMap &prdToTrackMap,
                                               ConstDataVector<TrackCollection> &result) const
 {
   using namespace std;
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainerIn;
   if (!m_clusterSplitProbContainerIn.key().empty()) {
      splitProbContainerIn = SG::ReadHandle( m_clusterSplitProbContainerIn, ctx);

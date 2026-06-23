@@ -8,6 +8,7 @@
 #ifndef COLUMNAR_INTERFACES_COLUMN_INFO_H
 #define COLUMNAR_INTERFACES_COLUMN_INFO_H
 
+#include <cstdint>
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -129,6 +130,20 @@ namespace columnar
     /// containers), this will be empty and @ref variantLinkTargetNames
     /// should be used instead.
     std::string soleLinkTargetName {};
+
+
+    /// @brief for simple link columns: the CLID of the target container
+    ///
+    /// This is the class ID (from the CLASS_DEF macro) of the xAOD
+    /// container type the link points into, or 0 if it is not known.
+    /// Together with the StoreGate name of the target container it
+    /// determines the hashed keys (sgkeys) stored as `m_persKey` for
+    /// persistified element links, allowing those keys to be computed
+    /// and checked at runtime.
+    ///
+    /// This is deliberately a plain integer rather than `CLID` to avoid
+    /// a dependency on the EDM headers in this interface package.
+    std::uint32_t soleLinkTargetClid = 0;
 
 
     /// @brief whether this is a variant link column

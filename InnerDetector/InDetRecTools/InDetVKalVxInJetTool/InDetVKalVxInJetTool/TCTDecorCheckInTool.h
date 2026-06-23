@@ -16,8 +16,7 @@
 
 #include <vector>
 #include <string>
-#include "AthenaBaseComps/AthAlgorithm.h"
-//#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
  
@@ -28,22 +27,13 @@
 #include "InDetVKalVxInJetTool/InDetTrkInJetType.h"
 
 
-
-class TLorentzVector;
-
-
-  class TCTDecorCheckInTool : public AthAlgorithm
+  class TCTDecorCheckInTool : public AthReentrantAlgorithm
   {
    public:
-       /* Constructor */
-      TCTDecorCheckInTool(const std::string& type, ISvcLocator* pSvcLocator);
-       /* Destructor */
-      virtual ~TCTDecorCheckInTool();
-
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
       virtual StatusCode initialize() override;
-      virtual StatusCode execute() override;
-      virtual StatusCode finalize() override;
+      virtual StatusCode execute(const EventContext& ctx) const override;
 
 //------------------------------------------------------------------------------------------------------------------
 // Private data and functions

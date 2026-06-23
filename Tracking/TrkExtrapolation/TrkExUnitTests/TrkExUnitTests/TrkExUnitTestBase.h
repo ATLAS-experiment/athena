@@ -31,7 +31,7 @@ namespace Trk {
     StatusCode initialize();
 
     /** standard Athena-Algorithm method */
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
 
     /* specify the test here */
     virtual StatusCode runTest() = 0;

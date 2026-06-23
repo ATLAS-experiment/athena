@@ -52,6 +52,7 @@ class IBTaggingSelectionTool;
 #include <iostream> // For warnings in static functions
 #include <vector>
 #include <string>
+#include "CxxUtils/checker_macros.h"
 
 // Forward declarations
 namespace Trig {
@@ -245,7 +246,7 @@ namespace ST {
 
     // Apply the correction on a modifyable object
     virtual StatusCode FillMuon(xAOD::Muon& input, const float ptcut, const float etacut) = 0;
-    virtual StatusCode FillJet(xAOD::Jet& input, const bool doCalib = true, const bool isFat = false, const bool doLargeRdecorations = false) = 0;
+    virtual StatusCode FillJet(xAOD::Jet& input, const bool doCalib = true, const bool isFat = false, const bool doLargeRdecorations = false) ATLAS_NOT_THREAD_SAFE = 0;
     virtual StatusCode FillTrackJet(xAOD::Jet& input) = 0;
     virtual StatusCode FillTau(xAOD::TauJet& input) = 0;
     virtual StatusCode FillElectron(xAOD::Electron& input, const float etcut, const float etacut) = 0;

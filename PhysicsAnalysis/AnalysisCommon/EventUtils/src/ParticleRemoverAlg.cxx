@@ -172,9 +172,8 @@ StatusCode ParticleRemoverAlg::finalize()
 
 
 
-StatusCode ParticleRemoverAlg::execute()
+StatusCode ParticleRemoverAlg::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = getContext();
 
   ATH_MSG_DEBUG ("Executing " << name() << "...");
   // Let's first clear some stuff

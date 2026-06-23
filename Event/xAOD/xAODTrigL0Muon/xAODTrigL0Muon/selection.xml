@@ -1,0 +1,18 @@
+<!-- Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+
+  <!-- Run4 EDM -->
+
+  <!-- xAOD::SectorLogicCandData interface type(s). -->
+  <class name="xAOD::SectorLogicCandData_v1" />
+  <class name="xAOD::SectorLogicCandDataContainer_v1"
+         id="9c179620-f6a6-4cdd-92a5-a87f7e0459ba" />
+  <typedef name="xAOD::SectorLogicCandData" />
+  <typedef name="xAOD::SectorLogicCandDataContainer" />
+
+  <!-- xAOD::SectorLogicCandData auxiliary type(s). -->
+  <class name="xAOD::SectorLogicCandDataAuxContainer_v1"
+         id="e062dc04-27d8-4027-a816-66cfe40b7c9e" />
+  <typedef name="xAOD::SectorLogicCandDataAuxContainer" />
+
+</lcgdict>

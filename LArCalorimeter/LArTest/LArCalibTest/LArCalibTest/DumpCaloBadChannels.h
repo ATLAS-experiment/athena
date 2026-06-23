@@ -18,7 +18,7 @@ class DumpCaloBadChannels : public AthAlgorithm
   ~DumpCaloBadChannels();
 
   StatusCode initialize(); 
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
 
  private:

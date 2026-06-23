@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardRegionGeoModelFactory.h"
@@ -258,6 +258,9 @@ void ForwardRegionGeoModelFactory::constructElements(GeoPhysVol *fwrPhys,std::ve
             loadedDataFile[i][xStart] = num2str(pointMagStart[0]/1000);
             loadedDataFile[i][yStart] = num2str(pointMagStart[1]/1000);
             loadedDataFile[i][zStart] = num2str(pointMagStart[2]/1000);
+            if (not std::in_range<std::size_t>(i-1)){
+              throw std::runtime_error("ForwardRegionGeoModelFactory::constructElements: i-1 invalid conversion to std::size_t for index into vector.");
+            }
             loadedDataFile[i-1][zEnd] = num2str(sgn(pointMagStart[2])*(abs(pointMagStart[2])-dL)/1000);
 
             loadedDataFile[i][xEnd] = num2str(pointMagEnd[0]/1000);

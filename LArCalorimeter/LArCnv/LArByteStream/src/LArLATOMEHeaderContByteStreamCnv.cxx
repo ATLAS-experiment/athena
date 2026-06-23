@@ -41,14 +41,13 @@ StatusCode
 LArLATOMEHeaderContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pObj) const {
   ATH_MSG_VERBOSE("Executing CreateObj method for  LArLATOMEHeaderContainer");
 
-  ByteStreamAddress *pRE_Addr= dynamic_cast<ByteStreamAddress*>(pAddr); //Cast from OpaqueAddress to ByteStreamAddress
-  if (!pRE_Addr)
-    {ATH_MSG_ERROR("dynamic_cast of OpaqueAdress to ByteStreamAddress failed!");
-     return StatusCode::FAILURE;
-    }
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
 
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  m_rdpSvc->getROBData(Gaudi::Hive::currentContext(), LArByteStream::s_allROBIDs_LATOME, robFrags );
+  m_rdpSvc->getROBData(ctx, LArByteStream::s_allROBIDs_LATOME, robFrags );
   const std::string& key = *(pAddr->par()); // Get key used in the StoreGateSvc::retrieve function
   // get gain and pass to convert function.
   std::unique_ptr<LArLATOMEHeaderContainer> header_coll=std::make_unique<LArLATOMEHeaderContainer>(); 

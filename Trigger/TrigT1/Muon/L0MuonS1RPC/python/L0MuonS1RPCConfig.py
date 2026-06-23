@@ -27,9 +27,6 @@ def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
     monTool.defineHistogram('track_input_eta', path='EXPERT', type='TH1F', title=';#eta_{#mu}^{truth};Muons', xbins=50, xmin=-3, xmax=3)
 
     alg.MonTool = monTool
-    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
-    result.merge(setupHistSvcCfg(flags, outFile=f"{name}.root", outStream="EXPERT"))
-
 
     result.addEventAlgo(alg)
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
@@ -39,10 +36,10 @@ def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
   
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
     from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
-    parser.set_defaults(inputFile= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"])
+    parser.set_defaults(inputFile= MuonPhaseIITestDefaults.RDO_R3)
     parser.set_defaults(nEvents = 20)
 
     args = parser.parse_args()
@@ -63,6 +60,9 @@ if __name__ == "__main__":
     acc.merge(L0MuonRPCSimCfg(flags,
                              name = "L0MuonRPCSim",
                              OutputLevel = DEBUG))
+
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    acc.merge(setupHistSvcCfg(flags, outFile="L0MuonRPCSim.root", outStream="EXPERT"))
 
     executeTest(acc)
    

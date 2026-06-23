@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonG4SD )
@@ -37,7 +37,7 @@ function( _add_test name )
       SOURCES test/${name}.cxx
       INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
       LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${GTEST_LIBRARIES} TestTools MuonG4SDLib StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth CxxUtils
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
    set_target_properties( MuonG4SD_${name}
       PROPERTIES
       INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

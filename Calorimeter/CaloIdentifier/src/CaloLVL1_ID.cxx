@@ -839,7 +839,7 @@ int   CaloLVL1_ID::init_neighbors()
 	}
       
       // index for the subsequent arrays
-      unsigned short index = hash_id;
+      IdentifierHash::value_type index = hash_id;
       assert (hash_id < m_prev_phi_vec.size());
       assert (hash_id < m_next_phi_vec.size());
       assert (hash_id < m_prev_eta_vec.size());

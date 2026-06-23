@@ -206,9 +206,13 @@ def STDM7CoreCfg(flags, name_tag='STDM7', StreamName='StreamDAOD_STDM7', Trigger
                                             "AntiKt4EMPFlowJets",
                                             "MET_Baseline_AntiKt4EMTopo",
                                             "MET_Baseline_AntiKt4EMPFlow",
-                                            "TauJets",
+                                            "TauJets"
                                             ]
-    
+
+    if flags.Tracking.doLowPtRoI:
+        STDM7SlimmingHelper.SmartCollections += ["InDetLowPtRoITrackParticles",
+                                                 "RoIVerticesLowPtRoI"]
+
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Tight_Vertices"]
@@ -223,25 +227,34 @@ def STDM7CoreCfg(flags, name_tag='STDM7', StreamName='StreamDAOD_STDM7', Trigger
     # IFF extra content
     from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
     STDM7SlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
-    
+
+    # TauJets extra content
+    STDM7SlimmingHelper.ExtraVariables += ["TauJets.dRmax.etOverPtLeadTrk"]
+
+    # Tracks extra content
+    STDM7SlimmingHelper.ExtraVariables += ["InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers"]
+    if flags.Tracking.doLowPtRoI:
+        STDM7SlimmingHelper.ExtraVariables += ["InDetLowPtRoITrackParticles.numberOfTRTHits.numberOfTRTOutliers"]
+        
     # Truth extra content
     if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(STDM7SlimmingHelper)
-        STDM7SlimmingHelper.AllVariables += ['TruthLHEParticles', 'TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+        STDM7SlimmingHelper.AllVariables += ["TruthParticles", "TruthVertices"]
         STDM7SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
                                                "Muons.TruthLink",
+                                               "TauJets.TruthLink",
                                                "Photons.TruthLink",
                                                "TruthPrimaryVertices.t.x.y.z",
-                                               "EventInfo.hardScatterVertexLink.timeStampNSOffset",
-                                               "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
-                                               "TauJets.dRmax.etOverPtLeadTrk",
+                                               "InDetTrackParticles.truthParticleLink.truthMatchProbability"
                                                ]
+        if flags.Tracking.doLowPtRoI:
+            STDM7SlimmingHelper.ExtraVariables += ["InDetLowPtRoITrackParticles.truthParticleLink.truthMatchProbability.truthType.truthOrigin"]
  
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
-        STDM7SlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
+        STDM7SlimmingHelper.AllVariables += ["TruthTausWithDecayParticles","TruthTausWithDecayVertices"]
 
     # STDM7 needs AFP information - hits only available in data
     else:

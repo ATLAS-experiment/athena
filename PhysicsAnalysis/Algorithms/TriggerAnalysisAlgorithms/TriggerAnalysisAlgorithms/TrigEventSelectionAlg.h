@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -8,12 +8,13 @@
 #define TRIGGER_ANALYSIS_ALGORITHMS__TRIG_EVENT_SELECTION_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <AsgTools/PropertyWrapper.h>
 #include <AsgTools/ToolHandle.h>
 #include <EventBookkeeperTools/FilterReporterParams.h>
 #include <TrigDecisionInterface/ITrigDecisionTool.h>
 #include <TrigDecisionInterface/Conditions.h>
-#include <AsgTools/PropertyWrapper.h>
+#include <AsgTools/PropertyWrapper.h> //Gaudi::Property
+#include <vector>
+#include <string>
 
 namespace CP
 {

@@ -73,7 +73,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         virtual ~FPGATrackSimLogicalHitsProcessAlg() = default;
 
         virtual StatusCode initialize() override;
-        virtual StatusCode execute() override;
+        virtual StatusCode execute(const EventContext& ctx) override;
         virtual StatusCode finalize() override;
 
     private:
@@ -153,6 +153,7 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<int> m_region {this, "Region", 0, "Region ID to assign to tracks"};
         Gaudi::Property<bool> m_writeInputBranches {this, "writeInputBranches", true, "If set to false, never write input branches"};
         Gaudi::Property<int> m_writeRegion {this,"writeRegion", -1, "Only output selected region, default is -1 which means not requirement"};
+        Gaudi::Property<bool> m_noHitFilter{this, "noHitFilter", false, "Disable filtering of hits"};
 
         // Properties for the output header tool.
         Gaudi::Property<std::string> m_sliceBranch  {this, "SliceBranchName", "LogicalEventSlicedHeader", "Name of the branch for sliced hits in output ROOT file." };

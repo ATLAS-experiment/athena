@@ -94,7 +94,7 @@ namespace VKalVrtAthena {
     virtual ~VrtSecInclusive() override;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode initEvent();
 
   private:
@@ -431,7 +431,7 @@ namespace VKalVrtAthena {
     StatusCode refitAndSelectGoodQualityVertices( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** get secondary vertex impact parameters **/
-    bool getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors);
+    bool getSVImpactParameters(const EventContext& ctx, const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors);
 
     enum TrkParameter    { k_d0=0, k_z0=1, k_theta=2, k_phi=3, k_qOverP=4 ,k_nTP=5 };
     enum TrkParameterUnc { k_d0d0=0, k_z0z0=1, k_nTPU=2 };
@@ -449,22 +449,22 @@ namespace VKalVrtAthena {
     void printWrkSet(const std::vector<WrkVrt> *WrkVrtSet, const std::string& name);
 
     /** refit the vertex. */
-    StatusCode refitVertex( WrkVrt& );
+    StatusCode refitVertex( const EventContext&, WrkVrt& );
     StatusCode refitVertex( WrkVrt&, Trk::IVKalState& istate );
 
     /** refit the vertex with suggestion */
-    StatusCode refitVertexWithSuggestion( WrkVrt&, const Amg::Vector3D& );
+    StatusCode refitVertexWithSuggestion( const EventContext& ctx, WrkVrt&, const Amg::Vector3D& );
     StatusCode refitVertexWithSuggestion( WrkVrt&, const Amg::Vector3D&, Trk::IVKalState& istate );
 
     /** attempt to improve the vertex chi2 by removing the most-outlier track one by one until
         the vertex chi2 satisfies a certain condition. */
-    double improveVertexChi2( WrkVrt& );
+    double improveVertexChi2( const EventContext&, WrkVrt& );
 
     static void removeTrackFromVertex(std::vector<WrkVrt>*,
                                       std::vector< std::deque<long int> > *,
                                       const long int & ,const long int & );
 
-    StatusCode disassembleVertex(std::vector<WrkVrt> *, const unsigned& vertexIndex );
+    StatusCode disassembleVertex(const EventContext& ctx, std::vector<WrkVrt> *, const unsigned& vertexIndex );
 
     void trackClassification(std::vector< WrkVrt >* , std::map< long int, std::vector<long int> >& );
 
@@ -488,7 +488,7 @@ namespace VKalVrtAthena {
     static double findMinVerticesNextPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>& );
 
     /** the 2nd vertex is merged into the 1st vertex. A destructive operation. */
-    StatusCode mergeVertices( WrkVrt& destination, WrkVrt& source );
+    StatusCode mergeVertices( const EventContext& ctx, WrkVrt& destination, WrkVrt& source );
 
     enum mergeStep { RECONSTRUCT_NTRK, REASSEMBLE, SHUFFLE1, SHUFFLE2, SHUFFLE3, FINAL };
 
@@ -573,7 +573,7 @@ namespace VKalVrtAthena {
     //
 
     template<class LeptonFlavor>
-    StatusCode augmentDVimpactParametersToLeptons( const std::string& containerName );
+    StatusCode augmentDVimpactParametersToLeptons( const EventContext& ctx, const std::string& containerName );
 
     /** lock decorations at the end of the algorithm */
     void lockTrackDecorations( const xAOD::TrackParticle* trk, bool onlySelection ) const;

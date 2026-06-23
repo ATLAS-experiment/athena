@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONMONITORING_TRIGMUONMONITORALGORITHM_H
@@ -48,10 +48,11 @@ class TrigMuonMonitorAlgorithm : public AthMonitorAlgorithm {
   /**
    * @brief Function that defines the event selection for anlayses
    * Users should reimlement in a subclass if needed.
+   * @param ctx @c EventContext provided by athenaMT
    * @param muons Offline muons in the MuonContainer
    * @param probes List of offline muons that are used in analyses
    */
-  virtual StatusCode selectMuons(SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const;
+  virtual StatusCode selectMuons(const EventContext& ctx, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const;
 
   /**
    * @brief Function that fills variables by just retrieving containers of trigger objects.
@@ -136,7 +137,9 @@ class TrigMuonMonitorAlgorithm : public AthMonitorAlgorithm {
   /// List of trigger chains that are monitored in @c fillVariablesPerChain and @c fillVariablesPerOfflineMuonPerChain
   Gaudi::Property<std::vector<std::string> > m_monitored_chains {this, "MonitoredChains", {}, "Trigger chains that are monitored"};
   /// Requirement for the offline muon type considered in analyses
-  Gaudi::Property<int> m_muontype {this, "MuonType", xAOD::Muon::MuonType::Combined, "MuonType used for monitoring"};
+  Gaudi::Property<int> m_muontype {this, "MuonType", 
+                                   static_cast<int>(xAOD::Muon::MuonType::Combined), 
+                                   "MuonType used for monitoring"};
   /// Name of monitored group
   Gaudi::Property<std::string> m_group {this, "Group", "", "Histogram group"};
 

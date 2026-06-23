@@ -34,7 +34,7 @@ class SegmentCnv_p1
      void persToTrans( const Trk::Segment_p1 *persObj, Trk::Segment   *transObj, MsgStream &log );
      void transToPers( const Trk::Segment   *transObj, Trk::Segment_p1 *persObj, MsgStream &log );
   
-     virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv ) {
+     virtual void initPrivateConverters( TopLevelTPCnvBase *topCnv ) {
        m_containedMeasBasesCnv.setTopConverter( topCnv, 0 );
      }
    

@@ -2,14 +2,7 @@
   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -31,7 +24,7 @@
 #include <RootCoreUtils/ThrowMsg.h>
 #include <RootCoreUtils/UnitTestDir.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
+#include <memory>
 
 //
 // main program
@@ -51,10 +44,9 @@ int main ()
     std::string tree ("physics");
 
     EL::DirectDriver driver;
-    std::unique_ptr<SH::SampleLocal> mysample (new SH::SampleLocal ("dataset"));
-    mysample->add (input.Data());
-    mysample->meta()->setString ("nc_tree", tree);
-    SH::SamplePtr sample = mysample.release();
+    auto sample = std::make_shared<SH::SampleLocal> ("dataset");
+    sample->add (input.Data());
+    sample->meta()->setString ("nc_tree", tree);
 
     EL::Job job;
     {

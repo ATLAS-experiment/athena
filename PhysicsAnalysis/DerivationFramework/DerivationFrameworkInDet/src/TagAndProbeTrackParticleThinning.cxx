@@ -41,10 +41,9 @@ StatusCode DerivationFramework::TagAndProbeTrackParticleThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::TagAndProbeTrackParticleThinning::doThinning() const
+StatusCode DerivationFramework::TagAndProbeTrackParticleThinning::doThinning(const EventContext& ctx) const
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve main TrackParticle collection
   SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles
@@ -113,7 +112,7 @@ StatusCode DerivationFramework::TagAndProbeTrackParticleThinning::doThinning() c
 
     // probe track keeping
     for (const auto muon : *muons) {
-      const auto* muon_trk = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      const auto* muon_trk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
 
       if( muon_trk ) {
 	if( muon_trk == trk) continue;

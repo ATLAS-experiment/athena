@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef OUTPUTSTREAMSEQUENCERSVC_H
@@ -14,6 +14,7 @@
 #include "Gaudi/Property.h"  // no forward decl: typedef
 #include "GaudiKernel/IIncidentListener.h"
 #include "AthenaBaseComps/AthService.h"
+#include "AthenaKernel/SlotSpecificObj.h"
 
 #include <memory>
 #include <map>
@@ -51,7 +52,7 @@ public: // Non-static members
    virtual void handle(const Incident& /*inc*/) override final;
 
    /// Returns sequenced file name for output stream
-   std::string buildSequenceFileName(const std::string&);
+   std::string buildSequenceFileName(const EventContext& ctx, const std::string&);
    void publishRangeReport(const std::string& outputFile);
    RangeReport_ptr getRangeReport();
 
@@ -59,10 +60,10 @@ public: // Non-static members
    std::string  incidentName() const            { return m_incidentName.value(); }
 
    /// The current Event Range ID (only one range is returned)
-   std::string  currentRangeID() const;
+   std::string  currentRangeID(const EventContext& ctx) const;
 
    /// set the RangeID (possibly temporarily) so the right Range Filename may be generated
-   std::string  setRangeID(const std::string & rangeID);
+   std::string  setRangeID(const EventContext& ctx, const std::string & rangeID);
 
    /// Is the service in active use? (true after the first range incident is handled)
    bool         inUse() const;
@@ -89,7 +90,7 @@ private: // data
    std::string  m_lastIncident;
 
    /// EventRange ID for all slots
-   std::vector<std::string>   m_rangeIDinSlot;
+   SG::SlotSpecificObj<std::string, SG::InvalidSlot::Enabled> m_rangeIDinSlot;
 
 private: // properties
    /// SequenceIncidentName, incident name for triggering file sequencing.

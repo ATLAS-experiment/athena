@@ -18,7 +18,7 @@ class ALFA_DigiAlg: public AthAlgorithm
   ALFA_DigiAlg(const std::string& name, ISvcLocator* pSvcLocator);
  
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
    
  private:

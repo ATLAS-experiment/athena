@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# @brief: Trigger translator to setup arguments for athenaHLT
+# @brief: Trigger translator to setup arguments for athenaHLT/EF
 # @details: to be used with Trig_tf_reco.py and trigRecoExe.py
 # @author: Mark Stockton
 
@@ -15,13 +15,13 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 import logging
 msg = logging.getLogger("PyJobTransforms." + __name__)
 
-# create option dict needed by athenaHLT from runargs
+# create option dict from runargs
 def getOption(runArgs, name, substep, first, output):
 
-    # Dictionary to be filled to run athenaHLT from
+    # Dictionary to be filled
     option = {}
 
-    # Dictionary defining args: key=transform value=athenaHLT
+    # Dictionary mapping transform to command line args:
     tfToAthenaHLT = {}
     tfToAthenaHLT['inputBS_RDOFile'] = 'file'
     tfToAthenaHLT['maxEvents'] = 'number-of-events'
@@ -47,7 +47,7 @@ def getOption(runArgs, name, substep, first, output):
         msg.info('BS output needed, but not defined. Saving as temp.BS, but not avaialable to other steps')
         option['save-output'] = "temp.BS"
     else:
-        msg.warning('No BS filename defined, athenaHLT will not save the output')
+        msg.warning('No BS filename defined, will not save the output')
 
     # Added support for multithread option of trfArgs
     from PyJobTransforms.trfMTTools import detectAthenaMTThreads
@@ -92,11 +92,11 @@ def getOption(runArgs, name, substep, first, output):
         msg.info('maxEvents not defined, explicitly set to -1')
 
     # Skips all the other runArgs (extra, literal, etc)
-    # as these are for running with athena not athenaHLT
+    # as these are for running with athena only
 
     return option
 
-# return option list to be used as command line for athenaHLT jobs
+# return option list to be used as command line
 # In Run2 this was handled by producing runTranslate file which is no longer needed
 def getTranslated(runArgs, name, substep, first, output):
     option = getOption(runArgs, name, substep, first, output)

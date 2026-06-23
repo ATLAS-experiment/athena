@@ -1,20 +1,18 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSensitiveDetectorsR4/Utils.h"
 
 #include "MdtSensitiveDetector.h"
 
-
-#include <MCTruth/TrackHelper.h>
+#include <GeneratorObjects/HepMcParticleLink.h>
 
 #include <limits>
 #include <iostream>
 #include <GeoPrimitives/CLHEPtoEigenConverter.h>
 #include <GeoModelKernel/throwExcept.h>
 #include <GaudiKernel/SystemOfUnits.h>
-#include <StoreGate/ReadHandle.h>
 
 using namespace MuonGMR4;
 using namespace CxxUtils;
@@ -60,7 +58,6 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
 
     const ActsTrk::GeometryContext gctx{getGeoContext()};
 
-  
     const Identifier HitID = getIdentifier(gctx, reEle, touchHist);
     if (!HitID.is_valid()) {
         ATH_MSG_VERBOSE("No valid hit found");
@@ -99,10 +96,8 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
         }
     }
   
-    TrackHelper trkHelp{currentTrack};
-
     ATH_MSG_VERBOSE(" Dumping of hit "<<m_detMgr->idHelperSvc()->toString(HitID)
-                  <<", barcode: "<<trkHelp.GenerateParticleLink().barcode()
+                  <<", barcode: "<<genParticleLink(currentTrack).barcode()
                   <<", "<<(*currentTrack) <<", driftCircle: "<<Amg::toString(driftHit, 4)
                   <<", direction "<<Amg::toString(trackLocDir, 4) <<" to SimHit container ahead. ");
     saveHit(HitID, driftHit, trackLocDir, globalTime, aStep);

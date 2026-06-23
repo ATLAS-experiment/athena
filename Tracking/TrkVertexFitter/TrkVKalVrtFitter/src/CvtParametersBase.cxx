@@ -234,7 +234,6 @@ namespace Trk {
       counter++;
       if(perGlobalPos.perp()<rxyMin){
         rxyMin = perGlobalPos.perp();
-        state.m_globalFirstHit=nullptr;
       }
     }
 

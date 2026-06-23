@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_RAWCOLLECTIONHEAD_H
@@ -39,28 +39,28 @@ private:
   ///
   /// In the following record: `xxxx xxxx xxxx xxxx xLLL LLxx xxxx xxxx`
   /// it means bits marked with `L`.
-  uint16_t m_lvl1Id;
+  uint16_t m_lvl1Id{};
 
   /// @brief Value of 5-8 most significant bits
   ///
   /// In the following record: `xxxx LLLL xxxx xxxx xxxx xxxx xxxx xxxx`
   /// it means bits marked with `L`. Contains information about outlink.
-  uint16_t m_link;
+  uint16_t m_link{};
   
   /// @brief Value of the 16 least significant bit
   ///
   /// In the following record: `xxxx xxxx xxxx xxxx Fxxx xxxx xxxx xxxx`
   /// it means bits marked with `F`.
-  uint32_t m_frontendFlag;
+  uint32_t m_frontendFlag{};
   
   /// @brief Value of 10 least significant bits
   ///
   /// In the following record: `xxxx xxxx xxxx xxxx xxxx xxBB BBBB BBBB`
   /// it means bits marked with `B`. Contains information about bunch crossing ID.
-  uint16_t m_bcId;
+  uint16_t m_bcId{};
 
   /// ROB in from which the collection was read
-  uint32_t m_robId;
+  uint32_t m_robId{};
 };
 
 #endif 

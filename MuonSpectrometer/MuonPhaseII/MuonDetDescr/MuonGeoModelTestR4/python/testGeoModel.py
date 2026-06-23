@@ -16,20 +16,46 @@ class MuonPhaseIITestDefaults:
     ### Hits parsed through the R4 MS-only ATLAS layout
     HITS_PG_R4_MSOnly = []
     ### BS file taken in MD3 2025 with a pile-up of >120
-    DATA_BS = [
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-11._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-12._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-13._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-14._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-15._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-16._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-17._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-18._0001.data",
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-19._0001.data"]
-    ###
-    RDO_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
-    ###
-    RDO_R4 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R4.pool.root"]
+
+    DATA_BS = [f"root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/MuonRecRTT/{fileName}" for fileName in [
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-11._0001.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-11._0002.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-12._0001.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-12._0002.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-20._0001.data",
+                            "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-20._0002.data",
+                        ]
+    ]
+    ### First files taken from https://gitlab.cern.ch/atlas-nextgen/work-package-2.5/SampleProduction/-/blob/master/FileLists/RDO_MU0/R3/999992.PG_DiMuon_Pt10to100.txt
+    RDO_R3 = [
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/9c/69/group.det-muon.48959424.EXT0._000002.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/af/b4/group.det-muon.48959424.EXT0._000003.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/d8/a1/group.det-muon.48959424.EXT0._000004.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/ea/62/group.det-muon.48959424.EXT0._000005.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/53/6e/group.det-muon.48959424.EXT0._000006.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/03/66/group.det-muon.48959424.EXT0._000007.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/30/58/group.det-muon.48959424.EXT0._000008.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/95/1e/group.det-muon.48959424.EXT0._000009.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/e7/64/group.det-muon.48959424.EXT0._000010.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/03/cc/group.det-muon.48959424.EXT0._000011.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/49/61/group.det-muon.48959424.EXT0._000012.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/74/ed/group.det-muon.48959424.EXT0._000013.RDO.pool.root",
+    ]
+    ### First files taken from (https://gitlab.cern.ch/atlas-nextgen/work-package-2.5/SampleProduction/-/blob/master/FileLists/RDO_MU0/R4/999992.PG_DiMuon_Pt10to100.txt)
+    RDO_R4 = [   
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/8b/de/group.det-muon.48959425.EXT0._000002.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/4f/ed/group.det-muon.48959425.EXT0._000007.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/3d/10/group.det-muon.48959425.EXT0._000009.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/28/62/group.det-muon.48959425.EXT0._000010.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/5e/26/group.det-muon.48959425.EXT0._000011.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/af/cd/group.det-muon.48959425.EXT0._000012.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/88/76/group.det-muon.48959425.EXT0._000015.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/54/fe/group.det-muon.48959425.EXT0._000016.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/4e/b4/group.det-muon.48959425.EXT0._000017.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/e3/d4/group.det-muon.48959425.EXT0._000022.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/ee/b4/group.det-muon.48959425.EXT0._000023.RDO.pool.root",
+        "root://eosatlas.cern.ch:1094//eos/atlas/atlaslocalgroupdisk/dq2/rucio/group/det-muon/75/c9/group.det-muon.48959425.EXT0._000027.RDO.pool.root",
+        ]
     ###
     ###     Layout files
     ###
@@ -38,6 +64,9 @@ class MuonPhaseIITestDefaults:
     GEODB_R3 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00.db"
     ### R3 MS only layout
     GEODB_R3MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MSOnly.db"
+    ### R3 MTech format - This file format will trigger the setup of the legacy MuonGeoModel and
+    ###                   not of the Phase II software    
+    GEODB_MTECH = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MTech.db"
     ### R4 ATLAS layout
     GEODB_R4 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db"
     ### R4 MS only layout
@@ -71,6 +100,8 @@ def SetupArgParser():
     parser.add_argument("--eventPrintoutLevel", type=int, help="Interval of event heartbeat printouts from the loop manager", default = 1)
     parser.add_argument("--localMdtMezzJSON", default="", help="")
     parser.add_argument("--localMdtCablingJSON", default="", help="")
+    parser.add_argument("--passiveMaterialMaps", default = "", help="Root file with the material maps on the surfaces")
+    parser.add_argument("--noPlots", help="Disable the pdf dumps of the geo tester", action='store_true', default = False)
     return parser
 
 def setupServicesCfg(flags):
@@ -91,16 +122,21 @@ def setupServicesCfg(flags):
     result.merge(MuonIdHelperSvcCfg(flags))
     return result
 
-def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", localMezzanineJSON="", localCablingJSON="",**kwargs):
+def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", localMezzanineJSON="", localCablingJSON="", doPlots=True,**kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
     result.merge(MDTCablingConfigCfg(flags,MezzanineJSON=localMezzanineJSON, CablingJSON=localCablingJSON))
+    if not doPlots:
+        kwargs["visualizeTubes"] = False
+        kwargs["visualizeStaggering"] = False
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", **kwargs):
+def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", doPlots=True,**kwargs):
     result = ComponentAccumulator()
+    if not doPlots:
+        kwargs["visualizePlanes"] = False
     the_alg = CompFactory.MuonGMR4.GeoModelRpcTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -175,10 +211,14 @@ def setupGeoR4TestCfg(args,  flags = None):
             flags.Input.Files += [ "{dir}/{file}".format(dir=fileArg, file=y) for y in listdir(fileArg) ]
         else:
             if fileArg[fileArg.rfind(".")+1 :]not in ["txt", "conf"]:
-                 flags.Input.Files+=[fileArg]
+                    flags.Input.Files+=[fileArg]
             else:
                 with open(fileArg) as inStream:
-                   flags.Input.Files+=[ line.strip() for line in inStream if line[0]!='#'] 
+                   #Check if the input is a string of comma separated files, and if it is, split it into a list
+                   if isinstance(inStream, str) and "," in inStream:
+                       flags.Input.Files += inStream.split(",")
+                   else:
+                      flags.Input.Files+=[ line.strip() for line in inStream if line[0]!='#'] 
 
     flags.Exec.FPE= 500
     flags.Exec.EventPrintoutInterval = 500
@@ -206,7 +246,10 @@ def setupGeoR4TestCfg(args,  flags = None):
 
     flags.GeoModel.SQLiteDB = True
     configureDefaultTagsCfg(flags)
-    
+
+    if args.passiveMaterialMaps:        
+        flags.Muon.trackGeometryMaterialMap = args.passiveMaterialMaps
+  
     flags.Detector.GeometryBpipe = False
     ### Inner detector
     flags.Detector.GeometryBCM = False
@@ -237,9 +280,10 @@ def setupGeoR4TestCfg(args,  flags = None):
         flags.Detector.GeometryRPC = False    
     if args.noMdt:
         flags.Detector.GeometryMDT = False
-
-    flags.Acts.TrackingGeometry.UseBlueprint = True
-
+    #### Flags from ACTS are not defined in AthSimulation.
+    try:
+        flags.Acts.TrackingGeometry.UseBlueprint = True
+    except AttributeError: pass
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True
     flags.Scheduler.ShowDataFlow = True
@@ -266,9 +310,6 @@ def setupGeoR4TestCfg(args,  flags = None):
 
     return flags, cfg
 
-def executeTest(cfg):
-    cfg.printConfig(withDetails=True, summariseProps=True)
-    if not cfg.run().isSuccess(): exit(1)
 
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
@@ -301,6 +342,7 @@ if __name__=="__main__":
                                          localMezzanineJSON=args.localMdtMezzJSON,
                                          localCablingJSON=args.localMdtCablingJSON,
                                          ReadoutSideXML="ReadoutSides.xml",
+                                         doPlots=not args.noPlots,
                                          ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryRPC: 
@@ -313,6 +355,7 @@ if __name__=="__main__":
             cfg.merge(GeoModelRpcTestCfg(flags, 
                                          TestStations = [ch for ch in chambToTest if ch[0] == "B"],
                                          ExcludeStations = [ch for ch in chambToExclude if ch[0] == "B"],
+                                         doPlots=not args.noPlots,
                                          ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
 
     if flags.Detector.GeometryTGC:
@@ -350,5 +393,5 @@ if __name__=="__main__":
                                           TestStations = [ch for ch in chambToTest if ch[0] == "S"],
                                           ExcludeStations = [ch for ch in chambToExclude if ch[0] == "S"],
                                           ExtraInputs=[( 'MuonGM::MuonDetectorManager' , 'ConditionStore+MuonDetectorManager' )]))
-    
+    from MuonConfig.MuonConfigUtils import executeTest
     executeTest(cfg)

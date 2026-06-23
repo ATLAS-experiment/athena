@@ -1,3 +1,4 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Constants import DEBUG
 
 # add in the Algortihm to build a  LArStrip Neighborhood container

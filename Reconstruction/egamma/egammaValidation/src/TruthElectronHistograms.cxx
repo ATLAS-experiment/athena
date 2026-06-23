@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthElectronHistograms.h"
-
+#include "xAODTruth/TruthParticle.h"
+#include "xAODEgamma/Electron.h"
 #include "AsgTools/AnaToolHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 

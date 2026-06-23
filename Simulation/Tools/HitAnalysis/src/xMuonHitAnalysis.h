@@ -19,7 +19,7 @@ namespace MuonValR4{
             using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
             virtual StatusCode initialize() override final;
-            virtual StatusCode execute() override final;
+            virtual StatusCode execute(const EventContext& ctx) override final;
         private:
             SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_inputKey{this, "InputKey", ""};
             // ACTS geometry context

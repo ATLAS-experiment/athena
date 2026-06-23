@@ -85,8 +85,8 @@ StatusCode LArShape2Ntuple::stop() {
 
 
   unsigned cellCounter=0;  
-  for ( unsigned igain=CaloGain::LARHIGHGAIN; 
-	igain<CaloGain::LARNGAIN ; ++igain )
+  for ( int igain=CaloGain::LARHIGHGAIN; 
+	igain<m_NGains.value() ; ++igain )
   {
     for (HWIdentifier chid : m_onlineId->channel_range()) {
       if (!cabling->isOnlineConnected(chid)) continue;

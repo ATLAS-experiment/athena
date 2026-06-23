@@ -24,23 +24,43 @@ StatusCode FastReconstructionAlg::initialize() {
     ATH_CHECK(m_visionTool.retrieve(EnableTool{!m_visionTool.empty()}));
 
     GlobalPatternFinder::Config patCfg{};
-    patCfg.thetaSearchWindow = m_thetaSearchWindow;
-    patCfg.maxMissedLayerHits = m_maxMissedLayerHits;
-    patCfg.baseRWindow = m_baseRWindow;
-    patCfg.minZDiff4Line = m_minZDiff4Line;
-    patCfg.minRDiff4Line = m_minRDiff4Line;
-    patCfg.phiTolerance = m_phiTolerance;
-    patCfg.minBendingTriggerHits = m_minBendingTriggerHits;
-    patCfg.minBendingPrecisionHits = m_minBendingPrecisionHits;
     patCfg.useMdtHits = m_useMdtHits;
     patCfg.seedFromMdt = m_seedFromMdt;
+    patCfg.thetaSearchWindow = m_thetaSearchWindow;
+    patCfg.baseRWindow = m_baseRWindow;
+    patCfg.phiTolerance = m_phiTolerance;
+    patCfg.minTriggerLayers = m_minTriggerLayers;
+    patCfg.minPrecisionLayers = m_minPrecisionLayers;
+    patCfg.minPhiLayers = m_minPhiLayers;
+    patCfg.minStationLayers = m_minStationLayers;
+    patCfg.meanNormRes2Cut = m_meanNormRes2Cut;
     patCfg.maxSeedAttempts = m_maxSeedAttempts;
+    patCfg.maxMissLayersInStation = m_maxMissLayersInStation;
+    patCfg.minLayerSeparation = m_minLayerSeparation;
+
     if (m_seedFromInner) {
         patCfg.layerSeedings.push_back(LayerIndex::Inner);
     }
     patCfg.visionTool = m_visionTool.get();
     patCfg.idHelperSvc = m_idHelperSvc.get();
     m_globPatFinder = std::make_unique<GlobalPatternFinder>(name(), std::move(patCfg));
+
+    //Print Configuration
+    ATH_MSG_DEBUG(" Configuration:\n"
+            << " Theta search window [rad]: " << m_thetaSearchWindow << "\n"
+            << " Base R window [mm]: " << m_baseRWindow << "\n"
+            << " Max missed layer hits in station: " << m_maxMissLayersInStation << "\n"
+            << " Min layer separation [mm]: " << m_minLayerSeparation << "\n"
+            << " Phi tolerance [rad]: " << m_phiTolerance << "\n"
+            << " Min trigger layers: " << m_minTriggerLayers << "\n"
+            << " Min precision layers: " << m_minPrecisionLayers << "\n"
+            << " Min phi layers: " << m_minPhiLayers << "\n"
+            << " Min station layers: " << m_minStationLayers << "\n"
+            << " Mean norm residual^2 cut: " << m_meanNormRes2Cut << "\n"
+            << " Seed from inner: " << m_seedFromInner << "\n"
+            << " Use MDT hits: " << m_useMdtHits << "\n"
+            << " Seed from MDT: " << m_seedFromMdt << "\n"
+            << " Max seed attempts: " << m_maxSeedAttempts << "\n");
 
     return StatusCode::SUCCESS;
 }

@@ -65,8 +65,7 @@ namespace MuonVal{
         return StatusCode::SUCCESS;
     }
 
-    StatusCode TgcRDOAnalysis::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
+    StatusCode TgcRDOAnalysis::execute(const EventContext& ctx) {
         const TgcRdoContainer* rdos{nullptr};
         ATH_CHECK(SG::get(rdos, m_inputKey, ctx));
         for (const TgcRdo* rdo : *rdos) {

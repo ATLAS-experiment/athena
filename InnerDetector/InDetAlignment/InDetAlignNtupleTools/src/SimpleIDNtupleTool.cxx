@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "SimpleIDNtupleTool.h"
@@ -195,7 +195,7 @@ namespace InDet {
   }
 
 //________________________________________________________________________
-  void SimpleIDNtupleTool::dumpTrack(int itrk, const Trk::AlignTrack* alignTrack) {
+  void SimpleIDNtupleTool::dumpTrack(const EventContext& ctx, int itrk, const Trk::AlignTrack* alignTrack) {
     ATH_MSG_DEBUG("In dumpTrack()");
 
     if (!m_tree) initializeNtuple();
@@ -256,7 +256,7 @@ namespace InDet {
       m_yvtx = aMeasPer->position().y();
       m_zvtx = aMeasPer->position().z();
 
-      xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(*alignTrack);
+      xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(ctx, *alignTrack);
       uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
 
       if (not trackPart) ATH_MSG_ERROR("Could not get xAOD::TrackParticle");

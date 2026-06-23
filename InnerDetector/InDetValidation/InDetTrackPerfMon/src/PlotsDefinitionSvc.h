@@ -25,6 +25,7 @@
 #include "IPlotsDefReadTool.h"
 #include "SinglePlotDefinition.h"
 
+namespace IDTPM { 
 
 class PlotsDefinitionSvc :
     public extends<asg::AsgService, IPlotsDefinitionSvc> {
@@ -63,4 +64,6 @@ private:
   
 }; // class PlotsDefinitionSvc
 
+}
+  
 #endif // > !INDETTRACKPERFMON_PLOTSDEFINITIONSVC_H

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimBinUtil_H
 #define FPGATrackSimBinUtil_H
@@ -9,28 +9,19 @@
  * @date Sept 10th, 2024
  * @brief Binning Utilities for GenScanTool
  *
- * Declarations in this file (there are a series of small classes):
- *
- *
- *
- * Overview of stucture:
- *
-
- *
- * References:
  *
  */
 
+#include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
+#include "FPGATrackSimObjects/FPGATrackSimConstants.h"
 #include <array>
 #include <fstream>
 #include <map>
 #include <string>
 #include <vector>
-
-#include "FPGATrackSimObjects/FPGATrackSimHit.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrackPars.h"
-#include "FPGATrackSimObjects/FPGATrackSimConstants.h"
-
+#include <limits>
+#include <memory>
 
 namespace FPGATrackSimBinUtil {
 

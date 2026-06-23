@@ -18,13 +18,13 @@
 #ifndef TRIGMUONEVENTTPCNV_TRIGMUONCLUSTERFEATURECNV_TLP1_H
 #define TRIGMUONEVENTTPCNV_TRIGMUONCLUSTERFEATURECNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigMuonEventTPCnv/TrigMuonClusterFeature_tlp1.h"
 #include "TrigMuonEventTPCnv/TrigMuonClusterFeatureCnv_p1.h"
 
 
-class TrigMuonClusterFeatureCnv_tlp1 : public AthenaPoolTopLevelTPConverter<TrigMuonClusterFeatureCnv_p1, TrigMuonClusterFeature_tlp1>  {
+class TrigMuonClusterFeatureCnv_tlp1 : public TopLevelTPConverter<TrigMuonClusterFeatureCnv_p1, TrigMuonClusterFeature_tlp1>  {
 
  public:
   TrigMuonClusterFeatureCnv_tlp1();

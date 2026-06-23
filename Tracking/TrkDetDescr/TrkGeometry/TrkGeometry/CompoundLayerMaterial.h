@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,8 +30,8 @@ typedef std::vector<unsigned char> ValueVector;
 typedef std::vector<ValueVector> ValueMatrix;
 
 struct ValueStore {
-  float valueMin;
-  float valueStep;
+  float valueMin = 0;
+  float valueStep = 0;
   ValueMatrix valueBinMatrix;
 
   double value(unsigned char ibin0, unsigned char ibin1) const {

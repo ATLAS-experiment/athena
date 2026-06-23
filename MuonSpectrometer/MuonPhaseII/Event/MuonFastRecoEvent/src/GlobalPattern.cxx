@@ -5,6 +5,11 @@
 #include "MuonFastRecoEvent/GlobalPattern.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
 
+namespace {
+    double inDegrees(double angle) {
+        return angle / Gaudi::Units::deg;
+    }
+}
 namespace MuonR4 {
 
 GlobalPattern::GlobalPattern(HitCollection&& hitPerStation)
@@ -33,8 +38,9 @@ double GlobalPattern::sectorPhi() const {
 }
 
 void GlobalPattern::print(std::ostream& ostr) const {
-    ostr<<"SpacePoint Pattern, Sector: "<< sector() << "  & " <<  (isSectorOverlap() ? std::to_string(secondarySector()) : "-")<< " Sector Phi: "<<sectorPhi()<<", theta: "<<theta()
-        <<", nPrecisionHits: "<<nPrecisionHits()<<", nEtaNonPrecisionHits: "<<nEtaNonPrecisionHits()<<", nPhiHits: "<<nPhiHits()
+    ostr<<"SpacePoint Pattern, Sector: "<< sector() << "  & " <<  (isSectorOverlap() ? std::to_string(secondarySector()) : "-")
+                                        <<", theta: "<<inDegrees(theta()) << ", Phi: "<<inDegrees(phi())<< " Sector Phi: "<<inDegrees(sectorPhi())
+        <<", nPrecisionLayers: "<<nPrecisionLayers()<<", nTriggerLayers: "<<nTriggerLayers()<<", nPhiLayers: "<<nPhiLayers()
         <<", mean normalized residual squared: "<<meanNormResidual2();    
     ostr<<", Hit per station: \n";
     for (const auto& [station, hits] : m_hitsInStation) {

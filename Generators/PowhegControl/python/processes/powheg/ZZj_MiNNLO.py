@@ -21,7 +21,11 @@ class ZZj_MiNNLO(PowhegRES):
         @param base_directory: path to PowhegBox code.
         @param kwargs          dictionary of arguments from Generate_tf.
         """
-        super(ZZj_MiNNLO, self).__init__(base_directory, "ZZJ", **kwargs)
+        errors = super(ZZj_MiNNLO, self).openloops_error()
+        warnings = super(ZZj_MiNNLO, self).hoppet_warning()
+        infos = super(ZZj_MiNNLO, self).hoppet_info()
+        infos.append("qqvvamp: increasing precision to")
+        super(ZZj_MiNNLO, self).__init__(base_directory, "ZZJ",warning_output=warnings, info_output=infos, error_output=errors, **kwargs)
 
         # Add parameter validation functions
         self.validation_functions.append("validate_decays")
@@ -74,6 +78,9 @@ class ZZj_MiNNLO(PowhegRES):
         self.add_keyword("facscfact", self.default_scales[0])
         self.add_keyword("storeinfo_rwgt", 1)
         self.add_keyword("rwl_file")
+        self.add_keyword("rwl_add")
+        self.add_keyword("rwl_format_rwgt")
+        self.add_keyword("clobberlhe")
         self.add_keyword("ewscheme")
         self.add_keyword("gfermi")
         self.add_keyword("zmass")

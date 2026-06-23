@@ -58,13 +58,6 @@ def configureRecoForPFlowCfg(cfgFlags):
     cfg.merge( JetRecCfg(cfgFlags,AntiKt4EMPFlow) )     
     cfg.merge( JetRecCfg(cfgFlags,AntiKt4LCTopo) )
     
-    from AthenaConfiguration.Enums import LHCPeriod
-    if cfgFlags.GeoModel.Run >= LHCPeriod.Run4:
-        #Fixes https://its.cern.ch/jira/browse/ATLASRECTS-8367
-        #AntiKt4EMPFlowNoPtCutTauSeedJets seem to require AntiKt4Truth
-        from JetRecConfig.StandardSmallRJets import AntiKt4Truth
-        cfg.merge( JetRecCfg(cfgFlags,AntiKt4Truth) )
-
     #Now do MET config
 
     #The MET soft term needs the EM and LC origin topoclusters.

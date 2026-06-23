@@ -78,7 +78,7 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor',
                                  toolName="L1TopoMonitoringTool"):
 
     # Do not plot triggers that can not be reproduced by the simulation
-    AlgoVetoList = ["jXE40delay","TeATIME","gESPRESSO","gRISTRETTO","CALMTEA","MATCHA"]
+    AlgoVetoList = ["jXE40delay","TeATIME","CALMTEA","MATCHA"]
     MultVetoList = ["ZeroBiasA","ZeroBiasB"]
 
     alg = CompFactory.L1TopoOnlineMonitor(toolName,
@@ -109,7 +109,7 @@ def getL1TopoPhase1DQMonitor(flags, name='L1TopoDQMonitor',
                              toolName="L1TopoMonitoringTool"):
 
     # Do not plot triggers that can not be reproduced by the simulation
-    AlgoVetoList = ["jXE40delay","TeATIME","gESPRESSO","gRISTRETTO","CALMTEA","MATCHA"]
+    AlgoVetoList = ["jXE40delay","TeATIME","CALMTEA","MATCHA"]
     MultVetoList = ["ZeroBiasA","ZeroBiasB"]
     # Ignore expected mismatches from these triggers in the DQ plots
     AlgoIgnoreList = ["*:ADBDT*", "*:ADVAE*", "*:ARTEMIS*"]

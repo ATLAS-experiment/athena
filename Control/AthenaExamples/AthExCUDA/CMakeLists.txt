@@ -10,15 +10,22 @@ if( NOT CMAKE_CUDA_COMPILER )
 endif()
 
 # External dependencies.
-find_package( vecmem COMPONENTS CUDA )
+find_package( vecmem )
+find_package( traccc )
 find_package( CUDAToolkit )
+
+# Using traccc::edm types in CUDA doesn't work (currently) without the
+# following.
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-relaxed-constexpr")
 
 # Add a component library that has some CUDA code in it.
 atlas_add_component( AthExCUDA
    src/*.h src/*.cxx src/*.cu src/components/*.cxx
    DEFINITIONS EIGEN_NO_CUDA EIGEN_DONT_VECTORIZE
-   LINK_LIBRARIES vecmem::core vecmem::cuda AthenaBaseComps GaudiKernel Gaudi::GaudiCUDALib
-   StoreGateLib xAODTracking AthCUDAInterfacesLib AthCUDAKernelLib )
+   LINK_LIBRARIES vecmem::core traccc::core
+   AthenaBaseComps GaudiKernel Gaudi::GaudiCUDALib
+   StoreGateLib xAODTracking AthDeviceInterfacesLib AthCUDAInterfacesLib
+   AthCUDAKernelLib )
 
 # Install extra files from the package.
 atlas_install_python_modules( python/*.py )

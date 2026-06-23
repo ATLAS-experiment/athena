@@ -52,7 +52,7 @@ StatusCode TileMuonFilterAlg::initialize(){
 } 
 
 //=======================================
-StatusCode TileMuonFilterAlg::execute(){
+StatusCode TileMuonFilterAlg::execute(const EventContext& /*ctx*/){
 //=======================================
    switch(m_trackType)
    {
@@ -108,7 +108,7 @@ StatusCode TileMuonFilterAlg::execute(){
     const MUON* muon = *muonItr;
     if(!muon){ ATH_MSG_INFO("Not a valid muon"); continue; }
     //Cut 0:  combined muon // probably it is better to use this cut
-    if( m_useCuts && muon->muonType()!=xAOD::Muon::Combined ) continue;
+    if( m_useCuts && muon->muonType()!=xAOD::Muon::MuonType::Combined ) continue;
     cut[0]++;
     //Cut 1: transverse momentum
     if( m_useCuts && muon->pt() < m_muonPt ) continue;

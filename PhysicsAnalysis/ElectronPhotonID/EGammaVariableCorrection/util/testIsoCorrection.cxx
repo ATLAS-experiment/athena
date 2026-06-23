@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,7 +13,7 @@
 #include "TString.h"
 
 //EDM includes
-#include "xAODEgamma/PhotonContainer.h" 
+#include "xAODEgamma/PhotonContainer.h"
 #include "xAODEgamma/PhotonAuxContainer.h"
 #include "xAODEgamma/Photon.h"
 
@@ -89,7 +89,7 @@ int main (int argc, char* argv[])
 
     static const SG::ConstAccessor<float> topoEtCone40OriginalAcc("topoetcone40_original");
     static const SG::ConstAccessor<float> topoEtCone40Acc("topoetcone40");
-    
+
     //loop over the events
     for (Long64_t entry = 0; entry < entries; entry++)
     {
@@ -101,8 +101,8 @@ int main (int argc, char* argv[])
         //get photon container
         const xAOD::PhotonContainer* photons;
         ANA_CHECK(pers.retrieve(photons, "Photons"));
-        std::pair< xAOD::PhotonContainer*, xAOD::ShallowAuxContainer* > photons_isocorr = xAOD::shallowCopyContainer( *photons );
-        std::pair< xAOD::PhotonContainer*, xAOD::ShallowAuxContainer* > photons_fudge = xAOD::shallowCopyContainer( *photons );
+        xAOD::ShallowCopyResult_t<xAOD::PhotonContainer> photons_isocorr = xAOD::shallowCopy( *photons );
+        xAOD::ShallowCopyResult_t<xAOD::PhotonContainer> photons_fudge = xAOD::shallowCopy( *photons );
 
         //loop over photon container
         for (unsigned int idx = 0; idx < photons->size(); idx++)

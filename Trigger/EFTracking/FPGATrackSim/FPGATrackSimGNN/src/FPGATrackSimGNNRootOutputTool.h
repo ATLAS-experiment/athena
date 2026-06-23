@@ -26,6 +26,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimGNNEdge.h"
 #include "FPGATrackSimObjects/FPGATrackSimGNNHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrack.h"
+#include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 
 #include "GaudiKernel/ITHistSvc.h"
 #include "TTree.h"
@@ -62,13 +63,17 @@ class FPGATrackSimGNNRootOutputTool : public AthAlgTool
 
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
         Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
+        ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool{this, "LayerNumberTool", "TrigL2LayerNumberToolITk"};
 
         ///////////////////////////////////////////////////////////////////////
         // Convenience
 
+        const std::vector<short>* m_pix_h2l{nullptr};
+        const std::vector<TrigInDetSiLayer>* m_layerGeometry{nullptr};
+
         TTree *m_hit_tree = nullptr; // output FPGATrackSimHit tree
-        std::vector<unsigned int> m_hit_id{};
-        std::vector<unsigned int> m_hit_module_id{};
+        std::vector<unsigned> m_hit_id{};
+        std::vector<unsigned> m_hit_module_id{};
         std::vector<float> m_hit_x{};
         std::vector<float> m_hit_y{};
         std::vector<float> m_hit_z{};
@@ -82,10 +87,13 @@ class FPGATrackSimGNNRootOutputTool : public AthAlgTool
         std::vector<float> m_hit_cluster_x{};
         std::vector<float> m_hit_cluster_y{};
         std::vector<float> m_hit_cluster_z{};
+        std::vector<int> m_hit_globalLayerID{};
 
         TTree *m_GNNHit_tree = nullptr; // output FPGATrackSimGNNHit tree
-        std::vector<unsigned int> m_GNNHit_id{};
-        std::vector<unsigned int> m_GNNHit_module_id{};
+        std::vector<unsigned> m_GNNHit_id{};
+        std::vector<unsigned> m_GNNHit_module_id{};
+        std::vector<HepMcParticleLink::barcode_type> m_GNNHit_uniqueID{};
+        std::vector<long> m_GNNHit_eventIndex{};
         std::vector<int> m_GNNHit_road_id{};
         std::vector<float> m_GNNHit_x{};
         std::vector<float> m_GNNHit_y{};

@@ -39,7 +39,7 @@ public:
     virtual StatusCode initialize() override;
 
     /// Algorithm execute once per event
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
     /// Algorithm finalize at end of job
     virtual StatusCode finalize() override;

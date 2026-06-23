@@ -155,7 +155,7 @@ namespace columnar
             std::string shallowName = containerName + "_shallowCopy";
             std::string shallowAuxName = shallowName + "Aux.";
             benchmarkShallowCopy.startTimer ();
-            auto shallowCopy = xAOD::shallowCopyContainer (*object, Gaudi::Hive::currentContext());
+            auto shallowCopy = xAOD::shallowCopy (*object);
             benchmarkShallowCopy.stopTimer ();
             benchmarkShallowRegister.startTimer ();
             object = shallowCopy.first.get();

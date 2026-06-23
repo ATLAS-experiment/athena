@@ -19,9 +19,6 @@ HiveAlgB::~HiveAlgB() = default;
 StatusCode HiveAlgB::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
 
-  ATH_MSG_INFO("context: " << Gaudi::Hive::currentContext() << " for "
-			   << this );
-
   ATH_MSG_INFO(" m_di was: " << m_di << " setting to -1 ");
   m_di = -1;
 
@@ -38,7 +35,6 @@ StatusCode HiveAlgB::initialize() {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode HiveAlgB::finalize() {
-  ATH_MSG_INFO("context: " << Gaudi::Hive::currentContext());
   ATH_MSG_DEBUG("finalize " << name());
 
   // dump out contents of context specific data
@@ -55,7 +51,7 @@ StatusCode HiveAlgB::execute(const EventContext& ctx) const {
 
   ATH_MSG_INFO("context: " << ctx << " for " << this);
 
-  int s = sleep();
+  int s = sleep(ctx);
 
   ATH_MSG_INFO("m_di was: " << m_di << " setting to " << s);
   m_di = s;

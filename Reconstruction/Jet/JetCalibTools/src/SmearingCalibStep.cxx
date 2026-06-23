@@ -6,7 +6,6 @@
 
 // SmearingCalibStep.cxx 
 // Implementation file for class SmearingCalibStep
-// Author: Ben Hodkinson <ben.hodkinson@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
 #include "JetCalibTools/SmearingCalibStep.h"

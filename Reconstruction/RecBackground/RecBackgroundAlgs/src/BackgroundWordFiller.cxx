@@ -146,13 +146,13 @@ StatusCode BackgroundWordFiller::initialize() {
 
 //----------------------------------------------------------------
 
-StatusCode BackgroundWordFiller::execute() {
+StatusCode BackgroundWordFiller::execute(const EventContext& ctx) {
 
   /////////////////////////
   // get the EventInfo
   /////////////////////////
 
-  SG::ReadHandle<xAOD::EventInfo> eventInfoReadHandle(m_eventInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> eventInfoReadHandle(m_eventInfoKey, ctx);
 
   m_totalcnt++;
 
@@ -165,7 +165,7 @@ StatusCode BackgroundWordFiller::execute() {
   //////////////////////////////////////////////////
   if (!m_isMC) {  // do not request in MC
     SG::ReadHandle<BeamBackgroundData> beamBackgroundDataReadHandle(
-        m_beamBackgroundDataKey);
+        m_beamBackgroundDataKey, ctx);
 
     if (!beamBackgroundDataReadHandle.isValid())
       ATH_MSG_WARNING("Invalid ReadHandle to BeamBackgoundData with name: "
@@ -216,7 +216,7 @@ StatusCode BackgroundWordFiller::execute() {
 
   if (!m_isMC) {  // do not request in MC
     SG::ReadHandle<LUCID_RawDataContainer> LUCID_rawDataContainerReadHandle(
-        m_LUCID_rawDataContainerKey);
+        m_LUCID_rawDataContainerKey, ctx);
 
     if (!LUCID_rawDataContainerReadHandle.isValid())
       ATH_MSG_WARNING("Invalid ReadHandle to LUCID_RawDataContainer with name: "
@@ -243,7 +243,7 @@ StatusCode BackgroundWordFiller::execute() {
   //////////////////////////////////////////////////
 
   SG::ReadHandle<BcmCollisionTime> bcmCollisionTimeReadHandle(
-      m_bcmCollisionTimeKey);
+      m_bcmCollisionTimeKey, ctx);
 
   if (!bcmCollisionTimeReadHandle.isValid())
     ATH_MSG_WARNING("Invalid ReadHandle to BcmCollisionTime with name: "
@@ -300,8 +300,8 @@ StatusCode BackgroundWordFiller::execute() {
   // IDSPNonEmpty
   ///////////////////////////////////////////////////////////////////////////////
   if (!m_isMC) {  // do not request in MC
-    SG::ReadHandle<SpacePointContainer> sctSP{m_sctSpacePointKey};
-    SG::ReadHandle<SpacePointContainer> pixSP{m_pixSpacePointKey};
+    SG::ReadHandle<SpacePointContainer> sctSP{m_sctSpacePointKey, ctx};
+    SG::ReadHandle<SpacePointContainer> pixSP{m_pixSpacePointKey, ctx};
 
     if (!sctSP.isValid() or !pixSP.isValid()) {
       ATH_MSG_WARNING("Invalid ReadHandle to SCT/Pix spacepoints");
@@ -363,7 +363,7 @@ StatusCode BackgroundWordFiller::execute() {
   ///////////////
 
   SG::ReadHandle<TileCellContainer> tileCellContainerReadHandle(
-      m_tileCellContainerKey);
+      m_tileCellContainerKey, ctx);
 
   if (!tileCellContainerReadHandle.isValid())
     ATH_MSG_WARNING("Invalid ReadHandle to TileCellContainer: "
@@ -401,7 +401,7 @@ StatusCode BackgroundWordFiller::execute() {
 
   if (!m_isMC) {  // do not request in MC
     SG::ReadHandle<LArCollisionTime> lArCollisionTimeReadHandle(
-        m_lArCollisionTimeKey);
+        m_lArCollisionTimeKey, ctx);
 
     if (!lArCollisionTimeReadHandle.isValid())
       ATH_MSG_WARNING("Invalid ReadHandle to LArCollisionTime: "

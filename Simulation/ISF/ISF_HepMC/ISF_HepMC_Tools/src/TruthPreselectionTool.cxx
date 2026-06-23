@@ -86,7 +86,7 @@ bool ISF::TruthPreselectionTool::hasQuasiStableAncestorParticle(HepMC::ConstGenP
   if (!part->production_vertex() || part->production_vertex()->particles_in().empty()) { return false; }
   for ( auto ancestor: part->production_vertex()->particles_in() ) {
     // Check ancestor particle for Attribute
-    if ( ancestor->attribute<HepMC3::IntAttribute>("ShadowParticleId") ) { return true; }
+    if ( ancestor->attribute<HepMC3::IntAttribute>(HepMCStr::ShadowParticleId) ) { return true; }
 #else
   if (!part->production_vertex() || part->production_vertex()->particles_in_size()==0) { return false; }
   // Recursively loop over ancestral particles looking for a quasi-stable particle
@@ -143,11 +143,11 @@ std::unique_ptr<HepMC::GenEvent> ISF::TruthPreselectionTool::filterGenEvent(cons
        // Particle to be simulated
        const int shadowId = particle->id();
        // Version 1 Use the Id
-       particle->add_attribute("ShadowParticleId",
+      particle->add_attribute(HepMCStr::ShadowParticleId,
                                std::make_shared<HepMC3::IntAttribute>(shadowId));
        // Version 2 Directly save the ConstGenParticlePtr - needs to link to a version of the GenEvent after zero-lifetime positioner as been applied.
        // HepMC::ConstGenParticlePtr& shadow = inputEvent.particles().at(shadowId);
-       // particle->add_attribute("ShadowParticle",
+      // particle->add_attribute(HepMCStr::ShadowParticle,
        //                         std::make_shared<HepMC::ShadowParticle>(particle));
      }
    }

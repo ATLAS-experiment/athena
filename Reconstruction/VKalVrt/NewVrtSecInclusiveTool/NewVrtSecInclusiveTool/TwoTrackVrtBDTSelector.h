@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -42,18 +42,20 @@ namespace Rec{
        /* Destructor */
       virtual ~TwoTrackVrtBDTSelector();
 
-      StatusCode initialize();
-      StatusCode finalize();
+      virtual StatusCode initialize() override;
+      virtual StatusCode finalize() override;
 
-     bool isgood( const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> tracks,
-		                      const xAOD::Vertex & candV,
-                                std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
-		                      const xAOD::Vertex & tPV) const final;
-     bool isgood( const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> tracks,
-		                      const xAOD::Vertex & candV,
-                                std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
-		                      const xAOD::Vertex & tPV,
-                          float & quality) const final;
+      virtual bool isgood( const EventContext& ctx,
+                           const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> tracks,
+                           const xAOD::Vertex & candV,
+                           std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
+                           const xAOD::Vertex & tPV) const override final;
+      virtual bool isgood( const EventContext& ctx,
+                           const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> tracks,
+                           const xAOD::Vertex & candV,
+                           std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
+                           const xAOD::Vertex & tPV,
+                           float & quality) const override final;
 
 //------------------------------------------------------------------------------------------------------------------
 // Private data and functions

@@ -18,7 +18,7 @@
 #ifndef TRIGMUONEVENTTPCNV_COMBINEDMUONFEATURECNV_TLP1_H
 #define TRIGMUONEVENTTPCNV_COMBINEDMUONFEATURECNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigMuonEventTPCnv/CombinedMuonFeature_tlp1.h"
 
@@ -28,7 +28,7 @@
 #include "TrigInDetEventTPCnv/TrigInDetTrackCnv_p1.h"
 
 
-class CombinedMuonFeatureCnv_tlp1 : public AthenaPoolTopLevelTPConverter<CombinedMuonFeatureCnv_p1, CombinedMuonFeature_tlp1>  {
+class CombinedMuonFeatureCnv_tlp1 : public TopLevelTPConverter<CombinedMuonFeatureCnv_p1, CombinedMuonFeature_tlp1>  {
 
  public:
   CombinedMuonFeatureCnv_tlp1();

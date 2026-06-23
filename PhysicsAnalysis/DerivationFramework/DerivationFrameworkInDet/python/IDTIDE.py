@@ -30,7 +30,9 @@ IDTIDE_AOD_EXCLUDED_AUXDATA = [
     'IDTIDE_unbiased_z0', 'IDTIDE_unbiased_z0Sigma',
     'IDTIDE_unbiased_z0SigmaSinTheta', 'IDTIDE_unbiased_z0SinTheta'
     ]
-
+IDTIDE_AOD_EXCLUDED_AUXDATA_TRUTH = [
+    'd0', 'z0', 'phi', 'theta', 'z0st', 'qOverP', 'prodR', 'prodZ', 'nSilHits', 'time'
+    ]
 
 def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
     acc = ComponentAccumulator()
@@ -274,6 +276,12 @@ def IDTIDEKernelCfg(flags, StreamName=""):
     acc.addSequence(parAND(IDTIDEPostProcSequenceName),
                     parentName=IDTIDEPreselSequenceName)
 
+    if flags.Input.isMC:
+        from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
+            InDetPhysValTruthDecoratorAlgCfg)
+        acc.merge(InDetPhysValTruthDecoratorAlgCfg(flags),
+                  sequenceName=IDTIDEPostProcSequenceName)
+
     from DerivationFrameworkInDet.InDetToolsConfig import (
         DFInDetTSOSKernelCfg)
     acc.merge(DFInDetTSOSKernelCfg(flags),
@@ -310,6 +318,13 @@ def ITkTIDEKernelCfg(flags, StreamName=""):
         from DerivationFrameworkInDet.InDetToolsConfig import DFITkTSOSKernelCfg
         acc.merge(DFITkTSOSKernelCfg(flags),
                   sequenceName=IDTIDEPostProcSequenceName)
+
+    if flags.Input.isMC:
+        from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
+            InDetPhysValTruthDecoratorAlgCfg)
+        acc.merge(InDetPhysValTruthDecoratorAlgCfg(flags),
+                  sequenceName=IDTIDEPostProcSequenceName)
+
     acc.merge(IDTIDEThinningKernelCfg(flags, StreamName=StreamName),
               sequenceName=IDTIDEPostProcSequenceName)
     return acc
@@ -387,6 +402,11 @@ def IDTIDECfg(flags):
             "ITkStripMeasurements": "xAOD::TrackMeasurementValidationContainer",
             "ITkStripMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer"
         })
+        if flags.ITk.DAODStorePLR:
+            IDTIDESlimmingHelper.AppendToDictionary.update({
+                "PLRMeasurements": "xAOD::TrackMeasurementValidationContainer",
+                "PLRMeasurementsAux": "xAOD::TrackMeasurementValidationAuxContainer"
+            })
 
     SmartCollections += ["Muons", "Electrons", "Photons"]
 
@@ -408,6 +428,8 @@ def IDTIDECfg(flags):
         AllVariables += ["PixelClusters", "SCT_Clusters"]
     if flags.Detector.GeometryITk:
         AllVariables += ["ITkPixelMeasurements", "ITkStripMeasurements"]
+        if flags.ITk.DAODStorePLR:
+            AllVariables += ["PLRMeasurements"]
 
     IDTIDESlimmingHelper.AppendToDictionary.update({
         "Kt4EMPFlowEventShape": "xAOD::EventShape",

@@ -61,7 +61,7 @@ StatusCode LArAutoCorrExtrapolate::initialize()
 
 
 //---------------------------------------------------------------------------
-StatusCode LArAutoCorrExtrapolate::execute()
+StatusCode LArAutoCorrExtrapolate::execute(const EventContext& /*ctx*/)
 {
   return StatusCode::SUCCESS;
 }

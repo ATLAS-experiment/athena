@@ -13,10 +13,11 @@
 #define HDef_SingleHistogramDefinition_h
 #include "InDetPhysValMonitoring/IHistogramDefinitionSvc.h"
 #include <string>
+#include <string_view>
 ///Almost-a-struct for holding the single histogram definition
 class SingleHistogramDefinition{
 public:
-    typedef const std::string & Titles_t;
+    typedef const std::string_view & Titles_t;
     typedef const unsigned int NBins_t;
     typedef const float Var_t;
     SingleHistogramDefinition();
@@ -66,7 +67,7 @@ public:
     /// add the folder path to produce the full histogram name e.g. myFolder/myHisto
     std::string stringIndex() const;
     /// concatenate a sanitised folderName with the histogram name
-    static std::string stringIndex(const std::string & thisname, const std::string & thisfolder);
+    static std::string stringIndex(std::string_view thisname, std::string_view thisfolder);
     /// produce single-line representation of the titles (titles separated by the ';' delimiter)
     std::string titleDigest() const;
 

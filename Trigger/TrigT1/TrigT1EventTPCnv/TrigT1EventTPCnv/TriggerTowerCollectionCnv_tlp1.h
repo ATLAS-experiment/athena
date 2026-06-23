@@ -5,7 +5,7 @@
 #define TriggerTowerCollectionCNV_TLP1_H
 
 // Gaudi/Athena include(s):
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigT1EventTPCnv/TriggerTowerCollection_tlp1.h"
 #include "TrigT1EventTPCnv/TriggerTowerCollectionCnv_p1.h"
@@ -20,7 +20,7 @@
  *          to do the T/P conversion before/after writing/reading the TriggerTower
  *          object.
  */
-class TriggerTowerCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TriggerTowerCollectionCnv_p1, TriggerTowerCollection_tlp1 > {
+class TriggerTowerCollectionCnv_tlp1 : public TopLevelTPConverter< TriggerTowerCollectionCnv_p1, TriggerTowerCollection_tlp1 > {
 
 public:
   TriggerTowerCollectionCnv_tlp1();

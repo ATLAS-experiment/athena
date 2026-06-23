@@ -41,7 +41,7 @@ public:
   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
 
   /// Run the Rivet analyses on one event, which is retrieved from StoreGate.
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   /// Finalise each analysis and commit the plots to an AIDA tree and the
   /// THistSvc ROOT tree.

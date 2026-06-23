@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -----------------------------------------------------------------------------------------------
@@ -25,10 +25,11 @@
 #include "GeneratorFilters/BSignalFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "TLorentzVector.h"
 #include "TruthUtils/MagicNumbers.h"
 
 #include <sstream>
-
+#include <cmath>
 
 BSignalFilter::BSignalFilter(const std::string& name, ISvcLocator* pSvcLocator) :
   GenFilter(name, pSvcLocator)
@@ -269,7 +270,7 @@ StatusCode BSignalFilter::filterEvent()
 			      ATH_MSG_DEBUG("");
 			      ATH_MSG_DEBUG(" *** INVARIANT MASS CUTS ON PARTICLES ACTIVATED! *** ");
 			      ATH_MSG_DEBUG("");
-                              if (m_InvMass_switch     ) ATH_MSG_DEBUG("     -- Mass cuts -->>  " << m_InvMassMin      << " < mass < "       << m_InvMassMax      << " MeV");
+            ATH_MSG_DEBUG("     -- Mass cuts -->>  " << m_InvMassMin      << " < mass < "       << m_InvMassMax      << " MeV");
 			      //
 			      double invMass = ( CandPart1 + CandPart2 ).M();
                               double invMass_total = total_4mom.M();

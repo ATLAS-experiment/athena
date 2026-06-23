@@ -25,7 +25,7 @@ atlas_add_root_dictionary( SampleHandler
    SampleHandler/SampleComposite.h SampleHandler/SampleGrid.h
    SampleHandler/SampleHandler.h SampleHandler/SampleHist.h
    SampleHandler/SampleLocal.h SampleHandler/SampleMeta.h
-   SampleHandler/SamplePtr.h SampleHandler/ScanDir.h SampleHandler/TagList.h
+   SampleHandler/ScanDir.h SampleHandler/TagList.h
    SampleHandler/ToolsDiscovery.h SampleHandler/ToolsDuplicates.h
    SampleHandler/ToolsJoin.h SampleHandler/ToolsMeta.h
    SampleHandler/ToolsSplit.h SampleHandler/fetch.h Root/LinkDef.h

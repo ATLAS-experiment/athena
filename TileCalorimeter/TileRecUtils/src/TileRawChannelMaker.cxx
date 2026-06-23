@@ -78,9 +78,8 @@ StatusCode TileRawChannelMaker::initialize() {
 /**
  * Execute
  */
-StatusCode TileRawChannelMaker::execute() {
+StatusCode TileRawChannelMaker::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // get named TileDigitsContaner from TES
   SG::ReadHandle<TileDigitsContainer> digitsContaner(m_digitsContainerKey, ctx);

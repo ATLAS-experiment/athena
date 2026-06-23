@@ -99,6 +99,13 @@ CoraCoolFolder::~CoraCoolFolder() {
   if (m_seqfk) delete m_seqfk;
 }
 
+const std::string&
+
+CoraCoolFolder::defaultTagName(){
+  static const std::string empty;
+  return empty;
+}
+
 const cool::IRecordSpecification& CoraCoolFolder::fkSpecification() 
  const 
 { return m_coolfolder->payloadSpecification(); }

@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType,Format
 from ActsConfig.ActsUtilities import extractChildKwargs
 from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
+from ActsConfig.ActsPhaseIIRawDataEdmConfig import PhaseIIPixelRawDataContainerCfg
 
 def ActsHgtdClusteringToolCfg(flags,
                               name: str = "ActsHgtdClusteringTool",
@@ -87,7 +88,39 @@ def ActsPixelClusteringToolCfg(flags,
     #Always use broad errors if cosmics
     kwargs.setdefault('UseBroadErrors', flags.Acts.Clusters.UsePixelBroadErrors or flags.Beam.Type is BeamType.Cosmics)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
+    if flags.Acts.EDM.PhaseII :
+        acc.setPrivateTools(CompFactory.ActsTrk.PhaseIIPixelClusteringTool(name, **kwargs))
+    else :
+        acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
+    return acc
+
+
+def ActsPLRClusteringToolCfg(flags,
+                             name: str = "ActsPLRClusteringTool",
+                             **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.Acts.Clusters.RetrieveChargeInformation:
+        from PixelConditionsAlgorithms.PLR_ConditionsConfig import PLR_ChargeCalibCondAlgCfg
+        acc.merge(PLR_ChargeCalibCondAlgCfg(flags))
+        kwargs.setdefault("PixelChargeCalibCondData", "PLR_ChargeCalibCondData")
+
+    if "PixelLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.PLR_LorentzAngleConfig import PLR_LorentzAngleToolCfg
+        kwargs.setdefault("PixelLorentzAngleTool",
+                          acc.popToolsAndMerge(PLR_LorentzAngleToolCfg(flags)))
+
+    kwargs.setdefault("IDHelperName", "PLR_ID")
+    kwargs.setdefault("UseWeightedPosition", flags.Acts.Clusters.UseWeightedPosition)
+
+    # Always use broad errors if cosmics
+    kwargs.setdefault("UseBroadErrors",
+                      flags.Acts.Clusters.UsePixelBroadErrors or flags.Beam.Type is BeamType.Cosmics)
+
+    if flags.Acts.EDM.PhaseII :
+        acc.setPrivateTools(CompFactory.ActsTrk.PhaseIIPixelClusteringTool(name, **kwargs))
+    else :
+        acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
     return acc
 
 
@@ -100,7 +133,6 @@ def ActsStripClusteringToolCfg(flags,
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("conditionsTool",None)
     if "StripDetElStatus" not in kwargs :
         from SCT_ConditionsAlgorithms.ITkStripConditionsAlgorithmsConfig import  (
             ITkStripDetectorElementStatusAlgCfg)
@@ -129,6 +161,9 @@ def ActsPixelClusterizationAlgCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault("IDHelper", "PixelID")
+    if flags.Acts.EDM.PhaseII and flags.Input.Format is not Format.BS:
+        # convert persistent to PhaseIIPixelRawDataContainer instead
+        acc.merge(PhaseIIPixelRawDataContainerCfg(flags, RDOKey="ITkPixelRDOs"))
     kwargs.setdefault("RDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("ClustersKey", "ITkPixelClusters")
     kwargs.setdefault("DetEleCollKey", "ITkPixelDetectorElementCollection")
@@ -154,10 +189,68 @@ def ActsPixelClusterizationAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelClusterizationMonitoringToolCfg(flags)))
 
-    if not useCache:
-        acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
-    else:
-        acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
+    if flags.Acts.EDM.PhaseII :
+        if not useCache:
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelClusterizationAlg(name, **kwargs))
+        else:
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelCacheClusterizationAlg(name, **kwargs))
+    else :
+        if not useCache:
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+        else:
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
+    return acc
+
+
+def ActsPLRClusterizationAlgCfg(flags,
+                                name: str = "ActsPLRClusterizationAlg",
+                                *,
+                                useCache: bool = False,
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("IDHelper", "PLR_ID")
+    if flags.Acts.EDM.PhaseII and flags.Input.Format is not Format.BS:
+        # convert persistent to PhaseIIPixelRawDataContainer instead
+        acc.merge(PhaseIIPixelRawDataContainerCfg(flags,RDOKey="PLR_RDOs"))
+    kwargs.setdefault("RDOContainerKey", "PLR_RDOs")
+    kwargs.setdefault("ClustersKey", "PLR_Clusters")
+    kwargs.setdefault("DetEleCollKey", "PLR_DetectorElementCollection")
+    kwargs.setdefault("RoIs", "ActsRegionOfInterest")
+
+    kwargs.setdefault("ClusterCacheBackend", "ActsPLRClusterCache_Back")
+    kwargs.setdefault("ClusterCache", "ActsPLRClustersCache")
+
+    if "RegSelTool" not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_PLR_Cfg
+        kwargs.setdefault("RegSelTool", acc.popToolsAndMerge(regSelTool_PLR_Cfg(flags)))
+
+    if "ClusteringTool" not in kwargs:
+        kwargs.setdefault("ClusteringTool", acc.popToolsAndMerge(ActsPLRClusteringToolCfg(flags)))
+
+    if "DetElStatus" not in kwargs:
+        from PixelConditionsAlgorithms.PLR_ConditionsConfig import PLR_DetectorElementStatusAlgCfg
+        acc.merge(PLR_DetectorElementStatusAlgCfg(flags))
+        kwargs.setdefault("DetElStatus", "PLR_DetectorElementStatus")
+
+    if flags.Acts.doMonitoring and "MonTool" not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
+        kwargs.setdefault("MonTool", acc.popToolsAndMerge(
+            ActsITkPixelClusterizationMonitoringToolCfg(
+                flags,
+                name="ActsPLRClusterizationMonitoringTool")))
+
+    # @TODO just call ActsPixelClusterizationAlgCfg ?
+    if flags.Acts.EDM.PhaseII :
+        if not useCache:
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelClusterizationAlg(name, **kwargs))
+        else:
+            acc.addEventAlgo(CompFactory.ActsTrk.PhaseIIPixelCacheClusterizationAlg(name, **kwargs))
+    else :
+        if not useCache:
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
+        else:
+            acc.addEventAlgo(CompFactory.ActsTrk.PixelCacheClusterizationAlg(name, **kwargs))
     return acc
 
 def ActsStripClusterizationAlgCfg(flags, 
@@ -306,10 +399,26 @@ def ActsMainClusterizationCfg(flags,
     # Step (2)
     if kwargs['runReconstruction']:
         if kwargs['processPixels']:
+            if flags.Input.Format is Format.BS:
+                if flags.Acts.EDM.PhaseII :
+                    from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingPhaseIIRDOAlgCfg
+                    # @TODO nRDO estimation needs to be refined.
+                    acc.merge( ITkPixelDecodingPhaseIIRDOAlgCfg(flags, nRDOs = 1200000, pixelRDOKey='ITkPixelRDOs') )
+                else :
+                    from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
+                    # @TODO handle RoIs
+                    acc.merge( ITkPixelDecodingAlgCfg(flags) )
+
             acc.merge(ActsPixelClusterizationAlgCfg(flags,
                                                     RoIs=RoIs,
                                                     **extractChildKwargs(prefix='PixelClusterizationAlg.', **kwargs)))
         if kwargs['processStrips']:
+            if flags.Input.Format is Format.BS:
+                from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
+                # @TODO handle RoIs, need to toggle flag isRoI_Seeded, when ?
+                acc.merge(ITkStripRawDataProviderCfg(flags,
+                                                     RoIs=RoIs))
+
             acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                     RoIs=RoIs,
                                                     **extractChildKwargs(prefix='StripClusterizationAlg.', **kwargs)))
@@ -393,7 +502,7 @@ def ActsClusterizationCfg(flags,
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius Tracking uses full scan RoI created in the primary pass
-    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+    if flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
         from InDetConfig.ITkActsHelpers import primaryPassExtension
         roisName = f'{primaryPassExtension(flags)}RegionOfInterest'
         
@@ -508,30 +617,12 @@ def ActsClusterizationCfg(flags,
 
     # Persistification
     if flags.Acts.EDM.PersistifyClusters and kwargs['runReconstruction']:
-        toAOD = []
-        if kwargs['processPixels']:
-            pixel_cluster_shortlist = ['-validationMeasurementLink']
-            pixel_cluster_variables = '.'.join(pixel_cluster_shortlist)
-            
-            pixelClusterCollection = kwargs['PixelClusterizationAlg.ClustersKey']
-            toAOD += [f'xAOD::PixelClusterContainer#{pixelClusterCollection}',
-                      f'xAOD::PixelClusterAuxContainer#{pixelClusterCollection}Aux.{pixel_cluster_variables}']
-            
-        if kwargs['processStrips']:
-            strip_cluster_shortlist = ['-validationMeasurementLink']
-            strip_cluster_variables = '.'.join(strip_cluster_shortlist)
-            
-            stripClusterCollection = kwargs['StripClusterizationAlg.ClustersKey']
-            toAOD += [f"xAOD::StripClusterContainer#{stripClusterCollection}",
-                      f"xAOD::StripClusterAuxContainer#{stripClusterCollection}Aux.{strip_cluster_variables}"]
-            
-        if kwargs['processHGTD']:
-            hgtdClusterCollection = kwargs['HgtdClusterizationAlg.ClusterContainerName']
-            toAOD += [f"xAOD::HGTDClusterContainer#{hgtdClusterCollection}",
-                      f"xAOD::HGTDClusterAuxContainer#{hgtdClusterCollection}Aux."]
-            
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
-        
+        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+        pixelClusterCollections = None if not kwargs['processPixels'] else [kwargs['PixelClusterizationAlg.ClustersKey']]
+        stripClusterCollections = None if not kwargs['processStrips'] else [kwargs['StripClusterizationAlg.ClustersKey']]
+        hgtdClusterCollections = None if not kwargs['processHGTD'] else [kwargs['HgtdClusterizationAlg.ClusterContainerName']]
+        acc.merge(PersistifyClusters(flags,
+                                     pixelClusterCollections=pixelClusterCollections,
+                                     stripClusterCollections=stripClusterCollections,
+                                     hgtdClusterCollections=hgtdClusterCollections))
     return acc
-

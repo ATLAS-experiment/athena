@@ -34,20 +34,32 @@ namespace MuonValR4{
           using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
           StatusCode initialize() override final;
-          StatusCode execute() override final;
+          StatusCode execute(const EventContext& ctx) override final;
           StatusCode finalize() override final;
       private:
-          using Location = MuonR4::MsTrackSeed::Location;
-          using SectorProjector = MuonR4::MsTrackSeeder::SectorProjector;
-          /** @brief Construct MS track seed from the truth associated segments. A nullopt is returned
-           *         if either no segment is matched to the particle or no valid seed could be constructed
-           *  @param gctx: Geometry context to project the segments onto the sector centers
-           *  @param truthMuon: Reference to the truth muon for which a seed should be constructed */
-          std::optional<MuonR4::MsTrackSeed> makeSeedFromTruth(const ActsTrk::GeometryContext& gctx,
-                                                               const xAOD::TruthParticle& truthMuon) const;
-          /** @brief */
-          std::pair<double, double>  calcSeedLength(const ActsTrk::GeometryContext& gctx, 
-                                                    const MuonR4::MsTrackSeed& seed) const;
+        using Location = MuonR4::MsTrackSeed::Location;
+        using SectorProjector = MuonR4::MsTrackSeeder::SectorProjector;
+        /** @brief Construct MS track seed from the truth associated segments. A nullopt is returned
+         *         if either no segment is matched to the particle or no valid seed could be constructed
+        *  @param gctx: Geometry context to project the segments onto the sector centers
+        *  @param truthMuon: Reference to the truth muon for which a seed should be constructed */
+        std::optional<MuonR4::MsTrackSeed> makeSeedFromTruth(const ActsTrk::GeometryContext& gctx,
+                                                             const xAOD::TruthParticle& truthMuon) const;
+        /** @brief Calculate the length of the seed and the theta deflection angle
+         *         The length is defined as the spread of the seed's segments in the
+        *         cylinder coordinate. The deflection angle is calculates as the spread
+        *         of the theta angles of the individual segments
+        *  @param gctx: Geometry context to retrieve the reference positions
+        *  @param seed: The seed with the contributing segments */
+        std::pair<double, double>  calcSeedLength(const ActsTrk::GeometryContext& gctx, 
+                                                  const MuonR4::MsTrackSeed& seed) const;
+
+        /** @brief Dumps the legacy containers to the TTree */
+        StatusCode dumpLegacyTracks(const EventContext& ctx);
+        /** @brief Dump truth information */
+        StatusCode dumpTruthContent(const EventContext& ctx);
+        /** @brief Dump the reconstructed information */
+        StatusCode dumpRecoContent(const EventContext& ctx);
 
         /** @brief  */
         MuonVal::MuonTesterTree m_tree{"MsTrackValidTest", "MuonTrackTester"};
@@ -60,6 +72,7 @@ namespace MuonValR4{
         using TruthHitCol = std::unordered_set<const xAOD::MuonSimHit*>;
 
         using SegmentKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
+        using MuonKey_t = SG::ReadHandleKey<xAOD::MuonContainer>;
         /** @brief Segment from the truth hits */
         SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "MuonTruthSegments"};
         /** @brief Primary segment container */
@@ -73,25 +86,28 @@ namespace MuonValR4{
         /** @brief Temporary container write handle to push the seeds to store gate for later efficiency analysis */
         SG::ReadHandleKey<MuonR4::MsTrackSeedContainer> m_msTrkSeedKey{this, "MsTrkSeedKey", "MsTrackSeeds"};
         /** @brief Dependency on the geometry alignment */
-        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
         /** @brief Dependency on the magnetic field */
         SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheKey{this, "MagFieldKey", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
         /** @brief Segment selection tool to pick the good quality segments */
         ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
-        /** @brief Dependency on the R4 MS track container  */
-        SG::ReadHandleKey<ActsTrk::TrackContainer> m_trackKey{this, "TrackKey", "MsTracks"};
-          
+        /** @brief Dependency on the R4 muon container */
+        MuonKey_t m_muonKey{this, "MuonKey", "MuonsR4"};
+  
         /** @brief Hit summary tool */
         ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" ,""};
         /** @brief Legacy track reconstruction chain */
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
 
         /** @brief Legacy muons  */
-        SG::ReadHandleKey<xAOD::MuonContainer> m_legacyMuonKey{this,"LegacyMuonKey", "Muons"};
+        MuonKey_t m_legacyMuonKey{this,"LegacyMuonKey", "Muons"};
 
         std::unique_ptr<MuonR4::MsTrackSeeder> m_seeder{};
+        
         using ParticleBranchPtr_t = std::shared_ptr<MuonVal::IParticleFourMomBranch>;
         ParticleBranchPtr_t m_truthTrks{};
+        /** @brief Stored muon information from the Acts muon reco chain */
+        ParticleBranchPtr_t m_muonTrks{};
 
         using SegmentBranchPtr_t = std::shared_ptr<MuonPRDTest::SegmentVariables>;
         SegmentBranchPtr_t m_truthSegs{};
@@ -110,21 +126,21 @@ namespace MuonValR4{
         MuonVal::VectorBranch<float>& m_seedThetaCone{m_tree.newVector<float>("MsTrkSeed_thetaCone")};
         /** @brief Estimated momentum times charge from the track seed */
         MuonVal::VectorBranch<float>& m_seedQP{m_tree.newVector<float>("MsTrkSeed_qTimesP")};
+        /** @brief Link to the truth muon */
+        MuonVal::VectorBranch<unsigned short>& m_seedTruthLink{m_tree.newVector<unsigned short>("MsTrkSeed_truthLink", -1)};
         /** @brief Hit summary on the track seed */
         std::shared_ptr<TrackSummaryModule> m_seedSummary{};
-        /** @brief Hit summary on the reconstructed track */
-        std::shared_ptr<TrackSummaryModule> m_trackSummary{};
         /** @brief Link of the track seed to the building segment  */
         MuonVal::MatrixBranch<unsigned short>& m_seedRecoSegMatch{m_tree.newMatrix<unsigned short>("MsTrkSeed_segmentLinks")};
         /** @brief Link of the truth segments to the matchin reco segments */
         MuonVal::MatrixBranch<unsigned short>& m_truthSegToRecoLink{m_tree.newMatrix<unsigned short>("TruthSegments_recoSegLinks",-1)};
 
         /** @brief Link of the legacy track to the legacy segment */
-        MuonVal::VectorBranch<unsigned short>& m_legacySegToTrkLinks{m_tree.newVector<unsigned short>("LegacyRecoSegments_trkLinks")};
+        MuonVal::VectorBranch<unsigned short>& m_legacySegToTrkLinks{m_tree.newVector<unsigned short>("LegacyRecoSegments_trkLinks", -1)};
 
         /** @brief Links to all MsTrkSeeds that could be matched to the truthMuon, i.e. >= 1 segment*/
         MuonVal::MatrixBranch<unsigned short>& m_truthMuToSeedIdx{m_tree.newMatrix<unsigned short>("TruthMuons_seedLinks", -1)};
-        /** @brief Corresponding matching counter of reconstructed segments */
+        /** @brief Number of matched segments in the seed */
         MuonVal::MatrixBranch<unsigned short>& m_truthMuToSeedCounter{m_tree.newMatrix<unsigned short>("TruthMuons_seedNSeg")};
         /** @brief Links from the truth muon to the segments  */
         MuonVal::MatrixBranch<unsigned short>& m_truthMuTruthSegLinks{m_tree.newMatrix<unsigned short>("TruthMuons_truthSegLinks")};
@@ -133,11 +149,20 @@ namespace MuonValR4{
         /** @brief Links from the truth muon to the segments  */
         MuonVal::MatrixBranch<unsigned short>& m_truthMuRecoSegLinks{m_tree.newMatrix<unsigned short>("TruthMuons_recoSegLinks")};
         /*** @brief Length of the true segment seed  */
-        MuonVal::VectorBranch<float>& m_truthMuonsSeedLength{m_tree.newVector<float>("TruthMuons_seedLength")};
+        MuonVal::VectorBranch<float>& m_truthMuonsSeedLength{m_tree.newVector<float>("TruthMuons_seedLength", -1)};
         /** @brief Angular deviation of the true segment seed */
-        MuonVal::VectorBranch<float>& m_truthMuonsSeedCone{m_tree.newVector<float>("TruthMuons_seedThetaCone")};
+        MuonVal::VectorBranch<float>& m_truthMuonsSeedCone{m_tree.newVector<float>("TruthMuons_seedThetaCone", -1)};
+        /** @brief The deflection angle from the */
+        MuonVal::VectorBranch<float>& m_truthMuonsQPAlpha{m_tree.newVector<float>("TruthMuons_qTimesPalpha", 0)};
         /** @brief Estimated Q x P from the seeder algorithm class  */
-        MuonVal::VectorBranch<float>& m_truthMuonQP{m_tree.newVector<float>("TruthMuons_qTimesP")};
+        MuonVal::VectorBranch<float>& m_truthMuonQP{m_tree.newVector<float>("TruthMuons_qTimesP", 0)};
+
+        /** @brief Link of the reconstructed muons -> muon segments */
+        MuonVal::MatrixBranch<unsigned short>& m_MuonsToRecoSegLinks{m_tree.newMatrix<unsigned short>("ActsMuons_segmentLinks")};
+        /** @brief Link of the reconstructed muons -> track seeds */
+        MuonVal::VectorBranch<unsigned short>& m_MuonsSeedLink{m_tree.newVector<unsigned short>("ActsMuons_seedLink")};
+
+
         /** @brief Output branches of the legacy MS tracks */
         ParticleBranchPtr_t m_legacyTrks{};
     };

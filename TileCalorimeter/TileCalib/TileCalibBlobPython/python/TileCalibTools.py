@@ -94,7 +94,14 @@ def getPromptCalibRunNumber():
     promptCalibRuns = []
 
     try:
-        fin = open("/afs/cern.ch/user/a/atlcond/scratch0/nemo/prod/web/calibruns.txt","r").read().split()
+        aliascalibrun = os.getenv(
+            'TILE_ALIAS_CALIBRUN',
+            '/afs/cern.ch/user/a/atlcond/scratch0/nemo/prod/web/calibruns.txt'
+            )
+        if not aliascalibrun or not os.path.exists(aliascalibrun):
+            log.warning("Prompt calib run file not found: %s", aliascalibrun)
+            raise FileNotFoundError(aliascalibrun)
+        fin = open(aliascalibrun, 'r').read().split()
         for line in fin:
             try:
                 if line:
@@ -136,14 +143,19 @@ def getAliasFromFile(aliastype='Current'):
     Return name of top-level tag for 'Current' or 'CurrentES' or 'Next' or 'NextES' aliases
     """
 
-    aliasfolder = '/afs/cern.ch/atlas/conditions/poolcond/buffer/BestKnowledge'
     try:
+        aliasfolder = os.getenv(
+            'TILE_ALIAS_FOLDER',
+            '/afs/cern.ch/atlas/conditions/poolcond/buffer/BestKnowledge'
+            )
+        if not aliasfolder or not os.path.isdir(aliasfolder):
+            log.warning("Alias folder not found: %s", aliasfolder)
+            raise FileNotFoundError(aliasfolder)
         falias = open('%s/%s' % (aliasfolder, aliastype))
         alias = falias.readline()
         falias.close()
         return alias.replace('\n','').replace('*','')
     except Exception:
-        import os
         aliasfolder = os.getcwd()+'/BestKnowledge'
         print("Looking for %s in %s" % (aliastype,aliasfolder))
         try:

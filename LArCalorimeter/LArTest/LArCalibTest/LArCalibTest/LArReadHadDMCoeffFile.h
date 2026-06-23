@@ -19,7 +19,7 @@ class LArReadHadDMCoeffFile : public AthAlgorithm
   ~LArReadHadDMCoeffFile();
 
   StatusCode initialize(); 
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
   StatusCode initDataFromFile(const std::string& hadDMCoeffFileName);
 

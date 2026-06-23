@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -24,7 +24,7 @@
 #include <TTree.h>
 #include <fstream>
 #include <xAODEventInfo/EventInfo.h>
-#include <xAODRootAccess/TEvent.h>
+#include <xAODRootAccess/Event.h>
 
 //
 // method implementations

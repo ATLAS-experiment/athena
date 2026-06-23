@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TrackTimeDefAndQualityAlg.cxx
  * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -19,8 +19,7 @@
 #include "Acts/Utilities/TrackHelpers.hpp"
 
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
-
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 namespace HGTD {
 
 TrackTimeDefAndQualityAlg::TrackTimeDefAndQualityAlg(const std::string& name,
@@ -46,17 +45,8 @@ StatusCode TrackTimeDefAndQualityAlg::initialize() {
 
 StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
 
-  SG::ReadHandle<xAOD::TrackParticleContainer> trk_ptkl_container_handle(
-      m_trackParticleContainerKey, ctx);
-  ATH_CHECK( trk_ptkl_container_handle.isValid() );
-  const xAOD::TrackParticleContainer* track_particles =
-      trk_ptkl_container_handle.cptr();
-  if (not track_particles) {
-    ATH_MSG_ERROR(
-        "[TrackTimeDefAndQualityAlg] TrackParticleContainer not found, "
-        "aborting execute!");
-    return StatusCode::FAILURE;
-  }
+  const xAOD::TrackParticleContainer* track_particles{nullptr};
+  ATH_CHECK(SG::get(track_particles, m_trackParticleContainerKey, ctx));
 
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> time_handle(
       m_time_dec_key, ctx);
@@ -71,7 +61,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
     layerClusterTimeHandle(m_layerClusterTimeKey, ctx);
   ATH_CHECK(layerClusterTimeHandle.isValid());
 
-  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>>
+  SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::vector<char>>
       layerHasExtensionHandle(m_layerHasExtensionKey, ctx);
   ATH_CHECK(layerHasExtensionHandle.isValid());
 
@@ -84,7 +74,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
     // runs the time consistency checks
     // if no hits are found in HGTD, returns a default time
     const std::vector<float>& times = layerClusterTimeHandle(*track_ptkl);
-    const std::vector<bool>& has_clusters = layerHasExtensionHandle(*track_ptkl);
+    const std::vector<char>& has_clusters = layerHasExtensionHandle(*track_ptkl);
     const std::vector<int>& hit_classification = layerClusterTruthClassHandle(*track_ptkl);
 
     CleaningResult res = runTimeConsistencyCuts(times,
@@ -121,7 +111,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
 
 TrackTimeDefAndQualityAlg::CleaningResult
 TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(const std::vector<float>& times,
-						  const std::vector<bool>& has_clusters,
+						  const std::vector<char>& has_clusters,
 						  const std::vector<int>& hit_classification) const {
   // get all available hits (see the struct Hit) in a first step
   std::array<Hit, s_hgtd_layers> valid_hits = getValidHits(times,
@@ -209,7 +199,7 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(const std::vector<float>& time
 
 std::array<TrackTimeDefAndQualityAlg::Hit, s_hgtd_layers>
 TrackTimeDefAndQualityAlg::getValidHits(const std::vector<float>& times,
-					const std::vector<bool>& has_clusters,
+					const std::vector<char>& has_clusters,
 					const std::vector<int>& hit_classification) const {
   std::array<Hit, s_hgtd_layers> valid_hits {};
 
@@ -388,24 +378,22 @@ std::pair<float, float> TrackTimeDefAndQualityAlg::getRadiusAndZ(const xAOD::Tra
     const auto lastMeasurementState = Acts::findLastMeasurementState(track);
     const auto state = lastMeasurementState.value();
 
-    auto sl = state.getUncalibratedSourceLink().template get<ActsTrk::ATLASUncalibSourceLink>();
-    assert( sl != nullptr);
-    const xAOD::UncalibratedMeasurement &cluster = ActsTrk::getUncalibratedMeasurement(sl);
-    xAOD::UncalibMeasType clusterType = cluster.type();
+    const xAOD::UncalibratedMeasurement *cluster = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+    xAOD::UncalibMeasType clusterType = cluster->type();
 
     switch (clusterType) {
     case xAOD::UncalibMeasType::PixelClusterType:
       {
-	auto glob = static_cast<const xAOD::PixelCluster*>(&cluster)->globalPosition();
-	radius = std::sqrt( glob(0, 0) * glob(0, 0) + glob(1, 0) * glob(1, 0) );
-	abs_z = std::abs( glob(2, 0) );
+        auto glob = static_cast<const xAOD::PixelCluster*>(cluster)->globalPosition();
+        radius = glob.perp();
+        abs_z = std::abs(glob.z());
       }
       break;
     case xAOD::UncalibMeasType::StripClusterType:
       {
-	auto glob = static_cast<const xAOD::StripCluster*>(&cluster)->globalPosition();
-        radius = std::sqrt( glob(0, 0) * glob(0, 0) + glob(1, 0) * glob(1, 0) );
-        abs_z =	std::abs( glob(2, 0) );
+        auto glob = static_cast<const xAOD::StripCluster*>(cluster)->globalPosition();
+        radius = glob.perp();
+        abs_z = std::abs(glob.z());
       }
       break;
     case xAOD::UncalibMeasType::HGTDClusterType:

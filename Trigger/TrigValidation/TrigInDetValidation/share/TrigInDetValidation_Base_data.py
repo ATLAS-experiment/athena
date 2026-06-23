@@ -1,10 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import re
 
 from TrigValTools.TrigValSteering import Test, CheckSteps
-from TrigInDetValidation.TrigInDetArtSteps import TrigInDetAna, TrigCostStep, TrigInDetRdictStep, TrigInDetCompStep, TrigInDetCpuCostStep, TrigInDetRecoData, TrigBSExtr, TrigTZReco
+from TrigInDetValidation.TrigInDetArtSteps import TrigInDetAna, TrigCostStep, TrigInDetRdictStep, TrigInDetCompStep, TrigInDetCpuCostStep, TrigInDetRecoData, TrigTZReco
+from TrigP1Test.TrigP1TestSteps import filterBS
 
 import os,sys,getopt
 
@@ -125,11 +126,7 @@ if (Malloc):
 
 
 
-filter_bs = TrigBSExtr()
-
-if MultipleLB:
-    filter_bs.args += ' -l 0'
-
+filter_bs = filterBS('Main', extra_args = '-l 0' if MultipleLB else '')
 
 tzreco = TrigTZReco()
 tzreco.threads = Threads

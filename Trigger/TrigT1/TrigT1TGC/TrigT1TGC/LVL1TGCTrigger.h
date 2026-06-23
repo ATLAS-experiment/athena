@@ -75,7 +75,7 @@ class LVL1TGCTrigger : public AthAlgorithm
     // standard algorithm methods:
     virtual StatusCode initialize() override;
     virtual StatusCode start() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
  private:
     StatusCode processOneBunch(const Muon::TgcCablingMap& cabling,

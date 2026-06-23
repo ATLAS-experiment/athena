@@ -19,17 +19,21 @@ def configureFlags(runArgs):
         log.warning("Enters the inputBSFile if")
         flags.Input.Files = runArgs.inputBSFile
 
+    from TrigEDMConfig.DataScoutingInfo import getDataScoutingTypeFromStream, getDataScoutingStreams
+    if flags.Input.TriggerStream in getDataScoutingStreams():
+       dstype = getDataScoutingTypeFromStream(flags.Input.TriggerStream)
+
     # Output
     if hasattr(runArgs, 'outputDAOD_TLAFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAFile
         log.info("---------- Configured DAOD_TLA output")
-        flags.Trigger.AODEDMSet='PhysicsTLA'
+        flags.Trigger.AODEDMSet=dstype
         from AthenaConfiguration.DetectorConfigFlags import allDetectors
         disabled_detectors = allDetectors
     elif hasattr(runArgs, 'outputDAOD_TLAFTAGPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAFTAGPEBFile
         log.info("---------- Configured DAOD_TLAFTAGPEB output")
-        flags.Trigger.AODEDMSet='FTagPEBTLA'
+        flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'TRT',
             'LAr', 'Tile', 'MBTS',
@@ -40,7 +44,7 @@ def configureFlags(runArgs):
     elif hasattr(runArgs, 'outputDAOD_TLADJETPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLADJETPEBFile
         log.info("---------- Configured DAOD_TLADJETPEB output")
-        flags.Trigger.AODEDMSet='DarkJetPEBTLA'
+        flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'MBTS',
             'Lucid', 'ZDC', 'ALFA', 'AFP',
@@ -48,7 +52,7 @@ def configureFlags(runArgs):
     elif hasattr(runArgs, 'outputDAOD_TLAEGAMPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAEGAMPEBFile
         log.info("---------- Configured DAOD_TLAEGAMPEB output")
-        flags.Trigger.AODEDMSet='EgammaPEBTLA'
+        flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'MBTS',
             'CSC', 'MDT', 'RPC', 'TGC',
@@ -144,6 +148,14 @@ def fromRunArgs(runArgs):
     # setup Metadata writer
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     cfg.merge(SetupMetaDataForStreamCfg(flags,'AOD'))
+
+    # Write stream metadata into TagInfo
+    from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+    cfg.merge(TagInfoMgrCfg(flags,
+                            tagValuePairs={
+                                "triggerStreamOfFile": ""
+                                if flags.Input.isMC
+                                else flags.Input.TriggerStream}))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

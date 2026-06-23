@@ -53,7 +53,7 @@ StatusCode CaloAddCellPedShift::initialize()
 
 
 //__________________________________________________________________________
-StatusCode CaloAddCellPedShift::execute()
+StatusCode CaloAddCellPedShift::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloAddCellPedShift execute()" );
   return StatusCode::SUCCESS; 

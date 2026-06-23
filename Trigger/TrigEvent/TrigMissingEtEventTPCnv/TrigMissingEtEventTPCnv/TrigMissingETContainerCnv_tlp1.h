@@ -18,7 +18,7 @@
 #ifndef  TRIGMISSINGETEVENTTPCNV_TrigMissingETContainer_CNV_TLP1_H
 #define  TRIGMISSINGETEVENTTPCNV_TrigMissingETContainer_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigMissingEtEventTPCnv/TrigMissingETContainerCnv_p1.h"   
 #include "TrigMissingEtEventTPCnv/TrigMissingETCnv_p1.h"   
@@ -28,7 +28,7 @@
  
 
  
-class TrigMissingETContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigMissingETContainerCnv_p1, TrigMissingETContainer_tlp1 >
+class TrigMissingETContainerCnv_tlp1 : public TopLevelTPConverter< TrigMissingETContainerCnv_p1, TrigMissingETContainer_tlp1 >
 {
  
  public:

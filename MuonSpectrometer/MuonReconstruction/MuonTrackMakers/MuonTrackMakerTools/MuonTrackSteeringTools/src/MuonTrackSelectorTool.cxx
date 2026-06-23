@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSelectorTool.h"
@@ -62,7 +62,7 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    bool MuonTrackSelectorTool::decision(Trk::Track& track) const {
+    bool MuonTrackSelectorTool::decision(const EventContext& ctx, Trk::Track& track) const {
         // loop over track and calculate residuals
         const Trk::TrackStates* states = track.trackStateOnSurfaces();
         if (!states) {
@@ -151,12 +151,12 @@ namespace Muon {
             if (summary->muonTrackSummary())
                 muonSummary = *summary->muonTrackSummary();
             else {
-                m_trackSummaryTool->addDetailedTrackSummary(track, *summary);
+                m_trackSummaryTool->addDetailedTrackSummary(ctx, track, *summary);
                 if (summary->muonTrackSummary()) muonSummary = *summary->muonTrackSummary();
             }
         } else {
             Trk::TrackSummary tmpSummary;
-            m_trackSummaryTool->addDetailedTrackSummary(track, tmpSummary);
+            m_trackSummaryTool->addDetailedTrackSummary(ctx, track, tmpSummary);
             if (tmpSummary.muonTrackSummary()) muonSummary = *tmpSummary.muonTrackSummary();
         }
 

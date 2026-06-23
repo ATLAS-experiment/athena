@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****** **************************************************************
@@ -30,6 +30,7 @@
 #include "TileEvent/TileBeamElemContainer.h"
 #include "TileByteStream/TileBeamElemContByteStreamCnv.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
+#include "CxxUtils/FPControl.h"
 
 
 #include "TFile.h"
@@ -313,9 +314,8 @@ StatusCode TileRawChNoiseCalibAlg::FirstEvt_initialize() {
 }
 
 /// Main method
-StatusCode TileRawChNoiseCalibAlg::execute() {
+StatusCode TileRawChNoiseCalibAlg::execute(const EventContext& ctx) {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus* dqStatus = SG::makeHandle (m_dqStatusKey, ctx).get();
 
   bool empty(false); // to add all StatusCodes
@@ -797,6 +797,12 @@ StatusCode TileRawChNoiseCalibAlg::fillRawChannels(const TileDQstatus* dqStatus,
 void TileRawChNoiseCalibAlg::finalRawCh(int rctype) {
   /*---------------------------------------------------------*/
 
+  // Some of the ROOT histogram/fitting code is not protected against FPEs.
+  // Just disable the detection of FPEs for this function.
+  CxxUtils::FPControl ctl;
+  ctl.disable (CxxUtils::FPControl::Exc::divbyzero |
+               CxxUtils::FPControl::Exc::invalid);
+
   TF1 * fit_gaus = new TF1("g", "gaus");
 
   for (unsigned int ros = 1; ros < TileCalibUtils::MAX_ROS; ++ros) {
@@ -816,15 +822,16 @@ void TileRawChNoiseCalibAlg::finalRawCh(int rctype) {
 
           if (m_evt[ros][drawer][chan][gain] > 0) {
 
-            m_histAmp[rctype][ros][drawer][chan][gain]->Fit("g", "NQ");
+            TH1F& histAmp = *m_histAmp[rctype][ros][drawer][chan][gain];
+            histAmp.Fit("g", "NQ");
 
-            m_rc_av[rctype][ros][drawer][chan][gain] = m_histAmp[rctype][ros][drawer][chan][gain]->GetMean();
-            m_rc_rms[rctype][ros][drawer][chan][gain] = m_histAmp[rctype][ros][drawer][chan][gain]->GetRMS();
+            m_rc_av[rctype][ros][drawer][chan][gain] = histAmp.GetMean();
+            m_rc_rms[rctype][ros][drawer][chan][gain] = histAmp.GetRMS();
 
-            if (TMath::Abs(m_histAmp[rctype][ros][drawer][chan][gain]->GetSkewness()) < 1000.)
-              m_rc_skewness[rctype][ros][drawer][chan][gain] = m_histAmp[rctype][ros][drawer][chan][gain]->GetSkewness();
-            if (TMath::Abs(m_histAmp[rctype][ros][drawer][chan][gain]->GetKurtosis()) < 1000.)
-              m_rc_kurtosis[rctype][ros][drawer][chan][gain] = m_histAmp[rctype][ros][drawer][chan][gain]->GetKurtosis();
+            if (TMath::Abs(histAmp.GetSkewness()) < 1000.)
+              m_rc_skewness[rctype][ros][drawer][chan][gain] = histAmp.GetSkewness();
+            if (TMath::Abs(histAmp.GetKurtosis()) < 1000.)
+              m_rc_kurtosis[rctype][ros][drawer][chan][gain] = histAmp.GetKurtosis();
 
             m_rc_mean[rctype][ros][drawer][chan][gain] = fit_gaus->GetParameter(1);
             m_rc_mean_err[rctype][ros][drawer][chan][gain] = fit_gaus->GetParError(1);
@@ -834,7 +841,7 @@ void TileRawChNoiseCalibAlg::finalRawCh(int rctype) {
             m_rc_ndf[rctype][ros][drawer][chan][gain] = fit_gaus->GetNDF();
             m_rc_probC2[rctype][ros][drawer][chan][gain] = fit_gaus->GetProb();
 
-            doFit(m_histAmp[rctype][ros][drawer][chan][gain], m_rc_ggpar[rctype][ros][drawer][chan][gain], m_invertChanRatio);
+            doFit(&histAmp, m_rc_ggpar[rctype][ros][drawer][chan][gain], m_invertChanRatio);
 
             m_rc_gsigma1[rctype][ros][drawer][chan][gain] = m_rc_ggpar[rctype][ros][drawer][chan][gain][0];
             m_rc_gsigma2[rctype][ros][drawer][chan][gain] = m_rc_ggpar[rctype][ros][drawer][chan][gain][2];
@@ -995,10 +1002,17 @@ void  TileRawChNoiseCalibAlg::doFit(TH1F* h, float* gp, bool invert) {
 
   float xmin = h->GetBinCenter(1);
   float xmax = h->GetBinCenter(h->GetNbinsX());
-  TF1* total = new TF1("total", "gaus(0)+gaus(3)", xmin, xmax);
-  total->SetLineColor(2);
+  TF1 total("total", "gaus(0)+gaus(3)", xmin, xmax);
+  total.SetLineColor(2);
 
   float nentries = h->GetEntries();
+
+  if (nentries == 0) {
+    // Protect against empty histogram.
+    std::fill (gp, gp+8, 0);
+    return;
+  }
+
   float rms = h->GetRMS();
   float bin = h->GetBinWidth(0);
 
@@ -1010,7 +1024,7 @@ void  TileRawChNoiseCalibAlg::doFit(TH1F* h, float* gp, bool invert) {
   par[4] = 0.;
   par[5] = 5. * par[2];
 
-  total->SetParameters(par);
+  total.SetParameters(par);
 
   float lim1 = bin / 2.;
   float lim2 = std::max(rms * 1.05, bin * 2.0);
@@ -1021,29 +1035,29 @@ void  TileRawChNoiseCalibAlg::doFit(TH1F* h, float* gp, bool invert) {
   float limN2 = nentries;
   if (lim2 < 0.5) limN2 /= (2. * lim2); // a bit more than Nentries / ( sqrt(2*pi) * sigma2 )
    
-  total->SetParLimits(0, 0., limN1);
-  total->FixParameter(1, 0.);
-  total->SetParLimits(2, lim1, lim2);
-  total->SetParLimits(3, 0., limN2);
-  total->FixParameter(4, 0.);
-  total->SetParLimits(5, lim2, lim3);
+  total.SetParLimits(0, 0., limN1);
+  total.FixParameter(1, 0.);
+  total.SetParLimits(2, lim1, lim2);
+  total.SetParLimits(3, 0., limN2);
+  total.FixParameter(4, 0.);
+  total.SetParLimits(5, lim2, lim3);
 
-  TFitResultPtr resfit = h->Fit(total, "BLQRS");
+  TFitResultPtr resfit = h->Fit(&total, "BLQRS");
 
-  float par0 = total->GetParameter(0);
-  float par3 = total->GetParameter(3);
+  float par0 = total.GetParameter(0);
+  float par3 = total.GetParameter(3);
 
-  float sigma1 = total->GetParameter(2); //sigma gauss1
-  float sigma2 = total->GetParameter(5); //sigma gauss1
+  float sigma1 = total.GetParameter(2); //sigma gauss1
+  float sigma2 = total.GetParameter(5); //sigma gauss1
 
   //Get errors
-  float errpar0 = total->GetParError(0);
-  float errpar3 = total->GetParError(3);
+  float errpar0 = total.GetParError(0);
+  float errpar3 = total.GetParError(3);
 
-  float errsigma1 = total->GetParError(2);
-  float errsigma2 = total->GetParError(5);
+  float errsigma1 = total.GetParError(2);
+  float errsigma2 = total.GetParError(5);
 
-  float norm = par3 / par0; //rel normalization of the gaussians
+  float norm = par0 != 0 ? par3 / par0 : 0; //rel normalization of the gaussians
 
   if (invert && norm > 1.) {  //invert the 2 gaussians if normalization is greater than 1
 
@@ -1062,22 +1076,26 @@ void  TileRawChNoiseCalibAlg::doFit(TH1F* h, float* gp, bool invert) {
     gp[2] = sigma2;
 
     gp[4] = errsigma1;
-    gp[5] = sqrt((errpar3 * errpar3) + (errpar0 * errpar0) * (par3 * par3) / (par0 * par0)) / par0;
+    gp[5] = par0 != 0 ? sqrt((errpar3 * errpar3) + (errpar0 * errpar0) * (par3 * par3) / (par0 * par0)) / par0 : 0;
     gp[6] = errsigma2;
 
   }
 
-  if (total->GetNDF() > 0) {
-    gp[3] = total->GetChisquare() / total->GetNDF(); //chi2/ndf
+  if (total.GetNDF() > 0) {
+    gp[3] = total.GetChisquare() / total.GetNDF(); //chi2/ndf
   } else {
     gp[3] = 0.;
   }
 
   // Get correlation sigma1, sigma2
-  TMatrixDSym corr = resfit->GetCorrelationMatrix();
-  gp[7] = corr(2, 5);
-
-  delete total;
+  if (resfit->CovMatrixStatus()) {
+    TMatrixDSym corr = resfit->GetCorrelationMatrix();
+    gp[7] = corr(2, 5);
+  }
+  else {
+    // May happen if the input histogram is empty.
+    gp[7] = 0;
+  }
 }
 
 

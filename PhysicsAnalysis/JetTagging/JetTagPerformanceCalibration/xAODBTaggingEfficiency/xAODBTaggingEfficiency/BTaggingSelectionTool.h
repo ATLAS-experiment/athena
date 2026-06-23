@@ -84,7 +84,6 @@ private:
   Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "operating point"};
   Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", ftag::defaults::jet_collection, "jet collection"};
   Gaudi::Property<std::string> m_ContinuousBenchmarks {this, "CutBenchmarksContinuousWP", "", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. "};
-  Gaudi::Property<std::string> m_wps_raw {this, "WorkingPointDefinitions", "FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_60", "Comma-separated list of tagger working points (in decreasing order of efficiency!) - required for 1D tagging purposes"};
   
   Gaudi::Property<bool> m_ErrorOnTagWeightFailure{this, "ErrorOnTagWeightFailure", true, "optionally ignore cases where the tagweight cannot be retrieved. default behaviour is to give an error, switching to false will turn it into a warning"};
   //use c-tagging or b-tagging in 1D
@@ -121,13 +120,15 @@ private:
 
   taggerproperties m_tagger;
 
-  enum Tagger{UNKNOWN, DL1, GN1, GN2, MV2c10};
+  enum Tagger{UNKNOWN, DL1, GN1, GN2, MV2c10, GN3EPCLV01, GN3PflowMuonsV00};
   Tagger m_taggerEnum{UNKNOWN};
-
+  
   Tagger SetTaggerEnum(const std::string& taggerName){
     if(taggerName.find("DL1") != std::string::npos) return Tagger::DL1;
     else if(taggerName.find("GN1") != std::string::npos) return Tagger::GN1;
     else if(taggerName.find("GN2") != std::string::npos) return Tagger::GN2;
+    else if(taggerName.find("GN3EPCLV01") != std::string::npos) return Tagger::GN3EPCLV01;
+    else if(taggerName.find("GN3PflowMuonsV00") != std::string::npos) return Tagger::GN3PflowMuonsV00;
     else if(taggerName == "MV2c10") return Tagger::MV2c10;
     else 
       ATH_MSG_ERROR("Tagger Name NOT supported.");

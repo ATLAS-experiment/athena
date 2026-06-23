@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file xAODRootAccess/test/ut_xaodtrigger_bytestreamauxcontainer_v1_test.cxx
@@ -140,8 +140,39 @@ void test1()
 }
 
 
+// Test getCopyIDs()
+void test_copyIDs()
+{
+  std::cout << "test_copyIDs\n";
+  AuxContainerTest s1;
+  s1.resize(5);
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t i1 = r.getAuxID<int> ("i1");
+  SG::auxid_t i2 = r.getAuxID<int> ("i2");
+  SG::auxid_t i3 = r.getAuxID<int> ("i3");
+  SG::auxid_t anInt = r.findAuxID ("anInt");
+
+  (void)s1.getData(i1, 5, 5);
+  (void)s1.getData(i3, 5, 5);
+  s1.lock();
+  (void)s1.getDecoration(i2, 5, 5);
+
+  SG::auxid_set_t exp;
+  exp.set (i1);
+  exp.set (i3);
+  exp.set (anInt);
+
+  {
+    SG::auxid_set_t out = s1.getCopyIDs();
+    assert (out == exp);
+  }
+}
+
+
 int main()
 {
   test1();
+  test_copyIDs();
   return 0;
 }

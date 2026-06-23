@@ -130,8 +130,8 @@ StatusCode NewMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvt
       HepMC::GenEvent * evt = new HepMC::GenEvent(c_evt);
       HepMC::fillBarcodesAttribute(evt);
       const int bunchCrossingTime=static_cast<int>(timeOffset);
-      evt->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
-      evt->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType));
+      evt->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime));
+      evt->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType));
       for (const auto&  itVer:  evt->vertices()) {
         HepMC::FourVector newPos(itVer->position().x(),itVer->position().y(),itVer->position().z(),itVer->position().t()+timeOffset);
         itVer->set_position(newPos);

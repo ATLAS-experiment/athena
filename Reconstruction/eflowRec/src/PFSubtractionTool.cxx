@@ -63,7 +63,7 @@ StatusCode PFSubtractionTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectContainer, eflowRecTrackContainer *recTrackContainer, eflowRecClusterContainer *recClusterContainer) const
+void PFSubtractionTool::execute(const EventContext& ctx, eflowCaloObjectContainer *theEflowCaloObjectContainer, eflowRecTrackContainer *recTrackContainer, eflowRecClusterContainer *recClusterContainer) const
 {
 
   ATH_MSG_DEBUG("Executing");
@@ -80,7 +80,7 @@ void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectCont
 
   ATH_MSG_DEBUG("This event has " << data.tracks.size() << " tracks " << data.clusters.size() << " clusters ");
 
-  unsigned int numMatches = matchAndCreateEflowCaloObj(data);
+  unsigned int numMatches = matchAndCreateEflowCaloObj(ctx, data);
 
   if (msgLvl(MSG::DEBUG)) printAllClusters(*recClusterContainer);
 
@@ -95,14 +95,13 @@ void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectCont
 
 }
 
-unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
+unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(const EventContext& ctx, PFData &data) const{
 
   //Counts up how many tracks found at least 1 calorimeter cluster matched to it.
   unsigned int nMatches(0);
 
   /* Cache the original number of eflowCaloObjects, if there were any */
   const unsigned int nCaloObj = data.caloObjects->size();
-  const EventContext &ctx = Gaudi::Hive::currentContext();
 
   /* loop tracks in data.tracks and do matching */
   for (auto *thisEfRecTrack : data.tracks)
@@ -139,7 +138,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
       if (trackMatchedTruthParticle){
         double uniqueID = HepMC::uniqueID(trackMatchedTruthParticle);
 
-        SG::ReadDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterReadDecorHandleNLeadingTruthParticles(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles);
+        SG::ReadDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterReadDecorHandleNLeadingTruthParticles(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles, ctx);
         if (!caloClusterReadDecorHandleNLeadingTruthParticles.isValid()){
           ATH_MSG_WARNING("Failed to retrieve CaloCluster decoration with key " << caloClusterReadDecorHandleNLeadingTruthParticles.key());
         }
@@ -268,7 +267,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
   //For each eflowCaloObject we calculate the expected energy deposit in the calorimeter and cell ordering for subtraction.  
   for (unsigned int iCalo = nCaloObj; iCalo < data.caloObjects->size(); ++iCalo) {  
     eflowCaloObject* thisEflowCaloObject = data.caloObjects->at(iCalo);
-    thisEflowCaloObject->simulateShower(&integrator, m_binnedParameters.get(), m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr, m_useLegacyEBinIndex);
+    thisEflowCaloObject->simulateShower(ctx, &integrator, m_binnedParameters.get(), m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr, m_useLegacyEBinIndex);
     if (m_useTruthForChargedShowerSubtraction) m_theTruthShowerSimulator->simulateShower(*thisEflowCaloObject);    
 
   }

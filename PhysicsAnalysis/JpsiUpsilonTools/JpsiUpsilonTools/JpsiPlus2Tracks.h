@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -57,7 +57,7 @@ namespace Analysis {
 
         bool  passCuts(xAOD::BPhysHelper &bHelper, std::span<const double> masses, std::string_view str) const;
         bool  vertexCuts(xAOD::BPhysHelper &bHelper) const;
-        xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>&,
+        std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>&,
                           const xAOD::TrackParticleContainer*, const xAOD::TrackParticleContainer* GSL) const;
         //-------------------------------------------------------------------------------------
         

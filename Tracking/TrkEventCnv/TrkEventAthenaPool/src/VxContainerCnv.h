@@ -45,7 +45,7 @@ protected:
   virtual VxContainer_PERS *createPersistent( VxContainer *transCont) override;
   virtual VxContainer      *createTransient(const Token* token) override;
 
-  virtual AthenaPoolTopLevelTPCnvBase*   getTopLevelTPCnv() override { return &m_TPConverter; }
+  virtual TopLevelTPCnvBase*   getTopLevelTPCnv() override { return &m_TPConverter; }
 
  
  private:

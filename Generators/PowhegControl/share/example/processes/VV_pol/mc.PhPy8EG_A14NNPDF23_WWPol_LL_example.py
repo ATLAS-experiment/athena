@@ -103,19 +103,6 @@ PowhegConfig.polarization = "longit-longit"
 PowhegConfig.runningscale = "0"
 
 # --------------------------------------------------------------
-# minlo or nnlops - uncomment each line to activate them
-# --------------------------------------------------------------
-# from the manual: "Note that Minlo overwrites any other running scale choice. The NNLOPS
-# works only if the Minlo option is on. Finally, if Minlo is switched off, one
-# needs to use a Born suppression factor, or, alternatively, a cut in the phase-space
-# generation, in order to make the cross-section finite. The latter cut can be set
-# through the token bornktmin."
-# --------------------------------------------------------------
-# PowhegConfig.minlo        = "1"
-# PowhegConfig.minlo_nnll   = "1"
-# PowhegConfig.nnlops       = "1"
-
-# --------------------------------------------------------------
 # Generate events
 # --------------------------------------------------------------
 PowhegConfig.generate()

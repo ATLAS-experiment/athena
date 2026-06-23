@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -79,42 +79,45 @@ namespace Trk
 
 
   /** Interface for xAOD::TrackParticle with Amg::Vector3D starting point */
-  xAOD::Vertex * TrkV0VertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+  std::unique_ptr<xAOD::Vertex> TrkV0VertexFitter::fit(const EventContext& ctx,
+                                        const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                                         const Amg::Vector3D& firstStartingPoint) const
   {
     std::vector<double> masses;
     double constraintMass = -9999.;
     xAOD::Vertex * pointingVertex = nullptr;
-    return fit(vectorTrk, masses, constraintMass, pointingVertex, firstStartingPoint);
+    return fit(ctx, vectorTrk, masses, constraintMass, pointingVertex, firstStartingPoint);
   }
 
   /** Interface for xAOD::TrackParticle with xAOD::Vertex starting point */
-  xAOD::Vertex * TrkV0VertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,
+  std::unique_ptr<xAOD::Vertex> TrkV0VertexFitter::fit(const EventContext& ctx,
+                                        const std::vector<const xAOD::TrackParticle*>& vectorTrk,
                                         const xAOD::Vertex& firstStartingPoint) const
   {
     std::vector<double> masses;
     double constraintMass = -9999.;
     xAOD::Vertex * pointingVertex = nullptr;
     const Amg::Vector3D& startingPoint = firstStartingPoint.position();
-    return fit(vectorTrk, masses, constraintMass, pointingVertex, startingPoint);
+    return fit(ctx, vectorTrk, masses, constraintMass, pointingVertex, startingPoint);
   }
 
   /** Interface for xAOD::TrackParticle with no starting point. (0,0,0) will be assumed */
-  xAOD::Vertex * TrkV0VertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk) const
+  std::unique_ptr<xAOD::Vertex> TrkV0VertexFitter::fit(const EventContext& ctx,
+                                        const std::vector<const xAOD::TrackParticle*>& vectorTrk) const
   {
     Amg::Vector3D tmpVtx;
     tmpVtx.setZero();
-    return fit(vectorTrk, tmpVtx);
+    return fit(ctx, vectorTrk, tmpVtx);
   }
 
   /** Interface for xAOD::TrackParticle with mass and pointing constraints */
-  xAOD::Vertex * TrkV0VertexFitter::fit(const std::vector<const xAOD::TrackParticle*> & vectorTrk,
+  std::unique_ptr<xAOD::Vertex> TrkV0VertexFitter::fit(const EventContext& ctx,
+                                        const std::vector<const xAOD::TrackParticle*> & vectorTrk,
                                         const std::vector<double>& masses,
                                         const double& constraintMass,
                                         const xAOD::Vertex* pointingVertex,
                                         const Amg::Vector3D& firstStartingPoint) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     std::vector<const Trk::TrackParameters*> measuredPerigees;
     std::vector<const Trk::TrackParameters*> measuredPerigees_delete;
     for (const xAOD::TrackParticle* p : vectorTrk)
@@ -174,7 +177,7 @@ namespace Trk
       }
     }
 
-    xAOD::Vertex * fittedVxCandidate = fit(measuredPerigees, masses, constraintMass, pointingVertex, firstStartingPoint);
+    std::unique_ptr<xAOD::Vertex> fittedVxCandidate = fit(ctx, measuredPerigees, masses, constraintMass, pointingVertex, firstStartingPoint);
 
     // assign the used tracks to the V0Candidate
     if (fittedVxCandidate) {
@@ -194,42 +197,45 @@ namespace Trk
 
 
   /** Interface for Trk::TrackParameters with Amg::Vector3D starting point */
-  xAOD::Vertex * TrkV0VertexFitter::fit(const std::vector<const Trk::TrackParameters*> & originalPerigees,
+  std::unique_ptr<xAOD::Vertex> TrkV0VertexFitter::fit(const EventContext& ctx,
+                                        const std::vector<const Trk::TrackParameters*> & originalPerigees,
                                         const Amg::Vector3D& firstStartingPoint) const
   {
     std::vector<double> masses;
     double constraintMass = -9999.;
     xAOD::Vertex * pointingVertex = nullptr;
-    return fit(originalPerigees, masses, constraintMass, pointingVertex, firstStartingPoint);
+    return fit(ctx, originalPerigees, masses, constraintMass, pointingVertex, firstStartingPoint);
   }
 
   /** Interface for Trk::TrackParameters with xAOD::Vertex starting point */
-  xAOD::Vertex * TrkV0VertexFitter::fit(const std::vector<const Trk::TrackParameters*> & originalPerigees,
+  std::unique_ptr<xAOD::Vertex> TrkV0VertexFitter::fit(const EventContext& ctx,
+                                        const std::vector<const Trk::TrackParameters*> & originalPerigees,
                                         const xAOD::Vertex& firstStartingPoint) const
   {
     std::vector<double> masses;
     double constraintMass = -9999.;
     xAOD::Vertex * pointingVertex = nullptr;
     const Amg::Vector3D& startingPoint = firstStartingPoint.position();
-    return fit(originalPerigees, masses, constraintMass, pointingVertex, startingPoint);
+    return fit(ctx, originalPerigees, masses, constraintMass, pointingVertex, startingPoint);
   }
 
   /** Interface for Trk::TrackParameters with no starting point. (0,0,0) will be assumed */
-  xAOD::Vertex * TrkV0VertexFitter::fit(const std::vector<const Trk::TrackParameters*>& originalPerigees) const
+  std::unique_ptr<xAOD::Vertex> TrkV0VertexFitter::fit(const EventContext& ctx,
+                                        const std::vector<const Trk::TrackParameters*>& originalPerigees) const
   {
     Amg::Vector3D tmpVtx;
     tmpVtx.setZero();
-    return fit(originalPerigees, tmpVtx);
+    return fit(ctx, originalPerigees, tmpVtx);
   }
 
   /** Interface for Trk::TrackParameters with mass and pointing constraints */
-  xAOD::Vertex * TrkV0VertexFitter::fit(const std::vector<const Trk::TrackParameters*>& originalPerigees,
+  std::unique_ptr<xAOD::Vertex> TrkV0VertexFitter::fit(const EventContext& ctx,
+                                        const std::vector<const Trk::TrackParameters*>& originalPerigees,
                                         const std::vector<double>& masses,
                                         const double& constraintMass,
                                         const xAOD::Vertex* pointingVertex,
                                         const Amg::Vector3D& firstStartingPoint) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     if ( originalPerigees.empty() )
     {
       ATH_MSG_DEBUG("No tracks to fit in this event.");
@@ -919,7 +925,7 @@ namespace Trk
     }
 
     // Store the vertex
-    xAOD::Vertex* vx = new xAOD::Vertex;
+    auto vx = std::make_unique<xAOD::Vertex>();
     vx->makePrivateStore();
     vx->setPosition (frameOrigin);
     vx->setCovariancePosition (C22_mat);

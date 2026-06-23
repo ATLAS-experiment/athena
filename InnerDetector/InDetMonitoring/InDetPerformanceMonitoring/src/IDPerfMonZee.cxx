@@ -406,7 +406,7 @@ void IDPerfMonZee::RegisterHisto(MonGroup& mon, TH2* histo, bool doSumw2) {
   }
 }
 
-StatusCode IDPerfMonZee::fillHistograms()
+StatusCode IDPerfMonZee::fillHistograms(const EventContext& /*ctx*/)
 {
   ATH_MSG_VERBOSE("In fillHistograms()");
   int nevents = (int) m_Nevents->GetEntries();

@@ -23,7 +23,7 @@ class SpacePointCsvDumperAlg: public AthAlgorithm {
     ~SpacePointCsvDumperAlg() = default;
 
      StatusCode initialize() override;
-     StatusCode execute() override;
+     StatusCode execute(const EventContext& ctx) override;
 
    private:
 

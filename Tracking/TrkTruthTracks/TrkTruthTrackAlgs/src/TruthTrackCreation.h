@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #define TRKTRUTHTRACKALGS_TRUTHTRACKCREATION_H
 
 // Gaudi includes
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 // GaudiHandle
 #include "GaudiKernel/ToolHandle.h"
@@ -44,7 +44,7 @@ namespace Trk
       @author  Andreas Salzburger <Andreas.Salzburger@cern.ch>
   */  
 
-  class TruthTrackCreation : public AthAlgorithm
+  class TruthTrackCreation : public AthReentrantAlgorithm
     {
     public:
 
@@ -56,7 +56,7 @@ namespace Trk
        /** standard Athena-Algorithm method */
        StatusCode          initialize();
        /** standard Athena-Algorithm method */
-       StatusCode          execute();
+       StatusCode          execute(const EventContext& ctx) const;
        /** standard Athena-Algorithm method */
        StatusCode          finalize();
 

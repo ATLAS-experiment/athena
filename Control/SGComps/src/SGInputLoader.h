@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGInputLoader.h 
@@ -31,7 +31,7 @@ class SGInputLoader
   bool isClonable() const override { return true; }
 
   virtual StatusCode  initialize() override;
-  virtual StatusCode  execute() override;
+  virtual StatusCode  execute(const EventContext& ctx) override;
   virtual StatusCode  finalize() override;
 
  private: 

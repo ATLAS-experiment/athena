@@ -47,6 +47,8 @@ def BPHY14Cfg(flags):
        acc.addPublicTool(trackselect)
        vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
        acc.addPublicTool(vpest)
+       PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+       acc.addPublicTool(PVrefit)
        BPHY14JpsiFinder = CompFactory.Analysis.JpsiFinder(
                 name                        = "BPHY14JpsiFinder",
                 muAndMu                     = True,
@@ -76,7 +78,7 @@ def BPHY14Cfg(flags):
                                 OutputVtxContainerName = "BPHY14OniaCandidates",
                                 PVContainerName        = "PrimaryVertices",
                                 V0Tools                = V0Tools,
-                                PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                PVRefitter             = PVrefit,
                                 RelinkTracks  =  toRelink,
                                 RelinkMuons   =  MuonReLink,
                                 RefPVContainerName     = "BPHY14RefittedPrimaryVertices",

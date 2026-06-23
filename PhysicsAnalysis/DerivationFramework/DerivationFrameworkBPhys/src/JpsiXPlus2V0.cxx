@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #include "JpsiXPlus2V0.h"
@@ -93,7 +93,7 @@ namespace DerivationFramework {
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_iV0Fitter("Trk::V0VertexFitter"),
     m_iGammaFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools"),
     m_trackToVertexTool("Reco::TrackToVertex"),
     m_v0TrkSelector("InDet::TrackSelectorTool"),
@@ -417,17 +417,17 @@ namespace DerivationFramework {
 	  }
 
 	  if(numberOfVertices==2) {
-	    Trk::VxCascadeInfo* result1 = fitMainVtx(*jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	    Trk::VxCascadeInfo* result1 = fitMainVtx(ctx, *jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result1) cascadeinfoContainer.push_back(result1);
-	    Trk::VxCascadeInfo* result2 = fitMainVtx(*jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	    Trk::VxCascadeInfo* result2 = fitMainVtx(ctx, *jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result2) cascadeinfoContainer.push_back(result2);
 	  }
 	  else if(numberOfVertices==1) {
-	    Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	    Trk::VxCascadeInfo* result = fitMainVtx(ctx, *jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result) cascadeinfoContainer.push_back(result);
 	  }
 	  else if(numberOfVertices==-1) {
-	    Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	    Trk::VxCascadeInfo* result = fitMainVtx(ctx, *jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result) cascadeinfoContainer.push_back(result);
 	  }
 	}
@@ -793,7 +793,7 @@ namespace DerivationFramework {
     return pass;
   }
 
-  Trk::VxCascadeInfo* JpsiXPlus2V0::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
+  Trk::VxCascadeInfo* JpsiXPlus2V0::fitMainVtx(const EventContext& ctx, const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     Trk::VxCascadeInfo* result(nullptr);
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -898,7 +898,7 @@ namespace DerivationFramework {
     std::vector<float> trk_pz;
 
     // Apply the user's settings to the fitter
-    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
     // Robustness: http://cdsweb.cern.ch/record/685551
     int robustness = 0;
     m_iVertexFitter->setRobustness(robustness, *state);
@@ -1154,7 +1154,7 @@ namespace DerivationFramework {
 	    if(pass) {
 	      std::vector<const xAOD::TrackParticle*> tracksV0;
 	      tracksV0.push_back(TP1); tracksV0.push_back(TP2);
-	      std::unique_ptr<xAOD::Vertex> V0vtx = std::unique_ptr<xAOD::Vertex>( m_iV0Fitter->fit(tracksV0, startingPoint) );
+	      std::unique_ptr<xAOD::Vertex> V0vtx = m_iV0Fitter->fit(ctx, tracksV0, startingPoint);
 	      if(V0vtx && V0vtx->chiSquared()>=0) {
 		double chi2DOF = V0vtx->chiSquared()/V0vtx->numberDoF();
 		if(chi2DOF>m_chi2cut_V0) continue;
@@ -1174,7 +1174,7 @@ namespace DerivationFramework {
 
 		int gamma_fit = 0; int gamma_ndof = 0; double gamma_chisq = 999999.;
 		double gamma_prob = -1., gamma_mass = -1., gamma_massErr = -1.;
-		std::unique_ptr<xAOD::Vertex> gammaVtx = std::unique_ptr<xAOD::Vertex>( m_iGammaFitter->fit(tracksV0, m_V0Tools->vtx(V0vtx.get())) );
+		std::unique_ptr<xAOD::Vertex> gammaVtx = m_iGammaFitter->fit(ctx, tracksV0, m_V0Tools->vtx(V0vtx.get()));
 		if (gammaVtx) {
 		  gamma_fit     = 1;
 		  gamma_mass    = m_V0Tools->invariantMass(gammaVtx.get(),m_mass_e,m_mass_e);

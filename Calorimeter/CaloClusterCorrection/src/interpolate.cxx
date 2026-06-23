@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  interpolate.cxx
@@ -14,7 +14,6 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
-
 
 namespace {
 
@@ -167,8 +166,10 @@ float interpolate (const CaloRec::Array<2>& a,
   // t gets the x coordinates, d gets the y coordinates.
   // Note that the order doesn't matter.
   // Reserve two extra points in case we end up adding some.
+  assert(ihi >= ilo);
   npts = ihi - ilo;
   std::vector<float> t;
+  //coverity[INTEGER_OVERFLOW]
   t.reserve (npts+2);
   std::vector<float> d;
   d.reserve (npts+2);
@@ -202,6 +203,7 @@ float interpolate (const CaloRec::Array<2>& a,
   // Now figure out the interpolation degree we're really going to use.
   assert (t.size() == npts);
   assert (d.size() == npts);
+  //coverity[INTEGER_OVERFLOW]
   degree = std::min (degree, npts-1);
 
   // Option to remove zeros in the interpolation table, by averaging
@@ -210,6 +212,7 @@ float interpolate (const CaloRec::Array<2>& a,
   if (fixZero) {
     for (size_t i = 1; i < npts-1; i++) {
       if (d[i] == 0) {
+        //coverity[INTEGER_OVERFLOW]
         d[i] = (d[i-1] + d[i+1])/2;
       }
     }
@@ -223,6 +226,7 @@ float interpolate (const CaloRec::Array<2>& a,
   // two extreme points are at the end of the table.
   // (If extra is true, extrahi and extralo must be false.)
   if (extra) {
+    //coverity[INTEGER_OVERFLOW]
     std::swap (t[0], t[npts-2]);
     std::swap (d[0], d[npts-2]);
   }

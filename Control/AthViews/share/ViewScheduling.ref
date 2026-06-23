@@ -1,2 +1,3 @@
-condTestAlg                                            0     0    INFO condTestAlg running with store view_0
+condTestAlg                                                  0    INFO Initializing condTestAlg...
+condTestAlg                                            0     0    INFO Creating 'ConditionStore+testConditionsData'
 merge_alg                                              9     0    INFO 109

@@ -19,9 +19,12 @@
 #include <InDetReadoutGeometry/SiDetectorElement.h>
 #include <InDetReadoutGeometry/SiDetectorElementStatus.h>
 #include <xAODInDetMeasurement/StripClusterContainer.h>
+#include "details/CellContainer.h"
+#include "details/CellContainerProxy.h"
+#include "details/InPlaceClusterization.h"
 
 namespace ActsTrk {
-
+struct StripAuxDataCache;
 
 class StripClusteringTool : public extends<AthAlgTool, IStripClusteringTool> {
 public:
@@ -34,50 +37,57 @@ public:
 
     virtual StatusCode initialize() override;
 
+    virtual std::pair<unsigned int, unsigned int>
+    countCells(const RDOContainer& rdo_collection,
+               const std::vector<IdentifierHash> &listOfIds,
+               const InDetDD::SiDetectorElementCollection &detector_elements) const override;
+
     virtual StatusCode
     clusterize(const EventContext& ctx,
-	       const InDetRawDataCollection<StripRDORawData>& RDOs,
-	       const InDet::SiDetectorElementStatus& stripDetElStatus,
-	       const InDetDD::SiDetectorElement& element,
-         Acts::Ccl::ClusteringData& data,
-	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
+               const RawDataCollection& RDOs,
+               const InDet::SiDetectorElementStatus& stripDetElStatus,
+               const InDetDD::SiDetectorElement& element,
+               IStripClusteringTool::CellContainer &cellContainer) const override;
 
-    virtual std::any makeVars (SG::AuxVectorData& /*cont*/) const override
-    { return std::any(); }
+    virtual std::any createEventDataCache(xAOD::StripClusterContainer& cont,
+                                          std::size_t nClusterRDOs) const override;
 
     virtual StatusCode
     makeClusters(const EventContext& ctx,
-		 typename IStripClusteringTool::ClusterCollection& cluster,
-		 const InDetDD::SiDetectorElement& element,
-                 size_t icluster,
-                 std::any& vars,
-		 typename ClusterContainer::iterator itrContainer) const override;
+                 const RDOContainer &rdo_container,
+                 const IStripClusteringTool::CellContainer& cellContainer,
+                 unsigned int module_i,
+                 const InDetDD::SiDetectorElement& element,
+                 unsigned int icluster,
+                 xAOD::StripClusterContainer& cont,
+                 std::any& vars) const override;
       
 private:
-    std::optional<std::pair<typename IStripClusteringTool::CellCollection, bool>>
-    unpackRDOs(const EventContext& ctx,
-	       const RawDataCollection& RDOs,
+    using ClusterProxy = InPlaceClusterization::ClusterProxy<const IStripClusteringTool::CellContainer>;
+    using Cell = IStripClusteringTool::CellContainer::Cell;
+
+    std::span<IStripClusteringTool::CellContainer::Cell>
+    unpackRDOs(const RawDataCollection& RDOs,
 	       const InDet::SiDetectorElementStatus& stripDetElStatus,
-	       const InDetDD::SiDetectorElement& element) const;
+	       const InDetDD::SiDetectorElement& element,
+               IStripClusteringTool::CellContainer &cellContainer) const;
   
     bool passTiming(const std::bitset<3>& timePattern) const;
     
     StatusCode decodeTimeBins();
 
-    bool isBadStrip(const EventContext& ctx,
-        const InDet::SiDetectorElementStatus *sctDetElStatus,
-		    const StripID& idHelper,
-		    IdentifierHash waferHash,
-		    Identifier stripId) const;
+    static bool isBadStrip(const InDet::SiDetectorElementStatus *sctDetElStatus,
+                           IdentifierHash waferHash,
+                           std::int16_t strip);
 
-    // N.B. the cluster is added to the container
-    StatusCode makeCluster(StripClusteringTool::Cluster &cluster,
-			   double LorentzShift,
-			   Eigen::Matrix<float,1,1>& localCov,
-			   const StripID& stripID,
-			   const InDetDD::SiDetectorElement& element,
-			   const InDetDD::SiDetectorDesign& design,
-			   xAOD::StripCluster& container) const;
+   StatusCode makeCluster(size_t icluster,
+                          xAOD::StripCluster& cl,
+                          const ClusterProxy &cluster_proxy,
+                          const InDetDD::SiDetectorElement& element,
+                          const InDetDD::SiDetectorDesign& design,
+                          const double lorentzShift,
+                          Eigen::Matrix<float,1,1>& localCov,
+                          StripAuxDataCache &auxDataCache) const;
 
     StringProperty m_timeBinStr{this, "timeBins", ""};
 
@@ -88,9 +98,6 @@ private:
     // TODO this one should be removed?
     SG::ReadHandleKey<InDet::SiDetectorElementStatus> m_stripDetElStatus {this, "StripDetElStatus", "",
       "SiDetectorElementStatus for strip"};
-
-    ToolHandle<IInDetConditionsTool> m_conditionsTool {this, "conditionsTool", "",
-      "Conditions summary tool"};
 
     Gaudi::Property<bool> m_checkBadModules {this, "checkBadModules", true,
       "Check bad modules using the conditions summary tool"};

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/RCUObject.h
@@ -285,7 +285,7 @@ private:
   std::mutex m_mutex;
 
   /// The service with which we're registered, or null.
-  IRCUSvc* m_svc;
+  IRCUSvc* m_svc = nullptr;
 
   /// Holds the current and old grace period bitmasks.
   /// Split off into a separate object to reduce header dependencies.
@@ -293,11 +293,11 @@ private:
 
   /// Number of old objects.
   /// The objects at the end of the garbage list are old.
-  size_t m_nold;
+  size_t m_nold = 0;
 
   /// True if there are any objects pending deletion.
   /// Used to avoid taking the lock in quiescent() if there's nothing to do.
-  std::atomic<bool> m_dirty;
+  std::atomic<bool> m_dirty{};
 };
 
 
@@ -495,7 +495,7 @@ public:
   
 private:
   /// The data object we're reading.
-  const T* m_obj;
+  const T* m_obj{};
 };
 
 

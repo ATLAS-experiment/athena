@@ -199,6 +199,8 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
    const DataHeader* dh = nullptr;
    std::vector<std::string> dhKeys;
    m_store->keys<DataHeader>(dhKeys);
+   //construct string out of loop
+   const std::string boolTypeStr{"bool"};
    for (const std::string& dhKey : dhKeys) {
       bool primaryDH = false;
       if (!m_store->transientContains<DataHeader>(dhKey)) {
@@ -233,7 +235,7 @@ StatusCode AthenaOutputStreamTool::connectOutput(const std::string& outputName) 
             auto streams = m_decSvc->getStreams();
             for (auto it  = streams.begin();
                       it != streams.end(); ++it) {
-               newone->extend(*it,"bool");
+               newone->extend(*it,boolTypeStr);
                (*newone)[*it].data<bool>() = m_decSvc->isEventAccepted(*it,Gaudi::Hive::currentContext());
                ATH_MSG_DEBUG("Added stream decision for " << *it << " to " << m_attrListKey);
             }

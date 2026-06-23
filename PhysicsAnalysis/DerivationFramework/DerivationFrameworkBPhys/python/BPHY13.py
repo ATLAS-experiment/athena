@@ -27,7 +27,8 @@ def BPHY13Cfg(flags):
     acc.addPublicTool(trackselect)
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
-
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     # mass bounds and constants used in the following
     Phi_lo = 770.0
     Phi_hi = 1300.0
@@ -280,7 +281,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
     BPHY13_Reco_Jpsimumu = CompFactory.DerivationFramework.Reco_Vertex(
@@ -290,7 +291,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
     BPHY13_Reco_Psimumu = CompFactory.DerivationFramework.Reco_Vertex(
@@ -300,7 +301,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
     BPHY13_Reco_Upsimumu = CompFactory.DerivationFramework.Reco_Vertex(
@@ -310,7 +311,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
     BPHY13_Reco_Dimumumu = CompFactory.DerivationFramework.Reco_Vertex(
@@ -320,7 +321,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
 
@@ -331,7 +332,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
     BPHY13_Reco_Jpsimutrk = CompFactory.DerivationFramework.Reco_Vertex(
@@ -341,7 +342,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
     BPHY13_Reco_Psimutrk = CompFactory.DerivationFramework.Reco_Vertex(
@@ -351,7 +352,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
     BPHY13_Reco_Upsimutrk = CompFactory.DerivationFramework.Reco_Vertex(
@@ -361,7 +362,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
     BPHY13_Reco_Dimumutrk = CompFactory.DerivationFramework.Reco_Vertex(
@@ -371,7 +372,7 @@ def BPHY13Cfg(flags):
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
-        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter             = PVrefit,
         DoVertexType           = 1)
 
 
@@ -384,7 +385,7 @@ def BPHY13Cfg(flags):
         VertexMass                 = Phimass,
         MassInputParticles         = [Mumass, Mumass],
         Chi2Cut                    = 50.,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
         TrkVertexFitterTool	   = vkalvrt,
         OutputVtxContainerName     = "BPHY13Phimumu_revtx")
@@ -398,7 +399,7 @@ def BPHY13Cfg(flags):
         VertexMass                 = Jpsimass,
         MassInputParticles         = [Mumass, Mumass],
         Chi2Cut                    = 50.,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
         TrkVertexFitterTool	   = vkalvrt,
         OutputVtxContainerName     = "BPHY13Jpsimumu_revtx")
@@ -412,7 +413,7 @@ def BPHY13Cfg(flags):
         VertexMass                 = Psi2Smass,
         MassInputParticles         = [Mumass, Mumass],
         Chi2Cut                    = 50.,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
         TrkVertexFitterTool	   = vkalvrt,
         OutputVtxContainerName     = "BPHY13Psimumu_revtx")
@@ -426,7 +427,7 @@ def BPHY13Cfg(flags):
         VertexMass                 = Upsimass,
         MassInputParticles         = [Mumass, Mumass],
         Chi2Cut                    = 50.,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
         TrkVertexFitterTool	   = vkalvrt,
         OutputVtxContainerName     = "BPHY13Upsimumu_revtx")
@@ -441,7 +442,7 @@ def BPHY13Cfg(flags):
         VertexMass                 = Phimass,
         MassInputParticles         = [Mumass, Mumass],
         Chi2Cut                    = 50.,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
         TrkVertexFitterTool	   = vkalvrt,
         OutputVtxContainerName     = "BPHY13Phimutrk_revtx")
@@ -455,7 +456,7 @@ def BPHY13Cfg(flags):
         VertexMass                 = Jpsimass,
         MassInputParticles         = [Mumass, Mumass],
         Chi2Cut                    = 50.,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
         TrkVertexFitterTool	   = vkalvrt,
         OutputVtxContainerName     = "BPHY13Jpsimutrk_revtx")
@@ -469,7 +470,7 @@ def BPHY13Cfg(flags):
         VertexMass                 = Psi2Smass,
         MassInputParticles         = [Mumass, Mumass],
         Chi2Cut                    = 50.,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
         TrkVertexFitterTool	   = vkalvrt,
         OutputVtxContainerName     = "BPHY13Psimutrk_revtx")
@@ -483,7 +484,7 @@ def BPHY13Cfg(flags):
         VertexMass                 = Upsimass,
         MassInputParticles         = [Mumass, Mumass],
         Chi2Cut                    = 50.,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+        PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
         TrkVertexFitterTool	   = vkalvrt,
         OutputVtxContainerName     = "BPHY13Upsimutrk_revtx")
@@ -549,7 +550,7 @@ def BPHY13Cfg(flags):
             list_4mu_obj[i].Jpsi2Mass                = list_4mu_jpsi2mass[i]
             list_4mu_obj[i].ApplyJpsi2MassConstraint = True
         list_4mu_obj[i].Chi2Cut                  = 25.
-        list_4mu_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+        list_4mu_obj[i].PVRefitter               = PVrefit
         list_4mu_obj[i].TrkVertexFitterTool      = vkalvrt
         list_4mu_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
         list_4mu_obj[i].OutputVertexCollections  = ["BPHY13_"+list_4mu_hypo[i]+"_SubVtx1","BPHY13_"+list_4mu_hypo[i]+"_SubVtx2","BPHY13_"+list_4mu_hypo[i]+"_MainVtx"]
@@ -645,7 +646,7 @@ def BPHY13Cfg(flags):
             list_3mu1trk_obj[i].ApplyJpsi1MassConstraint = True
             list_3mu1trk_obj[i].ApplyJpsi2MassConstraint = True
         list_3mu1trk_obj[i].Chi2Cut                  = 25.
-        list_3mu1trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+        list_3mu1trk_obj[i].PVRefitter               = PVrefit
         list_3mu1trk_obj[i].TrkVertexFitterTool      = vkalvrt
         list_3mu1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
         list_3mu1trk_obj[i].OutputVertexCollections  = ["BPHY13_"+list_3mu1trk_hypo[i]+"_SubVtx1","BPHY13_"+list_3mu1trk_hypo[i]+"_SubVtx2","BPHY13_"+list_3mu1trk_hypo[i]+"_MainVtx"]

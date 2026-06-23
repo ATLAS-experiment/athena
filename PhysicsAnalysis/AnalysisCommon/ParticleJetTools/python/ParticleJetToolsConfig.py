@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #                                                                      #
@@ -253,28 +253,44 @@ def getJetGhostLabelTool(jetdef, modspec):
 def getJetTruthLabelTool(jetdef, modspec):
 
     isTruthJet = 'Truth' in jetdef.fullname()
+    addopts = None
 
     if not isinstance(modspec, str):
         raise ValueError("JetTruthLabelingTool can only be scheduled with str as modspec")
     else:
-        truthLabel = str(modspec)
+        if ':' in modspec:
+            truthLabel, addopts = modspec.split(':',1)
+        else:
+            truthLabel = modspec
+
+    kwargs = {}
+    if addopts:
+        if 'DeltaR' in addopts:
+            kwargs['ForceDeltaRMatch'] = True
 
     jetTruthLabelTool = CompFactory.JetTruthLabelingTool('truthlabeler_{0}'.format(truthLabel),
                                                          RecoJetContainer = jetdef.fullname(),
                                                          IsTruthJetCollection = isTruthJet,
-                                                         TruthLabelName = truthLabel)
+                                                         TruthLabelName = truthLabel,
+                                                         **kwargs)
 
     return jetTruthLabelTool
 
 def getJetTruthLabelToolPrereqs(jetdef, modspec):
+    labelconfig = modspec
+    if ':' in modspec:
+        labelconfig = modspec.split(':')[0]
+    prereqs = []
     if (jetdef._cflags.Input.isMC):
-        if modspec == "R10WZTruthLabel_R22v1":
-            return ["input:AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"]
-        elif modspec == "R4TruthLabel":
-            return ["input:AntiKt4TruthJets"]
-            # return ["input:AntiKt4TruthDressedWZJets"]
-            # Dressed option not working as of 2026-04-17, using regular.
-    return []
+        prereqs.append({
+            "R10WZTruthLabel_R22v1": "input:AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets",
+            "R4TruthLabel": "input:AntiKt4TruthJets",
+            "R4TruthDressedWZLabel": "input:AntiKt4TruthDressedWZJets",
+            "R4InTimeTruthLabel": "input:InTimeAntiKt4TruthJets",
+            "R10TruthLabel_R21Precision_2022v1": "input:AntiKt10TruthJets",
+            "R10TruthLabel_R22v1": "input:AntiKt10TruthSoftDropBeta100Zcut10Jets",
+        }[labelconfig])
+    return prereqs
 
 
 def getJetPileupLabelTool(jetdef, modspec):

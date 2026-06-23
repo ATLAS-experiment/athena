@@ -9,9 +9,7 @@
 #include "G4VSensitiveDetector.hh"
 
 // use of the hits
-#include "AFP_SimEv/AFP_TDSimHitCollection.h"
-#include "AFP_SimEv/AFP_SIDSimHitCollection.h"
-#include "StoreGate/WriteHandle.h"
+#include "AFP_HitCollectionBuilders.h"
 #include <gtest/gtest_prod.h>
 
 // STL header
@@ -23,11 +21,8 @@ class G4TouchableHistory;
 
 class AFP_SensitiveDetector : public G4VSensitiveDetector
 {
- FRIEND_TEST( AFP_SensitiveDetectortest, Initialize );
  FRIEND_TEST( AFP_SensitiveDetectortest, ProcessHits1 );
  FRIEND_TEST( AFP_SensitiveDetectortest, ProcessHits2 );
- FRIEND_TEST( AFP_SensitiveDetectortest, StartOfAthenaEvent);
- FRIEND_TEST( AFP_SensitiveDetectortest, EndOfAthenaEvent );
 
 public:
   // Constructor
@@ -36,13 +31,9 @@ public:
   // Destructor
   ~AFP_SensitiveDetector() { /* I don't own myHitColl if all has gone well */ }
 
-  // Called from AFP_SensitiveDetectorTool::SetupEvent
-  void StartOfAthenaEvent ();
   // Called from G4 at the start of each G4 event
   void Initialize(G4HCofThisEvent *) override final;
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
-  // Called from AFP_SensitiveDetectorTool::Gather
-  void EndOfAthenaEvent();
 
   /** Templated method to stuff a single hit into the sensitive detector class.  This
    could get rather tricky, but the idea is to allow fast simulations to use the very
@@ -50,25 +41,23 @@ public:
   //template <class... Args> void AddHit(Args&&... args){ m_HitColl->Emplace( args... ); }
   
   static constexpr double TDMaxQEff = 0.15;
-  static constexpr int TDMaxCnt  = 4000;
-  static constexpr int SiDMaxCnt = 1000;
 
 private:
-  int m_nHitID;
-  int m_nEventNumber;
-  int m_nNumberOfTDSimHits;
-  int m_nNumberOfSIDSimHits;
+  AFP_TDSimHitCollectionBuilder* getTDHitCollection() const;
+  AFP_SIDSimHitCollectionBuilder* getSIDHitCollection() const;
 
-  int m_nNOfTDSimHits[4][32];
-  int m_nNOfSIDSimHits[4];
+  int m_nHitID;
 
   float m_delta_pixel_x, m_delta_pixel_y;
   float m_death_edge[4][10];
   float m_lower_edge[4][10];
 
   // The hits collections
-  SG::WriteHandle<AFP_TDSimHitCollection> m_pTDSimHitCollection;
-  SG::WriteHandle<AFP_SIDSimHitCollection> m_pSIDSimHitCollection;
+  std::string m_TDHitCollectionName;
+  std::string m_SIDHitCollectionName;
+  // Non-owning caches set by Initialize; HitCollectionMap owns the collections.
+  AFP_TDSimHitCollectionBuilder* m_pTDSimHitCollection{};
+  AFP_SIDSimHitCollectionBuilder* m_pSIDSimHitCollection{};
 
 };
 

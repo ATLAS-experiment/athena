@@ -27,12 +27,12 @@
 class VP1GraphicsItemCollection::Imp {
 public:
 
-  QGraphicsScene *scene;
-  VP1GraphicsView *lastview;
-  VP1GraphicsView *view;
-  bool ignoreall_int;
-  bool ignoreall_move;
-  int nactiveitems;
+  QGraphicsScene *scene{};
+  VP1GraphicsView *lastview{};
+  VP1GraphicsView *view{};
+  bool ignoreall_int{};
+  bool ignoreall_move{};
+  int nactiveitems{};
 
   void setEnabledMovableItems(const bool& enabled);
   bool ignoresInteractions() const;

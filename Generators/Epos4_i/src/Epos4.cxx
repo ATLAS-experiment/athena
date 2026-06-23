@@ -14,15 +14,16 @@
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "GaudiKernel/MsgStream.h"
+#include <xAODEventInfo/EventInfo.h>
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/HeavyIon.h"
 #include "AtlasHepMC/SimpleVector.h"
 
 #include "HepMC3/GenEvent.h"
-#include "HepMC3/Writer.h"
 #include "HepMC3/Print.h"
-#include "HepMC3/GenEvent.h" 
+#include "HepMC3/Writer.h"
+
 
 #include <cstdlib> //for std::getenv
 #include <cstring> //for strlen, memcpy
@@ -30,6 +31,7 @@
 #include <fstream> //for ofstream, ifstream
 #include <iostream>
 #include <memory> //for shared_ptr, dynamic_pointer_cast
+
 
 // Match the Fortran COMMON block layout
 
@@ -110,20 +112,17 @@ Epos4::Epos4(const std::string &name, ISvcLocator *pSvcLocator)
     : GenModule(name, pSvcLocator) {
 
   epos_rndm_stream = "EPOS4_INIT";
-  declareProperty("BeamMomentum", m_beamMomentum = -6500.0); // GeV
-  declareProperty("TargetMomentum", m_targetMomentum = 6500.0);
   declareProperty("InputCard", m_inputcard = "foo.optns");
+  declareProperty("ArgsRandomSeed", m_argsRandomSeed = 0);
   m_events = 0; // current event number (counted by interface)
 }
 
 namespace fs = std::filesystem;
 std::string Epos4::create_file(const std::string &filein) {
-
-  if (filein.size() < 6 ||
-      filein.compare(filein.size() - 6, 6, ".optns") != 0) {
-    ATH_MSG_ERROR(" Input file name: " << filein
-                                       << " does not end with \".optns\"\n");
-    return "";
+  if (filein.size() < 6 || filein.compare(filein.size() - 6, 6, ".optns") != 0) {
+      	ATH_MSG_ERROR(" Input file name: " << filein
+                        << " does not end with \".optns\"\n");
+  	return "";
   }
 
   fs::path source = filein;
@@ -169,15 +168,20 @@ std::string Epos4::create_file(const std::string &filein) {
                         : (ATH_MSG_WARNING(" CHK not set\n"), "");
   if (m_seeds.size() < 2)
     ATH_MSG_WARNING(" m_seeds should contain at least 2 elements\n");
-  std::string seedi = m_seeds.size() < 1
-                          ? "111111111"
-                          : std::to_string(m_seeds.at(
-                                0)); // Should be something like "222222222";
-                                     // //WARNING: SEEDS SHOUD EXIST HERE!
-  std::string seedj = m_seeds.size() < 2
+  std::string seedj;
+  if (m_argsRandomSeed != 0) {
+    seedj = std::to_string(m_argsRandomSeed);
+  } else if (!m_seeds.empty()) {
+    seedj = std::to_string(m_seeds.at(0));
+  } else {
+    seedj = "111111111";
+  };
+  std::string seedi = m_seeds.size() < 2
                           ? "222222222"
                           : std::to_string(m_seeds.at(
                                 1)); // Should be something like "111111111";
+                                     // for initialisation only
+
   std::string rootcproot = "nono";
   std::string system = "i";
   std::string ext1 = "-";
@@ -203,6 +207,16 @@ std::string Epos4::create_file(const std::string &filein) {
   } else {
     OPX = std::move(OPT);
   }
+
+  ATH_MSG_DEBUG("EPOS files: \n"
+           << "EPO:  " << EPO << "\n"
+           << "SRCEXT:  " << SRCEXT << "\n"
+           << " HTO:  " << HTO << "\n"
+           << " SRC:  " << SRC << "\n"
+           << " OPX:  " << OPX <<"\n"
+           << " CHK:  " << CHK << "\n"
+	   );
+
 
   ofile << "!fname mtr " << CHK << "z-" << one << ".mtr\n";
   ofile << "set seedj " << seedj << "  set seedi " << seedi << "\n";
@@ -277,7 +291,7 @@ StatusCode Epos4::genInitialize() {
   m_events = 0;
 
   writer = std::make_shared<HepMC3::WriterEPOS>("foo");
-  const std::string & x = this->create_file(m_inputcard);
+  const std::string &x = this->create_file(m_inputcard);
   set_job_common(x.c_str());
   showMemoryAtStart();
   checkTime();
@@ -293,13 +307,14 @@ StatusCode Epos4::genInitialize() {
     initializeEventCounters();
     defineStorageSettings();
   }
-
+  ATH_MSG_DEBUG( "EPOS initialization finalized.");
   return StatusCode::SUCCESS;
 }
 
 // ----------------------------------------------------------------------
 StatusCode Epos4::callGenerator() {
   // Re-seed the random number stream
+  ATH_MSG_DEBUG("Generating event #" << m_events);
   long seeds[7];
   const EventContext &ctx = Gaudi::Hive::currentContext();
   ATHRNG::calculateSeedsMC21(seeds, epos_rndm_stream,
@@ -312,8 +327,8 @@ StatusCode Epos4::callGenerator() {
   ++m_events;
   generateEposEvent(m_events);
   listParticles(m_events);
-  //    auto e =
-  //    std::dynamic_pointer_cast<HepMC3::WriterEPOS>(writer)->current_event();
+  ATH_MSG_DEBUG("Generated event #" << m_events);
+
   return StatusCode::SUCCESS;
 }
 
@@ -327,6 +342,7 @@ StatusCode Epos4::genFinalize() {
   readInputFile();
   eposEnd();
   showMemoryAtEnd();
+  ATH_MSG_DEBUG("Total generated events: " << m_events);
   return StatusCode::SUCCESS;
 }
 
@@ -337,7 +353,9 @@ StatusCode Epos4::fillEvt(HepMC::GenEvent *evt) {
   /// Here we should put e into evt
 
   e.set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
-  HepMC3::Print::content(e);
+  ATH_MSG_DEBUG("Event #" << m_events 
+              << " | particles: " << e.particles().size()
+              << " | vertices: " << e.vertices().size());
   
   *evt = e;
   return StatusCode::SUCCESS;

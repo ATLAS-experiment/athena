@@ -132,8 +132,8 @@ class CaloCondBlobBase{
 		      uint32_t nObjs,
 		      uint32_t nChans,
 		      uint16_t nGains,
-		      const std::string& author="",
-		      const std::string& comment="",
+		      std::string_view author="",
+		      std::string_view comment="",
 		      uint64_t timeStamp=0);
 
   /** @brief Prints the BLOB header summary information.

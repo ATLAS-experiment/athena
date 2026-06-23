@@ -86,8 +86,7 @@ StatusCode GeoModelsTgcTest::initialize() {
     }
     return StatusCode::SUCCESS;
 }
-StatusCode GeoModelsTgcTest::execute() {
-    const EventContext& ctx{Gaudi::Hive::currentContext()};
+StatusCode GeoModelsTgcTest::execute(const EventContext& ctx) {
     SG::ReadCondHandle detMgr{m_detMgrKey, ctx};
     if (!detMgr.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve MuonDetectorManager "

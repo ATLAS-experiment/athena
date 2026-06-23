@@ -478,7 +478,7 @@ StatusCode ISF_HitAnalysis::finalize ATLAS_NOT_THREAD_SAFE ()
 } //finalize
 
 
-StatusCode ISF_HitAnalysis::execute()
+StatusCode ISF_HitAnalysis::execute(const EventContext& ctx)
 {
 
  ATH_MSG_DEBUG( "In ISF_HitAnalysis::execute()" );
@@ -489,10 +489,10 @@ StatusCode ISF_HitAnalysis::execute()
   return StatusCode::FAILURE;
  }
 
- SG::ReadCondHandle<ILArfSampl> fSamplHdl(m_fSamplKey,Gaudi::Hive::currentContext());
+ SG::ReadCondHandle<ILArfSampl> fSamplHdl(m_fSamplKey,ctx);
  const ILArfSampl* fSampl=*fSamplHdl;
 
- SG::ReadCondHandle<TileSamplingFraction> tileSamplingFraction(m_tileSamplingFractionKey,Gaudi::Hive::currentContext());
+ SG::ReadCondHandle<TileSamplingFraction> tileSamplingFraction(m_tileSamplingFractionKey,ctx);
  ATH_CHECK( tileSamplingFraction.isValid() );
 
 
@@ -591,7 +591,7 @@ StatusCode ISF_HitAnalysis::execute()
 
  //##########################
 
- SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,Gaudi::Hive::currentContext()};
+ SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
  ATH_CHECK(caloMgrHandle.isValid());
  const CaloDetDescrManager* calo_dd_man = *caloMgrHandle;
 

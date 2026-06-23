@@ -1,5 +1,6 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Simple ComponentAccumulator configuration for running
 # AthCUDAExamples::TrackParticleCalibratorExampleAlg, offloading trivial
@@ -17,6 +18,12 @@ from AthenaCommon.Constants import DEBUG
 # I/O import(s).
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
+# Device/Accelerator import(s).
+from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg
+from AthCUDAServices.AthCUDAServicesConfig import \
+   HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, StreamToolCfg
+from AthCUDAServices.AthCUDAServicesConfig import AsyncCopyToolCfg as DeviceCopyToolCfg
+
 # System import(s).
 import sys
 
@@ -27,6 +34,24 @@ def TrackParticleCalibratorExampleAlgCfg(flags, **kwargs):
    result = ComponentAccumulator()
    # Create the example algorithm.
    alg = CompFactory.AthCUDAExamples.TrackParticleCalibratorExampleAlg(**kwargs)
+   hostMR = HostMemoryResourceToolCfg(flags, **kwargs)
+   alg.HostMR = hostMR.getPrimary()
+   result.merge(hostMR)
+   deviceMR = DeviceMemoryResourceToolCfg(flags, **kwargs)
+   alg.DeviceMR = deviceMR.getPrimary()
+   result.merge(deviceMR)
+   hostCopyTool = HostCopyToolCfg(flags, **kwargs)
+   alg.HostCopyTool = hostCopyTool.getPrimary()
+   result.merge(hostCopyTool)
+   deviceCopyTool = DeviceCopyToolCfg(flags, **kwargs)
+   alg.DeviceCopyTool = deviceCopyTool.getPrimary()
+   result.merge(deviceCopyTool)
+   streamTool = StreamToolCfg(flags, **kwargs)
+   alg.StreamTool = streamTool.getPrimary()
+   result.merge(streamTool)
+
+   # Add the algorithm to the accumulator, so that it would eventually be
+   # scheduled to run.
    result.addEventAlgo(alg)
    # Return the result to the caller.
    return result

@@ -46,11 +46,11 @@ StatusCode EventInfoRDOAnalysis::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode EventInfoRDOAnalysis::execute()
+StatusCode EventInfoRDOAnalysis::execute(const EventContext& ctx)
 {
   
   const xAOD::EventInfo* eventInfo{nullptr};
-  ATH_CHECK(SG::get(eventInfo, m_eventInfoKey, Gaudi::Hive::currentContext()));
+  ATH_CHECK(SG::get(eventInfo, m_eventInfoKey, ctx));
 
   m_runNumber = eventInfo->runNumber();
   m_eventNumber = eventInfo->eventNumber();

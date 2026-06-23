@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTErrMonAlg.h"
@@ -374,7 +374,7 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
 
       if (iProblem==summary) {
 	auto detectorCoverageR4PAcc{Monitored::Scalar<double>("detectorCoverage"+coverageVarNames[iProblem]+"InR4P", detector_coverage)};
-	bool atlasReady = m_atlasReadyFilter->accept();
+	bool atlasReady = m_atlasReadyFilter->accept(ctx);
 	if(atlasReady) {
 	  fill("SCTErrMonitor", lumiBlockAcc, detectorCoverageR4PAcc);
 	}

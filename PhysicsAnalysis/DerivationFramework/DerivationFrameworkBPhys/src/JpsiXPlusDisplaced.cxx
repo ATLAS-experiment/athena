@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #include "JpsiXPlusDisplaced.h"
@@ -150,7 +150,7 @@ namespace DerivationFramework {
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_iV0Fitter("Trk::V0VertexFitter"),
     m_iGammaFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools"),
     m_trackToVertexTool("Reco::TrackToVertex"),
     m_trkSelector("InDet::TrackSelectorTool"),
@@ -440,7 +440,7 @@ namespace DerivationFramework {
 	  }
 	  // A rough mass window cut, as V0 and track3 are not from a common vertex
 	  if(disV_mass > m_DisplacedMassLower-500. && disV_mass < m_DisplacedMassUpper+500.) {
-	    auto disVtx = getXiCandidate(elem.first,elem.second,TP);
+	    auto disVtx = getXiCandidate(ctx,elem.first,elem.second,TP);
 	    if(disVtx.V0vtx && disVtx.track) disVtxContainer.push_back(disVtx);
 	  }
 	}
@@ -527,7 +527,7 @@ namespace DerivationFramework {
       // Iterate over displaced vertices
       if(m_disVDaug_num==2) {
 	for(auto&& V0Candidate : selectedV0Candidates) {
-	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(jxVtx, massesJX, V0Candidate.first, V0Candidate.second, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(ctx, jxVtx, massesJX, V0Candidate.first, V0Candidate.second, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	  for(auto cascade_info_pair : result) {
 	    if(cascade_info_pair.first) cascadeinfoContainer.push_back(cascade_info_pair);
 	  }
@@ -535,7 +535,7 @@ namespace DerivationFramework {
       } // m_disVDaug_num==2
       else if(m_disVDaug_num==3) {
 	for(auto&& disVtx : disVtxContainer) {
-	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(jxVtx, massesJX, disVtx, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
+	  std::vector<std::pair<Trk::VxCascadeInfo*, Trk::VxCascadeInfo*> > result = fitMainVtx(ctx, jxVtx, massesJX, disVtx, trackContainer.cptr(), trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	  for(auto cascade_info_pair : result) {
 	    if(cascade_info_pair.first) cascadeinfoContainer.push_back(cascade_info_pair);
 	  }
@@ -646,7 +646,7 @@ namespace DerivationFramework {
 	  if(!trk_cut) continue;
 
 	  // track is used if std::abs(d0/sig_d0) > d0_cut for PV
-	  if(!d0Pass(TP,primaryVertex)) continue;
+	  if(!d0Pass(ctx,TP,primaryVertex)) continue;
 
 	  tracksDisplaced.push_back(TP);
 	}
@@ -702,7 +702,7 @@ namespace DerivationFramework {
     }
     else {
       // fit V0 vertices
-      fitV0Container(V0OutputContainer.ptr(), tracksDisplaced, trackCols);
+      fitV0Container(ctx, V0OutputContainer.ptr(), tracksDisplaced, trackCols);
 
       for(const xAOD::Vertex* vtx : *V0OutputContainer.cptr()) {
 	std::string type_V0Vtx;
@@ -1165,9 +1165,8 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  bool JpsiXPlusDisplaced::d0Pass(const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const {
+  bool JpsiXPlusDisplaced::d0Pass(const EventContext& ctx, const xAOD::TrackParticle* track, const xAOD::Vertex* PV) const {
     bool pass = false;
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     std::unique_ptr<Trk::Perigee> per = m_trackToVertexTool->perigeeAtVertex(ctx, *track, PV->position());
     if(!per) return pass;
     double d0 = per->parameters()[Trk::d0];
@@ -1176,7 +1175,7 @@ namespace DerivationFramework {
     return pass;
   }
 
-  JpsiXPlusDisplaced::XiCandidate JpsiXPlusDisplaced::getXiCandidate(const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const {
+  JpsiXPlusDisplaced::XiCandidate JpsiXPlusDisplaced::getXiCandidate(const EventContext& ctx, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticle* track3) const {
     XiCandidate disVtx;
 
     std::vector<const xAOD::TrackParticle*> tracksV0;
@@ -1187,7 +1186,7 @@ namespace DerivationFramework {
     else if(V0==LAMBDABAR) massesV0 = m_massesV0_pip;
     else if(V0==KS)        massesV0 = m_massesV0_pipi;
 
-    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
     int robustness = 0;
     m_iVertexFitter->setRobustness(robustness, *state);
     std::vector<Trk::VertexID> vrtList;
@@ -1226,26 +1225,24 @@ namespace DerivationFramework {
     return disVtx;
   }
 
-  std::unique_ptr<xAOD::Vertex> JpsiXPlusDisplaced::fitTracks(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3) const {
+  std::unique_ptr<xAOD::Vertex> JpsiXPlusDisplaced::fitTracks(const EventContext& ctx, const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3) const {
     // Starting point
     const Trk::Perigee& aPerigee1 = track1->perigeeParameters();
     const Trk::Perigee& aPerigee2 = track2->perigeeParameters();
     int sflag(0), errorcode(0);
     Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
     if(errorcode) startingPoint(0) = startingPoint(1) = startingPoint(2) = 0.0;
-    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
     // do the fit
     if(track3) {
-      std::unique_ptr<xAOD::Vertex> fittedVertex( m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2,track3}, startingPoint, *state) );
-      return fittedVertex;
+      return m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2,track3}, startingPoint, *state);
     }
     else {
-      std::unique_ptr<xAOD::Vertex> fittedVertex( m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2}, startingPoint, *state) );
-      return fittedVertex;
+      return m_iVertexFitter->fit(std::vector<const xAOD::TrackParticle*>{track1,track2}, startingPoint, *state);
     }
   }
 
-  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getDpmCandidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const {
+  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getDpmCandidate(const EventContext& ctx, const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const {
     MesonCandidate Dpm;
     // Check overlap
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -1258,7 +1255,7 @@ namespace DerivationFramework {
     tmp3.SetPtEtaPhiM(extraTrk3->pt(),extraTrk3->eta(),extraTrk3->phi(),m_extraTrk3MassHypo);
     if((tmp1+tmp2+tmp3).M() < m_DpmMassLower || (tmp1+tmp2+tmp3).M() > m_DpmMassUpper) return Dpm;
 
-    std::unique_ptr<xAOD::Vertex> vtx = fitTracks(extraTrk1, extraTrk2, extraTrk3);
+    std::unique_ptr<xAOD::Vertex> vtx = fitTracks(ctx, extraTrk1, extraTrk2, extraTrk3);
     if(vtx) {
       double chi2NDF = vtx->chiSquared()/vtx->numberDoF();
       if(m_chi2cut_Dpm<=0.0 || chi2NDF < m_chi2cut_Dpm) {
@@ -1281,7 +1278,7 @@ namespace DerivationFramework {
     return Dpm;
   }
 
-  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getD0Candidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const {
+  JpsiXPlusDisplaced::MesonCandidate JpsiXPlusDisplaced::getD0Candidate(const EventContext& ctx, const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const {
     MesonCandidate D0;
 
     TLorentzVector tmp1, tmp2;
@@ -1289,7 +1286,7 @@ namespace DerivationFramework {
     tmp2.SetPtEtaPhiM(extraTrk2->pt(),extraTrk2->eta(),extraTrk2->phi(),m_extraTrk2MassHypo);
     if((tmp1+tmp2).M() < m_D0MassLower || (tmp1+tmp2).M() > m_D0MassUpper) return D0;
 
-    std::unique_ptr<xAOD::Vertex> vtx = fitTracks(extraTrk1, extraTrk2);
+    std::unique_ptr<xAOD::Vertex> vtx = fitTracks(ctx, extraTrk1, extraTrk2);
     if(vtx) {
       double chi2NDF = vtx->chiSquared()/vtx->numberDoF();
       if(m_chi2cut_D0<=0.0 || chi2NDF < m_chi2cut_D0) {
@@ -1312,7 +1309,7 @@ namespace DerivationFramework {
     return D0;
   }
 
-  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
+  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const EventContext& ctx, const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -1403,7 +1400,7 @@ namespace DerivationFramework {
       if (main_mass < m_MassLower || main_mass > m_MassUpper) return result;
 
       // Apply the user's settings to the fitter
-      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
       // Robustness: http://cdsweb.cern.ch/record/685551
       int robustness = 0;
       m_iVertexFitter->setRobustness(robustness, *state);
@@ -1548,7 +1545,7 @@ namespace DerivationFramework {
 	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX; tracksJXExtra.push_back(tpExtra);
 
 	// Apply the user's settings to the fitter
-	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
 	// Robustness: http://cdsweb.cern.ch/record/685551
 	int robustness = 0;
 	m_iVertexFitter->setRobustness(robustness, *state);
@@ -1726,7 +1723,7 @@ namespace DerivationFramework {
 	      if(m_massD0>0) main_mass += - (p4_ExtraTrk1+p4_ExtraTrk2).M() + m_massD0;
 	    }
 	    if(main_mass < m_MassLower || main_mass > m_MassUpper) continue;
-	    auto D0 = getD0Candidate(JXvtx,tp1,tp2);
+	    auto D0 = getD0Candidate(ctx,JXvtx,tp1,tp2);
 	    if(D0.extraTrack1) D0Candidates.push_back(D0);
 	  }
 	}
@@ -1738,7 +1735,7 @@ namespace DerivationFramework {
 	std::vector<const xAOD::TrackParticle*> tracksExtra{D0.extraTrack1,D0.extraTrack2};
 
 	// Apply the user's settings to the fitter
-	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
 	// Robustness: http://cdsweb.cern.ch/record/685551
 	int robustness = 0;
 	m_iVertexFitter->setRobustness(robustness, *state);
@@ -1888,7 +1885,7 @@ namespace DerivationFramework {
 		if(m_massDpm>0) main_mass += - (p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() + m_massDpm;
 	      }
 	      if(main_mass < m_MassLower || main_mass > m_MassUpper) continue;
-	      auto Dpm = getDpmCandidate(JXvtx,tp1,tp2,tp3);
+	      auto Dpm = getDpmCandidate(ctx,JXvtx,tp1,tp2,tp3);
 	      if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
 	    }
 	  }
@@ -1915,7 +1912,7 @@ namespace DerivationFramework {
 		if(m_massDpm>0) main_mass += - (p4_ExtraTrk1+p4_ExtraTrk2+p4_ExtraTrk3).M() + m_massDpm;
 	      }
 	      if(main_mass < m_MassLower || main_mass > m_MassUpper) continue;
-	      auto Dpm = getDpmCandidate(JXvtx,tp1,tp2,tp3);
+	      auto Dpm = getDpmCandidate(ctx,JXvtx,tp1,tp2,tp3);
 	      if(Dpm.extraTrack1) DpmCandidates.push_back(Dpm);
 	    }
 	  }
@@ -1928,7 +1925,7 @@ namespace DerivationFramework {
 	std::vector<const xAOD::TrackParticle*> tracksExtra{Dpm.extraTrack1,Dpm.extraTrack2,Dpm.extraTrack3};
 
 	// Apply the user's settings to the fitter
-	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
 	// Robustness: http://cdsweb.cern.ch/record/685551
 	int robustness = 0;
 	m_iVertexFitter->setRobustness(robustness, *state);
@@ -2099,7 +2096,7 @@ namespace DerivationFramework {
 	      for(size_t it=0; it<moms[iMoth].size(); it++) totalMom += moms[iMoth][it];
 	      double mainV_mass = totalMom.M();
 	      if(mainV_mass>m_PostMassLower && mainV_mass<m_PostMassUpper) {
-		std::unique_ptr<Trk::IVKalState> state_mvc = m_iVertexFitter->makeState();
+		std::unique_ptr<Trk::IVKalState> state_mvc = m_iVertexFitter->makeState(ctx);
 		int robustness_mvc = 0;
 		m_iVertexFitter->setRobustness(robustness_mvc, *state_mvc);
 		std::vector<Trk::VertexID> vrtList_mvc;
@@ -2298,7 +2295,7 @@ namespace DerivationFramework {
     return result;
   }
 
-  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
+  std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > JpsiXPlusDisplaced::fitMainVtx(const EventContext& ctx, const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > result;
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -2394,7 +2391,7 @@ namespace DerivationFramework {
       if (main_mass < m_MassLower || main_mass > m_MassUpper) return result;
 
       // Apply the user's settings to the fitter
-      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
       // Robustness: http://cdsweb.cern.ch/record/685551
       int robustness = 0;
       m_iVertexFitter->setRobustness(robustness, *state);
@@ -2548,7 +2545,7 @@ namespace DerivationFramework {
 	std::vector<const xAOD::TrackParticle*> tracksJXExtra = tracksJX; tracksJXExtra.push_back(tpExtra);
 
 	// Apply the user's settings to the fitter
-	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+	std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
 	// Robustness: http://cdsweb.cern.ch/record/685551
 	int robustness = 0;
 	m_iVertexFitter->setRobustness(robustness, *state);
@@ -2708,8 +2705,7 @@ namespace DerivationFramework {
     return result;
   }
 
-  void JpsiXPlusDisplaced::fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+  void JpsiXPlusDisplaced::fitV0Container(const EventContext& ctx, xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
 
     SG::AuxElement::Decorator<std::string> mDec_type("Type_V0Vtx");
     SG::AuxElement::Decorator<int>         mDec_gfit("gamma_fit");
@@ -2764,7 +2760,7 @@ namespace DerivationFramework {
 	    if(pass) {
 	      std::vector<const xAOD::TrackParticle*> tracksV0;
 	      tracksV0.push_back(TP1); tracksV0.push_back(TP2);
-	      std::unique_ptr<xAOD::Vertex> V0vtx = std::unique_ptr<xAOD::Vertex>( m_iV0Fitter->fit(tracksV0, startingPoint) );
+	      std::unique_ptr<xAOD::Vertex> V0vtx = m_iV0Fitter->fit(ctx, tracksV0, startingPoint);
 	      if(V0vtx && V0vtx->chiSquared()>=0) {
 		double chi2DOF = V0vtx->chiSquared()/V0vtx->numberDoF();
 		if(chi2DOF>m_chi2cut_V0) continue;
@@ -2784,7 +2780,7 @@ namespace DerivationFramework {
 
 		int gamma_fit = 0; int gamma_ndof = 0; double gamma_chisq = 999999.;
 		double gamma_prob = -1., gamma_mass = -1., gamma_massErr = -1.;
-		std::unique_ptr<xAOD::Vertex> gammaVtx = std::unique_ptr<xAOD::Vertex>( m_iGammaFitter->fit(tracksV0, m_V0Tools->vtx(V0vtx.get())) );
+		std::unique_ptr<xAOD::Vertex> gammaVtx = m_iGammaFitter->fit(ctx, tracksV0, m_V0Tools->vtx(V0vtx.get()));
 		if (gammaVtx) {
 		  gamma_fit     = 1;
 		  gamma_mass    = m_V0Tools->invariantMass(gammaVtx.get(),m_mass_e,m_mass_e);

@@ -1,107 +1,84 @@
-#!/usr/bin/env tdaq_python
+#!/usr/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# select events for a given stream name from an input file and write them in an outfile
-# the output file obeys the conventions used by the SFO in P1
+"""
+Select events for a given stream name from an input file and write them to an output file.
+The output file obeys the conventions used by the SFO at P1.
+
+Multiple files can be processed but all events need to be from the same run.
+"""
 
 import sys
 import os
+import argparse
+import eformat
+import logging
+from libpyevent_storage import CompressionType
+from libpyeformat_helper import SourceIdentifier, SubDetector
+
 
 def peb_writer():
   """Runs the splitting routines"""
 
-  import eformat, logging
-  import EventApps.myopt as myopt
-  from libpyevent_storage import CompressionType
-  from libpyeformat_helper import SourceIdentifier, SubDetector
+  parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-  option = {}
+  parser.add_argument("files", metavar="FILE", nargs='+',
+                      help="RAW file to inspect")
 
-  # run mode options
-  option['start-event'] = {'short': 'a', 'arg': True,
-                           'default': 0,
-                           'group': 'Run mode',
-                           'description': 'Number of events which should be skipped from the begin'}
+  parser.add_argument('-s', '--stream-name', metavar='NAME', type=str, required=True,
+                      help='Name(s) of stream(s) which should be written out, e.g. "stream1,stream2,stream3"')
 
-  option['max-events'] = {'short': 'n', 'arg': True,
-                          'default': 0,
-                          'group': 'Run mode',
-                          'description': 'Maximum number of events in the output file. 0 means, all useful events from the input.'}
+  parser.add_argument('-o', '--output-name', metavar='NAME', type=str,
+                      help='Core output file name (by default derived from input)')
 
-  option['verbosity'] = {'short': 'v', 'arg': True,
-                         'default': logging.INFO,
-                         'group': 'Run mode',
-                         'description': 'Log verbosity'}
+  parser.add_argument('-d', '--output-dir', metavar='DIR', type=str, default='.',
+                      help='Directory in which the output file should be written')
 
-  option['progress-bar'] = {'short': 'P', 'arg': False,
-                            'default': None,
-                            'group': 'Run mode',
-                            'description': 'Show progress bar when running interactively'}
+  parser.add_argument('-a', '--start-event', metavar='N', type=int, default=0,
+                      help='Number of events which should be skipped from the begin')
 
-  option['output-dir'] = {'short': 'd', 'arg': True,
-                          'default': '.',
-                          'group': 'Run mode',
-                          'description': 'Directory in which the output file should be written'}
+  parser.add_argument('-n', '--max-events', metavar='N', type=int,
+                      help='Maximum number of events in the output file')
 
-  option['uncompressed'] = {'short': 'u', 'arg': False,
-                            'default': None,
-                            'group': 'Run mode',
-                            'description': 'Write out uncompressed data (default without this option is compressed)'}
+  parser.add_argument('-u', '--uncompressed', action='store_true',
+                      help='Write out uncompressed data')
 
-  # stream tag options
-  option['stream-name'] = {'short': 's', 'arg': True,
-                           'default': None,
-                           'group': 'Stream Tag',
-                           'description': 'Name(s) of stream(s) which should be written out, e.g. "stream1,stream2,stream3"'}
+  parser.add_argument('-p', '--project-tag', metavar='TAG', type=str,
+                      help='Project tag which should be used for the output file')
 
-  option['project-tag'] = {'short': 'p', 'arg': True,
-                           'default': None,
-                           'group': 'Stream Tag',
-                           'description': 'Project tag which should be used for the output file'}
+  parser.add_argument('-l', '--lumi-block', metavar='N', type=int,
+                      help='Lumiblock number used for the output file. Use 0 if multiple LBs in file.')
 
-  option['lumi-block'] = {'short': 'l', 'arg': True,
-                          'default': -1,
-                          'group': 'Stream Tag',
-                          'description': 'Lumiblock number used for the output file. Use 0 if multiple LB in file.'}
+  parser.add_argument('-m', '--hlt-only', metavar='ID', type=int,
+                      help='Drop all detector data and write out only HLT data for the given module ID. '
+                           'Module ID <0 is a wildcard for all HLT module IDs.')
 
-  # HLT result options
-  option['hlt-only'] = {'short': 'm', 'arg': True,
-                        'default': None,
-                        'group': 'HLT Result',
-                        'description': 'Drop all detector data and write out only HLT data for the given module ID.' + \
-                                       ' Module ID <0 is a wildcard for all HLT module IDs.'}
+  parser.add_argument('-v', '--verbosity', metavar='N', type=int, default=logging.INFO,
+                      help='Log verbosity')
 
-  parser = myopt.Parser(extra_args=True)
-  for (k,v) in option.items():
-    parser.add_option(k, v['short'], v['description'], v['arg'], v['default'],v['group'])
- 
-  if len(sys.argv) == 1:
-    print (parser.usage('global "%s" options:' % sys.argv[0]))
-    sys.exit(1)
+  parser.add_argument('-P', '--progress-bar', action='store_true',
+                      help='Show progress bar when running interactively')
 
-  # process the global options
-  (kwargs, extra) = parser.parse(sys.argv[1:], prefix='global "%s" options:' % sys.argv[0])
+  args = parser.parse_args()
 
   # global defaults
-  logging.getLogger('').name = os.path.splitext(os.path.basename(sys.argv[0]))[0]
-  logging.getLogger('').setLevel(kwargs['verbosity'])
+  logging.getLogger('').name = 'trigbs_extractStream'
+  logging.getLogger('').setLevel(args.verbosity)
 
   # input data stream
-  stream = eformat.istream(extra)
-  # input event counter
-  totalEvents_in = 0
+  stream = eformat.istream(args.files)
 
   # get metadata from inputfile
-  dr = eformat.EventStorage.pickDataReader(extra[0])
+  dr = eformat.EventStorage.pickDataReader(args.files[0])
 
   # interpret input file name
-  df = eformat.EventStorage.RawFileName(extra[0])
+  df = eformat.EventStorage.RawFileName(args.files[0])
 
   # extract some parameters from meta-data 
-  projectTag      = dr.projectTag()
-  lumiBlockNumber = dr.lumiblockNumber()
-  applicationName = 'athenaHLT'
+  projectTag      = args.project_tag or dr.projectTag()
+  lumiBlockNumber = args.lumi_block if args.lumi_block is not None else dr.lumiblockNumber()
+  applicationName = dr.appName()
   streamType      = 'unknown' # the real stream type will be extracted from the matching stream tag
   if df.hasValidCore() :
     productionStep  = df.productionStep()
@@ -110,19 +87,15 @@ def peb_writer():
 
   # input parameters for building the output file name
   runNumber       = dr.runNumber() 
-  outputDirectory = kwargs['output-dir']
-  streamName      = kwargs['stream-name']
+  outputDirectory = args.output_dir
+  streamName      = args.stream_name
+
   # check if multiple streams should be written to the same output file (used in debug recovery) 
   streamNames_out = streamName.split(',')
   if len(streamNames_out) > 1:
     streamName = 'accepted'
 
-  if kwargs['project-tag'] is not None:
-    projectTag      = kwargs['project-tag']
-  if kwargs['lumi-block'] != -1:
-    lumiBlockNumber = kwargs['lumi-block']  # if output file can have multiple lumi blocks, use 0 
-
-  if (lumiBlockNumber==0):
+  if lumiBlockNumber==0:
     productionStep  = 'merge'
 
   # check the output directory if it exists
@@ -130,24 +103,23 @@ def peb_writer():
     logging.fatal(' Output directory %s does not exist ' % outputDirectory)
     sys.exit(1)
 
-  # output event counter
+  # event counters
+  totalEvents_in = 0
   totalEvents_out = 0
-
-  # counter of skipped events 
   totalEvents_skipped = 0
 
   # Loop over events
   for e in stream:
 
-    if kwargs['max-events'] > 0 and totalEvents_in >= kwargs['max-events']:
-      logging.info(' Maximum number of events reached : %d', kwargs['max-events'])
+    if args.max_events and totalEvents_in >= args.max_events:
+      logging.info(' Maximum number of events reached : %d', args.max_events)
       break
 
     totalEvents_in += 1
 
     # select events
-    if kwargs['start-event'] > 0:
-      kwargs['start-event'] -= 1
+    if args.start_event > 0:
+      args.start_event -= 1
       totalEvents_skipped += 1
       continue
 
@@ -187,25 +159,27 @@ def peb_writer():
         if streamType != tag.type:
           streamType = tag.type
           logging.debug(' streamType set to = %s', streamType)
+
           # create the RAW output file name
-          outRawFile = eformat.EventStorage.RawFileName(projectTag,
-                                                        runNumber,
-                                                        streamType,
-                                                        streamName,
-                                                        lumiBlockNumber,
-                                                        applicationName,
-                                                        productionStep)
-          logging.debug(' set output file name = %s', outRawFile.fileNameCore())
+          outRawFile = args.output_name or \
+            eformat.EventStorage.RawFileName(projectTag,
+                                             runNumber,
+                                             streamType,
+                                             streamName,
+                                             lumiBlockNumber,
+                                             applicationName,
+                                             productionStep).fileNameCore()
+          logging.debug(' set output file name = %s', outRawFile)
 
           # Note: EventStorage and eformat compression enums have different values
-          compressionTypeES = CompressionType.NONE if kwargs['uncompressed'] else CompressionType.ZLIB
-          compressionType = eformat.helper.Compression.UNCOMPRESSED if kwargs['uncompressed'] \
+          compressionTypeES = CompressionType.NONE if args.uncompressed else CompressionType.ZLIB
+          compressionType = eformat.helper.Compression.UNCOMPRESSED if args.uncompressed \
                             else eformat.helper.Compression.ZLIB
-          compressionLevel = 0 if kwargs['uncompressed'] else 1
+          compressionLevel = 0 if args.uncompressed else 1
 
           # create the output stream
           ostream = eformat.ostream(directory=outputDirectory,
-                                    core_name=outRawFile.fileNameCore(),
+                                    core_name=outRawFile,
                                     run_number=dr.runNumber(), 
                                     trigger_type=dr.triggerType(),
                                     detector_mask=dr.detectorMask(), 
@@ -216,7 +190,7 @@ def peb_writer():
         
         # decide what to write out
         is_feb_tag = (len(tag.robs)==0 and len(tag.dets)==0)
-        if is_feb_tag and not kwargs['hlt-only']:
+        if is_feb_tag and not args.hlt_only:
           # write out the full event fragment
           pbev = eformat.write.FullEventFragment(e)  
           logging.debug(' Write full event fragment ')
@@ -224,12 +198,12 @@ def peb_writer():
           # filter stream tag robs and dets for the hlt-only option
           dets = []
           robs = []
-          if kwargs['hlt-only']:
-            if int(kwargs['hlt-only']) < 0:
+          if args.hlt_only:
+            if args.hlt_only < 0:
               dets = [SubDetector.TDAQ_HLT] if SubDetector.TDAQ_HLT in tag.dets or is_feb_tag else []
               robs = [robid for robid in tag.robs if SourceIdentifier(robid).subdetector_id()==SubDetector.TDAQ_HLT]
             else:
-              requested_rob_id = int(SourceIdentifier(SubDetector.TDAQ_HLT, int(kwargs['hlt-only'])))
+              requested_rob_id = int(SourceIdentifier(SubDetector.TDAQ_HLT, args.hlt_only))
               if SubDetector.TDAQ_HLT in tag.dets or requested_rob_id in tag.robs or is_feb_tag:
                 robs = [requested_rob_id]
           else:
@@ -254,7 +228,7 @@ def peb_writer():
         pbev.compression_type(compressionType)
         pbev.compression_level(compressionLevel)
         ostream.write(pbev)
-        if (logging.getLogger('').getEffectiveLevel() > logging.DEBUG) and kwargs['progress-bar']:
+        if (logging.getLogger('').getEffectiveLevel() > logging.DEBUG) and args.progress_bar:
           sys.stdout.write('.')
           sys.stdout.flush()
 
@@ -262,6 +236,7 @@ def peb_writer():
         totalEvents_out += 1
 
   # print final statistics
+  logging.info('Input file(s)                             = %s ', args.files)
   logging.info('Total number of events processed          = %d ', totalEvents_in)
   logging.info('Number of events skipped at the beginning = %d ', totalEvents_skipped)
   logging.info('Number of events written to output file   = %d ', totalEvents_out)
@@ -272,6 +247,7 @@ def peb_writer():
     sys.exit(1)
 
   sys.exit(0)
+
 
 if __name__ == "__main__":
   peb_writer()

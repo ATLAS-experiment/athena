@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictAltRegions.h"
@@ -46,7 +46,7 @@ IdDictAltRegions::resolve_references(IdDictMgr& idd,
 void
 IdDictAltRegions::generate_implementation(const IdDictMgr& idd,
                                           IdDictDictionary& dictionary,
-                                          const std::string& tag) {
+                                          std::string_view tag) {
   // Find the region given by the tag
   map_iterator region_it = m_regions.find(tag);
 

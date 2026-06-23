@@ -37,7 +37,7 @@ namespace MuonCalib {
         /** Is called at the beginning of the analysis */
         StatusCode initialize();
         /** execute function NOTE: This will read all events at once*/
-        StatusCode execute();
+        StatusCode execute(const EventContext& ctx);
         /** finalize functions */
         StatusCode finalize();
         bool CoolConnect(const std::string &connection_string, const std::string &tag_t0);

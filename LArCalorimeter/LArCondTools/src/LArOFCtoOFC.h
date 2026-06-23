@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCONDITIONSTEST_LAROFCTOOFC_H
@@ -27,7 +27,7 @@ class LArOFCtoOFC
   virtual ~LArOFCtoOFC(){}; 
 
   virtual StatusCode  initialize() override {return StatusCode::SUCCESS;};
-  virtual StatusCode  execute() override {return StatusCode::SUCCESS;};
+  virtual StatusCode  execute(const EventContext&) override {return StatusCode::SUCCESS;};
   virtual StatusCode  stop() override;
 
  private: 

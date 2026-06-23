@@ -43,3 +43,10 @@ def gnnTritonValidation(flags):
     flags.Reco.EnableHGTDExtension = False
     flags.Tracking.recoChain = [TrackingComponent.GNNChain]
     flags.Tracking.GNN.ToolType = GNNTrackFinderToolType.Triton
+
+
+def gnnActsPipelineValidation(flags):
+    """flags for Reco_tf with CA. Use ActsGnnModuleMapFinderTool for track finding."""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Tracking.recoChain = [TrackingComponent.GNNChain]
+    flags.Tracking.GNN.ToolType = GNNTrackFinderToolType.ActsPipeline

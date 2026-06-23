@@ -8,7 +8,6 @@
 #include "ActsToolInterfaces/IProtoTrackCreatorTool.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 
 namespace ActsTrk {
 
@@ -36,7 +35,7 @@ namespace ActsTrk {
     /// Warning: This is not a real parameter estimate. Should only serve as a placeholder. Use with care
     /// @param firstPRD: First hit on our proto track
     /// @return a set of dummy params - just pointing from the origin in a straight line to our hit
-    std::unique_ptr<Acts::BoundTrackParameters> makeDummyParams (const ActsTrk::ATLASUncalibSourceLink & firstPRD) const;
+    std::unique_ptr<Acts::BoundTrackParameters> makeDummyParams (const xAOD::UncalibratedMeasurement*  firstPRD) const;
     /// @brief get the global position for an uncalibrated measurement - delegates to the specialisation
     /// @param theMeas: uncalibrated measurement
     Amg::Vector3D getMeasurementPos(const xAOD::UncalibratedMeasurement* theMeas) const; 

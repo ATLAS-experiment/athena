@@ -52,7 +52,7 @@ AFP_Geometry::~AFP_Geometry()
     m_CfgParams.clear();
 }
 
-HepGeom::Transform3D AFP_Geometry::getStationTransform(const char* pszStationName) const
+HepGeom::Transform3D AFP_Geometry::getStationTransform(std::string_view pszStationName) const
 {
     HepGeom::Transform3D ReqTransform;
     eAFPStation eStation=parseStationName(pszStationName);
@@ -79,7 +79,7 @@ HepGeom::Transform3D AFP_Geometry::getStationTransform(const char* pszStationNam
 }
 
 HepGeom::Transform3D 
-AFP_Geometry::getStationElementTransform(const char* pszStationName, eStationElement eElement, const int nPlateID) const
+AFP_Geometry::getStationElementTransform(std::string_view pszStationName, eStationElement eElement, const int nPlateID) const
 {
     HepGeom::Transform3D ReqTransform;
     eAFPStation eStation=parseStationName(pszStationName);
@@ -136,7 +136,7 @@ AFP_Geometry::getStationElementTransform(const char* pszStationName, eStationEle
     return ReqTransform;
 }
 
-HepGeom::Transform3D AFP_Geometry::getSIDTransform(const eSIDTransformType eType, const char* pszStationName, const int nPlateID) const
+HepGeom::Transform3D AFP_Geometry::getSIDTransform(const eSIDTransformType eType, std::string_view pszStationName, const int nPlateID) const
 {
     HepGeom::Transform3D ReqTransform=HepGeom::Transform3D();
 
@@ -214,14 +214,14 @@ HepGeom::Transform3D AFP_Geometry::getSIDTransform(const eSIDTransformType eType
     return ReqTransform;
 }
 
-eAFPStation AFP_Geometry::parseStationName(const char* pszStationName) const
+eAFPStation AFP_Geometry::parseStationName(std::string_view pszStationName) const
 {
     eAFPStation eStation=EAS_UNKNOWN;
 
-    if(!strcmp(pszStationName,"AFP00")) eStation=EAS_AFP00;
-    else if(!strcmp(pszStationName,"AFP01")) eStation=EAS_AFP01;
-    else if(!strcmp(pszStationName,"AFP02")) eStation=EAS_AFP02;
-    else if(!strcmp(pszStationName,"AFP03")) eStation=EAS_AFP03;
+    if(pszStationName == "AFP00") eStation=EAS_AFP00;
+    else if(pszStationName =="AFP01") eStation=EAS_AFP01;
+    else if(pszStationName == "AFP02") eStation=EAS_AFP02;
+    else if(pszStationName == "AFP03") eStation=EAS_AFP03;
     else eStation=EAS_UNKNOWN;
 
     return eStation;

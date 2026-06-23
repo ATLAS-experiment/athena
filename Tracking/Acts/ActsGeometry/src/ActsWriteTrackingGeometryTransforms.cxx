@@ -43,12 +43,11 @@ StatusCode ActsWriteTrackingGeometryTransforms::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ActsWriteTrackingGeometryTransforms::execute() {
+StatusCode ActsWriteTrackingGeometryTransforms::execute(const EventContext& ctx) {
   
   ATH_MSG_DEBUG("In ActsWriteTrackingGeometryTransforms::execute");
 
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   ATH_MSG_DEBUG("Retrieved tracking Geometry");

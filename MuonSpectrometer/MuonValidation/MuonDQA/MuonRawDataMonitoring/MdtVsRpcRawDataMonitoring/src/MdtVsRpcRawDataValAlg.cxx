@@ -86,7 +86,7 @@ StatusCode MdtVsRpcRawDataValAlg::initialize() {
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-StatusCode MdtVsRpcRawDataValAlg::fillHistograms() {
+StatusCode MdtVsRpcRawDataValAlg::fillHistograms(const EventContext& ctx) {
     StatusCode sc = StatusCode::SUCCESS;
     ATH_MSG_DEBUG(
         "MdtVsRpcRawDataValAlg::MDT-RPC correlation RawData Monitoring "
@@ -120,17 +120,17 @@ StatusCode MdtVsRpcRawDataValAlg::fillHistograms() {
     int nPrdmdt = 0;
     Identifier dig_idmdt;
 
-    SG::ReadHandle<Muon::MdtPrepDataContainer> mdt_container(m_key_mdt);
+    SG::ReadHandle<Muon::MdtPrepDataContainer> mdt_container(m_key_mdt, ctx);
     ATH_MSG_DEBUG("****** mdt->size() : " << mdt_container->size());
 
     Muon::MdtPrepDataContainer::const_iterator mdt_containerIt;
     // mdt stuff end
 
-    SG::ReadHandle<Muon::RpcPrepDataContainer> rpc_container(m_key_rpc);
+    SG::ReadHandle<Muon::RpcPrepDataContainer> rpc_container(m_key_rpc, ctx);
 
     // MuonDetectorManager from the conditions store
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> MuonDetMgr{
-        m_DetectorManagerKey};
+        m_DetectorManagerKey, ctx};
     if (!MuonDetMgr.isValid()) {
         ATH_MSG_ERROR(
             "Null pointer to the read MuonDetectorManager conditions object");

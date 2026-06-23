@@ -31,7 +31,7 @@ def ActsFitterCfg(flags,
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
 
     from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+    kwargs.setdefault('ATLASConverterTool', acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
 
 
     if fitterKind is TrackFitterType.KalmanFitter:

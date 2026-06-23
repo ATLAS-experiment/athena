@@ -380,6 +380,10 @@ def handle_shared_refs():
     # Tests that are allowed to use the same reference. The key is the test that uses the
     # reference of its value.
     shared_refs = {
+        'CITest_DerivationRun2Data_PHYS_MT-test': 'CITest_DerivationRun2Data_PHYS-test',
+        'CITest_DerivationRun2MC_PHYS_MT-test': 'CITest_DerivationRun2MC_PHYS-test',
+        'CITest_DerivationRun3Data_PHYS_MT-test': 'CITest_DerivationRun3Data_PHYS-test',
+        'CITest_DerivationRun3MC_PHYS_MT-test': 'CITest_DerivationRun3MC_PHYS-test',
         'CITest_DerivationRun2Data_PHYSLITE_MT-test': 'CITest_DerivationRun2Data_PHYSLITE-test',
         'CITest_DerivationRun2MC_PHYSLITE_MT-test': 'CITest_DerivationRun2MC_PHYSLITE-test',
         'CITest_DerivationRun3Data_PHYSLITE_MT-test': 'CITest_DerivationRun3Data_PHYSLITE-test',
@@ -424,7 +428,7 @@ def summarise_failing_tests(check_for_duplicates = True):
                     if input("%s (y/N) " % msg).lower() != 'y':
                         sys.exit(1)
 
-                if (test.existing_ref not in reference_folders):
+                if (not test.shared_ref and test.existing_ref not in reference_folders):
                     reference_folders.append(test.existing_ref)
                 elif check_for_duplicates and not test.shared_ref:
                     print('FATAL: Found two tests which both change the same reference file: {}, which is not supported.'.format(test.existing_ref))

@@ -1,10 +1,36 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_CondCabling/CMAprogram.h"
+#include "MuonCablingTools/dbline.h"
 
 #include <string>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
+namespace {
+  void
+  storeThresholdWords(uint64_t twoWords,
+                      uint32_t (&programBytes)[CMAparameters::pivot_channels][2],
+                      bool (&thresholdRegisters)[CMAparameters::pivot_channels]
+                                               [CMAparameters::confirm_channels],
+                      int channel)
+  {
+      const uint32_t lowWord = static_cast<uint32_t>(twoWords);
+      const uint32_t highWord = static_cast<uint32_t>(twoWords >> 32);
+  
+      programBytes[channel][0] = lowWord;
+      programBytes[channel][1] = highWord;
+  
+      for (int bit = 0; bit < 32; ++bit) {
+          thresholdRegisters[channel][bit] = ((lowWord >> bit) & 1U) != 0U;
+          thresholdRegisters[channel][bit + 32] = ((highWord >> bit) & 1U) != 0U;
+      }
+  }
+}
 
 CMAprogram::CMAprogram() {
 
@@ -121,90 +147,51 @@ bool CMAprogram::read_v02(DBline& data) {
         uint64_t twowords;
 
         if (m_isnewcab) {
-            // case RPC_CondCabling
             if (data("set_trig_thr0_thr_reg_00")) {
-                for (int i = 0; i < 32; ++i) {
-                    ignore.clear();
-                    if (i == 0)
-                        data >> data.dbhex() >> twowords >> data.dbdec();
-                    else
-                        data >> ignore >> data.dbhex() >> twowords >> data.dbdec();
-
-                    union Data {
-                        uint64_t bits;
-                        uint32_t words[2];
-                    } dataun{};
-
-                    dataun.bits = twowords;
-
-                    m_program_bytes[0][i][0] = dataun.words[0];
-                    m_program_bytes[0][i][1] = dataun.words[1];
-
-                    for (int bit = 0; bit < 32; ++bit) {
-                        m_threshold_registers[0][i][bit] = ((dataun.words[0] >> bit) & right_bit) != 0;
-                        m_threshold_registers[0][i][bit + 32] = ((dataun.words[1] >> bit) & right_bit) != 0;
-                    }
-                    if (i < 31) ++data;
-                }
-            }
-
-            if (data("set_trig_thr1_thr_reg_00")) {
+              for (int i = 0; i < 32; ++i) {
                 ignore.clear();
-                for (int i = 0; i < 32; ++i) {
-                    if (i == 0)
-                        data >> data.dbhex() >> twowords >> data.dbdec();
-                    else
-                        data >> ignore >> data.dbhex() >> twowords >> data.dbdec();
-
-                    union Data {
-                        uint64_t bits;
-                        uint32_t words[2];
-                    } dataun{};
-
-                    dataun.bits = twowords;
-
-                    m_program_bytes[1][i][0] = dataun.words[0];
-                    m_program_bytes[1][i][1] = dataun.words[1];
-
-                    for (int bit = 0; bit < 32; ++bit) {
-                        m_threshold_registers[1][i][bit] = ((dataun.words[0] >> bit) & right_bit) != 0;
-                        m_threshold_registers[1][i][bit + 32] = ((dataun.words[1] >> bit) & right_bit) != 0;
-                    }
-
-                    if (i < 31) ++data;
+                if (i == 0) {
+                  data >> data.dbhex() >> twowords >> data.dbdec();
+                } else {
+                  data >> ignore >> data.dbhex() >> twowords >> data.dbdec();
                 }
+                storeThresholdWords(twowords, m_program_bytes[0], m_threshold_registers[0], i);
+                if (i < 31) {
+                  ++data;
+                }
+              }
+            }
+            if (data("set_trig_thr1_thr_reg_00")) {
+              ignore.clear();
+              for (int i = 0; i < 32; ++i) {
+                if (i == 0) {
+                  data >> data.dbhex() >> twowords >> data.dbdec();
+                } else {
+                  data >> ignore >> data.dbhex() >> twowords >> data.dbdec();
+                }
+                storeThresholdWords(twowords, m_program_bytes[1], m_threshold_registers[1], i);
+                if (i < 31) {
+                  ++data;
+                }
+              }
             }
 
             if (data("set_trig_thr2_thr_reg_00")) {
-                ignore.clear();
-                for (int i = 0; i < 32; ++i) {
-                    if (i == 0)
-                        data >> data.dbhex() >> twowords >> data.dbdec();
-                    else
-                        data >> ignore >> data.dbhex() >> twowords >> data.dbdec();
-
-                    union Data {
-                        uint64_t bits;
-                        uint32_t words[2];
-                    } dataun{};
-
-                    dataun.bits = twowords;
-
-                    m_program_bytes[2][i][0] = dataun.words[0];
-                    m_program_bytes[2][i][1] = dataun.words[1];
-
-                    for (int bit = 0; bit < 32; ++bit) {
-                        m_threshold_registers[2][i][bit] = ((dataun.words[0] >> bit) & right_bit) != 0;
-                        m_threshold_registers[2][i][bit + 32] = ((dataun.words[1] >> bit) & right_bit) != 0;
-                    }
-
-                    if (i < 31) ++data;
+              ignore.clear();
+              for (int i = 0; i < 32; ++i) {
+                if (i == 0) {
+                  data >> data.dbhex() >> twowords >> data.dbdec();
+                } else {
+                  data >> ignore >> data.dbhex() >> twowords >> data.dbdec();
                 }
+                storeThresholdWords(twowords, m_program_bytes[2], m_threshold_registers[2], i);
+                if (i < 31) {
+                  ++data;
+                }
+              }
             }
             ++data;
-        }
-
-        else {
+          } else {
             // case RPCcablingSim
             // old format ///////////////////////////////////////////////////////
             for (int i = 1; i <= 3; ++i) {

@@ -69,7 +69,7 @@ StatusCode HelloAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode HelloAlg::execute() {
+StatusCode HelloAlg::execute(const EventContext& /*ctx*/) {
   // Print where you are if needed (should never be INFO)
   ATH_MSG_DEBUG("execute()");
 

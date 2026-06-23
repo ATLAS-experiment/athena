@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( StripDigitization )
@@ -30,13 +30,13 @@ atlas_add_test( ITkStripFrontEnd_test
                 SOURCES  test/ITkStripFrontEnd_test.cxx 
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} StripDigitizationLib IdDictParser TestTools
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
               )
 atlas_add_test( ITkStripAmp_test
                 SOURCES src/*.cxx src/components/*.cxx test/ITkStripAmp_test.cxx 
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} StripDigitizationLib IdDictParser TestTools
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
               )
 
                

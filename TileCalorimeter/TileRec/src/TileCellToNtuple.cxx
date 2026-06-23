@@ -108,7 +108,7 @@ StatusCode TileCellToNtuple::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileCellToNtuple::execute()
+StatusCode TileCellToNtuple::execute(const EventContext& /*ctx*/)
 {
   m_nchan=0;
   m_tolE=0.0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NN_LAYER_CONFIG_HH_TAURECTOOLS
@@ -31,8 +31,8 @@ namespace lwtDev {
   struct EmbeddingConfig
   {
     std::vector<double> weights;
-    int index;
-    int n_out;
+    int index{};
+    int n_out{};
   };
 
   struct ActivationConfig
@@ -70,9 +70,9 @@ namespace lwtDev {
     enum class Type {
       INPUT, INPUT_SEQUENCE, FEED_FORWARD, CONCATENATE, SEQUENCE,
       TIME_DISTRIBUTED, SUM };
-    Type type;
+    Type type{};
     std::vector<size_t> sources;
-    int index;                  // input node size, or layer number
+    int index{};                  // input node size, or layer number
   };
 }
 

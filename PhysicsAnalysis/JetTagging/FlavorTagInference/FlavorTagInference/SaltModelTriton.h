@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FLAVORTAGINFERENCE_SALTMODELTRITON_H
@@ -36,7 +36,7 @@ namespace FlavorTagInference {
 		    , bool useSSL
 		    , const std::string& bearer = "");
 
-    virtual InferenceOutput runInference(std::map<std::string, Inputs>& gnn_inputs) const override;
+    virtual InferenceOutput runInference(InputMap& gnn_inputs) const override;
 
     virtual const SaltModelGraphConfig::GraphConfig getGraphConfig() const override;
     virtual const OutputConfig& getOutputConfig() const override;

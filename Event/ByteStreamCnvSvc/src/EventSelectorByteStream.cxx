@@ -28,6 +28,7 @@
 
 
 namespace {
+   const std::string stringTypeStr{"string"};
    /// Helper to suppress thread-checker warnings for single-threaded execution
    StatusCode putEvent_ST(const IAthenaIPCTool& tool,
                           long eventNumber, const void* source,
@@ -826,7 +827,7 @@ StatusCode EventSelectorByteStream::fillAttributeListImpl(coral::AttributeList *
    eformat::helper::decode(event->nstream_tag(), buffer, onl_streamTags);
    for (std::vector<eformat::helper::StreamTag>::const_iterator itS = onl_streamTags.begin(),
       itSE = onl_streamTags.end(); itS != itSE; ++itS) {
-      attrList->extend(itS->name + suffix, "string");
+      attrList->extend(itS->name + suffix, stringTypeStr);
       (*attrList)[itS->name + suffix].data<std::string>() = itS->type;
    }
 

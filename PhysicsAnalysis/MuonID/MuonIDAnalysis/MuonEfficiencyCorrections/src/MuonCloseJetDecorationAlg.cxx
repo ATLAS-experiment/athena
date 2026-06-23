@@ -43,7 +43,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonCloseJetDecorationAlg::execute() {
+    StatusCode MuonCloseJetDecorationAlg::execute(const EventContext& /*ctx*/) {
 
         const xAOD::MuonContainer* muons = nullptr;
         ATH_CHECK(evtStore()->retrieve(muons, m_muon_container));

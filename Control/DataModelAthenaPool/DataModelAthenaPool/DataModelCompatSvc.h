@@ -26,6 +26,7 @@
 #ifndef DATAMODELCOMPATSVC_H
 #define DATAMODELCOMPATSVC_H
 
+#include "CxxUtils/checker_macros.h"
 #include "RootUtils/ILogger.h"
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/IIncidentListener.h"
@@ -34,7 +35,7 @@
 /**
  * @brief Service for @c DataVector backwards compatibility.
  */
-class DataModelCompatSvc
+class ATLAS_NOT_THREAD_SAFE DataModelCompatSvc
   : public AthService,
     public RootUtils::ILogger,
     virtual public IIncidentListener

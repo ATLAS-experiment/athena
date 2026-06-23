@@ -41,13 +41,6 @@ using namespace Acts::UnitLiterals;
 using namespace Muon::MuonStationIndex;
 namespace {
 
-  //Muon System IDs
-  constexpr std::size_t s_muonBarrelId = 80;
-  constexpr std::size_t s_muonEndcapAId = 81;
-  constexpr std::size_t s_muonEndcapCId = 82;
-  constexpr std::size_t s_muonEndcapMiddleAId = 83;
-  constexpr std::size_t s_muonEndcapMiddleCId = 84;
-
   //Helper function to configure a material node with the correct Faces of the chambers' tracking volumes
   void configureMaterialFaces(
     Acts::Experimental::MaterialDesignatorBlueprintNode& node,
@@ -149,6 +142,7 @@ std::visit([&](auto& elems) {
 auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("MuonNode", Acts::AxisDirection::AxisZ);
 
 Acts::VolumeBoundFactory boundsFactory{};
+using namespace ActsTrk::detail::GeoVolIds;
 auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI", Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory, {ChIdx::BIS, ChIdx::BML, ChIdx::BOL, 
                                                                                                                                                ChIdx::EIS, ChIdx::EIL});
 auto endcapANode = buildMuonNode(gctx, endcapOuterAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
@@ -451,7 +445,7 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           break;
 
         } default: 
-              THROW_EXCEPTION("Unknown detector type for readout element: " << ActsTrk::to_string(readoutEle->detectorType()));
+              THROW_EXCEPTION("Unknown detector type for readout element: " << readoutEle->detectorType());
               break;
      
     }
@@ -461,10 +455,14 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
 }
 
 
-bool MuonBlueprintNodeBuilder::isBIS78(const MuonGMR4::MuonReadoutElement* element) const {    
-      return element->detectorType() == ActsTrk::DetectorType::Mdt && 
-             element->chamberIndex() == ChIndex::BIS && 
-             element->stationEta()>=7;
+bool MuonBlueprintNodeBuilder::isBIS78(const MuonGMR4::MuonReadoutElement* element) const {   
+  int stEta = element->stationEta();
+  if(m_isRun4){
+    stEta = std::abs(element->stationEta());
+  }
+  return  element->detectorType() == ActsTrk::DetectorType::Mdt && 
+          element->chamberIndex() == ChIndex::BIS && 
+          stEta >= 7;
   }
 
 template<typename ElementSet_t>
@@ -491,19 +489,26 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
   //otherwise they create overlap with the NSW sectors - stop a little bit before the cylinder of the passive surface
   const auto rejectBIS78 = [&](const MuonGMR4::MuonReadoutElement* readoutEle) {
     bool reject{false};
+    if(readoutEle->chamberIndex() != ChIdx::BIS){ 
+      return reject;
+    }
+    int stEta = readoutEle->stationEta();
+    if(m_isRun4){
+      stEta = std::abs(readoutEle->stationEta());
+    }
     switch (readoutEle->detectorType()) {
       case DetectorType::Mdt: {
         const auto* techEle =
           static_cast<const MuonGMR4::MdtReadoutElement*>(readoutEle);
-        if (techEle->multilayer() == 2) {
+        if (techEle->multilayer() == 2 && stEta >= 7) {
           reject = true;
         }
         break;
       }
       case DetectorType::Rpc: {
         const auto* techEle =
-          static_cast<const MuonGMR4::RpcReadoutElement*>(readoutEle);
-        if (techEle->doubletZ() == 2) {
+        static_cast<const MuonGMR4::RpcReadoutElement*>(readoutEle);
+        if (techEle->doubletZ() == 2 && stEta >= 7) {
           reject = true;
         }
         break;
@@ -511,7 +516,7 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       default:
         break;
     }
-    return isBIS78(readoutEle) && reject;
+    return reject;
   };
  
   for(const auto& [hash, elements] : elementsPerStation){
@@ -556,13 +561,13 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       case ChIdx::EMS :{
         side > 0 ? zShift = minZ - margin : zShift = maxZ + margin;
         trf = Amg::getTranslateZ3D(zShift);
-        auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, std::make_shared<Acts::RadialBounds>(0., rMax));
+        auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, std::make_shared<Acts::RadialBounds>(rMin, rMax));
         const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
         surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
         surfaces.push_back(surface);
         break;
         //large sectors (disc passive surface after NSW/EIL and after EML)
-      } case ChIdx::EIL :
+    } case ChIdx::EIL :
       case ChIdx::EML : {
         // HARDCODED!! (maybe think a better solution in the future) 
         // But for the EIL that we put after the EIS/EIL chambers we extend the radius of the disc surface 
@@ -573,7 +578,7 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
         side > 0 ? zShift = maxZ + margin : zShift = minZ - margin;
         trf = Amg::getTranslateZ3D(zShift);
         auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, 
-                             std::make_shared<Acts::RadialBounds>(0., rMax));
+                             std::make_shared<Acts::RadialBounds>(rMin, rMax));
         const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());
         surface->assignSurfaceMaterial(preparePassiveMaterial(surface->bounds(), nBins1, nBins2));
         surfaces.push_back(surface);
@@ -581,7 +586,12 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       } case ChIdx::BIS :
         case ChIdx::BML :
         case ChIdx::BOL : {
-        trf = Amg::getTranslateZ3D(halfZ + minZ);
+        //hack for run3 because of overlaps with eta = -7 BIS chambers
+      
+        if(!m_isRun4 && testCh->chamberIndex() == ChIdx::BIS){
+          halfZ -= 130.;
+          
+        }
         auto surface = Acts::Surface::makeShared<Acts::CylinderSurface>(trf, 
                              std::make_shared<Acts::CylinderBounds>(rMin - margin, halfZ));
         const auto [nBins1, nBins2] = getMaterialBins(testCh->chamberIndex());

@@ -7,7 +7,7 @@ atlas_subdir( RootUtils )
 find_package( Boost COMPONENTS thread )
 find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS RIO Hist Tree Core MathCore ROOTTPython
-   cppyy${Python_VERSION_MAJOR}_${Python_VERSION_MINOR} cppyy CPyCppyy )
+   CPyCppyy )
 
 set( ROOT_LIBRARIES_PYROOT ${ROOT_LIBRARIES} )
 unset( ROOT_FOUND )
@@ -58,7 +58,7 @@ atlas_add_test( TTreePatch_test
 
 atlas_add_test( WithRootErrorHandler_test
    SOURCES test/WithRootErrorHandler_test.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} RootUtils )
 
 atlas_add_test( TRandomTLS_test

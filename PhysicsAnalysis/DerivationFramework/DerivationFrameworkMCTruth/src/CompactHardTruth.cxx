@@ -101,7 +101,7 @@ StatusCode CompactHardTruth::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CompactHardTruth::execute() {
+StatusCode CompactHardTruth::execute(const EventContext& /*ctx*/) {
 
   ++m_evtCount;
   // if( m_evtCount%100 == 0 ){

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVertexFitters/SequentialVertexFitter.h"
@@ -95,7 +95,8 @@ namespace Trk{
  
    
   //conversion from the perigeeList and starting point   
-  xAOD::Vertex * SequentialVertexFitter::fit(const std::vector<const Trk::TrackParameters*> & perigeeList,
+  std::unique_ptr<xAOD::Vertex> SequentialVertexFitter::fit(const EventContext& ctx,
+                                             const std::vector<const Trk::TrackParameters*> & perigeeList,
                                              const std::vector<const Trk::NeutralParameters*> & neutralPerigeeList,
                                              const Amg::Vector3D& startingPoint)  const
   {
@@ -104,7 +105,7 @@ namespace Trk{
     constraint.setPosition( startingPoint );
     constraint.setCovariancePosition( AmgSymMatrix(3)::Zero(3,3) );
     constraint.setFitQuality( 0.,0.);
-    xAOD::Vertex * FittedVertex  = fit(perigeeList, neutralPerigeeList, constraint);
+    std::unique_ptr<xAOD::Vertex> FittedVertex = fit(ctx, perigeeList, neutralPerigeeList, constraint);
    
     //setting the initial perigees  
     if(FittedVertex !=nullptr )
@@ -132,20 +133,22 @@ namespace Trk{
   }
   
   //additional new fitting methods  
-  xAOD::Vertex * SequentialVertexFitter::fit(const std::vector<const Trk::TrackParameters*>& perigeeList, 
+  std::unique_ptr<xAOD::Vertex> SequentialVertexFitter::fit(const EventContext& ctx,
+                                             const std::vector<const Trk::TrackParameters*>& perigeeList,
                                              const std::vector<const Trk::NeutralParameters*> & neutralPerigeeList) const
   {    
    
     //this method will later be modifyed to use the a finder
     //uses a default starting point so  far.
     const Amg::Vector3D start_point(0.,0.,0.);
-    return fit(perigeeList, neutralPerigeeList, start_point);
+    return fit(ctx, perigeeList, neutralPerigeeList, start_point);
 
   }
 
   
   //method where the actual fit is done
-  xAOD::Vertex * SequentialVertexFitter::fit(const std::vector<const Trk::TrackParameters*> & perigeeList,
+  std::unique_ptr<xAOD::Vertex> SequentialVertexFitter::fit(const EventContext& /*ctx*/,
+                                             const std::vector<const Trk::TrackParameters*> & perigeeList,
                                              const std::vector<const Trk::NeutralParameters*> & neutralPerigeeList,
                                              const xAOD::Vertex& constraint) const
   {
@@ -272,7 +275,7 @@ namespace Trk{
     }
     //here the vertex is returned. It is foreseen that a vertex is _always_
     //returned (initial guess in worst case) unless there is a runtime crash
-    return returnVertex.release();
+    return returnVertex;
 
   }//end of the actual fit method
  
@@ -362,18 +365,18 @@ namespace Trk{
 
  //xAOD interfaced methods. Required to un-block the current situation 
  // with the xAOD tracking design.
- xAOD::Vertex * SequentialVertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk,const std::vector<const xAOD::NeutralParticle*>& vectorNeut,const Amg::Vector3D& startingPoint) const
+  std::unique_ptr<xAOD::Vertex> SequentialVertexFitter::fit(const EventContext& ctx,const std::vector<const xAOD::TrackParticle*>& vectorTrk,const std::vector<const xAOD::NeutralParticle*>& vectorNeut,const Amg::Vector3D& startingPoint) const
  {
    xAOD::Vertex constraint;
    constraint.makePrivateStore();
    constraint.setPosition( startingPoint );
    constraint.setCovariancePosition( AmgSymMatrix(3)::Zero(3,3) );
    constraint.setFitQuality( 0.,0.);			 
-   return fit(vectorTrk, vectorNeut, constraint);				 
+   return fit(ctx, vectorTrk, vectorNeut, constraint);
  }//end of the xAOD starting point fit method
 
     
- xAOD::Vertex * SequentialVertexFitter::fit(const std::vector<const xAOD::TrackParticle*>& vectorTrk, const std::vector<const xAOD::NeutralParticle*>& vectorNeut, const xAOD::Vertex& constraint) const
+  std::unique_ptr<xAOD::Vertex> SequentialVertexFitter::fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>& vectorTrk, const std::vector<const xAOD::NeutralParticle*>& vectorNeut, const xAOD::Vertex& constraint) const
  {
 
    if(vectorTrk.empty())
@@ -444,7 +447,7 @@ namespace Trk{
    }
 
 
-   xAOD::Vertex* fittedVertex = fit( measuredPerigees, measuredNeutralPerigees, constraint );
+   std::unique_ptr<xAOD::Vertex> fittedVertex = fit( ctx, measuredPerigees, measuredNeutralPerigees, constraint );
 
 
    //assigning the input tracks to the fitted vertex through vxTrackAtVertices

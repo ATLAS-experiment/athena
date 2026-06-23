@@ -19,7 +19,6 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <string>
 
@@ -65,9 +64,8 @@ StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::doThinning() const
+StatusCode DerivationFramework::JetLargeD0TrackParticleThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     // Retrieve main TrackParticle collection
     SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles

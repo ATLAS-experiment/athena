@@ -829,7 +829,7 @@ namespace InDet {
 
   }
 
-  void TRT_SegmentToTrackTool::addNewTrack(Trk::Track* trk, ITRT_SegmentToTrackTool::EventData &event_data) const {
+  void TRT_SegmentToTrackTool::addNewTrack(const EventContext& ctx, Trk::Track* trk, ITRT_SegmentToTrackTool::EventData &event_data) const {
     // @TODO avoid non const member m_trackScoreTrackMap
     ATH_MSG_DEBUG ("Add track to the scoring multimap...");
     //Score the track under investigation
@@ -837,8 +837,8 @@ namespace InDet {
     bool passBasicSelections = m_scoringTool->passBasicSelections(*trk);
     if(passBasicSelections){
       if (m_trackSummaryTool.isEnabled()) {
-	m_trackSummaryTool->computeAndReplaceTrackSummary(*trk,
-							  m_suppressHoleSearch);
+       m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *trk,
+                                                         m_suppressHoleSearch);
       }
       score = m_scoringTool->score(*trk);
     }

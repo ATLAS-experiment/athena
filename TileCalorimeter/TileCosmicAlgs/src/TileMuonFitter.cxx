@@ -250,14 +250,14 @@ StatusCode TileMuonFitter::finalize() {
 // ********************************************************************
 // ********************************************************************
 // ********************************************************************
-StatusCode TileMuonFitter::execute() {
+StatusCode TileMuonFitter::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( " start execute " );
 
   int fitStatus = 2; //not even try
   setEventDefaults();
 
-  SG::ReadHandle<CaloCellContainer> cellContainer(m_cellContainerKey);
+  SG::ReadHandle<CaloCellContainer> cellContainer(m_cellContainerKey, ctx);
   if (!cellContainer.isValid()) {
     ATH_MSG_WARNING( " Could not find container " << m_cellContainerKey.key() );
   } else {

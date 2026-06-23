@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisTools/AANTupleStream.h"
@@ -14,9 +14,7 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IAddressCreator.h"
 #include "GaudiKernel/IOpaqueAddress.h"
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/TypeNameString.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIoComponentMgr.h"
 
@@ -45,7 +43,7 @@ using namespace AANTupleParams;
 
 // Standard Constructor
 AANTupleStream::AANTupleStream(const std::string& name, ISvcLocator* pSvcLocator) 
-  : AthLegacySequence(name, pSvcLocator),
+  : base_class::base_class(name, pSvcLocator),
     m_persSvc      ("EventPersistencySvc", name),
     m_attribSpec(0),
     m_schemaDone(false),
@@ -61,7 +59,6 @@ AANTupleStream::AANTupleStream(const std::string& name, ISvcLocator* pSvcLocator
   declareProperty("LateSchemaWriting",    m_lateSchema=false);
   declareProperty("TreeName",             m_treeName=c_treeName);
   declareProperty("Macro",                m_macro="");
-  declareProperty("Members",              m_membersNames);
   declareProperty("FilterAlgs",           m_acceptNames);
 
   m_tokenCString[0] = '\0';
@@ -103,27 +100,25 @@ StatusCode AANTupleStream::initialize()
   m_attribSpec = new coral::AttributeListSpecification;
   m_attribSpec->extend( name_RunNumber,   "unsigned int" );
   m_attribSpec->extend( name_EventNumber, "unsigned int" );
-
+  const std::string refStr{"_ref"};
+  const std::string stringTypeStr{"string"};
   // Add on specification for extra refs
   for (const std::string& ref : m_extraRefNames.value())
     {
       // Append _ref to name of attribute
-      m_attribSpec->extend(ref + "_ref", "string");
+      m_attribSpec->extend(ref + refStr, stringTypeStr);
     }
 
   if (!m_lateSchema) {
     ATH_CHECK( initSchema() );
   }
 
-  // initialize sub-algos
-  ATH_CHECK( initialize_subAlgos() );
-
   // get filters
   ATH_CHECK( getFilters() );
 
   ATH_MSG_DEBUG ("End initialize ");
 
-  return AthLegacySequence::initialize();
+  return StatusCode::SUCCESS;
 }
 
 
@@ -164,12 +159,12 @@ StatusCode AANTupleStream::finalize()
       gDirectory->cd(curDir.c_str());
     }
 
-  return AthLegacySequence::finalize();
+  return StatusCode::SUCCESS;
 }
 
 
 // Work entry point
-StatusCode AANTupleStream::execute() 
+StatusCode AANTupleStream::execute(const EventContext& /*ctx*/) 
 {
   StatusCode sc;
 
@@ -178,14 +173,6 @@ StatusCode AANTupleStream::execute()
     if (sc.isFailure())
       return sc;
   }
-
-  // execute sub-algos
-  sc = execute_subAlgos();
-  if ( sc.isFailure() )
-    {
-      ATH_MSG_ERROR ("Could not execute sub-algos");
-      return sc;
-    }      
 
   std::map<std::string,std::string> inputRefs;
   std::string ref;
@@ -512,64 +499,6 @@ bool AANTupleStream::writeTokenAttrList( const std::string& token, const coral::
   m_tokenBranch->SetAddress(m_tokenCString); 
 
   return true;
-}
-
-
-// initialize sub-algos
-StatusCode AANTupleStream::initialize_subAlgos()
-{
-  StatusCode sc = StatusCode::SUCCESS;
-  
-  Algorithm* algo;
-  for (const std::string& name : m_membersNames)
-    {
-      // Parse the name for a syntax of the form:
-      //
-      // <type>/<name>
-      //
-      // Where <name> is the algorithm instance name, and <type> is the
-      // algorithm class type (being a subclass of Algorithm).
-      Gaudi::Utils::TypeNameString tn(name);
-
-      // create sub-algorithm
-      ATH_MSG_INFO (" -> creating sub-algorithm " << name);
-      sc = createSubAlgorithm( tn.type(), tn.name(), algo );
-      if (sc.isFailure())
-        {
-          ATH_MSG_FATAL (" ERROR creating sub-alg." << name);
-          return StatusCode::FAILURE;
-        }
-    }
-
-  return sc;
-}
-
-
-// execute sub-algos
-StatusCode AANTupleStream::execute_subAlgos()
-{
-  StatusCode sc = StatusCode::SUCCESS;
-  
-  ATH_MSG_DEBUG ("in execute_subAlgos() ...");
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  
-  // -- run subalgorithms
-  for ( unsigned int i=0; i < m_membersNames.size(); ++i )
-    {
-      ATH_MSG_DEBUG (" -> calling sub-algorithm " << m_membersNames[i]);
-      // skip disabled algo
-      if (! (*(this->subAlgorithms()))[i]->isEnabled()) continue ;
-      
-      sc = (*(this->subAlgorithms()))[i]->execute(ctx);
-      if ( sc.isFailure())
-	{
-	  ATH_MSG_ERROR
-	    (" ERROR executing sub-algorithm:" << m_membersNames[i]);
-	  return StatusCode::FAILURE;
-	}
-    }
-  return sc;
 }
 
 

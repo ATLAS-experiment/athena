@@ -15,15 +15,14 @@
 // Base Class
 #include "G4VSensitiveDetector.hh"
 
-// use of the hits
-#include "TileSimEvent/TileHitVector.h"
-#include "StoreGate/WriteHandle.h"
+#include "Identifier/Identifier.h"
+#include "TileSimEvent/TileHitVectorCellBuilder.h"
+
+#include <string>
 
 class G4Step;
 class G4HCofThisEvent;
 class TileTBID;
-class TileSimHit;
-class Identifier;
 
 class CombinedScintillatorSD : public G4VSensitiveDetector
 {
@@ -31,21 +30,20 @@ public:
   CombinedScintillatorSD(const std::string& name, const std::string& hitCollectionName);
   ~CombinedScintillatorSD() = default;
 
-  void StartOfAthenaEvent();   // Called from CombinedScintillatorSDTool::SetupEvent
+  static constexpr int NCells = 2;
+  using HitVectorBuilder = TileHitVectorCellBuilder<NCells>;
+
   void Initialize(G4HCofThisEvent*) override final;
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
-  void EndOfAthenaEvent();
 
 private:
   const TileTBID* m_tileTBID = nullptr;
 
-  static const int N_CELLS = 2;
+  HitVectorBuilder* GetHitCollection();
 
-  int m_nhits[N_CELLS]={};
-  TileSimHit* m_hit[N_CELLS]={};
-  Identifier m_id[N_CELLS]={};
-  // The hits collections
-  SG::WriteHandle<TileHitVector> m_HitColl;
+  Identifier m_id[NCells]={};
+  const std::string m_hitCollectionName;
+  HitVectorBuilder* m_hitCollection{};
 };
 
 #endif // COMBINEDSCINTILLATOR_COMBINEDSCINTILLATORSD_H

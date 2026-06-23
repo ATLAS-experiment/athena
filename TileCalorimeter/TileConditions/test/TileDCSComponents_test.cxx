@@ -157,7 +157,7 @@ class DummyAlgorithm: public AthAlgorithm {
 
     }
 
-    virtual StatusCode execute() override {
+    virtual StatusCode execute(const EventContext&) override {
       return StatusCode::SUCCESS;
     }
 };
@@ -872,7 +872,7 @@ void testTileDCSTool(ISvcLocator* svcLoc) {
 }
 
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main() {
 
   std::ofstream jo(TILE_JO_NAME);

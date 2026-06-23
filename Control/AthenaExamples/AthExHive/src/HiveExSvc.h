@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -30,7 +30,7 @@ public:
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
   
-  virtual void add(const std::string&, const unsigned int&) override;
+  virtual void add(const EventContext&, const std::string&, const unsigned int&) override;
 
 private:
 

@@ -41,6 +41,32 @@ namespace xAOD {
     return std::make_unique<T>();
   }
 
+  /// Base trait for the return type of @c xAOD::shallowCopy
+  template <class T>
+    requires SG::IsAuxDataVector<T> || SG::IsConstAuxElement<T>
+  struct ShallowCopyResult {};
+
+  /// Trait for the return type @c xAOD::shallowCopy for containers
+  template <SG::IsAuxDataVector T>
+  struct ShallowCopyResult<T> {
+    /// The type returned by @c xAOD::shallowCopy when called with a container
+    /// of type @c T
+    using type =
+        std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>>;
+  };
+
+  /// Trait for the return type @c xAOD::shallowCopy for objects
+  template <SG::IsConstAuxElement T>
+  struct ShallowCopyResult<T> {
+    /// The type returned by @c xAOD::shallowCopy when called with an object
+    /// of type @c T
+    using type = std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>>;
+  };
+
+  /// Return type of @c xAOD::shallowCopy
+  template <class T>
+  using ShallowCopyResult_t = typename ShallowCopyResult<T>::type;
+
   /// Create a shallow copy of an existing container
   ///
   /// This function can be used to make a shallow copy of an existing
@@ -56,8 +82,7 @@ namespace xAOD {
   /// @returns A pair of unique_ptr to the created objects.
   ///
   template <SG::IsAuxDataVector T>
-  std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>>
-  shallowCopy(const T& cont, const EventContext& ctx);
+  ShallowCopyResult_t<T> shallowCopy(const T& cont, const EventContext& ctx);
 
   /// Create a shallow copy of an existing container
   ///
@@ -71,8 +96,7 @@ namespace xAOD {
   /// @returns A pair of unique_ptr to the created objects.
   ///
   template <SG::IsAuxDataVector T>
-  std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxContainer>>
-  shallowCopy(const T& cont);
+  ShallowCopyResult_t<T> shallowCopy(const T& cont);
 
   /// Create a shallow copy of an existing standalone object
   ///
@@ -92,8 +116,7 @@ namespace xAOD {
   /// @returns A pair of unique_ptr to the created objects.
   ///
   template <SG::IsConstAuxElement T>
-  std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
-      const T& obj, const EventContext& ctx);
+  ShallowCopyResult_t<T> shallowCopy(const T& obj, const EventContext& ctx);
 
   /// Create a shallow copy of an existing standalone object
   ///
@@ -110,8 +133,7 @@ namespace xAOD {
   /// @returns A pair of unique_ptr to the created objects.
   ///
   template <SG::IsConstAuxElement T>
-  std::pair<std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo>> shallowCopy(
-      const T& obj);
+  ShallowCopyResult_t<T> shallowCopy(const T& obj);
 
   namespace detail{
   /// Impl function for shallow copy container
@@ -199,6 +221,7 @@ namespace xAOD {
    /// StoreGate/ShallowCopyDecorDeps.h.
    ///
    template< class T >
+   [[deprecated("Please switch to xAOD::shallowCopy(...), which returns unique_ptr")]]
    std::pair< T*, ShallowAuxContainer* > shallowCopyContainer( const T& cont ) {
      DataLink<SG::IConstAuxStore> link (cont.getConstStore());
      auto tmp = detail::shallowCopyContainerImpl(cont, link);
@@ -260,6 +283,7 @@ namespace xAOD {
 
    // Backwards compatibility
    template< class T >
+   [[deprecated("Please switch to xAOD::shallowCopy(...), which returns unique_ptr")]]
    std::pair< T*, ShallowAuxInfo* >
    shallowCopyObject( const T& obj ) {
      auto ptrs =  shallowCopyObject (obj, Gaudi::Hive::currentContext());

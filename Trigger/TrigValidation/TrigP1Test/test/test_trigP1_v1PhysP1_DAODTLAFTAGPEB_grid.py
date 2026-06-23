@@ -25,6 +25,7 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
+from TrigP1Test.TrigP1TestSteps import filterBS
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
@@ -43,12 +44,7 @@ hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
 hlt.args = '-o output'
 
 # Extract the physics_FTagPEBTLA stream out of the BS file with many streams
-filter_bs = ExecStep.ExecStep('FilterBS')
-filter_bs.type = 'other'
-filter_bs.executable = 'trigbs_extractStream.py'
-filter_bs.input = ''
-# cannot use 'find_file' as it only keeps the last file matching the pattern
-filter_bs.args = '-s FTagPEBTLA ' + '`find . -name "*_HLTMPPy_output.*.data"`'
+filter_bs = filterBS('FTagPEBTLA')
 
 # Tier-0 reco step (BS->AOD)
 tlarecoPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",
@@ -62,7 +58,7 @@ tlareco.threads = 8
 tlareco.concurrent_events = 8
 tlareco.input = ''
 tlareco.explicit_input = True
-tlareco.args = '--inputBSFile=' + find_file('*.physics_FTagPEBTLA*._athenaHLT*.data')  # output of the previous step
+tlareco.args = '--inputBSFile=' + find_file('*.physics_FTagPEBTLA.*.data')  # output of the previous step
 tlareco.args += ' --outputDAOD_TLAFTAGPEBFile=DAOD_TLAFTAGPEB.pool.root'
 tlareco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA25}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tlareco.args += ' --preExec="{:s}"'.format(tlarecoPreExec)

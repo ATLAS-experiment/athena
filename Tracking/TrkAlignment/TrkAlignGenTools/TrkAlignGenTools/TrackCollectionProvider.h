@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENTOOLS_TRACKCOLLECTIONPROVIDER_H
@@ -34,10 +34,12 @@ namespace Trk {
     StatusCode trackCollection(const TrackCollection*& tracks);
 
   private:
-    std::string m_inputCol;    //!< Name of input track collection
+    Gaudi::Property<std::string> m_inputCol{this, "InputTrkCol", "MooreTracks",
+	"Name of input track collection"};
     
-    int m_nRetrievalErrors;    //!< number of retrieval errors at the beginning of the job
-    int m_maxRetrievalErrors;  //!< maximum allowed number of retrieval errors at the beginning of the job (-1 for infinite)
+    int m_nRetrievalErrors = 0;    //!< number of retrieval errors at the beginning of the job
+    Gaudi::Property<int> m_maxRetrievalErrors{this, "MaxRetrievalErrors", 10,
+      "maximum allowed number of retrieval errors at the beginning of the job (-1 for infinite)"};
     
   }; // end class
 

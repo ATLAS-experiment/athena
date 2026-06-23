@@ -24,7 +24,7 @@ public:
   void transToPers( const Trk::Track* transObj, Trk::Track_p12* persObj, MsgStream& );
 
   //virtual 
-  void	initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv ) {
+  void	initPrivateConverters( TopLevelTPCnvBase *topCnv ) {
      m_trackStateVectorCnv.setTopConverter( topCnv, 0 );
   }
   

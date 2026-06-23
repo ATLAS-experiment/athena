@@ -67,7 +67,7 @@ StatusCode ReadTRT_DetectorElements::initialize(){
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode ReadTRT_DetectorElements::execute() {
+StatusCode ReadTRT_DetectorElements::execute(const EventContext& /*ctx*/) {
   msg(MSG::INFO) << "execute()" << endmsg;
   // Only print out on first event
   if (m_first && m_doExec) {

@@ -90,9 +90,8 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches(const Event
   // Decorate the vertices with the NN score
   ATH_MSG_DEBUG("PhotonVertexSelection returns vertex " << newPV << " " << (newPV? Form(" with z = %g", newPV->z()) : "") );
   // Create shallow copy of the PrimaryVertices container
-  std::pair< std::unique_ptr<xAOD::VertexContainer>,
-             std::unique_ptr<xAOD::ShallowAuxContainer> > HggPV =
-    xAOD::shallowCopyContainer( *PV, ctx );
+  xAOD::ShallowCopyResult_t<xAOD::VertexContainer> HggPV =
+    xAOD::shallowCopy( *PV, ctx );
   HggPV.second->setShallowIO(false);
 
   SG::WriteHandle<xAOD::VertexContainer> vertexContainer(m_diphotonVertexKey, ctx);

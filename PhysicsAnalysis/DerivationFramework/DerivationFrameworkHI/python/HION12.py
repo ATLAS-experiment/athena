@@ -14,7 +14,8 @@ def HION12SkimmingToolCfg(flags):
     
     ExtraData  = []
     ExtraData += ['xAOD::VertexContainer/PrimaryVertices']
-    ExtraData += ['xAOD::JetContainer/AntiKt4EMTopoJets']
+    if (flags.Input.ProjectName == "data15_hi" or flags.Input.ProjectName == "data18_hi"):
+        ExtraData += ['xAOD::JetContainer/AntiKt4EMTopoJets']
     ExtraData += ['xAOD::JetContainer/AntiKt4LCTopoJets']
     ExtraData += ['xAOD::JetContainer/AntiKt4EMPFlowJets']
     ExtraData += ['xAOD::JetContainer/AntiKt4HIJets']
@@ -29,36 +30,65 @@ def HION12SkimmingToolCfg(flags):
     from DerivationFrameworkHI import ListTriggers
     
     objectSelection = '(count(PrimaryVertices.z < 1000) < 10)'
-    nJetCuts    = ListTriggers.HION12nJetCuts2018()
-    MB_triggers = ListTriggers.HION12MBtriggers2018()
-    triggers    = ListTriggers.HION12triggers2018()
-    
-    expression = '( (' + ' || '.join(triggers+MB_triggers) + ') && '+objectSelection+ ' && ' + '(' + ' || '.join(nJetCuts) + ')' + ')'
+    nJetCuts    = ListTriggers.GetHION12nJetCuts(flags.Input.ProjectName)
+    triggers    = ListTriggers.GetHION12Triggers(flags.Input.ProjectName)
+    filterList = []
+
+    expression = '('+objectSelection+ ' && ' + '(' + ' || '.join(nJetCuts) + ')' + ')'
     
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
-    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-        flags, name = "HION12StringSkimmingTool", expression = expression)), primary=True)
+    HION12StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "HION12StringSkimmingTool",
+                                  expression = expression)))
+    filterList += [HION12StringSkimmingTool]
+
+    HION12TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+        name = "HION12TriggerSkimmingTool", TriggerListOR = triggers)
+    acc.addPublicTool(HION12TriggerSkimmingTool)
+    filterList += [HION12TriggerSkimmingTool]
+
+    HION12SkimmingTool  = CompFactory.DerivationFramework.FilterCombinationAND(
+        name="HION12SkimmingTool",  FilterList=filterList)
+    acc.addPublicTool(HION12SkimmingTool, primary = True)
+
     return(acc)
 
 
 def HION12KernelCfg(flags, name='HION12Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
     acc = ComponentAccumulator()
+    from DerivationFrameworkHI.HION7 import (
+        PhysAugmentationsHION7Cfg)
+    acc.merge(PhysAugmentationsHION7Cfg(flags))
+
+    if flags.HeavyIon.doHIBTagging:
+        #Rebuild jets
+        from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
+        acc.merge(JetCommonCfg(flags))
+        from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+        acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
+        from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
+        acc.merge(TrackLeptonDecorationCfg(flags))
+
     
 #########################################################################################
 #Thinning
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg
     
-    expression = "abs(InDetTrackParticles.d0)< 1000000000 && abs(InDetTrackParticles.z0*sin(InDetTrackParticles.theta)) < 1000000000 && InDetTrackParticles.pt > 200" #check limits
-    HION12TrackThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-    flags,
-    name                    = "HION12TrackThinningTool",
-    StreamName              = kwargs['StreamName'], 
-    SelectionString         = expression,
-    InDetTrackParticlesKey  = "InDetTrackParticles"))
+    thinningTools = []
+    # track thinning for data only, all tracks in MC used for training
+    if not flags.Input.isMC:
+        expression = "abs(InDetTrackParticles.d0)< 1000000000 && abs(InDetTrackParticles.z0*sin(InDetTrackParticles.theta)) < 1000000000 && InDetTrackParticles.pt > 200" #check limits
+        HION12TrackThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
+        flags,
+        name                    = "HION12TrackThinningTool",
+        StreamName              = kwargs['StreamName'],
+        SelectionString         = expression,
+        InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    thinningTools = [HION12TrackThinningTool]
+        thinningTools = [HION12TrackThinningTool]
+
     skimmingTool = acc.getPrimaryAndMerge(HION12SkimmingToolCfg(flags))
     
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
@@ -85,7 +115,7 @@ def HION12Cfg(flags):
     HION12SlimmingHelper = SlimmingHelper("HION12SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     
     HION12SlimmingHelper.SmartCollections = ListSlimming.HION12SmartCollections()
-    HION12SlimmingHelper.AllVariables     = ListSlimming.HION12AllVarContent()
+    HION12SlimmingHelper.AllVariables     = ListSlimming.HION12AllVarContent(flags.Input.ProjectName)
     HION12SlimmingHelper.ExtraVariables   = ListSlimming.HION12Extra()
     
     

@@ -24,7 +24,7 @@ public:
     virtual ~TgcCondDbTestAlg();
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
     SG::ReadCondHandleKey<TgcCondDbData> m_readKey{this, "ReadKey", "TgcCondDbData", "Key of TgcCondDbData"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -33,8 +33,8 @@
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/Sample.h>
-#include <SampleHandler/SamplePtr.h>
 #include <SampleHandler/ToolsOther.h>
+#include <xAODRootAccess/Event.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TROOT.h>
@@ -219,7 +219,7 @@ namespace EL
   treeEntry () const
   {
     RCU_READ_INVARIANT (this);
-    return m_inputTreeEntry;
+    return m_inputEntry;
   }
 
 
@@ -231,6 +231,13 @@ namespace EL
     return m_inputFile.get();
   }
 
+
+  bool Worker ::
+  hasInputEvents () const
+  {
+    // no invariant used
+    return m_hasInputEvents;
+  }
 
 
   std::string Worker ::
@@ -256,14 +263,14 @@ namespace EL
 
 
 
-  xAOD::TEvent *Worker ::
+  xAOD::Event *Worker ::
   xaodEvent () const
   {
     RCU_READ_INVARIANT (this);
 
-    if (m_tevent == nullptr)
+    if (m_event == nullptr)
       RCU_THROW_MSG ("Job not configured for xAOD support");
-    return m_tevent;
+    return m_event;
   }
 
 
@@ -366,7 +373,7 @@ namespace EL
   setJobConfig (JobConfig&& jobConfig)
   {
     RCU_CHANGE_INVARIANT (this);
-    for (std::unique_ptr<IAlgorithmWrapper>& alg : jobConfig.extractAlgorithms())
+    for (auto& alg : jobConfig.extractAlgorithms())
     {
       m_algs.push_back (std::move (alg));
     }
@@ -395,9 +402,7 @@ namespace EL
     }
     if (xAODInput)
     {
-      m_moduleConfig.emplace_back ("EL::Detail::TEventModule/TEventModule");
-      ANA_CHECK (m_moduleConfig.back().setProperty ("accessMode", metaData()->castString (Job::optXaodAccessMode)));
-      ANA_CHECK (m_moduleConfig.back().setProperty ("otherMetaDataTreeNamePattern", metaData()->castString (Job::optOtherMetaDataTreeNamePattern)));
+      m_moduleConfig.emplace_back ("EL::Detail::EventModule/EventModule");
       if (metaData()->castDouble (Job::optXAODSummaryReport, 1) == 0)
         ANA_CHECK (m_moduleConfig.back().setProperty ("summaryReport", false));
       ANA_CHECK (m_moduleConfig.back().setProperty ("useStats", metaData()->castBool (Job::optXAODPerfStats, false)));
@@ -497,8 +502,9 @@ namespace EL
 
     RCU_CHANGE_INVARIANT (this);
 
-    for (auto& module : m_modules)
+    for (auto& module : m_modules) 
       ANA_CHECK (module->processInputs (*this, *this));
+
     return ::StatusCode::SUCCESS;
   }
 
@@ -583,7 +589,7 @@ namespace EL
       return ::StatusCode::FAILURE;
     }
 
-    m_inputTreeEntry = eventRange.m_beginEvent;
+    m_inputEntry = eventRange.m_beginEvent;
 
     if (m_algorithmsInitialized == false)
     {
@@ -611,7 +617,7 @@ namespace EL
          event != uint64_t (eventRange.m_endEvent);
          ++ event)
     {
-      m_inputTreeEntry = event;
+      m_inputEntry = event;
       for (auto& module : m_modules)
       {
         if (module->onExecute (*this).isFailure())
@@ -682,8 +688,9 @@ namespace EL
         for (auto& module : m_modules)
           ANA_CHECK (module->postCloseInputFile (*this));
       }
-      m_newInputFile = false;
-      m_inputTree = nullptr;
+      m_newInputFile   = false;
+      m_hasInputEvents = false;
+      m_inputTree      = nullptr;
       m_inputFile.reset ();
       m_inputFileUrl.clear ();
     }
@@ -715,6 +722,7 @@ namespace EL
       return ::StatusCode::FAILURE;
     }
 
+    // Direct TTree access 
     TTree *tree = 0;
     const std::string treeName
       = m_metaData->castString (SH::MetaFields::treeName, SH::MetaFields::treeName_default);
@@ -724,12 +732,32 @@ namespace EL
       ANA_MSG_INFO ("tree " << treeName << " not found in input file: " << inputFileUrl);
       ANA_MSG_INFO ("treating this like a tree with no events");
     }
+    else {
+      m_hasInputEvents = (tree->GetEntries() > 0);
+    }
 
     m_newInputFile = true;
     m_inputTree = tree;
-    m_inputTreeEntry = 0;
+    m_inputEntry = 0;
     m_inputFile = std::move (inputFile);
     m_inputFileUrl = std::move (inputFileUrl);
+
+    // onFirstInputFile to setup Event object
+    if (m_firstInputFile)
+    {
+      for (auto& module : m_modules)
+        ANA_CHECK (module->onFirstInputFile (*this));
+      m_firstInputFile = false;
+    }
+    else {
+      for (auto& module : m_modules)
+        ANA_CHECK (module->onNextInputFile (*this));
+    }
+
+    // Check if we have input events - done above for TTree
+    if (m_inputTree == nullptr) {
+      if (m_event) m_hasInputEvents = (m_event->getEntries() > 0);
+    }
 
     return ::StatusCode::SUCCESS;
   }
@@ -767,7 +795,10 @@ namespace EL
     RCU_READ_INVARIANT (this);
     RCU_REQUIRE (inputFile() != 0);
 
-    if (m_inputTree != 0)
+    if (m_event) {
+      return m_event->getEntries();
+    }
+    else if (m_inputTree != 0)
       return m_inputTree->GetEntries();
     else
       return 0;
@@ -785,20 +816,20 @@ namespace EL
 
 
   ::StatusCode Worker ::
-  directExecute (const SH::SamplePtr& sample, const Job& job,
+  directExecute (const SH::Sample& sample, const Job& job,
                  const std::string& location, const SH::MetaObject& options)
   {
     using namespace msgEventLoop;
     RCU_CHANGE_INVARIANT (this);
 
-    SH::MetaObject meta (*sample->meta());
+    SH::MetaObject meta (*sample.meta());
     meta.fetchDefaults (options);
 
     setMetaData (&meta);
     setOutputHist (location);
-    setSegmentName (sample->name());
+    setSegmentName (sample.name());
 
-    ANA_MSG_INFO ("Running sample: " << sample->name());
+    ANA_MSG_INFO ("Running sample: " << sample.name());
 
     setJobConfig (JobConfig (job.jobConfig()));
 
@@ -806,13 +837,13 @@ namespace EL
            end = job.outputEnd(); out != end; ++ out)
     {
       Detail::OutputStreamData data {
-        out->output()->makeWriter (sample->name(), "", ".root")};
+        out->output()->makeWriter (sample.name(), "", ".root")};
       ANA_CHECK (addOutputStream (out->label(), std::move (data)));
     }
 
     {
       m_moduleConfig.emplace_back ("EL::Detail::DirectInputModule/DirectInputModule");
-      ANA_CHECK (m_moduleConfig.back().setProperty ("fileList", sample->makeFileList()));
+      ANA_CHECK (m_moduleConfig.back().setProperty ("fileList", sample.makeFileList()));
       Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
       if (maxEvents != -1)
         ANA_CHECK (m_moduleConfig.back().setProperty ("maxEvents", maxEvents));

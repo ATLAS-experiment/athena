@@ -112,8 +112,8 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
         if (geoContext.getStore(detType)) {
             continue;
         }
-        ATH_MSG_WARNING("No external detector alignment has been defined for technology "<<ActsTrk::to_string(detType));
-        geoContext.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(detType));
+        ATH_MSG_WARNING("No external detector alignment has been defined for technology "<<detType);
+        geoContext.setStore(std::make_unique<ActsTrk::DetectorAlignStore>(detType, ActsTrk::DetectorAlignStore::Mode::LazyFill));
     }
     /// Create the cache and populate it with the geoWolds
     ConstructionCache cacheObj;
@@ -756,6 +756,7 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsTrk::GeometryContext& gctx, Con
         newElement->m_innerRadius = pars.tubeInnerRad;
         newElement->m_tubeWallThickness = pars.tubeWall;
         newElement->m_tubepitch = pars.tubePitch;
+        newElement->m_builtFromCnv = true;
         /// Need to check how to obtain this parameter from the new geometry
         /// newElement->m_cutoutShift;
 

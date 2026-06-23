@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CondDBObjects/GenericDbTable.h"
@@ -1232,7 +1232,7 @@ int GenericDbTable::setColumndata(unsigned n_column, const vector<string> &data)
 			else
 			    tmp.push_back(atol(data[i].c_str()));
 		    }
-		    index= setColumndata(n_column, tmp);
+		    index = setColumndata(n_column, tmp);
 		    break;
 		}
 		case kArrayBool:
@@ -1440,13 +1440,13 @@ int GenericDbTable::setColumndata(unsigned n_column, const vector<vector<string>
     if (!m_isInitialized)
 	return CDB_NOT_INITIALIZED;
     
-    unsigned index = 0;
+    int index = 0;
     if (n_column < m_conddbtable.size())
     {
 	if (m_conddbtable[n_column]->type == kArrayString)
 	{
 	    CondDBColumnArrayString* tmpColumn = static_cast<CondDBColumnArrayString*>(m_conddbtable[n_column]);
-	    while((tmpColumn->column.size() < m_numRows+1) && (index < data.size()))
+	    while((tmpColumn->column.size() < m_numRows+1) && (index < std::ssize(data)))
 	    {
 		tmpColumn->column.push_back(data[index]);
 		index++;

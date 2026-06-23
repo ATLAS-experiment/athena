@@ -3,6 +3,14 @@
 */
 #ifndef MUONSENSITIVEDETECTORSR4_UTILS_H
 #define MUONSENSITIVEDETECTORSR4_UTILS_H
+
+/** @file Utils.h
+ *  @brief Utility helpers used by Run-4 muon sensitive detector implementations.
+ *
+ *  This file provides helper functions for extracting transformations from
+ *  Geant4 touchable histories and streaming G4 track and step-point objects.
+ */
+
 /// Include the common definitions from the MuonReadoutGeometry
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 

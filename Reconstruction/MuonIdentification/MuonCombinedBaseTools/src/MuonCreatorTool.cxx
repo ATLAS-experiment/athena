@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -52,11 +52,6 @@ namespace {
     static const SG::Accessor<float> acc_ET_HECCore("ET_HECCore");
 }  // namespace
 namespace MuonCombined {
-
-    MuonCreatorTool::MuonCreatorTool(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonCreatorTool>(this);
-    }
 
     StatusCode MuonCreatorTool::initialize() {
         if (m_buildStauContainer) ATH_MSG_DEBUG(" building Stau container ");
@@ -115,12 +110,6 @@ namespace MuonCombined {
     }
     void MuonCreatorTool::create(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
                                  const std::vector<const InDetCandidateToTagMap*>& tagMaps, OutputData& outputData) const {
-        create(ctx, muonCandidates, tagMaps, outputData, false);
-        create(ctx, muonCandidates, tagMaps, outputData, true);
-    }
-    void MuonCreatorTool::create(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
-                                 const std::vector<const InDetCandidateToTagMap*>& tagMaps, OutputData& outputData,
-                                 bool select_commissioning) const {
         // Create containers for resolved candidates (always of type VIEW_ELEMENTS)
         InDetCandidateTagsMap resolvedInDetCandidates;
         // std::vector<const MuonCombined::InDetCandidate*> resolvedInDetCandidates;
@@ -128,9 +117,10 @@ namespace MuonCombined {
 
         // Resolve Overlap
         if (!m_buildStauContainer)
-            resolveOverlaps(ctx, muonCandidates, tagMaps, resolvedInDetCandidates, resolvedMuonCandidates, select_commissioning);
-        else if (!select_commissioning)
+            resolveOverlaps(ctx, muonCandidates, tagMaps, resolvedInDetCandidates, resolvedMuonCandidates);
+        else{
             selectStaus(resolvedInDetCandidates, tagMaps);
+        }
 
         unsigned int numIdCan = resolvedInDetCandidates.size();
         unsigned int numMuCan = muonCandidates ? muonCandidates->size() : 0;
@@ -148,19 +138,13 @@ namespace MuonCombined {
                 ATH_MSG_DEBUG("no muon found");
             } else {
                 ATH_MSG_DEBUG("muon found");
-                if (select_commissioning) { muon->addAllAuthor(xAOD::Muon::Author::Commissioning); }
-                
-                if (!muon->primaryTrackParticleLink().isValid()) {
-                    ATH_MSG_ERROR("This muon has no valid primaryTrackParticleLink! Author=" << muon->author());
-                }
             }
             ATH_MSG_DEBUG("Creation of Muon from InDetCandidates done");
         }
         if (!m_requireIDTracks) {  // only build SA muons if ID tracks are not required
             for (const MuonCombined::MuonCandidate* can : resolvedMuonCandidates) {
                 ATH_MSG_DEBUG("New MuonCandidate");
-                xAOD::Muon* muon = create(ctx, *can, outputData);
-                if (muon && select_commissioning) { muon->addAllAuthor(xAOD::Muon::Author::Commissioning); }
+                create(ctx, *can, outputData);
                 ATH_MSG_DEBUG("Creation of Muon from MuonCandidates done");
             }
         }
@@ -183,13 +167,12 @@ namespace MuonCombined {
         }
 
         // Create the xAOD object:
-        xAOD::Muon* muon = new xAOD::Muon();
-        outputData.muonContainer->push_back(muon);
+        xAOD::Muon* muon = outputData.muonContainer->push_back(std::make_unique<xAOD::Muon>());
         decorateDummyValues(ctx, *muon, outputData);
 
-        muon->setAuthor(xAOD::Muon::MuidSA);
-        muon->setMuonType(xAOD::Muon::MuonStandAlone);
-        muon->addAllAuthor(xAOD::Muon::MuidSA);
+        muon->setAuthor(xAOD::Muon::Author::MuidSA);
+        muon->setMuonType(xAOD::Muon::MuonType::MuonStandAlone);
+        muon->addAllAuthor(xAOD::Muon::Author::MuidSA);
 
         // create candidate from SA muon only
         addMuonCandidate(ctx, candidate, *muon, outputData);
@@ -270,7 +253,7 @@ namespace MuonCombined {
         // now we need to sort the tags to get the best muon
 
         // set the link to the ID track particle
-        muon->setTrackParticleLink(xAOD::Muon::InnerDetectorTrackParticle, candidate.first->indetTrackParticleLink());
+        muon->setTrackParticleLink(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle, candidate.first->indetTrackParticleLink());
         ATH_MSG_DEBUG("Adding InDet Track: pt " << candidate.first->indetTrackParticle().pt() << " eta "
                                                 << candidate.first->indetTrackParticle().eta() << " phi "
                                                 << candidate.first->indetTrackParticle().phi());
@@ -293,13 +276,12 @@ namespace MuonCombined {
                     muon->setAuthor(tag->author());
                     muon->setMuonType(tag->type());
 
-                    if (tag->type() == xAOD::Muon::Combined) {
+                    if (tag->type() == xAOD::Muon::MuonType::Combined) {
                         ATH_MSG_DEBUG("MuonCreatorTool MuGirlLowBetaTag combined");
 
                         // Create the xAOD object:
                         if (outputData.slowMuonContainer) {
-                            xAOD::SlowMuon* slowMuon = new xAOD::SlowMuon();
-                            outputData.slowMuonContainer->push_back(slowMuon);
+                            xAOD::SlowMuon* slowMuon = outputData.slowMuonContainer->push_back(std::make_unique<xAOD::SlowMuon>());
 
                             addMuGirlLowBeta(ctx, *muon, muGirlLowBetaTag, slowMuon,
                                              outputData);  // CHECK to see what variables are created here.
@@ -324,7 +306,9 @@ namespace MuonCombined {
                     muon->setAuthor(tag->author());
                     muon->setMuonType(tag->type());
                     // Overrride type if InDet track is SiAssociated.
-                    if (candidate.first->isSiliconAssociated()) { muon->setMuonType(xAOD::Muon::SiliconAssociatedForwardMuon); }
+                    if (candidate.first->isSiliconAssociated()) { 
+                        muon->setMuonType(xAOD::Muon::MuonType::SiliconAssociatedForwardMuon); 
+                    }
                     first = false;
                 }
 
@@ -332,7 +316,7 @@ namespace MuonCombined {
 
                 // this is not too elegant, maybe rethink implementation
                 xAOD::Muon::MuonType type = tag->type();
-                if (type == xAOD::Muon::Combined) {
+                if (type == xAOD::Muon::MuonType::Combined) {
                     // work out type of tag
                     const CombinedFitTag* cbFitTag = dynamic_cast<const CombinedFitTag*>(tag);
                     const StacoTag* stacoTag = dynamic_cast<const StacoTag*>(tag);
@@ -343,7 +327,7 @@ namespace MuonCombined {
                     addStatisticalCombination(ctx, *muon, candidate.first, stacoTag, outputData);
                     if (!(cbFitTag || stacoTag || muGirlTag)) { ATH_MSG_WARNING("Unknown combined tag "); }
 
-                } else if (type == xAOD::Muon::SegmentTagged) {
+                } else if (type == xAOD::Muon::MuonType::SegmentTagged) {
                     const SegmentTag* segTag = dynamic_cast<const SegmentTag*>(tag);
                     const MuGirlTag* muGirlTag = dynamic_cast<const MuGirlTag*>(tag);
 
@@ -351,12 +335,12 @@ namespace MuonCombined {
                     addMuGirl(ctx, *muon, muGirlTag, outputData);
 
                     if (!(segTag || muGirlTag)) { ATH_MSG_WARNING("Unknown segment-tagged tag "); }
-                } else if (type == xAOD::Muon::CaloTagged) {
+                } else if (type == xAOD::Muon::MuonType::CaloTagged) {
                     const CaloTag* caloTag = dynamic_cast<const CaloTag*>(tag);
                     addCaloTag(*muon, caloTag);
                     if (!caloTag) { ATH_MSG_WARNING("Unknown calo tag type "); }
                 } else {
-                    ATH_MSG_WARNING("Unknown tag type. Type= " + std::to_string(type));
+                    ATH_MSG_WARNING("Unknown tag type. Type= "<<type);
                 }
             }
         }  // m_buildStauContainer
@@ -371,7 +355,7 @@ namespace MuonCombined {
 
         // If eLoss is not already available then build it
         float eLoss = -1;
-        bool haveEloss = muon->parameter(eLoss, xAOD::Muon::EnergyLoss);
+        bool haveEloss = muon->parameter(eLoss, xAOD::Muon::ParamDef::EnergyLoss);
         if (!haveEloss || eLoss == 0) {
             ATH_MSG_DEBUG("Adding Energy Loss to muon" << std::endl << m_muonPrinter->print(*muon));
             addEnergyLossToMuon(*muon);
@@ -408,7 +392,7 @@ namespace MuonCombined {
 
         ATH_MSG_DEBUG("Adding Staco Muon  " << tag->author() << " type " << tag->type());
 
-        if (!muon.combinedTrackParticleLink().isValid()) {
+        if (!muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) {
             // create primary track particle
             // get summary
             const Trk::Track* idTrack = candidate->indetTrackParticle().track();
@@ -443,7 +427,7 @@ namespace MuonCombined {
                         // link.toPersistent();
                         ATH_MSG_DEBUG("Adding statistical combination: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi "
                                                                             << (*link)->phi());
-                        muon.setTrackParticleLink(xAOD::Muon::CombinedTrackParticle, link);
+                        muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::CombinedTrackParticle, link);
                     }
                     // for the purpose of the truth matching, set the track link to point to
                     // the ID track
@@ -469,8 +453,8 @@ namespace MuonCombined {
         addMuonCandidate(ctx, tag->muonCandidate(), muon, outputData);
 
         // Add inner match chi^2
-        muon.setParameter(5, xAOD::Muon::msInnerMatchDOF);
-        muon.setParameter(static_cast<float>(tag->matchChi2()), xAOD::Muon::msInnerMatchChi2);
+        muon.setParameter(5, xAOD::Muon::ParamDef::msInnerMatchDOF);
+        muon.setParameter(static_cast<float>(tag->matchChi2()), xAOD::Muon::ParamDef::msInnerMatchChi2);
 
         // STACO parameters added as auxdata
         acc_d0(muon) = tag->combinedParameters().parameters()[Trk::d0];
@@ -491,17 +475,17 @@ namespace MuonCombined {
         }
 
         ATH_MSG_DEBUG("Adding Combined fit Muon  " << tag->author() << " type " << tag->type());
-        if (!muon.combinedTrackParticleLink().isValid()) {
+        if (!muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) {
             // if the combined track particle is part of a container set the link
             if (outputData.combinedTrackParticleContainer) {
                 // create element link from the track
                 ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-	             tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
+                    ctx, tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
 
                 if (link.isValid()) {
                     // link.toPersistent();
                     ATH_MSG_DEBUG("Adding combined fit: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
-                    muon.setTrackParticleLink(xAOD::Muon::CombinedTrackParticle, link);
+                    muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::CombinedTrackParticle, link);
                 } else
                     ATH_MSG_WARNING("Creating of Combined TrackParticle Link failed");
             }
@@ -511,8 +495,8 @@ namespace MuonCombined {
 
         // Add inner match chi^2
         const float inner_chi2 = tag->matchChi2();
-        muon.setParameter(tag->matchDoF(), xAOD::Muon::msInnerMatchDOF);
-        muon.setParameter(inner_chi2, xAOD::Muon::msInnerMatchChi2);
+        muon.setParameter(tag->matchDoF(), xAOD::Muon::ParamDef::msInnerMatchDOF);
+        muon.setParameter(inner_chi2, xAOD::Muon::ParamDef::msInnerMatchChi2);
 
         ATH_MSG_DEBUG("Done adding Combined Fit Muon  " << tag->author() << " type " << tag->type());
     }
@@ -599,16 +583,16 @@ namespace MuonCombined {
             
         }
 
-        if (!muon.combinedTrackParticleLink().isValid() && tag->combinedTrack()) {
+        if (!muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle) && tag->combinedTrack()) {
             // if the combined track particle is part of a container set the link
             if (outputData.combinedTrackParticleContainer) {
                 // create element link
                 ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-	             tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
+                    ctx, tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
 
                 if (link.isValid()) {
                     ATH_MSG_DEBUG("Adding MuGirlLowBeta: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
-                    muon.setTrackParticleLink(xAOD::Muon::CombinedTrackParticle, link);
+                    muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::CombinedTrackParticle, link);
                 } else
                     ATH_MSG_WARNING("Creating of MuGirlLowBeta TrackParticle Link failed");
             }
@@ -638,17 +622,17 @@ namespace MuonCombined {
 
         ATH_MSG_DEBUG("Adding MuGirl Muon  " << tag->author() << " type " << tag->type());
 
-        if (!muon.combinedTrackParticleLink().isValid() && tag->combinedTrack()) {
+        if (!muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle) && tag->combinedTrack()) {
             // if the combined track particle is part of a container set the link
             if (outputData.combinedTrackParticleContainer) {
                 // create element link
                 ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-	             tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
+                    ctx, tag->combinedTrackLink(), *outputData.combinedTrackParticleContainer, outputData.combinedTrackCollection);
 
                 if (link.isValid()) {
                     // link.toPersistent();
                     ATH_MSG_DEBUG("Adding MuGirl: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
-                    muon.setTrackParticleLink(xAOD::Muon::CombinedTrackParticle, link);
+                    muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::CombinedTrackParticle, link);
                 } else
                     ATH_MSG_WARNING("Creating of MuGirl TrackParticle Link failed");
             }
@@ -656,12 +640,12 @@ namespace MuonCombined {
             if (outputData.extrapolatedTrackParticleContainer && tag->updatedExtrapolatedTrack()) {
                 // create element link
                 ElementLink<xAOD::TrackParticleContainer> link =
-                    createTrackParticleElementLink(tag->updatedExtrapolatedTrackLink(), *outputData.extrapolatedTrackParticleContainer,
+                    createTrackParticleElementLink(ctx, tag->updatedExtrapolatedTrackLink(), *outputData.extrapolatedTrackParticleContainer,
                                                    outputData.extrapolatedTrackCollection);
 
                 if (link.isValid()) {
                     ATH_MSG_DEBUG("Adding MuGirl: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
-                    muon.setTrackParticleLink(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle, link);
+                    muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle, link);
                 } else
                     ATH_MSG_WARNING("Creating of MuGirl TrackParticle Link failed");
             }
@@ -688,9 +672,10 @@ namespace MuonCombined {
     void MuonCreatorTool::addSegmentTag(const EventContext& ctx, xAOD::Muon& muon, const SegmentTag* tag, OutputData& outputData) const {
         if (!tag) {
             // init variables if necessary.
-            muon.setParameter(-1.f, xAOD::Muon::segmentDeltaEta);
-            muon.setParameter(-1.f, xAOD::Muon::segmentDeltaPhi);
-            muon.setParameter(-1.f, xAOD::Muon::segmentChi2OverDoF);
+            using enum xAOD::Muon::ParamDef;
+            muon.setParameter(-1.f, segmentDeltaEta);
+            muon.setParameter(-1.f, segmentDeltaPhi);
+            muon.setParameter(-1.f, segmentChi2OverDoF);
             return;
         }
 
@@ -703,22 +688,22 @@ namespace MuonCombined {
             // but the new container should have the segments in the same order, plus the MuGirl ones tacked on the end
             // so we should be able to just make a new link here
             // note that this only applies to segment-tagged muons, others get their associated segments elsewhere
-            if (muon.author() == xAOD::Muon::MuTagIMO) {
+            if (muon.author() == xAOD::Muon::Author::MuTagIMO) {
                 ElementLink<xAOD::MuonSegmentContainer> seglink = createMuonSegmentElementLink(ctx, info.segment, outputData);
                 if (seglink.isValid()) segments.push_back(seglink);
             }
 
             if (!foundseg) {  // add parameters for the first segment
-                muon.setParameter(static_cast<float>(info.dtheta), xAOD::Muon::segmentDeltaEta);
-                muon.setParameter(static_cast<float>(info.dphi), xAOD::Muon::segmentDeltaPhi);
+                muon.setParameter(static_cast<float>(info.dtheta), xAOD::Muon::ParamDef::segmentDeltaEta);
+                muon.setParameter(static_cast<float>(info.dphi), xAOD::Muon::ParamDef::segmentDeltaPhi);
                 muon.setParameter(static_cast<float>(info.segment->fitQuality()->chiSquared() / info.segment->fitQuality()->numberDoF()),
-                                  xAOD::Muon::segmentChi2OverDoF);
+                                  xAOD::Muon::ParamDef::segmentChi2OverDoF);
                 foundseg = true;
-            } else if (muon.author() != xAOD::Muon::MuTagIMO)
+            } else if (muon.author() != xAOD::Muon::Author::MuTagIMO)
                 break;  // for non-segment-tagged muons, we only need to set the above
                         // parameters
         }
-        if (muon.author() == xAOD::Muon::MuTagIMO) muon.setMuonSegmentLinks(segments);  // set the associated segments
+        if (muon.author() == xAOD::Muon::Author::MuTagIMO) muon.setMuonSegmentLinks(segments);  // set the associated segments
     }
 
     void MuonCreatorTool::addCaloTag(xAOD::Muon& mu, const CaloTag* tag) const {
@@ -728,8 +713,8 @@ namespace MuonCombined {
         if (!tag) {
             // init variables if necessary.
 
-            mu.setParameter(0.f, xAOD::Muon::CaloMuonScore);
-            mu.setParameter(static_cast<int>(0xFF), xAOD::Muon::CaloMuonIDTag);
+            mu.setParameter(0.f, xAOD::Muon::ParamDef::CaloMuonScore);
+            mu.setParameter(static_cast<int>(0xFF), xAOD::Muon::ParamDef::CaloMuonIDTag);
             if (m_fillExtraELossInfo) {
                 // Here we can make sure that we store the extra calotag information -
                 // just always add it since this is then unambigious for debugging
@@ -742,8 +727,8 @@ namespace MuonCombined {
 
         ATH_MSG_DEBUG("Adding Calo Muon with author " << tag->author() << ", type " << tag->type() << ", CaloMuonScore "
                                                       << tag->caloMuonScore());
-        mu.setParameter(static_cast<float>(tag->caloMuonScore()), xAOD::Muon::CaloMuonScore);
-        mu.setParameter(static_cast<int>(tag->caloMuonIdTag()), xAOD::Muon::CaloMuonIDTag);
+        mu.setParameter(static_cast<float>(tag->caloMuonScore()), xAOD::Muon::ParamDef::CaloMuonScore);
+        mu.setParameter(static_cast<int>(tag->caloMuonIdTag()), xAOD::Muon::ParamDef::CaloMuonIDTag);
 
         if (m_fillExtraELossInfo) {
             // Here we can make sure that we store the extra calotag information - just
@@ -756,6 +741,7 @@ namespace MuonCombined {
     }
 
     ElementLink<xAOD::TrackParticleContainer> MuonCreatorTool::createTrackParticleElementLink(
+        const EventContext& ctx,
         const ElementLink<TrackCollection>& trackLink, xAOD::TrackParticleContainer& trackParticleContainer,
         TrackCollection* trackCollection) const {
         ATH_MSG_DEBUG("createTrackParticleElementLink");
@@ -765,13 +751,13 @@ namespace MuonCombined {
             // want to link the track particle to this track
             ElementLink<TrackCollection> link(*trackCollection, trackCollection->size() - 1);
             if (link.isValid())
-                tp = m_particleCreator->createParticle(link, &trackParticleContainer, nullptr, xAOD::muon);
+                tp = m_particleCreator->createParticle(ctx, link, &trackParticleContainer, nullptr, xAOD::muon);
             else
                 ATH_MSG_WARNING("new Track Collection link invalid");
         }
         if (!tp) {
             // create track particle without a link to the track
-            tp = m_particleCreator->createParticle(**trackLink, &trackParticleContainer, nullptr, xAOD::muon);
+            tp = m_particleCreator->createParticle(ctx, **trackLink, &trackParticleContainer, nullptr, xAOD::muon);
         }
 
         if (tp) {
@@ -815,12 +801,12 @@ namespace MuonCombined {
             muon.setMuonSegmentLinks(segments);
         }
         // only set once
-        if (muon.muonSpectrometerTrackParticleLink().isValid()) { return; }
+        if (muon.trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle)) { return; }
         // case where we have a MuGirl muon that is also reconstructed by STACO: don't
         // want to add this track as it is misleading however, we will still keep the
         // MS-only extrapolated track (see below) for debugging purposes
-        if (muon.author() != xAOD::Muon::MuGirl)
-            muon.setTrackParticleLink(xAOD::Muon::MuonSpectrometerTrackParticle, candidate.muonSpectrometerTrackLink());
+        if (muon.author() != xAOD::Muon::Author::MuGirl)
+            muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle, candidate.muonSpectrometerTrackLink());
 
         // we need both the container and the extrapolated muon track to add the link
         if (!outputData.extrapolatedTrackParticleContainer || (!candidate.extrapolatedTrack() && !meLink.isValid())) { return; }
@@ -829,17 +815,17 @@ namespace MuonCombined {
 
         if (!extrapolatedTrack || !extrapolatedTrack->perigeeParameters()) {
             ATH_MSG_DEBUG("There is no extrapolated track associated to the MuonCandidate.");
-            if (muon.author() == xAOD::Muon::MuidCo) {  // this can happen for MuidCo muons, though it's
+            if (muon.author() == xAOD::Muon::Author::MuidCo) {  // this can happen for MuidCo muons, though it's
                                                         // quite rare: in this case just add the ME track
                 if (meLink.isValid()) {
                     ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-                        meLink, *outputData.extrapolatedTrackParticleContainer, outputData.extrapolatedTrackCollection);
+                        ctx, meLink, *outputData.extrapolatedTrackParticleContainer, outputData.extrapolatedTrackCollection);
                     if (link.isValid()) {
                         ATH_MSG_DEBUG("Adding standalone fit (refitted): pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi "
                                                                               << (*link)->phi());
-                        muon.setTrackParticleLink(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle, link);
+                        muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle, link);
                         float fieldInt = m_trackQuery->fieldIntegral(**meLink, ctx).betweenSpectrometerMeasurements();
-                        muon.setParameter(fieldInt, xAOD::Muon::spectrometerFieldIntegral);
+                        muon.setParameter(fieldInt, xAOD::Muon::ParamDef::spectrometerFieldIntegral);
                         int nunspoiled = (*link)->track()->trackSummary()->get(Trk::numberOfCscUnspoiltEtaHits);
                         acc_nUnspoiledCscHits(muon) = nunspoiled;
                     }
@@ -855,84 +841,84 @@ namespace MuonCombined {
             // Now we just add the original extrapolated track itself
             // but not for SA muons, for consistency they will still have
             // extrapolatedTrackParticle
-            if (muon.muonType() != xAOD::Muon::MuonStandAlone) {
+            if (muon.muonType() != xAOD::Muon::MuonType::MuonStandAlone) {
                 if (meLink.isValid()) {                                         // add ME track and MS-only extrapolated track
                     if (outputData.msOnlyExtrapolatedTrackParticleContainer) {  // add un-refitted
                                                                                 // extrapolated track
                                                                                 // as MS-only
                                                                                 // extrapolated track
                         ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-                            candidate.extrapolatedTrackLink(), *outputData.msOnlyExtrapolatedTrackParticleContainer,
+                            ctx, candidate.extrapolatedTrackLink(), *outputData.msOnlyExtrapolatedTrackParticleContainer,
                             outputData.msOnlyExtrapolatedTrackCollection);
 
                         if (link.isValid()) {
                             ATH_MSG_DEBUG("Adding MS-only extrapolated track: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi "
                                                                                    << (*link)->phi());
                             // link.toPersistent();
-                            muon.setTrackParticleLink(xAOD::Muon::MSOnlyExtrapolatedMuonSpectrometerTrackParticle, link);
+                            muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::MSOnlyExtrapolatedMuonSpectrometerTrackParticle, link);
                         } else
                             ATH_MSG_WARNING("failed to create MS-only extrapolated track particle");
                     }
                     // now add refitted track as ME track
                     ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-                        meLink, *outputData.extrapolatedTrackParticleContainer, outputData.extrapolatedTrackCollection);
+                        ctx, meLink, *outputData.extrapolatedTrackParticleContainer, outputData.extrapolatedTrackCollection);
                     if (link.isValid()) {
                         ATH_MSG_DEBUG("Adding standalone fit (refitted): pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi "
                                                                               << (*link)->phi());
-                        muon.setTrackParticleLink(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle, link);
+                        muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle, link);
                         float fieldInt = m_trackQuery->fieldIntegral(**meLink, ctx).betweenSpectrometerMeasurements();
-                        muon.setParameter(fieldInt, xAOD::Muon::spectrometerFieldIntegral);
+                        muon.setParameter(fieldInt, xAOD::Muon::ParamDef::spectrometerFieldIntegral);
                         int nunspoiled = (*link)->track()->trackSummary()->get(Trk::numberOfCscUnspoiltEtaHits);
                         acc_nUnspoiledCscHits(muon) = nunspoiled;
                     }
                 } else {  // no refitted track, so add original un-refitted extrapolated
                           // track as ME track
-                    if (muon.author() == xAOD::Muon::MuGirl && muon.extrapolatedMuonSpectrometerTrackParticleLink().isValid()) {
+                    if (muon.author() == xAOD::Muon::Author::MuGirl && muon.trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle)) {
                         // MuGirl case: ME track is already set, but now we have the
                         // extrapolated track from the STACO tag add this as the MS-only
                         // extrapolated track instead
                         ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-                            candidate.extrapolatedTrackLink(), *outputData.msOnlyExtrapolatedTrackParticleContainer,
+                            ctx, candidate.extrapolatedTrackLink(), *outputData.msOnlyExtrapolatedTrackParticleContainer,
                             outputData.msOnlyExtrapolatedTrackCollection);
 
                         if (link.isValid()) {
                             ATH_MSG_DEBUG("Adding MS-only extrapolated track to MuGirl muon: pt "
                                           << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
                             // link.toPersistent();
-                            muon.setTrackParticleLink(xAOD::Muon::MSOnlyExtrapolatedMuonSpectrometerTrackParticle, link);
+                            muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::MSOnlyExtrapolatedMuonSpectrometerTrackParticle, link);
                             float fieldInt =
                                 m_trackQuery->fieldIntegral(**candidate.extrapolatedTrackLink(), ctx).betweenSpectrometerMeasurements();
-                            muon.setParameter(fieldInt, xAOD::Muon::spectrometerFieldIntegral);
+                            muon.setParameter(fieldInt, xAOD::Muon::ParamDef::spectrometerFieldIntegral);
                         }
                     } else {
                         ElementLink<xAOD::TrackParticleContainer> link = createTrackParticleElementLink(
-                            candidate.extrapolatedTrackLink(), *outputData.extrapolatedTrackParticleContainer,
+                            ctx, candidate.extrapolatedTrackLink(), *outputData.extrapolatedTrackParticleContainer,
                             outputData.extrapolatedTrackCollection);
 
                         if (link.isValid()) {
                             ATH_MSG_DEBUG("Adding standalone fit (un-refitted): pt " << (*link)->pt() << " eta " << (*link)->eta()
                                                                                      << " phi " << (*link)->phi());
                             // link.toPersistent();
-                            muon.setTrackParticleLink(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle, link);
+                            muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle, link);
                             float fieldInt =
                                 m_trackQuery->fieldIntegral(**candidate.extrapolatedTrackLink(), ctx).betweenSpectrometerMeasurements();
-                            muon.setParameter(fieldInt, xAOD::Muon::spectrometerFieldIntegral);
+                            muon.setParameter(fieldInt, xAOD::Muon::ParamDef::spectrometerFieldIntegral);
                         }
                     }
                 }
             } else {  // SA tracks only get un-refitted track as ME track
                 // create element link from the track
                 ElementLink<xAOD::TrackParticleContainer> link =
-                    createTrackParticleElementLink(candidate.extrapolatedTrackLink(), *outputData.extrapolatedTrackParticleContainer,
+                    createTrackParticleElementLink(ctx, candidate.extrapolatedTrackLink(), *outputData.extrapolatedTrackParticleContainer,
                                                    outputData.extrapolatedTrackCollection);
 
                 if (link.isValid()) {
                     ATH_MSG_DEBUG("Adding standalone fit: pt " << (*link)->pt() << " eta " << (*link)->eta() << " phi " << (*link)->phi());
                     // link.toPersistent();
-                    muon.setTrackParticleLink(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle, link);
+                    muon.setTrackParticleLink(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle, link);
                     float fieldInt =
                         m_trackQuery->fieldIntegral(**candidate.extrapolatedTrackLink(), ctx).betweenSpectrometerMeasurements();
-                    muon.setParameter(fieldInt, xAOD::Muon::spectrometerFieldIntegral);
+                    muon.setParameter(fieldInt, xAOD::Muon::ParamDef::spectrometerFieldIntegral);
                     int nunspoiled = extrapolatedTrack->trackSummary()->get(Trk::numberOfCscUnspoiltEtaHits);
                     acc_nUnspoiledCscHits(muon) = nunspoiled;
                 } else {
@@ -973,8 +959,7 @@ namespace MuonCombined {
     void MuonCreatorTool::resolveOverlaps(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
                                           const std::vector<const InDetCandidateToTagMap*>& tagMaps,
                                           InDetCandidateTagsMap& resolvedInDetCandidates,
-                                          std::vector<const MuonCombined::MuonCandidate*>& resolvedMuonCandidates,
-                                          bool select_commissioning) const {
+                                          std::vector<const MuonCombined::MuonCandidate*>& resolvedMuonCandidates) const {
         resolvedMuonCandidates.clear();
         resolvedInDetCandidates.clear();
 
@@ -992,7 +977,6 @@ namespace MuonCombined {
                 /// Check whether the author arises from the comissioning chain
                 /// The maps are filled in dedicated algorithim. So all tags will
                 /// fail / satisfy this condition
-                if (tag->isCommissioning() != select_commissioning) break;
                 InDetCandidateTagsMap::iterator itr =
                     std::find_if(inDetCandidateMap.begin(), inDetCandidateMap.end(),
                                  [&comb_tag](const InDetCandidateTags& to_test) { return (*to_test.first) == (*comb_tag.first); });
@@ -1016,7 +1000,7 @@ namespace MuonCombined {
             caloMuons.reserve(inDetCandidateMap.size());
             for (InDetCandidateTags& comb_tag : inDetCandidateMap) {
                 std::stable_sort(comb_tag.second.begin(), comb_tag.second.end(), SortTagBasePtr());
-                if (comb_tag.second.size() == 1 && comb_tag.second.front()->type() == xAOD::Muon::CaloTagged) {
+                if (comb_tag.second.size() == 1 && comb_tag.second.front()->type() == xAOD::Muon::MuonType::CaloTagged) {
                     caloMuons.emplace_back(std::move(comb_tag));
                 } else
                     resolvedInDetCandidates.emplace_back(std::move(comb_tag));
@@ -1072,7 +1056,7 @@ namespace MuonCombined {
             resolvedInDetCandidates.clear();
 
             // Resolve ambiguity between muon tracks
-            resolvedTracks.reset(m_ambiguityProcessor->process(to_resolve.asDataVector()));
+            resolvedTracks.reset(m_ambiguityProcessor->process(ctx, to_resolve.asDataVector()));
 
             // link back to InDet candidates and fill the resolved container
             for (const Trk::Track* track : *resolvedTracks) {
@@ -1123,10 +1107,10 @@ namespace MuonCombined {
         for (const InDetCandidateTags& indet_cand : resolvedInDetCandidates) {
             for (const TagBase* tag : indet_cand.second) {
                 /// In principle we can include here STACO as well but that is lower ranked as MuidSA
-                if (tag->author() == xAOD::Muon::MuidCo) {
+                if (tag->author() == xAOD::Muon::Author::MuidCo) {
                     const CombinedFitTag* cmb_tag = dynamic_cast<const CombinedFitTag*>(tag);
                     used_candidates.insert(&cmb_tag->muonCandidate());
-                } else if (tag->author() == xAOD::Muon::STACO && indet_cand.second[0] == tag) {
+                } else if (tag->author() == xAOD::Muon::Author::STACO && indet_cand.second[0] == tag) {
                     const StacoTag* staco_tag = dynamic_cast<const StacoTag*>(tag);
                     used_candidates.insert(&staco_tag->muonCandidate());
                 }
@@ -1137,7 +1121,6 @@ namespace MuonCombined {
         // and muon candidates
         std::map<const Trk::Track*, const MuonCandidate*> trackMuonCandLinks;
         for (const MuonCandidate* candidate : *muonCandidates) {
-            if (candidate->isCommissioning() != select_commissioning) continue;
             const Trk::Track* track = candidate->primaryTrack();
             if (used_candidates.count(candidate)) {
                 ATH_MSG_DEBUG("Duplicate MS track " << m_printer->print(*track));
@@ -1149,7 +1132,7 @@ namespace MuonCombined {
         }
 
         // solve ambiguity
-        resolvedTracks.reset(m_ambiguityProcessor->process(resolvedTracks2.asDataVector()));
+        resolvedTracks.reset(m_ambiguityProcessor->process(ctx, resolvedTracks2.asDataVector()));
 
         // loop over resolved tracks and fill resolved muon candidates
         for (const Trk::Track* track : *resolvedTracks) {
@@ -1197,16 +1180,12 @@ namespace MuonCombined {
             std::make_unique<Trk::Track>(info, std::move(trackStateOnSurfaces), (indetTrack.fitQuality())->uniqueClone());
 
         // create a track summary for this track
-        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*newtrack, false); }
+        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newtrack, false); }
 
         return newtrack;
     }
 
     bool MuonCreatorTool::dressMuon(xAOD::Muon& muon) const {
-        if (!muon.primaryTrackParticleLink().isValid()) {
-            ATH_MSG_DEBUG("No primary track particle set, deleting muon");
-            return false;
-        }
         const xAOD::TrackParticle* primary = muon.primaryTrackParticle();
         // update parameters with primary track particle
         setP4(muon, *primary);
@@ -1215,7 +1194,6 @@ namespace MuonCombined {
             muon.setCharge(qOverP > 0 ? 1. : -1.);
         } else {
             ATH_MSG_WARNING("MuonCreatorTool::dressMuon - trying to set qOverP, but value from muon.primaryTrackParticle ["
-                            << muon.primaryTrackParticleLink().dataID()
                             << "] is zero. Setting charge=0.0. The eta/phi of the muon is: " << muon.eta() << " / " << muon.phi());
             muon.setCharge(0.0);
         }
@@ -1227,22 +1205,22 @@ namespace MuonCombined {
         if (!m_scatteringAngleTool.empty()) {
             Rec::ScatteringAngleSignificance scatSign = m_scatteringAngleTool->scatteringAngleSignificance(muon);
             float curvatureSignificance = scatSign.curvatureSignificance();
-            muon.setParameter(curvatureSignificance, xAOD::Muon::scatteringCurvatureSignificance);
+            muon.setParameter(curvatureSignificance, xAOD::Muon::ParamDef::scatteringCurvatureSignificance);
             float neighbourSignificance = scatSign.neighbourSignificance();
-            muon.setParameter(neighbourSignificance, xAOD::Muon::scatteringNeighbourSignificance);
+            muon.setParameter(neighbourSignificance, xAOD::Muon::ParamDef::scatteringNeighbourSignificance);
             ATH_MSG_VERBOSE("Got curvatureSignificance " << curvatureSignificance << "  and neighbourSignificance "
                                                          << neighbourSignificance);
         }
 
         if (!m_momentumBalanceTool.empty()) {
             float momentumBalanceSignificance = m_momentumBalanceTool->momentumBalanceSignificance(muon);
-            muon.setParameter(momentumBalanceSignificance, xAOD::Muon::momentumBalanceSignificance);
+            muon.setParameter(momentumBalanceSignificance, xAOD::Muon::ParamDef::momentumBalanceSignificance);
             ATH_MSG_VERBOSE("Got momentumBalanceSignificance " << momentumBalanceSignificance);
         }
 
         if (!m_meanMDTdADCTool.empty()) {
             float meanDeltaADC = float(m_meanMDTdADCTool->meanMDTdADCFiller(muon));
-            muon.setParameter(meanDeltaADC, xAOD::Muon::meanDeltaADCCountsMDT);
+            muon.setParameter(meanDeltaADC, xAOD::Muon::ParamDef::meanDeltaADCCountsMDT);
             ATH_MSG_VERBOSE("Got meanDeltaADCCountsMDT " << meanDeltaADC);
         }
 
@@ -1259,11 +1237,11 @@ namespace MuonCombined {
 
         if (m_fillEnergyLossFromTrack) {
             const Trk::Track* trk = nullptr;
-            if (muon.trackParticle(xAOD::Muon::CombinedTrackParticle)) {
-                trk = muon.trackParticle(xAOD::Muon::CombinedTrackParticle)->track();
+            if (muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) {
+                trk = muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)->track();
             }
-            if (!trk && muon.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle)) {
-                trk = muon.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle)->track();
+            if (!trk && muon.trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle)) {
+                trk = muon.trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle)->track();
             }
             if (trk) {
                 fillEnergyLossFromTrack(muon, &(trk->trackStateOnSurfaces()->stdcont()));
@@ -1275,13 +1253,14 @@ namespace MuonCombined {
         return true;
     }
     void MuonCreatorTool::addEnergyLossToMuon(xAOD::Muon& muon) const {
-        if (!muon.inDetTrackParticleLink().isValid()) {
+        const xAOD::TrackParticle* trkPart = muon.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+        if (!trkPart) {
             ATH_MSG_WARNING("Missing ID track particle link in addEnergyLossToMuon!");
             return;
         }
 
         // get ID track particle
-        const Trk::Track* trk = (*(muon.inDetTrackParticleLink()))->track();
+        const Trk::Track* trk = trkPart->track();
         if (!trk) {
             ATH_MSG_WARNING("Missing ID trk::track in addEnergyLossToMuon!");
             return;
@@ -1323,16 +1302,17 @@ namespace MuonCombined {
     void MuonCreatorTool::fillEnergyLossFromTrack(xAOD::Muon& muon, const std::vector<const Trk::TrackStateOnSurface*>* tsosVector) const {
         // Ensure these are set for every muon
         if (!tsosVector) {
-            muon.setParameter(0.f, xAOD::Muon::EnergyLoss);
-            muon.setParameter(0.f, xAOD::Muon::ParamEnergyLoss);
-            muon.setParameter(0.f, xAOD::Muon::MeasEnergyLoss);
-            muon.setParameter(0.f, xAOD::Muon::EnergyLossSigma);
-            muon.setParameter(0.f, xAOD::Muon::MeasEnergyLossSigma);
-            muon.setParameter(0.f, xAOD::Muon::ParamEnergyLossSigmaPlus);
-            muon.setParameter(0.f, xAOD::Muon::ParamEnergyLossSigmaMinus);
-
-            muon.setEnergyLossType(xAOD::Muon::Parametrized);  // Not so nice! Add 'unknown' type?
-            muon.setParameter(0.f, xAOD::Muon::FSR_CandidateEnergy);
+            using enum xAOD::Muon::ParamDef;
+            muon.setParameter(0.f, EnergyLoss);
+            muon.setParameter(0.f, ParamEnergyLoss);
+            muon.setParameter(0.f, MeasEnergyLoss);
+            muon.setParameter(0.f, EnergyLossSigma);
+            muon.setParameter(0.f, MeasEnergyLossSigma);
+            muon.setParameter(0.f, ParamEnergyLossSigmaPlus);
+            muon.setParameter(0.f, ParamEnergyLossSigmaMinus);
+            muon.setParameter(0.f, FSR_CandidateEnergy);
+           
+            muon.setEnergyLossType(xAOD::Muon::EnergyLossType::Parametrized);  // Not so nice! Add 'unknown' type?
             if (m_fillExtraELossInfo) acc_numEnergyLossPerTrack(muon) = 0;
 
             return;
@@ -1347,17 +1327,18 @@ namespace MuonCombined {
             const CaloEnergy* caloEnergy = dynamic_cast<const CaloEnergy*>(el);
             if (!caloEnergy) continue;
             ++numEnergyLossPerTrack;
-
-            muon.setParameter(static_cast<float>(caloEnergy->deltaE()), xAOD::Muon::EnergyLoss);
-            muon.setParameter(static_cast<float>(caloEnergy->deltaEParam()), xAOD::Muon::ParamEnergyLoss);
-            muon.setParameter(static_cast<float>(caloEnergy->deltaEMeas()), xAOD::Muon::MeasEnergyLoss);
-            muon.setParameter(static_cast<float>(caloEnergy->sigmaDeltaE()), xAOD::Muon::EnergyLossSigma);
-            muon.setParameter(static_cast<float>(caloEnergy->sigmaDeltaEMeas()), xAOD::Muon::MeasEnergyLossSigma);
-            muon.setParameter(static_cast<float>(caloEnergy->sigmaPlusDeltaEParam()), xAOD::Muon::ParamEnergyLossSigmaPlus);
-            muon.setParameter(static_cast<float>(caloEnergy->sigmaMinusDeltaEParam()), xAOD::Muon::ParamEnergyLossSigmaMinus);
+            using enum xAOD::Muon::ParamDef;
+          
+            muon.setParameter(static_cast<float>(caloEnergy->deltaE()), EnergyLoss);
+            muon.setParameter(static_cast<float>(caloEnergy->deltaEParam()), ParamEnergyLoss);
+            muon.setParameter(static_cast<float>(caloEnergy->deltaEMeas()), MeasEnergyLoss);
+            muon.setParameter(static_cast<float>(caloEnergy->sigmaDeltaE()), EnergyLossSigma);
+            muon.setParameter(static_cast<float>(caloEnergy->sigmaDeltaEMeas()), MeasEnergyLossSigma);
+            muon.setParameter(static_cast<float>(caloEnergy->sigmaPlusDeltaEParam()), ParamEnergyLossSigmaPlus);
+            muon.setParameter(static_cast<float>(caloEnergy->sigmaMinusDeltaEParam()), ParamEnergyLossSigmaMinus);
 
             muon.setEnergyLossType(static_cast<xAOD::Muon::EnergyLossType>(caloEnergy->energyLossType()));
-            muon.setParameter(static_cast<float>(caloEnergy->fsrCandidateEnergy()), xAOD::Muon::FSR_CandidateEnergy);
+            muon.setParameter(static_cast<float>(caloEnergy->fsrCandidateEnergy()), FSR_CandidateEnergy);
         }
         if (numEnergyLossPerTrack > 1) {
             ATH_MSG_VERBOSE("More than one e loss per track... ");

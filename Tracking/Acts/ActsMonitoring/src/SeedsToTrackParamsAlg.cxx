@@ -60,7 +60,7 @@ namespace ActsTrk {
           const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
                 useTopSp ? sp->elementIdList().back() : sp->elementIdList().front());
           const Trk::Surface& atlas_surface = element->surface();
-          return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+          return *m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
         };
 
       std::optional<Acts::BoundTrackParameters> optTrackParams =

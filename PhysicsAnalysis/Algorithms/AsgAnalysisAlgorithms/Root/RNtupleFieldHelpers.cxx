@@ -129,7 +129,7 @@ namespace {
 #ifdef XAOD_STANDALONE
 
    const SG::AuxVectorBase* getVector( const std::string& key,
-                                       asg::SgTEvent& evtStore,
+                                       asg::SgEvent& evtStore,
                                        bool allowMissing,
                                        const TClass*& cl,
                                        MsgStream& msg ) {
@@ -160,7 +160,7 @@ namespace {
    }
 
    const SG::AuxElement* getElement( const std::string& key,
-                                     asg::SgTEvent& evtStore,
+                                     asg::SgEvent& evtStore,
                                      bool allowMissing,
                                      MsgStream& msg ) {
       if( allowMissing &&

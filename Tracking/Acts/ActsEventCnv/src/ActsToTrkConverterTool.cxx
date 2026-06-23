@@ -18,9 +18,15 @@
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkSurfaces/Surface.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
+
+#include "InDetPrepRawData/PixelClusterCollection.h"
+#include "InDetPrepRawData/SCT_ClusterCollection.h"
+
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
-
+#include "xAODMuonPrepData/MuonMeasurement.h"
+#include "xAODMuonPrepData/CombinedMuonStrip.h"
+#include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 // PACKAGE
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -36,18 +42,34 @@
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Surfaces/CylinderBounds.hpp"
+#include "Acts/Surfaces/DiscBounds.hpp"
+#include "Acts/Surfaces/LineBounds.hpp"
+#include "Acts/Surfaces/RadialBounds.hpp"
+#include "Acts/Surfaces/DiamondBounds.hpp"
+
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Propagator/detail/JacobianEngine.hpp"
+#include "Acts/Surfaces/detail/PlanarHelper.hpp"
+
 #include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 
-#include "ActsCalibrators/TrkMeasurementCalibrator.h"
-#include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
+#include "TrkSurfaces/DiscBounds.h"
+#include "TrkSurfaces/TrapezoidBounds.h"
+#include "TrkSurfaces/CylinderBounds.h"
+#include "TrkSurfaces/RectangleBounds.h"
+#include "TrkSurfaces/StraightLineSurface.h"
+#include "TrkSurfaces/CylinderSurface.h"
+#include "TrkSurfaces/DiamondBounds.h"
+
 // STL
 #include <cmath>
 #include <iostream>
@@ -56,6 +78,10 @@
 #include <format>
 
 namespace ActsTrk {
+
+using namespace Acts::UnitLiterals;
+
+using SurfacePtr_t = ActsToTrkConverterTool::SurfacePtr_t;
 
 // Forward definitions of local functions
 // @TODO unused, remove ?
@@ -74,9 +100,31 @@ static void ActsTrackParameterCheck(
     const Trk::PlaneSurface *planeSurface);
 
 
+std::unique_ptr<Trk::TrackParameters> rotateParams(const Trk::TrackParameters& inPars,
+                                                   const Trk::Surface&  target) {
+    const Amg::Vector3D& pos = inPars.position();
+    const Amg::Vector3D& mom = inPars.momentum();
+    using namespace Acts::PlanarHelper;
+    
+    const auto isect = intersectPlane(pos, mom.normalized(), target.normal(), target.center());
+    std::optional<AmgSymMatrix(5)> cov{};
+    if (inPars.covariance()) {
+        AmgSymMatrix(5) rot {AmgSymMatrix(5)::Identity()};
+        rot.block<2,2>(0,0) = AmgSymMatrix(2){Eigen::Rotation2D{90._degree}};
+        cov = rot.transpose() * (*inPars.covariance()) * rot;
+    }
+    return target.createUniqueTrackParameters(isect.position(), mom,
+                                              std::copysign(1., inPars.parameters()[Trk::qOverP]),
+                                              std::move(cov));                     
+}
+
 
 StatusCode ActsToTrkConverterTool::initialize() {
-  ATH_MSG_VERBOSE("Initializing ACTS to ATLAS converter tool");
+  ATH_MSG_DEBUG("Initializing ACTS to ATLAS converter tool");
+  if (parent() != toolSvc()) {
+        ATH_MSG_ERROR("The tool is initialized as a private tool but should be public");
+        return StatusCode::FAILURE;
+  }
   if (!m_trackingGeometryTool.empty()) {
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
@@ -96,7 +144,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
           return;
       }
 
-      auto [it, ok] =  m_actsSurfaceMap.insert({actsElement->identify(), surface});
+      auto [it, ok] =  m_actsSurfaceMap.insert(std::make_pair(actsElement->identify(), surface->getSharedPtr()));
       if (!ok) {
         ATH_MSG_WARNING("ATLAS ID " << actsElement->identify()
                                     << " has two ACTS surfaces: "
@@ -107,10 +155,15 @@ StatusCode ActsToTrkConverterTool::initialize() {
   }
 
   ATH_CHECK(m_trkSummaryTool.retrieve());
-  ATH_CHECK(m_boundaryCheckTool.retrieve(EnableTool{!m_boundaryCheckTool.empty()}));
   ATH_CHECK(m_ROTcreator.retrieve());
-
+  m_prdCalib = detail::TrkPrepRawDataCalibrator{this, m_ROTcreator.get()};
   ATH_CHECK(m_muonMgrKey.initialize(m_extractMuonSurfaces));
+  ATH_CHECK(m_keyMdt.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_keyRpc.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_keyTgc.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_keyMm.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_keyStgc.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_compRotCreator.retrieve(EnableTool{!m_keyRpc.empty() || !m_keyTgc.empty()}));
   if (m_extractMuonSurfaces){
     ATH_CHECK(m_idHelperSvc.retrieve());
     const MuonGMR4::MuonDetectorManager* muonMgr{nullptr};    
@@ -120,7 +173,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
       std::vector<std::shared_ptr<Acts::Surface>> reSurfaces = readoutElement->getSurfaces();
       for ( const auto& surf : reSurfaces) {
         const Identifier id = static_cast<const SurfaceCache*>(surf->surfacePlacement())->identify();
-        m_actsSurfaceMap.insert(std::make_pair(id, surf.get()));
+        m_actsSurfaceMap.insert(std::make_pair(id, surf));
       }
     }
     ATH_MSG_VERBOSE("After adding muon surfaces, the map has grown from "<<mapSize<<" to "<<m_actsSurfaceMap.size());
@@ -128,13 +181,40 @@ StatusCode ActsToTrkConverterTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-const Trk::Surface &ActsToTrkConverterTool::actsSurfaceToTrkSurface(
-    const Acts::Surface &actsSurface) const {
+SurfacePtr_t ActsToTrkConverterTool::translateFreeSurface(const Acts::Surface& surface) const {
+  const ActsTrk::GeometryContext gctx{};
+  const Amg::Transform3D& trf{surface.localToGlobalTransform(gctx.context())};
+  switch (surface.type()) {
+      using enum Acts::Surface::SurfaceType;
+      case Plane:
+        return SurfacePtr_t{new Trk::PlaneSurface(trf, translateBounds(surface.bounds()))};
+      case Cylinder:
+          return SurfacePtr_t{new Trk::CylinderSurface(trf,
+                 std::dynamic_pointer_cast<Trk::CylinderBounds>(translateBounds(surface.bounds())))};
+      case Perigee:
+          return SurfacePtr_t{new Trk::PerigeeSurface(trf)};
+      case Disc:
+          return SurfacePtr_t{new Trk::DiscSurface(trf,
+                 std::dynamic_pointer_cast<Trk::DiscBounds>(translateBounds(surface.bounds())))};
+      case Straw: {
+          auto bounds = std::dynamic_pointer_cast<Trk::CylinderBounds>(translateBounds(surface.bounds()));
+          return SurfacePtr_t{new Trk::StraightLineSurface(trf, bounds->r(), bounds->halflengthZ())};
+      } default:
+        break;
+
+  }
+  THROW_EXCEPTION("ActsToTrkConverterTool() - Surface cannot be translated " 
+                  <<surface.toString(gctx.context()));
+ 
+  return nullptr;
+}
+
+SurfacePtr_t ActsToTrkConverterTool::actsSurfaceToTrkSurface(const EventContext& ctx,
+                                                             const Acts::Surface &actsSurface) const {
 
   const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.surfacePlacement());
   if (!detEleBase) {
-    ATH_MSG_ERROR(actsSurface.toString(m_trackingGeometryTool->getNominalGeometryContext().context()));
-    throw std::domain_error("ActsToTrkConverterTool() - Surface does not have an associated detector element. ");
+     return translateFreeSurface(actsSurface);
   }
   switch (detEleBase->detectorType()) {
       using enum DetectorType;
@@ -144,7 +224,7 @@ const Trk::Surface &ActsToTrkConverterTool::actsSurfaceToTrkSurface(
       case Trt: {
         const auto actsElement = dynamic_cast<const ActsDetectorElement*>(detEleBase);
         if (actsElement) {
-            return actsElement->atlasSurface();
+            return SurfacePtr_t{&actsElement->atlasSurface()};
         }
         break;
       }
@@ -155,28 +235,43 @@ const Trk::Surface &ActsToTrkConverterTool::actsSurfaceToTrkSurface(
       case sTgc:
       case Mm: {
         const MuonGM::MuonDetectorManager* detMgr{nullptr};
-        if (!SG::get(detMgr, m_muonMgrKey, Gaudi::Hive::currentContext()).isSuccess() || !detMgr) {
+        if (!SG::get(detMgr, m_muonMgrKey, ctx).isSuccess() || !detMgr) {
             THROW_EXCEPTION("Failed to retrieve the muon detector manager");
         }
-        return detMgr->getReadoutElement(detEleBase->identify())->surface(detEleBase->identify());
+        return SurfacePtr_t{&detMgr->getReadoutElement(detEleBase->identify())->surface(detEleBase->identify())};
       
       } default:
         break;
   }
-  throw std::domain_error("ActsToTrkConverterTool() - No ATLAS surface corresponding to the Acts one");
+  /// Produce a new free surface
+  return translateFreeSurface(actsSurface);
 }
 
-const Acts::Surface &ActsToTrkConverterTool::trkSurfaceToActsSurface(
-    const Trk::Surface &atlasSurface) const {
+std::shared_ptr<const Acts::Surface> 
+  ActsToTrkConverterTool::trkSurfaceToActsSurface(const Trk::Surface &atlasSurface) const {
 
   Identifier atlasID = atlasSurface.associatedDetectorElementIdentifier();
   auto it = m_actsSurfaceMap.find(atlasID);
   if (it != m_actsSurfaceMap.end()) {
-    return *it->second;
+    return it->second;
   }
-  ATH_MSG_ERROR("No Acts surface corresponding to this ATLAS surface: "<<atlasID);
-  ATH_MSG_ERROR(atlasSurface);
-  throw std::domain_error("No Acts surface corresponding to the ATLAS one");
+  const Amg::Transform3D& trf{atlasSurface.transform()};
+  switch (atlasSurface.type()){
+      using enum Trk::SurfaceType;
+      case Plane:
+        return Acts::Surface::makeShared<Acts::PlaneSurface>(trf);
+      case Perigee:
+        return Acts::Surface::makeShared<Acts::PerigeeSurface>(trf);
+      case Line:
+        return Acts::Surface::makeShared<Acts::StrawSurface>(trf);
+      // TODO - implement the missing types?
+      default: {
+        break;
+      }
+  }
+  std::stringstream surfStr{};
+  atlasSurface.dump(surfStr);  
+  throw std::domain_error(std::format("Failed to translate surface {:}", surfStr.str()));
 }
 
 std::vector<Acts::SourceLink>
@@ -191,68 +286,39 @@ ActsToTrkConverterTool::trkTrackToSourceLinks(const Trk::Track &track) const {
 
  
 void ActsToTrkConverterTool::toSourceLinks(const std::vector<const Trk::MeasurementBase*>& measSet,
-                                                    std::vector<Acts::SourceLink>& sourceLinks) const{
+                                           std::vector<Acts::SourceLink>& sourceLinks) const{
     if (sourceLinks.capacity() < sourceLinks.size() + measSet.size()) {
       sourceLinks.reserve(sourceLinks.size() + measSet.size());
     }
     std::ranges::transform(measSet, std::back_inserter(sourceLinks), [](const Trk::MeasurementBase* meas) {
-                             return detail::TrkMeasurementCalibrator::pack(meas);
+                             return detail::MeasurementCalibratorBase::pack(meas);
                           });
 }
 void ActsToTrkConverterTool::toSourceLinks(const std::vector<const Trk::PrepRawData*>& prdSet,
-                                                    std::vector<Acts::SourceLink>& links) const {
+                                           std::vector<Acts::SourceLink>& links) const {
     if (links.capacity() < links.size() + prdSet.size()) {
       links.reserve(links.size() + prdSet.size());
     }
     std::ranges::transform(prdSet, std::back_inserter(links), [](const Trk::PrepRawData* prd) {
-                            return detail::TrkPrepRawDataCalibrator::pack(prd);
+                            return detail::MeasurementCalibratorBase::pack(prd);
                           });
 }
 
 const Acts::BoundTrackParameters
 ActsToTrkConverterTool::trkTrackParametersToActsParameters(const Trk::TrackParameters &atlasParameter, 
-                                                                    const Acts::GeometryContext & gctx, 
-                                                                    Trk::ParticleHypothesis hypothesis) const {
+                                                           const Acts::GeometryContext & gctx, 
+                                                           Trk::ParticleHypothesis hypothesis) const {
 
-  using namespace Acts::UnitLiterals;
-  std::shared_ptr<const Acts::Surface> actsSurface;
+  std::shared_ptr<const Acts::Surface> actsSurface{};
   Acts::BoundVector params;
 
   // get the associated surface
-  if (atlasParameter.hasSurface() &&
-      atlasParameter.associatedSurface().owner() == Trk::SurfaceOwner::DetElOwn) {
-    try {
-      actsSurface = trkSurfaceToActsSurface(atlasParameter.associatedSurface()).getSharedPtr();
-    } catch (const std::exception &e) {
+  try {
+      actsSurface = trkSurfaceToActsSurface(atlasParameter.associatedSurface());
+  } catch (const std::exception &e) {
       ATH_MSG_ERROR("Could not find ACTS detector surface for this TrackParameter:");
       ATH_MSG_ERROR(atlasParameter);
       throw;  // Nothing we can do, so just pass exception on...
-    }
-  }
-  // no associated surface create a perigee one
-  else {
-    ATH_MSG_VERBOSE(
-        "trkTrackParametersToActsParameters:: No associated surface found (owner: "<<atlasParameter.associatedSurface().owner()<<
-        "). Creating a free surface. Trk parameters:");
-    ATH_MSG_VERBOSE(atlasParameter);
-    const Amg::Transform3D& trf{atlasParameter.associatedSurface().transform()};
-    switch (atlasParameter.associatedSurface().type()){
-      case Trk::SurfaceType::Plane:
-        actsSurface = Acts::Surface::makeShared<const Acts::PlaneSurface>(trf);
-        break;
-      case Trk::SurfaceType::Perigee:
-        actsSurface = Acts::Surface::makeShared<const Acts::PerigeeSurface>(trf);
-        break;
-      case Trk::SurfaceType::Line:
-        actsSurface = Acts::Surface::makeShared<const Acts::StrawSurface>(trf);
-        break;
-      // TODO - implement the missing types?
-      default: {
-        std::stringstream surfStr{};
-        atlasParameter.dump(surfStr);  
-        throw std::domain_error(std::format("Failed to translate parameters {:}", surfStr.str()));
-      }
-    }
   }
 
   // Construct track parameters
@@ -297,10 +363,10 @@ ActsToTrkConverterTool::trkTrackParametersToActsParameters(const Trk::TrackParam
 
 std::unique_ptr<Trk::TrackParameters>
 ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
+    const EventContext& ctx,
     const Acts::BoundTrackParameters &actsParameter,
     const Acts::GeometryContext &gctx) const {
 
-  using namespace Acts::UnitLiterals;
   std::optional<AmgSymMatrix(5)> cov = std::nullopt;
   if (actsParameter.covariance()) {
     AmgSymMatrix(5) newcov(actsParameter.covariance()->topLeftCorner<5, 5>());
@@ -311,13 +377,14 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
     for (int i = 0; i < newcov.cols(); i++) {
       newcov(4, i) = newcov(4, i) * 1_MeV;
     }
-    cov = std::optional<AmgSymMatrix(5)>(newcov);
+    cov = newcov;
   }
 
   const Acts::Surface &actsSurface = actsParameter.referenceSurface();
+  SurfacePtr_t trkSurface = actsSurfaceToTrkSurface(ctx, actsSurface);
   switch (actsSurface.type()) {
     case Acts::Surface::SurfaceType::Cone: {
-      const auto &coneSurface = static_cast<const Trk::ConeSurface&>(actsSurfaceToTrkSurface(actsSurface));
+      const auto &coneSurface = static_cast<const Trk::ConeSurface&>(*trkSurface);
       return std::make_unique<Trk::AtaCone>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -325,7 +392,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, coneSurface, cov);
     } case Acts::Surface::SurfaceType::Cylinder: {
-      const auto &cylSurface{static_cast<const Trk::CylinderSurface&>(actsSurfaceToTrkSurface(actsSurface))};
+      const auto &cylSurface{static_cast<const Trk::CylinderSurface&>(*trkSurface)};
       return std::make_unique<Trk::AtaCylinder>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -333,17 +400,16 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, cylSurface, cov);
     } case Acts::Surface::SurfaceType::Disc: {
-      const Trk::Surface& trkSurface{actsSurfaceToTrkSurface(actsSurface)};
-      if (trkSurface.type() == Trk::SurfaceType::Disc) {
-         const auto& discSurface{static_cast<const Trk::DiscSurface&>(trkSurface)};
+      if (trkSurface->type() == Trk::SurfaceType::Disc) {
+         const auto& discSurface{static_cast<const Trk::DiscSurface&>(*trkSurface)};
          return std::make_unique<Trk::AtaDisc>(
               actsParameter.get<Acts::eBoundLoc0>(),
               actsParameter.get<Acts::eBoundLoc1>(),
               actsParameter.get<Acts::eBoundPhi>(),
               actsParameter.get<Acts::eBoundTheta>(),
               actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, discSurface, cov);
-      } else if (trkSurface.type() == Trk::SurfaceType::Plane) {
-        auto& planeSurface{static_cast<const Trk::PlaneSurface&>(trkSurface)};
+      } else if (trkSurface->type() == Trk::SurfaceType::Plane) {
+        auto& planeSurface{static_cast<const Trk::PlaneSurface&>(*trkSurface)};
         // need to convert to plane position on plane surface (annulus bounds)
         auto helperSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(planeSurface.transform());
 
@@ -386,7 +452,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
       }
       break;
     } case Acts::Surface::SurfaceType::Perigee: {
-      const Trk::PerigeeSurface perSurface(actsSurface.center(gctx));
+      const auto& perSurface = static_cast<const Trk::PerigeeSurface&>(*trkSurface);
       return std::make_unique<Trk::Perigee>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -394,7 +460,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, perSurface, cov);
     } case Acts::Surface::SurfaceType::Plane: {
-      auto &plaSurface{static_cast<const Trk::PlaneSurface&>(actsSurfaceToTrkSurface(actsSurface))};
+      auto &plaSurface{static_cast<const Trk::PlaneSurface&>(*trkSurface)};
       return std::make_unique<Trk::AtaPlane>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -402,7 +468,7 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, plaSurface, cov);
     } case Acts::Surface::SurfaceType::Straw: {
-      auto& lineSurface{static_cast<const Trk::StraightLineSurface&>(actsSurfaceToTrkSurface(actsSurface))};
+      auto& lineSurface{static_cast<const Trk::StraightLineSurface&>(*trkSurface)};
       return std::make_unique<Trk::AtaStraightLine>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
@@ -414,7 +480,6 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
           actsParameter.position(gctx), actsParameter.get<Acts::eBoundPhi>(),
           actsParameter.get<Acts::eBoundTheta>(),
           actsParameter.get<Acts::eBoundQOverP>() * 1_MeV, cov);
-      break;
     } case Acts::Surface::SurfaceType::Other: {
       break;
     }
@@ -423,8 +488,8 @@ ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
 }
 
 void ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(MutableTrackContainer &tc,
-                                                                             const TrackCollection &trackColl,
-                                                                             const Acts::GeometryContext & gctx) const {
+                                                                    const TrackCollection &trackColl,
+                                                                    const Acts::GeometryContext & gctx) const {
   ATH_MSG_VERBOSE("Calling trkTrackCollectionToActsTrackContainer with "
                   << trackColl.size() << " tracks.");
   unsigned int trkCount = 0;
@@ -509,6 +574,7 @@ void ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(MutableTrack
       }
       if (tsos->measurementOnTrack()) {
         auto &measurement = *(tsos->measurementOnTrack());
+        actsTSOS.typeFlags().setIsMeasurement();
 
         measurementsCount++;
         // const Acts::Surface &surface =
@@ -545,6 +611,59 @@ void ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(MutableTrack
   }
   ATH_MSG_VERBOSE("ACTS Track container has " << tc.size() << " tracks.");
 }
+
+std::shared_ptr<Trk::SurfaceBounds> 
+    ActsToTrkConverterTool::translateBounds(const Acts::SurfaceBounds& bounds) const {
+    switch (bounds.type()) {
+      using enum Acts::SurfaceBounds::BoundsType;
+      case eRectangle:{
+        using ParEnum_t = Acts::RectangleBounds::BoundValues;
+        const auto& cBounds = static_cast<const Acts::RectangleBounds&>(bounds);
+        return std::make_shared<Trk::RectangleBounds>(cBounds.get(ParEnum_t::eMaxX), 
+                                                      cBounds.get(ParEnum_t::eMaxY));
+      } case eTrapezoid: {
+        using ParEnum_t = Acts::TrapezoidBounds::BoundValues;
+        const auto& cBounds = static_cast<const Acts::TrapezoidBounds&>(bounds);
+        return std::make_shared<Trk::TrapezoidBounds>(cBounds.get(ParEnum_t::eHalfLengthXnegY),
+                                                      cBounds.get(ParEnum_t::eHalfLengthXposY),
+                                                      cBounds.get(ParEnum_t::eHalfLengthY));
+   
+      } case eDisc: {
+        using ParEnum_t = Acts::RadialBounds::BoundValues;
+        const auto& cBounds = static_cast<const Acts::RadialBounds&>(bounds);
+        return std::make_shared<Trk::DiscBounds>(cBounds.get(ParEnum_t::eMinR),
+                                                 cBounds.get(ParEnum_t::eMaxR),
+                                                 cBounds.get(ParEnum_t::eAveragePhi),
+                                                 cBounds.get(ParEnum_t::eHalfPhiSector));
+
+      } case eCylinder: {
+        using ParEnum_t = Acts::CylinderBounds::BoundValues;
+        const auto& cBounds = static_cast<const Acts::CylinderBounds&>(bounds);
+        return std::make_shared<Trk::CylinderBounds>(cBounds.get(ParEnum_t::eR),
+                                                     cBounds.get(ParEnum_t::eHalfPhiSector),
+                                                     cBounds.get(ParEnum_t::eAveragePhi),
+                                                     cBounds.get(ParEnum_t::eHalfLengthZ));
+      } case eLine: {
+        using ParEnum_t = Acts::LineBounds::BoundValues;
+        const auto& cBounds = static_cast<const Acts::LineBounds&>(bounds);
+        return std::make_shared<Trk::CylinderBounds>(cBounds.get(ParEnum_t::eR),
+                                                     cBounds.get(ParEnum_t::eHalfLengthZ));
+      } case eDiamond: {
+        using ParEnum_t = Acts::DiamondBounds::BoundValues;
+        const auto& cBounds = static_cast<const Acts::DiamondBounds&>(bounds);
+        return std::make_shared<Trk::DiamondBounds>(cBounds.get(ParEnum_t::eHalfLengthXnegY),
+                                                    cBounds.get(ParEnum_t::eHalfLengthXzeroY),
+                                                    cBounds.get(ParEnum_t::eHalfLengthXposY),
+                                                    cBounds.get(ParEnum_t::eHalfLengthYneg),
+                                                    cBounds.get(ParEnum_t::eHalfLengthYpos));
+      } default:
+          break;
+      
+    }
+    THROW_EXCEPTION("The bounds "<<bounds<<" cannot be translated");
+    return nullptr;
+}
+
 
 bool ActsToTrkConverterTool::actsTrackParameterPositionCheck(
     const Acts::BoundTrackParameters &parameters,
@@ -739,130 +858,243 @@ void ActsTrackParameterCheck(
 }
 
 std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const EventContext& ctx,
-                                                                     MutableTrackContainer& tracks,
                                                                      TrackFitResult_t& fitResult,
-                                                                     const Trk::TrackInfo::TrackFitter fitAuthor,
-                                                                     const detail::SourceLinkType slType) const {
-    detail::TrkMeasurementCalibrator measCalib{};
-    detail::TrkPrepRawDataCalibrator prdCalib{this, m_ROTcreator.get()};
+                                                                     const Trk::TrackInfo::TrackFitter fitAuthor) const {
 
     if (not fitResult.ok()) {
       ATH_MSG_VERBOSE("Fit did not converge");  
       return nullptr;    
     }
+    return convertActsTrack(ctx, fitResult.value(), fitAuthor);
+}
+
+template <typename Proxy_t>
+  std::unique_ptr<Trk::Track> 
+    ActsToTrkConverterTool::convertActsTrack(const EventContext& ctx,
+                                             const Proxy_t& acts_track,
+                                             const Trk::TrackInfo::TrackFitter fitAuthor) const{
+
+
     const Acts::CalibrationContext cctx{getCalibrationContext(ctx)};
     const Acts::GeometryContext gctx{m_trackingGeometryTool->getGeometryContext(ctx).context()};
-    Acts::ParticleHypothesis hypothesis{Acts::ParticleHypothesis::pion()};
-    if(m_convertMuons) hypothesis = Acts::ParticleHypothesis::muon();
-    
-    // Get the fit output object
-    const auto& acts_track = fitResult.value();
-      
+   
     auto finalTrajectory = std::make_unique<Trk::TrackStates>();
-    // initialise the number of dead Pixel and Acts strip
-    unsigned int numberOfDeadPixel{0}, numberOfDeadSCT{0};
     int nDoF{0};
 
     double chi2{0};
 
     // Loop over all the output state to create track state
-    tracks.trackStateContainer().visitBackwards(acts_track.tipIndex(), 
+    acts_track.container().trackStateContainer().visitBackwards(acts_track.tipIndex(), 
       [&] (const auto &state) -> void {
+        if (!state.hasReferenceSurface()) {
+          return;
+        }
         // First only consider state with an associated detector element
-        const auto* associatedDetEl = dynamic_cast<const IDetectorElementBase*>(
+        if (!m_convertMaterial && !state.referenceSurface().isSensitive()) {
+          return;
+        }
+
+        if (const auto* associatedDetEl = dynamic_cast<const IDetectorElementBase*>(
                                         state.referenceSurface().surfacePlacement());
-       
-        if (not associatedDetEl) {
-            ATH_MSG_VERBOSE("State is not associated with a measurement sruface");
-            return;
+            associatedDetEl != nullptr) {
+            ATH_MSG_VERBOSE("Associated det: "<<associatedDetEl->detectorType());
         }
-        ATH_MSG_VERBOSE("Associated det: "<<to_string(associatedDetEl->detectorType()));
+
         auto flag = state.typeFlags();
-    
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<", hole: "<<flag.isHole()
+                      <<", outlier: "<<flag.isOutlier()<<", measurement: "<<flag.isMeasurement()<<"/"
+                      <<flag.hasMeasurement()<<", "<<m_convertOutliers<<", "<<m_convertHoles
+                      <<", has SL: "<<state.hasUncalibratedSourceLink());
         // We need to determine the type of state 
-        std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-        std::unique_ptr<Trk::TrackParameters> measPars{};
-        std::unique_ptr<Trk::MeasurementBase> measState{};
-    
+        TrkTSOSMask typePattern;
+        std::unique_ptr<Trk::TrackParameters> trkPars = actsTrackParametersToTrkParameters(ctx, 
+                                                              acts_track.createParametersFromState(state), gctx);
+        std::unique_ptr<Trk::MeasurementBase> trkMeasurement{};
+
+
         // State is a hole (no associated measurement), use predicted parameters   
-        if (flag.isHole()){
-          const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-                                                     state.parameters(),
-                                                     state.covariance(),
-                                                     hypothesis);
-          measPars = actsTrackParametersToTrkParameters(actsParam, gctx);
-          if (associatedDetEl->detectorType() == DetectorType::Pixel ||
-              associatedDetEl->detectorType() == DetectorType::Sct) {
-              ATH_MSG_VERBOSE("Check if this is a hole, a dead sensors or a state outside the sensor boundary");
-              switch (m_boundaryCheckTool->boundaryCheck(*measPars)) {
-                  case Trk::BoundaryCheckResult::DeadElement:
-                      numberOfDeadPixel += (associatedDetEl->detectorType() == DetectorType::Pixel);
-                      numberOfDeadSCT+= (associatedDetEl->detectorType() == DetectorType::Sct);
-                      break;
-                  case Trk::BoundaryCheckResult::Candidate:
-                      break;
-                  default:
-                      return;
-              }
-          }
+        if (flag.isHole()) {
+          if (!m_convertHoles) { return; }
           typePattern.set(Trk::TrackStateOnSurface::Hole);
-        }
-        // The state is a measurement state, use smoothed parameters 
-        else if (flag.hasMeasurement()) {
-          Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-                                               state.parameters(),
-                                               state.covariance(),
-                                               hypothesis);
+        } if (flag.isOutlier()) {
+          if (!m_convertOutliers) { return; }
+          typePattern.set(Trk::TrackStateOnSurface::Outlier);
+        } 
+        if (flag.hasMeasurement()) {
           typePattern.set(Trk::TrackStateOnSurface::Measurement);
+          nDoF = state.calibratedSize();
+          chi2 = state.chi2();
+          const auto slType = detail::MeasurementCalibratorBase::getType(state.getUncalibratedSourceLink());
           switch (slType) {
               using enum detail::SourceLinkType;
               case TrkMeasurement: 
-                measState = measCalib.unpack(state.getUncalibratedSourceLink())->uniqueClone();
+                trkMeasurement = m_measCalib.unpack(state.getUncalibratedSourceLink())->uniqueClone();
                 break;
               case TrkPrepRawData:
-                measState = prdCalib.createROT(gctx, cctx, state.getUncalibratedSourceLink(), state);
+                trkMeasurement = m_prdCalib.createROT(gctx, cctx, state.getUncalibratedSourceLink(), state);
                 break;
               case xAODUnCalibMeas:
-                  ATH_MSG_WARNING("Uncalibrated measurement is not implemented");
+                  appendMeasTSOS(ctx, detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()),
+                                 typePattern, Trk::FitQualityOnSurface{chi2, nDoF}, 
+                                 std::move(trkPars), *finalTrajectory);
                   return;
-              case nTypes:
-                ATH_MSG_WARNING("Invalid type enumaration parsed");
-                return;
+              default:
+                THROW_EXCEPTION("Invalid "<<slType<<" type parsed.");
           }
-          nDoF = state.calibratedSize();
-          chi2 = state.chi2();
-          
         }
         auto perState = std::make_unique<Trk::TrackStateOnSurface>(Trk::FitQualityOnSurface{chi2, nDoF},
-                                                                   std::move(measState), 
-                                                                   std::move(measPars), nullptr, typePattern);
+                                                                   std::move(trkMeasurement), 
+                                                                   std::move(trkPars), nullptr, typePattern);
         // If a state was succesfully created add it to the trajectory 
-        ATH_MSG_VERBOSE("State succesfully creates, adding it to the trajectory");
+        ATH_MSG_VERBOSE("State succesfully created, adding it to the trajectory");
         finalTrajectory->insert(finalTrajectory->begin(), std::move(perState));
       });
       // Convert the perigee state and add it to the trajectory
-      const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
-                                              acts_track.parameters(), 
-                                              acts_track.covariance(),
-                                              acts_track.particleHypothesis());
-      std::unique_ptr<Trk::TrackParameters> per = actsTrackParametersToTrkParameters(actsPer, gctx);
-      std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
+      std::unique_ptr<Trk::TrackParameters> per = actsTrackParametersToTrkParameters(ctx, acts_track.createParametersAtReference(), gctx);
+      TrkTSOSMask typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
-      auto perState = std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(per), nullptr, typePattern);
-      finalTrajectory->insert(finalTrajectory->begin(), std::move(perState));
-    
+      finalTrajectory->insert(finalTrajectory->begin(), 
+                              std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(per), nullptr, typePattern));
       // Create the track using the states
-      Trk::TrackInfo newInfo{fitAuthor, Trk::noHypothesis};
+      Trk::TrackInfo newInfo{fitAuthor, ParticleHypothesis::convertTrk(acts_track.particleHypothesis())};
       auto newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
-      if (newtrack) {
-        // Create the track summary and update the holes information
-        if (!newtrack->trackSummary()) {
-          newtrack->setTrackSummary(std::make_unique<Trk::TrackSummary>());
-          newtrack->trackSummary()->update(Trk::numberOfPixelDeadSensors, numberOfDeadPixel);
-          newtrack->trackSummary()->update(Trk::numberOfSCTDeadSensors, numberOfDeadSCT);
-        }
-        m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, true);
-      }
+      constexpr bool suppressHoleSearch = false;
+      m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, suppressHoleSearch);
+      ATH_MSG_VERBOSE("Created new track "<<(*newtrack->trackSummary()));
       return newtrack;
+  }
+
+  std::unique_ptr<TrackCollection> 
+    ActsToTrkConverterTool::convertActsToTrkContainer(const EventContext& ctx,
+                                                      const ActsTrk::TrackContainer& trackCont) const {
+      auto outColl = std::make_unique<TrackCollection>();
+      for (const ActsTrk::TrackContainer::ConstTrackProxy& trk : trackCont) {
+          outColl->push_back(convertActsTrack(ctx, trk, m_fitAuthor));
+      }
+      return outColl;
+  }
+  void ActsToTrkConverterTool::appendMeasTSOS(const EventContext& ctx,
+                                              const xAOD::UncalibratedMeasurement* meas,
+                                              const TrkTSOSMask typePattern,
+                                              Trk::FitQualityOnSurface&& quality,
+                                              std::unique_ptr<Trk::TrackParameters> trkPars,
+                                              Trk::TrackStates& states) const {
+    std::unique_ptr<Trk::MeasurementBase> rot{};
+    switch (meas->type()) {
+        using enum xAOD::UncalibMeasType;
+        case PixelClusterType: {
+          static const SG::AuxElement::ConstAccessor<ElementLink<InDet::PixelClusterCollection>> acc_prdLink("pixelClusterLink");
+          if (acc_prdLink.isAvailable(*meas) && acc_prdLink(*meas).isValid()) {
+              rot.reset(m_ROTcreator->correct(**acc_prdLink(*meas), *trkPars, ctx));
+          } else {
+              ATH_MSG_WARNING(__func__<<" () "<<__LINE__<<" - The pixel xAOD -> prd accessor is invalid");
+          }
+          break;
+        } case StripClusterType: {
+          static const SG::AuxElement::ConstAccessor<ElementLink<InDet::SCT_ClusterCollection>> acc_prdLink("sctClusterLink");
+          if (acc_prdLink.isAvailable(*meas) && acc_prdLink(*meas).isValid()) {
+              rot.reset(m_ROTcreator->correct(**acc_prdLink(*meas), *trkPars, ctx));
+          } else {
+              ATH_MSG_WARNING(__func__<<" () "<<__LINE__<<" - The strip xAOD -> prd accessor is invalid");
+          }
+          break;
+        } case MdtDriftCircleType:
+          case MMClusterType: {
+            const Identifier& id = static_cast<const xAOD::MuonMeasurement*>(meas)->identify();
+            const IdentifierHash modHash = m_idHelperSvc->moduleHash(id);
+            const auto* prd =  meas->type() == MdtDriftCircleType ?  fetchPrd(ctx, m_keyMdt, id, modHash) 
+                                                                  :  fetchPrd(ctx, m_keyMm, id, modHash);
+            assert(prd != nullptr);
+            rot.reset(m_ROTcreator->correct(*prd, *trkPars, ctx));
+            break;
+        } case TgcStripType:
+          case RpcStripType:
+          case sTgcStripType: {
+            const Identifier& id = static_cast<const xAOD::MuonMeasurement*>(meas)->identify();
+            const IdentifierHash modHash = m_idHelperSvc->moduleHash(id);
+            /// Dimension 0 measurements are combined measurements!
+            const Trk::PrepRawData* prd{nullptr}, *prd1{nullptr};
+
+            if (meas->numDimensions() == 0) {
+              const auto* muonMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
+              if (meas->type() == RpcStripType) {
+                prd  = fetchPrd(ctx, m_keyRpc, id, modHash);
+                prd1 = fetchPrd(ctx, m_keyRpc, muonMeas->secondaryStrip()->identify(), modHash);
+              } else if (meas->type() == TgcStripType) {
+                prd = fetchPrd(ctx, m_keyTgc, id, modHash);
+                prd1 = fetchPrd(ctx, m_keyTgc, muonMeas->secondaryStrip()->identify(), modHash);
+              } else {
+                prd  = fetchPrd(ctx, m_keyStgc, id, modHash);
+                prd1 = fetchPrd(ctx, m_keyStgc, muonMeas->secondaryStrip()->identify(), modHash);
+              }
+              assert(prd != nullptr);
+              assert(prd1 != nullptr);
+
+              /// @todo Check whether the phi surface is in front of the eta surface
+              const Trk::Surface& phiSurface = prd1->detectorElement()->surface(prd1->identify());
+              auto phiPars = rotateParams(*trkPars, phiSurface);
+              assert(phiPars != nullptr);
+              std::unique_ptr<Trk::MeasurementBase> phiRot{};
+              if (meas->type() != sTgcStripType) {
+                phiRot = m_compRotCreator->createBroadCluster(std::list{prd1}, 1.);
+                rot = m_compRotCreator->createBroadCluster(std::list{prd}, 1.);
+              } else {
+                phiRot.reset(m_ROTcreator->correct(*prd1, *phiPars, ctx));
+                rot.reset(m_ROTcreator->correct(*prd, *trkPars, ctx));
+              }
+              assert(phiRot != nullptr);
+              states.insert(states.begin(),
+                            std::make_unique<Trk::TrackStateOnSurface>(quality, 
+                                                                       std::move(phiRot), 
+                                                                       std::move(phiPars), nullptr, typePattern));
+            } else {
+              const auto* prd  = meas->type() == RpcStripType ? fetchPrd(ctx, m_keyRpc, id, modHash)
+                                                              :
+                                meas->type() == TgcStripType ? fetchPrd(ctx, m_keyTgc, id, modHash)
+                                                             : fetchPrd(ctx, m_keyStgc, id, modHash);
+              assert(prd != nullptr);
+              // Track parameter representation needs to change towards a phi surface
+              if (m_idHelperSvc->measuresPhi(id)) {
+                  ATH_MSG_VERBOSE("Convert the track parameters "<<m_idHelperSvc->toString(id)
+                                <<", "<<m_idHelperSvc->toStringDetEl(prd->detectorElement()->identify()));
+                  const Trk::Surface& target = prd->detectorElement()->surface(id);
+                  trkPars = rotateParams(*trkPars, target);
+              }
+              /// Correct the ROT according to the surface
+              rot.reset(m_ROTcreator->correct(*prd, *trkPars, ctx));
+            }
+            break;
+        } default:
+          ATH_MSG_WARNING("Measurement type "<<meas->type()<<" is not implemented");
+          return;
+    }
+    assert(rot != nullptr);
+    assert(trkPars != nullptr);
+    states.insert(states.begin(),
+                  std::make_unique<Trk::TrackStateOnSurface>(std::move(quality), std::move(rot), 
+                                                             std::move(trkPars), nullptr, typePattern));
+
+  }
+  template <typename PrdType_t>
+  const Trk::PrepRawData* ActsToTrkConverterTool::fetchPrd(const EventContext& ctx,
+                                                           const SG::ReadHandleKey<PrdType_t>& key,
+                                                           const Identifier& prdId,
+                                                           const IdentifierHash& hash) const{
+      const PrdType_t* container{nullptr};
+      if (key.empty() || !SG::get(container, key, ctx).isSuccess()) {
+          THROW_EXCEPTION("Failed to retrieve container "<<key.fullKey());
+      }
+      const auto* coll = container->indexFindPtr(hash);
+      if (coll == nullptr){
+          ATH_MSG_WARNING("fetchPrd() - Failed to find a valid collection for "<<prdId.getString()<<", key: "<<key.fullKey());
+          return nullptr;
+      }
+      for (const Trk::PrepRawData* prd : *coll) {
+          if (prd->identify() == prdId) {
+              return prd;
+          }
+      }
+      ATH_MSG_WARNING("fetchPrd() - Prep data object "<<prdId.getString()<<" is not in "<<key.fullKey());
+      return nullptr;
   }
 }  // namespace ActsTrk

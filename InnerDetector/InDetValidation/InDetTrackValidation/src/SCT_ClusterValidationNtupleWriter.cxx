@@ -240,11 +240,11 @@ StatusCode InDet::SCT_ClusterValidationNtupleWriter::initialize() {
   return sc;
 }
 
-StatusCode InDet::SCT_ClusterValidationNtupleWriter::execute() {
+StatusCode InDet::SCT_ClusterValidationNtupleWriter::execute(const EventContext& ctx) {
 
   //-------------
   // get some event properties    
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
   if (not eventInfo.isValid()) {
     ATH_MSG_ERROR( "Could not retrieve event info" );
   }
@@ -307,7 +307,7 @@ StatusCode InDet::SCT_ClusterValidationNtupleWriter::execute() {
   // Container with SCT RIOs
   m_riocontainer = nullptr;
   if ( m_fillCluster.value()) {
-    SG::ReadHandle<SCT_ClusterContainer> h_riocontainer(m_jo_riocontainername);
+    SG::ReadHandle<SCT_ClusterContainer> h_riocontainer(m_jo_riocontainername, ctx);
     if (not h_riocontainer.isValid()) {
       ATH_MSG_DEBUG("Could not get PrepRawDataContainer");
     } else {
@@ -318,7 +318,7 @@ StatusCode InDet::SCT_ClusterValidationNtupleWriter::execute() {
   // SpacePoint container
   const SpacePointContainer* p_spContainer = nullptr;
   if (m_fillSpacePoint.value()) {
-    SG::ReadHandle<SpacePointContainer> h_spContainer(m_spacePointContainerName);
+    SG::ReadHandle<SpacePointContainer> h_spContainer(m_spacePointContainerName, ctx);
     if (not h_spContainer.isValid()) {
       ATH_MSG_DEBUG("Could not get SpacePointContainer");
     } else {
@@ -331,7 +331,7 @@ StatusCode InDet::SCT_ClusterValidationNtupleWriter::execute() {
   const SCT_RDO_Container* p_rdocontainer = nullptr;
   std::vector<Identifier> RDOsOnTracks;
   if (m_fillRDO.value()) {
-    SG::ReadHandle<SCT_RDO_Container> h_rdocontainer(m_dataObjectName);
+    SG::ReadHandle<SCT_RDO_Container> h_rdocontainer(m_dataObjectName, ctx);
     if (not h_rdocontainer.isValid()) {
       ATH_MSG_DEBUG( "Failed to retrieve SCT RDO container" );
     } else {
@@ -339,7 +339,7 @@ StatusCode InDet::SCT_ClusterValidationNtupleWriter::execute() {
     }
     if (m_doHitsOnTracks.value()) {
       //Track container
-      SG::ReadHandle<TrackCollection> tracks(m_inputTrackCollection);
+      SG::ReadHandle<TrackCollection> tracks(m_inputTrackCollection, ctx);
       if (not tracks.isValid()) {
         ATH_MSG_ERROR("Track container not found");
       } else {

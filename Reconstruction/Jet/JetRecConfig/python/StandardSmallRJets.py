@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from JetRecConfig.JetRecConfig import registerAsInputConstit
@@ -91,6 +91,12 @@ AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                lock = True
 )
 
+# The following jet collection will be scheduled in derivation production (instead of AntiKt4EMPFlow which is used e.g. at Tier-0)
+AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
+    ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
+    modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
+)
+
 AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
                                infix = "ML",
                                ghostdefs = standardghosts+flavourghosts,
@@ -136,6 +142,10 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                               lock = True,
 )
 
+# The following jet collection will be scheduled in derivation production (instead of AntiKt4EMTopo which is used e.g. at Tier-0) 
+AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
+    modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation",)
+)
 
 # *********************************************************
 # EMPFlow CSSK jets  (no jet calibration available yet,
@@ -285,6 +295,16 @@ AntiKt4TruthGENWZ = AntiKt4TruthGEN.clone(inputdef=cst.TruthGENWZ)
 
 AntiKt6TruthGEN   = AntiKt4TruthGEN.clone(radius=0.6)
 AntiKt6TruthGENWZ = AntiKt4TruthGENWZ.clone(radius=0.6)
+
+
+# *********************************************************
+# Support for merged HS/PU jet definitions from simulation
+# *********************************************************
+
+InTimeAntiKt4Truth = AntiKt4Truth.clone(prefix="InTime")
+
+# These jets may be used as input for the JetTruthLabelling, so they also need to be defined as constituents:
+registerAsInputConstit(InTimeAntiKt4Truth)
 
 
 def StandardSmallRJetCfg(flags):

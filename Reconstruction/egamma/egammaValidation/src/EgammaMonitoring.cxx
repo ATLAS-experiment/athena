@@ -520,9 +520,7 @@ StatusCode EgammaMonitoring::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode EgammaMonitoring::execute() {
-
-  const EventContext &ctx = Gaudi::Hive::currentContext();
+StatusCode EgammaMonitoring::execute(const EventContext& ctx) {
 
   // Retrieve things from the event store
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);

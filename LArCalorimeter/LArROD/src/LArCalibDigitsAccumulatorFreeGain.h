@@ -33,7 +33,7 @@ class LArCalibDigitsAccumulatorFreeGain : public AthAlgorithm
 public:
   LArCalibDigitsAccumulatorFreeGain (const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode finalize(){return StatusCode::SUCCESS;}
 
  /** 

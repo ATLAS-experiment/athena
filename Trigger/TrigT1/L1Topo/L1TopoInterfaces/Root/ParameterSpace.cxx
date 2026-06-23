@@ -7,19 +7,20 @@
 
 #include "L1TopoInterfaces/ParameterSpace.h"
 #include "L1TopoCommon/Exception.h"
+#include <iostream>
 
 using namespace std;
 using namespace TCS;
 
 
 ParameterSpace & 
-ParameterSpace::addParameter(const std::string & name, TCS::parType_t value) {
+ParameterSpace::addParameter(std::string_view name, TCS::parType_t value) {
    return addParameter( Parameter(name, value));
 }
 
 
 ParameterSpace & 
-ParameterSpace::addParameter(const std::string & name, TCS::parType_t value, unsigned int selection) {
+ParameterSpace::addParameter(std::string_view name, TCS::parType_t value, unsigned int selection) {
    return addParameter( Parameter(name, value, selection));
 }
 
@@ -38,7 +39,7 @@ ParameterSpace::addParameter(const TCS::Parameter& p) {
 
 
 ParameterSpace &
-ParameterSpace::setParameter(const std::string & name, TCS::parType_t value, unsigned int selection) {
+ParameterSpace::setParameter(std::string_view name, TCS::parType_t value, unsigned int selection) {
    return setParameter(Parameter(name, value, selection));
 }
 
@@ -89,7 +90,7 @@ ParameterSpace::setParameter(const Parameter & p) {
 
 
 bool
-ParameterSpace::contains(const std::string & parameterName, unsigned int selection) const {
+ParameterSpace::contains(std::string_view parameterName, unsigned int selection) const {
    for(const Parameter& pa: m_parameters)
       if( (pa.name() == parameterName) && (pa.selection() == selection) ) return true;
    return false;
@@ -98,7 +99,7 @@ ParameterSpace::contains(const std::string & parameterName, unsigned int selecti
 
 
 const Parameter &
-ParameterSpace::parameter(const std::string & parameterName) const {
+ParameterSpace::parameter(std::string_view parameterName) const {
    for(const Parameter & pa : m_parameters) {
       if( pa.isExtended() ) continue;
       if( pa.name() == parameterName ) 
@@ -109,7 +110,7 @@ ParameterSpace::parameter(const std::string & parameterName) const {
 
 
 const Parameter &
-ParameterSpace::parameter(const std::string & parameterName, unsigned int selection) const {
+ParameterSpace::parameter(std::string_view parameterName, unsigned int selection) const {
    for(const Parameter & pa : m_parameters) {
       if( ! pa.isExtended() ) continue;
       if( (pa.name() == parameterName) && (pa.selection() == selection) ) 

@@ -13,7 +13,7 @@ atlas_add_library( AFP_G4_SDLib
                    OBJECT
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} AFP_Geometry AFP_SimEv G4AtlasToolsLib StoreGateLib )
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} AFP_Geometry AFP_SimEv G4AtlasToolsLib HitManagement MCTruth StoreGateLib )
 set_target_properties( AFP_G4_SDLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 atlas_add_library( AFP_G4_SD
@@ -26,4 +26,3 @@ set_target_properties( AFP_G4_SD PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/optionForTest.txt )
-

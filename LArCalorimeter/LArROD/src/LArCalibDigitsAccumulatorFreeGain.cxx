@@ -53,7 +53,7 @@ StatusCode LArCalibDigitsAccumulatorFreeGain::initialize(){
 
 
 
-StatusCode LArCalibDigitsAccumulatorFreeGain::execute() 
+StatusCode LArCalibDigitsAccumulatorFreeGain::execute(const EventContext& ctx) 
 {
   
   StatusCode sc;
@@ -62,7 +62,7 @@ StatusCode LArCalibDigitsAccumulatorFreeGain::execute()
     ATH_MSG_INFO( "Processing event " << m_event_counter );
   ++m_event_counter;
 
-  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey};
+  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey, ctx};
   const LArCalibLineMapping *clcabling {*clHdl};
   if(!clcabling) {
      ATH_MSG_WARNING( "Do not have calib line mapping !!!" );

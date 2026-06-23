@@ -93,7 +93,8 @@ def CollectionMergerCfg(flags,
 
         input_attribute_name = f'Input{merger_input_property}'
         merger_input_collections = getattr(algo, input_attribute_name)
-        merger_input_collections.append(mergeable_collection)
+        if mergeable_collection not in merger_input_collections:
+            merger_input_collections.append(mergeable_collection)
     else:
         mergeable_collection = bare_collection_name
     return result, mergeable_collection

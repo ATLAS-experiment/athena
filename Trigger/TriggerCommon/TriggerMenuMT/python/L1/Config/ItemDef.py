@@ -192,8 +192,8 @@ class ItemDef:
         # Item for gESPRESSO algorithm
         gESPRESSO = Not(d.gESPRESSO280)
 
-        # Item for gESPRESSO BC+1 algorithm
-        gRISTRETTO = Not(d.gTE280) | Not(d.gESPRESSO280)
+        # Item for gRISTRETTO BC+1/BC+2 algorithm
+        gRISTRETTO = Not(d.gRISTRETTO280) & Not(d.gESPRESSO280)
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM12'      ).setLogic( d.EM12       & physcond).setTriggerType( TT.calo )
@@ -1088,7 +1088,7 @@ class ItemDef:
         MenuItem('L1_RIS_TeAsymmetry-jTENoSort').setLogic(d.TOPO_TeAsymmetry_jTENoSort_ParamSet0 & gRISTRETTO & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TeATIME-jTENoSort' ).setLogic( d.TOPO_TeATIME_jTENoSort_ParamSet0 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_ESPRESSO' ).setLogic( d.gESPRESSO280 & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_RISTRETTO' ).setLogic( d.gTE280 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_RISTRETTO' ).setLogic( d.gRISTRETTO280 & physcond).setTriggerType(TT.calo)
 
         # additional jTE items for 2023 heavy ion runs
         MenuItem('L1_jTE3'     ).setLogic( d.jTE3  & physcond).setTriggerType(TT.calo)

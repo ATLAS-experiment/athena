@@ -16,8 +16,8 @@ def CaloClusterROIPhiRZContainerMakerCfg(
         kwargs.setdefault("CaloSurfaceBuilder", result.popToolsAndMerge(
             CaloSurfaceBuilderEntranceCfg(flags)))
 
-    kwargs.setdefault("InputClusterContainerName",
-                      flags.Tracking.EgammaTopoClusters)
+    kwargs.setdefault("InputClusterContainerNames",
+                      [flags.Tracking.EgammaTopoClusters])
     kwargs.setdefault("EMEnergyOnly", True)
 
     OutputROIContainerName = []
@@ -81,8 +81,7 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(
         kwargs.setdefault("CaloSurfaceBuilder", result.popToolsAndMerge(
             CaloSurfaceBuilderEntranceCfg(flags)))
 
-    kwargs.setdefault("InputClusterContainerName",
-                      flags.Tracking.EgammaTopoClusters)
+    kwargs.setdefault("InputClusterContainerNames", [flags.Tracking.EgammaTopoClusters, flags.Tracking.ForwardTopoClusters])
     kwargs.setdefault("EMEnergyOnly", True)
 
     OutputROIContainerName = []
@@ -136,7 +135,7 @@ def HadCaloClusterROIPhiRZContainerMakerCfg(
         indetTopoClusterCopierCfg)
     result = indetTopoClusterCopierCfg(flags)
 
-    kwargs.setdefault("InputClusterContainerName",  "CaloCalTopoClusters")
+    kwargs.setdefault("InputClusterContainerNames",  ["CaloCalTopoClusters"])
 
     if "CaloSurfaceBuilder" not in kwargs:
         from CaloTrackingGeometry.CaloTrackingGeometryConfig import (
@@ -183,7 +182,7 @@ def ITkHadCaloClusterROIPhiRZContainerMakerCfg(
         indetTopoClusterCopierCfg)
     result = indetTopoClusterCopierCfg(flags)
 
-    kwargs.setdefault("InputClusterContainerName",  "CaloCalTopoClusters")
+    kwargs.setdefault("InputClusterContainerNames",  ["CaloCalTopoClusters"])
 
     if "CaloSurfaceBuilder" not in kwargs:
         from CaloTrackingGeometry.CaloTrackingGeometryConfig import (

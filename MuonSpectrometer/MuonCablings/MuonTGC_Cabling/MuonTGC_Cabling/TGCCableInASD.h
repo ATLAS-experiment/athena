@@ -28,8 +28,8 @@ class TGCCableInASD : public TGCCable {
                                                bool orChannel = false) const;
     std::unique_ptr<TGCChannelId> getChannelOut(const TGCChannelId& asdin,
                                                 bool orChannel = false) const;
-    std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>,
-               TGCId::MaxRegionType>
+    std::array<std::array<std::unique_ptr<TGCDatabase>, +TGCId::ModuleType::MaxModuleType>,
+               +TGCId::RegionType::MaxRegionType>
         m_database;
 };
 

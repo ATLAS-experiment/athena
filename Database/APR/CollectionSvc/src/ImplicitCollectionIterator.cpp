@@ -46,7 +46,9 @@ pool::ImplicitCollectionIterator::token() const
 const pool::CollectionRowBuffer&
 pool::ImplicitCollectionIterator::currentRow() const
 {
-   m_token->setData( &m_rowBuffer.token() );
+   if (m_token)[[likely]]{
+     m_token->setData( &m_rowBuffer.token() );
+   }
    return m_rowBuffer;
 }
 

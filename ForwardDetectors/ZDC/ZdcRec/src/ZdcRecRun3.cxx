@@ -86,12 +86,11 @@ StatusCode ZdcRecRun3::initialize()
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRecRun3::execute()
+StatusCode ZdcRecRun3::execute(const EventContext& ctx)
 {
 
   ATH_MSG_DEBUG("In ZdRecRun3");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ATH_MSG_DEBUG ("--> ZDC: ZdcRecRun3 execute starting on "
                  << ctx.evt()
@@ -99,7 +98,7 @@ StatusCode ZdcRecRun3::execute()
 
   // Get event info
   //
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
   if (!eventInfo.isValid()) {
     ATH_MSG_WARNING("EventInfo not valid");
     return StatusCode::FAILURE;
@@ -171,10 +170,10 @@ StatusCode ZdcRecRun3::execute()
       static const SG::ConstAccessor<unsigned int> eventTypeAcc("EventType");
       if (!eventTypeAcc.isAvailable(*modSum))
 	{ 
-	  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> eventTypeHandle(m_ZdcEventType);
+	  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> eventTypeHandle(m_ZdcEventType, ctx);
 	  eventTypeHandle(*modSum) = eventType;
 	  
-	  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> DAQModeHandle(m_ZdcDAQMode);
+	  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> DAQModeHandle(m_ZdcDAQMode, ctx);
 	  DAQModeHandle(*modSum) = m_DAQMode;
 	}
     }

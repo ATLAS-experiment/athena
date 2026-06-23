@@ -193,7 +193,7 @@ class TopoAlgoDefMultiplicity:
 
             'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100',
             'gTE5', 'gTE10', 'gTE200',
-            'gTE280', # gRISTRETTO280 - for HI 25ns bunch spacing test
+            'gRISTRETTO280',  # for HI 25/50ns mixed bunch spacing test
             'gESPRESSO280',
             # additional jTE thresholds needed for heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',

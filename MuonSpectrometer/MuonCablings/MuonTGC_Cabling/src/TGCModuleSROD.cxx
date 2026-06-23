@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCModuleSROD.h"
@@ -16,8 +16,7 @@ TGCModuleSROD::TGCModuleSROD(TGCId::SideType vside, int vreadoutSector)
 }
 
 bool TGCModuleSROD::isValid() const {
-    return (getSideType() > TGCId::NoSideType) &&
-           (getSideType() < TGCId::MaxSideType) && (getReadoutSector() >= 0) &&
+    return (getSideType() < TGCId::SideType::MaxSideType) && (getReadoutSector() >= 0) &&
            (getReadoutSector() < N_RODS);
 }
 

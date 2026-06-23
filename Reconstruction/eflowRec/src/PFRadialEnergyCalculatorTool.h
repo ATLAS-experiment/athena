@@ -17,7 +17,7 @@ class PFRadialEnergyCalculatorTool : public extends<AthAlgTool, IPFBaseTool> {
 
   ~PFRadialEnergyCalculatorTool() {};
 
-  virtual StatusCode execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
+  virtual StatusCode execute(const EventContext& ctx, eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
 
 };
 

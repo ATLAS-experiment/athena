@@ -84,11 +84,10 @@ StatusCode RootAsciiDumperAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode RootAsciiDumperAlg::execute()
+StatusCode RootAsciiDumperAlg::execute(const EventContext& ctx)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   uint64_t nevts = m_nentries;
   m_nentries += 1;

@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MeasurementToTruthAssociationAlg.h"
 
-#include "ActsGeometry/ATLASSourceLink.h"
 
 #include <iomanip>
 #include <cmath>
@@ -134,7 +133,7 @@ namespace ActsTrk
     for ( const auto *measurement : *measurements ) {
        summed_contribution.clear();
        for (const auto& a_rdo : getRDOList(*measurement) ) {
-          typename T_SimDataCollection::const_iterator sim_data_iter(simData->find(a_rdo));
+          typename T_SimDataCollection::const_iterator sim_data_iter(simData->find(Identifier(a_rdo)));
 
           if(sim_data_iter != simData->end() )  {
              auto  deposits_for_measurement = getSimDataDeposits(*simData, sim_data_iter);

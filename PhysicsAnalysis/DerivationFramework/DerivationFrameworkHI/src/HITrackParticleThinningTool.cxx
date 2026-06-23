@@ -10,7 +10,6 @@
 #include "HITrackParticleThinningTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // need to find this for the new version
 #include "xAODTracking/VertexContainer.h"
@@ -64,10 +63,9 @@ namespace DerivationFramework
     }
 
   // The thinning itself
-  StatusCode DerivationFramework::HITrackParticleThinningTool::doThinning() const
+  StatusCode DerivationFramework::HITrackParticleThinningTool::doThinning(const EventContext& ctx) const
   {
     // Get the current event context
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // Get the track container
     SG::ThinningHandle<xAOD::TrackParticleContainer> tracks (m_inDetSGKey, ctx);

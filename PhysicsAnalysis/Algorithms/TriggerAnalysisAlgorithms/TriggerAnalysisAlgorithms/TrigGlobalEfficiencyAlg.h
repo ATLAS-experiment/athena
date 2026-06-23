@@ -10,7 +10,6 @@
 // Algorithm includes
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysWriteHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysFilterReporterParams.h>

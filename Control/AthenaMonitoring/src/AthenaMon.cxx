@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -93,8 +93,9 @@ StatusCode AthenaMon::initialize()
 }
 
 /*---------------------------------------------------------------*/
-StatusCode AthenaMon::execute()
+StatusCode AthenaMon::execute(const EventContext& ctx)
 {
+
   MsgStream log(msgSvc(), name());
   
   log << MSG::DEBUG << "executing AthenaMon algorithm" << endmsg;
@@ -104,7 +105,7 @@ StatusCode AthenaMon::execute()
   
   for (; it < m_monTools.end(); ++it)  {
     if((*it)->preSelector())
-      if((*it)->fillHists().isFailure())  {
+      if((*it)->fillHists(ctx).isFailure())  {
 	log << MSG::WARNING << "Error Filling Histograms" << endmsg;
 	// return StatusCode::FAILURE;
       }

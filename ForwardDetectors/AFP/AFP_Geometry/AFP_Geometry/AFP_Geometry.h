@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_GEOMETRY_H
@@ -15,6 +15,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <string_view>
 
 class AFP_Geometry
 {
@@ -32,8 +33,8 @@ public:
 
 public:
 	void getCfgParams(AFP_CONFIGURATION* pCfgParams) const { *pCfgParams=m_CfgParams; }
-	HepGeom::Transform3D getStationTransform(const char* pszStationName) const; //in world
-	HepGeom::Transform3D getStationElementTransform(const char* pszStationName, eStationElement eElement, const int nPlateID=-1) const; //in station
+	HepGeom::Transform3D getStationTransform(std::string_view pszStationName) const; //in world
+	HepGeom::Transform3D getStationElementTransform(std::string_view pszStationName, eStationElement eElement, const int nPlateID=-1) const; //in station
 
 public:
 	//SID detector
@@ -41,10 +42,10 @@ public:
 		std::map<eAFPStation, AFP_SIDCONFIGURATION> sidcfg(m_CfgParams.sidcfg.begin(),m_CfgParams.sidcfg.end());
 		return sidcfg[eStation].fLayerCount;
 	}
-	HepGeom::Transform3D getSIDTransform(const eSIDTransformType eType, const char* pszStationName, const int nPlateID) const; // in station
+	HepGeom::Transform3D getSIDTransform(const eSIDTransformType eType, std::string_view pszStationName, const int nPlateID) const; // in station
 	StatusCode getPointInSIDSensorLocalCS(const int nStationID, const int nPlateID, const HepGeom::Point3D<double>& GlobalPoint, HepGeom::Point3D<double>& LocalPoint) const;
 	StatusCode getPointInSIDSensorGlobalCS(const int nStationID, const int nPlateID, const HepGeom::Point3D<double>& LocalPoint, HepGeom::Point3D<double>& GlobalPoint) const;
-	eAFPStation parseStationName(const char* pszStationName) const;
+	eAFPStation parseStationName(std::string_view pszStationName) const;
 
 	//TOF detector
 	void setupLBarsDims(const eAFPStation eStation);

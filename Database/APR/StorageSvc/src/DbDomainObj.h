@@ -45,7 +45,7 @@ namespace pool    {
     IDbDomain*      m_info;
   public:
     /// Constructor
-    DbDomainObj(IOODatabase* imp, const DbType& typ, DbAccessMode mode = pool::READ);
+    DbDomainObj(IOODatabase* imp, const DbType& typ, Io::IoFlag mode = Io::READ);
     /// Standard destructor
     virtual ~DbDomainObj();
     /// Access to technology dependent implementation
@@ -58,7 +58,7 @@ namespace pool    {
     /// Check for Database existence within domain
     bool existsDbase(const std::string& nam);
     /// Open domain with possible change of access mode
-    StatusCode open(DbAccessMode mode);
+    StatusCode open(Io::IoFlag mode);
     /// Open domain in default access mode
     StatusCode open();
     /// Close domain

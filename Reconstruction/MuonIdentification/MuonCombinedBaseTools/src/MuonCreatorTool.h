@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDBASETOOLS_MUONCREATORTOOL_H
@@ -57,11 +57,11 @@ namespace MuonCombined {
     class SegmentTag;
     class CaloTag;
 
-    class MuonCreatorTool : public AthAlgTool, virtual public IMuonCreatorTool {
+    class MuonCreatorTool : public extends<AthAlgTool, IMuonCreatorTool> {
     public:
         using InDetCandidateTagsMap = std::vector<InDetCandidateTags>;
 
-        MuonCreatorTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         ~MuonCreatorTool() = default;
 
         virtual StatusCode initialize() override final;
@@ -77,9 +77,7 @@ namespace MuonCombined {
         virtual xAOD::Muon* create(const EventContext& ctx, InDetCandidateTags& candidate, OutputData& outputData) const override final;
 
     private:
-        void create(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
-                    const std::vector<const InDetCandidateToTagMap*>& tagMaps, OutputData& outputData, bool select_comissioning) const;
-
+    
         /// De^corated a bunch of dummy values to the muon to ensure data consistency in the xAOD
         void decorateDummyValues(const EventContext& ctx, xAOD::Muon& muon, OutputData& outputData) const;
 
@@ -108,7 +106,8 @@ namespace MuonCombined {
         /// function creates an element link to a track particle from the track and
         /// the TrackParticle collection. if a TrackCollection is also provided, the
         /// element link to the track will also be set takes ownership of the track
-        ElementLink<xAOD::TrackParticleContainer> createTrackParticleElementLink(const ElementLink<TrackCollection>& trackLink,
+        ElementLink<xAOD::TrackParticleContainer> createTrackParticleElementLink(const EventContext& ctx,
+                                                                                 const ElementLink<TrackCollection>& trackLink,
                                                                                  xAOD::TrackParticleContainer& trackParticleContainer,
                                                                                  TrackCollection* trackCollection = 0) const;
 
@@ -118,8 +117,7 @@ namespace MuonCombined {
     private:
         void resolveOverlaps(const EventContext& ctx, const MuonCandidateCollection* muonCandidates,
                              const std::vector<const InDetCandidateToTagMap*>& tagMaps, InDetCandidateTagsMap& resolvedInDetCandidates,
-                             std::vector<const MuonCombined::MuonCandidate*>& resolvedMuonCandidates,
-                             bool select_comissioning = false) const;
+                             std::vector<const MuonCombined::MuonCandidate*>& resolvedMuonCandidates) const;
 
         void selectStaus(InDetCandidateTagsMap& resolvedInDetCandidates, const std::vector<const InDetCandidateToTagMap*>& tagMaps) const;
 

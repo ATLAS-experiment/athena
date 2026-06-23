@@ -15,7 +15,6 @@
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
 #include <iostream>
 
@@ -48,7 +47,6 @@ void testit (const Analysis::SETrackInfo& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE (SGTest::TestStore* store)
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   Athena::getMessageSvc();
   // Get proxies created outside of leak checking.
 

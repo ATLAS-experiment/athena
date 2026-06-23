@@ -155,10 +155,9 @@ LArFCalTowerBuilderToolTestAlg::test_subseg (const EventContext& ctx,
 }
 
 
-StatusCode LArFCalTowerBuilderToolTestAlg::test1()
+StatusCode LArFCalTowerBuilderToolTestAlg::test1(const EventContext& ctx)
 {
   std::cout << "test1\n";
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   const CaloCellContainer* cells = make_cells();
   CaloTowerContainer* tow1 = new CaloTowerContainer (m_seg);
@@ -202,8 +201,8 @@ StatusCode LArFCalTowerBuilderToolTestAlg::test1()
 /** 
  * @brief Standard Gaudi execute method.
  */
-StatusCode LArFCalTowerBuilderToolTestAlg::execute()
+StatusCode LArFCalTowerBuilderToolTestAlg::execute(const EventContext& ctx)
 {
-  CHECK( test1() );
+  CHECK( test1(ctx) );
   return StatusCode::SUCCESS;
 }

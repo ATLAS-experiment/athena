@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETHARDSCATTERSELECTIONTOOL_INDETHARDSCATTERSELECTIONTOOL_H
@@ -133,7 +133,7 @@ namespace InDet {
     /// xAOD::EventInfo ReadHandleKey
     SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey {this, "EventInfo", "EventInfo", "EventInfo key"};
     SG::ReadHandleKey<xAOD::VertexContainer> m_vtxContKey{this, "VertexContainer", "PrimaryVertices", "Name of the primary vertex container"};
-    SG::ReadHandleKey<xAOD::JetContainer> m_jetContKey{ this, "JetContainer", "AntiKt4EMTopoJets", "Name of the jet container" };
+    SG::ReadHandleKey<xAOD::JetContainer> m_jetContKey{ this, "JetContainer", "", "Name of the jet container" };
 
     BooleanProperty m_redoHardScatter{ this, "RedoHardScatter",  false,  "If true, redo the hardscatter selection using sumpt2 or sumpt or sumptw"};
     IntegerProperty m_mode{ this, "SelectionMode", InDet::InDetHardScatterSelectionTool::Mode::SumPt2, "Mode for selecting the hardscatter: sumpt2[0] or sumpt[1] or sumptw[2]"};

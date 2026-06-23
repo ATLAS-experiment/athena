@@ -11,7 +11,7 @@ LHEFGenerators = ["Lhef", # generic name: prefer to use the names below
                   "MCFM", "JHU", "MEtop", "BCVEGPY", "Dire4Pythia8", 
                   "BlackMax", "QBH", "gg2ww", "gg2zz", "gg2vv", "HvyN", 
                   "VBFNLO", "FPMC", "ProtosLHEF",
-                  "BCVEGPY", "STRINGS", "Phantom"]
+                  "BCVEGPY", "STRINGS", "Phantom", "Pepper"]
 
 # "Main" generators which typically model QCD showers, hadronisation, decays, etc.
 # Herwig family
@@ -27,7 +27,7 @@ MainGenerators += ["Epos4"]
 MainGenerators += ["ParticleGun"]
 MainGenerators += ["CosmicGenerator", "BeamHaloGenerator"]
 # Heavy ion generators - as a special group to avoid problems in sorting
-HIMainGenerators = ["AMPT","SuperChic","Starlight", "Hijing", "Hydjet"]
+HIMainGenerators = ["AMPT","SuperChic","Starlight", "Hijing"]
 # Reading in fully-formed events
 
 MainGenerators += ["HepMCAscii"]
@@ -42,7 +42,7 @@ KnownGenerators = LHEFGenerators + HIMainGenerators +MainGenerators + Afterburne
 
 # Note which generators should NOT be sanity tested by the TestHepMC alg
 NoTestHepMCGenerators = ["Superchic","ParticleDecayer", "ParticleGun", "CosmicGenerator", 
-                         "BeamHaloGenerator", "FPMC", "Hijing", "Hydjet", "Starlight"]
+                         "BeamHaloGenerator", "FPMC", "Hijing", "Starlight"]
 
 # Generators with no flexibility/concept of a tune or PDF choice
 NoTuneGenerators = ["ParticleGun", "CosmicGenerator", "BeamHaloGenerator", "HepMCAscii"]
@@ -114,13 +114,12 @@ def gen_sortkey(genname):
     return (genstage,  genname)
 
 # Function to perform consistency check on jO
-def checkJOConsistency(jofile):
+def checkNaming(jofile):
     import os, sys, string
-    officialJO = False
+
     joparts = (os.path.basename(jofile)).split(".")
     # Perform some consistency checks
     if joparts[0].startswith("mc") and all(c in string.digits for c in joparts[0][2:]):
-        officialJO = True
         # Check that there are exactly 4 name parts separated by '.': MCxx, DSID, physicsShort, .py
         if len(joparts) != 3:
             evgenLog.error(jofile + " name format is wrong: must be of the form mc.<physicsShort>.py: please rename.")
@@ -145,7 +144,7 @@ def checkJOConsistency(jofile):
         else:
             evgenLog.error("check_jo_consistency.py not found")
             sys.exit(1)
-    return officialJO
+
     
 def checkNEventsPerJob(sample):
     if sample.nEventsPerJob < 1:
@@ -162,7 +161,9 @@ def checkNEventsPerJob(sample):
         elif sample.nEventsPerJob < 1000 and sample.nEventsPerJob not in allowed_nEventsPerJob_lt1000:
             raise RuntimeError("nEventsPerJob in range <= 1000 must be one of %s" % allowed_nEventsPerJob_lt1000)
     
-def checkKeywords(sample, evgenLog, officialJO):
+def checkKeywords(sample, evgenLog):
+    import sys
+    
     # Get file containing keywords
     from AthenaCommon.Utils.unixtools import find_datafile
     kwpath = find_datafile("evgenkeywords.txt")
@@ -183,13 +184,13 @@ def checkKeywords(sample, evgenLog, officialJO):
             msg = "keywords contains non-standard keywords: %s. " % ", ".join(evil_keywords)
             msg += "Please check the allowed keywords list and fix."
             evgenLog.error(msg)
-            if officialJO:
-                import sys
-                sys.exit(1)
+            sys.exit(1)
     else:
         evgenLog.warning("evgenkeywords.txt not found ")
 
-def checkCategories(sample, evgenLog, officialJO):
+def checkCategories(sample, evgenLog):
+    import sys
+
     # Get file containing category names
     from AthenaCommon.Utils.unixtools import find_datafile
     lkwpath = find_datafile("CategoryList.txt")
@@ -220,8 +221,6 @@ def checkCategories(sample, evgenLog, officialJO):
                msg = "categories contains non-standard category: %s. " % ", ".join(bad_cat)
                msg += "Please check the allowed categories list and fix."
                evgenLog.error(msg)
-               if officialJO:
-                   import sys
-                   sys.exit(1)
+               sys.exit(1)
     else:
         evgenLog.warning("Could not find CategoryList.txt file ", lkwpath, " in $DATAPATH")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKTRACKSUMMARYTOOL_H
@@ -11,7 +11,7 @@
 #include "TrkTrackSummary/TrackSummary.h" //used in the included icc file
 
 #include "TRT_ElectronPidTools/ITRT_ToT_dEdx.h" //template parameter to tool handle
-#include "TrkToolInterfaces/IExtendedTrackSummaryHelperTool.h" //template parameter to tool handle
+#include "TrkToolInterfaces/ITrackSummaryHelperTool.h" //template parameter to tool handle
 #include "TrkToolInterfaces/IPixelToTPIDTool.h" //template parameter to tool handle
 #include "TrkToolInterfaces/ITRT_ElectronPidTool.h" //template parameter to tool handle
 
@@ -110,11 +110,6 @@ public:
     Track& track,
     bool suppress_hole_search = false) const override final;
 
-  /** method to update additional information (PID, dEdX), this is
-   * optimised for track collection merging.
-   */
-  virtual void updateAdditionalInfo(Track& track) const override;
-
 private:
   /*
    * Fill the summary info for a Track*/
@@ -139,14 +134,14 @@ private:
     bool doHolesMuon) const;
 
   /** Return the correct tool, matching the passed Identifier*/
-  const Trk::IExtendedTrackSummaryHelperTool* getTool(
+  const Trk::ITrackSummaryHelperTool* getTool(
     const Identifier& id) const;
 
   /**tool to decipher ID RoTs*/
-  ToolHandle<IExtendedTrackSummaryHelperTool>
+  ToolHandle<ITrackSummaryHelperTool>
     m_idTool{ this, "InDetSummaryHelperTool", "", "" };
   /**tool to decipher muon RoTs*/
-  ToolHandle<IExtendedTrackSummaryHelperTool>
+  ToolHandle<ITrackSummaryHelperTool>
     m_muonTool{ this, "MuonSummaryHelperTool", "", "" };
 
   /** controls whether holes on track in MS are produced

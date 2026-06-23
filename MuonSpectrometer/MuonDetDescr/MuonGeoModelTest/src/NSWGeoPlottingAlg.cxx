@@ -82,11 +82,10 @@ StatusCode NSWGeoPlottingAlg::initialize() {
   ATH_CHECK(initSTgcs());
   return StatusCode::SUCCESS;
 }
-StatusCode NSWGeoPlottingAlg::execute() {
+StatusCode NSWGeoPlottingAlg::execute(const EventContext& ctx) {
   if (m_alg_run)
     return StatusCode::SUCCESS;
   ATH_MSG_INFO("Executing NSWGeoPlottingAlg for the first time");
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   const MuonGM::MuonDetectorManager* detMgr{nullptr};
   

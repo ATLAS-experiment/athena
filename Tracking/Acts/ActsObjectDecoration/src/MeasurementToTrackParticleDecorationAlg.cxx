@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/MeasurementToTrackParticleDecorationAlg.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -15,6 +14,9 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "Acts/Surfaces/AnnulusBounds.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
+#include "ActsEvent/Decoration.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+
 
 using namespace Acts::UnitLiterals;
 
@@ -93,17 +95,10 @@ namespace ActsTrk {
         ATH_CHECK(trackParticlesHandle.isValid());
         const xAOD::TrackParticleContainer *track_particles = trackParticlesHandle.cptr();
 
-        static const SG::AuxElement::ConstAccessor<ElementLink<ActsTrk::TrackContainer> > actsTrackLink("actsTrack");
-
         for (const xAOD::TrackParticle *track_particle : *track_particles) {
-            ElementLink<ActsTrk::TrackContainer> link_to_track = actsTrackLink(*track_particle);
-            ATH_CHECK(link_to_track.isValid());
-
-            // to ensure that the code does not suggest something stupid (i.e. creating an unnecessary copy)
-            static_assert( std::is_same<ElementLink<ActsTrk::TrackContainer>::ElementConstReference,
-                           std::optional<ActsTrk::TrackContainer::ConstTrackProxy> >::value);
-            std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = *link_to_track;
-
+        
+		std::optional<ActsTrk::TrackContainer::ConstTrackProxy> optional_track = getActsTrack(*track_particle);
+		
             if ( not optional_track.has_value() ) {
 	      ATH_MSG_WARNING("Invalid track link for particle  " << track_particle->index() << ". Skipping track..");
 	      continue;  
@@ -275,15 +270,14 @@ namespace ActsTrk {
                     type = MeasurementType::UNBIASED;
                     // if unbiased, access the associated uncalibrated measurement and store the size
                     if (state.hasUncalibratedSourceLink()) {
-		      ATLASUncalibSourceLink sourceLink = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-		      const xAOD::UncalibratedMeasurement &uncalibratedMeasurement = getUncalibratedMeasurement(sourceLink);
-		      const xAOD::UncalibMeasType measurementType = uncalibratedMeasurement.type();
+		      const xAOD::UncalibratedMeasurement* uncalibratedMeasurement = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
+		      const xAOD::UncalibMeasType measurementType = uncalibratedMeasurement->type();
 		      if (measurementType == xAOD::UncalibMeasType::PixelClusterType) {
-			auto pixelCluster = static_cast<const xAOD::PixelCluster *>(&uncalibratedMeasurement);
+			auto pixelCluster = static_cast<const xAOD::PixelCluster *>(uncalibratedMeasurement);
 			sizePhi = pixelCluster->channelsInPhi();
 			sizeEta = pixelCluster->channelsInEta();
 		      } else if (measurementType == xAOD::UncalibMeasType::StripClusterType) {
-			auto stripCluster = static_cast<const xAOD::StripCluster *>(&uncalibratedMeasurement);
+			auto stripCluster = static_cast<const xAOD::StripCluster *>(uncalibratedMeasurement);
 			sizePhi = stripCluster->channelsInPhi();
 		      } else {
 			ATH_MSG_DEBUG("xAOD::UncalibratedMeasurement is neither xAOD::PixelCluster nor xAOD::StripCluster");

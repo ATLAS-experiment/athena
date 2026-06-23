@@ -17,6 +17,7 @@
 #include "RatesTrigger.h"
 #include "RatesScanTrigger.h"
 #include "RatesGroup.h"
+#include "IAdditionalWeight.h"
 
 #include "TTree.h"
 
@@ -197,7 +198,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
 
  private: 
 
-  virtual StatusCode execute(); //!< In first call - register all triggers. Then load event weighting parameters, fill trigger decisions, compute group rates.
+  virtual StatusCode execute(const EventContext& ctx); //!< In first call - register all triggers. Then load event weighting parameters, fill trigger decisions, compute group rates.
   virtual StatusCode finalize(); //!< Print rates
 
   StatusCode populateTriggers(); //!< Register all triggers to emulate. This is actually done at the start of the event loop such that the TDT has access to the configuration.
@@ -271,6 +272,7 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   ToolHandle<IEnhancedBiasWeighter> m_enhancedBiasRatesTool{this, "EnhancedBiasRatesTool", "EnhancedBiasWeighter/EnhancedBiasRatesTool"};
   ToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool"};
   ServiceHandle<TrigConf::ITrigConfigSvc> m_configSvc{this, "TrigConfigSvc", "TrigConf::xAODConfigSvc"};
+  ToolHandleArray<IAdditionalWeight> m_additionalWeights {this, "AdditionalWeights", {}, "Any additional reweightings to be applied directly on EB weight"};
 
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfo", "EventInfo", "EventInfo name"}; 
   SG::ReadHandleKey<xAOD::JetContainer> m_truthHS_jets_RHKey{this, "TruthHSJetsKey", "AntiKt4TruthJets", "Key for the hard scatter truth jet collection"};
@@ -295,6 +297,11 @@ class RatesAnalysisAlg: public ::AthAnalysisAlgorithm {
   uint32_t m_runNumber; //!<What is the RunNumber
   uint32_t m_eventCounter; //!< Count how many events processed
   double m_weightedEventCounter; //!< Count how many weighted events were processed
+
+  uint32_t m_metadataMasterKey = 0; //! <smk read patched
+  uint32_t m_metadataHLTPSK    = 0; //! <hltpsk read patched
+  uint32_t m_metadataL1PSK     = 0; //! < l1psk read patched
+  bool     m_metadataKeysCached = false;  //! < patched key read 
 
   TH1D* m_scalingHist; //!< One-bin histogram to store the normalisation of the sample, for use in later combinations
   TH1D* m_bcidHist; //!< Histogram of the BCIDs distribution of the processing

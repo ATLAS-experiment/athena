@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectorTool/InDetDetailedTrackSelectorTool.h"
@@ -127,6 +127,9 @@ namespace InDet
   // ---------------------------------------------------------------------
   bool
   InDetDetailedTrackSelectorTool::decision(const Trk::Track& track,const Trk::Vertex* vertex) const{
+
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     int nHitTrt = m_nHitTrt;
     int nHitTrtPlusOutliers = m_nHitTrtPlusOutliers;
     const Trk::Perigee* perigeeBeforeExtrapolation=dynamic_cast<const Trk::Perigee*>(track.perigeeParameters());
@@ -142,7 +145,7 @@ namespace InDet
     const Trk::Vertex* myVertex=vertex;
     //in case no Vertex is provided by the user, beam position will be used if available
     if (myVertex==nullptr) {
-      myVertex = getBeamSpot(Gaudi::Hive::currentContext());
+      myVertex = getBeamSpot(ctx);
     }
     Trk::PerigeeSurface perigeeSurface(myVertex->position());
     const Trk::TrackParameters *firstmeaspar=nullptr;
@@ -166,7 +169,7 @@ namespace InDet
 	      return false;
 	    }
     }
-    const Trk::TrackParameters* extrapolatedParameters= m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
+    const Trk::TrackParameters* extrapolatedParameters= m_extrapolator->extrapolate(ctx,
                                                                                     *firstmeaspar,
                                                                                     perigeeSurface,
                                                                                     Trk::anyDirection,
@@ -217,7 +220,7 @@ namespace InDet
       std::unique_ptr<Trk::TrackSummary> summaryUniquePtr;
       const Trk::TrackSummary* summary = track.trackSummary();
       if (m_trackSumToolAvailable && summary == nullptr) {
-        summaryUniquePtr = m_trackSumTool->summary(Gaudi::Hive::currentContext(), track);
+        summaryUniquePtr = m_trackSumTool->summary(ctx, track);
         summary = summaryUniquePtr.get();
       }
       if (nullptr==summary ) {
@@ -226,7 +229,7 @@ namespace InDet
       }
 
       // Create xAOD::TrackParticle to retrieve shared hit info
-      const xAOD::TrackParticle* tp = m_partCreatorToolAvailable ? m_particleCreator->createParticle(track) : nullptr;
+      const xAOD::TrackParticle* tp = m_partCreatorToolAvailable ? m_particleCreator->createParticle(ctx, track) : nullptr;
       if(m_useSharedHitInfo && tp==nullptr){
         ATH_MSG_FATAL( "Track preselection: cannot create a track particle (but useSharedHitInfo is true). Selection failed." );
         return false;
@@ -263,6 +266,9 @@ namespace InDet
   // ---------------------------------------------------------------------
   bool
   InDetDetailedTrackSelectorTool::decision(const Trk::TrackParticleBase& track,const Trk::Vertex* vertex) const{
+
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     int nHitTrt = m_nHitTrt;
     int nHitTrtPlusOutliers = m_nHitTrtPlusOutliers;
     const Trk::TrackParameters* definintParameters=&(track.definingParameters());
@@ -332,7 +338,7 @@ namespace InDet
     const Trk::Perigee* extrapolatedPerigee=dynamic_cast<const Trk::Perigee*>(definintParameters);
     const Trk::Vertex* myVertex=vertex;
     if (vertex==nullptr) {
-      myVertex = getBeamSpot(Gaudi::Hive::currentContext());
+      myVertex = getBeamSpot(ctx);
     }
     Trk::PerigeeSurface perigeeSurface(myVertex->position());
     const Trk::TrackParameters *firstmeaspar=nullptr;
@@ -360,7 +366,7 @@ namespace InDet
     ATH_MSG_VERBOSE ("Extrapolating to position: " << myVertex->position()[0] << " , " <<
 		     myVertex->position()[1] << " , " << myVertex->position()[2]);
     const Trk::TrackParameters* extrapolatedParameters= firstmeaspar ?
-      m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
+      m_extrapolator->extrapolate(ctx,
                                   *firstmeaspar,
                                   perigeeSurface,
                                   Trk::anyDirection,
@@ -421,6 +427,8 @@ namespace InDet
   bool
   InDetDetailedTrackSelectorTool::decision(const xAOD::TrackParticle& tp,const xAOD::Vertex* vertex) const
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     int nHitTrt = m_nHitTrt;
     int nHitTrtPlusOutliers = m_nHitTrtPlusOutliers;
 
@@ -615,7 +623,7 @@ namespace InDet
     Trk::PerigeeSurface perigeeSurface( getPosOrBeamSpot(vertex) );
 
     const Trk::TrackParameters* extrapolatedParameters= m_extrapolator->extrapolate(
-      Gaudi::Hive::currentContext(),
+      ctx,
       perigee,perigeeSurface,
       Trk::anyDirection,true,Trk::pion).release();
     const Trk::Perigee* extrapolatedPerigee = extrapolatedParameters ? dynamic_cast<const Trk::Perigee*>(extrapolatedParameters) : nullptr;

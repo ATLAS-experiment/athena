@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileCalibBlobObjs/TileCalibDrawerOfc.h"
 #include <iostream>
-#include <cstdlib>
 #include <set>
 #include <algorithm>
 
@@ -17,8 +16,8 @@ TileCalibDrawerOfc* TileCalibDrawerOfc::getInstance(coral::Blob&       blob
                                                     , int32_t            nPhases
                                                     , uint16_t           nChans
                                                     , uint16_t           nGains
-                                                    , const std::string& author
-                                                    , const std::string& comment
+                                                    , std::string_view author
+                                                    , std::string_view comment
                                                     , uint64_t           timeStamp)
 {
   TileCalibDrawerOfc* calibDrawer = new TileCalibDrawerOfc(blob);
@@ -93,8 +92,8 @@ void TileCalibDrawerOfc::init(uint16_t objVersion
                               , int32_t nPhases
                               , uint16_t nChans
                               , uint16_t nGains
-                              , const std::string& author
-                              , const std::string& comment
+                              , std::string_view author
+                              , std::string_view comment
                               , uint64_t timeStamp)
 {
   const uint16_t extraHeaderSize(2);
@@ -128,13 +127,8 @@ void TileCalibDrawerOfc::init(uint16_t objVersion
   }
   
   //=== initialize rest of blob to zero
-  union {
-    unsigned int ii;
-    float ff;
-  } zero;
-  zero.ff = 0;
-  for(unsigned int i = 0; i < blobLengthUint32 - (m_hdrSize32 + extraHeaderSize+phasesSize); ++i){
-    *(++pi) = zero.ii;
+  for(unsigned int i = 0; i < blobLengthUint32 - (m_hdrSize32 + extraHeaderSize + phasesSize); ++i){
+    *(++pi) = 0; //zero float = zero int
   }
 }
 
@@ -178,3 +172,7 @@ void TileCalibDrawerOfc::dump(std::ostream& stm) const {
     }
   }
 }
+
+void TileCalibDrawerOfc::dump() const{ 
+  dump(std::cout); 
+} 

@@ -80,19 +80,19 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
     HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
     HepMC::fillBarcodesAttribute(copiedEvent);
 #ifdef HEPMC3
-    auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+    auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
     if (bunchCrossingTime) {
-      copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
+      copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
     }
     else {
-      copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
+      copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
     }
-    auto pileupType = (*it)->attribute<HepMC3::IntAttribute>("PileUpType");
+    auto pileupType = (*it)->attribute<HepMC3::IntAttribute>(HepMCStr::PileUpType);
     if (pileupType) {
-      copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
+      copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
     }
     else {
-      copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
+      copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
       if (backupPileUpType == 0) { backupPileUpType = 1; } // ignore the possibility for cavern background for this back-up case
     }
 #endif
@@ -131,19 +131,19 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
       HepMC::GenEvent* copiedEvent = new HepMC::GenEvent(**it);
       HepMC::fillBarcodesAttribute(copiedEvent);
 #ifdef HEPMC3
-      auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>("BunchCrossingTime");
+      auto bunchCrossingTime = (*it)->attribute<HepMC3::IntAttribute>(HepMCStr::BunchCrossingTime);
       if (bunchCrossingTime) {
-        copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
+        copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(bunchCrossingTime->value()));
       }
       else {
-        copiedEvent->add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
+        copiedEvent->add_attribute(HepMCStr::BunchCrossingTime,std::make_shared<HepMC3::IntAttribute>(backupBunchCrossingTime));
       }
-      auto pileupType = (*it)->attribute<HepMC3::IntAttribute>("PileUpType");
+      auto pileupType = (*it)->attribute<HepMC3::IntAttribute>(HepMCStr::PileUpType);
       if (pileupType) {
-        copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
+        copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(pileupType->value()));
       }
       else {
-        copiedEvent->add_attribute("PileUpType",std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
+        copiedEvent->add_attribute(HepMCStr::PileUpType,std::make_shared<HepMC3::IntAttribute>(backupPileUpType));
         if (backupPileUpType == 0) { backupPileUpType = 1; } // ignore the possibility for cavern background for this back-up case
       }
 #endif

@@ -38,7 +38,7 @@ class L1CaloCondAlgReader: public ::AthAlgorithm {
 
   // these are the functions inherited from Algorithm
   virtual StatusCode initialize () override;
-  virtual StatusCode execute () override;
+  virtual StatusCode execute (const EventContext& ctx) override;
 
 
  private: 

@@ -59,13 +59,15 @@ public:
   StatusCode initialize() override;
 
   ActsTrackingGeometrySvc( const std::string& name, ISvcLocator* pSvcLocator );
-
-  std::shared_ptr<const Acts::TrackingGeometry>
-  trackingGeometry() override;
-
+    /** @copydoc ActsTrk::ITrackingGeometrySvc::trackingGeometry */
+  std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() override;
+  /** @copydoc ActsTrk::ITrackingGeometrySvc::populateAlignmentStore */
   unsigned int populateAlignmentStore(ActsTrk::DetectorAlignStore& store) const override;
 
+  /** @copydoc ActsTrk::ITrackingGeometrySvc::getNominalContext */
   const ActsTrk::GeometryContext& getNominalContext() const override;
+  /** @copydoc ActsTrk::ITrackingGeometrySvc::getEnvelope */
+  const Acts::TrackingVolume* getEnvelope(const ActsTrk::SystemEnvelope envType) const override;
 
 private:
   ActsLayerBuilder::Config

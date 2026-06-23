@@ -16,7 +16,7 @@ class LArShapeCorrector : public AthAlgorithm
   ~LArShapeCorrector();
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
   StatusCode stop();
   StatusCode finalize(){return StatusCode::SUCCESS;}
 

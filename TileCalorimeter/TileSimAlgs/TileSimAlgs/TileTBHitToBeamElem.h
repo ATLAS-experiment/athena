@@ -57,7 +57,7 @@ class TileTBHitToBeamElem: public AthAlgorithm {
     virtual ~TileTBHitToBeamElem(); //!< Destructor                         
 
     virtual StatusCode initialize() override;  //!< initialize method   
-    virtual StatusCode execute() override;     //!< execute method   
+    virtual StatusCode execute(const EventContext& ctx) override;     //!< execute method   
     virtual StatusCode finalize() override;    //!< finalize method  
 
   private:

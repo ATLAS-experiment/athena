@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRACKFINDINGTOOLS_MSTRACKSEEDER_H
 #define MUONTRACKFINDINGTOOLS_MSTRACKSEEDER_H
@@ -54,14 +54,9 @@ namespace MuonR4{
             using SearchTree_t = Acts::KDTree<3, const xAOD::MuonSegment*, double, std::array, 6>;
             /** @brief Enum toggling whether the segment is in the endcap or barrel */
             using Location = MsTrackSeed::Location;
-           
+            /** @brief Recycle the expanded sector */
+            using SectorProjector = ExpandedSector::SectorProjector;
             using VecOpt_t = std::optional<Amg::Vector3D>;
-            /** @brief Enumeration to select the sector projection */
-            enum class SectorProjector : std::int8_t {
-                leftOverlap = -1,   /// Project the segment onto the overlap with the previous sector
-                center = 0,         /// Project the segment onto the sector centre
-                rightOverlap = 1    /// Project the segment on the overlap with the next sector
-            };
             /** @brief Abrivation of the seed coordinates */
             enum class SeedCoords : std::uint8_t{
                 /** Encode the seed location (-1,1 -> endcaps, 0 -> barrel  */
@@ -81,37 +76,38 @@ namespace MuonR4{
              *               sector envelope
              *  @param segments: Reference to the segment container to construct. */
             SearchTree_t constructTree(const ActsTrk::GeometryContext& gctx,
-                                      const xAOD::MuonSegmentContainer& segments) const;
+                                       const xAOD::MuonSegmentContainer& segments) const;
             /** @brief Expresses the segment on the cylinder surface. 
              *  @param gctx: Geometry context to fetch the transforms of the associated 
              *               sector envelope
              *  @param segment: Reference to the segment of consideration
-             *  @param loc: Surface location: [barrel/endcap] */
+             *  @param loc: Surface location: [barrel/endcap]
+             *  @param expandedSector: The expanded sector number taking the
+             *         overlap regions between large and small sectors into 
+             *         account [0;32] */
             Amg::Vector2D expressOnCylinder(const ActsTrk::GeometryContext& gctx, 
                                             const xAOD::MuonSegment& segment,
                                             const Location loc,
-                                            const SectorProjector proj) const;
-            
+                                            const ExpandedSector sector) const;
+            /** @brief Projects the passed segment onto the plane with global phi = x
+             *         The local coordinate system is arranged such that the x-axis
+             *         is co-linear to the phi direction. The segment is moved is moved
+             *         along that line until the radial line with phi =x is crossed
+             *  @param gctx: Geometry context to retrieve the local -> global transform 
+             *               of the sector
+             *  @param segment: The segment to be moved 
+             *  @param projectedPhi: The value that the projected segment shall have afterwards */
             Amg::Vector3D projectOntoPhiPlane(const ActsTrk::GeometryContext& gctx, 
                                               const xAOD::MuonSegment& segment,
                                               const double projectPhi) const;
-            /** @brief Projects the segment's position onto the sector centre or onto the overlap point
-             *         with one of the neighbouring sector
-             * @param gctx: Geometry context to fetch the transforms of the associated sector envelope
-             * @param segment: Reference to the segment to project
-             * @param proj: Projector indicating onto which fix point of the sector the projection happens */
-            Amg::Vector3D projectOntoSector(const ActsTrk::GeometryContext& gctx, 
-                                            const xAOD::MuonSegment& segment,
-                                            const SectorProjector proj) const;
-             /** @brief Projects the segment's position onto the sector centre or onto the overlap point
-             *         with one of the neighbouring sector
-             * @param gctx: Geometry context to fetch the transforms of the associated sector envelope
-             * @param segment: Reference to the segment to project
-             * @param seed: Reference to the seed w.r.t. which the segment shall be projected */
-            Amg::Vector3D projectOntoSector(const ActsTrk::GeometryContext& gctx, 
-                                            const xAOD::MuonSegment& segment,
-                                            const MsTrackSeed& seed) const;
-            
+            /** @brief Calculates the precision deflection angle between two segments
+             *         on a muon track. 
+             *  @param segment1: The inner segment 
+             *  @param segment2: The outer segment
+             *  @param sector: The expanded sector in which the segments are expressed */
+            double estimateTwoStationP(const xAOD::MuonSegment& segment1,
+                                   const xAOD::MuonSegment& segment2,
+                                   const AtlasFieldCacheCondObj& magField) const;
             /** @brief Estimate the q /p of the seed candidate from the contained segments. A circle from 
              *         the inner, middle & outer segment points is constructed. To avoid side effects from
              *         (non)-present phi measurements, the segments are expressed on the sector planes
@@ -121,19 +117,6 @@ namespace MuonR4{
             double estimateQtimesP(const ActsTrk::GeometryContext& gctx,
                                    const AtlasFieldCacheCondObj& magField,
                                    const MsTrackSeed& seed) const;
-            /** @brief Returns the projected phi for a given sector and projector.
-             *  @param sector: Sector of interest [1-16]
-             *  @param proj: Enum indicating whether the angle at the left/right overlap or
-             *               sector center shall be returned */
-            static double projectedPhi(const int sector,
-                                       const SectorProjector proj);
-            /** @brief Returns the Sector projector within the context of a MsTrackSeed 
-             *  @param seg: Reference to the segment for which the Sector projector shall be
-             *              returned
-             *  @param refSeed: Seed context in which the segment is embedded */
-            static SectorProjector projectorFromSeed(const xAOD::MuonSegment& seg,
-                                                     const MsTrackSeed& refSeed);
-
             /** @brief Returns whether the expression on the cylinder is within the surface bounds
              *  @param projPos: Projected position on the cylinder
              *  @param loc: Surface location: [barrel/endcap] */
@@ -149,18 +132,13 @@ namespace MuonR4{
              *         (Coord system where the parameter are expressed)
              *  @param segment: Reference to the segment of interest */
             const MuonGMR4::SpectrometerSector* envelope(const xAOD::MuonSegment& segment) const;
-            /** @brief Ensure that the parsed sector number is following the MS sector schema
-             *         0 is mapped to 16 and 17 is mapped to 1.
-             *  @param sector: Calculated sector number */
-            static int ringSector(const int sector);
-            /** @brief Maps the sector 33 -> 0 to close the extended MS symmetry ring 
-             *  @param sector: Calculated sector number */
-            static int ringOverlap(const int sector);
-            /** @brief Print the sector projector
-             *  @param proj: Enum indicating whether the angle at the left/right overlap or
-             *               sector center shall be returned */
-            static std::string to_string(const SectorProjector proj);
         private:
+            using PosMomPair_t = std::pair<Amg::Vector3D, Amg::Vector3D>;
+            std::pair<double, unsigned> averageBField(const PosMomPair_t& start,
+                                                      const PosMomPair_t& end,
+                                                      const AtlasFieldCacheCondObj& magField,
+                                                      const bool skipFirst) const;
+
             /** @brief Calculates the radius of the bending circle from three points using the 
              *         sagitta. If one point is not defined, the origin is inserted instead.
              *         If two or more points are not set, a nullopt is returned */

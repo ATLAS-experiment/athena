@@ -5,7 +5,6 @@
 #include "TrigCompositeUtils/HLTIdentifier.h"
 
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include <fstream>
 

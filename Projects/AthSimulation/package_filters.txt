@@ -61,7 +61,6 @@
 + Control/xAODRootAccessInterfaces
 + Database/APR/CollectionSvc
 + Database/APR/PersistencySvc
-+ Database/APR/RootCollection
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
 + Database/AthenaPOOL/AthenaPoolCnvSvc
@@ -162,7 +161,6 @@
 + Generators/McEventSelector
 + Generators/TruthUtils
 + HighGranularityTimingDetector/HGTD_Config
-+ HighGranularityTimingDetector/HGTD_DetDescr/HGTD_GeoModel
 + HighGranularityTimingDetector/HGTD_DetDescr/HGTD_GeoModelXml
 + HighGranularityTimingDetector/HGTD_DetDescr/HGTD_Identifier
 + HighGranularityTimingDetector/HGTD_DetDescr/HGTD_ReadoutGeometry
@@ -265,8 +263,12 @@
 + MuonSpectrometer/MuonStationIndex
 + MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonReadoutGeometryR4
 + MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelR4
++ MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelTestR4
 + MuonSpectrometer/MuonPhaseII/MuonG4/MuonSensitiveDetectorsR4
++ MuonSpectrometer/MuonPhaseII/MuonG4/MuonG4TrfCache
++ MuonSpectrometer/MuonPhaseII/MuonG4/MuonSimHitSorting
 + MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHit
++ MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHitAthenaPool
 + Reconstruction/RecEvent
 + Reconstruction/RecEventAthenaPool
 + Reconstruction/RecEventTPCnv

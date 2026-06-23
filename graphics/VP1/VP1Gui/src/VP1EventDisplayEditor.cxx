@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -40,7 +40,7 @@ class VP1EventDisplayEditor::Imp {
 
 public:
 
-	VP1EventDisplayEditor * theclass;
+	VP1EventDisplayEditor * theclass{};
 	Ui::VP1EventDisplayEditorForm ui;
 
 	//	VP1ExaminerViewer* viewer;

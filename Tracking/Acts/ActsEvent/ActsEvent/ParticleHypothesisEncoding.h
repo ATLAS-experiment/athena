@@ -12,6 +12,7 @@ namespace ParticleHypothesis {
     xAOD::ParticleHypothesis convert(Acts::ParticleHypothesis h);
     Acts::ParticleHypothesis convert(xAOD::ParticleHypothesis h);
     Acts::ParticleHypothesis convert(Trk::ParticleHypothesis h);
+    Trk::ParticleHypothesis convertTrk(Acts::ParticleHypothesis h);
 }  // namespace ParticleHypothesis
 }  // namespace ActsTrk
 

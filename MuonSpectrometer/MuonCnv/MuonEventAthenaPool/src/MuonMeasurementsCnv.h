@@ -32,7 +32,7 @@ public:
   MuonMeasurementsCnv( ISvcLocator *svcloc );
 protected:
 
-  virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter_p2; }
+  virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter_p2; }
 
   virtual void          readObjectFromPool( const Token* );
 

@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
 
 #include <EventBookkeeperTools/FilterReporter.h>
-#include <RootCoreUtils/StringUtil.h>
+#include <algorithm>
 #include <TriggerAnalysisAlgorithms/TrigEventSelectionAlg.h>
 #include <xAODEventInfo/EventInfo.h>
 
@@ -27,8 +27,12 @@ StatusCode CP::TrigEventSelectionAlg::initialize()
   ANA_CHECK(m_trigDecisionTool.retrieve());
 
   if (!m_selectionDecoration.empty()) {
+    const std::string prefix{m_selectionDecoration.value() + "_"};
     for (const std::string &chain : m_trigList) {
-      m_selectionAccessors.emplace_back(m_selectionDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
+      std::string chainfix = chain;
+      std::replace(chainfix.begin(), chainfix.end(), '.', 'p');
+      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
+      m_selectionAccessors.emplace_back( prefix + chainfix);
     }
   }
 

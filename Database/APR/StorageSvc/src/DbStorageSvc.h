@@ -122,7 +122,7 @@ namespace pool  {
       * @return                 std::string container name.
       */
     virtual std::string getContName(FileDescriptor& refDB,
-                                    Token&          persToken) override final;
+                                    Token&          persToken) const override final;
 
     /// Retrieve persistent shape from Storage manager.
     /** The persistent shape is saved at write time to a Database.
@@ -161,10 +161,11 @@ namespace pool  {
       *                         READ, NEW/CREATE/WRITE, UPDATE, RECREATE
       * @param    tech     [IN] Flag indicating the technology type of the
       *                         Database  the user  wants to connect to.
+      * @param    ageLimit [IN] Overwriting default age limit of the session.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode startSession(int mode, int tech) override final;
+    virtual StatusCode startSession(Io::IoFlag mode, int tech, int ageLimit = -1) override final;
 
     /// End the Database session.
     /** The  request to end a Database session requires, that all pending 
@@ -202,7 +203,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode connect(int mode, FileDescriptor& refDB) override final;
+    virtual StatusCode connect(Io::IoFlag mode, FileDescriptor& refDB) override final;
 
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
@@ -228,7 +229,7 @@ namespace pool  {
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode openMode( FileDescriptor&     refDB,
-                                 int&                mode ) override final;
+                                 Io::IoFlag&         mode ) override final;
 
 
     /// End/Finish an existing Transaction sequence.

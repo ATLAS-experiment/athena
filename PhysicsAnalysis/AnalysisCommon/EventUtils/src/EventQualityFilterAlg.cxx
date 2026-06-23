@@ -55,11 +55,10 @@ StatusCode EventQualityFilterAlg::initialize()
 }
 
 
-StatusCode EventQualityFilterAlg::execute()
+StatusCode EventQualityFilterAlg::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Get the EventInfo object
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo, ctx);

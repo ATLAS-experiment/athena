@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,6 +15,7 @@
 #include "GaudiKernel/IService.h"
 #include <string>
 
+class EventContext;
 
 class IHiveExSvc : virtual public IService {
 
@@ -27,7 +28,7 @@ class IHiveExSvc : virtual public IService {
  public:
 
   // accumulate timing info
-  virtual void add(const std::string&, const unsigned int&) = 0;
+  virtual void add(const EventContext&, const std::string&, const unsigned int&) = 0;
 
 };
 

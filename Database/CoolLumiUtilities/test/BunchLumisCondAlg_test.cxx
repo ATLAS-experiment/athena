@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CoolLumiUtilities/test/BunchLumisCondAlg_test.cxx
@@ -26,6 +26,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "CoralBase/Blob.h"
 #include <iostream>
 #include <cassert>
+#include <bit>
 
 
 const unsigned int TOTAL_LHC_BCIDS = 3564;
@@ -59,33 +60,27 @@ void push2 (uint16_t x, std::vector<uint8_t>& data)
 
 void push_float (float x, std::vector<uint8_t>& data)
 {
-  union {
-    float f;
-    uint32_t i;
-  } cnv;
-  cnv.f = x;
-  data.push_back (cnv.i & 0xff);
-  data.push_back ((cnv.i>>8) & 0xff);
-  data.push_back ((cnv.i>>16) & 0xff);
-  data.push_back ((cnv.i>>24) & 0xff);
+
+  auto i = std::bit_cast<uint32_t>(x);
+  data.push_back (i & 0xff);
+  data.push_back ((i>>8) & 0xff);
+  data.push_back ((i>>16) & 0xff);
+  data.push_back ((i>>24) & 0xff);
 }
 
 
 void push_double (double x, std::vector<uint8_t>& data)
 {
-  union {
-    double f;
-    uint64_t i;
-  } cnv;
-  cnv.f = x;
-  data.push_back (cnv.i & 0xff);
-  data.push_back ((cnv.i>>8) & 0xff);
-  data.push_back ((cnv.i>>16) & 0xff);
-  data.push_back ((cnv.i>>24) & 0xff);
-  data.push_back ((cnv.i>>32) & 0xff);
-  data.push_back ((cnv.i>>40) & 0xff);
-  data.push_back ((cnv.i>>48) & 0xff);
-  data.push_back ((cnv.i>>56) & 0xff);
+
+  auto i = std::bit_cast<uint64_t>(x);
+  data.push_back (i & 0xff);
+  data.push_back ((i>>8) & 0xff);
+  data.push_back ((i>>16) & 0xff);
+  data.push_back ((i>>24) & 0xff);
+  data.push_back ((i>>32) & 0xff);
+  data.push_back ((i>>40) & 0xff);
+  data.push_back ((i>>48) & 0xff);
+  data.push_back ((i>>56) & 0xff);
 }
 
 

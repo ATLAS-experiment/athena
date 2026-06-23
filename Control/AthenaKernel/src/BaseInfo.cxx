@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -54,10 +54,10 @@ struct BaseInfoBaseImpl {
 
   /// Set to true when first created.
   /// Reset after we scan for init functions.
-  bool m_needs_init;
+  bool m_needs_init{true};
 
   /// @c std::type_info of this class.
-  const std::type_info* m_typeinfo;
+  const std::type_info* m_typeinfo{};
 
 
   /// Hold base information indexed by @a type_info.

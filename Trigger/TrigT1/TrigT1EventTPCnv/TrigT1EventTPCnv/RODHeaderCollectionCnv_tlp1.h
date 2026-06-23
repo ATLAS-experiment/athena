@@ -5,7 +5,7 @@
 #define RODHeaderCollectionCNV_TLP1_H
 
 // Gaudi/Athena include(s):
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigT1EventTPCnv/RODHeaderCollection_tlp1.h"
 #include "TrigT1EventTPCnv/RODHeaderCollectionCnv_p1.h"
@@ -20,7 +20,7 @@
  *          to do the T/P conversion before/after writing/reading the RODHeader
  *          object.
  */
-class RODHeaderCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< RODHeaderCollectionCnv_p1, RODHeaderCollection_tlp1 > {
+class RODHeaderCollectionCnv_tlp1 : public TopLevelTPConverter< RODHeaderCollectionCnv_p1, RODHeaderCollection_tlp1 > {
 
 public:
   RODHeaderCollectionCnv_tlp1();

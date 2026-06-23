@@ -20,7 +20,8 @@ namespace MuonCombined {
     void MuonDressingTool::addMuonHitSummary(xAOD::Muon& muon, const Trk::TrackSummary* trackSummary) const {
   
         
-        if (!trackSummary && (muon.muonType() != xAOD::Muon::SegmentTagged && muon.muonType() != xAOD::Muon::CaloTagged ) ) {
+        if (!trackSummary && (muon.muonType() != xAOD::Muon::MuonType::SegmentTagged && 
+                              muon.muonType() != xAOD::Muon::MuonType::CaloTagged ) ) {
             // get link to track particle
             const xAOD::TrackParticle* primTrk = muon.primaryTrackParticle();
             if (primTrk->track()) {
@@ -245,7 +246,7 @@ namespace MuonCombined {
             }
 
             // get out-of-bounds from ME track, shouldn't be any on combined track anyway
-            const xAOD::TrackParticle* MStrk = muon.trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+            const xAOD::TrackParticle* MStrk = muon.trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
             if (MStrk && MStrk->track() && MStrk->track()->trackSummary()) {
                 for (const auto& layer : m_hitSummaryTool->summary(*MStrk->track()->trackSummary()).stationLayers) {
                     switch (layer.first) {

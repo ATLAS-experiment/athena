@@ -14,7 +14,7 @@
 #ifndef  TRIGCALOEVENTTPCNV_TRIGTAUCLUSTERDETAILSCONTAINER_CNV_TLP1_H
 #define  TRIGCALOEVENTTPCNV_TRIGTAUCLUSTERDETAILSCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigCaloEventTPCnv/TrigTauClusterDetailsContainer_tlp1.h"
  
@@ -22,7 +22,7 @@
 #include "TrigCaloEventTPCnv/TrigTauClusterDetailsCnv_p1.h" 
 
  
-class TrigTauClusterDetailsContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigTauClusterDetailsContainerCnv_p1, TrigTauClusterDetailsContainer_tlp1 >
+class TrigTauClusterDetailsContainerCnv_tlp1 : public TopLevelTPConverter< TrigTauClusterDetailsContainerCnv_p1, TrigTauClusterDetailsContainer_tlp1 >
 {
  
  public:

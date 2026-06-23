@@ -17,7 +17,6 @@
 #include "xAODTracking/TrackParticleFwd.h"
 #include "xAODTracking/VertexFwd.h"
 //
-#include "CLHEP/Vector/ThreeVector.h"
 namespace Trk {
 
 class Track;
@@ -90,16 +89,18 @@ class TrackToVertexIPEstimator : public extends<AthAlgTool,
    * All  methods do check whether a track is actually fitted to a vertex
    */
   virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+      const EventContext &ctx,
       const xAOD::TrackParticle* track, const xAOD::Vertex* vtx,
       bool doRemoval) const override;
   virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+      const EventContext &ctx,
       const TrackParameters* track, const xAOD::Vertex* vtx,
       bool doRemoval) const override;
 
-  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(const EventContext &ctx,
       const xAOD::TrackParticle* track, const xAOD::TrackParticle* newtrack,
       const xAOD::Vertex* vtx, bool doRemoval) const override;
-  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(const EventContext &ctx,
       const TrackParameters* track, const TrackParameters* newtrack,
       const xAOD::Vertex* vtx, bool doRemoval) const override;
 
@@ -108,32 +109,23 @@ class TrackToVertexIPEstimator : public extends<AthAlgTool,
   virtual xAOD::Vertex* getUnbiasedVertex(
       const TrackParameters* track, const xAOD::Vertex* vtx) const override;
 
-  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(const EventContext &ctx,
       const xAOD::TrackParticle* track, const xAOD::Vertex* vtx) const override;
-  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(const EventContext &ctx,
       const TrackParameters* track, const xAOD::Vertex* vtx) const override;
 
   /* Methods which provide the lifetime Sign for the Impact Parameter (2D, Z,
    * 3D)  */
-  virtual double get3DLifetimeSignOfTrack(
+  virtual double get3DLifetimeSignOfTrack(const EventContext &ctx,
       const TrackParameters& track, const Amg::Vector3D& jetDirection,
-      const xAOD::Vertex& primaryVertex) const override;
-  virtual double get3DLifetimeSignOfTrack(
-      const TrackParameters& track, const CLHEP::Hep3Vector& jetDirection,
       const xAOD::Vertex& primaryVertex) const override;
 
-  virtual double get2DLifetimeSignOfTrack(
+  virtual double get2DLifetimeSignOfTrack(const EventContext &ctx,
       const TrackParameters& track, const Amg::Vector3D& jetDirection,
-      const xAOD::Vertex& primaryVertex) const override;
-  virtual double get2DLifetimeSignOfTrack(
-      const TrackParameters& track, const CLHEP::Hep3Vector& jetDirection,
       const xAOD::Vertex& primaryVertex) const override;
 
-  virtual double getZLifetimeSignOfTrack(
+  virtual double getZLifetimeSignOfTrack(const EventContext &ctx,
       const TrackParameters& track, const Amg::Vector3D& jetDirection,
-      const xAOD::Vertex& primaryVertex) const override;
-  virtual double getZLifetimeSignOfTrack(
-      const TrackParameters& track, const CLHEP::Hep3Vector& jetDirection,
       const xAOD::Vertex& primaryVertex) const override;
 
  private:
@@ -142,7 +134,7 @@ class TrackToVertexIPEstimator : public extends<AthAlgTool,
    * At this stage the trajectory is removed from the
    * vertex.
    */
-  std::unique_ptr<ImpactParametersAndSigma> calculate(
+  std::unique_ptr<ImpactParametersAndSigma> calculate(const EventContext &ctx,
       const TrackParameters* track, const xAOD::Vertex& vtx) const;
 
   ToolHandle<Trk::IExtrapolator> m_extrapolator{this, "Extrapolator",

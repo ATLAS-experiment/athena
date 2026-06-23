@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCaloEnergyTool.h"
@@ -142,7 +142,7 @@ namespace Rec {
 
         std::unique_ptr<const xAOD::TrackParticle> tpholder;
         if (!tp) {
-            tpholder = std::unique_ptr<const xAOD::TrackParticle>(m_particleCreator->createParticle(*trk, nullptr, nullptr, xAOD::muon));
+            tpholder = std::unique_ptr<const xAOD::TrackParticle>(m_particleCreator->createParticle(ctx, *trk, nullptr, nullptr, xAOD::muon));
 
             tp = tpholder.get();
             if (tp) ATH_MSG_DEBUG(" xAOD::TrackParticle created from scratch " << tp);

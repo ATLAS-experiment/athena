@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -50,11 +50,11 @@ StatusCode TrackTools::finalize(){
 } // TRACKTOOLS::FINALIZE
 
 //==================================================================================================
-std::unique_ptr<const Trk::TrackParameters> TrackTools::getTrackInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling) const {
+std::unique_ptr<const Trk::TrackParameters> TrackTools::getTrackInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling, const EventContext& ctx) const {
 //==================================================================================================
   if( !m_caloExtensionTool.empty() ){
     std::unique_ptr<Trk::CaloExtension> extension =
-      m_caloExtensionTool->caloExtension(Gaudi::Hive::currentContext(), *track);
+      m_caloExtensionTool->caloExtension(ctx, *track);
     if (!extension)
       return nullptr;
 
@@ -82,12 +82,12 @@ std::unique_ptr<const Trk::TrackParameters> TrackTools::getTrackInCellSampling(c
 }
 
 //==================================================================================================
-std::vector< double > TrackTools::getXYZEtaPhiInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling) const {
+std::vector< double > TrackTools::getXYZEtaPhiInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling, const EventContext& ctx) const {
 //==================================================================================================
   std::vector<double> coordinates;
   if( !m_caloExtensionTool.empty() ){
     std::unique_ptr<Trk::CaloExtension> extension =
-      m_caloExtensionTool->caloExtension(Gaudi::Hive::currentContext(), *track);
+      m_caloExtensionTool->caloExtension(ctx, *track);
     if (!extension)
       return coordinates;
 
@@ -120,7 +120,7 @@ std::vector< double > TrackTools::getXYZEtaPhiInCellSampling(const TRACK* track,
 
 
 //==========================================================================================================
-std::vector< double > TrackTools::getXYZEtaPhiInCellSampling(const TRACK* track, const CaloCell *cell) const {
+std::vector< double > TrackTools::getXYZEtaPhiInCellSampling(const TRACK* track, const CaloCell *cell, const EventContext& ctx) const {
 //==========================================================================================================
   std::vector<double> coordinates;
 
@@ -130,19 +130,19 @@ std::vector< double > TrackTools::getXYZEtaPhiInCellSampling(const TRACK* track,
   if(!dde) return coordinates;
   CaloSampling::CaloSample sampling = dde->getSampling();
 
-  return getXYZEtaPhiInCellSampling(track,sampling);
+  return getXYZEtaPhiInCellSampling(track,sampling,ctx);
 } // getXYZEtaPhiInCellSampling
 
 
 //=====================================================================================================
-std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerLayer(const TRACK* track) const {
+std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerLayer(const TRACK* track, const EventContext& ctx) const {
 //====================================================================================================
   std::vector< std::vector<double> > coordinates(11);
 
   for(unsigned int sample=0 ; sample<21; ++sample) //Samplings:http://acode-browser.usatlas.bnl.gov/lxr/source/atlas/Calorimeter/CaloGeoHelpers/CaloGeoHelpers/CaloSampling.def
   {
     std::vector<double> TrkPars(5);
-    std::vector<double> XYZEtaPhi = getXYZEtaPhiInCellSampling( track, (CaloSampling::CaloSample)sample );
+    std::vector<double> XYZEtaPhi = getXYZEtaPhiInCellSampling( track, (CaloSampling::CaloSample)sample, ctx );
     TrkPars[0] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[0] ;
     TrkPars[1] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[1] ;
     TrkPars[2] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[2] ;
@@ -169,14 +169,14 @@ std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerLayer(const TRACK*
 } // TrackTools::getXYZEtaPhiPerLayer
 
 //=====================================================================================================
-std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerSampling(const TRACK* track) const {
+std::vector< std::vector<double> > TrackTools::getXYZEtaPhiPerSampling(const TRACK* track, const EventContext& ctx) const {
 //====================================================================================================
   std::vector< std::vector<double> > coordinates;
 
   for(unsigned int s=0 ; s<21; ++s) //Samplings: http://acode-browser.usatlas.bnl.gov/lxr/source/atlas/Calorimeter/CaloGeoHelpers/CaloGeoHelpers/CaloSampling.def
   {
     std::vector<double> TrkPars(5);
-    std::vector<double> XYZEtaPhi = getXYZEtaPhiInCellSampling( track, (CaloSampling::CaloSample)s );
+    std::vector<double> XYZEtaPhi = getXYZEtaPhiInCellSampling( track, (CaloSampling::CaloSample)s, ctx );
     TrkPars[0] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[0] ;
     TrkPars[1] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[1] ;
     TrkPars[2] = ( XYZEtaPhi.size()!=5 ) ? -9999. : XYZEtaPhi[2] ;
@@ -194,7 +194,8 @@ void TrackTools::getCellsWithinConeAroundTrack(const TRACK* track,
                                                const CaloCellContainer* input,
                                                ConstDataVector<CaloCellContainer>* output,
                                                double cone,
-                                               bool includelar) const {
+                                               bool includelar,
+                                               const EventContext& ctx) const {
 //======================================================================
   // CELLS WITHIN CONE AROUND TRACK
   CaloCellContainer::const_iterator icell = input->begin();
@@ -208,7 +209,7 @@ void TrackTools::getCellsWithinConeAroundTrack(const TRACK* track,
     if(!includelar && dde->getSubCalo() == CaloCell_ID::LAREM) continue;
     if(dde->getSubCalo() != CaloCell_ID::LAREM && dde->getSubCalo() != CaloCell_ID::TILE) continue;
 
-    std::vector<double> coordinates = getXYZEtaPhiInCellSampling(track,dde->getSampling());
+    std::vector<double> coordinates = getXYZEtaPhiInCellSampling(track,dde->getSampling(),ctx);
     if(coordinates.size()!=5) continue;
 
     double deltaR = KinematicUtils::deltaR( cell->eta(),coordinates[3], cell->phi(),coordinates[4]);
@@ -226,7 +227,7 @@ void TrackTools::getCellsWithinConeAroundTrack(const TRACK* track,
 } // TrackTools::getCellsWithinConeAroundTrack
 
 //======================================================================================
-double TrackTools::getPathInsideCell(const TRACK *track, const CaloCell *cell) const {
+double TrackTools::getPathInsideCell(const TRACK *track, const CaloCell *cell, const EventContext& ctx) const {
 //======================================================================================
 
   ATH_MSG_DEBUG("in TrackInCaloTools::getPathInsideCell" );
@@ -264,10 +265,10 @@ double TrackTools::getPathInsideCell(const TRACK *track, const CaloCell *cell) c
       if (cell_tower == 10) {        // E1
         sampling_exit = 19;          // the exit is B11
       } else if (cell_tower == 11) { // E2
-        if (getTrackInCellSampling(track, CaloSampling::CaloSample::TileExt0)) sampling_exit = 18; // the exit is A12
+        if (getTrackInCellSampling(track, CaloSampling::CaloSample::TileExt0, ctx)) sampling_exit = 18; // the exit is A12
         else sampling_exit = 19;     // the exit is B11
        } else if ((cell_tower == 13) || (cell_tower == 15)) { // E3 or E4
-        if (getTrackInCellSampling(track, CaloSampling::CaloSample::PreSamplerE)) sampling_exit = 4; // the exit is PreSamplerE
+        if (getTrackInCellSampling(track, CaloSampling::CaloSample::PreSamplerE, ctx)) sampling_exit = 4; // the exit is PreSamplerE
         else sampling_exit = 18;     // the exit is TileExt0
       }
       break;
@@ -304,9 +305,9 @@ double TrackTools::getPathInsideCell(const TRACK *track, const CaloCell *cell) c
   }
 
   std::unique_ptr<const Trk::TrackParameters> pars_entrance =
-    getTrackInCellSampling(track, (CaloSampling::CaloSample)sampling_entrance);
+    getTrackInCellSampling(track, (CaloSampling::CaloSample)sampling_entrance, ctx);
   std::unique_ptr<const Trk::TrackParameters> pars_exit =
-    getTrackInCellSampling(track, (CaloSampling::CaloSample)sampling_exit);
+    getTrackInCellSampling(track, (CaloSampling::CaloSample)sampling_exit, ctx);
 
   if( !pars_entrance || !pars_exit ) return 0.;
 

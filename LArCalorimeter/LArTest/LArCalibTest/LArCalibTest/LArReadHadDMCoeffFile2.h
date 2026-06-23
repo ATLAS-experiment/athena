@@ -19,7 +19,7 @@ class LArReadHadDMCoeffFile2 : public AthAlgorithm
     ~LArReadHadDMCoeffFile2();
 
     StatusCode initialize(); 
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
     StatusCode initDataFromFile(const std::string& hadDMCoeffFileName);
     int parse_dim(std::string &sLine, CaloHadDMCoeff2::HadDMDimension &dim);

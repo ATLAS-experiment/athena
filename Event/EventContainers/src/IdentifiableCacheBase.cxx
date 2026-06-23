@@ -78,8 +78,7 @@ void IdentifiableCacheBase::clear (deleter_f* deleter)
 //Does not lock or clear atomics to allow faster destruction
 void IdentifiableCacheBase::cleanUp (deleter_f* deleter)
 {
-  std::atomic_thread_fence(std::memory_order_acquire);
-  if(0 != m_currentHashes.load(std::memory_order_relaxed)){ //Reduce overhead if cache was unused
+  if(0 != m_currentHashes.load(std::memory_order_acquire)){ //Reduce overhead if cache was unused
     size_t s = m_vec.size();
     for (size_t i=0; i<s ;i++) {
       const void* p = m_vec[i].load(std::memory_order_relaxed);

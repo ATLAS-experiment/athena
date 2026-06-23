@@ -121,16 +121,14 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
             /// not all muons have a track. catch the nullptrs in this case and skip
             if (!muon_trk) continue;
             // skip muon matching if the following cases occur
-            int MuonType = muon->muonType();
-            int MuonAuthor = muon->author();
-            if (MuonType == xAOD::Muon::SiliconAssociatedForwardMuon) {  // if muon is a forward muon, skip. Basically the tracks associated
+            if (muon->muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon) {  // if muon is a forward muon, skip. Basically the tracks associated
                                                                        // to this are the wrong type (InDetForwardTrackParticle instead of
                                                                        // InDetTrackParticle), so the indices used would be wrong/generate
                                                                        // spurious matches
                 ATH_MSG_DEBUG("Muon is identified as a forward muon, skipping");
                 continue;
             }
-            if (MuonAuthor == xAOD::Muon::Author::STACO) {  // remove muons primarily authored by STACO algorithm.
+            if (muon->author() == xAOD::Muon::Author::STACO) {  // remove muons primarily authored by STACO algorithm.
                 ATH_MSG_DEBUG("Muon is authored by STACO algorithm, skip");
                 continue;
             }

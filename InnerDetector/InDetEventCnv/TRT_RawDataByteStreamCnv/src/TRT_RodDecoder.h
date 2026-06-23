@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_RAWDATABYTESTREAM_TRT_RODDECODER_H
@@ -28,18 +28,11 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ContextSpecificPtr.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "GaudiKernel/ICondSvc.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CxxUtils/CachedUniquePtr.h"
-
-#include "CoralBase/Attribute.h"
-
-/*
- * Identifier
- */
-#include "InDetIdentifier/TRT_ID.h"
+#include "Identifier/IdContext.h"
 
 /*
  * For cache
@@ -53,6 +46,10 @@
 #include <atomic>
 #include <map>
 #include <vector>
+#include <cstdint>
+#include <memory>
+
+class TRT_ID;
 
 // the tool to decode a ROB frament
 
@@ -85,49 +82,49 @@ public:
    /*
     * Do we look for Front-End Errors at all?
     */
-   bool m_recordBSErrors;
+   bool m_recordBSErrors{};
 
    /*
     * Do we look for these types of Front-End Errors?
     */
-   bool m_lookAtSidErrors;
-   bool m_lookAtErrorErrors;
-   bool m_lookAtL1idErrors;
-   bool m_lookAtBcidErrors;
-   bool m_lookAtMissingErrors;
+   bool m_lookAtSidErrors{};
+   bool m_lookAtErrorErrors{};
+   bool m_lookAtL1idErrors{};
+   bool m_lookAtBcidErrors{};
+   bool m_lookAtMissingErrors{};
 
-   bool m_loadCompressTableFile;
-   bool m_loadCompressTableDB;
+   bool m_loadCompressTableFile{};
+   bool m_loadCompressTableDB{};
    std::vector<int> m_LoadCompressTableVersions;
-   const int m_maxCompressionVersion;
-   int m_forceRodVersion;
+   const int m_maxCompressionVersion{};
+   int m_forceRodVersion{};
 
-   const TRT_ID*               m_trt_id;
-   IdContext                   m_straw_layer_context;
+   const TRT_ID*               m_trt_id{};
+   IdContext                   m_straw_layer_context{};
 
    BooleanProperty m_TB04_RawData;   // true to create TRT_TB04_RawData RDOs
    BooleanProperty m_LoLumRawData;   // true to create TRT_LoLumRawData RDOs
 
-   bool m_eventTypeIsSim;            // look at first event to decide if RODBlockVersion
+   bool m_eventTypeIsSim{};            // look at first event to decide if RODBlockVersion
                                     // is incorrect.
 
-   uint32_t m_escape_marker;           // Straw word that means escaped literal
+   uint32_t m_escape_marker{};           // Straw word that means escaped literal
 
    bool m_sortCollections{};         // sort collections by identifiers if required
 
 #define CTABLE_FC_LENGTH 33
 #define CTABLE_LI_LENGTH 33
-   typedef struct {
+   struct t_CompressTable{
      // The TableVersion is a compression scheme.
      // There are presently 6 TableVersions for the different run periods of ATLAS.
      // Any IoV of /TRT/onl/ROD/Compress has one (and only one) of these as an attribute.
      // The code takes advantage of this and caches locally any TableVersion that is encountered
-     int m_TableVersion;
-     int m_firstcode[CTABLE_FC_LENGTH];
-     int m_lengths_integral[CTABLE_FC_LENGTH];    // ..[i] = Sum(numl[0,i-1])
+     int m_TableVersion{};
+     int m_firstcode[CTABLE_FC_LENGTH]{};
+     int m_lengths_integral[CTABLE_FC_LENGTH]{};    // ..[i] = Sum(numl[0,i-1])
      std::unique_ptr<unsigned int[]> m_syms;              // Array of symbols (straw data words)
-     int m_Nsymbols;
-   } t_CompressTable;
+     int m_Nsymbols{};
+   } ;
 
    std::vector<CxxUtils::CachedUniquePtr<t_CompressTable> > m_CompressionTables;
 

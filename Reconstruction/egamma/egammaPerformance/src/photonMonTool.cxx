@@ -400,13 +400,11 @@ StatusCode photonMonTool::fillHistogramsForOnePhoton(xAOD::PhotonContainer::cons
 }
 
 
-StatusCode photonMonTool::fillHistograms() {
+StatusCode photonMonTool::fillHistograms(const EventContext& ctx) {
   ATH_MSG_DEBUG("photonMonTool::fillHistograms()");
   
   if (!hasGoodTrigger("single photon")) return StatusCode::SUCCESS; 
   
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-
   //check whether Lar signalled event bad
   if(hasBadLar(ctx)) {
     ATH_MSG_DEBUG("photonMonTool::hasBadLar()");
@@ -461,7 +459,7 @@ StatusCode photonMonTool::fillHistograms() {
   }
 
   // Get photon container
-  SG::ReadHandle<xAOD::PhotonContainer> photon_container{m_PhotonContainer};
+  SG::ReadHandle<xAOD::PhotonContainer> photon_container{m_PhotonContainer, ctx};
   ATH_CHECK(photon_container.isValid());
 
   // Check that the auxiliary store association was made successfully:

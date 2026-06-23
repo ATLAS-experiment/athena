@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ByteStreamEventStorageInputSvc.h"
@@ -352,7 +352,10 @@ ByteStreamEventStorageInputSvc::buildFragment(
       throw ByteStreamExceptions::badFragment();
     }
   }
-
+  if (!fragment){
+    ATH_MSG_ERROR("fragment is nullptr!");
+    throw ByteStreamExceptions::badFragment();
+  }
   // This is a FullEventFragment
   // make a new FEFrag in memory from it
   cache->eventStatus = 0;
@@ -382,6 +385,8 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     ATH_MSG_DEBUG("ByteStream File GUID:              " << m_fileGUID);
     ATH_MSG_DEBUG("ByteStream Event Position in File: " << m_evtFileOffset);
 
+    const EventContext& context{Gaudi::Hive::currentContext()};
+
     // To accommodate for skipEvents option in EventSelector
     // While skipping BS event Selector does not return SUCCESS code,
     // just advances silently through events. So SG content is not refreshed
@@ -404,9 +409,11 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     key = m_eventInfoKey.value();
     ATH_CHECK(deleteEntry<xAOD::EventInfo>(key));
     // Now add ref to xAOD::EventInfo
-    std::unique_ptr<IOpaqueAddress> iopx = std::make_unique<ByteStreamAddress>(
+    auto bsaddr = std::make_unique<ByteStreamAddress>(
         ClassID_traits<xAOD::EventInfo>::ID(), key, "");
-    ATH_CHECK(m_storeGate->recordAddress(key, std::move(iopx)));
+    bsaddr->setEventContext(context);
+
+    ATH_CHECK(m_storeGate->recordAddress(key, std::move(bsaddr)));
     const SG::DataProxy* ptmpx = m_storeGate->transientProxy(
         ClassID_traits<xAOD::EventInfo>::ID(), key);
     if (ptmpx != nullptr) {
@@ -418,9 +425,11 @@ ByteStreamEventStorageInputSvc::generateDataHeader()
     key = m_eventInfoKey.value() + "Aux.";
     ATH_CHECK(deleteEntry<xAOD::EventAuxInfo>(key));
     // Now add ref to xAOD::EventAuxInfo
-    std::unique_ptr<IOpaqueAddress> iopaux = std::make_unique<ByteStreamAddress>(
+    bsaddr = std::make_unique<ByteStreamAddress>(
         ClassID_traits<xAOD::EventAuxInfo>::ID(), key, "");
-    ATH_CHECK(m_storeGate->recordAddress(key, std::move(iopaux)));
+    bsaddr->setEventContext(context);
+
+    ATH_CHECK(m_storeGate->recordAddress(key, std::move(bsaddr)));
     const SG::DataProxy* ptmpaux = m_storeGate->transientProxy(
         ClassID_traits<xAOD::EventAuxInfo>::ID(), key);
     if (ptmpaux !=0) {

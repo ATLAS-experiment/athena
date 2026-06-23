@@ -28,6 +28,14 @@
 #include "TFile.h"
 #include "TKey.h"
 
+#include <ColumnarEventInfo/EventInfoDef.h>
+#include <ColumnarCore/ColumnAccessor.h>
+#include <ColumnarCore/LinkColumn.h>
+#include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/VectorColumn.h>
+#include <ColumnarTau/TauJetDef.h>
+#include "TauAnalysisTools/ColumnarTauAccessors.h"
+
 namespace TauAnalysisTools
 {
 
@@ -37,6 +45,7 @@ class TauEfficiencyCorrectionsTool;
 class CommonEfficiencyTool
   : public virtual ITauEfficiencyCorrectionsTool
   , public asg::AsgTool
+  , public columnar::ColumnarTool<>	
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS( CommonEfficiencyTool, TauAnalysisTools::ITauEfficiencyCorrectionsTool )
@@ -47,31 +56,34 @@ public:
 
   ~CommonEfficiencyTool();
 
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   // CommonEfficiencyTool pure virtual public functionality
   //__________________________________________________________________________
 
   virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::TauJet& tau, double& dEfficiencyScaleFactor, 
-    unsigned int iRunNumber = 0 );
+    unsigned int iRunNumber = 0 ) override;
+
+  CP::CorrectionCode getEfficiencyScaleFactor( columnar::TauJetId tau, double& dEfficiencyScaleFactor,
+    unsigned int iRunNumber) const;
 
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(const xAOD::TauJet& xTau, 
-    unsigned int iRunNumber = 0 );
+    unsigned int iRunNumber = 0 ) override;
 
   /// returns: whether this tool is affected by the given systematics
-  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const;
+  virtual bool isAffectedBySystematic( const CP::SystematicVariation& systematic ) const override;
 
   /// returns: the list of all systematics this tool can be affected by
-  virtual CP::SystematicSet affectingSystematics() const;
+  virtual CP::SystematicSet affectingSystematics() const override;
 
   /// returns: the list of all systematics this tool recommends to use
-  virtual CP::SystematicSet recommendedSystematics() const;
+  virtual CP::SystematicSet recommendedSystematics() const override;
 
   /// configure this tool for the given list of systematic variations.  any
   /// requested systematics that are not affecting this tool will be silently ignored
-  virtual StatusCode applySystematicVariation ( const CP::SystematicSet& sSystematicSet);
+  virtual StatusCode applySystematicVariation ( const CP::SystematicSet& sSystematicSet) override;
 
-  virtual bool isSupportedRunNumber( int /*iRunNumber*/ ) const
+  virtual bool isSupportedRunNumber( int /*iRunNumber*/ ) const override
   {
     return true;
   };
@@ -107,7 +119,7 @@ protected:
   void addHistogramToSFMap(TKey* kKey, const std::string& sKeyName);
 
   virtual CP::CorrectionCode getValue(const std::string& sHistName,
-                                      const xAOD::TauJet& xTau,
+                                      columnar::TauJetId tau,
                                       double& dEfficiencyScaleFactor) const;
 
   static CP::CorrectionCode getValueTH1(const TObject* oObject,
@@ -147,6 +159,37 @@ protected:
 
   bool m_bSFIsAvailable;
   bool m_bSFIsAvailableChecked;
+
+
+public:
+
+  struct Accessors : public columnar::ColumnarTool<>
+  {
+    Accessors(CommonEfficiencyTool& tool) : columnar::ColumnarTool<>(&tool) {}
+
+    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfo {*this, "EventInfo", {.addMTDependency=true}};
+    columnar::EventInfoAccessor<uint32_t> randomrunnumber;
+
+    // Associated truth particles and jets. These are picked up by truth
+    // links on the tau itself.
+    columnar::TruthParticleAccessor<columnar::ObjectColumn> m_truthParticles {*this, "TruthTaus"};
+    columnar::JetAccessor<columnar::ObjectColumn> m_jets {*this, "AntiKt4TruthDressedWZJets"};
+
+    columnar::TauJetAccessor<columnar::ObjectColumn> m_taus {*this, "TauJets"};
+    //columnar::TauJetAccessor<int> m_nTracks{*this, "nChargedTracks", {.isOptional=true}}; to be used when 'nChargedTracks' will be in physlite
+    //columnar::TauJetAccessor<float> m_eta{*this,"eta"};
+    //columnar::TauJetAccessor<float> m_pt{*this,"pt"};
+    columnar::TauJetAccessor<int> m_decayMode{*this,"PanTau_DecayMode"};
+    TruthParticleTypeAccessor<> m_truthParticleType{*this};
+    columnar::TauJetDecorator<float> m_sfDec{*this,"sfOut"};
+    columnar::TauJetDecorator<char> m_validDec{*this,"validOut"};
+  };
+  std::unique_ptr<Accessors> m_accessors;
+
+  void callSingleEvent (columnar::TauJetRange taus, columnar::EventInfoId event) const;
+  void callEvents (columnar::EventContextRange events) const override;
+
+
 };
 } // namespace TauAnalysisTools
 

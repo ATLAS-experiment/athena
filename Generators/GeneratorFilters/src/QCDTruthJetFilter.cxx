@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/QCDTruthJetFilter.h"
@@ -139,7 +139,7 @@ StatusCode QCDTruthJetFilter::filterEvent() {
     else (*mec)[i]->weights().push_back( w*m_norm*orig );
     
 #ifdef HEPMC3
-      (*mec)[i]->add_attribute("filterWeight", std::make_shared<HepMC3::DoubleAttribute>(w*m_norm));
+      (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(w*m_norm));
 #endif
 
   }

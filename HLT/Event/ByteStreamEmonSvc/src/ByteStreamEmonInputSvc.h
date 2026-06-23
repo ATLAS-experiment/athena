@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEINPUTSVC_H
@@ -99,7 +99,7 @@ private:
 
    // internal
    bool                      m_connect{false};
-   std::auto_ptr<emon::EventIterator> m_eventIt;   //!< Event iterator
+   std::unique_ptr<emon::EventIterator> m_eventIt;   //!< Event iterator
 
    OHRootProvider*           m_provider{nullptr};
 

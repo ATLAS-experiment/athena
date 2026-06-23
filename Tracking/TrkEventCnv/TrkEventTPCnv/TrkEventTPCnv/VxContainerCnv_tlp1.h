@@ -11,7 +11,7 @@
 // @brief  Top Level converter for persistent Vertex Collection
 //
 //-----------------------------------------------------------------------------
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "VxContainer_tlp1.h"
 
@@ -57,7 +57,7 @@
 #include "AthLinks/ElementLink.h" 
 #include "TrkTrack/TrackCollection.h"
 
-class VxContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< VxContainerCnv_p1, Trk::VxContainer_tlp1 >
+class VxContainerCnv_tlp1 : public TopLevelTPConverter< VxContainerCnv_p1, Trk::VxContainer_tlp1 >
 {
 
  public:

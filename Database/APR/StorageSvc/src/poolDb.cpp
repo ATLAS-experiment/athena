@@ -62,23 +62,17 @@ void pool::debugBreak()   {
   if ( s_debug )    {
     startDebugger();
   }
-  else  {
-    //cout << "debugbreak (poolDb) However, breaks are DISABLED" 
-    //          << endl;
-  }
 }
 
 /// Translate access mode to string
-const char* pool::accessMode(pool::DbAccessMode mode)   {
-  if      ( mode & pool::READ      ) 
+const char* pool::accessMode(Io::IoFlag mode)   {
+  if      ( mode == Io::READ      ) 
     return "READ     ";
-  else if ( mode & pool::UPDATE && mode & pool::CREATE )
-    return "CREA/UPDA";
-  else if ( mode & pool::UPDATE    ) 
-    return "UPDATE   ";
-  else if ( mode & pool::CREATE    )
-    return "CREATE   ";
-  else if ( mode & pool::NOT_OPEN  ) 
+  else if ( mode == Io::WRITE     )
+    return "WRITE    ";
+  else if ( mode == Io::APPEND    )
+    return "APPEND   ";
+  else if ( mode == Io::INVALID  ) 
     return "NOT_OPEN ";
   else                                 
     return "UNKNOWN  ";

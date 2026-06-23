@@ -27,7 +27,7 @@ DbDomain::DbDomain(DbDomainObj* dom)   {
   if ( dom ) setType(dom->type());
 }
 
-StatusCode DbDomain::open(IOODatabase* imp, const DbType& typ, DbAccessMode mod)  {
+StatusCode DbDomain::open(IOODatabase* imp, const DbType& typ, Io::IoFlag mod)  {
   if ( !isValid() ) {
     DbDomainObj* dom = new DbDomainObj(imp, typ.majorType(), mod);
     switchPtr(dom);
@@ -92,8 +92,8 @@ StatusCode DbDomain::remove(DbDatabaseObj* dbH) {
 
 
 /// Access to access mode
-DbAccessMode DbDomain::openMode() const
-{  return isValid() ? ptr()->mode() : DbAccessMode(pool::NOT_OPEN);     }
+Io::IoFlag DbDomain::openMode() const
+{  return isValid() ? ptr()->mode() : Io::IoFlag(Io::INVALID);     }
 
 /// Access to domain name
 const string& DbDomain::name() const

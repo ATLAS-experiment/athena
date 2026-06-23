@@ -43,9 +43,8 @@ StatusCode EventCleaningTestAlg::initialize()
 //-----------------------------------------------------------------------------
 // Execute
 //-----------------------------------------------------------------------------
-StatusCode EventCleaningTestAlg::execute()
+StatusCode EventCleaningTestAlg::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Jets
   SG::ReadHandle<xAOD::JetContainer> jets{m_jetKey, ctx};
   if (!jets.isValid()) {

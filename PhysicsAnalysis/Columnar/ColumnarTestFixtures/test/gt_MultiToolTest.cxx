@@ -58,7 +58,7 @@ public:
   {
     if (!m_data.electronsCopy)
       {
-        auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_data.electrons, Gaudi::Hive::currentContext());
+        auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopy (*m_data.electrons);
         m_data.electronsCopy = electronsCopy.get();
         ANA_CHECK (evtStore.record (std::move(electronsCopy), m_name + postfix));
         ANA_CHECK (evtStore.record (std::move(electronsAuxCopy), m_name + postfix + "Aux."));
@@ -107,7 +107,7 @@ public:
   {
     if (!m_data.electronsCopy)
     {
-      auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_data.electrons, Gaudi::Hive::currentContext());
+      auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopy (*m_data.electrons);
       m_data.electronsCopy = electronsCopy.get();
       ANA_CHECK (evtStore.record (std::move(electronsCopy), m_name + postfix));
       ANA_CHECK (evtStore.record (std::move(electronsAuxCopy), m_name + postfix + "Aux."));

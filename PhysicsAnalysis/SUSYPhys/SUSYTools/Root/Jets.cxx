@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to Jets
@@ -105,12 +105,21 @@ namespace ST {
         ATH_MSG_DEBUG("Retrieve jet collection: " << jetkey_tmp);
         ATH_CHECK( evtStore()->retrieve(jets, jetkey_tmp) );
       }
-      std::pair<xAOD::JetContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*jets);
-      copy = shallowcopy.first;
-      copyaux = shallowcopy.second;
+      xAOD::ShallowCopyResult_t<xAOD::JetContainer> shallowcopy = xAOD::shallowCopy(*jets);
+      copy = shallowcopy.first.get();
+      copyaux = shallowcopy.second.get();
       bool setLinks = xAOD::setOriginalObjectLink(*jets, *copy);
       if (!setLinks) {
         ATH_MSG_WARNING("Failed to set original object links on " << jetkey_tmp);
+      }
+      if (recordSG) {
+        std::string auxname = copyaux->name();
+        if (auxname.compare("UNKNOWN")==0) copyaux->setName(std::string("STCalib" + jetkey_tmp + m_currentSyst.name() + "AuxCopy").c_str());
+        ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "STCalib" + jetkey_tmp + m_currentSyst.name()) );
+        ATH_CHECK( evtStore()->record(std::move(shallowcopy.second), "STCalib" + jetkey_tmp + m_currentSyst.name() + "Aux.") );
+      } else {
+        ATH_MSG_ERROR("Shallow copy not recorded in StoreGate!");
+        return StatusCode::FAILURE;
       }
     } else { // use the user-supplied collection instead
       ATH_MSG_DEBUG("Not retrieving jet collecton, using existing one provided by user");
@@ -157,12 +166,7 @@ namespace ST {
       this->IsSignalJet(*jet, m_jetPt, m_jetEta);
       if (!isData())this->IsTruthBJet(*jet);
     }
-    if (recordSG) {
-      std::string auxname = copyaux->name();
-      if (auxname.compare("UNKNOWN")==0) copyaux->setName(std::string("STCalib" + jetkey_tmp + m_currentSyst.name() + "AuxCopy").c_str());
-      ATH_CHECK( evtStore()->record(copy, "STCalib" + jetkey_tmp + m_currentSyst.name()) );
-      ATH_CHECK( evtStore()->record(copyaux, "STCalib" + jetkey_tmp + m_currentSyst.name() + "Aux.") );
-    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -196,12 +200,19 @@ namespace ST {
         ATH_MSG_DEBUG("Retrieve jet collection: " << jetkey_tmp);
         ATH_CHECK( evtStore()->retrieve(jets, jetkey_tmp) );
       }
-      std::pair<xAOD::JetContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*jets);
-      copy = shallowcopy.first;
-      copyaux = shallowcopy.second;
+      xAOD::ShallowCopyResult_t<xAOD::JetContainer> shallowcopy = xAOD::shallowCopy(*jets);
+      copy = shallowcopy.first.get();
+      copyaux = shallowcopy.second.get();
       bool setLinks = xAOD::setOriginalObjectLink(*jets, *copy);
       if (!setLinks) {
         ATH_MSG_WARNING("Failed to set original object links on " << jetkey_tmp);
+      }
+      if (recordSG) {
+        ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "STCalib" + jetkey_tmp + m_currentSyst.name()) );
+        ATH_CHECK( evtStore()->record(std::move(shallowcopy.second), "STCalib" + jetkey_tmp + m_currentSyst.name() + "Aux.") );
+      } else {
+        ATH_MSG_ERROR("Shallow copy not recorded in StoreGate!");
+        return StatusCode::FAILURE;
       }
     } else { // use the user-supplied collection instead
       ATH_MSG_DEBUG("Not retrieving jet collection, using existing one provided by user");
@@ -232,10 +243,7 @@ namespace ST {
           }
         }
     }
-    if (recordSG) {
-      ATH_CHECK( evtStore()->record(copy, "STCalib" + jetkey_tmp + m_currentSyst.name()) );
-      ATH_CHECK( evtStore()->record(copyaux, "STCalib" + jetkey_tmp + m_currentSyst.name() + "Aux.") );
-    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -266,12 +274,19 @@ namespace ST {
         ATH_CHECK( evtStore()->retrieve(jets, jetkey_tmp) );
       }
 
-      std::pair<xAOD::JetContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*jets);
-      copy = shallowcopy.first;
-      copyaux = shallowcopy.second;
+      xAOD::ShallowCopyResult_t<xAOD::JetContainer> shallowcopy = xAOD::shallowCopy(*jets);
+      copy = shallowcopy.first.get();
+      copyaux = shallowcopy.second.get();
       bool setLinks = xAOD::setOriginalObjectLink(*jets, *copy);
       if (!setLinks) {
         ATH_MSG_WARNING("Failed to set original object links on " << jetkey_tmp);
+      }
+      if (recordSG) {
+        ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "STCalib" + jetkey_tmp + m_currentSyst.name()) );
+        ATH_CHECK( evtStore()->record(std::move(shallowcopy.second), "STCalib" + jetkey_tmp + m_currentSyst.name() + "Aux.") );
+      } else {
+        ATH_MSG_ERROR("Shallow copy not recorded in StoreGate!");
+        return StatusCode::FAILURE;
       }
     } else { // use the user-supplied collection instead
       ATH_MSG_DEBUG("Not retrieving jet collection, using existing one provided by user");
@@ -299,9 +314,9 @@ namespace ST {
 
 
     // apply boosted jet taggers
-    if (!m_WtagConfig.empty()) 
+    if (!m_WtagConfig.empty())
       ATH_CHECK(m_WTaggerTool->decorate(*copy));
-    if (!m_ZtagConfig.empty()) 
+    if (!m_ZtagConfig.empty())
       ATH_CHECK(m_ZTaggerTool->decorate(*copy));
 
     for (const auto jet : *copy) {
@@ -315,10 +330,7 @@ namespace ST {
         dec_selected(*jet) = 0;
       }
     }
-    if (recordSG) {
-      ATH_CHECK( evtStore()->record(copy, "STCalib" + jetkey_tmp + m_currentSyst.name()) );
-      ATH_CHECK( evtStore()->record(copyaux, "STCalib" + jetkey_tmp + m_currentSyst.name() + "Aux.") );
-    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -335,9 +347,9 @@ namespace ST {
       jetkey_tmp = m_defaultJets;
     }
 
-    std::pair<xAOD::JetContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(calibjets);
-    copy = shallowcopy.first;
-    copyaux = shallowcopy.second;
+    xAOD::ShallowCopyResult_t<xAOD::JetContainer> shallowcopy = xAOD::shallowCopy(calibjets);
+    copy = shallowcopy.first.get();
+    copyaux = shallowcopy.second.get();
 
     bool setLinks = xAOD::setOriginalObjectLink(calibjets, *copy);
     if (!setLinks) {
@@ -379,8 +391,11 @@ namespace ST {
       if (!isData())this->IsTruthBJet(*jet);
     }
     if (recordSG) {
-      ATH_CHECK( evtStore()->record(copy, "STCalib" + jetkey_tmp + m_currentSyst.name()) );
-      ATH_CHECK( evtStore()->record(copyaux, "STCalib" + jetkey_tmp + m_currentSyst.name() + "Aux.") );
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "STCalib" + jetkey_tmp + m_currentSyst.name()) );
+      ATH_CHECK( evtStore()->record(std::move(shallowcopy.second), "STCalib" + jetkey_tmp + m_currentSyst.name() + "Aux.") );
+    } else {
+      ATH_MSG_ERROR("Shallow copy not recorded in StoreGate!");
+      return StatusCode::FAILURE;
     }
     return StatusCode::SUCCESS;
   }
@@ -1170,10 +1185,18 @@ namespace ST {
     if (btagTagger == "GN2v00LegacyWP" || btagTagger == "GN2v00NewAliasWP"){
       actualTagger = "GN2v00";
     }
-    xAOD::BTaggingUtilities::getBTagging(input)->pb(actualTagger, btag_pb);
-    xAOD::BTaggingUtilities::getBTagging(input)->pc(actualTagger, btag_pc);
-    xAOD::BTaggingUtilities::getBTagging(input)->pu(actualTagger, btag_pu);
-    xAOD::BTaggingUtilities::getBTagging(input)->pu(actualTagger, btag_ptau);
+    if (input.isAvailable<float>(actualTagger+"_pb") && input.isAvailable<float>(actualTagger+"_pc") 
+        && input.isAvailable<float>(actualTagger+"_pu") && input.isAvailable<float>(actualTagger+"_ptau")) { 
+      btag_pb = input.auxdata<float>(actualTagger+"_pb"); 
+      btag_pc = input.auxdata<float>(actualTagger+"_pc"); 
+      btag_pu = input.auxdata<float>(actualTagger+"_pu"); 
+      btag_ptau = input.auxdata<float>(actualTagger+"_ptau");
+    } else {
+      xAOD::BTaggingUtilities::getBTagging(input)->pb(actualTagger, btag_pb);
+      xAOD::BTaggingUtilities::getBTagging(input)->pc(actualTagger, btag_pc);
+      xAOD::BTaggingUtilities::getBTagging(input)->pu(actualTagger, btag_pu);
+      xAOD::BTaggingUtilities::getBTagging(input)->ptau(actualTagger, btag_ptau);
+    }
     dec_btag_pb(input) = btag_pb;
     dec_btag_pc(input) = btag_pc;
     dec_btag_pu(input) = btag_pu;
@@ -1182,17 +1205,7 @@ namespace ST {
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pc:   " << btag_pc );
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type pu:   " << btag_pu );
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag " << btagTagger << "-type ptau: " << btag_ptau );
-    // backwards compatibility
-    if ( btagSelTool->name().find("DL1")!=std::string::npos ) {
-       dec_btag_dl1pb(input) = btag_pb;
-       dec_btag_dl1pc(input) = btag_pc;
-       dec_btag_dl1pu(input) = btag_pu;
-    }
-    else {
-       dec_btag_dl1pb(input) = -10;
-       dec_btag_dl1pc(input) = -10;
-       dec_btag_dl1pu(input) = -10;
-    }
+
     return StatusCode::SUCCESS;
   }
 }

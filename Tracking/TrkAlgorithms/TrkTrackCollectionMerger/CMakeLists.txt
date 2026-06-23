@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkTrackCollectionMerger )
@@ -24,7 +24,7 @@ atlas_add_test( TrackCollectionMerger_test
                 SOURCES test/TrackCollectionMerger_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} TrkTrackCollectionMergerLib
-                POST_EXEC_SCRIPT "nopost.sh" )
+                POST_EXEC_SCRIPT noerror.sh )
 
 
 # Install files from the package:

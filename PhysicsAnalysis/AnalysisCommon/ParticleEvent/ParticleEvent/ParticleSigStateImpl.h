@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSigStateImpl.h
@@ -447,7 +447,7 @@ inline const I4Momentum_t& ParticleSigStateImpl<INavigable_t,
                                                 IParticle_t>::momentumBase(state_t s) const
 {
   if(hasSignalState(s))
-    return m_mom[int(s)];
+    return m_mom.at(int(s));
   else
     return m_mom[0];
 }
@@ -458,7 +458,7 @@ inline const I4Momentum_t& ParticleSigStateImpl<INavigable_t,
                                                 IParticle_t>::momentumBase() const
 {
   if(hasSignalState(m_currentState))
-    return m_mom[int(m_currentState)];
+    return m_mom.at(int(m_currentState));
   else
     return m_mom[0];
 }
@@ -1001,7 +1001,7 @@ inline I4Momentum_t& ParticleSigStateImpl<INavigable_t,
                                           IParticle_t>::momentumBase(state_t s)
 {
   if(hasSignalState(s))
-    return m_mom[int(s)];
+    return m_mom.at(int(s));
   else
     return m_mom[0];
 }
@@ -1012,7 +1012,7 @@ inline I4Momentum_t& ParticleSigStateImpl<INavigable_t,
                                           IParticle_t>::momentumBase()
 {
   if(hasSignalState(m_currentState))
-    return m_mom[int(m_currentState)];
+    return m_mom.at(int(m_currentState));
   else
     return m_mom[0];
 }

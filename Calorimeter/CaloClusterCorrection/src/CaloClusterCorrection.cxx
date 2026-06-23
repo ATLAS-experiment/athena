@@ -40,7 +40,6 @@ Updated:  February, 2006 (DLelas)
 #include "CaloClusterCorrection/CaloClusterCorrection.h"
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 using xAOD::CaloCluster;
 

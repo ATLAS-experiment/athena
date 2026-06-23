@@ -4,44 +4,54 @@
 
 #include "JetRecTools/ClusterAtMLScaleTool.h"
 
+#include "StoreGate/ReadDecorHandle.h"
+#include "GaudiKernel/ThreadLocalContext.h"
+
+
 ClusterAtMLScaleTool::ClusterAtMLScaleTool(const std::string& name) : JetConstituentModifierBase(name)
 {
 }
 
+
 StatusCode ClusterAtMLScaleTool::initialize() {
-    if(m_inputType!=xAOD::Type::CaloCluster) {
+
+    if (m_inputType != xAOD::Type::CaloCluster) {
         ATH_MSG_ERROR("As the name suggests, ClusterAtMLScaleTool cannot operate on objects of type "
-            << m_inputType);
+                      << m_inputType);
         return StatusCode::FAILURE;
     }
+
+    ATH_CHECK(m_clusterMLCorrectedEnergyKey.initialize());
     return StatusCode::SUCCESS;
 }
 
-StatusCode ClusterAtMLScaleTool::setClustersToMLScale(xAOD::CaloClusterContainer& cont) const {
-  
-    const SG::AuxElement::Accessor<double> clusterMLCorrectedEnergyAccessor(m_clusterMLCorrectedEnergyKey.value());
 
-    for(xAOD::CaloCluster* cl : cont ) {
-        if (!cl)
-            continue;
-	
-        if (clusterMLCorrectedEnergyAccessor.isAvailable(*cl))
-        {
-            cl->setCalE( clusterMLCorrectedEnergyAccessor(*cl) );
-        }
-        else
-        {
-            ATH_MSG_ERROR("No ML energy decoration '" << m_clusterMLCorrectedEnergyKey.value() << "' found for cluster with index " << cl->index() << ".");
-            return StatusCode::FAILURE;
-        }
-            
-        cl->setCalM( cl->rawM() );
-        cl->setCalPhi( cl->rawPhi() );
-        cl->setCalEta( cl->rawEta() );
+
+StatusCode ClusterAtMLScaleTool::setClustersToMLScale(xAOD::CaloClusterContainer& cont) const {
+
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
+    SG::ReadDecorHandle<xAOD::CaloClusterContainer, double> dec(
+        m_clusterMLCorrectedEnergyKey, ctx);
+
+    if (!dec.isValid()) {
+        ATH_MSG_ERROR("Decoration handle is not valid: " 
+                      << m_clusterMLCorrectedEnergyKey.key());
+        return StatusCode::FAILURE;
     }
 
-  return StatusCode::SUCCESS;
+    for (xAOD::CaloCluster* cl : cont) {
+        if (!cl) continue;
+       
+        cl->setCalE(dec(*cl));
+        cl->setCalM(cl->rawM());
+        cl->setCalPhi(cl->rawPhi());
+        cl->setCalEta(cl->rawEta());
+    }
+
+    return StatusCode::SUCCESS;
 }
+
 
 StatusCode ClusterAtMLScaleTool::process_impl(xAOD::IParticleContainer* cont) const {
     xAOD::CaloClusterContainer* clust = dynamic_cast<xAOD::CaloClusterContainer*> (cont); // Get CaloCluster container

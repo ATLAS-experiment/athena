@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -64,23 +64,11 @@ public:
     }
     std::cout << std::endl;
 
-
-    // get all the ROBFragments
-    const size_t MAX_ROBFRAGMENTS = 2048;
-    std::vector<OFFLINE_FRAGMENTS_NAMESPACE::PointerType> robF(MAX_ROBFRAGMENTS);
-    OFFLINE_FRAGMENTS_NAMESPACE::PointerType rePointer;
-    re->start(rePointer);
-    size_t robcount = re->children(robF.data(),MAX_ROBFRAGMENTS);
-    if (robcount == MAX_ROBFRAGMENTS)
-      {
-	std::cout << "ERROR : ROB buffer overflow" << std::endl;
-      }
-  
     // loop over all ROBs
-    for (size_t irob=0; irob<robcount; ++irob)
-      {
+    auto iter = re->child_iter();
+    while (OFFLINE_FRAGMENTS_NAMESPACE::PointerType fp = iter.next()) {
 	  // add to the map
-	  OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment rob(robF[irob]);
+	  OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment rob(fp);
 	  
 	  std::cout << "        ROBFragment, src ID ="
 		    << std::hex << rob.source_id()

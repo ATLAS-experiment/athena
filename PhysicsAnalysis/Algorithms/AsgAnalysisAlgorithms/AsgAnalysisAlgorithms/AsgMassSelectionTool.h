@@ -9,7 +9,6 @@
 #include <AthContainers/AuxElement.h>
 #include <PATCore/IAsgSelectionTool.h>
 #include "AsgTools/PropertyWrapper.h"
-#include <atomic>
 
 namespace CP
 {

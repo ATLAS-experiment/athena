@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TConverterRegistry.h
@@ -110,7 +110,7 @@ private:
   // The bool flag tells whether or not we own this converter.
   using Payload = std::pair<TVirtualConverter*, bool>;
   using CheckSumMap = std::map<UInt_t, Payload>;
-  using MapType = std::map<std::string, CheckSumMap>;
+  using MapType = std::map<std::string, CheckSumMap, std::less<>>;
 
   /// Map of registered converters.
   MapType fMap;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //====================================================================
 //    Root Database Container RNTuple implementation
@@ -72,8 +72,6 @@ class RNTupleContainer : public pool::DbContainerImp
   };
 
  private:
-   /// reference to exact type description
-   const pool::DbTypeInfo*  m_type{};
    /// List of field descriptors
    std::vector<FieldDesc>  m_fieldDescs;
    /// Parent Database handle
@@ -109,7 +107,7 @@ class RNTupleContainer : public pool::DbContainerImp
   /// Open the container for object access
   virtual StatusCode open(pool::DbDatabase& dbH, const std::string& nam,
                           const pool::DbTypeInfo* info,
-                          pool::DbAccessMode mod) override final;
+                          Io::IoFlag mod) override final;
 
   /// Check if we can access the container for reading with the given type
   virtual StatusCode checkAccess(pool::DbDatabase& dbH,

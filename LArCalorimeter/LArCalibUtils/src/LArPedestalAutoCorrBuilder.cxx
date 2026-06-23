@@ -87,7 +87,7 @@ StatusCode LArPedestalAutoCorrBuilder::initialize()
 
 
 //---------------------------------------------------------------------------
-StatusCode LArPedestalAutoCorrBuilder::execute()
+StatusCode LArPedestalAutoCorrBuilder::execute(const EventContext& /*ctx*/)
 //---------------------------------------------------------------------------
 {
 

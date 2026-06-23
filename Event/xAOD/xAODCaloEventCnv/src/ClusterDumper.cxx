@@ -43,12 +43,8 @@ StatusCode ClusterDumper::finalize() {
    return StatusCode::SUCCESS;
 }
  
-StatusCode ClusterDumper::execute() {
-
-
-  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
-  
-  SG::ReadHandle<xAOD::CaloClusterContainer> clustercontainer{m_containerName};
+StatusCode ClusterDumper::execute(const EventContext& ctx) {
+  SG::ReadHandle<xAOD::CaloClusterContainer> clustercontainer{m_containerName, ctx};
   ATH_MSG_DEBUG( "Retrieved clusters with key: " << m_containerName.key() );
 
   const CaloClusterCellLinkContainer* cclptr=nullptr;
@@ -60,6 +56,7 @@ StatusCode ClusterDumper::execute() {
     ATH_MSG_INFO("Did not find corresponding cell-link container");
 
   std::lock_guard<std::mutex> fileLock{m_fileMutex};
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
   (*m_out) << "Run " << eventInfo->runNumber() << ", evt " << eventInfo->eventNumber() << " contains " << clustercontainer->size() << " CaloClusters" << std::endl;
 
   for (const auto itr: *clustercontainer) {
@@ -119,7 +116,8 @@ StatusCode ClusterDumper::execute() {
     // }
 
     constexpr auto allMoments=std::to_array<const char*>({"FIRST_PHI","FIRST_ETA","SECOND_R","SECOND_LAMBDA","DELTA_PHI","DELTA_THETA","DELTA_ALPHA","CENTER_X","CENTER_Y","CENTER_Z","CENTER_MAG","CENTER_LAMBDA","LATERAL","LONGITUDINAL","ENG_FRAC_EM","ENG_FRAC_MAX","ENG_FRAC_CORE","FIRST_ENG_DENS","SECOND_ENG_DENS","ISOLATION","ENG_BAD_CELLS","N_BAD_CELLS","N_BAD_CELLS_CORR","BAD_CELLS_CORR_E","BADLARQ_FRAC","ENG_POS","SIGNIFICANCE.3","CELL_SIGNIFICANCE.3","CELL_SIG_SAMPLING","AVG_LAR_Q","AVG_TILE_Q","EM_PROBABILITY","HAD_WEIGHT","OOC_WEIGHT","DM_WEIGHT.3","TILE_CONFIDENCE_LEVEL","VERTEX_FRACTION","NVERTEX_FRACTION","ENG_CALIB_TOT","ENG_CALIB_OUT_L","ENG_CALIB_OUT_M","ENG_CALIB_OUT_T","ENG_CALIB_DEAD_L","ENG_CALIB_DEAD_M","ENG_CALIB_DEAD_T","ENG_CALIB_EMB0","ENG_CALIB_EME0","ENG_CALIB_TILEG3","ENG_CALIB_DEAD_TOT","ENG_CALIB_DEAD_EMB0","ENG_CALIB_DEAD_TILE0","ENG_CALIB_DEAD_TILEG3","ENG_CALIB_DEAD_EME0","ENG_CALIB_DEAD_HEC0","ENG_CALIB_DEAD_FCAL","ENG_CALIB_DEAD_LEAKAGE","ENG_CALIB_DEAD_UNCLASS","ENG_CALIB_FRAC_EM","ENG_CALIB_FRAC_HAD","ENG_CALIB_FRAC_REST", "ENERGY_Truth"});
-    (*m_out) << "Cluster Moments" << std::endl;
+    (*m_out) << "Cluster Moments\n";
+    static const std::string badChannelListStr{"BadChannelList"};
     for (std::string momName : allMoments) {
       int precision = 0;
       std::string::size_type dpos = momName.find ('.');
@@ -131,45 +129,45 @@ StatusCode ClusterDumper::execute() {
       if (a.isAvailable(cluster)) {
         float v = a(cluster);
         if (m_reducedPrecision && precision > 0) {
-          *m_out << std::format ("   {}: {:.{}f}", momName, v, precision) << std::endl;
+          *m_out << std::format ("   {}: {:.{}f}", momName, v, precision) << "\n";
         }
         else {
-          (*m_out) << "   " << momName << ": " << v << std::endl;
+          (*m_out) << "   " << momName << ": " << v << "\n";
         }
       }
     }
 
-    SG::AuxElement::Accessor<xAOD::CaloClusterBadChannelList> a("BadChannelList");
+    SG::AuxElement::Accessor<xAOD::CaloClusterBadChannelList> a(badChannelListStr);
     if (a.isAvailable(cluster)) {
-      (*m_out) << "Bad Channel data: " << std::endl;
+      (*m_out) << "Bad Channel data: \n";
       for (const auto& bc : cluster.badChannelList()) {
-        (*m_out) << "   eta=" << bc.eta() << ", phi=" << bc.phi() << ", layer=" << bc.layer() << ", word=" << bc.badChannel() << std::endl;
+        (*m_out) << "   eta=" << bc.eta() << ", phi=" << bc.phi() << ", layer=" << bc.layer() << ", word=" << bc.badChannel() << "\n";
       }
     }
 
     const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
     if (cellLinks) {
       if (m_printCellLinks) {
-        (*m_out) << "Cell-links:" << std::endl;
+        (*m_out) << "Cell-links:\n";
         CaloClusterCellLink::const_iterator lnk_it = cellLinks->begin();
         CaloClusterCellLink::const_iterator lnk_it_e = cellLinks->end();
         for (; lnk_it != lnk_it_e; ++lnk_it) {
           const CaloCell* cell = *lnk_it;
           if (m_reducedPrecision) {
-            *m_out << std::format ("   ID={}, E={:.2f}, weight={:.3f}",
-                                   cell->ID().getString(), cell->e(), lnk_it.weight())
-                   << std::endl;
+            *m_out << std::format ("   ID={}, E={:.2f}, weight={:.3f}\n",
+                                   cell->ID().getString(), cell->e(), lnk_it.weight());
+                   
           }
           else {
-            *m_out << std::format ("   ID={}, E={}, weight={}",
-                                   cell->ID().getString(), cell->e(), lnk_it.weight())
-                   << std::endl;
+            *m_out << std::format ("   ID={}, E={}, weight={}\n",
+                                   cell->ID().getString(), cell->e(), lnk_it.weight());
+                   
           }
         }
       } else 
-       (*m_out) << "  Nbr of cells: " << cellLinks->size() << std::endl;
+       (*m_out) << "  Nbr of cells: " << cellLinks->size() << "\n";
     } else {
-       (*m_out) << "  No Cell Links found" << std::endl; 
+       (*m_out) << "  No Cell Links found\n"; 
     }
 
   }//end loop over clusters

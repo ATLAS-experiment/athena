@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODForward/ZdcModuleToString.h"
 #include "AthContainers/ConstAccessor.h"
 #include <sstream>
+#include <cstdint>
+
 
 std::string ZdcModuleToString(const xAOD::ZdcModule& zm) 
 {
@@ -15,7 +17,8 @@ std::string ZdcModuleToString(const xAOD::ZdcModule& zm)
   o << "/" << zm.zdcType();
   o << "/" << zm.zdcChannel();
   o << "\n";
-  for (auto s : {"g0data","g1data","g0d0data","g0d1data","g1d0data","g1d1data"} )
+  using namespace std::string_literals;
+  for (const auto & s : {"g0data"s,"g1data"s,"g0d0data"s,"g0d1data"s,"g1d0data"s,"g1d1data"s} )
     {
       SG::ConstAccessor<std::vector<uint16_t> >acc(s);
       if (acc.isAvailable(zm))
@@ -24,7 +27,7 @@ std::string ZdcModuleToString(const xAOD::ZdcModule& zm)
 	  const std::vector<uint16_t>& v = zm.getWaveform(s);
 	  for (uint16_t d : v)
 	    {
-	      o << " " << std::to_string(d);
+	      o << " " << d;
 	    }
 	  o << "\n";
 	}

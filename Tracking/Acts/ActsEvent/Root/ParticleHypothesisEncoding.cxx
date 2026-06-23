@@ -9,6 +9,21 @@
 
 namespace ActsTrk::ParticleHypothesis {
 
+Trk::ParticleHypothesis convertTrk(Acts::ParticleHypothesis h) {
+    if (ATH_LIKELY(h == Acts::ParticleHypothesis::pion())) {
+    return Trk::ParticleHypothesis::pion;
+  } else if ( h == Acts::ParticleHypothesis::muon()) {
+    return Trk::ParticleHypothesis::muon;
+  } else if (h == Acts::ParticleHypothesis::electron()) {
+    return Trk::ParticleHypothesis::electron;
+  } else if (h == Acts::ParticleHypothesis::geantino()) {
+    return Trk::ParticleHypothesis::geantino;
+  } else {
+    throw std::domain_error(
+          "ActsTrk::ParticleHypothesis conversion to Trk does not handle particle of abs(pdg)" + std::to_string(h.absolutePdg()));
+  }
+  return Trk::ParticleHypothesis::noHypothesis;
+  }
 xAOD::ParticleHypothesis convert(Acts::ParticleHypothesis h) {
   if (ATH_LIKELY(h == Acts::ParticleHypothesis::pion())) {
     return xAOD::pion;

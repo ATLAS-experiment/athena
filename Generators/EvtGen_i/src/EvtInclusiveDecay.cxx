@@ -214,10 +214,9 @@ CLHEP::HepRandomEngine* EvtInclusiveDecay::getRandomEngineDuringInitialize(const
 }
 
 
-StatusCode EvtInclusiveDecay::execute() {
+StatusCode EvtInclusiveDecay::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("EvtInclusiveDecay executing");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   reseedRandomEngine(m_randomStreamName, ctx);
 
   std::string   key = m_inputKeyName;

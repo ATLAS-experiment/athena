@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -35,9 +35,9 @@ StatusCode MuonMatchingTool :: initialize(){
 }
 
 
-const Amg::Vector3D MuonMatchingTool :: offlineMuonAtPivot(const xAOD::Muon* mu) const{
+const Amg::Vector3D MuonMatchingTool :: offlineMuonAtPivot(const EventContext& ctx, const xAOD::Muon* mu) const{
   const xAOD::TrackParticle* track = mu->primaryTrackParticle();
-  std::unique_ptr<const Trk::TrackParameters> extPars(extTrackToPivot(track));
+  std::unique_ptr<const Trk::TrackParameters> extPars(extTrackToPivot(ctx, track));
   return extPars ? extPars->position() : Amg::Vector3D(0.,0.,0.);
 }
 
@@ -270,12 +270,12 @@ const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> MuonMatchingTool :: matc
 }
 
 
-const xAOD::L2StandAloneMuon* MuonMatchingTool :: matchL2SA(  const xAOD::Muon *mu, const std::string& trig, bool &pass) const {
+const xAOD::L2StandAloneMuon* MuonMatchingTool :: matchL2SA( const EventContext& ctx, const xAOD::Muon *mu, const std::string& trig, bool &pass) const {
   ATH_MSG_DEBUG("MuonMonitoring::matchL2SA()");
   float reqdR = m_L2SAreqdR;
   if(m_use_extrapolator){
     reqdR = reqdRL1byPt(mu->pt());
-    const Amg::Vector3D extPos = offlineMuonAtPivot(mu);
+    const Amg::Vector3D extPos = offlineMuonAtPivot(ctx, mu);
     if(extPos.norm()>ZERO_LIMIT){
       return match<xAOD::L2StandAloneMuon>( &extPos, trig, reqdR, pass);
     }
@@ -294,7 +294,7 @@ const xAOD::L2StandAloneMuon* MuonMatchingTool :: matchL2SAReadHandle( const Eve
   float reqdR = m_L2SAreqdR;
   if(m_use_extrapolator){
     reqdR = reqdRL1byPt(mu->pt());
-    const Amg::Vector3D extPos = offlineMuonAtPivot(mu);
+    const Amg::Vector3D extPos = offlineMuonAtPivot(ctx, mu);
     if(extPos.norm()>ZERO_LIMIT){
       return matchReadHandle<xAOD::L2StandAloneMuon>( &extPos, reqdR, m_L2MuonSAContainerKey, ctx);
     }
@@ -329,20 +329,20 @@ const xAOD::L2CombinedMuon* MuonMatchingTool :: matchL2CBReadHandle( const Event
   return MuonTrack ? matchReadHandle<xAOD::L2CombinedMuon>( MuonTrack, m_L2CBreqdR, m_L2muCombContainerKey, ctx) : nullptr;
 }
 
-const xAOD::MuonRoI* MuonMatchingTool :: matchL1( double refEta, double refPhi, double reqdR, const std::string& trig, bool &pass) const {
+const xAOD::MuonRoI* MuonMatchingTool :: matchL1( const EventContext& ctx, double refEta, double refPhi, double reqdR, const std::string& trig, bool &pass) const {
 
     /// Retrieve the chain configuration and the lower name corresponding to the L1 threshold
     const TrigConf::HLTChain* chainCfg = m_trigDec->ExperimentalAndExpertMethods().getChainConfigurationDetails(trig);
     const std::string L1toMatch = chainCfg->lower_chain_name().substr(3);
     
-    SG::ReadHandle<xAOD::MuonRoIContainer> L1rois(m_MuonRoIContainerKey, Gaudi::Hive::currentContext());
+    SG::ReadHandle<xAOD::MuonRoIContainer> L1rois(m_MuonRoIContainerKey, ctx);
     const xAOD::MuonRoI *closest = nullptr;
 
     for (const xAOD::MuonRoI* l1muon : *L1rois){
 
         // get all L1 thresholds from the L1 menu along with whether the L1roi passed each of those or not
         const std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> > L1thr_list = m_thresholdTool-> getThresholdDecisions(
-                    l1muon->roiWord(), Gaudi::Hive::currentContext());
+                    l1muon->roiWord(), ctx);
         
         // check the L1 threshold we are looking for
         bool L1thr_isMatch = false;
@@ -375,27 +375,27 @@ const xAOD::MuonRoI* MuonMatchingTool :: matchL1( double refEta, double refPhi, 
     return closest;
 }
 
-const xAOD::MuonRoI* MuonMatchingTool :: matchL1( const xAOD::Muon *mu, const std::string& trig, bool &pass) const {
+const xAOD::MuonRoI* MuonMatchingTool :: matchL1( const EventContext& ctx, const xAOD::Muon *mu, const std::string& trig, bool &pass) const {
   double refEta = mu->eta();
   double refPhi = mu->phi();
   double reqdR = 0.25;
 
   if(m_use_extrapolator){
     reqdR = reqdRL1byPt(mu->pt());
-    const Amg::Vector3D extPos = offlineMuonAtPivot(mu);
+    const Amg::Vector3D extPos = offlineMuonAtPivot(ctx, mu);
     if(extPos.norm()>ZERO_LIMIT){
       refEta = extPos.eta();
       refPhi = extPos.phi();
     }
   }
-  return matchL1(refEta, refPhi, reqdR, trig, pass); 
+  return matchL1(ctx, refEta, refPhi, reqdR, trig, pass);
 }
 
-const xAOD::MuonRoI* MuonMatchingTool :: matchL1( const xAOD::TruthParticle *mu, const std::string& trig, bool &pass) const {
+const xAOD::MuonRoI* MuonMatchingTool :: matchL1( const EventContext& ctx, const xAOD::TruthParticle *mu, const std::string& trig, bool &pass) const {
   double refEta = mu->eta();
   double refPhi = mu->phi();
   double reqdR = 0.25;
-  return matchL1(refEta, refPhi, reqdR, trig, pass);
+  return matchL1(ctx, refEta, refPhi, reqdR, trig, pass);
 }
 
 const xAOD::Muon* MuonMatchingTool :: matchL2SAtoOff( const EventContext& ctx, const xAOD::L2StandAloneMuon* samu) const {
@@ -435,7 +435,7 @@ double MuonMatchingTool :: FermiFunction(double x, double x0, double w) {
 
 
   
-const Trk::TrackParameters* MuonMatchingTool :: extTrackToPivot(const xAOD::TrackParticle* track) const {
+const Trk::TrackParameters* MuonMatchingTool :: extTrackToPivot(const EventContext& ctx, const xAOD::TrackParticle* track) const {
 
   const Trk::TrackParameters *extRPC = nullptr;
   const Trk::TrackParameters *extTGC = nullptr;
@@ -446,31 +446,31 @@ const Trk::TrackParameters* MuonMatchingTool :: extTrackToPivot(const xAOD::Trac
   bool isBarrel = true;
 
   if( fabs(trkEta)<1.05){
-    extRPC = extTrackToRPC(track);
+    extRPC = extTrackToRPC(ctx, track);
     if(!extRPC){
       isBarrel = false;
-      extTGC = extTrackToTGC(track);
+      extTGC = extTrackToTGC(ctx, track);
     }
     else{
       isBarrel = true;
       extEta = extRPC->position().eta();
       if(fabs(extEta)>=1.05){
-	extTGC = extTrackToTGC(track);
+	extTGC = extTrackToTGC(ctx, track);
 	isBarrel = (extTGC) == nullptr; 
       }
     }
   }
   else if( fabs(trkEta)>=1.05 ){
-    extTGC = extTrackToTGC(track);
+    extTGC = extTrackToTGC(ctx, track);
     if(!extTGC){
       isBarrel = true;
-      extRPC = extTrackToRPC(track);
+      extRPC = extTrackToRPC(ctx, track);
     }
     else{
       isBarrel = false;
       extEta = extTGC->position().eta();
       if(fabs(extEta)<1.05){
-	extRPC = extTrackToRPC(track);
+	extRPC = extTrackToRPC(ctx, track);
 	isBarrel = (extRPC) != nullptr;
       }
     }
@@ -484,7 +484,7 @@ const Trk::TrackParameters* MuonMatchingTool :: extTrackToPivot(const xAOD::Trac
 
   
 
-const Trk::TrackParameters* MuonMatchingTool :: extTrackToTGC( const xAOD::TrackParticle* trk ) const {
+const Trk::TrackParameters* MuonMatchingTool :: extTrackToTGC( const EventContext& ctx, const xAOD::TrackParticle* trk ) const {
   ATH_MSG_DEBUG("extTrackToTGC");
   if(!trk) return nullptr;
   double TGC_Z = ( trk->eta()>0 )? 15153.0:-15153.0;
@@ -493,7 +493,7 @@ const Trk::TrackParameters* MuonMatchingTool :: extTrackToTGC( const xAOD::Track
   std::unique_ptr<Trk::DiscSurface> disc(new Trk::DiscSurface( matrix, 0., 15000.));
   const bool boundaryCheck = true;
 
-  const Trk::TrackParameters* param = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
+  const Trk::TrackParameters* param = m_extrapolator->extrapolate(ctx,
                                                                   trk->perigeeParameters(),
                                                                   *disc,
                                                                   Trk::anyDirection,
@@ -508,13 +508,13 @@ const Trk::TrackParameters* MuonMatchingTool :: extTrackToTGC( const xAOD::Track
 
 
 
-const Trk::TrackParameters* MuonMatchingTool :: extTrackToRPC( const xAOD::TrackParticle* trk ) const {
+const Trk::TrackParameters* MuonMatchingTool :: extTrackToRPC( const EventContext& ctx, const xAOD::TrackParticle* trk ) const {
   ATH_MSG_DEBUG("extTrackToRPC");
   if(!trk) return nullptr;
   std::unique_ptr<Trk::CylinderSurface> barrel(new Trk::CylinderSurface(  7478., 15000. ));
   const bool boundaryCheck = true;
 
-  const Trk::TrackParameters* param = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
+  const Trk::TrackParameters* param = m_extrapolator->extrapolate(ctx,
                                                                   trk->perigeeParameters(),
                                                                   *barrel,
                                                                   Trk::anyDirection,
