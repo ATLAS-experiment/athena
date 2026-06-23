@@ -30,7 +30,7 @@ parser.add_argument(
 parser.add_argument(
     "--output-file",
     default="ITkPixelWaferIds.txt",
-    help="Output text file for one 32-bit waferID identifier per line.",
+    help="Output csv file for one 32-bit waferID identifier per line.",
 )
 
 parser.add_argument(
@@ -70,6 +70,7 @@ if args.verbose:
 cfg.run(1)
 
 print("Configured ITkPixelCsvWaferIdAlg")
-print(f"  CSV file: {args.csv_file}")
+print(f"  Input CSV file: {args.csv_file}")
 print(f"  Output file: {args.output_file}")
-print("  Note: the algorithm execution writes one 32-bit waferID+feID per line to the output file.")
+print("  Note: the algorithm execution writes one front end per line to the output file.")
+print("  32-bit waferID+feID, 32-bit waferID+feID, FELIX Card Name, Uplink Pin, DMA buffer, SourceID")

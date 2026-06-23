@@ -15,6 +15,9 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <string>
 #include <vector>
 #include <utility>
+#include <tuple>
+#include <bitset>
+
 
 class PixelID;
 
@@ -24,6 +27,8 @@ public:
         std::string spChain;
         std::string md;
         int fe = -1;
+        std::string flx_card_device;
+        unsigned int fiber = 0;
     };
 
     ITkPixelCsvWaferIdAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -35,12 +40,18 @@ public:
     const std::vector<CsvRow>& rows() const { return m_rows; }
 
     StatusCode loadCsv();
-    std::pair<Identifier,int> waferId(const CsvRow& row) const;
+    std::tuple<Identifier,int,unsigned long> waferId(const CsvRow& row) const;
+    unsigned long onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
 
 private:
     static std::string trim(const std::string& input);
     static std::vector<std::string> splitCsvLine(const std::string& line);
     static std::vector<std::string> parseSPChain(const std::string& spChain);
+    std::vector<int> DmaBuffer() const;
+    std::bitset<32> sourceID(const std::vector<std::string>& spchain, const std::string& flx, const unsigned int dma) const;
+    std::vector<std::string>  splitFLX_card_device(const std::string& s) const;
+    std::bitset<32>  subDetID(int barrel_endcap, int layer_disk) const;
+
 
     // Helper functions implemented in the .cxx file
     int barrel_ec(const std::vector<std::string>& spchain) const;
@@ -48,6 +59,7 @@ private:
     int phi_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
     int eta_module(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
     int feID(const std::vector<std::string>& spchain, int fe) const;
+
     Gaudi::Property<std::string> m_csvFile{this,
                                            "CsvFile",
                                            "AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA_slim.csv",
@@ -60,12 +72,6 @@ private:
     const PixelID* m_pixIdHelper = nullptr;
     std::vector<CsvRow> m_rows;
 
-    /*
-    uint32_t htonl(const std::string &x) {
-        unsigned char *s = (unsigned char *)x.c_str();
-        return (uint32_t)(s[0] << 24 | s[1] << 16 | s[2] << 8 | s[3]);
-    };
-    */
     mutable std::atomic<bool> m_done{false};
 };
 

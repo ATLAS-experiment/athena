@@ -12,7 +12,7 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <bitset>
+#include <limits>
 
 
 ITkPixelCsvWaferIdAlg::ITkPixelCsvWaferIdAlg(const std::string& name,
@@ -50,15 +50,23 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         ATH_MSG_FATAL("Could not open wafer ID output file: " << m_outputFile.value());
         return StatusCode::FAILURE;
     }
+    output << "DetectorResourceID,True DetectorResourceID,FELIX Card Name,Uplink Pin,DMA buffer,SourceID\n"; 
 
-    for (const CsvRow& row : m_rows) {
-        const std::pair< Identifier, int> w_and_fe_id =  waferId(row);
-        const Identifier id = w_and_fe_id.first;
+    std::vector<int> dma_buffer_vec = DmaBuffer();
+
+    for (size_t i = 0; i < m_rows.size(); ++i) {
+        const CsvRow& row = m_rows[i];
+        const auto w_and_fe_id = waferId(row);
+        const Identifier& id = std::get<0>(w_and_fe_id);
+        const int fe = std::get<1>(w_and_fe_id);
+        const unsigned long onlineId = std::get<2>(w_and_fe_id);
         const std::string waferId_str = id.get_identifier32().getString();
         const auto bec = m_pixIdHelper->barrel_ec(id);
         const auto ld = m_pixIdHelper->layer_disk(id);
         const auto phi = m_pixIdHelper->phi_module(id);
         const auto eta = m_pixIdHelper->eta_module(id);
+
+        std::bitset<32> sID = sourceID( parseSPChain(row.spChain), row.flx_card_device, dma_buffer_vec[i]);
 
         std::string x = waferId_str.substr(0, waferId_str.length() - 2 );
         std::stringstream ss;
@@ -67,7 +75,6 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         ss >> n;
         std::bitset<32> b(n);
         b <<= 2; //shift left by two bits, to add FE bits
-        int fe = w_and_fe_id.second;
         std::bitset<32> febits = std::bitset<32>(fe);
         b |= febits;
 
@@ -79,14 +86,20 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
                    << bec << "\t"
                    << ld << "\t"
                    << phi << "\t"
-                   << eta << "\t";
+                   << eta << "\t"
+                   << onlineId << "\t";
         }
         //convert back to hex
         std::stringstream res;
         res << std::hex << std::uppercase << b.to_ulong();
         // keep this, might be useful later
         //output << res.str() << "\n";
-        output << b.to_ulong() << "\n";
+        output << std::hex << b.to_ulong() + onlineId << ","
+                << b.to_ulong() + onlineId << ","
+                << row.flx_card_device << ","
+                << row.fiber << ","
+                << dma_buffer_vec[i] << ","
+                << sID.to_ulong() << "\n";
 
     }
 
@@ -123,7 +136,7 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
             continue;
         }
         const std::vector<std::string> fields = splitCsvLine(line);
-        if (fields.size() < 3) {
+        if (fields.size() < 5) {
             ATH_MSG_WARNING("Skipping malformed CSV line: " << line);
             continue;
         }
@@ -132,6 +145,8 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
         row.spChain = trim(fields[0]);
         row.md = trim(fields[1]);
         row.fe = std::stoi(trim(fields[2]));
+        row.flx_card_device = trim(fields[3]);
+        row.fiber = static_cast<unsigned int>(std::stoul(trim(fields[4])));
 
         m_rows.push_back(std::move(row));
     }
@@ -140,7 +155,7 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
     return StatusCode::SUCCESS;
 }
 
-std::pair < Identifier, int > ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
+std::tuple< Identifier, int, unsigned long > ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
     ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
                     << ", module " << row.md << ", FE " << row.fe);
 
@@ -152,8 +167,9 @@ std::pair < Identifier, int > ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) 
     int phi = phi_module(spChain_cur, row.md, row.fe );
     int eta = eta_module(spChain_cur, row.md, row.fe );
     int fe_n = feID(spChain_cur, row.fe );
+    unsigned long online_id = onlineId(spChain_cur, row.md, row.fe);
     
-    return std::pair< Identifier, int > (m_pixIdHelper->wafer_id(bec, ld, phi, eta), fe_n);
+    return std::make_tuple(m_pixIdHelper->wafer_id(bec, ld, phi, eta), fe_n, online_id);
 }
 
 std::string ITkPixelCsvWaferIdAlg::trim(const std::string& input) {
@@ -387,8 +403,193 @@ int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe)
     if(ld < 2){ //triplets
         return 0;
     }
-    else{ // quads: need to calculate properly
+    else{ // quads
         return fe-1;
     }
     
+}
+
+unsigned long ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const {
+    // onlineID = chipID (4b) chipID ON/OFF (1b) RD53C (1b)
+    std::bitset<32> febits(0);
+    int ld = layer_disk(spchain);
+    int fe_id = feID(spchain, fe);
+    int b_ec = barrel_ec(spchain);
+    int etamod = eta_module(spchain, mod, fe);
+
+    if( b_ec == 0 ){ // barrel
+        if(ld == 1 || ld ==2 ){ //L1, L2 flat, 4 to 2 merging
+            if(fe_id < 2){
+                febits = std::bitset<32>(0x30000000);
+            }
+            else{
+                febits = std::bitset<32>(0xC0000000);
+            }
+        }
+        if(ld == 3 || ld == 4 ){ //L3, L4 flat, 4 to 1 merging
+            febits = std::bitset<32>(0xF0000000);
+        }
+    }
+    else{
+        if(ld == 3){ // Barrel ring L2
+            if(fe_id < 2){
+                febits = std::bitset<32>(0x30000000);
+            }
+            else{
+                febits = std::bitset<32>(0xC0000000);
+            }
+        }
+        if(ld == 5 || ld ==7){ // Barrel rings L3, L4
+            febits = std::bitset<32>(0xF0000000);
+        }
+        if(ld == 4 && etamod < 5){ // first half of EC L2
+            if(fe_id < 2){
+                febits = std::bitset<32>(0x30000000);
+            }
+            else{
+                febits = std::bitset<32>(0xC0000000);
+            }
+        }
+        if(ld == 6){ // EC L3
+            if(fe_id < 2){
+                febits = std::bitset<32>(0x30000000);
+            }
+            else{
+                febits = std::bitset<32>(0xC0000000);
+            }
+        }
+        if(ld == 8 && etamod < 7){ // EC L4, 1-7
+            febits = std::bitset<32>(0xF0000000);
+        }
+        if(ld == 8 && etamod >= 7){ // EC L4, 8-9
+            if(fe_id < 2){
+                febits = std::bitset<32>(0x30000000);
+            }
+            else{
+                febits = std::bitset<32>(0xC0000000);
+            }
+        }
+    }
+    febits |= 0x01100000;
+    return febits.to_ulong();
+}
+
+
+std::vector<int> ITkPixelCsvWaferIdAlg::DmaBuffer() const {
+    std::vector<int> dmaNumbers;
+    dmaNumbers.reserve(m_rows.size());
+
+    size_t i = 0;
+    while (i < m_rows.size()) {
+        // find contiguous block for the same felix card device
+        const std::string& card = m_rows[i].flx_card_device;
+        size_t j = i;
+        unsigned int minFiber = std::numeric_limits<unsigned int>::max();
+        for (; j < m_rows.size() && m_rows[j].flx_card_device == card; ++j) {
+            if (m_rows[j].fiber > 0 && m_rows[j].fiber < minFiber){
+                minFiber = m_rows[j].fiber;
+            }
+        }
+        if (minFiber == std::numeric_limits<unsigned int>::max()) {
+            // no valid fiber found in this block, assign 9
+            for (size_t k = i; k < j; ++k){
+                dmaNumbers.push_back(9);
+            }
+            i = j;
+            continue;
+        }
+
+        // assign DMA groups based on minFiber, groups of 3 fibers -> DMA 0..3
+        for (size_t k = i; k < j; ++k) {
+            int dma = 0;
+            if (m_rows[k].fiber >= minFiber) {
+                const int offset = static_cast<int>(m_rows[k].fiber) - static_cast<int>(minFiber);
+                // 3 fibers per DMA buffer except for L0 flat barrel (4 lanes FE --> 2 fibers)
+                int b_ec = barrel_ec(parseSPChain(m_rows[k].spChain));
+                int ld = layer_disk(parseSPChain(m_rows[k].spChain));
+                if(b_ec == 0 && ld ==0){
+                    dma = offset / 2;
+                }
+                else{
+                    dma = offset / 3;
+                }
+            }
+            if (dma < 0){
+                ATH_MSG_WARNING("Assigned DMA buffer goes negative: " << dma);
+            }
+            if (dma > 3){
+                ATH_MSG_WARNING("Assigned DMA buffer goes higher than 3: " << dma);
+            }
+            dmaNumbers.push_back(std::move(dma));
+        }
+
+        i = j;
+    }
+    return dmaNumbers;
+}
+
+
+std::bitset<32> ITkPixelCsvWaferIdAlg::sourceID(const std::vector<std::string>& spchain, const std::string& flx, const unsigned int dma) const {
+    // ((subdetector ID) << 16) |((FELIX card ID) << 8) | ((FELIX device ID) << 7) | ((DMA buffer number) << 5)
+
+    int b_ec = barrel_ec(spchain);
+    int ld = layer_disk(spchain);
+
+    std::bitset<32> b(0);
+    std::bitset<32> subdet = subDetID(b_ec, ld); 
+    subdet <<= 16 ; //shift left by 16 bits
+
+    std::vector<std::string> flx_card_device = splitFLX_card_device(flx);
+
+    std::bitset<32> flxCard = std::bitset<32>(std::stoi(flx_card_device[0])); 
+    flxCard <<= 8; //shift left by 8 bits
+    std::bitset<32> flxDev = std::bitset<32>(std::stoi(flx_card_device[1]) - 1 ); 
+    flxDev <<= 7; //shift left by 7 bits
+    std::bitset<32> dma_b = std::bitset<32>(dma);
+    dma_b <<= 5; //shift left by 5 bits
+    b = subdet | flxCard | flxDev | dma_b;
+    return b;
+}
+
+
+
+std::vector<std::string> ITkPixelCsvWaferIdAlg::splitFLX_card_device(const std::string& s) const {
+    std::vector<std::string> fields;
+    std::stringstream ss(s);
+    std::string field;
+
+    while (std::getline(ss, field, '.')) {
+        fields.push_back(field);
+    }
+    if (fields.size() !=2){
+        ATH_MSG_ERROR("Wrong FLX_card_device input: " << s);
+    }
+    if (fields[1] !="1" && fields[1] !="2" ){
+        ATH_MSG_ERROR("Wrong FLX device input: " << fields[1]);
+    }
+    return fields;
+}
+
+
+std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_disk) const {
+    if(barrel_endcap == 0){
+        if(layer_disk < 2){
+            return std::bitset<32>(0x16);
+        }
+        else{
+            return std::bitset<32>(0x17);
+        }
+    }
+    else if(barrel_endcap == 2){
+        return std::bitset<32>(0x18);
+    }
+    else if(barrel_endcap == -2){
+        return std::bitset<32>(0x19);
+    }
+    else{
+        ATH_MSG_ERROR("Wrong barrel_endcap value: " << barrel_endcap);
+        ATH_MSG_ERROR("return subDetectorID =0 " );
+        return std::bitset<32>(0);
+    }
+
 }
