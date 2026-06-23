@@ -5,5 +5,5 @@
 
 #ifndef ATLASHEPMC_IOBASECLASS_FWD_H
 #define ATLASHEPMC_IOBASECLASS_FWD_H
-namespace HepMC {class IO_BaseClass;}
+#include "HepMC3/Version.h"
 #endif
