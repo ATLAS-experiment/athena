@@ -111,7 +111,7 @@ namespace TrigConf {
       std::vector<std::string> topoAlgorithmOutputNames(const std::string & category) const;
 
       /** Access to topo algorithm by name */
-      const TrigConf::L1TopoAlgorithm & algorithm(const std::string & algoName, const std::string & category) const;
+      const TrigConf::L1TopoAlgorithm & algorithm(const std::string & algoName, std::string_view ategory) const;
 
       /** Access to topo algorithm by name of triggerline as given in topo connector specification
        * @param triggerlineName string name of the triggerline 
