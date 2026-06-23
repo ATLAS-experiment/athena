@@ -112,13 +112,15 @@ def HION12Cfg(flags):
 #########################################################################################
 #Slimming
     from DerivationFrameworkHI import ListSlimming
+    from DerivationFrameworkFlavourTag import FtagBaseContent
     
     HION12SlimmingHelper = SlimmingHelper("HION12SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     HION12SlimmingHelper.SmartCollections = ListSlimming.HION12SmartCollections()
-    AllVars = ListSlimming.HION12AllVarContent(flags.Input.ProjectName,flags.Input.isMC)
-    ExtraVars = ListSlimming.HION12Extra()
+    AllVars = []
+    AllVars += ListSlimming.HION12AllVarContent(flags.Input.ProjectName,flags.Input.isMC)
+    ExtraVars = []
+    ExtraVars += ListSlimming.HION12Extra()
     if flags.Input.isMC and flags.HeavyIon.doHIBTagging:
-        from DerivationFrameworkFlavourTag import FtagBaseContent
         FtagBaseContent.add_truth_to_slimming_helper(HION12SlimmingHelper)
     if flags.HeavyIon.doHIBTagging:
         from DerivationFrameworkFlavourTag.FtagBaseContent import add_common_augmentation

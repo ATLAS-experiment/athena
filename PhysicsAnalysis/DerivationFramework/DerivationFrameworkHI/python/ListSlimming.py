@@ -601,6 +601,8 @@ def HION12AllVarContentRun3():
     variables  = []
     variables += ["EventInfo"]
     variables += ["CaloSums"]
+    variables += ["ZdcModules"]
+    variables += ["ZdcSums"]
     variables += ["Kt4EMPFlowNeutEventShape"]
     variables += ["AntiKt4EMPFlowJets"]                          # Include R = 0.4 anti-kt EM Particle Flow jets
     variables += ["AntiKt4LCTopoJets"]                           # Include R = 0.4 anti-kt local calibration topo-jets
@@ -648,6 +650,7 @@ def HION12AllVarContent(project_tag,isMC):
         'data23_hi': HION12AllVarContentRun3(),
         'data24_hi': HION12AllVarContentRun3(),
         'data25_hi': HION12AllVarContentRun3(),
+        'data26_hi': HION12AllVarContentRun3(),
         }
 
     if isMC:
