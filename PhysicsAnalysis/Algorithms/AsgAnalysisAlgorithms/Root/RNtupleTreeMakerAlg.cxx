@@ -16,6 +16,11 @@
 // Gaudi/EventLoop include(s):
 #ifdef XAOD_STANDALONE
 #include "EventLoop/Worker.h"
+#else
+#include "GaudiKernel/IProperty.h"
+#include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/AttribStringParser.h"
+
 #endif
 
 namespace CP {
@@ -49,8 +54,26 @@ namespace CP {
              return StatusCode::FAILURE;
          }
 #else
-        // naive implementation for AthAnalysis, I don't see any Ath Svc offer getting the output stream easily
+         // Ath no direct way to get Tfile pointer. Output filename is instead used as the handle.
+         // retrieve pointer to THistSvc
+         SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
+         ATH_CHECK(tHistSvc.isValid());
+         std::string outputRepr;
+         // THistSvc Output property example: [ 'ANALYSIS DATAFILE=\'output.root\' OPT=\'RECREATE\'' .. ]
+         ATH_CHECK(SmartIF<IProperty>(tHistSvc.get())->getProperty("Output", outputRepr));
+         ATH_MSG_INFO( "THistSvc Output property: " << outputRepr );
+         std::string fileName;
+         for (auto& attrib : Gaudi::Utils::AttribStringParser(outputRepr)) {
+           auto tag = attrib.tag;
+           ATH_MSG_INFO( "THistSvc Output attrib: " << tag << " = " << attrib.value );
+           if (tag == "ANALYSIS DATAFILE")
+             fileName = attrib.value;
+         }
+         ATH_MSG_INFO( "RNTuple Output file: " << fileName );
+         // naive implementation for AthAnalysis, I don't see any Ath Svc offer
+         // getting the output stream easily
          outputFile = TFile::Open( m_outputStreamName.value().c_str(), "UPDATE" );
+         ATH_MSG_INFO( "RNTuple Opened output file: " << m_outputStreamName.value() ); //INFO RNTuple Opened output file: ANALYSIS
 #endif
 
          if( !outputFile ) {
