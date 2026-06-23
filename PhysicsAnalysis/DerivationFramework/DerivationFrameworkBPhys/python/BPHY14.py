@@ -228,7 +228,13 @@ def BPHY14Cfg(flags):
        BPHY14_AllVariables += ["Photons"] #,"Muons","InDetTrackParticles","PrimaryVertices"]
 
        BPHY14_SmartCollections += ["InDetTrackParticles"]
-       BPHY14_ExtraVariables += ["%s.vx.vy.vz" %  "InDetTrackParticles"]
+       BPHY14_AllVariables += ["GSFTrackParticles"] 
+       BPHY14_ExtraVariables += ["%s.vx.vy.vz" % "InDetTrackParticles"] 
+       # conversion vertices 
+       BPHY14_ExtraVariables += [ 
+                    "GSFConversionVertices.x.y.z.px.py.pz.pt1.pt2.etaAtCalo.phiAtCalo", 
+                    "GSFConversionVertices.trackParticleLinks"
+       ] 
 
        BPHY14_AllVariables = list(set(BPHY14_AllVariables)) # remove duplicates
    
