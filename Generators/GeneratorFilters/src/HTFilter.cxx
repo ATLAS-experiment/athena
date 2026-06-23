@@ -69,7 +69,7 @@ StatusCode HTFilter::filterEvent(const EventContext& ctx) {
 
     
 if (! m_allowOld) {  
-  ATH_MSG_ERROR(" For HEPMC3 releases xAOD filters should be used. Exiting with ERROR. ");
+  ATH_MSG_ERROR(" For HepMC v3 releases xAOD filters should be used. Exiting with ERROR. ");
   return StatusCode::FAILURE;
 }
 

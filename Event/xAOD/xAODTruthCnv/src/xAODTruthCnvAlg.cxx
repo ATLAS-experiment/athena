@@ -304,7 +304,7 @@ namespace xAODMaker {
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->xf[1], xAOD::TruthEvent::XF2);
             }
 
-            // Handle LHE particles, only supported for HEPMC3
+            // Handle LHE event record
             auto lhe_record_attribute = genEvt->attribute<HepMC::ShortEventAttribute>(HepMCStr::LHERecord);
 
             if (lhe_record_attribute && !hadLHERecord && !m_lheTruthParticleContainerKey.empty()){
