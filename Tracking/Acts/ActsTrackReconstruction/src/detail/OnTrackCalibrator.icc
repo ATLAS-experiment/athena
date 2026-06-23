@@ -62,26 +62,23 @@ namespace ActsTrk::detail {
         using enum ProjectorType;
         case PixelClusterType: {
           assert(pixelCalibrator.connected());
-          auto [pos, cov] = pixelCalibrator(geoctx, cctx,
-                                            static_cast<const xAOD::PixelCluster&>(measurement), state);
-          setState<2>(e2DimNoTime, pos, cov, link, state);
+          prepareCalibratedState<2>(e2DimNoTime, link, state);
+          pixelCalibrator(geoctx, cctx,static_cast<const xAOD::PixelCluster&>(measurement), state);
           break;
         } case StripClusterType: {
           assert(stripCalibrator.connected());
-          auto [pos, cov] = stripCalibrator(geoctx, cctx,
-                                            static_cast<const xAOD::StripCluster&>(measurement), state);
           const Acts::Surface *surface = m_surfAcc.get(&measurement);
           if (!surface) {
             throw std::runtime_error("OnTrackCalibrator<traj_t>::calibrate() -- No surface for measurement.");
           }
-          setState<1>(surface->bounds().type() == Acts::SurfaceBounds::eAnnulus ? e1DimRotNoTime : e1DimNoTime,
-                              pos, cov, link, state);
+          prepareCalibratedState<1>(surface->bounds().type() == Acts::SurfaceBounds::eAnnulus ? e1DimRotNoTime : e1DimNoTime,
+                      link, state);
+          stripCalibrator(geoctx, cctx,static_cast<const xAOD::StripCluster&>(measurement), state);
           break;
         } case HGTDClusterType: {
           assert(hgtdCalibrator.connected());
-          auto [pos, cov] = hgtdCalibrator(geoctx, cctx,
-                                           static_cast<const xAOD::HGTDCluster&>(measurement), state);
-          setState<3>(e2DimWithTime, pos, cov, link, state);
+          prepareCalibratedState<3>(e2DimWithTime, link, state);
+          hgtdCalibrator(geoctx, cctx,static_cast<const xAOD::HGTDCluster&>(measurement), state);
           break;
         } default:
             throw std::domain_error("OnTrackCalibrator can only handle Pixel or Strip measurements");
@@ -90,19 +87,23 @@ namespace ActsTrk::detail {
   
   template <typename traj_t>
   template <std::size_t Dim, typename Cluster>
-  std::pair<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>>
+  void
   OnTrackCalibrator<traj_t>::passthrough(const Acts::GeometryContext& /*gctx*/,
                                          const Acts::CalibrationContext& /*cctx*/,
                                          const Cluster& cluster,
-                                         const TrackStateProxy& /*state*/) const {
-    auto ret = std::make_pair<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>>(cluster.template localPosition<Dim>(),
-                                                                            cluster.template localCovariance<Dim>());
+                                         TrackStateProxy& trackState) const {
+    trackState.allocateCalibrated(Dim);
+    auto pos = trackState.template calibrated<Dim>();
+    auto cov  = trackState.template calibratedCovariance<Dim>();
+    pos = cluster.template localPosition<Dim>().template cast<double>();
+    cov = cluster.template localCovariance<Dim>().template cast<double>();
     if constexpr(std::is_same_v<xAOD::HGTDCluster, std::remove_cvref_t<Cluster> >) {
-       ret.first(2,0)  = ActsTrk::timeToActs(ret.first(2,0));
-       assert(ret.second(2,1)==0. && ret.second(2,0)==0.);
-       ret.second(2,2) = ActsTrk::timeCovToActs(ret.second(2,2));
+       pos(2,0)  = ActsTrk::timeToActs(pos(2,0));
+       assert(cov(2,1)==0. && cov(2,0)==0.);
+       cov(2,2) = ActsTrk::timeCovToActs(cov(2,2));
+       assert( ActsTrk::timeToActs( cluster.template localPosition<Dim>().template cast<double>()(2,0) ) == trackState.template calibrated<Dim>()(2,0) );
+       assert( ActsTrk::timeToActs( cluster.template localCovariance<Dim>().template cast<double>()(2,0) ) == trackState.template calibratedCovariance<Dim>()(2,0) );
     }
-    return ret;
   }
 } // namespace ActsTrk
 

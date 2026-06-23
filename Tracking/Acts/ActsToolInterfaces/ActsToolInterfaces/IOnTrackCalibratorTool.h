@@ -7,6 +7,8 @@
 
 #include "IOnBoundStateCalibratorTool.h"
 
+#include <tuple>
+
 namespace ActsTrk {
 
   // @TODO remove traj_t template argument ?
@@ -20,13 +22,13 @@ namespace ActsTrk {
      using Cov = xAOD::MeasMatrix<DIM>;
      using TrackStateProxy = typename Acts::MultiTrajectory<traj_t>::TrackStateProxy;
 
-      // @TODO should pass through bound state
-      using OnTrackCalibrator = Acts::Delegate<
-         std::pair<Pos, Cov>(const Acts::GeometryContext&,
-                                       const Acts::CalibrationContext&,
-                                       const cluster_t &,
-                                       const TrackStateProxy &)>;
+     using OnTrackCalibrator = Acts::Delegate<
+        void(const Acts::GeometryContext&,
+             const Acts::CalibrationContext&,
+             const cluster_t &,
+             TrackStateProxy &)>;
 
+     using BASE::connectCalibrator;
      virtual void connectOnTrackCalibrator(OnTrackCalibrator &calibrator) const = 0;
 
   };
