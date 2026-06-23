@@ -8,6 +8,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/AttributeNames.h"
 #include <vector>
 
 
@@ -67,7 +68,7 @@ StatusCode FixHepMC::execute(const EventContext& /*ctx*/) {
     if (m_setHasCycles){
       // If asked, tag the event as having cycles and alert the user that this problem exists
       auto cycles = std::make_shared<HepMC3::IntAttribute>(1);
-      evt->add_attribute("cycles",cycles);
+      evt->add_attribute(HepMCStr::cycles, cycles);
     }
 
     // Add a unit entry to the event weight vector if it's currently empty
