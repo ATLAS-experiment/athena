@@ -4,8 +4,6 @@
 
 #include "TruthTrackRetriever.h"
 
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
 #include "GaudiKernel/SystemOfUnits.h" 
 #include "EventPrimitives/EventPrimitives.h"
 
