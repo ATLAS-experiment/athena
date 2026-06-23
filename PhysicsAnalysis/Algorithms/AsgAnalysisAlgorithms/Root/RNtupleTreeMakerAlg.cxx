@@ -13,6 +13,7 @@
 #include <TClass.h>
 #include <TFile.h>
 #include <TROOT.h>
+#include <filesystem>
 
 // Gaudi/EventLoop include(s):
 #ifdef XAOD_STANDALONE
@@ -80,10 +81,22 @@ namespace CP {
            return StatusCode::FAILURE;
          }
          ATH_MSG_INFO( "RNTuple Output file: " << fileName );
-         // naive implementation for AthAnalysis, I don't see any Ath Svc offer
-         // getting the output stream easily
-         outputFile = dynamic_cast<TFile*>(gROOT->GetListOfFiles()->FindObject(fileName.c_str()));
-         ATH_MSG_INFO( "RNTuple found output file: " << (fileName.empty() ? "nullptr" : outputFile->GetName()) );
+
+         // Match by basename: filesystem::path::filename() extracts the last
+         // component after '/' from any string, whether it is a relative path,
+         // absolute path, or xrootd URL (root://host//eos/.../output.root).
+         const std::filesystem::path targetName = std::filesystem::path(fileName).filename();
+         TIter next(gROOT->GetListOfFiles());
+         while (TObject* obj = next()) {
+           auto* f = dynamic_cast<TFile*>(obj);
+           if (!f) continue;
+           ATH_MSG_INFO( "RNTuple ROOT file: " << f->GetName() );
+           if (std::filesystem::path(f->GetName()).filename() == targetName) {
+             outputFile = f;
+             break;
+           }
+         }
+         ATH_MSG_INFO( "RNTuple found output file: " << (outputFile ? outputFile->GetName() : "nullptr") );
 #endif
          if( !outputFile ) {
              ATH_MSG_ERROR( "Could not retrieve file for stream: " << m_outputStreamName.value() );
