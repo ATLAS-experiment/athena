@@ -415,10 +415,10 @@ StatusCode DVInferenceToolBase::buildGraph(const EventContext& ctx,
   std::vector<float> edgeAttr;
   edgeAttr.reserve(2u * nMuonNodes * std::max<std::size_t>(nCaloNodes, 1u) * kEdgeFeatureCount);
 
-  auto addEdge = [this, &graphData, &edgeAttr, maxEdges](std::size_t src,
-                                                         std::size_t dst,
-                                                         const DVNodeAux& a,
-                                                         const DVNodeAux& b) -> bool {
+  auto addEdge = [&graphData, &edgeAttr, maxEdges](std::size_t src,
+						   std::size_t dst,
+						   const DVNodeAux& a,
+						   const DVNodeAux& b) -> bool {
     if (maxEdges >= 0 && static_cast<int>(graphData.srcEdges.size()) >= maxEdges) return false;
     const float dPhi = CxxUtils::deltaPhi(b.phi, a.phi);
     const float dEta = b.eta - a.eta;
