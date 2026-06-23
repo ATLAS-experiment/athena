@@ -12,6 +12,7 @@
 // ROOT include(s):
 #include <TClass.h>
 #include <TFile.h>
+#include <TROOT.h>
 
 // Gaudi/EventLoop include(s):
 #ifdef XAOD_STANDALONE
@@ -20,6 +21,7 @@
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/AttribStringParser.h"
+#include "Gaudi/Property.h"
 
 #endif
 
@@ -54,28 +56,35 @@ namespace CP {
              return StatusCode::FAILURE;
          }
 #else
-         // Ath no direct way to get Tfile pointer. Output filename is instead used as the handle.
-         // retrieve pointer to THistSvc
+         // AthAna has no direct way to get Tfile pointer. Output filename is
+         // instead used as the handle. retrieve pointer to THistSvc, it
+         // contains entry like:"ANALYSIS(stream name) DATAFILE='output.root' OPT='RECREATE'"
          SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
          ATH_CHECK(tHistSvc.isValid());
-         std::string outputRepr;
-         // THistSvc Output property example: [ 'ANALYSIS DATAFILE=\'output.root\' OPT=\'RECREATE\'' .. ]
-         ATH_CHECK(SmartIF<IProperty>(tHistSvc.get())->getProperty("Output", outputRepr));
-         ATH_MSG_INFO( "THistSvc Output property: " << outputRepr );
+         Gaudi::Property<std::vector<std::string>> outputProp("Output", {});
+         ATH_CHECK(SmartIF<IProperty>(tHistSvc.get())->getProperty(&outputProp));
          std::string fileName;
-         for (auto& attrib : Gaudi::Utils::AttribStringParser(outputRepr)) {
-           auto tag = attrib.tag;
-           ATH_MSG_INFO( "THistSvc Output attrib: " << tag << " = " << attrib.value );
-           if (tag == "ANALYSIS DATAFILE")
-             fileName = attrib.value;
+         const std::string& targetStream = m_outputStreamName.value(); //select ANALYSIS stream not ANALYSIS_HIST stream
+         for (const auto& entry : outputProp.value()) {
+           if (!entry.starts_with(targetStream + " ")) continue;
+           for (const auto& attrib : Gaudi::Utils::AttribStringParser(entry)) {
+             if (attrib.tag == "DATAFILE") {
+               fileName = attrib.value;
+               break;
+             }
+           }
+           break;
+         }
+         if (fileName.empty()) {
+           ATH_MSG_ERROR("Empty output file name for stream: " << targetStream);
+           return StatusCode::FAILURE;
          }
          ATH_MSG_INFO( "RNTuple Output file: " << fileName );
          // naive implementation for AthAnalysis, I don't see any Ath Svc offer
          // getting the output stream easily
-         outputFile = TFile::Open( m_outputStreamName.value().c_str(), "UPDATE" );
-         ATH_MSG_INFO( "RNTuple Opened output file: " << m_outputStreamName.value() ); //INFO RNTuple Opened output file: ANALYSIS
+         outputFile = dynamic_cast<TFile*>(gROOT->GetListOfFiles()->FindObject(fileName.c_str()));
+         ATH_MSG_INFO( "RNTuple found output file: " << (fileName.empty() ? "nullptr" : outputFile->GetName()) );
 #endif
-
          if( !outputFile ) {
              ATH_MSG_ERROR( "Could not retrieve file for stream: " << m_outputStreamName.value() );
              return StatusCode::FAILURE;
