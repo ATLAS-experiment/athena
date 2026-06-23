@@ -19,7 +19,6 @@
 // FrameWork includes
 
 #include "GeneratorObjects/McEventCollection.h"
-#include "HepPDT/ParticleDataTable.hh"
 
 // McParticleTools includes
 #include "HepMcFloatWriterTool.h"
