@@ -14,9 +14,9 @@
 // To get the Magnetic Field:
 #include "CLHEP/GenericFunctions/FixedConstant.hh"
 
-// To get the particle properties:
-#include "HepPDT/ParticleDataTable.hh"
-#include "HepPDT/ParticleData.hh"
+// TruthUtils
+#include "TruthUtils/HepMCHelpers.h"
+
 
 // To extrapolate:
 #include "AtlasBComponent.h"
@@ -289,10 +289,6 @@ StatusCode SingleTrackValidation::execute(const EventContext& ctx) {
     // Get just the primary, call it "theParticle"
     auto theParticle = *HepMC::begin(*e);
 
-    // Fetch whatever particle properties will be used in the following:
-    const HepPDT::ParticleDataTable * dataTable = m_c->partPropSvc->PDT();
-    const HepPDT::ParticleData      * particleData = dataTable->particle(iabs(theParticle->pdg_id()));
-
     // Get the kinematic variables:
     HepLorentzVector momentum(theParticle->momentum().px(),
                               theParticle->momentum().py(),
@@ -301,7 +297,7 @@ StatusCode SingleTrackValidation::execute(const EventContext& ctx) {
     Point3D<double>       origin(theParticle->production_vertex()->position().x(),
                                  theParticle->production_vertex()->position().y(),
                                  theParticle->production_vertex()->position().z());
-    double           charge = theParticle->pdg_id() > 0 ? particleData->charge() : - particleData->charge();
+    double           charge = MC::charge(theParticle->pdg_id());
     // Put Eta and Phi into the Ntuple
     m_c->phi = theParticle->momentum().phi();
     m_c->eta = -log(tan(theParticle->momentum().theta()/2));
