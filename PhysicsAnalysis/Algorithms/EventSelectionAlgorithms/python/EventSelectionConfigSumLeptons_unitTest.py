@@ -61,5 +61,33 @@ class TestSumElMuTau(unittest.TestCase):
         self.assertRaises(ValueError, run, "SUM_EL_N_MU_N_TAU_N 25000 27000 >= 3", containers=ELMUTAU)
 
 
+class TestSumDressedProperties(unittest.TestCase):
+    """useDressedProperties must be enabled when ANY input lepton container is a
+    truth container (not just the electron one)."""
+
+    def test_set_when_muons_are_truth(self):
+        algs = named(run("SUM_EL_N_MU_N 25000 >= 2",
+                         containers={"electrons": "AnaElectrons", "muons": "AnaTruthMuons"}), "SUMNELNMU")
+        self.assertTrue(prop(algs[0], "useDressedProperties"))
+
+    def test_truth_tau_does_not_set_dressed(self):
+        # dressed kinematics exist only for truth electrons and muons,
+        # so a truth tau must NOT enable them.
+        algs = named(run("SUM_EL_N_MU_N_TAU_N 25000 >= 3",
+                         containers={"electrons": "AnaElectrons", "muons": "AnaMuons",
+                                     "taus": "AnaTruthTaus"}), "SUMNLEPTONS")
+        self.assertFalse(prop(algs[0], "useDressedProperties", False))
+
+    def test_set_when_muons_are_truth_with_taus_present(self):
+        algs = named(run("SUM_EL_N_MU_N_TAU_N 25000 >= 3",
+                         containers={"electrons": "AnaElectrons", "muons": "AnaTruthMuons",
+                                     "taus": "AnaTaus"}), "SUMNLEPTONS")
+        self.assertTrue(prop(algs[0], "useDressedProperties"))
+
+    def test_unset_when_all_reco(self):
+        algs = named(run("SUM_EL_N_MU_N 25000 >= 2", containers=ELMU), "SUMNELNMU")
+        self.assertFalse(prop(algs[0], "useDressedProperties", False))
+
+
 if __name__ == "__main__":
     unittest.main()
