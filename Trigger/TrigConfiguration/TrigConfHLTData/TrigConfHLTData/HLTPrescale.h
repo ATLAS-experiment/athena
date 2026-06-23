@@ -1,19 +1,23 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
 
 #ifndef TrigConf_HLTPrescale
 #define TrigConf_HLTPrescale
+#include "TrigConfL1Data/TrigConfData.h"
+
+#include "CxxUtils/transparent_string_hash.h"
 
 #include <iosfwd>
 #include <string>
+#include <string_view>
 #include <map>
 #include <vector>
 #include <utility>
 
-#include "TrigConfL1Data/TrigConfData.h"
-
 #include <unordered_map>
+
 
 namespace TrigConf {
    class HLTPrescale;
@@ -39,7 +43,7 @@ namespace TrigConf {
       HLTPrescale& operator=(HLTPrescale&&) noexcept = default;
 
       // maps for rerun and stream prescales
-      typedef std::unordered_map<std::string, float> PrescaleMap_t;
+      typedef std::unordered_map<std::string, float, CxxUtils::TransparentStringHash, std::equal_to<> > PrescaleMap_t;
       typedef PrescaleMap_t::value_type value_type;
 
       // setters
@@ -51,8 +55,8 @@ namespace TrigConf {
       // getters
       float prescale() const { return m_prescale; }
       float pass_through() const { return m_pass_through; }
-      std::pair<bool, float> getRerunPrescale(const std::string& targetName) const;
-      std::pair<bool, float> getStreamPrescale(const std::string& streamName) const;
+      std::pair<bool, float> getRerunPrescale(std::string_view targetName) const;
+      std::pair<bool, float> getStreamPrescale(std::string_view streamName) const;
       const PrescaleMap_t& getRerunPrescales() const { return m_rerun_prescale; }
       const PrescaleMap_t& getStreamPrescales() const { return m_stream_prescale; }
 
