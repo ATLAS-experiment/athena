@@ -293,7 +293,6 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
       if (m_maxloops > 0 && m_looper.loop_particles().size() > static_cast<std::size_t>(m_maxloops) ) filter_pass = false;
     }
 
-#ifdef HEPMC3
     const auto xsec = evt->cross_section();
     if (!xsec) {
       ATH_MSG_WARNING("WATCH OUT: event is missing the generator cross-section!");
@@ -323,9 +322,6 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
       /// Uncomment for full debug HepMC3::Print::content(*evt);
       for (const auto& part: beams_t) HepMC3::Print::line(part);
     }
-#else
-    auto beams = evt->beam_particles();
-#endif
     double cmenergy = m_cm_energy;
     if (!HepMC::valid_beam_particles(evt)) {
       ATH_MSG_WARNING("Invalid beam particle pointers -- this generator interface should be fixed");
@@ -383,12 +379,7 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
     int vtxDisplacedstatuscode12CheckRateCnt=0;
     int vtxDisplacedstatuscodenot12CheckRateCnt=0;
     int vtxDisplacedMoreThan_1m_CheckRateCnt=0;
-#ifdef HEPMC3
     for (const auto& vtx: evt->vertices()) {
-#else
-    for (auto vitr = evt->vertices_begin(); vitr != evt->vertices_end(); ++vitr ) {
-      const HepMC::GenVertex* vtx = *vitr;
-#endif
       const HepMC::FourVector pos = vtx->position();
 
       // Check for NaNs and infs in vertex position components
@@ -422,12 +413,7 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
         ATH_MSG_WARNING("Found vertex position displaced by less than " << m_min_dist_trans
                         << "mm in transverse distance: " << dist_trans << "mm");
 
-#ifdef HEPMC3
         for (const auto& part: vtx->particles_in()) {
-#else
-        for (auto part_it = vtx->particles_in_const_begin(); part_it != vtx->particles_in_const_end(); ++part_it) {
-          auto part = (*part_it);
-#endif
           if (m_dumpEvent){
             ATH_MSG_WARNING("Incoming particle : ");
             HepMC::Print::line(msg( MSG::WARNING ).stream(), part);
@@ -442,12 +428,7 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
       if (dist_trans2 > m_max_dist_trans*m_max_dist_trans) {
         ATH_MSG_WARNING("Found vertex position displaced by more than " << m_max_dist_trans << "mm in transverse distance: " << dist_trans << "mm");
 
-#ifdef HEPMC3
         for (const auto& part: vtx->particles_in()) {
-#else
-        for (auto part_it = vtx->particles_in_const_begin(); part_it != vtx->particles_in_const_end(); ++part_it) {
-        auto part=(*part_it);
-#endif
           if (m_dumpEvent){
             ATH_MSG_WARNING("Outgoing particle : ");
             HepMC::Print::line(msg( MSG::WARNING ).stream(),part);
@@ -456,12 +437,7 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
           ATH_MSG_WARNING("end vertex        = " << part->end_vertex()->position().x() << ", " << part->end_vertex()->position().y() << ", " << part->end_vertex()->position().z());
           if (m_dumpEvent) ATH_MSG_WARNING("parents info: ");
           if (part->production_vertex()) {
-#ifdef HEPMC3
             for(const auto& p_parents: part->production_vertex()->particles_in()) {
-#else
-            for(auto p_parents_it = part->production_vertex()->particles_in_const_begin(); p_parents_it != part->production_vertex()->particles_in_const_end(); ++p_parents_it) {
-            auto p_parents=(*p_parents_it);
-#endif
               if (m_dumpEvent){
                 msg(MSG::WARNING) << "\t";
                 HepMC::Print::line( msg( MSG::WARNING ).stream() , p_parents );
@@ -632,12 +608,7 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
         auto vtx = pitr->end_vertex();
         if (vtx) {
           double p_energy = 0;
-#ifdef HEPMC3
           for (auto  desc: HepMC::descendant_particles(vtx)) {
-#else
-          for (auto  desc_it = vtx->particles_begin(HepMC::descendants); desc_it != vtx->particles_end(HepMC::descendants); ++desc_it) {
-          auto desc=(*desc_it);
-#endif
             if (std::abs(desc->pdg_id()) == m_pdg) tau_child = 1;
             if ( MC::isStable(desc) ) p_energy += desc->momentum().e();
           }

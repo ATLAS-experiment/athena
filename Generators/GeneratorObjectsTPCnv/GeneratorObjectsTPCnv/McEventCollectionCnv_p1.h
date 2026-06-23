@@ -14,31 +14,9 @@
 #include <sstream>
 
 // STL includes
-#ifndef HEPMC3
-# ifdef __clang__
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wkeyword-macro"
-# endif
-# if __GNUC__ >= 16
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wkeyword-macro"
-# endif
-# define private public
-# define protected public
-#endif
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
-#ifndef HEPMC3
-# undef private
-# undef protected
-# ifdef __clang__
-#  pragma clang diagnostic pop
-# endif
-# if __GNUC__ >= 16
-#  pragma GCC diagnostic pop
-# endif
-#endif
 #include "GeneratorObjects/McEventCollection.h"
 
 // AthenaPoolCnvSvc includes

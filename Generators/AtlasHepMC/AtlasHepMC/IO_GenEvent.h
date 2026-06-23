@@ -5,7 +5,6 @@
 
 #ifndef ATLASHEPMC_IOGENEVENT_H
 #define ATLASHEPMC_IOGENEVENT_H
-#ifdef HEPMC3
 #include "HepMC3/Version.h"
 #include "HepMC3/Reader.h"
 #include "HepMC3/Writer.h"
@@ -38,7 +37,4 @@ private:
     std::unique_ptr<HepMC3::WriterAsciiHepMC2> m_writer;
 };
 }
-#else
-#include "HepMC/IO_GenEvent.h"
-#endif
 #endif

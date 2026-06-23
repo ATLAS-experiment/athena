@@ -3,6 +3,7 @@
   for the benefit of the ATLAS collaboration
 */
 #include "GraphBucketFilterTool.h"
+#include "InferenceUtils.h"
 #include "BucketGraphUtils.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -352,7 +353,7 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     } else {
       const float rawScore = outputPtr[predIdx];
       const float score = m_singleOutputIsLogit.value()
-          ? 1.f / (1.f + std::exp(-rawScore))
+          ? InferenceUtils::sigmoid(rawScore)
           : rawScore;
       keepBucket = (score > scoreThreshold);
       if (keepBucket) {

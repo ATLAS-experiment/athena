@@ -64,6 +64,7 @@ def createGNNTrackingConfigFlags():
     icf.addFlag("Tracking.GNN.ActsPipeline.edgeCut", 0.5)
     icf.addFlag("Tracking.GNN.ActsPipeline.numTrtContexts", 1)
     icf.addFlag("Tracking.GNN.ActsPipeline.minCandidateMeasurements", 3)
+    icf.addFlag("Tracking.GNN.ActsPipeline.saveEdgeScore", False)
 
     return icf
 

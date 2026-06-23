@@ -138,7 +138,8 @@
                <string>SCT Hits</string>
               </property>
              </widget>
-            </item><item>
+            </item>
+            <item>
              <widget class="QCheckBox" name="chbxITkPixelHits">
               <property name="text">
                <string>ITkPixel Sim Hits</string>
@@ -149,6 +150,13 @@
              <widget class="QCheckBox" name="chbxITkStripHits">
               <property name="text">
                <string>ITkStrip Sim Hits</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="chbxHGTDHits">
+              <property name="text">
+               <string>HGTD Sim Hits</string>
               </property>
              </widget>
             </item>

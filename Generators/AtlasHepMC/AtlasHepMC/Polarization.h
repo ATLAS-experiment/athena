@@ -5,7 +5,6 @@
 
 #ifndef ATLASHEPMC_POLARIZATION_H
 #define ATLASHEPMC_POLARIZATION_H
-#ifdef HEPMC3
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/Attribute.h"
 #include "AtlasHepMC/AttributeNames.h"
@@ -39,15 +38,4 @@ template<class T> inline void  set_polarization(T& a, const Polarization& b) {
     a->add_attribute(HepMCStr::theta, std::make_shared<HepMC3::DoubleAttribute>(b.theta()));
 }
 }
-#else
-#include "HepMC/Polarization.h"
-namespace HepMC {
-template <class T> inline void set_polarization(T& a, const Polarization& b) {
-    a->set_polarization(b);
-}
-template <class T> inline Polarization polarization(const T& a) {
-    return a->polarization();
-}
-}
-#endif
 #endif

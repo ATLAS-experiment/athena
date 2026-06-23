@@ -28,7 +28,7 @@ def StandaloneMuonOutputCfg(flags):
 
     if flags.Muon.scheduleActsReco:
         aod_items += ["xAOD::MuonSegmentContainer#MuonSegmentsFromR4"]
-        aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment"]
+        aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment.-localSegCov"]
 
     # TrackParticles
     aod_items += ["xAOD::TrackParticleContainer#MuonSpectrometerTrackParticles"]

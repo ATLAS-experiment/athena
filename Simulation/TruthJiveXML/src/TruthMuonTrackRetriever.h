@@ -11,11 +11,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
-namespace HepPDT{
-  class ParticleDataTable;
-}
-
-
 namespace JiveXML{
 
   /**

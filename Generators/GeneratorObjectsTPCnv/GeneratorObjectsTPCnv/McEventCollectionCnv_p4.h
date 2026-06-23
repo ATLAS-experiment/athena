@@ -15,31 +15,9 @@
 #include <unordered_map>
 #include <sstream>
 
-#ifndef HEPMC3
-# ifdef __clang__
-#  pragma clang diagnostic push
-#  pragma clang diagnostic ignored "-Wkeyword-macro"
-# endif
-# if __GNUC__ >= 16
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wkeyword-macro"
-# endif
-# define private public
-# define protected public
-#endif
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
-#ifndef HEPMC3
-# undef private
-# undef protected
-# ifdef __clang__
-#  pragma clang diagnostic pop
-# endif
-# if __GNUC__ >= 16
-#  pragma GCC diagnostic pop
-# endif
-#endif
 #include "GeneratorObjects/McEventCollection.h"
 
 // AthenaPoolCnvSvc includes
@@ -137,27 +115,16 @@ class McEventCollectionCnv_p4 : public T_AthenaPoolTPCnvBase<
    *  vertex is added to the persistent is added to the persistent
    *  @c GenEvent.
    */
-#ifdef HEPMC3
   static void writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
                        McEventCollection_p4& persEvt ) ;
-#else
-  void writeGenVertex( const HepMC::GenVertex& vtx,
-                       McEventCollection_p4& persEvt ) const;
-#endif
 
   /** @brief Method to write a persistent @c GenParticle object
    *  It returns the index of the persistent @c GenParticle into the
    *  collection of persistent of @c GenParticles from the
    *  persistent @c GenEvent
    */
-#ifdef HEPMC3   
   static int writeGenParticle( const HepMC::ConstGenParticlePtr& p,
                         McEventCollection_p4& persEvt ) ;
-#else
-  int writeGenParticle( const HepMC::GenParticle& p,
-                        McEventCollection_p4& persEvt ) const;
-
-#endif
   ///////////////////////////////////////////////////////////////////
   // Protected data:
   ///////////////////////////////////////////////////////////////////

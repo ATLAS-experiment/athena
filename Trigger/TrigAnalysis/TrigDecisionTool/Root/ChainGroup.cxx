@@ -14,7 +14,7 @@
  *
  ***********************************************************************************/
 #include <limits>
-#include "boost/regex.hpp"
+#include <regex>
 #include <ranges>
 
 #include "CxxUtils/bitmask.h"
@@ -603,17 +603,16 @@ Trig::ChainGroup::update(const TrigConf::HLTChainList* confChains,
 
      for(const std::string& pat : m_patterns) {
         // find chains matching pattern
-        boost::regex compiled(pat);
-        boost::cmatch what;
+        std::regex compiled(pat);
 
         for(TrigConf::HLTChain* ch : *confChains) {
-           if ( boost::regex_match(ch->chain_name().c_str(), what, compiled) ) {
+           if ( std::regex_match(ch->chain_name().c_str(), compiled) ) {
               m_confChains.push_back(ch);
            }
         }
 
         for(TrigConf::TriggerItem* item : *confItems) {
-           if ( boost::regex_match( item->name().c_str(), what, compiled) ) {
+           if ( std::regex_match(item->name().c_str(), compiled) ) {
               m_confItems.push_back(item);
            }
         }

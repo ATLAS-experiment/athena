@@ -141,11 +141,7 @@ bool EvtPhotosEngine::doDecay( EvtParticle* theMother )
 
     // Now pass the event to Photos for processing
     // Create a Photos event object
-#ifdef HEPMC3
     Photospp::PhotosHepMC3Event photosEvent( theEvent.get() );
-#else
-    Photospp::PhotosHepMCEvent photosEvent( theEvent.get() );
-#endif
 
     // Run the Photos algorithm
     photosEvent.process();
@@ -162,15 +158,7 @@ bool EvtPhotosEngine::doDecay( EvtParticle* theMother )
         // to the outgoing particle list
 
         // Get the iterator of outgoing particles for this vertex
-#ifdef HEPMC3
         for ( auto outParticle : theVertex->particles_out() ) {
-#else
-        HepMC::GenVertex::particles_out_const_iterator outIter;
-        for ( outIter = theVertex->particles_out_const_begin();
-              outIter != theVertex->particles_out_const_end(); ++outIter ) {
-            // Get the next HepMC GenParticle
-            HepMC::GenParticle* outParticle = *outIter;
-#endif
 
             // Get the three-momentum Photos result for this particle, and the PDG id
             double px( 0.0 ), py( 0.0 ), pz( 0.0 );
@@ -281,16 +269,7 @@ int EvtPhotosEngine::getNumberOfPhotons( const GenVertexPtr theVertex ) const
     int nPhotons( 0 );
 
     // Get the iterator of outgoing particles for this vertex
-#ifdef HEPMC3
     for ( auto outParticle : theVertex->particles_out() ) {
-#else
-    HepMC::GenVertex::particles_out_const_iterator outIter;
-    for ( outIter = theVertex->particles_out_const_begin();
-          outIter != theVertex->particles_out_const_end(); ++outIter ) {
-        // Get the next HepMC GenParticle
-        HepMC::GenParticle* outParticle = *outIter;
-#endif
-
         // Get the PDG id
         int pdgId( 0 );
         if ( outParticle != 0 ) {

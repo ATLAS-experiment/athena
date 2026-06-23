@@ -21,6 +21,7 @@
 #include "TrigInDetAnalysisUtils/Filters.h" 
 
 #include "TLorentzVector.h"
+
 #include <vector>
 #include <string>
 #include <ostream>
@@ -161,7 +162,7 @@ protected:
     TIDARoiDescriptor roi_tag( troi.roi() );
   
     static_cast<Filter_Combined*>(filter_tag)->setRoi( &roi_tag );
-
+    
     std::vector<TIDA::Track*> refp_tag = selector_tag->tracks( filter_tag );
 
     /// get reference tracks from the probe roi 

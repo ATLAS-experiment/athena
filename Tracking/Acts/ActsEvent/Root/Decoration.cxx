@@ -24,16 +24,14 @@ std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy>
     if (!actsTrk) {
         return std::nullopt;
     }
-    std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy>  retOpt{};
-    (*actsTrk).container().trackStateContainer().visitBackwards((*actsTrk).tipIndex(), 
-        [&](const auto& state) {
-            if ((state.typeFlags().isOutlier() && skipOutlier) ||
-                !state.hasUncalibratedSourceLink() || retOpt) {
-              return;
-            }
-            retOpt = state;
-        });
-    return retOpt;
+    for (const auto& state : actsTrk->trackStatesReversed()) {
+        if ((state.typeFlags().isOutlier() && skipOutlier) ||
+              !state.hasUncalibratedSourceLink()) {
+            continue;
+        }
+        return state;
+    }
+    return std::nullopt;
 }
 
 std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy> 
@@ -43,17 +41,14 @@ std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy>
     if (!actsTrk) {
         return std::nullopt;
     }
-    std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy> retOpt{};
-    (*actsTrk).container().trackStateContainer().visitBackwards((*actsTrk).tipIndex(), 
-        [&](const auto& state) {
-            if ((state.typeFlags().isOutlier() && skipOutlier) ||
-                !state.hasUncalibratedSourceLink()) {
-              return;
-            }
-            retOpt = state;
-        });
-    return retOpt;
-
+    for (const auto& state : actsTrk->trackStates()) {
+        if ((state.typeFlags().isOutlier() && skipOutlier) ||
+              !state.hasUncalibratedSourceLink()) {
+            continue;
+        }
+        return state;
+    }
+    return std::nullopt;
 }
 
 

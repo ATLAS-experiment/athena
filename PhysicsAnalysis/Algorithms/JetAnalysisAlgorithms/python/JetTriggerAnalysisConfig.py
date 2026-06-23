@@ -44,7 +44,7 @@ class JetTriggerMatchingBlock (ConfigBlock):
             chain_out = chain_out.replace("-","_").replace(".","p")
 
             alg = config.createAlgorithm( 'CP::JetTriggerDecoratorAlg',
-                                          'JetTriggerDecoratorAlg_' + chain )
+                                          'JetTriggerDecoratorAlg_' + chain_out )
 
             alg.trigger = chain
 
@@ -70,7 +70,7 @@ class JetTriggerMatchingBlock (ConfigBlock):
                 config.addPrivateTool( 'trigEmulationTool',
                                        'Trig::TrigBtagEmulationTool' )
 
-                from TrigBtagEmulationTool.TrigBtagEmulationToolConfig import (
+                from TrigBtagEmulationTool.TrigBtagEmulationToolHelpers import (
                     TrigBtagEmulation_kwargs)
                 tool_kwargs = TrigBtagEmulation_kwargs(config.flags, [chain])
                 for prop, value in tool_kwargs.items():

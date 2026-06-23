@@ -70,6 +70,7 @@ namespace LVL1 {
     virtual
     std::pair<std::string, double> getMinThresholdNameAndValue(const std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> >& decisions,
 							       const double& eta = 0) const override;
+    using parsedFlagsMap = std::unordered_map<std::string, std::vector<std::vector<std::string_view> > >;
 
   protected:
     //Function that performs the actual initialization of the tool. 
@@ -103,19 +104,17 @@ namespace LVL1 {
                           bool isSideC) const;
 
     bool getTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H) const;
-    void makeTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H) const;
+    void makeTGCDecision(const std::string& tgcFlags, bool F, bool C, bool H, const parsedFlagsMap& parsed_flags) const;
 
     bool getRPCDecision(const std::string& rpcFlags, bool M) const;
-    void makeRPCDecision(const std::string& rpcFlags, bool M) const;
+    void makeRPCDecision(const std::string& rpcFlags, bool M, const parsedFlagsMap& parsed_flags) const;
 
-    void parseFlags(const std::string& flags) const;
+    void parseFlags(const std::string& flags, parsedFlagsMap& parsed_flags) const;
     std::string getShapedFlags(const std::string& flags) const;
 
     ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_rpcTool{this, "RPCRecRoiTool", "LVL1::TrigT1RPCRecRoiTool/LVL1__TrigT1RPCRecRoiTool", "Tool to get the eta/phi coordinates in the RPC"};
     ToolHandle<LVL1::ITrigT1MuonRecRoiTool> m_tgcTool{this, "TGCRecRoiTool", "LVL1::TrigT1TGCRecRoiTool/LVL1__TrigT1TGCRecRoiTool", "Tool to get the eta/phi coordinates in the TGC"};
 
-    //buffered parsed TGC/RPC flags
-    mutable std::map<std::string, std::vector<std::vector<std::string> > > m_parsed_flags ATLAS_THREAD_SAFE{};
 
     //buffered set of decisions for words that have been checked for each TGC/RPC flag
     mutable std::map<std::string, std::set<TGCFlagDecision> > m_tgcFlag_decisions ATLAS_THREAD_SAFE{};

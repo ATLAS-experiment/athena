@@ -26,7 +26,6 @@ StatusCode TTbarMassFilter::filterEvent(const EventContext& ctx) {
 
   for (McEventCollection::const_iterator itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-#ifdef HEPMC3
     for (const auto& mcpart: *genEvt) {
       // Reset the flag. it become true if the top with a final ('last') status is found
       isLastTop = false;
@@ -127,118 +126,7 @@ StatusCode TTbarMassFilter::filterEvent(const EventContext& ctx) {
         }
       }
     }
-#else
-    HepMC::GenEvent::particle_const_iterator pitr = genEvt->particles_begin();
-    for (; pitr!=genEvt->particles_end(); ++pitr) {
-      // Reset the flag. it become true if the top with a final ('last') status is found
-      isLastTop = false;
-      // Reset the flag. becomes true if the top with the initial ('first') status is found
-      isFirstTop = false;
-      HepMC::GenParticle* mcpart = (*pitr);
 
-      // Work only with tops
-      if (std::abs(mcpart->pdg_id()) == 6) {
-        // Assume that this is the 'last' top
-        isLastTop=true;
-        HepMC::GenVertex* decayVtx = mcpart->end_vertex();
-        // Unusual case...
-        if (!decayVtx) {
-          ATH_MSG_WARNING("top particle " << mcpart << " has no valid decay vertex. ");
-          ATH_MSG_WARNING("It looks like a Pythia history particle. Skip this particle ");
-          continue;
-        }
-
-        // Find out whether this is the top particle with final statuscode, so, just before its decay.
-        /// @todo How generator-portable is this status code assumption?
-
-        HepMC::GenVertex::particles_out_const_iterator child_mcpartItr  = decayVtx->particles_out_const_begin();
-        HepMC::GenVertex::particles_out_const_iterator child_mcpartItrE = decayVtx->particles_out_const_end();
-        for (; child_mcpartItr!=child_mcpartItrE; ++child_mcpartItr) {
-          HepMC::GenParticle* child_mcpart = (*child_mcpartItr);
-          if (std::abs(child_mcpart->pdg_id()) == 6) {
-            // This is not a 'last' top: break the loop over the children, and do nothing with this top particle
-            isLastTop = false;
-            break;
-          }
-        }
-
-        // Store the 'last' top
-        if (isLastTop) {
-          ATH_MSG_DEBUG("Top particle " << mcpart << " is found and stored");
-          tops.push_back(mcpart);
-        }
-
-        // Find and store production vertices for the 'last' tops. This will help to easily couple top and anti-top
-        // pairs later if there are 2 pairs of them. It's a very rare case but needs to be properly handled.
-        if (isLastTop) {
-          // Investigate whether this top particle is the 'first' one.
-          isFirstTop = false;
-          // Retrieve the production vertex of the current 'last' top particle
-          HepMC::GenVertex* prodVtx = mcpart->production_vertex();
-          if (!prodVtx) {
-            ATH_MSG_WARNING("Top particle " << mcpart << " has no valid production vertex");
-            //save null pointer for consistency
-            top_vtxs.push_back(NULL);
-          } else {
-            // Loop until the 'first' top particle  production vertex is not reached
-            while (!isFirstTop && prodVtx) {
-              // Loop over the top mother particles
-              HepMC::GenVertex::particles_in_const_iterator mother_mcpartItr  = prodVtx->particles_in_const_begin();
-              HepMC::GenVertex::particles_in_const_iterator mother_mcpartItrE = prodVtx->particles_in_const_end();
-              for (; mother_mcpartItr != mother_mcpartItrE; ++mother_mcpartItr) {
-                HepMC::GenParticle* mother_mcpart = (*mother_mcpartItr);
-                // One of the mother particles is still top quark. needed to go up in the hierarchy
-                if (mother_mcpart->pdg_id() == 6) {
-                  isFirstTop = false;
-                  prodVtx = mother_mcpart->production_vertex();
-                  if (!prodVtx) {
-                    ATH_MSG_WARNING("mother particle is still a top " << mcpart << ", but has no valid production vertex");
-                    top_vtxs.push_back(NULL);
-                  }
-                  break;
-                } else {
-                  // The current (in loop over the mother particles) mother particle is not a top.
-                  // maybe the found top particle is the initial one? set the flag true. it will be
-                  // set false if one of the other mother particles is top quark.
-                  isFirstTop = true;
-                }
-              }
-            }
-
-            //Store the production vertex for the given top particle. it's a production vertex
-            //  of the initial ('first') top particle for the current final ('last') top.
-            if (isFirstTop) {
-              top_vtxs.push_back(prodVtx);
-            }
-          }
-        }
-
-        // Investigate how many top and anti-tops are found and make a decision
-        // to continue or stop looping over GenParticles in the event
-        if (isLastTop) {
-          // One more 'last' top particle was stored into the vector --> increment the number of top or anti-top particles.
-          if (tops[tops.size()-1]->pdg_id() == 6) top++; else topbar++;
-
-          // One top and one ati-top 'last' particles are found.  Stop looping
-          // over the particles
-          if (top==1 && topbar==1) break;
-
-          // This should not happen. But depends on a style how a given
-          // generator records the particles.  In very rare cases there are more
-          // than 1 top-pairs created. If occasionally the same signed tops from
-          // the different couples are ordered first in the generator record,
-          // then the situation below is possible
-          if (top > 1 || topbar > 1) ATH_MSG_INFO("More than one top-pair exist in the event.");
-
-          // Both top-pairs are found. don't expect more than that.  So, it's
-          // time to break the loop over particles.  this fairly assumes that
-          // there are no more top-pairs
-          if (top==2 && topbar==2) break;
-        }
-
-      }
-    }
-#endif
   }
 
   // Main case: there is one top-pair in the event

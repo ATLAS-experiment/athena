@@ -26,20 +26,27 @@ namespace GlobalSim {
     CHECK(inContainer.isValid());
 
     ATH_MSG_DEBUG("Number of gFexRhoROIs read in " << inContainer->size());
+    if(inContainer->size() != 3){
+      ATH_MSG_ERROR("Expected 3 input gFex Rho TOBs. I received " << inContainer->size());
+    }
     
     using OutContainer=GlobalSim::IOBitwise::gFexRhoTOBContainer;
-
     auto outContainer = std::make_unique<OutContainer>();
- 
-    outContainer->reserve(inContainer->size());
 
-    using ConcTOB=GlobalSim::IOBitwise::gFexRhoTOB;
-    std::transform(std::cbegin(*inContainer),
-		   std::cend(*inContainer),
-		   std::back_inserter(*outContainer),
-		   [](const auto& inTob){
-		     return new ConcTOB(*inTob);});
+    uint rho_bits = 0;
+    uint rho_scale = 0;
+    for(auto tob:*inContainer){
+      ATH_MSG_DEBUG("tob->gFexTobEt() " << tob->gFexTobEt());
+      rho_bits += tob->gFexTobEt();
+      rho_scale = tob->tobEtScale();
+    }
 
+    outContainer->push_back(std::make_unique<IOBitwise::gFexRhoTOB>(rho_bits, rho_scale));
+
+    for(auto tob:*outContainer){
+      ATH_MSG_DEBUG("tob->gFexTobEt() " << tob->rho_bits());
+    }
+    
     auto h_write =  SG::WriteHandle<OutContainer>(m_gFexRhoTOBContainerKey,
 						  ctx);
     CHECK(h_write.record(std::move(outContainer)));

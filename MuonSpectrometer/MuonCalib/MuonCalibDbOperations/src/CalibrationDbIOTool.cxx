@@ -137,11 +137,12 @@ namespace MuonCalib {
                                             bool /*real resolution*/) {
         std::vector<SamplePoint> points;
         // fill rt poits
-        fillRtPoints(rt_relation->rt(), points);
+        auto rtrelationrt = rt_relation->rt();
+        fillRtPoints(rtrelationrt.get(), points);
         // fill resolution points
-        fillResPoints(resolution, points);
+        fillResPoints(*resolution, points);
         // fill multilayer rt difference as pseudo-point
-        if (rt_relation->rt()->hasTmaxDiff()) {
+        if (rtrelationrt->hasTmaxDiff()) {
             SamplePoint point(rt_relation->rt()->GetTmaxDiff(), -99.9, 0.0);
             points.push_back(point);
         }
@@ -201,10 +202,10 @@ namespace MuonCalib {
         return StatusCode::SUCCESS;
     }
 
-    void CalibrationDbIOTool::fillRtPoints(const std::shared_ptr<const IRtRelation>& rt, std::vector<SamplePoint> &points) {
+    void CalibrationDbIOTool::fillRtPoints(const IRtRelation* rt, std::vector<SamplePoint> &points) {
         points.clear();
         // for rt relations based on support points, write points
-        std::shared_ptr<const RtRelationLookUp> rt_lookup = std::dynamic_pointer_cast<const RtRelationLookUp>(rt);
+        auto rt_lookup = dynamic_cast<const RtRelationLookUp*>(rt);
         const CalibFunc::ParVec &rt_param = rt->parameters();
         if (rt_lookup && static_cast<int>(rt_lookup->nPar() - 2) <= m_max_rt_points) {
             double t_min(rt_param[0]);
@@ -221,7 +222,7 @@ namespace MuonCalib {
             }
             return;
         }
-        std::shared_ptr<const RtSpline> rt_spline = std::dynamic_pointer_cast<const RtSpline>(rt);
+        auto rt_spline = dynamic_cast<const RtSpline*>(rt);
         if (rt_spline && static_cast<int>(rt_param.size() / 2) <= m_max_rt_points) {
             for (unsigned int i = 0; i < rt_param.size(); i += 2) {
                 SamplePoint point(rt_param[i], rt_param[i + 1], -1);
@@ -236,8 +237,8 @@ namespace MuonCalib {
         }
     }
 
-    void CalibrationDbIOTool::fillResPoints(const std::shared_ptr<const IRtResolution>& rt_resolution, std::vector<SamplePoint> &points) {
-        for (auto & point : points) { point.set_error(rt_resolution->resolution(point.x1())); }
+    void CalibrationDbIOTool::fillResPoints(const IRtResolution& rt_resolution, std::vector<SamplePoint> &points) {
+        for (auto & point : points) { point.set_error(rt_resolution.resolution(point.x1())); }
     }
 
     CalibDbConnection *CalibrationDbIOTool::get_connection(int write) {

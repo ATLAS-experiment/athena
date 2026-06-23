@@ -247,7 +247,7 @@ def createMonTool( flags, slicetag, chain ) :
 
     
     defineHisto( monTool,  "d0_vs_phi_prof",     path=mypath, type="TProfile", title="d0 vs phi_prof;#phi;d0 [mm]",      xbins=25,     xmin=-pi,  xmax=pi )
-    defineHisto( monTool,  "d0_vs_phi_rec_prof", path=mypath, type="TProfile", title="d0 vs phi_rec_prof;#phi; do [mm]",  xbins=25,     xmin=-pi,  xmax=pi )
+    defineHisto( monTool,  "d0_vs_phi_rec_prof", path=mypath, type="TProfile", title="d0 vs phi_rec_prof;#phi; d0 [mm]",  xbins=25,     xmin=-pi,  xmax=pi )
 
     if "probe" in cs.extra: 
         if "Jpsi" in chain:

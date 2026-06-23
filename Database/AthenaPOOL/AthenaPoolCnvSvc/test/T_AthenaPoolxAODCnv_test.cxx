@@ -129,6 +129,7 @@ void test1 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   DataVector<Y_v1> pers_old;
   for (size_t i=0; i < N; i++)
     pers_old.push_back (new Y_v1(i));
+  // cppcheck-suppress danglingLifetime
   testsvc.m_pers1 = &pers_old;
   token = std::make_unique<Token>();
   token->setClassID (Guid (YCont_v1_guid));

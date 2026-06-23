@@ -155,6 +155,7 @@ def GNNHSOverlapRemovalAlgCfg(flags, name="GNNHS_OverlapRemovalAlg",
 
 def GNNToolCfg(flags, name="HardScatterSelectionGNNTool", **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("nnFile", flags.Tracking.PriVertex.HSGNN.nnFile)
     acc.setPrivateTools(CompFactory.InDetGNNHardScatterSelection.GNNTool(name, **kwargs))
     return acc
 
@@ -164,10 +165,7 @@ def GNNHSVertexDecoratorAlgCfg(flags, name="GNNHS_VertexDecoratorAlg", **kwargs)
     kwargs.setdefault("photonsIn", "Photons")
 
     if "gnnTool" not in kwargs:
-
-        kwargs.setdefault("gnnTool", cfg.popToolsAndMerge(
-            GNNToolCfg(flags,
-                       nnFile="InDetGNNHardScatterSelection/v1.2/HSGNN_baseline_v1.2.onnx")))
+        kwargs.setdefault("gnnTool", cfg.popToolsAndMerge(GNNToolCfg(flags)))
 
     if "TrackVertexAssociationTool" not in kwargs:
         from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import GNNHS_TTVAToolCfg

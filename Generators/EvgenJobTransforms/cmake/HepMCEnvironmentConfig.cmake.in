@@ -6,13 +6,8 @@
 
 # Set the environment variable(s):
 
-if (HEPMC3_USE)
 set( ATLAS_HEPMCVER "3" CACHE STRING
    "Version of HEPMC" )
-else()
-set( ATLAS_HEPMCVER "2" CACHE STRING
-   "Version of HEPMC" )
-endif()
 
 set( HEPMCENVIRONMENT_ENVIRONMENT
     SET HEPMCVER "${ATLAS_HEPMCVER}" )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonEfficiencyCorrections )
@@ -54,7 +54,7 @@ atlas_add_test( gt_ColumnarToolTests
                 SOURCES test/gt_ColumnarToolTests.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib MuonEfficiencyCorrectionsLib AsgTestingLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

@@ -47,7 +47,8 @@ namespace InDet{
      */
     virtual StatusCode getTracks(
       const std::vector<const Trk::SpacePoint*>& spacepoints,
-      std::vector<std::vector<uint32_t> >& tracks) const override;
+      std::vector<std::vector<uint32_t> >& tracks,
+      std::unordered_map<int, std::unordered_map<int, float>>* edgeMap = nullptr) const override;
 
     ///////////////////////////////////////////////////////////////////
     // Print internal tool parameters and status

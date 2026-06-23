@@ -30,28 +30,22 @@ public:
 
     using PixelPos = xAOD::MeasVector<2>;
     using PixelCov = xAOD::MeasMatrix<2>;
-    using PixelCalibrator = Acts::Delegate<
-	std::pair<PixelPos, PixelCov>(const Acts::GeometryContext&,
-				      const Acts::CalibrationContext&,
-				      const xAOD::PixelCluster&,
-				      const TrackStateProxy&)>;
 
     using StripPos = xAOD::MeasVector<1>;
     using StripCov = xAOD::MeasMatrix<1>;
-    using StripCalibrator = Acts::Delegate<
-	std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
-				      const Acts::CalibrationContext&,
-				      const xAOD::StripCluster&,
-				      const TrackStateProxy&)>;
 
     using HgtdPos = xAOD::MeasVector<3>;
     using HgtdCov = xAOD::MeasMatrix<3>;
-    using HGTDCalibrator = Acts::Delegate<
-  	std::pair<HgtdPos, HgtdCov>(const Acts::GeometryContext&,
-              			    const Acts::CalibrationContext&,
-              			    const xAOD::HGTDCluster &,
-              			    const TrackStateProxy&)>;
 
+    template <typename T_Cluster, std::size_t NDIM>
+    using OnTrackCalibratorDelegate = Acts::Delegate<
+       void(const Acts::GeometryContext&,
+            const Acts::CalibrationContext&,
+            const T_Cluster &,
+            TrackStateProxy&)>;
+    using PixelCalibrator = OnTrackCalibratorDelegate<const xAOD::PixelCluster,2>;
+    using StripCalibrator = OnTrackCalibratorDelegate<const xAOD::StripCluster,1>;
+    using HGTDCalibrator = OnTrackCalibratorDelegate<const xAOD::HGTDCluster,3>;
 
     PixelCalibrator pixelCalibrator;
     StripCalibrator stripCalibrator;
@@ -96,7 +90,8 @@ public:
 		   TrackStateProxy state) const;
 
 private:
-    /** @brief Helper class to access the Acts surfaces */
+
+   /** @brief Helper class to access the Acts surfaces */
     xAODUncalibMeasSurfAcc m_surfAcc{};
 
     /** @brief all the calibrator objects used and owned by this on track calibrator.*/
@@ -104,11 +99,10 @@ private:
 
     // Support the no-calibration case
     template <std::size_t Dim, typename Cluster>
-    std::pair<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>>
-    passthrough(const Acts::GeometryContext& gctx,
-		const Acts::CalibrationContext& /*cctx*/,
-		const Cluster& cluster,
-		const TrackStateProxy& state) const;
+    void passthrough(const Acts::GeometryContext& gctx,
+                     const Acts::CalibrationContext& /*cctx*/,
+                     const Cluster& cluster,
+                     TrackStateProxy& state) const;
 
     // connect passThrough calibrator for a certain measurement type
     template <typename T_CalibratorToolHandle, typename T_Delegate>

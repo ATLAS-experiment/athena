@@ -16,6 +16,7 @@ namespace HepMCStr {
  inline const std::string alphaQED{"alphaQED"};
  inline const std::string barcode{"barcode"};
  inline const std::string barcodes{"barcodes"};
+ inline const std::string cycles{"cycles"};
  inline const std::string event_scale{"event_scale"};
  inline const std::string filterHT{"filterHT"};
  inline const std::string filterMET{"filterMET"};

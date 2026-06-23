@@ -68,12 +68,7 @@ StatusCode DirectPhotonFilter::filterEvent(const EventContext& ctx) {
         // iterate over parent particles to exclude photons from hadron decays
         auto prodVtx = pitr->production_vertex();
         bool fromHadron(false);
-#ifdef HEPMC3
         for (const auto& parent:  prodVtx->particles_in()) {
-#else
-        for (auto parent_it = prodVtx->particles_begin(HepMC::parents); parent_it != prodVtx->particles_end(HepMC::parents); ++parent_it) {
-          auto parent=*parent_it;
-#endif
           int pdgindex =  std::abs(parent->pdg_id()); 
           ATH_MSG_DEBUG("Looping on Production (parents) vertex : " << parent->pdg_id() << parent);
           if (pdgindex > 100) {

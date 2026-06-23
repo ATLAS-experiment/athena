@@ -9,9 +9,7 @@ GenFilter::GenFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenBase(name, pSvcLocator)
 {
   declareProperty("TotalPassed", m_nNeeded=-1);
-#ifdef HEPMC3
   declareProperty("KeepAllEvents", m_keepAll=false);
-#endif
   m_nPass = 0;
   m_nFail = 0;
 }
@@ -35,11 +33,7 @@ StatusCode GenFilter::execute(const EventContext& ctx) {
     ATH_MSG_WARNING("More than one event in current McEventCollection -- which is valid?");
   }
   StatusCode sc = filterEvent(ctx);
-#ifdef HEPMC3
   if (filterPassed(ctx) || m_keepAll ) {
-#else
-  if (filterPassed(ctx) ) {
-#endif
     ATH_MSG_DEBUG("Event passed filter");
     m_nPass += 1;
   } else {

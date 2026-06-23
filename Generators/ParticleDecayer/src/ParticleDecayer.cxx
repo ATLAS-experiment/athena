@@ -408,14 +408,9 @@ StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
            
         //lifetime handling of the dark photons
         int polarizationSwitch = 1;
-#ifdef HEPMC3
         const std::vector<HepMC::GenParticlePtr>& particlesOut = genpart->end_vertex()->particles_out();
         std::vector<HepMC::GenParticlePtr>::const_iterator pItBegin = particlesOut.begin();
         std::vector<HepMC::GenParticlePtr>::const_iterator pItEnd = particlesOut.end();
-#else
-        HepMC::GenVertex::particles_out_const_iterator pItBegin    = genpart->end_vertex()->particles_out_const_begin();
-        HepMC::GenVertex::particles_out_const_iterator pItEnd = genpart->end_vertex()->particles_out_const_end();
-#endif
         for ( auto pIt=pItBegin ; pIt != pItEnd; ++pIt )
            {
                

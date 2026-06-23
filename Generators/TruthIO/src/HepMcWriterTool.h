@@ -22,10 +22,8 @@
 // Forward declaration
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/IO_BaseClass.h"
-#ifdef HEPMC3
 #include "HepMC3/Writer.h"
 #include "HepMC3/WriterAsciiHepMC2.h"
-#endif 
 class HepMcWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
@@ -89,11 +87,7 @@ class HepMcWriterTool : public extends<AthAlgTool, IIOHepMcTool>
 
   /** Abstract base class for the back-end
    */
-#ifdef HEPMC3
   HepMC3::Writer* m_ioBackend;
-#else   
-  HepMC::IO_BaseClass* m_ioBackend;
-#endif
 
 }; 
 #endif //> MCPARTICLETOOLS_HEPMCWRITERTOOL_H

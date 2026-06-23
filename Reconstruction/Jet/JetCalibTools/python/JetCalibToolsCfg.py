@@ -54,7 +54,7 @@ def defineJetCalibTool(jetdef, modspec):
 def getJetCalibToolPrereqs(jetdef, modspec):
     from JetCalibTools.JetCalibStepsConfig import load_yaml_cfg
 
-    cfg = calibdic_T0[jetdef.basename]
+    cfg, calibSeqOverride = getJetCalibToolSettings(jetdef, modspec)
     configDic = load_yaml_cfg(cfg)
 
     prereqs = ["mod:ConstitFourMom"]

@@ -385,13 +385,17 @@ TrigConf::L1Menu::topoAlgorithmOutputNames(const std::string & category) const
 
 
 const TrigConf::L1TopoAlgorithm & 
-TrigConf::L1Menu::algorithm(const std::string & algoName, const std::string & category) const
+TrigConf::L1Menu::algorithm(const std::string & algoName, std::string_view category) const
 {
+   const auto itr = m_algorithmsByName.find(category);
+   if (itr == m_algorithmsByName.end()){
+     throw std::out_of_range("TrigConf::L1Menu::algorithm: No algorithm of category "+std::string{category}+ " found.");
+   }
    try {
-      return * m_algorithmsByName.at(category).at(algoName);
+      return * itr->second.at(algoName);
    }
    catch(std::exception & ex) {
-      std::cerr << "No algorithm " << algoName << " of category " << category << " defined in the L1 menu" << std::endl;
+      std::cerr << "No algorithm " << algoName << " in the " << category << "category  defined in the L1 menu" << std::endl;
       throw;
    }
 }

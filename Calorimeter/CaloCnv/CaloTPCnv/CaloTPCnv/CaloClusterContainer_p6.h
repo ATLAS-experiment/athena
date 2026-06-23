@@ -44,7 +44,7 @@ public:
     typedef contType::iterator iterator;
 
 	
-	unsigned int m_varTypePattern;  // same for container
+	unsigned int m_varTypePattern = 0;  // same for container
     std::vector<float> m_dataStore; // stores variables in all the samplings
 	
 	CaloClusterMomentContainer_p2 m_momentContainer;

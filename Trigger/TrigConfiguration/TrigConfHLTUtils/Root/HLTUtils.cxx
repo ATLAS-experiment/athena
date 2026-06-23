@@ -93,11 +93,11 @@ void HLTUtils::hashes2file( const std::string& fileName) {
   std::ofstream fout(fileName);
 
   for (const auto [category, hashes] : s_hashStore.hashCat) {
-    fout << s_newCategory << std::endl << category << std::endl;
+    fout << s_newCategory << '\n' << category << '\n';
     for (const auto [hash, nameptr] : hashes.hash2name) {
       std::string name(nameptr);
-      name.erase(std::remove(name.begin(), name.end(), '\n'), name.end()); // Remove any line breaks
-      fout << hash << std::endl << name << std::endl;
+      std::erase(name, '\n'); // Remove any line breaks
+      fout << hash << '\n' << name << '\n';
     }
   }
 }

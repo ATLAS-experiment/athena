@@ -19,7 +19,7 @@
 
 #define VISITOR_UNARY(OP) else if (x.operator_ == #OP) code.push_back(op_ ## OP)
 
-std::atomic<std::size_t> g_maxStackSize=0;
+
 
 namespace ExpressionParsing {
    template <class T_func>
@@ -35,13 +35,11 @@ namespace ExpressionParsing {
   {
     std::vector<StackElement> stack;
     stack.reserve(m_stackSize);
-    std::size_t max_stack_size=g_maxStackSize;
 
     std::vector<StackElement>::const_iterator pc = code.begin();
 
     while (pc != code.end())
     {
-       if (stack.size() > max_stack_size) max_stack_size = stack.size();
       
       switch ((pc++)->asInt())
       {
@@ -104,9 +102,6 @@ namespace ExpressionParsing {
 
     if (stack.size()!=1){
       throw std::runtime_error("ExpressionEvaluation: Virtual machine finished in undefined state. Is expression valid?");
-    }
-    if (max_stack_size>g_maxStackSize) {
-       g_maxStackSize=max_stack_size;
     }
     return stack.back();
   }

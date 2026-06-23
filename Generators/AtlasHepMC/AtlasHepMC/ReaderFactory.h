@@ -5,7 +5,5 @@
 
 #ifndef ATLASHEPMC_READERFACTORY_H
 #define ATLASHEPMC_READERFACTORY_H
-#ifdef HEPMC3
 #include "HepMC3/ReaderFactory.h"
-#endif
 #endif

@@ -20,7 +20,7 @@
 #include "monitors/MonitorChain.h"
 #include "monitors/MonitorChainAlgorithm.h"
 #include "monitors/MonitorSequence.h"
-
+#include <format>
 
 TrigCostAnalysis::TrigCostAnalysis( const std::string& name, ISvcLocator* pSvcLocator ) :
   AthAlgorithm(name, pSvcLocator),
@@ -138,21 +138,24 @@ StatusCode TrigCostAnalysis::checkUpdateMaxView(const size_t max) {
   if (max <= m_maxViewsNumber) {
     return StatusCode::SUCCESS;
   }
+
   const size_t current = m_maxViewsNumber;
   m_maxViewsNumber = max;
-  ATH_MSG_DEBUG("Extending maximum View instances from " << current << " to " << max);
-  for (size_t viewID = current; viewID <= m_maxViewsNumber; ++ viewID) {
+
+  ATH_MSG_DEBUG(std::format("Extending maximum View instances from {} to {}", current, max));
+
+  for (size_t viewID = current; viewID <= m_maxViewsNumber; ++viewID) {
     // Allow for this many individual View instances
     for (const std::string& store : m_storeIdentifiers) {
-      std::stringstream ss;
-      ss << store << "_view_" << viewID;
-      TrigConf::HLTUtils::string2hash(ss.str(), "STORE");
+      TrigConf::HLTUtils::string2hash(
+          std::format("{}_view_{}", store, viewID), "STORE");
     }
-    // And this many global Slots. Though, in general, it will be the Views which are driving this. 
-    std::stringstream ss;
-    ss << viewID << "_StoreGateSvc_Impl";
-    TrigConf::HLTUtils::string2hash(ss.str(), "STORE");
+
+    // And this many global Slots. Though, in general, it will be the Views which are driving this.
+    TrigConf::HLTUtils::string2hash(
+        std::format("{}_StoreGateSvc_Impl", viewID), "STORE");
   }
+
   return StatusCode::SUCCESS;
 }
 
@@ -358,44 +361,50 @@ StatusCode TrigCostAnalysis::registerMonitors(MonitoredRange* range) {
 }
 
 
-StatusCode TrigCostAnalysis::getRange(const EventContext& context, MonitoredRange*& range) {
-  std::string rangeName;
-  range = nullptr;
-  constexpr bool includeEndOfLB = false;
+StatusCode TrigCostAnalysis::getRange(const EventContext& context, MonitoredRange*& range)
+{
+    range = nullptr;
+    constexpr bool includeEndOfLB = false;
 
-  if (m_singleTimeRange) {
-    rangeName = m_singleTimeRangeName;
-  } else {
-    const EventIDBase::number_type lumiBlock = context.eventID().lumi_block();
-    const size_t lumiBlockRangeStart = lumiBlock - (lumiBlock % m_TimeRangeLengthLB);
-    const size_t lumiBlockRangeStop  = lumiBlockRangeStart + m_TimeRangeLengthLB - 1;
-    std::stringstream ss;
-    ss << "LumiBlock_" << std::setfill('0') << std::setw(5) << lumiBlockRangeStart;
-    if (includeEndOfLB && lumiBlockRangeStop != lumiBlockRangeStart) {
-      ss << "_" << lumiBlockRangeStop;
-    }
-    rangeName = ss.str();
-  }
-
-  std::unordered_map<std::string, std::unique_ptr<MonitoredRange>>::iterator it;
-  it = m_monitoredRanges.find(rangeName);
-
-  // If we don't have a MonitoredRange with this name, try and make one.
-  if (it == m_monitoredRanges.end()) {
-    if (m_monitoredRanges.size() < m_maxTimeRange) {
-      auto result = m_monitoredRanges.insert( 
-        std::make_pair(rangeName, std::make_unique<MonitoredRange>(rangeName, this))
-      );
-      it = result.first; // Returns pair. First: map iterator. Second: insertion boolean
-      ATH_CHECK(registerMonitors( it->second.get() ));
+    std::string rangeName;
+    if (m_singleTimeRange) {
+        rangeName = m_singleTimeRangeName;
     } else {
-      range = nullptr; // Not monitoring any more ranges
-      return StatusCode::SUCCESS;
-    }
-  }
+        const auto lumiBlock = context.eventID().lumi_block();
+        const size_t start = lumiBlock - (lumiBlock % m_TimeRangeLengthLB);
+        const size_t stop  = start + m_TimeRangeLengthLB - 1;
 
-  range = it->second.get(); // Pointer to MonitoredRange
-  return StatusCode::SUCCESS;
+        if (includeEndOfLB && stop != start) {
+            rangeName = std::format("LumiBlock_{:05}_{}", start, stop);
+        } else {
+            rangeName = std::format("LumiBlock_{:05}", start);
+        }
+    }
+
+    // Fast path — range already exists
+    if (auto it = m_monitoredRanges.find(rangeName); it != m_monitoredRanges.end()) {
+        range = it->second.get();
+        return StatusCode::SUCCESS;
+    }
+
+    // We don't have this range yet — check if we are allowed to create more
+    if (m_monitoredRanges.size() >= m_maxTimeRange) {
+        return StatusCode::SUCCESS;   // range stays nullptr
+    }
+
+    auto [it, inserted] = m_monitoredRanges.try_emplace(
+        rangeName,
+        std::make_unique<MonitoredRange>(rangeName, this)
+    );
+
+    if (!inserted) {
+        range = it->second.get();
+        return StatusCode::SUCCESS;
+    }
+
+    ATH_CHECK(registerMonitors(it->second.get()));
+    range = it->second.get();
+    return StatusCode::SUCCESS;
 }
 
 uint32_t TrigCostAnalysis::getOnlineSlot(const xAOD::TrigCompositeContainer* costCollection) const {
@@ -445,7 +454,7 @@ StatusCode TrigCostAnalysis::dumpEvent(const EventContext& context) const {
     } else {
       ss << ", type:'point'";
     }
-    ss  << "}," << std::endl;
+    ss  << "},\n";
   }
 
   ATH_MSG_DEBUG("Full Event Summary for event " << context.eventID().event_number());

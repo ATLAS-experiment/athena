@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -148,6 +148,7 @@ namespace SH
       {
         sample->lockName ();
         m_named[sample->name()] = std::move (sample);
+        sample.reset();
       }
     } catch (...)
     {

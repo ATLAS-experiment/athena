@@ -246,8 +246,9 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
 }
 
 template <typename calib_data_t, typename traj_t>
-std::pair<typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Pos,
-          typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Cov>
+std::tuple<typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Pos,
+           typename AnalogueClusteringCalibrator<calib_data_t, traj_t>::BASE::Cov,
+           unsigned int>
 AnalogueClusteringCalibrator<calib_data_t, traj_t>::calibrate(
     const EventContext& ctx,
     const Acts::GeometryContext& /*gctx*/,
@@ -282,7 +283,7 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::calibrate(
       cov(1, 1) = std::max(newErr * newErr, cov(1, 1) * m_options.m_calibratedCovarianceLowerBound);
     }
     
-    return std::make_pair(pos, cov);
+    return std::make_tuple(pos, cov, 0u);
 }
 
 

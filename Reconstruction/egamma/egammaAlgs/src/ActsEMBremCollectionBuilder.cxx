@@ -12,6 +12,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "egammaUtils/egammaCopyTrackParticleInfo.h"
 
 #include "ActsEMBremCollectionBuilder.h"
 
@@ -186,6 +187,26 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
 
     originalTPLink(*tp) = ElementLink<xAOD::TrackParticleContainer>(
         originalTPs, originalTP->index(), ctx);
+
+    // Add qoverP from the last measurement
+    float QoverPLast(0);
+    for (const auto ts : track.trackStatesReversed()) {
+      if (ts.typeFlags().isMeasurement()) {
+        QoverPLast = ts.parameters()[Acts::eBoundQOverP];
+        break;
+      }
+    }
+    static const SG::AuxElement::Accessor<float> QoverPLM("QoverPLM");
+    QoverPLM(*tp) = QoverPLast;
+
+    // isRefitted option should check the actual refit status
+    egammaCopyTrackParticleInfo::ToCopy toCopy{.isRefitted = true,
+                                               .doTruth = m_doTruth,
+                                               .doPix = m_doPix,
+                                               .doSCT = m_doStrip,
+                                               .doHGTD = m_doHGTD};
+    egammaCopyTrackParticleInfo::copy(*tp, *originalTP, toCopy);
+
   }
   return StatusCode::SUCCESS;
 }

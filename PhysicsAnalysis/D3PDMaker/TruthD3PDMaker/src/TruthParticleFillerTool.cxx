@@ -12,9 +12,8 @@
 #include "TruthParticleFillerTool.h"
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/IPartPropSvc.h"
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace D3PD {
 
@@ -75,13 +74,7 @@ StatusCode TruthParticleFillerTool::fill (const xAOD::TruthParticle& p)
   *m_status = p.status();
   *m_uniqueID = HepMC::uniqueID(p);
   *m_pdgId = p.pdgId();
-
-  const HepPDT::ParticleDataTable* pdt = m_ppsvc->PDT();
-  const HepPDT::ParticleData* pd = pdt->particle (std::abs(p.pdgId()));
-  *m_charge = pd ? pd->charge() : 0;
-  if (p.pdgId() < 0)
-    *m_charge = - *m_charge;
-
+  *m_charge = static_cast<int>(MC::charge(p.pdgId()));
   return StatusCode::SUCCESS;
 }
 

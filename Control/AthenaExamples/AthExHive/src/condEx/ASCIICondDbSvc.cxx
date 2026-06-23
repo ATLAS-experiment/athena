@@ -7,7 +7,7 @@
 
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 
 #include <fstream>
 
@@ -15,9 +15,9 @@ const std::string r_t("\\[([0-9]+),([0-9]+)\\]");
 const std::string r_r = "\\s*\\{" + r_t + "-" + r_t + "\\}\\s*";
 const std::string r_e = "\\s*\\{" + r_t + "-" + r_t + "\\}=([0-9]+)\\s*";
 const std::string r_ef = "\\s*\\{" + r_t + "-" + r_t + "\\}=(-*[0-9]*\\.*[0-9]*)\\s*";
-const boost::regex rr(r_r);
-const boost::regex re(r_e);
-const boost::regex ref(r_ef);
+const std::regex rr(r_r);
+const std::regex re(r_e);
+const std::regex ref(r_ef);
 
 
 //---------------------------------------------------------------------------
@@ -173,8 +173,8 @@ ASCIICondDbSvc::finalize() {
 bool 
 ASCIICondDbSvc::parse(EventIDRange& t, const std::string& s) {
 
-  boost::smatch m;
-  boost::regex_match(s,m,rr);
+  std::smatch m;
+  std::regex_match(s,m,rr);
 
   // for (auto res : m) {
   //   cout << " - " << res << endl;
@@ -200,8 +200,8 @@ ASCIICondDbSvc::parse(EventIDRange& t, const std::string& s) {
 bool
 ASCIICondDbSvc::parse(IOVEntryT<IASCIICondDbSvc::dbData_t>& ie, const std::string& s) {
 
-  boost::smatch m;
-  boost::regex_match(s,m,ref);
+  std::smatch m;
+  std::regex_match(s,m,ref);
 
   if (m.size() != 6) { return false; }
 

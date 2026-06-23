@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #######################
 # TruthClassification #
 #######################
@@ -41,4 +41,4 @@ atlas_add_executable(testTruthClassificationTool
 # do not contain all necessary information
 atlas_add_test(TruthClassificationToolTest
   SCRIPT testTruthClassificationTool $ASG_TEST_FILE_MC 1000
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )

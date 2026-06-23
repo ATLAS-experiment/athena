@@ -749,6 +749,7 @@ private:
   Gaudi::Property<bool> m_DumpStore{this, "Dump", false, "Dump contents at EndEvent"};
   Gaudi::Property<bool> m_ActivateHistory{this, "ActivateHistory", false, "record DataObjects history"};
   Gaudi::Property<bool> m_DumpArena{this, "DumpArena", false, "Dump Arena usage stats"};
+  Gaudi::Property<bool> m_pruneIncidents{this, "PruneIncidents", false, "Don't send StoreCleared incidents if there are no registered listeners on the first event."};
   //@}
 
   /// Cache store type in the facade class.
@@ -882,6 +883,14 @@ private:
   typedef std::mutex mutex_t;
   typedef std::lock_guard<mutex_t> lock_t;
   mutable mutex_t m_badMutex;
+
+
+  // State of PruneIncidents checking.
+  // HAVE_LISTENERS means that there are listeners for the ClearStore
+  // incident; NO_LISTENERS means that there aren't any.
+  // UNCHECKED means that we haven't checked yet.
+  enum ListenerState { UNCHECKED, HAVE_LISTENERS, NO_LISTENERS };
+  std::atomic<ListenerState> m_listenerState { UNCHECKED };
 
 
   /**

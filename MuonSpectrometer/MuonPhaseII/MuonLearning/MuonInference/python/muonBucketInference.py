@@ -135,5 +135,3 @@ if __name__ == "__main__":
                                             VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
 
     executeTest(cfg)
-    
-

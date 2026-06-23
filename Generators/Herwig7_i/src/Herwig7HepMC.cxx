@@ -27,7 +27,6 @@
 
 #include "ThePEG/Vectors/HepMCConverter.h"
 #ifdef HWVER_IS_72
-#ifdef HEPMC3
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/GenVertex.h"
@@ -103,24 +102,6 @@ namespace ThePEG {
   }
     };
 }
-#else
-namespace ThePEG {
-  template<>
-  struct HepMCTraits<HepMC::GenEvent>
-    : public HepMCTraitsBase<HepMC::GenEvent,
-                             HepMC::GenParticle,
-                             HepMC::GenParticle *,
-                             HepMC::GenVertex,
-                             HepMC::GenVertex *,
-                             HepMC::Polarization,
-                             HepMC::PdfInfo>
-  {
-    static bool hasUnits() {
-      return true;
-    }
-  };
-}
-#endif
 #else
 namespace ThePEG {
   template<>

@@ -111,11 +111,7 @@ StatusCode HepMcWriterTool::execute()
 
 StatusCode HepMcWriterTool::write( const HepMC::GenEvent* evt )
 {
-#ifdef HEPMC3
   m_ioBackend->write_event(*evt);
-#else
-  m_ioBackend->write_event(evt);
-#endif
   return StatusCode::SUCCESS;
 }
 
@@ -146,7 +142,6 @@ void HepMcWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ )
 
   // get the protocol name in lower cases
   std::transform( protocol.begin(), protocol.end(), protocol.begin(), [](unsigned char c){ return std::tolower(c); } );
-#ifdef HEPMC3
   if ( "ascii" == protocol ) {
     m_ioBackend = new HepMC3::WriterAsciiHepMC2( fileName.c_str());
 
@@ -155,15 +150,5 @@ void HepMcWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ )
     protocol = "ascii";
     m_ioBackend = new HepMC3::WriterAsciiHepMC2( fileName.c_str());
   }    
-#else
-  if ( "ascii" == protocol ) {
-    m_ioBackend = new HepMC::IO_GenEvent( fileName.c_str(), std::ios::out | std::ios::trunc );
-
-  } else {
-    ATH_MSG_WARNING("UNKNOWN protocol [" << protocol << "] !!" << endmsg  << "Will use [ascii] instead...");
-    protocol = "ascii";
-    m_ioBackend = new HepMC::IO_GenEvent( fileName.c_str(), std::ios::out | std::ios::trunc );
-  }    
-#endif
   ATH_MSG_DEBUG("Using protocol [" << protocol << "] and write to ["<< fileName << "]");
 }

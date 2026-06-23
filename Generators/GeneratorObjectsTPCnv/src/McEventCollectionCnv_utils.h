@@ -15,7 +15,6 @@ namespace {
 
     return std::make_pair( nParts, nVerts );
   }
-#ifdef HEPMC3
 std::map<std::string, unsigned long int> names_to_name_index_map(const  std::vector<std::string>  &input )
 {
 std::map<std::string, unsigned long int> result;
@@ -32,5 +31,4 @@ unsigned long int i=1;
 for (const auto& a: input) {result.push_back(std::pair<int,int>(i,a)); i++;}
 return result;
 }
-#endif
 }

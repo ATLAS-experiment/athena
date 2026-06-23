@@ -20,9 +20,6 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
-/* Particle data */
-#include "HepPDT/ParticleDataTable.hh"
-
 /* Tracking includes */
 #include "TrkGeometry/TrackingGeometry.h"
 

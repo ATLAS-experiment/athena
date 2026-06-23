@@ -66,8 +66,6 @@ private:
   };
 
   // Private members
-  std::unique_ptr<TFile> m_file;
-  TTree* m_tree{nullptr};
   std::unique_ptr<MVAUtils::BDT> m_bdt;
 
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1THREXTRAINFO_H
@@ -9,8 +9,10 @@
 #include "TrigConfData/L1ThresholdBase.h"
 
 #include <map>
+#include <string>
+#include <string_view>
 #include <vector>
-#include <iostream>
+#include <stdexcept>
 
 namespace TrigConf {
 
@@ -84,13 +86,13 @@ namespace TrigConf {
       float ptMinToTopo() const { return m_ptMinToTopoMeV/1000.0f; }
       unsigned int ptMinToTopoMeV() const { return m_ptMinToTopoMeV; }
       unsigned int ptMinToTopoCounts() const { return energyInCounts( m_ptMinToTopoMeV, resolutionMeV() ); }
-      const IsolationLegacy & isolation(const std::string & thrType, size_t bit) const;
+      const IsolationLegacy & isolation(std::string_view thrType, size_t bit) const;
    private:
       /** Update the internal members */
       void load();
       /** EM specific data */
       unsigned int m_ptMinToTopoMeV{0}; // in MeV
-      std::map<std::string,std::vector<IsolationLegacy>> m_isolation{};
+      std::map<std::string,std::vector<IsolationLegacy>, std::less<>> m_isolation{};
    };
 
 

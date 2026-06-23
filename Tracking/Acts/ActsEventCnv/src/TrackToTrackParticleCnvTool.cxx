@@ -35,8 +35,10 @@ namespace {
       if (Acts::abs(x) < Acts::s_epsilon) {
          return 0.f;
       }
-      const double clampedX = std::copysign(std::clamp(x, 3.*static_cast<double>(std::numeric_limits<float>::min()),
-                                            static_cast<double>(std::numeric_limits<float>::max())), x);
+      constexpr double min = 3.*static_cast<double>(std::numeric_limits<float>::min());
+      constexpr double max = static_cast<double>(std::numeric_limits<float>::max());
+      const double clampedX = std::copysign(std::clamp(Acts::abs(x), min, max), x);
+
       return static_cast<float>(clampedX);
    }
     template <int nRowsMax, int nMatSize>

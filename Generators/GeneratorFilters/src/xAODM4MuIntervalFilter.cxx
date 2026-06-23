@@ -101,9 +101,7 @@ StatusCode xAODM4MuIntervalFilter::filterEvent(const EventContext& ctx) {
         (*mec)[i]->weights().push_back( eventWeight*existingWeight );
       }
 
-#ifdef HEPMC3
       (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(eventWeight));
-#endif
 
     }
   }

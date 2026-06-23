@@ -72,11 +72,7 @@ StatusCode xAODHTFilter::filterEvent(const EventContext& ctx)
   SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName, ctx};
   if (!truthjetTES.isValid()) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName.key());
-#ifdef HEPMC3
     setFilterPassed(m_MinHT < 1. || keepAll(), ctx);
-#else
-    setFilterPassed(m_MinHT < 1., ctx);
-#endif
     return StatusCode::SUCCESS;
   }
 
@@ -130,7 +126,6 @@ StatusCode xAODHTFilter::filterEvent(const EventContext& ctx)
   HT /= Gaudi::Units::GeV; // Make sure we're in GeV
   ATH_MSG_DEBUG("HT: " << HT);
 
-#ifdef HEPMC3
     // fill the HT value
     // Event passed.  Will add HT to xAOD::EventInfo
     // Get MC event collection for setting weight
@@ -149,9 +144,6 @@ StatusCode xAODHTFilter::filterEvent(const EventContext& ctx)
     }
 
   if ((HT < m_MinHT || HT >= m_MaxHT) && (!keepAll()))
-#else
-  if ((HT < m_MinHT || HT >= m_MaxHT) )
-#endif
   {
     ATH_MSG_DEBUG("Failed filter on HT: " << HT << " is not between " << m_MinHT << " and " << m_MaxHT);
     setFilterPassed(false, ctx);

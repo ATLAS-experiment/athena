@@ -66,7 +66,7 @@ namespace MuonValR4{
             m_preFitNPrecHits = reFitMe->summary().nPrecHits;
             m_preFitNTrigEtaHits = reFitMe->summary().nEtaTrigHits;
             m_preFitNTrigPhiHits = reFitMe->summary().nPhiHits;
-            static const SG::ConstAccessor<xAOD::MeasVector<toUnderlying(nPars)>> acc_seed{"seedSegPars"};
+            static const xAOD::PosAccessor<toUnderlying(nPars)> acc_seed{"seedSegPars"};
             m_seedFitLocY  = acc_seed(*seg)[toUnderlying(y0)];
             m_seedFitTheta = acc_seed(*seg)[toUnderlying(theta)];
             m_seedFitLocX  = acc_seed(*seg)[toUnderlying(x0)];

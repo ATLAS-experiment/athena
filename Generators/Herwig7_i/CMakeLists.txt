@@ -26,7 +26,6 @@ atlas_add_library ( powhegHerwig
    LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} CxxUtils )
 
 # Component(s) in the package:
-if (HEPMC3_USE)
 find_package( hepmc3 )
 atlas_add_component( Herwig7_i
    Herwig7_i/Herwig7.h src/Herwig7.cxx src/Herwig7HepMC.cxx src/components/*.cxx
@@ -38,19 +37,6 @@ atlas_add_component( Herwig7_i
    LINK_LIBRARIES ${HERWIG3_LIBRARIES}
    ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
    GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
-
-else()
-find_package( HepMC )
-atlas_add_component( Herwig7_i
-   Herwig7_i/Herwig7.h src/Herwig7.cxx src/Herwig7HepMC.cxx src/components/*.cxx
-   INCLUDE_DIRS ${HERWIG3_INCLUDE_DIRS}
-   ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${OPENLOOPS_INCLUDE_DIRS}
-   DEFINITIONS -DHWVERSION=\"${HERWIG3_LCGVERSION}\"
-   -DHWVER_IS_72=\"${HW3_VER_IS_72}\"
-   LINK_LIBRARIES ${HERWIG3_LIBRARIES}
-   ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
-   GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
-endif()
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
