@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 enum Author {
@@ -15,7 +15,6 @@ enum Author {
   CaloLikelihood,
   CaloScore,
   ExtrapolateMuonToIP,
-  Commissioning,
   NumberOfMuonAuthors  // increase this when adding
 };
 
@@ -50,21 +49,18 @@ enum ParamDef {
   /** common MuGirl and MuTag parameters */
   innAngle = 11,
   midAngle = 12,
-  msInnerMatchChi2 =
-      13,  //!< The chi^2 for the match of Inner detector (ID) and standalone
-           //!< (SA) tracks at the entrance to the spectrometer (MS).
+  msInnerMatchChi2 = 13,  //!< The chi^2 for the match of Inner detector (ID) and standalone
+                         //!< (SA) tracks at the entrance to the spectrometer (MS).
   msInnerMatchDOF = 14,  //!< The 'degrees of freedom' (DOF) for the match of
                          //!< Inner detector (ID) and standalone (SA) tracks
                          //!< at the entrance to the spectrometer (MS).
-  msOuterMatchChi2 =
-      15,  //!< The chi^2 for the match of Inner detector (ID) and standalone
-           //!< (SA) tracks at the exit of the spectrometer (MS).
+  msOuterMatchChi2 = 15, //!< The chi^2 for the match of Inner detector (ID) and standalone
+                         //!< (SA) tracks at the exit of the spectrometer (MS).
   msOuterMatchDOF = 16,  //!< The 'degrees of freedom' (DOF) for the match of
                          //!< Inner detector (ID) and standalone (SA) tracks
                          //!< at the exit of the spectrometer (MS).
-  meanDeltaADCCountsMDT =
-      17,  //!< Difference between mean number of ADC count for given track
-           //!< and mean number of ADC for all muons from DATA.
+  meanDeltaADCCountsMDT = 17,  //!< Difference between mean number of ADC count for given track
+                               //!< and mean number of ADC for all muons from DATA.
   /** CaloMuon variables (EnergyLossType is stored separately and retrieved
      using energyLossType() */
   CaloLRLikelihood = 18,     //!< Calo Muon ID likelihood
@@ -76,10 +72,8 @@ enum ParamDef {
   MeasEnergyLoss = 23,   //!< Measured energy loss [Mev]
   EnergyLossSigma = 24,  //!< Sigma of Measured or parametrised energy loss
                          //!< used in the track fit [Mev]
-  ParamEnergyLossSigmaPlus =
-      25,  //!< Sigma plus of Parametrised energy loss [Mev]
-  ParamEnergyLossSigmaMinus =
-      26,                    //!< Sigma minus of Parametrised energy loss [Mev]
+  ParamEnergyLossSigmaPlus = 25,  //!< Sigma plus of Parametrised energy loss [Mev]
+  ParamEnergyLossSigmaMinus =26,  //!< Sigma minus of Parametrised energy loss [Mev]
   MeasEnergyLossSigma = 27,  //!< Sigma of Measured energy loss [Mev]
   CaloMuonScore = 28,  //!< Calo Muon convolutional neural network ID score
 };
@@ -115,6 +109,7 @@ enum Quality {
   Medium,  /// Usual recommended working point - a good balance between purity
            /// and efficiency
   Loose,   /// Adds segment tagged and calo tagged muons.
-  VeryLoose
+  VeryLoose, /// Inclusive quality
+
 };  /// Low purity.
 

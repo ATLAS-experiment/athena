@@ -75,24 +75,18 @@ void MomentumTruthPullPlots::fill(const xAOD::Muon& muon,
                                   const xAOD::TrackParticle* msTrk,
                                   const xAOD::TruthParticle& truthMu,
                                   float weight) {
-    if (!(muon.muonType() == xAOD::Muon::Combined ||
-          muon.muonType() == xAOD::Muon::SegmentTagged ||
-          muon.muonType() == xAOD::Muon::MuonStandAlone)) {
+    if (!(muon.muonType() == xAOD::Muon::MuonType::Combined ||
+          muon.muonType() == xAOD::Muon::MuonType::SegmentTagged ||
+          muon.muonType() == xAOD::Muon::MuonType::MuonStandAlone)) {
         return;
     }
 
-    const xAOD::TrackParticle* muPrimaryTrk =
-        muon.trackParticle(xAOD::Muon::Primary);
-    if (!muPrimaryTrk) {
-        return;
-    }
+    using enum xAOD::Muon::TrackParticleType;
+    const xAOD::TrackParticle* muPrimaryTrk = muon.trackParticle(Primary);
 
-    const xAOD::TrackParticle* msExtrapTrk =
-        muon.trackParticle(xAOD::Muon::TrackParticleType::
-                               ExtrapolatedMuonSpectrometerTrackParticle);
+    const xAOD::TrackParticle* msExtrapTrk = muon.trackParticle(ExtrapolatedMuonSpectrometerTrackParticle);
     if (!msExtrapTrk) {
-        msExtrapTrk =
-            muon.trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+        msExtrapTrk = muon.trackParticle(MuonSpectrometerTrackParticle);
     }
 
     float eta = truthMu.eta();
@@ -110,7 +104,7 @@ void MomentumTruthPullPlots::fill(const xAOD::Muon& muon,
     }
 
     float eloss = 0;
-    if (muon.parameter(eloss, xAOD::Muon::MeasEnergyLoss)) {
+    if (muon.parameter(eloss, xAOD::Muon::ParamDef::MeasEnergyLoss)) {
         ;
     }
     float pTruthMS = 0;  // p truth at MS entry
@@ -124,7 +118,7 @@ void MomentumTruthPullPlots::fill(const xAOD::Muon& muon,
         pTruthMS = pvecTruthMS.mag();
     }
 
-    if (muon.muonType() != xAOD::Muon::SegmentTagged) {
+    if (muon.muonType() != xAOD::Muon::MuonType::SegmentTagged) {
         if (pTruth) {
             float dpCB = 0.001 * (pCB - pTruth);
             dp_CB_truthIP->Fill(dpCB, weight);
@@ -145,9 +139,6 @@ void MomentumTruthPullPlots::fill(const xAOD::Muon& muon,
         }
     }
 
-    // if (muon.muonType()==xAOD::Muon::Combined ||
-    // muon.muonType()==xAOD::Muon::SegmentTagged ||
-    // muon.muonType()==xAOD::Muon::MuonStandAlone) {
     if (eloss > 2000 && pTruthMS && pTruth) {
         float dpEloss = 0.001 * (pTruth - pTruthMS - eloss);
         dp_eloss->Fill(dpEloss, weight);

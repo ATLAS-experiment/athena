@@ -70,9 +70,9 @@ RecoMuonPlotOrganizer::RecoMuonPlotOrganizer(PlotBase* pParent,
 RecoMuonPlotOrganizer::~RecoMuonPlotOrganizer() = default;
 
 void RecoMuonPlotOrganizer::fill(const xAOD::Muon& mu, float weight) {
-    if (m_oIDHitPlots && (mu.inDetTrackParticleLink().isValid())) {
+    if (m_oIDHitPlots && mu.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) {
         m_oIDHitPlots->fill(
-            *mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle), weight);
+            *mu.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), weight);
     }
     if (m_oTrkParamPlots) {
         m_oTrkParamPlots->fill(mu, weight);

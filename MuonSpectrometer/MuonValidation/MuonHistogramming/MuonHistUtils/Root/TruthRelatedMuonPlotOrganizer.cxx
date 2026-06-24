@@ -83,8 +83,7 @@ TruthRelatedMuonPlotOrganizer::TruthRelatedMuonPlotOrganizer(
 TruthRelatedMuonPlotOrganizer::~TruthRelatedMuonPlotOrganizer() = default;
 
 void TruthRelatedMuonPlotOrganizer::fill(
-    const xAOD::TruthParticle& truthMu, const xAOD::Muon& mu,
-    const xAOD::TrackParticleContainer* MSTracks, float weight) {
+    const xAOD::TruthParticle& truthMu, const xAOD::Muon& mu, float weight) {
     if (m_oMatchedPlots) {
         m_oMatchedPlots->fill(truthMu, weight);
     }
@@ -124,67 +123,11 @@ void TruthRelatedMuonPlotOrganizer::fill(
 
     if (m_oMomentumTruthPullPlots_NoTail || m_oMomentumTruthPullPlots_Tail) {
         // muon spectrometer track at MS entry (not extrapolated)
-        const xAOD::TrackParticle* msTrk(nullptr);
-        // muon extrapolated to IP
-        // const xAOD::TrackParticle* msExtrapTrk(0);
-
-        ////////////////// @@@ sorting out the mess with the link to the
-        ///extrapolated muon
-        // for 20.1.0...
-        /// const xAOD::TrackParticle* msExtrapTrk =
-        /// mu.trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle); //
-        /// points to the ExtrapolatedMuonSpectrometerTrackParticle, the
-        /// ExtrapolatedMuonSpectrometerTrackParticle link doesn't exist
-        // for 20.1.3...
-        // const xAOD::TrackParticle* msExtrapTrk =
-        // mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
-
-        // trying to accomodate both in a way that the code compiles in both
-        // releases
-        static const SG::ConstAccessor<
-            ElementLink<xAOD::TrackParticleContainer> >
-            extrapLinkAcc("extrapolatedMuonSpectrometerTrackParticleLink");
-        if (extrapLinkAcc.isAvailable(mu) && extrapLinkAcc(mu).isValid()) {
-            // cool, we got both links:
-            // int correctEnumForExtrap =
-            // ((int)xAOD::Muon::MuonSpectrometerTrackParticle)+2; msExtrapTrk =
-            // mu.trackParticle((xAOD::Muon::TrackParticleType)
-            // correctEnumForExtrap);
-            msTrk = mu.trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
-        } else {
-            // gymnastics to get msTrk...
-            const ElementLink<xAOD::TrackParticleContainer>& msExtrapTrkLink =
-                mu.trackParticleLink(xAOD::Muon::MuonSpectrometerTrackParticle);
-            static const SG::ConstAccessor<TruthLink> truthParticleLinkAcc(
-                "truthParticleLink");
-            if (msExtrapTrkLink.isValid()) {
-                // msExtrapTrk = mu.trackParticle(
-                // xAOD::Muon::MuonSpectrometerTrackParticle );
-                TruthLink truthLink_muTrk;
-                if (truthParticleLinkAcc.isAvailable(**msExtrapTrkLink)) {
-                    truthLink_muTrk = truthParticleLinkAcc(**msExtrapTrkLink);
-                }
-                if (truthLink_muTrk.isValid()) {
-                    for (const auto trk : *MSTracks) {
-                        TruthLink truthLink_msTrk;
-                        if (truthParticleLinkAcc.isAvailable(*trk)) {
-                            truthLink_msTrk = truthParticleLinkAcc(*trk);
-                            if (truthLink_msTrk.isValid()) {
-                                if (truthLink_msTrk == truthLink_muTrk) {
-                                    msTrk = trk;  // got it!
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-#ifndef XAOD_ANALYSIS
+        const xAOD::TrackParticle* msTrk = mu.trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
+ #ifndef XAOD_ANALYSIS
         float eloss = 0;
-        if (mu.parameter(eloss, xAOD::Muon::EnergyLoss)) {
-            if (mu.energyLossType() !=
-                xAOD::Muon::Tail) {  // to test MEASURED energy loss
+        if (mu.parameter(eloss, xAOD::Muon::ParamDef::EnergyLoss)) {
+            if (mu.energyLossType() != xAOD::Muon::EnergyLossType::Tail) {  // to test MEASURED energy loss
                 if (m_oMomentumTruthPullPlots_NoTail) {
                     m_oMomentumTruthPullPlots_NoTail->fill(mu, msTrk, truthMu,
                                                            weight);

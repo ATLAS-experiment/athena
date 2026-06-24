@@ -113,28 +113,33 @@ void RecoMuonPlots::fill(const xAOD::Muon& mu, xAOD::Muon::Quality my_quality){
   m_origin_eta_phi->Fill(mu.eta(), mu.phi());
 
   //General Plots; inclusive
-  if (my_quality <= xAOD::Muon::Tight) m_tight_eta_phi->Fill(mu.eta(), mu.phi());
-  if (my_quality <= xAOD::Muon::Medium) m_medium_eta_phi->Fill(mu.eta(), mu.phi());
-
+  {
+    using enum xAOD::Muon::Quality;
+    if (my_quality <= Tight) m_tight_eta_phi->Fill(mu.eta(), mu.phi());
+    if (my_quality <= Medium) m_medium_eta_phi->Fill(mu.eta(), mu.phi());
+  }
   if(!Detail) return;
   if (mu.pt()/1000.0 > 100) {//ony for high pt muons
     m_pt_broad->Fill(mu.pt()/1000.0);
     m_eta_phi_broad->Fill(mu.eta(), mu.phi());
   }
-  const xAOD::TrackParticle* primaryTrk = mu.trackParticle(xAOD::Muon::Primary);
-  const xAOD::TrackParticle* inDetTrk = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-  int correctEnum = (int) xAOD::Muon::MuonSpectrometerTrackParticle;
-  static const SG::ConstAccessor< ElementLink<xAOD::TrackParticleContainer> >
-    extrapMSTPLinkAcc("extrapolatedMuonSpectrometerTrackParticleLink");
-  if (extrapMSTPLinkAcc.isAvailable(mu) && extrapMSTPLinkAcc(mu).isValid()) correctEnum+=2; //check correct numbering in Muon.h
-  const xAOD::TrackParticle* msExtrapTrk = mu.trackParticle((xAOD::Muon::TrackParticleType) correctEnum);
+  using enum xAOD::Muon::TrackParticleType;
+  const xAOD::TrackParticle* primaryTrk = mu.trackParticle(Primary);
+  const xAOD::TrackParticle* inDetTrk = mu.trackParticle(InnerDetectorTrackParticle);
+  
+  const xAOD::TrackParticle* msExtrapTrk = mu.trackParticle(ExtrapolatedMuonSpectrometerTrackParticle);
+  if (!msExtrapTrk) {
+    msExtrapTrk = mu.trackParticle(MuonSpectrometerTrackParticle);
+  }
+
+  if (!primaryTrk) {
+    return;
+  }
 
   //fill the ndof and chi2 as eta phi map; to calculate efficiencies in post processing
   //if necessary, can use a quality cut here
-  if (primaryTrk) {
-    m_eff_ndof->Fill(primaryTrk->eta(), primaryTrk->phi(), primaryTrk->numberDoF());
-    m_eff_chi2->Fill(primaryTrk->eta(), primaryTrk->phi(), primaryTrk->chiSquared()/(primaryTrk->numberDoF() * 1.0));
-  }
+  m_eff_ndof->Fill(primaryTrk->eta(), primaryTrk->phi(), primaryTrk->numberDoF());
+  m_eff_chi2->Fill(primaryTrk->eta(), primaryTrk->phi(), primaryTrk->chiSquared()/(primaryTrk->numberDoF() * 1.0));
   if (inDetTrk) {
     m_ID_eff_ndof->Fill(inDetTrk->eta(), inDetTrk->phi(), inDetTrk->numberDoF());
     m_ID_eff_chi2->Fill(inDetTrk->eta(), inDetTrk->phi(), inDetTrk->chiSquared()/(inDetTrk->numberDoF() * 1.0));
@@ -143,13 +148,12 @@ void RecoMuonPlots::fill(const xAOD::Muon& mu, xAOD::Muon::Quality my_quality){
     m_MS_eff_ndof->Fill(msExtrapTrk->eta(), msExtrapTrk->phi(), msExtrapTrk->numberDoF());
     m_MS_eff_chi2->Fill(msExtrapTrk->eta(), msExtrapTrk->phi(), msExtrapTrk->chiSquared()/(msExtrapTrk->numberDoF() * 1.0));
   }
-  
-  if (primaryTrk) {
-    if (!primaryTrk->summaryValue(hitval_numberOfPrecisionLayers,  xAOD::numberOfPrecisionLayers))  return; 
-    if (!primaryTrk->summaryValue(hitval_numberOfPhiLayers,        xAOD::numberOfPhiLayers))        return; 
-    if (!primaryTrk->summaryValue(hitval_numberOfTriggerEtaLayers, xAOD::numberOfTriggerEtaLayers)) return; 
-  }
 
+  
+  if (!(primaryTrk->summaryValue(hitval_numberOfPrecisionLayers,  xAOD::numberOfPrecisionLayers)))  return; 
+  if (!(primaryTrk->summaryValue(hitval_numberOfPhiLayers,        xAOD::numberOfPhiLayers)))        return; 
+  if (!(primaryTrk->summaryValue(hitval_numberOfTriggerEtaLayers, xAOD::numberOfTriggerEtaLayers))) return; 
+  
   if (!mu.summaryValue(hitval_innerSmallHits,     xAOD::MuonSummaryType::innerSmallHits))    return; 
   if (!mu.summaryValue(hitval_innerLargeHits,     xAOD::MuonSummaryType::innerLargeHits))    return; 
   if (!mu.summaryValue(hitval_middleSmallHits,    xAOD::MuonSummaryType::middleSmallHits))   return; 
@@ -188,7 +192,7 @@ void RecoMuonPlots::fill(const xAOD::Muon& mu, xAOD::Muon::Quality my_quality){
   m_avg_hits_sct -> Fill(mu.eta(), mu.phi(), hitval_numberOfSCTHits);
   m_avg_hits_trt -> Fill(mu.eta(), mu.phi(), hitval_numberOfTRTHits);
 
-  if (primaryTrk && inDetTrk && msExtrapTrk) {
+  if (inDetTrk && msExtrapTrk) {
       qoverp_diff   = std::abs(inDetTrk->qOverP() - msExtrapTrk->qOverP());
       qoverp_sigma  = std::sqrt(inDetTrk->definingParametersCovMatrix()(4,4) + msExtrapTrk->definingParametersCovMatrix()(4,4));
       qoverp_signif = (qoverp_sigma     > 0) ? (qoverp_diff / qoverp_sigma) : -999;

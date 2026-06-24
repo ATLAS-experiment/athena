@@ -242,9 +242,9 @@ void MuonTruthHitPlots::fill(const xAOD::Muon& muon, float weight) {
 void MuonTruthHitPlots::fillPlot(TH1* hitPlots, const std::string& sInfo,
                                  const xAOD::Muon& muon, float weight) {
     // protection
-    if (muon.author() != xAOD::Muon::MuidCo &&
-        muon.author() != xAOD::Muon::MuidSA &&
-        muon.author() != xAOD::Muon::MuGirl) {
+    if (muon.author() != xAOD::Muon::Author::MuidCo &&
+        muon.author() != xAOD::Muon::Author::MuidSA &&
+        muon.author() != xAOD::Muon::Author::MuGirl) {
         return;
     }
 
@@ -262,9 +262,9 @@ void MuonTruthHitPlots::fillPlot(TH1* hitPlots, const std::string& sInfo,
                                  const Muon::MuonStationIndex::ChIndex& index,
                                  const xAOD::Muon& muon, float weight) {
     // protection
-    if (muon.author() != xAOD::Muon::MuidCo &&
-        muon.author() != xAOD::Muon::MuidSA &&
-        muon.author() != xAOD::Muon::MuGirl) {
+    if (muon.author() != xAOD::Muon::Author::MuidCo &&
+        muon.author() != xAOD::Muon::Author::MuidSA &&
+        muon.author() != xAOD::Muon::Author::MuGirl) {
         return;
     }
     using namespace Muon::MuonStationIndex;
@@ -281,9 +281,9 @@ void MuonTruthHitPlots::fillPlot(TH1* hitPlots, const std::string& sInfo,
                                  const Muon::MuonStationIndex::PhiIndex& index,
                                  const xAOD::Muon& muon, float weight) {
     // protection
-    if (muon.author() != xAOD::Muon::MuidCo &&
-        muon.author() != xAOD::Muon::MuidSA &&
-        muon.author() != xAOD::Muon::MuGirl) {
+    if (muon.author() != xAOD::Muon::Author::MuidCo &&
+        muon.author() != xAOD::Muon::Author::MuidSA &&
+        muon.author() != xAOD::Muon::Author::MuGirl) {
         return;
     }
     using namespace Muon::MuonStationIndex;
