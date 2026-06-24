@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -107,7 +107,7 @@ class SCT_SurfaceChargesGenerator : public extends<AthAlgTool, ISurfaceChargesGe
   float maxDiffusionSigma(const InDetDD::SiDetectorElement* element, const EventContext& ctx) const; //!< max sigma diffusion
 
   // trap_pos and drift_time are updated based on spess.
-  bool chargeIsTrapped(double spess, const InDetDD::SiDetectorElement* element, double& trap_pos, double& drift_time);
+  bool chargeIsTrapped(double spess, const InDetDD::SiDetectorElement* element, double& trap_pos, double& drift_time, const EventContext& ctx);
 
   IntegerProperty m_numberOfCharges{this, "NumberOfCharges", 1, "number of charges"};
   FloatProperty m_smallStepLength{this, "SmallStepLength", 5 * CLHEP::micrometer, "max internal step along the larger G4 step"};
