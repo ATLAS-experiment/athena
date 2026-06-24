@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,6 +23,7 @@
 #include "DataModelAthenaPool/ElementLink_p3.h"
 #include "DataModelAthenaPool/DataLink_p1.h"
 #include "AthenaKernel/CLASS_DEF.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 
 namespace DMTest {
@@ -42,6 +43,29 @@ struct ELVec
   std::vector<DataLink_p1> m_dl2_p;
 };
 
+
+}
+
+
+namespace SG {
+
+// We need this because we test reading and writing this class
+// without T/P separation.
+template <>
+class ToTransient<DMTest::ELVec>
+{
+public:
+  static bool toTransient (DMTest::ELVec& elv, const EventContext& ctx)
+  {
+    SG::ToTransient<std::vector<ElementLink<DMTest::BVec> > >::toTransient (elv.m_el, ctx);
+    SG::ToTransient<std::vector<DataLink<DMTest::BVec> > >::toTransient (elv.m_dl, ctx);
+    return true;
+  }
+  static bool toTransient (DMTest::ELVec& elv)
+  {
+    return toTransient (elv, Gaudi::Hive::currentContext());
+  }
+};
 
 }
 
