@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+import re
 import warnings
 from functools import partial
 
@@ -7,6 +8,17 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigDeprecationWarning
+
+
+class UnavailableFeatureError(ValueError):
+    """Raised when an EXPR cut uses a syntactically valid but unimplemented
+    feature (an unknown variable or collection). Subclasses ValueError so the
+    framework's existing tolerance and `except ValueError` still apply."""
+
+
+class InconsistentSettingsError(ValueError):
+    """Raised when an EXPR cut is internally inconsistent or ill-typed (wrong
+    operand count, an operation undefined for the given object, etc.)."""
 
 
 class EventSelectionMergerConfig(ConfigBlock):
@@ -137,6 +149,7 @@ class EventSelectionConfig(ConfigBlock):
             "EVENTFLAG":           self.add_EVENTFLAG,
             "GLOBALTRIGMATCH":     self.add_GLOBALTRIGMATCH,
             "RUN_NUMBER":          self.add_RUNNUMBER,
+            "EXPR":                self.add_EXPR_selector,
         }
         for kw, (attr, tag) in self._NOBJECT.items():
             d[kw] = partial(self._add_nobject, attr=attr, tag=tag)
@@ -727,6 +740,205 @@ class EventSelectionConfig(ConfigBlock):
         alg.sign = self.check_sign(items[1])
         alg.runNumber = self.check_int(items[2])
         alg.useRandomRunNumber = config.dataType() is not DataType.Data
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    # ------------------------------------------------------------------ #
+    #  EXPR: generic object-kinematic expression cuts                    #
+    # ------------------------------------------------------------------ #
+
+    # collection token -> (container option, applies b-tagging, is MET)
+    _EXPR_COLL = {
+        "jet":  ("jets",       False, False),
+        "bjet": ("jets",       True,  False),
+        "el":   ("electrons",  False, False),
+        "mu":   ("muons",      False, False),
+        "tau":  ("taus",       False, False),
+        "ph":   ("photons",    False, False),
+        "ljet": ("largeRjets", False, False),
+        "met":  ("met",        False, True),
+    }
+
+    # variable -> (minOperands, maxOperands|None, separator, needsEta, metOk)
+    # separator: ',' for distinct objects, '+' for a summed composite, None unary
+    _EXPR_VARS = {
+        "dR":     (2, 2,    ",",  True,  False),
+        "dEta":   (2, 2,    ",",  True,  False),
+        "dPhi":   (2, 2,    ",",  False, True),
+        "m":      (1, None, "+",  False, False),
+        "e":      (1, None, "+",  False, False),
+        "pt":     (1, None, "+",  False, True),
+        "eta":    (1, 1,    None, True,  False),
+        "phi":    (1, 1,    None, False, True),
+    }
+
+    _EXPR_TOKEN_RE = re.compile(r"""
+          (?P<NUM>\d+\.\d+(?:[eE][+-]?\d+)?|\d+[eE][+-]?\d+|\d+)
+        | (?P<GE>>=) | (?P<LE><=) | (?P<EQ>==) | (?P<LT><) | (?P<GT>>)
+        | (?P<ID>[A-Za-z_][A-Za-z0-9_]*)
+        | (?P<LP>\() | (?P<RP>\)) | (?P<LB>\[) | (?P<RB>\])
+        | (?P<COMMA>,) | (?P<PLUS>\+) | (?P<MINUS>-)
+        | (?P<WS>\s+)
+    """, re.VERBOSE)
+
+    def _expr_tokenize(self, text):
+        tokens, pos = [], 0
+        while pos < len(text):
+            m = self._EXPR_TOKEN_RE.match(text, pos)
+            if not m:
+                raise InconsistentSettingsError(
+                    f"[EventSelectionConfig] EXPR: cannot parse near '{text[pos:]}'")
+            pos = m.end()
+            if m.lastgroup != "WS":
+                tokens.append((m.lastgroup, m.group()))
+        tokens.append(("END", ""))
+        return tokens
+
+    # --- recursive-descent parser (cursor over the token list) -------------
+    def _expr_peek(self):
+        return self._exprTokens[self._exprPos]
+
+    def _expr_advance(self):
+        tok = self._exprTokens[self._exprPos]
+        self._exprPos += 1
+        return tok
+
+    def _expr_expect(self, kind):
+        tok = self._expr_advance()
+        if tok[0] != kind:
+            raise InconsistentSettingsError(
+                f"[EventSelectionConfig] EXPR: expected {kind}, got '{tok[1]}'")
+        return tok
+
+    def _expr_parse(self, tokens):
+        self._exprTokens = tokens
+        self._exprPos = 0
+        variable, separator, operands = self._expr_parse_funcall()
+        sign = self._expr_parse_sign()
+        refValue = self._expr_parse_value()
+        self._expr_expect("END")
+        return variable, separator, operands, sign, refValue
+
+    def _expr_parse_funcall(self):
+        variable = self._expr_expect("ID")[1]
+        self._expr_expect("LP")
+        operands = [self._expr_parse_operand()]
+        separator = None
+        while self._expr_peek()[0] in ("COMMA", "PLUS"):
+            sep = "," if self._expr_advance()[0] == "COMMA" else "+"
+            if separator is None:
+                separator = sep
+            elif sep != separator:
+                raise InconsistentSettingsError(
+                    "[EventSelectionConfig] EXPR: cannot mix ',' and '+' separators")
+            operands.append(self._expr_parse_operand())
+        self._expr_expect("RP")
+        return variable, separator, operands
+
+    def _expr_parse_operand(self):
+        coll = self._expr_expect("ID")[1]
+        index = None
+        if self._expr_peek()[0] == "LB":
+            self._expr_advance()
+            index = int(self._expr_expect("NUM")[1])
+            self._expr_expect("RB")
+        return (coll, index)
+
+    def _expr_parse_sign(self):
+        tok = self._expr_advance()
+        if tok[0] not in ("LT", "GT", "EQ", "GE", "LE"):
+            raise InconsistentSettingsError(
+                f"[EventSelectionConfig] EXPR: expected a comparison operator, got '{tok[1]}'")
+        return tok[0]
+
+    def _expr_parse_value(self):
+        negative = False
+        if self._expr_peek()[0] == "MINUS":
+            self._expr_advance()
+            negative = True
+        value = float(self._expr_expect("NUM")[1])
+        return -value if negative else value
+
+    def _expr_validate(self, variable, separator, operands):
+        if variable not in self._EXPR_VARS:
+            raise UnavailableFeatureError(
+                f"[EventSelectionConfig] EXPR: variable '{variable}' is not available. "
+                "Please request it from the EventSelectionAlgorithms developers.")
+        minN, maxN, sep, _needsEta, metOk = self._EXPR_VARS[variable]
+        n = len(operands)
+        if n < minN or (maxN is not None and n > maxN):
+            expected = f"{minN}" if maxN == minN else (f"{minN}+" if maxN is None else f"{minN}-{maxN}")
+            raise InconsistentSettingsError(
+                f"[EventSelectionConfig] EXPR: '{variable}' takes {expected} operand(s), got {n}")
+        if n > 1 and separator != sep:
+            want = {",": "','", "+": "'+'"}.get(sep, str(sep))
+            raise InconsistentSettingsError(
+                f"[EventSelectionConfig] EXPR: '{variable}' operands must be separated by {want}")
+        for coll, index in operands:
+            if coll not in self._EXPR_COLL:
+                raise UnavailableFeatureError(
+                    f"[EventSelectionConfig] EXPR: collection '{coll}' is not available. "
+                    "Please request it from the EventSelectionAlgorithms developers.")
+            _opt, _btag, isMET = self._EXPR_COLL[coll]
+            if isMET:
+                if not metOk:
+                    raise InconsistentSettingsError(
+                        f"[EventSelectionConfig] EXPR: 'met' is not valid for '{variable}'")
+                if index is not None:
+                    raise InconsistentSettingsError(
+                        "[EventSelectionConfig] EXPR: 'met' cannot be indexed")
+                if separator == "+":
+                    raise InconsistentSettingsError(
+                        "[EventSelectionConfig] EXPR: 'met' cannot be combined in a sum")
+            elif index is None:
+                raise InconsistentSettingsError(
+                    f"[EventSelectionConfig] EXPR: '{coll}' must be indexed, e.g. {coll}[0]")
+
+    def add_EXPR_selector(self, text, config):
+        body = text[len("EXPR"):].strip()
+        if not body:
+            self.raise_misconfig(text, "EXPR expression")
+        variable, separator, operands, sign, refValue = self._expr_parse(self._expr_tokenize(body))
+        self._expr_validate(variable, separator, operands)
+
+        thisalg = f'{self.selectionName}_EXPR_{self.step}'
+        alg = config.createAlgorithm('CP::ObjectKinematicSelectorAlg', thisalg)
+        alg.variable = variable
+        alg.sign = sign
+        alg.refValue = refValue
+
+        operandKinds, collections, selections, indices = [], [], [], []
+        usesMET = False
+        for coll, index in operands:
+            opt, applyBtag, isMET = self._EXPR_COLL[coll]
+            container = getattr(self, opt)
+            if not container:
+                self.raise_missinginput(opt)
+            if isMET:
+                operandKinds.append("MET")
+                usesMET = True
+                continue
+            operandKinds.append("PARTICLE")
+            name, selection = config.readNameAndSelection(container)
+            if applyBtag:
+                if not self.btagDecoration:
+                    self.raise_missinginput("btagDecoration")
+                selection = (f'{selection}&&{self.btagDecoration},as_char'
+                             if selection else f'{self.btagDecoration},as_char')
+            collections.append(name)
+            selections.append(selection)
+            indices.append(index)
+
+        alg.operandKinds = operandKinds
+        alg.collections = collections
+        alg.selections = selections
+        alg.indices = indices
+        if usesMET:
+            if not self.met:
+                self.raise_missinginput("met")
+            alg.met = config.readName(self.met)
+            alg.metTerm = self.metTerm
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
