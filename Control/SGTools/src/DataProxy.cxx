@@ -198,11 +198,16 @@ bool DataProxy::bindHandle(IResetable* ir) {
 
 
 /// Drop the reference to the data object.
+inline
 void DataProxy::resetRef()
 {
-  DataObject* dobj = m_dObject;
-  resetGaudiRef(dobj);
-  m_dObject = dobj;
+  // Skip calling resetGaudiRef for the case where the proxy has never
+  // been defererenced.
+  if (m_dObject) {
+    DataObject* dobj = m_dObject;
+    resetGaudiRef(dobj);
+    m_dObject = dobj;
+  }
   m_tAddress.reset();
   m_const = m_origConst;
 }
@@ -328,7 +333,7 @@ bool DataProxy::requestRelease(bool force, bool hard) {
   }
   bool canRelease = force;
   if (!m_resetFlag) canRelease = true;
-#ifndef NDEBUG
+#if 0
   MsgStream gLog(m_ims, "DataProxy");
   if (gLog.level() <= MSG::VERBOSE) {
     gLog << MSG::VERBOSE << "requestRelease(): "
