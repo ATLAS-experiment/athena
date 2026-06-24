@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IITkCablingTool_h
@@ -45,15 +45,12 @@ class IITkStripCablingTool: virtual public IAlgTool {
   virtual IdentifierHash getHashFromOnlineId(const ITkStripOnlineId& onlineId, const EventContext& ctx, const bool withWarnings = true) const = 0;  
 
   /// return the online Id, given a hash (used by simulation encoders)
-  virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash) const = 0;
   virtual ITkStripOnlineId getOnlineIdFromHash(const IdentifierHash& hash, const EventContext& ctx) const = 0;
 
   /// return the rob/rod Id, given a hash (used by simulation encoders)
-  virtual std::uint32_t getRobIdFromHash(const IdentifierHash& hash) const = 0;
   virtual std::uint32_t getRobIdFromHash(const IdentifierHash& hash, const EventContext& ctx) const = 0;
   
   /// fill a users vector with all the RodIds
-  virtual void getAllRods(std::vector<std::uint32_t>& usersVector) const = 0;
   virtual void getAllRods(std::vector<std::uint32_t>& usersVector, const EventContext& ctx) const = 0;
 };
 
