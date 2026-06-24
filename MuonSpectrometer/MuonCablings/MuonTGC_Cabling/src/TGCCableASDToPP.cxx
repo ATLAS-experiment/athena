@@ -340,7 +340,7 @@ std::unique_ptr<TGCChannelId> TGCCableASDToPP::getChannelOut(
     const bool asdoutisStrip = asdout.isStrip();
     const bool asdoutisBackward = asdout.isBackward();
     const bool asdoutisEndcap = asdout.isEndcap();
-    const bool asdoutisTriplet = asdout.isTriplet();
+    const bool asdoutisM1 = (asdout.getStation() == TGCId::StationType::M1);
     const int asdoutLayer = asdout.getLayer();
     const int asdoutChamber = asdout.getChamber();
     const int asdoutChannel = asdout.getChannel();
@@ -365,7 +365,7 @@ std::unique_ptr<TGCChannelId> TGCCableASDToPP::getChannelOut(
 
         // Endcap Triplet chamberId start from 1 in ASDOut
         int chamber = asdoutChamber;
-        if (asdoutisEndcap && asdoutisTriplet) {
+        if (asdoutisEndcap && asdoutisM1) {
             chamber = chamber - 1;
         }
         int offset = (asdout.isWire()) ? 4 : 0;
