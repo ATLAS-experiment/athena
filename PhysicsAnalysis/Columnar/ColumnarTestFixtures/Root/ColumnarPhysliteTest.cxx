@@ -14,6 +14,7 @@
 #include <ColumnarTestFixtures/PerformanceData.h>
 #include <ColumnarCore/ColumnInfoHelpers.h>
 #include <ColumnarCore/ColumnarTool.h>
+#include <ColumnarInterfaces/KnownSgKeys.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
@@ -529,7 +530,7 @@ namespace columnar
             throw std::runtime_error ("missing offset column: " + name);
           if (clid != 0)
             m_targetKeys.push_back (computeSgKey (name, clid));
-          else if (auto keyIter = knownKeys.find (name); keyIter != knownKeys.end())
+          else if (auto keyIter = knownSgKeys.find (name); keyIter != knownSgKeys.end())
             m_targetKeys.push_back (keyIter->second);
           else
             m_targetKeys.push_back (0);
