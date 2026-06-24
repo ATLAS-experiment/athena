@@ -30,6 +30,7 @@ public:
 
   void setPDGCode(int v) { m_pdgcode = v; }
   void setStatus(int v) { m_status = v; }
+  void setPrimary(int v) { m_primary = v; }
   void setBarcode(const HepMcParticleLink::barcode_type& v) { m_barcode = v; }
   void setUniqueID(const HepMcParticleLink::barcode_type& v) { m_uniqueID = v; }
   void setEventIndex(int v) { m_evtindex = v; }
@@ -56,6 +57,7 @@ public:
 
   int getPDGCode() const { return m_pdgcode; }
   int getStatus() const { return m_status; }
+  int getPrimary() const { return m_primary; }
   int status() const { return m_status; }
   HepMcParticleLink::barcode_type getBarcode() const { return m_barcode; }
   HepMcParticleLink::barcode_type barcode() const { return m_barcode; }
@@ -93,6 +95,7 @@ private:
 
   int m_pdgcode;
   int m_status;
+  int m_primary;
   HepMcParticleLink::barcode_type m_barcode;
   HepMcParticleLink::barcode_type m_uniqueID;
   int m_evtindex;
@@ -101,7 +104,7 @@ private:
                                 // particle with m_barcode
 
 
-  ClassDefNV(FPGATrackSimTruthTrack, 5)
+  ClassDefNV(FPGATrackSimTruthTrack, 6)
 };
 
 #endif // TRIGFPGATrackSimOBJECTS_FPGATrackSimTRUTHTRACK_H
