@@ -293,7 +293,7 @@ bool TgcCablingMap::getOnlineIDfromOfflineID(
     }
 
     // layer#
-    // 0, (1), 2, ... 5, 6 (pivot) / 7, 8 (EI/FI)
+    // 0, (1), 2, ... 5, 6 (pivot) / 7, 8, 9 (EI/FI), Layer 9 only for Run-4+
     //                        N/A  T1  T2  T3  TI
     const int lyr_offset[5] = {0, -1, 2, 4, 6};
     layerNumber = iGasGap + lyr_offset[stationType];
