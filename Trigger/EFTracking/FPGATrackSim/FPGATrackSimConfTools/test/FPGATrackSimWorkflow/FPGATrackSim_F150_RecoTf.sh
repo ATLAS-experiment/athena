@@ -126,7 +126,10 @@ else # Do GNN Pixel Seeding
                     flags.Trigger.FPGATrackSim.regionToWriteDPTree=34;\
                     flags.Trigger.FPGATrackSim.writeToAOD=False;\
                     flags.Trigger.FPGATrackSim.writeClustersToAOD=False;\
-                    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=True;"
+                    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=True;\
+                    flags.Trigger.FPGATrackSim.GNN.doAllHits=False;\
+                    flags.Trigger.FPGATrackSim.GNN.doPixelHits=True;\
+                    flags.Trigger.FPGATrackSim.GNN.doStripHits=False;"
     postExecFlags="from AthenaCommon.CFElements import findAlgorithm;\
                    findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').ptMinMeasurements=[];\
                    findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').absEtaMaxMeasurements=[];\
