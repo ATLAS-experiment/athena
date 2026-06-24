@@ -1,11 +1,12 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+import warnings
 from functools import partial
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ConfigDeprecationWarning
 
 
 class EventSelectionMergerConfig(ConfigBlock):
@@ -158,6 +159,9 @@ class EventSelectionConfig(ConfigBlock):
                               "a single string where each line represents a different selection cut to apply in order.")
         for line in self.selectionCuts.split("\n"):
             self.interpret(line, config)
+        # the event filter is always created automatically at the end of the
+        # block; an explicit SAVE line only triggers a deprecation warning
+        self._emit_save(config)
         config.addEventCutFlow(self.selectionName, self.getCutflow())
 
     def interpret(self, text, cfg):
@@ -728,8 +732,22 @@ class EventSelectionConfig(ConfigBlock):
         return
 
     def add_SAVE(self, text, config):
+        # SAVE is deprecated: the event filter is now emitted automatically at
+        # the end of the block (see makeAlgs). The keyword is accepted only to
+        # warn existing configs; it performs no operation itself.
         items = text.split()
         self._check_args(items, "SAVE", (1,))
+        warnings.warn(
+            "[EventSelectionConfig] The 'SAVE' keyword is deprecated: the event "
+            "filter is now created automatically at the end of each EventSelection "
+            f"block. Please remove the 'SAVE' line from selection '{self.selectionName}'.",
+            category=ConfigDeprecationWarning, stacklevel=2)
+        return
+
+    def _emit_save(self, config):
+        """Create the SaveFilterAlg that turns the accumulated event selection
+        into a named, persisted selection (and ntuple branch). Called once per
+        block, automatically at the end of makeAlgs."""
         thisalg = f'{self.selectionName}_SAVE'
         alg = config.createAlgorithm('CP::SaveFilterAlg', thisalg)
         alg.FilterDescription = f'events passing < {self.selectionName} >'
