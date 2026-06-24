@@ -202,6 +202,17 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     ATH_MSG_DEBUG("No training-like graph nodes found. Passed through "
                   << passThroughNonModelBuckets
                   << " non-model buckets without ONNX inference.");
+    if (m_printFilterSummary) {
+      ATH_MSG_INFO("BucketFilterSummary event=" << ctx.evt()
+                   << " input=" << inputBuckets->size()
+                   << " model_input=0"
+                   << " model_kept=0"
+                   << " output=" << passThroughNonModelBuckets
+                   << " rejected=0"
+                   << " non_model_passthrough=" << passThroughNonModelBuckets
+                   << " expected_signal=n/a"
+                   << " expected_signal_kept=n/a");
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -446,6 +457,24 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
                  << " kept_bad=" << labelledBadKept
                  << " bad_accept_rate=" << badAcceptRate
                  << " unknown_label=" << labelledUnknownBuckets);
+  }
+
+  if (m_printFilterSummary) {
+    ATH_MSG_INFO("BucketFilterSummary event=" << ctx.evt()
+                 << " input=" << inputBuckets->size()
+                 << " model_input=" << validBuckets
+                 << " model_kept=" << keptByModel
+                 << " output=" << kept
+                 << " rejected=" << (inputBuckets->size() - kept)
+                 << " non_model_passthrough=" << passThroughNonModelBuckets);
+    if (m_printLabels) {
+      ATH_MSG_INFO("BucketFilterTruthSummary event=" << ctx.evt()
+                   << " expected_signal=" << labelledGoodBuckets
+                   << " expected_signal_kept=" << labelledGoodKept
+                   << " expected_background=" << labelledBadBuckets
+                   << " expected_background_kept=" << labelledBadKept
+                   << " unknown_label=" << labelledUnknownBuckets);
+    }
   }
 
   if (doDebugDump) {

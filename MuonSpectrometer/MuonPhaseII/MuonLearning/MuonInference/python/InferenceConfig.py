@@ -3,6 +3,10 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+DEFAULT_BUCKET_MODEL_PATH         = "dev/MuonRecRTT/edgecnn_mu200.onnx"
+DEFAULT_BUCKET_SCORE_THRESHOLD    = 0.160
+DEFAULT_BUCKET_SINGLE_OUTPUT_MODE = "logit"
+
 def MuonLearningOnnxRuntimeSvcCfg(flags, name="OnnxRuntimeSvc", **kwargs):
     """Configure the shared ONNX Runtime service used by MuonLearning tools."""
     result = ComponentAccumulator()
@@ -34,21 +38,28 @@ def GraphBucketFilterToolCfg(flags, name ="GraphBucketFilterTool", **kwargs):
     from AthOnnxComps.OnnxRuntimeSessionConfig import OnnxRuntimeSessionToolCfg
 
     result = ComponentAccumulator()
-    model_path = kwargs.pop("ModelPath", "dev/MuonRecRTT/edgecnn_mu200.onnx")
-    
-    if not model_path.startswith('/'):
-        pass
-    else:
-        pass
+    model_path = kwargs.pop("ModelPath", DEFAULT_BUCKET_MODEL_PATH)
+    single_output_mode = kwargs.pop("SingleOutputMode", None)
+    if single_output_mode is not None:
+        if "SingleOutputIsLogit" in kwargs:
+            raise ValueError(
+                "Specify either SingleOutputMode or SingleOutputIsLogit, not both."
+            )
+        if single_output_mode not in ("logit", "prob"):
+            raise ValueError(
+                "SingleOutputMode must be 'logit' or 'prob', got "
+                f"{single_output_mode!r}."
+            )
+        kwargs["SingleOutputIsLogit"] = (single_output_mode == "logit")
     
     result.merge(MuonLearningOnnxRuntimeSvcCfg(flags))
     kwargs.setdefault("ModelSession", result.popToolsAndMerge(
         OnnxRuntimeSessionToolCfg(flags, model_fname=model_path,
                                   OnnxRuntimeSvc=result.getService("OnnxRuntimeSvc"))))
     kwargs.setdefault("OutputLevel", 3)  # INFO level (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)
-    kwargs.setdefault("ScoreThreshold", 0.160)
+    kwargs.setdefault("ScoreThreshold", DEFAULT_BUCKET_SCORE_THRESHOLD)
     kwargs.setdefault("OutputName", "logits")
-    kwargs.setdefault("SingleOutputIsLogit", False)
+    kwargs.setdefault("SingleOutputIsLogit", DEFAULT_BUCKET_SINGLE_OUTPUT_MODE == "logit")
     
     the_tool = CompFactory.MuonML.GraphBucketFilterTool(name, **kwargs)
     result.setPrivateTools(the_tool)
@@ -72,6 +83,7 @@ def SegmentEdgeClassifierToolCfg(flags, name="SegmentEdgeClassifierTool", **kwar
     kwargs.setdefault("MaxDeltaThetaDeg", 35.0)
     kwargs.setdefault("MaxDeltaSector", 1)
     kwargs.setdefault("SectorModulo", 16)
+    kwargs.setdefault("ReadSpacePoints", "MuonSpacePoints")
     tool = CompFactory.MuonML.SegmentEdgeClassifierTool(name, **kwargs)
     result.setPrivateTools(tool)
     return result

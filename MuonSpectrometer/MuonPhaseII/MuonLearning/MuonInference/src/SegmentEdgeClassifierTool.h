@@ -9,7 +9,9 @@
 #include "MuonMLEvent.h"
 #include "Gaudi/Property.h"
 
+#include <atomic>
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -82,6 +84,10 @@ namespace MuonML {
                              std::vector<SegmentEdgeScore>& scores) const override;
 
   private:
+    StatusCode dumpDebugEvent(const EventContext& ctx,
+                              const SegmentEdgeGraph& graph,
+                              const std::vector<SegmentEdgeScore>& scores) const;
+
     Gaudi::Property<float> m_maxDeltaThetaDeg{this, "MaxDeltaThetaDeg", 35.f};
     Gaudi::Property<int> m_maxDeltaSector{this, "MaxDeltaSector", 1};
     Gaudi::Property<int> m_sectorModulo{this, "SectorModulo", 16};
@@ -89,11 +95,16 @@ namespace MuonML {
     Gaudi::Property<std::string> m_inputEdgeIndexName{this, "InputEdgeIndexName", "edge_index"};
     Gaudi::Property<std::string> m_inputEdgeAttrName{this, "InputEdgeAttrName", "edge_attr"};
     Gaudi::Property<std::string> m_outputName{this, "OutputName", "logits"};
+    Gaudi::Property<std::string> m_debugDumpFile{this, "DebugDumpFile", ""};
+    Gaudi::Property<unsigned int> m_debugDumpMaxEvents{this, "DebugDumpMaxEvents", 0};
     float m_cosMin{0.f};
 
     /// Node feature order expected by the model metadata (resolved at initialize).
     std::vector<std::string> m_nodeFeatureNames{};
     std::vector<SegmentNodeFeatureId> m_nodeFeatureIds{};
+
+    mutable std::mutex m_debugDumpMutex;
+    mutable std::atomic<unsigned int> m_debugDumpEvents{0};
   };
 }
 #endif
