@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -459,6 +459,10 @@ bool ImportData::importMapKeys(
     ss.str(line);
     int year;
     ss >> year >> token;
+    if (year < 2015) {
+      ATH_MSG_ERROR("Malformed line from TrigGlobalEfficiencyCorrection/MapKeys.cfg: " << line);
+      return false;
+    }
     year = 1 << (year - 2015);
     std::size_t leg = m_hasher(token);
     auto& keys = keysPerLeg[leg];
