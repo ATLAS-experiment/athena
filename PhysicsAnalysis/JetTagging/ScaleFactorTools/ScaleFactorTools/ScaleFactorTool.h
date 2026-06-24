@@ -21,12 +21,14 @@ class ScaleFactorTool: public asg::AsgTool,
   StatusCode initialize() override;
 
   float getSF(const xAOD::IParticle* p) const override;
+  std::unordered_map<std::string, int> inferWPs(const xAOD::IParticle* p) const;
 
   private:
   bool m_initialised = false;
   Gaudi::Property<std::string> m_taggerName {this, "TaggerName", "", "Name of the tagger"};
   Gaudi::Property<std::string> m_json_config_path {this, "JsonConfigFile", "", "Path to JSON config file"};
   Gaudi::Property<std::string> m_obj_container {this, "ObjContainer", "", "object container"};
+  Gaudi::Property<std::string> m_pct_Name {this, "PCTName", "", "pseudo-continuous tagger name"};
 
   ToolUtils::QuantileFunc m_sf_func;
   ToolUtils::QuantileFunc m_pct_func;
@@ -35,6 +37,7 @@ class ScaleFactorTool: public asg::AsgTool,
 
   int m_n_pct_bins;
   int inferPCTBins(const json& cfg);
+  std::unordered_map<std::string, std::unordered_set<int>> m_wp_bins;
 
   std::vector<float> m_sf_values;
 };

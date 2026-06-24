@@ -20,5 +20,6 @@ class IScaleFactorTool : virtual public asg::IAsgTool {
 
   public:
   virtual float getSF( const xAOD::IParticle* p ) const = 0;
+  virtual std::unordered_map<std::string, int> inferWPs( const xAOD::IParticle* p ) const = 0; 
 };
 #endif // CPISCALEFACTORTOOL_H

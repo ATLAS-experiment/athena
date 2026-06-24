@@ -98,10 +98,14 @@ ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
       throw std::runtime_error("enumerate: value above maximum edge");
     }
 
-    int bin = 0;
-    while (bin < (int) edges.size() && v > edges[bin]){
-      bin++;
+    int bin = -1;
+    for (int i = 0; i < (int)edges.size() - 1; ++i) {
+      if (v >= edges[i] && v < edges[i+1]) {
+        bin = i;
+        break;
+      }
     }
+
     return bin;
   };
 }

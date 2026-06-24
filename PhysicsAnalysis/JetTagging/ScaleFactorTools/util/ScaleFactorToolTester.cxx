@@ -22,7 +22,7 @@ using namespace testSFTool;
 
 int main(int argc, char* argv[]) {
 
-  if (argc < 3) {
+  if (argc < 4) {
     ANA_MSG_ERROR (  "No right inputs received!" );
     return 1;
   }
@@ -30,14 +30,16 @@ int main(int argc, char* argv[]) {
   std::string inputDAOD = argv[1];
   std::string JsonConfigFile = argv[2];
   std::string taggerName = argv[3];
+  std::string PCTName = argv[4];
   std::string objContainer = "AntiKt4EMPFlowJets";
 
   asg::StandaloneToolHandle<IScaleFactorTool> sel_tool("ScaleFactorTool/SFToolTest");
   StatusCode sel_code1 = sel_tool.setProperty( "TaggerName", taggerName);
   StatusCode sel_code2 = sel_tool.setProperty( "JsonConfigFile", JsonConfigFile);
   StatusCode sel_code3 = sel_tool.setProperty( "ObjContainer", objContainer);
-  StatusCode sel_code4 = sel_tool.initialize();
-  std::vector<StatusCode> sel_codes = { sel_code1, sel_code2, sel_code3, sel_code4};
+  StatusCode sel_code4 = sel_tool.setProperty( "PCTName", PCTName);
+  StatusCode sel_code5 = sel_tool.initialize();
+  std::vector<StatusCode> sel_codes = { sel_code1, sel_code2, sel_code3, sel_code4, sel_code5};
 
   for(const auto& code : sel_codes) {
     if(code.isFailure()) {
@@ -71,6 +73,14 @@ int main(int argc, char* argv[]) {
       float pu = SG::AuxElement::ConstAccessor<float>(taggerName+"_pu")(*particle);
       float ptau = SG::AuxElement::ConstAccessor<float>(taggerName+"_ptau")(*particle);
       ANA_MSG_INFO("pb : pc : pl : ptau = " << pb << ", " << pc << ", " << pu << ", " << ptau);
+      std::unordered_map<std::string, int> wp_map = sel_tool->inferWPs(particle);
+      ANA_MSG_INFO("passed ctag50: " << wp_map["ctag50"] << 
+                   ", passed ctag30: " << wp_map["ctag30"] << 
+                   ", passed ctag10: " << wp_map["ctag10"] << 
+                   ", passed btag77: " << wp_map["btag77"] << 
+                   ", passed btag70: " << wp_map["btag70"] << 
+                   ", passed btag65: " << wp_map["btag65"] << 
+                   ", PCT score: " << wp_map[PCTName]);
       float sf = 1.;
       sf = sel_tool->getSF(particle);
       ANA_MSG_INFO("SF = " << sf );

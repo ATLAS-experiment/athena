@@ -23,13 +23,18 @@ StatusCode ScaleFactorTool::initialize(){
   m_json_config = json::parse(jsonFile);
   jsonFile.close();
 
-  if (m_taggerName.empty()) {
-    ATH_MSG_ERROR("Tagger name not set");
+  if (m_taggerName.empty() || m_json_config.at("TaggerName").get<std::string>() != m_taggerName.value()) {
+    ATH_MSG_ERROR("Tagger name " + m_taggerName + " not found in JSON file:" + m_json_config_path);
     return StatusCode::FAILURE;
   }
 
-  if (m_obj_container.empty()) {
+  if (m_obj_container.empty() || m_json_config.at("Container").get<std::string>() != m_obj_container.value()) {
     ATH_MSG_ERROR("Missing container config for " + m_obj_container + "in tagger" + m_taggerName);
+    return StatusCode::FAILURE;
+  }
+
+  if (m_pct_Name.empty() || m_json_config.at("Scheme").get<std::string>() != m_pct_Name.value()) {
+    ATH_MSG_ERROR(" PCT WP " + m_pct_Name + "not avaialble for " + m_taggerName);
     return StatusCode::FAILURE;
   }
 
@@ -41,6 +46,14 @@ StatusCode ScaleFactorTool::initialize(){
   m_sf_func   = ToolUtils::quantileFactory(m_json_config.at("sf_bins"));
   m_pct_func = ToolUtils::quantileFactory(m_json_config.at("pct_bins"));
   m_n_pct_bins = inferPCTBins(m_json_config.at("pct_bins"));
+
+  for (const auto& [name, wp_cfg] : m_json_config.at("working_points").items()) {
+    std::unordered_set<int> bins;
+    for (int b : wp_cfg.at("bins")) {
+      bins.insert(b);
+    }
+    m_wp_bins[name] = std::move(bins);
+  }
 
   m_initialised = true;
 
@@ -54,6 +67,27 @@ float ScaleFactorTool::getSF(const xAOD::IParticle* p) const
   int pct_bin = m_pct_func(el);
   int global = sf_bin * m_n_pct_bins + pct_bin;
   return m_sf_values.at(global);
+}
+
+std::unordered_map<std::string, int> ScaleFactorTool::inferWPs(const xAOD::IParticle* p) const
+{
+  const SG::AuxElement& el = *p;
+  int pct_bin = m_pct_func(el);
+
+  std::unordered_map<std::string, int> result;
+
+  for (const auto& [name, bins] : m_wp_bins) {
+    if (bins.find(pct_bin) != bins.end()) {
+      result[name] = 1;
+    } else {
+      result[name] = 0;
+    }
+  }
+
+  result[m_pct_Name] = pct_bin;
+
+  return result;
+
 }
 
 // ==========================
