@@ -5,9 +5,9 @@
 #define TRIGGERPROCESSORTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "TrigT1NSWSimTools/ITriggerProcessorTool.h"
+#include "L0MuonNSWSimTools/ITriggerProcessorTool.h"
 
-namespace NSWL0 {
+namespace L0Muon {
 
   class TriggerProcessorTool : public extends<AthAlgTool,ITriggerProcessorTool> {
 

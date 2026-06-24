@@ -15,7 +15,7 @@
  * according to the chosen trigger logic
  **/
 
-namespace NSWL0 {
+namespace L0Muon {
 
   inline bool trigger_1over4(const bool in0, const bool in1, const bool in2, const bool in3) {
     return (in0 or in1 or in2 or in3);

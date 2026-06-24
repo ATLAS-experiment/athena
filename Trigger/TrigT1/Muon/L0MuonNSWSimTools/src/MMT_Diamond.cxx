@@ -14,7 +14,7 @@ namespace {
   constexpr int n_vmm  = 128;
 }
 
-
+namespace L0Muon {
 MMT_Diamond::MMT_Diamond(const int diamXthreshold, const bool uv, const int diamUVthreshold, const int roadSize,
     const int olapEtaUp, const int olapEtaDown, const int olapStereoUp, const int olapStereoDown): AthMessaging(Athena::getMessageSvc(), "MMT_Diamond") {
     m_xthr = diamXthreshold;
@@ -209,4 +209,5 @@ double MMT_Diamond::phiShift(const int n, const double phi, const char side) con
   if (n < 8)       return (Phi + shift);
   else if (n == 8) return (Phi + ((Phi > 0.) ? -1. : 1.)*shift);
   else             return (Phi - shift);
+}
 }

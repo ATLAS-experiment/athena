@@ -10,6 +10,7 @@
 #include <cmath>
 #include <vector>
 
+namespace L0Muon {
 struct slope_t {
   uint64_t event{0};
   int BC{-1};
@@ -53,4 +54,5 @@ class MMT_Diamond : public AthMessaging {
     int m_roadSize{}, m_roadSizeUpX{}, m_roadSizeDownX{}, m_roadSizeUpUV{}, m_roadSizeDownUV{};
     int m_xthr{}, m_uvthr{};
 };
+}
 #endif

@@ -16,7 +16,7 @@
  * Wheel, sector, pattern, hitmask, hitmask signature, bandID, sourceID, phiID, BCID
  **/
 
-namespace NSWL0 {
+namespace L0Muon {
 
   class PadEmulatorTrigger {
 
@@ -31,7 +31,7 @@ namespace NSWL0 {
       const PadPattern& getPattern() const { return m_pattern; };
       uint32_t getHitMask()      const { return m_hitmask; };
       uint32_t getBandid()       const { return m_bandid; };
-      uint32_t getSourceid()     const { return NSWL0::PAD::wheelSectorToSourceID(m_wheel, m_sector); };
+      uint32_t getSourceid()     const { return L0Muon::PAD::wheelSectorToSourceID(m_wheel, m_sector); };
       uint32_t getPhiid()        const { return m_phiid; };
       int getSignedPhiid()       const { return m_phiid_signed; };
       uint32_t getRelbcid()      const { return m_relbcid; };

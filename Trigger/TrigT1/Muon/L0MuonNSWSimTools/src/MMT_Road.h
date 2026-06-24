@@ -9,6 +9,7 @@
 #include <cmath>
 #include <numeric>
 
+namespace L0Muon {
 class MMT_Road {
   public:
     MMT_Road(const char sector, const int roadSize, const int UpX, const int DownX, const int UpUV, const int DownUV, const int xthr, const int uvthr,
@@ -44,4 +45,5 @@ class MMT_Road {
     int m_xthr, m_uvthr;
     char m_sector;
 };
+}
 #endif

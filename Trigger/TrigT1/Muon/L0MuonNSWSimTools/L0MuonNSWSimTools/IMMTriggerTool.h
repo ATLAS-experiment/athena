@@ -11,7 +11,7 @@
 #include "MuonTesterTree/MuonTesterTree.h"
 
 // namespace for the NSW LVL0 related classes
-namespace NSWL0 {
+namespace L0Muon {
 
   class IMMTriggerTool: virtual public IAlgTool {
 

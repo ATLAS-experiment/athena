@@ -21,7 +21,7 @@
 #include "PadEmulatorCoincidences.h"
 #include "PadEmulatorTrigger.h"
 #include "PathResolver/PathResolver.h"
-#include "TrigT1NSWSimTools/IPadEmulatorTool.h"
+#include "L0MuonNSWSimTools/IPadEmulatorTool.h"
 #include "TrigT1NSWSimExtras.h"
 #include <fstream>
 
@@ -37,7 +37,7 @@
  * The output is saved in the NSW_PadTriggerData RDO, which will be merged in the general trigger RDO
  **/
 
-namespace NSWL0 {
+namespace L0Muon {
 
   class PadEmulatorTool : public extends<AthAlgTool, IPadEmulatorTool> {
 

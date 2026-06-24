@@ -24,7 +24,7 @@
  * They will be extended to MicroMegas code and sTGC Strip Trigger, when available
  **/
 
-namespace NSWL0 {
+namespace L0Muon {
   // Space
   const std::string SPACE{" "};
 

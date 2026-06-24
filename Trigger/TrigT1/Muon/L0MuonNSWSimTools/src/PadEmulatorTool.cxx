@@ -4,7 +4,7 @@
 
 #include "PadEmulatorTool.h"
 
-namespace NSWL0 {
+namespace L0Muon {
   PadEmulatorTool::PadEmulatorTool(const std::string& type, const std::string& name, const IInterface* parent) :
   base_class(type,name,parent) {}
 
@@ -140,15 +140,15 @@ namespace NSWL0 {
             // Source ID retrieval: Pad Trigger logic needs sector number starting from 0
             int sector = m_idHelperSvc->sector(Id)-1;
             const char wheel = (stEta > 0) ? 'A' : 'C';
-            auto sourceid = NSWL0::PAD::wheelSectorToSourceID(wheel, sector);
+            auto sourceid = L0Muon::PAD::wheelSectorToSourceID(wheel, sector);
             hits_sourceid.emplace_back(sourceid);
 
             // pFEB retrieval
-            auto pfeb = NSWL0::PAD::getpFEBAthena(gasGap, multilayer, stEta);
+            auto pfeb = L0Muon::PAD::getpFEBAthena(gasGap, multilayer, stEta);
             hits_pfeb.emplace_back(pfeb);
 
             // padChannel retrieval: no check on the Type, as already done by selecting PAD digits only
-            auto padchan = NSWL0::PAD::getPadchAthena(channel, pfeb, sector, gasGap);
+            auto padchan = L0Muon::PAD::getPadchAthena(channel, pfeb, sector, gasGap);
             hits_padchan.emplace_back(padchan);
 
             // BC retrieval
@@ -184,11 +184,11 @@ namespace NSWL0 {
         // Preprocessing
         const auto& sourceid = hits_sourceid.at(hits_indices.front());
         const bool isLarge = (sourceid % 2 == 0);
-        const bool isA = NSWL0::isA(sourceid);
+        const bool isA = L0Muon::isA(sourceid);
         const char whl = isA ? 'A' : 'C';
         const auto sec = (sourceid & 0xf);  // last 4 bits of the sourceID are sector number (0-15)
         const auto& patterns = isLarge ? m_patterns_L : m_patterns_S;
-        std::vector<uint32_t> masks(patterns.size() * NSWL0::PAD::PAD_TRIGGER_READOUT_NBC);
+        std::vector<uint32_t> masks(patterns.size() * L0Muon::PAD::PAD_TRIGGER_READOUT_NBC);
 
         // Loop over available hits
         for(const auto& index: hits_indices) {
@@ -204,11 +204,11 @@ namespace NSWL0 {
            * for each hit, find the patterns it belongs to
            * then for the corresponding bcid and the ones within stretch, mark the layer as hit
            */
-          const auto layer = (pfeb % NSWL0::PAD::NPFEB_PER_RADIUS);
+          const auto layer = (pfeb % L0Muon::PAD::NPFEB_PER_RADIUS);
           for(size_t it{0}; it < patterns.size(); ++it) {
             if(patterns.at(it).getPfebs().at(layer) == pfeb and patterns.at(it).getPadChannels().at(layer) == chan) {
               for(uint32_t bc{bcid}; bc <= bcid + m_stretch; ++bc) {
-                if(bc >= NSWL0::PAD::PAD_TRIGGER_READOUT_NBC) break;
+                if(bc >= L0Muon::PAD::PAD_TRIGGER_READOUT_NBC) break;
                 masks.at(it + bc*patterns.size()) |= (1 << layer);
               }
             }
@@ -219,14 +219,14 @@ namespace NSWL0 {
         std::string secstr = whl + std::to_string(sec+1);
         if(m_maskedPatterns.find(secstr) != m_maskedPatterns.end()) {
           for(const auto& [patind, tomask] : m_maskedPatterns.at(secstr)) {
-            for(size_t bcid{0}; bcid < NSWL0::PAD::PAD_TRIGGER_READOUT_NBC; ++bcid) {
+            for(size_t bcid{0}; bcid < L0Muon::PAD::PAD_TRIGGER_READOUT_NBC; ++bcid) {
               masks.at(patind + bcid*patterns.size()) |= tomask;
             }
           }
         }
 
         // Check coincidences
-        for(size_t relbcid{0}; relbcid < NSWL0::PAD::PAD_TRIGGER_READOUT_NBC; ++relbcid) {
+        for(size_t relbcid{0}; relbcid < L0Muon::PAD::PAD_TRIGGER_READOUT_NBC; ++relbcid) {
           if(m_ignoreBCIDs and relbcid > 0) continue;
 
           bool isTrigger;
@@ -343,7 +343,7 @@ namespace NSWL0 {
   std::vector<uint32_t> PadEmulatorTool::getForbiddenBandIDs(const std::vector<PadEmulatorTrigger>& triggers,
                                                              const bool isLarge) const {
     std::set<uint32_t> forbiddens{};
-    const auto& encoder = isLarge ? NSWL0::PAD::priorityEncoderL : NSWL0::PAD::priorityEncoderS;
+    const auto& encoder = isLarge ? L0Muon::PAD::priorityEncoderL : L0Muon::PAD::priorityEncoderS;
 
     std::set<uint32_t> bands{};
     for(const auto& trigger : triggers) bands.emplace(trigger.getBandid());
@@ -351,7 +351,7 @@ namespace NSWL0 {
 
     std::sort(bandids.rbegin(), bandids.rend());
     for(const auto& bandid : bandids) {
-      if(NSWL0::PAD::contains(forbiddens, bandid)) continue;
+      if(L0Muon::PAD::contains(forbiddens, bandid)) continue;
 
       for(uint32_t forb{bandid-1}; forb >= encoder(bandid); --forb) forbiddens.emplace(forb);
     }
@@ -362,14 +362,14 @@ namespace NSWL0 {
     return std::vector<uint32_t>(forbiddens.cbegin(), forbiddens.cend());
   }
 
-  std::vector<PadEmulatorTrigger> NSWL0::PadEmulatorTool::filterPriorityEncoder(const std::vector<PadEmulatorTrigger>& input,
+  std::vector<PadEmulatorTrigger> L0Muon::PadEmulatorTool::filterPriorityEncoder(const std::vector<PadEmulatorTrigger>& input,
                                                                          const bool isLarge) const {
     if(input.empty()) return {};
 
     std::vector<PadEmulatorTrigger> output{};
     const auto& forbiddens = getForbiddenBandIDs(input, isLarge);
     for(const auto& trigger: input) {
-      if(NSWL0::PAD::contains(forbiddens, trigger.getBandid())) continue;
+      if(L0Muon::PAD::contains(forbiddens, trigger.getBandid())) continue;
       output.emplace_back(trigger);
     }
     return output;
@@ -381,7 +381,7 @@ namespace NSWL0 {
     std::vector<PadEmulatorTrigger> output{};
     const std::set<uint32_t> forbiddens{0, 1, 2, 3, 4, 5};
     for(const auto& trigger : input) {
-      if(NSWL0::PAD::contains(forbiddens, trigger.getBandid())) continue;
+      if(L0Muon::PAD::contains(forbiddens, trigger.getBandid())) continue;
       output.emplace_back(trigger);
     }
     return output;
@@ -430,63 +430,63 @@ namespace NSWL0 {
     std::string line;
     if(ifs) {
       bool isLarge = false;
-      uint32_t bandid = NSWL0::PAD::DUMMY_BANDID;
+      uint32_t bandid = L0Muon::PAD::DUMMY_BANDID;
       while (not ifs.eof()) {
         std::getline(ifs, line);
-        const auto words = CxxUtils::tokenize(line, NSWL0::SPACE);
+        const auto words = CxxUtils::tokenize(line, L0Muon::SPACE);
         ATH_MSG_DEBUG("Got words of size " << words.size());
 
         // check for EOF line
-        if(NSWL0::PAD::contains(line, NSWL0::PAD::PATTERN_END)) break;
+        if(L0Muon::PAD::contains(line, L0Muon::PAD::PATTERN_END)) break;
         ATH_MSG_DEBUG("Not pattern end line ");
 
         // find the current bandID
-        if(NSWL0::PAD::contains(line, NSWL0::PAD::PATTERN_TAG)) {
-          isLarge = NSWL0::PAD::contains(line, NSWL0::PAD::LARGE);
-          bandid = NSWL0::PAD::parseLineForBandid(line);
+        if(L0Muon::PAD::contains(line, L0Muon::PAD::PATTERN_TAG)) {
+          isLarge = L0Muon::PAD::contains(line, L0Muon::PAD::LARGE);
+          bandid = L0Muon::PAD::parseLineForBandid(line);
           continue;
         }
         ATH_MSG_DEBUG("Parsed line for band ID " << bandid << " for large sector " << isLarge);
 
         // skip uninteresting lines
-        if(bandid == NSWL0::PAD::DUMMY_BANDID) continue;
-        if(NSWL0::PAD::contains(line, NSWL0::SEMICOLON)) continue;
-        if(NSWL0::PAD::contains(words, NSWL0::VHDLCOMMENT)) continue;
+        if(bandid == L0Muon::PAD::DUMMY_BANDID) continue;
+        if(L0Muon::PAD::contains(line, L0Muon::SEMICOLON)) continue;
+        if(L0Muon::PAD::contains(words, L0Muon::VHDLCOMMENT)) continue;
         if(std::any_of(std::begin(line), std::end(line), [](char c){ return std::isalpha(c); })) continue;
-        if(words.size() < NSWL0::NLAYERS) continue;
+        if(words.size() < L0Muon::NLAYERS) continue;
         ATH_MSG_DEBUG("Skipped uninteresting lines");
 
         // clean up the line
-        line = NSWL0::PAD::replace(line, ",", ", ");
-        line = NSWL0::PAD::replace(line, "(", " ");
-        line = NSWL0::PAD::replace(line, ")", " ");
-        line = NSWL0::PAD::replace(line, "0-1", "-1");
-        line = NSWL0::PAD::replace(line, " ", "");
-        const auto vals = CxxUtils::tokenize(line, NSWL0::COMMA);
-        if(vals.size() != NSWL0::PAD::PATTERNLEN) {
+        line = L0Muon::PAD::replace(line, ",", ", ");
+        line = L0Muon::PAD::replace(line, "(", " ");
+        line = L0Muon::PAD::replace(line, ")", " ");
+        line = L0Muon::PAD::replace(line, "0-1", "-1");
+        line = L0Muon::PAD::replace(line, " ", "");
+        const auto vals = CxxUtils::tokenize(line, L0Muon::COMMA);
+        if(vals.size() != L0Muon::PAD::PATTERNLEN) {
           throw std::runtime_error("Can't unpack " + line);
         }
         ATH_MSG_DEBUG("Cleaned up lines");
 
         // unpack the line
-        const auto pfeb0    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PFEB0)));
-        const auto pfeb1    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PFEB1)));
-        const auto pfeb2    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PFEB2)));
-        const auto pfeb3    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PFEB3)));
-        const auto pfeb4    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PFEB4)));
-        const auto pfeb5    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PFEB5)));
-        const auto pfeb6    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PFEB6)));
-        const auto pfeb7    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PFEB7)));
+        const auto pfeb0    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PFEB0)));
+        const auto pfeb1    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PFEB1)));
+        const auto pfeb2    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PFEB2)));
+        const auto pfeb3    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PFEB3)));
+        const auto pfeb4    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PFEB4)));
+        const auto pfeb5    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PFEB5)));
+        const auto pfeb6    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PFEB6)));
+        const auto pfeb7    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PFEB7)));
 
-        const auto padchan0 = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PADCHAN0)));
-        const auto padchan1 = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PADCHAN1)));
-        const auto padchan2 = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PADCHAN2)));
-        const auto padchan3 = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PADCHAN3)));
-        const auto padchan4 = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PADCHAN4)));
-        const auto padchan5 = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PADCHAN5)));
-        const auto padchan6 = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PADCHAN6)));
-        const auto padchan7 = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PADCHAN7)));
-        const auto phiid    = static_cast<uint32_t>(std::stoul(vals.at(NSWL0::PAD::I_PHIID)));
+        const auto padchan0 = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PADCHAN0)));
+        const auto padchan1 = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PADCHAN1)));
+        const auto padchan2 = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PADCHAN2)));
+        const auto padchan3 = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PADCHAN3)));
+        const auto padchan4 = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PADCHAN4)));
+        const auto padchan5 = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PADCHAN5)));
+        const auto padchan6 = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PADCHAN6)));
+        const auto padchan7 = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PADCHAN7)));
+        const auto phiid    = static_cast<uint32_t>(std::stoul(vals.at(L0Muon::PAD::I_PHIID)));
 
         // Store the retrieved information
         const std::array<uint32_t,8> pfebs = {pfeb0, pfeb1, pfeb2, pfeb3, pfeb4, pfeb5, pfeb6, pfeb7};
@@ -519,8 +519,8 @@ namespace NSWL0 {
         const auto& pattern = patterns.at(patternitter);
         const auto pads = pattern.getPadChannels();
         uint32_t mask{0};
-        bool ipfake = NSWL0::PAD::isDummyPad(pads.at(0));
-        bool hofake = NSWL0::PAD::isDummyPad(pads.at(4));
+        bool ipfake = L0Muon::PAD::isDummyPad(pads.at(0));
+        bool hofake = L0Muon::PAD::isDummyPad(pads.at(4));
         bool is4layer = (ipfake || hofake);
 
         std::map<std::string, uint32_t> problematicSectors{};
@@ -530,8 +530,8 @@ namespace NSWL0 {
           if (m_triggerLogic != "specific4over8") mask |= (1 << (offset + 1));
           if (m_triggerLogic == "8over8" || m_triggerLogic == "2x3over4" || m_triggerLogic == "specific4over8") mask |= (1 << (offset + 2));
           if (m_triggerLogic == "8over8") mask |= (1 << (offset + 3));
-          for (const auto& wheel: NSWL0::WHEELS) {
-            for (const auto& sector: NSWL0::PAD::SECTORS) {
+          for (const auto& wheel: L0Muon::WHEELS) {
+            for (const auto& sector: L0Muon::PAD::SECTORS) {
               if (isLarge != (sector%2 == 0)) continue;
               std::string secname = wheel + std::to_string(sector+1);
               problematicSectors.try_emplace(secname, mask);
@@ -556,9 +556,9 @@ namespace NSWL0 {
    ***** Set ROB IDs when initializing the tool and to loop over them in the main algorithm loop
    */
   StatusCode PadEmulatorTool::createRobIDs() {
-    for(const auto& wheel : NSWL0::WHEELS) {
-      for(const auto& sector: NSWL0::PAD::SECTORS) {
-        m_robIDs.emplace_back(((wheel == "A" ? NSWL0::PAD::MUON_STGC_ENDCAP_A_SIDE : NSWL0::PAD::MUON_STGC_ENDCAP_C_SIDE) << 16) | NSWL0::PAD::PAD_TRIGGER_ROB | sector);
+    for(const auto& wheel : L0Muon::WHEELS) {
+      for(const auto& sector: L0Muon::PAD::SECTORS) {
+        m_robIDs.emplace_back(((wheel == "A" ? L0Muon::PAD::MUON_STGC_ENDCAP_A_SIDE : L0Muon::PAD::MUON_STGC_ENDCAP_C_SIDE) << 16) | L0Muon::PAD::PAD_TRIGGER_ROB | sector);
       }
     }
     return StatusCode::SUCCESS;

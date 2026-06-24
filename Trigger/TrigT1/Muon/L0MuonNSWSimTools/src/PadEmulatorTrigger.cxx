@@ -4,7 +4,7 @@
 
 #include "PadEmulatorTrigger.h"
 
-namespace NSWL0 {
+namespace L0Muon {
   PadEmulatorTrigger::PadEmulatorTrigger(const char wheel, const uint32_t sector,
                                          const uint32_t bandid, const uint32_t phiid, const uint32_t relbcid,
                                          const PadPattern &pattern, const uint32_t hitmask):
@@ -14,7 +14,7 @@ namespace NSWL0 {
     m_hitmask{hitmask},
     m_bandid{bandid},
     m_phiid{phiid},
-    m_phiid_signed{NSWL0::getSignedPhiID(m_phiid)},
+    m_phiid_signed{L0Muon::getSignedPhiID(m_phiid)},
     m_relbcid{relbcid}
   {
     std::string hitstr = std::bitset<32>(hitmask).to_string();

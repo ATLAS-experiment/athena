@@ -4,7 +4,7 @@
 
 #include "MMTriggerTool.h"
 
-namespace NSWL0 {
+namespace L0Muon {
 
   MMTriggerTool::MMTriggerTool( const std::string& type, const std::string& name, const IInterface* parent) :
     base_class(type,name,parent) {}

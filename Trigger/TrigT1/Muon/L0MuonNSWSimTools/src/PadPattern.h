@@ -15,7 +15,7 @@
  * Pfebs, pad channels, sector type, bandID, phiID
  **/
 
-namespace NSWL0 {
+namespace L0Muon {
 
   class PadPattern {
 

@@ -4,6 +4,7 @@
 
 #include "MMT_Road.h"
 
+namespace L0Muon {
 MMT_Road::MMT_Road(const char sector, const int roadSize,
                    const int UpX, const int DownX, const int UpUV, const int DownUV,
                    const int xthr, const int uvthr,
@@ -146,4 +147,5 @@ bool MMT_Road::stereoCheck() const {
     if (nu > 0 && nv > 0 && (nu+nv) >= m_uvthr) return true;
   }
   return false;
+}
 }

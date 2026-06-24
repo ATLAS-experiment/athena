@@ -14,7 +14,7 @@
 #include "MuonIdHelpers/MmIdHelper.h"
 
 //local includes
-#include "TrigT1NSWSimTools/IMMTriggerTool.h"
+#include "L0MuonNSWSimTools/IMMTriggerTool.h"
 #include "MMLoadVariables.h"
 #include "MMT_Diamond.h"
 
@@ -26,7 +26,7 @@
 
 
 // namespace for the NSW LVL0 related classes
-namespace NSWL0 {
+namespace L0Muon {
 
   class MMTriggerTool : public extends<AthAlgTool, IMMTriggerTool> {
 
@@ -117,5 +117,5 @@ namespace NSWL0 {
     std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_trueThePos ATLAS_THREAD_SAFE {};
     std::shared_ptr<MuonVal::VectorBranch<double> > m_trigger_truePhiPos ATLAS_THREAD_SAFE {};
   };  // end of MMTriggerTool class
-} // namespace NSWL0
+} // namespace L0Muon
 #endif

@@ -9,7 +9,7 @@
 #include "MuonRDO/NSW_PadTriggerDataContainer.h"
 #include "MuonTesterTree/MuonTesterTree.h"
 
-namespace NSWL0 {
+namespace L0Muon {
 
   class IPadEmulatorTool : virtual public IAlgTool {
 

@@ -10,6 +10,7 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include <cmath>
 
+namespace L0Muon {
 class MMT_Hit {
   public:
     MMT_Hit(const Identifier &id, const std::string& stationName,
@@ -65,4 +66,5 @@ class MMT_Hit {
     bool m_isU{false};
     bool m_isV{false};
 };
+}
 #endif

@@ -4,7 +4,7 @@
 
 #include "PadPattern.h"
 
-namespace NSWL0 {
+namespace L0Muon {
   PadPattern::PadPattern(const uint32_t bandid, const uint32_t phiid, const std::array<uint32_t,8>& pfebs, const std::array<uint32_t,8>& padchans, const bool isLarge):
     m_bandid{bandid},
     m_phiid{phiid},

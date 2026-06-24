@@ -11,6 +11,7 @@
 #include <cmath>
 #include <vector>
 
+namespace L0Muon {
 MMLoadVariables::MMLoadVariables() : AthMessaging(Athena::getMessageSvc(), "MMLoadVariables") {}
 
 StatusCode MMLoadVariables::getTruthInfo(const EventContext& ctx,
@@ -106,3 +107,4 @@ evInf_entry::evInf_entry(uint64_t event,int pdg,double e,double p,double ieta,do
                          int trn,int mun,const ROOT::Math::XYZVector& tex):
   athena_event(event),pdg_id(pdg),E(e),pt(p),eta_ip(ieta),eta_pos(peta),eta_ent(eeta),phi_ip(iphi),phi_pos(pphi),phi_ent(ephi),theta_ip(ithe),theta_pos(pthe),theta_ent(ethe),
   dtheta(dth),truth_n(trn),mu_n(mun),vertex(tex) {}
+}

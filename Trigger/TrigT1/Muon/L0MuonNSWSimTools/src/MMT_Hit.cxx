@@ -4,6 +4,7 @@
 
 #include "MMT_Hit.h"
 
+namespace L0Muon {
 MMT_Hit::MMT_Hit(const Identifier &id, const std::string& stationName,
                  const int stEta, const int stPhi, const int sectorPhi,
                  const int multiplet, const int gasGap, const int channel,
@@ -95,4 +96,5 @@ MMT_Hit::MMT_Hit(const Identifier &id, const std::string& stationName,
       m_shift = m_Rp / m_Z;
     }
   }
+}
 }

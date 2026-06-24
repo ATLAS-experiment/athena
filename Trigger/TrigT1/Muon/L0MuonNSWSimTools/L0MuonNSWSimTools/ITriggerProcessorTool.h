@@ -9,7 +9,7 @@
 #include "MuonRDO/NSW_PadTriggerDataContainer.h"
 #include "MuonRDO/NSW_TrigRawDataContainer.h"
 
-namespace NSWL0 {
+namespace L0Muon {
 
   class ITriggerProcessorTool: virtual public IAlgTool {
 
