@@ -12,6 +12,7 @@
 #include "Acts/EventData/TrackStateProxy.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/Utilities/PointerTraits.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 #include "Acts/EventData/TrackStateProxyConcept.hpp"
 
 #include "ActsCalibBase/SourceLinkType.h"
@@ -93,6 +94,12 @@ namespace ActsTrk::detail {
                     proxy_t& trackState) const;
 
   protected:
+    /** @brief Queries the track proxy to allocate memory for the 
+     *         incoming calibration object. Defines the projector 
+     *         indices and allocates the source link to the state
+     *  @param projector: Projector configuration of the measurement
+     *  @param link: Source link to associate with the state
+     *  @param trackState: Refrence to the track state proxy to write.  */
     template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t>
     void prepareCalibratedState(const ProjectorType projector,
                                 Acts::SourceLink link,
