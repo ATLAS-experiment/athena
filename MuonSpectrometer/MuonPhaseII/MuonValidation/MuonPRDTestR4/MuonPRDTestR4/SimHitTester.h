@@ -31,11 +31,11 @@ namespace MuonValR4{
            /** @brief Global position of the SimHits */
            ThreeVectorBranch m_globPos{parent(), m_collName+"_globPos"};
            /** @brief Global direction of the traversing particle generating the hit */
-           ThreeVectorBranch m_globDir{parent(), m_collName+"_globDir"};
+           UnitThreeVectorBranch m_globDir{parent(), m_collName+"_globDir"};
            /** @brief Local position of the produced simHit */           
            ThreeVectorBranch m_locPos{parent(), m_collName+"_localPos"};
            /** @brief Local direction of the traversing particle generating the hit */
-           ThreeVectorBranch m_locDir{parent(), m_collName+"_localDir"};
+           UnitThreeVectorBranch m_locDir{parent(), m_collName+"_localDir"};
            /** @brief Global time when the simHit was produced */
            VectorBranch<float>& m_globTime{parent().newVector<float>(m_collName+"_globalTime")};
            /** @brief Velocity of the simHit expressed in terms of beta */

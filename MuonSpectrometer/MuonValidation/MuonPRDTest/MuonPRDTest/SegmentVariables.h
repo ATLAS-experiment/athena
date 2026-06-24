@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONPRDTEST_SEGMENTVARIABLES_H
@@ -37,7 +37,7 @@ namespace MuonPRDTest{
             /** @brief Global position of the segment */
             ThreeVectorBranch m_pos{parent(), m_name+"_pos"};
             /** @brief Global direction of the segment */
-            ThreeVectorBranch m_dir{parent(), m_name+"_dir"};
+            UnitThreeVectorBranch m_dir{parent(), m_name+"_dir"};
             /** @brief Station-eta index of the segment's precision hits */
             VectorBranch<char>& m_etaIdx{parent().newVector<char>(m_name+"_etaIndex")};
             /** @brief MS-sector of the segment's precision hits */
