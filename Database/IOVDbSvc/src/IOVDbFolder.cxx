@@ -1163,18 +1163,18 @@ void IOVDbFolder::dumpFile(const std::string& dumpName
   myFile<<s_openJson;
   if(json) {
     // Dump COOL data
-    myFile<<json->description()<<s_delimiterJson<<std::endl;
-    myFile<<json->payloadSpec()<<s_delimiterJson<<std::endl;
+    myFile<<json->description()<<s_delimiterJson<<'\n';
+    myFile<<json->payloadSpec()<<s_delimiterJson<<'\n';
     if(!skipCoolIoV) {
-      myFile<<json->iov()<<s_delimiterJson<<std::endl;
+      myFile<<json->iov()<<s_delimiterJson<<'\n';
     }
-    myFile<<json->payload()<<std::endl;
+    myFile<<json->payload()<<'\n';
   }
   else {
     // Dump CREST data
-    myFile<<"\"node_description\" : \""<<m_folderDescription<< '\"'<<s_delimiterJson<<std::endl;
-    myFile<<"\"folder_payloadspec\": \""<<mng->getPayloadSpec()<< '\"'<<s_delimiterJson<<std::endl;
-    myFile<<"\"data_array\" : "<<mng->dumpPayload(crestVkey)<<std::endl;
+    myFile<<"\"node_description\" : \""<<m_folderDescription<< '\"'<<s_delimiterJson<<'\n';
+    myFile<<"\"folder_payloadspec\": \""<<mng->getPayloadSpec()<< '\"'<<s_delimiterJson<<'\n';
+    myFile<<"\"data_array\" : "<<mng->dumpPayload(crestVkey)<<'\n';
   }
   myFile<<s_closeJson;
 }

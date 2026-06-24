@@ -156,7 +156,7 @@ namespace LVL1 {
 		    << std::setw(8) << etaMinLow << " "
 		    << std::setw(8) << etaMaxLow << " "
 		    << std::setw(8) << etaMinHigh << " "
-		    << std::setw(8) << etaMaxHigh <<  std::endl;
+		    << std::setw(8) << etaMaxHigh <<  '\n';
 	  } 
 	}
       }    
