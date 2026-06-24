@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: athenaHLT test of partial event building and data scouting
 # art-type: build                                                                  
@@ -12,7 +12,7 @@ from TrigP1Test.TrigP1TestSteps import TrigBSDumpGrepStep
 output_name_base = 'output.test_trigP1_PEB_DS'
 
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'TrigP1Test.PEBDSTest.run'
 ex.input = 'data'
 ex.args = '-o ' + output_name_base
