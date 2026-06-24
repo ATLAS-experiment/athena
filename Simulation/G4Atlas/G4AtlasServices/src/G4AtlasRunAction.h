@@ -10,7 +10,7 @@
 
 // Geant4 includes
 #include "G4UserRunAction.hh"
-
+#include "G4Timer.hh"
 
 namespace G4UA
 {
@@ -50,7 +50,7 @@ namespace G4UA
 
       /// List of ATLAS run actions
       std::vector<G4UserRunAction*> m_runActions;
-
+      std::unique_ptr<G4Timer> fTimer;
   }; // class G4AtlasRunAction
 
 }

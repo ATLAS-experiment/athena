@@ -4,6 +4,7 @@
 atlas_subdir( MuonG4SD )
 
 # External dependencies:
+find_package( AtlasGeant4Utilities )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( GTest )
@@ -37,6 +38,10 @@ function( _add_test name )
       INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
       LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} ${GTEST_LIBRARIES} TestTools MuonG4SDLib StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth CxxUtils
       POST_EXEC_SCRIPT noerror.sh )
+
+   # Turn on/off CUDA device symbol resolution for tests (Geant4 links to VecGeom, which is CUDA-enabled)
+   atlas_configure_g4_targets( TARGETS MuonG4SD_${name} )
+
    set_target_properties( MuonG4SD_${name}
       PROPERTIES
       INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

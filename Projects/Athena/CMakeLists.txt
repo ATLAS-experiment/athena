@@ -162,6 +162,11 @@ set( xAODUtilities_DIR
    "${CMAKE_SOURCE_DIR}/../../Event/xAOD/xAODCore/cmake"
    CACHE PATH "Directory holding the xAODUtilities module" )
 
+# Set up where to find the AtlasGeant4Utilities CMake code.
+set( AtlasGeant4Utilities_DIR
+   "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake"
+   CACHE PATH "Directory holding the AtlasGeant4Utilities module" )
+
 # Make the local CMake files visible to AtlasCMake.
 list( INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake )
 
