@@ -17,8 +17,8 @@
 #include "TTree.h"
 
 #include <cassert>
+#include <iostream>
 #include <string>
-#include <memory>
 
 class TestHistogramming : public AthHistogramming{
 public:
@@ -56,8 +56,10 @@ public:
 void
 testNullPointers(TestHistogramming& hist){
   std::cout << "testNullPointers\n";
+
   assert(hist.book(static_cast<TH1*>(nullptr)).isFailure());
   assert(hist.bookGetPointer(static_cast<TH1*>(nullptr)) == nullptr);
+
   assert(hist.book(static_cast<TEfficiency*>(nullptr)).isFailure());
   assert(hist.bookGetPointer(static_cast<TEfficiency*>(nullptr)) == nullptr);
 }
@@ -65,6 +67,7 @@ testNullPointers(TestHistogramming& hist){
 void
 testBookTH1(TestHistogramming& hist){
   std::cout << "testBookTH1\n";
+
   const TH1F h1{"h1", "h1 title", 10, 0., 10.};
 
   TH1* booked = hist.bookGetPointer(h1);
@@ -73,12 +76,20 @@ testBookTH1(TestHistogramming& hist){
   TH1* retrieved = hist.hist("h1");
   assert(retrieved != nullptr);
   assert(retrieved == booked);
+
+  /*
+    Current behaviour:
+      - the configured title prefix/postfix are applied to the ROOT object title
+      - the configured name prefix/postfix are not applied to the ROOT object name
+  */
   assert(std::string{retrieved->GetName()} == "h1");
   assert(std::string{retrieved->GetTitle()} == "title h1 title postfix");
 }
 
 void
 testBookTH2(TestHistogramming& hist){
+  std::cout << "testBookTH2\n";
+
   const TH2F h2{"h2", "h2 title", 10, 0., 10., 10, 0., 10.};
 
   assert(hist.book(h2).isSuccess());
@@ -91,6 +102,7 @@ testBookTH2(TestHistogramming& hist){
 void
 testBookTH3(TestHistogramming& hist){
   std::cout << "testBookTH3\n";
+
   const TH3F h3{"h3", "h3 title", 10, 0., 10., 10, 0., 10., 10, 0., 10.};
 
   assert(hist.book(h3).isSuccess());
@@ -103,6 +115,7 @@ testBookTH3(TestHistogramming& hist){
 void
 testBookTree(TestHistogramming& hist){
   std::cout << "testBookTree\n";
+
   TTree tree{"tree", "tree title"};
 
   assert(hist.book(tree).isSuccess());
@@ -115,6 +128,7 @@ testBookTree(TestHistogramming& hist){
 void
 testBookGraph(TestHistogramming& hist){
   std::cout << "testBookGraph\n";
+
   TGraph graph{};
   graph.SetName("graph");
   graph.SetTitle("graph title");
@@ -125,114 +139,200 @@ testBookGraph(TestHistogramming& hist){
   TGraph* retrieved = hist.graph("graph");
   assert(retrieved != nullptr);
   assert(retrieved == booked);
+
+  /*
+    TGraph currently differs from TH1/TEfficiency: the cloned graph object
+    receives the configured name prefix/postfix.
+  */
+  assert(std::string{retrieved->GetName()} == "test_graph_suffix");
+  assert(std::string{retrieved->GetTitle()} == "title graph title postfix");
 }
 
 void
 testBookEfficiency(TestHistogramming& hist){
   std::cout << "testBookEfficiency\n";
 
-  TEfficiency eff{"eff", "eff title", 10, 0., 10.};
+  /*
+    The non-const-reference TEfficiency booking path gives ownership to
+    THistSvc, so this object is intentionally heap-allocated and not deleted
+    here.
+  */
+  auto* eff = new TEfficiency{"eff", "eff title", 10, 0., 10.};
 
-  TEfficiency* booked = hist.bookGetPointer(eff);
+  TEfficiency* booked = hist.bookGetPointer(*eff);
   assert(booked != nullptr);
 
   TEfficiency* retrieved = hist.efficiency("eff");
   assert(retrieved != nullptr);
   assert(retrieved == booked);
+
+  /*
+    Current behaviour, analogous to TH1:
+      - title prefix/postfix are applied
+      - name prefix/postfix are not applied to the ROOT object name
+  */
   assert(std::string{retrieved->GetName()} == "eff");
   assert(std::string{retrieved->GetTitle()} == "title eff title postfix");
 }
 
 void
-testTH1NamePrefixMismatch(TestHistogramming& hist, const ServiceHandle<ITHistSvc>& histSvc){
-  std::cout << "testTH1NamePrefixMismatch\n";
+testCurrentTH1ObjectNameDoesNotUseConfiguredPrefixPostfix(TestHistogramming& hist){
+  std::cout << "testCurrentTH1ObjectNameDoesNotUseConfiguredPrefixPostfix\n";
 
-  const TH1F h{"prefixMismatch", "prefix mismatch title", 10, 0., 10.};
-
-  TH1* booked = hist.bookGetPointer(h);
-  assert(booked != nullptr);
-
-  TH1* retrieved = hist.hist("prefixMismatch");
-  assert(retrieved != nullptr);
-  assert(retrieved == booked);
-
-  /*
-    The histogram is registered under the prefixed/postfixed THistSvc path,
-    but the actual ROOT object name is currently not prefixed/postfixed.
-
-    This documents the inconsistency:
-      path/object lookup name: test_prefixMismatch_suffix
-      ROOT object name:        prefixMismatch
-  */
-  TH1* retrievedFromSvc = nullptr;
-  assert(histSvc->getHist("/AANT/test_prefixMismatch_suffix", retrievedFromSvc).isSuccess());
-  assert(retrievedFromSvc != nullptr);
-  assert(retrievedFromSvc == booked);
-
-  assert(std::string{retrievedFromSvc->GetName()} == "test_prefixMismatch_suffix");
-}
-
-
-void
-testTEfficiencyNamePrefixMismatch(TestHistogramming& hist,
-                                  const ServiceHandle<ITHistSvc>& histSvc){
-  std::cout << "testTEfficiencyNamePrefixMismatch\n";
-
-  TEfficiency eff{"effPrefixMismatch", "eff prefix mismatch title", 10, 0., 10.};
-
-  TEfficiency* booked = hist.bookGetPointer(eff);
-  assert(booked != nullptr);
-
-  TEfficiency* retrieved = hist.efficiency("effPrefixMismatch");
-  assert(retrieved != nullptr);
-  assert(retrieved == booked);
-
-  /*
-    As for TH1, the THistSvc registration path uses prefix/postfix,
-    while the actual TEfficiency object name currently does not.
-  */
-  TEfficiency* retrievedFromSvc = nullptr;
-  assert(histSvc->getEfficiency("/AANT/test_effPrefixMismatch_suffix", retrievedFromSvc).isSuccess());
-  assert(retrievedFromSvc != nullptr);
-  assert(retrievedFromSvc == booked);
-
-  assert(std::string{retrievedFromSvc->GetName()} == "test_effPrefixMismatch_suffix");
-}
-
-
-void
-testTH1DirectoryNameCacheMismatch(TestHistogramming& hist){
-  std::cout << "testTH1DirectoryNameCacheMismatch\n";
-
-  const TH1F h{"dir/cacheMismatch", "cache mismatch title", 10, 0., 10.};
+  const TH1F h{"currentNameBehaviour", "current name behaviour title", 10, 0., 10.};
 
   TH1* booked = hist.bookGetPointer(h);
   assert(booked != nullptr);
 
-  /*
-    During booking, buildBookingString strips "dir/" from the histogram name
-    before computing the hash. So the local cache entry is under:
-
-      hash("cacheMismatch")
-
-    A lookup by the stripped name therefore hits the cache.
-  */
-  TH1* retrievedByBareName = hist.hist("cacheMismatch");
-  assert(retrievedByBareName != nullptr);
-  assert(retrievedByBareName == booked);
+  TH1* retrieved = hist.hist("currentNameBehaviour");
+  assert(retrieved != nullptr);
+  assert(retrieved == booked);
 
   /*
-    But hist("dir/cacheMismatch") computes its hash before normalising the
-    name, so it does not query the same cache key. With the current code this
-    will only work by falling through to THistSvc and then inserting another
-    cache entry under hash("dir/cacheMismatch").
+    Green/red test.
 
-    This assertion documents the desired behaviour: the directory-qualified
-    lookup should be equivalent to the normalised lookup.
+    This documents the current behaviour:
+      - the configured prefix/postfix are used in the booking string
+      - the actual ROOT object name is not prefixed/postfixed
+
+    This passes now, but should fail if the behaviour is corrected so that
+    the ROOT object name becomes "test_currentNameBehaviour_suffix".
   */
-  TH1* retrievedByQualifiedName = hist.hist("dir/cacheMismatch");
-  assert(retrievedByQualifiedName != nullptr);
-  assert(retrievedByQualifiedName == booked);
+  assert(std::string{retrieved->GetName()} == "currentNameBehaviour");
+}
+
+void
+testCurrentTEfficiencyObjectNameDoesNotUseConfiguredPrefixPostfix(TestHistogramming& hist){
+  std::cout << "testCurrentTEfficiencyObjectNameDoesNotUseConfiguredPrefixPostfix\n";
+
+  /*
+    The non-const-reference TEfficiency booking path gives ownership to
+    THistSvc, so this object is intentionally heap-allocated and not deleted
+    here.
+  */
+  auto* eff = new TEfficiency{"currentEffNameBehaviour",
+                              "current efficiency name behaviour title",
+                              10, 0., 10.};
+
+  TEfficiency* booked = hist.bookGetPointer(*eff);
+  assert(booked != nullptr);
+
+  TEfficiency* retrieved = hist.efficiency("currentEffNameBehaviour");
+  assert(retrieved != nullptr);
+  assert(retrieved == booked);
+
+  /*
+    Green/red test.
+
+    This documents the current behaviour:
+      - the configured prefix/postfix are used in the booking string
+      - the actual TEfficiency object name is not prefixed/postfixed
+
+    This passes now, but should fail if the behaviour is corrected so that
+    the ROOT object name becomes "test_currentEffNameBehaviour_suffix".
+  */
+  assert(std::string{retrieved->GetName()} == "currentEffNameBehaviour");
+}
+
+void
+testTH1ObjectNameUsesConfiguredPrefixPostfix(TestHistogramming& hist){
+  std::cout << "testTH1ObjectNameUsesConfiguredPrefixPostfix\n";
+
+  const TH1F h{"expectedNameBehaviour", "expected name behaviour title", 10, 0., 10.};
+
+  TH1* booked = hist.bookGetPointer(h);
+  assert(booked != nullptr);
+
+  TH1* retrieved = hist.hist("expectedNameBehaviour");
+  assert(retrieved != nullptr);
+  assert(retrieved == booked);
+
+  /*
+    Red/green test.
+
+    Desired behaviour:
+      - the configured prefix/postfix are used for the final ROOT object name,
+        consistently with the booking path.
+
+    This currently fails, because the object name remains
+    "expectedNameBehaviour".
+  */
+  assert(std::string{retrieved->GetName()} == "test_expectedNameBehaviour_suffix");
+}
+
+void
+testTEfficiencyObjectNameUsesConfiguredPrefixPostfix(TestHistogramming& hist){
+  std::cout << "testTEfficiencyObjectNameUsesConfiguredPrefixPostfix\n";
+
+  /*
+    The non-const-reference TEfficiency booking path gives ownership to
+    THistSvc, so this object is intentionally heap-allocated and not deleted
+    here.
+  */
+  auto* eff = new TEfficiency{"expectedEffNameBehaviour",
+                              "expected efficiency name behaviour title",
+                              10, 0., 10.};
+
+  TEfficiency* booked = hist.bookGetPointer(*eff);
+  assert(booked != nullptr);
+
+  TEfficiency* retrieved = hist.efficiency("expectedEffNameBehaviour");
+  assert(retrieved != nullptr);
+  assert(retrieved == booked);
+
+  /*
+    Red/green test.
+
+    Desired behaviour:
+      - the configured prefix/postfix are used for the final ROOT object name,
+        consistently with the booking path.
+
+    This currently fails, because the object name remains
+    "expectedEffNameBehaviour".
+  */
+  assert(std::string{retrieved->GetName()} == "test_expectedEffNameBehaviour_suffix");
+}
+
+void
+testTH1CanBeRetrievedByBareNameAfterBookingWithDirectoryName(TestHistogramming& hist){
+  std::cout << "testTH1CanBeRetrievedByBareNameAfterBookingWithDirectoryName\n";
+
+  const TH1F h{"dir/bareLookup", "bare lookup title", 10, 0., 10.};
+
+  TH1* booked = hist.bookGetPointer(h);
+  assert(booked != nullptr);
+
+  /*
+    buildBookingString strips "dir/" from the object name and appends it to
+    the booking directory. The public lookup by the stripped name should
+    retrieve the booked histogram.
+  */
+  TH1* retrieved = hist.hist("bareLookup");
+  assert(retrieved != nullptr);
+  assert(retrieved == booked);
+  assert(std::string{retrieved->GetName()} == "bareLookup");
+}
+
+void
+testTH1CanBeRetrievedByQualifiedNameAfterBookingWithDirectoryName(TestHistogramming& hist){
+  std::cout << "testTH1CanBeRetrievedByQualifiedNameAfterBookingWithDirectoryName\n";
+
+  const TH1F h{"dir/qualifiedLookup", "qualified lookup title", 10, 0., 10.};
+
+  TH1* booked = hist.bookGetPointer(h);
+  assert(booked != nullptr);
+
+  /*
+    This documents the public behaviour that a directory-qualified lookup is
+    also accepted.
+
+    With the current implementation, this may be rescued by a THistSvc lookup
+    rather than by the local cache, because hist("dir/qualifiedLookup") hashes
+    the unnormalised name before buildBookingString strips "dir/".
+  */
+  TH1* retrieved = hist.hist("dir/qualifiedLookup");
+  assert(retrieved != nullptr);
+  assert(retrieved == booked);
 }
 
 int
@@ -244,19 +344,43 @@ main(){
   assert(histSvc.retrieve().isSuccess());
 
   TestHistogramming hist{"AthHistogramming_test"};
-  assert(hist.config(histSvc,"AANT","/","test_","_suffix","title "," postfix").isSuccess());
+  assert(hist.config(histSvc,
+                     "AANT",
+                     "/",
+                     "test_",
+                     "_suffix",
+                     "title ",
+                     " postfix").isSuccess());
 
   testNullPointers(hist);
+
   testBookTH1(hist);
   testBookTH2(hist);
   testBookTH3(hist);
   testBookTree(hist);
   testBookGraph(hist);
   testBookEfficiency(hist);
-  //These document desired behaviour, but currently fail
-  //testTH1NamePrefixMismatch(hist, histSvc);
-  //testTEfficiencyNamePrefixMismatch(hist, histSvc);
-  //testTH1DirectoryNameCacheMismatch(hist);
+
+  testTH1CanBeRetrievedByBareNameAfterBookingWithDirectoryName(hist);
+  testTH1CanBeRetrievedByQualifiedNameAfterBookingWithDirectoryName(hist);
+
+  /*
+    Green/red tests:
+    These pass with the current behaviour, but should fail once the object-name
+    behaviour is corrected.
+  */
+  testCurrentTH1ObjectNameDoesNotUseConfiguredPrefixPostfix(hist);
+  testCurrentTEfficiencyObjectNameDoesNotUseConfiguredPrefixPostfix(hist);
+
+  /*
+    Red/green tests:
+    These document the desired corrected behaviour, but currently fail.
+    Enable these after fixing AthHistogramming::bookGetPointer(TH1&) and
+    AthHistogramming::bookGetPointer(TEfficiency&).
+
+    testTH1ObjectNameUsesConfiguredPrefixPostfix(hist);
+    testTEfficiencyObjectNameUsesConfiguredPrefixPostfix(hist);
+  */
 
   assert(histSvc.release().isSuccess());
 
