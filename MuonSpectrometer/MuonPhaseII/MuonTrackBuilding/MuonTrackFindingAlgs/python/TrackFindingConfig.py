@@ -50,6 +50,7 @@ def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
     kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
+    kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
  
 
     the_alg = CompFactory.MuonR4.MsTrackFindingAlg(name, **kwargs)
