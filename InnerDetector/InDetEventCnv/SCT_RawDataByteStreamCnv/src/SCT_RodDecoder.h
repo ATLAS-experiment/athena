@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETRAWDATABYTESTREAM_SCT_RODDECODER_H 
@@ -258,10 +258,12 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param rodID Identifer of ROD.
    * @param errorType Error type info.
    * @param errs Byte stream error container.
+   * @param ctx EventContext
    * @param foundHashes FE-links whose headers are found. Used only for MissingLinkHeaderError.
    */
   StatusCode addRODError(uint32_t rodID, SCT_ByteStreamErrors::ErrorType error,
                          SCT_RodDecoderErrorsHelper& errs,
+                         const EventContext& ctx,
                          const std::unordered_set<IdentifierHash>* foundHashes=nullptr) const;
   /**
    * @brief Add single eror
@@ -269,10 +271,12 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param hashID Identifier for hash.
    * @param bsErrorType Byte Stream error type info.
    * @param errs Byte stream error container.
+   * @param ctx EventContext
    */
   StatusCode addSingleError(const IdentifierHash& hashID,
                             SCT_ByteStreamErrors::ErrorType error,
-                            SCT_RodDecoderErrorsHelper& errs) const;
+                            SCT_RodDecoderErrorsHelper& errs,
+                            const EventContext& ctx) const;
 
   /**
    * @brief Set first temporarily masked chip information from byte stream trailer
@@ -280,10 +284,12 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param hashID Identifier for hash.
    * @param firstTempMaskedChip  Firt temporarily masked chip info.
    * @param errs Byte stream error container.
+   * @param ctx EventContext
    */
   StatusCode setFirstTempMaskedChip(const IdentifierHash& hashID, 
                                     unsigned int firstTempMaskedChip, 
-                                    SCT_RodDecoderErrorsHelper& errs) const;
+                                    SCT_RodDecoderErrorsHelper& errs,
+                                    const EventContext& ctx) const;
 
   /**
    * @brief Process header word
@@ -296,6 +302,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
    * @param hasError false means no error, true means at least one error
    * @param breakNow to tell if need to break after this method execution.
+   * @param ctx EventContext
    */
   StatusCode processHeader(const uint16_t inData,
                            const uint32_t robID,
@@ -318,6 +325,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param cache Cache.
    * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
    * @param hasError false means no error, true means at least one error
+   * @param ctx EventContext
    */
   StatusCode processSuperCondensedHit(const uint16_t inData,
                                       const uint32_t robID,
@@ -339,6 +347,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param cache Cache.
    * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
    * @param hasError false means no error, true means at least one error
+   * @param ctx EventContext
    */
   StatusCode processCondensedHit(const uint16_t inData,
                                  const uint32_t robID,
@@ -360,6 +369,7 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param cache Cache.
    * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
    * @param hasError false means no error, true means at least one error
+   * @param ctx EventContext
    */
   StatusCode processExpandedHit(const uint16_t inData,
                                 const uint32_t robID,
@@ -379,12 +389,14 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param data Struct to hold data shared in methods used in fillCollection method
    * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
    * @param hasError false means no error, true means at least one error
+   * @param ctx EventContext
    */
   StatusCode processABCDError(const uint16_t inData,
                               const uint32_t robID,
                               SharedData& data,
                               SCT_RodDecoderErrorsHelper& errs,
-                              bool& hasError) const;
+                              bool& hasError,
+                              const EventContext& ctx) const;
 
   /**
    * @brief Process raw data word
@@ -394,12 +406,14 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param data Struct to hold data shared in methods used in fillCollection method
    * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
    * @param hasError false means no error, true means at least one error
+   * @param ctx EventContext
    */
   StatusCode processRawData(const uint16_t inData,
                             const uint32_t robID,
                             SharedData& data,
                             SCT_RodDecoderErrorsHelper& errs,
-                            bool& hasError) const;
+                            bool& hasError,
+                            const EventContext& ctx) const;
 
   /**
    * @brief Process trailer word
@@ -409,12 +423,14 @@ class SCT_RodDecoder : public extends<AthAlgTool, ISCT_RodDecoder>
    * @param data Struct to hold data shared in methods used in fillCollection method
    * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
    * @param hasError false means no error, true means at least one error
+   * @param ctx EventContext
    */
   StatusCode processTrailer(const uint16_t inData,
                             const uint32_t robID,
                             SharedData& data,
                             SCT_RodDecoderErrorsHelper& errs,
-                            bool& hasError) const;
+                            bool& hasError,
+                            const EventContext& ctx) const;
 
   /** Identifier helper class for the SCT subdetector that creates compact Identifier objects and 
       IdentifierHash or hash IDs. Also allows decoding of these IDs. */
