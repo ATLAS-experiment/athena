@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITKRAWDATABYTESTREAM_ITK_STRIPS_RODDECODER_H 
@@ -75,7 +75,7 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
   /** Temp object to help with trigger caching. */
   struct CacheHelper {
     IdentifierHash skipHash, lastHash;
-    const std::vector<IdentifierHash>* vecHash;
+    const std::vector<IdentifierHash>* vecHash = nullptr;
   };
 
  public: 
