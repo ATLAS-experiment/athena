@@ -60,7 +60,7 @@ StatusCode TrigJetEJsHypoAlg::execute( const EventContext& context ) const {
   DecisionContainer* outputDecisions = outputHandle.ptr();
 
   for (const Decision* previousDecision : *prevDecisions) {
-    LinkInfo< xAOD::JetContainer > myFeature = findLink< xAOD::JetContainer >(previousDecision, featureString());
+    LinkInfo< xAOD::JetContainer > myFeature = findLink< xAOD::JetContainer >(context, previousDecision, featureString());
     TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
     TrigCompositeUtils::decisionIDs(previousDecision, previousDecisionIDs);
     Decision* newDecision = newDecisionIn(outputDecisions, previousDecision, hypoAlgNodeName(), context);

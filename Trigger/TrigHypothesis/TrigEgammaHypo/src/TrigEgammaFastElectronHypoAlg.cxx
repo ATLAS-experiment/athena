@@ -74,7 +74,7 @@ StatusCode TrigEgammaFastElectronHypoAlg::execute( const EventContext& context )
   for ( auto previousDecision : *previousDecisionsHandle){
 
     ElementLink<xAOD::TrigEMClusterContainer> clusterLink;
-    LinkInfo<xAOD::TrigEMClusterContainer> linkInfo = findLink<xAOD::TrigEMClusterContainer>(previousDecision, featureString());
+    LinkInfo<xAOD::TrigEMClusterContainer> linkInfo = findLink<xAOD::TrigEMClusterContainer>(context, previousDecision, featureString());
     clusterLink = linkInfo.link;
     ATH_CHECK( clusterLink.isValid() );    
  
@@ -118,7 +118,7 @@ StatusCode TrigEgammaFastElectronHypoAlg::execute( const EventContext& context )
 
       const xAOD::TrigRingerRings *rings=nullptr;
       {
-        LinkInfo<xAOD::TrigRingerRingsContainer> linkInfo = findLink<xAOD::TrigRingerRingsContainer>(previousDecision, "ringer");
+        LinkInfo<xAOD::TrigRingerRingsContainer> linkInfo = findLink<xAOD::TrigRingerRingsContainer>(context, previousDecision, "ringer");
         auto ringerLink = linkInfo.link;
         ATH_CHECK( ringerLink.isValid() ); 
         rings = *ringerLink;

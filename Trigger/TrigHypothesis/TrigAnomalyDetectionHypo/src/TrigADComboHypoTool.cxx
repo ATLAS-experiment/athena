@@ -131,12 +131,12 @@ StatusCode TrigADComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, cons
   for(const auto &leg_decs : legDecisions){ // loop over each leg
     for(const auto &dec_pair : leg_decs){ // loop over each object in a leg
       const TrigCompositeUtils::Decision* decision(*(dec_pair.second));
-      std::vector<TrigCompositeUtils::LinkInfo<xAOD::JetContainer>> jet_feature_links = TrigCompositeUtils::findLinks<xAOD::JetContainer>(decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
-      std::vector<TrigCompositeUtils::LinkInfo<xAOD::ElectronContainer>> ele_feature_links = TrigCompositeUtils::findLinks<xAOD::ElectronContainer>(decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
-      std::vector<TrigCompositeUtils::LinkInfo<xAOD::MuonContainer>> muon_feature_links = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
-      std::vector<TrigCompositeUtils::LinkInfo<xAOD::PhotonContainer>> gam_feature_links = TrigCompositeUtils::findLinks<xAOD::PhotonContainer>(decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
-      std::vector<TrigCompositeUtils::LinkInfo<xAOD::TauJetContainer>> taujet_feature_links = TrigCompositeUtils::findLinks<xAOD::TauJetContainer>(decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
-      std::vector<TrigCompositeUtils::LinkInfo<xAOD::TrigMissingETContainer>> met_feature_links = TrigCompositeUtils::findLinks<xAOD::TrigMissingETContainer>(decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      std::vector<TrigCompositeUtils::LinkInfo<xAOD::JetContainer>> jet_feature_links = TrigCompositeUtils::findLinks<xAOD::JetContainer>(context, decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      std::vector<TrigCompositeUtils::LinkInfo<xAOD::ElectronContainer>> ele_feature_links = TrigCompositeUtils::findLinks<xAOD::ElectronContainer>(context, decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      std::vector<TrigCompositeUtils::LinkInfo<xAOD::MuonContainer>> muon_feature_links = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(context, decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      std::vector<TrigCompositeUtils::LinkInfo<xAOD::PhotonContainer>> gam_feature_links = TrigCompositeUtils::findLinks<xAOD::PhotonContainer>(context, decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      std::vector<TrigCompositeUtils::LinkInfo<xAOD::TauJetContainer>> taujet_feature_links = TrigCompositeUtils::findLinks<xAOD::TauJetContainer>(context, decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      std::vector<TrigCompositeUtils::LinkInfo<xAOD::TrigMissingETContainer>> met_feature_links = TrigCompositeUtils::findLinks<xAOD::TrigMissingETContainer>(context, decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
       if(jet_feature_links.size()==1){
 	const TrigCompositeUtils::LinkInfo<xAOD::JetContainer> jet_feature_link = jet_feature_links.at(0);
 	ATH_CHECK(jet_feature_link.isValid());

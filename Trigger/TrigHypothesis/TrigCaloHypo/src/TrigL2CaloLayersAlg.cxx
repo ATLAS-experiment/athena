@@ -42,7 +42,7 @@ StatusCode TrigL2CaloLayersAlg::execute( const EventContext& context ) const {
 
   for (const Decision* previousDecision: *previousDecisionsHandle) {
 
-    const auto viewELInfo = findLink<ViewContainer>(previousDecision, viewString());
+    const auto viewELInfo = findLink<ViewContainer>(context, previousDecision, viewString());
     ATH_CHECK( viewELInfo.isValid() );
     SG::ReadHandle<xAOD::TrigEMClusterContainer> clustersHandle 
       = ViewHelper::makeHandle(*viewELInfo.link, m_caloContainerKey, context);

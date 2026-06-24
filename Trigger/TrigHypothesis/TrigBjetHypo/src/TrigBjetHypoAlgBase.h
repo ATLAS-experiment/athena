@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGBJETHYPO_TRIGBJETHYPOALGBASE_H
 #define TRIGBJETHYPO_TRIGBJETHYPOALGBASE_H 1
@@ -38,12 +38,14 @@ class TrigBjetHypoAlgBase : public ::HypoBase {
 					   const TrigCompositeUtils::Decision* ) const;
 
   template < class CONTAINER >
-    StatusCode retrieveObjectFromNavigation( const std::string&,
+    StatusCode retrieveObjectFromNavigation( const EventContext&,
+					     const std::string&,
 					     ElementLink< CONTAINER >&,
 					     const TrigCompositeUtils::Decision* ) const;
 
   template < class CONTAINER >
-    StatusCode retrieveCollectionFromNavigation( const std::string& linkName,
+    StatusCode retrieveCollectionFromNavigation( const EventContext&,
+						 const std::string& linkName,
 						 ElementLinkVector< CONTAINER >& objELs,
 						 const TrigCompositeUtils::DecisionContainer* ) const;
 

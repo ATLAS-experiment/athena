@@ -77,7 +77,7 @@ StatusCode TrigmuCombHypoAlg::execute(const EventContext& context) const
       TrigCompositeUtils::linkToPrevious( newd, previousDecision, context);
 
       //set roi link (to use same roi in EF CB step)
-      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(newd, "roi");
+      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context, newd, "roi");
       newd->setObjectLink(m_roiLinkName.value(), roiLink.link);
 
       // DEBUG

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "DisplacedJetRankComboHypoTool.h"
 #include "xAODJet/JetContainer.h"
@@ -11,7 +11,7 @@ StatusCode DisplacedJetRankComboHypoTool::initialize(){
 	return StatusCode::SUCCESS;
 }
 
-StatusCode DisplacedJetRankComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& /*context*/) const{
+StatusCode DisplacedJetRankComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const EventContext& context) const{
 	// if no combinations passed, then exit 
 	if (passingLegs.size() == 0) {
 		return StatusCode::SUCCESS;
@@ -57,7 +57,7 @@ StatusCode DisplacedJetRankComboHypoTool::decide(Combo::LegDecisionsMap& passing
 			if(dispj_leg_ids.count(dec_pair.first) == 0) continue;
 
 			//find the jet feature
-			std::vector<TrigCompositeUtils::LinkInfo<xAOD::JetContainer>> jet_feature_links = TrigCompositeUtils::findLinks<xAOD::JetContainer>(decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+			std::vector<TrigCompositeUtils::LinkInfo<xAOD::JetContainer>> jet_feature_links = TrigCompositeUtils::findLinks<xAOD::JetContainer>(context, decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
 			if(jet_feature_links.size() == 0) continue; //verify that we get a jet
 		    ATH_CHECK(jet_feature_links.size() == 1); //ensure we only have 1 link
 		    const TrigCompositeUtils::LinkInfo<xAOD::JetContainer> jet_feature_link = jet_feature_links.at(0);
