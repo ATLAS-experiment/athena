@@ -58,21 +58,6 @@
 <!ENTITY NBINSNINTERACTIONS "300">
 <!ENTITY NINTERACTIONSMAX "300">
 
-<!-- Tracking Recommendation Plots -->
-<!ENTITY EtaBinsTrkRec "100">
-
-<!ENTITY d0TrkRec     "10.0">
-<!ENTITY d0BinsTrkRec "4800">
-
-<!ENTITY prodRTrkRec     "300.0">
-<!ENTITY prodRBinsTrkRec "1200">
-
-<!ENTITY pTTrkRec     "50.0">
-<!ENTITY pTBinsTrkRec "500">
-
-<!ENTITY muTrkRec     "80.5">
-<!ENTITY muBinsTrkRec "80">
-
 <!-- histogram definitions common to Run2 and ITk -->
 <!ENTITY Common SYSTEM "InDetPVMPlotDefCommon.xml">
 <!ENTITY CommonRun2 SYSTEM "InDetPVMPlotDefCommon_Run2.xml">

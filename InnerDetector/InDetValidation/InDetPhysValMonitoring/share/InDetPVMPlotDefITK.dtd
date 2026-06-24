@@ -20,6 +20,3 @@
 <!-- PU density plots -->
 <!ENTITY NBINSPUDENS "20">
 <!ENTITY PUDENSMAX "5.0">
-
-<!-- Tracking Recommendation Plots -->
-<!ENTITY EtaBinsTrkRec "160">
