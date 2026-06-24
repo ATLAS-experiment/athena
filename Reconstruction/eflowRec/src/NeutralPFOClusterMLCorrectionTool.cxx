@@ -5,7 +5,6 @@
 #include "NeutralPFOClusterMLCorrectionTool.h"
 
 #include "StoreGate/ReadDecorHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 NeutralPFOClusterMLCorrectionTool::NeutralPFOClusterMLCorrectionTool(const std::string &type, const std::string &name, const IInterface *parent) 
