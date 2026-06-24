@@ -140,14 +140,21 @@ namespace MuonPhysValMonitoring {
 
         SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_decorDep{this, "DecorDependencies", {}};
         
-        Gaudi::Property<std::vector<int>> m_selectMuonWPs{
-            this, "SelectMuonWorkingPoints", {xAOD::Muon::Loose, xAOD::Muon::Medium, xAOD::Muon::Tight}};
-        Gaudi::Property<std::vector<unsigned int>> m_selectMuonAuthors{
+        using Quality = xAOD::Muon::Quality;
+        Gaudi::Property<std::set<int>> m_selectMuonWPs{
+            this, "SelectMuonWorkingPoints", {static_cast<int>(Quality::Loose), 
+                                              static_cast<int>(Quality::Medium), 
+                                              static_cast<int>(Quality::Tight)}};
+        using Author= xAOD::Muon::Author;
+        Gaudi::Property<std::set<int>> m_selectMuonAuthors{
             this,
             "SelectMuonAuthors",
-            {xAOD::Muon::MuidCo, xAOD::Muon::MuTagIMO, xAOD::Muon::MuidSA, xAOD::Muon::MuGirl, xAOD::Muon::CaloTag, xAOD::Muon::CaloScore}};
-        /// Flag to tell whether muons with the comissioning author will be selected or not
-        Gaudi::Property<bool> m_selectComissioning{this, "SelectComissioningMuons", false};
+            {   static_cast<int>(Author::MuidCo), 
+                static_cast<int>(Author::MuTagIMO), 
+                static_cast<int>(Author::MuidSA), 
+                static_cast<int>(Author::MuGirl), 
+                static_cast<int>(Author::CaloTag), 
+                static_cast<int>(Author::CaloScore)}};
         Gaudi::Property<std::vector<std::vector<std::string>>> m_selectHLTMuonItems{this, "SelectHLTMuonItems", {}};
         Gaudi::Property<std::vector<std::string>> m_L1MuonItems{this, "SelectL1MuonItems", {}};
         Gaudi::Property<std::vector<unsigned int>> m_selectMuonCategories{
@@ -222,9 +229,6 @@ namespace MuonPhysValMonitoring {
         std::vector<const xAOD::Muon*> m_vRecoMuons_EffDen_MS;
         std::vector<const xAOD::Muon*> m_vRecoMuons_EffDen;
 
-        template <class ContType> StatusCode retrieveContainer(const EventContext& ctx,
-                                                          const SG::ReadHandleKey<ContType>& key,
-                                                          const ContType* & container) const;
     };
 
     

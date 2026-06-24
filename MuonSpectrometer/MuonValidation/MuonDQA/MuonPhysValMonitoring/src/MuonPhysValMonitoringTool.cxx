@@ -34,31 +34,10 @@ namespace{
     using MuonSegmentLink =  ElementLink<xAOD::MuonSegmentContainer>;
     using TruthLink = ElementLink<xAOD::TruthParticleContainer>;
 
-    constexpr int comm_bit = (1<<xAOD::Muon::Commissioning);
 }
 using namespace xAOD::P4Helpers;
 
 namespace MuonPhysValMonitoring {
-
-    ///////////////////////////////////////////////////////////////////
-    // Public methods:
-    ///////////////////////////////////////////////////////////////////
-    template <class ContType> StatusCode MuonPhysValMonitoringTool::retrieveContainer(const EventContext& ctx,
-                                                                                      const SG::ReadHandleKey<ContType>& key,
-                                                                                      const ContType* & container) const{
-        container = nullptr;
-        if (key.empty()) {
-            ATH_MSG_DEBUG("No key of type "<<typeid(ContType).name()<<" has been parsed");
-            return StatusCode::SUCCESS;
-        }
-        SG::ReadHandle readHandle{key,ctx};
-        if (!readHandle.isPresent()) {
-            ATH_MSG_ERROR("Failed to retrieve "<<key.fullKey()<<". Please check.");
-            return StatusCode::FAILURE;
-        }
-        container = readHandle.cptr();
-        return StatusCode::SUCCESS;
-    }
 
     // Athena algtool's Hooks
     ////////////////////////////
@@ -133,9 +112,6 @@ namespace MuonPhysValMonitoring {
     StatusCode MuonPhysValMonitoringTool::bookHistograms() {
         ATH_MSG_INFO("Booking hists " << name() << "...");
 
-        if (m_selectMuonWPs.size() == 1 && m_selectMuonWPs[0] < 0) m_selectMuonWPs.clear();
-
-        if (m_selectMuonAuthors.size() == 1 && m_selectMuonAuthors[0] == 0) m_selectMuonAuthors.clear();
 
         static const std::map<int,std::string> theMuonCategories = {
           {ALL, "All"},
@@ -156,7 +132,7 @@ namespace MuonPhysValMonitoring {
 
             m_muonValidationPlots.emplace_back(std::make_unique<MuonValidationPlots>(
                 nullptr, categoryPath, m_selectMuonWPs, m_selectMuonAuthors, m_isData,
-                (category == theMuonCategories.at(ALL) ? false : m_doBinnedResolutionPlots.value()), separateSAFMuons, false));
+                (category == theMuonCategories.at(ALL) ? false : m_doBinnedResolutionPlots.value()), separateSAFMuons));
 
             if (!m_slowMuonsName.empty()) m_slowMuonValidationPlots.emplace_back(std::make_unique<SlowMuonValidationPlots>(nullptr, categoryPath, m_isData));
             if (m_doTrigMuonValidation) {
@@ -247,7 +223,7 @@ namespace MuonPhysValMonitoring {
         m_h_overview_reco_category->GetXaxis()->SetBinLabel(4, "Other");  // of some other origin or fakes
         ATH_CHECK(regHist(m_h_overview_reco_category, Form("%s/Overview", muonContainerName.c_str()), all));
 
-        int nAuth = xAOD::Muon::NumberOfMuonAuthors;
+        int nAuth = static_cast<int>(xAOD::Muon::Author::NumberOfMuonAuthors);
         for (int i = 1; i < 4; i++) {
             m_h_overview_reco_authors.emplace_back(new TH1F((muonContainerName + "_" + theMuonCategories.at(i) + "_reco_authors").c_str(),
                                                          (muonContainerName + "_" + theMuonCategories.at(i) + "_reco_authors").c_str(),
@@ -273,7 +249,7 @@ namespace MuonPhysValMonitoring {
 
             // check for histograms that are useless and skip regHist:
             if (sHistName.Contains("momentumPulls")) {
-                if (sHistName.Contains(Muon::EnumDefs::toString(xAOD::Muon::MuidSA))) continue;  // empty for standalone muons
+                if (sHistName.Contains(xAOD::Muon::toString(xAOD::Muon::Author::MuidSA).data())) continue;  // empty for standalone muons
                 if (!(sHistName.Contains("Prompt") && (sHistName.Contains("AllMuons") || sHistName.Contains("SiAssocForward"))))
                     continue;  // don't need binned eloss plots for separate muon types, keep only for Prompt AllMuons
             }
@@ -317,12 +293,12 @@ namespace MuonPhysValMonitoring {
         m_vRecoMuons_EffDen_MS.clear();
 
         const xAOD::EventInfo* eventInfo{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_eventInfo, eventInfo));
+        ATH_CHECK(SG::get(eventInfo,m_eventInfo, ctx));
 
         float beamSpotWeight = eventInfo->beamSpotWeight();
 
         const xAOD::TruthParticleContainer* TruthMuons{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_muonsTruthName, TruthMuons));
+        ATH_CHECK(SG::get(TruthMuons, m_muonsTruthName, ctx));
         
         if (!m_isData) {
             m_h_overview_nObjects[0]->Fill(TruthMuons->size(), beamSpotWeight);
@@ -330,8 +306,8 @@ namespace MuonPhysValMonitoring {
 
         const xAOD::MuonContainer* Muons = nullptr;
         const xAOD::SlowMuonContainer* SlowMuons{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_slowMuonsName, SlowMuons));
-        ATH_CHECK(retrieveContainer(ctx, m_muonsName, Muons));
+        ATH_CHECK(SG::get(SlowMuons, m_slowMuonsName, ctx));
+        ATH_CHECK(SG::get(Muons, m_muonsName, ctx));
         if (SlowMuons) {           
             ATH_MSG_DEBUG("Retrieved slow muons " << SlowMuons->size());
             m_h_overview_nObjects[1]->Fill(SlowMuons->size(), beamSpotWeight);
@@ -344,7 +320,7 @@ namespace MuonPhysValMonitoring {
         /////////////////////////////////////////////////////////////////////// @@@
         // @@@ Temp hack to get the MuonSpectrometerTrackParticle (@MS Entry, not extrapolated), needed for eloss plots
         // Remove when the link to the real MuonSpectrometerTrackParticle appears in the xAOD muon
-        ATH_CHECK(retrieveContainer(ctx, m_muonTracksName, m_MSTracks));
+        ATH_CHECK(SG::get(m_MSTracks, m_muonTracksName, ctx));
         /////////////////////////////////////////////////////////////////////// @@@
 
         // Do resonance selection
@@ -353,10 +329,8 @@ namespace MuonPhysValMonitoring {
             // Use iterator loop to avoid double counting
             for (xAOD::MuonContainer::const_iterator mu1_itr = Muons->begin(); mu1_itr != Muons->end(); ++mu1_itr) {
                 const xAOD::Muon* mu1 = (*mu1_itr);
-                if (!m_selectComissioning && mu1->allAuthors() & comm_bit) continue;
                 for (xAOD::MuonContainer::const_iterator mu2_itr = Muons->begin(); mu2_itr != mu1_itr; ++mu2_itr) {
                     const xAOD::Muon* mu2 = (*mu2_itr);
-                    if (!m_selectComissioning && mu2->allAuthors() & comm_bit) continue;                
                     if (mu1->charge() * mu2->charge() >= 0) continue;
                     pairs.emplace_back(std::make_pair(mu1, mu2));
                 }
@@ -428,33 +402,33 @@ namespace MuonPhysValMonitoring {
         }
 
         const xAOD::TrackParticleContainer* IDTracks{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_tracksName, IDTracks));
+        ATH_CHECK(SG::get(IDTracks, m_tracksName, ctx));
         if (IDTracks) {
             ATH_MSG_DEBUG("handling " << IDTracks->size() << " " << m_tracksName);
             for (const auto tp : *IDTracks) handleMuonTrack(tp, xAOD::Muon::InnerDetectorTrackParticle, beamSpotWeight);
         }
         const xAOD::TrackParticleContainer* FwdIDTracks{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_fwdtracksName, IDTracks));
+        ATH_CHECK(SG::get(FwdIDTracks, m_fwdtracksName, ctx));
         if (FwdIDTracks) {            
             ATH_MSG_DEBUG("handling " << FwdIDTracks->size() << " " << m_fwdtracksName);
             for (const auto tp : *FwdIDTracks) handleMuonTrack(tp, xAOD::Muon::InnerDetectorTrackParticle, beamSpotWeight);
         }
         const xAOD::TrackParticleContainer*  MuonTracks{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_muonTracksName, MuonTracks));
+        ATH_CHECK(SG::get(MuonTracks, m_muonTracksName, ctx));
         if (MuonTracks) {           
             ATH_MSG_DEBUG("handling " << MuonTracks->size() << " " << m_muonTracksName);
             m_h_overview_nObjects[2]->Fill(MuonTracks->size(), beamSpotWeight);
             for (const auto tp : *MuonTracks) handleMuonTrack(tp, xAOD::Muon::MuonSpectrometerTrackParticle, beamSpotWeight);
         }
         const xAOD::TrackParticleContainer* MuonExtrapolatedTracks{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_muonExtrapolatedTracksName, MuonExtrapolatedTracks));
+        ATH_CHECK(SG::get(MuonExtrapolatedTracks, m_muonExtrapolatedTracksName, ctx));
         if (MuonExtrapolatedTracks) {
             ATH_MSG_DEBUG("handling " << MuonExtrapolatedTracks->size() << " " << m_muonExtrapolatedTracksName);
             for (const auto tp : *MuonExtrapolatedTracks)
                 handleMuonTrack(tp, xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle, beamSpotWeight);
         }
         const xAOD::TrackParticleContainer* MSOnlyMuonExtrapolatedTracks{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_muonMSOnlyExtrapolatedTracksName, MSOnlyMuonExtrapolatedTracks));
+        ATH_CHECK(SG::get(MSOnlyMuonExtrapolatedTracks,  m_muonMSOnlyExtrapolatedTracksName, ctx));
 
         if (MSOnlyMuonExtrapolatedTracks) {
             ATH_MSG_DEBUG("handling " << MSOnlyMuonExtrapolatedTracks->size() << " " << m_muonMSOnlyExtrapolatedTracksName);
@@ -463,7 +437,7 @@ namespace MuonPhysValMonitoring {
         }
 
         const xAOD::MuonSegmentContainer* TruthMuonSegments{nullptr}; 
-        ATH_CHECK(retrieveContainer(ctx, m_muonSegmentsTruthName, TruthMuonSegments));
+        ATH_CHECK(SG::get(TruthMuonSegments,  m_muonSegmentsTruthName, ctx));
         if (TruthMuonSegments) {
             m_h_overview_nObjects[3]->Fill(TruthMuonSegments->size(), beamSpotWeight);
             ATH_MSG_DEBUG("handling " << TruthMuonSegments->size() << " " << m_muonSegmentsTruthName);
@@ -471,7 +445,7 @@ namespace MuonPhysValMonitoring {
         }
 
         const xAOD::MuonSegmentContainer* MuonSegments{nullptr};
-        ATH_CHECK(retrieveContainer(ctx, m_muonSegmentsName, MuonSegments));
+        ATH_CHECK(SG::get(MuonSegments, m_muonSegmentsName, ctx));
         if (MuonSegments) {
             m_h_overview_nObjects[4]->Fill(MuonSegments->size(), beamSpotWeight);
             ATH_MSG_DEBUG("handling " << MuonSegments->size() << " " << m_muonSegmentsName);
@@ -496,10 +470,10 @@ namespace MuonPhysValMonitoring {
             }
             for (auto mu : m_vRecoMuons) {
                 if (passesAcceptanceCuts(mu) && std::abs(mu->eta()) < 2.4) {
-                    if (mu->author() == 1) {
+                    if (mu->author() == xAOD::Muon::Author::MuidCo) {
                         m_vRecoMuons_EffDen_CB.emplace_back(mu);
                         ATH_MSG_DEBUG("##### m_vRecoMuons_EffDen_CB  pt:" << mu->pt() << "   phi:" << mu->phi() << "   eta:" << mu->eta());
-                    } else if (mu->author() == 5) {
+                    } else if (mu->author() == xAOD::Muon::Author::MuidSA) {
                         m_vRecoMuons_EffDen_MS.emplace_back(mu);
                         ATH_MSG_DEBUG("##### m_vRecoMuons_EffDen_MS  pt:" << mu->pt() << "   phi:" << mu->phi() << "   eta:" << mu->eta());
                     }
@@ -509,7 +483,7 @@ namespace MuonPhysValMonitoring {
             //@@@@@ L1 @@@@@
             if (m_doTrigMuonL1Validation) {
                 const xAOD::MuonRoIContainer* L1TrigMuons{nullptr};
-                ATH_CHECK(retrieveContainer(ctx, m_muonL1TrigName, L1TrigMuons));
+                ATH_CHECK(SG::get(L1TrigMuons, m_muonL1TrigName, ctx));
                 ATH_MSG_DEBUG("Retrieved L1 triggered muons " << L1TrigMuons->size());
                 for (const auto TrigL1mu : *L1TrigMuons) handleMuonL1Trigger(TrigL1mu);
             }
@@ -518,7 +492,7 @@ namespace MuonPhysValMonitoring {
             if (m_doTrigMuonL2Validation) {
                 //@@@@@ L2SA @@@@@
                 const xAOD::L2StandAloneMuonContainer* L2SAMuons{nullptr};
-                ATH_CHECK(retrieveContainer(ctx, m_muonL2SAName, L2SAMuons));
+                ATH_CHECK(SG::get(L2SAMuons, m_muonL2SAName, ctx));
                 ATH_MSG_DEBUG("Retrieved L2 StandAlone triggered muons " << L2SAMuons->size());
                 if (L2SAMuons->size() != 0) {
                     for (const auto L2SAmu : *L2SAMuons) {
@@ -577,7 +551,7 @@ namespace MuonPhysValMonitoring {
                 //@@@@@ L2CB @@@@@
                 
                 const xAOD::L2CombinedMuonContainer* L2CBMuons{nullptr};
-                ATH_CHECK(retrieveContainer(ctx, m_muonL2CBName, L2CBMuons));
+                ATH_CHECK(SG::get(L2CBMuons, m_muonL2CBName, ctx));
                 ATH_MSG_DEBUG("Retrieved L2 Combined triggered muons " << L2CBMuons->size());
                 if (L2CBMuons->size() != 0) {
                     for (const auto L2CBmu : *L2CBMuons) {
@@ -637,8 +611,8 @@ namespace MuonPhysValMonitoring {
             if (m_doTrigMuonEFValidation) {
                 const xAOD::MuonContainer* EFCombTrigMuons{nullptr};
                 const xAOD::MuonRoIContainer* L1TrigMuons{nullptr};
-                ATH_CHECK(retrieveContainer(ctx, m_muonEFCombTrigName, EFCombTrigMuons));
-                ATH_CHECK(retrieveContainer(ctx, m_muonL1TrigName, L1TrigMuons));
+                ATH_CHECK(SG::get(EFCombTrigMuons,  m_muonEFCombTrigName, ctx));
+                ATH_CHECK(SG::get(L1TrigMuons, m_muonL1TrigName, ctx));
                 ATH_MSG_DEBUG("Retrieved EF triggered muons " << EFCombTrigMuons->size());
                 if (EFCombTrigMuons->size() != 0) {
                     for (const auto Trigmu : *EFCombTrigMuons) {
@@ -650,9 +624,10 @@ namespace MuonPhysValMonitoring {
                     for (unsigned int i = 0; i < m_vEFMuons.size(); i++) {
                         unsigned int cont = 0;
                         for (unsigned int j = 0; j < m_vEFMuonsSelected.size(); j++) {
-                            if (((deltaR(m_vEFMuonsSelected.at(j), m_vEFMuons.at(i))) > 0.1) ||
-                                ((m_vEFMuons.at(i)->author() - m_vEFMuonsSelected.at(j)->author()) != 0))
+                            if (deltaR(m_vEFMuonsSelected.at(j), m_vEFMuons.at(i)) > 0.1 ||
+                                m_vEFMuons.at(i)->author() != m_vEFMuonsSelected.at(j)->author()){
                                 cont++;
+                            }
                             if (cont == m_vEFMuonsSelected.size()) {
                                 m_vEFMuonsSelected.emplace_back(m_vEFMuons.at(i));
                                 break;
@@ -700,7 +675,7 @@ namespace MuonPhysValMonitoring {
                                                   << "   author: " << (*mufeat.cptr())[i]->author());
                             for (unsigned int j = 0; j < m_selectMuonCategories.size(); j++) {
                                 if (m_selectMuonCategories[j] == ALL) {
-                                    if (((*mufeat.cptr())[i]->author()) == m_SelectedAuthor)
+                                    if (static_cast<int>((*mufeat.cptr())[i]->author()) == m_SelectedAuthor)
                                         m_TriggerMuonValidationPlots[j]->fillFeatPlots(*(*mufeat.cptr())[i], muonItem);
                                 }  // if categ=ALL
                             }      // categories
@@ -715,7 +690,7 @@ namespace MuonPhysValMonitoring {
                         }
                         for (const auto& mufeat : vec_muons) {
                             for (unsigned int i = 0; i < mufeat.cptr()->size(); i++) {
-                                if ((((*mufeat.cptr())[i]->author()) == m_SelectedAuthor) &&
+                                if ((static_cast<int>((*mufeat.cptr())[i]->author()) == m_SelectedAuthor) &&
                                     (deltaR((*mufeat.cptr())[i], m_vRecoMuons_EffDen.at(k)) < 0.1)) {
                                     break_flag = true;
                                     ATH_MSG_DEBUG("   $$$ match Reco_EffDen "
@@ -830,7 +805,7 @@ namespace MuonPhysValMonitoring {
                                 }      // categories
                                 for (const auto& mufeat : vec_muons) {
                                     for (unsigned int i = 0; i < mufeat.cptr()->size(); i++) {
-                                        if ((((*mufeat.cptr())[i]->author()) == m_SelectedAuthor) &&
+                                        if ((static_cast<int>((*mufeat.cptr())[i]->author()) == m_SelectedAuthor) &&
                                             (deltaR((*mufeat.cptr())[i], m_vRecoMuons_EffDen.at(k)) < 0.1)) {
                                             break_flag = true;
                                             for (unsigned int j = 0; j < m_selectMuonCategories.size(); j++) {
@@ -888,8 +863,7 @@ namespace MuonPhysValMonitoring {
 
     void MuonPhysValMonitoringTool::handleMuon(const xAOD::Muon* mu, const xAOD::SlowMuon* smu, float weight) {
         if (!mu) return;
-        if (!m_selectComissioning && mu->allAuthors() & comm_bit) return;
-
+       
         if (msgLvl(MSG::DEBUG)) printMuonDebug(mu);
 
         // make deep copy of muon and decorate with quality
@@ -915,8 +889,6 @@ namespace MuonPhysValMonitoring {
                     // histos
                     m_muonValidationPlots[i]->fill(*mu_c, weight);
                     if (smu) m_slowMuonValidationPlots[i]->fill(*smu, *mu_c, weight);
-                    // tree branches
-                    m_muonValidationPlots[i]->fillTreeBranches(*mu_c);
                   }
                 }
             }
@@ -925,7 +897,7 @@ namespace MuonPhysValMonitoring {
         ///////////////////////////////////////////////////////
         // SELECT MUON MEDIUM QUALITY FOR TRIGGER VALIDATION
         xAOD::Muon::Quality my_quality = m_muonSelectionTool->getQuality(*mu_c);
-        if (my_quality <= xAOD::Muon::Medium && m_isoTool->accept(*mu_c)) m_vRecoMuons.emplace_back(mu);
+        if (my_quality <= xAOD::Muon::Quality::Medium && m_isoTool->accept(*mu_c)) m_vRecoMuons.emplace_back(mu);
         ///////////////////////////////////////////////////////
 
         if (smu) {
@@ -938,15 +910,13 @@ namespace MuonPhysValMonitoring {
         if (!m_isData) m_oUnmatchedRecoMuonPlots->fill(*mu_c, weight);
 
         m_h_overview_reco_category->Fill("Other", weight);
-        m_h_overview_reco_authors[3]->Fill(mu->author(), weight);
+        m_h_overview_reco_authors[3]->Fill(static_cast<int>(mu->author()), weight);
 
         for (unsigned int i = 0; i < m_selectMuonCategories.size(); i++) {
             if (m_selectMuonCategories[i] == ALL) {
                 if (mu_c){// histos
                   m_muonValidationPlots[i]->fill(*mu_c);
                   if (smu) m_slowMuonValidationPlots[i]->fill(*smu, *mu_c, weight);
-                  // tree branches
-                  m_muonValidationPlots[i]->fillTreeBranches(*mu_c);
                   break;
                 }
             }
@@ -992,13 +962,11 @@ namespace MuonPhysValMonitoring {
                     truthMu, mu_c.get(), m_MSTracks,
                     weight);  // if no muon is found a protection inside MuonValidationPlots will ensure, its plots won't be filled
                 if (!m_slowMuonsName.empty()) m_slowMuonValidationPlots[i]->fill(truthMu, smu, mu_c.get(), weight);
-                // tree branches
-                m_muonValidationPlots[i]->fillTreeBranches(truthMu, mu_c.get(), m_MSTracks);
             }
         }
         if (mu_c) {
             m_h_overview_reco_category->Fill(thisMuonCategory - 1, weight);
-            m_h_overview_reco_authors[thisMuonCategory - 1]->Fill(mu_c->author(), weight);
+            m_h_overview_reco_authors[thisMuonCategory - 1]->Fill(static_cast<int>(mu_c->author()), weight);
         } else if (!m_isData)
             m_oUnmatchedTruthMuonPlots->fill(*truthMu, weight);
     }
@@ -1135,7 +1103,7 @@ namespace MuonPhysValMonitoring {
                                                             << m_vRecoMuons.at(i)->phi() << "    auth=" << m_vRecoMuons.at(i)->author());
         }
         for (unsigned int i = 0; i < m_vRecoMuons.size(); i++) {
-            if ((m_vRecoMuons.at(i)->author() != 1) || (std::abs(m_vRecoMuons.at(i)->eta()) > 2.4)) continue;
+            if ((m_vRecoMuons.at(i)->author() != xAOD::Muon::Author::MuidCo) || (std::abs(m_vRecoMuons.at(i)->eta()) > 2.4)) continue;
             ATH_MSG_DEBUG(":::: TEST: Recomu pt=" << m_vRecoMuons.at(i)->pt() << "  eta=" << m_vRecoMuons.at(i)->eta()
                                                   << "  phi=" << m_vRecoMuons.at(i)->phi() << "    auth=" << m_vRecoMuons.at(i)->author());
             k_L2SAMu_MinDeltaR = -1;
@@ -1182,7 +1150,7 @@ namespace MuonPhysValMonitoring {
                                                             << m_vRecoMuons.at(i)->phi() << "    auth=" << m_vRecoMuons.at(i)->author());
         }
         for (unsigned int i = 0; i < m_vRecoMuons.size(); i++) {
-            if ((m_vRecoMuons.at(i)->author() != 1) || (std::abs(m_vRecoMuons.at(i)->eta()) > 2.4)) continue;
+            if ((m_vRecoMuons.at(i)->author() != xAOD::Muon::Author::MuidCo) || (std::abs(m_vRecoMuons.at(i)->eta()) > 2.4)) continue;
             ATH_MSG_DEBUG(":::: TEST: Recomu pt=" << m_vRecoMuons.at(i)->pt() << "  eta=" << m_vRecoMuons.at(i)->eta()
                                                   << "  phi=" << m_vRecoMuons.at(i)->phi() << "    auth=" << m_vRecoMuons.at(i)->author());
             k_L2CBMu_MinDeltaR = -1;
@@ -1224,15 +1192,16 @@ namespace MuonPhysValMonitoring {
         int k_EFMu_MinDeltaR = -1;
         float MinDeltaR = 0.;
         std::vector<int> vAvailableAuthors;
-        vAvailableAuthors.clear();
-        vAvailableAuthors.emplace_back(m_vEFMuons[0]->author());
+
+        vAvailableAuthors.emplace_back(static_cast<int>(m_vEFMuons[0]->author()));
         unsigned int iter = 0;
         for (unsigned int k = 0; k < m_vEFMuons.size(); k++) {
             iter = 0;
             for (unsigned int l = 0; l < vAvailableAuthors.size(); l++) {
-                if (m_vEFMuons[k]->author() != vAvailableAuthors[l]) iter++;
+                if (static_cast<int>(m_vEFMuons[k]->author()) != vAvailableAuthors[l]) iter++;
             }
-            if (iter == vAvailableAuthors.size()) vAvailableAuthors.emplace_back(m_vEFMuons[k]->author());
+            if (iter == vAvailableAuthors.size()) vAvailableAuthors.emplace_back(
+                static_cast<int>(m_vEFMuons[k]->author()));
         }
         ATH_MSG_DEBUG(" m_vEFMuons.size()" << m_vEFMuons.size());
         for (unsigned int i = 0; i < m_vRecoMuons.size(); i++) {
@@ -1240,7 +1209,7 @@ namespace MuonPhysValMonitoring {
                                                             << m_vRecoMuons.at(i)->phi() << "    auth=" << m_vRecoMuons.at(i)->author());
         }
         for (unsigned int i = 0; i < m_vRecoMuons.size(); i++) {
-            if ((m_vRecoMuons.at(i)->author() != 1) || (std::abs(m_vRecoMuons.at(i)->eta()) > 2.4)) continue;
+            if ((m_vRecoMuons.at(i)->author() != xAOD::Muon::Author::MuidCo) || (std::abs(m_vRecoMuons.at(i)->eta()) > 2.4)) continue;
             ATH_MSG_DEBUG(":::: TEST: Recomu pt=" << m_vRecoMuons.at(i)->pt() << "  eta=" << m_vRecoMuons.at(i)->eta()
                                                   << "  phi=" << m_vRecoMuons.at(i)->phi() << "    auth=" << m_vRecoMuons.at(i)->author());
             for (unsigned int l = 0; l < vAvailableAuthors.size(); l++) {
@@ -1251,7 +1220,7 @@ namespace MuonPhysValMonitoring {
                                                             << "  phi=" << m_vEFMuons.at(k)->phi()
                                                             << "  DeltaR=" << deltaR(m_vRecoMuons.at(i), m_vEFMuons.at(k))
                                                             << "  author=" << m_vEFMuons.at(k)->author());
-                    if (m_vEFMuons.at(k)->author() == vAvailableAuthors.at(l) &&
+                    if (static_cast<int>(m_vEFMuons.at(k)->author()) == vAvailableAuthors.at(l) &&
                         (deltaR(m_vRecoMuons.at(i), m_vEFMuons.at(k)) < 0.1 &&
                          (deltaR(m_vRecoMuons.at(i), m_vEFMuons.at(k)) < MinDeltaR))) {
                         k_EFMu_MinDeltaR = k;
@@ -1284,14 +1253,13 @@ namespace MuonPhysValMonitoring {
         MuonLink link = acc_muon(*truthMu);
         if (!link.isValid()) return nullptr;
         const xAOD::Muon* reco_mu = (*link);
-        if (!m_selectComissioning && reco_mu->allAuthors() & comm_bit) return nullptr;
         m_vMatchedMuons.emplace_back(reco_mu);
         return reco_mu;
     }
 
     const xAOD::SlowMuon* MuonPhysValMonitoringTool::findRecoSlowMuon(const xAOD::TruthParticle* truthMu) {
         const xAOD::SlowMuonContainer* SlowMuons = nullptr;
-        retrieveContainer(Gaudi::Hive::currentContext() , m_slowMuonsName, SlowMuons).ignore();
+        SG::get(SlowMuons, m_slowMuonsName, Gaudi::Hive::currentContext()).ignore();
         if (!SlowMuons) return nullptr;
         for (const auto smu : *SlowMuons) {
             const MuonLink muLink = smu->muonLink();
