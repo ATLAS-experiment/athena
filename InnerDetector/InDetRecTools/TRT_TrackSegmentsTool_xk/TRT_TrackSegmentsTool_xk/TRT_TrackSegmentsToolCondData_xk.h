@@ -1,6 +1,6 @@
-/*                                                                                                                                 Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration                                                        
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkExInterfaces/IPropagator.h"
@@ -11,16 +11,16 @@
 namespace InDet{
 
  struct TRT_TrackSegmentsToolCondData_xk{
-    unsigned int                           m_nlayers[4]      ;
-    unsigned int                           m_nstraws[4]      ;
-    unsigned int                           m_flayers[4][30]  ;
-    unsigned int                           m_begin  [4][200] ;
-    unsigned int                           m_end    [4][200] ;
-    float                                  m_dzdr[26]        ;
+    unsigned int                           m_nlayers[4] = {0}     ;
+    unsigned int                           m_nstraws[4] = {0}      ;
+    unsigned int                           m_flayers[4][30] = {{0}}  ;
+    unsigned int                           m_begin  [4][200] = {0} ;
+    unsigned int                           m_end    [4][200] = {0} ;
+    float                                  m_dzdr[26] = {0}        ;
     unsigned int*                          m_ndzdr = 0       ;
     int*                                   m_islope= 0       ;
     float*                                 m_slope = 0       ;
-    int                                    m_cirsize         ; // Size of m_circles
+    int                                    m_cirsize = 0         ; // Size of m_circles
 
     ~TRT_TrackSegmentsToolCondData_xk(){  
         if(m_ndzdr  ) delete [] m_ndzdr  ;

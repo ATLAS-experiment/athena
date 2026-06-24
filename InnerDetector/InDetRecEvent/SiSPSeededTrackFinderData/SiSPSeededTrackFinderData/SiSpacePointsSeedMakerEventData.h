@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -229,10 +229,10 @@ namespace InDet {
      */
     SiSpacePointForSeedPoolList l_spforseed;
     //<! keep track of an iterator over the seed list. Frequently used to keep track of where to add the next SP
-    SiSpacePointForSeedPoolList::iterator i_spforseed;
+    SiSpacePointForSeedPoolList::iterator i_spforseed{};
 
     ITkSiSpacePointForSeedPoolList l_ITkSpacePointForSeed;
-    ITkSiSpacePointForSeedPoolList::iterator i_ITkSpacePointForSeed;
+    ITkSiSpacePointForSeedPoolList::iterator i_ITkSpacePointForSeed{};
 
     std::vector<const xAOD::SpacePoint*> v_ActsSpacePointForSeed;  //<! list of acts space points considered for seed building.
     std::vector<std::unique_ptr<InDet::PixelSpacePoint>> v_PixelSpacePointForSeed;
@@ -240,33 +240,33 @@ namespace InDet {
     std::map<std::pair<std::size_t, std::size_t>, std::unique_ptr<InDet::SCT_SpacePoint>> v_StripSpacePointForSeed;
 
     SiSpacePointsSeedPoolList l_seeds;
-    SiSpacePointsSeedPoolList::iterator i_seed;
-    SiSpacePointsSeedPoolList::iterator i_seede;
+    SiSpacePointsSeedPoolList::iterator i_seed{};
+    SiSpacePointsSeedPoolList::iterator i_seede{};
     SiSpacePointsProSeedPoolList l_seeds_Pro;       //<! lists of output seeds
-    SiSpacePointsProSeedPoolList::iterator i_seed_Pro; //<! iterators over the said list
-    SiSpacePointsProSeedPoolList::iterator i_seede_Pro;
+    SiSpacePointsProSeedPoolList::iterator i_seed_Pro{}; //<! iterators over the said list
+    SiSpacePointsProSeedPoolList::iterator i_seede_Pro{};
 
     ITkSiSpacePointsProSeedPoolList i_ITkSeeds;
-    ITkSiSpacePointsProSeedPoolList::iterator i_ITkSeed;
-    ITkSiSpacePointsProSeedPoolList::iterator i_ITkSeedEnd;
+    ITkSiSpacePointsProSeedPoolList::iterator i_ITkSeed{};
+    ITkSiSpacePointsProSeedPoolList::iterator i_ITkSeedEnd{};
 
-    std::vector<InDet::SiSpacePointForSeed*>::iterator rMin;
-    std::vector<ITk::SiSpacePointForSeed*>::iterator ITk_rMin;
+    std::vector<InDet::SiSpacePointForSeed*>::iterator rMin{};
+    std::vector<ITk::SiSpacePointForSeed*>::iterator ITk_rMin{};
 
     std::multimap<float,InDet::SiSpacePointsSeed*> mapOneSeeds;
     std::multimap<float,InDet::SiSpacePointsSeed*> mapSeeds;
     std::multimap<float,InDet::SiSpacePointsSeed*> l_seeds_map;
-    std::multimap<float,InDet::SiSpacePointsSeed*>::iterator seed;
-    std::multimap<float,InDet::SiSpacePointsSeed*>::iterator seede;
-    std::multimap<float,InDet::SiSpacePointsSeed*>::iterator i_seed_map;
-    std::multimap<float,InDet::SiSpacePointsSeed*>::iterator i_seede_map;
+    std::multimap<float,InDet::SiSpacePointsSeed*>::iterator seed{};
+    std::multimap<float,InDet::SiSpacePointsSeed*>::iterator seede{};
+    std::multimap<float,InDet::SiSpacePointsSeed*>::iterator i_seed_map{};
+    std::multimap<float,InDet::SiSpacePointsSeed*>::iterator i_seede_map{};
     std::multimap<float,InDet::SiSpacePointsProSeed*> mapOneSeeds_Pro;
     std::multimap<float,InDet::SiSpacePointsProSeed*> seeds_Pro;
-    std::multimap<float,InDet::SiSpacePointsProSeed*>::iterator seed_Pro;
+    std::multimap<float,InDet::SiSpacePointsProSeed*>::iterator seed_Pro{};
     std::multimap<float,ITk::SiSpacePointsProSeed*> ITkMapOneSeeds;
     std::multimap<float,ITk::SiSpacePointsProSeed*> ITkMapOneSeedsQ;
     std::multimap<float,ITk::SiSpacePointsProSeed*> ITkSeeds;
-    std::multimap<float,ITk::SiSpacePointsProSeed*>::iterator ITkSeedIterator;
+    std::multimap<float,ITk::SiSpacePointsProSeed*>::iterator ITkSeedIterator{};
 
 
     /// allow to resize the space-point container on-the-fly in case
