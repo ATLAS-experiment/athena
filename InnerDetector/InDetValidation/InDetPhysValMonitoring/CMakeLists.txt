@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetPhysValMonitoring )
@@ -37,7 +37,7 @@ atlas_add_test( SingleHistogramDefinition_test
                 test/SingleHistogramDefinition_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} InDetPhysValMonitoringLib
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( HistogramDefinitionSvc_test
@@ -45,7 +45,7 @@ atlas_add_test( HistogramDefinitionSvc_test
                 test/HistogramDefinitionSvc_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils TestTools InDetPhysValMonitoringLib
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( XmlEntityInclusion_test
@@ -53,7 +53,7 @@ atlas_add_test( XmlEntityInclusion_test
                 test/XmlEntityInclusion_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils TestTools InDetPhysValMonitoringLib
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( InDetPlotBase_test
@@ -61,12 +61,12 @@ atlas_add_test( InDetPlotBase_test
                 test/InDetPlotBase_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils TestTools xAODTracking InDetPhysValMonitoringLib
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( ValidateXml_test
                 SCRIPT "xmllint ${CMAKE_CURRENT_SOURCE_DIR}/share/InDetPVMPlotDefRun2.xml --schema ${CMAKE_CURRENT_SOURCE_DIR}/share/hdefSchema.xsd --loaddtd --noent --noout"
-                POST_EXEC_SCRIPT "nopost.sh" 
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 
