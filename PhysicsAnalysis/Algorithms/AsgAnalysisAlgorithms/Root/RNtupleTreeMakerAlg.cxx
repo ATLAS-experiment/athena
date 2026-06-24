@@ -12,18 +12,13 @@
 // ROOT include(s):
 #include <TClass.h>
 #include <TFile.h>
-#include <TROOT.h>
-#include <filesystem>
 
 // Gaudi/EventLoop include(s):
 #ifdef XAOD_STANDALONE
 #include "EventLoop/Worker.h"
 #else
-#include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/AttribStringParser.h"
-#include "Gaudi/Property.h"
-
+#include <TH1.h>
 #endif
 
 namespace CP {
@@ -57,46 +52,25 @@ namespace CP {
              return StatusCode::FAILURE;
          }
 #else
-         // AthAna has no direct way to get Tfile pointer. Output filename is
-         // instead used as the handle. retrieve pointer to THistSvc, it
-         // contains entry like:"ANALYSIS(stream name) DATAFILE='output.root' OPT='RECREATE'"
+         // The detour design: Output file is handled by THistSvc, including the file name. But THistSvc does not provide a direct way to get the TFile pointer for a given stream. 
+         // So we register a temporary histogram to get the TFile pointer for the output stream.
          SmartIF<ITHistSvc> tHistSvc{service("THistSvc")};
          ATH_CHECK(tHistSvc.isValid());
-         Gaudi::Property<std::vector<std::string>> outputProp("Output", {});
-         ATH_CHECK(SmartIF<IProperty>(tHistSvc.get())->getProperty(&outputProp));
-         std::string fileName;
-         const std::string& targetStream = m_outputStreamName.value(); //select ANALYSIS stream not ANALYSIS_HIST stream
-         for (const auto& entry : outputProp.value()) {
-           if (!entry.starts_with(targetStream + " ")) continue;
-           for (const auto& attrib : Gaudi::Utils::AttribStringParser(entry)) {
-             if (attrib.tag == "DATAFILE") {
-               fileName = attrib.value;
-               break;
-             }
-           }
-           break;
+         const std::string& targetStream = m_outputStreamName.value();
+         const std::string probeId = "/" + targetStream + "/__rntuple_file_probe__";
+         {
+             auto probe = std::make_unique<TH1F>("__rntuple_file_probe__", "", 1, 0., 1.);
+             probe->SetDirectory(nullptr);
+             ATH_CHECK(tHistSvc->regHist(probeId, std::move(probe)));
          }
-         if (fileName.empty()) {
-           ATH_MSG_ERROR("Empty output file name for stream: " << targetStream);
-           return StatusCode::FAILURE;
+         TH1* probeHist = nullptr;
+         ATH_CHECK(tHistSvc->getHist(probeId, probeHist));
+         if (probeHist && probeHist->GetDirectory()) {
+             outputFile = probeHist->GetDirectory()->GetFile();
          }
-         ATH_MSG_INFO( "RNTuple Output file: " << fileName );
-
-         // Match by basename: filesystem::path::filename() extracts the last
-         // component after '/' from any string, whether it is a relative path,
-         // absolute path, or xrootd URL (root://host//eos/.../output.root).
-         const std::filesystem::path targetName = std::filesystem::path(fileName).filename();
-         TIter next(gROOT->GetListOfFiles());
-         while (TObject* obj = next()) {
-           auto* f = dynamic_cast<TFile*>(obj);
-           if (!f) continue;
-           ATH_MSG_INFO( "RNTuple ROOT file: " << f->GetName() );
-           if (std::filesystem::path(f->GetName()).filename() == targetName) {
-             outputFile = f;
-             break;
-           }
-         }
-         ATH_MSG_INFO( "RNTuple found output file: " << (outputFile ? outputFile->GetName() : "nullptr") );
+         ATH_CHECK(tHistSvc->deReg(probeId));
+         delete probeHist;
+         ATH_MSG_INFO("RNTuple found output file: " << (outputFile ? outputFile->GetName() : "nullptr"));
 #endif
          if( !outputFile ) {
              ATH_MSG_ERROR( "Could not retrieve file for stream: " << m_outputStreamName.value() );
