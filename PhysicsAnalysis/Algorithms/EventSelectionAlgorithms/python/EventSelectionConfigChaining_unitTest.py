@@ -60,13 +60,20 @@ class TestRunNumber(unittest.TestCase):
 
 
 class TestSave(unittest.TestCase):
-    def test_save_creates_filter(self):
-        algs = run("EL_N 25000 >= 1\nSAVE", containers={"electrons": "AnaElectrons"})
+    def test_implicit_save_emitted_without_save_line(self):
+        # the event filter is now created automatically at the end of a block
+        algs = run("EL_N 25000 >= 1", containers={"electrons": "AnaElectrons"})
         save = [a for a in algs if a.getType() == "CP::SaveFilterAlg"]
         self.assertEqual(len(save), 1)
         self.assertEqual(prop(save[0], "selectionName"), "pass_SR_%SYS%,as_char")
         self.assertEqual(prop(save[0], "decorationName"), "ntuplepass_SR_%SYS%")
         self.assertTrue(prop(save[0], "noFilter"))
+
+    def test_explicit_save_is_deprecated_but_honoured(self):
+        with self.assertWarns(FutureWarning):
+            algs = run("EL_N 25000 >= 1\nSAVE", containers={"electrons": "AnaElectrons"})
+        save = [a for a in algs if a.getType() == "CP::SaveFilterAlg"]
+        self.assertEqual(len(save), 1)          # not doubled by the implicit one
 
     def test_save_bad_argcount(self):
         self.assertRaises(ValueError, run, "EL_N 25000 >= 1\nSAVE now",
