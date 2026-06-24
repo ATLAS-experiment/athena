@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger athenaHLT test of the Cosmic_run3_v1 menu on physics_Main stream from a cosmic run, then running BS decoding follows the athenaHLT process
+# art-description: Trigger athenaEF test of the Cosmic_run3_v1 menu on physics_Main stream from a cosmic run, then running BS decoding
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
@@ -18,7 +18,7 @@ from TrigP1Test.TrigP1TestSteps import filterBS, decodeBS
 ##################################################
 
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data_cos'
 ex.max_events = 200

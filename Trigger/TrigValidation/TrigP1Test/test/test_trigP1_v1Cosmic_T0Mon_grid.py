@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Test of cosmic P1+Tier0 workflow, runs athenaHLT with Cosmic_run3_v1 menu followed by offline reco and monitoring
+# art-description: Test of cosmic P1+Tier0 workflow, runs athenaEF with Cosmic_run3_v1 menu followed by offline reco and monitoring
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
@@ -29,7 +29,7 @@ triggermenu = 'Cosmic_run3_v1'
 
 # HLT step (BS->BS)
 hlt = ExecStep.ExecStep()
-hlt.type = 'athenaHLT'
+hlt.type = 'athenaEF'
 hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.forks = 1
 hlt.threads = 8
