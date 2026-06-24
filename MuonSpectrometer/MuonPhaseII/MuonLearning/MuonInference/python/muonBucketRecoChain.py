@@ -9,34 +9,7 @@ logging.getLogger("onnxruntime").setLevel(logging.ERROR)
 # Set environment variable for ONNX Runtime before imports (attempt early suppression)
 os.environ["ORT_LOGGING_LEVEL"] = "3"  # 3 = ERROR
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("isMC", flags.Input.isMC)
-    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
-    kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
-    kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
-    if not scheduleLegacy:
-        kwargs.setdefault("LegacySegmentKey", "")
-        kwargs.setdefault("LegacyTrackKey", "")
-        kwargs.setdefault("LegacyMuonKey" , "")
-    the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
-
-def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
-    result = ComponentAccumulator()
-    if not flags.Input.isMC:
-        from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-        result.merge(LegacyMuonRecoChainCfg(flags))
-        kwargs.setdefault("TruthSegkey", "MuonSegments")
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
-    the_tool = CompFactory.MuonValR4.TrackVisualizationTool(name, **kwargs)
-    result.setPrivateTools(the_tool)
-    return result
 
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
@@ -73,9 +46,6 @@ if __name__=="__main__":
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonTrackTester"))
-
     from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
     cfg.merge(MuonReconstructionConfig(flags))
     
@@ -105,7 +75,8 @@ if __name__=="__main__":
     if args.LegacyChain:
         cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = args.LegacyChain))
+    from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg
+    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = args.LegacyChain, outFile = args.outRootFile))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
@@ -118,6 +89,7 @@ if __name__=="__main__":
 
 
     if not args.noMonitorPlots:
+        from MuonTrackFindingTest.MsTrackFindingTester import MsTrackVisualizationToolCfg
         cfg.getEventAlgo("MSTrackFinderAlg").VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags,
                                                                                             CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots",
@@ -129,5 +101,5 @@ if __name__=="__main__":
                                                                                             saveSummaryPDF= False,CanvasLimits=10000))
 
 
-
+    cfg.getService("MessageSvc").setVerbose = []
     executeTest(cfg)
