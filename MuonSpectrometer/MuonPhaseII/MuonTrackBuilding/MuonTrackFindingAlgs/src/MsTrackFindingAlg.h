@@ -17,6 +17,8 @@
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
+#include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
+
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
@@ -105,6 +107,8 @@ namespace MuonR4{
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Visualization tool to debug the track finding */
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
+            /** @brief Handle to the muon summary tool */
+            ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
             /** @brief Maximum search window to search segments for */
             Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
             /** @brief Key to the output track container */
