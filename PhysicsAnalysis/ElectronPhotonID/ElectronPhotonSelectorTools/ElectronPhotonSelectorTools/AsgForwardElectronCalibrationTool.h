@@ -64,7 +64,7 @@ public:
   /** Return the DNN-calibrated pT in MeV
       Returns -999 on error. */
   double calibrate(const EventContext& ctx,
-                   const xAOD::Electron* eg) const;
+                   const xAOD::Electron* eg) const override;
 
 
 
