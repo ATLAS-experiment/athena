@@ -11,9 +11,6 @@
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
-
-#include "HepPDT/ParticleDataTable.hh"
-#include "HepPDT/ParticleData.hh"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetPrepRawData/SiClusterContainer.h"
@@ -90,7 +87,6 @@ private:
 
   const InDetDD::SiDetectorManager* m_PIX_mgr = nullptr;
   const InDetDD::SiDetectorManager* m_SCT_mgr = nullptr;
-  const HepPDT::ParticleDataTable* m_particleDataTable = nullptr;
 
   typedef std::map<Identifier, int> HitIndexMap;
   StatusCode readRawSilicon(FPGATrackSimEventInputHeader* header, HitIndexMap& hitIndexMap, const EventContext& eventContext) const; // dump raw silicon data to text file and populate hitIndexMap for rec. track processing
