@@ -15,7 +15,7 @@ atlas_add_component( RootAuxDynIO
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}
                                           AthContainers AthContainersInterfaces
-                                          AthContainersRoot RootUtils
+                                          AthContainersRoot RootUtils GaudiKernel
                    )
 
 atlas_add_library( RootAuxDynIOHeaders

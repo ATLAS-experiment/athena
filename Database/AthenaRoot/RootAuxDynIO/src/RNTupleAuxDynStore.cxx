@@ -58,6 +58,7 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
       return false;
    }
 
+   SG::AuxStoreInternal::toTransient (m_ctx, auxid);
    SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
    SG::auxid_t linked_auxid = r.linkedVariable (auxid);
    if (linked_auxid != SG::null_auxid) {
