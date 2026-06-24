@@ -43,7 +43,9 @@ def ActsToTrkConverterToolCfg(flags,
 
     from TrkConfig.TrkRIO_OnTrackCreatorConfig import CombinedRotCreatorCfg, InDetRotCreatorCfg
     if flags.Muon.usePhaseIIGeoSetup:
-        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(CombinedRotCreatorCfg(flags)))
+        rotCreatorTool = acc.getPrimaryAndMerge(CombinedRotCreatorCfg(flags))
+        rotCreatorTool.ToolMuonCluster.RestrictWarnings = True
+        kwargs.setdefault('RotCreatorTool', rotCreatorTool)
     else:
         kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
 
