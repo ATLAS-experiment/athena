@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file SCT_ReadCalibChipDataTool.cxx Implementation file for SCT_ReadCalibChipDataTool.
@@ -143,13 +143,6 @@ SCT_ReadCalibChipDataTool::getDetectorElementStatus(const EventContext& ctx, InD
   }
 }
 
-bool
-SCT_ReadCalibChipDataTool::isGood(const IdentifierHash& elementHashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementHashId, ctx);
-}
-
 //----------------------------------------------------------------------
 // Returns a bool summary of the data
 bool
@@ -162,13 +155,6 @@ SCT_ReadCalibChipDataTool::isGood(const Identifier& elementId, const EventContex
     ATH_MSG_WARNING("summary(): " << h << "good/bad is not applicable for Calibration data");
     return true;
   }
-}
-
-bool
-SCT_ReadCalibChipDataTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementId, ctx, h);
 }
 
 //----------------------------------------------------------------------
@@ -214,12 +200,6 @@ SCT_ReadCalibChipDataTool::getNPtGainData(const Identifier& moduleId, const int 
   }
 } //SCT_ReadCalibChipDataTool::getNPtGainData()
 
-std::vector<float> 
-SCT_ReadCalibChipDataTool::getNPtGainData(const Identifier& moduleId, const int side, const std::string& datatype) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getNPtGainData(moduleId, side, datatype, ctx);
-}
-
 //----------------------------------------------------------------------
 std::vector<float>
 SCT_ReadCalibChipDataTool::getNoiseOccupancyData(const Identifier& moduleId, const int side, const std::string& datatype, const EventContext& ctx) const {
@@ -261,12 +241,6 @@ SCT_ReadCalibChipDataTool::getNoiseOccupancyData(const Identifier& moduleId, con
     return waferData;
   }
 } // SCT_ReadCalibChipDataTool::getNoiseOccupancyData()
-
-std::vector<float>
-SCT_ReadCalibChipDataTool::getNoiseOccupancyData(const Identifier& moduleId, const int side, const std::string& datatype) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getNoiseOccupancyData(moduleId, side, datatype, ctx);
-}
 
 int
 SCT_ReadCalibChipDataTool::nPtGainIndex(const std::string& dataName) {

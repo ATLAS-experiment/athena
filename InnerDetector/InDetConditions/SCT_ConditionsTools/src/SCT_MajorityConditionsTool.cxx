@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_MajorityConditionsTool.h"
@@ -8,7 +8,6 @@
 
 // Gaudi includes
 #include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 using namespace SCT_ConditionsData;
 
@@ -50,11 +49,6 @@ bool SCT_MajorityConditionsTool::isGood(const EventContext& ctx) const {
   }
 }
 
-bool SCT_MajorityConditionsTool::isGood() const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(ctx);
-}
-
 // Is a barrel/endcap good?
 bool SCT_MajorityConditionsTool::isGood(int bec, const EventContext& ctx) const {
   const SCT_MajorityCondData* condData{getCondData(ctx)};
@@ -75,11 +69,6 @@ bool SCT_MajorityConditionsTool::isGood(int bec, const EventContext& ctx) const 
   }
 
   return result;
-}
-
-bool SCT_MajorityConditionsTool::isGood(int bec) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(bec, ctx);
 }
 
 const SCT_MajorityCondData* SCT_MajorityConditionsTool::getCondData(const EventContext& ctx) const {

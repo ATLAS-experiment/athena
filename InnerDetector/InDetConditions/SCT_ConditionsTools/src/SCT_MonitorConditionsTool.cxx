@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -105,32 +105,13 @@ SCT_MonitorConditionsTool::isGood(const Identifier& elementId, const EventContex
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-bool
-SCT_MonitorConditionsTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementId, ctx, h);
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-
 bool 
 SCT_MonitorConditionsTool::isGood(const IdentifierHash& hashId, const EventContext& ctx) const {
   Identifier elementId{m_pHelper->wafer_id(hashId)};
   return isGood(elementId, ctx, InDetConditions::SCT_SIDE);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-
-bool
-SCT_MonitorConditionsTool::isGood(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(hashId, ctx);
-}
-
-
-void SCT_MonitorConditionsTool::getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status, 
+void SCT_MonitorConditionsTool::getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status,
                                                          SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const  {
   SG::ReadCondHandle<SCT_MonitorCondData> condDataHandle{m_condKey, ctx};
   if (not condDataHandle.isValid()) {
@@ -220,12 +201,6 @@ SCT_MonitorConditionsTool::badStrips(std::set<Identifier>& strips, const EventCo
   }
 }
 
-void
-SCT_MonitorConditionsTool::badStrips(std::set<Identifier>& strips) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  badStrips(strips, ctx);
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void
@@ -257,23 +232,11 @@ SCT_MonitorConditionsTool::badStrips(const Identifier& moduleId, std::set<Identi
   }
 }
 
-void
-SCT_MonitorConditionsTool::badStrips(const Identifier& moduleId, std::set<Identifier>& strips) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return badStrips(moduleId, strips, ctx);
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 
 std::string 
 SCT_MonitorConditionsTool::badStripsAsString(const Identifier& moduleId, const EventContext& ctx) const {
   return getList(moduleId, ctx);
-}
-
-std::string
-SCT_MonitorConditionsTool::badStripsAsString(const Identifier& moduleId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return badStripsAsString(moduleId, ctx);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////

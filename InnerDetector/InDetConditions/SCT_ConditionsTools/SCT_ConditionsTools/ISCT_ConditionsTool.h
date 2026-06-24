@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -42,13 +42,11 @@ class ISCT_ConditionsTool: virtual public IAlgTool {
   virtual bool canReportAbout(InDetConditions::Hierarchy h) const =0;
   
   ///Summarise the result from the service as good/bad
-  virtual bool isGood(const Identifier& elementId, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const =0;
   virtual bool isGood(const Identifier& elementId, const EventContext& ctx, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const =0;
   virtual void getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status, 
                                         SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const = 0;
 
   //@todo introduce hash identifier method
-  virtual bool isGood(const IdentifierHash& hashId) const =0;
   virtual bool isGood(const IdentifierHash& hashId, const EventContext& ctx) const =0;
 };
 

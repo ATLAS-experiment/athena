@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -71,23 +71,10 @@ SCT_ChargeTrappingCondData SCT_ChargeTrappingTool::getCondData(const IdentifierH
   return calculate(elementHash, pos, ctx);
 }
 
-SCT_ChargeTrappingCondData SCT_ChargeTrappingTool::getCondData(const IdentifierHash& elementHash, double pos) const
-{
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getCondData(elementHash, pos, ctx);
-}
-
 void SCT_ChargeTrappingTool::getHoleTransport(double& x0, double& y0, double& xfin, double& yfin, double& Q_m2, double& Q_m1, double& Q_00, double& Q_p1, double& Q_p2, const EventContext& /*ctx*/) const
 {
   holeTransport(x0, y0, xfin, yfin, Q_m2, Q_m1, Q_00, Q_p1, Q_p2);
 }
-
-void SCT_ChargeTrappingTool::getHoleTransport(double& x0, double& y0, double& xfin, double& yfin, double& Q_m2, double& Q_m1, double& Q_00, double& Q_p1, double& Q_p2) const
-{
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  getHoleTransport(x0, y0, xfin, yfin, Q_m2, Q_m1, Q_00, Q_p1, Q_p2, ctx);
-}
-
 
 SCT_ChargeTrappingCondData SCT_ChargeTrappingTool::calculate(const IdentifierHash& elementHash, double pos, const EventContext& ctx) const
 {
