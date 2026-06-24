@@ -18,8 +18,8 @@ atlas_add_library( RDBAccessSvcLib
 
 atlas_add_component( RDBAccessSvc
                      src/*.cxx src/components/*.cxx
-                     INCLUDE_DIRS ${SQLITE3_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${SQLITE3_LIBRARIES} AthenaBaseComps CxxUtils RDBAccessSvcLib )
+                     INCLUDE_DIRS ${SQLite3_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${SQLite3_LIBRARIES} AthenaBaseComps CxxUtils RDBAccessSvcLib )
 
 atlas_add_executable( geomdb2sqlite
                       replicator/geomdb2sqlite.cpp
@@ -33,8 +33,8 @@ atlas_add_executable( geomdb2oracle
                       
 atlas_add_test( SqliteRecordset_test
   SOURCES src/SqliteRecord.cxx src/SqliteRecordset.cxx test/SqliteRecordset_test.cxx
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${SQLITE3_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} ${SQLITE3_LIBRARIES} RDBAccessSvcLib AthenaBaseComps Boost::unit_test_framework
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${SQLite3_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} ${SQLite3_LIBRARIES} RDBAccessSvcLib AthenaBaseComps Boost::unit_test_framework
   POST_EXEC_SCRIPT noerror.sh
 )
 

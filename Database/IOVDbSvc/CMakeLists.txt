@@ -7,9 +7,9 @@ atlas_subdir( IOVDbSvc )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase RelationalAccess )
 find_package( ROOT COMPONENTS Core )
-find_package( Boost COMPONENTS regex timer program_options thread)
 find_package( nlohmann_json )
 find_package( CrestApi COMPONENTS CrestApi)
+find_package( Boost COMPONENTS regex timer program_options thread)
 
 # Component(s) in the package:
 atlas_add_library( IOVDbSvcLib
