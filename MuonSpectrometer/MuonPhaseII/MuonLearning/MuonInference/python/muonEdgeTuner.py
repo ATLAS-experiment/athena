@@ -2,10 +2,10 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # External tuning harness:
-#   1. run baseline reco chain without edge inference / ML seeder
-#   2. run edge reco chain for a threshold grid
-#   3. compare a configurable track-count metric from the output ROOT files
-#   4. report threshold points with relative track loss below target
+#   1. run the regular, non ML reconstruction baseline
+#   2. run the edge-classifier reconstruction for a threshold grid
+#   3. measure signal-muon reconstruction efficiency in MsTrackValidTest
+#   4. report threshold points with relative efficiency loss below target
 
 from __future__ import annotations
 
@@ -16,307 +16,398 @@ import subprocess
 import sys
 from pathlib import Path
 
+REQUIRED_BRANCHES = (
+    "TruthMuons_truthOrigin",
+    "TruthMuons_truthType",
+    "MsTrkSeed_truthLink",
+    "ActsMuons_seedLink",
+)
 
 def _parse_float_list(raw: str) -> list[float]:
-    return [float(x) for x in raw.split(",") if x.strip()]
+    values = [float(value) for value in raw.split(",") if value.strip()]
+    if not values:
+        raise argparse.ArgumentTypeError("threshold list must contain at least one value")
+    return values
 
 
-def _run(cmd: list[str], log_path: Path) -> int:
+def _run(command: list[str], log_path: Path) -> int:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     with log_path.open("w", encoding="utf-8") as log:
-        proc = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, text=True)
-    return proc.returncode
+        process = subprocess.run(
+            command,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+    return process.returncode
 
 
-def _iter_root_trees(root_file: Path):
+def _signal_muon_efficiency(root_file: Path,
+                            tree_name: str,
+                            signal_origin: int,
+                            signal_type: int) -> dict[str, float | int]:
+    """Measure the same signal-muon efficiency used in the comparison notebook.
+    A denominator muon is a truth muon satisfying:
+
+        TruthMuons_truthOrigin == signal_origin
+        TruthMuons_truthType   == signal_type
+
+    It is reconstructed when an ActsMuons track points to a seed via
+    ActsMuons_seedLink and that seed points back to the truth-muon index via
+    MsTrkSeed_truthLink.  All links are local to one event.
+    """
+
     import ROOT
 
-    f = ROOT.TFile.Open(str(root_file), "READ")
-    if not f or f.IsZombie():
+    input_file = ROOT.TFile.Open(str(root_file), "READ")
+    if not input_file or input_file.IsZombie():
         raise RuntimeError(f"Could not open ROOT file: {root_file}")
-    if not f.GetListOfKeys() or f.GetListOfKeys().GetEntries() == 0:
-        f.Close()
+    tree = input_file.Get(tree_name)
+    if not tree or not tree.InheritsFrom("TTree"):
+        input_file.Close()
         raise RuntimeError(
-            f"ROOT file has no keys: {root_file}. "
-            "The Athena job finished, but no monitoring/tester tree was written. "
-            "Run muonEdgeRecoChain.py with --enableRecoChainTester, or pass an "
-            "output configuration that writes a tree containing the track-count metric."
+            f"Could not find TTree '{tree_name}' in {root_file}. "
+            "The reco chain must write the MsTrackValidTest tree."
         )
 
-    def walk(directory, prefix=""):
-        for key in directory.GetListOfKeys():
-            obj = key.ReadObj()
-            name = key.GetName()
-            full = f"{prefix}/{name}" if prefix else name
-            if obj.InheritsFrom("TTree"):
-                yield full, obj
-            elif obj.InheritsFrom("TDirectory"):
-                yield from walk(obj, full)
-
-    yield from walk(f)
-    f.Close()
-
-
-def _pt_to_gev(pt: float, units: str) -> float:
-    if units == "MeV":
-        return pt / 1000.0
-    if units == "GeV":
-        return pt
-    # auto: ATLAS track pT branches are usually MeV
-    return pt / 1000.0 if abs(pt) > 200.0 else pt
-
-
-def _matched_ms_track_metric(tree,
-                             truth_link_branch: str,
-                             pt_branch: str | None,
-                             truth_link_threshold: int,
-                             min_pt_gev: float,
-                             pt_units: str) -> float:
-    branches = {b.GetName() for b in tree.GetListOfBranches()}
-    if truth_link_branch not in branches:
-        raise RuntimeError(f"Missing truth-link branch '{truth_link_branch}'")
-    if pt_branch and pt_branch not in branches:
-        raise RuntimeError(f"Missing pT branch '{pt_branch}'")
-
-    total = 0
-    for entry in tree:
-        links = list(getattr(entry, truth_link_branch))
-        pts = list(getattr(entry, pt_branch)) if pt_branch else [None] * len(links)
-
-        for i, link in enumerate(links):
-            if int(link) < truth_link_threshold:
-                continue
-            if pt_branch:
-                pt_gev = _pt_to_gev(float(pts[i]), pt_units)
-                if pt_gev < min_pt_gev:
-                    continue
-            total += 1
-    return float(total)
-
-
-def _metric_from_root(root_file: Path,
-                      preferred_tree: str | None,
-                      preferred_branch: str | None,
-                      args) -> float:
-    """
-    Generic ROOT metric reader.
-
-    Preferred usage:
-      --metricTree <tree> --metricBranch <branch>
-
-    If not provided, the script tries common branch names. This is intentionally
-    external to Athena so the tuning loop can run many complete jobs.
-    """
-
-    branch_candidates = []
-    if preferred_branch:
-        branch_candidates.append(preferred_branch)
-    branch_candidates += [
-        "nMsTracks",
-        "nMSTracks",
-        "nTracks",
-        "nRecoTracks",
-        "nMuonTracks",
+    missing_branches = [
+        branch for branch in REQUIRED_BRANCHES if not tree.GetBranch(branch)
     ]
+    if missing_branches:
+        input_file.Close()
+        raise RuntimeError(
+            f"Missing required branch(es) in {root_file}: {', '.join(missing_branches)}"
+        )
 
-    trees = list(_iter_root_trees(root_file))
-    if preferred_tree:
-        trees = [(name, tree) for name, tree in trees if name == preferred_tree or name.endswith("/" + preferred_tree)]
-    if not trees:
-        raise RuntimeError(f"No matching TTree found in {root_file}")
+    signal_muons = 0
+    matched_signal_muons = 0
 
-    if args.metricMode == "matchedTruthTracks":
-        for _, tree in trees:
-            return _matched_ms_track_metric(tree,
-                                            args.truthLinkBranch,
-                                            args.trackPtBranch,
-                                            args.truthLinkThreshold,
-                                            args.minPtGeV,
-                                            args.ptUnits)
+    for entry_number in range(tree.GetEntries()):
+        tree.GetEntry(entry_number)
+        
+        truth_origins = [
+            int(value) for value in tree.TruthMuons_truthOrigin
+        ]
+        truth_types = [
+            int(value) for value in tree.TruthMuons_truthType
+        ]
+        seed_truth_links = [
+            int(value) for value in tree.MsTrkSeed_truthLink
+        ]
+        reco_seed_links = [
+            int(value) for value in tree.ActsMuons_seedLink
+        ]
 
-    for tree_name, tree in trees:
-        branches = {b.GetName() for b in tree.GetListOfBranches()}
-        for branch in branch_candidates:
-            if branch not in branches:
-                continue
-            total = 0.0
-            for entry in tree:
-                val = getattr(entry, branch)
-                try:
-                    total += float(val)
-                except TypeError:
-                    total += float(len(val))
-            return total
+        if len(truth_origins) != len(truth_types):
+            input_file.Close()
+            raise RuntimeError(
+                f"Truth origin/type vector-size mismatch in entry {entry_number} "
+                f"of {root_file}"
+            )
 
-    available = {}
-    for tree_name, tree in trees:
-        available[tree_name] = [b.GetName() for b in tree.GetListOfBranches()]
-    raise RuntimeError(
-        "Could not find a metric branch. Pass --metricTree/--metricBranch. "
-        f"Available branches: {json.dumps(available, indent=2)}"
-    )
+        signal_truth_indices = (
+            truth_index
+            for truth_index, (origin, truth_type) in enumerate(
+                zip(truth_origins, truth_types)
+            )
+            if origin == signal_origin and truth_type == signal_type
+        )
 
+        for truth_index in signal_truth_indices:
+            signal_muons += 1
+            matching_seed_indices = {
+                seed_index
+                for seed_index, linked_truth_index in enumerate(seed_truth_links)
+                if linked_truth_index == truth_index
+            }
+            if matching_seed_indices and any(
+                seed_index in matching_seed_indices
+                for seed_index in reco_seed_links
+            ):
+                matched_signal_muons += 1
 
-def _chain_cmd(args, out_root: Path, edge: bool,
-               edge_threshold: float | None = None,
-               overlap_threshold: float | None = None) -> list[str]:
+    input_file.Close()
+
+    if signal_muons == 0:
+        raise RuntimeError(
+            f"No signal truth muons found in {root_file}. "
+            f"Selection is truthOrigin={signal_origin}, truthType={signal_type}."
+        )
+
+    return {
+        "signalMuonCount": signal_muons,
+        "matchedSignalMuonCount": matched_signal_muons,
+        "signalMuonEfficiency": matched_signal_muons / signal_muons,
+    }
+
+def _chain_command(args,
+                   out_root: Path,
+                   edge: bool,
+                   edge_threshold: float | None = None,
+                   overlap_threshold: float | None = None) -> list[str]:
+    """Build a command equivalent to reco_chain_ec.sh or the no-ML baseline."""
     recochain_script = Path(__file__).with_name("muonEdgeRecoChain.py")
-    cmd = [
+
+    command = [
         sys.executable,
         str(recochain_script),
-        "--inputFile", args.inputFile,
+        "--threads", str(args.threads),
         "--nEvents", str(args.nEvents),
+        "--skipEvents", str(args.skipEvents),
+        "--inputFile", args.inputFile,
         "--outRootFile", str(out_root),
-        "--bucketModel", args.bucketModel,
-        "--bucketThreshold", str(args.bucketThreshold),
+        "--defaultGeoFile", args.defaultGeoFile,
+        "--noPerfMon", 
     ]
-    if args.extraRecoArgs:
-        cmd += args.extraRecoArgs.split()
-
-    # GPU passthrough to muonEdgeRecoChain
-    if getattr(args, 'use_gpu', None) is True:
-        cmd.append("--use-gpu")
-    elif getattr(args, 'use_gpu', None) is False:
-        cmd.append("--use-cpu")
 
     if edge:
-        cmd += [
+        command += [
             "--edgeModel", args.edgeModel,
-            "--enableEdgeClassifier",
-            "--useMlSeeder",
             "--edgeThreshold", str(edge_threshold),
             "--overlapThreshold", str(overlap_threshold),
+            "--enableBucketFilter",
+            "--enableEdgeClassifier",
+            "--useMlSeeder",
         ]
+        if args.bucketThreshold is not None:
+            command += ["--bucketThreshold", str(args.bucketThreshold)]
+        if args.bucketModel:
+            command += ["--bucketModel", args.bucketModel]
     else:
         # Same upstream chain, but no edge inference and old seeder.
-        cmd += [
+        command += [
+            "--disableBucketFilter",
             "--disableEdgeClassifier",
             "--useOldSeeder",
+            "--skip-onnx",
         ]
-    return cmd
+        
+    # muonEdgeRecoChain.py defaults to CUDA when ONNX inference is enabled.
+    if args.use_cpu:
+        command.append("--use-cpu")
+        
+    return command
 
+def _result_row(edge_threshold: float,
+                overlap_threshold: float,
+                baseline: dict[str, float | int],
+                edge: dict[str, float | int],
+                target_relative_efficiency_loss: float,
+                root_file: Path,
+                log_file: Path) -> dict[str, float | int | str | bool]:
+    if edge["signalMuonCount"] != baseline["signalMuonCount"]:
+        return {
+            "edgeThreshold": edge_threshold,
+            "overlapThreshold": overlap_threshold,
+            "status": "truth_count_mismatch",
+            "baselineSignalMuonCount": baseline["signalMuonCount"],
+            "edgeSignalMuonCount": edge["signalMuonCount"],
+            "rootFile": str(root_file),
+            "log": str(log_file),
+        }
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Tune SegmentEdge thresholds by comparing edge-chain track loss to baseline."
+    baseline_efficiency = float(baseline["signalMuonEfficiency"])
+    edge_efficiency = float(edge["signalMuonEfficiency"])
+    relative_efficiency_difference = (
+        (edge_efficiency - baseline_efficiency) / baseline_efficiency
     )
+    relative_efficiency_loss = max(0.0, -relative_efficiency_difference)
+
+    return {
+        "edgeThreshold": edge_threshold,
+        "overlapThreshold": overlap_threshold,
+        "status": "ok",
+        "baselineSignalMuonCount": baseline["signalMuonCount"],
+        "baselineMatchedSignalMuons": baseline["matchedSignalMuonCount"],
+        "baselineSignalEfficiency": baseline_efficiency,
+        "edgeSignalMuonCount": edge["signalMuonCount"],
+        "edgeMatchedSignalMuons": edge["matchedSignalMuonCount"],
+        "edgeSignalEfficiency": edge_efficiency,
+        "absoluteEfficiencyDifference": edge_efficiency - baseline_efficiency,
+        "relativeEfficiencyDifference": relative_efficiency_difference,
+        "relativeEfficiencyLoss": relative_efficiency_loss,
+        "passesTarget": relative_efficiency_loss <= target_relative_efficiency_loss,
+        "rootFile": str(root_file),
+        "log": str(log_file),
+    }
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description=("Tune SegmentEdge thresholds using signal-muon reconstruction "
+                     "efficiency relative to the regular no-ML reconstruction."))
     parser.add_argument("--inputFile", required=True)
-    parser.add_argument("--bucketModel", required=True)
-    parser.add_argument("--bucketThreshold", "--score-threshold", dest="bucketThreshold", type=float, default=0.0,
-                        help="Threshold on bucket filter score")
+    parser.add_argument("--bucketModel", default=None, help=("Optional bucket-filter ONNX model."),)
+    parser.add_argument("--bucketThreshold", "--score-threshold", dest="bucketThreshold", type=float,
+                        default=None, help="Bucket-filter score threshold")
+    parser.add_argument("--bucket-output-is-logit", dest="bucketOutputIsLogit", action="store_true", default=False,
+                        help=("Interpret the scalar bucket-model output as a logit"))
     parser.add_argument("--edgeModel", required=True)
     parser.add_argument("--nEvents", type=int, default=100)
+    parser.add_argument("--skipEvents", type=int, default=0)
+    parser.add_argument("--threads", type=int, default=1)
+    parser.add_argument("--defaultGeoFile", default="RUN4")    
     parser.add_argument("--workDir", default="edge_threshold_tuning")
-    parser.add_argument("--edgeThresholds", default="0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.50")
-    parser.add_argument("--overlapThresholds", default="0.60,0.70,0.80,0.90")
-    parser.add_argument("--targetLoss", type=float, default=0.001,
-                        help="Maximum allowed relative loss, default 0.001 = 0.1 percent")
-    parser.add_argument("--metricTree", default=None)
-    parser.add_argument("--metricBranch", default=None)
-    parser.add_argument("--metricMode", default="matchedTruthTracks",
-                        choices=["matchedTruthTracks", "rawTrackCount"],
-                        help="matchedTruthTracks counts MS tracks with truthLink >= threshold and pT cut")
-    parser.add_argument("--truthLinkBranch", default="MSTrksR4_truthLink")
-    parser.add_argument("--trackPtBranch", default="MSTrksR4_pt")
-    parser.add_argument("--truthLinkThreshold", type=int, default=1)
-    parser.add_argument("--minPtGeV", type=float, default=2.0)
-    parser.add_argument("--ptUnits", default="auto",
-                        choices=["auto", "MeV", "GeV"])
-    parser.add_argument("--extraRecoArgs", default="",
-                        help="Extra args forwarded to muonEdgeRecoChain.py")
-    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=None,
-                        help="Use GPU for ONNX inference in the reco chain (default: auto-detect)")
-    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
-                        help="Force CPU for ONNX inference in the reco chain")
+    parser.add_argument("--edgeThresholds", default="0.08,0.10,0.119,0.14,0.16", help="Comma-separated recovery edge-probability thresholds to scan",)
+    parser.add_argument("--overlapThresholds", default="0.20,0.30,0.50,0.80", help=("Comma-separated high-purity core edge-probability thresholds to scan."))
+    parser.add_argument("--targetRelativeEfficiencyLoss", "--targetLoss", dest="targetRelativeEfficiencyLoss",
+        type=float, default=0.05, help=("Maximum allowed relative loss in signal-muon efficiency"),)
+    parser.add_argument("--treeName", default="MsTrackValidTest")
+    parser.add_argument("--signalOrigin", type=int, default=13)
+    parser.add_argument("--signalType", type=int, default=6)
+    parser.add_argument("--use-cpu", dest="use_cpu", action="store_true", default=False,)    
     parser.add_argument("--skipExisting", action="store_true")
     args = parser.parse_args()
 
-    work = Path(args.workDir).resolve()
-    work.mkdir(parents=True, exist_ok=True)
+    edge_thresholds = _parse_float_list(args.edgeThresholds)
+    overlap_thresholds = _parse_float_list(args.overlapThresholds)
 
-    baseline_root = work / "baseline.root"
-    baseline_log = work / "baseline.log"
-    baseline_cmd = _chain_cmd(args, baseline_root, edge=False)
+    work_dir = Path(args.workDir).resolve()
+    work_dir.mkdir(parents=True, exist_ok=True)
+
+    baseline_root = work_dir / "baseline_noml.root"
+    baseline_log = work_dir / "baseline_noml.log"
+    baseline_command = _chain_command(args, baseline_root, edge=False)
     if not args.skipExisting or not baseline_root.exists():
-        rc = _run(baseline_cmd, baseline_log)
-        if rc != 0:
-            raise SystemExit(f"Baseline job failed with rc={rc}. See {baseline_log}")
+        return_code = _run(baseline_command, baseline_log)
+        if return_code != 0:
+            raise SystemExit(
+                f"No-ML baseline job failed with rc={return_code}. See {baseline_log}"
+            )
     if not baseline_root.exists():
         raise SystemExit(
-            f"Baseline job finished but output ROOT file is missing: {baseline_root}. "
-            f"Ensure reco args produce this output. "
+            f"No-ML baseline finished but ROOT output is missing: {baseline_root}. "
             f"See {baseline_log}"
         )
 
-    baseline_metric = _metric_from_root(baseline_root, args.metricTree, args.metricBranch, args)
-    if baseline_metric <= 0:
-        raise SystemExit(f"Baseline metric is non-positive: {baseline_metric}")
+    baseline = _signal_muon_efficiency(baseline_root, args.treeName, args.signalOrigin, args.signalType,)
 
-    rows = []
+    rows: list[dict[str, float | int | str | bool]] = []
+
     best = None
-    for edge_thr in _parse_float_list(args.edgeThresholds):
-        for overlap_thr in _parse_float_list(args.overlapThresholds):
-            tag = f"edge{edge_thr:.3f}_overlap{overlap_thr:.3f}".replace(".", "p")
-            out_root = work / f"{tag}.root"
-            out_log = work / f"{tag}.log"
-            cmd = _chain_cmd(args, out_root, edge=True,
-                             edge_threshold=edge_thr,
-                             overlap_threshold=overlap_thr)
+    for edge_threshold in edge_thresholds:
+        for overlap_threshold in overlap_thresholds:
+            tag = (
+                f"edge{edge_threshold:.6f}_overlap{overlap_threshold:.6f}"
+                .replace(".", "p")
+            )
+            out_root = work_dir / f"{tag}.root"
+            out_log = work_dir / f"{tag}.log"
+            command = _chain_command(
+                args,
+                out_root,
+                edge=True,
+                edge_threshold=edge_threshold,
+                overlap_threshold=overlap_threshold,
+            )
             if not args.skipExisting or not out_root.exists():
-                rc = _run(cmd, out_log)
-                if rc != 0:
+                return_code = _run(command, out_log)
+                if return_code != 0:
                     rows.append({
-                        "edgeThreshold": edge_thr,
-                        "overlapThreshold": overlap_thr,
+                        "edgeThreshold": edge_threshold,
+                        "overlapThreshold": overlap_threshold,
                         "status": "failed",
+                        "rootFile": str(out_root),
                         "log": str(out_log),
                     })
                     continue
             if not out_root.exists():
                 rows.append({
-                    "edgeThreshold": edge_thr,
-                    "overlapThreshold": overlap_thr,
+                    "edgeThreshold": edge_threshold,
+                    "overlapThreshold": overlap_threshold,
                     "status": "missing_output",
-                    "log": str(out_log),
                     "rootFile": str(out_root),
+                    "log": str(out_log),
                 })
                 continue
 
-            metric = _metric_from_root(out_root, args.metricTree, args.metricBranch, args)
-            loss = max(0.0, (baseline_metric - metric) / baseline_metric)
-            row = {
-                "edgeThreshold": edge_thr,
-                "overlapThreshold": overlap_thr,
-                "status": "ok",
-                "baselineMetric": baseline_metric,
-                "edgeMetric": metric,
-                "relativeLoss": loss,
-                "passesTarget": loss < args.targetLoss,
-                "rootFile": str(out_root),
-                "log": str(out_log),
-            }
+            edge = _signal_muon_efficiency(
+                out_root,
+                args.treeName,
+                args.signalOrigin,
+                args.signalType,
+            )
+            row = _result_row(
+                edge_threshold,
+                overlap_threshold,
+                baseline,
+                edge,
+                args.targetRelativeEfficiencyLoss,
+                out_root,
+                out_log,
+            )
+            
             rows.append(row)
 
-            if row["passesTarget"]:
-                # Prefer the largest EdgeThreshold that still passes, then largest OverlapThreshold.
-                key = (edge_thr, overlap_thr)
-                if best is None or key > (best["edgeThreshold"], best["overlapThreshold"]):
+            if row["status"] == "ok" and row["passesTarget"]:
+                key = (edge_threshold, overlap_threshold)
+                if best is None or key > (
+                    best["edgeThreshold"],
+                    best["overlapThreshold"],
+                ):
                     best = row
 
-    csv_path = work / "edge_threshold_scan.csv"
-    with csv_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=sorted({k for r in rows for k in r}))
+    csv_path = work_dir / "edge_threshold_scan.csv"
+    fieldnames = [
+        "edgeThreshold",
+        "overlapThreshold",
+        "status",
+        "baselineSignalMuonCount",
+        "baselineMatchedSignalMuons",
+        "baselineSignalEfficiency",
+        "edgeSignalMuonCount",
+        "edgeMatchedSignalMuons",
+        "edgeSignalEfficiency",
+        "absoluteEfficiencyDifference",
+        "relativeEfficiencyDifference",
+        "relativeEfficiencyLoss",
+        "passesTarget",
+        "rootFile",
+        "log",
+    ]
+    with csv_path.open("w", newline="", encoding="utf-8") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
     summary = {
-        "baselineMetric": baseline_metric,
-        "targetLoss": args.targetLoss,
+        "treeName": args.treeName,
+        "signalSelection": {
+            "truthOrigin": args.signalOrigin,
+            "truthType": args.signalType,
+        },
+        "matching": (
+            "Truth muon <- MsTrkSeed_truthLink -> seed <- "
+            "ActsMuons_seedLink -> reconstructed track"
+        ),
+        "baseline": baseline,
+        "bucketFilter": {
+            "model": args.bucketModel,
+            "scoreThreshold": args.bucketThreshold,
+            "scoreThresholdSource": (
+                "CLI override" if args.bucketThreshold is not None
+                else "GraphBucketFilterToolCfg default"
+            ),
+        },
+        "segmentEdgeGraph": {
+            "ReadSpacePoints": "FilteredMlBuckets",
+            "OrderingSpacePoints": "MuonSpacePoints",
+            "note": (
+                "Applied by muonEdgeRecoChain.py when bucket filtering and "
+                "edge inference are enabled."
+            ),
+        },
+        "targetRelativeEfficiencyLoss": args.targetRelativeEfficiencyLoss,
+        "selectionPolicy": (
+            "largest (edgeThreshold, overlapThreshold) pair with relative "
+            "signal-efficiency loss at or below the target"
+        ),
         "best": best,
         "scanCsv": str(csv_path),
     }
-    (work / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
-
+    (work_dir / "summary.json").write_text(
+        json.dumps(summary, indent=2),
+        encoding="utf-8",
+    )
     print(json.dumps(summary, indent=2))
 
 
