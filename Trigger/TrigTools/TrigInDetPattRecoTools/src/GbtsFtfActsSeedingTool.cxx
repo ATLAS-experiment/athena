@@ -76,7 +76,8 @@ StatusCode GbtsFtfActsSeedingTool::createSeeds(
         node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
         node.m_phi = std::atan2(node.m_y, node.m_x);
         node.m_idx = selectedXAODSpacePoints.size();
-
+	node.m_mod_id = isPixel ? static_cast<int>(elementlist[0]) : -1;
+	
         if (isPixel && m_useML){
           //Check type in debug build otherwise assume it is correct
           assert(dynamic_cast<const xAOD::PixelCluster*>(sp->measurements().front())!=nullptr);

@@ -600,6 +600,7 @@ void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spC
     if(pCL != nullptr){
       tmpColl[idx].m_pcw = pCL->width().z();
       tmpColl[idx].m_locPosY = pCL->localPosition().y();
+      tmpColl[idx].m_mod_id  = static_cast<int>(sp->elementIdList().first); //module id needed for intra-layer edge formation
     }
 
     idx++;

@@ -118,6 +118,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   const float max_z0            = m_LRTmode ? 600.0 : roi.zedPlus();
   const float min_deltaPhi      = m_LRTmode ? 0.01f : 0.001f;
   const float tau_ratio_precut  = 0.009f;
+
+  const float cut_sum_max       = 1.3f;//reasonable setting according to Mark B. 
   
   const float maxOuterRadius    = m_LRTmode ? 1050.0 : 550.0;
 
@@ -181,6 +183,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
         win_idx++;
         continue;
       }
+      if (B2.m_layerKey == lk1 && !m_addIntralayerEdges) continue;// skip same layer bin2 if intralayer edges are not requested
       
       float rb2 = B2.getMaxBinRadius();
 
@@ -196,6 +199,10 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
             deltaPhi = 0.002f + 4.33e-4f*pt_scale*abs_dr;
           } else {
             deltaPhi = 0.015f + 2.2e-4f*pt_scale*abs_dr;
+          }
+
+	  if (B2.m_layerKey == lk1) {//same layer: override as abs_dr is zero in this case
+            deltaPhi = 0.004f;//use constant width which is big enough to catch tracks with pT above 1GeV
           }
         }
       }
@@ -221,7 +228,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
       float phi1 = n1pars[2];
       float r1 = n1pars[3];
       float z1 = n1pars[4];
-
+      int mod1 = B1.m_vn[n1Idx]->m_mod_id;
+      
       for(unsigned int winIdx = 0; winIdx < vSLW.size(); winIdx++) {//the intermediate loop over sliding windows
 
         GBTS_SlidingWindow& slw = vSLW[winIdx];
@@ -233,7 +241,9 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	const unsigned int lk2 = B2.m_layerKey;
 
 	const bool isBarrel2 = (lk2 / 10000) == 8;
- 
+
+	const bool sameLayer = lk1 == lk2;
+  
         float deltaPhi = slw.m_deltaPhi;
       
         //sliding window phi1 +/- deltaPhi
@@ -253,6 +263,10 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	  
 	  unsigned int n2Idx = B2.m_vPhiNodes[n2PhiIdx].second;
 
+	  if (sameLayer) {
+            if (mod1 == B2.m_vn[n2Idx]->m_mod_id) continue;//two nodes from same module
+	  }
+	    
 	  unsigned short node_info = B2.m_vIsConnected[n2Idx];
 
 	  if ((lk1 == 80000) && (node_info == 0) ) continue;//skip isolated nodes as their incoming edges lead to nowhere
@@ -360,6 +374,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	    float uat_2  = 1.f/exp_eta;
 	    float Phi2  = phi2 + dPhi2;
 	    float curv2 = curv;
+
+	    float edge_eta = std::abs(-std::log(exp_eta));
 	    
 	    for(unsigned int inEdgeIdx = n2_first_edge; inEdgeIdx < n2_last_edge; inEdgeIdx++) {//looking for neighbours of the new edge
 	      
@@ -390,25 +406,49 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 		}
 	      }
 	      
-	      if(abs_tau_ratio > cut_tau_ratio_max + add_tau_ratio_corr){//bad match
-		continue;
-	      }
+	      if (edge_eta >= 1.2) {//excluding central barrel
+		
+		if(abs_tau_ratio > cut_tau_ratio_max + add_tau_ratio_corr){//bad match
+		  continue;
+		}
 	      
-	      float dPhi =  Phi2 - pS->m_p[2];
-	      
-	      if(dPhi<-M_PI) dPhi += M_2PI;
-	      else if(dPhi>M_PI) dPhi -= M_2PI;
-	      
-	      if(std::abs(dPhi) > cut_dphi_max) {
-		continue;
-	      }
-            
-	      float dcurv = curv2 - pS->m_p[1];
-            
-	      if(dcurv < -cut_dcurv_max || dcurv > cut_dcurv_max) {
-		continue;
-	      }
+		float dPhi =  Phi2 - pS->m_p[2];
+		
+		if(dPhi<-M_PI) dPhi += M_2PI;
+		else if(dPhi>M_PI) dPhi -= M_2PI;
+		
+		if(std::abs(dPhi) > cut_dphi_max) {
+		  continue;
+		}
+		
+		float dcurv = curv2 - pS->m_p[1];
+		
+		if(dcurv < -cut_dcurv_max || dcurv > cut_dcurv_max) {
+		  continue;
+		}
 
+	      }
+	      else {//central barrel : using cut-sum approach from GBTS-GPU version
+
+		float cut_sum = 0.0;
+
+                cut_sum += abs_tau_ratio / ( cut_tau_ratio_max + add_tau_ratio_corr );
+              
+                float dPhi =  Phi2 - pS->m_p[2];
+              
+                if(dPhi<-M_PI) dPhi += M_2PI;
+                else if(dPhi>M_PI) dPhi -= M_2PI;
+
+                cut_sum += std::abs(dPhi) / cut_dphi_max;
+            
+                float dcurv = curv2 - pS->m_p[1];
+
+                cut_sum += std::abs(dcurv) / cut_dcurv_max;
+
+                if (cut_sum > cut_sum_max) continue;
+
+	      }
+		
 	      //final check: cuts on pT and d0
 	      
 	      if (isBarrel1 && isBarrel2 && isBarrel3) {//Pixel barrel

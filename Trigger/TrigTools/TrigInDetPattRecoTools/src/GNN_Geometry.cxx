@@ -304,8 +304,15 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
   
   m_etaBinWidth = conn->m_etaBin;
 
+  std::vector<unsigned int> bin2key;//LUT to convert eta-bin index into corresponding layer ID (e.g. 80000)
+ 
   for(const auto& layer : layers) {
     const TrigFTF_GNN_Layer* pL = addNewLayer(layer, m_nEtaBins);
+
+    for (int b = 0; b < pL->num_bins(); b++) {
+      bin2key.push_back(pL->m_layer.m_subdet);
+    }
+    
     m_nEtaBins += pL->num_bins();
   }
  
@@ -458,6 +465,16 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& 
       const std::list<int>& bin2_list = (*p).second.second;//bins which are incoming to bin1
 
       std::vector<int> v2(bin2_list.begin(), bin2_list.end());
+
+      const unsigned int lk1 = bin2key[bin1_idx];
+
+      const int vol_id = lk1 / 10000;
+      
+      const bool isBarrel1 = vol_id == 8;
+
+      if (isBarrel1) {
+        v2.push_back(bin1_idx);//to create intra-layer graph edges
+      }
       
       m_binGroups.push_back(std::make_pair(bin1_idx, v2));//store the group
 
