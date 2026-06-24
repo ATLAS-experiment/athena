@@ -62,6 +62,9 @@ protected:
 protected:
   long long          m_entry;
 
+  /// Event context associated with the event store.
+  const EventContext& m_ctx;
+
   /// Mutex used to synchronize modifications to the cache vector.
   typedef AthContainers_detail::mutex mutex_t;
   typedef AthContainers_detail::lock_guard<mutex_t> guard_t;
