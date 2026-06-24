@@ -6,23 +6,22 @@ atlas_subdir( MuonG4SD )
 # External dependencies:
 find_package( CLHEP )
 find_package( Geant4 )
-find_package( XercesC )
 find_package( GTest )
 
 atlas_add_library( MuonG4SDLib
                    src/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS MuonG4SD
-                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth MuonIdHelpersLib)
+                   INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth MuonIdHelpersLib)
 
 # Component(s) in the package:
 atlas_add_library( MuonG4SD
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} MuonG4SDLib StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth )
+                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} MuonG4SDLib StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth )
 
 # Turn on/off LTO for all libraries in the package.
 set_target_properties(
@@ -35,8 +34,8 @@ set_target_properties(
 function( _add_test name )
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
-      INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
-      LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${GTEST_LIBRARIES} TestTools MuonG4SDLib StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth CxxUtils
+      INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
+      LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} ${GTEST_LIBRARIES} TestTools MuonG4SDLib StoreGateLib GeoPrimitives GaudiKernel MuonSimEvent G4AtlasToolsLib MCTruth CxxUtils
       POST_EXEC_SCRIPT noerror.sh )
    set_target_properties( MuonG4SD_${name}
       PROPERTIES
