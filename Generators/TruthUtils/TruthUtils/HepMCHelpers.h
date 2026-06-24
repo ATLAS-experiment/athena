@@ -16,18 +16,6 @@
 ///
 /// ATLAS-specific HepMC functions
 
-#if !defined(HEPMC3) && !defined(XAOD_ANALYSIS)
-#include "AtlasHepMC/GenVertex.h"
-#include <ranges>
-namespace MC {
-inline
-auto particles_in (const HepMC::GenVertex* p) {
-  return std::ranges::subrange (p->particles_in_const_begin(),
-                                p->particles_in_const_end());
-}
-}
-#endif
-
 namespace MC
 {
  template <class VTX>

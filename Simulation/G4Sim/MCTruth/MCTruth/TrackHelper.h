@@ -42,11 +42,7 @@ public:
 inline std::tuple<int, HepMcParticleLink::UniqueIDFlag>
 TrackHelper::particleIdentifierAndFlag() const
 {
-#if defined(HEPMC3)
   return {GetUniqueID(), HepMcParticleLink::IS_ID};
-#else
-  return {GetBarcode(), HepMcParticleLink::IS_BARCODE};
-#endif
 }
 
 HepMcParticleLink TrackHelper::GenerateParticleLink()

@@ -126,10 +126,6 @@ namespace HepMC {
       return p.status();
     }
   }
-#if !defined(HEPMC3) && !defined(XAOD_STANDALONE)
-  template <>  inline int status(const ConstGenVertexPtr& v1){ return v1->id();}
-  template <>  inline int status(const GenVertexPtr& v1){ return v1->id();}
-#endif
 
   /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
   template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, const int direction = 0) {
