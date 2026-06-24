@@ -118,7 +118,7 @@ def PersistifyTrackParticles(flags,
         trackparticles_shortlist += ['-TTVA_AMVFVertices',
                                      '-TTVA_AMVFWeights']
         # acts track link
-        if flags.Acts.EDM.PersistifyTracks:
+        if not flags.Acts.EDM.PersistifyTracks:
             trackparticles_shortlist.append('-actsTrack')
 
         trackparticles_variables = ".".join(trackparticles_shortlist)        
