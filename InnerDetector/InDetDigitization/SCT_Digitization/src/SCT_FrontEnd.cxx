@@ -126,7 +126,7 @@ StatusCode SCT_FrontEnd::initVectors(int strips, SCT_FrontEndData& data) const {
 // ----------------------------------------------------------------------
 // prepare gain and offset for the strips for a given module
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
+StatusCode SCT_FrontEnd::prepareGainAndOffset(const EventContext& /*ctx*/, SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
   // now we need to generate gain and offset channel by channel: some algebra
   // for generation of partially correlated random numbers
   float W = m_OGcorr * m_GainRMS * m_Ospread / (m_GainRMS * m_GainRMS - m_Ospread * m_Ospread);
@@ -229,22 +229,22 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collecti
 // prepare gain and offset for the strips for a given module using
 // Cond Db data to get the chip calibration data
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collection, int side, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
+StatusCode SCT_FrontEnd::prepareGainAndOffset(const EventContext& ctx, SiChargedDiodeCollection& collection, int side, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
   // Get chip data from calib DB
-  std::vector<float> gainByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "GainByChip");
-  std::vector<float> gainRMSByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "GainRMSByChip");
-  std::vector<float> offsetByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "OffsetByChip");
-  std::vector<float> offsetRMSByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "OffsetRMSByChip");
+  std::vector<float> gainByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "GainByChip", ctx);
+  std::vector<float> gainRMSByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "GainRMSByChip", ctx);
+  std::vector<float> offsetByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "OffsetByChip", ctx);
+  std::vector<float> offsetRMSByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "OffsetRMSByChip", ctx);
   std::vector<float> noiseByChipVect(6, 0.0);
 
   if (m_analogueNoiseOn) { // Check if noise should be on or off
-    noiseByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "NoiseByChip");
+    noiseByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "NoiseByChip", ctx);
   }
 
   // Need to check if empty, most should have data, but a few old DEAD modules don't
   if (gainByChipVect.empty() or noiseByChipVect.empty()) {
     ATH_MSG_DEBUG("No calibration data in cond DB for module " << moduleId << " using JO values");
-    if (StatusCode::SUCCESS != prepareGainAndOffset(collection, moduleId, rndmEngine, data,strip_max)) {
+    if (StatusCode::SUCCESS != prepareGainAndOffset(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
       return StatusCode::FAILURE;
     } else {
       return StatusCode::SUCCESS;
@@ -255,7 +255,7 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collecti
   float gainMeanValue = meanValue(gainByChipVect);
   if (gainMeanValue < 0.0) {
     ATH_MSG_DEBUG("All chip gain values are 0 for module " << moduleId << " using JO values");
-    if (StatusCode::SUCCESS != prepareGainAndOffset(collection, moduleId, rndmEngine, data,strip_max)) {
+    if (StatusCode::SUCCESS != prepareGainAndOffset(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
       return StatusCode::FAILURE;
     } else {
       return StatusCode::SUCCESS;
@@ -350,7 +350,7 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collecti
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
+StatusCode SCT_FrontEnd::randomNoise(const EventContext& /*ctx*/, SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
   // Add random noise
 
   double occupancy = 0.0;
@@ -470,7 +470,7 @@ StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
+StatusCode SCT_FrontEnd::randomNoise(const EventContext& ctx, SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
   const int n_chips = 6;
   const int chipStripmax = strip_max / n_chips;
   std::vector<float> NOByChipVect(n_chips, 0.0);
@@ -486,13 +486,13 @@ StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const
   }
 
   // Get chip data from calib DB
-  NOByChipVect = m_ReadCalibChipDataTool->getNoiseOccupancyData(moduleId, side, "OccupancyByChip");
-  ENCByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "NoiseByChip");
+  NOByChipVect = m_ReadCalibChipDataTool->getNoiseOccupancyData(moduleId, side, "OccupancyByChip", ctx);
+  ENCByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "NoiseByChip", ctx);
 
   // Need to check if empty, most should have data, but a few old DEAD modules don't, and 9C...
   if (NOByChipVect.empty()) {
     ATH_MSG_DEBUG("No calibration data in cond DB for module " << moduleId << " using JO values");
-    if (StatusCode::SUCCESS != randomNoise(collection, moduleId, rndmEngine, data,strip_max)) {
+    if (StatusCode::SUCCESS != randomNoise(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
       return StatusCode::FAILURE;
     } else {
       return StatusCode::SUCCESS;
@@ -573,6 +573,9 @@ StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const
 // (this could be moved elsewhere later) apply threshold do clustering
 // ----------------------------------------------------------------------
 void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRandomEngine * rndmEngine) const {
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   // get SCT module side design
   const SCT_ModuleSideDesign *p_design = static_cast<const SCT_ModuleSideDesign*>(&(collection.design()));
 
@@ -603,11 +606,11 @@ void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRando
   if (not collection.empty()) {
     // Setup gain/offset/noise to the hit and neighbouring strips
     if (m_useCalibData) { // Use calib cond DB data
-      if (StatusCode::SUCCESS != prepareGainAndOffset(collection, side, moduleId, rndmEngine, data, strip_max)) {
+      if (StatusCode::SUCCESS != prepareGainAndOffset(ctx, collection, side, moduleId, rndmEngine, data, strip_max)) {
         ATH_MSG_ERROR("\tCan't prepare Gain and Offset");
       }
     } else { // Use JO values
-      if (StatusCode::SUCCESS != prepareGainAndOffset(collection, moduleId, rndmEngine, data,strip_max)) {
+      if (StatusCode::SUCCESS != prepareGainAndOffset(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
         ATH_MSG_ERROR("\tCan't prepare Gain and Offset");
       }
     }
@@ -627,11 +630,11 @@ void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRando
 
   if (m_NoiseOn) {
     if (m_useCalibData) { // Check if using DB or not
-      if (StatusCode::SUCCESS != randomNoise(collection, moduleId, side, rndmEngine, data, strip_max)) {
+      if (StatusCode::SUCCESS != randomNoise(ctx, collection, moduleId, side, rndmEngine, data, strip_max)) {
         ATH_MSG_ERROR("\tCan't do random noise on wafer?!");
       }
     } else { // Use JO fixed values
-      if (StatusCode::SUCCESS != randomNoise(collection, moduleId, rndmEngine, data,strip_max)) {
+      if (StatusCode::SUCCESS != randomNoise(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
         ATH_MSG_ERROR("\tCan't do random noise on wafer?!");
       }
     }
