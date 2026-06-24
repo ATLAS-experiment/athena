@@ -160,3 +160,13 @@ def FastIDKillerToolCfg(flags, name="G4UA::FastIDKillerTool", **kwargs):
     kwargs.setdefault("Z", 3490.*mm) # ID maximum Z coordiate
     result.setPrivateTools(CompFactory.G4UA.FastIDKillerTool(name, **kwargs))
     return result
+
+def CelerOffloadToolCfg(flags, name="G4UA::CelerOffloadTool", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("max_num_tracks", 1024*16)
+    kwargs.setdefault("initializer_capacity", 1024*128*4)
+    # Avoid stuck tracks (use CELER_NONFATAL_FLUSH env var to continue processing)
+    kwargs.setdefault("max_step_iters", 10000)
+    kwargs.setdefault("ignore_processes", ["CoulombScat"])
+    result.setPrivateTools(CompFactory.G4UA.CelerOffloadTool(name, **kwargs))
+    return result

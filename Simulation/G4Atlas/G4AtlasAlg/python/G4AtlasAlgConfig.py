@@ -75,7 +75,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     kwargs.setdefault("MultiThreading", is_hive)
     if is_hive:
         result.merge(G4ThreadPoolSvcCfg(flags))
-        kwargs.setdefault('Cardinality', flags.Concurrency.NumThreads)
+        kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
 
     kwargs.setdefault("TruthRecordService", result.getPrimaryAndMerge(TruthServiceCfg(flags)))
     kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)))

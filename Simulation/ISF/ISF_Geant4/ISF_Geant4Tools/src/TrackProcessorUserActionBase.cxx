@@ -66,6 +66,12 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
   //TODO ELLI ATH_MSG_DEBUG( "Currently simulating TrackID = " << aStep->GetTrack()->GetTrackID() <<
   //TODO ELLI                " inside geoID = " << curGeoID );
 
+  // AdePT currently does not return the G4Secondary vector per G4Step. As the vector is required to attach
+  // the G4VUserInfo in the PreUserTrackingAction below, the G4VUserInfo is not available, which
+  // would lead to nullptr access crashes
+#ifdef ATHSIMULATION_USE_ADEPT
+  return;
+#endif
   //
   // call the ISFSteppingAction method of the implementation
   //
@@ -75,28 +81,36 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
   // propagate the current ISFParticle link to all secondaries
   //
   const std::vector<const G4Track*>  *secondaryVector = aStep->GetSecondaryInCurrentStep();
-  for ( auto* aConstSecondaryTrack : *secondaryVector ) {
-    // get a non-const G4Track for current secondary (nasty!)
-    G4Track* aSecondaryTrack ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstSecondaryTrack ); // imposed by Geant4 interface
+  if (secondaryVector && !secondaryVector->empty()) {
+    for ( auto* aConstSecondaryTrack : *secondaryVector ) {
+      // get a non-const G4Track for current secondary (nasty!)
+      G4Track* aSecondaryTrack ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstSecondaryTrack ); // imposed by Geant4 interface
 
-    auto *trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aSecondaryTrack);
+      auto *trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aSecondaryTrack);
 
-    // G4Tracks aready returned to ISF will have a TrackInformation attached to them
-    bool particleReturnedToISF = trackInfo && trackInfo->GetReturnedToISF();
-    if (!particleReturnedToISF) {
-      HepMC::GenParticlePtr generationZeroGenParticle{};
-      ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aSecondaryTrack,
-                                                *m_curBaseISP,
-                                                VTrackInformation::Secondary,
-                                                generationZeroGenParticle );
-    }
-  } // <- loop over secondaries from this step
+      // G4Tracks aready returned to ISF will have a TrackInformation attached to them
+      bool particleReturnedToISF = trackInfo && trackInfo->GetReturnedToISF();
+      if (!particleReturnedToISF) {
+        HepMC::GenParticlePtr generationZeroGenParticle{};
+        ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aSecondaryTrack,
+                                                  *m_curBaseISP,
+                                                  VTrackInformation::Secondary,
+                                                  generationZeroGenParticle );
+      }
+    } // <- loop over secondaries from this step
+  }
 
   return;
 }
 
 void TrackProcessorUserActionBase::PreUserTrackingAction(const G4Track* aTrack)
 {
+  // AdePT currently does not return the G4Secondary vector per G4Step. As the vector is required to attach
+  // the G4VUserInfo below the G4VUserInfo is not available, which would lead to nullptr access crashes
+#ifdef ATHSIMULATION_USE_ADEPT
+  return;
+#endif
+
   bool isPrimary = ! aTrack->GetParentID();
   if (isPrimary) {
     G4Track* nonConstTrack ATLAS_THREAD_SAFE = const_cast<G4Track*> (aTrack); // imposed by Geant4 interface

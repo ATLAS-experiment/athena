@@ -52,6 +52,10 @@ namespace G4UA
       atlasG4EvtUserInfo->SetCurrentGenParticle(std::move(currentGenParticle));
     }
 
+    // The G4Trajectory is currently attached to the TrackingManager. Therefore, only one Trajectory can
+    // be handled at the time, so it must be disabled for parallel tracking on the GPU
+#ifndef ATHSIMULATION_USE_ADEPT
+
     // Condition for creating a trajectory object to store truth.
     if (trackHelper.IsPrimary() ||
         (trackHelper.IsRegisteredSecondary() && m_secondarySavingLevel>1) ||
@@ -69,6 +73,7 @@ namespace G4UA
       trkMgr->SetStoreTrajectory(true);
       trkMgr->SetTrajectory(trajectory);
     }
+#endif
   }
 
   //---------------------------------------------------------------------------
@@ -78,10 +83,14 @@ namespace G4UA
   {
     ATH_MSG_DEBUG("Finished tracking a particle");
 
+    // The G4Trajectory is currently attached to the TrackingManager. Therefore, only one Trajectory can
+    // be handled at the time, so it must be disabled for parallel tracking on the GPU
+#ifndef ATHSIMULATION_USE_ADEPT
     // We are done tracking this particle, so reset the trajectory.
     // TODO: consider caching the tracking manager once to reduce overhead.
     G4EventManager::GetEventManager()->GetTrackingManager()->
       SetStoreTrajectory(false);
+#endif
   }
 
 } // namespace G4UA

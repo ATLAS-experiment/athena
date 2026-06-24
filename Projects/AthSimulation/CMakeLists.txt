@@ -7,6 +7,24 @@ string( STRIP ${_version} _version )
 project( AthSimulation VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
+# Turn on CUDA as an available compiler, if it's available.
+option( ATLAS_BUILD_SIM_CUDA "Build simulation packages with CUDA support" OFF )
+mark_as_advanced( ATLAS_BUILD_SIM_CUDA )
+if( ATLAS_BUILD_SIM_CUDA )
+   include( CheckLanguage )
+   check_language( CUDA )
+   if( CMAKE_CUDA_COMPILER )
+      # Default the compilation of CUDA code for only those arches that AdePT/Celeritas support
+      # Have to do this before enable_language else we can't override.
+      set( CMAKE_CUDA_ARCHITECTURES "75;80;86;89;90;100" CACHE STRING
+         "CUDA architectures to build code for" )
+      enable_language( CUDA )
+   endif()
+   # Use C++20 with CUDA.
+   set( CMAKE_CUDA_STANDARD 20 CACHE STRING "CUDA C++ standard to use" )
+   set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" )
+endif()
+
 # HepMC3
 set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
 
@@ -65,6 +83,11 @@ set( AthenaPoolUtilitiesTest_DIR
 set( xAODUtilities_DIR
    "${CMAKE_SOURCE_DIR}/../../Event/xAOD/xAODCore/cmake"
    CACHE PATH "Directory holding the xAODUtilities module" )
+
+# Set up where to find the AtlasGeant4Utilities CMake code.
+set( AtlasGeant4Utilities_DIR
+   "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake"
+   CACHE PATH "Directory holding the AtlasGeant4Utilities module" )
 
 # Make the local CMake files visible to AtlasCMake.
 list( INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake )

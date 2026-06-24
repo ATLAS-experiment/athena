@@ -135,6 +135,14 @@ StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 void G4AtlasAlg::initializeOnce()
 {
+  // Needed to ensure Geant4 knows it's in MT mode as we use a custom run manager
+  // Nominally the custom managers should do this, but was needed before for Celeritas integration
+  // We put it back in here for now in case
+  // TODO: Review if still needed!
+  G4Threading::SetMultithreadedApplication(m_useMT);
+  ATH_MSG_INFO("Multi-threading is " << (G4Threading::IsMultithreadedApplication() ? "enabled" : "disabled") 
+    << "WorkerThread" << G4Threading::IsWorkerThread());
+
   // Assign physics list
   if(m_physListSvc.retrieve().isFailure()) {
     throw std::runtime_error("Could not initialize ATLAS PhysicsListSvc!");
@@ -155,6 +163,9 @@ void G4AtlasAlg::initializeOnce()
 #ifdef G4MULTITHREADED
     auto* runMgr ATLAS_THREAD_SAFE = // protected by std::call_once above
       G4AtlasMTRunManager::GetG4AtlasMTRunManager();
+    ATH_MSG_INFO("Configuring G4AtlasMTRunManager with " << cardinality() << " threads");
+
+    runMgr->SetNumberOfThreads(cardinality());
     m_physListSvc->SetPhysicsList();
     runMgr->SetDetConstructionTool( m_detConstruction.get() );
     runMgr->SetPhysListSvc( m_physListSvc.typeAndName() );
