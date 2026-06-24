@@ -12,9 +12,8 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "xAODTruth/TruthVertex.h"
-
-#include "HepPDT/ParticleDataTable.hh"
 
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
@@ -53,8 +52,7 @@ int InDet::compute_overlap_SP_flag(const int& eta_module_cl1,const int& phi_modu
 //-------------------------------------------------------------------------
 InDet::DumpObjects::DumpObjects(const std::string &name, ISvcLocator *pSvcLocator)
     //-------------------------------------------------------------------------
-    : AthAlgorithm(name, pSvcLocator),
-      m_particlePropSvc("PartPropSvc", name) {
+    : AthAlgorithm(name, pSvcLocator) {
   declareProperty("Offset", m_offset);
   declareProperty("FileName", m_name = "");
   //
@@ -115,16 +113,6 @@ StatusCode InDet::DumpObjects::initialize() {
         detStore()->retrieve(m_SCT_Manager, "ITkStrip").isFailure()) {
       return StatusCode::FAILURE;
     }
-  }
-
-  // particle property service
-  ATH_CHECK (m_particlePropSvc.retrieve());
-
-  // and the particle data table
-  m_particleDataTable = m_particlePropSvc->PDT();
-  if (m_particleDataTable == 0) {
-    ATH_MSG_ERROR("Could not get ParticleDataTable! Cannot associate pdg code with charge. Aborting. ");
-    return StatusCode::FAILURE;
   }
 
   // Define the TTree
@@ -1478,16 +1466,7 @@ bool InDet::DumpObjects::isPassed(HepMC::ConstGenParticlePtr particle, float &px
   eta = particle->momentum().eta();
 
   int pdgCode = particle->pdg_id();
-
-  int absPdgCode = std::abs(pdgCode);
-  // get the charge: ap->charge() is used later, DOES NOT WORK RIGHT NOW
-  const HepPDT::ParticleData *ap = m_particleDataTable->particle(absPdgCode);
-  charge = 1.;
-  if (ap)
-    charge = ap->charge();
-  // since the PDT table only has abs(PID) values for the charge
-  charge *= (pdgCode > 0.) ? 1. : -1.;
-
+  charge = MC::charge(pdgCode);
   status = particle->status();
 
   if (particle->production_vertex()) {
