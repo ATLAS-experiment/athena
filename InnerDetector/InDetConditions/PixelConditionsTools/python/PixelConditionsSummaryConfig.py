@@ -25,9 +25,8 @@ def PixelConditionsSummaryCfg(flags, name="PixelConditionsSummary", **kwargs):
         acc.merge(SGInputLoaderCfg(flags, ["IDCInDetBSErrContainer#PixelByteStreamErrs"]))
 
     if flags.InDet.usePixelDCS:
-        pixel_states_active =  [ 'READY', 'ON' ]     # 'UNKNOWN', 'TRANSITION', 'UNDEFINED', 'DISABLED', 'LOCKED_OUT', 'OFF' states should be masked.
-        if flags.InDet.useHVActiveStates:
-            pixel_states_active =  [ 'READY', 'ON', 'UNDEFINED' ]     # 'UNKNOWN', 'TRANSITION', 'DISABLED', 'LOCKED_OUT', 'OFF' states should be masked.
+        # Allowing the pixel states bellow to reconstruct tracks
+        pixel_states_active =  [ 'READY', 'ON', 'UNDEFINED', 'UNKNOWN', 'TRANSITION' ]     # 23.06.2026 'DISABLED', 'LOCKED_OUT', 'OFF' states that should be masked.
 
         kwargs.setdefault("IsActiveStates", pixel_states_active)
         kwargs.setdefault("IsActiveStatus", [ 'OK', 'WARNING', 'ERROR', 'FATAL' ])
