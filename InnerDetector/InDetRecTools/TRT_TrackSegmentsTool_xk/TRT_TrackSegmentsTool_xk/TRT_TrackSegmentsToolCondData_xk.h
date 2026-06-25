@@ -14,8 +14,8 @@ namespace InDet{
     unsigned int                           m_nlayers[4] = {0}     ;
     unsigned int                           m_nstraws[4] = {0}      ;
     unsigned int                           m_flayers[4][30] = {{0}}  ;
-    unsigned int                           m_begin  [4][200] = {0} ;
-    unsigned int                           m_end    [4][200] = {0} ;
+    unsigned int                           m_begin  [4][200] = {{0}} ;
+    unsigned int                           m_end    [4][200] = {{0}} ;
     float                                  m_dzdr[26] = {0}        ;
     unsigned int*                          m_ndzdr = 0       ;
     int*                                   m_islope= 0       ;
