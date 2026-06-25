@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,12 +37,12 @@ StatusCode SCTSiLorentzAngleTestAlg::execute(const EventContext& ctx) const
   for (unsigned int hash{0}; hash<maxHash; hash++) {
     const IdentifierHash elementHash{hash};
     const double lorentzShift{m_tool->getLorentzShift(elementHash, ctx)};
-    const double lorentzShiftEta{m_tool->getLorentzShiftEta(elementHash)};
+    const double lorentzShiftEta{m_tool->getLorentzShiftEta(elementHash, ctx)};
     const double tanLorentzAngle{m_tool->getTanLorentzAngle(elementHash, ctx)};
-    const double tanLorentzAngleEta{m_tool->getTanLorentzAngleEta(elementHash)};
-    const double biasVoltage{m_tool->getBiasVoltage(elementHash)};
-    const double depletionVoltage{m_tool->getDepletionVoltage(elementHash)};
-    const double temperature{m_tool->getTemperature(elementHash)};
+    const double tanLorentzAngleEta{m_tool->getTanLorentzAngleEta(elementHash, ctx)};
+    const double biasVoltage{m_tool->getBiasVoltage(elementHash, ctx)};
+    const double depletionVoltage{m_tool->getDepletionVoltage(elementHash, ctx)};
+    const double temperature{m_tool->getTemperature(elementHash, ctx)};
     ATH_MSG_INFO("hash " << hash <<
                  " lorentzShift " << lorentzShift <<
                  " lorentzShiftEta " << lorentzShiftEta <<
