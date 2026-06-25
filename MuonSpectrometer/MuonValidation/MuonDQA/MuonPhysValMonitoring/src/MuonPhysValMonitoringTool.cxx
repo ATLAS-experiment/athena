@@ -1238,7 +1238,7 @@ namespace MuonPhysValMonitoring {
     }
 
     void MuonPhysValMonitoringTool::printMuonDebug(const xAOD::Muon* mu) {
-        const xAOD::TrackParticle* tp = mu->primaryTrackParticle();
+        const xAOD::TrackParticle* tp = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         static const SG::ConstAccessor<TruthLink> truthParticleLinkAcc("truthParticleLink");
         TruthLink truthLink;
         if (tp) {

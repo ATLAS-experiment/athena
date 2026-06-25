@@ -79,7 +79,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecis
       if( muonLinks.size() != 1 )        continue;
       if( ! muonLinks.at(0).isValid() )  continue;
       const xAOD::Muon *mu = *(muonLinks.at(0).link);
-      if( ! mu->primaryTrackParticle() ) continue;
+      if( ! mu->trackParticle(xAOD::Muon::TrackParticleType::Primary) ) continue;
 
       bool is_idperf_muon = false;
       ATH_MSG_VERBOSE("... selected: muonType="<<mu->muonType()<<", pT="<<mu->pt()/Gaudi::Units::GeV<<", eta="<<mu->eta()<<", phi="<<mu->phi()<<", author="<<mu->author());
@@ -298,7 +298,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::passedCBQualityCuts(const xAOD::Muon* muon) 
     
    if( idtrack && metrack ) {
       float qOverPsignif = TrigMuonEFIdtpCommon::qOverPMatching(metrack,idtrack);
-      float reducedChi2  = muon->primaryTrackParticle()->chiSquared()/muon->primaryTrackParticle()->numberDoF(); 
+      float reducedChi2  = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->chiSquared()/muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->numberDoF(); 
       // Selection criteria based on the requirements that are part of the muon quality working points (offline)
       if(std::abs(reducedChi2) < CHI2_CUT && !m_muonSelTool->isBadMuon(*muon) && qOverPsignif<QOVP_CUT && muon->author()==xAOD::Muon::Author::MuidCo) passCut = true;
    }
@@ -316,7 +316,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::passedSAQualityCuts(const xAOD::Muon* muon) 
    const float CHI2_CUT = 8.0;
 
    if( metrack ) {
-      float reducedChi2 = muon->primaryTrackParticle()->chiSquared()/muon->primaryTrackParticle()->numberDoF(); 
+      float reducedChi2 = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->chiSquared()/muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->numberDoF(); 
       if( std::abs(reducedChi2) < CHI2_CUT && !m_muonSelTool->isBadMuon(*muon) ) passCut = true;
    }
    

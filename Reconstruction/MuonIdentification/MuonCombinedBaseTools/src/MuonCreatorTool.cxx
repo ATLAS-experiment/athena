@@ -191,7 +191,7 @@ namespace MuonCombined {
         }
 
         const xAOD::TrackParticle* track = muon->trackParticle(TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
-        if (!track) track = muon->primaryTrackParticle();
+        if (!track) track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         std::unique_ptr<Trk::CaloExtension> caloExtension = m_caloExtTool->caloExtension(ctx, *track);
         if (m_requireCaloDepositForSA && !caloExtension) {
             ATH_MSG_DEBUG("failed to get a calo extension for this SA muon, discard it");
@@ -1186,7 +1186,7 @@ namespace MuonCombined {
     }
 
     bool MuonCreatorTool::dressMuon(xAOD::Muon& muon) const {
-        const xAOD::TrackParticle* primary = muon.primaryTrackParticle();
+        const xAOD::TrackParticle* primary = muon.trackParticle(xAOD::Muon::TrackParticleType::Primary);
         // update parameters with primary track particle
         setP4(muon, *primary);
         const float qOverP = primary->qOverP();
@@ -1350,7 +1350,7 @@ namespace MuonCombined {
 
     void MuonCreatorTool::collectCells(const EventContext& ctx, xAOD::Muon& muon, xAOD::CaloClusterContainer* clusterContainer,
                                        const Trk::CaloExtension* inputCaloExt) const {
-        const xAOD::TrackParticle* tp = muon.primaryTrackParticle();
+        const xAOD::TrackParticle* tp = muon.trackParticle(xAOD::Muon::TrackParticleType::Primary);
         if (!tp || !clusterContainer) {
             if (!tp) ATH_MSG_WARNING("Can not get primary track.");
             return;

@@ -77,8 +77,8 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
     }
   } else if (particle.type() == xAOD::Type::Muon) {
     const xAOD::Muon* muon = static_cast<const xAOD::Muon*>(&particle);
-    if (muon->primaryTrackParticle()) {
-      return caloExtension(ctx, *(muon->primaryTrackParticle()));
+    if (muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)) {
+      return caloExtension(ctx, *(muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)));
     }
   } else if (particle.type() == xAOD::Type::NeutralParticle) {
     const xAOD::NeutralParticle* neutralParticle = static_cast<const xAOD::NeutralParticle*>(&particle);

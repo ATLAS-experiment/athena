@@ -518,7 +518,7 @@ namespace CP {
             if (idtrack && metrack && metrack->definingParametersCovMatrix()(4, 4) > 0) {
                 const float qOverPsignif = qOverPsignificance(mu);
                 const float rho = rhoPrime(mu);
-                const float reducedChi2 = mu.primaryTrackParticle()->chiSquared() / mu.primaryTrackParticle()->numberDoF();
+                const float reducedChi2 = mu.trackParticle(xAOD::Muon::TrackParticleType::Primary)->chiSquared() / mu.trackParticle(xAOD::Muon::TrackParticleType::Primary)->numberDoF();
 
                 ATH_MSG_VERBOSE("Relevant cut variables:");
                 ATH_MSG_VERBOSE("number of precision layers = " << (int)summary.nprecisionLayers);
@@ -660,8 +660,8 @@ namespace CP {
         } else {
             if (mu.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle))
                 return passedIDCuts(*mu.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
-            else if (mu.primaryTrackParticle())
-                return passedIDCuts(*mu.primaryTrackParticle());
+            else if (mu.trackParticle(xAOD::Muon::TrackParticleType::Primary))
+                return passedIDCuts(*mu.trackParticle(xAOD::Muon::TrackParticleType::Primary));
         }
         return false;
     }
@@ -966,7 +966,7 @@ namespace CP {
             return false;
         }
         
-        const xAOD::TrackParticle* primary = mu.primaryTrackParticle();
+        const xAOD::TrackParticle* primary = mu.trackParticle(xAOD::Muon::TrackParticleType::Primary);
         const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
         const xAOD::TrackParticle* metrk = mu.trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
 
@@ -1429,13 +1429,13 @@ namespace CP {
             p2 = 0.000196466;
         }
 
-        double qOpRelResolution = std::hypot(p1, p2 * mu.primaryTrackParticle()->pt() * MeVtoGeV);
+        double qOpRelResolution = std::hypot(p1, p2 * mu.trackParticle(xAOD::Muon::TrackParticleType::Primary)->pt() * MeVtoGeV);
 
-        double qOverPabs_unsmeared = std::abs(mu.primaryTrackParticle()->definingParameters()[4]);
+        double qOverPabs_unsmeared = std::abs(mu.trackParticle(xAOD::Muon::TrackParticleType::Primary)->definingParameters()[4]);
         double qOverPabs_smeared = 1.0 / (mu.pt() * std::cosh(mu.eta()));
 
         if ((qOverPabs_smeared - qOverPabs_unsmeared) / (qOpRelResolution * qOverPabs_unsmeared) <
-            cutFunction->Eval(mu.primaryTrackParticle()->pt() * MeVtoGeV))
+            cutFunction->Eval(mu.trackParticle(xAOD::Muon::TrackParticleType::Primary)->pt() * MeVtoGeV))
             return false;
         else
             return true;
@@ -1883,7 +1883,7 @@ namespace CP {
         float mu_momentumBalanceSignificance=0.;
         retrieveParam(mu, mu_momentumBalanceSignificance, xAOD::Muon::ParamDef::momentumBalanceSignificance);
         float mu_qOverPSignificance=qOverPsignificance(mu);
-        float mu_reducedChi2=mu.primaryTrackParticle()->chiSquared() / mu.primaryTrackParticle()->numberDoF();
+        float mu_reducedChi2=mu.trackParticle(xAOD::Muon::TrackParticleType::Primary)->chiSquared() / mu.trackParticle(xAOD::Muon::TrackParticleType::Primary)->numberDoF();
         float mu_reducedChi2_ID=idtrack->chiSquared() / idtrack->numberDoF();
         float mu_reducedChi2_ME=metrack->chiSquared() / metrack->numberDoF();
         float mu_spectrometerFieldIntegral=0.;
