@@ -65,7 +65,7 @@ class TrackTimeDefAndQualityAlg : public AthReentrantAlgorithm {
 private:
   // different shift distances for bitfield definition
   const short m_recoed_ptrn_sft = 0;
-  //const short m_exp_ptrn_sft = 4;
+  const short m_exp_ptrn_sft = 4;
   const short m_comp_ptrn_sft = 8;
   const short m_holes_ptrn_sft = 12;
   const short m_primes_ptrn_sft = 16;
@@ -83,10 +83,12 @@ private:
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerKey{
       this, "TrackParticleContainerName", "InDetTrackParticles",
       "Name of the TrackParticle container"};
-
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_layerHasExtensionKey{
     this, "HGTD_has_extension", m_trackParticleContainerKey, "HGTD_has_extension",
       "deco with a handle for an extension"};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_holesHGTDKey{
+    this, "HGTD_holes", m_trackParticleContainerKey, "HGTD_holes",
+      "deco with a handle for HGTD holes"};
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTimeKey{
     this, "HGTD_cluster_time", m_trackParticleContainerKey, "HGTD_cluster_time",
       "deco with a handle for cluster time"};
@@ -107,8 +109,6 @@ private:
   m_summarypattern_dec_key{this, "HGTD_summaryinfo", m_trackParticleContainerKey,
                                "HGTD_summaryinfo",
                                "Bitfield for working point definition"};
-
-  Gaudi::Property<bool> m_doActs {this, "doActs", false};
   
   // TODO: the resolution is fixed to 0.035 ps, should add the resolution
   // calculation after the irradiation
@@ -142,6 +142,9 @@ private:
   FloatProperty m_default_time_res{
       this, "DefaultTimeRes", 50. / std::sqrt(12.),
       "Default time resolution used for tracks without HGTD timing info"};
+
+  BooleanProperty m_doActs{this, "doActs", false,
+      "Use ACTS track representation for last-hit extraction"};
 
   CleaningResult
   runTimeConsistencyCuts(const std::vector<float>& times,

@@ -39,6 +39,8 @@ struct ExtensionObject {
   // point of extrapolation on HGTD layer closest to IP
   float m_extrap_x = 0;
   float m_extrap_y = 0;
+  // holes on track in HGTD
+  std::vector<char> m_holes_hgtd = {0, 0, 0, 0};
 };
 
 } // namespace HGTD
