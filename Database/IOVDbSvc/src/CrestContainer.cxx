@@ -45,7 +45,8 @@ void Crest::CrestContainer::addColumn(const std::string &name, const std::string
       return;
     }
   }
-  throw CommonCrestException("The type of parameter is not defined.");	
+  std::string errStr="The type [" + type + "] of parameter [" + name + "] is not defined.";
+  throw CommonCrestException(errStr.c_str());	
 }
 
 void Crest::CrestContainer::addNullRecord(const std::string&name)
