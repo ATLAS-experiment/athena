@@ -150,6 +150,7 @@ class EventSelectionConfig(ConfigBlock):
             "GLOBALTRIGMATCH":     self.add_GLOBALTRIGMATCH,
             "RUN_NUMBER":          self.add_RUNNUMBER,
             "EXPR":                self.add_EXPR_selector,
+            "EVENTVAR":            self.add_EVENTVAR_selector,
         }
         for kw, (attr, tag) in self._NOBJECT.items():
             d[kw] = partial(self._add_nobject, attr=attr, tag=tag)
@@ -939,6 +940,29 @@ class EventSelectionConfig(ConfigBlock):
                 self.raise_missinginput("met")
             alg.met = config.readName(self.met)
             alg.metTerm = self.metTerm
+        alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    # EventInfo scalar (e.g. a DNN/BDT discriminant) -> threshold cut.
+    # The configurable stored type maps to the matching typed handle on the alg;
+    # the Python side populates exactly one of them.
+    _EVENTVAR_TYPES = {"float": "floatVariable", "int": "intVariable", "double": "doubleVariable"}
+
+    def add_EVENTVAR_selector(self, text, config):
+        # EVENTVAR <type> <varname> <sign> <threshold>
+        items = text.split()
+        self._check_args(items, "EVENTVAR", (5,))
+        valueType = self.check_string(items[1])
+        if valueType not in self._EVENTVAR_TYPES:
+            self.raise_misconfig(text, f"value type (one of {sorted(self._EVENTVAR_TYPES)})")
+        varname = self.check_string(items[2])
+        thisalg = f'{self.selectionName}_EVENTVAR_{self.step}'
+        alg = config.createAlgorithm('CP::EventScalarSelectorAlg', thisalg)
+        # the variable name is given bare; the systematics suffix is appended here
+        setattr(alg, self._EVENTVAR_TYPES[valueType], f'{varname}_%SYS%')
+        alg.sign = self.check_sign(items[3])
+        alg.refValue = self.check_float(items[4], requirePositive=False)  # discriminants may be negative
         alg.eventPreselection = self.checkDecorationName(self.currentDecoration)
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
