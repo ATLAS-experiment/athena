@@ -20,15 +20,16 @@
 #include <array>
 #include <map>
 #include <memory>
+#include <random>
 #include <string>
 #include <vector>
 // ROOT includes
 #include "TH1.h"
 #include "TH2.h"
 #include "TObjArray.h"
-#include "TRandom3.h"
 // Core includes
 #include "AsgMessaging/AsgMessaging.h"
+#include "CxxUtils/FastReseededPRNG.h"
 #include "PATCore/PATCoreEnums.h"
 
 namespace Root {
@@ -201,7 +202,7 @@ private:
     std::vector<std::vector<HistEdge>> m_fastHistEdges;
     std::vector<std::vector<HistArray>> m_fastSysList;
     // The Random generator class
-    TRandom3 m_Rndm;
+    FastReseededPRNG m_Rndm;
   };  // End: class definition
 } // End: namespace Root
 

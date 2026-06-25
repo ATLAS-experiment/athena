@@ -22,7 +22,7 @@
 #include "TH2.h"
 #include "TList.h"
 #include "TSystem.h"
-#include "TRandom3.h"
+#include "CxxUtils/FastReseededPRNG.h"
 #include "egammaUtils/eg_resolution.h"
 
 #include <format>
@@ -31,6 +31,7 @@
 #include <iomanip>
 #include <ios>
 #include <iostream>
+#include <random>
 #include <utility>
 #include <type_traits> //std::is_pointer
 #include <cmath> //hypot
@@ -3065,13 +3066,13 @@ double egammaEnergyCorrectionTool::getSmearingCorrection(
 
   const double sigma = sqrt(sigma2);
 
-  TRandom3 rng(seed);
+  FastReseededPRNG rng(seed);
 
-  const double DeltaE0 = rng.Gaus(0, sigma);
+  const double DeltaE0 = std::normal_distribution<double>{ 0, sigma }(rng);
   const double cor0 = (energyGeV + DeltaE0) / energyGeV;
 
   ATH_MSG_DEBUG("sigma|DeltaE0|cor0|seed = " << sigma << "|" << DeltaE0 << "|"
-                                             << cor0 << "|" << rng.GetSeed());
+                                             << cor0 << "|" << seed);
 
   return cor0;  // TODO: why not returning DeltaE0 and apply E -> E + DeltaE0 ?
 }

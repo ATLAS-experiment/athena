@@ -5,8 +5,9 @@
 #include <MuonEfficiencyCorrections/EfficiencyScaleFactor.h>
 #include <MuonEfficiencyCorrections/MuonEfficiencyScaleFactors.h>
 #include <MuonEfficiencyCorrections/EffiCollection.h>
-#include <TRandom3.h>
+#include <CxxUtils/FastReseededPRNG.h>
 #include <TClass.h>
+#include <random>
 namespace CP {
     const unsigned int EfficiencyScaleFactor::m_warningLimit = 10;
     EfficiencyScaleFactor::EfficiencyScaleFactor(std::shared_ptr<EfficiencyScaleFactor> nominal,
@@ -455,7 +456,7 @@ namespace CP {
     }
     void EfficiencyScaleFactor::GenerateReplicasFromHist(HistHandler* h, int nrep, int seed, EfficiencyScaleFactor::SFReplicaVec &replicas) {
         if (!h) return;
-        TRandom3 Rndm(seed);
+        FastReseededPRNG Rndm(seed);
         replicas.clear();
         replicas.reserve(nrep);
         int nBins = h->nBins();
@@ -463,7 +464,7 @@ namespace CP {
             replicas.push_back(package_histo(this, h->GetHist()));
             HistHandler* replica = replicas.back().get();
             for (int bin = 0; bin < nBins; bin++) {
-                replica->SetBinContent(bin, Rndm.Gaus(h->GetBinContent(bin), h->GetBinError(bin)));
+                replica->SetBinContent(bin, std::normal_distribution<double>{h->GetBinContent(bin), h->GetBinError(bin)}(Rndm));
             }            
         }
     }

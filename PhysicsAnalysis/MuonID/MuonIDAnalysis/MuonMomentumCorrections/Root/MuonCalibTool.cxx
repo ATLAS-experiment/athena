@@ -9,7 +9,8 @@
 
 // Local include(s):
 #include <cmath>
-#include "TRandom3.h"
+#include <random>
+#include "CxxUtils/FastReseededPRNG.h"
 
 #include "MuonMomentumCorrections/MuonCalibTool.h"
 
@@ -525,22 +526,21 @@ namespace CP
     void MuonCalibTool::initializeRandNumbers(MCP::MuonObj& muonObj, columnar::EventInfoId evtInfo) const
     {
         auto& acc = *m_acc;
-        // Random number generation for smearing
-        TRandom3 loc_random3;
         // Get Event Number, Retrieve the event information:
         unsigned long long eventNumber = 0;
         if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();
         else eventNumber = evtInfo(acc.eventNumberAcc);
         // Construct a seed for the random number generator:
         const UInt_t seed = 1 + std::abs(muonObj.CB.phi) * 1E6 + std::abs(muonObj.CB.eta) * 1E3 + eventNumber;
-        loc_random3.SetSeed(seed);
+        // Random number generation for smearing
+        FastReseededPRNG loc_random3(seed);
 
-        muonObj.rnd_g0 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g1 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g2 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g3 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g4 = loc_random3.Gaus(0, 1);
-        muonObj.rnd_g_highPt = loc_random3.Gaus(0, 1);
+        muonObj.rnd_g0 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g1 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g2 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g3 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g4 = std::normal_distribution<double>{0, 1}(loc_random3);
+        muonObj.rnd_g_highPt = std::normal_distribution<double>{0, 1}(loc_random3);
 
 
     }
