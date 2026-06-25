@@ -624,7 +624,7 @@ class MessageCountStep(Step):
     def __init__(self, name='MessageCount'):
         super(MessageCountStep, self).__init__(name)
         self.executable = 'messageCounter.py'
-        self.log_regex = r'(athena\.(?!.*tail).*log$|athenaHLT:.*\.out$|athenaEF\.log$|^log\.(.*to.*|Derivation))'
+        self.log_regex = r'(athena\.(?!.*tail).*log$|athenaHLT:.*\.out$|athenaEF\..*log$|^log\.(.*to.*|Derivation))'
         self.skip_logs = []
         self.start_pattern = r'(HltEventLoopMgr|AthenaHiveEventLoopMgr).*INFO Starting loop on events'
         self.end_pattern = r'(HltEventLoopMgr.*INFO All events processed|AthenaHiveEventLoopMgr.*INFO.*Loop Finished)'
