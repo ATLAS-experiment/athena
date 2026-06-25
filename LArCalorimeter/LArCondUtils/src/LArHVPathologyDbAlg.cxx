@@ -25,7 +25,6 @@
 #include "LArHV/HECHVSubgap.h"
 #include "LArReadoutGeometry/FCALTile.h"
 #include "LArHV/FCALHVLine.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include <fstream>
 #include <cstdlib>

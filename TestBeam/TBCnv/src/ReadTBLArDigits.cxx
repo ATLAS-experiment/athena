@@ -8,7 +8,6 @@
 #include "GaudiKernel/IToolSvc.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 ReadTBLArDigits::SortDigits::SortDigits(const LArOnlineID* onlineHelper)
 {

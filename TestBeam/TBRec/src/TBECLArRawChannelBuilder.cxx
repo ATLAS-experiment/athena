@@ -16,7 +16,6 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "AthenaKernel/Units.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include <math.h>
 

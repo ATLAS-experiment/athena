@@ -17,7 +17,6 @@
 #include "AthenaKernel/errorcheck.h"
 #include "TestTools/random.h"
 #include "CLHEP/Units/SystemOfUnits.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
