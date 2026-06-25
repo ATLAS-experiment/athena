@@ -7,6 +7,7 @@
 // @date 24 February 2025
 
 #include "CoralCrestManager.h"
+#include <memory>
 #include "CrestApi/CrestApi.h"
 #include "CrestApi/CrestApiFs.h"
 #include "CoralBase/AttributeList.h"
@@ -52,18 +53,18 @@ namespace{
       m_crestCl = std::make_unique<Crest::CrestApi>(Crest::CrestApi(crest_path));
     }
     else{
-      m_crestCl = std::make_unique<Crest::CrestApiFs>(Crest::CrestApiFs(true,crest_path));
+      m_crestCl = std::make_unique<Crest::CrestApiFs>(Crest::CrestApiFs(false,crest_path));
     }
 
   }
 
   std::map<std::string, std::string> CoralCrestManager::getGlobalTagMap(const std::string & crest_path, const std::string& globaltag){
-    Crest::CrestApiBase* crestCl=NULL;
+    std::unique_ptr<Crest::CrestApiBase> crestCl;
     if (crest_path.starts_with(CoralCrestManager::prefix1) || crest_path.starts_with(CoralCrestManager::prefix2)){
-      crestCl = new Crest::CrestApi(crest_path);
+      crestCl.reset(new Crest::CrestApi(crest_path));
     }
     else{
-      crestCl = new Crest::CrestApiFs(true,crest_path);
+      crestCl.reset(new Crest::CrestApiFs(true,crest_path));
     }
     std::map<std::string, std::string> tagmap;
     try{
@@ -74,10 +75,6 @@ namespace{
     } catch (std::exception & e){
       MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
       gLog << MSG::ERROR << __FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a global tag map for " << globaltag<<endmsg;
-    }
-    if(crestCl!=NULL){
-      delete crestCl;
-      crestCl=NULL;
     }
     return tagmap;
   }

@@ -318,9 +318,9 @@ private:
   IOVDbNamespace::IovStore m_iovs;
   const bool m_outputToFile{false};
   const bool m_crestCoolToFile{false};
-  const std::string m_source;
-  const std::string m_crestServer;
-  const std::string m_crestTag;
+  std::string m_source;
+  std::string m_crestServer;
+  std::string m_crestTag;
 
   std::optional<CoralCrestManager> m_crest_mng;
 };
