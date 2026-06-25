@@ -10,10 +10,6 @@
 
 #include "PathResolver/PathResolver.h"
 
-// Library include(s)
-#include <fmt/format.h>
-#include <fmt/ranges.h>
-
 // Standard include(s)
 #include <ranges>
 #include <utility>  //std::pair
@@ -118,7 +114,7 @@ StatusCode ExampleMLInferenceWithTriton::execute(
                        outputScores.begin() + (img_idx + 1) * n_scores);
       ATH_MSG_DEBUG("Scores for img " << img_idx << " of batch " << batch_idx
                                       << ": "
-                                      << fmt::format("{::.2e}", scores));
+                                      << EvaluateUtils::spanToString(scores));
       const auto max_elem = std::ranges::max_element(scores);
       ATH_MSG_DEBUG("Class: " << max_elem - scores.begin()
                               << " has the highest score: " << *max_elem
