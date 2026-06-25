@@ -36,7 +36,7 @@ StatusCode MuonMatchingTool :: initialize(){
 
 
 const Amg::Vector3D MuonMatchingTool :: offlineMuonAtPivot(const EventContext& ctx, const xAOD::Muon* mu) const{
-  const xAOD::TrackParticle* track = mu->primaryTrackParticle();
+  const xAOD::TrackParticle* track = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
   std::unique_ptr<const Trk::TrackParameters> extPars(extTrackToPivot(ctx, track));
   return extPars ? extPars->position() : Amg::Vector3D(0.,0.,0.);
 }

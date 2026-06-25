@@ -854,7 +854,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
         if(m_useOnlyMuidCoStacoMuons && (muon->author()!=xAOD::Muon::Author::MuidCo && muon->author()!=xAOD::Muon::Author::STACO)) continue;
         if(!m_PrimaryVertexContainerKey.empty()){
           if(primVertex==nullptr)continue;
-          auto trackParticle = muon->primaryTrackParticle();
+          auto trackParticle = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
           if(trackParticle!=nullptr){
             dz = trackParticle->z0() - primVertex->z();
             dca = trackParticle->d0();
@@ -992,7 +992,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
           }else if(m_useExtMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
           }else if(m_useMSOnlyExtMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::MSOnlyExtrapolatedMuonSpectrometerTrackParticle;
           }else{ trkPtclType = xAOD::Muon::TrackParticleType::Primary; } // default is Primary (i.e. same as muonType )
-          auto trackParticle = (m_useDirectPrimaryTrackForExtrapolation) ? muon->primaryTrackParticle() : muon->trackParticle( trkPtclType );
+          auto trackParticle = (m_useDirectPrimaryTrackForExtrapolation) ? muon->trackParticle(xAOD::Muon::TrackParticleType::Primary) : muon->trackParticle( trkPtclType );
           if(trackParticle==nullptr)continue;
           auto matrix = std::make_unique<Amg::Transform3D>();
           matrix->setIdentity();

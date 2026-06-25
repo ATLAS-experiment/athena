@@ -17,7 +17,7 @@ namespace MuonVal{
         if (p->type() == xAOD::Type::ObjectType::TrackParticle) {
             trk = static_cast<const xAOD::TrackParticle*>(p);    
         } else if (p->type() == xAOD::Type::ObjectType::Muon) {
-            trk = static_cast<const xAOD::Muon*>(p)->primaryTrackParticle();
+            trk = static_cast<const xAOD::Muon*>(p)->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         } else {
             THROW_EXCEPTION("No track particle object has been given to " <<name());
         }

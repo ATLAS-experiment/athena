@@ -79,7 +79,7 @@ namespace JiveXML {
 
       ATH_MSG_DEBUG("  Muon #" << counter++ << " : eta = "  << (*muItr)->eta()
 		    << ", phi = "  << (*muItr)->phi() << ", pt = " <<  (*muItr)->pt()
-		    << ", pdgId = " << -13.*(*muItr)->primaryTrackParticle()->charge());
+		    << ", pdgId = " << -13.*(*muItr)->trackParticle(xAOD::Muon::TrackParticleType::Primary)->charge());
 
       phi.emplace_back(DataType((*muItr)->phi()));
       eta.emplace_back(DataType((*muItr)->eta()));
@@ -88,7 +88,7 @@ namespace JiveXML {
       mass.emplace_back(DataType((*muItr)->m()/GeV));
       energy.emplace_back( DataType((*muItr)->e()/GeV ) );
       chi2.emplace_back( 1.0 ); //placeholder
-      pdgId.emplace_back(DataType( -13.*(*muItr)->primaryTrackParticle()->charge() )); // pdgId not available anymore in xAOD
+      pdgId.emplace_back(DataType( -13.*(*muItr)->trackParticle(xAOD::Muon::TrackParticleType::Primary)->charge() )); // pdgId not available anymore in xAOD
     } // end MuonIterator
 
     // four-vectors

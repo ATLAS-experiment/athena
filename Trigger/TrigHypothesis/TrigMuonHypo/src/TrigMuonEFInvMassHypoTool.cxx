@@ -56,7 +56,7 @@ bool TrigMuonEFInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>
     for(size_t i=0; i<muonLinks.size(); i++){
       if(muonLinks.at(i).isValid()){ 
         const xAOD::Muon *mu = *(muonLinks.at(i).link);
-        if(mu->primaryTrackParticle()) selected_muons.push_back(mu);
+        if(mu->trackParticle(xAOD::Muon::TrackParticleType::Primary)) selected_muons.push_back(mu);
       }
     }
   }

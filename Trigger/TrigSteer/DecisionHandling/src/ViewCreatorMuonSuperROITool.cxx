@@ -67,7 +67,7 @@ StatusCode ViewCreatorMuonSuperROITool::attachROILinks( TrigCompositeUtils::Deci
    const ElementLink<xAOD::IParticleContainer> p4EL = myFeature.at(0).link;
    const xAOD::Muon* muon = dynamic_cast< const xAOD::Muon*>(*p4EL); //get muon of this found object
 
-   if (!( muon && muon->primaryTrackParticle()) ) {
+   if (!( muon && muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)) ) {
      ATH_MSG_ERROR("NO PRIMARY  muon  from decision object! " << myFeature.at(0).link);
      return StatusCode::FAILURE;
    }
@@ -93,8 +93,8 @@ StatusCode ViewCreatorMuonSuperROITool::attachROILinks( TrigCompositeUtils::Deci
 
    std::unique_ptr<TrigRoiDescriptor> newROI = nullptr;
 
-   if ( muon->primaryTrackParticle() ) {
-      muonZed = muon->primaryTrackParticle()->z0() + muon->primaryTrackParticle()->vz();
+   if ( muon->trackParticle(xAOD::Muon::TrackParticleType::Primary) ) {
+      muonZed = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->z0() + muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->vz();
 	   
       // create ROIs
       ATH_MSG_DEBUG("Adding RoI to RoI container");

@@ -89,7 +89,7 @@ namespace CP
                         if (el) {
                             const xAOD::TrackParticle* electron_track = el->trackParticle();
                             const xAOD::TrackParticle* elOrig_track = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
-                            const xAOD::TrackParticle* muon_track = mu->primaryTrackParticle();
+                            const xAOD::TrackParticle* muon_track = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 
                             if (electron_track && muon_track) {
                                 elmutrackmatchOK =

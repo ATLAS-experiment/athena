@@ -174,7 +174,7 @@ StatusCode TrigMuonEFInfoCnvTestAlg::comparePrimaryTracks(const TrigMuonEFInfoTr
   if( infotrk->hasCombinedTrack() ) {
     primtrk = infotrk->CombinedTrack();
   }
-  ATH_CHECK(compareTracks(primtrk, muon->primaryTrackParticle()));
+  ATH_CHECK(compareTracks(primtrk, muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)));
 
   ATH_MSG_DEBUG("Passed check on primary track");
 

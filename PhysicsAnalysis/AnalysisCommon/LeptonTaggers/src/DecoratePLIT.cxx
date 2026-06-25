@@ -262,7 +262,7 @@ namespace Prompt {
     gnn_input.insert({"jet_features", muon_info});
 
     // decorate and fill track particles around the muon
-    const xAOD::TrackParticle *muonTrack = muon.primaryTrackParticle();
+    const xAOD::TrackParticle *muonTrack = muon.trackParticle(xAOD::Muon::TrackParticleType::Primary);
     std::vector<const xAOD::IParticle *> parts;
 
     if(!fillParticles(dec_trk_dr_lepton, dec_trk_dr_leptontrack, dec_trk_electron_track, dec_trk_muon_track,
