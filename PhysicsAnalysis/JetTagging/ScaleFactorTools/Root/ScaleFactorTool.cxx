@@ -81,12 +81,21 @@ StatusCode ScaleFactorTool::initialize(){
 
 std::map<CP::SystematicSet, float> ScaleFactorTool::getSF(const xAOD::IParticle* p) const
 {
+  std::map<CP::SystematicSet, float> result;
+
   const SG::AuxElement& el = *p;
   int sf_bin = m_sf_func(el);
+
+  if (sf_bin < 0) {
+    result[CP::SystematicSet()] = -99999.;
+    for (const auto& [set, _] : m_sf_systematics) {
+      result[set] = -99999.;
+    }
+    return result;
+  }
+
   int pct_bin = m_pct_func(el);
   int global = sf_bin * m_n_pct_bins + pct_bin;
-
-  std::map<CP::SystematicSet, float> result;
 
   result[CP::SystematicSet()] = m_sf_values.at(global);
 

@@ -33,7 +33,6 @@ std::vector<float> QuantileFactory::parseEdges(const json& cfg){
   }
 
   return edges;
-
 }
 
 QuantileFactory::QuantileFunc QuantileFactory::makeCategory(const json& cfg) {
@@ -63,27 +62,35 @@ QuantileFactory::QuantileFunc QuantileFactory::makeEnumerate(const json& cfg) {
 
   const bool useAbs = cfg.value("abs", false);
 
-  return [var, edges, useAbs] (const SG::AuxElement& el) -> int {
+  bool hasRangeHandling = cfg.contains("validRange");
+  float minRange = 0.0;
+  float maxRange = 0.0;
+  std::string mode;
+  if (hasRangeHandling) {
+    const auto& r = cfg.at("validRange");
+    minRange = r[0];
+    maxRange = r[1];
+    mode = cfg.at("OutOfRangeTreatment");
+  }
+
+  return [var, edges, useAbs, mode, hasRangeHandling, minRange, maxRange] (const SG::AuxElement& el) -> int {
     float v = var(el);
     if (useAbs)  v = std::abs(v);
+    int nBins = edges.size() - 1;
 
-    // TODO: need to decide what to do here for out-of-range jets
-    if (v < edges.front()) {
-      throw std::runtime_error("enumerate: value below minimum edge");
-    }
-    if (v >= edges.back()) {
-      throw std::runtime_error("enumerate: value above maximum edge");
-    }
-
-    int bin = -1;
-    for (int i = 0; i < (int)edges.size() - 1; ++i) {
-      if (v >= edges[i] && v < edges[i+1]) {
-        bin = i;
-        break;
+    if ( !hasRangeHandling || (v >= minRange && v < maxRange) )  {
+      for (int i = 0; i < nBins; ++i) {
+        if (v >= edges[i] && v < edges[i+1]) {
+          return i;
+        }
+      }
+    } else {
+      if (mode == "neighboring") {
+        if (v < edges[0])  return 0;
+        if (v >= edges[nBins])  return nBins - 1;
       }
     }
-
-    return bin;
+    return -1;
   };
 }
 
@@ -173,6 +180,7 @@ QuantileFactory::QuantileFunc QuantileFactory::makeDense (const json& cfg) {
 
     for (size_t i = 0; i < axes.size(); ++i) {
       int bin = axes[i](el);
+      if (bin < 0) {return -1;}
       index += bin * strides[i];
     }
 

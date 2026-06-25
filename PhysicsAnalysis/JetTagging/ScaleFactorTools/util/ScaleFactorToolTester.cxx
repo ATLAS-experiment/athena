@@ -50,7 +50,6 @@ int main(int argc, char* argv[]) {
 
   CP::SystematicSet sysSet;
   sysSet = sf_tool->recommendedSystematics();
-  ANA_MSG_INFO("Recommended systematics: " << sysSet.name());
 
   TEVENT event(TEVENT::kClassAccess);
   gErrorIgnoreLevel = kError;
