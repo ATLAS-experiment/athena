@@ -70,9 +70,9 @@ class TBXMLCaloCellWriterTool : public TBXMLWriterToolBase
   std::vector<CaloSampling::CaloSample> m_caloSamplings;
   std::string                           m_cellContainer;
 
-  const CaloCell_ID*                    m_idHelper; 
+  const CaloCell_ID*                    m_idHelper{};
 
-  const TBXMLWriter*                    m_mother;
+  const TBXMLWriter*                    m_mother{};
 
   std::unordered_set<EventIDBase::number_type> m_runNumbers;
 
