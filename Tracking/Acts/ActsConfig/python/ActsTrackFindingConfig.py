@@ -500,7 +500,7 @@ def ActsTrackToTrackParticleCnvToolCfg(flags,
     kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     kwargs.setdefault('FirstAndLastParameterOnly',True)
     kwargs.setdefault('ComputeExpectedLayerPattern',True)
-
+    kwargs.setdefault('HgtdDecorationLevel', 0 if not flags.Acts.useHGTDClusterInTrackFinding else 1 if not flags.PhysVal.IDPVM.doExpertOutput else 200 )
 
     acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
     return acc
