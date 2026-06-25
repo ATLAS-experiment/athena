@@ -40,6 +40,10 @@ option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" @ATLAS_USE_CPPCHECK@ )
 set( ATLAS_GEANT4_USE_LTO @ATLAS_GEANT4_USE_LTO@ CACHE BOOL
    "Use link-time-optimization in building AtlasGeant4" )
 
+# Look for optional languages.
+include( CheckLanguage )
+check_language( CUDA )
+
 # Figure out whether to use QUIET in the following calls.
 set( _quietFlag )
 if( Athena_FIND_QUIETLY )
@@ -55,7 +59,13 @@ find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
 # Due to the way CMake handles propagation of targets to dependees,
 # any "external" that is used through imported targets in the build need
 # to be imported explicitly here.
-find_package( Acts ${_quietFlag} COMPONENTS Core )
+if( CMAKE_CUDA_COMPILER )
+   find_package( CUDAToolkit ${_quietFlag} )
+endif()
+find_package( Acts ${_quietFlag} )
+if( TARGET Acts::PluginDetray )
+   find_package( traccc ${_quietFlag} )
+endif()
 find_package( nlohmann_json ${_quietFlag} )
 find_package( Qt5 ${_quietFlag} COMPONENTS Core OpenGL Gui PrintSupport Widgets
    Sql Network )
