@@ -43,6 +43,16 @@ def TrackTimeExtensionCfg(flags, name = "TrackTimeExtensionAlg", **kwargs):
     acc.addEventAlgo(CompFactory.HGTD.TrackTimeExtensionAlg(name, **kwargs))
     return acc
 
+def TimeCompatibilityCheckCfg(flags, name = "TimeCompatibilityCheckAlg", **kwargs):
+    """Schedules a timing check in  HGTD """
+    acc = ComponentAccumulator()
+    
+    kwargs.setdefault("ITkHoles", acc.popToolsAndMerge(HGTD_IterativeExtensionToolCfg(flags)))
+    kwargs.setdefault("Chi2Threshold", 1.5)
+    kwargs.setdefault("DeltaTCut", 2.0)
+    acc.addEventAlgo(CompFactory.HGTD.TimeCompatibilityCheckAlg(name, **kwargs))
+    return acc
+
 def TrackTimeDefAndQualityAlgCfg(flags, name = "TrackTimeDefAndQualityAlg", **kwargs):
     """Schedules an extension algorithm from ITk to HGTD """
     acc = ComponentAccumulator()

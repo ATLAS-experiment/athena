@@ -5,6 +5,7 @@
  *
  * @author Noemi Calace <noemi.calace@cern.ch>
  * @author Alexander Leopold <alexander.leopold@cern.ch>
+ * @author Valentina Raskina <Valentina.raskina@cern.ch>
  *
  * @date August, 2021
  *
@@ -25,6 +26,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "HGTD_RecToolInterfaces/IHGTD_TrackTimeExtensionTool.h"
+#include "HGTD_RecToolInterfaces/IHGTD_HolesITkTool.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "HGTD_PrepRawData/HGTD_ClusterContainer.h"
@@ -40,7 +42,7 @@ class HGTD_ID;
 class HGTD_DetectorManager;
 
 class HGTD_IterativeExtensionTool
-    : public extends<AthAlgTool, IHGTD_TrackTimeExtensionTool> {
+    : public extends<AthAlgTool, IHGTD_TrackTimeExtensionTool, IHGTD_HolesITkTool> {
 
 public:
   HGTD_IterativeExtensionTool(const std::string&, const std::string&,
@@ -64,6 +66,10 @@ public:
       const HepMC::GenEvent* hs_event = nullptr,
       const InDetSimDataCollection* sim_data = nullptr) const override final;
 
+  virtual std::vector<std::unique_ptr<Trk::TrackParameters> > getHolesITk(
+      const EventContext& ctx, const xAOD::TrackParticle& track_ptkl) const override final;
+ 
+ 
 private:
   /**
    * @brief  Retrieve the last hit on track stored in the Trk::Track.
@@ -118,7 +124,7 @@ private:
   updateStateWithBestFittingCluster(
       const Trk::Track* track,
       const std::vector<std::unique_ptr<const Trk::TrackParameters>>& params,
-      const HGTD_ClusterContainer* container) const;
+      const HGTD_ClusterContainer* container, bool &on_surface) const;
 
   /**
    * @brief Find the cluster on a given surface that has the best chi2 passing
@@ -144,6 +150,9 @@ private:
                          const xAOD::TruthParticle* truth_ptkl,
                          const HepMC::GenEvent* hs_event,
                          const InDetSimDataCollection* sim_data) const;
+  const Trk::Surface*
+  getFirstHGTDlayer(const xAOD::TrackParticle& track_ptkl) const;
+  bool isOnHGTDSurface(const std::unique_ptr<const Trk::TrackParameters>& last_param) const;
 
   // extrapolation tool
   ToolHandle<Trk::IExtrapolator> m_extrapolator{
@@ -178,6 +187,13 @@ private:
   IntegerProperty m_particle_hypot{
       this, "ParticleHypothesis", Trk::ParticleHypothesis::pion,
       "The hypothesis of the track's particle type"};
+
+  IntegerProperty m_phitol_ITk{
+      this, "ToleranceLevelITk", 3,
+      "The tolerance level in phi for an extrapolation to be a hole on track in ITk"};
+  IntegerProperty m_etatol_ITk{
+      this, "ToleranceLevelITk", 3,
+      "The tolerance level in eta for an extrapolation to be a hole on track in ITk"};
 };
 
 #endif // HGTD_ITERATIVEEXTENTSIONTOOL_H
