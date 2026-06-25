@@ -43,8 +43,8 @@ StatusCode ScaleFactorTool::initialize(){
   // =====================
   m_sf_values = m_json_config.at("scale_factors").get<std::vector<float>>();
 
-  m_sf_func   = ToolUtils::quantileFactory(m_json_config.at("sf_bins"));
-  m_pct_func = ToolUtils::quantileFactory(m_json_config.at("pct_bins"));
+  m_sf_func   = QuantileFactory::quantileFactory(m_json_config.at("sf_bins"));
+  m_pct_func = QuantileFactory::quantileFactory(m_json_config.at("pct_bins"));
   m_n_pct_bins = inferPCTBins(m_json_config.at("pct_bins"));
 
   for (const auto& [name, wp_cfg] : m_json_config.at("working_points").items()) {

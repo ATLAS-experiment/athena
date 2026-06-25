@@ -15,6 +15,8 @@ class QuantileFactory {
   using QuantileFunc = std::function<int(const SG::AuxElement&)>;
   static QuantileFunc quantileFactory(const json& cfg);
 
+  static std::vector<float> parseEdges(const json& cfg);
+
   private:
   static QuantileFunc makeCategory(const json& cfg);
   static QuantileFunc makeEnumerate(const json& cfg);

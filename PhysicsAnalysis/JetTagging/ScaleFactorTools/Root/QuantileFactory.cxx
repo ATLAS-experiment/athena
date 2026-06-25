@@ -6,6 +6,36 @@
 #include "PathResolver/PathResolver.h"
 #include <iostream>
 
+std::vector<float> QuantileFactory::parseEdges(const json& cfg){
+  std::vector<float> edges;
+  edges.reserve(cfg.size());
+
+  for (const auto& val : cfg) {
+    if (val.is_number()) {
+      edges.push_back(val.get<float>());
+    }
+    else if (val.is_string()) {
+      const std::string s = val.get<std::string>();
+
+      if (s == "inf" || s == "+inf") {
+        edges.push_back(std::numeric_limits<float>::infinity());
+      }
+      else if (s == "-inf") {
+        edges.push_back(-std::numeric_limits<float>::infinity());
+      }
+      else {
+        throw std::runtime_error("Invalid edge value: " + s);
+      }
+    }
+    else {
+      throw std::runtime_error("Edge must be number or string");
+    }
+  }
+
+  return edges;
+
+}
+
 QuantileFactory::QuantileFunc QuantileFactory::makeCategory(const json& cfg) {
   VariableFactory::IntFunc var = VariableFactory::intVariableFactory(cfg.at("variable"));
   std::vector<int> values = cfg.at("values").get<std::vector<int>>();
@@ -29,7 +59,7 @@ QuantileFactory::QuantileFunc QuantileFactory::makeCategory(const json& cfg) {
 
 QuantileFactory::QuantileFunc QuantileFactory::makeEnumerate(const json& cfg) {
   VariableFactory::FloatFunc var = VariableFactory::floatVariableFactory(cfg.at("variable"));
-  std::vector<float> edges = cfg.at("edges").get<std::vector<float>>();
+  std::vector<float> edges = QuantileFactory::parseEdges(cfg.at("edges"));
 
   const bool useAbs = cfg.value("abs", false);
 
@@ -60,7 +90,7 @@ QuantileFactory::QuantileFunc QuantileFactory::makeEnumerate(const json& cfg) {
 // for 2-d tagging
 QuantileFactory::QuantileFunc QuantileFactory::makeNodes(const json& cfg) {
   VariableFactory::FloatFunc var = VariableFactory::floatVariableFactory(cfg.at("variable"));
-  std::vector<float> edges = cfg.at("edges");
+  std::vector<float> edges = QuantileFactory::parseEdges(cfg.at("edges"));
 
   std::vector<QuantileFactory::QuantileFunc> sub_nodes;
   for (const auto& node : cfg.at("nodes")) {
