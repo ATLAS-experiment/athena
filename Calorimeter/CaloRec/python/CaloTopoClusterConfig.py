@@ -15,7 +15,7 @@ def CaloCalibHitDecoratorTool(flags, name="CaloCalibClusterDecoratorTool", **kwa
 
     kwargs.setdefault(
         "CaloClusterWriteDecorHandleKey_NLeadingTruthParticles",
-        "CaloTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Visible"
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Visible"
     )
 
 
@@ -23,21 +23,18 @@ def CaloCalibHitDecoratorTool(flags, name="CaloCalibClusterDecoratorTool", **kwa
     truth_tool = TruthAttributerTool("CaloCalibClusterTruthAttributerTool")
     DecoratorTool = CompFactory.CaloCalibClusterDecoratorTool
     decoratorTool = DecoratorTool(name,TruthAttributerTool=truth_tool,**kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
-    decoratorTool.useCellWeights = True
     return decoratorTool
 
 def CaloCalibHitDecoratorFullEnergyTool(flags, name="CaloCalibClusterDecoratorTool_Full", **kwargs):
 
     kwargs.setdefault(
         "CaloClusterWriteDecorHandleKey_NLeadingTruthParticles",
-        "CaloTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Full"
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Full"
     )
     TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool
     truth_tool = TruthAttributerTool("CaloCalibClusterTruthAttributerTool")
     DecoratorTool = CompFactory.CaloCalibClusterDecoratorTool
     decoratorTool = DecoratorTool(name, TruthAttributerTool=truth_tool, **kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
-    decoratorTool.useCellWeights = True
-    decoratorTool.StoreFullTruthEnergy = True
 
     return decoratorTool
 
@@ -46,11 +43,11 @@ def CaloCalibHitDecoratorToolOOC(flags, name="CaloCalibClusterDecoratorToolOOC",
 
     kwargs.setdefault(
         "CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesL",
-        "CaloTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_L",
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_L",
     )
     kwargs.setdefault(
         "CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesT",
-        "CaloTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_T",
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_T",
     )
 
     DecoratorTool = CompFactory.CaloCalibClusterDecoratorToolOOC
@@ -61,6 +58,34 @@ def CaloCalibHitDecoratorToolOOC(flags, name="CaloCalibClusterDecoratorToolOOC",
     "TileCalibHitActiveCell",
     "TileCalibHitInactiveCell"
     ]
+    return decoratorTool
+
+def CaloCalibHitDecoratorToolDM(flags, name="CaloCalibClusterDecoratorToolDM", **kwargs):
+
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesDM",
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_DM",
+    )
+
+    DecoratorTool = CompFactory.CaloCalibClusterDecoratorToolDM
+    decoratorTool = DecoratorTool(
+        name,
+        **kwargs,
+        ExtraInputs={('CaloCellContainer', 'StoreGateSvc+AllCalo')}
+    )
+
+    decoratorTool.CalibrationHitContainerNames = [
+        "LArCalibrationHitInactive",
+        "LArCalibrationHitActive",
+        "TileCalibHitActiveCell",
+        "TileCalibHitInactiveCell",
+    ]
+
+    decoratorTool.DMCalibrationHitContainerNames = [
+        "LArCalibrationHitDeadMaterial",
+        "TileCalibHitDeadMaterial",
+    ]
+
     return decoratorTool
 
 
@@ -438,12 +463,35 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
     if flags.Calo.TopoCluster.doCalibHitMoments:
             calibHitsMomentsMaker=getTopoCalibMoments(flags)
             CaloTopoCluster.ClusterCorrectionTools += [calibHitsMomentsMaker]
-            if clustersname == "CaloTopoClusters":
-                caloCalibTruthMapMaker = CaloCalibClusterTruthMapMakerTool(flags)
-                caloCalibDecorator = CaloCalibHitDecoratorTool(flags)
-                caloCalibDecoratorFullEnergy = CaloCalibHitDecoratorFullEnergyTool(flags)
-                caloCalibDecoratorOOC = CaloCalibHitDecoratorToolOOC(flags)
-                CaloTopoCluster.ClusterCorrectionTools += [caloCalibTruthMapMaker, caloCalibDecorator, caloCalibDecoratorFullEnergy,caloCalibDecoratorOOC]
+            caloCalibTruthMapMaker = CaloCalibClusterTruthMapMakerTool(flags)
+            caloCalibDecorator = CaloCalibHitDecoratorTool(flags)
+            caloCalibDecorator.CaloClusterWriteDecorHandleKey_NLeadingTruthParticles = (
+            clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Visible"
+            )
+            caloCalibDecoratorFullEnergy = CaloCalibHitDecoratorFullEnergyTool(flags)
+            caloCalibDecoratorFullEnergy.CaloClusterWriteDecorHandleKey_NLeadingTruthParticles = (
+            clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Full"
+            )
+            caloCalibDecoratorOOC = CaloCalibHitDecoratorToolOOC(flags)
+            caloCalibDecoratorOOC.CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesL = (
+                clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_L"
+            )
+            caloCalibDecoratorOOC.CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesT = (
+                clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_T"
+            )
+
+            caloCalibDecoratorDM = CaloCalibHitDecoratorToolDM(flags)
+            caloCalibDecoratorDM.CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesDM = (
+                clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_DM"
+            )
+
+            CaloTopoCluster.ClusterCorrectionTools += [
+                caloCalibTruthMapMaker,
+                caloCalibDecorator,
+                caloCalibDecoratorFullEnergy,
+                caloCalibDecoratorOOC,
+                caloCalibDecoratorDM,
+            ]
 
 
     
@@ -524,7 +572,13 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     AODMoments.append("CellLink") #Add data-link to cell-link container
     if flags.Calo.TopoCluster.addCalibrationHitDecoration: #Add calib hit deco if requried 
-        AODMoments.append(flags.Calo.TopoCluster.CalibrationHitDecorationName)
+       AODMoments += [
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Visible",
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Full",
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_L",
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_T",
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_DM",
+                    ]
 
     if flags.Calo.TopoCluster.addCPData:
         AODMoments += ["ClusterWidthEta","ClusterWidthPhi"]
