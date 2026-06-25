@@ -13,12 +13,6 @@
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
 
-// vecmem
-#include "vecmem/memory/memory_resource.hpp"
-#include "vecmem/utils/copy.hpp"
-#include "vecmem/utils/cuda/async_copy.hpp"
-#include "traccc/cuda/utils/stream.hpp"
-
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
@@ -66,9 +60,9 @@ private:
   ToolHandle<AthDevice::IMemoryResourceTool> m_hostMR{
     this, "HostMR", "", "Host memory resource tool"};
   ToolHandle<AthDevice::ICopyTool> m_copy{
-      this, "CopyProviderTool", "AthCUDA::CopyTool/CopyProviderTool", "Vecmem copy provider tool"};
+      this, "CopyProviderTool", "", "Vecmem copy provider tool"};
   ServiceHandle<ActsTrk::IActsDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
-    this, "DetectorDescriptionSvc", "ActsDeviceDetectorDescriptionProviderSvc"};
+    this, "DetectorDescriptionSvc", "ActsTrk::ActsDeviceDetectorDescriptionProviderSvc"};
 
   // ---- object counters ----
   mutable std::atomic<int> m_nPix = 0;
