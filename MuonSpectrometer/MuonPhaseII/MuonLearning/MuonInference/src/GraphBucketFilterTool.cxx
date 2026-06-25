@@ -11,8 +11,6 @@
 #include "StoreGate/WriteHandle.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include <fmt/format.h>
-#include <fmt/ranges.h>
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -241,7 +239,15 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     outputMode = OutputMode::SingleOutput;
     numPred = static_cast<size_t>(outShape[0]);
   } else {
-    ATH_MSG_ERROR("Unexpected ONNX output tensor shape = [" << fmt::format("{}", fmt::join(outShape, ","))
+    auto outShapeString = [](const std::vector<int64_t>& v) {
+        std::ostringstream oss;
+        if (!v.empty()) {
+            std::copy(v.begin(), v.end() - 1, std::ostream_iterator<int64_t>(oss, ","));
+            oss << v.back();
+        }
+        return oss.str();
+    };	  
+    ATH_MSG_ERROR("Unexpected ONNX output tensor shape = [" << outShapeString(outShape)
                   << "]  (expected [N,3] or [N] or [N,1]).");
     return StatusCode::FAILURE;
   }
