@@ -628,7 +628,7 @@ namespace TrigCompositeUtils {
     const std::string& chainName,
     const std::vector<LinkInfo<xAOD::IParticleContainer>>& features,
     const std::vector<std::size_t>& legMultiplicities,
-    const std::function<bool(const std::vector<LinkInfo<xAOD::IParticleContainer>>&)>& filter);
+    const IPartCombItr::FilterFunc_t& filter);
 
   /**
    * @brief Produce the combinations for a set of features
@@ -668,7 +668,7 @@ namespace TrigCompositeUtils {
     const std::string& chainName,
     const std::vector<LinkInfo<xAOD::IParticleContainer>>& features,
     const TrigConf::HLTChain *chainInfo,
-    const std::function<bool(const std::vector<LinkInfo<xAOD::IParticleContainer>>&)>& filter);
+    const IPartCombItr::FilterFunc_t& filter);
 
   /**
    * @brief Produce the combinations for a set of features

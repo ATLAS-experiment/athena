@@ -68,11 +68,11 @@ namespace TrigCompositeUtils
     return true;
   }
 
-  std::function<bool(const std::vector<LinkInfo<xAOD::IParticleContainer>> &)> getFilter(FilterType filter)
+  IPartCombItr::FilterFunc_t IPartCombItr::getFilter(FilterType filter)
   {
     switch (filter){
     case FilterType::All:
-      return [](const std::vector<LinkInfo<xAOD::IParticleContainer>> &) { return true; };
+      return [](const VecLInfo_t &) { return true; };
     case FilterType::UniqueObjects:
       return uniqueObjects;
     case FilterType::UniqueRoIs:
@@ -86,7 +86,7 @@ namespace TrigCompositeUtils
 
   IPartCombItr::IPartCombItr(
       const std::vector<std::tuple<std::size_t, LInfoItr_t, LInfoItr_t>> &pieces,
-      std::function<bool(const VecLInfo_t &)> filter)
+      FilterFunc_t filter)
       : m_filter(std::move(filter))
   {
     std::vector<KFromNItr> idxItrs;
