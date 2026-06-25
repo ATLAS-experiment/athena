@@ -3,6 +3,8 @@
 # Declare the package name:
 atlas_subdir(ActsGPUEventCnv)
 
+find_package(Acts)
+
 # placeholder for what will eventually be Acts::PluginTraccc
 if (NOT TARGET Acts::PluginDetray)
    # Without PluginDetray, the traccc code will not be available.
@@ -37,3 +39,11 @@ atlas_add_component( ActsGPUEventCnv
     PixelReadoutGeometryLib
     SCT_ReadoutGeometry
 )
+
+atlas_install_python_modules(python/*.py)
+
+# test to be addded after ActsDeviceDetectorDescriptionProviderSvc is available
+# atlas_add_test(RDOtoTracccTest
+#     SCRIPT athena.py --threads=1 ${CMAKE_CURRENT_SOURCE_DIR}/test/RDOtoTracccTest.py
+#     POST_EXEC_SCRIPT nopost.sh
+#     PROPERTIES SKIP_RETURN_CODE 2)
