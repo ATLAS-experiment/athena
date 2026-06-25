@@ -12,14 +12,16 @@
 #ifndef CPISCALEFACTORTOOL_H
 #define CPISCALEFACTORTOOL_H
 
-#include "AsgTools/IAsgTool.h"
+#include "PATInterfaces/IReentrantSystematicsTool.h"
+#include "PATInterfaces/SystematicSet.h"
 #include "xAODBase/IParticle.h"
+#include <map>
 
-class IScaleFactorTool : virtual public asg::IAsgTool {
+class IScaleFactorTool : virtual public CP::IReentrantSystematicsTool {
   ASG_TOOL_INTERFACE ( IScaleFactorTool )
 
   public:
-  virtual float getSF( const xAOD::IParticle* p ) const = 0;
+  virtual std::map<CP::SystematicSet, float> getSF( const xAOD::IParticle* p ) const = 0;
   virtual std::unordered_map<std::string, int> inferWPs( const xAOD::IParticle* p ) const = 0; 
 };
 #endif // CPISCALEFACTORTOOL_H

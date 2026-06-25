@@ -33,20 +33,24 @@ int main(int argc, char* argv[]) {
   std::string PCTName = argv[4];
   std::string objContainer = "AntiKt4EMPFlowJets";
 
-  asg::StandaloneToolHandle<IScaleFactorTool> sel_tool("ScaleFactorTool/SFToolTest");
-  StatusCode sel_code1 = sel_tool.setProperty( "TaggerName", taggerName);
-  StatusCode sel_code2 = sel_tool.setProperty( "JsonConfigFile", JsonConfigFile);
-  StatusCode sel_code3 = sel_tool.setProperty( "ObjContainer", objContainer);
-  StatusCode sel_code4 = sel_tool.setProperty( "PCTName", PCTName);
-  StatusCode sel_code5 = sel_tool.initialize();
-  std::vector<StatusCode> sel_codes = { sel_code1, sel_code2, sel_code3, sel_code4, sel_code5};
+  asg::StandaloneToolHandle<IScaleFactorTool> sf_tool("ScaleFactorTool/SFToolTest");
+  StatusCode sf_code1 = sf_tool.setProperty( "TaggerName", taggerName);
+  StatusCode sf_code2 = sf_tool.setProperty( "JsonConfigFile", JsonConfigFile);
+  StatusCode sf_code3 = sf_tool.setProperty( "ObjContainer", objContainer);
+  StatusCode sf_code4 = sf_tool.setProperty( "PCTName", PCTName);
+  StatusCode sf_code5 = sf_tool.initialize();
+  std::vector<StatusCode> sf_codes = { sf_code1, sf_code2, sf_code3, sf_code4, sf_code5};
 
-  for(const auto& code : sel_codes) {
+  for(const auto& code : sf_codes) {
     if(code.isFailure()) {
       ANA_MSG_ERROR("Failed to set property or initialize tool");
       return 1;
     }
   }
+
+  CP::SystematicSet sysSet;
+  sysSet = sf_tool->recommendedSystematics();
+  ANA_MSG_INFO("Recommended systematics: " << sysSet.name());
 
   TEVENT event(TEVENT::kClassAccess);
   gErrorIgnoreLevel = kError;
@@ -73,7 +77,7 @@ int main(int argc, char* argv[]) {
       float pu = SG::AuxElement::ConstAccessor<float>(taggerName+"_pu")(*particle);
       float ptau = SG::AuxElement::ConstAccessor<float>(taggerName+"_ptau")(*particle);
       ANA_MSG_INFO("pb : pc : pl : ptau = " << pb << ", " << pc << ", " << pu << ", " << ptau);
-      std::unordered_map<std::string, int> wp_map = sel_tool->inferWPs(particle);
+      std::unordered_map<std::string, int> wp_map = sf_tool->inferWPs(particle);
       ANA_MSG_INFO("passed ctag50: " << wp_map["ctag50"] << 
                    ", passed ctag30: " << wp_map["ctag30"] << 
                    ", passed ctag10: " << wp_map["ctag10"] << 
@@ -81,9 +85,15 @@ int main(int argc, char* argv[]) {
                    ", passed btag70: " << wp_map["btag70"] << 
                    ", passed btag65: " << wp_map["btag65"] << 
                    ", PCT score: " << wp_map[PCTName]);
-      float sf = 1.;
-      sf = sel_tool->getSF(particle);
-      ANA_MSG_INFO("SF = " << sf );
+
+      auto sfs = sf_tool->getSF(particle);
+      ANA_MSG_INFO(" sf for nominal is " << sfs.at(CP::SystematicSet()) );
+
+      for (const auto& set : sysSet) {
+        CP::SystematicSet single;
+        single.insert(set);
+        ANA_MSG_INFO(" sf for " << set.name() << " is " << sfs.at(single));
+      }
     }
   }
 

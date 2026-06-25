@@ -55,18 +55,45 @@ StatusCode ScaleFactorTool::initialize(){
     m_wp_bins[name] = std::move(bins);
   }
 
+  for (const auto& [name, values] : m_json_config.at("systematics").items()) {
+    CP::SystematicSet set;
+    set.insert(CP::SystematicVariation(name));
+
+    std::vector<float> vec = values.get<std::vector<float>>();
+    if (vec.size() != m_sf_values.size()) {
+      ATH_MSG_ERROR("Systematic size mismatch with nominal SFs");
+      return StatusCode::FAILURE;
+    }
+    m_sf_systematics[set] = std::move(vec);
+  }
+
+  for (const auto& [set, _] : m_sf_systematics) {
+    if (set.size() != 1) {
+      ATH_MSG_ERROR("Failed to initialize systematic cache");
+      return StatusCode::FAILURE;
+    }
+  }
+
   m_initialised = true;
 
   return StatusCode::SUCCESS;
 }
 
-float ScaleFactorTool::getSF(const xAOD::IParticle* p) const
+std::map<CP::SystematicSet, float> ScaleFactorTool::getSF(const xAOD::IParticle* p) const
 {
   const SG::AuxElement& el = *p;
   int sf_bin = m_sf_func(el);
   int pct_bin = m_pct_func(el);
   int global = sf_bin * m_n_pct_bins + pct_bin;
-  return m_sf_values.at(global);
+
+  std::map<CP::SystematicSet, float> result;
+
+  result[CP::SystematicSet()] = m_sf_values.at(global);
+
+  for (const auto& [set, vec] : m_sf_systematics) {
+    result[set] = vec.at(global);
+  }
+  return result;
 }
 
 std::unordered_map<std::string, int> ScaleFactorTool::inferWPs(const xAOD::IParticle* p) const
@@ -107,3 +134,22 @@ int ScaleFactorTool::inferPCTBins(const json& cfg)
   }
   throw std::runtime_error("Cannot infer pct bins");
 }
+
+CP::SystematicSet ScaleFactorTool::affectingSystematics() const
+{
+  CP::SystematicSet result;
+
+  for (const auto& [set, _] : m_sf_systematics) {
+    if (set.size() != 1) continue;
+    result.insert(*set.begin());
+  }
+
+  return result;
+
+}
+
+CP::SystematicSet ScaleFactorTool::recommendedSystematics() const
+{
+  return affectingSystematics();
+}
+

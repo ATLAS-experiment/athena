@@ -20,8 +20,12 @@ class ScaleFactorTool: public asg::AsgTool,
   ScaleFactorTool(const std::string& name);
   StatusCode initialize() override;
 
-  float getSF(const xAOD::IParticle* p) const override;
+  std::map<CP::SystematicSet, float> getSF(const xAOD::IParticle* p) const override;
   std::unordered_map<std::string, int> inferWPs(const xAOD::IParticle* p) const;
+
+  // systeamtic stuff
+  virtual CP::SystematicSet affectingSystematics() const override;
+  virtual CP::SystematicSet recommendedSystematics() const override;
 
   private:
   bool m_initialised = false;
@@ -38,6 +42,7 @@ class ScaleFactorTool: public asg::AsgTool,
   int m_n_pct_bins;
   int inferPCTBins(const json& cfg);
   std::unordered_map<std::string, std::unordered_set<int>> m_wp_bins;
+  std::map<CP::SystematicSet, std::vector<float>> m_sf_systematics;
 
   std::vector<float> m_sf_values;
 };
