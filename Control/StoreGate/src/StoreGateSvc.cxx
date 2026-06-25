@@ -150,9 +150,10 @@ StatusCode StoreGateSvc::initialize()    {
   // Don't retrieve m_activeStoreSvc here to prevent a possible
   // initialization loop.
 
-  const int PRIORITY=100;
-  m_incSvc->addListener(this, "EndEvent",PRIORITY);
-  m_incSvc->addListener(this, "BeginEvent", PRIORITY);
+  if (m_DumpStore) {
+    const int PRIORITY=100;
+    m_incSvc->addListener(this, "EndEvent",PRIORITY);
+  }
 
   return StatusCode::SUCCESS;
 }
