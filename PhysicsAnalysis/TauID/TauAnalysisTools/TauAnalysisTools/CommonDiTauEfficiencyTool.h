@@ -142,6 +142,7 @@ protected:
   CP::SystematicSet m_sAffectingSystematics;
   CP::SystematicSet m_sRecommendedSystematics;
 
+  Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
   Gaudi::Property<std::string> m_sInputFilePath{this, "InputFilePath", ""};
   Gaudi::Property<std::string> m_sWP{this, "WP", ""};
   Gaudi::Property<std::string> m_sVarName{this, "VarName", ""};
