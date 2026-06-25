@@ -8,7 +8,7 @@
 #include "AsgTools/AsgTool.h"
 #include <AsgTools/PropertyWrapper.h>
 #include "xAODBase/IParticle.h"
-#include "ScaleFactorTools/ToolUtils.h"
+#include "ScaleFactorTools/QuantileFactory.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -34,8 +34,8 @@ class ScaleFactorTool: public asg::AsgTool,
   Gaudi::Property<std::string> m_obj_container {this, "ObjContainer", "", "object container"};
   Gaudi::Property<std::string> m_pct_Name {this, "PCTName", "", "pseudo-continuous tagger name"};
 
-  ToolUtils::QuantileFunc m_sf_func;
-  ToolUtils::QuantileFunc m_pct_func;
+  QuantileFactory::QuantileFunc m_sf_func;
+  QuantileFactory::QuantileFunc m_pct_func;
 
   json m_json_config;
 

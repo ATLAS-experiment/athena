@@ -1,66 +1,13 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "ScaleFactorTools/ToolUtils.h"
+#include "ScaleFactorTools/VariableFactory.h"
+#include "ScaleFactorTools/QuantileFactory.h"
 #include "PathResolver/PathResolver.h"
 #include <iostream>
 
-ToolUtils::FloatFunc ToolUtils::floatVariableFactory(const json& cfg) {
-
-  // for simple variables
-  if (cfg.is_string()) {
-    std::string name = cfg.get<std::string>();
-    return [name](const SG::AuxElement& el) -> float {
-      return el.auxdata<float>(name);
-    };
-  }
-
-  // structured variables
-  if (cfg.is_object()) {
-    auto buildTerm = [](const json& terms) {
-      return [terms](const SG::AuxElement& el) -> float {
-        float sum = 0.0f;
-        for (const auto& t : terms) {
-          std::string var = t[0];
-          float weight    = t[1];
-          sum += weight * el.auxdata<float>(var);
-        }
-        return sum;
-      };
-    };
-
-    auto num_func = buildTerm(cfg.at("numerator"));
-    auto den_func = buildTerm(cfg.at("denominator"));
-    std::string mode = cfg.contains("mode") ? cfg.at("mode").get<std::string>() : "log_ratio";
-
-    return [num_func, den_func, mode] (const SG::AuxElement& el) -> float {
-      float num = num_func(el);
-      float den = den_func(el);
-      if (mode == "log_ratio" ) {
-        return (den > 0.0f && num > 0.0f) ? std::log(num / den) : 0.0f;
-      }
-      else {
-        throw std::runtime_error("Unknown variable mode: " + mode);
-      }
-    };
-  }
-
-  throw std::runtime_error("Invalid variable config");
-
-}
-
-ToolUtils::IntFunc ToolUtils::intVariableFactory(const json& cfg) {
-  if (cfg.is_string()) {
-    std::string name = cfg.get<std::string>();
-    return [name](const SG::AuxElement& el) -> int {
-      return el.auxdata<int>(name);
-    };
-  }
-  throw std::runtime_error("Invalid variable config");
-}
-
-ToolUtils::QuantileFunc ToolUtils::makeCategory(const json& cfg) {
-  ToolUtils::IntFunc var = ToolUtils::intVariableFactory(cfg.at("variable"));
+QuantileFactory::QuantileFunc QuantileFactory::makeCategory(const json& cfg) {
+  VariableFactory::IntFunc var = VariableFactory::intVariableFactory(cfg.at("variable"));
   std::vector<int> values = cfg.at("values").get<std::vector<int>>();
 
   std::unordered_map<int,int> mapping;
@@ -80,8 +27,8 @@ ToolUtils::QuantileFunc ToolUtils::makeCategory(const json& cfg) {
 
 }
 
-ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
-  ToolUtils::FloatFunc var = ToolUtils::floatVariableFactory(cfg.at("variable"));
+QuantileFactory::QuantileFunc QuantileFactory::makeEnumerate(const json& cfg) {
+  VariableFactory::FloatFunc var = VariableFactory::floatVariableFactory(cfg.at("variable"));
   std::vector<float> edges = cfg.at("edges").get<std::vector<float>>();
 
   const bool useAbs = cfg.value("abs", false);
@@ -111,13 +58,13 @@ ToolUtils::QuantileFunc ToolUtils::makeEnumerate(const json& cfg) {
 }
 
 // for 2-d tagging
-ToolUtils::QuantileFunc ToolUtils::makeNodes(const json& cfg) {
-  ToolUtils::FloatFunc var = ToolUtils::floatVariableFactory(cfg.at("variable"));
+QuantileFactory::QuantileFunc QuantileFactory::makeNodes(const json& cfg) {
+  VariableFactory::FloatFunc var = VariableFactory::floatVariableFactory(cfg.at("variable"));
   std::vector<float> edges = cfg.at("edges");
 
-  std::vector<ToolUtils::QuantileFunc> sub_nodes;
+  std::vector<QuantileFactory::QuantileFunc> sub_nodes;
   for (const auto& node : cfg.at("nodes")) {
-    sub_nodes.push_back(ToolUtils::quantileFactory(node));
+    sub_nodes.push_back(QuantileFactory::quantileFactory(node));
   }
 
   std::string numbering = cfg.value("numbering", "sequential");
@@ -152,11 +99,11 @@ ToolUtils::QuantileFunc ToolUtils::makeNodes(const json& cfg) {
 }
 
 // turn the already computed per-axis bin indices into a flattened index
-ToolUtils::QuantileFunc ToolUtils::makeDense (const json& cfg) {
-  std::vector<ToolUtils::QuantileFunc> axes;
+QuantileFactory::QuantileFunc QuantileFactory::makeDense (const json& cfg) {
+  std::vector<QuantileFactory::QuantileFunc> axes;
 
   for (const auto& axis : cfg.at("axes")) {
-    axes.push_back(ToolUtils::quantileFactory(axis));
+    axes.push_back(QuantileFactory::quantileFactory(axis));
   }
 
   std::vector<int> strides(axes.size(), 1);
@@ -203,14 +150,14 @@ ToolUtils::QuantileFunc ToolUtils::makeDense (const json& cfg) {
   };
 }
 
-ToolUtils::QuantileFunc ToolUtils::quantileFactory(const json& cfg) {
+QuantileFactory::QuantileFunc QuantileFactory::quantileFactory(const json& cfg) {
 
   std::string type = cfg.at("type");
 
-  if (type == "category")  return ToolUtils::makeCategory(cfg);
-  if (type == "enumerate") return ToolUtils::makeEnumerate(cfg);
-  if (type == "nodes")     return ToolUtils::makeNodes(cfg);
-  if (type == "dense")     return ToolUtils::makeDense(cfg);
+  if (type == "category")  return QuantileFactory::makeCategory(cfg);
+  if (type == "enumerate") return QuantileFactory::makeEnumerate(cfg);
+  if (type == "nodes")     return QuantileFactory::makeNodes(cfg);
+  if (type == "dense")     return QuantileFactory::makeDense(cfg);
 
   throw std::runtime_error("Unknown quantile type: " + type);
 
