@@ -1,0 +1,5 @@
+test_crc_combine_uint32
+  seed1=12345678 val1=87654321 result=de5d7a3b
+test_crc_combine_string
+  seed=12345678 str="hello" result=dc3bfc68
+All tests passed!

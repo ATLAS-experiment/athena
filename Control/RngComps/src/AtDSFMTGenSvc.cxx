@@ -10,7 +10,7 @@
 
 #include "interpretSeeds.h"
 #include "AtDSFMTGenSvc.h"
-#include "crc_combine.h"
+#include "CxxUtils/crc_combine.h"
 
 #include "AtlasCLHEP_RandomGenerators/dSFMTEngine.h"
 #include "CLHEP/Random/RandGauss.h"
@@ -367,9 +367,9 @@ CLHEP::HepRandomEngine* AtDSFMTGenSvc::setOnDefinedSeeds(uint32_t eventNumber, u
   uint32_t theHash(eventNumber);
   map<string, uint32_t>::const_iterator citer(m_reseedingOffsets.find(streamName));
   bool hasOffset(citer != m_reseedingOffsets.end() && 0 != citer->second);
-  if (hasOffset) theHash=crc_combine(theHash, citer->second);
+  if (hasOffset) theHash = CxxUtils::crc_combine(theHash, citer->second);
 
-  theHash=crc_combine(theHash, runNumber);
+  theHash = CxxUtils::crc_combine(theHash, runNumber);
   ATH_MSG_VERBOSE( "Reseeding stream " << streamName 
                    << " with eventNumber " << eventNumber 
                    << " runNumber " << runNumber);
@@ -385,7 +385,7 @@ CLHEP::HepRandomEngine* AtDSFMTGenSvc::setOnDefinedSeeds(uint32_t theSeed,
     m_engines.insert(engineValType(streamName, new CLHEP::dSFMTEngine() ) );
 
   engineIter iter = m_engines.find(streamName);
-  theSeed=crc_combine(theSeed, streamName);
+  theSeed = CxxUtils::crc_combine(theSeed, streamName);
   ATH_MSG_DEBUG("Reseeding stream " << streamName << " with " << theSeed);
   CLHEP::HepRandomEngine* eng = (*iter).second;
   eng->setSeed( theSeed, 0 );

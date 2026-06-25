@@ -21,17 +21,9 @@
 #include "AtlasCLHEP_RandomGenerators/dSFMTEngine.h"
 #include "CLHEP/Random/Ranlux64Engine.h"
 #include "CLHEP/Random/RanecuEngine.h"
-#include <boost/crc.hpp>
+#include "CxxUtils/crc_combine.h"
 
 #define CHECK_BIT(var,pos) (((var)>>(pos)) & 1)
-
-/// using crc32 for architecture independence in combining the seeds
-inline uint32_t crc_combine(uint32_t seed, uint32_t v) {
-  boost::crc_32_type crf;
-  crf.process_bytes(&seed,sizeof(uint32_t));
-  crf.process_bytes(&v,sizeof(uint32_t));
-  return crf.checksum();
-}
 
 std::ostream& operator<<(std::ostream& os, const std::vector<unsigned long>& state)
 {
@@ -42,7 +34,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<unsigned long>& sta
 inline uint32_t gethash(const std::vector<unsigned long>& state)
 {
   uint32_t hash=0;
-  for(auto s : state) hash=crc_combine(hash, s);
+  for(auto s : state) hash = CxxUtils::crc_combine(hash, s);
   return hash;
 }
 
@@ -228,7 +220,7 @@ void test2(ATHRNG::RNGWrapper* wrapper, const ATHRNG::RNGWrapper::SeedingOptionT
     
     std::vector<unsigned long> state = wrapper->getEngine(ctx)->put();
     uint32_t hash=0;
-    for(auto s : state) hash=crc_combine(hash, s);
+    for(auto s : state) hash = CxxUtils::crc_combine(hash, s);
     if(states.count(hash)>0) {
       auto range = states.equal_range(hash);
       for (auto i = range.first; i != range.second; ++i) {
@@ -241,7 +233,7 @@ void test2(ATHRNG::RNGWrapper* wrapper, const ATHRNG::RNGWrapper::SeedingOptionT
         wrapper->setSeedLegacy(algName, ctx, offset, option);
         std::vector<unsigned long> oldstate = wrapper->getEngine(ctx)->put();
         uint32_t oldhash=0;
-        for(auto s : oldstate) oldhash=crc_combine(oldhash, s);
+        for(auto s : oldstate) oldhash = CxxUtils::crc_combine(oldhash, s);
         if(hash!=oldhash) {
           std::cout << "closure problem!";
           std::cout << "  new :"<< hash << ": " << state << '\n';
