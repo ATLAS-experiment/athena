@@ -22,7 +22,7 @@
 #include <AsgTools/AsgTool.h>
 #include <AsgTools/AnaToolHandle.h>
 #include <TInterpreter.h>
-#include <boost/format.hpp>
+#include <format>
 
 #else
 
@@ -254,6 +254,14 @@ namespace asg
 #ifdef XAOD_STANDALONE
   namespace
   {
+    std::string convert_boost_format_to_std_format(const std::string& s) {
+      std::string out = s;
+      out = std::regex_replace(out, std::regex("\\{"), "{{");
+      out = std::regex_replace(out, std::regex("\\}"), "}}");
+    // Convert %x% to {}
+      out = std::regex_replace(out, std::regex("%[0-9]+%"), "{}");
+      return out;
+    }  
     /// whether to disable instantiating components via factories
     ///
     /// This is mostly meant to allow checking whether there are
@@ -306,9 +314,10 @@ namespace asg
         ATH_MSG_ERROR ("Unable to load class dictionary for type " << type);
         return StatusCode::FAILURE;
       }
-
-      AsgComponent *comp = reinterpret_cast<AsgComponent*>
-        (gInterpreter->Calc(("dynamic_cast<asg::AsgComponent*>(" + (boost::format (newCommand) % type % name).str() + ")").c_str()));
+      std::string fmt = convert_boost_format_to_std_format(newCommand);
+      std::string cmd = std::vformat(fmt, std::make_format_args(type, name));
+      std::string expr = std::format("dynamic_cast<asg::AsgComponent*>({})", cmd);
+      AsgComponent *comp = reinterpret_cast<AsgComponent*>(gInterpreter->Calc(expr.c_str()));
       if (comp == nullptr)
       {
         ANA_MSG_ERROR ("failed to create component of type " << type);
