@@ -19,6 +19,7 @@
 #include <EventSelectionAlgorithms/JetNGhostSelectorAlg.h>
 #include <EventSelectionAlgorithms/RunNumberSelectorAlg.h>
 #include <EventSelectionAlgorithms/ObjectKinematicSelectorAlg.h>
+#include <EventSelectionAlgorithms/EventScalarSelectorAlg.h>
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -38,3 +39,4 @@ DECLARE_COMPONENT (CP::SumNLeptonPtSelectorAlg)
 DECLARE_COMPONENT (CP::JetNGhostSelectorAlg)
 DECLARE_COMPONENT (CP::RunNumberSelectorAlg)
 DECLARE_COMPONENT (CP::ObjectKinematicSelectorAlg)
+DECLARE_COMPONENT (CP::EventScalarSelectorAlg)
