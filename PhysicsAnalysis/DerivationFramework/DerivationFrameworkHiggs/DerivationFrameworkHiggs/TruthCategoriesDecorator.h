@@ -97,6 +97,26 @@ namespace DerivationFramework {
         EvtInfoDecorKey m_dec_stage1p2_Fine_IdxPt30Key
           { this, "Stage1p2_Fine_IdxPt30Key", m_evtInfoKey, "HTXS_Stage1_2_Fine_FineIndex_pTjet30", "" };
 
+        // Stage-1.3 binning
+        EvtInfoDecorKey m_dec_stage1p3_CatPt25Key
+          { this, "Stage1p3_CatPt25Key", m_evtInfoKey, "HTXS_Stage1_3_Category_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1p3_CatPt30Key
+          { this, "Stage1p3_CatPt30Key", m_evtInfoKey, "HTXS_Stage1_3_Category_pTjet30", "" };
+        EvtInfoDecorKey m_dec_stage1p3_IdxPt25Key
+          { this, "Stage1p3_IdxPt25Key", m_evtInfoKey, "HTXS_Stage1_3_FineIndex_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1p3_IdxPt30Key
+          { this, "Stage1p3_IdxPt30Key", m_evtInfoKey, "HTXS_Stage1_3_FineIndex_pTjet30", "" };
+
+        // Stage-1.3 finer binning
+        EvtInfoDecorKey m_dec_stage1p3_Fine_CatPt25Key
+          { this, "Stage1p3_Fine_CatPt25Key", m_evtInfoKey, "HTXS_Stage1_3_Fine_Category_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1p3_Fine_CatPt30Key
+          { this, "Stage1p3_Fine_CatPt30Key", m_evtInfoKey, "HTXS_Stage1_3_Fine_Category_pTjet30", "" };
+        EvtInfoDecorKey m_dec_stage1p3_Fine_IdxPt25Key
+          { this, "Stage1p3_Fine_IdxPt25Key", m_evtInfoKey, "HTXS_Stage1_3_Fine_FineIndex_pTjet25", "" };
+        EvtInfoDecorKey m_dec_stage1p3_Fine_IdxPt30Key
+          { this, "Stage1p3_Fine_IdxPt30Key", m_evtInfoKey, "HTXS_Stage1_3_Fine_FineIndex_pTjet30", "" };
+
         EvtInfoDecorKey m_dec_NJets25Key
           { this, "NJets25Key", m_evtInfoKey, "HTXS_Njets_pTjet25", "" };
         EvtInfoDecorKey m_dec_NJets30Key

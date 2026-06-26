@@ -47,6 +47,14 @@ namespace DerivationFramework {
         ATH_CHECK(m_dec_stage1p2_Fine_CatPt30Key.initialize());
         ATH_CHECK(m_dec_stage1p2_Fine_IdxPt25Key.initialize());
         ATH_CHECK(m_dec_stage1p2_Fine_IdxPt30Key.initialize());
+        ATH_CHECK(m_dec_stage1p3_CatPt25Key.initialize());
+        ATH_CHECK(m_dec_stage1p3_CatPt30Key.initialize());
+        ATH_CHECK(m_dec_stage1p3_IdxPt25Key.initialize());
+        ATH_CHECK(m_dec_stage1p3_IdxPt30Key.initialize());
+        ATH_CHECK(m_dec_stage1p3_Fine_CatPt25Key.initialize());
+        ATH_CHECK(m_dec_stage1p3_Fine_CatPt30Key.initialize());
+        ATH_CHECK(m_dec_stage1p3_Fine_IdxPt25Key.initialize());
+        ATH_CHECK(m_dec_stage1p3_Fine_IdxPt30Key.initialize());
         ATH_CHECK(m_dec_NJets25Key.initialize());
         ATH_CHECK(m_dec_NJets30Key.initialize());
         ATH_CHECK(m_dec_isZnunuKey.initialize());
@@ -219,6 +227,20 @@ namespace DerivationFramework {
         intEIDecor (m_dec_stage1p2_Fine_CatPt30Key) = htxs->stage1_2_fine_cat_pTjet30GeV;
         intEIDecor (m_dec_stage1p2_Fine_IdxPt25Key) = HTXSstage1_2_Fine_to_HTXSstage1_2_Fine_FineIndex(*htxs, th_type, true);
         intEIDecor (m_dec_stage1p2_Fine_IdxPt30Key) = HTXSstage1_2_Fine_to_HTXSstage1_2_Fine_FineIndex(*htxs, th_type, false);
+
+        // Stage-1.3 binning
+        intEIDecor (m_dec_stage1p3_CatPt25Key) = htxs->stage1_3_cat_pTjet25GeV;
+        intEIDecor (m_dec_stage1p3_CatPt30Key) = htxs->stage1_3_cat_pTjet30GeV;
+        /// Last argument switches between 25 (true) / 30 (false) GeV jets.
+        intEIDecor (m_dec_stage1p3_IdxPt25Key) = HTXSstage1_3_to_HTXSstage1_3_FineIndex(*htxs, th_type, true);
+        intEIDecor (m_dec_stage1p3_IdxPt30Key) = HTXSstage1_3_to_HTXSstage1_3_FineIndex(*htxs, th_type, false);
+
+        // Stage-1.3 finer binning
+        intEIDecor (m_dec_stage1p3_Fine_CatPt25Key) = htxs->stage1_3_fine_cat_pTjet25GeV;
+        intEIDecor (m_dec_stage1p3_Fine_CatPt30Key) = htxs->stage1_3_fine_cat_pTjet30GeV;
+        intEIDecor (m_dec_stage1p3_Fine_IdxPt25Key) = HTXSstage1_3_Fine_to_HTXSstage1_3_Fine_FineIndex(*htxs, th_type, true);
+        intEIDecor (m_dec_stage1p3_Fine_IdxPt30Key) = HTXSstage1_3_Fine_to_HTXSstage1_3_Fine_FineIndex(*htxs, th_type, false);
+
 
         intEIDecor (m_dec_NJets25Key) = htxs->jets25.size();
         intEIDecor (m_dec_NJets30Key) = htxs->jets30.size();
