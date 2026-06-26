@@ -13,7 +13,7 @@
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "src/detail/FitterHelperFunctions.h"
-
+#include "src/detail/OnTrackCalibrator.h"
 
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 // ACTS
@@ -222,6 +222,10 @@ class GlobalChiSquareFitterTool
     detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc{};
     /** @brief Calibrator for the uncalibrated xAOD::UnCalibratedMeasurement objects */
     detail::xAODUncalibMeasCalibrator m_uncalibMeasCalibrator{};
+    /** @brief Calibrator of the ID / ITk measurements */
+    using xAODItkCalibrator_t = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend> ;
+    xAODItkCalibrator_t m_idCalibrator{};
+
     /** @brief Array of all configured fitter extensions depending on which source link type is in use */
     static constexpr unsigned s_nExtensions = static_cast<unsigned>(detail::SourceLinkType::nTypes);
     std::array<Gx2FitterExtension_t, s_nExtensions>  m_gx2fExtensions{};
