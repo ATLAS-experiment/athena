@@ -1,0 +1,16 @@
+{
+    "TrkAnaEFCluster" : {
+        "enabled" : true,
+        "TestType"  : "Offline",
+        "RefType"   : "Truth",
+        "OfflineTrkKey" : "_TRKCOLLNAME_",
+        "MatchingType"  : "TruthMatch",
+        "doClusterValidation"  : true,
+        "PixelClusterKey"  : "_PIXELCLUSTERCOLLNAME_",
+        "StripClusterKey"  : "_STRIPCLUSTERCOLLNAME_",
+        "plotResolutions"  : false,
+        "plotFakeRates" : false,
+        "plotHitsOnTracks" : false,
+        "plotVertexParameters" : false
+    }
+}

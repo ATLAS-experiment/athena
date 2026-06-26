@@ -1,0 +1,186 @@
+<?xml version="1.0" ?>
+<!--
+ DCube configuration XML file = dcube_config.xml
+ auto-generated using DCube 7.3.0 by Krzysztof Daniel Ciba (Krzysztof.Ciba@NOSPAMgmail.com)
+ on Fri, 16 May 2025 12:07:50 CEST
+ from Root reference file: IDTPM.C000_cluster_FS.ttbar_pu200.HIST.root
+ Statistics tests:
+ "['KSnorm']"
+ Legend:
+ * KS      - Kolmogorov-Smirnov test
+ * KSnorm  - Kolmogorov-Smirnov + normalisation tests (default)
+ * chi2    - chi2 test
+ * bbb     - bin-by-bin comparision
+ * meany   - avg eff mean y [TProfiles only!]
+ * all     - all above tests (except KSnorm)
+ * allnorm - all above tests (except KS)
+ Tweaks:
+ [1] remove or comment out (using HTML comments tags) histograms not relevant
+     to your analysis
+ [2] provide a new content to "ref_desc" and "mon_desc" tags to something
+     more meaningful
+ [3] and of course feel free to change attribute "tests" in each "hist" tag
+ [4] limits of p-value warning and failure can be set by changing attributes
+     in <plimit> tag
+ [5] if you want to make plots FOR EVERY histogram in your monitored file
+     change attribute "inclusive" in <mode> tag to "true"
+-->
+<dcube_client_config>
+ <dcube branch="*" install="*" cmtconfig="*" project="*" jobId="*">
+  <!--
+  ###################################################
+  DCubeClient for:
+  [1] branch: *
+  [2] install: *
+  [3] cmtconfig: *
+  [4] project: *
+  [5] jobId: *
+  [6] reference root file: /eos/home-m/maparo/IDTPMout/ART_v1/C000clus_v1/IDTPM.C000_cluster_FS.ttbar_pu200.HIST.root
+  [7] p-values limits FAIL = 0.750000 WARN = 0.950000
+  ###################################################
+-->
+  <reference file="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetTrackPerfMon/EFTrackRefereceHistograms/IDTPM.C000_cluster_FS.ttbar_pu200.HIST.root"/>
+  <ref_desc>PUT YOUR REFERENCE DESCRIPTION HERE</ref_desc>
+  <test_desc>PUT YOUR TEST DESCRIPTION HERE</test_desc>
+  <plimit fail="0.75" warn="0.95"/>
+  <TDirectory name="/">
+   <TDirectory name="InDetTrackPerfMonPlots">
+    <TDirectory name="TrkAnaEFCluster">
+     <TDirectory name="Offline">
+      <TDirectory name="Tracks">
+       <TDirectory name="Multiplicities">
+        <hist1D name="summary" type="TH1D" plotopts="logy;ratio" tests="KS"/>
+        <hist1D name="num_offl_all" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="num_offl_selected" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="num_offl_matched" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="num_truth_all" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="num_truth_selected" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="num_truth_matched" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       </TDirectory>
+       <TDirectory name="Parameters">
+        <hist1D name="offl_pt" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_eta" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_phi" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_d0" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_z0" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_z0sin" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_theta" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_qoverp" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_chi2" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_ndof" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_chi2OverNdof" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_author" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="offl_time" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_pt" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_eta" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_phi" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_d0" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_z0" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_z0sin" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_theta" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_qoverp" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_prodR" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_prodZ" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+        <hist1D name="truth_nSiHits" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       </TDirectory>
+      </TDirectory>
+      <TDirectory name="PixelClusters">
+       <hist1D name="barrelEndcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="layerDisk_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="layerDisk_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="phiModule_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="phiModule_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="etaModule_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="etaModule_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="isInnermost_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="isInnermost_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="isNextToInnermost_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="isNextToInnermost_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="eta_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="eta_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="perp_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="perp_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="charge_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="charge_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="total_charge_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="total_charge_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="tot_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="tot_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist2D name="charge_vs_tot_barrel" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="charge_vs_tot_endcap" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist1D name="total_tot_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="total_tot_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="omega_x_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="omega_x_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="omega_y_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="omega_y_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="lvl1a_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="lvl1a_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_x_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_x_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_y_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_y_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_z_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_z_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="local_x_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="local_x_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="local_y_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="local_y_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="localCovXX_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="localCovXX_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="localCovYY_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="localCovYY_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="sizeX_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="sizeX_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="sizeY_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="sizeY_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="widthY_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="widthY_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist2D name="global_xy_barrel" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="global_xy_endcap" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="global_zr_barrel" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="global_zr_endcap" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="sizeX_vs_eta_barrel" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="sizeX_vs_eta_endcap" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="sizeY_vs_eta_barrel" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="sizeY_vs_eta_endcap" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="sizeX_vs_sizeY_barrel" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="sizeX_vs_sizeY_endcap" type="TH2F" plotopts="box;norm" tests="KS"/>
+      </TDirectory>
+      <TDirectory name="StripClusters">
+       <hist1D name="barrelEndcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="layerDisk_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="layerDisk_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="phiModule_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="phiModule_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="etaModule_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="etaModule_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="sideModule_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="sideModule_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="eta_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="eta_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="perp_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="perp_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_x_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_x_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_y_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_y_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_z_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="global_z_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="local_x_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="local_x_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="localCovXX_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="localCovXX_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="sizeX_barrel" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist1D name="sizeX_endcap" type="TH1D" plotopts="norm;ratio" tests="KS"/>
+       <hist2D name="global_xy_barrel" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="global_xy_endcap" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="global_zr_barrel" type="TH2F" plotopts="box;norm" tests="KS"/>
+       <hist2D name="global_zr_endcap" type="TH2F" plotopts="box;norm" tests="KS"/>
+      </TDirectory>
+     </TDirectory>
+    </TDirectory>
+   </TDirectory>
+  </TDirectory>
+ </dcube>
+</dcube_client_config>
