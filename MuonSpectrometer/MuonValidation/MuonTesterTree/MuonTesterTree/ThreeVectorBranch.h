@@ -5,11 +5,6 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #define MUONTESTER_MUONTHREEVECTORBRANCH_H
 
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
-#ifndef XAOD_ANALYSIS
-#ifndef HEPMC3
-#include <HepMC/SimpleVector.h>
-#endif
-#endif
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/VectorBranch.h>
 
