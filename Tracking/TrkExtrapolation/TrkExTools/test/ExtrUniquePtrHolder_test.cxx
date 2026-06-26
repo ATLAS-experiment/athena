@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -14,7 +14,7 @@
 
 struct Cache {
   Trk::ExtrUniquePtrHolder<int> m_ptr;
-  int* m_anotherPtr;
+  int* m_anotherPtr = nullptr;
 };
 
 int main() {
