@@ -11,6 +11,7 @@
  **/
 
 #include <string>
+#include <string_view>
 
 /** @class Placement
  *  @brief This class holds all the necessary information to guide the writing of an object in a physical place.
@@ -39,7 +40,8 @@ public:
    /// Access auxiliary string
    const std::string& auxString() const { return m_auxString; }
    /// Set auxiliary string
-   Placement& setAuxString(const std::string& auxString) { m_auxString = auxString; return *this; }
+   Placement& setAuxString(std::string&& auxString) { m_auxString = std::move(auxString); return *this; }
+   void setAuxString(std::string_view auxString) { m_auxString = auxString; }
 
    /// Retrieve the string representation of the placement.
    const std::string toString() const;

@@ -112,6 +112,10 @@ if ( IS_DIRECTORY /usr/include/ck )
     PRIVATE "-DHAVE_CK" )
 endif()
 
+atlas_add_test( HexString_test
+   SOURCES test/HexString_test.cxx
+    LINK_LIBRARIES CxxUtils
+    POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( ConcurrentMap_test
   SOURCES test/ConcurrentMap_test.cxx

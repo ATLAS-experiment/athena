@@ -29,7 +29,7 @@
 #include <format>
 #include <iomanip>
 #include <sstream>
-
+#include "CxxUtils/HexString.h"
 //______________________________________________________________________________
 // Initialize the service.
 StatusCode AthenaPoolCnvSvc::initialize() {
@@ -153,11 +153,7 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
                ATH_MSG_DEBUG("setInputAttribute failed setting POOL database/container attributes.");
             }
          }
-         char text[32];
-         const std::string contextStr = std::format("[CTXT={:08X}]", auxContext);
-         std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
-         text[sizeof(text) - 1] = '\0';
-         tokAddr->getToken()->setAuxString(text);
+         tokAddr->getToken()->setAuxString(CxxUtils::HexString<"[CTXT={}]">(auxContext));
       }
    }
    // Forward to base class createObj
@@ -327,11 +323,7 @@ Token* AthenaPoolCnvSvc::registerForWrite(Placement* placement, const void* obj,
    PMonUtils::BasicStopWatch stopWatch("cRepR_ALL", m_chronoMap);
    Token* token = nullptr;
    if (m_persSvcPerOutput) { // Use separate PersistencySvc for each output stream/file
-      char text[32];
-      const std::string contextStr = std::format("[CTXT={:08X}]", m_poolSvc->getOutputContext(placement->fileName()));
-      std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
-      text[sizeof(text) - 1] = '\0';
-      placement->setAuxString(text);
+      placement->setAuxString(CxxUtils::HexString<"[CTXT={}]">(m_poolSvc->getOutputContext(placement->fileName())));
    }
    if(placement->technology() == 0) { // No technology specified, use the default
       placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
