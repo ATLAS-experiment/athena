@@ -6,7 +6,6 @@ EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 Context: s: 0  e: 0
-Current context: s: 0  e: 0
 initialize SG::WriteHandleKey<DecisionContainer> whkT
 call createAndStore( whkT ) with default context, twice
 StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key arbitrary and clid 1333228823
