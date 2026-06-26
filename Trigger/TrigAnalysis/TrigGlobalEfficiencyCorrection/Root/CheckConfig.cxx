@@ -1,17 +1,16 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
 
 #include "TrigGlobalEfficiencyCorrection/CheckConfig.h"
 
-#include <boost/container/flat_set.hpp>
-
 #include "TrigGlobalEfficiencyCorrection/Calculator.h"
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
+#include "CxxUtils/flat_set.h"
 template <typename Key>
-using flat_set = boost::container::flat_set<Key>;
+using flat_set = CxxUtils::flat_set<Key>;
 
 #include <cctype>
 
