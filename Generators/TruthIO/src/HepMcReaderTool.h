@@ -21,7 +21,6 @@
 
 // Forward declaration
 #include "AtlasHepMC/GenEvent_fwd.h"
-#include "AtlasHepMC/IO_BaseClass.h"
 #include "HepMC3/Reader.h"
 #include "HepMC3/ReaderAsciiHepMC2.h"
 #include "HepMC3/ReaderFactory_fwd.h"

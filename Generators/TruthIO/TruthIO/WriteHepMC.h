@@ -9,7 +9,7 @@
 #include "AtlasHepMC/IO_GenEvent.h"
 #include <memory>
 
-/// Write the MC event record to file in IO_GenEvent text format
+/// Write the MC event record to file
 class WriteHepMC : public GenBase {
 public:
 

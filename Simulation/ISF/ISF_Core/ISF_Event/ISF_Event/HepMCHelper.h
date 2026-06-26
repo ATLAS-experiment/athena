@@ -12,7 +12,6 @@
 #include "ISF_Event/ISFParticle.h"
 
 // HepMC includes
-#include "AtlasHepMC/GenRanges.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/IteratorRange.h"
 

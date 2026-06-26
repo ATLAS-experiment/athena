@@ -21,7 +21,6 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/GenRanges.h"
 #include "CxxUtils/checker_macros.h"
 #include <string>
 #include <string_view>

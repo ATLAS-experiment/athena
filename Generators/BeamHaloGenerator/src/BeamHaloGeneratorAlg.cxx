@@ -9,7 +9,6 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/WeightContainer.h"
 #include <cmath>
 
 //--------------------------------------------------------------------------
