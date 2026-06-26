@@ -53,18 +53,21 @@ QStringList VP1RawDataHandle_MM_RDO::clicked(bool verbose) const
   // ll << "   is a valid digit: "+ m_data->is_valid(idhelper);
   ll << "   stripResponseTime: " + QString::number(m_data->stripResponseTime());
   ll << "   stripResponseCharge: " + QString::number(m_data->stripResponseCharge());
-  if (verbose) {
-    if (idhelper) {
-      //Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
+  if (verbose)
+  {
+    if (idhelper)
+    {
+      // Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
       Identifier id(m_data->identify());
 
-      Amg::Vector3D globalPos; 
-         double length=0, angle=0;
-         int channel = idhelper->channel(id);
-         const MuonGM::MuonChannelDesign* design = elem->getDesign(id);
-         elem->stripGlobalPosition(id, globalPos);
-         length = design->channelLength(channel);
-         angle = design->stereoAngle();
+      Amg::Vector3D globalPos;
+      double length = 0, angle = 0;
+      int channel = idhelper->channel(id);
+      const MuonGM::MuonChannelDesign *design = elem->getDesign(id);
+      elem->stripGlobalPosition(id, globalPos);
+      length = design->channelLength(channel);
+      angle = design->stereoAngle();
+    }
   }
   return ll;
 }
