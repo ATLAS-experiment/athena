@@ -3,8 +3,9 @@
 */
 #include "MuonCreatorAlg.h"
 
-
+#include "MuonTrackEvent/AuthorHierachy.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "Acts/Utilities/Enumerate.hpp"
 
 namespace {
     constexpr double inGeV = 1./ Gaudi::Units::GeV;
@@ -47,19 +48,11 @@ StatusCode MuonCreatorAlg::setupDataShip(const EventContext& ctx, DataShip& ship
 
     std::unordered_set<const xAOD::TrackParticle*> cmbMsTrks{};
     std::vector<const MuonR4::MuonTagContainer*> tagContainers{};
-    tagContainers.reserve(m_tagKeys.size());
-    for (const SG::ReadHandleKey<MuonR4::MuonTagContainer>& key : m_tagKeys) {
-        const MuonR4::MuonTagContainer* tagCont{nullptr};
-        ATH_CHECK(SG::get(tagCont, key, ctx));
-        if (tagCont->empty()) {
-            continue;
-        }
-        tagContainers.push_back(tagCont);
+    tagContainers.resize(m_tagKeys.size());
+    for (const auto&[idx, key]  : Acts::enumerate(m_tagKeys)) {
+        ATH_CHECK(SG::get(tagContainers[idx], key, ctx));
     }
-
-    /** @todo Sort the tag containers by authors to ensure that 
-     *        the standalone tag is at last
-    */
+    std::ranges::sort(tagContainers, MuonR4::AuthorHierachy{});
     /** Loop over the defined muon tag containers and sort them 
      *  according to their ID track 
      *  (Covers segmentTag, inside-out combined, combined) */
