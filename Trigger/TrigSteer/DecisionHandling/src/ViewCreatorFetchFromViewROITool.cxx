@@ -1,6 +1,6 @@
 
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -31,7 +31,7 @@ StatusCode ViewCreatorFetchFromViewROITool::attachROILinks(TrigCompositeUtils::D
     LinkInfo<ViewContainer> viewToFetchFrom;
     if(!m_viewToFetchFrom.empty()){
       // Look for a specific View, keyed by the View's SG key
-      const std::vector<LinkInfo<ViewContainer>> myViews = findLinks<ViewContainer>(outputDecision, viewString(), TrigDefs::allFeaturesOfType);
+      const std::vector<LinkInfo<ViewContainer>> myViews = findLinks<ViewContainer>(ctx, outputDecision, viewString(), TrigDefs::allFeaturesOfType);
       bool found = false;
       for(const LinkInfo<ViewContainer>& v : myViews){
         ATH_MSG_DEBUG("view "<<v.link.dataID());
@@ -50,7 +50,7 @@ StatusCode ViewCreatorFetchFromViewROITool::attachROILinks(TrigCompositeUtils::D
     else{
 
       // Assume the most recent View is the one we fetch from, and that there is exactly one most recent View after any merging
-      const std::vector<LinkInfo<ViewContainer>> myView = findLinks<ViewContainer>(outputDecision, viewString(), TrigDefs::lastFeatureOfType);
+      const std::vector<LinkInfo<ViewContainer>> myView = findLinks<ViewContainer>(ctx, outputDecision, viewString(), TrigDefs::lastFeatureOfType);
       if (myView.size() != 1) {
         ATH_MSG_ERROR("Did not find exactly one most-recent '" << viewString() << "' for Decision object index " << outputDecision->index()
           << ", found " << myView.size());

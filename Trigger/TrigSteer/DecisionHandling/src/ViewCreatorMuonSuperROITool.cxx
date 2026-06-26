@@ -52,7 +52,7 @@ StatusCode ViewCreatorMuonSuperROITool::attachROILinks( TrigCompositeUtils::Deci
 
 
     // find the iParticle for this decision
-    const std::vector<TrigCompositeUtils::LinkInfo<xAOD::IParticleContainer>> myFeature = TrigCompositeUtils::findLinks<xAOD::IParticleContainer>(decision, m_iParticleLinkName, TrigDefs::lastFeatureOfType);
+    const std::vector<TrigCompositeUtils::LinkInfo<xAOD::IParticleContainer>> myFeature = TrigCompositeUtils::findLinks<xAOD::IParticleContainer>(ctx, decision, m_iParticleLinkName, TrigDefs::lastFeatureOfType);
 
     // there should be only one
     if (myFeature.size() != 1) {

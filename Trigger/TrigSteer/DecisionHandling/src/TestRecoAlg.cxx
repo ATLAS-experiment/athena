@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -95,7 +95,7 @@ namespace HLTTest {
     auto inputHandle = SG::makeHandle(m_input, ctx);
     ATH_MSG_DEBUG("Input " << m_input.key() << " has "<<inputHandle->size() <<" elements, scanning it");
     for ( auto i: *inputHandle.cptr() ) {     
-      auto featureInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( i, "initialRoI"  );
+      auto featureInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( ctx, i, "initialRoI"  );
       auto roiLink = featureInfo.link;
       CHECK( roiLink.isValid() );
       if ( roiLink.isValid() ) {

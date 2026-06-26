@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DecisionHandling/ComboHypo.h"
@@ -125,7 +125,7 @@ StatusCode ComboHypo::copyDecisions( const Combo::LegDecisionsMap & passingLegs,
 
         Decision* newDec = newDecisionIn( outDecisions, inputDecision, comboHypoAlgNodeName(), context );
         ATH_MSG_DEBUG("New decision (Container Index:" << input_counter << ", Element Index:"<< newDec->index() <<") has "
-          << (TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(newDec, initialRoIString())).isValid()
+          << (TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context, newDec, initialRoIString())).isValid()
           << " valid initialRoI, "<< TrigCompositeUtils::getLinkToPrevious(newDec).size() <<" previous decisions and "<<finalIds.size()<<" decision IDs") ;   
         insertDecisionIDs( finalIds, newDec );
 
