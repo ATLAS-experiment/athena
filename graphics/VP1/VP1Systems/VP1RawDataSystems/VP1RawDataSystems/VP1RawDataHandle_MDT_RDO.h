@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,7 +7,7 @@
 //                                                            //
 //  Header file for class VP1RawDataHandle_MDT_RDO            //
 //                                                            //
-//  Description: Handle for TRT RDO's                         //
+//  Description: Handle for MDT RDO's                         //
 //                                                            //
 //  Author: Riccardo Maria BIANCHI (riccardo.maria.bianchi@cern.ch) 
 //  Initial version: January 2024       
@@ -32,18 +32,11 @@ public:
   virtual ~VP1RawDataHandle_MDT_RDO();
   QStringList clicked(bool verbose) const;
 
-  // VP1RawDataFlags::InDetPartsFlags inInDetParts() const;
-
-  // bool highThreshold() const;
-  // double timeOverThreshold() const;
-
 protected:
   SoNode * buildShape();
   SoTransform * buildTransform();
   const MdtDigit* m_data;
   const MuonGM::MdtReadoutElement * element() const;//null in case of errors
-  // int strawID() const;//-1 in case of errors
-
 };
 
 #endif

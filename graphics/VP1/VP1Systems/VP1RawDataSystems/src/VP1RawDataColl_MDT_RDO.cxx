@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,24 +35,13 @@ QStringList VP1RawDataColl_MDT_RDO::availableCollections(IVP1System*sys)
 //____________________________________________________________________
 class VP1RawDataColl_MDT_RDO::Imp {
 public:
-  // VP1Interval allowedToT;
-  // bool requireHT = false;
-  // bool useSpecialTRTHTMaterial = false;
 };
 
 
 //____________________________________________________________________
 VP1RawDataColl_MDT_RDO::VP1RawDataColl_MDT_RDO(VP1RawDataCommonData*common,const QString& key)
   : VP1RawDataCollBase(common,key), m_d(new Imp)
-{
-  // m_d->requireHT = true;
-  // m_d->useSpecialTRTHTMaterial = true;
-  // m_d->allowedToT = VP1Interval();
-
-  // connect(common->controller(),SIGNAL(useSpecialTRTHTMaterialChanged(bool)),
-	//   this,SLOT(setUseSpecialTRTHTMaterial(bool)));
-  // setUseSpecialTRTHTMaterial(common->controller()->useSpecialTRTHTMaterial());
-}
+{}
 
 //____________________________________________________________________
 VP1RawDataColl_MDT_RDO::~VP1RawDataColl_MDT_RDO()
@@ -75,13 +64,6 @@ bool VP1RawDataColl_MDT_RDO::load() {
 
   //   // From:
   //   https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonCnv/MuonByteStreamCnvTest/src/ReadMdtDigit.cxx#0055
-  // std::string key = "MDT_DIGITS";
-  //      SG::ReadHandle<Muon::MdtDigitContainer> hndl(key);
-  //      const MdtDigitContainer* mdt_container = hndl.get();
-  //      ATH_CHECK(mdt_container != nullptr);
-
-  // SG::ReadCondHandle<MuonGM::MuonDetectorManager>
-  // detMgr{"MuonDetectorManager"};
 
   // get the detMgr
   // TODO: we should probably simplify by moving to:
@@ -100,25 +82,9 @@ bool VP1RawDataColl_MDT_RDO::load() {
   if (!container.isValid()) {
     std::cout << "Could not find MdtDigitContainer called " << container.name()
               << " in store " << container.store() << std::endl;
-    // return StatusCode::SUCCESS;
   }
-  //  ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() << "
-  //  in store " << container.store());
-
-  // ATH_MSG_DEBUG("****** mdt->size() : " << mdt_container->size());
-
-  // MuonDetectorManager from the conditions store
-  //  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> detMgr{this,
-  //  "DetectorManagerKey", "MuonDetectorManager", "Key of input
-  //  MuonDetectorManager condition data"};
-
-  //  // MuonDetectorManager from the conditions store
-  //          SG::ReadCondHandleKey<MuonGM::MuonDetectorManager>
-  //          m_DetectorManagerKey{this, "DetectorManagerKey",
-  //          "MuonDetectorManager",
-  //                                                                                  "Key of input MuonDetectorManager condition data"};
-  //          SG::ReadCondHandle<MuonGM::MuonDetectorManager>
-  //          DetectorManagerHandle{m_DetectorManagerKey};
+   ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() << "
+   in store " << container.store());
 
   // Iterate on the collections
   for (const MdtDigitCollection* coll : *container) {
@@ -144,10 +110,6 @@ bool VP1RawDataColl_MDT_RDO::load() {
 //____________________________________________________________________
 bool VP1RawDataColl_MDT_RDO::cut(VP1RawDataHandleBase* handle)
 {
-
-  // if (m_d->requireHT && !static_cast<VP1RawDataHandle_TRT_RDO*>(handle)->highThreshold())
-  //   return false;
-  // return m_d->allowedToT.contains(static_cast<VP1RawDataHandle_TRT_RDO*>(handle)->timeOverThreshold());
   VP1Msg::message("cut returning 'true'...");
   return true;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -25,7 +25,6 @@
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonDigitContainer/sTgcDigitContainer.h"
-// #include "MuonRDO/MmCsmContainer.h"
 
 class VP1RawDataColl_sTGC_RDO : public VP1RawDataCollBase {
 
@@ -40,15 +39,6 @@ public:
   virtual ~VP1RawDataColl_sTGC_RDO();
 
   bool cut(VP1RawDataHandleBase*);
-
-  // bool usesInDetPartsCuts() { return true; }//To get InDet parts cuts
-
-  // bool useSpecialHTMat();
-
-public Q_SLOTS:
-  // void setRequireHT(bool);
-  // void setAllowedToT(const VP1Interval&);
-  // void setUseSpecialTRTHTMaterial(bool);
 
 protected:
   void assignDefaultMaterial(SoMaterial*) const;
