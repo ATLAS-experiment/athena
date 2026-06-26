@@ -747,6 +747,20 @@ IDTRKVALIDStream.AddItem("xAOD::EventAuxInfo#*")
 IDTRKVALIDStream.AddItem("xAOD::TrackParticleContainer#InDetTrackParticles")
 IDTRKVALIDStream.AddItem("xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux."+excludedAuxData)
 
+if InDetFlags.doLowPtRoI:
+    IDTRKVALIDStream.AddItem("xAOD::TrackParticleContainer#LowPtRoITrackParticles")
+    IDTRKVALIDStream.AddItem("xAOD::TrackParticleAuxContainer#LowPtRoITrackParticlesAux."+excludedAuxData)
+    IDTRKVALIDStream.AddItem("xAOD::VertexContainer#LowPtRoIVertexContainer")
+    IDTRKVALIDStream.AddItem("xAOD::VertexAuxContainer#LowPtRoIVertexContainerAux."+excludedAuxData)
+
+if InDetFlags.doStoreTrackSeeds() and InDetFlags.doLowPtRoI:
+   IDTRKVALIDStream.AddItem('xAOD::TrackParticleContainer#'+InDetKeys.SiSPLowPtRoISeedSegments()+"TrackParticle")
+   IDTRKVALIDStream.AddItem('xAOD::TrackParticleAuxContainer#'+InDetKeys.SiSPLowPtRoISeedSegments()+"TrackParticle"+'Aux.' + excludedAuxData)
+
+if InDetFlags.doStoreTrackCandidates() and InDetFlags.doLowPtRoI:
+   IDTRKVALIDStream.AddItem('xAOD::TrackParticleContainer#'+InDetKeys.xAODSiSPLowPtRoITrackCandidates()+"TrackParticle")
+   IDTRKVALIDStream.AddItem('xAOD::TrackParticleAuxContainer#'+InDetKeys.xAODSiSPLowPtRoITrackCandidates()+"TrackParticle"+'Aux.' + excludedAuxData)
+
 if InDetFlags.doTrackSegmentsPixel():
     IDTRKVALIDStream.AddItem("xAOD::TrackParticleContainer#InDetPixelTrackParticles")
     IDTRKVALIDStream.AddItem("xAOD::TrackParticleAuxContainer#InDetPixelTrackParticlesAux."+excludedAuxData)
