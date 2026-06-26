@@ -1,27 +1,32 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # This module contains postExec commands that can be used with the CA-based
-# runHLT in athena(HLT).
+# runHLT in athena(EF).
 #
 # Assumptions:
 #  - the final ComponentAccumulator instance is called 'cfg'
 #  - the ConfigFlags instance is called 'flags'
 #
 # Example usage:
-#   athenaHLT -C 'from TriggerJobOpts import PostExec; PostExec.foo([args])' ... TriggerJobOpts.runHLT
+#   athenaEF -C 'from TriggerJobOpts import PostExec; PostExec.foo([args])' ... TriggerJobOpts.runHLT
 #   athena --postExec 'from TriggerJobOpts import PostExec; PostExec.foo([args])' TriggerJobOpts/runHLT.py
 #
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerJobOpts.PostExec')
 
-# For convenience we provide access to the globals of the calling frame.
-# This is where the `exec` of the post-commmand happens in athena or athenaHLT.
+# For convenience we provide access to the CA of the calling frame.
+# This is where the `exec` of the post-commmand happens in athena or athenaEF.
+cfg = None
+
 import inspect
 __postExec_frame = next(filter(lambda f : ('TrigPSCPythonCASetup.py' in f.filename or
+                                           'athenaEF.py' in f.filename or
                                            'runHLT.py' in f.filename), inspect.stack()), None)
 if __postExec_frame is not None:
-   __globals = dict(inspect.getmembers(__postExec_frame[0]))["f_globals"]
+   __frame_members = dict(inspect.getmembers(__postExec_frame[0]))
+   # in athenaEF we find the CA in the locals() otherwise globals()
+   cfg =  __frame_members['f_globals'].get('cfg') or __frame_members['f_locals'].get('cfg')
 
 
 #
@@ -34,7 +39,7 @@ def forceConditions(run, lb, timestamp=None, iovDbSvc=None):
    log.info(forceConditions.__doc__)
 
    if iovDbSvc is None:
-      iovDbSvc = __globals['cfg'].getService('IOVDbSvc')
+      iovDbSvc = cfg.getService('IOVDbSvc')
 
    # Do not override these folders:
    ignore = ['/TRIGGER/HLT/PrescaleKey']   # see ATR-22143
@@ -79,10 +84,10 @@ def forceConditions(run, lb, timestamp=None, iovDbSvc=None):
 def reverseViews():
    """Process views in reverse order"""
 
-   log.info(forceConditions.__doc__)
+   log.info(reverseViews.__doc__)
 
    from TriggerJobOpts.TriggerConfig import collectViewMakers
-   viewMakers = collectViewMakers( __globals['cfg'].getSequence() )
+   viewMakers = collectViewMakers( cfg.getSequence() )
    for alg in viewMakers:
       alg.ReverseViewsDebug = True
 
