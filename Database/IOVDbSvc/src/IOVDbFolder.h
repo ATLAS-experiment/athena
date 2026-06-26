@@ -61,6 +61,8 @@ public:
   // access methods to various internal information
   const std::string& folderName() const;
   const std::string& key() const;
+  const std::string& source() const;
+
   IOVDbConn* conn();
   bool multiVersion() const;
   bool timeStamp() const;
@@ -327,6 +329,7 @@ private:
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}
 inline const std::string& IOVDbFolder::key() const { return m_key;}
+inline const std::string& IOVDbFolder::source() const { return m_source; }
 
 inline IOVDbConn* IOVDbFolder::conn() { return m_conn;}
 
@@ -339,6 +342,8 @@ inline bool IOVDbFolder::tagOverride() const { return m_tagoverride; }
 inline bool IOVDbFolder::noOverride() const { return m_notagoverride; }
 
 inline bool IOVDbFolder::retrieved() const { return m_retrieved; }
+
+
 
 inline IOVDbNamespace::FolderType IOVDbFolder::folderType() const 
 {return m_foldertype;}
