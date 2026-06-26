@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -862,7 +862,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_run3_ofc_extrapolate_v0" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_MuonLowMu_rel21_run3ofc"));
+    TH1* histo_ps_tot_error = static_cast<TH1*>(f.Get("hPS_MuonLowMu_rel21_run3ofc"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
               new GetAmountHisto1D(*histo_ps_tot_error));
@@ -870,7 +870,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_mu_r21_v0" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v11/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_MuonLowMu_rel21"));
+    TH1* histo_ps_tot_error = static_cast<TH1*>(f.Get("hPS_MuonLowMu_rel21"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
               new GetAmountHisto1D(*histo_ps_tot_error));
