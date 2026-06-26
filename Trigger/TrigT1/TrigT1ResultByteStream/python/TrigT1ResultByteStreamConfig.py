@@ -318,8 +318,6 @@ def L1TriggerByteStreamDecoderCfg(flags):
   # The decoderAlg needs to load ByteStreamMetadata for the detector mask
   from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
   readBSAcc = ByteStreamReadCfg(flags)
-  readBSAcc.getEventAlgo('SGInputLoader').Load.add(
-    ('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata'))
   acc.merge(readBSAcc)
 
   # In reconstruction/monitoring jobs add the decoders' output EDM to the output file
