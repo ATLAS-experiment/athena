@@ -46,6 +46,17 @@ def HIEventSelectionRun3MonToolCfg(flags):
     monTool.defineHistogram( 'zdcPreSampleC;zdcPreSampleC_failed', cutmask="NoPUZDCPresampler_failed", path='EXPERT', type='TH1F', title='failed;ZDCPreampleAmp side C',
                              xbins=100, xmin=-400, xmax=1000)
     
+    monTool.defineHistogram( 'fcalEt;OO_all', path='EXPERT', type='TH1F', title='all;FCal Et sum',
+                             xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram( 'fcalEt;OO_1_FCalNtrk', cutmask='OO_1_passed',  path='EXPERT', type='TH1F', title='FCalNtrk;FCal Et sum',
+                             xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram( 'fcalEt;OO_2_Vtx', cutmask='OO_2_passed',  path='EXPERT', type='TH1F', title='FCalNtrk and Vtx;FCal Et sum',
+                             xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram( 'fcalEt;OO_3_FCalZdc', cutmask='OO_3_passed',  path='EXPERT', type='TH1F', title='FCalNtrk and Vtx and FCal ZDC;FCal Et sum',
+                             xbins=100, xmin=0, xmax=1000)
+    monTool.defineHistogram( 'fcalEt;OO_4_TCFCal', cutmask='OO_4_passed',  path='EXPERT', type='TH1F', title='FCalNtrk and Vtx and FCal ZDC and topoClusterInFCal;FCal Et sum',
+                             xbins=100, xmin=0, xmax=1000)
+
     
     prefix=flags.Input.Files[0].split("/")[-1]
     histsvc = CompFactory.THistSvc(Output=[f"EXPERT DATAFILE='{prefix}HIEventSelectionRun3Validation.root' OPT='RECREATE'"])
