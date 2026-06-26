@@ -97,12 +97,12 @@ namespace ActsTrk::detail {
        return createOnTrackCalibrator(ctx);
     }
 
-    virtual std::unique_ptr<PixelOnTrackCalibratorBase<traj_t> > createOnTrackCalibrator(const EventContext &ctx) const override final {
+    virtual std::unique_ptr<PixelOnTrackCalibratorBase<traj_t> > createOnTrackCalibrator(const EventContext &ctx) const override {
        return std::make_unique<AnalogueClusteringCalibrator<calib_data_t,traj_t> >(this->createBaseOptions(ctx),
                                                                                    this->createOptions(ctx));
     }
 
-  private:
+  protected:
     const typename AnalogueClusteringCalibrator<calib_data_t,traj_t>::error_data_t* getErrorData(const EventContext &ctx) const;
 
     AnalogueClusteringCalibratorOptions<calib_data_t> createOptions(const EventContext &ctx) const {
