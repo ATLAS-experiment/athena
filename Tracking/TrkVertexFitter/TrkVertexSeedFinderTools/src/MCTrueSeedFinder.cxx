@@ -8,8 +8,6 @@
 
 #include <utility>
 
-
-
 #include "TrkVertexSeedFinderTools/MCTrueSeedFinder.h"
 #include "TrkTrack/Track.h"
 #include "TrkEventPrimitives/ParamDefs.h"
@@ -22,10 +20,6 @@
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
-#include "GaudiKernel/IPartPropSvc.h"
-
-// Helper functors:
-#include "HepPDT/ParticleDataTable.hh"
 
 namespace {
     /// Auxiliary class for sorting interactions info
@@ -49,13 +43,11 @@ namespace Trk
 
   MCTrueSeedFinder::MCTrueSeedFinder(const std::string& t, const std::string& n, const IInterface*  p) : 
     base_class(t,n,p),
-    m_partPropSvc( "PartPropSvc", n ),
     m_removeInTimePileUp(false),
     m_removeHardScattering(false)
   {   
     declareProperty("RemoveHardScattering", m_removeHardScattering, "Do not consider hard-scattering");
     declareProperty("RemoveInTimePileUp", m_removeInTimePileUp, "Do not consider in-time pile-up");
-    declareProperty( "PartPropSvc", m_partPropSvc, "Handle to the particle property service" );
   }
   
   
@@ -232,13 +224,7 @@ namespace Trk
     /// remove gluons and quarks of status 2 that pass IsGenStable!!!
     if( std::abs(pdg) < 7 || std::abs(pdg) == 21 ) return false;
 
-    const HepPDT::ParticleData* pd = m_partPropSvc->PDT()->particle( std::abs( pdg ) );
-    if( ! pd ) {
-      ATH_MSG_DEBUG( "Could not get particle data for = " << part 
-		     << " process id " <<HepMC::signal_process_id(part->parent_event()));
-      return false;
-    }
-    float charge = pd->charge();
+    float charge = MC::charge(pdg);
 
     return std::abs( charge ) >= 1E-5;
   }

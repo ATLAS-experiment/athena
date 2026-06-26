@@ -10,7 +10,6 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "GeneratorObjects/McEventCollection.h"
 
-class IPartPropSvc;
 
 #include "AtlasHepMC/GenParticle_fwd.h"
 #include "AtlasHepMC/GenEvent_fwd.h"
@@ -98,9 +97,6 @@ namespace Trk
       "G4Truth",
       "MC Event Collection Name"
     };
-
-    /// Get particle properties
-    ServiceHandle< IPartPropSvc > m_partPropSvc;
 
     //Implement directly pass methods from GenObjectsFilterTool until better sol'n is found
     bool m_removeInTimePileUp; ///< Flag to consider in-time pile-up interactions
