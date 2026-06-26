@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///////////////////////////////////////////////////////////////////
 // L1TriggerTowerToolRun3.h, 
@@ -70,61 +70,63 @@ namespace LVL1
       virtual void handle(const Incident&) override;
 
       /** Take in vector of ADC digits, return PPrASIC results */
-      virtual void process(const std::vector<int> &digits,
+      virtual void process(const EventContext& ctx,
+                           const std::vector<int> &digits,
                            double eta, double phi, int layer,
                            std::vector<int> &et, std::vector<int> &bcidResults,
                            std::vector<int> &bcidDecisions, bool useJepLut = true) override;
        
-      virtual void process(const std::vector<int> &digits, const L1CaloCoolChannelId& channelId,
+      virtual void process(const EventContext& ctx,
+                           const std::vector<int> &digits, const L1CaloCoolChannelId& channelId,
                            std::vector<int> &et, std::vector<int> &bcidResults,
                            std::vector<int> &bcidDecisions, bool useJepLut = true) override;
 
-      virtual void simulateChannel(const xAOD::TriggerTower& tt, std::vector<int>& outCpLut,std::vector<int>& outJepLut, std::vector<int>& bcidResults, std::vector<int>& bcidDecisions) const override;
+      virtual void simulateChannel(const EventContext& ctx, const xAOD::TriggerTower& tt, std::vector<int>& outCpLut,std::vector<int>& outJepLut, std::vector<int>& bcidResults, std::vector<int>& bcidDecisions) const override;
       
       virtual void pedestalCorrection(std::vector<int>& firInOut, int firPed, int iElement, int layer,
                                       int bcid, float mu, std::vector<int_least16_t>& correctionOut) override;
-      virtual void fir(const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void fir(const EventContext& ctx, const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
       virtual void fir(const std::vector<int> &digits, const std::vector<int> &firCoeffs, std::vector<int> &output) const override;
-      virtual void dropBits(const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void dropBits(const EventContext& ctx, const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
       virtual void dropBits(const std::vector<int> &fir, unsigned int first, std::vector<int> &output) const override;
-      virtual void etRange(const std::vector<int> &et, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void etRange(const EventContext& ctx, const std::vector<int> &et, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
       virtual void etRange(const std::vector<int> &et, int energyLow, int energyHigh, std::vector<int> &output) const override;
-      virtual void peakBcid(const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void peakBcid(const EventContext& ctx, const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
       virtual void peakBcid(const std::vector<int> &fir, unsigned int strategy,  std::vector<int> &output) const override;
-      virtual void satBcid(const std::vector<int> &digits, const L1CaloCoolChannelId& channelId,  std::vector<int> &output) const override;
+      virtual void satBcid(const EventContext& ctx, const std::vector<int> &digits, const L1CaloCoolChannelId& channelId,  std::vector<int> &output) const override;
       virtual void satBcid(const std::vector<int> &digits, int satLow, int satHigh, int satLevel, std::vector<int> &output) const override;
-      virtual void bcid(const std::vector<int> &fir, const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void bcid(const EventContext& ctx, const std::vector<int> &fir, const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
       virtual void bcid(const std::vector<int> &fir, const std::vector<int> &digits, unsigned int strategy, int satLow, int satHigh, int satLevel, std::vector<int> &output) const override;
       virtual void bcid(const std::vector<int> &fir, const std::vector<int> &lutInput, const std::vector<int> &digits, int energyLow, int energyHigh, int decisionSource, std::vector<unsigned int> &decisionConditions, unsigned int strategy, int satLow, int satHigh, int satLevel, std::vector<int> &result, std::vector<int> &decision) const override;
-      virtual void bcidDecisionRange(const std::vector<int>& lutInput, const std::vector<int>& digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
-      virtual void bcidDecision(const std::vector<int> &bcidResults, const std::vector<int> &range, std::vector<int> &output) const override;
-      virtual void bcidDecision(const std::vector<int> &bcidResults, const std::vector<int> &range, const std::vector<unsigned int> &mask, std::vector<int> &output) const;
-      virtual void cpLut(const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
-      virtual void jepLut(const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void bcidDecisionRange(const EventContext& ctx, const std::vector<int>& lutInput, const std::vector<int>& digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void bcidDecision(const EventContext& ctx, const std::vector<int> &bcidResults, const std::vector<int> &range, std::vector<int> &output) const override;
+      virtual void cpLut(const EventContext& ctx, const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void jepLut(const EventContext& ctx, const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
       virtual void lut(const std::vector<int> &fir, int slope, int offset, int cut, int strategy, bool disabled, std::vector<int> &output) const override;
-      virtual void nonLinearLut(const std::vector<int> &fir, int slope, int offset, int cut, int scale, short par1, short par2, short par3, short par4, bool disabled, std::vector<int> &output) const;
-      virtual void applyEtRange(const std::vector<int>& lut, const std::vector<int>& range, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
-      virtual void firParams(const L1CaloCoolChannelId& channelId, std::vector<int> &firCoeffs) const override;
-      virtual void bcidParams(const L1CaloCoolChannelId& channelId, int &energyLow, int &energyHigh, int &decisionSource, std::vector<unsigned int> &decisionConditions,
+      virtual void applyEtRange(const EventContext& ctx, const std::vector<int>& lut, const std::vector<int>& range, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const override;
+      virtual void firParams(const EventContext& ctx, const L1CaloCoolChannelId& channelId, std::vector<int> &firCoeffs) const override;
+      virtual void bcidParams(const EventContext& ctx, const L1CaloCoolChannelId& channelId, int &energyLow, int &energyHigh, int &decisionSource, std::vector<unsigned int> &decisionConditions,
                               unsigned int &peakFinderStrategy, int &satLow, int &satHigh, int &satLevel) const override;
-      virtual void cpLutParams(const L1CaloCoolChannelId& channelId, int &startBit, int &slope, int &offset, int &cut, int &pedValue, float &pedMean, int &strategy, bool &disabled) override;
-      virtual void jepLutParams(const L1CaloCoolChannelId& channelId, int &startBit, int &slope, int &offset, int &cut, int &pedValue, float &pedMean, int &strategy, bool &disabled) override;
+      virtual void cpLutParams(const EventContext& ctx, const L1CaloCoolChannelId& channelId, int &startBit, int &slope, int &offset, int &cut, int &pedValue, float &pedMean, int &strategy, bool &disabled) override;
+      virtual void jepLutParams(const EventContext& ctx, const L1CaloCoolChannelId& channelId, int &startBit, int &slope, int &offset, int &cut, int &pedValue, float &pedMean, int &strategy, bool &disabled) override;
       virtual Identifier identifier(double eta, double phi, int layer) override;
       virtual HWIdentifier hwIdentifier(const Identifier& id) override;
       virtual HWIdentifier hwIdentifier(double eta, double phi, int layer) override;
       virtual L1CaloCoolChannelId channelID(double eta, double phi, int layer) override;
       virtual L1CaloCoolChannelId channelID(const Identifier& id) override;
-      virtual bool satOverride(int range) const override;
-      virtual bool disabledChannel(const L1CaloCoolChannelId& channelId) const override;
+      virtual bool satOverride(const EventContext& ctx, int range) const override;
+      virtual bool disabledChannel(const EventContext& ctx, const L1CaloCoolChannelId& channelId) const override;
       virtual double FCalTTeta(const L1CaloCoolChannelId& channelId) override;
       virtual double FCalTTeta(double nominalEta, double phi, int layer) override;
-      virtual std::pair<double, double> refValues(const L1CaloCoolChannelId& channelId) override; 
+      virtual std::pair<double, double> refValues(const EventContext& ctx, const L1CaloCoolChannelId& channelId) override;
       
     private:
-      bool isRun2() const;
+      bool isRun2(const EventContext& ctx) const;
+      void bcidDecision(const std::vector<int> &bcidResults, const std::vector<int> &range, const std::vector<unsigned int> &mask, std::vector<int> &output) const;
+      void nonLinearLut(const std::vector<int> &fir, int slope, int offset, int cut, int scale, short par1, short par2, short par3, short par4, bool disabled, std::vector<int> &output) const;
   
       /** Get extra noise cut with disabled channel */
-      bool disabledChannel(const L1CaloCoolChannelId& channelId, unsigned int& noiseCut) const;
+      bool disabledChannel(const EventContext& ctx, const L1CaloCoolChannelId& channelId, unsigned int& noiseCut) const;
 
       // calculate the LUT offset from DB parameters
       unsigned int getLutOffset(const double &pedMean, const unsigned int &firStartBit, const std::vector<short int> &firCoeff, const unsigned int &lutSlope, const unsigned int &lutStrategy) const;

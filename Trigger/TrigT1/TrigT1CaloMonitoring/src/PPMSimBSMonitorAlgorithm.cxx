@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PPMSimBSMonitorAlgorithm.h"
@@ -142,7 +142,7 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
     if(datCp || datJep || *std::max_element(std::begin(ADC), std::end(ADC)) >= m_simulationADCCut) {
       BcidR.clear();
       BcidD.clear();
-      m_ttTool->simulateChannel(*(myTower.tower), LutCp, LutJep, BcidR, BcidD);
+      m_ttTool->simulateChannel(ctx, *(myTower.tower), LutCp, LutJep, BcidR, BcidD);
       simBcid = BcidR[Peak];
       if (Slices < 7 || nPedCorr < 3) {
 	simJep = LutJep[Peak];
