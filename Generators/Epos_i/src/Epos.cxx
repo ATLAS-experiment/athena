@@ -38,6 +38,47 @@ extern "C" double atl_epos_rndm_( int* )
 {
     return CLHEP::RandFlat::shoot(p_rndmEngine);
 }
+
+// ----------------------------------------------------------------------
+// Translations of DRanf.F, Ranfini.F, Rangen.F Fortran routines.
+// These replace the original Fortran source files.
+// ----------------------------------------------------------------------
+
+// dranf: returns a uniform double in (0,1), retrying on boundary values.
+extern "C" double dranf_( int* dummy )
+{
+    double r;
+    do {
+        r = atl_epos_rndm_( dummy );
+    } while ( r <= 0.0 || r >= 1.0 );
+    return r;
+}
+
+// ranfgt / ranfst: seed query/set stubs (no-op in this implementation).
+extern "C" void ranfgt_( double* /*seed*/ ) {}
+extern "C" void ranfst_( double* /*seed*/ ) {}
+
+// ranfini: random-number initialisation stub (no-op in this implementation).
+extern "C" void ranfini_( int* /*iseed*/, int* /*iseq*/, int* /*iqq*/ ) {}
+
+// rangen: single-precision wrapper around dranf_, retrying on boundary values.
+extern "C" float rangen_()
+{
+    int dummy = 0;
+    float r;
+    do {
+        r = static_cast<float>( dranf_( &dummy ) );
+    } while ( r <= 0.0f || r >= 1.0f );
+    return r;
+}
+
+// drangen: double-precision wrapper around dranf_.
+extern "C" double drangen_( double* dummy )
+{
+    int idummy = static_cast<int>( *dummy );
+    return dranf_( &idummy );
+}
+
 // ----------------------------------------------------------------------
 // Epos Fortran bindings.
 // ----------------------------------------------------------------------

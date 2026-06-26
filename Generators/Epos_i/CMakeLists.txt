@@ -13,9 +13,6 @@ atlas_disable_as_needed()
 # Component(s) in the package:
 atlas_add_library( Epos_iLib
                    src/Epos.cxx
-                   src/Ranfini.F
-                   src/DRanf.F
-                   src/Rangen.F
                    PUBLIC_HEADERS Epos_i
                    INCLUDE_DIRS ${CRMC_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${CRMC_INCLUDE_DIRS}
