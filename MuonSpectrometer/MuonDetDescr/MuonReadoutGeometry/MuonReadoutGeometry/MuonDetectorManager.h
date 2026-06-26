@@ -20,7 +20,7 @@
 #include "MuonAlignmentData/sTGCAsBuiltData.h"
 #include "MuonAlignmentData/NswPassivationDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-
+#include "GeoModelUtilities/GeoAlignmentStore.h"
 
 #ifndef SIMULATIONBASE
 #include "MuonNSWAsBuilt/StripCalculator.h"
@@ -143,7 +143,7 @@ namespace MuonGM {
         void clearCache();
         void fillCache();
 
-        StatusCode updateAlignment(const ALineContainer& a);
+      StatusCode updateAlignment(const ALineContainer& a, GeoAlignmentStore* alignStore);
         StatusCode updateDeformations(const BLineContainer& a);
         StatusCode updateMdtAsBuiltParams(const MdtAsBuiltContainer& a);
         StatusCode updateCSCInternalAlignmentMap(const ALineContainer& cscIntAline);

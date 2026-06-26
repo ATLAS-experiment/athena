@@ -15,6 +15,7 @@
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
+#include "GeoModelUtilities/GeoAlignmentStore.h"
 #include <fstream>
 
 MuonDetectorCondAlg::MuonDetectorCondAlg(const std::string &name, ISvcLocator *pSvcLocator) : 
@@ -160,7 +161,8 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
             return StatusCode::FAILURE;
         }
         writeHandle.addDependency(readALinesHandle);
-        ATH_CHECK(MuonMgrData->updateAlignment(**readALinesHandle));     
+	std::unique_ptr<GeoAlignmentStore> alignStore = std::make_unique<GeoAlignmentStore>();
+        ATH_CHECK(MuonMgrData->updateAlignment(**readALinesHandle, alignStore.get()));
     } else ATH_MSG_INFO("Do not apply the A Lines of the alignment");
  
     // =======================

@@ -18,6 +18,8 @@
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/StraightLineSurface.h"
 
+#include "GeoModelUtilities/GeoAlignmentStore.h"
+
 namespace {
     std::string to_string(const Trk::DetectorElemType type ) {
         if (type == Trk::DetectorElemType::Mdt) return "Mdt";
@@ -123,4 +125,9 @@ namespace MuonGM {
         clearCache();
         fillCache();
     }
+
+  void MuonReadoutElement::updateTransforms(GeoAlignmentStore* alignStore) {
+    m_absTransform = getMaterialGeom()->getAbsoluteTransform(alignStore);
+    m_defTransform = getMaterialGeom()->getDefAbsoluteTransform(alignStore);
+  }
 }  // namespace MuonGM

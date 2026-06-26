@@ -187,7 +187,7 @@ namespace MuonGM {
 	if (nAlines == 0) {
 	  ap.tras = ap.traz = ap.trat = ap.rots = ap.rotz = ap.rott = 0.;
 	  ap.jobindex = 0;
-	  mst->setDelta_fromAline(ap.tras, ap.traz, ap.trat, ap.rots, ap.rotz, ap.rott);
+	  mst->setDelta_fromAline(ap.tras, ap.traz, ap.trat, ap.rots, ap.rotz, ap.rott, nullptr);
 	} else if (nAlines > 0) {
 	  AlignPosIterator alast;
 	  AlignPosIterator afirst = station->getFirstAlignPosInRange(zi, fi, alast);
@@ -204,7 +204,7 @@ namespace MuonGM {
 	    mst->setTransform(xf);
 	    mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, position)); 
 	    mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, position) * tsz_to_szt.inverse()); 
-	    mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity());
+	    mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity(), nullptr);
 	  }
 	}
       } // end loop on positions

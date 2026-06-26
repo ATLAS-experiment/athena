@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonReadoutGeometry_MuonStation_H
@@ -18,6 +18,7 @@
 #include "CxxUtils/CachedValue.h"
 class BLinePar;
 class MdtAsBuiltPar;
+class GeoAlignmentStore;
 
 namespace MuonGM {
 
@@ -88,11 +89,11 @@ namespace MuonGM {
         void updateBlineFixedPointInAmdbLRS();
         void setNativeToAmdbLRS(Amg::Transform3D xf);
         void setNominalAmdbLRSToGlobal(Amg::Transform3D xf);
-        void setDeltaAmdbLRS(Amg::Transform3D xf);
+      void setDeltaAmdbLRS(Amg::Transform3D xf, GeoAlignmentStore* alignStore);
         //!< set the delta transform in the amdb frame and update the geoModel Delta
 
-        void setDelta_fromAline_forComp(int, double, double, double, double, double, double);
-        void setDelta_fromAline(double, double, double, double, double, double);
+      void setDelta_fromAline_forComp(int, double, double, double, double, double, double, GeoAlignmentStore*);
+      void setDelta_fromAline(double, double, double, double, double, double, GeoAlignmentStore*);
         //!< set the delta transform in the amdb frame and update the geoModel Delta
         void addMuonReadoutElementWithAlTransf(MuonReadoutElement* a, GeoAlignableTransform* ptrsf, int jobIndex);
         
@@ -131,7 +132,8 @@ namespace MuonGM {
 
         void setMdtRsize(const double rSize);
         void setMdtZsize(const double zSize);
-        
+
+        void updateRETransforms(GeoAlignmentStore* geoAlignStore);        
     private:
         // Declaring private message stream member.
         bool m_firstRequestBlineFixedP{true};
