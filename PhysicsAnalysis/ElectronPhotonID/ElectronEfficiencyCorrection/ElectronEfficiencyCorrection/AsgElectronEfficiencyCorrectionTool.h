@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef __ASGELECTRONEFFICIENCYCORRECTIONTOOL__
@@ -133,10 +133,10 @@ private:
   StatusCode InitSystematics();
 
   // Gets the correction filename from map
-  virtual StatusCode getFile(const std::string& recokey,
-                             const std::string& idkey,
-                             const std::string& isokey,
-                             const std::string& trigkey);
+  StatusCode getFile(const std::string& recokey,
+                     const std::string& idkey,
+                     const std::string& isokey,
+                     const std::string& trigkey);
   // Get the simulation type from metadata
   StatusCode get_simType_from_metadata(
     PATCore::ParticleDataType::DataType& result) const;
