@@ -147,6 +147,7 @@ def configureInDetFlags(runArgs, flags):
         flags.InDet.Align.inputTFiles = [os.path.abspath(inputTFile) for inputTFile in runArgs.inputTFile]
         flags.InDet.Align.outputConditionFile = f"{flags.InDet.Align.baseDir}/Solve/{runArgs.outputConditionFile}"
         flags.IOVDb.DBConnection = f"sqlite://;schema={flags.InDet.Align.baseDir}/Solve/{runArgs.outputDBFile};dbname=CONDBR2"
+        
 
     flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
     flags.Exec.SkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0   
@@ -201,54 +202,66 @@ def configureITkFlags(runArgs, flags):
     from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
     OnlyTrackingPreInclude(flags)
 
-    ## Set Tags
-    for tag in [tag for tag in dir(runArgs) if "Tag" in tag and tag != "globalTag"]:
-        setattr(flags.InDet.Align, tag, getattr(runArgs, tag))
+    # ## Set Tags
+    # for tag in [tag for tag in dir(runArgs) if "Tag" in tag and tag != "globalTag"]:
+    #     setattr(flags.InDet.Align, tag, getattr(runArgs, tag))
 
-    ## Set configuration for chosen alignment level
-    from InDetAlignConfig.IDAlignFlags import setL3AlignmentFlags
+    # ## Set configuration for chosen alignment level
+    # from InDetAlignConfig.IDAlignFlags import setL3AlignmentFlags
         
-    if runArgs.alignLevel == 3:
-        setL3AlignmentFlags(flags)
+    # if runArgs.alignLevel == 3:
+    #     setL3AlignmentFlags(flags)
 
-    else:
-        raise Exception(f"No valid alignment level has been selected: '{runArgs.alignLevel}'")
+    # else:
+    #     raise Exception(f"No valid alignment level has been selected: '{runArgs.alignLevel}'")
 
 
-    ## Disable all non-track related flag parameter
-    from InDetConfig.ConfigurationHelpers import OnlyTrackingPreInclude
-    OnlyTrackingPreInclude(flags)
 
     ## Update flags based on parser line args
 
     flags.ITk.Align.accumulate = runArgs.accumulate
     flags.ITk.Align.baseDir = os.path.abspath(runArgs.baseDir)
 
-    if hasattr(runArgs, "alignITk"):
-        flags.ITk.Align.alignITk = runArgs.alignITk
-    if hasattr(runArgs, "alignITkPixel"):
-        print("PixelStatus: ", runArgs.alignITkPixel)
-        flags.ITk.Align.alignITkPixel = runArgs.alignITkPixel
-    if hasattr(runArgs, "alignITkStrip"):
-        flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
+    # if hasattr(runArgs, "alignITk"):
+    #     flags.ITk.Align.alignITk = runArgs.alignITk
+    # if hasattr(runArgs, "alignITkPixel"):
+    #     print("PixelStatus: ", runArgs.alignITkPixel)
+    #     flags.ITk.Align.alignITkPixel = runArgs.alignITkPixel
+    # if hasattr(runArgs, "alignITkStrip"):
+    #     flags.ITk.Align.alignITkStrip = runArgs.alignITkStrip
+
+    alignITk = getattr(runArgs, "alignITk", False)
+    alignITkPixel = getattr(runArgs, "alignITkPixel", False)
+    alignITkStrip = getattr(runArgs, "alignITkStrip", False)
+
+    flags.ITk.Align.alignITk = (
+        alignITk or
+        (not alignITk and not alignITkPixel and not alignITkStrip)
+    )
+    flags.ITk.Align.alignITkPixel = alignITkPixel or flags.ITk.Align.alignITk
+    flags.ITk.Align.alignITkStrip = alignITkStrip or flags.ITk.Align.alignITk
+    
 
     flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
 
     flags.ITk.Align.writeSilicon = False
 
-    if runArgs.solve:
-        flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
-    else:
-        flags.ITk.Align.inputTFiles = []
+    
+    flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
+
+    # if runArgs.solve:
+    #     flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
+    # else:
+    #     flags.ITk.Align.inputTFiles = []
 
     flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
 
     flags.IOVDb.GlobalTag = runArgs.globalTag
 
-    # These are not present in runITkAlign.py
-    flags.Exec.SkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0
-    flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
-    flags.Exec.FPE = -2
+    # # These are not present in runITkAlign.py
+    # flags.Exec.SkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0
+    # flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
+    # flags.Exec.FPE = -2
 
     if runArgs.localgeo:
         flags.ITk.Geometry.AllLocal = True
@@ -280,14 +293,15 @@ def configureITkFlags(runArgs, flags):
         flags.BField.endcapToroidOn = False
 
 
+
     if hasattr(runArgs, "localDB") and runArgs.localDB:
         flags.ITk.Align.useLocalDatabase = True
-
-        flags.IOVDb.DBConnection = (
-            f"sqlite://;schema={runArgs.localDB};dbname=OFLCOND"
-        )
-
+        DBFile = runArgs.localDB
+        flags.IOVDb.DBConnection = (f"sqlite://;schema={runArgs.localDB};dbname=OFLCOND")
         flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+
+
+
 
     if flags.ITk.Align.alignITkPixel:
         flags.ITk.Geometry.pixelAlignable = True
@@ -306,7 +320,6 @@ def configureITkFlags(runArgs, flags):
 
 def fromRunArgsITk(runArgs, flags):
 
-    DBFile = ""
     DBName="OFLCOND"
     tag="InDetSi_MisalignmentMode_random misalignment"
 
@@ -316,7 +329,9 @@ def fromRunArgsITk(runArgs, flags):
     if flags.ITk.Align.useLocalDatabase:
         from IOVDbSvc.IOVDbSvcConfig import addFolders, getSqliteContent
         print("Adding Align Folder "+flags.ITk.Geometry.alignmentFolder+" from local "+DBName+" Database in file "+DBFile)
-        cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=DBFile,tag=tag, className="AlignableTransformContainer"))     
+        cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=DBFile,tag=tag, className="AlignableTransformContainer")) 
+            
+    
 
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
     cfg.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags))
