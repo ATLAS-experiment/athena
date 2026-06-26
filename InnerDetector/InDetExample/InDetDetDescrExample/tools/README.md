@@ -45,6 +45,6 @@ Reco_tf.py \
 
 
 Masking Strip Modules using SQLite DB (not recently tested):
-- To use database one needs to turn on the flag "kwargs.setdefault("useDB", False)" in the /athena/InnerDetector/InDetConditions/SCT_ConditionsTools/python/ITkStripConditionsToolsConfig.py
+- To use database one needs to turn on the flag "kwargs.setdefault("useDB", False)" in the /athena/InnerDetector/InDetConditions/SCT_ConditionsTools/python/ITkStripConditionsToolsConfig.py . The flag "flags.ITk.useDatabaseForModuleVeto" sets this option to "True".
 - Also the reconstruction command should include:
    --preExec 'flags.ITk.doStripModuleVeto = True'

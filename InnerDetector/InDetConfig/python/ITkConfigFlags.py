@@ -59,6 +59,8 @@ def createITkConfigFlags():
     itkcf.addFlag("ITk.doStripModuleVeto", False)
     # Path to the JSON file to mask the modules
     itkcf.addFlag("ITk.JsonPathStripModuleVeto", "")
+    # Instead of json file to mask the module, use the database
+    itkcf.addFlag("ITk.useDatabaseForModuleVeto", False)
     # Path to the JSON file to mask the modules for Pixel.
     # A non-empty string activates the veto automatically 
     itkcf.addFlag("ITk.JsonPathPixelModuleVeto", "")
