@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,24 +35,13 @@ QStringList VP1RawDataColl_sTGC_RDO::availableCollections(IVP1System*sys)
 //____________________________________________________________________
 class VP1RawDataColl_sTGC_RDO::Imp {
 public:
-  // VP1Interval allowedToT;
-  // bool requireHT = false;
-  // bool useSpecialTRTHTMaterial = false;
 };
 
 
 //____________________________________________________________________
 VP1RawDataColl_sTGC_RDO::VP1RawDataColl_sTGC_RDO(VP1RawDataCommonData*common,const QString& key)
   : VP1RawDataCollBase(common,key), m_d(new Imp)
-{
-  // m_d->requireHT = true;
-  // m_d->useSpecialTRTHTMaterial = true;
-  // m_d->allowedToT = VP1Interval();
-
-  // connect(common->controller(),SIGNAL(useSpecialTRTHTMaterialChanged(bool)),
-	//   this,SLOT(setUseSpecialTRTHTMaterial(bool)));
-  // setUseSpecialTRTHTMaterial(common->controller()->useSpecialTRTHTMaterial());
-}
+{}
 
 //____________________________________________________________________
 VP1RawDataColl_sTGC_RDO::~VP1RawDataColl_sTGC_RDO()
@@ -63,7 +52,6 @@ VP1RawDataColl_sTGC_RDO::~VP1RawDataColl_sTGC_RDO()
 //____________________________________________________________________
 void VP1RawDataColl_sTGC_RDO::assignDefaultMaterial(SoMaterial*m) const
 {
-  // VP1MaterialButton::setMaterialParametersFromRGB( m, 255, 136, 0, 0.1 );
   VP1MaterialButton::setMaterialParameters( m, 0.42, 0.96, 0.16, 0.1 );
 }
 
@@ -91,7 +79,6 @@ bool VP1RawDataColl_sTGC_RDO::load() {
   if (!container.isValid()) {
     std::cout << "Could not find sTgcDigitContainer called " << container.name()
               << " in store " << container.store() << std::endl;
-    // return StatusCode::SUCCESS;
   }
 
   // Iterate on the collections
@@ -118,10 +105,6 @@ bool VP1RawDataColl_sTGC_RDO::load() {
 //____________________________________________________________________
 bool VP1RawDataColl_sTGC_RDO::cut(VP1RawDataHandleBase* handle)
 {
-
-  // if (m_d->requireHT && !static_cast<VP1RawDataHandle_TRT_RDO*>(handle)->highThreshold())
-  //   return false;
-  // return m_d->allowedToT.contains(static_cast<VP1RawDataHandle_TRT_RDO*>(handle)->timeOverThreshold());
   VP1Msg::message("cut returning 'true'...");
   return true;
 }

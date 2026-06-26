@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -22,8 +22,6 @@
 
 class sTgcDigit;
 
-// namespace InDetDD { class TRT_BaseElement; }
-
 class VP1RawDataHandle_sTGC_RDO : public VP1RawDataHandleBase {
 public:
 
@@ -31,17 +29,11 @@ public:
   virtual ~VP1RawDataHandle_sTGC_RDO();
   QStringList clicked(bool verbose) const;
 
-  // VP1RawDataFlags::InDetPartsFlags inInDetParts() const;
-
-  // bool highThreshold() const;
-  // double timeOverThreshold() const;
-
 protected:
   SoNode * buildShape();
   SoTransform * buildTransform();
   const sTgcDigit* m_data;
   const MuonGM::sTgcReadoutElement * element() const;//null in case of errors
-  // int strawID() const;//-1 in case of errors
 
   int m_channelType{-1};
   std::string m_channelTypeStr{""};

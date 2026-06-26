@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -101,7 +101,6 @@ def SetupVP1():
 
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = 0
-
     # ^ VP1 will not work with the scheduler, since its condition/data dependencies are not known in advance
     # More in details: the scheduler needs to know BEFORE the event, what the dependencies of each Alg are.
     # So for VP1, no dependencies are declared, which means the conditions data is not there.
@@ -277,9 +276,9 @@ def SetupVP1():
 
     # DEBUG -- inspect the flags
     flags.dump()
-    # flags._loadDynaFlags('GeoModel')
-    # flags._loadDynaFlags('Detector')
-    # flags.dump('Detector.(Geometry|Enable)', True)
+    # flags._loadDynaFlags('GeoModel') # for debug
+    # flags._loadDynaFlags('Detector') # for debug
+    # flags.dump('Detector.(Geometry|Enable)', True) # for debug
 
     # ++++ Now we setup the actual configuration ++++
 
