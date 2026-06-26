@@ -13,7 +13,7 @@ atlas_add_library( HIEventUtilsLib
                    Root/*.cxx
                    PUBLIC_HEADERS HIEventUtils
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools CaloGeoHelpers InDetTrackSelectionToolLib PATCoreAcceptLib xAODForward xAODHIEvent xAODTracking xAODTrigL1Calo
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools CaloGeoHelpers InDetTrackSelectionToolLib PATCoreAcceptLib xAODForward xAODHIEvent xAODTracking xAODTrigL1Calo xAODCaloEvent
                    PRIVATE_LINK_LIBRARIES AsgMessagingLib CxxUtils nlohmann_json::nlohmann_json PathResolver)
 
 if (NOT XAOD_STANDALONE AND NOT XAOD_ANALYSIS)
