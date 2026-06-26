@@ -24,9 +24,8 @@
 #include "AthenaKernel/StorableConversions.h"
 
 #include "CxxUtils/checker_macros.h"
-
+#include "CxxUtils/HexString.h"
 #include <exception>
-#include <format>
 
 //__________________________________________________________________________
 template <class COLL_T, class ELEM_T, class ELEM_P>
@@ -244,7 +243,7 @@ StatusCode
 T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::attrListCollToObject(CondAttrListCollection* attrListColl,
 								  COLL_T*& obj)
 {
-
+    using CxxUtils::HexString;
     ATH_MSG_DEBUG("Creating a collection from a CondAttrListCollection");
 
     // Create collection
@@ -271,9 +270,7 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::attrListCollToObject(CondAt
     CondAttrListCollection::const_iterator      last  = attrListColl->end();
     CondAttrListCollection::iov_const_iterator  itIOV = attrListColl->iov_begin();
     Token poolToken;
-    char context[32];
-    const std::string contextStr = std::format("[CTXT={:08X}]", m_persCtx);
-    std::strncpy(context, contextStr.c_str(), sizeof(context) - 1);
+    auto context = HexString<"[CTXT={}]">(m_persCtx);
     for (; it != last; ++it, ++itIOV) {
 	try {
 	    // pool token/ref
@@ -321,9 +318,7 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::condMultChanCollImplToObjec
     // Read in the CondMultChanCollImpl
     CondMultChanCollImpl* impl = 0;
     Token poolToken;
-    char context[32];
-    const std::string contextStr = std::format("[CTXT={:08X}]", m_persCtx);
-    std::strncpy(context, contextStr.c_str(), sizeof(context) - 1);
+    auto context = CxxUtils::HexString<"[CTXT={}]">(m_persCtx);
     poolToken.fromString(collImplToken + context);
     StatusCode sc = this->poolToObject(&poolToken, impl);
     if (sc != StatusCode::SUCCESS) {

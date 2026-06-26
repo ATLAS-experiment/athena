@@ -20,6 +20,7 @@
 #include "StorageSvc/APRDefaults.h"
 
 #include <format>
+#include "CxxUtils/HexString.h"
 
 //__________________________________________________________________________
 AthenaPoolConverter::~AthenaPoolConverter() {
@@ -65,11 +66,7 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
       tokAddr = new TokenAddress(*genAddr, std::move(token));
    }
    if( tokAddr->ipar()[0] > 0 and tokAddr->getToken()->auxString().empty() ) {
-      char text[32];
-      const std::string contextStr = std::format("[CTXT={:08X}]", static_cast<int>(*(pAddr->ipar())));
-      std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
-      text[sizeof(text) - 1] = '\0';
-      tokAddr->getToken()->setAuxString(text);
+      tokAddr->getToken()->setAuxString(CxxUtils::HexString<"[CTXT={}]">(static_cast<int>(*(pAddr->ipar()))));
    }
    ATH_MSG_VERBOSE("createObj: " << tokAddr->getToken()->toString() << ", CTX=" << tokAddr->ipar()[0]
                    << ", auxStr=" << tokAddr->getToken()->auxString() );

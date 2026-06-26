@@ -45,12 +45,7 @@ static const int KEY_MASK = (~0x0)&0x00;
 
 /// Produce the token keys only on demand for export
 void makeKey(const Token* tok, Guid& guid)  {
-  char text[32];
-  std::string s;
-  std::sprintf(text, "][TECH=%08X]", tok->technology()&KEY_MASK);
-  s = std::format("[DB={}][CNT={}][CLID={}{}]", tok->dbID().to_fixed_string(),
-                  tok->contID(), tok->classID().to_fixed_string(), text);
-  genMD5(s, &guid);
+    genMD5(tok->key(), &guid);
 }
 
 // Standard Constructor
