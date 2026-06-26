@@ -13,7 +13,6 @@
 #include <format>
 #include <random>
 #include <range/v3/algorithm/stable_sort.hpp>
-#include <range/v3/numeric/accumulate.hpp>
 #include <range/v3/to_container.hpp>
 #include <range/v3/view.hpp>
 #include <thread>
@@ -228,7 +227,7 @@ std::size_t BatchedMinbiasSvc::calcMBRequired(std::int64_t hs_id,
                    });
   }
 
-  std::uint64_t num_mb = ranges::accumulate(num_mb_by_bunch, 0UL);
+  std::uint64_t num_mb = std::accumulate(num_mb_by_bunch.begin(), num_mb_by_bunch.end(), std::uint64_t{0});
   std::vector<std::uint64_t>& index_array = *m_idx_lists.get(ctx);
   const std::uint64_t mbBatchSize = m_MBBatchSize.value();
   // Prevent running out of events
