@@ -491,14 +491,14 @@ TGraph* AthHistogramming::graph( const std::string& graphName, const std::string
 
       // Massage the final string to book things
       std::string bookingString("");
-      this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, true);
+      this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, false);
 
-      TGraph* graphPointer(NULL);
+      TGraph* graphPointer(nullptr);
       if ( !((histSvc()->getGraph(bookingString, graphPointer)).isSuccess()) )
         {
           // Massage the final string to book things
           std::string bookingString("");
-          this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, false );
+          this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, true );
 
           if ( !((histSvc()->getGraph(bookingString, graphPointer)).isSuccess()) )
             {
@@ -508,7 +508,7 @@ TGraph* AthHistogramming::graph( const std::string& graphName, const std::string
                     << " or with name " << graphNameCopy
                     << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
                     << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
-              return NULL;
+              return nullptr;
             }
           // If we get to here, we actually found the TGraph in the THistSvc.
           // So let's add it to the local cache map and return its pointer
