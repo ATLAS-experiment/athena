@@ -92,11 +92,6 @@ bool VP1RawDataColl_MDT_RDO::load() {
     for (const MdtDigit* digit : *coll) {
       const Identifier digitId{digit->identify()};
 
-      // example from Johannes
-      /*
-      mdtReadoutElement = detMgr->getMdtReadoutElement(digitId);
-      const Amg::Vector3D tubePos = mdtReadoutElement->tubePos(digitId);
-      */
 
       if (digit)
         addHandle(new VP1RawDataHandle_MDT_RDO(this, digit));
