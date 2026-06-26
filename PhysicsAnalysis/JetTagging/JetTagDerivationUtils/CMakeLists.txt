@@ -48,4 +48,4 @@ atlas_install_scripts(
 
 atlas_add_test( JetTagMetadataAlg
   SCRIPT ftag-test-metadata-merge
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )

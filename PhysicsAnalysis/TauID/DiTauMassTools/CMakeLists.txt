@@ -40,6 +40,6 @@ if( XAOD_STANDALONE )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers xAODEventInfo xAODJet
       xAODTau xAODMissingET xAODRootAccess DiTauMassToolsLib
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
 endif()
