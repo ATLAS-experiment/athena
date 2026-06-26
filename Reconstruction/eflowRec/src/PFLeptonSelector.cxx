@@ -144,13 +144,9 @@ PFLeptonSelector::storeMuonCells(const xAOD::Muon& muon,
                                  SG::WriteHandle<ConstDataVector<CaloCellContainer>> leptonCaloCellsWriteHandle) const
 {
 
-  const ElementLink<xAOD::CaloClusterContainer>& theLink = muon.clusterLink(); 
-  if (theLink.isValid()){
-    const xAOD::CaloCluster* muonCluster = *theLink;
-    if (muonCluster){
+  if (const xAOD::CaloCluster* muonCluster = muon.cluster(); muonCluster != nullptr){
       this->storeLeptonCells(*muonCluster,std::move(leptonCaloCellsWriteHandle));
-    }
-    else ATH_MSG_WARNING("This muon has an invalid pointer to its cluster ");
+    
   }
   else ATH_MSG_WARNING("This muon has an invalid element link to its cluster");
 }

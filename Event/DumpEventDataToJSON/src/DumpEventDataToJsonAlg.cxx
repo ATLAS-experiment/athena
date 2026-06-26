@@ -418,13 +418,15 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::Muon &muon) {
   data["Phi"] = muon.phi();
   data["Eta"] = muon.eta();
 
-  std::vector<std::string> quality = {"Tight", "Medium", "Loose", "VeryLoose"};
-  data["Quality"] = quality[static_cast<unsigned int>(muon.quality())];
-  std::vector<std::string> type = {"Combined", "Standalone", "SegmentTagged",
-                                   "CaloTagged", "SiAssociatedForward"};
-  data["Type"] = type[static_cast<unsigned int>(muon.muonType())];
+  data["Quality"] = muon.toString(muon.quality());
+  data["Type"] = muon.toString(muon.muonType());
 
-  addLink(muon.clusterLink(), data["LinkedClusters"]);
+  ElementLink<xAOD::CaloClusterContainer> clusterLink{};
+  if (const xAOD::CaloCluster* cluster = muon.cluster(); cluster != nullptr) {
+    clusterLink =  {static_cast<const xAOD::CaloClusterContainer&>(*cluster->container()), 
+                    cluster->index()};
+  }
+  addLink(clusterLink, data["LinkedClusters"]);
   
   using Track_t = xAOD::Muon::TrackParticleType;
   using Link_t = ElementLink<xAOD::TrackParticleContainer>;
