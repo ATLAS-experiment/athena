@@ -12,6 +12,8 @@
 #include "xAODTracking/TrackParticleFwd.h"
 #include <any>
 
+#include "Acts/EventData/BoundTrackParameters.hpp"
+
 namespace ActsTrk {
 using IndexType = std::uint32_t;  // TODO take from a common header
 namespace detail {
@@ -128,8 +130,24 @@ std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy>
     @param skipOutlier: Flag to ignore the outlier states */
 std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy> 
     firstMeasurementState(const xAOD::TrackParticle& trkPart,
-                         const bool skipOutlier = true);               
+                         const bool skipOutlier = true);
 
+/** @brief Returns the last MeasurementState in form of Acts::BoundTrackParameters. 
+  *         The logic follows the one from the `lastMeasurementState` 
+  * @param trkPart: Reference to the track particle made from the Acts chain
+  * @param skipOutlier: Flag to ignore the outlier states */
+std::optional<Acts::BoundTrackParameters>  
+    lastTrackParameters(const xAOD::TrackParticle& trkPart,
+                        const bool skipOutlier = true);
+
+/** @brief Returns the first MeasurementState in form of Acts::BoundTrackParameters. 
+  *         The logic follows the one from the `firstMeasurementState` 
+  * @param trkPart: Reference to the track particle made from the Acts chain
+  * @param skipOutlier: Flag to ignore the outlier states */
+std::optional<Acts::BoundTrackParameters>  
+    firstTrackParameters(const xAOD::TrackParticle& trkPart,
+                        const bool skipOutlier = true);
+          
 }  // namespace ActsTrk
 
 #endif
