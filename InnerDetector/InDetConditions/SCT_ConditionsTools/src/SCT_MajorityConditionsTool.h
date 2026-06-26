@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -47,11 +47,9 @@ class SCT_MajorityConditionsTool: public extends<AthAlgTool, ISCT_DetectorLevelC
   //@}
   
   /**Is the detector good?*/
-  virtual bool isGood() const override;
   virtual bool isGood(const EventContext& ctx) const override;
 
   /**Is a barrel/endcap good?*/
-  virtual bool isGood(int bec) const override;
   virtual bool isGood(int bec, const EventContext& ctx) const override;
 
  private:

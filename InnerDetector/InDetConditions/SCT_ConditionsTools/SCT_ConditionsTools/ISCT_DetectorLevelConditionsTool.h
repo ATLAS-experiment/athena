@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -36,12 +36,10 @@ class ISCT_DetectorLevelConditionsTool: virtual public IAlgTool {
   //@}
 
   ///Summarise the result of the detector as good/bad
-  virtual bool isGood() const =0;
   virtual bool isGood(const EventContext& ctx) const =0;
 
   ///Summarise the result of the barrel/endcap as good/bad
   //BEC = -2/0/2 for ECC/B/ECA
-  virtual bool isGood(int bec) const =0;
   virtual bool isGood(int bec, const EventContext& ctx) const =0;
   
  private:

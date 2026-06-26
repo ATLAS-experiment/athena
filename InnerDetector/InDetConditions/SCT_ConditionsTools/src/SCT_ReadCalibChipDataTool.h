@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file SCT_ReadCalibChipDataTool.h Header file for SCT_ReadCalibChipDataTool.
@@ -48,19 +48,15 @@ class SCT_ReadCalibChipDataTool: public extends<AthAlgTool, ISCT_ReadCalibChipDa
   virtual bool canReportAbout(InDetConditions::Hierarchy h) const override;
   ///Summarise the result from the service as good/bad
   virtual bool isGood(const Identifier& elementId, const EventContext& ctx, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override;
-  virtual bool isGood(const Identifier& elementId, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override;
   ///same thing with id hash, introduced by shaun with dummy method for now
   virtual bool isGood(const IdentifierHash& hashId, const EventContext& ctx) const override;
-  virtual bool isGood(const IdentifierHash& hashId) const override;
-  virtual void getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status, 
+  virtual void getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status,
                                         SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const override;
   //@}
   
   // Methods to return calibration data
   virtual std::vector<float> getNPtGainData(const Identifier& moduleId, const int side, const std::string& datatype, const EventContext& ctx) const override; //!<Get NPtGain data per wafer
-  virtual std::vector<float> getNPtGainData(const Identifier& moduleId, const int side, const std::string& datatype) const override; //!<Get NPtGain data per wafer
   virtual std::vector<float> getNoiseOccupancyData(const Identifier& moduleId, const int side, const std::string& datatype, const EventContext& ctx) const override; //!<Get NoiseOccupancy data wafer
-  virtual std::vector<float> getNoiseOccupancyData(const Identifier& moduleId, const int side, const std::string& datatype) const override; //!<Get NoiseOccupancy data wafer
 
  private:
   // Private enums

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -113,22 +113,10 @@ SCT_ModuleVetoTool::isGood(const Identifier& elementId, const EventContext& ctx,
   return (not condData->isBadWaferId(waferId));
 }
 
-bool 
-SCT_ModuleVetoTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(elementId, ctx, h);
-}
-
-bool 
+bool
 SCT_ModuleVetoTool::isGood(const IdentifierHash& hashId, const EventContext& ctx) const {
   Identifier elementId{m_pHelper->wafer_id(hashId)};
   return isGood(elementId, ctx, InDetConditions::SCT_SIDE);
-}
-
-bool
-SCT_ModuleVetoTool::isGood(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(hashId, ctx);
 }
 
 void

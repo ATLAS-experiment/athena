@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_LinkMaskingTool.h"
@@ -47,22 +47,10 @@ bool SCT_LinkMaskingTool::isGood(const Identifier& elementId, const EventContext
   return (not condData->isBadWaferId(elementId));
 }
 
-bool SCT_LinkMaskingTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementId, ctx, h);
-}
-
 // Is a wafer with this IdentifierHash good?
 bool SCT_LinkMaskingTool::isGood(const IdentifierHash& hashId, const EventContext& ctx) const {
   Identifier elementId{m_sctHelper->wafer_id(hashId)};
   return isGood(elementId, ctx, InDetConditions::SCT_SIDE);
-}
-
-bool SCT_LinkMaskingTool::isGood(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(hashId, ctx);
 }
 
 void SCT_LinkMaskingTool::getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status,
