@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the package's name.
 atlas_subdir( AtlasHepMC )
@@ -15,14 +15,6 @@ atlas_add_library( AtlasHepMCLib
    DEFINITIONS HEPMC3=1
    INCLUDE_DIRS  ${HEPMC3_INCLUDE_DIRS}
    LINK_LIBRARIES ${HEPMC3_HepMC3_LIBRARY}  )
-
-atlas_add_library( AtlasHepMCfioLib
-   AtlasHepMC/*.h
-   INTERFACE
-   PUBLIC_HEADERS AtlasHepMC
-   DEFINITIONS HEPMC3=1
-   INCLUDE_DIRS  ${HEPMC3_INCLUDE_DIRS}
-   )
 
 atlas_add_library( AtlasHepMCsearchLib
    AtlasHepMC/*.h
