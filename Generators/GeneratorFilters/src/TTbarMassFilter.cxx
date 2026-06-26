@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/TTbarMassFilter.h"
 #include "AtlasHepMC/SimpleVector.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <algorithm>//std::max
 #include <cmath>
 
@@ -33,7 +34,7 @@ StatusCode TTbarMassFilter::filterEvent(const EventContext& ctx) {
       isFirstTop = false;
 
       // Work only with tops
-      if (std::abs(mcpart->pdg_id()) == 6) {
+      if (MC::isTop(mcpart)) {
         // Assume that this is the 'last' top
         isLastTop=true;
         auto decayVtx = mcpart->end_vertex();
@@ -47,7 +48,7 @@ StatusCode TTbarMassFilter::filterEvent(const EventContext& ctx) {
         // Find out whether this is the top particle with final statuscode, so, just before its decay.
         /// @todo How generator-portable is this status code assumption?
         for (const auto& child_mcpart: decayVtx->particles_out() ) {
-          if (std::abs(child_mcpart->pdg_id()) == 6) {
+          if (MC::isTop(child_mcpart)) {
             // This is not a 'last' top: break the loop over the children, and do nothing with this top particle
             isLastTop = false;
             break;
@@ -77,7 +78,7 @@ StatusCode TTbarMassFilter::filterEvent(const EventContext& ctx) {
               // Loop over the top mother particles
               for (const auto&  mother_mcpart: prodVtx->particles_in()) {
                 // One of the mother particles is still top quark. needed to go up in the hierarchy
-                if (mother_mcpart->pdg_id() == 6) {
+                if (mother_mcpart->pdg_id() == MC::TQUARK) { // CHECK Not taking absolute value of pdg_id here??
                   isFirstTop = false;
                   prodVtx = mother_mcpart->production_vertex();
                   if (!prodVtx) {
@@ -106,7 +107,7 @@ StatusCode TTbarMassFilter::filterEvent(const EventContext& ctx) {
         // to continue or stop looping over GenParticles in the event
         if (isLastTop) {
           // One more 'last' top particle was stored into the vector --> increment the number of top or anti-top particles.
-          if (tops[tops.size()-1]->pdg_id() == 6) top++; else topbar++;
+          if (tops[tops.size()-1]->pdg_id() == MC::TQUARK) top++; else topbar++;
 
           // One top and one ati-top 'last' particles are found.  Stop looping
           // over the particles
@@ -126,7 +127,6 @@ StatusCode TTbarMassFilter::filterEvent(const EventContext& ctx) {
         }
       }
     }
-
   }
 
   // Main case: there is one top-pair in the event

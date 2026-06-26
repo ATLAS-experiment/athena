@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/TTbarWToLeptonFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 TTbarWToLeptonFilter::TTbarWToLeptonFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -31,9 +32,9 @@ StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
   for (McEventCollection::const_iterator itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto&  pitr: *genEvt) {
-        if (std::abs(pitr->pdg_id()) != 6) continue;
-        if ( pitr->pdg_id() ==  6 ) N_quark_t_all++;
-        if ( pitr->pdg_id() == -6 ) N_quark_tbar_all++;
+        if (!MC::isTop(pitr)) continue;
+        if ( pitr->pdg_id() ==  MC::TQUARK ) N_quark_t_all++;
+        if ( pitr->pdg_id() == -MC::TQUARK ) N_quark_tbar_all++;
         auto decayVtx = pitr->end_vertex();
         // Verify if we got a valid pointer and retrieve the number of daughters
         if (!decayVtx) continue; 
@@ -41,9 +42,9 @@ StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
         if (decayVtx->particles_out().size() < 2) continue;
         for (const auto& child_mcpart:  decayVtx->particles_out()) {
             //  Implicitly assume that tops always decay to W X
-            if (std::abs(child_mcpart->pdg_id()) != 24) continue;
-              if ( pitr->pdg_id() ==  6 ) N_quark_t++;
-              if ( pitr->pdg_id() == -6 ) N_quark_tbar++;
+          if ( !MC::isW(child_mcpart) ) continue;
+              if ( pitr->pdg_id() ==  MC::TQUARK ) N_quark_t++;
+              if ( pitr->pdg_id() == -MC::TQUARK ) N_quark_tbar++;
 
               bool  useNextVertex = false;
               auto w_decayVtx = child_mcpart->end_vertex();
@@ -53,7 +54,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
 			      int grandchild_pid = grandchild_mcpart->pdg_id();
 			      ATH_MSG_DEBUG("W (t/tbar) has " <<  w_decayVtx->particles_out().size() << " children and the pdg_id of the next is " << grandchild_pid);
 			      // Check if the W's child is W again. If yes, then move to its next decay vertex in a decay tree
-			      if (std::abs(grandchild_pid) == 24) {
+			      if ( MC::isW(grandchild_pid) ) {
 			         w_decayVtx = grandchild_mcpart->end_vertex();
 				 // If something wrong comes from truth...
 				 if (!w_decayVtx) {
@@ -65,14 +66,14 @@ StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
 			      }
 
 		  // use brute force to use only leptons that have not been found already 
-		  if (grandchild_pid == -11 && foundlepton[0] < count_found_leptons) {
+                    if (grandchild_pid == MC::POSITRON && foundlepton[0] < count_found_leptons) {
 		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
 		      foundlepton[0]++;
 		      N_pt_above_cut++;
                       N_pt_above_cut_minus++;
 		    }
 		  }
-		  if (grandchild_pid == 11 && foundlepton[1] < count_found_leptons) {
+                    if (grandchild_pid == MC::ELECTRON && foundlepton[1] < count_found_leptons) {
 		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
 		      foundlepton[1]++;
 		      N_pt_above_cut++;
@@ -80,28 +81,28 @@ StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
 
 		    }
 		  }
-		  if (grandchild_pid == -13 && foundlepton[2] < count_found_leptons) {
+                    if (grandchild_pid == -MC::MUON && foundlepton[2] < count_found_leptons) {
 		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
 		      foundlepton[2]++;
 		      N_pt_above_cut++;
                       N_pt_above_cut_minus++;
 		    }
 		  }
-		  if (grandchild_pid == 13 && foundlepton[3] < count_found_leptons) {
+                    if (grandchild_pid == MC::MUON && foundlepton[3] < count_found_leptons) {
 		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
 		      foundlepton[3]++;
 		      N_pt_above_cut++;
                       N_pt_above_cut_plus++;
 		    }
 		  }
-		  if (grandchild_pid == -15 && foundlepton[4] < count_found_leptons) {
+                    if (grandchild_pid == -MC::TAU && foundlepton[4] < count_found_leptons) {
 		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
 		      foundlepton[4]++;
 		      N_pt_above_cut++;
                       N_pt_above_cut_minus++;
 		    }
 		  }
-		  if (grandchild_pid == 15 && foundlepton[5] < count_found_leptons) {
+                    if (grandchild_pid == MC::TAU && foundlepton[5] < count_found_leptons) {
 		    if (grandchild_mcpart->momentum().perp() >= m_Ptmin) { 
 		      foundlepton[5]++;
 		      N_pt_above_cut++;
@@ -113,7 +114,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent(const EventContext& ctx) {
                 if (!useNextVertex) break;
          }
       }
-   }
+    }
   }
 
   ATH_MSG_INFO("Found " << N_quark_t_all    << " t    quarks in event record");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/LeptonFilter
@@ -40,12 +40,10 @@ StatusCode LeptonFilter::filterEvent(const EventContext& ctx) {
       if ( !MC::isStable(part)) continue;
 
       // We are specifically looking for electrons (+-11) and muons (+-13)
-      const long pid = part->pdg_id();
-      const long apid = std::abs(pid);
-      if (apid == 11 || apid == 13) {
+      if (MC::isElectron(part) || MC::isMuon(part)) {
         const double pT = part->momentum().perp();
         const double eta = part->momentum().pseudoRapidity();
-        const std::string pname = ((apid == 11) ? "electron" : "muon");
+        const std::string pname = ((MC::isElectron(part)) ? "electron" : "muon");
         ATH_MSG_DEBUG( "Found " << pname
 		       << ": pT, eta = " << pT << ", " << eta );
         
