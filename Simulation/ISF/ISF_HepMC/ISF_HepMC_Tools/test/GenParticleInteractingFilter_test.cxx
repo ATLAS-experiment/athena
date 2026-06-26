@@ -75,11 +75,7 @@ TEST_F(GenParticleInteractingFilter_test, allPropertiesUnset_stdParticle_expectN
 //   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
 //   const HepMC::FourVector mom4(1.0*sin(150.*M_PI/180.), 0.0, 1.0*cos(150.*M_PI/180.), 1.0); // rho=1, eta=-1.32
-// #ifdef HEPMC3
 //   HepMC::GenParticlePtr part=HepMC::newGenParticlePtr(mom4, /*pdg id=*/4110000);
-// #else
-//   const HepMC::GenParticle part(mom4, /*pdg id=*/4110000);
-// #endif
 
 //   ASSERT_FALSE( m_filterTool->pass(part) );
 // }
