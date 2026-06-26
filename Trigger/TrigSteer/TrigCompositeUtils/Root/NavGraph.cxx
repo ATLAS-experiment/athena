@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigCompositeUtils/NavGraph.h"
+#include "AsgTools/CurrentContext.h"
 #include "SGCore/sgkey_t.h"
 
 #ifndef XAOD_STANDALONE // Athena or AthAnalysis

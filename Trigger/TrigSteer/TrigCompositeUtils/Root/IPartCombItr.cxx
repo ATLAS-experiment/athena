@@ -4,6 +4,7 @@
 
 #include "TrigCompositeUtils/IPartCombItr.h"
 
+#include "AsgTools/CurrentContext.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include <set>
@@ -44,10 +45,11 @@ namespace TrigCompositeUtils
 
   bool uniqueInitialRoIs(const std::vector<LinkInfo<xAOD::IParticleContainer>> &links)
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     std::set<std::pair<uint32_t, uint32_t>> seen;
     for (const auto &info : links)
     {
-      LinkInfo<TrigRoiDescriptorCollection> roi = findLink<TrigRoiDescriptorCollection>(info.source, initialRoIString());
+      LinkInfo<TrigRoiDescriptorCollection> roi = findLink<TrigRoiDescriptorCollection>(ctx, info.source, initialRoIString());
       if (!seen.insert(std::make_pair(roi.link.persKey(), roi.link.persIndex())).second)
         // Insert returns false if that item already exists in it
         return false;
@@ -57,10 +59,11 @@ namespace TrigCompositeUtils
 
   bool uniqueRoIs(const std::vector<LinkInfo<xAOD::IParticleContainer>> &links)
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     std::set<std::pair<uint32_t, uint32_t>> seen;
     for (const auto &info : links)
     {
-      LinkInfo<TrigRoiDescriptorCollection> roi = findLink<TrigRoiDescriptorCollection>(info.source, "roi");
+      LinkInfo<TrigRoiDescriptorCollection> roi = findLink<TrigRoiDescriptorCollection>(ctx, info.source, "roi");
       if (!seen.insert(std::make_pair(roi.link.persKey(), roi.link.persIndex())).second)
         // Insert returns false if that item already exists in it
         return false;
