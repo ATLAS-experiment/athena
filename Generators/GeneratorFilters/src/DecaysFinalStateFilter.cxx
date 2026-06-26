@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/DecaysFinalStateFilter
@@ -30,6 +30,7 @@
 // Frank Siegert Nov 2014
 
 #include "GeneratorFilters/DecaysFinalStateFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
 
 
@@ -75,12 +76,16 @@ StatusCode DecaysFinalStateFilter::filterEvent(const EventContext& ctx) {
       if (!part->end_vertex()) continue;
 
       for (const auto& opitr: *(part->end_vertex())) {
-        int apid = std::abs(opitr->pdg_id());
-        if (apid == 1 || apid == 2 || apid == 3 || apid == 4 || apid ==5) nQuarks++;
-        if (apid == 5) nbQuarks++;
-        if (apid == 11 || apid == 13 || apid == 15) nChargedLeptons++;
-        if (apid == 12 || apid == 14 || apid == 16) nNeutrinos++;
-        if (apid == 22) nPhotons++;
+        const int apid = std::abs(opitr->pdg_id());
+        if ( apid <=  MC::BQUARK ) {
+          nQuarks++;
+          if (MC::isBottom(apid)) nbQuarks++;
+        }
+        else if (MC::isSMLepton(apid)) {
+          if (MC::isSMNeutrino(apid)) nNeutrinos++;
+          else nChargedLeptons++;
+        }
+        else if (MC::isPhoton(apid)) nPhotons++;
       }
     }
   }

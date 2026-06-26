@@ -68,13 +68,13 @@ StatusCode MultiElecMuTauFilter::filterEvent(const EventContext& ctx) {
           }
 
           // Ignore leptonic decays
-          if (std::abs(citr->pdg_id()) == 13 || std::abs(citr->pdg_id()) == 11) {
+          if ( MC::isMuon(citr) || MC::isElectron(citr) ) {
             tau = nullptr;
             break;
           }
 
           // Find tau decay nu
-          if (std::abs(citr->pdg_id()) == 16) {
+          if (std::abs(citr->pdg_id()) == MC::NU_TAU) {
             taunu = citr;
           }
         }

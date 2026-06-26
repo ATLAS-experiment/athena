@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/BoostedHadTopAndTopPair
@@ -11,6 +11,7 @@
 
 #include "GeneratorFilters/BoostedHadTopAndTopPair.h"
 #include "GaudiKernel/MsgStream.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <iostream>
 #include <cmath>
 
@@ -51,16 +52,16 @@ StatusCode BoostedHadTopAndTopPair::filterEvent(const EventContext& ctx) {
       int pdgId = part->pdg_id();
   
       // pdgId t quark = 6
-      if ( pdgId == 6 && isFinalParticle(part) ){
+      if ( pdgId == MC::TQUARK && isFinalParticle(part) ){
         if ( part->momentum().perp() > topListMomentum.perp() )  topListMomentum  = part->momentum();
       }
   
-      if ( pdgId == -6 && isFinalParticle(part) ){
+      if ( pdgId == -MC::TQUARK && isFinalParticle(part) ){
         if ( part->momentum().perp() > topbListMomentum.perp() ) topbListMomentum = part->momentum();
       }
   
       // pdgId W boson = 24
-      if ( std::abs(pdgId) != 24 || !isFinalParticle(part) ) continue; 
+      if ( MC::isW(pdgId) || !isFinalParticle(part) ) continue;
   
       if (isFromTop(part)){
         if (pdgId > 0) topChildrenMomentum.set(part->momentum().px() + momentumBofW(part).px(), part->momentum().py() + momentumBofW(part).py(), part->momentum().pz() + momentumBofW(part).pz(), part->momentum().e() + momentumBofW(part).e());
@@ -103,7 +104,7 @@ bool BoostedHadTopAndTopPair::isFromTop(const HepMC::ConstGenParticlePtr& part) 
 
   if(!prod) return false;
 
-   for (const auto& p: prod->particles_in()) if (std::abs(p->pdg_id()) == 6) return true;
+  for (const auto& p: prod->particles_in()) if (MC::isTop(p)) return true;
   return false;
 }
 

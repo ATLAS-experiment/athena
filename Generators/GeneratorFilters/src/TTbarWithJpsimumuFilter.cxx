@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/TTbarWithJpsimumuFilter.h"
 
 #include "GaudiKernel/MsgStream.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 //--------------------------------------------------------------------------
 TTbarWithJpsimumuFilter::TTbarWithJpsimumuFilter(const std::string& fname,
@@ -47,9 +47,9 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent(const EventContext& ctx) {
         // Loop over all truth particles in the event
         // ===========================================
         for(const auto& part: *genEvt) {
-            if (std::abs(part->pdg_id())!=443) continue;
+            if (std::abs(part->pdg_id())!=MC::JPSI) continue;
             if (HepMC::is_simulation_particle(part)) continue;
-            if(!isLeptonDecay(part,13)) continue;
+            if(!isLeptonDecay(part,MC::MUON)) continue;
             if ( !passJpsiSelection(part) ) continue;
             isjpsi=true;
         } /// loop on particles

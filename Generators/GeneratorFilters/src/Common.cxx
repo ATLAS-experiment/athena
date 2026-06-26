@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeneratorFilters/Common.h"
 #include "TruthUtils/TruthClassifiers.h"
@@ -45,9 +45,9 @@ static bool fromWZ(const HepMC::ConstGenParticlePtr& part )
   if (!part->production_vertex()) return false;
   for (const auto&  iter: part->production_vertex()->particles_in()){
     int parent_pdgid = iter->pdg_id();
-    if (MC::isW(parent_pdgid) || MC::isZ(parent_pdgid)) return true;
-    if (MC::isHadron( parent_pdgid ) ) return false;
-    if ( std::abs( parent_pdgid ) < 9 ) return true;
+    if ( MC::isW(parent_pdgid) || MC::isZ(parent_pdgid) ) return true;
+    if ( MC::isHadron( parent_pdgid ) ) return false;
+    if ( MC::isQuark( parent_pdgid ) ) return true;
     if ( parent_pdgid == part->pdg_id() ) return fromWZ( iter );
   }
   return false;
@@ -62,8 +62,8 @@ static bool fromTau(const HepMC::ConstGenParticlePtr& part )
   if (!part->production_vertex()) return false;
   for (const auto& iter: part->production_vertex()->particles_in()){
     int parent_pdgid = iter->pdg_id();
-    if ( std::abs( parent_pdgid ) == 15 ) return true;
-    if (MC::isHadron( parent_pdgid ) || MC::isQuark( parent_pdgid ) ) return false;
+    if ( MC::isTau( parent_pdgid ) ) return true;
+    if ( MC::isHadron( parent_pdgid ) || MC::isQuark( parent_pdgid ) ) return false;
     if ( parent_pdgid == part->pdg_id() ) return fromTau( iter );
   }
   return false;
