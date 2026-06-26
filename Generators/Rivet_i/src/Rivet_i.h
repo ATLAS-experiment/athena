@@ -43,18 +43,12 @@ public:
   /// Run the Rivet analyses on one event, which is retrieved from StoreGate.
   virtual StatusCode execute(const EventContext& ctx) override;
 
-  /// Finalise each analysis and commit the plots to an AIDA tree and the
+  /// Finalise each analysis and commit the plots to the YODA tree and the
   /// THistSvc ROOT tree.
   virtual StatusCode finalize() override;
 
 
 private:
-
-  /// Book an AIDA::IDataPointSet into the THistSvc as a TH1D at path @param path
-//  StatusCode regHist(const AIDA::IDataPointSet& dps, const std::string& path);
-
-  /// Book an AIDA::IDataPointSet into the THistSvc as a TGraph at path @param path
-//  StatusCode regGraph(const AIDA::IDataPointSet& dps, const std::string& path);
 
   // Check and potentially modify events for correct units, beam particles, ...
   std::unique_ptr<HepMC::GenEvent> checkEvent(const HepMC::GenEvent& event, const EventContext& ctx);
