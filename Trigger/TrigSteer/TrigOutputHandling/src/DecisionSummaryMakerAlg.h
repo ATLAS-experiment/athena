@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGOUTPUTHANDLING_DECISIONSUMMARYMAKERALG_H
 #define TRIGOUTPUTHANDLING_DECISIONSUMMARYMAKERALG_H
@@ -32,7 +32,7 @@ public:
 
 private:
   /// Monitor RoI updates between initial and final RoI
-  void monitorRoIs(const TrigCompositeUtils::Decision* terminusNode) const;
+  void monitorRoIs(const EventContext& context, const TrigCompositeUtils::Decision* terminusNode) const;
 
   SG::WriteHandleKey<TrigCompositeUtils::DecisionContainer> m_summaryKey{ this, "DecisionsSummaryKey", "HLTNav_Summary",
       "Location of final decision" };
