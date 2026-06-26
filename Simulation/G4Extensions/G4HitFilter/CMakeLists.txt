@@ -6,7 +6,6 @@
 atlas_subdir( G4HitFilter )
 
 # External dependencies:
-find_package( CLHEP )
 find_package( Geant4 )
 
 # Component(s) in the package:
@@ -15,6 +14,6 @@ atlas_add_library( G4HitFilter
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel CaloSimEvent AthenaBaseComps StoreGateLib LUCID_SimEvent InDetSimEvent LArSimEvent MuonSimEvent G4AtlasInterfaces G4AtlasToolsLib TileSimEvent )
+                   PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} GaudiKernel CaloSimEvent AthenaBaseComps StoreGateLib LUCID_SimEvent InDetSimEvent LArSimEvent MuonSimEvent G4AtlasInterfaces G4AtlasToolsLib TileSimEvent )
 set_target_properties( G4HitFilter PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
