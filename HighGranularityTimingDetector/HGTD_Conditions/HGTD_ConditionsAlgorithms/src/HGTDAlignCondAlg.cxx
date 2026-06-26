@@ -20,6 +20,7 @@ StatusCode HGTDAlignCondAlg::initialize()
 
   ATH_CHECK(m_writeKey.initialize());
   ATH_CHECK(detStore()->retrieve(m_detManager, m_detManagerName));
+  ATH_MSG_INFO("Detector manager = " << m_detManager);
 
   return StatusCode::SUCCESS;
 }
@@ -37,6 +38,18 @@ StatusCode HGTDAlignCondAlg::execute(const EventContext& ctx) const
   }
 
   auto writeCdo = std::make_unique<GeoAlignmentStore>();
+  ATH_MSG_INFO("Created GeoAlignmentStore at "
+              << writeCdo.get());
+
+  const auto* coll = m_detManager->getDetectorElementCollection();
+  for (const auto* el : *coll) {
+    if (!el) continue;
+    el->getMaterialGeom()->getAbsoluteTransform(writeCdo.get());
+    el->getMaterialGeom()->getDefAbsoluteTransform(writeCdo.get());
+  }
+
+  writeCdo->lockDelta();
+  writeCdo->lockPosCache();
 
   if (writeHandle.record(IOVInfiniteRange::infiniteMixed(),
                          std::move(writeCdo)).isFailure()) {
