@@ -19,17 +19,11 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "AthOnnxInterfaces/IAthInferenceTool.h"
 #include "MVAUtils/BDT.h"
-#include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ColumnarTool.h>
-#include <ColumnarCore/LinkColumn.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarMuon/MuonDef.h>
 #include <ColumnarMuon/MuonTrackHelpers.h>
 #include <ColumnarTracking/TrackDef.h>
-#include <ColumnarTracking/TrackHelpers.h>
-#include <ColumnarVariant/VariantAccessor.h>
-#include <ColumnarVariant/VariantDef.h>
-#include <ColumnarVariant/VariantLinkColumn.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
 #include <string>
 #include <vector>
@@ -382,138 +376,12 @@ namespace CP {
             "Set true for inputs where MuonSegment links are absent (e.g. PHYSLITE). "
             "Also disables IS_SIMULATION-dependent cuts that require full EventInfo."};
 
-        // ── Columnar accessors ────────────────────────────────────────────────
-        // Object-column handle: maps an EventContextId to a MuonRange
-        columnar::MuonAccessor<columnar::ObjectColumn> m_muonsHandle {*this, "Muons"};
-
-        // EventInfo handle and event number — used for LowPt MVA even/odd splitting
-        columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventInfoHandle {*this, "EventInfo"};
-        columnar::EventInfoAccessor<uint64_t> m_eventNumberAcc {*this, "eventNumber"};
-
-        // Output column: 1 if the muon passes the configured working point
-        columnar::MuonDecorator<char> m_passSelectionDec {*this, "passSelection"};
-
-        // Basic kinematics
-        columnar::MuonAccessor<float> m_etaAcc  {*this, "eta"};
-        columnar::MuonAccessor<float> m_ptAcc   {*this, "pt"};
-        columnar::MuonAccessor<float> m_phiAcc  {*this, "phi"};
-
-        // Muon type and author (stored as uint16_t on disk, exposed as enum)
-        columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType, uint16_t>> m_muonTypeAcc {*this, "muonType"};
-        columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::Author,   uint16_t>> m_authorAcc   {*this, "author"};
-        // allAuthors bitmask — checked with isAuthor() logic
-        columnar::MuonAccessor<uint16_t> m_allAuthorsAcc {*this, "allAuthors"};
-
-        // MS hit-summary quantities (all uint8_t on disk)
-        columnar::MuonAccessor<uint8_t> m_nprecisionLayersAcc          {*this, "numberOfPrecisionLayers"};
-        columnar::MuonAccessor<uint8_t> m_nprecisionHoleLayersAcc       {*this, "numberOfPrecisionHoleLayers"};
-        columnar::MuonAccessor<uint8_t> m_nGoodPrecLayersAcc            {*this, "numberOfGoodPrecisionLayers"};
-        columnar::MuonAccessor<uint8_t> m_innerSmallHitsAcc             {*this, "innerSmallHits"};
-        columnar::MuonAccessor<uint8_t> m_innerLargeHitsAcc             {*this, "innerLargeHits"};
-        columnar::MuonAccessor<uint8_t> m_middleSmallHitsAcc            {*this, "middleSmallHits"};
-        columnar::MuonAccessor<uint8_t> m_middleLargeHitsAcc            {*this, "middleLargeHits"};
-        columnar::MuonAccessor<uint8_t> m_outerSmallHitsAcc             {*this, "outerSmallHits"};
-        columnar::MuonAccessor<uint8_t> m_outerLargeHitsAcc             {*this, "outerLargeHits"};
-        columnar::MuonAccessor<uint8_t> m_extendedSmallHitsAcc          {*this, "extendedSmallHits"};
-        columnar::MuonAccessor<uint8_t> m_extendedLargeHitsAcc          {*this, "extendedLargeHits"};
-        columnar::MuonAccessor<uint8_t> m_extendedSmallHolesAcc         {*this, "extendedSmallHoles"};
-        columnar::MuonAccessor<uint8_t> m_isSmallGoodSectorsAcc         {*this, "isSmallGoodSectors"};
-        columnar::MuonAccessor<uint8_t> m_combinedTrackOutBoundsHitsAcc {*this, "combinedTrackOutBoundsPrecisionHits"};
-
-        // Run-2 specific (optional: absent in Run-3 PHYSLITE)
-        columnar::MuonAccessor<uint8_t> m_cscUnspoiledEtaHitsAcc {*this, "cscUnspoiledEtaHits", {.isOptional=true}};
-
-        // Run-3 NSW quantities (optional: absent in Run-2 PHYSLITE)
-        columnar::MuonAccessor<uint8_t> m_etaLayer1STGCHitsAcc {*this, "etaLayer1STGCHits", {.isOptional=true}};
-        columnar::MuonAccessor<uint8_t> m_etaLayer2STGCHitsAcc {*this, "etaLayer2STGCHits", {.isOptional=true}};
-        columnar::MuonAccessor<uint8_t> m_MMHitsAcc             {*this, "MMHits",            {.isOptional=true}};
-
-        // Calibrated track momenta used by IdMsPt / rhoPrime
-        columnar::MuonAccessor<float> m_mePtAcc {*this, "MuonSpectrometerPt", {.isOptional=true}};
-        columnar::MuonAccessor<float> m_idPtAcc {*this, "InnerDetectorPt",    {.isOptional=true}};
-
-        // CaloTag quality variables
-        columnar::MuonAccessor<float> m_caloMuonScoreAcc  {*this, "CaloMuonScore",  {.isOptional=true}};
-        columnar::MuonAccessor<int>   m_caloMuonIDTagAcc  {*this, "CaloMuonIDTag"};
-
-        // Quality parameters used by the LowPt cut-based selection
-        columnar::MuonAccessor<float> m_momentumBalanceSigAcc     {*this, "momentumBalanceSignificance"};
-        columnar::MuonAccessor<float> m_scatteringCurvatureSigAcc {*this, "scatteringCurvatureSignificance"};
-        columnar::MuonAccessor<float> m_scatteringNeighbourSigAcc {*this, "scatteringNeighbourSignificance"};
-
-        // ID-track hit quantities for passedIDCuts. Read from InDetTrackParticles /
-        // InDetForwardTrackParticles via the MuonTrackDef variant (same pattern as
-        // m_trkMomentumAcc), which dispatches to the correct container in all modes.
-        // MuonTrackDef also covers ExtrapolatedMuonTrackParticles (Track2Def), which
-        // does not carry pixel/SCT hit counts in PHYSLITE — mark as optional so the
-        // variant's ME-track branches don't cause "column not claimed" failures.
-        columnar::AccessorTemplate<columnar::MuonTrackDef, uint8_t, columnar::ColumnAccessMode::input>
-            m_nPixelHitsIDTrackAcc        {*this, "numberOfPixelHits",        {.isOptional=true}};
-        columnar::AccessorTemplate<columnar::MuonTrackDef, uint8_t, columnar::ColumnAccessMode::input>
-            m_nPixelDeadSensorsIDTrackAcc {*this, "numberOfPixelDeadSensors", {.isOptional=true}};
-        columnar::AccessorTemplate<columnar::MuonTrackDef, uint8_t, columnar::ColumnAccessMode::input>
-            m_nSCTHitsIDTrackAcc          {*this, "numberOfSCTHits",          {.isOptional=true}};
-        columnar::AccessorTemplate<columnar::MuonTrackDef, uint8_t, columnar::ColumnAccessMode::input>
-            m_nSCTDeadSensorsIDTrackAcc   {*this, "numberOfSCTDeadSensors",   {.isOptional=true}};
-        columnar::AccessorTemplate<columnar::MuonTrackDef, uint8_t, columnar::ColumnAccessMode::input>
-            m_nPixelHolesIDTrackAcc       {*this, "numberOfPixelHoles",       {.isOptional=true}};
-        columnar::AccessorTemplate<columnar::MuonTrackDef, uint8_t, columnar::ColumnAccessMode::input>
-            m_nSCTHolesIDTrackAcc         {*this, "numberOfSCTHoles",         {.isOptional=true}};
-        columnar::AccessorTemplate<columnar::MuonTrackDef, uint8_t, columnar::ColumnAccessMode::input>
-            m_nTRTHitsIDTrackAcc          {*this, "numberOfTRTHits",          {.isOptional=true}};
-        columnar::AccessorTemplate<columnar::MuonTrackDef, uint8_t, columnar::ColumnAccessMode::input>
-            m_nTRTOutliersIDTrackAcc      {*this, "numberOfTRTOutliers",      {.isOptional=true}};
-
-        // ── Track-particle access for passedHighPtCuts / qOverPsignificance ──────────
-        // Columnar container handles for the track-particle collections.
-        columnar::Track0Accessor<columnar::ObjectColumn> m_tracksID  {*this, "InDetTrackParticles"};
-        columnar::Track1Accessor<columnar::ObjectColumn> m_tracksCB  {*this, "CombinedMuonTrackParticles"};
-        columnar::Track2Accessor<columnar::ObjectColumn> m_tracksME  {*this, "ExtrapolatedMuonTrackParticles"};
-        columnar::Track3Accessor<columnar::ObjectColumn> m_tracksFID {*this, "InDetForwardTrackParticles"};
-
-        // Links from each muon to its track particles.
-        // Column names match PHYSLITE aux branch names (confirmed via MuonCalibTool).
-        // The ID-track link is a MuonTrackDef variant because forward muons use a
-        // different container (InDetForwardTrackParticles) than central muons.
-        columnar::MuonAccessor<columnar::OptObjectId<columnar::Track1Def>>
-            m_cbTrackLinkAcc {*this, "combinedTrackParticleLink"};
-        columnar::MuonAccessor<columnar::ObjectLink<columnar::MuonTrackDef>>
-            m_idTrackLinkAcc {*this, "inDetTrackParticleLink"};
-        columnar::MuonAccessor<columnar::OptObjectId<columnar::Track2Def>>
-            m_meTrackLinkAcc {*this, "extrapolatedMuonSpectrometerTrackParticleLink"};
-
-        // Per-track property accessors (MuonTrackDef variant reads from whichever container).
-        columnar::TrackHelpers::TrackMomentumAccessors<columnar::MuonTrackDef> m_trkMomentumAcc {*this};
-        columnar::TrackHelpers::ChargeAccessor<columnar::MuonTrackDef>         m_trkChargeAcc   {*this};
-        columnar::TrackHelpers::DefiningParametersCovAccessor<columnar::MuonTrackDef> m_trkCovAcc {*this};
-
-        // theta, qOverP, chi2, numberDoF — not exposed directly by TrackHelpers
-        columnar::AccessorTemplate<columnar::MuonTrackDef, float,
-            columnar::ColumnAccessMode::input> m_trkThetaAcc  {*this, "theta"};
-        columnar::AccessorTemplate<columnar::MuonTrackDef, float,
-            columnar::ColumnAccessMode::input> m_trkQOverPAcc {*this, "qOverP"};
-        // chi2/nDoF are only ever accessed for CombinedMuonTrackParticles (Track1Def), so
-        // declare as Track1Accessor to avoid registering columns for the other MuonTrackDef
-        // variants (e.g. ExtrapolatedMuonTrackParticles) that aren't present in PHYSLITE.
-        columnar::Track1Accessor<float>   m_trkChi2Acc             {*this, "chiSquared"};
-        columnar::Track1Accessor<float>   m_trkNDoFAcc             {*this, "numberDoF"};
-        columnar::Track1Accessor<float>   m_qOverPCBTrackAcc       {*this, "qOverP"};
-        columnar::Track1Accessor<uint8_t> m_nPixelHitsCBTrackAcc   {*this, "numberOfPixelHits"};
-        columnar::Track1Accessor<uint8_t> m_nTRTOutliersCBTrackAcc {*this, "numberOfTRTOutliers"};
-
-        // ── Additional muon-level columns for passedLowPtEfficiencyCuts ──────────────
-        columnar::MuonAccessor<float>   m_energyLossAcc              {*this, "EnergyLoss"};
-        columnar::MuonAccessor<float>   m_segmentDeltaEtaAcc         {*this, "segmentDeltaEta"};
-        columnar::MuonAccessor<uint8_t> m_middleSmallHolesAcc        {*this, "middleSmallHoles"};
-        columnar::MuonAccessor<uint8_t> m_middleLargeHolesAcc        {*this, "middleLargeHoles"};
-        columnar::MuonAccessor<uint8_t> m_outerSmallHolesAcc         {*this, "outerSmallHoles"};
-        columnar::MuonAccessor<uint8_t> m_outerLargeHolesAcc         {*this, "outerLargeHoles"};
-        columnar::MuonAccessor<uint8_t> m_middleClosePrecisionHitsAcc{*this, "middleClosePrecisionHits"};
-        columnar::MuonAccessor<uint8_t> m_outerClosePrecisionHitsAcc {*this, "outerClosePrecisionHits"};
-        // EnergyLossType is only used in the Run-3 LowPt MVA path; mark optional
-        // so the column is not required when that path is not taken.
-        columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::EnergyLossType, uint32_t>>
-            m_energyLossTypeAcc {*this, "EnergyLossType", {.isOptional=true}};
+        // Columnar accessors are held in a sub-object so that their complex template
+        // types are never seen by rootcling when generating Python dictionaries for
+        // this class.  The struct is defined in the .cxx; only a forward declaration
+        // is needed here.
+        struct Accessors;
+        std::unique_ptr<Accessors> m_accessors;
 
     };  // class MuonSelectionTool
 
