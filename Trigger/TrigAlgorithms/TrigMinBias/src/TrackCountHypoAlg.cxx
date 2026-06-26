@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackCountHypoAlg.h"
@@ -78,7 +78,7 @@ StatusCode TrackCountHypoAlg::execute(const EventContext &context) const
 
   float vertexZ = 0;
   float maxWeight = -1;
-  auto linkToVertex =  findLink<xAOD::TrigCompositeContainer>(previousDecisionsHandle->at(0), featureString());
+  auto linkToVertex =  findLink<xAOD::TrigCompositeContainer>(context, previousDecisionsHandle->at(0), featureString());
   if ( linkToVertex.link.isValid() ) {
     auto all_vertices = linkToVertex.link.getDataPtr();
     for ( auto vtxInfo: *all_vertices) {

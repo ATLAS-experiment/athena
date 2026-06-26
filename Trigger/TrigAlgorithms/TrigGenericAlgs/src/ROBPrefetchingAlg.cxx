@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -78,7 +78,7 @@ StatusCode ROBPrefetchingAlg::execute(const EventContext& eventContext) const {
         }
       }
 
-      ElementLink<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(decision, m_roiLinkName.value()).link;
+      ElementLink<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(eventContext, decision, m_roiLinkName.value()).link;
       if (!roiEL.isValid()) {
         ATH_MSG_WARNING("No " << m_roiLinkName.value() << " link in " << decisionContKey.key() << " decision " << *decision);
         continue;
