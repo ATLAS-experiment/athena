@@ -51,7 +51,25 @@ std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy>
     return std::nullopt;
 }
 
+std::optional<Acts::BoundTrackParameters>  
+    lastTrackParameters(const xAOD::TrackParticle& trkPart,
+                        const bool skipOutlier) {
+    auto lastTrkProxy = lastMeasurementState(trkPart, skipOutlier);
+    if (!lastTrkProxy) {
+        return std::nullopt;
+    }
+    return getActsTrack(trkPart)->createParametersFromState(*lastTrkProxy);
+}
 
+std::optional<Acts::BoundTrackParameters>  
+    firstTrackParameters(const xAOD::TrackParticle& trkPart,
+                        const bool skipOutlier) {
+    auto firstTrkProxy = firstMeasurementState(trkPart, skipOutlier);
+    if (!firstTrkProxy) {
+        return std::nullopt;
+    }
+    return getActsTrack(trkPart)->createParametersFromState(*firstTrkProxy);
+}
 }
 
 namespace ActsTrk::detail {
