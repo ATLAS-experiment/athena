@@ -83,8 +83,8 @@ bool VP1RawDataColl_MDT_RDO::load() {
     std::cout << "Could not find MdtDigitContainer called " << container.name()
               << " in store " << container.store() << std::endl;
   }
-   ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() << "
-   in store " << container.store());
+  //  ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() 
+  //  << " in store " << container.store());
 
   // Iterate on the collections
   for (const MdtDigitCollection* coll : *container) {
