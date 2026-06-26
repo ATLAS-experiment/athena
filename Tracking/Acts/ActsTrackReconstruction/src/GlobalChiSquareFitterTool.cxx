@@ -104,14 +104,18 @@ StatusCode GlobalChiSquareFitterTool::initialize() {
     configureMe = extensionTemplate;
     configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
     configureMe.calibrator.connect<&detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
+    m_idCalibrator = xAODItkCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
     /// Connect the muon types with the muon calibrator
+    using enum xAOD::UncalibMeasType;
     if (m_muonCalibrator.isEnabled()) {
-      for (const auto& muonType : {xAOD::UncalibMeasType::MdtDriftCircleType, xAOD::UncalibMeasType::RpcStripType, 
-                                   xAOD::UncalibMeasType::TgcStripType, xAOD::UncalibMeasType::MMClusterType, 
-                                   xAOD::UncalibMeasType::sTgcStripType}) {
+      for (const auto muonType : {MdtDriftCircleType, RpcStripType, TgcStripType, MMClusterType, sTgcStripType}) {
         m_uncalibMeasCalibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(muonType, m_muonCalibrator.get());
       }
     }
+    for (const auto idType: {PixelClusterType, StripClusterType, Other, HGTDClusterType}) {
+      m_uncalibMeasCalibrator.connect<&xAODItkCalibrator_t::calibrate>(idType, &m_idCalibrator);
+    }
+    
   }
   return StatusCode::SUCCESS;
 }
