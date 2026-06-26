@@ -46,7 +46,6 @@ VP1RawDataHandle_sTGC_RDO::~VP1RawDataHandle_sTGC_RDO()
 QStringList VP1RawDataHandle_sTGC_RDO::clicked(bool verbose) const
 {
   static const sTgcIdHelper * idhelper = VP1DetInfo::stgcIDHelper();
-  const MuonGM::sTgcReadoutElement * elem = element();
 
   QStringList ll;
   ll << " ===> sTGC Digit data";
@@ -58,10 +57,13 @@ QStringList VP1RawDataHandle_sTGC_RDO::clicked(bool verbose) const
   ll << "   time: " + QString::number(m_data->time());
   ll << "   isDead: " + QString::number(m_data->isDead());
   ll << "   isPileup: " + QString::number(m_data->isPileup());
-  if (verbose) {
-    if (idhelper) {
-      //Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
+  if (verbose)
+  {
+    if (idhelper)
+    {
+      // Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
       Identifier id(m_data->identify());
+    }
   }
   return ll;
 }
