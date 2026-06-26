@@ -416,6 +416,12 @@ class ExtendedTracksMapLowPt(JobProperty):
     allowedTypes = ['str']
     StoredValue  = 'ExtendedTracksMapLowPt'
 
+class ExtendedTracksMapLowPtRoI(JobProperty):
+    """ Storegate key for new-tracking low Pt extended tracks map within selected roi"""
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'ExtendedTracksMapLowPtRoI'
+
 class ExtendedTracksMapBeamGas(JobProperty):
     """ Storegate key for new-tracking beam gas extended tracks map"""
     statusOn     = True
@@ -451,6 +457,12 @@ class ExtendedLowPtTracks(JobProperty):
     statusOn     = True
     allowedTypes = ['str']
     StoredValue  = 'ExtendedLowPtTracks'
+
+class ExtendedLowPtRoITracks(JobProperty):
+    """ Storegate key for new-tracking extended low Pt tracks within selected roi"""
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'ExtendedLowPtRoITracks'
 
 class ExtendedBeamGasTracks(JobProperty):
     """ Storegate key for new-tracking extended beam gas tracks"""
@@ -536,6 +548,24 @@ class SiSpSeededSCTTracks(JobProperty):
     statusOn     = True
     allowedTypes = ['str']
     StoredValue  = 'SiSPSeededSCTTracks'
+
+class LowPtRoITracks(JobProperty):
+    """StoreGate key for LowPtRoI tracks """
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'LowPtRoITracks'
+
+class LowPtRoIDetailedTracksTruth(JobProperty):
+    """StoreGate key for DetailedTrackTruth  (doLowPtRoI)"""
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'ResolvedLowPtRoITrackDetailedTruth'
+
+class LowPtRoITracksTruth(JobProperty):
+    """StoreGate key for TracksTruth  (doLowPtRoI)"""
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'ResolvedLowPtRoITrackTruthCollection'
 
 class PixelTracks(JobProperty):
     """StoreGate key for resolved pixel standalone tracks """
@@ -628,6 +658,11 @@ class SiSPSeedSegments(JobProperty):
     allowedTypes = ['str']
     StoredValue  = 'SiSPSeedSegments'
 
+class SiSPLowPtRoISeedSegments(JobProperty):
+    """ Storegate key for SP LowPtRoI Seed Segments to studies"""
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'SiSPLowPtRoISeedSegments'
 
 class SiSpSeededSLHCTracks(JobProperty):
     """ Storegate key for new-tracking SP seeded SLHC tracks"""
@@ -646,6 +681,12 @@ class SiSpSeededVeryLowPtTracks(JobProperty):
     statusOn     = True
     allowedTypes = ['str']
     StoredValue  = 'SiSPSeededVeryLowPtTracks'
+
+class SiSpSeededLowPtRoITracks(JobProperty):
+    """ Storegate key for new-tracking SP seeded low Pt tracks within selected roi"""
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'SiSPSeededLowPtRoITracks'
 
 class SiSpSeededForwardTracks(JobProperty):
     """ Storegate key for new-tracking SP seeded very forward tracks"""
@@ -688,6 +729,12 @@ class ResolvedLowPtTracks(JobProperty):
     statusOn     = True
     allowedTypes = ['str']
     StoredValue  = 'ResolvedLowPtTracks'
+
+class ResolvedLowPtRoITracks(JobProperty):
+    """ Storegate key for new-tracking resolved low Pt tracks within selected roi"""
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'ResolvedLowPtRoITracks'
 
 class ResolvedForwardTracks(JobProperty):
     """ Storegate key for new-tracking resolved very forward tracks"""
@@ -981,6 +1028,18 @@ class xAODPseudoTrackParticleContainer(JobProperty):
     allowedTypes = ['str']
     StoredValue = "InDetPseudoTrackParticles"
 
+class xAODLowPtRoITrackParticleContainer(JobProperty):
+    """xAOD TrackParticle for LowPtRoI"""
+    statusOn = True
+    allowedTypes = ['str']
+    StoredValue = "LowPtRoITrackParticles"
+
+class xAODLowPtRoIVertexContainer(JobProperty):
+    """xAOD Vertex for LowPtRoI"""
+    statusOn = True
+    allowedTypes = ['str']
+    StoredValue = "LowPtRoIVertexContainer"
+
 class xAODPixelTrackParticleContainer(JobProperty):
     """xAOD PixelTrackParticle"""
     statusOn = True
@@ -1010,6 +1069,12 @@ class xAODDisappearingExtendedTrackParticleContainer(JobProperty):
     statusOn = True
     allowedTypes = ['str']
     StoredValue = "InDetDisappearingExtendedTrackParticles"
+
+class xAODSiSPLowPtRoITrackCandidates(JobProperty):
+    """ Storegate key for SP Seed LowPtRoI Track Candidates to studies"""
+    statusOn     = True
+    allowedTypes = ['str']
+    StoredValue  = 'SiSpLowPtRoITrackCandidates'
 
 ##-----------------------------------------------------------------------------
 ## 2nd step
@@ -1090,12 +1155,14 @@ jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracksMap)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracksMapPhase)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracksMapSLHC)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracksMapLowPt)
+jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracksMapLowPtRoI)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracksMapBeamGas)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracksMapLargeD0)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedTracksPhase)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedSLHCTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedLowPtTracks)
+jobproperties.InDetContainerKeys.add_JobProperty(ExtendedLowPtRoITracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedBeamGasTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedLargeD0Tracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ExtendedLargeD0TracksTruth)
@@ -1114,6 +1181,9 @@ jobproperties.InDetContainerKeys.add_JobProperty(PseudoTracksTruth)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededPixelTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededDisappearingTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededSCTTracks)
+jobproperties.InDetContainerKeys.add_JobProperty(LowPtRoITracks)
+jobproperties.InDetContainerKeys.add_JobProperty(LowPtRoITracksTruth)
+jobproperties.InDetContainerKeys.add_JobProperty(LowPtRoIDetailedTracksTruth)
 jobproperties.InDetContainerKeys.add_JobProperty(PixelTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(PixelDetailedTracksTruth)
 jobproperties.InDetContainerKeys.add_JobProperty(PixelTracksTruth)
@@ -1128,9 +1198,11 @@ jobproperties.InDetContainerKeys.add_JobProperty(TRTTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(TRTTracks_NewT)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSPSeedSegments)
+jobproperties.InDetContainerKeys.add_JobProperty(SiSPLowPtRoISeedSegments)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededSLHCTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededLowPtTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededVeryLowPtTracks)
+jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededLowPtRoITracks)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededForwardTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededSLHCConversionFindingTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededBeamGasTracks)
@@ -1139,6 +1211,7 @@ jobproperties.InDetContainerKeys.add_JobProperty(ResolvedTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ResolvedSLHCTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ResolvedLowPtTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ResolvedVeryLowPtTracks)
+jobproperties.InDetContainerKeys.add_JobProperty(ResolvedLowPtRoITracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ResolvedForwardTracks)
 jobproperties.InDetContainerKeys.add_JobProperty(ResolvedForwardTracksTruth)
 jobproperties.InDetContainerKeys.add_JobProperty(ResolvedForwardTrackParticles)
@@ -1186,11 +1259,14 @@ jobproperties.InDetContainerKeys.add_JobProperty(xAODForwardTrackParticleContain
 jobproperties.InDetContainerKeys.add_JobProperty(xAODLargeD0TrackParticleContainer)
 jobproperties.InDetContainerKeys.add_JobProperty(xAODLowBetaTrackParticleContainer)
 jobproperties.InDetContainerKeys.add_JobProperty(xAODPseudoTrackParticleContainer)
+jobproperties.InDetContainerKeys.add_JobProperty(xAODLowPtRoITrackParticleContainer)
+jobproperties.InDetContainerKeys.add_JobProperty(xAODLowPtRoIVertexContainer)
 jobproperties.InDetContainerKeys.add_JobProperty(xAODPixelTrackParticleContainer)
 jobproperties.InDetContainerKeys.add_JobProperty(xAODSCTTrackParticleContainer)
 jobproperties.InDetContainerKeys.add_JobProperty(xAODTRTTrackParticleContainer)
 jobproperties.InDetContainerKeys.add_JobProperty(xAODDisappearingTrackParticleContainer)
 jobproperties.InDetContainerKeys.add_JobProperty(xAODDisappearingExtendedTrackParticleContainer)
+jobproperties.InDetContainerKeys.add_JobProperty(xAODSiSPLowPtRoITrackCandidates)
 jobproperties.InDetContainerKeys.add_JobProperty(DBMDetailedTracksTruth) 
 jobproperties.InDetContainerKeys.add_JobProperty(DBMTracksTruth) 
 jobproperties.InDetContainerKeys.add_JobProperty(SiSpSeededDBMTracks) 

@@ -158,6 +158,14 @@ if InDetFlags.loadRotCreator():
     else:
         InDetRotCreatorDigital=InDetRotCreatorPattern
 
+
+    if InDetFlags.doStoreTrackSeeds() and InDetFlags.doLowPtRoI():
+        from SeedToTrackConversionTool.SeedToTrackConversionToolConf import InDet__SeedToTrackConversionTool
+        InDet_SeedToTrackConversionLowPtRoI = InDet__SeedToTrackConversionTool( name = "InDet_SeedToTrackConversionLowPtRoI", 
+                                                                                TrackPatternRecoInfo = "SiSpacePointsSeedMaker_LowMomentum",
+                                                                                SeedsegmentsOutput = "SiSPLowPtRoISeedSegments")
+        ToolSvc += InDet_SeedToTrackConversionLowPtRoI
+
     #
     # --- configure broad cluster ROT creator
     #
@@ -248,11 +256,26 @@ if InDetFlags.loadFitter():
 
     from AthenaCommon import CfgGetter
     InDetTrackFitter    = CfgGetter.getPublicTool('InDetTrackFitter')
+    from RecExConfig.RecFlags import rec
+    if not rec.doMuon():
+        #Switch-off muon-related components
+        InDetTrackFitter.ResidualPullCalculatorTool.ResidualPullCalculatorForRPC=""
+        InDetTrackFitter.ResidualPullCalculatorTool.ResidualPullCalculatorForTGC=""
 
-    if InDetFlags.doLowPt() or InDetFlags.doVeryLowPt() or (InDetFlags.doTrackSegmentsPixel() and InDetFlags.doMinBias()):
+    if InDetFlags.doLowPt() or InDetFlags.doVeryLowPt() or InDetFlags.doLowPtRoI() or (InDetFlags.doTrackSegmentsPixel() and InDetFlags.doMinBias()):
         InDetTrackFitterLowPt = CfgGetter.getPublicTool('InDetTrackFitterLowPt')
+        if not rec.doMuon():
+            #Switch-off muon-related components
+            InDetTrackFitterLowPt.ResidualPullCalculatorTool.ResidualPullCalculatorForRPC=""
+            InDetTrackFitterLowPt.ResidualPullCalculatorTool.ResidualPullCalculatorForTGC=""
+
     if DetFlags.TRT_on():
         InDetTrackFitterTRT =   CfgGetter.getPublicTool('InDetTrackFitterTRT')
+        if not rec.doMuon():
+            #Switch-off muon-related components
+            InDetTrackFitterTRT.ResidualPullCalculatorTool.ResidualPullCalculatorForRPC=""
+            InDetTrackFitterTRT.ResidualPullCalculatorTool.ResidualPullCalculatorForTGC=""
+
     if InDetFlags.doDBM():
         InDetTrackFitterDBM =   CfgGetter.getPublicTool('InDetTrackFitterDBM')
 
