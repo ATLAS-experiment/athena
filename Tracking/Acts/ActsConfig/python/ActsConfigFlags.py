@@ -59,10 +59,12 @@ class TrackFitterType(FlagEnum):
 #   measurements for extending tracks (AnalogueClustering)
 # - or only apply the AnalogueClustering to selected measurements
 #   (AnalogueClusteringAfterSelection)
+# - or perform AnalogueClustering with NN corrections
 class PixelCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
     AnalogueClustering = "AnalogueClustering"
     AnalogueClusteringAfterSelection = "AnalogueClusteringAfterSelection"
+    NNClustering = "NNClustering"
 
 # Flag for strip calibration strategy during track finding
 # - use cluster as is (Uncalibrated)

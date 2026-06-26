@@ -200,7 +200,8 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
             
             if flags.Acts.PixelCalibrationStrategy in (PixelCalibrationStrategy.AnalogueClustering,
-                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection) :
+                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
+                                                       PixelCalibrationStrategy.NNClustering):
 
                 kwargs.setdefault(
                     'PixelCalibrator',
