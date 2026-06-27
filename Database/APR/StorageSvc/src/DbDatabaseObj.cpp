@@ -41,7 +41,6 @@ std::ostream& operator << (std::ostream& os, const Token::OID_t oid ) {
 static const Guid s_localDb("00000000-0000-0000-0000-000000000000");
 
 void genMD5(const std::string& s, void* code);
-static const int KEY_MASK = (~0x0)&0x00;
 
 /// Produce the token keys only on demand for export
 void makeKey(const Token* tok, Guid& guid)  {
