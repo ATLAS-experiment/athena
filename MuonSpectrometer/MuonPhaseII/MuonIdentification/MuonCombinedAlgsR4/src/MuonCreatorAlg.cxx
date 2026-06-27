@@ -48,7 +48,7 @@ StatusCode MuonCreatorAlg::setupDataShip(const EventContext& ctx, DataShip& ship
 
     std::unordered_set<const xAOD::TrackParticle*> cmbMsTrks{};
     std::vector<const MuonR4::MuonTagContainer*> tagContainers{};
-    tagContainers.resize(m_tagKeys.size());
+    tagContainers.resize(m_tagKeys.size(), nullptr);
     for (const auto&[idx, key]  : Acts::enumerate(m_tagKeys)) {
         ATH_CHECK(SG::get(tagContainers[idx], key, ctx));
     }
