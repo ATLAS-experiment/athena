@@ -7,9 +7,6 @@ string( STRIP ${_version} _version )
 project( AthAnalysis VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
-# HepMC3
-set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
-
 # Configure flake8:
 set( ATLAS_FLAKE8 true   # <- this is the shell builtin `true`
    CACHE STRING "Default flake8 command" )
