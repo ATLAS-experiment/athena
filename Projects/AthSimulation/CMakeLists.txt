@@ -25,9 +25,6 @@ if( ATLAS_BUILD_SIM_CUDA )
    set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" )
 endif()
 
-# HepMC3
-set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
-
 # Configure flake8:
 set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,B,F,E101,E7,E9,W6
                                --ignore B006,B007,B019,E701,E702,E704,E741

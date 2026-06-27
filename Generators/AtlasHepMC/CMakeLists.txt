@@ -12,7 +12,6 @@ atlas_add_library( AtlasHepMCLib
    AtlasHepMC/*.h
    INTERFACE
    PUBLIC_HEADERS AtlasHepMC
-   DEFINITIONS HEPMC3=1
    INCLUDE_DIRS  ${HEPMC3_INCLUDE_DIRS}
    LINK_LIBRARIES ${HEPMC3_HepMC3_LIBRARY}  )
 
@@ -20,6 +19,5 @@ atlas_add_library( AtlasHepMCsearchLib
    AtlasHepMC/*.h
    INTERFACE
    PUBLIC_HEADERS AtlasHepMC
-   DEFINITIONS HEPMC3=1
    INCLUDE_DIRS  ${HEPMC3_INCLUDE_DIRS}
    LINK_LIBRARIES ${HEPMC3_HepMC3search_LIBRARY}  )
