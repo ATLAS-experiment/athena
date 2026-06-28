@@ -786,6 +786,7 @@ QMap<QString,QString> VP1MainWindow::availableFiles(const QString& extension,
     int nDuplicatesRemoved = vp1pluginpath.removeDuplicates();
     VP1Msg::messageDebug("Removed '" + QString::number(nDuplicatesRemoved) + "' duplicate paths.");
 
+/*
 	//Remove all nonexisting directories:
     unsigned idx=0;
     for (const auto& plugindir : vp1pluginpath) {
@@ -803,6 +804,25 @@ QMap<QString,QString> VP1MainWindow::availableFiles(const QString& extension,
         }
         ++idx;
     }
+*/
+
+    // Remove all nonexisting directories:
+    QStringList validPluginPaths;
+    validPluginPaths.reserve(vp1pluginpath.size());
+    for (const QString& plugindir : vp1pluginpath) {
+	    VP1Msg::messageDebug("plugindir: '" + plugindir + "'");
+	    QFileInfo fi(plugindir);
+
+	    if (fi.exists() && fi.isDir()) {
+		    validPluginPaths << plugindir;
+	    } else {
+		    VP1Msg::messageDebug("Removed non-valid path: '" + plugindir + "'");
+	    }
+    }
+    vp1pluginpath = validPluginPaths;
+
+
+
 
 	//Find all files with required extension in the directories (in case of duplicates - the ones appearing first are used):
 	QMap<QString,QString> plugins2fullpath;
