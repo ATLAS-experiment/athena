@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GeometrySystems/VolumeHandle.h"
@@ -11,7 +11,6 @@
 
 #include "VP1Base/VP1ExtraSepLayerHelper.h"
 #include "VP1Base/VP1Msg.h"
-// #include "VP1Base/VP1QtInventorUtils.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
 #include "VP1HEPVis/nodes/SoTransparency.h"
 #include "VP1HEPVis/nodes/SoPolyhedron.h"
@@ -152,7 +151,13 @@ void VolumeHandle::initialiseChildren()
     matr.multRight(m_d->accumTrans);
     m_children.push_back(new VolumeHandle(m_d->commondata,this,av.getVolume(),ichild++,(isInMuonChamber()?MUONCHAMBERCHILD:NONMUONCHAMBER),matr));
     //std::cout << "initialised: " << av.getName() << " - " << m_children.back()->getName().toStdString() << " - " << m_children.back() << std::endl;
+
+    // now expand child volumes to the first non-ether volume
+    // this is done to automatically expand Assembly volumes
+    m_children.back()->expandMothersRecursivelyToNonEther();
+    
     av.next();
+
   }
 
   assert(ichild==m_nchildren&&m_children.size()==m_nchildren);
@@ -346,6 +351,7 @@ void VolumeHandle::Imp::detach()
   }
 }
 
+/*
 //____________________________________________________________________
 void VolumeHandle::setState( const VP1GeoFlags::VOLSTATE& state )
 {
@@ -369,11 +375,13 @@ void VolumeHandle::setState( const VP1GeoFlags::VOLSTATE& state )
 
   //Only thing left is visibility updates (i.e. attachment to 3D scenegraph).
 
+  
   if (haveParentsNotExpanded()) {
     //No visibility updates necessary
     assert(!m_d->isattached);
     return;
   }
+  
 
   //We might need visibility updates. Which ones depend on the
   //particular change of state:
@@ -398,6 +406,82 @@ void VolumeHandle::setState( const VP1GeoFlags::VOLSTATE& state )
       detachAllContractedChildren();
   }
 }
+*/
+
+
+void VolumeHandle::setState( const VP1GeoFlags::VOLSTATE& state )
+{
+  if (m_state==state)
+    return;
+
+  // Mark muon chamber as dirty.
+  if (isInMuonChamber()) {
+    VolumeHandle *tp = topLevelParent();
+    if (tp->m_muonChamberState == MUONCHAMBER)
+      tp->m_muonChamberState = MUONCHAMBER_DIRTY;
+  }
+
+  // Update state flag and presence in GUI lists:
+  VP1GeoFlags::VOLSTATE oldstate = m_state;
+  m_state = state;
+  if (oldstate==VP1GeoFlags::ZAPPED)
+    m_d->commondata->removeZappedVolumesFromGui(this);
+  else if (state==VP1GeoFlags::ZAPPED)
+    m_d->commondata->addZappedVolumeToGui(this);
+
+  // Visibility updates. Ether volumes are automatically expanded so that
+  // the first non-ether descendants become visible.
+
+  if (state==VP1GeoFlags::CONTRACTED) {
+    for (auto d=childrenBegin(); d!=childrenEnd(); d++) {
+      if ((*d)->isEther())
+        (*d)->setState(VP1GeoFlags::CONTRACTED);
+    }
+
+    if (!isEther()) {
+      m_d->attach(this);
+      detachAllContractedChildren();
+    } else {
+      bool otherThanEther = false;
+      VolumeHandle *p = parent();
+      while (p) {
+        if (!p->isEther()) {
+          otherThanEther = true;
+          break;
+        }
+        p = p->parent();
+      }
+
+      if (!otherThanEther)
+        return;
+
+      m_d->attach(this);
+      detachAllContractedChildren();
+
+      p = parent();
+      if (p)
+        p->setState(VP1GeoFlags::CONTRACTED);
+    }
+  } else if (state==VP1GeoFlags::EXPANDED) {
+    if (oldstate==VP1GeoFlags::CONTRACTED)
+      m_d->detach();
+
+    attachAllContractedChildren();
+
+    for (auto d=childrenBegin(); d!=childrenEnd(); d++) {
+      if ((*d)->isEther())
+        (*d)->setState(VP1GeoFlags::EXPANDED);
+    }
+  } else {
+    assert(state==VP1GeoFlags::ZAPPED);
+
+    if (oldstate==VP1GeoFlags::CONTRACTED)
+      m_d->detach();
+    else
+      detachAllContractedChildren();
+  }
+}
+
 
 //____________________________________________________________________
 void VolumeHandle::contractDaughtersRecursively()
