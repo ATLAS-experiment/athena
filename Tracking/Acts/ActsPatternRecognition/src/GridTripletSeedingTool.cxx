@@ -52,6 +52,12 @@ StatusCode GridTripletSeedingTool::initialize() {
   ATH_MSG_DEBUG("   " << m_deltaZMax);
   ATH_MSG_DEBUG("   " << m_collisionRegionMin);
   ATH_MSG_DEBUG("   " << m_collisionRegionMax);
+  ATH_MSG_DEBUG("   " << m_useHVCollisionRegion);
+  ATH_CHECK(m_inputHoughVtxKey.initialize(m_useHVCollisionRegion));
+  if(m_useHVCollisionRegion) {
+    ATH_MSG_DEBUG("   " << m_inputHoughVtxKey);
+    ATH_MSG_DEBUG("   " << m_hvCollisionRegionTolerance);
+  }
   ATH_MSG_DEBUG("   " << m_sigmaScattering);
   ATH_MSG_DEBUG("   " << m_maxPtScattering);
   ATH_MSG_DEBUG("   " << m_radLengthPerSeed);
@@ -506,9 +512,22 @@ StatusCode GridTripletSeedingTool::createSeeds(
     return {minRange, maxRange};
   }();
 
+  auto bottomDoubletFinderCfg = m_bottomDoubletFinderCfg;
+
+  if(m_useHVCollisionRegion) {
+    SG::ReadHandle<xAOD::VertexContainer> inputHoughVtx = SG::makeHandle(m_inputHoughVtxKey, ctx);
+    ATH_CHECK(inputHoughVtx.isValid());
+
+    if(inputHoughVtx->size() == 1) {
+      bottomDoubletFinderCfg.collisionRegionMin = inputHoughVtx->at(0)->z() - m_hvCollisionRegionTolerance;
+      bottomDoubletFinderCfg.collisionRegionMax = inputHoughVtx->at(0)->z() + m_hvCollisionRegionTolerance;
+    }
+    // in case HoughVtx is not found, keep the original collision region
+  }
+
   auto bottomDoubletFinder =
       Acts::DoubletSeedFinder::create(Acts::DoubletSeedFinder::DerivedConfig(
-          m_bottomDoubletFinderCfg, bFieldInZ));
+          bottomDoubletFinderCfg, bFieldInZ));
   auto topDoubletFinder = Acts::DoubletSeedFinder::create(
       Acts::DoubletSeedFinder::DerivedConfig(m_topDoubletFinderCfg, bFieldInZ));
   auto tripletFinder = Acts::TripletSeedFinder::create(

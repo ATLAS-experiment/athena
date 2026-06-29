@@ -10,6 +10,8 @@
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetIdentifier/PixelID.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODTracking/VertexContainer.h"
 
 // ACTS CORE
 #include "Acts/EventData/SeedContainer2.hpp"
@@ -118,6 +120,12 @@ class GridTripletSeedingTool
   Gaudi::Property<float> m_collisionRegionMax{
       this, "collisionRegionMax", 200. * Acts::UnitConstants::mm,
       "limiting location of collision region in z"};
+  Gaudi::Property<bool> m_useHVCollisionRegion{
+      this, "useHVCollisionRegion", false, 
+      "restrict collision region by Hough vertex position"};
+  Gaudi::Property<float> m_hvCollisionRegionTolerance{
+      this, "hvCollisionRegionTolerance", 10. * Acts::UnitConstants::mm,
+      "size of collision region when using Hough vertex"};  
   Gaudi::Property<float> m_sigmaScattering{
       this, "sigmaScattering", 2.,
       "how many sigmas of scattering angle should be considered"};
@@ -373,6 +381,8 @@ class GridTripletSeedingTool
   std::pair<float, float> retrieveRadiusRangeForMiddle(
       const Acts::ConstSpacePointProxy2& spM,
       const Acts::Range1D<float>& rMiddleSpRange) const;
+
+  SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{this, "inputHoughVtx", "", "input vertex container"};
 };
 
 }  // namespace ActsTrk
