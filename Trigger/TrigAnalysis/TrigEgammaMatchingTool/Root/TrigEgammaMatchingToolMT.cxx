@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -71,7 +71,7 @@ std::string TrigEgammaMatchingToolMT::key( const std::string& key) const
 
 //!=======================================================================
 
-bool TrigEgammaMatchingToolMT::isPassed(const xAOD::Egamma *eg,const std::string &trigger, unsigned int condition ) const
+bool TrigEgammaMatchingToolMT::isPassed(const EventContext& ctx, const xAOD::Egamma *eg,const std::string &trigger, unsigned int condition ) const
 {
     const TrigCompositeUtils::Decision *dec=nullptr;
     if( match( eg, trigger, dec ) ){
@@ -80,10 +80,10 @@ bool TrigEgammaMatchingToolMT::isPassed(const xAOD::Egamma *eg,const std::string
           std::string key = this->key("Electrons_GSF");
           if(boost::contains(trigger,"nogsf")) key=this->key("Electrons");
           if(boost::contains(trigger,"lrt")) key=this->key("Electrons_LRT");
-          return ancestorPassed<xAOD::ElectronContainer>(dec, trigger,key, condition);
+          return ancestorPassed<xAOD::ElectronContainer>(ctx, dec, trigger,key, condition);
         }
         if(xAOD::EgammaHelpers::isPhoton(eg)){
-          return ancestorPassed<xAOD::PhotonContainer>(dec, trigger, key("Photons"), condition);
+          return ancestorPassed<xAOD::PhotonContainer>(ctx, dec, trigger, key("Photons"), condition);
         }
       }
     }

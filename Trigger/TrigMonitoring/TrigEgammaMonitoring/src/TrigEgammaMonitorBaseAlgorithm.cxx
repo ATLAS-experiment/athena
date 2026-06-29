@@ -178,7 +178,7 @@ bool TrigEgammaMonitorBaseAlgorithm::isPrescaled(const std::string& trigger) con
 
 
 
-asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUtils::Decision *dec, const TrigInfo& info, const bool onlyHLT) const {
+asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept(const EventContext& ctx, const TrigCompositeUtils::Decision *dec, const TrigInfo& info, const bool onlyHLT) const {
     
     ATH_MSG_DEBUG("setAccept");
 
@@ -197,11 +197,11 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
         auto trigger = info.trigger;
         if (!onlyHLT){
             // Step 1
-            passedL1Calo = match()->ancestorPassed<TrigRoiDescriptorCollection>( dec , trigger , "initialRois", condition);
+            passedL1Calo = match()->ancestorPassed<TrigRoiDescriptorCollection>(ctx, dec , trigger , "initialRois", condition);
 
             if( passedL1Calo ){ // HLT item get full decision
                 // Step 2
-                passedL2Calo = match()->ancestorPassed<xAOD::TrigEMClusterContainer>(dec, trigger, match()->key("FastCalo"), condition);  
+                passedL2Calo = match()->ancestorPassed<xAOD::TrigEMClusterContainer>(ctx, dec, trigger, match()->key("FastCalo"), condition);
             
                 if(passedL2Calo){
 
@@ -209,9 +209,9 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                     if(info.signature == "Electron" or info.signature == "e"){
                         std::string key = match()->key("FastElectrons");
                         if(info.lrt)  key = match()->key("FastElectrons_LRT");
-                        passedL2 = match()->ancestorPassed<xAOD::TrigElectronContainer>(dec, trigger, key, condition);
+                        passedL2 = match()->ancestorPassed<xAOD::TrigElectronContainer>(ctx, dec, trigger, key, condition);
                     }else if(info.signature == "Photon" or info.signature == "g"){
-                        passedL2 = match()->ancestorPassed<xAOD::TrigPhotonContainer>(dec, trigger, match()->key("FastPhotons"), condition);
+                        passedL2 = match()->ancestorPassed<xAOD::TrigPhotonContainer>(ctx, dec, trigger, match()->key("FastPhotons"), condition);
                     }
 
                     if(passedL2){
@@ -222,7 +222,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                         if(info.lrt) key = match()->key("PrecisionCalo_LRT");
                         if(info.ion) key = match()->key("PrecisionCalo_HI");
 
-                        passedEFCalo = match()->ancestorPassed<xAOD::CaloClusterContainer>(dec, trigger, key, condition);
+                        passedEFCalo = match()->ancestorPassed<xAOD::CaloClusterContainer>(ctx, dec, trigger, key, condition);
 
                         if(passedEFCalo){
 
@@ -237,14 +237,14 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                                     std::string key = match()->key("Electrons_GSF");
                                     if(info.lrt)  key = match()->key("Electrons_LRT");
                                     if(info.nogsf)  key = match()->key("Electrons");
-                                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
+                                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(ctx, dec, trigger, key, condition);
                                 }
     
                             }else if(info.signature == "Photon" or info.signature == "g"){
                                 if (info.etcut){
                                     passedEF = true; // since we dont run the precisePhoton step
                                 }else{
-                                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(dec, trigger, match()->key("Photons"), condition);
+                                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(ctx, dec, trigger, match()->key("Photons"), condition);
                                 }
                             }
                         } // EFCalo
@@ -261,14 +261,14 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                     std::string key = match()->key("Electrons_GSF");
                     if(info.lrt)  key = match()->key("Electrons_LRT");
                     if(info.nogsf)  key = match()->key("Electrons");
-                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
+                    passedEF = match()->ancestorPassed<xAOD::ElectronContainer>(ctx, dec, trigger, key, condition);
                 }
 
             }else if(info.signature == "Photon" or info.signature == "g"){
                 if (info.etcut){
                     passedEF = true; // since we dont run the precisePhoton step
                 }else{
-                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(dec, trigger, match()->key("Photons"), condition);
+                    passedEF = match()->ancestorPassed<xAOD::PhotonContainer>(ctx, dec, trigger, match()->key("Photons"), condition);
                 }
             }
         }

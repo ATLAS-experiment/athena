@@ -151,7 +151,7 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
 
 
     /*! Set the accept object for all trigger levels */
-    asg::AcceptData setAccept(const TrigCompositeUtils::Decision*, const TrigInfo&, const bool) const;
+    asg::AcceptData setAccept(const EventContext& ctx, const TrigCompositeUtils::Decision*, const TrigInfo&, const bool) const;
     /*! Get the trigger info parsed from the chain name (only single lepton triggers) */
     TrigInfo getTrigInfo(const std::string&) const;
     TrigInfo getTrigInfoR3(const std::string&) const;
