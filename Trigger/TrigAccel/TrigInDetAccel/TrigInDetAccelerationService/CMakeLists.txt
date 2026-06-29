@@ -10,6 +10,11 @@ atlas_add_library(TrigInDetAccelerationServiceLib
    PUBLIC_HEADERS TrigInDetAccelerationService
    LINK_LIBRARIES GaudiKernel TrigAccelEvent)
 
+# The component library needs CUDA. (For AthCUDAInterfacesLib.)
+if(NOT CMAKE_CUDA_COMPILER)
+   return()
+endif()
+
 atlas_add_component(TrigInDetAccelerationService
    src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES TrigInDetAccelerationServiceLib CxxUtils GaudiKernel

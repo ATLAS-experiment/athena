@@ -1,7 +1,12 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package.
 atlas_subdir( AthCUDAKernel )
+
+# Bail out if CUDA is not available.
+if( NOT CMAKE_CUDA_COMPILER )
+   return()
+endif()
 
 # Component(s) in the package.
 atlas_add_library( AthCUDAKernelLib
