@@ -21,9 +21,7 @@
 
 // Forward declaration
 #include "AtlasHepMC/GenEvent_fwd.h"
-#include "HepMC3/Reader.h"
-#include "HepMC3/ReaderAsciiHepMC2.h"
-#include "HepMC3/ReaderFactory_fwd.h"
+#include "AtlasHepMC/IO_GenEvent.h"
 
 
 class HepMcReaderTool : public extends<AthAlgTool, IIOHepMcTool>

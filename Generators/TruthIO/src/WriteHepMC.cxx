@@ -3,9 +3,8 @@
 */
 
 #include "TruthIO/WriteHepMC.h"
-#include "HepMC3/WriterAscii.h"
-#include "HepMC3/WriterAsciiHepMC2.h"
-#include "HepMC3/ReaderFactory.h"
+#include "AtlasHepMC/IO_GenEvent.h"
+#include "AtlasHepMC/ReaderFactory.h"
 // Additional includes for dealing with event numbers
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
