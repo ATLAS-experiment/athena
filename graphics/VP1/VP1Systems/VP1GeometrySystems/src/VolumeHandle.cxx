@@ -152,12 +152,7 @@ void VolumeHandle::initialiseChildren()
     m_children.push_back(new VolumeHandle(m_d->commondata,this,av.getVolume(),ichild++,(isInMuonChamber()?MUONCHAMBERCHILD:NONMUONCHAMBER),matr));
     //std::cout << "initialised: " << av.getName() << " - " << m_children.back()->getName().toStdString() << " - " << m_children.back() << std::endl;
 
-    // now expand child volumes to the first non-ether volume
-    // this is done to automatically expand Assembly volumes
-    m_children.back()->expandMothersRecursivelyToNonEther();
-    
     av.next();
-
   }
 
   assert(ichild==m_nchildren&&m_children.size()==m_nchildren);
