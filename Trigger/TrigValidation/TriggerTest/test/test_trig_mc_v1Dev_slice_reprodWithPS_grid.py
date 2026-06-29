@@ -3,7 +3,7 @@
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by prescaling
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 # art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42189392_00
 # art-input-nfiles: 1

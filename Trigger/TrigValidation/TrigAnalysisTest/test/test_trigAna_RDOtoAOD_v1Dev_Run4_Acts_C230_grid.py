@@ -3,7 +3,7 @@
 #
 # art-description: Test of transform RDO->RDO_TRIG->AOD with threads=8 and Acts tracking (C230)
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-input: group.trig-hlt.mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4494_r16635
 # art-input-nfiles: 1
 # art-athena-mt: 8

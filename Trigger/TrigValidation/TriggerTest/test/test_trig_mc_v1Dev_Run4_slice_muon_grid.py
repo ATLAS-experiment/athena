@@ -3,7 +3,7 @@
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the muon slice in Dev_pp_run4_v1 menu
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-architecture: '#x86_64-intel'
 # art-input: group.trig-hlt.group.det-muon.999992.PG_DiMuon_Pt10to100.RDO_MU0.R4-250226.v1_EXT0
 # art-input-nfiles: 1
