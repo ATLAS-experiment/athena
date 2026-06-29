@@ -188,6 +188,7 @@ bool VolumeHandle::hasName(const std::string& n) const
   return m_d->pV->getLogVol()->getName() == n;
 }
 
+
 //____________________________________________________________________
 SoMaterial * VolumeHandle::material()
 {
@@ -595,7 +596,18 @@ const GeoMaterial * VolumeHandle::geoMaterial() const {
 //____________________________________________________________________
 bool VolumeHandle::isEther() const
 {
-  return !isMuonChamber() && QString(geoMaterial()->getName().c_str()).endsWith("Ether");
+  // NOTE: 
+  // * the special::Ether is the old 'special' material used for assembly volumes in Pixel
+  // * the special::HyperUranium is the new 'special' material assigned by GeoModelXML 
+  //   to the 'AssemblyLV' volumes created out of assembly volumes; those are the ones that are
+  //   used, for example, in ITkStrip 
+  const QString materialName = QString(geoMaterial()->getName().c_str());
+  if (getName() == "AssemblyLV") {
+	  VP1Msg::messageDebug("AssemblyLV material: " + materialName);
+  }
+  return !isMuonChamber() &&
+         (materialName.endsWith("Ether") ||
+          materialName.endsWith("HyperUranium"));
 }
 
 //____________________________________________________________________
