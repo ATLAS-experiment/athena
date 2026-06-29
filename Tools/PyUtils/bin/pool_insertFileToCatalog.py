@@ -72,7 +72,7 @@ if __name__ == "__main__":
         print (" shell> pool_insertFileToCatalog.py aod.pool")
         sys.exit(1)
 
-    if not (options.files is None):
+    if options.files is not None:
         import os
         for f in options.files.split():
             f = os.path.expandvars(os.path.expanduser(f))

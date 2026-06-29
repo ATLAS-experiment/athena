@@ -107,12 +107,12 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doSharedHits", True)
     # Switch for running TIDE Ambi
     icf.addFlag("Tracking.doTIDE_Ambi", lambda prevFlags:
-                not (prevFlags.Beam.Type is BeamType.Cosmics))
+                prevFlags.Beam.Type is not BeamType.Cosmics)
     # Use simple position and error estimate for on-track pixel cluster
     icf.addFlag("Tracking.doPixelDigitalClustering", False)
     # Try to split pixel clusters
     icf.addFlag("Tracking.doPixelClusterSplitting",
-                lambda prevFlags: not (prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     # choose splitter type: NeuralNet or AnalogClus
     icf.addFlag("Tracking.pixelClusterSplittingType", lambda prevFlags:
                 PixelClusterSplittingType.NeuralNet

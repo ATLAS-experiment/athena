@@ -121,7 +121,7 @@ def py_svc(svcName, createIf=True, iface=None):
     from GaudiPython.Bindings import gbl,InterfaceCast
     svcLocator = gbl.Gaudi.svcLocator()
     svc = gbl.GaudiPython.Helper.service(svcLocator, fullName, createIf)
-    if svc and not(iface is None):
+    if svc and iface is not None:
         svc = InterfaceCast(iface).cast(svc)
 
     # if the component is actually a py-component,
@@ -173,7 +173,7 @@ def py_tool(toolName, createIf=True, iface=None):
     _py_tool = gbl.GaudiPython.Helper.tool
     toolSvc = py_svc('ToolSvc', iface='IToolSvc')
     tool = _py_tool(toolSvc, toolType, toolName, 0, createIf)
-    if tool and not(iface is None):
+    if tool and iface is not None:
         tool = InterfaceCast(iface).cast(tool)
 
     # if the component is actually a py-component,

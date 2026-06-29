@@ -12,7 +12,7 @@ def LArRawSCDataReadingCfg(configFlags, ROBList=None, name="LArRawSCDataReadingA
     from LArCabling.LArCablingConfig import LArLATOMEMappingCfg
     acc.merge(LArLATOMEMappingCfg(configFlags))
 
-    if ( not (ROBList is None) ):
+    if ( ROBList is not None ):
        acc.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(name,
                      LATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder",ProtectSourceId = True), 
                      ROBList=ROBList,

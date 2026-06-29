@@ -195,7 +195,7 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
-        if not (flags.Beam.Type is BeamType.Cosmics):
+        if flags.Beam.Type is not BeamType.Cosmics:
             from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
             
@@ -211,7 +211,7 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     # !!! Calibrator is not used for Inner Detector yet
     if 'StripCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
-        if not (flags.Beam.Type is BeamType.Cosmics):
+        if flags.Beam.Type is not BeamType.Cosmics:
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsStripCalibrationToolCfg
             from ActsConfig.ActsConfigFlags import StripCalibrationStrategy
 
