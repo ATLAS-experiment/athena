@@ -128,14 +128,18 @@ class CPBaseRunner(ABC):
     def _findYamlConfig(self, local=True):
         # Find local and abs path first
         if local and ((yamlConfig := CPBaseRunner.findLocalPathYamlConfig(self.args.text_config)) is not None):
-            return yamlConfig, [yamlConfig.parent]
+            return yamlConfig, [yamlConfig.parent if yamlConfig is not None else None]
         # Then search in the analysis repository and warn for duplicates
         else:
             yamlConfig, yamlBasePath = CPBaseRunner.findRepoPathYamlConfig(self.args.text_config)
             # Try the slowest method using AthenaCommon if nothing found
             if not yamlConfig:
                 from AthenaCommon.Utils.unixtools import find_datafile
-                return find_datafile(self.args.text_config)
+                yamlConfig = find_datafile(self.args.text_config)
+                if yamlConfig is None:
+                    return None, None
+                yamlConfig = Path(yamlConfig)
+                return yamlConfig, [yamlConfig.parent]
 
             if len(yamlConfig) > 1:
                 raise FileExistsError(
