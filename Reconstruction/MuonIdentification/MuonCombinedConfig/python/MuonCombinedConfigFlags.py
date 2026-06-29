@@ -9,19 +9,19 @@ def createMuonCombinedConfigFlags():
     # https://gitlab.cern.ch/atlas/athena/blob/release/22.0.8/Reconstruction/MuonIdentification/MuonCombinedRecExample/python/MuonCombinedRecFlags.py
     mcf.addFlag("MuonCombined.doCosmicSplitTracks",False)
     mcf.addFlag("MuonCombined.doMuGirl",
-                lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     mcf.addFlag("MuonCombined.doCombinedFit",
-                lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     mcf.addFlag("MuonCombined.doStatisticalCombination",
-                lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     mcf.addFlag("MuonCombined.doMuonSegmentTagger",
-                lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     # 'silicon-associated'muons, or muons which rely on special ID reconstruction because they're outside the usual acceptance.
     mcf.addFlag("MuonCombined.doSiAssocForwardMuons",
                 lambda prevFlags : prevFlags.Detector.GeometryID)
     # Switch on/off algorithms that make Muons for the CaloMuonCollection
     mcf.addFlag("MuonCombined.doCaloTrkMuId",
-                lambda prevFlags: not(prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     # Switch on/off algorithms that make Muons for the MuGirlLowBetaMuonCollection         
     mcf.addFlag("MuonCombined.doMuGirlLowBeta",
                 lambda prevFlags : prevFlags.MuonCombined.doMuGirl)

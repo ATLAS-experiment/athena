@@ -236,7 +236,7 @@ class AlgTool( CfgPyAlgTool ):
     def __init__(self, name=None, parent=None, **kw):
         kw.setdefault('OutputLevel', 3) #INFO
         if name is None: name = kw.get('name', self.__class__.__name__)
-        if not (parent is None):
+        if parent is not None:
             if isinstance(parent, str): name = "%s.%s" % (parent,name)
             else:                       name = "%s.%s" % (parent.name(),name)
         ## init base class
