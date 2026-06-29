@@ -79,16 +79,16 @@ StatusCode TrigBphysStreamerHypo::execute( const EventContext& context ) const {
     }
 
     if (m_triggerLevel == "L2") {
-      auto muonLinkInfo = TrigCompositeUtils::findLink<xAOD::L2StandAloneMuonContainer>(previousDecision, TrigCompositeUtils::featureString(), true);
+      auto muonLinkInfo = TrigCompositeUtils::findLink<xAOD::L2StandAloneMuonContainer>(context, previousDecision, TrigCompositeUtils::featureString(), true);
       ATH_CHECK( muonLinkInfo.isValid() );
       decision->setObjectLink<xAOD::L2StandAloneMuonContainer>(TrigCompositeUtils::featureString(), muonLinkInfo.link);
 
       //set roi link (to use same roi in EF CB muon step)
-      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(decision, "roi");
+      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context, decision, "roi");
       decision->setObjectLink(m_roiLinkName.value(), roiLink.link);
     }
     else if (m_triggerLevel == "EF") {
-      auto muonLinkInfo = TrigCompositeUtils::findLink<xAOD::MuonContainer>(previousDecision, TrigCompositeUtils::featureString(), true);
+      auto muonLinkInfo = TrigCompositeUtils::findLink<xAOD::MuonContainer>(context, previousDecision, TrigCompositeUtils::featureString(), true);
       ATH_CHECK( muonLinkInfo.isValid() );
       decision->setObjectLink<xAOD::MuonContainer>(TrigCompositeUtils::featureString(), muonLinkInfo.link);
 

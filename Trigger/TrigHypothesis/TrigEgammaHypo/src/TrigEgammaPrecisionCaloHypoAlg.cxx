@@ -45,7 +45,7 @@ StatusCode TrigEgammaPrecisionCaloHypoAlg::execute( const EventContext& context 
   for ( auto previousDecision: *previousDecisionsHandle ) {
 
     //get updated RoI  
-    auto roiELInfo = TCU::findLink<TrigRoiDescriptorCollection>( previousDecision, TCU::roiString() );
+    auto roiELInfo = TCU::findLink<TrigRoiDescriptorCollection>(context,  previousDecision, TCU::roiString() );
       
     ATH_CHECK( roiELInfo.isValid() );
     const TrigRoiDescriptor* roi = *(roiELInfo.link);

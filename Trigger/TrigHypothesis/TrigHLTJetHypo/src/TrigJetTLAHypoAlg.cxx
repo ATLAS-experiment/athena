@@ -56,7 +56,7 @@ StatusCode TrigJetTLAHypoAlg::execute( const EventContext& context ) const {
   {
     // get jets from the decision
       const xAOD::Jet *jetPrev = nullptr;
-      auto prevJets = TrigCompositeUtils::findLinks<xAOD::JetContainer>(previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      auto prevJets = TrigCompositeUtils::findLinks<xAOD::JetContainer>(context, previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
       ATH_MSG_DEBUG("This decision has " << prevJets.size() << " jets");
 
        //copy all jets into the new TLA collection

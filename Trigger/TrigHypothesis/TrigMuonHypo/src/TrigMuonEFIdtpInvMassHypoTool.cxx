@@ -1,5 +1,5 @@
 /*
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEFIdtpInvMassHypoTool.h"
@@ -50,7 +50,7 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& /*ctx*/) const
+bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& ctx) const
 {
    ATH_MSG_VERBOSE("in executeAlg");
    bool result = false;
@@ -75,7 +75,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecis
       auto decision= (*(leg.second));
       auto i_leg = TrigCompositeUtils::getIndexFromLeg(leg.first);
       ATH_MSG_VERBOSE("i_leg="<<i_leg);
-      auto muonLinks = TrigCompositeUtils::findLinks<xAOD::MuonContainer>( decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      auto muonLinks = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(ctx,  decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
       if( muonLinks.size() != 1 )        continue;
       if( ! muonLinks.at(0).isValid() )  continue;
       const xAOD::Muon *mu = *(muonLinks.at(0).link);
@@ -98,7 +98,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecis
       
       // if this leg is idperf leg (muon is SA) get ID tracks
       if( is_idperf_muon ) {
-	 const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrackParticleContainer> > ptLinks = TrigCompositeUtils::findLinks< xAOD::TrackParticleContainer >( decision, "HLT_IDTrack_Muon_IDTrig", TrigDefs::lastFeatureOfType);
+	 const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrackParticleContainer> > ptLinks = TrigCompositeUtils::findLinks< xAOD::TrackParticleContainer >(ctx,  decision, "HLT_IDTrack_Muon_IDTrig", TrigDefs::lastFeatureOfType);
 	 ATH_MSG_VERBOSE("PT TrackParticleContainer Links size = "<<ptLinks.size());
 	 if( ptLinks.size() == 1 && ptLinks.at(0).isValid() ) {
 	    const xAOD::TrackParticle* track = *(ptLinks.at(0).link);
@@ -108,7 +108,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecis
 	    float phi = track->phi();
 	    ATH_MSG_VERBOSE("... pt / eta / phi = "<<pt/Gaudi::Units::GeV << " / " << eta << " / " << phi<<", fitter="<<track->trackFitter());
 	 }
-	 const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrackParticleContainer> > ftfLinks = TrigCompositeUtils::findLinks< xAOD::TrackParticleContainer >( decision, "HLT_IDTrack_Muon_FTF", TrigDefs::lastFeatureOfType);
+	 const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrackParticleContainer> > ftfLinks = TrigCompositeUtils::findLinks< xAOD::TrackParticleContainer >(ctx,  decision, "HLT_IDTrack_Muon_FTF", TrigDefs::lastFeatureOfType);
 	 ATH_MSG_VERBOSE("FTF TrackParticleContainer Links size = "<< ftfLinks.size());
 	 if( ftfLinks.size() == 1 && ftfLinks.at(0).isValid() ) {
 	    const xAOD::TrackParticle* track = *(ftfLinks.at(0).link);

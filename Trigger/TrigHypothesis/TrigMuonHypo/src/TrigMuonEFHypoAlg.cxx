@@ -71,7 +71,7 @@ StatusCode TrigMuonEFHypoAlg::execute( const EventContext& context ) const
 
     const xAOD::Muon *muonPrev = nullptr;
     if(m_mapToPrevDec){
-      auto prevMuInfo = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      auto prevMuInfo = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(context, previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
       ATH_CHECK(prevMuInfo.size()==1);
       auto prevMuLink = prevMuInfo.at(0).link;
       ATH_CHECK(prevMuLink.isValid());

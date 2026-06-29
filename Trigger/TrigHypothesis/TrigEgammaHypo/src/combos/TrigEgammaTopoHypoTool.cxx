@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*************************************************************************************************
@@ -41,7 +41,7 @@ StatusCode TrigEgammaTopoHypoTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-bool TrigEgammaTopoHypoTool::executeAlg(const std::vector<Combo::LegDecision> &combination, const EventContext& /*ctx*/) const {
+bool TrigEgammaTopoHypoTool::executeAlg(const std::vector<Combo::LegDecision> &combination, const EventContext& ctx) const {
   auto massOfProcessed = Monitored::Scalar( "MassOfProcessed"   , -1.0);
   auto dphiOfProcessed = Monitored::Scalar( "DphiOfProcessed"   , -99. );
   auto massOfAccepted  = Monitored::Scalar( "MassOfAccepted"    , -1.0);
@@ -64,7 +64,7 @@ bool TrigEgammaTopoHypoTool::executeAlg(const std::vector<Combo::LegDecision> &c
   for (auto el: combination){
     ATH_MSG_DEBUG("found Combination: "<<combination);
     auto EL= el.second;    
-    auto electronLink = TCU::findLink<xAOD::IParticleContainer>( *EL, TCU::featureString() ).link;
+    auto electronLink = TCU::findLink<xAOD::IParticleContainer>(ctx,  *EL, TCU::featureString() ).link;
     selected_electrons.push_back(electronLink);
   }
   auto electronLink1=selected_electrons[0];
