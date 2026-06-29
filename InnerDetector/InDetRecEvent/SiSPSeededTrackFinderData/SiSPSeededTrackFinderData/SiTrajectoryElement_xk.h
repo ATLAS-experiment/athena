@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -268,7 +268,7 @@ namespace InDet{
       // @name TrackStateOnSurface production  
       ///////////////////////////////////////////////////////////////////
       //@{
-      Trk::TrackStateOnSurface* trackStateOnSurface(bool,bool,bool,int);
+      Trk::TrackStateOnSurface* trackStateOnSurface(bool,bool,bool,int,const EventContext& ctx);
       Trk::TrackStateOnSurface* trackSimpleStateOnSurface(bool,bool,int);
       Trk::TrackStateOnSurface* trackPerigeeStateOnSurface(const EventContext& ctx);
       //@}

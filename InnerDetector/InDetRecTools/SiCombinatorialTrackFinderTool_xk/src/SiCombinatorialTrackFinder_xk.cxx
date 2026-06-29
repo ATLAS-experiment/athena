@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -853,7 +853,7 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
          data.trackinfo(),
          std::make_unique<Trk::TrackStates>(
              data.trajectory().convertToTrackStateOnSurface(
-                 data.cosmicTrack())),
+                 data.cosmicTrack(), ctx)),
          data.trajectory().convertToFitQuality());
   }
 
