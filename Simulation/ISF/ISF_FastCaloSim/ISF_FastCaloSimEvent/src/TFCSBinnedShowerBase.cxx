@@ -4,7 +4,7 @@
 
 #include "ISF_FastCaloSimEvent/TFCSBinnedShowerBase.h"
 
-#include "HepPDT/ParticleData.hh" //for HepPDT::ParticleID
+#include "TruthUtils/HepMCHelpers.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
@@ -81,7 +81,7 @@ FCSReturnCode TFCSBinnedShowerBase::simulate_hit(
     const TFCSExtrapolationState */*extrapol*/) {
 
   const int pdgId = truth->pdgid();
-  const float charge = HepPDT::ParticleID(pdgId).charge();
+  const float charge = MC::charge(pdgId);
   long unsigned int layer_index = calosample();
 
   const double center_eta = hit.center_eta();
