@@ -190,6 +190,45 @@ bool VolumeHandle::hasName(const std::string& n) const
 
 
 //____________________________________________________________________
+QString VolumeHandle::getNameTag() const
+{
+  GeoPVConstLink parent_pV;
+
+  if (m_parent) {
+    parent_pV = m_parent->geoPVConstLink();
+  } else {
+    parent_pV = m_d->commondata->geoPVConstLinkOfTreeTopsMother();
+  }
+
+  GeoVolumeCursor av(parent_pV);
+  int i = 0;
+
+  while (!av.atEnd()) {
+    if (m_childNumber == i && m_d->pV == av.getVolume()) {
+      return QString::fromStdString(av.getName());
+    }
+    av.next();
+    ++i;
+  }
+
+  return QString();
+}
+
+
+//____________________________________________________________________
+QString VolumeHandle::getDisplayName() const
+{
+  const QString logicalName = getName();
+  const QString nameTag = getNameTag();
+
+  if (!nameTag.isEmpty() && nameTag != logicalName)
+    return nameTag + " (" + logicalName + ")";
+
+  return logicalName;
+}
+
+
+//____________________________________________________________________
 SoMaterial * VolumeHandle::material()
 {
   if (m_d->material)

@@ -457,10 +457,13 @@ QVariant VolumeTreeModel::data(const QModelIndex& index, int role) const
 	return QColor::fromRgbF( 0.5, 0.5, 0.5 );
     }
     //DisplayRole:
-    if (volumeHandle->nChildren()>1)
-      return volumeHandle->getName()+" ["+QString::number(volumeHandle->nChildren())+"]";
-    else
-      return volumeHandle->getName();
+    const QString displayName = volumeHandle->getDisplayName();
+
+    if (volumeHandle->nChildren()>1) {
+	    return displayName + " [" + QString::number(volumeHandle->nChildren()) + "]";
+    } else {
+	    return displayName;
+    }
   }
 
   if (role==Qt::ForegroundRole)

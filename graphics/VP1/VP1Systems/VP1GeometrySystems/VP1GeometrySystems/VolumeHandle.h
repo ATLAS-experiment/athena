@@ -44,6 +44,8 @@ public:
 
   //Information for printout:
   QString getName() const;
+  QString getNameTag() const;
+  QString getDisplayName() const;
   int copyNumber() const;//Returns -1 if doesnt have a valid copy number (because volume is not replicated), -2 in case of error.
   quint32 hashID() const;//For vp1 persistification
 
