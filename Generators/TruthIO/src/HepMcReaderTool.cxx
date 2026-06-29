@@ -17,7 +17,7 @@
 //HepMC includes
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/IO_GenEvent.h"
-#include "HepMC3/ReaderFactory.h"
+#include "AtlasHepMC/ReaderFactory.h"
 
 // McParticleTools includes
 #include "HepMcReaderTool.h"

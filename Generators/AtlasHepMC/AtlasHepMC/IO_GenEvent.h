@@ -8,6 +8,8 @@
 #include "HepMC3/Version.h"
 #include "HepMC3/Reader.h"
 #include "HepMC3/Writer.h"
+#include "HepMC3/ReaderAscii.h"
+#include "HepMC3/WriterAscii.h"
 #include "HepMC3/ReaderAsciiHepMC2.h"
 #include "HepMC3/WriterAsciiHepMC2.h"
 #endif
