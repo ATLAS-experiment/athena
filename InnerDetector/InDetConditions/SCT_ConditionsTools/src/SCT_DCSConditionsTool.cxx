@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // New SCT_DCSConditions Tool, based on existing tool in SCT_ConditionsAlgs
@@ -9,8 +9,6 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorElementStatus.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
-
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "SCT_IdConverter.h"
 using SCT_ConditionsTools::castId;
@@ -81,11 +79,6 @@ bool SCT_DCSConditionsTool::isGood(const Identifier& elementId, const EventConte
   }
 }
 
-bool SCT_DCSConditionsTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(elementId, ctx, h);
-}
-
 //Does the same for hashIds
 bool SCT_DCSConditionsTool::isGood(const IdentifierHash& hashId, const EventContext& ctx) const {
   Identifier waferId{m_pHelper->wafer_id(hashId)};
@@ -134,12 +127,7 @@ void SCT_DCSConditionsTool::getDetectorElementStatus(const EventContext& ctx, In
    }
 }
 
-bool SCT_DCSConditionsTool::isGood(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(hashId, ctx);
-}
-
-/////////////////////////////////// 
+///////////////////////////////////
 
 // some lame helper methods: 
 // returns HV (s_defaultHV(-30) if there is no information)
@@ -151,15 +139,10 @@ float SCT_DCSConditionsTool::modHV(const Identifier& elementId, const EventConte
   if (condDataHV==nullptr) return s_defaultHV; // no cond data
 
   float hvval{s_defaultHV};
-  if (condDataHV->getValue(castId(moduleId), hvval) and isGood(elementId, h)) {
+  if (condDataHV->getValue(castId(moduleId), hvval) and isGood(elementId, ctx, h)) {
     return hvval;
   }
   return s_defaultHV; //didn't find the module, return s_defaultHV(-30)
-}
-
-float SCT_DCSConditionsTool::modHV(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return modHV(elementId, ctx, h);
 }
 
 //Does the same for hashIds
@@ -167,11 +150,6 @@ float SCT_DCSConditionsTool::modHV(const IdentifierHash& hashId, const EventCont
   Identifier waferId{m_pHelper->wafer_id(hashId)};
   Identifier moduleId{m_pHelper->module_id(waferId)};
   return modHV(moduleId, ctx, InDetConditions::SCT_MODULE);
-}
-
-float SCT_DCSConditionsTool::modHV(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return modHV(hashId, ctx);
 }
 
 //Returns temp0 (s_defaultTemperature(-40) if there is no information)
@@ -183,15 +161,10 @@ float SCT_DCSConditionsTool::hybridTemperature(const Identifier& elementId, cons
   if (condDataTemp0==nullptr) return s_defaultTemperature; // no cond data
 
   float temperature{s_defaultTemperature};
-  if (condDataTemp0->getValue(castId(moduleId), temperature) and isGood(elementId, h)) {
+  if (condDataTemp0->getValue(castId(moduleId), temperature) and isGood(elementId, ctx, h)) {
     return temperature;
   }
   return s_defaultTemperature;//didn't find the module, return -40. 
-}
-
-float SCT_DCSConditionsTool::hybridTemperature(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return hybridTemperature(elementId, ctx, h);
 }
 
 //Does the same for hashIds
@@ -199,11 +172,6 @@ float SCT_DCSConditionsTool::hybridTemperature(const IdentifierHash& hashId, con
   Identifier waferId{m_pHelper->wafer_id(hashId)};
   Identifier moduleId{m_pHelper->module_id(waferId)};
   return hybridTemperature(moduleId, ctx, InDetConditions::SCT_MODULE);
-}
-
-float SCT_DCSConditionsTool::hybridTemperature(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return hybridTemperature(hashId, ctx);
 }
 
 //Returns temp0 + correction for Lorentz angle calculation (s_defaultTemperature(-40) if there is no information)
@@ -215,7 +183,7 @@ float SCT_DCSConditionsTool::sensorTemperature(const Identifier& elementId, cons
   if (condDataTemp0==nullptr) return s_defaultTemperature; // no cond data
 
   float temperature{s_defaultTemperature};
-  if (condDataTemp0->getValue(castId(moduleId), temperature) and isGood(elementId, h)) {
+  if (condDataTemp0->getValue(castId(moduleId), temperature) and isGood(elementId, ctx, h)) {
     int bec{m_pHelper->barrel_ec(moduleId)};
     if (bec==0) { // Barrel
       return ( temperature + m_barrel_correction);  //return the temp+correction
@@ -231,21 +199,11 @@ float SCT_DCSConditionsTool::sensorTemperature(const Identifier& elementId, cons
   return s_defaultTemperature;  //didn't find the module, return s_defaultTemperature(-40).
 } 
 
-float SCT_DCSConditionsTool::sensorTemperature(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return sensorTemperature(elementId, ctx, h);
-}
-
 //Does the same for hashIds
 float SCT_DCSConditionsTool::sensorTemperature(const IdentifierHash& hashId, const EventContext& ctx) const {
   Identifier waferId{m_pHelper->wafer_id(hashId)};
   Identifier moduleId{m_pHelper->module_id(waferId)};
   return sensorTemperature(moduleId, ctx, InDetConditions::SCT_MODULE);
-}
-
-float SCT_DCSConditionsTool::sensorTemperature(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return sensorTemperature(hashId, ctx);
 }
 
 ///////////////////////////////////

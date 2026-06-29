@@ -11,7 +11,6 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/GenRanges.h"
 
 /**
 // @brief This defines the McEventCollection, which is really just an 

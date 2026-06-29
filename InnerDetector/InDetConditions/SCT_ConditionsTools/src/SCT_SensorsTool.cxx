@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -36,18 +36,8 @@ const SCT_SensorCondData* SCT_SensorsTool::getSensorsData(const unsigned int tru
   return nullptr;
 }
 
-const SCT_SensorCondData* SCT_SensorsTool::getSensorsData(const unsigned int truncatedSerialNumber) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getSensorsData(truncatedSerialNumber, ctx);
-}
-
 void SCT_SensorsTool::getSensorsData(std::vector<std::string>& /*userVector*/, const EventContext& /*ctx*/) const {
   ATH_MSG_WARNING("This void SCT_SensorsTool::getSensorsData(std::vector<std::string>& userVector) method is not implemented.");
-}
-
-void SCT_SensorsTool::getSensorsData(std::vector<std::string>& userVector) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  getSensorsData(userVector, ctx);
 }
 
 std::string SCT_SensorsTool::getManufacturer(unsigned int truncatedSerialNumber, const EventContext& ctx) const {
@@ -63,11 +53,6 @@ std::string SCT_SensorsTool::getManufacturer(unsigned int truncatedSerialNumber,
   return manufacturer;
 }
 
-std::string SCT_SensorsTool::getManufacturer(unsigned int truncatedSerialNumber) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getManufacturer(truncatedSerialNumber, ctx);
-}
-
 void SCT_SensorsTool::printManufacturers(const EventContext& ctx) const {
   const SCT_SensorsCondData* condData{getCondData(ctx)};
   if (condData==nullptr) return;
@@ -75,11 +60,6 @@ void SCT_SensorsTool::printManufacturers(const EventContext& ctx) const {
   for (const std::pair<const CondAttrListCollection::ChanNum, SCT_SensorCondData>& it: *condData) {
     ATH_MSG_ALWAYS("channel " << it.first << " manufacturer " << (it.second).getManufacturer());
   }
-}
-
-void SCT_SensorsTool::printManufacturers() const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return printManufacturers(ctx);
 }
 
 const SCT_SensorsCondData*

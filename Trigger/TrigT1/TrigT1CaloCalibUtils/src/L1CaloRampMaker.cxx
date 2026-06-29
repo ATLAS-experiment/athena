@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibUtils/L1CaloRampMaker.h"
@@ -261,7 +261,7 @@ StatusCode L1CaloRampMaker::execute(const EventContext& ctx)
         if(*max >= m_fadcSaturationCut) continue;
 	
 	// skip disabled channels
-        if(m_ttTool->disabledChannel(tt->coolId())) continue;
+        if(m_ttTool->disabledChannel(ctx, tt->coolId())) continue;
 
         bool isTile = m_xAODTTTools->isTile(*tt);
 	if (this->validTower(isTile)) {

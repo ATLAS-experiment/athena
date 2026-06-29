@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_HIT_P1_H
@@ -9,17 +9,17 @@
 
 class TRT_Hit_p1 {
  public:
-  int hitID; // To identify the hit
+  int hitID = 0; // To identify the hit
   HepMcParticleLink_p1 m_partLink; // link to the particle generating the hit
-  int particleEncoding;         // PDG id 
-  float kineticEnergy;          // kin energy of the particle
-  float energyDeposit;          // energy deposit by the hit
-  float preStepX;
-  float preStepY;
-  float preStepZ;
-  float postStepX;
-  float postStepY;
-  float postStepZ;
-  float globalTime;
+  int particleEncoding = 0;         // PDG id
+  float kineticEnergy = 0;          // kin energy of the particle
+  float energyDeposit = 0;          // energy deposit by the hit
+  float preStepX = 0;
+  float preStepY = 0;
+  float preStepZ = 0;
+  float postStepX = 0;
+  float postStepY = 0;
+  float postStepZ = 0;
+  float globalTime = 0;
 };
 #endif

@@ -1197,14 +1197,14 @@ StatusCode TBByteStreamCnvTool::H6BuildObjects(int unrec_code)
 //     m_summary_path = m_summary_path+".summary";
 	std::ofstream outfile(m_summary_path.c_str());
 	
-	outfile << "Run number " << m_run_num << std::endl;
-	outfile << std::endl;
-	outfile << "Beam Type \t " << m_beam_part << std::endl;
-	outfile << "Beam Momentum \t " << m_beam_moment << std::endl;
-	outfile << std::endl;
-	outfile << "Cryostat X pos \t " << m_cryoX << std::endl;
-	outfile << "Cryostat Angle \t " << m_cryoAngle << std::endl;
-	outfile << "Table Y pos \t " << m_tableY << std::endl;
+	outfile << "Run number " << m_run_num << '\n';
+	outfile << '\n';
+	outfile << "Beam Type \t " << m_beam_part << '\n';
+	outfile << "Beam Momentum \t " << m_beam_moment << '\n';
+	outfile << '\n';
+	outfile << "Cryostat X pos \t " << m_cryoX << '\n';
+	outfile << "Cryostat Angle \t " << m_cryoAngle << '\n';
+	outfile << "Table Y pos \t " << m_tableY << '\n';
 
 
 

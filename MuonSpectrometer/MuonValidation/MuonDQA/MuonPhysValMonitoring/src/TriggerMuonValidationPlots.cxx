@@ -5,14 +5,15 @@
 #include "TriggerMuonValidationPlots.h"
 
 #include <utility>
+#include <format>
 
 #include "MuonHistUtils/MuonEnumDefs.h"
-TriggerMuonValidationPlots::TriggerMuonValidationPlots(PlotBase* pParent, const std::string& sDir, std::vector<unsigned int> authors,
+TriggerMuonValidationPlots::TriggerMuonValidationPlots(PlotBase* pParent, const std::string& sDir, std::set<int> authors,
                                                        bool /*isData*/, bool doTrigMuonL1Validation, bool doTrigMuonL2Validation,
                                                        bool doTrigMuonEFValidation, std::vector<std::vector<std::string>> ChainSeed,
                                                        std::vector<std::string> L1MuonItems) :
     PlotBase(pParent, sDir),
-    m_selectedAuthors(std::move(authors)),
+    m_selectedAuthors(authors.begin(), authors.end()),
     m_doTrigMuonL1Validation(doTrigMuonL1Validation),
     m_doTrigMuonL2Validation(doTrigMuonL2Validation),
     m_doTrigMuonEFValidation(doTrigMuonEFValidation),
@@ -41,17 +42,17 @@ TriggerMuonValidationPlots::TriggerMuonValidationPlots(PlotBase* pParent, const 
 
     // define a histogram class for each of the selected muon authors
     for (unsigned int i = 0; i < m_selectedAuthors.size(); i++) {
-        std::string sAuthor = Muon::EnumDefs::toString((xAOD::Muon::Author)m_selectedAuthors[i]);
-        if (m_doTrigMuonEFValidation) m_oEFTriggerMuonPlots.push_back(std::make_unique<HLTriggerMuonPlots>(this, "trigger/EF/" + sAuthor));
+        auto sAuthor = xAOD::Muon::toString(static_cast<xAOD::Muon::Author>(m_selectedAuthors[i]));
+        if (m_doTrigMuonEFValidation) m_oEFTriggerMuonPlots.push_back(std::make_unique<HLTriggerMuonPlots>(this, std::format("trigger/EF/{:}", sAuthor)));
         if (m_doTrigMuonEFValidation)
             m_oEFTriggerMuonBarrelResolutionPlots.push_back(
-                std::make_unique<ResoTriggerMuonPlots>(this, "trigger/EF/" + sAuthor + "/Resolution/BARREL/", ""));
+                std::make_unique<ResoTriggerMuonPlots>(this, std::format("trigger/EF/{:}/Resolution/BARREL/", sAuthor ), ""));
         if (m_doTrigMuonEFValidation)
             m_oEFTriggerMuonEndcapsResolutionPlots.push_back(
-                std::make_unique<ResoTriggerMuonPlots>(this, "trigger/EF/" + sAuthor + "/Resolution/ENDCAPS/", ""));
+                std::make_unique<ResoTriggerMuonPlots>(this, std::format("trigger/EF/{:}/Resolution/ENDCAPS/", sAuthor), ""));
         if (m_doTrigMuonEFValidation)
             m_oEFTriggerMuonResolutionPlots.push_back(
-                std::make_unique<ResoTriggerMuonPlots>(this, "trigger/EF/" + sAuthor + "/Resolution/WHOLE_DETECT/", ""));
+                std::make_unique<ResoTriggerMuonPlots>(this, std::format("trigger/EF/{:}/Resolution/WHOLE_DETECT/", sAuthor), ""));
     }
 
     for (unsigned int i = 0; i < m_L1MuonItems.size(); i++) {
@@ -100,7 +101,7 @@ void TriggerMuonValidationPlots::fillTriggerMuonPlots(const xAOD::L2CombinedMuon
 
 void TriggerMuonValidationPlots::fillTriggerMuonPlots(const xAOD::Muon& Trigmu) {
     for (unsigned int i = 0; i < m_selectedAuthors.size(); i++) {
-        if (Trigmu.isAuthor((xAOD::Muon::Author)m_selectedAuthors[i])) {
+        if (Trigmu.isAuthor(static_cast<xAOD::Muon::Author>(m_selectedAuthors[i]))) {
             // if (Trigmu.isAuthor( (xAOD::Muon::Author)m_selectedAuthors[i] ) || m_selectedAuthors[i]==xAOD::Muon::NumberOfMuonAuthors) {
             m_oEFTriggerMuonPlots[i]->fill(Trigmu);
         }

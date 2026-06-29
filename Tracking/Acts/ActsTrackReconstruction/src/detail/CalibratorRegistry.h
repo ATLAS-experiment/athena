@@ -14,16 +14,16 @@ struct CalibratorRegistryBase {
    using CalibratorType =calibrator_type_helper_t;
 
    template <std::size_t DIM, typename T_ValueType>
-   using Calibrator = typename CalibratorType::Calibrator<DIM,T_ValueType>;
+   using Calibrator = typename CalibratorType::template Calibrator<DIM,T_ValueType>;
 
    // Get the calibrator for the given measurement type T_ValueType, and the measurement dimension
    template <std::size_t DIM, typename T_ValueType>
-   const typename calibrator_type_helper_t::Calibrator<DIM, T_ValueType> &calibrator() const;
+   const typename calibrator_type_helper_t::template Calibrator<DIM, T_ValueType> &calibrator() const;
 
    // register a calibrator for the given measurement type and dimension.
    // the allowed measurement types and their allowed dimensions are defined by the measurement container variant
    template <std::size_t DIM, typename T_ValueType>
-   void setCalibrator(const typename calibrator_type_helper_t::Calibrator<DIM, T_ValueType> &calibrator);
+   void setCalibrator(const typename calibrator_type_helper_t::template Calibrator<DIM, T_ValueType> &calibrator);
 
    using CalibratorVariant = ActsTrk::detail::MakeDerivedVariant::MakeVariant< calibrator_type_helper_t,
                                                                                measurement_container_variant_t >::variant_type;
@@ -150,7 +150,7 @@ template <typename calibrator_type_helper_t, typename measurement_container_vari
 template <std::size_t DiM, typename T_ValueType>
 inline
 void CalibratorRegistryBase<calibrator_type_helper_t, measurement_container_variant_t>
-::setCalibrator(const typename calibrator_type_helper_t::Calibrator<DiM, T_ValueType> &calibrator) {
+::setCalibrator(const typename calibrator_type_helper_t::template Calibrator<DiM, T_ValueType> &calibrator) {
    CalibratorVariant universial { calibrator };
    assert( universial.index() < m_calibrators.size() );
    m_calibrators.at(universial.index()) = std::move( universial);

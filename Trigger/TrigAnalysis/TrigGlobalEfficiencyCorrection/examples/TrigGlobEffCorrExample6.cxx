@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
             if(pt<10e3f || fabs(muon->eta())>=2.5) continue;
             auto mt = muon->muonType();
             if(mt!=xAOD::Muon::MuonType::Combined && mt!=xAOD::Muon::MuonType::MuonStandAlone) continue;
-            auto& mtp = *(muon->primaryTrackParticle());
+            auto& mtp = *(muon->trackParticle(xAOD::Muon::TrackParticleType::Primary));
             if(!truthType.isAvailable(mtp)) continue;
             if(!truthOrigin.isAvailable(mtp)) continue;
             int t = truthType(mtp), o = truthOrigin(mtp);

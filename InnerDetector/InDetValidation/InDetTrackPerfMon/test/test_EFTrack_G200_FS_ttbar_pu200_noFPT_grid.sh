@@ -2,8 +2,8 @@
 # art-description: Nightly test to compare G-200 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 noFPT sample
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-architecture: '&nvidia:model!=.*P100.*'
-# art-pathena-flags-add: --site=BNL_GPU,OU_OSCER_GPU,UKI-SOUTHGRID-RALPP_GPU
+# art-architecture: '&nvidia:model!=.*[PV]100.*'
+# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU,FZK-LCG2_GPU,CERN-GPU,UKI-SOUTHGRID-RALPP_GPU
 # art-memory: 4095
 # art-output: IDTPM.*.root
 # art-output: *.json
@@ -26,8 +26,8 @@ refLabel="C-000"
 testLabel="G-200"
 
 ## search in $DATAPATH for matching files
-IDTPMjsonConfig='EFTrack_base_FS_noDoubleRatio_IDTPMconfig.json'
-dcubeXmlIDTPMconfig='dcube_config_EFTrack_base_FS_noDoubleRatio.xml'
+IDTPMjsonConfig='EFTrack_ttbar_FS_IDTPMconfig_EFsel.json'
+dcubeXmlIDTPMconfig='dcube_EFTrack_ttbar_pu200_EFsel.xml'
 
 IDTPMjsonConfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $IDTPMjsonConfig -print -quit 2>/dev/null )
 dcubeXmlIDTPMconfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXmlIDTPMconfig -print -quit 2>/dev/null )

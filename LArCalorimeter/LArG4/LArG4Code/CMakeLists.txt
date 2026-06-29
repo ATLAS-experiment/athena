@@ -4,6 +4,7 @@
 atlas_subdir( LArG4Code )
 
 # External dependencies:
+find_package( AtlasGeant4Utilities )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( GTest )
@@ -45,5 +46,10 @@ set_target_properties(
    LArG4Code_LArG4SimpleSD_gtest
    PROPERTIES
    INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+
+# Turn on/off CUDA device symbol resolution for tests (Geant4 links to VecGeom, which is CUDA-enabled)
+atlas_configure_g4_targets( TARGETS
+   LArG4Code_LArG4CalibSD_gtest
+   LArG4Code_LArG4SimpleSD_gtest )
 
 atlas_install_joboptions( share/optionForTest.txt )

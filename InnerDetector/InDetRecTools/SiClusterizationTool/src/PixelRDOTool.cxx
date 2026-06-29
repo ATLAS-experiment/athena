@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetIdentifier/PixelID.h"
 #include "TrkSurfaces/RectangleBounds.h"
-#include <boost/container/flat_set.hpp>
+#include "CxxUtils/flat_set.h"
 
 namespace InDet
 {
@@ -189,7 +189,7 @@ namespace InDet
     //std::unordered_set<Identifier> > idset;
 
     // This is not used for ITk, still we are creating it for the moment and could be optimized away in the future
-    boost::container::flat_set<Identifier> idset;
+    CxxUtils::flat_set<Identifier> idset;
 
     for(const auto *const rdo : collection) {
       const Identifier rdoID = rdo->identify();

@@ -279,7 +279,7 @@ StatusCode TileCellFillerTool::fill (const CaloCell& p){
             case 0:  muon_track = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);          break;
             case 1:  muon_track = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);     break;
             case 2:  muon_track = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);  break;
-            default: muon_track = muon->primaryTrackParticle();                                    break;
+            default: muon_track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);                                    break;
           }  // SWITCH
           if(!muon_track) continue;
       

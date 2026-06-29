@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestInputMaker.h"
@@ -65,11 +65,11 @@ namespace HLTTest {
       for (const auto& input: inputLinks){
         ATH_MSG_DEBUG( " -- Got seed link to input  "<<input.dataID() <<" and index "<< input.index() );
         const Decision* inputDecision = *input;
-        const auto roiELInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( inputDecision,  m_roisLink.value());
+        const auto roiELInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( context, inputDecision,  m_roisLink.value());
         CHECK( roiELInfo.isValid() );
 
         // retrieve input feature from input decision (TrigComposite), will in this case be a TrigRoiDescriptor   
-        const auto featureLinkInfo = TrigCompositeUtils::findLink<FeatureContainer>( inputDecision,  m_linkName.value());
+        const auto featureLinkInfo = TrigCompositeUtils::findLink<FeatureContainer>( context, inputDecision,  m_linkName.value());
         CHECK( featureLinkInfo.isValid() );
 
         // link input reco object to outputDecision

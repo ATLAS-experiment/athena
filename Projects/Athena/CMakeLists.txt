@@ -46,9 +46,6 @@ set( TDAQ_ATROOT
 mark_as_advanced( TDAQ-COMMON_ATROOT TDAQ_PROJECT_NAME
    TDAQ_ATROOT )
 
-# HepMC3
-set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
-
 # Configure flake8:
 set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,B,F,E101,E7,E9,W6
                                --ignore B006,B007,B019,E701,E702,E704,E741
@@ -161,6 +158,11 @@ set( AthenaPoolUtilitiesTest_DIR
 set( xAODUtilities_DIR
    "${CMAKE_SOURCE_DIR}/../../Event/xAOD/xAODCore/cmake"
    CACHE PATH "Directory holding the xAODUtilities module" )
+
+# Set up where to find the AtlasGeant4Utilities CMake code.
+set( AtlasGeant4Utilities_DIR
+   "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake"
+   CACHE PATH "Directory holding the AtlasGeant4Utilities module" )
 
 # Make the local CMake files visible to AtlasCMake.
 list( INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake )

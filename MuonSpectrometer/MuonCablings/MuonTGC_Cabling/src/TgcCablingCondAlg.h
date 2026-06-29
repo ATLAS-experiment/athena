@@ -25,6 +25,8 @@ class TgcCablingCondAlg : public AthCondAlgorithm {
     IntegerProperty m_AsideId{this, "AsideId", 103};
     IntegerProperty m_CsideId{this, "CsideId", 104};
 
+    BooleanProperty m_isRun4{this, "isRun4", false};
+
     StringProperty m_databaseASDToPP{this, "databaseASDToPP",
                                      "MuonTGC_Cabling_ASD2PP.db"};
     StringProperty m_databaseInPP{this, "databaseInPP",

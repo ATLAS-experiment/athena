@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -561,7 +561,7 @@ StatusCode InDet::SCT_ClusterValidationNtupleWriter::execute(const EventContext&
      * At the moment there are 15 different types of BS error.
      */
     for (int type=0; type < SCT_ByteStreamErrors::NUM_ERROR_TYPES; ++type) { 
-      const std::set<IdentifierHash> errorSet = m_byteStreamErrTool->getErrorSet(type);
+      const std::set<IdentifierHash> errorSet = m_byteStreamErrTool->getErrorSet(type, ctx);
 
       int eta=0,phi=0,bec=0,layer=0,side=0;
       m_totalNumErrors += errorSet.size();

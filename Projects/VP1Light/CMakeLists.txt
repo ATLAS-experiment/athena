@@ -11,9 +11,6 @@ string( STRIP ${_version} _version )
 project( VP1Light VERSION ${_version} LANGUAGES C CXX )
 unset( _version )
 
-# HepMC3
-set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
-
 # This project is built on top of VP1LightExternals:
 find_package( VP1LightExternals REQUIRED )
 

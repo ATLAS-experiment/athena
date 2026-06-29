@@ -87,6 +87,8 @@ TEvent::TEvent(EReadMode mode, const std::string& name) :
    AAH::setProperty( m_evtLoop , "EvtStore", m_evtStore.typeAndName() ).ignore();//connect loop to store
    AAH::setProperty( m_evtLoop , "EventPrintoutInterval", 0 ).ignore(); //disable printout (speeds up loop)
 
+   AAH::setProperty(m_evtStore, "PruneIncidents", true).ignore();
+
    if(m_evtSelect.type()=="Athena::xAODEventSelector") {
      AAH::setProperty( m_evtSelect , "ReadMetaDataWithPool" , true).ignore(); //uses hybrid xAOD reading by default
      AAH::setProperty( m_evtSelect , "AccessMode" , int(mode) ).ignore(); //sets the mode
@@ -199,7 +201,16 @@ int TEvent::getEntry( long entry ) {
    }
    StatusCode out = m_evtProcessor->nextEvent(entry+1);
    m_curEntry = entry;
-   m_incSvc->fireIncident(Incident("BeginEvent",IncidentType::BeginEvent));
+
+   if (m_listenerState == UNCHECKED) {
+     std::vector<IIncidentListener*> l;
+     m_incSvc->getListeners (l, "BeginEvent");
+     m_listenerState = l.empty() ? NO_LISTENERS : HAVE_LISTENERS;
+   }
+
+   if (m_listenerState == HAVE_LISTENERS) {
+     m_incSvc->fireIncident(Incident("BeginEvent",IncidentType::BeginEvent));
+   }
    return (out.isSuccess()) ? 0 : -1;
 }
 

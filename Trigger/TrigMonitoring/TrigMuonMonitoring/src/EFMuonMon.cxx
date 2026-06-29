@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EFMuonMon.h"
@@ -172,7 +172,7 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &
         // correlation histograms offlineSA (matched to EFSA) vs. offlineSA (matched to L2SA)
         // get L2SA feature
         const TrigCompositeUtils::Decision* EFSAMuonDecision = EFSAMuonLinkInfo.source;
-        const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> L2SALinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(EFSAMuonDecision, "feature");
+        const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> L2SALinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(ctx, EFSAMuonDecision, "feature");
         if(L2SALinkInfo.size() > 1) {
            ATH_MSG_DEBUG("More than one L2SA candidate associated to the EFSA");
         } 
@@ -245,7 +245,7 @@ StatusCode EFMuonMon :: fillVariablesPerOfflineMuonPerChain(const EventContext &
         // correlation histograms offlineCB (matched to EFCB) vs. offlineCB (matched to  L2CB)
         // get L2CB feature
         const TrigCompositeUtils::Decision* EFCBMuonDecision = EFCBMuonLinkInfo.source;
-        const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer>>L2CBLinkInfo = TrigCompositeUtils::findLinks<xAOD::L2CombinedMuonContainer>(EFCBMuonDecision, "feature");
+        const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer>>L2CBLinkInfo = TrigCompositeUtils::findLinks<xAOD::L2CombinedMuonContainer>(ctx, EFCBMuonDecision, "feature");
         if(L2CBLinkInfo.size() >1) {
            ATH_MSG_DEBUG("More than one L2CB muon associated to EFCBMuon");
         }

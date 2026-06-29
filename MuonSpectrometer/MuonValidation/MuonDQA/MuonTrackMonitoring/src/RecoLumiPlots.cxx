@@ -83,7 +83,7 @@ void RecoLumiPlots::fill_CB(const xAOD::MuonContainer* Muons, int current_lb, fl
   for(const auto mu : *Muons) {
 
     //do a muon quality cut: 0 tight, 1 medium, 2 loss
-    if(mu->muonType() == xAOD::Muon::Combined){NMuIDco++;}
+    if(mu->muonType() == xAOD::Muon::MuonType::Combined){NMuIDco++;}
 
   }
 
@@ -100,7 +100,7 @@ void RecoLumiPlots::fill_Other(const xAOD::MuonContainer* Muons, int current_lb,
   for(const auto mu : *Muons) {
 
     //do a muon quality cut: 0 tight, 1 medium, 2 loss
-    if(mu->muonType() != xAOD::Muon::Combined){NMuIDco++;}
+    if(mu->muonType() != xAOD::Muon::MuonType::Combined){NMuIDco++;}
 
   }
 

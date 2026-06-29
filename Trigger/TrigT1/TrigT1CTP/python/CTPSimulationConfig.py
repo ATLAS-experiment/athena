@@ -7,6 +7,20 @@ def CTPSimulationCfg(flags):
     from AthenaCommon.Logging import logging
     log = logging.getLogger("CTPMCSimulationCfg")
     acc = ComponentAccumulator()
+    inputlocations = dict(
+        jFexJetInput = "",
+        jFexLJetInput = "",
+        gFexJetInput =  "",
+        gFexMETNCInput = "",
+        gFexMETRhoInput = "",
+        gFexMETJwoJInput = "",
+        eFexClusterInput = "",
+        eFexTauInput = "",
+        TopoInput = "L1TopoToCTPLocation",
+        LegacyTopoInput = "L1TopoLegacyToCTPLocation",
+    )
+    if not flags.Trigger.enableL1MuonPhase1:
+        inputlocations["MuctpiInput"] = ""
     acc.addEventAlgo(CompFactory.LVL1CTP.CTPSimulation("CTPSimulation",
                                                         UseEDMxAOD = flags.Trigger.CTP.UseEDMxAOD,
                                                         DoL1Topo       = flags.Trigger.L1.doTopo, 
@@ -14,19 +28,10 @@ def CTPSimulationCfg(flags):
                                                         #Using same as Phase1L1Topo for now, but it should be changed in the future
                                                         DoL1CaloLegacy = flags.Trigger.enableL1CaloLegacy,
                                                         #TODO enable when input are also simulatedDetectors (and remove message)
-                                                        jFexJetInput = "",
-                                                        jFexLJetInput = "",
-                                                        gFexJetInput =  "",
-                                                        gFexMETNCInput = "",
-                                                        gFexMETRhoInput = "",
-                                                        gFexMETJwoJInput = "",
-                                                        eFexClusterInput = "",
-                                                        eFexTauInput = "",
-                                                        TopoInput = "L1TopoToCTPLocation",
-                                                        LegacyTopoInput = "L1TopoLegacyToCTPLocation",
                                                         DoZDC = flags.Trigger.doZDC,
                                                         DoTRT = flags.Trigger.doTRT,
-                                                        ForceBunchGroupPattern = False if flags.Beam.Type is BeamType.Cosmics else True #to allow simulation of cosmics triggers in MC
+                                                        ForceBunchGroupPattern = False if flags.Beam.Type is BeamType.Cosmics else True, #to allow simulation of cosmics triggers in MC
+                                                        **inputlocations
                                                         ))
     log.info("Not all part of CTP simulation are enabled yet")
     #Still needed for HLTSeeding, see ATR-29954

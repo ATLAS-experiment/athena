@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/ZtoLeptonFilter.h"
@@ -26,7 +26,7 @@ StatusCode ZtoLeptonFilter::filterEvent(const EventContext& ctx) {
         }
         // Z children
         for (const auto& thisChild: pitr->end_vertex()->particles_out()) {
-          if (std::abs(thisChild->pdg_id()) == 11 || std::abs(thisChild->pdg_id()) == 13 || std::abs(thisChild->pdg_id()) == 15) {
+          if ( MC::isElectron(thisChild) || MC::isMuon(thisChild) || MC::isTau(thisChild) ) {
             return StatusCode::SUCCESS;
           }
         }

@@ -13,7 +13,7 @@
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "src/detail/FitterHelperFunctions.h"
-
+#include "src/detail/OnTrackCalibrator.h"
 
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 // ACTS
@@ -31,9 +31,10 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
 #include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
@@ -160,7 +161,7 @@ class GlobalChiSquareFitterTool
     /** @brief Abrivate the track state proxy */
     using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
     
-    using TrackFitResult_t = IActsToTrkConverterTool::TrackFitResult_t;
+    using TrackFitResult_t = ITrackConverterTool::TrackFitResult_t;
     /** @brief Calls the underlying Acts::Gx2Fitter for a given configuration of measurements
      *  @param sourceLinks: List of measurements to fit
      *  @param initialPars: Initial estimate of the track parameters 
@@ -184,9 +185,10 @@ class GlobalChiSquareFitterTool
                                     const Acts::Surface* surface,
                                     detail::SourceLinkType slType) const;
    
-    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+    ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-    PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
+    ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
 
     ToolHandle<MuonR4::ISpacePointCalibrator> m_muonCalibrator{this, "MuonCalibrationTool", ""};
 
@@ -222,6 +224,10 @@ class GlobalChiSquareFitterTool
     detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc{};
     /** @brief Calibrator for the uncalibrated xAOD::UnCalibratedMeasurement objects */
     detail::xAODUncalibMeasCalibrator m_uncalibMeasCalibrator{};
+    /** @brief Calibrator of the ID / ITk measurements */
+    using xAODItkCalibrator_t = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend> ;
+    xAODItkCalibrator_t m_idCalibrator{};
+
     /** @brief Array of all configured fitter extensions depending on which source link type is in use */
     static constexpr unsigned s_nExtensions = static_cast<unsigned>(detail::SourceLinkType::nTypes);
     std::array<Gx2FitterExtension_t, s_nExtensions>  m_gx2fExtensions{};

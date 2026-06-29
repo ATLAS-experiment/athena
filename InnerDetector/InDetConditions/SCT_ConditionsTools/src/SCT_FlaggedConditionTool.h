@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -45,26 +45,20 @@ public:
   virtual bool canReportAbout(InDetConditions::Hierarchy h) const override;
   
   /**Is the detector element good?*/
-  virtual bool isGood(const Identifier& elementId, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override;
   virtual bool isGood(const Identifier& elementId, const EventContext& ctx, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override;
-  virtual bool isGood(const IdentifierHash& hashId) const override;
   virtual bool isGood(const IdentifierHash& hashId, const EventContext& ctx) const override;
   virtual void getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status, 
                                         SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const override;
 
   /**Get the reason why the wafer is bad (by Identifier)*/ 
-  virtual const std::string& details(const Identifier& id) const override;
   virtual const std::string& details(const Identifier& id, const EventContext& ctx) const override;
   /**Get the reason why the wafer is bad (by IdentifierHash)*/ 
-  virtual const std::string& details(const IdentifierHash& id) const override;
   virtual const std::string& details(const IdentifierHash& id, const EventContext& ctx) const override;
 
   /**Get number flagged as bad (per event)*/
-  virtual int numBadIds() const override;
   virtual int numBadIds(const EventContext& ctx) const override;
 
   /**Get IdentifierHashs ofwafers flagged as bad + reason (per event)*/
-  virtual const IDCInDetBSErrContainer* getBadIds() const override;
   virtual const IDCInDetBSErrContainer* getBadIds(const EventContext& ctx) const override;
 
  private:

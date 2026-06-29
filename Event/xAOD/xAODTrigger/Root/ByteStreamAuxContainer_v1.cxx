@@ -5,6 +5,7 @@
 // System include(s):
 #include <iostream>
 #include <atomic>
+#include <cstring>
 
 // EDM include(s):
 #include "xAODCore/tools/AuxPersVector.h"
@@ -572,13 +573,15 @@ namespace xAOD {
       }
 
       // The object can't handle this variable type...
-      std::cerr << "ERROR xAOD::ByteStreamAuxContainer_v1::getData "
-                << "Unknown variable type ("
-                << SG::AuxTypeRegistry::instance().getTypeName( auxid )
-                << ") requested for variable "
-                << SG::AuxTypeRegistry::instance().getName( auxid )
-                << " (" << auxid << ")"
-                << std::endl;
+      if (!quiet) {
+        std::cerr << "ERROR xAOD::ByteStreamAuxContainer_v1::getData "
+                  << "Unknown variable type ("
+                  << SG::AuxTypeRegistry::instance().getTypeName( auxid )
+                  << ") requested for variable "
+                  << SG::AuxTypeRegistry::instance().getName( auxid )
+                  << " (" << auxid << ")"
+                  << std::endl;
+      }
 
       return nullptr;
    }

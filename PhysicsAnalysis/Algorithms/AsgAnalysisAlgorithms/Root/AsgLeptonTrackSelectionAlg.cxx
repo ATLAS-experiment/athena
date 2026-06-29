@@ -111,7 +111,7 @@ namespace CP
 
           const xAOD::TrackParticle *track {nullptr};
           if (const xAOD::Muon *muon = dynamic_cast<const xAOD::Muon *>(particle)){
-            track = muon->primaryTrackParticle();
+            track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
           } else if (const xAOD::Electron *electron = dynamic_cast<const xAOD::Electron *>(particle)){
             track = electron->trackParticle();
           } else {

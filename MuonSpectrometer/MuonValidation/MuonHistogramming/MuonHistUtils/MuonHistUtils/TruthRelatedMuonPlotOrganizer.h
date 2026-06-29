@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHISTUTILS_TRUTHRELATEDMUONPLOTORGANIZER_H
@@ -11,7 +11,6 @@
 #include "MuonHistUtils/MuonHitDiffSummaryPlots.h"
 #include "MuonHistUtils/MuonParamElossPlots.h"
 #include "MuonHistUtils/MuonResolutionPlots.h"
-#include "MuonHistUtils/MuonTree.h"
 #include "MuonHistUtils/MuonTruthHitPlots.h"
 #include "TrkValHistUtils/DefParamPullPlots.h"
 #include "TrkValHistUtils/MSHitDiffPlots.h"
@@ -44,8 +43,7 @@ class TruthRelatedMuonPlotOrganizer : public PlotBase {
 
     std::vector<int> m_selPlots;
 
-    void fill(const xAOD::TruthParticle& truthMu, const xAOD::Muon& mu,
-              const xAOD::TrackParticleContainer* MSTracks, float weight = 1.0);
+    void fill(const xAOD::TruthParticle& truthMu, const xAOD::Muon& mu, float weight = 1.0);
     void fill(const xAOD::TruthParticle& truthMu, const xAOD::TrackParticle& mu,
               float weight = 1.0);
 

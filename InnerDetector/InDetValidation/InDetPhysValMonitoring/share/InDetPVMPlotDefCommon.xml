@@ -3209,52 +3209,6 @@
    <y title="Number of Entries"/>
 </h>
 
-<!-- Tracking Recommendation Plots -->
-<h id="TrkRec_eta" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#eta" n="&EtaBinsTrkRec;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_d0" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="d_{0} [mm]" n="&d0BinsTrkRec;" lo="-&d0TrkRec;" hi="&d0TrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_prodR" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="prodR [mm]" n="&prodRBinsTrkRec;" lo="0.0" hi="&prodRTrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_pT" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="p_{T} [GeV]" n="&pTBinsTrkRec;" lo="0.0" hi="&pTTrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_truthMu" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="Truth #mu" n="&muBinsTrkRec;" lo="0.5" hi="&muTrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_actualMu" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="Actual #mu" n="&muBinsTrkRec;" lo="0.5" hi="&muTrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_eta_d0" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#eta"       n="&EtaBinsTrkRec;" lo="-&ETA;"      hi="&ETA;"/>
-  <y title="d_{0} [mm]" n="&d0BinsTrkRec;"  lo="-&d0TrkRec;" hi="&d0TrkRec;"/>
-</h>
-
-<h id="TrkRec_eta_prodR" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#eta"       n="&EtaBinsTrkRec;"   lo="-&ETA;" hi="&ETA;"/>
-  <y title="prodR [mm]" n="&prodRBinsTrkRec;" lo="0.0"    hi="&prodRTrkRec;"/>
-</h>
-
-<h id="TrkRec_eta_pT" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#eta"        n="&EtaBinsTrkRec;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="p_{T} [GeV]" n="&pTBinsTrkRec;"  lo="0.0"    hi="&pTTrkRec;"/>
-</h>
-
 <!-- Extra information about the sample -->
 <h id="vx_PUdensity" type="TH1F" title="Pileup density">
   <x title="Local PU density [vertices/mm]" n="&NBINSPUDENS;" lo="0.0" hi="&PUDENSMAX;"/>

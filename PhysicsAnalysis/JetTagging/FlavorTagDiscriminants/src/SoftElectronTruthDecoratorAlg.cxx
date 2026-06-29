@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -33,13 +33,9 @@ namespace FlavorTagDiscriminants {
     ATH_MSG_DEBUG( "    ** " << m_ElectronContainerKey   );
 
     ATH_CHECK( m_ElectronContainerKey.initialize() );
+    ATH_CHECK( m_truthParticleContainerKey.initialize() );
 
     // Initialise accessors
-    m_acc_origin_label = "TruthParticles." + m_acc_origin_label.key();
-    m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
-    m_acc_source_label = "TruthParticles." + m_acc_source_label.key();
-    m_acc_vertex_index = "TruthParticles." + m_acc_vertex_index.key();
-    m_acc_parent_uniqueID = "TruthParticles." + m_acc_parent_uniqueID.key();
     ATH_CHECK( m_acc_origin_label.initialize() );
     ATH_CHECK( m_acc_type_label.initialize() );
     ATH_CHECK( m_acc_source_label.initialize() );
@@ -47,12 +43,6 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_acc_parent_uniqueID.initialize() );
 
     // Initialise decorators
-    m_dec_origin_label = m_ElectronContainerKey.key() + "." + m_dec_origin_label.key();
-    m_dec_type_label = m_ElectronContainerKey.key() + "." + m_dec_type_label.key();
-    m_dec_source_label = m_ElectronContainerKey.key() + "." + m_dec_source_label.key();
-    m_dec_vertex_index = m_ElectronContainerKey.key() + "." + m_dec_vertex_index.key();
-    m_dec_uniqueID = m_ElectronContainerKey.key() + "." + m_dec_uniqueID.key();
-    m_dec_parent_uniqueID = m_ElectronContainerKey.key() + "." + m_dec_parent_uniqueID.key();
     ATH_CHECK( m_dec_origin_label.initialize() );
     ATH_CHECK( m_dec_type_label.initialize() );
     ATH_CHECK( m_dec_source_label.initialize() );

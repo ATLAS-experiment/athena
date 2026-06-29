@@ -83,16 +83,6 @@ private:
   TEfficiency* m_efficiency_vs_prodZ{};
   TEfficiency* m_efficiency_vs_prodZ_extended{};
 
-  TEfficiency* m_TrkRec_eta{};
-  TEfficiency* m_TrkRec_d0{};
-  TEfficiency* m_TrkRec_prodR{};
-  TEfficiency* m_TrkRec_pT{};
-  TEfficiency* m_TrkRec_truthMu{};
-  TEfficiency* m_TrkRec_actualMu{};
-  TEfficiency* m_TrkRec_eta_d0{};
-  TEfficiency* m_TrkRec_eta_prodR{};
-  TEfficiency* m_TrkRec_eta_pT{};
-
   bool m_doTechEff{false};
   bool m_isITk{false};
 

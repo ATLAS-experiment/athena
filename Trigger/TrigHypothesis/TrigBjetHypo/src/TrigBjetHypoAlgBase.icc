@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthViews/ViewHelper.h"
@@ -28,12 +28,13 @@ StatusCode TrigBjetHypoAlgBase::retrieveCollectionFromView( const EventContext& 
 }
 
 template < class CONTAINER >
-StatusCode TrigBjetHypoAlgBase::retrieveObjectFromNavigation( const std::string& linkName,
+StatusCode TrigBjetHypoAlgBase::retrieveObjectFromNavigation( const EventContext& context,
+	   							const std::string& linkName,
 	   							ElementLink< CONTAINER >& EL,
 	   							const TrigCompositeUtils::Decision* prevDecision )  const {
 
     const std::vector< TrigCompositeUtils::LinkInfo< CONTAINER > > myObj = 
-    	  TrigCompositeUtils::findLinks< CONTAINER >( prevDecision, linkName.c_str(), TrigDefs::lastFeatureOfType);
+    	  TrigCompositeUtils::findLinks< CONTAINER >(context,  prevDecision, linkName.c_str(), TrigDefs::lastFeatureOfType);
 
     if ( myObj.size() != 1 ) {
       ATH_MSG_ERROR( "Did not find only 1 object for link `" << linkName << "` stored in navigation!" );
@@ -47,13 +48,14 @@ StatusCode TrigBjetHypoAlgBase::retrieveObjectFromNavigation( const std::string&
 }
 
 template < class CONTAINER >
-StatusCode TrigBjetHypoAlgBase::retrieveCollectionFromNavigation( const std::string& linkName,
-                                                    		    ElementLinkVector< CONTAINER >& objELs,
+StatusCode TrigBjetHypoAlgBase::retrieveCollectionFromNavigation( const EventContext& context,
+								    const std::string& linkName,
+								    ElementLinkVector< CONTAINER >& objELs,
 								    const TrigCompositeUtils::DecisionContainer* prevDecisionContainer )  const {
 
   for ( const TrigCompositeUtils::Decision *prevDecision : *prevDecisionContainer ) {
     ElementLink< CONTAINER > objEL;
-    CHECK( retrieveObjectFromNavigation( linkName, objEL, prevDecision ) );
+    CHECK( retrieveObjectFromNavigation( context, linkName, objEL, prevDecision ) );
     objELs.push_back( objEL ) ;
   }
 

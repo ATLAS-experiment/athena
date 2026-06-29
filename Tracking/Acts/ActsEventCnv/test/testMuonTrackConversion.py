@@ -57,7 +57,7 @@ if "__main__" == __name__:
     
     outputfile = 'muon_dump.json'
     track_collections = ['MuonSpectrometerTracks']
-    RunTrackConversion(flags, track_collections, outputfile=outputfile)
+    RunTrackConversion(flags, track_collections, outputfile=outputfile, setupMuon = True)
 
     tolerance = 0.001
     def _valuesEqual(acts, trk):

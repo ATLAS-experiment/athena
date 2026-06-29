@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOMPOSITEUTILS_COMBINATIONS_H
@@ -17,18 +17,19 @@ namespace TrigCompositeUtils
   class Combinations
   {
   public:
-    using VecLInfo_t = std::vector<LinkInfo<xAOD::IParticleContainer>>;
+    using VecLInfo_t = IPartCombItr::VecLInfo_t;
+
     Combinations(
         const std::vector<std::size_t> &legMultiplicities,
         const std::vector<VecLInfo_t> &legFeatures,
-        const std::function<bool(const VecLInfo_t &)> &filter);
+        const IPartCombItr::FilterFunc_t &filter);
 
     Combinations(
         const std::vector<std::size_t> &legMultiplicities,
         const std::vector<VecLInfo_t> &legFeatures,
         FilterType filter = FilterType::UniqueObjects);
 
-    Combinations(const std::function<bool(const VecLInfo_t &)> &filter);
+    Combinations(const IPartCombItr::FilterFunc_t &filter);
 
     Combinations(FilterType filter = FilterType::UniqueObjects);
 
@@ -47,7 +48,7 @@ namespace TrigCompositeUtils
     IPartCombItr end() const;
 
   private:
-    std::function<bool(const VecLInfo_t &)> m_filter;
+    IPartCombItr::FilterFunc_t m_filter;
     std::vector<std::size_t> m_legMultiplicities;
     std::vector<VecLInfo_t> m_legFeatures;
   }; //> end class Combinations

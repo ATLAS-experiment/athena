@@ -3,7 +3,7 @@
 
 # art-description: Trigger BS->RDO_TRIG athena test of the MC_pp_run3_v1 menu
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 # art-input: group.trig-hlt.data25_13p6TeV.00500306.physics_EnhancedBias.merge.RAW
 # art-input-nfiles: 1

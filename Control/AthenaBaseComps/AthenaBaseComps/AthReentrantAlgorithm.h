@@ -14,7 +14,7 @@
 
 
 // STL includes
-#include "AthenaBaseComps/AthCommonReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCommonAlgorithm.h"
 
 
 #include "Gaudi/Algorithm.h"
@@ -71,8 +71,8 @@
  *  }
  @endcode
  */
-class AthReentrantAlgorithm : public AthCommonReentrantAlgorithm<Gaudi::Algorithm>{
-    using AthCommonReentrantAlgorithm<Gaudi::Algorithm>::AthCommonReentrantAlgorithm;
+class AthReentrantAlgorithm : public AthCommonAlgorithm<Gaudi::Algorithm>{
+    using AthCommonAlgorithm<Gaudi::Algorithm>::AthCommonAlgorithm;
 };
 
 #endif //> !ATHENABASECOMPS_ATHREENTRANTALGORITHM_H

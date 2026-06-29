@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AGDDControl )
@@ -13,11 +13,11 @@ find_package( ROOT COMPONENTS Core )
 atlas_add_library( AGDDControl
    AGDDControl/*.h src/*.cxx
    PUBLIC_HEADERS AGDDControl
-   INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+   INCLUDE_DIRS ${XercesC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                 ${GEOMODEL_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
-   LINK_LIBRARIES ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES}
+   LINK_LIBRARIES ${XercesC_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES}
                   AthenaBaseComps AGDDKernel AGDDModel CxxUtils GaudiKernel
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel
                           GeoModelInterfaces GeoModelUtilities PathResolver

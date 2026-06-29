@@ -10,11 +10,8 @@
 #include <boost/core/demangle.hpp>
 #include <chrono>
 #include <format>
+#include <numeric>
 #include <random>
-#include <range/v3/algorithm.hpp>
-#include <range/v3/numeric/accumulate.hpp>
-#include <range/v3/to_container.hpp>
-#include <range/v3/view.hpp>
 #include <thread>
 
 #include "AthenaKernel/IAddressProvider.h"
@@ -186,7 +183,7 @@ std::size_t OnDemandMinbiasSvc::calcMBRequired(std::int64_t hs_id,
                    });
   }
 
-  std::uint64_t num_mb = ranges::accumulate(num_mb_by_bunch, 0UL);
+  std::uint64_t num_mb = std::accumulate(num_mb_by_bunch.begin(), num_mb_by_bunch.end(), std::uint64_t{0});
   if (!ctx.valid()) {
     return num_mb;
   }

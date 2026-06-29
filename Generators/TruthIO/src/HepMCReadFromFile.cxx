@@ -5,7 +5,6 @@
 #include "TruthIO/HepMCReadFromFile.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/IO_HEPEVT.h"
 #include "AtlasHepMC/HEPEVT_Wrapper.h"
 #include "AtlasHepMC/GenCrossSection.h" 
 #include "AtlasHepMC/ReaderFactory.h" 

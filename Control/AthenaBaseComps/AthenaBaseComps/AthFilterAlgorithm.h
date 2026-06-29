@@ -30,8 +30,6 @@ class AthFilterAlgorithm
   /////////////////////////////////////////////////////////////////// 
  public: 
 
-  // Copy constructor: 
-
   /// Constructor with parameters: 
   AthFilterAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
 
@@ -51,9 +49,9 @@ class AthFilterAlgorithm
    *  and of any sub-algorithms which it creates.
    */
   virtual StatusCode sysInitialize() override;
-  
+
   /// Set the filter passed flag to the specified state
-  void setFilterPassed( bool state, const EventContext& ctx ) const;
+  virtual void setFilterPassed( bool state, const EventContext& ctx ) const override;
 
   /// @brief helper method to ease the setting of this filter's description
   /// in derived classes

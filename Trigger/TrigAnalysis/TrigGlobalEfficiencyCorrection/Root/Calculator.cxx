@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -1622,7 +1622,7 @@ struct TrigGlobEffCorr::Calculator::Helper::BindPackedParam<flat_set<T>> {
   static constexpr bool multiple() { return true; }
   static constexpr bool optional() { return false; }
   static void add(flat_set<T>& arg, ImportData::TrigDef& def) {
-    arg.emplace().first->setDefinition(def);
+    arg.emplace(def);
   }
   static constexpr bool valid(const flat_set<T>& arg) { return arg.size(); }
 };

@@ -22,9 +22,9 @@ def ActsGaussianSumFitterToolCfg(flags,
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
         kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
 
-    if "TrackingGeometryTool" not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs["TrackingGeometryTool"] = acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     if "ExtrapolationTool" not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg

@@ -56,10 +56,6 @@ StatusCode FPGATrackSimSGToRawHitsTool::initialize() {
   if(!m_extrapolator.empty()) ATH_CHECK(m_extrapolator.retrieve());
   ATH_CHECK(m_beamSpotKey.initialize());
 
-  SmartIF<IPartPropSvc> partPropSvc{service("PartPropSvc")};
-  ATH_CHECK(partPropSvc.isValid());
-  m_particleDataTable = partPropSvc->PDT();
-
   ATH_CHECK(detStore()->retrieve(m_PIX_mgr, "ITkPixel"));
   ATH_CHECK(detStore()->retrieve(m_pixelId, "PixelID"));
   ATH_CHECK(detStore()->retrieve(m_SCT_mgr, "ITkStrip"));
@@ -758,13 +754,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       if (particle->production_vertex() == nullptr) {
         continue;
       }
-      // reject neutral or unstable particles
-      const HepPDT::ParticleData* pd = m_particleDataTable->particle(abs(pdgcode));
-      if (pd == nullptr) {
-        continue;
-      }
-      float charge = pd->charge();
-      if (pdgcode < 0) charge *= -1.; // since we took absolute value above
+      float charge = MC::charge(pdgcode);
       if (std::abs(charge) < 0.5) {
         continue;
       }
@@ -826,14 +816,13 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       tmpSGTrack.setVtxZ(track_truth_z0);
       tmpSGTrack.setD0(track_truth_d0);
       tmpSGTrack.setZ0(track_truth_z0);
-      tmpSGTrack.setVtxZ(primaryVtx.z());
       tmpSGTrack.setQ(track_truth_q);
       tmpSGTrack.setPX(track_truth_p * (track_truth_cosphi * track_truth_sintheta));
       tmpSGTrack.setPY(track_truth_p * (track_truth_sinphi * track_truth_sintheta));
       tmpSGTrack.setPZ(track_truth_p * track_truth_costheta);
       tmpSGTrack.setPDGCode(pdgcode);
       tmpSGTrack.setStatus(particle->status());
-
+      tmpSGTrack.setPrimary(!HepMC::is_simulation_particle(particle));
       tmpSGTrack.setBarcode(truthLink2.barcode());
       tmpSGTrack.setUniqueID(truthLink2.id());
       tmpSGTrack.setEventIndex(truthLink2.eventIndex());

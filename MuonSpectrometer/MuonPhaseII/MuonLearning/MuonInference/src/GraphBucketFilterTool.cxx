@@ -11,8 +11,6 @@
 #include "StoreGate/WriteHandle.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include <fmt/format.h>
-#include <fmt/ranges.h>
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
@@ -202,6 +200,17 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     ATH_MSG_DEBUG("No training-like graph nodes found. Passed through "
                   << passThroughNonModelBuckets
                   << " non-model buckets without ONNX inference.");
+    if (m_printFilterSummary) {
+      ATH_MSG_INFO("BucketFilterSummary event=" << ctx.evt()
+                   << " input=" << inputBuckets->size()
+                   << " model_input=0"
+                   << " model_kept=0"
+                   << " output=" << passThroughNonModelBuckets
+                   << " rejected=0"
+                   << " non_model_passthrough=" << passThroughNonModelBuckets
+                   << " expected_signal=n/a"
+                   << " expected_signal_kept=n/a");
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -230,7 +239,15 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
     outputMode = OutputMode::SingleOutput;
     numPred = static_cast<size_t>(outShape[0]);
   } else {
-    ATH_MSG_ERROR("Unexpected ONNX output tensor shape = [" << fmt::format("{}", fmt::join(outShape, ","))
+    auto outShapeString = [](const std::vector<int64_t>& v) {
+        std::ostringstream oss;
+        if (!v.empty()) {
+            std::copy(v.begin(), v.end() - 1, std::ostream_iterator<int64_t>(oss, ","));
+            oss << v.back();
+        }
+        return oss.str();
+    };	  
+    ATH_MSG_ERROR("Unexpected ONNX output tensor shape = [" << outShapeString(outShape)
                   << "]  (expected [N,3] or [N] or [N,1]).");
     return StatusCode::FAILURE;
   }
@@ -446,6 +463,24 @@ StatusCode GraphBucketFilterTool::runGraphInference(const EventContext& ctx,
                  << " kept_bad=" << labelledBadKept
                  << " bad_accept_rate=" << badAcceptRate
                  << " unknown_label=" << labelledUnknownBuckets);
+  }
+
+  if (m_printFilterSummary) {
+    ATH_MSG_INFO("BucketFilterSummary event=" << ctx.evt()
+                 << " input=" << inputBuckets->size()
+                 << " model_input=" << validBuckets
+                 << " model_kept=" << keptByModel
+                 << " output=" << kept
+                 << " rejected=" << (inputBuckets->size() - kept)
+                 << " non_model_passthrough=" << passThroughNonModelBuckets);
+    if (m_printLabels) {
+      ATH_MSG_INFO("BucketFilterTruthSummary event=" << ctx.evt()
+                   << " expected_signal=" << labelledGoodBuckets
+                   << " expected_signal_kept=" << labelledGoodKept
+                   << " expected_background=" << labelledBadBuckets
+                   << " expected_background_kept=" << labelledBadKept
+                   << " unknown_label=" << labelledUnknownBuckets);
+    }
   }
 
   if (doDebugDump) {

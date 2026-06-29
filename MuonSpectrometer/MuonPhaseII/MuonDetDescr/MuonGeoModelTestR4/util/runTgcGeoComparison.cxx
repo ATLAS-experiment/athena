@@ -25,7 +25,15 @@
 #include <TFile.h>
 #include <TTreeReader.h>
 
+#include "Acts/Utilities/UnitVectors.hpp"
+#include "Acts/Definitions/Units.hpp"
+
 #include "GeoModelHelpers/TransformToStringConverter.h"
+
+Amg::Vector3D makeDir(const double theta, const double phi) {
+    using namespace Acts::UnitLiterals;
+    return Acts::makeDirectionFromPhiTheta(phi *1._degree, theta* 1._degree);
+}
 
 constexpr double tolerance = 10 * Gaudi::Units::micrometer;
 
@@ -216,17 +224,14 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<uint8_t>> gangNumWires{treeReader, "gangNumWires"};
     TTreeReaderValue<std::vector<float>> gangLength{treeReader, "gangLength"};
 
-    TTreeReaderValue<std::vector<float>> layerCol1X{treeReader, "layerLinearCol1X"};
-    TTreeReaderValue<std::vector<float>> layerCol1Y{treeReader, "layerLinearCol1Y"};
-    TTreeReaderValue<std::vector<float>> layerCol1Z{treeReader, "layerLinearCol1Z"};
+    TTreeReaderValue<std::vector<float>> layerCol0Theta{treeReader, "layerLinearCol0Theta"};
+    TTreeReaderValue<std::vector<float>> layerCol0Phi{treeReader, "layerLinearCol0Phi"};
+ 
+    TTreeReaderValue<std::vector<float>> layerCol1Theta{treeReader, "layerLinearCol1Theta"};
+    TTreeReaderValue<std::vector<float>> layerCol1Phi{treeReader, "layerLinearCol1Phi"};
 
-    TTreeReaderValue<std::vector<float>> layerCol2X{treeReader, "layerLinearCol2X"};
-    TTreeReaderValue<std::vector<float>> layerCol2Y{treeReader, "layerLinearCol2Y"};
-    TTreeReaderValue<std::vector<float>> layerCol2Z{treeReader, "layerLinearCol2Z"};
-
-    TTreeReaderValue<std::vector<float>> layerCol3X{treeReader, "layerLinearCol3X"};
-    TTreeReaderValue<std::vector<float>> layerCol3Y{treeReader, "layerLinearCol3Y"};
-    TTreeReaderValue<std::vector<float>> layerCol3Z{treeReader, "layerLinearCol3Z"};
+    TTreeReaderValue<std::vector<float>> layerCol2Theta{treeReader, "layerLinearCol2Theta"};
+    TTreeReaderValue<std::vector<float>> layerCol2Phi{treeReader, "layerLinearCol2Phi"};
 
     TTreeReaderValue<std::vector<float>> layerTransX{treeReader, "layerTranslationX"};
     TTreeReaderValue<std::vector<float>> layerTransY{treeReader, "layerTranslationY"};
@@ -307,9 +312,9 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
         }
         for (size_t l = 0 ; l < layerMeasPhi->size(); ++l) {            
             Amg::RotationMatrix3D layRot{Amg::RotationMatrix3D::Identity()};
-            layRot.col(0) = Amg::Vector3D{(*layerCol1X)[l], (*layerCol1Y)[l], (*layerCol1Z)[l]};
-            layRot.col(1) = Amg::Vector3D{(*layerCol2X)[l], (*layerCol2Y)[l], (*layerCol2Z)[l]};
-            layRot.col(2) = Amg::Vector3D{(*layerCol3X)[l], (*layerCol3Y)[l], (*layerCol3Z)[l]};
+            layRot.col(0) = makeDir((*layerCol0Theta)[l], (*layerCol0Phi)[l]);
+            layRot.col(1) = makeDir((*layerCol1Theta)[l], (*layerCol1Phi)[l]);
+            layRot.col(2) = makeDir((*layerCol2Theta)[l], (*layerCol2Phi)[l]);
             Amg::Vector3D trans{(*layerTransX)[l],(*layerTransY)[l],(*layerTransZ)[l]};
             TgcChamber::LayerTrans layTrans{};
             layTrans.trans = Amg::getTransformFromRotTransl(std::move(layRot), std::move(trans));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L2muCombMon.h"
@@ -34,7 +34,7 @@ StatusCode L2muCombMon :: fillVariablesPerChain(const EventContext &ctx, const s
 
     // get L2SA feature
     const TrigCompositeUtils::Decision* muDecision = muLinkInfo.source;
-    const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> saLinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(muDecision, "feature");
+    const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> saLinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(ctx, muDecision, "feature");
     if(saLinkInfo.size()>1){
        ATH_MSG_DEBUG("More than one L2SA linked to L2 comb muon");
     }
@@ -219,7 +219,7 @@ StatusCode L2muCombMon :: fillVariablesPerOfflineMuonPerChain(const EventContext
   /* Comment out due to the failure at Tier0 (ATR-26161)
   // HLT_Roi_L2SAMuon variables
   const TrigCompositeUtils::Decision* muDecision = muLinkInfo.source;
-  const TrigCompositeUtils::LinkInfo<TrigRoiDescriptorCollection> roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(muDecision, "roi");
+  const TrigCompositeUtils::LinkInfo<TrigRoiDescriptorCollection> roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(ctx, muDecision, "roi");
   ATH_CHECK( roiLinkInfo.isValid() );
   const ElementLink<TrigRoiDescriptorCollection> roiEL = roiLinkInfo.link;
   float SAroiEta = (*roiEL)->eta();

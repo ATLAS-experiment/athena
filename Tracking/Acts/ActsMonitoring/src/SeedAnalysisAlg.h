@@ -26,7 +26,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -62,7 +62,7 @@ namespace ActsTrk {
   private:
     ToolHandle< ActsTrk::ITrackParamsEstimationTool > m_paramEstimationTool {this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
     PublicToolHandle< ActsTrk::ITrackingGeometryTool > m_trackingGeometryTool {this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-    PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "", "Acts to ATLAS converter tool"};
+    PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
 
     SG::ReadHandleKey< ActsTrk::SeedContainer > m_inputSeedColletionKey {this,  "InputSeedCollection", "", ""}; 
 

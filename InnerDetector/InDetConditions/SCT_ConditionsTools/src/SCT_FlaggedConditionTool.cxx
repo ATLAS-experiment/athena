@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_FlaggedConditionTool.h"
@@ -48,12 +48,6 @@ bool SCT_FlaggedConditionTool::isGood(const Identifier& elementId, const EventCo
   return isGood(hashId, ctx);
 }
 
-bool SCT_FlaggedConditionTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementId, ctx, h);
-}
-
 // Is this element good (by IdentifierHash)?
 bool SCT_FlaggedConditionTool::isGood(const IdentifierHash& hashId, const EventContext& ctx) const {
   const IDCInDetBSErrContainer* badIds{getCondData(ctx)};
@@ -100,13 +94,6 @@ void SCT_FlaggedConditionTool::getDetectorElementStatus(const EventContext& ctx,
    }
 }
 
-
-bool SCT_FlaggedConditionTool::isGood(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(hashId, ctx);
-}
-
 // Retrieve the reason why the wafer is flagged as bad (by IdentifierHash)
 // If wafer is not found return a null string
 const std::string& SCT_FlaggedConditionTool::details(const IdentifierHash& hashId, const EventContext& ctx) const {
@@ -135,21 +122,11 @@ const std::string& SCT_FlaggedConditionTool::details(const IdentifierHash& hashI
   return nullString;
 }
 
-const std::string& SCT_FlaggedConditionTool::details(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return details(hashId, ctx);
-}
-
 // Retrieve the reason why the wafer is flagged as bad (by Identifier)
 // If wafer is not found return a null string
 const std::string& SCT_FlaggedConditionTool::details(const Identifier& Id, const EventContext& ctx) const {
   const IdentifierHash hashId{m_sctID->wafer_hash(Id)};
   return details(hashId, ctx);
-}
-
-const std::string& SCT_FlaggedConditionTool::details(const Identifier& Id) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return details(Id, ctx);
 }
 
 int SCT_FlaggedConditionTool::numBadIds(const EventContext& ctx) const {
@@ -168,18 +145,8 @@ int SCT_FlaggedConditionTool::numBadIds(const EventContext& ctx) const {
   return static_cast<int>(badIds->numberSet());
 }
 
-int SCT_FlaggedConditionTool::numBadIds() const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return numBadIds(ctx);
-}
-
 const IDCInDetBSErrContainer* SCT_FlaggedConditionTool::getBadIds(const EventContext& ctx) const {
   return getCondData(ctx);
-}
-
-const IDCInDetBSErrContainer* SCT_FlaggedConditionTool::getBadIds() const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getBadIds(ctx);
 }
 
 const IDCInDetBSErrContainer* SCT_FlaggedConditionTool::getCondData(const EventContext& ctx) const {

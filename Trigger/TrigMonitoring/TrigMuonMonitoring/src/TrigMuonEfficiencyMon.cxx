@@ -204,9 +204,9 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
       bool bit_mass = (dimu_mass > m_mass_lowlim) && (dimu_mass < m_mass_highlim);
       bool bit_dR = lvmu1.DeltaR(lvmu2)>0.5;
       if(m_use_extrapolator){
-	const xAOD::TrackParticle *track1 = mu1->primaryTrackParticle();
+	const xAOD::TrackParticle *track1 = mu1->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 	const Trk::TrackParameters *extTrack1 = m_matchTool->extTrackToPivot(ctx, track1);
-	const xAOD::TrackParticle *track2 = mu2->primaryTrackParticle();
+	const xAOD::TrackParticle *track2 = mu2->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 	const Trk::TrackParameters *extTrack2 = m_matchTool->extTrackToPivot(ctx, track2);
 	if(extTrack1 && extTrack2){
 	  TLorentzVector lvext1 = lvmu1;

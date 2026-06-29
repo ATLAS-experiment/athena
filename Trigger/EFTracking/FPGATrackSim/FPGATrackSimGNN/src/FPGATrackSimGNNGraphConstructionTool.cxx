@@ -467,7 +467,9 @@ bool FPGATrackSimGNNGraphConstructionTool::applyDoubletCuts(const std::shared_pt
     // If an edge passes all four, then it is a valid edge and can be stored
 
     // delta_eta cuts
-    float deta = hit2->getEta() - hit1->getEta();
+    float deta = 0.0;
+    if(m_moduleMapType == "triplet") deta = hit2->getEta() - hit1->getEta();
+    else if(m_moduleMapType == "doublet") deta = hit1->getEta() - hit2->getEta(); // F150g maps still have the deta bug
     if(!doMask(deta, cuts.deta)) return false;
 
     // z0 cuts

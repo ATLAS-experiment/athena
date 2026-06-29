@@ -193,7 +193,7 @@ namespace MuonValR4 {
             /// Calculate the two station momentum
             m_truthTrks->addVariable(
                 std::make_unique<GenericPartDecorBranch<xAOD::TruthParticle, float>>(m_tree, 
-                std::format("{:}_qTimesAlpha", m_truthTrks->name()), [&] (const xAOD::TruthParticle& p) -> float {
+                std::format("{:}_qTimesPalpha", m_truthTrks->name()), [&] (const xAOD::TruthParticle& p) -> float {
                     const auto truthSegs = getTruthSegments(p);
                     if (truthSegs.size() < 2) {
                         return 0.f;

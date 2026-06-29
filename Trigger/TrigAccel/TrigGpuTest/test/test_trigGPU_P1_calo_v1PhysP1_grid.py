@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu
+# art-description: Trigger athenaEF test of the PhysicsP1_pp_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
 # art-input: group.trig-hlt.data25_13p6TeV.00500306.physics_EnhancedBias.merge.RAW
@@ -25,7 +25,7 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
 ex.threads = 8

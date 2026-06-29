@@ -13,6 +13,7 @@
 #include "PersistentDataModel/Guid.h"
 
 #include <string>
+#include <string_view>
 #include <utility>
 
 /** @class Token
@@ -90,7 +91,8 @@ public:
    /// Access auxiliary string
    const std::string& auxString() const { return m_auxString; }
    /// Set auxiliary string
-   Token& setAuxString(const std::string& auxString) { m_auxString = auxString; return *this; }
+   Token& setAuxString(std::string&& auxString) { m_auxString = std::move(auxString); return *this; }
+   void setAuxString(std::string_view auxString) { m_auxString = auxString; }
 
    /// Retrieve the string representation of the token.
    virtual const std::string toString() const;

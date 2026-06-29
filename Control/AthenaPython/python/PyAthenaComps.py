@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file: PyAthenaComps.py
 # @purpose: a set of Python classes for PyAthena
@@ -154,11 +154,11 @@ class Alg( CfgPyAlgorithm ):
 
     def filterPassed(self):
         """Did this algorithm pass or fail its filter criterion for the last event?"""
-        return self._cppHandle.filterPassed()
+        return self._cppHandle.filterPassed(self._ctx)
 
     def setFilterPassed(self, state):
         """Set the filter passed flag to the specified state"""
-        return self._cppHandle.setFilterPassed(state)
+        return self._cppHandle.setFilterPassed(state, self._ctx)
     
     def resetExecuted(self):
        self.setExecuted(False)
@@ -236,7 +236,7 @@ class AlgTool( CfgPyAlgTool ):
     def __init__(self, name=None, parent=None, **kw):
         kw.setdefault('OutputLevel', 3) #INFO
         if name is None: name = kw.get('name', self.__class__.__name__)
-        if not (parent is None):
+        if parent is not None:
             if isinstance(parent, str): name = "%s.%s" % (parent,name)
             else:                       name = "%s.%s" % (parent.name(),name)
         ## init base class

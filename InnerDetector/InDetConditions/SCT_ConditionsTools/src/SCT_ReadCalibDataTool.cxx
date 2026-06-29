@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file SCT_ReadCalibDataTool.cxx Implementation file for SCT_ReadCalibDataTool.
@@ -107,13 +107,7 @@ bool SCT_ReadCalibDataTool::isGood(const Identifier& elementId, const EventConte
   return status;
 } //SCT_ReadCalibDataTool::summary()
 
-bool SCT_ReadCalibDataTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementId, ctx, h);
-}
-
-void SCT_ReadCalibDataTool::getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status, 
+void SCT_ReadCalibDataTool::getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status,
                                                      SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const {
    SG::ReadCondHandle<SCT_AllGoodStripInfo> condDataHandle{m_condKeyInfo, ctx};
    if (not condDataHandle.isValid()) {
@@ -270,10 +264,6 @@ ISCT_ReadCalibDataTool::CalibDefectType SCT_ReadCalibDataTool::defectType(const 
   return theseSummaryDefects;
 } //SCT_ReadCalibDataTool::defectType()
 
-ISCT_ReadCalibDataTool::CalibDefectType SCT_ReadCalibDataTool::defectType(const Identifier& stripId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return defectType(stripId, ctx, h);
-}
 //----------------------------------------------------------------------
 // Returns a summary of all defects on a module for a given scan
 SCT_CalibDefectData::CalibModuleDefects SCT_ReadCalibDataTool::defectsSummary(const Identifier& moduleId, const std::string& scan, const EventContext& ctx) const {
@@ -301,11 +291,6 @@ SCT_CalibDefectData::CalibModuleDefects SCT_ReadCalibDataTool::defectsSummary(co
 
   return wantedDefects;
 } //SCT_ReadCalibDataTool::defectsSummary()
-
-SCT_CalibDefectData::CalibModuleDefects SCT_ReadCalibDataTool::defectsSummary(const Identifier& moduleId, const std::string& scan) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return defectsSummary(moduleId, scan, ctx);
-}
 
 //---------------------------------------------------------------------- 
 //----------------------------------------------------------------------
@@ -397,11 +382,7 @@ std::list<Identifier> SCT_ReadCalibDataTool::defectList(const std::string& defec
   return defectList;
 } //SCT_ReadCalibDataTool::defects()
 
-std::list<Identifier> SCT_ReadCalibDataTool::defectList(const std::string& defect) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return defectList(defect, ctx);
-}
-//---------------------------------------------------------------------- 
+//----------------------------------------------------------------------
 
 const SCT_CalibDefectData*
 SCT_ReadCalibDataTool::getCondDataGain(const EventContext& ctx) const {

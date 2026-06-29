@@ -1,10 +1,12 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "Acts/EventData/ParticleHypothesis.hpp"
 namespace ActsTrk::detail {
     template <Acts::TrackStateProxyConcept proxy_t>
     std::unique_ptr<Trk::RIO_OnTrack> 
-        TrkPrepRawDataCalibrator::createROT(const Acts::GeometryContext &gctx,
+        TrkPrepRawDataCalibrator::createROT(const Acts::GeometryContext &/*tgContext*/,
                                             const Acts::CalibrationContext & cctx,
                                             const Acts::SourceLink& sl,
                                             const proxy_t& trackState) const {
@@ -18,7 +20,7 @@ namespace ActsTrk::detail {
       // Check that the conversion tool is set
       assert(m_convTool != nullptr);
       const EventContext* ctx = cctx.get<const EventContext*>();
-      const auto trkParam = m_convTool->actsTrackParametersToTrkParameters(*ctx, actsParam, gctx);
+      const auto trkParam = m_convTool->convertTrackParametersToTrk(*ctx, actsParam);
       
       /// Check that the ROT creator has been defined
       assert(m_rotCreator != nullptr);

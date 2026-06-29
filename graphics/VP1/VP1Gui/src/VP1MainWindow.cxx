@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -786,23 +786,21 @@ QMap<QString,QString> VP1MainWindow::availableFiles(const QString& extension,
     int nDuplicatesRemoved = vp1pluginpath.removeDuplicates();
     VP1Msg::messageDebug("Removed '" + QString::number(nDuplicatesRemoved) + "' duplicate paths.");
 
-	//Remove all nonexisting directories:
-    unsigned idx=0;
-    for (const auto& plugindir : vp1pluginpath) {
-        VP1Msg::messageDebug("plugindir: '" + plugindir + "'");
-        QFileInfo fi(plugindir);
-        if (!fi.exists()||!fi.isDir()) {
-            VP1Msg::messageDebug("list: " + vp1pluginpath.join(";"));
-            if (vp1pluginpath.contains(plugindir)) {
-                vp1pluginpath.removeAt(idx); // Note: do not use 'removeAll(string)' it has issues when run within loops
-                VP1Msg::messageDebug("Removed non-valid path: '" + plugindir + "'");
-            }
-            else {
-                VP1Msg::messageDebug("plugindir not present; perhaps, it has been removed already. Skipping it...");
-            }
-        }
-        ++idx;
+    // Remove all nonexisting directories:
+    QStringList validPluginPaths;
+    validPluginPaths.reserve(vp1pluginpath.size());
+    for (const QString& plugindir : vp1pluginpath) {
+	    VP1Msg::messageDebug("plugindir: '" + plugindir + "'");
+	    QFileInfo fi(plugindir);
+
+	    if (fi.exists() && fi.isDir()) {
+		    validPluginPaths << plugindir;
+	    } else {
+		    VP1Msg::messageDebug("Removed non-valid path: '" + plugindir + "'");
+	    }
     }
+    vp1pluginpath = validPluginPaths;
+
 
 	//Find all files with required extension in the directories (in case of duplicates - the ones appearing first are used):
 	QMap<QString,QString> plugins2fullpath;

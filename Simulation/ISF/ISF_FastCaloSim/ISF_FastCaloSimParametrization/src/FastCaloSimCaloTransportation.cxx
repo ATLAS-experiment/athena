@@ -23,13 +23,11 @@
 /* Geometry primitives */
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
-/* Particle data */
-#include "HepPDT/ParticleDataTable.hh"
-
 /* Transport steps will be return as G4FieldTracks*/
 #include "G4FieldTrack.hh"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
+#include "TruthUtils/HepMCHelpers.h"
 
 FastCaloSimCaloTransportation::FastCaloSimCaloTransportation(const std::string& t, const std::string& n, const IInterface* p)
   : base_class(t,n,p)
@@ -69,7 +67,7 @@ std::vector<G4FieldTrack> FastCaloSimCaloTransportation::transport(const TFCSTru
   auto hitVector = std::make_unique<std::vector<Trk::HitInfo>>();
 
   int     pdgId    = truth->pdgid();
-  double  charge   = HepPDT::ParticleID(pdgId).charge();
+  double  charge   = MC::charge(pdgId);
   if (forceNeutral) charge   = 0.;
 
   // particle Hypothesis for the extrapolation

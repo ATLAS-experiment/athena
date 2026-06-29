@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DeltaRRoIComboHypoTool.h"
@@ -24,7 +24,7 @@ StatusCode DeltaRRoIComboHypoTool::initialize() {
 
 
 bool DeltaRRoIComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination,
-                                        const EventContext& /*ctx*/) const
+                                        const EventContext& ctx) const
 {
   //retrieve the rois 
   std::vector<ElementLink<TrigRoiDescriptorCollection>> selected_rois;
@@ -43,7 +43,7 @@ bool DeltaRRoIComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>& c
   for (const auto& el: combination){
     const auto EL= el.second;    
     const auto dec= (*EL);
-    const auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( dec, initialRoIString() ).link;
+    const auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( ctx, dec, initialRoIString() ).link;
     selected_rois.push_back(roiLink);
   }
 

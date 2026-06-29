@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/VBFForwardJetsFilter.h"
@@ -119,9 +119,9 @@ StatusCode VBFForwardJetsFilter::filterEvent(const EventContext& ctx) {
         int leptonic = 0;
         for (const auto& beg: tau->end_vertex()->particles_out() ) {
           if ( beg->production_vertex() != tau->end_vertex() ) continue;
-          if ( std::abs( beg->pdg_id() ) == 12 ) leptonic = 1;
-          if ( std::abs( beg->pdg_id() ) == 14 ) leptonic = 2;
-          if ( std::abs( beg->pdg_id() ) == 15 ) leptonic = 11;
+          if ( std::abs( beg->pdg_id() ) == MC::NU_E ) leptonic = 1;
+          else if ( std::abs( beg->pdg_id() ) == MC::NU_MU ) leptonic = 2;
+          else if ( MC::isTau(beg) ) leptonic = 11;
         }
 
         if (leptonic == 0) {
@@ -133,7 +133,7 @@ StatusCode VBFForwardJetsFilter::filterEvent(const EventContext& ctx) {
           if (tauvis.vect().perp() >= m_LGMinPt && std::abs(tauvis.vect().pseudoRapidity()) <= m_LGMaxEta) {
             MCTruthTauList.push_back(tauvis);
             ATH_MSG_INFO("had-tau pt(Gaudi::Units::GeV) = " << tauvis.vect().perp()/Gaudi::Units::GeV << " eta = " << tauvis.vect().pseudoRapidity());
-          } 
+          }
         }
       }
     }
@@ -241,7 +241,7 @@ StatusCode VBFForwardJetsFilter::filterEvent(const EventContext& ctx) {
 CLHEP::HepLorentzVector VBFForwardJetsFilter::sumDaughterNeutrinos(const HepMC::ConstGenParticlePtr& part ) const{
   CLHEP::HepLorentzVector nu( 0, 0, 0, 0);
 
-  if ( ( std::abs( part->pdg_id() ) == 12 ) || ( std::abs( part->pdg_id() ) == 14 ) || ( std::abs( part->pdg_id() ) == 16 ) ) {
+  if ( MC::isSMNeutrino(part) ) {
     nu.setPx(part->momentum().px());
     nu.setPy(part->momentum().py());
     nu.setPz(part->momentum().pz());

@@ -23,7 +23,7 @@ namespace MuonCombined {
         if (!trackSummary && (muon.muonType() != xAOD::Muon::MuonType::SegmentTagged && 
                               muon.muonType() != xAOD::Muon::MuonType::CaloTagged ) ) {
             // get link to track particle
-            const xAOD::TrackParticle* primTrk = muon.primaryTrackParticle();
+            const xAOD::TrackParticle* primTrk = muon.trackParticle(xAOD::Muon::TrackParticleType::Primary);
             if (primTrk->track()) {
                 trackSummary = primTrk->track()->trackSummary();
             }

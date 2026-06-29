@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -36,23 +36,23 @@ namespace ClusterSeg {
 
     static const int CLUSTERSIZE = 50000;
 
-    double residualT[CLUSTERSIZE];
-    double residual[CLUSTERSIZE];
-    int nMDT;
-    int nMDTT;
-    double chi2T[CLUSTERSIZE];
-    double chi2[CLUSTERSIZE];
-    int ntracksT;
-    int ntracks;
-    int nclusters;
-    double x[CLUSTERSIZE];
-    double y[CLUSTERSIZE];
-    double z[CLUSTERSIZE];
-    int tIndex[CLUSTERSIZE];
-    int pIndex[CLUSTERSIZE];
-    bool isPhi[CLUSTERSIZE]; 
-    bool isMatch[CLUSTERSIZE];
-    int barcode[CLUSTERSIZE];
+    double residualT[CLUSTERSIZE] = {};
+    double residual[CLUSTERSIZE] = {};
+    int nMDT = 0;
+    int nMDTT = 0;
+    double chi2T[CLUSTERSIZE] = {};
+    double chi2[CLUSTERSIZE] = {};
+    int ntracksT = 0;
+    int ntracks = 0;
+    int nclusters = 0;
+    double x[CLUSTERSIZE] = {};
+    double y[CLUSTERSIZE] = {};
+    double z[CLUSTERSIZE] = {};
+    int tIndex[CLUSTERSIZE] = {};
+    int pIndex[CLUSTERSIZE] = {};
+    bool isPhi[CLUSTERSIZE] = {};
+    bool isMatch[CLUSTERSIZE] = {};
+    int barcode[CLUSTERSIZE] = {};
   };
 
 }

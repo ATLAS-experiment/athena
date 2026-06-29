@@ -95,7 +95,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Muon* mu, MCTruthPartClas
   ATH_MSG_DEBUG("Executing muon  Classifier");
   ParticleType parttype = Unknown;
   ParticleOrigin partorig = NonDefined;
-  const xAOD::TrackParticle* trkPtr = mu->primaryTrackParticle();
+  const xAOD::TrackParticle* trkPtr = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
   
   if (!trkPtr) return std::make_pair(parttype, partorig);
 

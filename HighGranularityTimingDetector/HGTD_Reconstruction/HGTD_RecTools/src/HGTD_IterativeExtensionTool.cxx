@@ -4,6 +4,7 @@
  * @file HGTD_RecTools/src/HGTD_IterativeExtensionTool.cxx
  * @author Noemi Calace <noemi.calace@cern.ch>
  * @author Alexander Leopold <alexander.leopold@cern.ch>
+ * @author Valentina Raskina <Valentina.raskina@cern.ch>
  * @date August, 2021
  * @brief
  */
@@ -14,6 +15,7 @@
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "HGTD_RIO_OnTrack/HGTD_ClusterOnTrack.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkGeometry/DiscLayer.h"
 #include "TrkGeometry/TrackingGeometry.h"
@@ -133,7 +135,7 @@ HGTD::ExtensionObject HGTD_IterativeExtensionTool::extendTrackToHGTD(
         ctx, *last_param, surf_obj, Trk::PropDirection::alongMomentum, false,
         part);
 
-    //
+    
     if (not extrap_result) {
       ATH_MSG_WARNING("Extrapolator returned null");
       result.m_hits.at(hgtd_layer_i) = nullptr;
@@ -171,14 +173,16 @@ HGTD::ExtensionObject HGTD_IterativeExtensionTool::extendTrackToHGTD(
     auto extrapolated_params =
         extrapolateToSurfaces(ctx, *last_param, compatible_surfaces);
 
+    bool on_surface = false;
     std::unique_ptr<const Trk::TrackStateOnSurface> updated_state =
         updateStateWithBestFittingCluster(track, extrapolated_params,
-                                          container);
-
+                                          container, on_surface);
+    
     if (not updated_state) {
       result.m_hits.at(hgtd_layer_i) = nullptr;
       result.m_truth_primary_hits.at(hgtd_layer_i) = nullptr;
       result.m_truth_primary_info.at(hgtd_layer_i) = HGTD::ClusterTruthInfo();
+      result.m_holes_hgtd.at(hgtd_layer_i) = on_surface;
       continue;
     }
     // if the state was updated with a measurement, the it becomes the new last
@@ -193,7 +197,8 @@ HGTD::ExtensionObject HGTD_IterativeExtensionTool::extendTrackToHGTD(
     result.m_hits.at(hgtd_layer_i) = std::move(updated_state);
     result.m_truth_primary_hits.at(hgtd_layer_i) = truth_info.first;
     result.m_truth_primary_info.at(hgtd_layer_i) = truth_info.second;
-  }
+
+   }
 
   return result;
 }
@@ -293,7 +298,7 @@ std::unique_ptr<const Trk::TrackStateOnSurface>
 HGTD_IterativeExtensionTool::updateStateWithBestFittingCluster(
     const Trk::Track* track,
     const std::vector<std::unique_ptr<const Trk::TrackParameters>>& params,
-    const HGTD_ClusterContainer* container) const {
+    const HGTD_ClusterContainer* container, bool &on_surface) const {
   ATH_MSG_DEBUG("[updateStateWithBestFittingCluster] start updating");
 
   std::unique_ptr<const Trk::TrackStateOnSurface> updated_state = nullptr;
@@ -301,6 +306,12 @@ HGTD_IterativeExtensionTool::updateStateWithBestFittingCluster(
   double lowest_chi2 = -1.;
   // all compatible surfaces are tested for the best fitting cluster
   for (const auto& param : params) {
+
+    if (!on_surface)
+      {
+        on_surface = isOnHGTDSurface(param);
+      }
+     
     std::unique_ptr<const Trk::TrackStateOnSurface> best_tsos =
         findBestCompatibleCluster(track, param.get(), container);
     if (not best_tsos) {
@@ -457,4 +468,149 @@ HGTD_IterativeExtensionTool::getTruthMatchedCluster(
   }
   // no matched cluster found
   return {nullptr, HGTD::ClusterTruthInfo()};
+}
+
+
+const Trk::Surface*
+HGTD_IterativeExtensionTool::getFirstHGTDlayer(const xAOD::TrackParticle& track_ptkl) const {
+  
+  const Trk::Track* track = track_ptkl.track();
+  const Trk::TrackStateOnSurface* last_hit = getLastHitOnTrack(*track);
+  const Trk::TrackParameters* startParameters = last_hit->trackParameters();
+  const Trk::Surface* surf = nullptr;
+
+  const Trk::TrackingGeometry* trk_geom = m_extrapolator->trackingGeometry();
+  if (not trk_geom){
+    ATH_MSG_DEBUG("trackingGeometry returns null");
+    return surf;
+  }
+
+  bool is_pos_endcap = startParameters->eta() > 0;
+
+  // get the target volume
+  const Trk::TrackingVolume* hgtd_trk_volume = trk_geom->trackingVolume(
+        is_pos_endcap ? "HGTD::PositiveEndcap" : "HGTD::NegativeEndcap");
+
+  if (not hgtd_trk_volume) {
+    ATH_MSG_DEBUG("trackingVolume returns null");
+    return surf;
+  }
+
+  const Trk::BinnedArray<Trk::Layer>* confined_layer =
+        hgtd_trk_volume->confinedLayers();
+  //careful, this array is not ordered from inside out (only in pos endcap)
+  if (not confined_layer) {
+    ATH_MSG_DEBUG("confinedLayer returns null");
+    return surf;
+  }
+  
+  // get the layers, traverse depending in endcap used
+  // since they are not in ascending z order !!
+  std::span<Trk::Layer const * const> layers =
+      confined_layer->arrayObjects();
+  const Trk::Layer* layer = layers[0];
+  surf = &(layer->surfaceRepresentation());
+  return surf;
+
+}
+
+std::vector<std::unique_ptr<Trk::TrackParameters> >
+HGTD_IterativeExtensionTool::getHolesITk(const EventContext& ctx, const xAOD::TrackParticle& track_ptkl) const {
+  const Trk::Track* track = track_ptkl.track();
+  const Trk::TrackStateOnSurface* last_hit = getLastHitOnTrack(*track);
+  const Trk::TrackParameters* startParameters = last_hit->trackParameters();
+  const Trk::Surface* surf_obj = getFirstHGTDlayer(track_ptkl);
+
+  std::vector<std::unique_ptr<Trk::TrackParameters> > paramList = m_extrapolator->extrapolateStepwise(
+    ctx, *startParameters, *surf_obj, Trk::alongMomentum,
+    false, static_cast<Trk::ParticleHypothesis>(m_particle_hypot.value()));
+  
+  int nOfExtrapolations = paramList.size();
+  if (paramList.empty()) {
+    return paramList;
+  }
+
+  std::vector<std::unique_ptr<Trk::TrackParameters> > listOfHoles;
+  listOfHoles.reserve(nOfExtrapolations);
+
+  for (std::unique_ptr<Trk::TrackParameters>& thisParameters : paramList) {
+    ATH_MSG_DEBUG("extrapolated pos: " << thisParameters->position() << "   r: " <<
+                           sqrt(pow(thisParameters->position().x(),2)+pow(thisParameters->position().y(),2)));
+  
+  // check if surface has identifier !
+  Identifier id;
+  if ((thisParameters->associatedSurface()).associatedDetectorElement() != nullptr and
+      (thisParameters->associatedSurface()).associatedDetectorElement()->identify() != 0) {
+        id = (thisParameters->associatedSurface()).associatedDetectorElement()->identify();
+        ATH_MSG_DEBUG("ID: "<<id);
+      } else {
+        ATH_MSG_VERBOSE("Surface has no detector element ID, skip it");
+        continue;
+      }
+
+  const InDetDD::SiDetectorElement* siElement =
+      dynamic_cast<const InDetDD::SiDetectorElement*>(
+        thisParameters->associatedSurface().associatedDetectorElement());
+    if (siElement == nullptr) {
+      ATH_MSG_DEBUG("TrackParameters do not belong to a Si Element");
+    /// checking active material
+      continue;
+    }
+    double phitol = 2.5;
+    double etatol = 5.;
+    if (thisParameters->covariance()) {
+       phitol = m_phitol_ITk * sqrt((*thisParameters->covariance())(Trk::locX, Trk::locX));
+      etatol = m_etatol_ITk * sqrt((*thisParameters->covariance())(Trk::locY, Trk::locY));
+    }
+    if (siElement->nearBondGap(thisParameters->localPosition(), etatol)) {
+      continue;
+    }
+    InDetDD::SiIntersect siIn =
+    siElement->inDetector(thisParameters->localPosition(), phitol, etatol);
+
+    if (not siIn.in()){
+       ATH_MSG_DEBUG("Extrapolation does not belong to ITk");
+       continue;
+    } 
+
+    if(thisParameters->position().z() > 3200){
+      ATH_MSG_DEBUG("Extrapolated pos. z is probably at HGTD: " << thisParameters->position().z());
+      continue;
+     }
+
+  // check if this surface is not already in the list to avoid repetitions
+  auto searchRepeatition = std::find_if(
+          listOfHoles.begin(), listOfHoles.end(), [id](std::unique_ptr<Trk::TrackParameters> &tp_test)
+          {return tp_test->associatedSurface().associatedDetectorElement()->identify() == id ; });
+  if (searchRepeatition == listOfHoles.end()) {
+    listOfHoles.push_back(std::move(thisParameters));
+  } else {
+      continue;
+  }
+
+}
+
+  ATH_MSG_DEBUG("[HGTD_IterativeExtensionTool::getHolesITk] difference in 2 lists: "<< nOfExtrapolations-listOfHoles.size());
+  return listOfHoles;
+ }
+
+ bool HGTD_IterativeExtensionTool::isOnHGTDSurface(
+    const std::unique_ptr<const Trk::TrackParameters>& last_param) const {
+  //Here I will check if the extrapolation is on the sensor within the 
+  //tolerance level
+  double phitol = 2.5;
+  double etatol = 5.;
+  if (last_param->covariance()) {
+      phitol = (-3) * sqrt((*last_param->covariance())(Trk::locX, Trk::locX));
+      etatol = (-3) * sqrt((*last_param->covariance())(Trk::locY, Trk::locY));
+  }
+
+  const Trk::SurfaceBounds &bounds_HGTD =
+    dynamic_cast<const Trk::SurfaceBounds &>(last_param->associatedSurface().bounds());
+  ATH_MSG_DEBUG("Distance from the surface: " << last_param->associatedSurface().bounds().minDistance(
+    last_param->localPosition()));
+  ATH_MSG_DEBUG("Phitol: " << phitol << " , etatol: "<<etatol);
+  ATH_MSG_DEBUG("Is on surface: "<< bounds_HGTD.inside(last_param->localPosition(), phitol, etatol));
+
+  return bounds_HGTD.inside(last_param->localPosition(), phitol, etatol);
 }

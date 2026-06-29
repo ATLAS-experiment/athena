@@ -7,9 +7,6 @@ string( STRIP ${_version} _version )
 project( AthGeneration VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
-# HepMC3
-set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
-
 # Configure flake8:
 set( ATLAS_FLAKE8 flake8_atlas --isolated --select ATL,B,F,E101,E7,E9,W6
                                --ignore B006,B007,B019,E701,E702,E704,E741
@@ -31,7 +28,6 @@ find_package( GSL )
 find_package( Davix )
 find_package( PNG )
 find_package( BLAS )
-find_package( AIDA )
 find_package( VDT )
 find_package( libffi )
 find_package( gl2ps )

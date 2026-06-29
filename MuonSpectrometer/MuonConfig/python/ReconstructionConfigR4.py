@@ -56,13 +56,13 @@ def MuonReconstructionConfig(flags):
     result.merge(MuonPatternRecognitionCfg(flags))
 
     ### Track building
-    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg, MuidSaTagMakerAlg, \
+    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg, MuidSaTagMakerAlgCfg, \
                                                         StandaloneTrackPartCnvCfg, MuonCreatorAlgCfg
     result.merge(MSTrackFinderAlgCfg(flags))
     
     ### MuTag conversion to share same format as the combined chain
     result.merge(StandaloneTrackPartCnvCfg(flags))
-    result.merge(MuidSaTagMakerAlg(flags))
+    result.merge(MuidSaTagMakerAlgCfg(flags))
 
     MuonTags = ["MuonTagsSA"]
     ### Combined reconstruction chain

@@ -5,49 +5,46 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def ActsToTrkConverterToolCfg(flags,
                               name: str = "ActsToTrkConverterTool",
+                              setupMuon = False,
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    # Currently this does not work if we are in a muon-only mode
-    if (flags.Detector.GeometryITk or \
-        flags.Detector.GeometryID or \
-        flags.Acts.TrackingGeometry.UseBlueprint) and 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    else:
-         # Disable TrackingGeometryTool
-         kwargs.setdefault("TrackingGeometryTool", "")
-    
-    kwargs.setdefault("ExtractMuonSurfaces", flags.Muon.usePhaseIIGeoSetup)
-    if not flags.Muon.usePhaseIIGeoSetup or not flags.Detector.EnableMDT:
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+
+    setupMuon = setupMuon and flags.Muon.usePhaseIIGeoSetup
+    if not setupMuon or not flags.Detector.EnableMDT:
         kwargs.setdefault("MdtKey", "")
-    if not flags.Muon.usePhaseIIGeoSetup or not flags.Detector.EnableRPC:
+    if not setupMuon or not flags.Detector.EnableRPC:
         kwargs.setdefault("RpcKey", "")
-    if not flags.Muon.usePhaseIIGeoSetup or not flags.Detector.EnableTGC:
+    if not setupMuon or not flags.Detector.EnableTGC:
         kwargs.setdefault("TgcKey", "")
-    if not flags.Muon.usePhaseIIGeoSetup or not flags.Detector.EnableMM:
+    if not setupMuon or not flags.Detector.EnableMM:
         kwargs.setdefault("MmKey", "")
-    if not flags.Muon.usePhaseIIGeoSetup or not flags.Detector.EnablesTGC:
+    if not setupMuon or not flags.Detector.EnablesTGC:
         kwargs.setdefault("sTgcKey", "")
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)) if flags.Muon.usePhaseIIGeoSetup else "")
+    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)) if setupMuon else "")
 
     from TrkConfig.TrkTrackSummaryToolConfig import CombinedSummaryToolCfg, InDetTrackSummaryToolCfg
-    if flags.Muon.usePhaseIIGeoSetup:
+    if setupMuon:
         kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(CombinedSummaryToolCfg(flags)))
     else:
         kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags)))
-    if flags.Muon.usePhaseIIGeoSetup and (flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
+    if setupMuon and (flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import TriggerChamberClusterOnTrackCreatorCfg
         kwargs.setdefault("CompetingRotCreator", acc.getPrimaryAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags)))
 
     from TrkConfig.TrkRIO_OnTrackCreatorConfig import CombinedRotCreatorCfg, InDetRotCreatorCfg
-    if flags.Muon.usePhaseIIGeoSetup:
-        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(CombinedRotCreatorCfg(flags)))
+    if setupMuon:
+        rotCreatorTool = acc.getPrimaryAndMerge(CombinedRotCreatorCfg(flags))
+        rotCreatorTool.ToolMuonCluster.RestrictWarnings = True
+        kwargs.setdefault('RotCreatorTool', rotCreatorTool)
     else:
         kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
 
-    acc.addPublicTool(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs), primary = True)
+    acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
     return acc
 
 
@@ -56,8 +53,8 @@ def TrkToActsConvertorAlgCfg(flags,
                              **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
-    if 'ConvertorTool' not in kwargs:
-        kwargs.setdefault("ConvertorTool", acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
+    if 'ATLASConverterTool' not in kwargs:
+        kwargs.setdefault("ATLASConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrkToActsConvertorAlg(name, **kwargs))
     return acc
@@ -77,7 +74,6 @@ def ActsToTrkConvertorAlgCfg(flags,
     if "ATLASConverterTool" in kwargs:
         ATLASConverterTool = kwargs["ATLASConverterTool"]
     else:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
         ATLASConverterTool = acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags, **kwargs))
     acc.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, 
                                                                TracksLocation = TracksLocation, 
@@ -85,7 +81,7 @@ def ActsToTrkConvertorAlgCfg(flags,
                                                                ATLASConverterTool = ATLASConverterTool))
     return acc
 
-def RunTrackConversion(flags, track_collections = [], outputfile='dump.json'):
+def RunTrackConversion(flags, track_collections = [], outputfile='dump.json', setupMuon = False):
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -107,7 +103,8 @@ def RunTrackConversion(flags, track_collections = [], outputfile='dump.json'):
 
     # Now setup the convertor
     acc = TrkToActsConvertorAlgCfg(
-        flags, OutputLevel=1, TrackCollectionKeys=track_collections)
+        flags, OutputLevel=1, TrackCollectionKeys=track_collections,
+        ATLASConverterTool= cfg.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon=setupMuon)))
     cfg.merge(acc)
 
     # Let's dump the input tracks, and also the output ACTS tracks

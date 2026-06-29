@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgMessaging/MessageCheck.h"
-#include "AsgTools/CurrentContext.h"
 #include <regex>
 
 namespace TrigCompositeUtils {
@@ -46,7 +45,7 @@ namespace TrigCompositeUtils {
 
   template<typename T>
   void
-  findLinks(const Decision* start, const std::string& linkName, std::vector<LinkInfo<T>>& links, unsigned int behaviour, std::set<const Decision*>* fullyExploredFrom) {
+  findLinks(const EventContext& ctx, const Decision* start, const std::string& linkName, std::vector<LinkInfo<T>>& links, unsigned int behaviour, std::set<const Decision*>* fullyExploredFrom) {
     using namespace msgFindLink;
     std::vector<ElementLink<T>> featureLinks;
     if (start->hasObjectCollectionLinks(linkName, ClassID_traits<T>::ID())) {
@@ -57,7 +56,6 @@ namespace TrigCompositeUtils {
     }
     const bool linkFound = (featureLinks.size() > 0);
     const std::vector<DecisionID> &ids = decisionIDs(start);
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     for (const ElementLink<T>& featureLink : featureLinks) {
       // Check for duplicates
       bool duplicate = false;
@@ -106,7 +104,7 @@ namespace TrigCompositeUtils {
         }
       }
 #endif
-      findLinks<T>(*seed, linkName, links, behaviour, fullyExploredFrom);
+      findLinks<T>(ctx, *seed, linkName, links, behaviour, fullyExploredFrom);
     }
     // Fully explored this node
     if (fullyExploredFrom != nullptr) {
@@ -116,16 +114,16 @@ namespace TrigCompositeUtils {
 
   template<typename T>
   std::vector<LinkInfo<T>>
-  findLinks(const Decision* start, const std::string& linkName, unsigned int behaviour) {
+  findLinks(const EventContext& ctx, const Decision* start, const std::string& linkName, unsigned int behaviour) {
     std::vector<LinkInfo<T>> links;
     std::set<const Decision*> fullyExploredFrom;
-    findLinks(start, linkName, links, behaviour, &fullyExploredFrom);
+    findLinks(ctx, start, linkName, links, behaviour, &fullyExploredFrom);
     return links;
   }
 
   template<typename T>
   LinkInfo<T>
-  findLink(const Decision* start, const std::string& linkName, const bool suppressMultipleLinksWarning) {
+  findLink(const EventContext& ctx, const Decision* start, const std::string& linkName, const bool suppressMultipleLinksWarning) {
     using namespace msgFindLink;
     // We use findLink in cases where there is only one link to be found, or if there are multiple then we 
     // only want the most recent.
@@ -133,7 +131,7 @@ namespace TrigCompositeUtils {
     // We can still have more then one link found if there is a branch in the navigation. E.g. start --> parent1 --> parent2(link)
     // If both parent2 and parent3 posessed an admisable ElementLink, then the warning below will trigger, and only one of the
     // links will be returned (whichever of parent2 or parent3 happened to be the first seed of parent1).
-    std::vector<LinkInfo<T>> links = findLinks<T>(start, linkName, TrigDefs::lastFeatureOfType);
+    std::vector<LinkInfo<T>> links = findLinks<T>(ctx, start, linkName, TrigDefs::lastFeatureOfType);
     if (links.size() > 1 && !suppressMultipleLinksWarning) {
       ANA_MSG_WARNING (links.size() << " links found for " << linkName
                        << " returning the first link, consider using findLinks.");

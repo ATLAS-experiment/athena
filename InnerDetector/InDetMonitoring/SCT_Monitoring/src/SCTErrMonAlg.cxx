@@ -74,7 +74,7 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
   const unsigned int wafer_hash_max{static_cast<unsigned int>(m_pSCTHelper->wafer_hash_max())};
   for (unsigned int iHash{0}; iHash<wafer_hash_max; iHash++) {
     const IdentifierHash hash{iHash};
-    if (not m_flaggedTool->isGood(hash)) {
+    if (not m_flaggedTool->isGood(hash, ctx)) {
       const Identifier wafer_id{m_pSCTHelper->wafer_id(hash)};
       const unsigned barrel_ec{bec2Index(m_pSCTHelper->barrel_ec(wafer_id))};
       nFlaggedWafers[barrel_ec]++;
@@ -118,7 +118,7 @@ StatusCode SCTErrMonAlg::fillHistograms(const EventContext& ctx) const {
       if (barrel_ec == ENDCAP_A) reg = ENDCAP_A_INDEX;
       if (barrel_ec == ENDCAP_C) reg = ENDCAP_C_INDEX;
 
-      int IN{m_configurationTool->isGood(waferId, InDetConditions::SCT_SIDE) ? 0 : 1};
+      int IN{m_configurationTool->isGood(waferId, ctx, InDetConditions::SCT_SIDE) ? 0 : 1};
       if (m_pSCTHelper->side(waferId) == 0) { // Use only side 0 to check module level
         if (IN == 1) {
           moduleOut++;
@@ -151,7 +151,7 @@ SCTErrMonAlg::stop() {
 StatusCode
 SCTErrMonAlg::fillConfigurationDetails(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Inside fillConfigurationDetails()");
-  unsigned int nBadMods{static_cast<unsigned int>(m_configurationTool->badModules()->size())}; // bad modules
+  unsigned int nBadMods{static_cast<unsigned int>(m_configurationTool->badModules(ctx)->size())}; // bad modules
   const std::map<IdentifierHash, std::pair<bool, bool>>* badLinks{m_configurationTool->badLinks(ctx)}; // bad links
   unsigned int nBadLink0{0}, nBadLink1{0}, nBadLinkBoth{0};
   for (const std::pair<const IdentifierHash, std::pair<bool, bool>>& link: *badLinks) {
@@ -348,11 +348,11 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     }
 
     std::set<IdentifierHash> sctHash[numberOfProblemForCoverage]{{}};
-    disabledSCT(sctHash[disabled]);
+    disabledSCT(ctx, sctHash[disabled]);
     errorSCT(sctHash[badLinkError], sctHash[badRODError], sctHash[badError]);
     summarySCT(sctHash[allRegion], sctHash[summary]);
     float psTripModules{0.};
-    psTripDCSSCT(sctHash[psTripDCS], psTripModules);
+    psTripDCSSCT(ctx, sctHash[psTripDCS], psTripModules);
 
     sctHash[summary].clear();
     sctHash[summary].insert(sctHash[disabled].begin(),sctHash[disabled].end()); // disabled
@@ -572,10 +572,10 @@ SCTErrMonAlg::numByteStreamErrors(const std::set<IdentifierHash>& errors, int& n
   }
 }
 
-bool SCTErrMonAlg::disabledSCT(std::set<IdentifierHash>& sctHashDisabled) const {
+bool SCTErrMonAlg::disabledSCT(const EventContext& ctx, std::set<IdentifierHash>& sctHashDisabled) const {
   bool altered{false};
   sctHashDisabled.clear();
-  const std::set<Identifier>* badModules{m_configurationTool->badModules()};
+  const std::set<Identifier>* badModules{m_configurationTool->badModules(ctx)};
 
   for (const Identifier& badModule: *badModules) {
     altered = true;
@@ -641,7 +641,7 @@ bool SCTErrMonAlg::summarySCT(std::set<IdentifierHash>& sctHashAll, std::set<Ide
 }
 
 // Power supply trip (SCT_DCSConditionsTool)
-bool SCTErrMonAlg::psTripDCSSCT(std::set<IdentifierHash>& sctHashPSTripDCS, float& psTripModules) const {
+bool SCTErrMonAlg::psTripDCSSCT(const EventContext& ctx, std::set<IdentifierHash>& sctHashPSTripDCS, float& psTripModules) const {
   bool altered{false};
   sctHashPSTripDCS.clear();
 
@@ -649,7 +649,7 @@ bool SCTErrMonAlg::psTripDCSSCT(std::set<IdentifierHash>& sctHashPSTripDCS, floa
   int npsw{0};
   for (unsigned int i{0}; i<maxHash; i++) {
     IdentifierHash hash{i};
-    if (m_useDCS and (not m_dcsTool->isGood(hash))) {
+    if (m_useDCS and (not m_dcsTool->isGood(hash, ctx))) {
       npsw++; //Counting the number of PS sides
       altered = true;
       sctHashPSTripDCS.insert(hash);

@@ -931,7 +931,7 @@ int main( int argc, char* argv[] ) {
             // Example to access MC type/origin
             int muonTruthType = 0;
             int muonTruthOrigin = 0;
-            const xAOD::TrackParticle* trackParticle = mu->primaryTrackParticle();
+            const xAOD::TrackParticle* trackParticle = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
             if (trackParticle) {
               if (ST::acc_truthType.isAvailable(*trackParticle)) muonTruthType = ST::acc_truthType(*trackParticle);
               if (ST::acc_truthOrigin.isAvailable(*trackParticle)) muonTruthOrigin = ST::acc_truthOrigin(*trackParticle);

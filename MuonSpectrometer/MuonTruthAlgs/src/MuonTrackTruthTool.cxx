@@ -145,11 +145,7 @@ namespace Muon {
             // associate the muon truth with the gen event info
             if (genEvent) {
                 HepMC::ConstGenParticlePtr genParticle =
-#ifdef HEPMC3
                   (barcode>HepMC::UNDEFINED_ID) ? genEvent->particles().at(barcode-1) : nullptr; // FIXME implement HepMC::id_to_particle/vertex explicitly
-#else
-                 genEvent->barcode_to_particle(HepMC::uniqueID(*tr_it));
-#endif
                 if (genParticle) {
                     truthTrajectory = std::make_unique<TruthTrajectory>();
                     m_truthTrajectoryBuilder->buildTruthTrajectory(truthTrajectory.get(), genParticle);

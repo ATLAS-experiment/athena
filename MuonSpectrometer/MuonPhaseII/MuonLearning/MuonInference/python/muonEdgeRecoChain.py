@@ -7,6 +7,9 @@ def main(args):
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.PerfMon.OutputJSON = "perfmonmt_MuonR4Reco.json"
+    flags.Trigger.Muon.useNewRegionSelector = False
 
     run_bucket_filter = args.enableBucketFilter and not args.skip_onnx
     run_edge_classifier = args.enableEdgeClassifier and not args.skip_onnx
@@ -34,43 +37,32 @@ def main(args):
 
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
     if run_bucket_filter or run_edge_classifier:
-        use_gpu_requested = args.use_gpu if args.use_gpu is not None else True
-        gpu_available = False
-        try:
-            import onnxruntime as ort
-            gpu_available = "CUDAExecutionProvider" in ort.get_available_providers()
-        except Exception:
-            try:
-                import torch
-                gpu_available = torch.cuda.is_available()
-            except Exception:
-                gpu_available = False
-        if use_gpu_requested and gpu_available:
-            flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CUDA
-        else:
-            flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CPU
+        flags.AthOnnx.ExecutionProvider = (
+            OnnxRuntimeType.CPU if args.use_cpu else OnnxRuntimeType.CUDA
+        )
     else:
         flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CPU
 
     flags, cfg = setupGeoR4TestCfg(args, flags)
 
-    cfg.merge(setupHistSvcCfg(flags, outFile=args.outRootFile,
-                              outStream="MuonEtaHoughTransformTest"))
-
-    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
-    cfg.merge(xAODUncalibMeasPrepCfg(flags))
-
-    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
-    cfg.merge(MuonSpacePointFormationCfg(flags))
+    if not args.skipTrackTester:
+        cfg.merge(setupHistSvcCfg(flags, outFile=args.outRootFile,
+                                  outStream="MuonTrackTester"))
 
     output_level = 1 if args.athenaDebug else 3
 
     if run_bucket_filter:
         from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
-        bucketTool = cfg.popToolsAndMerge(GraphBucketFilterToolCfg(flags,
-                                                                    ModelPath=args.bucketModel,
-                                                                    ScoreThreshold=args.bucketThreshold,
-                                                                    OutputLevel=output_level))
+        bucketTool = cfg.popToolsAndMerge(
+            GraphBucketFilterToolCfg(
+                flags,
+                ModelPath=args.bucket_model_path,
+                ScoreThreshold=args.score_threshold,
+                OutputName=args.output_name,
+                SingleOutputMode=args.single_output_mode,
+                OutputLevel=output_level,
+            )
+        )
         cfg.merge(GraphInferenceAlgCfg(flags, InferenceTools=[bucketTool]))
 
     from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
@@ -80,26 +72,34 @@ def main(args):
 
     if run_edge_classifier:
         from MuonInference.InferenceConfig import SegmentEdgeInferenceAlgCfg
-        cfg.merge(SegmentEdgeInferenceAlgCfg(flags,
-                                             EdgeModelPath=args.edgeModel,
-                                             EdgeThreshold=args.edgeThreshold,
-                                             OverlapThreshold=args.overlapThreshold,
-                                             UseRecoveryComponents=args.useRecoveryComponents,
-                                             OutputLevel=output_level))
-        
+        edge_classifier_kwargs = {
+            "ModelPath": args.edgeModel,
+            "ReadSpacePoints": (
+                "FilteredMlBuckets" if run_bucket_filter else "MuonSpacePoints"
+            ),
+        }
+        cfg.merge(SegmentEdgeInferenceAlgCfg(
+            flags,
+            EdgeClassifierTool=edge_classifier_kwargs,
+            EdgeThreshold=args.edgeThreshold,
+            OverlapThreshold=args.overlapThreshold,
+            UseRecoveryComponents=args.useRecoveryComponents,
+            OutputLevel=output_level,
+        ))
+
     if run_ml_seeder and not run_edge_classifier:
         print("WARNING: ML seeder enabled while edge classifier is disabled."
               " The decoration 'trackCandidateIds' may be missing.")
 
-    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    cfg.merge(MSTrackFinderAlgCfg(flags,
-                                  UseMlSeeder=run_ml_seeder,
-                                  MlCandidateDecoration="trackCandidateIds",
-                                  TrackingGeometryTool=cfg.getPrimaryAndMerge(
-                                      ActsTrackingGeometryToolCfg(flags)),
-                                  MlFallbackToBaselineIfUndecorated=True,
-                                  MlFallbackToBaselineIfNoCandidates=False))
+    ms_track_finder = cfg.getEventAlgo("MSTrackFinderAlg")
+    ms_track_finder.UseMlSeeder = run_ml_seeder
+    ms_track_finder.MlCandidateDecoration = "trackCandidateIds"
+    ms_track_finder.MlFallbackToBaselineIfUndecorated = True
+    ms_track_finder.MlFallbackToBaselineIfNoCandidates = True
+
+    if not args.skipTrackTester:
+        from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg
+        cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy=False, outFile=args.outRootFile))
 
     if args.enableRecoChainTester:
         from MuonTrackFindingAlgs.TrackFindingConfig import MuonActsToTrkConvCfg
@@ -140,45 +140,56 @@ if __name__ == "__main__":
     parser.set_defaults(nEvents=-1)
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.set_defaults(outRootFile="EdgeRecoChain.root")
-    parser.add_argument("--bucketModel")
-    parser.add_argument("--bucketThreshold", "--score-threshold", dest="bucketThreshold", type=float, default=0.0,
-                        help="Threshold on bucket filter score")
+    from MuonInference.InferenceConfig import (
+        DEFAULT_BUCKET_MODEL_PATH,
+        DEFAULT_BUCKET_SCORE_THRESHOLD,
+        DEFAULT_BUCKET_SINGLE_OUTPUT_MODE,
+    )
+    parser.add_argument("--bucketModel", "--bucket-model-path", dest="bucket_model_path", default=DEFAULT_BUCKET_MODEL_PATH)
+    parser.add_argument("--bucketThreshold", "--score-threshold", dest="score_threshold", type=float, default=DEFAULT_BUCKET_SCORE_THRESHOLD)
+    parser.add_argument("--output-name", default="logits", dest="output_name",
+                        help="Bucket filter ONNX output tensor name")
+    score_mode = parser.add_mutually_exclusive_group()
+    score_mode.add_argument("--single-output-mode", choices=("logit", "prob"), default=DEFAULT_BUCKET_SINGLE_OUTPUT_MODE, dest="single_output_mode",
+                            help="Scalar ONNX-output interpretation. 'logit' applies sigmoid before thresholding.")
+    score_mode.add_argument("--is-logit", action="store_const", const="logit", dest="single_output_mode",
+                            help="Alias for --single-output-mode logit.")
+    score_mode.add_argument("--is-prob", action="store_const", const="prob", dest="single_output_mode",
+                            help="Alias for --single-output-mode prob.")    
     parser.add_argument("--edgeModel")
     parser.add_argument("--athenaDebug", action="store_true",
                         help="Enable Athena DEBUG verbosity for inference and seeding components")
-    parser.add_argument("--edgeThreshold", type=float, default=0.25,
+    parser.add_argument("--noPerfMon", default=False, action="store_true",
+                        help="Disable performance monitoring")
+    parser.add_argument("--edgeThreshold", type=float, default=0.01,
                         help="Loose threshold for recovery components")
-    parser.add_argument("--overlapThreshold", type=float, default=0.8,
+    parser.add_argument("--overlapThreshold", type=float, default=0.20,
                         help="High-purity threshold for core components")
     parser.add_argument("--useRecoveryComponents", action="store_true", default=True,
                         help="Use loose recovery connected components")
     parser.add_argument("--enableRecoChainTester", action="store_true", default=False,
                         help="Enable MuonRecoChainTester (can crash for some custom chains)")
-
+    parser.add_argument("--skipTrackTester", action="store_true", default=False,
+                        help="Do not write the MsTrackValidTest validation tree")
     parser.add_argument("--enableBucketFilter", dest="enableBucketFilter", action="store_true", default=True,
                         help="Enable ML bucket filtering stage")
     parser.add_argument("--disableBucketFilter", dest="enableBucketFilter", action="store_false",
                         help="Disable ML bucket filtering stage")
-
     parser.add_argument("--enableEdgeClassifier", dest="enableEdgeClassifier", action="store_true", default=True,
                         help="Enable segment-edge classifier stage")
     parser.add_argument("--disableEdgeClassifier", dest="enableEdgeClassifier", action="store_false",
                         help="Disable segment-edge classifier stage")
-
     parser.add_argument("--useMlSeeder", dest="useMlSeeder", action="store_true", default=True,
                         help="Use new ML-assisted seeder (default)")
     parser.add_argument("--useOldSeeder", dest="useMlSeeder", action="store_false",
                         help="Use legacy seeder")
-    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=True,
-                        help="Use GPU for ONNX inference (default: True)")
-    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
+    parser.add_argument("--use-cpu", action="store_true", default=False,
                         help="Force CPU for ONNX inference")
     parser.add_argument("--skip-onnx", action="store_true", default=False,
                         help="Skip all ONNX inference stages (bucket filter + edge classifier)")
 
     args = parser.parse_args()
-    if not args.skip_onnx and args.enableBucketFilter and not args.bucketModel:
-        parser.error("--bucketModel is required when bucket filter is enabled")
+    
     if not args.skip_onnx and args.enableEdgeClassifier and not args.edgeModel:
         parser.error("--edgeModel is required when edge classifier is enabled")
     main(args)

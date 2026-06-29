@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_PrepRawData/HGTD_Cluster.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -55,23 +55,23 @@ public:
 
 
   // return width class reference
-  virtual const InDet::SiWidth& width() const;
+  const InDet::SiWidth& width() const;
 
   // return global position reference
-  virtual const Amg::Vector3D& globalPosition() const;
+  const Amg::Vector3D& globalPosition() const;
 
   virtual const InDetDD::SolidStateDetectorElementBase* detectorElement() const override;
 
   /** Interface method checking the type*/
   virtual Trk::PrepRawDataType prdType() const override;
   // return time of arrival
-  virtual float time() const;
+  float time() const;
 
   // return the resolution of the time of arrival
-  virtual float timeResolution() const;
+  float timeResolution() const;
 
   // return time over threshold list
-  virtual const std::vector<int>& totList() const;
+  const std::vector<int>& totList() const;
 
 private:
   InDet::SiWidth m_width; // col, row, and width in mm

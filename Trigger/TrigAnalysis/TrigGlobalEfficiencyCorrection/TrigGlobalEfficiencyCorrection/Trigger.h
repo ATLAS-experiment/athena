@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -9,13 +9,13 @@
 
 #include <algorithm>
 #include <array>
-#include <boost/container/flat_set.hpp>
 #include <type_traits>
 
 #include "TrigGlobalEfficiencyCorrection/ImportData.h"
 #include "xAODBase/ObjectType.h"
+#include "CxxUtils/flat_set.h"
 template <typename Key>
-using flat_set = boost::container::flat_set<Key>;
+using flat_set = CxxUtils::flat_set<Key>;
 
 namespace TrigGlobEffCorr {
 
@@ -221,6 +221,12 @@ class Trigger {
   std::array<std::size_t, nDistinctLegs()> legs;
 
   explicit Trigger() { std::fill(legs.begin(), legs.end(), 0); }
+
+  Trigger(const ImportData::TrigDef& def)
+    : Trigger()
+  {
+    TriggerProperties(tt).loadLegs(def, legs);
+  }
 
   void setDefinition(const ImportData::TrigDef& def) {
     TriggerProperties(tt).loadLegs(def, legs);

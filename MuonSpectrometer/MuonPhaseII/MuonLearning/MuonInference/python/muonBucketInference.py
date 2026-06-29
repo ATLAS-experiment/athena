@@ -12,6 +12,11 @@ os.environ["ORT_LOGGING_LEVEL"] = "3"  # 3 = ERROR
 if __name__ == "__main__":
     from MuonGeoModelTestR4.testGeoModel import SetupArgParser, MuonPhaseIITestDefaults
     parser = SetupArgParser()
+    from MuonInference.InferenceConfig import (
+        DEFAULT_BUCKET_MODEL_PATH,
+        DEFAULT_BUCKET_SCORE_THRESHOLD,
+        DEFAULT_BUCKET_SINGLE_OUTPUT_MODE,
+    )
     parser.set_defaults(nEvents = -1)
     parser.set_defaults(outRootFile="InferenceHoughTest.root")
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.RDO_R4)
@@ -24,10 +29,16 @@ if __name__ == "__main__":
                        help="Enable DEBUG verbosity for bucket inference components in MessageSvc")
     parser.add_argument("--athenaVerbose", action="store_true", default=False,
                        help="Enable VERBOSE verbosity for bucket inference components in MessageSvc")
-    parser.add_argument("--bucket-model-path", dest="bucket_model_path", default="dev/MuonRecRTT/edgecnn_mu200.onnx",
+    parser.add_argument("--bucket-model-path", dest="bucket_model_path", default=DEFAULT_BUCKET_MODEL_PATH,
                         help="Absolute path (or PathResolver key) for the bucket ONNX model")
-    parser.add_argument("--score-threshold", type=float, default=0.2, dest="score_threshold",
+    parser.add_argument("--score-threshold", type=float, default=DEFAULT_BUCKET_SCORE_THRESHOLD, dest="score_threshold",
                         help="Keep bucket if single-output score > threshold (default: 0.2)")
+    parser.add_argument("--output-name", default="logits", dest="output_name")
+    score_mode = parser.add_mutually_exclusive_group()
+    score_mode.add_argument("--single-output-mode", choices=("logit", "prob"), default=DEFAULT_BUCKET_SINGLE_OUTPUT_MODE, dest="single_output_mode",
+        help="Scalar ONNX-output interpretation. 'logit' applies sigmoid before thresholding.")
+    score_mode.add_argument("--is-logit", action="store_const", const="logit", dest="single_output_mode", help="alias for --single-output-mode logit.")
+    score_mode.add_argument("--is-prob", action="store_const", const="prob", dest="single_output_mode", help="alias for --single-output-mode prob.")    
     parser.add_argument("--bucket-debug-dump-file", default="", dest="bucket_debug_dump_file",
                         help=("Optional JSONL output file with Athena-side bucket ONNX."))
     parser.add_argument("--bucket-debug-dump-max-events", type=int, default=0, dest="bucket_debug_dump_max_events",
@@ -101,6 +112,8 @@ if __name__ == "__main__":
     bucket_tool_kwargs = dict(
         ModelPath=args.bucket_model_path,
         ScoreThreshold=args.score_threshold,
+        OutputName=args.output_name,
+        SingleOutputMode=args.single_output_mode,
         DebugDumpFile=args.bucket_debug_dump_file,
         DebugDumpMaxEvents=args.bucket_debug_dump_max_events,
         PrintLabels=args.bucket_print_labels,

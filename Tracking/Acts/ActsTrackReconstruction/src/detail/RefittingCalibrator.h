@@ -25,10 +25,10 @@
 #include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
 
 namespace ActsTrk::detail {
-
+    /** @brief */
     class RefittingCalibrator {
       public:
-        RefittingCalibrator(const ActsTrk::IActsToTrkConverterTool* convTool,
+        RefittingCalibrator(const ActsTrk::IGeometryRealmConvTool* convTool,
                             const Trk::IRIO_OnTrackCreator* rotCreator);
         
         using MutableTrackStateProxy = ActsTrk::MutableTrackStateBackend::TrackStateProxy;
@@ -53,7 +53,7 @@ namespace ActsTrk::detail {
 
     class RefittingSurfaceAccesor {
         public:
-            RefittingSurfaceAccesor(const IActsToTrkConverterTool* trkConvTool,
+            RefittingSurfaceAccesor(const IGeometryRealmConvTool* trkConvTool,
                                     const ActsTrk::ITrackingGeometryTool* trackGeoTool); 
              /** @brief Operator called by the Acts API to fetch the surface. */
             const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;

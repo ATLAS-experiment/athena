@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEFInvMassHypoTool.h"
@@ -31,7 +31,7 @@ if(m_acceptAll) {
  return StatusCode::SUCCESS;
 }
 
-bool TrigMuonEFInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& /*ctx*/) const{
+bool TrigMuonEFInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& ctx) const{
 
   //Monitored Variables
   std::vector<float> fexInvMass, fexInvMassSel;
@@ -52,11 +52,11 @@ bool TrigMuonEFInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>
   for(auto el: combination){
     auto EL= el.second;    
     auto dec= (*EL);
-    auto muonLinks = TrigCompositeUtils::findLinks<xAOD::MuonContainer>( dec, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+    auto muonLinks = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(ctx,  dec, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
     for(size_t i=0; i<muonLinks.size(); i++){
       if(muonLinks.at(i).isValid()){ 
         const xAOD::Muon *mu = *(muonLinks.at(i).link);
-        if(mu->primaryTrackParticle()) selected_muons.push_back(mu);
+        if(mu->trackParticle(xAOD::Muon::TrackParticleType::Primary)) selected_muons.push_back(mu);
       }
     }
   }

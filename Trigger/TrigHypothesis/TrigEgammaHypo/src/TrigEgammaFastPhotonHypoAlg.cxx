@@ -36,7 +36,7 @@ StatusCode TrigEgammaFastPhotonHypoAlg::execute( const EventContext& context ) c
   std::map<const xAOD::TrigEMCluster*, size_t> clusterToIndexMap;
   size_t clusterCounter = 0;
   for ( auto previousDecision : *previousDecisionsHandle){
-    auto clusterELInfo = TCU::findLink<xAOD::TrigEMClusterContainer>( previousDecision, "feature" );
+    auto clusterELInfo = TCU::findLink<xAOD::TrigEMClusterContainer>(context,  previousDecision, "feature" );
 
     if( not clusterELInfo.isValid() ) {
       ATH_MSG_ERROR("Can not obtain the link to Cluster");

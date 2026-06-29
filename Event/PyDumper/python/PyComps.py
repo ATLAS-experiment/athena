@@ -213,8 +213,8 @@ class PyReader (PyAthena.Alg):
         else:
             o_name = '<unnamed file>'
         import sys
-        if not (self.ofile is sys.stdout) and \
-           not (self.ofile is sys.stderr) and \
+        if self.ofile is not sys.stdout and \
+           self.ofile is not sys.stderr and \
            not (o_name in ['/dev/stdout', '/dev/stderr',]):
             self.ofile.close()
         return StatusCode.Success
@@ -395,8 +395,8 @@ class PySgDumper (PyAthena.Alg):
         else:
             o_name = '<unnamed file>'
         import sys
-        if not (self.ofile is sys.stdout) and \
-           not (self.ofile is sys.stderr) and \
+        if self.ofile is not sys.stdout and \
+           self.ofile is not sys.stderr and \
            not (o_name in ['/dev/stdout', '/dev/stderr',]):
             self.ofile.close()
 

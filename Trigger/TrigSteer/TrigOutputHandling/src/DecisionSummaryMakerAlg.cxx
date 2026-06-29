@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "DecisionSummaryMakerAlg.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
@@ -122,7 +122,7 @@ StatusCode DecisionSummaryMakerAlg::execute(const EventContext& context) const {
   }
 
   // Monitor RoI updates between initial and final RoI
-  monitorRoIs(passRawOutput);
+  monitorRoIs(context, passRawOutput);
 
   // Get the data from the HLTSeeding, this is where prescales were applied
   SG::ReadHandle<DecisionContainer> hltSeedingSummary( m_hltSeedingSummaryKey, context );
@@ -210,7 +210,7 @@ StatusCode DecisionSummaryMakerAlg::execute(const EventContext& context) const {
   return StatusCode::SUCCESS;
 }
 
-void DecisionSummaryMakerAlg::monitorRoIs(const TrigCompositeUtils::Decision* terminusNode) const {
+void DecisionSummaryMakerAlg::monitorRoIs(const EventContext& context, const TrigCompositeUtils::Decision* terminusNode) const {
   using namespace TrigCompositeUtils;
   using RoILinkVec = std::vector<LinkInfo<TrigRoiDescriptorCollection>>;
 
@@ -226,7 +226,7 @@ void DecisionSummaryMakerAlg::monitorRoIs(const TrigCompositeUtils::Decision* te
   };
 
   // Loop over all final RoIs
-  const RoILinkVec allFinalRoIs = findLinks<TrigRoiDescriptorCollection>(terminusNode, roiString(), TrigDefs::lastFeatureOfType);
+  const RoILinkVec allFinalRoIs = findLinks<TrigRoiDescriptorCollection>(context, terminusNode, roiString(), TrigDefs::lastFeatureOfType);
   for (const auto& finalRoILink : allFinalRoIs) {
     // Get the final TrigRoiDescriptor reference
     if (!finalRoILink.isValid() || *(finalRoILink.link)==nullptr) {
@@ -240,7 +240,7 @@ void DecisionSummaryMakerAlg::monitorRoIs(const TrigCompositeUtils::Decision* te
     if (finalRoI.isFullscan() || finalRoI.composite()) {continue;}
 
     // Get all initial RoIs associated with this final RoI (should be exactly one)
-    const RoILinkVec initialRoIs = findLinks<TrigRoiDescriptorCollection>(finalRoILink.source, initialRoIString(), TrigDefs::lastFeatureOfType);
+    const RoILinkVec initialRoIs = findLinks<TrigRoiDescriptorCollection>(context, finalRoILink.source, initialRoIString(), TrigDefs::lastFeatureOfType);
 
     // Warn if the number of initial RoIs differs from one
     if (initialRoIs.empty()) {

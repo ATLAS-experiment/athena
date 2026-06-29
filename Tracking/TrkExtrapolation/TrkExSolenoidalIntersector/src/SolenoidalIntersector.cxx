@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -402,6 +402,7 @@ SolenoidalIntersector::newIntersection (const TrackSurfaceIntersection& isect,
       cache = std::make_unique<Constants>(solpar, isect, qOverP);
   }
 
+  // cppcheck-suppress danglingLifetime
   com = cache.get();
   auto newIsect =
       std::make_optional<TrackSurfaceIntersection>(isect, std::move(cache));

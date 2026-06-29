@@ -41,16 +41,10 @@ std::ostream& operator << (std::ostream& os, const Token::OID_t oid ) {
 static const Guid s_localDb("00000000-0000-0000-0000-000000000000");
 
 void genMD5(const std::string& s, void* code);
-static const int KEY_MASK = (~0x0)&0x00;
 
 /// Produce the token keys only on demand for export
 void makeKey(const Token* tok, Guid& guid)  {
-  char text[32];
-  std::string s;
-  std::sprintf(text, "][TECH=%08X]", tok->technology()&KEY_MASK);
-  s = std::format("[DB={}][CNT={}][CLID={}{}]", tok->dbID().to_fixed_string(),
-                  tok->contID(), tok->classID().to_fixed_string(), text);
-  genMD5(s, &guid);
+    genMD5(tok->key(), &guid);
 }
 
 // Standard Constructor

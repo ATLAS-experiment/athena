@@ -77,8 +77,6 @@ namespace MuonR4{
             Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", false, 
                                                      "If set to true hit with pdgId != 13 are skipped"};
 
-            int m_stationIndex_T4E{0};
-
 
     };
 }

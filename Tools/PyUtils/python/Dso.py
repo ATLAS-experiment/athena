@@ -148,7 +148,7 @@ def _is_rootcint_dict (libname):
         return False
     pat = re.compile(r'\w*?.dll')
     return not (libname.startswith("lib")) and \
-           not (pat.match (libname) is None)
+           pat.match(libname) is not None
 
 class CxxDsoDb(object):
     """

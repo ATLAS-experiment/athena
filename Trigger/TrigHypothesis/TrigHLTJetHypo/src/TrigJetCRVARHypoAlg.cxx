@@ -59,7 +59,7 @@ StatusCode TrigJetCRVARHypoAlg::execute( const EventContext& context ) const {
     Decision* d = newDecisionIn( decisions, previousDecision, hypoAlgNodeName(), context );
 
     // Obtain an ElementLink to the jet from the previous step, and set this to be the feature for this step too
-    const LinkInfo<xAOD::JetContainer> jetLinkInfo = findLink<xAOD::JetContainer>(previousDecision, featureString());
+    const LinkInfo<xAOD::JetContainer> jetLinkInfo = findLink<xAOD::JetContainer>(context, previousDecision, featureString());
     d->setObjectLink<xAOD::JetContainer>( featureString(), jetLinkInfo.link );
 
     // Obtain the set of chains which are active in previousDecision

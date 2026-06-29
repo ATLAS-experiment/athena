@@ -185,13 +185,13 @@ def ActsExtrapolationToolCfg(flags,
   return acc
 
 
-def ActsMaterialJsonWriterToolCfg(flags,
-                                  name: str = "ActsMaterialJsonWriterTool",
-                                  **kwargs) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  acc.addPublicTool(CompFactory.ActsMaterialJsonWriterTool(name, **kwargs), primary=True)
-  return acc
-
+def ActsGeometryRealmConvTool(flags, name: str = "ActsGeometryRealmConvTool", **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("ExtractMuonSurfaces", flags.Muon.usePhaseIIGeoSetup)
+    acc.addPublicTool(CompFactory.ActsTrk.GeometryRealmConvTool(name, **kwargs), primary = True)
+    return acc
 
 def ActsObjWriterToolCfg(flags,
                          name: str = "ActsObjWriterTool",
@@ -217,33 +217,9 @@ def ActsWriteTrackingGeometryCfg(flags,
                                  name: str = "ActsWriteTrackingGeometry",
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-
-    if 'TrackingGeometryTool' not in kwargs:
-      kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-
-    if 'MaterialJsonWriterTool' not in kwargs:
-      kwargs.setdefault("MaterialJsonWriterTool", acc.getPrimaryAndMerge(ActsMaterialJsonWriterToolCfg(flags,
-                                                                                                       OutputFile = "geometry-maps.json",
-                                                                                                       processSensitives = False,
-                                                                                                       processNonMaterial = True) ))
-
-    subDetectors = []
-    if flags.Detector.GeometryBpipe:
-      subDetectors = ["BeamPipe"]
-
-    if flags.Detector.GeometryPixel:
-      subDetectors += ["Pixel"]
-    if flags.Detector.GeometryITkPixel:
-      subDetectors += ["ITkPixel"]
-
-    if flags.Detector.GeometrySCT:
-      subDetectors += ["SCT"]
-    if flags.Detector.GeometryITkStrip:
-      subDetectors += ["ITkStrip"]
-    if flags.Detector.GeometryHGTD:
-      subDetectors += ["HGTD"]
-
-    acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometry(name, **kwargs))
+        
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
+    acc.addEventAlgo(CompFactory.ActsTrk.WriteTrackingGeometry(name, **kwargs), primary = True)
     return acc
 
 def ActsWriteTrackingGeometryTransformsAlgCfg(flags,

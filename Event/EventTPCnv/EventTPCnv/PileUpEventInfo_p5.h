@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTTPCNV_PILEUPEVENTINFO_P5_H
@@ -24,9 +24,9 @@ public:
   virtual ~PileUpEventInfo_p5() {};
         
   struct SubEvent {
-    short		m_time;
-    short               m_index;
-    short               m_type;
+    short		m_time = 0;
+    short		m_index = 0;
+    short		m_type = 0;
     EventInfo_p4	m_subEventInfo; 
   };
 

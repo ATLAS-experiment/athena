@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBjetBtagHypoAlg.h"
@@ -58,7 +58,7 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
 
   // Retrieve Jets
   ElementLinkVector< xAOD::JetContainer > jetELs;
-  CHECK( retrieveCollectionFromNavigation( TrigCompositeUtils::featureString(), jetELs, prevDecisionContainer ) );  
+  CHECK( retrieveCollectionFromNavigation( context, TrigCompositeUtils::featureString(), jetELs, prevDecisionContainer ) );
   ATH_MSG_DEBUG( "Retrieved " << jetELs.size() << " Jets of key " << TrigCompositeUtils::featureString() );
 
   // online monitoring for tracks, per decision
@@ -114,7 +114,7 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
 
     // online monitoring for btagging, with a check to ensure the PV is marked
     ElementLink< xAOD::VertexContainer > vertexEL;
-    CHECK( retrieveObjectFromNavigation(  m_prmVtxLink.value(), vertexEL, prevDecisionContainer->at(index) ) );
+    CHECK( retrieveObjectFromNavigation( context, m_prmVtxLink.value(), vertexEL, prevDecisionContainer->at(index) ) );
         
     if ( (*vertexEL)->vertexType() == xAOD::VxType::VertexType::PriVtx ) {
       CHECK( monitor_primary_vertex( vertexEL ) );
@@ -159,7 +159,7 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
 
     // Retrieve PV from navigation
     ElementLink< xAOD::VertexContainer > vertexEL;
-    CHECK( retrieveObjectFromNavigation(  m_prmVtxLink.value(), vertexEL, previousDecision ) );
+    CHECK( retrieveObjectFromNavigation( context, m_prmVtxLink.value(), vertexEL, previousDecision ) );
     ElementLinkVector< xAOD::JetContainer > bTaggedJetEL;
     CHECK( retrieveCollectionFromView( context, bTaggedJetEL, m_bTaggedJetKey, previousDecision ) );
     CHECK( bTaggedJetEL.size() == 1 );

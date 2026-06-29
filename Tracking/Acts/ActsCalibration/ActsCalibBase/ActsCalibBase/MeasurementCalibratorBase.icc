@@ -10,10 +10,7 @@ template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t, typename pos_t,
                                                     const pos_t& locpos, const cov_t& cov,
                                                     Acts::SourceLink link,
                                                     proxy_t& trackState) const {
-      static_assert(Dim>0 && Dim <= 3, "Wrong measurement dimension");
-      trackState.setUncalibratedSourceLink(std::move(link));
-      trackState.allocateCalibrated(Dim);
-      trackState.setProjectorSubspaceIndices(s_boundSpaceIndices[static_cast<int>(projector)]);
+     prepareCalibratedState<Dim>(projector, std::move(link), trackState);
       trackState.template calibrated<Dim>() = locpos.template cast<double>();
       trackState.template calibratedCovariance<Dim>() = cov.template cast<double>();
   }
@@ -24,7 +21,8 @@ template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t>
                                                            proxy_t& trackState) const {
       static_assert(Dim>0 && Dim <= 3, "Wrong measurement dimension");
       trackState.setUncalibratedSourceLink(std::move(link));
-      trackState.setProjectorSubspaceIndices(s_boundSpaceIndices[static_cast<int>(projector)]);
+      trackState.setProjectorSubspaceIndices(s_boundSpaceIndices[Acts::toUnderlying(projector)]);
+      trackState.allocateCalibrated(Dim);
   }
 
 template <Acts::PointerConcept Ptr_t>
@@ -34,7 +32,14 @@ template <Acts::PointerConcept Ptr_t>
         }
         return Acts::SourceLink{SourceLink_t{measurement}};
     }
-
+template <Acts::PointerConcept Ptr_t>
+  inline void MeasurementCalibratorBase::pack(const std::vector<Ptr_t>& measList,
+               std::vector<Acts::SourceLink>& targetSL) {
+    targetSL.reserve(targetSL.size() + measList.size());
+    for (const auto& meas : measList) {
+        targetSL.emplace_back(pack(meas));
+    }
+  }
   inline MeasurementCalibratorBase::SourceLink_t 
       MeasurementCalibratorBase::unpackBase(const Acts::SourceLink& sl) {
       return sl.template get<SourceLink_t>();

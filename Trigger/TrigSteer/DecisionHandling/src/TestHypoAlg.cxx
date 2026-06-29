@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestHypoAlg.h"
@@ -52,7 +52,7 @@ namespace HLTTest {
     // find features:
     std::vector<const FeatureOBJ*> featureFromDecision;
     for ( const auto previousDecision: *previousDecisionsHandle ) {
-      const auto linkInfo = TrigCompositeUtils::findLink<FeatureContainer>(previousDecision, m_linkName.value());
+      const auto linkInfo = TrigCompositeUtils::findLink<FeatureContainer>(context, previousDecision, m_linkName.value());
       const auto featureLink = linkInfo.link;
       CHECK( featureLink.isValid() );
       const FeatureOBJ* feature = *featureLink;
@@ -63,11 +63,11 @@ namespace HLTTest {
     //map reco object and decision: find in reco obejct the initial RoI and map it to the correct decision
     size_t reco_counter = 0;
     for (const auto recoobj: *recoInput){
-      const auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( recoobj, "initialRoI"  );
+      const auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( context, recoobj, "initialRoI"  );
       const auto roiEL = roiInfo.link;
       CHECK( roiEL.isValid() );
       
-      const auto featureInfo = TrigCompositeUtils::findLink<FeatureContainer>( recoobj, m_linkName.value()  );
+      const auto featureInfo = TrigCompositeUtils::findLink<FeatureContainer>( context, recoobj, m_linkName.value()  );
       const auto featurelink = featureInfo.link;
       CHECK( featurelink.isValid() );
       if ( not featurelink.isValid() )  {

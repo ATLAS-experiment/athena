@@ -85,7 +85,7 @@ bool TrigMuonEFHypoTool::decideOnSingleObject(TrigMuonEFHypoTool::MuonEFInfo& in
     return false;
   }
 
-  if (muon->primaryTrackParticle()) { // was there a muon in this RoI ?
+  if (muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)) { // was there a muon in this RoI ?
     const xAOD::TrackParticle* tr = muon->trackParticle(m_type);
     if (!tr) {
       ATH_MSG_DEBUG("No TrackParticle found.");
@@ -173,7 +173,7 @@ bool TrigMuonEFHypoTool::passedQualityCuts(const xAOD::Muon* muon) const {
         float meP  = 1.0 / ( sin(metrack->theta()) / mePt); 
         float idP  = 1.0 / ( sin(idtrack->theta()) / idPt); 
         qOverPsignif  = std::abs( (metrack->charge() / meP) - (idtrack->charge() / idP) ) / sqrt( idtrack->definingParametersCovMatrix()(4,4) + metrack->definingParametersCovMatrix()(4,4) ); 
-        reducedChi2 = muon->primaryTrackParticle()->chiSquared()/muon->primaryTrackParticle()->numberDoF(); 
+        reducedChi2 = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->chiSquared()/muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->numberDoF(); 
         // Selection criteria based on the requirements that are part of the muon quality working points (offline)
         if(std::abs(reducedChi2) < 8.0 && !m_muonSelTool->isBadMuon(*muon) && qOverPsignif<7.0 && muon->author()==xAOD::Muon::Author::MuidCo) passCut = true;
    }

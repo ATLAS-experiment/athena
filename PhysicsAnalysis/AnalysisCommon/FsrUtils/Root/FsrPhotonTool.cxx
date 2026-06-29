@@ -297,7 +297,7 @@ namespace FSR {
 bool oqIsOK = (bool) m_elIsGoodOQSelectionTool->accept(electron);
    
             const xAOD::TrackParticle* electron_track = electron->trackParticle();
-            const xAOD::TrackParticle* muon_track     = muon->primaryTrackParticle();
+            const xAOD::TrackParticle* muon_track     = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 
             bool elmutrackmatch = ( (fabs(electron_track->theta()- muon_track->theta()) < m_overlap_el_mu) &&
                                     (deltaPhi(electron_track->phi(),  muon_track->phi())   < m_overlap_el_mu) );

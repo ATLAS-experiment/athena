@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SeedsToTrackParamsAlg.h"
@@ -19,7 +19,7 @@ namespace ActsTrk {
 
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
-    ATH_CHECK(m_ATLASConverterTool.retrieve());
+    ATH_CHECK(m_geometryConvTool.retrieve());
     ATH_CHECK(m_paramEstimationTool.retrieve());
 
     ATH_CHECK(m_detEleCollKey.initialize());
@@ -60,7 +60,7 @@ namespace ActsTrk {
           const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
                 useTopSp ? sp->elementIdList().back() : sp->elementIdList().front());
           const Trk::Surface& atlas_surface = element->surface();
-          return *m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+          return *m_geometryConvTool->convertSurfaceToActs(atlas_surface);
         };
 
       std::optional<Acts::BoundTrackParameters> optTrackParams =

@@ -24,7 +24,7 @@
 
 
 // PACKAGE
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 #include "ActsCalibBase/SourceLinkType.h"
@@ -41,7 +41,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 namespace ActsTrk {
-class ActsToTrkConverterTool : public extends<AthAlgTool, IActsToTrkConverterTool>
+class ActsToTrkConverterTool : public extends<AthAlgTool, ITrackConverterTool>
 {
 
 public:
@@ -49,51 +49,18 @@ public:
 
   using base_class::base_class;
 
-
-
-  /// Find the ATLAS surface corresponding to the Acts surface 
-  /// Only work if the Acts surface has an associated detector element
-  /// (Pixel and SCT)
-  virtual SurfacePtr_t actsSurfaceToTrkSurface(const EventContext& ctx,
-                                               const Acts::Surface &actsSurface) const override;
-
-  /// Find the Acts surface corresponding to the ATLAS surface 
-  /// Use a map associating ATLAS ID to Acts surfaces
-  /// (Pixel and SCT)
-  virtual std::shared_ptr<const Acts::Surface> trkSurfaceToActsSurface(const Trk::Surface &atlasSurface) const override;
-
-  /// Transform an ATLAS track into a vector of SourceLink to be use in the avts tracking
-  /// Transform both measurement and outliers.
+  /** @copydoc ITrackConverterTool::trkTrackToSourceLinks  */
   virtual std::vector<Acts::SourceLink> trkTrackToSourceLinks(const Trk::Track& track) const override;
-
-  virtual void toSourceLinks(const std::vector<const Trk::MeasurementBase*>& measSet,
-                              std::vector<Acts::SourceLink>& links) const override final;
-
-  virtual void toSourceLinks(const std::vector<const Trk::PrepRawData*>& prdSet,
-                             std::vector<Acts::SourceLink>& links) const override final;
-
+  /** @copydoc ITrackConverterTool::convertFitResult  */
   virtual std::unique_ptr<Trk::Track> convertFitResult(const EventContext& ctx,
                                                        TrackFitResult_t& fitResult,
                                                        const Trk::TrackInfo::TrackFitter fitAuthor) const override final;
-  /// Create Acts TrackParameter from ATLAS one.
-  /// Take care of unit conversion between the two.  
-  virtual
-  const Acts::BoundTrackParameters
-  trkTrackParametersToActsParameters(const Trk::TrackParameters &atlasParameter, const Acts::GeometryContext& gctx, Trk::ParticleHypothesis = Trk::pion) const override;
-
-  /// Create ATLAS TrackParameter from Acts one.
-  /// Take care of unit conversion between the two.  
-  virtual
-  std::unique_ptr<Trk::TrackParameters>
-  actsTrackParametersToTrkParameters(const EventContext& ctx, const Acts::BoundTrackParameters &actsParameter, const Acts::GeometryContext& gctx) const override;
-
-  /** Convert TrackCollection to Acts track container. 
-   * @param tc The track container to fill
-  */
-  virtual 
-  void trkTrackCollectionToActsTrackContainer(ActsTrk::MutableTrackContainer &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
-
- virtual std::unique_ptr<TrackCollection> 
+  /** @copydoc ITrackConverterTool::convertTrkToActsContainer  */
+  virtual void convertTrkToActsContainer(const EventContext& ctx,
+                                         const TrackCollection& trackColl,
+                                         ActsTrk::MutableTrackContainer& outTrackcoll) const override;
+  /** @copydoc ITrackConverterTool::convertActsToTrkContainer  */
+  virtual std::unique_ptr<TrackCollection> 
       convertActsToTrkContainer(const EventContext& ctx,
                                 const ActsTrk::TrackContainer& trackCont) const override final;
 private:
@@ -106,16 +73,6 @@ private:
   std::unique_ptr<Trk::Track> convertActsTrack(const EventContext& ctx,
                                                const Proxy_t& track,
                                                const Trk::TrackInfo::TrackFitter fitAuthor) const;
-
-  /*** @brief Translate the Acts surface bounds to its equivalent in the Trk realm.
-   *          @note Not all bounds are implemented
-   *  @param bounds: Refrence to the bounds to be translated */
-  std::shared_ptr<Trk::SurfaceBounds> translateBounds(const Acts::SurfaceBounds& bounds) const;
-  /** @brief Translate a surface that is not associated with any detector element.
-   *         Bounds of the surface are also translated
-   *  @param surface Reference to the Acts surface for translation */
-  SurfacePtr_t translateFreeSurface(const Acts::Surface& surface) const;
-
   /** @brief Abrivate the state mask for the TSOS */
   using  TrkTSOSMask = std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>;
   /** @brief Append the translated TSOS at the beginning of the states container corresponding
@@ -146,27 +103,17 @@ private:
                                    const Identifier& prdId,
                                    const IdentifierHash& hash) const;
 
-
   bool actsTrackParameterPositionCheck(
      const Acts::BoundTrackParameters& actsParameter,
      const Trk::TrackParameters& tsos, const Acts::GeometryContext& gctx) const;
 
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
   
   /** @brief Tools needed to create Trk::Tracks from the ACts fit result */
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", ""};
 
-  std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry{};
-  std::unordered_map<Identifier, std::shared_ptr<const Acts::Surface>> m_actsSurfaceMap{};
-
-  Gaudi::Property<bool> m_visualDebugOutput{
-     this, "VisualDebugOutput", false,
-     "Print additional output for debug plots"};
-
-
-  Gaudi::Property<bool> m_extractMuonSurfaces{this, "ExtractMuonSurfaces", false,
-     "If True, use the MuonDetectorManager to extract the Muon surfaces"};
   /** @brief Flag to convert the hole states */
   Gaudi::Property<bool> m_convertHoles{this, "convertHoles", true };
   /** @brief Flag to convert the outlier states */
@@ -184,9 +131,6 @@ private:
 
 
   ToolHandle<Muon::IMuonCompetingClustersOnTrackCreator> m_compRotCreator{this, "CompetingRotCreator", ""};  //<! competing clusters rio ontrack creator
-
-  /** @brief Detector manager to fetch the legacy Trk surfaces */
-  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrKey{this, "MuonManagerKey", "MuonDetectorManager"};
 
   detail::TrkMeasurementCalibrator m_measCalib{};
   detail::TrkPrepRawDataCalibrator m_prdCalib{};

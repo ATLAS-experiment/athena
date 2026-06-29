@@ -17,6 +17,10 @@ def HGTD_RecoCfg(flags):
 
         from HGTD_Config.HGTD_TrackTimeExtensionConfig import TrackTimeExtensionCfg
         result.merge(TrackTimeExtensionCfg(flags))
+
+        from HGTD_Config.HGTD_TrackTimeExtensionConfig import TimeCompatibilityCheckCfg #ITk holes
+        result.merge(TimeCompatibilityCheckCfg(flags))
+        
     else:
         from ActsConfig.ActsClusterizationConfig import ActsHgtdClusterizationAlgCfg
         result.merge(ActsHgtdClusterizationAlgCfg(flags))

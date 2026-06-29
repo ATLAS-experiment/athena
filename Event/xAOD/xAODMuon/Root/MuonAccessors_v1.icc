@@ -5,10 +5,12 @@
 
 // System include(s):
 #include <iostream>
+#include <sstream>
+#include <exception>
 // #include "MuonAccessors_v1.h"
 /// Helper macro for managing cluster moment Accessor objects
 #define DEFINE_ACCESSOR(TYPE, NAME )                               \
-   case xAOD::Muon_v1::NAME:                                       \
+   case NAME:                                                      \
    {                                                               \
       static const SG::Accessor< TYPE > a( #NAME );                \
       return &a;                                                   \
@@ -21,6 +23,7 @@ namespace xAOD {
   template<>
    const SG::Accessor< float >*
    parameterAccessorV1<float>( Muon_v1::ParamDef type ) {
+      using enum Muon_v1::ParamDef;
       switch( type ) {
         DEFINE_ACCESSOR( float, spectrometerFieldIntegral        );
         DEFINE_ACCESSOR( float, scatteringCurvatureSignificance  );
@@ -48,28 +51,30 @@ namespace xAOD {
         DEFINE_ACCESSOR( float, ParamEnergyLossSigmaPlus         );		
         DEFINE_ACCESSOR( float, ParamEnergyLossSigmaMinus        );		
         DEFINE_ACCESSOR( float, MeasEnergyLossSigma              );		
-    default:                  
-         std::cerr << "xAOD::Muon::parameterAccessorV1 ERROR Unknown float ParamDef ("
-                   << type << ") requested.";
-         if (type == Muon_v1::msInnerMatchDOF || type == Muon_v1::msOuterMatchDOF || type == Muon_v1::CaloMuonIDTag) 
-           std::cerr << " (This type is actually int)"<<std::endl;
-         std::cerr << std::endl;
-         return 0;
+        default:{
+          std::stringstream sstr{};
+          sstr<<__FILE__<<":"<<__LINE__<<" Unknown float parameter "<<type<<" requested.";
+          throw std::runtime_error(sstr.str());
+        } 
       }
+      return nullptr;
    }
    
    template<>
     const SG::Accessor< int >*
     parameterAccessorV1<int>( Muon_v1::ParamDef type ) {
        switch( type ) {
+         using enum Muon_v1::ParamDef;
          DEFINE_ACCESSOR( int,   msInnerMatchDOF                  );
          DEFINE_ACCESSOR( int,   msOuterMatchDOF                  );
          DEFINE_ACCESSOR( int,   CaloMuonIDTag                    );
-       default:                  
-          std::cerr << "xAOD::Muon::parameterAccessorV1 ERROR Unknown integer ParamDef ("
-                    << type << ") requested." << std::endl;
-          return 0;
+         default:{
+             std::stringstream sstr{};
+             sstr<<__FILE__<<":"<<__LINE__<<" - Unknown int parameter "<<type<<" requested.";
+             throw std::runtime_error(sstr.str());
+         }
        }
+       return nullptr;
     }
 
 } // namespace xAOD

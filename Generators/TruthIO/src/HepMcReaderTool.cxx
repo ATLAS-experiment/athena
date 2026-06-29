@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -17,39 +17,25 @@
 //HepMC includes
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/IO_GenEvent.h"
+#include "AtlasHepMC/ReaderFactory.h"
 
 // McParticleTools includes
 #include "HepMcReaderTool.h"
 
 static const char * const s_protocolSep = ":";
 
-
-/////////////////////////////////////////////////////////////////// 
-/// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
 /// Constructors
 ////////////////
-HepMcReaderTool::HepMcReaderTool( const std::string& type, 
-				  const std::string& name, 
-				  const IInterface* parent ) : 
-  base_class( type, name, parent ),
-  m_ioFrontend( nullptr )
+HepMcReaderTool::HepMcReaderTool( const std::string& type, const std::string& name, const IInterface* parent ) : 
+  base_class( type, name, parent )
 {
   //
   // Property declaration
   // 
 
-  declareProperty( "Input", 
-		   m_ioFrontendURL = "ascii:hepmc.genevent.txt", 
-		   "Name of the front-end we'll use to read in the HepMC::GenEvent."
-		   "\nEx: ascii:hepmc.genevent.txt" );
-  m_ioFrontendURL.declareUpdateHandler( &HepMcReaderTool::setupFrontend,
-					this );
-
-  declareProperty( "McEventsOutput",
-		   m_mcEventsOutputName = "GEN_EVENT",
-		   "Output location of the McEventCollection to read out" );
+  declareProperty( "Input", m_ioFrontendURL = "auto:hepmc.genevent.txt", "Name of the front-end we'll use to read in the HepMC::GenEvent.\nEx: ascii:hepmc.genevent.txt" );
+  m_ioFrontendURL.declareUpdateHandler( &HepMcReaderTool::setupFrontend, this );
+  declareProperty( "McEventsOutput", m_mcEventsOutputName = "GEN_EVENT", "Output location of the McEventCollection to read out" );
 }
 
 /// Destructor
@@ -57,9 +43,6 @@ HepMcReaderTool::HepMcReaderTool( const std::string& type,
 HepMcReaderTool::~HepMcReaderTool()
 { 
   ATH_MSG_DEBUG("Calling destructor");
-
-  delete m_ioFrontend;
-  m_ioFrontend = nullptr;
 }
 
 /// Athena Algorithm's Hooks
@@ -74,7 +57,7 @@ StatusCode HepMcReaderTool::initialize()
   }
 
   // setup frontend
-  if ( nullptr == m_ioFrontend ) {
+  if ( !m_ioFrontend ) {
     setupFrontend(m_ioFrontendURL);
   }
 
@@ -106,28 +89,20 @@ StatusCode HepMcReaderTool::execute()
   return read(evt);
 }
 
-/////////////////////////////////////////////////////////////////// 
-/// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
-
 StatusCode HepMcReaderTool::read( HepMC::GenEvent* evt )
 {
   m_ioFrontend->read_event(*evt);
-
   return StatusCode::SUCCESS;
 }
 
 void HepMcReaderTool::setupFrontend( Gaudi::Details::PropertyBase& /*prop*/ )
 {
   // defaults
-  std::string protocol = "ascii";
+  std::string protocol = "auto";
   std::string fileName = "hepmc.genevent.txt";
 
   // reset internal state
-  if ( m_ioFrontend ) {
-    delete m_ioFrontend;
-    m_ioFrontend = nullptr;
-  }
+  m_ioFrontend = nullptr;
 
   // caching URL
   const std::string& url = m_ioFrontendURL.value();
@@ -136,22 +111,22 @@ void HepMcReaderTool::setupFrontend( Gaudi::Details::PropertyBase& /*prop*/ )
 
   if ( std::string::npos != protocolPos ) {
     protocol = url.substr( 0, protocolPos );
-    fileName = url.substr( protocolPos+1, std::string::npos );
+    fileName = url.substr( protocolPos + 1, std::string::npos );
   } else {
-    //protocol = "ascii";
     fileName = url;
   }
 
   // get the protocol name in lower cases
   std::transform( protocol.begin(), protocol.end(), protocol.begin(), [](unsigned char c){ return std::tolower(c); } );
 
-  if ( "ascii" == protocol ) {
-    m_ioFrontend = new HepMC3::ReaderAsciiHepMC2( fileName.c_str());
-
+  if ( "auto" == protocol ) {
+    m_ioFrontend = HepMC3::deduce_reader( fileName.c_str());
+  } else if ( "ascii" == protocol ) {
+    m_ioFrontend = std::make_shared<HepMC3::ReaderAsciiHepMC2>( fileName.c_str());
   } else {
     msg(MSG::WARNING) << "UNKNOWN protocol [" << protocol << "] !!" << endmsg<< "Will use [ascii] instead..."<< endmsg;
     protocol = "ascii";
-    m_ioFrontend = new HepMC3::ReaderAsciiHepMC2( fileName.c_str());
+    m_ioFrontend = std::make_shared<HepMC3::ReaderAsciiHepMC2>( fileName.c_str());
   }    
   ATH_MSG_DEBUG("Using protocol [" << protocol << "] and write to ["<< fileName << "]");
 }

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file SCT_ReadCalibDataTool.h Header file for SCT_ReadCalibDataTool.
@@ -48,22 +48,17 @@ class SCT_ReadCalibDataTool: public extends<AthAlgTool, ISCT_ReadCalibDataTool> 
   ///Return whether this tool can report on the hierarchy level (e.g. module, chip...)
   virtual bool canReportAbout(InDetConditions::Hierarchy h) const override;
   ///Summarise the result from the tool as good/bad
-  virtual bool isGood(const Identifier& elementId, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override;
   virtual bool isGood(const Identifier& elementId, const EventContext& ctx, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override;
   ///same thing with id hash, introduced by shaun with dummy method for now
-  virtual bool isGood(const IdentifierHash& /*hashId*/) const override { return true; }
-  virtual bool isGood(const IdentifierHash& hashId, const EventContext& /*ctx*/) const override { return isGood(hashId); }
+  virtual bool isGood(const IdentifierHash& /*hashId*/, const EventContext& /*ctx*/) const override { return true; }
   virtual void getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status, 
                                         SG::WriteCondHandle<InDet::SiDetectorElementStatus>* whandle) const override;
   //@}
   
   // Methods to return calibration defect type and summary
   virtual ISCT_ReadCalibDataTool::CalibDefectType defectType(const Identifier& stripId, const EventContext& ctx, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override; //!<Return summary of defect type and values for a strip
-  virtual ISCT_ReadCalibDataTool::CalibDefectType defectType(const Identifier& stripId, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override; //!<Return summary of defect type and values for a strip
   virtual SCT_CalibDefectData::CalibModuleDefects defectsSummary(const Identifier& moduleId, const std::string& scan, const EventContext& ctx) const override; //!<Returns module summary of defect
-  virtual SCT_CalibDefectData::CalibModuleDefects defectsSummary(const Identifier& moduleId, const std::string& scan) const override; //!<Returns module summary of defect
   virtual std::list<Identifier> defectList(const std::string& defect, const EventContext& ctx) const override; //!<Returns module summary of defect
-  virtual std::list<Identifier> defectList(const std::string& defect) const override; //!<Returns module summary of defect
 
  private:
   // Read Cond Handles

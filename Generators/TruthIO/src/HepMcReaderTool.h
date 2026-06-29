@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcReaderTool.h 
@@ -21,19 +21,13 @@
 
 // Forward declaration
 #include "AtlasHepMC/GenEvent_fwd.h"
-#include "AtlasHepMC/IO_BaseClass.h"
-#include "HepMC3/Reader.h"
-#include "HepMC3/ReaderAsciiHepMC2.h"
+#include "AtlasHepMC/IO_GenEvent.h"
+
 
 class HepMcReaderTool : public extends<AthAlgTool, IIOHepMcTool>
 { 
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
  public: 
-
-  // Copy constructor: 
 
   /// Constructor with parameters: 
   HepMcReaderTool( const std::string& type, const std::string& name,  const IInterface* parent );
@@ -46,17 +40,10 @@ class HepMcReaderTool : public extends<AthAlgTool, IIOHepMcTool>
   StatusCode  execute();
   StatusCode  finalize();
 
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
   /** Process the @c HepMC::GenEvent through the I/O frontend.
    */
   StatusCode read( HepMC::GenEvent* evt );
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected methods: 
-  /////////////////////////////////////////////////////////////////// 
  protected: 
 
   /** Default constructor: 
@@ -68,9 +55,6 @@ class HepMcReaderTool : public extends<AthAlgTool, IIOHepMcTool>
    */
   void setupFrontend( Gaudi::Details::PropertyBase& ioFrontendURL );
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
  protected: 
 
   /** URL of the I/O front-end (only "ASCII" for now...) glued with
@@ -86,7 +70,7 @@ class HepMcReaderTool : public extends<AthAlgTool, IIOHepMcTool>
 
   /** Abstract base class for the back-end
    */
-  HepMC3::Reader* m_ioFrontend;
+  std::shared_ptr<HepMC3::Reader> m_ioFrontend{nullptr};
 
 }; 
 #endif //> MCPARTICLETOOLS_HEPMCREADERTOOL_H

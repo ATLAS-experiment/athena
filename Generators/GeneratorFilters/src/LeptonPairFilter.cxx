@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -119,7 +119,7 @@ StatusCode LeptonPairFilter::filterEvent(const EventContext& ctx) {
 	// We do not place requirements on their origins (updated: optionally rejecting hadron decays)
 	// save pdg ids of found leptons
 	// do not consider taus
-	  if( std::abs(pitr->pdg_id()) !=  11  && std::abs(pitr->pdg_id()) !=  13) continue;
+	if( !(MC::isElectron(pitr) || MC::isMuon(pitr)) ) continue;
 	  //only consider leptons which satisfy  pt and eta requirements
 	  if( (pitr->momentum().perp() < m_Ptmin) || std::abs(pitr->momentum().pseudoRapidity()) > m_EtaRange) continue;
 			  if(m_onlyMassiveParents)
@@ -132,8 +132,7 @@ StatusCode LeptonPairFilter::filterEvent(const EventContext& ctx) {
 					  if(!vxp) break;
 					  if(vxp->particles_in().size()!=1) break;
 					  p = vxp->particles_in().at(0);
-					  const int pdg = std::abs(p->pdg_id());
-					  if(!((pdg>=11 && pdg<=16) || pdg==22))
+					  if(!(MC::isSMLepton(p) || MC::isPhoton(p)))
 					  {
 						  massiveParent = (p->generated_mass()>20000);
 						  break;

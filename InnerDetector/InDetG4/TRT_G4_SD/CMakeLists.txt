@@ -4,6 +4,7 @@
 atlas_subdir( TRT_G4_SD )
 
 # External dependencies:
+find_package( AtlasGeant4Utilities )
 find_package( Geant4 )
 find_package( GTest )
 
@@ -40,6 +41,10 @@ set_target_properties(
    TRT_G4_SD_TRTSensitiveDetector_gtest
    PROPERTIES
    INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+
+# Turn on/off CUDA device symbol resolution for tests (Geant4 links to VecGeom, which is CUDA-enabled)
+atlas_configure_g4_targets( TARGETS
+   TRT_G4_SD_TRTSensitiveDetector_gtest )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -133,144 +133,144 @@ namespace JiveXML {
 
   void GeometryWriter::writeHeader(std::ofstream &out)
   {
-    out << "<?xml version=\"1.0\"?>" << std::endl
-	<< "<!DOCTYPE AGeometry [" << std::endl
-	<< "<!ELEMENT AGeometry (ADisc | ARectangle | ABarrelCalorimeter |" << std::endl 
-	<< "                     AEndcapCalorimeter | AGapCalorimeter | AEndcapCryostat |" << std::endl
-	<< "                     ABarrelSiliconDetector | AEndcapSiliconDetector |" << std::endl
-	<< "                     ABarrelTRTDetector | AEndcapTRTDetector)* >" << std::endl
-	<< "<!ELEMENT ADisc EMPTY >" << std::endl
-	<< "<!ATTLIST ADisc" << std::endl
-	<< "          p          CDATA     #REQUIRED" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          rIn        CDATA     #REQUIRED" << std::endl
-	<< "          rOut       CDATA     #REQUIRED" << std::endl
-	<< "          nIn        CDATA     \"256\"" << std::endl
-	<< "          nOut       CDATA     \"256\">" << std::endl
-	<< "<!ELEMENT ARectangle EMPTY >" << std::endl
-	<< "<!ATTLIST ARectangle" << std::endl
-	<< "          p          CDATA     #REQUIRED" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          xMin       CDATA     #REQUIRED" << std::endl
-	<< "          xMax       CDATA     #REQUIRED" << std::endl
-	<< "          yMin       CDATA     #REQUIRED" << std::endl
-	<< "          yMax       CDATA     #REQUIRED" << std::endl
-	<< "          xR         (YES|NO)  \"YES\"" << std::endl
-	<< "          yR         (YES|NO)  \"YES\">" << std::endl
-	<< "<!ELEMENT ABarrelCalorimeter EMPTY >" << std::endl
-	<< "<!ATTLIST ABarrelCalorimeter" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          sampling   CDATA     #REQUIRED" << std::endl
-	<< "          region     CDATA     #REQUIRED" << std::endl
-	<< "          rMin       CDATA     #REQUIRED" << std::endl
-	<< "          rMax       CDATA     #REQUIRED" << std::endl
-	<< "          zMin       CDATA     #REQUIRED" << std::endl
-	<< "          zMax       CDATA     #REQUIRED" << std::endl
-	<< "          eta0       CDATA     #REQUIRED" << std::endl
-	<< "          deta       CDATA     #REQUIRED" << std::endl
-	<< "          neta       CDATA     #REQUIRED" << std::endl
-	<< "          meta       CDATA     #REQUIRED" << std::endl
-	<< "          phi0       CDATA     #REQUIRED" << std::endl
-	<< "          nphi       CDATA     #REQUIRED>" << std::endl
-	<< "<!ELEMENT AEndcapCalorimeter EMPTY >" << std::endl
-	<< "<!ATTLIST AEndcapCalorimeter" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          sampling   CDATA     #REQUIRED" << std::endl
-	<< "          region     CDATA     #REQUIRED" << std::endl
-	<< "          rMin       CDATA     #REQUIRED" << std::endl
-	<< "          rMax       CDATA     #REQUIRED" << std::endl
-	<< "          zMin       CDATA     #REQUIRED" << std::endl
-	<< "          zMax       CDATA     #REQUIRED" << std::endl
-	<< "          eta0       CDATA     #REQUIRED" << std::endl
-	<< "          deta       CDATA     #REQUIRED" << std::endl
-	<< "          neta       CDATA     #REQUIRED" << std::endl
-	<< "          meta       CDATA     #REQUIRED" << std::endl
-	<< "          phi0       CDATA     #REQUIRED" << std::endl
-	<< "          nphi       CDATA     #REQUIRED>" << std::endl
-	<< "<!ELEMENT AGapCalorimeter EMPTY >" << std::endl
-	<< "<!ATTLIST AGapCalorimeter" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          sampling   CDATA     #REQUIRED" << std::endl
-	<< "          region     CDATA     #REQUIRED" << std::endl
-	<< "          rMin       CDATA     #REQUIRED" << std::endl
-	<< "          rMax       CDATA     #REQUIRED" << std::endl
-	<< "          zMin       CDATA     #REQUIRED" << std::endl
-	<< "          zMax       CDATA     #REQUIRED" << std::endl
-	<< "          eta        CDATA     #REQUIRED" << std::endl
-	<< "          phi0       CDATA     #REQUIRED" << std::endl
-	<< "          nphi       CDATA     #REQUIRED>" << std::endl
-	<< "<!ELEMENT AEndcapCryostat EMPTY >" << std::endl
-	<< "<!ATTLIST AEndcapCryostat" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          sampling   CDATA     #REQUIRED" << std::endl
-	<< "          region     CDATA     #REQUIRED" << std::endl
-	<< "          rMin       CDATA     #REQUIRED" << std::endl
-	<< "          rMax       CDATA     #REQUIRED" << std::endl
-	<< "          zMin       CDATA     #REQUIRED" << std::endl
-	<< "          zMax       CDATA     #REQUIRED" << std::endl
-	<< "          neta       CDATA     #REQUIRED" << std::endl
-	<< "          nphi       CDATA     #REQUIRED>" << std::endl
-	<< "<!ELEMENT ABarrelSiliconDetector EMPTY >" << std::endl
-	<< "<!ATTLIST ABarrelSiliconDetector" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          layer      CDATA     #REQUIRED" << std::endl
-	<< "          length     CDATA     #REQUIRED" << std::endl
-	<< "          width      CDATA     #REQUIRED" << std::endl
-	<< "          thickness  CDATA     #REQUIRED" << std::endl
-	<< "          tilt       CDATA     #REQUIRED" << std::endl
-	<< "          nz         CDATA     #REQUIRED" << std::endl
-	<< "          nphi       CDATA     #REQUIRED" << std::endl
-	<< "          r0         CDATA     #REQUIRED" << std::endl
-	<< "          phi0       CDATA     #REQUIRED" << std::endl
-	<< "          zMin       CDATA     #REQUIRED" << std::endl
-	<< "          zMax       CDATA     #REQUIRED>" << std::endl
-	<< "<!ELEMENT AEndcapSiliconDetector EMPTY >" << std::endl
-	<< "<!ATTLIST AEndcapSiliconDetector" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          layer      CDATA     #REQUIRED" << std::endl
-	<< "          length     CDATA     #REQUIRED" << std::endl
-	<< "          width      CDATA     #REQUIRED" << std::endl
-	<< "          thickness  CDATA     #REQUIRED" << std::endl
-	<< "          nz         CDATA     #REQUIRED" << std::endl
-	<< "          nphi       CDATA     #REQUIRED" << std::endl
-	<< "          rMin       CDATA     #REQUIRED" << std::endl
-	<< "          rMax       CDATA     #REQUIRED" << std::endl
-	<< "          phi0       CDATA     #REQUIRED" << std::endl
-	<< "          zMin       CDATA     #REQUIRED" << std::endl
-	<< "          zMax       CDATA     #REQUIRED>" << std::endl
-	<< "<!ELEMENT ABarrelTRTDetector EMPTY >" << std::endl
-	<< "<!ATTLIST ABarrelTRTDetector" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          layer      CDATA     #REQUIRED" << std::endl
-	<< "          nphi       CDATA     #REQUIRED" << std::endl
-	<< "          rMin       CDATA     #REQUIRED" << std::endl
-	<< "          rMax       CDATA     #REQUIRED" << std::endl
-	<< "          phiIn      CDATA     #REQUIRED" << std::endl
-	<< "          phiOut     CDATA     #REQUIRED" << std::endl
-	<< "          zMin       CDATA     #REQUIRED" << std::endl
-	<< "          zMax       CDATA     #REQUIRED>" << std::endl
-	<< "<!ELEMENT AEndcapTRTDetector EMPTY >" << std::endl
-	<< "<!ATTLIST AEndcapTRTDetector" << std::endl
-	<< "          c          CDATA     #REQUIRED" << std::endl
-	<< "          n          CDATA     #REQUIRED" << std::endl
-	<< "          layer      CDATA     #REQUIRED" << std::endl
-	<< "          nphi       CDATA     #REQUIRED" << std::endl
-	<< "          rMin       CDATA     #REQUIRED" << std::endl
-	<< "          rMax       CDATA     #REQUIRED" << std::endl
-	<< "          phi0       CDATA     #REQUIRED" << std::endl
-	<< "          zMin       CDATA     #REQUIRED" << std::endl
-	<< "          zMax       CDATA     #REQUIRED>" << std::endl
-	<< "]>" << std::endl
-	<< "<AGeometry>" << std::endl;
+    out << "<?xml version=\"1.0\"?>" << '\n'
+	<< "<!DOCTYPE AGeometry [" << '\n'
+	<< "<!ELEMENT AGeometry (ADisc | ARectangle | ABarrelCalorimeter |" << '\n' 
+	<< "                     AEndcapCalorimeter | AGapCalorimeter | AEndcapCryostat |" << '\n'
+	<< "                     ABarrelSiliconDetector | AEndcapSiliconDetector |" << '\n'
+	<< "                     ABarrelTRTDetector | AEndcapTRTDetector)* >" << '\n'
+	<< "<!ELEMENT ADisc EMPTY >" << '\n'
+	<< "<!ATTLIST ADisc" << '\n'
+	<< "          p          CDATA     #REQUIRED" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          rIn        CDATA     #REQUIRED" << '\n'
+	<< "          rOut       CDATA     #REQUIRED" << '\n'
+	<< "          nIn        CDATA     \"256\"" << '\n'
+	<< "          nOut       CDATA     \"256\">" << '\n'
+	<< "<!ELEMENT ARectangle EMPTY >" << '\n'
+	<< "<!ATTLIST ARectangle" << '\n'
+	<< "          p          CDATA     #REQUIRED" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          xMin       CDATA     #REQUIRED" << '\n'
+	<< "          xMax       CDATA     #REQUIRED" << '\n'
+	<< "          yMin       CDATA     #REQUIRED" << '\n'
+	<< "          yMax       CDATA     #REQUIRED" << '\n'
+	<< "          xR         (YES|NO)  \"YES\"" << '\n'
+	<< "          yR         (YES|NO)  \"YES\">" << '\n'
+	<< "<!ELEMENT ABarrelCalorimeter EMPTY >" << '\n'
+	<< "<!ATTLIST ABarrelCalorimeter" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          sampling   CDATA     #REQUIRED" << '\n'
+	<< "          region     CDATA     #REQUIRED" << '\n'
+	<< "          rMin       CDATA     #REQUIRED" << '\n'
+	<< "          rMax       CDATA     #REQUIRED" << '\n'
+	<< "          zMin       CDATA     #REQUIRED" << '\n'
+	<< "          zMax       CDATA     #REQUIRED" << '\n'
+	<< "          eta0       CDATA     #REQUIRED" << '\n'
+	<< "          deta       CDATA     #REQUIRED" << '\n'
+	<< "          neta       CDATA     #REQUIRED" << '\n'
+	<< "          meta       CDATA     #REQUIRED" << '\n'
+	<< "          phi0       CDATA     #REQUIRED" << '\n'
+	<< "          nphi       CDATA     #REQUIRED>" << '\n'
+	<< "<!ELEMENT AEndcapCalorimeter EMPTY >" << '\n'
+	<< "<!ATTLIST AEndcapCalorimeter" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          sampling   CDATA     #REQUIRED" << '\n'
+	<< "          region     CDATA     #REQUIRED" << '\n'
+	<< "          rMin       CDATA     #REQUIRED" << '\n'
+	<< "          rMax       CDATA     #REQUIRED" << '\n'
+	<< "          zMin       CDATA     #REQUIRED" << '\n'
+	<< "          zMax       CDATA     #REQUIRED" << '\n'
+	<< "          eta0       CDATA     #REQUIRED" << '\n'
+	<< "          deta       CDATA     #REQUIRED" << '\n'
+	<< "          neta       CDATA     #REQUIRED" << '\n'
+	<< "          meta       CDATA     #REQUIRED" << '\n'
+	<< "          phi0       CDATA     #REQUIRED" << '\n'
+	<< "          nphi       CDATA     #REQUIRED>" << '\n'
+	<< "<!ELEMENT AGapCalorimeter EMPTY >" << '\n'
+	<< "<!ATTLIST AGapCalorimeter" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          sampling   CDATA     #REQUIRED" << '\n'
+	<< "          region     CDATA     #REQUIRED" << '\n'
+	<< "          rMin       CDATA     #REQUIRED" << '\n'
+	<< "          rMax       CDATA     #REQUIRED" << '\n'
+	<< "          zMin       CDATA     #REQUIRED" << '\n'
+	<< "          zMax       CDATA     #REQUIRED" << '\n'
+	<< "          eta        CDATA     #REQUIRED" << '\n'
+	<< "          phi0       CDATA     #REQUIRED" << '\n'
+	<< "          nphi       CDATA     #REQUIRED>" << '\n'
+	<< "<!ELEMENT AEndcapCryostat EMPTY >" << '\n'
+	<< "<!ATTLIST AEndcapCryostat" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          sampling   CDATA     #REQUIRED" << '\n'
+	<< "          region     CDATA     #REQUIRED" << '\n'
+	<< "          rMin       CDATA     #REQUIRED" << '\n'
+	<< "          rMax       CDATA     #REQUIRED" << '\n'
+	<< "          zMin       CDATA     #REQUIRED" << '\n'
+	<< "          zMax       CDATA     #REQUIRED" << '\n'
+	<< "          neta       CDATA     #REQUIRED" << '\n'
+	<< "          nphi       CDATA     #REQUIRED>" << '\n'
+	<< "<!ELEMENT ABarrelSiliconDetector EMPTY >" << '\n'
+	<< "<!ATTLIST ABarrelSiliconDetector" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          layer      CDATA     #REQUIRED" << '\n'
+	<< "          length     CDATA     #REQUIRED" << '\n'
+	<< "          width      CDATA     #REQUIRED" << '\n'
+	<< "          thickness  CDATA     #REQUIRED" << '\n'
+	<< "          tilt       CDATA     #REQUIRED" << '\n'
+	<< "          nz         CDATA     #REQUIRED" << '\n'
+	<< "          nphi       CDATA     #REQUIRED" << '\n'
+	<< "          r0         CDATA     #REQUIRED" << '\n'
+	<< "          phi0       CDATA     #REQUIRED" << '\n'
+	<< "          zMin       CDATA     #REQUIRED" << '\n'
+	<< "          zMax       CDATA     #REQUIRED>" << '\n'
+	<< "<!ELEMENT AEndcapSiliconDetector EMPTY >" << '\n'
+	<< "<!ATTLIST AEndcapSiliconDetector" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          layer      CDATA     #REQUIRED" << '\n'
+	<< "          length     CDATA     #REQUIRED" << '\n'
+	<< "          width      CDATA     #REQUIRED" << '\n'
+	<< "          thickness  CDATA     #REQUIRED" << '\n'
+	<< "          nz         CDATA     #REQUIRED" << '\n'
+	<< "          nphi       CDATA     #REQUIRED" << '\n'
+	<< "          rMin       CDATA     #REQUIRED" << '\n'
+	<< "          rMax       CDATA     #REQUIRED" << '\n'
+	<< "          phi0       CDATA     #REQUIRED" << '\n'
+	<< "          zMin       CDATA     #REQUIRED" << '\n'
+	<< "          zMax       CDATA     #REQUIRED>" << '\n'
+	<< "<!ELEMENT ABarrelTRTDetector EMPTY >" << '\n'
+	<< "<!ATTLIST ABarrelTRTDetector" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          layer      CDATA     #REQUIRED" << '\n'
+	<< "          nphi       CDATA     #REQUIRED" << '\n'
+	<< "          rMin       CDATA     #REQUIRED" << '\n'
+	<< "          rMax       CDATA     #REQUIRED" << '\n'
+	<< "          phiIn      CDATA     #REQUIRED" << '\n'
+	<< "          phiOut     CDATA     #REQUIRED" << '\n'
+	<< "          zMin       CDATA     #REQUIRED" << '\n'
+	<< "          zMax       CDATA     #REQUIRED>" << '\n'
+	<< "<!ELEMENT AEndcapTRTDetector EMPTY >" << '\n'
+	<< "<!ATTLIST AEndcapTRTDetector" << '\n'
+	<< "          c          CDATA     #REQUIRED" << '\n'
+	<< "          n          CDATA     #REQUIRED" << '\n'
+	<< "          layer      CDATA     #REQUIRED" << '\n'
+	<< "          nphi       CDATA     #REQUIRED" << '\n'
+	<< "          rMin       CDATA     #REQUIRED" << '\n'
+	<< "          rMax       CDATA     #REQUIRED" << '\n'
+	<< "          phi0       CDATA     #REQUIRED" << '\n'
+	<< "          zMin       CDATA     #REQUIRED" << '\n'
+	<< "          zMax       CDATA     #REQUIRED>" << '\n'
+	<< "]>" << '\n'
+	<< "<AGeometry>" << '\n';
   }
 
   void GeometryWriter::writePixelGeometry(std::ofstream &out) {
@@ -312,7 +312,7 @@ namespace JiveXML {
 	    << " phi0=\"" << 180./M_PI * (element->phiMin()+element->phiMax())/2. << "\""
 	    << " zMin=\"" << -zMax/10. << "\""
 	    << " zMax=\"" << zMax/10. << "\""
-	    << " />" << std::endl;
+	    << " />" << '\n';
         //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Pixel barrel out: " << out << endmsg;
       }
 
@@ -348,7 +348,7 @@ namespace JiveXML {
 	    << " phi0=\"" << 180./M_PI * (element->phiMin()+element->phiMax())/2. << "\""
 	    << " zMin=\"" << zMin/10. << "\""
 	    << " zMax=\"" << zMax/10. << "\""
-	    << " />" << std::endl;
+	    << " />" << '\n';
         //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Pixel endcap out: " << out << endmsg;
       }
     }
@@ -401,7 +401,7 @@ namespace JiveXML {
 	    << " phi0=\"" << 180./M_PI * (element->phiMin()+element->phiMax())/2. << "\""
 	    << " zMin=\"" << -zMax/10. << "\""
 	    << " zMax=\"" << zMax/10. << "\""
-	    << " />" << std::endl;
+	    << " />" << '\n';
         //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "SCT barrel out: " << out << endmsg;
       }
 
@@ -447,7 +447,7 @@ namespace JiveXML {
 	    << " phi0=\"" << 180./M_PI * (element->phiMin()+element->phiMax())/2. << "\""
 	    << " zMin=\"" << zMin/10. << "\""
 	    << " zMax=\"" << zMax/10. << "\""
-	    << " />" << std::endl;
+	    << " />" << '\n';
         //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "SCT endcap out: " << out << endmsg;
       }
     }
@@ -498,7 +498,7 @@ namespace JiveXML {
 	    << " phiOut=\"" << 180./M_PI * (posOut.phi() - dphiOut - 2e-3) << "\""
 	    << " zMin=\"" << -(posIn.z() + elementIn->strawLength()/2.)/10. << "\""
 	    << " zMax=\"" << (posIn.z() + elementIn->strawLength()/2.)/10. << "\""
-	    << " />" << std::endl;
+	    << " />" << '\n';
         //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "TRT barrel out: " << out << endmsg;
       } else {
 	elementOut = m_trt_manager->getEndcapElement(1,//m_trtIdHelper->barrel_ec(id),
@@ -523,7 +523,7 @@ namespace JiveXML {
 	    << " phi0=\"" << 180./M_PI * posIn.phi() << "\""
 	    << " zMin=\"" << posIn.z()/10. << "\""
 	    << " zMax=\"" << posOut.z()/10. << "\""
-	    << " />" << std::endl;
+	    << " />" << '\n';
         //if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "TRT endcap out: " << out << endmsg;
       }
 
@@ -540,7 +540,7 @@ namespace JiveXML {
     out << "<ADisc p=\"YX\" c=\"Sol\"  n=\"Solenoid\"" 
 	<< " rIn=\"" << rIn << "\""
 	<< " rOut=\"" << rOut << "\" />"
-	<< std::endl;
+	<< '\n';
 
     out << "<ARectangle p=\"RZ\" c=\"Sol\" n=\"Solenoid\""
 	<< " xMin=\"" << zIn << "\""
@@ -548,7 +548,7 @@ namespace JiveXML {
 	<< " yMin=\"" << rIn << "\""
 	<< " yMax=\"" << rOut << "\""
 	<< " xR=\"NO\" />"
-	<< std::endl;
+	<< '\n';
   }
 
 
@@ -583,7 +583,7 @@ namespace JiveXML {
 	      << " eta=\"" << (i < 3 ? tileIdHelper->eta_min(descriptor->identify())-i+2 : i) << "\""
 	      << " phi0=\"" << descriptor->phi_min() << "\""
 	      << " nphi=\"" << descriptor->n_phi() << "\""
-	      << " />" << std::endl;
+	      << " />" << '\n';
 	} else {
 	  int section = tileIdHelper->section(descriptor->identify());
 	  int side = tileIdHelper->side(descriptor->identify());
@@ -603,7 +603,7 @@ namespace JiveXML {
 	      << " meta=\"" << tileIdHelper->eta_min(id) << "\""
 	      << " phi0=\"" << descriptor->phi_min() << "\""
 	      << " nphi=\"" << descriptor->n_phi() << "\""
-	      << " />" << std::endl;
+	      << " />" << '\n';
 	}
       }
     }
@@ -757,7 +757,7 @@ namespace JiveXML {
 		  << " meta=\"" << minEtaIndex << "\""
 		  << " phi0=\"" << phi0 << "\""
 		  << " nphi=\"" << numPhi << "\""
-		  << " />" << std::endl;
+		  << " />" << '\n';
 	      break;
 	    case ENDCAP:
 	      out << "<AEndcapCalorimeter c=\"" << color << "\" n=\"" << name << "\""
@@ -772,19 +772,19 @@ namespace JiveXML {
 		  << " meta=\"" << minEtaIndex << "\""
 		  << " phi0=\"" << phi0 << "\""
 		  << " nphi=\"" << numPhi << "\""
-		  << " />" << std::endl;
+		  << " />" << '\n';
 	      break;
 	    case FORWARD:
 	      out << "<ADisc p=\"YX\" c=\"" << color << "\" n=\"" << name << "\""
 		  << " rIn=\"" << descriptor->calo_r_min()/10. << "\""
 		  << " rOut=\"" << descriptor->calo_r_max()/10. << "\""
-		  << " />" << std::endl;
+		  << " />" << '\n';
 	      out << "<ARectangle p=\"RZ\" c=\"" << color << "\" n=\"" << name << "\""
 		  << " xMin=\"" << descriptor->calo_z_min()/10. << "\""
 		  << " xMax=\"" << descriptor->calo_z_max()/10. << "\""
 		  << " yMin=\"" << descriptor->calo_r_min()/10. << "\""
 		  << " yMax=\"" << descriptor->calo_r_max()/10. << "\""
-		  << " />" << std::endl;
+		  << " />" << '\n';
 	    }
 	  }
 	}
@@ -881,7 +881,7 @@ namespace JiveXML {
 					   << " zMax=\"" << (zlocation+zmovement+zthickness)/10. << "\""
 					   << " neta=\"" << "1" << "\""
 					   << " nphi=\"" << numPhi << "\""
-					   << " />" << std::endl;
+					   << " />" << '\n';
 					sampling++;
 				 } 
 			  }
@@ -894,6 +894,6 @@ namespace JiveXML {
 
   void GeometryWriter::writeFooter(std::ofstream &out) {
 
-    out << "</AGeometry>" << std::endl;
+    out << "</AGeometry>" << '\n';
   }
 }

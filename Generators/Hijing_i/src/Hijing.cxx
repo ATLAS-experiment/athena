@@ -35,6 +35,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Geometry/Point3D.h"
+#include <cstdint>
 
 #include "AthenaKernel/RNGWrapper.h"
 
@@ -43,13 +44,60 @@ namespace {
   static std::string hijing_stream = "HIJING_INIT";
 }
 
-// calls to fortran routines
+
+extern "C" {
+
+  void* getaddr_(void* arg);
+  void* getaddri_(int* arg);
+
+}
+
+void* getaddr_(void* arg) {
+
+  return(arg);
+
+}
+
+// Version to be used with integer arguments, to prevent LTO warnings
+// about inconsistent parameter types.
+void* getaddri_(int* arg) {
+
+  return(arg);
+
+}
+
+// calls to fortran routines and common-block address accessors
 extern "C"
 {
   float atl_ran_( int* )
   {
     return (float) CLHEP::RandFlat::shoot(p_Engine);
   }
+
+  float ran_(int* idummy)
+  {
+    return atl_ran_(idummy);
+  }
+
+  extern char himain1_[];
+  extern char himain2_[];
+  extern char hijjet1_[];
+  extern char hijjet2_[];
+  extern char hijjet4_[];
+  extern char hiparnt_[];
+  extern char histrng_[];
+  extern char hijcrdn_[];
+  extern char ranseed_[];
+
+  uintptr_t himain1_address_() { return reinterpret_cast<uintptr_t>(himain1_); }
+  uintptr_t himain2_address_() { return reinterpret_cast<uintptr_t>(himain2_); }
+  uintptr_t hijjet1_address_() { return reinterpret_cast<uintptr_t>(hijjet1_); }
+  uintptr_t hijjet2_address_() { return reinterpret_cast<uintptr_t>(hijjet2_); }
+  uintptr_t hijjet4_address_() { return reinterpret_cast<uintptr_t>(hijjet4_); }
+  uintptr_t hiparnt_address_() { return reinterpret_cast<uintptr_t>(hiparnt_); }
+  uintptr_t histrng_address_() { return reinterpret_cast<uintptr_t>(histrng_); }
+  uintptr_t hijcrdn_address_() { return reinterpret_cast<uintptr_t>(hijcrdn_); }
+  uintptr_t ranseed_address_() { return reinterpret_cast<uintptr_t>(ranseed_); }
 
   void hijset_(float*,
               const char*,

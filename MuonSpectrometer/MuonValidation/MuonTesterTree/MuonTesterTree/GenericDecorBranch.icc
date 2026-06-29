@@ -12,7 +12,7 @@ namespace MuonVal {
 
     template<class AuxType, class dType>
         GenericAuxEleBranch<AuxType, dType>::GenericAuxEleBranch(MuonTesterTree& t, const std::string& var_name, Filler_t fill) :
-            VectorBranch<dType>{t, var_name}, m_fillFunc{fill}{}
+            VectorBranch<dType>{t.tree(), var_name}, m_fillFunc{fill}{}
 
     template<class AuxType, class dType>
         void GenericAuxEleBranch<AuxType, dType>::push_back(const SG::AuxElement& p) {

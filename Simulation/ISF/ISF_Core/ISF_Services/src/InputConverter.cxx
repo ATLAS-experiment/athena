@@ -292,7 +292,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
   }
 
   const int pPdgId = genPartPtr->pdg_id();
-  const double charge = HepPDT::ParticleID(pPdgId).charge();
+  const double charge = MC::charge(pPdgId);
   const double pTime = pVertex->position().t() / Gaudi::Units::c_light;
   /// particle origin (TODO: add proper GeoID, collision/cosmics)
   DetRegionSvcIDPair origin(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);

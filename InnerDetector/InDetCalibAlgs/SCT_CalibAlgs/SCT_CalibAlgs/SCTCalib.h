@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -301,7 +301,7 @@ class SCTCalib : public AthAlgorithm {
       getNumNoisyStrips(const Identifier& waferId) const;
 
       StatusCode
-      addStripsToList(Identifier& waferId, std::set<Identifier>& stripIdList, bool isNoisy, bool isNew) const;
+      addStripsToList(const EventContext& ctx, Identifier& waferId, std::set<Identifier>& stripIdList, bool isNoisy, bool isNew) const;
 
       StatusCode
       writeModuleListToCool ATLAS_NOT_THREAD_SAFE // Thread unsafe SCTCalibWriteTool::createCondObjects method is used.

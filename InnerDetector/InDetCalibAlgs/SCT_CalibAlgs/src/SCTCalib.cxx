@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -295,7 +295,7 @@ StatusCode SCTCalib::execute(const EventContext& ctx) {
 
    ATH_MSG_DEBUG("----- in execute() ----- ");
 
-   const bool majorityIsGoodOrUnused{(m_useMajority and m_MajorityConditionsTool->isGood()) or !m_useMajority};
+   const bool majorityIsGoodOrUnused{(m_useMajority and m_MajorityConditionsTool->isGood(ctx)) or !m_useMajority};
    if (m_readBS) {
       //--- TimeStamp/LB range analyzed
       const int timeStamp{static_cast<int>(ctx.eventID().time_stamp())};
@@ -508,6 +508,8 @@ StatusCode SCTCalib::getNoisyStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe w
 
    ATH_MSG_INFO("----- in getNoisyStrip() ----- ");
 
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+
    //--- Number of LBs processed
    m_numOfLBsProcessed = 0;
    for (int iLB{0}; iLB != m_LBRange; ++iLB) {
@@ -521,7 +523,7 @@ StatusCode SCTCalib::getNoisyStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe w
    //Reading data from COOL
    // original code switched on this :if (m_noisyUpdate)
    ATH_MSG_DEBUG("in getNoisyStrips: before readModuleList");
-   if (m_calibModuleListTool->readModuleList(moduleLists[REF]).isFailure()) {
+   if (m_calibModuleListTool->readModuleList(ctx, moduleLists[REF]).isFailure()) {
       ATH_MSG_ERROR("Could not read moduleList");
       return StatusCode::FAILURE;
    }
@@ -550,20 +552,20 @@ StatusCode SCTCalib::getNoisyStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe w
             
             if (not m_noisyWaferWrite) break;
             if (m_noisyWaferAllStrips) { //write out all strips
-               if (addStripsToList(waferId, stripIdLists[ALL], false, false).isFailure() or  addStripsToList(waferId, stripIdLists[NEW], false, true).isFailure()) {
+               if (addStripsToList(ctx, waferId, stripIdLists[ALL], false, false).isFailure() or  addStripsToList(ctx, waferId, stripIdLists[NEW], false, true).isFailure()) {
                   ATH_MSG_ERROR("Could not add stripIds to the list");
                   return StatusCode::FAILURE;
                }
                break;
             } else {
                //only noisy strips in noisy wafer
-               if (addStripsToList(waferId, stripIdLists[ALL], true, false).isFailure() or addStripsToList(waferId, stripIdLists[NEW], true, true).isFailure()) {
+               if (addStripsToList(ctx, waferId, stripIdLists[ALL], true, false).isFailure() or addStripsToList(ctx, waferId, stripIdLists[NEW], true, true).isFailure()) {
                   ATH_MSG_ERROR("Could not add stripIds to the list");
                   return StatusCode::FAILURE;
                }
             }
          } else { // not in noisy wafer
-            if (addStripsToList(waferId, stripIdLists[ALL], true, false).isFailure() or addStripsToList(waferId, stripIdLists[NEW], true, true).isFailure()) {
+            if (addStripsToList(ctx, waferId, stripIdLists[ALL], true, false).isFailure() or addStripsToList(ctx, waferId, stripIdLists[NEW], true, true).isFailure()) {
                ATH_MSG_ERROR("Could not add stripIds to the list");
                return StatusCode::FAILURE;
             }
@@ -610,21 +612,23 @@ StatusCode SCTCalib::getDeadStrip ATLAS_NOT_THREAD_SAFE () { // Thread unsafe SC
    //Function to identify and print out the dead strips.
    ATH_MSG_INFO("getDeadStrip() called");
 
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+
    // Bad Mods
-   const std::set<Identifier>* badMods{m_ConfigurationConditionsTool->badModules()};
+   const std::set<Identifier>* badMods{m_ConfigurationConditionsTool->badModules(ctx)};
    std::set<Identifier>::const_iterator ModItr{badMods->begin()};
    std::set<Identifier>::const_iterator ModEnd{badMods->end()};
    // Bad links
-   const std::map<IdentifierHash, std::pair<bool, bool> >* badLinks{m_ConfigurationConditionsTool->badLinks()};
+   const std::map<IdentifierHash, std::pair<bool, bool> >* badLinks{m_ConfigurationConditionsTool->badLinks(ctx)};
    std::map<IdentifierHash, std::pair<bool, bool> >::const_iterator linkItr{badLinks->begin()};
    std::map<IdentifierHash, std::pair<bool, bool> >::const_iterator linkEnd{badLinks->end()};
    // Bad chips
-   const std::map<Identifier, unsigned int>* badChips{m_ConfigurationConditionsTool->badChips()};
+   const std::map<Identifier, unsigned int>* badChips{m_ConfigurationConditionsTool->badChips(ctx)};
    std::map<Identifier, unsigned int>::const_iterator chipItr{badChips->begin()};
    std::map<Identifier, unsigned int>::const_iterator chipEnd{badChips->end()};
    // Bad strips (w/o bad modules and chips)
    std::set<Identifier> badStripsExclusive;
-   m_ConfigurationConditionsTool->badStrips(badStripsExclusive, true, true);
+   m_ConfigurationConditionsTool->badStrips(badStripsExclusive, ctx, true, true);
    std::set<Identifier>::const_iterator stripEnd(badStripsExclusive.end());
    //To get #(Enabled Modules)
    int numEnabledModules_B[n_barrels] = {n_phiBinsB0*n_etaInBarrel, n_phiBinsB1*n_etaInBarrel, n_phiBinsB2*n_etaInBarrel, n_phiBinsB3*n_etaInBarrel};
@@ -2734,7 +2738,7 @@ SCTCalib::getNumNoisyStrips(const Identifier& waferId) const {
 
 
 StatusCode
-SCTCalib::addStripsToList(Identifier& waferId, std::set<Identifier>& stripIdList, bool isNoisy, bool isNew) const {
+SCTCalib::addStripsToList(const EventContext& ctx, Identifier& waferId, std::set<Identifier>& stripIdList, bool isNoisy, bool isNew) const {
    IdentifierHash waferHash{m_pSCTHelper->wafer_hash(waferId)};
    float noisyStripThr{m_noisyStripThrDef ? (m_noisyStripThrOffline):(m_noisyStripThrOnline)};
    for (int iStrip{0}; iStrip != nbins; ++iStrip) {
@@ -2747,8 +2751,8 @@ SCTCalib::addStripsToList(Identifier& waferId, std::set<Identifier>& stripIdList
             if (!isNew) { //--- All noisy strips
                stripIdList.insert(stripId);
             } else { //--- New noisy strips : compared with configuration and calibration
-               const bool isGoodInConfiguration{m_useConfiguration ? m_ConfigurationConditionsTool->isGood(stripId, InDetConditions::SCT_STRIP) : true};
-               const bool isGoodInCalibration{m_useCalibration ? m_ReadCalibDataTool->isGood(stripId, InDetConditions::SCT_STRIP) : true};
+               const bool isGoodInConfiguration{m_useConfiguration ? m_ConfigurationConditionsTool->isGood(stripId, ctx, InDetConditions::SCT_STRIP) : true};
+               const bool isGoodInCalibration{m_useCalibration ? m_ReadCalibDataTool->isGood(stripId, ctx, InDetConditions::SCT_STRIP) : true};
                if (m_useConfiguration or m_useCalibration) {
                   if (isGoodInConfiguration and isGoodInCalibration) {
                      stripIdList.insert(stripId);

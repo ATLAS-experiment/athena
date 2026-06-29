@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -9,6 +9,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "SGTools/TestStore.h"
 #include "TestTools/initGaudi.h"
 #include "TestTools/expect.h"
@@ -37,11 +38,6 @@ int main ATLAS_NOT_THREAD_SAFE () {
   ctx.setExtension( Atlas::ExtendedEventContext(xdict) );
   Gaudi::Hive::setCurrentContext (ctx);
   std::cout << "Context: " << ctx << std::endl;
-
-
-  // check current context
-  const EventContext& ctx1 = Gaudi::Hive::currentContext();
-  std::cout << "Current context: " << ctx1 << std::endl;
 
   // create handle and record tests
 
@@ -202,7 +198,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
   ElementLink<DecisionContainer > d5feature = d5->objectLink<DecisionContainer>("feature");
   std::cout << "get d6 feature link " << std::endl;
   // We have to get this recursivly
-  LinkInfo<DecisionContainer> linkInfo = findLink<DecisionContainer>(d6, "feature");
+  LinkInfo<DecisionContainer> linkInfo = findLink<DecisionContainer>(ctx, d6, "feature");
   VALUE ( linkInfo.isValid() ) EXPECTED ( true );
   ElementLink<DecisionContainer > d6feature = linkInfo.link;
   std::cout << "compare feature links " << std::endl;

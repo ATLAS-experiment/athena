@@ -127,6 +127,11 @@ private:
   /// label = hasTruth || (bucket_segments > 0).
   Gaudi::Property<bool> m_printLabels{this, "PrintLabels", false};
 
+  /// Print one compact per-event selection summary at INFO level.
+  Gaudi::Property<bool> m_printFilterSummary{
+      this, "PrintFilterSummary", false,
+      "Print input, selected, rejected, and (when labels are enabled) expected-signal counts"};
+
   /// Print detailed per-bucket label/decision lines for the first N buckets per event.
   /// 0 disables per-bucket lines while keeping the per-event performance summary.
   Gaudi::Property<unsigned int> m_labelPrintFirstNBuckets{this, "LabelPrintFirstNBuckets", 20};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -34,7 +34,7 @@ StatusCode SCT_FlaggedConditionTestAlg::execute(const EventContext& ctx) const {
   ATH_MSG_ALWAYS(" numBadIds " << m_flaggedTool->numBadIds(ctx));
   const IDCInDetBSErrContainer* badIds{m_flaggedTool->getBadIds(ctx)};
   for (const std::pair<const size_t, const IDCInDetBSErrContainer::ErrorCode> badId : badIds->getAll()) {
-    ATH_MSG_ALWAYS("  Wafer hash " << badId.first << " reason " << m_flaggedTool->details(badId.first));
+    ATH_MSG_ALWAYS("  Wafer hash " << badId.first << " reason " << m_flaggedTool->details(badId.first, ctx));
   }
 
   return StatusCode::SUCCESS;
