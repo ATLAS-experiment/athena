@@ -185,6 +185,14 @@ def ActsExtrapolationToolCfg(flags,
   return acc
 
 
+def ActsGeometryRealmConvTool(flags, name: str = "ActsGeometryRealmConvTool", **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("ExtractMuonSurfaces", flags.Muon.usePhaseIIGeoSetup)
+    acc.addPublicTool(CompFactory.ActsTrk.GeometryRealmConvTool(name, **kwargs), primary = True)
+    return acc
+
 def ActsObjWriterToolCfg(flags,
                          name: str = "ActsObjWriterTool",
                          **kwargs) -> ComponentAccumulator:

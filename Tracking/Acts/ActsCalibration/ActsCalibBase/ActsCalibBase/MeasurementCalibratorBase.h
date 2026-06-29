@@ -20,10 +20,7 @@
 
 
 #include <array>
-
-
 #include <variant>
-
 namespace Trk{
     class MeasurementBase;
     class PrepRawData;
@@ -74,6 +71,13 @@ namespace ActsTrk::detail {
      *                      into a SourceLInk */
     template <Acts::PointerConcept Ptr_t>
     static Acts::SourceLink pack(const Ptr_t& measurement);
+    /** @brief Converts a vector measurement pointers to Acts::SourceLinks
+     *  @param measList: The list of measurement pointers for conversion
+     *  @param targetSL: The allocated SourceLink vectors to which the 
+     *                   Acts::SourceLink objects are appended. */
+    template<Acts::PointerConcept Ptr_t>
+    static void pack(const std::vector<Ptr_t>& measList,
+                     std::vector<Acts::SourceLink>& targetSL);
 
     /** @brief Copy the local position & covariance into the Acts track state proxy.
      *  @tparam Dim: Dimension of the measurement

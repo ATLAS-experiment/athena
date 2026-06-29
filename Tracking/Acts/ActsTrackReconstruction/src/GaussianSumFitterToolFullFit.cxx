@@ -18,7 +18,6 @@ namespace ActsTrk {
 
 std::unique_ptr<Trk::Track>
 GaussianSumFitterTool::performFit(const EventContext& ctx,
-			      const Acts::GeometryContext& tgContext,
 			      const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
 			      const std::vector<Acts::SourceLink>& trackSourceLinks,
 			      const Acts::BoundTrackParameters& initialParams) const
@@ -40,9 +39,8 @@ GaussianSumFitterTool::performFit(const EventContext& ctx,
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
 			      initialParams, gsfOptions, tracks);
 
-  // Convert
-  if (not result.ok()) return nullptr;
-  return makeTrack(ctx, tgContext, tracks, result);
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
+                                                Trk::TrackInfo::TrackFitter::GaussianSumFilter);
 }
 
 }

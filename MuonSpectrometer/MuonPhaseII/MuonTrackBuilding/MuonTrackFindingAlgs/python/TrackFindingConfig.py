@@ -14,6 +14,8 @@ def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     from ActsConfig.ActsConfigFlags import TrackFitterType
     from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+    kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon = True)))
     kwargs.setdefault("fitterKind", TrackFitterType.GlobalChiSquareFitter)
     kwargs.setdefault("OutlierChi2Cut", 200000)
     kwargs.setdefault("DoReFitFromPRD", False)
@@ -66,13 +68,15 @@ def StandaloneTrackPartCnvCfg(flags, name="MuonMsTrackParticleCnvR4", **kwargs):
     kwargs.setdefault("VertexContainerKey", "")
     kwargs.setdefault("ACTSTracksLocation" ,["MsTracks"])
     kwargs.setdefault("TrackParticlesOutKey", "MsTrackParticlesR4")
-    kwargs.setdefault("PerigeeExpression", "DontRecalculate")    
+    kwargs.setdefault("PerigeeExpression", "DontRecalculate")
     return ActsTrackToTrackParticleCnvAlgCfg(flags, name=name, **kwargs)
 
 def MuonActsToTrkConvCfg(flags, name="MuonActsToTrkConverterAlg", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault('ACTSTracksLocation', "MsTracks")
     kwargs.setdefault('TracksLocation', 'MsTracksTrkCnv')
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+    kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon = True)))
     from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
     result.merge(ActsToTrkConvertorAlgCfg(flags, name=name, **kwargs))
     return result 

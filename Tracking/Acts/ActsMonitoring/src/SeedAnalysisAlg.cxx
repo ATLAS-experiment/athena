@@ -34,12 +34,10 @@ namespace ActsTrk {
 
     ATH_CHECK( m_EventInfoKey.initialize() );
 
-    if (not m_prdTruth.empty()) {
-      ATH_CHECK( m_paramEstimationTool.retrieve() );
-      ATH_CHECK( m_trackingGeometryTool.retrieve() );
-      ATH_CHECK( m_ATLASConverterTool.retrieve() );
-    }
-
+    ATH_CHECK( m_paramEstimationTool.retrieve(EnableTool{!m_prdTruth.empty()}) );
+    ATH_CHECK( m_trackingGeometryTool.retrieve(EnableTool{!m_prdTruth.empty()}) );
+    ATH_CHECK( m_geometryConvTool.retrieve(EnableTool{!m_prdTruth.empty()}) );
+ 
     ATH_MSG_DEBUG("Monitoring settings ...");
     ATH_MSG_DEBUG(m_monGroupName);
 
@@ -241,7 +239,7 @@ namespace ActsTrk {
           const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
                 useTopSp ? sp->elementIdList().back() : sp->elementIdList().front());
           const Trk::Surface& atlas_surface = element->surface();
-          return *m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
+          return *m_geometryConvTool->convertSurfaceToActs(atlas_surface);
       };
 
 

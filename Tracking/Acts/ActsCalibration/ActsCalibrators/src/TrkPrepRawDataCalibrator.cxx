@@ -4,7 +4,7 @@
 #include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
 
 namespace ActsTrk::detail {
-  TrkPrepRawDataCalibrator::TrkPrepRawDataCalibrator(const ActsTrk::IActsToTrkConverterTool* convTool,
+  TrkPrepRawDataCalibrator::TrkPrepRawDataCalibrator(const ActsTrk::IGeometryRealmConvTool* convTool,
                                                      const Trk::IRIO_OnTrackCreator* rotCreator):
       m_convTool{convTool}, m_rotCreator{rotCreator} {}
   
