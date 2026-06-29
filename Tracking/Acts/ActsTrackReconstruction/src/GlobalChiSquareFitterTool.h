@@ -31,9 +31,10 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
 #include "ActsCalibrators/TrkPrepRawDataCalibrator.h"
@@ -160,7 +161,7 @@ class GlobalChiSquareFitterTool
     /** @brief Abrivate the track state proxy */
     using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
     
-    using TrackFitResult_t = IActsToTrkConverterTool::TrackFitResult_t;
+    using TrackFitResult_t = ITrackConverterTool::TrackFitResult_t;
     /** @brief Calls the underlying Acts::Gx2Fitter for a given configuration of measurements
      *  @param sourceLinks: List of measurements to fit
      *  @param initialPars: Initial estimate of the track parameters 
@@ -184,9 +185,10 @@ class GlobalChiSquareFitterTool
                                     const Acts::Surface* surface,
                                     detail::SourceLinkType slType) const;
    
-    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+    ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-    PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
+    ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
 
     ToolHandle<MuonR4::ISpacePointCalibrator> m_muonCalibrator{this, "MuonCalibrationTool", ""};
 

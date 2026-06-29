@@ -32,7 +32,14 @@ template <Acts::PointerConcept Ptr_t>
         }
         return Acts::SourceLink{SourceLink_t{measurement}};
     }
-
+template <Acts::PointerConcept Ptr_t>
+  inline void MeasurementCalibratorBase::pack(const std::vector<Ptr_t>& measList,
+               std::vector<Acts::SourceLink>& targetSL) {
+    targetSL.reserve(targetSL.size() + measList.size());
+    for (const auto& meas : measList) {
+        targetSL.emplace_back(pack(meas));
+    }
+  }
   inline MeasurementCalibratorBase::SourceLink_t 
       MeasurementCalibratorBase::unpackBase(const Acts::SourceLink& sl) {
       return sl.template get<SourceLink_t>();

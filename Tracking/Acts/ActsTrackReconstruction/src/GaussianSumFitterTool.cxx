@@ -84,6 +84,7 @@ StatusCode GaussianSumFitterTool::initialize() {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ATLASConverterTool.retrieve());
+  ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_trkSummaryTool.retrieve(EnableTool{!m_refitOnly}));
   if (m_refitOnly) {
     ATH_MSG_INFO("Running GSF without track summary");
@@ -131,7 +132,7 @@ StatusCode GaussianSumFitterTool::initialize() {
   m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>();
   m_gsfExtensions.calibrator.connect<&ActsTrk::detail::TrkMeasurementCalibrator::calibrate<TrackState_t>>(m_calibrator.get());
 
-  m_surfaceAccessor = detail::TrkMeasSurfaceAccessor{m_ATLASConverterTool.get()};
+  m_surfaceAccessor = detail::TrkMeasSurfaceAccessor{m_geometryConvTool.get()};
   m_gsfExtensions.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_surfaceAccessor);
   m_gsfExtensions.mixtureReducer.connect<&Acts::reduceMixtureWithKLDistance>();
   
@@ -200,10 +201,9 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   
 
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *inputTrack.perigeeParameters());
 
   return performFit(ctx, 
-		    tgContext,
 		    gsfOptions,
 		    trackSourceLinks, 
 		    initialParams);
@@ -244,9 +244,9 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   gsfOptions.abortOnError = false;
   
   std::vector< Acts::SourceLink > trackSourceLinks;
-  m_ATLASConverterTool->toSourceLinks(inputMeasSet, trackSourceLinks);
+  detail::MeasurementCalibratorBase::pack(inputMeasSet, trackSourceLinks);
 
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, estimatedStartParameters);
   
   if(m_useDirectNavigation){
     
@@ -255,14 +255,12 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
     std::ranges::transform(trackSourceLinks, std::back_inserter(surfaces), m_surfaceAccessor);
     
     return performDirectFit(ctx,
-			    tgContext,
 			    gsfOptions,
 			    trackSourceLinks,
 			    initialParams,
 			    surfaces);
   }else{
     return performFit(ctx,
-		      tgContext,
 		      gsfOptions,
 		      trackSourceLinks,
 		      initialParams);
@@ -331,11 +329,11 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
 				*pSurface);
 
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *inputTrack.perigeeParameters());
 
-  m_ATLASConverterTool->toSourceLinks(addMeasColl, trackSourceLinks);
+  detail::MeasurementCalibratorBase::pack(addMeasColl, trackSourceLinks);
 
-  return performFit(ctx, tgContext, gsfOptions,
+  return performFit(ctx, gsfOptions,
                     trackSourceLinks,
                     initialParams);
 }
@@ -405,11 +403,9 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(intrk1);
   std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(intrk2);
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *intrk1.perigeeParameters());
 
-  return performFit(ctx,
-		    tgContext,
-		    gsfOptions,
+  return performFit(ctx, gsfOptions,
                     trackSourceLinks,
                     initialParams);
 }
@@ -473,14 +469,14 @@ StatusCode GaussianSumFitterTool::fit(
 
   Acts::GsfOptions<ActsTrk::MutableTrackStateBackend> gsfOptions = prepareOptions(tgContext, mfContext, calContext, pSurface);
 
-  detail::RefittingCalibrator calibrator{m_ATLASConverterTool.get(), m_ROTcreator.get()};
+  detail::RefittingCalibrator calibrator{m_geometryConvTool.get(), m_ROTcreator.get()};
   using xAODUnCalibrator_t = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>;
   auto xODCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
   calibrator.connect<&xAODUnCalibrator_t::calibrate>(xAOD::UncalibMeasType::PixelClusterType, &xODCalibrator);
   calibrator.connect<&xAODUnCalibrator_t::calibrate>(xAOD::UncalibMeasType::StripClusterType, &xODCalibrator);
   
 
-  detail::RefittingSurfaceAccesor surfaceAcc{m_ATLASConverterTool.get(),
+  detail::RefittingSurfaceAccesor surfaceAcc{m_geometryConvTool.get(),
                                              m_trackingGeometryTool.get()};
 
   auto gsfExtensions = m_gsfExtensions;
@@ -496,159 +492,6 @@ StatusCode GaussianSumFitterTool::fit(
   }
 
   return StatusCode::SUCCESS;
-}
-
-std::unique_ptr<Trk::Track>
-GaussianSumFitterTool::makeTrack(const EventContext& ctx,
-				 const Acts::GeometryContext& tgContext,
-				 ActsTrk::MutableTrackContainer& tracks,
-				 Acts::Result<typename ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult) const
-{
-  if (not fitResult.ok()) 
-    return nullptr;
-
-  std::unique_ptr<Trk::Track> newtrack = nullptr;
-  // Get the fit output object
-  const auto& acts_track = fitResult.value();
-  auto finalTrajectory = std::make_unique<Trk::TrackStates>();
-  // initialise the number of dead Pixel and Acts strip
-  int numberOfDeadPixel = 0;
-  int numberOfDeadSCT = 0;
-
-  std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
-  // Loop over all the output state to create track state
-  tracks.trackStateContainer().visitBackwards(acts_track.tipIndex(), 
-                [&] (const auto &state) -> void
-  {
-    // First only concider state with an associated detector element not in the TRT
-    auto flag = state.typeFlags();
-    const auto* associatedDetEl = state.referenceSurface().surfacePlacement();
-    if (not associatedDetEl) 
-      return;
-    
-    const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(associatedDetEl);
-    if (not actsElement) 
-      return;
-
-    const auto* upstreamDetEl = actsElement->upstreamDetectorElement();
-    if (not upstreamDetEl) 
-      return;
-
-    ATH_MSG_VERBOSE("Try casting to TRT for if");
-    if (dynamic_cast<const InDetDD::TRT_BaseElement*>(upstreamDetEl))
-      return;
-
-    const auto* trkDetElem = dynamic_cast<const Trk::TrkDetElementBase*>(upstreamDetEl);
-    if (not trkDetElem)
-      return;
-
-    ATH_MSG_VERBOSE("trkDetElem type: " << static_cast<std::underlying_type_t<Trk::DetectorElemType>>(trkDetElem->detectorType()));
-
-    ATH_MSG_VERBOSE("Try casting to SiDetectorElement");
-    const auto* detElem = dynamic_cast<const InDetDD::SiDetectorElement*>(upstreamDetEl);
-    if (not detElem)
-      return;
-    ATH_MSG_VERBOSE("detElem = " << detElem);
-
-    // We need to determine the type of state 
-    std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-    std::unique_ptr<Trk::TrackParameters> parm;
-
-    // State is a hole (no associated measurement), use predicted parameters      
-    if (flag.isHole()){
-      ATH_MSG_VERBOSE("State is a hole (no associated measurement), use predicted parameters");
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.predicted(),
-             state.predictedCovariance(),
-             acts_track.particleHypothesis());
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(ctx, actsParam, tgContext);
-      auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
-      // Check if this is a hole, a dead sensors or a state outside the sensor boundary
-      ATH_MSG_VERBOSE("Check if this is a hole, a dead sensors or a state outside the sensor boundary");
-      if(boundaryCheck == Trk::BoundaryCheckResult::DeadElement){
-  if (detElem->isPixel()) {
-    ++numberOfDeadPixel;
-  }
-  else if (detElem->isSCT()) {
-    ++numberOfDeadSCT;
-  }
-  // Dead sensors states are not stored              
-  return;
-      } else if (boundaryCheck != Trk::BoundaryCheckResult::Candidate){
-  // States outside the sensor boundary are ignored
-  return;
-      }
-      typePattern.set(Trk::TrackStateOnSurface::Hole);
-    }
-    // The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters
-    else if (flag.isOutlier() or not state.hasSmoothed()) {
-      ATH_MSG_VERBOSE("The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters");
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.filtered(),
-             state.filteredCovariance(),
-             acts_track.particleHypothesis());
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(ctx, actsParam, tgContext);
-      typePattern.set(Trk::TrackStateOnSurface::Outlier);
-    }
-    // The state is a measurement state, use smoothed parameters 
-    else{
-      ATH_MSG_VERBOSE("The state is a measurement state, use smoothed parameters");
-
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.smoothed(),
-             state.smoothedCovariance(),
-             acts_track.particleHypothesis());
-      
-      actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(ctx, actsParam, tgContext);
-      typePattern.set(Trk::TrackStateOnSurface::Measurement);
-    }
-
-    std::unique_ptr<Trk::MeasurementBase> measState;
-    if (state.hasUncalibratedSourceLink()){
-      auto sl = detail::TrkMeasurementCalibrator::unpack(state.getUncalibratedSourceLink());
-      assert(sl);
-      measState = sl->uniqueClone();
-    }
-    double nDoF = state.calibratedSize();
-    auto quality =Trk::FitQualityOnSurface(state.chi2(), nDoF);
-    const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(quality, std::move(measState), std::move(parm), nullptr, typePattern);
-    // If a state was succesfully created add it to the trajectory 
-    if (perState) {
-      ATH_MSG_VERBOSE("State succesfully creates, adding it to the trajectory");
-      finalTrajectory->insert(finalTrajectory->begin(), perState);
-    }
-  });
-  
-  // Convert the perigee state and add it to the trajectory
-  const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
-                 acts_track.parameters(), 
-                 acts_track.covariance(),
-                 acts_track.particleHypothesis());
-  std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(ctx, actsPer, tgContext);
-  std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-  typePattern.set(Trk::TrackStateOnSurface::Perigee);
-  const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);
-  if (perState) finalTrajectory->insert(finalTrajectory->begin(), perState);
-
-  // Create the track using the states
-  Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::GaussianSumFilter, Trk::noHypothesis);
-  newInfo.setTrackFitter(Trk::TrackInfo::TrackFitter::GaussianSumFilter); //Mark the fitter as GaussianSumFilter
-  newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
-  if (newtrack && !m_refitOnly) {
-    // Create the track summary and update the holes information
-    if (!newtrack->trackSummary()) {
-      newtrack->setTrackSummary(std::make_unique<Trk::TrackSummary>());
-      newtrack->trackSummary()->update(Trk::numberOfPixelHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfSCTHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfTRTHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfPixelDeadSensors, numberOfDeadPixel);
-      newtrack->trackSummary()->update(Trk::numberOfSCTDeadSensors, numberOfDeadSCT);
-    }
-    m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, true);
-  }
-  
-  return newtrack;
 }
 
 const Acts::GsfExtensions<typename ActsTrk::MutableTrackStateBackend>& 

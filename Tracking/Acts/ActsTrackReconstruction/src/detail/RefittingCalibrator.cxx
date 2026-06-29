@@ -11,7 +11,7 @@
 
 namespace ActsTrk::detail {
 
-RefittingCalibrator::RefittingCalibrator(const ActsTrk::IActsToTrkConverterTool* convTool,
+RefittingCalibrator::RefittingCalibrator(const ActsTrk::IGeometryRealmConvTool* convTool,
                                           const Trk::IRIO_OnTrackCreator* rotCreator):
     m_prdCalibrator{convTool, rotCreator}{}
 
@@ -40,7 +40,7 @@ void RefittingCalibrator::calibrate(const Acts::GeometryContext& gctx,
 //##########################################################################
 //                      RefittingSurfaceAccesor
 //##########################################################################
-RefittingSurfaceAccesor::RefittingSurfaceAccesor(const IActsToTrkConverterTool* trkConvTool,
+RefittingSurfaceAccesor::RefittingSurfaceAccesor(const IGeometryRealmConvTool* trkConvTool,
                                                  const ITrackingGeometryTool* trackGeoTool):
       m_xAODAcc{trackGeoTool}, m_prdAcc{trkConvTool}, m_rotAcc{trkConvTool} {}
 

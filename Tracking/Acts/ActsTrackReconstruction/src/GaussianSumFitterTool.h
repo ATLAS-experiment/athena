@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_GAUSSIANSUMFITTERTOOL_H
@@ -28,7 +28,8 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "src/detail/FitterHelperFunctions.h"
 
@@ -135,23 +136,15 @@ private:
                       const Acts::PerigeeSurface& surface) const;
   
   std::unique_ptr<Trk::Track> performFit(const EventContext& ctx,
-           const Acts::GeometryContext& tgContext,
            const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
            const std::vector<Acts::SourceLink>& trackSourceLinks,
            const Acts::BoundTrackParameters& initialParams) const;
 
   std::unique_ptr<Trk::Track> performDirectFit(const EventContext& ctx,
-                 const Acts::GeometryContext& tgContext,
                  const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
                  const std::vector<Acts::SourceLink>& trackSourceLinks,
                  const Acts::BoundTrackParameters& initialParams,
                  const std::vector<const Acts::Surface*>& surfaces) const;
-
-  // Create a track from the fitter result
-  std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
-          const Acts::GeometryContext& tgContext, 
-          ActsTrk::MutableTrackContainer& tracks,
-          Acts::Result<typename ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult) const;
 
   const Acts::GsfExtensions<ActsTrk::MutableTrackStateBackend>& getExtensions() const;
 
@@ -161,9 +154,10 @@ private:
  private:
   /** @brief Abrivate the track state proxy */
   using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
-  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-  PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+  ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
+  ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
   ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool {this, 
                                                            "BoundaryCheckTool", 
