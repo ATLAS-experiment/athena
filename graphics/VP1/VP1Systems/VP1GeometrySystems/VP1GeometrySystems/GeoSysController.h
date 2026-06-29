@@ -103,6 +103,7 @@ signals:
   void adaptMuonChambersToEventData();
   void autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool);//pixel,brl,ecA,ecC,bcmA,bcmC
   void autoAdaptMuonNSW(bool,bool,bool,bool,bool,bool); // reset to full NSW geo, sTGC, MicroMegas, Spacer, Structure, APlate
+  void autoAdaptITk(bool,bool,bool,bool,bool,bool,bool,bool); // reset to full ITk geo, pixel modules/services/supports, strip sensors/electronics/services/supports
   void resetSubSystems(VP1GeoFlags::SubSystemFlags);
   void autoExpandByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
   void autoIconifyByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
@@ -128,6 +129,7 @@ private Q_SLOTS:
   void emit_adaptMuonChambersToEventData();
   void emit_autoAdaptPixelsOrSCT();
   void emit_autoAdaptMuonNSW();
+  void emit_autoAdaptITk();
   void emit_autoExpandByVolumeOrMaterialName();
   void emit_autoIconifyByVolumeOrMaterialName();
   void emit_actionOnAllNonStandardVolumes();

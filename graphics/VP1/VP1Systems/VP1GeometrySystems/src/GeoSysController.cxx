@@ -98,6 +98,7 @@ GeoSysController::GeoSysController(IVP1System * sys)
     m_d->ui.pushButton_settings_muonchambers->setEnabled(false);
     m_d->ui_misc.groupBox_pixelactivemodules->setVisible(false);
     m_d->ui_misc.groupBox_sctactivemodules->setVisible(false);
+    m_d->ui_misc.groupBox_show_ITk_components->setVisible(false);
     m_d->ui.groupBox_misc->setVisible(false);
     m_d->ui_muon.groupBox_muonchamberconfig->setVisible(false);
     m_d->ui_misc.groupBox_show_NSW_chambers->setVisible(false);
@@ -111,6 +112,7 @@ GeoSysController::GeoSysController(IVP1System * sys)
 					      || VP1JobConfigInfo::hasInDetServiceMaterialGeometry());
     m_d->ui_misc.groupBox_pixelactivemodules->setVisible(VP1JobConfigInfo::hasPixelGeometry() || VP1JobConfigInfo::hasITkGeometry() );
     m_d->ui_misc.groupBox_sctactivemodules->setVisible(VP1JobConfigInfo::hasSCTGeometry() || VP1JobConfigInfo::hasITkGeometry() );
+    m_d->ui_misc.groupBox_show_ITk_components->setVisible(VP1JobConfigInfo::hasITkGeometry());
     m_d->ui.groupBox_calorimeters->setVisible(VP1JobConfigInfo::hasLArGeometry()
 					     ||VP1JobConfigInfo::hasTileGeometry());
     m_d->ui.groupBox_muonsystems->setVisible(VP1JobConfigInfo::hasMuonGeometry());
@@ -182,6 +184,9 @@ GeoSysController::GeoSysController(IVP1System * sys)
   
   connect(m_d->ui_misc.toolButton_nswchambers_adapt,SIGNAL(clicked(bool)),this,SLOT(emit_autoAdaptMuonNSW()));
   connect(m_d->ui_misc.toolButton_nswchambers_reset,SIGNAL(clicked(bool)),this,SLOT(emit_autoAdaptMuonNSW()));
+
+  connect(m_d->ui_misc.toolButton_itkcomponents_adapt,SIGNAL(clicked(bool)),this,SLOT(emit_autoAdaptITk()));
+  connect(m_d->ui_misc.toolButton_itkcomponents_reset,SIGNAL(clicked(bool)),this,SLOT(emit_autoAdaptITk()));
 
   connect(m_d->ui_misc.toolButton_pixelmod_reset,SIGNAL(clicked(bool)),this,SLOT(emit_resetSubSystems()));
   connect(m_d->ui_misc.toolButton_sctmod_reset,SIGNAL(clicked(bool)),this,SLOT(emit_resetSubSystems()));
@@ -584,6 +589,26 @@ void GeoSysController::emit_autoAdaptMuonNSW()
 }
 
 
+//____________________________________________________________________
+void GeoSysController::emit_autoAdaptITk()
+{
+  bool reset = false;
+  if (sender()==m_d->ui_misc.toolButton_itkcomponents_reset) {
+    reset = true;
+  }
+  bool pixelModules = m_d->ui_misc.checkBox_ITk_Pixel_Modules->isChecked();
+  bool pixelServices = m_d->ui_misc.checkBox_ITk_Pixel_Services->isChecked();
+  bool pixelSupports = m_d->ui_misc.checkBox_ITk_Pixel_Supports->isChecked();
+  bool stripSensors = m_d->ui_misc.checkBox_ITk_Strip_Sensors->isChecked();
+  bool stripElectronics = m_d->ui_misc.checkBox_ITk_Strip_Electronics->isChecked();
+  bool stripServices = m_d->ui_misc.checkBox_ITk_Strip_Services->isChecked();
+  bool stripSupports = m_d->ui_misc.checkBox_ITk_Strip_Supports->isChecked();
+
+  messageVerbose ("Emitting autoAdaptITk("+str(reset)+","+str(pixelModules)+","+str(pixelServices)+","+str(pixelSupports)+","+str(stripSensors)+","+str(stripElectronics)+","+str(stripServices)+","+str(stripSupports)+")");
+  emit autoAdaptITk(reset, pixelModules, pixelServices, pixelSupports, stripSensors, stripElectronics, stripServices, stripSupports);
+}
+
+
 
 //____________________________________________________________________
 void GeoSysController::emit_autoIconifyByVolumeOrMaterialName()
@@ -653,7 +678,7 @@ void GeoSysController::emit_resetSubSystems()
 //____________________________________________________________________
 int GeoSysController::currentSettingsVersion() const
 {
-  return 6;
+  return 7;
 }
 
 //____________________________________________________________________
@@ -706,6 +731,14 @@ void GeoSysController::actualSaveSettings(VP1Serialise&s) const
   s.save(m_d->ui_misc.checkBox_NSW_Passive_Spacer);
   s.save(m_d->ui_misc.checkBox_NSW_Passive_Structure);
   s.save(m_d->ui_misc.checkBox_NSW_Passive_APlate);
+  // version >=7
+  s.save(m_d->ui_misc.checkBox_ITk_Pixel_Modules);
+  s.save(m_d->ui_misc.checkBox_ITk_Pixel_Services);
+  s.save(m_d->ui_misc.checkBox_ITk_Pixel_Supports);
+  s.save(m_d->ui_misc.checkBox_ITk_Strip_Sensors);
+  s.save(m_d->ui_misc.checkBox_ITk_Strip_Electronics);
+  s.save(m_d->ui_misc.checkBox_ITk_Strip_Services);
+  s.save(m_d->ui_misc.checkBox_ITk_Strip_Supports);
   
   
   s.ignoreWidget(m_d->ui_disp.matButton_lastSel);
@@ -782,6 +815,15 @@ void GeoSysController::actualRestoreSettings(VP1Deserialise& s)
     s.restore(m_d->ui_misc.checkBox_NSW_Passive_Structure);
     s.restore(m_d->ui_misc.checkBox_NSW_Passive_APlate);
   }
+  if (s.version()>=7){
+    s.restore(m_d->ui_misc.checkBox_ITk_Pixel_Modules);
+    s.restore(m_d->ui_misc.checkBox_ITk_Pixel_Services);
+    s.restore(m_d->ui_misc.checkBox_ITk_Pixel_Supports);
+    s.restore(m_d->ui_misc.checkBox_ITk_Strip_Sensors);
+    s.restore(m_d->ui_misc.checkBox_ITk_Strip_Electronics);
+    s.restore(m_d->ui_misc.checkBox_ITk_Strip_Services);
+    s.restore(m_d->ui_misc.checkBox_ITk_Strip_Supports);
+  }
 
   s.ignoreWidget(m_d->ui_disp.matButton_lastSel);
   std::map<VP1GeoFlags::SubSystemFlag,QCheckBox*>::const_iterator it,itE(m_d->subSysCheckBoxMap.end());
@@ -803,6 +845,4 @@ POSSIBLECHANGE_IMP(showVolumeOutLines)
 POSSIBLECHANGE_IMP(muonChamberAdaptionStyle)
 POSSIBLECHANGE_IMP(labels)
 POSSIBLECHANGE_IMP(labelPosOffset)
-
-
 

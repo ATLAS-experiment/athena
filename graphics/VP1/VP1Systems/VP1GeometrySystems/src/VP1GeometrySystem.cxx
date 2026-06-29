@@ -89,6 +89,7 @@
 #include <QMessageBox>
 #include <QFileInfo>
 
+#include <initializer_list>
 #include <map>
 
 class VP1GeometrySystem::Imp {
@@ -285,6 +286,7 @@ public:
   void showPixelModules(VolumeHandle*);
   void showITkPixelModules(VolumeHandle*, bool brl, bool ecA, bool ecC);
   void showITkStripModules(VolumeHandle*, bool brl, bool ecA, bool ecC);
+  bool selectITkComponent(VolumeHandle*, bool isPixel, bool pixelModules, bool pixelServices, bool pixelSupports, bool stripSensors, bool stripElectronics, bool stripServices, bool stripSupports);
   void showSCTBarrelModules(VolumeHandle*);
   void showSCTEndcapModules(VolumeHandle*);
 
@@ -408,6 +410,7 @@ QWidget * VP1GeometrySystem::buildController()
   connect(m_d->controller,SIGNAL(actionOnAllNonStandardVolumes(bool)),this,SLOT(actionOnAllNonStandardVolumes(bool)));
   connect(m_d->controller,SIGNAL(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(autoAdaptMuonNSW(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptMuonNSW(bool, bool,bool,bool,bool,bool)));
+  connect(m_d->controller,SIGNAL(autoAdaptITk(bool,bool,bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptITk(bool,bool,bool,bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(resetSubSystems(VP1GeoFlags::SubSystemFlags)),this,SLOT(resetSubSystems(VP1GeoFlags::SubSystemFlags)));
 
   connect(m_d->controller,SIGNAL(labelsChanged(int)),this,SLOT(setLabels(int)));
@@ -2438,6 +2441,61 @@ void VP1GeometrySystem::autoAdaptMuonNSW(bool reset, bool stgc, bool mm, bool pa
 }
 
 
+//_____________________________________________________________________________________
+void VP1GeometrySystem::autoAdaptITk(bool reset, bool pixelModules, bool pixelServices, bool pixelSupports, bool stripSensors, bool stripElectronics, bool stripServices, bool stripSupports)
+{
+  VP1Msg::messageDebug("VP1GeometrySystem::autoAdaptITk()");
+
+  #ifndef BUILDVP1LIGHT
+    if (!VP1JobConfigInfo::hasITkGeometry())
+      return;
+  #endif
+
+  bool save = m_d->sceneroot->enableNotify(false);
+  m_d->phisectormanager->largeChangesBegin();
+
+  const VP1GeoFlags::SubSystemFlag flags[] = { VP1GeoFlags::ITkPixel, VP1GeoFlags::ITkStrip };
+  for (VP1GeoFlags::SubSystemFlag subSysFlag : flags) {
+    Imp::SubSystemInfo* subsys(0);
+    for (Imp::SubSystemInfo*si : m_d->subsysInfoList) {
+      if (si->flag == subSysFlag) {
+        subsys = si;
+        break;
+      }
+    }
+    if (!subsys) {
+      message("autoAdaptITk Error: Could not find subsystem");
+      continue;
+    }
+    if (!subsys->isbuilt) {
+      VP1Msg::messageDebug("autoAdaptITk: Aborting since subsystem geometry not built yet");
+      continue;
+    }
+
+    bool isPixel(subSysFlag==VP1GeoFlags::ITkPixel);
+    VolumeHandle::VolumeHandleListItr it(subsys->vollist.begin()),itE(subsys->vollist.end());
+    for (;it!=itE;++it) {
+      (*it)->initialiseChildren();
+      if (reset) {
+        (*it)->reset();
+        (*it)->setState(VP1GeoFlags::EXPANDED);
+      } else {
+        bool show = m_d->selectITkComponent(*it, isPixel, pixelModules, pixelServices, pixelSupports, stripSensors, stripElectronics, stripServices, stripSupports);
+        (*it)->setState(show ? VP1GeoFlags::EXPANDED : VP1GeoFlags::ZAPPED);
+      }
+    }
+  }
+
+  m_d->phisectormanager->updateRepresentationsOfVolsAroundZAxis();
+  m_d->phisectormanager->largeChangesEnd();
+
+  if (save) {
+    m_d->sceneroot->enableNotify(true);
+    m_d->sceneroot->touch();
+  }
+}
+
+
 
 
 //_____________________________________________________________________________________
@@ -2619,6 +2677,66 @@ void VP1GeometrySystem::Imp::showITkStripModules(VolumeHandle* h, bool brl, bool
     } else
       (*it)->setState(VP1GeoFlags::ZAPPED);
   }
+}
+
+namespace {
+bool itkNameIsOneOf(const QString& name, std::initializer_list<const char*> candidates)
+{
+  for (const char* candidate : candidates) {
+    if (name==candidate)
+      return true;
+  }
+  return false;
+}
+
+bool itkNameStartsWithOneOf(const QString& name, std::initializer_list<const char*> prefixes)
+{
+  for (const char* prefix : prefixes) {
+    if (name.startsWith(prefix))
+      return true;
+  }
+  return false;
+}
+}
+
+bool VP1GeometrySystem::Imp::selectITkComponent(VolumeHandle* h, bool isPixel, bool pixelModules, bool pixelServices, bool pixelSupports, bool stripSensors, bool stripElectronics, bool stripServices, bool stripSupports)
+{
+  h->initialiseChildren();
+  bool showChildren(false);
+  VolumeHandle::VolumeHandleListItr it(h->childrenBegin()),itE(h->childrenEnd());
+  for (;it!=itE;++it) {
+    if (selectITkComponent(*it, isPixel, pixelModules, pixelServices, pixelSupports, stripSensors, stripElectronics, stripServices, stripSupports))
+      showChildren = true;
+  }
+
+  bool showThis(false);
+  const QString name(h->getName());
+  if (isPixel) {
+    if (pixelModules && (name.endsWith("_Sensor") || name.endsWith("_Chip") || name.endsWith("_Bonding") || name.endsWith("_DeadVolume")))
+      showThis = true;
+    if (pixelServices && (name.contains("Svc") || name.contains("Service") || name.contains("Cooling") || name.contains("Pigtail") || name.contains("Flex") || name.contains("BusTape") || name.endsWith("_Cell") || name.startsWith("Pixel__ModuleSvc")))
+      showThis = true;
+    if (pixelSupports && (name.contains("Support") || name.contains("HalfShell") || name.contains("HalfRing") || name.contains("CarbonFoam") || name.contains("FaceSheet") || name.contains("Longeron") || name.contains("QuarterShell") || name.contains("Stave") || itkNameIsOneOf(name, {"IPTvol", "ISTvol", "FrontSupportFacing", "FrontSupportCore", "RearSupport"})))
+      showThis = true;
+  } else {
+    if (stripSensors && (name.startsWith("BRLSensor") || name.startsWith("ECSensor")))
+      showThis = true;
+    if (stripElectronics && (name.contains("Hybrid") || name.contains("DCDC") || name.contains("Bus") || itkNameIsOneOf(name, {"StaveSignalSS", "StaveGround"})))
+      showThis = true;
+    if (stripServices && (name.startsWith("SV") || name.contains("Service")))
+      showThis = true;
+    if (stripSupports && (name.contains("Support") || name.contains("Stave") || name.contains("Petal") || name.contains("Core") || name.contains("Flange") || name.contains("Interlink") || name.contains("Wheel") || name.contains("Shell") || name.contains("Brace") || name.contains("Tube") || name.contains("Cyl") || name.contains("Hat") || name.contains("Bulkhead") || name.contains("Rail") || name.contains("Blade") || name.contains("Lock") || name.contains("Mount") || name.contains("Face") || name.contains("EOS") || itkNameStartsWithOneOf(name, {"StripB_", "OC", "EC_", "Ztube", "StiffDisc"})))
+      showThis = true;
+  }
+
+  if (showChildren)
+    h->setState(VP1GeoFlags::EXPANDED);
+  else if (showThis)
+    h->setState(VP1GeoFlags::CONTRACTED);
+  else
+    h->setState(VP1GeoFlags::ZAPPED);
+
+  return showChildren || showThis;
 }
 
 //_____________________________________________________________________________________

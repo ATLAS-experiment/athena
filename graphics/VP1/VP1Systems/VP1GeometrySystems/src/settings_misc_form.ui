@@ -219,10 +219,141 @@
        </spacer>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="groupBox_show_NSW_chambers">
+   </widget>
+  </item>
+  <item>
+   <widget class="QGroupBox" name="groupBox_show_ITk_components">
+    <property name="title">
+     <string>ITk detector components</string>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_7">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QCheckBox" name="checkBox_ITk_Pixel_Modules">
+         <property name="toolTip">
+          <string>Show ITk Pixel sensors, chips, and module-level material</string>
+         </property>
+         <property name="text">
+          <string>Pix modules</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_ITk_Pixel_Services">
+         <property name="toolTip">
+          <string>Show ITk Pixel services and cooling</string>
+         </property>
+         <property name="text">
+          <string>Pix services</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_ITk_Pixel_Supports">
+         <property name="toolTip">
+          <string>Show ITk Pixel support structures</string>
+         </property>
+         <property name="text">
+          <string>Pix supports</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_ITk_Strip_Sensors">
+         <property name="toolTip">
+          <string>Show ITk Strip sensors</string>
+         </property>
+         <property name="text">
+          <string>Strip sensors</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_ITk_Strip_Electronics">
+         <property name="toolTip">
+          <string>Show ITk Strip hybrids, DCDC components, and bus material</string>
+         </property>
+         <property name="text">
+          <string>Strip elec.</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_ITk_Strip_Services">
+         <property name="toolTip">
+          <string>Show ITk Strip services</string>
+         </property>
+         <property name="text">
+          <string>Strip services</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_ITk_Strip_Supports">
+         <property name="toolTip">
+          <string>Show ITk Strip support structures</string>
+         </property>
+         <property name="text">
+          <string>Strip supports</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toolButton_itkcomponents_adapt">
+         <property name="text">
+          <string>Adapt</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toolButton_itkcomponents_reset">
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+  </item>
+  <item>
+   <widget class="QGroupBox" name="groupBox_show_NSW_chambers">
      <property name="title">
       <string>Muons - NSW chambers and passive material</string>
      </property>
