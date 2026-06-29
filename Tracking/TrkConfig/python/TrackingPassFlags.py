@@ -154,6 +154,7 @@ def createITkTrackingPassFlags():
     icf.addFlag("maxPrimaryImpactSeed"      , 2.0 * Units.mm)
     icf.addFlag("maxZImpactSeed"            , 200.0 * Units.mm)
     icf.addFlag("useSeedFilter"             , True)
+    icf.addFlag("useHoughVertexFilter"      , False) # experimental, keep False
 
     # --- cluster cuts
     icf.addFlag("minClusters"             , lambda pcf :

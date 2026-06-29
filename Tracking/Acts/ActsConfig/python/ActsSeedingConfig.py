@@ -60,6 +60,11 @@ def ActsPixelSeedingToolCfg(flags,
         [40, 260],
         [140, 260],
         [0, 0]])
+    
+    kwargs.setdefault("useHVCollisionRegion", flags.Tracking.ActiveConfig.useHoughVertexFilter)
+    kwargs.setdefault("hvCollisionRegionTolerance", 10. * ActsUnits.mm)
+    kwargs.setdefault("inputHoughVtx", "HoughVertices" if flags.Tracking.ActiveConfig.useHoughVertexFilter else "")
+
     acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
@@ -163,7 +168,10 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
     kwargs.setdefault("collisionRegionMin", -200. * ActsUnits.mm)
     kwargs.setdefault("collisionRegionMax", 200. * ActsUnits.mm)
-
+    kwargs.setdefault("useHVCollisionRegion", flags.Tracking.ActiveConfig.useHoughVertexFilter)
+    kwargs.setdefault("hvCollisionRegionTolerance", 10. * ActsUnits.mm)
+    kwargs.setdefault("inputHoughVtx", "HoughVertices" if flags.Tracking.ActiveConfig.useHoughVertexFilter else "")
+    
     acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
