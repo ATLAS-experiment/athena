@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelDigitization/RD53SimTool.h
@@ -27,11 +27,10 @@ class RD53SimTool: public FrontEndSimTool {
 public:
   RD53SimTool(const std::string& type, const std::string& name, const IInterface* parent);
 
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
-  virtual ~RD53SimTool();
-  virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
-                       CLHEP::HepRandomEngine* rndmEngine) const;
+  virtual StatusCode initialize() override;
+  virtual void process(const EventContext& ctx,
+                       SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
+                       CLHEP::HepRandomEngine* rndmEngine) const override;
 private:
   
    ITkPixSimulationParameters m_chipSim{};
