@@ -96,13 +96,6 @@ class AthAlgorithm
    */
   virtual const DataObjIDColl& extraOutputDeps() const override;
 
-  ///@{
-  /** Deprecated methods (use the ones with EventContext) */
-  const EventContext& getContext() const;
-  bool filterPassed() const;
-  void setFilterPassed(bool state) const;
-  ///@}
-
   bool filterPassed(const EventContext& ctx) const;
   void setFilterPassed( bool state, const EventContext& ctx ) const;
 
