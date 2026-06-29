@@ -215,7 +215,7 @@ def configureITkFlags(runArgs, flags):
     # else:
     #     raise Exception(f"No valid alignment level has been selected: '{runArgs.alignLevel}'")
 
-
+    print("solve!!!!_1")
 
     ## Update flags based on parser line args
 
@@ -234,6 +234,8 @@ def configureITkFlags(runArgs, flags):
     alignITkPixel = getattr(runArgs, "alignITkPixel", False)
     alignITkStrip = getattr(runArgs, "alignITkStrip", False)
 
+    print("solve!!!!_2")
+
     flags.ITk.Align.alignITk = (
         alignITk or
         (not alignITk and not alignITkPixel and not alignITkStrip)
@@ -241,18 +243,30 @@ def configureITkFlags(runArgs, flags):
     flags.ITk.Align.alignITkPixel = alignITkPixel or flags.ITk.Align.alignITk
     flags.ITk.Align.alignITkStrip = alignITkStrip or flags.ITk.Align.alignITk
     
+    print("solve!!!!_3")
 
     flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", runArgs.inputTracksCollection)
 
     flags.ITk.Align.writeSilicon = False
 
-    
-    flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
+    print("solve!!!!_4")
 
-    # if runArgs.solve:
-    #     flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
-    # else:
-    #     flags.ITk.Align.inputTFiles = []
+    
+    # flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
+
+    if runArgs.solve:
+        print("solve!!!!")
+        print(os.path.abspath(f) for f in runArgs.inputTFile)
+        print(runArgs.inputTFile[0])
+        for f in runArgs.inputTFile:
+            print(f)
+        # flags.ITk.Align.inputTFiles = [os.path.abspath(f) for f in runArgs.inputTFile]
+        # flags.ITk.Align.inputTFiles = runArgs.inputTFile[0]
+        flags.ITk.Align.inputTFiles = os.path.basename(runArgs.inputTFile[0])
+    else:
+        flags.ITk.Align.inputTFiles = []
+
+    print("solve!!!!_5")
 
     flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
 
@@ -316,6 +330,7 @@ def configureITkFlags(runArgs, flags):
 
     # Lock flags
     flags.lock()
+    print("solve!!!!_6")
     return flags
 
 def fromRunArgsITk(runArgs, flags):
@@ -356,6 +371,9 @@ def fromRunArgsITk(runArgs, flags):
         raise Exception("You can run either the acculumation step or the solve step, but not both or neither at the same time!")
 
     ##----- Run the setup -----##
+
+    print("runArgs.inputTFile =", runArgs.inputTFile)
+    print("flags.ITk.Align.inputTFiles =", flags.ITk.Align.inputTFiles)
                 
     if runArgs.dryRun:
         cfg.printConfig()
