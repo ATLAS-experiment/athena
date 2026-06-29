@@ -21,8 +21,6 @@
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/Incident.h" 
 
-#include "HepPDT/TableBuilder.hh"
-
 
 DecayVolumeFilter::DecayVolumeFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name, pSvcLocator)
