@@ -1,15 +1,15 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// AthCommonReentrantAlgorithm.h 
-// Header file for class AthCommonReentrantAlgorithm
+// AthCommonAlgorithm.h 
+// Header file for class AthCommonAlgorithm
 // Author: Charles Leggett
 /////////////////////////////////////////////////////////////////// 
-#ifndef ATHENABASECOMPS_ATHCOMMONREENTRANTALGORITHM_H
-#define ATHENABASECOMPS_ATHCOMMONREENTRANTALGORITHM_H 1
+#ifndef ATHENABASECOMPS_ATHCOMMONALGORITHM_H
+#define ATHENABASECOMPS_ATHCOMMONALGORITHM_H
 
 
 // STL includes
@@ -26,32 +26,31 @@
 
 
 /**
- * @brief An algorithm that can be simultaneously executed in multiple threads.
+ * @brief Common base class for algorithms.
  *
  * This is a common template class. Your algorithm should derive from @c AthReentrantAlgorithm
  * if it executes on the CPU, or @c AthAsynchronousAlgorithm if it offloads to an accelerator.
- *
+ * For legacy non-thread safe algorithms use @c AthAlgorithm.
  */
-
-
 template <class BaseAlg>
-class AthCommonReentrantAlgorithm
+class AthCommonAlgorithm
   : public AthCommonDataStore<AthCommonMsg<BaseAlg>>
 { 
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
- public: 
+public:
   using BaseAlg::execState;
   using BaseAlg::name;
   using BaseAlg::m_updateDataHandles;
   using BaseAlg::outputHandles;
 
   /// Constructor with parameters:
-  AthCommonReentrantAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
+  AthCommonAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
 
   /// Destructor: 
-  virtual ~AthCommonReentrantAlgorithm() override;
+  virtual ~AthCommonAlgorithm() override = default;
+
 
   /** @brief Override sysInitialize
    *
@@ -59,20 +58,16 @@ class AthCommonReentrantAlgorithm
    * automatically register them and this Algorithm with the CondSvc
    */
   virtual StatusCode sysInitialize() override;
-  
 
-  /** Specify if the algorithm is clonable
+
+  /** @brief Specify if the algorithm is clonable.
    *
-   * Reentrant algorithms are clonable.
+   * Only relevant for non-reentrant algorithms. Actual number of clones
+   * needs to be set via the "Cardinality" property.
    */
-  virtual bool isClonable() const override;
-
-
-  /** Cardinality (Maximum number of clones that can exist)
-   *  special value 0 means that algorithm is reentrant
-   *
-   * Override this to return 0 for reentrant algorithms.   */
-  virtual unsigned int cardinality() const override;
+  virtual bool isClonable() const override {
+    return true;
+  }
 
 
   /**
@@ -93,10 +88,14 @@ class AthCommonReentrantAlgorithm
    */
   virtual const DataObjIDColl& extraOutputDeps() const override;
 
+
+  /// Get filter decision:
   virtual bool filterPassed(const EventContext& ctx) const {
     return execState( ctx ).filterPassed();
   }
 
+
+  /// Set filter decision:
   virtual void setFilterPassed( bool state, const EventContext& ctx ) const {
     execState( ctx ).setFilterPassed( state );
   }
@@ -104,15 +103,10 @@ class AthCommonReentrantAlgorithm
 
  private: 
 
-  /// Default constructor: 
-  AthCommonReentrantAlgorithm(); //> not implemented
-  AthCommonReentrantAlgorithm (const AthCommonReentrantAlgorithm& ); //> not implemented
-  AthCommonReentrantAlgorithm& operator= (const AthCommonReentrantAlgorithm&); //> not implemented
-
   /// Extra output dependency collection, extended by AthAlgorithmDHUpdate
-  /// to add symlinks.  Empty if no symlinks were found.
+  /// to add symlinks. Empty if no symlinks were found.
   DataObjIDColl m_extendedExtraObjects;
 
 }; 
 
-#endif //> !ATHENABASECOMPS_ATHCOMMONREENTRANTALGORITHM_H
+#endif

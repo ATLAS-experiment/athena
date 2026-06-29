@@ -1,16 +1,9 @@
-///////////////////////// -*- C++ -*- /////////////////////////////
-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// AthReentrantAlgorithm.cxx 
-// Implementation file for class AthReentrantAlgorithm
-// Author: C. Leggett
-/////////////////////////////////////////////////////////////////// 
-
 // AthenaBaseComps includes
-#include "AthenaBaseComps/AthCommonReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCommonAlgorithm.h"
 #include "AthAlgorithmDHUpdate.h"
 #include "GaudiKernel/ICondSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -21,8 +14,8 @@
 
 
 template <class BaseAlg>
-AthCommonReentrantAlgorithm<BaseAlg>::AthCommonReentrantAlgorithm( const std::string& name, 
-                                              ISvcLocator* pSvcLocator ) :
+AthCommonAlgorithm<BaseAlg>::AthCommonAlgorithm( const std::string& name, 
+                                                 ISvcLocator* pSvcLocator ) :
   ::AthCommonDataStore<AthCommonMsg<BaseAlg>>   ( name, pSvcLocator )
 {
 
@@ -35,33 +28,6 @@ AthCommonReentrantAlgorithm<BaseAlg>::AthCommonReentrantAlgorithm( const std::st
      std::move (m_updateDataHandles));
 }
 
-// Destructor
-///////////////
-template <class BaseAlg>
-AthCommonReentrantAlgorithm<BaseAlg>::~AthCommonReentrantAlgorithm()
-{ 
-  ATH_MSG_DEBUG ("Calling destructor");
-}
-
-/** Specify if the algorithm is clonable
- */
-template <class BaseAlg>
-bool AthCommonReentrantAlgorithm<BaseAlg>::isClonable() const
-{
-  // Reentrant algorithms are clonable.
-  return true;
-}
-
-/** Cardinality (Maximum number of clones that can exist)
- *  special value 0 means that algorithm is reentrant
- *
- * Override this to return 0 for reentrant algorithms.
- */
-template <class BaseAlg>
-unsigned int AthCommonReentrantAlgorithm<BaseAlg>::cardinality() const
-{
-  return 0;
-}
 
 /**
  * @brief Execute an algorithm.
@@ -71,7 +37,7 @@ unsigned int AthCommonReentrantAlgorithm<BaseAlg>::cardinality() const
  * cause crashes in MT jobs.
  */
 template <class BaseAlg>
-StatusCode AthCommonReentrantAlgorithm<BaseAlg>::sysExecute (const EventContext& ctx)
+StatusCode AthCommonAlgorithm<BaseAlg>::sysExecute (const EventContext& ctx)
 {
   return BaseAlg::sysExecute (ctx);
 }
@@ -84,7 +50,7 @@ StatusCode AthCommonReentrantAlgorithm<BaseAlg>::sysExecute (const EventContext&
  * relations.
  */
 template <class BaseAlg>
-const DataObjIDColl& AthCommonReentrantAlgorithm<BaseAlg>::extraOutputDeps() const
+const DataObjIDColl& AthCommonAlgorithm<BaseAlg>::extraOutputDeps() const
 {
   // If we didn't find any symlinks to add, just return the collection
   // from the base class.  Otherwise, return the extended collection.
@@ -102,7 +68,7 @@ const DataObjIDColl& AthCommonReentrantAlgorithm<BaseAlg>::extraOutputDeps() con
  * register them with the CondSvc
  */
 template <class BaseAlg>
-StatusCode AthCommonReentrantAlgorithm<BaseAlg>::sysInitialize() {
+StatusCode AthCommonAlgorithm<BaseAlg>::sysInitialize() {
   StatusCode sc=AthCommonDataStore<AthCommonMsg<BaseAlg>>::sysInitialize();
 
   if (sc.isFailure()) {
@@ -128,6 +94,6 @@ StatusCode AthCommonReentrantAlgorithm<BaseAlg>::sysInitialize() {
 }
 
 /// instantiate for Gaudi::Algorithm
-template class AthCommonReentrantAlgorithm<Gaudi::Algorithm>;
+template class AthCommonAlgorithm<Gaudi::Algorithm>;
 /// instantiate for Gaudi::AsynchronousAlgorithm
-template class AthCommonReentrantAlgorithm<Gaudi::AsynchronousAlgorithm>;
+template class AthCommonAlgorithm<Gaudi::AsynchronousAlgorithm>;
