@@ -13,12 +13,10 @@ def LArCellPreparationAlgCfg(
     # this alg needs totalNoise conditions ... configure the condalg for that:
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     cfg.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))
-
+    kwargs.setdefault("caloCells", "AllCalo" if flags.Input.isMC else "SeedLessFS")
     alg = CompFactory.GlobalSim.LArCellPreparationAlg(name,**kwargs)
-    if flags.Input.isMC:
-        alg.caloCells = "AllCalo"
-    else:
-        alg.caloCells = "SeedLessFS"
+
+    if alg.caloCells == "SeedLessFS":
         # ensure we are producing this cell collection ...
         from TrigCaloRec.TrigCaloRecConfig import hltCaloCellSeedlessMakerCfg
         cfg.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey=''))

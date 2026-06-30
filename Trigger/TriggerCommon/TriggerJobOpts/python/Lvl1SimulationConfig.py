@@ -42,10 +42,10 @@ def Lvl1SimulationCfg(flags, seqName = None):
         acc.merge(L1TopoSimulationCfg(flags), sequenceName='L1TopoSimSeq')
 
     if flags.Trigger.L1.doGlobal:
-        globalSimSeqName = 'L0GlobalSimSeq'
+        globalSimSeqName = 'L1GlobalSimSeq'
         acc.addSequence(parOR(globalSimSeqName), parentName='L1SimSeq')
-        from GlobalSimulation.GlobalL1TopoSimulation import GlobalL1TopoSimulationCfg
-        acc.merge(GlobalL1TopoSimulationCfg(flags), sequenceName=globalSimSeqName)
+        from GlobalSimulation.GlobalSimulationConfig import GlobalSimulationCfg
+        acc.merge(GlobalSimulationCfg(flags), sequenceName=globalSimSeqName)
 
     if flags.Trigger.doZDC:
         acc.addSequence(seqAND('L1ZDCSimSeq'),parentName='L1SimSeq')
