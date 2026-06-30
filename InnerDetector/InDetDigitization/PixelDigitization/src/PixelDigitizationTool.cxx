@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PixelDigitizationTool.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
@@ -218,7 +218,7 @@ StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx, EventDa
     RDOColl->setIdentifier(chargedDiodes->identify());
     for (unsigned int itool = 0; itool < m_fesimTool.size(); itool++) {
       ATH_MSG_DEBUG("Executing tool " << m_fesimTool[itool]->name());
-      m_fesimTool[itool]->process(*chargedDiodes, *RDOColl, rndmEngine);
+      m_fesimTool[itool]->process(ctx, *chargedDiodes, *RDOColl, rndmEngine);
     }
     assert(event_data.m_rdoContainer.isValid());
     ATH_CHECK(event_data.m_rdoContainer->addCollection(RDOColl, RDOColl->identifyHash()));
@@ -257,7 +257,7 @@ StatusCode PixelDigitizationTool::digitizeEvent(const EventContext& ctx, EventDa
           RDOColl->setIdentifier(chargedDiodes->identify());
           for (unsigned int itool = 0; itool < m_fesimTool.size(); itool++) {
             ATH_MSG_DEBUG("Executing tool " << m_fesimTool[itool]->name());
-            m_fesimTool[itool]->process(*chargedDiodes, *RDOColl, rndmEngine);
+            m_fesimTool[itool]->process(ctx, *chargedDiodes, *RDOColl, rndmEngine);
           }
           assert( event_data.m_rdoContainer.isValid());
           ATH_CHECK(event_data.m_rdoContainer->addCollection(RDOColl, RDOColl->identifyHash()));
