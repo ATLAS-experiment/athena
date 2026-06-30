@@ -89,21 +89,22 @@ write_handles = {
 }
 
 def GlobalSimulationAlgCfg(flags,
-                           dump,
-                           algName = 'GlobalSimTestAlg',
+                           dump=False,
+                           fn=None,
+                           algName='GlobalSimTestAlg',
                            OutputLevel=DEBUG):
 
     logger.setLevel(OutputLevel)
     cfg = ComponentAccumulator()
-    
-    fn = os.environ.get('GS_CFG_FILE', None)
+
     if fn is None:
-        logger.error('Please set export environment variable GS_CFG_FILE'\
-                     'with the name of a GloblSim config xml file')
+        fn = os.environ.get('GS_CFG_FILE', None)
+        if fn is None:
+            logger.error('Please set export environment variable GS_CFG_FILE'
+                         ' with the name of a GlobalSim config xml file')
+            return cfg
 
-
-    logger.info('GlobalSim local config, cfg file:' + fn)
-
+    logger.info('GlobalSim local config, cfg file: ' + fn)
    
     def str_id(toolEl):
         """ obtain a string id for each AlgTool"""
