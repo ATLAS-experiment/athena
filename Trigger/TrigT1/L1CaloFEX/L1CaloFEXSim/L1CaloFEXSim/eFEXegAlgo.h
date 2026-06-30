@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -49,10 +49,10 @@ namespace LVL1 {
     virtual void getWstot(std::vector<unsigned int> & );
     virtual void getRealPhi(float & phi);
     virtual void getRealEta(float & eta);
-    virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB();
+    virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB(const EventContext& ctx);
     virtual void getClusterCells(std::vector<unsigned int> &cellETs);
-    virtual unsigned int getET();
-    virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer);
+    virtual unsigned int getET(const EventContext& ctx);
+    virtual unsigned int dmCorrection(const EventContext& ctx, unsigned int ET, unsigned int layer);
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &);
     virtual bool hasSeed() const {return m_hasSeed;};
     virtual unsigned int getSeed() const {return m_seedID;};
