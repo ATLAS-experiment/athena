@@ -53,12 +53,14 @@ class BlueprintNode;
 
 }
 
-class ActsTrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometrySvc> {
+
+namespace ActsTrk{
+class TrackingGeometrySvc : public extends<AthService, ActsTrk::ITrackingGeometrySvc> {
 public:
 
   StatusCode initialize() override;
 
-  ActsTrackingGeometrySvc( const std::string& name, ISvcLocator* pSvcLocator );
+  TrackingGeometrySvc( const std::string& name, ISvcLocator* pSvcLocator );
     /** @copydoc ActsTrk::ITrackingGeometrySvc::trackingGeometry */
   std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry() override;
   /** @copydoc ActsTrk::ITrackingGeometrySvc::populateAlignmentStore */
@@ -170,6 +172,6 @@ private:
 
 };
 
-
+}
 
 #endif

@@ -10,8 +10,6 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
 
 // ACTS

@@ -107,7 +107,7 @@ def ActsTrackingGeometrySvcCfg(flags,
         from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     acc.merge(HGTD_ReadoutGeometryCfg(flags))
 
-  actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
+  actsTrackingGeometrySvc = CompFactory.ActsTrk.TrackingGeometrySvc(name,
                                                                 BuildSubDetectors=subDetectors,
                                                                 BlueprintNodeBuilders=blueprintTools,
                                                                 RefinementTools=refineTools,
@@ -171,7 +171,7 @@ def ActsTrackingGeometryToolCfg(flags,
   acc.merge(ActsTrackingGeometrySvcCfg(flags))
   from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
   acc.merge(ActsGeometryContextAlgCfg(flags))
-  acc.addPublicTool(CompFactory.ActsTrackingGeometryTool(name), primary = True)
+  acc.addPublicTool(CompFactory.ActsTrk.TrackingGeometryTool(name), primary = True)
   return acc
 
 def ActsExtrapolationToolCfg(flags,

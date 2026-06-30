@@ -16,11 +16,9 @@ atlas_add_library( ActsGeometryLib
                    src/ActsDetectorElement.cxx
                    src/ActsLayerBuilder.cxx
                    src/ActsStrawLayerBuilder.cxx
-                   src/ActsHGTDLayerBuilder.cxx
-                   src/ActsTrackingGeometrySvc.cxx
+                   src/ActsHGTDLayerBuilder.cxx                   
                    src/ItkBlueprintNodeBuilder.cxx    
                    src/CaloBlueprintNodeBuilder.cxx
-                   src/TrackingGeoAlignVisitor.cxx
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
@@ -51,7 +49,6 @@ atlas_add_library( ActsGeometryLib
                    TrkSurfaces
                    xAODMeasurementBase
                    PRIVATE_LINK_LIBRARIES
-                   PathResolver
                    TrkGeometry
                    BeamPipeGeoModelLib
                    )
@@ -62,10 +59,12 @@ atlas_add_component( ActsGeometry
                      src/ActsWriteTrackingGeometryTransforms.cxx
                      src/ExtrapolationTool.cxx
                      src/ActsMaterialJsonWriterTool.cxx
-                     src/ActsTrackingGeometryTool.cxx
+                     src/TrackingGeometryTool.cxx
                      src/ActsPropStepRootWriterSvc.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
                      src/ITkMaterialDecoratorTool.cxx
+                     src/TrackingGeometrySvc.cxx
+                     src/TrackingGeoAlignVisitor.cxx
                      src/ActsVolumeIdToDetectorElementCollectionMappingAlg.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
@@ -87,6 +86,8 @@ atlas_add_component( ActsGeometry
                      TrkParameters
                      TrkSurfaces
                      Acts::PluginGeoModel
+                     PathResolver
+                     BeamPipeGeoModelLib
                     )
 
 # Install files from the package:
