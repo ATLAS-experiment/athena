@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -123,13 +123,13 @@ namespace InDet{
       void getClusters(std::vector<const InDet::SiCluster*>&) const;
 
       Trk::TrackStates
-      convertToTrackStateOnSurface();
+      convertToTrackStateOnSurface(const EventContext& ctx);
 
       Trk::TrackStates
-      convertToTrackStateOnSurface(int);
+      convertToTrackStateOnSurface(int, const EventContext& ctx);
 
       Trk::TrackStates
-      convertToTrackStateOnSurfaceWithNewDirection();
+      convertToTrackStateOnSurfaceWithNewDirection(const EventContext& ctx);
 
       Trk::TrackStates
       convertToNextTrackStateOnSurface();
