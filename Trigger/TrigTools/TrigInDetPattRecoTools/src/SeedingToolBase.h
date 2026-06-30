@@ -78,7 +78,7 @@ class SeedingToolBase: public AthAlgTool {
   BooleanProperty m_validateTriplets{this, "ValidateTriplets", true};
   BooleanProperty m_useAdaptiveCuts{this, "UseAdaptiveCuts", true};
   BooleanProperty m_addTriplets{this, "AddTriplets", false};
-  
+  BooleanProperty m_addIntralayerEdges{this, "AddIntralayerEdges", true};
 
   FloatProperty m_tau_ratio_cut{this, "tau_ratio_cut", 0.007};
   FloatProperty m_tau_ratio_corr{this, "tau_ratio_correction", 0.006};

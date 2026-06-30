@@ -595,11 +595,13 @@ void TrigInDetTrackSeedingTool::createGraphNodes(const SpacePointCollection* spC
     tmpColl[idx].m_r = std::sqrt(xs*xs + ys*ys);
     tmpColl[idx].m_phi = std::atan2(ys,xs);
     tmpColl[idx].m_idx = init_size + idx;
-
+    tmpColl[idx].m_mod_id = -1;
+    
     const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(sp->clusterList().first);
     if(pCL != nullptr){
       tmpColl[idx].m_pcw = pCL->width().z();
       tmpColl[idx].m_locPosY = pCL->localPosition().y();
+      tmpColl[idx].m_mod_id  = static_cast<int>(sp->elementIdList().first); //module id needed for intra-layer edge formation
     }
 
     idx++;

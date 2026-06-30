@@ -17,7 +17,7 @@ class TrigFTF_GNN_Geometry;
 
 struct TrigFTF_GNN_Node {
 
-  TrigFTF_GNN_Node(unsigned short l) : m_x(0), m_y(0), m_z(0), m_r(0), m_phi(0), m_layer(l), m_pcw(0), m_locPosY(0) {};
+  TrigFTF_GNN_Node(unsigned short l) : m_x(0), m_y(0), m_z(0), m_r(0), m_phi(0), m_layer(l), m_pcw(0), m_locPosY(0), m_mod_id(-1) {};
 
   inline float x() const {return m_x;}
   inline float y() const {return m_y;}
@@ -35,6 +35,7 @@ struct TrigFTF_GNN_Node {
   unsigned short m_layer{10000};
   unsigned int m_idx{std::numeric_limits<unsigned int>::max()};
   float m_pcw, m_locPosY;
+  int m_mod_id;
 };
 
 
