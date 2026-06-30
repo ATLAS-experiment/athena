@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -293,7 +293,7 @@ namespace LVL1 {
 
     }
 
-    unsigned int LVL1::eFEXegAlgo::getET() {
+    unsigned int LVL1::eFEXegAlgo::getET(const EventContext& ctx) {
 
         /// Get cells used in cluster
         std::vector<unsigned int> clusterCells;
@@ -304,27 +304,27 @@ namespace LVL1 {
         unsigned int PS_ET = 0;
 
         if(m_algoVersion==0) {
-            PS_ET = dmCorrection(clusterCells[0], 0)
-                    + dmCorrection(clusterCells[1], 0);
+            PS_ET = dmCorrection(ctx, clusterCells[0], 0)
+                    + dmCorrection(ctx, clusterCells[1], 0);
         } else {
             // 2025 algoVersion only uses 1 PS scell, except at most extreme eta values
-            PS_ET = dmCorrection(clusterCells[0], 0);
+            PS_ET = dmCorrection(ctx, clusterCells[0], 0);
             if ( ((m_efexid%3) == 0 && m_fpgaid == 0) || ((m_efexid%3) == 2 && m_fpgaid == 3)) {
-                PS_ET += dmCorrection(clusterCells[1], 0);
+                PS_ET += dmCorrection(ctx, clusterCells[1], 0);
             }
         }
-        unsigned int L1_ET = dmCorrection(clusterCells[2], 1)
-                             + dmCorrection(clusterCells[3], 1)
-                             + dmCorrection(clusterCells[4], 1)
-                             + dmCorrection(clusterCells[5], 1)
-                             + dmCorrection(clusterCells[6], 1)
-                             + dmCorrection(clusterCells[7], 1);
-        unsigned int L2_ET = dmCorrection(clusterCells[8], 2)
-                             + dmCorrection(clusterCells[9], 2)
-                             + dmCorrection(clusterCells[10], 2)
-                             + dmCorrection(clusterCells[11], 2)
-                             + dmCorrection(clusterCells[12], 2)
-                             + dmCorrection(clusterCells[13], 2);
+        unsigned int L1_ET = dmCorrection(ctx, clusterCells[2], 1)
+                             + dmCorrection(ctx, clusterCells[3], 1)
+                             + dmCorrection(ctx, clusterCells[4], 1)
+                             + dmCorrection(ctx, clusterCells[5], 1)
+                             + dmCorrection(ctx, clusterCells[6], 1)
+                             + dmCorrection(ctx, clusterCells[7], 1);
+        unsigned int L2_ET = dmCorrection(ctx, clusterCells[8], 2)
+                             + dmCorrection(ctx, clusterCells[9], 2)
+                             + dmCorrection(ctx, clusterCells[10], 2)
+                             + dmCorrection(ctx, clusterCells[11], 2)
+                             + dmCorrection(ctx, clusterCells[12], 2)
+                             + dmCorrection(ctx, clusterCells[13], 2);
         unsigned int L3_ET = clusterCells[14] + clusterCells[15];
 
         /// Final ET sum
@@ -354,7 +354,7 @@ namespace LVL1 {
       }
     }
 
-    unsigned int LVL1::eFEXegAlgo::dmCorrection (unsigned int ET, unsigned int layer) {
+  unsigned int LVL1::eFEXegAlgo::dmCorrection (const EventContext& ctx, unsigned int ET, unsigned int layer) {
         /// Check corrections are required and layer is valid, otherwise do nothing
         if ( !m_dmCorr || layer > 2 ) return ET;
 
@@ -384,9 +384,9 @@ namespace LVL1 {
 
             if (!m_dmCorrectionsKey.empty()) {
                 // replace m_corrections values with values from database ... only try this once
-                SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey/*, ctx*/ };
+                SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey, ctx};
                 if (dmCorrections.isValid()) {
-                    if(dmCorrections->size()==0 && Gaudi::Hive::currentContext().eventID().time_stamp()>1672527600) { // not an error for data before 2023 (will include MC21 and MC23a)
+                    if(dmCorrections->size()==0 && ctx.eventID().time_stamp()>1672527600) { // not an error for data before 2023 (will include MC21 and MC23a)
                         ATH_MSG_ERROR("No dead material corrections found in conditions database for this event in folder " << m_dmCorrectionsKey.key());
                         throw std::runtime_error("No dead material corrections found in database for this event");
                     }
@@ -415,10 +415,10 @@ namespace LVL1 {
     }
 
 
-    std::unique_ptr<eFEXegTOB> LVL1::eFEXegAlgo::geteFEXegTOB() {
+    std::unique_ptr<eFEXegTOB> LVL1::eFEXegAlgo::geteFEXegTOB(const EventContext& ctx) {
 
         std::unique_ptr<eFEXegTOB> out = std::make_unique<eFEXegTOB>();
-        out->setET(getET());
+        out->setET(getET(ctx));
 
         std::vector<unsigned int> temvector;
         getWstot(temvector);
