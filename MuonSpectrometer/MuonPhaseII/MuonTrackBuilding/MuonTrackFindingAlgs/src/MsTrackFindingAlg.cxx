@@ -338,7 +338,7 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                                               tgContext, mfContext, calContext, 
                                               &(*initialPars).referenceSurface());
         if (!fitTraject || fitTraject->size() == 0) {
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fit failed ");
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fit failed. Seed was \n"<<seed);
             if (m_visualizationTool.isEnabled()) {
                 m_visualizationTool->displayTrackSeedObj(ctx, seed, initialPars, "FailedFit");
             }
@@ -367,7 +367,10 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         // Eventually we should implement some recovery mechanism for track where we loose too many stations
         MuonR4::HitSummary summary = m_summaryTool->makeSummary(ctx, fitTraject->getTrack(0));
         ATH_MSG_DEBUG("Track has " << static_cast<std::uint32_t>(summary.nPrecisionStations()) << " precision layers with summary "<< summary);
-        if(summary.nPrecisionStations()<2) return false;
+        if(summary.nPrecisionStations()<2) {
+            ATH_MSG_DEBUG("rejecting single station track");
+            return false;
+        }
 
         
         }

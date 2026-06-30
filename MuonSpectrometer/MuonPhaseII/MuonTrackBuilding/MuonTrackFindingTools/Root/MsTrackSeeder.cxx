@@ -493,7 +493,27 @@ namespace MuonR4{
             if (newSeed.segments().empty()) {
                 continue;
             }
+
             newSeed.addSegment(seedCandidate);
+
+            // Let's check if we build a single station seed and if yes reject it.
+            using namespace Muon::MuonStationIndex;
+            std::optional<LayerIndex> layerIndex{std::nullopt};
+            bool foundSingleStationSeed{true};
+
+            for(const xAOD::MuonSegment* seg : newSeed.segments()) {
+                if (!layerIndex) {
+                    layerIndex = toLayerIndex(seg->chamberIndex());
+                    ATH_MSG_DEBUG("First segment is in layer "<<*layerIndex);
+                } else if ( (*layerIndex) != toLayerIndex(seg->chamberIndex())) {
+                    ATH_MSG_DEBUG("Found segment in layer "<<toLayerIndex(seg->chamberIndex())<<" which is different from the first segment in layer "<<*layerIndex);
+                    foundSingleStationSeed = false;
+                    break;
+                } 
+            }
+            if(foundSingleStationSeed) {
+                continue;
+            }
 
             //Check if we have multiple segments from the same station, if so split the seed and create duplicate seeds
 
