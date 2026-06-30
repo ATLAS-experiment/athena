@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -59,14 +59,11 @@ public:
   DeclareInterfaceID(ISCT_ByteStreamErrorsTool, 1, 0);
   //@}
   
-  virtual std::set<IdentifierHash> getErrorSet(int errorType) const =0;
   virtual std::set<IdentifierHash> getErrorSet(int errorType, const EventContext& ctx) const =0;
 
   /** Temporary status of chips for a particular module (packed as 1st 12 bits of unsigned int) */
-  virtual unsigned int tempMaskedChips(const Identifier& moduleId) const =0;
   virtual unsigned int tempMaskedChips(const Identifier& moduleId, const EventContext& ctx) const =0;
   /** Status ABCD errors of chips for a particular module (packed as 1st 12 bits of unsigned int) */
-  virtual unsigned int abcdErrorChips(const Identifier& moduleId) const =0;
   virtual unsigned int abcdErrorChips(const Identifier& moduleId, const EventContext& ctx) const =0;
 
 private:

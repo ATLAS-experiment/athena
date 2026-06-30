@@ -43,10 +43,10 @@ namespace{
     for (const xAOD::Muon* mu : *muons) {
         using enum xAOD::Muon::TrackParticleType; 
         // no CT or ST muons
-        if (mu->primaryTrackParticle() == mu->trackParticle(InnerDetectorTrackParticle)) continue;  
+        if (mu->trackParticle(xAOD::Muon::TrackParticleType::Primary) == mu->trackParticle(InnerDetectorTrackParticle)) continue;  
         // no SA muons w/o ME tracks
-        if (mu->primaryTrackParticle() == mu->trackParticle(MuonSpectrometerTrackParticle)) continue;  
-        const xAOD::TrackParticle* ptp = mu->primaryTrackParticle();
+        if (mu->trackParticle(xAOD::Muon::TrackParticleType::Primary) == mu->trackParticle(MuonSpectrometerTrackParticle)) continue;  
+        const xAOD::TrackParticle* ptp = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         const std::vector<std::vector<unsigned int>>& chIds = acc_alignEffectChId(*ptp);
         const std::vector<float>& alignEffSDT = acc_alligSigmaDeltaTrans(*ptp);
 

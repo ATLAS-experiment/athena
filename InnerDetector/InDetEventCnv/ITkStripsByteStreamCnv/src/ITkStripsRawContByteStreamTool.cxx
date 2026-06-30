@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ITkStripsRawContByteStreamTool.h"
@@ -45,6 +45,9 @@ ITkStripsRawContByteStreamTool::finalize() {
 
 StatusCode 
 ITkStripsRawContByteStreamTool::convert(const SCT_RDO_Container* itkStripsRDOCont) const{
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();  // FIXME: should be taken by convert
+
   FullEventAssembler<SrcIdMap>* fullEventAssembler = nullptr;
   ATH_CHECK( m_byteStreamCnvSvc->getFullEventAssembler (fullEventAssembler,"SCTRawCont") );
   FullEventAssembler<SrcIdMap>::RODDATA* rod;
@@ -58,7 +61,7 @@ ITkStripsRawContByteStreamTool::convert(const SCT_RDO_Container* itkStripsRDOCon
   // every ROD, even if there are no hits in it for a particular event 
   // (as there might be ByteStream errors e.g. TimeOut errors).
   std::vector<std::uint32_t> listOfAllRODs;
-  m_cabling->getAllRods(listOfAllRODs);
+  m_cabling->getAllRods(listOfAllRODs, ctx);
   for (std::uint32_t rod : listOfAllRODs) {
     rdoMap[rod].clear();
   }
@@ -71,7 +74,7 @@ ITkStripsRawContByteStreamTool::convert(const SCT_RDO_Container* itkStripsRDOCon
       // Collection ID
       Identifier idColl{itkStripsRawColl->identify()};
       IdentifierHash idCollHash{m_itkStripsIDHelper->wafer_hash(idColl)};
-      uint32_t robid{m_cabling->getRobIdFromHash(idCollHash)};
+      uint32_t robid{m_cabling->getRobIdFromHash(idCollHash, ctx)};
       if (robid == 0) continue;
       // Building the ROD ID
       eformat::helper::SourceIdentifier srcIDROB{robid};

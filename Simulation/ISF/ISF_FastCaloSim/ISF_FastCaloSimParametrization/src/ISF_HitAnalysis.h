@@ -34,7 +34,7 @@
 #include "CxxUtils/CachedPointer.h"
 
 #include "AtlasHepMC/GenParticle.h"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 #include <TLorentzVector.h>
@@ -249,11 +249,6 @@ private:
   double m_lzCalo[CaloCell_ID_FCS::MaxSample][3]{};
   double m_dCalo[CaloCell_ID_FCS::MaxSample][3]{};
   double m_distetaCaloBorder[CaloCell_ID_FCS::MaxSample][3]{};
-
-  /// Handle on the particle property service
-  ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
-
-  HepPDT::ParticleDataTable*     m_particleDataTable{};
 
   //###################################################################
 

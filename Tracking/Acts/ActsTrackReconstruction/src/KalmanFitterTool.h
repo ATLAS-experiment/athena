@@ -31,7 +31,8 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
@@ -167,9 +168,10 @@ private:
                                  detail::SourceLinkType slType) const;
 
 
-  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-  PublicToolHandle<IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+  ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
+  ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   // the settable job options
   Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
       "Chi2 cut used by the outlier finder" };

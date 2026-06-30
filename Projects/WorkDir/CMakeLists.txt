@@ -103,6 +103,14 @@ if( IS_DIRECTORY
       CACHE PATH "Directory holding the xAODUtilities module" )
 endif()
 
+# Set up where to find the AtlasGeant4Utilities CMake code.
+if( IS_DIRECTORY
+   "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake" )
+   set( AtlasGeant4Utilities_DIR
+      "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake"
+      CACHE PATH "Directory holding the AtlasGeant4Utilities module" )
+endif()
+
 # Set up CTest:
 atlas_ctest_setup()
 

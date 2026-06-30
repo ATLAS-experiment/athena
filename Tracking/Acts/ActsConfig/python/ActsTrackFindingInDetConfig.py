@@ -154,16 +154,9 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
 
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault(
-            "TrackingGeometryTool",
-            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
-        )
-
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault('ATLASConverterTool', acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
@@ -195,12 +188,13 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
-        if not (flags.Beam.Type is BeamType.Cosmics):
+        if flags.Beam.Type is not BeamType.Cosmics:
             from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
             
             if flags.Acts.PixelCalibrationStrategy in (PixelCalibrationStrategy.AnalogueClustering,
-                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection) :
+                                                       PixelCalibrationStrategy.AnalogueClusteringAfterSelection,
+                                                       PixelCalibrationStrategy.NNClustering):
 
                 kwargs.setdefault(
                     'PixelCalibrator',
@@ -210,7 +204,7 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     # !!! Calibrator is not used for Inner Detector yet
     if 'StripCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
-        if not (flags.Beam.Type is BeamType.Cosmics):
+        if flags.Beam.Type is not BeamType.Cosmics:
             from ActsConfig.ActsMeasurementCalibrationConfig import ActsStripCalibrationToolCfg
             from ActsConfig.ActsConfigFlags import StripCalibrationStrategy
 

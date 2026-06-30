@@ -130,7 +130,7 @@ StatusCode McAodWriterTool::write( const TruthParticleContainer* mcParts )
   std::ofstream& out = *m_ioBackend;
   out << std::fixed;
 
-  out << "---" << std::setw(5) << mcParts->size() << std::endl;
+  out << "---" << std::setw(5) << mcParts->size() << '\n';
   for ( unsigned int i = 0; i != mcParts->size(); ++i ) {
     const TruthParticle* mc = (*mcParts)[i];
     out << "P " << std::setprecision(3) << std::setw(10) << mc->px()
@@ -140,7 +140,7 @@ StatusCode McAodWriterTool::write( const TruthParticleContainer* mcParts )
 	<< " "  << std::setprecision(3) << std::setw(10) << mc->pdgId()
 	<< " "  << std::setprecision(3) << std::setw(10) << mc->charge()
 	<< " "  << std::setprecision(3) << std::setw(10) << HepMC::barcode(mc->genParticle())
-	<< std::endl;
+	<< '\n';
     out << "EtIsol " 
 	<< std::setw(3) << TruthParticleParameters::NbrOfCones
 	<< " : ";
@@ -150,7 +150,7 @@ StatusCode McAodWriterTool::write( const TruthParticleContainer* mcParts )
       out << " " << std::setprecision(3) << std::setw(10) 
 	  << mc->etIsol(static_cast<TruthParticleParameters::ConeSize>(iCone));
     }
-    out << std::endl;
+    out << '\n';
   }
 
   return StatusCode::SUCCESS;

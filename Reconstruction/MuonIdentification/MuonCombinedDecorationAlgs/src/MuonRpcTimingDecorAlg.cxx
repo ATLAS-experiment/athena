@@ -39,7 +39,7 @@ MuonRpcTimingDecorAlg::MuonRpcTimingDecorAlg(const std::string& name, ISvcLocato
     UintDecorator dec_id{m_idKey,ctx};
 
     for (const xAOD::Muon* mu : *muons) {
-        const xAOD::TrackParticle* tp = mu->primaryTrackParticle();
+        const xAOD::TrackParticle* tp = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         std::vector<RpcInfo> timing_info{};
         getRpcTiming(tp != mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)? tp : nullptr, timing_info);
         insert<float>(timing_info, mu, dec_pos_x, [](const RpcInfo& info){ return info.pos[Amg::x]; });

@@ -42,7 +42,7 @@ StatusCode TrigLArNoiseBurstAlg::execute( const EventContext& context ) const {
   ATH_CHECK( previousDecisionsHandle->size() == 1 );
   const auto previousDecision = previousDecisionsHandle->at(0);
   //get RoI  
-  auto roiELInfo = findLink<TrigRoiDescriptorCollection>( previousDecision, initialRoIString() );
+  auto roiELInfo = findLink<TrigRoiDescriptorCollection>(context,  previousDecision, initialRoIString() );
     
   ATH_CHECK( roiELInfo.isValid() );
   const TrigRoiDescriptor* roi = *(roiELInfo.link);

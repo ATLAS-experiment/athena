@@ -46,7 +46,7 @@ StatusCode TrigStreamerHypoAlg::execute( const EventContext& context ) const {
     if (m_featureIsROI) {
        // Obligatory link to feature. Re-using the initial ROI.
        // If this happens to be a FullScan ROI, then the following ComboHypo will also pass this leg through without cuts
-       LinkInfo<TrigRoiDescriptorCollection> featureLinkInfo = findLink<TrigRoiDescriptorCollection>(previousDecision, initialRoIString());
+       LinkInfo<TrigRoiDescriptorCollection> featureLinkInfo = findLink<TrigRoiDescriptorCollection>(context, previousDecision, initialRoIString());
        newDecision->setObjectLink(featureString(), featureLinkInfo.link);
      } else {
        // Obligatory link to feature. Re-use previous Step's feature.

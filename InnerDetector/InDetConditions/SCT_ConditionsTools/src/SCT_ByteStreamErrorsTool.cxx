@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -237,13 +237,6 @@ SCT_ByteStreamErrorsTool::getDetectorElementStatus(const EventContext& ctx, InDe
 
 
 bool
-SCT_ByteStreamErrorsTool::isGood(const IdentifierHash& elementIdHash) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementIdHash, ctx);
-}
-
-bool
 SCT_ByteStreamErrorsTool::isGood(const Identifier& elementId, const EventContext& ctx, InDetConditions::Hierarchy h) const {
   if (not canReportAbout(h)) return true;
 
@@ -256,12 +249,6 @@ SCT_ByteStreamErrorsTool::isGood(const Identifier& elementId, const EventContext
   }
 
   return true;
-}
-
-bool
-SCT_ByteStreamErrorsTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return isGood(elementId, ctx, h);
 }
 
 bool
@@ -345,12 +332,6 @@ SCT_ByteStreamErrorsTool::getErrorSet(int errorType, const EventContext& ctx) co
     }
   }
   return result;
-}
-
-std::set<IdentifierHash>
-SCT_ByteStreamErrorsTool::getErrorSet(int errorType) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getErrorSet(errorType, ctx);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -449,11 +430,6 @@ unsigned int SCT_ByteStreamErrorsTool::tempMaskedChips(const Identifier& moduleI
   // Bit 0 is for chip 0 on side 0, bit 1 is for chip 1 on side 0, ..., and bit 11 is for chip 5 on side 1
 }
 
-unsigned int SCT_ByteStreamErrorsTool::tempMaskedChips(const Identifier& moduleId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return tempMaskedChips(moduleId, ctx);
-}
-
 unsigned int SCT_ByteStreamErrorsTool::abcdErrorChips(const Identifier& moduleId, const EventContext& ctx) const {
   ATH_MSG_VERBOSE("SCT_ByteStreamErrorsTool abcdErrorChips");
   std::scoped_lock<std::mutex> lock{*m_cacheMutex.get(ctx)};
@@ -469,11 +445,6 @@ unsigned int SCT_ByteStreamErrorsTool::abcdErrorChips(const Identifier& moduleId
   }
   return v_abcdErrorChips; // 12 bits are used.
   // Bit 0 is for chip 0 on side 0, bit 1 is for chip 1 on side 0, ..., and bit 11 is for chip 5 on side 1
-}
-
-unsigned int SCT_ByteStreamErrorsTool::abcdErrorChips(const Identifier& moduleId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return abcdErrorChips(moduleId, ctx);
 }
 
 std::pair<StatusCode, unsigned int> SCT_ByteStreamErrorsTool::getErrorCodeWithCacheUpdate(const Identifier& moduleId, const EventContext& ctx,

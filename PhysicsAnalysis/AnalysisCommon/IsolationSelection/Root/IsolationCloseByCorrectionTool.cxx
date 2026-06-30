@@ -1012,7 +1012,7 @@ namespace CP {
         if (P->type() == xAOD::Type::ObjectType::Muon) {
             const xAOD::Muon* muon = static_cast<const xAOD::Muon*>(P);
             const xAOD::TrackParticle* idTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
-            return idTrk ? idTrk : muon->primaryTrackParticle();
+            return idTrk ? idTrk : muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         }
         return P;
     }

@@ -20,6 +20,8 @@
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonSpacePoint/SpacePointHelpers.h"
 
+#include "MuonTrackEvent/HitSummary.h"
+
 #include "ActsInterop/UnitConverters.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -55,6 +57,7 @@ namespace MuonR4{
         ATH_CHECK(m_trackFitTool.retrieve());
         ATH_CHECK(m_calibTool.retrieve());
         ATH_CHECK(m_writeKey.initialize());
+        ATH_CHECK(m_summaryTool.retrieve());
 
         if (m_trackingGeometryTool->trackingGeometry()->geometryVersion() !=
             Acts::TrackingGeometry::GeometryVersion::Gen3){
@@ -335,14 +338,14 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                                               tgContext, mfContext, calContext, 
                                               &(*initialPars).referenceSurface());
         if (!fitTraject || fitTraject->size() == 0) {
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fit failed ");
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fit failed. Seed was \n"<<seed);
             if (m_visualizationTool.isEnabled()) {
                 m_visualizationTool->displayTrackSeedObj(ctx, seed, initialPars, "FailedFit");
             }
             return false;
         }
-
-        auto track = fitTraject->getTrack(0);
+ 
+        ActsTrk::MutableTrackContainer::TrackProxy track = fitTraject->getTrack(0);
         const Amg::Vector3D trkP4 = ActsTrk::convertMomFromActs(track.fourMomentum()).first;
         double pt = trkP4.perp() / 1000; //in GeV
         if(pt < 2 ) {
@@ -359,6 +362,17 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         }
         );
 
+
+        // Check the hit counts on track post fit and if we only have one station on track discard track
+        // Eventually we should implement some recovery mechanism for track where we loose too many stations
+        MuonR4::HitSummary summary = m_summaryTool->makeSummary(ctx, fitTraject->getTrack(0));
+        ATH_MSG_DEBUG("Track has " << static_cast<std::uint32_t>(summary.nPrecisionStations()) << " precision layers with summary "<< summary);
+        if(summary.nPrecisionStations()<2) {
+            ATH_MSG_DEBUG("rejecting single station track");
+            return false;
+        }
+
+        
         }
         /** Add the links to the segments making up this track as an extra
          *  column. Use the indices of the segment objects which can later

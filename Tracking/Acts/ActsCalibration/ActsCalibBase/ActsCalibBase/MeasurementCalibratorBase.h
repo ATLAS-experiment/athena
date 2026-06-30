@@ -12,6 +12,7 @@
 #include "Acts/EventData/TrackStateProxy.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/Utilities/PointerTraits.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 #include "Acts/EventData/TrackStateProxyConcept.hpp"
 
 #include "ActsCalibBase/SourceLinkType.h"
@@ -19,10 +20,7 @@
 
 
 #include <array>
-
-
 #include <variant>
-
 namespace Trk{
     class MeasurementBase;
     class PrepRawData;
@@ -73,6 +71,13 @@ namespace ActsTrk::detail {
      *                      into a SourceLInk */
     template <Acts::PointerConcept Ptr_t>
     static Acts::SourceLink pack(const Ptr_t& measurement);
+    /** @brief Converts a vector measurement pointers to Acts::SourceLinks
+     *  @param measList: The list of measurement pointers for conversion
+     *  @param targetSL: The allocated SourceLink vectors to which the 
+     *                   Acts::SourceLink objects are appended. */
+    template<Acts::PointerConcept Ptr_t>
+    static void pack(const std::vector<Ptr_t>& measList,
+                     std::vector<Acts::SourceLink>& targetSL);
 
     /** @brief Copy the local position & covariance into the Acts track state proxy.
      *  @tparam Dim: Dimension of the measurement
@@ -93,6 +98,12 @@ namespace ActsTrk::detail {
                     proxy_t& trackState) const;
 
   protected:
+    /** @brief Queries the track proxy to allocate memory for the 
+     *         incoming calibration object. Defines the projector 
+     *         indices and allocates the source link to the state
+     *  @param projector: Projector configuration of the measurement
+     *  @param link: Source link to associate with the state
+     *  @param trackState: Refrence to the track state proxy to write.  */
     template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t>
     void prepareCalibratedState(const ProjectorType projector,
                                 Acts::SourceLink link,

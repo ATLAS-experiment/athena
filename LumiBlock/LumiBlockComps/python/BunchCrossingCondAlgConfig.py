@@ -26,7 +26,7 @@ def BunchCrossingCondAlgCfg(flags):
         else:
             # For ByteStream input, don't set folder key - will read from BS metadata
             folder = ''
-            bsmdkey = 'MetaDataStore+ByteStreamMetadata'
+            bsmdkey = 'InputMetaDataStore+ByteStreamMetadata'
 
     elif flags.Beam.BunchStructureSource == BunchStructureSource.FILLPARAMS:
         folder = '/TDAQ/OLC/LHC/FILLPARAMS'

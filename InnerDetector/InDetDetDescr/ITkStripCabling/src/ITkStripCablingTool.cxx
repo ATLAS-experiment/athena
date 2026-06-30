@@ -1,5 +1,5 @@
 /*
-/  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+/  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -58,21 +58,9 @@ ITkStripCablingTool::getOnlineIdFromHash(const IdentifierHash& hash, const Event
   return data->getOnlineIdFromHash(hash);
 }
 
-ITkStripOnlineId
-ITkStripCablingTool::getOnlineIdFromHash(const IdentifierHash& hash) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getOnlineIdFromHash(hash, ctx);
-}
-
 std::uint32_t
 ITkStripCablingTool::getRobIdFromHash(const IdentifierHash& hash, const EventContext& ctx) const {
   return getOnlineIdFromHash(hash, ctx).rod();
-}
-
-std::uint32_t
-ITkStripCablingTool::getRobIdFromHash(const IdentifierHash& hash) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  return getRobIdFromHash(hash, ctx);
 }
 
 void
@@ -90,12 +78,6 @@ ITkStripCablingTool::getAllRods(std::vector<std::uint32_t>& usersVector, const E
          ATH_MSG_DEBUG("ROD ID: 0x" << std::hex << rodId << std::dec);
       }
   }    
-}
-
-void
-ITkStripCablingTool::getAllRods(std::vector<std::uint32_t>& usersVector) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-  getAllRods(usersVector, ctx);
 }
 
 const ITkStripCablingData*

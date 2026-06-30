@@ -210,6 +210,14 @@ def xAODDecayTimeFilterCommonCfg(flags, **kwargs):
     cfg.addEventAlgo(CompFactory.xAODDecayTimeFilter("xAODDecayTimeFilter", **kwargs)) # TODO Add to filtSeq
     return cfg
 
+def xAODDecayVolumeFilterCommonCfg(flags, **kwargs):
+    """common fragment for xAODDecayVolume filter conversion to xAOD,
+    creation of slimmed container containing truth events connecting
+    the filter"""
+    cfg = CreatexAODSlimmedContainerCfg(flags, containerName="TruthGen") # Algs in prefiltSeq
+    # To modify cuts make a new Cfg method depending on this one, where you set the required kwargs
+    cfg.addEventAlgo(CompFactory.xAODDecayVolumeFilter("xAODDecayVolumeFilter", **kwargs)) # TODO Add to filtSeq
+    return cfg
 
 def xAODDecaysFinalStateFilterCommonCfg(flags, **kwargs):
     """common fragment for xAODDecaysFinalState filter conversion to xAOD,

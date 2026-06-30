@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_CalibModuleListTool.h"
@@ -25,7 +25,7 @@ StatusCode SCT_CalibModuleListTool::finalize() {
    return StatusCode::SUCCESS;
 }
 
-StatusCode SCT_CalibModuleListTool::readModuleList(std::map<Identifier, std::set<Identifier>>& moduleList) const {
+StatusCode SCT_CalibModuleListTool::readModuleList(const EventContext& ctx, std::map<Identifier, std::set<Identifier>>& moduleList) const {
    //--- Read strips using SCT_MonitorConditionsSvc
    SCT_ID::const_id_iterator waferIdItr{m_pSCTHelper->wafer_begin()};
    SCT_ID::const_id_iterator waferIdItrE{m_pSCTHelper->wafer_end()};
@@ -36,7 +36,7 @@ StatusCode SCT_CalibModuleListTool::readModuleList(std::map<Identifier, std::set
 
       std::set<Identifier> stripIdList;
       //ATH_MSG_DEBUG("in SCT_CalibModuleListTool::readModuleList: before accessing badStrips");
-      m_MonitorConditionsTool->badStrips(moduleId, stripIdList);
+      m_MonitorConditionsTool->badStrips(moduleId, stripIdList, ctx);
       //ATH_MSG_DEBUG("in SCT_CalibModuleListTool::readModuleList: after accessing badStrips");
       if (!stripIdList.empty()) moduleList.insert(std::map<Identifier, std::set<Identifier>>::value_type(moduleId, stripIdList));
    }

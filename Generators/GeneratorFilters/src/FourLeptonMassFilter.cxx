@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/FourLeptonMassFilter.h"
@@ -44,12 +44,11 @@ StatusCode FourLeptonMassFilter::filterEvent(const EventContext& ctx) {
 	  if (!MC::isStable(*pitr1)) continue;
 
 	  // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
-	  int pdgId1((*pitr1)->pdg_id());
-    
-	  if (!(std::abs(pdgId1) == 11 || std::abs(pdgId1) == 13)) continue;
+	  if (!(MC::isElectron(*pitr1) || MC::isMuon(*pitr1))) continue;
     
 	  if (!((*pitr1)->momentum().perp() >= m_minPt && std::abs((*pitr1)->momentum().pseudoRapidity()) <= m_maxEta)) continue;
-
+        const int pdgId1((*pitr1)->pdg_id());
+        
 	  // Loop over all remaining particles in the event
 	  auto pitr2 = pitr1;
 	  pitr2++;
@@ -59,9 +58,9 @@ StatusCode FourLeptonMassFilter::filterEvent(const EventContext& ctx) {
 	  for (; pitr2 != genEvt_particles_end; ++pitr2) {
         if (!MC::isStable(*pitr2) || pitr1 == pitr2) continue;
         // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
-        int pdgId2((*pitr2)->pdg_id());
-        if (!(std::abs(pdgId2) == 11 || abs(pdgId2) == 13)) continue;
+        if (!(MC::isElectron(*pitr2) || MC::isMuon(*pitr2))) continue;
         if (!((*pitr2)->momentum().perp() >= m_minPt && std::abs((*pitr2)->momentum().pseudoRapidity()) <= m_maxEta)) continue;
+        const int pdgId2((*pitr2)->pdg_id());
 
         // Loop over all remaining particles in the event
         auto pitr3 = pitr2;
@@ -71,9 +70,9 @@ StatusCode FourLeptonMassFilter::filterEvent(const EventContext& ctx) {
 		  if (!MC::isStable(*pitr3) || pitr1 == pitr3 || pitr2 == pitr3 ) continue;
 
 		  // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
-		  int pdgId3((*pitr3)->pdg_id());
-		  if (!(std::abs(pdgId3) == 11 || std::abs(pdgId3) == 13)) continue;
+		  if (!(MC::isElectron(*pitr3) || MC::isMuon(*pitr3))) continue;
 		  if (!((*pitr3)->momentum().perp() >= m_minPt && std::abs((*pitr3)->momentum().pseudoRapidity()) <= m_maxEta)) continue;
+                  const int pdgId3((*pitr3)->pdg_id());
 
           // Loop over all remaining particles in the event
 		  auto pitr4 = pitr3;
@@ -83,10 +82,10 @@ StatusCode FourLeptonMassFilter::filterEvent(const EventContext& ctx) {
             if (!MC::isStable(*pitr4) || pitr1 == pitr4 || pitr2 == pitr4 || pitr3 == pitr4) continue;
 
             // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
-            int pdgId4((*pitr4)->pdg_id());
-            if (!(std::abs(pdgId4) == 11 || abs(pdgId4) == 13)) continue;
+            if (!(MC::isElectron(*pitr4) || MC::isMuon(*pitr4))) continue;
             if (!((*pitr4)->momentum().perp() >= m_minPt && std::abs((*pitr4)->momentum().pseudoRapidity()) <= m_maxEta)) continue;
-            
+            const int pdgId4((*pitr4)->pdg_id());
+
             decltype(pitr1) apitr[4] = {pitr1,pitr2,pitr3,pitr4};
             int pdgIds[4]={pdgId1,pdgId2,pdgId3,pdgId4};
             for (int ii = 0; ii < 4; ii++) {

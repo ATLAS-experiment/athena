@@ -24,23 +24,15 @@ void RecoMuonTrackPlots::initializePlots(){
 //when the plot function called with a Muon
 //get's the corresponding link and fill it
 void RecoMuonTrackPlots::fill(const xAOD::Muon& mu, int component){
-
-  if (component == 0 ) {
-    const ElementLink<xAOD::TrackParticleContainer>& Mu_MStrack = mu.muonSpectrometerTrackParticleLink();
-    if(Mu_MStrack.isValid()){
-      const xAOD::TrackParticle* trk = *Mu_MStrack;
-      fill(*trk);
-    }
+  if (component > 1) {
+      return;
   }
-
-  if (component == 1 ){
-
-    const ElementLink<xAOD::TrackParticleContainer>& Mu_metrack = mu.trackParticleLink(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
-    if(Mu_metrack.isValid()){
-      const xAOD::TrackParticle* trk = *Mu_metrack;
+  xAOD::Muon::TrackParticleType tType = component == 0 ? xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle
+                                                       : xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
+  const xAOD::TrackParticle* trk = mu.trackParticle(tType);
+  if (trk) {
       fill(*trk);
-    }
-  }
+  } 
 }
 
 

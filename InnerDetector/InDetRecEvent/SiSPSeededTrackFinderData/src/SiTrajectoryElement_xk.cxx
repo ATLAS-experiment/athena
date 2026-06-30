@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSPSeededTrackFinderData/SiTrajectoryElement_xk.h"
@@ -899,7 +899,7 @@ bool InDet::SiTrajectoryElement_xk::addNextClusterF
 ///////////////////////////////////////////////////////////////////
 
 Trk::TrackStateOnSurface*
-InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool multi,int Q)
+InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool multi,int Q,const EventContext& ctx)
 {
   std::unique_ptr<Trk::TrackParameters> tp = nullptr;
   if (!change) {
@@ -927,10 +927,10 @@ InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool mu
     0);
 
   if (m_cluster) {
-    ro.reset(m_riotool->correct(*m_cluster, *tp, Gaudi::Hive::currentContext()));
+    ro.reset(m_riotool->correct(*m_cluster, *tp, ctx));
     pat.set(Trk::TrackStateOnSurface::Measurement);
   } else {
-    ro.reset(m_riotool->correct(*m_clusterNoAdd, *tp, Gaudi::Hive::currentContext()));
+    ro.reset(m_riotool->correct(*m_clusterNoAdd, *tp, ctx));
     pat.set(Trk::TrackStateOnSurface::Outlier);
   }
   auto sa = Trk::ScatteringAngles(
@@ -961,7 +961,7 @@ InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool mu
       }
       auto fqn = Trk::FitQualityOnSurface(m_linkBackward[i].xi2(),m_ndf);
       std::unique_ptr<Trk::MeasurementBase> ron(m_riotool->correct(
-        *m_linkBackward[i].cluster(), *(sos->trackParameters()), Gaudi::Hive::currentContext()) );
+        *m_linkBackward[i].cluster(), *(sos->trackParameters()), ctx) );
       m_tsos[m_ntsos] = new Trk::TrackStateOnSurface(
         fqn, std::move(ron), std::move(tpn), meTemplate->uniqueClone(), pat);
       m_utsos[m_ntsos] = false;

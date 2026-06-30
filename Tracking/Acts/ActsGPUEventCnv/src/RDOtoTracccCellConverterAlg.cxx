@@ -84,9 +84,10 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
   std::vector<traccc::io::csv::cell> cells_aos;
 
   // 8 here is for the time being a placeholder
-  // the user will need to provde the correct cell activation values
+  // the user will need to provde the correct cell activation values and time
 
   float staticToTValue = 8.f;
+  float staticTimeStampValue = 1.f;
 
   ATH_MSG_DEBUG("Reading pixel hits");
   for (const auto* coll : pixel_rdos) {
@@ -102,7 +103,7 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       cells_aos.push_back({geoId, 0,
           static_cast<uint32_t>(cellId.phiIndex()),
           static_cast<uint32_t>(cellId.etaIndex()),
-          static_cast<float>(rdo->getToT()), staticToTValue});
+          staticTimeStampValue, static_cast<float>(rdo->getToT())});
       ++nPix;
     }
   }
@@ -122,13 +123,13 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       if (m_stripID->barrel_ec(modId) == 0) {
         for (int i = 0; i < rdo->getGroupSize(); ++i) {
           cells_aos.push_back({geoId, 0,
-              static_cast<uint32_t>(cellId.phiIndex() + i), 0, 1.f, staticToTValue});
+              static_cast<uint32_t>(cellId.phiIndex() + i), 0, staticTimeStampValue, staticToTValue});
           ++nStrip;
         }
       } else {
         for (int i = 0; i < rdo->getGroupSize(); ++i) {
           cells_aos.push_back({geoId, 0, 0,
-              static_cast<uint32_t>(cellId.phiIndex() + i), 1.f, staticToTValue});
+              static_cast<uint32_t>(cellId.phiIndex() + i), staticTimeStampValue, staticToTValue});
           ++nStrip;
         }
       }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Daiki Hayakawa ( daiki.hayakawa@cern.ch )
@@ -65,7 +65,7 @@ namespace DerivationFramework {
 
     // fill BS error information
     for (int n_type=0; n_type < SCT_ByteStreamErrors::NUM_ERROR_TYPES; ++n_type) {
-      const std::set<IdentifierHash> errorSet = m_byteStreamErrTool->getErrorSet(n_type);
+      const std::set<IdentifierHash> errorSet = m_byteStreamErrTool->getErrorSet(n_type, ctx);
       int eta=0,phi=0,bec=0,layer=0,side=0;
       // add totalNumErrors to vector
       totalNumErrors += errorSet.size();

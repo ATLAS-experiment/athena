@@ -87,7 +87,7 @@ StatusCode TrigVSIHypoAlg::execute(const EventContext& context) const
        SG::ReadHandle<xAOD::VertexContainer> vtxHandle;
 
       if (m_isViewBased) {
-         const auto viewELInfo = findLink<ViewContainer>( previousDecision, viewString() );
+         const auto viewELInfo = findLink<ViewContainer>(context,  previousDecision, viewString() );
          ATH_CHECK( viewELInfo.isValid() );
 
          // get vertices from the key

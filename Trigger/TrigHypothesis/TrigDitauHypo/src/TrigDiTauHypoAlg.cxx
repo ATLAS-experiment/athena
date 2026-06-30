@@ -56,7 +56,7 @@ StatusCode TrigDiTauHypoAlg::execute(const EventContext& context) const
         ATH_CHECK(viewEL.isValid());
 
         // Get RoI
-        LinkInfo<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(previousDecision, roiString());
+        LinkInfo<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(context, previousDecision, roiString());
         ATH_CHECK(roiEL.isValid());
         const TrigRoiDescriptor* roi = *roiEL.link;
 

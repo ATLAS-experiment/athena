@@ -26,7 +26,6 @@
 #include <unordered_set>
 
 
-#include "AtlasHepMC/WeightContainer.h"
 #include "AtlasHepMC/Polarization.h"
 #include "AtlasHepMC/GenVertex_fwd.h"
 #include "AtlasHepMC/GenParticle_fwd.h"

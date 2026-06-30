@@ -80,3 +80,13 @@ atlas_add_test( EventSelectionConfigMerger
    SCRIPT python/EventSelectionConfigMerger_unitTest.py
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 60 )
+
+ atlas_add_test( EventSelectionConfigExpr
+   SCRIPT python/EventSelectionConfigExpr_unitTest.py
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 120 )
+
+ atlas_add_test( EventSelectionConfigEventVar
+   SCRIPT python/EventSelectionConfigEventVar_unitTest.py
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 120 )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( JetTagConfig )
@@ -12,4 +12,4 @@ atlas_install_scripts(
 
 atlas_add_test(FTagNamesTest
   SCRIPT ftag-test-tagger-names
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )

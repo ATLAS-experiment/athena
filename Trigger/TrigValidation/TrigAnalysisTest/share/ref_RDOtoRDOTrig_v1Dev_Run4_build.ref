@@ -1887,10 +1887,10 @@ HLT_g35_medium_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM26M:
     1: 10
     2: 10
     3: 8
-    4: 35
-    5: 35
-    6: 35
-    7: 35
+    4: 36
+    5: 36
+    6: 36
+    7: 36
 HLT_g35_tight_icalotight_mu15noL1_mu2noL1_L1eEM28M:
   eventCount: 0
   stepCounts:

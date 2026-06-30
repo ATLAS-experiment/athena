@@ -14,7 +14,7 @@ def RoIBResultToxAODCfg(flags):
 
     acc = ComponentAccumulator()
     alg = CompFactory.RoIBResultToxAOD('RoIBResultToxAOD')
-    alg.DoMuon = flags.Detector.EnableMuon and not (flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL0Muon)
+    alg.DoMuon = flags.Detector.EnableMuon and flags.Trigger.L1.doMuon and not (flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL0Muon)
     alg.DoCalo = flags.Detector.EnableCalo and flags.Trigger.enableL1CaloLegacy
 
     if flags.Input.Format is Format.POOL:

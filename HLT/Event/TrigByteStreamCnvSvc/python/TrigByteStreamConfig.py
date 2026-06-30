@@ -149,4 +149,8 @@ def TrigByteStreamCfg(flags, type_names=[]):
                                FailIfNoProxy=flags.Input.FailOnUnknownCollections,
                                ExtraOutputs=[("xAOD::EventInfo","StoreGateSvc+EventInfo"),("xAOD::EventAuxInfo","StoreGateSvc+EventInfoAux.")])) # EventInfo created by TrigEventSelectorByteStream 
 
+    if flags.Input.isMC:
+        acc.getEventAlgo('SGInputLoader').Load.add(
+        ('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata'))
+
     return acc

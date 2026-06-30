@@ -453,7 +453,7 @@ namespace met {
 						      std::vector<const xAOD::IParticle*>& truthlist) 
   {
     const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(obj);
-    const TrackParticle* trk = mu->primaryTrackParticle();
+    const TrackParticle* trk = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
     const xAOD::TruthParticle* truth(nullptr);
     if(trk) truth = TruthHelpers::getTruthParticle( *trk );
     if(truth && truth->isGenStable())

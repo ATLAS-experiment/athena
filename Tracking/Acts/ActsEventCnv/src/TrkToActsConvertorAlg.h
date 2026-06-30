@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */  
 
 #ifndef TRKTOACTSCONVERTORALG_H
 #define TRKTOACTSCONVERTORALG_H
 
 
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkTrack/TrackCollection.h"
@@ -26,15 +26,12 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
   virtual StatusCode execute(const EventContext& ctx) const override;
 
  protected:
-  PublicToolHandle<IActsToTrkConverterTool> m_convertorTool{this, "ConvertorTool",
-                                                      ""};
+  ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   SG::ReadHandleKeyArray<TrackCollection> m_trackCollectionKeys{
       this,
       "TrackCollectionKeys",
       {"CombinedInDetTracks", "CombinedMuonTracks", "MuonSpectrometerTracks"},
       "Keys for Track Containers"};
-  ActsTrk::GeoContextReadKey_t m_geometryContextKey {
-      this, "ActsAlignmentKey", "ActsAlignment", "Cond read key for the alignment"};
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey {this, "TrackContainerLocation", "ConvertedTracks", "Location of the converted TrackContainer"};
   ActsTrk::MutableTrackContainerHandlesHelper m_trackContainerBackendsHelper{this};
 

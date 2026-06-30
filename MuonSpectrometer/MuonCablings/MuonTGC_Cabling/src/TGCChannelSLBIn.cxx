@@ -76,6 +76,8 @@ const int TGCChannelSLBIn::s_lengthWD[] = {40, 36, 36, 44, 44};
 const int TGCChannelSLBIn::s_lengthSD[] = {40, 32, 32, 32, 32};
 const int TGCChannelSLBIn::s_lengthWT[] = {40, 36, 36, 36, 36};
 const int TGCChannelSLBIn::s_lengthST[] = {40, 32, 32, 32, 32};
+const int TGCChannelSLBIn::s_lengthWI[] = {40, 32, 32, 32, 32};
+const int TGCChannelSLBIn::s_lengthSI[] = {40, 32, 32, 32, 32};
 const int TGCChannelSLBIn::s_adjacentCell[] = {0, 2, 2, 6, 6};
 const int TGCChannelSLBIn::s_adjacentWD[] = {0, 2, 2, 6, 6};
 const int TGCChannelSLBIn::s_adjacentSD[] = {0, 0, 0, 0, 0};
@@ -105,9 +107,9 @@ int TGCChannelSLBIn::getLengthOfSLB(TGCId::ModuleType moduleType,
         case TGCId::ModuleType::ST:
             return s_lengthST[cellType];
         case TGCId::ModuleType::WI:
-            return s_lengthST[cellType];
+            return s_lengthWI[cellType];
         case TGCId::ModuleType::SI:
-            return s_lengthST[cellType];
+            return s_lengthSI[cellType];
         default:
             break;
     }

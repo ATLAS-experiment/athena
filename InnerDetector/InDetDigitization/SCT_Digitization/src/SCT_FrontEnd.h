@@ -94,10 +94,10 @@ class  SCT_FrontEnd : public extends<AthAlgTool, IFrontEnd> {
   StatusCode doThresholdCheckForRealHits(SiChargedDiodeCollection& collectione, SCT_FrontEndData& data, int stripMax) const;
   StatusCode doThresholdCheckForCrosstalkHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, int stripMax) const;
   StatusCode doClustering(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, int stripMax) const;
-  StatusCode prepareGainAndOffset(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
-  StatusCode prepareGainAndOffset(SiChargedDiodeCollection& collection, int side, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
-  StatusCode randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
-  StatusCode randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode prepareGainAndOffset(const EventContext& ctx, SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode prepareGainAndOffset(const EventContext& ctx, SiChargedDiodeCollection& collection, int side, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode randomNoise(const EventContext& ctx, SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode randomNoise(const EventContext& ctx, SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
   StatusCode addNoiseDiode(SiChargedDiodeCollection& collection, int strip, int tbin) const;
   static float meanValue(std::vector<float>& calibDataVect) ;
   StatusCode initVectors(int strips, SCT_FrontEndData& data) const;

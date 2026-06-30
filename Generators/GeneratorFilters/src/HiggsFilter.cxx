@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -25,6 +25,7 @@
 // Header for this module:-
 
 #include "GeneratorFilters/HiggsFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 //--------------------------------------------------------------------------
 HiggsFilter::HiggsFilter(const std::string& name, 
@@ -58,7 +59,7 @@ StatusCode HiggsFilter::filterEvent(const EventContext& ctx) {
     const HepMC::GenEvent* genEvt = (*itr);
 
     for(const auto& pitr: *genEvt){
-        if( std::abs(pitr->pdg_id()) != 25 ) continue;
+      if( !MC::isHiggs((pitr)) ) continue;
 	N_Higgs_all++;	
 	auto decayVtx = pitr->end_vertex();
 	// verify if we got a valid pointer and retrieve the number of daughters
@@ -66,8 +67,8 @@ StatusCode HiggsFilter::filterEvent(const EventContext& ctx) {
     int n_daughters =  decayVtx->particles_out_size();
 	if( n_daughters < 2 ) continue;
 	for (const auto& child_mcpart: *decayVtx) {
-	      if ( std::abs(child_mcpart->pdg_id()) != 5 ) continue;
-	      if ( pitr->pdg_id() ==  25 ) {
+	      if ( !MC::isBottom(child_mcpart) ) continue;
+	      if ( MC::isHiggs(pitr) ) {
 		N_Higgs++;
 	      }
 	      if( (pitr->momentum().perp() >=m_Ptmin && pitr->momentum().perp() <m_Ptmax ) ){

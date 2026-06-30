@@ -1,24 +1,24 @@
-################################################################################
-# Package: TrigInDetAccelerationService
-################################################################################
-
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
-
 atlas_subdir( TrigInDetAccelerationService )
 
-# External dependencies:
-
-find_package( TBB )
-
 # Component(s) in the package:
-atlas_add_library( TrigInDetAccelerationServiceLib
-                   src/*.cxx
-                   PUBLIC_HEADERS TrigInDetAccelerationService
-		   INCLUDE_DIRS ${TBB_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaKernel GaudiKernel AthCUDAInterfacesLib  AthenaBaseComps AthenaInterprocess StoreGateLib InDetIdentifier PixelReadoutGeometryLib SCT_ReadoutGeometry TrigAccelEvent ${TBB_LIBRARIES} rt dl)
+atlas_add_library(TrigInDetAccelerationServiceLib
+   TrigInDetAccelerationService/*.h
+   INTERFACE
+   PUBLIC_HEADERS TrigInDetAccelerationService
+   LINK_LIBRARIES GaudiKernel TrigAccelEvent)
 
-atlas_add_component( TrigInDetAccelerationService
-                     src/components/*.cxx
-                     LINK_LIBRARIES TrigInDetAccelerationServiceLib AthenaKernel GaudiKernel AthenaInterprocess AthenaBaseComps StoreGateLib TrigAccelEvent ${TBB_LIBRARIES} rt dl)
+# The component library needs CUDA. (For AthCUDAInterfacesLib.)
+if(NOT CMAKE_CUDA_COMPILER)
+   return()
+endif()
+
+atlas_add_component(TrigInDetAccelerationService
+   src/*.h src/*.cxx src/components/*.cxx
+   LINK_LIBRARIES TrigInDetAccelerationServiceLib CxxUtils GaudiKernel
+                  AthCUDAInterfacesLib AthenaInterprocess AthenaBaseComps
+                  StoreGateLib TrigAccelEvent InDetIdentifier
+                  InDetReadoutGeometry PixelReadoutGeometryLib
+                  SCT_ReadoutGeometry ${CMAKE_DL_LIBS})

@@ -11,6 +11,7 @@
 #include <format>
 #include <charconv>
 #include <string_view>
+#include "CxxUtils/HexString.h"
 
 constexpr std::string_view LABEL_DB   = "[DB=";
 constexpr std::string_view LABEL_CNT  = "[CNT=";
@@ -132,16 +133,37 @@ bool Token::less(const Token& copy) const {
 }
 
 const std::string Token::toString() const {
-   return std::format(
-      "[DB={}][CNT={}][CLID={}][TECH={:08X}][OID={:016X}-{:016X}]{}",
-      m_dbID.to_fixed_string(),
-      m_cntID,
-      m_classID.to_fixed_string(),
-      m_technology,
-      static_cast<uint64_t>(m_oid.first),
-      static_cast<uint64_t>(m_oid.second),
-      m_auxString
-   );
+// Pre-compute the hex representations using the format strings
+   CxxUtils::HexString<"[TECH={}]"> techHex(m_technology);
+   CxxUtils::HexString<"[OID={}-"> oid1Hex(static_cast<uint64_t>(m_oid.first));
+   CxxUtils::HexString<"{}]"> oid2Hex(static_cast<uint64_t>(m_oid.second));
+
+   std::string res;
+   // Reserve exact capacity to prevent reallocations. 
+   // "[DB=" (4) + Guid (36) + "][CNT=" (6) + CNT + "][CLID=" (7) + Guid (36) + "]" (1) 
+   res.reserve(4 + 36 + 6 + m_cntID.size() + 7 + 36 + 1 + 
+               techHex.size() + oid1Hex.size() + oid2Hex.size() + m_auxString.size());
+   
+   res += "[DB=";
+   size_t pos = res.size();
+   res.resize(pos + 36);
+   m_dbID.toString(std::span<char, 36>(res.data() + pos, 36));
+   
+   res += "][CNT=";
+   res += m_cntID;
+   
+   res += "][CLID=";
+   pos = res.size();
+   res.resize(pos + 36);
+   m_classID.toString(std::span<char, 36>(res.data() + pos, 36));
+   res += ']';
+   
+   res += static_cast<std::string_view>(techHex);
+   res += static_cast<std::string_view>(oid1Hex);
+   res += static_cast<std::string_view>(oid2Hex);
+   res += m_auxString;
+   
+   return res;
 }
 
 Token& Token::fromString(const std::string_view src)    {
@@ -204,13 +226,31 @@ Token& Token::fromString(const std::string_view src)    {
 
 /// Retrieve the string representation of the token.
 const std::string Token::key() const {
-   return std::format(
-      "[DB={}][CNT={}][CLID={}][TECH={:08X}]",
-      m_dbID.to_fixed_string(),
-      m_cntID,
-      m_classID.to_fixed_string(),
-      m_technology & KEY_MASK
-   );
+   //Do not replace with std::format unless it is found to be more performant
+   // m_technology & KEY_MASK yields an unsigned int -> 8 hex digits
+   CxxUtils::HexString<"[TECH={}]"> techHex(m_technology & KEY_MASK);
+
+   std::string res;
+   // "[DB=" (4) + Guid (36) + "][CNT=" (6) + CNT + "][CLID=" (7) + Guid (36) + "]" (1) 
+   res.reserve(4 + 36 + 6 + m_cntID.size() + 7 + 36 + 1 + techHex.size());
+   
+   res += "[DB=";
+   size_t pos = res.size();
+   res.resize(pos + 36);
+   m_dbID.toString(std::span<char, 36>(res.data() + pos, 36));
+   
+   res += "][CNT=";
+   res += m_cntID;
+   
+   res += "][CLID=";
+   pos = res.size();
+   res.resize(pos + 36);
+   m_classID.toString(std::span<char, 36>(res.data() + pos, 36));
+   res += ']';
+   
+   res += static_cast<std::string_view>(techHex);
+   
+   return res;
 }
 
 const Token& Token::set(Token* pToken) const {

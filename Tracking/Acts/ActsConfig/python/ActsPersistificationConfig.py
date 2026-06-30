@@ -118,19 +118,18 @@ def PersistifyTrackParticles(flags,
         trackparticles_shortlist += ['-TTVA_AMVFVertices',
                                      '-TTVA_AMVFWeights']
         # acts track link
-        if flags.Acts.EDM.PersistifyTracks:
+        if not flags.Acts.EDM.PersistifyTracks:
             trackparticles_shortlist.append('-actsTrack')
 
         trackparticles_variables = ".".join(trackparticles_shortlist)        
         # remove track decorations used internally by FTAG software
         from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA
-        trackparticles_shortlist += '.-'.join([''] + FTAG_AUXDATA)
+        trackparticles_variables += '.-'.join([''] + FTAG_AUXDATA)
         # exclude IDTIDE decorations
         from DerivationFrameworkInDet.IDTIDE import IDTIDE_AOD_EXCLUDED_AUXDATA
-        trackparticles_shortlist += '.-'.join([''] + IDTIDE_AOD_EXCLUDED_AUXDATA)
+        trackparticles_variables += '.-'.join([''] + IDTIDE_AOD_EXCLUDED_AUXDATA)
         from DerivationFrameworkInDet.IDTRKVALID import IDTRKVALID_AOD_EXCLUDED_AUXDATA
-        trackparticles_shortlist += '.-'.join([''] + IDTRKVALID_AOD_EXCLUDED_AUXDATA)
-
+        trackparticles_variables += '.-'.join([''] + IDTRKVALID_AOD_EXCLUDED_AUXDATA)
 
         for trackParticleCollection in trackParticleCollections:
             toAOD += [f"xAOD::TrackParticleContainer#{trackParticleCollection}",

@@ -175,7 +175,7 @@ StatusCode DQTGlobalWZFinderAlg::fillHistograms( const EventContext& ctx ) const
      static const SG::AuxElement::Accessor<float> aptc20("ptcone20");
 
      for (const xAOD::Muon* muon : *muons){
-       auto muTrk = (muon)->primaryTrackParticle();
+       auto muTrk = (muon)->trackParticle(xAOD::Muon::TrackParticleType::Primary);
        float d0sig;
        if (!muTrk) {
          ATH_MSG_WARNING("No muon track! " << thisEventInfo->runNumber() << " " << thisEventInfo->eventNumber());
@@ -1163,7 +1163,7 @@ bool DQTGlobalWZFinderAlg::checkTruthMuon(const xAOD::Muon* muon) const{
   unsigned int iTypeOfPart = res.first;
   unsigned int iPartOrig   = res.second;
 
-  auto muTrk = muon->primaryTrackParticle();
+  auto muTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 
   const auto* thePart = m_truthClassifier->getGenPart(muTrk);
 

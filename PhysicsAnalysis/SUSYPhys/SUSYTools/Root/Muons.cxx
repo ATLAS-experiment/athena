@@ -246,14 +246,14 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
   ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
   const xAOD::Vertex* pv = this->GetPrimVtx();
   double primvertex_z = pv ? pv->z() : 0;
-  //const xAOD::TrackParticle* track = input.primaryTrackParticle();
+  //const xAOD::TrackParticle* track = input.trackParticle(xAOD::Muon::TrackParticleType::Primary);
   const xAOD::TrackParticle* track;
   if (input.muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon) {
-    track = input.trackParticle(xAOD::Muon::CombinedTrackParticle);
+    track = input.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle);
     if (!track) return StatusCode::SUCCESS; // don't treat SAF muons without CB track further
   }
   else {
-    track = input.primaryTrackParticle();
+    track = input.trackParticle(xAOD::Muon::TrackParticleType::Primary);
   }
 
   //impact parameters (after applyCorrection() so to have the primaryTrack links restored in old buggy samples)

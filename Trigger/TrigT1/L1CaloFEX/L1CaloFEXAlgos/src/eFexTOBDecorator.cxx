@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -85,7 +85,7 @@ namespace LVL1 {
       std::vector<unsigned int> RhadSums;
       std::vector<unsigned int> WstotSums;
 
-      ATH_CHECK( m_eFEXTOBEtTool->getegSums(eta, phi, seed, UnD, ClusterCellETs, RetaSums, RhadSums, WstotSums) );
+      ATH_CHECK( m_eFEXTOBEtTool->getegSums(ctx, eta, phi, seed, UnD, ClusterCellETs, RetaSums, RhadSums, WstotSums) );
 
       RetaCoreDec (*emRoI) = RetaSums[0];
       RetaEnvDec  (*emRoI) = RetaSums[1];
@@ -113,7 +113,7 @@ namespace LVL1 {
       std::vector<unsigned int> RcoreSums;
       std::vector<unsigned int> RemSums;
 
-      ATH_CHECK( m_eFEXTOBEtTool->gettauSums(eta, phi, seed, UnD, RcoreSums, RemSums) );
+      ATH_CHECK( m_eFEXTOBEtTool->gettauSums(ctx, eta, phi, seed, UnD, RcoreSums, RemSums) );
 
       RCoreDec   (*tauRoI) = RcoreSums[0];
       REnvDec    (*tauRoI) = RcoreSums[1];

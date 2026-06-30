@@ -51,10 +51,16 @@
 #include "egammaInterfaces/IegammaOQFlagsBuilder.h"
 #include "EgammaAnalysisInterfaces/IegammaMVASvc.h"
 
+
 #include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
+#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
+#include "EgammaAnalysisInterfaces/IForwardElectronCalib.h"
 //
 #include <memory>
 #include <string>
+
+
+
 
 class egammaForwardBuilder : public AthReentrantAlgorithm
 {
@@ -111,6 +117,23 @@ private:
     "Boolean to do energy calibration"
   };
 
+
+  /** @brief Private member flag to do pT calibration. */
+  Gaudi::Property<bool> m_dopTCal {
+    this,
+    "dopTCal",
+    false,
+    "Boolean to do pT calibration"
+  };
+
+  Gaudi::Property<bool> m_fwdDNN {
+    this,
+    "dofwdDNN",
+    false,
+    "Boolean to do forward DNN identification"
+  };
+
+  
   /** @brief Input primary vertices for fwd energy calibration */
   SG::ReadHandleKey<xAOD::VertexContainer> m_pVtxKey{
     this,
@@ -224,12 +247,36 @@ protected:
     "The selectors that we need to apply to the FwdElectron object"
   };
 
+  ToolHandleArray<IAsgElectronLikelihoodTool> m_forwardElectronNNSelectors {
+    this,
+    "forwardelectronNNselectors",
+    {},
+    "The selectors that we need to apply to the FwdElectron object"
+  };
+
+
+  ToolHandle<IForwardElectronCalib> m_forwardElectronpTCalib {
+    this,
+    "forwardelectronNNCalib",
+    {},
+    "The tool that we need to calibrate the pT of the FwdElectron object"
+  };
+
+
   Gaudi::Property<std::vector<std::string>> m_forwardElectronIsEMSelectorResultNames {
     this,
     "forwardelectronIsEMselectorResultNames",
     {},
     "The selector result names"
   };
+
+  Gaudi::Property<std::vector<std::string>> m_forwardElectronNNSelectorResultNames {
+    this,
+    "forwardelectronNNselectorResultNames",
+    {},
+    "The selector result names"
+  };
+
 };
 #endif
 

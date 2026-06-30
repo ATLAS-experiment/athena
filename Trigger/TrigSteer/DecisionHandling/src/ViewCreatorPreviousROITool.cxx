@@ -1,6 +1,6 @@
 
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -24,7 +24,7 @@ StatusCode ViewCreatorPreviousROITool::attachROILinks(TrigCompositeUtils::Decisi
   // I.e. don't update the "roi", just re-use the one from the previous Step.
 
   for ( Decision* outputDecision : decisions ) { 
-    const std::vector<LinkInfo<TrigRoiDescriptorCollection>> myROIs = findLinks<TrigRoiDescriptorCollection>(outputDecision, roiString(), TrigDefs::lastFeatureOfType);
+    const std::vector<LinkInfo<TrigRoiDescriptorCollection>> myROIs = findLinks<TrigRoiDescriptorCollection>(ctx, outputDecision, roiString(), TrigDefs::lastFeatureOfType);
 
     int location = -1;
 

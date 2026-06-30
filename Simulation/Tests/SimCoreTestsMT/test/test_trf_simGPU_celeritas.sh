@@ -4,7 +4,7 @@
 # art-type: grid
 # art-include: main--simGPU/AthSimulation
 # art-athena-mt: 8
-# art-architecture: '#&nvidia'
+# art-architecture: {"gpu_spec": {"vendor": "nvidia", "model": {"pattern": ".*(P100|V100).*", "excl": true}}}
 # art-output: dcube*
 # art-html: dcube_simGPU
 

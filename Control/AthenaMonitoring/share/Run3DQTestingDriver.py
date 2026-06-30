@@ -14,7 +14,8 @@ if __name__=='__main__':
     import sys
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from AthenaConfiguration.Enums import Format
+    from AthenaConfiguration.Enums import Format, LHCPeriod
+
     flags = initConfigFlags()
     parser = flags.getArgumentParser()
     parser.add_argument('--preExec', help='Code to execute before locking configs')
@@ -74,17 +75,24 @@ if __name__=='__main__':
         log.info('Executing preExec: %s', args.preExec)
         exec(args.preExec)
 
-    if flags.hasCategory("DQ.Steering") and flags.hasCategory("Detector"):
-        if flags.hasCategory("DQ.Steering.InDet"):
-            if (flags.hasFlag("DQ.Steering.InDet.doAlignMon") and flags.DQ.Steering.InDet.doAlignMon) or \
-               (flags.hasFlag("DQ.Steering.InDet.doGlobalMon") and flags.DQ.Steering.InDet.doGlobalMon) or \
-               (flags.hasFlag("DQ.Steering.InDet.doPerfMon") and flags.DQ.Steering.InDet.doPerfMon):
-                flags.Detector.GeometryID = True
-
-    # Just assume we want the full ID geometry, if we are reading in geometry
-    flags.Detector.GeometryPixel = True
-    flags.Detector.GeometrySCT = True
-    flags.Detector.GeometryTRT = True
+    if flags.GeoModel.Run < LHCPeriod.Run4:
+      # Just assume we want the full ID geometry, if we are reading in geometry
+      flags.Detector.GeometryPixel = True
+      flags.Detector.GeometrySCT = True
+      flags.Detector.GeometryTRT = True
+      if flags.hasCategory("DQ.Steering") and flags.hasCategory("Detector"):
+          if flags.hasCategory("DQ.Steering.InDet"):
+              if (flags.hasFlag("DQ.Steering.InDet.doAlignMon") and flags.DQ.Steering.InDet.doAlignMon) or \
+                 (flags.hasFlag("DQ.Steering.InDet.doGlobalMon") and flags.DQ.Steering.InDet.doGlobalMon) or \
+                 (flags.hasFlag("DQ.Steering.InDet.doPerfMon") and flags.DQ.Steering.InDet.doPerfMon):
+                  flags.Detector.GeometryID = True
+    else:
+      flags.Detector.EnableITk = True
+      flags.Detector.EnableITkPixel = True
+      flags.Detector.GeometryITkPixel = True
+      flags.Detector.EnableITkStrip = True
+      flags.Detector.GeometryITkStrip = True
+      flags.Detector.GeometryITk = True
 
     log.info('FINAL CONFIG FLAGS SETTINGS FOLLOW')
     if args.loglevel is None or getattr(Constants, args.loglevel) <= Constants.INFO:

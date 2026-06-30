@@ -214,14 +214,14 @@ EGInvariantMassTool::getInvariantMasses(const EventContext& ctx,
         q1 = ((xAOD::Electron*)((*particles1)[first]))->charge();
       } else if (type1 == xAOD::Type::Muon) {
         q1 = ((xAOD::Muon*)((*particles1)[first]))
-               ->primaryTrackParticle()
+               ->trackParticle(xAOD::Muon::TrackParticleType::Primary)
                ->charge();
       }
       if (type2 == xAOD::Type::Electron) {
         q2 = ((xAOD::Electron*)((*particles2)[second]))->charge();
       } else if (type2 == xAOD::Type::Muon) {
         q2 = ((xAOD::Muon*)((*particles2)[second]))
-               ->primaryTrackParticle()
+               ->trackParticle(xAOD::Muon::TrackParticleType::Primary)
                ->charge();
       }
       if (q1 * q2 > 0.) {

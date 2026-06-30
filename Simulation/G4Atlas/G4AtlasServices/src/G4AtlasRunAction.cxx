@@ -11,7 +11,7 @@ namespace G4UA
   //---------------------------------------------------------------------------
   // Constructor
   //---------------------------------------------------------------------------
-  G4AtlasRunAction::G4AtlasRunAction()
+  G4AtlasRunAction::G4AtlasRunAction(): fTimer(std::make_unique<G4Timer>())
   {
   }
 
@@ -24,6 +24,8 @@ namespace G4UA
     for(auto action : m_runActions){
       action->BeginOfRunAction(run);
     }
+    fTimer->Start();
+
   }
 
   //---------------------------------------------------------------------------
@@ -31,6 +33,10 @@ namespace G4UA
   //---------------------------------------------------------------------------
   void G4AtlasRunAction::EndOfRunAction(const G4Run* run)
   {
+    fTimer->Stop();
+    G4cout << "  ======================================================" << G4endl;
+    G4cout << "   Time:  "  << *fTimer << G4endl;
+    G4cout << "  ======================================================" << G4endl;
     // Loop over my post-actions and apply each one in turn
     for(auto action : m_runActions){
       action->EndOfRunAction(run);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSPSeededTrackFinderData/SiTrajectory_xk.h"
@@ -40,12 +40,12 @@ void InDet::SiTrajectory_xk::erase(int n)
 ///////////////////////////////////////////////////////////////////
 
 Trk::TrackStates
-InDet::SiTrajectory_xk::convertToTrackStateOnSurface(int cosmic)
+InDet::SiTrajectory_xk::convertToTrackStateOnSurface(int cosmic, const EventContext& ctx)
 {
   if (!cosmic ||  m_elements[m_elementsMap[m_firstElement]].parametersUB().parameters()[2] < 0.) {
-    return convertToTrackStateOnSurface();
+    return convertToTrackStateOnSurface(ctx);
   }
-  return convertToTrackStateOnSurfaceWithNewDirection();
+  return convertToTrackStateOnSurfaceWithNewDirection(ctx);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface(int cosmic)
 ///////////////////////////////////////////////////////////////////
 
 Trk::TrackStates
-InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
+InDet::SiTrajectory_xk::convertToTrackStateOnSurface(const EventContext& ctx)
 {
 
   auto dtsos = Trk::TrackStates();
@@ -65,7 +65,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
   int i = m_firstElement;
   
   const Trk::TrackStateOnSurface* 
-    tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(false,true,multi,1);
+    tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(false,true,multi,1,ctx);
 
   if (tsos) dtsos.push_back(tsos);
 
@@ -73,13 +73,13 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
 
     int m = m_elementsMap[i];
     if (m_elements[m].cluster() || m_elements[m].clusterNoAdd() ) {
-      tsos = m_elements[m].trackStateOnSurface(false,false,multi,0);
+      tsos = m_elements[m].trackStateOnSurface(false,false,multi,0,ctx);
       if (tsos) dtsos.push_back(tsos);
     }
   }
 
   i = m_lastElement;
-  tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(false,false,multi,2);
+  tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(false,false,multi,2,ctx);
   if (tsos) dtsos.push_back(tsos);
 
   if (multi) {
@@ -100,7 +100,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
 ///////////////////////////////////////////////////////////////////
 
 Trk::TrackStates
-InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
+InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection(const EventContext& ctx)
 {
 
   auto dtsos = Trk::TrackStates();
@@ -111,7 +111,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
   int i = m_lastElement;
 
   const Trk::TrackStateOnSurface* 
-    tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(true,true,multi,2);
+    tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(true,true,multi,2,ctx);
 
   if (tsos) dtsos.push_back(tsos);
 
@@ -119,13 +119,13 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
 
     int m = m_elementsMap[i];
     if (m_elements[m].cluster() || m_elements[m].clusterNoAdd() ) {
-      tsos = m_elements[m].trackStateOnSurface(true,false,multi,0);
+      tsos = m_elements[m].trackStateOnSurface(true,false,multi,0,ctx);
       if (tsos) dtsos.push_back(tsos);
     }
   }
 
   i = m_firstElement;
-  tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(true,false,multi,1);
+  tsos = m_elements[m_elementsMap[i]].trackStateOnSurface(true,false,multi,1,ctx);
   if (tsos) dtsos.push_back(tsos);
 
   return dtsos;

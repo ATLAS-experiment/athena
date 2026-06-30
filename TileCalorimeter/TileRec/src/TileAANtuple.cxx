@@ -52,7 +52,6 @@
 
 // Gaudi includes
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TTree.h"
 #include "TFile.h"

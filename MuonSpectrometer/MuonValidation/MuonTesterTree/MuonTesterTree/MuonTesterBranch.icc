@@ -23,6 +23,7 @@ template <class T> bool MuonTesterBranch::addToTree(T& variable) {
         ATH_MSG_ERROR("Could not create the branch " << name() << " in TTree " << m_tree->GetName() << ".");
         return false;
     }
+    ATH_MSG_VERBOSE("init () -- Successfully initialized "<<name());
     m_init = true;
     return true;
 }

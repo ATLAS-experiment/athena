@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -46,7 +46,7 @@ namespace LVL1 {
 
     /** Tool to calculate eEM discriminant sums */
     virtual
-    StatusCode getegSums(float etaTOB, float phiTOB, int seed, int UnD, 
+    StatusCode getegSums(const EventContext& ctx, float etaTOB, float phiTOB, int seed, int UnD,
                                   std::vector<unsigned int> &ClusterCellETs,
                                   std::vector<unsigned int> &RetaSums,
                                   std::vector<unsigned int> &RhadSums, 
@@ -58,7 +58,7 @@ namespace LVL1 {
 
     /** Tool to calculate eTaudiscriminant sums */
     virtual
-    StatusCode gettauSums(float etaTOB, float phiTOB, int seed, int UnD, 
+    StatusCode gettauSums(const EventContext& ctx, float etaTOB, float phiTOB, int seed, int UnD,
                                    std::vector<unsigned int> &RcoreSums,
                                    std::vector<unsigned int> &RemSums);
 

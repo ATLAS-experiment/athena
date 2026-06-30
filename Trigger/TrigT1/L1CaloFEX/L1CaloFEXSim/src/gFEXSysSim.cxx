@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSysSim - Overall gFEX simulation
@@ -19,16 +19,6 @@
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 namespace LVL1 {
-
-   // default constructor for persistency
-
-   gFEXSysSim::gFEXSysSim(const std::string& type,const std::string& name,const IInterface* parent):
-      AthAlgTool(type,name,parent)
-   {
-      declareInterface<IgFEXSysSim>(this);
-
-   }
-
 
    //---------------- Initialisation -------------------------------------------------
 
@@ -83,10 +73,8 @@ namespace LVL1 {
    }
 
 
-   StatusCode gFEXSysSim::execute(gFEXOutputCollection* gFEXOutputs)   {
+   StatusCode gFEXSysSim::execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs)   {
 
-      const EventContext& ctx = Gaudi::Hive::currentContext();
-    
       SG::ReadHandle<LVL1::gTowerContainer> this_gTowerContainer(m_gTowerContainerSGKey,ctx);
       if(!this_gTowerContainer.isValid()){
          ATH_MSG_FATAL("Could not retrieve gTowerContainer " << m_gTowerContainerSGKey.key());

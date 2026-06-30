@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCTERRMONALG_H
@@ -115,12 +115,12 @@ class SCTErrMonAlg : public AthMonitorAlgorithm {
                                  categoryErrorMap_t& categoryErrorMap,
                                  std::array<int, SCT_Monitoring::N_REGIONS_INC_GENERAL>& nMaskedLinks) const;
   void numByteStreamErrors(const std::set<IdentifierHash>& errors, int& ntot) const;
-  bool disabledSCT(std::set<IdentifierHash>& sctHashDisabled) const;
+  bool disabledSCT(const EventContext& ctx, std::set<IdentifierHash>& sctHashDisabled) const;
   bool errorSCT(std::set<IdentifierHash>& sctHashBadLinkError,
                     std::set<IdentifierHash>& sctHashBadRODError,
                     std::set<IdentifierHash>& sctHashBadError) const;
   bool summarySCT(std::set<IdentifierHash>& sctHashAll, std::set<IdentifierHash>& sctHashSummary) const;
-  bool psTripDCSSCT(std::set<IdentifierHash>& sctHashPSTripDCS, float& PSTripModules) const;
+  bool psTripDCSSCT(const EventContext& ctx, std::set<IdentifierHash>& sctHashPSTripDCS, float& PSTripModules) const;
   void fillWafer(moduleGeo_t module, TH2F& histo) const;
   double calculateDetectorCoverage(const TH2F& histo, const TH2F& histoAll) const;
 };

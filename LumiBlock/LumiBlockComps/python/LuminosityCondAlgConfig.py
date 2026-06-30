@@ -64,7 +64,7 @@ def luminosityCondAlgMCCfg (flags, name, result):
     else:
         # For ByteStream input, don't use conditions folder - will read from BS metadata
         digitizationFolderKey = ''
-        bsMetadataKey = 'MetaDataStore+ByteStreamMetadata'
+        bsMetadataKey = 'InputMetaDataStore+ByteStreamMetadata'
 
     return { 'LuminosityFolderInputKey' : '',
              'DigitizationFolderInputKey' : digitizationFolderKey,

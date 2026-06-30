@@ -96,7 +96,7 @@ std::string Rec::MuonPrintingTool::print(const xAOD::Muon& muon) const {
     uint8_t ntrigEtaHoleLayers = 0;
     uint8_t mainSector = 0;
     uint8_t secondSector = 0;
-   const xAOD::TrackParticle& tp = *muon.primaryTrackParticle();
+   const xAOD::TrackParticle& tp = *muon.trackParticle(xAOD::Muon::TrackParticleType::Primary);
     tp.summaryValue(nprecisionLayers, xAOD::numberOfPrecisionLayers);
     tp.summaryValue(nprecisionHoleLayers, xAOD::numberOfPrecisionHoleLayers);
     tp.summaryValue(nphiLayers, xAOD::numberOfPhiLayers);

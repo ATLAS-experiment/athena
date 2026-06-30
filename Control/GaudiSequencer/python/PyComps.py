@@ -87,14 +87,14 @@ class PyEvtFilter (PyAthena.Alg):
             _error ('usage:\n%s', self.__doc__)
             return StatusCode.Failure
 
-        if (not (self.evt_list is None)) and \
-           (not (self.filter_fct is None)):
+        if (self.evt_list is not None) and \
+           (self.filter_fct is not None):
             _error ('invalid properties: evt_list *and* filter_fct '
                     'are not None !')
             _error ('usage:\n%s', self.__doc__)
             return StatusCode.Failure
 
-        if not (self.filter_fct is None):
+        if self.filter_fct is not None:
             # checking the filtering function is sound
             import inspect
             args = inspect.getargspec (self.filter_fct)[0]

@@ -76,7 +76,7 @@ bool TrigMuonEFIdtpHypoTool::decideOnSingleObject(TrigMuonEFIdtpHypoTool::MuonEF
       ATH_MSG_ERROR("Retrieval of xAOD::MuonContainer failed");
       return false;
    }
-   if(! muon->primaryTrackParticle()) return false;
+   if(! muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)) return false;
 
    const xAOD::TrackParticle* tr = muon->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
    if ( !tr ) {
@@ -136,7 +136,7 @@ bool TrigMuonEFIdtpHypoTool::passedQualityCuts(const xAOD::Muon* muon) const
    float reducedChi2 = -10;
    
    if( metrack ) {
-      reducedChi2 = muon->primaryTrackParticle()->chiSquared()/muon->primaryTrackParticle()->numberDoF(); 
+      reducedChi2 = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->chiSquared()/muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->numberDoF(); 
       // Selection criteria based on the requirements that are part of the muon quality working points (offline)
       if(std::abs(reducedChi2) < 8.0 && !m_muonSelTool->isBadMuon(*muon) && muon->author()==xAOD::Muon::Author::MuidSA) passCut = true;
    }

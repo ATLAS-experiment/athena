@@ -49,7 +49,6 @@
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 #include "TrkGeometry/TrackingGeometry.h"
-#include "HepPDT/ParticleData.hh"
 //#########################
 
 #include "TTree.h"
@@ -128,14 +127,6 @@ StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
   // Grab the Ntuple and histogramming service for the tree
   ATH_CHECK(m_thistSvc.retrieve());
 
-  //#########################
-  ATH_CHECK(m_partPropSvc.retrieve());
-
-  m_particleDataTable = (HepPDT::ParticleDataTable*) m_partPropSvc->PDT();
-  if(m_particleDataTable == nullptr) {
-    ATH_MSG_ERROR("PDG table not found");
-    return StatusCode::FAILURE;
-  }
   //#########################
   std::unique_ptr<TFile> dummyFile = std::unique_ptr<TFile>(TFile::Open("dummyFile.root", "RECREATE")); //This is added to suppress the error messages about memory-resident trees
   m_tree = new TTree("FCS_ParametrizationInput", "FCS_ParametrizationInput");
@@ -1329,7 +1320,7 @@ std::vector<Trk::HitInfo>* ISF_HitAnalysis::caloHits(const HepMC::GenParticle& p
  std::vector<Trk::HitInfo>*     hitVector =  new std::vector<Trk::HitInfo>;
 
  int     pdgId    = part.pdg_id();
- double  charge   = HepPDT::ParticleID(pdgId).charge();
+ double  charge   = MC::charge(pdgId);
 
  // particle Hypothesis for the extrapolation
  Trk::ParticleHypothesis pHypothesis = m_pdgToParticleHypothesis.convert(pdgId,charge);

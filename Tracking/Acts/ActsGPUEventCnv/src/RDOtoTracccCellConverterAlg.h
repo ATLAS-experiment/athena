@@ -22,11 +22,6 @@
 
 #include "ActsGPUInterfaces/IActsDeviceDetectorDescriptionProviderSvc.h"
 
-// vecmem
-#include "vecmem/memory/memory_resource.hpp"
-#include "vecmem/utils/cuda/copy.hpp"
-#include "traccc/cuda/utils/stream.hpp"
-
 #include <unordered_map>
 #include <cstdint>
 
@@ -65,10 +60,10 @@ private:
   ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
       this, "DeviceMR", "", "The device memory resource tool to use"};
   ToolHandle<AthDevice::ICopyTool> m_copy{
-      this, "CopyProviderTool", "AthCUDA::CopyTool/CopyProviderTool", "Vecmem copy provider tool"};
+      this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
   ServiceHandle<ActsTrk::IActsDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
-    this, "DetectorDescriptionSvc", "ActsDeviceDetectorDescriptionProviderSvc"};
+    this, "DetectorDescriptionSvc", "ActsTrk::ActsDeviceDetectorDescriptionProviderSvc"};
 
   const traccc::detector_conditions_description::host* m_hostCond{nullptr};
 

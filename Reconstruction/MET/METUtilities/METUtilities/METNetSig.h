@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METNetSig.h
@@ -78,7 +78,7 @@ namespace met {
                               bool doJetJVT = false) const override;
 
     /// Uses ONNX runtime to propagate the input features created in rebuildJetMET through the trained network
-    virtual StatusCode evaluateNNMETSig( xAOD::MissingETContainer* metCont,
+    StatusCode evaluateNNMETSig( xAOD::MissingETContainer* metCont,
                   float& met_x, float& met_y, float& sigma_x, float& sigma_y ) const;
 
 

@@ -67,9 +67,9 @@ MuonHitSummaryPlots::MuonHitSummaryPlots(PlotBase* pParent,
 void MuonHitSummaryPlots::fill(const xAOD::Muon& muon, float weight) {
 
     const xAOD::TrackParticle* tp =
-        (muon.muonType() == xAOD::Muon::SiliconAssociatedForwardMuon)
-            ? muon.trackParticle(xAOD::Muon::CombinedTrackParticle)
-            : muon.trackParticle(xAOD::Muon::Primary);
+        (muon.muonType() == xAOD::Muon::MuonType::SiliconAssociatedForwardMuon)
+            ? muon.trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)
+            : muon.trackParticle(xAOD::Muon::TrackParticleType::Primary);
     if (tp) {
         m_oMSHitPlots.fill(*tp);
     }

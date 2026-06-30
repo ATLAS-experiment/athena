@@ -62,6 +62,9 @@ def ActsInDetPixelSeedingToolCfg(flags,
         (0, 0), (0, 1), (0, 1), (0, 1), (0, 1), (0, 0),
         (-1, 0), (-1, 0), (-1, 0), (-1, 0), (0, 0)
     ])
+    kwargs.setdefault("useHVCollisionRegion", flags.Tracking.ActiveConfig.useHoughVertexFilter)
+    kwargs.setdefault("hvCollisionRegionTolerance", 10. * ActsUnits.mm)
+    kwargs.setdefault("inputHoughVtx", "HoughVertices" if flags.Tracking.ActiveConfig.useHoughVertexFilter else "")
     kwargs.setdefault("doSeedQualitySelection", True)
 
     # Seed confirmation
@@ -141,6 +144,9 @@ def ActsInDetStripSeedingToolCfg(flags,
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
     kwargs.setdefault("collisionRegionMin", -1. * collisionRegionAbsMax)
     kwargs.setdefault("collisionRegionMax", collisionRegionAbsMax)
+    kwargs.setdefault("useHVCollisionRegion", flags.Tracking.ActiveConfig.useHoughVertexFilter)
+    kwargs.setdefault("hvCollisionRegionTolerance", 10. * ActsUnits.mm)
+    kwargs.setdefault("inputHoughVtx", "HoughVertices" if flags.Tracking.ActiveConfig.useHoughVertexFilter else "")
 
     kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPT / GaudiUnits.GeV * ActsUnits.GeV)
     kwargs.setdefault("cotThetaMax" , 7.40626311) # eta = 2.7

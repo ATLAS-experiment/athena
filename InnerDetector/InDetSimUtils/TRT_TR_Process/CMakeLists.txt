@@ -9,7 +9,6 @@ atlas_subdir( TRT_TR_Process )
 find_package( Boost )
 find_package( CLHEP )
 find_package( Geant4 )
-find_package( XercesC )
 
 # Component(s) in the package:
 atlas_add_library( TRT_TR_Process
@@ -17,8 +16,8 @@ atlas_add_library( TRT_TR_Process
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps AthenaKernel StoreGateLib IdDictDetDescr IdDict G4AtlasInterfaces GeoMaterial2G4 GeoModelInterfaces PathResolver RDBAccessSvcLib )
+                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${Boost_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps AthenaKernel StoreGateLib IdDictDetDescr IdDict G4AtlasInterfaces GeoMaterial2G4 GeoModelInterfaces PathResolver RDBAccessSvcLib )
 set_target_properties( TRT_TR_Process PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:

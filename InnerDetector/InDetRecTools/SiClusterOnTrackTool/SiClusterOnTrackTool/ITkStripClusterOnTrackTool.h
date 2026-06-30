@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@
 #define ITkStripClusterOnTrackTool_H
 
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
@@ -54,7 +53,7 @@ public:
    * of management/deletion of the SCT_ClusterOnTrack.
   */
   virtual InDet::SCT_ClusterOnTrack* correct(
-      const Trk::PrepRawData&, const Trk::TrackParameters&, const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+      const Trk::PrepRawData&, const Trk::TrackParameters&, const EventContext&) const override;
 
  private:
 

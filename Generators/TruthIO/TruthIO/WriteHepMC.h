@@ -9,7 +9,7 @@
 #include "AtlasHepMC/IO_GenEvent.h"
 #include <memory>
 
-/// Write the MC event record to file in IO_GenEvent text format
+/// Write the MC event record to file
 class WriteHepMC : public GenBase {
 public:
 
@@ -22,7 +22,7 @@ public:
   std::string m_format;
   std::string m_units;
 
-  std::unique_ptr<HepMC3::Writer> m_hepmcio;
+  std::shared_ptr<HepMC3::Writer> m_hepmcio;
   HepMC3::Units::MomentumUnit m_momentumunit{};
   HepMC3::Units::LengthUnit m_lengthunit{};
 };

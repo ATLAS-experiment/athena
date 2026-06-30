@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelDigitization/FEI4SimTool.h
@@ -24,17 +24,15 @@ class FEI4SimTool: public FrontEndSimTool {
 public:
   FEI4SimTool(const std::string& type, const std::string& name, const IInterface* parent);
 
-  virtual StatusCode initialize();
-  virtual StatusCode finalize();
-  virtual ~FEI4SimTool();
-  virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
-                       CLHEP::HepRandomEngine* rndmEngine) const;
+  virtual StatusCode initialize() override;
+  virtual void process(const EventContext& ctx,
+                       SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
+                       CLHEP::HepRandomEngine* rndmEngine) const override;
 private:
    SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey{
     this, "PixelModuleData", "PixelModuleData", "Pixel module data"
   };
 
-  FEI4SimTool();
 };
 
 #endif // PIXELDIGITIZATION_FEI4SimTool_H

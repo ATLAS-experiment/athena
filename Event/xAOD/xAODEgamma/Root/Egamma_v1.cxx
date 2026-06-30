@@ -438,6 +438,12 @@ void Egamma_v1::setSelectionisEM(unsigned int value, const std::string& isEM){
   acc(*this)=value;
 }
 
+void Egamma_v1::setLikelihoodValue(float value, const std::string& isEM){
+  const SG::AuxElement::Accessor< float > acc( isEM );
+  acc(*this)=value;
+}
+
+  
 } // namespace xAOD
 
 //  LocalWords:  const el hasStore makePrivateStore

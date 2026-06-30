@@ -18,7 +18,6 @@
 // Forward declarations
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/IO_GenEvent.h"
-#include "HepMC3/WriterAscii.h"
 
 class IFastSimDedicatedSD;
 class ILArG4ShowerLibSvc;

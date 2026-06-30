@@ -14,7 +14,6 @@
 
 // Gaudi includes
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 //Event info
 #include "xAODEventInfo/EventInfo.h"

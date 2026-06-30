@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ISCT_ReadCalibDataTool.h Interface file for SCT_ReadCalibDataTool.
@@ -45,12 +45,9 @@ class ISCT_ReadCalibDataTool: virtual public ISCT_ConditionsTool {
 
   // Methods to return calibration defect type and summary
   virtual ISCT_ReadCalibDataTool::CalibDefectType defectType(const Identifier& stripId, const EventContext& ctx, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const = 0; //!<Return summary of defect type and values for a strip
-  virtual ISCT_ReadCalibDataTool::CalibDefectType defectType(const Identifier& stripId, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const = 0; //!<Return summary of defect type and values for a strip
   virtual SCT_CalibDefectData::CalibModuleDefects defectsSummary(const Identifier& moduleId, const std::string& scan, const EventContext& ctx) const = 0; //!<Returns module summary of defect
-  virtual SCT_CalibDefectData::CalibModuleDefects defectsSummary(const Identifier& moduleId, const std::string& scan) const = 0; //!<Returns module summary of defect
   virtual std::list<Identifier> defectList(const std::string& defect, const EventContext& ctx) const = 0; //!<Returns module summary of defect
-  virtual std::list<Identifier> defectList(const std::string& defect) const = 0; //!<Returns module summary of defect
-  
+
 };
 
 //---------------------------------------------------------------------- 

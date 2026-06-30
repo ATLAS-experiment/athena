@@ -12,7 +12,6 @@
 // Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 // Trk includes
 #include "TrkTruthTrackInterfaces/ITruthTrackBuilder.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
@@ -22,9 +21,6 @@
 
 class AtlasDetectorID;
 
-namespace HepPDT{
-    class ParticleDataTable;
-}
 
 namespace Trk {
  
@@ -58,8 +54,6 @@ namespace Trk {
         ToolHandle< IRIO_OnTrackCreator >           m_rotcreatorbroad{this, "BroadRotCreatorTool", ""};
         
         const AtlasDetectorID                       *m_DetID;
-        ServiceHandle<IPartPropSvc>                 m_particlePropSvc;           //!< Pointer to the particle properties svc */        
-        const HepPDT::ParticleDataTable*            m_particleDataTable;         //!< ParticleDataTable needed to get connection pdg_code <-> charge */
         
         Gaudi::Property<size_t>                     m_minNdof{this, "MinDegreesOfFreedom", 6};                   //!< checks min degrees of freedom if bigger -1
         Gaudi::Property<bool>                       m_onlyPrimaries{this, "OnlyPrimaries", false};             //!< restrict track creation to primaries

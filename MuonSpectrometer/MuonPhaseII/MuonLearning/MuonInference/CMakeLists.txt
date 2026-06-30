@@ -5,11 +5,10 @@ atlas_subdir( MuonInference )
 
 
 find_package( onnxruntime )
-find_package( fmt )
 
 atlas_add_component(    MuonInference
                         src/components/*.cxx src/*.cxx
-                        INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS} ${FMT_INCLUDE_DIRS}
+                        INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
                         LINK_LIBRARIES  AthenaKernel StoreGateLib  PathResolver
                                         AthenaBaseComps GeoPrimitives MuonIdHelpersLib
                                         MuonSimEvent xAODMuonSimHit  MdtCalibInterfacesLib
@@ -17,7 +16,7 @@ atlas_add_component(    MuonInference
                                         MuonPatternEvent MuonTrackEvent MuonPatternHelpers MuonPatternHelpers
                                         CaloEvent FourMomUtils xAODEventInfo
                                         MuonInferenceInterfaces 
-                                        AthOnnxInterfaces AthOnnxCompsLib  ${ONNXRUNTIME_LIBRARIES} ${FMT_LIBRARIES}
+                                        AthOnnxInterfaces AthOnnxCompsLib  ${ONNXRUNTIME_LIBRARIES}
                     )
 
 atlas_install_python_modules( python/*.py)

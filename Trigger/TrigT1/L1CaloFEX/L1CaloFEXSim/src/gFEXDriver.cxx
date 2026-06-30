@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -46,7 +46,7 @@ StatusCode gFEXDriver::initialize()
   my_gFEXOutputCollection->setdooutput(true);
 
   // STEP 2 - Run the gFEXSysSim
-  ATH_CHECK(m_gFEXSysSimTool->execute(my_gFEXOutputCollection));
+  ATH_CHECK(m_gFEXSysSimTool->execute(ctx, my_gFEXOutputCollection));
 
   // STEP 3 - Close and clean the event
   m_gFEXSysSimTool->cleanup();

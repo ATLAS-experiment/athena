@@ -3,7 +3,7 @@
 
 # art-description: art job for cosmic
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 # art-input: valid1.310772.CosmicRays_CollisionSetup.recon.RDO.s4559_s4560_r16709_tid45807425_00
 # art-input-nfiles: 2

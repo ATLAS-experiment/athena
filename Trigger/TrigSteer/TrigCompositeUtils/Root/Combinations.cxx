@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCompositeUtils/Combinations.h"
@@ -12,7 +12,7 @@ namespace TrigCompositeUtils
   Combinations::Combinations(
       const std::vector<std::size_t> &legMultiplicities,
       const std::vector<VecLInfo_t> &legFeatures,
-      const std::function<bool(const VecLInfo_t &)> &filter)
+      const IPartCombItr::FilterFunc_t &filter)
       : m_filter(filter),
         m_legMultiplicities(legMultiplicities),
         m_legFeatures(legFeatures)
@@ -25,16 +25,16 @@ namespace TrigCompositeUtils
       const std::vector<std::size_t> &legMultiplicities,
       const std::vector<VecLInfo_t> &legFeatures,
       FilterType filter)
-      : Combinations(legMultiplicities, legFeatures, getFilter(filter))
+      : Combinations(legMultiplicities, legFeatures, IPartCombItr::getFilter(filter))
   {
   }
 
-  Combinations::Combinations(const std::function<bool(const VecLInfo_t &)> &filter)
+  Combinations::Combinations(const IPartCombItr::FilterFunc_t &filter)
       : Combinations(std::vector<std::size_t>{}, std::vector<VecLInfo_t>{}, filter)
   {
   }
 
-  Combinations::Combinations(FilterType filter) : Combinations(getFilter(filter)) {}
+  Combinations::Combinations(FilterType filter) : Combinations(IPartCombItr::getFilter(filter)) {}
 
   void Combinations::reserve(std::size_t capacity)
   {

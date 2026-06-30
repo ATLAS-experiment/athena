@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatCandidateTool.h"
@@ -362,7 +362,9 @@ namespace Muon {
                 ATH_MSG_WARNING(" could not create CompetingMuonClustersOnTrack in chamber   " << m_idHelperSvc->toString(chit->first));
                 continue;
             }
+            // cppcheck-suppress danglingLifetime
             hits.push_back(comprot.get());
+            // cppcheck-suppress danglingLifetime
             allHits.push_back(comprot.get());
 
             // add to garbage collection

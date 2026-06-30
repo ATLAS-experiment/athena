@@ -75,7 +75,7 @@ StatusCode TrigMuonEFIdtpHypoAlg::execute( const EventContext& context ) const
 
       // get SA muon from the previous decision
       const xAOD::Muon *muonSA = nullptr;
-      auto prevMuInfo = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      auto prevMuInfo = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(context, previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
       ATH_CHECK(prevMuInfo.size()==1);
       auto muonSALink = prevMuInfo.at(0).link;
       ATH_CHECK( muonSALink.isValid() );

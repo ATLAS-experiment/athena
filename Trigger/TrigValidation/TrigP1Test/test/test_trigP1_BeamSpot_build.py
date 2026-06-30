@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
-# art-description: BeamSpot update test using athenaHLT
+# art-description: BeamSpot update test using athenaEF
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, Step, ExecStep, CheckSteps
@@ -28,17 +28,17 @@ ex_bs.args = '-m TrigP1Test.BeamSpotUpdate -n 50 -o beamspot %s' % get_input('da
 # Running from CA is done with --dump-config-reload by default. However, we need to be able
 # to execute an additional pre-command (see below). So we have to do the two steps separately:
 
-# Run athenaHLT and dump config
+# Run athenaEF and dump config
 ex_cfg = ExecStep.ExecStep('dump_config')
-ex_cfg.type = 'athenaHLT'
+ex_cfg.type = 'athenaEF'
 ex_cfg.job_options = 'TrigP1Test.BeamSpotUpdate.run'
 ex_cfg.input = ''
 ex_cfg.explicit_input = True
 ex_cfg.args = '-f ./beamspot._0001.data --dump-config-exit'
 
-# Run athenaHLT
+# Run athenaEF
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'HLTJobOptions.json'
 ex.input = ''
 ex.explicit_input = True

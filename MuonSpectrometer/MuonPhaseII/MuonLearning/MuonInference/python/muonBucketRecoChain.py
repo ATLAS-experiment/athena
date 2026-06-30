@@ -9,35 +9,6 @@ logging.getLogger("onnxruntime").setLevel(logging.ERROR)
 # Set environment variable for ONNX Runtime before imports (attempt early suppression)
 os.environ["ORT_LOGGING_LEVEL"] = "3"  # 3 = ERROR
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-
-def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("isMC", flags.Input.isMC)
-    from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
-    kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
-    kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
-    if not scheduleLegacy:
-        kwargs.setdefault("LegacySegmentKey", "")
-        kwargs.setdefault("LegacyTrackKey", "")
-        kwargs.setdefault("LegacyMuonKey" , "")
-    the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
-
-def MsTrackVisualizationToolCfg(flags, name = "VisualizationTool", **kwargs):
-    result = ComponentAccumulator()
-    if not flags.Input.isMC:
-        from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-        result.merge(LegacyMuonRecoChainCfg(flags))
-        kwargs.setdefault("TruthSegkey", "MuonSegments")
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
-    the_tool = CompFactory.MuonValR4.TrackVisualizationTool(name, **kwargs)
-    result.setPrivateTools(the_tool)
-    return result
-
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
     from MuonConfig.MuonConfigUtils import executeTest, setupHistSvcCfg
@@ -48,11 +19,19 @@ if __name__=="__main__":
     parser.add_argument("--LegacyChain", default = False, action = 'store_true', help="If set to true, the legacy chain is not scheduled",)
     parser.add_argument("--use-cpu", default = False, action = 'store_true', help="Use CPU for ONNX inference")
     parser.add_argument("--skip-onnx", action="store_true", default=False, help="Skip ONNX inference step")
-    parser.add_argument("--bucket-model-path", dest="bucket_model_path", default="dev/MuonRecRTT/edgecnn_mu200.onnx")
-    parser.add_argument("--score-threshold", type=float, default=0.160, dest="score_threshold")
+    from MuonInference.InferenceConfig import (
+        DEFAULT_BUCKET_MODEL_PATH,
+        DEFAULT_BUCKET_SCORE_THRESHOLD,
+        DEFAULT_BUCKET_SINGLE_OUTPUT_MODE,
+    )
+    parser.add_argument("--bucket-model-path", dest="bucket_model_path", default=DEFAULT_BUCKET_MODEL_PATH)
+    parser.add_argument("--score-threshold", type=float, default=DEFAULT_BUCKET_SCORE_THRESHOLD, dest="score_threshold")
     parser.add_argument("--output-name", default="logits", dest="output_name")
-    parser.add_argument("--graph-bucket-output-level", type=int, default=3, dest="graph_bucket_output_level", help="OutputLevel for GraphBucketFilterTool")
-    parser.add_argument("--is-logit", dest="is_logit", default=False, action="store_true", help="Interpret the single output directly and do not apply sigmoid")
+    score_mode = parser.add_mutually_exclusive_group()
+    score_mode.add_argument("--single-output-mode", choices=("logit", "prob"), default=DEFAULT_BUCKET_SINGLE_OUTPUT_MODE, dest="single_output_mode",
+        help="Scalar ONNX-output interpretation. 'logit' applies sigmoid before thresholding.")
+    score_mode.add_argument("--is-logit", action="store_const", const="logit", dest="single_output_mode", help="alias for --single-output-mode logit.")
+    score_mode.add_argument("--is-prob", action="store_const", const="prob", dest="single_output_mode", help="alias for --single-output-mode prob.")
     parser.set_defaults(nEvents = -1)
 
     parser.set_defaults(outRootFile="MsTrkTester.root")
@@ -73,9 +52,6 @@ if __name__=="__main__":
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonTrackTester"))
-
     from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
     cfg.merge(MuonReconstructionConfig(flags))
     
@@ -87,8 +63,7 @@ if __name__=="__main__":
                 ModelPath=args.bucket_model_path,
                 ScoreThreshold=args.score_threshold,
                 OutputName=args.output_name,
-                OutputLevel=args.graph_bucket_output_level,
-                SingleOutputIsLogit=args.is_logit if hasattr(args, "is_logit") else False,
+                SingleOutputMode=args.single_output_mode,
             )
         )
         cfg.merge(
@@ -105,7 +80,8 @@ if __name__=="__main__":
     if args.LegacyChain:
         cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = args.LegacyChain))
+    from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg
+    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = args.LegacyChain, outFile = args.outRootFile))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
@@ -118,6 +94,7 @@ if __name__=="__main__":
 
 
     if not args.noMonitorPlots:
+        from MuonTrackFindingTest.MsTrackFindingTester import MsTrackVisualizationToolCfg
         cfg.getEventAlgo("MSTrackFinderAlg").VisualizationTool = cfg.popToolsAndMerge(MsTrackVisualizationToolCfg(flags))
         cfg.getEventAlgo("MuonSegmentFittingAlg").VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags,
                                                                                             CanvasPreFix="SegmentPlotValid", outSubDir="SegmentValidPlots",
@@ -129,5 +106,5 @@ if __name__=="__main__":
                                                                                             saveSummaryPDF= False,CanvasLimits=10000))
 
 
-
+    cfg.getService("MessageSvc").setVerbose = []
     executeTest(cfg)

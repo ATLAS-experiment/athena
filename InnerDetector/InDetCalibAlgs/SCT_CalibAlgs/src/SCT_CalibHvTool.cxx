@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -101,7 +101,7 @@ SCT_CalibHvTool::fill(const bool fromData) {
       Identifier waferId{m_pSCTHelper->wafer_id(waferhash)};
       Identifier moduleId{m_pSCTHelper->module_id(waferId)};
       //step one is to make sure this one isn't already know to be messed up:
-      isgoodnow = m_DCSConditionsTool->isGood(moduleId,InDetConditions::SCT_MODULE);
+      isgoodnow = m_DCSConditionsTool->isGood(moduleId,ctx,InDetConditions::SCT_MODULE);
       ATH_MSG_DEBUG("checked is good "<< isgoodnow);
       if (isgoodnow) {
          int numhits{(*m_sct_numHitsInWafer)[itrk]};

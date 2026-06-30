@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -36,9 +36,7 @@ class ISCT_RadDamageSummaryTool: virtual public IAlgTool
   DeclareInterfaceID(ISCT_RadDamageSummaryTool, 1, 0);
 
   virtual void holeTransport(double& x0, double& y0, double& xfin, double& yfin, double& Q_m2, double& Q_m1, double& Q_00, double& Q_p1, double& Q_p2, const EventContext& ctx) const =0;
-  virtual void holeTransport(double& x0, double& y0, double& xfin, double& yfin, double& Q_m2, double& Q_m1, double& Q_00, double& Q_p1, double& Q_p2) const =0;
   virtual SCT_ChargeTrappingCondData getCondData(const IdentifierHash& elementHash, const double& zpos, const EventContext& ctx) const =0;
-  virtual SCT_ChargeTrappingCondData getCondData(const IdentifierHash& elementHash, const double& zpos) const =0;
 };
 
 #endif // ISCT_RadDamageSummaryTool_h

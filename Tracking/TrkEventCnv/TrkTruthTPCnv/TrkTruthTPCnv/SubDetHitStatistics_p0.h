@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -17,7 +17,7 @@ namespace Trk {
   class SubDetHitStatistics_p0 {
   public:
     //enum SubDetType { Pixel=0, SCT, TRT, MDT, RPC, TGC, CSC, NUM_SUBDETECTORS };
-    unsigned char numPRDs[SubDetHitStatistics::NUM_SUBDETECTORS];
+    unsigned char numPRDs[SubDetHitStatistics::NUM_SUBDETECTORS] = {};
     // default ctr leaves memory uninitialized, which is fine.
   };
 }

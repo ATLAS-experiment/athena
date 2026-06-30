@@ -240,7 +240,7 @@ def FTAG2Cfg(
             name_tag=name_tag,
             trigger_lists_helper=trigger_lists_helper,
             keep_truth_collections=False,
-            keep_track_covariance_offdiag=False,
+            keep_track_covariance_offdiag=True,
             tau_as_smart_collection=True,
         )
     )

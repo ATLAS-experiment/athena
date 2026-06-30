@@ -6,7 +6,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "CxxUtils/MurmurHash2.h"
 #include "CxxUtils/crc64.h"
-#include "crc_combine.h"
+#include "CxxUtils/crc_combine.h"
 
   /// Set the random seed using a string (e.g. algorithm name) and
   /// the current slot, event, and run numbers and an optional
@@ -14,10 +14,10 @@
   /// thread-unsafe random number services
 size_t ATHRNG::calculateSeedMC16(const std::string& algName, uint64_t ev, uint64_t run, uint32_t offset) {
   uint32_t theHash = static_cast<uint32_t>(ev);
-  if (0 != offset) theHash=crc_combine(theHash, offset);
+  if (0 != offset) theHash = CxxUtils::crc_combine(theHash, offset);
   uint32_t runNumber = static_cast<uint32_t>(run);
-  theHash=crc_combine(theHash, runNumber);
-  theHash=crc_combine(theHash, algName);
+  theHash = CxxUtils::crc_combine(theHash, runNumber);
+  theHash = CxxUtils::crc_combine(theHash, algName);
   return theHash;
 }
 

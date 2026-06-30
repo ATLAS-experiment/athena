@@ -73,16 +73,17 @@ def run(cuts, *, dataType=DataType.FullSim, containers=None,
 def run_merger(region_names, *, dataType=DataType.FullSim, noFilter=False):
     """Build real regions then the merger, and return the algorithm sequence.
 
-    Each region is a trivial EventSelectionConfig (RUN_NUMBER + SAVE) so that
-    the merger's `EventSelection` dependency is satisfied and `eventSelectionNames`
-    is populated through the normal SAVE path (no manual metadata).
+    Each region is a trivial EventSelectionConfig (a single RUN_NUMBER cut) so
+    that the merger's `EventSelection` dependency is satisfied and
+    `eventSelectionNames` is populated. The event filter is emitted implicitly
+    at the end of each block (no explicit SAVE needed).
     """
     algSeq, config = _new_accumulator(dataType, [])
     seq = ConfigSequence()
     for name in region_names:
         block = EventSelectionConfig()
         block.setOptionValue("selectionName", name)
-        block.setOptionValue("selectionCuts", "RUN_NUMBER >= 0\nSAVE")
+        block.setOptionValue("selectionCuts", "RUN_NUMBER >= 0")
         seq.append(block)
     merger = EventSelectionMergerConfig()
     merger._instance_number = 1            # defensive: ensure the guard runs

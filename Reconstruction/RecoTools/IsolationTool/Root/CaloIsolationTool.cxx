@@ -788,7 +788,7 @@ for( auto isoType : isoTypes ){
     bool doCoreCone = (!m_saveOnlyRequestedCorrections || result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::coreCone)));
     if(doCoreCone && maxConeSize<coreConeDR) maxConeSize = coreConeDR;
 
-    if(!muon.clusterLink().isValid()){
+    if(!muon.cluster()){
       ATH_MSG_DEBUG("no valid cluster link");
       //no cluster, set everything to 0
       for(unsigned int i=0; i<conesf.size(); i++) result.etcones[i] = 0;
@@ -812,7 +812,7 @@ for( auto isoType : isoTypes ){
       }
     }
     else{
-      const xAOD::CaloCluster* muonCluster=*muon.clusterLink();
+      const xAOD::CaloCluster* muonCluster = muon.cluster();
       /// start the calculation
       ATH_MSG_DEBUG("calculating etcone for # " << conesf.size() << " cones");
       Trk::CaloCellSelectorLayerdR selector(maxConeSize);

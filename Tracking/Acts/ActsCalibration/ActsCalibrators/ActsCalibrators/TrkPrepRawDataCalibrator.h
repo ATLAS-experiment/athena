@@ -5,7 +5,7 @@
 #define ACTSCALIBRATION_DETAIL_PREPRAWDATACALIBRATOR_H
 
 #include "ActsCalibrators/TrkMeasurementCalibrator.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
@@ -23,7 +23,7 @@ namespace ActsTrk::detail {
           *         a preconfigured rot creator to calibrate the measurements
           *  @param convTool: Pointer to the configured track conversion tool
           *  @param rotCreator: Pointer to the configured ROT creator */
-         TrkPrepRawDataCalibrator(const ActsTrk::IActsToTrkConverterTool* convTool,
+         TrkPrepRawDataCalibrator(const ActsTrk::IGeometryRealmConvTool* convTool,
                                   const Trk::IRIO_OnTrackCreator* rotCreator);
          /** @brief Calibrator delegate implementation to calibrate the ActsTrk fit from Trk::PrepRawData objects
           *  @tparam trajectory_t: Tepmlate parameter of the underlying MultTrajectory container backend
@@ -55,7 +55,7 @@ namespace ActsTrk::detail {
       private:
          TrkMeasurementCalibrator m_rotCalib{};
          /** @brief Pointer to the track conversion tool */
-         const ActsTrk::IActsToTrkConverterTool* m_convTool{nullptr};
+         const ActsTrk::IGeometryRealmConvTool* m_convTool{nullptr};
          /** @brief ROT creator */
          const Trk::IRIO_OnTrackCreator* m_rotCreator{nullptr};
    };

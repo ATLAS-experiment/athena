@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -62,7 +62,7 @@ StatusCode TrigMuonTLAHypoAlg::execute(const EventContext &ctx) const
 
         // get muons from the decision
         const xAOD::Muon *muonPrev = nullptr;
-        auto prevMuons = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+        auto prevMuons = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(ctx, previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
         ATH_MSG_DEBUG("This decision has " << prevMuons.size() << " decisions");
 
         // verify that only one object is found per decision

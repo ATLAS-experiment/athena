@@ -58,7 +58,7 @@ atlas_add_library( ActsGeometryLib
 
 atlas_add_component( ActsGeometry
                      src/ActsExtrapolationAlg.cxx
-                     src/ActsWriteTrackingGeometry.cxx
+                     src/WriteTrackingGeometry.cxx
                      src/ActsWriteTrackingGeometryTransforms.cxx
                      src/ExtrapolationTool.cxx
                      src/ActsMaterialJsonWriterTool.cxx
@@ -92,3 +92,9 @@ atlas_add_component( ActsGeometry
 # Install files from the package:
 atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_add_test( CombinedGen3TrackTest
+                PROPERTIES TIMEOUT 1000
+                PRIVATE_WORKING_DIRECTORY
+                SCRIPT ActsITkMuonCaloTest.py
+                POST_EXEC_SCRIPT noerror.sh)

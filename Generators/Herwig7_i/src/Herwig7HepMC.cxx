@@ -24,6 +24,7 @@
 /// Defines shoul be before HepMCConverter.h
 #define HEPMC_HAS_CROSS_SECTION
 #define HEPMC_HAS_PDF_INFO
+#define HAVE_HEPMC3 1
 
 #include "ThePEG/Vectors/HepMCConverter.h"
 #ifdef HWVER_IS_72

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSysSim - Overall gFEX simulation
@@ -36,20 +36,16 @@ namespace LVL1 {
       It will need to interact with gTowers and produce the gTOBs
   */
 
-  class gFEXSysSim : public AthAlgTool, virtual public IgFEXSysSim {
+  class gFEXSysSim : public extends<AthAlgTool, IgFEXSysSim> {
 
   public:
-
     /** Constructors */
-
-    gFEXSysSim(const std::string& type,const std::string& name,const IInterface* parent);
-    /** Destructor */
-    gFEXSysSim&& operator= (const gFEXSysSim& ) = delete;
+    using base_class::base_class;
 
     /** standard Athena-Algorithm method */
     virtual StatusCode initialize() override;
 
-    virtual StatusCode execute(gFEXOutputCollection* gFEXOutputs) override ;
+    virtual StatusCode execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs) override ;
 
     virtual void cleanup() override;
 

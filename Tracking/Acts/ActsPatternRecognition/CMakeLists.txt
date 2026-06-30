@@ -29,11 +29,12 @@ atlas_add_component( ActsPatternRecognition
                SiSPSeededTrackFinderData
                SiSpacePoint
                StoreGateLib
+               TrigInDetToolInterfacesLib
                TrkEventUtils
                TrkParameters
                TrkSpacePoint
                xAODInDetMeasurement
-               TrigInDetToolInterfacesLib )
+               xAODTracking )
 
 
 

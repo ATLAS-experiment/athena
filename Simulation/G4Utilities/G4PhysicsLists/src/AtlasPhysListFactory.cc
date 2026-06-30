@@ -13,6 +13,15 @@
 #include "FTFP_BERP_ATL.hh"
 #include "FTFP_BERT_ATL_noExtraEm.hh"
 
+#ifdef ATHSIMULATION_USE_ADEPT
+#include "FTFP_BERT_ATL_AdePT.hh"
+#include "FTFP_BERT_ATL_HepEm.hh"
+#endif
+
+#ifdef ATHSIMULATION_USE_CELER
+#include "FTFP_BERT_ATL_Celer.hh"
+#endif
+
 #include <algorithm>
 
 AtlasPhysListFactory::AtlasPhysListFactory() 
@@ -28,6 +37,13 @@ AtlasPhysListFactory::AtlasPhysListFactory()
       "FTFP_BERP_ATL", // (office Geant4 Preco model is used instead of Bertini)
       "FTFP_BERT_ATL_chipsXS", //(different inelastic hadron-nucleus cros-sections)
       "FTFP_BERT_ATL_HP", //(transportation of neutrons below 20 MeV is more accurate)
+#ifdef ATHSIMULATION_USE_ADEPT
+      "FTFP_BERT_ATL_AdePT", // (Offload of e/g tracks to AdePT on GPU)
+      "FTFP_BERT_ATL_HepEm", // (Offload of e/g tracks to G4HepEm on CPU)
+#endif
+#ifdef ATHSIMULATION_USE_CELER
+      "FTFP_BERT_ATL_Celer", // (Offload of e/g tracks to Celeritas CPU/GPU)
+#endif
       "FTFP_BERT_ATL_noExtraEm" //(Synchrotron Radiation & GN Physics processes are disabled)
     }
 {
@@ -70,6 +86,13 @@ AtlasPhysListFactory::GetReferencePhysList(const G4String& name)
   else if (name=="FTFP_BERP_ATL")               {p = new FTFP_BERP_ATL(m_verbose);}
   else if (name=="FTFP_BERT_ATL_chipsXS")       {p = new FTFP_BERT_ATL_chipsXS(m_verbose);}
   else if (name=="FTFP_BERT_ATL_HP")            {p = new FTFP_BERT_ATL_HP(m_verbose);}
+#ifdef ATHSIMULATION_USE_ADEPT
+  else if (name=="FTFP_BERT_ATL_AdePT")         {p = new FTFP_BERT_ATL_AdePT(m_verbose);}
+  else if (name=="FTFP_BERT_ATL_HepEm")         {p = new FTFP_BERT_ATL_HepEm(m_verbose);}
+#endif
+#ifdef ATHSIMULATION_USE_CELER
+  else if (name=="FTFP_BERT_ATL_Celer")         {p = new FTFP_BERT_ATL_Celer(m_verbose);}
+#endif
   else if (name=="FTFP_BERT_ATL_noExtraEm")     {p = new FTFP_BERT_ATL_noExtraEm(m_verbose);}
   else {
     G4cout << "### AtlasPhysListFactory WARNING: "

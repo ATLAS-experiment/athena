@@ -89,7 +89,7 @@ namespace xAOD {
     if( particle.type() == xAOD::Type::ObjectType::Muon) {
       const Muon* muon = static_cast<const Muon*>(&particle);
       const xAOD::TrackParticle* tp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-      if( !tp ) tp = muon->primaryTrackParticle();
+      if( !tp ) tp = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
       if( !tp ) {
         /// Print a warning for the case that no primary track was found. Given that eta/phi/pt are the same for
         /// the primary track and the muon track... Do not return a nullptr

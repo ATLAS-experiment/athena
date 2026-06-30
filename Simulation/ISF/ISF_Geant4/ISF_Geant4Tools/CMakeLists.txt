@@ -29,3 +29,8 @@ set_target_properties( ISF_Geant4Tools PROPERTIES INTERPROCEDURAL_OPTIMIZATION $
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
+# only needed to have ATHSIMULATION_USE_ADEPT available
+find_package( AdePT QUIET )
+if (AdePT_FOUND)
+  target_compile_definitions(ISF_Geant4Tools PRIVATE ATHSIMULATION_USE_ADEPT)
+endif()

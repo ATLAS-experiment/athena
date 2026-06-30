@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -7,7 +7,6 @@
 #ifndef TRIGGLOBALEFFICIENCYCORRECTION_TRIGGLOBALEFFICIENCYCORRECTIONTOOL_H
 #define TRIGGLOBALEFFICIENCYCORRECTION_TRIGGLOBALEFFICIENCYCORRECTIONTOOL_H 1
 
-#include <boost/container/container_fwd.hpp>
 #include <map>
 #include <memory>
 #include <set>
@@ -23,6 +22,7 @@
 #include "TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 #include "xAODEgamma/PhotonFwd.h"
+#include "CxxUtils/flat_set.h"
 
 namespace TrigGlobEffCorr {
 class ImportData;
@@ -193,7 +193,7 @@ class TrigGlobalEfficiencyCorrectionTool
   std::unique_ptr<TrigGlobEffCorr::Calculator> m_calculator;         //!
 
   template <typename Key>
-  using flat_set = boost::container::flat_set<Key>;
+  using flat_set = CxxUtils::flat_set<Key>;
 
   /// Internal methods (I) -- initialization of the tool
   bool loadHierarchies();

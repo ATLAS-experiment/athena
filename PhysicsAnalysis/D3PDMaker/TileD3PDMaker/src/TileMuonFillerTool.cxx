@@ -227,7 +227,7 @@ StatusCode TileMuonFillerTool::fill(const xAOD::Muon& p){
       case 0:  muon_track = muonPointer->trackParticle(xAOD::Muon::CombinedTrackParticle);          break;
       case 1:  muon_track = muonPointer->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);     break;
       case 2:  muon_track = muonPointer->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);  break;
-      default: muon_track = muonPointer->primaryTrackParticle();     break;
+      default: muon_track = muonPointer->trackParticle(xAOD::Muon::TrackParticleType::Primary);     break;
     } // SWITCH
 
     if( !muon_track ){ return StatusCode::SUCCESS; }

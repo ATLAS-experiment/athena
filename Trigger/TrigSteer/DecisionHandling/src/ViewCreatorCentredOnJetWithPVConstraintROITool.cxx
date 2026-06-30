@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -58,7 +58,7 @@ StatusCode ViewCreatorCentredOnJetWithPVConstraintROITool::attachROILinks( TrigC
   // ===================================================================================== // 
 
   for ( TrigCompositeUtils::Decision* outputDecision : decisions ) { 
-    const std::vector< TrigCompositeUtils::LinkInfo< xAOD::JetContainer >> myFeature = TrigCompositeUtils::findLinks< xAOD::JetContainer >(outputDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+    const std::vector< TrigCompositeUtils::LinkInfo< xAOD::JetContainer >> myFeature = TrigCompositeUtils::findLinks< xAOD::JetContainer >(ctx, outputDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
     
     if (myFeature.size() != 1) {
       ATH_MSG_ERROR("Did not find exactly one most-recent xAOD::Jet '" << TrigCompositeUtils::featureString() << "' for Decision object index " << outputDecision->index()

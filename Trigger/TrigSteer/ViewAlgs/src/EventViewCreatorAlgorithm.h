@@ -1,7 +1,7 @@
 /*
   General-purpose view creation algorithm <bwynne@cern.ch>
 
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ViewAlgs_EventViewCreatorAlgorithm_h
@@ -121,7 +121,7 @@ class EventViewCreatorAlgorithm : public ::InputMakerBase
     /**
      * @brief Makes sure the views are linked, if configuration requireParentView is set. Failure to set the parent is an error
      **/
-    StatusCode linkViewToParent( const TrigCompositeUtils::Decision* outputDecision, SG::View* newView ) const;
+    StatusCode linkViewToParent( const EventContext& context, const TrigCompositeUtils::Decision* outputDecision, SG::View* newView ) const;
 
     /**
      * @brief Seeds a newly created view with an ROI collection containing the single seeding ROI
@@ -137,7 +137,8 @@ class EventViewCreatorAlgorithm : public ::InputMakerBase
      * @brief Allow for the re-use of EventViews run in a previous Step in another EVCA instance configured
      * to spawn EventViews using the same reconstruction sequence (i.e. both algs should share a common ViewNodeName).
      **/
-    bool checkCache(const TrigCompositeUtils::DecisionContainer* cachedViews, 
+    bool checkCache(const EventContext& context,
+      const TrigCompositeUtils::DecisionContainer* cachedViews,
       const TrigCompositeUtils::Decision* outputDecision, 
       size_t& cachedIndex,
       MatchingCache& matchingCache) const;
@@ -154,7 +155,7 @@ class EventViewCreatorAlgorithm : public ::InputMakerBase
     /**
      * @brief Obtain view(s) from most recent prior step(s) which are to be wired up.
      **/
-    std::vector<TrigCompositeUtils::LinkInfo<ViewContainer>> viewsToLink(const TrigCompositeUtils::Decision* outputDecision) const; 
+  std::vector<TrigCompositeUtils::LinkInfo<ViewContainer>> viewsToLink(const EventContext& context, const TrigCompositeUtils::Decision* outputDecision) const;
 
 };
 

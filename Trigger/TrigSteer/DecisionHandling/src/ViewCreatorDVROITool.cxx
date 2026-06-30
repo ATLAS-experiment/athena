@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -45,7 +45,7 @@ StatusCode ViewCreatorDVROITool::attachROILinks( TrigCompositeUtils::DecisionCon
 
       ATH_MSG_DEBUG("Loop over decisions");
 
-      const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrigCompositeContainer> > dvSeedLinks = TrigCompositeUtils::findLinks< xAOD::TrigCompositeContainer >(outputDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrigCompositeContainer> > dvSeedLinks = TrigCompositeUtils::findLinks< xAOD::TrigCompositeContainer >(ctx, outputDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
 
       if (dvSeedLinks.size() != 1) {
          ATH_MSG_DEBUG("Did not find exactly one most-recent " << m_featureLinkName << " for Decision object index "
