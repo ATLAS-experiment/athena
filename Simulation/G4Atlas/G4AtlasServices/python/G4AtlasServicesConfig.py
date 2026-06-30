@@ -38,6 +38,7 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
         kwargs.setdefault("NeutronTimeCut", flags.Sim.NeutronTimeCut)
     kwargs.setdefault("NeutronEnergyCut", flags.Sim.NeutronEnergyCut)
     kwargs.setdefault("ApplyEMCuts", flags.Sim.ApplyEMCuts)
+    kwargs.setdefault("MultipleStepsInMSCTransport", flags.Sim.MultipleStepsInMSCTransport)
     kwargs.setdefault("QuietMode", flags.Exec.QuietMode)
 
     #fast simulation constructor tool

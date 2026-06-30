@@ -72,7 +72,7 @@ class G4EmStandardPhysics_AdePT : public G4VPhysicsConstructor
 {
 public:
 
-  explicit G4EmStandardPhysics_AdePT(G4int ver=1, const G4String& name="");
+  explicit G4EmStandardPhysics_AdePT(G4int ver=1, const G4String& name="G4EmStandard_AdePT", G4bool multipleStepsInMSCTransport=false);
 
   ~G4EmStandardPhysics_AdePT() override;
 
@@ -82,6 +82,7 @@ public:
 private:
   AdePTTrackingManager *fTrackingManager;
   AdePTConfiguration *fAdePTConfiguration;
+  G4bool fMultipleStepsInMSCTransport;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
