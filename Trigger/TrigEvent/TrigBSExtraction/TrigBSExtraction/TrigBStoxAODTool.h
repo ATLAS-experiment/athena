@@ -38,7 +38,6 @@
 #include "xAODTrigMinBiasCnv/ITrigVertexCountsCnvTool.h"
 
 //tracking collections
-#include "xAODTrackingCnv/IRecTrackParticleContainerCnvTool.h"
 #include "xAODTrackingCnv/ITrackCollectionCnvTool.h"
 
 //egamma
@@ -119,7 +118,6 @@ public:
 
   // xAODTrackingCnv
   ToolHandle<xAODMaker::ITrackCollectionCnvTool> m_trackCollectionTool{this, "TrackCollectionCnvTool","xAODMaker::TrackCollectionCnvTool/TrackCollectionCnvTool","Cnv of tracks"};
-  ToolHandle<xAODMaker::IRecTrackParticleContainerCnvTool> m_recTrackParticleContTool{this, "TrackParticleContainerCnvTool","xAODMaker::RecTrackParticleContainerCnvTool/RecTrackParticleContainerCnvTool","Cnv of Rec::TrackParticles"};
 
   // xAODEgammaCnv
   ToolHandle<xAODMaker::IElectronCnvTool> m_electronTool;
