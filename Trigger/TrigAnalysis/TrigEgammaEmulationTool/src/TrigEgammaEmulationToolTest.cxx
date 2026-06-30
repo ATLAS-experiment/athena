@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrigEgammaMatchingToolTest.cxx 
@@ -93,9 +93,9 @@ StatusCode TrigEgammaEmulationToolTest::fillHistograms( const EventContext &ctx 
         continue;
       }
 
-      auto accept = setAccept(dec, info);
+      auto accept = setAccept(ctx, dec, info);
       bool valid=false;
-      auto emu_accept = m_emulatorTool->emulate( dec, info.trigger, valid );
+      auto emu_accept = m_emulatorTool->emulate( ctx, dec, info.trigger, valid );
 
       ATH_MSG_DEBUG( "trigger : " << info.trigger << " (tdt/emu)");
       ATH_MSG_DEBUG( "L1Calo  : " << accept.getCutResult(0) << " / " << emu_accept.getCutResult(0));
@@ -160,7 +160,8 @@ StatusCode TrigEgammaEmulationToolTest::fillHistograms( const EventContext &ctx 
 
 
 
-asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const TrigCompositeUtils::Decision *dec, 
+asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const EventContext& ctx,
+                                                        const TrigCompositeUtils::Decision *dec,
                                                         const TrigEgammaEmulationToolTest::TrigInfo& info) const 
 {
     
@@ -179,11 +180,11 @@ asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const TrigCompositeUtils
 
         auto trigger = info.trigger; 
         // Step 1
-        passedL1Calo = m_matchTool->ancestorPassed<TrigRoiDescriptorCollection>( dec , trigger , "initialRois", condition);
+        passedL1Calo = m_matchTool->ancestorPassed<TrigRoiDescriptorCollection>(ctx, dec , trigger , "initialRois", condition);
 
         if( passedL1Calo ){ // HLT item get full decision
             // Step 2
-            passedL2Calo = m_matchTool->ancestorPassed<xAOD::TrigEMClusterContainer>(dec, trigger, m_matchTool->key("FastCalo"), condition);  
+            passedL2Calo = m_matchTool->ancestorPassed<xAOD::TrigEMClusterContainer>(ctx, dec, trigger, m_matchTool->key("FastCalo"), condition);
           
             if(passedL2Calo){
 
@@ -191,9 +192,9 @@ asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const TrigCompositeUtils
                 if(info.type == "electron"){
                     std::string key = m_matchTool->key("FastElectrons");
                     if(info.lrt)  key = m_matchTool->key("FastElectrons_LRT");
-                    passedL2 = m_matchTool->ancestorPassed<xAOD::TrigElectronContainer>(dec, trigger, key, condition);
+                    passedL2 = m_matchTool->ancestorPassed<xAOD::TrigElectronContainer>(ctx, dec, trigger, key, condition);
                 }else if(info.type == "photon"){
-                    passedL2 = m_matchTool->ancestorPassed<xAOD::TrigPhotonContainer>(dec, trigger, m_matchTool->key("FastPhotons"), condition);
+                    passedL2 = m_matchTool->ancestorPassed<xAOD::TrigPhotonContainer>(ctx, dec, trigger, m_matchTool->key("FastPhotons"), condition);
                 }
 
                 if(passedL2){
@@ -202,7 +203,7 @@ asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const TrigCompositeUtils
                     // Step 4
                     std::string key = m_matchTool->key("PrecisionCalo");
                     if(info.lrt)  key = m_matchTool->key("PrecisionCalo_LRT");
-                    passedEFCalo = m_matchTool->ancestorPassed<xAOD::CaloClusterContainer>(dec, trigger, key, condition);
+                    passedEFCalo = m_matchTool->ancestorPassed<xAOD::CaloClusterContainer>(ctx, dec, trigger, key, condition);
 
                     if(passedEFCalo){
 
@@ -218,14 +219,14 @@ asg::AcceptData TrigEgammaEmulationToolTest::setAccept( const TrigCompositeUtils
                                 std::string key = m_matchTool->key("Electrons");
                                 if(info.lrt)  key = m_matchTool->key("Electrons_LRT");
                                 if(info.gsf)  key = m_matchTool->key("Electrons_GSF");
-                                passedEF = m_matchTool->ancestorPassed<xAOD::ElectronContainer>(dec, trigger, key, condition);
+                                passedEF = m_matchTool->ancestorPassed<xAOD::ElectronContainer>(ctx, dec, trigger, key, condition);
                             }
    
                         }else if(info.type == "photon"){
                             if (info.etcut){
                                 passedEF = true; // since we dont run the precisePhoton step
                             }else{
-                                passedEF = m_matchTool->ancestorPassed<xAOD::PhotonContainer>(dec, trigger, m_matchTool->key("Photons"), condition);
+                                passedEF = m_matchTool->ancestorPassed<xAOD::PhotonContainer>(ctx, dec, trigger, m_matchTool->key("Photons"), condition);
                             }
                         }
                     } // EFCalo

@@ -389,7 +389,7 @@ bool TrigEgammaMonitorTagAndProbeAlgorithm::isTagElectron(const EventContext& ct
     bool tagMatched=false;
     for(unsigned int ilist = 0; ilist != m_tagTrigList.size(); ilist++) {
         std::string tag = m_tagTrigList[ilist];
-        if( match()->isPassed(el,tag) )
+        if( match()->isPassed(ctx,el,tag) )
             tagMatched=true;
     }
     

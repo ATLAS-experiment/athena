@@ -585,8 +585,9 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::matchDiElectronTrigger(const xAO
 
 
 
-bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::isTagElectron( const ToolHandle<GenericMonitoringTool>& monGroup, 
-                                               const xAOD::Electron *el) const 
+bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::isTagElectron(const EventContext& ctx,
+                                                              const ToolHandle<GenericMonitoringTool>& monGroup,
+                                                              const xAOD::Electron *el) const
 {
     fillLabel(monGroup, "TagCutCounter", "Electrons");
 
@@ -683,7 +684,7 @@ bool TrigEgammaMonitorTagAndProbeAlgorithmZeeg::isTagElectron( const ToolHandle<
     ATH_MSG_INFO("Matching Tag Electron FC");
     bool tagMatched=false;
     for (const std::string& tag : m_tagTrigList) {
-        if (match()->isPassed(el,tag)){
+        if (match()->isPassed(ctx, el,tag)){
             	tagMatched=true;
         }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrigEgammaMatchingToolTest.h 
@@ -55,7 +55,8 @@ class TrigEgammaEmulationToolTest : public AthMonitorAlgorithm
       SG::ReadHandleKey<xAOD::ElectronContainer> m_offElectronKey{ this, "ElectronKey", "Electrons", ""};
       SG::ReadHandleKey<xAOD::PhotonContainer> m_offPhotonKey{ this, "PhotonKey", "Photons", ""};
 
-      asg::AcceptData setAccept( const TrigCompositeUtils::Decision *dec, 
+      asg::AcceptData setAccept( const EventContext& ctx,
+                                 const TrigCompositeUtils::Decision *dec,
                                  const TrigEgammaEmulationToolTest::TrigInfo& info) const;
 
       TrigEgammaEmulationToolTest::TrigInfo getInfo( std::string trigger ) const;

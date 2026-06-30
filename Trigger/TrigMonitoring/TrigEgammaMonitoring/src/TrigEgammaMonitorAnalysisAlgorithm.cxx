@@ -95,7 +95,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
     // Good pair to be measure
     if(m_doEmulation){ // Emulation
         bool valid=false;
-        auto acceptData = m_emulatorTool->emulate( pairObj.second, info.trigger , valid);
+        auto acceptData = m_emulatorTool->emulate(ctx, pairObj.second, info.trigger, valid);
         // skip this probe since the emulation is not possible. Avoid diff denominators between emulation and efficiecy
         if(!valid) {
             ATH_MSG_DEBUG("Emulation fail. Skip this probe...");
@@ -111,7 +111,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const EventContext& c
     // Good pair to be measure
     { // Efficiency
         pair_vec.push_back(pairObj);
-        auto acceptData = setAccept( pairObj.second, info, onlyHLT );
+        auto acceptData = setAccept( ctx, pairObj.second, info, onlyHLT );
         accept_vec.push_back(acceptData);
         static const SG::Decorator<bool> IsolatedDec("Isolated");
         if( IsolatedDec(*pairObj.first) ){
