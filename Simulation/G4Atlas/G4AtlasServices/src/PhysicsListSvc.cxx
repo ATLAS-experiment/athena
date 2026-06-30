@@ -57,6 +57,7 @@ void PhysicsListSvc::CreatePhysicsList()
       Atlasfactory.SetVerbose(0); // HACK
       G4HadronicProcessStore::Instance()->SetVerbose(0);
     }
+    Atlasfactory.SetMultipleStepsInMSCTransport(m_multipleStepsInMSCTransport);
     if (factory.IsReferencePhysList(m_physicsListName.value()))
     {
       ATH_MSG_INFO("Creating Geant4 PhysicsList: " << m_physicsListName.value());

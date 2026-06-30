@@ -29,11 +29,13 @@ public:
   // list of avalable base Phys Lists
 
   inline void SetVerbose(G4int val) { m_verbose = val; }
+  inline void SetMultipleStepsInMSCTransport(G4bool val) { m_multipleStepsInMSCTransport = val; }
 
 private:
 
   G4String m_defName;  
   G4int m_verbose;
+  G4bool m_multipleStepsInMSCTransport{false};
   std::vector<G4String> m_listnames;
 };
 

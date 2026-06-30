@@ -51,7 +51,7 @@
 class FTFP_BERT_ATL_AdePT: public G4VModularPhysicsList
 {
 public:
-FTFP_BERT_ATL_AdePT(G4int ver = 1);
+FTFP_BERT_ATL_AdePT(G4int ver = 1, G4bool multipleStepsInMSCTransport = false);
   virtual ~FTFP_BERT_ATL_AdePT()=default;
 
   FTFP_BERT_ATL_AdePT(const FTFP_BERT_ATL_AdePT &) = delete;

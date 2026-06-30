@@ -50,7 +50,7 @@
 class FTFP_BERT_ATL_HepEm: public G4VModularPhysicsList
 {
 public:
-FTFP_BERT_ATL_HepEm(G4int ver = 1);
+FTFP_BERT_ATL_HepEm(G4int ver = 1, G4bool multipleStepsInMSCTransport = false);
   virtual ~FTFP_BERT_ATL_HepEm()=default;
 
   FTFP_BERT_ATL_HepEm(const FTFP_BERT_ATL_HepEm &) = delete;

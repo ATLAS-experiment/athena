@@ -59,6 +59,7 @@ private:
   */
   Gaudi::Property<int> m_emNumberOfBinsPerDecade{this, "EMNumberOfBinsPerDecade", -1, "Number of bins per Energy decade. Used for both DeDx and for the Lambda binning."};     ///!< Number of bins per Energy decade. Used for both DeDx and for the Lambda binning.
   Gaudi::Property<bool> m_applyEMCuts{this, "ApplyEMCuts", true, "Apply cuts EM flag in Geant4"};                ///!< Switch for the G4 "apply cuts" EM physics flag
+  Gaudi::Property<bool> m_multipleStepsInMSCTransport{this, "MultipleStepsInMSCTransport", false, "Allow multiple MSC+transportation steps in G4HepEm, including the G4HepEm configuration used by AdePT"};
   Gaudi::Property<bool> m_quietMode{this, "QuietMode", false, ""};
   Gaudi::Property<bool> m_unstableAntiNeutrons{this, "UnstableAntiNeutrons",false,"Bugfix for ATLASSIM-6634 until we switch to using Geant4 11"};
 };
