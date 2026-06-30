@@ -200,14 +200,9 @@ namespace ActsTrk {
                          static_cast<uint8_t>(xAOD::numberOfPixelHits),
                          false),
 
-         std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat),
-                         static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelFlatLayers),
-                         static_cast<uint8_t>(xAOD::numberOfPixelBarrelFlatHits),
-                         true),
-
-         std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrelInclined),
-                         static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelInclinedLayers),
-                         static_cast<uint8_t>(xAOD::numberOfPixelBarrelInclinedHits),
+         std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrel),
+                         static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelLayers),
+                         static_cast<uint8_t>(xAOD::numberOfPixelBarrelHits),
                          true),
 
          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelEndcap),
