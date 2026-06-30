@@ -211,6 +211,26 @@ private:
   TProfile* m_nPixelDeadSensors_vs_mu{nullptr};
   TProfile* m_nSCTDeadSensors_vs_mu{nullptr};
 
+  TH1* m_nHGTDHits{nullptr};
+  TH1* m_nHGTDHoles{nullptr};
+  TProfile* m_nHGTDHits_vs_eta{nullptr};
+  TProfile* m_nHGTDHoles_vs_eta{nullptr};
+  TProfile* m_nHGTDHits_vs_phi{nullptr};
+  TProfile* m_nHGTDHoles_vs_phi{nullptr};
+  TH1* m_nHGTDSharedHits{nullptr};
+  TProfile* m_nHGTDSharedHits_vs_eta{nullptr};
+  TProfile* m_nHGTDSharedHits_vs_phi{nullptr};
+  TProfile2D* m_nHGTDHits_vs_etaphi{nullptr};
+  TProfile2D* m_nHGTDHoles_vs_etaphi{nullptr};
+  TH1* m_nHGTDOutliers{nullptr};
+  TProfile* m_nHGTDOutliers_vs_eta{nullptr};
+  TProfile* m_nHGTDOutliers_vs_phi{nullptr};
+  TProfile* m_nHGTDHits_vs_mu{nullptr};
+  TProfile* m_nHGTDHoles_vs_mu{nullptr};
+  TProfile* m_nHGTDSharedHits_vs_mu{nullptr};
+  TProfile* m_nHGTDOutliers_vs_mu{nullptr};
+
+  bool m_addHGTDHistos=true;
 
   // plot base has nop default implementation of this; we use it to book the histos
   void initializePlots();

@@ -108,6 +108,87 @@
     =======================================================
 -->
 
+<!--
+HGTD hit plots
+-->
+<h id="nHGTDHits" type="TH1F" title="HGTD Hits">
+  <x title="# HGTD Hits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+  <y title="Entries"/>
+</h>
+<h id="nHGTDHits_vs_eta" type="TProfile" title="HGTD Hits vs Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="# HGTD Hits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDHits_vs_etaphi" type="TProfile" title="HGTD Hits vs Eta and Phi">
+  <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+  <z title="# HGTD Hits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDHits_vs_phi" type="TProfile" title="HGTD Hits vs Phi">
+  <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+  <y title="# HGTD Hits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDHits_vs_mu" type="TProfile" title="HGTD Hits vs Mu">
+  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <y title="# HGTD Hits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+
+<h id="nHGTDHoles" type="TH1F" title="HGTD Holes">
+  <x title="# HGTD Holes" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+  <y title="Entries"/>
+</h>
+<h id="nHGTDHoles_vs_eta" type="TProfile" title="HGTD Holes vs Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="# HGTD Holes" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDHoles_vs_etaphi" type="TProfile2D" title="HGTD Holes vs Eta and Phi">
+  <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+  <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+  <z title="# HGTD Holes" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDHoles_vs_phi" type="TProfile" title="HGTD Holes vs Phi">
+  <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+  <y title="# HGTD Holes" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDHoles_vs_mu" type="TProfile" title="HGTD Holes vs Mu">
+  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <y title="# HGTD Holes" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+
+<h id="nHGTDOutliers" type="TH1F" title="HGTD Outliers">
+  <x title="# HGTD Outliers" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+  <y title="Entries"/>
+</h>
+<h id="nHGTDOutliers_vs_eta" type="TProfile" title="HGTD Outliers vs Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="# HGTD Outliers" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDOutliers_vs_phi" type="TProfile" title="HGTD Outliers vs Phi">
+  <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+  <y title="# HGTD Outliers" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDOutliers_vs_mu" type="TProfile" title="HGTD Outliers vs Mu">
+  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <y title="# HGTD Outliers" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+
+<h id="nHGTDSharedHits" type="TH1F" title="HGTD SharedHits">
+  <x title="# HGTD SharedHits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+  <y title="Entries"/>
+</h>
+<h id="nHGTDSharedHits_vs_eta" type="TProfile" title="HGTD SharedHits vs Eta">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="# HGTD SharedHits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDSharedHits_vs_phi" type="TProfile" title="HGTD SharedHits vs Phi">
+  <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+  <y title="# HGTD SharedHits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+<h id="nHGTDSharedHits_vs_mu" type="TProfile" title="HGTD SharedHits vs Mu">
+  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <y title="# HGTD SharedHits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
+</h>
+
 
 <!--
     =======================================================

@@ -11,6 +11,7 @@
 <!-- bins for hits -->
 <!ENTITY PIXHIT "20">
 <!ENTITY SIHIT "30">
+<!ENTITY HGTDHIT "4">
 
 <!-- Number of tracks vs MU -->
 <!ENTITY EXPMU "260">
