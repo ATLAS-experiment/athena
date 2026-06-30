@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -53,7 +53,7 @@ StatusCode jFEXDriver::execute(const EventContext& ctx) {
     my_jFEXOutputCollection->setdooutput(true);  
     
     // STEP 3 - Run the jFEXSysSim
-    ATH_CHECK(m_jFEXSysSimTool->execute(my_jFEXOutputCollection));      
+    ATH_CHECK(m_jFEXSysSimTool->execute(ctx, my_jFEXOutputCollection));
     
     // STEP 4 - Close and clean the event  
     m_jFEXSysSimTool->cleanup();
