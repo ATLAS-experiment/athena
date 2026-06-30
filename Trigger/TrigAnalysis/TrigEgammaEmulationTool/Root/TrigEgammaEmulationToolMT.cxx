@@ -153,7 +153,7 @@ bool TrigEgammaEmulationToolMT::match( const EventContext& ctx,
         // Step 1
         {
           // get rings from container access
-          output.rings = match()->getRingsFeature(roi);
+          output.rings = match()->getRingsFeature(ctx, roi);
           if(output.rings){
             output.emCluster = output.rings->emCluster();
           }
@@ -164,7 +164,7 @@ bool TrigEgammaEmulationToolMT::match( const EventContext& ctx,
         // Step 0
         {
           // L1Calo (step 0)
-          output.l1 = match()->getL1Feature(roi);
+          output.l1 = match()->getL1Feature(ctx, roi);
           auto featLinkInfo = match()->getFeature<TrigRoiDescriptorCollection>(ctx,roi,trigger, condition);
           if(featLinkInfo.isValid()){
             output.roi = *featLinkInfo.link;
@@ -222,14 +222,14 @@ bool TrigEgammaEmulationToolMT::match( const EventContext& ctx,
             output.emCluster = *featLinkInfo.link;
           }
           // get rings from container access
-          output.rings = match()->getRingsFeature(roi);
+          output.rings = match()->getRingsFeature(ctx, roi);
 
         }
 
         // Step 0
         {
           // L1Calo (step 0)
-          output.l1 = match()->getL1Feature(roi);
+          output.l1 = match()->getL1Feature(ctx, roi);
           auto featLinkInfo = match()->getFeature<TrigRoiDescriptorCollection>(ctx,roi,trigger);
           if(featLinkInfo.isValid()){
             output.roi = *featLinkInfo.link;

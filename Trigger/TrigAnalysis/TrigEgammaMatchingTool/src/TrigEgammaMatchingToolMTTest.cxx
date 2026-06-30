@@ -66,7 +66,7 @@ void TrigEgammaMatchingToolMTTest::inspect(const EventContext& ctx, const std::s
       if( l1_link.isValid() ){
         ATH_MSG_INFO( "We found the Roi object link" );
         // Let's get the EMTau
-        auto l1 = m_matchTool->getL1Feature( l1_link.source );
+        auto l1 = m_matchTool->getL1Feature( ctx, l1_link.source );
         if(l1)
           ATH_MSG_INFO( "We found the EmTau object" );
         ATH_MSG_INFO( "L1 object state is assigned as " << (l1_link.state==ActiveState::ACTIVE ? "Active" : "Not active") );
