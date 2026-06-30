@@ -2,16 +2,15 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
+#include "TrackingGeometryTool.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
 
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
 
-using namespace ActsTrk;
-
-StatusCode ActsTrackingGeometryTool::initialize() {
+namespace ActsTrk {
+StatusCode TrackingGeometryTool::initialize() {
     ATH_MSG_DEBUG(name() << " initializing");
     if (parent() != toolSvc()) {
         ATH_MSG_ERROR("The tool is initialized as a private tool but should be public");
@@ -26,18 +25,18 @@ StatusCode ActsTrackingGeometryTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-std::shared_ptr<const Acts::TrackingGeometry> ActsTrackingGeometryTool::trackingGeometry() const {
+std::shared_ptr<const Acts::TrackingGeometry> TrackingGeometryTool::trackingGeometry() const {
     return m_trackingGeometrySvc->trackingGeometry();
 }
-const Acts::TrackingVolume* ActsTrackingGeometryTool::getEnvelope(const ActsTrk::SystemEnvelope envType) const {
+const Acts::TrackingVolume* TrackingGeometryTool::getEnvelope(const ActsTrk::SystemEnvelope envType) const {
     return m_trackingGeometrySvc->getEnvelope(envType);
 }
 
-const ActsTrk::DetectorElementToActsGeometryIdMap* ActsTrackingGeometryTool::surfaceIdMap() const {
+const ActsTrk::DetectorElementToActsGeometryIdMap* TrackingGeometryTool::surfaceIdMap() const {
     return m_detIdMap.get();
 }
 
-const GeometryContext& ActsTrackingGeometryTool::getGeometryContext(const EventContext& ctx) const {
+const GeometryContext& TrackingGeometryTool::getGeometryContext(const EventContext& ctx) const {
     ATH_MSG_DEBUG("Creating alignment context for event");
     const GeometryContext* geoCtx{nullptr};
     if (!SG::get(geoCtx, m_rchk, ctx).isSuccess()) {
@@ -46,13 +45,13 @@ const GeometryContext& ActsTrackingGeometryTool::getGeometryContext(const EventC
     return *geoCtx;
 }
 
-const GeometryContext& ActsTrackingGeometryTool::getNominalGeometryContext() const {
+const GeometryContext& TrackingGeometryTool::getNominalGeometryContext() const {
      return m_trackingGeometrySvc->getNominalContext();
 }
 
 
 std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap> 
-    ActsTrackingGeometryTool::createDetectorElementToGeoIdMap() const {
+    TrackingGeometryTool::createDetectorElementToGeoIdMap() const {
     // create map from
     auto detector_element_to_geoid = std::make_unique<DetectorElementToActsGeometryIdMap>();
 
@@ -124,4 +123,5 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
         ATH_MSG_WARNING( "Surfaces associated to detector elements not of type Trk::TrkDetElementBase :" << counter.n_wrong_type);
     }
     return detector_element_to_geoid;
+}
 }

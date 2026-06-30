@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This absolutely needs to go first to ensure Eigen plugin is loaded
 #include "GeoPrimitives/GeoPrimitives.h"
 //
 
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
+#include "TrackingGeometrySvc.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
@@ -67,8 +67,9 @@
 #include <stdexcept>
 
 using namespace Acts::UnitLiterals;
-using namespace ActsTrk;
-ActsTrackingGeometrySvc::ActsTrackingGeometrySvc(const std::string &name,
+
+namespace ActsTrk{
+TrackingGeometrySvc::TrackingGeometrySvc(const std::string &name,
                                                  ISvcLocator *svc)
     : base_class(name, svc),
       m_detStore("StoreGateSvc/DetectorStore", name),
@@ -76,7 +77,7 @@ ActsTrackingGeometrySvc::ActsTrackingGeometrySvc(const std::string &name,
 {
 }
 
-StatusCode ActsTrackingGeometrySvc::initialize() {
+StatusCode TrackingGeometrySvc::initialize() {
   ATH_MSG_INFO(name() << " is initializing");
   for (unsigned int skipAlign : m_subDetNoAlignProp) {
     try {
@@ -526,7 +527,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
-bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
+bool TrackingGeometrySvc::runConsistencyChecks() const {
   bool result = true;
 
   std::vector<Acts::Vector2> localPoints;
@@ -753,14 +754,14 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
 }
 
 std::shared_ptr<const Acts::TrackingGeometry>
-ActsTrackingGeometrySvc::trackingGeometry() {
+TrackingGeometrySvc::trackingGeometry() {
 
   ATH_MSG_VERBOSE("Retrieving tracking geometry");
   return m_trackingGeometry;
 }
 
 std::shared_ptr<const Acts::ILayerBuilder>
-ActsTrackingGeometrySvc::makeStrawLayerBuilder(
+TrackingGeometrySvc::makeStrawLayerBuilder(
     const InDetDD::InDetDetectorManager *manager) {
 
   std::string managerName = manager->getName();
@@ -791,7 +792,7 @@ ActsTrackingGeometrySvc::makeStrawLayerBuilder(
 }
 
 std::shared_ptr<const Acts::ILayerBuilder>
-ActsTrackingGeometrySvc::makeHGTDLayerBuilder(
+TrackingGeometrySvc::makeHGTDLayerBuilder(
     const HGTD_DetectorManager *manager) {
 
   std::string managerName = manager->getName();
@@ -822,7 +823,7 @@ ActsTrackingGeometrySvc::makeHGTDLayerBuilder(
       cfg, makeActsAthenaLogger(this, managerName + "GMSLayBldr", std::string("ActsTGSvc")));
 }
 
-ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
+ActsLayerBuilder::Config TrackingGeometrySvc::makeLayerBuilderConfig(
     const InDetDD::InDetDetectorManager *manager) {
   using enum Acts::AxisDirection;
 
@@ -839,7 +840,7 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
     if ((not a) or (not b)) {
       throw std::runtime_error(
           "Cast of surface associated element to ActsDetectorElement failed "
-          "in ActsTrackingGeometrySvc::makeVolumeBuilder");
+          "in TrackingGeometrySvc::makeVolumeBuilder");
     }
 
     IdentityHelper idA = a->identityHelper();
@@ -913,7 +914,7 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
 }
 
 std::shared_ptr<Acts::TrackingVolume>
-ActsTrackingGeometrySvc::makeSCTTRTAssembly(
+TrackingGeometrySvc::makeSCTTRTAssembly(
     const Acts::GeometryContext &gctx, const Acts::ILayerBuilder &sct_lb,
     const Acts::ILayerBuilder &trt_lb, const Acts::CylinderVolumeHelper &cvh,
     const std::shared_ptr<const Acts::TrackingVolume> &pixel) {
@@ -1128,17 +1129,17 @@ ActsTrackingGeometrySvc::makeSCTTRTAssembly(
   return container;
 }
 
-unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore &store) const {
+unsigned int TrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore &store) const {
     ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
     TrackingGeoAlignVisitor visitor{store};
     m_trackingGeometry->apply(visitor);
     ATH_MSG_DEBUG("Populated with " << visitor.alignedObjects() << " elements");
     return visitor.alignedObjects();
 }
-const GeometryContext &ActsTrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
+const GeometryContext &TrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
 
 Acts::CylinderVolumeBuilder::Config
-ActsTrackingGeometrySvc::makeBeamPipeConfig(
+TrackingGeometrySvc::makeBeamPipeConfig(
     std::shared_ptr<const Acts::CylinderVolumeHelper> cvh) const {
 
   // adapted from InnerDetector/InDetDetDescr/InDetTrackingGeometry/src/BeamPipeBuilder.cxx
@@ -1218,7 +1219,7 @@ ActsTrackingGeometrySvc::makeBeamPipeConfig(
 
 
 const Acts::TrackingVolume* 
-      ActsTrackingGeometrySvc::getEnvelope(const ActsTrk::SystemEnvelope envType) const {
+      TrackingGeometrySvc::getEnvelope(const ActsTrk::SystemEnvelope envType) const {
       const Acts::TrackingVolume* retVol{nullptr};
       using namespace ActsTrk::detail::GeoVolIds;
       switch (envType) {
@@ -1235,4 +1236,5 @@ const Acts::TrackingVolume*
         THROW_EXCEPTION("There is no system envelope "<<envType);
       }
       return retVol;
+}
 }

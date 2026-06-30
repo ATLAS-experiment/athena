@@ -10,9 +10,6 @@
 #include "TrkLinks/LinkToXAODTrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
-// PACKAGE
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
 
 // ACTS
 #include "Acts/Propagator/Navigator.hpp"

@@ -8,8 +8,7 @@
 #include "ActsGeometry/ActsExtrapolationAlg.h"
 #include "ActsGeometry/ExtrapolationTool.h"
 #include "ActsGeometry/ActsPropStepRootWriterSvc.h"
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
+
 
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 
@@ -18,12 +17,13 @@
 #include "../CaloBlueprintNodeBuilder.h"
 #include "../ITkMaterialDecoratorTool.h"
 #include "../WriteTrackingGeometry.h"
+#include "../TrackingGeometryTool.h"
+#include "../TrackingGeometrySvc.h"
 
 
 DECLARE_COMPONENT(ActsExtrapolationAlg)
 DECLARE_COMPONENT(ActsWriteTrackingGeometryTransforms)
-DECLARE_COMPONENT(ActsTrackingGeometrySvc)
-DECLARE_COMPONENT(ActsTrackingGeometryTool)
+
 
 DECLARE_COMPONENT(ActsPropStepRootWriterSvc)
 DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
@@ -34,3 +34,5 @@ DECLARE_COMPONENT(ActsTrk::ExtrapolationTool)
 DECLARE_COMPONENT(ActsTrk::CaloBlueprintNodeBuilder)
 DECLARE_COMPONENT(ActsTrk::ITkMaterialDecoratorTool)
 DECLARE_COMPONENT(ActsTrk::WriteTrackingGeometry)
+DECLARE_COMPONENT(ActsTrk::TrackingGeometrySvc)
+DECLARE_COMPONENT(ActsTrk::TrackingGeometryTool)

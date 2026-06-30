@@ -23,8 +23,8 @@ namespace Acts {
 
 
 
-
-class ActsTrackingGeometryTool : public extends<AthAlgTool, ActsTrk::ITrackingGeometryTool> {
+namespace ActsTrk{
+class TrackingGeometryTool : public extends<AthAlgTool, ActsTrk::ITrackingGeometryTool> {
 
     public:
       StatusCode initialize() override;
@@ -51,5 +51,5 @@ class ActsTrackingGeometryTool : public extends<AthAlgTool, ActsTrk::ITrackingGe
 
       std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 };
-
+}
 #endif

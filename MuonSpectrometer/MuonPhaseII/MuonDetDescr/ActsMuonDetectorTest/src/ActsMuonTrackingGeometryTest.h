@@ -17,7 +17,6 @@
 #include "MuonTesterTree/ThreeVectorBranch.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
