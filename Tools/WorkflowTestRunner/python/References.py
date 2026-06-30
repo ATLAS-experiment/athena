@@ -11,7 +11,7 @@
 # Format is "test" : "version"
 references_map = {
     # Simulation
-    "s3761": "v27",
+    "s3761": "v28",
     "s4005": "v19",
     "s4006": "v28",
     "s4007": "v27",
@@ -19,7 +19,7 @@ references_map = {
     "s4454": "v12",
     "a913": "v22",
     # Digi
-    "d1920": "v20",
+    "d1920": "v21",
     # Overlay
     "d1726": "v18",
     "d1759": "v26",
@@ -30,7 +30,7 @@ references_map = {
     "q442": "v121",
     "q449": "v182",
     "q452": "v86",
-    "q454": "v108",
+    "q454": "v109",
     # Derivations
     "data_PHYS_Run2": "v88",
     "data_PHYSLITE_Run2": "v52",

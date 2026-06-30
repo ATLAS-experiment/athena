@@ -121,7 +121,7 @@ class defaultConditionsTags:
     RUN3_DATA25 = "CONDBR2-BLKPA-2025-06"
     RUN3_DATA26 = "CONDBR2-BLKPA-2026-01"
     RUN3_MC = "OFLCOND-MC23-SDR-RUN3-11-02"
-    RUN4_MC = "OFLCOND-MC21-SDR-RUN4-05"
+    RUN4_MC = "OFLCOND-MC21-SDR-RUN4-06"
 
     @staticmethod
     def autoconfigure(flags):
