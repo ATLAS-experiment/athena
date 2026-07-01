@@ -74,6 +74,7 @@ namespace InDet {
     int sizeY = 0;
     std::vector<std::vector<float> > matrixOfToT;
     std::vector<float> vectorOfPitchesY;
+    std::vector<float> vectorOfPitchesX;
     int ClusterPixLayer = 0;
     int ClusterPixBarrelEC = 0;
     float phi = 0;
@@ -168,9 +169,8 @@ namespace InDet {
         std::vector<Amg::MatrixX>& errors) const;
 
     // For error formatting in lwtnn cases
-    static double correctedRMSX(double posPixels) ;
-
-    double correctedRMSY(double posPixels, std::vector<float>& pitches) const; 
+    double correctedRMS(double posPixels, const std::vector<float>& pitches,
+                        unsigned int size) const;
 
      /* algorithmic component */
     NNinput createInput(const InDet::PixelCluster& pCluster,
@@ -312,6 +312,12 @@ namespace InDet {
 
     Gaudi::Property<bool> m_useRecenteringNNWithTracks
        {this, "useRecenteringNNWithTracks",false,"Recenter x position when evaluating NN with track input."};
+
+    Gaudi::Property<bool> m_useXPitches
+       {this, "useXPitches", false,
+        "Also feed the phi-direction (X) pixel pitch vector as NN input "
+        "(ONNX only). Off by default so existing 60-input models are "
+        "unaffected; needs a (60 + sizeX)-input model when enabled."};
 
     Gaudi::Property<unsigned int> m_sizeX
        {this, "sizeX",7,"Size of pixel matrix along X"};

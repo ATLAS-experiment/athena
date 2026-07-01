@@ -851,7 +851,11 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
 
   std::vector< std::vector<float> > matrixOfToT (sizeX, std::vector<float>(sizeY,0) );
   std::vector< std::vector<float> > matrixOfCharge(sizeX, std::vector<float>(sizeY,0));
-  std::vector<float> vectorOfPitchesY(sizeY,0.4);
+  // Seed with the module's nominal pitch (from the design), as in
+  // NnClusterizationFactory::createInput; correct for ITk (25x100 / 50x50 um)
+  // where the old literal 0.4 (eta) seed and the >0.1 fill guard were both wrong.
+  std::vector<float> vectorOfPitchesY(sizeY, design->etaPitch());
+  std::vector<float> vectorOfPitchesX(sizeX, design->phiPitch());
 
 
   //Itererate over all elements hits in the cluster and fill the charge and tot matrices 
@@ -886,6 +890,7 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
     InDetDD::SiCellId  cellId = de->cellIdFromIdentifier(*rdosBegin);
     InDetDD::SiDiodesParameters diodeParameters = design->parameters(cellId);
     float pitchY = diodeParameters.width().xEta();
+    float pitchX = diodeParameters.width().xPhi();
   
     if ( (not totList.empty()) && tot    != totList.end()) {
       matrixOfToT[absphiPixelIndex][absetaPixelIndex]   =*tot;
@@ -897,10 +902,11 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
      ++charge;
     } else matrixOfCharge[absphiPixelIndex][absetaPixelIndex] = -1;
   
-    if (pitchY > 0.1)
-    {
-      vectorOfPitchesY[absetaPixelIndex]=pitchY;
-    }
+    // Store the real per-cell pitch, built the same way as
+    // NnClusterizationFactory::createInput so the dumped training inputs match
+    // the runtime inference inputs.
+    vectorOfPitchesY[absetaPixelIndex]=pitchY;
+    vectorOfPitchesX[absphiPixelIndex]=pitchX;
   }//end iteration on rdos
   
 
@@ -968,6 +974,7 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
   AUXDATA(xprd, std::vector<float>, NN_matrixOfToT)      = vectorOfToT;
   AUXDATA(xprd, std::vector<float>, NN_matrixOfCharge)   = vectorOfCharge;
   AUXDATA(xprd, std::vector<float>, NN_vectorOfPitchesY) = vectorOfPitchesY;
+  AUXDATA(xprd, std::vector<float>, NN_vectorOfPitchesX) = vectorOfPitchesX;
   
   
   AUXDATA(xprd, int, NN_etaPixelIndexWeightedPosition) = etaPixelIndexWeightedPosition;
