@@ -59,12 +59,14 @@ in the vertical position (the way it is positioned in the ATLAS detector)
 #define GENERATORMODULESCOSMICGEN_H
 
 #include "GeneratorModules/GenModule.h"
+#include "GeneratorModules/GenData.h"
 
 #include "CLHEP/Vector/LorentzVector.h"
 #include "AtlasHepMC/Polarization.h"
 
 #include <iostream>
 #include <fstream>
+#include <memory>
 #include <vector>
 #include <string>
 
@@ -164,6 +166,7 @@ private:
   DoubleProperty m_rvertmax{this, "rvert_max", 300.*m_mm}; // replaces rectangle in case of reweighting
   DoubleProperty m_pixelplanemaxx{this, "pixelplane_maxx", 1150.};
   DoubleProperty m_pixelplanemaxz{this, "pixelplane_maxz", 1650.};
+  std::shared_ptr<GenData> m_gendata{nullptr};
 };
 
 #endif

@@ -41,6 +41,7 @@ StatusCode BeamHaloGeneratorAlg::genInitialize() {
   ATH_MSG_INFO(" Random stream name ----------  " << m_randomStream);
   ATH_MSG_INFO("=====================================================");
 
+  m_gendata = std::make_shared<GenData>();
   // Check the flip probability
   if(m_flipProbability <= 0) {
     ATH_MSG_INFO("Event flipping will be disabled.");
@@ -108,17 +109,17 @@ StatusCode BeamHaloGeneratorAlg::genInitialize() {
 
   // Check the input type string
   if (m_inputTypeStr == "MARS-NM") {
-    m_beamHaloGenerator = new MarsHaloGenerator(&particleTable(),
+    m_beamHaloGenerator = new MarsHaloGenerator(&m_gendata->particleTable(),
                                                 m_inputFile,
                                                 m_generatorSettings);
   }
   else if (m_inputTypeStr == "FLUKA-VT") {
-    m_beamHaloGenerator = new FlukaHaloGenerator(1, &particleTable(),
+    m_beamHaloGenerator = new FlukaHaloGenerator(1, &m_gendata->particleTable(),
                                                  m_inputFile,
                                                  m_generatorSettings);
   }
   else if (m_inputTypeStr == "FLUKA-RB") {
-    m_beamHaloGenerator = new FlukaHaloGenerator(0, &particleTable(),
+    m_beamHaloGenerator = new FlukaHaloGenerator(0, &m_gendata->particleTable(),
                                                  m_inputFile,
                                                  m_generatorSettings);
   }

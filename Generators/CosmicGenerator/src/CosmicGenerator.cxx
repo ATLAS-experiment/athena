@@ -125,6 +125,8 @@ StatusCode CosmicGenerator::genInitialize() {
 
   m_center=CLHEP::Hep3Vector(m_IPx, m_IPy, m_IPz);
 
+  m_gendata = std::make_shared<GenData>();
+
   return StatusCode::SUCCESS;
 
 }
@@ -463,13 +465,13 @@ StatusCode CosmicGenerator::callGenerator() {
       // m_pdgCode.push_back(charge*13);
       m_pdgCode.push_back(charge*-13);
 
-      const HepPDT::ParticleData* particle = particleData(std::abs(m_pdgCode.back()));
-      if (particle==nullptr){
+      const auto pmass = m_gendata->particleMass(std::abs(m_pdgCode.back()));
+      if (!pmass){
         ATH_MSG_FATAL( "Particle with PDG ID=" << std::abs(m_pdgCode.back()) << " returned a nullptr" );
         return StatusCode::FAILURE;
       }
 
-      double mass = particle->mass().value();
+      double mass = *pmass;
 
       // Compute the kinematic values.  First, the vertex 4-vector:
       double x = vert.x();

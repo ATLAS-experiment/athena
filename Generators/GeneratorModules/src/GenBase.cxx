@@ -18,8 +18,6 @@ StatusCode GenBase::initialize() {
   ATH_CHECK( m_mcevents_const.initialize() );
   m_mcEventKey = m_mcevents_const.key();
 
-  // Get the particle property service
-  ATH_CHECK(m_ppSvc.retrieve());
   return StatusCode::SUCCESS;
 }
 

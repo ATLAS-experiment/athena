@@ -130,6 +130,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
 
 StatusCode TestHepMC::initialize() {
   CHECK(GenBase::initialize());
+  m_gendata = std::make_shared<GenData>();
 
   if (m_doHist){
     CHECK(m_thistSvc.retrieve());
@@ -516,11 +517,11 @@ StatusCode TestHepMC::execute(const EventContext& ctx) {
 
       //check stable particle lifetimes
       if (MC::isStable(pstatus)) {
-        const HepPDT::ParticleData* pd = particleData(ppdgid);
-        if (pd != NULL) {
-          double plifetime = pd->lifetime()*1e+12;  // why lifetime doesn't come in common units???
-          if (plifetime != 0 && plifetime < m_min_tau) { // particles with infinite lifetime get a 0 in the PDT
-            ATH_MSG_WARNING("Stable particle found with lifetime = " << plifetime << "~ns!!");
+        const auto plifetime = m_gendata->particleLifetime(ppdgid);
+        if (plifetime) {
+          double lifetime = plifetime.value()*1e+12;  // why lifetime doesn't come in common units???
+          if (lifetime != 0 && lifetime < m_min_tau) { // particles with infinite lifetime get a 0 in the PDT
+            ATH_MSG_WARNING("Stable particle found with lifetime = " << lifetime << "~ns!!");
             if (m_dumpEvent) HepMC::Print::line(std::cout,pitr);
 
             ++m_Status1ShortLifetime;

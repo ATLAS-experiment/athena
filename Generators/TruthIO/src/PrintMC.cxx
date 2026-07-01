@@ -44,6 +44,7 @@ StatusCode PrintMC::initialize() {
   // Check that last > first
   if (m_lastEvt < m_firstEvt) m_lastEvt = m_firstEvt;
 
+  m_gendata = std::make_shared<GenData>();
   return StatusCode::SUCCESS;
 }
 
@@ -166,7 +167,7 @@ StatusCode PrintMC::execute(const EventContext& ctx) {
         // Access the PDG table to get the particle name (and mass?)
         std::string sname;
         double p_mass = p->generated_mass();
-        const HepPDT::ParticleData* ap = particleData(std::abs(p_pdg_id));
+        const HepPDT::ParticleData* ap = m_gendata->particleData(std::abs(p_pdg_id));
         if (!ap) {
           ATH_MSG_DEBUG("PID " << std::abs(p_pdg_id) << " is not in particle data table");
         } else {
