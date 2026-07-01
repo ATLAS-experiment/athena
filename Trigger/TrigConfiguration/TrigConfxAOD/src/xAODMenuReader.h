@@ -38,7 +38,7 @@ namespace TrigConf {
       virtual StatusCode initialize();
 
       /// Function executing the algorithm
-      virtual StatusCode execute();
+      virtual StatusCode execute(const EventContext& ctx);
 
    private:
       /// Connection to the trigger configuration service

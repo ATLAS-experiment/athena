@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* **********************************************************************\
@@ -9,7 +9,7 @@
  *                                                                      *
  *  #   Date    Comments                   By                           *
  * -- -------- -------------------------- ----------------------------- *
- *  1 14/03/16  First Version              J. Bossio (jbossios@cern.ch) * 
+ *  1 14/03/16  First Version              J. Bossio (jbossios@cern.ch) *
 \************************************************************************/
 
 // System include(s):
@@ -42,6 +42,7 @@
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/CurrentContext.h"
 
 //JetCalibrationTool
 #include "JetCalibTools/JetCalibrationTool.h"
@@ -102,11 +103,11 @@ int main(int argc, char* argv[]){
     }
 
     if ( opt.find("--sample=")   != std::string::npos ) sample = v[1];
-    
+
     if ( opt.find("--jetColl=")   != std::string::npos ) jetColl = v[1];
-    
+
     if ( opt.find("--jetCalibConfig=")   != std::string::npos ) jetCalibConfig = v[1];
-    
+
     if ( opt.find("--calibSeq=")   != std::string::npos ) calibSeq = v[1];
 
     if ( opt.find("--calibArea=")   != std::string::npos ) calibArea = v[1];
@@ -206,15 +207,11 @@ int main(int argc, char* argv[]){
     const xAOD::JetContainer* jets = nullptr;
     ANA_CHECK( event.retrieve( jets, jetColl + "Jets" ) );
 
-    // Shallow copy 
-    auto jets_shallowCopy = xAOD::shallowCopyContainer( *jets );
+    // Shallow copy
+    auto jets_shallowCopy = xAOD::shallowCopy( *jets );
 
     // Calibrate the shallow copy
-    ANA_CHECK( jetCalibrationTool.applyCalibration( *(jets_shallowCopy.first) ) );
-
-    delete jets_shallowCopy.first;
-    delete jets_shallowCopy.second;
-  
+    ANA_CHECK( jetCalibrationTool.applyCalibration( *jets_shallowCopy.first ) );
   }//END: Loop over events
 
   xAOD::IOStats::instance().stats().printSmartSlimmingBranchList();

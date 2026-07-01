@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -24,7 +24,6 @@
 
 #include "ExpressionEvaluation/ExpressionParserUser.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace DerivationFramework {
 
@@ -38,7 +37,7 @@ public:
   virtual ~EgammaTrackParticleThinning();
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
-  virtual StatusCode doThinning() const override;
+  virtual StatusCode doThinning(const EventContext& ctx) const override;
 
 private:
   mutable std::atomic<unsigned long int> m_ntot = 0;
@@ -70,7 +69,8 @@ private:
   BooleanProperty m_bestVtxMatchOnly{ this, "BestVtxMatchOnly", false, "" };
   FloatProperty m_coneSize{ this, "ConeSize", -1.0, "" };
 
-  void setPhotonMasks(std::vector<bool>&,
+  void setPhotonMasks(const EventContext& ctx,
+                      std::vector<bool>&,
                       std::vector<bool>&,
                       const xAOD::EgammaContainer*,
                       const xAOD::TrackParticleContainer*,

@@ -26,7 +26,7 @@ public:
 	ALFA_CLinkEventCnv(ISvcLocator* svcloc) : T_AthenaPoolCustomCnv <ALFA_CLinkEvent, ALFA_CLinkEvent_PERS >(svcloc) {}
 protected:
 	ALFA_CLinkEvent_PERS* createPersistent (ALFA_CLinkEvent *transCont);
-	ALFA_CLinkEvent* createTransient ();
+	ALFA_CLinkEvent* createTransient(const Token* token);
 };
 
 #endif // ALFA_CLinkEventCnv_h

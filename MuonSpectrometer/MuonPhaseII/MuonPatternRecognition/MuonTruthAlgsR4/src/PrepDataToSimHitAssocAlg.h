@@ -9,7 +9,7 @@
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteDecorHandleKey.h>
 #include <xAODMuonSimHit/MuonSimHitContainer.h>
-#include <xAODMeasurementBase/UncalibratedMeasurementContainer.h>
+#include <xAODMuonPrepData/MuonMeasurementContainer.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <xAODMuonViews/ChamberViewer.h>
@@ -34,15 +34,15 @@ namespace MuonR4{
              *  @param measurement: Reference to the measurement which the best hit is to be found */
             template <typename PrdType_t>
                 const xAOD::MuonSimHit* truthMatchPrd(Viewer_t<xAOD::MuonSimHitContainer>& simHits,
-                                                      const xAOD::UncalibratedMeasurement* measurement) const;
+                                                      const xAOD::MuonMeasurement* measurement) const;
 
             /** @brief Key to the associated simHit container */
             SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_simHitsKey{this, "SimHits" , ""};
             /** @brief Key to the uncalibrated measurements to decorate */
-            SG::ReadHandleKey<xAOD::UncalibratedMeasurementContainer> m_prdHitKey{this, "Measurements", "Measurements"};
+            SG::ReadHandleKey<xAOD::MuonMeasurementContainer> m_prdHitKey{this, "Measurements", "Measurements"};
             /** @brief Attached sim-hit link decoration to the measurement container */
             using LinkType = ElementLink<xAOD::MuonSimHitContainer>;
-            SG::WriteDecorHandleKey<xAOD::UncalibratedMeasurementContainer> m_decorKey{this, "Decoration", m_prdHitKey, "simHitLink"};
+            SG::WriteDecorHandleKey<xAOD::MuonMeasurementContainer> m_decorKey{this, "Decoration", m_prdHitKey, "simHitLink"};
             /** @brief IdHelperSvc to decode the Identifiers */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     };

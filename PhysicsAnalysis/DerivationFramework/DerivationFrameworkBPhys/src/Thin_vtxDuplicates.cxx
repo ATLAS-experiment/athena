@@ -70,10 +70,9 @@ StatusCode DerivationFramework::Thin_vtxDuplicates::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::Thin_vtxDuplicates::doThinning() const
+StatusCode DerivationFramework::Thin_vtxDuplicates::doThinning(const EventContext& ctx) const
 {
     // retieve vertex
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ThinningHandle< xAOD::VertexContainer > vertexContainer(m_vertexContainerNames, ctx);
     std::vector<bool> vtxMask(vertexContainer->size(), true); // default: keep all vertices
     int vtxTot = 0;

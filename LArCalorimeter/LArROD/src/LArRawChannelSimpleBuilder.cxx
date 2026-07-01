@@ -11,7 +11,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "LArElecCalib/ILArPedestal.h"
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package's name.
 atlas_subdir( AthOnnxComps )
@@ -6,12 +6,19 @@ atlas_subdir( AthOnnxComps )
 # External dependencies.
 find_package( onnxruntime )
 
-# Libraray in the package.
+# AthenaBaseComps if in Athena
+if (XAOD_STANDALONE)
+  set(COND_ATHENA_BASE_COMPS "")
+else()
+  set(COND_ATHENA_BASE_COMPS AthenaBaseComps)
+endif()
+
+# Library in the package.
 atlas_add_library( AthOnnxCompsLib
    src/*.cxx
    PUBLIC_HEADERS AthOnnxComps
    INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib AthOnnxInterfaces AthOnnxUtilsLib PathResolver
+   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib AthOnnxInterfaces AthOnnxUtilsLib ${COND_ATHENA_BASE_COMPS} PathResolver
 )
 
 atlas_add_dictionary( AthOnnxCompsDict

@@ -252,6 +252,9 @@ unsigned int SpectrometerSector::nLayerPerReadout (const MuonReadoutElement* rel
             THROW_EXCEPTION("Unexpected Readout Element Type in nLayerPerReadout()");
     }
 }
+void SpectrometerSector::addPlacement(std::unique_ptr<ActsTrk::VolumePlacement>&& placement) const {
+    m_args.chambers.front()->addPlacement(std::move(placement));
+}
 
 }
 

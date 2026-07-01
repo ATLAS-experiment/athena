@@ -23,7 +23,8 @@ StatusCode InDet::GNNTrackFinderTritonTool::initialize() {
 
 StatusCode InDet::GNNTrackFinderTritonTool::getTracks(
     const std::vector<const Trk::SpacePoint*>& spacepoints,
-    std::vector<std::vector<uint32_t> >& tracks) const {
+    std::vector<std::vector<uint32_t> >& tracks,
+    std::unordered_map<int, std::unordered_map<int, float>>* /*edgeMap*/) const {
   int64_t numSpacepoints = (int64_t)spacepoints.size();
   std::vector<float> inputValues;
   std::vector<uint32_t> spacepointIDs;

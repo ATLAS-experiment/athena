@@ -50,6 +50,7 @@
 /// helper struct - steer the configuration from the parent tool's side 
 struct InDetRttPlotConfig{
   bool isITk{false};
+  bool hasHGTDReco{false};
 
   /// Plots for (selected) tracks, not necessarily truth matched
   bool doTrackParameters{true}; 
@@ -59,11 +60,9 @@ struct InDetRttPlotConfig{
   bool doHitsRecoTracksPlots{true}; 
   bool doTrtExtensionPlots{true}; 
 
-  /// Fake plots (and unlinked) 
+  /// Fake plots 
   bool doFakePlots{true}; 
-  bool doMissingTruthFakePlots{true}; 
   bool doHitsFakeTracksPlots{true};
-  bool doHitsUnlinkedTracksPlots{true};
 
   /// Efficiency and duplicate plots - require truth, optionally
   /// matching reco 
@@ -94,8 +93,6 @@ struct InDetRttPlotConfig{
   bool doTrkInJetPlots_matched_bjets{false}; 
   bool doTrkInJetPlots_fake{false}; 
   bool doTrkInJetPlots_fake_bjets{false}; 
-  bool doTrkInJetPlots_unlinked{false}; 
-  bool doTrkInJetPlots_unlinked_bjets{false}; 
   bool doTrkInJetPlots_truthFromB{false}; 
 
   /// per author plots 
@@ -144,14 +141,14 @@ public:
   ///fill reco-vertex related plots that need EventInfo
   void fill(const xAOD::VertexContainer& vertexContainer, const unsigned int truthMu, const float actualMu, const float weight=1.0);
 
-  void fill(const xAOD::TrackParticle& track, const xAOD::Jet& jet, bool isBjet=false, bool isFake=false, bool isUnlinked=false, bool truthIsFromB=false, const float weight=1.0);
+  void fill(const xAOD::TrackParticle& track, const xAOD::Jet& jet, bool isBjet=false, bool isFake=false, bool truthIsFromB=false, const float weight=1.0);
   void fillEfficiency(const xAOD::TruthParticle& truth, const xAOD::Jet& jet, const bool isGood, bool isBjet=false, bool truthIsFromB=false, float weight=1.0);
   void fillFakeRate(const xAOD::TrackParticle& track, const xAOD::Jet& jet, const bool isFake, bool isBjet=false, bool truthIsFromB=false, float weight=1.0);
   
   ///fill for Counters
   void fillCounter(const unsigned int freq, const InDetPerfPlot_nTracks::CounterCategory counter, float weight);
   ///fill for fakes
-  void fillFakeRate(const xAOD::TrackParticle& particle, const bool isFake, const bool isAssociatedTruth, const float mu, float weight);
+  void fillFakeRate(const xAOD::TrackParticle& particle, const bool isFake, const float mu, float weight);
 
   // fill IDPVM Ntuple
   void fillNtuple(const xAOD::TrackParticle& track, const xAOD::Vertex* vtx);
@@ -190,7 +187,6 @@ private:
   std::unique_ptr<InDetPerfPlot_Resolution> m_resolutionPlotSecd;
   std::unique_ptr<InDetPerfPlot_Hits> m_hitsMatchedTracksPlots;
   std::unique_ptr<InDetPerfPlot_Hits> m_hitsFakeTracksPlots;
-  std::unique_ptr<InDetPerfPlot_Hits> m_hitsUnlinkedTracksPlots;
   std::unique_ptr<InDetPerfPlot_VertexTruthMatching> m_vertexTruthMatchingPlots;
   std::unique_ptr<InDetPerfPlot_TrkInJet> m_trkInJetPlots;
   std::unique_ptr<InDetPerfPlot_TrkInJet> m_trkInJetPlots_bjets;
@@ -198,8 +194,6 @@ private:
   std::unique_ptr<InDetPerfPlot_TrkInJet> m_trkInJetPlots_matched_bjets;
   std::unique_ptr<InDetPerfPlot_TrkInJet> m_trkInJetPlots_fake;
   std::unique_ptr<InDetPerfPlot_TrkInJet> m_trkInJetPlots_fake_bjets;
-  std::unique_ptr<InDetPerfPlot_TrkInJet> m_trkInJetPlots_unlinked;
-  std::unique_ptr<InDetPerfPlot_TrkInJet> m_trkInJetPlots_unlinked_bjets;
   
   std::unique_ptr<InDetPerfPlot_TrkInJet> m_trkInJetPlots_truthFromB;
 

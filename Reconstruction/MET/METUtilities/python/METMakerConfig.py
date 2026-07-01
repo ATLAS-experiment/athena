@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -58,7 +58,7 @@ def getTauSelectionTool(name="TauSelectionTool_METMakerAlg"):
                                                                        AbsEtaRegion = (0.0, 1.37, 1.52, 2.5))
     return tauSel
 
-def getMETMakerAlg(suffix,jetSelection="Tier0",jetColl=""):
+def getMETMakerAlg(suffix,jetSelection="Tier0",jetColl="",**kwargs):
 
     print ("Generate METMaker and METMakerAlg for METAssoc_"+suffix)
 
@@ -93,5 +93,37 @@ def getMETMakerAlg(suffix,jetSelection="Tier0",jetColl=""):
                                        ElectronLHSelectionTool=elecSelLH,
                                        PhotonIsEMSelectionTool=photonSelIsEM,
                                        TauSelectionTool=tauSel,
+                                       **kwargs
                                        )
     return makerAlg
+
+
+def main():
+
+        # Config flags steer the job at various levels
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.fillFromArgs()
+    flags.lock()
+
+    # Get a ComponentAccumulator setting up the fundamental Athena job
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
+    cfg=MainServicesCfg(flags) 
+
+    # Add the components for reading in pool files
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
+
+    from AthenaCommon.Constants import VERBOSE
+    cfg.addEventAlgo(
+        getMETMakerAlg(
+            suffix="AntiKt4EMPFlow",
+            jetSelection="Tight",
+            OutputLevel=VERBOSE
+        )
+    )
+
+    cfg.run(10)
+
+if __name__=="__main__":
+    main()

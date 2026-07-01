@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "HltROBDataProviderSvc.h"
 #include "TrigKernel/HltExceptions.h"
@@ -19,8 +19,8 @@
 // STL includes
 #include <algorithm>    // std::find
 
-// Maximum number of ROB fragments in ROB buffer
-static const size_t MAX_ROBFRAGMENTS = 4096;
+// Guess for maximum number of ROB fragments
+static const size_t MAX_ROBFRAGMENTS_GUESS = 2200;  // Run-3 has ~2150 ROBs
 
 HltROBDataProviderSvc::HltROBDataProviderSvc(const std::string& name, ISvcLocator* pSvcLocator) :
   base_class(name, pSvcLocator)
@@ -268,18 +268,15 @@ void HltROBDataProviderSvc::setNextEvent(const EventContext& context, const RawE
   // Fill the ROB cache |
   //--------------------+
 
-  // get all the ROBFragments
-  OFFLINE_FRAGMENTS_NAMESPACE::PointerType robF[MAX_ROBFRAGMENTS];
-  size_t number_robs = re->children(robF,MAX_ROBFRAGMENTS);
-  if (number_robs == MAX_ROBFRAGMENTS) {
-    ATH_MSG_ERROR("ROB buffer overflow: ROBs found = " << number_robs 
-		  << " Max. number of ROBs allowed = " << MAX_ROBFRAGMENTS);
-  }
   std::vector<ROBF> rob_fragments;
-  rob_fragments.reserve(number_robs);
+  // We use a hard-coded size guess because calling nchildren() would
+  // result in a second iteration over the entire raw event.
+  rob_fragments.reserve(MAX_ROBFRAGMENTS_GUESS);
+
   // loop over all ROBs
-  for (size_t irob = 0; irob < number_robs; irob++) {
-    rob_fragments.push_back(ROBF(robF[irob]));
+  auto iter = re->child_iter();
+  while (OFFLINE_FRAGMENTS_NAMESPACE::PointerType fp = iter.next()) {
+    rob_fragments.emplace_back(fp);
   }
   // add the ROBs to the cache/rob map, but extract the size before moving it
   const size_t nRobs = rob_fragments.size();
@@ -490,7 +487,7 @@ int HltROBDataProviderSvc::collectCompleteEventData(const EventContext& context,
   if (!m_enabledROBs.value().empty()) {
     vRobInfos.reserve( m_enabledROBs.value().size() ) ;
   } else {
-    vRobInfos.reserve( MAX_ROBFRAGMENTS ) ;
+    vRobInfos.reserve( MAX_ROBFRAGMENTS_GUESS ) ;
   }
 
   // Get ROB Fragments for complete event with DataCollector

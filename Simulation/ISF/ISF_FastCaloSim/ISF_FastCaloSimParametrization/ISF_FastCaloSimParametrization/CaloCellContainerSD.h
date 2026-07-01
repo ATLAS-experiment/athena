@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_CALOCELLCONTAINERSD_H
@@ -7,28 +7,22 @@
 
 /* Base class header */
 #include "G4VSensitiveDetector.hh"
-/* Athena WriteHandle include */
-#include "StoreGate/WriteHandle.h"
-/* Empty cell builder interface include */
-#include "CaloInterface/ICaloCellMakerTool.h"
 /* CaloCellContainer include */
 #include "CaloEvent/CaloCellContainer.h"
-
+#include <string>
 
 class G4TouchableHistory;
+class G4HCofThisEvent;
 class TFCSSimulationState;
 
 class CaloCellContainerSD : public G4VSensitiveDetector
 {
 public:
-  CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName, PublicToolHandle<ICaloCellMakerTool> FastHitConvertTool);
+  CaloCellContainerSD(const std::string& name, const std::string& CaloCellContainerName);
   ~CaloCellContainerSD() {}
 
-  // Start of *ATHENA* event
-  void StartOfAthenaEvent(const EventContext& ctx);
-
-  // End of *ATHENA* event
-  void EndOfAthenaEvent(const EventContext& ctx);
+  // Initialize from G4.
+  void Initialize(G4HCofThisEvent*) override final;
 
   // Needs to be implemented, but is not used for this SD
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;
@@ -37,14 +31,11 @@ public:
   void recordCells(TFCSSimulationState&);
 
 protected:
-  // The empty cell builder tool to initialize an empty calo cell container
-  PublicToolHandle<ICaloCellMakerTool> m_EmptyCellBuilderTool;
-  // The write handle to the CaloCellContainer
-  SG::WriteHandle<CaloCellContainer> m_caloCellContainer;
-  // Fast hit converter - converts CaloCells into LAr and Tile Hits - takes into account sampling fractions
-  PublicToolHandle<ICaloCellMakerTool> m_FastHitConvertTool;
+  CaloCellContainer* getCaloCellContainer() const;
 
-
+  std::string m_caloCellContainerName;
+  // Non-owning cache set by Initialize; HitCollectionMap owns the container.
+  CaloCellContainer* m_caloCellContainer{};
 };
 
 #endif // ISF_FASTCALOSIMPARAMETRIZATION_CALOCELLCONTAINERSD_H

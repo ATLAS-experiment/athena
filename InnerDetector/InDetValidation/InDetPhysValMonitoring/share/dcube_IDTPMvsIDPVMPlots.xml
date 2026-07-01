@@ -1,0 +1,224 @@
+<?xml version="1.0" ?>
+<!--
+ DCube configuration XML file = dcube_config.xml
+ auto-generated using DCube 7.3.0 by Krzysztof Daniel Ciba (Krzysztof.Ciba@NOSPAMgmail.com)
+ on Wed, 18 Sep 2024 19:20:36 CEST
+ from Root reference file: idpvm.IDTPMcnv.root
+ Statistics tests:
+ "['KSnorm']"
+ Legend:
+ * KS      - Kolmogorov-Smirnov test
+ * KSnorm  - Kolmogorov-Smirnov + normalisation tests (default)
+ * chi2    - chi2 test
+ * bbb     - bin-by-bin comparision
+ * meany   - avg eff mean y [TProfiles only!]
+ * all     - all above tests (except KSnorm)
+ * allnorm - all above tests (except KS)
+ Tweaks:
+ [1] remove or comment out (using HTML comments tags) histograms not relevant
+     to your analysis
+ [2] provide a new content to "ref_desc" and "mon_desc" tags to something
+     more meaningful
+ [3] and of course feel free to change attribute "tests" in each "hist" tag
+ [4] limits of p-value warning and failure can be set by changing attributes
+     in <plimit> tag
+ [5] if you want to make plots FOR EVERY histogram in your monitored file
+     change attribute "inclusive" in <mode> tag to "true"
+-->
+<dcube_client_config>
+ <dcube branch="*" install="*" cmtconfig="*" project="*" jobId="*">
+  <!--
+  ###################################################
+  DCubeClient for:
+  [1] branch: *
+  [2] install: *
+  [3] cmtconfig: *
+  [4] project: *
+  [5] jobId: *
+  [6] reference root file: /afs/cern.ch/work/m/maparo/public/my_athena_Trig/my_art/my_out/InDetTrackPerfMon/test_IDTPM_RDOtoOfflTrkAna_grid/idpvm.IDTPMcnv.root
+  [7] p-values limits FAIL = 0.750000 WARN = 0.950000
+  ###################################################
+-->
+  <reference file="/afs/cern.ch/work/m/maparo/public/my_athena_Trig/my_art/my_out/InDetTrackPerfMon/test_IDTPM_RDOtoOfflTrkAna_grid/idpvm.IDTPMcnv.root"/>
+  <ref_desc>PUT YOUR REFERENCE DESCRIPTION HERE</ref_desc>
+  <test_desc>PUT YOUR TEST DESCRIPTION HERE</test_desc>
+  <plimit fail="0.75" warn="0.95"/>
+  <TDirectory name="/">
+   <TDirectory name="InDetTrackPerfMonPlots">
+    <TDirectory name="TrkAnaOffl">
+     <TDirectory name="Offline">
+      <TDirectory name="Tracks">
+       <TDirectory name="Parameters">
+        <hist1D name="offl_d0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_z0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_phi" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_theta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_pt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_chi2" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_ndof" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_chi2OverNdof" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="offl_author" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_d0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_z0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_phi" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_theta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_pt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_prodR" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="truth_prodZ" type="TH1D" plotopts="" tests="KSnorm"/>
+       </TDirectory>
+       <TDirectory name="HitsOnTracks">
+        <hist1D name="offl_nPixelHits" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="offl_nSCTHits" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="offl_nInnerMostPixelHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nNextToInnerMostPixelHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelHoles_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nInnerMostPixelHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nNextToInnerMostPixelHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelHoles_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nInnerMostPixelOutliers_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nInnerMostPixelSharedHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nInnerMostPixelSplitHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nExpectedInnerMostPixelHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nExpectedNextToInnerMostPixelHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelOutliers_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelContribLayers_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelSharedHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelSplitHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelGangedHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelGangedHitsFlaggedFakes_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTOutliers_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTDoubleHoles_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTSharedHits_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelDeadSensors_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTDeadSensors_vs_offl_eta" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nInnerMostPixelOutliers_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nInnerMostPixelSharedHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nInnerMostPixelSplitHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nExpectedInnerMostPixelHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nExpectedNextToInnerMostPixelHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelOutliers_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelContribLayers_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelSharedHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelSplitHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelGangedHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelGangedHitsFlaggedFakes_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTOutliers_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTDoubleHoles_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTSharedHits_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nPixelDeadSensors_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+        <hist1D name="offl_nSCTDeadSensors_vs_offl_phi" plotopts="" tests="meany" type="TProfile"/>
+       </TDirectory>
+       <TDirectory name="Multiplicities">
+        <hist1D name="num_offl_all" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_offl_selected" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="num_truth_all" type="TH1D" plotopts="" tests="KSnorm"/>
+       </TDirectory>
+       <TDirectory name="Resolutions">
+        <hist1D name="pull_d0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="res_d0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="sigma_offl_d0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resmean_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_d0_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="resmean_d0_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullwidth_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullmean_d0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullwidth_d0_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullmean_d0_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pull_z0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="res_z0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="sigma_offl_z0" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resmean_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_z0_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="resmean_z0_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullwidth_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullmean_z0_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullwidth_z0_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullmean_z0_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pull_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="res_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="sigma_offl_qoverp" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resmean_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_qoverp_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="resmean_qoverp_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullwidth_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullmean_qoverp_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullwidth_qoverp_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullmean_qoverp_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pull_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="res_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="sigma_offl_ptqopt" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resmean_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_ptqopt_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="resmean_ptqopt_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullwidth_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullmean_ptqopt_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullwidth_ptqopt_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullmean_ptqopt_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pull_theta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="res_theta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="sigma_offl_theta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resmean_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_theta_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="resmean_theta_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullwidth_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullmean_theta_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullwidth_theta_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullmean_theta_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pull_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="res_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="sigma_offl_z0sin" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resmean_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="resolution_z0sin_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="resmean_z0sin_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullwidth_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullmean_z0sin_vs_truth_eta" type="TH1D" plotopts="" tests="KSnorm"/>
+        <hist1D name="pullwidth_z0sin_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+        <hist1D name="pullmean_z0sin_vs_truth_pt" type="TH1D" plotopts="logx" tests="KSnorm"/>
+       </TDirectory>
+       <TDirectory name="FakeRates">
+        <graph name="fakerate_vs_offl_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="fakerate_vs_offl_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="fakerate_vs_offl_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="fakerate_vs_offl_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="fakerate_vs_offl_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
+       </TDirectory>
+       <TDirectory name="Efficiencies">
+        <graph name="eff_vs_truth_eta" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_pt" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_phi" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_d0" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_z0" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_prodR" type="TEfficiency" plotopts="" tests="KSnorm"/>
+        <graph name="eff_vs_truth_prodZ" type="TEfficiency" plotopts="" tests="KSnorm"/>
+       </TDirectory>
+      </TDirectory>
+      <TDirectory name="Vertices">
+       <TDirectory name="AllPrimary">
+        <TDirectory name="Parameters">
+         <hist2D name="offline_nVtx_vs_truthMu_2D" plotopts="" tests="KS" type="TH2F"/>
+         <hist2D name="offline_nVtx_vs_actualMu_2D" plotopts="" tests="KS" type="TH2F"/>
+        </TDirectory>
+       </TDirectory>
+      </TDirectory>
+     </TDirectory>
+    </TDirectory>
+   </TDirectory>
+  </TDirectory>
+ </dcube>
+</dcube_client_config>

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictGroup_H
 #define IDDICT_IdDictGroup_H
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <variant>
 #include <utility>
@@ -64,7 +65,7 @@ public:
                              size_t& index);  
     void generate_implementation (const IdDictMgr& idd,  
                                   IdDictDictionary& dictionary, 
-                                  const std::string& tag = "");
+                                  std::string_view tag = "");
     void reset_implementation ();  
     bool verify () const;
     void sort   ();  

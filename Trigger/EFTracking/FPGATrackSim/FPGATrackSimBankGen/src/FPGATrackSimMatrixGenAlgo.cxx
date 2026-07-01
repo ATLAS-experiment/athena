@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimMatrixGenAlgo.cxx
@@ -201,13 +201,13 @@ void fillTrackPars(TH1I* const hists[FPGATrackSimTrackPars::NPARS], FPGATrackSim
 ///////////////////////////////////////////////////////////////////////////////
 
 
-StatusCode FPGATrackSimMatrixGenAlgo::execute()
+StatusCode FPGATrackSimMatrixGenAlgo::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("execute()");
   m_eventHeader->clearHits();
   m_eventHeader->reset();
   // Get hits and training tracks from this event
-  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, Gaudi::Hive::currentContext()));
+  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, ctx));
 
   std::vector<FPGATrackSimHit> hits = getLogicalHits();
 
@@ -279,7 +279,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
           ATH_MSG_DEBUG("We found " << tracks_1st.size() << " combinations");
         }
         for (const auto& track_comb : tracks_1st) {
-          auto track_hits_ptrs = track_comb.getFPGATrackSimHitPtrs();
+          auto & track_hits_ptrs = track_comb.getFPGATrackSimHitPtrs();
 
           if (m_doSecondStage) { // if doing 2nd stage, we want to get tracks from the road and then do tracking and overlap removal
 
@@ -301,7 +301,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
             std::vector<FPGATrackSimTrack> tracks_2nd;
             roadsToTrack(roads_2nd, tracks_2nd, m_pmap_2nd);
             for (const FPGATrackSimTrack& track_2nd : tracks_2nd) {
-              auto track_hits_2nd_ptrs = track_2nd.getFPGATrackSimHitPtrs();
+              auto & track_hits_2nd_ptrs = track_2nd.getFPGATrackSimHitPtrs();
               std::vector<module_t> modules(m_nLayers_2nd);
               FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
               acc.pars.qOverPt = track_2nd.getHoughY();
@@ -346,8 +346,18 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
         // Convert sector_hits to non-owning shared_ptr vector for the non-Hough-constants path
         std::vector<std::shared_ptr<const FPGATrackSimHit>> sector_hits_ptrs;
         sector_hits_ptrs.reserve(sector_hits.size());
+        // Single control block representing "the lifetime of sector_hits" (non-owning)
+        //this is ugly, but harmless: multiple smart pointers hold the resource, but one
+        //has a no-op deleter
+        //coverity[MULTIPLE_INIT_SMART_PTRS]
+        auto owner = std::shared_ptr<const std::vector<FPGATrackSimHit>>(
+          &sector_hits,
+          [](const std::vector<FPGATrackSimHit>*) {} // no-op deleter
+        );
+        
         for (const auto& hit : sector_hits) {
-          sector_hits_ptrs.push_back(std::shared_ptr<const FPGATrackSimHit>(&hit, [](const FPGATrackSimHit*) {}));
+          // Aliasing ctor: shares owner's control block, but points to this element
+          sector_hits_ptrs.emplace_back(owner, &hit);
         }
 
         // Prepare the accumulator struct
@@ -721,9 +731,13 @@ StatusCode FPGATrackSimMatrixGenAlgo::fillAccumulatorByDropping(std::vector<std:
       
       // If this is a spacepoint, we must also convert the other hit.
       std::shared_ptr<const FPGATrackSimHit> originalHit;
-      unsigned other_layer = 0;
+      int other_layer = 0;
       if (sector_hits[layer] && sector_hits[layer]->getHitType() == HitType::spacepoint) {
          other_layer = (sector_hits[layer]->getPhysLayer() % 2 == 0) ? layer + 1 : layer - 1;
+         if(other_layer < 0)[[unlikely]]{
+           ATH_MSG_ERROR("FPGATrackSimMatrixGenAlgo::fillAccumulatorByDropping: layer index is negative.");
+           continue;
+         }
          originalHit = std::make_shared<FPGATrackSimHit>(sector_hits[other_layer]->getOriginalHit());
          modified_hits[other_layer] = std::move(originalHit);
       }

@@ -24,7 +24,7 @@
 using namespace PerfMonTest;
 
 
-StatusCode MallocAlg::execute()
+StatusCode MallocAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ( "Executing " << name() << "..." ) ;
 

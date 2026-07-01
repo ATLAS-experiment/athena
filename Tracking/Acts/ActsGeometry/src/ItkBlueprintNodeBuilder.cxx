@@ -6,12 +6,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 //
 
-#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include <GeoModelKernel/GeoTube.h>
 #include <GeoModelKernel/GeoVPhysVol.h>
-
-
-#include "ItkBlueprintNodeBuilder.h"
 
 #include <Acts/Definitions/Units.hpp>
 #include <Acts/Geometry/Blueprint.hpp>
@@ -24,36 +20,31 @@
 #include <Acts/Geometry/MaterialDesignatorBlueprintNode.hpp>
 #include <Acts/Geometry/ProtoLayer.hpp>
 #include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
-#include "Acts/Geometry/VolumeResizeStrategy.hpp"
-#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
-#include <Acts/Surfaces/SurfaceArray.hpp>
 #include <Acts/Navigation/TryAllNavigationPolicy.hpp>
+#include <Acts/Surfaces/SurfaceArray.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
-
-
+#include <cstddef>
 #include <format>
 #include <fstream>
 #include <ranges>
 
+#include "Acts/Geometry/VolumeResizeStrategy.hpp"
+#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsElementVector.h"
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsInterop/Logger.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "BeamPipeGeoModel/BeamPipeDetectorManager.h"
-
-
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "ItkBlueprintNodeBuilder.h"
 
 using namespace Acts::UnitLiterals;
 
+namespace {
 
-namespace{
 
-constexpr std::size_t s_stripVolumeId = 20;
-constexpr std::size_t s_innerPixelVolumeId = 5;
-constexpr std::size_t s_outerPixelVolumeId = 10;
-constexpr std::size_t s_beamPipeVolumeId = 1;
 
 using enum Acts::CylinderVolumeBounds::Face;
 using enum Acts::AxisDirection;
@@ -61,6 +52,8 @@ using enum Acts::AxisBoundaryType;
 using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
 using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
+using namespace ActsTrk::detail::GeoVolIds;
+
 
 // Helper function to convert shared_ptr vector to const ptr vector
 std::vector<const Acts::Surface*> makeConstPtrVector(
@@ -127,7 +120,6 @@ std::vector<LayerData> mergeLayers(const Acts::GeometryContext& gctx,
   return mergedLayers;
 }
 
-
 void addStripBarrelLayer(
     Acts::Experimental::BlueprintNode& parent, std::size_t ilayer,
     const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
@@ -160,7 +152,7 @@ void addStripBarrelLayer(
     parent.addMaterial("Strip_Brl_" + std::to_string(ilayer) + "_Material",
                        [&addLayer](auto& lmat) {
                          lmat.configureFace(OuterCylinder,
-                                            {AxisRPhi, Bound, 20},
+                                            {AxisRPhi, Closed, 20},
                                             {AxisZ, Bound, 20});
                          addLayer(lmat);
                        });
@@ -176,10 +168,10 @@ void addStripEndcapLayer(
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
   using enum Acts::AxisBoundaryType;
- 
+
   parent.addMaterial(name + "_Material", [&](auto& mat) {
     mat.configureFace(bec < 0 ? NegativeDisc : PositiveDisc, {AxisR, Bound, 20},
-                      {AxisPhi, Bound, 40});
+                      {AxisPhi, Closed, 40});
 
     mat.addLayer(name, [&surfaces](auto& layer) {
       layer.setNavigationPolicyFactory(
@@ -201,47 +193,55 @@ void addStripEndcapLayer(
 }
 }  // namespace
 
-namespace ActsTrk{
+namespace ActsTrk {
 
-StatusCode ItkBlueprintNodeBuilder::initialize(){
-    ATH_CHECK(detStore()->retrieve(m_itkStripMgr, "ITkStrip"));
-    ATH_CHECK(detStore()->retrieve(m_itkPixelMgr, "ITkPixel"));
-    if(m_buildBeamPipe) {
-        ATH_CHECK(detStore()->retrieve(m_beamPipeMgr, "BeamPipe"));
-    } 
-    m_elementStore = std::make_shared<ActsElementVector>();
-    return StatusCode::SUCCESS;
-
+StatusCode ItkBlueprintNodeBuilder::initialize() {
+  ATH_CHECK(detStore()->retrieve(m_itkStripMgr, "ITkStrip"));
+  ATH_CHECK(detStore()->retrieve(m_itkPixelMgr, "ITkPixel"));
+  if (m_buildBeamPipe) {
+    ATH_CHECK(detStore()->retrieve(m_beamPipeMgr, "BeamPipe"));
+  }
+  m_elementStore = std::make_shared<ActsElementVector>();
+  return StatusCode::SUCCESS;
 }
 
-std::shared_ptr<Acts::Experimental::BlueprintNode> ItkBlueprintNodeBuilder::buildBlueprintNode(
-    const Acts::GeometryContext& gctx, std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
+std::shared_ptr<Acts::Experimental::BlueprintNode>
+ItkBlueprintNodeBuilder::buildBlueprintNode(
+    const Acts::GeometryContext& gctx,
+    std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
 
-    if(childNode) {
+  if (childNode) {
     ATH_MSG_ERROR("Child node for the Calo should be null - no child expected");
     throw std::runtime_error("Child node is not null");
-    }
+  }
 
-    auto itkNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("ItkNode", AxisR);
+  auto itkNode =
+      std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>(
+          "ItkNode", AxisZ);
 
-    // Add the itk pixel to the node
-    buildItkPixelBlueprintNode(gctx, *itkNode);
+  auto& itk_mat = itkNode->addMaterial("ItkNodeMaterial", [&](auto& mat) {
+    mat.configureFace(NegativeDisc, {AxisR, Bound, 10}, {AxisPhi, Closed, 60});
+    mat.configureFace(PositiveDisc, {AxisR, Bound, 10}, {AxisPhi, Closed, 60});
+  });
 
-    // Add the itk strip to the node
-    buildItkStripBlueprintNode(gctx, *itkNode);
+  auto& itk = itk_mat.addCylinderContainer("ItkNodeMain", AxisR);
 
-    //Add the beam pipe to the node
-    if(m_buildBeamPipe) {
+  buildItkPixelBlueprintNode(gctx, itk);
 
-    buildBeamPipeBlueprintNode(gctx, *itkNode);
+  // Add the itk strip to the node
+  buildItkStripBlueprintNode(gctx, itk);
 
-    }
+  // Add the beam pipe to the node
+  if (m_buildBeamPipe) {
 
-    return itkNode;
+    buildBeamPipeBlueprintNode(gctx, itk);
+  }
+  return itkNode;
 }
 
 void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
-    const Acts::GeometryContext& gctx, Acts::Experimental::BlueprintNode& node) {
+    const Acts::GeometryContext& gctx,
+    Acts::Experimental::BlueprintNode& node) {
 
   // Get ITkPixel parameters from detector manager
   if (!m_itkPixelMgr) {
@@ -256,8 +256,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
   std::vector<std::shared_ptr<ActsDetectorElement>> elements;
 
   InDetDD::SiDetectorElementCollection::const_iterator iter;
-  for (const auto* element :
-       *m_itkPixelMgr->getDetectorElementCollection()) {
+  for (const auto* element : *m_itkPixelMgr->getDetectorElementCollection()) {
     const InDetDD::SiDetectorElement* siDetElement =
         dynamic_cast<const InDetDD::SiDetectorElement*>(element);
     if (siDetElement == nullptr) {
@@ -270,13 +269,15 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
 
   // Copy to service level store to extend lifetime
   m_elementStore->vector().insert(m_elementStore->vector().end(),
-                                      elements.begin(), elements.end());
+                                  elements.begin(), elements.end());
 
   // Create containers for inner and outer pixel parts
   node.addMaterial("InnerPixelMaterial", [&](auto& mat) {
-    mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
+    mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
+                      {AxisZ, Bound, 20});
 
     auto& innerPixelContainer = mat.addCylinderContainer("InnerPixel", AxisZ);
+    
 
     // Add barrel container
     auto& barrelGeoId = innerPixelContainer.withGeometryIdentifier();
@@ -295,7 +296,17 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
           return aMidR < bMidR;
         });
 
-    auto& barrel = barrelGeoId.addCylinderContainer("InnerPixel_Brl", AxisR);
+    // enable material on the positive and negative disks
+    // NB: put it on the outer container to avoid issues with merging volumes
+    auto& brl_mat =
+        barrelGeoId.addMaterial("InnerPixel_Material", [&](auto& mat) {
+          mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+                            {AxisPhi, Closed, 10});
+          mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+                            {AxisPhi, Closed, 10});
+        });
+    auto& barrel = brl_mat.addCylinderContainer("InnerPixel_Brl", AxisR);
+
     barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
     barrel.setResizeStrategy(ResizeStrategy::Gap);
 
@@ -324,7 +335,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       barrel.addMaterial(
           std::format("InnerPixel_Brl_{}_Material", ilayer), [&](auto& lmat) {
             // Innermost layer: outer cylinder, else inner cylinder
-            lmat.configureFace(OuterCylinder, {AxisRPhi, Bound, 40},
+            lmat.configureFace(OuterCylinder, {AxisRPhi, Closed, 40},
                                {AxisZ, Bound, 20});
 
             // Add layer with surfaces
@@ -446,12 +457,11 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                         << key << " / " << mergedLayers.size()
                         << " at z = " << pl.protoLayer.medium(AxisZ));
         if (key < mergedLayers.size() - 1) {
-          ATH_MSG_VERBOSE("Adding material for layer "
-                          << layerName );
+          ATH_MSG_VERBOSE("Adding material for layer " << layerName);
           ec.addMaterial(layerName + "_Material", [&](auto& lmat) {
             // Set binning for endcap layer
             lmat.configureFace(bec < 0 ? NegativeDisc : PositiveDisc,
-                               {AxisR, Bound, 40}, {AxisPhi, Bound, 40});
+                               {AxisR, Bound, 40}, {AxisPhi, Closed, 40});
             addLayer(lmat);
           });
         } else {
@@ -471,7 +481,17 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
     auto& barrelGeoId = outerPixelContainer.withGeometryIdentifier();
     barrelGeoId.setAllVolumeIdsTo(s_outerPixelVolumeId).incrementLayerIds(1);
 
-    auto& barrel = barrelGeoId.addCylinderContainer("OuterPixel_Brl", AxisR);
+    // enable material on the positive and negative disks
+    // NB: put it on the outer container to avoid issues with merging volumes
+    auto& brl_mat =
+        barrelGeoId.addMaterial("OuterPixel_Material", [&](auto& mat) {
+          mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+                            {AxisPhi, Closed, 10});
+          mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+                            {AxisPhi, Closed, 10});
+        });
+    auto& barrel = brl_mat.addCylinderContainer("OuterPixel_Brl", AxisR);
+
     barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
     barrel.setResizeStrategy(ResizeStrategy::Gap);
 
@@ -500,7 +520,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       barrel.addMaterial(
           std::format("OuterPixel_Brl_{}_Material", ilayer), [&](auto& lmat) {
             // Innermost layer: outer cylinder, else inner cylinder
-            lmat.configureFace(OuterCylinder, {AxisRPhi, Bound, 40},
+            lmat.configureFace(OuterCylinder, {AxisRPhi, Closed, 40},
                                {AxisZ, Bound, 20});
 
             // Add layer with surfaces
@@ -563,8 +583,25 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       for (size_t idx = 0; idx < diskGroups.size(); ++idx) {
         auto [disk1, disk2] = diskGroups[idx];
 
-        auto& ec_stack = ec_outer.addCylinderContainer(
-            "OuterPixel_" + s + "EC_" + std::to_string(idx), AxisZ);
+        // enable material on the outer cylinder of the disk groups
+        // NB: this is needed only for the inner boundaries,
+        // hence do not consider the last one.
+        Acts::Experimental::MaterialDesignatorBlueprintNode* material = nullptr;
+        if (idx < (diskGroups.size() - 1)) {
+          material = &ec_outer.addMaterial(
+              "OuterPixel_" + s + "EC_" + std::to_string(idx) + "_Material",
+              [&](auto& mat) {
+                mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
+                                  {AxisZ, Bound, 20});
+              });
+        }
+
+        auto& ec_stack =
+            material
+                ? material->addCylinderContainer(
+                      "OuterPixel_" + s + "EC_" + std::to_string(idx), AxisZ)
+                : ec_outer.addCylinderContainer(
+                      "OuterPixel_" + s + "EC_" + std::to_string(idx), AxisZ);
 
         ec_stack.setAttachmentStrategy(AttachmentStrategy::Gap);
         ec_stack.setResizeStrategy(ResizeStrategy::Expand);
@@ -609,7 +646,7 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
           if (i < sorted_rings.size() - 1) {
             ec_stack.addMaterial(layerName + "_Material", [&](auto& mat) {
               mat.configureFace(bec > 0 ? PositiveDisc : NegativeDisc,
-                                {AxisR, Bound, 20}, {AxisPhi, Bound, 40});
+                                {AxisR, Bound, 20}, {AxisPhi, Closed, 40});
               addEndcapLayer(mat, layerName, surfaces);
             });
           } else {
@@ -619,140 +656,148 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       }
     }
   });
-
 }
 
-void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(const Acts::GeometryContext& gctx, 
-                                                        Acts::Experimental::BlueprintNode& node) {
+void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
+    const Acts::GeometryContext& gctx,
+    Acts::Experimental::BlueprintNode& node) {
 
-           // Get ITkStrip parameters from detector manager
-        if (!m_itkStripMgr) {
-            ATH_MSG_ERROR("ITkStrip manager not available");
-            throw std::runtime_error("ITkStrip manager not available");
-        }
+  // Get ITkStrip parameters from detector manager
+  if (!m_itkStripMgr) {
+    ATH_MSG_ERROR("ITkStrip manager not available");
+    throw std::runtime_error("ITkStrip manager not available");
+  }
 
-        ATH_MSG_DEBUG("Detector manager has "
-                        << m_itkStripMgr->getDetectorElementCollection()->size()
-                        << " elements");
+  ATH_MSG_DEBUG("Detector manager has "
+                << m_itkStripMgr->getDetectorElementCollection()->size()
+                << " elements");
 
-        std::vector<std::shared_ptr<ActsDetectorElement>> elements;
+  std::vector<std::shared_ptr<ActsDetectorElement>> elements;
 
-        InDetDD::SiDetectorElementCollection::const_iterator iter;
-        for (const auto* element :
-            *m_itkStripMgr->getDetectorElementCollection()) {
-            const InDetDD::SiDetectorElement* siDetElement =
-                dynamic_cast<const InDetDD::SiDetectorElement*>(element);
-            if (siDetElement == nullptr) {
-            ATH_MSG_ERROR("Detector element was nullptr");
-            throw std::runtime_error{"Corrupt detector element collection"};
-            }
-            elements.push_back(std::make_shared<ActsDetectorElement>(*siDetElement));
-        }
-        ATH_MSG_VERBOSE("Retrieved " << elements.size() << " elements");
-
-        // Copy to service level store to extend lifetime
-        m_elementStore->vector().insert(m_elementStore->vector().end(),
-                                            elements.begin(), elements.end());
-
-        // Create container for strip part
-        node.addMaterial("StripMaterial", [&](auto& mat) {
-            mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
-
-            mat.addCylinderContainer("Strip", AxisZ, [&](auto& strips) {
-            // Add barrel container
-            strips.withGeometryIdentifier([this, &elements](auto& geoId) {
-                geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
-
-                geoId.addCylinderContainer(
-                    "Strip_Brl", AxisR, [this, &elements](auto& barrel) {
-                    barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
-                    barrel.setResizeStrategy(ResizeStrategy::Gap);
-
-                    std::map<int, std::vector<std::shared_ptr<Acts::Surface>>>
-                        layers{};
-
-                    for (auto& element : elements) {
-                        IdentityHelper id = element->identityHelper();
-                        if (id.bec() != 0) {
-                        continue;
-                        }
-
-                        int elementLayer = id.layer_disk();
-                        layers[elementLayer].push_back(
-                            element->surface().getSharedPtr());
-                    }
-
-                    ATH_MSG_DEBUG("Adding " << layers.size()
-                                            << " layers to Strip barrel");
-
-                    for (const auto& [ilayer, surfaces] : layers) {
-                        ATH_MSG_DEBUG("- Layer " << ilayer << " has " << surfaces.size()
-                                                << " surfaces");
-                        addStripBarrelLayer(barrel, ilayer, surfaces);
-                    }
-                });
-            });
-
-            // Add endcap containers
-            for (int bec : {-2, 2}) {  // Negative and positive endcaps
-                const std::string s = bec > 0 ? "p" : "n";
-
-                std::map<int, std::vector<std::shared_ptr<Acts::Surface>>> layers{};
-
-                for (auto& element : elements) {
-                IdentityHelper id = element->identityHelper();
-                if (id.bec() * bec <= 0) {
-                    continue;  // Skip if not in the right endcap
-                }
-
-                layers[id.layer_disk()].push_back(element->surface().getSharedPtr());
-                }
-
-                ATH_MSG_DEBUG("Found " << layers.size() << " layers in Strip " << s
-                                    << "EC");
-
-                // Sort layers by absolute z position
-                std::vector<std::vector<std::shared_ptr<Acts::Surface>>> sorted_layers;
-                sorted_layers.reserve(layers.size());
-                for (const auto& [key, surfaces] : layers) {
-                sorted_layers.push_back(surfaces);
-                }
-
-                std::sort(sorted_layers.begin(), sorted_layers.end(),
-                        [&gctx](const auto& a, const auto& b) {
-                            Acts::ProtoLayer pl_a(gctx, makeConstPtrVector(a));
-                            Acts::ProtoLayer pl_b(gctx, makeConstPtrVector(b));
-                            return std::abs(pl_a.min(AxisZ)) <
-                                std::abs(pl_b.min(AxisZ));
-                        });
-
-                strips.withGeometryIdentifier([&sorted_layers, bec, &s](auto& geoId) {
-                    geoId.setAllVolumeIdsTo(s_stripVolumeId + std::floor(bec / 2))
-                        .incrementLayerIds(1);
-
-                    geoId.addCylinderContainer(
-                        "Strip_" + s + "EC", AxisZ, [&sorted_layers, bec, &s](auto& ec) {
-                            ec.setAttachmentStrategy(AttachmentStrategy::Gap);
-                            ec.setResizeStrategy(ResizeStrategy::Gap);
-
-                            // Create layers from sorted layers
-                            for (size_t i = 0; i < sorted_layers.size(); ++i) {
-                            const auto& surfaces = sorted_layers[i];
-                            auto layerName = "Strip_" + s + "EC_" + std::to_string(i);
-
-                            addStripEndcapLayer(ec, bec, layerName, surfaces);
-                            }
-                    });
-                });
-            }
-
-            });
-        });
+  InDetDD::SiDetectorElementCollection::const_iterator iter;
+  for (const auto* element : *m_itkStripMgr->getDetectorElementCollection()) {
+    const InDetDD::SiDetectorElement* siDetElement =
+        dynamic_cast<const InDetDD::SiDetectorElement*>(element);
+    if (siDetElement == nullptr) {
+      ATH_MSG_ERROR("Detector element was nullptr");
+      throw std::runtime_error{"Corrupt detector element collection"};
     }
+    elements.push_back(std::make_shared<ActsDetectorElement>(*siDetElement));
+  }
+  ATH_MSG_VERBOSE("Retrieved " << elements.size() << " elements");
 
-  void ItkBlueprintNodeBuilder::buildBeamPipeBlueprintNode(const Acts::GeometryContext& /*gctx*/,
-                                                           Acts::Experimental::BlueprintNode& node) {
+  // Copy to service level store to extend lifetime
+  m_elementStore->vector().insert(m_elementStore->vector().end(),
+                                  elements.begin(), elements.end());
 
+  // Create container for strip part
+  node.addMaterial("StripMaterial", [&](auto& mat) {
+    mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
+                      {AxisZ, Bound, 20});
+
+    mat.addCylinderContainer("Strip", AxisZ, [&](auto& strips) {
+      // Add barrel container
+      strips.withGeometryIdentifier([this, &elements](auto& geoId) {
+        geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
+
+        // enable material on positive and negative disks
+        // NB: put it on the outer container to avoid issues with merging
+        // volumes
+        auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& mat) {
+          mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+                            {AxisPhi, Closed, 10});
+          mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+                            {AxisPhi, Closed, 10});
+        });
+        brl_mat.addCylinderContainer(
+            "Strip_Brl", AxisR, [this, &elements](auto& barrel) {
+              barrel.setAttachmentStrategy(AttachmentStrategy::Gap);
+              barrel.setResizeStrategy(ResizeStrategy::Gap);
+
+              std::map<int, std::vector<std::shared_ptr<Acts::Surface>>>
+                  layers{};
+
+              for (auto& element : elements) {
+                IdentityHelper id = element->identityHelper();
+                if (id.bec() != 0) {
+                  continue;
+                }
+
+                int elementLayer = id.layer_disk();
+                layers[elementLayer].push_back(
+                    element->surface().getSharedPtr());
+              }
+
+              ATH_MSG_DEBUG("Adding " << layers.size()
+                                      << " layers to Strip barrel");
+
+              for (const auto& [ilayer, surfaces] : layers) {
+                ATH_MSG_DEBUG("- Layer " << ilayer << " has " << surfaces.size()
+                                         << " surfaces");
+                addStripBarrelLayer(barrel, ilayer, surfaces);
+              }
+            });
+      });
+
+      // Add endcap containers
+      for (int bec : {-2, 2}) {  // Negative and positive endcaps
+        const std::string s = bec > 0 ? "p" : "n";
+
+        std::map<int, std::vector<std::shared_ptr<Acts::Surface>>> layers{};
+
+        for (auto& element : elements) {
+          IdentityHelper id = element->identityHelper();
+          if (id.bec() * bec <= 0) {
+            continue;  // Skip if not in the right endcap
+          }
+
+          layers[id.layer_disk()].push_back(element->surface().getSharedPtr());
+        }
+
+        ATH_MSG_DEBUG("Found " << layers.size() << " layers in Strip " << s
+                               << "EC");
+
+        // Sort layers by absolute z position
+        std::vector<std::vector<std::shared_ptr<Acts::Surface>>> sorted_layers;
+        sorted_layers.reserve(layers.size());
+        for (const auto& [key, surfaces] : layers) {
+          sorted_layers.push_back(surfaces);
+        }
+
+        std::sort(sorted_layers.begin(), sorted_layers.end(),
+                  [&gctx](const auto& a, const auto& b) {
+                    Acts::ProtoLayer pl_a(gctx, makeConstPtrVector(a));
+                    Acts::ProtoLayer pl_b(gctx, makeConstPtrVector(b));
+                    return std::abs(pl_a.min(AxisZ)) <
+                           std::abs(pl_b.min(AxisZ));
+                  });
+
+        strips.withGeometryIdentifier([&sorted_layers, bec, &s](auto& geoId) {
+          geoId.setAllVolumeIdsTo(s_stripVolumeId + std::floor(bec / 2))
+              .incrementLayerIds(1);
+
+          geoId.addCylinderContainer(
+              "Strip_" + s + "EC", AxisZ, [&sorted_layers, bec, &s](auto& ec) {
+                ec.setAttachmentStrategy(AttachmentStrategy::Gap);
+                ec.setResizeStrategy(ResizeStrategy::Gap);
+
+                // Create layers from sorted layers
+                for (size_t i = 0; i < sorted_layers.size(); ++i) {
+                  const auto& surfaces = sorted_layers[i];
+                  auto layerName = "Strip_" + s + "EC_" + std::to_string(i);
+
+                  addStripEndcapLayer(ec, bec, layerName, surfaces);
+                }
+              });
+        });
+      }
+    });
+  });
+}
+
+void ItkBlueprintNodeBuilder::buildBeamPipeBlueprintNode(
+    const Acts::GeometryContext& /*gctx*/,
+    Acts::Experimental::BlueprintNode& node) {
 
   // Get beam pipe parameters from existing code
   PVConstLink beamPipeTopVolume = m_beamPipeMgr->getTreeTop(0);
@@ -761,7 +806,8 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(const Acts::GeometryCon
         m_beamPipeMgr->getTreeTop(0)->getChildVol(0)->getChildVol(0);
   }
 
-  const Amg::Transform3D beamPipeTransform{Amg::getTranslate3D(beamPipeTopVolume->getX().translation())};
+  const Amg::Transform3D beamPipeTransform{
+      Amg::getTranslate3D(beamPipeTopVolume->getX().translation())};
 
   // Extract radius similar to makeBeamPipeConfig
   double beamPipeRadius = 20;  // Default value
@@ -790,14 +836,12 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(const Acts::GeometryCon
     PVConstLink childTopVolume = beamPipeTopVolume->getChildVol(i);
     const GeoLogVol* childLogVolume = childTopVolume->getLogVol();
     const GeoTube* childTube =
-            dynamic_cast<const GeoTube*>(childLogVolume->getShape());
+        dynamic_cast<const GeoTube*>(childLogVolume->getShape());
     if (childTube) {
-        beamPipeRadius = 0.5 * (childTube->getRMax() + childTube->getRMin());
-        break;
+      beamPipeRadius = 0.5 * (childTube->getRMax() + childTube->getRMin());
+      break;
     }
-
   }
-  
 
   ATH_MSG_VERBOSE(
       "BeamPipe constructed from Database: translation (yes) - radius "
@@ -811,7 +855,7 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(const Acts::GeometryCon
     geoId.setAllVolumeIdsTo(s_beamPipeVolumeId);
 
     geoId.addMaterial("BeamPipe_Material", [&](auto& mat) {
-      mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20},
+      mat.configureFace(OuterCylinder, {AxisRPhi, Closed, 20},
                         {AxisZ, Bound, 20});
 
       // Add static volume for beam pipe
@@ -823,4 +867,4 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(const Acts::GeometryCon
   });
 }
 
-} //namespace ActsTrk
+}  // namespace ActsTrk

@@ -112,7 +112,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_s4345_r15583_tid39626672_00/RDO.39626672._001121.pool.root.1"
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4494_r16635_tid46493535_00/RDO.46493535._000001.pool.root.1"
         ]
     },
     "bphysics_mumu": {
@@ -238,7 +238,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864949_00/RDO.41864949._000217.pool.root.1"
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4494_r16632_tid45451592_00/RDO.45451592._000001.pool.root.1"
         ]
     },
     "Bphys_JpsiPhi": {
@@ -301,7 +301,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128_tid41864936_00/RDO.41864936._000339.pool.root.1"
+            "/eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/PhaseIIUpgrade/mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4494_r16632_tid45451609_00/RDO.45451609._000016.pool.root.1"
         ]
     },
     "Ztautau": {

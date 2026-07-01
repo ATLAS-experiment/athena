@@ -396,8 +396,8 @@ bool HLT::NavigationCore::getFeaturesInRoI( const TriggerElement* te,
 
   bool oneRetStatus = false;
   bool allRetStatus = false;
-  for ( const TriggerElement* te : roi->getRelated(TriggerElement::sameRoIRelation) ) {
-    oneRetStatus = getFeatures(te, features, label, labels );  // the features will be paked to the end of the vector (see push_back in getFeatures)
+  for ( const TriggerElement* trigEl : roi->getRelated(TriggerElement::sameRoIRelation) ) {
+    oneRetStatus = getFeatures(trigEl, features, label, labels );  // the features will be packed to the end of the vector (see push_back in getFeatures)
     allRetStatus = allRetStatus || oneRetStatus; // that's OK if at least one call returns some feature
   }
   return allRetStatus;
@@ -555,8 +555,8 @@ const T* HLT::NavigationCore::featureLink2Object( const TrigFeatureLink& fl) con
   // std::cerr << " has container "  << list_of_possible_features::template has<container>::result << std::endl;
 
   const T* ptr = HLT::get<T, container, 
-    list_of_possible_features::template has<container>::result,
-    list_of_possible_features::template has<T>::result>::do_it(fl, this);
+    list_of_possible_features::template has<container>,
+    list_of_possible_features::template has<T>>::do_it(fl, this);
 
   return ptr;
 

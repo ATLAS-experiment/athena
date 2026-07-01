@@ -12,15 +12,14 @@
 // Base class
 #include "G4VSensitiveDetector.hh"
 
-// use of the hits
-#include "StoreGate/WriteHandle.h"
-
 //new LAr stuff
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "InDetSimEvent/SiHitCollection.h"
 
 // Geant4 headers
 #include "G4ThreeVector.hh"
+
+#include <string>
 
 // G4 needed classes
 class G4Step;
@@ -49,7 +48,11 @@ public:
 
 private:
 
-    SG::WriteHandle<SiHitCollection> m_HitColl;
+    SiHitCollection* getHitCollection() const;
+
+    std::string m_hitCollectionName;
+    // Non-owning cache set by Initialize; HitCollectionMap owns the collection.
+    SiHitCollection* m_hitColl{};
     GeoModelIO::ReadGeoModel * m_sqlreader;
 
 };

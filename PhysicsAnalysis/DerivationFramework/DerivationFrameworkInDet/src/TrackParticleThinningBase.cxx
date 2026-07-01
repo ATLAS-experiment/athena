@@ -10,7 +10,6 @@
 #include "xAODTracking/TrackStateValidationContainer.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <string>
 #include "AthContainers/ConstAccessor.h"
@@ -71,15 +70,14 @@ StatusCode DerivationFramework::TrackParticleThinningBase::finalize()
   return StatusCode::SUCCESS;
 }
 
-std::vector<int> DerivationFramework::TrackParticleThinningBase::updateMask(const xAOD::TrackParticleContainer* trackParticles) const
+std::vector<int> DerivationFramework::TrackParticleThinningBase::updateMask(const EventContext& /*ctx*/, const xAOD::TrackParticleContainer* trackParticles) const
 {
   return std::vector<int>(trackParticles->size(), 0);
 }
 
 // The thinning itself
-StatusCode DerivationFramework::TrackParticleThinningBase::doThinning() const
+StatusCode DerivationFramework::TrackParticleThinningBase::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve main TrackParticle collection
   SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles
@@ -95,7 +93,7 @@ StatusCode DerivationFramework::TrackParticleThinningBase::doThinning() const
   m_ntot += nTracks;
 
   // Execute the text parser and update the mask
-  std::vector<int> entries =  updateMask(importedTrackParticles.cptr());
+  std::vector<int> entries =  updateMask(ctx, importedTrackParticles.cptr());
   unsigned int nEntries = entries.size();
   // check the sizes are compatible
   if (nTracks != nEntries ) {

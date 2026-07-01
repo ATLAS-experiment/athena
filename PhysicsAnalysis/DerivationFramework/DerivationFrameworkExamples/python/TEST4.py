@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TEST4.py - derivation framework example demonstrating slimming 
 # Note this is the same as TEST1,2,3 but without any tools
 
@@ -36,8 +36,7 @@ def TEST4Cfg(flags):
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "TauJets",
                                             "DiTauJets",
-                                            "DiTauJetsLowPt",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
+                                            "DiTauJetsLowPt"]
     TEST4ItemList = TEST4SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(flags, "DAOD_TEST4", ItemList=TEST4ItemList, AcceptAlgs=["TEST4Kernel"]))

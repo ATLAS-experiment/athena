@@ -40,11 +40,11 @@ public:
   PixelClusterContainerCnv (ISvcLocator* svcloc);
 protected:
   virtual PixelClusterContainer_PERS*   createPersistent (InDet::PixelClusterContainer* transCont) override;
-  virtual InDet::PixelClusterContainer* createTransient () override;
+  virtual InDet::PixelClusterContainer* createTransient(const Token* token) override;
 
   // Must initialize ID helpers
   virtual StatusCode initialize() override;
-  virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
+  virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
 };
 
 

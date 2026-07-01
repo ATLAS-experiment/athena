@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-import MadGraphControl.MadGraphUtils
-MadGraphControl.MadGraphUtils.MADGRAPH_PDFSETTING={
+import MadGraphControl.MGC
+MadGraphControl.MGC.MADGRAPH_PDFSETTING={
     'central_pdf': 90400, #PDF4LHC15_nlo_30_pdfas
     'pdf_variations':[303000,90400], # NNPDF30_nlo_as_0118_hessian PDF4LHC15_nlo_30_pdfas
     'alternative_pdfs':[266000, #NNPDF30_nlo_as_0119

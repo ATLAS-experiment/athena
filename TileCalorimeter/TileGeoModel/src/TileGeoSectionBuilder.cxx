@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileGeoSectionBuilder.h"
@@ -2415,7 +2415,7 @@ void TileGeoSectionBuilder::fillPeriod(PVLink &              mother,
 
 // Checking geometry dimensions for all directions
 
-void TileGeoSectionBuilder::checking(const std::string& Name, bool print, int level,
+void TileGeoSectionBuilder::checking(std::string_view Name, bool print, int level,
                                      double X1, double X2, double Y1, double Y2, double Z)
 {
   double rless = .005; //5 [mkm]
@@ -3015,7 +3015,13 @@ void TileGeoSectionBuilder::computeCellDim(TileDetDescrManager*& manager,
 
       rMin = m_dbManager->TILBrmin()*Gaudi::Units::cm;
       if (addPlates) rMin -= m_dbManager->TILBdrfront() *Gaudi::Units::cm;
-      CurrentScin = 100*m_dbManager->TILBsection() + 1;
+      if(const auto section = m_dbManager->TILBsection(); section != -999)[[likely]]{
+        CurrentScin = 100 * section + 1;
+      } else {
+        (*m_log) << MSG::ERROR << "TileGeoSectionBuilder::computeCellDim: error return"<< endmsg;
+        return;
+      }
+      
 
       for (unsigned int j = CurrentScin; j < (CurrentScin + m_dbManager->TILBnscin()); j++) {
         m_dbManager->SetCurrentScin(j);
@@ -3357,7 +3363,13 @@ void TileGeoSectionBuilder::calculateR(int detector,
     int last = 100*m_dbManager->TILBsection()+lastScin;
     if (m_dbManager->TILBcurscint() != 0) { // for cells C10 and D4 first/last should be different
       first = m_dbManager->TILBcurscint();
-      last = first + m_dbManager->TILBnscin()-1;
+      int n = m_dbManager->TILBnscin();
+      if ((first < 0) or (n < 0))[[unlikely]]{
+        //something went very wrong
+        (*m_log) << MSG::ERROR << "TileGeoSectionBuilder::calculateR: error return"<< endmsg;
+        return;
+      }
+      last = first + n -1;
     }
     if (addPlates) {
       if (cell == -1) { // adjust size for cell C10

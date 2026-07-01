@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -111,8 +111,11 @@ if __name__ == "__main__":
 
     flags.fillFromArgs()
     if flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']:
-        flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"]
-        
+        flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4494_r16632/RDO.45451592._000021.pool.root.1"]
+
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags   
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+    
     flags.Debug.DumpEvtStore = True
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWFIRSTINTPARAMETRS_H
-#define EFLOWFIRSTINTPARAMETRS_H
+#ifndef EFLOWREC_EFLOWFIRSTINTPARAMETRS_H
+#define EFLOWREC_EFLOWFIRSTINTPARAMETRS_H
 
 /********************************************************************
 
@@ -20,7 +20,6 @@ CREATED:  18th Aug, 2005
 #include "eflowCaloRegions.h"
 //C++ Headers
 #include <vector>
-#include <istream>
 
 /**
  Extends eflowFirstInt to include parameters of the fits to radial shower profiles. Also adds functionality to allow interpolation between fixed energy and eta reference bins. This object is used internally in the eflowRingSubtractionManager.

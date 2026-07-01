@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,7 +47,7 @@ L1TopoByteStreamCnv::~L1TopoByteStreamCnv() {
  * Function telling the framework the Class ID of the object that this converter
  * is for (L1TopoRDOCollection).
  */
-const CLID& L1TopoByteStreamCnv::classID() {
+CLID L1TopoByteStreamCnv::classID() {
   return ClassID_traits<L1TopoRDOCollection>::ID();
 }
 
@@ -121,7 +121,9 @@ StatusCode L1TopoByteStreamCnv::createObjConst(IOpaqueAddress* pAddr,
   // -------------------------------------------------------------------------
   ByteStreamAddress* pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr);
   CHECK(pBS_Addr != nullptr);
+  const EventContext& ctx = pBS_Addr->getEventContext();
   // -------------------------------------------------------------------------
+  //coverity[FORWARD_NULL:FALSE]
   const std::string nm = *(pBS_Addr->par());
   ATH_MSG_DEBUG("Creating Objects " << nm);
 
@@ -129,7 +131,7 @@ StatusCode L1TopoByteStreamCnv::createObjConst(IOpaqueAddress* pAddr,
   // vector of pointers to L1TopoRDO and it owns the L1TopoRDOs from a memory
   // cleanup point of view
   L1TopoRDOCollection* result = new L1TopoRDOCollection();
-  StatusCode sc = m_tool->convert(nm, result);
+  StatusCode sc = m_tool->convert(ctx, nm, result);
   if (sc.isFailure()) {
     return sc;
   }

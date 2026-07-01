@@ -8,6 +8,7 @@
 #ifndef COLUMNAR_INTERFACES_COLUMN_INFO_H
 #define COLUMNAR_INTERFACES_COLUMN_INFO_H
 
+#include <cstdint>
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -121,52 +122,74 @@ namespace columnar
     bool isOptional = false;
 
 
-    /// @brief for link columns: the name(s) of the container(s) we link
-    /// to
+    /// @brief for simple link columns: the name of the target container
     ///
-    /// Some of our columns contain links to other objects. For those
-    /// columns this will contain the names of the containers we link
-    /// to (i.e. the names of their offset columns).
+    /// For link columns that only reference a single container type, this
+    /// contains the name of that container (i.e. the name of its offset
+    /// column). For variant links (links that can reference multiple
+    /// containers), this will be empty and @ref variantLinkTargetNames
+    /// should be used instead.
+    std::string soleLinkTargetName {};
+
+
+    /// @brief for simple link columns: the CLID of the target container
     ///
-    /// For simple link columns that can only link to a single other
-    /// container, this will be a vector of length one and @ref
-    /// variantLinkKeyColumn will not be set. In that case the link
-    /// column will simply contain the index of the object in the linked
-    /// too container.
+    /// This is the class ID (from the CLASS_DEF macro) of the xAOD
+    /// container type the link points into, or 0 if it is not known.
+    /// Together with the StoreGate name of the target container it
+    /// determines the hashed keys (sgkeys) stored as `m_persKey` for
+    /// persistified element links, allowing those keys to be computed
+    /// and checked at runtime.
     ///
-    /// For variant link columns (i.e. columns with links that can
-    /// reference objects in more than one container), this will contain
-    /// the list of all linked to columns that this tool will use. In
-    /// that case the most significant bits of the index in this column
-    /// will encode a container key that is matched against @ref
-    /// variantLinkKeyColumn to identify which container is being
-    /// referenced by each link.
+    /// This is deliberately a plain integer rather than `CLID` to avoid
+    /// a dependency on the EDM headers in this interface package.
+    std::uint32_t soleLinkTargetClid = 0;
+
+
+    /// @brief whether this is a variant link column
+    ///
+    /// If true, this column contains variant links that can reference
+    /// objects in more than one container. In that case @ref
+    /// variantLinkTargetNames and @ref variantLinkKeyColumn will be set.
+    bool isVariantLink = false;
+
+
+    /// @brief for variant link key columns: the names of the containers
+    /// we can link to
+    ///
+    /// This field is set on the key column (the column that has @ref
+    /// keyColumnForVariantLink set) rather than on the variant link
+    /// column itself.  It lists the container names that the associated
+    /// variant link column can reference, in the order corresponding to
+    /// the key values stored in this column.
+    ///
+    /// For simple link columns (non-variant), this will be empty and
+    /// @ref soleLinkTargetName should be used instead.
     ///
     /// Note that a variant link column may contain links to columns
     /// that are not listed here, but those will not be used by this
-    /// tool. There are also no requirements on the exact values of the
-    /// keys, as long as they match @ref variantLinkKeyColumn. And
-    /// different tools may list the columns in different order. The
-    /// thought behind that is that it allows multiple tools to read the
-    /// same link column as long as they have each a unique key column,
-    /// without having to coordinate the exact list of linked containers
-    /// used.
-    std::vector<std::string> linkTargetNames {};
+    /// tool.  There are also no requirements on the exact values of the
+    /// keys.  And different tools may list the columns in different
+    /// order.  The thought behind that is that it allows multiple tools
+    /// to read the same link column as long as they have each a unique
+    /// key column, without having to coordinate the exact list of
+    /// linked containers used.
+    std::vector<std::string> variantLinkTargetNames {};
 
 
-    /// @brief if this is a variant link column, this is the name of the
-    /// column with the container keys
+    /// @brief if this is a key column for a variant link, the name of
+    /// the associated link column
     ///
-    /// If set, this is the name of another column that should have
-    /// exactly one entry per entry in @ref linkTargetNames, giving the
-    /// container keys for each.
+    /// If set on a column, it indicates that this column serves as the
+    /// key column for a variant link, and points to the link column
+    /// that uses it.  The key column should have exactly one entry per
+    /// entry in @ref variantLinkTargetNames, giving the container keys
+    /// for each target container.
     ///
-    /// This doesn't have to be set for simple link columns that only
-    /// point to a single container. In that case the link column will
-    /// simply contain indices without keys (a.k.a. all keys are zero).
-    /// That is actually the more common case, which is also simpler to
-    /// handle in columnar code.
-    std::string variantLinkKeyColumn {};
+    /// This field works together with @ref variantLinkTargetNames on
+    /// the same (key) column to define which containers the associated
+    /// variant link can reference.
+    std::string keyColumnForVariantLink {};
   };
 }
 

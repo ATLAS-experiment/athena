@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef LEGENDREWEIGHTS_H_
-#define LEGENDREWEIGHTS_H_
+#ifndef EFLOWREC_LEGENDREWEIGHTS_H
+#define EFLOWREC_LEGENDREWEIGHTS_H
 
 /**
  Stores weights of 5th and 6th order Legendre polynomials. Used in eflowCellIntegrator.
@@ -42,4 +42,4 @@ constexpr double legendreRoots[21] = {
 
 };
 
-#endif /* LEGENDREWEIGHTS_H_ */
+#endif /* EFLOWREC_LEGENDREWEIGHTS_H */

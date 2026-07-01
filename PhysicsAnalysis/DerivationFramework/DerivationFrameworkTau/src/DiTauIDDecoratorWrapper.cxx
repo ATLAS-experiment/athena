@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTau/DiTauIDDecoratorWrapper.h"
@@ -46,7 +46,7 @@ namespace DerivationFramework {
     }
 
     // create shallow copy
-    auto shallowCopy = xAOD::shallowCopyContainer (*ditauContainer);
+    auto shallowCopy = xAOD::shallowCopy (*ditauContainer, ctx);
 
     for (auto ditau : *shallowCopy.first) {
 
@@ -63,9 +63,6 @@ namespace DerivationFramework {
         i++;
       }
     }
-
-    delete shallowCopy.first;
-    delete shallowCopy.second;
 
     return StatusCode::SUCCESS;
   }

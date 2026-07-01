@@ -246,7 +246,6 @@ void TruthParticle::setGenParticle( HepMC::ConstGenParticlePtr particle )
 
     // children
     auto dcyVtx = particle->end_vertex();
-#ifdef HEPMC3
     m_children.reserve( dcyVtx ? dcyVtx->particles_out().size() : 0 );
 
     if ( dcyVtx ) {
@@ -263,32 +262,6 @@ void TruthParticle::setGenParticle( HepMC::ConstGenParticlePtr particle )
         m_mothers.push_back( HepMC::barcode(itr) );
       }//> end loop over ingoing particles
     }//> production vertex exists
-#else
-
-    m_children.reserve( dcyVtx ? dcyVtx->particles_out_size() : 0 );
-
-    if ( dcyVtx ) {
-      for ( HepMC::GenVertex::particles_out_const_iterator itr = 
-              dcyVtx->particles_out_const_begin();
-            itr != dcyVtx->particles_out_const_end();
-            ++itr ) {
-        m_children.push_back( (*itr)->barcode() );
-      }//> end loop over outgoing particles
-    }//> decay vertex exists
-
-    // parents
-    auto prodVtx = particle->production_vertex();
-    m_mothers.reserve( prodVtx ? prodVtx->particles_in_size() : 0 );
-    if ( prodVtx ) {
-      for ( HepMC::GenVertex::particles_in_const_iterator itr = 
-              prodVtx->particles_in_const_begin();
-            itr != prodVtx->particles_in_const_end();
-            ++itr ) {
-        m_mothers.push_back( (*itr)->barcode() );
-      }//> end loop over ingoing particles
-    }//> production vertex exists
-
-#endif
   } else {
     m_mothers.resize( 0 );
     m_children.resize( 0 );

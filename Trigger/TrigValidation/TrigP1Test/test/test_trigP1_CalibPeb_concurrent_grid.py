@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: CalibPeb test where chains are executed in parallel doing concurrent ROB requests
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 # art-input: group.trig-hlt.data25_13p6TeV.00500306.physics_EnhancedBias.merge.RAW
 # art-input-nfiles: 1
@@ -25,10 +25,9 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
-ex.type = 'athenaHLT'
+ex.type = 'athenaEF'
 ex.job_options = 'TrigExamples.MTCalibPeb.calibPebCfg'
 ex.input = 'data'
-ex.forks = 2
 ex.threads = 6
 ex.concurrent_events = 2 # three threads per event
 ex.args = '-c \'concurrent=True\''

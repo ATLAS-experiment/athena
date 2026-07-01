@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
@@ -59,7 +59,7 @@ StatusCode TrigTauJetHypoAlg::execute(const EventContext& ctx) const
         ATH_CHECK(viewEL.isValid());
 
         // Get RoI
-        LinkInfo<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(previousDecision, roiString());
+        LinkInfo<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(ctx, previousDecision, roiString());
         ATH_CHECK(roiEL.isValid());
         const TrigRoiDescriptor* roi = *roiEL.link;
 

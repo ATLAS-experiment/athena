@@ -223,11 +223,7 @@ namespace MCTesting {
       HepMC::FourVector pmvxpos=hScatVx->position();
       genVertex->set_position(pmvxpos);
       //to set geantino kinematic phi=eta=0, E=p=E_hard_scat
-#ifdef HEPMC3
       auto itrp =hScatVx->particles_in().begin();
-#else
-      HepMC::GenVertex::particles_in_const_iterator itrp =hScatVx->particles_in_const_begin();
-#endif
       if (hScatVx->particles_in_size()==2){
         HepMC::FourVector mom1=(*itrp)->momentum();
         HepMC::FourVector mom2=(*(++itrp))->momentum();
@@ -241,19 +237,7 @@ namespace MCTesting {
       }
     }
 
-#ifdef HEPMC3
     for (const auto& vtx: ge.vertices())  ge.remove_vertex(vtx);
-#else
-    if(!ge.vertices_empty()){
-      HepMC::GenEvent::vertex_iterator itvtx = ge.vertices_begin();
-      while (itvtx != ge.vertices_end()) {
-        HepMC::GenVertex* vtx = *itvtx++;
-        ge.remove_vertex(vtx);
-        delete vtx;
-      }
-    }
-#endif
-
     //.....add new vertex with geantino
     ge.add_vertex(std::move(genVertex));
     HepMC::suggest_barcode(genPart, std::numeric_limits<int32_t>::max());
@@ -271,12 +255,7 @@ namespace MCTesting {
     inputTestDataHandle->push_back(pEvent);
     inputTestDataHandle->push_back(buildEvent());  //a copy
     std::list<HepMC::GenParticlePtr> theGammas;
-#ifdef HEPMC3
     std::copy_if( pEvent->particles().begin(), pEvent->particles().end(), std::back_inserter(theGammas), is_photon() );
-#else
-    std::copy_if( pEvent->particles_begin(), pEvent->particles_end(),
-                  back_inserter(theGammas), is_photon() );
-#endif
     ASSERT_EQ(1u, theGammas.size());
     HepMC::ConstGenParticlePtr pGamma(theGammas.front());
 #ifdef GENP_DEBUG
@@ -331,11 +310,7 @@ namespace MCTesting {
     std::stringstream out;
     out << "Testing HepMcParticleLink streamer "
         << gammaLink3a2 << " --- " << gammaLink2a <<std::endl;
-#ifdef HEPMC3
     ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0 (event number) , Unique ID 5 (id) , McEventCollection TruthEvent --- Event index 1 (event number) , Unique ID 5 (id) , McEventCollection TruthEvent\n");
-#else
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0 (event number) , Unique ID 10005 (id) , McEventCollection TruthEvent --- Event index 1 (event number) , Unique ID 10005 (id) , McEventCollection TruthEvent\n");
-#endif
 
     ASSERT_EQ(*gammaLink1a, *gammaLink1b);
     ASSERT_EQ(*gammaLink1b, *gammaLink1c);
@@ -1183,11 +1158,7 @@ namespace MCTesting {
     ASSERT_TRUE( testLink1f < testLink2f );
 
     // Make links to another GenParticle from the first GenEvent
-#ifdef HEPMC3
     HepMC::ConstGenParticlePtr particle3 = ge1.particles().at(3);
- #else
-    HepMC::ConstGenParticlePtr particle3 = HepMC::barcode_to_particle(&ge1, 4);
-#endif
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
     HepMcParticleLink testLink3a(particle3,dummyIndex1,

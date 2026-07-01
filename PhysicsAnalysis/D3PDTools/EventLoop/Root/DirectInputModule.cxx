@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -34,7 +34,7 @@ namespace EL
       {
         // open the input file to inspect it
         ANA_CHECK (actions.openInputFile (fileName));
-        ANA_MSG_DEBUG ("Opened input file: " << fileName);
+        ANA_MSG_INFO ("Opened input file: " << fileName);
 
         EventRange eventRange;
         eventRange.m_url = fileName;

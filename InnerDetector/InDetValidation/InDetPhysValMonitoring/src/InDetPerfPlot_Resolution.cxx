@@ -26,7 +26,7 @@ namespace{
   constexpr float smallestAllowableQoverPt(1e-8);
 }
 
-InDetPerfPlot_Resolution::InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& sDir, bool d0Only)  : InDetPlotBase(pParent, sDir),
+InDetPerfPlot_Resolution::InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& sDir, bool d0Only, bool hasHGTDReco)  : InDetPlotBase(pParent, sDir),
   m_resolutionMethod(IDPVM::ResolutionHelper::iterRMS_convergence),
   m_primTrk(false),
   m_secdTrk(false),
@@ -98,6 +98,7 @@ InDetPerfPlot_Resolution::InDetPerfPlot_Resolution(InDetPlotBase* pParent, const
   m_sigma_vs_lowpt{}
   {
   m_d0Only = d0Only;
+  m_hasHGTDReco = hasHGTDReco;
     
   TString tsDir = (TString) sDir;
 
@@ -135,6 +136,7 @@ InDetPerfPlot_Resolution::initializePlots() {
 
     if(iparam == PT) continue;
     if(m_d0Only && iparam != D0) continue;
+    if(!m_hasHGTDReco && iparam == TIME) continue;
 
     book(m_pull[iparam], "pull_" + m_paramProp[iparam]);
     book(m_res[iparam],  "res_" + m_paramProp[iparam]);
@@ -345,6 +347,7 @@ InDetPerfPlot_Resolution::getPlots(float weight, bool useTruthKin) {
   for (unsigned int iparam = 0; iparam < NPARAMS; iparam++) {    
     if(iparam == PT) continue;
     if(m_d0Only && iparam != D0) continue;
+    if(!m_hasHGTDReco && iparam == TIME) continue;
     m_pull[iparam]->Fill(m_pullP[iparam], weight);
     m_res[iparam]->Fill(m_resP[iparam], weight);
     m_sigma[iparam]->Fill(m_sigP[iparam], weight);
@@ -394,6 +397,16 @@ InDetPerfPlot_Resolution::getPlotParameters() {
     m_sigP[QOVERPT] = undefinedValue;
   } else {
     m_sigP[QOVERPT] *= 1. / std::abs(m_trkP[QOVERPT]);  // relative q/pt error
+  }
+
+  // Missing time information - fill with undefined values
+  if (m_truetrkP[TIME] < -9000. || m_trkP[TIME] < -9000.) {
+    m_resP[TIME] = undefinedValue;
+    m_pullP[TIME] = undefinedValue;
+  }
+  if (m_trkErrP[TIME] < -9000.) {
+    m_sigP[TIME] = undefinedValue;
+    m_pullP[TIME] = undefinedValue;
   }
 }
 
@@ -445,6 +458,21 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TrackParticle& trkprt) 
     m_trkErrP[PT] = pt_err2 < 0 ? 0 : std::sqrt(pt_err2) / Gaudi::Units::GeV;
   }
 
+  // Initialize track time and uncertainty to undefined
+  m_trkP[TIME] = undefinedValue;
+  m_trkErrP[TIME] = undefinedValue;
+  if (m_hasHGTDReco) {
+    static const SG::Accessor<uint8_t> accValidTime("hasValidTime");
+    static const SG::Accessor<float> accTime("time");
+    static const SG::Accessor<float> accTimeRes("timeResolution");
+    if(accValidTime.isAvailable(trkprt) && accTime.isAvailable(trkprt) && accTimeRes.isAvailable(trkprt)) {
+      if (trkprt.hasValidTime()) {
+        m_trkP[TIME] = trkprt.time();
+        m_trkErrP[TIME] = trkprt.timeResolution();
+      }
+    }
+  }
+
 }
 
 
@@ -482,6 +510,11 @@ InDetPerfPlot_Resolution::getTrackParameters(const xAOD::TruthParticle& truthprt
   } else {
     m_truetrkP[Z0SIN] = undefinedValue;
   }
+
+  // Even if we don't have a track time, we always have a truth particle time
+  static const SG::Accessor<float> accTruthTime("time");
+  m_truetrkP[TIME] = accTruthTime.isAvailable(truthprt) ? accTruthTime(truthprt) : undefinedValue;
+
 }
 
 
@@ -492,6 +525,7 @@ InDetPerfPlot_Resolution::finalizePlots() {
   for (unsigned int iparam = 0; iparam < NPARAMS; iparam++) {
     if(iparam == PT) continue;
     if(m_d0Only && iparam != D0) continue;
+    if(!m_hasHGTDReco && iparam == TIME) continue;
     //
     //Only save vert detailed information if... high detail level
     //Reduces output for ART / PhysVal

@@ -14,7 +14,7 @@ atlas_add_library( ActsToolInterfacesLib
                    LINK_LIBRARIES
 		     Acts::Core
 		     ActsEventLib
-		     ActsGeometryLib
+		     ActsGeometryInterfacesLib
 		     BeamSpotConditionsData
 		     GaudiKernel
 		     HGTD_RawData
@@ -24,4 +24,5 @@ atlas_add_library( ActsToolInterfacesLib
 		     SiSpacePointFormationLib
 		     TrkTrack
 		     xAODInDetMeasurement
-		     xAODMeasurementBase )
+		     xAODMeasurementBase
+		     xAODTracking )

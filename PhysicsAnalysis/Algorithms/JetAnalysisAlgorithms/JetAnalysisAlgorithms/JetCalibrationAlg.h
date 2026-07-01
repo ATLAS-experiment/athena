@@ -22,15 +22,15 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    JetCalibrationAlg (const std::string& name, ISvcLocator* pSvcLocator);
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 
     /// \brief the calibration tool
   private:
-    ToolHandle<IJetCalibrationTool> m_calibrationTool {this, "calibrationTool", "JetCalibrationTool", "the calibration tool we apply"};
+    ToolHandle<IJetCalibrationTool> m_calibrationTool;
 
     /// \brief the systematics list we run
   private:

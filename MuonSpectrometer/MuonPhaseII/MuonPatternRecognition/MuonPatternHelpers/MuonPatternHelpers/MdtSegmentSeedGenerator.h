@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNHELPERS_MDTSEGMENTSEEDGENERATOR_H
 #define MUONR4_MUONPATTERNHELPERS_MDTSEGMENTSEEDGENERATOR_H
 
 #include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
-
+#include <MuonPatternEvent/Segment.h>
 
 #include "Acts/Seeding/CompositeSpacePointLineSeeder.hpp"
 namespace MuonR4{
@@ -20,13 +20,14 @@ namespace MuonR4::SegmentFit {
      *         with the space point container during the seeding  */
     struct SeederStateBase : public SpacePointPerLayerSplitter {
         protected:
-            /** @brief Protected constructor to instantiate the  */
+            /** @brief Protected constructor to prevent instantiation
+             *         from anything else than the seeder state */
             explicit SeederStateBase(const SegmentSeed* parentSeed,
-                                        const ISpacePointCalibrator* calibrator,
-                                        const bool calibratedPull);
+                                     const ISpacePointCalibrator* calibrator,
+                                     const bool calibratedPull);
         public:
             /** @brief Abrivation of the collection of calibrated space points */
-            using CalibCont_t = std::vector<std::unique_ptr<CalibratedSpacePoint>>;
+            using CalibCont_t = Segment::MeasVec;
             /** @brief Returns the parent seed from which the state is constructed */
             const SegmentSeed* parent() const;
             /** @brief Returns whether the hit is a good candidate for seeding

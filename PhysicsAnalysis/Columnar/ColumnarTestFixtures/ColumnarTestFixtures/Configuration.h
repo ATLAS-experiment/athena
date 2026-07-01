@@ -45,7 +45,9 @@ namespace columnar
 
       /// whether to measure non-retrieval for empty containers
       bool measureNonAccessForEmpty = false;
-
+      
+      /// whether to use rntuple file as input
+      bool isrntuple = false;
 
       /// @brief load configuration overrides from a JSON file
       ///

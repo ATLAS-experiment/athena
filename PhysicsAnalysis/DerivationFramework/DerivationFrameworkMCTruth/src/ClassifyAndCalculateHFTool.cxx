@@ -42,7 +42,8 @@ namespace DerivationFramework {
 
     ATH_MSG_INFO("Cut on the pt of the jets: "           << m_jetPtCut);
     ATH_MSG_INFO("Cut on the eta of the jets: "          << m_jetEtaCut);
-    ATH_MSG_INFO("Cut on the pt of the leading hadron: " << m_leadingHadronPtCut);
+    ATH_MSG_INFO("Cut on the pt of the leading B-hadron: " << m_leadingBHadronPtCut);
+    ATH_MSG_INFO("Cut on the pt of the leading C-hadron: " << m_leadingCHadronPtCut);
     ATH_MSG_INFO("Cut on the ratio between the pt of the leading hadron and the pt of its associated jet: " << m_leadingHadronPtRatioCut);
 
     return StatusCode::SUCCESS;
@@ -152,7 +153,7 @@ namespace DerivationFramework {
           
             ++bcount;
 
-            if((*hf)->p4().Pt()>m_leadingHadronPtCut && ptratio>m_leadingHadronPtRatioCut){
+            if((*hf)->p4().Pt()>m_leadingBHadronPtCut && ptratio>m_leadingHadronPtRatioCut){
               ++bcountcut;
             }
           }
@@ -167,7 +168,7 @@ namespace DerivationFramework {
 
             ++ccount;
 
-            if((*hf)->p4().Pt()>m_leadingHadronPtCut && ptratio>m_leadingHadronPtRatioCut){
+            if((*hf)->p4().Pt()>m_leadingCHadronPtCut && ptratio>m_leadingHadronPtRatioCut){
               ++ccountcut;
             }
           

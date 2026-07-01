@@ -18,6 +18,8 @@ namespace CP{
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 "abcdefghijklmnopqrstuvwxyz";
             const size_t max_index = (sizeof(charset) - 1);
+            //we don't care that this is a weak (insecure) random number generator
+            //coverity[dont_call]
             return charset[rand() % max_index];
         };
         std::string str(length, 0);

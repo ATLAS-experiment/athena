@@ -11,13 +11,14 @@ def ITkStripOverlayAlgCfg(flags, name="ITkStripOverlay", **kwargs):
     """Return a ComponentAccumulator for ITk Strip Overlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}ITkStripRDOs")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}ITkStripRDOs" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}ITkStripRDOs")
     kwargs.setdefault("OutputKey", "ITkStripRDOs")
 
     # Input setup
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'SCT_RDO_Container#{kwargs["BkgInputKey"]}']))
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'SCT_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do SCT overlay
     acc.addEventAlgo(CompFactory.SCTOverlay(name, **kwargs))

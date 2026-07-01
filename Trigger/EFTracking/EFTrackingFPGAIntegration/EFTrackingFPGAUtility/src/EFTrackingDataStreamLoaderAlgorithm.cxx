@@ -195,18 +195,23 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::execute(const EventContext& ctx)
   return StatusCode::SUCCESS;
 }
 
+
 StatusCode EFTrackingDataStreamLoaderAlgorithm::finalize() {
   ATH_CHECK(m_GHITZTxtOutputKeys.size() == m_GHITZTxtOutputPaths.size());
+
+  auto outstreamlambda = [](
+        std::ofstream& fileStream, 
+        const uint64_t word
+      ) { 
+         std::array<char, 32> buffer; 
+         auto result = std::format_to(buffer.begin(), "{:016x}\n", word);
+         fileStream.write(buffer.data(), std::distance(buffer.begin(), result));
+        };
 
   for (std::size_t index = 0; index < m_GHITZTxtOutputKeys.size(); index++) {
     ATH_CHECK(writeFile(
       m_GHITZTxtOutputPaths.value().at(index), 
-      [](
-        std::ofstream& fileStream, 
-        const uint64_t word
-      ) { 
-        fileStream << std::format("{:016x}\n", word);
-      },
+      outstreamlambda,
       [](const uint64_t word) { return FPGADataFormatUtilities::get_bitfields_GHITZ_w1(word).last; },
       1,
       m_GHITZTxtOutputEvents.at(index)
@@ -219,12 +224,7 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::finalize() {
     //coverity[ARRAY_VS_SINGLETON]
     ATH_CHECK(writeFile(
       m_GHITZBinOutputPaths.value().at(index), 
-      [](
-        std::ofstream& fileStream, 
-        const uint64_t word
-      ) { 
-        fileStream.write(std::bit_cast<char*>(&word), 8); 
-      },
+      outstreamlambda,
       [](const uint64_t word) { return FPGADataFormatUtilities::get_bitfields_GHITZ_w1(word).last; },
       1,
       m_GHITZBinOutputEvents.at(index)
@@ -236,12 +236,7 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::finalize() {
   for (std::size_t index = 0; index < m_GHITZTxtOutputKeys.size(); index++) {
     ATH_CHECK(writeFile(
       m_GHITZTxtOutputPaths.value().at(index), 
-      [](
-        std::ofstream& fileStream, 
-        const uint64_t word
-      ) { 
-        fileStream << std::format("{:016x}\n", word);
-      },
+      outstreamlambda,
       [](const uint64_t word) { return FPGADataFormatUtilities::get_bitfields_GHITZ_w1(word).last; },
       1,
       m_GHITZTxtOutputEvents.at(index)
@@ -271,12 +266,7 @@ StatusCode EFTrackingDataStreamLoaderAlgorithm::finalize() {
   for (std::size_t index = 0; index < m_CLUSTERTxtOutputKeys.size(); index++) {
     ATH_CHECK(writeFile(
       m_CLUSTERTxtOutputPaths.value().at(index), 
-      [](
-        std::ofstream& fileStream, 
-        const uint64_t word
-      ) { 
-        fileStream << std::format("{:016x}\n", word);
-      },
+      outstreamlambda,
       [](const uint64_t word) { return FPGADataFormatUtilities::get_bitfields_STRIP_CLUSTER(word).last; },
       0,
       m_CLUSTERTxtOutputEvents.at(index)

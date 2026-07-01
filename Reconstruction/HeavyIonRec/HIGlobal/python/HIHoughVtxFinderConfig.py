@@ -47,8 +47,8 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags, defaultTestFiles
     flags = initConfigFlags()
 
-    flags.Input.Files = [defaultTestFiles.d + "/RecJobTransformTests/data23_hi/data23_hi.00462809.physics_EnhancedBias.merge.RAW._lb0422._SFO-11._0001.1"]
-    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA
+    flags.Input.Files = defaultTestFiles.RAW_RUN3_DATA24_HI
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_DATA24
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
     flags.Exec.MaxEvents=20
@@ -67,8 +67,18 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
-    from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     acc.merge(ByteStreamReadCfg(flags))
+
+    # get beamspot
+    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoBeamSpotDecoratorAlgCfg
+    acc.merge(EventInfoBeamSpotDecoratorAlgCfg(flags))
+
+    # add standard track-based vertex, needs calorimeter first
+    from CaloRec.CaloRecoConfig import CaloRecoCfg
+    acc.merge(CaloRecoCfg(flags))
+    from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+    acc.merge(InDetTrackRecoCfg(flags))
 
     # need PixelSpacePoints first
     from InDetConfig.InDetPrepRawDataFormationConfig  import PixelClusterizationCfg, SCTClusterizationCfg

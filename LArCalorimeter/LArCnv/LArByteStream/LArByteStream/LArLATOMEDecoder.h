@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,27 +16,18 @@
 
 #define N_LATOME_CHANNELS 320
 
-#include <stdint.h>
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "LArRawEvent/LArDigitContainer.h"
-#include "LArRawEvent/LArRawSCContainer.h"
-#include "LArRawEvent/LArAccumulatedDigitContainer.h"
-#include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
-#include "LArRawEvent/LArSCDigit.h"
-#include "LArRawEvent/LArLATOMEHeaderContainer.h"
-#include "LArCabling/LArLATOMEMapping.h"
-#include "ByteStreamData/RawEvent.h"
-#include "CxxUtils/unused.h"
-#include "eformat/Version.h"
-#include "eformat/Issue.h"
+#include "LArRawEvent/LArRawSCContainer.h" //why?
+#include "LArRawEvent/LArLATOMEHeaderContainer.h" //why?
+#include "ByteStreamData/RawEvent.h" //for OFFLINE_FRAGMENTS_NAMESPACE
+
+#include "CaloDetDescr/ICaloSuperCellIDTool.h"
+#include "LArCabling/LArOnOffIdMapping.h"
 #include <vector>
 #include <string>
 #include <fstream>
-#include "eformat/index.h"
-#include "LArIdentifier/LArOnline_SuperCellID.h"
-#include "CaloDetDescr/ICaloSuperCellIDTool.h"
-#include "LArCabling/LArOnOffIdMapping.h"
-#include "LArRecConditions/LArCalibLineMapping.h"
+#include <stdint.h>
+
 
 
 
@@ -47,6 +38,12 @@
  */
 
 class LArOnline_SuperCellID;
+class LArDigitContainer;
+class LArAccumulatedDigitContainer;
+class LArAccumulatedCalibDigitContainer;
+class LArLATOMEMapping;
+class LArCalibLineMapping;
+
 
 enum class MonDataType {
   RawADC=1,
@@ -251,7 +248,7 @@ private:
     std::vector<LatomeCalibPatterns> m_latomeCalibPatternsInEvent;
   };
 
-  // propary of tool
+  // tool properties
   const LArOnline_SuperCellID* m_onlineId{};
   ToolHandle<ICaloSuperCellIDTool> m_sc2ccMappingTool;
   

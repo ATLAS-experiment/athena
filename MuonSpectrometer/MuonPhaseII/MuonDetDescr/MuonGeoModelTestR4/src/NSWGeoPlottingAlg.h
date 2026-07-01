@@ -21,7 +21,7 @@ class NswGeoPlottingAlg : public AthHistogramAlgorithm {
   using AthHistogramAlgorithm::AthHistogramAlgorithm;
 
   StatusCode initialize() override;
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) override;
   unsigned int cardinality() const override final { return 1; }
 
  private:
@@ -35,7 +35,7 @@ class NswGeoPlottingAlg : public AthHistogramAlgorithm {
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                           "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-  SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+  ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
   const MuonDetectorManager* m_detMgr{nullptr};
 

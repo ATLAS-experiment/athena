@@ -31,6 +31,16 @@ namespace {
             if (ele) ele->fillCache();
         }
     }
+    template <typename read_out>
+    void unpackSmartPtr(const std::vector<std::unique_ptr<read_out>>& array,
+                        std::vector<const MuonGM::MuonReadoutElement*>& unpacked) {
+        unpacked.reserve(array.size() + unpacked.capacity());
+        for (const auto& ptr : array){
+            if (ptr) {
+                unpacked.push_back(ptr.get());
+            }
+        }
+    }
 }
 
 namespace MuonGM {
@@ -694,13 +704,15 @@ namespace MuonGM {
     void MuonDetectorManager::setCutoutsFlag(int flag) { m_includeCutouts = flag; }
     void MuonDetectorManager::setCutoutsBogFlag(int flag) { m_includeCutoutsBog = flag; }
 
-    std::vector<const MuonStation*> MuonDetectorManager::getMuonStations() const {
-        std::vector<const MuonStation*> stations{};
-        for (const auto & [_, ptr]: m_MuonStationMap){
-            stations.push_back(ptr.get());
-        }
-        return stations;
+    std::vector<const MuonReadoutElement*> MuonDetectorManager::getAllReadoutElements() const {
+        std::vector<const MuonReadoutElement*> res{};
+        unpackSmartPtr(m_mdtArray, res);
+        unpackSmartPtr(m_rpcArray, res);
+        unpackSmartPtr(m_tgcArray, res);
+        unpackSmartPtr(m_stgArray, res);
+        unpackSmartPtr(m_mmcArray, res);
+        unpackSmartPtr(m_cscArray, res);
+        return res;
     }
-
 
 }  // namespace MuonGM

@@ -25,10 +25,10 @@ TgcL1RdoContainerCnv;
 template < >
 inline
 TgcL1RdoContainer*
-TgcL1RdoContainerCnv::createTransient()
+TgcL1RdoContainerCnv::createTransient(const Token* token)
 {
    MsgStream log(msgSvc(), "TgcL1RdoContainerCnv" );
-   log << MSG::DEBUG << " **** Entered createTransient() "
+   log << MSG::DEBUG << " **** Entered createTransient(const Token* token) "
        << endmsg;
 
    // the use of auto pointers ensures that the persistent object is deleted
@@ -37,8 +37,8 @@ TgcL1RdoContainerCnv::createTransient()
    TgcL1RdoContainer *trans_cont = 0;
    static const pool::Guid	p1_guid("799C629C-ECA9-4963-9C84-A4AD7D775B24");
 
-   if( compareClassGuid(p1_guid) ) {
-      std::unique_ptr< TgcL1RdoContainer_p1 >  col_vect( this->poolReadObject<TgcL1RdoContainer_p1>() );
+   if( compareClassGuid(token, p1_guid) ) {
+      std::unique_ptr< TgcL1RdoContainer_p1 >  col_vect( this->poolReadObject<TgcL1RdoContainer_p1>(token) );
       trans_cont =  m_TPconverter.createTransient( col_vect.get(), log );
    }
    else {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -9,8 +9,13 @@
 
 #include "LArCOOLConditions/LArCondFlatBase.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
+#include "LArIdentifier/LArOnlineID.h"
+#include "Identifier/HWIdentifier.h"
+#include "Identifier/IdentifierHash.h"
 #include <vector>
 #include <memory>
+#include <cstdint>
+
 
 class LArDSPConfig: 
   public LArCondFlatBase
@@ -56,9 +61,9 @@ protected:
   }
 
 protected:
-  const AthenaAttributeList* m_attrList;
-  const uint8_t* m_pBlob;
-  unsigned m_nFebs;
+  const AthenaAttributeList* m_attrList{};
+  const uint8_t* m_pBlob{};
+  unsigned m_nFebs{};
 		   
 };
 
@@ -81,7 +86,7 @@ public:
 
 private:
   std::unique_ptr<AthenaAttributeList> m_attrListNC;
-  uint8_t* m_pBlob_nc;
+  uint8_t* m_pBlob_nc{};
   //uint8_t m_nSamples;
 };
 

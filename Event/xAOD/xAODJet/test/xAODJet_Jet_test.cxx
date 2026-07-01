@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -12,6 +12,7 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/CurrentContext.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <vector>
@@ -281,7 +282,7 @@ int testClusterConstituents ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& jetCont, 
 int testShallowCopy ATLAS_NOT_THREAD_SAFE (xAOD::JetContainer& jetCont){
   TEST_MSG("\n ---------------- testShallowCopy  ");
 
-  auto [shallowcopy, shallowcopyAux] = xAOD:: shallowCopyContainer( jetCont );
+  auto [shallowcopy, shallowcopyAux] = xAOD:: shallowCopy( jetCont );
   xAOD::Jet * cjet = (*shallowcopy)[0];
   xAOD::Jet * jet = jetCont[0];
 

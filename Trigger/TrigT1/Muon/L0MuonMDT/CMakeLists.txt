@@ -4,8 +4,11 @@ atlas_subdir ( L0MuonMDT )
 
 atlas_add_component (L0MuonMDT
         src/*.cxx src/components/*.cxx
-        LINK_LIBRARIES AthenaKernel xAODMuonRDO MuonRDO MuonDigitContainer xAODTrigger AthenaMonitoringKernelLib
-        MuonCablingData xAODTrigger)
+
+        LINK_LIBRARIES AthenaKernel xAODMuonRDO MuonRDO MuonDigitContainer xAODTrigger AthenaMonitoringKernelLib IRegionSelector 
+  MuonReadoutGeometryR4 L0MuonInterface  L0MuonMDTToolsLib TrigSteeringEvent xAODMuonViews xAODMuonPrepData xAODL0MuonCand MdtCalibSvcLib MuonCalibEventBase MuonCalibITools xAODMuonSimHit)
+
+
 
 
 atlas_add_test( RunTest
@@ -15,5 +18,4 @@ atlas_add_test( RunTest
 
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL901 )
-
 

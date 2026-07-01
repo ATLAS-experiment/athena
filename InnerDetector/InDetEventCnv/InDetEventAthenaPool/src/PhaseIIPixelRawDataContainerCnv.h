@@ -27,7 +27,7 @@ public:
    {}
 protected:
    virtual PixelRDO_Container_PERS*   createPersistent (PhaseIIPixelRawDataContainer* transCont) override;
-   virtual PhaseIIPixelRawDataContainer* createTransient () override;
+   virtual PhaseIIPixelRawDataContainer* createTransient(const Token* token) override;
 
    virtual StatusCode initialize() override;
 

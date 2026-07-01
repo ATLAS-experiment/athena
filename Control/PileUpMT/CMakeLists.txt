@@ -6,7 +6,6 @@ atlas_subdir(PileUpMT)
 # External dependencies:
 find_package(CLHEP)
 find_package(Boost)
-find_package(fmt)
 find_package(Rangev3)
 
 # Component(s) in the package:
@@ -29,7 +28,6 @@ atlas_add_component(
   PileUpMTLib
   ${Boost_LIBRARIES}
   ${CLHEP_LIBRARIES}
-  fmt::fmt
   Rangev3::rangev3
   AthenaBaseComps
   xAODEventInfo

@@ -9,16 +9,18 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "Gaudi/Property.h"
 
+#include "DeviceStateHandler.h"
+
 namespace AthHIPExamples {
 
-   /// Example algorithm running a very simple operation using SYCL
+   /// Example algorithm running a very simple operation using HIP
    ///
-   /// This is just to demonstrate how to organise C++ + SYCL code in Athena
+   /// This is just to demonstrate how to organise C++ + HIP code in Athena
    /// to execute such code "directly".
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   class LinearTransformExampleAlg : public AthReentrantAlgorithm {
+  class LinearTransformExampleAlg : public ::AthReentrantAlgorithm, public DeviceStateHandler {
 
    public:
       /// Inherit the base class's constructor
@@ -27,11 +29,16 @@ namespace AthHIPExamples {
       /// @name Function(s) inherited from @c AthReentrantAlgortihm
       /// @{
 
-      /// The function initialising the algorithm
-      virtual StatusCode initialize() override;
       /// The function executing this algorithm
       virtual StatusCode execute( const EventContext& ctx ) const override;
 
+      /// @}
+      
+      /// @name Function(s) inherited from @c DeviceStateHandler
+      /// for initialising device code in the appropriate place
+      /// @{
+      //virtual StatusCode initialize_global() override;
+      virtual StatusCode initialize_worker() override;
       /// @}
 
    private:

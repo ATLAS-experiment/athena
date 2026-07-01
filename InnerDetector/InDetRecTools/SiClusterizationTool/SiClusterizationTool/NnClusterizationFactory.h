@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
  #ifndef SICLUSTERIZATIONTOOL_NnClusterizationFactory_C
@@ -31,6 +31,7 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "SiClusterizationTool/TTrainedNetworkCollection.h"
 #include "SiClusterizationTool/LWTNNCollection.h"
+#include "SiClusterizationTool/OnnxNNCollection.h"
 #include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -73,6 +74,7 @@ namespace InDet {
     int sizeY = 0;
     std::vector<std::vector<float> > matrixOfToT;
     std::vector<float> vectorOfPitchesY;
+    std::vector<float> vectorOfPitchesX;
     int ClusterPixLayer = 0;
     int ClusterPixBarrelEC = 0;
     float phi = 0;
@@ -154,10 +156,21 @@ namespace InDet {
                                                 int numberSubClusters,
                                                 std::vector<Amg::MatrixX> & errors) const;
 
-    // For error formatting in lwtnn cases
-    static double correctedRMSX(double posPixels) ;
+    /* Estimate number of particles using ONNX */
+    std::vector<double> estimateNumberOfParticlesONNX(
+        const Eigen::VectorXd& input) const;
 
-    double correctedRMSY(double posPixels, std::vector<float>& pitches) const; 
+    /* Estimate position using ONNX */
+    std::vector<Amg::Vector2D> estimatePositionsONNX(
+        const Eigen::VectorXd& input,
+        NNinput& rawInput,
+        const InDet::PixelCluster& pCluster,
+        int numberSubClusters,
+        std::vector<Amg::MatrixX>& errors) const;
+
+    // For error formatting in lwtnn cases
+    double correctedRMS(double posPixels, const std::vector<float>& pitches,
+                        unsigned int size) const;
 
      /* algorithmic component */
     NNinput createInput(const InDet::PixelCluster& pCluster,
@@ -284,6 +297,13 @@ namespace InDet {
     Gaudi::Property<bool> m_doRunI
        {this, "doRunI", false, "Use runI style network (outputs are not normalised; add pitches; use charge if not m_useToT)"};
 
+    SG::ReadCondHandleKey<OnnxNNCollection> m_readKeyONNX
+       {this, "NnCollectionONNXReadKey", "",
+        "The conditions key for ONNX-based pixel cluster NNs"};
+
+    Gaudi::Property<bool> m_useONNX
+       {this, "useONNX", false, "Use ONNX models instead of LWTNN for NN inference."};
+
     Gaudi::Property<bool> m_useTTrainedNetworks
        {this, "useTTrainedNetworks", false, "Use earlier (release-21-like) neural networks stored in ROOT files and accessed via TTrainedNetowrk."};
 
@@ -292,6 +312,12 @@ namespace InDet {
 
     Gaudi::Property<bool> m_useRecenteringNNWithTracks
        {this, "useRecenteringNNWithTracks",false,"Recenter x position when evaluating NN with track input."};
+
+    Gaudi::Property<bool> m_useXPitches
+       {this, "useXPitches", false,
+        "Also feed the phi-direction (X) pixel pitch vector as NN input "
+        "(ONNX only). Off by default so existing 60-input models are "
+        "unaffected; needs a (60 + sizeX)-input model when enabled."};
 
     Gaudi::Property<unsigned int> m_sizeX
        {this, "sizeX",7,"Size of pixel matrix along X"};

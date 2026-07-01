@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,6 +11,7 @@
 
 
 #include "DataModelAthenaPool/DataVectorConvert.h"
+#include "RootUtils/WithRootErrorHandler.h"
 #include "TClass.h"
 #include "TBuffer.h"
 #include "TClassEdit.h"
@@ -349,7 +350,16 @@ void diddle_dv_streaminfo (RootUtils::ILogger* logfn,
       elem->SetNewType (-2);
   }
 
-  // Rebuild all the internal tables.
+  // Rebuild all the internal tables, suppressing a useless error we see
+  // with more recent ROOT versions.
+  auto errhand = [](int /*level*/, bool /*abort*/, const char* /*location*/, const char* msg)
+  {
+    if (strstr (msg, "No information on the alignment") != 0) {
+      return false;
+    }
+    return true;
+  };
+  RootUtils::WithRootErrorHandler eh (errhand);
   si1->Compile();
 }
 

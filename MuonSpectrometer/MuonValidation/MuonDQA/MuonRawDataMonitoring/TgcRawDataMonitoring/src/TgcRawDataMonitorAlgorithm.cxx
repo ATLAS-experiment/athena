@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRawDataMonitorAlgorithm.h"
@@ -37,9 +37,6 @@ namespace {
   constexpr double nsw_z = 7824.46;
   constexpr double nsw_rindex_div = 255;
   constexpr double nsw_rindex_step = ( nsw_rmax - nsw_rmin ) / nsw_rindex_div;
-}
-TgcRawDataMonitorAlgorithm::TgcRawDataMonitorAlgorithm(const std::string &name, ISvcLocator *pSvcLocator) :
-  AthMonitorAlgorithm(name, pSvcLocator) {
 }
 
 StatusCode TgcRawDataMonitorAlgorithm::initialize() {
@@ -857,7 +854,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
         if(m_useOnlyMuidCoStacoMuons && (muon->author()!=xAOD::Muon::Author::MuidCo && muon->author()!=xAOD::Muon::Author::STACO)) continue;
         if(!m_PrimaryVertexContainerKey.empty()){
           if(primVertex==nullptr)continue;
-          auto trackParticle = muon->primaryTrackParticle();
+          auto trackParticle = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
           if(trackParticle!=nullptr){
             dz = trackParticle->z0() - primVertex->z();
             dca = trackParticle->d0();
@@ -995,7 +992,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
           }else if(m_useExtMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle;
           }else if(m_useMSOnlyExtMSTrackForExtrapolation){trkPtclType = xAOD::Muon::TrackParticleType::MSOnlyExtrapolatedMuonSpectrometerTrackParticle;
           }else{ trkPtclType = xAOD::Muon::TrackParticleType::Primary; } // default is Primary (i.e. same as muonType )
-          auto trackParticle = (m_useDirectPrimaryTrackForExtrapolation) ? muon->primaryTrackParticle() : muon->trackParticle( trkPtclType );
+          auto trackParticle = (m_useDirectPrimaryTrackForExtrapolation) ? muon->trackParticle(xAOD::Muon::TrackParticleType::Primary) : muon->trackParticle( trkPtclType );
           if(trackParticle==nullptr)continue;
           auto matrix = std::make_unique<Amg::Transform3D>();
           matrix->setIdentity();
@@ -1080,9 +1077,10 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 
 
     auto oflmuon_num=Monitored::Scalar<int>("oflmuon_num",(*muons).size());
-    auto oflmuon_muonType=Monitored::Collection("oflmuon_muonType",*muons,[](const xAOD::Muon*m){return m->muonType();});
-    auto oflmuon_author=Monitored::Collection("oflmuon_author",*muons,[](const xAOD::Muon*m){return m->author();});
-    auto oflmuon_quality=Monitored::Collection("oflmuon_quality",*muons,[](const xAOD::Muon*m){return m->quality();});
+    using namespace Muon::MuonStationIndex;
+    auto oflmuon_muonType=Monitored::Collection("oflmuon_muonType",*muons,[](const xAOD::Muon*m){return toInt(m->muonType());});
+    auto oflmuon_author=Monitored::Collection("oflmuon_author",*muons,[](const xAOD::Muon*m){return toInt(m->author());});
+    auto oflmuon_quality=Monitored::Collection("oflmuon_quality",*muons,[](const xAOD::Muon*m){return toInt(m->quality());});
     auto oflmuon_pt=Monitored::Collection("oflmuon_pt",*muons,[](const xAOD::Muon*m){return m->pt() / Gaudi::Units::GeV;});
     auto oflmuon_eta=Monitored::Collection("oflmuon_eta",*muons,[](const xAOD::Muon*m){return m->eta();});
     auto oflmuon_phi=Monitored::Collection("oflmuon_phi",*muons,[](const xAOD::Muon*m){return m->phi();});
@@ -1090,9 +1088,9 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     auto oflmuon_pvdca=Monitored::Collection("oflmuon_pvdca",muon2pv_dca);
 
     auto oflmuon_probe_num=Monitored::Scalar<int>("oflmuon_probe_num",mymuons.size());
-    auto oflmuon_probe_muonType=Monitored::Collection("oflmuon_probe_muonType",mymuons,[](const TimedMuon&m){return m.muon->muonType();});
-    auto oflmuon_probe_author=Monitored::Collection("oflmuon_probe_author",mymuons,[](const TimedMuon&m){return m.muon->author();});
-    auto oflmuon_probe_quality=Monitored::Collection("oflmuon_probe_quality",mymuons,[](const TimedMuon&m){return m.muon->quality();});
+    auto oflmuon_probe_muonType=Monitored::Collection("oflmuon_probe_muonType",mymuons,[](const TimedMuon&m){return toInt(m.muon->muonType());});
+    auto oflmuon_probe_author=Monitored::Collection("oflmuon_probe_author",mymuons,[](const TimedMuon&m){return toInt(m.muon->author());});
+    auto oflmuon_probe_quality=Monitored::Collection("oflmuon_probe_quality",mymuons,[](const TimedMuon&m){return toInt(m.muon->quality());});
     auto oflmuon_probe_pt=Monitored::Collection("oflmuon_probe_pt",mymuons,[](const TimedMuon&m){return m.muon->pt() / Gaudi::Units::GeV;});
     auto oflmuon_probe_eta=Monitored::Collection("oflmuon_probe_eta",mymuons,[](const TimedMuon&m){return m.muon->eta();});
     auto oflmuon_probe_phi=Monitored::Collection("oflmuon_probe_phi",mymuons,[](const TimedMuon&m){return m.muon->phi();});

@@ -53,7 +53,7 @@ StatusCode LArStripsCrossTalkCorrector::initialize() {
 }
 
 
-StatusCode LArStripsCrossTalkCorrector::execute()
+StatusCode LArStripsCrossTalkCorrector::execute(const EventContext& ctx)
 { 
   if ( m_event_counter < 100 || ( m_event_counter < 1000 && m_event_counter%100==0 ) || m_event_counter%1000==0 )
     ATH_MSG_INFO( "Processing event " << m_event_counter );
@@ -80,17 +80,17 @@ StatusCode LArStripsCrossTalkCorrector::execute()
     if (m_event_counter==1)
       ATH_MSG_WARNING( "No FebErrorSummaryObject found! Feb errors not checked!" );
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
   if(!cabling) {
      ATH_MSG_ERROR( "Do not have cabling object LArOnOffIdMapping");
      return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<LArBadChannelCont> bcHdl{m_BCKey};
+  SG::ReadCondHandle<LArBadChannelCont> bcHdl{m_BCKey, ctx};
   const LArBadChannelCont* bcCont{*bcHdl};
 
-  SG::ReadCondHandle<ILArPedestal> pedHdl{m_pedKey};
+  SG::ReadCondHandle<ILArPedestal> pedHdl{m_pedKey, ctx};
   const ILArPedestal* larPedestal=*pedHdl; 
 
 

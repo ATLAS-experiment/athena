@@ -12,7 +12,7 @@ atlas_add_component( HGTD_RecAlgs
                      src/components/*.cxx
                      LINK_LIBRARIES Acts::Core ActsEventLib AthenaBaseComps GaudiKernel GeneratorObjects
                      HGTD_RecToolInterfaces HGTD_RawData HGTD_RIO_OnTrack HGTD_Identifier
-                     xAODTracking xAODTruth InDetSimData AthenaMonitoringKernelLib
+                     xAODTracking xAODTruth InDetSimData AthenaMonitoringKernelLib ActsCalibratorsLib
                      PathResolver ${ROOT_LIBRARIES})
 
 atlas_install_runtime( share/*.xml )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -----------------------------------------------------------------------------------------------
@@ -23,8 +23,11 @@
 // -----------------------------------------------------------------------------------------------
 
 #include "GeneratorFilters/xAODBSignalFilter.h"
+#include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Vector/LorentzVector.h"
+#include "TLorentzVector.h"
+
 #include "TruthUtils/MagicNumbers.h"
 
 #include <sstream>
@@ -32,10 +35,11 @@
 StatusCode xAODBSignalFilter::filterInitialize()
 {
     CHECK(m_truthPartContKey.initialize());
+    m_gendata = std::make_shared<GenData>();
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODBSignalFilter::filterEvent()
+StatusCode xAODBSignalFilter::filterEvent(const EventContext& ctx)
 {
     ATH_MSG_INFO("");
     ATH_MSG_INFO(" ---------------------------------- ");
@@ -54,7 +58,7 @@ StatusCode xAODBSignalFilter::filterEvent()
         }
 // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
 // duplicated barcode ones
-    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+    SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
     CHECK(xTruthParticleContainer.isValid());
 
 bool acceptEvent = true;
@@ -182,14 +186,9 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
                 // ** New B-signal found, output message and find whole decay tree **
                 if (newBChain)
                 {
-                    const HepPDT::ParticleData *HadronData = particleData(particleID);
+                    const auto HadronData = m_gendata->particleName(std::abs(particleID));
                     std::string HadronName = "unknown particle";
-                    if (HadronData)
-                    {
-                        HadronName = HadronData->name();
-                        if (particleID < 0)
-                            HadronName = "anti - " + HadronName;
-                    }
+                    if (HadronData) HadronName = ((particleID < 0) ? std::string("anti - ") : std::string("")) + *HadronData;
                     ATH_MSG_DEBUG("");
                     ATH_MSG_DEBUG(" ------------------------------------------ ");
                     ATH_MSG_DEBUG(" *** xAODBSignalFilter.cxx: B-signal found ***  ");
@@ -233,8 +232,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
                                 ATH_MSG_DEBUG("");
                                 ATH_MSG_DEBUG(" *** INVARIANT MASS CUTS ON PARTICLES ACTIVATED! *** ");
                                 ATH_MSG_DEBUG("");
-                                if (m_InvMass_switch)
-                                    ATH_MSG_DEBUG("     -- Mass cuts -->>  " << m_InvMassMin << " < mass < " << m_InvMassMax << " MeV");
+                                ATH_MSG_DEBUG("     -- Mass cuts -->>  " << m_InvMassMin << " < mass < " << m_InvMassMax << " MeV");
                                 //
                                 double invMass = (CandPart1 + CandPart2).M();
                                 double invMass_total = total_4mom.M();
@@ -330,7 +328,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
         ATH_MSG_DEBUG("");
         if (!acceptEvent)
         {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             m_rejectedAll++;
             ATH_MSG_DEBUG(" ==========================");
             ATH_MSG_DEBUG("  Event REJECTED by Filter ");
@@ -338,7 +336,7 @@ if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
         }
         else
         {
-            setFilterPassed(true);
+            setFilterPassed(true, ctx);
             ATH_MSG_DEBUG(" ==========================");
             ATH_MSG_DEBUG("  Event ACCEPTED by Filter ");
             ATH_MSG_DEBUG(" ==========================");
@@ -615,14 +613,9 @@ void xAODBSignalFilter::PrintChild(const xAOD::TruthParticle* child,
 {
     int pID = child->pdgId();
     // ** Find name **
-    const HepPDT::ParticleData *pData = particleData(std::abs(pID));
+    const auto pData = m_gendata->particleName(std::abs(pID));
     std::string pName = "unknown particle";
-    if (pData)
-    {
-        pName = pData->name();
-        if (pID < 0)
-            pName = "anti - " + pName;
-    }
+    if (pData) pName = ((pID < 0) ? std::string("anti - ") : std::string("")) + *pData;
     ATH_MSG_DEBUG("    " << treeIDStr << "   "
                          << "Child (" << pName
                          << ") " << child << " , from final B = " << fromFinalB);

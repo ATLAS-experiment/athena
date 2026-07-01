@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -50,8 +50,7 @@
 
 #include <cstdlib>
 
-//C++ STL includes
-#include <vector>
+
 using CLHEP::RandGaussQ;
 using CLHEP::RandFlat;
 
@@ -268,15 +267,15 @@ StatusCode TileDigitsFromPulse::initialize() {
 //
 // Begin Execution Phase.
 //
-StatusCode TileDigitsFromPulse::execute() {
+StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
 	ATH_MSG_DEBUG("in execute()");
 
-	const EventContext& ctx = Gaudi::Hive::currentContext();
 
 	// Prepare RNG service
 	ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomStreamName);
 	rngWrapper->setSeed( m_randomStreamName, ctx );
+	CLHEP::HepRandomEngine* rndmEngine = rngWrapper->getEngine(ctx);
 
 	// Create new container for digits
 	auto digitsContainer = std::make_unique<TileMutableDigitsContainer>(true,
@@ -402,8 +401,8 @@ StatusCode TileDigitsFromPulse::execute() {
 							double Hfn1 = m_tileToolNoiseSample->getHfn1(drawerIdx, channel, gain, ctx);
 							double Hfn2 = m_tileToolNoiseSample->getHfn2(drawerIdx, channel, gain, ctx);
 							double Norm = m_tileToolNoiseSample->getHfnNorm(drawerIdx, channel, gain, ctx);
-							RandGaussQ::shootArray(*rngWrapper, samples.size(), Rndm, 0.0, 1.0);
-							RandFlat::shootArray(*rngWrapper, 1, Rndm_dG, 0.0, 1.0);
+							RandGaussQ::shootArray(rndmEngine, samples.size(), Rndm, 0.0, 1.0);
+							RandFlat::shootArray(rndmEngine, 1, Rndm_dG, 0.0, 1.0);
 							for (unsigned int js = 0; js < samples.size(); ++js) {
 								//using the same gaussian(sigma) for all samples in one channel in one event
 								if (Rndm_dG[0] < Norm)
@@ -428,8 +427,7 @@ StatusCode TileDigitsFromPulse::execute() {
 						ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
 
 						TileDigits * digit = tileDigitsPool.nextElementPtr();
-						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain),
-								     std::move(samples));
+						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain), samples);
 
 						ATH_CHECK( digitsContainer->push_back(digit) );
 						  
@@ -444,11 +442,10 @@ StatusCode TileDigitsFromPulse::execute() {
 					}
 
 					if(!m_bigain){
-					        ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
+					  ATH_MSG_VERBOSE("New ADC " << ros << "/" << drawer << "/" << channel << "/   saving gain  " << gain);
 
 						TileDigits * digit = tileDigitsPool.nextElementPtr();
-						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain),
-								     std::move(samples));
+						*digit = TileDigits (m_tileHWID->adc_id(ros, drawer, channel, gain), std::move(samples));
 
 						ATH_CHECK( digitsContainer->push_back(digit) );
 

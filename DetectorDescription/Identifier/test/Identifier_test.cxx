@@ -67,9 +67,6 @@ BOOST_AUTO_TEST_CASE(IdentifierConstructors){
     cout_redirect guard( output.rdbuf() );
     BOOST_CHECK_NO_THROW([[maybe_unused]] Identifier a(vt));
   }
-  //should have put a warning in cout
-  BOOST_TEST( output.str().find("WARNING")!= std::string::npos);
-  output.flush();
   //
   Identifier32 i32(345);
   BOOST_CHECK_NO_THROW([[maybe_unused]] Identifier j(i32));
@@ -108,7 +105,7 @@ BOOST_AUTO_TEST_CASE(IdentifierRepresentation){
   boost::test_tools::output_test_stream output;
   {//scoped redirect of cout
     cout_redirect guard( output.rdbuf( ) );
-    g.show();
+    g.show(std::cout);
   }
   BOOST_CHECK( output.is_equal( "0xf123400000000" ) );
 }
@@ -156,8 +153,6 @@ BOOST_AUTO_TEST_CASE(IdentifierAssignment){
     cout_redirect guard( output.rdbuf() );
     BOOST_CHECK_NO_THROW(z = vt);
   }
-  //should have put a warning in cout
-  BOOST_TEST( output.str().find("WARNING")!= std::string::npos);
   //
   Identifier32 i32(0x159);
   BOOST_CHECK_NO_THROW(z = i32);

@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_lowMu_run3_v1 menu followed by offline reco and monitoring
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
+from TrigP1Test.TrigP1TestSteps import filterBS
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
@@ -29,11 +30,7 @@ hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
 hlt.args = '-o output'
 
 # Extract the physics_Main stream out of the BS file with many streams
-filter_bs = ExecStep.ExecStep('FilterBS')
-filter_bs.type = 'other'
-filter_bs.executable = 'trigbs_extractStream.py'
-filter_bs.input = ''
-filter_bs.args = '-s Main ' + find_file('*_HLTMPPy_output.*.data')
+filter_bs = filterBS('Main')
 
 # Tier-0 reco step (BS->AOD)
 tzrecoPreExec = ';'.join([
@@ -57,6 +54,8 @@ tzrecoPreExec = ';'.join([
   "flags.DQ.Steering.HLT.doMinBias=True",
   "flags.DQ.Steering.HLT.doMuon=True",
   "flags.DQ.Steering.HLT.doTau=True",
+  "flags.Trigger.CTP.UseEDMxAOD=False",
+  "flags.Trigger.CTP.UseRoibROB=True",
 ])
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
@@ -64,10 +63,10 @@ tzreco.type = 'Reco_tf'
 tzreco.input = ''
 tzreco.explicit_input = True
 tzreco.max_events = 50
-tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
+tzreco.args = '--inputBSFile=' + find_file('data*.physics_Main.*.data')  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
-tzreco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
+tzreco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA24}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 
 # The full test

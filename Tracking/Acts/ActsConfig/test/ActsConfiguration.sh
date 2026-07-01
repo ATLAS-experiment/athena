@@ -49,8 +49,7 @@ checkIdpvmOnFile() {
 failed_tests=()
 
 # Few flags
-activate_all_flags="flags.Acts.doITkConversion=True; \
-                    flags.Acts.doLargeRadius=True; \
+activate_all_flags="flags.Acts.doLargeRadius=True; \
 		    flags.Acts.doLowPt=True; \
 		    flags.Tracking.ITkActsLegacyPass.storeSeparateContainer=True; \
         	    flags.Tracking.ITkActsLargeRadiusPass.storeSeparateContainer=True; \
@@ -73,18 +72,18 @@ activate_all_flags="flags.Acts.doITkConversion=True; \
 activate_all_collections="\"InDet\" \
         \"InDetActsLegacy\" \
         \"InDetActsConversion\" \
-        \"InDetActsLargeRadius\" \
+        \"InDetLargeD0\" \
         \"InDetActsLowPt\" \
 	\"SiSPSeedSegmentsActsLegacy\" \
         \"SiSPSeedSegmentsActsLegacyPixel\" \
         \"SiSPSeedSegmentsActsLegacyStrip\" \
         \"SiSPSeedSegmentsActsConversionStrip\" \
-        \"SiSPSeedSegmentsActsLargeRadiusStrip\" \
+        \"SiSPSeedSegmentsLargeD0Strip\" \
 	\"SiSPSeedSegmentsActsLowPt\" \
         \"SiSPSeedSegmentsActsLowPtPixel\" \
         \"SiSPSeedSegmentsActsLowPtStrip\" \
         \"SiSPSeededTracksActsLegacy\" \
-        \"SiSPSeededTracksActsLargeRadius\" \
+        \"SiSPSeededTracksLargeD0\" \
         \"SiSPSeededTracksActsConversion\" \
         \"SiSPSeededTracksActsLowPt\" \
 	"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RecoToTruthAssociationAlg.h"
@@ -18,7 +18,6 @@
 using namespace xAOD::P4Helpers;
 namespace {
     constexpr unsigned int dummy_unsigned = 999;
-    constexpr int com_bit = (1<<xAOD::Muon::Author::Commissioning);
     void increment_unsigned(unsigned& val) {
         if (val == dummy_unsigned)
             val = 1;
@@ -122,11 +121,10 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
         ATH_MSG_DEBUG("muon with pT " << muon->pt() << " MeV, eta: " << muon->eta() << ", phi " << muon->phi() << " and author "
                                       << muon->author());
         const xAOD::TrackParticle* tp = nullptr;
-        if (m_associateWithInDetTP || muon->author() == xAOD::Muon::STACO || muon->author() == xAOD::Muon::MuGirl) {
-            tp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-        } else {
-            tp = muon->primaryTrackParticle();
-        }
+        const bool useID = m_associateWithInDetTP || muon->author() == xAOD::Muon::Author::STACO || muon->author() == xAOD::Muon::Author::MuGirl;
+
+        using enum xAOD::Muon::TrackParticleType;
+        tp = muon->trackParticle(useID ?InnerDetectorTrackParticle : Primary);
 
         bool foundTruth{false}, setOrigin{false};
         if (tp) {
@@ -185,12 +183,6 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                             ATH_MSG_DEBUG("Author of the decorated muon is better than the one of the new candidate");
                             continue;
                         }
-                        /// May be both muons are reconstructed by the same author but one is commissioning
-                        const int com_score = (muon->allAuthors() & com_bit) - (decor_muon->allAuthors() &com_bit);
-                        if (com_score > 0){
-                            ATH_MSG_DEBUG("Found two muons reconstructed by an equivalent author. But this one is from the commissioning chain");
-                            continue;
-                        }
                         /// The last judge is a simple dR cut but this will hopefully never trigger
                         if (deltaR2(muon,truthParticle) >= deltaR2(muon, decor_muon)) continue;
                     }
@@ -203,8 +195,10 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                     std::vector<unsigned int> nphiHitsPerChamberLayer(toInt(PhiIndex::PhiIndexMax), dummy_unsigned);
                     std::vector<unsigned int> ntrigEtaHitsPerChamberLayer(toInt(PhiIndex::PhiIndexMax), dummy_unsigned);
 
-                    constexpr int author_sel = (1<<xAOD::Muon::MuidCo) | (1<<xAOD::Muon::MuidSA) | (1<<xAOD::Muon::MuGirl);
-                    count_chamber_layers(muon->allAuthors() & author_sel
+                    constexpr std::array<xAOD::Muon::Author, 3> author_sel{xAOD::Muon::Author::MuidCo,
+                                                                           xAOD::Muon::Author::MuidSA,
+                                                                           xAOD::Muon::Author::MuGirl};
+                    count_chamber_layers(std::ranges::any_of(author_sel, [muon](const auto a ){ return muon->isAuthor(a); })
                                              ? truthParticle
                                              : nullptr,
                                          tp->track(), nprecHitsPerChamberLayer, nphiHitsPerChamberLayer, ntrigEtaHitsPerChamberLayer);
@@ -239,7 +233,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
         }
         /// Patch for STACO muons: Copy the truth information from the muon back to the combined
         /// track to avoid file corruptions reported in ATLASRECTS-6454
-        if (muon->author() == xAOD::Muon::STACO) {
+        if (muon->author() == xAOD::Muon::Author::STACO) {
             const xAOD::TrackParticle* cmb_trk = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);
             if (!cmb_trk){
                 ATH_MSG_WARNING("Even a STACO muon should have a combined track");

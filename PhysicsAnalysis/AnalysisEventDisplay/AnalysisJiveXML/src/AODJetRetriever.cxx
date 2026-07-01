@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/AODJetRetriever.h"
@@ -163,50 +163,50 @@ namespace JiveXML {
 
     JetCollection::const_iterator itr = jets->begin();
     for (; itr != jets->end(); ++itr) {
-      phi.push_back(DataType((*itr)->phi()));
-      eta.push_back(DataType((*itr)->eta()));
-      et.push_back(DataType((*itr)->et()/CLHEP::GeV));
-      pt.push_back(DataType((*itr)->pt()/CLHEP::GeV));
-      idVec.push_back( DataType( ++id ));
+      phi.emplace_back((*itr)->phi());
+      eta.emplace_back((*itr)->eta());
+      et.emplace_back((*itr)->et()/CLHEP::GeV);
+      pt.emplace_back((*itr)->pt()/CLHEP::GeV);
+      idVec.emplace_back( ++id );
 
 //from: http://alxr.usatlas.bnl.gov/lxr/source/atlas/PhysicsAnalysis/AnalysisCommon/AnalysisExamples/src/JetTagAna.cxx
 //
       // bjet tagger values
-      bTagName.push_back( DataType( "JetFitterCOMBNN" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("JetFitterCOMBNN") ));
-      bTagName.push_back( DataType( "JetFitterTagNN" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("JetFitterTagNN") ));
-      bTagName.push_back( DataType( "IP3D+SV1" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight() ));
-      bTagName.push_back( DataType( "IP2D" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("IP2D") ));
-      bTagName.push_back( DataType( "IP3D" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("IP3D") ));
-      bTagName.push_back( DataType( "SV1" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("SV1") ));
-      bTagName.push_back( DataType( "SV2" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("SV2") ));
-      bTagName.push_back( DataType( "MV1" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("MV1") ));
-      bTagName.push_back( DataType( "MV2" ));
-      bTagValue.push_back( DataType( (*itr)->getFlavourTagWeight("MV2") ));
+      bTagName.emplace_back( "JetFitterCOMBNN" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight("JetFitterCOMBNN") );
+      bTagName.emplace_back( "JetFitterTagNN" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight("JetFitterTagNN") );
+      bTagName.emplace_back( "IP3D+SV1" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight() );
+      bTagName.emplace_back( "IP2D" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight("IP2D") );
+      bTagName.emplace_back( "IP3D" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight("IP3D") );
+      bTagName.emplace_back( "SV1" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight("SV1") );
+      bTagName.emplace_back( "SV2" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight("SV2") );
+      bTagName.emplace_back( "MV1" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight("MV1") );
+      bTagName.emplace_back( "MV2" );
+      bTagValue.emplace_back( (*itr)->getFlavourTagWeight("MV2") );
 
       // basic jet quality 
-      quality.push_back(DataType((*itr)->getMoment("LArQuality")));
+      quality.emplace_back((*itr)->getMoment("LArQuality"));
 
-      isGood.push_back(DataType( 1 ));
-      isBad.push_back(DataType( 0 ));
-      isUgly.push_back(DataType( 0 ));
-      emfrac.push_back(DataType( 0.5 ));
+      isGood.emplace_back( 1 );
+      isBad.emplace_back( 0 );
+      isUgly.emplace_back( 0 );
+      emfrac.emplace_back( 0.5 );
 
 
-      jvf.push_back( DataType((*itr)->getMoment("JVF") ));
+      jvf.emplace_back((*itr)->getMoment("JVF") );
 
-      energy.push_back( DataType((*itr)->e()/CLHEP::GeV ) );
-      mass.push_back(DataType((*itr)->m()/CLHEP::GeV));
-      px.push_back( DataType((*itr)->px()/CLHEP::GeV ) );
-      py.push_back( DataType((*itr)->py()/CLHEP::GeV ) );
-      pz.push_back( DataType((*itr)->pz()/CLHEP::GeV ) );
+      energy.emplace_back( (*itr)->e()/CLHEP::GeV  );
+      mass.emplace_back((*itr)->m()/CLHEP::GeV);
+      px.emplace_back( (*itr)->px()/CLHEP::GeV  );
+      py.emplace_back( (*itr)->py()/CLHEP::GeV  );
+      pz.emplace_back( (*itr)->pz()/CLHEP::GeV  );
     }
 
     // Start with mandatory entries

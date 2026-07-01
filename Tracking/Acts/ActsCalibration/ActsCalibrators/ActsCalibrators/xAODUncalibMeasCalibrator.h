@@ -8,6 +8,7 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "ActsEvent/TrackContainer.h"
 #include "Acts/TrackFitting/GlobalChiSquareFitter.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 #include "CxxUtils/ArrayHelper.h"
 
 namespace ActsTrk::detail{
@@ -20,11 +21,6 @@ namespace ActsTrk::detail{
         public:
           /** @brief Empty default constructor */
           xAODUncalibMeasCalibrator();
-          /** @brief Underlying source link type of the uncalibrated measurement  */
-          using SourceLink_t = const xAOD::UncalibratedMeasurement*;
-          /** @brief Helper method to pack an uncalibrated measurement to an Acts source link
-           *  @param meas: Pointer to the measurement to unpack */
-          static Acts::SourceLink pack(const xAOD::UncalibratedMeasurement* meas);
           /** @brief Helper method to unpack an Acts source link to an uncalibrated measurement
            *  @param sl: Reference to the source link pointing to the uncalibrated measurement */
           static const xAOD::UncalibratedMeasurement* unpack(const Acts::SourceLink& sl);
@@ -79,7 +75,7 @@ namespace ActsTrk::detail{
             /** @brief Abrivation for the calibrator delegate. The signature of all delegates should
              *         be shared accross all fitters implemented in Acts */
             using CalibDelegate = Acts::Experimental::Gx2FitterExtensions<MutableTrackStateBackend>::Calibrator; 
-            constexpr static int s_nMeasTypes = static_cast<int>(xAOD::UncalibMeasType::nTypes);
+            constexpr static std::size_t s_nMeasTypes = Acts::toUnderlying(xAOD::UncalibMeasType::nTypes);
             /** @brief Dispatch table of the calibrators per measurement type. In the construction phase
              *         of this class all delegates are connected with the `invalidCalibrator` method. */
             std::array<CalibDelegate, s_nMeasTypes> m_calibrators{};

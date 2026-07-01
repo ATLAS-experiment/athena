@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -41,21 +41,21 @@
 //____________________________________________________________________
 class VP1CameraHelper::Imp {
 public:
-  VP1CameraHelper* theclass;
-  SoCamera * camera;
-  SoGroup * sceneroot;
+  VP1CameraHelper* theclass{};
+  SoCamera * camera{};
+  SoGroup * sceneroot{};
   QByteArray targetCamState;
-  bool forceCircular;
+  bool forceCircular{};
   static void seeksensorCB(void * data, SoSensor *);
   void getCameraCoordinateSystem(SoCamera * cameraarg,SoNode * root,
 				 SbMatrix & matrix,SbMatrix & inverse);
 
   // Seek functionality
-  SoTimerSensor * seeksensor;
-  float seekperiod;
+  SoTimerSensor * seeksensor{};
+  float seekperiod{};
   SbBool inseekmode;
   SbBool seektopoint;
-  float seekdistance;
+  float seekdistance{};
   SbBool seekdistanceabs;
   //
   SbVec3f camerastartposition, cameraendposition;
@@ -64,41 +64,41 @@ public:
   SoSFFloat camerastart_nearDistance, cameraend_nearDistance;
   SoSFFloat camerastart_farDistance, cameraend_farDistance;
   SoSFFloat camerastart_focalDistance, cameraend_focalDistance;
-  bool camera_isperspective;
+  bool camera_isperspective{};
   SoSFFloat camerastart_ortho_height, cameraend_ortho_height;
   
-  bool varySpeed;
-  double clipVol_startPercentage, clipVol_percentage, clipVol_endPercentage;
+  bool varySpeed{};
+  double clipVol_startPercentage{}, clipVol_percentage{}, clipVol_endPercentage{};
 
   //Movie making mode:
 //  SoQtRenderArea * renderArea; // original
-  VP1ExaminerViewer * renderArea; // test
+  VP1ExaminerViewer * renderArea{}; // test
   QString outputdir;
   QString prefix;
-  double fps;
-  int ntotframes;
-  int iframe;
-  int width;
-  int height;
+  double fps{};
+  int ntotframes{};
+  int iframe{};
+  int width{};
+  int height{};
 
   //Variables to detect if we should abort, if e.g. the user started
   //changing the view by hand:
   SbRotation last_cameraorient;
   SbVec3f last_cameraposition;
   SoSFFloat last_camera_ortho_height;
-  double clipVol_lastPercentage;
+  double clipVol_lastPercentage{};
   void updateLastVars();
   bool lastParsChanged() const;
 
   void startSeekTimer( double duration_in_secs );
 
   //
-  SoSearchAction * searchaction;
-  SoGetMatrixAction * matrixaction;
+  SoSearchAction * searchaction{};
+  SoGetMatrixAction * matrixaction{};
 
   //For keeping track of current seeks and whether the camera is invalidated while seeking:
-  int32_t camera_ref;
-  bool instance_invalid;//This will be set if the camera/sceneroot ref count changes during the lifetime of the VP1CameraHelper.
+  int32_t camera_ref{};
+  bool instance_invalid{};//This will be set if the camera/sceneroot ref count changes during the lifetime of the VP1CameraHelper.
   bool instanceInvalid();
 
   bool getCameraParametersForBBox( const SbBox3f & box,

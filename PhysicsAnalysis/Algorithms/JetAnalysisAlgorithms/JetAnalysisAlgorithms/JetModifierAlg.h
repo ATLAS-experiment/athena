@@ -24,7 +24,7 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 

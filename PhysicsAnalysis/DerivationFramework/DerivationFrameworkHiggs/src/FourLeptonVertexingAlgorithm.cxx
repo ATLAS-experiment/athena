@@ -49,10 +49,11 @@ namespace DerivationFramework {
         ATH_CHECK(m_vtxKey.initialize());
         ATH_CHECK(m_fitter.retrieve());
 
-        if (!m_elecSelTool.empty()) ATH_CHECK(m_elecSelTool.retrieve());
-        if (!m_muonSelTool.empty()) ATH_CHECK(m_muonSelTool.retrieve());
+        ATH_CHECK(m_elecSelTool.retrieve(EnableTool{!m_elecSelTool.empty()}));
+        ATH_CHECK(m_muonSelTool.retrieve(EnableTool{!m_muonSelTool.empty()}));
 
-        if (m_muonTrkProp < MuonTrk::Primary || m_muonTrk > MuonTrk::MSOnlyExtrapolatedMuonSpectrometerTrackParticle) {
+        if (m_muonTrkProp < static_cast<int>(MuonTrk::Primary) || 
+            m_muonTrkProp > static_cast<int>(MuonTrk::MSOnlyExtrapolatedMuonSpectrometerTrackParticle)) {
             ATH_MSG_FATAL("A bogous muon track particle has been picked " << m_muonTrkProp);
             return StatusCode::FAILURE;
         }

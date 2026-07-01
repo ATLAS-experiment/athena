@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef F_TAG_GHOST_LEPTON_ASSOCIATION_ALG_H
@@ -67,6 +67,11 @@ namespace FlavorTagDiscriminants
     // Output containers
     SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_MuonsOutKey{
         this, "outMuons", "Something.GhostMuons", "Link to be added to the Jet"
+    };
+
+    Gaudi::Property<bool> m_doConeMatching{
+        this, "doConeMatching", false,
+        "Associate muons to the closest jet in DeltaR instead of ghost-track matching"
     };
   };
 }  // namespace FlavorTagDiscriminants

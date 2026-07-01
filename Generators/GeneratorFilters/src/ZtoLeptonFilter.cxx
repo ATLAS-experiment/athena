@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/ZtoLeptonFilter.h"
@@ -13,11 +13,10 @@ ZtoLeptonFilter::ZtoLeptonFilter(const std::string& name, ISvcLocator* pSvcLocat
 }
 
 
-StatusCode ZtoLeptonFilter::filterEvent() {
+StatusCode ZtoLeptonFilter::filterEvent(const EventContext& ctx) {
   McEventCollection::const_iterator itr;
   for (itr = events()->begin(); itr!=events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
-#ifdef HEPMC3
     for ( const auto& pitr: genEvt->particles()) {
       if (MC::isZ(pitr)) {
         if ( !pitr->end_vertex() && !MC::isPhysical(pitr)) continue; // Allow status 3 Zs with no end vertex
@@ -27,33 +26,13 @@ StatusCode ZtoLeptonFilter::filterEvent() {
         }
         // Z children
         for (const auto& thisChild: pitr->end_vertex()->particles_out()) {
-          if (std::abs(thisChild->pdg_id()) == 11 || std::abs(thisChild->pdg_id()) == 13 || std::abs(thisChild->pdg_id()) == 15) {
+          if ( MC::isElectron(thisChild) || MC::isMuon(thisChild) || MC::isTau(thisChild) ) {
             return StatusCode::SUCCESS;
           }
         }
       }
     }
-#else
-    for (HepMC::GenEvent::particle_const_iterator pitr = genEvt->particles_begin();	pitr != genEvt->particles_end(); ++pitr) {
-      if (MC::isZ(*pitr)) {
-        if ( !(*pitr)->end_vertex() && !MC::isPhysical(*pitr)) continue; // Allow status 3 Zs with no end vertex
-        else if ( !(*pitr)->end_vertex() ){
-          // Found a Z boson with no end vertex and status!=3 .  Something is sick about this event
-          break;
-        }
-        // Z children
-        HepMC::GenVertex::particle_iterator firstChild = (*pitr)->end_vertex()->particles_begin(HepMC::children);
-        HepMC::GenVertex::particle_iterator endChild = (*pitr)->end_vertex()->particles_end(HepMC::children);
-        HepMC::GenVertex::particle_iterator thisChild = firstChild;
-        for (; thisChild != endChild; ++thisChild) {
-          if (std::abs((*thisChild)->pdg_id()) == 11 || std::abs((*thisChild)->pdg_id()) == 13 || std::abs((*thisChild)->pdg_id()) == 15) {
-            return StatusCode::SUCCESS;
-          }
-        }
-      }
-    }
-#endif
   }
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/StorableConversions.h"
@@ -166,26 +166,17 @@ namespace PayloadHelpers {
   using TDA = TriggerEDMDeserialiserAlg;
 
   /// CLID of the collection stored in the next fragment
-  #if __cpp_lib_array_constexpr >= 201811L
-  constexpr
-  #endif
-  CLID collectionCLID(TDA::PayloadIterator start) {
+  constexpr CLID collectionCLID(TDA::PayloadIterator start) {
     return *( start + TDA::CLIDOffset );
   }
 
   /// Length of the serialised name payload
-  #if __cpp_lib_array_constexpr >= 201811L
-  constexpr
-  #endif
-  size_t nameLength(TDA::PayloadIterator start) {
+  constexpr size_t nameLength(TDA::PayloadIterator start) {
     return *( start + TDA::NameLengthOffset );
   }
 
   /// Size in bytes of the buffer that is needed to decode next fragment data content
-  #if __cpp_lib_array_constexpr >= 201811L
-  constexpr
-  #endif
-  size_t dataSize(TDA::PayloadIterator start) {
+  constexpr size_t dataSize(TDA::PayloadIterator start) {
     return *( start + TDA::NameOffset + nameLength(start) );
   }
 
@@ -194,10 +185,7 @@ namespace PayloadHelpers {
    *
    * Intended to be used like this: start = advance(start); if ( start != data.end() )... decode else ... done
    **/
-  #if __cpp_lib_array_constexpr >= 201811L
-  constexpr
-  #endif
-  TDA::PayloadIterator toNextFragment(TDA::PayloadIterator start) {
+  constexpr TDA::PayloadIterator toNextFragment(TDA::PayloadIterator start) {
     return start + (*start); // point ahead by the number of words pointed to by start iterator
   }
 

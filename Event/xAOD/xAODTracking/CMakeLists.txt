@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODTracking )
@@ -44,7 +44,7 @@ atlas_add_test( xAODTracking_TrackParticle_test
 atlas_add_test( xAODTracking_TrackParticlexAODHelpers_test
    SOURCES test/xAODTracking_TrackParticlexAODHelpers_test.cxx
    LINK_LIBRARIES xAODTracking
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ut_xaodtracking_vertex
    SOURCES test/ut_xaodtracking_vertex.cxx
@@ -56,5 +56,5 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
    atlas_add_test(MultiTrajectoryBackends_test
       SOURCES test/MultiTrajectoryBackends_test.cxx
       LINK_LIBRARIES xAODTracking xAODInDetMeasurement
-      POST_EXEC_SCRIPT nopost.sh)
+      POST_EXEC_SCRIPT noerror.sh)
 endif()

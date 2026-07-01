@@ -10,10 +10,12 @@ atlas_add_library( TriggerAnalysisAlgorithmsLib
    LINK_LIBRARIES xAODEventInfo SelectionHelpersLib SystematicsHandlesLib
       AnaAlgorithmLib AsgTools AsgAnalysisInterfaces EventBookkeeperToolsLib TrigDecisionInterface
       xAODEgamma xAODMuon TriggerAnalysisInterfaces TrigCompositeUtilsLib TrigGlobalEfficiencyCorrectionLib TriggerMatchingToolLib
-   PRIVATE_LINK_LIBRARIES RootCoreUtils )
+   PRIVATE_LINK_LIBRARIES  )
 
 atlas_add_component( TriggerAnalysisAlgorithms
    src/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES TriggerAnalysisAlgorithmsLib )
 
 atlas_install_python_modules( python/*.py )
+
+atlas_install_data( data/* )

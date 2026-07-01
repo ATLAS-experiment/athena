@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BadTileRetriever.h"
@@ -29,27 +29,7 @@ using Athena::Units::GeV;
 namespace JiveXML {
 
   /**
-   * This is the standard AthAlgTool constructor
-   * @param type   AlgTool type name
-   * @param name   AlgTool instance name
-   * @param parent AlgTools parent owning this tool
-   **/
-  BadTileRetriever::BadTileRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_calocell_id(nullptr)
-  {
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-    
-    declareProperty("CellThreshold", m_cellThreshold = 50.);
-    declareProperty("RetrieveTILE" , m_tile = true);
-    declareProperty("DoBadTile",     m_doBadTile = false);
-  
-    declareProperty("CellEnergyPrec", m_cellEnergyPrec = 3);
-  }
-
-  /**
-   * Initialise the ToolSvc
+   * Initialise the Tool
    */
 
   StatusCode BadTileRetriever::initialize() {
@@ -66,7 +46,7 @@ namespace JiveXML {
     ATH_MSG_DEBUG( "in retrieve()"  );
     SG::ReadHandle<CaloCellContainer> cellContainer(m_sgKey);
     if (!cellContainer.isValid()){
-	    ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
+      ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
     } else {
       if(m_tile){
         DataMap data = getBadTileData(&(*cellContainer));

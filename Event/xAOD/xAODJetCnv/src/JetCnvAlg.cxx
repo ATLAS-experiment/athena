@@ -78,7 +78,7 @@ StatusCode JetCnvAlg::finalize()
 
 
 
-StatusCode JetCnvAlg::execute()
+StatusCode JetCnvAlg::execute(const EventContext& /*ctx*/)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
   ATH_MSG_DEBUG( "Converting " << m_inputJetCollectionName << "  into "<< m_xaodJetCollectionName );

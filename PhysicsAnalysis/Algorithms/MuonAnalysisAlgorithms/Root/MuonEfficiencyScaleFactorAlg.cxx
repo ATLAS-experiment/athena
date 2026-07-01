@@ -12,8 +12,6 @@
 
 #include <MuonAnalysisAlgorithms/MuonEfficiencyScaleFactorAlg.h>
 
-#include <RootCoreUtils/Assert.h>
-
 //
 // method implementations
 //
@@ -47,15 +45,15 @@ namespace CP
 
 
   StatusCode MuonEfficiencyScaleFactorAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_efficiencyScaleFactorTool->applySystematicVariation (sys));
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK (m_muonHandle.retrieve (muons, sys));
+      ANA_CHECK (m_muonHandle.retrieve (muons, sys, ctx));
       const xAOD::EventInfo *eventInfo = nullptr;
-      ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys));
+      ANA_CHECK (m_eventInfoHandle.retrieve (eventInfo, sys, ctx));
       for (const xAOD::Muon *muon : *muons)
       {
         if (m_preselection.getBool (*muon, sys))

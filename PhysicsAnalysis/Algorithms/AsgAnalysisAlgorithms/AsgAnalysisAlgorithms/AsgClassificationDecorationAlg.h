@@ -10,7 +10,6 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
-#include <xAODBase/IParticle.h>
 #include <xAODBase/IParticleContainer.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 
@@ -28,7 +27,7 @@ class AsgClassificationDecorationAlg final : public EL::AnaAlgorithm
   /// \brief the standard constructor
   using EL::AnaAlgorithm::AnaAlgorithm;
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
   /// \brief truth classifier tool handle

@@ -12,11 +12,11 @@ from Campaigns.Utils import Campaign
 from AthenaCommon.Logging import logging
 
 
-class MuonCalibrationConfig (ConfigBlock):
+class MuonMomentumCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the muon four-momentum correction"""
 
     def __init__ (self) :
-        super (MuonCalibrationConfig, self).__init__ ()
+        super (MuonMomentumCalibrationConfig, self).__init__ ()
         self.setBlockName('Muons')
         self.addOption ('inputContainer', '', type=str,
             info="the name of the input muon container. If left empty, automatically defaults "
@@ -41,16 +41,13 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the `MuonCalibTool` needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS), see https://atlas-mcp.docs.cern.ch/guidelines/muonmomentumcorrections/index.html#cpmuoncalibtool-tool.')
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one.")
-        self.addOption ('writeTrackD0Z0', False, type = bool,
-            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
             info="whether to add variables needed for running the columnar muon tool(s) on the output n-tuple (EXPERIMENTAL).",
             expertMode=True)
-        self.addOption ('runTrackBiasing', False, type=bool,
-            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for tracks "
-            "associated to muons. The tool does not have Run 3 recommendations yet.",
+        self.addOption ('addGlobalFELinksDep', False, type=bool,
+            info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
             expertMode=True)
-        
+
     def instanceName (self) :
         if self.postfix != "":
             return self.postfix
@@ -71,8 +68,12 @@ class MuonCalibrationConfig (ConfigBlock):
             calibMode = 2
         elif self.calibMode == 'notCorrectData_CB':
             calibMode = 3
+        elif self.calibMode == 'correctData_IDonly':
+            calibMode = 4
+        elif self.calibMode == 'correctData_MSonly':
+            calibMode = 5
         else :
-            raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB")
+            raise ValueError ("invalid calibMode: \"" + self.calibMode + "\". Allowed values are correctData_CB, correctData_IDMS, notCorrectData_IDMS, notCorrectData_CB, correctData_IDonly, correctData_MSonly")
 
         inputContainer = "AnalysisMuons" if config.isPhyslite() else "Muons"
         if self.inputContainer:
@@ -85,6 +86,20 @@ class MuonCalibrationConfig (ConfigBlock):
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'MuonShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
+            alg.outputType = 'xAOD::MuonContainer'
+            decorationList = ['DFCommonJetDr',
+                              'DFCommonMuonPassIDCuts',
+                              'DFCommonMuonPassPreselection',
+                              'neflowisol20_CloseByCorr',
+                              'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr',
+                              'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr',
+                              'topoetcone20_CloseByCorr']
+            if self.addGlobalFELinksDep:
+                decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+            if config.dataType() is not DataType.Data:
+                decorationList += ['TruthLink']
+            if self.addGlobalFELinksDep or config.dataType() is not DataType.Data:
+                alg.declareDecorations = decorationList
 
         # Set up the eta-cut on all muons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
@@ -126,6 +141,49 @@ class MuonCalibrationConfig (ConfigBlock):
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                 preselection = True)
 
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
+        alg.particles = config.readName (self.containerName)
+
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+
+        # decorate truth information on the reconstructed object:
+        if self.decorateTruth and config.dataType() is not DataType.Data:
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
+        
+        config.addOutputVar (self.containerName, 'muonType', 'muonType', noSys=True, enabled=self.writeColumnarToolVariables)
+
+
+class MuonIPCalibrationConfig (ConfigBlock) :
+    """the ConfigBlock for the muon impact parameter correction"""
+
+    def __init__ (self) :
+        super (MuonIPCalibrationConfig, self).__init__ ()
+        self.setBlockName('MuonIPCalibration')
+        self.addDependency('Muons', required=True)
+        self.addDependency('MuonWorkingPointSelection', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('postfix', "", type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here since the calibration is common to "
+            "all muons.")
+        self.addOption ('writeTrackD0Z0', False, type = bool,
+            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
+        self.addOption ('runTrackBiasing', False, type=bool,
+            info="This enables the `InDetTrackBiasingTool`, for tracks "
+            "associated to muons")
+
+    def instanceName (self) :
+        return self.containerName + self.postfix
+
+    def makeAlgs (self, config) :
+
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
@@ -136,28 +194,12 @@ class MuonCalibrationConfig (ConfigBlock):
                 InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
             alg.particles = config.readName (self.containerName)
 
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
-        alg.particles = config.readName (self.containerName)
-
-        config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
-        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
-
-        if self.writeTrackD0Z0:
             config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
             config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
             config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
             config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
             config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
 
-        # decorate truth information on the reconstructed object:
-        if self.decorateTruth and config.dataType() is not DataType.Data:
-            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
-            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
-        
-        config.addOutputVar (self.containerName, 'muonType', 'muonType', noSys=True, enabled=self.writeColumnarToolVariables)
 
 class MuonWorkingPointSelectionConfig (ConfigBlock) :
     """the ConfigBlock for the muon working point selection"""
@@ -197,6 +239,8 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834).")
+        self.addOption('useLRT', False, type=bool,
+            info="whether to enable LRT handling in CP::MuonSelectionTool")
     
     def instanceName (self) :
         if self.postfix is not None:
@@ -253,6 +297,7 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
         config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
         alg.selectionTool.MuQuality = quality
         alg.selectionTool.IsRun3Geo = config.geometry() >= LHCPeriod.Run3
+        alg.selectionTool.UseLRT = self.useLRT
         if config.geometry() is LHCPeriod.Run4:
             log.warning("Disabling NSW hits for Run4 geometry")
             alg.selectionTool.ExcludeNSWFromPrecisionLayers = True
@@ -288,6 +333,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def __init__ (self) :
         super (MuonWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('MuonWorkingPointEfficiency')
         self.addDependency('MuonWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)
@@ -319,10 +365,6 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             "Experimental! Only useful to test a new WP for which scale "
             "factors are not available.",
             expertMode=True)
-        self.addOption ('onlyRecoEffSF', False, type=bool,
-            info="same as `noEffSF`, but retains the ID scale factor. "
-            "Experimental! Only useful for CI tests.",
-            expertMode=True)
         self.addOption ('saveDetailedSF', True, type=bool,
             info="save all the independent detailed object scale factors.")
         self.addOption ('saveCombinedSF', False, type=bool,
@@ -348,11 +390,12 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
 
         sfList = []
         # Set up the reco/ID efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and (not self.noEffSF or self.onlyRecoEffSF):
+        if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgReco' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
                             'CP::MuonEfficiencyScaleFactors' )
+            config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
             alg.scaleFactorDecoration = 'muon_reco_effSF' + postfix + "_%SYS%"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_reco_bad_eff' + postfix
@@ -360,7 +403,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             if config.geometry() >= LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '251211_Preliminary_r24run3'
             else:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -370,7 +413,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the HighPt-specific BadMuonVeto efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.quality == 'HighPt' and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.quality == 'HighPt' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgBMVHighPt' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -382,7 +425,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             if config.geometry() >= LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3' # not available as part of '230123_Preliminary_r22run3'!
             else:
-                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2'
+                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -392,7 +435,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the isolation efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgIsol' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -404,7 +447,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             if config.geometry() >= LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '251211_Preliminary_r24run3'
             else:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -414,7 +457,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the TTVA scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.trackSelection and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.trackSelection and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgTTVA' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -426,7 +469,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             if config.geometry() >= LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '251211_Preliminary_r24run3'
             else:
-                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2'
+                alg.efficiencyScaleFactorTool.CalibrationRelease = '230213_Preliminary_r22run2_loosefix'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
@@ -474,6 +517,12 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('containerName', '', type=str,
                         info="the input muon container, with a possible selection, in "
                         "the format `container` or `container.selection`.")
+        self.addOption ('customToolSuffix', '', type=str,
+                        expertMode=True, info="EXPERIMENTAL: specify custom suffix for the public tool name")
+        self.addOption ('customInputFolder', '', type=str,
+                        expertMode=True, info="EXPERIMENTAL: specify custom input folder")
+        self.addOption ('customInputFilePerYear', {}, type=dict,
+                        expertMode=True, info="EXPERIMENTAL: specify custom input file per year")
 
     def instanceName (self) :
         return self.containerName + '_' + self.muonID
@@ -536,11 +585,17 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                                 else:
                                     triggerConfigYears[leg_out] = [year]
 
+            if not triggerConfigs:
+                return
+
             # Make the public tool for this configuration
-            sfTool = config.createPublicTool("CP::MuonTriggerScaleFactors", f"{self.instanceName()}_SFTool")
+            sfTool = config.createPublicTool("CP::MuonTriggerScaleFactors", f"{self.instanceName()}_SFTool{self.customToolSuffix}")
             # Reproduce config from TrigGlobalEfficiencyAlg
             sfTool.MuonQuality = self.muonID
             sfTool.AllowZeroSF = True
+            sfTool.CustomInputFolder = self.customInputFolder
+            sfTool.CustomInputFilePerYear = self.customInputFilePerYear
+            sfTool.Campaign = config.campaign().value
 
             for trig_short, trig in triggerConfigs.items():
                 alg = config.createAlgorithm('CP::MuonTriggerEfficiencyScaleFactorAlg',
@@ -648,6 +703,12 @@ class MuonContainerMergingConfig (ConfigBlock) :
         alg.CreateViewCollection = self.createViewCollection
 
 @groupBlocks
+def MuonCalibration(seq):
+    seq.append(MuonMomentumCalibrationConfig())
+    seq.append(MuonIPCalibrationConfig())
+
+@groupBlocks
 def MuonWorkingPoint(seq):
     seq.append(MuonWorkingPointSelectionConfig())
     seq.append(MuonWorkingPointEfficiencyConfig())
+

@@ -75,7 +75,7 @@ public:
   typedef MultiRange::const_identifier_factory const_expanded_id_iterator;
   //@}
 
-  PixelID();
+  PixelID(const std::string & name = "PixelID", const std::string & group = "pixel");
   
   /// This is a PixelID helper
   virtual AtlasDetectorID::HelperType helper() const override{ 

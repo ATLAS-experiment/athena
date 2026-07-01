@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENT_LOOP_WORKER_HH
@@ -151,6 +151,12 @@ namespace EL
     TFile *inputFile () const override;
 
 
+    /// \brief flag whether the most recently opened input file has events or not
+    /// \par Guarantee no-fail
+  public:
+    bool hasInputEvents () const override;
+
+
     /// \brief the name of the file we are reading the current tree
     /// from, without the path component
     /// \par Guarantee
@@ -170,10 +176,10 @@ namespace EL
     /// description: the xAOD event and store
     /// guarantee: strong
     /// failures: out of memory I
-    /// failures: TEventSvc not configured
+    /// failures: EventSvc not configured
     /// postcondition: result != 0
   public:
-    xAOD::TEvent *xaodEvent () const override;
+    xAOD::Event  *xaodEvent () const override;
     xAOD::TStore *xaodStore () const override;
 
 
@@ -233,7 +239,7 @@ namespace EL
     /// \par Guarantee
     ///   basic
   public:
-    ::StatusCode directExecute (const SH::SamplePtr& sample, const Job& job,
+    ::StatusCode directExecute (const SH::Sample& sample, const Job& job,
                                const std::string& location, const SH::MetaObject& options);
 
 
@@ -413,6 +419,11 @@ namespace EL
     /// \brief the list of modules we hold
   private:
     std::vector<std::unique_ptr<Detail::Module> > m_modules;
+
+
+    /// \brief whether this is the first input file
+  private:
+    bool m_firstInputFile {true};
 
 
     /// \brief whether this is a new input file (i.e. one that has not

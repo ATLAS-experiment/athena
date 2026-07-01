@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -133,11 +133,10 @@ StatusCode Trk::ReFitTrack::initialize()
 }
 
 // Execute method:
-StatusCode Trk::ReFitTrack::execute()
+StatusCode Trk::ReFitTrack::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("ReFitTrack::execute()");
   std::unique_ptr<Trk::PRDtoTrackMap> prd_to_track_map(m_assoTool->createPRDtoTrackMap());
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<TrackCollection> tracks (m_trackName, ctx);
 
   if (!tracks.isValid()){
@@ -193,7 +192,7 @@ StatusCode Trk::ReFitTrack::execute()
          n_trt_hits = (*itr)->trackSummary()->get(numberOfTRTHits);
       }
       else {
-         std::unique_ptr<const Trk::TrackSummary> summary(  m_trkSummaryTool->summaryNoHoleSearch(**itr));
+         std::unique_ptr<const Trk::TrackSummary> summary( m_trkSummaryTool->summaryNoHoleSearch(ctx, **itr) );
          n_trt_hits = summary->get(numberOfTRTHits);
       }
       if ( (**itr).measurementsOnTrack()->size() - n_trt_hits<3 )
@@ -244,7 +243,7 @@ StatusCode Trk::ReFitTrack::execute()
          //    vec.push_back((*measIter));
          // refit with the beamspot / vertex
          newtrack = ((trtonly ? m_ITrackFitterTRT : m_ITrackFitter)
-                       ->fit(Gaudi::Hive::currentContext(),
+                       ->fit(ctx,
                              vec,
                              *origPerigee,
                              m_runOutlier,
@@ -253,7 +252,7 @@ StatusCode Trk::ReFitTrack::execute()
       } else {
         newtrack =
           ((trtonly ? m_ITrackFitterTRT : m_ITrackFitter)
-             ->fit(Gaudi::Hive::currentContext(), **itr, m_runOutlier, hypo));
+             ->fit(ctx, **itr, m_runOutlier, hypo));
       }
     } // passed selection
 
@@ -295,12 +294,12 @@ StatusCode Trk::ReFitTrack::execute()
   std::unique_ptr<TrackCollection> new_track_collection = std::make_unique<TrackCollection>();
   new_track_collection->reserve(new_tracks.size());
   for(std::unique_ptr<Trk::Track> &new_track : new_tracks ) {
-    m_trkSummaryTool->computeAndReplaceTrackSummary(*new_track, false /* DO NOT suppress hole search*/);
+    m_trkSummaryTool->computeAndReplaceTrackSummary(ctx, *new_track, false /* DO NOT suppress hole search*/);
     new_track_collection->push_back(std::move(new_track));
   }
 
   ATH_MSG_VERBOSE ("Save tracks");
-  ATH_CHECK(SG::WriteHandle<TrackCollection>(m_newTrackName).record(std::move(new_track_collection)));
+  ATH_CHECK(SG::WriteHandle<TrackCollection>(m_newTrackName, ctx).record(std::move(new_track_collection)));
 
   return StatusCode::SUCCESS;
 }

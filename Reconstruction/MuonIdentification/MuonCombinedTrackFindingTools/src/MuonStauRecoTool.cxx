@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStauRecoTool.h"
@@ -178,7 +178,7 @@ namespace MuonCombined {
            resolve ambiguities
         */
 
-        if (!resolveAmbiguities(candidates)) { return; }
+        if (!resolveAmbiguities(ctx, candidates)) { return; }
 
         if (!m_recoValidationTool.empty()) addCandidatesToNtuple(indetTrackParticle, candidates, 3);
         /** STAGE 6
@@ -409,7 +409,10 @@ namespace MuonCombined {
                 std::vector<const Muon::MuonClusterOnTrack*> clusters;
                 const Muon::CompetingMuonClustersOnTrack* crot = dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(meas);
                 if (crot) {
-                    clusters = crot->containedROTs();
+                    std::ranges::transform(crot->containedROTs(), std::back_inserter(clusters), 
+                                            [](const auto& rot){
+                                                return rot.get();
+                                            });
                 } else {
                     const Muon::RpcClusterOnTrack* rpc = dynamic_cast<const Muon::RpcClusterOnTrack*>(meas);
                     if (rpc) clusters.push_back(rpc);
@@ -765,7 +768,7 @@ namespace MuonCombined {
         tagMap->addEntry(&indetCandidate, tag);
     }
 
-    bool MuonStauRecoTool::resolveAmbiguities(MuonStauRecoTool::CandidateVec& candidates) const {
+    bool MuonStauRecoTool::resolveAmbiguities(const EventContext& ctx, MuonStauRecoTool::CandidateVec& candidates) const {
         ATH_MSG_DEBUG("Resolving ambiguities: candidates " << candidates.size());
 
         // push tracks into a collection and run ambi-solver
@@ -784,7 +787,7 @@ namespace MuonCombined {
         if (tracks.size() == 1) return true;
 
         // more than 1 track call ambiguity solver and select first track
-        std::unique_ptr<const TrackCollection> resolvedTracks(m_trackAmbibuityResolver->process(&tracks));
+        std::unique_ptr<const TrackCollection> resolvedTracks(m_trackAmbibuityResolver->process(ctx, &tracks));
         if (!resolvedTracks || resolvedTracks->empty()) {
             ATH_MSG_WARNING("No track survived the ambiguity solving");
             return false;

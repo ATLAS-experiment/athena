@@ -20,8 +20,8 @@ PixelRDO_Container_PERS* PhaseIIPixelRawDataContainerCnv::createPersistent(Phase
   unsigned int n_rdos=0;
 
   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(*transCont);
-  using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-  using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
+  using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
+  using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
   for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
      if (!module_rdo_container_proxy.empty()) {
         IdentifierHash id_hash(module_rdo_container_proxy.identifyHash());
@@ -47,7 +47,7 @@ PixelRDO_Container_PERS* PhaseIIPixelRawDataContainerCnv::createPersistent(Phase
            persObj->m_rawdata.emplace_back();
            persObj->m_rawdata.back().m_rdoId = m_idHelper->pixel_id(wafer_id,
                                                                     rdo_proxy.coordinates()[0],
-                                                                    rdo_proxy.coordinates()[1]).get_identifier32().get_compact();
+                                                                    rdo_proxy.coordinates()[1]).get_compact();
            persObj->m_rawdata.back().m_word = rdo_proxy.dataWord();
         }
         assert( persObj->m_rawdata.size() == persObj->m_collections[ module_rdo_container_proxy.identifyHash() ].m_end);
@@ -56,12 +56,12 @@ PixelRDO_Container_PERS* PhaseIIPixelRawDataContainerCnv::createPersistent(Phase
   return persObj.release();
 }
 
-PhaseIIPixelRawDataContainer* PhaseIIPixelRawDataContainerCnv::createTransient() {
+PhaseIIPixelRawDataContainer* PhaseIIPixelRawDataContainerCnv::createTransient(const Token* token) {
   // @TODO add support for  p0 guid  7F2C09B6-0B47-4957-8BBA-EDC665A290AC i.e. initial version Pixel1RawData
   // @TODO add support for  p2 guid  DA76970C-E019-43D2-B2F9-25660DCECD9D i.e. for t/p separated version with InDetRawDataContainer_p1
   static const pool::Guid   TP2_guid("7138342E-0A80-4A32-A387-2842A01C2539"); // for t/p separated version with InDetRawDataContainer_p2
-  if( compareClassGuid(TP2_guid) ) {
-    std::unique_ptr< InDetRawDataContainer_p2 >   persCont( poolReadObject< InDetRawDataContainer_p2 >() );
+  if( compareClassGuid(token, TP2_guid) ) {
+    std::unique_ptr< InDetRawDataContainer_p2 >   persCont( poolReadObject< InDetRawDataContainer_p2 >(token) );
     std::unique_ptr<PhaseIIPixelRawDataContainer> transCont(std::make_unique<PhaseIIPixelRawDataContainer>(m_idHelper->wafer_hash_max(),
                                                                                                            1 /* a single data container */));
 

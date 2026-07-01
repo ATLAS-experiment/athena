@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// System include(s):
-#include <map>
+
+// Local include(s):
+#include "ElementLinkResetAlg.h"
 
 // Framework include(s):
 #include "AthenaKernel/errorcheck.h"
@@ -15,8 +16,11 @@
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthLinks/ElementLinkBase.h"
 
-// Local include(s):
-#include "ElementLinkResetAlg.h"
+
+
+// System include(s):
+#include <map>
+#include <limits>
 
 namespace xAODMaker {
 
@@ -37,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode ElementLinkResetAlg::execute() {
+   StatusCode ElementLinkResetAlg::execute(const EventContext& /*ctx*/) {
 
       // Collect all the container(s):
       std::vector< std::pair< const SG::IConstAuxStore*, std::string > > stores;
@@ -83,12 +87,11 @@ namespace xAODMaker {
 
       // The auxiliary type registry:
       SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
-
+      static constexpr SG::auxid_t maxPossibleAuxId = std::numeric_limits<SG::auxid_t>::max();
       // Loop over them:
       for( SG::auxid_t auxid : auxids ) {
-
          // Check/cache its type:
-         if( m_typeCache.size() <= auxid ) {
+         if( (m_typeCache.size() <= auxid) and (auxid < maxPossibleAuxId)) {
             m_typeCache.resize( auxid + 1 );
          }
          if( ! m_typeCache[ auxid ].isSet ) {

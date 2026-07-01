@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonThinningConfig
 # Contains the configuration for the thinning for PHYS(LITE)
@@ -22,9 +22,7 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
         acc.merge(TrackParticleThinningPHYSCfg(
             flags,
             name                    = kwargs['TrackParticleThinningToolName'],
-            StreamName              = StreamName,
-            Z0SGEntryName           = "DFCommonInDetTrackZ0AtPV",
-            InDetTrackParticlesKey  = "InDetTrackParticles"))
+            StreamName              = StreamName))
 
     # Include inner detector tracks associated with muons
     if "MuonTPThinningToolName" in kwargs:
@@ -37,7 +35,11 @@ def PhysCommonThinningCfg(flags, StreamName = "StreamDAOD_PHYS", **kwargs):
 
     # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
     if "TauJetThinningToolName" in kwargs:
-        tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD} && TauJets.nTracks <= {flags.Tau.MaxTracksDAOD}"
+        if "PHYSLITE" in StreamName:
+            tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtLITE} && (TauJets.nTracks == 1 || TauJets.nTracks == 3) && abs(TauJets.charge) == 1"
+        else:    
+            tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD} && TauJets.nTracks <= {flags.Tau.MaxTracksDAOD}"
+
         acc.merge(TauThinningCfg(flags,
             name                 = kwargs['TauJetThinningToolName'],
             StreamName           = StreamName,

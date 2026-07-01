@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthViews/ViewHelper.h"
@@ -70,7 +70,7 @@ StatusCode TrigTauTrackingHypoAlg::execute(const EventContext& ctx) const
             }
             roi = roiHandle->at(0);
         } else {
-           LinkInfo<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(previousDecision, initialRoIString());
+           LinkInfo<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(ctx, previousDecision, initialRoIString());
            ATH_CHECK(roiEL.isValid());
            roi = *roiEL.link;
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPrecisionLayerDecorAlg.h"
@@ -41,11 +41,12 @@ namespace{
     SG::WriteDecorHandle<xAOD::MuonContainer, uint8_t> acc_isEndcapGood{m_isEndcapGoodLayersKey, ctx};
  
     for (const xAOD::Muon* mu : *muons) {
-         // no CT or ST muons
-        if (mu->primaryTrackParticle() == mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle)) continue;  
+        using enum xAOD::Muon::TrackParticleType; 
+        // no CT or ST muons
+        if (mu->trackParticle(xAOD::Muon::TrackParticleType::Primary) == mu->trackParticle(InnerDetectorTrackParticle)) continue;  
         // no SA muons w/o ME tracks
-        if (mu->primaryTrackParticle() == mu->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle)) continue;  
-        const xAOD::TrackParticle* ptp = mu->primaryTrackParticle();
+        if (mu->trackParticle(xAOD::Muon::TrackParticleType::Primary) == mu->trackParticle(MuonSpectrometerTrackParticle)) continue;  
+        const xAOD::TrackParticle* ptp = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         const std::vector<std::vector<unsigned int>>& chIds = acc_alignEffectChId(*ptp);
         const std::vector<float>& alignEffSDT = acc_alligSigmaDeltaTrans(*ptp);
 

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: CaloFillRectangularCluster.h,v 1.7 2009-04-25 17:57:00 ssnyder Exp $
@@ -41,7 +41,6 @@
 #include "CaloInterface/ISetCaloCellContainerName.h"
 #include <string>
 #include "StoreGate/ReadHandleKey.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
@@ -176,24 +175,23 @@ protected:
   double m_dphi0 = 0.0, m_dphi1 = 0.0, m_dphi2 = 0.0, m_dphi3 = 0.0;
 
   /// @f$\eta\times\phi@f$ cluster size.  These are properties.
-  int m_neta, m_nphi;
+  Gaudi::Property<int> m_neta{this, "eta_size", 5};
+  Gaudi::Property<int> m_nphi{this, "phi_size", 5};
 
   /// Fill-cluster flag.  This is a property.
   /// If true, then we fill the cluster with cells from StoreGate.
   /// Otherwise, we use the cells already in the cluster.
-  bool m_fill_cluster;
+  Gaudi::Property<bool> m_fill_cluster{this, "fill_cluster", true};
 
 
   /// Property to tell if the raw energy, eta0 and phi0 should 
-  /// be saved as uncalibrated signal state 
-  bool m_setRawState;
+  /// be saved as uncalibrated signal state
+  Gaudi::Property<bool> m_setRawState{this, "set_raw_state", true};
 
 private:
   /// The StoreGate key for the container of our input cells.
   /// This is a property.
-  SG::ReadHandleKey<CaloCellContainer> m_cellsName;
-  
-  
+  SG::ReadHandleKey<CaloCellContainer> m_cellsName{this, "cells_name", "AllCalo"};
 };
 
 #endif // not CALOCLUSTERCORRECTION_CALOFILLRECTANGULARCLUSTER_H

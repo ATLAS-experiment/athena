@@ -18,37 +18,6 @@ def settingIsTrue(setting):
         return True
     return False
 
-def totallyStripped(x):
-    y=str(x).lower().strip()
-    # remove leading and trailing "/'
-    while len(y)>0 and (y[0]=='"' or y[0]=="'"):
-        y=y[1:]
-    while len(y)>0 and (y[-1]=='"' or y[-1]=="'"):
-        y=y[:-1]
-    return y
-
-def checkSetting(key_,value_,mydict_):
-    key=totallyStripped(key_)
-    value=totallyStripped(value_)
-    mydict={}
-    for k in mydict_:
-        mydict[totallyStripped(k)]=totallyStripped(mydict_[k])
-    return key in mydict and mydict[key]==value
-
-def checkSettingIsTrue(key_,mydict_):
-    key=totallyStripped(key_)
-    mydict={}
-    for k in mydict_:
-        mydict[totallyStripped(k)]=totallyStripped(mydict_[k])
-    return key in mydict and mydict[key] in ['t','true']
-
-def checkSettingExists(key_,mydict_):
-    key=totallyStripped(key_)
-    keys=[]
-    for k in mydict_:
-        keys+=[totallyStripped(k)]
-    return key in keys
-
 def get_mg5_version():
     """Return MadGraph version string (e.g. '3.5.1')
 
@@ -100,22 +69,16 @@ def isNLO_from_run_card(run_card):
         f.close()
         return False
 
-def get_runArgs_info(runArgs):
-    if runArgs is None:
-        raise RuntimeError('runArgs must be provided!')
-    if hasattr(runArgs,'ecmEnergy'):
-        beamEnergy = runArgs.ecmEnergy / 2.
-    else:
-        raise RuntimeError("No center of mass energy found in runArgs.")
-    if hasattr(runArgs,'randomSeed'):
-        random_seed = runArgs.randomSeed
-    else:
-        raise RuntimeError("No random seed found in runArgs.")
-    return beamEnergy,random_seed
-
-
 def error_check(errors_a, return_code):
     if not MADGRAPH_CATCH_ERRORS:
+        return
+    if errors_a is None:
+        # stderr is not always captured (e.g. catch_errors=False).
+        # Still fail on non-zero return code.
+        if return_code != 0:
+            mglog.error(f'Detected a bad return code: {return_code}')
+            write_test_script()
+            raise RuntimeError('Error detected in MadGraphControl process')
         return
     unmasked_error = False
     my_debug_file = None
@@ -230,26 +193,6 @@ def write_test_script():
                 standalone_script.write(line+'\n')
     mglog.info('# Script end')
     mglog.info('Script also written to %s/standalone_script.sh',os.getcwd())
-
-def setup_path_protection():
-    # Addition for models directory
-    global MADGRAPH_COMMAND_STACK
-    if 'PYTHONPATH' in os.environ:
-        if not any( [('Generators/madgraph/models' in x and 'shutil_patch' not in x) for x in os.environ['PYTHONPATH'].split(':') ]):
-            os.environ['PYTHONPATH'] += ':/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest'
-            MADGRAPH_COMMAND_STACK += ['export PYTHONPATH=${PYTHONPATH}:/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest']
-    # Make sure that gfortran doesn't write to somewhere it shouldn't
-    if 'GFORTRAN_TMPDIR' in os.environ:
-        return
-    if 'TMPDIR' in os.environ:
-        os.environ['GFORTRAN_TMPDIR']=os.environ['TMPDIR']
-        MADGRAPH_COMMAND_STACK += ['export GFORTRAN_TMPDIR=${TMPDIR}']
-        return
-    if 'TMP' in os.environ:
-        os.environ['GFORTRAN_TMPDIR']=os.environ['TMP']
-        MADGRAPH_COMMAND_STACK += ['export GFORTRAN_TMPDIR=${TMP}']
-        return
-    
 
 def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOCATION,params={},output_location=None):
     """Build a new param_card.dat from an existing one.

@@ -35,11 +35,11 @@ public:
   TRT_DriftCircleContainerCnv (ISvcLocator* svcloc);
 protected:
   virtual TRT_DriftCircleContainer_PERS*   createPersistent (InDet::TRT_DriftCircleContainer* transCont) override;
-  virtual InDet::TRT_DriftCircleContainer* createTransient () override;
+  virtual InDet::TRT_DriftCircleContainer* createTransient(const Token* token) override;
 
   // Must initialize ID helpers
   virtual StatusCode initialize() override;
-  virtual AthenaPoolTopLevelTPCnvBase*	getTopLevelTPCnv() { return &m_TPConverter; }
+  virtual TopLevelTPCnvBase*	getTopLevelTPCnv() { return &m_TPConverter; }
 };
 
 #endif

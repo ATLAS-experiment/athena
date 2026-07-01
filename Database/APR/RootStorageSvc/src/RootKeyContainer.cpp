@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -239,7 +239,7 @@ StatusCode RootKeyContainer::close()   {
 StatusCode RootKeyContainer::open(DbDatabase&           dbH,
                                   const std::string&    dir_nam,
                                   const DbTypeInfo*  /* info */,
-                                  DbAccessMode          mode)
+                                  Io::IoFlag          mode)
 {
   m_name = dir_nam;
 
@@ -281,7 +281,7 @@ StatusCode RootKeyContainer::open(DbDatabase&           dbH,
       std::string s = nam.substr(idx1, idx2-idx1); 
       m_dir->cd();
       TDirectory* dir = (TDirectory*)m_dir->Get(s.c_str());
-      if ( 0==dir && mode&pool::CREATE && !s.empty() ) {
+      if ( 0==dir && mode == Io::WRITE && !s.empty() ) {
         dir = m_dir->mkdir(s.c_str());
       }
       else if ( 0==dir ) {
@@ -305,7 +305,7 @@ StatusCode RootKeyContainer::open(DbDatabase&           dbH,
       m_dir->cd();
     DbOption opt1("DEFAULT_WRITEPOLICY","");
     CHECK( dbH.getOption(opt1) );
-    CHECK( opt1._getValue(m_policy) );
+    CHECK( opt1.getValue(m_policy) );
     /// Parent Database handle
     m_dbH = dbH;
     ATH_MSG_DEBUG("Opened container " << m_name << " of type "
@@ -337,65 +337,65 @@ StatusCode RootKeyContainer::getOption(DbOption& opt) {
   if ( m_dir )  {
     const char* n = opt.name().c_str();
     if ( !strcasecmp(n,"BYTES_IO") )  {
-      return opt._setValue((int)m_ioBytes);
+      return opt.setValue((int)m_ioBytes);
     }
     else if ( !strcasecmp(n,"DIRECTORY") )  {
-      return opt._setValue((void*)m_dir);
+      return opt.setValue((void*)m_dir);
     }
     else if ( !strcasecmp(n, "DEFAULT_WRITEPOLICY") ) {
-      return opt._setValue(int(m_policy));
+      return opt.setValue(int(m_policy));
     }
     else if ( ::toupper(n[0])=='D' && opt.name().length() > 4 ) {
       switch(::toupper(n[4]))  {
       case 'B':
         if ( !strncasecmp(n+4,"BYTES",5) )
-          return opt._setValue((int)m_ioBytes);
+          return opt.setValue((int)m_ioBytes);
         break;
       case 'F':
         if ( !strcasecmp(n+4,"FILE") )  {
-          return opt._setValue((void*)m_dir->GetFile());
+          return opt.setValue((void*)m_dir->GetFile());
         }
         break;
       case 'G':
         if ( !strcasecmp(n+4,"GETOBJ") )  {
-          return opt._setValue((void*)m_dir->Get(opt.option().c_str()));
+          return opt.setValue((void*)m_dir->Get(opt.option().c_str()));
         }
         break;
       case 'L':
         if ( !strcasecmp(n+4,"LIST_KEYS") )  {
-          return opt._setValue((void*)m_dir->GetListOfKeys());
+          return opt.setValue((void*)m_dir->GetListOfKeys());
         }
         else if ( !strcasecmp(n+4,"LS") )  {
           m_dir->ls();
-          return opt._setValue(int(1));
+          return opt.setValue(int(1));
         }
         break;
       case 'N':
         if ( !strcasecmp(n+4,"NKEYS") )  {
-          return opt._setValue(int(m_dir->GetNkeys()));
+          return opt.setValue(int(m_dir->GetNkeys()));
         }
         else if ( !strcasecmp(n+4,"NBYTESKEYS") )  {
-          return opt._setValue(int(m_dir->GetNbytesKeys()));
+          return opt.setValue(int(m_dir->GetNbytesKeys()));
         }
         break;
       case 'M':
         if ( !strcasecmp(n+4,"MOTHER") )  {
-          return opt._setValue((void*)m_dir->GetMother());
+          return opt.setValue((void*)m_dir->GetMother());
         }
         else if ( !strcasecmp(n+4,"MODIFIED") )  {
-          return opt._setValue((int)m_dir->IsModified() ? 1 : 0);
+          return opt.setValue((int)m_dir->IsModified() ? 1 : 0);
         }
         break;
       case 'P':
         if ( !strcasecmp(n+4,"PRINT") )  {
           m_dir->Print(opt.option().c_str());
           std::cout << std::endl;
-          return opt._setValue(1);
+          return opt.setValue(1);
         }
         break;
       case 'W':
         if ( !strcasecmp(n+4,"WRITABLE") )  {
-          return opt._setValue((int)m_dir->IsWritable() ? 1 : 0);
+          return opt.setValue((int)m_dir->IsWritable() ? 1 : 0);
         }
         break;
       }
@@ -410,7 +410,7 @@ StatusCode RootKeyContainer::setOption(const DbOption& opt)  {
   if ( m_dir )  {
     const char* n = opt.name().c_str();
     if ( !strcasecmp(n, "DEFAULT_WRITEPOLICY") ) {
-      return opt._getValue(m_policy);
+      return opt.getValue(m_policy);
     }
     else if ( ::toupper(n[0]) == 'D' )  {
       switch(::toupper(n[4]))   {
@@ -434,7 +434,7 @@ StatusCode RootKeyContainer::setOption(const DbOption& opt)  {
         }
         else if ( !strcasecmp(n+4,"PURGE") )  {
           int val=1;
-          CHECK( opt._getValue(val) );
+          CHECK( opt.getValue(val) );
           if ( val > 0 )  {
             m_dir->Purge(val);
             return SUCCESS;

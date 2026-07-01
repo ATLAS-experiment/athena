@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODPrimitives/IsolationType.h"
@@ -57,10 +57,11 @@ unsigned int encode() {
     // skip invalid entries
     if( i%10 >= static_cast<int>(Iso::IsolationConeSize::numIsolationConeSizes) ) continue;
     Iso::IsolationType type = static_cast<Iso::IsolationType>(i);
-
+    
     // decode and check cone size
+    static const std::string invalidConeStr{"invalid cone size"};
     Iso::IsolationConeSize coneSize = Iso::enumconeSize(type);
-    check( coneSize <= Iso::IsolationConeSize::numIsolationConeSizes, "invalid cone size",type,nfailures);
+    check( coneSize <= Iso::IsolationConeSize::numIsolationConeSizes, invalidConeStr,type,nfailures);
 
     float fsize = Iso::coneSize(coneSize);
     check (Iso::coneSize(fsize)==coneSize, "Cone size conversion to float & back failed",type,nfailures);

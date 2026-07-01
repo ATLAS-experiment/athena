@@ -22,8 +22,8 @@
 
 using InDetIdentifierPkg::formatOutput;
 
-PixelID::PixelID()
-  : AtlasDetectorID("PixelID", "pixel")
+PixelID::PixelID(const std::string & name, const std::string & group)
+  : AtlasDetectorID(name, group)
 {
   m_barrel_field.add_value(0);
   m_dbm_field.add_value(0); //DBM

@@ -53,7 +53,7 @@ StatusCode PhotonOriginCorrectionAlg ::execute(const EventContext &ctx) const {
 
     xAOD::PhotonContainer* photons = nullptr;
 
-    ANA_CHECK(m_PhotonHandle.getCopy(photons, sys));
+    ANA_CHECK(m_PhotonHandle.getCopy(photons, sys, ctx));
 
     // Actually here we rely on the egamma preselection
     // to have run. Otherwise there is high danger

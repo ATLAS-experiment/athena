@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
  
 #include "L0MuonSmearingAlg.h"
@@ -9,6 +9,9 @@
 #include "TruthTrackSmearer.h"
 
 #include "TH1.h"
+
+#include <cstdint>
+#include <cmath>
 
 namespace L0Muon {
 
@@ -135,10 +138,13 @@ StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
 
     uint32_t extraword = (static_cast<uint32_t>(0x1)<<31) | (((ptword>>1) + 0x2) & 0xf);  // for the time being...
 
-    std::string emu_thr_name = "L0_MUx";
+    static const std::string emu_thr_name = "L0_MUx";
     float thrvalue = static_cast<float>(((ptword>>1) + 0x2) & 0xf);
     outputRoIs->back()->initialize(roiword, roi_eta, roi_phi, emu_thr_name, thrvalue, extraword);
-
+    if (outputRoIs->back()->pt() == 0.){
+      ATH_MSG_WARNING("L0MuonRoI: pT = 0");
+      continue;
+    }
     ATH_MSG_DEBUG("L0MuonRoI: phi = " << roi_phi << " (0x" << std::hex << phiword << std::dec << "), "
                       << "eta = " << roi_eta << " (0x" << std::hex << etaword << std::dec << "), "
                       << "pT = " << outputRoIs->back()->pt() << " (GeV) (0x" << std::hex << ptword << std::dec << "), "
@@ -152,8 +158,12 @@ StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
 
       auto delta_eta = Monitored::Scalar<float>("delta_eta", outputRoIs->back()->eta() - part->eta());  
       auto delta_phi = Monitored::Scalar<float>("delta_phi", TVector2::Phi_mpi_pi(outputRoIs->back()->phi() - (part->phi())));
-      auto delta_pt = Monitored::Scalar<float>("delta_pt", (outputRoIs->back()->pt() - part->pt()/1000.) / (part->pt()/1000.));
-      auto delta_curv = Monitored::Scalar<float>("delta_curv", ((outputRoIs->back()->getCharge() == 1 ? 1. : -1.)/outputRoIs->back()->pt() - (part->charge()*1000./part->pt())) / (part->charge()*1000./part->pt()));
+      auto pt0 = part->pt();
+      if (pt0 == 0.) pt0 = 1e-9; //set minimum value to avoid div-by-zero
+      //units of outputRoIs->back()->pt() ?? something looks wrong here, division takes precedence over subtraction
+      auto delta_pt = Monitored::Scalar<float>("delta_pt", (outputRoIs->back()->pt() - pt0/1000.) / (pt0/1000.));
+      //
+      auto delta_curv = Monitored::Scalar<float>("delta_curv", ((outputRoIs->back()->getCharge() == 1 ? 1. : -1.)/outputRoIs->back()->pt() - (part->charge()*1000./pt0)) / (part->charge()*1000./pt0));
 
       auto monitorIt = Monitored::Group(m_monTool, roi_output_eta, roi_output_pt, roi_output_phi, roi_output_curv,
                                                    delta_eta, delta_phi, delta_pt, delta_curv);

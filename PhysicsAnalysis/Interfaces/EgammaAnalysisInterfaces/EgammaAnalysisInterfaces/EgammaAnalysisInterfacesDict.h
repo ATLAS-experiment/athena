@@ -23,5 +23,6 @@
 #include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 
 #include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
+#include "EgammaAnalysisInterfaces/IForwardElectronCalib.h"
 
 #endif

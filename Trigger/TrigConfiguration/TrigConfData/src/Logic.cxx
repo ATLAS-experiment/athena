@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/Logic.h"
@@ -7,7 +7,7 @@
 #include <iostream>
 #include <regex>
 
-const std::regex re( "([-\\w.]+)(?:\\[x(\\d+)\\])?$" );
+static const std::regex re( "([-\\w.]+)(?:\\[x(\\d+)\\])?$" );
 
 TrigConf::Logic::Logic(NodeType nodeType) :
    m_nodeType(nodeType)
@@ -36,7 +36,7 @@ TrigConf::Logic::expression() const {
 void
 TrigConf::Logic::print(std::ostream & o) const {
    if(m_expression.size()>0) {
-      o << m_expression << std::endl;
+      o << m_expression << "\n";
       o << std::string(m_expression.size(), '-') << std::endl;
    }
    print(o, 4, 0);
@@ -54,7 +54,9 @@ void
 TrigConf::LogicLeaf::setContent(const std::string & content) {
    m_content = content;
    std::smatch sm;
-   std::regex_match(content, sm, re);
+   if(!std::regex_match(content, sm, re)){
+     throw std::invalid_argument("LogicLeaf::setContent: Invalid content '" + content + "'");
+   }
    m_name = sm[1];
    m_count = sm[2].length() > 0 ? static_cast<unsigned int>(std::stoul(sm[2])) : 1;
 }

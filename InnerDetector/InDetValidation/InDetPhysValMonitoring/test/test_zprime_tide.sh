@@ -16,7 +16,7 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r25.0.39"
+relname="r25.0.59"
 
 lastref_dir=last_results
 
@@ -41,13 +41,12 @@ case $ArtProcess in
     echo "List of files = " ${ArtInFile}
     ;;
   "end")
-    if ls art_core_*/${idtide} >/dev/null 2>&1 ; then
+    if ls art_core_*/physval_idtide.ntuple.root >/dev/null 2>&1 ; then
 
-      echo "Merging physval.DAOD_TIDE.root"
-      hadd -f505 ${idtide} art_core_*/${idtide}
-
-      #run IDPVM for IDTIDE derivation
-      run runIDPVM.py --doIDTIDE --doTracksInJets --doTracksInBJets --filesInput $idtide --outputFile physval_idtide.ntuple.root
+      echo "Merging IDPVM output files"
+      hadd  physval_idtide.ntuple.root art_core_*/physval_idtide.ntuple.root
+      echo "postprocess"
+      postProcessIDPVMHistos physval_idtide.ntuple.root
 
       echo "download latest result"
       run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
@@ -115,6 +114,12 @@ case $ArtProcess in
       rec_tf_exit_code=$?
       echo "art-result: $rec_tf_exit_code reco"
 
+    fi 
+    if [ $rec_tf_exit_code -eq 0 ]  ;then
+      #run IDPVM for IDTIDE derivation
+      run runIDPVM.py --doIDTIDE --doTracksInJets --doTracksInBJets --filesInput $idtide --outputFile physval_idtide.ntuple.root
+      idpvm_exit_code=$?
+      echo "art-result: $idpvm_exit_code IDPVM"
     fi 
     ;;
 

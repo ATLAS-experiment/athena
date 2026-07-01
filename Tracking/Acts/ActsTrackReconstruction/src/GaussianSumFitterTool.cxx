@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/GaussianSumFitterTool.h"
@@ -24,7 +24,7 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "ActsEvent/TrackContainer.h"
@@ -32,26 +32,51 @@
 // PACKAGE
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "Acts/Propagator/DirectNavigator.hpp"
 #include "src/detail/RefittingCalibrator.h"
-
+#include "src/detail/OnTrackCalibrator.h"
 // STL
 #include <vector>
 #include <bitset>
 #include <type_traits>
 #include <system_error>
+#include <fstream>
+
+#include "PathResolver/PathResolver.h"
+
+namespace {
+// Read an ATLAS Bethe-Heitler .par file (format: "n_cmps  degree\n[data]").
+Acts::AtlasBetheHeitlerApprox::Data readBHParFile(const std::string& path) {
+  std::ifstream fin(path);
+  if (!fin) {
+    throw std::invalid_argument("Could not open BH par file: " + path);
+  }
+  std::size_t n_cmps = 0, degree = 0;
+  fin >> n_cmps >> degree;
+  if (!fin || n_cmps == 0 || degree == 0) {
+    throw std::invalid_argument("Bad header in BH par file: " + path);
+  }
+  Acts::AtlasBetheHeitlerApprox::Data data(n_cmps);
+  for (auto& cmp : data) {
+    cmp.weightCoeffs.resize(degree + 1);
+    cmp.meanCoeffs.resize(degree + 1);
+    cmp.varCoeffs.resize(degree + 1);
+    for (double& c : cmp.weightCoeffs) { fin >> c; }
+    for (double& c : cmp.meanCoeffs)   { fin >> c; }
+    for (double& c : cmp.varCoeffs)    { fin >> c; }
+  }
+  if (!fin) {
+    throw std::invalid_argument("Truncated data in BH par file: " + path);
+  }
+  return data;
+}
+} // anonymous namespace
 
 namespace ActsTrk {
 
-GaussianSumFitterTool::GaussianSumFitterTool(const std::string& t,
-					     const std::string& n,
-					     const IInterface* p) :
-  base_class(t,n,p)
-{}
 
 StatusCode GaussianSumFitterTool::initialize() {
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
@@ -59,11 +84,12 @@ StatusCode GaussianSumFitterTool::initialize() {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ATLASConverterTool.retrieve());
-  if (!m_refitOnly) {
-    ATH_CHECK(m_trkSummaryTool.retrieve());
-  }else{
+  ATH_CHECK(m_geometryConvTool.retrieve());
+  ATH_CHECK(m_trkSummaryTool.retrieve(EnableTool{!m_refitOnly}));
+  if (m_refitOnly) {
     ATH_MSG_INFO("Running GSF without track summary");
   }
+  ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
 
   m_logger = makeActsAthenaLogger(this, "Acts Gaussian Sum Refit");
 
@@ -75,10 +101,21 @@ StatusCode GaussianSumFitterTool::initialize() {
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));
 
-  auto bha = std::make_shared<Acts::AtlasBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
-  m_fitter = std::make_unique<Fitter>(std::move(propagator), std::move(bha),
+  // Use the GeantSim Bethe-Heitler parameterisation, which clamps at X/X0=0.20
+  // matching the behaviour in Trk::ElectronCombinedMaterialEffects. The files
+  // store coefficients in logit(z) space; transform=true applies sigmoid/exp to
+  // recover physical z in (0,1).
+  const std::string bhLow  = PathResolver::find_file("GeantSim_LT01_cdf_nC6_O5.par", "DATAPATH");
+  const std::string bhHigh = PathResolver::find_file("GeantSim_GT01_cdf_nC6_O5.par", "DATAPATH");
+  ATH_MSG_INFO("ACTS GSF: loading GeantSim BH parameterisation (" << bhLow << ", " << bhHigh << ")");
+  auto bha = std::make_shared<Acts::AtlasBetheHeitlerApprox>(
+      readBHParFile(bhLow), readBHParFile(bhHigh),
+      /*lowTransform=*/true, /*highTransform=*/true,
+      /*lowLimit=*/0.1, /*highLimit=*/0.2, /*clampToRange=*/true,
+      /*noChangeLimit=*/0.0001, /*singleGaussianLimit=*/0.002);
+  m_fitter = std::make_unique<Fitter>(std::move(propagator), bha,
               logger().cloneWithSuffix("GaussianSumFitter"));
-  
+
   // Direct Fitter
   if( m_useDirectNavigation ){
     Acts::DirectNavigator directNavigator( logger().cloneWithSuffix("DirectNavigator") );
@@ -86,17 +123,16 @@ StatusCode GaussianSumFitterTool::initialize() {
     Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator> directPropagator(std::move(stepperDirect),
 											    std::move(directNavigator),
 											    logger().cloneWithSuffix("DirectPropagator"));
-    auto bhaDirect = std::make_shared<Acts::AtlasBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
-    m_directFitter = std::make_unique<DirectFitter>(std::move(directPropagator),std::move(bhaDirect),
+    m_directFitter = std::make_unique<DirectFitter>(std::move(directPropagator), bha,
 						    logger().cloneWithSuffix("DirectGaussianSumFitter"));
 
   }
 
   m_gsfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
   m_calibrator = std::make_unique<ActsTrk::detail::TrkMeasurementCalibrator>();
-  m_gsfExtensions.calibrator.connect<&ActsTrk::detail::TrkMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(m_calibrator.get());
+  m_gsfExtensions.calibrator.connect<&ActsTrk::detail::TrkMeasurementCalibrator::calibrate<TrackState_t>>(m_calibrator.get());
 
-  m_surfaceAccessor = detail::TrkMeasSurfaceAccessor{m_ATLASConverterTool.get()};
+  m_surfaceAccessor = detail::TrkMeasSurfaceAccessor{m_geometryConvTool.get()};
   m_gsfExtensions.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_surfaceAccessor);
   m_gsfExtensions.mixtureReducer.connect<&Acts::reduceMixtureWithKLDistance>();
   
@@ -165,10 +201,9 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   
 
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *inputTrack.perigeeParameters());
 
   return performFit(ctx, 
-		    tgContext,
 		    gsfOptions,
 		    trackSourceLinks, 
 		    initialParams);
@@ -209,9 +244,9 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   gsfOptions.abortOnError = false;
   
   std::vector< Acts::SourceLink > trackSourceLinks;
-  m_ATLASConverterTool->toSourceLinks(inputMeasSet, trackSourceLinks);
+  detail::MeasurementCalibratorBase::pack(inputMeasSet, trackSourceLinks);
 
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, estimatedStartParameters);
   
   if(m_useDirectNavigation){
     
@@ -220,14 +255,12 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
     std::ranges::transform(trackSourceLinks, std::back_inserter(surfaces), m_surfaceAccessor);
     
     return performDirectFit(ctx,
-			    tgContext,
 			    gsfOptions,
 			    trackSourceLinks,
 			    initialParams,
 			    surfaces);
   }else{
     return performFit(ctx,
-		      tgContext,
 		      gsfOptions,
 		      trackSourceLinks,
 		      initialParams);
@@ -296,11 +329,11 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
 				*pSurface);
 
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *inputTrack.perigeeParameters());
 
-  m_ATLASConverterTool->toSourceLinks(addMeasColl, trackSourceLinks);
+  detail::MeasurementCalibratorBase::pack(addMeasColl, trackSourceLinks);
 
-  return performFit(ctx, tgContext, gsfOptions,
+  return performFit(ctx, gsfOptions,
                     trackSourceLinks,
                     initialParams);
 }
@@ -370,11 +403,9 @@ GaussianSumFitterTool::fit(const EventContext& ctx,
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(intrk1);
   std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(intrk2);
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *intrk1.perigeeParameters());
 
-  return performFit(ctx,
-		    tgContext,
-		    gsfOptions,
+  return performFit(ctx, gsfOptions,
                     trackSourceLinks,
                     initialParams);
 }
@@ -393,7 +424,7 @@ GaussianSumFitterTool::fit(const ActsTrk::Seed & /*seed*/,
 }
 
 std::unique_ptr< ActsTrk::MutableTrackContainer >
-GaussianSumFitterTool::fit(const std::vector< ActsTrk::ATLASUncalibSourceLink> & /*clusterList*/,
+GaussianSumFitterTool::fit(const std::vector< const xAOD::UncalibratedMeasurement*> & /*clusterList*/,
          const Acts::BoundTrackParameters& /*initialParams*/,
          const Acts::GeometryContext& /*tgContext*/,
          const Acts::MagneticFieldContext& /*mfContext*/,
@@ -423,7 +454,7 @@ StatusCode GaussianSumFitterTool::fit(
     }
     
     if (ts.typeFlags().hasMeasurement()) {
-      sourceLinks.push_back(Acts::SourceLink{detail::RefittingCalibrator::RefittingSourceLink(ts)});
+      sourceLinks.push_back(ts.getUncalibratedSourceLink());
     }
   }
 
@@ -434,21 +465,23 @@ StatusCode GaussianSumFitterTool::fit(
 
   Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
   Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-  Acts::CalibrationContext calContext{};
+  Acts::CalibrationContext calContext{getCalibrationContext(ctx)};
 
   Acts::GsfOptions<ActsTrk::MutableTrackStateBackend> gsfOptions = prepareOptions(tgContext, mfContext, calContext, pSurface);
-  const Acts::TrackingGeometry* actsTrackingGeometry = m_trackingGeometryTool->trackingGeometry().get();
 
-  if (!actsTrackingGeometry) {
-    ATH_MSG_ERROR("No Acts tracking geometry.");
-    return StatusCode::FAILURE;
-  }
+  detail::RefittingCalibrator calibrator{m_geometryConvTool.get(), m_ROTcreator.get()};
+  using xAODUnCalibrator_t = detail::OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>;
+  auto xODCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
+  calibrator.connect<&xAODUnCalibrator_t::calibrate>(xAOD::UncalibMeasType::PixelClusterType, &xODCalibrator);
+  calibrator.connect<&xAODUnCalibrator_t::calibrate>(xAOD::UncalibMeasType::StripClusterType, &xODCalibrator);
+  
 
-  detail::RefittingCalibrator calibrator;
+  detail::RefittingSurfaceAccesor surfaceAcc{m_geometryConvTool.get(),
+                                             m_trackingGeometryTool.get()};
 
   auto gsfExtensions = m_gsfExtensions;
   gsfExtensions.calibrator.connect<&detail::RefittingCalibrator::calibrate>(&calibrator);
-  gsfExtensions.surfaceAccessor.connect<&detail::RefittingCalibrator::accessSurface>();
+  gsfExtensions.surfaceAccessor.connect<&detail::RefittingSurfaceAccesor::operator()>(&surfaceAcc);
   gsfOptions.extensions = gsfExtensions;
   gsfOptions.abortOnError = false;
 
@@ -459,159 +492,6 @@ StatusCode GaussianSumFitterTool::fit(
   }
 
   return StatusCode::SUCCESS;
-}
-
-std::unique_ptr<Trk::Track>
-GaussianSumFitterTool::makeTrack(const EventContext& ctx,
-				 const Acts::GeometryContext& tgContext,
-				 ActsTrk::MutableTrackContainer& tracks,
-				 Acts::Result<typename ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult) const
-{
-  if (not fitResult.ok()) 
-    return nullptr;
-
-  std::unique_ptr<Trk::Track> newtrack = nullptr;
-  // Get the fit output object
-  const auto& acts_track = fitResult.value();
-  auto finalTrajectory = std::make_unique<Trk::TrackStates>();
-  // initialise the number of dead Pixel and Acts strip
-  int numberOfDeadPixel = 0;
-  int numberOfDeadSCT = 0;
-
-  std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
-  // Loop over all the output state to create track state
-  tracks.trackStateContainer().visitBackwards(acts_track.tipIndex(), 
-                [&] (const auto &state) -> void
-  {
-    // First only concider state with an associated detector element not in the TRT
-    auto flag = state.typeFlags();
-    const auto* associatedDetEl = state.referenceSurface().surfacePlacement();
-    if (not associatedDetEl) 
-      return;
-    
-    const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(associatedDetEl);
-    if (not actsElement) 
-      return;
-
-    const auto* upstreamDetEl = actsElement->upstreamDetectorElement();
-    if (not upstreamDetEl) 
-      return;
-
-    ATH_MSG_VERBOSE("Try casting to TRT for if");
-    if (dynamic_cast<const InDetDD::TRT_BaseElement*>(upstreamDetEl))
-      return;
-
-    const auto* trkDetElem = dynamic_cast<const Trk::TrkDetElementBase*>(upstreamDetEl);
-    if (not trkDetElem)
-      return;
-
-    ATH_MSG_VERBOSE("trkDetElem type: " << static_cast<std::underlying_type_t<Trk::DetectorElemType>>(trkDetElem->detectorType()));
-
-    ATH_MSG_VERBOSE("Try casting to SiDetectorElement");
-    const auto* detElem = dynamic_cast<const InDetDD::SiDetectorElement*>(upstreamDetEl);
-    if (not detElem)
-      return;
-    ATH_MSG_VERBOSE("detElem = " << detElem);
-
-    // We need to determine the type of state 
-    std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-    std::unique_ptr<Trk::TrackParameters> parm;
-
-    // State is a hole (no associated measurement), use predicted parameters      
-    if (flag.isHole()){
-      ATH_MSG_VERBOSE("State is a hole (no associated measurement), use predicted parameters");
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.predicted(),
-             state.predictedCovariance(),
-             acts_track.particleHypothesis());
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
-      auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
-      // Check if this is a hole, a dead sensors or a state outside the sensor boundary
-      ATH_MSG_VERBOSE("Check if this is a hole, a dead sensors or a state outside the sensor boundary");
-      if(boundaryCheck == Trk::BoundaryCheckResult::DeadElement){
-  if (detElem->isPixel()) {
-    ++numberOfDeadPixel;
-  }
-  else if (detElem->isSCT()) {
-    ++numberOfDeadSCT;
-  }
-  // Dead sensors states are not stored              
-  return;
-      } else if (boundaryCheck != Trk::BoundaryCheckResult::Candidate){
-  // States outside the sensor boundary are ignored
-  return;
-      }
-      typePattern.set(Trk::TrackStateOnSurface::Hole);
-    }
-    // The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters
-    else if (flag.isOutlier() or not state.hasSmoothed()) {
-      ATH_MSG_VERBOSE("The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters");
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.filtered(),
-             state.filteredCovariance(),
-             acts_track.particleHypothesis());
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
-      typePattern.set(Trk::TrackStateOnSurface::Outlier);
-    }
-    // The state is a measurement state, use smoothed parameters 
-    else{
-      ATH_MSG_VERBOSE("The state is a measurement state, use smoothed parameters");
-
-      const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
-             state.smoothed(),
-             state.smoothedCovariance(),
-             acts_track.particleHypothesis());
-      
-      actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
-      parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
-      typePattern.set(Trk::TrackStateOnSurface::Measurement);
-    }
-
-    std::unique_ptr<Trk::MeasurementBase> measState;
-    if (state.hasUncalibratedSourceLink()){
-      auto sl = state.getUncalibratedSourceLink().template get<ATLASSourceLink>();
-      assert(sl);
-      measState = sl->uniqueClone();
-    }
-    double nDoF = state.calibratedSize();
-    auto quality =Trk::FitQualityOnSurface(state.chi2(), nDoF);
-    const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(quality, std::move(measState), std::move(parm), nullptr, typePattern);
-    // If a state was succesfully created add it to the trajectory 
-    if (perState) {
-      ATH_MSG_VERBOSE("State succesfully creates, adding it to the trajectory");
-      finalTrajectory->insert(finalTrajectory->begin(), perState);
-    }
-  });
-  
-  // Convert the perigee state and add it to the trajectory
-  const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
-                 acts_track.parameters(), 
-                 acts_track.covariance(),
-                 acts_track.particleHypothesis());
-  std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
-  std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-  typePattern.set(Trk::TrackStateOnSurface::Perigee);
-  const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);
-  if (perState) finalTrajectory->insert(finalTrajectory->begin(), perState);
-
-  // Create the track using the states
-  Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::GaussianSumFilter, Trk::noHypothesis);
-  newInfo.setTrackFitter(Trk::TrackInfo::TrackFitter::GaussianSumFilter); //Mark the fitter as GaussianSumFilter
-  newtrack = std::make_unique<Trk::Track>(newInfo, std::move(finalTrajectory), nullptr);
-  if (newtrack && !m_refitOnly) {
-    // Create the track summary and update the holes information
-    if (!newtrack->trackSummary()) {
-      newtrack->setTrackSummary(std::make_unique<Trk::TrackSummary>());
-      newtrack->trackSummary()->update(Trk::numberOfPixelHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfSCTHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfTRTHoles, 0);
-      newtrack->trackSummary()->update(Trk::numberOfPixelDeadSensors, numberOfDeadPixel);
-      newtrack->trackSummary()->update(Trk::numberOfSCTDeadSensors, numberOfDeadSCT);
-    }
-    m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, true);
-  }
-  
-  return newtrack;
 }
 
 const Acts::GsfExtensions<typename ActsTrk::MutableTrackStateBackend>& 

@@ -105,11 +105,11 @@ StatusCode TileExpertDump::setEmExpertOptions() {
 
 //
 //___________________________________________________________________________________________
-StatusCode TileExpertDump::execute() {
+StatusCode TileExpertDump::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( " in execute()" );
 
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
   ATH_CHECK( eventInfo.isValid() );
 
   ATH_MSG_DEBUG( "Event: ["

@@ -10,6 +10,7 @@
 
 #include <ColumnarInterfaces/ColumnInfo.h>
 
+#include <cstdint>
 #include <span>
 #include <string>
 #include <typeinfo>
@@ -92,11 +93,20 @@ namespace columnar
     /// @brief the name of the offset column (or empty for none)
     std::string offsetName;
 
-    /// @brief for link columns: the target container names
-    std::vector<std::string> linkTargetNames;
+    /// @brief for simple link columns: the target container name
+    std::string soleLinkTargetName;
 
-    /// @brief if this is a variant link column, the name of the key column
-    std::string variantLinkKeyColumn;
+    /// @brief for simple link columns: the target container CLID (or 0)
+    std::uint32_t soleLinkTargetClid = 0;
+
+    /// @brief whether this is a variant link column
+    bool isVariantLink = false;
+
+    /// @brief for variant link key columns: the target container names
+    std::vector<std::string> variantLinkTargetNames;
+
+    /// @brief if this is a key column for a variant link, the name of the link column
+    std::string keyColumnForVariantLink;
 
     /// @brief the fixed dimensions (if any)
     std::vector<unsigned> fixedDimensions;
@@ -215,7 +225,7 @@ namespace columnar
         return std::make_pair (size, static_cast<CT*>(const_cast<void*>(ptr)));
     }
     [[nodiscard]] std::pair<std::size_t,const void*>
-    getColumnVoid (std::size_t columnIndex, const std::type_info *type, bool isConst);
+    getColumnVoid (std::size_t columnIndex, const std::type_info *type, bool isConst) const;
 
 
     /// @brief do a basic check of the data vector

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Epos4_i )
@@ -22,7 +22,7 @@ atlas_add_library( Epos4_iLib
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES  GeneratorModulesLib
-                   PRIVATE_LINK_LIBRARIES AtlasHepMCLib AtlasHepMCfioLib ${CLHEP_LIBRARIES} GaudiKernel TruthUtils ${EPOS4_LIBRARIES})
+                   PRIVATE_LINK_LIBRARIES AtlasHepMCLib ${CLHEP_LIBRARIES} GaudiKernel TruthUtils ${EPOS4_LIBRARIES})
 
 atlas_add_component( Epos4_i
                      src/components/*.cxx

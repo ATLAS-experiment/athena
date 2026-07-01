@@ -117,13 +117,6 @@
       <graph name="fakerate_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="fakerate_vs_mu" plotopts="" tests="KS" type="TEfficiency"/>
      </TDirectory>
-     <TDirectory name="Unlinked">
-      <TDirectory name="FakeRate">
-       <graph name="fakerate_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
-       <graph name="fakerate_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
-       <graph name="fakerate_vs_phi" plotopts="" tests="KS" type="TEfficiency"/>
-      </TDirectory>
-     </TDirectory>
      <TDirectory name="Efficiency">
       <graph name="efficiency_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="efficiency_vs_pt" plotopts="" tests="KS" type="TEfficiency"/>
@@ -627,9 +620,6 @@
      <hist1D name="NumChargedPFOPt500_0_" plotopts="" tests="KS" type="TH1F"/>
      <hist1D name="NumChargedPFOPt1000_0_" plotopts="" tests="KS" type="TH1F"/>
      <hist1D name="ChargedPFOWidthPt1000_0_" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="DFCommonJets_QGTagger_NTracks" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="DFCommonJets_QGTagger_TracksWidth" plotopts="" tests="KS" type="TH1F"/>
-     <hist1D name="DFCommonJets_QGTagger_TracksC1" plotopts="" tests="KS" type="TH1F"/>
      <hist1D name="DFCommonJets_fJvt" plotopts="" tests="KS" type="TH1F"/>
      <hist1D name="erhEfficiencyR1" plotopts="" tests="KS" type="TProfile"/>
      <hist1D name="erhResponse" plotopts="" tests="KS" type="TH1F"/>

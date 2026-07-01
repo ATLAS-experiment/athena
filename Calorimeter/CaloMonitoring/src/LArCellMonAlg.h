@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // based on LArCellMonTool by W.Lampl (Spring 2017: Major re-design, early 2020: migration to AthenaMT)
 
@@ -100,7 +100,14 @@ private:
   enum TriggerType{RNDM,CALO,MINBIAS,MET,MISC,NOTA,MAXTRIGTYPE};
 
   BooleanProperty m_useTrigger{this, "useTrigger", true};
-  StringProperty   m_triggerNames[NOTA];
+
+  // Trigger Awareness:
+  std::array<StringProperty,NOTA> m_triggerNames{{{this,"rndmTriggerNames",""},
+						  {this,"caloTriggerNames",""},
+						  {this,"minBiasTriggerNames",""},
+						  {this,"metTriggerNames",""},
+						  {this,"miscTriggerNames",""}
+    }};
 
   BooleanProperty m_ignoreKnownBadChannels{this, "MaskBadChannels", false, "Do not fill histograms with values from known bad channels"};
   BooleanProperty m_maskNoCondChannels{this, "MaskNoCondChannels", false, "Do not fill histograms with values from cells reco'ed w/o conditions database"};
@@ -143,10 +150,22 @@ private:
   StringArrayProperty  m_doEtaPhiAvgTimeNames{this, "DoEtaPhiAvgTimeNames", {},"Turns on 'totTime' and total 'Occupancy' plots. The ratio will be computed at post-processing stage"};
   StringArrayProperty  m_doEtaPhiFractionPastTthNames{this, "DoEtaPhiFractionPastTthNames", {}};
 
-  
-
-
-  FloatArrayProperty   m_thresholdsProp[MAXLYRNS];
+  std::array<FloatArrayProperty, MAXLYRNS> m_thresholdsProp {{{this, "EMBP_Thresh", {}},
+							      {this, "EMB1_Thresh", {}},
+							      {this, "EMB2_Thresh", {}},
+							      {this, "EMB3_Thresh", {}},
+							      {this, "EMECP_Thresh", {}},
+							      {this, "EMEC1_Thresh", {}},
+							      {this, "EMEC2_Thresh", {}},
+							      {this, "EMEC3_Thresh", {}},
+							      {this, "HEC0_Thresh", {}},
+							      {this, "HEC1_Thresh", {}},
+							      {this, "HEC2_Thresh", {}},
+							      {this, "HEC3_Thresh", {}},
+							      {this, "FCAL1_Thresh", {}},
+							      {this, "FCAL2_Thresh", {}},
+							      {this, "FCAL3_Thresh", {}},
+    }};
 
   //Enumerate partitions
   enum PartitionEnum{EMBA,EMBC,EMECA,EMECC,HECA,HECC,FCALA,FCALC,MAXPARTITIONS};
@@ -169,7 +188,7 @@ private:
     std::string m_threshTitleTemplate;               /// Histogram title template
     std::array<float,MAXLYRNS> m_threshValue{{}};    /// The actual threshold (per layer)
     std::array<std::string,MAXLYRNS> m_threshTitles; /// Part of the histogram title (containing the threshold value, so per-layer)
-    size_t m_thrIndex;                                  ///for filling in the eventCount plot 
+    size_t m_thrIndex{};                                  ///for filling in the eventCount plot 
 
     bool m_inSigNoise=false;                         /// Absolute threshold or in sigma noise?
     Direction m_threshDirection=OVER;

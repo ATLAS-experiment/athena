@@ -28,13 +28,13 @@ namespace MuonValR4{
             virtual ~MuonSPCalibrationTest() = default;
 
             virtual StatusCode initialize() override;
-            virtual StatusCode execute() override;
+            virtual StatusCode execute(const EventContext& ctx) override;
             // virtual StatusCode finalize() override;
 
         private:
             //Retrieve the xAODMdtCircles container
             SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spKeyArray{this, "SpacePointKeyArray", {"NswSpacePoints"}};
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** pointer to MdtCalibSvc */
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
            

@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( EventLoopGrid )
 
 # External dependencies of the package:
-find_package( ROOT COMPONENTS Core RIO PyROOT Tree )
+find_package( ROOT COMPONENTS Core RIO ROOTTPython Tree )
 
 # Library in the package:
 atlas_add_root_dictionary( EventLoopGrid EventLoopGridCintDict

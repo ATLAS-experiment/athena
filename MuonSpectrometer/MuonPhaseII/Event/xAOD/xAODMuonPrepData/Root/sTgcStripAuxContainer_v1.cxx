@@ -14,8 +14,6 @@ namespace {
 namespace xAOD {
 sTgcStripAuxContainer_v1::sTgcStripAuxContainer_v1()
     : AuxContainerBase() {
-    /// Identifier variable hopefully unique
-    AUX_VARIABLE(identifier);
     AUX_VARIABLE(identifierHash);
     AUX_MEASUREMENTVAR(localPosition, 1)
     AUX_MEASUREMENTVAR(localCovariance, 1)

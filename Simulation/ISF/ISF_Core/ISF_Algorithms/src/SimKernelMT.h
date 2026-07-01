@@ -74,7 +74,7 @@ public:
    *  @retval StatusCode::SUCCESS all HepMC::GenEvents of the current Athena event are valid
    *  @retval StatusCode::FAILURE the MC truth collection could not be read
    *  @retval StatusCode::FAILURE the MC truth collection does not have a valid tree structure */
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) override;
 
   /// Implements empty finalize (implementation required by AthAlgorithm)
   StatusCode finalize() override;

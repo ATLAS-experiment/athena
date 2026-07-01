@@ -85,7 +85,7 @@ StatusCode DerivationFramework::SkimmingToolHIGG5VBF::finalize()
 }
 
 // The filter itself
-bool DerivationFramework::SkimmingToolHIGG5VBF::eventPassesFilter() const
+bool DerivationFramework::SkimmingToolHIGG5VBF::eventPassesFilter(const EventContext& /*ctx*/) const
 {
   m_ntot++;
   bool acceptEvent(true);

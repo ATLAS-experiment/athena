@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,12 +14,14 @@
 
 #include <AnaAlgorithm/AlgorithmWorkerData.h>
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
-#include <AsgTools/SgTEvent.h>
+#include <AsgTools/CurrentContext.h>
+#include <AsgTools/SgEvent.h>
 #include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
 #include <TTree.h>
+#include <algorithm>
 #include <exception>
 
 //
@@ -110,9 +112,8 @@ namespace EL
         return StatusCode::FAILURE;
       }
 
-      if (data.m_inputTree == nullptr ||
-          data.m_inputTree->GetEntries() == 0)
-        return StatusCode::SUCCESS;
+      // Check that there are events on input
+      if (!data.m_hasInputEvents) return StatusCode::SUCCESS;
 
       if (forAllAlgorithms (msg(), data, "changeInput", [&] (AlgorithmData& alg) {
             return alg->beginInputFile ();}).isFailure())
@@ -135,50 +136,65 @@ namespace EL
     onExecute (ModuleData& data)
     {
       data.m_skipEvent = false;
-      auto iter = data.m_algs.begin();
-      try
+      bool sequenceSkip = false;
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+      for (auto& algData : data.m_algs)
       {
-        for (auto end = data.m_algs.end();
-            iter != end; ++ iter)
+        try
         {
-          iter->m_executeCount += 1;
-          if (iter->m_algorithm->execute() == StatusCode::FAILURE)
+          if (algData.m_sequenceStart)
+            sequenceSkip = false;
+          else if (sequenceSkip)
           {
-            ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
+            algData.m_wasSkipped = true;
+            continue;
+          }
+
+          algData.m_executeCount += 1;
+          if (algData.m_algorithm->execute(ctx) == StatusCode::FAILURE)
+          {
+            ANA_MSG_ERROR ("while calling execute() on algorithm " << algData.m_algorithm->getName());
             return StatusCode::FAILURE;
           }
 
           if (data.m_skipEvent)
           {
-            iter->m_skipCount += 1;
-            return StatusCode::SUCCESS;
+            algData.m_skipCount += 1;
+            algData.m_wasSkipped = true;
+            sequenceSkip = true;
+            data.m_skipEvent = false;
           }
+        } catch (...)
+        {
+          Detail::report_exception (std::current_exception());
+          ANA_MSG_ERROR ("while calling execute() on algorithm " << algData.m_algorithm->getName());
+          return StatusCode::FAILURE;
         }
-      } catch (...)
-      {
-        Detail::report_exception (std::current_exception());
-        ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
-        return StatusCode::FAILURE;
       }
 
-      /// rationale: this will make sure that the post-processing runs
-      ///   for all algorithms for which the regular processing was run
-      try
+      for (auto& algData : data.m_algs)
       {
-        for (auto jter = data.m_algs.begin(), end = iter;
-            jter != end && !data.m_skipEvent; ++ jter)
+        try
         {
-          if (jter->m_algorithm->postExecute() == StatusCode::FAILURE)
+          // This will skip `postExecute` for all algorithms that called
+          // `setFilterPassed(false)` or that were skipped because of a
+          // prior algorithm calling `setFilterPassed(false)`.
+          if (algData.m_wasSkipped)
           {
-            ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
+            algData.m_wasSkipped = false;
+            continue;
+          }
+          if (algData.m_algorithm->postExecute() == StatusCode::FAILURE)
+          {
+            ANA_MSG_ERROR ("while calling postExecute() on algorithm " << algData.m_algorithm->getName());
             return StatusCode::FAILURE;
           }
+        } catch (...)
+        {
+          Detail::report_exception (std::current_exception());
+          ANA_MSG_ERROR ("while calling postExecute() on algorithm " << algData.m_algorithm->getName());
+          return StatusCode::FAILURE;
         }
-      } catch (...)
-      {
-        Detail::report_exception (std::current_exception());
-        ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
-        return StatusCode::FAILURE;
       }
 
       return StatusCode::SUCCESS;

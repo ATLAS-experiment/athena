@@ -30,7 +30,7 @@ StatusCode HiveAlgC::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
 
-  sleep();
+  sleep(ctx);
 
   SG::ReadHandle<HiveDataObj> rdh1{m_rdh1, ctx};
   if (!rdh1.isValid()) {

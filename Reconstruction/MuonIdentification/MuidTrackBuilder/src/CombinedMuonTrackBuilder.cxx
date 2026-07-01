@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1398,7 +1398,7 @@ namespace Rec {
         momentumUpdate(perigee_owner, pInner, true, deltaPhi, deltaTheta);
 
         std::unique_ptr<Trk::RecVertex> mbeamAxis = std::make_unique<Trk::RecVertex>(*m_beamAxis);
-        /// Create the vertex element before the perigee_owner looses ownership
+        /// Create the vertex element before the perigee_owner loses ownership
         std::unique_ptr<Trk::PseudoMeasurementOnTrack> vertexInFit{vertexOnTrack(*perigee_owner, vertex.get(), mbeamAxis.get())};
 
         // create perigee TSOS
@@ -2922,7 +2922,7 @@ namespace Rec {
             // material in spectrometer
             if (tsos->materialEffectsOnTrack() &&
                 !m_calorimeterVolume->inside(tsos->materialEffectsOnTrack()->associatedSurface().globalReferencePoint())) {
-                if (tsos->measurementOnTrack()) {
+                if (tsos->measurementOnTrack() && tsos->trackParameters()) {
                     Amg::VectorX parameterVector = tsos->trackParameters()->parameters();
                     if (limitMomentum) { parameterVector[Trk::qOverP] = qOverP; }
                     std::unique_ptr<Trk::TrackParameters> trackParameters =

@@ -43,7 +43,7 @@ StatusCode TruthMuonsToSG::finalize() {
 }
 
 
-StatusCode TruthMuonsToSG::execute() {
+StatusCode TruthMuonsToSG::execute(const EventContext& /*ctx*/) {
   const xAOD::TruthParticleContainer *truthCollection = nullptr;
   StatusCode sc=evtStore()->retrieve( truthCollection, m_resolver.key());
   if( sc.isFailure()  ||  !truthCollection) {

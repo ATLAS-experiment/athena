@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,6 +9,15 @@ from xAODEgamma.xAODEgammaParameters import xAOD
 def egammaMVAToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.egammaMVACalibTool(**kwargs))
+    return acc
+
+def egammaTransformerToolCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    doFix, _ = False, 'dummy'
+    if doFix:
+        kwargs['egammaCellRecoveryTool'] = None
+        kwargs['useFixForMissingCells'] = False
+    acc.setPrivateTools(CompFactory.egammaTransformerCalibTool(**kwargs))
     return acc
 
 
@@ -61,6 +70,47 @@ def egammaMVASvcCfg(flags, name="egammaMVASvc", **kwargs):
             **kwargs), primary=True)
     return acc
 
+def egammaTransformerSvcCfg(flags, name="egammaTransformerSvc", **kwargs):
+
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("folder", flags.Egamma.Calib.TransformerVersion)
+    if "ElectronTool" not in kwargs:
+        kwargs["ElectronTool"] = acc.popToolsAndMerge(
+            egammaTransformerToolCfg(
+                flags,
+                name="electronTransformerTool",
+                ParticleType=xAOD.EgammaParameters.electron,
+                folder=kwargs['folder'],
+                isMC = flags.Input.isMC),
+        )
+
+    if "UnconvertedPhotonTool" not in kwargs:
+        kwargs["UnconvertedPhotonTool"] = acc.popToolsAndMerge(
+            egammaTransformerToolCfg(
+                flags,
+                name="unconvertedPhotonTransformerTool",
+                ParticleType=xAOD.EgammaParameters.unconvertedPhoton,
+                folder=kwargs['folder'],
+                isMC = flags.Input.isMC),
+        )
+
+    if "ConvertedPhotonTool" not in kwargs:
+        kwargs["ConvertedPhotonTool"] = acc.popToolsAndMerge(
+            egammaTransformerToolCfg(
+                flags,
+                name="convertedPhotonTransformerTool",
+                ParticleType=xAOD.EgammaParameters.convertedPhoton,
+                folder=kwargs['folder'],
+                isMC = flags.Input.isMC),
+        )
+
+    kwargs['RemoveTRTConvBarrel'] = 1
+    acc.addService(
+        CompFactory.egammaMVASvc(
+            name=name,
+            **kwargs), primary=True)
+    return acc
 
 if __name__ == "__main__":
 
@@ -76,10 +126,13 @@ if __name__ == "__main__":
     mlog = logging.getLogger("egammaMVASvcConfigTest")
     mlog.info("Configuring egammaMVASvc :")
     printProperties(mlog, cfg.getPrimaryAndMerge(
-        egammaMVASvcCfg(flags,
-                        folder=flags.Egamma.Calib.MVAVersion)),
-                    nestLevel=1,
-                    printDefaults=True)
+        egammaMVASvcCfg(flags)),
+        nestLevel=1,
+        printDefaults=True)
+    printProperties(mlog, cfg.getPrimaryAndMerge(
+        egammaTransformerSvcCfg(flags)),
+        nestLevel=1,
+        printDefaults=True)
     cfg.printConfig()
 
     f = open("egmvatools.pkl", "wb")

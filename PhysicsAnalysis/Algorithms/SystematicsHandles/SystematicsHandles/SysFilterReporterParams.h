@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -16,6 +16,7 @@
 #include <functional>
 
 #ifndef XAOD_STANDALONE
+#include <AsgTools/CurrentContext.h>
 #include <AthenaKernel/ICutFlowSvc.h>
 #include <GaudiKernel/ServiceHandle.h>
 #endif
@@ -135,7 +136,12 @@ namespace CP
   template<typename T> SysFilterReporterParams ::
   SysFilterReporterParams (T *owner, std::string val_filterDescription)
     : AsgMessagingForward (owner)
-    , m_setFilterPassed ([owner] (bool val_setFilterPassed) {owner->setFilterPassed (val_setFilterPassed);})
+    , m_setFilterPassed ([owner] (bool val_setFilterPassed) {
+#ifndef XAOD_STANDALONE
+      owner->setFilterPassed (val_setFilterPassed, Gaudi::Hive::currentContext());})
+#else
+      owner->setFilterPassed (val_setFilterPassed);})
+#endif
     , m_eventInfoHandle (owner, "eventInfo", "EventInfo", "the event info object to run on")
     , m_eventDecisionOutputDecoration (owner, "eventDecisionOutputDecoration", "", "the decoration for the event decision")
     , m_filterDescription (std::move (val_filterDescription))

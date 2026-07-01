@@ -48,7 +48,7 @@ StatusCode TileCosmicMuonFilterAlg::initialize(){
 } 
 
 //=======================================
-StatusCode TileCosmicMuonFilterAlg::execute(){
+StatusCode TileCosmicMuonFilterAlg::execute(const EventContext& /*ctx*/){
 //=======================================
    switch(m_trackType)
    {
@@ -105,7 +105,7 @@ StatusCode TileCosmicMuonFilterAlg::execute(){
     const MUON* muon = *muonItr;
     if(!muon){ ATH_MSG_INFO("Not a valid muon"); continue; }
     //Cut 0:  combined muon // probably it is better to use this cut
-    if( m_useCuts && muon->muonType()!=xAOD::Muon::Combined ) continue;
+    if( m_useCuts && muon->muonType()!=xAOD::Muon::MuonType::Combined ) continue;
     cut[0]++;
     //Cut 1: transverse momentum
     if( m_useCuts && muon->pt() < m_muonPt ) continue;
@@ -136,7 +136,7 @@ StatusCode TileCosmicMuonFilterAlg::execute(){
       case 0:  muon_track = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);          break;
       case 1:  muon_track = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);     break;
       case 2:  muon_track = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);  break;
-      default: muon_track = muon->primaryTrackParticle();                                    break;
+      default: muon_track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);                                    break;
     } // SWITCH
     if(!muon_track) continue;
     cut[4]++;
@@ -171,7 +171,7 @@ StatusCode TileCosmicMuonFilterAlg::execute(){
       case 0:  muon_track = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);          break;
       case 1:  muon_track = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);     break;
       case 2:  muon_track = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);  break;
-      default: muon_track = muon->primaryTrackParticle();                                    break;
+      default: muon_track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);                                    break;
     } // SWITCH
     if(!muon_track) continue;  
 

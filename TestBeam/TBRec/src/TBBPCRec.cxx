@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -57,10 +57,9 @@ TBBPCRec::initialize()
 }
 
 StatusCode
-TBBPCRec::execute()
+TBBPCRec::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "In execute()" );
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Get run number and get new calib constants -----------------------------
   unsigned int thisrun=ctx.eventID().run_number();
@@ -196,9 +195,9 @@ TBBPCRec::execute()
   }
 
   if ( sc.isFailure( ) ) {
-     setFilterPassed(false);
+     setFilterPassed(false, ctx);
   } else {
-     setFilterPassed(true);
+     setFilterPassed(true, ctx);
   }
 
   return StatusCode::SUCCESS;

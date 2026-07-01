@@ -16,7 +16,7 @@ AFP_SiDigiCollection_PERS* AFP_SiDigiCollectionCnv::createPersistent(AFP_SiDigiC
 	return pPersColl;
 }
 
-AFP_SiDigiCollection* AFP_SiDigiCollectionCnv::createTransient()
+AFP_SiDigiCollection* AFP_SiDigiCollectionCnv::createTransient(const Token* token)
 {
 	MsgStream mlog(msgSvc(), "AFP_SiDigiCollectionConverter" );
 
@@ -26,8 +26,8 @@ AFP_SiDigiCollection* AFP_SiDigiCollectionCnv::createTransient()
 	AFP_SiDigiCollectionCnv_p1 TPConverter_p1;
 	AFP_SiDigiCollection *pTransColl=nullptr;
 
-	if(this->compareClassGuid(p1_guid)){
-		std::unique_ptr<AFP_SiDigiCollection_p1> col_vect(this->poolReadObject<AFP_SiDigiCollection_p1>());
+	if(this->compareClassGuid(token, p1_guid)){
+		std::unique_ptr<AFP_SiDigiCollection_p1> col_vect(this->poolReadObject<AFP_SiDigiCollection_p1>(token));
 		pTransColl=TPConverter_p1.createTransient(col_vect.get(), mlog);
 	}
 	else{

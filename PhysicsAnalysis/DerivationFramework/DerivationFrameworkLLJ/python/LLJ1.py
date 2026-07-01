@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_LLJ1.py
 # Derivation format to store additional jet information, as UFO jets constituents
@@ -136,7 +136,6 @@ def LLJ1Cfg(flags):
                                            "TauJets_MuonRM",
                                            "DiTauJets",
                                            "DiTauJetsLowPt",
-                                           "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            ]
     
@@ -152,27 +151,27 @@ def LLJ1Cfg(flags):
     LLJ1SlimmingHelper.StaticContent = StaticContent
    
     # Extra content
-    LLJ1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                              "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                              "TruthPrimaryVertices.t.x.y.z",
-                                              "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
-                                              "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
-                                              "TauJets.dRmax.etOverPtLeadTrk",
-                                              "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
-                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
-                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
+    LLJ1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.constituentLinks",
+                                          "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+                                          "TruthPrimaryVertices.t.x.y.z",
+                                          "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
+                                          "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ",
+                                          "TauJets.dRmax.etOverPtLeadTrk",
+                                          "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
+                                          "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
+                                          "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
 
     ### add more variables
     LLJ1SlimmingHelper.AllVariables += ["CaloCalTopoClusters", "CaloCalFwdTopoTowers",
                                         "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
                                         "CSSKGChargedParticleFlowObjects","CSSKGNeutralParticleFlowObjects",
-                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape",
+                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape",
                                         "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"
                                         ]
 
-    LLJ1SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower",
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter",
+    LLJ1SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower.constituentLinks",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter.constituentLinks",
                                           "UFOCSSK.pt.eta.phi.m.signalType.otherObjectLinks.chargedObjectLinks",
                                           "UFO.pt.eta.phi.m.signalType.otherObjectLinks.chargedObjectLinks",
                                           "InDetTrackParticles.particleHypothesis.vx.vy.vz.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty.btagIp_z0SinTheta.btagIp_trackMomentum.btagIp_trackDisplacement.btagIp_invalidIp",

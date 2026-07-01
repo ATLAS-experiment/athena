@@ -60,7 +60,7 @@ StatusCode TrigMuonLateMuRoIHypoAlg::execute( const EventContext& context ) cons
   for (const auto previousDecision: *previousDecisionsHandle ) {
 
     // get RoIs
-    auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( previousDecision, initialRoIString() );
+    auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context,  previousDecision, initialRoIString() );
     auto roiEL = roiInfo.link;
     ATH_CHECK( roiEL.isValid() );
     const TrigRoiDescriptor* roi = *roiEL;

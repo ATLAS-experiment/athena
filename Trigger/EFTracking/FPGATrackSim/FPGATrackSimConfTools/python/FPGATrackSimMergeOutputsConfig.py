@@ -15,7 +15,11 @@ def FPGATrackSimMergeOutputsAlgCfg(flags,**kwargs):
     kwargs.setdefault('InFileNames', files) 
 
     from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimOverlapRemovalToolCfg
-    acc.addEventAlgo(CompFactory.FPGATrackSimMergeOutputsAlg(name = 'FPGAMergeOutputsAlg', **kwargs,
-                                                            OverlapRemoval = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags))))
+    MergeOutputsAlg = CompFactory.FPGATrackSimMergeOutputsAlg(name = 'FPGAMergeOutputsAlg', **kwargs,
+                                                            OverlapRemoval = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags)))
+    MergeOutputsAlg.OverlapRemoval.MinChi2 = 1e15 ## disable here
+    MergeOutputsAlg.SkipEvents = flags.Exec.SkipEvents
+    MergeOutputsAlg.SortTracks = flags.Trigger.FPGATrackSim.SortTracks
+    acc.addEventAlgo(MergeOutputsAlg)
 
     return acc

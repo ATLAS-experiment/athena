@@ -13,6 +13,7 @@
 
 #include <AsgMessaging/MessageCheck.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
+#include <SystematicsHandles/ISysHandleBase.h>
 
 //
 // method implementations
@@ -69,7 +70,7 @@ namespace CP
   fillSystematics (const ISystematicsSvc& svc,
                    const CP::SystematicSet& fullAffecting,
                    const std::vector<CP::SystematicSet>& sysList,
-                   const std::string& objectName)
+                   ISysObjectHandleBase& objectHandle)
   {
     using namespace msgSelectionHelpers;
 
@@ -91,7 +92,8 @@ namespace CP
       ANA_CHECK (makeSelectionWriteAccessor (decorName + suffix, accessor));
       m_dataCache.emplace (sys, std::make_tuple (decorName, std::move (accessor)));
     }
-    ANA_CHECK (svc.setDecorSystematics (objectName, baseName, fullAffecting));
+    ANA_CHECK (svc.setDecorSystematics (objectHandle.getNamePattern(), baseName, fullAffecting));
+    ANA_CHECK (objectHandle.addDecorationDependency (svc, baseName, true));
     return StatusCode::SUCCESS;
   }
 }

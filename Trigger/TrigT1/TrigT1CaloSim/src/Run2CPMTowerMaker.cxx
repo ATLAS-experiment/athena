@@ -46,18 +46,18 @@ There is so little to do that this routine does it all itself:
 */
 
 
-StatusCode Run2CPMTowerMaker::execute( )
+StatusCode Run2CPMTowerMaker::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "Executing" ) ;
 				      
   // Vectors to store CPMTs in
-  auto CPMTs = SG::makeHandle(m_cpmTowerKey);
+  auto CPMTs = SG::makeHandle(m_cpmTowerKey, ctx);
   auto vectorOfCPMTs = std::make_unique<CPMTCollection>();
   auto cpmtAuxVector = std::make_unique<CPMTAuxCollection>();
   vectorOfCPMTs->setStore(cpmtAuxVector.get());
   
   // Retrieve TriggerTowers from StoreGate 
-  auto vectorOfTTs = SG::makeHandle(m_triggerTowerKey);
+  auto vectorOfTTs = SG::makeHandle(m_triggerTowerKey, ctx);
   ATH_CHECK(vectorOfTTs.isValid());
   // Fill a DataVector of CPMTowers using L1CPMTowerTools
   m_CPMTowerTool->makeCPMTowers(vectorOfTTs.get(), vectorOfCPMTs.get(), true);

@@ -13,7 +13,6 @@
 #include <TrackingAnalysisAlgorithms/InDetTrackSelectionAlg.h>
 
 #include <InDetTrackSystematicsTools/InDetTrackSystematics.h>
-#include <PATInterfaces/ISystematicsTool.h>
 
 //
 // method implementations
@@ -90,6 +89,9 @@ namespace CP
     }
 
     ANA_CHECK (m_tracksHandle.initialize (m_systematicsList));
+    if (!m_vertexContainerKey.empty())
+      ANA_CHECK (m_vertexContainerKey.initialize());
+
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_tracksHandle, SG::AllowEmpty));
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_tracksHandle));
     ANA_CHECK (m_systematicsList.initialize());
@@ -122,15 +124,22 @@ namespace CP
 
 
   StatusCode InDetTrackSelectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       if (!m_filterTool.empty())
         ANA_CHECK (m_filterTool->applySystematicVariation (sys));
 
+      const xAOD::Vertex *primary_vertex = nullptr;
+      if (!m_vertexContainerKey.key().empty())
+      {
+        SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainerKey, ctx);
+        primary_vertex = vertices->at(0);
+      }
+
       const xAOD::TrackParticleContainer *tracks = nullptr;
-      ANA_CHECK (m_tracksHandle.retrieve (tracks, sys));
+      ANA_CHECK (m_tracksHandle.retrieve (tracks, sys, ctx));
       for (const xAOD::TrackParticle *track : *tracks)
       {
         if (m_preselection.getBool (*track, sys))
@@ -138,16 +147,23 @@ namespace CP
           if (!m_selectionTool.empty())
           {
             asg::AcceptData fullAccept (&m_acceptInfo);
-            asg::AcceptData selectAccept = m_selectionTool->accept(track);
+            asg::AcceptData selectAccept (&m_acceptInfo);
+            if (primary_vertex)
+            {
+              selectAccept = m_selectionTool->accept(*track, primary_vertex);
+            }
+            else
+            {
+              selectAccept = m_selectionTool->accept(track);
+            }
+
             for (unsigned int i = 0; i < selectAccept.getNCuts(); i++)
             {
               fullAccept.setCutResult (selectAccept.getCutName(i), selectAccept.getCutResult(i));
             }
 
             if (!m_filterTool.empty())
-            {
               fullAccept.setCutResult ("truthFilter", m_filterTool->accept (track));
-            }
 
             m_selectionHandle.setBits
               (*track, selectionFromAccept (fullAccept), sys);
@@ -160,13 +176,9 @@ namespace CP
         else
         {
           if (!m_selectionTool.empty())
-          {
             m_selectionHandle.setBits (*track, m_setOnFail, sys);
-          }
           else
-          {
             m_selectionHandle.setBool (*track, false, sys);
-          }
         }
       }
     }

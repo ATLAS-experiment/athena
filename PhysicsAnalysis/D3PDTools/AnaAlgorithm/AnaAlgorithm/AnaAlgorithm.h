@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,8 +14,8 @@
 
 #ifdef XAOD_STANDALONE
 #include <AsgTools/AsgComponent.h>
-#include <AsgTools/SgTEvent.h>
-#include <AsgTools/SgTEventMeta.h>
+#include <AsgTools/SgEvent.h>
+#include <AsgTools/SgEventMeta.h>
 #include <memory>
 #include <vector>
 #else
@@ -103,8 +103,8 @@ namespace EL
 
 #ifdef XAOD_STANDALONE
     /// Type of the metadata store pointer in standalone mode
-    typedef asg::SgTEventMeta* MetaStorePtr_t;
-    typedef const asg::SgTEventMeta* ConstMetaStorePtr_t;
+    typedef asg::SgEventMeta* MetaStorePtr_t;
+    typedef const asg::SgEventMeta* ConstMetaStorePtr_t;
 #else
     /// Type of the metadata store pointer in standalone mode
     typedef ServiceHandle< StoreGateSvc >& MetaStorePtr_t;
@@ -132,7 +132,7 @@ namespace EL
     ///   job not configured for xAODs
     /// \post result != nullptr
   public:
-    asg::SgTEvent *evtStore() const;
+    asg::SgEvent *evtStore() const;
 
 
     /// \brief book the given histogram
@@ -313,12 +313,29 @@ namespace EL
   protected:
     virtual ::StatusCode initialize ();
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverloaded-virtual"
+
     /// \brief execute this algorithm
+    ///
+    /// \deprecated Prefer method with EventContext.
+    /// \warn Override only one of the two execute methods.
     ///
     /// This gets called once on every event and is where the bulk of
     /// the processing ought to be happening.
   protected:
     virtual ::StatusCode execute ();
+
+    /// \brief execute this algorithm
+    ///
+    /// \warn Override only one of the two execute methods.
+    ///
+    /// This gets called once on every event and is where the bulk of
+    /// the processing ought to be happening.
+  protected:
+    virtual ::StatusCode execute (const EventContext& ctx);
+
+#pragma GCC diagnostic pop
 
     /// \brief finalize this algorithm
     ///
@@ -427,7 +444,7 @@ namespace EL
 
     /// \brief call \ref execute
   public:
-    ::StatusCode sysExecute ();
+    ::StatusCode sysExecute (const EventContext& ctx);
 
     /// \brief call \ref finalize
   public:
@@ -456,7 +473,7 @@ namespace EL
     /// \par Failures
     ///   service already configured
   public:
-    void setEvtStore (asg::SgTEvent *val_evtStore);
+    void setEvtStore (asg::SgEvent *val_evtStore);
 
     /// \brief set the value of \ref histogramWorker
     /// \par Guarantee
@@ -535,12 +552,12 @@ namespace EL
 #ifdef XAOD_STANDALONE
     /// \brief the value of \ref evtStore
   private:
-    asg::SgTEvent *m_evtStore = nullptr;
+    asg::SgEvent *m_evtStore = nullptr;
 #endif
 
 #ifdef XAOD_STANDALONE
     /// Type of the metadata store variable in standalone mode
-    typedef asg::SgTEventMeta MetaStore_t;
+    typedef asg::SgEventMeta MetaStore_t;
 #else
     /// Type of the metadata store variable in Athena
     typedef ServiceHandle< StoreGateSvc > MetaStore_t;

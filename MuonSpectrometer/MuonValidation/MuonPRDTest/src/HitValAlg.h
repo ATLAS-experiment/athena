@@ -20,7 +20,7 @@ public:
 
     StatusCode initialize() override;
     StatusCode finalize() override;
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
     unsigned int cardinality() const override final { return 1; }
 
 private:

@@ -1,25 +1,13 @@
 /*
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
-
+#include "TrigMonitoringEvent/TrigConfAlg.h"
+#include "AthenaKernel/errorcheck.h"
 // C/C++
 #include <algorithm>
 #include <sstream>
+#include <iostream>
 
-#include "AthenaKernel/errorcheck.h"
-#include "TrigMonitoringEvent/TrigConfAlg.h"
-
-
-//--------------------------------------------------------------------------------------
-TrigConfAlg::TrigConfAlg() 
-  :m_index(0),
-   m_position(0),
-   m_name_id(0),
-   m_type_id(0),
-   m_name(),
-   m_type()
-{
-}
 
 //--------------------------------------------------------------------------------------  
 TrigConfAlg::TrigConfAlg(const uint32_t index,
@@ -58,6 +46,12 @@ void TrigConfAlg::print(std::ostream &os) const
 {
   os << str(*this) << std::endl;
 }
+
+void TrigConfAlg::print() const
+{
+  std::cout << str(*this) << std::endl;
+}
+
 
 //--------------------------------------------------------------------------------------  
 std::string str(const TrigConfAlg &o)

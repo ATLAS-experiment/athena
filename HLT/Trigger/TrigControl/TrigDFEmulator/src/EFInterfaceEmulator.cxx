@@ -7,10 +7,19 @@
 #include "eformat_utils.h"
 #include <cstdlib>
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+#endif
+
 extern "C" std::unique_ptr<daq::df_ef_interface::EventHandler> createEventHandler(const boost::property_tree::ptree &conf){
   std::unique_ptr<daq::df_ef_interface::EventHandler> s(new DFEF::EFInterfaceEmulator(conf));
   return s;
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 DFEF::EFInterfaceEmulator::EFInterfaceEmulator(const boost::property_tree::ptree &cargs)
 {
@@ -25,9 +34,8 @@ DFEF::EFInterfaceEmulator::EFInterfaceEmulator(const boost::property_tree::ptree
     std::lock_guard<std::mutex> lock(m_RWMutex);
     m_file_rw = std::make_unique<FileReaderWriter>(cargs);
   }
-  // TODO: read ptree to get the compression type and level
-  m_comp = eformat::UNCOMPRESSED;
-  m_compLevel = 0;
+  m_comp = eformat::ZLIB;
+  m_compLevel = 2;
 }
 
 void DFEF::EFInterfaceEmulator::open(){
@@ -174,6 +182,7 @@ void DFEF::EFInterfaceEmulator::outputThreadCallback() {
       } else {
        throw std::runtime_error("Missing the FullEvent copy for event accepted with L0ID: " + std::to_string(eventPair.first)); 
       }
+      ERS_DEBUG(2, "m_events size after erase: " << m_events.size());
     }
     //FIXME Remove this, just for debugging
     std::unique_ptr<uint32_t[]> hltResult = std::move(eventPair.second);
@@ -190,7 +199,6 @@ void DFEF::EFInterfaceEmulator::outputThreadCallback() {
       m_file_rw->writeEvent(sizeInBytes, finalEvent.data());
     }
     ERS_DEBUG(2, "Event with L0ID: " << eventPair.first << " written to file");
-    ERS_DEBUG(2, "m_events size after erase: " << m_events.size());
   }
   ERS_DEBUG(2, "Output thread finished processing.");
 }

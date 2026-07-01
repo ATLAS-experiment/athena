@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/PhiSectionWidget.h"
@@ -38,7 +38,7 @@
 //____________________________________________________________________
 class PhiSectionWidget::Imp {
 public:
-  PhiSectionWidget * theclass;
+  PhiSectionWidget * theclass{};
 
   //Sectors status and mapping to graphics:
   QVector<bool> sectorstatus;
@@ -58,28 +58,28 @@ public:
   void updateColors();
 
   //Cache:
-  bool cacheValid;
+  bool cacheValid{};
   QList<VP1Interval> cachedRanges;//this also serves as the cache
-  bool cachedAllOn;//part of the cache
-  bool cachedAllOff;//part of the cache
+  bool cachedAllOn{};//part of the cache
+  bool cachedAllOff{};//part of the cache
 
   //Convenience:
   static void wrap(QList<VP1Interval>&);
 
   //Allowed sectors:
-  bool allowCustomNSectors;
+  bool allowCustomNSectors{};
   QList<int> allowedNSectors;
 
   //Menu:
-  QMenu * popup_menu;
-  QAction* popup_enableAllAction;
-  QAction* popup_disableAllAction;
-  QAction* popup_invertAction;
-  QAction* popup_copyAction;
-  QAction* popup_pasteAction;
-  QMenu * popup_setNPhiSubMenu;
+  QMenu * popup_menu{};
+  QAction* popup_enableAllAction{};
+  QAction* popup_disableAllAction{};
+  QAction* popup_invertAction{};
+  QAction* popup_copyAction{};
+  QAction* popup_pasteAction{};
+  QMenu * popup_setNPhiSubMenu{};
   QList<QAction*> popuplist_setNPhi;
-  QAction* popup_setCustomNPhi;
+  QAction* popup_setCustomNPhi{};
   void ensureMenuInit();
   void addMenuEntriesForSetNPhi();
 

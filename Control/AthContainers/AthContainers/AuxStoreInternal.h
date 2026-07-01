@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxStoreInternal.h
@@ -235,6 +235,17 @@ public:
 
 
   /**
+   * @brief Return the set of variables to copy in a deep copy.
+   * @param warnUnlocked If true, we warn about variables skipped on account
+   *                     of being decorations.
+   *
+   * This is getAuxIDs()-getDecorIDs().
+   */
+  virtual SG::auxid_set_t
+  getCopyIDs (bool warnUnlocked = false) const override;
+
+
+  /**
    * @brief Test if a particular variable is tagged as a decoration.
    * @param auxid The identifier of the desired aux data item.
    */
@@ -360,6 +371,32 @@ public:
   virtual const IAuxTypeVector* linkedVector (SG::auxid_t auxid) const override;
 
 
+  /**
+   * @brief Perform post-read processing for a single variable.
+   * @param ctx The current event context.
+   * @param auxid The ID of the variable to process.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method for the single variable identified by AUXID.
+   */
+  void toTransient (const EventContext& ctx, SG::auxid_t auxid);
+
+
+  /**
+   * @brief Perform post-read processing on this store.
+   * @param ctx The current event context.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method for all contained variables for which this
+   * is required.
+   */
+  virtual void toTransient (const EventContext& ctx) override;
+
+
 protected:
   /**
    * @brief Return a pointer to the data to be stored for one aux data item.
@@ -426,8 +463,8 @@ protected:
    *
    * For internal use.  The @c auxid must not already exist in the store.
    */
-  void addVector (std::unique_ptr<IAuxTypeVector> vec,
-                  bool isDecoration);
+  IAuxTypeVector* addVector (std::unique_ptr<IAuxTypeVector> vec,
+                             bool isDecoration);
 
 
 private:
@@ -461,6 +498,22 @@ private:
   typedef AthContainers_detail::lock_guard<mutex_t> guard_t;
   mutable mutex_t m_mutex;
 };
+
+
+/**
+ * @brief Compute the set of variables to copy in a deep copy.
+ * @param auxids Set of all variables.
+ * @param decors Set of decorations.
+ * @param warnUnlocked If true, we warn about variables skipped on account
+ *                     of being decorations.
+ * @param noWarn Names of variables for which we should not issue such warnings.
+ *
+ * Returns auxids -  decors.
+ */
+SG::auxid_set_t getCopyIDs (const SG::auxid_set_t& auxids,
+                            const SG::auxid_set_t& decors,
+                            bool warnUnlocked,
+                            std::span<const std::string> noWarn);
 
 
 } // namespace SG

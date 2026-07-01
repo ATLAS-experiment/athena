@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,23 +13,13 @@
 
 #include "DerivationFrameworkCore/DerivationKernel.h"
 
-#include <sstream>                                      // C++ utilities
-#include <string>
-#include <algorithm>
-#include <fstream>
-
-#include "GaudiKernel/ISvcLocator.h"
-#include "AthContainers/DataVector.h"
 #include "AthLinks/ElementLink.h"
+#include "EventBookkeeperTools/FilterReporter.h"
 #include "GaudiKernel/AlgTool.h"
 #include "GaudiKernel/Chrono.h"
 #include "GaudiKernel/ToolVisitor.h"
-#include "GaudiKernel/ConcurrencyFlags.h"
 
-#include "StoreGate/StoreGateSvc.h"             // Storegate stuff
-#include "StoreGate/DataHandle.h"
-#include "AthenaKernel/DefaultKey.h"
-#include "SGTools/StlVectorClids.h"
+#include <string>
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace {
@@ -56,11 +46,6 @@ namespace {
   }
 }
 
-DerivationFramework::DerivationKernel::DerivationKernel(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthFilterAlgorithm(name, pSvcLocator)
-{
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode DerivationFramework::DerivationKernel::initialize() {
@@ -81,6 +66,10 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
   ATH_CHECK( m_augmentationTools.retrieve() );
   ATH_MSG_INFO("The following augmentation tools will be applied....");
   ATH_MSG_INFO(m_augmentationTools);
+
+  // setup filter reporting
+  m_filterParams.setKey(name());
+  ATH_CHECK( m_filterParams.initialize() );
 
   if (m_doChronoStat) {
     //get the chrono auditor
@@ -141,7 +130,7 @@ StatusCode DerivationFramework::DerivationKernel::initialize() {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode DerivationFramework::DerivationKernel::execute() {
+StatusCode DerivationFramework::DerivationKernel::execute(const EventContext& ctx) {
 
   IChronoSvc* cSvc=m_chronoSvc.get(); //Might be null ...
   // On your marks.... get set.... (but only if not in MT)
@@ -156,7 +145,6 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
   //=============================================================================
   // AUGMENTATION ===============================================================
   //=============================================================================
-  const EventContext &ctx = Gaudi::Hive::currentContext();
   if (!m_runSkimmingFirst) {
     for (const auto &  augmentationTool : m_augmentationTools) {
       ATH_MSG_DEBUG("Entering " << augmentationTool->name());
@@ -173,11 +161,13 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
 
   // Set master flag to true
   bool acceptEvent(true);
+  // Setup the filter reporter
+  FilterReporter filter (m_filterParams, acceptEvent, ctx);
 
   // Loop over the filters
   for (const auto &  skimmingTool : m_skimmingTools) {
     ATH_MSG_DEBUG("Entering " << skimmingTool->name());
-    if (!(skimmingTool->eventPassesFilter())) {
+    if (!(skimmingTool->eventPassesFilter(ctx))) {
       acceptEvent=false;
       ATH_MSG_DEBUG("This event failed the " << skimmingTool->name() << " filter. Therefore it will not be recorded.");
       break;
@@ -187,8 +177,8 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
   // Increment local counters if event to be accepted
   if (acceptEvent) ++m_acceptCntr;
 
-  // Set the setFilterPassed flag
-  setFilterPassed(acceptEvent);
+  // Set the filter passed flag
+  filter.setPassed (acceptEvent);
 
   // Return if event didn't pass
   if (!acceptEvent) return StatusCode::SUCCESS;
@@ -210,7 +200,7 @@ StatusCode DerivationFramework::DerivationKernel::execute() {
 
   for (const auto &  thinningTool : m_thinningTools) {
     ATH_MSG_DEBUG("Entering " << thinningTool->name());
-    if ( thinningTool->doThinning().isFailure() ) {
+    if ( thinningTool->doThinning(ctx).isFailure() ) {
       ATH_MSG_ERROR("Thinning failed!");
       return StatusCode::FAILURE;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ISkimmingTool.h, (c) ATLAS Detector software
@@ -9,6 +9,7 @@
 #define DERIVATIONFRAMEWORK_INTERFACES_ITHINNINGTOOL_H 
 
 // Gaudi
+#include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
 
 namespace DerivationFramework {
@@ -27,7 +28,7 @@ namespace DerivationFramework {
        virtual ~IThinningTool(){}
 
        /** Pass the thinning service  */
-       virtual StatusCode doThinning() const = 0;  	
+       virtual StatusCode doThinning(const EventContext& ctx) const = 0;
   };
 
 } // end of namespace

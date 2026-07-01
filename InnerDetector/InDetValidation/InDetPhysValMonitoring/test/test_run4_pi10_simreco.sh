@@ -11,10 +11,11 @@
 # art-output: *Analysis*.root
 # art-output: *.xml
 # art-output: dcube*
+# art-output: art_core_0
 # art-html: dcube_shifter_last
 
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-relname="r25.0.49"
+relname="r25.0.59"
 dcuberef_sim=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/HitValid_run4_pi10GeV_simreco.root
 dcuberef_rdo=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/RDOAnalysis_run4_pi10GeV_simreco.root
 dcuberef_rec=$artdata/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_run4_pi10GeV_simreco.root

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -41,7 +41,7 @@ namespace LVL1 {
     /** Destructor */
     virtual ~eFEXegAlgo();
 
-    virtual StatusCode safetyTest() const;
+    virtual StatusCode safetyTest(const EventContext& ctx);
     virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta);
 
     virtual void getReta(std::vector<unsigned int> & );
@@ -49,10 +49,10 @@ namespace LVL1 {
     virtual void getWstot(std::vector<unsigned int> & );
     virtual void getRealPhi(float & phi);
     virtual void getRealEta(float & eta);
-    virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB();
+    virtual std::unique_ptr<eFEXegTOB> geteFEXegTOB(const EventContext& ctx);
     virtual void getClusterCells(std::vector<unsigned int> &cellETs);
-    virtual unsigned int getET();
-    virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer);
+    virtual unsigned int getET(const EventContext& ctx);
+    virtual unsigned int dmCorrection(const EventContext& ctx, unsigned int ET, unsigned int layer);
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &);
     virtual bool hasSeed() const {return m_hasSeed;};
     virtual unsigned int getSeed() const {return m_seedID;};
@@ -95,6 +95,7 @@ namespace LVL1 {
 
     // Key for input towers
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
+    const LVL1::eTowerContainer* m_eTowers = nullptr;
 
     // Key for reading dm corrections
     SG::ReadCondHandleKey<CondAttrListCollection> m_dmCorrectionsKey{this,"DMCorrectionsKey","",

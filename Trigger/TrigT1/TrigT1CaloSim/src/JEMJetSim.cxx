@@ -73,7 +73,7 @@ StatusCode JEMJetSim::initialize()
 //
 
 
-StatusCode JEMJetSim::execute( )
+StatusCode JEMJetSim::execute(const EventContext& ctx)
 {
     
   /* 
@@ -94,7 +94,7 @@ StatusCode JEMJetSim::execute( )
   m_allTOBs      = new DataVector<JEMTobRoI>;  // Container to hold all TOB RoIs in event
 
   // Retrieve the JetElementContainer
-  auto rh = SG::makeHandle(m_JetElementInputKey);
+  auto rh = SG::makeHandle(m_JetElementInputKey, ctx);
 
   if (rh.isValid()) {
      const DataVector<xAOD::JetElement>* storedJEs = &(*rh);
@@ -135,8 +135,8 @@ StatusCode JEMJetSim::execute( )
   
        
   // Store module readout and backplane results in the TES
-  storeBackplaneTOBs();
-  storeModuleRoIs();
+  storeBackplaneTOBs(ctx);
+  storeModuleRoIs(ctx);
   
   // Clean up at end of event
   m_JetCMXData  = 0;
@@ -146,13 +146,12 @@ StatusCode JEMJetSim::execute( )
 }
 
 /** place backplane data objects (CPM -> CMX) in StoreGate */
-void LVL1::JEMJetSim::storeBackplaneTOBs() {
+void LVL1::JEMJetSim::storeBackplaneTOBs(const EventContext& ctx) {
    
   size_t datasize = m_JetCMXData->size();
 
   // Store backplane data objects
   ///StatusCode sc = evtStore()->overwrite(m_JetCMXData, m_JetCMXDataLocation, true);
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   StatusCode sc = SG::makeHandle(m_JetCMXDataOutputKey, ctx).record( std::unique_ptr<DataVector<JetCMXData>>(m_JetCMXData) );
   m_JetCMXData = nullptr;
 
@@ -171,11 +170,10 @@ void LVL1::JEMJetSim::storeBackplaneTOBs() {
 
 
 /** place final ROI objects in the TES. */
-void LVL1::JEMJetSim::storeModuleRoIs() {
+void LVL1::JEMJetSim::storeModuleRoIs(const EventContext& ctx) {
 
    size_t n_jetsTobs = m_allTOBs->size();
 
-   const EventContext& ctx = Gaudi::Hive::currentContext();
    StatusCode sc = SG::makeHandle(m_JEMTobRoIOutputKey, ctx).record( std::unique_ptr<DataVector<JEMTobRoI>>(m_allTOBs) );
    m_allTOBs = nullptr;
    

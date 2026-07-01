@@ -80,7 +80,7 @@ HistogramDefinitionSvc::finalize() {
 }
 
 SingleHistogramDefinition
-HistogramDefinitionSvc::definition(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::definition(std::string_view  name, std::string_view  dirName) const {
   SingleHistogramDefinition result;
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -91,7 +91,7 @@ HistogramDefinitionSvc::definition(const std::string& name, const std::string& d
 }
 
 std::string
-HistogramDefinitionSvc::histoType(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::histoType(std::string_view  name, std::string_view  dirName) const {
   std::string result {};
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -102,7 +102,7 @@ HistogramDefinitionSvc::histoType(const std::string& name, const std::string& di
 }
 
 std::string
-HistogramDefinitionSvc::title(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::title(std::string_view  name, std::string_view  dirName) const {
   std::string result {};
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -113,7 +113,7 @@ HistogramDefinitionSvc::title(const std::string& name, const std::string& dirNam
 }
 
 unsigned int
-HistogramDefinitionSvc::nBinsX(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::nBinsX(std::string_view  name, std::string_view  dirName) const {
   unsigned int nbins(0);
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -124,7 +124,7 @@ HistogramDefinitionSvc::nBinsX(const std::string& name, const std::string& dirNa
 }
 
 unsigned int
-HistogramDefinitionSvc::nBinsY(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::nBinsY(std::string_view  name, std::string_view  dirName) const {
   unsigned int nbins(0);
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -135,7 +135,7 @@ HistogramDefinitionSvc::nBinsY(const std::string& name, const std::string& dirNa
 }
 
 unsigned int
-HistogramDefinitionSvc::nBinsZ(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::nBinsZ(std::string_view  name, std::string_view  dirName) const {
   unsigned int nbins(0);
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -146,7 +146,7 @@ HistogramDefinitionSvc::nBinsZ(const std::string& name, const std::string& dirNa
 }
 
 IHistogramDefinitionSvc::axesLimits_t
-HistogramDefinitionSvc::xLimits(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::xLimits(std::string_view  name, std::string_view  dirName) const {
   axesLimits_t result(invalidLimits);
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -157,7 +157,7 @@ HistogramDefinitionSvc::xLimits(const std::string& name, const std::string& dirN
 }
 
 IHistogramDefinitionSvc::axesLimits_t
-HistogramDefinitionSvc::yLimits(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::yLimits(std::string_view  name, std::string_view  dirName) const {
   axesLimits_t result(invalidLimits);
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -168,7 +168,7 @@ HistogramDefinitionSvc::yLimits(const std::string& name, const std::string& dirN
 }
 
 IHistogramDefinitionSvc::axesLimits_t
-HistogramDefinitionSvc::zLimits(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::zLimits(std::string_view  name, std::string_view  dirName) const {
   axesLimits_t result(invalidLimits);
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -179,7 +179,7 @@ HistogramDefinitionSvc::zLimits(const std::string& name, const std::string& dirN
 }
 
 std::string
-HistogramDefinitionSvc::xTitle(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::xTitle(std::string_view  name, std::string_view  dirName) const {
   std::string result {};
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
 
@@ -190,7 +190,7 @@ HistogramDefinitionSvc::xTitle(const std::string& name, const std::string& dirNa
 }
 
 std::string
-HistogramDefinitionSvc::yTitle(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::yTitle(std::string_view  name, std::string_view  dirName) const {
   std::string result {};
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
   if (pthisHistoPair != m_histoDefMap.end()) {
@@ -200,7 +200,7 @@ HistogramDefinitionSvc::yTitle(const std::string& name, const std::string& dirNa
 }
 
 std::string
-HistogramDefinitionSvc::zTitle(const std::string& name, const std::string& dirName) const {
+HistogramDefinitionSvc::zTitle(std::string_view  name, std::string_view  dirName) const {
   std::string result {};
   const auto pthisHistoPair(m_histoDefMap.find(SingleHistogramDefinition::stringIndex(name, dirName)));
   if (pthisHistoPair != m_histoDefMap.end()) {

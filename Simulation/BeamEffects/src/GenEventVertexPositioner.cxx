@@ -76,20 +76,11 @@ namespace Simulation
 
       // loop over the vertices in the event, they are in respect with another
       //   (code from Simulation/Fatras/FatrasAlgs/McEventPreProcessing.cxx)
-#ifdef HEPMC3
       for(auto& curVtx: ge.vertices()) {
         // NB Doing this check to explicitly avoid the fallback mechanism in
         // HepMC3::GenVertex::position() to return the position of
         // another GenVertex in the event if the position isn't set (or is set to zero)!
         const HepMC::FourVector &curPos = (curVtx->has_set_position()) ? curVtx->position() : HepMC::FourVector::ZERO_VECTOR();
-#else
-      auto vtxIt    = ge.vertices_begin();
-      auto vtxItEnd = ge.vertices_end();
-      for( ; vtxIt != vtxItEnd; ++vtxIt) {
-        // quick access:
-        auto curVtx = (*vtxIt);
-        const HepMC::FourVector &curPos = curVtx->position();
-#endif
 
         // get a copy of the current vertex position
         CLHEP::HepLorentzVector newPos( curPos.x(), curPos.y(), curPos.z(), curPos.t() );

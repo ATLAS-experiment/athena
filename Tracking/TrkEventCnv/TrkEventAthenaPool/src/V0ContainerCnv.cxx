@@ -79,20 +79,16 @@ V0Container_PERS * V0ContainerCnv::createPersistent( V0Container *transCont)
 
 }//end of create persistent method
 
-V0Container * V0ContainerCnv::createTransient()
+V0Container * V0ContainerCnv::createTransient(const Token* token)
 {
     static const pool::Guid p2_guid( "9BC2B917-940A-4121-8E8B-8C99E178D8C1" );
     static const pool::Guid p1_guid( "402A9BD1-4476-4E97-A5E4-EB4D742FBB38" );
     static const pool::Guid p0_guid( "0C363A21-1B86-4B39-8A84-A62161B13C7B" );
 
   V0Container *p_collection = nullptr;
-    if( compareClassGuid( p2_guid ) )     
+    if( compareClassGuid(token,  p2_guid ) )     
     {
        // std::cout << "V0ContainerCnv::createTransient: do new TP p2" << std::endl;
-       /*
-     usingTPCnvForReading( m_TPConverter );
-     std::unique_ptr< V0Container_PERS >  p_coll( poolReadObject< V0Container_PERS >() );
-       */
 
   /* 
      std::cout<<"READING: Dumping the contents of the V0Container "<<std::endl;
@@ -116,16 +112,12 @@ V0Container * V0ContainerCnv::createTransient()
      std::cout<<" m_fitQualities size:      "<< p_coll->m_fitQualities.size()<<std::endl;
      std::cout<<" m_hepSymMatrices size:    "<< p_coll->m_hepSymMatrices.size()<<std::endl; 
   */
-       poolReadObject< Trk::V0Container_tlp2 >(m_TPConverter);
+       poolReadObject< Trk::V0Container_tlp2 >(m_TPConverter, token);
        p_collection = m_TPConverter.createTransient( m_log );
 
-    }else if( compareClassGuid( p1_guid ) )     
+    }else if( compareClassGuid(token,  p1_guid ) )     
   {
      // std::cout << "V0ContainerCnv::createTransient: do TP p1" << std::endl;
-     /*
-   usingTPCnvForReading( m_TPConverter );
-   std::unique_ptr< V0Container_PERS >  p_coll( poolReadObject< V0Container_PERS >() );
-     */
  
 /* 
    std::cout<<"READING: Dumping the contents of the V0Container "<<std::endl;
@@ -150,12 +142,12 @@ V0Container * V0ContainerCnv::createTransient()
    std::cout<<" m_hepSymMatrices size:    "<< p_coll->m_hepSymMatrices.size()<<std::endl; 
 */
      V0ContainerCnv_tlp1 tpCnv;
-     poolReadObject< Trk::V0Container_tlp1 >(tpCnv);
+     poolReadObject< Trk::V0Container_tlp1 >(tpCnv, token);
      p_collection = tpCnv.createTransient( m_log );
   
-  }else if( compareClassGuid( p0_guid ) ){
+  }else if( compareClassGuid(token,  p0_guid ) ){
   // std::cout << "V0ContainerCnv::createTransient: use old converter" << std::endl;  
-   p_collection = poolReadObject< V0Container >();
+   p_collection = poolReadObject< V0Container >(token);
    
   }else  throw std::runtime_error( "Unsupported persistent version of V0Container" );
     
@@ -164,11 +156,6 @@ V0Container * V0ContainerCnv::createTransient()
 }//end of create transient method
 
 void V0ContainerCnv::updateLog(){  
-    //const DataObject* dObj = getDataObject();
-    //if (dObj==0) return; // Can't do much if this fails.
-  //const std::string  key = (dObj->name());
- 
-     //m_log.m_source="V0ContainerCnv: "+key; // A hack - relies on getting access to private data of MsgStream via #define trick. EJWM.
 }
 
 

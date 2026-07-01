@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigAFPDijetComboHypoTool.h"
@@ -90,7 +90,7 @@ bool TrigAFPDijetComboHypoTool::executeAlg(const std::vector<Combo::LegDecision>
   // The other two should be Jet Decision Objects.
   for(const auto& comb: combination){
     const auto dec = comb.second;
-    const auto jet_link = TrigCompositeUtils::findLink<xAOD::JetContainer>(*dec, TrigCompositeUtils::featureString()).link;
+    const auto jet_link = TrigCompositeUtils::findLink<xAOD::JetContainer>(ctx, *dec, TrigCompositeUtils::featureString()).link;
     if (jet_link.isValid()) {
       selected_jets.push_back(jet_link);
     }

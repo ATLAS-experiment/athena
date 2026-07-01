@@ -67,19 +67,12 @@ namespace CP
   public:
     explicit operator bool () const noexcept;
 
-    /// \brief get the name pattern before substitution
-    ///
-    /// This is not currently defined for decoration handles and made
-    /// private.
-  private:
-    virtual std::string getNamePattern () const override;
-
 
     /// \brief initialize this handle
     /// \{
   public:
-    StatusCode initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle);
-    StatusCode initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle, SG::AllowEmptyEnum);
+    StatusCode initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle);
+    StatusCode initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle, SG::AllowEmptyEnum);
     /// \}
 
 
@@ -119,11 +112,19 @@ namespace CP
 
     /// \brief the object handle we use
   private:
-    const ISysHandleBase *m_objectHandle {nullptr};
+    ISysObjectHandleBase *m_objectHandle {nullptr};
 
-    /// \brief the cache of names we use
+    /// \brief the data held per-systematic (filled in `initialize`)
   private:
-    std::unordered_map<CP::SystematicSet,std::tuple<std::string,SG::ConstAccessor<T> > > m_dataCache;
+    struct SysData
+    {
+      /// the expanded name of the decoration
+      std::string name;
+
+      /// the accessor for the decoration
+      SG::ConstAccessor<T> accessor;
+    };
+    std::unordered_map<CP::SystematicSet,SysData> m_sysData;
 
     /// \brief get the data for the given systematics
   private:

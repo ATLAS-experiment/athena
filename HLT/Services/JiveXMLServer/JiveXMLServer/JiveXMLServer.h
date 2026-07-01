@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_JIVEXMLSERVER_H
@@ -15,6 +15,7 @@
  * @author Sebastian Boeser <sboeser --at-- hep.ucl.ac.uk>
  **/
 
+#include <future>
 #include <vector>
 #include <string>
 
@@ -26,9 +27,6 @@
 //JiveXML includes
 #include <JiveXML/IServer.h>
 #include <JiveXML/EventStream.h>
-
-//tdaq includes
-#include <owl/semaphore.h>
 
 namespace JiveXML {
 
@@ -90,14 +88,11 @@ namespace JiveXML {
       //Signal handler must be static function
       static void signalHandler (int signum);
 
-      //Static semaphore used to suspend main thread while server thread is
+      //Promise used to suspend main thread while server thread is
       //running. The semaphore will reach its post-condition either by
       // a) receiving a signal through the signal handler
       // b) the ServerThreadStopped callback being called
-      inline static OWLSemaphore m_lock ATLAS_THREAD_SAFE;
-
-      //Store the received signal in a static member
-      inline static std::atomic<int> m_receivedSignal{0};
+      inline static std::promise<int> m_receivedSignal ATLAS_THREAD_SAFE;
 
       //Port number property - defaults to zero in which case
       //it is dynamically assigned

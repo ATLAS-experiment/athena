@@ -42,13 +42,13 @@ namespace CP
 
 
   StatusCode PhotonEfficiencyCorrectionAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_efficiencyCorrectionTool->applySystematicVariation (sys));
       const xAOD::PhotonContainer *photons = nullptr;
-      ANA_CHECK (m_photonHandle.retrieve (photons, sys));
+      ANA_CHECK (m_photonHandle.retrieve (photons, sys, ctx));
       for (const xAOD::Photon *photon : *photons)
       {
         if (m_preselection.getBool (*photon, sys))

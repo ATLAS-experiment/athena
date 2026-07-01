@@ -1,5 +1,5 @@
 /*
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEFIdtpInvMassHypoTool.h"
@@ -50,7 +50,7 @@ StatusCode TrigMuonEFIdtpInvMassHypoTool::initialize()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& /*ctx*/) const
+bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecision>& combination, const EventContext& ctx) const
 {
    ATH_MSG_VERBOSE("in executeAlg");
    bool result = false;
@@ -75,11 +75,11 @@ bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecis
       auto decision= (*(leg.second));
       auto i_leg = TrigCompositeUtils::getIndexFromLeg(leg.first);
       ATH_MSG_VERBOSE("i_leg="<<i_leg);
-      auto muonLinks = TrigCompositeUtils::findLinks<xAOD::MuonContainer>( decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      auto muonLinks = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(ctx,  decision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
       if( muonLinks.size() != 1 )        continue;
       if( ! muonLinks.at(0).isValid() )  continue;
       const xAOD::Muon *mu = *(muonLinks.at(0).link);
-      if( ! mu->primaryTrackParticle() ) continue;
+      if( ! mu->trackParticle(xAOD::Muon::TrackParticleType::Primary) ) continue;
 
       bool is_idperf_muon = false;
       ATH_MSG_VERBOSE("... selected: muonType="<<mu->muonType()<<", pT="<<mu->pt()/Gaudi::Units::GeV<<", eta="<<mu->eta()<<", phi="<<mu->phi()<<", author="<<mu->author());
@@ -98,7 +98,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecis
       
       // if this leg is idperf leg (muon is SA) get ID tracks
       if( is_idperf_muon ) {
-	 const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrackParticleContainer> > ptLinks = TrigCompositeUtils::findLinks< xAOD::TrackParticleContainer >( decision, "HLT_IDTrack_Muon_IDTrig", TrigDefs::lastFeatureOfType);
+	 const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrackParticleContainer> > ptLinks = TrigCompositeUtils::findLinks< xAOD::TrackParticleContainer >(ctx,  decision, "HLT_IDTrack_Muon_IDTrig", TrigDefs::lastFeatureOfType);
 	 ATH_MSG_VERBOSE("PT TrackParticleContainer Links size = "<<ptLinks.size());
 	 if( ptLinks.size() == 1 && ptLinks.at(0).isValid() ) {
 	    const xAOD::TrackParticle* track = *(ptLinks.at(0).link);
@@ -108,7 +108,7 @@ bool TrigMuonEFIdtpInvMassHypoTool::executeAlg(const std::vector<Combo::LegDecis
 	    float phi = track->phi();
 	    ATH_MSG_VERBOSE("... pt / eta / phi = "<<pt/Gaudi::Units::GeV << " / " << eta << " / " << phi<<", fitter="<<track->trackFitter());
 	 }
-	 const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrackParticleContainer> > ftfLinks = TrigCompositeUtils::findLinks< xAOD::TrackParticleContainer >( decision, "HLT_IDTrack_Muon_FTF", TrigDefs::lastFeatureOfType);
+	 const std::vector< TrigCompositeUtils::LinkInfo<xAOD::TrackParticleContainer> > ftfLinks = TrigCompositeUtils::findLinks< xAOD::TrackParticleContainer >(ctx,  decision, "HLT_IDTrack_Muon_FTF", TrigDefs::lastFeatureOfType);
 	 ATH_MSG_VERBOSE("FTF TrackParticleContainer Links size = "<< ftfLinks.size());
 	 if( ftfLinks.size() == 1 && ftfLinks.at(0).isValid() ) {
 	    const xAOD::TrackParticle* track = *(ftfLinks.at(0).link);
@@ -290,17 +290,17 @@ bool TrigMuonEFIdtpInvMassHypoTool::passedCBQualityCuts(const xAOD::Muon* muon) 
 {
    bool passCut = false;
 
-   const xAOD::TrackParticle* idtrack = muon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
-   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle );
+   const xAOD::TrackParticle* idtrack = muon->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
+   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle );
 
    const float CHI2_CUT = 8.0;
    const float QOVP_CUT = 7.0;
     
    if( idtrack && metrack ) {
       float qOverPsignif = TrigMuonEFIdtpCommon::qOverPMatching(metrack,idtrack);
-      float reducedChi2  = muon->primaryTrackParticle()->chiSquared()/muon->primaryTrackParticle()->numberDoF(); 
+      float reducedChi2  = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->chiSquared()/muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->numberDoF(); 
       // Selection criteria based on the requirements that are part of the muon quality working points (offline)
-      if(std::abs(reducedChi2) < CHI2_CUT && !m_muonSelTool->isBadMuon(*muon) && qOverPsignif<QOVP_CUT && muon->author()==xAOD::Muon::MuidCo) passCut = true;
+      if(std::abs(reducedChi2) < CHI2_CUT && !m_muonSelTool->isBadMuon(*muon) && qOverPsignif<QOVP_CUT && muon->author()==xAOD::Muon::Author::MuidCo) passCut = true;
    }
    
    return passCut;
@@ -311,12 +311,12 @@ bool TrigMuonEFIdtpInvMassHypoTool::passedSAQualityCuts(const xAOD::Muon* muon) 
 {
    bool passCut = false;
 
-   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle );
+   const xAOD::TrackParticle* metrack = muon->trackParticle( xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle );
 
    const float CHI2_CUT = 8.0;
 
    if( metrack ) {
-      float reducedChi2 = muon->primaryTrackParticle()->chiSquared()/muon->primaryTrackParticle()->numberDoF(); 
+      float reducedChi2 = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->chiSquared()/muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->numberDoF(); 
       if( std::abs(reducedChi2) < CHI2_CUT && !m_muonSelTool->isBadMuon(*muon) ) passCut = true;
    }
    

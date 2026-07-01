@@ -10,4 +10,13 @@ atlas_add_library( ActsCalibBase
                    ActCalibBase/*.h
                    INTERFACE
                    PUBLIC_HEADERS ActsCalibBase
-                   LINK_LIBRARIES Acts::Core GaudiKernel GeoPrimitives)              
+                   LINK_LIBRARIES Acts::Core 
+                                  GaudiKernel 
+                                  GeoPrimitives 
+                                  xAODMeasurementBase)
+
+atlas_add_dictionary( ActsCalibBaseDict
+                      ActsCalibBase/SourceLinkType.h
+                      ActsCalibBase/selection.xml 
+                      LINK_LIBRARIES ActsCalibBase)
+                 

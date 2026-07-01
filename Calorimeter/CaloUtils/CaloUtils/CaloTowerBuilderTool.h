@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOREC_CALOTOWERBUILDERTOOL_H
@@ -75,7 +75,8 @@ public:
                               CaloTowerContainer* theContainer) override;
 
 
-  virtual void setCalos( const std::vector<CaloCell_ID::SUBCALO>& v);
+  virtual void setCalos(const EventContext& ctx,
+                        const std::vector<CaloCell_ID::SUBCALO>& v);
 
   virtual StatusCode initializeTool() override;
   

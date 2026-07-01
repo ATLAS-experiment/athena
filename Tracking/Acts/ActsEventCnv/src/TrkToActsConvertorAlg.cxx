@@ -15,9 +15,8 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 StatusCode ActsTrk::TrkToActsConvertorAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize());
   ATH_CHECK(m_trackContainerKey.initialize());
-  ATH_CHECK(m_convertorTool.retrieve());
+  ATH_CHECK(m_ATLASConverterTool.retrieve());
   ATH_CHECK(m_trackContainerBackendsHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
-  ATH_CHECK(m_geometryContextKey.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -30,18 +29,12 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   ActsTrk::MutableTrackContainer tc( std::move(trackBackend),
                                      std::move(trackStateBackend) );
 
-  const GeometryContext* gcx{};
-  ATH_CHECK(SG::get(gcx, m_geometryContextKey, ctx));
-  Acts::GeometryContext tgContext = gcx->context();
-
-    
   ATH_MSG_VERBOSE("Loop over track collections");
   for (auto handle : m_trackCollectionKeys.makeHandles(ctx)) {
     ATH_CHECK(handle.isValid());
     ATH_MSG_VERBOSE("Got back " << handle->size() << " tracks from "<< handle.key());
 
-    m_convertorTool->trkTrackCollectionToActsTrackContainer(
-          tc, *handle, tgContext);
+    m_ATLASConverterTool->convertTrkToActsContainer(ctx, *handle, tc);
     ATH_MSG_VERBOSE("multiTraj has  " << tc.trackStateContainer().size() << " states");
   }
 

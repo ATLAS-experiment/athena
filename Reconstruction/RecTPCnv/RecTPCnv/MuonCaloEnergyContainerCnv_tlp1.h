@@ -12,14 +12,14 @@
 #ifndef RECTPCNV_MUONCALOENERGY_CONTAINER_CNV_TLP1_H
 #define RECTPCNV_MUONCALOENERGY_CONTAINER_CNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "RecTPCnv/MuonCaloEnergyContainer_tlp1.h"
 #include "RecTPCnv/MuonCaloEnergyContainerCnv_p1.h"
 
 #include "RecTPCnv/CaloEnergyCnv_p2.h"
 
 class MuonCaloEnergyContainerCnv_tlp1:
-    public AthenaPoolTopLevelTPConverter<MuonCaloEnergyContainerCnv_p1, MuonCaloEnergyContainer_tlp1>
+    public TopLevelTPConverter<MuonCaloEnergyContainerCnv_p1, MuonCaloEnergyContainer_tlp1>
 {
     public:
         MuonCaloEnergyContainerCnv_tlp1();

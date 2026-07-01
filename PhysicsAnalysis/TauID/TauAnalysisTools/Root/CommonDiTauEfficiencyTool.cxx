@@ -1,5 +1,5 @@
 /**
- * @copyright Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -7,27 +7,34 @@
 
 // local include(s)
 #include "TauAnalysisTools/CommonDiTauEfficiencyTool.h"
-#include "TauAnalysisTools/TauEfficiencyCorrectionsTool.h"
+#include "TauAnalysisTools/DiTauEfficiencyCorrectionsTool.h"
 
 // ROOT include(s)
 #include "TH2F.h"
+#include "TROOT.h"
+#include "TClass.h"
 #include <utility>
 
 using namespace TauAnalysisTools;
 
 //______________________________________________________________________________
 CommonDiTauEfficiencyTool::CommonDiTauEfficiencyTool(const std::string& sName)
-  : CommonEfficiencyTool( sName )
+  : asg::AsgTool( sName )
   , m_fXDiTau(&TruthLeadPt)
   , m_fYDiTau(&TruthSubleadPt)
   , m_fZDiTau(&TruthDeltaR)
+  , m_sSystematicSet(nullptr)
   , m_bSFIsAvailableDiTau(false)
   , m_bSFIsAvailableCheckedDiTau(false)
+  , m_eCheckTruth(TauAnalysisTools::Unknown)
 {
 }
 
 CommonDiTauEfficiencyTool::~CommonDiTauEfficiencyTool()
 {
+  if (m_mSF)
+    for (auto mEntry : *m_mSF)
+      delete std::get<0>(mEntry.second);	
 }
 
 
@@ -85,7 +92,7 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getEfficiencyScaleFactor(const xAO
     double& dEfficiencyScaleFactor)
 {
   // check which true state is requestet
-  if (getTruthParticleType(xDiTau) != m_eCheckTruth)
+  if (!m_bSkipTruthMatchCheck and getTruthParticleType(xDiTau) != m_eCheckTruth)
   {
     dEfficiencyScaleFactor = 1.;
     return CP::CorrectionCode::Ok;
@@ -184,8 +191,97 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::applyEfficiencyScaleFactor(const x
   return tmpCorrectionCode;
 }
 
+/*
+  standard check if a systematic is available
+*/
+//______________________________________________________________________________
+bool CommonDiTauEfficiencyTool::isAffectedBySystematic( const CP::SystematicVariation& systematic ) const
+{
+  CP::SystematicSet sys = affectingSystematics();
+  return sys.find(systematic) != sys.end();
+}
 
-// //______________________________________________________________________________
+/*
+  standard way to return systematics that are available (including recommended
+  systematics)
+*/
+//______________________________________________________________________________
+CP::SystematicSet CommonDiTauEfficiencyTool::affectingSystematics() const
+{
+  return m_sAffectingSystematics;
+}
+
+/*
+  standard way to return systematics that are recommended
+*/
+//______________________________________________________________________________
+CP::SystematicSet CommonDiTauEfficiencyTool::recommendedSystematics() const
+{
+  return m_sRecommendedSystematics;
+}
+
+/*
+  Configure the tool to use a systematic variation for further usage, until the
+  tool is reconfigured with this function. The passed systematic set is checked
+  for sanity:
+    - unsupported systematics are skipped
+    - only combinations of up or down supported systematics is allowed
+    - don't mix recommended systematics with other available systematics, cause
+      sometimes recommended are a quadratic sum of the other variations,
+      e.g. TOTAL=(SYST^2 + STAT^2)^0.5
+*/
+//______________________________________________________________________________
+StatusCode CommonDiTauEfficiencyTool::applySystematicVariation ( const CP::SystematicSet& sSystematicSet)
+{
+
+  // first check if we already know this systematic configuration
+  auto itSystematicSet = m_mSystematicSets.find(sSystematicSet);
+  if (itSystematicSet != m_mSystematicSets.end())
+  {
+    m_sSystematicSet = &itSystematicSet->first;
+    return StatusCode::SUCCESS;
+  }
+
+  // sanity checks if systematic set is supported
+  double dDirection = 0.;
+  CP::SystematicSet sSystematicSetAvailable;
+  for (auto sSyst : sSystematicSet)
+  {
+    // check if systematic is available
+    auto it = m_mSystematicsHistNames.find(sSyst.basename());
+    if (it == m_mSystematicsHistNames.end())
+    {
+      ATH_MSG_VERBOSE("unsupported systematic variation: "<< sSyst.basename()<<"; skipping this one");
+      continue;
+    }
+
+
+    if (sSyst.parameter() * dDirection < 0)
+    {
+      ATH_MSG_ERROR("unsupported set of systematic variations, you should either use only \"UP\" or only \"DOWN\" systematics in one set!");
+      ATH_MSG_ERROR("systematic set will not be applied");
+      return StatusCode::FAILURE;
+    }
+    dDirection = sSyst.parameter();
+
+    if ((m_sRecommendedSystematics.find(sSyst.basename()) != m_sRecommendedSystematics.end()) and sSystematicSet.size() > 1)
+    {
+      ATH_MSG_ERROR("unsupported set of systematic variations, you should not combine \"TAUS_{TRUE|FAKE}_EFF_*_TOTAL\" with other systematic variations!");
+      ATH_MSG_ERROR("systematic set will not be applied");
+      return StatusCode::FAILURE;
+    }
+
+    // finally add the systematic to the set of systematics to process
+    sSystematicSetAvailable.insert(sSyst);
+  }
+
+  // store this calibration for future use, and make it current
+  m_sSystematicSet = &m_mSystematicSets.insert(std::pair<CP::SystematicSet,std::string>(sSystematicSetAvailable, sSystematicSet.name())).first->first;
+
+  return StatusCode::SUCCESS;
+}
+
+//=================================PRIVATE-PART=================================
 void CommonDiTauEfficiencyTool::ReadInputs(std::unique_ptr<TFile> &fFile)
 {
   m_mSF->clear();
@@ -222,6 +318,35 @@ void CommonDiTauEfficiencyTool::ReadInputs(std::unique_ptr<TFile> &fFile)
     }
   }
   ATH_MSG_INFO("data loaded from " << fFile->GetName());
+}
+
+/*
+  Create the tuple objects for the map
+*/
+//______________________________________________________________________________
+void CommonDiTauEfficiencyTool::addHistogramToSFMap(TKey* kKey, const std::string& sKeyName)
+{
+  // handling for the 3 different input types TH1F/TH1D/TF1, function pointer
+  // handle the access methods for the final scale factor retrieval
+  TClass *cClass = gROOT->GetClass(kKey->GetClassName());
+  if (cClass->InheritsFrom("TH2"))
+  {
+    TH2* oObject = static_cast<TH2*>(kKey->ReadObj());
+    oObject->SetDirectory(0);
+    (*m_mSF)[sKeyName] = tTupleObjectFunc(oObject,&getValueTH2);
+    ATH_MSG_DEBUG("added histogram with name "<<sKeyName);
+  }
+  else if (cClass->InheritsFrom("TH1"))
+  {
+    TH1* oObject = static_cast<TH1*>(kKey->ReadObj());
+    oObject->SetDirectory(0);
+    (*m_mSF)[sKeyName] = tTupleObjectFunc(oObject,&getValueTH1);
+    ATH_MSG_DEBUG("added histogram with name "<<sKeyName);
+  }
+  else
+  {
+    ATH_MSG_DEBUG("ignored object with name "<<sKeyName);
+  }
 }
 
 
@@ -339,3 +464,67 @@ double TauAnalysisTools::TruthDeltaR(const xAOD::DiTauJet& xDiTau)
   static const SG::ConstAccessor< float > acc( "TruthVisDeltaR" );
   return acc( xDiTau );
 }
+
+/*
+  find the particular value in TH1 depending on pt (or the
+  corresponding value in case of configuration)
+  Note: In case values are outside of bin ranges, the closest bin value is used
+*/
+//______________________________________________________________________________
+CP::CorrectionCode CommonDiTauEfficiencyTool::getValueTH1(const TObject* oObject,
+    double& dEfficiencyScaleFactor, double dVars[])
+{
+  double dPt = dVars[0];
+
+  const TH1* hHist = dynamic_cast<const TH1*>(oObject);
+
+  if (!hHist)
+  {
+    // ATH_MSG_ERROR("Problem with casting TObject of type "<<oObject->ClassName()<<" to TH2F");
+    return CP::CorrectionCode::Error;
+  }
+
+  // protect values from underflow bins
+  dPt = std::max(dPt,hHist->GetXaxis()->GetXmin());
+  // protect values from overflow bins (times .999 to keep it inside last bin)
+  dPt = std::min(dPt,hHist->GetXaxis()->GetXmax() * .999);
+
+  // get bin from TH2 depending on x and y values; finally set the scale factor
+  int iBin = hHist->FindFixBin(dPt);
+  dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
+  return CP::CorrectionCode::Ok;
+}
+
+/*
+  find the particular value in TH2 depending on pt and eta (or the
+  corresponding value in case of configuration)
+  Note: In case values are outside of bin ranges, the closest bin value is used
+*/
+//______________________________________________________________________________
+CP::CorrectionCode CommonDiTauEfficiencyTool::getValueTH2(const TObject* oObject,
+    double& dEfficiencyScaleFactor, double dVars[])
+{
+  double dPt = dVars[0];
+  double dEta = dVars[1];
+
+  const TH2* hHist = dynamic_cast<const TH2*>(oObject);
+
+  if (!hHist)
+  {
+    // ATH_MSG_ERROR("Problem with casting TObject of type "<<oObject->ClassName()<<" to TH2F");
+    return CP::CorrectionCode::Error;
+  }
+
+  // protect values from underflow bins
+  dPt = std::max(dPt,hHist->GetXaxis()->GetXmin());
+  dEta = std::max(dEta,hHist->GetYaxis()->GetXmin());
+  // protect values from overflow bins (times .999 to keep it inside last bin)
+  dPt = std::min(dPt,hHist->GetXaxis()->GetXmax() * .999);
+  dEta = std::min(dEta,hHist->GetYaxis()->GetXmax() * .999);
+
+  // get bin from TH2 depending on x and y values; finally set the scale factor
+  int iBin = hHist->FindFixBin(dPt,dEta);
+  dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
+  return CP::CorrectionCode::Ok;
+}
+

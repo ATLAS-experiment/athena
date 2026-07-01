@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METRecoAlg.cxx
@@ -13,25 +13,11 @@ namespace met {
 
   //**********************************************************************
 
-  METRecoAlg::METRecoAlg(const std::string& name,
-			 ISvcLocator* pSvcLocator )
-    : ::AthReentrantAlgorithm( name, pSvcLocator ),
-      m_recotools (this)
-  {
-    declareProperty( "RecoTools", m_recotools);
-  }
-
-  //**********************************************************************
-
-  METRecoAlg::~METRecoAlg() = default;
-
-  //**********************************************************************
-
   StatusCode METRecoAlg::initialize() {
     ATH_MSG_VERBOSE("Initializing " << name() << "...");
 
     ATH_CHECK( m_recotools.retrieve() );
-  
+
     return StatusCode::SUCCESS;
   }
 
@@ -44,14 +30,14 @@ namespace met {
 
   //**********************************************************************
 
-  StatusCode METRecoAlg::execute(const EventContext& /*ctx*/) const{ 
+  StatusCode METRecoAlg::execute(const EventContext& ctx) const{
     ATH_MSG_VERBOSE("Executing " << name() << "...");
     // Loop over tools.
 
     // Run the top-level MET tools in sequence
     for(auto tool : m_recotools) {
       ATH_MSG_VERBOSE("Running tool: " << tool->name() );
-      if( tool->execute().isFailure() ) {
+      if( tool->execute(ctx).isFailure() ) {
         ATH_MSG_ERROR("Failed to execute tool: " << tool->name());
         return StatusCode::FAILURE;
       }
@@ -63,4 +49,3 @@ namespace met {
   //**********************************************************************
 
 }
-

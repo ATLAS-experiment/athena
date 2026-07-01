@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBBLOBOBJS_TILECALIBDRAWERBASE_H
@@ -47,13 +47,15 @@
 */
 
 
-#include <stdint.h>
-#include <vector>
-#include <string>
-#include <iostream>
+
 #include "CoralBase/Blob.h"
 #include "TileCalibBlobObjs/Exception.h"
 #include "TileCalibBlobObjs/TileCalibType.h"
+
+#include <stdint.h>
+#include <vector>
+#include <string>
+#include <iosfwd>
 
 
 class TileCalibDrawerBase{
@@ -80,7 +82,7 @@ class TileCalibDrawerBase{
   virtual uint16_t getType() const {return TileCalibType::BASE;}
 
   /** @brief Prints the BLOB header summary information to std::cout. */
-  virtual void dump() const { dumpHeader(std::cout); } 
+  virtual void dump() const;
   /** @brief Prints the BLOB header summary information.
       @param stm The output stream to use */
   virtual void dump(std::ostream& stm) const {dumpHeader(stm);} 
@@ -160,8 +162,8 @@ class TileCalibDrawerBase{
 		      uint32_t nObjs,
 		      uint16_t nChans,
 		      uint16_t nGains,
-		      const std::string& author="",
-		      const std::string& comment="",
+		      std::string_view author="",
+		      std::string_view comment="",
 		      uint64_t timeStamp=0);
 
   /** @brief Prints the BLOB header summary information.

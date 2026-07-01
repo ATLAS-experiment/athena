@@ -115,7 +115,7 @@ namespace columnar
 
 
     /// @brief call the tool for the given event range
-    virtual void callEvents (ObjectRange<ContainerId::eventContext,CM> /*events*/) const {
+    virtual void callEvents (ObjectRange<EventContextDef,CM> /*events*/) const {
       throw std::runtime_error ("tool didn't implement callEvents");}
 
 
@@ -126,6 +126,6 @@ namespace columnar
 
     void callVoid (void **data) const final {
       auto eventsOffset = static_cast<const ColumnarOffsetType*> (data[m_eventsIndex]);
-      callEvents (ObjectRange<ContainerId::eventContext,CM> (data, eventsOffset[0], eventsOffset[1])); }
+      callEvents (ObjectRange<EventContextDef,CM> (data, eventsOffset[0], eventsOffset[1])); }
   };
 }

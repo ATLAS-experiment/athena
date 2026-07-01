@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NRPC_RawDataProviderTool.h"
@@ -8,32 +8,29 @@
 
 namespace Muon {
 
-
-NRPC_RawDataProviderTool::NRPC_RawDataProviderTool(const std::string& t, const std::string& n, const IInterface* p) :
-    base_class(t, n, p) {}
-
 StatusCode NRPC_RawDataProviderTool::initialize() {
 
     // Get ROBDataProviderSvc
     ATH_CHECK(m_robDataProvider.retrieve());
     ATH_CHECK(m_idHelperSvc.retrieve());
-
     ATH_CHECK(m_rdoContainerKey.initialize());
-
     ATH_CHECK(m_readKey.initialize()); 
-
-    ATH_MSG_DEBUG("initialize() successful in " << name());
     return StatusCode::SUCCESS;
 }
 
 StatusCode NRPC_RawDataProviderTool::convertIntoContainer(
-    const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs, xAOD::NRPCRDOContainer& nrpcContainer) const {
+    const ROBFragmentList& vecRobs, const EventContext& ctx) const {
+    
+    ATH_MSG_VERBOSE("convert(): " << vecRobs.size() << " ROBFragments.");
+    SG::WriteHandle rdoContainer(m_rdoContainerKey, ctx);
+    ATH_CHECK(rdoContainer.record(std::make_unique<xAOD::NRPCRDOContainer>(), std::make_unique<xAOD::NRPCRDOAuxContainer>()));
+
     ATH_MSG_VERBOSE("convert(): " << vecRobs.size() << " ROBFragments.");
 
     for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* frag : vecRobs) {
         // convert only if data payload is delivered
         if (frag->rod_ndata() != 0) {
-            ATH_CHECK(fillCollections(*frag, nrpcContainer).ignore() );
+            ATH_CHECK(fillCollections(*frag, *rdoContainer));
         } else {
             ATH_MSG_DEBUG(" ROB " << MSG::hex << frag->source_id() << " is delivered with an empty payload" );
         }
@@ -42,73 +39,30 @@ StatusCode NRPC_RawDataProviderTool::convertIntoContainer(
     return StatusCode::SUCCESS;
 }
 
-StatusCode NRPC_RawDataProviderTool::convert() const  // call decoding function using list of all detector ROBId's
-{
-    return convert(Gaudi::Hive::currentContext());
+StatusCode NRPC_RawDataProviderTool::convert(const EventContext& ctx) const  {
+    const RpcCablingMap* cabling{nullptr};
+    ATH_CHECK(SG::get(cabling, m_readKey, ctx));
+    return convert(cabling->getAllROBId(), ctx);
 }
 
-StatusCode NRPC_RawDataProviderTool::convert(
-    const EventContext& ctx) const  // call decoding function using list of all detector ROBId's
-{
 
-    SG::ReadCondHandle readCdo{m_readKey, ctx};   
-    if (!readCdo.isValid()) {
-        ATH_MSG_ERROR("Null pointer to the read conditions object");
-        return StatusCode::FAILURE;
-    }
-    return convert(readCdo->getAllROBId(), ctx);
+StatusCode NRPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& HashVec,
+                                             const EventContext& ctx) const {
+    const RpcCablingMap* cabling{nullptr};
+    ATH_CHECK(SG::get(cabling, m_readKey, ctx));
+    return convert(cabling->getROBId(HashVec, msgStream()), ctx);
 }
 
-StatusCode NRPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& HashVec) const {
-    return convert(HashVec, Gaudi::Hive::currentContext());
-}
-
-StatusCode NRPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& HashVec, const EventContext& ctx) const {
-    SG::ReadCondHandle readCdo{m_readKey, ctx};
-    if (!readCdo.isValid()) {
-        ATH_MSG_ERROR("Null pointer to the read conditions object");
-        return StatusCode::FAILURE;
-    }
-    return convert(readCdo->getROBId(HashVec, msgStream()), ctx);
-}
-
-StatusCode NRPC_RawDataProviderTool::convert(const std::vector<uint32_t>& robIds) const {
-    return convert(robIds, Gaudi::Hive::currentContext());
-}
-
-StatusCode NRPC_RawDataProviderTool::convert(const std::vector<uint32_t>& robIds, const EventContext& ctx) const {
-    std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
+StatusCode NRPC_RawDataProviderTool::convert(const std::vector<uint32_t>& robIds, 
+                                             const EventContext& ctx) const {
+    ROBFragmentList vecOfRobf;
     m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
-    return convert(vecOfRobf, ctx); 
-}
-
-StatusCode NRPC_RawDataProviderTool::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-                                                    const std::vector<IdentifierHash>&) const {
-    return convert(vecRobs, Gaudi::Hive::currentContext());
-}
-
-StatusCode NRPC_RawDataProviderTool::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-                                                    const std::vector<IdentifierHash>& /*collection*/, const EventContext& ctx) const {
-    return convert(vecRobs, ctx);
-}
-
-StatusCode NRPC_RawDataProviderTool::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs) const {
-    return convert(vecRobs, Gaudi::Hive::currentContext());
-}
-
-StatusCode NRPC_RawDataProviderTool::convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-                                                    const EventContext& ctx) const {
-    ATH_MSG_VERBOSE("convert(): " << vecRobs.size() << " ROBFragments.");
-
-    SG::WriteHandle rdoContainer(m_rdoContainerKey, ctx);
-    ATH_CHECK(rdoContainer.record(std::make_unique<xAOD::NRPCRDOContainer>(), std::make_unique<xAOD::NRPCRDOAuxContainer>()));
-    // use the convert function in the NRPC_RawDataProviderTool class
-    ATH_CHECK(convertIntoContainer(vecRobs, *rdoContainer));
-    return StatusCode::SUCCESS;
+    return convertIntoContainer(vecOfRobf, ctx); 
 }
 
 
-StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, xAOD::NRPCRDOContainer& rdoIdc) const {
+StatusCode NRPC_RawDataProviderTool::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, 
+                                                     xAOD::NRPCRDOContainer& rdoIdc) const {
 #define WARNING_WITH_LINE(msg) ATH_MSG_WARNING(__FILE__ << ":" << __LINE__<< " " << msg)
     try {
         robFrag.check();

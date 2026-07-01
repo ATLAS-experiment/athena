@@ -38,7 +38,7 @@ def STDM13KernelCfg(flags, name='STDM13Kernel', **kwargs):
     STDM13StringSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
         flags, name = "STDM13StringSkimmingTool", expression = lepton_skimming_expression))
 
-    tp_thinning_expression = "abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 6.0*mm"
+    tp_thinning_expression = "abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 6.0*mm"
     STDM13TPThinningTool =  acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "STDM13TPThinningTool",
@@ -46,8 +46,20 @@ def STDM13KernelCfg(flags, name='STDM13Kernel', **kwargs):
         SelectionString         = tp_thinning_expression,
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    thinningTools = [ STDM13TPThinningTool ]
-    skimmingTools = [ STDM13StringSkimmingTool ]
+    # Truth thinning
+    if flags.Input.isMC:
+        truth_stable_expr = "TruthParticles.isGenStable"   
+        STDM13TruthThinningTool = CompFactory.DerivationFramework.GenericTruthThinning(
+            name                     = "STDM13TruthThin_stable",
+            StreamName               = kwargs['StreamName'],
+            ParticleSelectionString  = truth_stable_expr,   
+        )
+        acc.addPublicTool(STDM13TruthThinningTool)
+
+    thinningTools = [STDM13TPThinningTool]
+    if flags.Input.isMC:
+        thinningTools += [STDM13TruthThinningTool]
+    skimmingTools = [STDM13StringSkimmingTool]
     
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, SkimmingTools = skimmingTools, ThinningTools = thinningTools))       
@@ -77,26 +89,34 @@ def STDM13Cfg(flags):
     STDM13SlimmingHelper = SlimmingHelper("STDM13SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
-    FtagBaseContent.addCommonAugmentation(flags, acc, STDM13SlimmingHelper)
+    FtagBaseContent.add_common_augmentation(flags, acc, STDM13SlimmingHelper)
     
-    STDM13SlimmingHelper.SmartCollections = [
+    STDM13SlimmingHelper.SmartCollections += [
         "Electrons",
         "Muons",
         "AntiKt4EMPFlowJets",
         "MET_Baseline_AntiKt4EMPFlow",
         "PrimaryVertices",
         "InDetTrackParticles",
+        "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
     ]
 
-    STDM13SlimmingHelper.AllVariables = [
+    STDM13SlimmingHelper.ExtraVariables += [
+        "AntiKt4EMPFlowJets.GhostTrack",
+        "InDetTrackParticles.btagIp_d0.btagIp_d0Uncertainty.btagIp_z0SinTheta.btagIp_z0SinThetaUncertainty.btagIp_trackMomentum.btagIp_trackDisplacement.btagIp_invalidIp",
+        "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights",
+        "InDetTrackParticles.truthMatchProbability.truthParticleLink",
+        "AntiKt4EMPFlowJets.GN2v01_TrackOrigin.GN2v01_TrackLinks",
+    ]
+
+    STDM13SlimmingHelper.AllVariables += [
         "EventInfo",
         "PrimaryVertices",
         "InDetTrackParticles",
-
+        "TruthParticles",
         "AntiKt4TruthDressedWZJets",
         "TruthEvents","TruthHFWithDecayParticles","TruthBoson","TruthBottom", "TruthCharm","TruthElectrons","TruthMuons","TruthTop","TruthTaus","MET_Truth",
         "TruthPrimaryVertices","TruthHFWithDecayVertices",
-##        "AntiKt4EMPFlowJets"
     ]
 
     STDM13SlimmingHelper.IncludeTriggerNavigation = False
@@ -125,10 +145,9 @@ def STDM13Cfg(flags):
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
         STDM13SlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
 
-        # Extra content
-    STDM13SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub" ]
+    # Extra content
+    STDM13SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.QGTransformer_ConstScore.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub" ]
 
-    
     # Trigger matching
     # Run 2
     if flags.Trigger.EDMVersion == 2:

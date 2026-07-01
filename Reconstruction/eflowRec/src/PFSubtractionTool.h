@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFSUBTRACTIONTOOL_H
-#define PFSUBTRACTIONTOOL_H
+#ifndef EFLOWREC_PFSUBTRACTIONTOOL_H
+#define EFLOWREC_PFSUBTRACTIONTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -36,15 +36,15 @@ public:
   ~PFSubtractionTool();
 
   StatusCode initialize();
-  void execute(eflowCaloObjectContainer *theEflowCaloObjectContainer, eflowRecTrackContainer *recTrackContainer, eflowRecClusterContainer *recClusterContainer) const;
+  void execute(const EventContext& ctx, eflowCaloObjectContainer *theEflowCaloObjectContainer, eflowRecTrackContainer *recTrackContainer, eflowRecClusterContainer *recClusterContainer) const;
   StatusCode finalize();
 
 private:  
 
   /** This matches ID tracks and CaloClusters, and then creates eflowCaloObjects */
-  unsigned int matchAndCreateEflowCaloObj(PFData &data) const;
+  unsigned int matchAndCreateEflowCaloObj(const EventContext& ctx, PFData &data) const;
 
-  void performSubtraction(const unsigned int& startingPoint,PFData &data) const;
+  void performSubtraction(unsigned int startingPoint,PFData &data) const;
   void performSubtraction(eflowCaloObject& thisEflowCaloObject) const;
   void performTruthSubtraction(PFData &data) const;
   void performTruthSubtraction(eflowCaloObject& thisEflowCaloObject) const;

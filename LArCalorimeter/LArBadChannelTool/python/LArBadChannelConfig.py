@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -48,17 +48,20 @@ def LArBadFebCfg(configFlags, tag=None, dbname=None):
         result.merge(addFolders(configFlags,"/LAR/BadChannels/MissingFEBs","LAR_OFL",tag=tag,
                                 className="AthenaAttributeList"))
     else:
+        if dbname is None and configFlags.hasFlag("LArCalib.BadChannelDB"):
+            dbname=configFlags.LArCalib.BadChannelDB
         if dbname is None:
            result.merge(addFoldersSplitOnline(configFlags,"LAR","/LAR/BadChannels/MissingFEBs",
                                            f"/LAR/BadChannelsOfl/MissingFEBs<key>{rekey}</key>",tag=tag,
                                            className="AthenaAttributeList"))  
         else:   
-           result.merge(addFolders(configFlags,"/LAR/BadChannelsOfl/MissingFEBs","LAR_OFL",
+           result.merge(addFolders(configFlags,"/LAR/BadChannelsOfl/MissingFEBs",dbname,
                                            modifiers=f"<key>{rekey}</key>",tag=tag,
                                            className="AthenaAttributeList"))  
         pass      
     result.addCondAlgo(CompFactory.LArBadFebCondAlg(ReadKey=rekey))
     return result
+
 
 def LArMaskedSCCfg(configFlags):
      

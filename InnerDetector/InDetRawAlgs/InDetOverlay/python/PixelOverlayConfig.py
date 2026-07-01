@@ -11,13 +11,14 @@ def PixelOverlayAlgCfg(flags, name="PixelOverlay", **kwargs):
     """Return a ComponentAccumulator for PixelOverlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}PixelRDOs")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}PixelRDOs" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}PixelRDOs")
     kwargs.setdefault("OutputKey", "PixelRDOs")
 
     # Input setup
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do Pixel overlay
     acc.addEventAlgo(CompFactory.PixelOverlay(name, **kwargs))

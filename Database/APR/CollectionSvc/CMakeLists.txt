@@ -4,22 +4,15 @@
 atlas_subdir( CollectionSvc )
 
 # External dependencies:
-find_package( Boost )
 find_package( CORAL COMPONENTS CoralBase )
-find_package( XercesC )
 
 # Component(s) in the package:
 atlas_add_library( CollectionSvc
                    src/*.cpp
 		               PUBLIC_HEADERS CollectionSvc
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-		               LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils StorageSvc
-                   PRIVATE_LINK_LIBRARIES CxxUtils POOLCore PersistencySvc )
-
-atlas_add_component( CollectionSvcComponents
-    src/components/*.cpp
-    NO_PUBLIC_HEADERS
-    LINK_LIBRARIES CollectionSvc POOLCore )
+                   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
+		               LINK_LIBRARIES ${CORAL_LIBRARIES} CxxUtils StorageSvc
+                   PRIVATE_LINK_LIBRARIES CxxUtils PersistencySvc )
 
 atlas_add_dictionary( CollectionSvcDict
 		CollectionSvc/CollectionSvcDict.h
@@ -31,15 +24,25 @@ atlas_add_dictionary( CollectionSvcDict
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 if( NOT GENERATIONBASE )
-  atlas_add_test( Factory_test
-                  SOURCES test/Factory_test.cxx
-                  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-		              LINK_LIBRARIES CollectionSvc POOLCore PersistentDataModel
-                  ${ROOT_LIBRARIES}
-                  PROPERTIES TIMEOUT 300 )
-
   atlas_add_test( collSorting_test
                   SCRIPT test/test_CollSort.py
-                  POST_EXEC_SCRIPT nopost.sh )
+                  POST_EXEC_SCRIPT noerror.sh )
+
+  atlas_add_test( ttree_coll_rw_test
+                  SOURCES test/ttree_rw_test.cxx test/rw_test.cxx
+                  LINK_LIBRARIES ${CORAL_LIBRARIES} CollectionSvc 
+                     PersistentDataModel StorageSvc CxxUtils AthenaKernel
+                  LOG_IGNORE_PATTERN "POOLCollectionID.*Value=" )
+
+  atlas_add_test( rntuple_coll_rw_test
+                  SOURCES test/rntuple_rw_test.cxx test/rw_test.cxx
+	                LINK_LIBRARIES ${CORAL_LIBRARIES} CollectionSvc 
+                    PersistentDataModel StorageSvc CxxUtils AthenaKernel
+                  LOG_IGNORE_PATTERN "POOLCollectionID.*Value=" )
+
+  # wait for the test collections to be created, then sort them
+  atlas_add_test( sort_test
+                  SCRIPT test/sort_test.py
+                  DEPENDS ttree_coll_rw_test rntuple_coll_rw_test )
 
 endif()

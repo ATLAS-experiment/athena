@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -32,8 +32,8 @@ namespace {
 struct Rule {
   std::regex locationPattern;  ///< Location pattern to match
   std::regex messagePattern;   ///< Message pattern to match
-  int severity;                ///< Severity level to apply the rule for
-  std::size_t hash;            ///< Hash value for the rule, for comparisons
+  int severity{};                ///< Severity level to apply the rule for
+  std::size_t hash{};            ///< Hash value for the rule, for comparisons
 };
 
 /// Comparison operator for @c Rule

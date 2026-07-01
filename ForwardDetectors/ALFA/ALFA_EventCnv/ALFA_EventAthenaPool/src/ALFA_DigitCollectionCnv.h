@@ -29,7 +29,7 @@ public:
 protected:
 
   ALFA_DigitCollection_PERS*  createPersistent (ALFA_DigitCollection *transCont);
-  ALFA_DigitCollection*       createTransient ();
+  ALFA_DigitCollection*       createTransient(const Token* token);
     
  };
  

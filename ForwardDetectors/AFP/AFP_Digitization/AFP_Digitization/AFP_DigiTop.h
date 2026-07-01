@@ -19,7 +19,7 @@ class AFP_DigiTop: public AthAlgorithm
               ISvcLocator* pSvcLocator);
   virtual ~AFP_DigiTop() = default;
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual bool isClonable() const override final { return true; }
 
  private:

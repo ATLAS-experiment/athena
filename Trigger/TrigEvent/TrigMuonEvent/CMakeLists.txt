@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigMuonEvent )
@@ -36,4 +36,4 @@ atlas_add_test( Operators_test
                 SOURCES
                 test/Operators_test.cxx
                 LINK_LIBRARIES TrigMuonEvent
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

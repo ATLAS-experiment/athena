@@ -4,7 +4,6 @@
 #include "cTauRoIThresholdsTool.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/exceptions.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "L1TopoAlgorithms/cTauMultiplicity.h"
 #include "utilities.h"
 using namespace HLTSeedingNs;

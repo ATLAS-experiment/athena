@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCELLREC_MAKELARCELLFROMRAW_H
@@ -34,15 +34,15 @@ public:
    struct CellInfo
 	{
 		Identifier id;
-		double eta ; 
-		double phi ; 
-		double x ; 
-		double y ; 
-		double z ; 
-		bool  fcal ; 
-		unsigned int tt; 
-		const CaloDetDescrElement* elem;
-		double eCorr ; 
+		double eta = 0;
+		double phi = 0;
+		double x = 0;
+		double y = 0;
+		double z = 0;
+		bool  fcal = false;
+		unsigned int tt = 0;
+		const CaloDetDescrElement* elem = nullptr;
+		double eCorr = 0;
 	}; 
 
   /** constructor

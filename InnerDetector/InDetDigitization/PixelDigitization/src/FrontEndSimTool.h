@@ -1,12 +1,11 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELDIGITIZATION_FrontEndSimTool_H
 #define PIXELDIGITIZATION_FrontEndSimTool_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IAlgTool.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -26,27 +25,17 @@ namespace CLHEP{
   class HepRandomEngine;
 }
 
-static const InterfaceID IID_IFrontEndSimTool("FrontEndSimTool", 1, 0);
-
-class FrontEndSimTool: public AthAlgTool, virtual public IAlgTool {
+class FrontEndSimTool: public AthAlgTool {
 public:
-  FrontEndSimTool(const std::string& type, const std::string& name, const IInterface* parent);
-  
-  static const InterfaceID& interfaceID() {return IID_IFrontEndSimTool;}
+  using AthAlgTool::AthAlgTool;
 
   virtual StatusCode initialize() override;
   
-  virtual StatusCode finalize() override;
-  virtual ~FrontEndSimTool() {}
-  //
-  virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
+  virtual void process(const EventContext& ctx,
+                       SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                        CLHEP::HepRandomEngine* rndmEngine) const = 0;
 
- 
-
-private:
-  FrontEndSimTool();
-protected:
+ protected:
   static constexpr double m_bunchSpace{25.0};
   int m_numberOfBcid{1}; //assumed same for all positions
   double m_timeOffset{5.0};

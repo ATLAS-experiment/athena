@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFLCCALIBTOOL_H
-#define PFLCCALIBTOOL_H
+#ifndef EFLOWREC_PFLCCALIBTOOL_H
+#define EFLOWREC_PFLCCALIBTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -28,7 +28,7 @@ class PFLCCalibTool : public extends<AthAlgTool, IPFBaseTool> {
   ~PFLCCalibTool() {}
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
+  virtual StatusCode execute(const EventContext& ctx, eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
   virtual StatusCode finalize() override;
 
  private:

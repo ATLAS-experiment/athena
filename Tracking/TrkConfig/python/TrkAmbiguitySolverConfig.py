@@ -210,6 +210,8 @@ def ITkTrkAmbiguitySolverCfg(
         name="ITkAmbiguitySolver",
         ResolvedTrackCollectionKey=None, **kwargs):
     acc = ComponentAccumulator()
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
+    prefix = 'Sig_' if doTrackOverlay else ""
 
     from TrkConfig.TrkAmbiguityProcessorConfig import (
         ITkDenseEnvironmentsAmbiguityProcessorToolCfg)
@@ -225,5 +227,5 @@ def ITkTrkAmbiguitySolverCfg(
     kwargs.setdefault("AmbiguityProcessor", ITkAmbiguityProcessor)
 
     acc.addEventAlgo(CompFactory.Trk.TrkAmbiguitySolver(
-        name+flags.Tracking.ActiveConfig.extension, **kwargs))
+        prefix+name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc

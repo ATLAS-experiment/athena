@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMuonAssociator.cxx 
@@ -38,7 +38,7 @@ namespace met {
 
   // Constructors
   ////////////////
-  METMuonAssociator::METMuonAssociator(const std::string& name) : 
+  METMuonAssociator::METMuonAssociator(const std::string& name) :
     AsgTool(name),
     METAssociator(name)
   {
@@ -51,13 +51,8 @@ namespace met {
     ATH_CHECK( METAssociator::initialize() );
     ATH_MSG_VERBOSE ("Initializing " << name() << "...");
     ATH_CHECK( m_muContKey.initialize());
-    if (m_useFELinks) {
-      if (m_neutralFEReadDecorKey.empty()) {ATH_CHECK( m_neutralFEReadDecorKey.assign(m_muContKey.key()+"."+m_neutralFELinksKey));}
-      if (m_chargedFEReadDecorKey.empty()) {ATH_CHECK( m_chargedFEReadDecorKey.assign(m_muContKey.key()+"."+m_chargedFELinksKey));}
-      ATH_CHECK( m_neutralFEReadDecorKey.initialize());
-      ATH_CHECK( m_chargedFEReadDecorKey.initialize());
-    }
-
+    ATH_CHECK( m_neutralFEReadDecorKey.initialize(m_useFELinks) );
+    ATH_CHECK( m_chargedFEReadDecorKey.initialize(m_useFELinks) );
     ATH_CHECK(m_elementLinkName.initialize(m_doMuonClusterMatch));
 
     return StatusCode::SUCCESS;
@@ -65,18 +60,18 @@ namespace met {
 
   // executeTool
   ////////////////
-  StatusCode METMuonAssociator::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METMuonAssociator::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
     ATH_MSG_VERBOSE ("In execute: " << name() << "...");
 
-    SG::ReadHandle<xAOD::MuonContainer> muonCont(m_muContKey);
+    SG::ReadHandle<xAOD::MuonContainer> muonCont(m_muContKey, ctx);
     if (!muonCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input muon container " << m_muContKey.key());
       return StatusCode::FAILURE;
     }
 
     ATH_MSG_DEBUG("Successfully retrieved muon collection");
-    if (fillAssocMap(metMap,muonCont.cptr()).isFailure()) {
+    if (fillAssocMap(metMap,muonCont.cptr(), ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to fill map with muon container " << m_muContKey.key());
       return StatusCode::FAILURE;
     }
@@ -87,7 +82,7 @@ namespace met {
   // Get constituents
   StatusCode METMuonAssociator::extractTopoClusters(const xAOD::IParticle* obj,
                                                     std::vector<const xAOD::IParticle*>& tclist,
-                                                    const met::METAssociator::ConstitHolder& /*constits*/) const
+                                                    const met::METAssociator::ConstitHolder& /*constits*/, const EventContext& ctx) const
   {
     const xAOD::Muon *mu = static_cast<const xAOD::Muon*>(obj);
     const CaloCluster* muclus = mu->cluster();
@@ -101,11 +96,11 @@ namespace met {
                    << ", E "   << muclus->calE()
                    << " formed of " << muclus->size() << " cells.");
       ATH_MSG_VERBOSE("Muon Eloss type: " << mu->energyLossType()
-                   << " Eloss: " << mu->floatParameter(xAOD::Muon::EnergyLoss)
-                   << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::MeasEnergyLoss)
-                   << " FSR E: " << mu->floatParameter(xAOD::Muon::FSR_CandidateEnergy) );
+                   << " Eloss: " << mu->floatParameter(xAOD::Muon::ParamDef::EnergyLoss)
+                   << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::ParamDef::MeasEnergyLoss)
+                   << " FSR E: " << mu->floatParameter(xAOD::Muon::ParamDef::FSR_CandidateEnergy) );
       
-      SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName); 
+      SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName, ctx); 
       for(const auto& matchel : tcLinkAcc(*muclus)) {
         if(!matchel.isValid()) {continue;} // In case of thinned cluster collection
         ATH_MSG_VERBOSE("Tool found cluster " << (*matchel)->index() << " with pt " << (*matchel)->pt() );
@@ -141,7 +136,7 @@ namespace met {
   StatusCode METMuonAssociator::extractPFO(const xAOD::IParticle* obj,
                                            std::vector<const xAOD::IParticle*>& pfolist,
                                            const met::METAssociator::ConstitHolder& constits,
-                                           std::map<const IParticle*,MissingETBase::Types::constvec_t>& /*momenta*/) const
+                                           std::map<const IParticle*,MissingETBase::Types::constvec_t>& /*momenta*/, const EventContext& ctx) const
   {
     const xAOD::Muon *mu = static_cast<const xAOD::Muon*>(obj);
     const TrackParticle* idtrack = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
@@ -158,9 +153,9 @@ namespace met {
                       << " formed of " << muclus->size() << " cells.");
     }
     ATH_MSG_VERBOSE("Muon Eloss type: " << mu->energyLossType()
-                    << " Eloss: " << mu->floatParameter(xAOD::Muon::EnergyLoss)
-                    << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::MeasEnergyLoss)
-                    << " FSR E: " << mu->floatParameter(xAOD::Muon::FSR_CandidateEnergy) );
+                    << " Eloss: " << mu->floatParameter(xAOD::Muon::ParamDef::EnergyLoss)
+                    << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::ParamDef::MeasEnergyLoss)
+                    << " FSR E: " << mu->floatParameter(xAOD::Muon::ParamDef::FSR_CandidateEnergy) );
 
     // One loop over PFOs
     for(const auto *const pfo : *constits.pfoCont) {
@@ -168,7 +163,7 @@ namespace met {
         // get charged PFOs by matching the muon ID track
         // We set a small -ve pt for cPFOs that were rejected
         // by the ChargedHadronSubtractionTool
-        const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+        const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
         if(idtrack && pfo->track(0) == idtrack && PVMatchedAcc(*pfo) &&
            ( !m_cleanChargedPFO || isGoodEoverP(pfo->track(0)) )
            ) {
@@ -182,7 +177,7 @@ namespace met {
         // get neutral PFOs by matching the muon cluster
         if(muclus && m_doMuonClusterMatch) {
 
-          SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName);
+          SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName, ctx);
                 for(const auto& matchel : tcLinkAcc(*muclus)) {
             if(!matchel.isValid()) {
               ATH_MSG_DEBUG("Invalid muon-cluster elementLink");
@@ -204,28 +199,28 @@ namespace met {
   StatusCode METMuonAssociator::extractFE(const xAOD::IParticle* obj,
                                             std::vector<const xAOD::IParticle*>& felist,
                                             const met::METAssociator::ConstitHolder& constits,
-                                            std::map<const IParticle*,MissingETBase::Types::constvec_t> &/*momenta*/) const
+                                          std::map<const IParticle*,MissingETBase::Types::constvec_t> &/*momenta*/, const EventContext& ctx) const
   {
     const xAOD::Muon *mu = static_cast<const xAOD::Muon*>(obj);
     if (m_useFELinks)
-      ATH_CHECK( extractFEsFromLinks(mu, felist,constits) );
+      ATH_CHECK( extractFEsFromLinks(mu, felist,constits, ctx) );
     else
-      ATH_CHECK( extractFEs(mu, felist, constits) );
+      ATH_CHECK( extractFEs(mu, felist, constits, ctx) );
 
     return StatusCode::SUCCESS;
   }
 
   StatusCode METMuonAssociator::extractFEsFromLinks(const xAOD::Muon* mu, //TODO to be tested
 						       std::vector<const xAOD::IParticle*>& felist,
-						       const met::METAssociator::ConstitHolder& constits) const
+						       const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("Extract FEs From Links for " << mu->type()  << " with pT " << mu->pt());
 
     std::vector<FELink_t> nFELinks;
     std::vector<FELink_t> cFELinks;
 
-    SG::ReadDecorHandle<xAOD::MuonContainer, std::vector<FELink_t> > neutralFEReadDecorHandle (m_neutralFEReadDecorKey);
-    SG::ReadDecorHandle<xAOD::MuonContainer, std::vector<FELink_t> > chargedFEReadDecorHandle (m_chargedFEReadDecorKey);
+    SG::ReadDecorHandle<xAOD::MuonContainer, std::vector<FELink_t> > neutralFEReadDecorHandle (m_neutralFEReadDecorKey, ctx);
+    SG::ReadDecorHandle<xAOD::MuonContainer, std::vector<FELink_t> > chargedFEReadDecorHandle (m_chargedFEReadDecorKey, ctx);
     nFELinks=neutralFEReadDecorHandle(*mu);
     cFELinks=chargedFEReadDecorHandle(*mu);
 
@@ -235,7 +230,7 @@ namespace met {
       const xAOD::FlowElement* fe_init = *feLink;
       for (const auto *const fe : *constits.feCont){
         if (fe->index() == fe_init->index() && fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
-          const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+          const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
           if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
             ATH_MSG_DEBUG("Accept cFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() );
             felist.push_back(fe);
@@ -264,7 +259,7 @@ namespace met {
 
   StatusCode METMuonAssociator::extractFEs(const xAOD::Muon* mu,
 				 std::vector<const xAOD::IParticle*>& felist,
-				 const met::METAssociator::ConstitHolder& constits) const
+				 const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const
   {
     const TrackParticle* idtrack = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
     const CaloCluster* muclus = mu->cluster();
@@ -279,9 +274,9 @@ namespace met {
                       << " formed of " << muclus->size() << " cells.");
     }
     ATH_MSG_VERBOSE("Muon Eloss type: " << mu->energyLossType()
-                    << " Eloss: " << mu->floatParameter(xAOD::Muon::EnergyLoss)
-                    << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::MeasEnergyLoss)
-                    << " FSR E: " << mu->floatParameter(xAOD::Muon::FSR_CandidateEnergy) );
+                    << " Eloss: " << mu->floatParameter(xAOD::Muon::ParamDef::EnergyLoss)
+                    << " MeasuredEloss: " << mu->floatParameter(xAOD::Muon::ParamDef::MeasEnergyLoss)
+                    << " FSR E: " << mu->floatParameter(xAOD::Muon::ParamDef::FSR_CandidateEnergy) );
 
     // One loop over PFOs
     for(const xAOD::FlowElement* fe : *constits.feCont) {
@@ -289,7 +284,7 @@ namespace met {
         // get charged FEs by matching the muon ID track
         // We set a small -ve pt for cPFOs that were rejected
         // by the ChargedHadronSubtractionTool
-        const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+        const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
         if(idtrack && fe->chargedObject(0) == idtrack && PVMatchedAcc(*fe) &&
            ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) )
            ) {
@@ -303,7 +298,7 @@ namespace met {
         // get neutral PFOs by matching the muon cluster
         if(muclus && m_doMuonClusterMatch) {
 
-          SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName); 
+          SG::ReadDecorHandle<CaloClusterContainer, std::vector<ElementLink<CaloClusterContainer> > > tcLinkAcc(m_elementLinkName, ctx); 
           for(const auto& matchel : tcLinkAcc(*muclus)) {
             if(!matchel.isValid()) {
               ATH_MSG_DEBUG("Invalid muon-cluster elementLink");

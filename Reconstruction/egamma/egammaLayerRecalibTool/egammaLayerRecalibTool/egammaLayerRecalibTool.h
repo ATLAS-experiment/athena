@@ -281,7 +281,14 @@ public:
   ~egammaLayerRecalibTool() { clear_corrections(); delete m_pileup_tool; }
 
   CP::CorrectionCode applyCorrection(xAOD::Egamma &, const xAOD::EventInfo& event_info) const;
-
+  CP::CorrectionCode read_and_scale_inputs( const xAOD::Egamma& particle,
+                                            const xAOD::EventInfo& event_info,
+                                            StdCalibrationInputs& inputs,
+                                            bool& isData,
+                                            std::string& fixT,
+                                            double& addE2,
+                                            double& addE3 ) const;
+  std::array<double,4> getLayerCorrections(const xAOD::Egamma& particle, const xAOD::EventInfo& event_info) const;
   /**
    * helper to create a tool from a string (useful for command line arguments)
    **/
@@ -311,6 +318,7 @@ public:
   void disable_PSCorrections() {m_doPSCorrections=false;}
   void disable_S12Corrections() {m_doS12Corrections=false;}
   void disable_SaccCorrections() {m_doSaccCorrections=false;}
+  void disable_LayerclEdecoration() {m_doLayerclEdecoration=false;}
 
 private:
 
@@ -328,6 +336,8 @@ private:
 
   bool m_aodFixMissingCells = false;
   bool m_scaleMC = false;
+
+  bool m_doLayerclEdecoration = true; 
 };
 
 #endif // EGAMMA_LAYER_RECALIB_TOOL

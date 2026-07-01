@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/CondCont_test.cxx
@@ -201,7 +201,7 @@ const EventIDRange r3 (timestamp (123), timestamp (456));
 
 
 template <class T>
-void fillit (CondCont<T>& cc_rl, CondCont<T>& cc_ts, std::vector<T*> & ptrs)
+void fillit (CondCont<T>& cc_rl, CondCont<T>& cc_ts, std::vector<T*> & ptrs, const EventContext& ctx)
 {
   int nsave = ConditionsCleanerTest::s_nobj;
   assert (cc_rl.entries() == 0);
@@ -229,11 +229,11 @@ void fillit (CondCont<T>& cc_rl, CondCont<T>& cc_ts, std::vector<T*> & ptrs)
   ptrs.push_back (new T(2));
   ptrs.push_back (new T(3));
 
-  assert(succ( cc_rl.typelessInsert (r1, ptrs[0]) ));
-  assert(succ( cc_rl.typelessInsert (r2, ptrs[1]) ));
-  assert(succ( cc_ts.insert (r3, std::unique_ptr<T> (ptrs[2])) ));
+  assert(succ( cc_rl.typelessInsert (r1, ptrs[0], ctx) ));
+  assert(succ( cc_rl.typelessInsert (r2, ptrs[1], ctx) ));
+  assert(succ( cc_ts.insert (r3, std::unique_ptr<T> (ptrs[2]), ctx) ));
   {
-    StatusCode sc = cc_ts.insert (r3, std::make_unique<T> (99));
+    StatusCode sc = cc_ts.insert (r3, std::make_unique<T> (99), ctx);
     assert (sc.isSuccess());
     assert (CondContBase::Category::isDuplicate (sc));
   }
@@ -258,7 +258,7 @@ void fillit (CondCont<T>& cc_rl, CondCont<T>& cc_ts, std::vector<T*> & ptrs)
   assert (ss4.str() == exp4.str());
 
   auto t4 = std::make_unique<T> (4);
-  assert( ! cc_rl.insert (EventIDRange (runlbn (40, 2), timestamp (543)), std::move(t4)).isSuccess() );
+  assert( ! cc_rl.insert (EventIDRange (runlbn (40, 2), timestamp (543)), std::move(t4), ctx).isSuccess() );
   assert (ConditionsCleanerTest::s_nobj - nsave == 3);
 }
 
@@ -327,8 +327,11 @@ std::string dump_cc (const CondCont<B>& cc)
 void test1 (TestRCUSvc& rcusvc)
 {
   std::cout << "test1\n";
+
   SG::DataProxy proxy;
   DataObjID id ("cls", "key");
+  const EventContext ctx(0, 0);
+
   CondCont<B> cc_rl (rcusvc, id, &proxy);
   assert (cc_rl.proxy() == &proxy);
   assert (cc_rl.id() == id);
@@ -340,7 +343,7 @@ void test1 (TestRCUSvc& rcusvc)
   assert (cc_ts.keyType() == CondContBase::KeyType::SINGLE);
 
   std::vector<B*> bptrs;
-  fillit (cc_rl, cc_ts, bptrs);
+  fillit (cc_rl, cc_ts, bptrs, ctx);
   checkit (cc_rl, cc_ts, bptrs);
 
   assert (cc_rl.nInserts() == 2);
@@ -350,7 +353,7 @@ void test1 (TestRCUSvc& rcusvc)
   assert (cc_ts.maxSize() == 1);
 
   const EventIDRange r4 (timestamp (800), timestamp (899));
-  StatusCode sc = cc_ts.typelessInsert (r4, new B(4));
+  StatusCode sc = cc_ts.typelessInsert (r4, new B(4), ctx);
   assert (sc.isSuccess());
   assert (cc_ts.entries() == 2);
 
@@ -367,48 +370,48 @@ void test1 (TestRCUSvc& rcusvc)
   assert (cc_ts.trim (keys1,keys2) == 0);
 
   //*** Test errors from erase().
-  assert (cc_rl.erase (timestamp (800)).isFailure());
-  assert (cc_ts.erase (runlbn (100, 200)).isFailure());
+  assert (cc_rl.erase (timestamp (800), ctx).isFailure());
+  assert (cc_ts.erase (runlbn (100, 200), ctx).isFailure());
 
   CondCont<B> cc_empty (rcusvc, id, &proxy);
-  assert (cc_empty.erase (timestamp (800)).isSuccess());
-  assert (cc_empty.erase (runlbn (100, 200)).isSuccess());
+  assert (cc_empty.erase (timestamp (800), ctx).isSuccess());
+  assert (cc_empty.erase (runlbn (100, 200), ctx).isSuccess());
 
-  assert (cc_rl.erase (runlbn (20, 17)).isSuccess());
-  assert (cc_ts.erase (timestamp (800)).isSuccess());
+  assert (cc_rl.erase (runlbn (20, 17), ctx).isSuccess());
+  assert (cc_ts.erase (timestamp (800), ctx).isSuccess());
 
   assert (cc_rl.entries() == 0);
   assert (cc_ts.entries() == 0);
 
   //*** Test errors from insert().
   assert (cc_rl.insert (EventIDRange (timestamp (800), timestamp (900)),
-                        std::make_unique<B> (10)).isFailure());
+                        std::make_unique<B> (10), ctx).isFailure());
   assert (cc_ts.insert (EventIDRange (runlbn (10, 20), runlbn (10, 30)),
-                        std::make_unique<B> (20)).isFailure());
+                        std::make_unique<B> (20), ctx).isFailure());
 
   sc = cc_rl.insert (EventIDRange (runlbn (10, 20), runlbn (10, 40)),
-                     std::make_unique<B> (30));
+                     std::make_unique<B> (30), ctx);
   assert (sc.isSuccess()); 
   assert (!CondContBase::Category::isDuplicate (sc));
   assert (!CondContBase::Category::isOverlap (sc));
 
   sc = cc_rl.insert (EventIDRange (runlbn (10, 35), runlbn (10, 39)),
-                     std::make_unique<B> (40));
+                     std::make_unique<B> (40), ctx);
   assert (sc.isSuccess()); 
   assert (CondContBase::Category::isDuplicate (sc));
   assert (!CondContBase::Category::isOverlap (sc));
 
   sc = cc_rl.insert (EventIDRange (runlbn (10, 35), runlbn (10, 45)),
-                     std::make_unique<B> (41));
+                     std::make_unique<B> (41), ctx);
   assert (sc.isSuccess()); 
   assert (!CondContBase::Category::isDuplicate (sc));
   assert (CondContBase::Category::isOverlap (sc));
 
   assert (cc_ts.insert (EventIDRange (timestamp (100), timestamp (200)),
-                        std::make_unique<B> (50)).isSuccess());
+                        std::make_unique<B> (50), ctx).isSuccess());
 
   sc = cc_ts.insert (EventIDRange (timestamp (100), timestamp (300)),
-                     std::make_unique<B> (60));
+                     std::make_unique<B> (60), ctx);
   assert (sc.isSuccess());
   assert (CondContBase::Category::isExtended (sc));
   assert (dump_cc(cc_ts) == "{[t:100] - [t:300]} [50]\n");
@@ -421,8 +424,8 @@ void test1 (TestRCUSvc& rcusvc)
   assert (!cc_empty.find (runlbn (5, 6), b));
 
   //*** Test errors from extendLastRange().
-  assert (cc_rl.extendLastRange (EventIDRange (timestamp (800), timestamp (900))).isFailure());
-  assert (cc_ts.extendLastRange (EventIDRange (runlbn (50, 10), runlbn (50, 20))).isFailure());
+  assert (cc_rl.extendLastRange (EventIDRange (timestamp (800), timestamp (900)), ctx).isFailure());
+  assert (cc_ts.extendLastRange (EventIDRange (runlbn (50, 10), runlbn (50, 20)), ctx).isFailure());
 
   assert (cc_rl.entries() == 2);
   cc_rl.clear();
@@ -433,8 +436,10 @@ void test1 (TestRCUSvc& rcusvc)
 void test2 (TestRCUSvc& rcusvc)
 {
   std::cout << "test2\n";
+
   SG::DataProxy proxy;
   DataObjID id ("cls", "key");
+  const EventContext ctx(0, 0);
 
   CondCont<D> cc_rl (rcusvc, id, &proxy);
   assert (cc_rl.proxy() == &proxy);
@@ -445,7 +450,7 @@ void test2 (TestRCUSvc& rcusvc)
   assert (cc_ts.id() == id);
 
   std::vector<D*> dptrs;
-  fillit (cc_rl, cc_ts, dptrs);
+  fillit (cc_rl, cc_ts, dptrs, ctx);
   checkit (cc_rl, cc_ts, dptrs);
 
   std::vector<B*> bptrs (dptrs.begin(), dptrs.end());
@@ -454,7 +459,7 @@ void test2 (TestRCUSvc& rcusvc)
   checkit (bcc_rl, bcc_ts, bptrs);
 
   auto b4 = std::make_unique<B> (4);
-  assert( ! bcc_rl.insert (EventIDRange (runlbn (40, 2), runlbn (40, 5)), std::move(b4)).isSuccess() );
+  assert( ! bcc_rl.insert (EventIDRange (runlbn (40, 2), runlbn (40, 5)), std::move(b4), ctx).isSuccess() );
 }
 
 
@@ -462,31 +467,33 @@ void test2 (TestRCUSvc& rcusvc)
 void test3 (TestRCUSvc& rcusvc)
 {
   std::cout << "test3\n";
+
   DataObjID id ("cls", "key");
   CondCont<B> cc (rcusvc, id);
+  const EventContext ctx(0, 0);
 
   const B* b = nullptr;
   assert (!cc.find (runlbn (10, 15), b));
 
   assert (cc.insert (EventIDRange (runlbn (10, 15), runlbn (10, 20)),
-                     std::make_unique<B>(1)));
+                     std::make_unique<B>(1), ctx));
   assert (cc.insert (EventIDRange (runlbn (10, 30), runlbn (10, 35)),
-                     std::make_unique<B>(2)));
+                     std::make_unique<B>(2), ctx));
   assert (dump_cc(cc) == "{[10,l:15] - [10,l:20]} [1]\n{[10,l:30] - [10,l:35]} [2]\n");
 
-  assert (cc.extendLastRange (EventIDRange (runlbn (10, 30), runlbn (10, 37))).isSuccess());
+  assert (cc.extendLastRange (EventIDRange (runlbn (10, 30), runlbn (10, 37)), ctx).isSuccess());
   assert (dump_cc(cc) == "{[10,l:15] - [10,l:20]} [1]\n{[10,l:30] - [10,l:37]} [2]\n");
 
-  assert (cc.extendLastRange (EventIDRange (runlbn (10, 30), runlbn (10, 33))).isSuccess());
+  assert (cc.extendLastRange (EventIDRange (runlbn (10, 30), runlbn (10, 33)), ctx).isSuccess());
   assert (dump_cc(cc) == "{[10,l:15] - [10,l:20]} [1]\n{[10,l:30] - [10,l:37]} [2]\n");
 
-  assert (cc.extendLastRange (EventIDRange (runlbn (10, 25), runlbn (10, 33))).isFailure());
+  assert (cc.extendLastRange (EventIDRange (runlbn (10, 25), runlbn (10, 33)), ctx).isFailure());
   assert (dump_cc(cc) == "{[10,l:15] - [10,l:20]} [1]\n{[10,l:30] - [10,l:37]} [2]\n");
 
-  assert (cc.extendLastRange (EventIDRange (runlbn (10, 31), runlbn (10, 33))).isSuccess());
+  assert (cc.extendLastRange (EventIDRange (runlbn (10, 31), runlbn (10, 33)), ctx).isSuccess());
   assert (dump_cc(cc) == "{[10,l:15] - [10,l:20]} [1]\n{[10,l:30] - [10,l:37]} [2]\n");
 
-  assert (cc.extendLastRange (EventIDRange (runlbn (10, 32), runlbn (10,40))).isSuccess());
+  assert (cc.extendLastRange (EventIDRange (runlbn (10, 32), runlbn (10,40)), ctx).isSuccess());
   assert (dump_cc(cc) == "{[10,l:15] - [10,l:20]} [1]\n{[10,l:30] - [10,l:40]} [2]\n");
 }
 
@@ -614,6 +621,7 @@ void test5 (TestRCUSvc& rcusvc)
 {
   std::cout << "test5\n";
   DataObjID id ("cls", "key");
+  const EventContext ctx(0, 0);
 
   std::vector<BM*> bptrs;
   for (int i=0; i < 6; i++) {
@@ -627,32 +635,32 @@ void test5 (TestRCUSvc& rcusvc)
 
   assert (succ (cc.insert (EventIDRange (mixed(1, 10, 1),
                                          mixed(1, 20, 2)),
-                           std::unique_ptr<BM>(bptrs[0]))) );
+                           std::unique_ptr<BM>(bptrs[0]), ctx)) );
   assert (succ (cc.insert (EventIDRange (mixed(1, 10, 2),
                                          mixed(1, 20, 4.5)),
-                           std::unique_ptr<BM>(bptrs[1]))) );
+                           std::unique_ptr<BM>(bptrs[1]), ctx)) );
 
   assert (succ (cc.insert (EventIDRange (mixed(1, 30, 25),
                                          mixed(1, 40, 30)),
-                           std::unique_ptr<BM>(bptrs[2]))) );
+                           std::unique_ptr<BM>(bptrs[2]), ctx)) );
 
   assert (succ (cc.insert (EventIDRange (mixed(2, 10, 100),
                                          mixed(2, 20, 103.5)),
-                           std::unique_ptr<BM>(bptrs[3]))) );
+                           std::unique_ptr<BM>(bptrs[3]), ctx)) );
   assert (succ (cc.insert (EventIDRange (mixed(2, 10, 103.5),
                                          mixed(2, 20, 110)),
-                           std::unique_ptr<BM>(bptrs[4]))) );
+                           std::unique_ptr<BM>(bptrs[4]), ctx)) );
   assert (succ (cc.typelessInsert (EventIDRange (mixed(2, 10, 120),
                                                  mixed(2, 20, 130)),
-                                   bptrs[5])) );
+                                   bptrs[5], ctx)) );
 
   assert (cc.insert (EventIDRange (mixed(2, 10, 150),
                                    mixed(2, 15, 150)),
-                     std::make_unique<BM>(7)).isFailure());
+                     std::make_unique<BM>(7), ctx).isFailure());
 
   StatusCode sc = cc.insert (EventIDRange (mixed(2, 10, 120),
                                            mixed(2, 20, 130)),
-                             std::make_unique<BM>(9));
+                             std::make_unique<BM>(9), ctx);
   assert (sc.isSuccess());
   assert (CondContBase::Category::isDuplicate (sc));
 
@@ -735,7 +743,8 @@ void test5 (TestRCUSvc& rcusvc)
   bptrs.push_back (new BM (11)); // [6]
   sc = cc.insert (EventIDRange (mixed (2, 10, 125),
                                 mixed (2, 20, 127)),
-                  std::unique_ptr<BM> (bptrs.back()));
+                  std::unique_ptr<BM> (bptrs.back()),
+                  ctx);
   assert (CondContBase::Category::isDuplicate (sc));
 
 
@@ -744,37 +753,44 @@ void test5 (TestRCUSvc& rcusvc)
   bptrs.push_back (new BM (11)); // [7]
   sc = cc.insert (EventIDRange (mixed (2, 10, 125),
                                 mixed (2, 20, 135)),
-                  std::unique_ptr<BM> (bptrs.back()));
+                  std::unique_ptr<BM> (bptrs.back()),
+                  ctx);
   assert (CondContBase::Category::isOverlap (sc));
 
 
   // Erase/extendLastRange
-  assert (cc.erase (mixed(2, 10, 100)).isFailure());
+  assert (cc.erase (mixed(2, 10, 100), ctx).isFailure());
   assert (cc.extendLastRange (EventIDRange (mixed(2, 10, 125),
-                                            mixed(2, 20, 200))).isFailure());
+                                            mixed(2, 20, 200)),
+                              ctx).isFailure());
 
   // Extending input
   // Multiple TS ranges in last RL range.
   assert ( cc.insert (EventIDRange (mixed (2, 10, 120),
                                     mixed (2, 30, 130)),
-                      std::make_unique<BM> (12)).isFailure() );
+                      std::make_unique<BM> (12),
+                      ctx).isFailure() );
   // Insert new last RL range with one TS range.
   bptrs.push_back (new BM(13)); // [8]
   assert ( cc.insert (EventIDRange (mixed (20, 10, 120),
                                     mixed (20, 30, 130)),
-                      std::unique_ptr<BM> (bptrs.back())).isSuccess() );
+                      std::unique_ptr<BM> (bptrs.back()),
+                      ctx).isSuccess() );
   // TS range doesn't match.
   assert ( cc.insert (EventIDRange (mixed (20, 10, 120),
                                     mixed (20, 40, 150)),
-                      std::make_unique<BM> (14)).isFailure() );
+                      std::make_unique<BM> (14),
+                      ctx).isFailure() );
   // RL range isn't last.
   assert ( cc.insert (EventIDRange (mixed (1, 30, 25),
                                     mixed (1, 50, 30)),
-                      std::make_unique<BM> (15)).isFailure() );
+                      std::make_unique<BM> (15),
+                      ctx).isFailure() );
   // Should work.
   sc = cc.insert (EventIDRange (mixed (20, 10, 120),
                                 mixed (20, 40, 130)),
-                  std::make_unique<BM> (16));
+                  std::make_unique<BM> (16),
+                  ctx);
   assert (sc.isSuccess());
   assert (CondContBase::Category::isExtended (sc));
 
@@ -834,6 +850,7 @@ void test6 (TestRCUSvc& rcusvc)
   std::cout << "test6\n";
   SG::DataProxy proxy;
   DataObjID id ("cls", "key");
+  const EventContext ctx(0,0);
 
   std::vector<DM*> dptrs;
   for (int i=0; i < 6; i++) {
@@ -847,24 +864,33 @@ void test6 (TestRCUSvc& rcusvc)
 
   assert (succ (cc.insert (EventIDRange (mixed(1, 10, 1),
                                          mixed(1, 20, 2)),
-                           std::unique_ptr<DM>(dptrs[0]))) );
+                           std::unique_ptr<DM>(dptrs[0]),
+                           ctx)) );
+
   assert (succ (cc.insert (EventIDRange (mixed(1, 10, 2),
                                          mixed(1, 20, 4.5)),
-                           std::unique_ptr<DM>(dptrs[1]))) );
+                           std::unique_ptr<DM>(dptrs[1]),
+                           ctx)) );
 
   assert (succ (cc.insert (EventIDRange (mixed(1, 30, 25),
                                          mixed(1, 40, 30)),
-                           std::unique_ptr<DM>(dptrs[2]))) );
+                           std::unique_ptr<DM>(dptrs[2]),
+                           ctx)) );
 
   assert (succ (cc.insert (EventIDRange (mixed(2, 10, 100),
                                          mixed(2, 20, 103.5)),
-                           std::unique_ptr<DM>(dptrs[3]))) );
+                           std::unique_ptr<DM>(dptrs[3]),
+                           ctx)) );
+
   assert (succ (cc.insert (EventIDRange (mixed(2, 10, 103.5),
                                          mixed(2, 20, 110)),
-                           std::unique_ptr<DM>(dptrs[4]))) );
+                           std::unique_ptr<DM>(dptrs[4]),
+                           ctx)) );
+
   assert (succ (cc.typelessInsert (EventIDRange (mixed(2, 10, 120),
                                                  mixed(2, 20, 130)),
-                                   dptrs[5])) );
+                                   dptrs[5],
+                                   ctx)) );
 
   auto check = [] (auto& cc) {
     using Payload = typename std::remove_reference<decltype(cc)>::type::Payload;
@@ -889,7 +915,7 @@ void test6 (TestRCUSvc& rcusvc)
   check (bcc);
 
   auto b4 = std::make_unique<BM> (4);
-  assert( ! bcc.insert (EventIDRange (runlbn (40, 2), runlbn (40, 5)), std::move(b4)).isSuccess() );
+  assert( ! bcc.insert (EventIDRange (runlbn (40, 2), runlbn (40, 5)), std::move(b4), ctx).isSuccess() );
 }
 
 

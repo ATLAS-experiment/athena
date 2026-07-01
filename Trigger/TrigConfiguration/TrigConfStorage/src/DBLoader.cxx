@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./DBHelper.h"
@@ -16,6 +16,7 @@
 #include <CoralBase/AttributeList.h>
 
 #include <stdexcept>
+#include <memory>
 
 using namespace std;
 using namespace TrigConf;
@@ -35,7 +36,6 @@ DBLoader::DBLoader( StorageMgr& sm, coral::ISessionProxy& session ) :
 void TrigConf::DBLoader::startSession()
 {
    if ( ! m_session.transaction().isActive() ) {
-      //std::cout << "DBLoader: startSession(readonly=true)" << std::endl;
       bool readOnly = true;
       m_session.transaction().start(readOnly);
       m_sessionOwner = true;
@@ -191,7 +191,6 @@ TrigConf::DBLoader::loadL1MenuKey(int SuperMasterKey, int& Lvl1MenuKey) {
       if ( ! cursor.next() ) {
          msg() << "DBLoader >> No such L1 Master key exists " << l1Master << std::endl;
          throw std::runtime_error( "DBLoader >> L1MasterKey not available" );
-         commitSession();
       }
 	
       const coral::AttributeList& row = cursor.currentRow();

@@ -179,6 +179,9 @@ namespace InDet {
     Gaudi::Property<int> m_useMinBiasInnermostLayersCut
       {this, "useMinBiasInnermostLayersCut", 0,
        "IBL hit if expected, otherwise next layer hit if expected"};
+    Gaudi::Property<bool> m_useHILoosePixModInnermostLayersCut
+      {this, "useHILoosePixModInnermostLayersCut", false,
+        "IBL or next layer hit, otherwise zero expected next layer hits"};
     Gaudi::Property<int> m_minNSiHits
       {this, "minNSiHits", -1, "Minimum silicon (pixel + SCT) hits"};
     Gaudi::Property<int> m_maxNSiSharedHits

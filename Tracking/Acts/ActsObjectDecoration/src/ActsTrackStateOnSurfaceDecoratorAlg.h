@@ -37,6 +37,8 @@ namespace ActsTrk {
     SG::WriteHandleKey< xAOD::TrackStateValidationContainer > m_pixelMsosKey {this, "PixelMSOSs", ""};
     SG::WriteHandleKey< xAOD::TrackStateValidationContainer > m_stripMsosKey {this, "StripMSOSs", ""};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_trackMsosLink {this, "msosLink", m_trackParticlesKey, "Reco_msosLink"};
+
+    Gaudi::Property<bool> m_isITk {this, "isITk", true, "Flag to indicate whether running on ITk"};
   };
 
 }

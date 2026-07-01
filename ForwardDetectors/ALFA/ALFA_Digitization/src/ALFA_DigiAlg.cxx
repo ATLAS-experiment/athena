@@ -23,11 +23,11 @@ StatusCode ALFA_DigiAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_DigiAlg::execute() 
+StatusCode ALFA_DigiAlg::execute(const EventContext& ctx) 
 {
   ATH_MSG_DEBUG ( "ALFA_DigiAlg::execute" );
   
-  return m_digiTool->processAllSubEvents(Gaudi::Hive::currentContext());
+  return m_digiTool->processAllSubEvents(ctx);
 }
 
 StatusCode ALFA_DigiAlg::finalize() 

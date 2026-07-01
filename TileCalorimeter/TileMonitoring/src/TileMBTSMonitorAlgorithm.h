@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEMBTSMONITORALGORITHM_H
@@ -130,8 +130,8 @@ class TileMBTSMonitorAlgorithm : public AthMonitorAlgorithm {
     const TileTBID* m_tileTBID{nullptr};
     const TileHWID* m_tileHWID{nullptr};
 
-    int m_MBTSchannels[Tile::MAX_ROS - 3][Tile::MAX_DRAWER];
-    int m_MBTScounters[Tile::MAX_ROS - 3][Tile::MAX_DRAWER];
+    int m_MBTSchannels[Tile::MAX_ROS - 3][Tile::MAX_DRAWER]{};
+    int m_MBTScounters[Tile::MAX_ROS - 3][Tile::MAX_DRAWER]{};
 
     static const unsigned int MAX_MBTS_COUNTER{32};
     static const unsigned int MBTS_DMU{0};

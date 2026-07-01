@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrkTrackSummaryUpdater/test/TrackSummaryUpdater_test.cxx
@@ -54,7 +54,7 @@ class GaudiFixture {
     return m_detStore;
    }
 
-   explicit GaudiFixture(const std::string & joPath = "TrkTrackSummaryUpdater/TrackSummaryUpdater_test.txt") {
+   explicit GaudiFixture(const std::string & joPath = "TrkTrackSummaryTool/TrackSummaryTool_test.txt") {
      setUpGaudi(joPath);
    }
  
@@ -98,20 +98,17 @@ class GaudiFixture {
    SmartIF<StoreGateSvc>    m_detStore;
  };
 
-BOOST_AUTO_TEST_SUITE(TrackSummaryUpdaterTest)
+
+BOOST_FIXTURE_TEST_SUITE(TrackSummaryUpdaterTest, GaudiFixture)
  
-  GaudiFixture g("TrkTrackSummaryTool/TrackSummaryTool_test.txt");
-  auto  pSvcLoc=g.svcLoc();
-  auto  pToolSvc=g.toolSvc();
-  auto  pDetStore=g.detStore();
   IAlgTool* pToolInterface{};
   
   BOOST_AUTO_TEST_CASE( sanityCheck ){
-    const bool svcLocatorIsOk=(pSvcLoc != nullptr);
+    const bool svcLocatorIsOk=(svcLoc() != nullptr);
     BOOST_TEST(svcLocatorIsOk);
-    const bool toolSvcIsOk = ( pToolSvc != nullptr);
+    const bool toolSvcIsOk = ( toolSvc() != nullptr);
     BOOST_TEST(toolSvcIsOk);
-    const bool detStoreIsOk = (pDetStore != nullptr);
+    const bool detStoreIsOk = (detStore() != nullptr);
     BOOST_TEST(detStoreIsOk);
   }
   
@@ -123,10 +120,10 @@ BOOST_AUTO_TEST_SUITE(TrackSummaryUpdaterTest)
         IdDictMgr& idDict = parser.parse ("IdDictParser/ATLAS_IDS.xml");
     auto atlasId = std::make_unique<AtlasDetectorID>("AtlasDetectorID", "");
     atlasId->initialize_from_dictionary (idDict);
-    if (pDetStore and (not pDetStore->contains<AtlasDetectorID>("AtlasID"))) {
-      BOOST_TEST ( pDetStore->record (std::move (atlasId), "AtlasID").isSuccess() );
+    if (detStore() and (not detStore()->contains<AtlasDetectorID>("AtlasID"))) {
+      BOOST_TEST ( detStore()->record (std::move (atlasId), "AtlasID").isSuccess() );
     }
-    BOOST_TEST ( pToolSvc->retrieveTool("Trk::TrackSummaryTool", pToolInterface).isSuccess());
+    BOOST_TEST ( toolSvc()->retrieveTool("Trk::TrackSummaryTool", pToolInterface).isSuccess());
     BOOST_TEST(pToolInterface -> initialize());
   }
   

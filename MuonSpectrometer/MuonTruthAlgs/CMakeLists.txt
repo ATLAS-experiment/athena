@@ -1,3 +1,5 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
 ################################################################################
 # Package: MuonTruthAlgs
 ################################################################################
@@ -18,7 +20,7 @@ atlas_add_component( MuonTruthAlgs
                      src/components/*.cxx
                      INCLUDE_DIRS 
                      LINK_LIBRARIES MuonTruthAlgsLib AtlasHepMCLib Identifier AthLinks AthContainers AtlasDetDescr EventPrimitives xAODMuon 
-                                    xAODTracking xAODTruth GeneratorObjects MuonReadoutGeometry MuonGeoModelLib MuonCombinedEvent 
+                                    xAODTracking xAODTruth GeneratorObjects MuonReadoutGeometry MuonCombinedEvent 
                                     FourMomUtils MuonCompetingRIOsOnTrack MuonPattern MuonRIO_OnTrack MuonSegment MuonRecHelperToolsLib 
                                     MCTruthClassifierLib Particle ParticleTruth TrkDetElementBase TrkGeometry TrkSurfaces 
                                     TrkCompetingRIOsOnTrack TrkEventUtils TrkMeasurementBase TrkParameters TrkPrepRawData 

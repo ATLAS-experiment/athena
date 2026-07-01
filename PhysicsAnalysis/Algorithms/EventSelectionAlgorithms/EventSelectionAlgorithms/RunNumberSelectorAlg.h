@@ -15,7 +15,6 @@
  #include <SelectionHelpers/SysWriteSelectionHandle.h>
  
  // Framework includes
- #include <xAODBase/IParticleContainer.h>
  #include <xAODEventInfo/EventInfo.h>
  
  #include <EventSelectionAlgorithms/SignEnums.h>
@@ -31,7 +30,7 @@
    public:
      using EL::AnaAlgorithm::AnaAlgorithm;
      virtual StatusCode initialize() override;
-     virtual StatusCode execute() override;
+     virtual StatusCode execute(const EventContext& ctx) override;
 
    private:
  

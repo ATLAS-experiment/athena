@@ -12,7 +12,7 @@
 #define ATHENABASECOMPS_ATHASYNCHRONOUSALGORITHM_H 1
 
 // Framework includes
-#include "AthenaBaseComps/AthCommonReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCommonAlgorithm.h"
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/AsynchronousAlgorithm.h"
 
@@ -25,9 +25,9 @@
  *
  */
 class AthAsynchronousAlgorithm
-    : public AthCommonReentrantAlgorithm<Gaudi::AsynchronousAlgorithm> {
-  using AthCommonReentrantAlgorithm<
-      Gaudi::AsynchronousAlgorithm>::AthCommonReentrantAlgorithm;
+    : public AthCommonAlgorithm<Gaudi::AsynchronousAlgorithm> {
+  using AthCommonAlgorithm<
+      Gaudi::AsynchronousAlgorithm>::AthCommonAlgorithm;
 
  public:
   StatusCode sysExecute(const EventContext& ctx) override;

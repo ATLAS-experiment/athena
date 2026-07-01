@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBSEXTRACTION_TRIGBSTOXAODTOOL_H
@@ -38,7 +38,6 @@
 #include "xAODTrigMinBiasCnv/ITrigVertexCountsCnvTool.h"
 
 //tracking collections
-#include "xAODTrackingCnv/IRecTrackParticleContainerCnvTool.h"
 #include "xAODTrackingCnv/ITrackCollectionCnvTool.h"
 
 //egamma
@@ -66,7 +65,7 @@ public:
   TrigBStoxAODTool(const std::string& type, const std::string& name, const IInterface* parent);
   virtual ~TrigBStoxAODTool();   
   virtual StatusCode initialize();
-  StatusCode convert(HLT::Navigation* nav); 
+  StatusCode convert(const EventContext& ctx, HLT::Navigation* nav);
   StatusCode rewireNavigation(HLT::Navigation* nav);
   StatusCode setTrigPassBits(HLT::Navigation* nav);
 
@@ -119,7 +118,6 @@ public:
 
   // xAODTrackingCnv
   ToolHandle<xAODMaker::ITrackCollectionCnvTool> m_trackCollectionTool{this, "TrackCollectionCnvTool","xAODMaker::TrackCollectionCnvTool/TrackCollectionCnvTool","Cnv of tracks"};
-  ToolHandle<xAODMaker::IRecTrackParticleContainerCnvTool> m_recTrackParticleContTool{this, "TrackParticleContainerCnvTool","xAODMaker::RecTrackParticleContainerCnvTool/RecTrackParticleContainerCnvTool","Cnv of Rec::TrackParticles"};
 
   // xAODEgammaCnv
   ToolHandle<xAODMaker::IElectronCnvTool> m_electronTool;

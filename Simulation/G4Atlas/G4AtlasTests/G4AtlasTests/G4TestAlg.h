@@ -17,7 +17,7 @@ public:
   G4TestAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
   StatusCode initialize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
 private:
   ToolHandleArray<ISimTestTool> m_testTools;

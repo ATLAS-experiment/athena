@@ -3,30 +3,30 @@ LineNumber,VariableName,Type,Description
 2,eta,vector<float>,Large radius jet eta
 3,phi,vector<float>,Large radius jet phi
 4,m,vector<float>,Large radius jet mass
-5,JetConstitScaleMomentum_pt,vector<float>,Large radius jet transverse momentum at the constituent scale
-6,JetConstitScaleMomentum_eta,vector<float>,Large radius jet eta at the constituent scale
-7,JetConstitScaleMomentum_phi,vector<float>,Large radius jet phi at the constituent scale
-8,JetConstitScaleMomentum_m,vector<float>,Large radius jet mass at the constituent scale
-9,DetectorEta,vector<float>,Eta of large radius jet as measured in the detector
-10,D2,vector<float>,Ratio of energy correlation functions
-11,ECF1,vector<float>,Energy correlation functions
-12,ECF2,vector<float>,Energy correlation functions
-13,ECF3,vector<float>,Energy correlation functions
-14,Tau1_wta,vector<float>,"Measure of how well jet can be considered to consist of n subjets, using winner-takes-all recombination scheme"
-15,Tau2_wta,vector<float>,"Measure of how well jet can be considered to consist of n subjets, using winner-takes-all recombination scheme"
-16,Tau3_wta,vector<float>,"Measure of how well jet can be considered to consist of n subjets, using winner-takes-all recombination scheme"
-17,C2,vector<float>,Ratio of energy correlation functions
-18,Split12,vector<float>,Kt distance between subjets during merging
-19,Split23,vector<float>,Kt distance between subjets during merging
-20,Qw,vector<float>,Qw (minimum pair-wise invariant mass) observable for top jet tagging
-21,constituentLinks,vector<vector<ElementLink<DataVector<xAOD::IParticle> > > >,Link from large-radius jets to constituents (e.g. UFOs)
-22,GN2Xv01_phbb,vector<float>,Probability that the jet is higgs -> bb (maintained by the flavor tagging group)
-23,GN2Xv01_ptop,vector<float>,Probability that the jet is top (maintained by the flavor tagging group)
-24,GN2Xv01_pqcd,vector<float>,Probability that the jet is QCD (maintained by the flavor tagging group)
-25,GN2Xv01_phcc,vector<float>,Probability that the jet is higgs -> cc (maintained by the flavor tagging group)
-26,Parent,vector<ElementLink<DataVector<xAOD::Jet_v1> > >,Link to ungroomed parent jet
-27,GhostBHadronsFinalCount,vector<int>,Number of ghost-associated b-hadrons
-28,GhostCHadronsFinalCount,vector<int>,Number of ghost-associated c-hadrons
-29,R10TruthLabel_R21Precision,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following early R21 recommendations
+5,numConstit,vector<int>,Number of large-R jet constituents
+6,JetConstitScaleMomentum_pt,vector<float>,Large radius jet transverse momentum at the constituent scale
+7,JetConstitScaleMomentum_eta,vector<float>,Large radius jet eta at the constituent scale
+8,JetConstitScaleMomentum_phi,vector<float>,Large radius jet phi at the constituent scale
+9,JetConstitScaleMomentum_m,vector<float>,Large radius jet mass at the constituent scale
+10,DetectorEta,vector<float>,Eta of large radius jet as measured in the detector
+11,DetectorY,vector<float>,Rapditiy of large radius jet as measured in the detector
+12,D2,vector<float>,Ratio of energy correlation functions
+13,ECF1,vector<float>,Energy correlation functions
+14,ECF2,vector<float>,Energy correlation functions
+15,ECF3,vector<float>,Energy correlation functions
+16,Tau1_wta,vector<float>,"Measure of how well jet can be considered to consist of n subjets, using winner-takes-all recombination scheme"
+17,Tau2_wta,vector<float>,"Measure of how well jet can be considered to consist of n subjets, using winner-takes-all recombination scheme"
+18,Tau3_wta,vector<float>,"Measure of how well jet can be considered to consist of n subjets, using winner-takes-all recombination scheme"
+19,C2,vector<float>,Ratio of energy correlation functions
+20,Split12,vector<float>,Kt distance between subjets during merging
+21,Split23,vector<float>,Kt distance between subjets during merging
+22,Qw,vector<float>,Qw (minimum pair-wise invariant mass) observable for top jet tagging
+23,constituentLinks,vector<vector<ElementLink<DataVector<xAOD::IParticle> > > >,Link from large-radius jets to constituents (e.g. UFOs)
+24,GN2Xv01_phbb,vector<float>,Probability that the jet is higgs -> bb (maintained by the flavor tagging group)
+25,GN2Xv01_ptop,vector<float>,Probability that the jet is top (maintained by the flavor tagging group)
+26,GN2Xv01_pqcd,vector<float>,Probability that the jet is QCD (maintained by the flavor tagging group)
+27,GN2Xv01_phcc,vector<float>,Probability that the jet is higgs -> cc (maintained by the flavor tagging group)
+28,GhostBHadronsFinalCount,vector<int>,Number of ghost-associated b-hadrons
+29,GhostCHadronsFinalCount,vector<int>,Number of ghost-associated c-hadrons
 30,R10TruthLabel_R21Precision_2022v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following R21 recommendations
 31,R10TruthLabel_R22v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following preliminary R22 recommendations

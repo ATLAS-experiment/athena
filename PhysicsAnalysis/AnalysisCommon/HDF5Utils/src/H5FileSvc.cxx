@@ -16,9 +16,10 @@ StatusCode H5FileSvc::initialize() {
     return StatusCode::FAILURE;
   }
   m_file = std::make_unique<H5::H5File>(m_file_path, H5F_ACC_TRUNC);
+  m_root_group = std::make_unique<H5::Group>(m_file->openGroup("/"));
   return StatusCode::SUCCESS;
 }
 
 H5::Group* H5FileSvc::group() {
-  return m_file.get();
+  return m_root_group.get();
 }

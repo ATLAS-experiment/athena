@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArMinBiasAlg.h"
-
 
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/LArEM_ID.h"
@@ -16,21 +15,10 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 
-
-
   //Constructor
   LArMinBiasAlg:: LArMinBiasAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthAlgorithm(name,pSvcLocator),
-    m_datasetID_lowPt(119995),
-    m_datasetID_highPt(119996),
-    m_weight_lowPt(39.8606),
-    m_weight_highPt(0.138128)
+    AthAlgorithm(name,pSvcLocator)
   {
-     declareProperty("datasetID_lowPt",m_datasetID_lowPt);
-     declareProperty("datasetID_highPt",m_datasetID_highPt);
-     declareProperty("weight_highPt",m_weight_highPt);
-     declareProperty("weight_lowPt",m_weight_lowPt);
-     m_first=true;
   }
   
   //__________________________________________________________________________
@@ -105,31 +93,24 @@
     ATH_MSG_INFO(" stop after fill ntuple");
     return StatusCode::SUCCESS;
   }
-  //__________________________________________________________________________
-  StatusCode LArMinBiasAlg::finalize()
-  {
-    ATH_MSG_INFO(" finalize()");
-    return StatusCode::SUCCESS; 
-  }
   
   //__________________________________________________________________________
-  StatusCode LArMinBiasAlg::execute()
+  StatusCode LArMinBiasAlg::execute(const EventContext& ctx)
   {
     //.............................................
     
     ATH_MSG_DEBUG(" LArMinBiasAlg execute()");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     if (m_first) {
 
       const CaloDetDescrManager_Base *cMgr=nullptr;
       if(m_isSC){
-         SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSCMgrKey};
+         SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSCMgrKey, ctx};
          ATH_CHECK(caloMgrHandle.isValid());
          cMgr=(const CaloDetDescrManager_Base *)(*caloMgrHandle);
       } else {
-         SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+         SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
          ATH_CHECK(caloMgrHandle.isValid());
          cMgr=(const CaloDetDescrManager_Base *)(*caloMgrHandle);
       }
@@ -204,7 +185,7 @@
       m_first=false;
     }
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve EventInfo");
       return StatusCode::FAILURE;

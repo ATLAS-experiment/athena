@@ -58,7 +58,7 @@ CmxCpHitsByteStreamAuxCnv::CmxCpHitsByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& CmxCpHitsByteStreamAuxCnv::classID() {
+CLID CmxCpHitsByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::CMXCPHitsAuxContainer>::ID();
 }
 
@@ -86,6 +86,7 @@ StatusCode CmxCpHitsByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   ByteStreamAddress *pBS_Addr = dynamic_cast<ByteStreamAddress *>(pAddr);
   if (not pBS_Addr) return StatusCode::FAILURE;
   // -------------------------------------------------------------------------
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *(pBS_Addr->par());
   ATH_MSG_DEBUG("Creating Objects " << nm);
 
@@ -94,7 +95,7 @@ StatusCode CmxCpHitsByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   cmxCpHitsContainer.setStore(aux);
   // -------------------------------------------------------------------------
   DataVector<LVL1::CMXCPHits> cmxCpHitsVector;
-  StatusCode sc = m_readTool->convert(nm, &cmxCpHitsVector);
+  StatusCode sc = m_readTool->convert(ctx, nm, &cmxCpHitsVector);
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to create objects");
     delete aux;

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -18,6 +18,8 @@
 #include <EventSelectionAlgorithms/SumNLeptonPtSelectorAlg.h>
 #include <EventSelectionAlgorithms/JetNGhostSelectorAlg.h>
 #include <EventSelectionAlgorithms/RunNumberSelectorAlg.h>
+#include <EventSelectionAlgorithms/ObjectKinematicSelectorAlg.h>
+#include <EventSelectionAlgorithms/EventScalarSelectorAlg.h>
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -36,3 +38,5 @@ DECLARE_COMPONENT (CP::DileptonOSSFInvariantMassWindowSelectorAlg)
 DECLARE_COMPONENT (CP::SumNLeptonPtSelectorAlg)
 DECLARE_COMPONENT (CP::JetNGhostSelectorAlg)
 DECLARE_COMPONENT (CP::RunNumberSelectorAlg)
+DECLARE_COMPONENT (CP::ObjectKinematicSelectorAlg)
+DECLARE_COMPONENT (CP::EventScalarSelectorAlg)

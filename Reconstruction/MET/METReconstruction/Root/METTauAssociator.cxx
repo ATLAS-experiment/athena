@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTauAssociator.cxx
@@ -56,32 +56,27 @@ namespace met {
     ATH_CHECK( METAssociator::initialize() );
 
     ATH_MSG_VERBOSE ("Initializing " << name() << "...");
-    ATH_CHECK( m_tauContKey.initialize());
-
-    if (m_useFELinks) {
-      if (m_neutralFEReadDecorKey.key().empty()) {ATH_CHECK( m_neutralFEReadDecorKey.assign(m_tauContKey.key() + "." + m_neutralFELinksKey));}
-      if (m_chargedFEReadDecorKey.key().empty()) {ATH_CHECK( m_chargedFEReadDecorKey.assign(m_tauContKey.key() + "." + m_chargedFELinksKey));}
-      ATH_CHECK( m_neutralFEReadDecorKey.initialize());
-      ATH_CHECK( m_chargedFEReadDecorKey.initialize());
-    }
+    ATH_CHECK( m_tauContKey.initialize() );
+    ATH_CHECK( m_neutralFEReadDecorKey.initialize(m_useFELinks) );
+    ATH_CHECK( m_chargedFEReadDecorKey.initialize(m_useFELinks) );
 
     return StatusCode::SUCCESS;
   }
 
   // executeTool
   ////////////////
-  StatusCode METTauAssociator::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METTauAssociator::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
     ATH_MSG_VERBOSE ("In execute: " << name() << "...");
     
-    SG::ReadHandle<xAOD::TauJetContainer> tauCont(m_tauContKey);
+    SG::ReadHandle<xAOD::TauJetContainer> tauCont(m_tauContKey, ctx);
     if (!tauCont.isValid()) {
       ATH_MSG_WARNING("Unable to retrieve input tau container " << m_tauContKey.key());
       return StatusCode::FAILURE;
     }
 
     ATH_MSG_DEBUG("Successfully retrieved tau collection");
-    if (fillAssocMap(metMap,tauCont.cptr()).isFailure()) {
+    if (fillAssocMap(metMap,tauCont.cptr(), ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to fill map with tau container " << m_tauContKey.key());
       return StatusCode::FAILURE;
     }
@@ -93,7 +88,7 @@ namespace met {
   // Get tau constituents
   StatusCode METTauAssociator::extractTopoClusters(const xAOD::IParticle *obj,
                                                    std::vector<const xAOD::IParticle*>& tclist,
-                                                   const met::METAssociator::ConstitHolder& /*tcCont*/) const
+                                                   const met::METAssociator::ConstitHolder& /*tcCont*/, const EventContext&) const
   {
     const TauJet* tau = static_cast<const TauJet*>(obj);
     TLorentzVector tauAxis = tauRecTools::getTauAxis(*tau);
@@ -144,7 +139,7 @@ namespace met {
   StatusCode METTauAssociator::extractPFO(const xAOD::IParticle* obj,
                                           std::vector<const xAOD::IParticle*>& pfolist,
                                           const met::METAssociator::ConstitHolder& constits,
-                                          std::map<const IParticle*,MissingETBase::Types::constvec_t> &/*momenta*/) const
+                                          std::map<const IParticle*,MissingETBase::Types::constvec_t> &/*momenta*/, const EventContext&) const
   {
     const TauJet* tau = static_cast<const TauJet*>(obj);
     const Jet* seedjet = *tau->jetLink();
@@ -169,7 +164,7 @@ namespace met {
             ATH_MSG_VERBOSE("Found cPFO with dR " << seedjet->p4().DeltaR(ttrk->p4()));
             // We set a small -ve pt for cPFOs that were rejected
             // by the ChargedHadronSubtractionTool
-            const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");        
+            const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");        
             if(PVMatchedAcc(*pfo) && ( !m_cleanChargedPFO || isGoodEoverP(pfotrk) )) match = true;
           }
         }
@@ -184,11 +179,11 @@ namespace met {
   StatusCode METTauAssociator::extractFE(const xAOD::IParticle* obj, 
                                             std::vector<const xAOD::IParticle*>& felist,
                                             const met::METAssociator::ConstitHolder& constits,
-                                            std::map<const IParticle*,MissingETBase::Types::constvec_t> &/*momenta*/) const
+                                            std::map<const IParticle*,MissingETBase::Types::constvec_t> &/*momenta*/, const EventContext& ctx) const
   {
     const TauJet* tau = static_cast<const TauJet*>(obj);
     if (m_useFELinks)
-      ATH_CHECK( extractFEsFromLinks(tau, felist,constits) );
+      ATH_CHECK( extractFEsFromLinks(tau, felist,constits, ctx) );
     else
       ATH_CHECK( extractFEs(tau, felist, constits) );
 
@@ -198,7 +193,7 @@ namespace met {
 
   StatusCode METTauAssociator::extractFEsFromLinks(const xAOD::TauJet* tau, //TODO to be tested
     				    std::vector<const xAOD::IParticle*>& felist,
-				    const met::METAssociator::ConstitHolder& constits) const 
+				    const met::METAssociator::ConstitHolder& constits, const EventContext& ctx) const 
   {
 
     ATH_MSG_DEBUG("Extract FEs From Links for " << tau->type()  << " with pT " << tau->pt());
@@ -206,8 +201,8 @@ namespace met {
     std::vector<FELink_t> nFELinks;
     std::vector<FELink_t> cFELinks;
 
-    SG::ReadDecorHandle<xAOD::TauJetContainer, std::vector<FELink_t> > neutralFEReadDecorHandle (m_neutralFEReadDecorKey);
-    SG::ReadDecorHandle<xAOD::TauJetContainer, std::vector<FELink_t> > chargedFEReadDecorHandle (m_chargedFEReadDecorKey);
+    SG::ReadDecorHandle<xAOD::TauJetContainer, std::vector<FELink_t> > neutralFEReadDecorHandle (m_neutralFEReadDecorKey, ctx);
+    SG::ReadDecorHandle<xAOD::TauJetContainer, std::vector<FELink_t> > chargedFEReadDecorHandle (m_chargedFEReadDecorKey, ctx);
     nFELinks=neutralFEReadDecorHandle(*tau);
     cFELinks=chargedFEReadDecorHandle(*tau);
 
@@ -217,7 +212,7 @@ namespace met {
       const xAOD::FlowElement* fe_init = *feLink;
       for (const auto *const fe : *constits.feCont){
         if (fe->index() == fe_init->index() && fe->isCharged()){ //index-based match between JetETmiss and CHSFlowElements collections
-          const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+          const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");
           if(  fe->isCharged() && PVMatchedAcc(*fe)&& ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(fe->chargedObject(0))) ) ) {
             ATH_MSG_DEBUG("Accept cFE with pt " << fe->pt() << ", e " << fe->e() << ", eta " << fe->eta() << ", phi " << fe->phi() );
             felist.push_back(fe); 
@@ -277,7 +272,7 @@ namespace met {
             ATH_MSG_VERBOSE("Found cPFO with dR " << seedjet->p4().DeltaR(ttrk->p4())); 
             // We set a small -ve pt for cPFOs that were rejected
             // by the ChargedHadronSubtractionTool
-            const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");        
+            const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");        
             if(PVMatchedAcc(*pfo) && ( !m_cleanChargedPFO || isGoodEoverP(pfotrk) )) match = true;
           }
         }

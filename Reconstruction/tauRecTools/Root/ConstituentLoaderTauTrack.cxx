@@ -63,12 +63,10 @@ namespace FlavorTagInference {
         return Inputs{std::move(features), std::move(features_dim)};
     }
 
-    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> ConstituentLoaderTauTrack::getData(const xAOD::IParticle& i_tau) const {
+    Inputs ConstituentLoaderTauTrack::getData(const xAOD::IParticle& i_tau) const {
         auto tau = dynamic_cast<const xAOD::TauJet*>(&i_tau);
         std::vector<const xAOD::TauTrack*> sorted_tau_trks = getTauTracks(tau);
-        std::vector<const xAOD::IParticle*> i_sorted_tau_trks(sorted_tau_trks.begin(), sorted_tau_trks.end());
-
-        return std::make_tuple(getFeatures(tau, sorted_tau_trks), i_sorted_tau_trks);
+        return getFeatures(tau, sorted_tau_trks);
     }
 
     FeatureFunc_t ConstituentLoaderTauTrack::getFeatureExtractor(const std::string& var_name) const {

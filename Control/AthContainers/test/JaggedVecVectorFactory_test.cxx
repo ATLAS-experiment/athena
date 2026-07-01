@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecVectorFactory_test.cxx
@@ -47,11 +47,7 @@ namespace {
 template <class CONT, class ITER>
 void copyRange (const CONT& c, ITER it)
 {
-#if HAVE_STD_RANGES
   std::ranges::copy (c, it);
-#else
-  std::copy (c.begin(), c.end(), it);
-#endif
 }
 
 
@@ -74,7 +70,8 @@ void compareElts (const SG::JaggedVecElt<T>* ptr, size_t n,
   }
   SG::JaggedVecElt<T> tail (v.back().end());
   for (size_t i = v.size(); i  < n; ++i) {
-    assert (ptr[i] == tail);
+    if (ptr[i].end() == 0) tail = 0;
+    assert (ptr[i].end() == tail);
   }
 }
 
@@ -371,6 +368,118 @@ void test_vector (const std::string& name)
   Elt* ptr3 = reinterpret_cast<Elt*> (v3->toPtr());
   assert (ptr3[0] == Elt (3));
   assert (ptr3[1] == Elt (5));
+
+  // --- Testing clear() with trailing zeros.
+  {
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    lv->resize(2);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+    copyRange (std::vector<int>{0, 1}, lptr);
+
+    fac.clear (foo_id, avd1, 0, 1);
+    compareElts (ptr, 10, {{0}, {0}, {1}, {2}, {2}, {2}, {2}, {2}, {2}, {2}});
+    assert (lv->size() == 2);
+
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    fac.clear (foo_id, avd1, 1, 2);
+    compareElts (ptr, 10, {{0}, {0}, {0}, {1}, {1}, {1}, {1}, {1}, {1}, {1}});
+    assert (lv->size() == 1);
+    comparePayload (lptr, {1});
+
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    lv->resize(2);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+    copyRange (std::vector<int>{0, 1}, lptr);
+    fac.clear (foo_id, avd1, 3, 2);
+    compareElts (ptr, 10, {{0}, {0}, {1}, {1}, {1}, {1}, {1}, {1}, {1}, {1}});
+    assert (lv->size() == 1);
+    comparePayload (lptr, {0});
+
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    lv->resize(2);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+    copyRange (std::vector<int>{0, 1}, lptr);
+    fac.clear (foo_id, avd1, 4, 2);
+    compareElts (ptr, 10, {{0}, {0}, {1}, {2}, {2}, {2}, {2}, {2}, {2}, {2}});
+    assert (lv->size() == 2);
+    comparePayload (lptr, {0, 1});
+  }
+
+  // --- Testing swap() with trailing zeros.
+  {
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    lv->resize(2);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+    copyRange (std::vector<int>{0, 1}, lptr);
+
+    copyRange (std::vector<Elt>{{0}, {0}, {0}, {0}, {0}, {1}, {2}, {0}, {0}, {0}}, ptr2);
+    lv2->resize(2);
+    lptr2 = reinterpret_cast<T*> (lv2->toPtr());
+    copyRange (std::vector<int>{10, 11}, lptr2);
+
+    fac.swap (foo_id, avd1, 3, avd2, 4, 2);
+    compareElts (ptr, 10, {{0}, {0}, {1}, {1}, {2}, {2}, {2}, {2}, {2}, {2}});
+    compareElts (ptr2, 10, {{0}, {0}, {0}, {0}, {1}, {1}, {2}, {2}, {2}, {2}});
+    assert (lv->size() == 2);
+    assert (lv2->size() == 2);
+    comparePayload (lptr, {0, 10});
+    comparePayload (lptr2, {1, 11});
+  }
+
+  // --- Testing copy() with trailing zeros.
+  {
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    lv->resize(2);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+    copyRange (std::vector<int>{0, 1}, lptr);
+
+    copyRange (std::vector<Elt>{{0}, {0}, {0}, {0}, {0}, {1}, {3}, {0}, {0}, {0}}, ptr2);
+    lv2->resize(3);
+    lptr2 = reinterpret_cast<T*> (lv2->toPtr());
+    copyRange (std::vector<int>{10, 11, 12}, lptr2);
+
+    fac.copy (foo_id, avd1, 5, avd2, 1, 2);
+    compareElts (ptr, 10, {{0}, {0}, {1}, {2}, {2}, {2}, {2}, {0}, {0}, {0}});
+    assert (lv->size() == 2);
+    comparePayload (lptr, {0, 1});
+
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    fac.copy (foo_id, avd1, 5, avd2, 7, 2);
+    compareElts (ptr, 10, {{0}, {0}, {1}, {2}, {2}, {2}, {2}, {0}, {0}, {0}});
+    assert (lv->size() == 2);
+    comparePayload (lptr, {0, 1});
+
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    fac.copy (foo_id, avd1, 5, avd2, 6, 2);
+    compareElts (ptr, 10, {{0}, {0}, {1}, {2}, {2}, {4}, {4}, {0}, {0}, {0}});
+    assert (lv->size() == 4);
+    comparePayload (lptr, {0, 1, 11, 12});
+
+    copyRange (std::vector<Elt>{{0}, {0}, {1}, {2}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    lv->resize(2);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+    copyRange (std::vector<int>{0, 1}, lptr);
+    fac.copy (foo_id, avd1, 5, avd2, 4, 4);
+    compareElts (ptr, 10, {{0}, {0}, {1}, {2}, {2}, {2}, {3}, {5}, {5}, {0}});
+    assert (lv->size() == 5);
+    comparePayload (lptr, {0, 1, 10, 11, 12});
+
+    copyRange (std::vector<Elt>{{0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}, ptr);
+    lv->resize(0);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+
+    fac.copy (foo_id, avd1, 0, avd2, 5, 1);
+    compareElts (ptr, 10, {{1}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}});
+    assert (lv->size() == 1);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+    comparePayload (lptr, {10});
+
+    fac.copy (foo_id, avd1, 1, avd2, 6, 1);
+    compareElts (ptr, 10, {{1}, {3}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}});
+    assert (lv->size() == 3);
+    lptr = reinterpret_cast<T*> (lv->toPtr());
+    comparePayload (lptr, {10, 11, 12});
+  }
 }
 
 

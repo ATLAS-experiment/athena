@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBTRACKINFOFROMTAG_H
@@ -57,7 +57,7 @@ class TBTrackInfoFromTag : public AthAlgorithm
   virtual ~TBTrackInfoFromTag();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
  private:

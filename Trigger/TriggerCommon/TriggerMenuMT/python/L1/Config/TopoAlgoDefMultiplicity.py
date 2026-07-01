@@ -25,11 +25,10 @@ class TopoAlgoDefMultiplicity:
         ]
         emVarThresholds_2bits = [
             'eEM24VM',  'eEM26',  'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M',
-            'eEM1', 'eEM2', 'eEM20M', 'eEM24M',
+            'eEM1', 'eEM2', 'eEM3', 'eEM20M', 'eEM24M',
             'eEM40L',
 
             # spares
-            'eEMSPARE1',
         ]
 
         for em in emThresholds_3bits:
@@ -186,14 +185,15 @@ class TopoAlgoDefMultiplicity:
 
         XEThresholds = [ 
             'gXEJWOJ60', 'gXEJWOJ70', 'gXEJWOJ80', 'gXEJWOJ100', 'gXEJWOJ110', 'gXEJWOJ120', 'gXEJWOJ500',
+            'gXENC100',  'gXENC110',
 
             'jXE60', 'jXE70', 'jXE80', 'jXE90', 'jXE100', 'jXE110', 'jXE120', 'jXE500',
 
             'cXE100', 'cXE110',
 
-            'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
+            'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100',
             'gTE5', 'gTE10', 'gTE200',
-            'gTE280', # gRISTRETTO280 - for HI 25ns bunch spacing test
+            'gRISTRETTO280',  # for HI 25/50ns mixed bunch spacing test
             'gESPRESSO280',
             # additional jTE thresholds needed for heavy ion runs
             'jTE3','jTE4','jTE5', 'jTE10', 'jTE20','jTE50',
@@ -280,7 +280,7 @@ class TopoAlgoDefMultiplicity:
                 thrtype = algo.input
                 if 'LArSaturation' in algo.name:
                     thrtype = 'LArSaturation'
-                elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input or 'ESPRESSO' in algo.input:
+                elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input or 'ESPRESSO' in algo.input or 'RISTRETTO' in algo.input:
                     thrtype = 'EN'
                 elif 'eEmVar' in algo.classtype:
                     thrtype = 'eEMV'

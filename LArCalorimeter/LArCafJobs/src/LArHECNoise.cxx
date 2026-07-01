@@ -189,7 +189,7 @@ StatusCode LArHECNoise::finalize() {
 }
 
 
-StatusCode LArHECNoise::execute() {
+StatusCode LArHECNoise::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG ( "in execute()" );
 
@@ -214,7 +214,7 @@ StatusCode LArHECNoise::execute() {
      ATH_CHECK(evtStore()->retrieve(lraw, "LArRawChannels"));
   }
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
   if(!cabling) {
      ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key() );
@@ -222,14 +222,14 @@ StatusCode LArHECNoise::execute() {
   }
 
 
-  SG::ReadCondHandle<ILArPedestal> pedHdl{m_pedKey};
+  SG::ReadCondHandle<ILArPedestal> pedHdl{m_pedKey, ctx};
   const ILArPedestal* ped{*pedHdl};
   if(!ped) {
      ATH_MSG_ERROR("Do not have pedestal object " << m_pedKey.key() );
      return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
   ATH_CHECK(caloMgrHandle.isValid());
   const CaloDetDescrManager* caloMgr = *caloMgrHandle;
 

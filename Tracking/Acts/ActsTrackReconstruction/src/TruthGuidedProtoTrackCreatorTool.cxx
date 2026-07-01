@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 
 #include "src/TruthGuidedProtoTrackCreatorTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
-#include "TruthUtils/AtlasPID.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 ActsTrk::TruthGuidedProtoTrackCreatorTool::TruthGuidedProtoTrackCreatorTool(const std::string& type, 
@@ -54,12 +54,7 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
         for ( ; prdMtCIter != prdMtCIterE; ++ prdMtCIter ){
 
             // check if entry exists and if   
-#ifdef HEPMC3
             HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second.scptr();
-#else
-//AV Looks like an implicit conversion
-            HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second;
-#endif
             Identifier                curIdentifier = (*prdMtCIter).first;
 
             // Min pT cut
@@ -72,7 +67,8 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
     }
 
     // Now loop over the pixel and strip container and make collectiong
-    std::map<HepMC::ConstGenParticlePtr, std::vector<ActsTrk::ATLASUncalibSourceLink>> trackCollections;
+    std::map<HepMC::ConstGenParticlePtr,
+            std::vector<const xAOD::UncalibratedMeasurement*>> trackCollections;
 
     for(const auto cluster: pixelContainer)
     {
@@ -80,13 +76,14 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
         auto identifierList = cluster->rdoList();
 
         // Loop and push back the cluster in the corresponding trith particle
-        for(auto& id: identifierList)
+        for(auto& id_value: identifierList)
         {
+            Identifier id(id_value);
             // Found a match, so push it into the track collection
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {
                 auto truthParticle = identToHepMCMap.at(id);
-                trackCollections[truthParticle].emplace_back(makeATLASUncalibSourceLink(&pixelContainer, cluster, ctx));
+                trackCollections[truthParticle].emplace_back(cluster);
             }
         }
     }
@@ -97,13 +94,14 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
         auto identifierList = cluster->rdoList();
 
         // Loop and push back the cluster in the corresponding trith particle
-        for(auto& id: identifierList)
+        for(auto& id_value: identifierList)
         {
+           Identifier id(id_value);
             // Found a match, so push it into the track collection
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {
                 auto truthParticle = identToHepMCMap.at(id);
-                trackCollections[truthParticle].emplace_back(makeATLASUncalibSourceLink(&stripContainer, cluster, ctx));
+                trackCollections[truthParticle].emplace_back(cluster);
             }
         }
     }
@@ -139,7 +137,7 @@ ActsTrk::TruthGuidedProtoTrackCreatorTool::makeDummyParams (const HepMC::ConstGe
   // A real track finder would do something more reasonable here. 
   params << 0., 0.,
         truthParticle->momentum().phi(), truthParticle->momentum().theta(),
-        static_cast<float>(::charge(truthParticle)) / (truthParticle->momentum().e()), 0.;
+        static_cast<float>(MC::charge(truthParticle)) / (truthParticle->momentum().e()), 0.;
  
 
   // Covariance - let's be honest and say we have no clue ;-) 
@@ -151,7 +149,7 @@ ActsTrk::TruthGuidedProtoTrackCreatorTool::makeDummyParams (const HepMC::ConstGe
   float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
   Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
   Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, Acts::AnyCharge{static_cast<float>(::charge(truthParticle))}};
+    absPdg, mass, static_cast<float>(MC::charge(truthParticle))};
 
   return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
                                     cov, actsHypothesis);

@@ -88,11 +88,7 @@ DecayInFlyTruthTrajectoryBuilder::truthTrajectoryCuts(const HepMC::ConstGenVerte
       // allow 1 outgoing to cover possible vertexes from interaction in detector material
   if(vtx && (vtx->particles_in_size() == 1) && (vtx->particles_out_size() <= 2) ) {
 
-#ifdef HEPMC3
     mother = vtx->particles_in().front();
-#else 
-    mother = *vtx->particles_in_const_begin();
-#endif    
     // Allow status code 1 and 2.  E.g. a pion that produced a long track can decay  outside of InDet and have status==2.
     if( mother && MC::isPhysical(mother) ) {
 

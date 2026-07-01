@@ -59,13 +59,13 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
   float eHadAtEMScaleFixed = 0.;
   float eHad1AtEMScaleFixed = 0.;
 
-  TLorentzVector tauAxis = tauRecTools::getTauAxis(tau, m_doVertexCorrection);
+  TLorentzVector tau_mom = m_doRun4 ? tau.p4() : tauRecTools::getTauAxis(tau, m_doVertexCorrection); 
 
   std::vector<xAOD::CaloVertexedTopoCluster> vertexedClusterList = tau.vertexedClusters();
   for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList){
     TLorentzVector clusterP4 = vertexedCluster.p4();
     
-    if( clusterP4.DeltaR(tauAxis) > 0.2 ) continue;
+    if( clusterP4.DeltaR(tau_mom) > 0.2 ) continue;
    
     const xAOD::CaloCluster& cluster = vertexedCluster.clust(); 
     for( auto samp : EMSamps )

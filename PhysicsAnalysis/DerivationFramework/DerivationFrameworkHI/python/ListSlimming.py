@@ -27,7 +27,7 @@ def HION2AllVariablesGeneral():
 def HION2ExtraVariablesGeneral():
     variables  = []
     variables += ["InDetTrackParticles.qOverP.theta.phi.d0.z0.vz.chiSquared.numberDoF.TrackQuality.Chi2ToPV.VertexIndex.CovD0.CovZ0.CovTheta"]
-    variables += ["CaloSums.Summary"] # Need to be passed explicitelly
+    variables += ["CaloSums.Summary"] # Need to be passed explicitly
     
     return variables
 
@@ -385,7 +385,6 @@ def HION5SmartCollections():
     variables += ["Muons"]
     variables += ["Photons"]
     #variables += ["MET_Reference_AntiKt4EMTopo",]
-    variables += ["AntiKt4EMTopoJets"]
     
     return variables
 
@@ -569,7 +568,7 @@ def HION12SmartCollections():
 
     return variables
 
-def HION12AllVarContent():
+def HION12AllVarContentRun2():
     variables  = []
     variables += ["AntiKt4EMPFlowJets"]                          # Include R = 0.4 anti-kt EM Particle Flow jets
     variables += ["AntiKt4EMTopoJets"]                           # Include R = 0.4 anti-kt EM topo-jets
@@ -597,6 +596,45 @@ def HION12AllVarContent():
     variables += ["HLT_xAOD__JetContainer_a10tclcwsubjesFS"]     # Include the HLT R = 1.0 LCW Topo trigger jets (2018 HI Run)
 
     return variables
+
+def HION12AllVarContentRun3():
+    variables  = []
+    variables += ["AntiKt4EMPFlowJets"]                          # Include R = 0.4 anti-kt EM Particle Flow jets
+    variables += ["AntiKt4LCTopoJets"]                           # Include R = 0.4 anti-kt local calibration topo-jets
+    variables += ["CaloCalTopoClusters"]                         # Include topocluster information
+    variables += ["PrimaryVertices"]                             # Include a list of all primary vertices
+    variables += ["NCB_MuonSegments"]                            # Include the non-collision background muons to handle punch-throughs.
+    variables += ["JetETMissChargedParticleFlowObjects"]         # Include the charged particle flow objects from the Jet/ET Miss group
+    variables += ["JetETMissNeutralParticleFlowObjects"]         # Include the neutral particle flow objects from the Jet/ET Miss group
+    variables += ["TauChargedParticleFlowObjects"]               # Include the charged particle flow objects used for Tau reconstruction
+    variables += ["TauNeutralParticleFlowObjects"]               # Include the neutral particle flow objects used for Tau reconstruction
+    variables += ["TauShotParticleFlowObjects"]                  # Include the["shot" particle flow objects used for Tau reconstruction
+    variables += ["Kt4EMPFlowEventShape"]                        # The event shape specifically for R=0.4 EM PFlow jets
+    variables += ["Kt4EMTopoOriginEventShape"]                   # The event shape specifically for R=0.4 EM Topo jets
+    variables += ["Kt4LCTopoOriginEventShape"]                   # The event shape specifically for R=0.4 LC Topo jets
+    variables += ["TopoClusterIsoCentralEventShape"]             # Part of the event shape for topo-jets
+    variables += ["TopoClusterIsoVeryForwardEventShape"]         # Part of the event shape for topo-jets
+    variables += ["TopoClusterIsoForwardEventShape"]             # Part of the event shape for topo-jets
+    variables += ["NeutralParticleFlowIsoCentralEventShape"]     # Part of the event shape for PFlow jets
+    variables += ["ParticleFlowIsoCentralEventShape"]            # Part of the event shape for PFlow jets
+    variables += ["NeutralParticleFlowIsoForwardEventShape"]     # Part of the event shape for PFlow jets
+    variables += ["ParticleFlowIsoForwardEventShape"]            # Part of the event shape for PFlow jets
+    variables += ["HLT_xAOD__JetContainer_a4tcemsubjesISFS"]     # Include the HLT R = 0.4 EM Topo trigger jets (2018 HI Run)
+    variables += ["HLT_xAOD__JetContainer_a4ionemsubjesISFS"]    # Include the HLT R = 0.4 heavy ion trigger jets (2015 HI Run)
+    variables += ["HLT_xAOD__JetContainer_a10tclcwsubjesFS"]     # Include the HLT R = 1.0 LCW Topo trigger jets (2018 HI Run)
+
+    return variables
+
+def HION12AllVarContent(project_tag):
+    switcher_HION12 = {
+        'data15_hi': HION12AllVarContentRun2(),
+        'data18_hi': HION12AllVarContentRun2(),
+        'data23_hi': HION12AllVarContentRun3(),
+        'data24_hi': HION12AllVarContentRun3(),
+        'data25_hi': HION12AllVarContentRun3(),
+        }
+
+    return  switcher_HION12.get(project_tag, "Invalid project tag")
 
 def HION12HIJetBranches():
     state_vars  = []
@@ -862,17 +900,6 @@ def HION14ExtraContentAllTruth():
     return variables
 
 #################################################################################
-#HIONHPOD
-
-def HIONHPODSmartCollections():
-    variables  = []
-    variables += ["Electrons"]
-    variables += ["Photons"]
-    variables += ["Muons"]
-
-    return variables
-
-#################################################################################
 #HION15
 
 def HION15SmartCollections():
@@ -895,3 +922,192 @@ def HION15BasicJetVars(JetColl):
 
 def HION15ExtraContainersTrigger():
     return HION7ExtraContainersTrigger()
+
+#################################################################################
+# HIONHPOD
+
+def HIONHPODSmartCollections():
+    variables  = []
+
+    return variables
+
+def HIONHPODAllVariables():
+    variables = [
+        "CaloSums",
+    ]
+
+    return variables
+
+def HIONHPODAllTruthVariables():
+    variables = [
+        "MET_Truth",
+        "TruthElectrons",
+        "TruthMuons",
+        "TruthPhotons",
+        "TruthTaus",
+        "TruthNeutrinos",
+        "TruthBSM",
+        "TruthBottom",
+        "TruthTop",
+        "TruthBoson",
+        "TruthForwardProtons",
+        "BornLeptons",
+        "TruthBosonsWithDecayParticles",
+        "TruthBosonsWithDecayVertices",
+        "TruthBSMWithDecayParticles",
+        "TruthBSMWithDecayVertices",
+    ]
+
+    return variables
+
+def HIONHPODExtraVariablesAll():
+
+    variables = []
+
+    variables += [".".join(["PrimaryVertices",field]) for field in [
+        "trackParticleLinks.neutralParticleLinks.vertexType.x.y.z"
+    ]]
+    variables += [".".join(["EventInfo",field]) for field in [
+        "eventNumber.mcEventNumber",
+        "runNumber.lumiBlock.timeStamp.timeStampNSOffset.bcid",
+        "steamTagNames.streamTagTypes.streamTagObeysLumiblock.streamTagRobs.streamTagDets",
+        "actualInteractionsPerCrossing.averageInteractionsPerCrossing",
+        "mcChannelNumber.mcEventWeights",
+        "detectorMask0.detectorMask1.detectorMask2.detectorMask3",
+        "detDescrTags.eventTypeBitmask.statusElement.extendedLevel1ID.level1TriggerType",
+        "beamPosX.beamPosY.beamPosZ.beamPosSigmaX.beamPosSigmaY.beamPosSigmaZ.beamPosSigmaXY.beamTiltXZ.beamTiltYZ.beamStatus",
+        "pixelFlags.sctFlags.trtFlags.larFlags.muonFlags.forwardDetFlags.coreFlags.backgroundFlags.lumiFlags",
+        "CentralityMin.CentralityMax",
+
+        "FCalEtA.FCalEtC.HalfFCalEtA.HalfFCalEtC",
+        "FCalEtA_Q2x.FCalEtA_Q2y.FCalEtC_Q2x.FCalEtC_Q2y",
+        "HalfFCalEtA_Q2x.HalfFCalEtA_Q2y.HalfFCalEtC_Q2x.HalfFCalEtC_Q2y",
+        "FCalEtA_Q3x.FCalEtA_Q3y.FCalEtC_Q3x.FCalEtC_Q3y",
+        "HalfFCalEtA_Q3x.HalfFCalEtA_Q3y.HalfFCalEtC_Q3x.HalfFCalEtC_Q3y",
+        "FCalEtA_Q4x.FCalEtA_Q4y.FCalEtC_Q4x.FCalEtC_Q4y",
+        "HalfFCalEtA_Q4x.HalfFCalEtA_Q4y.HalfFCalEtC_Q4x.HalfFCalEtC_Q4y",
+        "FCalEtA_Q5x.FCalEtA_Q5y.FCalEtC_Q5x.FCalEtC_Q5y",
+        "HalfFCalEtA_Q5x.HalfFCalEtA_Q5y.HalfFCalEtC_Q5x.HalfFCalEtC_Q5y",
+        "FCalEtA_Q6x.FCalEtA_Q6y.FCalEtC_Q6x.FCalEtC_Q6y",
+        "HalfFCalEtA_Q6x.HalfFCalEtA_Q6y.HalfFCalEtC_Q6x.HalfFCalEtC_Q6y",
+    ]]
+    variables += [".".join(["InDetTrackParticles",field]) for field in [
+        "definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
+        "phi.d0.z0.theta.qOverP.vz.chiSquared",
+        "vertexLink.truthParticleLink",
+        "numberOfPixelHits.numberOfPixelHoles.numberOfPixelDealSensors.numberOfTRTHits.numberOfTRTOutliers",
+        "HITight"
+    ]]
+
+    # Muons
+    variables += [".".join(["Muons",field]) for field in [
+            "pt.eta.phi.charge",
+            "ptcone20.ptvarcone20.ptcone30.ptvarcone30.topoetcone20.topoetcone40.ptcone40.ptvarcone40.topoetcone30.Tight.TightIso",
+            "numberOfPrecisionLayers.numberOfPrecisionHoleLayers",
+            "truthOrigin.truthParticleLink.truthType",
+            "inDetTrackParticleLink.muonSpectrometerTrackParticleLink.extrapolatedMuonSpectrometerTrackParticleLink",
+            "msOnlyExtapolatedMuonSpectrometerTrackParticleLink.combinedTrackParticleLink",
+            "allAuthors.author.muonType.quality.energyLossType",
+            "innerSmallHits.innerLargeHits.middleSmallHits.middleLargeHits.outerSmallHits.outerLargeHits.extendedSmallHits.extendedLargeHits",
+            "extendedSmallHoles",
+            "cscUnspoiledEtaHits",
+            "scatteringCurvatureSignificance.scatteringNeighbourSignificance.momenutmBalanceSignificance",
+            "InnerDetectorPt.MuonSpectrometerPt.combinedTrackOutBoundsPrecisionHits",
+            "isSmallGoodSectors.numberOfGoodPrecisionLayers",
+            "momentumBalanceSignificance.EnergyLoss"
+    ]]
+    variables += [".".join(["CombinedMuonTrackParticles",field]) for field in [
+            "definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
+            "phi.d0.z0.theta.qOverP.vz.chiSquared.numberDoF",
+            "numberOfPixelHits.numberOfPixelHoles.numberOfPixelDeadSensors",
+            "numberOfSCTHits.numberOfSCTHoles.numberOfSCTDeadSensors",
+            "numberOfTRTHits.numberOfTRTOutliers"
+    ]]
+    variables += [".".join(["ExtrapolatedMuonTrackParticles",field]) for field in [
+            "definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
+            "phi.d0.z0.theta.qOverP.vz"
+    ]]
+    variables += [".".join(["MuonSpectrometerTrackParticles",field]) for field in[
+        "definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
+        "phi.d0.z0.theta.qOverP.vz",
+        "truthParticleLink.vertexLink"
+    ]]
+
+    # Electrons/photons
+    variables += [".".join(["Electrons",field]) for field in [
+        "pt.eta.phi.m.charge",
+        "trackParticleLinks.ambiguityLink",
+        "ptvarcone20.topoetcone20.ptvarcone40.topoetcone40.truthOrigin.truthParticleLink.truthType.Tight.TightIso",
+        "author",
+        "caloClusterLinks.OQ.ambiguityType",
+        # Extra electron shower shapes
+        "Rhad.Rhad1.e277.Reta.Rphi.weta2.f1.Eratio.DeltaE.weta1.fracs1",
+        "wtots1.f3.f3core.deltaEta1.deltaPhi1.deltaPhi2",
+        "deltaPhiRescaled2.deltaPhiFromLastMeasurement"
+    ]]
+    variables += [".".join(["GSFTrackParticles",field]) for field in [
+        "d0.z0.theta.qOverP.vz",
+        "definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag",
+        "originalTrackParticle.numberOfPixelHits.numberOfSCTHits",
+        "eProbabilityHT"
+    ]]
+
+    variables += [".".join(["Photons",field]) for field in [
+        "pt.eta.phi.m",
+        "ptcone20.topoetcone20.topoetcone40.topoetcone30.Tight.TightIso",
+        "topoetcone20ptCorrection.topoetcone30ptCorrection.topoetcone40ptCorrection",
+        "ambiguityLink.truthOrigin.truthParticleLink.truthType",
+        "author",
+        "caloClusterLinks.vertexLinks",
+        # Extra photon shower shapes
+        "Rhad.Rhad1.e277.Reta.Rphi.weta2.f1.weta1.fracs1.wtots1",
+        "Eratio.DeltaE.f3"
+    ]]
+    variables += [".".join(["egammaClusters",field]) for field in [
+        "calE.calEta.calPhi.calM",
+        "e_sampl.eta_sampl.phi_sampl",
+        "ETA2CALOFRAME.ETACALOFRAME.PHI2CALOFRAME.PHICALOFRAME",
+        "constituentClusterLinks"
+    ]]
+
+    return variables
+
+def HIONHPODExtraVariablesJets():
+    variables = []
+    containers = ["AntiKt2HIJets","AntiKt4HIJets"]
+    
+    for c in containers:
+        variables += [".".join([c,field]) for field in [
+            *(f"JetConstitScaleMomentum_{x}" for x in ["pt","eta","phi","m"]),
+            "Width",
+            "DetectorEta.EMFrac",
+            "JVFCorr.Timing",
+            "NumTrkPt1000.NumTrkPt500.SumPtTrkPt1000.SumPtTrkPt500.TrackWidthPt1000.GhostTrack",
+            "EnergyPerSampling",
+            "ConeTruthLabelID.HadronConeExclEntendedTruthLabelID.HadronConeExclTruthLabelID",
+            "GhostMuonSegmentCount" if c == "AntiKt2HIJets" else "GhostMuonSegmentCount.btaggingLink",
+        ]]
+
+    return variables
+
+def HIONHPODExtraTruthVariables():
+    variables = [
+        "TruthEvents.Q.XF1.XF2.PDGID1.PDGID2.PDFID1.PDFID2.X1.X2.crossSection",
+    ]
+
+    return variables
+
+def HIONHPODExtraTruthVariablesJets():
+    variables = []
+    containers = ["AntiKt2TruthJets","AntiKt4TruthJets"]
+
+    for c in containers:
+        variables += [".".join([c,field]) for field in [
+            *(f"JetConstitScaleMomentum_{x}" for x in ["pt","eta","phi","m"]),
+            "ConeTruthLabelID.HadronConExclTruthLabelID.PartonTruthLabelID",
+            *(f"Ghost{x}HadronsFinalCount" for x in ["B","C"]),
+            "JetGhostArea",
+            "Width"
+        ]]
+
+    return variables

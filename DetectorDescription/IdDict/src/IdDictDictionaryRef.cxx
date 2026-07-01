@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictDictionaryRef.h"
@@ -11,6 +11,8 @@
 #include "IdDict/IdDictRangeRef.h"
 #include "IdDict/IdDictRange.h"
 #include "IdDict/IdDictFieldImplementation.h"
+
+#include <iostream>
 
 IdDictDictionaryRef::IdDictDictionaryRef (const std::string& dictionary_name)
   :
@@ -48,7 +50,7 @@ void IdDictDictionaryRef::resolve_references(IdDictMgr& idd,
 void IdDictDictionaryRef::generate_implementation(const IdDictMgr& idd,
                                                   IdDictDictionary& dictionary,
                                                   IdDictRegion& region,
-                                                  const std::string& tag) {
+                                                  std::string_view tag) {
   if (!m_generated_implementation) {
     if (m_dictionary) {
       if (!m_propagated_information) {
@@ -74,10 +76,6 @@ void IdDictDictionaryRef::generate_implementation(const IdDictMgr& idd,
             prepend_entries.insert(prepend_entries.begin(), entry.get());
           }
         }
-
-
-
-
         // Now prepend list to each region and generate each region
         for (IdDictRegion* region2 : m_dictionary->all_regions()) {
           for (IdDictRegionEntry* entry : prepend_entries) {

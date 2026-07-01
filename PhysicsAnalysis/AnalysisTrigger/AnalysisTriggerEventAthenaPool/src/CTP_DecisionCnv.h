@@ -38,7 +38,7 @@ public:
 protected:
 
   virtual CTP_Decision_PERS* createPersistent( CTP_Decision* transObj );
-  virtual CTP_Decision*      createTransient();
+  virtual CTP_Decision*      createTransient(const Token* token);
 
 private:
   CTP_DecisionCnv_p2 m_converter;

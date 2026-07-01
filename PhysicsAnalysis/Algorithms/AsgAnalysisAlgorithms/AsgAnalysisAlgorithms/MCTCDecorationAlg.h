@@ -33,7 +33,7 @@ namespace CP
     virtual StatusCode initialize () override;
 
   public:
-    virtual StatusCode execute () override;
+    virtual StatusCode execute (const EventContext& ctx) override;
     
 
 

@@ -82,7 +82,7 @@ class CfgPyComponent:
 
         ## populate the PyComponents instances repository
         o = PyComponents.instances.get(self.getName(), None)
-        if not (o is None) and not (o is self):
+        if o is not None and o is not self:
             err = "A python component [%r] has already been "\
                   "registered with the PyComponents registry !" % o
             raise RuntimeError(err)

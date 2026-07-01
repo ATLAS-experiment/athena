@@ -39,7 +39,7 @@ public:
 protected:
 
   virtual LVL1_ROI_PERS* createPersistent( LVL1_ROI* transObj );
-  virtual LVL1_ROI*      createTransient();
+  virtual LVL1_ROI*      createTransient(const Token* token);
 
 }; // class LVL1_ROICnv
 

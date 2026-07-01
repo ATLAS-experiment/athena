@@ -19,7 +19,7 @@ class sTgcIdHelper;
 
 namespace Muon{
 /** Class to handle the conversion of the transient sTgcPrepDataContainer into its persistent representation (defined in MuonPRD_Container_p1).
-This replaces sTgcPrepDataContainerCnv_tlp1, which is a AthenaPoolTopLevelTPConverter, as I have now simplified/flattened the sTgcPrepData.*/
+This replaces sTgcPrepDataContainerCnv_tlp1, which is a TopLevelTPConverter, as I have now simplified/flattened the sTgcPrepData.*/
 class sTgcPrepDataContainerCnv_p1 : public T_AthenaPoolTPCnvBase<Muon::sTgcPrepDataContainer, Muon::sTgcPrepDataContainer_p1>
 {
 public:

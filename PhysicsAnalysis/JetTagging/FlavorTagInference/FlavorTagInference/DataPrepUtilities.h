@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DATA_PREP_UTILITIES_H
@@ -37,7 +37,7 @@ namespace FlavorTagInference {
   struct FTagInputConfig
   {
     std::string name;
-    EDMType type;
+    EDMType type {};
     std::string default_flag;
   };
 
@@ -47,10 +47,15 @@ namespace FlavorTagInference {
     std::string track_prefix;
     FlipTagConfig flip;
     std::string track_link_name;
+    std::string object_link_prefix;
     std::map<std::string,std::string> remap_scalar;
     float default_output_value;
     std::string invalid_ip_key;
     std::string electron_link_name;
+    std::string muon_link_name;
+    // Skip invalid element links in CaloClusterLoader rather than throwing.
+    // constituentLinks can be invalid after jet constituent thinning.
+    bool skip_invalid_links{false};
   };
 
 
@@ -156,7 +161,8 @@ namespace FlavorTagInference {
     FTagOptions>
     createGetterConfig( GraphConfig& graph_config,
       FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar);
+      std::map<std::string, std::string> remap_scalar,
+      const std::string& object_link_prefix);
 
     // return the scalar getter functions for NNs
     std::tuple<

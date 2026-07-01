@@ -29,10 +29,12 @@ StatusCode MuonFilterAlg::execute(const EventContext& ctx) const
   }
 
   //if we find no muons, pass
-  const xAOD::MuonContainer *muons = rh_muons.ptr();
   int nCBmuons=0;
-  for(auto mu : *muons){
-    if(mu->author()==1) nCBmuons++; //count only combined muons
+  for(auto mu : *rh_muons){
+    if(mu->muonType()== xAOD::Muon::MuonType::Combined &&
+       mu->author() != xAOD::Muon::Author::STACO) {
+        nCBmuons++; //count only combined muons
+      }
   }
   if(nCBmuons==0) pass = true;
 

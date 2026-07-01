@@ -40,8 +40,21 @@ def ByteStreamReadCfg(flags, type_names=None):
     """
     result = ComponentAccumulator()
 
-    bytestream_conversion = CompFactory.ByteStreamCnvSvc()
+    bytestream_conversion = CompFactory.ByteStreamCnvSvc(
+        IsSimulation=flags.Input.isMC,
+    )
     result.addService(bytestream_conversion)
+
+    # For MC ByteStream, add the MCEventInfoByteStreamTool to decode MC EventInfo
+    if flags.Input.isMC:
+        mcEventInfoTool = CompFactory.MCEventInfoByteStreamTool(
+            name="MCEventInfoByteStreamTool",
+            ROBIDs=[0x00ff0001],  # SubDetector=OTHER=0xFF, ModuleId=0x01
+            EventInfoReadKey="",  # Empty for decoding mode
+        )
+        result.addPublicTool(mcEventInfoTool)
+
+        result.merge(SGInputLoaderCfg(flags, [('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata')]))
 
     eiName = "EventInfo"
     if flags.Common.isOnline and not any(flags.Input.Files) and not (flags.Trigger.doHLT or flags.Trigger.doLVL1):
@@ -136,6 +149,7 @@ def ByteStreamWriteCfg(flags, type_names=None):
     bytestream_conversion = CompFactory.ByteStreamCnvSvc(
         name="ByteStreamCnvSvc",
         ByteStreamOutputSvcList=[event_storage_output.getName()],
+        IsSimulation=flags.Input.isMC,
     )
     result.addService(bytestream_conversion)
 
@@ -158,6 +172,42 @@ def ByteStreamWriteCfg(flags, type_names=None):
     )
 
     return result
+
+def MCEventInfoByteStreamToolCfg(flags, name="MCEventInfoByteStreamTool", writeBS=False):
+    """Configure the MCEventInfoByteStreamTool for encoding/decoding MC EventInfo
+
+    This tool serializes MC-specific EventInfo fields (mcChannelNumber, mcEventNumber,
+    mcEventWeights, pileup information, etc.) into a dedicated ROB fragment for MC
+    ByteStream files (RDO->BS workflow).
+
+    Args:
+        flags:    Job configuration flags
+        name:     Tool name
+        writeBS:  If True, configure for encoding, else for decoding
+
+    Returns:
+        A component accumulator fragment containing the configured tool
+    """
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
+
+    acc = ComponentAccumulator()
+    tool = CompFactory.MCEventInfoByteStreamTool(name)
+
+    # ROB ID for MC EventInfo (SubDetector=OTHER=0xFF, ModuleId=0x01)
+    mc_eventinfo_robid = 0x00ff0001
+    tool.ROBIDs = [mc_eventinfo_robid]
+
+    if writeBS:
+        # write BS == read xAOD (encoding mode)
+        tool.EventInfoReadKey = "EventInfo"
+    else:
+        # read BS == write xAOD (decoding mode)
+        tool.EventInfoReadKey = ""
+
+    acc.setPrivateTools(tool)
+    return acc
+
 
 def TransientByteStreamCfg(flags, item_list=None, type_names=None, extra_inputs=None):
     """Set up transient ByteStream output stream
@@ -190,6 +240,7 @@ def TransientByteStreamCfg(flags, item_list=None, type_names=None, extra_inputs=
         name="ByteStreamCnvSvc",
         FillTriggerBits=False,  # ATR-25971, transient BS is produced before trigger bits in RDOtoRDOTrigger
         ByteStreamOutputSvcList=[rdp_output.getName()],
+        IsSimulation=flags.Input.isMC,
     )
     result.addService(bytestream_conversion)
 

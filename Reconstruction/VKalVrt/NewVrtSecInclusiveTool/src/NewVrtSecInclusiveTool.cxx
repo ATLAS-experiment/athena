@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 ///
 ///  @author  Vadim Kostyukhin <vadim.kostyukhin@cern.ch>
@@ -251,6 +251,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
 
 
   std::unique_ptr<Trk::VxSecVertexInfo> NewVrtSecInclusiveTool::findAllVertices (
+           const EventContext& ctx,
            const std::vector<const xAOD::TrackParticle*> & inpTrk,
            const xAOD::Vertex & primVrt ) const 
   {
@@ -266,7 +267,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     workVectorArrxAOD * tmpVectxAOD=new workVectorArrxAOD();
     tmpVectxAOD->inpTrk.resize(inpTrk.size());
     std::copy(inpTrk.begin(),inpTrk.end(), tmpVectxAOD->inpTrk.begin());
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
+    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
     tmpVectxAOD->beamX=beamSpotHandle->beamPos().x();
     tmpVectxAOD->beamY=beamSpotHandle->beamPos().y();
     tmpVectxAOD->beamZ=beamSpotHandle->beamPos().z();
@@ -274,7 +275,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     tmpVectxAOD->tanBeamTiltY=tan(beamSpotHandle->beamTilt(1));
 
     compatibilityGraph_t compatibilityGraph;
-    listVrtSec = getVrtSecMulti(tmpVectxAOD,primVrt,compatibilityGraph);
+    listVrtSec = getVrtSecMulti(ctx,tmpVectxAOD,primVrt,compatibilityGraph);
 
     for (const auto trk : tmpVectxAOD->listSelTracks) {
       // Mark the track as selected
@@ -291,7 +292,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
 
         // Get the perigee of the track at the vertex
         ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": > Track index " << (*trk)->index() << ": Get the perigee of the track at the vertex." );
-        auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), **trk, vrt->position() );
+        auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(ctx, **trk, vrt->position() );
         if( !sv_perigee ) {
           ATH_MSG_WARNING(" > " << __FUNCTION__ << ": > Track index " << (*trk)->index() << ": Failed in obtaining the SV perigee!" );
         }

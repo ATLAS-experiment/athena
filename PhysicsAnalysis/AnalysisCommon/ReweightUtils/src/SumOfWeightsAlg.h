@@ -39,7 +39,7 @@ class SumOfWeightsAlg : public ::AthFilterAlgorithm {
    
      /// Athena algorithm's Hooks
      StatusCode  initialize ATLAS_NOT_THREAD_SAFE ();
-     StatusCode  execute();
+     StatusCode  execute(const EventContext& ctx);
      StatusCode  finalize();
    
    private: 

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAOUTPUTSTREAM_H
@@ -69,17 +69,17 @@ public:
    //@{
    virtual StatusCode initialize() override;
    virtual StatusCode finalize() override;
-   virtual StatusCode execute() override;
+   virtual StatusCode execute(const EventContext& ctx) override;
    //@}
 
    /// Stream the data
-   virtual StatusCode write();
+   virtual StatusCode write(const EventContext& ctx);
 
    /// Clear list of selected objects
    void clearSelection();
 
    /// Collect data objects for output streamer list
-   StatusCode collectAllObjects();
+   StatusCode collectAllObjects(const EventContext& ctx);
 
    /// Return the list of selected objects
    IDataSelector* selectedObjects() {
@@ -231,7 +231,7 @@ private:
    std::string m_outputAttributes;
 
    /// Add item data objects to output streamer list
-   StatusCode addItemObjects(const SG::FolderItem&, SG::SelectionVetoes& vetoes, SG::CompressionInfo& compInfo);
+   StatusCode addItemObjects(const EventContext&, const SG::FolderItem&, SG::SelectionVetoes& vetoes, SG::CompressionInfo& compInfo);
 
    void handleVariableSelection (const SG::IConstAuxStore& auxstore,
                                  SG::DataProxy& itemProxy,
@@ -239,7 +239,7 @@ private:
                                  SG::SelectionVetoes& vetoes) const;
 
    /// Write MetaData for this stream (by default) or for a substream outputFN (in ES mode)
-   void writeMetaData( const std::string& outputFN="" );
+   void writeMetaData( const EventContext& ctx, const std::string& outputFN="" );
 
    /// Helper function for building the compression lists
    std::set<std::string> buildCompressionSet (const ToolHandle<SG::IFolder>& handle,
@@ -247,7 +247,7 @@ private:
                                               const std::string& item_key) const;
 
    // close an EventService substream that was writing to 'rangeFN' output
-   void finalizeRange( const std::string & rangeFN );
+   void finalizeRange( const EventContext& ctx, const std::string & rangeFN );
 
   /// Helper function to load dictionaries (both transient and persistent)
   /// for a given type.

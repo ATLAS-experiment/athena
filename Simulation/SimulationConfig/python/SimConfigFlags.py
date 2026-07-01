@@ -4,7 +4,7 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, \
-    LArParameterization, SimulationFlavour, TruthStrategy, VertexSource
+    LArParameterization, InDetParameterization, SimulationFlavour, TruthStrategy, VertexSource
 from AthenaCommon.SystemOfUnits import m, ns
 
 #todo? add in the explanatory text from previous implementation
@@ -125,6 +125,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.StoppedParticleFile", "")
     scf.addFlag("Sim.BeamPipeSimMode", BeamPipeSimMode.Normal, type=BeamPipeSimMode)
     scf.addFlag("Sim.LArParameterization", LArParameterization.NoFrozenShowers, type=LArParameterization)
+    scf.addFlag("Sim.InDetParameterization", InDetParameterization.NONE, type=InDetParameterization)
     # TRT Range cut used in simulation in mm. Should be 0.05 or 30.
     scf.addFlag("Sim.TRTRangeCut",
                 lambda prevFlags: float(GetFileMD(prevFlags.Input.Files).get('TRTRangeCut', 30.0)))
@@ -148,6 +149,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.NRRWeight", False)
     scf.addFlag("Sim.PRRThreshold", False)
     scf.addFlag("Sim.PRRWeight", False)
+    scf.addFlag("Sim.MultipleStepsInMSCTransport", False)
     scf.addFlag("Sim.OptionalUserActionList", [])
 
     # G4FieldConfig

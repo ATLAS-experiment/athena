@@ -58,7 +58,7 @@ CmxCpTobByteStreamAuxCnv::CmxCpTobByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& CmxCpTobByteStreamAuxCnv::classID() {
+CLID CmxCpTobByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::CMXCPTobAuxContainer>::ID();
 }
 
@@ -86,6 +86,7 @@ StatusCode CmxCpTobByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   ByteStreamAddress *pBS_Addr = dynamic_cast<ByteStreamAddress *>(pAddr);
   if (not pBS_Addr) return StatusCode::FAILURE;
   // -------------------------------------------------------------------------
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *(pBS_Addr->par());
   ATH_MSG_DEBUG("Creating Objects " << nm);
 
@@ -94,7 +95,7 @@ StatusCode CmxCpTobByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   cpmCollection.setStore(aux);
   // -------------------------------------------------------------------------
   DataVector<LVL1::CMXCPTob> cmxCpTobVector;
-  StatusCode sc = m_readTool->convert(nm, &cmxCpTobVector);
+  StatusCode sc = m_readTool->convert(ctx, nm, &cmxCpTobVector);
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to create objects");
     delete aux;

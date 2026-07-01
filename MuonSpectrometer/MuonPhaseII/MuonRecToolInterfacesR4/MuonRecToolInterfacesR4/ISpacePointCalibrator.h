@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONSPACEPOINTCALIBRATOR_ISPACEPOINTCALIBRATOR_H
@@ -12,7 +12,9 @@
 ///
 #include <xAODMuon/MuonSegment.h>
 #include <ActsEvent/TrackContainer.h>
+
 #include <Acts/EventData/SourceLink.hpp>
+#include <Acts/Utilities/CloneablePtr.hpp>
 
 #include <memory>
 
@@ -36,7 +38,7 @@ namespace MuonR4{
             
             virtual ~ISpacePointCalibrator() = default;
 
-            using CalibSpacePointPtr = std::unique_ptr<CalibratedSpacePoint>;
+            using CalibSpacePointPtr = Acts::CloneablePtr<CalibratedSpacePoint>;
             using CalibSpacePointVec = std::vector<CalibSpacePointPtr>;
             /** @brief Calibrates a single space point. Mdt drift radii are corrected for time slew, signal
              *         propagation & LorentzAngle effects. The second coordinate of 1D space points is updated according

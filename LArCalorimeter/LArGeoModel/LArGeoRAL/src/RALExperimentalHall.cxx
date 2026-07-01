@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RALExperimentalHall
@@ -78,7 +78,7 @@ LArGeo::RALExperimentalHall::~RALExperimentalHall()
 }
 
 
-double LArGeo::RALExperimentalHall::GetValue(const std::string& a_name,
+double LArGeo::RALExperimentalHall::GetValue(std::string_view a_name,
                                              const int /*a0*/,
                                              const int /*a1*/,
                                              const int /*a2*/,
@@ -92,7 +92,8 @@ double LArGeo::RALExperimentalHall::GetValue(const std::string& a_name,
   if ( a_name == "LArExpHallZmax"             ) return (*m_c->atlasMother)[1]->getDouble("ZMAX")*CLHEP::cm;
 
   // We didn't find a match.
-  std::string errMessage = "RALExperimentalHall::GetValue: could not find a match for the key '" + a_name;
+  std::string errMessage = "RALExperimentalHall::GetValue: could not find a match for the key '";
+  errMessage.append( a_name);
   std::cerr << errMessage << std::endl;
   throw std::runtime_error (errMessage.c_str());
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -132,6 +132,7 @@ void DecayParser::parse( const std::string& inputCmd )
   PyObject *parents = PyTuple_GET_ITEM (res, 1);
   Py_XINCREF (parents);
   if (!parents) {
+    //coverity[COPY_PASTE_ERROR]
     Py_DECREF (res);
     std::string error = "corrupted parents' list";
     throw std::runtime_error (error);

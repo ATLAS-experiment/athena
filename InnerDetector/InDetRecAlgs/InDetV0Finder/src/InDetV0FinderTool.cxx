@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -11,7 +11,7 @@
     changes : December 2014
     author  : Evelina Bouhova-Thacker <e.bouhova@cern.ch> 
               Changed to use xAOD
-              Changed to receive DataHandles from caller
+              Changed to receive handles from caller
 
  ***************************************************************************/
 
@@ -381,9 +381,9 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
 
             std::unique_ptr<xAOD::Vertex> myVxCandidate;
             if (m_useV0Fitter) {
-              myVxCandidate = std::unique_ptr<xAOD::Vertex>( m_concreteVertexFitter->fit(pairV0, startingPoint) );
+              myVxCandidate = m_concreteVertexFitter->fit(ctx, pairV0, startingPoint);
             } else {
-              myVxCandidate = std::unique_ptr<xAOD::Vertex>(  m_iVKVertexFitter->fit(pairV0, startingPoint) );
+              myVxCandidate = m_iVKVertexFitter->fit(ctx, pairV0, startingPoint);
             }
       
               if (myVxCandidate)
@@ -421,7 +421,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                       bool foundLambdabar = false;
 
                       if (doKshortFit && !m_doSimpleV0) {
-                        myKshort = std::unique_ptr<xAOD::Vertex>( massFit(310, pairV0, vertex) );
+                        myKshort = massFit(ctx, 310, pairV0, vertex);
                         if (myKshort) {
                           if (m_V0Tools->vertexProbability(myKshort.get()) >= m_minConstrVertProb) {
                             myKshort->setVertexType(xAOD::VxType::V0Vtx);
@@ -431,7 +431,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                       }
 
                       if (doLambdaFit && !m_doSimpleV0) {
-                        myLambda = std::unique_ptr<xAOD::Vertex>( massFit(3122, pairV0, vertex) );
+                        myLambda = massFit(ctx, 3122, pairV0, vertex);
                         if (myLambda) {
                           if (m_V0Tools->vertexProbability(myLambda.get()) >= m_minConstrVertProb) {
                             myLambda->setVertexType(xAOD::VxType::V0Vtx);
@@ -441,7 +441,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                       }
 
                       if (doLambdabarFit && !m_doSimpleV0) {
-                        myLambdabar = std::unique_ptr<xAOD::Vertex>( massFit(-3122, pairV0, vertex));
+                        myLambdabar = massFit(ctx, -3122, pairV0, vertex);
                         if (myLambdabar) {
                           if (m_V0Tools->vertexProbability(myLambdabar.get()) >= m_minConstrVertProb) {
                             myLambdabar->setVertexType(xAOD::VxType::V0Vtx);
@@ -529,7 +529,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
                           v0_lbLinksDecor(*(v0Container->back())) = lbLink;
                         }
                         if (doGamma && !m_doSimpleV0) {
-		          myGamma = std::unique_ptr<xAOD::Vertex>( massFit(22, pairV0, vertex) );
+                          myGamma = massFit(ctx, 22, pairV0, vertex);
                           if (myGamma && m_V0Tools->vertexProbability(myGamma.get()) >= m_minConstrVertProb) {
                             gamma_fit = 1;
                             gamma_prob = m_V0Tools->vertexProbability(myGamma.get());
@@ -816,9 +816,9 @@ bool InDetV0FinderTool::doMassFit(xAOD::Vertex* vxCandidate, int pdgID) const
   return pass;
 }
 
-xAOD::Vertex* InDetV0FinderTool::massFit(int pdgID, const std::vector<const xAOD::TrackParticle*> &pairV0, const Amg::Vector3D &vertex) const
+std::unique_ptr<xAOD::Vertex> InDetV0FinderTool::massFit(const EventContext& ctx, int pdgID, const std::vector<const xAOD::TrackParticle*> &pairV0, const Amg::Vector3D &vertex) const
 {
-  xAOD::Vertex* vxCandidate(nullptr);
+  std::unique_ptr<xAOD::Vertex> vxCandidate;
   std::vector<double> masses;
   if (pdgID == 310) {
     masses.push_back(m_masspi);
@@ -835,27 +835,27 @@ xAOD::Vertex* InDetV0FinderTool::massFit(int pdgID, const std::vector<const xAOD
   }
 
   if (pdgID == 22) {
-    vxCandidate = m_iGammaFitter->fit(pairV0, vertex);
+    vxCandidate = m_iGammaFitter->fit(ctx, pairV0, vertex);
   }
   if (pdgID ==   310) {
     if (m_useV0Fitter) {
-      vxCandidate = m_concreteVertexFitter->fit(pairV0, masses, m_massK0S, nullptr, vertex);
+      vxCandidate = m_concreteVertexFitter->fit(ctx, pairV0, masses, m_massK0S, nullptr, vertex);
     } else {
-      vxCandidate = m_iKshortFitter->fit(pairV0, vertex);
+      vxCandidate = m_iKshortFitter->fit(ctx, pairV0, vertex);
     }
   }
   if (pdgID ==  3122) {
     if (m_useV0Fitter) {
-      vxCandidate = m_concreteVertexFitter->fit(pairV0, masses, m_massLambda, nullptr, vertex);
+      vxCandidate = m_concreteVertexFitter->fit(ctx, pairV0, masses, m_massLambda, nullptr, vertex);
     } else {
-      vxCandidate = m_iLambdaFitter->fit(pairV0, vertex);
+      vxCandidate = m_iLambdaFitter->fit(ctx, pairV0, vertex);
     }
   }
   if (pdgID == -3122) {
     if (m_useV0Fitter) {
-      vxCandidate = m_concreteVertexFitter->fit(pairV0, masses, m_massLambda, nullptr, vertex);
+      vxCandidate = m_concreteVertexFitter->fit(ctx, pairV0, masses, m_massLambda, nullptr, vertex);
     } else {
-      vxCandidate = m_iLambdabarFitter->fit(pairV0, vertex);
+      vxCandidate = m_iLambdabarFitter->fit(ctx, pairV0, vertex);
     }
   }
 

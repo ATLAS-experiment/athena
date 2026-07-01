@@ -50,7 +50,7 @@ public:
 
 protected:
    virtual TrigVertexCollection_PERS *createPersistent( TrigVertexCollection *transObj);
-   virtual TrigVertexCollection      *createTransient();
+   virtual TrigVertexCollection      *createTransient(const Token* token);
  
   private:
  

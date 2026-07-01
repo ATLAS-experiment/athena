@@ -42,7 +42,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual MissingEtCalo* createTransient();
+  virtual MissingEtCalo* createTransient(const Token* token);
 
 };
 

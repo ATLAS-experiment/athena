@@ -99,6 +99,9 @@ namespace MuonValR4{
             m_trkTruthLinks.emplace_back(std::format("{:}.truthParticleLink", m_segmentKeyR4.value()));
 
             m_truthTrks = std::make_unique<IParticleFourMomBranch>(m_tree, "TruthMuons");
+            m_truthTrks->addVariable<int>(-1, "truthOrigin");
+            m_truthTrks->addVariable<int>(-1, "truthType");
+            
             BilateralLinkerBranch::connectCollections(m_legacyTrks, m_truthTrks, [](const xAOD::IParticle* trk){ 
                                                       return xAOD::TruthHelpers::getTruthParticle(*trk); }, "truth", "LegacyMS");
             BilateralLinkerBranch::connectCollections(m_TrksSegmentR4, m_truthTrks, [](const xAOD::IParticle* trk){ 
@@ -119,10 +122,9 @@ namespace MuonValR4{
                                 });
     }
 
-    StatusCode MuonRecoChainTester::execute() {
+    StatusCode MuonRecoChainTester::execute(const EventContext& ctx) {
     
-      const EventContext& ctx{Gaudi::Hive::currentContext()};
-      const xAOD::TrackParticleContainer* legacyTrks{nullptr};
+            const xAOD::TrackParticleContainer* legacyTrks{nullptr};
       ATH_CHECK(SG::get(legacyTrks, m_legacyTrackKey, ctx));
 
       const xAOD::TrackParticleContainer* trksFromHoughR4{nullptr};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -35,8 +35,6 @@ namespace DerivationFramework {
     ATH_CHECK( m_iVertexFitter.retrieve() );
     ATH_MSG_DEBUG("Retrieved tool " << m_iVertexFitter);
 
-    // retrieving V0 Fitter
-    ATH_CHECK( m_iV0VertexFitter.retrieve(DisableTool{!m_useV0Fitter}));
 
     // Get the track selector tool from ToolSvc
     ATH_CHECK ( m_trkSelector.retrieve() );
@@ -86,17 +84,15 @@ namespace DerivationFramework {
     for (const auto * muon : *importedMuonCollection) {
       if ( !muon ) continue;
       muonDecorator(*muon) = -1; // all muons must be decorated
-      if (  (muon->muonType() != xAOD::Muon::Combined ) && (muon->muonType() != xAOD::Muon::SegmentTagged ) ) continue;
-      if (!muon->inDetTrackParticleLink().isValid()) continue; // No muons without ID tracks
-      auto& link = muon->inDetTrackParticleLink();
-      const xAOD::TrackParticle* muonTrk = *link;
+      if (  (muon->muonType() != xAOD::Muon::MuonType::Combined ) && (muon->muonType() != xAOD::Muon::MuonType::SegmentTagged ) ) continue;
+      const xAOD::TrackParticle* muonTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       if ( !muonTrk ) continue;
       const xAOD::Vertex* vx{};
       if ( !m_trkSelector->decision(*muonTrk, vx) ) continue; // all ID tracks must pass basic tracking cuts
       if ( fabs(muonTrk->pt())<m_ptCut ) continue; //  pt cut
       if ( fabs(muonTrk->eta())>m_etaCut ) continue; //  eta cut
-      if ( muon->muonType() == xAOD::Muon::Combined ) ++nCombMuons;
-      if ( muon->muonType() == xAOD::Muon::SegmentTagged ) ++nSegmentTaggedMuons;
+      if ( muon->muonType() == xAOD::Muon::MuonType::Combined ) ++nCombMuons;
+      if ( muon->muonType() == xAOD::Muon::MuonType::SegmentTagged ) ++nSegmentTaggedMuons;
       theMuonsAfterSelection.push_back(muon);
     }
     unsigned int nSelectedMuons = theMuonsAfterSelection.size();
@@ -143,22 +139,22 @@ namespace DerivationFramework {
     ATH_MSG_DEBUG("Successful pairs.....");
     for (std::vector<Combination>::iterator pairItr = pairs.begin(); pairItr!=pairs.end(); ++pairItr) {
       std::vector<const xAOD::TrackParticle*> theTracks = (*pairItr).trackParticles("pair1");
-      xAOD::Vertex* pairVxCandidate = fit(theTracks,importedTrackCollection.get(),beamSpot); // This line actually does the fitting and object making
+      std::unique_ptr<xAOD::Vertex> pairVxCandidate = fit(ctx,theTracks,importedTrackCollection.get(),beamSpot); // This line actually does the fitting and object making
       if (pairVxCandidate) {
         // decorate the candidate with its codes
         indexDecorator(*pairVxCandidate) = (*pairItr).combinationIndices();
         chargeDecorator(*pairVxCandidate) = (*pairItr).combinationCharges();
         // decorate the candidate with refitted tracks and muons via the BPhysHelper
-        xAOD::BPhysHelper helper(pairVxCandidate);
+        xAOD::BPhysHelper helper(pairVxCandidate.get());
         helper.setRefTrks();
         std::vector<const xAOD::Muon*> theStoredMuons;
         theStoredMuons = (*pairItr).muons;
         helper.setMuons(theStoredMuons,importedMuonCollection.get());
-        // Retain the vertex
-        pairVxContainer->push_back(pairVxCandidate);
         ATH_MSG_DEBUG("..... indices: " << (*pairItr).combinationIndices() <<
                       " charges: " << (*pairItr).combinationCharges() <<
                       " chi2:    " << pairVxCandidate->chiSquared());
+        // Retain the vertex
+        pairVxContainer->push_back(std::move(pairVxCandidate));
       } else { // fit failed
         ATH_MSG_DEBUG("Fitter failed!");
       }
@@ -170,7 +166,7 @@ namespace DerivationFramework {
     for (std::vector<Combination>::iterator quadItr = quadruplets.begin(); quadItr!=quadruplets.end(); ++quadItr) {
       std::vector<const xAOD::TrackParticle*> theDCTracks; theDCTracks.clear();
       theDCTracks = (*quadItr).trackParticles("DC");
-      xAOD::Vertex* dcVxCandidate = fit(theDCTracks,importedTrackCollection.get(), beamSpot);
+      std::unique_ptr<xAOD::Vertex> dcVxCandidate = fit(ctx,theDCTracks,importedTrackCollection.get(), beamSpot);
       if (dcVxCandidate != 0) {
         // decorate the candidate with its codes
         indexDecorator(*dcVxCandidate) = (*quadItr).combinationIndices();
@@ -178,12 +174,12 @@ namespace DerivationFramework {
         // Decorate the DC candidate with the differences between its chi2 and the other
         double dcChi2 = dcVxCandidate->chiSquared();
         // decorate the candidate with refitted tracks and muons via the BPhysHelper
-        xAOD::BPhysHelper helper(dcVxCandidate);
+        xAOD::BPhysHelper helper(dcVxCandidate.get());
         helper.setRefTrks();
         const std::vector<const xAOD::Muon*> &theStoredMuons = (*quadItr).muons;
         helper.setMuons(theStoredMuons,importedMuonCollection.get());
         // Retain the vertex
-        quadVxContainer->push_back(dcVxCandidate);
+        quadVxContainer->push_back(std::move(dcVxCandidate));
         ATH_MSG_DEBUG("..... indices: " << (*quadItr).combinationIndices() <<
                       " charges: " << (*quadItr).combinationCharges() <<
                       " chi2(DC): " << dcChi2);
@@ -192,6 +188,9 @@ namespace DerivationFramework {
       }
     }
     ATH_MSG_DEBUG("quadruplet container size " << quadVxContainer->size());
+    if(quadVxContainer->size() > 500){
+      ATH_MSG_WARNING("Event Run: " << evt->runNumber() << " Event: " << evt->eventNumber() << " quadruplet container size " << quadVxContainer->size());
+    }
 
     return StatusCode::SUCCESS;;
   }
@@ -202,28 +201,15 @@ namespace DerivationFramework {
   // fit - does the fit
   // ---------------------------------------------------------------------------------
 
-  xAOD::Vertex* FourMuonTool::fit(const std::vector<const xAOD::TrackParticle*> &inputTracks,
-                                  const xAOD::TrackParticleContainer* importedTrackCollection,
-                                  const Amg::Vector3D &beamSpot) const {
+  std::unique_ptr<xAOD::Vertex> FourMuonTool::fit(const EventContext& ctx,
+                                                  const std::vector<const xAOD::TrackParticle*> &inputTracks,
+                                                  const xAOD::TrackParticleContainer* importedTrackCollection,
+                                                  const Amg::Vector3D &beamSpot) const {
 
-    const Trk::TrkV0VertexFitter* concreteVertexFitter=0;
-    if (m_useV0Fitter) {
-      // making a concrete fitter for the V0Fitter
-      concreteVertexFitter = dynamic_cast<const Trk::TrkV0VertexFitter * >(&(*m_iV0VertexFitter));
-      if(concreteVertexFitter == 0) {
-        ATH_MSG_FATAL("The vertex fitter passed is not a V0 Vertex Fitter");
-        return nullptr;
-      }
-    }
 
-    xAOD::Vertex* myVxCandidate{};
-    if (m_useV0Fitter) {
-      myVxCandidate = concreteVertexFitter->fit(inputTracks, beamSpot /*vertex startingPoint*/ );
-    } else {
-      myVxCandidate = m_iVertexFitter->fit(inputTracks, beamSpot /*vertex startingPoint*/ );
-    }
+    std::unique_ptr<xAOD::Vertex> myVxCandidate = m_iVertexFitter->fit(ctx, inputTracks, beamSpot /*vertex startingPoint*/ );
 
-    if(myVxCandidate) BPhysPVTools::PrepareVertexLinks(myVxCandidate, importedTrackCollection);
+    if(myVxCandidate) BPhysPVTools::PrepareVertexLinks(myVxCandidate.get(), importedTrackCollection);
 
     return myVxCandidate;
 
@@ -346,10 +332,10 @@ namespace DerivationFramework {
     bool accept(false);
     bool charges(true);
     bool quality(false);
-    if ((  muons.at(0)->muonType() == xAOD::Muon::Combined ) ||
-        (  muons.at(1)->muonType() == xAOD::Muon::Combined ) ||
-        (  muons.at(2)->muonType() == xAOD::Muon::Combined ) ||
-        (  muons.at(3)->muonType() == xAOD::Muon::Combined )
+    if ((  muons.at(0)->muonType() == xAOD::Muon::MuonType::Combined ) ||
+        (  muons.at(1)->muonType() == xAOD::Muon::MuonType::Combined ) ||
+        (  muons.at(2)->muonType() == xAOD::Muon::MuonType::Combined ) ||
+        (  muons.at(3)->muonType() == xAOD::Muon::MuonType::Combined )
         ) quality = true;
     if (charges && quality) accept = true;
     return accept;

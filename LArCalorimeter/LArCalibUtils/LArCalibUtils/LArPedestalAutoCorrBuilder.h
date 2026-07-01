@@ -40,7 +40,7 @@ class LArPedestalAutoCorrBuilder : public AthAlgorithm
   StatusCode initialize(); 
 
   // Algorithm execution
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
   // endRun - real work
   virtual StatusCode stop();

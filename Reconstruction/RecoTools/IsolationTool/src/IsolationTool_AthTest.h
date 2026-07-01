@@ -17,7 +17,7 @@ class IsolationTool_AthTest: public ::AthAlgorithm {
   virtual ~IsolationTool_AthTest(); 
 
   virtual StatusCode  initialize();
-  virtual StatusCode  execute();
+  virtual StatusCode  execute(const EventContext& ctx);
   virtual StatusCode  finalize();
 
  private: 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from JetRecConfig.JetRecConfig import registerAsInputConstit
@@ -28,17 +28,17 @@ flavourghosts = [ "BHadronsInitial", "BHadronsFinal", "BQuarksFinal",
 calibmods = (
     "ConstitFourMom",   "CaloEnergies",
     "Calib:T0:mc",
-    "Sort",
+    "Sort","numConstit",
     )
 
 calibmods_lowCut = (
     "ConstitFourMom", "CaloEnergies",
     "Calib:T0:mc:JetArea_Residual",
-    "Sort",
+    "Sort","numConstit",
 )
 
 calibmods_noCut = (
-    "ConstitFourMom", "CaloEnergies", "Sort"
+    "ConstitFourMom","CaloEnergies","Sort","numConstit",
 )
 
 standardmods = (
@@ -59,11 +59,13 @@ pflowmods        = ()
 
 substrmods = ("nsubjettiness","ecorr")
 
+truthlabels = ("JetTaggingTruthLabel:R4TruthLabel",)
+
 # ********************************************************
 # Standard track jet definition
 # ********************************************************
 AntiKtVR30Rmax4Rmin02PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
-                                              modifiers = ("Sort","JetDeltaRLabel:4500","JetGhostLabel","vr"),
+                                              modifiers = ("Sort","JetDeltaRLabel:4500","JetGhostLabel","vr","numConstit"),
                                               ptmin=4000,
                                               VRMinR = 0.02,
                                               VRMassSc = 30000,
@@ -74,9 +76,9 @@ registerAsInputConstit(AntiKtVR30Rmax4Rmin02PV0Track)
 
 
 AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
-                                modifiers = ("Sort",)+truthmods,
+                                modifiers = ("Sort","numConstit")+truthmods,
                                 ptmin=2000,
-                                  lock = True)
+                                lock = True)
 
 
 # *********************************************************
@@ -85,15 +87,20 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso")+truthlabels,
                                lock = True
 )
 
+# The following jet collection will be scheduled in derivation production (instead of AntiKt4EMPFlow which is used e.g. at Tier-0)
+AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
+    ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
+    modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
+)
 
 AntiKt4EMPFlowML = JetDefinition("AntiKt",0.4,cst.GPFlowML,
                                infix = "ML",
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:10000","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
+                               modifiers = calibmods+truthmods+standardmods+("Filter_calibThreshold:1","JetGhostLabel","JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel","LArHVCorr","jetiso"),
                                lock = True
 )
 
@@ -124,7 +131,8 @@ AntiKt4EMPFlow_tauSeedEleRM = JetDefinition("AntiKt",0.4,cst.GPFlow_tauSeedEleRM
 
 AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
                               ghostdefs = standardghosts+flavourghosts, 
-                              modifiers = calibmods+("Filter_ifnotESD:15000","OriginSetPV","LArHVCorr")+standardmods+clustermods,
+                              modifiers = calibmods+truthmods+standardmods+clustermods+("Filter_ifnotESD:15000","OriginSetPV","LArHVCorr",
+                              "JetDeltaRInitialLabel:5000","JetGhostInitialLabel","JetQuarkChargeLabel"),
                               lock = True,
 )
 
@@ -134,6 +142,10 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                               lock = True,
 )
 
+# The following jet collection will be scheduled in derivation production (instead of AntiKt4EMTopo which is used e.g. at Tier-0) 
+AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
+    modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation",)
+)
 
 # *********************************************************
 # EMPFlow CSSK jets  (no jet calibration available yet,
@@ -141,7 +153,7 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 # *********************************************************
 AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
                                    ghostdefs = standardghosts+flavourghosts,
-                                   modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","LArHVCorr","jetiso")+truthmods+standardmods,
+                                   modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","LArHVCorr","jetiso","numConstit")+truthmods+standardmods,
                                    ptmin = 2000,
                                    lock = True
 )
@@ -169,7 +181,7 @@ AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4EMPFlowCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
                                           infix = "NoPtCut",
                                           ghostdefs = standardghosts+flavourghosts,
-                                          modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","jetiso")+truthmods+standardmods,
+                                          modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","jetiso","numConstit")+truthmods+standardmods,
                                           ptmin = 1,
                                           lock = True
 )
@@ -201,7 +213,7 @@ AntiKt4EMTopoNoPtCut = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 AntiKt4MLTopo = JetDefinition("AntiKt",0.4,cst.MLTopoOrigin,
                                      infix = "",
                                      ghostdefs = standardghosts+flavourghosts,
-                                     modifiers = ("CaloEnergies", "Sort")+("Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
+                                     modifiers = ("CaloEnergies","Sort","numConstit","Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
                                      ptmin = 1,
                                      lock = True
 )
@@ -236,25 +248,28 @@ AntiKt4EMTopoLowPt = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 
 AntiKt4Truth = JetDefinition("AntiKt",0.4, cst.Truth,
                              ghostdefs = flavourghosts,
-                             modifiers = ("Sort", "Width", "jetisoTruth")+truthmods,
+                             modifiers = ("Sort", "Width", "jetisoTruth", "numConstit")+truthmods,
                              lock = True,
 )
 
+# These jets may be used as input for the JetTruthLabelling, so they also need to be defined as constituents:
+registerAsInputConstit(AntiKt4Truth)
+
 AntiKt2Truth = JetDefinition("AntiKt",0.2, cst.Truth,
                              ghostdefs = flavourghosts,
-                             modifiers = ("Sort", "Width")+truthmods,
+                             modifiers = ("Sort", "Width", "numConstit")+truthmods,
                              lock = True,
 )
 
 AntiKt4TruthWZ = JetDefinition("AntiKt",0.4, cst.TruthWZ,
                                ghostdefs = flavourghosts,
-                               modifiers = ("Sort", "Width", "jetisoTruth")+truthmods,
+                               modifiers = ("Sort", "Width", "jetisoTruth", "numConstit")+truthmods,
                                lock = True,
 )
 
 AntiKt4TruthDressedWZ = JetDefinition("AntiKt",0.4, cst.TruthDressedWZ,
                                       ghostdefs = flavourghosts,
-                                      modifiers = ("Sort", "Width", "jetisoTruth")+truthmods,
+                                      modifiers = ("Sort", "Width", "jetisoTruth", "numConstit")+truthmods,
                                       lock = True,
 )
 
@@ -263,7 +278,7 @@ registerAsInputConstit(AntiKt4TruthDressedWZ)
 
 AntiKtVRTruthCharged = JetDefinition("AntiKt",0.4, cst.TruthCharged,
                                      ghostdefs = flavourghosts,
-                                     modifiers = ("Sort",)+truthmods,
+                                     modifiers = ("Sort", "numConstit")+truthmods,
                                      VRMinR = 0.02,
                                      VRMassSc = 30000,
                                      lock = True
@@ -272,7 +287,7 @@ AntiKtVRTruthCharged = JetDefinition("AntiKt",0.4, cst.TruthCharged,
 AntiKt4TruthGEN = JetDefinition("AntiKt",0.4, cst.TruthGEN,
                                 ptmin = 5000, 
                                 ghostdefs = [],
-                                modifiers = ("Sort", )+truthmods,
+                                modifiers = ("Sort",)+truthmods,
                                 ghostarea = 0.,
                                 lock = True,
 )
@@ -280,6 +295,16 @@ AntiKt4TruthGENWZ = AntiKt4TruthGEN.clone(inputdef=cst.TruthGENWZ)
 
 AntiKt6TruthGEN   = AntiKt4TruthGEN.clone(radius=0.6)
 AntiKt6TruthGENWZ = AntiKt4TruthGENWZ.clone(radius=0.6)
+
+
+# *********************************************************
+# Support for merged HS/PU jet definitions from simulation
+# *********************************************************
+
+InTimeAntiKt4Truth = AntiKt4Truth.clone(prefix="InTime")
+
+# These jets may be used as input for the JetTruthLabelling, so they also need to be defined as constituents:
+registerAsInputConstit(InTimeAntiKt4Truth)
 
 
 def StandardSmallRJetCfg(flags):

@@ -21,6 +21,8 @@ class DiTauCalibrationConfig (ConfigBlock):
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here since the calibration is common to "
             "all ditau-jets.")
+        self.addOption ('quality', None, type=str,
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`,`Loose`,`NoID`.")
         self.addOption ('rerunTruthMatching', True, type=bool,
             info="whether to rerun truth matching (sets up an instance of "
             "`CP::DiTauTruthMatchingAlg`).")
@@ -148,9 +150,13 @@ class DiTauWorkingPointSelectionConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt.conf'
         if "DiTauJetsLowPt" in self.containerName:
             inputfile = 'TauAnalysisAlgorithms/ditau_selection_lowpt.conf' 
+        else:
+            if 'NoID' in self.quality:
+                inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt.conf'
+            else: 
+                inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt_'+self.quality+'.conf'        
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'DiTauSelectionAlg' )
@@ -168,6 +174,7 @@ class DiTauWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def __init__ (self) :
         super (DiTauWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('DiTauWorkingPointEfficiency')
         self.addDependency('DiTauWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)

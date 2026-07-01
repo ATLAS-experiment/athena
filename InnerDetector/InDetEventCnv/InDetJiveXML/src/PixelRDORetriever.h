@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_PIXELRDORETRIEVER_H
@@ -12,7 +12,6 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetRawData/PixelRDO_Container.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "StoreGate/DataHandle.h"
 
 class PixelID;
 

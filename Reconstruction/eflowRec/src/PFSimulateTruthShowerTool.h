@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFSIMULATETRUTHSHOWERTOOL_H
-#define PFSIMULATETRUTHSHOWERTOOL_H
+#ifndef EFLOWREC_PFSIMULATETRUTHSHOWERTOOL_H
+#define EFLOWREC_PFSIMULATETRUTHSHOWERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 

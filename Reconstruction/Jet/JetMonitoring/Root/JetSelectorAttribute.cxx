@@ -21,7 +21,7 @@ StatusCode JetSelectorAttribute::initialize() {
 
   for (unsigned int it = 0; it < m_var.size(); it++) {
     ATH_CHECK(m_var[it].retrieve());
-    ATH_MSG_INFO( "Selecting on var ("<< m_var[it]->describe() << ") in ["<< m_min.at(it) << " , "<< m_max.at(it)<< "]");
+    ATH_MSG_DEBUG( "Selecting on var ("<< m_var[it]->describe() << ") in ["<< m_min.at(it) << " , "<< m_max.at(it)<< "]");
   }
   return StatusCode::SUCCESS;
 }

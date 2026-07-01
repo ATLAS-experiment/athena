@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonErrorOptimisationTool.h"
@@ -159,13 +159,13 @@ namespace Muon {
                         if (muonSummary0) nhits0 = muonSummary0->netaHits() + muonSummary0->nphiHits();
                     } else {
                         Trk::TrackSummary tmpSum(*summary0);
-                        m_trackSummaryTool->addDetailedTrackSummary(track, tmpSum);
+                        m_trackSummaryTool->addDetailedTrackSummary(ctx, track, tmpSum);
                         muonSummary0 = tmpSum.muonTrackSummary();
                         if (muonSummary0) nhits0 = muonSummary0->netaHits() + muonSummary0->nphiHits();
                     }
                 } else {
                     Trk::TrackSummary tmpSummary;
-                    m_trackSummaryTool->addDetailedTrackSummary(track, tmpSummary);
+                    m_trackSummaryTool->addDetailedTrackSummary(ctx, track, tmpSummary);
                     if (tmpSummary.muonTrackSummary()) muonSummary0 = tmpSummary.muonTrackSummary();
                     if (muonSummary0) nhits0 = muonSummary0->netaHits() + muonSummary0->nphiHits();
                 }
@@ -178,13 +178,13 @@ namespace Muon {
                         muonSummary1 = summary1->muonTrackSummary();
                     else {
                         Trk::TrackSummary* tmpSum = summary1;
-                        if (tmpSum) m_trackSummaryTool->addDetailedTrackSummary(track, *tmpSum);
+                        if (tmpSum) m_trackSummaryTool->addDetailedTrackSummary(ctx, track, *tmpSum);
                         if (tmpSum->muonTrackSummary()) muonSummary1 = tmpSum->muonTrackSummary();
                     }
                     if (muonSummary1) nhits1 = muonSummary1->netaHits() + muonSummary1->nphiHits();
                 } else {
                     Trk::TrackSummary tmpSummary;
-                    m_trackSummaryTool->addDetailedTrackSummary(track, tmpSummary);
+                    m_trackSummaryTool->addDetailedTrackSummary(ctx, track, tmpSummary);
                     if (tmpSummary.muonTrackSummary()) muonSummary1 = tmpSummary.muonTrackSummary();
                     if (muonSummary1) nhits1 = muonSummary1->netaHits() + muonSummary1->nphiHits();
                 }
@@ -197,13 +197,13 @@ namespace Muon {
                         muonSummary2 = summary2->muonTrackSummary();
                     else {
                         Trk::TrackSummary* tmpSum = summary2;
-                        if (tmpSum) m_trackSummaryTool->addDetailedTrackSummary(track, *tmpSum);
+                        if (tmpSum) m_trackSummaryTool->addDetailedTrackSummary(ctx, track, *tmpSum);
                         if (tmpSum->muonTrackSummary()) muonSummary2 = tmpSum->muonTrackSummary();
                     }
                     if (muonSummary2) nhits2 = muonSummary2->netaHits() + muonSummary2->nphiHits();
                 } else {
                     Trk::TrackSummary tmpSummary;
-                    m_trackSummaryTool->addDetailedTrackSummary(track, tmpSummary);
+                    m_trackSummaryTool->addDetailedTrackSummary(ctx, track, tmpSummary);
                     if (tmpSummary.muonTrackSummary()) muonSummary2 = tmpSummary.muonTrackSummary();
                     if (muonSummary2) nhits2 = muonSummary2->netaHits() + muonSummary2->nphiHits();
                 }

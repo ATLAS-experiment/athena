@@ -56,6 +56,9 @@ public:                         // Wrapper functions
   virtual TLorentzVector getTruthTauP4Invis(const xAOD::TauJet& xTau) override final;
   virtual TLorentzVector getTruthTauP4Invis(const xAOD::TruthParticle& xTruthTau) const override final;
 
+  // function to check if a reconstructed electron or muon is matched to a true tau 
+  bool matchTruthLeptonicTauDecay(const xAOD::IParticle* p, const xAOD::TruthParticleContainer* truth_taus);
+
   // get type of truth match particle (hadronic tau, leptonic tau, electron, muon, jet)
   virtual TauAnalysisTools::TruthMatchedParticleType getTruthParticleType(const xAOD::TauJet& xTau) override final;
 

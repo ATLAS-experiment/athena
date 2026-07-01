@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCaloEvent/TrigT2ZdcSignals.h"
-#include <iostream>
+#include "GaudiKernel/MsgStream.h"
 
-TrigT2ZdcSignals::TrigT2ZdcSignals(): m_triggerEnergies(TrigT2ZdcSignals::NUM_ZDC,0.), 
-				      m_triggerTimes(TrigT2ZdcSignals::NUM_ZDC,0) {
-}
+#include <iostream>
+#include <sstream>
 
 TrigT2ZdcSignals::TrigT2ZdcSignals(const std::vector<float>& triggerEnergies, 
 				   const std::vector<float>& triggerTimes)
@@ -27,29 +26,9 @@ TrigT2ZdcSignals::TrigT2ZdcSignals(std::vector<float>&& triggerEnergies,
   m_triggerTimes.resize(TrigT2ZdcSignals::NUM_ZDC,0);
 }
 
-TrigT2ZdcSignals::~TrigT2ZdcSignals() {
-}
-
 // Simple debug method using MsgStream
-void TrigT2ZdcSignals::print(void) const {
-  std::vector<float>::const_iterator itr;
-  std::vector<float>::const_iterator itr_end;
-
-  itr=m_triggerEnergies.begin();
-  itr_end=m_triggerEnergies.end();
-  std::cout << "m_triggerEnergies = {";
-  for(;itr != itr_end; ++itr) {
-    std::cout << (*itr) << ",";
-  }
-  std::cout << "}" << std::endl;
-
-  itr = m_triggerTimes.begin();
-  itr_end = m_triggerTimes.end();
-  std::cout << "m_triggerTimes = {";
-  for(;itr != itr_end; ++itr) {
-    std::cout << (*itr) << ",";
-  }
-  std::cout << "}" << std::endl;
+void TrigT2ZdcSignals::print() const {
+  std::cout << str(*this) << std::endl;
 }
 
 // Simple debug method using MsgStream
@@ -88,7 +67,7 @@ std::string str(const TrigT2ZdcSignals& trigT2ZdcSignals) {
   for(;itr != itr_end; ++itr) {
     sstream << (*itr) << ",";
   }
-  sstream << "}" << std::endl;
+  sstream << "}\n";
 
   counterValues = trigT2ZdcSignals.triggerTimes();
   itr = counterValues.begin();

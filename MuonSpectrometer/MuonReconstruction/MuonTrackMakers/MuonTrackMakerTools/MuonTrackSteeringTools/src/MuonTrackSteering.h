@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSTEERING_H
@@ -95,7 +95,7 @@ namespace Muon {
             std::vector<std::unique_ptr<MuPatSegment>> pat_garbage{};
             std::vector<std::unique_ptr<MuonSegment>> seg_garbage{};            
         };
-        std::unique_ptr<TrackCollection> selectTracks(std::vector<std::unique_ptr<MuPatTrack>>& candidates, bool takeOwnership = true) const;
+        std::unique_ptr<TrackCollection> selectTracks(const EventContext& ctx, std::vector<std::unique_ptr<MuPatTrack>>& candidates, bool takeOwnership = true) const;
 
         /** actual find method */
         std::unique_ptr<TrackCollection> findTracks(const EventContext& ctx, ChSegCol_t& chamberSegments, StSegCol_t& stationSegments) const;
@@ -123,7 +123,7 @@ namespace Muon {
             @param vector of tracks that were found
             @param strat the steering strategy
         */
-        void solveAmbiguities(std::vector<std::unique_ptr<MuPatTrack>>& tracks, const MuonTrackSteeringStrategy* strat = nullptr) const;
+        void solveAmbiguities(const EventContext& ctx, std::vector<std::unique_ptr<MuPatTrack>>& tracks, const MuonTrackSteeringStrategy* strat = nullptr) const;
 
         void combineOverlapSegments(const EventContext& ctx, std::vector<MuPatSegment*>& ch1, std::vector<MuPatSegment*>& ch2, StSegCol_t& stationSegments,
                                     StSet& stationsWithSegments, GarbageContainer& trash_bin) const;

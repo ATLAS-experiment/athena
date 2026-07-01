@@ -1,5 +1,5 @@
 /*                                                                                                                                                                                                                                          
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration                                                                                                                                                                   
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -29,7 +29,7 @@ PFSubtractionStatusSetter::markSubtractionStatus(
   const std::vector<std::pair<eflowTrackClusterLink*, std::pair<float,float> > >& matchedTrackList = thisEflowCaloObject.efRecLink();
 
   unsigned int clusCounter = 0;
-  for (auto thisClusterPair : clusterList){
+  for (const auto& thisClusterPair : clusterList){
     xAOD::CaloCluster* thisCluster = thisClusterPair.first;
     ATH_MSG_DEBUG("Cluster with e and eta " << thisCluster->e() << " and " << thisCluster->eta());
     unsigned int counter = 0;
@@ -90,4 +90,3 @@ PFSubtractionStatusSetter::markAllTracksAnnihStatus(
     counter++;
   }
 }
-

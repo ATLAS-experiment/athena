@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -74,9 +74,9 @@ class VP1ChannelManager::Imp {
 
 public:
 
-	VP1ChannelManager*channelmanager;
-	VP1ExecutionScheduler*scheduler;
-	VP1MainWindow*mainwindow;
+	VP1ChannelManager* channelmanager{};
+	VP1ExecutionScheduler* scheduler{};
+	VP1MainWindow* mainwindow{};
 
 	//Actual created channels:
 	std::map<QString,std::set<IVP1ChannelWidget*> > basename_2_channels;

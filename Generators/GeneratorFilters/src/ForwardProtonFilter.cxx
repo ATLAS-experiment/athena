@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/ForwardProtonFilter
@@ -30,7 +30,7 @@ ForwardProtonFilter::ForwardProtonFilter(const std::string& name, ISvcLocator* p
 }
 
 
-StatusCode ForwardProtonFilter::filterEvent() {
+StatusCode ForwardProtonFilter::filterEvent(const EventContext& ctx) {
   bool accepted_A = false;
   bool accepted_C = false;
 
@@ -41,8 +41,7 @@ StatusCode ForwardProtonFilter::filterEvent() {
       if ( !MC::isStable(part)) continue;
 
       // We are specifically looking for protons
-      const long pid = part->pdg_id();
-      if (pid != 2212 ) continue;
+      if (part->pdg_id() != MC::PROTON) continue;
 
       const double E = part->momentum().e();
       const double pz = part->momentum().pz();
@@ -72,6 +71,6 @@ StatusCode ForwardProtonFilter::filterEvent() {
   }
 
   // If we get here the event doesn't pass the criteria
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

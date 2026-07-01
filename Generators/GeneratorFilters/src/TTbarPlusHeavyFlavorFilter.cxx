@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/TTbarPlusHeavyFlavorFilter.h"
 #include "AtlasHepMC/Relatives.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/MsgStream.h"
 
 //--------------------------------------------------------------------------
@@ -46,7 +46,7 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterFinalize() {
 
 
 //---------------------------------------------------------------------------
-StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
+StatusCode TTbarPlusHeavyFlavorFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
   bool pass = false;
@@ -66,7 +66,7 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
     // ===========================================
     for(const auto&  part: *genEvt) {
 
-      if(HepMC::is_simulation_particle(part)) break;
+      if(HepMC::is_simulation_particle(part)) break; // FIXME This is dangerous as it assumes a certain ordering of particles which does not properly consider quasi-stable particles
 
       bool isbquark=false;
       bool iscquark=false;
@@ -74,13 +74,11 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
       bool isbhadron=false;
       bool ischadron=false;
 
-      int pdgid = abs(part->pdg_id());
-
       //// don't loose time checking all if one found
-      if(pdgid == 5 ){
+      if( MC::isBottom(part) ){
 	isbquark=true;
       }
-      else if(pdgid == 4 ){
+      else if( MC::isCharm(part) ){
 	iscquark=true;
       }
       else if ( isBHadron(part) ){
@@ -149,7 +147,7 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
   if(m_selectC && 4 == flavortype) pass=true;
   if(m_selectL && 0 == flavortype) pass=true;
 
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
   return StatusCode::SUCCESS;
 
 }
@@ -182,40 +180,18 @@ bool TTbarPlusHeavyFlavorFilter::passCSelection(const HepMC::ConstGenParticlePtr
 
 
 int TTbarPlusHeavyFlavorFilter::hadronType(int pdgid) const{
-
-  int rest1(std::abs(pdgid%1000));
-  int rest2(std::abs(pdgid%10000));
-
-  if ( rest2 >= 5000 && rest2 < 6000 ) return 5;
-  if( rest1 >= 500 && rest1 < 600 ) return 5;
-
-  if ( rest2 >= 4000 && rest2 < 5000 ) return 4;
-  if( rest1 >= 400 && rest1 < 500 ) return 4;
-
-  return 0;
-
+  const int leadingQuark = MC::leadingQuark(pdgid);
+  return (leadingQuark < 4 || leadingQuark > 5) ? 0 : leadingQuark; // Only interested in b/c hadrons
 }
 
 
 bool TTbarPlusHeavyFlavorFilter::isBHadron(const HepMC::ConstGenParticlePtr& part) const{
-
-  if(HepMC::is_simulation_particle(part)) return false;
-  int type = hadronType(part->pdg_id());
-  if(type == 5)  return true;
-
-  return false;
-
+  return (!HepMC::is_simulation_particle(part) && MC::isBottomHadron(part));
 }
 
 
 bool TTbarPlusHeavyFlavorFilter::isCHadron(const HepMC::ConstGenParticlePtr& part) const{
-
-  if(HepMC::is_simulation_particle(part)) return false;
-  int type = hadronType(part->pdg_id());
-  if(type == 4)  return true;
-
-  return false;
-
+  return (!HepMC::is_simulation_particle(part) && MC::isCharmHadron(part));
 }
 
 
@@ -224,24 +200,12 @@ bool TTbarPlusHeavyFlavorFilter::isInitialHadron(const HepMC::ConstGenParticlePt
 
     auto prod = part->production_vertex();
     if(!prod) return true;
-    int type = hadronType(part->pdg_id());
-#ifdef HEPMC3
+    const int type = hadronType(part->pdg_id());
     for(const auto& firstParent: prod->particles_in()){
-      int mothertype = hadronType( firstParent->pdg_id() );
-      if( mothertype == type ){
+      if( hadronType( firstParent->pdg_id() ) == type ){
 	return false;
       }
     }
-#else
-    HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
-    HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
-    for(;firstParent!=endParent; ++firstParent){
-      int mothertype = hadronType( (*firstParent)->pdg_id() );
-      if( mothertype == type ){
-	return false;
-      }
-    }
-#endif
 
   return true;
 }
@@ -251,24 +215,12 @@ bool TTbarPlusHeavyFlavorFilter::isFinalHadron(const HepMC::ConstGenParticlePtr&
 
     auto end = part->end_vertex();
     if(!end) return true;
-    int type = hadronType(part->pdg_id());
-#ifdef HEPMC3
+    const int type = hadronType(part->pdg_id());
     for(const auto& firstChild: end->particles_out()){
-      int childtype = hadronType( firstChild->pdg_id() );
-      if( childtype == type ){
+      if( hadronType( firstChild->pdg_id() ) == type ){
 	return false;
       }
     }
-#else
-    HepMC::GenVertex::particle_iterator firstChild = end->particles_begin(HepMC::children);
-    HepMC::GenVertex::particle_iterator endChild = end->particles_end(HepMC::children);
-    for(;firstChild!=endChild; ++firstChild){
-      int childtype = hadronType( (*firstChild)->pdg_id() );
-      if( childtype == type ){
-	return false;
-      }
-    }
-#endif
   return true;
 
 }
@@ -279,23 +231,12 @@ bool TTbarPlusHeavyFlavorFilter::isQuarkFromHadron(const HepMC::ConstGenParticle
 
   auto prod = part->production_vertex();
   if(!prod) return false;
-#ifdef HEPMC3
     for(const auto& firstParent: HepMC::ancestor_particles(prod)){
-      int mothertype = hadronType( firstParent->pdg_id() );
-      if( 4 == mothertype || 5 == mothertype ){
+      const int mothertype = hadronType( firstParent->pdg_id() );
+      if( MC::isCharm(mothertype) || MC::isBottom(mothertype) ){
 	return true;
       }
     }
-#else	  
-    HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::ancestors);
-    HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::ancestors);
-    for(;firstParent!=endParent; ++firstParent){
-      int mothertype = hadronType( (*firstParent)->pdg_id() );
-      if( 4 == mothertype || 5 == mothertype ){
-	return true;
-      }
-    }
-#endif
   return false;
 
 }
@@ -306,21 +247,11 @@ bool TTbarPlusHeavyFlavorFilter::isCHadronFromB(const HepMC::ConstGenParticlePtr
 
   auto prod = part->production_vertex();
   if(!prod) return false;
-#ifdef HEPMC3
     for(const auto& firstParent:HepMC::ancestor_particles(prod)){
       if( isBHadron(firstParent) ){
 	return true;
       }
     }
-#else
-    HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::ancestors);
-    HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::ancestors);
-    for(;firstParent!=endParent; ++firstParent){
-      if( isBHadron(*firstParent) ){
-	return true;
-      }
-    }
-#endif
   return false;
 }
 
@@ -333,21 +264,11 @@ HepMC::ConstGenParticlePtr  TTbarPlusHeavyFlavorFilter::findInitial(const HepMC:
   auto prod = part->production_vertex();
 
   if(!prod) return part;
-#ifdef HEPMC3
   for(const auto& firstParent: prod->particles_in()){
     if( part->pdg_id() == firstParent->pdg_id() ){
       return findInitial(firstParent);
     }
   }
-#else
-  HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
-  HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
-  for(;firstParent!=endParent; ++firstParent){
-    if( part->pdg_id() == (*firstParent)->pdg_id() ){
-      return findInitial(*firstParent);
-    }
-  }
-#endif
    
   return part;
 
@@ -365,17 +286,9 @@ bool TTbarPlusHeavyFlavorFilter::isDirectlyFromTop(const HepMC::ConstGenParticle
  auto prod = part->production_vertex();
 
   if(!prod) return false;
-#ifdef HEPMC3
   for (auto firstParent: prod->particles_in()){
-    if( std::abs( firstParent->pdg_id() ) == 6 ) return true;
+    if( MC::isTop(firstParent) ) return true;
   }
-#else
-  HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
-  HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
-  for(;firstParent!=endParent; ++firstParent){
-    if( std::abs( (*firstParent)->pdg_id() ) == 6 ) return true;
-  }
-#endif 
    
   return false;
 }
@@ -387,21 +300,11 @@ bool TTbarPlusHeavyFlavorFilter::isDirectlyFromWTop(const HepMC::ConstGenParticl
   auto prod = part->production_vertex();
 
   if(!prod) return false;
-#ifdef HEPMC3
   for(const auto& firstParent: prod->particles_in()){
-    if( std::abs( firstParent->pdg_id() ) == 24 ){
+    if( MC::isW(firstParent) ){
       if( isFromTop(firstParent) ) return true;
     }
   }
-#else
-  HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
-  HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
-  for(;firstParent!=endParent; ++firstParent){
-    if( std::abs( (*firstParent)->pdg_id() ) == 24 ){
-      if( isFromTop(*firstParent) ) return true;
-    }
-  }
-#endif   
    
   return false;
 

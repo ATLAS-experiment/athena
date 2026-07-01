@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKSTATEPRINTERTOOL_H
@@ -17,12 +17,11 @@
 
 // ACTS CORE
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/EventData/TrackStateType.hpp"
 
 // PACKAGE
 #include "src/detail/MeasurementIndex.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
@@ -82,7 +81,7 @@ namespace ActsTrk
                     bool newLine = true) const;
 
     using MeasurementInfo = std::tuple<size_t,
-                                       const ATLASUncalibSourceLink *,
+                                       const xAOD::UncalibratedMeasurement* *,
                                        std::vector<const xAOD::SpacePoint *>>;
 
   private:

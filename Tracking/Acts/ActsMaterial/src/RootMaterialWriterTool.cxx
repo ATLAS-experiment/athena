@@ -124,7 +124,7 @@ void ActsTrk::RootMaterialWriterTool::writeMaterial(const ActsTrk::GeometryConte
             TH1F rmax(accessorConfig.maxRangeHistName.c_str(), "max; bin", bins, -0.5, fBins - 0.5);
 
             // Now fill the histogram content
-            for (const auto& [b, bData] : enumerate(binningData)) {
+            for (const auto [b, bData] : enumerate(binningData)) {
                 // Fill: nbins, value, option, min, max
                 n.SetBinContent(static_cast<int>(b), static_cast<int>(binningData[b - 1].bins()));
                 v.SetBinContent(static_cast<int>(b), static_cast<int>(binningData[b - 1].binvalue));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -104,7 +104,7 @@ namespace xAODMaker {
           xAOD::EventInfo* ei = new xAOD::EventInfo();
           puei->push_back( ei );
           // Fill it with information:
-          CHECK( m_cnvTool->convert( pu_itr->pSubEvt, ei, true, false, ctx ) );
+          CHECK( m_cnvTool->convert( ctx, pu_itr->pSubEvt, ei, true, false ) );
           // And now add a sub-event to the temporary list:
           xAOD::EventInfo::PileUpType type = xAOD::EventInfo::Unknown;
           switch (pu_itr->type()) {
@@ -146,7 +146,7 @@ namespace xAODMaker {
       }
 
       // Do the translation:
-      CHECK( m_cnvTool->convert( aod, ei.get(), false, true, ctx ) );
+      CHECK( m_cnvTool->convert( ctx, aod, ei.get(), false, true ) );
 
       // Record EI objects.
       SG::WriteHandle<xAOD::EventInfo> ei_h (m_xaodKey, ctx);

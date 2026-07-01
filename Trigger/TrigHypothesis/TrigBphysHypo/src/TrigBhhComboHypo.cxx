@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -20,6 +20,7 @@
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "AthViews/View.h"
 #include "AthViews/ViewHelper.h"
@@ -150,7 +151,7 @@ StatusCode TrigBhhComboHypo::mergeMuonsFromDecisions(TrigBhhState& state) const 
     ATH_MSG_DEBUG( "Dump found muons before vertex fit: " << muons.size() << " candidates" );
     for (const auto& item : muons) {
       const xAOD::Muon* muon = *item.link;
-      const xAOD::TrackParticle* track = *muon->inDetTrackParticleLink();
+      const xAOD::TrackParticle* track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       ATH_MSG_DEBUG( " -- muon InDetTrackParticle pt/eta/phi/q: " << track->pt() << " / " << track->eta() << " / " << track->phi() << " / " << track->charge() );
       ATH_MSG_DEBUG( "    muon CombinedTrackParticle pt: " << muon->pt() );
       ATH_MSG_DEBUG( "    allowed decisions:" );
@@ -174,11 +175,11 @@ StatusCode TrigBhhComboHypo::mergeTracksFromViews(TrigBhhState& state) const {
   for (const Decision* decision : state.previousDecisions()) {
     if (!TrigCompositeUtils::isAnyIDPassing(decision, m_allowedIDs)) continue;
 
-    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(decision, TrigCompositeUtils::viewString(), true);
+    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(state.context(), decision, TrigCompositeUtils::viewString(), true);
     ATH_CHECK( viewLinkInfo.isValid() );
     auto view = *viewLinkInfo.link;
 
-    auto roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(decision, TrigCompositeUtils::roiString(), true);
+    auto roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(state.context(), decision, TrigCompositeUtils::roiString(), true);
     ATH_CHECK( roiLinkInfo.isValid() );
     const auto roi = *roiLinkInfo.link;
 
@@ -226,7 +227,7 @@ StatusCode TrigBhhComboHypo::mergeTracksFromViews(TrigBhhState& state) const {
   if (m_applyMuonRemoval) {
     for (size_t i = 0; i < muons.size(); ++i) {
       const xAOD::Muon* muon = *muons[i].link;
-      const xAOD::TrackParticle* track = *muon->inDetTrackParticleLink();
+      const xAOD::TrackParticle* track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       std::sort(tracks.begin(), tracks.end(), [p_mu=track->genvecP4()](const auto& lhs, const auto& rhs){ return ROOT::Math::VectorUtil::DeltaR(p_mu, (*lhs)->genvecP4()) > ROOT::Math::VectorUtil::DeltaR(p_mu, (*rhs)->genvecP4()); });
       if (isIdenticalTracks(track, *tracks.back())) tracks.pop_back();
     }
@@ -467,7 +468,8 @@ bool TrigBhhComboHypo::isIdenticalTracks(const xAOD::TrackParticle* lhs, const x
 
 bool TrigBhhComboHypo::isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const {
 
-  return isIdenticalTracks(*lhs->inDetTrackParticleLink(), *rhs->inDetTrackParticleLink());
+  return isIdenticalTracks(lhs->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
+                           rhs->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
 }
 
 

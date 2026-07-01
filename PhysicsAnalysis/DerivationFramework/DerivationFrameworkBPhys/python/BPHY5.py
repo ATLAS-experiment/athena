@@ -54,6 +54,8 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
    acc.addPublicTool(trackselect)
    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
    acc.addPublicTool(vpest)
+   PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+   acc.addPublicTool(PVrefit)
    BPHY5JpsiFinder = CompFactory.Analysis.JpsiFinder(
        name                        = "BPHY5JpsiFinder",
        muAndMu                     = True,
@@ -69,9 +71,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        useCombinedMeasurement      = False, # Only takes effect if combOnly=True
        muonCollectionKey           = mainMuonInput,
        TrackParticleCollection     = mainIDInput,
-       useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
        TrkVertexFitterTool         = vkalvrt,
-       V0VertexFitterTool          = None,
        TrackSelectorTool           = trackselect,
        VertexPointEstimator        = vpest,
        useMCPCuts                  = False )
@@ -82,7 +82,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                                        OutputVtxContainerName = JpsiContainerName,
                                                        PVContainerName        = "PrimaryVertices",
                                                        V0Tools                = V0Tools,
-                                                       PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                                       PVRefitter             = PVrefit,
                                                        RefPVContainerName     = "SHOULDNOTBEUSED",
                                                        RelinkTracks  =  toRelink,
                                                        RelinkMuons   =  MuonReLink,
@@ -192,7 +192,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                         OutputVtxContainerName   = BsJpsiPhiContainerName,
                         PVContainerName          = "PrimaryVertices",
                         V0Tools                  = V0Tools,
-                        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                        PVRefitter               = PVrefit,
                         RefPVContainerName       = "BPHY5RefittedPrimaryVertices",
                         RefitPV                  = True, Do3d = False,
                         RelinkTracks  =  toRelink,
@@ -203,7 +203,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                                               OutputVtxContainerName    = BPlusContainerName,
                                                               PVContainerName           = "PrimaryVertices",
                                                               V0Tools                   = V0Tools,
-                                                              PVRefitter                = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                                              PVRefitter                = PVrefit,
                                                               RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",                                                              
                                                               RefitPV                   = True,
                                                               RelinkTracks  =  toRelink,
@@ -214,7 +214,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                                            OutputVtxContainerName   = BpipiContainerName,
                                                            PVContainerName          = "PrimaryVertices",
                                                            V0Tools                  = V0Tools,
-                                                           PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                                           PVRefitter               = PVrefit,
                                                            RefPVContainerName       = "BPHY5RefittedBPipiPrimaryVertices",
                                                            RefitPV                  = True, Do3d = False,
                                                            RelinkTracks  =  toRelink,
@@ -225,7 +225,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                  VertexSearchTool       = BPHY5BdJpsiKst,
                                  OutputVtxContainerName = BdJpsiKstContainerName,
                                  V0Tools                = V0Tools,
-                                 PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                 PVRefitter             = PVrefit,
                                  PVContainerName        = "PrimaryVertices",
                                  RefPVContainerName     = "BPHY5RefittedKstPrimaryVertices",
                                  RefitPV                = True,
@@ -308,7 +308,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        UseMassConstraint          = False,
        TrackContainerName         = mainIDInput,
        RelinkTracks  =  toRelink,
-       PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+       PVRefitter                 = PVrefit,
        TrkVertexFitterTool        = vkalvrt,
        OutputVtxContainerName     = "BPHY5BsJpsiKKCandidatesNoConstraint")
 
@@ -320,7 +320,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        UseMassConstraint          = False,
        TrackContainerName         = mainIDInput,
        RelinkTracks  =  toRelink,
-       PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+       PVRefitter                 = PVrefit,
        TrkVertexFitterTool        = vkalvrt,
        OutputVtxContainerName     = "BPHY5BdJpsiKstCandidatesNoConstraint")
 

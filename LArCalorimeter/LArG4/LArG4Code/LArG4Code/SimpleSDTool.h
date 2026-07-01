@@ -19,6 +19,8 @@
 // G4Atlas includes
 #include "G4AtlasTools/SensitiveDetectorBase.h"
 
+#include "HitManagement/HitCollectionMap.h"
+
 // Local includes
 #include "LArG4SimpleSD.h"
 
@@ -38,7 +40,9 @@ namespace LArG4
   /// @class SimpleSDTool
   /// @brief A base class for tools that manage LArG4SimpleSDs.
   ///
-  /// @todo Add more details.
+  /// The tool owns only the Athena-event lifecycle of the output collection.
+  /// Geant4 SD instances write through `LArHitContainerBuilder`, which carries
+  /// all per-event merge state and the ordered regular-SD partitions.
   ///
   /// @author Steve Farrell <Steven.Farrell@cern.ch>
   ///
@@ -54,8 +58,14 @@ namespace LArG4
       /// Initialize the tool
       StatusCode initialize() override final;
 
-      /// Calls down to all the SDs to pack their hits into one collection
-      StatusCode Gather() override final;
+      /// Create and register all SDs for the current thread.
+      StatusCode initializeSD() override final;
+
+      /// Create event-owned hit collections.
+      StatusCode SetupEvent(HitCollectionMap&) override final;
+
+      /// Finalize and record event-owned hit collections.
+      StatusCode Gather(HitCollectionMap&) override final;
 
     protected:
 
@@ -69,6 +79,9 @@ namespace LArG4
 
       /// Are we handling frozen shower fast sim?
       bool useFrozenShowers() const { return m_useFrozenShowers; }
+
+      /// Collection receiving the hits for this tool.
+      virtual std::string hitCollectionName() const;
 
     protected:
 

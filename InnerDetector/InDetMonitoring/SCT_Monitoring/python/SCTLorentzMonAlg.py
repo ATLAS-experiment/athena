@@ -30,11 +30,14 @@ def SCTLorentzMonAlgConfig(flags):
     # is the algorithm.
     from AthenaConfiguration.ComponentFactory import CompFactory
     from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
+    from InDetConfig.InDetTrackHoleSearchConfig import InDetTrackHoleSearchToolCfg
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
 
     myMonAlg = helper.addAlgorithm(
         CompFactory.SCTLorentzMonAlg,
         'SCTLorentzMonAlg',
+        HoleSearch = result.popToolsAndMerge(
+            InDetTrackHoleSearchToolCfg(flags)),
         AssociationTool = result.popToolsAndMerge(
             InDetPRDtoTrackMapToolGangedPixelsCfg(flags)),
         TrackSummaryTool = result.popToolsAndMerge(
@@ -58,7 +61,10 @@ def SCTLorentzMonAlgConfig(flags):
 
     # set up conditions
     from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_DetectorElementCondAlgCfg
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    
     result.merge(SCT_DetectorElementCondAlgCfg(flags))
+    result.merge(BeamSpotCondAlgCfg(flags))
 
     # # Then, add a tool that doesn't have its own configuration function. In
     # # this example, no accumulator is returned, so no merge is necessary.

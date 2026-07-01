@@ -13,7 +13,6 @@
 #include <xAODTau/TauJetContainer.h>
 #include <xAODTau/TauJetAuxContainer.h>
 #include <TauAnalysisTools/HelperFunctions.h>
-#include <AthContainers/ConstDataVector.h>
 
 namespace CP
 {
@@ -22,7 +21,7 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
   private:
     SysListHandle m_systematicsList {this};

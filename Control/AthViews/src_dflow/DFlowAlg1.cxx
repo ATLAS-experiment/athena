@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // DFlowAlg1.cxx 
@@ -21,36 +21,6 @@
 #include "StoreGate/WriteHandle.h"
 
 namespace AthViews {
-
-/////////////////////////////////////////////////////////////////// 
-// Public methods: 
-/////////////////////////////////////////////////////////////////// 
-
-// Constructors
-////////////////
-DFlowAlg1::DFlowAlg1( const std::string& name, 
-                      ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_r_int( "view_start" ),
-  m_w_int( "dflow_int" ),
-  m_testUpdate( "testUpdate" )
-{
-  //
-  // Property declaration
-  // 
-  //declareProperty( "Property", m_nProperty );
-
-  declareProperty( "IntFlow", m_w_int, "Data flow of int" );
-
-  declareProperty( "ViewStart", m_r_int, "Seed data of view" );
-
-  declareProperty( "TestUpdate", m_testUpdate, "Test update handle" );
-}
-
-// Destructor
-///////////////
-DFlowAlg1::~DFlowAlg1()
-{}
 
 // Athena Algorithm's Hooks
 ////////////////////////////
@@ -72,11 +42,9 @@ StatusCode DFlowAlg1::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode DFlowAlg1::execute()
+StatusCode DFlowAlg1::execute(const EventContext& ctx) const
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
-
-  const EventContext& ctx = getContext();
 
   SG::ReadHandle< int > inputData( m_r_int, ctx );
   if ( !inputData.isValid() )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @author: Sebastien Binet <binet@cern.ch>
 # @date:   March 2007
@@ -15,35 +15,18 @@ from tempfile import NamedTemporaryFile
 # is used during the build (see athena!62739).
 # !!!
 
-def ROOTSetup(batch=False):
+
+def ROOTSetup(batch=True):
    """
-   At this point this function just makes sure the ROOT batch mode is set
-   correctly when someone imports ROOT
+   Do basic ROOT setup. This should be called before any other import of ROOT.
    """
    from AthenaCommon.Logging import log
-   import builtins as builtin_mod
-   oldimporthook = builtin_mod.__import__
-   batch_mode = bool(batch)
+   log.debug('Setting ROOT batch mode to %s', batch)
 
-   def root6_importhook(name, globals={}, locals={}, fromlist=[], level=0):
-       nonlocal batch_mode
-       isroot = False
-       bm = batch_mode
-       if name=='ROOT' or (name[0:4]=='ROOT' and name!='ROOT.pythonization'):
-          isroot = True
-          batch_mode = None  # only set it on first ROOT import
-
-       m = oldimporthook(name, globals, locals, fromlist, level)
-
-       if m and isroot:
-          log.debug('Python import module=%s, fromlist=%s', name, fromlist)
-          if bm is not None:
-             log.debug('Setting ROOT batch mode to %s', bm)
-             m.gROOT.SetBatch(bm)
-
-       return m
-
-   builtin_mod.__import__ = root6_importhook
+   if batch is True:
+      os.environ['ROOT_BATCH'] = '1'
+   else:
+      os.environ.pop('ROOT_BATCH', None)
 
 
 class ShutUp(object):
@@ -87,6 +70,8 @@ class ShutUp(object):
     def __del__ (self):
        self.save_err.close()
        self.save_out.close()
+       self.quiet_err.close()
+       self.quiet_out.close()
        return
     
     def mute(self):

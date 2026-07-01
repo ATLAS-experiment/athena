@@ -29,17 +29,18 @@ namespace DerivationFramework {
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override final;
-    virtual StatusCode doThinning() const override final;
+    virtual StatusCode doThinning(const EventContext& ctx) const override final;
 
   protected:
-    virtual std::vector<int> updateMask(const xAOD::TrackParticleContainer*) const;
+    virtual std::vector<int> updateMask(const EventContext& ctx, const xAOD::TrackParticleContainer*) const;
+    SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_inDetSGKey
+      { this, "InDetTrackParticlesKey", "InDetTrackParticles", "" };
+
   private:
     //Counters and keys for xAOD::TrackParticle container
     mutable std::atomic<unsigned int> m_ntot{}, m_npass{};
     StringProperty m_streamName
       { this, "StreamName", "", "Name of the stream being thinned" };
-    SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_inDetSGKey
-      { this, "InDetTrackParticlesKey", "InDetTrackParticles", "" };
 
     //Counters and keys for xAOD::TrackStateValidation and xAOD::TrackMeasurementValidation containers
     mutable std::atomic<unsigned int> m_ntot_pix_states{}, m_npass_pix_states{};

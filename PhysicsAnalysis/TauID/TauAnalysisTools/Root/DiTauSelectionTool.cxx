@@ -42,7 +42,6 @@ StatusCode DiTauSelectionTool::initialize()
 
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
-  if (!bConfigViaProperties and !m_vPtRegion.empty())             bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dPtMin.value()))             bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMin.value()))     bConfigViaProperties = true;
@@ -157,7 +156,8 @@ StatusCode DiTauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | DiTauCutOmniIDWP;
         if (m_iOmniIDWP == OMNIIDNONE){
-          m_iOmniIDWP = convertStrToOmniIDWP(rEnv.GetValue("OmniIDWP","OMNIIDNONE"));
+	  m_sOmniIDWP = rEnv.GetValue("OmniIDWP","OMNIIDNONE");	
+          m_iOmniIDWP = convertStrToOmniIDWP(m_sOmniIDWP);
         }	  
 	// check for possible mis-config in Tau selection
         for (const std::string& checkCut : vCuts){
@@ -181,8 +181,6 @@ StatusCode DiTauSelectionTool::initialize()
     }     
   }
   ATH_CHECK( m_OmniScoreDecorKey.initialize( m_useOmniScore ) );
-
-  m_sOmniIDWP = convertOmniIDWPToStr(m_iOmniIDWP);
 
   // specify all available cut descriptions
   using map_type  = std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>>;
@@ -447,29 +445,4 @@ int DiTauSelectionTool::convertStrToOmniIDWP(const std::string& sOmniIDWP) const
   ATH_MSG_ERROR( "omni ID working point "<<sOmniIDWP<<" is unknown, the OmniIDWP cut will not accept any ditau!" );
   return -1;
 }
-
-//______________________________________________________________________________
-std::string DiTauSelectionTool::convertOmniIDWPToStr(int iOmniIDWP) const
-{
-  switch (iOmniIDWP)
-  {
-  case OMNIIDNONE:
-    return "OMNIIDNONE";
-  case OMNIIDVERYLOOSE:
-    return "OMNIIDVERYLOOSE";
-  case OMNIIDLOOSE:
-    return "OMNIIDLOOSE";
-  case OMNIIDMEDIUM:
-    return "OMNIIDMEDIUM";
-  case OMNIIDTIGHT:
-    return "OMNIIDTIGHT";
-
-  default:
-    ATH_MSG_WARNING( "OmniID working point with enum " << iOmniIDWP << " is unknown, the OmniIDWP cut will not accept any ditau!" );
-    return "";
-  }
-}
-
-
-
 

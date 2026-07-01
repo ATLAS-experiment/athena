@@ -36,9 +36,8 @@ StatusCode xAODTruthParticleSlimmerGen::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODTruthParticleSlimmerGen::execute()
+StatusCode xAODTruthParticleSlimmerGen::execute(const EventContext& ctx)
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext(); // As not re-entrant
     // Create new output container
     SG::WriteHandle<xAOD::TruthParticleContainer> xTruthParticleContainerGen(m_xaodTruthParticleContainerNameGen, ctx);
     ATH_CHECK(xTruthParticleContainerGen.record(std::make_unique<xAOD::TruthParticleContainer>(),
@@ -46,7 +45,7 @@ StatusCode xAODTruthParticleSlimmerGen::execute()
     ATH_MSG_DEBUG("Recorded TruthParticleContainerGen with key: " << m_xaodTruthParticleContainerNameGen.key());
 
     // Retrieve full TruthEventContainer container
-    SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_xaodTruthEventContainerName};
+    SG::ReadHandle<xAOD::TruthEventContainer> xTruthEventContainer{m_xaodTruthEventContainerName, ctx};
     if ( !xTruthEventContainer.isValid() )
       {
         ATH_MSG_ERROR("No TruthEvent collection with name " << m_xaodTruthEventContainerName << " found in StoreGate!");

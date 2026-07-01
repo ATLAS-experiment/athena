@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************
@@ -23,7 +23,6 @@
 #include "xAODTrigRinger/TrigRingerRingsContainer.h"
 #include "xAODTrigRinger/TrigRingerRingsAuxContainer.h"
 #include "TrigT2CaloCommon/IReAlgToolCalo.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -460,7 +459,7 @@ void RingerReFex::RingSet::clear(){
 void RingerReFex::RingSet::buildRings( const double eta_center, const double phi_center,const CaloNoise* noiseCDO, const double noiseFactor, const bool doNoiseThrRings)
 { 
   // cache cosh eta value
-  const double cosh_eta = std::cosh(std::abs(eta_center));
+  const double cosh_eta = std::cosh(eta_center);
   
   //are we, possibly at the wrap-around region for phi?
   const bool wrap = Ringer::check_wrap_around(phi_center, false);

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef dqutilsStatusFlagCOOLBase_h
@@ -89,8 +89,8 @@ namespace dqutils {
     virtual ~StatusFlagCOOLBase ();
 
     // Methods of "interest". To insert a status flag you can use either ChannelId or ChannelName.
-    void dump(cool::ChannelSelection selection, std::string tag_name);
-    std::string dumpField(cool::ChannelId channelId, std::string field, std::string tag_name);
+    void dump(cool::ChannelSelection selection, const std::string & tag_name);
+    std::string dumpField(cool::ChannelId channelId, const std::string & field, const std::string & tag_name);
     int dumpCode(const std::string& channelName, const std::string& tag_name);
     void dumpall(const std::string& tag_name);
 

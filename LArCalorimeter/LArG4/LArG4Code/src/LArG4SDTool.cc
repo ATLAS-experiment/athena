@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/LArG4SDTool.h"
@@ -17,6 +17,7 @@
 #include "G4LogicalVolumeStore.hh"
 #include "G4SDManager.hh"
 #include "G4VSensitiveDetector.hh"
+#include "LArG4Code/VolumeUtils.h"
 
 LArG4SDTool::LArG4SDTool(const std::string& type, const std::string& name, const IInterface *parent)
   : SensitiveDetectorBase(type,name,parent)
@@ -88,10 +89,11 @@ void LArG4SDTool::setupAllSDs(const std::map<G4VSensitiveDetector*,std::vector<s
       }
     // Go through the logical volumes and hook the SDs up
     G4LogicalVolumeStore * logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
-    for (auto myvol : *(iter.second)){
+    for (const auto & myvol : *(iter.second)){
       int found = 0;
+      std::string_view myvolstring(myvol);
       for (auto *ilv : *logicalVolumeStore ){
-        if ( match(myvol.data(),ilv->GetName() ) ){
+        if ( LArG4::matchStrings(myvolstring,ilv->GetName() ) ){
           ++found; // Do not break on found to protect against multiple volumes with the same name
           //dc->SetSensitiveDetector( ilv , anSD );
           SetSensitiveDetector( ilv , anSD ); //getSD() );
@@ -106,35 +108,4 @@ void LArG4SDTool::setupAllSDs(const std::map<G4VSensitiveDetector*,std::vector<s
     } // Loop over my volumes
   } // Done going through all the SDs
 
-}
-
-// NOTE: there has GOT to be a non-custom solution to this!
-// How about POSIX glob? Or std regex?
-
-// Dear internet: thank you, you provide endless solutions to problems
-// A C program to match wild card characters
-// The main function that checks if two given strings match. The first
-// string may contain wildcard characters
-bool LArG4SDTool::match(const char *first, const char * second) const
-{
-  // If we reach at the end of both strings, we are done
-  if (*first == '\0' && *second == '\0')
-    return true;
-
-  // Make sure that the characters after '*' are present in second string.
-  // This function assumes that the first string will not contain two
-  // consecutive '*'
-  if (*first == '*' && *(first+1) != '\0' && *second == '\0')
-    return false;
-
-  // If the current characters of both strings match
-  if (*first == *second)
-    return match(first+1, second+1);
-
-  // If there is *, then there are two possibilities
-  // a) We consider current character of second string
-  // b) We ignore current character of second string.
-  if (*first == '*')
-    return match(first+1, second) || match(first, second+1);
-  return false;
 }

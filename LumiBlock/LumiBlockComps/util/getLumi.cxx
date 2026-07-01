@@ -46,6 +46,7 @@ int main( int, char** ) {
 #include "xAODRootAccess/TEvent.h"
 #include "xAODLuminosity/LumiBlockRangeContainer.h"
 #include "xAODLuminosity/LumiBlockRangeAuxContainer.h"
+#include "CxxUtils/checker_macros.h"
 
 struct lbx {
    lbx() : nExpected(0),nSeen(0) {}
@@ -54,10 +55,10 @@ struct lbx {
    bool fromSuspect = false;
 };
 
-int main(int argc, char* argv[]) {
+ATLAS_NOT_THREAD_SAFE int main(int argc, char* argv[]) {
    const char* optstring = "m";
    bool showMissing = false;
-static struct option long_options[] =
+static struct option long_options[] ATLAS_THREAD_SAFE =
   {
     /* name    has_arg       flag      val */
     {"showMissing", no_argument ,  NULL,     'm'}
@@ -76,7 +77,7 @@ static struct option long_options[] =
             break;
           case '?' :
             printf("Please supply a valid option to the program.  Exiting\n");
-            exit(1);
+            return 1;
             break;
       }
   }
@@ -155,7 +156,8 @@ static struct option long_options[] =
          //use TEvent to read the lumiblocks, if we can
          bool ok(false);
          xAOD::TEvent event;
-         const xAOD::LumiBlockRangeContainer* lbrs = 0;
+         const xAOD::LumiBlockRangeContainer* lbrs = nullptr;
+         xAOD::LumiBlockRangeContainer* lbrs_nc ATLAS_THREAD_SAFE = nullptr;
          xAOD::LumiBlockRangeAuxContainer* lbrs_aux = 0;
          if(useTEvent && event.readFrom(file,true,"MetaData").isSuccess()) {
             if(event.containsMeta<xAOD::LumiBlockRangeContainer>("LumiBlocks")) {
@@ -167,9 +169,10 @@ static struct option long_options[] =
                if(metaTree->FindBranch("LumiBlocksAux.")->GetSplitLevel()==0) {
                   std::cout << " Unable to read unsplit LumiBlocksAux" << std::endl;
                }
-               lbrs = new xAOD::LumiBlockRangeContainer();
+               lbrs_nc = new xAOD::LumiBlockRangeContainer();
+               lbrs = lbrs_nc;
                lbrs_aux = new xAOD::LumiBlockRangeAuxContainer;
-               const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->setStore( lbrs_aux );
+               lbrs_nc->setStore( lbrs_aux );
                metaTree->SetBranchAddress("LumiBlocksAux.startRunNumber",&startRunNumber);
                metaTree->SetBranchAddress("LumiBlocksAux.stopRunNumber",&stopRunNumber);
                metaTree->SetBranchAddress("LumiBlocksAux.startLumiBlockNumber",&startLumiBlockNumber);
@@ -183,10 +186,10 @@ static struct option long_options[] =
             std::cout << "...xAOD LumiBlocks";
             for(int ii=0;ii<metaTree->GetEntries();ii++) {
                if(!useTEvent) {
-                  const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->clear();
+                  lbrs_nc->clear();
                   metaTree->GetEntry(ii);
                   for(unsigned int j=0;j<startRunNumber.size();j++) {
-                     xAOD::LumiBlockRange* r = new xAOD::LumiBlockRange; const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->push_back(r);
+                     xAOD::LumiBlockRange* r = new xAOD::LumiBlockRange; lbrs_nc->push_back(r);
                      r->setStartRunNumber(startRunNumber.at(j));r->setStopRunNumber(stopRunNumber.at(j));
                      r->setStartLumiBlockNumber(startLumiBlockNumber.at(j));r->setStopLumiBlockNumber(stopLumiBlockNumber.at(j));
                      r->setEventsExpected(eventsExpected.at(j));r->setEventsSeen(eventsSeen.at(j));
@@ -196,7 +199,7 @@ static struct option long_options[] =
                //add lb to grl
                for(auto lbr : *lbrs) {
                   for(uint runNum = lbr->startRunNumber(); runNum <= lbr->stopRunNumber(); runNum++) {
-                     if(lbr->startLumiBlockNumber()!=lbr->stopLumiBlockNumber()) {std::cout << " Unexpected behaviour. Please report! " << std::endl; exit(1);}
+                     if(lbr->startLumiBlockNumber()!=lbr->stopLumiBlockNumber()) {std::cout << " Unexpected behaviour. Please report! " << std::endl; std::abort();}
                      for(uint lb = lbr->startLumiBlockNumber(); lb <= lbr->stopLumiBlockNumber(); lb++) {
                         lbxs[runNum][lb].nSeen += lbr->eventsSeen();
                         if(lbxs[runNum][lb].nExpected!=0 && lbxs[runNum][lb].nExpected != lbr->eventsExpected()) {
@@ -211,10 +214,10 @@ static struct option long_options[] =
                ok=true;
             }
             std::cout << "...ok" << std::endl;
-            if(!useTEvent) { delete lbrs; delete lbrs_aux; }
+            if(!useTEvent) { delete lbrs_nc; lbrs_nc = nullptr; delete lbrs_aux; }
          }
 
-         lbrs = 0;lbrs_aux=0;
+         lbrs = nullptr; lbrs_nc = nullptr; lbrs_aux=0;
          if(useTEvent && event.readFrom(file,true,"MetaData").isSuccess()) {
             if(event.containsMeta<xAOD::LumiBlockRangeContainer>("IncompleteLumiBlocks")) {
                event.retrieveMetaInput<xAOD::LumiBlockRangeContainer>(lbrs, "IncompleteLumiBlocks").isSuccess();
@@ -225,9 +228,10 @@ static struct option long_options[] =
                if(metaTree->FindBranch("IncompleteLumiBlocksAux.")->GetSplitLevel()==0) {
                   std::cout << " Unable to read unsplit IncompleteLumiBlocksAux" << std::endl;
                }
-               lbrs = new xAOD::LumiBlockRangeContainer();
+               lbrs_nc = new xAOD::LumiBlockRangeContainer();
+               lbrs = lbrs_nc;
                lbrs_aux = new xAOD::LumiBlockRangeAuxContainer;
-               const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->setStore( lbrs_aux );
+               lbrs_nc->setStore( lbrs_aux );
                metaTree->ResetBranchAddresses();
                metaTree->SetBranchAddress("IncompleteLumiBlocksAux.startRunNumber",&startRunNumber);
                metaTree->SetBranchAddress("IncompleteLumiBlocksAux.stopRunNumber",&stopRunNumber);
@@ -242,10 +246,10 @@ static struct option long_options[] =
             std::cout << "...xAOD IncompleteLumiBlocks";
             for(int ii=0;ii<metaTree->GetEntries();ii++) {
                if(!useTEvent) {
-                  const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->clear();
+                  lbrs_nc->clear();
                   metaTree->GetEntry(ii);
                   for(unsigned int j=0;j<startRunNumber.size();j++) {
-                     xAOD::LumiBlockRange* r = new xAOD::LumiBlockRange; const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->push_back(r);
+                     xAOD::LumiBlockRange* r = new xAOD::LumiBlockRange; lbrs_nc->push_back(r);
                      r->setStartRunNumber(startRunNumber.at(j));r->setStopRunNumber(stopRunNumber.at(j));
                      r->setStartLumiBlockNumber(startLumiBlockNumber.at(j));r->setStopLumiBlockNumber(stopLumiBlockNumber.at(j));
                      r->setEventsExpected(eventsExpected.at(j));r->setEventsSeen(eventsSeen.at(j));
@@ -255,7 +259,7 @@ static struct option long_options[] =
                //add lb to grl
                for(auto lbr : *lbrs) {
                   for(uint runNum = lbr->startRunNumber(); runNum <= lbr->stopRunNumber(); runNum++) {
-                     if(lbr->startLumiBlockNumber()!=lbr->stopLumiBlockNumber()) {std::cout << " Unexpected behaviour. Please report! " << std::endl; exit(1);}
+                     if(lbr->startLumiBlockNumber()!=lbr->stopLumiBlockNumber()) {std::cout << " Unexpected behaviour. Please report! " << std::endl; std::abort();}
                      for(uint lb = lbr->startLumiBlockNumber(); lb <= lbr->stopLumiBlockNumber(); lb++) {
                         lbxs[runNum][lb].nSeen += lbr->eventsSeen();
                         if(lbxs[runNum][lb].nExpected!=0 && lbxs[runNum][lb].nExpected != lbr->eventsExpected()) {
@@ -270,12 +274,12 @@ static struct option long_options[] =
                ok=true;
             }
             std::cout << "...ok" << std::endl;
-            if(!useTEvent) { delete lbrs; lbrs = 0; delete lbrs_aux; lbrs_aux=0; }
+            if(!useTEvent) { delete lbrs_nc; lbrs_nc = nullptr; delete lbrs_aux; lbrs_aux=0; }
          }
 
 
 
-         lbrs = 0;lbrs_aux=0;
+         lbrs = nullptr; lbrs_nc = nullptr; lbrs_aux=0;
          if(useTEvent && event.readFrom(file,true,"MetaData").isSuccess()) {
             if(event.containsMeta<xAOD::LumiBlockRangeContainer>("SuspectLumiBlocks")) {
                event.retrieveMetaInput<xAOD::LumiBlockRangeContainer>(lbrs, "SuspectLumiBlocks").isSuccess();
@@ -286,9 +290,10 @@ static struct option long_options[] =
                if(metaTree->FindBranch("SuspectLumiBlocksAux.")->GetSplitLevel()==0) {
                   std::cout << " Unable to read unsplit SuspectLumiBlocks" << std::endl;
                }
-               lbrs = new xAOD::LumiBlockRangeContainer();
+               lbrs_nc = new xAOD::LumiBlockRangeContainer();
+               lbrs = lbrs_nc;
                lbrs_aux = new xAOD::LumiBlockRangeAuxContainer;
-               const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->setStore( lbrs_aux );
+               lbrs_nc->setStore( lbrs_aux );
                metaTree->ResetBranchAddresses();
                metaTree->SetBranchAddress("SuspectLumiBlocksAux.startRunNumber",&startRunNumber);
                metaTree->SetBranchAddress("SuspectLumiBlocksAux.stopRunNumber",&stopRunNumber);
@@ -303,10 +308,10 @@ static struct option long_options[] =
             std::cout << "...xAOD SuspectLumiBlocksAux";
             for(int ii=0;ii<metaTree->GetEntries();ii++) {
                if(!useTEvent) {
-                  const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->clear();
+                  lbrs_nc->clear();
                   metaTree->GetEntry(ii);
                   for(unsigned int j=0;j<startRunNumber.size();j++) {
-                     xAOD::LumiBlockRange* r = new xAOD::LumiBlockRange; const_cast<xAOD::LumiBlockRangeContainer*>(lbrs)->push_back(r);
+                     xAOD::LumiBlockRange* r = new xAOD::LumiBlockRange; lbrs_nc->push_back(r);
                      r->setStartRunNumber(startRunNumber.at(j));r->setStopRunNumber(stopRunNumber.at(j));
                      r->setStartLumiBlockNumber(startLumiBlockNumber.at(j));r->setStopLumiBlockNumber(stopLumiBlockNumber.at(j));
                      r->setEventsExpected(eventsExpected.at(j));r->setEventsSeen(eventsSeen.at(j));
@@ -315,7 +320,7 @@ static struct option long_options[] =
                //add lb to grl
                for(auto lbr : *lbrs) {
                   for(uint runNum = lbr->startRunNumber(); runNum <= lbr->stopRunNumber(); runNum++) {
-                     if(lbr->startLumiBlockNumber()!=lbr->stopLumiBlockNumber()) {std::cout << " Unexpected behaviour. Please report! " << std::endl; exit(1);}
+                     if(lbr->startLumiBlockNumber()!=lbr->stopLumiBlockNumber()) {std::cout << " Unexpected behaviour. Please report! " << std::endl; std::abort();}
                      for(uint lb = lbr->startLumiBlockNumber(); lb <= lbr->stopLumiBlockNumber(); lb++) {
                         lbxs[runNum][lb].nSeen += lbr->eventsSeen();
                         lbxs[runNum][lb].fromSuspect = true;
@@ -332,7 +337,7 @@ static struct option long_options[] =
                ok=true;
             }
             std::cout << "...ok" << std::endl;
-            if(!useTEvent) { delete lbrs; lbrs = 0; delete lbrs_aux; lbrs_aux=0; }
+            if(!useTEvent) { delete lbrs_nc; lbrs_nc = nullptr; delete lbrs_aux; lbrs_aux=0; }
          }
 
          if(ok) { file->Close(); delete file; continue; } //don't try to read Lumi folder

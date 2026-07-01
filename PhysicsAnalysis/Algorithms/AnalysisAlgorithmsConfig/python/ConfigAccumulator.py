@@ -1,10 +1,15 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
+from AnalysisAlgorithmsConfig.ConfigPropertySubstitution import (
+    substituteComponentProperties,
+    substituteValue,
+)
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
 import re
 
 import warnings
+import logging
 import functools
 
 # warn about deprecations with a FutureWarning instead of a
@@ -34,6 +39,57 @@ class ExpertModeWarning(Warning):
 # Default filter: error out unless the user overrides
 if not any(f[0] == 'error' and f[2] is ExpertModeWarning for f in warnings.filters):
     warnings.simplefilter('error', ExpertModeWarning)
+
+# Route Python warnings through the logging system so they appear in
+# the Athena log stream and remain suppressible via filterwarnings.
+logging.captureWarnings(True)
+
+
+class AnalysisWarning(UserWarning):
+    """Base for expected-but-noteworthy analysis configuration conditions.
+    Silence with:
+        warnings.filterwarnings("ignore", category=AnalysisWarning)
+    """
+
+
+class ElectronEfficiencyCorrelationWarning(AnalysisWarning):
+    """Correlation model not fully supported for this run period."""
+
+
+class VGammaORSkipWarning(AnalysisWarning):
+    """Sample DSID not configured for VGammaOR removal; alg skipped."""
+
+
+class Run4FallbackWarning(AnalysisWarning):
+    """Run 4 geometry lacks dedicated config; falling back to Run 3."""
+
+
+class GeneratorWeightWarning(AnalysisWarning):
+    """HF production fraction reweighting cannot be configured for this
+    generator; using fallback weights or dummy weights of 1.0."""
+
+
+class TestingOnlyWarning(AnalysisWarning):
+    """Configuration is only intended for testing/debugging purposes."""
+
+
+class Run2OnlyFeatureWarning(AnalysisWarning):
+    """Feature is only available for Run 2 and has no effect here."""
+
+
+class JetUncertaintyWarning(AnalysisWarning):
+    """Jet uncertainty configuration not available for this jet
+    type or geometry."""
+
+
+class TriggerSFWarning(AnalysisWarning):
+    """Trigger SF configuration issue (e.g. no chains for a year)."""
+
+
+class ConfigDeprecationWarning(FutureWarning):
+    """A configuration option is deprecated and will be removed
+    in a future release."""
+
 
 class DataType(FlagEnum):
     """holds the various data types as an enum"""
@@ -88,22 +144,28 @@ class ContainerConfig :
         self.sourceName = sourceName
         self.originalName = originalName
         self.noSysSuffix = noSysSuffix
-        self.index = 0
-        self.maxIndex = None
-        self.viewIndex = 1
         self.isMet = isMet
         self.selections = []
         self.outputs = {}
         self.meta = {}
+        # The chain of container names this container has occupied in the
+        # event store, in order. The latest name is the current name.
+        self.names = [sourceName] if sourceName is not None else []
 
-    def currentName (self) :
-        if self.index == 0 :
-            if self.sourceName is None :
-                raise Exception ("should not get here, reading container name before created: " + self.name)
-            return self.sourceName
-        if self.maxIndex and self.index == self.maxIndex :
-            return self.systematicsName(self.name, noSysSuffix=self.noSysSuffix)
-        return self.systematicsName(f"{self.name}_STEP{self.index}", noSysSuffix=self.noSysSuffix)
+    def appendStep (self) :
+        """Add a new step/copy, return the new name of the container"""
+        step = len(self.names)
+        newName = ContainerConfig.systematicsName(f"{self.name}_STEP{step}", noSysSuffix=self.noSysSuffix)
+        self.names.append(newName)
+        return newName
+
+    def currentName (self, *, nominal=False) :
+        if not self.names :
+            raise Exception ("should not get here, reading container name before created: " + self.name)
+        result = self.names[-1]
+        if nominal :
+             result = result.replace("%SYS%", "NOSYS")
+        return result
 
     @staticmethod
     def systematicsName (name, *, noSysSuffix) :
@@ -114,14 +176,6 @@ class ContainerConfig :
             return name + "_%SYS%"
         else :
             return name
-
-    def nextPass (self) :
-        self.maxIndex = self.index
-        self.index = 0
-        self.viewIndex = 1
-        self.selections = []
-        self.outputs = {}
-        self.meta = {}
 
 
 
@@ -146,6 +200,16 @@ class ConfigAccumulator :
     If not explicitly set the decision to run systematics or not
     will be taken depending on the CommonServicesConfig setup.
     """
+    # class-level counter
+    _instance_counter = 0
+    # tracks singleton names already added to any algSeq
+    _singleton_registry = {}
+
+    @classmethod
+    def beginJob(cls):
+        """Helper class method to fully reset the counters, call once before building a new job sequence."""
+        cls._instance_counter = 0
+        cls._singleton_registry.clear()
 
     def __init__ (self, *, flags=None, algSeq=None, noSysSuffix=False, noSystematics=None, dataType=None, isPhyslite=None, geometry=None, dsid=0, campaign=None, runNumber=None, autoconfigFromFlags=None, dataYear=0):
 
@@ -249,11 +313,11 @@ class ConfigAccumulator :
         self._defaultHistogramStream = 'ANALYSIS'
         self._containerConfig = {}
         self._outputContainers = {}
-        self._pass = 0
         self._algorithms = {}
         self._currentAlg = None
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
+        self.setContainerMeta ('EventInfo', "nonContainer", True)
         self._eventcutflow = {}
         self.CA = None
 
@@ -265,6 +329,9 @@ class ConfigAccumulator :
         else:
             if algSeq is None :
                 raise ValueError ("need to pass algSeq if not using ComponentAccumulator")
+
+        ConfigAccumulator._instance_counter += 1
+        self._algPrefix = f'seq{self._instance_counter}_'
 
     def noSystematics (self) :
         """noSystematics flag used by CommonServices block"""
@@ -360,93 +427,99 @@ class ConfigAccumulator :
         Despite the name this will also return services and tools. It is
         mostly meant for internal use, particularly for the property
         overrides."""
-        name = name + self._algPostfix
+        name = self._algPrefix + name + self._algPostfix
         if name not in self._algorithms:
             return None
         return self._algorithms[name]
 
     def createAlgorithm (self, type, name, reentrant=False) :
         """create a new algorithm and register it as the current algorithm"""
-        name = name + self._algPostfix
-        if self._pass == 0 :
-            if name in self._algorithms :
-                raise Exception ('duplicate algorithms: ' + name + ' with algPostfix=' + self._algPostfix)
-            if reentrant:
-                alg = DualUseConfig.createReentrantAlgorithm (type, name)
-            else:
-                alg = DualUseConfig.createAlgorithm (type, name)
+        name = self._algPrefix + name + self._algPostfix
+        if name in self._algorithms :
+            raise Exception ('duplicate algorithms: ' + name + ' with algPostfix=' + self._algPostfix)
+        if reentrant:
+            alg = DualUseConfig.createReentrantAlgorithm (type, name)
+        else:
+            alg = DualUseConfig.createAlgorithm (type, name)
 
-            if DualUseConfig.isAthena:
-                if self._algSeq is not None:
-                    self.CA.addEventAlgo(alg,self._algSeq.name)
-                else :
-                    self.CA.addEventAlgo(alg)
-            else:
-                self._algSeq += alg
+        if DualUseConfig.isAthena:
+            if self._algSeq is not None:
+                self.CA.addEventAlgo(alg,self._algSeq.name)
+            else :
+                self.CA.addEventAlgo(alg)
+        else:
+            self._algSeq += alg
 
-            self._algorithms[name] = alg
-            self._currentAlg = alg
-            return alg
-        else :
-            if name not in self._algorithms :
-                raise Exception ('unknown algorithm requested: ' + name)
-            self._currentAlg = self._algorithms[name]
-            if self.CA and self._currentAlg != self.CA.getEventAlgo(name) :
-                raise Exception ('change to algorithm object: ' + name)
-            return self._algorithms[name]
+        self._algorithms[name] = alg
+        self._currentAlg = alg
+        return alg
 
 
-    def createService (self, type, name) :
+    def createService (self, type, name, isSingleton=True) :
         '''create a new service and register it as the "current algorithm"'''
-        if self._pass == 0 :
-            if name in self._algorithms :
-                raise Exception ('duplicate service: ' + name)
-            service = DualUseConfig.createService (type, name)
-            # Avoid importing AthenaCommon.AppMgr in a CA Athena job
-            # as it modifies Gaudi behaviour
-            if DualUseConfig.isAthena:
-                self.CA.addService(service)
-            else:
-                # We're not, so let's remember this as a "normal" algorithm:
-                self._algSeq += service
+        if not isSingleton:
+            name = self._algPrefix + name + self._algPostfix
+        if isSingleton and name in ConfigAccumulator._singleton_registry:
+            service = ConfigAccumulator._singleton_registry[name]
             self._algorithms[name] = service
             self._currentAlg = service
             return service
-        else :
-            if name not in self._algorithms :
-                raise Exception ('unknown service requested: ' + name)
-            self._currentAlg = self._algorithms[name]
-            return self._algorithms[name]
+        if name in self._algorithms :
+            raise Exception ('duplicate service: ' + name)
+        service = DualUseConfig.createService (type, name)
+        # Avoid importing AthenaCommon.AppMgr in a CA Athena job
+        # as it modifies Gaudi behaviour
+        if DualUseConfig.isAthena:
+            self.CA.addService(service)
+        else:
+            # We're not, so let's remember this as a "normal" algorithm:
+            self._algSeq += service
+        self._algorithms[name] = service
+        self._currentAlg = service
+        if isSingleton:
+            ConfigAccumulator._singleton_registry[name] = service
+        return service
 
 
-    def createPublicTool (self, type, name) :
+    def createPublicTool (self, type, name, isSingleton=True) :
         '''create a new public tool and register it as the "current algorithm"'''
-        if self._pass == 0 :
-            if name in self._algorithms :
-                raise Exception ('duplicate public tool: ' + name)
-            tool = DualUseConfig.createPublicTool (type, name)
-            # Avoid importing AthenaCommon.AppMgr in a CA Athena job
-            # as it modifies Gaudi behaviour
-            if DualUseConfig.isAthena:
-                self.CA.addPublicTool(tool)
-            else:
-                # We're not, so let's remember this as a "normal" algorithm:
-                self._algSeq += tool
+        if not isSingleton:
+            name = self._algPrefix + name + self._algPostfix
+        if isSingleton and name in ConfigAccumulator._singleton_registry:
+            tool = ConfigAccumulator._singleton_registry[name]
             self._algorithms[name] = tool
             self._currentAlg = tool
             return tool
-        else :
-            if name not in self._algorithms :
-                raise Exception ('unknown public tool requested: ' + name)
-            self._currentAlg = self._algorithms[name]
-            return self._algorithms[name]
+        if name in self._algorithms :
+            raise Exception ('duplicate public tool: ' + name)
+        tool = DualUseConfig.createPublicTool (type, name)
+        # Avoid importing AthenaCommon.AppMgr in a CA Athena job
+        # as it modifies Gaudi behaviour
+        if DualUseConfig.isAthena:
+            self.CA.addPublicTool(tool)
+        else:
+            # We're not, so let's remember this as a "normal" algorithm:
+            self._algSeq += tool
+        self._algorithms[name] = tool
+        self._currentAlg = tool
+        if isSingleton:
+            ConfigAccumulator._singleton_registry[name] = tool
+        return tool
 
 
     def addPrivateTool (self, propertyName, toolType) :
         """add a private tool to the current algorithm"""
-        if self._pass == 0 :
-            DualUseConfig.addPrivateTool (self._currentAlg, propertyName, toolType)
+        DualUseConfig.addPrivateTool (self._currentAlg, propertyName, toolType)
 
+    def setExtraInputs (self, inputs) :
+        """set extra input dependencies for the current algorithm"""
+        if DualUseConfig.isAthena:
+            self._currentAlg.ExtraInputs = inputs
+
+    def setExtraOutputs (self, outputs) :
+        """set extra output dependencies for the current algorithm"""
+        if DualUseConfig.isAthena:
+            self._currentAlg.ExtraOutputs = outputs
 
     def setSourceName (self, containerName, sourceName,
                        *, originalName = None, isMet = False) :
@@ -472,17 +545,17 @@ class ConfigAccumulator :
         its name"""
         if containerName not in self._containerConfig :
             self._containerConfig[containerName] = ContainerConfig (containerName, sourceName = None, noSysSuffix = self._noSysSuffix)
-        if self._containerConfig[containerName].sourceName is not None :
+        config = self._containerConfig[containerName]
+        if config.sourceName is not None :
             raise Exception ("trying to write container configured for input: " + containerName)
-        if self._containerConfig[containerName].index != 0 :
+        if config.names :
             raise Exception ("trying to write container twice: " + containerName)
-        self._containerConfig[containerName].index += 1
         if isMet is not None :
-            self._containerConfig[containerName].isMet = isMet
-        return self._containerConfig[containerName].currentName()
+            config.isMet = isMet
+        return config.appendStep()
 
 
-    def readName (self, containerName) :
+    def readName (self, containerName, *, nominal=False) :
         """get the name of the "current copy" of the given container
 
         As extra copies get created during processing this will track
@@ -491,7 +564,7 @@ class ConfigAccumulator :
         """
         if containerName not in self._containerConfig :
             raise Exception ("no source container for: " + containerName)
-        return self._containerConfig[containerName].currentName()
+        return self._containerConfig[containerName].currentName(nominal=nominal)
 
 
     def copyName (self, containerName) :
@@ -499,8 +572,7 @@ class ConfigAccumulator :
         its name"""
         if containerName not in self._containerConfig :
             raise Exception ("unknown container: " + containerName)
-        self._containerConfig[containerName].index += 1
-        return self._containerConfig[containerName].currentName()
+        return self._containerConfig[containerName].appendStep()
 
 
     def wantCopy (self, containerName) :
@@ -511,7 +583,39 @@ class ConfigAccumulator :
         """
         if containerName not in self._containerConfig :
             raise Exception ("no source container for: " + containerName)
-        return self._containerConfig[containerName].index == 0
+        config = self._containerConfig[containerName]
+        if len (config.names) == 0 :
+            raise Exception ("checking wantCopy on container with no name in event store: " + containerName)
+        return config.names[-1] == config.sourceName
+
+
+    def renameFinalContainers (self) :
+        """post-process the configured algorithms, tools and services to
+        strip the auto-generated `_STEP<n>` suffix from each container's
+        *final* name in every property value.
+
+        This is mostly needed in case the user has further downstream
+        algorithms that rely on the exact name of containers in the
+        event store. For anything configured through the
+        `ConfigAccumulator` this doesn't matter, as the names are
+        configured consistently."""
+
+        substitutions = []
+        for containerConfig in self._containerConfig.values() :
+            if not containerConfig.names :
+                continue
+            base = containerConfig.name
+            lastName = containerConfig.names[-1]
+            match = re.match (re.escape (base) + r'_STEP\d+', lastName)
+            if match :
+                substitutions.append ((match.group(0), base))
+                # keep ContainerConfig in sync, in case anything reads
+                # currentName() after this pass
+                containerConfig.names[-1] = substituteValue (lastName, [(match.group(0), base)])
+        if not substitutions :
+            return
+        for component in self._algorithms.values() :
+            substituteComponentProperties (component, substitutions)
 
 
     def originalName (self, containerName) :
@@ -583,21 +687,6 @@ class ConfigAccumulator :
         else :
             raise Exception ('invalid object selection name: ' + containerName)
         return self.readName (objectName), self.getFullSelection (objectName, selectionName, excludeFrom=excludeFrom)
-
-
-    def nextPass (self) :
-        """switch to the next configuration pass
-
-        Configuration happens in two steps, with all the blocks processed
-        twice.  This switches from the first to the second pass.
-        """
-        if self._pass != 0 :
-            raise Exception ("already performed final pass")
-        for name in self._containerConfig :
-            self._containerConfig[name].nextPass ()
-        self._pass = 1
-        self._currentAlg = None
-        self._outputContainers = {}
 
 
     def getPreselection (self, containerName, selectionName, *, asList = False) :
@@ -724,11 +813,10 @@ class ConfigAccumulator :
         """register a new event cutflow, adding it to the dictionary with key 'selection'
         and value 'decorations', a list of decorated selections
         """
-        if self._pass == 0:
-            if selection in self._eventcutflow.keys():
-                raise ValueError ('the event cutflow dictionary already contains an entry ' + selection)
-            else:
-                self._eventcutflow[selection] = decorations
+        if selection in self._eventcutflow.keys():
+            raise ValueError ('the event cutflow dictionary already contains an entry ' + selection)
+        else:
+            self._eventcutflow[selection] = decorations
 
 
     def getEventCutFlow (self, selection) :

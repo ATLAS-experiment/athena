@@ -1,18 +1,15 @@
 
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <cmath>
+#include "FPGATrackSimAlgorithms/TrackFitter.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
 
-
-#include "FPGATrackSimAlgorithms/TrackFitter.h"
-
+#include <numeric> //std::accumulate
+#include <memory>
+#include <stdexcept>
 
 std::vector<FPGATrackSimTrack>::const_iterator getBestChi2(std::vector<FPGATrackSimTrack> const & tracks);
 bool hasGoodFit(std::vector<FPGATrackSimTrack> const & track_cands, float minchi2);
@@ -165,7 +162,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vect
             ATH_MSG_DEBUG("Set z0 = " << track_cand.getZ0());
             ATH_MSG_DEBUG("Set eta = " << track_cand.getEta());
             ATH_MSG_DEBUG("Set phi = " << track_cand.getPhi());
-            tracks.push_back(track_cand);
+            tracks.push_back(std::move(track_cand));
             continue;
         } else {
 
@@ -201,7 +198,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vect
                     }
                     newtrack.setHitMap(bitmask); // update bitmask
                     m_nominalBank->linfit(sector, newtrack, m_do2ndStage);
-                    m_tracks_missinghits_track.push_back(newtrack);
+                    m_tracks_missinghits_track.push_back(std::move(newtrack));
                     if (m_pmap->getDim(icoord) == 2) {
                         icoord++; // skip 2nd of pixel coordinates so we don't do them twice
                     }
@@ -209,7 +206,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vect
             }
         }
         }
-        tracks.push_back(track_cand);
+        tracks.push_back(std::move(track_cand));
 
         // Enforce m_max_ncomb here, but only for the tracks that we actually fit.
         // Let's see how often this warning fires.
@@ -318,73 +315,6 @@ void TrackFitter::getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, 
 
 
 
-/**
- * Creates a list of track candidates by taking all possible combination of hits in road.
- * Sets basic ID info and hits.
- *
- * NB: If the number of combinations becomes large and memory is a concern,
- * it may be worth turning this function into a sort of iterator
- * over `combs`, return a single track each call.
- *
- * This has now been done, but this function preserved for legacy support.
- */
-void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack>& track_cands)
-{
-    std::vector<std::vector<int>> combs = getComboIndices(road.getNHits_layer());
-    track_cands.resize(combs.size(), temp);
-
-    //get the WC hits:
-    layer_bitmask_t wcbits= road.getWCLayers();
-    for (size_t icomb = 0; icomb < combs.size(); icomb++)
-    {
-      //Need to set the ID and the hits size of this track
-      track_cands[icomb].setTrackID(m_idbase + icomb);
-      track_cands[icomb].setNLayers(m_pmap->getNLogiLayers());
-
-      // If this is an idealized coordinate fit; keep references to the idealized radii.
-      track_cands[icomb].setIdealRadii(m_rmap->getAvgRadii(0));
-
-      std::vector<int> const & hit_indices = m_comboIndices[icomb]; // size nLayers
-        for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++)
-        {
-            if (hit_indices[layer] < 0) // Set a dummy hit if road has no hits in this layer
-            {
-                FPGATrackSimHit newhit=FPGATrackSimHit();
-                newhit.setLayer(layer);
-                newhit.setSection(0);
-                if (m_pmap->getDim(layer) == 2) newhit.setDetType(SiliconTech::pixel);
-	            else newhit.setDetType(SiliconTech::strip);
-
-                if (wcbits & (1 << layer ) ) {
-                    newhit.setHitType(HitType::wildcard);
-		    newhit.setLayer(layer);
-		}
-                
-                track_cands[icomb].setFPGATrackSimHit(layer, std::make_shared<FPGATrackSimHit>(newhit));
-            }
-            else
-            {
-                const std::shared_ptr<const FPGATrackSimHit> hit = road.getHitPtrs(layer)[hit_indices[layer]];
-                // If this is an outer spacepoint, and it is not the same as the inner spacepoint, reject it.
-                // Here we "reject" it by marking the candidate as "invalid", to be rejected later.
-                // That require another field on the track object, but it avoids having to change the sizes
-                // of arrays computed above.
-                if (hit->getHitType() == HitType::spacepoint && hit->getSide() == 1 && layer > 0) {
-                    auto inner_hit_ptr = track_cands[icomb].getFPGATrackSimHitPtrs().at(layer - 1); //avoid negative index
-                    if (!inner_hit_ptr) throw std::runtime_error("Null inner hit pointer in TrackFitter::makeTrackCandidates: inner layer should have a hit when comparing spacepoints");
-                    const FPGATrackSimHit inner_hit = *inner_hit_ptr;
-                    if ((hit->getX() != inner_hit.getX()) || (hit->getY() != inner_hit.getY()) || (hit->getZ() != inner_hit.getZ())) {
-                        track_cands[icomb].setValidCand(false);
-                    }
-                }
-                track_cands[icomb].setFPGATrackSimHit(layer, hit);
-            }
-        }
-    }
-
-    m_idbase += combs.size();
-}
-
 // This is a version of the above that produces a single track candidate on demand.
 FPGATrackSimTrack TrackFitter::makeTrackCandidate(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, const std::vector<int>& hit_indices)
 {
@@ -435,7 +365,7 @@ FPGATrackSimTrack TrackFitter::makeTrackCandidate(const FPGATrackSimRoad & road,
                     break;
                 }
             }
-            track_cand.setFPGATrackSimHit(layer, hit);
+            track_cand.setFPGATrackSimHit(layer, std::move(hit));
         }
     }
 

@@ -44,7 +44,7 @@ AthenaPoolTestDataWriter::AthenaPoolTestDataWriter(const std::string& name,
 AthenaPoolTestDataWriter::~AthenaPoolTestDataWriter()
 {}
 
-StatusCode AthenaPoolTestDataWriter::execute()
+StatusCode AthenaPoolTestDataWriter::execute(const EventContext& /*ctx*/)
 { 
     ATH_MSG_DEBUG("Executing AthenaPoolTestDataWriter" );
    

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/NSW_MMTP_RawDataContainer.h"
@@ -14,7 +14,14 @@ Muon::NSW_MMTP_RawDataContainer::NSW_MMTP_RawDataContainer(unsigned int hashmax)
 : IdentifiableContainer<NSW_MMTP_RawDataCollection>(hashmax)
 { }
 
-const CLID& Muon::NSW_MMTP_RawDataContainer::classID()
+CLID Muon::NSW_MMTP_RawDataContainer::classID()
 {
   return ClassID_traits<NSW_MMTP_RawDataContainer>::ID();
+}
+
+
+const CLID& Muon::NSW_MMTP_RawDataContainer::clID() const
+{
+  static const CLID cid = classID();
+  return cid;
 }

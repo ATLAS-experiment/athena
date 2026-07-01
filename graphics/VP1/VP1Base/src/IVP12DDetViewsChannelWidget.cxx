@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -38,10 +38,10 @@
 
 class IVP12DDetViewsChannelWidget::Imp {
 public:
-  IVP12DDetViewsChannelWidget*channel;
-  VP1GraphicsView * view_xy;
-  VP1GraphicsView * view_rz;
-  bool first;
+  IVP12DDetViewsChannelWidget* channel{};
+  VP1GraphicsView * view_xy{};
+  VP1GraphicsView * view_rz{};
+  bool first{};
 
   QMap<IVP12DSystem*,QSet<VP1GraphicsItemCollection*> > system2itemcols;
 
@@ -53,9 +53,9 @@ public:
   void updateSystemState(QCheckBox*);
 
   QMap<IVP1System*,QWidget*> sys2tabpage;
-  VP1TabWidget*tabwidget;
+  VP1TabWidget* tabwidget{};
 
-  VP1ColorSelectButton * colorselectbutton;
+  VP1ColorSelectButton * colorselectbutton{};
 };
 
 //___________________________________________________________________________

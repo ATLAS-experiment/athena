@@ -92,16 +92,15 @@ StatusCode xAODMuDstarFilter::filterInitialize()
 }
 
 //---------------------------------------------------------------------------
-StatusCode xAODMuDstarFilter::filterEvent()
+StatusCode xAODMuDstarFilter::filterEvent(const EventContext& ctx)
 {
   //---------------------------------------------------------------------------
 
 // Retrieve TruthGen container from xAODTruthParticleSlimmerGen, contains all particles witout barcode_zero and
 // duplicated barcode ones
-   const EventContext& context = Gaudi::Hive::currentContext();
    SG::ReadHandle<xAOD::TruthParticleContainer>
       xTruthParticleContainer(
-          m_xaodTruthParticleContainerNameGenKey, context);
+          m_xaodTruthParticleContainerNameGenKey, ctx);
    if (!xTruthParticleContainer.isValid()) {
     ATH_MSG_ERROR("Could not retrieve xAOD::TruthParticleGenContainer with key:"
                   << m_xaodTruthParticleContainerNameGenKey.key());
@@ -148,7 +147,7 @@ StatusCode xAODMuDstarFilter::filterEvent()
     }
 
     if (NumMuons == 0){
-       setFilterPassed(false);
+       setFilterPassed(false, ctx);
        return StatusCode::SUCCESS;
       }
 
@@ -453,7 +452,7 @@ StatusCode xAODMuDstarFilter::filterEvent()
                       ATH_MSG_DEBUG("xAODMuDstarFilter: NumChildD0neutrinos, NumChildD0gammas = " << NumChildD0neutrinos << " , " << NumChildD0gammas);
                       ATH_MSG_DEBUG("xAODMuDstarFilter: pis_pdg, K_pdg, ChargeD0Child1, ChargeD0Child2 = " << pis_pdg << " , " << K_pdg << " , " << ChargeD0Child1 << " , " << ChargeD0Child2);
 
-                      setFilterPassed(true);
+                      setFilterPassed(true, ctx);
                       return StatusCode::SUCCESS;
                     }
                   } // for i
@@ -473,7 +472,7 @@ StatusCode xAODMuDstarFilter::filterEvent()
   //
   // if we get here we have failed
   //
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 

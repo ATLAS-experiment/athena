@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMA_CALIB_TOOL_H_
@@ -100,7 +100,7 @@ inline float get_eta_calo(const xAOD::CaloCluster& cluster, int author,
 namespace columnar {
   namespace ClusterHelpers {
 
-    template<ContainerIdConcept CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
     class PhiCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_phiCaloAcc;
@@ -138,7 +138,7 @@ namespace columnar {
       }
     };
 
-    template<ContainerIdConcept CI = ContainerId::cluster,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
     class EtaCaloAccessor final
     {
       ColumnAccessor<CI,float,CM> m_etaCaloAcc;
@@ -425,7 +425,7 @@ class EgammaCalibrationAndSmearingTool
 
   struct SysInfo {
     EgammaPredicate predicate;
-    egEnergyCorr::Scale::Variation effect;
+    egEnergyCorr::Scale::Variation effect {};
   };
 
   std::map<CP::SystematicVariation, SysInfo> m_syst_description;
@@ -456,12 +456,14 @@ public:
     Accessors(columnar::ColumnarTool<>& tool) : columnar::ColumnarTool<>(&tool) {}
 
     columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
-    columnar::MomentumAccessors<columnar::ContainerId::egamma> momAcc;
+    columnar::MomentumAccessors<columnar::EgammaDef> momAcc;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
     columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
     columnar::EgammaDecorator<float> decEmva;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
+    // test GNN
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> gnn_energy_Acc;
     columnar::EgammaAccessor<uint16_t> authorAcc {*this, "author"};
     columnar::EgammaAccessor<std::vector<columnar::OptTrackId>> electronTrackAcc;
     columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;

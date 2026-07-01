@@ -15,12 +15,12 @@
 #ifndef  TRIGINDETEVENTTPCNV_TRIGHISTO1DCONTAINER_CNV_TLP1_H
 #define  TRIGINDETEVENTTPCNV_TRIGHISTO1DCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigInDetEventTPCnv/TrigHisto1DContainer_tlp1.h"
  
 #include "TrigInDetEventTPCnv/TrigHisto1DContainerCnv_p1.h"   
  
-class TrigHisto1DContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigHisto1DContainerCnv_p1, TrigHisto1DContainer_tlp1 >
+class TrigHisto1DContainerCnv_tlp1 : public TopLevelTPConverter< TrigHisto1DContainerCnv_p1, TrigHisto1DContainer_tlp1 >
 {
  
  public:

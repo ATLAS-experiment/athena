@@ -13,6 +13,7 @@
 #include "PathResolver/PathResolver.h"
 
 #include "TFile.h"
+#include "TKey.h"
 #include "TObjArray.h"
 #include "TObjString.h"
 #include "TMatrixD.h"
@@ -128,8 +129,8 @@ StatusCode BTaggingSelectionTool::initialize() {
      ATH_MSG_ERROR("Tagger fraction_c in Continuous2D WP not available");
      return StatusCode::FAILURE;
    }
-   //now the tau-fraction if the tagger is GN2*:
-   if ( m_taggerName == "GN2v01" ){
+   //now the tau-fraction if the tagger is GN2* or GN3*:
+   if ( m_taggerName.value().find("GN2") != std::string::npos || m_taggerName.value().find("GN3") != std::string::npos ){
      fraction_data_name = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau";
      TString fraction_data_name_cTag = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/fraction_tau_cTag";
      fraction_data = dynamic_cast<TVector*> (m_inf->Get(fraction_data_name));
@@ -154,14 +155,46 @@ StatusCode BTaggingSelectionTool::initialize() {
       if(m_useCTag)
       ATH_MSG_WARNING( "Running in Continuous WP and using 1D c-tagging");
       m_continuous   = true;
-      // For GN2v01, we have different WPs than the default ones.
-      if ( m_taggerName == "GN2v01" )
-        m_wps_raw="FixedCutBEff_90,FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_65";
-      std::vector<std::string> workingpoints = split(m_wps_raw, ',');
+
+      std::string subDirName = m_taggerName + "/" + m_jetAuthor;
+      // Get directory containing the cuts information 
+      TDirectoryFile *tmpDir = dynamic_cast<TDirectoryFile*>( m_inf->Get(subDirName.c_str()) );
+      if (!tmpDir){
+        // Raise error if could not retrieve subdirectory 
+        ATH_MSG_ERROR( "CDI file does not contain sub-directory: " << subDirName );
+        return StatusCode::FAILURE;
+      }
+      
+      // Now retrieve the name of the b-tagging fixed cut efficiency working points 
+      static const std::string fixedBCutPrefix = "FixedCutBEff_";
+      std::vector<std::string> workingpoints;
+      
+      // Loop over keys in the sub directory and select the ones corresponding to fixed cuts 
+      TIter next(tmpDir->GetListOfKeys());
+      TKey *key;
+      while ((key = (TKey*)next())) {
+        std::string keyName = key->GetName();
+        // Check if key begins with prefix in that case it's one of the working point
+        // Also make sure the key is not already in the vector as 
+        // the list of keys from GetListOfKeys() can contain several times the same name
+        // because there can be several cycle number per objects
+        // since here we check the entry is not already in the vector it's fine 
+        // See
+        // https://root-forum.cern.ch/t/tkey-tobject-and-getlistofkeys-for-only-newest-ttrees/25928/3
+        // https://root-forum.cern.ch/t/tkey-tobject-and-getlistofkeys-for-only-newest-ttrees/25928/7
+        if (keyName.starts_with(fixedBCutPrefix) && 
+            std::find(workingpoints.begin(), workingpoints.end(), keyName) == workingpoints.end()){
+            // Add efficiency working point to the vector 
+            workingpoints.push_back( keyName );
+        }
+      }
+      
+      // After having retrieved all b-tagging working points 
+      // Sort vector then set descending order i.e. loosest working point first 
       std::sort(workingpoints.begin(), workingpoints.end());
       std::reverse(workingpoints.begin(), workingpoints.end()); // put in descending order
       for(const std::string& wp : workingpoints){
-        cutname = m_taggerName + "/" + m_jetAuthor + "/" + wp + "/cutvalue";
+        cutname = subDirName + "/" + wp + "/cutvalue";
         m_tagger.constcut = dynamic_cast<TVector*> (m_inf->Get(cutname));
         if (m_tagger.constcut != nullptr) {
           m_continuouscuts.push_back(m_tagger.constcut[0](0));
@@ -234,7 +267,7 @@ StatusCode BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagg
 
   //retrieve the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
   // (backwards compatibility)
-  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
+  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2) || (m_taggerEnum == Tagger::GN3EPCLV01) || (m_taggerEnum == Tagger::GN3PflowMuonsV00) ){
     
     double fraction_b = -1;
     const TString basePath = taggerName + "/" + m_jetAuthor + "/" + OP;
@@ -346,9 +379,9 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
   tagger_pb = m_accessor_pb(*btagInfo);  
   tagger_pc = m_accessor_pc(*btagInfo);  
   tagger_pu = m_accessor_pu(*btagInfo);  
-  if(m_taggerName == "GN2v01")
+  if(m_taggerEnum == Tagger::GN2 || m_taggerEnum == Tagger::GN3EPCLV01 || m_taggerEnum == Tagger::GN3PflowMuonsV00){
       tagger_ptau = m_accessor_ptau(*btagInfo);  
-
+  }
 
    return getTaggerWeight(tagger_pb, tagger_pc, tagger_pu, tagweight, getCTagW, tagger_ptau);
 
@@ -383,7 +416,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
   }
 
   tagweight = -100.;
-  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
+  if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2) || (m_taggerEnum == Tagger::GN3EPCLV01) || (m_taggerEnum == Tagger::GN3PflowMuonsV00) ){
 
     bool valid_input = (!std::isnan(pu) && pb>=0 && pc>=0 && pu>=0 && ptau>=0);
 
@@ -562,9 +595,9 @@ asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double tagg
 
 asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double pb, double pc, double pu) const
 {
-  if (m_tagger.name == "GN2v01"){
+  if (m_tagger.name == "GN2v01" || m_tagger.name.find("GN3") != std::string::npos ){
     asg::AcceptData acceptData (&m_acceptinfo);
-    ATH_MSG_ERROR("For GN2v01 tagger, there is a new tau claass in the NN output. Please update the accept() to accept(double pT, double eta, double pb, double pc, double pu, double ptau)");
+    ATH_MSG_ERROR("For GN2v01 and GN3 taggers, there is a new tau class in the NN output. Please update the accept() to accept(double pT, double eta, double pb, double pc, double pu, double ptau)");
     return acceptData;
   } else {
     return accept(pT, eta, pb, pc, pu, 0.);

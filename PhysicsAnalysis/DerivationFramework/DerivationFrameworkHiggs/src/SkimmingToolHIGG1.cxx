@@ -154,13 +154,12 @@ StatusCode DerivationFramework::SkimmingToolHIGG1::finalize()
 }
 
 // The filter itself
-bool DerivationFramework::SkimmingToolHIGG1::eventPassesFilter() const
+bool DerivationFramework::SkimmingToolHIGG1::eventPassesFilter(const EventContext& ctx) const
 {
 
   m_n_tot++;
 
   bool writeEvent(false);
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 
   if (m_reqGRL      && !SubcutGoodRunList() ) return false;

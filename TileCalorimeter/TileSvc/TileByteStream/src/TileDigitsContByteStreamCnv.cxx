@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -43,7 +43,7 @@ TileDigitsContByteStreamCnv::TileDigitsContByteStreamCnv(ISvcLocator* svcloc)
 {
 }
 
-const CLID& TileDigitsContByteStreamCnv::classID(){ return ClassID_traits<TileDigitsContainer>::ID();}
+CLID TileDigitsContByteStreamCnv::classID(){ return ClassID_traits<TileDigitsContainer>::ID();}
 
 long TileDigitsContByteStreamCnv::storageType() { return ByteStreamAddress::storageType(); }
 
@@ -72,12 +72,10 @@ StatusCode TileDigitsContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, Da
 {
   ATH_MSG_DEBUG(" Executing createObj method ");
 
-  ByteStreamAddress *pRE_Addr;
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr); 
-  if(!pRE_Addr) {
-    ATH_MSG_ERROR(" Can not cast to ByteStreamAddress ");
-    return StatusCode::FAILURE;    
-  }
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
 
   const std::string containerName(*(pRE_Addr->par()));
   bool isTMDB(containerName == std::string("MuRcvDigitsCnt"));
@@ -111,7 +109,7 @@ StatusCode TileDigitsContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, Da
     if (newrob != robid[0]) {
       robid[0] = newrob;
       robf.clear();
-      m_robSvc->getROBData(Gaudi::Hive::currentContext(), robid, robf);
+      m_robSvc->getROBData(ctx, robid, robf);
     }
       
     if (robf.size() > 0 ) {

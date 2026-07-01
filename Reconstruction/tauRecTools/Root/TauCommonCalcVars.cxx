@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -47,19 +47,15 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
     float emscale_ptEM = 0.;
     float emscale_ptHad = 0.;
       
-    if ( !pTau.detail( xAOD::TauJetParameters::etEMAtEMScale, emscale_ptEM ) ) 
+    if ( !pTau.detail( xAOD::TauJetParameters::etEMAtEMScale, emscale_ptEM ) ||
+         !pTau.detail( xAOD::TauJetParameters::etHadAtEMScale, emscale_ptHad ) )
       {
-	ATH_MSG_DEBUG("retrieval of tau detail failed. stopping calculation of further variables");
-	return StatusCode::SUCCESS;
+	ATH_MSG_DEBUG("retrieval of tau detail failed. Will set etOverPtLeadTrk to 0");
+	pTau.setDetail( xAOD::TauJetParameters::etOverPtLeadTrk, 0.f );
       }
-
-    if ( !pTau.detail( xAOD::TauJetParameters::etHadAtEMScale, emscale_ptHad ) )
-      {
-	ATH_MSG_DEBUG("retrieval of tau detail failed. stopping calculation of further variables");
-	return StatusCode::SUCCESS;
-      }
-      
-    pTau.setDetail( xAOD::TauJetParameters::etOverPtLeadTrk, static_cast<float>( (emscale_ptEM + emscale_ptHad) / pTau.track(0)->pt() ) );
+    else {
+      pTau.setDetail( xAOD::TauJetParameters::etOverPtLeadTrk, static_cast<float>( (emscale_ptEM + emscale_ptHad) / pTau.track(0)->pt() ) );
+    } 
   }
 
   std::vector<const xAOD::TauTrack*> tauTracks = pTau.tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged);
@@ -75,7 +71,12 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
     for (const xAOD::TauTrack* tauTrk : tauTracks){
       sumOfTrackVector += tauTrk->p4();
 
-      double deltaR_tautrack = inTrigger() ? pTau.p4().DeltaR(tauTrk->p4()) : pTau.p4(xAOD::TauJetParameters::IntermediateAxis).DeltaR(tauTrk->p4());
+      double deltaR_tautrack = 0;  
+      if( inTrigger() || m_doRun4){
+        deltaR_tautrack = pTau.p4().DeltaR(tauTrk->p4());
+      } else {
+        deltaR_tautrack = pTau.p4(xAOD::TauJetParameters::IntermediateAxis).DeltaR(tauTrk->p4());
+      }  
 
       ptSum += tauTrk->pt();
       sumWeightedDR_tautrack += deltaR_tautrack * tauTrk->pt();

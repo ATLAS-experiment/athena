@@ -760,6 +760,8 @@ public:
   virtual void* getDecoration (SG::auxid_t, size_t, size_t) override { return 0; }
   virtual const SG::auxid_set_t& getAuxIDs() const override { return m_auxids; }
   virtual const SG::auxid_set_t& getDecorIDs() const override { std::abort(); }
+  virtual SG::auxid_set_t
+  getCopyIDs (bool /*warnUnlocked*/) const override { std::abort(); }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
   virtual void lock() override { }
   virtual void lockDecoration (SG::auxid_t) override { }
@@ -771,6 +773,7 @@ public:
   virtual void reserve (size_t) override { }
   virtual void shift (size_t, ptrdiff_t) override { }
   virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { return false; }
+  virtual void toTransient (const EventContext&) override { std::abort(); }
 
   SG::auxid_set_t m_auxids;
 };

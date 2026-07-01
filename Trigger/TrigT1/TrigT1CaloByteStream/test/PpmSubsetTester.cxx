@@ -60,7 +60,7 @@ StatusCode PpmSubsetTester::initialize()
 
 // Execute
 
-StatusCode PpmSubsetTester::execute()
+StatusCode PpmSubsetTester::execute(const EventContext& ctx)
 {
   if ( !msgLvl(MSG::INFO) ) return StatusCode::SUCCESS;
   msg(MSG::INFO);

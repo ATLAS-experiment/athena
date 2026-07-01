@@ -1,16 +1,18 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// STL include(s):
-#include <algorithm>
-#include <functional>
-#include <cmath>
+
 
 // Local include(s):
 #include "TrigBunchCrossingTool/BunchCrossingToolBase.h"
 #include "SetPrint.h"
 #include "count_bunch_neighbors.h"
+
+// STL include(s):
+#include <algorithm>
+#include <functional>
+#include <cmath>
 
 namespace Trig {
 
@@ -371,50 +373,33 @@ namespace Trig {
     * @param type The type of the requested return value
     * @returns The gap before the train of the specified bcid
     */
-   int BunchCrossingToolBase::gapBeforeTrain( bcid_type bcid,
-                                              BunchDistanceType type ) const {
-
-      // Find this BCID in the list of bunch trains:
-      std::set< BunchTrain >::const_iterator itr = m_bunchTrains.begin();
-      std::set< BunchTrain >::const_iterator end = m_bunchTrains.end();
-      std::set< BunchTrain >::const_iterator train = m_bunchTrains.end();
-      for( ; itr != end; ++itr ) {
-         if( itr->find( bcid ) != itr->end() ) {
-            train = itr;
-            break;
-         }
-      }
-
+   int BunchCrossingToolBase::gapBeforeTrain( bcid_type bcid, BunchDistanceType type ) const {
+      const auto train = std::ranges::find_if(m_bunchTrains,
+          [bcid](const BunchTrain& bunchTrain) {
+          return bunchTrain.contains(bcid);
+      });
       // If we didn't find this BCID in a train, let's return right away:
-      if( train == end ) {
+      if( train == m_bunchTrains.end() ) {
          return -1;
       }
-
       // Search for the first filled bunch before the front of this train:
-      BunchCrossing train_tail = *( train->train_front() );
-      --train_tail;
-      while( ! isFilled( train_tail ) ) {
-         --train_tail;
-      }
-
+      BunchCrossing trainFront = *train->train_front();
+      BunchCrossing prevFilled = trainFront;
+      while (!isFilled(--prevFilled));
+      auto dist = train->train_front()->distance( prevFilled );
       // Now return the results:
       switch( type ) {
-
       case NanoSec:
-         return BunchCrossing::BUNCH_SPACING *
-            train->train_front()->distance( train_tail );
+         return BunchCrossing::BUNCH_SPACING * dist;
          break;
       case BunchCrossings:
-         return train->train_front()->distance( train_tail );
+         return dist;
          break;
       default:
          ATH_MSG_ERROR( "You can only use NanoSec or BunchCrossings for type "
                         "for gapBeforeTrain" );
          return -1;
       }
-
-      // This should actually never be reached:
-      return -1;
    }
 
    /**
@@ -426,50 +411,32 @@ namespace Trig {
     * @param type The type of the requested return value
     * @returns The gap after the train of the specified bcid
     */
-   int BunchCrossingToolBase::gapAfterTrain( bcid_type bcid,
-                                             BunchDistanceType type ) const {
-
-      // Find this BCID in the list of bunch trains:
-      std::set< BunchTrain >::const_iterator itr = m_bunchTrains.begin();
-      std::set< BunchTrain >::const_iterator end = m_bunchTrains.end();
-      std::set< BunchTrain >::const_iterator train = m_bunchTrains.end();
-      for( ; itr != end; ++itr ) {
-         if( itr->find( bcid ) != itr->end() ) {
-            train = itr;
-            break;
-         }
-      }
-
+   int BunchCrossingToolBase::gapAfterTrain( bcid_type bcid, BunchDistanceType type ) const {
+      const auto train = std::ranges::find_if(m_bunchTrains,
+          [bcid](const BunchTrain& bunchTrain) {
+          return bunchTrain.contains(bcid);
+      });
       // If we didn't find this BCID in a train, let's return right away:
-      if( train == end ) {
+      if( train == m_bunchTrains.end() ) {
          return -1;
       }
-
-      // Search for the first filled bunch before the front of this train:
+      // Search for the first filled bunch after the back of this train:
       BunchCrossing train_front = *( train->train_back() );
-      ++train_front;
-      while( ! isFilled( train_front ) ) {
-         ++train_front;
-      }
-
+      do {++train_front; } while (!isFilled(train_front));
+      const auto dist = train_front.distance(*train->train_back());
       // Now return the results:
       switch( type ) {
-
       case NanoSec:
-         return BunchCrossing::BUNCH_SPACING *
-            train_front.distance( *( train->train_back() ) );
+         return BunchCrossing::BUNCH_SPACING * dist;
          break;
       case BunchCrossings:
-         return train_front.distance( *( train->train_back() ) );
+         return dist;
          break;
       default:
          ATH_MSG_ERROR( "You can only use NanoSec or BunchCrossings for type "
                         "for gapAfterTrain" );
          return -1;
       }
-
-      // This should actually never be reached:
-      return -1;
    }
 
    /**

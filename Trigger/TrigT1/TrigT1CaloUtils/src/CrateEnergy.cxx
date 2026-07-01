@@ -10,6 +10,8 @@
 
 
 #include "TrigT1CaloUtils/CrateEnergy.h"
+#include <iostream>
+#include <stdexcept>
 
 namespace LVL1 {
 
@@ -58,8 +60,8 @@ CrateEnergy::CrateEnergy(unsigned int crate, const DataVector<ModuleEnergy>* JEM
   }   // Loop over JEMs
   
   /** Check for overflows then truncate quadrant sums*/
-  unsigned int mask = (1 << m_sumBits) - 1;
-
+  const unsigned int mask = (1U << m_sumBits) - 1U;
+  const int overflowValue = -static_cast<int>(mask + 1U);
   /** Form crate sums */
   /** For total ET we must check for further overflows */
   m_crateEt = eT[0] + eT[1];
@@ -69,23 +71,24 @@ CrateEnergy::CrateEnergy(unsigned int crate, const DataVector<ModuleEnergy>* JEM
   }
 
  
-  if (!m_overflowX){
-    m_crateEx = eX[0] - eX[1];
-  } else{
-    m_crateEx = -(mask + 1);
+  if (!m_overflowX) {
+    m_crateEx = static_cast<int>(eX[0]) - static_cast<int>(eX[1]);
+  } else {
+    m_crateEx = overflowValue;
   }
-  if (!m_overflowY){
-    m_crateEy = eY[0] - eY[1];
-  }else{
-    m_crateEy = -(mask + 1);
+
+  if (!m_overflowY) {
+    m_crateEy = static_cast<int>(eY[0]) - static_cast<int>(eY[1]);
+  } else {
+    m_crateEy = overflowValue;
   }
   
 
   if (m_debug) {
-    std::cout << "CrateEnergy: crate " << m_crate << " results " << std::endl
-              << "   Et "  << m_crateEt << " overflow " << m_overflowT << std::endl
-              << "   Ex "  << m_crateEx << " overflow " << m_overflowX << std::endl
-              << "   Ey "  << m_crateEy << " overflow " << m_overflowY << std::endl;
+    std::cout << "CrateEnergy: crate " << m_crate << " results " 
+              << "\n   Et "  << m_crateEt << " overflow " << m_overflowT 
+              << "\n   Ex "  << m_crateEx << " overflow " << m_overflowX 
+              << "\n   Ey "  << m_crateEy << " overflow " << m_overflowY << std::endl;
               
   }
   
@@ -151,19 +154,21 @@ CrateEnergy::CrateEnergy(unsigned int crate, const DataVector<EnergyCMXData>* JE
   if (!m_overflowX){
     m_crateEx = eX[0] - eX[1];
   } else{
-    m_crateEx = -(mask + 1);
+    if (std::in_range<int>(-(static_cast<int>(mask) + 1))) m_crateEx = -(static_cast<int>(mask) + 1);
+    else throw std::out_of_range("m_crateEx set value is out of integer range");
   }
   if (!m_overflowY){
     m_crateEy = eY[0] - eY[1];
   }else{
-    m_crateEy = -(mask + 1);
+    if (std::in_range<int>(-(static_cast<int>(mask) + 1))) m_crateEy = -(static_cast<int>(mask) + 1);
+    else throw std::out_of_range("m_crateEy set value is out of integer range");
   }
 
   if (m_debug) {
-    std::cout << "CrateEnergy: crate " << m_crate << " results " << std::endl
-              << "   Et "  << m_crateEt << " overflow " << m_overflowT << std::endl
-              << "   Ex "  << m_crateEx << " overflow " << m_overflowX << std::endl
-              << "   Ey "  << m_crateEy << " overflow " << m_overflowY << std::endl;
+    std::cout << "CrateEnergy: crate " << m_crate << " results " 
+              << "\n   Et "  << m_crateEt << " overflow " << m_overflowT 
+              << "\n   Ex "  << m_crateEx << " overflow " << m_overflowX 
+              << "\n   Ey "  << m_crateEy << " overflow " << m_overflowY << std::endl;
               
   }
   
@@ -192,10 +197,10 @@ CrateEnergy::CrateEnergy(unsigned int crate, unsigned int et, unsigned int exTC,
   m_overflowY = overflowY;
 
   if (m_debug) {
-    std::cout << "CrateEnergy: crate " << m_crate << " results " << std::endl
-              << "   Et "  << m_crateEt << " overflow " << m_overflowT << std::endl
-              << "   Ex "  << m_crateEx << " overflow " << m_overflowX << std::endl
-              << "   Ey "  << m_crateEy << " overflow " << m_overflowY << std::endl;
+    std::cout << "CrateEnergy: crate " << m_crate << " results " 
+              << "\n   Et "  << m_crateEt << " overflow " << m_overflowT 
+              << "\n   Ex "  << m_crateEx << " overflow " << m_overflowX 
+              << "\n   Ey "  << m_crateEy << " overflow " << m_overflowY << std::endl;
               
   }
 }

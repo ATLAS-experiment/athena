@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -170,7 +170,7 @@ int main( int argc, char* argv[] ) {
     ANA_CHECK( jetUncToolSF->setProperty("ConfigFile", "TagSFUncert_JSSANNTagger_AntiKt10LCTopoTrimmed.config") );
     ANA_CHECK( jetUncToolSF->setProperty("MCType", "MC16a") );
     ANA_CHECK( jetUncToolSF->initialize() );
-    
+
     std::vector<std::string> pulls = {"__1down", "__1up"};
     CP::SystematicSet jetUnc_sysSet = jetUncToolSF->recommendedSystematics();
     const std::set<std::string> sysNames = jetUnc_sysSet.getBaseNames();
@@ -201,7 +201,7 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.retrieve() );
 
   static const SG::ConstAccessor<float> acc_ANNWContained80_PassScore("ANNWContained80_PassScore");
-  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R22v1");
   static const SG::ConstAccessor<float> acc_ANNWContained80_SF("ANNWContained80_SF");
   static const SG::ConstAccessor<float> acc_ANNTagger_SF("ANNTagger_SF");
 
@@ -231,12 +231,10 @@ int main( int argc, char* argv[] ) {
       continue ;
 
     // Loop over jet container
-    std::pair< xAOD::JetContainer*, xAOD::ShallowAuxContainer* > jets_shallowCopy = xAOD::shallowCopyContainer( *myJets );
-    std::unique_ptr<xAOD::JetContainer> shallowJets(jets_shallowCopy.first);
-    std::unique_ptr<xAOD::ShallowAuxContainer> shallowAux(jets_shallowCopy.second);
+    auto [shallowJets, shallowAux] = xAOD::shallowCopy( *myJets );
     idx=0;
     for( xAOD::Jet* jetSC : *shallowJets ){
-      
+
       ANA_CHECK( m_Tagger->tag( *jetSC ) );
       if(verbose) {
         std::cout << "Testing ANN Tagger " << std::endl;
@@ -300,4 +298,3 @@ int main( int argc, char* argv[] ) {
   return 0;
 
 }
-

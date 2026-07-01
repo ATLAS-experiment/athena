@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PileUpTools )
@@ -26,4 +26,4 @@ atlas_add_test( PileUpHashHelper_test
                 SOURCES test/PileUpHashHelper_test.cxx src/PileUpHashHelper.cxx
                 INCLUDE_DIRS src ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} CxxUtils PileUpToolsLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

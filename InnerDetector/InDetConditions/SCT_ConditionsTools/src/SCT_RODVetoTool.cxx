@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,7 +15,6 @@
 //Athena includes
 #include "Identifier/IdentifierHash.h"
 #include "InDetIdentifier/SCT_ID.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadHandle.h"
 
 //STL includes
@@ -67,25 +66,11 @@ SCT_RODVetoTool::isGood(const Identifier& elementId, const EventContext& ctx, In
   return result;
 }
 
-bool 
-SCT_RODVetoTool::isGood(const Identifier& elementId, InDetConditions::Hierarchy h) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(elementId, ctx, h);
-}
-
-bool 
+bool
 SCT_RODVetoTool::isGood(const IdentifierHash& hashId, const EventContext& ctx) const {
   Identifier elementId{m_pHelper->wafer_id(hashId)};
   Identifier moduleId{m_pHelper->module_id(elementId)};
   return isGood(moduleId, ctx, InDetConditions::SCT_MODULE);
-}
-
-bool 
-SCT_RODVetoTool::isGood(const IdentifierHash& hashId) const {
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
-
-  return isGood(hashId, ctx);
 }
 
 void

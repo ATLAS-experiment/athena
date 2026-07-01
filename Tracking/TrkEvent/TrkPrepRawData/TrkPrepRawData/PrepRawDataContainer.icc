@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ PrepRawDataContainer< CollectionT>::~PrepRawDataContainer()
 }
 
 template< class CollectionT>
-const CLID& PrepRawDataContainer< CollectionT>::classID() 
+CLID PrepRawDataContainer< CollectionT>::classID()
 {
 	return ClassID_traits< PrepRawDataContainer <CollectionT> > ::ID();
 }
@@ -59,7 +59,8 @@ const CLID& PrepRawDataContainer< CollectionT>::classID()
 template< class CollectionT>
 const CLID& PrepRawDataContainer< CollectionT>::clID() const
 {
-	return classID();
+        static const CLID cid = classID();
+	return cid;
 }
 // }
 

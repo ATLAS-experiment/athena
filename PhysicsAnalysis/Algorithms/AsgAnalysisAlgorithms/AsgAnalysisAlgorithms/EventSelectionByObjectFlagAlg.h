@@ -9,12 +9,10 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
-#include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysFilterReporterParams.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <xAODBase/IParticleContainer.h>
-#include <xAODEventInfo/EventInfo.h>
 
 namespace CP {
 /// \brief an algorithm for selecting events based on object flags
@@ -28,7 +26,7 @@ class EventSelectionByObjectFlagAlg final : public EL::AnaAlgorithm {
     StatusCode initialize() override;
 
   public:
-    StatusCode execute() override;
+    StatusCode execute(const EventContext& ctx) override;
 
   public:
     StatusCode finalize() override;

@@ -98,7 +98,7 @@ void TBNoiseWrite::clear()
   m_cell_energy->clear(); 
 }
 
-StatusCode TBNoiseWrite::execute()
+StatusCode TBNoiseWrite::execute(const EventContext& /*ctx*/)
 {
   m_nEvent++;
   ATH_MSG_DEBUG ( "Executing TBNoiseWrite " );

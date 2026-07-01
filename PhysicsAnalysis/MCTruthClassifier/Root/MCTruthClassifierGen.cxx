@@ -325,7 +325,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   const int NumOfMuNeut = DP.apd(MC::NU_MU);
   const int NumOfTau = DP.apd(MC::TAU);
   const int NumOfTauNeut = DP.apd(MC::NU_TAU);
-
+  
   samePart = false;
   int NumOfNucFr(0);
   const bool possibleNuclearFragment = (numOfParents == 1 && (MC::isPhoton(ancestorPDG) || MC::isElectron(ancestorPDG) || MC::isMuon(ancestorPDG) || std::abs(ancestorPDG) == MC::PIPLUS));
@@ -382,7 +382,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   if (MC::isSMQuark(ancestorPDG) && numOfParents == 1 && numberOfChildren == 3 && NumOfquark == 1 && NumOfElNeut == 1) return QuarkWeakDec;
 
   if (MC::isMuon(ancestorPDG) && NumOfNucFr != 0) return ElMagProc;
-
+  
   if (MC::isTop(ancestorPDG)) return top;
 
   if (MC::isW(ancestorPDG) && ancestorProdVtx && ancestorProdVtx->nIncomingParticles() != 0) {
@@ -454,18 +454,36 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
     //--Sherpa W->enu ??
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) return WBoson;
-
+    
     const int pdg1 = partProdVtx->incomingParticle(0)->pdgId();
     const int pdg2 = partProdVtx->incomingParticle(1)->pdgId();
     //--Sherpa ZZ,ZW
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 4 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
-
+    
     //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
     if ((numberOfChildren - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+
+    //--Sherpa tttt with all t->Wb; W->lnu
+    if ((numberOfChildren - NumOfquark - NumOfgluon) == 8 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 8) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) {
+      ATH_MSG_VERBOSE("MultiBoson for 4topLep");
+      return MultiBoson;
+    }
+    
+    //--Sherpa Vgamma ( Z->ee+gamma or W->enu+gamma ) 
+    if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && NumOfEl == 1 && NumOfPos == 1) {
+	    ATH_MSG_VERBOSE("Sherpa ee + gamma");
+	    return ZBoson;
+    }
+    if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) {
+	    ATH_MSG_VERBOSE("Sherpa enu + gamma");
+	    return WBoson;
+    }
   }
 
   // New Sherpa Z->ee
@@ -689,6 +707,25 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     if ((numberOfChildren - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+
+    //--Sherpa tttt with all t->Wb; W->lnu
+    if ((numberOfChildren - NumOfquark - NumOfgluon) == 8 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 8) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) {
+      ATH_MSG_VERBOSE("MultiBoson for 4topLep");
+      return MultiBoson;
+    }
+    
+    //--Sherpa Vgamma ( Z->ee+gamma or W->enu+gamma )
+    if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && NumOfMuPl == 1 && NumOfMuMin == 1) {
+            ATH_MSG_VERBOSE("Sherpa mumu + gamma");
+            return ZBoson;
+    }
+    if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && (NumOfMuPl == 1 || NumOfMuMin == 1) && NumOfMuNeut == 1) {
+            ATH_MSG_VERBOSE("Sherpa munu + gamma");
+            return WBoson;
+    }
+    
   }
 
   //--New Sherpa Z->mumu
@@ -871,6 +908,24 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     if ((numberOfChildren - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+
+    //--Sherpa tttt with all t->Wb; W->lnu
+    if ((numberOfChildren - NumOfquark - NumOfgluon) == 8 &&
+        (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 8) &&
+        (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) {
+      ATH_MSG_VERBOSE("MultiBoson for 4topLep");
+      return MultiBoson;
+    }
+    
+    //--Sherpa Vgamma ( Z->tautau+gamma or W->taunu+gamma )
+    if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && NumOfTau == 2) {
+	    ATH_MSG_VERBOSE("Sherpa tautau + gamma");
+	    return ZBoson;
+    }
+    if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && NumOfTau == 1 && NumOfTauNeut == 1) {
+	    ATH_MSG_VERBOSE("Sherpa taunu + gamma");
+	    return WBoson;
+    }
   }
 
   // New Sherpa Z->tautau
@@ -1366,6 +1421,12 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
     if ((numberOfChildren - NumOfquark - NumOfgluon - NumOfPhot) == 6 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+    
+    //--Sherpa Vgamma ( Z->nunu+gamma )
+    if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && (NumOfElNeut == 2 || NumOfMuNeut == 2 || NumOfTauNeut == 2)) {
+	    ATH_MSG_VERBOSE("Sherpa nunu + gamma");
+	    return ZBoson;
+    }
   }
 
   // New Sherpa Z->nunu

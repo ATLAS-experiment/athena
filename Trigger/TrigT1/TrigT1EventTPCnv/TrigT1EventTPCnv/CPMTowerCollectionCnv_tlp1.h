@@ -5,7 +5,7 @@
 #define CPMTowerCollectionCNV_TLP1_H
 
 // Gaudi/Athena include(s):
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigT1EventTPCnv/CPMTowerCollection_tlp1.h"
 #include "TrigT1EventTPCnv/CPMTowerCollectionCnv_p1.h"
@@ -20,7 +20,7 @@
  *          to do the T/P conversion before/after writing/reading the CPMTower
  *          object.
  */
-class CPMTowerCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< CPMTowerCollectionCnv_p1, CPMTowerCollection_tlp1 > {
+class CPMTowerCollectionCnv_tlp1 : public TopLevelTPConverter< CPMTowerCollectionCnv_p1, CPMTowerCollection_tlp1 > {
 
 public:
   CPMTowerCollectionCnv_tlp1();

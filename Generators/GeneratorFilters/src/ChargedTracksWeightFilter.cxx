@@ -71,12 +71,11 @@ CLHEP::HepRandomEngine* ChargedTracksWeightFilter::getRandomEngine(const std::st
 }
 
 
-StatusCode ChargedTracksWeightFilter::filterEvent() {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode ChargedTracksWeightFilter::filterEvent(const EventContext& ctx) {
   CLHEP::HepRandomEngine* rndmGen = this->getRandomEngine(name(), ctx);
   if (!rndmGen) {
     ATH_MSG_WARNING("Failed to retrieve random number engine " << name());
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::FAILURE;
   }
 
@@ -119,13 +118,13 @@ StatusCode ChargedTracksWeightFilter::filterEvent() {
 
   // get event weight from the McEventCollection, used to determine efficiency of weight-filtering and cuts
   double orig_event_weight = 1;
-  CHECK(event_weight(orig_event_weight));
+  CHECK(event_weight(orig_event_weight, ctx));
 
   const auto selection = (((nChargedTracks <= m_nchmax)) && (nChargedTracks >= m_nchmin));
 
 
   if(!selection) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -150,10 +149,10 @@ StatusCode ChargedTracksWeightFilter::filterEvent() {
 
     weight_event(weight);
 
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
 
     double final_event_weight = 1;
-    CHECK(event_weight(final_event_weight));
+    CHECK(event_weight(final_event_weight, ctx));
 
     ATH_MSG_DEBUG("Event accepted nch: " << nChargedTracks
                   << " nch weight: " << weight
@@ -163,7 +162,7 @@ StatusCode ChargedTracksWeightFilter::filterEvent() {
     return StatusCode::SUCCESS;
   }
 
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 
@@ -282,11 +281,11 @@ StatusCode ChargedTracksWeightFilter::Spline::initialize( std::vector<double> & 
   return StatusCode::SUCCESS;
 }
 
-StatusCode ChargedTracksWeightFilter::event_weight(double & event_weight) const {
+StatusCode ChargedTracksWeightFilter::event_weight(double & event_weight, const EventContext& ctx) const {
 
   event_weight = 1;
 
-  auto first_event = event_const();
+  auto first_event = event_const(ctx);
 
   if(!first_event){
     ATH_MSG_ERROR("No events in McEventCollection");

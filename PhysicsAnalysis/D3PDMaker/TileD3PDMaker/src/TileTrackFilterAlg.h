@@ -59,7 +59,7 @@ class TileTrackFilterAlg : public AthAlgorithm{
         ~TileTrackFilterAlg(){};
 
         virtual StatusCode initialize();             // EXECUTED BEFORE EVENT LOOP 
-        virtual StatusCode execute();                // EXECUTED FOR EACH EVENT
+        virtual StatusCode execute(const EventContext& ctx);                // EXECUTED FOR EACH EVENT
         virtual StatusCode finalize();               // EXECUTED AFTER EVENT LOOP
         
         bool accept(const TRACK* p);         // CHECK WHETHER TRACKPARTICLE IS OK

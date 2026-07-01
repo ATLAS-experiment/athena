@@ -18,7 +18,7 @@ public:
         T_AthenaPoolCustomCnv<TileBeamElemContainer, TileBeamElemContainer_PERS >( svcloc) {}
 protected:
   TileBeamElemContainer_PERS*  createPersistent(TileBeamElemContainer* transCont);
-  TileBeamElemContainer*       createTransient ();
+  TileBeamElemContainer*       createTransient(const Token* token);
 };
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * L1TopoDataTypes.h
@@ -13,6 +13,7 @@
 #include <string>
 #include <iostream>
 #include <stdint.h>
+#include <stdexcept>
 
 /* Setting maximal number of bits */
 #ifndef MAXBITS 
@@ -180,7 +181,13 @@ namespace TSU {
           // Do the fractional part
           if (F > 0) {
             unsigned frac = m_tvalue & ( (1ull<<F)-1ull );
-            res += static_cast<float>(frac) / (2ull<<(F-1ull));
+            //coverity[shift_count_too_large]
+            // cppcheck-suppress shiftNegative; false positive
+            const auto denom = 2ull<<(F-1ull);
+            if (denom == 0){
+              throw std::runtime_error("Denominator is zero in L1TopoDataTypes:to_float");
+            }
+            res += static_cast<float>(frac) / (denom);
           }
           return res;
        }

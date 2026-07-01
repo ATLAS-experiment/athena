@@ -27,7 +27,7 @@ public:
   TBTrackInfoCnv (ISvcLocator* svcloc) : TBTrackInfoCnvBase(svcloc) {}
 protected:
   virtual TBTrackInfo_PERS*   createPersistent (TBTrackInfo* transCont);
-  virtual TBTrackInfo*        createTransient ();
+  virtual TBTrackInfo*        createTransient(const Token* token);
 
   TBTrackInfoCnv_p1  m_TPConverter;
 };

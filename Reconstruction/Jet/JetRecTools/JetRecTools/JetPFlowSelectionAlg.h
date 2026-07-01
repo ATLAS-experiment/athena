@@ -1,6 +1,6 @@
 // this is a -*- C++ -*- file
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
 #define JetPFlowSelectionAlg_H
 
 #include "AnaAlgorithm/AnaReentrantAlgorithm.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 
 #include "xAODPFlow/FlowElementContainer.h"
@@ -68,8 +67,8 @@ private:
 
   SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_chargedFE_energy_match_muonReadHandleKey{this,"FlowElementContainer_ChargedFE_energy_matched_muon","JetETMissChargedParticleFlowObjects.FE_efrac_matched_muon","ReadHandleKey for the fraction of neutral FlowElements cluster energy used to match to Muons"};
 
-  
 
+  
 };
 
 #endif

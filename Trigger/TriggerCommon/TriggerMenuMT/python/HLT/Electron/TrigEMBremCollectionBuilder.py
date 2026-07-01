@@ -30,7 +30,7 @@ def TrigEMBremCollectionBuilderCfg(flags, name = "TrigEgammaBremCollectionBuilde
         "useSCT",
         flags.Detector.EnableSCT or flags.Detector.EnableITkStrip)
     kwargs.setdefault("useTRT", flags.Detector.EnableTRT)
-    kwargs.setdefault("DoTruth", flags.Input.isMC)
+    kwargs.setdefault("doTruth", flags.Input.isMC)
     kwargs.setdefault("slimTrkTracks", flags.Egamma.slimGSFTrkTracks)
 
     # P->T conversion extra dependencies

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -18,6 +18,7 @@
 
 
 eflowRecTrack::eflowRecTrack(
+    const EventContext& ctx,
     const ElementLink<xAOD::TrackParticleContainer>& trackElemLink,
     const ToolHandle<eflowTrackExtrapolatorBaseAlgTool>& theTrackExtrapolatorTool) :
     m_trackId(-1), m_trackElemLink(trackElemLink), m_track(*trackElemLink), m_type(5),
@@ -29,7 +30,7 @@ eflowRecTrack::eflowRecTrack(
     m_isSubtracted(false),
     m_isRecovered(false),
     m_hasBin(true),
-    m_trackCaloPoints(theTrackExtrapolatorTool->execute(m_track))
+    m_trackCaloPoints(theTrackExtrapolatorTool->execute(ctx, m_track))
 {
 }
 

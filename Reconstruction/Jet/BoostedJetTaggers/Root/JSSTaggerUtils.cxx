@@ -155,6 +155,32 @@ StatusCode JSSTaggerUtils::initialize(){
   m_decHLScoreKey = m_containerName + "." + m_decorationName + "_" + m_decHLScoreKey.key();
   ATH_CHECK( m_decHLScoreKey.initialize() );
 
+  m_decConstScoreQGKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreQGKey.key();
+  m_decConstScoreWLKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreWLKey.key();
+  m_decConstScoreWTKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreWTKey.key();
+  m_decConstScoreZLKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreZLKey.key();
+  m_decConstScoreZTKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreZTKey.key();
+  m_decConstScoreCosTKey = m_containerName + "." + m_decorationName + "_" + m_decConstScoreCosTKey.key();
+  m_decConstScorePT1Key = m_containerName + "." + m_decorationName + "_" + m_decConstScorePT1Key.key();
+  m_decConstScoreEta1Key = m_containerName + "." + m_decorationName + "_" + m_decConstScoreEta1Key.key();
+  m_decConstScorePhi1Key = m_containerName + "." + m_decorationName + "_" + m_decConstScorePhi1Key.key();
+  m_decConstScorePT2Key = m_containerName + "." + m_decorationName + "_" + m_decConstScorePT2Key.key();
+  m_decConstScoreEta2Key = m_containerName + "." + m_decorationName + "_" + m_decConstScoreEta2Key.key();
+  m_decConstScorePhi2Key = m_containerName + "." + m_decorationName + "_" + m_decConstScorePhi2Key.key();
+
+  ATH_CHECK( m_decConstScoreQGKey.initialize() );
+  ATH_CHECK( m_decConstScoreWLKey.initialize() );
+  ATH_CHECK( m_decConstScoreWTKey.initialize() );
+  ATH_CHECK( m_decConstScoreZLKey.initialize() );
+  ATH_CHECK( m_decConstScoreZTKey.initialize() );
+  ATH_CHECK( m_decConstScoreCosTKey.initialize() );
+  ATH_CHECK( m_decConstScorePT1Key.initialize() );
+  ATH_CHECK( m_decConstScoreEta1Key.initialize() );
+  ATH_CHECK( m_decConstScorePhi1Key.initialize() );
+  ATH_CHECK( m_decConstScorePT2Key.initialize() );
+  ATH_CHECK( m_decConstScoreEta2Key.initialize() );
+  ATH_CHECK( m_decConstScorePhi2Key.initialize() );
+
   return StatusCode::SUCCESS;
 
 }
@@ -950,6 +976,204 @@ StatusCode JSSTaggerUtils::GetWConstScore(const xAOD::JetContainer& jets) const 
 
     // save decorator
     decConstScore(*jet) = score;
+  }
+  
+  return StatusCode::SUCCESS;
+}
+
+StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) const {
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore(m_decConstScoreKey);
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_qg(m_decConstScoreQGKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_wl(m_decConstScoreWLKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_wt(m_decConstScoreWTKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_zl(m_decConstScoreZLKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_zt(m_decConstScoreZTKey);
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_cosT(m_decConstScoreCosTKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_pT1(m_decConstScorePT1Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_eta1(m_decConstScoreEta1Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_phi1(m_decConstScorePhi1Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_pT2(m_decConstScorePT2Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_eta2(m_decConstScoreEta2Key);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decConstScore_phi2(m_decConstScorePhi2Key);
+
+  // define vectors to store constituents for calculations
+  const long unsigned int nMaxConstituents (70);
+  std::vector<float> pT, eta, phi, E;
+  pT.reserve(nMaxConstituents); eta.reserve(nMaxConstituents); phi.reserve(nMaxConstituents); E.reserve(nMaxConstituents);
+
+  for(const xAOD::Jet *jet : jets){
+
+    // init value
+    std::vector<float> scores;
+
+    // get constituents
+    std::vector<xAOD::JetConstituent> constituents = jet -> getConstituents().asSTLVector();
+
+    // skip non physical constituents
+    constituents.erase( std::remove_if( constituents.begin(), constituents.end(),
+                        [] (xAOD::JetConstituent constituent) -> bool {return constituent -> pt() < 1.e-3;}), 
+                        constituents.end()) ;
+
+    // sort by pT
+    std::sort( constituents.begin(), constituents.end(), DescendingPtSorterConstituents) ;
+
+    std::vector<xAOD::JetConstituent> constituentsForModel;
+
+    if( constituents.size() > nMaxConstituents )
+    {
+      constituentsForModel = std::vector<xAOD::JetConstituent> (constituents.begin(), constituents.begin() + nMaxConstituents);
+    }
+    else 
+      constituentsForModel = constituents;
+
+    // build constituents, mask and base momentum for interaction variables
+    std::vector<std::vector<float>> const_vars;
+    std::vector<std::vector<float>> masks_vars;
+    std::vector<std::vector<std::vector<float>>> inter_vars;
+
+    for (const auto& ci : constituentsForModel) {
+
+      // put the constituent in a tlv for help
+      TLorentzVector constituent_i;
+      constituent_i.SetPtEtaPhiE(ci.pt(), ci.eta(), ci.phi(), ci.e());
+
+      // calculate variables
+      float log_pT = log(ci.pt());
+      float log_E = log(ci.e());
+      float log_pT_rel = log(Clip(ci.pt() / jet->pt(), 1.e-8));
+      float log_E_rel = log(Clip(ci.e() / jet->e(), 1.e-8));
+      float Deta = ci.eta() - jet->eta();
+      float Dphi = constituent_i.DeltaPhi(jet->p4());
+      float DR = constituent_i.DeltaR(jet->p4());
+
+      // pack: constituents variables
+      std::vector<float> vars = {log_pT, log_E,
+                                 (float)ci.eta(), (float)ci.phi(),
+                                 log_pT_rel, log_E_rel, Deta, Dphi, DR};
+      const_vars.push_back(vars);
+
+      // pack: mask variable
+      vars = {1.};
+      masks_vars.push_back(vars);
+
+      // explict interaction variables
+      // calculate variables: interactions
+      std::vector<std::vector<float>> inter_vars_int;
+      for (const auto& cj : constituentsForModel) {
+        // tlv for constituents
+        TLorentzVector constituent_j;
+        constituent_j.SetPtEtaPhiE(cj.pt(), cj.eta(), cj.phi(), cj.e());
+  
+        // preparing variables
+        float delta = constituent_i.DeltaR(constituent_j, true);
+        float min = std::min(ci.pt(), cj.pt());
+        float mass2 = (constituent_i + constituent_j).M2();
+
+        // final values
+        float log_delta = log(Clip(delta, 1.e-8));        
+        float log_mindelta = log(Clip(min * delta, 1.e-8));
+        float log_min_over_pT = log(Clip(min / (ci.pt() + cj.pt()), 1.e-8));
+        float log_mass2 = log(Clip(mass2, 1.e-8));
+
+        // set the diagonal to 0
+        if(&ci == &cj){
+          log_delta = 0;
+          log_mindelta = 0;
+          log_min_over_pT = 0;
+          log_mass2 = 0;
+        }
+
+        std::vector<float> vars = { log_delta,
+                                    log_mindelta,
+                                    log_min_over_pT,
+                                    log_mass2
+                                  };
+        inter_vars_int.push_back(vars);
+      }
+
+      inter_vars.push_back(inter_vars_int);
+    }
+
+    // adjust
+    std::vector<std::vector<float>> vars_inter;
+    vars_inter.reserve(nMaxConstituents);
+    for(long unsigned int i=constituents.size(); i<nMaxConstituents; i++){
+      // pack: constituents variables
+      std::vector<float> vars = {-99., -99., -99., -99., -99., -99., -99., -99., -99.};
+      const_vars.push_back(vars);
+
+      // pack: interaction variables
+      vars_inter.clear();
+      vars = {-99., -99., -99., -99.};
+      for(long unsigned int j=0; j<nMaxConstituents; j++){
+        vars_inter.push_back(vars);
+      }
+      inter_vars.push_back(vars_inter);
+
+      // pack: mask variable
+      vars = {0.};
+      masks_vars.push_back(vars);
+    }
+
+    for(long unsigned int i=0; i<constituents.size(); i++){
+      std::vector<float> vars = {-99., -99., -99., -99.};
+      for(long unsigned int j=constituents.size(); j<nMaxConstituents; j++){
+        inter_vars.at(i).push_back(vars);
+      }
+    }
+
+    // evaluate the model
+    if( constituents.size() > 1 ) 
+      scores = m_MLBosonTagger -> retrieveConstituentsScoreMultiClass(const_vars, inter_vars, masks_vars);
+
+    // save decorator(s)
+    // score not available
+    if(scores.size() == 0)
+      decConstScore(*jet) = -99.;
+    // binary or regression
+    else if(scores.size() == 1)
+      decConstScore(*jet) = scores.at(0);
+    // multiclass
+    else if(scores.size() == 5){
+      decConstScore_qg(*jet) = scores.at(0);
+      decConstScore_wl(*jet) = scores.at(1);
+      decConstScore_wt(*jet) = scores.at(2);
+      decConstScore_zl(*jet) = scores.at(3);
+      decConstScore_zt(*jet) = scores.at(4);
+    }
+    // multi regression
+    else if(scores.size() == 7){
+      decConstScore_pT1(*jet) = scores.at(0);
+      decConstScore_eta1(*jet) = scores.at(1);
+      decConstScore_phi1(*jet) = scores.at(2);
+      decConstScore_pT2(*jet) = scores.at(3);
+      decConstScore_eta2(*jet) = scores.at(4);
+      decConstScore_phi2(*jet) = scores.at(5);
+      decConstScore_cosT(*jet) = scores.at(6);
+    }
+    // multiclass + regression
+    else if(scores.size() == 12){
+      decConstScore_qg(*jet) = scores.at(0);
+      decConstScore_wl(*jet) = scores.at(1);
+      decConstScore_wt(*jet) = scores.at(2);
+      decConstScore_zl(*jet) = scores.at(3);
+      decConstScore_zt(*jet) = scores.at(4);
+      decConstScore_pT1(*jet) = scores.at(5);
+      decConstScore_eta1(*jet) = scores.at(6);
+      decConstScore_phi1(*jet) = scores.at(7);
+      decConstScore_pT2(*jet) = scores.at(8);
+      decConstScore_eta2(*jet) = scores.at(9);
+      decConstScore_phi2(*jet) = scores.at(10);
+      decConstScore_cosT(*jet) = scores.at(11);
+    }
+    else{
+      ATH_MSG_ERROR("ERROR: the output size of this tagger is not currently supported!");
+      return StatusCode::FAILURE;
+    }
+
   }
   
   return StatusCode::SUCCESS;

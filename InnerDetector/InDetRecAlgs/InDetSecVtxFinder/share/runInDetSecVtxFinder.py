@@ -14,7 +14,6 @@ if __name__ == "__main__":
     # use one of the predefined files
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
-    flags.Input.isMC=True
 
     # lock the flags
     flags.lock()
@@ -28,14 +27,7 @@ if __name__ == "__main__":
 
     # add the algorithm to the configuration
     from InDetConfig.InDetSecVtxFinderConfig import InDetSecVtxFinderAlgCfg
-    acc.merge(InDetSecVtxFinderAlgCfg(flags,
-              name = "InDetSecVtxFinder",
-              FinderTool = "ISV",
-              useTrackParticles = True,
-              inputTrackParticles = "InDetTrackParticles",
-              outputSecondaryVertices = "RecoSecVtx",
-              doVertexMerging = False,
-              OutputLevel = Lvl.INFO))
+    acc.merge(InDetSecVtxFinderAlgCfg(flags, OutputLevel = Lvl.INFO))
 
     # Contents
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // Local include(s):
 #include "CalibratedMuonsProvider.h"
@@ -24,16 +24,15 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CalibratedMuonsProvider::execute() {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    StatusCode CalibratedMuonsProvider::execute(const EventContext& ctx) {
         SG::ReadHandle<xAOD::MuonContainer> muons{m_inputKey, ctx};
         if (!muons.isValid()) {
             ATH_MSG_FATAL("No muon container found");
             return StatusCode::FAILURE;
         }
-     
-        std::pair<std::unique_ptr<xAOD::MuonContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> output =
-            xAOD::shallowCopyContainer(*muons, ctx);
+
+        xAOD::ShallowCopyResult_t<xAOD::MuonContainer> output =
+            xAOD::shallowCopy(*muons, ctx);
 
         if (!output.first || !output.second) {
             ATH_MSG_FATAL("Creation of shallow copy failed");

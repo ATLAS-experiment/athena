@@ -11,18 +11,18 @@ TBTDC_PERS* TBTDCCnv::createPersistent(TBTDC* transCont) {
     return persObj; 
 }
     
-TBTDC* TBTDCCnv::createTransient() {
+TBTDC* TBTDCCnv::createTransient(const Token* token) {
    MsgStream log(msgSvc(), "TBTDCConverter" );
    static const pool::Guid   p1_guid("D909CCF6-CE91-4401-98FC-C1C41BD06513");  // GUID of the persistent object
    static const pool::Guid   p0_guid("51CEFACC-47E5-4BF1-8BF5-FA48FCA15B43");  // GUID of the transient object
-   if( compareClassGuid(p1_guid) ) {
+   if( compareClassGuid(token, p1_guid) ) {
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< TBTDC_p1 > col_vect( poolReadObject< TBTDC_p1 >() );
+      std::unique_ptr< TBTDC_p1 > col_vect( poolReadObject< TBTDC_p1 >(token) );
       return m_TPConverter.createTransient( col_vect.get(), log );
    }
-   else if( compareClassGuid(p0_guid) ) {
+   else if( compareClassGuid(token, p0_guid) ) {
       // regular object from before TP separation, just return it
-      return poolReadObject< TBTDC >();
+      return poolReadObject< TBTDC >(token);
    } 
    throw std::runtime_error("Unsupported persistent version of Data Collection");
 }

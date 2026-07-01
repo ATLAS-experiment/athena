@@ -126,7 +126,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
     ATH_MSG_DEBUG("**********Decoder dumping the words******** ");
 
     if (size > 0) {
-        ATH_MSG_DEBUG("The size of this ROD-read is ");
+        ATH_MSG_DEBUG("The size of this ROD-read is " << size << ", wordPos=" << wordPos);
         for (unsigned int i = 0; i < size; i++) ATH_MSG_DEBUG("word " << i << " = " << MSG::hex << vint[i] << MSG::dec);
     } else {
         WARNING_WITH_LINE("Buffer size 0 ! ");
@@ -204,9 +204,9 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
 
         if (!cab) {
             ATH_MSG_WARNING("Cabling not understood");
-            ATH_MSG_WARNING("Skip decoding of CSM link, subdetId : " << MSG::hex << std::showbase << cabling_data.subdetectorId << " "
-                                                                     << "mrodId : " << cabling_data.mrod << " " << MSG::dec
-                                                                     << "csmId : " << cabling_data.csm);
+            ATH_MSG_WARNING("Skip decoding of CSM link, subdetId : " << MSG::hex << std::showbase << (int)cabling_data.subdetectorId << " "
+                                                                     << "mrodId : " << (int)cabling_data.mrod << " " << MSG::dec
+                                                                     << "csmId : " << (int)cabling_data.csm);
             // assert(false);
             // continue;  // Go to next link instead of crashing (here or later) E.P.
 

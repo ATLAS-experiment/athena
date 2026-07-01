@@ -13,6 +13,7 @@
 
 #include "xAODTruth/TruthVertex.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include "GaudiKernel/PhysicalConstants.h"
 
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
@@ -21,10 +22,6 @@
 
 // ref:
 // https://svnweb.cern.ch/trac/atlasoff/browser/Tracking/TrkEvent/TrkParametersBase/trunk/TrkParametersBase/CurvilinearParametersT.h
-
-
-
-
 
 InDetPhysValTruthDecoratorAlg::InDetPhysValTruthDecoratorAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator)
@@ -41,13 +38,12 @@ InDetPhysValTruthDecoratorAlg::initialize() {
   ATH_CHECK(m_beamSpotDecoKey.initialize());
   ATH_CHECK( m_truthPixelClusterName.initialize() );
   ATH_CHECK( m_truthSCTClusterName.initialize() );
-  ATH_CHECK( m_truthSelectionTool.retrieve( EnableTool { not m_truthSelectionTool.name().empty() } ) );
-  if (not m_truthSelectionTool.name().empty() ) {
-    m_cutFlow = CutFlow(m_truthSelectionTool->nCuts() );
-  }
 
   ATH_CHECK( m_truthParticleName.initialize());
   ATH_CHECK( m_truthParticleIndexDecor.initialize( !m_truthParticleIndexDecor.key().empty()));
+
+  ATH_CHECK(m_truthEventName.initialize(!m_truthEventName.key().empty()));
+  ATH_CHECK(m_truthPileupEventName.initialize(!m_truthPileupEventName.key().empty()));
 
   std::vector<std::string> decor_names(kNDecorators);
   decor_names[kDecorD0]="d0";
@@ -59,6 +55,7 @@ InDetPhysValTruthDecoratorAlg::initialize() {
   decor_names[kDecorProdR]="prodR";
   decor_names[kDecorProdZ]="prodZ";
   decor_names[kDecorNSilHits]="nSilHits";
+  decor_names[kDecorTime]="time";
 
   IDPVM::createDecoratorKeysAndAccessor(*this, m_truthParticleName,m_prefix.value(),decor_names, m_decor);
   assert( m_decor.size() == kNDecorators);
@@ -67,10 +64,6 @@ InDetPhysValTruthDecoratorAlg::initialize() {
 
 StatusCode
 InDetPhysValTruthDecoratorAlg::finalize() {
-  if (not m_truthSelectionTool.name().empty()) {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    ATH_MSG_DEBUG( "Truth selection cut flow : " << m_cutFlow.report(m_truthSelectionTool->names()) );
-  }
   if (m_nMissingTruthParticles>0) {
     ATH_MSG_INFO( "Clusters which reference missing / thinned truth particles : " << m_nMissingTruthParticles );
   }
@@ -83,6 +76,7 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
   if ((not ptruth.isValid())) {
     return StatusCode::FAILURE;
   }
+
   std::size_t ptruth_size=ptruth->size();
 
   std::vector<unsigned int> truthIndexMap;
@@ -167,28 +161,16 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
      SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosY(m_beamSpotDecoKey[1], ctx);
      SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosZ(m_beamSpotDecoKey[2], ctx);
      Amg::Vector3D beamPos = Amg::Vector3D(beamPosX(0), beamPosY(0), beamPosZ(0));
-
-     if ( m_truthSelectionTool.get() ) {
-        CutFlow tmp_cut_flow(m_truthSelectionTool->nCuts());
-        for (const xAOD::TruthParticle *truth_particle : *ptruth) {
-           auto passed = m_truthSelectionTool->accept(truth_particle);
-           tmp_cut_flow.update( passed.missingCuts() );
-           if (not passed) continue;
-           decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
-        }
-        std::lock_guard<std::mutex> lock(m_mutex);
-        m_cutFlow.merge(std::move(tmp_cut_flow));
+     for (const xAOD::TruthParticle *truth_particle : *ptruth) {
+        decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
      }
-     else {
-        for (const xAOD::TruthParticle *truth_particle : *ptruth) {
-           decorateTruth(*truth_particle, float_decor, beamPos, tp_clustercount);
-        }
+     if (!decorateTruthTime(float_decor)) {
+        return StatusCode::FAILURE;
      }
   }
+
   return StatusCode::SUCCESS;
 }
-
-
 
 bool
 InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle,
@@ -265,6 +247,73 @@ InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle
     ATH_MSG_DEBUG("The TrackParameters pointer for this TruthParticle is NULL");
     return false;
   }
+}
+
+bool
+InDetPhysValTruthDecoratorAlg::decorateTruthTime(std::vector<IDPVM::OptionalDecoration<xAOD::TruthParticleContainer, float>>& float_decor) const {
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
+  const xAOD::TruthVertex* truthVtx = nullptr;
+  float truthTime;
+
+  // First HS event
+  if (!m_truthEventName.key().empty()) {
+    ATH_MSG_VERBOSE("Getting TruthEventContainer");
+    SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer(m_truthEventName, ctx);
+    if (!truthEventContainer.isPresent()) {
+      ATH_MSG_WARNING("TruthEventContainer name was specified, but no container is present");
+      return true;
+    }
+    const xAOD::TruthEvent* event = (truthEventContainer.isValid()) ? truthEventContainer->at(0) : nullptr;
+    if (event) {
+      truthVtx = event->signalProcessVertex();
+      truthTime = (truthVtx) ? truthVtx->t() / Gaudi::Units::c_light : -9999.;
+      for (const auto& link : event->truthParticleLinks()) {
+        if (link.isValid()) {
+          IDPVM::decorateOrRejectQuietly(**link, float_decor[kDecorTime], truthTime);
+        }
+      }
+    }
+    else {
+      ATH_MSG_ERROR("No valid TruthEvent!");
+      return false;
+    }
+  }
+
+   // Then PU events
+  if (!m_truthPileupEventName.key().empty()) {
+    ATH_MSG_VERBOSE("Getting TruthPileupEventContainer");
+    SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileupEventName, ctx);
+    if (!truthPileupEventContainer.isPresent()) {
+      ATH_MSG_WARNING("TruthPileupEventContainer name was specified, but no container is present");
+      return true;
+    }
+    if (truthPileupEventContainer.isValid()) {
+      for (const auto event : *truthPileupEventContainer) {
+        truthVtx = nullptr;
+        for (std::size_t i = 0; i < event->nTruthVertices(); i++) {
+          truthVtx = event->truthVertex(i);
+          if (truthVtx) {
+            break;
+          }
+        }
+        truthTime = (truthVtx) ? truthVtx->t() / Gaudi::Units::c_light: -9999.;
+        for (const auto& link : event->truthParticleLinks()) {
+          if (link.isValid()) {
+            IDPVM::decorateOrRejectQuietly(**link, float_decor[kDecorTime], truthTime);
+          }
+        }
+      }
+    }
+    else {
+      ATH_MSG_ERROR("TruthPileupEventContainer is invalid!");
+      return false;
+    }
+  }
+
+  return true;
+
 }
 
 /** references:

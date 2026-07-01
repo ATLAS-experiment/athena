@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( IdDictParser )
 find_package( Boost COMPONENTS unit_test_framework )
+find_package( LibXml2 )  # required for unit test
 
 # Component(s) in the package:
 atlas_add_library( IdDictParser
@@ -27,13 +28,14 @@ atlas_add_test( IdDictParser_test
                 SOURCES test/IdDictParser_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDictParser
-                POST_EXEC_SCRIPT nopost.sh )
+                LOG_IGNORE_PATTERN "will exit with ERROR"
+                POST_EXEC_SCRIPT noerror.sh )
                 
 atlas_add_test(IdDictMgr_test
   SOURCES test/IdDictMgr_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils IdDict IdDictParser
-  POST_EXEC_SCRIPT nopost.sh 
+  POST_EXEC_SCRIPT noerror.sh
 )
 
 set_property(TEST IdDictParser_IdDictParser_test_ctest PROPERTY ENVIRONMENT_MODIFICATION "XMLDEBUG=set:1")
@@ -43,7 +45,7 @@ atlas_install_xmls( data/*.dtd data/*.xml )
 
 atlas_add_test( ValidateIdDictXml_test
                 SCRIPT "xmllint ${CMAKE_CURRENT_SOURCE_DIR}/data/ATLAS_IDS.xml --valid --loaddtd --noent --noout"
-                POST_EXEC_SCRIPT "nopost.sh" 
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 

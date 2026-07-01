@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCafJobs/LArSimpleShapeDumper.h"
@@ -25,21 +25,18 @@ LArSimpleShapeDumper::~LArSimpleShapeDumper()
 StatusCode LArSimpleShapeDumper::initialize()
 {
   ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
-  ATH_CHECK( detStore()->regHandle(m_shape, "LArShape") );
   return StatusCode::SUCCESS; 
 }
 
 
-StatusCode LArSimpleShapeDumper::execute()
+StatusCode LArSimpleShapeDumper::execute(const EventContext& /*ctx*/)
 {
   static bool first = true;
   if (first) {
     first = false;
-    if (!m_shape || !m_shape.cptr()) {
-      ATH_MSG_FATAL ( "Could not retrieve shape object, abort!" );
-      return StatusCode::FAILURE;
-    }
-    const LArShapeComplete* shapeObj = dynamic_cast<const LArShapeComplete*>(m_shape.cptr());
+    const ILArShape* shape = nullptr;
+    ATH_CHECK( detStore()->retrieve (shape, "LArShape") );
+    const LArShapeComplete* shapeObj = dynamic_cast<const LArShapeComplete*>(shape);
     if (!shapeObj) {
       ATH_MSG_FATAL ( "Shape object is not of type LArShapeComplete ?!" );
       return StatusCode::FAILURE;

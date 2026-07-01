@@ -46,7 +46,7 @@ StatusCode FakeLArTimeOffset::initialize() {
 
 
 
-StatusCode FakeLArTimeOffset::execute()
+StatusCode FakeLArTimeOffset::execute(const EventContext& /*ctx*/)
 {return StatusCode::SUCCESS;}
 
 StatusCode FakeLArTimeOffset::finalize()

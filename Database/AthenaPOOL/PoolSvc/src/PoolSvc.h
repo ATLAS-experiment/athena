@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_H
@@ -26,7 +26,7 @@
 namespace pool {
    class IContainer;
    class IDatabase;
-   class IPersistencySvc;
+   class ISession;
 }
 
 
@@ -134,7 +134,7 @@ public: // Non-static members
 
    /// Connect to a logical database unit; PersistencySvc is chosen according to transaction type (accessmode).
    virtual
-   StatusCode connect(pool::ITransaction::Type type,
+   StatusCode connect(Io::IoFlag type,
 	   unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// Commit data for a given contextId and flush buffer.
@@ -220,18 +220,16 @@ private: // data
    coral::Context*                                   m_context{nullptr};
    bool                                              m_shareCat{false};
    pool::IFileCatalog*                               m_catalog{nullptr};
-   std::vector<pool::IPersistencySvc*>               m_persistencySvcVec;
+   std::vector<pool::ISession*>      m_dbSessionVec;
    std::vector<CallMutex*>                           m_pers_mut;
    std::map<std::string, unsigned int>               m_inputContextLabel;
    std::map<std::string, unsigned int>               m_outputContextLabel;
    std::string                                       m_mainOutputLabel{};
    std::map<unsigned int, unsigned int>              m_contextMaxFile;
-   // Cache for open file guids for each m_persistencySvcVec member, protected by m_pers_mut
+   // Cache for open file guids for each m_dbsessionVec member, protected by m_pers_mut
    mutable std::map<unsigned int, std::list<Guid> >  m_guidLists ATLAS_THREAD_SAFE;
 
 private: // properties
-   /// FileOpen, the open mode for the file ("append" or "overwrite").
-   Gaudi::Property<std::string> m_fileOpen{this,"FileOpen","overwrite"};
    /// MaxFilesOpen, option to have PoolSvc limit the number of open Input Files: default = 0
    ///  (No files are closed automatically)
    Gaudi::Property<int> m_dbAgeLimit{this,"MaxFilesOpen",0};
@@ -260,17 +258,15 @@ private: // properties
    Gaudi::Property<std::vector<std::string>> m_frontierRefresh{this,"FrontierRefreshSchema",{}};
    /// Use DBReplicaSvc to sort database connections, default = true.
    Gaudi::Property<bool> m_sortReplicas{this,"SortReplicas",true};
-   /// Default ROOT container type
-   Gaudi::Property<std::string> m_defaultContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
 
 private: // internal helper functions
-   // delete all APR::Persistency Services, Catalog, Mutexes and Indexes
+   // delete all Persistency Services, Catalog, Mutexes and Indexes
    void clearState();
 
    pool::IFileCatalog* createCatalog();
    void patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const;
 
-   // setup APR persistency
+   // setup persistency
    StatusCode setupPersistencySvc();
 
    /// Get Database handle

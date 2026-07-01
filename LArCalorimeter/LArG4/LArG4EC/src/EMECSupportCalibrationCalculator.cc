@@ -166,6 +166,7 @@ namespace LArG4 {
 
   G4bool EMECSupportCalibrationCalculator::Process (const G4Step* a_step,
                   LArG4Identifier & identifier,
+                  LArG4Identifier & identifier_sr,
                   std::vector<G4double> & energies,
                   const eCalculatorProcessing a_process) const
   {
@@ -460,7 +461,7 @@ namespace LArG4 {
         //m_backupCalculator->Process(a_step, kOnlyID);
         //identifier = m_backupCalculator->identifier();
         std::vector<G4double> tmpv;
-        m_backupCalculator->Process(a_step, identifier, tmpv, kOnlyID);
+        m_backupCalculator->Process(a_step, identifier, identifier_sr, tmpv, kOnlyID);
       } else {
         // Append the cell ID to the (empty) identifier.
         identifier << 10         // Calorimeter

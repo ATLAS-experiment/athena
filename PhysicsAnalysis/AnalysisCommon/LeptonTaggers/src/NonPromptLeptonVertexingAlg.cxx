@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -11,7 +11,6 @@
 #include "xAODTracking/VertexAuxContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/DecorKeyHelpers.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // C/C++
 #include <cmath>
@@ -104,14 +103,13 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::finalize()
 }
 
 //=============================================================================
-StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
+StatusCode Prompt::NonPromptLeptonVertexingAlg::execute(const EventContext& ctx)
 {
   //
   // Start execute timer for new event
   //
   TimerScopeHelper timer(m_timerExec);
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   m_countEvents++;
 
@@ -216,8 +214,8 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
       }
     }
     else if(muon) {
-      if(passMuonCand(*muon) && muon->inDetTrackParticleLink().isValid()) {
-        tracklep = *(muon->inDetTrackParticleLink());
+      if(passMuonCand(*muon)) {
+        tracklep = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       }
     }
     else {
@@ -230,7 +228,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
       indexVectorDec                (*lepton).clear();
       indexVectorDecDeepMerge       (*lepton).clear();
 
-      ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute - cannot find muon->inDetTrackParticleLink() nor electron->trackParticle()");
+      ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::execute - cannot find muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) nor electron->trackParticle()");
       continue;
     }
 
@@ -261,7 +259,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
     // Fit 2-track vertices
     //
     std::vector<std::unique_ptr<xAOD::Vertex>> twoTrkVertices = prepLepWithTwoTrkSVVec(
-      fittingInput, tracklep, ifitTracks
+      ctx, fittingInput, tracklep, ifitTracks
     );
 
     // We make a copy so we can store the list of original
@@ -276,7 +274,7 @@ StatusCode Prompt::NonPromptLeptonVertexingAlg::execute()
     ATH_MSG_DEBUG("Getting deep merged vertices");
     ATH_MSG_DEBUG("Starting with " << twoTrkVertices.size() << " 2-track vertices");
     Prompt::MergeResultNotOwner deep_merged_result = m_vertexMerger->mergeInitVertices(
-        fittingInput, tracklep, twoTrkVertices, ifitTracks);
+      ctx, fittingInput, tracklep, twoTrkVertices, ifitTracks);
 
     //
     // Save secondary vertices
@@ -350,15 +348,12 @@ bool Prompt::NonPromptLeptonVertexingAlg::passMuonCand(const xAOD::Muon &muon) c
   //
   // Check whether muon candidate is a combined muon
   //
-  const bool combined = (muon.muonType() == xAOD::Muon::Combined);
-
   ATH_MSG_DEBUG("NonPromptLeptonVertexingAlg::passMuonCand - "
     << "pT=" << muon.pt() << ", eta=" << muon.eta() << ", phi=" << muon.phi() << std::endl
     << "   Type     = " << muon.muonType() << std::endl
-    << "   Combined = " << combined        << std::endl
     << "   " << truthAsStr(muon));
 
-  return combined;
+  return muon.muonType() == xAOD::Muon::MuonType::Combined;
 }
 
 //=============================================================================
@@ -440,6 +435,7 @@ std::vector<const xAOD::TrackParticle*> Prompt::NonPromptLeptonVertexingAlg::fin
 
 //=============================================================================
 std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::prepLepWithTwoTrkSVVec(
+  const EventContext& ctx,
   const FittingInput &input,
   const xAOD::TrackParticle* tracklep,
   const std::vector<const xAOD::TrackParticle*> &tracks
@@ -463,7 +459,7 @@ std::vector<std::unique_ptr<xAOD::Vertex>> Prompt::NonPromptLeptonVertexingAlg::
     tracksForFit.push_back(selectedtrack);
 
     std::unique_ptr<xAOD::Vertex> newSecondaryVertex = m_vertexFitterTool->fitVertexWithPrimarySeed(
-      input, tracksForFit, kTwoTrackVtx
+      ctx, input, tracksForFit, kTwoTrackVtx
     );
 
     if(!newSecondaryVertex) {

@@ -1816,13 +1816,12 @@ namespace Trk {
   }
 
   Track *
-  GlobalChi2Fitter::alignmentFit(AlignmentCache& alignCache,
+  GlobalChi2Fitter::alignmentFit(const EventContext& ctx,
+                        AlignmentCache& alignCache,
                         const Track &inputTrack,
                         const RunOutlierRemoval runOutlier,
                         const ParticleHypothesis matEffects) const {
 
-
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     Cache cache(this);
     initFieldCache(ctx, cache);
 

@@ -44,14 +44,14 @@ bool xAODDirectPhotonFilterCmpByPt(const xAOD::TruthParticle* p1, const xAOD::Tr
   return (p1->pt()>p2->pt());
 }
 
-StatusCode xAODDirectPhotonFilter::filterEvent() {
+StatusCode xAODDirectPhotonFilter::filterEvent(const EventContext& ctx) {
 
   std::vector<const xAOD::TruthParticle*> promptPhotonsInEta;
 
   int phot = 0;
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event and find photons in given eta range
@@ -82,7 +82,7 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
   ATH_MSG_DEBUG("number of photons" << phot);
 
   if (promptPhotonsInEta.size()<m_NPhotons) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   }
   else {
     for (const auto& photon: promptPhotonsInEta) {
@@ -105,7 +105,7 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
       if (pass) {
          ATH_MSG_DEBUG("Passed!");
          }
-      setFilterPassed(pass);
+      setFilterPassed(pass, ctx);
     }
     else { // just require NPhotons to pass m_Ptmin/max[0]
       size_t NPhotons=0;
@@ -115,7 +115,7 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
       }
 
       if (NPhotons>=m_NPhotons) ATH_MSG_DEBUG("Passed!");
-      setFilterPassed(NPhotons>=m_NPhotons);
+      setFilterPassed(NPhotons>=m_NPhotons, ctx);
     }
   }
   return StatusCode::SUCCESS;

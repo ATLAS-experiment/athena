@@ -11,18 +11,18 @@ TBTriggerPatternUnit_PERS* TBTriggerPatternUnitCnv::createPersistent(TBTriggerPa
     return persObj; 
 }
     
-TBTriggerPatternUnit* TBTriggerPatternUnitCnv::createTransient() {
+TBTriggerPatternUnit* TBTriggerPatternUnitCnv::createTransient(const Token* token) {
    MsgStream log(msgSvc(), "TBTriggerPatternUnitConverter" );
    static const pool::Guid   p1_guid("7630C108-3B5F-4ED3-97C8-F3148AF1B84F");  // GUID of the persistent object
    static const pool::Guid   p0_guid("0B82A5B3-0808-4B78-B47B-BFE9388EEEEB");  // GUID of the transient object
-   if( compareClassGuid(p1_guid) ) {
+   if( compareClassGuid(token, p1_guid) ) {
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< TBTriggerPatternUnit_p1 > col_vect( poolReadObject< TBTriggerPatternUnit_p1 >() );
+      std::unique_ptr< TBTriggerPatternUnit_p1 > col_vect( poolReadObject< TBTriggerPatternUnit_p1 >(token) );
       return m_TPConverter.createTransient( col_vect.get(), log );
    }
-   else if( compareClassGuid(p0_guid) ) {
+   else if( compareClassGuid(token, p0_guid) ) {
       // regular object from before TP separation, just return it
-      return poolReadObject< TBTriggerPatternUnit >();
+      return poolReadObject< TBTriggerPatternUnit >(token);
    } 
    throw std::runtime_error("Unsupported persistent version of Data Collection");
 }

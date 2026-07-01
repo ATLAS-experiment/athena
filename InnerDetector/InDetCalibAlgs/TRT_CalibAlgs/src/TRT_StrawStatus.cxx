@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,6 +27,10 @@
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
 
 #include "StoreGate/ReadHandle.h"
+
+#include <fstream>
+#include <format>
+#include <system_error>
 
 int last_lumiBlock0=-99;
 
@@ -86,9 +90,9 @@ StatusCode InDet::TRT_StrawStatus::finalize(){
 
 //================ Execution ====================================================
 
-StatusCode InDet::TRT_StrawStatus::execute(){
+StatusCode InDet::TRT_StrawStatus::execute(const EventContext& ctx){
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     StatusCode sc = StatusCode::SUCCESS;
     if (not eventInfo.isValid()) {
       ATH_MSG_ERROR( "Unable to retrieve Event Info " );
@@ -100,13 +104,13 @@ StatusCode InDet::TRT_StrawStatus::execute(){
       m_runNumber = runNumber;
     }
     int lumiBlock0 =eventInfo->lumiBlock();
-    SG::ReadHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey);
+    SG::ReadHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey, ctx);
 
     if (not rdoContainer.isValid()) {
       ATH_MSG_ERROR( "no TRT_RDO container available " );
       return StatusCode::FAILURE;
     }
-    SG::ReadHandle<DataVector<Trk::Track>> trkCollection(m_tracksName);
+    SG::ReadHandle<DataVector<Trk::Track>> trkCollection(m_tracksName, ctx);
     if (not trkCollection.isValid()) {
       ATH_MSG_ERROR( "Could not find Tracks Collection: " << m_tracksName );
       return StatusCode::FAILURE;
@@ -114,7 +118,7 @@ StatusCode InDet::TRT_StrawStatus::execute(){
 
     //================ Event selection
 
-    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vxContainerKey);
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vxContainerKey, ctx);
     if (not vertices.isValid()) {
        ATH_MSG_DEBUG ("Couldn't retrieve VertexContainer with key: PrimaryVertices");
        return StatusCode::SUCCESS;   // just skip to next event in case of no vertexcontainer
@@ -304,37 +308,56 @@ StatusCode InDet::TRT_StrawStatus::reportResults() {
     return StatusCode::SUCCESS;
 }
 
-void InDet::TRT_StrawStatus::printDetailedInformation() {
-    ATH_MSG_INFO( "InDet::TRT_StrawStatus::printDetailedInformation() " );
-    char fileName[300];
-    snprintf(fileName, 299,"%s.%07d_printDetailedInformation.txt", m_fileName.value().c_str(), m_runNumber);
-    FILE *f = fopen(fileName, "w");
-    for (std::vector<Identifier>::const_iterator it = m_TRTHelper->straw_layer_begin(); it != m_TRTHelper->straw_layer_end(); ++it  ) {
-        for (int i=0; i<=m_TRTHelper->straw_max( *it); i++) {
-            Identifier id = m_TRTHelper->straw_id( *it, i);
-            int index[6];
-            myStrawIndex(id, index);
-            int chip, HVpad;
-            m_TRTStrawNeighbourSvc->getChip(id, chip);
-            m_TRTStrawNeighbourSvc->getPad(id, HVpad);
-            if (!m_printStatusCount) {
-                ATH_MSG_INFO( "if the code crashes on the next line, there is a problem with m_TRTStrawStatusSummarySvc not being loaded " );
-                ATH_MSG_INFO( "in that case, running with reco turned on normally solves the problem, know of no better solution at the moment" );
-                ATH_MSG_INFO( "if you do not need the detailed print information, you can also just set printDetailedInformation to 0 to avoid this crash" );
-                m_printStatusCount++;
-            }
-            int status = m_TRTStrawStatusSummaryTool->get_status( id, Gaudi::Hive::currentContext() );
-            int statusTemporary = m_TRTStrawStatusSummaryTool->getStatus( id, Gaudi::Hive::currentContext() );
-            int statusPermanent = m_TRTStrawStatusSummaryTool->getStatusPermanent( id, Gaudi::Hive::currentContext() );
-            for (int j=0; j<6; j++) fprintf(f, "%d ", index[j]);
-            fprintf(f, "%d %d %d %d %d\n", chip, HVpad, status, statusTemporary, statusPermanent);
-        }
-    }
-    fclose(f);
+void 
+InDet::TRT_StrawStatus::printDetailedInformation(){
+  ATH_MSG_INFO("InDet::TRT_StrawStatus::printDetailedInformation()");
+  const std::string fileName =
+    std::format("{}.{}{}_printDetailedInformation.txt",
+                m_fileName.value(),
+                std::string(7 - std::min<std::size_t>(7, std::to_string(m_runNumber).size()), '0'),
+                m_runNumber);
+  std::ofstream out(fileName, std::ios::out | std::ios::trunc);
+  if (!out) {
+    ATH_MSG_ERROR(std::format("Failed to open '{}' for writing", fileName));
     return;
+  }
+
+  // Iterate over straw layers
+  for (auto it = m_TRTHelper->straw_layer_begin(); it != m_TRTHelper->straw_layer_end(); ++it) {
+    const Identifier layerId = *it;
+    const int maxStraw = m_TRTHelper->straw_max(layerId);
+
+    for (int i = 0; i <= maxStraw; ++i) {
+      const Identifier id = m_TRTHelper->straw_id(layerId, i);
+      std::array<int, 6> index{};
+      myStrawIndex(id, index.data());
+      int chip = 0;
+      int HVpad = 0;
+      m_TRTStrawNeighbourSvc->getChip(id, chip);
+      m_TRTStrawNeighbourSvc->getPad(id, HVpad);
+      if (!m_printStatusCount) {
+        ATH_MSG_INFO("if the code crashes on the next line, there is a problem with "
+                     "m_TRTStrawStatusSummarySvc not being loaded ");
+        ATH_MSG_INFO("in that case, running with reco turned on normally solves the problem, "
+                     "know of no better solution at the moment");
+        ATH_MSG_INFO("if you do not need the detailed print information, you can also just set "
+                     "printDetailedInformation to 0 to avoid this crash");
+        ++m_printStatusCount;
+      }
+      const auto& ctx = Gaudi::Hive::currentContext();
+      const int status          = m_TRTStrawStatusSummaryTool->get_status(id, ctx);
+      const int statusTemporary = m_TRTStrawStatusSummaryTool->getStatus(id, ctx);
+      const int statusPermanent = m_TRTStrawStatusSummaryTool->getStatusPermanent(id, ctx);
+      // Write: six indices, then chip/HVpad/status trio
+      for (int j = 0; j < 6; ++j) out << index[j] << ' ';
+      out << chip << ' ' << HVpad << ' ' << status << ' '
+          << statusTemporary << ' ' << statusPermanent << '\n';
+    }
+  }
 }
 
-void InDet::TRT_StrawStatus::myStrawIndex(Identifier id, int *index) {
+void 
+InDet::TRT_StrawStatus::myStrawIndex(Identifier id, int *index) {
     int side = m_TRTHelper->barrel_ec(id);
     int layerNumber = m_TRTHelper->layer_or_wheel(id);
     int strawLayerNumber = m_TRTHelper->straw_layer(id);

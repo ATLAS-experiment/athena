@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ALFA_G4_SD )
@@ -13,7 +13,7 @@ atlas_add_library( ALFA_G4_SDLib
                    OBJECT
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} ALFA_SimEv G4AtlasToolsLib StoreGateLib )
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} ALFA_SimEv G4AtlasToolsLib HitManagement MCTruth StoreGateLib )
 
 atlas_add_library( ALFA_G4_SD
                    src/components/*.cxx
@@ -29,7 +29,7 @@ atlas_install_joboptions( share/optionForTest.txt )
 atlas_add_test( ALFA_SensitiveDetector_gtest
                 SOURCES test/ALFA_SensitiveDetector_gtest.cxx
                 LINK_LIBRARIES ALFA_G4_SDLib G4AtlasToolsLib TestTools CxxUtils
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Turn on/off LTO for all targets in the package.
 set_target_properties(

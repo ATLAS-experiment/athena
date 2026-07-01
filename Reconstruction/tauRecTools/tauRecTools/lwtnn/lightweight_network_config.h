@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LIGHTWEIGHT_NETWORK_CONFIG_HH_TAURECTOOLS
@@ -24,8 +24,8 @@ namespace lwtDev {
   struct Input
   {
     std::string name;
-    double offset;
-    double scale;
+    double offset{};
+    double scale{};
   };
 
   // feed forward structure
@@ -52,7 +52,7 @@ namespace lwtDev {
   struct OutputNodeConfig
   {
     std::vector<std::string> labels;
-    size_t node_index;
+    size_t node_index{};
   };
   struct GraphConfig
   {

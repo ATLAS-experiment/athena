@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,7 +10,7 @@
 
 #include <EventLoop/Global.h>
 
-#include <AsgTools/SgTEventMeta.h>
+#include <AsgTools/SgEventMeta.h>
 #include <TObject.h>
 
 namespace EL
@@ -31,7 +31,7 @@ namespace EL
   public:
 
     /// \brief access the meta store in the input file
-    [[nodiscard]] const asg::SgTEventMeta *metaStore() const noexcept;
+    [[nodiscard]] const asg::SgEventMeta *metaStore() const noexcept;
 
 
     /// \brief add the given component
@@ -55,7 +55,7 @@ namespace EL
   private:
 
     Detail::ModuleData *m_data = nullptr; //!
-    asg::SgTEventMeta m_metaStore; //!
+    asg::SgEventMeta m_metaStore; //!
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
@@ -70,7 +70,7 @@ namespace EL
   /// Inline/Template Functions
   /// =========================
 
-  [[nodiscard]] inline const asg::SgTEventMeta *WorkerConfig ::
+  [[nodiscard]] inline const asg::SgEventMeta *WorkerConfig ::
   metaStore() const noexcept
   {
     return &m_metaStore;

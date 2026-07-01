@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MooTrackFitter.h"
@@ -1029,7 +1029,7 @@ namespace Muon {
         return nphiConstraints;
     }
 
-    unsigned int MooTrackFitter::hasPhiConstrain(Trk::Track* track) const {
+    unsigned int MooTrackFitter::hasPhiConstrain(const EventContext& ctx, Trk::Track* track) const {
         std::map<MuonStationIndex::StIndex, StationPhiData> stationDataMap;
 
         // Get a MuonTrackSummary.
@@ -1040,12 +1040,12 @@ namespace Muon {
                 muonSummary = *summary->muonTrackSummary();
             } else {
                 Trk::TrackSummary tmpSum(*summary);
-                m_trackSummaryTool->addDetailedTrackSummary(*track, tmpSum);
+                m_trackSummaryTool->addDetailedTrackSummary(ctx, *track, tmpSum);
                 if (tmpSum.muonTrackSummary()) muonSummary = *(tmpSum.muonTrackSummary());
             }
         } else {
             Trk::TrackSummary tmpSummary;
-            m_trackSummaryTool->addDetailedTrackSummary(*track, tmpSummary);
+            m_trackSummaryTool->addDetailedTrackSummary(ctx, *track, tmpSummary);
             if (tmpSummary.muonTrackSummary()) muonSummary = *(tmpSummary.muonTrackSummary());
         }
 
@@ -1148,7 +1148,7 @@ namespace Muon {
                 const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(meas);
                 // if also to a crot we cannot create a fake phi hit
                 if (!crot || crot->containedROTs().empty()) continue;
-                rot = crot->containedROTs().front();
+                rot = crot->containedROTs().front().get();
             }
 
             if (!rot) {
@@ -1710,8 +1710,8 @@ namespace Muon {
             }
             const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(hit);
             if (crot) {
-                for (const MuonClusterOnTrack* mit : crot->containedROTs()) {
-                    rots.push_back(mit);
+                for (const std::unique_ptr<const MuonClusterOnTrack>& mit : crot->containedROTs()) {
+                    rots.push_back(mit.get());
                     ids.insert(mit->identify());
                     MuonStationIndex::StIndex stIndex = m_idHelperSvc->stationIndex(mit->identify());
                     stations.insert(stIndex);
@@ -2165,7 +2165,7 @@ namespace Muon {
         Trk::TrackInfo trackInfo(Trk::TrackInfo::Unknown, Trk::muon);
         std::unique_ptr<Trk::Track> track = std::make_unique<Trk::Track>(trackInfo, std::move(trackStateOnSurfaces), nullptr);
 
-        unsigned int nphi = hasPhiConstrain(track.get());
+        unsigned int nphi = hasPhiConstrain(ctx, track.get());
 
         if (nphi > 1) {
             ATH_MSG_DEBUG("Track has sufficient phi constraints, fitting ");

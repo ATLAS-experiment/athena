@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -21,8 +21,8 @@
 #include "hltinterface/DataCollector.h"
 
 // System includes
+#include <format>
 #include <sstream>
-#include <iomanip>
 #include <chrono>
 
 // Local helper functions
@@ -40,13 +40,7 @@ namespace {
     T word;
   };
   template<typename T> std::ostream& operator<<(std::ostream& str, const printWordHex<T>& pw) {
-    str << "0x" << std::hex << std::setfill('0') << std::setw(2*sizeof(T));
-    // Prevent printing char as ASCII character
-    if (sizeof(T)==1)
-      str << static_cast<int>(pw.word);
-    else
-      str << pw.word;
-    str << std::dec;
+    str << std::format("0x{:0{}x}", pw.word, 2*sizeof(T));
     return str;
   }
   template<typename T> struct printNWordsHex {
@@ -168,6 +162,12 @@ StatusCode TrigByteStreamCnvSvc::connectOutput(const std::string& /*outputFile*/
     return StatusCode::FAILURE;
   }
   re->copy_header(inputRawEvent);
+  //Force the header compression type to uncompressed
+  //copy_header may copy the compression type/level if the input event is compressed (e.g. EFDFEmulator case)
+  //This would cause the HLT result to be compressed during bind().
+  //Compression should instead be applied at the DCM/EventBuilder level.
+  re->compression_type(0 /*eformat::UNCOMPRESSED*/);
+  re->compression_level(0);
 
   ATH_MSG_VERBOSE("Created RawEventWrite pointer = " << re);
 
@@ -206,7 +206,7 @@ StatusCode TrigByteStreamCnvSvc::commitOutput(const std::string& /*outputFile*/,
   try {
     const eformat::write::node_t* top = re->bind();
     uint32_t rawEventSize = re->size_word();
-    rawEventPtr = std::make_unique<uint32_t[]>(rawEventSize);
+    rawEventPtr = std::make_unique_for_overwrite<uint32_t[]>(rawEventSize);
     uint32_t copiedSize = eformat::write::copy(*top,rawEventPtr.get(),rawEventSize);
     if(copiedSize!=rawEventSize) {
       ATH_MSG_ERROR("FullEventFragment serialisation failed");

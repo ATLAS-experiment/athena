@@ -115,7 +115,7 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::disassembleVertex(std::vector<WrkVrt> *workVerticesContainer, const unsigned& iv )
+  StatusCode VrtSecInclusive::disassembleVertex(const EventContext& ctx, std::vector<WrkVrt> *workVerticesContainer, const unsigned& iv )
   {
 
     auto& wrkvrt = workVerticesContainer->at(iv);
@@ -199,7 +199,7 @@ namespace VKalVrtAthena {
       // Fit the new vertex
       ATH_MSG_VERBOSE(" >> disassembleVertex(): > Fast Fit" );
 
-      std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState(ctx);
       ATH_CHECK( m_fitSvc->VKalVrtFitFast( ListBaseTracks, newvrt.vertex, *state ) );
 
       ATH_MSG_VERBOSE( " >> disassembleVertex(): > ApproxVertex: r = " << newvrt.vertex.perp() << ", z = " << newvrt.vertex.z() );
@@ -242,7 +242,7 @@ namespace VKalVrtAthena {
     // refit the original vertex
     ATH_MSG_VERBOSE(" >> disassembleVertex(): refit the original vertex" );
 
-    StatusCode sc = refitVertex( wrkvrt );
+    StatusCode sc = refitVertex( ctx, wrkvrt );
     if( sc.isFailure() ) {
         // WARNING CODE ATLASRECTS-3145::001 refitVertex Failure, vertex lost
         ATH_MSG_WARNING("ATLASRECTS-3145::001" );
@@ -262,7 +262,7 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  double  VrtSecInclusive::improveVertexChi2( WrkVrt& vertex )
+  double  VrtSecInclusive::improveVertexChi2( const EventContext& ctx, WrkVrt& vertex )
   {
     //
     //  Iterate track removal until vertex get good Chi2
@@ -276,7 +276,7 @@ namespace VKalVrtAthena {
 
     {
       WrkVrt backup = vertex;
-      StatusCode sc = refitVertexWithSuggestion( vertex, vertex.vertex );
+      StatusCode sc = refitVertexWithSuggestion( ctx, vertex, vertex.vertex );
       if( sc.isFailure() ) {
         vertex = backup;
         return 0;
@@ -309,7 +309,7 @@ namespace VKalVrtAthena {
         removeCounter++;
       }
 
-      StatusCode sc = refitVertexWithSuggestion( vertex, vertex.vertex );
+      StatusCode sc = refitVertexWithSuggestion( ctx, vertex, vertex.vertex );
 
       if( sc.isFailure() || vertex_backup.fitQuality() < vertex.fitQuality() ) {
         vertex = vertex_backup;
@@ -449,7 +449,7 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::mergeVertices( WrkVrt& v1, WrkVrt& v2 )
+  StatusCode VrtSecInclusive::mergeVertices( const EventContext& ctx, WrkVrt& v1, WrkVrt& v2 )
   {
     //
     //  Merge two close vertices into one (first) and set NTr=0 for second vertex
@@ -477,7 +477,7 @@ namespace VKalVrtAthena {
     v1.closestWrkVrtIndex = 0;                   //Clean new vertex
     v1.isGood = true;                            //Clean new vertex
 
-    StatusCode sc = refitVertex( v1 );
+    StatusCode sc = refitVertex( ctx, v1 );
     if( sc.isFailure() ) {
       v1 = v1_bak;
       v2 = v2_bak;
@@ -493,9 +493,10 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::refitVertex( WrkVrt& workVertex )
+  StatusCode VrtSecInclusive::refitVertex( const EventContext& ctx,
+                                           WrkVrt& workVertex )
   {
-    std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState(ctx);
     return refitVertex (workVertex, *state);
   }
 
@@ -582,9 +583,9 @@ namespace VKalVrtAthena {
   }
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::refitVertexWithSuggestion( WrkVrt& workVertex, const Amg::Vector3D& suggestedPosition )
+  StatusCode VrtSecInclusive::refitVertexWithSuggestion( const EventContext& ctx, WrkVrt& workVertex, const Amg::Vector3D& suggestedPosition )
   {
-    std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState();
+    std::unique_ptr<Trk::IVKalState> state = m_fitSvc->makeState(ctx);
     return refitVertexWithSuggestion (workVertex, suggestedPosition, *state);
   }
 

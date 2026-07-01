@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for LLP Derivations
@@ -33,6 +33,14 @@ def JetLargeD0TrackParticleThinningCfg(flags, name, **kwargs):
     JetLargeD0TrackParticleThinning = CompFactory.DerivationFramework.JetLargeD0TrackParticleThinning
     acc.addPublicTool(JetLargeD0TrackParticleThinning(name, **kwargs),
                       primary = True)
+    return acc
+
+def TauLRTThinningCfg(flags, name, **kwargs):
+    """configure tau thinning"""
+
+    acc = ComponentAccumulator()
+    TauLRTThinningTool = CompFactory.DerivationFramework.TauLRTThinningTool
+    acc.addPublicTool(TauLRTThinningTool(name, **kwargs), primary=True)
     return acc
 
 # RC jet substructure computation tool
@@ -151,46 +159,53 @@ def LLP1TriggerSkimmingToolCfg(flags, name, TriggerListsHelper, **kwargs):
 
     from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
-    import re
 
-    # This is not all periods! Run 2 and current triggers only
-    allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
-    TriggerAPI.setConfigFlags(flags)
-    trig_el  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el,  livefraction=0.8)
-    trig_mu  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu,  livefraction=0.8)
-    trig_g   = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.g,   livefraction=0.8)
-    trig_xe   = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.xe,  livefraction=0.8)
-    trig_elmu = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el, additionalTriggerType=TriggerType.mu,  livefraction=0.8)
-    trig_mug = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu, additionalTriggerType=TriggerType.g,  livefraction=0.8)
+    # tapi chain lists
+    trig_tapis = {k: [] for k in ('el','mu','g','xe','elmu','mug','tau','tauxe','exotics','gxe')}
+    if flags.Trigger.EDMVersion <= 2:
+        # Run 2: use the Run 2 TriggerAPI
+        allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
+        TriggerAPI.setConfigFlags(flags)
+        trig_tapis['el']   = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el, livefraction=0.8)
+        trig_tapis['mu']   = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu, livefraction=0.8)
+        trig_tapis['g']    = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.g,  livefraction=0.8)
+        trig_tapis['xe']   = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.xe, livefraction=0.8)
+        trig_tapis['elmu'] = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.el, additionalTriggerType=TriggerType.mu, livefraction=0.8)
+        trig_tapis['mug']  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.mu, additionalTriggerType=TriggerType.g,  livefraction=0.8)
+        trig_tapis['tau']  = TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.tau, livefraction=0.8)
+        trig_tapis['tauxe']= TriggerAPI.getLowestUnprescaledAnyPeriod(allperiods, triggerType=TriggerType.tau, additionalTriggerType=TriggerType.xe, livefraction=0.8)
+    else:
+        # Run 3: use the TriggerAPI session via tapis session
+        from DerivationFrameworkPhys.TriggerListsHelper import getTapisSession
+        session = getTapisSession(flags)
+        trig_tapis['el']      = list(session.getLowestUnprescaled(triggerType=TriggerType.el, livefraction=0.75))
+        trig_tapis['mu']      = list(session.getLowestUnprescaled(triggerType=TriggerType.mu, livefraction=0.75))
+        trig_tapis['g']       = list(session.getLowestUnprescaled(triggerType=TriggerType.g,  livefraction=0.75))
+        trig_tapis['xe']      = list(session.getLowestUnprescaled(triggerType=TriggerType.xe, livefraction=0.75))
+        trig_tapis['elmu']    = list(session.getLowestUnprescaled(triggerType=[TriggerType.el, TriggerType.mu], livefraction=0.75))
+        trig_tapis['mug']     = list(session.getLowestUnprescaled(triggerType=[TriggerType.mu, TriggerType.g],  livefraction=0.75))
+        trig_tapis['tau']     = list(session.getLowestUnprescaled(triggerType=TriggerType.tau, livefraction=0.75))
+        trig_tapis['tauxe']   = list(session.getLowestUnprescaled(triggerType=[TriggerType.tau, TriggerType.xe], livefraction=0.75))
+        trig_tapis['exotics'] = list(session.getLowestUnprescaled(triggerType=TriggerType.exotics, livefraction=0.75))
+        trig_tapis['gxe']     = list(session.getLowestUnprescaled(triggerType=[TriggerType.g, TriggerType.xe], livefraction=0.75))
 
-    # Run 3 triggers.  Doesn't take into account prescales, so this is overly inclusive.  Needs updates to trigger api: ATR-25805
-    all_run3 = TriggerListsHelper.Run3TriggerNames
-    r_run3_nojets = re.compile("(HLT_[1-9]*(j).*)")
-    r_tau = re.compile("HLT_.*tau.*")
-    trig_run3_elmug = []
-    for chain_name in all_run3:
-        result_jets = r_run3_nojets.match(chain_name)
-        result_taus = r_tau.match(chain_name) # no taus in llp1 atm
-        # no perf chains
-        if 'perf' in chain_name.lower(): continue
-        if result_jets is None and result_taus is None: trig_run3_elmug.append(chain_name)
+    # All chains not picked up by tapis are hardcoded in LLP1Triggers.txt and loaded below; see comments there for details
+    # (just take every non-comment, non-empty line)
+    from PathResolver import PathResolver
+    with open(PathResolver.FindCalibFile("DerivationFrameworkLLP/LLP1Triggers.txt")) as fp:
+        trig_hardcoded = [
+            line for ln in fp
+            if (line := ln.strip()) and not line.startswith('#')
+        ]
 
-    trig_EJ_Run3 = ["HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100", "HLT_j460_a10r_L1J100", "HLT_j460_a10r_L1jJ160", "HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1gLJ140p0ETA25","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1SC111-CjJ40","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ160","HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1SC175-SCjJ10"]
-    trig_VBF_2018 =["HLT_j55_gsc80_bmv2c1070_split_j45_gsc60_bmv2c1085_split_j45_320eta490", "HLT_j45_gsc55_bmv2c1070_split_2j45_320eta490_L1J25.0ETA23_2J15.31ETA49", "HLT_j80_0eta240_j60_j45_320eta490_AND_2j35_gsc45_bmv2c1070_split", "HLT_ht300_2j40_0eta490_invm700_L1HT150-J20s5.ETA31_MJJ-400-CF_AND_2j35_gsc45_bmv2c1070_split", "HLT_j70_j50_0eta490_invm1100j70_dphi20_deta40_L1MJJ-500-NFF"]
-    trig_VBF_Run3 = ["HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1MJJ500NFF","HLT_j70_j50a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF"] 
-    trig_dispjet_Run3 = ["HLT_j180_hitdvjet260_tight_L1J100", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100", "HLT_j180_2dispjet50_3d2p_L1J100","HLT_j180_2dispjet50_3d2p_L1jJ160", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1jJ160", "HLT_j180_dispjet90_x3d1p_L1jJ160", "HLT_j180_dispjet100_x3d1p_L1jJ160", "HLT_j180_2dispjet50_3d2p_L1J100", "HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100", "HLT_j180_dispjet90_x3d1p_L1J100", "HLT_j180_dispjet90_x3d1p_L1J100", "HLT_j180_dispjet100_x3d1p_L1J100", "HLT_j180_2dispjet50_2p_L1jJ160", "HLT_j180_2dispjet50_2p_L1J100"]
-    trig_dedx_Run3 = ["HLT_xe80_tcpufit_dedxtrk25_medium_L1XE50", "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE50", "HLT_xe80_tcpufit_dedxtrk25_medium_L1XE55", "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE55"]
-    trig_dt_Run3 = ["HLT_xe80_tcpufit_distrk20_tight_L1XE50", "HLT_xe80_tcpufit_distrk20_medium_L1XE50", "HLT_xe80_tcpufit_distrk20_tight_L1XE55", "HLT_xe80_tcpufit_distrk20_medium_L1XE55"]
-    trig_isohighpt_Run3  = ["HLT_xe80_tcpufit_isotrk100_medium_iaggrmedium_L1XE50", "HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1XE50", "HLT_xe80_tcpufit_isotrk120_medium_iaggrloose_L1XE50", "HLT_xe80_tcpufit_isotrk140_medium_iaggrmedium_L1XE50", "HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1jXE100", "HLT_xe50_tcpufit_isotrk120_medium_iaggrmedium_L1jXE100"]
-    trig_latemu = ["HLT_mu10_mgonly_L1LATEMU10_J50", "HLT_mu10_mgonly_L1LATEMU10_XE50", "HLT_mu10_mgonly_L1LATE-MU10_XE40", "HLT_mu10_lateMu_L1LATE-MU8F_jJ90", "HLT_mu10_lateMu_L1LATE-MU8F_jXE70"]
-    trig_calratio_dispjet_run3 = ["HLT_j30_CLEANllp_momemfrac006_calratio_L1jJ160","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1jJ160","HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU140","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU140","HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU80","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU80","HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60_EMPTY","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_EMPTY","HLT_j30_CLEANllp_momemfrac006_calratio_L1eTAU60_UNPAIRED_ISO","HLT_j30_CLEANllp_momemfrac006_calratiormbib_L1eTAU60_UNPAIRED_ISO","HLT_j30_CLEANllp_momemfrac012_calratiovar_roiftf_preselj20emf12_L1jJ160"]
-    trig_multijet_ht_data22_23 = ["HLT_2j250c_j120c_pf_ftf_presel2j180XXj80_L1J100", "HLT_3j200_pf_ftf_L1J100", "HLT_4j115_pf_ftf_presel4j85_L13J50", "HLT_4j110_pf_ftf_presel4j85_L13J50", "HLT_4j120_L13J50", "HLT_5j70c_pf_ftf_presel5c50_L14J15", "HLT_5j65c_pf_ftf_presel5c55_L14J15", "HLT_5j85_pf_ftf_presel5j50_L14J15", "HLT_5j80_pf_ftf_presel5j50_L14J15", "HLT_5j80_pf_ftf_presel5j55_L14J15", "HLT_6j35c_020jvt_pf_ftf_presel6c25_L14J15", "HLT_6j55c_pf_ftf_presel6j40_L14J15", "HLT_6j70_pf_ftf_presel6j40_L14J15", "HLT_7j45_pf_ftf_presel7j30_L14J15", "HLT_10j40_pf_ftf_presel7j30_L14J15", "HLT_j0_HT1000_L1HT190-J15s5pETA21", "HLT_j0_HT1000_L1J100", "HLT_j0_HT1000_pf_ftf_preselcHT450_L1HT190-J15s5pETA21", "HLT_j0_HT940_pf_ftf_preselcHT450_L1HT190-J15s5pETA21", "HLT_j0_HT1000_pf_ftf_preselj180_L1HT190-J15s5pETA21", "HLT_j0_HT940_pf_ftf_preselj180_L1HT190-J15s5pETA21", "HLT_j0_HT1000_pf_ftf_preselj180_L1J100"] 
-    trig_delayedjets_Run3 = ["HLT_2j100_2timeSig15_L1jJ90", "HLT_2j45_2j55_3timeSig15_L14jJ40", "HLT_j200_2timing15_L1jJ160", "HLT_j200_3timeSig15_L1jJ160", "HLT_j220_j150_2timing15_L1jJ160", "HLT_j250_2timing15_L1jJ160", "HLT_j250_3timeSig15_L1jJ160"]
+    triggers = sorted(set(sum(trig_tapis.values(), []) + trig_hardcoded))
 
-    triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018 + trig_EJ_Run3 + trig_run3_elmug + trig_dispjet_Run3 + trig_xe + trig_multijet_ht_data22_23 + trig_dedx_Run3 + trig_dt_Run3 + trig_isohighpt_Run3 + trig_latemu + trig_VBF_Run3 + trig_calratio_dispjet_run3 + trig_delayedjets_Run3
-
-    #remove duplicates
-    triggers = sorted(list(set(triggers)))
+    # debug printout of the final trigger list when needed
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger("LLP1TriggerSkimmingToolCfg")
+    log.debug("LLP1 skimming trigger list (%d chains):", len(triggers))
+    for t in triggers:
+        log.debug("  %s", t)
 
     acc = ComponentAccumulator()
     TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool
@@ -259,8 +274,25 @@ def ZeroPixelHitMuonMergerAlgCfg(flags, name='LLP1_MuonZPHMergingAlg', **kwargs)
 
 def LRTElectronMergerAlg(flags, name="LLP1_ElectronLRTMergingAlg", **kwargs):
     acc = ComponentAccumulator()
-    alg = CompFactory.CP.ElectronLRTMergingAlg(name, **kwargs)
-    acc.addEventAlgo(alg, primary=True)
+    prompt = kwargs.setdefault ('PromptElectronLocation', 'Electrons')
+    lrt = kwargs.setdefault ('LRTElectronLocation', 'LRTElectrons')
+    ExtraInputs = kwargs.setdefault ('ExtraInputs', [])
+    from IsolationAlgs.DerivationTrackIsoConfig import iso_vars
+    ExtraInputs += [('xAOD::IParticleContainer', f'{prompt}.{v}')
+                    for v in iso_vars()]
+    ExtraInputs += [('xAOD::IParticleContainer', f'{lrt}.{v}')
+                    for v in iso_vars()]
+    ExtraInputs += [
+             ('xAOD::IParticleContainer', f'{lrt}.core57cellsEnergyCorrection'),
+             ('xAOD::IParticleContainer', f'{lrt}.ptcone20'),
+             ('xAOD::IParticleContainer', f'{lrt}.neflowisol20'),
+             ('xAOD::IParticleContainer', f'{prompt}.neflowisol20'),
+        ]
+    alg = CompFactory.CP.ElectronLRTMergingAlg \
+        (name,
+         **kwargs)
+    acc.addEventAlgo(alg,
+                     primary=True)
     return acc
 
 # Photon IsEM setup for LLP1
@@ -441,6 +473,9 @@ def LRTElectronLHSelectorsCfg(flags):
 # RecoverZeroPixelHitMuons setup
 def RecoverZeroPixelHitMuonsCfg(flags):
     acc = ComponentAccumulator()
-    acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons"))
+    from IsolationAlgs.DerivationTrackIsoConfig import iso_vars
+    ExtraInputs = [('xAOD::IParticleContainer', 'Muons.' + v)
+                   for v in iso_vars()]
+    acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons", ExtraInputs=ExtraInputs))
     
     return acc 

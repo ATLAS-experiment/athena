@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPTOOLS_IBEAMINTENSITY_H
@@ -9,11 +9,13 @@
 /** @file IBeamIntensity.h
  * @brief provides the relative beam intensity as a function of the
  * bunch xing.
- * $Id: PileUpStream.h,v 1.18 2008-10-31 18:34:42 calaf Exp $
  * @author Paolo Calafiura - ATLAS Collaboration
  */
 
 #include "GaudiKernel/IService.h"
+
+class EventContext;
+
 class IBeamIntensity : virtual public IService {
 public:
   ///a scale factor (average value 1.0) for the beam intensity at a given
@@ -26,7 +28,7 @@ public:
 
   ///randomly select in which bunch the current t0 is wrto the beam intensity
   /// distribution. This should be done proportionally to the distribution...
-  virtual void selectT0(unsigned int run, unsigned long long event) =0;
+  virtual void selectT0(const EventContext& ctx) =0;
 
   ///return the bunch crossing selected to be the current t0 bunch crossing
   virtual unsigned int getCurrentT0BunchCrossing() const =0;

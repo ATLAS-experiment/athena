@@ -47,9 +47,6 @@ def ISF_HitAnalysisCfg(flags, name="ISF_HitAnalysis",
     kwargs.setdefault("DoClusterInfo", doClusterInfo) #FIXME
     kwargs.setdefault("TimingCut", 999999)
 
-    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags)))
-
     result.merge(addFolders(flags, ["/Simulation/Parameters", "/Digitization/Parameters"]))
 
     result.addEventAlgo(CompFactory.ISF_HitAnalysis(name,**kwargs))

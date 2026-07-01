@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,13 +12,18 @@
 #ifndef LATOMEMAPPING_H
 #define LATOMEMAPPING_H
 #include <map>
-#include "LArByteStream/LArLATOMEDecoder.h"
+#include <string>
+
+class HWIdentifier;
+class MsgStream;
 
 /** @brief Tool to get LATOME SC and SCID mapping file and fill std::map variable with it.*/
 class LATOMEMapping
 {
 public:
-  static void fill(std::map<int, HWIdentifier> *toFill, std::string inputfile);
+  static void fill(std::map<int, HWIdentifier>& toFill,
+                   const std::string& inputfile,
+                   MsgStream& log);
 };
 
 #endif // LATOMEMAPPING_H

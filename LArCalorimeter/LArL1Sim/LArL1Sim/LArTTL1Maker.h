@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARL1SIM_LARTTL1MAKER_H
@@ -78,7 +78,7 @@ public:
   /**       Create  LArTTL1  object
             save in TES (2 containers: 1 EM, 1 hadronic)
   */
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   virtual StatusCode finalize() override;
   virtual void handle(const Incident&) override;
@@ -145,7 +145,6 @@ private:
   /** pointer to the offline id helper  */
   const CaloCell_ID*           m_OflHelper{};
   /** Sampling fractions retrieved from DB */
-  //const DataHandle<ILArfSampl>    m_dd_fSampl;
   SG::ReadCondHandleKey<ILArfSampl> m_fSamplKey{this, "LArfSamplKey", "LArfSamplSym"};
 
   /** number of sampling (in depth) */

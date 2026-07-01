@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_ITRANSACTION_H
 #define INCLUDE_PERSISTENCYSVC_ITRANSACTION_H
+
+#include "StorageSvc/pool.h"
 
 /*
  *   POOL namespace declaration
@@ -17,18 +19,9 @@ namespace pool {
    */
 
   class ITransaction {
-  protected:
-    /// Default destructor
-    virtual ~ITransaction() {}
-
   public:
-    /// Transaction type enumeration
-    typedef enum { UNDEFINED,
-                   READ,
-                   UPDATE } Type;
-
     /// Starts a new transaction. Returns the success of the operation
-    virtual bool start( Type type = READ ) = 0;
+    virtual bool start( Io::IoFlag type = Io::READ ) = 0;
 
     /// Commits the transaction.
     virtual bool commit() = 0;
@@ -39,11 +32,12 @@ namespace pool {
     /// Checks if the transaction is active
     virtual bool isActive() const = 0;
 
-    /// Reverts to update mode
-    virtual void update() = 0;
-
     /// Returns the transaction type
-    virtual Type type() const = 0;
+    virtual Io::IoFlag type() const = 0;
+
+  protected:
+    /// Default destructor
+    virtual ~ITransaction() = default;  
   };
 
 }

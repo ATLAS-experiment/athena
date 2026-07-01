@@ -189,7 +189,7 @@ StatusCode TileTMDBRawChannelMonitorAlgorithm::fillHistograms( const EventContex
         
         if(dR > 0.1)       {continue;} // dR cut
         if(muon_pt < 15000) {continue;} // pt cut
-        if(mu->muonType() != xAOD::Muon::Combined)   {continue;} // combined muon
+        if(mu->muonType() != xAOD::Muon::MuonType::Combined)   {continue;} // combined muon
 
         unsigned int partition  = (muon_eta > 0.0) ? 0 : 1;
         tgcSectors[partition].push_back(sector);

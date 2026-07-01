@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile digits filter algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileDigitsFilterCfg(flags, **kwargs):
@@ -20,6 +21,10 @@ def TileDigitsFilterCfg(flags, **kwargs):
 
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge( TileCablingSvcCfg(flags) )
+
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
+        kwargs.setdefault('InputDigitsContainer', f'{flags.Overlay.BkgPrefix}TileDigitsCnt')
+        kwargs.setdefault('InputRawChannelContainer', f'{flags.Overlay.BkgPrefix}TileRawChannelCnt')
 
     TileDigitsFilter=CompFactory.TileDigitsFilter
     acc.addEventAlgo(TileDigitsFilter(**kwargs), primary = True)

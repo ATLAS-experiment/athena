@@ -1,0 +1,91 @@
+PreJetAnalysisConfig:
+  - name: pt
+    description: jet $p_\mathrm{T}$
+  - name: eta
+    description: jet $\eta$ (no systematics)
+  - name: phi
+    description: jet $\phi$ (no systematics)
+  - name: e
+    description: jet $E$ (*since AnalysisBase 25.2.13*)
+  - name: HadronConeExclTruthLabelID
+    description: truth labels used by the FTAG group (no systematics)
+    toggled_by: outputTruthLabelIDs
+  - name: PartonTruthLabelID
+    description: PDG identification of the highest-energy ghost-associated parton (no systematics)
+    toggled_by: outputTruthLabelIDs
+
+SmallRJetAnalysisConfig:
+  - name: jvtEfficiency
+    description: the per-jet JVT efficiency SF
+  - name: select_baselineJvt
+    description: the per-jet selection flag for baseline selection and JVT
+  - name: fjvtEfficiency
+    description: the per-jet fJVT efficiency SF
+    toggled_by: runFJvtEfficiency
+  - name: select_baselineFJvt
+    description: the per-jet selection flag for baseline selection and forward JVT
+    toggled_by: runFJvtSelection
+
+LargeRJetAnalysisConfig:
+  - name: m
+    description: jet mass
+
+JetJvtAnalysisConfig:
+  - name: weight_jvt_effSF
+    description: the event-level JVT efficiency SF
+  - name: weight_fjvt_effSF
+    description: the event-level forward JVT efficiency SF
+
+JetReclusteringBlock:
+  - name: pt
+    description: reclustered jet $p_\mathrm{T}$
+  - name: eta
+    description: reclustered jet $\eta$
+  - name: phi
+    description: reclustered jet $\phi$
+  - name: e
+    description: reclustered jet $E$
+  - name: small_r_jet_indices
+    description: vector of indices of the small-R jets clustered into this large-R jet
+
+ReclusteredJetCalibrationBlock:
+  - name: pt
+    description: reclustered jet $p_\mathrm{T}$
+  - name: eta
+    description: reclustered jet $\eta$
+  - name: phi
+    description: reclustered jet $\phi$
+  - name: m
+    description: reclustered jet invariant mass
+
+JetTriggerMatchingBlock:
+  - name: match_<trigger_chain>_L1et
+    description: L1-matched jet ET
+    toggled_by: runL1Matching
+  - name: match_<trigger_chain>_L1eta
+    description: L1-matched jet eta
+    toggled_by: runL1Matching
+  - name: match_<trigger_chain>_L1phi
+    description: L1-matched jet phi
+    toggled_by: runL1Matching
+  - name: match_<trigger_chain>_L1dr
+    description: L1-matched jet dR wrt offline jet
+    toggled_by: runL1Matching
+  - name: match_<trigger_chain>_L1thresholds
+    description: L1-matched jet thresholds
+    toggled_by: runL1Matching
+  - name: match_<trigger_chain>_HLTpt
+    description: HLT-matched jet pt
+    toggled_by: runHLTMatching
+  - name: match_<trigger_chain>_HLTeta
+    description: HLT-matched jet eta
+    toggled_by: runHLTMatching
+  - name: match_<trigger_chain>_HLTphi
+    description: HLT-matched jet phi
+    toggled_by: runHLTMatching
+  - name: match_<trigger_chain>_HLTdr
+    description: HLT-matched jet dR wrt offline jet
+    toggled_by: runHLTMatching
+  - name: match_<trigger_chain>_HLTthresholds
+    description: HLT-matched jet thresholds
+    toggled_by: runHLTMatching

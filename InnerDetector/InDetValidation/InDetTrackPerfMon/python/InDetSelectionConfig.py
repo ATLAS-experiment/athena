@@ -304,7 +304,7 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
             OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
 
     ## Truth particles quality selection
-    if flags.Input.isMC:
+    if flags.Tracking.doTruth:
         kwargs.setdefault( "DoTruthSelection", True )
     
         kwargs.setdefault( "TruthSelectionTool", acc.popToolsAndMerge(

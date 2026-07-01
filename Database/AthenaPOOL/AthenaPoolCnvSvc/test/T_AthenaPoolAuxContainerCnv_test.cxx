@@ -218,6 +218,8 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
   std::cout << "test2\n";
   const size_t N = 10;
 
+  Gaudi::Hive::setCurrentContextEvt (123);
+
   T_AthenaPoolAuxContainerCnv<YAuxCont_v2, YAuxContCnv_v1> cnv (svcloc);
   assert (static_cast<AthenaPoolConverter&>(cnv).initialize().isSuccess());
 
@@ -250,6 +252,7 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
       assert (lt[i].dataID() == "vec");
       assert (lt[i].index() == i);
     }
+    assert (trans->m_evt == 123);
 
     delete pObj;
   }
@@ -262,6 +265,8 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
     x1[i] = i*4;
     l1[i] = Link_t ("vec", i);
   }
+
+  Gaudi::Hive::setCurrentContextEvt (124);
 
   testsvc.m_pers1 = &pers1;
   token = std::make_unique<Token>();
@@ -279,6 +284,7 @@ void test2 (ISvcLocator* svcloc, TestCnvSvc& testsvc)
       assert (lt[i].dataID() == "vec");
       assert (lt[i].index() == i);
     }
+    assert (trans->m_evt == 124);
 
     delete pObj;
   }

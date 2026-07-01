@@ -33,11 +33,11 @@ public:
     virtual ~MdtPrepDataContainerCnv();
     
     virtual MdtPrepDataContainer_PERS*   createPersistent (Muon::MdtPrepDataContainer* transCont);
-    virtual Muon::MdtPrepDataContainer*  createTransient ();
+    virtual Muon::MdtPrepDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();
-    virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_converter_tlp1; }
+    virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_converter_tlp1; }
         
 private:
     MdtPrepDataContainerCnv_tlp1        m_converter_tlp1; //!< 'Old style' top level convertor

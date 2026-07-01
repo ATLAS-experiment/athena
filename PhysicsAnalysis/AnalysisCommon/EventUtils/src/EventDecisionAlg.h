@@ -41,7 +41,7 @@ class EventDecisionAlg
   virtual StatusCode  initialize();
 
   /// Athena algorithm's execute hook
-  virtual StatusCode  execute();
+  virtual StatusCode  execute(const EventContext& ctx);
 
   /// Athena algorithm's finalize hook
   virtual StatusCode  finalize();

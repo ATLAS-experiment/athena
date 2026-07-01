@@ -50,12 +50,11 @@ namespace VKalVrtAthena {
     }
   }
 
-
+  
   //__________________________________________________________________________
   VrtSecInclusive::~VrtSecInclusive()
   {
   }
-
 
   //__________________________________________________________________________
   StatusCode VrtSecInclusive::initialize()
@@ -229,25 +228,69 @@ namespace VKalVrtAthena {
     ATH_CHECK(m_eventInfoKey.initialize());
 
     // Instantiate and initialize our event info decorator write
-    m_vertexingStatusKey = SG::WriteDecorHandleKey<xAOD::EventInfo>(m_eventInfoKey.key() + "." + "VrtSecInclusive_"+ m_secondaryVerticesContainerName + m_augVerString + "_status");
-    this->declare(m_vertexingStatusKey);
-    m_vertexingStatusKey.setOwner(&(*this));
-    ATH_CHECK(m_vertexingStatusKey.initialize());
+    m_vertexingStatusKey = "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString + "_status";
+    ATH_CHECK( m_vertexingStatusKey.initialize() );
+    
+    m_vertexKey = "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString;
+    m_twoTrksVertexKey = "VrtSecInclusive_" + m_all2trksVerticesContainerName + m_augVerString;
+    ATH_CHECK( m_vertexKey.initialize() );
+    ATH_CHECK( m_twoTrksVertexKey.initialize(m_FillIntermediateVertices) );
+    m_vertexCollectionsDefinitions[m_vertexKey.key()] = false;
+    if (m_FillIntermediateVertices) m_vertexCollectionsDefinitions[m_twoTrksVertexKey.key()] = false;
+    
+    if ( m_FillIntermediateVertices ) {
+      for( auto itr = m_vertexingAlgorithms.begin(); itr!=m_vertexingAlgorithms.end(); ++itr ) {
+	const std::string& nameAlgo = itr->first;
+	std::string fullName = "VrtSecInclusive_IntermediateVertices_" + nameAlgo + m_augVerString;
+	m_intermediateVertexKey[nameAlgo] = SG::WriteHandleKey<xAOD::VertexContainer>( this, nameAlgo, fullName );
+	ATH_CHECK( m_intermediateVertexKey[nameAlgo].initialize() );
+	m_vertexCollectionsDefinitions[m_intermediateVertexKey[nameAlgo].key()] = false;
+      }
+    }
 
+    
+    ATH_CHECK( m_TrackLocation.initialize() );
+    ATH_CHECK( m_MuonLocation.initialize() );
+    ATH_CHECK( m_ElectronLocation.initialize() );
+    ATH_CHECK( m_PrimVrtLocation.initialize() );
+    
     //
     ATH_MSG_INFO("initialize: Exit VrtSecInclusive::initialize()");
     return StatusCode::SUCCESS;
   }
 
 
-
-  //__________________________________________________________________________
-  StatusCode VrtSecInclusive::finalize()
+  StatusCode VrtSecInclusive::dummyVertexContainer(const EventContext& ctx,
+						   const SG::WriteHandleKey<xAOD::VertexContainer>& handleKey)
   {
-
-    ATH_MSG_INFO("finalize: VrtSecInclusive finalize()");
+    SG::WriteHandle<xAOD::VertexContainer> vHandle = SG::makeHandle( handleKey, ctx );
+    ATH_CHECK( vHandle.record( std::make_unique<xAOD::VertexContainer>(),
+			       std::make_unique<xAOD::VertexAuxContainer>() ) );
+    m_vertexCollectionsDefinitions.at(handleKey.key()) = true;
     return StatusCode::SUCCESS;
   }
+  
+  StatusCode VrtSecInclusive::defineDummyCollections(const EventContext& ctx)
+  {
+    if ( not m_vertexCollectionsDefinitions.at(m_vertexKey.key()) ) {
+      ATH_CHECK( dummyVertexContainer(ctx, m_vertexKey) );
+    }
+
+    if (m_FillIntermediateVertices) {
+      if (not m_vertexCollectionsDefinitions.at( m_twoTrksVertexKey.key() )) {
+	ATH_CHECK( dummyVertexContainer(ctx, m_twoTrksVertexKey) );
+      }
+
+      for (const auto& [nameAlgo, handleKey] : m_intermediateVertexKey) {
+	if (not m_vertexCollectionsDefinitions.at( handleKey.key() )) {
+	  ATH_CHECK( dummyVertexContainer(ctx, handleKey) );
+	}
+      }
+    }
+    
+    return StatusCode::SUCCESS;
+  }
+
 
   //__________________________________________________________________________
   StatusCode VrtSecInclusive::initEvent()
@@ -268,26 +311,33 @@ namespace VKalVrtAthena {
 
 
   //__________________________________________________________________________
-  StatusCode VrtSecInclusive::execute()
+  StatusCode VrtSecInclusive::execute(const EventContext& ctx)
   {
+    
     //
     ATH_MSG_DEBUG("VrtSecInclusive execute()");
 
+    // Reset values
+    for (auto& [key, val] : m_vertexCollectionsDefinitions) {
+      val = false;
+    }
+    
     m_vertexingStatus = -1;
 
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo = SG::makeHandle(m_eventInfoKey, ctx);
     if (!eventInfo.isValid()) {
       ATH_MSG_ERROR ("Could not retrieve EventInfo");
       return StatusCode::FAILURE;
     }
 
-    SG::WriteDecorHandle<xAOD::EventInfo,int> vertexingStatusDecor(m_vertexingStatusKey);
+    SG::WriteDecorHandle<xAOD::EventInfo,int> vertexingStatusDecor(m_vertexingStatusKey, ctx);
 
     // clear ntuple variables
     StatusCode sc = this->initEvent();
     if(sc.isFailure()) {
       ATH_MSG_WARNING("Problem in initEvent ");
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -297,6 +347,7 @@ namespace VKalVrtAthena {
     if (sc.isFailure() ) {
       ATH_MSG_WARNING("Failure in getEventInfo() ");
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -317,37 +368,6 @@ namespace VKalVrtAthena {
       }
     }
 
-    auto *secondaryVertexContainer    = new xAOD::VertexContainer;
-    auto *secondaryVertexAuxContainer = new xAOD::VertexAuxContainer;
-
-    secondaryVertexContainer ->setStore( secondaryVertexAuxContainer );
-
-    ATH_CHECK( evtStore()->record( secondaryVertexContainer,    "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString          ) );
-    ATH_CHECK( evtStore()->record( secondaryVertexAuxContainer, "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString + "Aux." ) );
-
-    if( m_FillIntermediateVertices ) {
-      auto *twoTrksVertexContainer      = new xAOD::VertexContainer;
-      auto *twoTrksVertexAuxContainer   = new xAOD::VertexAuxContainer;
-
-      twoTrksVertexContainer   ->setStore( twoTrksVertexAuxContainer );
-
-      ATH_CHECK( evtStore()->record( twoTrksVertexContainer,      "VrtSecInclusive_" + m_all2trksVerticesContainerName + m_augVerString          ) );
-      ATH_CHECK( evtStore()->record( twoTrksVertexAuxContainer,   "VrtSecInclusive_" + m_all2trksVerticesContainerName + m_augVerString + "Aux."  ) );
-
-      for( auto itr = m_vertexingAlgorithms.begin(); itr!=m_vertexingAlgorithms.end(); ++itr ) {
-
-        auto& name = itr->first;
-
-        auto *intermediateVertexContainer      = new xAOD::VertexContainer;
-        auto *intermediateVertexAuxContainer   = new xAOD::VertexAuxContainer;
-
-        intermediateVertexContainer   ->setStore( intermediateVertexAuxContainer );
-
-        ATH_CHECK( evtStore()->record( intermediateVertexContainer,      "VrtSecInclusive_IntermediateVertices_" + name + m_augVerString           ) );
-        ATH_CHECK( evtStore()->record( intermediateVertexAuxContainer,   "VrtSecInclusive_IntermediateVertices_" + name + m_augVerString + "Aux."  ) );
-      }
-
-    }
 
     dumpTruthInformation();
 
@@ -373,12 +393,13 @@ namespace VKalVrtAthena {
 
       ATH_MSG_WARNING("processPrimaryVertices() failed");
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
     // Perform track selection and store it to selectedBaseTracks
     for( auto alg : m_trackSelectionAlgs ) {
-      ATH_CHECK( (this->*alg)() );
+      ATH_CHECK( (this->*alg)(ctx) );
     }
 
     if( m_FillNtuple )
@@ -393,7 +414,8 @@ namespace VKalVrtAthena {
       ATH_MSG_DEBUG( "execute: Too few (<2) selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 1;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
-      ATH_CHECK( lockTrackDecorations( true ) );
+      ATH_CHECK( lockTrackDecorations( true, ctx ) );
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -401,7 +423,8 @@ namespace VKalVrtAthena {
       ATH_MSG_INFO( "execute: Too many selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 2;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
-      ATH_CHECK( lockTrackDecorations( true ) );
+      ATH_CHECK( lockTrackDecorations( true, ctx ) );
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -425,7 +448,7 @@ namespace VKalVrtAthena {
 
         auto t_start = std::chrono::system_clock::now();
 
-        ATH_CHECK( (this->*alg)( &workVerticesContainer ) );
+        ATH_CHECK( (this->*alg)( ctx, &workVerticesContainer ) );
 
         auto t_end = std::chrono::system_clock::now();
 
@@ -439,7 +462,7 @@ namespace VKalVrtAthena {
                          return ( !wrkvrt.isGood || wrkvrt.nTracksTotal() < 2 ); }
                        );
 
-        ATH_CHECK( monitorVertexingAlgorithmStep( &workVerticesContainer, name, std::next( itr ) == m_vertexingAlgorithms.end() ) );
+        ATH_CHECK( monitorVertexingAlgorithmStep( ctx, &workVerticesContainer, name, std::next( itr ) == m_vertexingAlgorithms.end() ) );
 
         m_vertexingAlgorithmStep++;
 
@@ -455,10 +478,11 @@ namespace VKalVrtAthena {
       ATH_CHECK( clearNtupleVariables() );
     }
 
-    ATH_CHECK( lockTrackDecorations( false ) );
+    ATH_CHECK( lockTrackDecorations( false, ctx ) );
 
     ATH_MSG_VERBOSE( "execute: process done." );
     // end
+    ATH_CHECK(defineDummyCollections(ctx));
     return StatusCode::SUCCESS;
 
   }
@@ -498,16 +522,19 @@ namespace VKalVrtAthena {
     }
   }
 
-  StatusCode VrtSecInclusive::lockTrackDecorations( bool onlySelection ) const
+  StatusCode VrtSecInclusive::lockTrackDecorations( bool onlySelection,
+						    const EventContext& ctx ) const
   {
-    const xAOD::TrackParticleContainer* trackParticleContainer{};
-    ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_TrackLocation) );
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleHandle = SG::makeHandle( m_TrackLocation, ctx );
+    ATH_CHECK( trackParticleHandle.isValid() );
+    const xAOD::TrackParticleContainer* trackParticleContainer = trackParticleHandle.cptr();
     for( const xAOD::TrackParticle* trk : *trackParticleContainer ) {
       lockTrackDecorations( trk, onlySelection );
     }
 
-    const xAOD::MuonContainer* muons{};
-    ATH_CHECK( evtStore()->retrieve( muons, m_MuonLocation) );
+    SG::ReadHandle<xAOD::MuonContainer> muonsHandle = SG::makeHandle( m_MuonLocation, ctx );
+    ATH_CHECK( muonsHandle.isValid() );
+    const xAOD::MuonContainer* muons = muonsHandle.cptr();
     if (muons->ownPolicy() != SG::VIEW_ELEMENTS) {
       lockLeptonDecorations (muons);
     }
@@ -520,8 +547,9 @@ namespace VKalVrtAthena {
       }
     }
 
-    const xAOD::ElectronContainer *electrons{};
-    ATH_CHECK( evtStore()->retrieve( electrons, m_ElectronLocation ) );
+    SG::ReadHandle<xAOD::ElectronContainer> electronsHandle = SG::makeHandle( m_ElectronLocation, ctx);
+    ATH_CHECK( electronsHandle.isValid() );
+    const xAOD::ElectronContainer *electrons = electronsHandle.cptr();
     if (electrons->ownPolicy() != SG::VIEW_ELEMENTS) {
       lockLeptonDecorations (electrons);
     }
@@ -536,8 +564,9 @@ namespace VKalVrtAthena {
       }
     }
 
-    const xAOD::TrackParticleContainer* IDtracks{};
-    ATH_CHECK( evtStore()->retrieve( IDtracks, m_TrackLocation) );
+    SG::ReadHandle<xAOD::TrackParticleContainer> IDtracksHandle = SG::makeHandle( m_TrackLocation, ctx );
+    ATH_CHECK( IDtracksHandle.isValid() );
+    const xAOD::TrackParticleContainer* IDtracks = IDtracksHandle.cptr();
     for( const auto *trk : *IDtracks ) {
       lockTrackDecorations( trk, onlySelection );
     }

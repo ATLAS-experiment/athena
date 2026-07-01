@@ -112,9 +112,10 @@ def defineMenu():
         'L1_BCM_2A_CALIB':'',
         'L1_BCM_2C_CALIB':'',
 
-        'L1_AFP_A_OR_C_UNPAIRED_ISO':'',
-        'L1_AFP_A_OR_C_UNPAIRED_NONISO':'',
-        'L1_AFP_A_OR_C_EMPTY':'',
+        # Commenting out to allow Dev menu tests use those
+        # 'L1_AFP_A_OR_C_UNPAIRED_ISO':'',
+        # 'L1_AFP_A_OR_C_UNPAIRED_NONISO':'',
+        # 'L1_AFP_A_OR_C_EMPTY':'',
         'L1_AFP_A_OR_C_FIRSTEMPTY':'',
         'L1_AFP_FSA_BGRP12':'',
         'L1_AFP_FSC_BGRP12':'',

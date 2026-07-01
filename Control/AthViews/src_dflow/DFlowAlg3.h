@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // DFlowAlg3.h 
@@ -15,7 +15,7 @@
 #include <string>
 
 // FrameWork includes
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "AthExHive/HiveDataObj.h"
@@ -24,45 +24,21 @@
 namespace AthViews {
 
 class DFlowAlg3
-  : public ::AthAlgorithm
+  : public ::AthReentrantAlgorithm
 { 
-
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  DFlowAlg3( const std::string& name, ISvcLocator* pSvcLocator );
-
-  /// Destructor: 
-  virtual ~DFlowAlg3(); 
-
-  // Assignment operator: 
-  //DFlowAlg3 &operator=(const DFlowAlg3 &alg); 
+ public:
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute(const EventContext& ctx) const override;
+  virtual StatusCode  finalize() override;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Private data: 
-  /////////////////////////////////////////////////////////////////// 
- private: 
-
-  /// Default constructor: 
-  DFlowAlg3();
-
-  /// Containers
-  
-  // vars
-  SG::ReadHandleKey<int>  m_r_int;
-  SG::ReadHandleKey<std::vector<int> > m_r_ints;
-  SG::WriteHandleKey<int> m_w_dflowDummy;
-  SG::ReadHandleKey<HiveDataObj> m_testUpdate;
+ private:
+  SG::ReadHandleKey<int>  m_r_int{this, "RIntFlow", "dflow_int", "Data flow of int (read)"};
+  SG::ReadHandleKey<std::vector<int> > m_r_ints{this, "RIntsFlow", "dflow_ints", "Data flow of integers (read)"};
+  SG::WriteHandleKey<int> m_w_dflowDummy{this, "DFlowDummy", "dflow_dummy", "Dummy object to fix dependencies"};
+  SG::ReadHandleKey<HiveDataObj> m_testUpdate{this, "TestUpdate", "testUpdate", "Test update handle"};
   SG::ReadCondHandleKey<CondDataObj> m_condKeyTest{ this, "TestConditionsData", "testConditionsData", "" };
 
 }; 

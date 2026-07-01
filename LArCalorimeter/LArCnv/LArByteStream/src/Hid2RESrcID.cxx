@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/Hid2RESrcID.h"
@@ -11,6 +11,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/MsgStream.h"
+#include "AthenaKernel/errorcheck.h"
 
 #include <iostream> 
 
@@ -25,8 +26,6 @@ using eformat::helper::SourceIdentifier;
 //   FEB_ID assumes pos-neg. 
 //   I have assumed here, left  for pn=0  (negative?) 
 //                        right for pn=1 (positive?) 
-
-// using ByteStream::Nat8; 
 
 Hid2RESrcID::Hid2RESrcID():
   m_initialized(false),
@@ -77,7 +76,8 @@ uint32_t  Hid2RESrcID::getRodIDFromROM(const COLLECTION_ID& id) const
 
   COLL_MAP::const_iterator it = m_coll2ROD.find( id ); 
   if(it == m_coll2ROD.end()){
-    std::cout <<" H2d2RESrcID invalid COLL ID in hex "<<std::hex<<id.get_compact()<<std::dec<<std::endl;
+    REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "H2d2RESrcID::getRodIDFromROM")
+      << "invalid COLL ID in hex "<<std::hex<<id.get_compact()<<std::dec<<endmsg;
     std::abort();
   }	
 

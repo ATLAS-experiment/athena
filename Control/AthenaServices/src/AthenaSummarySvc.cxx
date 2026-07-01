@@ -23,10 +23,10 @@
 #include <fstream>
 #include <unistd.h>
 #include <exception>
-#include <sstream>
+#include <string_view>
 #include <ctype.h>
 
-static const std::string levelNames[MSG::NUM_LEVELS] = {"NIL",     "VERBOSE", "DEBUG", "INFO",
+static constexpr std::string levelNames[MSG::NUM_LEVELS] = {"NIL",     "VERBOSE", "DEBUG", "INFO",
                                                         "WARNING", "ERROR",   "FATAL", "ALWAYS"};
 
 using namespace std;
@@ -56,13 +56,7 @@ public:
   }
   template <typename T>
   void add(const string& a, const T t) {
-    ostringstream ofs;
-    m_ofs.clear();
-    m_ofs.str("");
-
-    m_ofs << II << t;
-
-    m_dat[a].push_back( m_ofs.str() );
+    m_dat[a].push_back(std::format("\001{}", t));
   }
 
   operator const string () const
@@ -99,11 +93,9 @@ public:
 private:
 
   map<string, vector<string> > m_dat;
-  static ostringstream m_ofs ATLAS_THREAD_SAFE;
   
 };
 
-ostringstream PD::m_ofs("nothing");
 
 inline void tolower(std::string &s)
 {
@@ -376,33 +368,33 @@ AthenaSummarySvc::createASCII( std::ofstream& ofs ) {
 
   list<string>::const_iterator itr;
   
-  ofs << "Files read: " << m_inputFilesRead.size() << std::endl;
+  ofs << "Files read: " << m_inputFilesRead.size() << '\n';
   for (itr=m_inputFilesRead.begin(); itr != m_inputFilesRead.end(); ++itr) {
-    ofs << "  " << *itr << endl;
+    ofs << "  " << *itr << '\n';
   }
   
-  ofs << "Files written: " << m_outputFiles.size() << std::endl;
+  ofs << "Files written: " << m_outputFiles.size() << '\n';
   for (itr=m_outputFiles.begin(); itr != m_outputFiles.end(); ++itr) {
-    ofs << "  " << *itr << endl;
+    ofs << "  " << *itr << '\n';
   }
   
-  ofs << "File Write Error: " << m_outputFilesError.size() << std::endl;
+  ofs << "File Write Error: " << m_outputFilesError.size() << '\n';
   for (itr=m_outputFilesError.begin(); itr != m_outputFilesError.end(); ++itr) {
-    ofs << "  " << *itr << endl;
+    ofs << "  " << *itr << '\n';
   }
   
-  ofs << "Events Read:    " << m_eventsRead << endl;
-  ofs << "Events Written: " << m_eventsWritten << endl;
-  ofs << "Events Skipped: " << m_eventsSkipped << endl;
+  ofs << "Events Read:    " << m_eventsRead << '\n';
+  ofs << "Events Written: " << m_eventsWritten << '\n';
+  ofs << "Events Skipped: " << m_eventsSkipped << '\n';
 
-  ofs << "Runs: " << m_runs << endl;
+  ofs << "Runs: " << m_runs << '\n';
   
 
-  ofs << "Message Count: " << endl;
-  ofs << " FATAL:   " << msgSvc()->messageCount( MSG::FATAL ) << endl;
-  ofs << " ERROR:   " << msgSvc()->messageCount( MSG::ERROR ) << endl;
-  ofs << " WARNING: " << msgSvc()->messageCount( MSG::WARNING ) << endl;
-  ofs << " INFO:    " << msgSvc()->messageCount( MSG::INFO ) << endl;
+  ofs << "Message Count: " << '\n';
+  ofs << " FATAL:   " << msgSvc()->messageCount( MSG::FATAL ) << '\n';
+  ofs << " ERROR:   " << msgSvc()->messageCount( MSG::ERROR ) << '\n';
+  ofs << " WARNING: " << msgSvc()->messageCount( MSG::WARNING ) << '\n';
+  ofs << " INFO:    " << msgSvc()->messageCount( MSG::INFO ) << '\n';
 
   if (p_logMsg != nullptr) {
 
@@ -418,59 +410,59 @@ AthenaSummarySvc::createASCII( std::ofstream& ofs ) {
       
 	
 
-    ofs << "Message Log: " << endl;
+    ofs << "Message Log: " << '\n';
     vector<pair<string,string> > msgs;
     vector<pair<string,string> >::const_iterator mitr;
     for (unsigned int l=thresh.value(); l < MSG::ALWAYS; l++) {
       ofs << "  " << levelNames[l];
       msgs = p_logMsg->getMessages( MSG::Level(l) );
-      ofs << "  " << msgs.size() << endl;
+      ofs << "  " << msgs.size() << '\n';
       for (mitr=msgs.begin(); mitr != msgs.end(); ++mitr) {
-	ofs << "      " << mitr->first << " : " << mitr->second << endl;
+	ofs << "      " << mitr->first << " : " << mitr->second << '\n';
       }
     }
 
-    ofs << "Keyword tracked messages: " << endl;
+    ofs << "Keyword tracked messages: " << '\n';
     for (const auto& msg : p_logMsg->getKeyMessages()) {
       ofs << "  " << levelNames[msg.level]
 	  << "  " << msg.source
 	  << "  " << msg.message
-	  << endl;
+	  << '\n';
     }
     
   }
 
   if (m_extraInfo.size() > 0) {
-    ofs << "Extra Summary Info:" << endl;
+    ofs << "Extra Summary Info:" << '\n';
     vector<pair<string,string> >::const_iterator itr (m_extraInfo.begin() );
     for (; itr != m_extraInfo.end(); ++itr) {
-      ofs << " " << itr->first << " : " << itr->second << endl;
+      ofs << " " << itr->first << " : " << itr->second << '\n';
     }
   }
   
   if (m_extraIncidents.size() > 0) {
-    ofs << "Extra Incident Counts:" << endl;
+    ofs << "Extra Incident Counts:" << '\n';
     map<string, map<string,int> >::const_iterator itr(m_extraIncidents.begin());
     for (; itr != m_extraIncidents.end(); ++itr) {
       ofs << " " << itr->first;
       if (itr->second.begin() == itr->second.end()) {
-	ofs << " : 0" << endl;
+	ofs << " : 0" << '\n';
       } else {
 	for (map<string,int>::const_iterator it=itr->second.begin();
 	     it != itr->second.end(); ++it) {
 	  ofs << " ::  " << it->first << ":" << it->second;
 	}
-	ofs << endl;
+	ofs << '\n';
       }
     }
   }
 
   if (s_badalloc) {
     ofs << "std::bad_alloc caught: out of memory condition detected" 
-	<< endl;
+	<< '\n';
   }
 
-  ofs << "Exit Status: " << m_status << endl;
+  ofs << "Exit Status: " << m_status << '\n';
 
 
 }

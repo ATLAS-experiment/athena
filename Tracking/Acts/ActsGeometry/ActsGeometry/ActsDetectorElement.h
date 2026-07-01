@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSDETECTORELEMENT_H
@@ -15,11 +15,10 @@
 #include "ActsGeoUtils/TransformCache.h"
 
 // ACTS
-#include "Acts/Geometry/DetectorElementBase.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 
 // STL
-#include <iostream>
+#include <memory>
 
 namespace InDetDD {
 class TRT_BaseElement;
@@ -74,11 +73,13 @@ public:
   /// Identifier hash
   IdentifierHash identifyHash() const { return m_idHash; }
 
-  virtual unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& alignStore) const override;
+  virtual unsigned int storeAlignedTransforms(ActsTrk::DetectorAlignStore& alignStore) const override;
   
   virtual const Acts::Transform3 &
   localToGlobalTransform(const Acts::GeometryContext &gctx) const final override;
 
+  virtual const Acts::Transform3 &
+  localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const final override;
   /// Return surface associated with this identifier, which should come from the
   virtual const Acts::Surface &surface() const final override;
   /// Returns whether the detector element is sensitive
@@ -110,6 +111,7 @@ private:
   IdentifierHash m_idHash {};
   DetectorType m_type{DetectorType::UnDefined};
   ActsTrk::TransformCacheDetEle<ActsDetectorElement> m_trfCache{0, this};
+
   /// Detector element as variant
   const GeoVDetectorElement *m_detElement{nullptr};
   /// Boundaries of the detector element

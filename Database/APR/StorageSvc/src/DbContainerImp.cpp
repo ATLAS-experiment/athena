@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -26,10 +26,6 @@ DbContainerImp::DbContainerImp(const std::string& name) :
   APRMessaging(name),
   m_size(0), m_name("UNKNOWN")
 {
-}
-
-/// Standard Destructor
-DbContainerImp::~DbContainerImp() {
 }
 
 /// Size of the container

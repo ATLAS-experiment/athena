@@ -7,7 +7,6 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"
 
-#include "TruthUtils/AtlasPID.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "TTree.h"
@@ -58,7 +57,7 @@ StatusCode HGTD_RDOAnalysis::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode HGTD_RDOAnalysis::execute() {
+StatusCode HGTD_RDOAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG(" In HGTD_RDOAnalysis::execute()" );
   m_rdo_module_layer.clear();
   m_rdo_module_x.clear();
@@ -72,7 +71,6 @@ StatusCode HGTD_RDOAnalysis::execute() {
   m_rdo_hit_sdo_toa.clear();
   m_rdo_hit_sdo_truth_category.clear();
 
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   // Raw HGTD Data
   const HGTD_RDO_Container* p_RDO_cont{nullptr};
   ATH_CHECK(SG::get(p_RDO_cont, m_inputKey, ctx));
@@ -180,7 +178,7 @@ StatusCode HGTD_RDOAnalysis::execute() {
 bool HGTD_RDOAnalysis::isHSGoodParticle(HepMC::ConstGenParticlePtr particlePtr,const HepMC::GenEvent* hardScatterGenEvent, float min_pt_cut) {
   bool decision = false;
   if( MC::isGenStable(particlePtr) and
-      isCharged(particlePtr) and
+      MC::isCharged(particlePtr) and
       particlePtr->momentum().perp() >= min_pt_cut and
       particlePtr->momentum().eta() < 4.0 and
       particlePtr->parent_event() == hardScatterGenEvent)

@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *   */
 
 #include "boost/algorithm/string.hpp"
@@ -53,7 +53,8 @@ StatusCode TrigEgammaEmulationToolMT::initialize()
 
 //**********************************************************************
 
-asg::AcceptData TrigEgammaEmulationToolMT::emulate(const TrigCompositeUtils::Decision *roi,
+asg::AcceptData TrigEgammaEmulationToolMT::emulate(const EventContext& ctx,
+                                                   const TrigCompositeUtils::Decision *roi,
                                                    const std::string& trigger, bool &valid) const
 {
   asg::AcceptData acceptData (&m_accept);
@@ -63,7 +64,7 @@ asg::AcceptData TrigEgammaEmulationToolMT::emulate(const TrigCompositeUtils::Dec
     if( tool->chain() == trigger )
     {
       Trig::TrigData input(trigger);
-      if(!match(roi, input)) return acceptData;
+      if(!match(ctx, roi, input)) return acceptData;
 
       // Check of the match procedure has all objects inside
       if(!input.isValid()){
@@ -84,7 +85,8 @@ asg::AcceptData TrigEgammaEmulationToolMT::emulate(const TrigCompositeUtils::Dec
 
 //**********************************************************************
 
-bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi, 
+bool TrigEgammaEmulationToolMT::match( const EventContext& ctx,
+                                       const TrigCompositeUtils::Decision *roi,
                                        Trig::TrigData &output,
                                        unsigned int condition) const
 {
@@ -114,7 +116,7 @@ bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi,
       ATH_MSG_DEBUG("Matching with " << trigger );
 
 
-      auto vec_el_linkInfo = match()->getFeatures<xAOD::ElectronContainer>(roi,trigger,condition);
+      auto vec_el_linkInfo = match()->getFeatures<xAOD::ElectronContainer>(ctx,roi,trigger,condition);
 
       if( !vec_el_linkInfo.empty() ){
 
@@ -132,7 +134,7 @@ bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi,
 
         // Step 3
         {
-          auto vec_feat = match()->getFeatures<xAOD::CaloClusterContainer>(roi,trigger,condition);
+          auto vec_feat = match()->getFeatures<xAOD::CaloClusterContainer>(ctx,roi,trigger,condition);
           for(auto& featLinkInfo : vec_feat){
             if(!featLinkInfo.isValid()) continue;
             output.clusters.push_back(*featLinkInfo.link); 
@@ -141,7 +143,7 @@ bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi,
 
         // Step 2
         {
-          auto vec_feat = match()->getFeatures<xAOD::TrigElectronContainer>(roi, trigger, condition);
+          auto vec_feat = match()->getFeatures<xAOD::TrigElectronContainer>(ctx,roi, trigger, condition);
           for ( auto& featLinkInfo : vec_feat ){
             if(!featLinkInfo.isValid()) continue;
             output.trig_electrons.push_back(*featLinkInfo.link);
@@ -151,7 +153,7 @@ bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi,
         // Step 1
         {
           // get rings from container access
-          output.rings = match()->getRingsFeature(roi);
+          output.rings = match()->getRingsFeature(ctx, roi);
           if(output.rings){
             output.emCluster = output.rings->emCluster();
           }
@@ -162,8 +164,8 @@ bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi,
         // Step 0
         {
           // L1Calo (step 0)
-          output.l1 = match()->getL1Feature(roi);
-          auto featLinkInfo = match()->getFeature<TrigRoiDescriptorCollection>(roi,trigger, condition);
+          output.l1 = match()->getL1Feature(ctx, roi);
+          auto featLinkInfo = match()->getFeature<TrigRoiDescriptorCollection>(ctx,roi,trigger, condition);
           if(featLinkInfo.isValid()){
             output.roi = *featLinkInfo.link;
           }
@@ -189,7 +191,7 @@ bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi,
 
     for (auto& trigger : m_photonTrigList){
 
-      auto vec_ph_linkInfo = match()->getFeatures<xAOD::PhotonContainer>(roi,trigger,condition);
+      auto vec_ph_linkInfo = match()->getFeatures<xAOD::PhotonContainer>(ctx,roi,trigger,condition);
 
       if( !vec_ph_linkInfo.empty() ){
 
@@ -206,7 +208,7 @@ bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi,
 
         // Step 3
         {
-          auto vec_feat = match()->getFeatures<xAOD::CaloClusterContainer>(roi,trigger,condition);
+          auto vec_feat = match()->getFeatures<xAOD::CaloClusterContainer>(ctx,roi,trigger,condition);
           for(auto& featLinkInfo : vec_feat){
             if(!featLinkInfo.isValid()) continue;
             output.clusters.push_back(*featLinkInfo.link);
@@ -215,20 +217,20 @@ bool TrigEgammaEmulationToolMT::match( const TrigCompositeUtils::Decision *roi,
 
         // Step 1
         {
-          auto featLinkInfo = match()->getFeature<xAOD::TrigEMClusterContainer>(roi,trigger);
+          auto featLinkInfo = match()->getFeature<xAOD::TrigEMClusterContainer>(ctx,roi,trigger);
           if(featLinkInfo.isValid()){
             output.emCluster = *featLinkInfo.link;
           }
           // get rings from container access
-          output.rings = match()->getRingsFeature(roi);
+          output.rings = match()->getRingsFeature(ctx, roi);
 
         }
 
         // Step 0
         {
           // L1Calo (step 0)
-          output.l1 = match()->getL1Feature(roi);
-          auto featLinkInfo = match()->getFeature<TrigRoiDescriptorCollection>(roi,trigger);
+          output.l1 = match()->getL1Feature(ctx, roi);
+          auto featLinkInfo = match()->getFeature<TrigRoiDescriptorCollection>(ctx,roi,trigger);
           if(featLinkInfo.isValid()){
             output.roi = *featLinkInfo.link;
           }

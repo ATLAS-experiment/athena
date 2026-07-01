@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RootCoreUtils )
@@ -20,4 +20,4 @@ atlas_add_executable( rcu_locate util/rcu_locate.cxx
 atlas_add_test( ut_expression
    SOURCES test/ut_expression.cxx
    LINK_LIBRARIES RootCoreUtils
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )

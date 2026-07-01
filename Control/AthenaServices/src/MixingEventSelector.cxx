@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -110,7 +110,7 @@ MixingEventSelector::setUpTriggerList(Gaudi::Details::PropertyBase&) {
 }
 
 void 
-MixingEventSelector::decodeTrigger(string triggDescr) {
+MixingEventSelector::decodeTrigger(const std::string & triggDescr) {
   //all this would be much more readable without error reporting...
   typedef  tokenizer<char_separator<char> > Tokenizer;
   Tokenizer tokens(triggDescr, char_separator<char>(" :"));
@@ -483,7 +483,7 @@ StatusCode MixingEventSelector::resetCriteria(const std::string&,
 // IConverter implementation.
 const CLID& MixingEventSelector::objType() const
 {
-  return ClassID_traits<EventInfo>::ID();
+  static const CLID cid = ClassID_traits<EventInfo>::ID();  return cid;
 }
 long MixingEventSelector::repSvcType() const
 {

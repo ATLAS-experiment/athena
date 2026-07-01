@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
-
-
 
 #include "CaloFillCellPositionShift.h"
 
@@ -16,17 +14,14 @@
 
 //Constructor
 CaloFillCellPositionShift::CaloFillCellPositionShift(const std::string& name, ISvcLocator* pSvcLocator):
-AthAlgorithm(name,pSvcLocator),m_calo_id(nullptr),m_cellPos(nullptr),m_key("LArCellPositionShift")
+  AthAlgorithm(name,pSvcLocator)
 {
-  declareProperty("outputKey",m_key,"Key for output CaloCellPositionShift");
 }
 
 //__________________________________________________________________________
 //Destructor
-CaloFillCellPositionShift::~CaloFillCellPositionShift()
-{
-  ATH_MSG_DEBUG( "CaloFillCellPositionShift destructor called"  );
-}
+CaloFillCellPositionShift::~CaloFillCellPositionShift() = default;
+
 //__________________________________________________________________________
 StatusCode CaloFillCellPositionShift::initialize()
 {
@@ -43,7 +38,7 @@ StatusCode CaloFillCellPositionShift::initialize()
 
 }
 //__________________________________________________________________________
-StatusCode CaloFillCellPositionShift::execute()
+StatusCode CaloFillCellPositionShift::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloFillCellPositionShift execute()" );
   return StatusCode::SUCCESS; 
@@ -94,8 +89,3 @@ StatusCode CaloFillCellPositionShift::stop()
 
   return StatusCode::SUCCESS;
  }
-
-StatusCode CaloFillCellPositionShift::finalize()
-{
-  return StatusCode::SUCCESS;
-}

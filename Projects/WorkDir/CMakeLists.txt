@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -9,15 +9,6 @@ cmake_minimum_required( VERSION 3.25 )
 # Note that there is a second `project` call further below to set
 # the version and languages.
 project( WorkDir )
-
-# Force the compilation of CUDA code for only compute capability 5.2 for now.
-# To get rid of warnings from 11.0 about not supporting older compute
-# capabilities anymore.
-set( CMAKE_CUDA_ARCHITECTURES "all-major" CACHE STRING
-   "CUDA architectures to build code for" )
-
-set( CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -Wno-deprecated-gpu-targets" CACHE STRING
-   "CUDA switch off deprecated architecture compilation warning" )
 
 # Enable the CI tests in the CITest package in case the user wants to
 # run them locally:
@@ -60,8 +51,15 @@ unset( _defaultParentProject )
 # we use the QUIET keyword.
 find_package( AtlasCMake QUIET )
 
+# Check for the availability of extra compilers/languages. So that the Acts
+# override could make use of them if needed.
+include( CheckLanguage )
+check_language( Fortran )
+check_language( CUDA )
+check_language( HIP )
+
 # Potentially override the Acts package to use a local checkout.
-include(${CMAKE_CURRENT_SOURCE_DIR}/ActsOverride.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ActsOverride.cmake)
 
 # Find the project that we depend on:
 find_package( ${ATLAS_PROJECT} REQUIRED )
@@ -69,27 +67,24 @@ find_package( ${ATLAS_PROJECT} REQUIRED )
 # Set up the project with its version and baseline languages.
 project( WorkDir VERSION ${${ATLAS_PROJECT}_VERSION} LANGUAGES C CXX )
 
+# Set up all additional languages that are available.
+if( CMAKE_Fortran_COMPILER )
+   enable_language( Fortran )
+endif()
+if( CMAKE_CUDA_COMPILER )
+   enable_language( CUDA )
+   find_package( CUDAToolkit )
+endif()
+if( CMAKE_HIP_COMPILER )
+   enable_language( HIP )
+endif()
+
 # If the parent project build type was "Release" enable the generation of debug
 # symbols for local builds. If you absolutely do want to keep "Release", use a
 # different capitalization, e.g. "-DCMAKE_BUILD_TYPE=RELEASE".
 if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
    set( CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
       "Build mode for the release" FORCE )
-endif()
-
-# Set up any additional languages that may be available.
-include( CheckLanguage )
-check_language( Fortran )
-if( CMAKE_Fortran_COMPILER )
-   enable_language( Fortran )
-endif()
-check_language( CUDA )
-if( CMAKE_CUDA_COMPILER )
-   enable_language( CUDA )
-endif()
-check_language( HIP )
-if( CMAKE_HIP_COMPILER )
-   enable_language( HIP )
 endif()
 
 # Set up where to find the AthenaPoolUtilitiesTest CMake code.
@@ -106,6 +101,14 @@ if( IS_DIRECTORY
    set( xAODUtilities_DIR
       "${CMAKE_SOURCE_DIR}/../../Event/xAOD/xAODCore/cmake"
       CACHE PATH "Directory holding the xAODUtilities module" )
+endif()
+
+# Set up where to find the AtlasGeant4Utilities CMake code.
+if( IS_DIRECTORY
+   "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake" )
+   set( AtlasGeant4Utilities_DIR
+      "${CMAKE_SOURCE_DIR}/../../Simulation/AtlasGeant4/cmake"
+      CACHE PATH "Directory holding the AtlasGeant4Utilities module" )
 endif()
 
 # Set up CTest:

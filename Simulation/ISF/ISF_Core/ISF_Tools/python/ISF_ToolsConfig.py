@@ -35,6 +35,7 @@ def EntryLayerFilterCfg(flags, **kwargs):
         TruthStrategy.MC18: MC18EntryLayerFilterCfg,
         TruthStrategy.MC18LLP: MC18LLPEntryLayerFilterCfg,
         TruthStrategy.Validation: ValidationEntryLayerFilterCfg,
+        TruthStrategy.MSLLPValidation: MSLLPValidationEntryLayerFilterCfg,
         # TruthStrategy.PhysicsProcess: PhysicsProcessTruthServiceCfg,
         # TruthStrategy.Global: GlobalTruthServiceCfg,
         TruthStrategy.Cosmic: CosmicEventFilterToolCfg,
@@ -95,6 +96,10 @@ def MC18LLPEntryLayerFilterCfg(flags, name="ISF_MC18LLPEntryLayerFilter", **kwar
 
 def ValidationEntryLayerFilterCfg(flags, name="ISF_ValidationEntryLayerFilter", **kwargs):
     return MC12EntryLayerFilterCfg(flags, name, **kwargs)
+
+
+def MSLLPValidationEntryLayerFilterCfg(flags, name="ISF_MSLLPValidationEntryLayerFilter", **kwargs):
+    return MC15aPlusEntryLayerFilterCfg(flags, name, **kwargs)
 
 
 def CosmicEventFilterToolCfg(flags, name="ISF_CosmicEventFilter", **kwargs):

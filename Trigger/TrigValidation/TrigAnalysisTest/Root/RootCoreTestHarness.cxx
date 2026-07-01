@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -16,10 +16,10 @@ using namespace std;
 
 
 #ifdef ROOTCORE
-#		include <xAODRootAccess/TEvent.h>
+#		include <xAODRootAccess/Event.h>
 #		include <xAODRootAccess/Init.h>
 #		include <xAODRootAccess/tools/ReturnCheck.h>
-#               include <AsgTools/SgTEvent.h>
+#               include <AsgTools/SgEvent.h>
 #endif
 
 #include "TrigConfxAOD/xAODConfigTool.h"
@@ -53,31 +53,32 @@ namespace TrigAnalysisTest {
     }
 
     // Load up the proper file we should be checking against.
-    auto chain = new TChain("CollectionTree");
-    chain->Add(gSystem->Getenv("ROOTCORE_TEST_FILE"));
+    std::unique_ptr< TFile > file( TFile::Open( gSystem->Getenv("ROOTCORE_TEST_FILE"), "READ" ) );
+
 
     // Init data access to the trigger
-    TEvent event(TEvent::kClassAccess);
-    if (!event.readFrom(chain).isSuccess()) {
+    auto event = xAOD::Event::createAndReadFrom(*file);
+    if (!event) {
+      cout << "cannot read from file: " << file << endl;
       return 1;
     }
 
     xAODConfigTool configTool("xAODConfigTool");
     ToolHandle<TrigConf::ITrigConfigTool> configHandle(&configTool);
-    configHandle->initialize();
+    if (!configHandle->initialize().isSuccess()) return 1;
    
     TrigDecisionTool trigDecTool("TrigDecTool");
-    trigDecTool.setProperty("ConfigTool",configHandle);
-    trigDecTool.setProperty("TrigDecisionKey","xTrigDecision");
-    trigDecTool.initialize();
+    if (!trigDecTool.setProperty("ConfigTool",configHandle)) return 1;
+    if (!trigDecTool.setProperty("TrigDecisionKey","xTrigDecision")) return 1;
+    if (!trigDecTool.initialize()) return 1;
 
-		asg::SgTEvent sgtevent(&event);
-		test->setEventStore( &sgtevent );
+		asg::SgEvent sgevent(event.get());
+		test->setEventStore( &sgevent );
 
     // Run the files
-    size_t nEntries = chain->GetEntries();
+    size_t nEntries = event->getEntries();
     for (size_t entry = 0; entry < nEntries; entry++) {
-      event.getEntry(entry);
+      event->getEntry(entry);
 
       test->processEvent (trigDecTool);
     }

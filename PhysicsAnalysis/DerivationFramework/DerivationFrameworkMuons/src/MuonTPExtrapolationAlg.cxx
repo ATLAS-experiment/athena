@@ -65,8 +65,8 @@ StatusCode MuonTPExtrapolationAlg::execute(const EventContext& ctx) const {
           track = static_cast<const xAOD::TrackParticle*>(muon);
        } else if (muon->type() == xAOD::Type::ObjectType::Muon) {
             const xAOD::Muon* probeMuon = static_cast<const xAOD::Muon*>(muon);
-            track = probeMuon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
-            if (!track) { track = probeMuon->primaryTrackParticle(); }
+            track = probeMuon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
+            if (!track) { track = probeMuon->trackParticle(xAOD::Muon::TrackParticleType::Primary); }
        }
        bool passSelection = muon->pt() > m_ptMin && (selDecors.empty () || 
                                                      std::find_if(selDecors.begin(),selDecors.end(),

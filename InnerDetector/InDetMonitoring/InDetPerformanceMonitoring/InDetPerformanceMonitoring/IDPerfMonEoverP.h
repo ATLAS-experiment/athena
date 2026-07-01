@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDPerfMonEoverP_H
@@ -72,7 +72,7 @@ namespace Trk{
   class Track;
 }
 
-#define NOS_ELECTRONS 100
+#define NOS_ELECTRONS 10
 #define NO_PV 50
 
 typedef std::pair<const xAOD::Vertex* , int> VxPos;
@@ -91,7 +91,7 @@ class IDPerfMonEoverP : public AthAlgorithm
   /** @brief Gaudi algorithm hooks*/
   StatusCode initialize();
   StatusCode finalize();
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
  private:
   /** @brief addToValidationNutple*/
@@ -173,6 +173,9 @@ class IDPerfMonEoverP : public AthAlgorithm
   /* Flag for data*/
   bool                            m_isDATA;
 
+  /* Flag to activate the filling of the vertex information */
+  bool                            m_fillVertexInfo;
+  
   //Validation Ntuple Stuff
   //!< boolean to switch to validation mode
   bool                            m_validationMode;

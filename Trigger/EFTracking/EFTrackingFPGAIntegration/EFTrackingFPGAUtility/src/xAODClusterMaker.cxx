@@ -27,6 +27,7 @@ false;
 #include "StoreGate/WriteHandle.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
+#include "xAODInDetMeasurement/JaggedVecEltCache.h"
 #include "AthAllocators/DataPool.h"
 #include <bit>
 
@@ -164,6 +165,17 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
     constexpr size_t ROW_channelsPhi = 12; // int (from u32)
 
     // --------------------------
+    // First pass: count total RDOs across all clusters
+    // --------------------------
+    unsigned int totalStripRDOs = 0;
+    for (size_t i = 0; i < nClusters; ++i) {
+        uint64_t rdo1 = load_u64(ROW_rdo_w1, i);
+        uint64_t rdo2 = load_u64(ROW_rdo_w2, i);
+        if (rdo1) ++totalStripRDOs;
+        if (rdo2) ++totalStripRDOs;
+    }
+
+    // --------------------------
     // Precompute spans into aux data store (types match the non-bulk path)
     // --------------------------
     if (nClusters > 0) {
@@ -173,7 +185,6 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
         static const SG::Accessor<std::array<float, 1>> locCovXXAcc("localCovarianceDim1");
         static const SG::Accessor<std::array<float, 3>> gpAcc("globalPosition");
         static const SG::Accessor<int> channelsPhiAcc("channelsInPhi");
-        static const SG::Accessor<std::vector<unsigned long long>> rdoListAcc("rdoList");
 
         auto idHashSpan      = idHashAcc.getDataSpan(*stripCl);
         auto idSpan          = idAcc.getDataSpan(*stripCl);
@@ -181,7 +192,10 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
         auto locCovXXSpan    = locCovXXAcc.getDataSpan(*stripCl);
         auto gpSpan          = gpAcc.getDataSpan(*stripCl);
         auto channelsPhiSpan = channelsPhiAcc.getDataSpan(*stripCl);
-        auto rdoSpan         = rdoListAcc.getDataSpan(*stripCl);
+
+        // Create JaggedVecEltCache for rdoList (StripCluster has no ClusterVars, use cache directly)
+        xAOD::xAODInDetMeasurement::Utilities::JaggedVecEltCache<Identifier::value_type> rdoListCache(
+            *stripCl, xAOD::StripCluster::rdoListAcc(), totalStripRDOs);
 
         // --------------------------
         // Vectorized bulk assignments
@@ -207,13 +221,19 @@ StatusCode xAODClusterMaker::makeStripClusterContainer(
                 // channels in phi
                 channelsPhiSpan[i] = static_cast<int>(load_u32(ROW_channelsPhi, i));
 
-                // RDO list: up to 2 entries (Identifier)
-                auto& rdoList = rdoSpan[i];
-                rdoList.reserve(2);
+                // RDO list: up to 2 entries (Identifier) using JaggedVecEltCache
+                unsigned int rdoIdx = rdoListCache.getBeginIndex(i);
                 uint64_t rdo1 = load_u64(ROW_rdo_w1, i);
                 uint64_t rdo2 = load_u64(ROW_rdo_w2, i);
-                if (rdo1) rdoList.emplace_back(rdo1);
-                if (rdo2) rdoList.emplace_back(rdo2);
+                if (rdo1) {
+                    rdoListCache.setValue(rdoIdx, static_cast<Identifier::value_type>(rdo1));
+                    ++rdoIdx;
+                }
+                if (rdo2) {
+                    rdoListCache.setValue(rdoIdx, static_cast<Identifier::value_type>(rdo2));
+                    ++rdoIdx;
+                }
+                rdoListCache.updateEndIndex(i, rdoIdx);
             }
         }
     }
@@ -356,16 +376,12 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
             row = 20; // width in eta
             double widthInEta = std::bit_cast<float>(pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i + 16]);
 
-            row = 21; // total ToT
-            int totalToT = pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i + 16];
-
             Eigen::Matrix<float, 3, 1> globalPosition(globalX, globalY, globalZ);
 
             pixelCl->setMeasurement<2>(idHash, localPosition,localCovariance);
             pixelCl->setIdentifier(id);
             pixelCl->setRDOlist(RDOs);
             pixelCl->globalPosition() = globalPosition;
-            pixelCl->setTotalToT(totalToT);
             pixelCl->setChannelsInPhiEta(channelsInPhi, channelsInEta);
             pixelCl->setWidthInEta(widthInEta);
         }
@@ -428,6 +444,17 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
     constexpr size_t ROW_totalToT     = 21;  // i32
 
     // --------------------------
+    // First pass: count total RDOs across all clusters (up to 4 per cluster)
+    // --------------------------
+    unsigned int totalPixelRDOs = 0;
+    for (size_t i = 0; i < nClusters; ++i) {
+        if (load_u64(ROW_rdo_w1, i)) ++totalPixelRDOs;
+        if (load_u64(ROW_rdo_w2, i)) ++totalPixelRDOs;
+        if (load_u64(ROW_rdo_w3, i)) ++totalPixelRDOs;
+        if (load_u64(ROW_rdo_w4, i)) ++totalPixelRDOs;
+    }
+
+    // --------------------------
     // Precompute spans into aux data store (types aligned with !m_doBulkCopy behavior)
     // --------------------------
     if (nClusters > 0) {
@@ -440,8 +467,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
         static const SG::Accessor<int> channelsPhiAcc("channelsInPhi");
         static const SG::Accessor<int> channelsEtaAcc("channelsInEta");
         static const SG::Accessor<float> widthEtaAcc("widthInEta");
-        static const SG::Accessor<std::vector<unsigned long long>> rdoListAcc("rdoList");
-
 
         auto idHashSpan      = idHashAcc.getDataSpan(*pixelCl);
         auto idSpan          = idAcc.getDataSpan(*pixelCl);
@@ -452,7 +477,9 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
         auto channelsPhiSpan = channelsPhiAcc.getDataSpan(*pixelCl);
         auto channelsEtaSpan = channelsEtaAcc.getDataSpan(*pixelCl);
         auto widthEtaSpan    = widthEtaAcc.getDataSpan(*pixelCl);
-        auto rdoSpan         = rdoListAcc.getDataSpan(*pixelCl);
+
+        // Use PixelCluster::ClusterVars for jagged vector access
+        xAOD::PixelCluster::ClusterVars clusterVars(*pixelCl, totalPixelRDOs);
 
         // --------------------------
         // Vectorized bulk assignments
@@ -483,17 +510,29 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
                 widthEtaSpan[i]    = load_f32(ROW_widthEta, i);
                 totalToTSpan[i]    = static_cast<int>(load_u32(ROW_totalToT, i));
 
-                // RDOs (up to 4)
-                auto& rdoList = rdoSpan[i];
-                rdoList.reserve(4);
+                // RDOs (up to 4) using JaggedVecEltCache via ClusterVars
+                unsigned int rdoIdx = clusterVars.rdoList.getBeginIndex(i);
                 uint64_t r1 = load_u64(ROW_rdo_w1, i);
                 uint64_t r2 = load_u64(ROW_rdo_w2, i);
                 uint64_t r3 = load_u64(ROW_rdo_w3, i);
                 uint64_t r4 = load_u64(ROW_rdo_w4, i);
-                if (r1) rdoList.emplace_back(r1);
-                if (r2) rdoList.emplace_back(r2);
-                if (r3) rdoList.emplace_back(r3);
-                if (r4) rdoList.emplace_back(r4);
+                if (r1) {
+                    clusterVars.rdoList.setValue(rdoIdx, static_cast<Identifier::value_type>(r1));
+                    ++rdoIdx;
+                }
+                if (r2) {
+                    clusterVars.rdoList.setValue(rdoIdx, static_cast<Identifier::value_type>(r2));
+                    ++rdoIdx;
+                }
+                if (r3) {
+                    clusterVars.rdoList.setValue(rdoIdx, static_cast<Identifier::value_type>(r3));
+                    ++rdoIdx;
+                }
+                if (r4) {
+                    clusterVars.rdoList.setValue(rdoIdx, static_cast<Identifier::value_type>(r4));
+                    ++rdoIdx;
+                }
+                clusterVars.rdoList.updateEndIndex(i, rdoIdx);
             }
         }
     }
@@ -566,7 +605,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
             pixelCl->setIdentifier(pxAux.id[i]);
             pixelCl->setRDOlist(RDOs);
             pixelCl->globalPosition() = globalPosition;
-            pixelCl->setTotalToT(pxAux.totalToT[i]);
             pixelCl->setChannelsInPhiEta(pxAux.channelsInPhi[i],
                     pxAux.channelsInEta[i]);
             pixelCl->setWidthInEta(pxAux.widthInEta[i]);

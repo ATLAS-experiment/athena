@@ -39,7 +39,7 @@ namespace DerivationFramework {
     virtual ~PixeldEdxTrackParticleThinning() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
-    virtual StatusCode doThinning() const override;
+    virtual StatusCode doThinning(const EventContext& ctx) const override;
 
   private:
 
@@ -72,9 +72,6 @@ namespace DerivationFramework {
     std::vector<double> m_pTbins;
     static const std::vector<double> m_preScales;
     
-    //logic
-    mutable std::vector<unsigned long long> m_counter ATLAS_THREAD_SAFE;
-    mutable std::vector<unsigned long long> m_counter_picked ATLAS_THREAD_SAFE;
     mutable std::mutex m_mutex;
 
   }; 

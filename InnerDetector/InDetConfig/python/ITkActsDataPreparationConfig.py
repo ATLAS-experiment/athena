@@ -17,6 +17,18 @@ def ITkActsDataPreparationCfg(flags,
     acc.merge(ActsClusterizationCfg(flags,
                                     previousActsExtension = previousExtension))
 
+    # PLR is reconstructed as a sidecar cluster stream only. It is kept
+    # separate from the standard ITk tracking inputs and is therefore only
+    # scheduled once on the primary/validation pass.
+    from InDetConfig.ITkActsHelpers import isPrimaryPass, isValidationPass
+    if flags.Detector.EnablePLR and (isPrimaryPass(flags) or isValidationPass(flags)):
+        from ActsConfig.ActsClusterizationConfig import ActsPLRClusterizationAlgCfg
+        acc.merge(ActsPLRClusterizationAlgCfg(
+            flags,
+            name=f"{flags.Tracking.ActiveConfig.extension}PLRClusterizationAlg",
+            RoIs=f"{flags.Tracking.ActiveConfig.extension}RegionOfInterest",
+        ))
+
     # Space Point Formation
     from ActsConfig.ActsSpacePointFormationConfig import ActsSpacePointFormationCfg
     acc.merge(ActsSpacePointFormationCfg(flags,
@@ -35,4 +47,3 @@ def ITkActsDataPreparationCfg(flags,
             acc.merge(ActsInspectTruthContentAlgCfg(flags))
         
     return acc
-

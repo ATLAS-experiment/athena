@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHXRTSERVICES_DEVICEMGMTSVC_H
 #define ATHXRTSERVICES_DEVICEMGMTSVC_H
@@ -89,9 +89,9 @@ class DeviceMgmtSvc : public extends<AthService, IDeviceMgmtSvc> {
     // grouping (by contexts) is not known yet.
     std::vector<std::vector<cl::Device>> device_types;
 
-    std::size_t device_count;
-    std::size_t different_xclbin_count;
-    std::size_t different_xclbin_fpga_device_name;
+    std::size_t device_count{};
+    std::size_t different_xclbin_count{};
+    std::size_t different_xclbin_fpga_device_name{};
   };
 
   // Helpers to get device information.

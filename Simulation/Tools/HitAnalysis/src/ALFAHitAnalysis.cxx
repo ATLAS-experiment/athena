@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFAHitAnalysis.h"
@@ -57,7 +57,7 @@ StatusCode ALFAHitAnalysis::initialize() {
 }		 
 
 
-StatusCode ALFAHitAnalysis::execute() {
+StatusCode ALFAHitAnalysis::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG( "In ALFAHitAnalysis::execute()" );
   
   m_station->clear();
@@ -67,23 +67,11 @@ StatusCode ALFAHitAnalysis::execute() {
   m_energy->clear();
 
   //cleaning
-  int fiber, plate, sign, station;
-  double E_fiber_sum[8][10][64][2], E_full_sum[8], E_layer_sum[8][20];
-  for (int l= 0; l<8; l++) {
-    E_full_sum[l] = 0.;           
-    for (int i = 0; i < 10; i++) {
-      E_layer_sum[l][i] = 0.;
-      E_layer_sum[l][i+10] = 0.;
-      for (int j = 0; j < 64; j++) {
-	for (int k = 0; k < 2; k++) {
-	  E_fiber_sum[l][i][j][k] = 0.;
-	}
-      }
-    }
-  }
-  
+  int fiber{}, plate{}, sign{}, station{};
+  //Local variable E_fiber_sum uses 81920 bytes of stack space
+  //coverity[STACK_USE]
+  double E_fiber_sum[8][10][64][2]{}, E_full_sum[8]{}, E_layer_sum[8][20]{};
   ALFA_HitConstIter iter;
-  const EventContext& ctx{Gaudi::Hive::currentContext()};
   const ALFA_HitCollection* col_alfa{nullptr};
   ATH_CHECK(SG::get(col_alfa, m_readKey, ctx));
   for (iter = (*col_alfa).begin(); iter != (*col_alfa).end(); ++iter) {

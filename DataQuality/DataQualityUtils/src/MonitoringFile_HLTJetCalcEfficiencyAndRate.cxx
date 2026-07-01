@@ -31,6 +31,54 @@
 #include "TTree.h"
 #include "TBranch.h"
 
+namespace{
+
+ //==Efficiency
+  const std::vector<std::string> effobs = {
+    "_Eff_vs_pt",
+    "_Eff_vs_eta",
+    "_Eff_vs_phi",
+  };
+
+  const std::vector<std::string> TrigItems = {
+    // EF_fj30(_a4_EFFS)  <-- L2_fj25 <-- L1_FJ10
+    // EF_j30(_a4_EFFS)   <-- L2_j25 <-- L1_J10
+    // EF_j240(_a4_EFFS)  <-- L2_j95 <-- L1_J75
+
+    "EF_fj30",
+    "EF_j30",
+    "EF_j240",
+    //EF_fj50",
+    //EF_fj75",
+
+    //EF_j50",
+    //EF_j75",
+    //EF_j95",
+
+    "L1_FJ10",
+    "L1_J10",
+    "L1_J75",
+    //"L1_FJ55",
+    //"L1_FJ95",
+
+    //"L1_J30",
+    //"L1_J55",
+    //"L1_J75",
+
+    //"L2_fj45",
+    //"L2_fj70",
+
+    "L2_fj25",
+    "L2_j25",
+    "L2_j95",
+    //"L2_j30",
+    //"L2_j45",
+    //"L2_j70",
+    //"L2_j90",
+  };
+
+}
+
 namespace dqutils {
   void
   MonitoringFile::HLTJetCalcEfficiencyAndRate(TFile* f, std::string& run_dir) {
@@ -49,16 +97,11 @@ namespace dqutils {
       }
 
 
-      std::string run_dir2 = run_dir;
-      //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
-      //run_number=run_number;
-
 
       std::string jetmon_dir = run_dir + "/HLT/JetMon";
 
       //===HLTJet efficiency histograms
       std::string akt4topo_dir = jetmon_dir + "/AntiKt4TopoJets/TrigEff";
-      //std::string akt6topo_dir = jetmon_dir + "/AntiKt6TopoJets/TrigEff";
 
       TDirectory* dir(0);
 
@@ -71,49 +114,7 @@ namespace dqutils {
       TH1F* hden(0);
 
 
-      //==Efficiency
-      static const std::vector<std::string> effobs = {
-        "_Eff_vs_pt",
-        "_Eff_vs_eta",
-        "_Eff_vs_phi",
-      };
-
-      static const std::vector<std::string> TrigItems = {
-        // EF_fj30(_a4_EFFS)  <-- L2_fj25 <-- L1_FJ10
-        // EF_j30(_a4_EFFS)   <-- L2_j25 <-- L1_J10
-        // EF_j240(_a4_EFFS)  <-- L2_j95 <-- L1_J75
-
-        "EF_fj30",
-        "EF_j30",
-        "EF_j240",
-        //EF_fj50",
-        //EF_fj75",
-
-        //EF_j50",
-        //EF_j75",
-        //EF_j95",
-
-        "L1_FJ10",
-        "L1_J10",
-        "L1_J75",
-        //"L1_FJ55",
-        //"L1_FJ95",
-
-        //"L1_J30",
-        //"L1_J55",
-        //"L1_J75",
-
-        //"L2_fj45",
-        //"L2_fj70",
-
-        "L2_fj25",
-        "L2_j25",
-        "L2_j95",
-        //"L2_j30",
-        //"L2_j45",
-        //"L2_j70",
-        //"L2_j90",
-      };
+     
 
       std::string snum, sden, hnumname;
       for (const std::string& item : TrigItems) {

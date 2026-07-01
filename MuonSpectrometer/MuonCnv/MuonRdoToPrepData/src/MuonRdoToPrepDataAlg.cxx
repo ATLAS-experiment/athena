@@ -3,8 +3,11 @@
 */
 
 #include "MuonRdoToPrepData/MuonRdoToPrepDataAlg.h"
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
 #include "Identifier/IdentifierHash.h"
+#include <cstdint>
+#include <vector>
 
 MuonRdoToPrepDataAlg::MuonRdoToPrepDataAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthReentrantAlgorithm(name, pSvcLocator) {}

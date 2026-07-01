@@ -53,20 +53,12 @@ StatusCode ISF::SimEventFilter::finalize()
 }
 
 /** check if the given particle passes all filters */
-#ifdef HEPMC3
 bool ISF::SimEventFilter::passesFilters(HepMC::ConstGenParticlePtr& part, const ToolHandleArray<IGenParticleFilter>& filters) const
-#else
-bool ISF::SimEventFilter::passesFilters(HepMC::ConstGenParticlePtr part, const ToolHandleArray<IGenParticleFilter>& filters) const
-#endif
 {
   // TODO: implement this as a std::find_if with a lambda function
   for ( const auto& filter : filters ) {
     // determine if the particle passes current filter
-#ifdef HEPMC3
     bool passFilter = filter->pass(part);
-#else
-    bool passFilter = filter->pass(*part);
-#endif
     ATH_MSG_VERBOSE("Filter '" << filter.typeAndName() << "' returned: "
                     << (passFilter ? "true, will keep particle."
                         : "false, will remove particle."));
@@ -123,33 +115,21 @@ StatusCode ISF::SimEventFilter::execute(const EventContext &ctx) const
 
         for ( const auto& filter : m_genParticleCommonFilters ) {
           // determine if the particle passes current filter
-#ifdef HEPMC3
           bool passFilter = filter->pass(p);
-#else
-          bool passFilter = filter->pass(*p);
-#endif
           ATH_MSG_DEBUG("  GenParticleCommonFilter '" << filter.typeAndName() << "' returned: "
                           << (passFilter ? "true, will keep particle."
                               : "false, will remove particle."));
         }
         for ( const auto& filter : m_genParticleOldFilters ) {
           // determine if the particle passes current filter
-#ifdef HEPMC3
           bool passFilter = filter->pass(p);
-#else
-          bool passFilter = filter->pass(*p);
-#endif
           ATH_MSG_DEBUG("  GenParticleOldFilter '" << filter.typeAndName() << "' returned: "
                           << (passFilter ? "true, will keep particle."
                               : "false, will remove particle."));
         }
         for ( const auto& filter : m_genParticleNewFilters ) {
           // determine if the particle passes current filter
-#ifdef HEPMC3
           bool passFilter = filter->pass(p);
-#else
-          bool passFilter = filter->pass(*p);
-#endif
           ATH_MSG_DEBUG("  GenParticleNewFilter '" << filter.typeAndName() << "' returned: "
                           << (passFilter ? "true, will keep particle."
                               : "false, will remove particle."));

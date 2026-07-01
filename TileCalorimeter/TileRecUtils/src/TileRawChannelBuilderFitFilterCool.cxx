@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileEvent/TileRawChannel.h"
@@ -1481,6 +1481,10 @@ void TileRawChannelBuilderFitFilterCool::pulseFit(const TileDigits *digit, doubl
           leakped = (syg * sg - sy * sgg) / dgg0;
         } else {
           leakampl = 0.0;
+          if (serr == 0.)[[unlikely]]{
+            ATH_MSG_ERROR("serr is zero in TileRawChannelBuilderFitFilterCool::pulseFit");
+            return;
+          }
           leakped = sy / serr;
         }
 

@@ -186,15 +186,15 @@ private:
    * @param postz:               PostStepPoint @a z coordinate
    * @param clusterlist:         List of ionisation clusters along step
    */
-  void addClustersFromStep ( const double& scaledKineticEnergy,
-                             const double& particleCharge,
-                             const double& timeOfHit,
-                             const double& prex,
-                             const double& prey,
-                             const double& prez,
-                             const double& postx,
-                             const double& posty,
-                             const double& postz,
+  void addClustersFromStep ( double scaledKineticEnergy,
+                             double particleCharge,
+                             double timeOfHit,
+                             double prex,
+                             double prey,
+                             double prez,
+                             double postx,
+                             double posty,
+                             double postz,
                              std::vector<cluster>& clusterlist,
                              int strawGasType,
                              CLHEP::HepRandomEngine* rndmEngine,
@@ -215,10 +215,10 @@ private:
    * @param clusters: ionisation clusters along particle trajectory
    * @param deposits: energy deposits on wire
    */
-  void ClustersToDeposits (MagField::AtlasFieldCache& fieldCache, const int& hitID,
+  void ClustersToDeposits (MagField::AtlasFieldCache& fieldCache, int hitID,
 			   const std::vector<cluster>& clusters,
 			   std::vector<TRTElectronicsProcessing::Deposit>& deposits,
-			   Amg::Vector3D TRThitGlobalPos,
+			   const Amg::Vector3D& TRThitGlobalPos,
                            double m_cosmicEventPhase, // const ComTime* m_ComTime
                            int strawGasType,
                            CLHEP::HepRandomEngine* rndmEngine);

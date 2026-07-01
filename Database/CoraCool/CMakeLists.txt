@@ -30,7 +30,7 @@ atlas_add_test  ( CoraCoolDatabaseSvcFactory_test
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
                   Boost::unit_test_framework
-                  POST_EXEC_SCRIPT nopost.sh
+                  POST_EXEC_SCRIPT noerror.sh
                   )
                   
 atlas_add_test  ( CoraCoolDatabaseSvc_test
@@ -39,7 +39,7 @@ atlas_add_test  ( CoraCoolDatabaseSvc_test
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
                   Boost::unit_test_framework
-                  POST_EXEC_SCRIPT nopost.sh
+                  POST_EXEC_SCRIPT noerror.sh
                   )                
 
 atlas_add_test  ( CoraCoolDatabase_test
@@ -48,7 +48,7 @@ atlas_add_test  ( CoraCoolDatabase_test
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
                   Boost::unit_test_framework
-                  POST_EXEC_SCRIPT nopost.sh
+                  POST_EXEC_SCRIPT noerror.sh
                   )     
                   
 atlas_add_test  ( CoraCoolFolder_test
@@ -57,7 +57,7 @@ atlas_add_test  ( CoraCoolFolder_test
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
                   Boost::unit_test_framework
-                  POST_EXEC_SCRIPT nopost.sh
+                  POST_EXEC_SCRIPT noerror.sh
                   )   
                   
 atlas_add_test  ( CoraCoolObjectIter_test
@@ -66,6 +66,6 @@ atlas_add_test  ( CoraCoolObjectIter_test
                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}  ${CORAL_INCLUDE_DIRS}
                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CoraCool
                   Boost::unit_test_framework
-                  POST_EXEC_SCRIPT nopost.sh
+                  POST_EXEC_SCRIPT noerror.sh
                   )     
                       

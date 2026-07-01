@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -43,7 +43,8 @@ StatusCode eFEXTOBEtTool::initialize()
 }
   
 // The main user calls
-StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int UnD,
+StatusCode eFEXTOBEtTool::getegSums(const EventContext& ctx,
+                              float etaTOB, float phiTOB, int seed, int UnD,
                               std::vector<unsigned int> &ClusterCellETs, 
                               std::vector<unsigned int> &RetaSums,
                               std::vector<unsigned int> &RhadSums, 
@@ -73,7 +74,7 @@ StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int Un
   location(etaTOB,phiTOB, eFEX, FPGA, fpgaEta);
 
   // Set up e/g algorithm for this location
-  ATH_CHECK( m_eFEXegAlgoTool->safetyTest() );
+  ATH_CHECK( m_eFEXegAlgoTool->safetyTest(ctx) );
   m_eFEXegAlgoTool->setup(tobtable, eFEX, FPGA, fpgaEta);
 
   // Get ETs of cells making up the ET clusters
@@ -157,7 +158,8 @@ StatusCode eFEXTOBEtTool::getTOBCellEnergies(float etaTOB, float phiTOB, std::ve
 }
 
 
-StatusCode eFEXTOBEtTool::gettauSums(float etaTOB, float phiTOB, int seed, int UnD, 
+StatusCode eFEXTOBEtTool::gettauSums(const EventContext& ctx,
+                              float etaTOB, float phiTOB, int seed, int UnD,
                               std::vector<unsigned int> &RcoreSums,
                               std::vector<unsigned int> &RemSums)
 {
@@ -185,7 +187,7 @@ StatusCode eFEXTOBEtTool::gettauSums(float etaTOB, float phiTOB, int seed, int U
   location(etaTOB,phiTOB, eFEX, FPGA, fpgaEta);
 
   // Set up e/g algorithm for this location
-  ATH_CHECK( m_eFEXtauAlgoTool->safetyTest() );
+  ATH_CHECK( m_eFEXtauAlgoTool->safetyTest(ctx) );
   m_eFEXtauAlgoTool->setup(tobtable, eFEX, FPGA, fpgaEta);
 
   // Get sums from algorithm

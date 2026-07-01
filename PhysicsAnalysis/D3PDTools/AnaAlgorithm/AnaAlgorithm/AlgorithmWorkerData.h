@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,7 +17,7 @@
 
 namespace asg
 {
-  class SgTEvent;
+  class SgEvent;
 }
 
 namespace EL
@@ -32,7 +32,7 @@ namespace EL
 
   struct AlgorithmWorkerData final
   {
-    asg::SgTEvent *m_evtStore = nullptr;
+    asg::SgEvent *m_evtStore = nullptr;
     IHistogramWorker *m_histogramWorker = nullptr;
     ITreeWorker *m_treeWorker = nullptr;
     IFilterWorker *m_filterWorker = nullptr;

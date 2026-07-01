@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode CMMEtSumsCnvAlg::execute() {
+   StatusCode CMMEtSumsCnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const CMMEtSumsCollection* esd = nullptr;

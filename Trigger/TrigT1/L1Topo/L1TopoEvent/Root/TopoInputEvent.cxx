@@ -39,7 +39,8 @@ TopoInputEvent::TopoInputEvent() :
   m_gmht("InputgMHT",1),
   m_gte("InputgTE",1),
   m_cxe("InputcXE",1),
-  m_gespresso("InputgESPRESSO",1)
+  m_gespresso("InputgESPRESSO",1),
+  m_gristretto("InputgRISTRETTO",1)
 {
 }
 
@@ -226,6 +227,13 @@ StatusCode TopoInputEvent::setgESPRESSO(const TCS::gTETOB & gespresso) {
    return StatusCode::SUCCESS;
 }
 
+StatusCode TopoInputEvent::setgRISTRETTO(const TCS::gTETOB & gristretto) {
+   m_gristretto.clear();
+   m_gristretto.push_back(gristretto);
+   return StatusCode::SUCCESS;
+}
+
+
 StatusCode TopoInputEvent::setEventInfo(const uint32_t runNo, const uint32_t evtNo, const uint32_t lumiB, const uint32_t BCID) {
    m_runNo = runNo;
    m_evtNo = evtNo;
@@ -359,6 +367,11 @@ void TopoInputEvent::setOverflowFromgESPRESSOInput   (bool v)
     m_overflowFromgESPRESSOInput = v;
 }
 
+void TopoInputEvent::setOverflowFromgRISTRETTOInput   (bool v)
+{
+    m_overflowFromgRISTRETTOInput = v;
+}
+
 void TopoInputEvent::setOverflowFromMuonInput  (bool v)
 {
     m_overflowFromMuonInput = v;
@@ -409,6 +422,7 @@ TopoInputEvent::inputTOBs(inputTOBType_t tobType) const {
    case GTE: return &m_gte;
    case CXE: return &m_cxe;
    case GESPRESSO: return &m_gespresso;
+   case GRISTRETTO: return &m_gristretto;
    }
    return 0;
 }
@@ -449,6 +463,7 @@ bool TopoInputEvent::hasInputOverflow(TCS::inputTOBType_t tobType) const
     case GTE:        inputOverflow = overflowFromgTEInput();        break;
     case CXE:        inputOverflow = overflowFromcXEInput();        break;
     case GESPRESSO:  inputOverflow = overflowFromgESPRESSOInput();  break;
+    case GRISTRETTO: inputOverflow = overflowFromgRISTRETTOInput(); break;
     default:         inputOverflow = false;
     }
    return inputOverflow;
@@ -490,6 +505,7 @@ TCS::TopoInputEvent::clear() {
    m_gte.clear();
    m_cxe.clear();
    m_gespresso.clear();
+   m_gristretto.clear();
    m_runNo = 0;
    m_evtNo = 0;
    m_lumiB = 0;
@@ -509,6 +525,7 @@ TCS::TopoInputEvent::clear() {
    setgTE(gTETOB(0));       // default gTE
    setcXE(jXETOB(0,0,0));       // default cXE
    setgESPRESSO(gTETOB(0)); // default gESPRESSO
+   setgRISTRETTO(gTETOB(0)); // default gRISTRETTO
    m_overflowFromMuonInput = false;
 
    return StatusCode::SUCCESS;
@@ -691,6 +708,12 @@ TopoInputEvent::dump() {
    }
    file << "</gespresso>" << std::endl;
 
+   file << "<gristretto>" << std::endl;
+   for(const gTETOB* gristretto : m_gristretto) {
+      file << gristretto->sumEt() << std::endl;
+   }
+   file << "</gristretto>" << std::endl;
+
 
 
    file << "<met>" << std::endl;
@@ -750,6 +773,7 @@ std::ostream & operator<<(std::ostream &o, const TCS::TopoInputEvent &evt) {
    o << "  #gte     : " << evt.m_gte.size() << " (capacity: " << evt.m_gte.capacity() << ")" << std::endl;
    o << "  #cxe     : " << evt.m_cxe.size() << " (capacity: " << evt.m_cxe.capacity() << ")" << std::endl;
    o << "  #gespresso   : " << evt.m_gespresso.size() << " (capacity: " << evt.m_gespresso.capacity() << ")" << std::endl;
+   o << "  #gristretto   : " << evt.m_gristretto.size() << " (capacity: " << evt.m_gristretto.capacity() << ")" << std::endl;
    o << "  #met     : " << evt.m_met.size() << " (capacity: " << evt.m_met.capacity() << ")" << std::endl;
    o << "  #info    : runNo, evtNo, lumiBlock and BCID" << std::endl;
    
@@ -776,6 +800,7 @@ std::ostream & operator<<(std::ostream &o, const TCS::TopoInputEvent &evt) {
    o << "gTE input (" << evt.m_gte.name() << "):" << std::endl << evt.m_gte;
    o << "cXE input (" << evt.m_cxe.name() << "):" << std::endl << evt.m_cxe;
    o << "gESPRESSO input (" << evt.m_gespresso.name() << "):" << std::endl << evt.m_gespresso;
+   o << "gRISTRETTO input (" << evt.m_gristretto.name() << "):" << std::endl << evt.m_gristretto;
    o << "MET input (" << evt.m_met.name() << "):" << std::endl << evt.m_met;
    o << "Overflow from:"
      <<" EmtauInput "<<evt.overflowFromEmtauInput()
@@ -816,6 +841,7 @@ TopoInputEvent::print() const {
    TRG_MSG_INFO("  #gte     : " << m_gte.size() << " (capacity: " << m_gte.capacity() << ")");
    TRG_MSG_INFO("  #cxe     : " << m_cxe.size() << " (capacity: " << m_cxe.capacity() << ")");
    TRG_MSG_INFO("  #gespresso  : " << m_gespresso.size() << " (capacity: " << m_gespresso.capacity() << ")");
+   TRG_MSG_INFO("  #gristretto  : " << m_gristretto.size() << " (capacity: " << m_gristretto.capacity() << ")");
    TRG_MSG_INFO("  #met     : " << m_met.size() << " (capacity: " << m_met.capacity() << ")");
    
    TRG_MSG_DEBUG("Details:");
@@ -863,6 +889,8 @@ TopoInputEvent::print() const {
    for(auto * x : m_cxe) TRG_MSG_DEBUG("      " << *x);
    TRG_MSG_DEBUG("gESPRESSO input (" << m_gespresso.name() << "):");
    for(auto * x : m_gespresso) TRG_MSG_DEBUG("      " << *x);
+   TRG_MSG_DEBUG("gRISTRETTO input (" << m_gristretto.name() << "):");
+   for(auto * x : m_gristretto) TRG_MSG_DEBUG("      " << *x);
    TRG_MSG_DEBUG("MET input (" << m_met.name() << "):");// << std::endl << m_met;
    for(auto * x : m_met) TRG_MSG_DEBUG("      " << *x);
    TRG_MSG_DEBUG("Overflow bits from:"

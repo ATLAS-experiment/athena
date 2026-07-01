@@ -60,7 +60,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual INav4MomAssocs* createTransient();
+  virtual INav4MomAssocs* createTransient(const Token* token);
 
   /////////////////////////////////////////////////////////////////// 
   // Protected data: 

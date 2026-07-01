@@ -32,10 +32,7 @@
 #include "CoralBase/AttributeListException.h"
 
 #include "PersistencySvc/IFileCatalog.h"
-#include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/ISession.h"
-#include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/SimpleUtilityBase.h"
+#include "StorageSvc/SimpleUtilityBase.h"
 #include "RelationalAccess/ConnectionService.h"
 #include "RelationalAccess/IConnectionServiceConfiguration.h"
 #include "RelationalAccess/ISessionProxy.h"

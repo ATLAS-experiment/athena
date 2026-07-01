@@ -12,12 +12,14 @@ find_package( ROOT COMPONENTS Core )
 find_package( TBB )
 find_package( UUID )
 find_package( yampl )
+find_package( valgrind ) # Note that there is no VALGRIND_LIBRARIES variable.
 
 # Component(s) in the package:
 atlas_add_component( AthenaServices
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
    ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} ${YAMPL_INCLUDE_DIRS}
+   ${VALGRIND_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
    ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES}
    AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
@@ -73,8 +75,9 @@ atlas_add_test( MetaDataSvc_test
    SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
-                  StoreGateLib PersistencySvc AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
-   POST_EXEC_SCRIPT nopost.sh)
+                  StoreGateLib AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
+   LOG_IGNORE_PATTERN "ERROR Unable to get|ERROR Failing|ERROR Unable to call|tool->endInputFile|Cannot create proxy|FAILURE: addProxyToInputMetaDataStore"
+   POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( AthTPCnvSvc
    SCRIPT test/AthTPCnvSvc_test.py
@@ -88,13 +91,14 @@ atlas_add_test( AthDictLoaderSvc
 
 atlas_add_test( ItemListSemanticsTest
    SCRIPT test/OutputStreamItemListTest.py
-   POST_EXEC_SCRIPT nopost.sh)
+   POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TimeoutAlgTest
    SCRIPT test/TimeoutAlg_test.py
    PROPERTIES PROCESSORS 2
               PASS_REGULAR_EXPRESSION "ERROR Event timeout"
-   POST_EXEC_SCRIPT nopost.sh )
+   LOG_IGNORE_PATTERN "ERROR Event timeout"
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py

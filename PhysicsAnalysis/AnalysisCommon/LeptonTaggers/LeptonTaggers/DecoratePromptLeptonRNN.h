@@ -60,7 +60,7 @@ namespace Prompt
     DecoratePromptLeptonRNN(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
 
     using decoratorFloatH_t = SG::WriteDecorHandle<xAOD::IParticleContainer, float>;
@@ -139,7 +139,6 @@ namespace Prompt
 
     std::map<std::string, TH1*>                       m_hists;
 
-    std::unique_ptr<SG::AuxElement::ConstAccessor<unsigned char> > m_accessQuality;
 
     SG::WriteDecorHandleKeyArray<xAOD::IParticleContainer> m_decorHandleKeys
       { this, "DecorHandleKeys", {} };

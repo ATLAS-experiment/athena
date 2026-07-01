@@ -4,7 +4,7 @@
 
 #include "CaloSimEventTPCnv/SrCaloCalibrationHitContainerCnv_p1.h"
 
-#include "AthenaPoolCnvSvc/Compressor.h"
+#include "CxxUtils/Compressor.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloIdentifier/CaloDM_ID.h"
 #include "CaloIdentifier/CaloIdManager.h"

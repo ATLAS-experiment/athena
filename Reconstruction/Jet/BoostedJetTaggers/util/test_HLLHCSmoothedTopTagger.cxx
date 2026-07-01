@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -28,12 +28,12 @@
 
 #include "AsgMessaging/MessageCheck.h"
 
-// messaging 
+// messaging
 ANA_MSG_HEADER(Test)
 ANA_MSG_SOURCE(Test, "BoostedJetTaggers")
 using namespace Test;
 
-int main( int argc, char* argv[] ) {
+int test1( int argc, char* argv[] ) {
 
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
 
@@ -188,11 +188,11 @@ int main( int argc, char* argv[] ) {
 
   // flags used for tagger setup
   bool useLocalCalibArea = true; // retrieve config files from local directory
-  
+
   // variables to define different config related variables
   std::string configFile, decorationName;
 
-  // 50% efficiency setup 
+  // 50% efficiency setup
   if (taggerEfficiency == "50") {
     configFile = "HLLHCSmoothedContainedTopTagger_AntiKt10LCTopoTrimmed_MassSphericityFixedSignalEfficiency50_20220413.dat";
     decorationName = "HLLHCSmoothedTop50MassSphericity";
@@ -231,18 +231,18 @@ int main( int argc, char* argv[] ) {
   asg::StandaloneToolHandle<SmoothedTopTagger> m_Tagger; //!
   m_Tagger.setTypeAndName("SmoothedTopTagger/MyTagger");
   if(verbose) ANA_CHECK( m_Tagger.setProperty("OutputLevel", MSG::DEBUG) );
-  if (useLocalCalibArea) {ANA_CHECK( m_Tagger.setProperty("CalibArea", "Local") );} 
+  if (useLocalCalibArea) {ANA_CHECK( m_Tagger.setProperty("CalibArea", "Local") );}
   else {ANA_CHECK( m_Tagger.setProperty("CalibArea", "SmoothedTopTaggers/HLLHC/July2022/") );}
-  
-  if (useConfigFile) { 
+
+  if (useConfigFile) {
     if (!useLocalCalibArea) {
-      ANA_CHECK( m_Tagger.setProperty( "ConfigFile", configFile) ); 
+      ANA_CHECK( m_Tagger.setProperty( "ConfigFile", configFile) );
     } else {
       ANA_CHECK( m_Tagger.setProperty( "ConfigFile", localConfigPath + configFile) )
     }
   }
   else {
-    // use an empty CalibArea 
+    // use an empty CalibArea
     ANA_CHECK( m_Tagger.setProperty("CalibArea", "") );
     // working point dependent settings for tagger cuts
     std::vector<std::string> variableNames = {"Mass", "Sphericity"};
@@ -275,7 +275,7 @@ int main( int argc, char* argv[] ) {
   std::string sphericityPassDecor = decorationName + "_PassSphericity";
   std::string massPassDecor = decorationName + "_PassMass";
 
-  std::string validJetDecor = decorationName + "_ValidJetContent";  
+  std::string validJetDecor = decorationName + "_ValidJetContent";
   std::string validKinRangeDecor = decorationName + "_ValidKinRange";
 
   static const SG::ConstAccessor<float> acc_massDecor(massDecor);
@@ -306,9 +306,7 @@ int main( int argc, char* argv[] ) {
       continue ;
 
     // Loop over jet container
-    std::pair< xAOD::JetContainer*, xAOD::ShallowAuxContainer* > jets_shallowCopy = xAOD::shallowCopyContainer( *myJets );
-    std::unique_ptr<xAOD::JetContainer> shallowJets(jets_shallowCopy.first);
-    std::unique_ptr<xAOD::ShallowAuxContainer> shallowAux(jets_shallowCopy.second);
+    auto [shallowJets, shallowAux] = xAOD::shallowCopy( *myJets );
     for(const xAOD::Jet* jet : * shallowJets ){
 
       if(verbose) std::cout<<"Testing Top Tagger"<< std::endl;
@@ -362,7 +360,7 @@ int main( int argc, char* argv[] ) {
   outputFile->Close();
 
   // cleanup
-  delete chain;  
+  delete chain;
 
   // print the branches that were used for help with smart slimming
   std::cout<<std::endl<<std::endl;
@@ -372,4 +370,15 @@ int main( int argc, char* argv[] ) {
 
   return 0;
 
+}
+
+
+int main (int argc, char* argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

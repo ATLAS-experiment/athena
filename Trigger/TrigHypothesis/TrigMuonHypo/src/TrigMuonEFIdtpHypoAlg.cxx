@@ -75,7 +75,7 @@ StatusCode TrigMuonEFIdtpHypoAlg::execute( const EventContext& context ) const
 
       // get SA muon from the previous decision
       const xAOD::Muon *muonSA = nullptr;
-      auto prevMuInfo = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+      auto prevMuInfo = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(context, previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
       ATH_CHECK(prevMuInfo.size()==1);
       auto muonSALink = prevMuInfo.at(0).link;
       ATH_CHECK( muonSALink.isValid() );
@@ -84,7 +84,7 @@ StatusCode TrigMuonEFIdtpHypoAlg::execute( const EventContext& context ) const
 	 ATH_MSG_VERBOSE("previous decision muon is not SA, skipping this decision");
 	 continue;
       }
-      const xAOD::TrackParticle* metrack = muonSA->trackParticle( xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle );
+      const xAOD::TrackParticle* metrack = muonSA->trackParticle( xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle );
       ATH_MSG_VERBOSE("muonSA: muonType="<<muonSA->muonType()<<", pT="<<muonSA->pt()/1000.0<<", eta="<<muonSA->eta()<<", phi="<<muonSA->phi()<<", author="<<muonSA->author());
 
       // select PT track

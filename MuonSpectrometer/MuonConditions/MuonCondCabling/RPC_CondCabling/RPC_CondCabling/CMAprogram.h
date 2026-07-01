@@ -1,12 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CMAPROGRAM_H
 #define CMAPROGRAM_H
 
-#include "MuonCablingTools/dbline.h"
+
 #include "RPC_CondCabling/CMAparameters.h"
+#include <cstdint>
+#include <iosfwd>
+
+class DBline;
 
 class CMAprogram {
 private:

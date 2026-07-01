@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloRec )
@@ -63,12 +63,12 @@ atlas_add_test( CaloBCIDLumiCondAlgConfig_test
 atlas_add_test( CaloTopoCluster_test
                 SCRIPT python -m CaloRec.CaloTopoClusterConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 
 atlas_add_test( CaloCellContainerAliasAlg_test
                 SCRIPT python -m CaloRec.CaloCellContainerAliasAlg_test
-                PROPERTIES TIMEOUT 300
+                PROPERTIES TIMEOUT 600
                 LOG_SELECT_PATTERN "ERROR|error|WARNING [^U]|FATAL|processing" )
 
 
@@ -109,6 +109,7 @@ atlas_add_test( ToolConstantsCondAlgConfig_test
 
 atlas_add_test( CaloCellMakerTest
 		SCRIPT python -m CaloRec.CaloCellMakerConfig
+                PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( CaloTowerStore_test

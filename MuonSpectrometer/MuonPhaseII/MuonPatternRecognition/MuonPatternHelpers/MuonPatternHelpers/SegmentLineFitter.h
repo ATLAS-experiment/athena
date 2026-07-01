@@ -32,7 +32,7 @@ namespace MuonR4::SegmentFit {
             /** @brief Abrivation of the fitted line parameters */
             using LinePar_t = Fitter_t::ParamVec_t; 
             /** @brief Abrivation of the space point type to use */
-            using Hit_t = std::unique_ptr<CalibratedSpacePoint>;
+            using Hit_t = Segment::MeasType;
             /** @brief Collection of space points */
             using HitVec_t = std::vector<Hit_t>;
             /** @brief Abrivation of the fit parameters  */
@@ -108,9 +108,6 @@ namespace MuonR4::SegmentFit {
             ConfigSwitches m_cfg{};
             /** @brief Selector to identify the valid hits */
             Selector_t m_goodHitSel{};
-            /** @brief Moves the segment to the average x0 position, if 
-             *         the segment does not contain any measurement. */
-            void centerAlongWire(Result_t& fitResult) const;
             /** @brief Calls the underlying line fitter to determine the segment parameters
              *  @param cctx: Calibration context to fetch later the measurement's calib constants
              *               from StoreGate (It's a packed EventContext*)
@@ -166,12 +163,16 @@ namespace MuonR4::SegmentFit {
              *         competing contributions from the same layers in the fit. Hits
              *         on the same layer are sorted by their chi2 and the worse ones
              *         are rejected if they don't provide additional information
-             *  @param linePos: Position of the latest segment line 
-             *  @param lineDir: Direction of the latest segment line
              *  @param hits: List of hit measurements to clean*/
-            void cleanStripLayers(const Amg::Vector3D& linePos,
-                                  const Amg::Vector3D& lineDir,
-                                  HitVec_t& hits) const;
+            void cleanStripLayers(HitVec_t& hits) const;
+
+            /** @brief Returns whether the new fit result is better than the one from the
+             *         previous iteration. Selection criterion is the chi2 estimation for the
+             *         same number of degrees of freedom and then the one which has more degree
+             *         of freedom but still remains under the good segment threshold
+             * @param newResult: The first fit result
+             * @param oldResult: The second fit result */
+            bool betterResult(const Result_t& newResult, const Result_t& oldResult) const;
             /** @brief Converts the fit result into a segment object
              *  @param locToGlobTrf: Local to global transform to translate the segment parameters into
              *                       global parameters

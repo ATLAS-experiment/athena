@@ -210,7 +210,7 @@ StatusCode FixLArIdMap::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArIdMap::execute()
+StatusCode FixLArIdMap::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG(" in execute, fix = "<<m_fixFlag );
   return StatusCode::SUCCESS;

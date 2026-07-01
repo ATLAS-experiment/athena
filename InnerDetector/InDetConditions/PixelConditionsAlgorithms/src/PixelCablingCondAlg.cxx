@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelCablingCondAlg.h"
@@ -15,6 +15,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <utility> //std::in_range
 
 PixelCablingCondAlg::PixelCablingCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthCondAlgorithm(name, pSvcLocator)
@@ -138,13 +139,21 @@ StatusCode PixelCablingCondAlg::execute(const EventContext& ctx) const {
                                       << sl_40_fmt << "\t" << sl_40_link << "\t" << sl_80_fmt << "\t"
                                       << sl_80_link << "\t" << DCSname << std::dec << std::endl;
     }
-
+    
     // Get the offline ID for this module
     // check layer_disk value is inside some very wide range
     if (layer_disk>100){
       ATH_MSG_ERROR("Value for layer_disk is insane: "<<layer_disk);
       return StatusCode::FAILURE;
     }
+    // Broad range check before passing to the wafer_id function (which takes ints)
+    if (!std::in_range<int>(layer_disk) || !std::in_range<int>(phi_module)) {
+      ATH_MSG_ERROR("Input value out of range for wafer_id arguments: "
+                << "layer_disk=" << layer_disk
+                << ", phi_module=" << phi_module);
+      return StatusCode::FAILURE;
+    }
+    
     Identifier offlineId = m_pixelID->wafer_id(barrel_ec,layer_disk,phi_module,eta_module);
 
     // Set linknumber for IBL / DBM entries
@@ -181,7 +190,7 @@ StatusCode PixelCablingCondAlg::execute(const EventContext& ctx) const {
       // Check if offlineId fail was caused by exceeding eta_module range
       if (eta_module>m_pixelID->eta_module_max(offlineId) || eta_module<m_pixelID->eta_module_min(offlineId)) {
         // eta_module_max == -999 indicates the module does not exist
-        if (m_pixelID->eta_module_max(offlineId)==-999 && m_pixelID->eta_module_min(offlineId)==-999) {
+        if (m_pixelID->eta_module_max(offlineId)==-999 && m_pixelID->eta_module_min(offlineId)==-999) [[unlikely]]{
           ATH_MSG_ERROR("Module does not exist in geometry");
         }
         else {
@@ -192,7 +201,12 @@ StatusCode PixelCablingCondAlg::execute(const EventContext& ctx) const {
         }
       }
     }
-
+    if (!std::in_range<int>(robid) || !std::in_range<int>(rodid)) [[unlikely]]{
+      ATH_MSG_ERROR("Input value out of range for add_entry_robrod arguments: "
+                << "robid=" << robid
+                << ", rodid=" << rodid);
+      return StatusCode::FAILURE;
+    }
     // Fill the maps
     writeCdo->add_entry_onoff(onlineId, offlineId);
     writeCdo->add_entry_offon(offlineId, onlineId);

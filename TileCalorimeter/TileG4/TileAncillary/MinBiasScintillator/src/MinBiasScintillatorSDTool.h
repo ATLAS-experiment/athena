@@ -23,8 +23,8 @@ public:
   ~MinBiasScintillatorSDTool() = default;
   virtual StatusCode initialize() override;
 
-  /** End of an athena event */
-  virtual StatusCode Gather() override final; //FIXME would be good to be able to avoid this.
+  virtual StatusCode SetupEvent(HitCollectionMap&) override final;
+  virtual StatusCode Gather(HitCollectionMap&) override final;
 
 protected:
     // Make me an SD!

@@ -7,14 +7,12 @@ atlas_subdir( TrkVertexFitterUtils )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( CLHEP )
 
 atlas_add_library( TrkVertexFitterUtilsLib
                    TrkVertexFitterUtils/*.h
                    INTERFACE
                    PUBLIC_HEADERS TrkVertexFitterUtils
-                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES TrkVertexFitterInterfaces AthenaBaseComps xAODTracking GaudiKernel TrkParametersBase TrkParameters MagFieldConditions ${CLHEP_LIBRARIES} )
+                   LINK_LIBRARIES TrkVertexFitterInterfaces AthenaBaseComps xAODTracking GaudiKernel TrkParametersBase TrkParameters MagFieldConditions )
 
 # Component(s) in the package:
 atlas_add_component( TrkVertexFitterUtils

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CondWriterExtAlg.h"
@@ -23,14 +23,13 @@ StatusCode CondWriterExtAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CondWriterExtAlg::execute()
+StatusCode CondWriterExtAlg::execute(const EventContext& ctx)
 {
-  const EventContext& context = getContext();
-  ATH_MSG_INFO ("Event " << context.eventID().event_number() <<
-                " LBN " << context.eventID().lumi_block());
+  ATH_MSG_INFO ("Event " << ctx.eventID().event_number() <<
+                " LBN " << ctx.eventID().lumi_block());
 
   // Check if we need to execute a command
-  auto it = m_cmd.find(context.eventID().lumi_block());
+  auto it = m_cmd.find(ctx.eventID().lumi_block());
   if (it != m_cmd.end()) {
     ATH_MSG_INFO("Executing: " << it->second);
     if ( system(it->second.c_str()) != 0 ) {

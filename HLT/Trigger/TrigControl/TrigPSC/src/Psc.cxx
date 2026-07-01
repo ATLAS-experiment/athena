@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -178,17 +178,17 @@ bool psc::Psc::configure(const ptree& config)
     if ( ! Py_IsInitialized() ) {
       ERS_DEBUG(1,"Initializing Python interpreter");
 
-      PyConfig config;
-      PyConfig_InitPythonConfig (&config);
-      PyStatus status = PyConfig_SetBytesArgv (&config, System::argc(), System::argv());
+      PyConfig thisConfig;
+      PyConfig_InitPythonConfig (&thisConfig);
+      PyStatus status = PyConfig_SetBytesArgv (&thisConfig, System::argc(), System::argv());
       if (PyStatus_Exception (status)) {
-        PyConfig_Clear (&config);
+        PyConfig_Clear (&thisConfig);
         ERS_PSC_ERROR("Error: Python could not be initialized.");
         return false;
       }
-      status = Py_InitializeFromConfig (&config);
+      status = Py_InitializeFromConfig (&thisConfig);
       if (PyStatus_Exception (status)) {
-        PyConfig_Clear (&config);
+        PyConfig_Clear (&thisConfig);
         ERS_PSC_ERROR("Error: Python could not be initialized.");
         return false;
       }
@@ -507,6 +507,12 @@ bool psc::Psc::prepareForRun (const ptree& args)
 bool psc::Psc::stopRun (const ptree& /*args*/)
 {
   psc::Utils::ScopeTimer timer("Psc stopRun");
+
+  if ( Py_IsInitialized() && m_workerID==0 ) {
+    // We are back in the mother process after fork. Fixes deadlock with Python 3.13 (ATR-32627).
+    ERS_DEBUG(1, "After-fork initialization of Python interpreter");
+    PyOS_AfterFork_Parent();
+  }
 
   if(!callOnEventLoopMgr<IService>(&IService::sysStop, "sysStop").isSuccess())
   {

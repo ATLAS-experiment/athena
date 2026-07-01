@@ -28,7 +28,7 @@ public:
   LumiBlockCollectionCnv (ISvcLocator* svcloc) : LumiBlockCollectionCnvBase(svcloc) {}
 protected:
   virtual LumiBlockCollection_PERS*  createPersistent (LumiBlockCollection* transCont);
-  virtual LumiBlockCollection*     createTransient ();
+  virtual LumiBlockCollection*     createTransient(const Token* token);
 
  private:
   LumiBlockCollectionCnv_p1   m_converter_p1;

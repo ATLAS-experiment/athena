@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MDTDRIFTCIRCLEONTRACKCREATOR_H
@@ -173,8 +173,8 @@ class MdtDriftCircleOnTrackCreator: public AthAlgTool, public IMdtDriftCircleOnT
             : locPars(lp), locErr(le), driftTime(t), calibOk(ok) {}
         Trk::LocalParameters locPars;
         Amg::MatrixX locErr;
-        double driftTime;
-        bool calibOk;
+        double driftTime = 0;
+        bool calibOk = false;
     };
 
 

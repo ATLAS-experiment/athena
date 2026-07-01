@@ -9,11 +9,29 @@
 // Package includes
 #include "LUCID_SensitiveDetector.h"
 
+#include "HitManagement/HitCollectionMap.h"
+#include "LUCID_SimEvent/LUCID_SimHitCollection.h"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 LUCID_SensitiveDetectorTool::LUCID_SensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase(type,name,parent)
 {
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+StatusCode LUCID_SensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<LUCID_SimHitCollection>(m_outputCollectionNames[0],
+                                                 m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode LUCID_SensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
+{
+  CHECK(hitCollections.Record<LUCID_SimHitCollection>(m_outputCollectionNames[0]));
+  return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

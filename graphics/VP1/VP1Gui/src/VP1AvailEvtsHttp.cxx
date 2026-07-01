@@ -25,14 +25,14 @@
 //____________________________________________________________________
 class VP1AvailEvtsHttp::Imp {
 public:
-  VP1AvailEvtsHttp * theclass;
+  VP1AvailEvtsHttp * theclass{};
   QString fileinfoUrl;
   QString baseUrl;
   VP1HttpGetFile httpgetfile_events;
   VP1HttpGetFile httpgetfile_fileinfo;
-  VP1WebWatcher * webwatcher_fileinfo;
-  VP1EvtsOnServerInfo * evtsOnServer;
-  QTimer * examineEvtsOnServerTimer;
+  VP1WebWatcher * webwatcher_fileinfo{};
+  VP1EvtsOnServerInfo * evtsOnServer{};
+  QTimer * examineEvtsOnServerTimer{};
   void restartExamineEvtsOnServerTimer() {
     if (!examineEvtsOnServerTimer) {
       examineEvtsOnServerTimer = new QTimer(theclass);

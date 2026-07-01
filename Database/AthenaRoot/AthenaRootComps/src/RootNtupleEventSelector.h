@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootNtupleEventSelector.h 
@@ -24,10 +24,13 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IAddressProvider.h"
+#include "AthenaKernel/InputFileIncidentGuard.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "TFile.h"
 #include "TObjString.h"
+
+#include <optional>
 
 // Forward declaration
 class ISvcLocator;
@@ -64,8 +67,9 @@ class ATLAS_NOT_THREAD_SAFE RootNtupleEventSelector :
 
   // Athena hooks
   virtual StatusCode initialize() override;
+  virtual StatusCode stop() override;
   virtual StatusCode finalize() override;
-  
+
   virtual void handle(const Incident& incident) override;
 
   ///@{
@@ -213,6 +217,16 @@ class ATLAS_NOT_THREAD_SAFE RootNtupleEventSelector :
   /// List of branches to activate in the @c TTree 
   StringArrayProperty m_activeBranchNames;
 
+  /// optional event number variable to propagate to EventInfo.
+  StringProperty m_eventNumberVar
+    { this, "EventNumberVar", "", "Optional event number variable to propagate to EventInfo" };
+  /// optional run number variable to propagate to EventInfo.
+  StringProperty m_runNumberVar
+    { this, "RunNumberVar", "", "Optional run number variable to propagate to EventInfo" };
+  /// optional LBN variable to propagate to EventInfo.
+  StringProperty m_lbnVar
+    { this, "LBNVar", "", "Optional LBN variable to propagate to EventInfo" };
+
   /// Number of events to skip at the beginning 
   long m_skipEvts;
 
@@ -246,14 +260,13 @@ class ATLAS_NOT_THREAD_SAFE RootNtupleEventSelector :
 
   // flag to trigger reloading of root branch addresses
   mutable bool m_needReload;
-  // flag to trigger firing BeginInputFile incidents once the root branch 
-  // addresses have been reloaded. 
-  // Reloading addresses (we assume?) means a new TTree
-  // has been loaded from a new file in the list of input files.
-  //
-  // FIXME: use some kind of state-machine to couple 
-  //   m_needReload and m_fireBIF ?
-  mutable bool m_fireBIF;
+
+  /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile.
+  /// BeginInputFile is deferred to the next BeginEvent (data must be loaded
+  /// in the store first), so the guard is created in handle(), not immediately.
+  mutable std::optional<InputFileIncidentGuard> m_inputFileGuard;
+  /// Flag to fire BeginInputFile on the next BeginEvent incident.
+  mutable bool m_fireBIF{true};
 
   // the list of transient addresses we "manage" or know about
   // these addresses are the actual TTree's branch names

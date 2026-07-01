@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           CPMTobAlgorithm.cxx  -  description
@@ -248,8 +248,9 @@ void LVL1::CPMTobAlgorithm::emAlgorithm() {
     * Also must rescale ET sums to same scale for comparison */
   std::vector<int> emisolcuts(5,m_noIsol);
   std::vector<int> hadisolcuts(5,m_noIsol);
+  const std::string emIsolationStr1{"EMIsoForEMthr"};
   for(size_t bit = 1; bit<=5; ++bit) {
-    const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().EM().isolation("EMIsoForEMthr", bit);
+    const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().EM().isolation(emIsolationStr1, bit);
     if(! iso.isDefined() ) {
       continue;
     }
@@ -264,8 +265,9 @@ void LVL1::CPMTobAlgorithm::emAlgorithm() {
       emisolcuts[bit-1] = cut;
     }
   }
+  const std::string emIsolationStr2{"HAIsoForEMthr"};
   for(size_t bit = 1; bit<=5; ++bit) {
-    const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().EM().isolation("HAIsoForEMthr", bit);
+    const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().EM().isolation(emIsolationStr2, bit);
     if(! iso.isDefined() ) {
       continue;
     }
@@ -329,8 +331,9 @@ void LVL1::CPMTobAlgorithm::tauAlgorithm() {
   
   // Get isolation values from menu (placeholder code - example logic)
   std::vector<int> emisolcuts(5,m_noIsol);
+  const std::string tauIsolationStr{"EMIsoForTAUthr"};
   for(size_t bit = 1; bit<=5; ++bit) {
-    const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().TAU().isolation("EMIsoForTAUthr", bit);
+    const TrigConf::IsolationLegacy & iso = m_l1menu->thrExtraInfo().TAU().isolation(tauIsolationStr, bit);
     if(! iso.isDefined() ) {
       continue;
     }

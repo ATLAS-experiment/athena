@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/RNGSeeding_test.cxx
@@ -21,17 +21,9 @@
 #include "AtlasCLHEP_RandomGenerators/dSFMTEngine.h"
 #include "CLHEP/Random/Ranlux64Engine.h"
 #include "CLHEP/Random/RanecuEngine.h"
-#include <boost/crc.hpp>
+#include "CxxUtils/crc_combine.h"
 
 #define CHECK_BIT(var,pos) (((var)>>(pos)) & 1)
-
-/// using crc32 for architecture independence in combining the seeds
-inline uint32_t crc_combine(uint32_t seed, uint32_t v) {
-  boost::crc_32_type crf;
-  crf.process_bytes(&seed,sizeof(uint32_t));
-  crf.process_bytes(&v,sizeof(uint32_t));
-  return crf.checksum();
-}
 
 std::ostream& operator<<(std::ostream& os, const std::vector<unsigned long>& state)
 {
@@ -42,7 +34,7 @@ std::ostream& operator<<(std::ostream& os, const std::vector<unsigned long>& sta
 inline uint32_t gethash(const std::vector<unsigned long>& state)
 {
   uint32_t hash=0;
-  for(auto s : state) hash=crc_combine(hash, s);
+  for(auto s : state) hash = CxxUtils::crc_combine(hash, s);
   return hash;
 }
 
@@ -61,9 +53,9 @@ void test1(ATHRNG::RNGWrapper* wrapper,
   const size_t slot=0;
   EventContext ctx;
   ctx.setSlot( slot );
-  
-  const size_t slot_evnr=0;
-  wrapper->setSeedLegacy(algName, slot_evnr, 0, run, 0, option);
+  EventIDBase eid(run, /*evt*/0);
+  ctx.setEventID(eid);
+  wrapper->setSeedLegacy(algName, ctx, 0, option);
   auto evnr_engine=wrapper->getEngine(ctx);
   std::vector< bool > used_events(maxevnr);
   
@@ -109,8 +101,10 @@ void test1(ATHRNG::RNGWrapper* wrapper,
     used_events[ev]=true;
     
     if(iseed % nprint == 0 && nseeds>nprint) std::cout <<"calculating hashes:"<< iseed<< ", ev="<<ev<< ", max internal vector size="<<maxvecsize<<std::endl;
-    
-    wrapper->setSeedLegacy(algName, slot, ev, run, 0, option);     
+
+    eid.set_event_number(ev);
+    ctx.setEventID(eid);
+    wrapper->setSeedLegacy(algName, ctx, 0, option);
     
     std::vector<unsigned long> state = wrapper->getEngine(ctx)->put();
     uint32_t maskedhash=getmaskedhash(state,hashmask);
@@ -140,8 +134,9 @@ void test1(ATHRNG::RNGWrapper* wrapper,
     std::vector< std::vector<unsigned long> > states(vecsize);
     std::vector< uint32_t > hashes(vecsize);
     for(size_t iev=0;iev<vecsize;++iev) {
-      uint64_t ev=vec_ev[maskedhash][iev];
-      wrapper->setSeedLegacy(algName, slot, ev, run, 0, option);     
+      eid.set_event_number( vec_ev[maskedhash][iev] );
+      ctx.setEventID(eid);
+      wrapper->setSeedLegacy(algName, ctx, 0, option);
       states[iev] = wrapper->getEngine(ctx)->put();
       hashes[iev]=gethash(states[iev]);
       uint32_t maskedoldhash=hashes[iev] & hashmask;
@@ -187,6 +182,8 @@ void test2(ATHRNG::RNGWrapper* wrapper, const ATHRNG::RNGWrapper::SeedingOptionT
   const size_t slot=0;
   EventContext ctx;
   ctx.setSlot( slot );
+  EventIDBase eid;
+  ctx.setEventID(eid);
 
   std::cout << "test2 with <<"<<wrapper->getEngine(ctx)->name()<<", "<<ntest<<" seeds tested, ";
   switch(option) {
@@ -213,30 +210,30 @@ void test2(ATHRNG::RNGWrapper* wrapper, const ATHRNG::RNGWrapper::SeedingOptionT
   for(uint64_t itest=0;itest<ntest;++itest) {
     //if(itest % nprint == 0) std::cout <<"test:"<< itest << ", so far total=" << nidentical << "/" << itest << " identical \n";
 
-    uint64_t ev=base_ev+CHECK_BIT(increment_mask,0)*itest;
-    uint64_t run=base_run+CHECK_BIT(increment_mask,1)*itest;
+    eid.set_event_number( base_ev+CHECK_BIT(increment_mask,0)*itest );
+    eid.set_run_number( base_run+CHECK_BIT(increment_mask,1)*itest );
+    ctx.setEventID(eid);
     std::string algName=base_algName+std::to_string( CHECK_BIT(increment_mask,2)*itest );
     uint32_t offset=base_offset+CHECK_BIT(increment_mask,3)*itest;
     
-    //std::cout<<"ev="<<ev<<" run="<<run<<" algName="<<algName<<" offset="<<offset<<"\n";
-
-    wrapper->setSeedLegacy(algName, slot, ev, run, offset, option);     
+    wrapper->setSeedLegacy(algName, ctx, offset, option);
     
     std::vector<unsigned long> state = wrapper->getEngine(ctx)->put();
     uint32_t hash=0;
-    for(auto s : state) hash=crc_combine(hash, s);
+    for(auto s : state) hash = CxxUtils::crc_combine(hash, s);
     if(states.count(hash)>0) {
       auto range = states.equal_range(hash);
       for (auto i = range.first; i != range.second; ++i) {
         uint64_t iold=i->second;
-        ev=base_ev+CHECK_BIT(increment_mask,0)*iold;
-        run=base_run+CHECK_BIT(increment_mask,1)*iold;
+        eid.set_event_number( base_ev+CHECK_BIT(increment_mask,0)*iold );
+        eid.set_run_number( base_run+CHECK_BIT(increment_mask,1)*iold );
+        ctx.setEventID(eid);
         algName=base_algName+std::to_string( CHECK_BIT(increment_mask,2)*iold );
         offset=base_offset+CHECK_BIT(increment_mask,3)*iold;
-        wrapper->setSeedLegacy(algName, slot, ev, run, offset, option);     
+        wrapper->setSeedLegacy(algName, ctx, offset, option);
         std::vector<unsigned long> oldstate = wrapper->getEngine(ctx)->put();
         uint32_t oldhash=0;
-        for(auto s : oldstate) oldhash=crc_combine(oldhash, s);
+        for(auto s : oldstate) oldhash = CxxUtils::crc_combine(oldhash, s);
         if(hash!=oldhash) {
           std::cout << "closure problem!";
           std::cout << "  new :"<< hash << ": " << state << '\n';

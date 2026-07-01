@@ -1,7 +1,7 @@
 // Emacs -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVSTRUCTURE_TYPEDHOLDER_H
@@ -17,7 +17,7 @@
 
 #ifdef XAOD_STANDALONE
 #include "xAODCore/ClassID_traits.h"  //guarded b/c athena includes its own
-#include "AsgTools/SgTEvent.h"
+#include "AsgTools/SgEvent.h"
 #else
 #include "StoreGate/StoreGateSvc.h"
 #endif

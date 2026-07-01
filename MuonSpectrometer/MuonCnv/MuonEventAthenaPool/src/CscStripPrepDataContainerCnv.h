@@ -31,11 +31,11 @@ public:
     virtual ~CscStripPrepDataContainerCnv();
     
     virtual CscStripPrepDataContainer_PERS*   createPersistent (Muon::CscStripPrepDataContainer* transCont);
-    virtual Muon::CscStripPrepDataContainer*  createTransient ();
+    virtual Muon::CscStripPrepDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();
-    virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
+    virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
         
 private:
     StoreGateSvc*                   m_storeGate{};

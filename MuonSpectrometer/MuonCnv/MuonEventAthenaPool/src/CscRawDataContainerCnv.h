@@ -20,9 +20,9 @@
 */
 typedef MuonRdoContainerTPCnv<CscRawDataContainer, CscRawDataContainer_p4, CscRawDataContainerCnv_p4 > CscRawDataContainerCnvBase;
 
-// override here the createTransient() of MuonRdoContainerTPCnv.icc since it cause compiler error
+// override here the createTransient(const Token* token) of MuonRdoContainerTPCnv.icc since it cause compiler error
 // TODO: need to properly address compiler error and get rid of this override
-template < > inline CscRawDataContainer* CscRawDataContainerCnvBase::createTransient(){
+template < > inline CscRawDataContainer* CscRawDataContainerCnvBase::createTransient(const Token* /*token*/){
   return nullptr;
 }
 
@@ -31,7 +31,7 @@ class CscRawDataContainerCnv : public CscRawDataContainerCnvBase {
     CscRawDataContainerCnv (ISvcLocator* svcloc) : CscRawDataContainerCnvBase(svcloc) {}
     ~CscRawDataContainerCnv() {}
   protected:
-    virtual CscRawDataContainer* createTransient();
+    virtual CscRawDataContainer* createTransient(const Token* token);
     virtual StatusCode initialize(); // pass the MuonIdHelperSvc to the CscRawDataCnv_p...
   private:
     CscRawDataContainerCnv_p1   m_converter_p1;

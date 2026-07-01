@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTRTHTHhypoAlg.h"
@@ -49,7 +49,7 @@ StatusCode TrigTRTHTHhypoAlg::execute( const EventContext& context ) const {
    
     auto d = TCU::newDecisionIn( decisions, TCU::hypoAlgNodeName() );
     //get RoI  
-    auto roiELInfo = TCU::findLink<TrigRoiDescriptorCollection>( previousDecision, TCU::initialRoIString() );
+    auto roiELInfo = TCU::findLink<TrigRoiDescriptorCollection>( context, previousDecision, TCU::initialRoIString() );
     ATH_CHECK( roiELInfo.isValid() );
     d->setObjectLink( TCU::roiString(), roiELInfo.link );
 

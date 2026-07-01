@@ -18,6 +18,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include <string>
+#include <stdexcept>
 
 namespace TIDA {
 
@@ -26,29 +27,24 @@ class Histogram {
 
 public:
 
-  Histogram() : m_monTool(0), m_name("") { } 
+  Histogram() : m_monTool(0), m_name("UNINITIALISED"), m_initialised(false) { } 
   
-  Histogram( ToolHandle<GenericMonitoringTool>* m, const std::string& name ) : m_monTool(m), m_name(name)  { 
-    //    std::cout << "book: " << m_name << "  " << m_monTool->name() << std::endl;
+  Histogram( ToolHandle<GenericMonitoringTool>* m, const std::string& name ) :
+    m_monTool(m), m_name(name), m_initialised(false)  { 
+    if ( !m_name.empty() && m_monTool ) m_initialised = true;
   } 
 
-  void Fill( T d ) const { 
-    if ( m_monTool ) { 
-        //  std::cout << "Histogram::Fill() monTool " << m_monTool << "\tname: " << m_name << "\td: " << d << "\t" << monTool()->name() << std::endl;
-        auto s = Monitored::Scalar<T>( m_name, d ); 
-        Monitored::Group( *m_monTool, s );
-    }
-    else std::cerr << "Histogram " << m_name << "\tmonTool not defined" << std::endl;
+  void Fill( T d ) const {
+    if ( !m_initialised ) throw std::runtime_error("TIDA::Histogram not initialised: "+name());
+    auto s = Monitored::Scalar<T>( m_name, d ); 
+    Monitored::Group( *m_monTool, s );
   }
 
   void Fill( T d, T w ) const { 
-    if ( m_monTool ) { 
-        // std::cout << "Histogram::Fill() monTool " << m_monTool << "\tname: " << m_name << "\td: " << d << "\tw:" << w << std::endl;
-	auto s  = Monitored::Scalar<T>( m_name, d );
-	auto sw = Monitored::Scalar<T>( m_name+"_weight", w ); 
-	Monitored::Group( *m_monTool, s, sw );
-    }
-    else std::cerr << "Histogram " << m_name << "\tmonTool not defined" << std::endl;
+    if ( !m_initialised ) throw std::runtime_error("TIDA::Histogram not initialised: "+name());
+    auto s  = Monitored::Scalar<T>( m_name, d );
+    auto sw = Monitored::Scalar<T>( m_name+"_weight", w ); 
+    Monitored::Group( *m_monTool, s, sw );
   }
 
   const std::string& name() const { return m_name; }
@@ -63,6 +59,8 @@ private:
 
   std::string m_name;
 
+  bool        m_initialised;
+  
 };
 
 

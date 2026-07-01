@@ -135,7 +135,9 @@ namespace FlavorTagDiscriminants {
 
   StatusCode PoorMansIpAugmenterAlg::initialize() {
     ATH_MSG_INFO( "Inizializing " << name() << "... " );
-
+    if (m_d0_modification){
+     ATH_MSG_INFO( "Running modified PoorMansIpAugmenter with d0 correction!" );
+    }
     // Initialize Container keys
     ATH_MSG_DEBUG( "Inizializing containers:"        );
     ATH_MSG_DEBUG( "    ** " << m_TrackContainerKey  );
@@ -256,12 +258,20 @@ namespace FlavorTagDiscriminants {
       }
 
       // the primary vertex position is absolute, whereas the track
-      // perigee parameters are all relative to the beamspot. The x
-      // and y coordinates are zero so that the 2d impact parameter
-      // has no idea about the primary vertex location.
+      // perigee parameters are all relative to the beamspot.
+      
+     
+      // If m_d0_modification (Gaudi property) is true, the beamspot (x,y) is
+      // subtracted from the primary vertex position, modifying d0
+      // relative to the beamspot.
+      // If false, only z0 is made relative to the beamspot,
+      // leaving d0 unmodified (existing PoorMansIp behaviour).
+      // In both cases, z0 is made relative to the beamspot.
+
       const Amg::Vector3D primary_relative_to_beamspot(
-        0, 0,
-        primary ? primary->position().z() - trk->vz() : 0);
+       m_d0_modification && primary ? primary->position().x() - trk->vx() : 0,
+       m_d0_modification && primary ? primary->position().y() - trk->vy() : 0,
+       primary ? primary->position().z() - trk->vz() : 0);
       const Amg::Vector3D position = (
         Pmt::getPosition(*trk) - primary_relative_to_beamspot);
 

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictDictEntry_H
 #define IDDICT_IdDictDictEntry_H
 
 #include <string>
+#include <string_view>
 class Range;
 class IdDictMgr;
 class IdDictDictionary;
@@ -21,7 +22,7 @@ public:
                                      IdDictDictionary& dictionary) = 0;  
     virtual void generate_implementation (const IdDictMgr& idd,  
                                           IdDictDictionary& dictionary, 
-                                          const std::string& tag = "") = 0;
+                                          std::string_view tag = "") = 0;
     virtual void reset_implementation () = 0;  
     virtual bool verify () const = 0;
     virtual void clear () = 0; 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLESLBTOSSW_HH
@@ -18,12 +18,12 @@ class TGCDatabase;
 class TGCCableSLBToSSW : public TGCCable {
    public:
     enum {
-        SL = TGCId::MaxModuleType,
-        MaxModuleType = TGCId::MaxModuleType + 1
+        SL = +TGCId::ModuleType::MaxModuleType,
+        MaxModuleType = +TGCId::ModuleType::MaxModuleType + 1
     };
 
     TGCCableSLBToSSW(const std::string& filename);
-    virtual ~TGCCableSLBToSSW() = default;
+    virtual ~TGCCableSLBToSSW();
 
     TGCModuleMap getModule(const TGCModuleId& moduleId) const;
 
@@ -32,7 +32,7 @@ class TGCCableSLBToSSW : public TGCCable {
     TGCModuleMap getModuleIn(const TGCModuleId& ssw) const;
     TGCModuleMap getModuleOut(const TGCModuleId& slb) const;
     std::array<std::array<std::unique_ptr<TGCDatabase>, MaxModuleType>,
-               TGCId::MaxRegionType>
+               +TGCId::RegionType::MaxRegionType>
         m_database;
 };
 

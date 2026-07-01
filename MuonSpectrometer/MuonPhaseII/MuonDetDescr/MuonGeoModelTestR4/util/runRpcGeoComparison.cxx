@@ -21,9 +21,17 @@
 #include <TFile.h>
 #include <TTreeReader.h>
 
+
+#include "Acts/Utilities/UnitVectors.hpp"
+#include "Acts/Definitions/Units.hpp"
+
+Amg::Vector3D makeDir(const double theta, const double phi) {
+    using namespace Acts::UnitLiterals;
+    return Acts::makeDirectionFromPhiTheta(phi *1._degree, theta* 1._degree);
+}
+
 using namespace MuonGMR4;
 using namespace ActsTrk;
-
 
 constexpr double tolerance = 0.005*Gaudi::Units::millimeter;
 
@@ -193,18 +201,14 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> stripRotTranslationY{treeReader, "stripRotTranslationY"};
     TTreeReaderValue<std::vector<float>> stripRotTranslationZ{treeReader, "stripRotTranslationZ"};
 
+    TTreeReaderValue<std::vector<float>> stripRotCol0Theta{treeReader, "stripRotLinearCol0Theta"};
+    TTreeReaderValue<std::vector<float>> stripRotCol0Phi{treeReader, "stripRotLinearCol0Phi"};
 
-    TTreeReaderValue<std::vector<float>> stripRotCol1X{treeReader, "stripRotLinearCol1X"};
-    TTreeReaderValue<std::vector<float>> stripRotCol1Y{treeReader, "stripRotLinearCol1Y"};
-    TTreeReaderValue<std::vector<float>> stripRotCol1Z{treeReader, "stripRotLinearCol1Z"};
+    TTreeReaderValue<std::vector<float>> stripRotCol1Theta{treeReader, "stripRotLinearCol1Theta"};
+    TTreeReaderValue<std::vector<float>> stripRotCol1Phi{treeReader, "stripRotLinearCol1Phi"};
 
-    TTreeReaderValue<std::vector<float>> stripRotCol2X{treeReader, "stripRotLinearCol2X"};
-    TTreeReaderValue<std::vector<float>> stripRotCol2Y{treeReader, "stripRotLinearCol2Y"};
-    TTreeReaderValue<std::vector<float>> stripRotCol2Z{treeReader, "stripRotLinearCol2Z"};
-
-    TTreeReaderValue<std::vector<float>> stripRotCol3X{treeReader, "stripRotLinearCol3X"};
-    TTreeReaderValue<std::vector<float>> stripRotCol3Y{treeReader, "stripRotLinearCol3Y"};
-    TTreeReaderValue<std::vector<float>> stripRotCol3Z{treeReader, "stripRotLinearCol3Z"};
+    TTreeReaderValue<std::vector<float>> stripRotCol2Theta{treeReader, "stripRotLinearCol2Theta"};
+    TTreeReaderValue<std::vector<float>> stripRotCol2Phi{treeReader, "stripRotLinearCol2Phi"};
 
     TTreeReaderValue<std::vector<uint8_t>> stripRotGasGap{treeReader, "stripRotGasGap"};
     TTreeReaderValue<std::vector<uint8_t>> stripRotDblPhi{treeReader, "stripRotDoubletPhi"};
@@ -280,9 +284,9 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
             newLayer.doubletPhi = (*stripRotDblPhi)[l];
             Amg::RotationMatrix3D stripRot{Amg::RotationMatrix3D::Identity()};
             Amg::Vector3D translation{(*stripRotTranslationX)[l],(*stripRotTranslationY)[l],(*stripRotTranslationZ)[l]};
-            stripRot.col(0) = Amg::Vector3D((*stripRotCol1X)[l],(*stripRotCol1Y)[l], (*stripRotCol1Z)[l]);
-            stripRot.col(1) = Amg::Vector3D((*stripRotCol2X)[l],(*stripRotCol2Y)[l], (*stripRotCol2Z)[l]);
-            stripRot.col(2) = Amg::Vector3D((*stripRotCol3X)[l],(*stripRotCol3Y)[l], (*stripRotCol3Z)[l]);
+            stripRot.col(0) = makeDir((*stripRotCol0Theta)[l], (*stripRotCol0Phi)[l]);
+            stripRot.col(1) = makeDir((*stripRotCol1Theta)[l], (*stripRotCol1Phi)[l]);
+            stripRot.col(2) = makeDir((*stripRotCol2Theta)[l], (*stripRotCol2Phi)[l]);
             newLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), std::move(translation));
             newchamber.layers.insert(std::move(newLayer));
         } 

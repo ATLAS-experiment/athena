@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
@@ -32,6 +32,19 @@ def getNSubregions(filePath):
         n = fields.split()[1]
         return int(n)
 
+def getCutSetFromPath(flags):
+    # this allows the cut file defined in python to be loaded from the map directory
+    cutpath = os.path.join(
+            PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
+            f"{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py")
+    log.info("Cut File = %s", cutpath)
+    spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts,cutpath)
+    if spec is None:
+        log.error("Failed to find Cut File: %s", cutpath)
+    cutmodule = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cutmodule)
+    cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+    return cutset
 
 # Need to figure out if we have two output writers or somehow only one.
 def FPGATrackSimWriteOutputCfg(flags):
@@ -254,17 +267,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
             toload = 'FPGATrackSimHough.FPGATrackSimGenScanCuts_incr'
         cutset = importlib.import_module(toload).cuts[flags.Trigger.FPGATrackSim.region]
     else:
-        # this allows the cut file defined in python to be loaded from the map directory
-        cutpath = os.path.join(
-             PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
-             f"{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py")
-        print("Cut File = ", cutpath)
-        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts,cutpath)
-        if spec is None:
-            print("Failed to find Cut File")
-        cutmodule = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(cutmodule)
-        cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+        cutset = getCutSetFromPath(flags)
 
     # make the binned hits class
     BinnnedHits = CompFactory.FPGATrackSimBinnedHits("BinnedHits_1stStage")
@@ -349,6 +352,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     tool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     tool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    tool.enableMonitoring = flags.Trigger.FPGATrackSim.GenScan.enableMonitoring
     tool.Monitoring = Monitor
     tool.BinnedHits = BinnnedHits
     tool.rin=cutset["rin"]
@@ -366,13 +370,14 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
     tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
-    tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
-    tool.keepHitsStrategy = flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy
+    tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts    
     tool.threshold = 4
 
     # set cuts
     for (cut,val) in cutset.items():
         if cut in ["parBins","parSet","parMin","parMax"]:
+            continue
+        if "pairSetChi2" in cut:
             continue
         setattr(tool,cut,val)
 
@@ -395,9 +400,12 @@ def FPGATrackSimRoadUnionToolGNNCfg(flags,name="FPGATrackSimRoadUnionToolGNN"):
     result = ComponentAccumulator()
     RF = CompFactory.FPGATrackSimRoadUnionTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     RF.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
+    RF.noHitFilter = flags.Trigger.FPGATrackSim.GNN.doAllHits # Flag to turn on doing all hits for full-scan running of GNN pipeline
 
     patternRecoTool = CompFactory.FPGATrackSimGNNPatternRecoTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimGNNPatternRecoTool"))
-    patternRecoTool.GNNGraphHitSelector = CompFactory.FPGATrackSimGNNGraphHitSelectorTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimGNNGraphHitSelectorTool"))
+    patternRecoTool.GNNGraphHitSelector = result.popToolsAndMerge(FPGATrackSimGNNGraphHitSelectorToolCfg(flags))
+    
+    
     patternRecoTool.GNNGraphConstruction = result.popToolsAndMerge(FPGATrackSimGNNGraphConstructionToolCfg(flags))
     edgeResult, edgeClassifierTools = FPGATrackSimGNNEdgeClassifierToolCfg(flags)
     result.merge(edgeResult)
@@ -412,6 +420,18 @@ def FPGATrackSimRoadUnionToolGNNCfg(flags,name="FPGATrackSimRoadUnionToolGNN"):
 
     return result
 
+def FPGATrackSimGNNGraphHitSelectorToolCfg(flags,name="FPGATrackSimGNNGraphHitSelectorTool"):
+    result = ComponentAccumulator()
+
+    GNNGraphHitSelectorTool = CompFactory.FPGATrackSimGNNGraphHitSelectorTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,"FPGATrackSimGNNGraphHitSelectorTool"))
+    GNNGraphHitSelectorTool.doPixelHits = flags.Trigger.FPGATrackSim.GNN.doPixelHits
+    GNNGraphHitSelectorTool.doStripHits = flags.Trigger.FPGATrackSim.GNN.doStripHits
+
+    result.setPrivateTools(GNNGraphHitSelectorTool)
+
+    return result
+
+
 def FPGATrackSimGNNGraphConstructionToolCfg(flags,name="FPGATrackSimGNNGraphConstructionTool"):
     result = ComponentAccumulator()
 
@@ -424,6 +444,7 @@ def FPGATrackSimGNNGraphConstructionToolCfg(flags,name="FPGATrackSimGNNGraphCons
     GNNGraphConstructionTool.moduleMapType=flags.Trigger.FPGATrackSim.GNN.moduleMapType.value
     GNNGraphConstructionTool.moduleMapFunc=flags.Trigger.FPGATrackSim.GNN.moduleMapFunc.value
     GNNGraphConstructionTool.moduleMapTol=flags.Trigger.FPGATrackSim.GNN.moduleMapTol
+    GNNGraphConstructionTool.moduleMapRMSThresholdFactor=flags.Trigger.FPGATrackSim.GNN.moduleMapRMSThresholdFactor
 
     # Metric Learning Configuration
     GNNGraphConstructionTool.metricLearningR=flags.Trigger.FPGATrackSim.GNN.metricLearningR
@@ -445,8 +466,16 @@ def FPGATrackSimGNNEdgeClassifierToolCfg(flags, name="FPGATrackSimGNNEdgeClassif
     from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
 
+    # For GNN models, we will have one model for each eta-slice, meant to be used for all 20 phi-slices
     region = int(flags.Trigger.FPGATrackSim.region)
-    model_path = f"{flags.Trigger.FPGATrackSim.GNN.GNNModelPath}_{region}.onnx"
+    phiBinBase = 2  # [2π/16, 3π/16]
+    etaBin = (region >> 6) & 0x1f # extract η bin and side from the real region number
+    #side   = (region >> 5) & 0x1
+    side = 1 # For now, only use the positive size models
+    minAbsEta = etaBin * 0.2 
+
+    base_region = FPGATrackSimDataPrepConfig.getRegionNumber(phiBinBase, minAbsEta, side, verbosePrint=False)
+    model_path = f"{flags.Trigger.FPGATrackSim.GNN.GNNModelPath}_{base_region}.onnx"
 
     GNNEdgeClassifierTool = CompFactory.FPGATrackSimGNNEdgeClassifierTool(
         FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags, name))
@@ -454,6 +483,7 @@ def FPGATrackSimGNNEdgeClassifierToolCfg(flags, name="FPGATrackSimGNNEdgeClassif
         OnnxRuntimeInferenceToolCfg(flags, model_path, OnnxRuntimeType.CPU, name=f"OnnxInferenceTool_{region}")
     )
     GNNEdgeClassifierTool.regionNum = region
+    GNNEdgeClassifierTool.doGNNPixelSeeding = flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding # Use new models
 
     return result, [GNNEdgeClassifierTool]
 
@@ -478,6 +508,9 @@ def FPGATrackSimGNNRootOutputToolCfg(flags,name="FPGATrackSimGNNRootOutputTool")
 
     GNNRootOutputTool = CompFactory.FPGATrackSimGNNRootOutputTool(FPGATrackSimDataPrepConfig.nameWithRegionSuffix(flags,name))
     GNNRootOutputTool.OutputRegion = str(flags.Trigger.FPGATrackSim.region)
+
+    from TrigFastTrackFinder.TrigFastTrackFinderConfig import ITkTrigL2LayerNumberToolCfg
+    GNNRootOutputTool.LayerNumberTool = result.getPrimaryAndMerge(ITkTrigL2LayerNumberToolCfg(flags))
 
     if(flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput):
         result.addService(CompFactory.THistSvc(Output = ["TRIGFPGATrackSimGNNOUTPUT DATAFILE='GNNRootOutput.root', OPT='RECREATE'"]))
@@ -629,6 +662,7 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
     theFPGATrackSimLogicalHitsProcessAlg.DoNNTrack_1st = flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis
     theFPGATrackSimLogicalHitsProcessAlg.DoGNNTrack = flags.Trigger.FPGATrackSim.GNN.doGNNTracking
     theFPGATrackSimLogicalHitsProcessAlg.DoGNNPixelSeeding = flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding
+    theFPGATrackSimLogicalHitsProcessAlg.noHitFilter = flags.Trigger.FPGATrackSim.GNN.doAllHits # Flag to turn on doing all hits for full-scan running of GNN pipeline
     theFPGATrackSimLogicalHitsProcessAlg.eventSelector = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     if flags.Trigger.FPGATrackSim.ActiveConfig.useVaryingChi2Cut and not flags.Trigger.FPGATrackSim.ActiveConfig.trackNNAnalysis2nd:
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2Cut(flags.Trigger.FPGATrackSim.region)
@@ -636,6 +670,20 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2CutNN(flags.Trigger.FPGATrackSim.region)
     else:
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
+
+    if flags.Trigger.FPGATrackSim.applyEtaPhiChi2Cuts:
+        cutset = getCutSetFromPath(flags)
+        theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = 1e10
+        scale = 1.0
+        if flags.Trigger.FPGATrackSim.applyEtaPhiChi2Cuts4HitOnly:
+            theFPGATrackSimLogicalHitsProcessAlg.Chi2PhiCut = [1e10,scale*cutset["pairSetChi2PhiCut_best_lowPt_4"]]
+            theFPGATrackSimLogicalHitsProcessAlg.Chi2EtaCut = [1e10,scale*cutset["pairSetChi2EtaCut_best_lowPt_4"]]
+        else:
+            theFPGATrackSimLogicalHitsProcessAlg.Chi2PhiCut = [cutset["pairSetChi2PhiCut_best_lowPt_5"],cutset["pairSetChi2PhiCut_best_lowPt_4"]]
+            theFPGATrackSimLogicalHitsProcessAlg.Chi2EtaCut = [cutset["pairSetChi2EtaCut_best_lowPt_5"],cutset["pairSetChi2EtaCut_best_lowPt_4"]]
+        
+    theFPGATrackSimLogicalHitsProcessAlg.keepHitsStrategy = flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy
+
     theFPGATrackSimLogicalHitsProcessAlg.passLowestChi2TrackOnly = flags.Trigger.FPGATrackSim.ActiveConfig.passLowestChi2TrackOnly
     theFPGATrackSimLogicalHitsProcessAlg.secondStageStrips = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
@@ -778,18 +826,29 @@ def getChi2CutNN(region):
     return eta_to_chi2.get(abs_etaRange, 0.99) 
 
 
+def ConfigureMultiRegionFlags(flags):
+    print(f"Input Region: {flags.Trigger.FPGATrackSim.regionList} and RegionList: {flags.Trigger.FPGATrackSim.regionList}")
+    # convert regex to array of regions
+    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
+        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
+    else: # otherwise use the regionList (this overrides the region flag)
+        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)    
+    print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
+
+
+
 def FPGATrackSimF150FlagCfg(flags):    
     FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg(flags)
-    
+        
     flags.Scheduler.ShowDataDeps=True 
-    flags.Scheduler.CheckDependencies=True
+    flags.Scheduler.CheckDependencies=True    
     flags.Debug.DumpEvtStore=False
-    
+
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
     flags.Trigger.FPGATrackSim.tracking = False
-    flags.Trigger.FPGATrackSim.Hough.genScan = True
     flags.Trigger.FPGATrackSim.convertSPs = False # in case we need the conversion to take place on hw we'll have to convert to SPs after the cluster-sorting (will probably need new algorithm)
     flags.Tracking.ITkActsValidateF150Pass.doActsSpacePoint = not flags.Trigger.FPGATrackSim.convertSPs
     flags.Trigger.FPGATrackSim.Hough.secondStage = False
@@ -801,7 +860,25 @@ def FPGATrackSimF150FlagCfg(flags):
     flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile=''
     flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile=''
     
+    ConfigureMultiRegionFlags(flags)
+    
     return flags
+
+
+# # this is meant to be called in the preExec
+# def FPGATrackSimDoF150FlagCfg():
+#     flags=AthConfigFlags()
+#     print("Calling the F150 preExec flag configuration")
+#     FPGATrackSimF150FlagCfg(flags)
+
+# this is meant to be called in the preExec
+def FPGATrackSimHello():
+    print("HELLO!!!!")
+
+# this is meant to be called in the preExec
+def FPGATrackSimPreInclude(flags):
+    print("Loading FPGATrackSim Config")
+    
 
 def FPGATrackSimSeedingCfg(flags):
     acc=ComponentAccumulator()
@@ -872,13 +949,11 @@ if __name__ == "__main__":
     FinalProtoTrackChainxAODTracksKey="FPGA"
     flags.Detector.EnableCalo = False 
 
-    # ensure that the xAOD SP and cluster containers are available
-    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
-    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
-    actsLegacyWorkflowFlags(flags)
-    flags.Acts.doRotCorrection = False
+    from ActsConfig.ActsCIFlags import actsWorkflowFlags
+    actsWorkflowFlags(flags)
 
+    if not flags.Trigger.FPGATrackSim.runBaselineActs:
+        flags.Tracking.ITkActsPass.doActsSpacePoint = False
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Concurrency.NumConcurrentEvents=1
@@ -955,9 +1030,11 @@ if __name__ == "__main__":
         if flags.Trigger.FPGATrackSim.Hough.useVaryingChi2Cut and flags.Trigger.FPGATrackSim.Hough.trackNNAnalysis:
             flags.Trigger.FPGATrackSim.Hough.chi2cut = getChi2CutNN(flags.Trigger.FPGATrackSim.region)
 
+        flags.Detector.GeometryMuon = False
+
         flags.lock()
         flags.dump()
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
+        flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.ITkActsPass",keepOriginal=True)
         acc=MainServicesCfg(flags)
 
         acc.merge(WriteAdditionalFPGATrackSimOutputCfg(flags))
@@ -969,27 +1046,28 @@ if __name__ == "__main__":
             if flags.Input.isMC:
                 from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
                 acc.merge(GEN_AOD2xAODCfg(flags))
-
-                from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
-                acc.merge(addTruthPileupJetsToOutputCfg(flags))
-
-            if flags.Detector.EnableCalo:
-                from CaloRec.CaloRecoConfig import CaloRecoCfg
-                acc.merge(CaloRecoCfg(flags))
+                
+                from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
+                acc.merge(addTruthPileupJetsToOutputCfg(flags)) # needed by IDTPM
 
             if flags.Tracking.recoChain:
-                from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-                acc.merge(InDetTrackRecoCfg(flags))
+                if flags.Trigger.FPGATrackSim.runBaselineActs:
+                    # Full ITk reconstruction
+                    from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
+                    acc.merge(ITkTrackRecoCfg(flags))
+                else:
+                    # Only schedule data preparation (clustering) for technical efficiency
+                    from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
+                    acc.merge(ITkRecPreProcessingSiliconCfg(flags))
+                
+                from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+                acc.merge(BeamSpotCondAlgCfg(flags))
+                    
                 if flags.Trigger.FPGATrackSim.writeOfflPRDInfo: 
                     from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
                     acc.merge( ITkActsPrepDataToxAODCfg( flags,
                                     PixelMeasurementContainer = "ITkPixelMeasurements_offl",
                                     StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
-                from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
-                acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
-                from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
-                acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
-    
 
         # Configure both the dataprep and logical hits algorithms.
         acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))

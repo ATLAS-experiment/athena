@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetRecTool.cxx
@@ -136,7 +136,7 @@ StatusCode JetRecTool::initialize() {
         }
       }
     } else {
-      // Input DataHandles
+      // Input handles
       ATH_CHECK( m_incoll.initialize() );
     }
     m_incolls.push_back(m_incoll.key());
@@ -147,7 +147,7 @@ StatusCode JetRecTool::initialize() {
       ATH_MSG_ERROR("Output collection must be specified.");
       return StatusCode::FAILURE;
     } else {
-      // Output DataHandle
+      // Output handle
       ATH_CHECK( m_outcoll.initialize() );
     }
   }

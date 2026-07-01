@@ -66,7 +66,7 @@ StatusCode CutTool::finalize()
 
 
 // Implement the method from the ISkimmingTool interface
-bool CutTool::eventPassesFilter() const
+bool CutTool::eventPassesFilter(const EventContext& /*ctx*/) const
 {
   ATH_MSG_DEBUG ( "==> eventPassesFilter() " << name()  );
   ATH_MSG_VERBOSE ( "Dumping event store: " << evtStore()->dump() );

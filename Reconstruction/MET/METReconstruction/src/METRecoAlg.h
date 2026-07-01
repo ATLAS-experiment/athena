@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METRecoAlg.h
@@ -13,22 +13,18 @@
 class IMETRecoTool;
 
 namespace met {
-  class METRecoAlg : public AthReentrantAlgorithm { 
+  class METRecoAlg : public AthReentrantAlgorithm {
 
-  public: 
+  public:
 
-    /// Constructor with parameters:
-    METRecoAlg(const std::string& name, ISvcLocator* pSvcLocator);
-
-    /// Destructor:
-    ~METRecoAlg(); 
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     /// Athena algorithm's Hooks
     virtual StatusCode  initialize() override;
     virtual StatusCode  execute(const EventContext& ctx) const override;
     virtual StatusCode  finalize() override;
 
-  private: 
+  private:
 
     /// Default constructor:
     METRecoAlg();
@@ -36,9 +32,9 @@ namespace met {
   private:
 
     /// Athena configured tools
-    ToolHandleArray<IMETRecoTool> m_recotools;
+    ToolHandleArray<IMETRecoTool> m_recotools{this, "RecoTools", {}};
 
-  }; 
+  };
 
 }
 

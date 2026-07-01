@@ -71,9 +71,9 @@ StatusCode ViewCreatorCentredOnIParticleROITool::attachROILinks(TrigCompositeUti
          bool update_z_width = true;
       
          if ( m_useZedPosition ) { 
-	    if ( muon && muon->primaryTrackParticle() ) { 
-	       zed0 = muon->primaryTrackParticle()->z0();
-	       if ( m_useBeamspot ) zed0 += muon->primaryTrackParticle()->vz();
+	    if ( muon && muon->trackParticle(xAOD::Muon::TrackParticleType::Primary) ) { 
+	       zed0 = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->z0();
+	       if ( m_useBeamspot ) zed0 += muon->trackParticle(xAOD::Muon::TrackParticleType::Primary)->vz();
 	    }
 	    else update_z_width = false;
          }

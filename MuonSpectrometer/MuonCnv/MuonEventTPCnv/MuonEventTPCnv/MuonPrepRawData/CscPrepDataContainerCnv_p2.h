@@ -19,7 +19,7 @@ class CscIdHelper;
 
 namespace Muon{
 /** Class to handle the conversion of the transient CscPrepDataContainer into its persistent representation (defined in MuonPRD_Container_p2).
-This replaces CscPrepDataContainerCnv_tlp1, which is a AthenaPoolTopLevelTPConverter, as I have now simplified/flattened the CscPrepData.*/
+This replaces CscPrepDataContainerCnv_tlp1, which is a TopLevelTPConverter, as I have now simplified/flattened the CscPrepData.*/
 class CscPrepDataContainerCnv_p2 : public T_AthenaPoolTPCnvBase<Muon::CscPrepDataContainer, Muon::CscPrepDataContainer_p2>
 {
 public:

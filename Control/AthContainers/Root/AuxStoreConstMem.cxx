@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/AuxStoreConstMem.h
@@ -69,7 +69,7 @@ const void* AuxStoreConstMem::getData (SG::auxid_t auxid) const
  * @brief Return vector interface for one aux data item.
  * @param auxid The identifier of the desired aux data item.
  *
- * Unimplmented for this implementation.
+ * Unimplemented for this implementation.
  */
 const IAuxTypeVector* AuxStoreConstMem::getVector (SG::auxid_t /*auxid*/) const
 {
@@ -113,6 +113,20 @@ const SG::auxid_set_t& AuxStoreConstMem::getDecorIDs() const
 {
   static const auxid_set_t empty;
   return empty;
+}
+
+
+/**
+ * @brief Return the set of variables to copy in a deep copy.
+ * @param warnUnlocked If true, we warn about variables skipped on account
+ *                     of being decorations.
+ *
+ * This just returns getAuxIDs().
+ */
+SG::auxid_set_t
+AuxStoreConstMem::getCopyIDs (bool /*warnUnlocked*/) const
+{
+  return m_auxids;
 }
 
 

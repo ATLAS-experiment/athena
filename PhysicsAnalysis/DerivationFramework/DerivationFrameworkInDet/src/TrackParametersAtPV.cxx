@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Tomoe Kishimoto (Tomoe.Kishimoto@cern.ch)
@@ -7,6 +7,10 @@
 // Writes result to SG for later selection by string parser
 
 #include "DerivationFrameworkInDet/TrackParametersAtPV.h"
+
+#include <StoreGate/ReadHandle.h>
+#include <StoreGate/WriteDecorHandle.h>
+
 #include <string>
 
 // Athena initialize and finalize
@@ -18,12 +22,7 @@ StatusCode DerivationFramework::TrackParametersAtPV::initialize()
   }
   ATH_CHECK( m_collTrackKey.initialize() );
   ATH_CHECK( m_collVertexKey.initialize() );
-
-  if (m_trackZ0PVKey.key().empty()) {
-    ATH_MSG_ERROR("No Store Gate Keys for the TrackParametersAtPV tool!");
-    return StatusCode::FAILURE;
-  }
-  ATH_CHECK( m_trackZ0PVKey.initialize() );
+  ATH_CHECK( m_trackZ0PVDecoKey.initialize() );
 
   ATH_MSG_VERBOSE("initialize() ...");
   return StatusCode::SUCCESS;
@@ -32,8 +31,7 @@ StatusCode DerivationFramework::TrackParametersAtPV::initialize()
 // Augmentation
 StatusCode DerivationFramework::TrackParametersAtPV::addBranches(const EventContext& ctx) const
 {
-  SG::WriteHandle< std::vector<float> >track_z0_PV(m_trackZ0PVKey,ctx);
-  ATH_CHECK(track_z0_PV.record(std::make_unique< std::vector<float> >()));
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> track_z0_PV(m_trackZ0PVDecoKey, ctx);
 
   // Get Primary vertex
   SG::ReadHandle<xAOD::VertexContainer> vertices(m_collVertexKey,ctx);
@@ -59,13 +57,7 @@ StatusCode DerivationFramework::TrackParametersAtPV::addBranches(const EventCont
 
   // Get track z0 w.r.t PV
   for (const auto *trackIt : *tracks) {
-    if (pv) {
-      float z0wrtPV = trackIt->z0() + trackIt->vz() - pv->z();
-      track_z0_PV->push_back(z0wrtPV);
-
-    } else {
-      track_z0_PV->push_back(999.);
-    }
+    track_z0_PV(*trackIt) = pv ? trackIt->z0() + trackIt->vz() - pv->z() : 999.;
   }
 
   return StatusCode::SUCCESS;

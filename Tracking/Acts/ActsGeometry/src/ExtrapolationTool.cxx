@@ -10,8 +10,6 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometry/ActsTrackingGeometrySvc.h"
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
 
 // ACTS
@@ -247,10 +245,8 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
 
       Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
       auto result = target.type() == Acts::Surface::Perigee  ?
-        propagator.template propagate<Acts::BoundTrackParameters, Options,
-                                    Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options) :
-        propagator.template propagate<Acts::BoundTrackParameters, Options,
-                                    Acts::SurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
+        propagator.template propagate<Options, Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options) :
+        propagator.template propagate<Options, Acts::SurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
 
       
       if (!result.ok()) {
@@ -303,10 +299,8 @@ ExtrapolationTool::propagate(const EventContext& ctx,
 
       Options options = prepareOptions<Options>(anygctx, mctx, startParameters, navDir, pathLimit);
       auto result = target.type() == Acts::Surface::Perigee  ?
-        propagator.template propagate<Acts::BoundTrackParameters, Options,
-                                    Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options) :
-        propagator.template propagate<Acts::BoundTrackParameters, Options,
-                                    Acts::SurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
+        propagator.template propagate<Options, Acts::ForcedSurfaceReached, Acts::PathLimitReached>(startParameters, target, options) :
+        propagator.template propagate<Options, Acts::SurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
       if (!result.ok()) {
         ATH_MSG_DEBUG("Got error during propagation: " << result.error());
         return result.error();

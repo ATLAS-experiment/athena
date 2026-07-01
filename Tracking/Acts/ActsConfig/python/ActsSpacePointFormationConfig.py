@@ -67,24 +67,6 @@ def ActsStripSpacePointToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
     return acc
 
-def ActsCoreStripSpacePointToolCfg(flags,
-                                   name: str = "ActsCoreStripSpacePointTool",
-                                   **kwargs: dict) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
-    
-    if 'LorentzAngleTool' not in kwargs:
-        from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
-        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-        
-    acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
-    return acc
-
 def ActsPixelSpacePointPreparationAlgCfg(flags,
                                          name: str = "ActsPixelSpacePointPreparationAlg",
                                          *,
@@ -209,11 +191,7 @@ def ActsStripSpacePointFormationAlgCfg(flags,
         kwargs.setdefault('OSPCache', 'ActsStripOverlapSpacePointCache')
 
     if 'SpacePointFormationTool' not in kwargs:
-        from ActsConfig.ActsConfigFlags import SpacePointStrategy
-        if flags.Acts.SpacePointStrategy is SpacePointStrategy.ActsCore:
-            kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsCoreStripSpacePointToolCfg(flags)))
-        else:
-            kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsStripSpacePointToolCfg(flags)))
+        kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsStripSpacePointToolCfg(flags)))
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsStripSpacePointFormationMonitoringToolCfg
@@ -295,7 +273,9 @@ def ActsSpacePointFormationCfg(flags,
     # For conversion and LRT pass we do not process pixels since we assume
     # they have been processed on the primary pass.
     from InDetConfig.ITkActsHelpers import isPrimaryPass
-    if flags.Tracking.ActiveConfig.extension in ["ActsConversion", "ActsLargeRadius", "ActsValidateLargeRadiusStandalone"]:
+    if flags.Acts.GNN.Enable and isPrimaryPass(flags):
+        processStrips = True
+    elif flags.Tracking.ActiveConfig.extension == "ActsConversion" or flags.Tracking.ActiveConfig.isLargeD0:
         processPixels = False
     elif isPrimaryPass(flags) and flags.Tracking.doITkFastTracking:
         processStrips = reconstructStripSpacePointsInPrimaryPass(flags)
@@ -343,7 +323,7 @@ def ActsSpacePointFormationCfg(flags,
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius pass uses the same roi as the primary pass (FS roi)
-    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+    if flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
         from InDetConfig.ITkActsHelpers import primaryPassExtension
         roisName = f'{primaryPassExtension(flags)}RegionOfInterest'
     
@@ -474,37 +454,19 @@ def ActsSpacePointFormationCfg(flags,
 
 
     # Persistification
-    if flags.Acts.EDM.PersistifySpacePoints and kwargs['runReconstruction']:
-        toAOD = []
-        pixel_spacepoint_shortlist = ['-measurements']
-        strip_spacepoint_shortlist = ['topHalfStripLength', 
-                                      'bottomHalfStripLength', 
-                                      'topStripDirection',
-                                      'bottomStripDirection',
-                                      'stripCenterDistance',
-                                      'topStripCenter',
-                                      'measurementLink']
-
-        pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
-        strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
-
-        if kwargs['processPixels']:
-            pixelSpacePointCollection = kwargs['PixelSpacePointFormationAlg.PixelSpacePoints']
-            toAOD += [f'xAOD::SpacePointContainer#{pixelSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{pixelSpacePointCollection}Aux.{pixel_spacepoint_variables}"]
-
+    if flags.Acts.EDM.PersistifySpacePoints and kwargs['runReconstruction']:        
+        from ActsConfig.ActsPersistificationConfig import PersistifySpacePoints
+        pixelSpacePointCollections = None if not kwargs['processPixels'] else [kwargs['PixelSpacePointFormationAlg.PixelSpacePoints']]
+        stripSpacePointCollections = []
         if kwargs['processStrips']:
-            stripSpacePointCollection = kwargs['StripSpacePointFormationAlg.StripSpacePoints']
-            toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
-
+            stripSpacePointCollections.append(kwargs['StripSpacePointFormationAlg.StripSpacePoints'])
         if kwargs['processOverlapSpacePoints']:
-            stripSpacePointCollection = kwargs['StripSpacePointFormationAlg.StripOverlapSpacePoints']
-            toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
+            stripSpacePointCollections.append(kwargs['StripSpacePointFormationAlg.StripOverlapSpacePoints'])
+        if len(stripSpacePointCollections) == 0:
+            stripSpacePointCollections = None
 
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
-        acc.merge(addToAOD(flags, toAOD))
-
+        acc.merge(PersistifySpacePoints(flags,
+                                        pixelSpacePointCollections=pixelSpacePointCollections,
+                                        stripSpacePointCollections=stripSpacePointCollections))
     return acc
 

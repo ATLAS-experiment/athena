@@ -262,7 +262,7 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         SG::WriteHandleKey<SegmentContainer> m_writeSegmentKey{this, "MuonNswSegmentWriteKey", "MuonNswSegments"};
 
         // access to the ACTS geometry context 
-        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
         // access to the Muon Id Helper
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -309,8 +309,14 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         //maximum number of dY window size for killing hits on the layer from the segments 
         DoubleProperty m_maxdYWindow{this, "maxdYWindow", 4.*Gaudi::Units::cm};  
 
+        //maximum tanAlpha for the seed quality check
+        DoubleProperty m_maxTanAlpha{this, "maxTanAlpha", 0.2};
+
         //dump statistics for the seeds per sector
         BooleanProperty m_dumpSeedStatistics{this, "dumpStatistics", true};
+
+        //dump the space points in an obj file
+        BooleanProperty m_dumpObj{this, "dumpObj", false};
 
         std::unique_ptr<SeedStatistics> m_seedCounter ATLAS_THREAD_SAFE{};
 

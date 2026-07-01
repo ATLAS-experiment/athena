@@ -30,22 +30,22 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   m_json_config = json::parse(jsonFile);
   jsonFile.close();
 
-  if (m_taggerName.empty() || !m_json_config.contains(m_taggerName)){
-    ATH_MSG_ERROR( " Tagger " + m_taggerName + " not found in JSON file: " + m_json_config_path );
+  if (m_outputName.empty() || !m_json_config.contains(m_outputName)){
+    ATH_MSG_ERROR( "The output name " + m_outputName + " not found in JSON file: " + m_json_config_path );
     return StatusCode::FAILURE;
   }
 
-  if (m_jetAuthor.empty() || !m_json_config[m_taggerName].contains(m_jetAuthor)){
-    ATH_MSG_ERROR( "Tagger: " +m_taggerName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_json_config_path );
+  if (m_jetAuthor.empty() || !m_json_config[m_outputName].contains(m_jetAuthor)){
+    ATH_MSG_ERROR( "Tagger: " +m_outputName+ " and Jet Collection: " +m_jetAuthor+ " not found in JSON file: " +m_json_config_path );
     return StatusCode::FAILURE;
   }
 
-  if (m_OP.empty() || !m_json_config[m_taggerName][m_jetAuthor].contains(m_OP)){
-    ATH_MSG_ERROR( "OP " +m_OP+ " not available for " +m_taggerName+ " tagger.");
+  if (m_OP.empty() || !m_json_config[m_outputName][m_jetAuthor].contains(m_OP)){
+    ATH_MSG_ERROR( "OP " +m_OP+ " not available for " +m_outputName+ " tagger.");
     return StatusCode::FAILURE;
   }
 
-  const auto& meta = m_json_config[m_taggerName][m_jetAuthor]["meta"];
+  const auto& meta = m_json_config[m_outputName][m_jetAuthor]["meta"];
   m_truthlabel = meta["TruthLabel"];
 
   // map truth labels to categories
@@ -65,7 +65,7 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
     }
   }
   // preload pt bins, systematics and SFs for each category
-  auto& json_config_OP = m_json_config[m_taggerName][m_jetAuthor][m_OP];
+  auto& json_config_OP = m_json_config[m_outputName][m_jetAuthor][m_OP];
   for (auto& label : meta["labelMapping"].items()) {
     std::string labelString = label.key();;
 

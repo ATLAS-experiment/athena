@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -11,8 +11,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#ifndef PFMATCHINGTOOL_H_
-#define PFMATCHINGTOOL_H_
+#ifndef EFLOWREC_PFTRACKCLUSTERMATCHINGTOOL_H
+#define EFLOWREC_PFTRACKCLUSTERMATCHINGTOOL_H
 
 #include <utility>
 #include "PFMatcher.h"
@@ -73,4 +73,4 @@ private:
 inline const InterfaceID& PFTrackClusterMatchingTool::interfaceID() { return IID_PFTrackClusterMatchingTool; }
 
 
-#endif /* PFMATCHINGTOOL_H_ */
+#endif /* EFLOWREC_PFTRACKCLUSTERMATCHINGTOOL_H */

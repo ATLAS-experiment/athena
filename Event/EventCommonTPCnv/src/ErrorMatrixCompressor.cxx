@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,72 +9,49 @@
  *  <Dmitry.Emeliyanov@cern.ch>
  *
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
 #include "EventCommonTPCnv/ErrorMatrixCompressor.h"
 
-#include <fstream>
+#include <cmath>
 #include <cstring>
+#include <iostream>
+#include <format>
 
-using std::memset;
 
 void DecoderFloat_IEEE754::print()
 {
-  //  printf("0x%X\n",m_data.l);
-  unsigned int mask = 0x00000001;
-  for(int i=31;i>=0;i--)
-    {
-      unsigned int m = mask << i;
-      //printf("0x%X\n",m);
-      if(m_data.l & m) std::cout<<"1";
-      else std::cout<<"0";
-    }
-  std::cout<<std::endl;
-  /*
-    mask = 0x80000000;
-    int sign = (m_data.l & mask) >> 31;
-    mask = 0x7f800000;
-    short int exponent = (m_data.l & mask) >> 23;
-    mask = 0x007fffff;
-    unsigned int mant = (m_data.l & mask);
-    printf("Sign=0x%X Exponent = 0x%X Mantissa = 0x%X\n",sign,exponent,mant); 
-    printf("Sign=%d Exponent = %d Mantissa = %ld\n",sign,exponent,mant);  
-  */
+ std::cout << std::format("{:032b}\n", m_data);
 }
 
 short int DecoderFloat_IEEE754::getExponent()
 {
-  unsigned int mask = 0x7f800000;
-  return ((m_data.l & mask) >> 23);
+  std::uint32_t mask = 0x7f800000u;
+  return ((m_data & mask) >> 23);
 }
 
 unsigned int DecoderFloat_IEEE754::getMantissa()
 {
-  unsigned int mask = 0x007fffff;
-  return (m_data.l & mask);
+  std::uint32_t mask = 0x007fffffu;
+  return (m_data & mask);
 }
 
 
 void DecoderFloat_IEEE754::setExponent(short int ex)
 {
-  unsigned int buf=ex;
+  std::uint32_t buf=ex;
   buf=buf<<23;
-  unsigned int mask=0x7F800000;
-  m_data.l=m_data.l | (buf & mask);
+  std::uint32_t mask=0x7F800000u;
+  m_data = m_data | (buf & mask);
 }
 
 void DecoderFloat_IEEE754::setSign(int s)
 {
   if(s>0)
     {
-      m_data.l=m_data.l & 0x7FFFFFFF;
+      m_data = m_data & 0x7FFFFFFFu;
     }
   else
     {
-      m_data.l=m_data.l | 0x80000000;
+      m_data= m_data | 0x80000000u;
     }
 }
 
@@ -141,9 +118,9 @@ void ErrorMatrixCompressor::setUpperLimits(const int l[2])
 bool ErrorMatrixCompressor::CholeskyDecomposition(double a[5][5], double L[5][5])
 {
 
-  int i,j,k;
-  double sum;
-  double p[5];
+  int i{},j{},k{};
+  double sum{};
+  double p[5]{};
 
   for(i=0;i<5;i++)
     {
@@ -158,7 +135,8 @@ bool ErrorMatrixCompressor::CholeskyDecomposition(double a[5][5], double L[5][5]
 		{
 		  return false;
 		}
-	      p[i]=sqrt(sum);L[i][i]=p[i];
+	      p[i]=std::sqrt(sum);
+	      L[i][i]=p[i];
 	    }
 	  else
 	    { 
@@ -172,9 +150,9 @@ bool ErrorMatrixCompressor::CholeskyDecomposition(double a[5][5], double L[5][5]
 
 bool ErrorMatrixCompressor::compress(const std::vector<double>& src, std::vector<unsigned int>& dest)
 {
-  int i,j;
-  double L[5][5],C0[5][5],C[5][5];
-  float S[5][5];
+  int i{},j{};
+  double C0[5][5]{},C[5][5]{};
+ 
 
   dest.clear();
 
@@ -186,8 +164,7 @@ bool ErrorMatrixCompressor::compress(const std::vector<double>& src, std::vector
 	C[j][i]=C0[i][j]=C0[j][i]=C[i][j];
 	idx++;
       }
-
-  memset(&L[0][0],0,sizeof(L));
+  double L[5][5]{};
 
   for(i=0;i<5;i++)
     for(j=0;j<=i;j++) 
@@ -196,7 +173,8 @@ bool ErrorMatrixCompressor::compress(const std::vector<double>& src, std::vector
 	C[j][i]=C[i][j];
       }
   if(!CholeskyDecomposition(C,L)) return false;
-  memset(&S[0][0],0,sizeof(S));
+  //
+  float S[5][5]{};
   for(i=0;i<5;i++)
     for(j=0;j<=i;j++) S[i][j]=L[i][j];
 
@@ -209,7 +187,7 @@ bool ErrorMatrixCompressor::compress(const std::vector<double>& src, std::vector
 	{
 	  m_decoder.setF(S[i][j]);
 	  char sign=(S[i][j]<0)?1:0;
-	  unsigned int mant=m_decoder.getMantissa();
+	  std::uint32_t mant=m_decoder.getMantissa();
 	  unsigned short int ex=m_decoder.getExponent();
 	  vecFR.push_back(FloatRep(sign,ex,mant));
 	}
@@ -220,10 +198,8 @@ bool ErrorMatrixCompressor::compress(const std::vector<double>& src, std::vector
 
   //re-packing as ints
 
-  //  std::cout<<"Total "<<vShorts.size()<<" unsigned short"<<std::endl;
-
   int nBits=0;
-  unsigned int buffer = 0x00000000;
+  std::uint32_t buffer = 0x00000000u;
 
   for(std::vector<unsigned short>::iterator it = vShorts.begin(); it != vShorts.end();++it) {
     // printf("short = 0x%X\n",(*it));
@@ -248,9 +224,8 @@ bool ErrorMatrixCompressor::compress(const std::vector<double>& src, std::vector
   
 bool ErrorMatrixCompressor::restore(const std::vector<unsigned int>& src, std::vector<double>& dest)
 {
-  int i,j;
-  float S[5][5];
-  double L[5][5],C[5][5];
+  int i{},j{};
+  double C[5][5]{};
 
   dest.clear();
 
@@ -274,7 +249,7 @@ bool ErrorMatrixCompressor::restore(const std::vector<unsigned int>& src, std::v
   if(!restoreFR(vShorts,vecFR)) return false;
 
   std::vector<FloatRep>::iterator fIt(vecFR.begin());
-  memset(&S[0][0],0,sizeof(S));
+  float S[5][5]{};
   for(i=0;i<5;i++)
     for(j=0;j<=i;j++)
       {
@@ -283,7 +258,7 @@ bool ErrorMatrixCompressor::restore(const std::vector<unsigned int>& src, std::v
         ++fIt;
       }
 
-  memset(&L[0][0],0,sizeof(L));
+  double L[5][5]{};
   for(i=0;i<5;i++)
     for(j=0;j<=i;j++) L[i][j]=S[i][j];
   for(i=0;i<5;i++)  
@@ -316,13 +291,7 @@ bool ErrorMatrixCompressor::compressFR(const std::vector<FloatRep>& src, std::ve
       return false;
     }
   std::vector<FloatRep>::const_iterator fIt;
-  /*
-  for(fIt=src.begin();fIt!=src.end();++fIt)
-    {
-      printf("%d %d %d -> %2.8f\n",(*fIt).sign(),
-	     (*fIt).exponent(),(*fIt).mantissa(),(*fIt).restore());
-    }
-  */
+  
   // 1. Check limits
   fIt=src.begin();
   int i,j;
@@ -330,7 +299,7 @@ bool ErrorMatrixCompressor::compressFR(const std::vector<FloatRep>& src, std::ve
     for (j=0;j<=i;j++)
       {
 	unsigned short int ex=(*fIt).exponent();
-	unsigned int mant=(*fIt).mantissa();
+	std::uint32_t mant=(*fIt).mantissa();
 	int bias,limit;
 	if(i==j)
 	  {
@@ -346,7 +315,6 @@ bool ErrorMatrixCompressor::compressFR(const std::vector<FloatRep>& src, std::ve
 	  {
 	    if((ex<bias)||(ex-bias>limit))
 	      {
-		//		std::cout<<"i="<<i<<" j="<<j<<" ex="<<ex<<" bias="<<bias<<" lim="<<limit<<std::endl;
 		return false;
 	      }
 	  }
@@ -398,7 +366,7 @@ bool ErrorMatrixCompressor::compressFR(const std::vector<FloatRep>& src, std::ve
   fIt=src.begin();
   unsigned int nPacked=0;
   int nFreeBits=0,nBitsToStore=0,nBufferLength=0;
-  unsigned int srcBuffer=0x00000000;
+  std::uint32_t srcBuffer=0x00000000u;
   //  printf("L=%d\n",nMantLength);
   while (nPacked<=src.size()+1)
     {
@@ -424,19 +392,17 @@ bool ErrorMatrixCompressor::compressFR(const std::vector<FloatRep>& src, std::ve
 	  nBitsToStore=nMantLength;
 	}
       int Np=(nBitsToStore>nFreeBits)?nFreeBits:nBitsToStore;
-      unsigned int mask=m_srcMasks[Np-1];
-      unsigned int slice = srcBuffer & mask;
+      std::uint32_t mask=m_srcMasks[Np-1];
+      std::uint32_t slice = srcBuffer & mask;
       slice = (slice >> (32-nFreeBits)) & 0x0000FFFF;
-      unsigned int tmp=(unsigned int)(slice);
+      std::uint32_t tmp = slice;
       //	printf("Np=%d Tmp=0x%X\n",Np,tmp);
       buf =  buf | tmp;
       srcBuffer = srcBuffer << Np;
       //	printf("dest=0x%X src=0x%X\n",buf,srcBuffer);
       nFreeBits-=Np;
       nBitsToStore-=Np;
-      //cout<<"F="<<nFreeBits<<" TS="<<nBitsToStore<<endl;
     }
-  //  printf("Storing 0x%X\n",buf);
   dest.push_back(buf);
   return true;
 }
@@ -445,7 +411,7 @@ bool ErrorMatrixCompressor::restoreFR(const std::vector<unsigned short>& src, st
 {
   int i,nRestored,nFreeBits,nBitsToStore;
   unsigned short buf=0x0000;
-  unsigned int destBuffer=0x00000000;
+  std::uint32_t destBuffer=0x00000000;
   std::vector<unsigned short>::const_iterator uIt(src.begin());
   dest.clear();
 
@@ -506,18 +472,11 @@ bool ErrorMatrixCompressor::restoreFR(const std::vector<unsigned short>& src, st
 	  nBitsToStore=16;buf=(*uIt);//printf("Source 0x%X\n",buf);
 	}
       int Np=(nFreeBits>nBitsToStore) ? nBitsToStore : nFreeBits;
-      unsigned int tmp = buf;
+      std::uint32_t tmp = buf;
       tmp = tmp >> (16-Np);
-      buf = (unsigned int)((buf << Np) & 0x0000FFFF);
-      //printf("F=%d TS=%d Np=%d 0x%X 0x%X\n",nFreeBits,nBitsToStore,Np,tmp,buf);
       nBitsToStore-=Np;
-      //printf("Copy 0x%X ",destBuffer);
-      destBuffer = destBuffer << Np;
-      //printf("<< 0x%X ",destBuffer);
       destBuffer = destBuffer | tmp;
-      //printf(" | 0x%X\n",destBuffer);
       nFreeBits-=Np;
-      //printf("nR=%d\n",nRestored);
     }
   return true;
 }

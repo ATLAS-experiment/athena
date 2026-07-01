@@ -21,7 +21,7 @@ public:
         T_AthenaPoolCustomCnv<TrackRecordCollection, TrackRecordCollection_PERS >( svcloc) {}
 protected:
   TrackRecordCollection_PERS* createPersistent(TrackRecordCollection* transCont);
-  TrackRecordCollection*   createTransient ();
+  TrackRecordCollection*   createTransient(const Token* token);
 };
 
 // #include "TrackRecordCollectionCnv.icc"

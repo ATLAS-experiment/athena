@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventSelectorByteStream.h"
@@ -19,6 +19,7 @@
 
 #include "AthenaKernel/IAthenaIPCTool.h"
 #include "AthenaKernel/IAthMetaDataSvc.h"
+#include "AthenaKernel/InputFileIncidentGuard.h"
 
 // EventInfoAttributeList includes
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
@@ -27,6 +28,7 @@
 
 
 namespace {
+   const std::string stringTypeStr{"string"};
    /// Helper to suppress thread-checker warnings for single-threaded execution
    StatusCode putEvent_ST(const IAthenaIPCTool& tool,
                           long eventNumber, const void* source,
@@ -189,8 +191,6 @@ StatusCode EventSelectorByteStream::reinit(lock_t& lock) {
 
       // try to open a file
       ATH_CHECK(this->openNewRun(lock));
-      // should be in openNewRun, but see comment there
-      m_beginFileFired = true;
    }
 
    return StatusCode::SUCCESS;
@@ -211,13 +211,11 @@ StatusCode EventSelectorByteStream::start() {
 //________________________________________________________________________________
 StatusCode EventSelectorByteStream::stop() {
    ATH_MSG_DEBUG("Calling EventSelectorByteStream::stop()");
-   // Handle open files
    if (m_filebased) {
-      // Close the file
+      // Fire EndInputFile for any file still open
+      m_inputFileGuard.reset();
       if (m_eventSource->ready()) {
          m_eventSource->closeBlockIterator(false);
-         FileIncident endInputFileIncident(name(), "EndInputFile", "stop");
-         m_incidentSvc->fireIncident(endInputFileIncident);
       }
    }
    return StatusCode::SUCCESS;
@@ -243,8 +241,8 @@ StatusCode EventSelectorByteStream::finalize() {
 }
 
 void EventSelectorByteStream::nextFile(lock_t& /*lock*/) const {
-   FileIncident endInputFileIncident(name(), "EndInputFile", "BSF:" + *m_inputCollectionsIterator);
-   m_incidentSvc->fireIncident(endInputFileIncident);
+   // EndInputFile is handled by the InputFileIncidentGuard via transition()
+   // when the next file is opened, or via reset() on stop().
    ++m_inputCollectionsIterator;
    ++m_fileCount;
 }
@@ -268,12 +266,10 @@ StatusCode EventSelectorByteStream::openNewRun(lock_t& lock) const {
       ATH_MSG_FATAL("Unable to access file " << *m_inputCollectionsIterator << ", stopping here");
       throw ByteStreamExceptions::fileAccessError();
    }
-   // Fire the incident
-   if (!m_beginFileFired) {
-     FileIncident beginInputFileIncident(name(), "BeginInputFile", "BSF:" + *m_inputCollectionsIterator,nevguid.second);
-     m_incidentSvc->fireIncident(beginInputFileIncident);
-     //m_beginFileFired = true;   // Should go here, but can't because IEvtSelector next is const
-   }
+   // Fire EndInputFile for previous file (if any), then BeginInputFile for new file
+   InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
+                           "BSF:" + *m_inputCollectionsIterator, nevguid.second,
+                           /*endFileName=*/{});
 
    // check if file is empty
    if (nev == 0) {
@@ -831,7 +827,7 @@ StatusCode EventSelectorByteStream::fillAttributeListImpl(coral::AttributeList *
    eformat::helper::decode(event->nstream_tag(), buffer, onl_streamTags);
    for (std::vector<eformat::helper::StreamTag>::const_iterator itS = onl_streamTags.begin(),
       itSE = onl_streamTags.end(); itS != itSE; ++itS) {
-      attrList->extend(itS->name + suffix, "string");
+      attrList->extend(itS->name + suffix, stringTypeStr);
       (*attrList)[itS->name + suffix].data<std::string>() = itS->type;
    }
 
@@ -1004,7 +1000,7 @@ StatusCode EventSelectorByteStream::io_reinit() {
       ATH_CHECK(iomgr->io_retrieve(this, fname));
    }
    // all good... copy over.
-   m_beginFileFired = false;
+   m_inputFileGuard.reset();
 
    // Set m_inputCollectionsProp.  But we _dont_ want to run the update
    // handler --- that calls reinit(), which will deadlock since

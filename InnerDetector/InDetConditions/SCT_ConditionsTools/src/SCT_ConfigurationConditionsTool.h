@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -52,11 +52,9 @@ class SCT_ConfigurationConditionsTool: public extends<AthAlgTool, ISCT_Configura
   virtual bool                          canReportAbout(InDetConditions::Hierarchy h) const override;
   
   /**Is the detector element good?*/
-  virtual bool                          isGood(const Identifier& elementId, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override;
   virtual bool                          isGood(const Identifier& elementId, const EventContext& ctx, InDetConditions::Hierarchy h=InDetConditions::DEFAULT) const override;
   
   /**Is it good?, using wafer hash*/
-  virtual bool                          isGood(const IdentifierHash& hashId) const override;
   virtual bool                          isGood(const IdentifierHash& hashId, const EventContext& ctx) const override;
 
   virtual void                          getDetectorElementStatus(const EventContext& ctx, InDet::SiDetectorElementStatus &element_status,
@@ -64,28 +62,20 @@ class SCT_ConfigurationConditionsTool: public extends<AthAlgTool, ISCT_Configura
 
   /**List of bad modules*/
   virtual const std::set<Identifier>*   badModules(const EventContext& ctx) const override;
-  virtual const std::set<Identifier>*   badModules() const override;
   /**List of bad strips*/
   virtual void                          badStrips(std::set<Identifier>& strips, const EventContext& ctx, bool ignoreBadModules=false, bool ignoreBadChips=false) const override;
-  virtual void                          badStrips(std::set<Identifier>& strips, bool ignoreBadModules=false, bool ignoreBadChips=false) const override;
   /**List of bad strips for a given module*/
   virtual void                          badStrips(const Identifier& moduleId, std::set<Identifier>& strips, const EventContext& ctx, bool ignoreBadModules=false, bool ignoreBadChips=false) const override;
-  virtual void                          badStrips(const Identifier& moduleId, std::set<Identifier>& strips, bool ignoreBadModules=false, bool ignoreBadChips=false) const override;
   /**List of bad links*/
   virtual std::pair<bool, bool>         badLinks(const IdentifierHash& hash, const EventContext& ctx) const override;
-  virtual std::pair<bool, bool>         badLinks(const IdentifierHash& hash) const override;
   /**Bad links for a given module*/
   virtual const std::map<IdentifierHash, std::pair<bool, bool>>* badLinks(const EventContext& ctx) const override;
-  virtual const std::map<IdentifierHash, std::pair<bool, bool>>* badLinks() const override;
   /**List of bad chips*/
   virtual const std::map<Identifier, unsigned int>* badChips(const EventContext& ctx) const override;
-  virtual const std::map<Identifier, unsigned int>* badChips() const override;
   /**Bad chips for a given module*/
   virtual unsigned int                  badChips(const Identifier& moduleId, const EventContext& ctx) const override;
-  virtual unsigned int                  badChips(const Identifier& moduleId) const override;
   /** Get the chip number containing a particular strip*/
   virtual int                           getChip(const Identifier& stripId, const EventContext& ctx) const override;
-  virtual int                           getChip(const Identifier& stripId) const override;
 
  private:
   SG::ReadCondHandleKey<SCT_ConfigurationCondData> m_condKey{this, "CondKey", "SCT_ConfigurationCondData", "SCT DAQ configuration"};

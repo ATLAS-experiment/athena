@@ -1,27 +1,134 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcRdoToPrepDataToolMT.h"
 
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
-#include "xAODMuonPrepData/sTgcStripAuxContainer.h"
-#include "xAODMuonPrepData/sTgcWireAuxContainer.h"
-#include "xAODMuonPrepData/sTgcPadAuxContainer.h"
+
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 using namespace MuonGM;
 using namespace Trk;
-using namespace Muon;
 
 namespace {
     std::atomic<bool> hitNegativeCharge{false};
 }
 
+
+namespace Muon{
+
+
+ sTgcRdoToPrepDataToolMT::DataCache::DataCache(const std::size_t hashMax,
+                                               const PrdKey_t& key,
+                                               const EventContext& ctx):
+        prdWriteHandle{key, ctx}{
+    
+    collections.resize(hashMax);
+
+}
+
+void sTgcRdoToPrepDataToolMT::DataCache::translateAndSort(sTgcPrepDataCollection& coll) {
+    if (!detMgr) {
+        return;
+    }
+    std::sort(coll.begin(), coll.end(),[](const sTgcPrepData*a, const sTgcPrepData* b){
+        return a->identify() < b->identify();
+    });
+    /// update the index otherwise the persitification is not happy...
+    std::size_t idx{0};
+    for (sTgcPrepData* prd : coll) {
+        prd->setHashAndIndex(coll.identifyHash(), idx++);
+    }
+    const IMuonIdHelperSvc* idHelperSvc = detMgr->idHelperSvc();
+    
+    const sTgcIdHelper& id_helper = idHelperSvc->stgcIdHelper();
+    for (const sTgcPrepData* prd : coll) {
+        const Identifier prdId = prd->identify();
+        const int gasGap = id_helper.gasGap(prdId);
+        const int channel = id_helper.channel(prdId);
+        const int chType = id_helper.channelType(prdId);
+        xAOD::sTgcMeasurement* outHit{nullptr};
+        if (chType == sTgcIdHelper::sTgcChannelTypes::Pad) {    
+            if (!pads.hasHandle()) {
+                continue;
+            }          
+            xAOD::MeasMatrix<2> lCov{xAOD::MeasMatrix<2>::Identity()};
+            lCov(1,1) = prd->localCovariance()(0,0);
+            /// Calculate the eta covariance from the geometry for now for 
+            const MuonGMR4::sTgcReadoutElement* readoutEle =  detMgr->getsTgcReadoutElement(prdId);
+            lCov(0,0) = Acts::square(0.5* readoutEle->padHeight(readoutEle->measurementHash(prdId)));
+
+            //skip for now measurements with zero covariance
+            if (lCov.determinant() == 0) {
+                continue;               
+            }
+            outHit = pads->push_back(std::make_unique<xAOD::sTgcPadHit>());
+            outHit->setMeasurement<2>(idHelperSvc->detElementHash(prdId), 
+                                      xAOD::toStorage(Eigen::Rotation2D{-M_PI_2}*prd->localPosition()),
+                                      std::move(lCov));
+        } else if (chType == sTgcIdHelper::sTgcChannelTypes::Wire) {
+            if (!wires.hasHandle()){
+                continue;
+            }
+            outHit = wires->push_back(std::make_unique<xAOD::sTgcWireHit>());
+        } else if (chType == sTgcIdHelper::sTgcChannelTypes::Strip) {
+            if (!strips.hasHandle()) {
+                continue;
+            }
+            auto stripHit = strips->push_back(std::make_unique<xAOD::sTgcStripCluster>());
+            stripHit->setStripCharges(prd->stripCharges());
+            stripHit->setStripNumbers(prd->stripNumbers());
+            stripHit->setStripTimes(prd->stripTimes());
+            outHit = stripHit;
+        }
+        if (!outHit) {
+            continue;
+        }
+        if (chType != sTgcIdHelper::sTgcChannelTypes::Pad){
+            /// In the R4 layout both phi & eta measurements are expressed on the same surface. However, the
+            ///  rotation from eta -> phi is clockwise  --> minus sign in prd creation
+            const double locPos = (chType == sTgcIdHelper::sTgcChannelTypes::Wire ? -1. : 1.) * prd->localPosition().x();
+            xAOD::MeasVector<1> lPos = locPos * xAOD::MeasVector<1>::UnitX();
+            xAOD::MeasMatrix<1> lCov{};
+            lCov(0,0) = prd->localCovariance()(0,0);
+            outHit->setMeasurement<1>(idHelperSvc->detElementHash(prdId),
+                                      std::move(lPos),
+                                      std::move(lCov));
+
+        }
+        outHit->setChannelNumber(channel);
+        outHit->setGasGap(gasGap);
+        outHit->setAuthor(prd->author());
+        outHit->setTime(prd->time());
+        outHit->setCharge(prd->charge());
+        outHit->setReadoutElement(detMgr->getsTgcReadoutElement(prdId));
+    }
+}
+sTgcRdoToPrepDataToolMT::DataCache::~DataCache() {
+    if (!isValid) {
+        return;
+    }
+    
+    for (std::size_t hash = 0; hash < collections.size(); ++hash) {
+        std::unique_ptr<sTgcPrepDataCollection>& coll = collections[hash];
+        if (!coll) {
+            continue;
+        }
+        sTgcPrepDataContainer::IDC_WriteHandle lock = prdWriteHandle->getWriteHandle( hash );
+        if (lock.OnlineAndPresentInAnotherView()){
+            continue;
+        }
+
+        translateAndSort(*coll);
+
+        lock.addOrDelete(std::move(coll)).ignore();
+    }
+}
 //============================================================================
-StatusCode Muon::sTgcRdoToPrepDataToolMT::initialize()
+StatusCode sTgcRdoToPrepDataToolMT::initialize()
 {  
     ATH_MSG_DEBUG(" in initialize()");
     ATH_CHECK( m_idHelperSvc.retrieve() );
@@ -44,8 +151,8 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::initialize()
 
 
 //============================================================================
-StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
-                                                            outputCache& xAODcontainers,
+StatusCode sTgcRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
+                                                            DataCache& cache,
                                                             const STGC_RawDataCollection *rdoColl) const {
 
     const sTgcIdHelper& id_helper = m_idHelperSvc->stgcIdHelper();
@@ -53,16 +160,15 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
 
     ATH_MSG_DEBUG(" ***************** Start of process STGC Collection with hash Id: " << hash);
   
-    auto stgcPrepDataContainer = xAODcontainers.prd;
     // check if the collection already exists, otherwise add it
-    if ( stgcPrepDataContainer->indexFindPtr(hash) != nullptr ) {
+    if ( cache.prdWriteHandle->indexFindPtr(hash) != nullptr ) {
         ATH_MSG_DEBUG("In processCollection: collection already contained in the sTGC PrepData container");
         return StatusCode::FAILURE;
 
     } 
 
     // Get write handle for this collection
-    sTgcPrepDataContainer::IDC_WriteHandle lock = stgcPrepDataContainer->getWriteHandle( hash );
+    sTgcPrepDataContainer::IDC_WriteHandle lock = cache.prdWriteHandle->getWriteHandle( hash );
     // Check if collection already exists (via the cache, i.e. in online trigger mode)
     if( lock.OnlineAndPresentInAnotherView() ) {
       ATH_MSG_DEBUG("In processCollection: collection already available in the sTgc PrepData container (via cache)");
@@ -70,7 +176,10 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
     }
 
     // Make the PRD collection (will be added to container later
-    std::unique_ptr<sTgcPrepDataCollection> prdColl = std::make_unique<sTgcPrepDataCollection>(hash);
+    std::unique_ptr<sTgcPrepDataCollection>& prdColl = cache.collections[hash];
+    if (!prdColl) {
+       prdColl = std::make_unique<sTgcPrepDataCollection>(hash);
+    }
 
     // set the offline identifier of the collection Id
     IdContext  context = id_helper.module_context();
@@ -192,94 +301,24 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
 
     if(m_merge) {
         // merge strip prds that fire closeby channels (not clusterizing wires and pads)
-        std::vector<std::unique_ptr<Muon::sTgcPrepData>> sTgcStripClusters;
+        std::vector<std::unique_ptr<sTgcPrepData>> sTgcStripClusters;
         ATH_CHECK(m_clusterBuilderTool->getClusters(ctx, std::move(sTgcStripPrds), sTgcStripClusters)); // Clusterize strips
 
-        for ( std::unique_ptr<Muon::sTgcPrepData>& it : sTgcStripClusters ) {
+        for ( std::unique_ptr<sTgcPrepData>& it : sTgcStripClusters ) {
             it->setHashAndIndex(prdColl->identifyHash(), prdColl->size());
             prdColl->push_back(std::move(it));
         } 
-        for ( Muon::sTgcPrepData& prd : sTgcWirePrds ) {
+        for ( sTgcPrepData& prd : sTgcWirePrds ) {
             prd.setHashAndIndex(prdColl->identifyHash(), prdColl->size());
             prdColl->push_back(std::make_unique<sTgcPrepData>(std::move(prd)));
         }
-        for (Muon::sTgcPrepData& prd : sTgcPadPrds ) {
+        for (sTgcPrepData& prd : sTgcPadPrds ) {
             prd.setHashAndIndex(prdColl->identifyHash(), prdColl->size());
             prdColl->push_back(std::make_unique<sTgcPrepData>(std::move(prd)));
         }
     }
-    const bool convertXAOD = !m_xAODPadKey.empty() || !m_xAODStripKey.empty() ||
-                             !m_xAODWireKey.empty();
-    
-    if (convertXAOD) {
-        for (const Muon::sTgcPrepData* prd : *prdColl) {
-            const Identifier prdId = prd->identify();
-            const int gasGap = id_helper.gasGap(prdId);
-            const int channel = id_helper.channel(prdId);
-            const int chType = id_helper.channelType(prdId);
-            xAOD::sTgcMeasurement* outHit{nullptr};
-            ATH_MSG_VERBOSE("Convert "
-                    <<m_idHelperSvc->toString(prdId)<<". "<<Amg::toString(prd->localPosition())
-                    <<", cov: "<<prd->localCovariance()(0,0)
-                    <<" global pos: "<<Amg::toString(prd->globalPosition()));
-            if (!m_xAODPadKey.empty() && chType == sTgcIdHelper::sTgcChannelTypes::Pad) {              
-                xAOD::MeasMatrix<2> lCov{xAOD::MeasMatrix<2>::Identity()};
-                lCov(1,1) = prd->localCovariance()(0,0);
-                /// Calculate the eta covariance from the geometry for now for 
-                if(m_detMgrR4){
-                    const MuonGMR4::sTgcReadoutElement* readoutEle =  m_detMgrR4->getsTgcReadoutElement(prdId);
-                    lCov(0,0) = Acts::square(0.5* readoutEle->padHeight(readoutEle->measurementHash(prdId)));
-
-                }                
-                // lCov(1,1) = prd->localCovariance()(1,1); 
-                //skip for now measurements with zero covariance
-                if (lCov.determinant() == 0) {
-                    ATH_MSG_WARNING("sTgcPadHit with zero covariance, skip filling xAOD");
-                    continue;               
-                }
-                outHit = xAODcontainers.pad->push_back(std::make_unique<xAOD::sTgcPadHit>());
-                outHit->setMeasurement<2>(m_idHelperSvc->detElementHash(prdId), 
-                                          xAOD::toStorage(Eigen::Rotation2D{-M_PI_2}*prd->localPosition()),
-                                          std::move(lCov));
-            } else if (chType == sTgcIdHelper::sTgcChannelTypes::Wire && !m_xAODWireKey.empty()) {
-               outHit = xAODcontainers.wire->push_back(std::make_unique<xAOD::sTgcWireHit>());
-            } else if (chType == sTgcIdHelper::sTgcChannelTypes::Strip && !m_xAODStripKey.empty()) {
-                auto stripHit = xAODcontainers.strip->push_back(std::make_unique<xAOD::sTgcStripCluster>());
-                stripHit->setStripCharges(prd->stripCharges());
-                stripHit->setStripNumbers(prd->stripNumbers());
-                stripHit->setStripTimes(prd->stripTimes());
-                outHit = stripHit;
-            }
-            if (!outHit) {
-                continue;
-            }
-            if (chType != sTgcIdHelper::sTgcChannelTypes::Pad){
-               /// In the R4 layout both phi & eta measurements are expressed on the same surface. However, the
-               ///  rotation from eta -> phi is clockwise  --> minus sign in prd creation
-               const double locPos = (chType == sTgcIdHelper::sTgcChannelTypes::Wire ? -1. : 1.) * prd->localPosition().x();
-               xAOD::MeasVector<1> lPos = locPos * xAOD::MeasVector<1>::UnitX();
-               xAOD::MeasMatrix<1> lCov{};
-               lCov(0,0) = prd->localCovariance()(0,0);
-               outHit->setMeasurement<1>(m_idHelperSvc->detElementHash(prdId),
-                                         std::move(lPos),
-                                         std::move(lCov));
-
-            }
-            outHit->setChannelNumber(channel);
-            outHit->setGasGap(gasGap);
-            outHit->setAuthor(prd->author());
-            outHit->setTime(prd->time());
-            outHit->setCharge(prd->charge());
-            outHit->setIdentifier(prdId.get_compact());
-            if (m_detMgrR4) {
-                outHit->setReadoutElement(m_detMgrR4->getsTgcReadoutElement(prdId));
-            }
-        }
-    }
-
 
     // now add the collection to the container
-    ATH_CHECK( lock.addOrDelete(std::move( prdColl ) ) );
     ATH_MSG_DEBUG("PRD hash " << hash << " has been moved to container");
 
     return StatusCode::SUCCESS;
@@ -287,7 +326,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::processCollection(const EventContext& 
 
 
 //============================================================================
-const STGC_RawDataContainer* Muon::sTgcRdoToPrepDataToolMT::getRdoContainer(const EventContext& ctx) const 
+const STGC_RawDataContainer* sTgcRdoToPrepDataToolMT::getRdoContainer(const EventContext& ctx) const 
 {
     auto rdoContainerHandle  = SG::makeHandle(m_rdoContainerKey, ctx);
     if(rdoContainerHandle.isValid()) {
@@ -301,8 +340,8 @@ const STGC_RawDataContainer* Muon::sTgcRdoToPrepDataToolMT::getRdoContainer(cons
 
 
 //============================================================================
-void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx, 
-                                                        outputCache& xAODcontainers,
+void sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx, 
+                                                        DataCache& cache,
                                                         const std::vector<IdentifierHash>& idsToDecode) const
 {
     ATH_MSG_DEBUG("In processRDOContainer");
@@ -322,7 +361,7 @@ void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx,
             continue;
         } else ATH_MSG_DEBUG("Going to decode " << hash);
 
-        if(processCollection(ctx, xAODcontainers, rdoColl).isFailure()) {
+        if(processCollection(ctx, cache, rdoColl).isFailure()) {
             ATH_MSG_DEBUG("processCsm returns a bad StatusCode - keep going for new data collections in this event");
         }
     } 
@@ -330,11 +369,11 @@ void Muon::sTgcRdoToPrepDataToolMT::processRDOContainer(const EventContext& ctx,
 
 // methods for ROB-based decoding
 //============================================================================
-StatusCode Muon::sTgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
+StatusCode sTgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
                                                  const std::vector<IdentifierHash>& idVect) const {
     ATH_MSG_DEBUG("Size of the input hash id vector: " << idVect.size());
 
-    outputCache outCache = setupOutputContainers(ctx);
+    DataCache outCache = setupOutputContainers(ctx);
     if (!outCache.isValid) return StatusCode::FAILURE;
 
     processRDOContainer(ctx, outCache, idVect);
@@ -343,64 +382,46 @@ StatusCode Muon::sTgcRdoToPrepDataToolMT::decode(const EventContext& ctx,
 
 
 //============================================================================
-StatusCode Muon::sTgcRdoToPrepDataToolMT::decode(const EventContext&, const std::vector<uint32_t>& ) const {
+StatusCode sTgcRdoToPrepDataToolMT::decode(const EventContext&, const std::vector<uint32_t>& ) const {
    ATH_MSG_FATAL("ROB based decoding is not supported....");
    return StatusCode::FAILURE;
 }
-StatusCode Muon::sTgcRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const {
+StatusCode sTgcRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const {
     return setupOutputContainers(ctx).isValid ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
 
 
-sTgcRdoToPrepDataToolMT::outputCache
+sTgcRdoToPrepDataToolMT::DataCache
   sTgcRdoToPrepDataToolMT::setupOutputContainers(const EventContext& ctx) const {
-      outputCache containers;
-      if (!m_xAODStripKey.empty()) {
-          containers.strip = SG::WriteHandle<xAOD::sTgcStripContainer>{m_xAODStripKey, ctx};
-          if (!containers.strip.record(std::make_unique<xAOD::sTgcStripContainer>(),
-                                       std::make_unique<xAOD::sTgcStripAuxContainer>()).isSuccess()){
-              ATH_MSG_FATAL("Failed to record "<<m_xAODStripKey.fullKey());
-              return containers;
-          }
-      }
-      if (!m_xAODPadKey.empty()) {
-          containers.pad = SG::WriteHandle<xAOD::sTgcPadContainer>{m_xAODPadKey, ctx};
-          if (!containers.pad.record(std::make_unique<xAOD::sTgcPadContainer>(),
-                                     std::make_unique<xAOD::sTgcPadAuxContainer>()).isSuccess()){
-              ATH_MSG_FATAL("Failed to record "<<m_xAODPadKey.fullKey());
-              return containers;
-          }
-      }
-      if (!m_xAODWireKey.empty()) {
-          containers.wire = SG::WriteHandle<xAOD::sTgcWireContainer>{m_xAODWireKey, ctx};
-          if (!containers.wire.record(std::make_unique<xAOD::sTgcWireContainer>(),
-                                      std::make_unique<xAOD::sTgcWireAuxContainer>()).isSuccess()){
-              ATH_MSG_FATAL("Failed to record "<<m_xAODWireKey.fullKey());
-              return containers;
-          }
-      }
+      
+    
+      const std::size_t hashMax = m_idHelperSvc->stgcIdHelper().module_hash_max();
+      DataCache containers{hashMax, m_stgcPrepDataContainerKey, ctx};
 
-      containers.prd = SG::WriteHandle<Muon::sTgcPrepDataContainer>(m_stgcPrepDataContainerKey, ctx);
+      containers.detMgr = m_detMgrR4;
       if(m_prdContainerCacheKey.key().empty()) {
          // No external cache, just record the container
-         const int hashMax = m_idHelperSvc->stgcIdHelper().module_hash_max();
-         if (!containers.prd.record(std::make_unique<Muon::sTgcPrepDataContainer>(hashMax)).isSuccess()){
+
+         if (!containers.prdWriteHandle.record(std::make_unique<sTgcPrepDataContainer>(hashMax)).isSuccess()){
              ATH_MSG_FATAL("Faile to record "<<m_stgcPrepDataContainerKey.fullKey());
              return containers; 
          }
       } else {
         ///use the cache to get the container
-        SG::UpdateHandle<sTgcPrepDataCollection_Cache> update(m_prdContainerCacheKey, ctx);
+        SG::UpdateHandle update{m_prdContainerCacheKey, ctx};
         if (!update.isValid()) {
           ATH_MSG_FATAL("Invalid UpdateHandle " << m_prdContainerCacheKey.key());
           return containers;
         }
-        if (!containers.prd.record(std::make_unique<Muon::sTgcPrepDataContainer>(update.ptr())).isSuccess()) {
+        if (!containers.prdWriteHandle.record(std::make_unique<sTgcPrepDataContainer>(update.ptr())).isSuccess()) {
             ATH_MSG_FATAL("Failed to record "<<m_stgcPrepDataContainerKey.fullKey()
                         <<" from "<<m_prdContainerCacheKey.fullKey());
             return containers;
         }
       }
-      containers.isValid = true;
+      containers.isValid = containers.strips.record(m_xAODStripKey, ctx).isSuccess()
+                         && containers.wires.record(m_xAODWireKey, ctx).isSuccess()
+                         && containers.pads.record(m_xAODPadKey, ctx).isSuccess();
       return containers;
+}
 }

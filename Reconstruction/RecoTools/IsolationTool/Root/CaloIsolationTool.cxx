@@ -788,7 +788,7 @@ for( auto isoType : isoTypes ){
     bool doCoreCone = (!m_saveOnlyRequestedCorrections || result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::coreCone)));
     if(doCoreCone && maxConeSize<coreConeDR) maxConeSize = coreConeDR;
 
-    if(!muon.clusterLink().isValid()){
+    if(!muon.cluster()){
       ATH_MSG_DEBUG("no valid cluster link");
       //no cluster, set everything to 0
       for(unsigned int i=0; i<conesf.size(); i++) result.etcones[i] = 0;
@@ -812,7 +812,7 @@ for( auto isoType : isoTypes ){
       }
     }
     else{
-      const xAOD::CaloCluster* muonCluster=*muon.clusterLink();
+      const xAOD::CaloCluster* muonCluster = muon.cluster();
       /// start the calculation
       ATH_MSG_DEBUG("calculating etcone for # " << conesf.size() << " cones");
       Trk::CaloCellSelectorLayerdR selector(maxConeSize);
@@ -862,9 +862,9 @@ for( auto isoType : isoTypes ){
     // calculate etcore
     if(!m_saveOnlyRequestedCorrections ||
        result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::coreMuon))){
-      const TrackParticle* tp = nullptr;
-      if(muon.primaryTrackParticleLink().isValid() && muon.author()!=2) tp = *muon.primaryTrackParticleLink();
-      if( !tp) tp = *muon.inDetTrackParticleLink();
+      const TrackParticle* tp = muon.trackParticle(muon.author() != xAOD::Muon::Author::STACO ? 
+                                                    xAOD::Muon::TrackParticleType::Primary :
+                                                    xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       correctIsolationEnergy_MuonCore(result, *tp, derefMap);
     }
 
@@ -1596,10 +1596,9 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
     const Muon* muon = dynamic_cast<const Muon*>(&particle);
     if( muon ) {
       ATH_MSG_DEBUG("muon with author "<<muon->author()<<" and pT "<<muon->pt());
-      const TrackParticle* tp = nullptr;
-      //note: if STACO, the track particle has no Trk::Track associated, so use the ID track
-      if(muon->primaryTrackParticleLink().isValid() && muon->author()!=2) tp = *muon->primaryTrackParticleLink();
-      if( !tp) tp = *muon->inDetTrackParticleLink();
+      const TrackParticle* tp = muon->trackParticle(muon->author() != xAOD::Muon::Author::STACO ? 
+                                                    xAOD::Muon::TrackParticleType::Primary :
+                                                    xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
       if( !tp ) {
         ATH_MSG_WARNING(" No TrackParticle found for muon " );
         return nullptr;

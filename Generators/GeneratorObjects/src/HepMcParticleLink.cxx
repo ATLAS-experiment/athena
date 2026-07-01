@@ -247,7 +247,6 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
         }
         else {
           // id to GenParticle
-#ifdef HEPMC3
           const auto &particles = pEvt->particles();
           if (particle_id-1 < particles.size()) {
             const HepMC::ConstGenParticlePtr p = particles[particle_id-1];
@@ -256,13 +255,6 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
               return p;
             }
           }
-#else
-          const HepMC::ConstGenParticlePtr p = HepMC::barcode_to_particle(pEvt,int(particle_id)); // For HepMC2 "id" == barcode
-          if (p) {
-            m_ptr.set (p);
-            return p;
-          }
-#endif
         }
       }
     } else {
@@ -516,21 +508,21 @@ HepMcParticleLink::retrieveMcEventCollection (const IProxyDict* sg)
 SG::DataProxy* HepMcParticleLink::find_proxy (const IProxyDict* sg)
 {
   const CLID clid = ClassID_traits<McEventCollection>::ID();
-  unsigned int hint_orig = s_hint;
+  unsigned int hint_orig = s_hint.load(std::memory_order_relaxed);
   if (hint_orig >= NKEYS) hint_orig = 0;
   unsigned int hint = hint_orig;
   do {
     SG::DataProxy* proxy = sg->proxy (clid, s_keys[hint]);
     if (proxy) {
-      if (hint != s_hint) {
-        s_hint = hint;
+      if (hint != s_hint.load(std::memory_order_relaxed)) {
+        s_hint.store(hint, std::memory_order_relaxed);
       }
-      static std::atomic<unsigned> findCount {0};
-      if(++findCount == 1) {
+      static std::once_flag log_flag;
+      std::call_once(log_flag, [hint]() {
         MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
         log << MSG::INFO << "find_proxy: Using " << s_keys[hint]
-            <<" as McEventCollection key for this job " << endmsg;
-      }
+            << " as McEventCollection key for this job " << endmsg;
+      });
       return proxy;
     }
     ++hint;

@@ -22,14 +22,14 @@ StatusCode xAODForwardProtonFilter::filterInitialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode xAODForwardProtonFilter::filterEvent()
+StatusCode xAODForwardProtonFilter::filterEvent(const EventContext& ctx)
 {
   bool accepted_A = false;
   bool accepted_C = false;
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
@@ -72,6 +72,6 @@ StatusCode xAODForwardProtonFilter::filterEvent()
     } // end loop on particles
 
   // If we get here the event doesn't pass the criteria
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

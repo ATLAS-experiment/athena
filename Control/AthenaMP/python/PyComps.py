@@ -74,10 +74,6 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
             if use_shared_reader:
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
                 svcMgr.PoolSvc.MaxFilesOpen = 2
-                from AthenaIPCTools.AthenaIPCToolsConf import AthenaSharedMemoryTool
-                svcMgr.EventSelector.SharedMemoryTool = AthenaSharedMemoryTool("EventStreamingTool", SharedMemoryName=f"EventStream{unique_id}")
-                if 'AthenaPoolCnvSvc.ReadAthenaPool' in sys.modules:
-                    svcMgr.AthenaPoolCnvSvc.InputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool", SharedMemoryName=f"InputStream{unique_id}")
             if use_shared_writer:
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
                 if 'AthenaPoolCnvSvc.WriteAthenaPool' in sys.modules:

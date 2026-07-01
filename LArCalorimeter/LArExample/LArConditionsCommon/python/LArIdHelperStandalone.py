@@ -57,6 +57,7 @@ class LArIdHelper:
             pass
         from ROOT import CaloCell_ID
         self._caloHelper=CaloCell_ID(*self._allHelpers)
+        self._caloHelper.initialize_from_dictionary(idd)
         #Note: It's important that all sub-helpers are part of this class. The CaloCell_ID keeps pointers to the individual sub-helpers, 
         #but python's garbage collector doesn't know about this relationship. So it may delete the sub-helpers at any time.
 

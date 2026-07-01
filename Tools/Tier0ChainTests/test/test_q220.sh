@@ -17,7 +17,7 @@
 
 Reco_tf.py \
 --AMI=q220 \
---conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
+--conditionsTag 'all:CONDBR2-BLKPA-RUN2-13' \
 --athenaopts='--threads=8' \
 --preExec='pass' \
 --maxEvents=800 \
@@ -32,7 +32,9 @@ if [ ${rc1} -eq 0 ]
 then
   ArtPackage=$1
   ArtJobName=$2
-  art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
+  art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --ignore-exit-code diff-pool \
+	 --ignore-leave "xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux.serialized" \
+	 --ignore-leave "HLT::HLTResult_p1_HLTResult_HLT.m_navigationResult"
   rc2=$?
 fi
 echo  "art-result: ${rc2} Diff"

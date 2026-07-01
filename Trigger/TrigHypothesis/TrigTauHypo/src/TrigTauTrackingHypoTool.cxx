@@ -31,7 +31,8 @@ bool TrigTauTrackingHypoTool::decide(const ITrigTauTrackingHypoTool::ToolInfo& i
     ATH_MSG_DEBUG("Input RoI eta: " << input.roi->eta() << ", phi: " << input.roi->phi() << ", z: " << input.roi->zed());
 
     // Check the input track collection
-    ATH_MSG_DEBUG("Input Tracks collection has size: " << input.trackParticles->size());
+    if(input.trackParticles) ATH_MSG_DEBUG("Input Tracks collection has size: " << input.trackParticles->size());
+    else ATH_MSG_WARNING("No input Tracks collection!");
 
     // This is (for now) a dummy step, so we return an always passing decision
     return true;

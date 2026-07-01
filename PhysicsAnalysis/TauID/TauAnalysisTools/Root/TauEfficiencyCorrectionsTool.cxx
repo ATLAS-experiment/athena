@@ -76,9 +76,6 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
 
 StatusCode TauEfficiencyCorrectionsTool::firstEvent() 
 {
-  const xAOD::EventInfo* xEventInfo = nullptr;
-  ATH_CHECK(evtStore()->retrieve(xEventInfo, "EventInfo"));
-
   return StatusCode::SUCCESS;
 }
 
@@ -225,14 +222,10 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
     if (iEfficiencyCorrectionType == SFJetIDHadTau)
     {
       if (m_sInputFilePathJetIDHadTau.empty()) {
-        if(m_useFastSim) {
-          ATH_MSG_WARNING("No fast-sim recommendation for Tau RNN, using full sim");
-        }
-
-	if(m_sCampaign=="mc23"){  
-            m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc23_v2.root";
+	if(m_sCampaign=="mc23"){
+	    m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "RNNID_TrueHadTau_mc23_v2_incl_AF3.root" :  sDirectory + "RNNID_TrueHadTau_mc23_v2.root";  	
         } else if (m_sCampaign=="mc20"){
-	    m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_mc20_v1.root";   	
+	    m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "RNNID_TrueHadTau_mc20_v1_incl_AF3.root" :  sDirectory + "RNNID_TrueHadTau_mc20_v1.root";   	
         }
       }
       m_sVarName = "TauScaleFactorJetIDHadTau";

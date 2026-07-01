@@ -12,15 +12,15 @@ def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False,
 
   if writeBS:
     # write BS == read xAOD
-    # Note: this is currently unsupported!!!
-    tool.eEMContainerReadKey   = "L1_eEMxRoI"  if xTOBs else "L1_eEMRoI"
-    tool.eTAUContainerReadKey  = "L1_eTauxRoI" if xTOBs else "L1_eTauRoI"
+    # Input RoI containers come from the TrigCompositeContainer passed by the
+    # Cnv at runtime, so no read-handle properties are needed here.
     tool.eEMContainerWriteKey  = ""
     tool.eTAUContainerWriteKey = ""
+    efex_roi_moduleids = [0x1000,0x1100]
+    tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in efex_roi_moduleids]
+
   else:
     # read BS == write xAOD
-    tool.eEMContainerReadKey   = ""
-    tool.eTAUContainerReadKey  = ""
     if TOBs or xTOBs or multiSlice:
       efex_roi_moduleids = [0x1000,0x1100]
       tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in efex_roi_moduleids]
@@ -42,42 +42,42 @@ def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False,
       tool.ROBIDs += efex_raw_ids
       tool.eTowerContainerWriteKey   = "L1_eFexDataTowers"
 
-  if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
-    if flags.Trigger.doHLT:
-      from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-      monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
-      topDir = "EXPERT"
-      monTool.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;errors', path=topDir, type='TH2I',
-                              title='Decoder Errors;Title;Location',
+    if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
+      if flags.Trigger.doHLT:
+        from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+        monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
+        topDir = "EXPERT"
+        monTool.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;errors', path=topDir, type='TH2I',
+                                title='Decoder Errors;Title;Location',
+                                xbins=1,xmin=0,xmax=1,
+                                ybins=1,ymin=0,ymax=1,
+                                opt=['kCanRebin'],merge="merge")
+        tool.MonTool = monTool
+      else:
+        # if used in offline reconstruction respect DQ convention (ATR-26371)
+        # use L1Calo's special MonitoringCfgHelper
+        from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+        helper = L1CaloMonitorCfgHelper(flags,None,name)
+
+        # could consider getting rid of this first histogram, since all the info should be accessible in the second
+        # will make decision after gaining experience @ P1
+        helper.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;h_efex_errors', type='TH2I',
+                              path="Developer/ByteStreamDecoders",
+                              fillGroup = f'{name}MonTool',
+                              title='eFEX Decoder Errors;Title;Location',
                               xbins=1,xmin=0,xmax=1,
                               ybins=1,ymin=0,ymax=1,
-                              opt=['kCanRebin'],merge="merge")
-      tool.MonTool = monTool
-    else:
-      # if used in offline reconstruction respect DQ convention (ATR-26371)
-      # use L1Calo's special MonitoringCfgHelper
-      from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
-      helper = L1CaloMonitorCfgHelper(flags,None,name)
-
-      # could consider getting rid of this first histogram, since all the info should be accessible in the second
-      # will make decision after gaining experience @ P1
-      helper.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;h_efex_errors', type='TH2I',
-                             path="Developer/ByteStreamDecoders",
-                             fillGroup = f'{name}MonTool',
-                             title='eFEX Decoder Errors;Title;Location',
-                             xbins=1,xmin=0,xmax=1,
-                             ybins=1,ymin=0,ymax=1,
-                             opt=['kCanRebin','kAlwaysCreate'],merge="merge")
-      helper.defineHistogram('lbn,decoderError;h_efex_errors_vs_lbn', type='TH2I',
-                             path="Expert/ByteStreamDecoders",
-                             hanConfig={"algorithm":"Histogram_Empty","description":"Should be empty. Please report any errors to eFEX software experts."},
-                             fillGroup = f'{name}MonTool',
-                             title='eFEX Decoder Errors;LB;Error',
-                             xbins=1,xmin=0,xmax=1,
-                             ybins=1,ymin=0,ymax=1,
-                             opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge="merge")
-      tool.MonTool = helper.fillGroups[f'{name}MonTool']
-      acc.merge(helper.result())
+                              opt=['kCanRebin','kAlwaysCreate'],merge="merge")
+        helper.defineHistogram('lbn,decoderError;h_efex_errors_vs_lbn', type='TH2I',
+                              path="Expert/ByteStreamDecoders",
+                              hanConfig={"algorithm":"Histogram_Empty","description":"Should be empty. Please report any errors to eFEX software experts."},
+                              fillGroup = f'{name}MonTool',
+                              title='eFEX Decoder Errors;LB;Error',
+                              xbins=1,xmin=0,xmax=1,
+                              ybins=1,ymin=0,ymax=1,
+                              opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge="merge")
+        tool.MonTool = helper.fillGroups[f'{name}MonTool']
+        acc.merge(helper.result())
 
 
   acc.setPrivateTools(tool)
@@ -92,13 +92,8 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in jfex_roi_moduleids]
   if writeBS:
     # write BS == read xAOD
-    tool.jJRoIContainerReadKey   = "L1_jFexSRJetxRoI" if xTOBs else "L1_jFexSRJetRoI"
-    tool.jLJRoIContainerReadKey  = "L1_jFexLRJetxRoI" if xTOBs else "L1_jFexLRJetRoI"
-    tool.jTauRoIContainerReadKey = "L1_jFexTauxRoI"   if xTOBs else "L1_jFexTauRoI"
-    tool.jEMRoIContainerReadKey  = "L1_jFexFwdElxRoI" if xTOBs else "L1_jFexFwdElRoI"
-    tool.jTERoIContainerReadKey  = "L1_jFexSumETxRoI" if xTOBs else "L1_jFexSumETRoI"
-    tool.jXERoIContainerReadKey  = "L1_jFexMETxRoI"   if xTOBs else "L1_jFexMETRoI"
-
+    # Input RoI containers come from the TrigCompositeContainer passed by the
+    # Cnv at runtime, so no read-handle properties are needed here.
     tool.jJRoIContainerWriteKey  =""
     tool.jLJRoIContainerWriteKey =""
     tool.jTauRoIContainerWriteKey=""
@@ -107,13 +102,6 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
     tool.jXERoIContainerWriteKey =""
   else:
     # read BS == write xAOD
-    tool.jJRoIContainerReadKey   =""
-    tool.jLJRoIContainerReadKey  =""
-    tool.jTauRoIContainerReadKey =""
-    tool.jEMRoIContainerReadKey  =""
-    tool.jTERoIContainerReadKey  =""
-    tool.jXERoIContainerReadKey  =""
-
     tool.jJRoIContainerWriteKey  = "L1_jFexSRJetxRoI" if xTOBs else "L1_jFexSRJetRoI"
     tool.jLJRoIContainerWriteKey = "L1_jFexLRJetxRoI" if xTOBs else "L1_jFexLRJetRoI"
     tool.jTauRoIContainerWriteKey= "L1_jFexTauxRoI"   if xTOBs else "L1_jFexTauRoI"
@@ -145,32 +133,21 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
   return acc
 
  
-def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
+def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False, TOBs=True):
   acc = ComponentAccumulator()
   tool = CompFactory.gFexByteStreamTool(name)
   gfex_roi_moduleids = [0x3000]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in gfex_roi_moduleids]
   if writeBS:
-    # write BS == read xAOD
-    tool.gFexRhoOutputContainerReadKey                  ="L1_gFexRhoRoI"
-    tool.gFexSRJetOutputContainerReadKey                ="L1_gFexSRJetRoI"
-    tool.gFexLRJetOutputContainerReadKey                ="L1_gFexLRJetRoI"
-    tool.gScalarEJwojOutputContainerReadKey             ="L1_gScalarEJwoj"
-    tool.gEspressoOutputContainerReadKey                ="L1_gEspresso"
-    tool.gMETComponentsJwojOutputContainerReadKey       ="L1_gMETComponentsJwoj"
-    tool.gMHTComponentsJwojOutputContainerReadKey       ="L1_gMHTComponentsJwoj"
-    tool.gMSTComponentsJwojOutputContainerReadKey       ="L1_gMSTComponentsJwoj"
-    tool.gMETComponentsNoiseCutOutputContainerReadKey   ="L1_gMETComponentsNoiseCut"
-    tool.gMETComponentsRmsOutputContainerReadKey        ="L1_gMETComponentsRms"
-    tool.gScalarENoiseCutOutputContainerReadKey         ="L1_gScalarENoiseCut"
-    tool.gScalarERmsOutputContainerReadKey              ="L1_gScalarERms"
-    
-    
+    # write BS == read xAOD; encoder consumes RoIs from the TrigCompositeContainer
+    # pushed in by L1TriggerResultByteStreamCnv, so no per-container ReadHandleKeys
+    # are needed and the WriteHandleKeys are forced empty.
     tool.gFexRhoOutputContainerWriteKey                 =""
     tool.gFexSRJetOutputContainerWriteKey               =""
     tool.gFexLRJetOutputContainerWriteKey               =""
     tool.gScalarEJwojOutputContainerWriteKey            =""
     tool.gEspressoOutputContainerWriteKey               =""
+    tool.gRistrettoOutputContainerWriteKey              =""
     tool.gMETComponentsJwojOutputContainerWriteKey      =""
     tool.gMHTComponentsJwojOutputContainerWriteKey      =""
     tool.gMSTComponentsJwojOutputContainerWriteKey      =""
@@ -180,32 +157,22 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
     tool.gScalarERmsOutputContainerWriteKey             =""
   else:
     # read BS == write xAOD
-    tool.gFexRhoOutputContainerReadKey                  =""
-    tool.gFexSRJetOutputContainerReadKey                =""
-    tool.gFexLRJetOutputContainerReadKey                =""
-    tool.gScalarEJwojOutputContainerReadKey             =""
-    tool.gEspressoOutputContainerReadKey                =""
-    tool.gMETComponentsJwojOutputContainerReadKey       =""
-    tool.gMHTComponentsJwojOutputContainerReadKey       =""
-    tool.gMSTComponentsJwojOutputContainerReadKey       =""
-    tool.gMETComponentsNoiseCutOutputContainerReadKey   =""
-    tool.gMETComponentsRmsOutputContainerReadKey        =""
-    tool.gScalarENoiseCutOutputContainerReadKey         =""
-    tool.gScalarERmsOutputContainerReadKey              =""
-    
-    
-    tool.gFexRhoOutputContainerWriteKey                 ="L1_gFexRhoRoI"
-    tool.gFexSRJetOutputContainerWriteKey               ="L1_gFexSRJetRoI"
-    tool.gFexLRJetOutputContainerWriteKey               ="L1_gFexLRJetRoI"
-    tool.gScalarEJwojOutputContainerWriteKey            ="L1_gScalarEJwoj"
+    # When TOBs=False, standard L1A containers are disabled (empty write keys).
+    # They are already provided by the HLT result deserialiser.
+    # Only gEspresso, gRistretto and multi-slice (OutOfTime) containers are decoded.
+    tool.gFexRhoOutputContainerWriteKey                 ="L1_gFexRhoRoI" if TOBs else ""
+    tool.gFexSRJetOutputContainerWriteKey               ="L1_gFexSRJetRoI" if TOBs else ""
+    tool.gFexLRJetOutputContainerWriteKey               ="L1_gFexLRJetRoI" if TOBs else ""
+    tool.gScalarEJwojOutputContainerWriteKey            ="L1_gScalarEJwoj" if TOBs else ""
     tool.gEspressoOutputContainerWriteKey               ="L1_gEspresso"
-    tool.gMETComponentsJwojOutputContainerWriteKey      ="L1_gMETComponentsJwoj"
-    tool.gMHTComponentsJwojOutputContainerWriteKey      ="L1_gMHTComponentsJwoj"
-    tool.gMSTComponentsJwojOutputContainerWriteKey      ="L1_gMSTComponentsJwoj"
-    tool.gMETComponentsNoiseCutOutputContainerWriteKey  ="L1_gMETComponentsNoiseCut"
-    tool.gMETComponentsRmsOutputContainerWriteKey       ="L1_gMETComponentsRms"
-    tool.gScalarENoiseCutOutputContainerWriteKey        ="L1_gScalarENoiseCut"
-    tool.gScalarERmsOutputContainerWriteKey             ="L1_gScalarERms"
+    tool.gRistrettoOutputContainerWriteKey              ="L1_gRistretto"
+    tool.gMETComponentsJwojOutputContainerWriteKey      ="L1_gMETComponentsJwoj" if TOBs else ""
+    tool.gMHTComponentsJwojOutputContainerWriteKey      ="L1_gMHTComponentsJwoj" if TOBs else ""
+    tool.gMSTComponentsJwojOutputContainerWriteKey      ="L1_gMSTComponentsJwoj" if TOBs else ""
+    tool.gMETComponentsNoiseCutOutputContainerWriteKey  ="L1_gMETComponentsNoiseCut" if TOBs else ""
+    tool.gMETComponentsRmsOutputContainerWriteKey       ="L1_gMETComponentsRms" if TOBs else ""
+    tool.gScalarENoiseCutOutputContainerWriteKey        ="L1_gScalarENoiseCut" if TOBs else ""
+    tool.gScalarERmsOutputContainerWriteKey             ="L1_gScalarERms" if TOBs else ""
 
     # Multi-slice containers (out-of-time TOBs from slices 1,2)
     if multiSlice:
@@ -220,6 +187,8 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
       tool.gMSTComponentsJwojSliceContainerWriteKey    ="L1_gMSTComponentsJwojOutOfTime"
       # Global TOBs - gEspresso
       tool.gEspressoSliceContainerWriteKey             ="L1_gEspressoOutOfTime"
+      # Global TOBs - gRistretto
+      tool.gRistrettoSliceContainerWriteKey            ="L1_gRistrettoOutOfTime"
       # Global TOBs - NoiseCut
       tool.gMETComponentsNoiseCutSliceContainerWriteKey="L1_gMETComponentsNoiseCutOutOfTime"
       tool.gScalarENoiseCutSliceContainerWriteKey      ="L1_gScalarENoiseCutOutOfTime"

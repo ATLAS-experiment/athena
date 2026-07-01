@@ -43,7 +43,7 @@ public:
   StatusCode initialize(); 
 
   virtual StatusCode bookHistogramsRecurrent();
-  virtual StatusCode fillHistograms();
+  virtual StatusCode fillHistograms(const EventContext& ctx);
   virtual StatusCode procHistograms();
    
  private:

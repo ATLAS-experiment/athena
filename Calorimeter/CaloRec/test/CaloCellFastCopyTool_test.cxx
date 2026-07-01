@@ -47,7 +47,7 @@ class DummyAlgorithm: public AthAlgorithm {
         : AthAlgorithm(name, svcloc) {
     }
 
-    virtual StatusCode execute() {
+    virtual StatusCode execute(const EventContext&) {
       return StatusCode::SUCCESS;
     }
 
@@ -813,8 +813,13 @@ int main (int /*argc*/, char** argv)
 {
   Athena_test::setupStoreGate (argv[0]);
 
-  CaloHelper helper;
-  test1 (helper);
+  try {
+    CaloHelper helper;
+    test1 (helper);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }

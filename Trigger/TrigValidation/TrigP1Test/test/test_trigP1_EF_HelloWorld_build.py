@@ -3,7 +3,7 @@
 
 # art-description: HelloWorld in AthenaEF
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # Skipping art-output which has no effect for build tests.
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps

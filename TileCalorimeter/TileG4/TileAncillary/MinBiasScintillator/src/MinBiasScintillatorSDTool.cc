@@ -10,7 +10,10 @@
 //************************************************************
 
 #include "MinBiasScintillatorSDTool.h"
+
+#include "HitManagement/HitCollectionMap.h"
 #include "MinBiasScintillatorSD.h"
+#include "TileSimEvent/TileHitVector.h"
 
 MinBiasScintillatorSDTool::MinBiasScintillatorSDTool(const std::string& type, const std::string& name, const IInterface *parent)
   : SensitiveDetectorBase( type , name , parent )
@@ -37,20 +40,17 @@ G4VSensitiveDetector* MinBiasScintillatorSDTool::makeSD() const
   return new MinBiasScintillatorSD(name(), m_outputCollectionNames[0], m_options);
 }
 
-StatusCode MinBiasScintillatorSDTool::Gather()
+StatusCode MinBiasScintillatorSDTool::SetupEvent(HitCollectionMap& hitCollections)
 {
-  ATH_MSG_VERBOSE( "Gather()" );
-  if(!getSD()) {
-    ATH_MSG_ERROR ("Gather: MinBiasScintillatorSD never created!");
-    return StatusCode::FAILURE;
-  } else {
-    MinBiasScintillatorSD *localSD = dynamic_cast<MinBiasScintillatorSD*>(getSD());
-    if(!localSD){
-      ATH_MSG_ERROR ("Gather: Failed to cast m_SD into MinBiasScintillatorSD.");
-      return StatusCode::FAILURE;
-    }
-    localSD->EndOfAthenaEvent();
-  }
+  ATH_MSG_VERBOSE( "SetupEvent()" );
+  hitCollections.Emplace<MinBiasScintillatorSD::HitVectorBuilder>(m_outputCollectionNames[0], m_outputCollectionNames[0]);
   return StatusCode::SUCCESS;
 }
 
+StatusCode MinBiasScintillatorSDTool::Gather(HitCollectionMap& hitCollections)
+{
+  ATH_MSG_VERBOSE( "Gather()" );
+  return hitCollections.TransformAndRecord<TileHitVector>(m_outputCollectionNames[0], [](TileHitVector& hits) {
+    static_cast<MinBiasScintillatorSD::HitVectorBuilder&>(hits).Finalize();
+  });
+}

@@ -28,7 +28,7 @@ namespace MuonR4{
                                                               const SG::WriteHandleKey<DigitCont>& key,
                                                               OutDigitCache_t<DigitColl>&& digitCache,
                                                               unsigned int hashMax) const {
-        SG::WriteHandle<DigitCont> writeHandle{key, ctx};
+        SG::WriteHandle writeHandle{key, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<DigitCont>(hashMax)));
         for (size_t coll_hash = 0; coll_hash < digitCache.size(); ++coll_hash) {
             if (digitCache[coll_hash] && digitCache[coll_hash]->size()) {

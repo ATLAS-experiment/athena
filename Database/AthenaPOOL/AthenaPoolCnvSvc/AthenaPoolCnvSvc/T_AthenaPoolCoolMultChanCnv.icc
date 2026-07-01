@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file T_AthenaPoolCoolMultChanCnv.icc
@@ -24,10 +24,8 @@
 #include "AthenaKernel/StorableConversions.h"
 
 #include "CxxUtils/checker_macros.h"
-
+#include "CxxUtils/HexString.h"
 #include <exception>
-#include <string>
-#include <format>
 
 //__________________________________________________________________________
 template <class COLL_T, class ELEM_T, class ELEM_P>
@@ -146,32 +144,32 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::objectToAttrListColl ATLAS_
     typename COLL_T::chan_const_iterator itChan = obj->chan_begin();
     typename COLL_T::iov_const_iterator  itIOV  = obj->iov_begin();
     std::string token_str;
-    std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
+    static const std::string  poolRefStr{"PoolRef"};
+    static const std::string  dataTypeStr{"string"};
     for (unsigned int chan = 0; chan < obj->size(); ++chan, ++itChan) {
-	ELEM_T* elem = (*obj)[chan];
-        // Allow for T/P separation, convert to persistent object
-        ELEM_P* elem_p = this->createPersistent(elem);
-        std::unique_ptr<Token> token;
-	StatusCode sc = this->objectToPool(elem_p, token, "", *pAddr->par());
-	if (sc != StatusCode::SUCCESS || !token) {
-	    ATH_MSG_ERROR("Unable to write out object");
-	    return(StatusCode::FAILURE);
-	}
-        token_str = token->toString();
-
-	// Create a new AthenaAttributeList
-	AthenaAttributeList attrList;
-        attrList.extend("PoolRef","string");
-	attrList["PoolRef"].setValue( token_str );
-	attrListColl->add((*itChan), attrList);
-	if (hasIOVs) {
-	    attrListColl->add((*itChan), (*itIOV));
-	    ++itIOV;
-	}
-	ATH_MSG_DEBUG("Adding new attrList for token: " << token_str);
-
-	// Save as well in implementation
-	impl->add(token_str);
+      ELEM_T* elem = (*obj)[chan];
+      // Allow for T/P separation, convert to persistent object
+      ELEM_P* elem_p = this->createPersistent(elem);
+      std::unique_ptr<Token> token;
+      StatusCode sc = this->objectToPool(elem_p, token, "", *pAddr->par());
+      if (sc != StatusCode::SUCCESS || !token) {
+        ATH_MSG_ERROR("Unable to write out object");
+        return(StatusCode::FAILURE);
+      }
+      token_str = token->toString();
+      
+      // Create a new AthenaAttributeList
+      AthenaAttributeList attrList;
+      attrList.extend(poolRefStr,dataTypeStr);
+      attrList[poolRefStr].setValue( token_str );
+      attrListColl->add((*itChan), attrList);
+      if (hasIOVs) {
+        attrListColl->add((*itChan), (*itIOV));
+        ++itIOV;
+      }
+	    ATH_MSG_DEBUG("Adding new attrList for token: " << token_str);
+	    // Save as well in implementation
+	    impl->add(token_str);
     }
 
     // Print out tokens
@@ -245,7 +243,7 @@ StatusCode
 T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::attrListCollToObject(CondAttrListCollection* attrListColl,
 								  COLL_T*& obj)
 {
-
+    using CxxUtils::HexString;
     ATH_MSG_DEBUG("Creating a collection from a CondAttrListCollection");
 
     // Create collection
@@ -271,6 +269,8 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::attrListCollToObject(CondAt
     CondAttrListCollection::const_iterator      it    = attrListColl->begin();
     CondAttrListCollection::const_iterator      last  = attrListColl->end();
     CondAttrListCollection::iov_const_iterator  itIOV = attrListColl->iov_begin();
+    Token poolToken;
+    auto context = HexString<"[CTXT={}]">(m_persCtx);
     for (; it != last; ++it, ++itIOV) {
 	try {
 	    // pool token/ref
@@ -284,11 +284,8 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::attrListCollToObject(CondAt
 	}
         // Allow T/P separation - set token and use createTransient
         ELEM_T* elem {nullptr};
-        {
-           std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
-           this->setToken( token );
-           elem = this->createTransient();
-        }
+        poolToken.fromString(token + context);
+        elem = this->createTransient(&poolToken);
 	// Add elem, channel number and IOV
 	obj->push_back(elem);
 	obj->add((*it).first);
@@ -319,10 +316,11 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::condMultChanCollImplToObjec
     ELEM_T* elem = 0;
 
     // Read in the CondMultChanCollImpl
-    std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
     CondMultChanCollImpl* impl = 0;
-    this->setToken(collImplToken);
-    StatusCode sc = this->poolToObject(this->m_i_poolToken, impl);
+    Token poolToken;
+    auto context = CxxUtils::HexString<"[CTXT={}]">(m_persCtx);
+    poolToken.fromString(collImplToken + context);
+    StatusCode sc = this->poolToObject(&poolToken, impl);
     if (sc != StatusCode::SUCCESS) {
 	ATH_MSG_ERROR("Unable to read in CondMultChanCollImpl");
 	return(StatusCode::FAILURE);
@@ -343,10 +341,9 @@ T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::condMultChanCollImplToObjec
     CondMultChanCollImpl::iov_const_iterator   itIOV   = impl->iov_begin();
     CondMultChanCollImpl::token_const_iterator itToken = impl->token_begin();
     for (unsigned int i = 0; i < impl->chan_size(); ++i, ++itChan, ++itIOV, ++itToken) {
-
-        // Allow T/P separation - set token and use createTransient
-        this->setToken( *itToken );
-        elem = this->createTransient();
+        // Allow T/P separation
+        poolToken.fromString(*itToken + context);
+        elem = this->createTransient(&poolToken);
 
 	// Add elem, channel number and IOV
 	obj->push_back(elem);
@@ -386,9 +383,9 @@ StatusCode T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::persToTrans(COLL
 template <class COLL_T, class ELEM_T, class ELEM_P>
 template <class P>
 inline
-P* T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::poolReadObject() {
+P* T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::poolReadObject(const Token* token) {
    P* persObj = 0;
-   if( this->poolToObject( this->m_i_poolToken , persObj ).isFailure() ) {
+   if( this->poolToObject( token , persObj ).isFailure() ) {
       throw std::runtime_error("POOL read failed");
    }
    return(persObj);
@@ -399,9 +396,9 @@ P* T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::poolReadObject() {
 // plus reading of all extending objects
 template <class COLL_T, class ELEM_T, class ELEM_P>
 inline
-ELEM_T* T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::poolReadObject() {
+ELEM_T* T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::poolReadObject(const Token* token) {
    ELEM_T* persObj = 0;
-   if( this->poolToObject( this->m_i_poolToken , persObj ).isFailure() ) {
+   if( this->poolToObject( token, persObj ).isFailure() ) {
       throw std::runtime_error("POOL read failed");
    }
    return(persObj);
@@ -418,25 +415,11 @@ ELEM_P* T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::createPersistent(EL
 
 //__________________________________________________________________________
 template <class COLL_T, class ELEM_T, class ELEM_P>
-ELEM_T* T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::createTransient()
+ELEM_T* T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::createTransient(const Token* token)
 {
     // Default version - no T/P separation. We read in transient
     // object
     //ELEM_T* elem = 0;
-    ELEM_T* elem = this->poolReadObject();
+    ELEM_T* elem = this->poolReadObject(token);
     return(elem);
-}
-
-//__________________________________________________________________________
-/// specialized version that adds persistency contextID to tokens (for reading)
-template <class COLL_T, class ELEM_T, class ELEM_P>
-void
-T_AthenaPoolCoolMultChanCnv<COLL_T, ELEM_T, ELEM_P>::
-setToken (const std::string& token)
-{
-   char context[32];
-   const std::string contextStr = std::format("[CTXT={:08X}]", m_persCtx);
-   std::strncpy(context, contextStr.c_str(), sizeof(context) - 1);
-   context[sizeof(context) - 1] = '\0';
-   T_AthenaPoolCustCnv<COLL_T, ELEM_T>::setToken( token + context );
 }

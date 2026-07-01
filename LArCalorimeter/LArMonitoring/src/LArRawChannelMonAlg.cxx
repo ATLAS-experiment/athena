@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawChannelMonAlg.h"
@@ -20,12 +20,13 @@
 #include "AthenaKernel/Units.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "CaloConditions/CaloNoise.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
 #include <complex>
+#include <format>
+#include <tuple>
 
 using namespace std::complex_literals;
 
@@ -44,7 +45,7 @@ enum : int8_t {
   UNDEF = -1
 };
 
-constexpr unsigned numberOfSlotsPerFeedthrough(int8_t det) {
+constexpr unsigned numberOfSlotsPerFeedthrough(std::size_t det) {
   bool b{det == ::EMBA || det == ::EMBC};
   return b ? 14 : 15;
 }
@@ -168,7 +169,7 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
   const bool is_atlas_ready = std::all_of(
       m_atlasReady_tools.begin(),
       m_atlasReady_tools.end(),
-      [](auto &f) { return f->accept(); });
+      [&ctx](auto &f) { return f->accept(ctx); });
 
   SG::ReadHandle<xAOD::EventInfo> event_info{GetEventInfo(ctx)};
   int bcid{0}, lumi_block{0};
@@ -204,11 +205,11 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
   std::array<uint32_t, ::NDETECTORS> det_n_badQ_channels{};
   using wsum_t = std::complex<double>;
   wsum_t event_mean_time{};
-  std::array<wsum_t, ::NDETECTORS> mean_detector_times;
+  std::array<wsum_t, ::NDETECTORS> mean_detector_times{};
   std::vector<wsum_t> mean_feb_times(m_feb_hash_to_detector.size(), 0.);
   std::array<double, ::NDETECTORS> per_detector_total_energy{};
   int8_t lastdet{::UNDEF};
-  ToolHandle<GenericMonitoringTool> monitoring{nullptr};
+  const ToolHandle<GenericMonitoringTool>* monitoring{nullptr};
   SG::ReadCondHandle<CaloNoise> noiseH{m_noiseKey, ctx};
   SG::ReadCondHandle<LArBadChannelCont> bcContH{m_bcContKey, ctx};
   SG::ReadCondHandle<LArOnOffIdMapping> cablingH{m_cablingKey, ctx};
@@ -258,7 +259,7 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
       det = m_feb_hash_to_detector.at(feb_hash);
       if (det != lastdet) {
         if (det >= 0 && det < ::NDETECTORS) {
-          monitoring = m_tools[m_monitoring_tool_index[det]];
+          monitoring = &m_tools[m_monitoring_tool_index[det]];
         } else {
           monitoring = nullptr;
         }
@@ -288,9 +289,12 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
       ATH_MSG_WARNING("channel offline id undefined ... skipping");
       continue; // skip this channel
     }
-
+    if ( det <0 or det >= NDETECTORS)[[unlikely]]{
+      ATH_MSG_WARNING(std::format("Subdetector index {} out of range of the arrays.", det));
+      continue; // skip this channel
+    }
     // Fill per-detector histograms ---
-    if (m_monitor_detectors && monitoring) {
+    if (m_monitor_detectors && monitoring ) {
       bool noisy_pos{significance > m_pos_noise_thresholds[det]};
       bool noisy_neg{-significance > m_neg_noise_thresholds[det]};
       per_detector_total_energy[det] += energy;
@@ -311,7 +315,7 @@ StatusCode LArRawChannelMonAlg::fillHistograms(const EventContext &ctx) const
                         && noisy_neg && is_atlas_ready);
       dqm_qual = 100 * (bad_quality && is_atlas_ready
                         && !larNoisyROAlgInTimeW_flag);
-      fill(monitoring, dqm_superslot, dqm_channel,
+      fill(*monitoring, dqm_superslot, dqm_channel,
            dqmf_occ, dqmf_sig, dqm_energy, dqm_gain,
            dqm_posn, dqm_negn, dqm_qual);
 

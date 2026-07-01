@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Header: /build/atlas/cvs/atlas/offline/Calorimeter/CaloIdentifier/test/test_calo_dm_id.cxx,v 1.6 2006-05-18 11:38:04 fledroit Exp $ 
   
 #include "IdDictParser/IdDictParser.h"  
 #include "Identifier/IdentifierHash.h" 
@@ -336,14 +335,14 @@ int main (int argc, char* argv[])
     IdDictMgr& idd = parser.parse (argv[1]);  
     std::cout << "got dict mgr " << std::endl;
 
-    check_lar_dm_id_decoding(idd);
-    check_tile_dm_id_decoding(idd);
-     
+    try {
+      check_lar_dm_id_decoding(idd);
+      check_tile_dm_id_decoding(idd);
+    }
+    catch (const std::exception& e) {
+      std::cerr << "Caught exception: " << e.what() << "\n";
+      return 1;
+    }
+
     return 0;  
 }  
-  
- 
- 
- 
- 
- 

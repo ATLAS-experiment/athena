@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -29,22 +29,7 @@
 #include <ctime>
 
 namespace LVL1 {
-  
-  
-  // default constructor for persistency
 
-  jFEXSysSim::jFEXSysSim(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent)
-  {
-    declareInterface<IjFEXSysSim>(this);
-
-  }
-
-    
-  /** Destructor */
-  //jFEXSysSim::~jFEXSysSim()
-  //{
-  //}
 
   //================ Initialisation =================================================
 
@@ -104,9 +89,9 @@ namespace LVL1 {
     return ((64*eta) + phi + mod);
   }
 
-  StatusCode jFEXSysSim::execute(jFEXOutputCollection* inputOutputCollection)  {    
+  StatusCode jFEXSysSim::execute(const EventContext& ctx, jFEXOutputCollection* inputOutputCollection)  {
 
-    SG::ReadHandle<LVL1::jTowerContainer> this_jTowerContainer(m_jTowerContainerSGKey/*,ctx*/);
+    SG::ReadHandle<LVL1::jTowerContainer> this_jTowerContainer(m_jTowerContainerSGKey, ctx);
     if(!this_jTowerContainer.isValid()){
       ATH_MSG_ERROR("Could not retrieve jTowerContainer " << m_jTowerContainerSGKey.key());
       return StatusCode::FAILURE;
@@ -159,13 +144,13 @@ namespace LVL1 {
     int embEta = 13; int embPhi = 0; int embMod = 100000;
     int initialEMB = calcTowerID(embEta,embPhi,embMod); //100832
 
-    SG::ReadCondHandle<jFEXDBCondData> myDBTool = SG::ReadCondHandle<jFEXDBCondData>( m_DBToolKey/*, ctx*/ );
+    SG::ReadCondHandle<jFEXDBCondData> myDBTool = SG::ReadCondHandle<jFEXDBCondData>( m_DBToolKey, ctx );
     if (!myDBTool.isValid()){
         ATH_MSG_ERROR("Not able to read " << m_DBToolKey );
         return StatusCode::FAILURE;
     }
     
-    unsigned int evtTimeStamp = Gaudi::Hive::currentContext().eventID().time_stamp();
+    unsigned int evtTimeStamp = ctx.eventID().time_stamp();
     
     uint8_t thisJFEX = 0;
     // jFEX 0
@@ -178,6 +163,7 @@ namespace LVL1 {
     tmp_jTowersColl_subset_ENDCAP_AND_EMB_AND_FCAL.reserve(1600);
 
     // let's try doing this with an array initially just containing tower IDs.
+    //coverity[STACK_USE]
     int tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL [2*FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width];
 
     // zero the matrix out
@@ -756,6 +742,8 @@ namespace LVL1 {
     std::unordered_map<int,jTower> tmp_jTowersColl_subset_ENDCAP_AND_EMB_AND_FCAL_2;
 
     // let's try doing this with an array initially just containing tower IDs.
+    //uses 11520 bytes of stack space
+    //coverity[STACK_USE]
     int tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL_2 [2*FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width];
 
     // zero the matrix out
@@ -891,7 +879,7 @@ namespace LVL1 {
     
     //Reading the Trigger menu to send the jFEX Resolution to the EDMs
     
-    SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
+    SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey, ctx);
 
     const int jFwdElResolution = l1Menu->thrExtraInfo().jEM().resolutionMeV();
 
@@ -900,20 +888,20 @@ namespace LVL1 {
     std::unique_ptr< xAOD::jFexSRJetRoIAuxContainer > tobAuxContainer_jJ = std::make_unique<xAOD::jFexSRJetRoIAuxContainer> ();
     tobContainer_jJ->setStore(tobAuxContainer_jJ.get());
     
-    SG::WriteDecorHandle<xAOD::jFexSRJetRoIContainer, int > tobDec_jJ_seedET (m_TobDecorKey_jJ_seedET);
+    SG::WriteDecorHandle<xAOD::jFexSRJetRoIContainer, int > tobDec_jJ_seedET (m_TobDecorKey_jJ_seedET, ctx);
     
     auto xtobContainer_jJ = std::make_unique<xAOD::jFexSRJetRoIContainer> ();
     std::unique_ptr< xAOD::jFexSRJetRoIAuxContainer > xtobAuxContainer_jJ = std::make_unique<xAOD::jFexSRJetRoIAuxContainer> ();
     xtobContainer_jJ->setStore(xtobAuxContainer_jJ.get());
     
-    SG::WriteDecorHandle<xAOD::jFexSRJetRoIContainer, int > xtobDec_jJ_seedET (m_xTobDecorKey_jJ_seedET);
+    SG::WriteDecorHandle<xAOD::jFexSRJetRoIContainer, int > xtobDec_jJ_seedET (m_xTobDecorKey_jJ_seedET, ctx);
 
     
-    SG::WriteHandle<xAOD::jFexSRJetRoIContainer> output_Tob_jJ(m_TobOutKey_jJ/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexSRJetRoIContainer> output_Tob_jJ(m_TobOutKey_jJ, ctx);
     ATH_MSG_DEBUG("  write: " << output_Tob_jJ.key() << " = " << "..." );
     ATH_CHECK(output_Tob_jJ.record(std::move(tobContainer_jJ),std::move(tobAuxContainer_jJ)));
     
-    SG::WriteHandle<xAOD::jFexSRJetRoIContainer> output_xTob_jJ(m_xTobOutKey_jJ/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexSRJetRoIContainer> output_xTob_jJ(m_xTobOutKey_jJ, ctx);
     ATH_MSG_DEBUG("  write: " << output_xTob_jJ.key() << " = " << "..." );
     ATH_CHECK(output_xTob_jJ.record(std::move(xtobContainer_jJ),std::move(xtobAuxContainer_jJ)));
     
@@ -951,11 +939,11 @@ namespace LVL1 {
     xtobContainer_jLJ->setStore(xtobAuxContainer_jLJ.get());
     
 
-    SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_Tob_jLJ(m_TobOutKey_jLJ/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_Tob_jLJ(m_TobOutKey_jLJ, ctx);
     ATH_MSG_DEBUG("  write: " << output_Tob_jLJ.key() << " = " << "..." );
     ATH_CHECK(output_Tob_jLJ.record(std::move(tobContainer_jLJ),std::move(tobAuxContainer_jLJ)));
 
-    SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_xTob_jLJ(m_xTobOutKey_jLJ/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexLRJetRoIContainer_v1> output_xTob_jLJ(m_xTobOutKey_jLJ, ctx);
     ATH_MSG_DEBUG("  write: " << output_xTob_jLJ.key() << " = " << "..." );
     ATH_CHECK(output_xTob_jLJ.record(std::move(xtobContainer_jLJ),std::move(xtobAuxContainer_jLJ)));
 
@@ -991,11 +979,11 @@ namespace LVL1 {
     std::unique_ptr< xAOD::jFexTauRoIAuxContainer > xtobAuxContainer_jTau = std::make_unique<xAOD::jFexTauRoIAuxContainer> ();
     xtobContainer_jTau->setStore(xtobAuxContainer_jTau.get());
     
-    SG::WriteHandle<xAOD::jFexTauRoIContainer_v1> output_Tob_jTau(m_TobOutKey_jTau/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexTauRoIContainer_v1> output_Tob_jTau(m_TobOutKey_jTau, ctx);
     ATH_MSG_DEBUG("  write: " << output_Tob_jTau.key() << " = " << "..." );
     ATH_CHECK(output_Tob_jTau.record(std::move(tobContainer_jTau),std::move(tobAuxContainer_jTau)));
 
-    SG::WriteHandle<xAOD::jFexTauRoIContainer_v1> output_xTob_jTau(m_xTobOutKey_jTau/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexTauRoIContainer_v1> output_xTob_jTau(m_xTobOutKey_jTau, ctx);
     ATH_MSG_DEBUG("  write: " << output_xTob_jTau.key() << " = " << "..." );
     ATH_CHECK(output_xTob_jTau.record(std::move(xtobContainer_jTau),std::move(xtobAuxContainer_jTau)));
         
@@ -1031,11 +1019,11 @@ namespace LVL1 {
     std::unique_ptr< xAOD::jFexFwdElRoIAuxContainer > xtobAuxContainer_jEM = std::make_unique<xAOD::jFexFwdElRoIAuxContainer> ();
     xtobContainer_jEM->setStore(xtobAuxContainer_jEM.get());
 
-    SG::WriteHandle<xAOD::jFexFwdElRoIContainer_v1> output_Tob_jEM(m_TobOutKey_jEM/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexFwdElRoIContainer_v1> output_Tob_jEM(m_TobOutKey_jEM, ctx);
     ATH_MSG_DEBUG("  write: " << output_Tob_jEM.key() << " = " << "..." );
     ATH_CHECK(output_Tob_jEM.record(std::move(tobContainer_jEM),std::move(tobAuxContainer_jEM)));
 
-    SG::WriteHandle<xAOD::jFexFwdElRoIContainer_v1> output_xTob_jEM(m_xTobOutKey_jEM/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexFwdElRoIContainer_v1> output_xTob_jEM(m_xTobOutKey_jEM, ctx);
     ATH_MSG_DEBUG("  write: " << output_xTob_jEM.key() << " = " << "..." );
     ATH_CHECK(output_xTob_jEM.record(std::move(xtobContainer_jEM),std::move(xtobAuxContainer_jEM)));
     
@@ -1073,7 +1061,7 @@ namespace LVL1 {
     std::unique_ptr< xAOD::jFexSumETRoIAuxContainer > tobAuxContainer_jTE = std::make_unique<xAOD::jFexSumETRoIAuxContainer> ();
     tobContainer_jTE->setStore(tobAuxContainer_jTE.get());    
     
-    SG::WriteHandle<xAOD::jFexSumETRoIContainer_v1> output_Tob_jTE(m_TobOutKey_jTE/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexSumETRoIContainer_v1> output_Tob_jTE(m_TobOutKey_jTE, ctx);
     ATH_MSG_DEBUG("  write: " << output_Tob_jTE.key() << " = " << "..." );
     ATH_CHECK(output_Tob_jTE.record(std::move(tobContainer_jTE),std::move(tobAuxContainer_jTE)));    
     
@@ -1089,7 +1077,7 @@ namespace LVL1 {
     std::unique_ptr< xAOD::jFexMETRoIAuxContainer > tobAuxContainer_jXE = std::make_unique<xAOD::jFexMETRoIAuxContainer> ();
     tobContainer_jXE->setStore(tobAuxContainer_jXE.get());    
 
-    SG::WriteHandle<xAOD::jFexMETRoIContainer_v1> output_Tob_jXE(m_TobOutKey_jXE/*, ctx*/);
+    SG::WriteHandle<xAOD::jFexMETRoIContainer_v1> output_Tob_jXE(m_TobOutKey_jXE, ctx);
     ATH_MSG_DEBUG("  write: " << output_Tob_jXE.key() << " = " << "..." );
     ATH_CHECK(output_Tob_jXE.record(std::move(tobContainer_jXE),std::move(tobAuxContainer_jXE)));   
 

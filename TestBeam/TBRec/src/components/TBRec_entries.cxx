@@ -1,5 +1,3 @@
-#include "../TBAlgoSequencer.h"
-
 #include "../TBXMLWriter.h"
 #include "../TBXMLEventWriterTool.h"
 #include "../TBXMLCaloCellWriterTool.h"
@@ -49,7 +47,6 @@
 #include "../TBTrackToCaloAlg.h"
 
 DECLARE_COMPONENT( TBXMLWriter )
-DECLARE_COMPONENT( TBAlgoSequencer )
 DECLARE_COMPONENT( TBBPCRec )
 DECLARE_COMPONENT( TBMWPCRec )
 DECLARE_COMPONENT( TBScintillatorRec )

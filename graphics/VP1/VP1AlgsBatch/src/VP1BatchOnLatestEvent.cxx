@@ -50,10 +50,10 @@ StatusCode VP1BatchOnLatestEvent::initialize()
 	return StatusCode::SUCCESS;
 }
 
-StatusCode VP1BatchOnLatestEvent::execute()
+StatusCode VP1BatchOnLatestEvent::execute(const EventContext& ctx)
 {
         ATH_MSG_DEBUG(" in execute() ");
-	SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+	SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
 	if(eventInfo.isValid()) {
 	  m_eventNumber = eventInfo->eventNumber();
 	  m_runNumber = eventInfo->runNumber();

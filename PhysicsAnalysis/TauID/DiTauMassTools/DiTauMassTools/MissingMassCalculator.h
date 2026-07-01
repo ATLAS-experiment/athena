@@ -92,14 +92,11 @@ class MissingMassCalculator {
 
   bool m_debugThisIteration, m_lfvLeplepRefit, m_SaveLlhHisto;
   
-  int m_nCallprobCalculatorV9fast;
-  
   double m_nsigma_METscan{},m_nsigma_METscan2{},m_nsigma_METscan_ll{};
   double m_nsigma_METscan_lh{},m_nsigma_METscan_hh{},m_nsigma_METscan_lfv_ll{};
   double m_nsigma_METscan_lfv_lh{}, m_beamEnergy{}; // number of sigmas for MET-scan
 
   int m_iter1{},m_iter2{},m_iter3{},m_iter4{},m_iter5{},m_iang1low{},m_iang1high{},m_iang2low{},m_iang2high{};
-  int m_iterTheta3d{};
   
   double m_prob_tmp{};
   
@@ -137,8 +134,6 @@ class MissingMassCalculator {
   double m_proposalTryMEt{};
   double m_ProposalTryPhi{};
   double m_ProposalTryMnu{};
-  double m_ProposalTryEtau{};
-
 
   double m_mTau{},m_mTau2{};
   double m_MEtL{},m_MEtP{},m_Phi1{},m_Phi2{},m_Mnu1{},m_Mnu2{};
@@ -194,7 +189,6 @@ class MissingMassCalculator {
   double m_Ev2{};
   double m_Ev1{};
   double m_Mvis{},m_Meff{};
-  bool m_reRunWithBestMET{};
   
   //--- define histograms for histogram method
   //--- upper limits need to be revisied in the future!!! It may be not enough for some analyses
@@ -257,8 +251,6 @@ class MissingMassCalculator {
   int m_RMSStop{};
   int m_RndmSeedAltering{}; // reset seed (not necessary by default)
 
-  double m_dTheta3d_binMin{}; // minimal step size for dTheta3D
-  double m_dTheta3d_binMax{}; // maximum step size for dTheta3D
   double m_dRmax_tau{}; // maximum dR(nu-visTau)
 
   double m_MnuScanRange{}; // range of M(nunu) scan; M(nunu) range can be affected by selection cuts
@@ -353,8 +345,6 @@ public:
   void SetRMSStop(const int val) { m_RMSStop=val;}
   void SetMeanbinStop(const double val) {m_meanbinStop=val;}
   void SetRndmSeedAltering(const int val) { m_RndmSeedAltering=val; } // number of iterations per loop in Mnu loop
-  void SetdTheta3d_binMax(const double val) { m_dTheta3d_binMax=val; } // maximum step size for dTheta3D
-  void SetdTheta3d_binMin(const double val) { m_dTheta3d_binMin=val; } // minimal step size for dTheta3D
   void SetEventNumber(const int eventNumber) { m_eventNumber = eventNumber; }
 
   void SetMnuScanRange(const double val) { m_MnuScanRange=val; }
@@ -362,7 +352,6 @@ public:
   void SetProposalTryMEt(const double val) {m_proposalTryMEt=val; }
   void SetProposalTryPhi(const double val) {m_ProposalTryPhi=val;}
   void SetProposalTryMnu(const double val) {m_ProposalTryMnu=val;}
-  void SetProposalTryEtau(const double val) {m_ProposalTryEtau=val;}
 
   void SetUseEfficiencyRecovery(const  bool val) { m_fUseEfficiencyRecovery=val; }
   bool GetUseEfficiencyRecovery() const { return m_fUseEfficiencyRecovery; }
@@ -385,7 +374,6 @@ public:
   double GetProposalTryMEt() const {return m_proposalTryMEt;}
   double GetProposalTryPhi() const {return m_ProposalTryPhi;}
   double GetProposalTryMnu() const {return m_ProposalTryMnu;}
-  double GetProposalTryEtau() const {return m_ProposalTryEtau;}
 
   void SetNsigmaMETscan_ll(const double val) { m_nsigma_METscan_ll=val; } // number of sigma's for MET-scan in ll events
   void SetNsigmaMETscan_lh(const double val) { m_nsigma_METscan_lh=val; } // number of sigma's for MET-scan in lh events

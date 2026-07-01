@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVKalVrtFitter/src/TrkVKalVrtFitterTestAlg.cxx
@@ -364,13 +364,13 @@ StatusCode TrkVKalVrtFitterTestAlg::initialize()
 /**
  * @brief Standard Gaudi execute method.
  */
-StatusCode TrkVKalVrtFitterTestAlg::execute()
+StatusCode TrkVKalVrtFitterTestAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_VERBOSE ("execute");
 
-  ATH_CHECK( test1() );
-  ATH_CHECK( test2() );
-  ATH_CHECK( test3() );
+  ATH_CHECK( test1(ctx) );
+  ATH_CHECK( test2(ctx) );
+  ATH_CHECK( test3(ctx) );
 
   return StatusCode::SUCCESS;
 }
@@ -379,7 +379,7 @@ StatusCode TrkVKalVrtFitterTestAlg::execute()
 
 // Neutral, no constraint.
 // (Mixed charged+neutral seems not to work.)
-StatusCode TrkVKalVrtFitterTestAlg::test1()
+StatusCode TrkVKalVrtFitterTestAlg::test1(const EventContext& ctx) const
 {
   xAOD::Vertex exp_v0;
   exp_v0.makePrivateStore();
@@ -395,7 +395,7 @@ StatusCode TrkVKalVrtFitterTestAlg::test1()
   setFitQuality (exp_v0, 2, 0.082, 2);
 
   NeutralUVec_t neutrals = makeNeutrals1();
-  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (std::vector<const Trk::TrackParameters*>(),
+  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (ctx, std::vector<const Trk::TrackParameters*>(),
                                                    asVec (neutrals)));
   compareVertex (*v1, exp_v0);
 
@@ -405,7 +405,7 @@ StatusCode TrkVKalVrtFitterTestAlg::test1()
 
 
 // Neutral + Vector3D constraint
-StatusCode TrkVKalVrtFitterTestAlg::test2()
+StatusCode TrkVKalVrtFitterTestAlg::test2(const EventContext& ctx) const
 {
   xAOD::Vertex exp_v0;
   exp_v0.makePrivateStore();
@@ -424,7 +424,7 @@ StatusCode TrkVKalVrtFitterTestAlg::test2()
   Amg::Vector3D pnt1(5, 6, -3);
 
   NeutralUVec_t neutrals = makeNeutrals1();
-  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (std::vector<const Trk::TrackParameters*>(),
+  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (ctx, std::vector<const Trk::TrackParameters*>(),
                                                    asVec (neutrals),
                                                    pnt1));
   compareVertex (*v1, exp_v0);
@@ -446,7 +446,7 @@ StatusCode TrkVKalVrtFitterTestAlg::test2()
   setFitQuality(exp_v1, 2, 0.248, 2);
 
   xAODNPUVec_t xaodnp = makexAODNP(makeNeutrals1());
-  std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (std::vector<const xAOD::TrackParticle*>(),
+  std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (ctx, std::vector<const xAOD::TrackParticle*>(),
                                                    asVec (xaodnp),
                                                    pnt1));
   compareVertex (*v2, exp_v1);
@@ -456,7 +456,7 @@ StatusCode TrkVKalVrtFitterTestAlg::test2()
 
 
 // Neutral + Vertex constraint
-StatusCode TrkVKalVrtFitterTestAlg::test3()
+StatusCode TrkVKalVrtFitterTestAlg::test3(const EventContext& ctx) const
 {
   xAOD::Vertex exp_v0;
   exp_v0.makePrivateStore();
@@ -482,7 +482,7 @@ StatusCode TrkVKalVrtFitterTestAlg::test3()
   pnt2.setCovariancePosition (pnt2covar);
 
   NeutralUVec_t neutrals = makeNeutrals1();
-  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (std::vector<const Trk::TrackParameters*>(),
+  std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (ctx, std::vector<const Trk::TrackParameters*>(),
                                                    asVec (neutrals),
                                                    pnt2));
   compareVertex (*v1, exp_v0);
@@ -505,7 +505,7 @@ StatusCode TrkVKalVrtFitterTestAlg::test3()
   setFitQuality (exp_v1, 2, 1.246, 2);
 
   xAODNPUVec_t xaodnp = makexAODNP (makeNeutrals1());
-  std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (std::vector<const xAOD::TrackParticle*>(),
+  std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (ctx, std::vector<const xAOD::TrackParticle*>(),
                                                    asVec (xaodnp),
                                                    pnt2));
   compareVertex (*v2, exp_v1);
@@ -582,14 +582,14 @@ namespace Trk {
 
 
 // Simple cascade fitter test.
-StatusCode TrkVKalVrtFitterTestAlg::test4()
+StatusCode TrkVKalVrtFitterTestAlg::test4(const EventContext& ctx) const
 {
-  Trk::IVertexCascadeFitter* fitter =
-    dynamic_cast<Trk::IVertexCascadeFitter*> (m_fitter.get());
+  const Trk::IVertexCascadeFitter* fitter =
+    dynamic_cast<const Trk::IVertexCascadeFitter*> (m_fitter.get());
 
   xAODTPUVec_t tracks1 = makexAODTP (makePerigees2());
 
-  std::unique_ptr<IVKalState> state (fitter->makeState());
+  std::unique_ptr<IVKalState> state (fitter->makeState(ctx));
   Trk::VertexID v1 = fitter->startVertex (asVec (tracks1),
                                           std::vector<double> {100*MeV, 150*MeV, 200*MeV},
                                           *state,

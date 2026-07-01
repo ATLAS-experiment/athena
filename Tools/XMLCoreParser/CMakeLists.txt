@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( XMLCoreParser )
@@ -10,8 +10,9 @@ find_package(Boost COMPONENTS unit_test_framework )
 # Component(s) in the package:
 atlas_add_library( XMLCoreParser
                    src/XMLCoreParser.cxx
-                   src/DOMNode.cxx
+                   src/XMLCoreNode.cxx
                    src/ExpatCoreParser.cxx
+                   src/XMLParserUtilities.cxx
                    PUBLIC_HEADERS XMLCoreParser
                    PRIVATE_INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${EXPAT_LIBRARIES} CxxUtils )
@@ -34,13 +35,33 @@ atlas_add_test( XMLCoreParser_test
                 SOURCES test/XMLCoreParser_test.cxx
                 INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                 LINK_LIBRARIES ${EXPAT_LIBRARIES} ${Boost_LIBRARIES} PathResolver XMLCoreParser
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
+
+atlas_add_test( parse1_test
+                SOURCES test/parse1_test.cxx
+                INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES ${EXPAT_LIBRARIES} ${Boost_LIBRARIES} PathResolver XMLCoreParser TestTools
+                POST_EXEC_SCRIPT noerror.sh )
+
+
+atlas_add_test( XMLCoreNode_test
+                SOURCES test/XMLCoreNode_test.cxx
+                INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES ${EXPAT_LIBRARIES} ${Boost_LIBRARIES} PathResolver XMLCoreParser TestTools
+                POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( XMLParserUtilities_test
+                SOURCES test/XMLParserUtilities_test.cxx
+                INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+                LINK_LIBRARIES ${EXPAT_LIBRARIES} ${Boost_LIBRARIES} PathResolver XMLCoreParser TestTools
+                POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_executable( texpat
                       src/texpat.cxx
-                      src/DOMNode.cxx
                       src/ExpatCoreParser.cxx
+                      src/XMLParserUtilities.cxx
+                      src/XMLCoreNode.cxx
                       INCLUDE_DIRS ${EXPAT_INCLUDE_DIRS}
                       LINK_LIBRARIES ${EXPAT_LIBRARIES}  CxxUtils XMLCoreParser
                       )

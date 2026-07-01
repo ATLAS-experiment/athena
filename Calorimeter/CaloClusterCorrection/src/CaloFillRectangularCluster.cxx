@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloFillRectangularCluster.h
@@ -784,12 +784,6 @@ CaloFillRectangularCluster::CaloFillRectangularCluster
    const IInterface* parent)
     : CaloClusterCorrection(type, name, parent)
 { 
-  // properties 
-  declareProperty("eta_size",     m_neta = 5);
-  declareProperty("phi_size",     m_nphi = 5);
-  declareProperty("fill_cluster", m_fill_cluster = true);
-  declareProperty("cells_name",   m_cellsName = "AllCalo");
-  declareProperty("set_raw_state",m_setRawState=true);
 }
 
 

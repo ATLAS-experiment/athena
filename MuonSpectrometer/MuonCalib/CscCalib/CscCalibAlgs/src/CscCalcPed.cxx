@@ -16,7 +16,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <bitset>
 #include <inttypes.h>
 
 namespace MuonCalib {
@@ -274,7 +273,7 @@ namespace MuonCalib {
   }
 
   //Execute loops through all strips and fills histograms
-  StatusCode CscCalcPed::execute()
+  StatusCode CscCalcPed::execute(const EventContext& /*ctx*/)
   {
     ATH_MSG_DEBUG("Begin execute");	
     //collectEventInfo collects infomation about each event by filling ampHistCollection and peaktHist.
@@ -366,11 +365,17 @@ namespace MuonCalib {
     IdContext channelContext = m_idHelperSvc->cscIdHelper().channel_context();	
 
     //Loop over RODs (data from 2 chambers), each of which is in
-    //a single CscRawaData collection
-
+    //a single CscRawaData collection.
+    //Names of timers used in this loop
+    static const std::string rodChronoStr{"RodItr"};
+    static const std::string clusterChronoStr{"ClusterItr"};
+    static const std::string stripChronoStr{"stripItr"};
+    static const std::string afterId1Str{"afterID1"};
+    static const std::string afterId2Str{"afterID2"};
+    //
     for(const auto rod : *rawDataContainer)
     {
-      Chrono chronoRod(m_chronoSvc,"RodItr");
+      Chrono chronoRod(m_chronoSvc,rodChronoStr);
       ATH_MSG_VERBOSE("Examining a ROD");
 
       ATH_MSG_VERBOSE("There are " << rod->size() << " clusters in the ROD");
@@ -381,7 +386,7 @@ namespace MuonCalib {
 
         for(const auto cluster: *rod)
         {
-          Chrono chronoClus(m_chronoSvc,"ClusterItr");
+          Chrono chronoClus(m_chronoSvc,clusterChronoStr);
           int numStrips = cluster->width();
           int samplesPerStrip = (cluster->samples()).size()/numStrips;
 
@@ -389,7 +394,7 @@ namespace MuonCalib {
           for(int stripItr = 0; stripItr <numStrips; stripItr++)
           {
 
-            Chrono chronoStrip(m_chronoSvc,"stripItr");
+            Chrono chronoStrip(m_chronoSvc,stripChronoStr);
             // WP Added
             Identifier channelId =m_cscRdoDecoderTool->channelIdentifier(cluster, &m_idHelperSvc->cscIdHelper(), stripItr);
             IdentifierHash cscChannelHashId;
@@ -402,7 +407,7 @@ namespace MuonCalib {
             m_idHelperSvc->cscIdHelper().get_id(stripHash, stripId, &channelContext);
 
 
-            Chrono chronoAfterId(m_chronoSvc,"afterID1");
+            Chrono chronoAfterId(m_chronoSvc,afterId1Str);
 
             if( m_idHelperSvc->cscIdHelper().chamberLayer(channelId) != m_expectedChamberLayer)
             {
@@ -429,6 +434,10 @@ namespace MuonCalib {
                   ); 
               IdentifierHash newHash;
               m_idHelperSvc->cscIdHelper().get_channel_hash(stripId, newHash );
+              if (!newHash.is_valid())[[unlikely]]{
+                ATH_MSG_WARNING("Hash "<< newHash <<" is invalid");
+                continue;
+              }
               stripHash = newHash;
               ATH_MSG_DEBUG("New hash " << stripHash);
             }
@@ -439,7 +448,7 @@ namespace MuonCalib {
                 ATH_MSG_VERBOSE(" good id is eta");
             }
 
-            Chrono chronoAfterId2(m_chronoSvc,"afterID2");
+            Chrono chronoAfterId2(m_chronoSvc, afterId2Str);
 
             //Get samples. Each shows amplitude of pulse at different
             //time slice.

@@ -29,7 +29,7 @@ public:
 protected:
 
   ALFA_LocRecEvCollection_PERS*  createPersistent (ALFA_LocRecEvCollection *transCont);
-  ALFA_LocRecEvCollection*       createTransient ();
+  ALFA_LocRecEvCollection*       createTransient(const Token* token);
     
  };
  

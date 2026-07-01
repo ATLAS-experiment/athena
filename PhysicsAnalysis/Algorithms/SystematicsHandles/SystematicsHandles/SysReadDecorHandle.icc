@@ -53,19 +53,8 @@ namespace CP
 
 
 
-  template<typename T> std::string SysReadDecorHandle<T> ::
-  getNamePattern () const
-  {
-    // So far it is undefined what to return here, it could either be
-    // "decorName" or "objectName.decorName".  I'll fill this in once
-    // there is a reason for it to be one or the other.
-    return "";
-  }
-
-
-
   template<typename T> StatusCode SysReadDecorHandle<T> ::
-  initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle)
+  initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle)
   {
     if (m_objectHandle != nullptr)
     {
@@ -79,7 +68,7 @@ namespace CP
 
 
   template<typename T> StatusCode SysReadDecorHandle<T> ::
-  initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle, SG::AllowEmptyEnum)
+  initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle, SG::AllowEmptyEnum)
   {
     if (!empty())
       return initialize (sysListHandle, objectHandle);
@@ -93,7 +82,7 @@ namespace CP
   getName (const CP::SystematicSet& sys) const
   {
     const auto& data = getData (sys);
-    return std::get<0> (data);
+    return data.name;
   }
 
 
@@ -103,7 +92,7 @@ namespace CP
        const CP::SystematicSet& sys) const
   {
     const auto& data = getData (sys);
-    return std::get<1> (data) (object);
+    return data.accessor (object);
   }
 
 
@@ -130,8 +119,9 @@ namespace CP
       std::string decorName;
       ANA_CHECK (svc.makeSystematicsName (decorName, m_decorName, inputSys));
       ANA_MSG_DEBUG ("SysReadDecorHandle: " << decorName << " (" << sys.name() << ")");
-      m_dataCache.emplace (sys, std::make_tuple (decorName, decorName));
+      m_sysData.emplace (sys, SysData{decorName, SG::ConstAccessor<T>{decorName}});
     }
+    ANA_CHECK (m_objectHandle->addDecorationDependency (svc, m_decorName, false));
     return StatusCode::SUCCESS;
   }
 
@@ -141,10 +131,10 @@ namespace CP
   SysReadDecorHandle<T> ::
   getData (const CP::SystematicSet& sys) const
   {
-    auto cache = m_dataCache.find (sys);
-    if (cache == m_dataCache.end())
+    auto cache = m_sysData.find (sys);
+    if (cache == m_sysData.end())
     {
-      if (m_dataCache.empty())
+      if (m_sysData.empty())
         throw std::logic_error ("uninitialized SysReadDecorHandle (" + m_decorName + ")");
       else
         throw std::logic_error ("unsupported systematic in SysReadDecorHandle (" + m_decorName + "): (" + sys.name() + ")");

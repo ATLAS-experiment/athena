@@ -34,7 +34,7 @@
 #include "CxxUtils/CachedPointer.h"
 
 #include "AtlasHepMC/GenParticle.h"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 #include <TLorentzVector.h>
@@ -70,7 +70,7 @@ public:
 
   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
   virtual StatusCode finalize ATLAS_NOT_THREAD_SAFE () override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
   const static int MAX_LAYER = 25;
 
@@ -249,11 +249,6 @@ private:
   double m_lzCalo[CaloCell_ID_FCS::MaxSample][3]{};
   double m_dCalo[CaloCell_ID_FCS::MaxSample][3]{};
   double m_distetaCaloBorder[CaloCell_ID_FCS::MaxSample][3]{};
-
-  /// Handle on the particle property service
-  ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
-
-  HepPDT::ParticleDataTable*     m_particleDataTable{};
 
   //###################################################################
 

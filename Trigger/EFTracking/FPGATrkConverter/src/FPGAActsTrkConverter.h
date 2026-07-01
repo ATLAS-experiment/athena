@@ -26,7 +26,6 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
                   const xAOD::PixelClusterContainer & pixelContainer,
                   const xAOD::StripClusterContainer & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks,
-                  const FPGATrackSimHitContainer & hitsInRoads,
                   const std::vector<FPGATrackSimRoad>& roads) const override final; 
     virtual StatusCode findProtoTracks(const EventContext& ctx,
                   const xAOD::PixelClusterContainer & pixelContainer,
@@ -41,16 +40,9 @@ class FPGAActsTrkConverter : public extends<AthAlgTool,IFPGAActsTrkConverter> {
     StatusCode matchTrackMeasurements(const EventContext& ctx,
                                       const XAOD_CLUSTER& cluster,
                                       const FPGATrackSimHit & trackHit,
-                                      std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
+                                      std::vector<const xAOD::UncalibratedMeasurement* >& measurements,
                                       const DataVector<XAOD_CLUSTER>& clusterContainer) const;
     
-    StatusCode findPrototrackMeasurements( const EventContext& ctx,
-                                           const xAOD::PixelClusterContainer &pixelClusterContainer,
-                                           const xAOD::StripClusterContainer &stripClusterContainer,
-                                           const std::multimap<xAOD::DetectorIdentType, const xAOD::PixelCluster*> & pixelClusterMap,
-                                           const std::multimap<xAOD::DetectorIdentType, const xAOD::StripCluster*> & stripClusterMap,
-                                           std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
-                                           const FPGATrackSimHitCollection& hits) const;
     private:
     const PixelID* m_pixelId{nullptr};
     const SCT_ID* m_SCTId{nullptr};

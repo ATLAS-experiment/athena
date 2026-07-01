@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,32 +35,22 @@ namespace FlavorTagDiscriminants {
     ATH_MSG_DEBUG( "    ** " << m_MuonContainerKey       );
     ATH_CHECK( m_TrackContainerKey.initialize() );
     ATH_CHECK( m_MuonContainerKey.initialize() );
+    ATH_CHECK( m_truthParticleContainerKey.initialize() );
 
     // Initialize accessors
-    m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
-    m_acc_source_label = "TruthParticles." + m_acc_source_label.key();
-    m_acc_vertex_index = "TruthParticles." + m_acc_vertex_index.key();
-    m_acc_parent_uniqueID = "TruthParticles." + m_acc_parent_uniqueID.key();
     ATH_CHECK( m_acc_type_label.initialize() );
     ATH_CHECK( m_acc_source_label.initialize() );
     ATH_CHECK( m_acc_vertex_index.initialize() );
     ATH_CHECK( m_acc_parent_uniqueID.initialize() );
 
     // Initialize decorators
-    m_dec_origin_label = m_TrackContainerKey.key() + "." + m_dec_origin_label.key();
-    m_dec_type_label = m_TrackContainerKey.key() + "." + m_dec_type_label.key();
-    m_dec_source_label = m_TrackContainerKey.key() + "." + m_dec_source_label.key();
-    m_dec_vertex_index = m_TrackContainerKey.key() + "." + m_dec_vertex_index.key();
-    m_dec_uniqueID = m_TrackContainerKey.key() + "." + m_dec_uniqueID.key();
-    m_dec_parent_uniqueID = m_TrackContainerKey.key() + "." + m_dec_parent_uniqueID.key();
-    m_dec_muon_origin_label = m_TrackContainerKey.key() + "." + m_dec_muon_origin_label.key();
-    CHECK( m_dec_origin_label.initialize() );
-    CHECK( m_dec_type_label.initialize() );
-    CHECK( m_dec_source_label.initialize() );
-    CHECK( m_dec_vertex_index.initialize() );
-    CHECK( m_dec_uniqueID.initialize() );
-    CHECK( m_dec_parent_uniqueID.initialize() );
-    CHECK( m_dec_muon_origin_label.initialize() );
+    ATH_CHECK( m_dec_origin_label.initialize() );
+    ATH_CHECK( m_dec_type_label.initialize() );
+    ATH_CHECK( m_dec_source_label.initialize() );
+    ATH_CHECK( m_dec_vertex_index.initialize() );
+    ATH_CHECK( m_dec_uniqueID.initialize() );
+    ATH_CHECK( m_dec_parent_uniqueID.initialize() );
+    ATH_CHECK( m_dec_muon_origin_label.initialize() );
 
     // Retrieve tools
     ATH_CHECK( m_trackTruthOriginTool.retrieve() );
@@ -136,10 +126,9 @@ namespace FlavorTagDiscriminants {
         Truth::Type muTruthOriginType = static_cast<Truth::Type>(muTruthOrigin);
 
         // Get the track associated to the muon
-        auto track_link = muon->inDetTrackParticleLink();
-        if ( !track_link.isValid() ) { continue; }
-        auto track = *track_link;
-
+        auto track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+        if ( !track ) { continue; }
+ 
         // Get the truth particle associated to the track
         const auto truth = m_trackTruthOriginTool->getTruth(track);
         if ( !truth ) { continue; }

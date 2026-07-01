@@ -64,24 +64,22 @@ StatusCode HTFilter::filterFinalize() {
 
 //---------------------------------------------------------------------------
 
-StatusCode HTFilter::filterEvent() {
+StatusCode HTFilter::filterEvent(const EventContext& ctx) {
   m_total++; // Book keeping
 
-#ifdef HEPMC3
     
 if (! m_allowOld) {  
-  ATH_MSG_ERROR(" For HEPMC3 releases xAOD filters should be used. Exiting with ERROR. ");
+  ATH_MSG_ERROR(" For HepMC v3 releases xAOD filters should be used. Exiting with ERROR. ");
   return StatusCode::FAILURE;
 }
 
-#endif
 
   // Get jet container out
   const xAOD::JetContainer* truthjetTES = 0;
   if ( !evtStore()->contains<xAOD::JetContainer>( m_TruthJetContainerName ) ||
         evtStore()->retrieve( truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES ){
     ATH_MSG_INFO( "No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName ); 
-    setFilterPassed(m_MinHT<1.);  
+    setFilterPassed(m_MinHT<1., ctx);  
     return StatusCode::SUCCESS;
   }
 
@@ -135,11 +133,11 @@ if (! m_allowOld) {
 
   if (HT<m_MinHT || HT>=m_MaxHT){
     ATH_MSG_DEBUG( "Failed filter on HT: " << HT << " is not between " << m_MinHT << " and " << m_MaxHT );
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } else {
     // Made it to the end - success!
     m_passed++;
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
   }
 
   return StatusCode::SUCCESS;

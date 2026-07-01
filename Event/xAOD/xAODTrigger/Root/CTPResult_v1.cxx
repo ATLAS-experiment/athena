@@ -92,42 +92,58 @@ namespace xAOD {
 
   // Get the CTPBunchCrossing object for a specific bunch in the readout window. Returns L1A bunch by default.
   const CTPResult_v1::CTPBunchCrossing CTPResult_v1::getBC(const int bunch) const {
-    int idx;
-    if (bunch == -1) {
-        idx = l1AcceptBunchPosition();
-    } else {
-        idx = bunch;
+
+    // If there are no bunches, then return an empty CTPBunchCrossing struct
+    if (numberOfBunches() == 0) return {};
+
+    // Test to see what index to use
+    int idx = (bunch == -1) ? l1AcceptBunchPosition() : bunch;
+
+    // Grab words
+    const auto& tip = tipWords();
+    const auto& tbp = tbpWords();
+    const auto& tap = tapWords();
+    const auto& tav = tavWords();
+
+    // Check the index is valid, if not then return an empty CTPBunchCrossing struct
+    if (idx < 0 ||
+        idx >= static_cast<int>(numberOfBunches()) ||
+        idx >= static_cast<int>(tbp.size()) ||
+        idx >= static_cast<int>(tip.size()) ||
+        idx >= static_cast<int>(tap.size()) ||
+        idx >= static_cast<int>(tav.size())) {
+      return {};
     }
-    CTPResult_v1::CTPBunchCrossing bc;
-    bc.tipWords = tipWords()[idx];
-    bc.tbpWords = tbpWords()[idx];
-    bc.tapWords = tapWords()[idx];
-    bc.tavWords = tavWords()[idx];
+
+    // Return the appropriate bunch information
+    CTPBunchCrossing bc;
+    bc.tipWords = tip[idx];
+    bc.tbpWords = tbp[idx];
+    bc.tapWords = tap[idx];
+    bc.tavWords = tav[idx];
+
     return bc;
   }
 
   // set the number of bunches
   void CTPResult_v1::setNumberOfBunches(const uint32_t nBCs) {
-    if(nBCs > tipWords().size()) {
-      static const SG::AuxElement::Accessor< uint32_t > accNumOfBunches("numberOfBunches");
-      static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTIPWords("tipWords");
-      static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTBPWords("tbpWords");
-      static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTAPWords("tapWords");
-      static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTAVWords("tavWords");
-      accNumOfBunches( *this ) = nBCs;
-      accTIPWords( *this ).resize(nBCs);
-      accTBPWords( *this ).resize(nBCs);
-      accTAPWords( *this ).resize(nBCs);
-      accTAVWords( *this ).resize(nBCs);
-    }
+    static const SG::AuxElement::Accessor< uint32_t > accNumOfBunches("numberOfBunches");
+    static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTIPWords("tipWords");
+    static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTBPWords("tbpWords");
+    static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTAPWords("tapWords");
+    static const SG::AuxElement::Accessor< std::vector<std::vector<uint32_t> > > accTAVWords("tavWords");
+    accNumOfBunches( *this ) = nBCs;
+    accTIPWords( *this ).resize(nBCs);
+    accTBPWords( *this ).resize(nBCs);
+    accTAPWords( *this ).resize(nBCs);
+    accTAVWords( *this ).resize(nBCs);
   }
 
   // set the L1 Accept Bunch Position
-  void CTPResult_v1::setL1AcceptBunchPosition(const uint32_t pos) {
-    if(pos < numberOfBunches()) {
-      static const SG::Accessor< uint32_t > acc("l1AcceptBunchPosition");
-      acc( *this ) = pos;
-    }
+  void CTPResult_v1::setL1AcceptBunchPosition(uint32_t pos) {
+    if (numberOfBunches() == 1 && pos > 0) {pos=0;}    
+    static const SG::Accessor<uint32_t> acc("l1AcceptBunchPosition");
+    acc(*this) = pos;
   }
 
   // Get TIP words for a specific bunch crossing
@@ -196,5 +212,40 @@ namespace xAOD {
     setNumStatusWords(numStat);
     setNumDataWords(numData);
     setStatusPosition(statPos);
+  }
+
+ // Check the object using requirements of the CTP data format (for Run 3)
+  std::vector<std::string> CTPResult_v1::checkForIssues() const {
+
+    // Create vector to store warnings
+    std::vector<std::string> msg;
+
+    // Check for completely empty payload
+    if (numberOfBunches() == 0 && additionalWords().empty()) {
+      msg.push_back("CTPResult has a completely empty payload!");
+    }
+
+    // Expect exactly 2 status words
+    if (numStatusWords() != 2) {
+      msg.push_back("CTPResult does not have exactly 2 status words!");
+    }
+
+    // Both status words must be zero
+    if (errorStatus() != 0 || infoStatus() != 0) {
+      msg.push_back("CTPResult has non-zero status words!");
+    }
+
+    // Status information position must be 1
+    if (statusPosition() != 1) {
+      msg.push_back("CTPResult has incorrect status info position!");
+    }
+
+    // L1 accept position must be valid
+    uint32_t nBCs = numberOfBunches(); {
+    if (nBCs != 0 && l1AcceptBunchPosition() >= nBCs)
+      msg.push_back("CTPResult has an invalid L1A accept position!");
+    }
+
+    return msg;
   }
 }

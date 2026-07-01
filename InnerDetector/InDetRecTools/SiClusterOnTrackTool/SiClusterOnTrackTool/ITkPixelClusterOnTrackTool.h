@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITkPixelClusterOnTrackTool_H
 #define ITkPixelClusterOnTrackTool_H
 
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
@@ -79,7 +78,7 @@ public:
       of the intersecting track.
   */
   virtual InDet::PixelClusterOnTrack* correct(
-      const Trk::PrepRawData&, const Trk::TrackParameters&, const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+      const Trk::PrepRawData&, const Trk::TrackParameters&, const EventContext& ctx) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:
@@ -87,30 +86,33 @@ public:
 
 protected:
  InDet::PixelClusterOnTrack* correctDefault(const Trk::PrepRawData&,
-                                            const Trk::TrackParameters&) const;
+                                            const Trk::TrackParameters&,
+                                            const EventContext&) const;
 
  InDet::PixelClusterOnTrack* correctNN(const Trk::PrepRawData&,
-                                       const Trk::TrackParameters&) const;
+                                       const Trk::TrackParameters&,
+                                       const EventContext&) const;
 
  bool getErrorsDefaultAmbi(const InDet::PixelCluster*,
                            const Trk::TrackParameters&, Amg::Vector2D&,
-                           Amg::MatrixX&) const;
+                           Amg::MatrixX&, const EventContext&) const;
 
  bool getErrorsTIDE_Ambi(const InDet::PixelCluster*,
                          const Trk::TrackParameters&, Amg::Vector2D&,
-                         Amg::MatrixX&) const;
+                         Amg::MatrixX&, const EventContext&) const;
 
  InDet::PixelClusterOnTrack* correct(const Trk::PrepRawData&,
                                      const Trk::TrackParameters&,
-                                     const ITk::PixelClusterStrategy) const;
+                                     const ITk::PixelClusterStrategy,
+                                     const EventContext&) const;
 
  const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
- getClusterSplittingProbability(const InDet::PixelCluster* pix) const {
+ getClusterSplittingProbability(const InDet::PixelCluster* pix, const EventContext& ctx) const {
    if (!pix || m_clusterSplitProbContainer.key().empty())
      return Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
 
    SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainer(
-       m_clusterSplitProbContainer);
+       m_clusterSplitProbContainer, ctx);
    if (!splitProbContainer.isValid()) {
      ATH_MSG_FATAL("Failed to get cluster splitting probability container "
                    << m_clusterSplitProbContainer);

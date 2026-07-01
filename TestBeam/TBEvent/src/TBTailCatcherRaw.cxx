@@ -14,7 +14,7 @@ TBTailCatcherRaw::TBTailCatcherRaw() : TBBeamDetector(),
 				 DataVector< TBScintillatorRaw >() 
 { }
 
-TBTailCatcherRaw::TBTailCatcherRaw(const std::string& thisTailCatcherName,
+TBTailCatcherRaw::TBTailCatcherRaw(std::string_view thisTailCatcherName,
 			     bool overflow,
 			     const 
 			     std::vector< TBScintillatorRaw* >&

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloClusterRetriever.h"
@@ -9,26 +9,6 @@
 using Athena::Units::GeV;
 
 namespace JiveXML {
-
-  /**
-   * This is the standard AthAlgTool constructor
-   * @param type   AlgTool type name
-   * @param name   AlgTool instance name
-   * @param parent AlgTools parent owning this tool
-   **/
-  CaloClusterRetriever::CaloClusterRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_sgKeyFavourite ("egammaClusters")
-  {
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-    
-    declareProperty("FavouriteClusterCollection" ,m_sgKeyFavourite,
-        "Collection to be first in output, shown in Atlantis without switching");
-    declareProperty("OtherClusterCollections" ,m_otherKeys,
-        "Other collections to be retrieved. If list left empty, all available retrieved");
-    declareProperty("DoWriteHLT", m_doWriteHLT = false,"Ignore HLTAutokey object by default."); // ignore HLTAutoKey objects
-  }
 
   StatusCode CaloClusterRetriever::initialize()
   {

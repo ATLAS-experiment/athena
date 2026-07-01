@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual CPMHitsCollection_PERS*   createPersistent (CPMHitsCollection* transCont);
-  virtual CPMHitsCollection*        createTransient ();
+  virtual CPMHitsCollection*        createTransient(const Token* token);
 
 private:
   

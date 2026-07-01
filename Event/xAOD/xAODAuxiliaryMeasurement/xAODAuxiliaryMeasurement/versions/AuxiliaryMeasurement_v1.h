@@ -61,4 +61,5 @@ namespace xAOD {
             CxxUtils::CachedValue<SurfacePtr_t> m_surface{};
     };
 }
+DATAVECTOR_BASE(xAOD::AuxiliaryMeasurement_v1, xAOD::UncalibratedMeasurement_v1);
 #endif

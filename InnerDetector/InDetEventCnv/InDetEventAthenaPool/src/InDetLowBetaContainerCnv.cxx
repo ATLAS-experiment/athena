@@ -27,14 +27,14 @@ InDetLowBetaContainer_PERS *InDetLowBetaContainerCnv::createPersistent(InDet::In
 }
  
 // createTransient
-InDet::InDetLowBetaContainer *InDetLowBetaContainerCnv::createTransient() {
+InDet::InDetLowBetaContainer *InDetLowBetaContainerCnv::createTransient(const Token* token) {
   ATH_MSG_DEBUG("InDetLowBetaContainerCnv::createTransient called");
 
   static const pool::Guid tlp1_guid("2EBE2034-8157-477B-B327-D37BE8A0317D");
 
   InDet::InDetLowBetaContainer *p_collection = nullptr;
-  if (compareClassGuid(tlp1_guid)) {
-    poolReadObject<InDetLowBetaContainer_PERS>(*m_TPConverter_tlp1);
+  if (compareClassGuid(token, tlp1_guid)) {
+    poolReadObject<InDetLowBetaContainer_PERS>(*m_TPConverter_tlp1, token);
     p_collection = m_TPConverter_tlp1->createTransient(msg());
   } else
     throw std::runtime_error("Unsupported persistent version of InDetLowBetaContainer");
@@ -43,7 +43,7 @@ InDet::InDetLowBetaContainer *InDetLowBetaContainerCnv::createTransient() {
 }
 
 
-AthenaPoolTopLevelTPCnvBase*
+TopLevelTPCnvBase*
 InDetLowBetaContainerCnv::getTopLevelTPCnv()
 {
   return m_TPConverter_tlp1;

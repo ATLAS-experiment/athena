@@ -25,7 +25,7 @@ def main():
         dsid = "421356" if not options.dsid else options.dsid
         tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
     elif options.simulation:
-        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"{options.extra_args}  --geometryVersion {defaultGeometryTags.RUN4}") )
+        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} {options.extra_args}") )
     elif options.overlay:
         log.error("Overlay not supported yet")
         exit(1)
@@ -34,11 +34,11 @@ def main():
             log.error("Parallel execution not supported for pile-up workflow")
             exit(1)
         if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
-            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, f"{options.extra_args} --digiSteeringConf StandardInTimeOnlyTruth --geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC}"))
+            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} {options.extra_args} --digiSteeringConf StandardInTimeOnlyTruth"))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q456", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.reco:
-        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion {defaultGeometryTags.RUN4}"))
+        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} --steering doRDO_TRIG {options.extra_args}"))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"
@@ -47,8 +47,8 @@ def main():
         if setup.parallel_execution:
             log.error("Parallel execution not supported for the default Phase-II workflow")
             exit(1)
-        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"{options.extra_args}  --geometryVersion {defaultGeometryTags.RUN4}"))
-        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion {defaultGeometryTags.RUN4} --inputHITSFile ../run_s3761/myHITS.pool.root"))
+        tests_to_run.append(SimulationTest("s3761", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} {options.extra_args}"))
+        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --inputHITSFile ../run_s3761/myHITS.pool.root {options.extra_args}"))
 
     # Define which perfomance checks to run
     # TODO: standard performance checks do not work, disable for now

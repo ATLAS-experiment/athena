@@ -29,7 +29,7 @@ DBReplicaSvc                                         INFO Frontier server at (se
 DBReplicaSvc                                         INFO Read replica configuration from /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2020-12-02T2101/Athena/22.0.22/InstallArea/x86_64-centos7-gcc8-opt/share/dbreplica.config
 DBReplicaSvc                                         INFO Total of 10 servers found for host pcaz001.dyndns.cern.ch [ATLF ATLAS_COOLPROD atlas_dd ATLAS_CONFIG INT8R INTR ATONR_COOL ATONR_CONF DEVDB11 ATLF ]
 PoolSvc                                              INFO Successfully setup replica sorting algorithm
-PoolSvc                                              INFO Setting up APR FileCatalog and Streams
+PoolSvc                                              INFO Setting up FileCatalog and Streams
 PoolSvc                                              INFO Resolved path (via ATLAS_POOLCOND_PATH) is /cvmfs/atlas-condb.cern.ch/repo/conditions/poolcond/PoolFileCatalog.xml
 PoolSvc                                           WARNING Unable to locate catalog for prfile:poolcond/PoolCat_oflcond.xml check your ATLAS_POOLCOND_PATH and DATAPATH variables
 PoolSvc                                           WARNING Unable to locate catalog for apcfile:poolcond/PoolCat_oflcond.xml check your ATLAS_POOLCOND_PATH and DATAPATH variables

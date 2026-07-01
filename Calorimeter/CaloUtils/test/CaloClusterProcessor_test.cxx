@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: CaloClusterProcessor_test.cxx,v 1.3 2009-04-18 02:56:19 ssnyder Exp $
 /**
  * @file  CaloClusterProcessor_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -28,7 +27,7 @@ public:
   TAlg( const std::string& name, ISvcLocator *svcloc)
     : AthAlgorithm (name, svcloc) {}
 
-  virtual StatusCode execute() { return StatusCode::SUCCESS; }
+  virtual StatusCode execute(const EventContext&) { return StatusCode::SUCCESS; }
 };
 
 

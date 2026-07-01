@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
-#ifndef TRIGINTERFACES_ENUMS_H
-#define TRIGINTERFACES_ENUMS_H
+#ifndef TRIGSTEERINGEVENT_ENUMS_H
+#define TRIGSTEERINGEVENT_ENUMS_H
 
-#include <vector>
 #include <string>
 #include <stdint.h>
 
@@ -92,7 +90,7 @@ namespace HLT {
 
     ErrorCode(Action::Code a, Reason::Code r, SteeringInternalReason::Code s);
 
-    // comapricon operators
+    // comparison operators
     bool operator==(const ErrorCode& ec) const;
     bool operator!=(const ErrorCode& ec) const;
 

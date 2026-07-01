@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODEVENTINFOCNV_EVENTINFOCNVTOOL_H
@@ -51,11 +51,11 @@ namespace xAODMaker {
       virtual StatusCode initialize() override;
 
       /// Function that fills an existing xAOD::EventInfo object with data
-      virtual StatusCode convert( const EventInfo* aod,
+      virtual StatusCode convert( const EventContext& ctx,
+                                  const EventInfo* aod,
                                   xAOD::EventInfo* xaod,
                                   bool pileUpInfo = false,
-                                  bool copyPileUpLinks = true,
-                                  const EventContext& ctx = Gaudi::Hive::currentContext()) const override;
+                                  bool copyPileUpLinks = true ) const override;
 
    private:
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------------
@@ -16,15 +16,15 @@ class TBEventInfo_p1
 
 public:
 
-  int m_ev_number;
-  int m_ev_clock;
-  int m_ev_type;
-  unsigned int m_run_num;
-  float m_beam_moment;
+  int m_ev_number = 0;
+  int m_ev_clock = 0;
+  int m_ev_type = 0;
+  unsigned int m_run_num = 0;
+  float m_beam_moment = 0;
   std::string m_beam_part;
-  float m_cryoX;
-  float m_cryoAngle;
-  float m_tableY;
+  float m_cryoX = 0;
+  float m_cryoAngle = 0;
+  float m_tableY = 0;
     
 };
 

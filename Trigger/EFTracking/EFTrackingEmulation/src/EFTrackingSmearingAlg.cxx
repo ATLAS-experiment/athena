@@ -339,10 +339,9 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
 
 
 
-StatusCode EFTrackingSmearingAlg::execute() {  
+StatusCode EFTrackingSmearingAlg::execute(const EventContext& ctx) {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  auto ctx = getContext() ;
   if (m_smearTruthParticle)
     return smearTruthParticles(ctx);      
   

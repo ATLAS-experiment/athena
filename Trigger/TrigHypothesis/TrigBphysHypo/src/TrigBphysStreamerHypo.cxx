@@ -79,25 +79,24 @@ StatusCode TrigBphysStreamerHypo::execute( const EventContext& context ) const {
     }
 
     if (m_triggerLevel == "L2") {
-      auto muonLinkInfo = TrigCompositeUtils::findLink<xAOD::L2StandAloneMuonContainer>(previousDecision, TrigCompositeUtils::featureString(), true);
+      auto muonLinkInfo = TrigCompositeUtils::findLink<xAOD::L2StandAloneMuonContainer>(context, previousDecision, TrigCompositeUtils::featureString(), true);
       ATH_CHECK( muonLinkInfo.isValid() );
       decision->setObjectLink<xAOD::L2StandAloneMuonContainer>(TrigCompositeUtils::featureString(), muonLinkInfo.link);
 
       //set roi link (to use same roi in EF CB muon step)
-      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(decision, "roi");
+      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context, decision, "roi");
       decision->setObjectLink(m_roiLinkName.value(), roiLink.link);
     }
     else if (m_triggerLevel == "EF") {
-      auto muonLinkInfo = TrigCompositeUtils::findLink<xAOD::MuonContainer>(previousDecision, TrigCompositeUtils::featureString(), true);
+      auto muonLinkInfo = TrigCompositeUtils::findLink<xAOD::MuonContainer>(context, previousDecision, TrigCompositeUtils::featureString(), true);
       ATH_CHECK( muonLinkInfo.isValid() );
       decision->setObjectLink<xAOD::MuonContainer>(TrigCompositeUtils::featureString(), muonLinkInfo.link);
 
       if (msgLvl(MSG::DEBUG)) {
         const xAOD::Muon* muon = *(muonLinkInfo.link);
         if (muon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) {
-          const ElementLink<xAOD::TrackParticleContainer> trackEL = muon->inDetTrackParticleLink();
-          ATH_CHECK( trackEL.isValid() );
-          const xAOD::TrackParticle* track = *trackEL;
+          const xAOD::TrackParticle* track = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+          ATH_CHECK( track != nullptr );
           ATH_MSG_DEBUG( " -- muon pt/eta/phi/q: " << track->pt() << " / " << track->eta() << " / " << track->phi() << " / " << track->charge() );
           ATH_MSG_DEBUG( " Allowed decisions:" );
           DecisionIDContainer IDs;

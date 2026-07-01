@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METPhotonAssociator.h 
@@ -17,10 +17,6 @@
 // METReconstruction includes
 #include "METReconstruction/METEgammaAssociator.h"
 #include "xAODEgamma/PhotonFwd.h"
-
-//Includes for DataHandles
-#include "StoreGate/DataHandle.h"
-
 
 namespace met{
   class METPhotonAssociator final
@@ -47,7 +43,7 @@ namespace met{
     /////////////////////////////////////////////////////////////////// 
     protected: 
 
-    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const final;
+    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const final;
 
     private:
  

@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_CALIBRATION_AFP_NOISYPIXELTOOL_H
@@ -14,6 +14,7 @@
 
 // STL includes
 #include <string>
+#include <string_view>
 #include <vector>
 #include <memory>
 #include <tuple>
@@ -47,7 +48,7 @@ private:
 	
 	std::vector<std::string> m_methods; // methods to be used for identification of noisy pixels; available: \"2_ROW\", \"2_COL\", \"4_PIX\", \"8_PIX\", and \"FIT\""};
 	
-	std::vector<std::pair<int,int>> getLegitPixels(std::shared_ptr<const TH2F> input, const int col_ID, const int row_ID, const std::string& method) const;
+	std::vector<std::pair<int,int>> getLegitPixels(std::shared_ptr<const TH2F> input, const int col_ID, const int row_ID, std::string_view method = "8_PIX") const;
 	
 	TH2F countInactivePixelsAround(std::shared_ptr<const TH2F> input) const;
 	double getNeighbours(std::shared_ptr<const TH2F> input, int row_ID, int col_ID) const;

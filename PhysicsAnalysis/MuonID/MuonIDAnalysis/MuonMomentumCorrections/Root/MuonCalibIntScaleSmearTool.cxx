@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -10,6 +10,7 @@
 #include <cmath>
 #include "TRandom3.h"
 
+#include "MuonMomentumCorrections/MuonCalibTool.h"
 #include "MuonMomentumCorrections/MuonCalibIntScaleSmearTool.h"
 #include "MuonMomentumCorrections/EnumDef.h"
 #include <MuonMomentumCorrections/CalibInitializer.h>
@@ -96,10 +97,18 @@ namespace CP
         mu.ME.calib_charge = mu.ME.uncalib_charge * ((corrMEpT < -0.1) ? -1 : 1);
         mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpT < -0.1) ? -1 : 1);
 
-        if(!m_doDirectCBCalib) {
+	if(m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS) {
            mu.CB.calib_pt = corrCBpTWithIDME * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
            mu.CB.calib_charge = mu.CB.uncalib_charge * ((corrCBpTWithIDME < -0.1) ? -1 : 1);
-        }
+	}
+	else if(m_calibMode == MuonCalibTool::correctData_IDonly) {
+	   mu.CB.calib_pt = mu.ID.calib_pt;
+           mu.CB.calib_charge = mu.ID.calib_charge;
+	}
+	else if(m_calibMode == MuonCalibTool::correctData_MSonly) {
+	   mu.CB.calib_pt = mu.ME.calib_pt;
+           mu.CB.calib_charge = mu.ME.calib_charge;
+	}
 
         // Return gracefully:
         return CorrectionCode::Ok;
@@ -284,20 +293,21 @@ namespace CP
         /////////////////////////
         // Resolution systematics
         /////////////////////////
-        if (m_doDirectCBCalib || m_sysScheme == "AllSys") {
+        if (m_calibMode == MuonCalibTool::correctData_CB || m_calibMode == MuonCalibTool::notCorrectData_CB || m_sysScheme == "AllSys") {
             // CB systematics
             result.insert(SystematicVariation("MUON_CB", 1));
             result.insert(SystematicVariation("MUON_CB", -1));
-        }
-        if (!m_doDirectCBCalib || m_sysScheme == "AllSys") {
+	}
+	if (m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS || m_calibMode == MuonCalibTool::correctData_IDonly || m_sysScheme == "AllSys") {
             // ID systematics
             result.insert(SystematicVariation("MUON_ID", 1));
             result.insert(SystematicVariation("MUON_ID", -1));
-
+	}
+	if (m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS || m_calibMode == MuonCalibTool::correctData_MSonly || m_sysScheme == "AllSys") {
             // MS systematics
             result.insert(SystematicVariation("MUON_MS", 1));
             result.insert(SystematicVariation("MUON_MS", -1));
-        }
+	}
 
         /////////////////////
         /// Scale Systematics
@@ -308,7 +318,7 @@ namespace CP
         } 
         else if (m_sysScheme == "Decorr_Scale" || m_sysScheme == "AllSys") {
             // Either doing direct calib of CB or asking for all the sys
-            if (m_doDirectCBCalib || m_sysScheme == "AllSys") {
+            if (m_calibMode == MuonCalibTool::correctData_CB || m_calibMode == MuonCalibTool::notCorrectData_CB || m_sysScheme == "AllSys") {
                 result.insert(SystematicVariation("MUON_SCALE_CB", 1));
                 result.insert(SystematicVariation("MUON_SCALE_CB", -1));
 
@@ -316,11 +326,14 @@ namespace CP
                 result.insert(SystematicVariation("MUON_SCALE_CB_ELOSS", -1));
             }
 
-            // Either not doing direct calib of CB or asking for all the sys
-            if (!m_doDirectCBCalib || m_sysScheme == "AllSys") {
+            // Either not doing direct calib of CB or asking for IDonly calib or asking for all the sys
+            if (m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS || m_calibMode == MuonCalibTool::correctData_IDonly || m_sysScheme == "AllSys") {
                 result.insert(SystematicVariation("MUON_SCALE_ID", 1));
                 result.insert(SystematicVariation("MUON_SCALE_ID", -1));
+	    }
 
+	    // Either not doing direct calib of CB or asking for MEonly calib or asking for all the sys
+	    if (m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS || m_calibMode == MuonCalibTool::correctData_MSonly || m_sysScheme == "AllSys") {
                 result.insert(SystematicVariation("MUON_SCALE_MS", 1));
                 result.insert(SystematicVariation("MUON_SCALE_MS", -1));
 

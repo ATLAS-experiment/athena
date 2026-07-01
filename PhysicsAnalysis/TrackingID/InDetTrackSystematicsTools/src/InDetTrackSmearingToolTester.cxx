@@ -1,5 +1,5 @@
  /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -7,6 +7,7 @@
 
 // EDM include(s):
 #include "xAODTracking/TrackParticleContainer.h"
+#include "AthContainers/CurrentContext.h"
 
 // Local include(s):
 #include "InDetTrackSmearingToolTester.h"
@@ -25,7 +26,7 @@ namespace InDet {
         }
 
    StatusCode InDetTrackSmearingToolTester::initialize() {
-     
+
       // Greet the user:
       ATH_MSG_INFO( "Initialising" );
       ATH_MSG_DEBUG( "InDetTrackSmearingTool   = " << m_smearTool );
@@ -46,23 +47,24 @@ namespace InDet {
 	return StatusCode::FAILURE;
       }
 
-      ATH_CHECK( book( TH1F("d0_B", "original d0", 100, -5.0, 5.0) ) );     
-      ATH_CHECK( book( TH1F("z0_B", "original z0", 100, -200.0, 200.0) ) );     
-      ATH_CHECK( book( TH1F("d0sm", "d0 after smearing", 100, -5.0, 5.0) ) );     
-      ATH_CHECK( book( TH1F("z0sm", "z0 after smearing", 100, -200.0, 200.0) ) );     
-      ATH_CHECK( book( TH1F("subtraction_d0", "subtraction_d0", 100, -0.10, 0.10) ) );     
-      ATH_CHECK( book( TH1F("subtraction_z0", "subtraction_z0", 100,-0.50, 0.50) ) );     
+      ATH_CHECK( book( TH1F("d0_B", "original d0", 100, -5.0, 5.0) ) );
+      ATH_CHECK( book( TH1F("z0_B", "original z0", 100, -200.0, 200.0) ) );
+      ATH_CHECK( book( TH1F("d0sm", "d0 after smearing", 100, -5.0, 5.0) ) );
+      ATH_CHECK( book( TH1F("z0sm", "z0 after smearing", 100, -200.0, 200.0) ) );
+      ATH_CHECK( book( TH1F("subtraction_d0", "subtraction_d0", 100, -0.10, 0.10) ) );
+      ATH_CHECK( book( TH1F("subtraction_z0", "subtraction_z0", 100,-0.50, 0.50) ) );
 
       // Return gracefully:
       return StatusCode::SUCCESS;
    }
 
-   StatusCode InDetTrackSmearingToolTester::execute() {
+   StatusCode InDetTrackSmearingToolTester::execute(const EventContext& /*ctx*/) {
 
-      // Create a shallow container copy and then apply the smearingtool to impact parameters:      
+      // Create a shallow container copy and then apply the smearingtool to impact parameters:
       const xAOD::TrackParticleContainer *IDParticles = nullptr;
       ATH_CHECK( evtStore()->retrieve( IDParticles , m_Track_IP ) );
-      std::pair< xAOD::TrackParticleContainer*, xAOD::ShallowAuxContainer* > IDParticles_shallowCopy = xAOD::shallowCopyContainer( *IDParticles );
+      xAOD::ShallowCopyResult_t<xAOD::TrackParticleContainer> IDParticles_shallowCopy =
+        xAOD::shallowCopy( *IDParticles );
       for( xAOD::TrackParticle* track : *IDParticles_shallowCopy.first ) {
           double d0_1=0.,d0_2=0.,z0_1=0.,z0_2=0.;
           d0_1=track->d0();
@@ -75,16 +77,14 @@ namespace InDet {
           d0_2=track->d0();
           z0_2=track->z0();
           hist("d0sm")->Fill( d0_2 );
-          hist("z0sm")->Fill( z0_2 ); 
+          hist("z0sm")->Fill( z0_2 );
           hist("subtraction_d0")->Fill( d0_2 - d0_1 );
           hist("subtraction_z0")->Fill( z0_2 - z0_1 );
       }
-      delete IDParticles_shallowCopy.first;
-      delete IDParticles_shallowCopy.second;  
 
       // Return gracefully:
       return StatusCode::SUCCESS;
 
    } // End of the execute()
 
-} // namespace InDet        
+} // namespace InDet

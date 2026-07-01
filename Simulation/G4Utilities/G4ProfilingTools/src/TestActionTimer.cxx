@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -59,12 +59,6 @@ namespace G4UA
   }
 
   TestActionTimer::TestActionTimer()
-    : m_report(),
-      m_runTimer(0),
-      m_eventTimer(0),
-      //m_runTime(0.),
-      m_eventTime(0.)//,
-      //m_histSvc("THistSvc",name)
   {
     m_report.timeName.resize(eMax);
     m_report.timeName[eEMB]   = "EMB";
@@ -82,6 +76,7 @@ namespace G4UA
     m_report.timeName[eMu]    = "Mu";
     m_report.timeName[ePx]    = "Px";
     m_report.timeName[eTrt]    = "TRT";
+    m_report.timeName[eHGTD] = "HGTD";
     m_report.timeName[eSev]   = "IDServ";
     m_report.timeName[eSct]   = "SCT";
     m_report.timeName[eOther] = "Other";
@@ -344,6 +339,10 @@ namespace G4UA
                 nom.substr(0,3) == "TRT" ) ||
               nom == "GasMANeg" ){
       return eTrt;
+    }
+    else if ( nom.length() >= 4 &&
+              nom.substr(0,4) == "HGTD"){
+      return eHGTD;
     }
     else if ( nom.length() >= 4 &&
               nom.substr(0,4) == "Tile"){

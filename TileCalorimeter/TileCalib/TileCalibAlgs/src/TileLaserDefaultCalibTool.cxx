@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -884,6 +884,7 @@ StatusCode TileLaserDefaultCalibTool::finalizeCalculations(){
 	  for (int pmt2=pmt1+1; pmt2<NCOUPLES; ++pmt2){
 	    chan1 = getCoupleOfPMT(partition, pmt1).second;
 	    chan2 = getCoupleOfPMT(partition, pmt2).second;
+            if (chan1 < 0 || chan2 < 0) continue;
 	    q1 = m_rs_signal[partition][drawer][chan1][gain]->Mean();
 	    q2 = m_rs_signal[partition][drawer][chan2][gain]->Mean();
 
@@ -909,6 +910,7 @@ StatusCode TileLaserDefaultCalibTool::finalizeCalculations(){
 	  for (int pmt2=pmt1+1; pmt2<NCOUPLES; ++pmt2){
 	    chan1 = getCoupleOfPMT(partition, pmt2).first;
 	    chan2 = getCoupleOfPMT(partition, pmt1).first;
+            if (chan1 < 0 || chan2 < 0) continue;
 	    q1 = m_rs_signal[partition][drawer][chan1][gain]->Mean();
 	    q2 = m_rs_signal[partition][drawer][chan2][gain]->Mean();
 
@@ -1183,9 +1185,7 @@ StatusCode TileLaserDefaultCalibTool::finalize(){
 } // FInalize
 
 
-std::pair<unsigned int, unsigned int> TileLaserDefaultCalibTool::getCoupleOfPMT(int part, int couple){
-  std::pair<unsigned int, unsigned int> coupleOfPMTs;
-
+std::pair<int, int> TileLaserDefaultCalibTool::getCoupleOfPMT(int part, int couple){
   int chanLBOdd[NCOUPLES] = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 33, 35, 37, 39, 41, 45, 47};
   int chanLBEven[NCOUPLES] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 34, 36, 38, 40, 42, 44, 46};
 
@@ -1193,12 +1193,9 @@ std::pair<unsigned int, unsigned int> TileLaserDefaultCalibTool::getCoupleOfPMT(
   int chanEBEven[NCOUPLES] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 20, 22, 30, 31, 38, 39, 41, -1, -1, -1, -1, -1, -1};
 
   if (part<2){   //----LB
-    coupleOfPMTs.first = chanLBEven[couple];
-    coupleOfPMTs.second = chanLBOdd[couple];
-  } else {  //----EB
-    coupleOfPMTs.first = chanEBEven[couple];
-    coupleOfPMTs.second = chanEBOdd[couple];
+    return std::make_pair (chanLBEven[couple], chanLBOdd[couple]);
   }
-
-  return coupleOfPMTs;
+  else {  //----EB
+    return std::make_pair (chanEBEven[couple], chanEBOdd[couple]);
+  }
 }

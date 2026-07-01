@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TriggerResultMaker.h"
 #include "L1TopoAlgorithms/cTauMultiplicity.h"
 #include "xAODTrigger/eFexTauRoIAuxContainer.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
+#include <limits>
 
 namespace {
   template<class T> void makeLink(const SG::ReadHandleKey<T>& rhk,
@@ -42,17 +43,20 @@ L1TriggerResultMaker::L1TriggerResultMaker(const std::string& name, ISvcLocator*
 StatusCode L1TriggerResultMaker::initialize() {
   ATH_MSG_DEBUG("Initialising " << name());
   ATH_CHECK(m_l1TriggerResultWHKey.initialize());
-  ATH_CHECK(m_muRoIKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_eFexEMRoIKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_eFexTauRoIKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_jFexFwdElRoIKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_jFexTauRoIKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_muRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_eFexEMRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_eFexTauRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_jFexFwdElRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_jFexTauRoIKeys.initialize(SG::AllowEmpty));
   ATH_CHECK(m_cTauRoIKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_cjTauLinkKey.initialize(!m_cjTauLinkKey.empty()));
-  ATH_CHECK(m_jFexSRJetRoIKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_jFexLRJetRoIKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_gFexSRJetRoIKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_gFexLRJetRoIKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_jFexSRJetRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_jFexLRJetRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_gFexSRJetRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_gFexLRJetRoIKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_CTPKey.initialize(!m_CTPKey.empty()));
+  ATH_CHECK(m_gScalarEJwojKeys.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_gMETComponentsJwojKeys.initialize(SG::AllowEmpty));
   ATH_CHECK(m_thresholdPatternTools.retrieve());
   return StatusCode::SUCCESS;
 }
@@ -75,29 +79,40 @@ StatusCode L1TriggerResultMaker::execute(const EventContext& eventContext) const
   l1trHandle->push_back(std::make_unique<xAOD::TrigComposite>());
 
   // For all RoI types, find it in the event store and link to the L1TriggerResult
-  auto retrieveAndLink = [this, &eventContext, &l1trHandle](auto key) -> StatusCode {
-    // Skip disabled inputs
-    if (key.empty()) {return StatusCode::SUCCESS;}
-    // Retrieve the L1 xAOD container to verify it exists
-    auto handle = SG::makeHandle(key, eventContext);
-    ATH_CHECK(handle.isValid());
-    // Link the L1 xAOD container (actually its first element) to L1TriggerResult
-    ATH_MSG_DEBUG(key.key() << " size: " << handle->size());
-    if (not handle->empty()) {
-      makeLink(key, *(l1trHandle->back()), key.key(), eventContext);
-    }
+  auto retrieveAndLink = [this, &eventContext, &l1trHandle](const auto &keys) -> StatusCode {
+      for(const auto& key : keys) {
+          // Skip disabled inputs
+          if (key.empty()) { continue; }
+          // Retrieve the L1 xAOD container to verify it exists
+          auto handle = SG::makeHandle(key, eventContext);
+          ATH_CHECK(handle.isValid());
+          // Link the L1 xAOD container (actually its first element) to L1TriggerResult
+          ATH_MSG_DEBUG(key.key() << " size: " << handle->size());
+          if (not handle->empty()) {
+              makeLink(key, *(l1trHandle->back()), key.key(), eventContext);
+          }
+      }
     return StatusCode::SUCCESS;
   };
 
-  ATH_CHECK(retrieveAndLink(m_muRoIKey));
-  ATH_CHECK(retrieveAndLink(m_eFexEMRoIKey));
-  ATH_CHECK(retrieveAndLink(m_eFexTauRoIKey));
-  ATH_CHECK(retrieveAndLink(m_jFexFwdElRoIKey));
-  ATH_CHECK(retrieveAndLink(m_jFexTauRoIKey));
-  ATH_CHECK(retrieveAndLink(m_jFexSRJetRoIKey));
-  ATH_CHECK(retrieveAndLink(m_jFexLRJetRoIKey));
-  ATH_CHECK(retrieveAndLink(m_gFexSRJetRoIKey));
-  ATH_CHECK(retrieveAndLink(m_gFexLRJetRoIKey));
+  ATH_CHECK(retrieveAndLink(m_muRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_eFexEMRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_eFexTauRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_jFexFwdElRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_jFexTauRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_jFexSRJetRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_jFexLRJetRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_gFexSRJetRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_gFexLRJetRoIKeys));
+  ATH_CHECK(retrieveAndLink(m_gScalarEJwojKeys));
+  ATH_CHECK(retrieveAndLink(m_gMETComponentsJwojKeys));
+
+  // If including CTPResult, need to treat it separately as it is not stored using a DataVector
+  if (!m_CTPKey.empty()) {
+    SG::ReadHandle<xAOD::CTPResult> ctpReadHandle(m_CTPKey, eventContext);
+    ATH_CHECK(ctpReadHandle.isValid());
+    ATH_CHECK(l1trHandle->back()->setDetail<std::string>("CTPResultKey", m_CTPKey.key()));
+  }
 
   // Create combined Taus and link them to the L1TR
   ATH_CHECK(createCombinedTauRoIs(*(l1trHandle->back()), eventContext));
@@ -118,45 +133,52 @@ StatusCode L1TriggerResultMaker::createCombinedTauRoIs(xAOD::TrigComposite& l1tr
 
   // Create handles
   using jTauLink_t = ElementLink<xAOD::jFexTauRoIContainer>;
-  SG::ReadHandle<xAOD::eFexTauRoIContainer> eTauRoIs{m_eFexTauRoIKey, eventContext};
-  SG::ReadHandle<xAOD::jFexTauRoIContainer> jTauRoIs{m_jFexTauRoIKey, eventContext};
+
   SG::WriteHandle<xAOD::eFexTauRoIContainer> cTauRoIs{m_cTauRoIKey, eventContext};
   SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, jTauLink_t> cjTauLink{m_cjTauLinkKey, eventContext};
-  ATH_CHECK(eTauRoIs.isValid());
-  ATH_CHECK(jTauRoIs.isValid());
+
 
   // Create and record the new eTau container for cTaus
   ATH_CHECK(cTauRoIs.record(std::make_unique<xAOD::eFexTauRoIContainer>(),
                             std::make_unique<xAOD::eFexTauRoIAuxContainer>()));
 
-  // Match jTaus to eTaus and add the resulting cTaus to the container
-  // Unmatched eTaus get added as cTau with invalid link to jTau, ATR-25927
-  size_t i_eTau{0};
   size_t n_matched{0};
-  for (const xAOD::eFexTauRoI* eTau : *eTauRoIs) {
-    // Add new eTau to the cTau container
-    cTauRoIs->push_back(std::make_unique<xAOD::eFexTauRoI>());
-    // Copy over all variables from the original eTau
-    *cTauRoIs->back() = *eTau;
+  for(auto& jTauKey : m_jFexTauRoIKeys) {
+      SG::ReadHandle <xAOD::jFexTauRoIContainer> jTauRoIs{jTauKey, eventContext};
+      ATH_CHECK(jTauRoIs.isValid());
+      for (auto &eTauKey: m_eFexTauRoIKeys) {
+          SG::ReadHandle <xAOD::eFexTauRoIContainer> eTauRoIs{eTauKey, eventContext};
+          ATH_CHECK(eTauRoIs.isValid());
+          // Match jTaus to eTaus and add the resulting cTaus to the container
+          // Unmatched eTaus get added as cTau with invalid link to jTau, ATR-25927
+          size_t i_eTau{0};
+          for (const xAOD::eFexTauRoI *eTau: *eTauRoIs) {
+              // Add new eTau to the cTau container
+              cTauRoIs->push_back(std::make_unique<xAOD::eFexTauRoI>());
+              // Copy over all variables from the original eTau
+              *cTauRoIs->back() = *eTau;
 
-    const size_t i_jTau = TCS::cTauMultiplicity::cTauMatching(*eTau, *jTauRoIs);
-    if (i_jTau==std::numeric_limits<size_t>::max()) {
-      ATH_MSG_DEBUG("No matching jTau for eTau index " << i_eTau);
-      // Add an invalid link to jTau
-      cjTauLink(*cTauRoIs->back()) = jTauLink_t{};
-    } else {
-      ++n_matched;
-      ATH_MSG_DEBUG("Matched jTau index " << i_jTau << " to eTau index " << i_eTau);
-      // Link the matched jTau
-      cjTauLink(*cTauRoIs->back()) = jTauLink_t{m_jFexTauRoIKey.key(), i_jTau, eventContext};
-    }
-    ++i_eTau;
+              const size_t i_jTau = TCS::cTauMultiplicity::cTauMatching(*eTau, *jTauRoIs);
+              if (i_jTau == std::numeric_limits<size_t>::max()) {
+                  ATH_MSG_DEBUG("No matching jTau for eTau index " << i_eTau);
+                  // Add an invalid link to jTau
+                  cjTauLink(*cTauRoIs->back()) = jTauLink_t{};
+              } else {
+                  ++n_matched;
+                  ATH_MSG_DEBUG("Matched jTau index " << i_jTau << " to eTau index " << i_eTau);
+                  // Link the matched jTau
+                  cjTauLink(*cTauRoIs->back()) = jTauLink_t{jTauKey.key(), i_jTau, eventContext};
+              }
+              ++i_eTau;
+          }
+
+
+          ATH_MSG_DEBUG(eTauKey.key() << " size: " << eTauRoIs->size());
+      }
+      ATH_MSG_DEBUG(jTauKey.key() << " size: " << jTauRoIs->size());
   }
-
-  // Link the cTaus to the L1TriggerResult
-  ATH_MSG_DEBUG(m_eFexTauRoIKey.key() << " size: " << eTauRoIs->size());
-  ATH_MSG_DEBUG(m_jFexTauRoIKey.key() << " size: " << jTauRoIs->size());
   ATH_MSG_DEBUG(m_cTauRoIKey.key() << " size: " << cTauRoIs->size() << ", matched: " << n_matched);
+    // Link the cTaus to the L1TriggerResult
   if (not cTauRoIs->empty()) {
     makeLink(m_cTauRoIKey, l1tr, m_cTauRoIKey.key(), eventContext);
   }

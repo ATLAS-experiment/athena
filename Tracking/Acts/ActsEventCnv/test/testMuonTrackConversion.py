@@ -13,6 +13,7 @@ if "__main__" == __name__:
     args = flags.fillFromArgs()
     
     flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ActsEventCnv/q447_ESD.pool.root']
+    flags.Muon.Calib.readMdtJSON = False
     flags.GeoModel.SQLiteDB = True
     #### The official upgrade samples contain an ITk but a R3-MS. To compare the input
     #### from those samples with the Phase-II style Muon geometry use a non-standard 
@@ -56,7 +57,7 @@ if "__main__" == __name__:
     
     outputfile = 'muon_dump.json'
     track_collections = ['MuonSpectrometerTracks']
-    RunTrackConversion(flags, track_collections, outputfile=outputfile)
+    RunTrackConversion(flags, track_collections, outputfile=outputfile, setupMuon = True)
 
     tolerance = 0.001
     def _valuesEqual(acts, trk):

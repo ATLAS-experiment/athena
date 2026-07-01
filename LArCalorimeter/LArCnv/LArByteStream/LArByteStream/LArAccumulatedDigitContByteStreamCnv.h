@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARACCUMULATEDDIGITCONTRAWEVENTCNV_H
@@ -48,7 +48,7 @@ public:
   /// Storage type and class ID
   virtual long repSvcType() const override { return i_repSvcType(); }
   static long storageType()     { return ByteStreamAddress::storageType(); }
-  static const CLID& classID();
+  static CLID classID();
 
 private: 
    ToolHandle<BYTESTREAMTOOL> m_tool ; 

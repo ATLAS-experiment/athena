@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -105,9 +105,9 @@ class TrigEgammaEmulationToolMT: public asg::AsgTool
 
     StatusCode initialize();
 
-    asg::AcceptData emulate(const TrigCompositeUtils::Decision *dec, const std::string& trigger, bool &valid) const;
+    asg::AcceptData emulate(const EventContext& ctx, const TrigCompositeUtils::Decision *dec, const std::string& trigger, bool &valid) const;
     
-    bool match( const TrigCompositeUtils::Decision *dec , Trig::TrigData &, unsigned int condition=TrigDefs::includeFailedDecisions ) const;
+    bool match( const EventContext& ctx, const TrigCompositeUtils::Decision *dec , Trig::TrigData &, unsigned int condition=TrigDefs::includeFailedDecisions ) const;
 
 
   private:

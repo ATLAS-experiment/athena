@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -39,6 +39,10 @@ def fromRunArgs(runArgs):
     flags.Trigger.L1.doCalo=False
     flags.Trigger.L1.doTopo=False
 
+    # LArShapeDumper uses RoIB ROB.
+    flags.Trigger.CTP.UseEDMxAOD = False
+    flags.Trigger.CTP.UseRoibROB = True
+
     if hasattr(runArgs,"outputNTUP_HECNOISEFile"):
         flags.LArShapeDump.HECNoiseNtup=runArgs.outputNTUP_HECNOISEFile
         
@@ -55,19 +59,34 @@ def fromRunArgs(runArgs):
           fw=5
        else:   
           fw=runinfo.FWversion()
-          for i in range(0,len(runinfo.streamTypes())):
-             if runinfo.streamTypes()[i] ==  "SelectedEnergy":
-                   flags.LArShapeDump.rawSCKey = "SC_ET_ID"
-                   flags.LArShapeDump.nrawSC = runinfo.streamLengths()[i]
-             elif runinfo.streamTypes()[i] ==  "Energy":
-                   flags.LArShapeDump.rawSCKey = "SC_ET"
-                   flags.LArShapeDump.nrawSC = runinfo.streamLengths()[i]
-             elif runinfo.streamTypes()[i] ==  "RawADC":
-                   flags.LArShapeDump.digitsKeySC="SC"
-                   flags.LArShapeDump.ndigitsSC = runinfo.streamLengths()[i]
-             elif runinfo.streamTypes()[i] ==  "ADC":
-                   flags.LArShapeDump.digitsKeySC="SC_ADC_BAS"
-                   flags.LArShapeDump.ndigitsSC = runinfo.streamLengths()[i]
+          if hasattr(runArgs,"doPEBStream") and runArgs.doPEBStream:
+             for i in range(0,len(runinfo.streamTypesPEB())):
+                if runinfo.streamTypesPEB()[i] ==  "SelectedEnergy":
+                      flags.LArShapeDump.rawSCKey = "SC_ET_ID"
+                      flags.LArShapeDump.nrawSC = runinfo.streamLengthsPEB()[i]
+                elif runinfo.streamTypesPEB()[i] ==  "Energy":
+                      flags.LArShapeDump.rawSCKey = "SC_ET"
+                      flags.LArShapeDump.nrawSC = runinfo.streamLengthsPEB()[i]
+                elif runinfo.streamTypesPEB()[i] ==  "RawADC":
+                      flags.LArShapeDump.digitsKeySC="SC"
+                      flags.LArShapeDump.ndigitsSC = runinfo.streamLengthsPEB()[i]
+                elif runinfo.streamTypesPEB()[i] ==  "ADC":
+                      flags.LArShapeDump.digitsKeySC="SC_ADC_BAS"
+                      flags.LArShapeDump.ndigitsSC = runinfo.streamLengthsPEB()[i]
+          else:
+             for i in range(0,len(runinfo.streamTypes())):
+                if runinfo.streamTypes()[i] ==  "SelectedEnergy":
+                      flags.LArShapeDump.rawSCKey = "SC_ET_ID"
+                      flags.LArShapeDump.nrawSC = runinfo.streamLengths()[i]
+                elif runinfo.streamTypes()[i] ==  "Energy":
+                      flags.LArShapeDump.rawSCKey = "SC_ET"
+                      flags.LArShapeDump.nrawSC = runinfo.streamLengths()[i]
+                elif runinfo.streamTypes()[i] ==  "RawADC":
+                      flags.LArShapeDump.digitsKeySC="SC"
+                      flags.LArShapeDump.ndigitsSC = runinfo.streamLengths()[i]
+                elif runinfo.streamTypes()[i] ==  "ADC":
+                      flags.LArShapeDump.digitsKeySC="SC_ADC_BAS"
+                      flags.LArShapeDump.ndigitsSC = runinfo.streamLengths()[i]
 
     # To respect --athenaopts 
     flags.fillFromArgs()

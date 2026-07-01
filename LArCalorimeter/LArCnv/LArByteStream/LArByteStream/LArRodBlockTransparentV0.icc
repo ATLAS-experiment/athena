@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of a LArRODBlockStructure class
@@ -11,7 +11,6 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include <iostream>
 
-//#define LARBSDBGOUTPUT
 #ifdef  LARBSDBGOUTPUT
 #define LARBSDBG(text) logstr<<MSG::DEBUG<<text<<endmsg
 #else
@@ -19,7 +18,8 @@
 #endif
 
 template<class DSPHEADER>
-LArRodBlockTransparentV0<DSPHEADER>::LArRodBlockTransparentV0() : LArRodBlockStructure()
+LArRodBlockTransparentV0<DSPHEADER>::LArRodBlockTransparentV0(IMessageSvc* msgSvc)
+  : LArRodBlockStructure(msgSvc, BlockType())
 { m_iHeadBlockSize=DSPHEADER::endtag/2; // The implicit cast rounds down to the right size 
   //Fill array of offset to enable for-loops
   m_BlkOffset=DSPHEADER::RawDataBlkOffset; //RawDataOffset
@@ -130,10 +130,6 @@ void LArRodBlockTransparentV0<DSPHEADER>::setRawDataFixed(const int channel, con
    logstr << "  samples.size() =" << samples.size() << endmsg;
    std::abort();
  }
- //std::cout << "Size of Raw Data block # " << febgain << " = " << m_RawDataBlock.size();
-
- // m_RawDataBlock
-
 
  // Save data as is, we will arrange it later...
  m_RawDataBlock.push_back(channel);
@@ -164,7 +160,6 @@ void LArRodBlockTransparentV0<DSPHEADER>::finalizeFEB()
   s_size = 8 + 64 * ngains;  // Size of one sample block 16 RADD of 16 bit + 128 channels (16 bit data) 
   size = m_iHeadBlockSize + nsamples*s_size; // Total fragment size;
 
-  //m_vFragment->resize( m_iHeadBlockSize);
   m_vFragment->resize(size,0);
 
   LARBSDBG("Size of block (in 32bit words) = " << size);
@@ -198,8 +193,6 @@ void LArRodBlockTransparentV0<DSPHEADER>::finalizeFEB()
   }
   // Set header words
   LARBSDBG("FINAL Nsamples= " << nsamples);
-  //setHeader16(DSPHEADER::NSamples,nsamples);
-  //setNumberOfSamples(nsamples); 
   setHeader16(DSPHEADER::NGains,ngains);
   setHeader32(DSPHEADER::RawDataBlkOffset, m_iHeadBlockSize);
   setHeader32(DSPHEADER::NWTot,m_vFragment->size());
@@ -211,24 +204,11 @@ void LArRodBlockTransparentV0<DSPHEADER>::finalizeFEB()
 template<class DSPHEADER>
 void  LArRodBlockTransparentV0<DSPHEADER>::concatinateFEBs( )
 {
-  // std::cout << "Concatinating FEBs. Have "<< m_mFebBlocks.size() <<" febs." << std::endl;
  FEBMAPTYPE::const_iterator feb_it_b=m_mFebBlocks.begin();
  FEBMAPTYPE::const_iterator feb_it_e=m_mFebBlocks.end();
  FEBMAPTYPE::const_iterator feb_it;
  for (feb_it=feb_it_b;feb_it!=feb_it_e;++feb_it) {
    if (feb_it!=feb_it_b) //Not first Feb
-/* 
-     if (fullHeader) {//Add middle header
-       m_pRODblock->push_back(fullHeader->version().full());//Format Version number
-       m_pRODblock->push_back(fullHeader->source_id());  //Source identifer
-       m_pRODblock->push_back(fullHeader->run_no());
-       m_pRODblock->push_back(fullHeader->lvl1_id());    //Level 1 identifer
-       m_pRODblock->push_back(fullHeader->bc_id());      //Bunch Crossing identifer 
-       m_pRODblock->push_back(fullHeader->lvl1_type());  //Level 1 trigger type
-       m_pRODblock->push_back(fullHeader->detev_type()); //Detector event type
-     }
-     else //No ROD-Header
-*/
        m_pRODblock->resize( m_pRODblock->size()+m_MiddleHeaderSize);
    
    //Add feb data to rod data block
@@ -246,7 +226,7 @@ int LArRodBlockTransparentV0<DSPHEADER>::getNextRawData(int& channelNumber, std:
 #ifdef LARBSDBGOUTPUT
   MsgStream logstr(Athena::getMessageSvc(), BlockType());
 #endif
- //Debug output
+  //Debug output
   LARBSDBG("GetNextRawData for FEB 0x" << MSG::hex << (uint32_t)getHeader32(DSPHEADER::FEBID) << MSG::dec);
   LARBSDBG("m_RawDataCounter=" << m_RawDataCounter << " m_RawDataIndex="<<  m_RawDataIndex 
 	   << " m_channelsPerFEB=" << m_channelsPerFEB);
@@ -261,7 +241,6 @@ int LArRodBlockTransparentV0<DSPHEADER>::getNextRawData(int& channelNumber, std:
     return 0; 
   }
   //The m_RawDataChannel keeps track of the last read channel
-  //std::cout << "endtag=" << DSPHEADER::endtag << " m_iHeadBlockSize=" << m_iHeadBlockSize << std::endl;
 
   // Get next channel
   channelNumber=m_RawDataCounter;
@@ -313,15 +292,14 @@ int LArRodBlockTransparentV0<DSPHEADER>::getNextRawData(int& channelNumber, std:
     }
     gain=RawToOfflineGain(febgain);
   }
-  //std::cout << "Gain= " << gain << " Febgain=" << febgain << std::endl;
   ++m_RawDataCounter;
   if (m_rearrangeFirstSample && m_rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
-      {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
-	short movedSample=samples[0];
-	for (unsigned i=1;i<=m_rearrangeFirstSample;i++)
-	  samples[i-1]=samples[i];
-	samples[m_rearrangeFirstSample]=movedSample;
-      }
+  {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4
+    short movedSample=samples[0];
+    for (unsigned i=1;i<=m_rearrangeFirstSample;i++)
+      samples[i-1]=samples[i];
+    samples[m_rearrangeFirstSample]=movedSample;
+  }
   return 1;
 }
 

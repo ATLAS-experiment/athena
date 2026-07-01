@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -16,7 +16,6 @@
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/DbHandleBase.h"
 #include "StorageSvc/pool.h"
-#include "StorageSvc/Transaction.h"
 
 #include <cstdint>
 
@@ -78,7 +77,7 @@ namespace pool  {
     /// Name of the container the handle is supposed to point to
     const std::string& name() const;
     /// Mode of the handle (READ,WRITE,...)
-    DbAccessMode openMode() const;
+    Io::IoFlag openMode() const;
     /// Access to the size of the container
     uint64_t size();
     /// Access to the Database the container resides in
@@ -107,7 +106,7 @@ namespace pool  {
                     const std::string&  nam,
                     const DbTypeInfo*   typ,
                     const DbType&       dbtyp,
-                    DbAccessMode        mod);
+                    Io::IoFlag        mod);
 
     /// Check if we can access the residing in \<file\> container for reading with the given type
     /** @param   dbH     [IN]    Valid handle to database object

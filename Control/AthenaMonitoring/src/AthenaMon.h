@@ -17,7 +17,7 @@ class AthenaMon:public AthAlgorithm {
   virtual ~AthenaMon();
   
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
   virtual StatusCode finalize();
   
   virtual StatusCode start();

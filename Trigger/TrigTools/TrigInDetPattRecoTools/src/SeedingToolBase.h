@@ -43,10 +43,14 @@ class SeedingToolBase: public AthAlgTool {
 
   int runCCA(int, std::vector<GNN_Edge>&) const;
 
-  void extractSeedsFromTheGraph(int, int, int, std::vector<GNN_Edge>&, std::vector<std::tuple<float, int, std::vector<unsigned int> > >&) const;
+  void extractSeedsFromTheGraph(int, int, int, std::vector<GNN_Edge>&, std::vector<std::pair<float, std::vector<unsigned int> > >&) const;
 
   bool check_z0_bitmask(const unsigned short&, const float&, const float&, const float&) const;
-  
+
+  float estimate_curvature(const std::array<const GNN_Node*, 3>&) const;
+
+  bool validate_triplet(std::array<const GNN_Node*, 3>&, const float min_pt, const float tau_ratio, const float tau_ratio_cut ) const;
+    
   ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberToolITk"};
 
   const AtlasDetectorID* m_atlasId = nullptr;
@@ -71,9 +75,19 @@ class SeedingToolBase: public AthAlgTool {
 
   BooleanProperty m_useGPUseedExtraction{this, "UseGPUseedExtraction", true};
   BooleanProperty m_useOldTunings{this, "UseOldTunings", false};
+  BooleanProperty m_validateTriplets{this, "ValidateTriplets", true};
+  BooleanProperty m_useAdaptiveCuts{this, "UseAdaptiveCuts", true};
+  BooleanProperty m_addTriplets{this, "AddTriplets", false};
+  
 
   FloatProperty m_tau_ratio_cut{this, "tau_ratio_cut", 0.007};
+  FloatProperty m_tau_ratio_corr{this, "tau_ratio_correction", 0.006};
 
+  FloatProperty m_d0_max{this, "d0_max", 3.0};
+
+  FloatProperty m_max_eta_add_triplets{this, "add_triplets_eta_cut", 1.5};
+  FloatProperty m_max_eta_for_seed_split{this, "split_seeds_eta_cut", 0.6};
+  
   float m_phiSliceWidth = 0.;
 
   std::unique_ptr<GNN_FasTrackConnector> m_connector = nullptr;

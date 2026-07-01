@@ -102,6 +102,8 @@ namespace Trk {
   {
     ATH_MSG_DEBUG("in scanShifts");
 
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     const Trk::Track* trackForRefit =
       (m_removeScatteringBeforeRefit) ? alignTrack->trackWithoutScattering():
       dynamic_cast<const Trk::Track*>(alignTrack);
@@ -118,7 +120,7 @@ namespace Trk {
 
     IGlobalTrackFitter::AlignmentCache alignCache;
     alignCache.m_minIterations = m_nIterations;
-    const Track* refittedTrack = m_fitter->alignmentFit(alignCache, *trackForRefit,
+    const Track* refittedTrack = m_fitter->alignmentFit(ctx, alignCache, *trackForRefit,
             m_runOutlierRemoval,
             m_particleHypothesis);
     if (!refittedTrack) {
@@ -149,7 +151,7 @@ namespace Trk {
     double shiftsize = shiftSize(*alignParIt);
     if (ishift>0) shiftsize*=-1.;
     m_alignModuleTool->shiftModule(*moduleIt,alignTrack,(**alignParIt).paramType(),shiftsize);
-    refittedTrack = (m_fitter->fit(Gaudi::Hive::currentContext(),
+    refittedTrack = (m_fitter->fit(ctx,
                                   *trackForRefit,m_runOutlierRemoval,
                                   m_particleHypothesis)).release();
     m_alignModuleTool->restoreModule(*moduleIt);
@@ -179,6 +181,7 @@ namespace Trk {
   //________________________________________________________________________
   bool ShiftingDerivCalcTool::setUnshiftedResiduals(AlignTrack* alignTrack)
   {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     // see whether straight track or not
     m_fitter = alignTrack->isSLTrack() ?
@@ -199,7 +202,7 @@ namespace Trk {
       return false;
     }
 
-    const Track* refittedTrack = m_fitter->alignmentFit( alignCache,
+    const Track* refittedTrack = m_fitter->alignmentFit( ctx, alignCache,
             *trackForRefit,
             m_runOutlierRemoval,
             m_particleHypothesis);
@@ -434,6 +437,8 @@ Amg::VectorX ShiftingDerivCalcTool::getDerivatives(
               bool& resetIPar,
               double& actualSecondDeriv)
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   const Trk::Track* trackForRefit =
     (m_removeScatteringBeforeRefit) ? alignTrack->trackWithoutScattering():
     dynamic_cast<const Trk::Track*>(alignTrack);
@@ -519,7 +524,7 @@ Amg::VectorX ShiftingDerivCalcTool::getDerivatives(
 
 
     ATH_MSG_VERBOSE("fitting after shift");
-    const Track* refittedTrack=m_fitter->alignmentFit(alignCache,
+    const Track* refittedTrack=m_fitter->alignmentFit(ctx, alignCache,
                *trackForRefit,
                m_runOutlierRemoval,m_particleHypothesis);
     if (m_setMinIterations && alignCache.m_iterationsOfLastFit>m_nIterations) {

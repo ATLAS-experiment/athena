@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_MICROSESSIONMANAGER_H
@@ -9,76 +9,72 @@
 #include <set>
 
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
+#include "StorageSvc/pool.h"
 
 namespace pool {
 
   // forward declarations
   class IStorageSvc;
-  class Session;
-  class ITransaction;
 
-  namespace PersistencySvc {
+  // forward declarations
+  class DatabaseRegistry;
+  class DatabaseHandler;
 
-    // forward declarations
-    class DatabaseRegistry;
-    class DatabaseHandler;
+  /** @class MicroSessionManager
+   * 
+   * MicroSessionManager is a class taking care of starting
+   * sessions for a given major technology and managing
+   * the individual database connections.
+   *
+   */
 
-    /** @class MicroSessionManager
-     * 
-     * MicroSessionManager is a class taking care of starting
-     * sessions for a given major technology and managing
-     * the individual database connections.
-     *
-     */
+  class MicroSessionManager : virtual public ITechnologySpecificAttributes {
+  public:
+    /// Constructor
+    MicroSessionManager( DatabaseRegistry& registry, long technology );
+    /// Destructor
+    virtual ~MicroSessionManager();
 
-    class MicroSessionManager : virtual public ITechnologySpecificAttributes {
-    public:
-      /// Constructor
-      MicroSessionManager( DatabaseRegistry& registry,
-                           ITransaction& transaction,
-                           long technology );
-      /// Destructor
-      virtual ~MicroSessionManager();
+    /// Connects to the storage service
+    bool connect( Io::IoFlag transType, int ageLimit );
 
-      /// Connects to a database.
-      DatabaseHandler* connect( const std::string& fid,
-                                const std::string& pfn,
-                                long accessMode );
+    /// Connects to a database.
+    DatabaseHandler* connect( Io::IoFlag transType,
+                              const std::string& fid,
+                              const std::string& pfn );
 
-      /// Disconnects from a database.
-      void disconnect( DatabaseHandler* database );
+    /// Disconnects from a database.
+    void disconnect( DatabaseHandler* database );
 
-      /// Disconnects from all the databases
-      bool disconnectAll();
+    /// Disconnects from all the databases
+    bool disconnectAll();
 
-      /// Returns the technology
-      long technology() const;
+    /// Returns the technology
+    long technology() const;
 
-      /// Fetches the FID by trying to temporatily connect to a database.
-      std::string fidForPfn( const std::string& pfn );
+    /// Fetches the FID by trying to temporatily connect to a database.
+    std::string fidForPfn( const std::string& pfn );
 
-    protected:
-      virtual
-      bool attributeOfType( const std::string& attributeName,
-                            void* data,
-                            const std::type_info& typeInfo,
-                            const std::string& option ) override;
+  protected:
+    virtual
+    bool attributeOfType( const std::string& attributeName,
+                          void* data,
+                          const std::type_info& typeInfo,
+                          const std::string& option ) override;
 
-      virtual
-      bool setAttributeOfType( const std::string& attributeName,
-                               const void* data,
-                               const std::type_info& typeInfo,
-                               const std::string& option ) override;
+    virtual
+    bool setAttributeOfType( const std::string& attributeName,
+                             const void* data,
+                             const std::type_info& typeInfo,
+                             const std::string& option ) override;
 
-    private:
-      DatabaseRegistry&          m_registry;
-      ITransaction&              m_transaction;
-      IStorageSvc*               m_storageSvc;
-      Session*                   m_session;
-      long                       m_technology;
-      std::set<DatabaseHandler*> m_databaseHandlers;
-    };
-  }
+  private:
+    DatabaseRegistry&          m_registry;
+    IStorageSvc*               m_storageSvc;
+    bool                       m_inSession;
+    long                       m_technology;
+    std::set<DatabaseHandler*> m_databaseHandlers;
+  };
 }
 
 #endif

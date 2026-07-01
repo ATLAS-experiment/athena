@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
     
 #include "MuonCalibSegmentCreator/MuonSegmentReader.h"
@@ -43,11 +43,10 @@ StatusCode MuonSegmentReader::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode MuonSegmentReader::execute()
+StatusCode MuonSegmentReader::execute(const EventContext& ctx)
 {
 
   // fill eventInfo branches
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtKey,ctx);
   if (!eventInfo.isValid()) {
     ATH_MSG_ERROR("Did not find xAOD::EventInfo");
@@ -403,50 +402,49 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
     // use competingROT from RPC and TGC
     const Muon::CompetingMuonClustersOnTrack* crot = dynamic_cast<const Muon::CompetingMuonClustersOnTrack*>(measurement);
     if (crot) {
-      const std::vector<const Muon::MuonClusterOnTrack*>& rots = crot->containedROTs();
-      if (rots.size() > 0) {
-        std::vector<const Muon::MuonClusterOnTrack*>::const_iterator itR = rots.begin(), itR_end = rots.end();
-        for (; itR != itR_end; ++itR) {
-          Identifier crot_id = (*itR)->identify() ;
-          MuonFixedId fixid = m_idToFixedIdTool->idToFixedId(crot_id);
-          m_trkTriggerHit_id.push_back(fixid.getIdInt());
-          m_trkTriggerHit_trackIndex.push_back(itrk);
-          if (m_MuonIdHelper->isTgc(crot_id))  {
-            ATH_MSG_DEBUG("This is TGC competing hits on track!") ;                  
-            if (m_MuonIdHelper->tgcIdHelper().isStrip(crot_id)) m_trkTriggerHit_type.push_back(5);  // tgc strip hit, measuresPhi
-            else m_trkTriggerHit_type.push_back(4); // tgc wire hit
-            const Muon::TgcClusterOnTrack* tgc    = dynamic_cast<const Muon::TgcClusterOnTrack*>(*itR);
-            const Muon::TgcPrepData*       tgcPRD = tgc ? tgc->prepRawData() : nullptr;
-            if (tgcPRD) {
-              m_trkTriggerHit_time.push_back(tgcPRD->getBcBitMap());
-              m_trkTriggerHit_gPos.push_back(tgcPRD->globalPosition());
-            }
-            else {
-              m_trkTriggerHit_time.push_back(0);
-              m_trkTriggerHit_gPos.push_back(Amg::Vector3D(0,0,0));
-            }
-          } // tgc case
-          else if (m_MuonIdHelper->isRpc(crot_id))  {
-            ATH_MSG_DEBUG("This is RPC competing hits on track!") ;
-            m_trkTriggerHit_type.push_back(2);
-            const Muon::RpcClusterOnTrack* rpc    = dynamic_cast<const Muon::RpcClusterOnTrack*>(*itR);
-            const Muon::RpcPrepData*       rpcPRD = rpc ? rpc->prepRawData() : nullptr;
-            if (rpcPRD) {
-              m_trkTriggerHit_time.push_back(rpcPRD->time());
-              m_trkTriggerHit_gPos.push_back(rpcPRD->globalPosition());
-            }
-            else    {
-            m_trkTriggerHit_time.push_back(0);
-            m_trkTriggerHit_gPos.push_back(Amg::Vector3D(0,0,0));
-            } // rpc case
-          } // rpc case
-          else {
-            m_trkTriggerHit_type.push_back(0);
-            m_trkTriggerHit_time.push_back(0);
-            m_trkTriggerHit_gPos.push_back(Amg::Vector3D(0,0,0));
+      for (const auto& itR : crot->containedROTs()) {
+        Identifier crot_id = itR->identify() ;
+        MuonFixedId fixid = m_idToFixedIdTool->idToFixedId(crot_id);
+        m_trkTriggerHit_id.push_back(fixid.getIdInt());
+        m_trkTriggerHit_trackIndex.push_back(itrk);
+        if (m_MuonIdHelper->isTgc(crot_id))  {
+          ATH_MSG_DEBUG("This is TGC competing hits on track!") ;                  
+          if (m_MuonIdHelper->tgcIdHelper().isStrip(crot_id)) m_trkTriggerHit_type.push_back(5);  // tgc strip hit, measuresPhi
+          else m_trkTriggerHit_type.push_back(4); // tgc wire hit
+          const Muon::TgcClusterOnTrack* tgc    = dynamic_cast<const Muon::TgcClusterOnTrack*>(itR.get());
+          const Muon::TgcPrepData*       tgcPRD = tgc ? tgc->prepRawData() : nullptr;
+          if (tgcPRD) {
+            m_trkTriggerHit_time.push_back(tgcPRD->getBcBitMap());
+            m_trkTriggerHit_gPos.push_back(tgcPRD->globalPosition());
           }
-        } // end of crots loop
-      }  // end of crots size check
+          else {
+            m_trkTriggerHit_time.push_back(0);
+            Amg::Vector3D zero = Amg::Vector3D::Zero();
+            m_trkTriggerHit_gPos.push_back(zero);
+          }
+        } // tgc case
+        else if (m_MuonIdHelper->isRpc(crot_id))  {
+          ATH_MSG_DEBUG("This is RPC competing hits on track!") ;
+          m_trkTriggerHit_type.push_back(2);
+          const Muon::RpcClusterOnTrack* rpc    = dynamic_cast<const Muon::RpcClusterOnTrack*>(itR.get());
+          const Muon::RpcPrepData*       rpcPRD = rpc ? rpc->prepRawData() : nullptr;
+          if (rpcPRD) {
+            m_trkTriggerHit_time.push_back(rpcPRD->time());
+            m_trkTriggerHit_gPos.push_back(rpcPRD->globalPosition());
+          }
+          else    {
+          m_trkTriggerHit_time.push_back(0);
+          Amg::Vector3D zero = Amg::Vector3D::Zero();
+          m_trkTriggerHit_gPos.push_back(zero);
+          } // rpc case
+        } // rpc case
+        else {
+          m_trkTriggerHit_type.push_back(0);
+          m_trkTriggerHit_time.push_back(0);
+          Amg::Vector3D zero = Amg::Vector3D::Zero();
+          m_trkTriggerHit_gPos.push_back(zero);
+        }
+      } // end of crots loop
     }  // end of crot check
   }  // end of CompetingROT
 }  // end of store measurement 

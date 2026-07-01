@@ -62,7 +62,7 @@ class defaultTestFiles:
     AOD_RUN2_DATA = [f"{d}/CampaignInputs/data18/AOD/data18_13TeV.00357772.physics_Main.merge.AOD.r13286_p4910/1000events.AOD.27655096._000455.pool.root.1"]
     AOD_RUN2_MC = [f"{d}/CampaignInputs/mc20/AOD/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/1000events.AOD.27121237._002005.pool.root.1"]
     AOD_RUN3_DATA = [f"{d}/CampaignInputs/data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1"]
-    AOD_RUN3_MC = [f"{d}/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4159_r14799/1000events.AOD.34124794._001345.pool.root.1"] #MC23c
+    AOD_RUN3_MC = [f"{d}/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4162_r14622/1000events.AOD.33799166._000073.pool.root.1"]
     AOD_RUN4_MC = [f"{d}/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8481_s4494_r16436/AOD.44098360._000011.pool.root.1"]
 
     # Files for dedicated detector setups
@@ -112,14 +112,16 @@ class defaultGeometryTags:
 
 class defaultConditionsTags:
     RUN1_DATA = "COMCOND-BLKPA-RUN1-07"
-    RUN2_DATA = "CONDBR2-BLKPA-RUN2-11"
+    RUN2_DATA = "CONDBR2-BLKPA-RUN2-13"
     RUN2_MC = "OFLCOND-MC16-SDR-RUN2-12"
     RUN3_DATA = "CONDBR2-BLKPA-2024-05"
     RUN3_DATA22 = "CONDBR2-BLKPA-2022-17"
     RUN3_DATA23 = "CONDBR2-BLKPA-2023-07"
     RUN3_DATA24 = "CONDBR2-BLKPA-2024-05"
+    RUN3_DATA25 = "CONDBR2-BLKPA-2025-06"
+    RUN3_DATA26 = "CONDBR2-BLKPA-2026-01"
     RUN3_MC = "OFLCOND-MC23-SDR-RUN3-11-02"
-    RUN4_MC = "OFLCOND-MC21-SDR-RUN4-03"
+    RUN4_MC = "OFLCOND-MC21-SDR-RUN4-06"
 
     @staticmethod
     def autoconfigure(flags):

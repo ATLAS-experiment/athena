@@ -84,6 +84,9 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
                     2: 'random misalignment',
                     3: 'IBL-stave temperature dependent bowing',
                     7: 'misalignment according to module indices',
+                    41: 'ITk endcap beam-pipe z shift',
+                    42: 'ITk pixel barrel layer bowing',
+                    43: 'ITk barrel radial expansion',
                     11: 'R deltaR (radial expansion)', 12: 'Phi deltaR (ellipse)',13: 'Z deltaR (funnel)',
                     21: 'R deltaPhi (curl)', 22: 'Phi deltaPhi (clamshell) ',23:'Z deltaPhi (twist)',
                     31: 'R deltaZ (telescope)',32:'Phi deltaZ (skew)',33:'Z deltaZ (z-expansion)'}
@@ -102,6 +105,13 @@ def CreateMis(flags,name="CreateITkMisalignAlg",**kwargs):
     kwargs.setdefault("ASCIIFilenameBase",outFiles)
     kwargs.setdefault("SQLiteTag",'MisalignmentMode_'+str(misalignModeMap.get(int(MisalignMode),'unknown')))
     kwargs.setdefault("MisalignMode",int(MisalignMode))
+    kwargs.setdefault("TargetLayer", int(kwargs.pop('TargetLayer', 0)))
+    kwargs.setdefault("TargetLayerMax", int(kwargs.pop('TargetLayerMax', -999)))
+    kwargs.setdefault("IBLBowingTshift", float(kwargs.pop('IBLBowingTshift', 0.0)))
+    kwargs.setdefault("EndcapShiftConvention", kwargs.pop('EndcapShiftConvention', 'outward'))
+    kwargs.setdefault("RadialShift", float(kwargs.pop('RadialShift', 0.0)))
+    kwargs.setdefault("RadialShiftConvention", kwargs.pop('RadialShiftConvention', 'outward'))
+    kwargs.setdefault("RadialSubdetector", kwargs.pop('RadialSubdetector', 'Pixel'))
     kwargs.setdefault("Translation_Scale",Translation_Scale)
     kwargs.setdefault("Rotation_Scale",Rotation_Scale)
     kwargs.setdefault("Local_Translation",Local_Translation)

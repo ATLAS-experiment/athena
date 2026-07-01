@@ -18,7 +18,7 @@ public:
         T_AthenaPoolCustomCnv<TileRawChannelContainer, TileRawChannelContainer_PERS >( svcloc) {}
 protected:
   TileRawChannelContainer_PERS*  createPersistent(TileRawChannelContainer* transCont);
-  TileRawChannelContainer*       createTransient ();
+  TileRawChannelContainer*       createTransient(const Token* token);
 };
 
 

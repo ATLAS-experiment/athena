@@ -39,6 +39,7 @@
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
 #include "GeneratorFilters/xAODSplitPhotonFilter.h"
 #include "GeneratorFilters/xAODDiPhotonFilter.h"
+#include "GeneratorFilters/xAODFourLeptonInvMassFilter.h" 
 
 // slimmers for 22.6
 #include "GeneratorFilters/PileupTruthParticleSlimmer.h"
@@ -56,6 +57,7 @@
 #include "GeneratorFilters/ChargedTracksWeightFilter.h"
 #include "GeneratorFilters/DecaysFinalStateFilter.h"
 #include "GeneratorFilters/DecayTimeFilter.h"
+#include "GeneratorFilters/DecayVolumeFilter.h"
 #include "GeneratorFilters/DiLeptonMassFilter.h"
 #include "GeneratorFilters/DirectPhotonFilter.h"
 #include "GeneratorFilters/ElectronFilter.h"
@@ -148,6 +150,7 @@ DECLARE_COMPONENT( xAODVBFMjjIntervalFilter )
 DECLARE_COMPONENT( xAODXtoVVDecayFilterExtended )
 DECLARE_COMPONENT( xAODSplitPhotonFilter )
 DECLARE_COMPONENT( xAODDiPhotonFilter )
+DECLARE_COMPONENT( xAODFourLeptonInvMassFilter )
 //slimmers accepted for 22.6
 DECLARE_COMPONENT( PileupTruthParticleSlimmer )
 DECLARE_COMPONENT( xAODTruthParticleSlimmerElectron )
@@ -164,6 +167,7 @@ DECLARE_COMPONENT( ChargedTracksFilter )
 DECLARE_COMPONENT( ChargedTracksWeightFilter )
 DECLARE_COMPONENT( DecaysFinalStateFilter ) 
 DECLARE_COMPONENT( DecayTimeFilter )
+DECLARE_COMPONENT( DecayVolumeFilter )
 DECLARE_COMPONENT( DiLeptonMassFilter )
 DECLARE_COMPONENT( DirectPhotonFilter )
 DECLARE_COMPONENT( ElectronFilter ) 

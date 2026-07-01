@@ -86,8 +86,8 @@ namespace SG {
     typedef IStringPool::sgkey_t sgkey_t;
 
     struct remap_t {
-      sgkey_t target;
-      off_t index_offset;
+      sgkey_t target = 0;
+      off_t index_offset = 0;
     };
     typedef SGKeyMap<remap_t> remap_map_t;
     remap_map_t m_remaps;
@@ -1328,69 +1328,6 @@ void SGImplSvc::emptyTrash() {
   }
 }
 
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-bool SGImplSvc::bindHandleToProxy(const CLID& id, const string& key,
-                                  IResetable* ir, DataProxy *&dp) 
-{
-  lock_t lock (m_mutex);
-
-  dp = m_pStore->proxy (id, key);
-  if (dp == nullptr && m_pPPS != nullptr) {
-    dp = m_pPPS->retrieveProxy(id, key, *m_pStore);
-  }
-
-  if (0 == dp) return false;
-
-  if (! dp->bindHandle(ir) ) {
-    fatal() << "DataHandle at " << hex << ir << dec 
-            << " already bound to DataProxy with key " << ir->key() 
-            << ". Cannot bind to proxy " << dp->name() << " as well\n"
-            << "        You have probably registered multiple callbacks via regFcn with the same DataHandle using different keys (DataProxies)\n"
-            << endmsg;
-    return false;
-  }
-    
-  //already done in DataHandleBase::setState  dp->addRef();
-
-#ifndef NDEBUG
-  SG_MSG_DEBUG(" Bound handle " << MSG::hex << ir << " to proxy " 
-               << dp << MSG::dec); 
-#endif
-  return true;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                              IResetable* ir, SG::DataProxy *&dp) 
-{
-  lock_t lock (m_mutex);
-  bool ret = bindHandleToProxy (id, key, ir, dp);
-  if (ret) {
-    StatusCode sc = m_pIOVSvc->regProxy(dp,key);
-    if (sc.isFailure()) return false;
-  }
-  return true;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                              IResetable* ir, SG::DataProxy *&dp,
-                                              const CallBackID& /*c*/,
-                                              const IOVSvcCallBackFcn& /*fcn*/,
-                                              bool /*trigger*/)
-{
-  lock_t lock (m_mutex);
-  bool ret = bindHandleToProxy (id, key, ir, dp);
-  if (ret) {
-    StatusCode sc = m_pIOVSvc->regProxy(dp,key);
-    if (sc.isFailure()) return false;
-  }
-  return true;
-}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 

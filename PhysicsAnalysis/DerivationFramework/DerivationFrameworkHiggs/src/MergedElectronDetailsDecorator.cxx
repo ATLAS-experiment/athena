@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -64,8 +64,8 @@ namespace DerivationFramework {
 
 
     for( const auto *const el : *electrons ){
-      fillTrackDetails(el,isMC);
-      fillVertexDetails(el);
+      fillTrackDetails(ctx, el,isMC);
+      fillVertexDetails(ctx, el);
       fillClusterDetails(el);
     }
 
@@ -73,7 +73,8 @@ namespace DerivationFramework {
 
   } // addBranches
 
-  void DerivationFramework::MergedElectronDetailsDecorator::fillTruthDetails( std::vector<float>& trkMatchTrk,
+  void DerivationFramework::MergedElectronDetailsDecorator::fillTruthDetails( const EventContext& ctx,
+                                                                              std::vector<float>& trkMatchTrk,
                                                                               const xAOD::TrackParticle* tp,
                                                                               const xAOD::CaloCluster* cluster) const{
 
@@ -90,7 +91,6 @@ namespace DerivationFramework {
 
    Trk::CurvilinearParameters  truthTP( pos, mom, truthPart->charge() );
 
-   const EventContext& ctx = Gaudi::Hive::currentContext();
    float etaAtCalo, phiAtCalo;
    if( m_emExtrapolationTool->getEtaPhiAtCalo ( ctx,
                                            &truthTP,
@@ -104,11 +104,12 @@ namespace DerivationFramework {
 
   }
 
-  void DerivationFramework::MergedElectronDetailsDecorator::fillMatchDetails( std::vector<float>& trkMatchTrk,
+  void DerivationFramework::MergedElectronDetailsDecorator::fillMatchDetails( const EventContext& ctx,
+                                                                              std::vector<float>& trkMatchTrk,
                                                                               const xAOD::TrackParticle* tp,
                                                                               const xAOD::CaloCluster* cluster) const {
 
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{ m_caloMgrKey };
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{ m_caloMgrKey, ctx };
     const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
 
     //Reset values
@@ -121,7 +122,6 @@ namespace DerivationFramework {
     std::array<double,4>  deltaEta = { -999.0, -999.0, -999.0, -999.0 };
     std::array<double,4>  deltaPhi = { -999.0, -999.0, -999.0, -999.0 };
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     std::pair<std::vector<CaloSampling::CaloSample>,
               std::vector<std::unique_ptr<Trk::Surface>>>
       layersAndSurfaces =
@@ -192,7 +192,7 @@ namespace DerivationFramework {
   }
 
 
-  void DerivationFramework::MergedElectronDetailsDecorator::fillTrackDetails(const xAOD::Electron* el,bool isMC) const
+  void DerivationFramework::MergedElectronDetailsDecorator::fillTrackDetails(const EventContext& ctx, const xAOD::Electron* el,bool isMC) const
   {
     std::vector<float> trkMatchTrkP_dEta1(el->nTrackParticles(),-999);
     std::vector<float> trkMatchTrkP_dEta2(el->nTrackParticles(),-999);
@@ -213,7 +213,7 @@ namespace DerivationFramework {
       for( unsigned int i(0); i < el->nTrackParticles(); ++i ){
         const auto *trackParticle = el->trackParticle( i );
         if(trackParticle){
-          fillMatchDetails( trkMatch, trackParticle, caloCluster);
+          fillMatchDetails( ctx, trkMatch, trackParticle, caloCluster);
           trkMatchTrkP_dEta1[i]  = trkMatch[0];
           trkMatchTrkP_dEta2[i]  = trkMatch[1];
           trkMatchTrkP_dPhi1[i]  = trkMatch[2];
@@ -225,7 +225,7 @@ namespace DerivationFramework {
           trkMatchTrkR_dPhi2[i]  = trkMatch[8];
 
           if(isMC){
-            fillTruthDetails( trkMatch, trackParticle, caloCluster );
+            fillTruthDetails( ctx, trkMatch, trackParticle, caloCluster );
             if( trkMatch.size() == 2 ){
               trueMatch_dEta2[i] = trkMatch[0];
               trueMatch_dPhi2[i] = trkMatch[1];
@@ -288,9 +288,8 @@ namespace DerivationFramework {
   }
 
 
-  void DerivationFramework::MergedElectronDetailsDecorator::fillVertexDetails(const xAOD::Electron* el) const
+  void DerivationFramework::MergedElectronDetailsDecorator::fillVertexDetails(const EventContext& ctx, const xAOD::Electron* el) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     const auto *caloCluster =  el->caloCluster();
 
     float vtxR = -999;
@@ -348,7 +347,7 @@ namespace DerivationFramework {
         vtxTrkParticleIndex1 = trkIndex1;
         vtxTrkParticleIndex2 = trkIndex2;
 
-        std::unique_ptr<xAOD::Vertex> myVertex( m_VertexFitter->fit( trksToFit, startingPoint ) );
+        std::unique_ptr<xAOD::Vertex> myVertex( m_VertexFitter->fit( ctx, trksToFit, startingPoint ) );
 
         if(myVertex){
 

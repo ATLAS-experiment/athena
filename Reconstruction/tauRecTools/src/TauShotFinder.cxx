@@ -195,7 +195,6 @@ StatusCode TauShotFinder::selectCells(const xAOD::TauJet& tau,
   
   for (const CaloCell* cell : shotCells) {
     // Require cells above threshold (100 MeV by default)
-    // FIXME: cells are not corrected to point at tau vertex
     if (cell->pt() * m_caloWeightTool->wtCell(cell) < m_energyThreshold) continue;
     // if in EleRM, check the clusters do not include electron activities
     if (m_removeElectronCells && inEleRM() && std::find(removed_cells.cbegin(), removed_cells.cend(), cell) != removed_cells.cend()) continue;

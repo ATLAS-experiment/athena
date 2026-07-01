@@ -72,6 +72,7 @@
        <hist1D name="truth_lowpt" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_prodR" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_prodZ" plotopts="" tests="KS" type="TH1F"/>
+       <hist1D name="truth_time" plotopts="" tests="KS" type="TH1F"/>
       </TDirectory>
       <TDirectory name="HitsOnTracks">
        <hist1D name="nPixelHits" plotopts="" tests="KS" type="TH1F"/>
@@ -224,6 +225,19 @@
         <hist1D name="pullmean_vs_pt_z0sin" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="sigma_vs_eta_z0sin" plotopts="" tests="KS" type="TProfile"/>
         <hist1D name="sigma_vs_pt_z0sin" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="pull_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="res_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="sigma_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="resolution_vs_eta_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="resmean_vs_eta_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="resolution_vs_pt_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="resmean_vs_pt_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="pullwidth_vs_eta_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="pullmean_vs_eta_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="pullwidth_vs_pt_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="pullmean_vs_pt_time" plotopts="" tests="KS" type="TH1F"/>
+        <hist1D name="sigma_vs_eta_time" plotopts="" tests="KS" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_time" plotopts="" tests="KS" type="TProfile"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -234,11 +248,6 @@
       <graph name="fakerate_vs_phi" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="fakerate_vs_d0" plotopts="" tests="KS" type="TEfficiency"/>
       <graph name="fakerate_vs_z0" plotopts="" tests="KS" type="TEfficiency"/>
-     </TDirectory>
-     <TDirectory name="Unlinked">
-      <TDirectory name="FakeRate">
-       <graph name="fakerate_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
-      </TDirectory>
      </TDirectory>
      <TDirectory name="Efficiency">
       <graph name="efficiency_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>

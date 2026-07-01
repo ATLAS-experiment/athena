@@ -18,6 +18,7 @@
 #include <string> 
 #include <vector> 
 #include <sstream>
+#include <iostream>
 #include <limits>
 #include <iomanip> 
 #include <stdexcept>

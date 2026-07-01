@@ -40,7 +40,7 @@ namespace CP
     SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterContainer {this, "clusterContainer", "egammaClusters", "the name of the e-gamma cluster container"};
 
     /// @brief the sampling pattern decoration
-    SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_samplingPattern {this, "samplingPattern", "egammaClusters.samplingPattern", "the samplingPattern decoration"};
+    SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_samplingPattern {this, "samplingPattern", m_clusterContainer, "samplingPattern", "the samplingPattern decoration"};
   };
 }
 

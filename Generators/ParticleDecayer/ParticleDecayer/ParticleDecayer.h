@@ -69,6 +69,7 @@ class ParticleDecayer: public GenModule {
   bool   m_expDecayDoVariableLifetime{};
   double m_expDecayFractionToKeep{};
   bool   m_expDecayDoTruncateLongDecays{};
+  bool   m_decayOnlyStable{};
 
   double m_barrelRadius;
   double m_endCapDistance;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArDSPConfig2Ntuple.h"
@@ -72,6 +72,10 @@ StatusCode LArDSPConfig2Ntuple::stop() {
    }
       
    LArDSPConfig larDSPConfig(attrList);
+   if (!larDSPConfig.good()) {
+     ATH_MSG_ERROR( "larDSPConfig failed to initialise correctly." );
+     return StatusCode::FAILURE;
+   }
    
    for (const HWIdentifier hwid: m_onlineId->channel_range()) {
      m_peakSample=larDSPConfig.peakSample(hwid);

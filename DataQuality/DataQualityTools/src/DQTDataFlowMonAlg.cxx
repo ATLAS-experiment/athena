@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -53,7 +53,7 @@ DQTDataFlowMonAlg::fillHistograms( const EventContext& ctx ) const
         fill(group, weight, lb);
       } else {
         //Monitor AtlasReady flag .. for real-data only
-        bool atlasReady=m_atlasReadyFilter->accept();
+        bool atlasReady=m_atlasReadyFilter->accept(ctx);
         auto isReady=Scalar<short>("atlasready",atlasReady);
         fill(group,isReady);
       }

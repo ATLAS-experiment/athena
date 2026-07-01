@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -795,7 +795,7 @@ float Calibrator::FitResidual ATLAS_NOT_THREAD_SAFE (const std::string& key, TH1
 
 }
 
-TDirectory* Calibrator::Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory* dir, std::string key, const std::string& opt, caldata * caldata_above){ // Thread unsafe FitResidual, FitRt, FitTimeResidual are used.
+TDirectory* Calibrator::Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory* dir, const std::string &key, const std::string& opt, caldata * caldata_above){ // Thread unsafe FitResidual, FitRt, FitTimeResidual are used.
 
   //set some bool flags
   bool calrt=opt.find('R')!=std::string::npos;

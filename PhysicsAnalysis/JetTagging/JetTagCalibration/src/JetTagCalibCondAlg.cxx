@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
@@ -8,7 +8,6 @@
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "PoolSvc/IPoolSvc.h"
-#include "PersistencySvc/IFileCatalog.h"
 #include "TH1.h"
 #include "TH2.h"
 #include <TObjString.h>
@@ -221,10 +220,11 @@ namespace Analysis {
 
     //check that hypotheses for likelihood tool are defined
     std::string hName;
+    const std::string histoTagStr{"IP2D"};
     for(unsigned int i=0;i<m_IP2D_trackGradePartitions.size();i++) {
       for(unsigned int ih=0;ih<m_IPTag_hypotheses.size();ih++) {
         hName = m_IPTag_hypotheses[ih]+"/"+m_IP2D_trackGradePartitions[i]+"/SipA0";
-        registerHistogram("IP2D", hName);          
+        registerHistogram(histoTagStr, hName);          
       }
     }
   }
@@ -232,13 +232,14 @@ namespace Analysis {
  
   void JetTagCalibCondAlg::initializeIP3D() {
     ATH_MSG_DEBUG("initialize IP3D paths of the calibration file");
-
     //check that hypotheses for likelihood tool are defined
     std::string hName;
+    //construct const string out of loop
+    const std::string taggerStr{"IP3D"};
     for(unsigned int i=0;i<m_IP2D_trackGradePartitions.size();i++) {
       for(unsigned int ih=0;ih<m_IPTag_hypotheses.size();ih++) {
         hName = m_IPTag_hypotheses[ih]+"/"+m_IP2D_trackGradePartitions[i]+"/Sip3D";
-        registerHistogram("IP3D", hName);          
+        registerHistogram(taggerStr, hName);          
       }
     }
   }
@@ -259,18 +260,19 @@ namespace Analysis {
     ATH_MSG_DEBUG("initialize SV1 paths of the calibration file");
 
     std::string hName;
+    const std::string histoTagStr{"SV1"};
     for(unsigned int ih=0;ih<m_IPTag_hypotheses.size();ih++) {
       hName = m_IPTag_hypotheses[ih]+"/N2T";
-      registerHistogram("SV1", hName);
+      registerHistogram(histoTagStr, hName);
       hName = m_IPTag_hypotheses[ih]+"/BidimME";
-      registerHistogram("SV1", hName);
+      registerHistogram(histoTagStr, hName);
         if(m_useDRJPVSV) {
           hName = m_IPTag_hypotheses[ih]+"/DRJPVSV";
-          registerHistogram("SV1", hName);
+          registerHistogram(histoTagStr, hName);
       }
     }
 
-    this->initializeSVEff("SV1");
+    this->initializeSVEff(histoTagStr);
   }
 
   void JetTagCalibCondAlg::initializeSV2() {
@@ -279,21 +281,22 @@ namespace Analysis {
     this->initializeIPTag();
 
     std::string hName;
+    const std::string histoTagStr{"SV2"};
     if(m_usePtSV2){
       for(unsigned int ih=0;ih<m_IPTag_hypotheses.size();ih++) {
         hName = m_IPTag_hypotheses[ih]+"/TridimMENPt";
-        registerHistogram("SV2", hName);
+        registerHistogram(histoTagStr, hName);
         hName = m_IPTag_hypotheses[ih]+"/N2TEffSV2";
-        registerHistogram("SV2", hName);
+        registerHistogram(histoTagStr, hName);
        }
     }else{
       for(unsigned int ih=0;ih<m_IPTag_hypotheses.size();ih++) {
         hName = m_IPTag_hypotheses[ih]+"/TridimMEN2T";
-        registerHistogram("SV2", hName);
+        registerHistogram(histoTagStr, hName);
       }
     }
 
-    this->initializeSVEff("SV2");
+    this->initializeSVEff(histoTagStr);
   }
 
   
@@ -316,10 +319,9 @@ namespace Analysis {
                                          std::string((const char*)(directory+"LayersInfo")));
     
     Int_t nHidden=m_JetFitterNN_maximumRegisteredLayers-2;
-    
+    const std::string histoTagStr{"JetFitterNN"};
     for (Int_t i=0;i<nHidden+1;++i)
     {
-      
       TString weightName("Layer");
       weightName+=i;
       weightName+="_weights";
@@ -328,10 +330,10 @@ namespace Analysis {
       thresholdName+=i;
       thresholdName+="_thresholds";
       
-      this->registerHistogram("JetFitterNN", m_JetFitterNN_calibrationDirectory,
+      this->registerHistogram(histoTagStr, m_JetFitterNN_calibrationDirectory,
                                            std::string((const char*)(directory+weightName)));
       
-      this->registerHistogram("JetFitterNN", m_JetFitterNN_calibrationDirectory,
+      this->registerHistogram(histoTagStr, m_JetFitterNN_calibrationDirectory,
                                            std::string((const char*)(directory+thresholdName)));
     }
     ATH_MSG_DEBUG(" Registered NN histograms with directory: " << m_JetFitterNN_calibrationDirectory << " and subdirectory " << directory);
@@ -391,12 +393,12 @@ namespace Analysis {
     ATH_MSG_DEBUG(" #BTAG# Registered NN histograms with directory: " << taggerNameBase);
   }
 
-  void JetTagCalibCondAlg::registerHistogram(const std::string& tagger, const std::string& hname) {
+  void JetTagCalibCondAlg::registerHistogram(const std::string & tagger, const std::string& hname) {
     std::string dir(tagger);
     this->registerHistogram(tagger,dir,hname);
   }
 
-  void JetTagCalibCondAlg::registerHistogram(const std::string& tagger, const std::string& directory, const std::string& hname) {
+  void JetTagCalibCondAlg::registerHistogram(const std::string & tagger, const std::string& directory, const std::string& hname) {
     ATH_MSG_DEBUG(  "#BTAG# registering histogram " << hname << " in tagger " << tagger );
     m_directoryMap[tagger] = directory;
     bool registered = false;
@@ -460,7 +462,7 @@ namespace Analysis {
 
     // Open the file
     std::string pfname, tech;
-    m_poolsvc->catalog()->getFirstPFN(coolguid, pfname, tech );
+    m_poolsvc->lookupBestPfn(coolguid, pfname, tech );
     std::unique_ptr< TFile > pfile(TFile::Open(pfname.c_str(),"READ"));
     if (pfile.get()==nullptr || !pfile.get()->IsOpen()) {
       ATH_MSG_WARNING("Problems opening input file " << pfname 

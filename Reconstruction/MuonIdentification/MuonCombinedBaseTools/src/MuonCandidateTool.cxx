@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,7 @@ namespace MuonCombined {
                 std::unique_ptr<Trk::TrackSummary> msTrackSummary;
                 // If reading from an ESD, the track will not have a track summary yet
                 if (!msTrack.trackSummary()) {
-                    msTrackSummary = m_trackSummaryTool->summary(msTrack);
+                    msTrackSummary = m_trackSummaryTool->summary(ctx, msTrack);
                     msMuonTrackSummary = msTrackSummary->muonTrackSummary();
                 } else
                     msMuonTrackSummary = msTrack.trackSummary()->muonTrackSummary();
@@ -132,7 +132,7 @@ namespace MuonCombined {
         ATH_MSG_DEBUG("Finished back-tracking, total number of successfull fits " << ntracks);
 
         // Resolve ambiguity between extrapolated tracks (where available)
-        std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiguityProcessor->process(extrapTracks.get()));
+        std::unique_ptr<const TrackCollection> resolvedTracks(m_ambiguityProcessor->process(ctx, extrapTracks.get()));
 
         ATH_MSG_DEBUG("Finished ambiguity solving: " << extrapTracks->size() << " track(s) in -> " << resolvedTracks->size()
                                                      << " track(s) out");
@@ -167,7 +167,6 @@ namespace MuonCombined {
                 // in this case the extrapolation failed
                 muon_candidate = std::make_unique<MuonCandidate>(MS_TrkLink);
             }
-            muon_candidate->setCommissioning(m_commissioning);
             /// Last but not least set the segments
             if (segments) {
                 std::vector<const Muon::MuonSegment*> assoc_segs;

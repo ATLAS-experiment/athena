@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -21,7 +21,7 @@ namespace MuonGM {
         double stripPitch{0.};
         double invStripPitch{0.};
         double stripLength{0.};
-        double stripWidth;
+        double stripWidth{0.};
         double readoutLocY{0.};
         double signY{0.};
         Amg::Vector2D firstStripPos{Amg::Vector2D::Zero()};

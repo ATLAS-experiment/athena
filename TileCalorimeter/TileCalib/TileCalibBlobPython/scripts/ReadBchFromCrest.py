@@ -263,6 +263,9 @@ if iov:
 
         #=== IOV only option
         if iovonly or IOVONLY:
+            if comment:
+                for iovs in iovList:
+                    log.info("(%i,%i)  %s", iovs[0], iovs[1], blobReader.getComment(iovs) )
             option = 1 if iovonly else 0
             option += (2 if IOVONLY else 0)
             blobReader.dumpIovs(iovList,rosmin,rosmax,modmin,modmax,option,(rosmin<=0),True)

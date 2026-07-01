@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVERTEXFITTERBILLOIR_FASTVERTEXFITTER_H
@@ -50,13 +50,15 @@ public:
   virtual ~FastVertexFitter(); //!< standard destructor
 
   /** Interface for ParametersBase with starting point */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const Amg::Vector3D& startingPoint) const override;
 
   /** Interface for TrackParameters and NeutralParameters with starting point
    */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& /*neutralPerigeeList*/,
     const Amg::Vector3D& startingPoint) const override
@@ -66,18 +68,20 @@ public:
          "TrackParameters*>&,const std::vector<const "
          "Trk::NeutralParameters*>&,const Amg::Vector3D&) ignoring neutrals"
       << endmsg;
-    return fit(perigeeList, startingPoint);
+    return fit(ctx, perigeeList, startingPoint);
   };
 
   /** Interface for ParametersBase with vertex constraint */
   /** the position of the constraint is ALWAYS the starting point */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList,
     const xAOD::Vertex& constraint) const override;
 
   /** Interface for TrackParameters and NeutralParameters with RecVertex
    * starting point */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& /*neutralPerigeeList*/,
     const xAOD::Vertex& constraint) const override
@@ -87,17 +91,19 @@ public:
          "TrackParameters*>&,const std::vector<const "
          "Trk::NeutralParameters*>&,const xAOD::Vertex&) ignoring neutrals"
       << endmsg;
-    return fit(perigeeList, constraint);
+    return fit(ctx, perigeeList, constraint);
   };
 
   /**
    * Fit interface with no starting point or constraint. (0,0,0) will be
    * assumed.
    */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const Trk::TrackParameters*>& perigeeList) const override;
 
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const TrackParameters*>& perigeeList,
     const std::vector<const Trk::NeutralParameters*>& /*neutralPerigeeList*/)
     const override
@@ -106,17 +112,19 @@ public:
                          "TrackParameters*>&,const std::vector<const "
                          "Trk::NeutralParameters*>&) ignoring neutrals"
                       << endmsg;
-    return fit(perigeeList);
+    return fit(ctx, perigeeList);
   };
 
   /**  	     *Interface for xAOD::TrackParticle with starting point  */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
     const Amg::Vector3D& startingPoint) const override;
 
   /**  	     *Interface for xAOD::TrackParticle and NeutralParticle with
    * starting point  */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
     const std::vector<const xAOD::NeutralParticle*>& /*vectorNeut*/,
     const Amg::Vector3D& startingPoint) const override
@@ -126,19 +134,21 @@ public:
          "TrackParticle*>&,const std::vector<const "
          "Trk::NeutralParticle*>&,const Amg::Vector3D&) ignoring neutrals"
       << endmsg;
-    return fit(vectorTrk, startingPoint);
+    return fit(ctx, vectorTrk, startingPoint);
   };
 
   /**  	     * Interface for xAOD::TrackParticle with vertex constraint
    * the position of the constraint is ALWAYS the starting point  	     */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
     const xAOD::Vertex& constraint) const override;
 
   /**  	     * Interface for xAOD::TrackParticle and NeutralParticle with
    * vertex constraint the position of the constraint is ALWAYS the starting
    * point  	     */
-  virtual xAOD::Vertex* fit(
+  virtual std::unique_ptr<xAOD::Vertex> fit(
+    const EventContext& ctx,
     const std::vector<const xAOD::TrackParticle*>& vectorTrk,
     const std::vector<const xAOD::NeutralParticle*>& /*vectorNeut*/,
     const xAOD::Vertex& constraint) const override
@@ -148,7 +158,7 @@ public:
          "TrackParticle*>&,const std::vector<const "
          "Trk::NeutralParticle*>&,const xAOD::Vertex&) ignoring neutrals"
       << endmsg;
-    return fit(vectorTrk, constraint);
+    return fit(ctx, vectorTrk, constraint);
   };
 
 private:

@@ -21,8 +21,7 @@ StatusCode GenericMuonSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCol
 
 StatusCode GenericMuonSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<GenericMuonSimHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<GenericMuonSimHitCollection>(m_outputCollectionNames[0]);
 }
 
 G4VSensitiveDetector* GenericMuonSensitiveDetectorTool::makeSD() const

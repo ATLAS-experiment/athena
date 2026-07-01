@@ -31,7 +31,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
-#include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrackCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimOfflineTrackCollection.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -131,7 +130,7 @@ class FPGATrackSimDataPrepAlg : public ::AthReentrantAlgorithm
 
         // NOTE: the clusters collection(s) contain ALL Clusters, not just "first stage" clusters.
         SG::WriteHandleKeyArray<FPGATrackSimClusterCollection> m_FPGAClusterKey{this, "FPGATrackSimClusterKey",{"FPGAClusters_1st"},"FPGATrackSim Clusters key"};
-        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim Hits key"};
+        SG::WriteHandleKey<ConstDataVector<FPGATrackSimHitCollection>> m_FPGAHitKey{this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim Hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitUnmappedKey{this, "FPGATrackSimHitUnmappedKey","FPGAHitsUnmapped_1st","FPGATrackSim Unmapped Hits 1st stage key"};
 
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleContainerKey{this, "TruthTrackContainer", "TruthParticles", "Truth Particle Container"};

@@ -46,12 +46,12 @@ namespace CP
 
 
   StatusCode MuonSelectionAlgV2 ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::MuonContainer *muons = nullptr;
-      ANA_CHECK (m_muonsHandle.retrieve (muons, sys));
+      ANA_CHECK (m_muonsHandle.retrieve (muons, sys, ctx));
       for (const xAOD::Muon *muon : *muons)
       {
         if (m_preselection.getBool (*muon, sys))

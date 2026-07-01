@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODShallowAuxContainerCnv.h"
@@ -7,6 +7,7 @@
 #include "AthenaKernel/getThinningCache.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/AuxVectorInterface.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 
 xAODShallowAuxContainerCnv::xAODShallowAuxContainerCnv( ISvcLocator* svcLoc ) :
@@ -113,6 +114,8 @@ xAODShallowAuxContainerCnv::createPersistentWithKey( xAOD::ShallowAuxContainer* 
 }
 
 xAOD::ShallowAuxContainer*
-xAODShallowAuxContainerCnv::createTransientWithKey ( const std::string& /*key*/ ) {
-   return poolReadObject<xAOD::ShallowAuxContainer>(); 
+xAODShallowAuxContainerCnv::createTransientWithKey ( const Token* token, const std::string& /*key*/ ) {
+   xAOD::ShallowAuxContainer* o = poolReadObject<xAOD::ShallowAuxContainer>(token);
+   o->toTransient (Gaudi::Hive::currentContext());
+   return o;
 }

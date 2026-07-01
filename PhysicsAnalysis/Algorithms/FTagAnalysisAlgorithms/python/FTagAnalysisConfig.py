@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -14,7 +14,6 @@ class FTagConfig (ConfigBlock):
             noneAction='error',
             info="the name of the input container.")
         self.addOption ('selectionName', '', type=str,
-            noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
             "`f'{btagger}_{btagWP}'` is used.")
@@ -72,7 +71,7 @@ class FTagConfig (ConfigBlock):
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
         else:
-            bTagCalibFile = getRecommendedBTagCalib(config.geometry())
+            bTagCalibFile = getRecommendedBTagCalib(config.geometry(), self.btagWP)
         
         # Set up the ftag selection algorithm(s):
         if 'Continuous' in self.btagWP:
@@ -97,8 +96,8 @@ class FTagConfig (ConfigBlock):
         else:
             alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
             alg.particles = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, selectionName + '_select', noSys=True)
-            config.addSelection (self.containerName, selectionName, alg.selectionDecoration)
+            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, 'select_' + selectionName, noSys=True)
+            config.addSelection (self.containerName, selectionName, alg.selectionDecoration, comesFrom='ftag')
 
         # Save the b-tagging score
         if self.saveScores in ['True', 'All']:
@@ -120,7 +119,7 @@ class FTagConfig (ConfigBlock):
 
         # Save the per-flavour probabilities or additional custom variables
         if self.saveScores == 'All' or self.saveCustomVariables:
-            variables = [f'{self.btagger}_{x}' for x in ['pb','pc','pu','ptau'] if x != 'ptau' or self.btagger == 'GN2v01']
+            variables = [f'{self.btagger}_{x}' for x in ['pb','pc','pu','ptau'] if x != 'ptau' or self.btagger == 'GN2v01' or self.btagger.startswith('GN3')]
             variables += self.saveCustomVariables
 
             if self.readFromBTaggingObject:

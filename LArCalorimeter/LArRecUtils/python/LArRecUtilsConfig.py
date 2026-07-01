@@ -59,7 +59,7 @@ def LArOFCSCCondAlgCfg (flags, name = 'LArOFCSCCondAlg', **kwargs):
     kwargs.setdefault ('isSuperCell', True)
     kwargs.setdefault ('firstSample', flags.LAr.ROD.FirstSample)
     kwargs.setdefault ('useHighestGainAutoCorr', flags.LAr.ROD.UseHighestGainAutoCorr)
-
+    kwargs.setdefault ('NGains',1) #SuperCells have only one gain
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
     acc = LArOnOffIdMappingSCCfg(flags)
     kwargs.setdefault("LArOnOffIdMappingObjKey", 'LArOnOffIdMapSC') # Provided by LArOnOffMappingAlgSC

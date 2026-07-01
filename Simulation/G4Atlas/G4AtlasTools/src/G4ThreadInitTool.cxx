@@ -17,6 +17,9 @@
 #include "G4UserWorkerInitialization.hh"
 #include "G4AutoDelete.hh"
 
+// Framework includes
+#include "GaudiKernel/ConcurrencyFlags.h"
+
 // System includes
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -54,6 +57,12 @@ void G4ThreadInitTool::initThread()
 
   // Retrieve the master thread run manager
   G4MTRunManager* masterRM = G4MTRunManager::GetMasterRunManager();
+
+  // For offloading EM showers to GPUs via AdePT, the G4 worker threads must know the number of G4 workers
+  // Since this is so far known by Gaudi and not the G4MTRunManager, we need to pass
+  // back the number of G4 worker threads to the G4MTRunManager, so that they are available in AdePT.
+  masterRM->SetNumberOfThreads(Gaudi::Concurrency::ConcurrencyFlags::numThreads());
+
   // Worker thread initialization object
   const G4UserWorkerThreadInitialization* workerInitializer =
     masterRM->GetUserWorkerThreadInitialization();

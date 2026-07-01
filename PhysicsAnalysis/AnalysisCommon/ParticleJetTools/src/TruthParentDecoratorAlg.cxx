@@ -1,22 +1,23 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthParentDecoratorAlg.h"
 
 #include "StoreGate/WriteDecorHandle.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-#include "TruthUtils/HepMCHelpers.h"
-
 #include <format>
+#include <limits>
+#include <set>
+#include <stdexcept>
 
 // structure to hold info on a matched parent particle
 struct MatchedParent
 {
-  const xAOD::TruthParticle* parent;
-  const xAOD::TruthParticle* child;
-  float deltaR;
-  unsigned int parent_index;
+  const xAOD::TruthParticle* parent = nullptr;
+  const xAOD::TruthParticle* child = nullptr;
+  float deltaR = 0;
+  unsigned int parent_index = 0;
   std::set<int> cascade_pids;
 };
 
@@ -32,26 +33,35 @@ namespace {
     parent_mask_t mask = 0x0;
     for (const auto& match: matches) {
       constexpr size_t max_idx = std::numeric_limits<decltype(mask)>::digits;
-      if (match.parent_index > max_idx) {
+      if (match.parent_index >= max_idx) {
         throw std::runtime_error(
           "parent index overflowed the match mask "
           "[index: "  + std::to_string(match.parent_index) +
           " , max_mask: " + std::to_string(max_idx) + "]");
       }
-      mask |= (0x1u << match.parent_index);
+      mask |= (parent_mask_t{1} << match.parent_index);
     }
     return mask;
   }
 
   // debugging functions
-  std::string join(const std::vector<std::string>& v, const std::string& sep = ", ") {
+  std::string
+  join(const std::vector<std::string>& v, std::string_view sep = ", "){
     std::string out;
-    for (unsigned int pos = 0; pos < v.size(); pos++) {
-      out.append(v.at(pos));
-      if (pos + 1 < v.size()) out.append(sep);
+    if (v.empty()) return out;
+    auto totalSize = (v.size() - 1) * sep.size();
+    for (const auto& s: v) {
+      totalSize += s.size();
+    }
+    out.reserve(totalSize);
+    out.append(v.front());
+    for (std::size_t pos = 1; pos < v.size(); ++pos) {
+      out.append(sep);
+      out.append(v[pos]);
     }
     return out;
   }
+  //
   template <typename T>
   std::vector<std::string> stringify(const T& container) {
     std::vector<std::string> out;
@@ -228,6 +238,11 @@ TruthParentDecoratorAlg::TruthParentDecoratorAlg(const std::string& name, ISvcLo
   declare(m_match_pdgid_key);
   declare(m_match_children_key);
   declare(m_match_link_key);
+  declare(m_target_mass_key);
+  declare(m_target_pt_key);
+  declare(m_target_energy_key);
+  declare(m_target_eta_key);
+  declare(m_target_phi_key);
 }
 
 StatusCode TruthParentDecoratorAlg::initialize() {
@@ -249,6 +264,11 @@ StatusCode TruthParentDecoratorAlg::initialize() {
   m_match_pdgid_key = pfx + "MatchingParticlePdgId";
   m_match_children_key = pfx + "MatchingParticleNChildren";
   m_match_link_key = pfx + "MatchingParticleLink";
+  m_target_mass_key = pfx + "Mass";
+  m_target_pt_key = pfx + "PT";
+  m_target_energy_key = pfx + "Energy";
+  m_target_eta_key = pfx + "Eta";
+  m_target_phi_key = pfx + "Phi";
   ATH_CHECK(m_target_pdgid_key.initialize());
   ATH_CHECK(m_target_dr_truth_key.initialize());
   ATH_CHECK(m_target_link_key.initialize());
@@ -258,6 +278,11 @@ StatusCode TruthParentDecoratorAlg::initialize() {
   ATH_CHECK(m_match_pdgid_key.initialize());
   ATH_CHECK(m_match_children_key.initialize());
   ATH_CHECK(m_match_link_key.initialize());
+  ATH_CHECK(m_target_mass_key.initialize());
+  ATH_CHECK(m_target_pt_key.initialize());
+  ATH_CHECK(m_target_energy_key.initialize());
+  ATH_CHECK(m_target_eta_key.initialize());
+  ATH_CHECK(m_target_phi_key.initialize());
 
   for (auto& [key, pids]: m_counts_matching_cascade) {
     m_cascade_count_writer_keys.emplace_back(jc + "." + key);
@@ -291,6 +316,11 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
   SG::WriteDecorHandle<JC,int> matchPdgId(m_match_pdgid_key, cxt);
   SG::WriteDecorHandle<JC,int> matchChildCount(m_match_children_key, cxt);
   SG::WriteDecorHandle<JC,JL> matchLink(m_match_link_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_mass(m_target_mass_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_pt(m_target_pt_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_energy(m_target_energy_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_eta(m_target_eta_key, cxt);
+  SG::WriteDecorHandle<JC,float> dec_phi(m_target_phi_key, cxt);
 
   if (targets->empty()) return StatusCode::SUCCESS;
 
@@ -398,6 +428,11 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
       matchChildCount(*j) = child->nChildren();
       auto* matchedContainer = dynamic_cast<const TPC*>(child->container());
       matchLink(*j) = JL(*matchedContainer, child->index());
+      dec_mass(*j) = p->m();
+      dec_pt(*j) = p->pt();
+      dec_energy(*j) = p->e();
+      dec_eta(*j) = p->eta();
+      dec_phi(*j) = p->phi();
       for (const auto& cascadeCount: m_cascade_count_decorators) {
         cascadeCount.decorate(*j, matches);
       }
@@ -411,6 +446,11 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
       matchPdgId(*j) = 0;
       matchChildCount(*j) = 0;
       matchLink(*j) = JL();
+      dec_mass(*j) = NAN;
+      dec_pt(*j) = NAN;
+      dec_energy(*j) = NAN;
+      dec_eta(*j) = NAN;
+      dec_phi(*j) = NAN;
       for (const auto& cascadeCount: m_cascade_count_decorators) {
         cascadeCount.decorateDefault(*j);
       }
@@ -458,10 +498,10 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
   // this determines if a cascade vertex should be saved or not
   auto cascadeWants = [
     &targid,
-    b=m_add_b,
-    c=m_add_c,
-    vsl=m_veto_soft_lepton,
-    vsc=m_veto_soft_charm
+    &b=m_add_b,
+    &c=m_add_c,
+    &vsl=m_veto_soft_lepton,
+    &vsc=m_veto_soft_charm
     ] (const xAOD::TruthParticle* p) {
     if (int n_parents = p->nParents(); n_parents == 1) {
       if (vsl && isSoftLepton(p)) return false;

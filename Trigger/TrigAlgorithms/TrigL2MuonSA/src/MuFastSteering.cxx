@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastSteering.h"
@@ -82,7 +82,7 @@ StatusCode MuFastSteering::initialize()
   ATH_CHECK(m_trackFitter->setMCFlag(m_use_mcLUT));
   m_trackFitter -> setUseEIFromBarrel( m_use_endcapInnerFromBarrel );
 
-  // DataHandles for AthenaMT
+  // initialize handle keys.
   ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_roiCollectionKey.initialize());
   ATH_CHECK(m_run2recRoiCollectionKey.initialize(!m_useRun3Config));
@@ -380,7 +380,7 @@ StatusCode MuFastSteering::execute(const EventContext& ctx) const
         }
     }
 
-    ATH_MSG_DEBUG("StatusCode MuFastSteering::execute() success");
+    ATH_MSG_DEBUG("StatusCode MuFastSteering::execute(const EventContext& ctx) success");
     return StatusCode::SUCCESS;
 }
 

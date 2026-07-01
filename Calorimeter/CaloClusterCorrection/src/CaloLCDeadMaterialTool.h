@@ -27,6 +27,8 @@
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "GaudiKernel/EventContext.h"
+#include "CaloEvent/CaloRecoStatus.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 #include <map>
 #include <vector>
@@ -36,9 +38,12 @@
 class CaloCell_ID;
 
 
-class CaloLCDeadMaterialTool : public AthAlgTool, virtual public IClusterCellWeightTool
+//class CaloLCDeadMaterialTool : public AthAlgTool, virtual public IClusterCellWeightTool
+class CaloLCDeadMaterialTool : public extends<AthAlgTool, IClusterCellWeightTool>
 {
   public:
+    using base_class::base_class;
+  
     /**
      * @brief Dead Material area number
      *
@@ -61,10 +66,6 @@ class CaloLCDeadMaterialTool : public AthAlgTool, virtual public IClusterCellWei
 
     virtual StatusCode weight(xAOD::CaloCluster* theCluster, const EventContext& ctx) const override;
     virtual StatusCode initialize() override;
-
-    CaloLCDeadMaterialTool(const std::string& type,
-                                const std::string& name,
-                                const IInterface* parent);
 
   private:
     // Hold information about one cell.
@@ -94,11 +95,11 @@ class CaloLCDeadMaterialTool : public AthAlgTool, virtual public IClusterCellWei
 
     /**
      * @brief name of the key for DM cell weights */
-    SG::ReadCondHandleKey<CaloLocalHadCoeff>  m_key;
+    SG::ReadCondHandleKey<CaloLocalHadCoeff>  m_key{this, "HadDMCoeffKey", "HadDMCoeff2"};
 
     /**
      * @brief Required Reco Status for the clusters in order to be calibrated */
-    int m_recoStatus;
+    Gaudi::Property<int> m_recoStatus{this, "ClusterRecoStatus", CaloRecoStatus::UNKNOWNSTATUS};
 
     /**
      * @brief method of assignment of DM energy to cluster
@@ -106,23 +107,23 @@ class CaloLCDeadMaterialTool : public AthAlgTool, virtual public IClusterCellWei
      * if 0: setting cluster energy to the new value without changing of cells weights
      * if 1: weights of all cells in the cluster with energy > m_MinCellEnergyToDeal will be changed
      * if 2: changing only weights of cells which have been involved into DM calculation */
-    int m_weightModeDM;
+    Gaudi::Property<int> m_weightModeDM{this, "WeightModeDM", 1};
 
     /**
      * @brief Minimum energy of clusters to apply correction */
-    float m_MinClusterEnergyToDeal;
+    Gaudi::Property<float> m_MinClusterEnergyToDeal{this, "MinClusterEnergyToDeal", 200.0*CLHEP::MeV};
 
     /**
      * @brief minimum number of events in one lookup bin to use */
-    int m_MinLookupBinNentry;
+    Gaudi::Property<int> m_MinLookupBinNentry{this, "MinLookupBinNentry", 40};
 
     /**
      * @brief minimum cell energy to deal*/
-    float m_MinCellEnergyToDeal;
+    Gaudi::Property<float> m_MinCellEnergyToDeal{this, "MinCellEnergyToDeal", 0.0};
 
     /**
      * @brief maximum allowed change in cell weights */
-    float m_MaxChangeInCellWeight;
+    Gaudi::Property<float> m_MaxChangeInCellWeight{this, "MaxChangeInCellWeight", 30.0};
 
     /**
      * @brief calculate DM energy using em-probability moment
@@ -131,20 +132,27 @@ class CaloLCDeadMaterialTool : public AthAlgTool, virtual public IClusterCellWei
      * cluster to be em-like. Dead material enegry of cluster is calculated as
      * a mixture of DM energies for pure EM and pure HAD clusters using p as
      * engDM = p *engDM_EM+(1-p)*endDM_HAD */
-    bool  m_useHadProbability;
+    Gaudi::Property<bool> m_useHadProbability{this, "UseHadProbability", false};
 
     /**
      * @brief interpolate correction coefficients */
-    bool m_interpolate;
+    Gaudi::Property<bool> m_interpolate{this, "Interpolate", false};
 
     /**
      * @brief update also sampling variables */
-    bool m_updateSamplingVars;
+    Gaudi::Property<bool> m_updateSamplingVars{this, "UpdateSamplingVars", false};
 
    /** 
     * @brief vector of names of dimensions to interpolate (for different correction types different set of dimensions) */
-   std::map<std::string, std::vector<std::string > >  m_interpolateDimensionNames;
-
+    Gaudi::Property<std::map<std::string, std::vector<std::string>>>  m_interpolateDimensionNames {this
+     , "InterpolateDimensionNames"
+     , {
+        {"AREA_DMFIT" , {"DIMD_ETA", "DIMD_ENER"}}
+	,  {"AREA_DMLOOKUP" , {"DIMD_ETA", "DIMD_ENER", "DIMD_LAMBDA"}}
+	, {"AREA_DMSMPW" , {"DIMD_ETA", "DIMD_LAMBDA"}}
+      }
+    };
+  
    /** 
     * @brief actual set of dimension id's to interpolate (in the DM areas corrected with TProfile approach)*/
    std::vector<int > m_interpolateDimensionsFit;
@@ -157,7 +165,8 @@ class CaloLCDeadMaterialTool : public AthAlgTool, virtual public IClusterCellWei
    
    /** 
     * @brief In Abs Option case, DM calculation has to be handled in a slightly different way*/
-   bool m_absOpt;
+   Gaudi::Property<bool> m_absOpt{this, "WeightingOfNegClusters", false};
+
 };
 
 

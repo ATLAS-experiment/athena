@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDBASETOOLS_MUONCALOTAGTOOL_H
@@ -10,8 +10,6 @@
 #include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "ICaloTrkMuIdTools/ICaloMuonLikelihoodTool.h"
 #include "ICaloTrkMuIdTools/ICaloMuonScoreTool.h"
 #include "ICaloTrkMuIdTools/ICaloMuonTag.h"
 #include "ICaloTrkMuIdTools/ITrackDepositInCaloTool.h"
@@ -19,7 +17,6 @@
 #include "MuonCombinedEvent/InDetCandidate.h"
 #include "MuonCombinedEvent/InDetCandidateCollection.h"
 #include "MuonCombinedToolInterfaces/IMuonCombinedInDetExtensionTool.h"
-#include "MuonCombinedToolInterfaces/IMuonCombinedTrigCaloTagExtensionTool.h"
 #include "RecoToolInterfaces/IParticleCaloCellAssociationTool.h"
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #include "RecoToolInterfaces/ITrackIsolationTool.h"
@@ -32,11 +29,9 @@
 
 namespace MuonCombined {
 
-    class MuonCaloTagTool : public AthAlgTool,
-                            virtual public IMuonCombinedInDetExtensionTool,
-                            virtual public IMuonCombinedTrigCaloTagExtensionTool {
+    class MuonCaloTagTool : public extends<AthAlgTool, IMuonCombinedInDetExtensionTool> {
     public:
-        MuonCaloTagTool(const std::string& type, const std::string& name, const IInterface* parent);
+        using base_class::base_class;
         virtual ~MuonCaloTagTool() = default;
 
         virtual StatusCode initialize() override;
@@ -46,16 +41,19 @@ namespace MuonCombined {
         virtual void extend(const InDetCandidateCollection& inDetCandidates, InDetCandidateToTagMap* tagMap, TrackCollection* combTracks,
                             TrackCollection* meTracks, Trk::SegmentCollection* segments, const EventContext& ctx) const override;
 
-        virtual void extend(const InDetCandidateCollection& inDetCandidates, InDetCandidateToTagMap* tagMap,
-                            const CaloCellContainer* caloCellContainer,
-                            const xAOD::CaloClusterContainer* caloClusterContainer) const override;
+
 
         virtual void extendWithPRDs(const InDetCandidateCollection& inDetCandidates, InDetCandidateToTagMap* tagMap,
                                     IMuonCombinedInDetExtensionTool::MuonPrdData prdData, TrackCollection* combTracks,
                                     TrackCollection* meTracks, Trk::SegmentCollection* segments, const EventContext& ctx) const override;
 
     private:
-        void createMuon(const InDetCandidate& muonCandidate, const std::vector<DepositInCalo>& deposits, int tag, float likelihood,
+        void extend(const InDetCandidateCollection& inDetCandidates, 
+                   InDetCandidateToTagMap* tagMap,
+                   const CaloCellContainer* caloCellCont) const;
+
+        void createMuon(const InDetCandidate& muonCandidate, 
+                        const std::vector<DepositInCalo>& deposits, int tag,
                         float muonScore, InDetCandidateToTagMap* tagMap) const;
         const Trk::TrackParameters* getTrackParameters(const Trk::Track* trk) const;
         bool selectTrack(const Trk::Track* trk, const Trk::Vertex* vertex) const;
@@ -64,7 +62,6 @@ namespace MuonCombined {
         void showTrackInfo(const Trk::TrackParameters* par) const;
 
         // --- StoreGate keys ---
-        SG::ReadHandleKey<xAOD::CaloClusterContainer> m_caloClusterCont{this, "CaloClusters", "CaloTopoClusters", "calo cluster container"};
         SG::ReadHandleKey<CaloCellContainer> m_caloCellCont{this, "CaloCells", "AllCalo", "calo cell container"};
 
         // --- Internal cache ---
@@ -75,7 +72,6 @@ namespace MuonCombined {
         // --- Set up what to do and what not to do ---
         Gaudi::Property<bool> m_doCaloMuonTag{this, "doCaloMuonTag", true, "run CaloMuonTag Tool"};
         Gaudi::Property<bool> m_doCaloMuonScore{this, "doCaloMuonScore", true, "run CaloMuonScoreTool"};
-        Gaudi::Property<bool> m_doCaloLR{this, "doCaloLR", true, "run CaloMuonLikelihoodTool"};
         Gaudi::Property<bool> m_doTrkSelection{this, "doTrkSelection", true,
                                                "This variable should be set to false when there is no primary vertex reconstructed."};
         Gaudi::Property<bool> m_doCosmicTrackSelection{this, "doCosmicTrackSelection", false, "Apply track selection for cosmics"};
@@ -98,15 +94,12 @@ namespace MuonCombined {
             "Energy isolation  for a .45 cone in Barrel-EndCap transition region, normalized to track pt"};
         Gaudi::Property<double> m_eIsoPtRatioEndCapCut{this, "TrackEIsoPtRatioEndCapCut", 1.6,
                                                        "Energy isolation for a .45 cone in Endcap, normalized to track pt"};
-        Gaudi::Property<double> m_CaloLRlikelihoodCut{this, "CaloLRLikelihoodCut", 0.5, "CaloLR likelihood ratio hard cut"};
         Gaudi::Property<double> m_CaloMuonScoreCut{this, "CaloMuonScoreCut", 0.4,
                                                    "Calo muon convolutional neural network output score hard cut"};
         Gaudi::Property<double> m_trackIsoCone{this, "TrackIsoConeSize", 0.45, "Cone size for track isolation"};
         Gaudi::Property<double> m_energyIsoCone{this, "EnergyIsoConeSize", 0.4, "Cone size for energy isolation"};
 
         // --- CaloTrkMuIdTools ---
-        ToolHandle<ICaloMuonLikelihoodTool> m_caloMuonLikelihood{this, "CaloMuonLikelihoodTool",
-                                                                 "CaloMuonLikelihoodTool/CaloMuonLikelihoodTool"};
         ToolHandle<ICaloMuonScoreTool> m_caloMuonScoreTool{this, "CaloMuonScoreTool", "CaloMuonScoreTool/CaloMuonScoreTool"};
 
         ToolHandle<ICaloMuonTag> m_caloMuonTagLoose{this, "CaloMuonTagLoose", "CaloMuonTag/CaloMuonTagLoose",

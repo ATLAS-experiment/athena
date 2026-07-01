@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileCalibAlgs )
@@ -19,7 +19,7 @@ atlas_add_component( TileCalibAlgs
                      src/Tile*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${CLHEP_LIBRARIES} CaloDetDescrLib CaloIdentifier AthenaBaseComps Identifier GaudiKernel TileConditionsLib TileIdentifier TrigT1CaloCalibToolInterfaces CaloEvent AthenaKernel StoreGateLib AthenaPoolUtilities ByteStreamCnvSvcBaseLib xAODEventInfo xAODTrigL1Calo TileCalibBlobObjs TileEvent TileRecUtilsLib TileByteStreamLib TileMonitoringLib RegistrationServicesLib CaloConditions TileCalibAlgsLib )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${CLHEP_LIBRARIES} CaloDetDescrLib CaloIdentifier AthenaBaseComps Identifier GaudiKernel TileConditionsLib TileIdentifier TrigT1CaloCalibToolInterfaces CaloEvent AthenaKernel StoreGateLib AthenaPoolUtilities ByteStreamCnvSvcBaseLib xAODEventInfo xAODTrigL1Calo TileCalibBlobObjs TileEvent TileRecUtilsLib TileByteStreamLib TileMonitoringLib RegistrationServicesLib CaloConditions TileCalibAlgsLib CxxUtils )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
@@ -28,24 +28,24 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( TileDigiNoiseCalibAlgConfig_test
                 SCRIPT python -m TileCalibAlgs.TileDigiNoiseCalibAlgConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChNoiseCalibAlgConfig_test
                 SCRIPT python -m TileCalibAlgs.TileRawChNoiseCalibAlgConfig
                 PROPERTIES TIMEOUT 600
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileLaserCalibAlgConfig_test
                 SCRIPT python -m TileCalibAlgs.TileLaserCalibAlgConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileCisCalibAlgConfig_test
                 SCRIPT python -m TileCalibAlgs.TileCisCalibAlgConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileTriggerCalibAlgConfig_test
                 SCRIPT python -m TileCalibAlgs.TileTriggerCalibAlgConfig
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)

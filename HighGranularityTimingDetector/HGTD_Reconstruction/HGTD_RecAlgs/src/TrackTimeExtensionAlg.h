@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/TrackTimeExtensionAlg.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -50,16 +50,17 @@ private:
   struct DecorHandles
   {
     DecorHandles (const TrackTimeExtensionAlg& tool, const EventContext& ctx);
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerHasExtensionHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerHasExtensionHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerExtensionChi2Handle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterRawTimeHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> layerClusterTruthClassHandle;
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterShadowedHandle;
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterMergedHandle;
-    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerPrimaryExpectedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerClusterShadowedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerClusterMergedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> layerPrimaryExpectedHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapXHandle;
     SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<char>> holesHGTDHandle;
   };
   friend struct DecorHandles;
 
@@ -93,7 +94,7 @@ private:
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey{this, "HGTD_primary_expected", m_trk_ptkl_rh_key, "HGTD_primary_expected", "deco with a handle for an expected primary"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapXKey{this, "HGTD_extrap_x", m_trk_ptkl_rh_key, "HGTD_extrap_x", "deco with a handle for an x of extrap"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapYKey{this, "HGTD_extrap_y", m_trk_ptkl_rh_key, "HGTD_extrap_y", "deco with a handle for an y of extrap"};
-
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_holesHGTDKey{this, "HGTD_holes", m_trk_ptkl_rh_key, "HGTD_holes", "deco with the holes on track in HGTD"};
 };
 
 } // namespace HGTD

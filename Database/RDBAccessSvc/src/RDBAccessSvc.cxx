@@ -38,9 +38,10 @@ RDBAccessSvc::RDBAccessSvc(const std::string& name, ISvcLocator* svc)
 {
 }
 
-bool RDBAccessSvc::connect(const std::string& connName)
+bool RDBAccessSvc::connect(std::string_view connName)
 {
   std::scoped_lock<std::mutex> guard(m_sessionMutex);
+  const std::string connStr{connName};
   // Check if it is the first attempt to open a connection connName
   if(m_sessions.find(connName)==m_sessions.end()) {
     ATH_MSG_DEBUG(" Trying to open the connection " << connName << " for the first time");
@@ -48,14 +49,14 @@ bool RDBAccessSvc::connect(const std::string& connName)
     // 1. Sessions
     // 2. open connections
     // 3. Recordset by connection
-    m_sessions[connName] = nullptr;
-    m_openConnections[connName] = 0;
+    m_sessions[connStr] = nullptr;
+    m_openConnections[connStr] = 0;
     m_recordsetptrs.emplace(connName,RecordsetPtrMap());
   }
 
   // Use existing Connection Proxy if available
-  if(m_openConnections[connName]++) {
-    ATH_MSG_DEBUG(" Connection " << connName << " already open, sessions = " << m_openConnections[connName]);
+  if(m_openConnections[connStr]++) {
+    ATH_MSG_DEBUG(" Connection " << connName << " already open, sessions = " << m_openConnections[connStr]);
     return true;
   }
 
@@ -63,22 +64,22 @@ bool RDBAccessSvc::connect(const std::string& connName)
   coral::ConnectionService conSvcH;
   coral::ISessionProxy *proxy = nullptr;
   try {
-    proxy = conSvcH.connect(connName,coral::ReadOnly);
+    proxy = conSvcH.connect(connStr,coral::ReadOnly);
     proxy->transaction().start(true);
     ATH_MSG_DEBUG("Proxy for connection "  << connName << " obtained");
   }
   catch(std::exception& e) {
     ATH_MSG_ERROR("Exception caught: " << e.what());
-    m_openConnections[connName]--;
+    m_openConnections[connStr]--;
     return false;
   }
 
-  m_sessions[connName] = proxy;
+  m_sessions[connStr] = proxy;
 
   return true;
 }
 
-bool RDBAccessSvc::disconnect(const std::string& connName)
+bool RDBAccessSvc::disconnect(std::string_view connName)
 {
   auto connection = m_openConnections.find(connName);
   if(connection==m_openConnections.end()) {
@@ -106,7 +107,7 @@ bool RDBAccessSvc::disconnect(const std::string& connName)
   return true;
 }
 
-bool RDBAccessSvc::shutdown(const std::string& connName)
+bool RDBAccessSvc::shutdown(std::string_view connName)
 {
   if(connName=="*Everything*") {
     for(const auto& ii : m_openConnections) {
@@ -123,7 +124,7 @@ bool RDBAccessSvc::shutdown(const std::string& connName)
   return shutdown_connection(connName);
 }
 
-bool RDBAccessSvc::shutdown_connection(const std::string& connName)
+bool RDBAccessSvc::shutdown_connection(std::string_view connName)
 {
   auto connection = m_openConnections.find(connName);
   if(connection==m_openConnections.end()) {
@@ -146,21 +147,28 @@ bool RDBAccessSvc::shutdown_connection(const std::string& connName)
   return true;
 }
 
-IRDBRecordset_ptr RDBAccessSvc::getRecordsetPtr(const std::string& node
-						, const std::string& tag
-						, const std::string& tag2node
-						, const std::string& connName)
+IRDBRecordset_ptr RDBAccessSvc::getRecordsetPtr(std::string_view node
+						, std::string_view tag
+						, std::string_view tag2node
+						, std::string_view connName)
 {
-  std::string key = node + "::" + tag;
-  if(tag2node!="")
-    key += ("::" + tag2node);
-
+  static const std::string dc{"::"};//double colon
+  std::string key;
+  key.reserve(node.size() + tag.size() + tag2node.size() + 4);
+  key.append(node);
+  key.append(dc);
+  key.append(tag);
+  if(!tag2node.empty()){
+    key.append(dc);
+    key.append(tag2node);
+  }
+  const std::string connStr{connName};
   ATH_MSG_DEBUG("Getting RecordsetPtr with key " << key);
 
   Athena::DBLock dblock;
   std::scoped_lock<std::mutex> guard(m_recordsetMutex);
 
-  RecordsetPtrMap& recordsets = m_recordsetptrs[connName];
+  RecordsetPtrMap& recordsets = m_recordsetptrs[connStr];
   RecordsetPtrMap::const_iterator it = recordsets.find(key);
   if(it != recordsets.end()) {
     ATH_MSG_DEBUG("Reusing existing recordset");
@@ -174,24 +182,31 @@ IRDBRecordset_ptr RDBAccessSvc::getRecordsetPtr(const std::string& node
 
   RDBRecordset* recConcrete = new RDBRecordset(this);
   IRDBRecordset_ptr rec(recConcrete);
-  coral::ISessionProxy* session = m_sessions[connName];
+  coral::ISessionProxy* session = m_sessions[connStr];
 
   try {
     // Check lookup table first
-    std::string lookupMapKey = tag + "::" + connName;
+    std::string lookupMapKey;
+    lookupMapKey.reserve(tag.size() + connName.size() + 2);
+    lookupMapKey.append(tag);
+    lookupMapKey.append(dc);
+    lookupMapKey.append(connName);
+    //
+    const std::string nodeStr{node};
     GlobalTagLookupMap::const_iterator lookupmap = m_globalTagLookup.find(lookupMapKey);
     if(lookupmap!=m_globalTagLookup.end()) {
       TagNameIdByNode::const_iterator childtagdet = lookupmap->second->find(node);
       if(childtagdet!=lookupmap->second->end()) {
-	recConcrete->getData(session,node,childtagdet->second.first,childtagdet->second.second);
+	recConcrete->getData(session,nodeStr,childtagdet->second.first,childtagdet->second.second);
       }
       else {
-	recConcrete->setNodeName(node);
+	recConcrete->setNodeName(nodeStr);
 	ATH_MSG_DEBUG("Unable to find tag for the node " << node << " in the cache of global tag " << tag << ". Returning empty recordset");
       }
     }
     else {
-      RDBVersionAccessor versionAccessor(node,(tag2node.empty()?node:tag2node),tag,session,msg());
+      const std::string str{tag2node.empty()?node:tag2node};
+      RDBVersionAccessor versionAccessor(nodeStr,str,std::string{tag},session,msg());
       versionAccessor.getChildTagData();
       recConcrete->getData(session,versionAccessor.getNodeName(),versionAccessor.getTagName(),versionAccessor.getTagID());
     }

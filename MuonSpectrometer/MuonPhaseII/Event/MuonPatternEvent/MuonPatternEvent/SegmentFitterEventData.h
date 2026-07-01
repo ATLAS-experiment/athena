@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONR4_MUONPATTERNEVENT_SEGMENTFITEVENTDATA__H
@@ -12,7 +12,8 @@
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 
 #include "Acts/Seeding/CompositeSpacePointLineFitter.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
+#include "Acts/EventData/ParticleHypothesis.hpp"
 
 namespace MuonGMR4 {
    class MuonDetectorManager;
@@ -48,29 +49,52 @@ namespace MuonR4{
         std::string toString(const ParamDefs par);
         /** @brief Returns the localSegPars decoration from a xAODMuon::Segment */
         Parameters localSegmentPars(const xAOD::MuonSegment& seg);
+        /** @brief Returns the localCovariance decoration from a xAOD::MuonSegment */
+        std::optional<Covariance> localSegmentCov(const xAOD::MuonSegment& seg);
+        
+        
         /** @brief Returns the local segment parameters from a segment object
          *  @param gctx: Geometry context storing the local -> global transformation
          *  @param segment: Reference to the segment */
         Parameters localSegmentPars(const ActsTrk::GeometryContext& gctx,
                                     const Segment& segment);
+        /** @copydoc localSegmentPars */
+        Parameters localSegmentPars(const Acts::GeometryContext& tgContext,
+                                    const Segment& segment);
         /** @brief Returns the segment parameters as boundTrackParameters. The
          *         position is expressed locally on the sector surface & the direction in
          *         the global frame
+         *  @param gctx: The Geometrycontext to translate the angular jacobian of theta & phi
          *  @param detMgr: Detector manager to pick up the proper sector object
          *  @param segment: Reference to the segment of interest
          *  @param cov: Uncertainty on the parsed parameters
          *  @param hypot: The particle hypothesis to plugin (Muon by default) */
-        Acts::BoundTrackParameters boundSegmentPars(const MuonGMR4::MuonDetectorManager& detMgr,
+        Acts::BoundTrackParameters boundSegmentPars(const ActsTrk::GeometryContext& gctx,
+                                                    const MuonGMR4::MuonDetectorManager& detMgr,
                                                     const xAOD::MuonSegment& segment,
-                                                    std::optional<Acts::BoundMatrix> cov = std::nullopt,
-                                                    Acts::ParticleHypothesis hypot = Acts::ParticleHypothesis::muon());
+                                                    const Acts::ParticleHypothesis hypot = Acts::ParticleHypothesis::muon());
+        /** @copydoc boundSegmentPars */
+        Acts::BoundTrackParameters boundSegmentPars(const Acts::GeometryContext& tgContext,
+                                                    const MuonGMR4::MuonDetectorManager& detMgr,
+                                                    const xAOD::MuonSegment& segment,
+                                                    const Acts::ParticleHypothesis hypot = Acts::ParticleHypothesis::muon());
+
         /** @brief Returns the segment parameters as boundTrackParameters. The
          *         position is expressed locally on the sector surface & the direction in
-         *         the global frame */
+         *         the global frame. 
+         * @param gctx: The geometry context needed to transform the global -> local parameters
+         * @param segment: The segment for which the bound paramters shall be created
+         *  @param hypot: The particle hypothesis to plugin (Muon by default) */
         Acts::BoundTrackParameters boundSegmentPars(const ActsTrk::GeometryContext& gctx,
                                                    const Segment& segment,
                                                    const Acts::ParticleHypothesis hypot = Acts::ParticleHypothesis::muon());
-    }
+        /** @copydoc boundSegmentPars */
+        Acts::BoundTrackParameters boundSegmentPars(const Acts::GeometryContext& tgContext,
+                                                   const Segment& segment,
+                                                   const Acts::ParticleHypothesis hypot = Acts::ParticleHypothesis::muon());
+
+
+      }
 }
 
 #endif 

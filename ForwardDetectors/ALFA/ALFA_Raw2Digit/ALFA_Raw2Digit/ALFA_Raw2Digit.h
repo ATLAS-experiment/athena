@@ -42,7 +42,7 @@ public:
 	ALFA_Raw2Digit(const std::string& name, ISvcLocator* pSvcLocator);
 
 	StatusCode initialize();
-	StatusCode execute();
+	StatusCode execute(const EventContext& ctx);
 	StatusCode finalize();
 
 private:

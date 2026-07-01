@@ -19,6 +19,7 @@
 // EDM includes
 #include "xAODTracking/VertexFwd.h"
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <map>
@@ -43,11 +44,11 @@ namespace InDetGNNHardScatterSelection {
   {
   public:
     GNN(const std::string& nnFile);
-    GNN(GNN&&);
-    GNN(const GNN&);
+    GNN(GNN&&) = delete;
+    GNN(const GNN&) = delete;
     virtual ~GNN();
 
-    virtual void decorate(const xAOD::Vertex& verrtex) const;
+    virtual float decorate(const xAOD::Vertex& verrtex) const;
 
   private:
     // type definitions for ONNX output decorators
@@ -68,10 +69,10 @@ namespace InDetGNNHardScatterSelection {
     std::set<std::string> createDecorators(const FlavorTagInference::OutputConfig& outConfig);
 
     std::shared_ptr<const FlavorTagInference::SaltModel> m_saltModel;
+    std::string m_modelPath;
     std::string m_input_node_name;
     std::vector<internal::VarFromVertex> m_varsFromVertex;
     std::vector<std::shared_ptr<IConstituentsLoader>> m_constituentsLoaders;
-
     Decorators m_decorators;
     float m_defaultValue{};
   };

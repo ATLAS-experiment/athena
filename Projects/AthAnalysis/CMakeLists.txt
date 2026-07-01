@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.25 )
@@ -7,14 +7,16 @@ string( STRIP ${_version} _version )
 project( AthAnalysis VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
-# HepMC3
-set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
-
 # Configure flake8:
 set( ATLAS_FLAKE8 true   # <- this is the shell builtin `true`
    CACHE STRING "Default flake8 command" )
 set( ATLAS_PYTHON_CHECKER ""
    CACHE STRING "Python checker command to run during Python module compilation" )
+
+# Apply (compiler) settings from CxxUtils:
+set( CxxUtilsSettings_DIR
+   "${CMAKE_SOURCE_DIR}/../../Control/CxxUtils/cmake" )
+find_package( CxxUtilsSettings )
 
 # Find the ATLAS CMake code:
 find_package( AtlasCMake QUIET )

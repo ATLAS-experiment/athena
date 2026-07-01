@@ -75,7 +75,7 @@ namespace ActsTrk {
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
-    ATH_CHECK(m_ATLASConverterTool.retrieve());
+    ATH_CHECK(m_geometryConvTool.retrieve());
     ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
@@ -181,10 +181,12 @@ namespace ActsTrk {
   }
 
   std::unique_ptr<ActsTrk::IMeasurementSelector> TrackFindingBaseAlg::setMeasurementSelector(
+      const EventContext &ctx,
       const detail::TrackFindingMeasurements &measurements,
       TrackFinderOptions &options) const {
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = ActsTrk::detail::getMeasurementSelector(
+        ctx,
         m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
         m_stripCalibTool.isEnabled() ? &(*m_stripCalibTool) : nullptr,
         m_hgtdCalibTool.isEnabled() ? &(*m_hgtdCalibTool) : nullptr,
@@ -200,6 +202,7 @@ namespace ActsTrk {
   }
 
   TrackFindingBaseAlg::TrackFindingDefaultOptions TrackFindingBaseAlg::getDefaultOptions(
+      const EventContext &ctx,
       const DetectorContextHolder &detContext,
       const detail::TrackFindingMeasurements &measurements,
       const Acts::PerigeeSurface* pSurface) const {
@@ -212,7 +215,7 @@ namespace ActsTrk {
     TrackFinderOptions options(detContext.geometry, detContext.magField, detContext.calib,
                                trackFinder().ckfExtensions, plainOptions, pSurface);
 
-    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(measurements, options);
+    std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(ctx, measurements, options);
 
     Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
     plainSecondOptions.maxSteps = m_maxPropagationStep;
@@ -245,6 +248,27 @@ namespace ActsTrk {
     Acts::BoundTrackParameters secondInitialParameters = trackProxy.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
     if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
       return {};
+    }
+
+    // First, inflate the covariance matrix if configured
+    if (m_inflateCovarianceTwoWay) {
+      ATH_MSG_DEBUG("Inflating covariance matrix for second track finding with factor = " << m_twoWayinflateCovarianceFactor.value());
+      ATH_MSG_VERBOSE("Original parameters before inflation: \n" << secondInitialParameters);
+
+      auto inflatedCovariance = secondInitialParameters.covariance().value();
+      inflatedCovariance *= m_twoWayinflateCovarianceFactor;
+
+      const auto& origSurface = secondInitialParameters.referenceSurface();
+      auto surfacePtr = const_cast<Acts::Surface&>(origSurface).shared_from_this();
+
+      Acts::BoundTrackParameters newParams(
+          std::static_pointer_cast<const Acts::Surface>(std::move(surfacePtr)),
+          secondInitialParameters.parameters(), 
+          std::make_optional(inflatedCovariance),
+          secondInitialParameters.particleHypothesis());
+      secondInitialParameters = std::move(newParams);
+      
+      ATH_MSG_VERBOSE("Inflated covariance matrix : \n" << secondInitialParameters.covariance().value());
     }
 
     auto rootBranch = tracksContainerTemp.makeTrack();
@@ -564,6 +588,7 @@ namespace ActsTrk {
                                           std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
+                                          std::make_pair(kNResolvedTracks, "resolved tracks"),
                                           std::make_pair(kNStoppedTracksMaxHoles, "Stopped tracks reaching max holes"),
                                           std::make_pair(kMultipleBranches, "Seeds with more than one branch"),
                                           std::make_pair(kNoSecond, "Tracks failing second CKF"),
@@ -662,6 +687,8 @@ namespace ActsTrk {
                                                       TableUtils::defineSimpleRatio("Rejected refined params / seeds", kNRejectedRefinedSeeds, kNTotalSeeds),
                                                       TableUtils::defineSimpleRatio("selected / CKF tracks", kNSelectedTracks, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds),
+                                                      TableUtils::defineSimpleRatio("resolved / selected tracks", kNResolvedTracks, kNSelectedTracks),
+                                                      TableUtils::defineSimpleRatio("resolved tracks / used seeds", kNResolvedTracks, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("branched tracks / used seeds", kMultipleBranches, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("no 2nd CKF / CKF tracks", kNoSecond, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("shared hits / CKF tracks", kNTotalSharedHits, kNOutputTracks),
@@ -713,9 +740,9 @@ namespace ActsTrk {
                          .minLabelWidth(max_label_width)
                          .dumpFooter(false);
 
-        // also dump a table for final tracks over seeds (ratio_i==3) showing one row per eta bin
+        // also dump a table for final tracks over used seeds (ratio_i==6 or 4) showing one row per eta bin
         eta_labels.erase(eta_labels.end() - 1); // drop last line of table which shows again all eta bins summed.
-        constexpr std::size_t ratio_i = 3;
+        std::size_t ratio_i = m_showResolvedStats ? 6 : 4;
         table_out << makeTable(ratio,
                                ratio_i * ratio_stride,
                                ratio_eta_stride,

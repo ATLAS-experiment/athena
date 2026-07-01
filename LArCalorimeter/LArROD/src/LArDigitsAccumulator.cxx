@@ -59,7 +59,7 @@ StatusCode LArDigitsAccumulator::initialize()
 
 
 
-StatusCode LArDigitsAccumulator::execute() 
+StatusCode LArDigitsAccumulator::execute(const EventContext& /*ctx*/) 
 {
   if ( m_event_counter < 100 || m_event_counter%100==0 )
     ATH_MSG_INFO( "Processing event " << m_event_counter );

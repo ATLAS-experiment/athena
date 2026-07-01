@@ -1,0 +1,15 @@
+{
+  "MuonTrigFTF" : {
+    "enabled"       : true,
+    "TestType"      : "Trigger",
+    "RefType"       : "Truth", 
+    "TrigTrkKey"    : "HLT_IDTrack_Muon_FTF",
+    "ChainNames"    : [ "HLT_mu6_idperf_L1MU5VF" ],
+    "RoiKey"        : "HLT_Roi_L2SAMuon",
+    "MatchingType"  : "DeltaRMatch",
+    "dRmax"         : 0.05,
+    "truthMinPt"    : 2000,
+    "plotFakeRates" : false,
+    "plotVertexParameters" : false
+   }
+}

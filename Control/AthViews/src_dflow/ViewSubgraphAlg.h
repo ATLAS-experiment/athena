@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHVIEWS_ATHVIEWS_VIEWSUBGRAPHALG_H
@@ -10,7 +10,7 @@
 #include <vector>
 
 // FrameWork includes
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthViews/View.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "GaudiKernel/IScheduler.h"
@@ -18,34 +18,16 @@
 namespace AthViews {
 
 class ViewSubgraphAlg
-  : public ::AthAlgorithm
+  : public ::AthReentrantAlgorithm
 { 
-
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods: 
-  /////////////////////////////////////////////////////////////////// 
- public: 
-
-  // Copy constructor: 
-
-  /// Constructor with parameters: 
-  ViewSubgraphAlg( const std::string& name, ISvcLocator* pSvcLocator );
-
-  /// Destructor: 
-  virtual ~ViewSubgraphAlg(); 
+ public:
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   // Athena algorithm's Hooks
-  virtual StatusCode  initialize();
-  virtual StatusCode  execute();
-  virtual StatusCode  finalize();
+  virtual StatusCode  initialize() override;
+  virtual StatusCode  execute(const EventContext& ctx) const override;
+  virtual StatusCode  finalize() override;
  private: 
-
-  /// Default constructor: 
-  ViewSubgraphAlg();
-
-  /// Containers
-  
-  // vars
   ServiceHandle< IScheduler > m_scheduler { this, "Scheduler", "AvalancheSchedulerSvc", "The Athena scheduler" };
   SG::WriteHandleKey< ViewContainer > m_w_views { this, "AllViews", "all_views", "All views" };
   SG::ReadHandleKey< ViewContainer > m_r_views { this, "ParentViews", "", "Parent views" };

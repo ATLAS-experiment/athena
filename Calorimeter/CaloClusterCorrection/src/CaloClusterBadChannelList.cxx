@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -22,10 +22,8 @@ using xAOD::CaloCluster;
 CaloClusterBadChannelList::CaloClusterBadChannelList(const std::string& type,
                                      const std::string& name,
                                      const IInterface* parent)
-  : CaloClusterCorrection(type, name, parent),
-    m_badChannelTool("CaloBadChanTool", this)
+  : CaloClusterCorrection(type, name, parent)
 {
- declareProperty("badChannelTool",m_badChannelTool,"Tool handle for bad channel");
 }
 
 StatusCode CaloClusterBadChannelList::initialize()

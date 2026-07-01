@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LeptonTaggers/DecoratePLIT.h"
@@ -47,7 +47,7 @@ namespace Prompt {
         m_num_track_features = 17;
 
         // set up decorators using a dummy query of the onnx model
-        std::map<std::string, FlavorTagInference::Inputs> gnn_input;
+        FlavorTagInference::InputMap gnn_input;
         
         std::vector<float> elec_feat(m_num_lepton_features, 0.);
         std::vector<int64_t> elec_feat_dim = {1, static_cast<int64_t>(elec_feat.size())};
@@ -79,7 +79,7 @@ namespace Prompt {
         m_num_track_features = 17;
 
         // set up decorators using a dummy query of the onnx model
-        std::map<std::string, FlavorTagInference::Inputs> gnn_input;
+        FlavorTagInference::InputMap gnn_input;
         
         std::vector<float> muon_feat(m_num_lepton_features, 0.);
         std::vector<int64_t> muon_feat_dim = {1, static_cast<int64_t>(muon_feat.size())};
@@ -188,6 +188,11 @@ namespace Prompt {
     ATH_CHECK(m_dec_trk_muon_track.initialize());
     ATH_CHECK(m_dec_trk_dr_leptontrack.initialize());
 
+    renounce(m_acc_trk_dr_lepton);
+    renounce(m_acc_trk_dr_leptontrack);
+    renounce(m_acc_trk_electron_track);
+    renounce(m_acc_trk_muon_track);
+
     return StatusCode::SUCCESS;
 
   }
@@ -216,7 +221,7 @@ namespace Prompt {
 
     // prepare input
     // -------------
-    std::map<std::string, FlavorTagInference::Inputs> gnn_input;
+    FlavorTagInference::InputMap gnn_input;
 
     // collect muon features
     float muon_pt = muon.pt();
@@ -230,7 +235,7 @@ namespace Prompt {
     const xAOD::CaloCluster* cluster = muon.cluster();
     if (cluster) {
       float energyloss = 0;
-      if (!muon.parameter(energyloss,xAOD::Muon::EnergyLoss)) {
+      if (!muon.parameter(energyloss,xAOD::Muon::ParamDef::EnergyLoss)) {
         ATH_MSG_WARNING("DecoratePLIT::execute - failed to retrieve energy loss");
         return StatusCode::FAILURE;
       }
@@ -257,7 +262,7 @@ namespace Prompt {
     gnn_input.insert({"jet_features", muon_info});
 
     // decorate and fill track particles around the muon
-    const xAOD::TrackParticle *muonTrack = muon.primaryTrackParticle();
+    const xAOD::TrackParticle *muonTrack = muon.trackParticle(xAOD::Muon::TrackParticleType::Primary);
     std::vector<const xAOD::IParticle *> parts;
 
     if(!fillParticles(dec_trk_dr_lepton, dec_trk_dr_leptontrack, dec_trk_electron_track, dec_trk_muon_track,
@@ -441,7 +446,7 @@ namespace Prompt {
     const EventContext& ctx) const {
     // prepare input
     // -------------
-    std::map<std::string, FlavorTagInference::Inputs> gnn_input;
+    FlavorTagInference::InputMap gnn_input;
 
     // accessors
     // ---------
@@ -786,8 +791,9 @@ namespace Prompt {
     if (const auto* elec = dynamic_cast<const xAOD::Electron*>(&lepton)) {
         tracksUsedForElectron = xAOD::EgammaHelpers::getTrackParticles(elec, true); // useBremAssoc = true
     } else if (const auto* muon = dynamic_cast<const xAOD::Muon*>(&lepton)) {
-        if (muon->muonType() == xAOD::Muon::Combined && muon->inDetTrackParticleLink().isValid()) {
-            tracksUsedForMuon.insert(*(muon->inDetTrackParticleLink())); // even if the primary track should be a combined track, we still use the id for the match
+        if (muon->muonType() == xAOD::Muon::MuonType::Combined && 
+            muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) {
+            tracksUsedForMuon.insert(muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)); // even if the primary track should be a combined track, we still use the id for the match
         }
     }
 

@@ -1,4 +1,5 @@
 #include "../TrigInDetTrackSeedingTool.h"
-#include "../Gbts2ActsSeedingTool.h"
+#include "../GbtsFtfActsSeedingTool.h"
+
 DECLARE_COMPONENT( TrigInDetTrackSeedingTool )
-DECLARE_COMPONENT( Gbts2ActsSeedingTool )
+DECLARE_COMPONENT( GbtsFtfActsSeedingTool )

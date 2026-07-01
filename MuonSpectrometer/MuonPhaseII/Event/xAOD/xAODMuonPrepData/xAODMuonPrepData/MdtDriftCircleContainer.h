@@ -1,13 +1,13 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_MDTDRIFTCIRCLECONTAINER_H
 #define XAODMUONPREPDATA_MDTDRIFTCIRCLECONTAINER_H
 
-#include "xAODMuonPrepData/MdtDriftCircleFwd.h"
+#include "xAODMuonPrepData/MuonMeasurementContainer.h"
 #include "xAODMuonPrepData/MdtDriftCircle.h"
-#include "xAODCore/CLASS_DEF.h"
+
 namespace xAOD{
    using MdtDriftCircleContainer_v1 = DataVector<MdtDriftCircle_v1>;
    using MdtDriftCircleContainer = MdtDriftCircleContainer_v1;

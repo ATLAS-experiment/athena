@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- mode: python -*-
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # athenaEF.py - A modified version of athenaHLT.py that runs the HLT configuration
 # directly without using HLTMPPy/HLTMPPU. It creates the configuration like
@@ -92,7 +92,10 @@ class RunParams:
                 run_type=None,
                 trigger_type=None,
                 recording_enabled=None,
-                conditions_run=None):
+                conditions_run=None,
+                T0_project_tag='',
+                stream='',
+                lumiblock=0):
       """Initialize run parameters with defaults for any unspecified values."""
       self.run_number = run_number if run_number is not None else self.DEFAULT_RUN_NUMBER
       self.lb_number = lb_number if lb_number is not None else self.DEFAULT_LB_NUMBER
@@ -106,6 +109,9 @@ class RunParams:
       self.trigger_type = trigger_type if trigger_type is not None else self.DEFAULT_TRIGGER_TYPE
       self.recording_enabled = recording_enabled if recording_enabled is not None else self.DEFAULT_RECORDING_ENABLED
       self.conditions_run = conditions_run  # Reference run for conditions lookup (None = use run_number)
+      self.T0_project_tag = T0_project_tag
+      self.stream = stream
+      self.lumiblock = lumiblock
    
    def to_dict(self):
       """Return run parameters as a dictionary for prepareForStart."""
@@ -122,6 +128,9 @@ class RunParams:
          'trigger_type': self.trigger_type,
          'recording_enabled': self.recording_enabled,
          'conditions_run': self.conditions_run,
+         'T0_project_tag': self.T0_project_tag,
+         'stream': self.stream,
+         'lumiblock': self.lumiblock,
       }
    
    @classmethod
@@ -135,6 +144,9 @@ class RunParams:
          solenoid_current=getattr(args, 'solenoid_current', None),
          toroids_current=getattr(args, 'toroids_current', None),
          conditions_run=getattr(args, 'conditions_run', None),
+         T0_project_tag=getattr(args, 'T0_project_tag', ''),
+         stream=getattr(args, 'stream', ''),
+         lumiblock=getattr(args, 'lumiblock', 0),
       )
    
    @classmethod
@@ -617,10 +629,17 @@ class ConfigRunner:
       iProperty("AvalancheSchedulerSvc").ThreadPoolSize = self.num_threads
       iProperty("EventDataSvc").NSlots = self.num_slots
       
-      # Set input files for EFInterfaceSvc (overrides what's in DB/JSON config)
+      # Set input files and metadata for EFInterfaceSvc (overrides what's in DB/JSON config)
       if self.ef_files:
          log.info("Setting EFInterfaceSvc.Files = %s", self.ef_files)
          iProperty("EFInterfaceSvc").Files = self.ef_files
+         iProperty("EFInterfaceSvc").T0ProjectTag = self.run_params.get('T0_project_tag', '')
+         iProperty("EFInterfaceSvc").BeamType = self.run_params.get('beam_type', 0)
+         iProperty("EFInterfaceSvc").BeamEnergy = self.run_params.get('beam_energy', 0)
+         iProperty("EFInterfaceSvc").TriggerType = self.run_params.get('trigger_type', 0)
+         iProperty("EFInterfaceSvc").Stream = self.run_params.get('stream', '')
+         iProperty("EFInterfaceSvc").Lumiblock = self.run_params.get('lumiblock', 0)
+         iProperty("EFInterfaceSvc").DetMask = self.run_params.get('detector_mask', '')
       
       # If HLT PSK is set on command line, read it from DB instead of COOL (ATR-25974)
       # This is the same logic as TrigPSCPythonDbSetup.py
@@ -804,8 +823,8 @@ def check_args(parser, args):
    if not args.jobOptions and not args.use_database:
       parser.error("No job options file specified")
 
-   if not args.file and not args.dump_config_exit:
-      parser.error("--file is required unless using --dump-config-exit")
+   if (not args.file and not args.dump_config_exit and args.efdf_interface_library == 'TrigDFEmulator'):
+      parser.error("--file is required unless using --dump-config-exit or online efdf-interface-library")
 
    if args.use_crest and not args.use_database:
       parser.error("--use-crest requires --use-database")
@@ -849,11 +868,28 @@ def update_run_params(args, flags):
    if (args.run_number is not None and args.lb_number is None) or (args.run_number is None and args.lb_number is not None):
       log.error("Both or neither of the options -R (--run-number) and -L (--lb-number) have to be specified")
 
-   if args.run_number is None and args.file:
+   # Read metadata from input file (like HLTMPPy/runner.py getRunParamsFromFile)
+   if args.file:
       from eformat import EventStorage
       dr = EventStorage.pickDataReader(args.file[0])
-      args.run_number = dr.runNumber()
-      args.lb_number = dr.lumiblockNumber()
+      if args.run_number is None:
+         args.run_number = dr.runNumber()
+         args.lb_number = dr.lumiblockNumber()
+      args.T0_project_tag = dr.projectTag()
+      args.beam_type = dr.beamType()
+      args.beam_energy = dr.beamEnergy()
+      args.trigger_type = dr.triggerType()
+      args.stream = dr.stream()
+      args.lumiblock = dr.lumiblockNumber()
+      args.file_detector_mask = "{:032x}".format(dr.detectorMask())
+   else:
+      args.T0_project_tag = getattr(args, 'T0_project_tag', '')
+      args.beam_type = getattr(args, 'beam_type', 0)
+      args.beam_energy = getattr(args, 'beam_energy', 0)
+      args.trigger_type = getattr(args, 'trigger_type', 0)
+      args.stream = getattr(args, 'stream', '')
+      args.lumiblock = getattr(args, 'lumiblock', 0)
+      args.file_detector_mask = getattr(args, 'file_detector_mask', '00000000000000000000000000000000')
 
    sor_params = None
    if (args.sor_time is None or args.detector_mask is None) and args.run_number is not None:
@@ -873,6 +909,9 @@ def update_run_params(args, flags):
          dmask = hex(dmask)
       args.detector_mask = arg_detector_mask(dmask)
    
+   if args.dump_config_exit and not args.run_number:
+      args.run_number = 0
+
    # Apply defaults for magnet currents if not set (offline mode only)
    # In online mode, magnets must come from IS or command line (handled above)
    if getattr(args, 'solenoid_current', None) is None:
@@ -995,6 +1034,8 @@ def main():
    g.add_argument('--number-of-events', '--evtMax', '-n', metavar='N', type=int, default=-1, help='processes N events (default: -1, means all)')
    g.add_argument('--skip-events', '--skipEvents', '-k', metavar='N', type=int, default=0, help='skip N first events')
    g.add_argument('--loop-files', action='store_true', help='loop over input files if no more events')
+   g.add_argument('--efdf-interface-library', metavar='LIB', default='TrigDFEmulator',
+                  help='name of the EFDF interface shared library to load')
 
    ## Performance and debugging
    g = parser.add_argument_group('Performance and debugging')
@@ -1065,8 +1106,12 @@ def main():
    check_args(parser, args)
 
    # set ROOT to batch mode (ATR-21890)
-   from ROOT import gROOT
-   gROOT.SetBatch()
+   from PyUtils.Helpers import ROOTSetup
+   ROOTSetup(batch=True)
+
+   # Enable ROOT thread safety
+   import ROOT
+   ROOT.ROOT.EnableThreadSafety()
 
    # set default OutputLevels and file inclusion
    import AthenaCommon.Logging
@@ -1150,11 +1195,20 @@ def main():
    flags.Trigger.Online.useEFByteStreamSvc = True
    ef = flags.Trigger.Online.EFInterface
    ef_files = args.file if args.file else []
-   ef.Files        = ef_files
+   ef.Files          = ef_files
+   ef.OutputFileName = f"athenaEF_{args.save_output}" if args.save_output else ""
    ef.LoopFiles    = args.loop_files
    ef.NumEvents    = args.number_of_events
    ef.SkipEvents   = args.skip_events
    ef.RunNumber    = args.run_number
+   ef.T0ProjectTag = args.T0_project_tag
+   ef.BeamType     = args.beam_type
+   ef.BeamEnergy   = args.beam_energy
+   ef.TriggerType  = args.trigger_type
+   ef.Stream       = args.stream
+   ef.Lumiblock    = args.lumiblock
+   ef.DetMask      = args.file_detector_mask
+   ef.LibraryName  = args.efdf_interface_library
 
    # Execute precommands
    if args.precommand:
@@ -1248,7 +1302,7 @@ def main():
          args.postcommand = []  # Clear so we don't run them again later
       
       # Dump configuration to JSON (like TrigPSCPythonCASetup)
-      fname = "HLTJobOptions_EF"
+      fname = "HLTJobOptions"
       log.info("Dumping configuration to %s.pkl and %s.json", fname, fname)
       with open(f"{fname}.pkl", "wb") as f:
          cfg.store(f)
@@ -1280,7 +1334,7 @@ def main():
 
    # Dump configuration if requested
    if args.dump_config or args.dump_config_exit:
-      fname = "HLTJobOptions_EF"
+      fname = "HLTJobOptions"
       
       if is_database:
          # For DB mode, fetch properties via Python API

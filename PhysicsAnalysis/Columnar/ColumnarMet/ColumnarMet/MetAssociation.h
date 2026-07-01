@@ -93,9 +93,9 @@ namespace columnar
     /// ==============
   public:
 
-    using AssocId = ObjectId<ContainerId::metAssociation,CM>;
-    using OptAssocId = OptObjectId<ContainerId::metAssociation,CM>;
-    using PartId = ObjectId<ContainerId::particle,CM>;
+    using AssocId = ObjectId<MetAssociationDef,CM>;
+    using OptAssocId = OptObjectId<MetAssociationDef,CM>;
+    using PartId = ObjectId<ParticleDef,CM>;
     static constexpr bool useMissingETAssociationHelper = std::is_same_v<CM,ColumnarModeXAOD>;
 
     using constvec_t = MissingETBase::Types::constvec_t;
@@ -130,46 +130,46 @@ namespace columnar
         objectTypeAcc (columnarBase, "objectType")
     {
       if constexpr (!useMissingETAssociationHelper)
-        useObjectFlagsAcc = ColumnUpdater<ContainerId::metAssociation,bitmask_t,CM> (columnarBase, "useObjectFlags");
+        useObjectFlagsAcc = ColumnUpdater<MetAssociationDef,bitmask_t,CM> (columnarBase, "useObjectFlags");
     }
 
     MetAssociationHelper<CM> operator () (xAOD::MissingETAssociationHelper& helper) const;
-    MetAssociationHelper<CM> operator () (ObjectRange<ContainerId::metAssociation,CM> map) const;
+    MetAssociationHelper<CM> operator () (ObjectRange<MetAssociationDef,CM> map) const;
 
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> calpx;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> calpy;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> calpz;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> cale;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> calsumpt;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<bitmask_t>,CM> calkeyAcc;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> calpx;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> calpy;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> calpz;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> cale;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> calsumpt;
+    ColumnAccessor<MetAssociationDef,std::vector<bitmask_t>,CM> calkeyAcc;
 
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> trkpx;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> trkpy;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> trkpz;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> trke;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<float>,CM> trksumpt;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<bitmask_t>,CM> trkkeyAcc;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> trkpx;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> trkpy;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> trkpz;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> trke;
+    ColumnAccessor<MetAssociationDef,std::vector<float>,CM> trksumpt;
+    ColumnAccessor<MetAssociationDef,std::vector<bitmask_t>,CM> trkkeyAcc;
 
-    ColumnAccessor<ContainerId::metAssociation,float,CM> jettrkpx;
-    ColumnAccessor<ContainerId::metAssociation,float,CM> jettrkpy;
-    ColumnAccessor<ContainerId::metAssociation,float,CM> jettrkpz;
-    ColumnAccessor<ContainerId::metAssociation,float,CM> jettrke;
-    ColumnAccessor<ContainerId::metAssociation,float,CM> jettrksumpt;
+    ColumnAccessor<MetAssociationDef,float,CM> jettrkpx;
+    ColumnAccessor<MetAssociationDef,float,CM> jettrkpy;
+    ColumnAccessor<MetAssociationDef,float,CM> jettrkpz;
+    ColumnAccessor<MetAssociationDef,float,CM> jettrke;
+    ColumnAccessor<MetAssociationDef,float,CM> jettrksumpt;
 
-    using ObjectLinkCI = VariantContainerId<ContainerId::particle,ContainerId::particle,ContainerId::jet,ContainerId::electron,ContainerId::photon,ContainerId::muon>;
+    using ObjectLinkCI = VariantContainerId<ParticleDef,ParticleDef,JetDef,ElectronDef,PhotonDef,MuonDef>;
     using ObjectLinkType = ObjectLink<ObjectLinkCI,CM>;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<ObjectLinkType>,CM> objectLinks;
+    ColumnAccessor<MetAssociationDef,std::vector<ObjectLinkType>,CM> objectLinks;
 
-    ColumnAccessor<ContainerId::metAssociation,LinkCastColumn<ContainerId::jet,xAOD::JetContainer>,CM> jetLink;
+    ColumnAccessor<MetAssociationDef,LinkCastColumn<JetDef,xAOD::JetContainer>,CM> jetLink;
 
-    ColumnAccessor<ContainerId::metAssociation,char,CM> isMisc;
+    ColumnAccessor<MetAssociationDef,char,CM> isMisc;
 
-    ColumnAccessor<ContainerId::metAssociation,std::vector<std::vector<std::size_t>>,CM> overlapIndicesAcc;
-    ColumnAccessor<ContainerId::metAssociation,std::vector<std::vector<unsigned char>>,CM> overlapTypesAcc;
+    ColumnAccessor<MetAssociationDef,std::vector<std::vector<std::size_t>>,CM> overlapIndicesAcc;
+    ColumnAccessor<MetAssociationDef,std::vector<std::vector<unsigned char>>,CM> overlapTypesAcc;
 
-    MetHelpers::ObjectTypeAccessor<ContainerId::particle> objectTypeAcc;
+    MetHelpers::ObjectTypeAccessor<ParticleDef> objectTypeAcc;
 
-    ColumnUpdater<ContainerId::metAssociation,bitmask_t,CM> useObjectFlagsAcc;
+    ColumnUpdater<MetAssociationDef,bitmask_t,CM> useObjectFlagsAcc;
 
 
 
@@ -342,10 +342,10 @@ namespace columnar
     /// ==============
   public:
 
-    using PartId = ObjectId<ContainerId::particle,CM>;
-    using JetId = ObjectId<ContainerId::jet,CM>;
-    using AssocId = ObjectId<ContainerId::metAssociation,CM>;
-    using OptAssocId = OptObjectId<ContainerId::metAssociation,CM>;
+    using PartId = ObjectId<ParticleDef,CM>;
+    using JetId = ObjectId<JetDef,CM>;
+    using AssocId = ObjectId<MetAssociationDef,CM>;
+    using OptAssocId = OptObjectId<MetAssociationDef,CM>;
     using ObjectLinkType = MetAssocationAccessors<CM>::ObjectLinkType;
 
     using constvec_t = MissingETBase::Types::constvec_t;
@@ -360,7 +360,7 @@ namespace columnar
       : m_xaodHelper (&val_helper), m_map (*val_helper.map()), m_accessors (&val_accessors)
     {}
 
-    MetAssociationHelper (ObjectRange<ContainerId::metAssociation,CM> map, const columnar::MetAssocationAccessors<CM>& val_accessors)
+    MetAssociationHelper (ObjectRange<MetAssociationDef,CM> map, const columnar::MetAssocationAccessors<CM>& val_accessors)
       : m_map (map), m_accessors (&val_accessors)
     {}
 
@@ -373,7 +373,7 @@ namespace columnar
 
 
     /// @brief the underlying association map
-    [[nodiscard]] ObjectRange<ContainerId::metAssociation,CM> map () const noexcept {
+    [[nodiscard]] ObjectRange<MetAssociationDef,CM> map () const noexcept {
       return m_map;}
 
 
@@ -558,7 +558,7 @@ namespace columnar
     xAOD::MissingETAssociationHelper* m_xaodHelper = nullptr;
 
     /// @brief the underlying MET association map
-    ObjectRange<ContainerId::metAssociation,CM> m_map;
+    ObjectRange<MetAssociationDef,CM> m_map;
 
     /// @brief the accessors for the members of the MET association map
     const MetAssocationAccessors<CM>* m_accessors = nullptr;
@@ -575,7 +575,7 @@ namespace columnar
 
   template<typename CM>
   MetAssociationHelper<CM> MetAssocationAccessors<CM> ::
-  operator () (ObjectRange<ContainerId::metAssociation,CM> map) const
+  operator () (ObjectRange<MetAssociationDef,CM> map) const
   {
     return MetAssociationHelper<CM> (map, *this);
   }

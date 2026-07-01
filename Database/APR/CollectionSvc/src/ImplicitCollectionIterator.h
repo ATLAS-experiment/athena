@@ -73,11 +73,11 @@ namespace pool {
 
 
   protected:
-     IContainer&        m_container;
-     std::unique_ptr<ITokenIterator> m_tokenIterator;
-     Token*             m_token;
+     IContainer&                       m_container;
+     std::unique_ptr<ITokenIterator>   m_tokenIterator;
+     Token*                            m_token{};
 
-     mutable CollectionRowBuffer        m_rowBuffer;
+     mutable CollectionRowBuffer       m_rowBuffer;
    };
 
 }

@@ -1,7 +1,7 @@
 // emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETREC_GLOBALEVENTSETUP_H
@@ -25,11 +25,11 @@ class ATLAS_NOT_THREAD_SAFE JetGlobalEventSetup : public AthAlgorithm,
                                                   virtual public IIncidentListener {
 public:
   JetGlobalEventSetup(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode initialize();
-  virtual StatusCode execute(){return StatusCode::SUCCESS;};
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;};
   
   /// Implementation of IIncidentListener::handle
-  virtual void handle(const Incident&);
+  virtual void handle(const Incident&) override;
 };
 
 #endif

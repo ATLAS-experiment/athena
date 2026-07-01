@@ -44,7 +44,7 @@ namespace xAODMaker {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CombinedMuonFeatureCnvAlg::execute() {
+    StatusCode CombinedMuonFeatureCnvAlg::execute(const EventContext& /*ctx*/) {
         
         // Retrieve the AOD container:
         const CombinedMuonFeatureContainer* aod = nullptr;

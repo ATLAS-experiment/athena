@@ -38,6 +38,7 @@ public:
   static bool hasPixelGeometry;
   static bool hasSCTGeometry;
   static bool hasTRTGeometry;
+  static bool hasHGTDGeometry;
   static bool hasInDetServiceMaterialGeometry;
   static bool hasBeamPipeGeometry;
   static bool hasLArGeometry;
@@ -56,6 +57,7 @@ GeoPVConstLink VP1JobConfigInfo::Imp::geoModelWorld;
 bool VP1JobConfigInfo::Imp::initialised = false;
 bool VP1JobConfigInfo::Imp::hasGeoModelExperiment = false;
 bool VP1JobConfigInfo::Imp::hasITkGeometry = false;
+bool VP1JobConfigInfo::Imp::hasHGTDGeometry = false;
 bool VP1JobConfigInfo::Imp::hasPixelGeometry = false;
 bool VP1JobConfigInfo::Imp::hasSCTGeometry = false;
 bool VP1JobConfigInfo::Imp::hasTRTGeometry = false;
@@ -74,6 +76,7 @@ void VP1JobConfigInfo::Imp::turnOffAll()
 {
   hasGeoModelExperiment = false;
   hasITkGeometry = false;
+  hasHGTDGeometry = false;
   hasPixelGeometry = false;
   hasSCTGeometry = false;
   hasTRTGeometry = false;
@@ -104,6 +107,7 @@ void VP1JobConfigInfo::Imp::ensureInit()
     VP1Msg::messageVerbose("VP1JobConfigInfo => Found job configuration:");
     VP1Msg::messageVerbose("VP1JobConfigInfo => hasGeoModelExperiment = "+QString(hasGeoModelExperiment?"On":"Off"));
     VP1Msg::messageVerbose("VP1JobConfigInfo => hasITkGeometry = "+QString(hasITkGeometry?"On":"Off"));
+    VP1Msg::messageVerbose("VP1JobConfigInfo => hasHGTDGeometry = "+QString(hasHGTDGeometry?"On":"Off"));
     VP1Msg::messageVerbose("VP1JobConfigInfo => hasPixelGeometry = "+QString(hasPixelGeometry?"On":"Off"));
     VP1Msg::messageVerbose("VP1JobConfigInfo => hasSCTGeometry = "+QString(hasSCTGeometry?"On":"Off"));
     VP1Msg::messageVerbose("VP1JobConfigInfo => hasTRTGeometry = "+QString(hasTRTGeometry?"On":"Off"));
@@ -124,6 +128,7 @@ void VP1JobConfigInfo::Imp::ensureInit()
 bool VP1JobConfigInfo::hasGeoModelExperiment() { if (!Imp::initialised) Imp::ensureInit(); return Imp::hasGeoModelExperiment; }
 bool VP1JobConfigInfo::hasITkGeometry() { if (!Imp::initialised) Imp::ensureInit(); return Imp::hasITkGeometry; }
 bool VP1JobConfigInfo::hasPixelGeometry() { if (!Imp::initialised) Imp::ensureInit(); return Imp::hasPixelGeometry; }
+bool VP1JobConfigInfo::hasHGTDGeometry() { if (!Imp::initialised) Imp::ensureInit(); return Imp::hasHGTDGeometry; }
 bool VP1JobConfigInfo::hasSCTGeometry() { if (!Imp::initialised) Imp::ensureInit(); return Imp::hasSCTGeometry; }
 bool VP1JobConfigInfo::hasTRTGeometry() { if (!Imp::initialised) Imp::ensureInit(); return Imp::hasTRTGeometry; }
 bool VP1JobConfigInfo::hasInDetServiceMaterialGeometry() { if (!Imp::initialised) Imp::ensureInit(); return Imp::hasInDetServiceMaterialGeometry; }
@@ -180,10 +185,15 @@ bool VP1JobConfigInfo::Imp::actualInit( StoreGateSvc* detStore )
 
   while (!av.atEnd()) {
     std::string name = av.getName();
-    if ( !hasPixelGeometry && (name=="Pixel" or name=="ITkPixel")) {
+
+    if ( !hasITkGeometry && name=="ITkPixel") { hasITkGeometry = true; }
+    if ( !hasITkGeometry && name=="ITkStrip") { hasITkGeometry = true; }
+    if ( !hasHGTDGeometry && name=="HGTD") { hasHGTDGeometry = true; }
+    if ( !hasPixelGeometry && name=="Pixel") {
       hasPixelGeometry = true;
-      if (not hasITkGeometry and name == "ITkPixel")
-        hasITkGeometry = true;
+      if (not hasITkGeometry and name == "ITkPixel") { 
+          VP1Msg::messageWarningAllRed("WARNING!!! --- The GeoVolume has name 'ITkPixel' but the flag 'hasITkGeometry' is false ---> CHECK IT!!");
+      }
       if ( !hasBCMGeometry ) {
 	    //Loop under the top Pixel volume to check if there are BCM volumes
 	    //present in the current config:
@@ -197,10 +207,11 @@ bool VP1JobConfigInfo::Imp::actualInit( StoreGateSvc* detStore )
 	    }
       }
     }
-    if ( !hasSCTGeometry && (name=="SCT" or name=="ITkStrip")) {
+    if ( !hasSCTGeometry && name=="SCT" ) {
       hasSCTGeometry = true;
-      if (not hasITkGeometry and name == "ITkStrip")
-        hasITkGeometry = true;
+      if (not hasITkGeometry and name == "ITkStrip") { 
+          VP1Msg::messageWarningAllRed("WARNING!!! --- The GeoVolume has name 'ITkStrip' but the flag 'hasITkGeometry' is false ---> CHECK IT!!");
+      }
     }
     if ( !hasTRTGeometry && name=="TRT") hasTRTGeometry = true;
     if ( !hasInDetServiceMaterialGeometry && name=="InDetServMat") hasInDetServiceMaterialGeometry = true;

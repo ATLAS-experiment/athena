@@ -33,12 +33,12 @@ namespace CP
 
 
   StatusCode KinematicHistAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *input = nullptr;
-      ANA_CHECK (m_inputHandle.retrieve (input, sys));
+      ANA_CHECK (m_inputHandle.retrieve (input, sys, ctx));
 
       auto histIter = m_hist.find (sys);
       if (histIter == m_hist.end())
@@ -46,7 +46,7 @@ namespace CP
         std::string name;
         HistGroup group;
 
-        name = RCU::substitute (m_histPattern, "%VAR%", "multiplicity");
+        name = RCU::substitute (m_histPattern.value(), "%VAR%", "multiplicity");
         ANA_CHECK (m_systematicsList.service().makeSystematicsName (name, name, sys));
         ANA_CHECK (book (TH1F (name.c_str(), "multiplicity", 20, 0, 20)));
         group.multiplicity = hist (name);
@@ -67,17 +67,17 @@ namespace CP
             std::string name;
             HistSubgroup group;
 
-            name = RCU::substitute (m_histPattern, "%VAR%", "pt" + std::to_string(histIter->second.perObject.size()));
+            name = RCU::substitute (m_histPattern.value(), "%VAR%", "pt" + std::to_string(histIter->second.perObject.size()));
             ANA_CHECK (m_systematicsList.service().makeSystematicsName (name, name, sys));
             ANA_CHECK (book (TH1F (name.c_str(), "pt", 20, 0, 200e3)));
             group.pt = hist (name);
 
-            name = RCU::substitute (m_histPattern, "%VAR%", "eta" + std::to_string(histIter->second.perObject.size()));
+            name = RCU::substitute (m_histPattern.value(), "%VAR%", "eta" + std::to_string(histIter->second.perObject.size()));
             ANA_CHECK (m_systematicsList.service().makeSystematicsName (name, name, sys));
             ANA_CHECK (book (TH1F (name.c_str(), "eta", 20, -5, 5)));
             group.eta = hist (name);
 
-            name = RCU::substitute (m_histPattern, "%VAR%", "phi" + std::to_string(histIter->second.perObject.size()));
+            name = RCU::substitute (m_histPattern.value(), "%VAR%", "phi" + std::to_string(histIter->second.perObject.size()));
             ANA_CHECK (m_systematicsList.service().makeSystematicsName (name, name, sys));
             ANA_CHECK (book (TH1F (name.c_str(), "phi", 20, -M_PI, M_PI)));
             group.phi = hist (name);

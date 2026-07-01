@@ -3,12 +3,22 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MsTrackTesterCfg(flags, name = "MsTrackTester", **kwargs):
+def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, 
+                     outFile="MsTrkTester.root", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    
+    result.merge(setupHistSvcCfg(flags, outFile=outFile,
+                                 outStream="MuonTrackTester"))
+
     from MuonTrackFindingAlgs.TrackFindingConfig import SegmentSelectorCfg, TrackSummaryToolCfg
     kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
     kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    if not scheduleLegacy:
+        kwargs.setdefault("LegacySegmentKey", "")
+        kwargs.setdefault("LegacyTrackKey", "")
+        kwargs.setdefault("LegacyMuonKey" , "")
     the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -35,38 +45,36 @@ if __name__=="__main__":
                                               default=False, action='store_true')
     parser.add_argument("--noPerfMon", help="If set to true, disable performance monitoring.",
                                               default=False, action='store_true')
+    parser.add_argument("--noLegacyChain", help="If set to true, the legacy chain is not scheduled",
+                                           default = False, action = 'store_true')
     parser.set_defaults(nEvents = -1)
   
     parser.set_defaults(outRootFile="MsTrkTester.root")
-    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
+    parser.set_defaults(inputFile=MuonPhaseIITestDefaults.RDO_R3)
    
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.Trigger.Muon.useNewRegionSelector = False
+    flags.Muon.includePileUpTruth = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                                    outStream="MuonTrackTester"))
+    cfg.getService("MessageSvc").setVerbose= []
 
-    # cfg.getService("MessageSvc").setVerbose = ["MsTrackTester", "MSTrackFinderAlg", "MuonSegmentFittingAlg"]
-    from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
-    cfg.merge(xAODUncalibMeasPrepCfg(flags))
-    
-    from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
-    cfg.merge(MuonSpacePointFormationCfg(flags))
+ 
+    from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
+    cfg.merge(MuonReconstructionConfig(flags))
 
-    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-    cfg.merge(MuonPatternRecognitionCfg(flags))
-
-    from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
-    cfg.merge(MSTrackFinderAlgCfg(flags))
     
     #### Schedule the legacy MS track building to compare the two reconstruction chains
     from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-    cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags))
+    if not args.noLegacyChain:
+        cfg.merge(LegacyMuonRecoChainCfg(flags))
+
+    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain,
+                                      outFile = args.outRootFile))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))

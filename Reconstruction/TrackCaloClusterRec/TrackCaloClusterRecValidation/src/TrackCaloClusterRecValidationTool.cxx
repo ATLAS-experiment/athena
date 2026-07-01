@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrackCaloClusterRecValidationTool.h"
 //
@@ -11,6 +11,7 @@
 #include "xAODCore/ShallowCopy.h"
 #include "xAODPFlow/TrackCaloClusterContainer.h"
 #include "xAODParticleEvent/IParticleLink.h"
+#include "AthContainers/CurrentContext.h"
 
 #include "JetCalibTools/JetCalibrationTool.h"
 
@@ -128,10 +129,9 @@ TrackCaloClusterRecValidationTool::initialize()
 }
 
 StatusCode
-TrackCaloClusterRecValidationTool::fillHistograms()
+TrackCaloClusterRecValidationTool::fillHistograms(const EventContext& ctx)
 {
-
-  SG::ReadHandle<xAOD::EventInfo> evt(m_evt);
+  SG::ReadHandle<xAOD::EventInfo> evt(m_evt, ctx);
   if (!evt.isValid()) {
     ATH_MSG_FATAL("Unable to retrieve Event Info");
   }
@@ -160,7 +160,7 @@ TrackCaloClusterRecValidationTool::fillHistograms()
           std::find(m_jetCalibrationCollections.begin(), m_jetCalibrationCollections.end(), name) !=
             m_jetCalibrationCollections.end()) {
         /** Calibrate and record a shallow copy of the jet container */
-        jets = calibrateAndRecordShallowCopyJetCollection(jets_beforeCalib, name);
+        jets = calibrateAndRecordShallowCopyJetCollection(jets_beforeCalib, name, ctx);
         if (!jets) {
           ATH_MSG_WARNING("Unable to create calibrated jet shallow copy container");
           return StatusCode::SUCCESS;
@@ -458,46 +458,35 @@ TrackCaloClusterRecValidationTool::procHistograms()
 /**Calibrate and record a shallow copy of a given jet container */
 const xAOD::JetContainer*
 TrackCaloClusterRecValidationTool::calibrateAndRecordShallowCopyJetCollection(const xAOD::JetContainer* jetContainer,
-                                                                              const std::string& name)
+                                                                              const std::string& name,
+                                                                              const EventContext& ctx)
 {
 
   // create a shallow copy of the jet container
-  std::pair<xAOD::JetContainer*, xAOD::ShallowAuxContainer*> shallowCopy = xAOD::shallowCopyContainer(*jetContainer);
-  xAOD::JetContainer* jetContainerShallowCopy = shallowCopy.first;
-  xAOD::ShallowAuxContainer* jetAuxContainerShallowCopy = shallowCopy.second;
-
-  if (evtStore()->record(jetContainerShallowCopy, name + "_Calib").isFailure()) {
-    ATH_MSG_WARNING("Unable to record JetCalibratedContainer: " << name + "_Calib");
-    return nullptr;
-  }
-  if (evtStore()->record(jetAuxContainerShallowCopy, name + "_Calib" + "Aux.").isFailure()) {
-    ATH_MSG_WARNING("Unable to record JetCalibratedAuxContainer: " << name + "_Calib" + "Aux.");
-    return nullptr;
-  }
-
-  static const SG::AuxElement::Accessor<xAOD::IParticleLink> accSetOriginLink("originalObjectLink");
-  static const SG::AuxElement::Decorator<float> decJvt("JvtUpdate");
+  xAOD::ShallowCopyResult_t<xAOD::JetContainer> shallowCopy =
+    xAOD::shallowCopy(*jetContainer, ctx);
 
   int pos = std::find(m_jetCalibrationCollections.begin(), m_jetCalibrationCollections.end(), name) -
             m_jetCalibrationCollections.begin();
-  if (m_jetCalibrationTools[pos]->applyCalibration(*jetContainerShallowCopy).isFailure()) {
+  if (m_jetCalibrationTools[pos]->applyCalibration(*shallowCopy.first).isFailure()) {
     ATH_MSG_WARNING("Failed to apply calibration to the jet container");
     return nullptr;
   }
 
-  for (xAOD::Jet* shallowCopyJet : *jetContainerShallowCopy) {
+  static const SG::AuxElement::Accessor<xAOD::IParticleLink> accSetOriginLink("originalObjectLink");
+  for (xAOD::Jet* shallowCopyJet : *shallowCopy.first) {
     const xAOD::IParticleLink originLink(*jetContainer, shallowCopyJet->index());
     accSetOriginLink(*shallowCopyJet) = originLink;
   }
 
-  if (evtStore()->setConst(jetContainerShallowCopy).isFailure()) {
-    ATH_MSG_WARNING("Failed to set jetcalibCollection (" << name + "_Calib" + "Aux."
-                                                         << ")const in StoreGate!");
+  xAOD::JetContainer* jetContainerShallowCopy = shallowCopy.first.get();
+
+  if (evtStore()->record(std::move(shallowCopy.first), name + "_Calib").isFailure()) {
+    ATH_MSG_WARNING("Unable to record JetCalibratedContainer: " << name + "_Calib");
     return nullptr;
   }
-  if (evtStore()->setConst(jetAuxContainerShallowCopy).isFailure()) {
-    ATH_MSG_WARNING("Failed to set jetcalibCollection (" << name + "_Calib" + "Aux."
-                                                         << ")const in StoreGate!");
+  if (evtStore()->record(std::move(shallowCopy.second), name + "_Calib" + "Aux.").isFailure()) {
+    ATH_MSG_WARNING("Unable to record JetCalibratedAuxContainer: " << name + "_Calib" + "Aux.");
     return nullptr;
   }
 

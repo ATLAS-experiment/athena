@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTRTHTHCOUNTER_H
@@ -12,9 +12,7 @@
     @migrated from TrigTRTHTHCounter.h & cxx
 */
 
-// standard stuff
-#include <string>
-#include <vector>
+
 
 //Gaudi
 #include "GaudiKernel/ToolHandle.h"
@@ -24,7 +22,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "CxxUtils/phihelper.h"
 #include "InDetIdentifier/TRT_ID.h"
@@ -37,6 +35,9 @@
 
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
+// standard stuff
+#include <string>
+#include <vector>
 
 class TrigTRTHTHCounter: public AthReentrantAlgorithm {
  public:

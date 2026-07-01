@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 ///////////////////////////////////////////////////////////////////
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 // BTaggingTruthTaggingTool.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 /**
@@ -81,7 +81,7 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
 
     struct jetVariable{
       Analysis::CalibrationDataVariables vars;
-      int flav;
+      int flav = 0;
     };
 
     // all the results about a single event are stored in this object
@@ -92,7 +92,7 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
       // features that will be used by the onnx tool
       std::vector<std::vector<float> > node_feat;
         
-      unsigned int njets;
+      unsigned int njets = 0;
 
       TRandom3 rand;
 

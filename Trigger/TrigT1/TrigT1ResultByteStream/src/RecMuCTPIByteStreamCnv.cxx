@@ -31,7 +31,7 @@ RecMuCTPIByteStreamCnv::RecMuCTPIByteStreamCnv( ISvcLocator* svcloc )
  * Function telling the framework the Class ID of the object that this converter
  * is for (CTP_RIO).
  */
-const CLID& RecMuCTPIByteStreamCnv::classID() {
+CLID RecMuCTPIByteStreamCnv::classID() {
 
   return ClassID_traits< MuCTPI_RIO >::ID();
 
@@ -79,12 +79,10 @@ StatusCode RecMuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*
   MsgStream log( msgSvc(), "RecMuCTPIByteStreamCnv" );
   log << MSG::DEBUG << "executing createObj()" << endmsg;
 
-  ByteStreamAddress *pBS_Addr;
-  pBS_Addr = dynamic_cast< ByteStreamAddress* >( pAddr );
-  if ( !pBS_Addr ) {
-    log << MSG::ERROR << " Cannot cast to ByteStreamAddress " << endmsg ;
-    return StatusCode::FAILURE;
-  }
+  ByteStreamAddress* pBS_Addr{};
+  ATH_CHECK( (pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pBS_Addr->getEventContext();
 
   log << MSG::DEBUG << " Creating Objects  " << *( pBS_Addr->par() ) << endmsg;
 
@@ -96,7 +94,7 @@ StatusCode RecMuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*
 
   // get ROB fragment
   IROBDataProviderSvc::VROBFRAG robFrags ;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
+  m_robDataProvider->getROBData(ctx, vID, robFrags );
 
   // size check
   if ( robFrags.size() == 0 ) {    
@@ -105,7 +103,7 @@ StatusCode RecMuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*
     uint32_t newRobId = robId;
     newRobId |= 0x00000b;
     vID[0] = ( newRobId );
-    m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
+    m_robDataProvider->getROBData(ctx, vID, robFrags );
     // size check
     if ( robFrags.size() != 1 ) {
       log << MSG::WARNING << " Number of ROB fragments for source ROB ID " << MSG::hex << newRobId << " (ROD ID " 

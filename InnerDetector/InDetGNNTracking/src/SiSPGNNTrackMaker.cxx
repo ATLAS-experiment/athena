@@ -1,12 +1,15 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
 #include <fstream>
+#include <tuple>
+#include <utility>
 
 #include "SiSPGNNTrackMaker.h"
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 
@@ -26,6 +29,7 @@ StatusCode InDet::SiSPGNNTrackMaker::initialize()
   ATH_CHECK(m_ClusterStripKey.initialize());
 
   ATH_CHECK(m_outputTracksKey.initialize());
+  ATH_CHECK(m_outputEdgeScoresKey.initialize());
 
   ATH_CHECK(m_trackFitter.retrieve());
   ATH_CHECK(m_seedFitter.retrieve());
@@ -86,6 +90,9 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   SG::WriteHandle<TrackCollection> outputTracks{m_outputTracksKey, ctx};
   ATH_CHECK(outputTracks.record(std::make_unique<TrackCollection>()));
 
+  SG::WriteHandle<std::vector<std::vector<float>>> outputEdgeScores{m_outputEdgeScoresKey, ctx};
+  ATH_CHECK(outputEdgeScores.record(std::make_unique<std::vector<std::vector<float>>>()));
+  
   // get event info
   uint32_t runNumber = ctx.eventID().run_number();
   uint32_t eventNumber = ctx.eventID().event_number();
@@ -99,8 +106,14 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   // get tracks from GNN chain
   std::vector<std::vector<uint32_t> > TT;
   std::vector<std::vector<uint32_t> > clusterTracks;
+  std::unordered_map<int, std::unordered_map<int, float>> edgeMap;
   if (m_gnnTrackFinder.isSet()) {
-    ATH_CHECK(m_gnnTrackFinder->getTracks(spacePoints, TT));
+    ATH_CHECK(m_gnnTrackFinder->getTracks(
+      spacePoints, 
+      TT, 
+      m_saveEdgeScore ? &edgeMap : nullptr
+      )
+    );
   } else if (m_gnnTrackReader.isSet()) {
     // if track candidates are built from cluster, get both clusters and SPs
     m_areInputClusters ? 
@@ -122,8 +135,10 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
     // For each track candidate:
     trackCounter++;
 
-    // 1. Sort space points by distance from origin
-    std::vector<const Trk::SpacePoint*> trackCandidate = getSpacePoints(trackIndices, spacePoints);
+    // 1. Sort space points by distance from origin (and retrieve SP ID for edge scores)
+    std::pair<std::vector<const Trk::SpacePoint*>, std::vector<uint32_t> > trackInfos = getSpacePoints(trackIndices, spacePoints);
+    std::vector<const Trk::SpacePoint*> trackCandidate = trackInfos.first;
+    std::vector<uint32_t> sortedID = trackInfos.second;
 
     // 2. Get associated clusters
     // if track candidates are built from cluster, get both clusters and SPs
@@ -146,6 +161,10 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
 
     if (passTrackCut <= 0) {
       outputTracks->push_back(track.release());
+      if (m_saveEdgeScore){
+        std::vector<float> edges = getEdgeScores(sortedID, edgeMap);
+        outputEdgeScores->push_back(edges);
+      }
     }
 
     status_codes.push_back(passTrackCut);
@@ -163,6 +182,45 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   return StatusCode::SUCCESS;
 }
 
+std::vector<float> InDet::SiSPGNNTrackMaker::getEdgeScores(
+  const std::vector<uint32_t>& sortedID,
+  const std::unordered_map<int, std::unordered_map<int, float>>& edgeMap
+) const {
+  
+  std::vector<float> edges;
+  edges.reserve(sortedID.size() - 1);
+
+  if (sortedID.size() < 2) {
+    ATH_MSG_WARNING("Not enough SP in this track, returning empty edge list!");
+    return edges;
+  }
+  if (edgeMap.empty()) {
+    ATH_MSG_WARNING("Empty edgeMap, returning empty edge list! ");
+    return edges;
+  }
+
+  for (std::size_t i = 0; i < sortedID.size() - 1; ++i) {
+      uint32_t src = sortedID[i];
+      uint32_t dst = sortedID[i+1];
+      
+      auto srcMap = edgeMap.find(src);
+        if (srcMap == edgeMap.end()) {
+            edges.push_back(-1.f);
+            continue;
+        }
+
+        auto dstMap = srcMap->second.find(dst);
+        if (dstMap == srcMap->second.end()) {
+            edges.push_back(-1.f);
+            continue;
+        }
+
+        float score = dstMap->second;
+        edges.push_back(score);
+  }
+
+  return edges;
+}
 
 bool InDet::SiSPGNNTrackMaker::prefitCheck(unsigned int nPix, unsigned int nStrip, unsigned int nClusters, unsigned int nSpacePoints) const {
   return nPix >= m_minPixelClusters && nStrip >= m_minStripClusters && nClusters >= m_minClusters && nSpacePoints >= 3;
@@ -355,15 +413,17 @@ std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker::getClustersInEven
 }
  
 
-std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePoints (
+std::pair<std::vector<const Trk::SpacePoint*>, std::vector<uint32_t> > InDet::SiSPGNNTrackMaker::getSpacePoints (
   const std::vector<uint32_t>& trackIndices,
   const std::vector<const Trk::SpacePoint*>& allSpacePoints
 ) const {
 
   std::vector<const Trk::SpacePoint*> trackCandidate;
+  std::vector<uint32_t> sorted_idx;
   trackCandidate.reserve(trackIndices.size());
+  sorted_idx.reserve(trackIndices.size());
 
-  std::vector<std::pair<double, const Trk::SpacePoint*> > distanceSortedSPs;
+  std::vector<std::tuple<double, const Trk::SpacePoint*, uint32_t> > distanceSortedSPs;
 
   // get track space points
   // sort SPs in track by distance from origin
@@ -380,9 +440,10 @@ std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePoints (
     // store distance - hit paire
     if (sp != nullptr) {
       distanceSortedSPs.push_back(
-        std::make_pair(
+        std::make_tuple(
           pow(sp->globalPosition().x(), 2) + pow(sp->globalPosition().y(), 2),
-          sp
+          sp,
+          id
         )
       );
     }
@@ -393,10 +454,14 @@ std::vector<const Trk::SpacePoint*> InDet::SiSPGNNTrackMaker::getSpacePoints (
 
   // add SP to trk candidate in the same order
   for (size_t i = 0; i < distanceSortedSPs.size(); i++) {
-    trackCandidate.push_back(distanceSortedSPs[i].second);
-  }
+    trackCandidate.push_back(std::get<1>(distanceSortedSPs[i]));
 
-  return trackCandidate;
+    if (m_saveEdgeScore) {
+      sorted_idx.push_back(std::get<2>(distanceSortedSPs[i]));
+    }
+  }
+  
+  return std::make_pair(trackCandidate, sorted_idx);
 }
 
 std::vector<const Trk::PrepRawData*> InDet::SiSPGNNTrackMaker :: spacePointsToClusters (
@@ -522,7 +587,7 @@ std::tuple<bool, int, std::unique_ptr<Trk::Track>> InDet::SiSPGNNTrackMaker::doF
 
     // if track fit succeeds, eta and pT within range, compute track summary. This is quite expensive.
     m_trackSummaryTool->computeAndReplaceTrackSummary(
-        *track, false /* DO NOT suppress hole search*/);
+        ctx, *track, false /* DO NOT suppress hole search*/);
     
     int passTrackCut = (m_doRecoTrackCuts) ? passEtaDepCuts(*track) : -1;
     

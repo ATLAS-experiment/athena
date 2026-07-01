@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -55,13 +55,20 @@ def clear_art_summary():
         os.remove(art_result_summary)
 
 
-def find_file(pattern):
+def find_file(pattern, max_files=1):
     '''
     Bash inline command frequently used in multi-step tests
     to pass the output of one step to the input of another
-    based on a name pattern rather than a fixed full file name
+    based on a name pattern rather than a fixed full file name.
+
+    By default only the first match is returned. Set max_files
+    to None to return all matches (as space separated list).
     '''
-    return '`find . -name \'{:s}\' | tail -n 1`'.format(pattern)
+    cmd = f'find . -name \'{pattern}\''
+    if max_files is not None:
+        cmd += f' | tail -n {max_files}'
+    return f'`{cmd}`'
+
 
 def find_file_in_path(filename, path_env_var):
     '''Find filename in search path given by environment variable'''

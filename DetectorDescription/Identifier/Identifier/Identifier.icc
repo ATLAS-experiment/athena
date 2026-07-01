@@ -28,17 +28,11 @@ inline Identifier::Identifier(int value)
 //-----------------------------------------------
 inline Identifier::Identifier(value_type value)
   : m_id(value){
-
-  // Print out warning for potential call with value for a 32-bit id
-  // I.e. if lower bits are set and no upper bit set
   const value_type upper = 0XFFFFFFFF00000000LL;
   const value_type lower = 0X00000000FFFFFFFFLL;
   const value_type testUpper = value & upper;
   const value_type testLower = value & lower;
   if (testUpper == 0 && testLower > 0) {
-    std::cout << "Identifier::Identifier - WARNING Constructing 64-bit id "
-                 "with empty upper and non-empty lower: "
-              << std::hex << testUpper << " " << testLower << std::dec << std::endl;
     m_id = (value << 32);
   }
 }
@@ -52,16 +46,12 @@ Identifier::operator=(const Identifier32& old){
 
 inline Identifier&
 Identifier::operator=(value_type value){
-  // Print out warning for potential call with value for a 32-bit id
   // I.e. if lower bits are set and no upper bit set
   const value_type upper = 0XFFFFFFFF00000000LL;
   const value_type lower = 0X00000000FFFFFFFFLL;
   const value_type testUpper = value & upper;
   const value_type testLower = value & lower;
   if (testUpper == 0 && testLower > 0) {
-    std::cout << "Identifier::operator = - WARNING Constructing 64-bit id "
-                 "with empty upper and non-empty lower: "
-              << std::hex << testUpper << " " << testLower << std::dec << std::endl;
     m_id = (value << 32);
     return (*this);
   }

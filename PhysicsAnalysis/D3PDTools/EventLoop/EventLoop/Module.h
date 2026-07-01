@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -91,6 +91,12 @@ namespace EL
       virtual StatusCode postFirstEvent (ModuleData& data);
 
 
+      /// @brief actions after opening a the first input file
+      virtual StatusCode onFirstInputFile (ModuleData& data);
+
+      /// @brief actions after opening an input file after the first one
+      virtual StatusCode onNextInputFile (ModuleData& data);
+
       /// @brief actions after opening a new input file
       virtual StatusCode onNewInputFile (ModuleData& data);
 
@@ -102,7 +108,7 @@ namespace EL
       /// @brief actions after `CloseInputFile` is called on the
       /// algorithms
       ///
-      /// Right now that is only used to disconnect the `TEvent`
+      /// Right now that is only used to disconnect the `Event`
       /// object from the input file.
       virtual StatusCode postCloseInputFile (ModuleData& data);
 

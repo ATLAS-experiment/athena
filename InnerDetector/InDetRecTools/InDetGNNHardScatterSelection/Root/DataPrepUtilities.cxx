@@ -124,12 +124,12 @@ namespace InDetGNNHardScatterSelection {
       TypeRegexes type_regexes = {
         {".*_isDefaults"_r, EDMType::CHAR},
         {"sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, EDMType::FLOAT},
-        {"ntrk"_r, EDMType::INT},
+        {"ntrk|nElectrons|nMuons|nJets|nPhotons"_r, EDMType::INT},
         {"(log_)?pt|abs_eta|eta|phi|energy|mass|sumPt"_r, EDMType::CUSTOM_GETTER},
       };
 
       StringRegexes default_flag_regexes{
-        {"ntrk|sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing"_r, ""},
+        {"ntrk|sumPt2|chi2Over_ndf|z_asymmetry|weighted_z_asymmetry|z_kurtosis|z_skewness|photon_deltaz|photon_deltaPhi|actualIntPerXing|nElectrons|nMuons|nJets|nPhotons"_r, ""},
         {"((log_)?pt|abs_eta|eta|phi|energy|mass|sumPt)"_r, ""}}; // no default for custom cases
 
       std::vector<HSGNNInputConfig> input_config;

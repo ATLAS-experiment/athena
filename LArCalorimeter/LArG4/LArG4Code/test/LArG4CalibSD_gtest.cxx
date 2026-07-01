@@ -34,6 +34,9 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "G4AtlasTools/DerivedG4PhysicalVolume.h"
 #include "LArG4Code/DerivedILArCalibCalculatorSvcForTest.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
+#include "LArG4Code/LArCalibrationHitContainerBuilder.h"
+
+#include <memory>
 
 //set environment
 class GaudiEnvironment : public ::testing::Environment {
@@ -66,37 +69,37 @@ TEST_F( LArG4CalibSDtest, ProcessHits )
   G4TouchableHistory* th = new G4TouchableHistory();
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();//use the derived ILArCalibCalculatorSvc class since ILArCalibCalculatorSvc is abstact and can not be instantiated
-  LArG4CalibSD sd1("name1", calc, false);
+  LArG4CalibSD sd1("name1", calc, "LArCalibHitTest", "", "", false);
   sd1.setupHelpers(&m_EM, &m_FCAL, &m_HEC, &m_caloDm);//add helpers(&m_EM, &m_FCAL, &m_HEC, &m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
   sd1.addDetectorHelper(&m_EM);//same with setupHelpers
-  sd1.ProcessHits(aStep, th);
-
-//now that the newly-generated hit has already been stored in the hit collection calibrationHits, here I will test that. According to previous setting, the compact id stored in the hit should be 7
-  unsigned long long compact_num = (*(sd1.m_calibrationHits.begin()))->cellID().get_compact();//get the compact id 
-  ASSERT_EQ(compact_num , 7u);//test if the compact id is as we expected
+  ASSERT_FALSE(sd1.ProcessHits(aStep, th));
 }
 
-TEST_F( LArG4CalibSDtest, EndOfAthenaEvent )
+TEST_F( LArG4CalibSDtest, LArCalibrationHitContainerBuilder )
 {
-// define two actual parameters for the tested member function EndOfAthenaEvent
-  CaloCalibrationHitContainer* hitContainer = new CaloCalibrationHitContainer();//this kind of instantiation will make the expression "(hitContainer)" be 1
-  CaloCalibrationHitContainer* deadHitContainer = new CaloCalibrationHitContainer();
-
-// define aStep and energies as the actual parameters of the member function SpecialHit 
-  G4Step* aStep = new G4Step();
-  std::vector<G4double> energies = {1., 2., 3., 4.};
-
-  DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();//use the derived ILArCalibCalculatorSvc class since ILArCalibCalculatorSvc is abstact and can not be instantiated
-  LArG4CalibSD sd2("name2", calc, false);
-  sd2.setupHelpers(&m_EM, &m_FCAL, &m_HEC, &m_caloDm);//add helpers(&m_EM, &m_FCAL, &m_HEC, &m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
-  sd2.addDetectorHelper(&m_EM);//same with setupHelpers
-  sd2.SpecialHit(aStep, energies);//this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
-
-//so far the newly-generated hit has already been stored in the object m_calibrationHits, so I can invoke the member function EndOfAthenaEvent to move the hits into the object hitContainer that was just defined
-  sd2.EndOfAthenaEvent(hitContainer, deadHitContainer);
-
-  unsigned long long compact_num = (*(hitContainer->begin()))->cellID().get_compact();//get the compact id
+  LArCalibrationHitContainerBuilder hitContainer("LArCalibHitTest");
+  Identifier id;
+  id.set_literal(7);
+  hitContainer.AddHit("", std::make_unique<CaloCalibrationHit>(id, 1., 2., 3., 4.));
+  hitContainer.Finalize();
+  unsigned long long compact_num = (*(hitContainer.begin()))->cellID().get_compact();//get the compact id
   ASSERT_EQ(compact_num, 7u);//test if it is 7, which is the expected value according to previous setting
+}
+
+TEST_F( LArG4CalibSDtest, LArCalibrationHitContainerBuilderPartitions )
+{
+  LArCalibrationHitContainerBuilder hitContainer("LArCalibHitTest");
+  Identifier id;
+  id.set_literal(7);
+  hitContainer.RegisterSource("sd1");
+  hitContainer.RegisterSource("sd2");
+  hitContainer.AddHit("sd1", std::make_unique<CaloCalibrationHit>(id, 1., 2., 3., 4.));
+  hitContainer.AddHit("sd1", std::make_unique<CaloCalibrationHit>(id, 1., 2., 3., 4.));
+  hitContainer.AddHit("sd2", std::make_unique<CaloCalibrationHit>(id, 1., 2., 3., 4.));
+  hitContainer.AddHit("", std::make_unique<CaloCalibrationHit>(id, 1., 2., 3., 4.));
+  hitContainer.Finalize();
+
+  ASSERT_EQ(3u, hitContainer.size());
 }
 
 TEST_F( LArG4CalibSDtest, SpecialHit )
@@ -107,14 +110,10 @@ TEST_F( LArG4CalibSDtest, SpecialHit )
   std::vector<G4double> energies = {1., 2., 3., 4.}; 
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();//use the derived ILArCalibCalculatorSvc class since ILArCalibCalculatorSvc is abstact and can not be instantiated
-  LArG4CalibSD sd5("name5", calc, false);
+  LArG4CalibSD sd5("name5", calc, "LArCalibHitTest", "", "", false);
   sd5.setupHelpers(&m_EM, &m_FCAL, &m_HEC, &m_caloDm);//add helpers(&m_EM, &m_FCAL, &m_HEC, &m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
   sd5.addDetectorHelper(&m_EM);//same with setupHelpers
-  sd5.SpecialHit(aStep, energies);//this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
-  
-//now that the newly-generated hit has already been stored in the hit collection calibrationHits, here I will test that. According to previous setting, the compact id stored in the hit should be 7
-  unsigned long long compact_num = (*(sd5.m_calibrationHits.begin()))->cellID().get_compact();//get the compact id 
-  ASSERT_EQ(compact_num , 7u);//test if the compact id is as we expected
+  ASSERT_FALSE(sd5.SpecialHit(aStep, energies));
 }
 
 TEST_F( LArG4CalibSDtest, SimpleHit )
@@ -134,15 +133,10 @@ TEST_F( LArG4CalibSDtest, SimpleHit )
   std::vector<double> energies = {1., 2., 3., 4.};
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();
-  LArG4CalibSD sd6("name6", calc, false);
+  LArG4CalibSD sd6("name6", calc, "LArCalibHitTest", "", "", false);
   sd6.setupHelpers(&m_EM, &m_FCAL, &m_HEC, &m_caloDm);
-  LArG4CalibSD::m_calibrationHits_t calibrationHits; //it is actually a hit collection, since there is no previous hit in it, it will execute the "if (bookmark == calibrationHits.end() || !(*bookmark)->Equals(hit)) {if (calibrationHits.empty() || bookmark == calibrationHits.begin()) ...}" block of the member function SimpleHit
   sd6.addDetectorHelper(&m_EM);
-  sd6.SimpleHit(a_ident, energies, calibrationHits); //this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
-
-// Since there is a new hit added in the hit collection, I will test if the hit is stored correctly in the hit collection calibrationHits
-  unsigned long long compact_num = (*(calibrationHits.begin()))->cellID().get_compact(); //get the compacted id of the hit, according to the previous setting it should be 7
-  ASSERT_TRUE(compact_num == 7u); 
+  ASSERT_FALSE(sd6.SimpleHit(a_ident, energies, false));
 
 }
 
@@ -159,7 +153,7 @@ TEST_F( LArG4CalibSDtest, ConvertID )
 //here I decorate the LArG4Identifier object a_ident with a set of numbers to make it complete.//This kind of setting for a_ident will make the "else if(a_ident[0]==10)" block of the member function ConvertID be tested. you can change the setting to test other block
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();
-  LArG4CalibSD sd7("name7", calc, false);
+  LArG4CalibSD sd7("name7", calc, "LArCalibHitTest", "", "", false);
   sd7.setupHelpers(&m_EM, &m_FCAL, &m_HEC, &m_caloDm); //To set the identifier helper class objects m_larEmID using these objects: EM, FCAL, HEC, caloDm
   sd7.addDetectorHelper(&m_EM); //To set the identifier helper class object m_id_helper using the object: id_helper
   Identifier id = sd7.ConvertID(a_ident); //generally speaking, a set of number was compact into a single number stored in id
@@ -177,4 +171,3 @@ int main( int argc, char** argv ) {
   return RUN_ALL_TESTS();
 
 }
-

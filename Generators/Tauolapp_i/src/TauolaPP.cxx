@@ -8,16 +8,12 @@
 // Tauola header files
 #include "Tauola/Log.h"
 #include "Tauola/Tauola.h"
-#ifdef HEPMC3
 #include "Tauola/TauolaHepMC3Event.h"
 namespace Tauolapp
 {
 using TauolaHepMCEvent=TauolaHepMC3Event;
 using TauolaHepMCParticle=TauolaHepMC3Particle;
 }
-#else
-#include "Tauola/TauolaHepMCEvent.h"
-#endif
 
 #include "Tauola/f_Variables.h"
 
@@ -112,10 +108,9 @@ CLHEP::HepRandomEngine* TauolaPP::getRandomEngineDuringInitialize(const std::str
 }
 
 
-StatusCode TauolaPP::execute() {
+StatusCode TauolaPP::execute(const EventContext& ctx) {
 
   //Re-seed the random number stream
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   reseedRandomEngine("TAUOLAPP", ctx);
 
   // Load HepMC info

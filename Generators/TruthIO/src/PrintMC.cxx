@@ -44,26 +44,27 @@ StatusCode PrintMC::initialize() {
   // Check that last > first
   if (m_lastEvt < m_firstEvt) m_lastEvt = m_firstEvt;
 
+  m_gendata = std::make_shared<GenData>();
   return StatusCode::SUCCESS;
 }
 
 
 
 /// @todo Avoid use of unprotected std::cout: stringstream + MsgStream would be better
-StatusCode PrintMC::execute() {
+StatusCode PrintMC::execute(const EventContext& ctx) {
   // If output already turned off by passing last dumped event, just return
   /// @todo I get the feeling VerboseOutput is being abused here...
   if (!m_VerboseOutput) return StatusCode::SUCCESS;
 
   // Loop over all events in McEventCollection
 
-  for (const HepMC::GenEvent* evt : *events_const()) {
+  for (const HepMC::GenEvent* evt : *events_const(ctx)) {
 
     // Get event number from HepMC
     uint64_t evtnum = std::max(0,evt->event_number());
     // Override with evtnum from Athena if enabled and functional
     if (!m_trustHepMC) {
-      SG::ReadHandle<xAOD::EventInfo> evtInfo(m_evtInfoKey);
+      SG::ReadHandle<xAOD::EventInfo> evtInfo(m_evtInfoKey, ctx);
       evtnum = evtInfo->eventNumber();
     }
 
@@ -96,7 +97,6 @@ StatusCode PrintMC::execute() {
                 << ( HepMC::signal_process_vertex(evt) ? HepMC::barcode(HepMC::signal_process_vertex(evt)) : 0 ) << "\n";
       std::cout << " Entries this event: " << evt->vertices_size() << " vertices, "
                 << evt->particles_size() << " particles.\n";
-#ifdef HEPMC3
       if (evt->heavy_ion()) {
         std::cout << " HeavyIon: jatt=" << evt->heavy_ion()->Ncoll_hard
                   << " np=" << evt->heavy_ion()->Npart_proj
@@ -124,9 +124,9 @@ StatusCode PrintMC::execute() {
       for ( auto wgt = evt->weights().begin();
             wgt != evt->weights().end(); wgt++ ) { std::cout << *wgt << " "; }
       std::cout << "\n";
-      std::cout << " EventScale " << (evt->attribute<HepMC3::DoubleAttribute>("event_scale")? evt->attribute<HepMC3::DoubleAttribute>("event_scale")->value():0.0)
-                << " [energy] \t alphaQCD=" << (evt->attribute<HepMC3::DoubleAttribute>("alphaQCD")? evt->attribute<HepMC3::DoubleAttribute>("alphaQCD")->value():0.0)
-                << "\t alphaQED=" << (evt->attribute<HepMC3::DoubleAttribute>("alphaQED")? evt->attribute<HepMC3::DoubleAttribute>("alphaQED")->value():0.0) << std::endl;
+      std::cout << " EventScale " << (evt->attribute<HepMC3::DoubleAttribute>(HepMCStr::event_scale)? evt->attribute<HepMC3::DoubleAttribute>(HepMCStr::event_scale)->value():0.0)
+                << " [energy] \t alphaQCD=" << (evt->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQCD)? evt->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQCD)->value():0.0)
+                << "\t alphaQED=" << (evt->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQED)? evt->attribute<HepMC3::DoubleAttribute>(HepMCStr::alphaQED)->value():0.0) << std::endl;
 
       if (evt->pdf_info()) {
         std::cout << "PdfInfo: id1=" << evt->pdf_info()->parton_id[0]
@@ -142,54 +142,6 @@ StatusCode PrintMC::execute() {
         std::cout << "PdfInfo: EMPTY"
 		  << std::endl;
       }
-#else
-      if (evt->heavy_ion()) {
-        std::cout << " HeavyIon: jatt=" << evt->heavy_ion()->Ncoll_hard()
-                  << " np=" << evt->heavy_ion()->Npart_proj()
-                  << " nt=" << evt->heavy_ion()->Npart_targ()
-                  << " ncoll=" << evt->heavy_ion()->Ncoll()
-                  << " specn=" << evt->heavy_ion()->spectator_neutrons()
-                  << " specp=" << evt->heavy_ion()->spectator_protons()
-                  << " n01=" << evt->heavy_ion()->N_Nwounded_collisions()
-                  << " n10=" << evt->heavy_ion()->Nwounded_N_collisions()
-                  << " n11=" << evt->heavy_ion()->Nwounded_Nwounded_collisions()
-                  << " impact=" << evt->heavy_ion()->impact_parameter()
-                  << " evplane=" << evt->heavy_ion()->event_plane_angle()
-                  << " ecc=" << evt->heavy_ion()->eccentricity()
-                  << " sigmaNNinel=" << evt->heavy_ion()->sigma_inel_NN()
-		  << std::endl;
-      }
-      else {
-        std::cout << "HeavyIon: EMPTY"
-		  << std::endl;
-      }
-
-
-      // Weights
-      std::cout << " Weights(" << evt->weights().size() << ")=";
-      for (double w :  evt->weights()) {
-        std::cout << w << " ";
-      }
-      std::cout << "\n";
-      std::cout << " EventScale " << evt->event_scale()
-                << " [energy] \t alphaQCD=" << evt->alphaQCD()
-                << "\t alphaQED=" << evt->alphaQED() << std::endl;
-
-      if (evt->pdf_info()) {
-        std::cout << "PdfInfo: id1=" << evt->pdf_info()->id1()
-                  << " id2=" << evt->pdf_info()->id2()
-                  << " x1=" << evt->pdf_info()->x1()
-                  << " x2=" << evt->pdf_info()->x2()
-                  << " q=" << evt->pdf_info()->scalePDF()
-                  << " xpdf1=" << evt->pdf_info()->pdf1()
-                  << " xpdf2=" << evt->pdf_info()->pdf2()
-		  << std::endl;
-      }
-      else {
-        std::cout << "PdfInfo: EMPTY"
-		  << std::endl;
-      }
-#endif
 
       // Print a legend to describe the particle info
       char particle_legend[120];
@@ -215,7 +167,7 @@ StatusCode PrintMC::execute() {
         // Access the PDG table to get the particle name (and mass?)
         std::string sname;
         double p_mass = p->generated_mass();
-        const HepPDT::ParticleData* ap = particleData(std::abs(p_pdg_id));
+        const HepPDT::ParticleData* ap = m_gendata->particleData(std::abs(p_pdg_id));
         if (!ap) {
           ATH_MSG_DEBUG("PID " << std::abs(p_pdg_id) << " is not in particle data table");
         } else {

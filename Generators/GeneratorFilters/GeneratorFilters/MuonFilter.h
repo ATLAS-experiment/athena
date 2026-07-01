@@ -14,7 +14,7 @@ class MuonFilter : public GenFilter {
 public:
 
   MuonFilter(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

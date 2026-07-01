@@ -12,7 +12,6 @@
 #include "ThinningToolExample.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <string>
 
@@ -38,9 +37,8 @@ StatusCode DerivationFramework::ThinningToolExample::finalize()
 
 
 // The thinning itself
-StatusCode DerivationFramework::ThinningToolExample::doThinning() const
+StatusCode DerivationFramework::ThinningToolExample::doThinning(const EventContext& ctx) const
 {
-      const EventContext& ctx = Gaudi::Hive::currentContext();
 
       // Get the track container
       SG::ThinningHandle<xAOD::TrackParticleContainer> tracks (m_inDetSGKey, ctx);

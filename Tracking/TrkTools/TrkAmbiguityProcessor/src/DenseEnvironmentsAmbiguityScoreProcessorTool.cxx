@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DenseEnvironmentsAmbiguityScoreProcessorTool.h"
@@ -92,9 +92,9 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::statistics() {
     and then returns the tracks which have been selected*/
 
 void 
-Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::process(const TrackCollection & tracks,
-                                                    Trk::TracksScores* trackScoreTrackMap) const{
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::process(const EventContext& ctx,
+                                                           const TrackCollection & tracks,
+                                                           Trk::TracksScores* trackScoreTrackMap) const{
   InDet::PixelGangedClusterAmbiguities *splitClusterMap = nullptr;
   if(!m_splitClusterMapKey.key().empty()){
     if(!m_splitClusterMapKey_last.key().empty()){

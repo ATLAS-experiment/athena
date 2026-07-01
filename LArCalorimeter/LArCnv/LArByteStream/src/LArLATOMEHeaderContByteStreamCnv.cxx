@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArLATOMEHeaderContByteStreamCnv.h"
 #include "LArByteStream/LArLATOMEDecoder.h"
+#include "LArRawEvent/LArLATOMEHeaderContainer.h"
+
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h" 
 #include "ByteStreamData/RawEvent.h" 
 #include "GaudiKernel/DataObject.h"
@@ -11,6 +13,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 // For LATOME while no Condition alg exists
 #include "LArLATOMEROBIDs.h"
+
 
 LArLATOMEHeaderContByteStreamCnv::LArLATOMEHeaderContByteStreamCnv(ISvcLocator* svcloc) :
   AthConstConverter(storageType(), classID(),svcloc,"LArLATOMEHeaderContByteStreamCnv"),
@@ -20,7 +23,7 @@ LArLATOMEHeaderContByteStreamCnv::LArLATOMEHeaderContByteStreamCnv(ISvcLocator* 
 
 LArLATOMEHeaderContByteStreamCnv::~LArLATOMEHeaderContByteStreamCnv() {}
 
-const CLID& LArLATOMEHeaderContByteStreamCnv::classID(){
+CLID LArLATOMEHeaderContByteStreamCnv::classID(){
   return ClassID_traits<LArLATOMEHeaderContainer>::ID() ;
 }
 
@@ -38,14 +41,13 @@ StatusCode
 LArLATOMEHeaderContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pObj) const {
   ATH_MSG_VERBOSE("Executing CreateObj method for  LArLATOMEHeaderContainer");
 
-  ByteStreamAddress *pRE_Addr= dynamic_cast<ByteStreamAddress*>(pAddr); //Cast from OpaqueAddress to ByteStreamAddress
-  if (!pRE_Addr)
-    {ATH_MSG_ERROR("dynamic_cast of OpaqueAdress to ByteStreamAddress failed!");
-     return StatusCode::FAILURE;
-    }
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
 
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  m_rdpSvc->getROBData(Gaudi::Hive::currentContext(), LArByteStream::s_allROBIDs_LATOME, robFrags );
+  m_rdpSvc->getROBData(ctx, LArByteStream::s_allROBIDs_LATOME, robFrags );
   const std::string& key = *(pAddr->par()); // Get key used in the StoreGateSvc::retrieve function
   // get gain and pass to convert function.
   std::unique_ptr<LArLATOMEHeaderContainer> header_coll=std::make_unique<LArLATOMEHeaderContainer>(); 

@@ -31,11 +31,11 @@ StatusCode ZdcByteStreamLucrodData::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ZdcByteStreamLucrodData::execute() {
+StatusCode ZdcByteStreamLucrodData::execute(const EventContext& ctx) {
   
   ATH_MSG_DEBUG(" ZdcByteStreamLucrodData::execute ");
 
-  SG::WriteHandle<ZdcLucrodDataContainer> h_write(m_ZdcLucrodDataContainerKey);
+  SG::WriteHandle<ZdcLucrodDataContainer> h_write(m_ZdcLucrodDataContainerKey, ctx);
   
   std::vector<const ROBFragment*> listOfRobf;
   std::vector<unsigned int> ROBIDs;
@@ -44,15 +44,15 @@ StatusCode ZdcByteStreamLucrodData::execute() {
   //
   //  High word of source ID indicates the ZDC (0x83)
   //  Low word numbers the modules: 0-5 for the 6 LUCRODs in Run 3
-  //
+  //  Update Jan 2026: LIS added as module 6 
   const unsigned int RODSourceIdShifted = eformat::FORWARD_ZDC << 16;
 
-  for (unsigned int lucrodModuleNum = 0; lucrodModuleNum < 6; lucrodModuleNum++) {
+  for (unsigned int lucrodModuleNum = 0; lucrodModuleNum < 7; lucrodModuleNum++) {
     ROBIDs.push_back(RODSourceIdShifted + lucrodModuleNum);
   }
 
   ATH_MSG_DEBUG("ZdcByteStreamLucrodData::execute::getROBDATA");
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), ROBIDs, listOfRobf);
+  m_robDataProvider->getROBData(ctx, ROBIDs, listOfRobf);
   
   auto zdcLucrodDataContainer = std::make_unique<ZdcLucrodDataContainer>(); 
   

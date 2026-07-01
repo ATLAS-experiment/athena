@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -34,7 +34,7 @@ ANA_MSG_HEADER(Test)
 ANA_MSG_SOURCE(Test, "BoostedJetTaggers")
 using namespace Test;
 
-int main( int argc, char* argv[] ) {
+int test1( int argc, char* argv[] ) {
 
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
 
@@ -77,7 +77,7 @@ int main( int argc, char* argv[] ) {
     options+=(argv[i]);
   }
 
-  if(options.find("-f")!=std::string::npos){    
+  if(options.find("-f")!=std::string::npos){
     for( int ipos=0; ipos<argc ; ipos++ ) {
       if(std::string(argv[ipos]).compare("-f")==0){
 	if( ipos+1 == argc || std::string(argv[ipos+1])[0]=='-' ) {
@@ -178,8 +178,8 @@ int main( int argc, char* argv[] ) {
   Tree->Branch( "m", &m, "m/F" );
   Tree->Branch( "eta", &eta, "eta/F" );
   Tree->Branch( "eff", &eff, "eff/F" );
-  Tree->Branch( "effSF", &effSF, "effSF/F" );  
-  Tree->Branch( "sigeffSF", &sigeffSF, "sigeffSF/F" );  
+  Tree->Branch( "effSF", &effSF, "effSF/F" );
+  Tree->Branch( "sigeffSF", &sigeffSF, "sigeffSF/F" );
   Tree->Branch( "truthLabel", &truthLabel, "truthLabel/I" );
 
   std::unique_ptr<JetUncertaintiesTool> jetUncToolSF(new JetUncertaintiesTool(("JetUncProvider_SF")));
@@ -199,7 +199,7 @@ int main( int argc, char* argv[] ) {
 	std::string sysPulled = sysName + pull;
 	jetUnc_sysSets.push_back(CP::SystematicSet(sysPulled));
       }
-    }  
+    }
   }
 
   ////////////////////////////////////////////
@@ -224,7 +224,7 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.retrieve() );
 
   // ToDo: update to rel.22+
-  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R22v1");
 
   static const SG::ConstAccessor<bool> acc_Tagged(tagger+"_Tagged");
   static const SG::ConstAccessor<bool> acc_PassD2(tagger+"_PassD2");
@@ -259,9 +259,7 @@ int main( int argc, char* argv[] ) {
       continue ;
 
     // Loop over jet container
-    std::pair< xAOD::JetContainer*, xAOD::ShallowAuxContainer* > jets_shallowCopy = xAOD::shallowCopyContainer( *myJets );
-    std::unique_ptr<xAOD::JetContainer> shallowJets(jets_shallowCopy.first);
-    std::unique_ptr<xAOD::ShallowAuxContainer> shallowAux(jets_shallowCopy.second);
+    auto [shallowJets, shallowAux] = xAOD::shallowCopy( *myJets );
     for( xAOD::Jet* jetSC : *shallowJets ){
 
       ANA_CHECK( m_Tagger->tag( *jetSC ) );
@@ -303,8 +301,8 @@ int main( int argc, char* argv[] ) {
 	    validForUncTool &= ( m/pt >= 0 && m/pt <= 1 );
 	    validForUncTool &= ( std::abs(eta) < 2 );
 	    std::cout << "Pass: " << pass << std::endl;
-	    std::cout << "Nominal SF=" << sf << " truthLabel=" << truthLabel << " (1: t->qqb) " 
-		      << effSF << " " << eff << " " << pass << std::endl;     
+	    std::cout << "Nominal SF=" << sf << " truthLabel=" << truthLabel << " (1: t->qqb) "
+		      << effSF << " " << eff << " " << pass << std::endl;
 	    if( validForUncTool ){
 	      for ( const CP::SystematicSet& sysSet : jetUnc_sysSets ){
 		ANA_CHECK( m_Tagger->tag( *jetSC ) );
@@ -343,3 +341,13 @@ int main( int argc, char* argv[] ) {
 
 }
 
+
+int main (int argc, char* argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
+}

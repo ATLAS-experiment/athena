@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include <iostream>
 #include "ISF_FastCaloGpu/GeoLoadGpu.h"
 
@@ -137,8 +140,18 @@ bool GeoLoadGpu::LoadGpu_cu() {
   if ( cudaSuccess != cudaMalloc( (void**)&m_cells_d, sizeof( CaloDetDescrElement_Gpu ) * m_ncells ) ) return false;
 
   CaloDetDescrElement_Gpu* cells_Host = (CaloDetDescrElement_Gpu*)malloc( m_ncells * sizeof( CaloDetDescrElement_Gpu ) );
+  if (!cells_Host){
+    cudaFree(m_cells_d);
+    m_cells_d = nullptr;
+    return false;
+  }
   m_cellid_array                  = (Identifier_Gpu*)malloc( m_ncells * sizeof( Identifier_Gpu ) );
-
+  if (!m_cellid_array){
+    cudaFree(m_cells_d);
+    m_cells_d = nullptr;
+    free(cells_Host);
+    return false;
+  }
   // create an array of cell identities, they are in order of hashids.
   int ii = 0;
   for ( t_cellmap_Gpu::iterator ic = m_cells->begin(); ic != m_cells->end(); ++ic ) {
@@ -149,8 +162,15 @@ bool GeoLoadGpu::LoadGpu_cu() {
   }
 
   if ( cudaSuccess !=
-       cudaMemcpy( &m_cells_d[0], cells_Host, sizeof( CaloDetDescrElement_Gpu ) * m_ncells, cudaMemcpyHostToDevice ) )
-    return false;
+       cudaMemcpy( &m_cells_d[0], cells_Host, sizeof( CaloDetDescrElement_Gpu ) * m_ncells, cudaMemcpyHostToDevice ) ){
+         cudaFree(m_cells_d);
+         m_cells_d = nullptr;
+         free(cells_Host);
+         free(m_cellid_array);
+         m_cellid_array = nullptr;
+         return false;
+         
+       }
 
   free( cells_Host );
 
@@ -158,38 +178,77 @@ bool GeoLoadGpu::LoadGpu_cu() {
     if ( !SanityCheck() ) { return false; }
   }
 
-  Rg_Sample_Index* SampleIndex_g;
-  if ( cudaSuccess != cudaMalloc( (void**)&SampleIndex_g, sizeof( Rg_Sample_Index ) * m_max_sample ) ) return false;
+  Rg_Sample_Index* SampleIndex_g{};
+  if ( cudaSuccess != cudaMalloc( (void**)&SampleIndex_g, sizeof( Rg_Sample_Index ) * m_max_sample ) ){
+    cudaFree(m_cells_d);
+    m_cells_d = nullptr;
+    free(m_cellid_array);
+    m_cellid_array = nullptr;
+    return false;
+  } 
 
   // copy sample_index array  to gpu
   if ( cudaSuccess != cudaMemcpy( SampleIndex_g, m_sample_index_h, sizeof( Rg_Sample_Index ) * m_max_sample,
                                   cudaMemcpyHostToDevice ) ) {
     std::cout << "Error copy sample index " << std::endl;
-
+    cudaFree(SampleIndex_g);
+    cudaFree(m_cells_d);
+    m_cells_d = nullptr;
+    free(m_cellid_array);
+    m_cellid_array = nullptr;
     return false;
   }
 
   // each Region allocate a grid (long Long) gpu array
   //  copy array to GPU
   //  save to regions m_cell_g ;
+  auto freePreviousAllocations = [this](int i)->void{
+    
+    for (int j=0; j !=i;++j){
+      cudaFree(m_regions[j].cell_grid_g());
+      m_regions[j].set_cell_grid_g(nullptr);
+    }
+    cudaFree(m_cells_d); m_cells_d = nullptr;
+    free(m_cellid_array); m_cellid_array = nullptr;
+  };
   for ( unsigned int ir = 0; ir < m_nregions; ++ir ) {
-    long long* ptr_g;
+    long long* ptr_g{};
     if ( cudaSuccess != cudaMalloc( (void**)&ptr_g, sizeof( long long ) * m_regions[ir].cell_grid_eta() *
-                                                        m_regions[ir].cell_grid_phi() ) )
+                                                        m_regions[ir].cell_grid_phi() ) ){
+      cudaFree(SampleIndex_g);
+      SampleIndex_g = nullptr;
+      freePreviousAllocations(ir);                                         
       return false;
+    }
     if ( cudaSuccess != cudaMemcpy( ptr_g, m_regions[ir].cell_grid(),
                                     sizeof( long long ) * m_regions[ir].cell_grid_eta() * m_regions[ir].cell_grid_phi(),
-                                    cudaMemcpyHostToDevice ) )
+                                    cudaMemcpyHostToDevice ) ){
+      cudaFree(SampleIndex_g);
+      SampleIndex_g = nullptr;
+      cudaFree(ptr_g);
+      freePreviousAllocations(ir); 
       return false;
+    }
     m_regions[ir].set_cell_grid_g( ptr_g );
     m_regions[ir].set_all_cells( m_cells_d ); // set this so all region instance know where the GPU cells are, before
   }
 
   // GPU allocate Regions data  and load them to GPU as array of regions
 
-  if ( cudaSuccess != cudaMalloc( (void**)&m_regions_d, sizeof( GeoRegion ) * m_nregions ) ) return false;
-  if ( cudaSuccess != cudaMemcpy( m_regions_d, m_regions, sizeof( GeoRegion ) * m_nregions, cudaMemcpyHostToDevice ) )
+  if ( cudaSuccess != cudaMalloc( (void**)&m_regions_d, sizeof( GeoRegion ) * m_nregions ) ){
+    cudaFree(SampleIndex_g);
+    freePreviousAllocations(m_nregions);
     return false;
+  };
+  if ( cudaSuccess != cudaMemcpy( m_regions_d, m_regions, sizeof( GeoRegion ) * m_nregions, cudaMemcpyHostToDevice ) ){
+    cudaFree(m_regions_d);
+    m_regions_d = nullptr;
+    cudaFree(SampleIndex_g);
+    SampleIndex_g = nullptr;
+    freePreviousAllocations(m_nregions);
+    return false;
+  }
+    
 
   geo_gpu_h.cells        = m_cells_d;
   geo_gpu_h.ncells       = m_ncells;
@@ -199,8 +258,24 @@ bool GeoLoadGpu::LoadGpu_cu() {
   geo_gpu_h.sample_index = SampleIndex_g;
 
   // Now copy this to GPU and set the static member to this pointer
-  cudaMalloc( (void**)&m_geo_d, sizeof( GeoGpu ) );
-  cudaMemcpy( m_geo_d, &geo_gpu_h, sizeof( GeoGpu ), cudaMemcpyHostToDevice );
+  if ( cudaSuccess != cudaMalloc( (void**)&m_geo_d, sizeof( GeoGpu ))){
+    cudaFree(m_regions_d);
+    m_regions_d = nullptr;
+    cudaFree(SampleIndex_g);
+    SampleIndex_g = nullptr;
+    freePreviousAllocations(m_nregions);
+    return false;
+  }
+  if ( cudaSuccess != cudaMemcpy( m_geo_d, &geo_gpu_h, sizeof( GeoGpu ), cudaMemcpyHostToDevice )){
+    cudaFree(m_geo_d);
+    m_geo_d = nullptr;
+    cudaFree(m_regions_d);
+    m_regions_d = nullptr;
+    cudaFree(SampleIndex_g);
+    SampleIndex_g = nullptr;
+    freePreviousAllocations(m_nregions);
+    return false;
+  }
 
   // more test for region grids
   if ( 0 ) { return TestGeo(); }

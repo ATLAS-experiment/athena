@@ -8,6 +8,10 @@
 #ifndef PMGTOOLS_MYPMGAPP_H
 #define PMGTOOLS_MYPMGAPP_H
 
+// Local includes
+#include "PMGTools/PMGSherpa22VJetsWeightTool.h"
+#include "PMGTools/PMGTruthWeightTool.h"
+
 // EDM includes
 #include "AsgTools/StandaloneToolHandle.h"
 #include "AsgMessaging/MessageCheck.h"  // for messaging
@@ -22,15 +26,15 @@
 #include "TH1F.h"
 #include "TFile.h"
 
-// Local includes
-#include "PMGTools/PMGSherpa22VJetsWeightTool.h"
-#include "PMGTools/PMGTruthWeightTool.h"
+#include <iostream>
+#include <cmath>
+#include <stdexcept>
 
 // For convenience messaging macros
 using namespace asg::msgUserCode;
 
 //coverity[UNCAUGHT_EXCEPT]
-int main(int argc, char *argv[])
+int test1(int argc, char *argv[])
 {
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
 
@@ -84,7 +88,7 @@ int main(int argc, char *argv[])
   TH1F *h_njetTruthWZ_Tool = new TH1F("jetmult_AntiKt4TruthWZJets_Tool", "jetmult_AntiKt4TruthWZJets_Tool", 10, -0.5, 9.5);
   TFile *histfile = TFile::Open("hists.root", "RECREATE");
 
-  bool debug = false;
+  constexpr bool debug = false;
 
   for (int i = 0; i < evt.getEntries(); i++) {
     if (evt.getEntry(i) < 0) { ANA_MSG_ERROR("Failed to read event " << i); continue; }
@@ -175,5 +179,17 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+
+
+int main(int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
+}
+
 
 #endif //> !PMGTOOLS_MYPMGAPP_H

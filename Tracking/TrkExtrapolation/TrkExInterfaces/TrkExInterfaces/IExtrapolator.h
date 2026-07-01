@@ -12,7 +12,6 @@
 // Gaudi
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // Trk
 #include "TrkEventPrimitives/ParticleHypothesis.h"

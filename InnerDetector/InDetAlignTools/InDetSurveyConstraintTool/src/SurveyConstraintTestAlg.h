@@ -19,7 +19,7 @@ class ATLAS_NOT_THREAD_SAFE SurveyConstraintTestAlg : public AthAlgorithm {
  public:
   SurveyConstraintTestAlg (const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
   StatusCode BookHist(); 
   void CreateMisAlignNtuple();

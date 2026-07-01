@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCableHPBToSL.h"
@@ -12,13 +12,13 @@ namespace MuonTGC_Cabling {
 
 TGCCableHPBToSL::TGCCableHPBToSL(const std::string& filename)
     : TGCCable(TGCCable::HPBToSL), m_database{{{nullptr}}} {
-    m_database[TGCId::Endcap][TGCId::Wire] =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::SignalType::Wire) =
         std::make_unique<TGCDatabasePPToSL>(filename, "HPB EW");
-    m_database[TGCId::Endcap][TGCId::Strip] =
+    m_database.at(+TGCId::RegionType::Endcap).at(+TGCId::SignalType::Strip) =
         std::make_unique<TGCDatabasePPToSL>(filename, "HPB ES");
-    m_database[TGCId::Forward][TGCId::Wire] =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::SignalType::Wire) =
         std::make_unique<TGCDatabasePPToSL>(filename, "HPB FW");
-    m_database[TGCId::Forward][TGCId::Strip] =
+    m_database.at(+TGCId::RegionType::Forward).at(+TGCId::SignalType::Strip) =
         std::make_unique<TGCDatabasePPToSL>(filename, "HPB FS");
 }
 
@@ -39,15 +39,16 @@ TGCModuleMap TGCCableHPBToSL::getModuleIn(const TGCModuleId& sl) const {
         return TGCModuleMap{};
     }
 
-    TGCDatabase* wireP = m_database[sl.getRegionType()][TGCId::Wire].get();
-    TGCDatabase* stripP = m_database[sl.getRegionType()][TGCId::Strip].get();
+    TGCDatabase* wireP = m_database.at(+sl.getRegionType()).at(+TGCId::SignalType::Wire).get();
+    TGCDatabase* stripP = m_database.at(+sl.getRegionType()).at(+TGCId::SignalType::Strip).get();
 
     TGCModuleMap mapId{};
     const int wireMaxEntry = wireP->getMaxEntry();
     for (int i = 0; i < wireMaxEntry; i++) {
         int id = wireP->getEntry(i, 0);
         int block = wireP->getEntry(i, 1);
-        auto hpb = std::make_unique<TGCModuleHPB>(sl.getSideType(), TGCId::Wire,
+        auto hpb = std::make_unique<TGCModuleHPB>(sl.getSideType(),
+                                                  TGCId::SignalType::Wire,
                                                   sl.getRegionType(),
                                                   sl.getSector(), id);
         mapId.insert(block, std::move(hpb));
@@ -58,7 +59,7 @@ TGCModuleMap TGCCableHPBToSL::getModuleIn(const TGCModuleId& sl) const {
         int id = stripP->getEntry(i, 0);
         int block = stripP->getEntry(i, 1);
         auto hpb = std::make_unique<TGCModuleHPB>(
-            sl.getSideType(), TGCId::Strip, sl.getRegionType(), sl.getSector(),
+            sl.getSideType(), TGCId::SignalType::Strip, sl.getRegionType(), sl.getSector(),
             id);
         mapId.insert(block, std::move(hpb));
     }
@@ -74,7 +75,7 @@ TGCModuleMap TGCCableHPBToSL::getModuleOut(const TGCModuleId& hpb) const {
     const int hpbId = hpb.getId();
 
     TGCDatabase* databaseP =
-        m_database[hpb.getRegionType()][hpb.getSignalType()].get();
+        m_database.at(+hpb.getRegionType()).at(+hpb.getSignalType()).get();
 
     TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();

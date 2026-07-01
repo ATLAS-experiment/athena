@@ -1,12 +1,16 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <math.h>
+#include "TrigMufastHypoAlg.h"
 
 #include "AthLinks/ElementLink.h"
-#include "TrigMufastHypoAlg.h"
 #include "AthViews/ViewHelper.h"
+
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+
+#include <math.h>
 
 using namespace TrigCompositeUtils; 
 
@@ -55,7 +59,7 @@ StatusCode TrigMufastHypoAlg::execute( const EventContext& context ) const
   size_t counter=0;
   for ( const auto previousDecision: *previousDecisionsHandle ) {
     //get RoI
-    auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( previousDecision, initialRoIString() );
+    auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( context, previousDecision, initialRoIString() );
     auto roiEL = roiInfo.link;
     ATH_CHECK( roiEL.isValid() );
     const TrigRoiDescriptor* roi = *roiEL;

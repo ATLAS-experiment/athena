@@ -34,7 +34,7 @@ public:
   
 private:
 
-  // By default this DataHandle is created by HiveAlgD
+  // By default this object is created by HiveAlgD
   SG::ReadHandleKey<HiveDataObj>  m_rdh1 {this, "Key_R1", "d1", "Read key 1"};
   
   SG::WriteHandleKey<HiveDataObj> m_wrh1 {this, "Key_W1", "g1", "Write key 1"};

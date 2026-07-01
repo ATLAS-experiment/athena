@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimTrackMonitor_H
 #define FPGATrackSimTrackMonitor_H
@@ -55,11 +55,19 @@ class TH2D;
                   const std::vector<FPGATrackSimTruthTrack>& truthTracks,
                   size_t nLogicalLayers);
 
-    // track monitor
+    //// track monitor
     void fillTrack(const std::vector<const FPGATrackSimTrack*>& tracks,
                      const std::vector<FPGATrackSimTruthTrack>& truthTracks,
                      float chi2Cut);
     
+    //// get the number of events with elements (roads or tracks)
+    unsigned getNElements() const {return m_nElements;}
+
+    //// get the max number of elements per events
+    unsigned getMaxNElements() const {return m_maxNElements;}
+
+    //// get the vcumulative total number of elements in all events
+    unsigned getTotNElements() const {return m_totNElements;}
 
    private:
     ///////////////////////////////////////////////////////////////////////
@@ -75,6 +83,14 @@ class TH2D;
     //// ServiceHandle<ITHistSvc> is the bridge between the monitoring tool and Athena's central histogram service
     ServiceHandle<ITHistSvc> m_tHistSvc{this, "THistSvc", "THistSvc/THistSvc", "Histogramming service"};
 
+    //// number of events with elements (roads or tracks)
+    unsigned m_nElements{0};
+
+    //// max number of elements per events
+    unsigned m_maxNElements{0};
+
+    //// cumulative total number of elements in all events
+    unsigned m_totNElements{0};
  };
 
 #endif // FPGATrackSimTrackMonitor_H

@@ -12,11 +12,11 @@ SimTimeEstimate::SimTimeEstimate(const std::string& name, ISvcLocator* pSvcLocat
 {
 }
 
-StatusCode SimTimeEstimate::execute() 
+StatusCode SimTimeEstimate::execute(const EventContext& ctx) 
 {
     // Loop over all events in McEventCollection
     /// @todo Use C++ for(:)
-    for (const auto itr : *(events_const()))
+    for (const auto itr : *(events_const(ctx)))
     {
         m_eventEnergy = 0.;  
         m_particleNumber = 0.;

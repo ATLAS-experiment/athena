@@ -227,7 +227,7 @@ StatusCode TileMuonFillerTool::fill(const xAOD::Muon& p){
       case 0:  muon_track = muonPointer->trackParticle(xAOD::Muon::CombinedTrackParticle);          break;
       case 1:  muon_track = muonPointer->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);     break;
       case 2:  muon_track = muonPointer->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);  break;
-      default: muon_track = muonPointer->primaryTrackParticle();     break;
+      default: muon_track = muonPointer->trackParticle(xAOD::Muon::TrackParticleType::Primary);     break;
     } // SWITCH
 
     if( !muon_track ){ return StatusCode::SUCCESS; }
@@ -239,9 +239,10 @@ StatusCode TileMuonFillerTool::fill(const xAOD::Muon& p){
         *m_charge                           = muonPointer->charge();
         *m_eta                              = muonPointer->eta();
         *m_phi                              = muonPointer->phi();
-        *m_muonAuthor = muonPointer->author();
-        *m_muonType = muonPointer->muonType();
-        *m_muonQuality = muonPointer->quality();
+        using namespace Muon::MuonStationIndex;
+        *m_muonAuthor  = toInt(muonPointer->author());
+        *m_muonType    = toInt(muonPointer->muonType());
+        *m_muonQuality = toInt(muonPointer->quality());
     } // IF
 
 

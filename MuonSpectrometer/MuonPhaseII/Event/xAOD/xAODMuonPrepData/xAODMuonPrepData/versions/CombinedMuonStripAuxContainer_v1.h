@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_VERSIONS_COMBINEDMUONSTRIPAUXCONTAINER_V1_H
@@ -7,7 +7,7 @@
 
 
 #include "xAODCore/AuxContainerBase.h"
-#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "xAODMuonPrepData/MuonMeasurementContainer.h"
 #include "AthLinks/ElementLink.h"
 
 namespace xAOD {
@@ -19,11 +19,12 @@ class CombinedMuonStripAuxContainer_v1 : public AuxContainerBase {
             CombinedMuonStripAuxContainer_v1();
             /** @brief virtual destructor */
             virtual ~CombinedMuonStripAuxContainer_v1() = default;
-        private:
-            using Link_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
+
+            using Link_t = ElementLink<xAOD::MuonMeasurementContainer>;
             std::vector<Link_t> MuonStripLink1{};
             std::vector<Link_t> MuonStripLink2{};
-            
+            std::vector<PosAccessor<2>::element_type> localPosition{};
+            std::vector<CovAccessor<2>::element_type> localCovariance{};
 
     };
 }

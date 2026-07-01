@@ -10,7 +10,6 @@
 #include "DerivationFrameworkCalo/CaloClusterThinning.h"
 #include "ClustersInCone.h"
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ThinningHandle.h"
 #include "xAODCaloEvent/CaloCluster.h"
@@ -106,9 +105,8 @@ DerivationFramework::CaloClusterThinning::finalize()
 
 // The thinning itself
 StatusCode
-DerivationFramework::CaloClusterThinning::doThinning() const
+DerivationFramework::CaloClusterThinning::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   bool is_muons = false;
   bool is_egamma = false;

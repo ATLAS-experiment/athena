@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import MeV, deg
 from AthenaCommon.Logging import logging
@@ -47,6 +47,48 @@ def trigCaloClusterMonitoringTool(flags, doMonCells = False, isFullScan = None):
 
     return monTool
 
+def hltCaloGlobalCellMakerCfg(flags, name="HLTCaloGlobalCellMaker", **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("InputCellKey", "Calo")
+    kwargs.setdefault("OutputCellKey", "OutCalo")
+    kwargs.setdefault("MaxNCellsPerFEB", 30)
+
+    from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+    acc.merge(CaloNoiseCondAlgCfg(flags))
+
+    acc.addEventAlgo(CompFactory.HLTCaloGlobalCellMaker(name, **kwargs))
+    return(acc)
+
+def hltCaloGlobalCellMonitorCfg(flags, name="HLTCaloGlobalCellMonitor", **kwargs):
+    acc = ComponentAccumulator()
+
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool(flags, 'MonTool'+name)
+    monTool.defineHistogram('inputContSize', path='EXPERT', type='TH1F',  title="InputContSize; InputContSize; events", xbins=190, xmin=0, xmax=190000)
+    monTool.defineHistogram('outputContSize', path='EXPERT', type='TH1F',  title="outputContSize; outputContSize; events", xbins=200, xmin=0, xmax=20000)
+    monTool.defineHistogram('larContSize', path='EXPERT', type='TH1F',  title="larContSize; larContSize; events", xbins=190, xmin=0, xmax=190000)
+    monTool.defineHistogram('larAboveSigmaContSize', path='EXPERT', type='TH1F',  title="larAboveSigmaContSize; larAboveSigmaContSize; events", xbins=150, xmin=0, xmax=15000)
+    monTool.defineHistogram('CellsPerFEB', path='EXPERT', type='TH1F',  title="CellsPerFEB; CellsPerFEB; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('FEBID,CellsPerFEB', path='EXPERT', type='TH2F',  title="CellsPerFEB; CellsPerFEB; FEBID", xbins=1524, xmin=0x38000000, xmax=0x3bc60000, ybins=128, ymin=0, ymax=128)
+    monTool.defineHistogram('layer0', path='EXPERT', type='TH1F',  title="layer0; layer0; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layer1', path='EXPERT', type='TH1F',  title="layer1; layer1; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layer2', path='EXPERT', type='TH1F',  title="layer2; layer2; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layer3', path='EXPERT', type='TH1F',  title="layer3; layer3; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layer4', path='EXPERT', type='TH1F',  title="layer4; layer4; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layer5', path='EXPERT', type='TH1F',  title="layer5; layer5; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layer6', path='EXPERT', type='TH1F',  title="layer6; layer6; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layer7', path='EXPERT', type='TH1F',  title="layer7; layer7; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layerIW1', path='EXPERT', type='TH1F',  title="layerIW1; layerIW1; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('layerIW2', path='EXPERT', type='TH1F',  title="layerIW2; layerIW2; counts ", xbins=128, xmin=0, xmax=128)
+    monTool.defineHistogram('BCID,layerIW1', path='EXPERT', type='TH2F',  title="BCID_vs_layerIW1; BCID; layerIW1; ", xbins=512, xmin=0, xmax=512, ybins=128, ymin=0, ymax=128)
+    monTool.defineHistogram('BCID,layerIW2', path='EXPERT', type='TH2F',  title="BCID_vs_layerIW2; BCID; layerIW2;", xbins=512, xmin=0, xmax=512, ybins=128, ymin=0, ymax=128)
+    kwargs.setdefault("MonitoringTool", monTool)
+
+    kwargs.setdefault("MaxNCellsPerFEB", 128 )
+    kwargs.setdefault("NumberOfSigma", 2)
+    acc.addEventAlgo(CompFactory.HLTCaloGlobalCellMonitor(name, **kwargs))
+    return(acc)
 
 @AccumulatorCache
 def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False,sequenceName=None):
@@ -595,6 +637,9 @@ if __name__ == "__main__":
     CAs = [hltCaloCellSeedlessMakerCfg(flags,roisKey=''),
            theL0CaloGlobalRoIBuilderCfg,
            hltCaloCellMakerCfg(flags, "SthFS",roisKey=''),
+           hltCaloGlobalCellMakerCfg(flags,InputCellKey="SeedLessFS",OutputCellKey="SeedLessFSGlobal"),
+           hltCaloGlobalCellMonitorCfg(flags,InputCellKey="SeedLessFSGlobal"),
+           hltCaloGlobalCellMonitorCfg(flags,name="HLTCaloGlobalCellMonitor1",InputCellKey="SeedLessFS"),
            OutputStreamCfg(flags,flags.Output.ESDFileName,ItemList=outputContainers)]
            #hltTopoClusterMakerCfg(flags, "TrigCaloClusterMaker_topoFS")]
 
@@ -602,6 +647,4 @@ if __name__ == "__main__":
         ca.printConfig(withDetails=True, summariseProps=True)
         #ca.wasMerged()
         cfg.merge(ca)
-
-
     cfg.run(50)

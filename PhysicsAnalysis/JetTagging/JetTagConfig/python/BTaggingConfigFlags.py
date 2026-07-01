@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
@@ -81,8 +81,12 @@ def getNNs(flags):
     '''
 
     # dummy for now
-    caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
-    pf_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
+    ak4_nns = []
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        ak4_nns = ["BTagging/20260308/GN2HL/antikt4emtopo/network.onnx"]
+    else:
+        caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
+        ak4_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
 
     # We can save our results to the jet container, rather than the b-tagging container
     # but this functionality is not yet setup for non multi-fold taggers. The easiest (/hackiest)
@@ -100,13 +104,17 @@ def getNNs(flags):
     # Combine the paths for GN3v00 and GN3v01 models
     gn3_paths = gn3v00_paths + gn3v01_paths
 
+    bjr4_paths = [
+        "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bJES_calibFactors_R22_MC20MC23_AntiKt4EMPflow_bJR4v01_20260319.onnx" # bJR4v01
+    ] if isRun3Derivation(flags) else []
+    
     lrj_paths = [
              "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
              "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
              "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx",
              "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx",
-             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx", # bJR10v00Ext
-             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" # bJR10v01
+             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20260513.onnx", # bJR10v00Ext
+             "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20260513.onnx" # bJR10v01
     ]
     # we can't flip large-R taggers
     noflip = dict(flip=False)
@@ -114,30 +122,30 @@ def getNNs(flags):
     return {
         'AntiKt4EMPFlowJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True,
             },
-            *[{'folds' : [nn_path]} for nn_path in gn3_paths]
+            *[{'folds' : [nn_path]} for nn_path in gn3_paths+bjr4_paths]
         ],
         'AntiKt4EMTopoJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True,
             },
         ],
         'AntiKt4EMPFlowCustomVtxJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True
             },
-            *[{'folds' : [nn_path]} for nn_path in gn3_paths]
+            *[{'folds' : [nn_path]} for nn_path in gn3_paths+bjr4_paths]
         ],
         'AntiKt4EMPFlowByVertexJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True
             }
@@ -147,7 +155,7 @@ def getNNs(flags):
         ],
         'DFAntiKt4HIJets': [
             {
-                'folds': pf_nns,
+                'folds': ak4_nns,
                 'hash': 'jetFoldHash',
                 'cone_association': True
             }
@@ -213,5 +221,11 @@ def createBTaggingConfigFlags():
     #  - folds: list of NNs to run
     #  - remapping (optional): any variable remapping
     btagcf.addFlag("BTagging.NNs", getNNs)
+    btagcf.addFlag("BTagging.AK4TaggerName", lambda pcf: (
+        "GN2HLv01" if pcf.GeoModel.Run>=LHCPeriod.Run4 else "GN2v01"))
+
+    # master switch for using Triton for NN inference.
+    # see athena/PhysicsAnalysis/JetTagging/FlavorTagInference/python/FlavorTagNNConfig.py
+    btagcf.addFlag("BTagging.UseTriton", False)
 
     return btagcf

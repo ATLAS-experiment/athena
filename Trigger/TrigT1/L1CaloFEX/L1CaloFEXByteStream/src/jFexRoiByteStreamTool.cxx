@@ -38,67 +38,53 @@ struct color {
     std::string B_GREEN  ="\033[1;42m";
 } const C;
 
+namespace {
+    // Per-(jfex,fpga) bucket of TOB / xTOB raw words for encoder serialisation.
+    // jXE / jTE only have non-empty vectors when fpga is U1 or U4 (firmware constraint).
+    struct FpgaBlock {
+        std::vector<uint32_t> jJ, jLJ, jTau, jEM;
+        std::vector<uint32_t> xjJ, xjLJ, xjTau, xjEM;
+        std::vector<uint32_t> jTE, jXE;
+        void addTob(const xAOD::jFexSRJetRoI&  t) { (t.isTOB() ? jJ   : xjJ  ).push_back(t.tobWord()); }
+        void addTob(const xAOD::jFexLRJetRoI&  t) { (t.isTOB() ? jLJ  : xjLJ ).push_back(t.tobWord()); }
+        void addTob(const xAOD::jFexTauRoI&    t) { (t.isTOB() ? jTau : xjTau).push_back(t.tobWord()); }
+        void addTob(const xAOD::jFexFwdElRoI&  t) { (t.isTOB() ? jEM  : xjEM ).push_back(t.tobWord()); }
+        void addTob(const xAOD::jFexSumETRoI&  t) { jTE.push_back(t.tobWord()); }
+        void addTob(const xAOD::jFexMETRoI&    t) { jXE.push_back(t.tobWord()); }
+    };
+
+    // (jfex, fpga) -> bucket. std::map sorts by < so iteration order is deterministic.
+    using FragmentMap = std::map<std::pair<uint32_t,uint32_t>, FpgaBlock>;
+
+    template<typename T>
+    void bucketContainer(const xAOD::TrigComposite& l1, FragmentMap& blocks) {
+        using ContT = DataVector<T>;
+        for (const std::string& name : l1.getObjectNames<ContT>()) {
+            auto link = l1.objectLink<ContT>(name);
+            if (!link.isValid()) continue;
+            const ContT* c = link.getStorableObjectPointer();
+            if (!c) continue;
+            for (const T* tob : *c) {
+                blocks[{tob->jFexNumber(), tob->fpgaNumber()}].addTob(*tob);
+            }
+        }
+    }
+}
+
 jFexRoiByteStreamTool::jFexRoiByteStreamTool(const std::string& type,
         const std::string& name,
         const IInterface* parent)
     : base_class(type, name, parent) {}
 
 StatusCode jFexRoiByteStreamTool::initialize() {
-    // Conversion mode for jJ TOBs
-    ConversionMode jJmode = getConversionMode(m_jJReadKey, m_jJWriteKey, msg());
-    ATH_CHECK(jJmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_jJWriteKey.initialize(jJmode==ConversionMode::Decoding));
-    ATH_CHECK(m_jJReadKey.initialize(jJmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((jJmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " jJ ROB IDs: "
-                  << MSG::hex << m_robIds.value() << MSG::dec);
+    // Decoder write keys (BS->xAOD); each one is initialised only if configured.
+    ATH_CHECK(m_jJWriteKey  .initialize(!m_jJWriteKey  .empty()));
+    ATH_CHECK(m_jLJWriteKey .initialize(!m_jLJWriteKey .empty()));
+    ATH_CHECK(m_jTauWriteKey.initialize(!m_jTauWriteKey.empty()));
+    ATH_CHECK(m_jEMWriteKey .initialize(!m_jEMWriteKey .empty()));
+    ATH_CHECK(m_jTEWriteKey .initialize(!m_jTEWriteKey .empty()));
+    ATH_CHECK(m_jXEWriteKey .initialize(!m_jXEWriteKey .empty()));
 
-    // Conversion mode for jLJ TOBs
-    ConversionMode jLJmode = getConversionMode(m_jLJReadKey, m_jLJWriteKey, msg());
-    ATH_CHECK(jLJmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_jLJWriteKey.initialize(jLJmode==ConversionMode::Decoding));
-    ATH_CHECK(m_jLJReadKey.initialize(jLJmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((jLJmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " jLJ ROB IDs: "
-                  << MSG::hex << m_robIds.value() << MSG::dec);
-
-    // Conversion mode for jTau TOBs
-    ConversionMode jTaumode = getConversionMode(m_jTauReadKey, m_jTauWriteKey, msg());
-    ATH_CHECK(jTaumode!=ConversionMode::Undefined);
-    ATH_CHECK(m_jTauWriteKey.initialize(jTaumode==ConversionMode::Decoding));
-    ATH_CHECK(m_jTauReadKey.initialize(jTaumode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((jTaumode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " jTau ROB IDs: "
-                  << MSG::hex << m_robIds.value() << MSG::dec);
-
-    // Conversion mode for jEM TOBs
-    ConversionMode jEMmode = getConversionMode(m_jEMReadKey, m_jEMWriteKey, msg());
-    ATH_CHECK(jEMmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_jEMWriteKey.initialize(jEMmode==ConversionMode::Decoding));
-    ATH_CHECK(m_jEMReadKey.initialize(jEMmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((jEMmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " jEM ROB IDs: "
-                  << MSG::hex << m_robIds.value() << MSG::dec);
-
-    // Conversion mode for jTE TOBs
-    ConversionMode jTEmode = getConversionMode(m_jTEReadKey, m_jTEWriteKey, msg());
-    ATH_CHECK(jTEmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_jTEWriteKey.initialize(jTEmode==ConversionMode::Decoding));
-    ATH_CHECK(m_jTEReadKey.initialize(jTEmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((jTEmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " jTE ROB IDs: "
-                  << MSG::hex << m_robIds.value() << MSG::dec);
-
-    // Conversion mode for jXE TOBs
-    ConversionMode jXEmode = getConversionMode(m_jXEReadKey, m_jXEWriteKey, msg());
-    ATH_CHECK(jXEmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_jXEWriteKey.initialize(jXEmode==ConversionMode::Decoding));
-    ATH_CHECK(m_jXEReadKey.initialize(jXEmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((jXEmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " jXE ROB IDs: "
-                  << MSG::hex << m_robIds.value() << MSG::dec);
-    
-    //checking all Conversion modes.. avoid misconfigurations
-    const std::array<ConversionMode,5> modes{jLJmode,jTaumode,jEMmode,jTEmode,jXEmode};
-    if (std::any_of(modes.begin(),modes.end(),[&jJmode](ConversionMode m) { return m!=jJmode;  } )) {
-        ATH_MSG_ERROR("Inconsistent conversion modes");
-        return StatusCode::FAILURE;
-    }
-    
     ATH_CHECK(m_l1MenuKey.initialize());
     
 
@@ -649,12 +635,52 @@ std::array<uint32_t,4> jFexRoiByteStreamTool::jFEXtoRODTrailer (uint32_t word0, 
 
 // Unpack ROD Trailer
 std::array<uint32_t,1> jFexRoiByteStreamTool::RODTrailer (uint32_t /*word0*/, uint32_t word1) const {
-    
+
     uint32_t error      = ((word1 >> jBits::ERROR_ROD_TRAILER   ) & jBits::ROD_TRAILER_7b );
-    
+
     //return an array since we can implement more features in the future
     return {error};
-   
+
+}
+
+
+// Pack TOB counts into "TOB Counter Trailer" (inverse of TOBCounterTrailer)
+uint32_t jFexRoiByteStreamTool::buildTOBCounterTrailer(uint32_t n_jJ, uint32_t n_jLJ, uint32_t n_jTau,
+                                                       uint32_t n_jEM, uint32_t has_jTE, uint32_t has_jXE) const {
+    uint32_t word = 0;
+    word |= (n_jJ    & jBits::TOB_COUNTS_6b) << jBits::jJ_TOB_COUNTS;
+    word |= (n_jLJ   & jBits::TOB_COUNTS_6b) << jBits::jLJ_TOB_COUNTS;
+    word |= (n_jTau  & jBits::TOB_COUNTS_6b) << jBits::jTau_TOB_COUNTS;
+    word |= (n_jEM   & jBits::TOB_COUNTS_6b) << jBits::jEM_TOB_COUNTS;
+    word |= (has_jTE & jBits::TOB_COUNTS_1b) << jBits::jTE_TOB_COUNTS;
+    word |= (has_jXE & jBits::TOB_COUNTS_1b) << jBits::jXE_TOB_COUNTS;
+    return word;
+}
+
+
+// Pack xTOB counts into "xTOB Counter Trailer" (inverse of xTOBCounterTrailer)
+uint32_t jFexRoiByteStreamTool::buildxTOBCounterTrailer(uint32_t n_xjJ, uint32_t n_xjLJ,
+                                                        uint32_t n_xjTau, uint32_t n_xjEM) const {
+    uint32_t word = 0;
+    word |= (n_xjJ   & jBits::TOB_COUNTS_6b) << jBits::jJ_TOB_COUNTS;
+    word |= (n_xjLJ  & jBits::TOB_COUNTS_6b) << jBits::jLJ_TOB_COUNTS;
+    word |= (n_xjTau & jBits::TOB_COUNTS_6b) << jBits::jTau_TOB_COUNTS;
+    word |= (n_xjEM  & jBits::TOB_COUNTS_6b) << jBits::jEM_TOB_COUNTS;
+    return word;
+}
+
+
+// Pack jFEX-to-ROD trailer (inverse of jFEXtoRODTrailer).
+// ROslice / TSN (in word0) and error / CRC (in word1) are left at 0; round-trip
+// decoder does not use them for histogram comparison.
+std::array<uint32_t,2> jFexRoiByteStreamTool::buildjFEXtoRODTrailer(uint32_t payload, uint32_t fpga,
+                                                                   uint32_t jfex) const {
+    uint32_t word0 = 0;
+    word0 |= (payload & jBits::ROD_TRAILER_16b) << jBits::PAYLOAD_ROD_TRAILER;
+    word0 |= (fpga    & jBits::ROD_TRAILER_2b ) << jBits::FPGA_ROD_TRAILER;
+    word0 |= (jfex    & jBits::ROD_TRAILER_4b ) << jBits::jFEX_ROD_TRAILER;
+    uint32_t word1 = 0;
+    return {word0, word1};
 }
 
 
@@ -764,33 +790,79 @@ std::array<float,2> jFexRoiByteStreamTool::getEtaPhi  (unsigned int jfex, unsign
 }
 
 /// xAOD->BS conversion
-StatusCode jFexRoiByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {
-    
-/*
-    // Retrieve the RoI container
-    auto muonRoIs = SG::makeHandle(m_roiReadKey, eventContext);
-    ATH_CHECK(muonRoIs.isValid());
+StatusCode jFexRoiByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
+                                              const xAOD::TrigCompositeContainer* tc,
+                                              const EventContext& eventContext) {
 
-    // Clear BS data cache
-    clearCache(eventContext);
-
-    // Create raw ROD data words
-    ATH_MSG_DEBUG("Converting " << muonRoIs->size() << " L1 Muon RoIs to ByteStream");
-    uint32_t* data = newRodData(eventContext, muonRoIs->size());
-    for (size_t i=0; i<muonRoIs->size(); ++i) {
-        data[i] = muonRoIs->at(i)->roiWord();
+    FragmentMap blocks;
+    if (tc && !tc->empty()) {
+        const xAOD::TrigComposite& l1 = *tc->at(0);
+        bucketContainer<xAOD::jFexSRJetRoI >(l1, blocks);
+        bucketContainer<xAOD::jFexLRJetRoI >(l1, blocks);
+        bucketContainer<xAOD::jFexTauRoI   >(l1, blocks);
+        bucketContainer<xAOD::jFexFwdElRoI >(l1, blocks);
+        bucketContainer<xAOD::jFexMETRoI   >(l1, blocks);
+        bucketContainer<xAOD::jFexSumETRoI >(l1, blocks);
     }
 
-    // Create ROBFragment containing the ROD words
-    const eformat::helper::SourceIdentifier sid(eformat::TDAQ_MUON_CTP_INTERFACE, m_muCTPIModuleID.value());
-    vrobf.push_back(newRobFragment(
-                        eventContext,
-                        sid.code(),
-                        muonRoIs->size(),
-                        data,
-                        eformat::STATUS_BACK // status_position is system-specific
-                    ));
-*/
+    std::vector<uint32_t> words;
+    for (const auto& [key, blk] : blocks) {
+        const uint32_t jfex = key.first;
+        const uint32_t fpga = key.second;
+
+        const uint32_t n_jJ    = blk.jJ.size();
+        const uint32_t n_jLJ   = blk.jLJ.size();
+        const uint32_t n_jTau  = blk.jTau.size();
+        const uint32_t n_jEM   = blk.jEM.size();
+        const uint32_t n_jTE   = blk.jTE.size();
+        const uint32_t n_jXE   = blk.jXE.size();
+        const uint32_t n_xjJ   = blk.xjJ.size();
+        const uint32_t n_xjLJ  = blk.xjLJ.size();
+        const uint32_t n_xjTau = blk.xjTau.size();
+        const uint32_t n_xjEM  = blk.xjEM.size();
+
+        const uint32_t total_tobs = n_jJ + n_jLJ + n_jTau + n_jEM + n_jTE + n_jXE
+                                  + n_xjJ + n_xjLJ + n_xjTau + n_xjEM;
+        const uint32_t paddingWord = (total_tobs % 2 == 0) ? 0 : 1;
+        const uint32_t payload     = total_tobs + jBits::TOB_TRAILERS + paddingWord;
+
+        // Layout (low → high addr), reversing the decoder walk:
+        //   jJ, jLJ, jTau, jEM, jTE, jXE, xjJ, xjLJ, xjTau, xjEM, [pad],
+        //   TOB-counter, xTOB-counter, jFEX-to-ROD w0, jFEX-to-ROD w1
+        // Decoder (TOB mode) does `tobIndex -= n_xtobs` first, then reads jXE → jJ
+        // going downwards, so xTOBs sit at high addresses, just below the trailers.
+        for (uint32_t w : blk.jJ)    words.push_back(w);
+        for (uint32_t w : blk.jLJ)   words.push_back(w);
+        for (uint32_t w : blk.jTau)  words.push_back(w);
+        for (uint32_t w : blk.jEM)   words.push_back(w);
+        for (uint32_t w : blk.jTE)   words.push_back(w);
+        for (uint32_t w : blk.jXE)   words.push_back(w);
+        for (uint32_t w : blk.xjJ)   words.push_back(w);
+        for (uint32_t w : blk.xjLJ)  words.push_back(w);
+        for (uint32_t w : blk.xjTau) words.push_back(w);
+        for (uint32_t w : blk.xjEM)  words.push_back(w);
+        if (paddingWord) words.push_back(0);
+
+        words.push_back(buildTOBCounterTrailer (n_jJ, n_jLJ, n_jTau, n_jEM,
+                                                n_jTE > 0, n_jXE > 0));
+        words.push_back(buildxTOBCounterTrailer(n_xjJ, n_xjLJ, n_xjTau, n_xjEM));
+        const auto rod = buildjFEXtoRODTrailer(payload, fpga, jfex);
+        words.push_back(rod[0]);
+        words.push_back(rod[1]);
+    }
+
+    // ROD trailer (decoder reads only 7-bit error in word1 — write 0)
+    words.push_back(0);
+    words.push_back(0);
+
+    clearCache(eventContext);
+    uint32_t* data = newRodData(eventContext, words.size());
+    std::copy(words.begin(), words.end(), data);
+
+    // jFex packs all 24 FPGA blocks (6 modules × 4 FPGAs) into a single ROB.
+    eformat::helper::SourceIdentifier sid(eformat::TDAQ_CALO_FEAT_EXTRACT_ROI, 0x2000);
+    vrobf.push_back(newRobFragment(eventContext, sid.code(), words.size(), data, 0));
+
     return StatusCode::SUCCESS;
 }
 

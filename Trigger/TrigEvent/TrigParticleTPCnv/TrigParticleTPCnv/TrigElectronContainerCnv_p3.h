@@ -19,7 +19,7 @@
 #ifndef TRIGPARTICLETPCNV_TRIGELECTRONCONTAINERCNV_P3_H
 #define TRIGPARTICLETPCNV_TRIGELECTRONCONTAINERCNV_P3_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigParticle/TrigElectronContainer.h"
 #include "TrigParticleTPCnv/TrigElectronContainer_p3.h"

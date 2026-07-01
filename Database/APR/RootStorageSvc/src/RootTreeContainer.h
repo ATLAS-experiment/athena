@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -18,9 +18,10 @@
 #include "StorageSvc/DbContainerImp.h"
 
 #include <map>
+#include <string>
+#include <string_view>
 #include <vector>
-#include <set>
-#include <functional>
+#include <memory>
 
 // Forward declarations
 class StatucCode;
@@ -120,7 +121,7 @@ namespace pool  {
     /// Add item branch
     StatusCode addBranch( const DbColumn* col,
                           BranchDesc& dsc,
-                          const std::string& desc);
+                          std::string_view desc);
 
     /// Add BLOB
     StatusCode addObject( DbDatabase& dbH,
@@ -151,7 +152,7 @@ namespace pool  {
     virtual StatusCode open(DbDatabase& dbH, 
                             const std::string& nam, 
                             const DbTypeInfo* info,
-                            DbAccessMode mod) override;
+                            Io::IoFlag mod) override;
 
     /// Check if we can access the container for reading with the given type
     virtual StatusCode checkAccess(DbDatabase& dbH,

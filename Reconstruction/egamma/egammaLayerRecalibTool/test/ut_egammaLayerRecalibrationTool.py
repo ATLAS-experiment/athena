@@ -158,6 +158,12 @@ class TestLayer(unittest.TestCase):
         amounter1 = ROOT.GetAmountFixed(0)
         amounter2 = ROOT.GetAmountFixed(1)
 
+        # add_scale() takes ownership of these objects (the tool destructor
+        # deletes them via clear_corrections()), so release Python ownership to
+        # avoid a double-free.
+        for obj in (modifier1, modifier2, amounter1, amounter2):
+            ROOT.SetOwnership(obj, False)
+
         tool.add_scale(modifier1, amounter1)
         tool.add_scale(modifier2, amounter2)
 

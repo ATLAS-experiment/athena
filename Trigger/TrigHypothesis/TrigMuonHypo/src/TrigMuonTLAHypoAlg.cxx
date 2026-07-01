@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -62,7 +62,7 @@ StatusCode TrigMuonTLAHypoAlg::execute(const EventContext &ctx) const
 
         // get muons from the decision
         const xAOD::Muon *muonPrev = nullptr;
-        auto prevMuons = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+        auto prevMuons = TrigCompositeUtils::findLinks<xAOD::MuonContainer>(ctx, previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
         ATH_MSG_DEBUG("This decision has " << prevMuons.size() << " decisions");
 
         // verify that only one object is found per decision
@@ -96,7 +96,7 @@ StatusCode TrigMuonTLAHypoAlg::execute(const EventContext &ctx) const
     auto muonPtMon  = Monitored::Collection("Pt", *h_TLAMuons, []( const auto& t ) { return t->pt() * t->charge() / Gaudi::Units::GeV; });
     auto muonEtaMon = Monitored::Collection("Eta", *h_TLAMuons, &xAOD::Muon::eta);
     auto muonPhiMon = Monitored::Collection("Phi", *h_TLAMuons, &xAOD::Muon::phi);
-    auto muonAuthor	= Monitored::Collection("Author", *h_TLAMuons, &xAOD::Muon::author);
+    auto muonAuthor	= Monitored::Collection("Author", *h_TLAMuons, [](const auto* m){return static_cast<int>(m->author());});
     auto monitorIt  = Monitored::Group(m_monTool, Nmuons, muonPtMon, muonAuthor, muonEtaMon, muonPhiMon);
 
 

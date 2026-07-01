@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // @file CoralCrestManager.cxx
 // Implementation for CrestFunctions utilities
@@ -7,6 +7,7 @@
 // @date 24 February 2025
 
 #include "CoralCrestManager.h"
+#include <memory>
 #include "CrestApi/CrestApi.h"
 #include "CrestApi/CrestApiFs.h"
 #include "CoralBase/AttributeList.h"
@@ -21,6 +22,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
+namespace{
   const std::map<std::string, cool::StorageType::TypeId> typeCorrespondance={
       {"Bool", cool::StorageType::Bool},
       {"UChar",cool::StorageType::UChar},
@@ -41,7 +43,9 @@
       {"Blob16M", cool::StorageType::Blob16M},
       {"Blob128M", cool::StorageType::Blob128M}
     };
-
+    
+    const std::string colonDelimiter{" : "};
+}
  CoralCrestManager::CoralCrestManager(const std::string & crest_path, const std::string & crestTag):m_crestTag(crestTag){ //AthMessaging("CoralCrestManager")
     if(crest_path.length()==0)
       return;
@@ -49,18 +53,18 @@
       m_crestCl = std::make_unique<Crest::CrestApi>(Crest::CrestApi(crest_path));
     }
     else{
-      m_crestCl = std::make_unique<Crest::CrestApiFs>(Crest::CrestApiFs(true,crest_path));
+      m_crestCl = std::make_unique<Crest::CrestApiFs>(Crest::CrestApiFs(false,crest_path));
     }
 
   }
 
   std::map<std::string, std::string> CoralCrestManager::getGlobalTagMap(const std::string & crest_path, const std::string& globaltag){
-    Crest::CrestApiBase* crestCl=NULL;
+    std::unique_ptr<Crest::CrestApiBase> crestCl;
     if (crest_path.starts_with(CoralCrestManager::prefix1) || crest_path.starts_with(CoralCrestManager::prefix2)){
-      crestCl = new Crest::CrestApi(crest_path);
+      crestCl.reset(new Crest::CrestApi(crest_path));
     }
     else{
-      crestCl = new Crest::CrestApiFs(true,crest_path);
+      crestCl.reset(new Crest::CrestApiFs(true,crest_path));
     }
     std::map<std::string, std::string> tagmap;
     try{
@@ -71,10 +75,6 @@
     } catch (std::exception & e){
       MsgStream gLog(Athena::getMessageSvc(), "CoralCrestManager");
       gLog << MSG::ERROR << __FILE__<<":"<<__LINE__<< ": " << e.what() << " Cannot get a global tag map for " << globaltag<<endmsg;
-    }
-    if(crestCl!=NULL){
-      delete crestCl;
-      crestCl=NULL;
     }
     return tagmap;
   }
@@ -325,8 +325,7 @@
         std::ostringstream os;
         attr[0].toOutputStream(os);
         auto str=os.str();
-        const std::string del(" : ");
-        const auto separatorPosition = str.find(del);
+        const auto separatorPosition = str.find(colonDelimiter);
         const std::string payloadOnly=str.substr(separatorPosition+3);
         res<<"\""<<payloadOnly<<"\"";
         break;

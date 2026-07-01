@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -35,39 +35,42 @@ public:
     enum VisibilityState { NOTVISIBLE, VISIBLE, SOONVISIBLE };
     SystemInfo(IVP1System*,Imp *, IVP1ChannelWidget *, const VisibilityState& );
     ~SystemInfo();
-    IVP1System * system;
+    IVP1System * system{};
     void setVisibilityState(const VisibilityState&);
     void addTimeMeasurement(const double&);
     double refreshtime() const { return m_timing; }
   private:
-    double m_timing;
-    double m_priority;
+    double m_timing{};
+    double m_priority{};
     const bool m_accumulator;
     VisibilityState m_vs;
     void calcPriority();
-    Imp *m_d;
+    Imp *m_d{};
     void removeFromPriMap();
     QQueue<double> m_timemeasurements;
   };
 
-  VP1Prioritiser * prioritiser;
+  VP1Prioritiser * prioritiser{};
   //The following map is for prioritising the order of system refreshes:
   typedef std::multimap<double,IVP1System*> Pri2SysMap;
   Pri2SysMap priority2sys;//This map is kept updated automatically by the SystemInfo objects.
 
   QSet<IVP1ChannelWidget*> visiblechannels, soonvisiblechannels;
-  double soonvisbonus;
+  double soonvisbonus{};
 
   QHash<IVP1System*,SystemInfo*> sys2info;
 
-  QElapsedTimer * stopwatch;
-  IVP1System* currenttimedsystem;
+  QElapsedTimer * stopwatch{};
+  IVP1System* currenttimedsystem{};
 
   void updateSysinfoWithVisibilityState(const QSet<IVP1ChannelWidget*>& channels,
 					const SystemInfo::VisibilityState&vs);
 
 
-  std::set<IVP1System *>::const_iterator itsys, itsysE;
+  // cppcheck-suppress uninitMemberVarNoCtor
+  std::set<IVP1System *>::const_iterator itsys;
+  // cppcheck-suppress uninitMemberVarNoCtor
+  std::set<IVP1System *>::const_iterator itsysE;
 };
 
 /////////////////////////////////////////////////////////////////////

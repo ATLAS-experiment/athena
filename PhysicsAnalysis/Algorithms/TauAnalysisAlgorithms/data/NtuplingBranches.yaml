@@ -1,0 +1,220 @@
+DiTauCalibrationConfig:
+  - name: TruthVisLeadPt
+    description: $p_\mathrm{T}$ of the truth-level leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisLeadEta
+    description: $\eta$ of the truth-level leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisLeadPhi
+    description: $\phi$ of the truth-level leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisLeadM
+    description: invariant mass of the truth-level leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthLeadPdgID
+    description: PDG ID of the truth-level leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisSubleadPt
+    description: $p_\mathrm{T}$ of the truth-level leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisSubleadEta
+    description: $\eta$ of the truth-level sub-leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisSubleadPhi
+    description: $\phi$ of the truth-level sub-leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisSubleadM
+    description: invariant mass of the truth-level sub-leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthSubleadPdgID
+    description: PDG ID of the truth-level sub-leading visible subsystem (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisDeltaR
+    description: $\Delta R$ between the two truth-level visible subsystems (no systematics)
+    toggled_by: decorateTruth
+  - name: TruthVisMass
+    description: invariant mass of the truth-level visible system (no systematics)
+    toggled_by: decorateTruth
+  - name: IsTruthMatched
+    description: TODO
+    toggled_by: decorateTruth
+  - name: IsTruthHadronic
+    description: TODO
+    toggled_by: decorateTruth
+  - name: omniScore
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: nSubjets
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: leadSubjetPt
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: leadSubjetEta
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: leadSubjetPhi
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: leadSubjetE
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: leadSubjetNTracks
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: leadSubjetCharge
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: subleadSubjetPt
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: subleadSubjetEta
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: subleadSubjetPhi
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: subleadSubjetE
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: subleadSubjetNTracks
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: subleadSubjetCharge
+    description: TODO
+    toggled_by: decorateExtraVariables
+  - name: pt
+    description: $p_\mathrm{T}$ of the di-tau-jet system
+  - name: eta
+    description: $\eta$ of the di-tau-jet system (no systematics)
+  - name: phi
+    description: $\phi$ of the di-tau-jet system (no systematics)
+  - name: m
+    description: invariant mass of the di-tau-jet system (no systematics)
+
+DiTauMassBlock:
+  - name: mmc_fit_status
+    description: the returned status of the MMC fit
+  - name: mmc_mlm_mass
+    description: the mass of the di-tau resonance using the maximum-likelihood estimator
+  - name: mmc_maxw_mass
+    description: the mass of the di-tau resonance using the maximum-weight estimator (if `doMAXW`)
+  - name: mmc_mlnu3p_mass
+    description: the mass of the di-tau resonance using the best-fit neutrino kinematics (if `doMLNU3P`)
+  - name: mmc_mlnu3p_res_4vect
+    description: four-vector of the di-tau resonance using the best-fit neutrino kinematics
+    toggled_by: saveExtraVariables
+  - name: mmc_mlnu3p_nu1_4vect
+    description: four-vector of the leading-$p_\mathrm{T}$ neutrino using the best-fit neutrino kinematics
+    toggled_by: saveExtraVariables
+  - name: mmc_mlnu3p_nu2_4vect
+    description: four-vector of the subleading-$p_\mathrm{T}$ neutrino using the best-fit neutrino kinematics
+    toggled_by: saveExtraVariables
+  - name: mmc_mlnu3p_tau1_4vect
+    description: four-vector of the leading-$p_\mathrm{T}$ tau-lepton using the best-fit neutrino kinematics
+    toggled_by: saveExtraVariables
+  - name: mmc_mlnu3p_tau2_4vect
+    description: four-vector of the subleading-$p_\mathrm{T}$ tau-lepton using the best-fit neutrino kinematics
+    toggled_by: saveExtraVariables
+  - name: mmc_maxw_res_4vect
+    description: four-vector of the di-tau resonance using the maximum-weight estimator
+    toggled_by: saveExtraVariables
+  - name: mmc_maxw_nu1_4vect
+    description: four-vector of the leading-$p_\mathrm{T}$ neutrino using the maximum-weight estimator
+    toggled_by: saveExtraVariables
+  - name: mmc_maxw_nu2_4vect
+    description: four-vector of the subleading-$p_\mathrm{T}$ neutrino using the maximum-weight estimator
+    toggled_by: saveExtraVariables
+  - name: mmc_maxw_tau1_4vect
+    description: four-vector of the leading-$p_\mathrm{T}$ tau-lepton using the maximum-weight estimator
+    toggled_by: saveExtraVariables
+  - name: mmc_maxw_tau2_4vect
+    description: four-vector of the subleading-$p_\mathrm{T}$ tau-lepton using the maximum-weight estimator
+    toggled_by: saveExtraVariables
+
+TauCalibrationConfig:
+  - name: pt
+    description: tau-jet $p_\mathrm{T}$
+  - name: eta
+    description: tau-jet $\eta$ (no systematics)
+  - name: phi
+    description: tau-jet $\phi$ (no systematics)
+  - name: charge
+    description: tau-jet charge (no systematics)
+  - name: NNDecayMode
+    description: decay mode classification (no systematics)
+  - name: e
+    description: tau-jet $E$ (*since AnalysisBase 25.2.13*)
+  - name: TESCompatibility
+    description: compatibility of the calorimeter- and MVA-based TES to improve the rejection against muons mis-reconstructed as tau-jets
+  - name: truth_pt_vis
+    description: visible $p_\mathrm{T}$ of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_eta_vis
+    description: visible $\eta$ of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_phi_vis
+    description: visible $\phi$ of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_m_vis
+    description: visible mass of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_pt_invis
+    description: invisible $p_\mathrm{T}$ of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_eta_invis
+    description: invisible $\eta$ of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_phi_invis
+    description: invisible $\phi$ of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_m_invis
+    description: invisible mass of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_pdgId
+    description: pdgId of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_IsHadronicTau
+    description: whether the linked truth-tau decays hadronically (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_DecayMode
+    description: decay mode classification of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_ParticleType
+    description: particle type of the linked truth-tau (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_type
+    description: type of the corresponding truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_origin
+    description: origin of the corresponding truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_PartonTruthLabelID
+    description: the PDG ID of the highest-energy ghost parton (no systematics)
+    toggled_by: decorateTruth
+
+TauWorkingPointSelectionConfig:
+  - name: select
+    description: whether the tau-jet passes the ID cuts
+
+TauWorkingPointEfficiencyConfig:
+  - name: effSF
+    description: the per-tau-jet reconstruction SF
+    toggled_by: saveDetailedSF
+  - name: ID_effSF
+    description: the per-tau-jet ID SF
+    toggled_by: saveDetailedSF
+  - name: EvetoFakeTau_effSF
+    description: the per-tau-jet eVeto fake SF
+    toggled_by: saveDetailedSF
+  - name: EvetoTrueTau_effSF
+    description: the per-tau-jet eVeto true SF
+    toggled_by: saveDetailedSF
+  - name: effSF
+    description: the per-tau-jet combined SF
+    toggled_by: saveCombinedSF
+
+TauTriggerAnalysisSFBlock:
+  - name: <prefixSF>
+    description: the per-tau-jet trigger efficiency SF
+

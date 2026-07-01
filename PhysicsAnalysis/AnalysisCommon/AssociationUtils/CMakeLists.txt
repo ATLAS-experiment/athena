@@ -14,7 +14,7 @@ atlas_add_library( AssociationUtilsLib
    PUBLIC_HEADERS AssociationUtils
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES AnaAlgorithmLib AsgMessagingLib AsgTools AthContainers AthLinks AsgDataHandlesLib
-   xAODBase ColumnarClusterLib ColumnarEventInfoLib ColumnarEgammaLib ColumnarJetLib ColumnarMuonLib ColumnarTauLib ColumnarTrackingLib ColumnarCoreLib ColumnarVariantLib
+   xAODBase ColumnarClusterLib ColumnarEventInfoLib ColumnarEgammaLib ColumnarJetLib ColumnarMuonLib ColumnarTauLib ColumnarTrackingLib ColumnarCoreLib ColumnarVariantLib xAODMissingET
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} FourMomUtils )
 
 atlas_add_dictionary( AssociationUtilsDict
@@ -57,7 +57,7 @@ if (NOT COLUMNAR_ANALYSIS)
          INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
          LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTools AsgTestingLib AssociationUtilsLib CxxUtils
          ${extra_libs}
-         POST_EXEC_SCRIPT nopost.sh )
+         POST_EXEC_SCRIPT noerror.sh )
    endmacro( _add_gtest )
 
    # Define the google unit tests.
@@ -69,10 +69,10 @@ if (NOT COLUMNAR_ANALYSIS)
    if( XAOD_STANDALONE )
       atlas_add_test( ut_assocUtilsDict
          SCRIPT test/ut_assocUtilsDict.py
-         POST_EXEC_SCRIPT nopost.sh )
+         POST_EXEC_SCRIPT noerror.sh )
       atlas_add_test( ut_ort_tester
          SCRIPT test/ut_ort_tester.sh
-         POST_EXEC_SCRIPT nopost.sh )
+         POST_EXEC_SCRIPT noerror.sh )
    endif()
 endif()
 
@@ -80,7 +80,7 @@ atlas_add_test( gt_ColumnarToolTests
   SOURCES test/gt_ColumnarToolTests.cxx
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
   LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib AssociationUtilsLib
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

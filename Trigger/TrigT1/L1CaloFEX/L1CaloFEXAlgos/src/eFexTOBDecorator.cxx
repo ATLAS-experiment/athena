@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -46,17 +46,17 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode eFexTOBDecorator::execute() {
+  StatusCode eFexTOBDecorator::execute(const EventContext& ctx) {
     
     // read the TOB containers
-    SG::ReadHandle<xAOD::eFexEMRoIContainer> eFEXegEDMContainerObj{m_eFEXegEDMContainerKey};
+    SG::ReadHandle<xAOD::eFexEMRoIContainer> eFEXegEDMContainerObj{m_eFEXegEDMContainerKey, ctx};
     if (!eFEXegEDMContainerObj.isValid()) {
       ATH_MSG_ERROR("Failed to retrieve EDM collection");
       return StatusCode::SUCCESS; 
     }
     const xAOD::eFexEMRoIContainer* emEDMConstPtr = eFEXegEDMContainerObj.cptr();
 
-    SG::ReadHandle<xAOD::eFexTauRoIContainer> eFEXtauEDMContainerObj{m_eFEXtauEDMContainerKey};
+    SG::ReadHandle<xAOD::eFexTauRoIContainer> eFEXtauEDMContainerObj{m_eFEXtauEDMContainerKey, ctx};
     if (!eFEXtauEDMContainerObj.isValid()) {
       ATH_MSG_ERROR("Failed to retrieve tau EDM collection");
       return StatusCode::SUCCESS; 
@@ -64,14 +64,14 @@ namespace LVL1 {
     const xAOD::eFexTauRoIContainer* tauEDMConstPtr = eFEXtauEDMContainerObj.cptr();
     
     //Setup EM Decorator Handlers
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   RetaCoreDec  (m_RetaCoreDec );
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   RetaEnvDec   (m_RetaEnvDec  );
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   RhadEMDec    (m_RhadEMDec   );
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   RhadHadDec   (m_RhadHadDec  );
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   WstotDenDec  (m_WstotDenDec );
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   WstotNumDec  (m_WstotNumDec );
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   RetaCoreDec  (m_RetaCoreDec , ctx);
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   RetaEnvDec   (m_RetaEnvDec  , ctx);
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   RhadEMDec    (m_RhadEMDec   , ctx);
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   RhadHadDec   (m_RhadHadDec  , ctx);
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   WstotDenDec  (m_WstotDenDec , ctx);
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, unsigned int >   WstotNumDec  (m_WstotNumDec , ctx);
 
-    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, std::vector<unsigned int > >   ClusterSCellEtSumsDec  (m_ClusterSCellEtSumsDec );
+    SG::WriteDecorHandle<xAOD::eFexEMRoIContainer, std::vector<unsigned int > >   ClusterSCellEtSumsDec  (m_ClusterSCellEtSumsDec , ctx);
 
     //looping over EM TOB to decorate them
     for ( const xAOD::eFexEMRoI* emRoI : *emEDMConstPtr ){
@@ -85,7 +85,7 @@ namespace LVL1 {
       std::vector<unsigned int> RhadSums;
       std::vector<unsigned int> WstotSums;
 
-      ATH_CHECK( m_eFEXTOBEtTool->getegSums(eta, phi, seed, UnD, ClusterCellETs, RetaSums, RhadSums, WstotSums) );
+      ATH_CHECK( m_eFEXTOBEtTool->getegSums(ctx, eta, phi, seed, UnD, ClusterCellETs, RetaSums, RhadSums, WstotSums) );
 
       RetaCoreDec (*emRoI) = RetaSums[0];
       RetaEnvDec  (*emRoI) = RetaSums[1];
@@ -98,10 +98,10 @@ namespace LVL1 {
     }
 
     //Setup Tau Decorator Handlers
-    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, unsigned int >   RCoreDec   (m_RCoreDec   );
-    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, unsigned int >   REnvDec    (m_REnvDec    );
-    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, unsigned int >   REMCoreDec (m_REMCoreDec );
-    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, unsigned int >   REMHadDec  (m_REMHadDec  );
+    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, unsigned int >   RCoreDec   (m_RCoreDec   , ctx);
+    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, unsigned int >   REnvDec    (m_REnvDec    , ctx);
+    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, unsigned int >   REMCoreDec (m_REMCoreDec , ctx);
+    SG::WriteDecorHandle<xAOD::eFexTauRoIContainer, unsigned int >   REMHadDec  (m_REMHadDec  , ctx);
 
     //looping over Tau TOB to decorate them
     for ( const xAOD::eFexTauRoI* tauRoI : *tauEDMConstPtr ){
@@ -113,7 +113,7 @@ namespace LVL1 {
       std::vector<unsigned int> RcoreSums;
       std::vector<unsigned int> RemSums;
 
-      ATH_CHECK( m_eFEXTOBEtTool->gettauSums(eta, phi, seed, UnD, RcoreSums, RemSums) );
+      ATH_CHECK( m_eFEXTOBEtTool->gettauSums(ctx, eta, phi, seed, UnD, RcoreSums, RemSums) );
 
       RCoreDec   (*tauRoI) = RcoreSums[0];
       REnvDec    (*tauRoI) = RcoreSums[1];

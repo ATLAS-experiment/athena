@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -172,7 +172,7 @@ std::vector<float> BTaggingEigenVectorRecompositionTool::getCoefficients(const s
 
   std::string evName = "Eigen_"+label+"_"+std::to_string(evIdx);
   if(fullMap.count(evName) <= 0){
-    ATH_MSG_ERROR("Cannot find " << evName <<" in Eigen Vector coefficient map.");
+    ATH_MSG_ERROR("Cannot find " << evName <<" in Eigen Vector coefficient map for label " << label);
     return coefficients;
   }
   

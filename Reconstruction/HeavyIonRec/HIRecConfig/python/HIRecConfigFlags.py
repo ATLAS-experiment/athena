@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import HIMode
+from AthenaConfiguration.Enums import ProductionStep
 
 def createHIRecConfigFlags():
   flags=AthConfigFlags()
@@ -34,7 +35,7 @@ def createHIRecConfigFlags():
   flags.addFlag("HeavyIon.redoTracking", True)
   flags.addFlag("HeavyIon.redoEgamma", True)
   # derivation flags
-  flags.addFlag("HeavyIon.isDerivation", False)
+  flags.addFlag("HeavyIon.isDerivation", lambda prevFlags: True if (prevFlags.Reco.HIMode is HIMode.HI or prevFlags.Reco.HIMode is HIMode.HIP) and prevFlags.Common.ProductionStep is ProductionStep.Derivation else False)
   flags.addFlag("HeavyIon.HIJetPrefix", lambda prevFlags: "DF" if prevFlags.HeavyIon.isDerivation else "")
   flags.addFlag("HeavyIon.doHIBTagging", True) # to get flavour tagging running on DFAntiKt4HIJets collection in derivations
   flags.addFlag("HeavyIon.FTagModifiers", lambda prevFlags: ["QGTagging", "NNJVT"] if prevFlags.HeavyIon.doHIBTagging else [] )

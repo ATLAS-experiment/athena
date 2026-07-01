@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SELECTION_HELPERS__SELECTION_EXPR_PARSER_H
@@ -62,7 +62,7 @@ class Lexer {
   /// Struct grouping together the type and original string representation
   /// of a symbol.
   struct Symbol {
-    Type type;
+    Type type {};
     std::string value;
   };
 

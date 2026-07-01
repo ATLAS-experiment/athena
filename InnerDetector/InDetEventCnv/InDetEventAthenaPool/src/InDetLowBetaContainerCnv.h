@@ -36,9 +36,9 @@ public:
 protected:
  
   virtual InDetLowBetaContainer_PERS *createPersistent(InDet::InDetLowBetaContainer *transObj);
-  virtual InDet::InDetLowBetaContainer *createTransient();
+  virtual InDet::InDetLowBetaContainer *createTransient(const Token* token);
  
-  virtual AthenaPoolTopLevelTPCnvBase *getTopLevelTPCnv();
+  virtual TopLevelTPCnvBase *getTopLevelTPCnv();
  
   private:
  

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Navigation )
@@ -30,4 +30,4 @@ atlas_add_test( NavigableIterator_test
 atlas_add_test( AthenaBarCodeImpl_test
    SOURCES test/AthenaBarCodeImpl_test.cxx
    LINK_LIBRARIES Navigation
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )

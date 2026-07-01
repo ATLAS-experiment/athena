@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LayerTestTool.h"
@@ -26,42 +26,42 @@ StatusCode LayerTestTool::initialize()
   m_path+="Layer/";
   m_path+=m_collection+"/";
 
-  _TH1D(m_n_energy,(m_collection+"_energy").c_str(),31,0.,2000000.);
+  _TH1D(m_n_energy,m_collection+"_energy",31,0.,2000000.);
   _SET_TITLE(m_n_energy,"energy","E MeV","n");
 
-  _TH1D(m_n_energy_e,(m_collection+"_energy_e").c_str(),31,0.,20000.);
+  _TH1D(m_n_energy_e,m_collection+"_energy_e",31,0.,20000.);
   _SET_TITLE(m_n_energy_e,"energy","E MeV","n");
 
-  _TH1D(m_n_energy_ep,(m_collection+"_energy_ep").c_str(),31,0.,20000.);
+  _TH1D(m_n_energy_ep,m_collection+"_energy_ep",31,0.,20000.);
   _SET_TITLE(m_n_energy_ep,"energy","E MeV","n");
 
-  _TH1D(m_n_energy_gamma,(m_collection+"_energy_gamma").c_str(),31,0.,20000.);
+  _TH1D(m_n_energy_gamma,m_collection+"_energy_gamma",31,0.,20000.);
   _SET_TITLE(m_n_energy_gamma,"energy","E MeV","n");
 
-  _TH1D(m_n_energy_neutron,(m_collection+"_energy_neutron").c_str(),31,0.,20000.);
+  _TH1D(m_n_energy_neutron,m_collection+"_energy_neutron",31,0.,20000.);
   _SET_TITLE(m_n_energy_neutron,"energy","E MeV","n");
 
-  _TH1D(m_n_energy_muon,(m_collection+"_energy_muon").c_str(),31,0.,2000000.);
+  _TH1D(m_n_energy_muon,m_collection+"_energy_muon",31,0.,2000000.);
   _SET_TITLE(m_n_energy_muon,"energy","E MeV","n");
 
-  _TH1D(m_n_energy_muonp,(m_collection+"_energy_muonp").c_str(),31,0.,2000000.);
+  _TH1D(m_n_energy_muonp,m_collection+"_energy_muonp",31,0.,2000000.);
   _SET_TITLE(m_n_energy_muonp,"energy","E MeV","n");
 
-  _TH1D(m_n_px,(m_collection+"_px").c_str(),31,-500000.,500000.);
+  _TH1D(m_n_px,m_collection+"_px",31,-500000.,500000.);
   _SET_TITLE(m_n_px,"px distribution","px MeV","n");
-  _TH1D(m_n_py,(m_collection+"_py").c_str(),31,-500000.,500000.);
+  _TH1D(m_n_py,m_collection+"_py",31,-500000.,500000.);
   _SET_TITLE(m_n_py,"py distribution","py MeV","n");
-  _TH1D(m_n_pz,(m_collection+"_pz").c_str(),31,-500000.,500000.);
+  _TH1D(m_n_pz,m_collection+"_pz",31,-500000.,500000.);
   _SET_TITLE(m_n_pz,"pz distribution","pz MeV","n");
 
-  _TH1D(m_n_rho,(m_collection+"_rho").c_str(),31,0,50000.);
+  _TH1D(m_n_rho,m_collection+"_rho",31,0,50000.);
   _SET_TITLE(m_n_rho,"rho distribution","rho","n");
-  _TH1D(m_n_eta,(m_collection+"_eta").c_str(),31,-5.,5.);
+  _TH1D(m_n_eta,m_collection+"_eta",31,-5.,5.);
   _SET_TITLE(m_n_eta,"eta distribution","eta","n");
-  _TH1D(m_n_phi,(m_collection+"_phi").c_str(),31,-5.,5.);
+  _TH1D(m_n_phi,m_collection+"_phi",31,-5.,5.);
   _SET_TITLE(m_n_phi,"phi distribution","phi","n");
 
-  _TH2D(m_n_pos,(m_collection+"_pos").c_str(),31,-7500.,7500.,31,0.,4500.);
+  _TH2D(m_n_pos,m_collection+"_pos",31,-7500.,7500.,31,0.,4500.);
   _SET_TITLE(m_n_pos,"pos","z","r");
   return StatusCode::SUCCESS;
 }

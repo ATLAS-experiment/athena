@@ -19,7 +19,7 @@ StatusCode MuonInJetCorrectionTool::applyMuonInJetCorrection
 
   if(nmuons>0){
     float eLoss = 0.0;
-    muon_in_jet->parameter(eLoss,xAOD::Muon::EnergyLoss);
+    muon_in_jet->parameter(eLoss,xAOD::Muon::ParamDef::EnergyLoss);
     TLorentzVector mu_tlv = muon_in_jet->p4();
     // Loss with same direction as muon + mass = 0
     TLorentzVector Loss;

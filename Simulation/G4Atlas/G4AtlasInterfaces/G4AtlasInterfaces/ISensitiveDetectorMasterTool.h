@@ -21,9 +21,9 @@ class HitCollectionMap;
 class ISensitiveDetectorMasterTool : virtual public IAlgTool {
  public:
 
-  ISensitiveDetectorMasterTool() {}
+  ISensitiveDetectorMasterTool() = default;
 
-  virtual ~ISensitiveDetectorMasterTool() {}
+  virtual ~ISensitiveDetectorMasterTool() = default;
 
   /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID(ISensitiveDetectorMasterTool, 1, 0);

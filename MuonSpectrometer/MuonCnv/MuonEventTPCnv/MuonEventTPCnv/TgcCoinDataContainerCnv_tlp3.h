@@ -6,7 +6,7 @@
 #define TGCCOINDATACONTAINERCNV_TLP3_H
 
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TgcCoinDataContainer_tlp3.h"
 
@@ -18,7 +18,7 @@
 #include <iostream>
 
 class TgcCoinDataContainerCnv_tlp3
-   : public AthenaPoolTopLevelTPConverter<Muon::TgcCoinDataContainerCnv_p3, Muon::TgcCoinDataContainer_tlp3 >
+   : public TopLevelTPConverter<Muon::TgcCoinDataContainerCnv_p3, Muon::TgcCoinDataContainer_tlp3 >
 {
 public:
 

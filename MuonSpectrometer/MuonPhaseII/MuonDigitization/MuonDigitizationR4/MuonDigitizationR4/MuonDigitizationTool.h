@@ -120,7 +120,7 @@ namespace MuonR4 {
             
             SG::ReadHandleKey<xAOD::MuonSimHitContainer> m_simHitKey{this, "SimHitKey", ""};
 
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", 
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", 
                                                                "Geometry context"};
 
             ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "PileUpMergeSvc", "PileUpMergeSvc", ""};

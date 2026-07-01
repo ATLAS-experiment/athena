@@ -18,13 +18,13 @@
 #ifndef  TRIGMUONEVENTTPCNV_TRIGMUONEFCONTAINER_CNV_TLP1_H
 #define  TRIGMUONEVENTTPCNV_TRIGMUONEFCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigMuonEventTPCnv/TrigMuonEFContainer_tlp1.h"
  
 #include "TrigMuonEventTPCnv/TrigMuonEFContainerCnv_p1.h"   
 #include "EventCommonTPCnv/P4IPtCotThPhiMCnv_p1.h" 
  
-class TrigMuonEFContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigMuonEFContainerCnv_p1, TrigMuonEFContainer_tlp1 >
+class TrigMuonEFContainerCnv_tlp1 : public TopLevelTPConverter< TrigMuonEFContainerCnv_p1, TrigMuonEFContainer_tlp1 >
 {
  
  public:

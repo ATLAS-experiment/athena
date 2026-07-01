@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -105,13 +105,14 @@ StatusCode RodHeaderByteStreamTool::finalize()
 
 // Conversion bytestream to CMX-CP TOBs
 StatusCode RodHeaderByteStreamTool::convert(
+  const EventContext& ctx,
   const std::string& sgKey,
   DataVector<LVL1::RODHeader>* const rhCollection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs(sgKey));
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "RodHeaderByteStreamTool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "RodHeaderByteStreamTool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(robFrags, rhCollection);
 }

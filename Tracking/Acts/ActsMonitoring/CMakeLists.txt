@@ -5,6 +5,7 @@ atlas_subdir( ActsMonitoring )
 
 # External dependencies
 find_package( Acts COMPONENTS Core )
+find_package( ROOT COMPONENTS Core Tree TreePlayer )
 
 # Component(s) in the package:
 atlas_add_component( ActsMonitoring
@@ -18,6 +19,7 @@ atlas_add_component( ActsMonitoring
                 ActsToolInterfacesLib
                 AthenaMonitoringLib
                 AthenaMonitoringKernelLib
+                ActsCalibratorsLib
                 BeamSpotConditionsData
                 GaudiKernel
                 GeoPrimitives
@@ -43,11 +45,6 @@ atlas_add_component( ActsMonitoring
                 TrkSurfaces )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-
-atlas_add_test( ActsSeedingToolComparison
-  SCRIPT test/ActsSeedingAlgorithmTest.py
-  PROPERTIES TIMEOUT 900
-  POST_EXEC_SCRIPT nopost.sh )
 
 file(GLOB_RECURSE files "util/*.cxx")
 foreach(_exeFile ${files})

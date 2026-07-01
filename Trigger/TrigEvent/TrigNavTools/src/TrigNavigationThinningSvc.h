@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVTOOLS_TRIGNAVIGATIONTHINNINGSVC_H
@@ -87,7 +87,7 @@ private:
   };
 
   std::vector<std::string> m_actions;
-  typedef StatusCode (TrigNavigationThinningSvc::*Action)(State& state) const;
+  typedef StatusCode (TrigNavigationThinningSvc::*Action)(const EventContext& ctx, State& state) const;
   std::map<std::string, Action> m_actionsMap;	 
   std::string m_chainsRegex;
 	 
@@ -104,28 +104,28 @@ private:
    * @brief clear the result of the slimming in the doSliming argument (vector<uint32_t>)
    * Makes no sense to combine with other options
    */
-  StatusCode drop(State& state) const;
+  StatusCode drop(const EventContext& ctx, State& state) const;
   /**
    * @brief Reload the slimmed navigation in TDT so that all clients of current job see the chage
    */
-  StatusCode reload(State& state) const;
+  StatusCode reload(const EventContext& ctx, State& state) const;
 
   /**
    * @brief Restore the original navigation structure
    */
-  StatusCode restore(State& state) const;
+  StatusCode restore(const EventContext& ctx, State& state) const;
 
   /**
    * @brief Save the result of the slimming in the doSlimming argument (vector<uint32_t>)
    */
 
-  StatusCode save(State& state) const;
+  StatusCode save(const EventContext& ctx, State& state) const;
 
-  StatusCode print(State& state) const;
+  StatusCode print(const EventContext& ctx, State& state) const;
   /**
    * @brief Remove intermediate TEs leaving very flat structure with event node, rois and terminals
    */
-  StatusCode squeeze(State& state) const;
+  StatusCode squeeze(const EventContext& ctx, State& state) const;
 
   /**
    * @brief Removes references to features from the navigation structure.  Features are
@@ -134,21 +134,21 @@ private:
    *        ignored).  If the inclusion list is NULL or empty, then all elements except
    *        those on the exclusion list are included.
    */
-  StatusCode dropFeatures(State& state) const;
+  StatusCode dropFeatures(const EventContext& ctx, State& state) const;
   /**
    * @brief Removes RoI nodes, rather aggressive option, should be use as one of last actions as it 
    * makes impossible to traverse the tree. Nonetheless the tree can be to some extent usable in the analysis
    * i.e. when no TEs traversing is really needed
    */
-  StatusCode dropRoIs(State& state) const;
+  StatusCode dropRoIs(const EventContext& ctx, State& state) const;
   /**
    * @brief Removes RoI nodes, which do not seed anything
    */
-  StatusCode dropEmptyRoIs(State& state) const;
+  StatusCode dropEmptyRoIs(const EventContext& ctx, State& state) const;
   /**
    * @brief Removes TEs which have no features (combine wiht squeeze)
    */
-  StatusCode dropFeatureless(State& state) const;
+  StatusCode dropFeatureless(const EventContext& ctx, State& state) const;
   /**
    * @brief Removes TEs which are inactive (rejected by hypothesis)
    */
@@ -157,12 +157,12 @@ private:
   /**
    * @brief reset indexes in the after the thinning
    **/	 
-  StatusCode syncThinning(State& state) const;
+  StatusCode syncThinning(const EventContext& ctx, State& state) const;
 
   /**
    * @brief remove info not related to the specified chains
    */
-  StatusCode dropChains(State& state) const;
+  StatusCode dropChains(const EventContext& ctx, State& state) const;
 
   /**
    * @brief Removes the passed trigger element from the navigation structure by removing

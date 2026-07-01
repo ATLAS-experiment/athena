@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PathResolver )
@@ -38,7 +38,7 @@ atlas_add_test( PathResolver_test
 atlas_add_test( PathResolver_test_download
    SCRIPT "test-path-resolver -d"
    ENVIRONMENT "DATAPATH=${_dpath}:$ENV{DATAPATH}"
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Skip the runtime environment setup in release rebuilding mode:
 if( ATLAS_RELEASE_MODE )

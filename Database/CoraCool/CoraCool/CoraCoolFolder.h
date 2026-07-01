@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CORACOOL_CORACOOLFOLDER_H
@@ -38,6 +38,7 @@ class CoraCoolFolder {
   // allow the object iterator to access internals
  friend class CoraCoolObjectIter;
  public:
+  static const std::string& defaultTagName();
   // iterators for storing objects
   typedef std::vector<coral::AttributeList>::const_iterator const_iterator;
 
@@ -75,7 +76,7 @@ class CoraCoolFolder {
 		   const_iterator begin,
 		   const_iterator end,
 		   const cool::ChannelId& channelId=0,
-		   const std::string& tagName="",
+		   const std::string& tagName=defaultTagName(),
 		   const bool userTagOnly=false);
 
   // setup storage buffer for bulk insertion via repeated storeObject calls
@@ -92,7 +93,7 @@ class CoraCoolFolder {
 		       const cool::ValidityKey& until,
 		       const coral::Attribute& fkey,
 		       const cool::ChannelId& channelId=0,
-		       const std::string& tagName="",
+		       const std::string& tagName=defaultTagName(),
 		       const bool userTagOnly=false);
 
   // add a reference to COOL to an existing stored payload object
@@ -101,7 +102,7 @@ class CoraCoolFolder {
 		       const cool::ValidityKey& until,
 		       const int ifkey,
 		       const cool::ChannelId& channelId=0,
-		       const std::string& tagName="",
+		       const std::string& tagName=defaultTagName(),
 		       const bool userTagOnly=false);
 
   // add more payload AttributeLists to the CORAL payload table
@@ -114,14 +115,14 @@ class CoraCoolFolder {
   // find the one object valid at a given time/channel and tag
   CoraCoolObjectPtr findObject(const cool::ValidityKey& pointInTime,
 			       const cool::ChannelId& channelId=0, 
-			       const std::string& tagName="");
+			       const std::string& tagName=defaultTagName());
 
   // return an iterator to a set of objects identified by a point in time
   // and a channel specification (and optionally a tag)
   CoraCoolObjectIterPtr browseObjects(
        const cool::ValidityKey& pointInTime,
        const cool::ChannelSelection& channels,
-       const std::string& tagName="");
+       const std::string& tagName=defaultTagName());
 
   // return an interator to a set of objects identified by a range in 
   // time and a channel specification (and optionally a tag)
@@ -129,7 +130,7 @@ class CoraCoolFolder {
        const cool::ValidityKey& since=cool::ValidityKeyMin,
        const cool::ValidityKey& until=cool::ValidityKeyMax,
        const cool::ChannelSelection& channels=cool::ChannelSelection(0),
-       const std::string& tagName="");
+       const std::string& tagName=defaultTagName());
 
   // setup folder preFetch status (passed on to COOL)
   void setPrefetchAll(const bool prefetchAll);

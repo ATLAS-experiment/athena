@@ -4,7 +4,6 @@
 
 #include "FPGATrackSimObjects/FPGATrackSimEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimTowerInputHeader.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -46,11 +45,11 @@ StatusCode TrigFPGATrackSimRawHitsWrapperAlg::initialize()
 }
 
 
-StatusCode TrigFPGATrackSimRawHitsWrapperAlg::execute() {
+StatusCode TrigFPGATrackSimRawHitsWrapperAlg::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG("Running on event ");
 
   ATH_CHECK(m_eventHeader != nullptr);
-  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, Gaudi::Hive::currentContext()));
+  ATH_CHECK(m_hitInputTool->readData(m_eventHeader, ctx));
   m_EventTree->Fill();
   return StatusCode::SUCCESS;
 

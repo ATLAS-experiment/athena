@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanConfig.h"
@@ -51,9 +51,14 @@
 #include <ranges>
 
 #include "CxxUtils/checker_macros.h"
+
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
 
 ClassImp(dqi::HanConfig)
+
+namespace{
+  const std::string inputNameStr{"inputname"};
+}
 
 namespace dqi {
 
@@ -978,7 +983,7 @@ Visit( const MiniConfigTreeNode* node )
 
     // Add the histogram name
     HanConfigParMap parMap;
-    parMap.SetName("inputname"); parMap.SetValue( strFullHistName );
+    parMap.SetName(inputNameStr); parMap.SetValue( strFullHistName );
     dqpar.AddAnnotation(parMap);
 
     HanConfigGroup* dqreg = m_root->GetNode( regID );
@@ -1135,7 +1140,7 @@ Visit( const MiniConfigTreeNode* node )
 
 	// Add the histogram name
 	HanConfigParMap parMap;
-	parMap.SetName("inputname"); parMap.SetValue( objName );
+	parMap.SetName(inputNameStr); parMap.SetValue( objName );
 	dqpar.AddAnnotation(parMap);
 
         HanConfigGroup* dqreg = m_root->GetNode( regID );

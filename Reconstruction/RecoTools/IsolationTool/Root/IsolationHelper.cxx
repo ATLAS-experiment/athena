@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <IsolationTool/IsolationHelper.h>
 #include <xAODPrimitives/tools/getIsolationAccessor.h>
 #include <xAODPrimitives/tools/getIsolationCorrectionAccessor.h>
 #include <xAODPrimitives/IsolationHelpers.h>
+#include "AthContainers/CurrentContext.h"
 
 #ifndef XAOD_ANALYSIS
 #include "TrkParameters/TrackParameters.h"
@@ -90,7 +91,7 @@ namespace CP {
 		xAOD::Iso::IsolationCaloCorrectionBitset mask = 0;
 		xAOD::Iso::IsolationCaloCorrectionBitsetHelper::encode(corrs, mask);
 
-		return isolation(value, par, type, mask); 
+		return isolation(value, par, type, mask);
 	}
 
 	bool IsolationHelper::isolation(float& value, const xAOD::IParticle& par, xAOD::Iso::IsolationType type, const xAOD::Iso::IsolationCaloCorrectionBitset& corrMask) const {
@@ -100,7 +101,7 @@ namespace CP {
 		xAOD::Iso::IsolationCaloCorrectionBitset origMask = 0;
 		if(!correctionBitset(origMask, par, type)) return false;
 
-		if(origMask == corrMask) { 
+		if(origMask == corrMask) {
 			value=origValue;
 		} else{
 			float origCorr = 0;
@@ -117,9 +118,10 @@ namespace CP {
 	bool IsolationHelper::updateIsolation(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, std::vector<xAOD::Iso::IsolationType>& types, xAOD::Iso::IsolationCaloCorrectionBitset corrMask, std::string muonkey, bool recordSG) const {
 		const xAOD::MuonContainer* muons(nullptr);
 		ATH_CHECK( evtStore()->retrieve(muons,muonkey), false );
-		std::pair<xAOD::MuonContainer*,xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
-		copy = shallowcopy.first;
-		copyaux = shallowcopy.second;
+      xAOD::ShallowCopyResult_t<xAOD::MuonContainer> shallowcopy =
+		  xAOD::shallowCopy(*muons);
+		copy = shallowcopy.first.get();
+		copyaux = shallowcopy.second.get();
 
 		for(auto par: *copy){
 			for(auto type: types){
@@ -137,8 +139,8 @@ namespace CP {
         }
 
 			if(recordSG) {
-			ATH_CHECK( evtStore()->record(shallowcopy.first, "IsoFixed_"+muonkey), false );
-			ATH_CHECK( evtStore()->record(shallowcopy.second,"IsoFixed_"+muonkey+"Aux."), false );
+                          ATH_CHECK( evtStore()->record(std::move(shallowcopy.first), "IsoFixed_"+muonkey), false );
+                          ATH_CHECK( evtStore()->record(std::move(shallowcopy.second),"IsoFixed_"+muonkey+"Aux."), false );
 		}
 		return true;
 	}
@@ -174,7 +176,7 @@ namespace CP {
 		if (evtStore()->retrieve(edShape,esName).isFailure()) {
 			ATH_MSG_ERROR("Cannot retrieve density container " + esName + " for isolation correction. No ED correction");
 			return false;
-		} 
+		}
 
 		double rho = 0;
 		bool gotDensity = edShape->getDensity(xAOD::EventShape::Density,rho);

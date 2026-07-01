@@ -1,23 +1,22 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// STL include(s):
-#include <algorithm>
-#include <cmath>
-
-// Gaudi/Athena include(s):
-#include "AthenaKernel/errorcheck.h"
-#include "StoreGate/ReadCondHandle.h"
+// Local include(s):
+#include "CaloCellFilterAlg.h"
 
 // EDM include(s):
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloID.h"
 #include "AthContainers/ConstDataVector.h"
 
-// Local include(s):
-#include "CaloCellFilterAlg.h"
+// Gaudi/Athena include(s):
+#include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadCondHandle.h"
 
+// STL include(s):
+#include <algorithm>
+#include <cmath>
 
 CaloCellFilterAlg::CaloCellFilterAlg( const std::string& name, 
                                       ISvcLocator* pSvcLocator )
@@ -107,7 +106,7 @@ StatusCode CaloCellFilterAlg::initialize() {
    if( m_caloSamplings.size() == 0 ) {
       ATH_MSG_INFO( " No calorimeter sampling selection" );
       return StatusCode::SUCCESS;
-   } else if( m_caloSamplings.size() > nSubCalo ) {
+   } else if( m_caloSamplings.size() > nCaloSamplings ) {
       REPORT_MESSAGE( MSG::FATAL )
          << " More than " << nCaloSamplings << " calo samplings specified. "
          << "Must be wrong. Stop.";
@@ -131,7 +130,7 @@ StatusCode CaloCellFilterAlg::initialize() {
 }
 
 
-StatusCode CaloCellFilterAlg::execute() {
+StatusCode CaloCellFilterAlg::execute(const EventContext& ctx) {
 
    REPORT_MESSAGE( MSG::VERBOSE ) << " in execute";
 
@@ -195,7 +194,7 @@ StatusCode CaloCellFilterAlg::execute() {
             }
 
             if( useNoiseCut ) {
-               SG::ReadCondHandle<CaloNoise> caloNoise{m_caloNoiseKey};
+               SG::ReadCondHandle<CaloNoise> caloNoise{m_caloNoiseKey, ctx};
                float sigma = caloNoise->getNoise( cell->ID(), cell->gain() );
                if( std::abs( e ) < sigma * m_sigmaCut ) continue;
             }

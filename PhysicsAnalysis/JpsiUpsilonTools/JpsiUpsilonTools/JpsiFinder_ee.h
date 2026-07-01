@@ -72,10 +72,9 @@ namespace Analysis {
         std::vector<JpsiEECandidate> getPairs2Colls(const std::vector<const xAOD::TrackParticle*>&, const std::vector<const xAOD::Electron*>&, bool) const;
         double getInvariantMass(const JpsiEECandidate&, const std::vector<double>& ) const;
         std::vector<JpsiEECandidate> selectCharges(const std::vector<JpsiEECandidate>& , const std::string&) const;
-        xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer* importedTrackCollection) const;
+        std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer* importedTrackCollection) const;
         bool passesEgammaCuts(const xAOD::Electron*) const;
         bool isContainedIn(const xAOD::TrackParticle*, const xAOD::TrackParticleContainer*) const;
-        TVector3 trackMomentum(const xAOD::Vertex * vxCandidate, int trkIndex) const;
         //-------------------------------------------------------------------------------------
         
     private:
@@ -84,7 +83,6 @@ namespace Analysis {
         bool m_trktrk;
         bool m_allElectrons;
         bool m_useTrackMeasurement;
-        bool m_useV0Fitter;
         bool m_diElectrons;
         double m_trk1M;
         double m_trk2M;
@@ -107,7 +105,6 @@ namespace Analysis {
         };
 
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
-        ToolHandle < Trk::IVertexFitter > m_iV0VertexFitter;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
         ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
         ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};

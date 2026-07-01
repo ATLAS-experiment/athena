@@ -40,7 +40,7 @@ CpmTowerByteStreamxAODCnv::CpmTowerByteStreamxAODCnv(ISvcLocator* svcloc) :
 
 // CLID
 
-const CLID& CpmTowerByteStreamxAODCnv::classID() {
+CLID CpmTowerByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::CPMTowerContainer>::ID();
 }
 

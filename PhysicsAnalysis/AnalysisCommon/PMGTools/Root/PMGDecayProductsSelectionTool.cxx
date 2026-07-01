@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -103,42 +103,21 @@ namespace PMGTools
 
 
   asg::AcceptData PMGDecayProductsSelectionTool ::
-  hasRequiredInitialParent (const xAOD::TruthParticle *truthParticle, asg::AcceptData& acceptData) const
-  {
-    size_t nParents = getNParents (truthParticle);
-    for (size_t i = 0; i < nParents; i++)
-    {
-      const xAOD::TruthParticle *parent = getParent(truthParticle, i);
-      if (parent)
-      {
-        if (std::find(m_requiredParentPDGIDs.begin(), m_requiredParentPDGIDs.end(), std::abs(parent->pdgId())) != m_requiredParentPDGIDs.end())
-        {
-          acceptData.setCutResult (m_requiredParentIndex, true);
-          return acceptData;
-        }
-        else if (m_allowedIntermediatePDGIDs.empty() || std::find(m_allowedIntermediatePDGIDs.begin(), m_allowedIntermediatePDGIDs.end(), std::abs(parent->pdgId())) != m_allowedIntermediatePDGIDs.end())
-        {
-          return hasRequiredInitialParent(parent, acceptData);
-        }
-        else
-        {
-          ATH_MSG_VERBOSE("Removing particle as parent is not allowed: " << parent->pdgId());
-          return acceptData;
-        }
-      }
-      else
-      {
-        ATH_MSG_WARNING("Particle parent is not valid");
+  hasRequiredInitialParent (const xAOD::TruthParticle *truthParticle, asg::AcceptData& acceptData) const{
+    const int i = 0;
+    const xAOD::TruthParticle *parent = getParent(truthParticle, i);
+    if (parent) {
+      if (std::find(m_requiredParentPDGIDs.begin(), m_requiredParentPDGIDs.end(), std::abs(parent->pdgId())) != m_requiredParentPDGIDs.end()){
+        acceptData.setCutResult (m_requiredParentIndex, true);
+        return acceptData;
+      } else if (m_allowedIntermediatePDGIDs.empty() || std::find(m_allowedIntermediatePDGIDs.begin(), m_allowedIntermediatePDGIDs.end(), std::abs(parent->pdgId())) != m_allowedIntermediatePDGIDs.end()){
+        return hasRequiredInitialParent(parent, acceptData);
+      } else {
+        ATH_MSG_VERBOSE("Removing particle as parent is not allowed: " << parent->pdgId());
         return acceptData;
       }
-    }
-
-    if (std::find(m_requiredParentPDGIDs.begin(), m_requiredParentPDGIDs.end(), std::abs(truthParticle->pdgId())) != m_requiredParentPDGIDs.end())
-    {
-      acceptData.setCutResult (m_requiredParentIndex, true);
-      return acceptData;
-    }
-
+    } 
+    ATH_MSG_WARNING("Particle parent is not valid");
     return acceptData;
   }
 

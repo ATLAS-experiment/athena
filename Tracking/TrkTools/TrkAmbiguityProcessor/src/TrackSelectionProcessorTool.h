@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKSELECTIONPROCESSORTOOL_H
@@ -68,10 +68,12 @@ namespace Trk {
  (for internal use only, or exported to storegate).
     */
     virtual const TrackCollection *process(
+        const EventContext& ctx,
         const TrackCollection *tracksCol,
         Trk::PRDtoTrackMap *prdToTrackMap) const override;
 
     virtual const TrackCollection *process(
+        const EventContext& /*ctx*/,
         const TracksScores * /*trackScoreTrackMap*/) const override {
       return nullptr;
     }
@@ -89,7 +91,8 @@ namespace Trk {
                       Trk::PRDtoTrackMap &prdToTrackMap,
                       const std::vector<const Track *> &tracks) const;
 
-    void solveTracks(TrackScoreMap &trackScoreTrackMap,
+    void solveTracks(const EventContext& ctx,
+                     TrackScoreMap &trackScoreTrackMap,
                      Trk::PRDtoTrackMap &prdToTrackMap,
                      ConstDataVector<TrackCollection> &final_tracks) const;
 

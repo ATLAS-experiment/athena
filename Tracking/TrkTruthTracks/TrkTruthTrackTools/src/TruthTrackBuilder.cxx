@@ -15,22 +15,19 @@
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 // Gaudi
-#include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
 // HepMC
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "TruthUtils/MagicNumbers.h"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 
 /** Constructor **/
 Trk::TruthTrackBuilder::TruthTrackBuilder(const std::string& t, const std::string& n, const IInterface* p) : 
   AthAlgTool(t,n,p),
-  m_DetID(nullptr),
-  m_particlePropSvc("PartPropSvc",n),
-  m_particleDataTable(nullptr)
+  m_DetID(nullptr)
 {
     declareInterface<Trk::ITruthTrackBuilder>(this);
 }
@@ -61,21 +58,6 @@ StatusCode  Trk::TruthTrackBuilder::initialize()
         ATH_MSG_ERROR("Could not retrieve " << m_extrapolator << ". Aborting ...");
         return StatusCode::FAILURE;
     }
-
-    // particle property service
-    if (m_particlePropSvc.retrieve().isFailure())
-    {
-        ATH_MSG_ERROR("Can not retrieve " << m_particlePropSvc << " . Aborting ... " );
-        return StatusCode::FAILURE;
-    }
-    
-    // and the particle data table 
-    m_particleDataTable = m_particlePropSvc->PDT();
-    if (m_particleDataTable==nullptr)
-    {
-      ATH_MSG_ERROR( "Could not get ParticleDataTable! Cannot associate pdg code with charge. Aborting. " );
-      return StatusCode::FAILURE;
-    }    
     
     // need an Atlas id-helper to identify sub-detectors, take the one from detStore
     if (detStore()->retrieve(m_DetID, "AtlasID").isFailure()) {
@@ -120,13 +102,8 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
                                  genPart->momentum().z());
     //!< get the charge via the particle table ...
     
-    int pdgCode = genPart->pdg_id();
-    // get the charge: ap->charge() is used later, DOES NOT WORK RIGHT NOW
-    const HepPDT::ParticleData* ap = m_particleDataTable->particle(std::abs(pdgCode));
-    double charge = 1.;
-    if (ap) charge = ap->charge();
-    // since the PDT table only has abs(PID) values for the charge
-    charge *= (pdgCode > 0.) ?  1. : -1.;
+    const int pdgCode = genPart->pdg_id();
+    const double charge = MC::charge(pdgCode);
 
     // ----------------------- get teh PRDS and start 
     const std::vector<const Trk::PrepRawData*> & clusters = prdTraj.prds;

@@ -40,10 +40,10 @@ StatusCode DerivationFramework::DRAW_ZMUMUSkimmingTool::finalize()
 }
 
 // The filter itself
-bool DerivationFramework::DRAW_ZMUMUSkimmingTool::eventPassesFilter() const
+bool DerivationFramework::DRAW_ZMUMUSkimmingTool::eventPassesFilter(const EventContext& ctx) const
 {
      ++m_ntot;
-     SG::ReadHandle<xAOD::MuonContainer> muons{m_muonSGKey};
+     SG::ReadHandle<xAOD::MuonContainer> muons{m_muonSGKey, ctx};
      // Loop over muons, count up and set decision
      unsigned int nGoodMu(0);
      for (const xAOD::Muon* muItr : *muons) {

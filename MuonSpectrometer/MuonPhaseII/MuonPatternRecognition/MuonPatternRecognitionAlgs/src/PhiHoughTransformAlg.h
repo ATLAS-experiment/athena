@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNRECOGNITIONALGS_PHIHOUGHTRANSFORMALG__H
 #define MUONR4_MUONPATTERNRECOGNITIONALGS_PHIHOUGHTRANSFORMALG__H
@@ -84,9 +84,15 @@ namespace MuonR4{
             /// @param etaMax: the eta-maximum
             /// @param phiMax: the phi-transform maximum 
             /// @return a SegmentSeed representing the updated candidate
-            std::unique_ptr<SegmentSeed> buildSegmentSeed(const HoughMaximum & etaMax,  
+            std::unique_ptr<SegmentSeed> buildSegmentSeed(const HoughMaximum& etaMax,  
                                                           const MuonR4::ActsPeakFinderForMuon::Maximum & phiMax) const; 
 
+            
+            /// @brief Constructs the segment seed without phi hits.
+            /// @param gctx: The geometry context to align the segment in global space
+            /// @param etaMax: Hough maximum from which the seed is constructed.
+            std::unique_ptr<SegmentSeed> buildPhiLessSeed(const ActsTrk::GeometryContext& gctx,
+                                                          const HoughMaximum& etaMax) const;
             /// Handle to the IdHelperSvc
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -95,7 +101,7 @@ namespace MuonR4{
             // write handle key for the output segment seeds 
             SG::WriteHandleKey<SegmentSeedContainer> m_segmentSeeds{this, "WriteKey", "MuonHoughStationSegmentSeeds"};
             // access to the ACTS geometry context 
-            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// Pattern visualization tool
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
             // steers the target resolution in tan(phi) 
@@ -120,6 +126,9 @@ namespace MuonR4{
             // flag to steer whether to recover maxima with a single phi measurement
             // using a beam spot projection. Should not be used in splashes or cosmics. 
             BooleanProperty m_recoverSinglePhiWithBS{this, "recoverSinglePhiHitsWithBS", true};
+            /// Flag to steer whether the phi parameters of the seeds without phi hits are refined
+            /// using the beamspot
+            BooleanProperty m_refinePhiLessWithBS{this, "refinePhiLessSeedsWithBS", true};
             // Flag to steer whether space points shall be downweighted according to their instance
             // multiplicity of the phi measurement such that it effectively contributes with weight 1
             BooleanProperty m_downWeightMultiplePrd{this, "downWeightPrdMultiplicity", false};

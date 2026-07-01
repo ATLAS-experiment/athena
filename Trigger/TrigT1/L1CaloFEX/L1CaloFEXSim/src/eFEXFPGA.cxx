@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -70,19 +70,19 @@ void eFEXFPGA::reset(){
   m_efexid = -1;
 }
 
-StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
+StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection, const EventContext& ctx){
   m_emTobObjects.clear();
   m_tauHeuristicTobObjects.clear();
   m_tauBDTTobObjects.clear();
 
-  SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
+  SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey,ctx);
   if(!eTowerContainer.isValid()){
     ATH_MSG_FATAL("Could not retrieve container " << m_eTowerContainerKey.key() );
     return StatusCode::FAILURE;
   }
 
   // Retrieve the L1 menu configuration
-  SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
+  SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey, ctx);
   ATH_CHECK(l1Menu.isValid());
 
   auto & thr_eEM = l1Menu->thrExtraInfo().eEM();
@@ -105,7 +105,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   } else {
     overflow_eta = 5;
   }
-  
+
+  ATH_CHECK( m_eFEXegAlgoTool->safetyTest(ctx) );
   for(int ieta = min_eta; ieta < overflow_eta; ieta++) {
     for(int iphi = 1; iphi < 9; iphi++) {
 
@@ -124,7 +125,6 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       };
 
 
-      ATH_CHECK( m_eFEXegAlgoTool->safetyTest() );
       m_eFEXegAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
 
       // ignore any tobs without a seed, move on to the next window
@@ -136,7 +136,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       unsigned int ptMinToTopoCounts = thr_eEM.ptMinToTopoCounts();
 
       //returns a unsigned integer et value corresponding to the... eFEX EM cluster in 25 MeV internal calculation scale
-      unsigned int eEMTobEt = m_eFEXegAlgoTool->getET();
+      unsigned int eEMTobEt = m_eFEXegAlgoTool->getET(ctx);
             
       // thresholds from Trigger menu
       // the menu eta runs from -25 to 24
@@ -200,7 +200,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       uint32_t tobword = m_eFEXFormTOBsTool->formEmTOBWord(m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,und,eEMTobEt,ptMinToTopoCounts, emAlgoVersion);
       std::vector<uint32_t> xtobwords = m_eFEXFormTOBsTool->formEmxTOBWords(m_efexid,m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,und,eEMTobEt,ptMinToTopoCounts, emAlgoVersion);
 
-      std::unique_ptr<eFEXegTOB> tmp_tob = m_eFEXegAlgoTool->geteFEXegTOB();
+      std::unique_ptr<eFEXegTOB> tmp_tob = m_eFEXegAlgoTool->geteFEXegTOB(ctx);
       
       tmp_tob->setFPGAID(m_id);
       tmp_tob->seteFEXID(m_efexid);
@@ -221,7 +221,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
         inputOutputCollection->addValue_eg("RhadNum", tmp_tob->getRhadEM());
         inputOutputCollection->addValue_eg("RhadDen", tmp_tob->getRhadHad());
         inputOutputCollection->addValue_eg("haveSeed", m_eFEXegAlgoTool->hasSeed());
-        inputOutputCollection->addValue_eg("ET", m_eFEXegAlgoTool->getET());
+        inputOutputCollection->addValue_eg("ET", m_eFEXegAlgoTool->getET(ctx));
         float eta = 9999;
         m_eFEXegAlgoTool->getRealEta(eta);
         inputOutputCollection->addValue_eg("eta", eta);
@@ -244,6 +244,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   }
 
   // --------------- TAU -------------
+  ATH_CHECK( m_eFEXtauAlgoTool->safetyTest(ctx) );
+  ATH_CHECK( m_eFEXtauBDTAlgoTool->safetyTest(ctx) );
   for(int ieta = min_eta; ieta < overflow_eta; ieta++)
   {
     for(int iphi = 1; iphi < 9; iphi++)
@@ -262,10 +264,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
          ieta < 5 ? m_eTowersIDs[iphi+1][ieta+1] : 0},
       };
       
-      ATH_CHECK( m_eFEXtauAlgoTool->safetyTest() );
-      ATH_CHECK( m_eFEXtauBDTAlgoTool->safetyTest() );
+      m_eFEXtauAlgoTool->setAlgoVersion(tauAlgoVersion); // do before setup, part of setup relies AlgoVersion!
       m_eFEXtauAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
-      m_eFEXtauAlgoTool->setAlgoVersion(tauAlgoVersion);
       m_eFEXtauBDTAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
 
       if ( m_eFEXtauAlgoTool->isCentralTowerSeed() != m_eFEXtauBDTAlgoTool->isCentralTowerSeed() )

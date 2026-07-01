@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -31,6 +31,12 @@ def MaxCellDecoratorCfg(flags, name="MaxCellDecorator", **kwargs):
         electronDecorations += ["dR"]
     kwargs.setdefault("SGKey_electrons_decorations", electronDecorations)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
+
+    # MaxCellDecorator looks at cells, but accesses them only via links,
+    # so the scheduler doesn't see the dependency.  Add it explicitly using
+    # ExtraInputs.
+    kwargs.setdefault("ExtraInputs", [("CaloCellContainer", flags.Egamma.Keys.Input.CaloCells)])
+
     acc.setPrivateTools(CompFactory.DerivationFramework.MaxCellDecorator(name, **kwargs))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
 

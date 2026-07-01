@@ -26,6 +26,7 @@
 #include "GaudiKernel/System.h"
 #include "AthenaKernel/IDictLoaderSvc.h"
 #include "AthenaKernel/DataBucketBase.h"
+#include "StorageSvc/DbType.h"
 
 // ROOT 
 #include "TBranch.h"
@@ -52,7 +53,7 @@ namespace Athena {
 ////////////////
 xAODCnv::xAODCnv( const CLID& clid,
                   ISvcLocator* pSvcLocator ) : 
-  ::Converter( POOL_ROOTTREE_StorageType, clid, pSvcLocator ),
+  ::Converter( pool::ROOT_StorageType.type(), clid, pSvcLocator ),
   ::AthMessaging( msgSvc(),    name_from_clid(clid) ),
   m_type()
 {
@@ -64,7 +65,7 @@ xAODCnv::xAODCnv( const CLID& clid,
 }
 
 xAODCnv::xAODCnv( ISvcLocator* pSvcLocator ) : 
-  ::Converter   ( POOL_ROOTTREE_StorageType, CLID_NULL, pSvcLocator ),
+  ::Converter   ( pool::ROOT_StorageType.type(), CLID_NULL, pSvcLocator ),
   ::AthMessaging( msgSvc(),    name_from_clid(CLID_NULL) ),
   m_type()
 {
@@ -128,7 +129,7 @@ long
 xAODCnv::repSvcType() const
 {
   ATH_MSG_DEBUG("Calling xAODCnv::repSvcType");
-  return POOL_ROOTTREE_StorageType;
+  return pool::ROOT_StorageType.type();
 }
 
 /////////////////////////////////////////////////////////////////// 
@@ -192,19 +193,19 @@ xAODCnv::createRep(DataObject* pObj, IOpaqueAddress*& pAddr)
 
   // FIXME:
   // Athena::RootBranchAddress* addr = new Athena::RootBranchAddress
-  //   (POOL_ROOTTREE_StorageType, 
+  //   (pool::ROOT_StorageType.type(), 
   //    dbb->clID(), 
   //    m_tupleName.value(), 
   //    br_name, 
   //    (unsigned long)(value_ptr),
   //    (unsigned long)(m_nbrEvts-1));
 #if 1
-  GenericAddress* addr = new GenericAddress(POOL_ROOTTREE_StorageType, 
+  GenericAddress* addr = new GenericAddress(pool::ROOT_StorageType.type(), 
                                             pObj->clID(),
                                             pObj->name());
 #else
   Athena::xAODBranchAddress* addr = new Athena::xAODBranchAddress
-    (POOL_ROOTTREE_StorageType, id, 
+    (pool::ROOT_StorageType.type(), id, 
      "foo",//m_tupleName.value(), 
      dbb->name(), 
      (unsigned long)(value_ptr),
@@ -219,7 +220,7 @@ xAODCnv::storageType()
 {
   std::cout << "Calling xAODCnv::storageType" << std::endl;
 
-  return POOL_ROOTTREE_StorageType;
+  return pool::ROOT_StorageType.type();
 
 }
 

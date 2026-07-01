@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/TrackCollection.h"
@@ -178,9 +178,10 @@ StatusCode AlignAlg::start()
 }
 
 //___________________________________________________________________________
-StatusCode AlignAlg::execute() 
+StatusCode AlignAlg::execute(const EventContext& ctx) 
 {
   ATH_MSG_DEBUG("AlignAlg::execute()");
+
 
   // increment number of events
   m_nevents++;
@@ -318,7 +319,7 @@ StatusCode AlignAlg::execute()
     m_ntracksAccum++;
     
     if (m_writeNtuple)
-      m_fillNtupleTool->dumpTrack(itrk,alignTrack);
+      m_fillNtupleTool->dumpTrack(ctx, itrk,alignTrack);
     ATH_MSG_DEBUG("done with track "<<itrk);
 
   }                                                                   // end of the second loop over AlignTracks

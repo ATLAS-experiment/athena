@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloNoise2Ntuple.h"
@@ -11,32 +11,14 @@
  
 //Constructor
 CaloNoise2Ntuple::CaloNoise2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name,pSvcLocator),
-  m_calo_id(nullptr),
-  m_iCool(0),
-  m_SubHash(0),
-  m_Hash(0),
-  m_OffId(0),
-  m_eta(0),
-  m_phi(0),
-  m_layer(0),
-  m_Gain(0),
-  m_noise(0),
-  m_elecNoise(0),
-  m_pileupNoise(0),
-  m_tree(nullptr),
-  m_runNumber(0),
-  m_lumiBlock(0)
+  AthAlgorithm(name,pSvcLocator)
 {
-  declareProperty("TreeName",m_treeName="mytree");
 }
 
 //__________________________________________________________________________
 //Destructor
-CaloNoise2Ntuple::~CaloNoise2Ntuple()
-{
-  ATH_MSG_DEBUG ( "CaloNoise2Ntuple destructor called" );
-}
+CaloNoise2Ntuple::~CaloNoise2Ntuple() = default;
+
 //__________________________________________________________________________
 StatusCode CaloNoise2Ntuple::initialize()
 {
@@ -53,7 +35,7 @@ StatusCode CaloNoise2Ntuple::initialize()
   ATH_CHECK( m_pileupNoiseKey.initialize() );
   ATH_CHECK( m_caloMgrKey.initialize() );
 
-  m_tree = new TTree(m_treeName.c_str(),"Calo Noise ntuple");
+  m_tree = new TTree(m_treeName.value().c_str(),"Calo Noise ntuple");
   m_tree->Branch("iCool",&m_iCool,"iCool/I");
   m_tree->Branch("iSubHash",&m_SubHash,"iSubHash/I");
   m_tree->Branch("iHash",&m_Hash,"iHash/I");
@@ -72,7 +54,7 @@ StatusCode CaloNoise2Ntuple::initialize()
 
 }
 //__________________________________________________________________________
-StatusCode CaloNoise2Ntuple::execute()
+StatusCode CaloNoise2Ntuple::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloNoise2Ntuple execute()" );
   
@@ -177,8 +159,3 @@ StatusCode CaloNoise2Ntuple::stop()
 
   return StatusCode::SUCCESS;
  }
-
-StatusCode CaloNoise2Ntuple::finalize()
-{
- return StatusCode::SUCCESS;
-}

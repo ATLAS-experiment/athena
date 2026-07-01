@@ -12,8 +12,10 @@ if __name__=="__main__":
    # the input file
 
    #flags.Input.Files = ['/afs/cern.ch/work/o/okovanda/ITk/DAQ/encoding_in_athena/run/data_test.00242000.Single_Stream.daq.RAW._lb0001._Athena._0101.data'] #single muon
-   flags.Input.Files = ['/afs/cern.ch/work/o/okovanda/ITk/DAQ/encoding_in_athena/run/data_test.00350200.Single_Stream.daq.RAW._lb0008._Athena._1001.data'] #ttbar
+   #flags.Input.Files = ['/afs/cern.ch/work/o/okovanda/ITk/DAQ/encoding_in_athena/run/data_test.00350200.Single_Stream.daq.RAW._lb0008._Athena._1001.data'] #ttbar
    #flags.Input.Files = ['/eos/user/o/okepka/public/itk/forOndra/SR1/data_test.1749797964.calibration_DcmDummyProcessor.daq.RAW._lb0000._SFO-SR1._0001.data']
+   flags.Input.Files = ['/afs/cern.ch/work/f/fballi/private/athena/run_UI_ITk/encode/data_test.00242020.Single_Stream.daq.RAW._lb0002._Athena._0201.data'] #ttbar, Fabrice
+   flags.Output.RDOFileName = "RDO.pool.root"
 
    from AthenaConfiguration.TestDefaults import defaultGeometryTags
    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
@@ -26,6 +28,10 @@ if __name__=="__main__":
    # Set the necessary flags
    flags.PerfMon.doFullMonMT = True
    flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
+   
+   # We want to keet the commented code for debugging
+   from AthenaCommon.Constants import DEBUG
+   flags.Exec.OutputLevel=DEBUG
 
    flags.lock()
 
@@ -51,7 +57,12 @@ if __name__=="__main__":
 
    #from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
    #cfg.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
+   itemList = [] # items to store in RDO
+   acceptAlgs = [] # skimming algs
+   itemList.append('PixelRDO_Container#ITkPixelRDOs')
 
+   from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+   cfg.merge(OutputStreamCfg(flags, 'RDO', itemList, AcceptAlgs=acceptAlgs))
    
    cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
    
@@ -59,7 +70,7 @@ if __name__=="__main__":
    sg = cfg.getService("StoreGateSvc")
    sg.Dump = True
 
-   cfg.run(1000)
+   cfg.run(10)
 
 
 

@@ -1,31 +1,33 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
 #include "xAODBase/IParticle.h"
 #include "FlavorTagInference/SaltModelGraphConfig.h"
-#include "FlavorTagInference/ISaltModel.h"
+#include "FlavorTagInference/ISaltModel.h" //Inputs, InputMap typedef
 
 #include "FlavorTagInference/TracksLoader.h"
 #include "FlavorTagInference/FlowElementsLoader.h"
 #include "FlavorTagInference/HitsLoader.h"
 #include "FlavorTagInference/ElectronsLoader.h"
+#include "FlavorTagInference/MuonsLoader.h"
+#include "FlavorTagInference/CaloClusterLoader.h"
+#include "FlavorTagInference/TowerLoader.h"
 
 #include <map>
 #include <vector>
 #include <utility>
 #include <functional>
+#include <iostream>
 
 namespace FlavorTagInference {
 
-    using Inputs = std::pair<std::vector<float>, std::vector<int64_t>>;
-    using SaltModelInputs = std::map<std::string, Inputs>;
+    using SaltModelInputs = InputMap; //FlavorTagInference::InputMap defined in ISaltModel.h
 
     struct SaltModelData {
         SaltModelInputs gnn_inputs;
         size_t num_inputs = 0;
-        std::map<std::string, std::vector<const xAOD::IParticle*>> constituents;
     };
 
     class SaltModelEDMLoaderBase {
@@ -61,11 +63,10 @@ namespace FlavorTagInference {
             //load vector inputs.
             for (auto loader : vectorVarLoaders) {
                 std::string input_name = loader.first;
-                auto [input_data, input_objects] = loader.second->getData(*p);
+                Inputs input_data = loader.second->getData(*p);
 
                 salt_model_data.gnn_inputs.insert({input_name, input_data});
                 salt_model_data.num_inputs += input_data.first.size();
-                salt_model_data.constituents[input_name] = input_objects;
             }
             return salt_model_data;
         }

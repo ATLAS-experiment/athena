@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* print_algorithms.cpp
@@ -11,6 +11,10 @@
 #include <dqm_core/AlgorithmManager.h>
 #include <iostream>
 #include <ers/ers.h>
+
+namespace{
+  const std::string helpStr{"help"};
+}
 
 int main(int argc, char ** argv) 
 {
@@ -32,7 +36,7 @@ int main(int argc, char ** argv)
 	    return 1;
 	}
     
-    if ( arguments.count("help") ) {
+    if ( arguments.count(helpStr) ) {
 	std::cout << "Test application of the 'dqm' package" << std::endl;
 	description.print( std::cout );
 	return 0;

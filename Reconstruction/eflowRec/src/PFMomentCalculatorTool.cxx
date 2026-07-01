@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFMomentCalculatorTool.h"
@@ -28,7 +28,7 @@ StatusCode PFMomentCalculatorTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode PFMomentCalculatorTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) {
+StatusCode PFMomentCalculatorTool::execute(const EventContext& ctx, eflowCaloObjectContainer& theEflowCaloObjectContainer) {
 
   /* Collect all the clusters in a temporary container (with VIEW_ELEMENTS!) */
   bool useNonModifiedClusters = true;
@@ -40,10 +40,10 @@ StatusCode PFMomentCalculatorTool::execute(eflowCaloObjectContainer& theEflowCal
   for (auto cluster : *tempClusterContainer) CaloClusterKineHelper::calculateKine(cluster, true, true);
 
   /* Remake the cluster moments */
-  ATH_CHECK(m_clusterMomentsMaker->execute(tempClusterContainer.get()));
+  ATH_CHECK(m_clusterMomentsMaker->execute(ctx, tempClusterContainer.get()));
 
   if (m_useCalibHitTruth){
-    ATH_CHECK(m_clusterCalibHitMomentsMaker2->execute(tempClusterContainer.get()));
+    ATH_CHECK(m_clusterCalibHitMomentsMaker2->execute(ctx, tempClusterContainer.get()));
   }
 
   return StatusCode::SUCCESS;

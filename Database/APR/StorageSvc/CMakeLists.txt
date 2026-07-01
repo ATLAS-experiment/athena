@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( StorageSvc )
@@ -13,22 +13,22 @@ atlas_add_library( StorageSvc src/*.cpp
    INCLUDE_DIRS ${UUID_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${UUID_LIBRARIES} CxxUtils DataModelRoot GaudiKernel
-   PersistentDataModel AthenaKernel
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers POOLCore )
+   PersistentDataModel AthenaKernel AthenaBaseComps
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers )
 
 atlas_add_dictionary( StorageSvcDict
    StorageSvc/dict.h StorageSvc/dict.xml
-   LINK_LIBRARIES POOLCore StorageSvc )
+   LINK_LIBRARIES StorageSvc )
 
 # The test(s) of the package:
 atlas_add_test( StorageSvc_mtShape_test
    SOURCES test/StorageSvc_mtShape_test.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} StorageSvc
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
     atlas_add_test( StorageSvc_getGuid_test
        SOURCES test/StorageSvc_getGuid_test.cxx
-       LINK_LIBRARIES POOLCore StorageSvc )
+       LINK_LIBRARIES StorageSvc )
 endif()

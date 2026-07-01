@@ -1,0 +1,163 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
+*/
+
+#ifndef STRIPCALIBRATORTOOLIMPL_ICC
+#define STRIPCALIBRATORTOOLIMPL_ICC
+
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
+#include <stdexcept>
+
+namespace ActsTrk::detail{
+
+  template <typename traj_t>
+  StripCalibratorToolImpl<traj_t>::StripCalibratorToolImpl(const std::string& type,
+                                                   const std::string& name,
+                                                   const IInterface* parent)
+    : base_class(type, name, parent)
+  {}
+
+  template <typename traj_t>
+  StatusCode StripCalibratorToolImpl<traj_t>::initialize()
+  {
+    ATH_MSG_DEBUG("Initializing " << AthAlgTool::name() << " ...");
+
+    ATH_MSG_DEBUG(AthAlgTool::name() << " successfully initialized");
+
+    ATH_MSG_INFO( m_correctCovariance );
+    ATH_MSG_INFO( m_postCalibration );
+    ATH_MSG_INFO( m_errorStrategy );
+
+    return StatusCode::SUCCESS;
+    
+  }
+
+  template <typename traj_t>
+  const InDetDD::SiDetectorElement& StripCalibrator<traj_t>::getDetectorElement(const Acts::Surface &surface) const
+  {
+    const ActsDetectorElement* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
+    const InDetDD::SiDetectorElement *siDetElement = detElem ? dynamic_cast<const InDetDD::SiDetectorElement *>(detElem->upstreamDetectorElement()) : nullptr;
+    if (!siDetElement) {
+        ATH_MSG_ERROR("Surface without associated SI detector element");
+        throw std::runtime_error("SiDetectorElement is NULL");
+    }
+    return *siDetElement;
+  }
+
+  template <typename traj_t>
+  std::optional<float> StripCalibrator<traj_t>::getCorrectedError(const xAOD::StripCluster& cluster) const
+  {
+    std::optional<float> errX {std::nullopt};
+    if (not m_options.m_correctCovariance) {
+      return errX;
+    }
+
+    Cov cov = cluster.template localCovariance<1>();
+    int nrows = cluster.channelsInPhi();
+
+    if (m_options.m_errorStrategy == 0 ) {
+      
+      errX = std::sqrt(cov(0,0));
+      
+    } else if (m_options.m_errorStrategy == 1 ) {
+      
+      errX = std::sqrt(cov(0,0)) / nrows;
+      
+    }
+
+
+    return errX;
+  }
+
+  template <typename traj_t>
+  void
+  StripCalibrator<traj_t>::calibrate(
+      const Acts::GeometryContext& gctx,
+      const Acts::CalibrationContext& cctx,
+      const xAOD::StripCluster& cluster,
+      StripCalibrator<traj_t>::TrackStateProxy& trackState) const
+  {
+     //      const InDetDD::SiDetectorElement &detElement = getDetectorElement(state.referenceSurface());
+     auto [pos,cov,flags] = calibrate(gctx, cctx, cluster);
+     assert( !trackState.hasCalibrated());
+     trackState.allocateCalibrated(1);
+     trackState.template calibrated<1>() = pos.template cast<double>();
+     trackState.template calibratedCovariance<1>() = cov.template cast<double>();
+     if (flags & 1u<<6) {
+        trackState.typeFlags().setIsSplitHit();
+     }
+  }
+
+  template <typename traj_t>
+  std::tuple<typename StripCalibrator<traj_t>::Pos,
+             typename StripCalibrator<traj_t>::Cov,
+             unsigned int>
+  StripCalibrator<traj_t>::calibrate(
+      const Acts::GeometryContext& gctx,
+      const Acts::CalibrationContext& cctx,
+      [[maybe_unused]] const Acts::Surface& surface,
+      const xAOD::StripCluster& cluster,
+      const Acts::BoundTrackParameters& /*bound_parameters*/) const
+  {
+     //      const InDetDD::SiDetectorElement &detElement = getDetectorElement(surface);
+      return calibrate(gctx, cctx, cluster);
+  }
+
+  template <typename traj_t>
+  std::tuple<typename StripCalibrator<traj_t>::Pos,
+             typename StripCalibrator<traj_t>::Cov,
+             unsigned int>
+  StripCalibrator<traj_t>::calibrate(
+      const Acts::GeometryContext& /*gctx*/,
+      const Acts::CalibrationContext& /*cctx*/,
+      const xAOD::StripCluster& cluster) const
+  {
+      Pos pos = cluster.template localPosition<1>();
+      Cov cov = cluster.template localCovariance<1>();
+
+      auto errX = getCorrectedError(cluster);
+      if (errX.has_value()) {
+        double newErr = *errX;
+        cov(0, 0) = newErr * newErr;
+      }
+
+      return std::make_tuple(pos, cov,0u);
+  }
+
+  template <typename traj_t>
+  void StripCalibrator<traj_t>::connectOnTrackCalibrator(typename StripCalibrator<traj_t>::BASE::OnTrackCalibrator& stripCalibrator) const
+  {
+    using CalibFuncPtr_t =
+       void(StripCalibrator<traj_t>:: *)(const Acts::GeometryContext&,
+                                         const Acts::CalibrationContext&,
+                                         const xAOD::StripCluster&,
+                                         StripCalibrator<traj_t>::TrackStateProxy&) const;
+
+    stripCalibrator. template connect<static_cast<CalibFuncPtr_t>(&StripCalibrator<traj_t>::calibrate)>(this);
+  }
+
+  template <typename traj_t>
+  void StripCalibrator<traj_t>::connectCalibrator(StripOnBoundStateCalibratorBase::Calibrator& stripCalibrator) const
+  {
+    using CalibFuncPtr_t =
+      std::tuple<typename StripCalibrator<traj_t>::Pos,
+                 typename StripCalibrator<traj_t>::Cov,
+                 unsigned int>
+        (StripCalibrator<traj_t>:: *)(const Acts::GeometryContext&,
+                                      const Acts::CalibrationContext&,
+                                      const Acts::Surface &,
+                                      const xAOD::StripCluster&,
+                                      const Acts::BoundTrackParameters&) const;
+
+    stripCalibrator.template connect<static_cast<CalibFuncPtr_t>(&StripCalibrator<traj_t>::calibrate)>(this);
+  }
+
+  template <typename traj_t>
+  bool StripCalibratorToolImpl<traj_t>::calibrateAfterMeasurementSelection() const
+  { return m_postCalibration.value(); }
+
+} // namespace ActsTrk::detail
+
+#endif

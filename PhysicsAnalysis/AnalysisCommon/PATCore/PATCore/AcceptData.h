@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -19,6 +19,7 @@
 */
 
 #include <string>
+#include <string_view>
 #include <map>
 #include <bitset>
 #include <cassert>
@@ -68,7 +69,7 @@ namespace asg {
 
 
     /** Get the bit position of a cut */
-    inline unsigned int getCutPosition( const std::string& cutName ) const 
+    inline unsigned int getCutPosition( std::string_view cutName ) const 
     {
       return m_info->getCutPosition(cutName);
     }
@@ -95,7 +96,7 @@ namespace asg {
 
 
     /** Get the result of a cut, based on the cut name (safer) */
-    inline bool getCutResult( const std::string& cutName ) const
+    inline bool getCutResult( std::string_view cutName ) const
     {
       unsigned int cutPosition = getCutPosition(cutName);
       return getCutResult(cutPosition);

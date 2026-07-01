@@ -18,14 +18,14 @@
 #ifndef  TRIGSTEERINGEVENTTPCNV_TrigRoiDescriptorCollection_CNV_TLP1_H
 #define  TRIGSTEERINGEVENTTPCNV_TrigRoiDescriptorCollection_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigSteeringEventTPCnv/TrigRoiDescriptorCollection_tlp1.h"
  
 #include "TrigSteeringEventTPCnv/TrigRoiDescriptorCollectionCnv_p1.h"   
 
  
-class TrigRoiDescriptorCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigRoiDescriptorCollectionCnv_p1, TrigRoiDescriptorCollection_tlp1 >
+class TrigRoiDescriptorCollectionCnv_tlp1 : public TopLevelTPConverter< TrigRoiDescriptorCollectionCnv_p1, TrigRoiDescriptorCollection_tlp1 >
 {
  
  public:

@@ -13,6 +13,27 @@
 #include "StoreGate/ThinningHandle.h"
 #include <vector>
 #include <string>
+#include <cstdint>
+#include <bit>       // std::bit_cast
+
+namespace {
+  constexpr uint64_t bits_of(double x) {
+    return std::bit_cast<uint64_t>(x);
+  }
+  constexpr void hash_combine(uint64_t& h, uint64_t x) {
+    h ^= x + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+  }
+  constexpr uint64_t track_keep_hash(uint64_t eventNumber, double d0, double z0,
+                                      double phi0, double theta, double qOverP) {
+    uint64_t h = eventNumber;
+    hash_combine(h, bits_of(d0));
+    hash_combine(h, bits_of(z0));
+    hash_combine(h, bits_of(phi0));
+    hash_combine(h, bits_of(theta));
+    hash_combine(h, bits_of(qOverP));
+    return h;
+  }
+}
 
 const std::vector<double> DerivationFramework::PixeldEdxTrackParticleThinning::m_preScales = {
   150, 150, 150, 150, 150, 150, 150, 150, 150, 150,
@@ -44,8 +65,6 @@ StatusCode DerivationFramework::PixeldEdxTrackParticleThinning::initialize()
     ATH_CHECK(initializeParser(m_selectionString));
   }
 
-  m_counter.resize(50);
-  m_counter_picked.resize(50);
   //////////////////////////////////////////////////////////////////////////////////////////
   
   if( 0 == m_pTbins.size() ) {
@@ -62,16 +81,16 @@ StatusCode DerivationFramework::PixeldEdxTrackParticleThinning::initialize()
 StatusCode DerivationFramework::PixeldEdxTrackParticleThinning::finalize()
 {
   ATH_MSG_DEBUG("finalize() ...");
-  ATH_MSG_INFO("Processed "<< m_ntot <<" tracks, "<< m_npass<< " were retained ");
+  ATH_MSG_INFO("Processed "<< m_ntot <<" tracks, "<< m_npass<< " were retained "
+               << "("<< (m_ntot ? 100.0 * m_npass / m_ntot : 0.0) <<"%)");
   ATH_CHECK( finalizeParser() );
   return StatusCode::SUCCESS;
 }
 
 // The thinning itself
-StatusCode DerivationFramework::PixeldEdxTrackParticleThinning::doThinning() const
+StatusCode DerivationFramework::PixeldEdxTrackParticleThinning::doThinning(const EventContext& ctx) const
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Retrieve main TrackParticle collection
   SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles
@@ -173,27 +192,32 @@ StatusCode DerivationFramework::PixeldEdxTrackParticleThinning::doThinning() con
     float dEdx { 0 };
     trk->summaryValue( dEdx, xAOD::pixeldEdx );
 
-    // Increment the m_counter
-    m_counter.at(bin)++;
+    // Order-free per-track keep key: a deterministic hash of the event number and
+    // the track's perigee parameters. Each track is kept with probability ~1/preScale
+    // (statistical prescale, replacing the old exact 1-in-N running-counter keep),
+    // independent of the order tracks are encountered -> reproducible under AthenaMP.
+    const uint64_t keepHash = track_keep_hash(
+        static_cast<uint64_t>( ctx.eventID().event_number() ),
+        trk->d0(), trk->z0(), trk->phi0(), trk->theta(), trk->qOverP() );
 
     // Relatively higher dE/dx tracks
     static const float dEdxThr { static_cast<float>(pow( 10, 0.1 )) };
     if( dEdx > dEdxThr ) {
-      
-      mask.at(i) = ( (m_counter.at(bin) % preScale10) == 0 );
-      
+
+      mask.at(i) = ( (keepHash % preScale10) == 0 );
+
       // There are also tracks with dE/dx == -1.
     } else if( dEdx > 0. ) {
-      
-      mask.at(i) = ( (m_counter.at(bin) % preScale) == 0 );
-      
+
+      mask.at(i) = ( (keepHash % preScale) == 0 );
+
     } else {
-      
+
       mask.at(i) = false;
-      
+
     }
     
-    if( mask.back() ) { ++m_npass; m_counter_picked.at(bin)++; }
+    if( mask.back() ) { ++m_npass; }
     
   }
 

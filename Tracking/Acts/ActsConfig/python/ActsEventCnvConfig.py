@@ -5,37 +5,45 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def ActsToTrkConverterToolCfg(flags,
                               name: str = "ActsToTrkConverterTool",
+                              setupMuon = False,
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    # Currently this does not work if we are in a muon-only mode
-    if (flags.Detector.GeometryITk or flags.Detector.GeometryID) and 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+
+    setupMuon = setupMuon and flags.Muon.usePhaseIIGeoSetup
+    if not setupMuon or not flags.Detector.EnableMDT:
+        kwargs.setdefault("MdtKey", "")
+    if not setupMuon or not flags.Detector.EnableRPC:
+        kwargs.setdefault("RpcKey", "")
+    if not setupMuon or not flags.Detector.EnableTGC:
+        kwargs.setdefault("TgcKey", "")
+    if not setupMuon or not flags.Detector.EnableMM:
+        kwargs.setdefault("MmKey", "")
+    if not setupMuon or not flags.Detector.EnablesTGC:
+        kwargs.setdefault("sTgcKey", "")
+    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
+    kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)) if setupMuon else "")
+
+    from TrkConfig.TrkTrackSummaryToolConfig import CombinedSummaryToolCfg, InDetTrackSummaryToolCfg
+    if setupMuon:
+        kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(CombinedSummaryToolCfg(flags)))
     else:
-         # Disable TrackingGeometryTool
-         kwargs.setdefault("TrackingGeometryTool", "")
-    
-    kwargs.setdefault("ExtractMuonSurfaces", flags.Muon.usePhaseIIGeoSetup)
+        kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags)))
+    if setupMuon and (flags.Detector.GeometryRPC or flags.Detector.GeometryTGC):
+        from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import TriggerChamberClusterOnTrackCreatorCfg
+        kwargs.setdefault("CompetingRotCreator", acc.getPrimaryAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags)))
 
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    kwargs.setdefault('SummaryTool', acc.getPrimaryAndMerge(InDetTrackSummaryToolCfg(flags)))
-
-    
-    if flags.Detector.GeometryITk:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
-        from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
-        kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(ITkBoundaryCheckToolCfg(flags)))
-    elif flags.Detector.GeometryID:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import CombinedRotCreatorCfg, InDetRotCreatorCfg
+    if setupMuon:
+        rotCreatorTool = acc.getPrimaryAndMerge(CombinedRotCreatorCfg(flags))
+        rotCreatorTool.ToolMuonCluster.RestrictWarnings = True
+        kwargs.setdefault('RotCreatorTool', rotCreatorTool)
+    else:
         kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
-        from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
-        kwargs.setdefault("BoundaryCheckTool",acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
-    elif flags.Detector.GeometryMuon:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import MuonRotCreatorCfg
-        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(MuonRotCreatorCfg(flags)))
-  
+
     acc.setPrivateTools(CompFactory.ActsTrk.ActsToTrkConverterTool(name, **kwargs))
     return acc
 
@@ -45,8 +53,8 @@ def TrkToActsConvertorAlgCfg(flags,
                              **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
-    if 'ConvertorTool' not in kwargs:
-        kwargs.setdefault("ConvertorTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+    if 'ATLASConverterTool' not in kwargs:
+        kwargs.setdefault("ATLASConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrkToActsConvertorAlg(name, **kwargs))
     return acc
@@ -59,39 +67,21 @@ def ActsToTrkConvertorAlgCfg(flags,
     # convert proper ACTS track collection
     # this depends on the ambi resol. activation
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks' if not flags.Acts.doAmbiguityResolution else 'ActsResolvedTracks')
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs.setdefault("ATLASConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
-
-    if 'BoundaryCheckTool' not in kwargs:
-        if flags.Detector.GeometryITk:
-            from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg
-            kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(ITkBoundaryCheckToolCfg(flags)))
-        else:
-            from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
-            kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
-
-    if 'SummaryTool' not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags)))
-
-    if flags.Acts.doRotCorrection and 'RotCreatorTool' not in kwargs:
-        if flags.Detector.GeometryITk:
-            from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-            kwargs.setdefault("RotCreatorTool", acc.popToolsAndMerge(ITkRotCreatorCfg(flags, name="ActsRotCreatorTool")))
-        else:
-            from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
-            kwargs.setdefault("RotCreatorTool", acc.popToolsAndMerge(InDetRotCreatorCfg(flags, name="ActsRotCreatorTool")))
-
-    acc.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, **kwargs))
+    kwargs.setdefault("TracksLocation", "SiSPSeededActsTracks")
+    ACTSTracksLocation = kwargs.pop('ACTSTracksLocation')
+    TracksLocation = kwargs.pop("TracksLocation")
+    ATLASConverterTool = None
+    if "ATLASConverterTool" in kwargs:
+        ATLASConverterTool = kwargs["ATLASConverterTool"]
+    else:
+        ATLASConverterTool = acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.ActsToTrkConvertorAlg(name, 
+                                                               TracksLocation = TracksLocation, 
+                                                               ACTSTracksLocation = ACTSTracksLocation,
+                                                               ATLASConverterTool = ATLASConverterTool))
     return acc
 
-def RunTrackConversion(flags, track_collections = [], outputfile='dump.json'):
+def RunTrackConversion(flags, track_collections = [], outputfile='dump.json', setupMuon = False):
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -113,7 +103,8 @@ def RunTrackConversion(flags, track_collections = [], outputfile='dump.json'):
 
     # Now setup the convertor
     acc = TrkToActsConvertorAlgCfg(
-        flags, OutputLevel=1, TrackCollectionKeys=track_collections)
+        flags, OutputLevel=1, TrackCollectionKeys=track_collections,
+        ATLASConverterTool= cfg.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon=setupMuon)))
     cfg.merge(acc)
 
     # Let's dump the input tracks, and also the output ACTS tracks

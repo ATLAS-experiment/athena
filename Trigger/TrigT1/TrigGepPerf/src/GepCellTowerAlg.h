@@ -30,6 +30,8 @@ class GepCellTowerAlg: public ::AthReentrantAlgorithm {
   SG::ReadHandleKey<Gep::GepCellMap> m_gepCellsKey {
     this, "gepCellMapKey", "GepCells", "Key to get the correct cell map"};  
 
+  float m_minEt;
+
 }; 
 
 #endif //> !TRIGL0GEPPERF_TOPOTOWER_H

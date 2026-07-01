@@ -40,7 +40,7 @@ TrigRoiDescriptor_PERS* TrigRoiDescriptorCnv::createPersistent(TrigRoiDescriptor
 }
 
 //createTransient
-TrigRoiDescriptor* TrigRoiDescriptorCnv::createTransient() 
+TrigRoiDescriptor* TrigRoiDescriptorCnv::createTransient(const Token* token) 
 {
   MsgStream mlog(msgSvc(), "TrigRoiDescriptorConverter" );
 
@@ -51,28 +51,28 @@ TrigRoiDescriptor* TrigRoiDescriptorCnv::createTransient()
 
   TrigRoiDescriptor *trans_obj(0);
   
-  if( compareClassGuid(p3_guid) ) {
+  if( compareClassGuid(token, p3_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptor_p3 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p3 >() );
+    std::unique_ptr< TrigRoiDescriptor_p3 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p3 >(token) );
     trans_obj = m_TPConverters->p3.createTransient( col_vect.get(), mlog );
     
   }
-  else if( compareClassGuid(p2_guid) ) {
+  else if( compareClassGuid(token, p2_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptor_p2 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p2 >() );
+    std::unique_ptr< TrigRoiDescriptor_p2 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p2 >(token) );
     trans_obj = m_TPConverters->p2.createTransient( col_vect.get(), mlog );
     
   }
-  else if( compareClassGuid(p1_guid) ) {
+  else if( compareClassGuid(token, p1_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptor_p1 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p1 >() );
+    std::unique_ptr< TrigRoiDescriptor_p1 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p1 >(token) );
     trans_obj = m_TPConverters->p1.createTransient( col_vect.get(), mlog );
     
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
 
     // old version from before TP separation, just return it
-    trans_obj = this->poolReadObject<TrigRoiDescriptor>();
+    trans_obj = this->poolReadObject<TrigRoiDescriptor>(token);
 
   }  else {
     

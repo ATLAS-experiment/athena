@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_FrontEnd.h"
@@ -126,14 +126,14 @@ StatusCode SCT_FrontEnd::initVectors(int strips, SCT_FrontEndData& data) const {
 // ----------------------------------------------------------------------
 // prepare gain and offset for the strips for a given module
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, const int& strip_max) const {
+StatusCode SCT_FrontEnd::prepareGainAndOffset(const EventContext& /*ctx*/, SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
   // now we need to generate gain and offset channel by channel: some algebra
   // for generation of partially correlated random numbers
   float W = m_OGcorr * m_GainRMS * m_Ospread / (m_GainRMS * m_GainRMS - m_Ospread * m_Ospread);
   float A = 4.0f * W * W + 1.0f;
   float x1 = (A - std::sqrt(A)) / (2.0f * A);
   float sinfi = std::sqrt(x1);
-  float cosfi = sqrt(1.0 - x1);
+  float cosfi = std::sqrt(1.0 - x1);
 
   sinfi = sinfi * m_OGcorr / std::abs(m_OGcorr);
   float S = m_GainRMS * m_GainRMS + m_Ospread * m_Ospread;
@@ -183,12 +183,12 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collecti
   SiChargedDiodeIterator i_chargedDiode_end = collection.end();
 
   for (; i_chargedDiode != i_chargedDiode_end; ++i_chargedDiode) {
-    SiChargedDiode diode = (*i_chargedDiode).second;
+    const SiChargedDiode& diode = (*i_chargedDiode).second;
     // should be const as we aren't trying to change it here - but getReadoutCell() is not a const method...
     unsigned int flagmask = diode.flag() & 0xFE;
     // Get the flag for this diode ( if flagmask = 1 If diode is disconnected/disabled skip it)
     if (!flagmask) { // If the diode is OK (not flagged)
-      const SiReadoutCellId roCell = diode.getReadoutCell();
+      const SiReadoutCellId& roCell = diode.getReadoutCell();
       if (roCell.isValid()) {
         int strip = roCell.strip();
         int i = std::max(strip - 1, 0);
@@ -229,22 +229,22 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collecti
 // prepare gain and offset for the strips for a given module using
 // Cond Db data to get the chip calibration data
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collection, int side, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, const int& strip_max) const {
+StatusCode SCT_FrontEnd::prepareGainAndOffset(const EventContext& ctx, SiChargedDiodeCollection& collection, int side, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
   // Get chip data from calib DB
-  std::vector<float> gainByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "GainByChip");
-  std::vector<float> gainRMSByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "GainRMSByChip");
-  std::vector<float> offsetByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "OffsetByChip");
-  std::vector<float> offsetRMSByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "OffsetRMSByChip");
+  std::vector<float> gainByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "GainByChip", ctx);
+  std::vector<float> gainRMSByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "GainRMSByChip", ctx);
+  std::vector<float> offsetByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "OffsetByChip", ctx);
+  std::vector<float> offsetRMSByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "OffsetRMSByChip", ctx);
   std::vector<float> noiseByChipVect(6, 0.0);
 
   if (m_analogueNoiseOn) { // Check if noise should be on or off
-    noiseByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "NoiseByChip");
+    noiseByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "NoiseByChip", ctx);
   }
 
   // Need to check if empty, most should have data, but a few old DEAD modules don't
   if (gainByChipVect.empty() or noiseByChipVect.empty()) {
     ATH_MSG_DEBUG("No calibration data in cond DB for module " << moduleId << " using JO values");
-    if (StatusCode::SUCCESS != prepareGainAndOffset(collection, moduleId, rndmEngine, data,strip_max)) {
+    if (StatusCode::SUCCESS != prepareGainAndOffset(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
       return StatusCode::FAILURE;
     } else {
       return StatusCode::SUCCESS;
@@ -255,7 +255,7 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collecti
   float gainMeanValue = meanValue(gainByChipVect);
   if (gainMeanValue < 0.0) {
     ATH_MSG_DEBUG("All chip gain values are 0 for module " << moduleId << " using JO values");
-    if (StatusCode::SUCCESS != prepareGainAndOffset(collection, moduleId, rndmEngine, data,strip_max)) {
+    if (StatusCode::SUCCESS != prepareGainAndOffset(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
       return StatusCode::FAILURE;
     } else {
       return StatusCode::SUCCESS;
@@ -302,12 +302,12 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collecti
   SiChargedDiodeIterator i_chargedDiode_end = collection.end();
 
   for (; i_chargedDiode != i_chargedDiode_end; ++i_chargedDiode) {
-    SiChargedDiode diode = (*i_chargedDiode).second;
+    const SiChargedDiode& diode = (*i_chargedDiode).second;
     // should be const as we aren't trying to change it here - but getReadoutCell() is not a const method...
     unsigned int flagmask = diode.flag() & 0xFE;
     // Get the flag for this diode ( if flagmask = 1 If diode is disconnected/disabled skip it)
     if (!flagmask) { // If the diode is OK (not flagged)
-      const SiReadoutCellId roCell = diode.getReadoutCell();
+      const SiReadoutCellId& roCell = diode.getReadoutCell();
 
       if (roCell.isValid()) {
         int strip = roCell.strip();
@@ -350,7 +350,7 @@ StatusCode SCT_FrontEnd::prepareGainAndOffset(SiChargedDiodeCollection& collecti
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, const int& strip_max) const {
+StatusCode SCT_FrontEnd::randomNoise(const EventContext& /*ctx*/, SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
   // Add random noise
 
   double occupancy = 0.0;
@@ -470,7 +470,7 @@ StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, const int& strip_max) const {
+StatusCode SCT_FrontEnd::randomNoise(const EventContext& ctx, SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine * rndmEngine, SCT_FrontEndData& data, int strip_max) const {
   const int n_chips = 6;
   const int chipStripmax = strip_max / n_chips;
   std::vector<float> NOByChipVect(n_chips, 0.0);
@@ -486,13 +486,13 @@ StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const
   }
 
   // Get chip data from calib DB
-  NOByChipVect = m_ReadCalibChipDataTool->getNoiseOccupancyData(moduleId, side, "OccupancyByChip");
-  ENCByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "NoiseByChip");
+  NOByChipVect = m_ReadCalibChipDataTool->getNoiseOccupancyData(moduleId, side, "OccupancyByChip", ctx);
+  ENCByChipVect = m_ReadCalibChipDataTool->getNPtGainData(moduleId, side, "NoiseByChip", ctx);
 
   // Need to check if empty, most should have data, but a few old DEAD modules don't, and 9C...
   if (NOByChipVect.empty()) {
     ATH_MSG_DEBUG("No calibration data in cond DB for module " << moduleId << " using JO values");
-    if (StatusCode::SUCCESS != randomNoise(collection, moduleId, rndmEngine, data,strip_max)) {
+    if (StatusCode::SUCCESS != randomNoise(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
       return StatusCode::FAILURE;
     } else {
       return StatusCode::SUCCESS;
@@ -573,6 +573,9 @@ StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const
 // (this could be moved elsewhere later) apply threshold do clustering
 // ----------------------------------------------------------------------
 void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRandomEngine * rndmEngine) const {
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   // get SCT module side design
   const SCT_ModuleSideDesign *p_design = static_cast<const SCT_ModuleSideDesign*>(&(collection.design()));
 
@@ -603,11 +606,11 @@ void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRando
   if (not collection.empty()) {
     // Setup gain/offset/noise to the hit and neighbouring strips
     if (m_useCalibData) { // Use calib cond DB data
-      if (StatusCode::SUCCESS != prepareGainAndOffset(collection, side, moduleId, rndmEngine, data, strip_max)) {
+      if (StatusCode::SUCCESS != prepareGainAndOffset(ctx, collection, side, moduleId, rndmEngine, data, strip_max)) {
         ATH_MSG_ERROR("\tCan't prepare Gain and Offset");
       }
     } else { // Use JO values
-      if (StatusCode::SUCCESS != prepareGainAndOffset(collection, moduleId, rndmEngine, data,strip_max)) {
+      if (StatusCode::SUCCESS != prepareGainAndOffset(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
         ATH_MSG_ERROR("\tCan't prepare Gain and Offset");
       }
     }
@@ -627,11 +630,11 @@ void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRando
 
   if (m_NoiseOn) {
     if (m_useCalibData) { // Check if using DB or not
-      if (StatusCode::SUCCESS != randomNoise(collection, moduleId, side, rndmEngine, data, strip_max)) {
+      if (StatusCode::SUCCESS != randomNoise(ctx, collection, moduleId, side, rndmEngine, data, strip_max)) {
         ATH_MSG_ERROR("\tCan't do random noise on wafer?!");
       }
     } else { // Use JO fixed values
-      if (StatusCode::SUCCESS != randomNoise(collection, moduleId, rndmEngine, data,strip_max)) {
+      if (StatusCode::SUCCESS != randomNoise(ctx, collection, moduleId, rndmEngine, data,strip_max)) {
         ATH_MSG_ERROR("\tCan't do random noise on wafer?!");
       }
     }
@@ -643,7 +646,7 @@ void SCT_FrontEnd::process(SiChargedDiodeCollection& collection, CLHEP::HepRando
   }
 }
 
-StatusCode SCT_FrontEnd::doSignalChargeForHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, const int& strip_max) const {
+StatusCode SCT_FrontEnd::doSignalChargeForHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, int strip_max) const {
   using list_t = SiTotalCharge::list_t;
 
   // *****************************************************************************
@@ -663,12 +666,12 @@ StatusCode SCT_FrontEnd::doSignalChargeForHits(SiChargedDiodeCollection& collect
   SiChargedDiodeIterator i_chargedDiode = collection.begin();
   SiChargedDiodeIterator i_chargedDiode_end = collection.end();
   for (; i_chargedDiode != i_chargedDiode_end; ++i_chargedDiode) {
-    SiChargedDiode diode = (*i_chargedDiode).second;
+    const SiChargedDiode& diode = (*i_chargedDiode).second;
     // should be const as we aren't trying to change it here - but getReadoutCell() is not a const method...
     unsigned int flagmask = diode.flag() & 0xFE;
     // Get the flag for this diode ( if flagmask = 1 If diode is disconnected/disabled skip it)
     if (!flagmask) { // If the diode is OK (not flagged)
-      const SiReadoutCellId roCell = diode.getReadoutCell();
+      const SiReadoutCellId& roCell = diode.getReadoutCell();
 
       if (roCell.isValid()) {
         int strip = roCell.strip();
@@ -718,7 +721,7 @@ StatusCode SCT_FrontEnd::doSignalChargeForHits(SiChargedDiodeCollection& collect
   return StatusCode::SUCCESS;
 }
 
-StatusCode SCT_FrontEnd::doThresholdCheckForRealHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, const int& strip_max) const {
+StatusCode SCT_FrontEnd::doThresholdCheckForRealHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, int strip_max) const {
   // **********************************************************************************
   // Flag strips below threshold and flag the threshold check into data.m_StripHitsOnWafer
   // **********************************************************************************
@@ -728,7 +731,7 @@ StatusCode SCT_FrontEnd::doThresholdCheckForRealHits(SiChargedDiodeCollection& c
 
   for (; i_chargedDiode != i_chargedDiode_end; ++i_chargedDiode) {
     SiChargedDiode& diode = (*i_chargedDiode).second;
-    SiReadoutCellId roCell = diode.getReadoutCell();
+    const SiReadoutCellId& roCell = diode.getReadoutCell();
     if (roCell.isValid()) {
       int strip = roCell.strip();
       if (strip > -1 and strip < strip_max) {
@@ -796,7 +799,7 @@ StatusCode SCT_FrontEnd::doThresholdCheckForRealHits(SiChargedDiodeCollection& c
 // ----------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------
-StatusCode SCT_FrontEnd::doThresholdCheckForCrosstalkHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, const int& strip_max) const {
+StatusCode SCT_FrontEnd::doThresholdCheckForCrosstalkHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, int strip_max) const {
   // Check for noise+crosstalk strips above threshold
   // data.m_StripHitsOnWafer: real hits above threshold == 1 or below/disconnected
   // == -1
@@ -872,7 +875,7 @@ StatusCode SCT_FrontEnd::doThresholdCheckForCrosstalkHits(SiChargedDiodeCollecti
   return StatusCode::SUCCESS;
 }
 
-StatusCode SCT_FrontEnd::doClustering(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, const int& strip_max) const {
+StatusCode SCT_FrontEnd::doClustering(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, int strip_max) const {
   // ********************************
   // now do clustering
   // ********************************
@@ -983,11 +986,10 @@ StatusCode SCT_FrontEnd::addNoiseDiode(SiChargedDiodeCollection& collection, int
 float SCT_FrontEnd::meanValue(std::vector<float>& calibDataVect) {
   float mean_value = 0.0;
   int nData = 0;
-  const unsigned int vec_size = calibDataVect.size();
 
-  for (unsigned int i = 0; i < vec_size; ++i) {
-    if (calibDataVect[i] > 0.1) {
-      mean_value += calibDataVect[i];
+  for (float calibData : calibDataVect) {
+    if (calibData > 0.1) {
+      mean_value += calibData;
       ++nData;
     }
   }

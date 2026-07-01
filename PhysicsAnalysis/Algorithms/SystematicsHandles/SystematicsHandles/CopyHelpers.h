@@ -9,6 +9,7 @@
 #define SYSTEMATICS_HANDLES__COPY_HELPERS_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgDataHandles/WriteHandle.h>
 #include <AsgMessaging/MessageCheck.h>
 #include <AsgMessaging/MsgStream.h>
 #include <AsgMessaging/StatusCode.h>
@@ -16,6 +17,7 @@
 #include <xAODBase/IParticleContainer.h>
 #include <xAODBase/IParticleHelpers.h>
 #include <xAODCore/ShallowCopy.h>
+#include <AthContainers/CurrentContext.h>
 
 #include <memory>
 #include <type_traits>
@@ -69,15 +71,10 @@ namespace CP
     template<typename T>
     struct ShallowCopy<T,1>
     {
-      /// \brief the type of the event store we use
-    public:
-      typedef std::decay<decltype(
-      *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
-
       static StatusCode
-      getCopy (MsgStream& msgStream, StoreType& store,
+      getCopy (MsgStream& msgStream, const EventContext& ctx,
                T*& object, const T *inputObject,
-               const std::string& outputName, const std::string& auxName)
+               const std::string& outputName)
       {
         // Define the msg(...) function as a lambda.
         // Suppress thread-checker warning because this provides just a wrapper to MsgStream.
@@ -114,23 +111,25 @@ namespace CP
               // Postfix for the shallow-copy container of the origin container.
               static const char* const ORIGIN_POSTFIX = "_ShallowCopyOrigin";
               // Make a shallow copy of the origin container.
-              auto originCopy = xAOD::shallowCopyContainer( *originContainer );
+              auto originCopy = xAOD::shallowCopy( *originContainer );
               if( ( ! originCopy.first ) || ( ! originCopy.second ) ) {
                  ANA_MSG_ERROR( "Failed to shallow copy the origin of a view "
                                 << "container, meant for: " << outputName );
                  return StatusCode::FAILURE;
               }
-              // ...and record it.
-              ANA_CHECK( store.record( originCopy.first,
-                                       outputName + ORIGIN_POSTFIX ) );
-              ANA_CHECK( store.record( originCopy.second,
-                                       outputName + ORIGIN_POSTFIX + "Aux." ) );
               // Make a view copy on top of it.
               auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
               auto viewCopyPtr = viewCopy.get();
               for( const auto* element : *inputObject ) {
                  viewCopy->push_back( originCopy.first->at( element->index() ) );
               }
+
+              // ...and record it without locking, since the caller will
+              // typically still modify the copy.
+              SG::WriteHandle<T> originHandle( outputName + ORIGIN_POSTFIX, ctx );
+              ANA_CHECK( originHandle.recordNonConst( std::move(originCopy.first),
+                                                      std::move(originCopy.second) ) );
+
               // Set the origin links on it. Note that
               // xAOD::setOriginalObjectLink's "container version" doesn't work
               // with view containers, we have to call this function one-by-one
@@ -142,7 +141,8 @@ namespace CP
                  }
               }
               // Finally, record the view container with the requested name.
-              ANA_CHECK( store.record( viewCopy.release(), outputName ) );
+              SG::WriteHandle<T> viewHandle( outputName, ctx );
+              ANA_CHECK( viewHandle.recordNonConst( std::move(viewCopy) ) );
               // The copy is done.
               object = viewCopyPtr;
               return StatusCode::SUCCESS;
@@ -151,7 +151,8 @@ namespace CP
               // container, and that's that...
               auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
               auto viewCopyPtr = viewCopy.get();
-              ANA_CHECK( store.record( viewCopy.release(), outputName ) );
+              SG::WriteHandle<T> viewHandle( outputName, ctx );
+              ANA_CHECK( viewHandle.recordNonConst( std::move(viewCopy) ) );
               // The copy is done.
               object = viewCopyPtr;
               return StatusCode::SUCCESS;
@@ -160,7 +161,7 @@ namespace CP
         } else {
 
            // We can just copy the container as is.
-           auto copy = xAOD::shallowCopyContainer( *inputObject );
+           auto copy = xAOD::shallowCopy( *inputObject );
            if (!copy.first || !copy.second)
            {
               ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);
@@ -171,10 +172,12 @@ namespace CP
            if (!xAOD::setOriginalObjectLink (*inputObject, *copy.first)) {
               return StatusCode::FAILURE;
            }
-
-           ANA_CHECK (store.record (copy.second, auxName));
-           ANA_CHECK (store.record (copy.first, outputName));
-           object = copy.first;
+           //coverity[WRAPPER_ESCAPE]
+           object = copy.first.get();
+           // Record the copy and its aux store without locking, since the
+           // caller will typically still modify it.
+           SG::WriteHandle<T> handle (outputName, ctx);
+           ANA_CHECK (handle.recordNonConst (std::move(copy.first), std::move(copy.second)));
            return StatusCode::SUCCESS;
         }
       }
@@ -183,15 +186,10 @@ namespace CP
     template<typename T>
     struct ShallowCopy<T,2>
     {
-      /// \brief the type of the event store we use
-    public:
-      typedef std::decay<decltype(
-      *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
-
       static StatusCode
-      getCopy (MsgStream& msgStream, StoreType& store,
+      getCopy (MsgStream& msgStream, const EventContext& ctx,
                T*& object, const T *inputObject,
-               const std::string& outputName, const std::string& auxName)
+               const std::string& outputName)
       {
          // Define the msg(...) function as a lambda.
          // Suppress thread-checker warning because this provides just a wrapper to MsgStream.
@@ -227,26 +225,29 @@ namespace CP
                // Postfix for the shallow-copy container of the origin container.
                static const char* const ORIGIN_POSTFIX = "_ShallowCopyOrigin";
                // Make a shallow copy of the origin container.
-               auto originCopy = xAOD::shallowCopyContainer( *originContainer );
+               auto originCopy = xAOD::shallowCopy( *originContainer );
                if( ( ! originCopy.first ) || ( ! originCopy.second ) ) {
                   ANA_MSG_ERROR( "Failed to shallow copy the origin of a view "
                                  << "container, meant for: " << outputName );
                   return StatusCode::FAILURE;
                }
-               // ...and record it.
-               ANA_CHECK( store.record( originCopy.first,
-                                        outputName + ORIGIN_POSTFIX ) );
-               ANA_CHECK( store.record( originCopy.second,
-                                        outputName + ORIGIN_POSTFIX +
-                                        "Aux." ) );
+
                // Make a view copy on top of it.
                auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
                auto viewCopyPtr = viewCopy.get();
                for( const auto* element : *inputObject ) {
                   viewCopy->push_back( originCopy.first->at( element->index() ) );
                }
+
+               // ...and record it without locking, since the caller will
+               // typically still modify the copy.
+               SG::WriteHandle<T> originHandle( outputName + ORIGIN_POSTFIX, ctx );
+               ANA_CHECK( originHandle.recordNonConst( std::move(originCopy.first),
+                                                       std::move(originCopy.second) ) );
+
                // Finally, record the view container with the requested name.
-               ANA_CHECK( store.record( viewCopy.release(), outputName ) );
+               SG::WriteHandle<T> viewHandle( outputName, ctx );
+               ANA_CHECK( viewHandle.recordNonConst( std::move(viewCopy) ) );
                // The copy is done.
                object = viewCopyPtr;
                return StatusCode::SUCCESS;
@@ -255,7 +256,8 @@ namespace CP
                // container, and that's that...
                auto viewCopy = std::make_unique< T >( SG::VIEW_ELEMENTS );
                auto viewCopyPtr = viewCopy.get();
-               ANA_CHECK( store.record( viewCopy.release(), outputName ) );
+               SG::WriteHandle<T> viewHandle( outputName, ctx );
+               ANA_CHECK( viewHandle.recordNonConst( std::move(viewCopy) ) );
                // The copy is done.
                object = viewCopyPtr;
                return StatusCode::SUCCESS;
@@ -264,17 +266,20 @@ namespace CP
          } else {
 
             // We can just copy the container as is.
-            auto copy = xAOD::shallowCopyContainer( *inputObject );
+            auto copy = xAOD::shallowCopy( *inputObject );
             if (!copy.first || !copy.second)
             {
                ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);
                ANA_MSG_ERROR ("likely shallow copying a view container");
                return StatusCode::FAILURE;
             }
-
-            ANA_CHECK (store.record (copy.second, auxName));
-            ANA_CHECK (store.record (copy.first, outputName));
-            object = copy.first;
+            //coverity warns about the bare pointer outliving the 'copy' object
+            //coverity[WRAPPER_ESCAPE]
+            object = copy.first.get();
+            // Record the copy and its aux store without locking, since the
+            // caller will typically still modify it.
+            SG::WriteHandle<T> handle (outputName, ctx);
+            ANA_CHECK (handle.recordNonConst (std::move(copy.first), std::move(copy.second)));
             return StatusCode::SUCCESS;
          }
       }
@@ -283,15 +288,10 @@ namespace CP
     template<typename T>
     struct ShallowCopy<T,3>
     {
-       /// \brief the type of the event store we use
-    public:
-       typedef std::decay<decltype(
-       *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
-
        static StatusCode
-       getCopy (MsgStream& msgStream, StoreType& store,
+       getCopy (MsgStream& msgStream, const EventContext& ctx,
                 T*& object, const T *inputObject,
-                const std::string& outputName, const std::string& auxName)
+                const std::string& outputName)
        {
           // Define the msg(...) function as a lambda.
           // Suppress thread-checker warning because this provides just a wrapper to MsgStream.
@@ -301,17 +301,19 @@ namespace CP
           };
 
           // We can just copy the object as is.
-          auto copy = xAOD::shallowCopyObject( *inputObject );
+          auto copy = xAOD::shallowCopy( *inputObject );
           if (!copy.first || !copy.second)
           {
              ANA_MSG_ERROR ("failed to shallow copy object: " << outputName);
              ANA_MSG_ERROR ("likely shallow copying a view container");
              return StatusCode::FAILURE;
           }
-
-          ANA_CHECK (store.record (copy.second, auxName));
-          ANA_CHECK (store.record (copy.first, outputName));
-          object = copy.first;
+          //coverity[WRAPPER_ESCAPE]
+          object = copy.first.get();
+          // Record the copy and its aux store without locking, since the
+          // caller will typically still modify it.
+          SG::WriteHandle<T> handle (outputName, ctx);
+          ANA_CHECK (handle.recordNonConst (std::move(copy.first), std::move(copy.second)));
           return StatusCode::SUCCESS;
        }
     };
@@ -319,15 +321,11 @@ namespace CP
     template<>
     struct ShallowCopy<xAOD::IParticleContainer>
     {
-      /// \brief the type of the event store we use
-    public:
-      typedef std::decay<decltype(
-        *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
       static StatusCode
-      getCopy (MsgStream& msgStream, StoreType& store,
+      getCopy (MsgStream& msgStream, const EventContext& ctx,
                xAOD::IParticleContainer*& object,
                const xAOD::IParticleContainer *inputObject,
-               const std::string& outputName, const std::string& auxName);
+               const std::string& outputName);
     };
   }
 }

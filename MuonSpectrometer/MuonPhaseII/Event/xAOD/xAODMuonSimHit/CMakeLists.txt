@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODMuonSimHit )
@@ -23,4 +23,16 @@ atlas_add_dictionary( xAODMuonSimHitDict
     ${_selectionFile}
     LINK_LIBRARIES xAODCore xAODMuonSimHit
     EXTRA_FILES Root/dict/*.cxx )
+
+
+find_package( GTest )
+
+
+
+atlas_add_test( SimHitTest
+                SOURCES test/test_simHit.cxx
+                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GTEST_LIBRARIES} xAODMuonSimHit TestTools
+                POST_EXEC_SCRIPT noerror.sh)
+    
 

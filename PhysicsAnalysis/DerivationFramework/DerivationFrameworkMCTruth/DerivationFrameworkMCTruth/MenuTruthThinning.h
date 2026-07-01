@@ -30,7 +30,7 @@ namespace DerivationFramework {
         virtual ~MenuTruthThinning();
         virtual StatusCode initialize() override;
         virtual StatusCode finalize() override;
-        virtual StatusCode doThinning() const override;
+        virtual StatusCode doThinning(const EventContext& ctx) const override;
 
         bool isAccepted(const xAOD::TruthParticle*) const;
         bool matchHadronIncTau(const xAOD::TruthParticle* part) const;

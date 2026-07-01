@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKANALYSIS_SEEDSTOTRACKPARAMSALG_H
@@ -11,7 +11,9 @@
 
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
+
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 
 #include "ActsEvent/SeedContainer.h"
@@ -33,7 +35,7 @@ namespace ActsTrk {
   private:
     ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-    ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+    PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
     ToolHandle<ActsTrk::ITrackParamsEstimationTool> m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};
 
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_detEleCollKey{this, "DetectorElementsKey", {}, "Key of input SiDetectorElementCollection"};

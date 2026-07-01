@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -157,9 +157,6 @@ MagField::AtlasFieldMapCondAlg::updateFieldMap(const EventContext& ctx,
                     << readHandle.key());
       return StatusCode::FAILURE;
     }
-
-    // // handle for COOL field map filenames
-    // const DataHandle<CondAttrListCollection> mapHandle;
 
     // Get the validitiy range
     EventIDRange rangeW;
@@ -508,10 +505,10 @@ MagField::AtlasFieldMapCondAlg::checkCurrentFromConditions(
   if (!gotsol || !gottor) {
     if (!gotsol)
       ATH_MSG_ERROR("checkCurrentFromConditions: Missing solenoid current in "
-                    "DCS information");
+                    "DCS information; time: " << ctx.eventID().time_stamp());
     if (!gottor)
       ATH_MSG_ERROR("checkCurrentFromConditions: Missing toroid current in DCS "
-                    "information");
+                    "information; time: " << ctx.eventID().time_stamp());
     return StatusCode::FAILURE;
   }
 

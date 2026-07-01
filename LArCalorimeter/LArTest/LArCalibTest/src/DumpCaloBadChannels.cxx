@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTest/DumpCaloBadChannels.h"
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "StoreGate/StoreGateSvc.h"
 #include <iostream>
@@ -47,8 +48,9 @@ StatusCode  DumpCaloBadChannels::finalize() {
       ATH_MSG_ERROR ( "Failed to open file " << m_fileName );
   }
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   for (const Identifier& id : m_cellID->cell_range()) {
-    CaloBadChannel bc=m_caloBCT ->caloStatus(id); 
+    CaloBadChannel bc=m_caloBCT ->caloStatus(ctx, id);
     (*out) << "Chan: 0x" << std::hex << id.get_compact() << ": " << bc.packedData() << std::dec << std::endl;
   }
 
@@ -57,7 +59,7 @@ StatusCode  DumpCaloBadChannels::finalize() {
       outfile.close();
   return StatusCode::SUCCESS;
 }
-StatusCode  DumpCaloBadChannels::execute() { 
+StatusCode  DumpCaloBadChannels::execute(const EventContext& /*ctx*/) { 
   return StatusCode::SUCCESS;
 }
 

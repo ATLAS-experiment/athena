@@ -229,6 +229,7 @@ bool use_intermodule_correction(egEnergyCorr::ESModel model) {
     case egEnergyCorr::es2023_R22_Run2_v1:
     case egEnergyCorr::es2024_Run3_ofc0_v0:
     case egEnergyCorr::es2024_Run3_v0:
+    case egEnergyCorr::es2025_Run3_GNN_v0:
       return true;
     case egEnergyCorr::UNDEFINED:  // TODO: find better logic
       return false;
@@ -277,6 +278,7 @@ bool is_after_run1(egEnergyCorr::ESModel model) {
     case egEnergyCorr::es2023_R22_Run2_v1:
     case egEnergyCorr::es2024_Run3_ofc0_v0:
     case egEnergyCorr::es2024_Run3_v0:
+    case egEnergyCorr::es2025_Run3_GNN_v0:
       return true;
     case egEnergyCorr::UNDEFINED:  // TODO: find better logic
       return false;
@@ -429,6 +431,8 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
     m_TESModel = egEnergyCorr::es2024_Run3_ofc0_v0;
   } else if (m_ESModel == "es2024_Run3_v0") {
     m_TESModel = egEnergyCorr::es2024_Run3_v0;
+  } else if (m_ESModel == "es2025_Run3_GNN_v0") {
+    m_TESModel = egEnergyCorr::es2025_Run3_GNN_v0;
   } else if (m_ESModel.empty()) {
     ATH_MSG_ERROR("you must set ESModel property");
     return StatusCode::FAILURE;
@@ -661,6 +665,11 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       ATH_CHECK(
           config_mva_service.setProperty("OutputLevel", this->msg().level()));
       ATH_CHECK(config_mva_service.makeService(m_MVACalibSvc));
+    } else if (m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
+      ATH_MSG_INFO(
+        "WIP: testing GNN based calibration for Run3," 
+        "requring decorated GNN energy (gnn_energy) from input,"
+        "which should already have the layer calibration applied");
     } else {
       m_use_mva_calibration = false;
     }
@@ -770,7 +779,8 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
 
   if (m_TESModel == egEnergyCorr::es2023_R22_Run2_v0 ||
       m_TESModel == egEnergyCorr::es2023_R22_Run2_v1 ||
-      m_TESModel == egEnergyCorr::es2024_Run3_v0) {
+      m_TESModel == egEnergyCorr::es2024_Run3_v0 ||
+      m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
     // ADC non linearity correction
     if (m_doADCLinearityCorrection == AUTO || m_doADCLinearityCorrection == 1) {
       m_doADCLinearityCorrection = 1;
@@ -850,6 +860,16 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   if (registry.registerSystematics(*this) != StatusCode::SUCCESS)
     return StatusCode::FAILURE;
 
+  // For columnar, it is important only to set this accessor if it is
+  // needed, as it creates a hard data dependency on the column, which
+  // is not present in older PHYSLITE files, causing the tool to fail.
+  // An alternative would be to mark the column with `isOptional`, but
+  // since it is always required for the GNN calibration (and never
+  // otherwise), declaring it only for the GNN calibration seemed
+  // cleaner.
+  if (m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
+    resetAccessor (m_accessors->gnn_energy_Acc, *this, "TransformerEnergy");
+  }
   if (m_onlyElectrons.value() && m_onlyPhotons.value()) {
     ATH_MSG_ERROR("Cannot select both onlyElectrons and onlyPhotons");
     return StatusCode::FAILURE;
@@ -1051,6 +1071,17 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       ATH_MSG_DEBUG("energy after MVA calibration = " << std::format("{:.2f}", energy));
     }
   }
+  else if (m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
+    // for now assume the input has already the layer calibration applied
+    // and just take the decorated gnn_energy
+    if (!acc.gnn_energy_Acc.isAvailable(input)) {
+      ATH_MSG_ERROR("GNN energy requested but decoration TransformerEnergy not found");
+      return CP::CorrectionCode::Error;
+    }
+    energy = acc.gnn_energy_Acc(input);
+    ATH_MSG_DEBUG("energy after GNN calibration = " << std::format("{:.2f}", energy));
+
+  }
   if (m_decorateEmva)
   {
     acc.decEmva(input) = energy;
@@ -1113,7 +1144,8 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
     // Calo distortion
     if ( (m_TESModel == egEnergyCorr::es2023_R22_Run2_v0 || 
           m_TESModel == egEnergyCorr::es2023_R22_Run2_v1 || 
-          m_TESModel == egEnergyCorr::es2024_Run3_v0) &&
+          m_TESModel == egEnergyCorr::es2024_Run3_v0 ||
+          m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) &&
         m_useCaloDistPhiUnifCorrection) {
       double etaC = acc.clusterEtaAcc(inputCluster);
       double phiC = acc.clusterPhiAcc(inputCluster);
@@ -1230,7 +1262,8 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
 
 void EgammaCalibrationAndSmearingTool::setPt(columnar::MutableEgammaId input, double energy) const {
   const double new_energy2 = energy * energy;
-  const double m = m_accessors->momAcc.m (input);
+  const auto ptype = xAOD2ptype(input);
+  const double m = ptype == PATCore::ParticleType::Electron ? ParticleConstants::electronMassInMeV : ParticleConstants::photonMassInMeV;
   const double m2 = m * m;
   const double p2 = new_energy2 > m2 ? new_energy2 - m2 : 0.;
   m_accessors->ptOutDec (input) = sqrt(p2) / cosh(m_accessors->etaAcc (input));
@@ -2211,7 +2244,8 @@ double EgammaCalibrationAndSmearingTool::intermodule_correction(
       m_TESModel == egEnergyCorr::es2022_R22_PRE ||
       m_TESModel == egEnergyCorr::es2023_R22_Run2_v0 ||
       m_TESModel == egEnergyCorr::es2023_R22_Run2_v1 ||
-      m_TESModel == egEnergyCorr::es2024_Run3_v0) {
+      m_TESModel == egEnergyCorr::es2024_Run3_v0 ||
+      m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
 
     double phi_mod = 0;
     if (phi < 0)
@@ -2405,7 +2439,8 @@ double EgammaCalibrationAndSmearingTool::correction_phi_unif(double eta,
       m_TESModel == egEnergyCorr::es2022_R22_PRE ||
       m_TESModel == egEnergyCorr::es2023_R22_Run2_v0 ||
       m_TESModel == egEnergyCorr::es2023_R22_Run2_v1 ||
-      m_TESModel == egEnergyCorr::es2024_Run3_v0) {
+      m_TESModel == egEnergyCorr::es2024_Run3_v0 ||
+      m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
 
     if (eta < 0.2 && eta > 0.) {
       if (phi < (-7 * 2 * PI / 32.) && phi > (-8 * 2 * PI / 32.)) {

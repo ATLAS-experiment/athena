@@ -20,7 +20,7 @@ class MmIdHelper;
 
 namespace Muon{
 /** Class to handle the conversion of the transient MMPrepDataContainer into its persistent representation (defined in MuonPRD_Container_p2).
-This replaces MMPrepDataContainerCnv_tlp1, which is a AthenaPoolTopLevelTPConverter, as I have now simplified/flattened the MMPrepData.*/
+This replaces MMPrepDataContainerCnv_tlp1, which is a TopLevelTPConverter, as I have now simplified/flattened the MMPrepData.*/
 class MMPrepDataContainerCnv_p2 : public T_AthenaPoolTPCnvBase<Muon::MMPrepDataContainer, Muon::MMPrepDataContainer_p2>
 {
 public:

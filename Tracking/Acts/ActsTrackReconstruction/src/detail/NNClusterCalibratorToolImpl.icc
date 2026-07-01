@@ -1,0 +1,63 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef NNCLUSTERINGTOOLIMPL_ICC
+#define NNCLUSTERINGTOOLIMPL_ICC
+
+#include <PixelReadoutGeometry/PixelModuleDesign.h>
+
+#include <limits>
+#include <stdexcept>
+
+#include "ActsGeometry/ActsDetectorElement.h"
+#include "InDetMeasurementUtilities/Helpers.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+
+namespace ActsTrk::detail {
+
+template <typename calib_data_t, typename traj_t>
+StatusCode NNClusterCalibratorToolImpl<calib_data_t, traj_t>::initialize() {
+  ATH_MSG_DEBUG("Initializing ...");
+
+  ATH_CHECK(BASE::initialize());
+  ATH_MSG_INFO(" successfully initialized, NNClusterCalibrator implementation");
+  return StatusCode::SUCCESS;
+}
+
+template <typename calib_data_t, typename traj_t>
+std::pair<std::optional<float>, std::optional<float>>
+NNClusterCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
+    const EventContext& ctx, const xAOD::PixelCluster& cluster,
+    const error_data_t& errorData, const InDetDD::SiDetectorElement& element,
+    const std::pair<float, float>& tan_angles) const {
+  return BASE::getCorrectedPosition(ctx, cluster, errorData, element,
+                                    tan_angles);
+}
+
+template <typename calib_data_t, typename traj_t>
+std::pair<std::optional<float>, std::optional<float>>
+NNClusterCalibrator<calib_data_t, traj_t>::getCorrectedError(
+    const error_data_t& errorData,
+    [[maybe_unused]] const InDetDD::SiDetectorElement& element,
+    const std::pair<float, float>& tan_angles,
+    const xAOD::PixelCluster& cluster) const {
+
+  return BASE::getCorrectedError(errorData, element, tan_angles, cluster);
+}
+
+template <typename calib_data_t, typename traj_t>
+std::tuple<
+    typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos,
+    typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Cov, 
+    unsigned int>
+NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
+    const EventContext& ctx, const Acts::GeometryContext& gctx,
+    const Acts::CalibrationContext& cctx, const xAOD::PixelCluster& cluster,
+    const InDetDD::SiDetectorElement& detElement,
+    const std::pair<float, float>& tan_incidence_angles) const {
+  return BASE::calibrate(ctx, gctx, cctx, cluster, detElement, tan_incidence_angles);
+}
+
+}  // namespace ActsTrk::detail
+
+#endif  // NNCLUSTERINGTOOLIMPL_ICC

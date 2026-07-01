@@ -29,7 +29,7 @@ StatusCode TileClusterFilterAlg::initialize(){
   return StatusCode::SUCCESS;
 } 
 
-StatusCode TileClusterFilterAlg::execute(){
+StatusCode TileClusterFilterAlg::execute(const EventContext& /*ctx*/){
   
   //Get input clusters
   const CLUSTERCONTAINER* inputClusters=0;

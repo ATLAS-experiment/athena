@@ -1,15 +1,24 @@
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def AddRecoMumuToolCfg(flags, name = "MuonTPRecoMumuTool", **kwargs):
     result = ComponentAccumulator()
-    from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsCfg
-    kwargs.setdefault("V0Tools", result.popToolsAndMerge(V0ToolsCfg(flags, "RecoMumuToolV0Tools"))) 
-    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
-    kwargs.setdefault("PVRefitter", result.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)))
-    the_tool = CompFactory.DerivationFramework.Reco_mumu(name, **kwargs)
-    result.setPrivateTools(the_tool)
+
+    if "V0Tools" not in kwargs:
+        from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsCfg
+        V0Tools = result.popToolsAndMerge(V0ToolsCfg(flags, "RecoMumuToolV0Tools"))
+        result.addPublicTool(V0Tools)
+        kwargs.setdefault("V0Tools", V0Tools)
+
+    if "PVRefitter" not in kwargs:
+        from JpsiUpsilonTools.JpsiUpsilonToolsConfig import (
+            PrimaryVertexRefittingToolCfg)
+        PVrefit = result.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+        result.addPublicTool(PVrefit)
+        kwargs.setdefault("PVRefitter", PVrefit)
+
+    result.setPrivateTools(CompFactory.DerivationFramework.Reco_mumu(name, **kwargs))
     return result
 
 def AddJPsiVertexingFitterCfg(flags, prefix='', IdTrkContainer = "InDetTrackParticles", MuonContainer = "Muons"):
@@ -32,7 +41,6 @@ def AddJPsiVertexingFitterCfg(flags, prefix='', IdTrkContainer = "InDetTrackPart
                                            useCombinedMeasurement = False, # Only takes effect if combOnly=True  
                                            muonCollectionKey = MuonContainer,                                        
                                            TrackParticleCollection = IdTrkContainer,
-                                           useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
                                            useMCPCuts                  = True))
 
   

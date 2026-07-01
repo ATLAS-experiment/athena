@@ -28,9 +28,8 @@ namespace MuonR4{
         return StatusCode::SUCCESS;
     }
     
-    StatusCode TruthMuonVertexDumperAlg::execute(){
-        const EventContext& ctx{Gaudi::Hive::currentContext()};
-        
+    StatusCode TruthMuonVertexDumperAlg::execute(const EventContext& ctx) {
+                
         const xAOD::TruthParticleContainer* truthMuons{nullptr};
         ATH_CHECK(SG::get(truthMuons, m_truthMuonsKey, ctx));
         const xAOD::TruthVertexContainer* truthVertices{nullptr};
@@ -47,6 +46,7 @@ namespace MuonR4{
         // Filling the information about all final state muons
         for (const auto* particle : *truthMuons) {
             m_truthMuonP4->push_back(particle);
+            printParents(particle, 20);
             for(uint i_vertex=0; i_vertex<bsmVertices.size(); ++i_vertex) {
                 const auto* bsmVertex = bsmVertices[i_vertex];
                 if(isFromVertexOfInterest(particle, bsmVertex)) {
@@ -97,6 +97,18 @@ void TruthMuonVertexDumperAlg::printChildren(const xAOD::TruthParticle* particle
     for (size_t i=0; i<particle->nChildren(); ++i) {
         const auto* child = particle->child(i);
         printChildren(child, indentLevel + 1);
+    }
+}
+
+void TruthMuonVertexDumperAlg::printParents(const xAOD::TruthParticle* particle, int indentLevel) const {
+    std::string indent(indentLevel * 2, ' ');
+    ATH_MSG_VERBOSE(indent << "Particle: PDG ID = " << particle->pdgId() << ", pT = " << particle->pt() 
+                    << ", eta = " << particle->eta() << ", phi = " << particle->phi() << ", charge = " << particle->charge());
+    if (particle->prodVtx()) {
+        for (size_t i=0; i<particle->prodVtx()->nIncomingParticles(); ++i) {
+            const auto* parent = particle->prodVtx()->incomingParticle(i);
+            printParents(parent, indentLevel + 1);
+        }
     }
 }
 

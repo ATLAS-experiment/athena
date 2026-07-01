@@ -11,7 +11,6 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h>
-#include <EgammaAnalysisAlgorithms/CopyHelpers.h>
 #include <SelectionHelpers/OutOfValidityHelper.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysCopyHandle.h>
@@ -29,7 +28,7 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 

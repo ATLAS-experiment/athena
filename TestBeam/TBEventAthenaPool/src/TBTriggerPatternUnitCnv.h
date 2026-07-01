@@ -27,7 +27,7 @@ public:
   TBTriggerPatternUnitCnv (ISvcLocator* svcloc) : TBTriggerPatternUnitCnvBase(svcloc) {}
 protected:
   virtual TBTriggerPatternUnit_PERS*   createPersistent (TBTriggerPatternUnit* transCont);
-  virtual TBTriggerPatternUnit*        createTransient ();
+  virtual TBTriggerPatternUnit*        createTransient(const Token* token);
 
   TBTriggerPatternUnitCnv_p1  m_TPConverter;
 };

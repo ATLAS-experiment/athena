@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ViewContainerThinning.h 
@@ -43,12 +43,13 @@ namespace DerivationFramework {
     // Athena algtool's Hooks
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
-    virtual StatusCode doThinning() const override;
+    virtual StatusCode doThinning(const EventContext& ctx) const override;
 
   protected: 
 
     template <class T>
-    StatusCode doThinningT (const SG::ThinningHandleKey<T>& key,
+    StatusCode doThinningT (const EventContext& ctx,
+                            const SG::ThinningHandleKey<T>& key,
                             const SG::ReadHandleKey<T>& viewKey) const;
 
     StringProperty m_streamName

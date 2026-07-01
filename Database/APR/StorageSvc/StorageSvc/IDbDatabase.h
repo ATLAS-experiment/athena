@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -14,7 +14,6 @@
 
 // Framework include files
 #include "StorageSvc/pool.h"
-#include "StorageSvc/Transaction.h"
 
 class StatusCode;
 
@@ -65,7 +64,7 @@ namespace pool    {
       *
       * @return StatusCode code indicating success or failure.  
       */
-    virtual StatusCode close(DbAccessMode mode)  = 0;
+    virtual StatusCode close(Io::IoFlag mode)  = 0;
 
     /// Open Database object
     /** @param domH     [IN]  Handle to valid domain object
@@ -77,7 +76,7 @@ namespace pool    {
       */
     virtual StatusCode open(const DbDomain&     domH, 
                           const std::string&  nam, 
-                          DbAccessMode        mode)  = 0;
+                          Io::IoFlag        mode)  = 0;
 
     /// Callback after successful open of a database object
     /** @param dbH      [IN]  Handle to valid database object
@@ -86,7 +85,7 @@ namespace pool    {
       * @return StatusCode code indicating success or failure.  
       */
     virtual StatusCode onOpen(DbDatabase& dbH, 
-                            DbAccessMode      mode) = 0;
+                            Io::IoFlag      mode) = 0;
 
     /// Execute Database Transaction action
     /** @param   action     [IN]  action to perform

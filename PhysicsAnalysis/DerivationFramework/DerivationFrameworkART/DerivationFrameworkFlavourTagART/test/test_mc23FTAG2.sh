@@ -3,6 +3,7 @@
 # art-include: main/Athena
 # art-description: DAOD building FTAG2 mc23
 # art-type: grid
+# art-memory: 4096
 # art-output: *.pool.root
 # art-output: checkFile*.txt
 # art-output: checkxAOD*.txt

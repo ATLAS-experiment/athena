@@ -1,17 +1,19 @@
 /*
- Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "xAODCaloEvent/CaloClusterFwd.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloEvent/CaloCellContainer.h"
 
+#include <memory>
+
 namespace egammaClusterCookieCut {
 
 struct CookieCutPars {
-  double maxDelEta;
-  double maxDelPhi;
-  double maxDelR2;
+  double maxDelEta{};
+  double maxDelPhi{};
+  double maxDelR2{};
   bool recomputeMoments = false;
   bool fixCellWeights = false;
 };

@@ -1,121 +1,127 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "ExampleMLInferenceWithTriton.h"
 
+#include "EvaluateUtils.h"
+
 // Framework include(s).
-#include "PathResolver/PathResolver.h"
 #include <arpa/inet.h>
-#include <utility> //std::pair
-#include <fstream>
+
+#include "PathResolver/PathResolver.h"
+
+// Standard include(s)
+#include <ranges>
+#include <utility>  //std::pair
 
 namespace AthInfer {
 
 StatusCode ExampleMLInferenceWithTriton::initialize() {
-    // Fetch tools
-    ATH_CHECK( m_tritonTool.retrieve() );
-       
-   if(m_batchSize > 10000){
-      ATH_MSG_INFO("The total no. of sample crossed the no. of available sample ....");
-	   return StatusCode::FAILURE;
-   }
-   // read input file, and the target file for comparison.
-   std::string pixelFilePath = PathResolver::find_calib_file(m_pixelFileName);
-   ATH_MSG_INFO( "Using pixel file: " << pixelFilePath );
-  
-   m_input_tensor_values_notFlat = read_mnist_pixel_notFlat(pixelFilePath);
-   ATH_MSG_INFO("Total no. of samples: "<<m_input_tensor_values_notFlat.size());
-    
-   return StatusCode::SUCCESS;
+  if (m_batchSize.value() < 1) {
+    ATH_MSG_ERROR("Requested an invalid batch size: " << m_batchSize.value());
+    return StatusCode::FAILURE;
+  }
+
+  // Fetch tools
+  ATH_CHECK(m_tritonTool.retrieve());
+
+  // read input file, and the target file for comparison.
+  std::string pixelFilePath =
+      PathResolver::find_calib_file(m_pixelFileName.value());
+  ATH_MSG_INFO("Using pixel file: " << pixelFilePath);
+
+  try {
+    m_input_tensor_values_notFlat =
+        EvaluateUtils::read_mnist_pixel_notFlat(pixelFilePath);
+    ATH_MSG_INFO(
+        "Total no. of samples: " << m_input_tensor_values_notFlat.size());
+  } catch (const std::exception& e) {
+    ATH_MSG_ERROR(e.what());
+    return StatusCode::FAILURE;
+  }
+
+  if (std::size_t(m_batchSize.value()) > m_input_tensor_values_notFlat.size()) {
+    ATH_MSG_ERROR("The batch size requested ("
+                  << m_batchSize.value()
+                  << ") is greater than the number of available "
+                     "samples ("
+                  << m_input_tensor_values_notFlat.size() << ")");
+    return StatusCode::FAILURE;
+  }
+
+  if (m_input_tensor_values_notFlat.size() % m_batchSize.value() != 0) {
+    ATH_MSG_ERROR("The number of samples ("
+                  << m_input_tensor_values_notFlat.size()
+                  << ") is not a multiple of the requested batch size ("
+                  << m_batchSize.value() << ")");
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_INFO("Running " << m_input_tensor_values_notFlat.size() /
+                                 m_batchSize.value()
+                          << " batches of " << m_batchSize.value());
+  return StatusCode::SUCCESS;
 }
 
-StatusCode ExampleMLInferenceWithTriton::execute( [[maybe_unused]] const EventContext& ctx ) const {
+StatusCode ExampleMLInferenceWithTriton::execute(
+    [[maybe_unused]] const EventContext& ctx) const {
+  // We know we have at least one image, otherwise we would have errored out
+  // earlier
+  const std::size_t n_batches =
+      m_input_tensor_values_notFlat.size() / m_batchSize.value();
+  const auto n_rows = std::int64_t(m_input_tensor_values_notFlat[0].size());
+  const auto n_cols = std::int64_t(m_input_tensor_values_notFlat[0][0].size());
 
-   // prepare inputs
-   std::vector<float> inputDataVector;
-   inputDataVector.reserve(m_input_tensor_values_notFlat.size());
-   for (const std::vector<std::vector<float> >& imageData : m_input_tensor_values_notFlat){
+  for (std::size_t batch_idx = 0; batch_idx < n_batches; ++batch_idx) {
+    // prepare inputs
+    std::vector<float> inputDataVector;
+    inputDataVector.reserve(m_batchSize.value() * n_rows * n_cols);
+    for (const std::vector<std::vector<float>>& imageData :
+         m_input_tensor_values_notFlat |
+             std::views::drop(batch_idx * m_batchSize.value()) |
+             std::views::take(m_batchSize.value())) {
+      std::vector<float> flatten =
+          EvaluateUtils::flattenNestedVectors(imageData);
+      inputDataVector.insert(inputDataVector.end(), flatten.begin(),
+                             flatten.end());
+    }
 
-      std::vector<float> flatten;
-      int total_size = 0;
-      for(const auto& feature : imageData) total_size += feature.size();
-      flatten.reserve(total_size);
-      for (const auto& feature : imageData)
-         for (const auto& elem : feature)
-            flatten.push_back(elem);
+    std::vector<int64_t> inputShape = {m_batchSize.value(), n_rows, n_cols};
 
-      inputDataVector.insert(inputDataVector.end(), flatten.begin(), flatten.end());
-   }
-   std::vector<int64_t> inputShape = {m_batchSize, 28, 28};
+    AthInfer::InputDataMap inputData;
+    inputData["flatten_input:0"] =
+        std::make_pair(inputShape, std::move(inputDataVector));
 
-   AthInfer::InputDataMap inputData;
-   inputData["flatten_input:0"] = std::make_pair(
-      inputShape, std::move(inputDataVector)
-   );
+    const std::int64_t n_scores = 10;
+    AthInfer::OutputDataMap outputData;
+    outputData["dense_1/Softmax:0"] = std::make_pair(
+        std::vector<int64_t>{m_batchSize, n_scores}, std::vector<float>{});
 
-   AthInfer::OutputDataMap outputData;
-   outputData["dense_1/Softmax:0"] = std::make_pair(
-      std::vector<int64_t>{m_batchSize, 10}, std::vector<float>{}
-   );
+    ATH_CHECK(m_tritonTool->inference(inputData, outputData));
 
-   ATH_CHECK(m_tritonTool->inference(inputData, outputData));
+    auto const& outputScores =
+        std::get<std::vector<float>>(outputData["dense_1/Softmax:0"].second);
 
-   auto& outputScores = std::get<std::vector<float>>(outputData["dense_1/Softmax:0"].second);
-   auto inRange = [&outputScores](int idx)->bool{return (idx>=0) and (idx<std::ssize(outputScores));};
-   ATH_MSG_DEBUG("Label for the input test data: ");
-   for(int ibatch = 0; ibatch < m_batchSize; ibatch++){
-      float max = -999;
-      int max_index{-1};
-      for (int i = 0; i < 10; i++){
-            ATH_MSG_DEBUG("Score for class "<< i <<" = "<<outputScores[i] << " in batch " << ibatch);
-            int index = i + ibatch * 10;
-            if (not inRange(index)) continue;
-            if (max < outputScores[index]){
-               max = outputScores[index];
-               max_index = index;
-            }
-      }
-      if (not inRange(max_index)){
-        ATH_MSG_ERROR("No maximum found in ExampleMLInferenceWithTriton::execute");
-        return StatusCode::FAILURE;
-      }
-      ATH_MSG_DEBUG("Class: "<<max_index<<" has the highest score: "<<outputScores[max_index] << " in batch " << ibatch);
-   }
+    if (outputScores.size() != std::size_t(n_scores * m_batchSize.value())) {
+      ATH_MSG_ERROR("Got back " << outputScores.size()
+                                << " scores when it should have been "
+                                << n_scores << " * " << m_batchSize.value()
+                                << " = " << n_scores * m_batchSize.value());
+      return StatusCode::FAILURE;
+    }
 
-   return StatusCode::SUCCESS;
+    for (int img_idx = 0; img_idx < m_batchSize.value(); img_idx++) {
+      std::span scores(outputScores.begin() + img_idx * n_scores,
+                       outputScores.begin() + (img_idx + 1) * n_scores);
+      ATH_MSG_DEBUG("Scores for img " << img_idx << " of batch " << batch_idx
+                                      << ": "
+                                      << EvaluateUtils::spanToString(scores));
+      const auto max_elem = std::ranges::max_element(scores);
+      ATH_MSG_DEBUG("Class: " << max_elem - scores.begin()
+                              << " has the highest score: " << *max_elem
+                              << " in img " << img_idx << " of batch "
+                              << batch_idx);
+    }
+  }
+  return StatusCode::SUCCESS;
 }
-
-std::vector<std::vector<std::vector<float>>> 
-ExampleMLInferenceWithTriton::read_mnist_pixel_notFlat(const std::string &full_path) const
-{
-  std::vector<std::vector<std::vector<float>>> input_tensor_values;
-  input_tensor_values.resize(10000, std::vector<std::vector<float> >(28,std::vector<float>(28)));
-  std::ifstream file (full_path.c_str(), std::ios::binary);
-  int magic_number=0;
-  int number_of_images=0;
-  int n_rows=0;
-  int n_cols=0;
-  file.read(reinterpret_cast<char*>(&magic_number),sizeof(magic_number));
-  magic_number= ntohl(magic_number);
-  file.read(reinterpret_cast<char*>(&number_of_images),sizeof(number_of_images));
-  number_of_images= ntohl(number_of_images);
-  file.read(reinterpret_cast<char*>(&n_rows),sizeof(n_rows));
-  n_rows= ntohl(n_rows);
-  file.read(reinterpret_cast<char*>(&n_cols),sizeof(n_cols));
-  n_cols= ntohl(n_cols);
-  for(int i=0;i<number_of_images;++i)
-  {
-      for(int r=0;r<n_rows;++r)
-     {
-        for(int c=0;c<n_cols;++c)
-        {
-          unsigned char temp=0;
-          file.read(reinterpret_cast<char*>(&temp),sizeof(temp));
-          input_tensor_values[i][r][c]= float(temp)/255;
-        }
-     }
- }
- return input_tensor_values;
-}
-
-}
+}  // namespace AthInfer

@@ -10,9 +10,12 @@
 
 // FrameWork includes
 #include "AsgDataHandles/ReadHandleKey.h"
-#include "AthenaBaseComps/AthFilterAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include "EventBookkeeperTools/FilterReporterParams.h"
 #include "HIEventUtils/IHIEventSelectionToolRun3.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
@@ -21,7 +24,7 @@
 
 namespace HI {
 
-class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
+class HIEventFilterAlgRun3 : public ::AthReentrantAlgorithm {
 
  public:
   HIEventFilterAlgRun3(const std::string& name, ISvcLocator* pSvcLocator);
@@ -29,12 +32,13 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
   virtual ~HIEventFilterAlgRun3() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual StatusCode finalize() override;
 
  private:
   using mask_t = unsigned int;
 
-  Gaudi::Property<bool> m_doFilter{this, "doFilter", true,
+  Gaudi::Property<bool> m_doFilter{this, "doFilter", false,
                                    "When false no filtering is actually done"};
   Gaudi::Property<mask_t> m_selectionMask{
       this, "SelectionMask",
@@ -56,6 +60,8 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
       this, "HIEventShape", "HIEventShape", "Vertices key"};
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcKey{
       this, "ZDC", "ZDCModules", "Vertices key"};
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clustersKey{
+      this, "CaloClusters", "CaloCalTopoClusters", "Key for calo clusters"};
 
   SG::WriteDecorHandleKey<xAOD::EventInfo> m_decisionBitsKey{
       this, "HIEventSelection", m_eventInfoKey, "HIEventSelection",
@@ -64,14 +70,28 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
   ToolHandle<HI::IHIEventSelectionToolRun3> m_tool{this, "SelectionTool",
                                                    "HIEventSelectionToolRun3"};
 
-  auto isRequested(const mask_t mask, HI::SelectionMask req) const {
+  ToolHandle<GenericMonitoringTool> m_monTool{
+      this, "MonTool", "", "Tool to monitor performance of selection"};
+
+  FilterReporterParams m_filterParams{
+      this, "HIEventFilterRun3",
+      "Records number of events that pass the filter"};
+
+  bool isSet(const mask_t mask, HI::SelectionMask req) const {
     return (mask & static_cast<mask_t>(req)) != 0;
   }
+
+  bool isRequested(const mask_t mask, HI::SelectionMask req) const {
+    return isSet(mask, req);
+  }
+
 
   void store(HI::SelectionMask m, mask_t& mask) const {
     mask |= static_cast<mask_t>(m);
   }
   std::string maskToString(const mask_t m) const;
+
+  void fillCounters(const mask_t m) const;
 };
 }  // namespace HI
 #endif  //> !HIEVENTUTILS_HIEVENTFILTERALGRUN3_H

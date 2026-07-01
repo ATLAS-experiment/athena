@@ -33,7 +33,7 @@ StatusCode Trk::TrkExUnitTestBase::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::TrkExUnitTestBase::execute() {
+StatusCode Trk::TrkExUnitTestBase::execute(const EventContext& /*ctx*/) {
   if (m_scanMode) return runScan();
 
   return runTest();

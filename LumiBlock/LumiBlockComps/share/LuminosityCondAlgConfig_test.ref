@@ -80,11 +80,13 @@ Py:ComponentAccumulator    INFO      * OnlineLumiCalibrationInputKey: 'OnlineLum
 IOVDbSvc: ['/TagInfo<metaOnly/>', '<db>COOLONL_TRIGGER/COMP200</db> /TRIGGER/LUMI/LBLESTONL', '<db>COOLONL_TDAQ/COMP200</db> /TDAQ/OLC/LHC/FILLPARAMS<tag>HEAD</tag>', '<db>COOLONL_TDAQ/COMP200</db> /TDAQ/OLC/BUNCHLUMIS', '<db>COOLONL_TRIGGER/COMP200</db> /TRIGGER/LVL1/BunchGroupContent<tag>HEAD</tag>', '<db>COOLONL_TDAQ/COMP200</db> /TDAQ/OLC/CALIBRATIONS']
 --- mc
 Py:ComponentAccumulator    INFO Condition Algorithms
-Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/Digitization/Parameters')}
+Py:ComponentAccumulator    INFO  \__ DigitizationParamsMetaDataToCondAlg (cond alg)
+Py:ComponentAccumulator    INFO      * FolderName: '/Digitization/Parameters'
+Py:ComponentAccumulator    INFO      * OutputKey: '/Digitization/Parameters'
 Py:ComponentAccumulator    INFO  \__ LuminosityCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * BunchGroupInputKey: ''
 Py:ComponentAccumulator    INFO      * BunchLumisInputKey: ''
+Py:ComponentAccumulator    INFO      * ByteStreamMetadataKey: ''
 Py:ComponentAccumulator    INFO      * DigitizationFolderInputKey: '/Digitization/Parameters'
 Py:ComponentAccumulator    INFO      * FillParamsInputKey: ''
 Py:ComponentAccumulator    INFO      * IsMC: True

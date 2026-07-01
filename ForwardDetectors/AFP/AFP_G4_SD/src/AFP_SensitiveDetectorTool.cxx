@@ -7,7 +7,9 @@
 #include "AFP_SensitiveDetectorTool.h"
 
 // For the SD itself
+#include "AFP_HitCollectionBuilders.h"
 #include "AFP_SensitiveDetector.h"
+#include "HitManagement/HitCollectionMap.h"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -18,47 +20,23 @@ AFP_SensitiveDetectorTool::AFP_SensitiveDetectorTool(const std::string& type, co
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode AFP_SensitiveDetectorTool::SetupEvent()
+StatusCode AFP_SensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections)
 {
   ATH_MSG_VERBOSE( "AFP_SensitiveDetectorTool::SetupEvent()" );
-  if(!getSD())
-    {
-      ATH_MSG_ERROR ("SetupEvent: AFP_SensitiveDetector never created!");
-      return StatusCode::FAILURE;
-    }
-  else
-    {
-      AFP_SensitiveDetector *localSD = dynamic_cast<AFP_SensitiveDetector*>(getSD());
-      if(!localSD)
-        {
-          ATH_MSG_ERROR ("SetupEvent: Failed to cast m_SD into AFP_SensitiveDetector.");
-          return StatusCode::FAILURE;
-        }
-      localSD->StartOfAthenaEvent();
-    }
+  hitCollections.Emplace<AFP_TDSimHitCollectionBuilder>(m_outputCollectionNames[0],
+                                                        m_outputCollectionNames[0]);
+  hitCollections.Emplace<AFP_SIDSimHitCollectionBuilder>(m_outputCollectionNames[1],
+                                                         m_outputCollectionNames[1]);
   return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode AFP_SensitiveDetectorTool::Gather()
+StatusCode AFP_SensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
   ATH_MSG_VERBOSE( "AFP_SensitiveDetectorTool::Gather()" );
-  if(!getSD())
-    {
-      ATH_MSG_ERROR ("Gather: AFP_SensitiveDetector never created!");
-      return StatusCode::FAILURE;
-    }
-  else
-    {
-      AFP_SensitiveDetector *localSD = dynamic_cast<AFP_SensitiveDetector*>(getSD());
-      if(!localSD)
-        {
-          ATH_MSG_ERROR ("Gather: Failed to cast m_SD into AFP_SensitiveDetector.");
-          return StatusCode::FAILURE;
-        }
-      localSD->EndOfAthenaEvent();
-    }
+  CHECK(hitCollections.Record<AFP_TDSimHitCollection>(m_outputCollectionNames[0]));
+  CHECK(hitCollections.Record<AFP_SIDSimHitCollection>(m_outputCollectionNames[1]));
   return StatusCode::SUCCESS;
 }
 
@@ -70,4 +48,3 @@ G4VSensitiveDetector* AFP_SensitiveDetectorTool::makeSD() const
   // Create a fresh SD
   return new AFP_SensitiveDetector(name(), m_outputCollectionNames[0], m_outputCollectionNames[1]);
 }
-

@@ -43,10 +43,19 @@ StatusCode TgcCablingCondAlg::execute(const EventContext& ctx) const {
     cfg.AsideId = m_AsideId;
     cfg.CsideId = m_CsideId;
 
-    ATH_CHECK(findCalibFile(m_databaseASDToPP, cfg.fileNameASDtoPP));
-    ATH_CHECK(findCalibFile(m_databaseInPP, cfg.fileNameInPP));
-    ATH_CHECK(findCalibFile(m_databasePPToSL, cfg.fileNamePPtoSL));
-    ATH_CHECK(findCalibFile(m_databaseSLBToROD, cfg.fileNameSLBtoROD));
+    if (m_isRun4) {
+      ATH_MSG_DEBUG("TGC Cabling map is being prepared for Run 4+");
+      ATH_CHECK(findCalibFile(std::string("R4_") + std::string(m_databaseASDToPP), cfg.fileNameASDtoPP));
+      ATH_CHECK(findCalibFile(std::string("R4_") + std::string(m_databaseInPP), cfg.fileNameInPP));
+      ATH_CHECK(findCalibFile(std::string("R4_") + std::string(m_databasePPToSL), cfg.fileNamePPtoSL));
+      ATH_CHECK(findCalibFile(std::string("R4_") + std::string(m_databaseSLBToROD), cfg.fileNameSLBtoROD));
+    } else {
+      ATH_MSG_DEBUG("TGC Cabling map is being prepared for Run 1-3");
+      ATH_CHECK(findCalibFile(m_databaseASDToPP, cfg.fileNameASDtoPP));
+      ATH_CHECK(findCalibFile(m_databaseInPP, cfg.fileNameInPP));
+      ATH_CHECK(findCalibFile(m_databasePPToSL, cfg.fileNamePPtoSL));
+      ATH_CHECK(findCalibFile(m_databaseSLBToROD, cfg.fileNameSLBtoROD));
+    }
     ATH_CHECK(findCalibFile(m_databaseASDToPP, cfg.fileNameASDtoPPdiff));
 
     // instantiate TGC cabling manager

@@ -11,7 +11,7 @@ class MuonPrdCacheNames(object):
     CscCache       = "CscPrdCache"
     CscStripCache  = "CscStripPrdCache"
     RpcCache       = "RpcPrdCache"
-    TgcCache       = "TgcPrdCache"
+    TgcCache       = "TgcPrdCacheAllBCs"
     sTgcCache      = "sTgcPrdCache"
     MmCache        = "MmPrdCache"
     RpcCoinCache   = "RpcCoinCache"
@@ -32,7 +32,7 @@ def MuonPrdCacheCfg(flags):
                                        MdtCacheKey       = MuonPrdCacheNames.MdtCache,
                                        CscCacheKey       = (MuonPrdCacheNames.CscCache if flags.Detector.GeometryCSC else ""),
                                        RpcCacheKey       = MuonPrdCacheNames.RpcCache,
-                                       TgcCacheStr       = MuonPrdCacheNames.TgcCache,
+                                       TgcCacheKey      = MuonPrdCacheNames.TgcCache,
                                        sTgcCacheKey      = (MuonPrdCacheNames.sTgcCache if flags.Detector.GeometrysTGC else ""),
                                        MmCacheKey        = (MuonPrdCacheNames.MmCache if flags.Detector.GeometryMM else ""),
                                        TgcCoinCacheStr   = MuonPrdCacheNames.TgcCoinCache,
@@ -62,8 +62,8 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
     result = ComponentAccumulator()
     #### Check whether the input collection contains an old legacy pad container. 
     #### Introduce the digit conversion bypass to convert them into the new RDO format
-    if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup and \
-        len([x for x in flags.Input.TypedCollections if x.find("RpcPadContainer#") != -1]):
+    if flags.Muon.usePhaseIIGeoSetup and ( \
+       not flags.Input.isMC or len([x for x in flags.Input.TypedCollections if x.find("RpcPadContainer#") != -1])):
        
         from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg, NrpcDigitToNrpcRDOCfg
        
@@ -85,7 +85,7 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
     if RDOContainer: 
         kwargs.setdefault("RpcRdoContainer", RDOContainer)
 
-    if flags.Input.isMC and flags.Muon.usePhaseIIGeoSetup:
+    if flags.Muon.usePhaseIIGeoSetup:
         from MuonConfig.MuonCablingConfig import NRPCCablingConfigCfg
         result.merge(NRPCCablingConfigCfg(flags))
         from AthenaConfiguration.Enums import LHCPeriod
@@ -117,8 +117,6 @@ def RpcRdoToPrepDataToolCfg(flags, suffix ="", RDOContainer = None, **kwargs):
         if not flags.Muon.enableNRPC:
             kwargs["NrpcInputCollection"] = ""
 
-        kwargs["xAODKey"] = "xRpcMeasurements" if flags.Muon.writexAODPRD or \
-                                                  flags.Muon.usePhaseIIGeoSetup else ""
 
         #### After the tree ripping the main LHC powerline, the Rpc
         #### community has managed to introduce a 50 ns shift on top
@@ -153,18 +151,20 @@ def RpcRDODecodeCfg(flags, name="MuonRpcRdoToPrdConv", RDOContainer = None, **kw
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
    
    
-    if flags.Muon.usePhaseIIGeoSetup and flags.Input.isMC:
-        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToRpcPrepDataCnvAlgCfg
-        acc.merge(xRpcToRpcPrepDataCnvAlgCfg(flags, name=f"xAODRpcToPrepDataCnvAlg{suffix}"))
+    if flags.Muon.usePhaseIIGeoSetup:
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xRpcToPrepDataCnvAlgCfg
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.GeoModel.Run >= LHCPeriod.Run4:
             from xAODMuonViewAlgs.ViewAlgsConfig import RpcMeasViewAlgCfg
             acc.merge(RpcMeasViewAlgCfg(flags, name=f"RpcMeasViewAlg{suffix}"))
+        acc.merge(xRpcToPrepDataCnvAlgCfg(flags, name=f"xAODRpcToPrepDataCnvAlg{suffix}"))
+
     return acc
 
 
 def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **kwargs):
     acc = ComponentAccumulator()
+    suffix = name[name.find("_") :] if name.find("_") != -1 else ""
 
     # We need the TGC cabling to be setup
     from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
@@ -172,13 +172,28 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
 
     # Get the RDO -> PRD tool
     tool_args = {}
-    if not flags.Trigger.doHLT:
-       tool_args.setdefault("PrdCacheString", "")
-       tool_args.setdefault("CoinCacheString", "")
-    tool_args.setdefault("xAODKey", "xTgcStrips" if flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup else "")
+    
+    if flags.Muon.usePhaseIIGeoSetup:
+        from MuonConfig.MuonByteStreamCnvTestConfig import TgcRdoToTgcDigitCfg
+        acc.merge(TgcRdoToTgcDigitCfg(flags, name=f"MuonTgcRdoToDigitR4{suffix}",
+                                      TgcRdoContainer = "TGCRDO" if not  RDOContainer else RDOContainer,
+                                      TgcDigitContainer="TgcDigitsRdoConv"))
+        kwargs.setdefault("DecodingTool", 
+            CompFactory.MuonR4.TgcDigitToPrepDataCnvTool(name="TgcPrepDataProviderTool",
+                                                         ReadKey="TgcDigitsRdoConv",
+                                                         convertAllBCs = not flags.Muon.useTGCPriorNextBC))
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xTgcToPrepDataCnvAlgCfg
+        acc.merge(xTgcToPrepDataCnvAlgCfg(flags, name=f"xAODTgcToPrepDataCnvAlg{suffix}"))
+ 
+    else:
+        if not flags.Trigger.doHLT:
+           tool_args.setdefault("UpdateKeyPrd", "")
+           tool_args.setdefault("CoinCacheString", "")
 
-    if RDOContainer: tool_args.setdefault("RDOContainer", RDOContainer)
-    kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool", **tool_args))
+        if RDOContainer: 
+            tool_args.setdefault("RDOContainer", RDOContainer)
+            tool_args.setdefault("convertAllBCs", not flags.Muon.useTGCPriorNextBC)
+        kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool", **tool_args))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_TGC_Cfg
@@ -189,19 +204,6 @@ def TgcRDODecodeCfg(flags, name="MuonTgcRdoToPrdConv", RDOContainer = None,  **k
     ## Add the RDO -> PRD alorithm
     acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
-
-def TgcPrepDataReplicationToolAllBCto3BC(flags, name = "TgcPrepDataAllBCto3BCTool", **kwargs):
-    acc = ComponentAccumulator()
-    the_tool = CompFactory.Muon.TgcPrepDataReplicationToolAllBCto3BC(name, **kwargs)
-    acc.setPrivateTools(the_tool)
-    return acc
-    
-def TgcPrepDataAllBCto3BCCfg(flags, name="TgcPrepDataAllTo3Replicator", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("Tool", acc.popToolsAndMerge(TgcPrepDataReplicationToolAllBCto3BC(flags)))
-    acc.addEventAlgo(CompFactory.Muon.TgcPrepDataReplicationAlg(name, **kwargs))
-    return acc
-
 
 def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     result = ComponentAccumulator()
@@ -286,27 +288,28 @@ def MdtRDODecodeCfg(flags, name="MuonMdtRdoToPrdConv", RDOContainer = None, **kw
     if tool_kwargs['UseTwin']:
         acc.merge(MdtTwinTubeMapCondAlgCfg(flags))
 
-    writexAOD = flags.Muon.writexAODPRD or flags.Muon.usePhaseIIGeoSetup
-    tool_kwargs["xAODKey"] =  "xMdtDriftCircles" if writexAOD else ""
-    tool_kwargs["xAODTwinKey"] =  "xMdtTwinDriftCircles" if writexAOD else ""
-    
-    tool_kwargs["UseR4DetMgr"]  = flags.Muon.usePhaseIIGeoSetup
     tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, 
                                                                                 DoPropagationCorrection = False))
     if RDOContainer: tool_kwargs["RDOContainer"] = RDOContainer
-    # Get the RDO -> PRD tool
-    kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool", **tool_kwargs))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg
     kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags)))
     
-    # Add the RDO -> PRD alorithm
-    acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
-    if writexAOD:
+    # Add RDO -> PRD algorithm for Phase II
+    if flags.Muon.usePhaseIIGeoSetup:
+        kwargs["DecodingTool"] = CompFactory.MuonR4.MdtRdoToMdtPrepDataTool(name="MdtRdoToMdtPrepDataTool", **tool_kwargs)
+        acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
         suffix = name[name.find("_") :] if name.find("_") != -1 else ""
         from xAODMuonViewAlgs.ViewAlgsConfig import MdtMeasViewAlgCfg
         acc.merge(MdtMeasViewAlgCfg(flags, name=f"MdtMeasViewAlg{suffix}"))
+        from xAODMuonTrkPrepDataCnv.MuonPrepDataCnvCfg import xMdtToPrepDataCnvAlgCfg
+        acc.merge(xMdtToPrepDataCnvAlgCfg(flags, name=f"xAODMdtToPrepDataCnvAlg{suffix}"))
+    # else, use legacy
+    else: 
+        kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool", **tool_kwargs))
+        acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
+
     return acc
 
 
@@ -383,7 +386,7 @@ def MuonPRD_MultiTruthMakerCfg(flags, name="MuonPRD_MultiTruthMaker", **kwargs):
     if not flags.Detector.GeometrysTGC: kwargs.setdefault("sTgcPrdKey", "")
     if not flags.Detector.GeometryMM: kwargs.setdefault("MmPrdKey", "")
 
-    kwargs.setdefault("TgcPrdKey", 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault("TgcPrdKey", 'TGC_MeasurementsAllBCs')
     result.addEventAlgo(CompFactory.MuonPRD_MultiTruthMaker(name, **kwargs), primary = True)
     return result
 
@@ -416,10 +419,11 @@ def MuonRDOtoPRDConvertorsCfg(flags):
         from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
         acc.merge(MuonSpacePointFormationCfg(flags))
 
-    if flags.Input.isMC:
+    from AthenaConfiguration.Enums import Format
+    if flags.Input.isMC and flags.Input.Format!=Format.BS:
         if not flags.Muon.usePhaseIIGeoSetup:
             acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
-        else:
+        elif flags.Muon.setupTruthAlgorithms:
             from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
             acc.merge(MuonTruthAlgsCfg(flags))
     return acc

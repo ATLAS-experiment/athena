@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFCLUSTERCOLLECTIONTOOL_H
-#define PFCLUSTERCOLLECTIONTOOL_H
+#ifndef EFLOWREC_PFCLUSTERCOLLECTIONTOOL_H
+#define EFLOWREC_PFCLUSTERCOLLECTIONTOOL_H
 
 #include "IPFClusterCollectionTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -20,8 +20,8 @@ class PFClusterCollectionTool : public extends<AthAlgTool, IPFClusterCollectionT
   ~PFClusterCollectionTool() {};
 
   StatusCode initialize();
-  std::unique_ptr<xAOD::CaloClusterContainer> execute(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters);
-  std::unique_ptr<eflowRecClusterContainer> retrieve(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters);
+  std::unique_ptr<xAOD::CaloClusterContainer> execute(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) const;
+  std::unique_ptr<eflowRecClusterContainer> retrieve(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) const;
   StatusCode finalize();
 
 };

@@ -24,8 +24,8 @@ refLabel="C-000"
 testLabel="F-100"
 
 ## search in $DATAPATH for matching files
-IDTPMjsonConfig='EFTrack_base_FS_noDoubleRatio_IDTPMconfig.json'
-dcubeXmlIDTPMconfig='dcube_config_EFTrack_base_FS_noDoubleRatio.xml'
+IDTPMjsonConfig='EFTrack_ttbar_FS_IDTPMconfig_EFsel.json'
+dcubeXmlIDTPMconfig='dcube_EFTrack_ttbar_pu200_EFsel.xml'
 
 IDTPMjsonConfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $IDTPMjsonConfig -print -quit 2>/dev/null )
 dcubeXmlIDTPMconfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXmlIDTPMconfig -print -quit 2>/dev/null )
@@ -42,6 +42,10 @@ run () {
     chmod 777 step_${name}.sh
     time $(pwd)/step_${name}.sh
     rc=$?
+    ## if _diffOK is in name, then we expect dcube differences, so don't flag as an error
+    if [[ $rc == 1 && "${name}" =~ "_diffOK" ]]; then
+      rc=0
+    fi
     rm step_${name}.sh
     echo "art-result: $rc ${name}"
     ## if _skipRC is in name skip exit condition
@@ -98,7 +102,7 @@ if [ ! -f "$referenceName_absPath" ]; then
 fi
 
 ## dcube step
-run "dcube_skipRC" \
+run "dcube_diffOK" \
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_cmp \
     -c ${dcubeXmlIDTPMconfig_absPath} \

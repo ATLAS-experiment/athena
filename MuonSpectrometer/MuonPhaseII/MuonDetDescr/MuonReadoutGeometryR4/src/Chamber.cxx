@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef SIMULATIONBASE
 #include "MuonReadoutGeometryR4/Chamber.h"
@@ -8,6 +8,10 @@
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <format>
+#include <mutex>
+namespace {
+    static std::mutex placementMutex{};
+}
 
 namespace MuonGMR4{
    
@@ -54,8 +58,7 @@ namespace MuonGMR4{
                                idHelperSvc()->toStringDetEl(readoutEles().front()->identify()));
         }
         return std::format("MS chamber {:} station {:} eta {:02} phi {:02}",
-                          ActsTrk::to_string(detectorType()),
-                          idHelperSvc()->stationNameString(readoutEles().front()->identify()),
+                          detectorType(),idHelperSvc()->stationNameString(readoutEles().front()->identify()),
                           stationEta(), stationPhi());        
     }
     bool Chamber::barrel() const {
@@ -69,15 +72,21 @@ namespace MuonGMR4{
     }
       
     ActsTrk::DetectorType Chamber::detectorType() const {
-       return readoutEles().front()->detectorType();
+       return m_args.placement->detectorType();
     }
     double Chamber::halfXLong() const { return MuonGMR4::halfXhighY(*m_args.bounds); }
     double Chamber::halfXShort() const { return MuonGMR4::halfXlowY(*m_args.bounds);  }
     double Chamber::halfY() const { return MuonGMR4::halfY(* m_args.bounds); }
     double Chamber::halfZ() const { return MuonGMR4::halfZ(*m_args.bounds);}
 
-    std::shared_ptr<Acts::Volume> Chamber::boundingVolume(const ActsTrk::GeometryContext& gctx) const {
-        return std::make_shared<Acts::Volume>(localToGlobalTransform(gctx), bounds());
+    std::shared_ptr<Acts::Volume> Chamber::boundingVolume(const ActsTrk::GeometryContext& /*gctx*/) const {
+        Acts::VolumePlacementBase* ATLAS_THREAD_SAFE placement = m_args.placement.get();
+        return std::make_shared<Acts::Volume>(*placement, bounds());
+    }
+    void Chamber::addPlacement(std::unique_ptr<ActsTrk::VolumePlacement>&& child) const {
+        ActsTrk::VolumePlacement* ATLAS_THREAD_SAFE placement = m_args.placement.get();
+        std::unique_lock guard{placementMutex};
+        placement->addChild(std::move(child));
     }
     std::shared_ptr<Acts::VolumeBounds> Chamber::bounds() const { return m_args.bounds; }
     int Chamber::stationPhi() const{ return readoutEles().front()->stationPhi(); }
@@ -93,10 +102,10 @@ namespace MuonGMR4{
         return *m_args.surface;
     }
     const Amg::Transform3D& Chamber::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
-        return surface().localToGlobalTransform(gctx.context());
+        return m_args.placement->localToGlobalTransform(gctx.context());
     }
-    Amg::Transform3D Chamber::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
-        return localToGlobalTransform(gctx).inverse();
+    const Amg::Transform3D& Chamber::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
+        return m_args.placement->globalToLocalTransform(gctx.context());
     }
     const SpectrometerSector* Chamber::parent() const { return m_parent; }
     void Chamber::setParent(const SpectrometerSector* parent) { m_parent = parent; }

@@ -41,7 +41,7 @@ def xAODUncalibMeasPrepCfg(flags):
     result.merge(MuonRDOtoPRDConvertorsCfg(flags))
 
     ### Schedule the truth segment maker & truth hit association
-    if flags.Input.isMC:
+    if flags.Muon.setupTruthAlgorithms:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
         result.merge(MuonTruthAlgsCfg(flags))
         from MuonObjectMarker.ObjectMarkerConfig import TruthMeasMarkerAlgCfg

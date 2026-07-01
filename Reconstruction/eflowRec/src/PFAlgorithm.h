@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef PFALGORITHM_H
-#define PFALGORITHM_H
+#ifndef EFLOWREC_PFALGORITHM_H
+#define EFLOWREC_PFALGORITHM_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include "eflowCaloObject.h"
@@ -16,6 +15,10 @@
 #include "IPFClusterSelectorTool.h"
 #include "IPFBaseTool.h"
 #include "IPFSubtractionTool.h"
+#include "IPFUnifiedBaseTool.h"
+
+#include "PFData.h"
+
 
 class eflowRecClusterContainer;
 
@@ -45,6 +48,9 @@ private:
 
   /** List of PFBaseAlgTool, which will be executed by this algorithm */
   ToolHandleArray<IPFBaseTool> m_IPFBaseTools;
+
+  /** List of IPFUnifiedBaseTool, which will be executed by this algorithm */
+  ToolHandleArray<IPFUnifiedBaseTool> m_IPFUnifiedBaseTools;
 
   /** ReadHandleKey for the eflowRecTrackContainer to be read in */
   SG::ReadHandleKey<eflowRecTrackContainer> m_eflowRecTracksReadHandleKey{
@@ -86,6 +92,8 @@ private:
 
   /** Funciton to print out list of tools if in VERBOSE mode */
   void printTools();
-  
+
+  Gaudi::Property<bool> m_useUnified{this, "useUnified", false, "Toggle to use standard PFA or unified PFA setup"};
+
 };
 #endif

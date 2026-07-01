@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRACKFINIDNGALGS_MSTRACKFINIDNGALG_H
 #define MUONTRACKFINIDNGALGS_MSTRACKFINIDNGALG_H
@@ -17,6 +17,8 @@
 
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
+#include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
+
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
@@ -31,6 +33,7 @@
 
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
+#include "MuonTrackFindingTools/MlMsTrackSeeder.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 
@@ -80,6 +83,8 @@ namespace MuonR4{
                                                             const Acts::MagneticFieldContext& mfContext,
                                                             const Acts::CalibrationContext& calContext,
                                                             const MsTrackSeed& seed) const;
+
+            const MsTrackSeeder& baselineSeeder() const;
             
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
@@ -102,12 +107,32 @@ namespace MuonR4{
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Visualization tool to debug the track finding */
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
+            /** @brief Handle to the muon summary tool */
+            ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
             /** @brief Maximum search window to search segments for */
             Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
             /** @brief Key to the output track container */
             SG::WriteHandleKey<ActsTrk::TrackContainer> m_writeKey{this, "TrackWriteKey", "MsTracks"};
+            /** @brief Use ML-guided segment grouping before baseline seeding */
+            Gaudi::Property<bool> m_useMlSeeder{this, "UseMlSeeder", false, "Use segment-edge ML candidate ids to split seeding"};
+            /** @brief Segment decoration containing vector<unsigned> candidate IDs */
+            Gaudi::Property<std::string> m_mlCandidateDecoration{this, "MlCandidateDecoration", "trackCandidateIds", "Segment vector<unsigned> decoration with ML track-candidate ids"};
+            Gaudi::Property<unsigned> m_mlMinSegmentsPerCandidate{this, "MlMinSegmentsPerCandidate", 2};
+            Gaudi::Property<bool> m_mlFallbackToBaselineIfUndecorated{
+                this, "MlFallbackToBaselineIfUndecorated", true,
+                "Run baseline seeder if the input segment container has no ML decoration"};
+            Gaudi::Property<bool> m_mlFallbackToBaselineIfNoCandidates{
+                this, "MlFallbackToBaselineIfNoCandidates", false,
+                "Run baseline seeder if ML grouping produced no seed candidates"};
+            Gaudi::Property<bool> m_mlRunCandidatesInParallel{
+                this, "MlRunCandidatesInParallel", true,
+                "Run baseline seeding independently for ML candidate groups in parallel"};
+            SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_mlCandidateDecorKey{
+                this, "MlCandidateDecorationKey", "", "Scheduler dependency on ML candidate decoration"};
             /** @brief Pointer to the actual seeder implementation */
             std::unique_ptr<MsTrackSeeder> m_seeder{};
+            /** @brief Optional ML-wrapper seeder implementation */
+            std::unique_ptr<MlMsTrackSeeder> m_mlSeeder{};
     };      
 }
 

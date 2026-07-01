@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGMEASUREMENTS_H
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGMEASUREMENTS_H
 
-#include <vector>
+
 
 #include "ActsEvent/SeedContainer.h"
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
 #include "src/detail/MeasurementIndex.h"
+#include <vector>
 
 namespace ActsTrk {
 struct DetectorElementToActsGeometryIdMap;
@@ -31,8 +32,8 @@ namespace ActsTrk::detail {
                         const xAOD::UncalibratedMeasurementContainer &clusterContainer,
                         const DetectorElementToActsGeometryIdMap &detectorElementToGeoid,
                         const MeasurementIndex *measurementIndex = nullptr);
-    MeasurementRangeListFlat setMeasurementRangesForced(const ActsTrk::Seed &seed,
-                                                        const MeasurementIndex &measurementIndex) const;
+    std::unique_ptr<MeasurementRangeListFlat> createMeasurementRangesForced(const ActsTrk::Seed &seed,
+                                                                            const MeasurementIndex &measurementIndex) const;
     MeasurementRange markSurfaceInsensitive(const Acts::GeometryIdentifier &identifier);
 
     inline const MeasurementRangeList &measurementRanges() const;
@@ -43,8 +44,8 @@ namespace ActsTrk::detail {
   private:
     struct MeasurementSurfaceIndex {
       Acts::GeometryIdentifier measurementSurfaceId;
-      unsigned int typeIndex;
-      unsigned int sl_idx;
+      unsigned int typeIndex{};
+      unsigned int sl_idx{};
     };
 
     template <typename MeasurementRangeList_t>

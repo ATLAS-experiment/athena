@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
    */
 /**
  * @file FPGATrackSimNNTrackTool.cxx
@@ -452,7 +452,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_1st(std::vector<FPGATrackSimRoad> 
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
               track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
             }
-            tracks.push_back(track_cand);
+            tracks.push_back(std::move(track_cand));
 
             ATH_MSG_DEBUG("NN InputTensorValues:");
             ATH_MSG_DEBUG(inputTensorValues);
@@ -697,7 +697,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_2nd(std::vector<FPGATrackSimRoad> 
             for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
               track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
             }
-            tracks.push_back(track_cand);
+            tracks.push_back(std::move(track_cand));
 
         }  // loop over combinations
     }  // loop over roads
@@ -740,18 +740,19 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<FPGATrackSimRoad> 
 
         // Get info on layers with missing hits
         int nMissing = 0;
-        layer_bitmask_t missing_mask = 0;
-	layer_bitmask_t hit_mask = 0x0;
-	for (unsigned ilayer = 0; ilayer < 13; ilayer++) {
-	  if ((missing_mask >> ilayer) & 0x1) {
-	    nMissing++;
-	    if (planeMap->isPixel(ilayer)) nMissing++; /// should be 2 missing coords for pixel
-	  }
-	  else {
-	    hit_mask |= (0x1 << ilayer);
-	  }
-	}
-
+        //if missing_mask is set to zero, then the condition ""(missing_mask >> ilayer) 
+        // & 1U" cannot be true.
+        layer_bitmask_t missing_mask = iroad.getNWCLayers();
+        layer_bitmask_t hit_mask = 0x0;
+        for (unsigned ilayer = 0; ilayer < 13; ilayer++) {
+          if ((missing_mask >> ilayer) & 0x1) {
+            nMissing++;
+            if (planeMap->isPixel(ilayer)) nMissing++;
+          }
+          else {
+            hit_mask |= (0x1 << ilayer);
+          }
+        }
 
         // Create a template track with common parameters filled already for
         // initializing below
@@ -945,7 +946,7 @@ StatusCode FPGATrackSimNNTrackTool::getTracks_GNN(std::vector<FPGATrackSimRoad> 
         for (unsigned ihit = 0; ihit < hit_list.size(); ihit++) {
           track_cand.setFPGATrackSimHit(ihit, hit_list[ihit]);
         }
-        tracks.push_back(track_cand);
+        tracks.push_back(std::move(track_cand));
 
 
         ATH_MSG_DEBUG("NN InputTensorValues:");

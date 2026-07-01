@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthHistogramming.cxx
@@ -13,22 +13,7 @@
 #include "AthenaBaseComps/AthHistogramming.h"
 
 // Framework includes
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include "AthenaKernel/getMessageSvc.h"
-
-// STL includes
-#include <string>
-#include <map>
-
-// ROOT includes
-#include "TH1.h"
-#include "TH2.h"
-#include "TH3.h"
-#include "TEfficiency.h"
-#include "TTree.h"
-#include "TGraph.h"
-
 
 
 
@@ -97,153 +82,129 @@ StatusCode AthHistogramming::configAthHistogramming( const ServiceHandle<ITHistS
 // =============================================================================
 TH1* AthHistogramming::bookGetPointer( TH1& histRef, std::string tDir, std::string stream )
 {
-  // Modify the name and title according to the prefixes of this classes instance
   std::string histName(histRef.GetName());
   const std::string histTitle(histRef.GetTitle());
-  std::string bookingString("");
+  std::string bookingString;
 
-  this->buildBookingString( bookingString, histName, tDir, stream );
-  histRef.SetTitle((m_histTitlePrefix+histTitle+m_histTitlePostfix).c_str() );
-  histRef.SetName(histName.c_str());
+  this->buildBookingString(bookingString, histName, tDir, stream);
 
-  // Check if the hash for this histName already exists, i.e., if we have a hash collision
+  const std::string finalHistName = m_histNamePrefix + histName + m_histNamePostfix;
+
+  histRef.SetTitle((m_histTitlePrefix + histTitle + m_histTitlePostfix).c_str());
+  histRef.SetName(finalHistName.c_str());
+
   const hash_t histHash = this->hash(histName);
-  HistMap_t::const_iterator it = m_histMap.find( histHash );
-  if ( it != m_histMap.end() ) // It does exist!
-    {
-      m_msg << MSG::WARNING
-            << "Detected a hash collision. The hash for the histogram with name=" << histName
-            << " already exists and points to a histogram with name=" << it->second->GetName()
-            << " NOT going to book the new histogram and returning a NULL pointer!" << endmsg;
-      return NULL;
-    }
+  HistMap_t::const_iterator it = m_histMap.find(histHash);
+  if (it != m_histMap.end()) {
+    m_msg << MSG::WARNING
+          << "Detected a hash collision. The hash for the histogram with name=" << histName
+          << " already exists and points to a histogram with name=" << it->second->GetName()
+          << " NOT going to book the new histogram and returning a NULL pointer!" << endmsg;
+    return nullptr;
+  }
 
-  // Set the new name and title for the histogram, based on the prefixes that the user set for this class instance
-  // Create a clone that has the new name
+  if (!histSvc()->regHist(bookingString, &histRef).isSuccess()) {
+    m_msg << MSG::WARNING
+          << "Problem registering histogram with name " << histName
+          << ", name prefix " << m_histNamePrefix
+          << ", title " << histTitle
+          << ", title prefix " << m_histTitlePrefix
+          << ", and title postfix " << m_histTitlePostfix
+          << " in " << m_name << "!" << endmsg;
+    return nullptr;
+  }
 
-  // Massage the final string to book things
-
-  // Register the histogram into the THistSvc
-  if ( !((histSvc()->regHist(bookingString, &histRef)).isSuccess()) )
-    {
-      m_msg << MSG::WARNING
-            << "Problem registering histogram with name " << histName
-            << ", name prefix " << m_histNamePrefix
-            << ", title " << histTitle
-            << ", tile prefix " << m_histTitlePrefix
-            << ", and tile postfix " << m_histTitlePostfix
-            << " in " << m_name << "!" << endmsg;
-      return NULL;
-    }
-
-  // Also register it in the local map of string to pointer
-  m_histMap.insert( m_histMap.end(), std::pair< const hash_t, TH1* >( histHash, &histRef ) );
+  m_histMap.insert(m_histMap.end(), std::pair<const hash_t, TH1*>(histHash, &histRef));
 
   return &histRef;
 }
 
-
-TEfficiency* AthHistogramming::bookGetPointer( TEfficiency& effRef, std::string tDir, std::string stream )
+TEfficiency*
+AthHistogramming::bookGetPointer(TEfficiency& effRef, std::string tDir, std::string stream)
 {
-  // Modify the name and title according to the prefixes of this classes instance
   std::string effName(effRef.GetName());
   const std::string effTitle(effRef.GetTitle());
-  std::string bookingString("");
+  std::string bookingString;
+  this->buildBookingString(bookingString, effName, tDir, stream);
+  const std::string finalEffName = m_histNamePrefix + effName + m_histNamePostfix;
+  effRef.SetTitle((m_histTitlePrefix + effTitle + m_histTitlePostfix).c_str());
+  effRef.SetName(finalEffName.c_str());
 
-  this->buildBookingString( bookingString, effName, tDir, stream );
-  effRef.SetTitle((m_histTitlePrefix+effTitle+m_histTitlePostfix).c_str() );
-  effRef.SetName(effName.c_str());
-
-  // Check if the hash for this effName already exists, i.e., if we have a hash collision
   const hash_t effHash = this->hash(effName);
-  EffMap_t::const_iterator it = m_effMap.find( effHash );
-  if ( it != m_effMap.end() ) // It does exist!
-    {
-      m_msg << MSG::WARNING
-            << "Detected a hash collision. The hash for the TEfficiency with name=" << effName
-            << " already exists and points to a TEfficiency with name=" << it->second->GetName()
-            << " NOT going to book the new TEfficiency and returning a NULL pointer!" << endmsg;
-      return NULL;
-    }
+  EffMap_t::const_iterator it = m_effMap.find(effHash);
+  if (it != m_effMap.end()) {
+    m_msg << MSG::WARNING
+          << "Detected a hash collision. The hash for the TEfficiency with name=" << effName
+          << " already exists and points to a TEfficiency with name=" << it->second->GetName()
+          << " NOT going to book the new TEfficiency and returning a NULL pointer!" << endmsg;
+    return nullptr;
+  }
 
-  // Set the new name and title for the TEfficiency, based on the prefixes that the user set for this class instance
-  // Create a clone that has the new name
+  if (!histSvc()->regEfficiency(bookingString, &effRef).isSuccess()) {
+    m_msg << MSG::WARNING
+          << "Problem registering TEfficiency with name " << effName
+          << ", name prefix " << m_histNamePrefix
+          << ", title " << effTitle
+          << ", title prefix " << m_histTitlePrefix
+          << ", and title postfix " << m_histTitlePostfix
+          << " in " << m_name << "!" << endmsg;
+    return nullptr;
+  }
 
-  // Massage the final string to book things
-
-  // Register the TEfficiency into the THistSvc
-  if ( !((histSvc()->regEfficiency(bookingString, &effRef)).isSuccess()) )
-    {
-      m_msg << MSG::WARNING
-            << "Problem registering TEfficiency with name " << effName
-            << ", name prefix " << m_histNamePrefix
-            << ", title " << effTitle
-            << ", tile prefix " << m_histTitlePrefix
-            << ", and tile postfix " << m_histTitlePostfix
-            << " in " << m_name << "!" << endmsg;
-      return NULL;
-    }
-
-  // Also register it in the local map of string to pointer
-  m_effMap.insert( m_effMap.end(), std::pair< const hash_t, TEfficiency* >( effHash, &effRef ) );
+  m_effMap.insert(m_effMap.end(), std::pair<const hash_t, TEfficiency*>(effHash, &effRef));
 
   return &effRef;
 }
 
 
-
 // =============================================================================
 // Simplify the retrieval of registered histograms of any type
 // =============================================================================
-TH1* AthHistogramming::hist( const std::string& histName, const std::string& tDir, const std::string& stream )
+TH1*
+AthHistogramming::hist(const std::string& histName,
+                       const std::string& tDir,
+                       const std::string& stream)
 {
-  // Build a 32 bit hash out of the name
-  const hash_t histHash = this->hash(histName);
+  std::string histNameCopy = histName;
+  std::string tDirCopy     = tDir;
+  std::string streamCopy   = stream;
 
-  // See if this entry exists in the map
-  HistMap_t::const_iterator it = m_histMap.find( histHash );
-  if ( it == m_histMap.end() ) // It doesn't exist!
-    { // Let's see into the THistSvc if somebody else has registered the histogram...
+  std::string bookingString;
+  this->buildBookingString(bookingString, histNameCopy, tDirCopy, streamCopy, false);
 
-      // Need to copy the strings as we will massage them from here on
-      std::string histNameCopy = histName;
-      std::string tDirCopy     = tDir;
-      std::string streamCopy   = stream;
+  const hash_t histHash = this->hash(histNameCopy);
 
-      // Massage the final string to book things
-      std::string bookingString("");
-      this->buildBookingString( bookingString, histNameCopy, tDirCopy, streamCopy ,false);
+  HistMap_t::const_iterator it = m_histMap.find(histHash);
+  if (it == m_histMap.end()) {
+    TH1* histPointer(nullptr);
 
-      TH1* histPointer(NULL);
-      if ( !((histSvc()->getHist(bookingString, histPointer)).isSuccess()) )
-        {
-          // Massage the final string to book things
-          std::string bookingString("");
-          this->buildBookingString( bookingString, histNameCopy, tDirCopy, streamCopy, true );
+    if (!histSvc()->getHist(bookingString, histPointer).isSuccess()) {
+      std::string prefixedHistNameCopy = histName;
+      std::string prefixedTDirCopy     = tDir;
+      std::string prefixedStreamCopy   = stream;
 
-          if ( !((histSvc()->getHist(bookingString, histPointer)).isSuccess()) )
-            {
-              m_msg << MSG::WARNING
-                    << "Problem retrieving the histogram with name (including pre- and post-fixes) "
-                    << m_histNamePrefix + histNameCopy + m_histNamePostfix
-                    << " or with name " << histNameCopy
-                    << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
-                    << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
-              return NULL;
-            }
-          // If we get to here, we actually found the histogram in the THistSvc.
-          // So let's add it to the local cache map and return its pointer
-          m_histMap.insert( m_histMap.end(), std::pair< const hash_t, TH1* >( histHash, histPointer ) );
-          return histPointer;
-        }
-      // If we get to here, we actually found the histogram in the THistSvc.
-      // So let's add it to the local cache map and return its pointer
-      m_histMap.insert( m_histMap.end(), std::pair< const hash_t, TH1* >( histHash, histPointer ) );
-      return histPointer;
+      std::string prefixedBookingString;
+      this->buildBookingString(prefixedBookingString,
+                               prefixedHistNameCopy,
+                               prefixedTDirCopy,
+                               prefixedStreamCopy,
+                               true);
+
+      if (!histSvc()->getHist(prefixedBookingString, histPointer).isSuccess()) {
+        m_msg << MSG::WARNING
+              << "Problem retrieving the histogram with name (including pre- and post-fixes) "
+              << m_histNamePrefix + histNameCopy + m_histNamePostfix
+              << " or with name " << histNameCopy
+              << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
+              << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
+        return nullptr;
+      }
     }
 
+    m_histMap.insert(m_histMap.end(), std::pair<const hash_t, TH1*>(histHash, histPointer));
+    return histPointer;
+  }
 
-  // Return the pointer to the histogram that we got from the local cache map
   return it->second;
 }
 
@@ -506,14 +467,14 @@ TGraph* AthHistogramming::graph( const std::string& graphName, const std::string
 
       // Massage the final string to book things
       std::string bookingString("");
-      this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, true);
+      this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, false);
 
-      TGraph* graphPointer(NULL);
+      TGraph* graphPointer(nullptr);
       if ( !((histSvc()->getGraph(bookingString, graphPointer)).isSuccess()) )
         {
           // Massage the final string to book things
           std::string bookingString("");
-          this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, false );
+          this->buildBookingString( bookingString, graphNameCopy, tDirCopy, streamCopy, true );
 
           if ( !((histSvc()->getGraph(bookingString, graphPointer)).isSuccess()) )
             {
@@ -523,7 +484,7 @@ TGraph* AthHistogramming::graph( const std::string& graphName, const std::string
                     << " or with name " << graphNameCopy
                     << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
                     << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
-              return NULL;
+              return nullptr;
             }
           // If we get to here, we actually found the TGraph in the THistSvc.
           // So let's add it to the local cache map and return its pointer

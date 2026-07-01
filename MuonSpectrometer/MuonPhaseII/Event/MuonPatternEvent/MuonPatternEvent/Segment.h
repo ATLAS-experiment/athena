@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONR4_MUONPATTERNEVENT_SEGMENT__H
@@ -11,16 +11,17 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
+#include "Acts/Utilities/CloneablePtr.hpp"
+
 namespace MuonR4{
 
     /// @brief Placeholder for what will later be the muon segment EDM representation. 
     /// For now, just a plain storage for the dummy fit result, to test the 
     /// implementation of residuals 
     class Segment{
-        public: 
-            
+        public:
             /** @brief Calibrated space point type */
-            using MeasType = std::unique_ptr<CalibratedSpacePoint>;
+            using MeasType = Acts::CloneablePtr<CalibratedSpacePoint>;
             using MeasVec = std::vector<MeasType>;
             /** @brief Segment constructor
              *  @param globPos: Global position of the segment expressed at the associated chamber centre

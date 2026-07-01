@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -262,8 +262,7 @@ void GeoPixelServices::initializeOld(const std::string & a)
     double zShift=0.;           // the famous IBL Z shift
     int iShiftIndex = m_gmt_mgr->PixelServiceShift(a, ii);
     // FIXME: The magic number 100 here should be explained...
-    // cppcheck-suppress negativeContainerIndex
-    if(iShiftIndex>0) zShift=m_layerShift[iShiftIndex-100];
+    if(iShiftIndex>99) zShift=m_layerShift[iShiftIndex-100];
     param.setZShift(zShift);
 
     // Service envelopes

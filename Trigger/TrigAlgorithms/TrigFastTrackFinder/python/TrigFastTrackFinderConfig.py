@@ -391,7 +391,8 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   
   # GPU offloading config begins - perhaps set from configure
   if flags.Trigger.InDetTracking.doGPU:
-    
+    from AthCUDAServices.AthCUDAServicesConfig import GPUSystemInfoSvcCfg
+    acc.merge(GPUSystemInfoSvcCfg(flags))
     inDetAccelSvc = CompFactory.TrigInDetAccelerationSvc("TrigInDetAccelerationSvc")
     inDetAccelSvc.useITkGeometry = flags.Detector.GeometryITk
     if flags.Detector.GeometryITk:
@@ -521,6 +522,8 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   ftf.UseTrigSeedML = flags.Tracking.ActiveConfig.UseTrigSeedML
 
   if flags.Trigger.InDetTracking.doGPU:
+    from AthCUDAServices.AthCUDAServicesConfig import GPUSystemInfoSvcCfg
+    acc.merge(GPUSystemInfoSvcCfg(flags))
     ftf.TrigAccelerationSvc      = acc.getService("TrigInDetAccelerationSvc")
     if flags.Detector.GeometryITk:
         ftf.TrigAccelerationTool     = acc.getPublicTool("TrigITkAccelerationTool_FTF")

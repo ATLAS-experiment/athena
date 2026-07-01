@@ -11,7 +11,7 @@ public:
 
   using AthAlgorithm::AthAlgorithm; //Delgate c'tor
 
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
   float divide (float a, float b);

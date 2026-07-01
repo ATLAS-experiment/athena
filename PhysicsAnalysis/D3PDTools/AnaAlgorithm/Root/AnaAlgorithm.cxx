@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -45,8 +45,8 @@ namespace EL
                 )
 #ifdef XAOD_STANDALONE
     : AsgComponent (name)
-    , m_inputMetaStore  (asg::SgTEventMeta::InputStore, nullptr)
-    , m_outputMetaStore (asg::SgTEventMeta::OutputStore, nullptr)
+    , m_inputMetaStore  (asg::SgEventMeta::InputStore, nullptr)
+    , m_outputMetaStore (asg::SgEventMeta::OutputStore, nullptr)
 #else
     : AthHistogramAlgorithm (name, pSvcLocator)
     , m_inputMetaStore  ("StoreGateSvc/InputMetaDataStore", name)
@@ -110,7 +110,7 @@ namespace EL
 
 
 #ifdef XAOD_STANDALONE
-  asg::SgTEvent *AnaAlgorithm ::
+  asg::SgEvent *AnaAlgorithm ::
   evtStore () const
   {
     if (!m_evtStore)
@@ -326,6 +326,15 @@ namespace EL
 
 
   ::StatusCode AnaAlgorithm ::
+  execute (const EventContext& /*ctx*/)
+  {
+    // By default we invoke the deprecated method:
+    return execute();
+  }
+
+
+
+  ::StatusCode AnaAlgorithm ::
   finalize ()
   {
     return StatusCode::SUCCESS;
@@ -373,9 +382,9 @@ namespace EL
 
 
   ::StatusCode AnaAlgorithm ::
-  sysExecute ()
+  sysExecute (const EventContext& ctx)
   {
-    return execute ();
+    return execute (ctx);
   }
 
 
@@ -436,14 +445,14 @@ namespace EL
 
 
   void AnaAlgorithm ::
-  setEvtStore (asg::SgTEvent *val_evtStore)
+  setEvtStore (asg::SgEvent *val_evtStore)
   {
     if (m_evtStore)
       throw std::logic_error ("set evtStore twice on algorithm " + name());
     m_evtStore = val_evtStore;
-    m_inputMetaStore = asg::SgTEventMeta (asg::SgTEventMeta::InputStore,
+    m_inputMetaStore = asg::SgEventMeta (asg::SgEventMeta::InputStore,
                                           val_evtStore->event());
-    m_outputMetaStore = asg::SgTEventMeta (asg::SgTEventMeta::OutputStore,
+    m_outputMetaStore = asg::SgEventMeta (asg::SgEventMeta::OutputStore,
                                            val_evtStore->event());
   }
 

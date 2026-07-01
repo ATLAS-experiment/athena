@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -118,9 +118,10 @@ namespace MuonGM {
 
       for (unsigned int ind = 0; ind < wstgcRec->size(); ind++) {
             std::string WSTGC_TYPE       = (*wstgcRec)[ind]->getString("WSTGC_TYPE");               
-    
+            if (WSTGC_TYPE.size()<=8)
+              THROW_EXCEPTION_RE("Malformed WSTGC_TYPE = " << WSTGC_TYPE);
             if (getStationName()[2] != WSTGC_TYPE[6]) continue;
-            if (std::abs(getStationEta())!=(int) (WSTGC_TYPE[7]-'0')) continue;
+            if (std::abs(getStationEta()) != static_cast<int>(WSTGC_TYPE[7]-'0')) continue;
             if (getStationName()[2] == 'S' &&  WSTGC_TYPE[8] != (m_ml ==2 ?'P' : 'C')) continue;
             if (getStationName()[2] == 'L' &&  WSTGC_TYPE[8] != (m_ml ==2 ?'C' : 'P')) continue;
 

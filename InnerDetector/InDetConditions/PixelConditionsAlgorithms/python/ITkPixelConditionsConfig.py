@@ -37,6 +37,14 @@ def ITkPixelModuleConfigCondAlgCfg(flags, name="ITkPixelModuleConfigCondAlg", **
     CondArgs.update(kwargs)
     acc.addCondAlgo(CompFactory.PixelModuleConfigCondAlg(name, **CondArgs))
     return acc
+    
+def ITkPixFieldMapsAlgCfg(flags, name="ITkPixFieldMapsAlg", **kwargs):
+    """Return a ComponentAccumulator with configured E-Field maps for ITk radiation damage studies"""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("WriteKey", "ITkPixFieldMaps")
+    
+    acc.addCondAlgo(CompFactory.ITkPixFieldMapsAlg(name, **kwargs))
+    return acc
 
 def ITkPixelAlignCondAlgCfg(flags,name="ITkPixelAlignCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelAlignCondAlg for ITk"""

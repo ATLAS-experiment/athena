@@ -18,10 +18,10 @@ StatusCode MuonSPCalibrationTest::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonSPCalibrationTest::execute() {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    SG::ReadHandle geoCtx{m_geoCtxKey, ctx};
-    ATH_CHECK(geoCtx.isPresent());
+StatusCode MuonSPCalibrationTest::execute(const EventContext& ctx) {
+    
+    const ActsTrk::GeometryContext* geoCtx{nullptr};
+    ATH_CHECK(SG::get(geoCtx, m_geoCtxKey, ctx));
 
     for (const auto& spContainer : m_spKeyArray) {
         SG::ReadHandle<MuonR4::SpacePointContainer> spHandle{spContainer, ctx};

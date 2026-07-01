@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLROOTACCESS_TEVENT_H
@@ -114,6 +114,12 @@ namespace POOL {
          long m_size = -1; //cache of the event size, filled on first call to getEntries
 
          IEventProcessor* m_evtProcessor;
+
+         // HAVE_LISTENERS means that there are listeners for the ClearStore
+         // incident; NO_LISTENERS means that there aren't any.
+         // UNCHECKED means that we haven't checked yet.
+         enum ListenerState { UNCHECKED, HAVE_LISTENERS, NO_LISTENERS };
+         std::atomic<ListenerState> m_listenerState { UNCHECKED };
 
          ServiceHandle<IIncidentSvc> m_incSvc;
          ServiceHandle<Gaudi::Interfaces::IOptionsSvc> m_joSvc;

@@ -39,7 +39,7 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         virtual ~FPGATrackSimMapMakerAlg() = default;
 
         StatusCode initialize() override;
-        StatusCode execute() override;
+        StatusCode execute(const EventContext& ctx) override;
         StatusCode finalize() override;
 
     private:
@@ -166,7 +166,6 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         std::vector <std::vector < std::vector<float> > > m_radii; // used to calculate mean radii per layer for each slice, [slice][plane][hit]
         std::vector <std::vector < std::vector<float> > > m_z; // used to calculate median z per layer for each slice, [slice][plane][hit]
         // output map files and monitoring
-        std::ofstream m_pmap, m_rmap, m_subrmap, m_etapat, m_radfile, m_zedfile;
         std::unique_ptr<TFile> m_monitorFile{};
 
 

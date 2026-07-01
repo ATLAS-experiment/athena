@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,8 +9,8 @@
  *      Author: zhangrui
  */
 
-#ifndef EFLOWSUBTRACTOR_H_
-#define EFLOWSUBTRACTOR_H_
+#ifndef EFLOWREC_EFLOWSUBTRACTOR_H
+#define EFLOWREC_EFLOWSUBTRACTOR_H
 
 #include "eflowCellList.h"
 #include "eflowCellSubtractionFacilitator.h"
@@ -41,7 +41,7 @@ public:
 
   void subtractTracksFromClusters(
     eflowRecTrack* efRecTrack,
-    std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusterSubtractionList, const bool& addCPData) const;
+    std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusterSubtractionList, bool addCPData) const;
 
   static void annihilateClusters(
     std::vector<std::pair<xAOD::CaloCluster*, bool>>& clusters);
@@ -59,4 +59,4 @@ public:
 };
 }
 
-#endif /* EFLOWSUBTRACTOR_H_ */
+#endif /* EFLOWREC_EFLOWSUBTRACTOR_H */

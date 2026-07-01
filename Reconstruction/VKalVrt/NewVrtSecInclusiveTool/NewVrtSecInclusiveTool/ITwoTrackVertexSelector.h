@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 // ITwoTrackVertexSelector.h - Description
@@ -27,25 +27,23 @@
 //------------------------------------------------------------------------
 namespace Rec {
 
-//------------------------------------------------------------------------
-  static const InterfaceID IID_ITwoTrackVertexSelector("ITwoTrackVertexSelector", 1, 0);
-
   class ITwoTrackVertexSelector : virtual public IAlgTool {
     public:
-      static const InterfaceID& interfaceID() { return IID_ITwoTrackVertexSelector;}
-//---------------------------------------------------------------------------
+     DeclareInterfaceID(ITwoTrackVertexSelector, 1, 0);
 
-  /** @class ITwoTrackVertexSelector
-    Interface class to select good 2-track vertex for inclusive vertexing
-  */
-     virtual bool isgood( const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> tracks,
-		                      const xAOD::Vertex & candV,
-                                std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
-		                      const xAOD::Vertex & tPV) const =0;
-     virtual bool isgood( const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> tracks,
-		                      const xAOD::Vertex & candV,
-                                std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
-		                      const xAOD::Vertex & tPV,
+     /** @class ITwoTrackVertexSelector
+      Interface class to select good 2-track vertex for inclusive vertexing
+     */
+     virtual bool isgood( const EventContext& ctx,
+                          const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> tracks,
+                          const xAOD::Vertex & candV,
+                          std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
+                          const xAOD::Vertex & tPV) const =0;
+     virtual bool isgood( const EventContext& ctx,
+                          const std::pair<const xAOD::TrackParticle*,const xAOD::TrackParticle*> tracks,
+                          const xAOD::Vertex & candV,
+                          std::pair<ROOT::Math::XYZTVector,ROOT::Math::XYZTVector> moms,
+                          const xAOD::Vertex & tPV,
                           float & quality) const =0;
   };
 

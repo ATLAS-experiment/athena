@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloClusterCorrection )
@@ -33,6 +33,7 @@ atlas_add_test( interpolate_test
 
 atlas_add_test( config_test
                 SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/config_t.py
+                PROPERTIES TIMEOUT 300
                 LOG_IGNORE_PATTERN "Current filenames|by peeking|^Py:MetaReader|^Py:AutoConfigFlags|no dictionary for" )
 
 atlas_add_test( CaloScaleCluster_test

@@ -28,8 +28,7 @@ StatusCode BCMSensorSDTool::SetupEvent(HitCollectionMap& hitCollections)
 
 StatusCode BCMSensorSDTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<SiHitCollection>(m_outputCollectionNames[0]);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

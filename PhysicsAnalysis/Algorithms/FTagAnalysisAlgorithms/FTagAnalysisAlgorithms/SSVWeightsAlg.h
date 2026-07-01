@@ -10,8 +10,6 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
-#include <SystematicsHandles/SysWriteHandle.h>
-#include <SystematicsHandles/SysReadDecorHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 
@@ -35,7 +33,7 @@ namespace CP{
   public:
     SSVWeightsAlg(const std::string &name, ISvcLocator *pSvcLocator);
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
 
   private:
     Gaudi::Property<std::string> m_jsonConfigPath_SSVWeightsAlg {this, "JsonConfigFile_SSVWeightsAlg","", "Path to the JSON config file that contains the SSV calibration results which are needed to calculate the SSV weights"};

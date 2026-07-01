@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -76,26 +76,26 @@ A structure to contain hit data
 */
 class databundle{
  public:
-  /**detector (barrel -1 or 1, or end-cap -2 or 2)*/ int det;
-  /**layer*/ int lay;
-  /**phi module*/ int mod;
-  /**board*/ int brd;
-  /**chip*/ int chp;
-  /**straw-layer*/ int stl;
-  /**straw number (within the strawlayer)*/ int stw;
-  /**straw ID*/ int sid;
-  /**event number*/ int ievt;
-  /**time residual*/ float tres;
-  /**histogram weight (currently set to 1)*/ float weight;
-  /**space residual*/ float res;
-  /**raw time*/ float t;
-  /**drift radius from r(t) relation*/ float r;
-  /**t0 value used in reconstruction*/ float t0;
-  /**reference t0 (offset from board mean)*/ float rt0;
+  /**detector (barrel -1 or 1, or end-cap -2 or 2)*/ int det{};
+  /**layer*/ int lay{};
+  /**phi module*/ int mod{};
+  /**board*/ int brd{};
+  /**chip*/ int chp{};
+  /**straw-layer*/ int stl{};
+  /**straw number (within the strawlayer)*/ int stw{};
+  /**straw ID*/ int sid{};
+  /**event number*/ int ievt{};
+  /**time residual*/ float tres{};
+  /**histogram weight (currently set to 1)*/ float weight{};
+  /**space residual*/ float res{};
+  /**raw time*/ float t{};
+  /**drift radius from r(t) relation*/ float r{};
+  /**t0 value used in reconstruction*/ float t0{};
+  /**reference t0 (offset from board mean)*/ float rt0{};
   /**rt-parameters used in the reconstruction*/ std::array<float, 4> rtpar{};
-  /**straw x position*/ float x;
-  /**straw y position*/ float y;
-  /**straw z position*/ float z;
+  /**straw x position*/ float x{};
+  /**straw y position*/ float y{};
+  /**straw z position*/ float z{};
 };
 
 /**
@@ -106,46 +106,46 @@ class caldata{
   caldata();
   caldata(bool,int,int);
   ~caldata();
-  /**detector (barrel or end-cap)*/ int det;
-  /**layer*/ int lay;
-  /**phi module*/ int mod;
-  /**board*/ int brd;
-  /**chip*/ int chp;
-  /**straw-layer*/ int stl;
-  /**straw number (within the strawlayer)*/ int stw;
-  /**straw ID*/ int sid;
-  /**number of time residual histogram entries*/ int ntres;
-  /**number of rt histogram entries*/ int nrt;
-  /**number of residual histogram entries */ int nres;
-  /**the type of time residual fit that was made*/ int t0fittype;
-  /**the residual*/ float res;
-  /**the residual mean*/ float resMean;
-  /**the residual error*/ float reserr;
-  /**the time residual*/ float tres;
-  /**the time residual mean*/ float tresMean;
-  /**the new t0*/ float t0;
-  /**the new to error*/ float t0err;
-  /**the reference t0 (offset from board mean)*/ float reft0;
-  /**the t0 offset from the level below*/ float t0off;
-  /**the t0 fron the R-t fit*/ float rtt0;
+  /**detector (barrel or end-cap)*/ int det{};
+  /**layer*/ int lay{};
+  /**phi module*/ int mod{};
+  /**board*/ int brd{};
+  /**chip*/ int chp{};
+  /**straw-layer*/ int stl{};
+  /**straw number (within the strawlayer)*/ int stw{};
+  /**straw ID*/ int sid{};
+  /**number of time residual histogram entries*/ int ntres{};
+  /**number of rt histogram entries*/ int nrt{};
+  /**number of residual histogram entries */ int nres{};
+  /**the type of time residual fit that was made*/ int t0fittype{};
+  /**the residual*/ float res{};
+  /**the residual mean*/ float resMean{};
+  /**the residual error*/ float reserr{};
+  /**the time residual*/ float tres{};
+  /**the time residual mean*/ float tresMean{};
+  /**the new t0*/ float t0{};
+  /**the new to error*/ float t0err{};
+  /**the reference t0 (offset from board mean)*/ float reft0{};
+  /**the t0 offset from the level below*/ float t0off{};
+  /**the t0 fron the R-t fit*/ float rtt0{};
   /**the rt-parameters used in the track reconstruction*/ std::array<float, 4> oldrtpar{};
   /**the new rt-parameters*/ std::array<float, 4> rtpar{};
-  /**the number of straws in the sub-module*/ float nhits;
-  /**sub-module x position (average of all straws in the module)*/ float x;
-  /**sub-module y position (average of all straws in the module)*/ float y;
-  /**sub-module z position (average of all straws in the module)*/ float z;
-  /**the old sub-module t0 (average of t0 for all straws in the module)*/ double oldt02;
-  /**...*/ double sumt0;
-  /**...*/ double sumx;
-  /**...*/ double sumy;
-  /**...*/ double sumz;
-  /**flag indicating if any calibration has been made*/ bool calflag;
-  /**flag indicating if an R-t calibration has been made*/ bool rtflag;
-  /**flag indicating if a t0 calibration has been made*/ bool t0flag;
+  /**the number of straws in the sub-module*/ float nhits{};
+  /**sub-module x position (average of all straws in the module)*/ float x{};
+  /**sub-module y position (average of all straws in the module)*/ float y{};
+  /**sub-module z position (average of all straws in the module)*/ float z{};
+  /**the old sub-module t0 (average of t0 for all straws in the module)*/ double oldt02{};
+  /**...*/ double sumt0{};
+  /**...*/ double sumx{};
+  /**...*/ double sumy{};
+  /**...*/ double sumz{};
+  /**flag indicating if any calibration has been made*/ bool calflag{};
+  /**flag indicating if an R-t calibration has been made*/ bool rtflag{};
+  /**flag indicating if a t0 calibration has been made*/ bool t0flag{};
   /**the 1D time residual histogram (100 bins)*/ std::vector<float> m_treshist;
   /**the 1D residual histogram (100 bins)*/ std::vector<float> reshist;
   /**the 2D rt histogram (20x32 bins)*/ std::vector<float> rthist;
-  /**the rt graph*/ RtGraph* rtgraph;
+  /**the rt graph*/ RtGraph* rtgraph{};
 };
 
 /**
@@ -246,7 +246,7 @@ public:
      @param[in] caldata_above the caldata object from the sub-module above the one to be calibrated
      @return the root directory where the histgrams were written
   */
-  TDirectory* Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory*, std::string, const std::string&, caldata*);
+  TDirectory* Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory*, const std::string&, const std::string&, caldata*);
 
   /**
      Makes the R-t fit
@@ -338,50 +338,50 @@ public:
   /**A map between the sub-module identifier string and the calibration data structure (caldata)*/
   std::map<std::string,caldata> data;
 
-  /**if true an rt fit is made, if false the value from the level above is used*/  bool dort;
-  /**if true a time residual fit is made, if false the value from the level above is used*/  bool dot0;
-  /**if true a residual fit is made*/  bool dores;
-  /**if true the old rt parameters are copied to the new ones*/  bool nort;
-  /**if true the old t0 valus is copied to the new one*/  bool not0;
-  /**if true chip reference t0 values (offset from board mean) are used*/  bool usebref;
-  /**if true no histograms are written to the root file*/  bool bequiet;
-  /**if true a log entry is prined for each sub-modile in this sub-level*/  bool printlog;
-  /**if true a t0 entry in the calibration output file is prined for each sub-module in this sub-level*/  bool printt0;
-  /**if true an rt entry in the calibration output file is prined for each sub-module in this sub-level*/  bool printrt;
-  /**if true the 0th order coeficcient of the rt fit function is not set to 0 in the calibration output file*/  bool usep0;
-  /**if true the 3rd order coeficcient of the rt fit function is not fixed to 0*/  bool floatp3;
-  /**if true a shift of -0.75 ns is applied for straws in layer ==0, strawlayer < 9, and when doing calibration in a granuralyty different from chip or straw*/  bool useshortstraws;
+  /**if true an rt fit is made, if false the value from the level above is used*/  bool dort{};
+  /**if true a time residual fit is made, if false the value from the level above is used*/  bool dot0{};
+  /**if true a residual fit is made*/  bool dores{};
+  /**if true the old rt parameters are copied to the new ones*/  bool nort{};
+  /**if true the old t0 valus is copied to the new one*/  bool not0{};
+  /**if true chip reference t0 values (offset from board mean) are used*/  bool usebref{};
+  /**if true no histograms are written to the root file*/  bool bequiet{};
+  /**if true a log entry is prined for each sub-modile in this sub-level*/  bool printlog{};
+  /**if true a t0 entry in the calibration output file is prined for each sub-module in this sub-level*/  bool printt0{};
+  /**if true an rt entry in the calibration output file is prined for each sub-module in this sub-level*/  bool printrt{};
+  /**if true the 0th order coeficcient of the rt fit function is not set to 0 in the calibration output file*/  bool usep0{};
+  /**if true the 3rd order coeficcient of the rt fit function is not fixed to 0*/  bool floatp3{};
+  /**if true a shift of -0.75 ns is applied for straws in layer ==0, strawlayer < 9, and when doing calibration in a granuralyty different from chip or straw*/  bool useshortstraws{};
   /**a set containing the sub-modules to be calibrated*/ std::set<int> selection;
-  /**the sub-level of the Calibrator instance*/ int level;
+  /**the sub-level of the Calibrator instance*/ int level{};
 
 private:
 
   /**The name of the Calibrator instance*/ std::string m_name;
   /**The direction to do the R-t binning*/ std::string m_rtbinning;
-  /**minimum number of hits in a sub-module required to do an R-t calibration*/ int m_minrtstat;
-  /**minimum number of hits in a sub-module required to do a t0 calibration*/ int m_mint0stat;
-  /**the t0 shift*/ float m_t0shift;
-  /**number of r-bins in the 2D rt histogram*/ int m_nbinsr;
-  /**number of t-bins in the 2D rt histogram*/ int m_nbinst;
-  /**number of bins in the 1D time residual histogram*/ int m_nbinstres;
-  /**number of bins in the 1D residual histogram*/ int m_nbinsres;
-  /**lower limit of r in 2D rt histogram*/ float m_minr;
-  /**upper limit of r in 2D rt histogram*/ float m_maxr;
-  /**lower limit of t in 2D rt histogram*/ float m_mint;
-  /**upper limit of t in 2D rt histogram*/ float m_maxt;
-  /**lower limit of 1D time residual histogram*/ float m_mintres;
-  /**upper limit of 1D time residual histogram*/ float m_maxtres;
-  /**lower limit of 1D residual histogram*/ float m_minres;
-  /**upper limit of 1D residual histogram*/ float m_maxres;
+  /**minimum number of hits in a sub-module required to do an R-t calibration*/ int m_minrtstat{};
+  /**minimum number of hits in a sub-module required to do a t0 calibration*/ int m_mint0stat{};
+  /**the t0 shift*/ float m_t0shift{};
+  /**number of r-bins in the 2D rt histogram*/ int m_nbinsr{};
+  /**number of t-bins in the 2D rt histogram*/ int m_nbinst{};
+  /**number of bins in the 1D time residual histogram*/ int m_nbinstres{};
+  /**number of bins in the 1D residual histogram*/ int m_nbinsres{};
+  /**lower limit of r in 2D rt histogram*/ float m_minr{};
+  /**upper limit of r in 2D rt histogram*/ float m_maxr{};
+  /**lower limit of t in 2D rt histogram*/ float m_mint{};
+  /**upper limit of t in 2D rt histogram*/ float m_maxt{};
+  /**lower limit of 1D time residual histogram*/ float m_mintres{};
+  /**upper limit of 1D time residual histogram*/ float m_maxtres{};
+  /**lower limit of 1D residual histogram*/ float m_minres{};
+  /**upper limit of 1D residual histogram*/ float m_maxres{};
   /**...*/ std::map<std::string,TDirectory*> m_hdirs;
   /**...*/ std::map<std::string,TH1F*> m_resHists;
   /**...*/ std::map<std::string,TH1F*> m_tresHists;
   /**...*/ std::map<std::string,TH2F*> m_rtHists;
-  //  /**...*/ std::map<std::string,RtGraph*> m_rtgraphs;
-  /**...*/ int m_ntreshits;
-  /**...*/ int m_nreshits;
-  /**...*/ int m_nrthits;
-  /**...*/ int m_nhits;
+  //  /**...*/ std::map<std::string,RtGraph*> m_rtgraphs{};
+  /**...*/ int m_ntreshits{};
+  /**...*/ int m_nreshits{};
+  /**...*/ int m_nrthits{};
+  /**...*/ int m_nhits{};
 
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -17,7 +17,6 @@
 #include "DataModelRoot/RootType.h"
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbHandleBase.h"
-#include "StorageSvc/Transaction.h"
 
 // STL include files
 #include <vector>
@@ -107,7 +106,7 @@ namespace pool  {
     /// Access reference counter
     int refCount()  const;
     /// Access to access mode member
-    DbAccessMode openMode() const;
+    Io::IoFlag openMode() const;
     /// Access to db name (FID)
     const std::string& name() const;
     /// Set db name (FID) after opening in case opening happened by PFN
@@ -115,7 +114,7 @@ namespace pool  {
     /// Access to db logon string
     const std::string& logon() const;
     /// Access the size of the database: May be undefined for some technologies
-    long long int size();
+    long long int size() const;
     /// Allow access to the Database implementation
     IOODatabase* db();
     const IOODatabase* db()   const;
@@ -144,7 +143,7 @@ namespace pool  {
     StatusCode open(DbDomain&          domH,
                   const std::string& pfn,
                   const std::string& fid,
-                  DbAccessMode mode = pool::READ);
+                  Io::IoFlag mode = Io::READ);
     /// Close Database
     StatusCode close();
     /// End database access, but still leave database accessible
@@ -168,36 +167,28 @@ namespace pool  {
     StatusCode getOption(DbOption& refOpt);
     /// Add a persistent parameter to the file
     StatusCode addParam(const std::string& nam, const std::string& val);
-    /// Retrieve the number of user parameters
-    int nParam();
     /// Retrieve existing parameter by name
-    StatusCode param(const std::string& nam, std::string& val);
-    /// Retrieve all parameters
-    StatusCode params(Parameters& vals);
+    StatusCode param(const std::string& nam, std::string& val) const;
 
     /// read an object referenced by the token
     StatusCode read(const Token& token, ShapeH shape, void** object);
-    /// Expand OID into a full Token, based on the Links table.
-    StatusCode getLink(const Token::OID_t& oid, Token* pTok);
     /// Retrieve container name from link container (using token oid, rather than contID)
-    std::string cntName(Token& token);
+    std::string cntName(Token& token) const;
     /// Add association link to link container
     StatusCode makeLink(Token* pToken, Token::OID_t& linkH);
     /// Add persistent shape to the Database
     StatusCode addShape(const DbTypeInfo* pShape);
     /// Retrieve persistent type information by class handle
-    const DbTypeInfo* objectShape(const RootType& typeH);
+    const DbTypeInfo* objectShape(const RootType& typeH) const;
     /// Retrieve persistent type information by name
-    const DbTypeInfo* objectShape(const Guid& nam);
+    const DbTypeInfo* objectShape(const Guid& nam) const;
     /// Retrieve persistent type information by container
-    const DbTypeInfo* contShape(const std::string& nam);
+    const DbTypeInfo* contShape(const std::string& nam) const;
     /// Access local container token (if container exists)
     const Token* cntToken(const std::string& cntName);
     /// Allow access to all known containers
     StatusCode containers(std::vector<const Token*>& conts, bool intern=false);
     StatusCode containers(std::vector<IDbContainer*>& conts, bool intern=false);
-    /// Allow access to all known shapes used by the database
-    StatusCode shapes(std::vector<const DbTypeInfo*>& shaps);
     /// Let the implementation access the internals
     IDbDatabase* info();
     const IDbDatabase* info()  const;

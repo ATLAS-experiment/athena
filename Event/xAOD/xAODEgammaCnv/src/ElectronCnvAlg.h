@@ -37,7 +37,7 @@ namespace xAODMaker {
       ///@brief Function initialising the algorithm
      virtual StatusCode initialize();
      ///@brief Function executing the algorithm
-     virtual StatusCode execute();
+     virtual StatusCode execute(const EventContext& ctx);
      
    private:
 

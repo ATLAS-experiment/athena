@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-import MadGraphControl.MadGraphUtils
-MadGraphControl.MadGraphUtils.MADGRAPH_PDFSETTING={
+import MadGraphControl.MGC
+MadGraphControl.MGC.MADGRAPH_PDFSETTING={
     'central_pdf': 260800, #NNPDF30_nlo_as_0118_mc
     'pdf_variations':[260800,93300], # NNPDF30_nlo_as_0118_mc PDF4LHC21_40_pdfas
     # changes wrt to non-MC setting: default NNPDF30 and MC NNPDF31 as alternative weight

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Lianyou Shan <lianyou.shan@cern.ch>
 
@@ -58,7 +58,7 @@
      *Merging  
      */
     virtual std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
-    mergeVertexContainer(const xAOD::VertexContainer& MyVxCont) const override;
+    mergeVertexContainer(const EventContext& ctx, const xAOD::VertexContainer& MyVxCont) const override;
 
   private:
     

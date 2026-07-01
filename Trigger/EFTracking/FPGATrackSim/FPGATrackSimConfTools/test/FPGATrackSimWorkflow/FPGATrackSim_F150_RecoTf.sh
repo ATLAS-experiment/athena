@@ -42,6 +42,7 @@ writeAdditionalOutputData="0"
 regionList="[34, 98, 162, 226, 290, 354, 418, 482, 546, 610, 674, 738, 802, 866, 930, 994, 1058, 1122, 1186, 1250]"
 keepHitsStrategy="2"   # NEW: user-settable via -g/--keepHitsStrategy
 doGNN="0"
+particleType="skipTruth"  # default if user doesn't specify
 
 ## parsing flags
 while [ $# -ge 1 ]; do
@@ -57,6 +58,7 @@ while [ $# -ge 1 ]; do
         -r  | --region )        if [ $# -lt 2 ] ; then usage 1 "Missing value for --region"; fi ; regionList="$2" ; shift ;;
         -g  | --keepHitsStrategy ) if [ $# -lt 2 ] ; then usage 1 "Missing value for --keepHitsStrategy"; fi ; keepHitsStrategy="$2" ; shift ;;
         -j  | --doGNN )         doGNN="1" ;;
+        -p  | --particleType )  if [ $# -lt 2 ] ; then usage 1 "Missing value for --particleType"; fi ; particleType="$2" ; shift ;;
         -h  | --help )          usage 0 ;;
         *) shift ; continue ;;
     esac
@@ -73,6 +75,10 @@ if [[ "$inputRDO" == *"*"* ]]; then
 else
     IFS=',' read -ra FILES <<< "$inputRDO"
     for file in "${FILES[@]}"; do
+        if [[ "$file" == root://* ]]; then
+            # Remote file, skip -f check
+            continue
+        fi
         if [[ ! -f "$file" ]]; then
             echo "Error: File not found: $file"
             exit 1
@@ -83,12 +89,18 @@ fi
 
 export ATHENA_CORE_NUMBER=1
 source FPGATrackSim_CommonEnv.sh
+
+# Required for F150* to get all region maps to override the default maps path
+MAPS_5L="maps_5L/InsideOut/v0.35/" 
+
 # Prepare preExec flags
 preExecFlags="flags.Tracking.doPixelDigitalClustering=True;\
                flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy=${keepHitsStrategy};\
                flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
                flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
-               flags.Trigger.FPGATrackSim.regionList=${regionList};"
+               flags.Trigger.FPGATrackSim.regionList=${regionList};\
+               flags.Trigger.FPGATrackSim.bankDir=\"${BANKS_5L}\";"
+postExecFlags=""
 
 if [ "$writeAdditionalOutputData" == "0" ]; then
     preExecFlags="${preExecFlags}flags.Trigger.FPGATrackSim.writeAdditionalOutputData=False;"
@@ -103,12 +115,27 @@ else # Do GNN Pixel Seeding
                     flags.Trigger.FPGATrackSim.GNN.moduleMapPath=\"${GNN_MODULE_MAP}\";\
                     flags.Trigger.FPGATrackSim.GNN.MLModelPath=\"${GNN_METRIC_LEARNING}\";\
                     flags.Trigger.FPGATrackSim.GNN.GNNModelPath=\"${GNN_ONNX_MODEL}\";\
-                    flags.Trigger.FPGATrackSim.GNN.moduleMapTol=0.5;\
+                    flags.Trigger.FPGATrackSim.GNN.moduleMapTol=0.0;\
                     flags.Trigger.FPGATrackSim.GNN.edgeScoreCut=0.5;\
                     flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding=True;\
                     flags.Trigger.FPGATrackSim.doOverlapRemoval=False;\
                     flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions=False;\
-                    flags.Trigger.FPGATrackSim.sampleType='singleMuons';"
+                    flags.Trigger.FPGATrackSim.sampleType='${particleType}';\
+                    flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput=True;\
+                    flags.Trigger.FPGATrackSim.MaxSpacePointsPerSeed=5;\
+                    flags.Trigger.FPGATrackSim.regionToWriteDPTree=34;\
+                    flags.Trigger.FPGATrackSim.writeToAOD=False;\
+                    flags.Trigger.FPGATrackSim.writeClustersToAOD=False;\
+                    flags.Trigger.FPGATrackSim.writeAdditionalOutputData=True;\
+                    flags.Trigger.FPGATrackSim.GNN.doAllHits=False;\
+                    flags.Trigger.FPGATrackSim.GNN.doPixelHits=True;\
+                    flags.Trigger.FPGATrackSim.GNN.doStripHits=False;"
+    postExecFlags="from AthenaCommon.CFElements import findAlgorithm;\
+                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').ptMinMeasurements=[];\
+                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').absEtaMaxMeasurements=[];\
+                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').maxHoles=[2,1,1];\
+                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').chi2CutOff=[200,50,50];\
+                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').chi2OutlierCutOff=[200,100,100];"
 fi
 
 Reco_tf.py --CA \
@@ -116,6 +143,7 @@ Reco_tf.py --CA \
     --skipEvents ${skipEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF150Flags,FPGATrackSimConfTools.FPGATrackSimAnalysisConfig.FPGATrackSimF150FlagCfg' \
     --preExec "${preExecFlags}" \
+    --postExec "${postExecFlags}" \
     --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
     --steering 'doRAWtoALL' \
     --inputRDOFile "${inputRDO_arg}" \

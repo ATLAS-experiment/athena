@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARROD_ENCODER_H
@@ -33,7 +33,6 @@
 
 #include "LArRawEvent/LArRawChannel.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
-//#include "LArRawEvent/LArRawChannelCollection.h"
 
 #include "LArRawEvent/LArDigit.h"
 #include "LArRawEvent/LArDigitContainer.h"
@@ -43,9 +42,6 @@
 
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArByteStream/LArRodBlockStructure.h"
-//#include "LArByteStream/LArRodBlockStructure_0.h"
-//#include "LArByteStream/LArRodBlockStructure_1.h"
-//#include "LArByteStream/LArRodBlockStructure_3.h"
 #include "ByteStreamData/RawEvent.h" 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "LArIdentifier/LArOnlineID.h"
@@ -79,49 +75,23 @@ public:
   void clear(); 
 
   // convert all LArRawChannels in the current list to a vector of 32bit words
-//  void fillROD(std::vector<uint32_t>& v, MsgStream& logstr) ; 
   void fillROD(std::vector<uint32_t>& v, MsgStream& logstr, const CaloNoise& noise, double nsigma) ;
 
 
 private:
-  /*
-  int m_NFeb;
-  uint32_t *m_FEB_ID;
-  std::vector<const LArRawChannel*> **m_vLArRC;
-  std::vector<const LArDigit*> **m_vLArDigit;
-  
-  
-  std::vector<uint32_t> m_FEB_ID;
-  std::vector<std::vector<const LArRawChannel*>> m_vLArRC;
-  std::vector<std::vector<const LArRawChannel*>> m_vLArDigit;
-  std::vector<std::vector<const LArRawChannel*>> m_vLArDigitFixed[3];
-
-  //std::vector<std::vector<const LArRawChannel*>> m_vLArDigit2;
-  //std::vector<std::vector<const LArRawChannel*>> m_vLArDigit3;
-  */
-
   struct FebData_t {
-    //uint32_t FEB_ID;
     std::vector<const LArRawChannel*> vLArRC;
     std::vector<const LArDigit*> vLArDigit;           //Free gain
     std::vector<const LArDigit*> vLArDigitFixed[3];   //Three gains
     std::vector<const LArCalibDigit*> vLArCalibDigit[3];  //Three gains
-    //std::vector<const LArAverageDigits* > vLArAverageDigits[3];  //Three gains
   };
 
-  //std::vector<FebData> m_vFEB;
   std::map<uint32_t,FebData_t> m_mFEB;
 
   const LArOnlineID&         m_onlineHelper; 
   const CaloDetDescrManager& m_CaloDetDescrManager;
   const LArOnOffIdMapping&   m_onOffIdMapping;
   LArRodBlockStructure* m_BlStruct;
-
-  /*
- public:
-  static int m_digitcounter; //for debug purpose only
-  static int m_fixeddigitcounter[4];
-  */
-} ; 
+};
 
 #endif

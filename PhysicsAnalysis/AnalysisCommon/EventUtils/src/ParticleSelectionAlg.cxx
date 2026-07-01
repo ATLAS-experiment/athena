@@ -223,7 +223,7 @@ StatusCode ParticleSelectionAlg::start()
 
 
 
-StatusCode ParticleSelectionAlg::execute()
+StatusCode ParticleSelectionAlg::execute(const EventContext& /*ctx*/)
 {
   // Increase the event counter
   ++m_nEventsProcessed;

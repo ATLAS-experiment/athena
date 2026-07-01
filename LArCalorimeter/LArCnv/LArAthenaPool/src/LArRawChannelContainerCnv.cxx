@@ -26,7 +26,7 @@ LArRawChannelContainerCnv::createPersistent(LArRawChannelContainer* transCont)
 
 template<>
 LArRawChannelContainer*
-LArRawChannelContainerCnv::createTransient()
+LArRawChannelContainerCnv::createTransient(const Token* token)
 {
   MsgStream log(msgSvc(), "LArRawChannelContainerConverter" );
   LArRawChannelContainer         *trans_cont = NULL;
@@ -38,32 +38,32 @@ LArRawChannelContainerCnv::createTransient()
   static const pool::Guid   guid_p1("1569AF5C-5F27-4C02-A87B-47FF192F1605");
   static const pool::Guid   guid_p0("9D624DCE-B943-4515-B33A-6F6928F8EB90");
  // even newer representation of LArRawChannelContainer
-  if( compareClassGuid(guid_p4) ) {
+  if( compareClassGuid(token, guid_p4) ) {
       LArRawChannelContainerCnv_p4   converter;
-      std::unique_ptr<LArRawChannelContainer_p4> col_vect( poolReadObject<LArRawChannelContainer_p4>() );
+      std::unique_ptr<LArRawChannelContainer_p4> col_vect( poolReadObject<LArRawChannelContainer_p4>(token) );
       trans_cont = converter.createTransient( col_vect.get(), log );
   }
-  else if( compareClassGuid(guid_p3) ) {
+  else if( compareClassGuid(token, guid_p3) ) {
       LArRawChannelContainerCnv_p3   converter;
-      std::unique_ptr<LArRawChannelContainer_p3> col_vect( poolReadObject<LArRawChannelContainer_p3>() );
+      std::unique_ptr<LArRawChannelContainer_p3> col_vect( poolReadObject<LArRawChannelContainer_p3>(token) );
       trans_cont = converter.createTransient( col_vect.get(), log );
   }
   // new representation of LArRawChannelContainer
-  else if( compareClassGuid(guid_p2) ) {
+  else if( compareClassGuid(token, guid_p2) ) {
       LArRawChannelContainerCnv_p2   converter;
-      std::unique_ptr<LArRawChannelContainer_p2> col_vect( poolReadObject<LArRawChannelContainer_p2>() );
+      std::unique_ptr<LArRawChannelContainer_p2> col_vect( poolReadObject<LArRawChannelContainer_p2>(token) );
       trans_cont = converter.createTransient( col_vect.get(), log );
 
   }
   // previous representation of LArRawChannelContainer
-  else if( compareClassGuid(guid_p1) )
+  else if( compareClassGuid(token, guid_p1) )
     {
       LArRawChannelContainerCnv_p1   converter;
-      std::unique_ptr<LArRawChannelContainer_p1> col_vect( poolReadObject<LArRawChannelContainer_p1>() );
+      std::unique_ptr<LArRawChannelContainer_p1> col_vect( poolReadObject<LArRawChannelContainer_p1>(token) );
       trans_cont = converter.createTransient( col_vect.get(), log );
     }
   // old representation of LArRawChannelContainer
-  else if( compareClassGuid(guid_p0) )
+  else if( compareClassGuid(token, guid_p0) )
     {
       log << MSG::ERROR << "Reading of version 0 of LArRawChannelContainer not supported any more" << endmsg;
     

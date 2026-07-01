@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -172,21 +172,6 @@ class TrigInDetRecoData(ExecStep):
 
 
 ##################################################
-# Additional exec (athena) steps - extract Physics_Main when running on data
-##################################################
-
-class TrigBSExtr(ExecStep):
-    def __init__(self, name='TrigBSExtr'):
-        super(TrigBSExtr, self).__init__(name)
-        self.type = 'other'
-        self.executable = 'trigbs_extractStream.py'
-        self.input = ''
-        # the HLT step may produce several BS files, if we exceed the 2 GB file size limit
-        # process all BS files in trigbs_extractStream.py (by default, find_file only keeps the last one)
-        self.args = '-s Main ' + '`find . -name "*_HLTMPPy_output.*.data"`'
-
-
-##################################################
 # Additional exec (athena) steps - Tier0 Reco (BS->AOD)
 ##################################################
 
@@ -203,7 +188,7 @@ class TrigTZReco(ExecStep):
         self.input = ''
         self.explicit_input = True
         self.max_events = -1
-        self.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
+        self.args = '--inputBSFile=' + find_file('*.physics_Main.*.data')  # output of the previous step
         self.args += ' --outputAODFile=AOD.pool.root'
         self.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA23}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYS.py
 # This defines DAOD_PHYS, an unskimmed DAOD format for Run 3.
@@ -122,24 +122,31 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Medium_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Medium_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
-    StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]   
+    StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData] 
+    StaticContent += ["xAOD::VertexContainer#NVSI_SecVrt_Tight"]
+    StaticContent += ["xAOD::VertexAuxContainer#NVSI_SecVrt_TightAux."+excludedVertexAuxData]   
 
     PHYSSlimmingHelper.StaticContent = StaticContent
    
     # Extra content
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
-                                              "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
-                                              "TruthPrimaryVertices.t.x.y.z",
-                                              "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
-                                              "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
-                                              "TauJets.dRmax.etOverPtLeadTrk",
-                                              "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
-                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
-                                              "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey",
-                                              "HLT_AnomDet_ComboHypo.adScore"]
+    PHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
+                                          "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
+                                          "TruthPrimaryVertices.t.x.y.z",
+                                          "InDetTrackParticles.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
+                                          "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.HF_ClassificationC5J20.HF_ClassificationC5J25.HF_ClassificationC15J20.HF_ClassificationC15J25",
+                                          "TauJets.dRmax.etOverPtLeadTrk",
+                                          "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
+                                          "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
+                                          "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey",
+                                          "HLT_AnomDet_ComboHypo.adScore"]
 
     if addExtraVariables:
         PHYSSlimmingHelper.ExtraVariables += addExtraVariables
+
+    # HSGNN Score
+    from TrkConfig.VertexFindingFlags import VertexSortingSetup
+    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
+        PHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
 
     if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]
@@ -147,17 +154,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     # IFF extra content
     from LeptonTaggers.LeptonTaggersConfig import GetExtraPLITVariablesForDxAOD
     PHYSSlimmingHelper.ExtraVariables += GetExtraPLITVariablesForDxAOD()
-
-    # boosted jet taggers
-    PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthJetMass",
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthJetPt",
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthGroomedJetMass",
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthGroomedJetPt",
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthJetMass",
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthJetPt",
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthGroomedJetMass",
-                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_TruthGroomedJetPt"]
-
+                                  
     # Truth extra content
     if flags.Input.isMC:
 
@@ -177,6 +174,32 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
         acc.merge(AddTauAndDownstreamParticlesCfg(flags))
         PHYSSlimmingHelper.ExtraVariables += ["TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
                                               "TruthTausWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t"]
+        
+        #Truth jet matching variables - largeR
+        PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetMass",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetPt",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetEta",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetPhi",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetDR",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthJetGF",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthGroomedJetMass",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_MatchedTruthGroomedJetPt",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthJetMass",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthJetPt",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthJetEta",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthJetPhi",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_MatchedTruthJetDR",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_MatchedTruthJetGF",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthGroomedJetMass",
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10WZTruthLabel_R22v1_MatchedTruthGroomedJetPt"]
+
+        #Truth jet matching variables - smallR
+        PHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetMass",
+                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetPt",
+                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetEta",
+                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetPhi",
+                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetDR",
+                                              "AntiKt4EMPFlowJets.R4TruthLabel_MatchedTruthJetGF"]
 
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
@@ -205,6 +228,11 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     PHYSSlimmingHelper.IncludeMinBiasTriggerContent = False
     # Compact b-jet trigger matching info
     PHYSSlimmingHelper.IncludeBJetTriggerByYearContent = True
+
+    #Trigger content for DarkJetPEB 
+    if flags.Input.TriggerStream=='physics_DarkJetPEBTLA' and not flags.Input.isMC:
+        PHYSSlimmingHelper.AllVariables += ['HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
+                                            'HLT_MET_pfopufit']
 
     # Trigger matching
     # Run 2

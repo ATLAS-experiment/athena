@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -100,14 +100,14 @@ void eflowEEtaBinnedParameters::initialise(const std::vector<double>& eBinBounds
     //deals with e = 0 bin to avoid dividing by zero
     if (lowerEBound < FLT_MIN) lowerEBound = FLT_MIN;
 
-    weight = log(higherEBound / e) / log(higherEBound / lowerEBound);
+    weight = std::log(higherEBound / e) / std::log(higherEBound / lowerEBound);
   }
   return weight;
 }
 
 eflowFirstIntENUM 
 eflowEEtaBinnedParameters::adjustLFI(double e, double eta,
-                                                   eflowFirstIntENUM j1st, bool useLegacyEnergyBinIndexing) const {
+				     eflowFirstIntENUM j1st, bool useLegacyEnergyBinIndexing) const {
 
 
   int eBinIndex = 0;               
@@ -120,13 +120,13 @@ eflowEEtaBinnedParameters::adjustLFI(double e, double eta,
   //hard code this check - needs to be rechecked if ever remake e/p tables
   //if e.g track extrapolation slightly off can have inconsistent j1st and eta (e.g eta = 1.52, j1st = EMB2) and hence fudgeMean is zero
   if (0 <= eBinIndex && eBinIndex <= 5) {
-    if (fabs(eta) < 1.5) {
+    if (std::fabs(eta) < 1.5) {
       if (eflowFirstIntRegions::EME1 == j1st) j1st = eflowFirstIntRegions::EMB1;
       if (eflowFirstIntRegions::EME2 == j1st) j1st = eflowFirstIntRegions::EMB2;
       if (eflowFirstIntRegions::EME3 == j1st) j1st = eflowFirstIntRegions::EMB3;
       if (eflowFirstIntRegions::HEC == j1st) j1st = eflowFirstIntRegions::Tile;
     }
-    if (fabs(eta) >= 1.6) {
+    if (std::fabs(eta) >= 1.6) {
       if (eflowFirstIntRegions::EMB1 == j1st) j1st = eflowFirstIntRegions::EME1;
       if (eflowFirstIntRegions::EMB2 == j1st) j1st = eflowFirstIntRegions::EME2;
       if (eflowFirstIntRegions::EMB3 == j1st) j1st = eflowFirstIntRegions::EME3;
@@ -136,29 +136,29 @@ eflowEEtaBinnedParameters::adjustLFI(double e, double eta,
   }
 
   if (0 == eBinIndex || 1 == eBinIndex) {
-    if (fabs(eta) >= 1.0 && fabs(eta) < 1.1) {
+    if (std::fabs(eta) >= 1.0 && std::fabs(eta) < 1.1) {
       if(eflowFirstIntRegions::Tile == j1st) j1st = eflowFirstIntRegions::EMB3;
     }
-    else if (fabs(eta) >= 1.2 && fabs(eta) < 1.3) {
+    else if (std::fabs(eta) >= 1.2 && std::fabs(eta) < 1.3) {
       if(eflowFirstIntRegions::Tile == j1st) j1st = eflowFirstIntRegions::EMB3;
     }
-    else if (fabs(eta) >= 1.5 && fabs(eta) < 1.6) {
+    else if (std::fabs(eta) >= 1.5 && std::fabs(eta) < 1.6) {
       if(eflowFirstIntRegions::EMB3 == j1st) j1st = eflowFirstIntRegions::EME3;
     }
 
   } else if (2 == eBinIndex) {
-    if (fabs(eta) >= 1.5 && fabs(eta) < 1.6) {
+    if (std::fabs(eta) >= 1.5 && std::fabs(eta) < 1.6) {
       if(eflowFirstIntRegions::EMB2 == j1st) j1st = eflowFirstIntRegions::EME2;
     }
 
   } else if (3 == eBinIndex) {
-    if (fabs(eta) >= 1.5 && fabs(eta) < 1.6) {
+    if (std::fabs(eta) >= 1.5 && fabs(eta) < 1.6) {
       if (eflowFirstIntRegions::EMB2 == j1st) j1st = eflowFirstIntRegions::EME2;
       if (eflowFirstIntRegions::EMB1 == j1st) j1st = eflowFirstIntRegions::EME1;
     }
 
   } else if (4 == eBinIndex || 5 == eBinIndex) {
-    if (fabs(eta) >= 1.5 && fabs(eta) < 1.6) {
+    if (std::fabs(eta) >= 1.5 && std::fabs(eta) < 1.6) {
       if(eflowFirstIntRegions::EMB1 == j1st) j1st = eflowFirstIntRegions::EME1;
     }
   }

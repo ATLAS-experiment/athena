@@ -2,9 +2,13 @@
 
 from Herwig7_i.Herwig7_iConf import Herwig7
 from Herwig7_i.Herwig7ConfigBuiltinME import Hw7ConfigBuiltinME
+from Herwig7_i.Herwig7Control import herwig_version
 
 genSeq += Herwig7()
 Herwig7Config = Hw7ConfigBuiltinME(genSeq, runArgs)
 
 # Set Herwig7 for evgen
 evgenConfig.generators += ["Herwig7"]
+
+## Set the tune metadata based on version number
+evgenConfig.tune = "H"+herwig_version()+"-Default"

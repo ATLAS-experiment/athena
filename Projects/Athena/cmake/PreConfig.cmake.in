@@ -19,9 +19,6 @@ set( CMAKE_SYCL_STANDARD "@CMAKE_SYCL_STANDARD@"
 set( CMAKE_CUDA_ARCHITECTURES "@CMAKE_CUDA_ARCHITECTURES@" CACHE STRING
    "CUDA architectures to build code for" )
 
-# HepMC3
-set( HEPMC3_USE @HEPMC3_USE@ CACHE BOOL "Use HepMC3 in the project" )
-
 # Use the -pthread flag for the build instead of the -lpthread linker option,
 # if the main project was set up in that way.
 set( THREADS_PREFER_PTHREAD_FLAG @THREADS_PREFER_PTHREAD_FLAG@ CACHE BOOL
@@ -40,6 +37,10 @@ option( ATLAS_USE_CPPCHECK "Use CppCheck in the build" @ATLAS_USE_CPPCHECK@ )
 set( ATLAS_GEANT4_USE_LTO @ATLAS_GEANT4_USE_LTO@ CACHE BOOL
    "Use link-time-optimization in building AtlasGeant4" )
 
+# Look for optional languages.
+include( CheckLanguage )
+check_language( CUDA )
+
 # Figure out whether to use QUIET in the following calls.
 set( _quietFlag )
 if( Athena_FIND_QUIETLY )
@@ -55,14 +56,19 @@ find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
 # Due to the way CMake handles propagation of targets to dependees,
 # any "external" that is used through imported targets in the build need
 # to be imported explicitly here.
-find_package( Acts ${_quietFlag} COMPONENTS Core )
+if( CMAKE_CUDA_COMPILER )
+   find_package( CUDAToolkit ${_quietFlag} )
+endif()
+find_package( Acts ${_quietFlag} )
+if( TARGET Acts::PluginDetray )
+   find_package( traccc ${_quietFlag} )
+endif()
 find_package( nlohmann_json ${_quietFlag} )
 find_package( Qt5 ${_quietFlag} COMPONENTS Core OpenGL Gui PrintSupport Widgets
    Sql Network )
 find_package( GTest ${_quietFlag} )
 find_package( Geant4 ${_quietFlag} )
 find_package( Boost ${_quietFlag} COMPONENTS ALL )
-find_package( SQLite3 ${_quietFlag} )
 
 # Set the versions of the TDAQ projects:
 set( TDAQ_PROJECT_NAME "@TDAQ_PROJECT_NAME@" CACHE STRING

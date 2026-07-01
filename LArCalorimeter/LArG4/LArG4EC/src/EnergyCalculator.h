@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator.h
@@ -23,8 +23,7 @@
 #ifndef LArG4_EC_EnergyCalculator_H
 #define LArG4_EC_EnergyCalculator_H
 
-#include <string>
-#include <stdexcept>
+
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -42,7 +41,9 @@
 #include "G4ThreeVector.hh"
 #include "HVHelper.h"
 #include "globals.hh"
-
+#include <string>
+#include <vector>
+#include <memory>
 class ILArCalibCalculatorSvc;
 class LArG4BirksLaw;
 
@@ -196,27 +197,27 @@ namespace LArG4 {
       static const G4double s_inv_AverageGap;
 
       struct Fold_Efield_Map{
-        G4bool    FieldMapPrepared;
-        G4double*  FieldMap;           // [NumberOfRadialLayers][ZYWeight][MaxNofPoints];
-        G4double* MinZofLayer;        //these are limits of the
-        G4double* MaxZofLayer;        //area where  the FieldMap can
-        G4double* MinYofLayer;        //be used for interpolation
-        G4double* MaxYofLayer;
-        G4int*    NofColofLayer;      // a column is parallel to y
-        G4int*    NofRowofLayer;      // a row is  parallel to z
-        G4int*    NofPointsinLayer;
-        G4int*    pLayer;
+        G4bool    FieldMapPrepared = false;
+        G4double*  FieldMap{};           // [NumberOfRadialLayers][ZYWeight][MaxNofPoints];
+        G4double* MinZofLayer{};        //these are limits of the
+        G4double* MaxZofLayer{};        //area where  the FieldMap can
+        G4double* MinYofLayer{};        //be used for interpolation
+        G4double* MaxYofLayer{};
+        G4int*    NofColofLayer{};      // a column is parallel to y
+        G4int*    NofRowofLayer{};      // a row is  parallel to z
+        G4int*    NofPointsinLayer{};
+        G4int*    pLayer{};
       };
 
-      struct Wheel_Efield_Map {G4bool          FieldMapPrepared;
-        G4int           NumberOfRadialLayer;
-        G4double*       RadiusOfLayers;
-        G4double*       FoldinAngleOfLayers;
-        G4double*       HalfLArGapSizeOfLayers;
-        Fold_Efield_Map* Fold;
-        Fold_Efield_Map Fold0;
-        Fold_Efield_Map Fold1;
-        G4double  GridShift;
+      struct Wheel_Efield_Map {G4bool          FieldMapPrepared = false;
+        G4int           NumberOfRadialLayer = 0;
+        G4double*       RadiusOfLayers{};
+        G4double*       FoldinAngleOfLayers{};
+        G4double*       HalfLArGapSizeOfLayers{};
+        Fold_Efield_Map* Fold{};
+        Fold_Efield_Map Fold0{};
+        Fold_Efield_Map Fold1{};
+        G4double  GridShift = 0;
       };
 
       Wheel_Efield_Map m_ChCollInner{},m_ChCollOuter{}; // used as const after init

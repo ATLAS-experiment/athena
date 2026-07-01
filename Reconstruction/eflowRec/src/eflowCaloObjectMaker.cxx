@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -39,7 +39,7 @@ unsigned int eflowCaloObjectMaker::makeTrkCluCaloObjects(std::vector<eflowRecTra
   unsigned int result(0);
 
   /* Create all eflowCaloObjects that contain only eflowRecTracks and cache eflowRecTracks matched with cluster */
-  std::vector<eflowRecTrack*> tracksToConsider;  tracksToConsider.clear();
+  std::vector<eflowRecTrack*> tracksToConsider;
   unsigned int nTrack = tracksToRecover.size();
   for (unsigned int iTrack=0; iTrack<nTrack; ++iTrack) {
     eflowRecTrack *thisEflowRecTrack = static_cast<eflowRecTrack*>(tracksToRecover.at(iTrack));
@@ -71,12 +71,12 @@ unsigned int eflowCaloObjectMaker::makeTrkCluCaloObjects(std::vector<eflowRecTra
     /* one loop creates one CaloObject */
     do {
       /* temporary vector for next loop */
-      std::vector<eflowRecTrack*> trackForNextLoop; trackForNextLoop.clear();
-      std::vector<eflowRecCluster*> clusterForNextLoop; clusterForNextLoop.clear();
+      std::vector<eflowRecTrack*> trackForNextLoop;
+      std::vector<eflowRecCluster*> clusterForNextLoop;
       
       /* track/cluster vector for CaloObject */
-      std::vector<eflowRecTrack*> trackList; trackList.clear();
-      std::vector<eflowRecCluster*> clusterList; clusterList.clear();
+      std::vector<eflowRecTrack*> trackList;
+      std::vector<eflowRecCluster*> clusterList;
       
       /* initiallize trackForNextLoop by the first track in tracksToConsider */
       trackForNextLoop.push_back(tracksToConsider.at(0));
@@ -118,10 +118,10 @@ unsigned int eflowCaloObjectMaker::makeTrkCluCaloObjects(std::vector<eflowRecTra
 }
 
 std::vector<eflowRecCluster*> eflowCaloObjectMaker::uniqCluster(const std::vector<eflowRecTrack*>& trackForNextLoop, const std::vector<eflowRecCluster*>& clusterList) {
-  std::vector<eflowRecCluster*> result; result.clear();
-  std::vector<int> allClusterId; allClusterId.clear();
+  std::vector<eflowRecCluster*> result;
+  std::vector<int> allClusterId;
   for(auto *itr_track : trackForNextLoop) {
-    std::vector<eflowTrackClusterLink*> allLinks = itr_track->getClusterMatches();
+    const std::vector<eflowTrackClusterLink*>& allLinks = itr_track->getClusterMatches();
     for(auto *allLink : allLinks) {
       int id = allLink->getCluster()->getClusterId();
       bool notInList(true);
@@ -143,8 +143,8 @@ std::vector<eflowRecCluster*> eflowCaloObjectMaker::uniqCluster(const std::vecto
 }
 
 std::vector<eflowRecTrack*> eflowCaloObjectMaker::uniqTrack(const std::vector<eflowRecCluster*>& clusterForNextLoop, const std::vector<eflowRecTrack*>& trackList) {
-  std::vector<eflowRecTrack*> result; result.clear();
-  std::vector<int> allTrackId; allTrackId.clear();
+  std::vector<eflowRecTrack*> result;
+  std::vector<int> allTrackId;
   for(auto *itr_cluster : clusterForNextLoop) {
     std::vector<eflowTrackClusterLink*> allLinks = itr_cluster->getTrackMatches();
     for(auto *allLink : allLinks) {

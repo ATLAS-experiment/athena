@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -920,8 +920,8 @@ namespace dqutils
       if (i != (pathname.size() - 1)) {
         pathname += "/";
       }
-      std::string idirStatus = "Undefined";
-      std::string idirAlg = "Undefined";
+      static const std::string idirStatus = "Undefined";
+      static const std::string idirAlg = "Undefined";
       std::string indent = (idirName == "<top_level>") ? "" : getIndentation(idirName, "  ");
       if (!streamAll) {
         std::string::size_type idirNamei = idirName.find_last_of('/');
@@ -986,8 +986,8 @@ namespace dqutils
       if (i != (pathname.size() - 1)) {
         pathname += "/";
       }
-      std::string idirStatus = "Undefined";
-      std::string idirAlg = "Undefined";
+      static const std::string idirStatus = "Undefined";
+      static const std::string idirAlg = "Undefined";
       std::string indent = (idirName == "<top_level>") ? "" : getIndentation(idirName, "  ");
       if (!streamAll) {
         std::string::size_type idirNamei = idirName.find_last_of('/');

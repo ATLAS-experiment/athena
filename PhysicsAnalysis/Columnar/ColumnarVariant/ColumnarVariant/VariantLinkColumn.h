@@ -63,13 +63,13 @@ namespace columnar
     }
 
     /// whether this is a valid link
-    explicit operator bool () const noexcept
+    explicit operator bool () const 
     {
       return m_link->isValid();
     }
 
     /// whether this is a valid link
-    [[nodiscard]] bool has_value () const noexcept
+    [[nodiscard]] bool has_value () const 
     {
       return m_link->isValid();
     }
@@ -343,13 +343,15 @@ namespace columnar
 
         auto dataInfo = options.makeColumnInfo();
         dataInfo.offsetName = optionsArray.offsetName;
-        dataInfo.variantLinkKeyColumn = keysName;
-        dataInfo.linkTargetNames.reserve (VariantCI::numVariants);
-        for (unsigned i = 0; i < VariantCI::numVariants; ++ i)
-          dataInfo.linkTargetNames.emplace_back (containerIdNames[i]);
+        dataInfo.isVariantLink = true;
+
         auto keyInfo = options.makeColumnInfo();
         keyInfo.accessMode = ColumnAccessMode::input;
         keyInfo.fixedDimensions.push_back (VariantCI::numVariants);
+        keyInfo.keyColumnForVariantLink = dataName;
+        keyInfo.variantLinkTargetNames.reserve (VariantCI::numVariants);
+        for (unsigned i = 0; i < VariantCI::numVariants; ++ i)
+          keyInfo.variantLinkTargetNames.emplace_back (containerIdNames[i]);
 
         m_dataData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_dataData, &typeid (typename CM::LinkIndexType), CAM);
         columnarTool.addColumn (dataName, m_dataData.get(), std::move (dataInfo));

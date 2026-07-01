@@ -48,7 +48,7 @@ StatusCode TRTStrawStatusRead::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode TRTStrawStatusRead::execute()
+StatusCode TRTStrawStatusRead::execute(const EventContext& /*ctx*/)
 {
 
     StatusCode sc = StatusCode::SUCCESS;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -34,6 +34,7 @@
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/FakeBkgCalculatorAlg.h>
+#include <AsgAnalysisAlgorithms/HSTPFilterAlg.h>
 #include <AsgAnalysisAlgorithms/IOStatsAlg.h>
 #include <AsgAnalysisAlgorithms/KinematicHistAlg.h>
 #include <AsgAnalysisAlgorithms/LeptonSFCalculatorAlg.h>
@@ -44,6 +45,7 @@
 #include <AsgAnalysisAlgorithms/PDFinfoAlg.h>
 #include <AsgAnalysisAlgorithms/PDFReweightAlg.h>
 #include <AsgAnalysisAlgorithms/PMGTruthWeightAlg.h>
+#include <AsgAnalysisAlgorithms/RNtupleTreeMakerAlg.h>
 #include <AsgAnalysisAlgorithms/SysTruthWeightAlg.h>
 #include <AsgAnalysisAlgorithms/SysListDumperAlg.h>
 #include <AsgAnalysisAlgorithms/SystObjectLinkerAlg.h>
@@ -86,6 +88,7 @@ DECLARE_COMPONENT (CP::EventFlagSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)
 DECLARE_COMPONENT (CP::EventStatusSelectionAlg)
 DECLARE_COMPONENT (CP::FakeBkgCalculatorAlg)
+DECLARE_COMPONENT (CP::HSTPFilterAlg)
 DECLARE_COMPONENT (CP::IOStatsAlg)
 DECLARE_COMPONENT (CP::KinematicHistAlg)
 DECLARE_COMPONENT (CP::LeptonSFCalculatorAlg)
@@ -96,6 +99,7 @@ DECLARE_COMPONENT (CP::PileupReweightingAlg)
 DECLARE_COMPONENT (CP::PDFinfoAlg)
 DECLARE_COMPONENT (CP::PDFReweightAlg)
 DECLARE_COMPONENT (CP::PMGTruthWeightAlg)
+DECLARE_COMPONENT (CP::RNtupleTreeMakerAlg)
 DECLARE_COMPONENT (CP::SysTruthWeightAlg)
 DECLARE_COMPONENT (CP::SysListDumperAlg)
 DECLARE_COMPONENT (CP::SystObjectLinkerAlg)

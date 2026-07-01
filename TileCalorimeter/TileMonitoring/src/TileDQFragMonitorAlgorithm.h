@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEDQFRAGMONITORALGORITHM_H
@@ -138,8 +138,8 @@ class TileDQFragMonitorAlgorithm : public AthMonitorAlgorithm {
     // TileInfo
     std::string m_infoName = "TileInfo";
     const TileInfo* m_tileInfo{nullptr};
-    float m_ADCmaxMinusEps;
-    float m_ADCmaskValueMinusEps; //!< indicates channels which were masked in background dataset
+    float m_ADCmaxMinusEps{};
+    float m_ADCmaskValueMinusEps{}; //!< indicates channels which were masked in background dataset
 
 };
 

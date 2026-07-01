@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // test interface for a wrapper module that can open various kinds of neural
@@ -16,7 +16,7 @@
 #include <vector>
 
 using ISF_FCS::MLogging;
-
+//coverity[UNCAUGHT_EXCEPT]
 int main() {
   ISF_FCS::MLogging logger;
   ATH_MSG_NOCLASS(logger, "Running TFCSEnergyAndHitGANV2 on LWTNN");

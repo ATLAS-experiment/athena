@@ -127,9 +127,8 @@ StatusCode PixelPrepDataToxAOD::initialize()
 //        Execute method: 
 //
 /////////////////////////////////////////////////////////////////////
-StatusCode PixelPrepDataToxAOD::execute() 
+StatusCode PixelPrepDataToxAOD::execute(const EventContext& ctx) 
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   //Mandatory. Require if the algorithm is scheduled.
   SG::ReadHandle<InDet::PixelClusterContainer> PixelClusterContainer(m_clustercontainer_key,ctx);
   
@@ -852,7 +851,11 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
 
   std::vector< std::vector<float> > matrixOfToT (sizeX, std::vector<float>(sizeY,0) );
   std::vector< std::vector<float> > matrixOfCharge(sizeX, std::vector<float>(sizeY,0));
-  std::vector<float> vectorOfPitchesY(sizeY,0.4);
+  // Seed with the module's nominal pitch (from the design), as in
+  // NnClusterizationFactory::createInput; correct for ITk (25x100 / 50x50 um)
+  // where the old literal 0.4 (eta) seed and the >0.1 fill guard were both wrong.
+  std::vector<float> vectorOfPitchesY(sizeY, design->etaPitch());
+  std::vector<float> vectorOfPitchesX(sizeX, design->phiPitch());
 
 
   //Itererate over all elements hits in the cluster and fill the charge and tot matrices 
@@ -887,6 +890,7 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
     InDetDD::SiCellId  cellId = de->cellIdFromIdentifier(*rdosBegin);
     InDetDD::SiDiodesParameters diodeParameters = design->parameters(cellId);
     float pitchY = diodeParameters.width().xEta();
+    float pitchX = diodeParameters.width().xPhi();
   
     if ( (not totList.empty()) && tot    != totList.end()) {
       matrixOfToT[absphiPixelIndex][absetaPixelIndex]   =*tot;
@@ -898,10 +902,11 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
      ++charge;
     } else matrixOfCharge[absphiPixelIndex][absetaPixelIndex] = -1;
   
-    if (pitchY > 0.1)
-    {
-      vectorOfPitchesY[absetaPixelIndex]=pitchY;
-    }
+    // Store the real per-cell pitch, built the same way as
+    // NnClusterizationFactory::createInput so the dumped training inputs match
+    // the runtime inference inputs.
+    vectorOfPitchesY[absetaPixelIndex]=pitchY;
+    vectorOfPitchesX[absphiPixelIndex]=pitchX;
   }//end iteration on rdos
   
 
@@ -969,6 +974,7 @@ void PixelPrepDataToxAOD::addNNInformation(xAOD::TrackMeasurementValidation* xpr
   AUXDATA(xprd, std::vector<float>, NN_matrixOfToT)      = vectorOfToT;
   AUXDATA(xprd, std::vector<float>, NN_matrixOfCharge)   = vectorOfCharge;
   AUXDATA(xprd, std::vector<float>, NN_vectorOfPitchesY) = vectorOfPitchesY;
+  AUXDATA(xprd, std::vector<float>, NN_vectorOfPitchesX) = vectorOfPitchesX;
   
   
   AUXDATA(xprd, int, NN_etaPixelIndexWeightedPosition) = etaPixelIndexWeightedPosition;
@@ -1121,20 +1127,11 @@ void  PixelPrepDataToxAOD::addNNTruthInfo(  xAOD::TrackMeasurementValidation* xp
       truep[hitNumber]  = std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z());
       const auto vertex =  particle->production_vertex();
 //AV Please note that taking the first particle as a mother is ambiguous.
-#ifdef HEPMC3
       if ( vertex && !vertex->particles_in().empty()){
         const auto& mother_of_particle=vertex->particles_in().front();             
         motherUniqueID[hitNumber] =  HepMC::uniqueID(mother_of_particle);
         motherPdgid[hitNumber]    = mother_of_particle->pdg_id();
       }
-#else
-      if ( vertex ){
-        if( vertex->particles_in_const_begin() !=  vertex->particles_in_const_end() ){
-          motherUniqueID[hitNumber] =  HepMC::uniqueID(*vertex->particles_in_const_begin());
-          motherPdgid[hitNumber]    =  (*vertex->particles_in_const_begin())->pdg_id();
-        }
-      }
-#endif
     }
     chargeDep[hitNumber] = siHit.energyLoss() ;
     

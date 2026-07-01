@@ -1186,10 +1186,9 @@ namespace Muon {
             } else {
                 const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(*it);
                 if (crot) {
-                    const std::vector<const MuonClusterOnTrack*>& rots = crot->containedROTs();
-                    std::vector<const MuonClusterOnTrack*>::const_iterator rit = rots.begin();
-                    std::vector<const MuonClusterOnTrack*>::const_iterator rit_end = rots.end();
-                    for (; rit != rit_end; ++rit) ids.insert((*rit)->identify());
+                    std::ranges::for_each(crot->containedROTs(),  [&ids](const auto& rot){
+                        ids.insert(rot->identify());
+                    });
                 }
             }
         }

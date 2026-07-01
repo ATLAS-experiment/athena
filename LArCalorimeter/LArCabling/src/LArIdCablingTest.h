@@ -20,7 +20,7 @@ public:
   ~LArIdCablingTest();
 
   virtual StatusCode initialize() final;
-  virtual StatusCode execute() final;
+  virtual StatusCode execute(const EventContext& ctx) final;
 
 private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap"};

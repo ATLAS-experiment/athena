@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReweightUtils includes
@@ -62,9 +62,9 @@ StatusCode SumOfWeightsAlg::initialize ATLAS_NOT_THREAD_SAFE () {
 
 //**********************************************************************
 
-StatusCode SumOfWeightsAlg::execute() {  
+StatusCode SumOfWeightsAlg::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG ("Executing " << name() << ", will loop over WeightTools...");
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
 
   for (std::size_t i = 0; i < m_cutIDs.size(); ++i) {
     float weight = m_weightTools[i]->getWeight();

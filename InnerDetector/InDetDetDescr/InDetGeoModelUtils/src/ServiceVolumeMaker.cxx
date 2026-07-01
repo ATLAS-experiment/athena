@@ -300,7 +300,7 @@ namespace InDetDD {
     param->setVolName(m_mgr->volName(ii));
 
     double zShift = 0.;           // the famous IBL Z shift
-    if (m_mgr->shiftFlag(ii) > 0) zShift = m_layerShift[m_mgr->shiftFlag(ii) - 100];
+    if (m_mgr->shiftFlag(ii) >= 100) zShift = m_layerShift[m_mgr->shiftFlag(ii) - 100];
     param->setZShift(zShift);
 
     int volId = m_mgr->volId(ii);

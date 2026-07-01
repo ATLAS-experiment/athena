@@ -16,16 +16,23 @@
 exec 2>&1
 run() { (set -x; exec "$@") }
 
-relname="r25.0.49"
+relname="r25.0.59"
 
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
 dcubeXml_lrt=IDPVMPlots_lrt.xml                                                                                                                                                
 dcubeRef_lrt=${artdata}/InDetPhysValMonitoring/ReferenceHistograms/${relname}/physval_ttbarPU40_reco.root
+idtpmConfig=test_ttbarPU40_reco_IDTPMvsIDPVM.json
+IDPVMtoIDTPMcnv=test_ttbarPU40_reco_IDPVMtoIDTPMcnv.txt
+dcubeXml_IDTPMcmp=dcube_IDTPMvsIDPVMPlots.xml
 
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_lrt -print -quit 2>/dev/null)
+idtpmConfigAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $idtpmConfig -print -quit 2>/dev/null)
+IDPVMtoIDTPMcnvAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $IDPVMtoIDTPMcnv -print -quit 2>/dev/null)
+dcubeXmlIDTPMcmpAbsPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXml_IDTPMcmp -print -quit 2>/dev/null )
+
 # Don't run if dcube config not found
 if [ -z "$dcubeXmlAbsPath" ]; then
     echo "art-result: 1 dcube-xml-config"
@@ -37,17 +44,14 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 run Reco_tf.py \
-  --CA \
   --runNumber="801271" \
   --AMITag="r14519" \
-  --autoConfiguration="everything" \
   --conditionsTag "default:${conditions}" \
   --inputRDOFile     ${ArtInFile} \
   --outputAODFile   physval.AOD.root \
-  --steering        doRAWtoALL \
   --checkEventCount False \
   --ignoreErrors    True \
-  --maxEvents       100 
+  --maxEvents       100
 rec_tf_exit_code=$?
 echo "art-result: $rec_tf_exit_code reco"
 
@@ -55,6 +59,8 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
   #run IDPVM for IDTIDE derivation
   #for LRT
   run runIDPVM.py --doLargeD0Tracks --filesInput physval.AOD.root --outputFile physval_lrt.ntuple.root
+  run runIDTPM.py --inputFileNames physval.AOD.root --trkAnaCfgFile $idtpmConfigAbsPath --outputFilePrefix idtpm
+
 
   echo "download latest result"
   run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
@@ -76,6 +82,23 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
     -r ${lastref_dir}/physval_lrt.ntuple.root \
     physval_lrt.ntuple.root
   echo "art-result: $? shifter_plots_lrt_last"
+
+
+
+  # convert IDPVM output to IDTPM's format
+  echo "Converting IDPVM output for comparison..."
+  IDTPMcnv.py -i physval_lrt.ntuple.root -c ${IDPVMtoIDTPMcnvAbsPath} -o IDTPMcnv
+
+
+  echo "compare with IDTPM"
+  $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
+    -p -x dcube_idtpm \
+    -c ${dcubeXmlIDTPMcmpAbsPath} \
+    -r physval_lrt.ntuple.IDTPMcnv.root \
+    -R 'ref=IDPVM' -M 'mon=IDTPM' \
+    idtpm.HIST.root
+  echo "art-result: $? shifter_plots_idtpm"
+
 fi
 
 echo "Clean up output directory (based on compiler)"

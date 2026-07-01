@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTUTILS_PARTICLEREMOVERALG_H
@@ -23,15 +23,16 @@ class ParticleRemoverAlg: public ::AthAlgorithm {
   virtual StatusCode  initialize();
 
   /// Standard Gaudi execute method called once for every event
-  virtual StatusCode  execute();
+  virtual StatusCode  execute(const EventContext& ctx);
 
   /// Standard Gaudi finalize method called once after the event loop
   virtual StatusCode  finalize();
 
  private:
-   /// Private function to perform the actualy work
+   /// Private function to perform the actual work
    template<class CONT>
-   StatusCode removeParticles( const std::vector<bool>& keepParticleVec );
+   StatusCode removeParticles( const std::vector<bool>& keepParticleVec,
+                               const EventContext& ctx );
 
  private:
 

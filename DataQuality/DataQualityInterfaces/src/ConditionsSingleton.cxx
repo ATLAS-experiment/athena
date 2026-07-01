@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/ConditionsSingleton.h"
@@ -13,6 +13,10 @@
 #include "boost/tokenizer.hpp"
 #include <boost/algorithm/string.hpp>
 #include "boost/algorithm/string/split.hpp"
+
+namespace{
+  const std::string equalStr{"="};
+}
 
 namespace dqi{
 
@@ -122,10 +126,11 @@ namespace dqi{
     std::erase(cleanCond,' ');//delete all spaces
     boost::char_separator<char> condSep(","); //filed seperator for conditions and respective reference
     tokenizer conditionPairs(condition, condSep);
+    
     for (tokenizer::const_iterator tok_iter = conditionPairs.begin();
-	 tok_iter != conditionPairs.end(); ++tok_iter) {
+	     tok_iter != conditionPairs.end(); ++tok_iter) {
       std::vector<std::string> splitpairs;
-      boost::split(splitpairs, *tok_iter, boost::is_any_of(std::string("=")));
+      boost::split(splitpairs, *tok_iter, boost::is_any_of(equalStr));
       if (splitpairs.size() != 2) {
 	std::cerr << "WARNING: malformed condition \"" << *tok_iter << "\"" << std::endl;
 	continue;

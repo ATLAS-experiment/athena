@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArParams2Ntuple.h"
@@ -256,7 +256,7 @@ StatusCode LArParams2Ntuple::stop() {
   // first, scan all complete data structures to collect a map of channels
   //
 
-  int nGains = (int)CaloGain::LARNGAIN ;
+  int nGains = m_NGains.value() ;
 
   m_dump_flags_map.resize(nGains) ;  // map of channels to be dumped; resized to host 3 gains
 
@@ -524,7 +524,7 @@ StatusCode LArParams2Ntuple::scanReadoutChannels( const DATA*& data_object ) {
   StatusCode sc = m_detStore->retrieve(data_object,detStoreKey) ;
   if ( sc == StatusCode::FAILURE ) {
     ATH_MSG_VERBOSE("... failed! Trying without key ...");
-    StatusCode sc = m_detStore->retrieve(data_object) ;
+    sc = m_detStore->retrieve(data_object) ;
   }
 
   if ( sc == StatusCode::FAILURE ) {
@@ -536,7 +536,7 @@ StatusCode LArParams2Ntuple::scanReadoutChannels( const DATA*& data_object ) {
 
   ATH_MSG_VERBOSE("... " << dataName << " retrieved");
 
-  unsigned nGains = (int)CaloGain::LARNGAIN ;
+  unsigned nGains = m_NGains.value() ;
   if ( ! useGain ) nGains = 1 ;  // data are gain-independent
 
   for ( unsigned gain=0 ; gain<nGains ; gain++) {
@@ -588,7 +588,7 @@ StatusCode LArParams2Ntuple::scanCalibChannels( const DATA*& data_object ) {
   StatusCode sc = m_detStore->retrieve(data_object,detStoreKey) ;
   if ( sc == StatusCode::FAILURE ) {
     ATH_MSG_VERBOSE("... failed! Trying without key ...");
-    StatusCode sc = m_detStore->retrieve(data_object) ;
+    sc = m_detStore->retrieve(data_object) ;
   }
 
   if ( sc == StatusCode::FAILURE ) {
@@ -665,7 +665,7 @@ StatusCode LArParams2Ntuple::retrieveFromDetStore( const DATA*& data_object ) {
     StatusCode sc = m_detStore->retrieve(data_object,detStoreKey) ;
     if ( sc == StatusCode::FAILURE ) {
       ATH_MSG_VERBOSE("... failed! Trying without key ...");
-      StatusCode sc = m_detStore->retrieve(data_object) ;
+      sc = m_detStore->retrieve(data_object) ;
     }
     if ( sc == StatusCode::FAILURE ) {
       ATH_MSG_WARNING( "Could not retrieve " << dataName << " from detector store!" ) ;

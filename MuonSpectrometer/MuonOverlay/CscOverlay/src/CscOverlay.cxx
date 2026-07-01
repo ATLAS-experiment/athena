@@ -43,7 +43,7 @@ StatusCode CscOverlay::initialize() {
   //random number initialization
   ATH_CHECK(m_rndmSvc.retrieve());
 
-  ATH_CHECK( m_bkgInputKey.initialize() );
+  ATH_CHECK( m_bkgInputKey.initialize(!m_bkgInputKey.empty()) );
   ATH_CHECK( m_signalInputKey.initialize() );
   ATH_CHECK( m_outputKey.initialize() );
 
@@ -54,13 +54,16 @@ StatusCode CscOverlay::initialize() {
 StatusCode CscOverlay::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("execute() begin");
 
-
-  SG::ReadHandle<CscRawDataContainer> bkgContainer(m_bkgInputKey, ctx);
-  if(!bkgContainer.isValid()) {
-    ATH_MSG_ERROR("Could not get background CscRawDataContainer called " << bkgContainer.name() << " from store " << bkgContainer.store());
-    return StatusCode::FAILURE;
+  const CscRawDataContainer *bkgContainerPtr = nullptr;
+  if (!m_bkgInputKey.empty()) {
+    SG::ReadHandle<CscRawDataContainer> bkgContainer(m_bkgInputKey, ctx);
+    if(!bkgContainer.isValid()) {
+      ATH_MSG_ERROR("Could not get background CscRawDataContainer called " << bkgContainer.name() << " from store " << bkgContainer.store());
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG("Found background CscRawDataContainer called " << bkgContainer.name() << " in store " << bkgContainer.store());
+    bkgContainerPtr = bkgContainer.cptr();
   }
-  ATH_MSG_DEBUG("Found background CscRawDataContainer called " << bkgContainer.name() << " in store " << bkgContainer.store());
 
   SG::ReadHandle<CscRawDataContainer> signalContainer(m_signalInputKey, ctx);
   if(!signalContainer.isValid()) {
@@ -70,7 +73,7 @@ StatusCode CscOverlay::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Found signal CscRawOverlayContainer called " << signalContainer.name() << " in store " << signalContainer.store());
 
   SG::WriteHandle<CscRawDataContainer> outputContainer(m_outputKey, ctx);
-  ATH_CHECK(outputContainer.record(std::make_unique<CscRawDataContainer>(bkgContainer->size())));
+  ATH_CHECK(outputContainer.record(std::make_unique<CscRawDataContainer>(signalContainer->size())));
   if (!outputContainer.isValid()) {
     ATH_MSG_ERROR("Could not record output CscRawOverlayContainer called " << outputContainer.name() << " to store " << outputContainer.store());
     return StatusCode::FAILURE;
@@ -78,7 +81,7 @@ StatusCode CscOverlay::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Recorded output CscRawOverlayContainer called " << outputContainer.name() << " in store " << outputContainer.store());
 
   // now do the overlay
-  ATH_CHECK(overlayContainer(bkgContainer.cptr(), signalContainer.cptr(), outputContainer.ptr()));
+  ATH_CHECK(overlayContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr()));
 
 
   ATH_MSG_DEBUG("execute() end");

@@ -43,10 +43,12 @@ namespace LArG4 {
     {
     }
 
-    G4bool CalibrationCalculator::Process(const G4Step* step, LArG4Identifier & identifier,
-                                          std::vector<G4double> & energies,
-                                          const eCalculatorProcessing process) const
-    {
+    G4bool CalibrationCalculator::Process(const G4Step* step,
+      LArG4Identifier& identifier,
+      [[maybe_unused]] LArG4Identifier & identifier_sr,
+      std::vector<double>& energies,
+      const LArG4::eCalculatorProcessing process) const 
+      {
       // Use the calculators to determine the energies and the
       // identifier associated with this G4Step.  Note that the
       // default is to process both the energy and the ID.

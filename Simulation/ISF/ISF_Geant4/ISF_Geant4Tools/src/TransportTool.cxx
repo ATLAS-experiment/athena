@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -366,14 +366,6 @@ StatusCode iGeant4::G4TransportTool::simulateVector(
     }
   }
 
-  // const DataHandle <TrackRecordCollection> tracks;
-
-  // StatusCode sc = evtStore()->retrieve(tracks,m_trackCollName);
-
-  // if (sc.isFailure()) {
-  //   ATH_MSG_WARNING(" Cannot retrieve TrackRecordCollection " << m_trackCollName);
-  // }
-
   // not implemented yet... need to get particle stack from Geant4 and convert to ISFParticle
   ATH_MSG_VERBOSE( "Simulation done" );
 
@@ -446,7 +438,7 @@ StatusCode iGeant4::G4TransportTool::releaseEvent(
 
   ATH_CHECK(m_senDetTool->EndOfAthenaEvent(hitCollections));
   ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(hitCollections));
-  ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
+  ATH_CHECK(m_fastSimTool->EndOfAthenaEvent(hitCollections));
 
   return StatusCode::SUCCESS;
 }

@@ -12,7 +12,6 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <METInterface/IMETMaker.h>
 #include <xAODMissingET/MissingETContainer.h>
 #include <AsgTools/PropertyWrapper.h>
 
@@ -26,7 +25,7 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 

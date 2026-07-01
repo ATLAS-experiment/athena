@@ -4,14 +4,13 @@
  <class name="DataVector<TrigOperationalInfo>" /> 
  <class name="std::vector<TrigOperationalInfo*>" /> 
 
- <class name="TrigRoiDescriptor" id="B2C86E23-8421-4F34-8014-AE4A7E4BA0A7" >
-   <field name="m_serialized" transient="true" />
- </class>
-
+ <class name="TrigRoiDescriptor" id="B2C86E23-8421-4F34-8014-AE4A7E4BA0A7" />
  <class name="TrigRoiDescriptorCollection" id="A2E10999-9B32-4510-8483-0BCB9E5B857F" />
  <class name="DataVector<TrigRoiDescriptor>" />
  <class name="std::vector<TrigRoiDescriptor*>" />
  <class name="std::vector<const TrigRoiDescriptor*>" />
+ <!-- Used by Views as decoration -->
+ <class name="std::vector<ElementLink<TrigRoiDescriptorCollection>>" />
 
  <class name="TrigPassBits" id="AE9EA3A9-5E80-4DCA-90D0-A40BBC5F68DD">
    <field name="m_container_ptr" transient="true" />

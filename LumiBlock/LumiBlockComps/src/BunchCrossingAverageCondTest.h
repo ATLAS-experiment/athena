@@ -24,7 +24,7 @@ public:
   /// Initialization run before the event loop
   virtual StatusCode initialize();
   /// Function called once per event
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
 
 private:
   /// Function for printing detailed info about a given bunch crossing

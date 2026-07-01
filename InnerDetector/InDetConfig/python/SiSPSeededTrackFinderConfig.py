@@ -131,17 +131,8 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
     if "SeedsTool" not in kwargs:
         ITkSiSpacePointsSeedMaker = None
 
-        if (flags.Tracking.ActiveConfig.extension != "Conversion" and
-            flags.Tracking.ActiveConfig.doActsToAthenaSeed):
-            from ActsConfig.ActsSeedingConfig import (
-                ActsSiSpacePointsSeedMakerToolCfg)
-            ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(
-                ActsSiSpacePointsSeedMakerToolCfg(flags))
-        else:
-            from InDetConfig.SiSpacePointsSeedToolConfig import (
-                ITkSiSpacePointsSeedMakerCfg)
-            ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(
-                ITkSiSpacePointsSeedMakerCfg(flags))
+        from InDetConfig.SiSpacePointsSeedToolConfig import ITkSiSpacePointsSeedMakerCfg
+        ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags))
 
         kwargs.setdefault("SeedsTool", ITkSiSpacePointsSeedMaker)
 
@@ -199,12 +190,8 @@ def ITkSiSPSeededTrackFinderROIConvCfg(
                       "ITkCaloClusterROIPhiRZ15GeVUnordered")
 
     if "SeedsTool" not in kwargs:
-        if flags.Tracking.ActiveConfig.doActsToAthenaSeed:
-            from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerToolCfg
-            kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags)))
-        else:
-            from InDetConfig.SiSpacePointsSeedToolConfig import ITkSiSpacePointsSeedMakerCfg
-            kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags)))
+        from InDetConfig.SiSpacePointsSeedToolConfig import ITkSiSpacePointsSeedMakerCfg
+        kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags)))
             
     acc.merge(ITkSiSPSeededTrackFinderCfg(flags, name, **kwargs))
     return acc

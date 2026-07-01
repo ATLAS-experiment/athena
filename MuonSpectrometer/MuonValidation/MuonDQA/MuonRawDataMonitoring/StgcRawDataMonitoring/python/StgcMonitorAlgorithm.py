@@ -41,13 +41,14 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     stationEtaMax = 3
     sectorMax     = 16
     layerMax      = 8
+    quad_labels = ['Q1Inner', 'Q1Outer', 'Q2', 'Q3']
 
     # Custom labels
     # Pad trigger occupancy
     columnLabels = [columnLabels_AL, columnLabels_AS, columnLabels_CL, columnLabels_CS]
     
     # Shifter
-    OverviewGroup  = helper.addGroup(sTgcMonAlg, 'Overview', globalPath + 'Shifter/Overview')
+    OverviewGroup  = helper.addGroup(sTgcMonAlg, 'Overview', globalPath + 'Shifter/PadTriggerOverview')
     OverviewGroup.defineHistogram('muonRecoTriggerMatch,etaRecoMuonEff,phiRecoMuonEff;padTrigger_Efficiency_per_etaPhi', type = 'TEfficiency', title = '; #eta (reco); #phi (reco); Pad trigger efficiency wrt. reco. muon', path = '', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
     OverviewGroup.defineHistogram('etaRecoMuon,phiRecoMuon;recoMuon_Map_per_etaPhi', type = 'TH2F', title = '; #eta (reco); #phi (reco); Entries', path = '', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')  
     OverviewGroup.defineHistogram('etaPadTrigger,phiPadTrigger;padTrigger_Map_per_etaPhi', type = 'TH2F', title = '; #eta (trig); #phi (trig); Entries', path = '', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
@@ -119,10 +120,8 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             stationEtaCounter=0
             for stationEtaIndex in range(1, stationEtaMax + 1):
                 stationEtaCounter+=1
-                padChargeGroup = helper.addGroup(sTgcMonAlg, f'padCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/Pad/{sideIndex}' + f'{sectorIndex}'.zfill(2))
-                stripChargeGroup = helper.addGroup(sTgcMonAlg, f'stripCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/Strip/{sideIndex}' + f'{sectorIndex}'.zfill(2))
-                wireGroupChargeGroup = helper.addGroup(sTgcMonAlg, f'wireGroupCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/Wire/{sideIndex}' + f'{sectorIndex}'.zfill(2))
-                residualGroup = helper.addGroup(sTgcMonAlg, f'sTgcResiduals_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Residuals/{sideIndex}' + f'{sectorIndex}'.zfill(2)+'/')
+                residualGroup = helper.addGroup(sTgcMonAlg, f'sTgcResiduals_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Residuals/Q{stationEtaIndex}'.zfill(2)+'/')
+                wireGroupChargeGroup = helper.addGroup(sTgcMonAlg, f'wireGroupCharge_{sideIndex}{sectorIndex}_quad_{stationEtaIndex}', globalPath + f'Expert/Charge/Wire/Q{stationEtaIndex}'.zfill(2)+'/')
                 
                 if sideCounter==1 and sectorCounter==1:
                     sTgcPadTimingExpertGroup = helper.addGroup(sTgcMonAlg, f'padTiming_quad_{stationEtaIndex}', globalPath + 'Expert/Timing/Pad')
@@ -130,19 +129,26 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
                     sTgcWireTimingExpertGroup = helper.addGroup(sTgcMonAlg, f'wireTiming_quad_{stationEtaIndex}', globalPath + 'Expert/Timing/Wire')
 
                 for layerIndex in range(1, layerMax + 1):
-                    padChargeGroup.defineHistogram(f'padTrackCharge_{sideIndex}_quad_{stationEtaIndex}_sector_{sectorIndex}_layer_{layerIndex};All_pad_charge_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH1F', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}Q{stationEtaIndex}; Pad Charge (on-track) [fC]; Number of Entries', path = f'Q{stationEtaIndex}', xbins = 100, xmin = 0., xmax = 1000., opt = 'kAlwaysCreate')
-                    stripChargeGroup.defineHistogram(f'stripTrackCharge_{sideIndex}_quad_{stationEtaIndex}_sector_{sectorIndex}_layer_{layerIndex};All_strip_charge_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH1F', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}Q{stationEtaIndex}; Strip Cluster Charge (on-track) [fC]; Number of Entries', path = f'Q{stationEtaIndex}', xbins = 120, xmin = 0., xmax = 1200., opt = 'kAlwaysCreate')
-                    wireGroupChargeGroup.defineHistogram(f'wireGroupTrackCharge_{sideIndex}_quad_{stationEtaIndex}_sector_{sectorIndex}_layer_{layerIndex};All_wire_charge_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH1F', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}Q{stationEtaIndex}; Wire Group Charge (on-track) [fC]; Number of Entries', path = f'Q{stationEtaIndex}', xbins = 100, xmin = 0., xmax = 1000., opt = 'kAlwaysCreate')
-                    residualGroup.defineHistogram(f'residual_{sideIndex}_quad_{stationEtaIndex}_sector_{sectorIndex}_layer_{layerIndex};Residuals_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH1F', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}Q{stationEtaIndex}; Residual [mm]; Number of Entries', path = f'Q{stationEtaIndex}', xbins = 1000, xmin = -2., xmax = 2., opt = 'kAlwaysCreate')
+                        residualGroup.defineHistogram(f'residual_{sideIndex}_quad_{stationEtaIndex}_sector_{sectorIndex}_layer_{layerIndex};Residuals_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH1F', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}Q{stationEtaIndex}; Residual [mm]; Number of Entries', path = f'{sideIndex}' + f'{sectorIndex}'.zfill(2), xbins = 1000, xmin = -2., xmax = 2., opt = 'kAlwaysCreate')
+                        wireGroupChargeGroup.defineHistogram(f'wireGroupTrackCharge_{sideIndex}_quad_{stationEtaIndex}_sector_{sectorIndex}_layer_{layerIndex};All_wire_charge_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH1F', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}Q{stationEtaIndex}; Wire Group Charge (on-track) [fC]; Number of Entries', path = f'{sideIndex}' + f'{sectorIndex}'.zfill(2), xbins = 100, xmin = 0., xmax = 500., opt = 'kAlwaysCreate')               
 
-                    if stationEtaCounter==1:
-                        efficiencyGlobalRgroup.defineHistogram(f'hitLayer,rPosStrip_{sideIndex}_sector_{sectorIndex}_layer_{layerIndex};Efficiency_per_Radius_Layer{layerIndex}', type = 'TEfficiency', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}; sTgc-GlobalR-Strip (on track) [mm]' + f'; Efficiency sTGC strip {sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}', path = f'{sideIndex}' + f'{sectorIndex}'.zfill(2), xbins = 100, xmin = 0., xmax = 5000., opt = 'kAlwaysCreate')
 
-                    if sideCounter==1 and sectorCounter==1:
-                        sTgcPadTimingExpertGroup.defineHistogram(f'padTrackSectorSided_quad_{stationEtaIndex}_layer_{layerIndex},padTrackTiming_quad_{stationEtaIndex}_layer_{layerIndex};All_pad_timing_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH2F', title = f'Q{stationEtaIndex}L{layerIndex}; Sector; Pad Timing (on-track) [ns]; Hits', path = f'Q{stationEtaIndex}', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 201, ymin = -75.5, ymax = 125.5, opt = 'kAlwaysCreate')
-                        sTgcStripTimingExpertGroup.defineHistogram(f'stripTrackSectorSided_quad_{stationEtaIndex}_layer_{layerIndex},stripTrackTiming_quad_{stationEtaIndex}_layer_{layerIndex};All_strip_timing_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH2F', title = f'Q{stationEtaIndex}L{layerIndex}; Sector; Strip Cluster Timing (on-track) [ns]; Hits', path = f'Q{stationEtaIndex}', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 201, ymin = -75.5, ymax = 125.5, opt = 'kAlwaysCreate')
-                        sTgcWireTimingExpertGroup.defineHistogram(f'wireTrackSectorSided_quad_{stationEtaIndex}_layer_{layerIndex},wireTrackTiming_quad_{stationEtaIndex}_layer_{layerIndex};All_wire_timing_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH2F', title = f'Q{stationEtaIndex}L{layerIndex}; Sector; Wire Group Timing (on-track) [ns]; Hits', path = f'Q{stationEtaIndex}', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 201, ymin = -75.5, ymax = 125.5, opt = 'kAlwaysCreate')            
+                        if stationEtaCounter==1:
+                            efficiencyGlobalRgroup.defineHistogram(f'hitLayer,rPosStrip_{sideIndex}_sector_{sectorIndex}_layer_{layerIndex};Efficiency_per_Radius_Layer{layerIndex}', type = 'TEfficiency', title = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}; sTgc-GlobalR-Strip (on track) [mm]' + f'; Efficiency sTGC strip {sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}', path = f'{sideIndex}' + f'{sectorIndex}'.zfill(2), xbins = 100, xmin = 0., xmax = 5000., opt = 'kAlwaysCreate')
+
+                        if sideCounter==1 and sectorCounter==1:
+                            sTgcPadTimingExpertGroup.defineHistogram(f'padTrackSectorSided_quad_{stationEtaIndex}_layer_{layerIndex},padTrackTiming_quad_{stationEtaIndex}_layer_{layerIndex};All_pad_timing_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH2F', title = f'Q{stationEtaIndex}L{layerIndex}; Sector; Pad Timing (on-track) [ns]; Hits', path = f'Q{stationEtaIndex}', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 201, ymin = -75.5, ymax = 125.5, opt = 'kAlwaysCreate')
+                            sTgcStripTimingExpertGroup.defineHistogram(f'stripTrackSectorSided_quad_{stationEtaIndex}_layer_{layerIndex},stripTrackTiming_quad_{stationEtaIndex}_layer_{layerIndex};All_strip_timing_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH2F', title = f'Q{stationEtaIndex}L{layerIndex}; Sector; Strip Cluster Timing (on-track) [ns]; Hits', path = f'Q{stationEtaIndex}', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 201, ymin = -75.5, ymax = 125.5, opt = 'kAlwaysCreate')
+                            sTgcWireTimingExpertGroup.defineHistogram(f'wireTrackSectorSided_quad_{stationEtaIndex}_layer_{layerIndex},wireTrackTiming_quad_{stationEtaIndex}_layer_{layerIndex};All_wire_timing_in_Q{stationEtaIndex}_Layer{layerIndex}', type = 'TH2F', title = f'Q{stationEtaIndex}L{layerIndex}; Sector; Wire Group Timing (on-track) [ns]; Hits', path = f'Q{stationEtaIndex}', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 201, ymin = -75.5, ymax = 125.5, opt = 'kAlwaysCreate')            
         
+            for quadLabel in quad_labels:
+                padChargeGroup = helper.addGroup(sTgcMonAlg, f'padCharge_{sideIndex}{sectorIndex}_quad_{quadLabel}', globalPath + f'Expert/Charge/Pad/{quadLabel}'+'/')
+                stripChargeGroup = helper.addGroup(sTgcMonAlg, f'stripCharge_{sideIndex}{sectorIndex}_quad_{quadLabel}', globalPath + f'Expert/Charge/Strip/{quadLabel}'+'/')
+
+                for layerIndex in range(1, layerMax + 1):
+                    padChargeGroup.defineHistogram(f'padTrackCharge_{sideIndex}_quad_{quadLabel}_sector_{sectorIndex}_layer_{layerIndex};All_pad_charge_in_{quadLabel}_Layer{layerIndex}',type='TH1F',title=f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}{quadLabel}; Pad Charge (on-track) [fC]; Number of Entries',path=f'{sideIndex}' + f'{sectorIndex}'.zfill(2), xbins=100, xmin=0., xmax=500., opt='kAlwaysCreate')
+                    stripChargeGroup.defineHistogram(f'stripTrackCharge_{sideIndex}_quad_{quadLabel}_sector_{sectorIndex}_layer_{layerIndex};All_strip_charge_in_{quadLabel}_Layer{layerIndex}',type='TH1F',title=f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + f'L{layerIndex}{quadLabel}; Strip Cluster Charge (on-track) [fC]; Number of Entries',path=f'{sideIndex}' + f'{sectorIndex}'.zfill(2), xbins=160, xmin=0., xmax=800., opt='kAlwaysCreate')
+    
     acc = helper.result()
     result.merge(acc)
     return result

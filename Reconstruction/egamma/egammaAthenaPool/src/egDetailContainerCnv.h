@@ -58,7 +58,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual egDetailContainer* createTransient();
+  virtual egDetailContainer* createTransient(const Token* token);
 
 };
 

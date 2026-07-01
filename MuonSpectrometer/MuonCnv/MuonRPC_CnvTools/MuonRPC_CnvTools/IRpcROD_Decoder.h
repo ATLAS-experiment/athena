@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IMUONRPCRODDECODER_H
@@ -21,7 +21,8 @@ namespace Muon {
 
         // enter declaration of your interface-defining member functions here
         // bool decodeSL - Used to determine whether sector logic is being decoded too
-        virtual StatusCode fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, RpcPadContainer& rdoIdc,
+        virtual StatusCode fillCollections(const EventContext& ctx,
+                                           const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, RpcPadContainer& rdoIdc,
                                            const std::vector<IdentifierHash>& collections, RpcSectorLogicContainer*,
                                            const bool& decodeSL) const = 0;
     };

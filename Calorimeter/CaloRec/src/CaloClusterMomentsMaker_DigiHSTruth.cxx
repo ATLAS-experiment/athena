@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //-----------------------------------------------------------------------
 // File and Version Information:
@@ -46,7 +46,7 @@ namespace {
   //FIXME, somehow make sure these names are in sync with the xAOD variable names
 struct MomentName
 {
-  const char* name;
+  const char* name{};
   xAOD::CaloCluster::MomentType mom;
 };
 
@@ -259,16 +259,16 @@ StatusCode CaloClusterMomentsMaker_DigiHSTruth::initialize()
 namespace CaloClusterMomentsMaker_DigiHSTruth_detail {
 
 struct cellinfo {
-  double x;
-  double y;
-  double z;
-  double energy;
-  double eta;
-  double phi;
-  double r;
-  double lambda;
-  double volume;
-  CaloCell_ID::CaloSample sample;
+  double x{};
+  double y{};
+  double z{};
+  double energy{};
+  double eta{};
+  double phi{};
+  double r{};
+  double lambda{};
+  double volume{};
+  CaloCell_ID::CaloSample sample{};
 };
 
 } // namespace CaloClusterMomentsMaker_DigiHSTruth_detail

@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-from AthenaConfiguration.Enums import LHCPeriod
 
 
 class MetAnalysisConfig (ConfigBlock):
@@ -18,6 +17,8 @@ class MetAnalysisConfig (ConfigBlock):
             info="whether to use the JVT decision in the MET calculation.")
         self.addOption ('useFJVT', False, type=bool,
             info="whether to use the forward JVT decision in the MET calculation.")
+        self.addOption ('selectionNameFJVT', "", type=str,
+            info="name of the forward JVT selection to be used if `useFJVT` is activated.")
         self.addOption ('treatPUJets', False, type=bool,
             info="whether to treat pile-up jets in the MET significance calculation.")
         self.addOption ('setMuonJetEMScale', True, type=bool,
@@ -60,7 +61,7 @@ class MetAnalysisConfig (ConfigBlock):
             info="name of the CalibArea used in jet calibration (for MET significance).")
         self.addOption ('egammaESModel', "", type=str,
             info="ESModel for EGamma calibration (for MET significance).")
-        self.addOption ('egammaDecorrelationModel', "1NP_v1", type=str,
+        self.addOption ('egammaDecorrelationModel', "", type=str,
             info="decorrelation model for EGamma calibration (for MET significance).")
         self.addOption ('tauTESConfig', "CombinedTES_R22_Round2.5_v2.root", type=str,
             info="config file for tau energy scale calibration (for MET significance).")
@@ -75,6 +76,9 @@ class MetAnalysisConfig (ConfigBlock):
             expertMode=True)
         self.addOption ('softTermResolution', -1.0, type=float,
             info="override the default soft term resolution in METSignificance.",
+            expertMode=True)
+        self.addOption ('switchTauMuOrder', False, type=bool,
+            info="whether to switch order of taus and muons",
             expertMode=True)
 
     def instanceName (self) :
@@ -107,11 +111,18 @@ class MetAnalysisConfig (ConfigBlock):
             alg.makerTool.JvtSelTool.JetContainer = config.readName (self.jets)
             alg.makerTool.JvtSelTool.JvtMomentName = "NNJvt"
         if self.useFJVT:
-            alg.makerTool.JetRejectionDec = 'fjvt_selection'
+            # for backwards compatibility with "old" FJVT handling in JetAnalysisConfig.py
+            if not self.selectionNameFJVT:
+                alg.makerTool.JetRejectionDec = 'fjvt_selection'
+            # otherwise get the decoration from the selection
+            else:
+                fjvt_decoration = config.getFullSelection(self.jets, self.selectionNameFJVT, skipBase=True).replace(",as_char", "")
+                alg.makerTool.JetRejectionDec = fjvt_decoration
 
         alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
         alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale if self.muons else False
+        alg.switchTauMu = self.switchTauMuOrder
 
         if config.dataType() is not DataType.Data :
             config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )
@@ -164,10 +175,11 @@ class MetAnalysisConfig (ConfigBlock):
 
             # Standard e/gamma calibration. Must be kept in agreement with ElectronAnalysisConfig.py
             if self.egammaESModel == "":
-                if config.geometry() is LHCPeriod.Run2:
-                    self.egammaESModel = 'es2023_R22_Run2_v1'
-                elif config.geometry() is LHCPeriod.Run3:
-                    self.egammaESModel = 'es2024_Run3_v0'
+                self.egammaESModel = (
+                    config.getContainerMeta(self.electrons.split(".")[0], 'ESModel', failOnMiss=True))
+            if self.egammaDecorrelationModel == "":
+                self.egammaDecorrelationModel = (
+                    config.getContainerMeta(self.electrons.split(".")[0], 'decorrelationModel', failOnMiss=True))
 
             alg.significanceTool.SoftTermParam = 0
             if self.softTermResolution > 0:

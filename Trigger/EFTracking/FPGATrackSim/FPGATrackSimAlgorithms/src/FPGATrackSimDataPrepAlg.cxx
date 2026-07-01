@@ -24,6 +24,7 @@
 #include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 
 #include "GaudiKernel/IEventProcessor.h"
+#include "AthContainers/ConstDataVector.h"
 
 constexpr bool enableBenchmark = 
 #ifdef BENCHMARK_FPGATRACKSIM
@@ -129,8 +130,8 @@ StatusCode FPGATrackSimDataPrepAlg::execute(const EventContext& ctx) const
       return appMgr->stopRun();
     }
 
-    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits (m_FPGAHitKey, ctx);
-    ATH_CHECK( FPGAHits.record (std::make_unique<FPGATrackSimHitCollection>()));
+    SG::WriteHandle<ConstDataVector<FPGATrackSimHitCollection>> FPGAHits (m_FPGAHitKey, ctx);
+    ATH_CHECK( FPGAHits.record (std::make_unique<ConstDataVector<FPGATrackSimHitCollection>>(SG::VIEW_ELEMENTS)) );
 
     SG::WriteHandle<FPGATrackSimHitCollection> FPGAHitUnmapped (m_FPGAHitUnmappedKey, ctx);
     ATH_CHECK( FPGAHitUnmapped.record (std::make_unique<FPGATrackSimHitCollection>()));
@@ -238,9 +239,10 @@ StatusCode FPGATrackSimDataPrepAlg::execute(const EventContext& ctx) const
     if (m_recordHits) {
         if constexpr (enableBenchmark) m_chrono->chronoStart("DataPrep: record hits");
         // If and when we set up code to run over more than one region/tower at a time this will need to be updated
-        FPGAHits->reserve(hits.size());
-        for (const auto& hit : hits) {
-            if (hit.isReal()) FPGAHits->push_back(new FPGATrackSimHit(hit));
+        auto *FPGAHits_cdv = FPGAHits.ptr();
+        for (const FPGATrackSimCluster& cluster : *FPGAClusters) {
+            const FPGATrackSimHit* hit = &cluster.getClusterEquiv();
+            if (hit->isReal()) FPGAHits_cdv->push_back(hit);
         }
         if constexpr (enableBenchmark) m_chrono->chronoStop("DataPrep: record hits");
     }

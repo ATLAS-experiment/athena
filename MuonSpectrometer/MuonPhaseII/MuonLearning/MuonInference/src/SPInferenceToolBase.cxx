@@ -7,7 +7,8 @@
 #include "MuonInferenceInterfaces/GraphData.h"
 #include "MuonInferenceInterfaces/NodeFeatureList.h"
 #include "PathResolver/PathResolver.h"
-#include "Acts/Utilities/MathHelpers.hpp" 
+#include "Acts/Utilities/MathHelpers.hpp"
+#include "AthOnnxComps/OnnxRuntimeSessionToolCUDA.h"
 #include <span>
 
 namespace {
@@ -90,7 +91,19 @@ namespace MuonML{
     StatusCode SPInferenceToolBase::setupModel() {
         ATH_CHECK(m_onnxSessionTool.retrieve());
         ATH_CHECK(m_readKey.initialize());
-            
+
+        // Detect CUDA provider by dynamic-casting the concrete session tool.
+        if (const auto* cudaTool = dynamic_cast<const AthOnnx::OnnxRuntimeSessionToolCUDA*>(
+                m_onnxSessionTool.get())) {
+            m_isCuda       = true;
+            m_cudaDeviceId = cudaTool->deviceId();
+            ATH_MSG_DEBUG("ONNX session is running on CUDA device " << m_cudaDeviceId
+                         << ". I/O binding will be used.");
+        } else {
+            m_isCuda = false;
+            ATH_MSG_DEBUG("ONNX session is running on CPU.");
+        }
+
         Ort::ModelMetadata metadata = model().GetModelMetadata();
         Ort::AllocatorWithDefaultOptions allocator;
         Ort::AllocatedStringPtr feature_json_ptr = metadata.LookupCustomMetadataMapAllocated("feature_names", allocator);
@@ -204,8 +217,44 @@ namespace MuonML{
         std::vector<const char*> outputNames = {"output"};
 
         Ort::RunOptions run_options;
-        run_options.SetRunLogSeverityLevel(ORT_LOGGING_LEVEL_WARNING);
+        run_options.SetRunLogSeverityLevel(ORT_LOGGING_LEVEL_ERROR);
 
+        if (m_isCuda) {
+            // ---- CUDA path: use IoBinding ----
+            Ort::IoBinding binding(model());
+            for (std::size_t i = 0; i < inputNames.size(); ++i) {
+                binding.BindInput(inputNames[i], graphData.graph->dataTensor[i]);
+            }
+            // Bind output to CPU so logits are directly readable after sync.
+            Ort::MemoryInfo cpuOut = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+            for (const char* outName : outputNames) {
+                binding.BindOutput(outName, cpuOut);
+            }
+
+            model().Run(run_options, binding);
+            binding.SynchronizeOutputs();
+
+            std::vector<Ort::Value> outputTensors = binding.GetOutputValues();
+            if (outputTensors.empty()) {
+                ATH_MSG_ERROR("IoBinding inference returned empty output.");
+                return StatusCode::FAILURE;
+            }
+
+            float* output_data = outputTensors[0].GetTensorMutableData<float>();
+            size_t output_size = outputTensors[0].GetTensorTypeAndShapeInfo().GetElementCount();
+
+            std::span<float> predictions(output_data, output_data + output_size);
+            for (size_t i = 0; i < output_size; i++) {
+                if (!std::isfinite(predictions[i])) {
+                    ATH_MSG_WARNING("Non-finite prediction detected! Setting to -100..");
+                    predictions[i] = -100.0f;
+                }
+            }
+            graphData.graph->dataTensor.emplace_back(std::move(outputTensors[0]));
+            return StatusCode::SUCCESS;
+        }
+
+        // ---- CPU path (unchanged) ----
         std::vector<Ort::Value> outputTensors = model().Run(run_options, 
                                                 inputNames.data(),                    // input tensor names
                                                 graphData.graph->dataTensor.data(),  // pointer to the tensor vector

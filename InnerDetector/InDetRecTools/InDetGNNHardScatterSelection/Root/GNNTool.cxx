@@ -21,8 +21,8 @@ namespace InDetGNNHardScatterSelection {
     return StatusCode::SUCCESS;
   }
 
-  void GNNTool::decorate(const xAOD::Vertex& vertex) const {
-    m_gnn->decorate(vertex);
+  float GNNTool::decorate(const xAOD::Vertex& vertex) const {
+    return m_gnn->decorate(vertex);
   }
 
 }

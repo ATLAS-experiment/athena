@@ -35,10 +35,10 @@ StatusCode JetFFSmearingAlg ::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode JetFFSmearingAlg ::execute() {
+StatusCode JetFFSmearingAlg ::execute(const EventContext& ctx) {
   for (const auto &sys : m_systematicsList.systematicsVector()) {
     xAOD::JetContainer *jets = nullptr;
-    ANA_CHECK(m_jetHandle.getCopy(jets, sys));
+    ANA_CHECK(m_jetHandle.getCopy(jets, sys, ctx));
 
     // FIXME: while the FFJetSmearingTool is unable to accept external systematics,
     // only run over the internal ones

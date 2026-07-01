@@ -23,7 +23,7 @@
 /// ------------------
 /// --- initialize ---
 /// ------------------
-StatusCode TrackAnalysisDefinitionSvc::initialize()
+StatusCode IDTPM::TrackAnalysisDefinitionSvc::initialize()
 {
 
   ATH_MSG_DEBUG( "Initialising  using TEST = " << m_testTypeStr.value() <<
@@ -69,14 +69,14 @@ StatusCode TrackAnalysisDefinitionSvc::initialize()
 /// ----------------
 /// --- finalize ---
 /// ----------------
-StatusCode TrackAnalysisDefinitionSvc::finalize() {
+StatusCode IDTPM::TrackAnalysisDefinitionSvc::finalize() {
   return StatusCode::SUCCESS;
 }
 
 /// --------------------
 /// --- plotsFullDir ---
 /// --------------------
-std::string TrackAnalysisDefinitionSvc::plotsFullDir( std::string chain ) const
+std::string IDTPM::TrackAnalysisDefinitionSvc::plotsFullDir( std::string chain ) const
 {
   /// get "topDir/" or "" if empty
   std::string topDir( m_dirName );
@@ -106,7 +106,7 @@ std::string TrackAnalysisDefinitionSvc::plotsFullDir( std::string chain ) const
 /// ------------------------
 /// --- resolutionMethod ---
 /// ------------------------
-unsigned int TrackAnalysisDefinitionSvc::resolutionMethod() const
+unsigned int IDTPM::TrackAnalysisDefinitionSvc::resolutionMethod() const
 {
   /// Defining map
   using methodMap_t = std::unordered_map<

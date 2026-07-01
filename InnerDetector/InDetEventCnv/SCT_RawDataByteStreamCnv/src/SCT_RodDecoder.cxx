@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_RodDecoder.h"
@@ -178,7 +178,7 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
   // Determine whether this data was generated using the ROD simulator
   const uint32_t rodDataType{robFrag.rod_detev_type()};
   const bool rodSimulatedData{static_cast<bool>((rodDataType >> 20) & 0x1)};
-  if (rodSimulatedData) ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::RODSimulatedData, errs));
+  if (rodSimulatedData) ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::RODSimulatedData, errs, ctx));
 
   // Look for the bit that denotes "Super-condensed" mode
   const bool superCondensedMode{static_cast<bool>((rodDataType >> 21) & 0x1)};
@@ -193,20 +193,20 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
       ATH_MSG_DEBUG("ROB status word for robID " << std::hex << robID
                     << " is non-zero " << (*robStatus) << std::dec);
       // First store generic "ROBFragmentError" error type.
-      ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::ROBFragmentError, errs));
+      ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::ROBFragmentError, errs, ctx));
       sc = StatusCode::RECOVERABLE;
       // Now look for specific problems, e.g. truncated or masked-off RODs
       if (((*robStatus) >> 27) & 0x1) {
         ATH_MSG_DEBUG("ROB status word for robID " << std::hex << robID
                       << std::dec << " indicates data truncation.");
-        ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::TruncatedROD, errs));
+        ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::TruncatedROD, errs, ctx));
         m_truncatedRODNumber++;
         return sc;
       }
       if ((((*robStatus) >> 29) & 0x1) or (((*robStatus) >> 31) & 0x1)) {
         ATH_MSG_DEBUG("ROB status word for robID " << std::hex << robID
                       << std::dec << " indicates resource was masked off.");
-        ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::MaskedROD, errs));
+        ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::MaskedROD, errs, ctx));
         m_maskedRODNumber++;
         return sc;
       }
@@ -226,7 +226,7 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
       const int bocClockError{static_cast<int>((statusWord >> 17) & 0x1)};
       if (timClockError or bocClockError) {
         ATH_MSG_DEBUG(" Clock error in ROD status word: " << timClockError << " " << bocClockError);
-        ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::RODClockError, errs));
+        ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::RODClockError, errs, ctx));
         m_rodClockErrorNumber++;
         sc=StatusCode::RECOVERABLE;
       }
@@ -265,7 +265,7 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
       bool hasError{false};
       if (((data16[n]>>13) & 0x7) == 0x1) { // Header
         bool breakNow{false};
-        ATH_CHECK(processHeader(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, breakNow,ctx));
+        ATH_CHECK(processHeader(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, breakNow, ctx));
         if (hasError) sc = StatusCode::RECOVERABLE;
         if (breakNow) break;
         continue;
@@ -285,35 +285,35 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
           continue;
         }
         else if (data.condensedMode) { // Condensed mode
-          ATH_CHECK(processCondensedHit(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError,ctx));
+          ATH_CHECK(processCondensedHit(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, ctx));
           if (hasError) sc = StatusCode::RECOVERABLE;
           continue;
         }
         else { // Expanded mode
-          ATH_CHECK(processExpandedHit(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError,ctx));
+          ATH_CHECK(processExpandedHit(data16[n], robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, ctx));
           if (hasError) sc = StatusCode::RECOVERABLE;
           continue;
         }
       }
       else if (((data16[n]>>13) & 0x7) == 0x0) { // FlaggedABCD error
-        ATH_CHECK(processABCDError(data16[n], robID, data, errs, hasError));
+        ATH_CHECK(processABCDError(data16[n], robID, data, errs, hasError, ctx));
         if (hasError) sc = StatusCode::RECOVERABLE;
         continue;
       }
       else if (((data16[n]>>13) & 0x7) == 0x3) { // Raw Data
-        ATH_CHECK(processRawData(data16[n], robID, data, errs, hasError));
+        ATH_CHECK(processRawData(data16[n], robID, data, errs, hasError, ctx));
         if (hasError) sc = StatusCode::RECOVERABLE;
         continue;
       }
       else if (((data16[n]>>13) & 0x7) == 0x2) { // Trailer
-        ATH_CHECK(processTrailer(data16[n], robID, data, errs, hasError));
+        ATH_CHECK(processTrailer(data16[n], robID, data, errs, hasError, ctx));
         if (hasError) sc = StatusCode::RECOVERABLE;
         continue;
       }
       else { /// Unknown
         ATH_MSG_DEBUG("Data word format unknown ");
         m_unknownDataFormat++;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
         sc = StatusCode::RECOVERABLE;
       }
     } // End of 16-bit word loop
@@ -325,7 +325,7 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
         const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
         if (rdoMade == -1) {
            sc = StatusCode::RECOVERABLE;
-           ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+           ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
         }
         else {
            data.setSaved(false, rdoMade);
@@ -336,7 +336,7 @@ StatusCode SCT_RodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
   // MissingLinkHeaderError is filled in only FE-lins of the ROD whose headers are not found.
   // We cannot know which FE-link does not have header. However, we should not add the error to found ones.
   if (data.foundMissingLinkHeaderError) {
-    ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::MissingLinkHeaderError, errs, &(data.foundHashes)));
+    ATH_CHECK(addRODError(robID, SCT_ByteStreamErrors::MissingLinkHeaderError, errs, ctx, &(data.foundHashes)));
   }
 
   for (auto& [hash, rdoColl] : data.rdoCollMap) {
@@ -429,6 +429,7 @@ int SCT_RodDecoder::makeRDO(const bool isOld,
 
 StatusCode SCT_RodDecoder::addRODError(uint32_t rodID, SCT_ByteStreamErrors::ErrorType error,
                                        SCT_RodDecoderErrorsHelper& errs,
+                                       const EventContext& ctx,
                                        const std::unordered_set<IdentifierHash>* foundHashes) const
 {
   std::vector<IdentifierHash> hashIDs;
@@ -442,17 +443,17 @@ StatusCode SCT_RodDecoder::addRODError(uint32_t rodID, SCT_ByteStreamErrors::Err
     }
 
     // Skip disabled modules
-    if(!m_configTool->isGood(hash)) {
+    if(!m_configTool->isGood(hash, ctx)) {
       continue;
     }
 
     // Skip bad links
-    const auto & [link0Good, link1Good] = m_configTool->badLinks(hash);
+    const auto & [link0Good, link1Good] = m_configTool->badLinks(hash, ctx);
     int side{m_sctID->side(m_sctID->wafer_id(hash))};
     const bool result{side==0 ? not link0Good : not link1Good};
     if (result) continue;
 
-    ATH_CHECK(addSingleError(hash, error, errs));
+    ATH_CHECK(addSingleError(hash, error, errs, ctx));
   }
   return StatusCode::SUCCESS;
 }
@@ -461,7 +462,8 @@ StatusCode SCT_RodDecoder::addRODError(uint32_t rodID, SCT_ByteStreamErrors::Err
 
 StatusCode SCT_RodDecoder::addSingleError(const IdentifierHash& hashID,
                                           SCT_ByteStreamErrors::ErrorType error,
-                                          SCT_RodDecoderErrorsHelper& errs) const
+                                          SCT_RodDecoderErrorsHelper& errs,
+                                          const EventContext& ctx) const
 {
   if (not hashID.is_valid()) {
     ATH_MSG_INFO("addSingleError hashID " << hashID << " is invalid.");
@@ -472,7 +474,7 @@ StatusCode SCT_RodDecoder::addSingleError(const IdentifierHash& hashID,
 
   if ((error<SCT_ByteStreamErrors::ABCDError_Chip0 || error>SCT_ByteStreamErrors::ABCDError_Chip5) and
       (error<SCT_ByteStreamErrors::TempMaskedChip0 || error>SCT_ByteStreamErrors::TempMaskedChip5)) {
-    std::pair<bool, bool> badLinks{m_configTool->badLinks(hashID)};
+    std::pair<bool, bool> badLinks{m_configTool->badLinks(hashID, ctx)};
     int side{m_sctID->side(m_sctID->wafer_id(hashID))};
     bool result{(side==0 ? badLinks.first : badLinks.second) and (badLinks.first xor badLinks.second)};
     if (result) {
@@ -492,7 +494,8 @@ StatusCode SCT_RodDecoder::addSingleError(const IdentifierHash& hashID,
 
 StatusCode SCT_RodDecoder::setFirstTempMaskedChip(const IdentifierHash& hashID,
                                                   unsigned int firstTempMaskedChip,
-                                                  SCT_RodDecoderErrorsHelper& errs) const
+                                                  SCT_RodDecoderErrorsHelper& errs,
+                                                  const EventContext& ctx) const
 {
   if (not hashID.is_valid()) {
     ATH_MSG_INFO("setFirstTempMaskedChip hashID " << hashID << " is invalid.");
@@ -522,7 +525,7 @@ StatusCode SCT_RodDecoder::setFirstTempMaskedChip(const IdentifierHash& hashID,
 
   int type{0};
   // Check if Rx redundancy is used or not in this module
-  const std::pair<bool, bool> badLinks{m_configTool->badLinks(hashID)};
+  const std::pair<bool, bool> badLinks{m_configTool->badLinks(hashID, ctx)};
   if (badLinks.first xor badLinks.second) {
     // Rx redundancy is used in this module.
     if (badLinks.first and not badLinks.second) {
@@ -616,12 +619,12 @@ StatusCode SCT_RodDecoder::setFirstTempMaskedChip(const IdentifierHash& hashID,
 
     if (firstTempMaskedChipSide0>0) {
       for (unsigned int iChip{firstTempMaskedChipSide0-1}; iChip<N_CHIPS_PER_SIDE; iChip++) {
-        ATH_CHECK(addSingleError(hashSide0, SCT_ByteStreamErrors::TempMaskedChipToBit(iChip), errs));
+        ATH_CHECK(addSingleError(hashSide0, SCT_ByteStreamErrors::TempMaskedChipToBit(iChip), errs, ctx));
       }
     }
     if (firstTempMaskedChipSide1>N_CHIPS_PER_SIDE) {
       for (unsigned int iChip{firstTempMaskedChipSide1-1}; iChip<N_SIDES*N_CHIPS_PER_SIDE; iChip++) {
-        ATH_CHECK(addSingleError(hashSide1, SCT_ByteStreamErrors::TempMaskedChipToBit(iChip-N_CHIPS_PER_SIDE), errs));
+        ATH_CHECK(addSingleError(hashSide1, SCT_ByteStreamErrors::TempMaskedChipToBit(iChip-N_CHIPS_PER_SIDE), errs, ctx));
       }
     }
   }
@@ -633,10 +636,10 @@ StatusCode SCT_RodDecoder::setFirstTempMaskedChip(const IdentifierHash& hashID,
       if (jChip==static_cast<int>(firstTempMaskedChip-1)) toBeMasked = true;
       if (toBeMasked) {
         if (jChip<N_CHIPS_PER_SIDE) {
-          ATH_CHECK(addSingleError(hashSide0, SCT_ByteStreamErrors::TempMaskedChipToBit(jChip), errs));
+          ATH_CHECK(addSingleError(hashSide0, SCT_ByteStreamErrors::TempMaskedChipToBit(jChip), errs, ctx));
         }
         else {
-          ATH_CHECK(addSingleError(hashSide1, SCT_ByteStreamErrors::TempMaskedChipToBit(jChip-N_CHIPS_PER_SIDE), errs));
+          ATH_CHECK(addSingleError(hashSide1, SCT_ByteStreamErrors::TempMaskedChipToBit(jChip-N_CHIPS_PER_SIDE), errs, ctx));
         }
       }
     }
@@ -677,7 +680,7 @@ StatusCode SCT_RodDecoder::processHeader(const uint16_t inData,
         const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
         if (rdoMade == -1) {
            hasError = true;
-           ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+           ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
         }
         else {
            data.setSaved(false, rdoMade);
@@ -696,7 +699,7 @@ StatusCode SCT_RodDecoder::processHeader(const uint16_t inData,
   const uint32_t onlineID{(robID & 0xFFFFFF) | (data.linkNumber << 24)};
   IdentifierHash hash;
   if ((onlineID ==0) or (data.linkNumber > 95)) {
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
     hasError = true;
     ATH_MSG_DEBUG("Header: xxx Link number out of range (skipping following data)"
                   << std::dec << data.linkNumber);
@@ -717,41 +720,41 @@ StatusCode SCT_RodDecoder::processHeader(const uint16_t inData,
   // Look for masked off links - bit 7
   if ((inData >> 7) & 0x1) {
     ATH_MSG_DEBUG("Masked link " << onlineID << " " << data.linkIDHash);
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::MaskedLink, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::MaskedLink, errs, ctx));
     hasError = true;
   }
   if (inData & 0x800) {
     ATH_MSG_DEBUG("    Header: xxx TimeOut Error " << data.linkIDHash);
     m_headErrorTimeout++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::TimeOutError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::TimeOutError, errs, ctx));
     hasError = true;
   }
   
   if (inData & 0x1000) {
     ATH_MSG_DEBUG("    Header: xxx Preamble Error " << data.linkIDHash);
     m_headErrorPreamble++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::PreambleError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::PreambleError, errs, ctx));
     hasError = true;
   }
 
   if (inData & 0x400) {
     ATH_MSG_DEBUG("    Header: xxx LVL1 ID Error " << data.linkIDHash);
     m_headErrorLvl1ID++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::LVL1IDError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::LVL1IDError, errs, ctx));
     hasError = true;
   }
   
   if (inData & 0x200) {
     ATH_MSG_DEBUG("    Header: xxx BCID Error " << data.linkIDHash);
     m_headErrorBCID++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::BCIDError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::BCIDError, errs, ctx));
     hasError = true;
   }
   
   if ((inData & 0xF) > 11) {
     ATH_MSG_DEBUG("    Header: xxx Error in formatter " << data.linkIDHash);
     m_headErrorFormatter++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::FormatterError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::FormatterError, errs, ctx));
     hasError = true;
   }
   if (!hasError and not hash.is_valid())  {
@@ -792,7 +795,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
     ATH_MSG_DEBUG("    Hit super-condensed : xxx Chip number = " << chip << " >= "<< N_CHIPS_PER_SIDE << " for hit "
                   << std::hex << inData);
     m_chipNumberError++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
     hasError = true;
     return sc;
   }
@@ -805,7 +808,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
        const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
        if (rdoMade == -1) {
           hasError = true;
-          ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+          ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
        }
        else {
           data.setSaved(true, rdoMade);
@@ -821,7 +824,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
        const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
        if (rdoMade == -1) {
           hasError = true;
-          ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+          ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
        }
        else {
           data.setSaved(true, rdoMade);
@@ -850,7 +853,7 @@ StatusCode SCT_RodDecoder::processSuperCondensedHit(const uint16_t inData,
      const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
      if (rdoMade == -1) {
         hasError = true;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
      }
      else {
         data.setSaved(true, rdoMade);
@@ -882,7 +885,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
     ATH_MSG_DEBUG("    Hit condensed : xxx Chip number = " << chip << " >= " << N_CHIPS_PER_SIDE << " for hit "
                   << std::hex << inData);
     m_chipNumberError++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
     hasError = true;
     return sc;
   }
@@ -895,7 +898,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
       const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       }
       else {
         data.setSaved(true, rdoMade);
@@ -911,7 +914,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
       const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       }
       else {
         data.setSaved(true, rdoMade);
@@ -937,7 +940,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
       const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       }
       else {
         data.setSaved(true, rdoMade);
@@ -956,7 +959,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
   }
   else { // 2-hits
     if (data.strip >= N_STRIPS_PER_SIDE) {
-      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       hasError = true;
 
       ATH_MSG_DEBUG("Condensed mode - strip number out of range");
@@ -969,7 +972,7 @@ StatusCode SCT_RodDecoder::processCondensedHit(const uint16_t inData,
       const int rdoMade{makeRDO(true, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       }
       else {
         data.setSaved(true, rdoMade);
@@ -1019,7 +1022,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
     if (chip>=N_CHIPS_PER_SIDE) {
       ATH_MSG_DEBUG("Expanded hit: First hit xxx ERROR chip Nb = " << chip << " >= " << N_CHIPS_PER_SIDE);
       m_chipNumberError++;
-      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       return sc;
     }
 
@@ -1041,7 +1044,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
     const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
     if (rdoMade == -1) {
       hasError = true;
-      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
     }
     else {
       data.setSaved(false, rdoMade);
@@ -1051,7 +1054,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
   else { // Next hits cluster expanded
     if (inData & 0x80) { // Paired hits
       if (data.strip >= N_STRIPS_PER_SIDE-2) {
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
         hasError = true;
         ATH_MSG_DEBUG("Expanded mode - strip number out of range");
         return sc;
@@ -1064,7 +1067,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
       const int rdoMade1{makeRDO(false, data, cache, dataItemsPool)};
       if (rdoMade1 == -1) {
         hasError = true;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       }
       else {
         data.setSaved(false, rdoMade1);
@@ -1075,7 +1078,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
       const int rdoMade2{makeRDO(false, data, cache, dataItemsPool)};
       if (rdoMade2 == -1) {
         hasError = true;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       }
       else {
         data.setSaved(false, rdoMade2);
@@ -1085,7 +1088,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
     else { // Last hit of the cluster
       m_lastExpHitNumber++;
       if (data.strip >= N_STRIPS_PER_SIDE-1) {
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
         hasError = true;
         ATH_MSG_DEBUG("Expanded mode - strip number out of range");
         return sc;
@@ -1096,7 +1099,7 @@ StatusCode SCT_RodDecoder::processExpandedHit(const uint16_t inData,
       const int rdoMade{makeRDO(false, data, cache, dataItemsPool)};
       if (rdoMade == -1) {
         hasError = true;
-        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs, ctx));
       }
       else {
         data.setSaved(false, rdoMade);
@@ -1112,7 +1115,8 @@ StatusCode SCT_RodDecoder::processABCDError(const uint16_t inData,
                                             const uint32_t robID,
                                             SharedData& data,
                                             SCT_RodDecoderErrorsHelper& errs,
-                                            bool& hasError) const
+                                            bool& hasError,
+                                            const EventContext& ctx) const
 {
   StatusCode sc{StatusCode::SUCCESS};
 
@@ -1134,7 +1138,7 @@ StatusCode SCT_RodDecoder::processABCDError(const uint16_t inData,
     ATH_MSG_DEBUG("ABCD error has an invalid error code " << abcError
                   << " the 16-bit word is 0x" << std::hex << inData << std::dec
                   << " for hash " << data.linkIDHash);
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Invalid, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Invalid, errs, ctx));
   }
   else {
     // Chip is 4 bits. The highest bit 3 represents side. Chip 0-5 on side 0 and chip 8-13 on side 1.
@@ -1153,22 +1157,22 @@ StatusCode SCT_RodDecoder::processABCDError(const uint16_t inData,
       ATH_MSG_DEBUG("ABCD error has an invalid chip 0x" << std::hex << chip << std::dec
                     << " the 16-bit word is 0x" << std::hex << inData << std::dec
                     << " for hash " << data.linkIDHash.value());
-      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Invalid, errs));
+      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Invalid, errs, ctx));
     }
     else {
-      if (     abcError==0x1) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Error1, errs));
-      else if (abcError==0x2) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Error2, errs));
-      else if (abcError==0x4) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Error4, errs));
-      else if (abcError==0x7) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Error7, errs));
-      if (     chip%8==0) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip0, errs));
-      else if (chip%8==1) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip1, errs));
-      else if (chip%8==2) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip2, errs));
-      else if (chip%8==3) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip3, errs));
-      else if (chip%8==4) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip4, errs));
-      else if (chip%8==5) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip5, errs));
+      if (     abcError==0x1) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Error1, errs, ctx));
+      else if (abcError==0x2) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Error2, errs, ctx));
+      else if (abcError==0x4) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Error4, errs, ctx));
+      else if (abcError==0x7) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Error7, errs, ctx));
+      if (     chip%8==0) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip0, errs, ctx));
+      else if (chip%8==1) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip1, errs, ctx));
+      else if (chip%8==2) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip2, errs, ctx));
+      else if (chip%8==3) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip3, errs, ctx));
+      else if (chip%8==4) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip4, errs, ctx));
+      else if (chip%8==5) ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError_Chip5, errs, ctx));
     }
   }
-  ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError, errs));
+  ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ABCDError, errs, ctx));
   hasError = true;
 
   return sc;
@@ -1178,7 +1182,8 @@ StatusCode SCT_RodDecoder::processRawData(const uint16_t inData,
                                           const uint32_t robID,
                                           SharedData& data,
                                           SCT_RodDecoderErrorsHelper& errs,
-                                          bool& hasError) const
+                                          bool& hasError,
+                                          const EventContext& ctx) const
 {
   StatusCode sc{StatusCode::SUCCESS};
 
@@ -1193,7 +1198,7 @@ StatusCode SCT_RodDecoder::processRawData(const uint16_t inData,
   ATH_MSG_DEBUG(" xxx Raw Data Mode " << std::hex << inData << std::dec << ": Config Data Mode ");
   // Too many errors in the BS for the ROD to decode the data
   m_configDataBit++;
-  ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::RawError, errs));
+  ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::RawError, errs, ctx));
   hasError = true;
 
   return sc;
@@ -1203,7 +1208,8 @@ StatusCode SCT_RodDecoder::processTrailer(const uint16_t inData,
                                           const uint32_t /*robID*/,
                                           SharedData& data,
                                           SCT_RodDecoderErrorsHelper& errs,
-                                          bool& hasError) const
+                                          bool& hasError,
+                                          const EventContext& ctx) const
 {
   StatusCode sc{StatusCode::SUCCESS};
   /* Temporarily disabled
@@ -1222,7 +1228,7 @@ StatusCode SCT_RodDecoder::processTrailer(const uint16_t inData,
   if (inData & 0x1000) {
     ATH_MSG_DEBUG("    Trailer: xxx Trailer ERROR " << std::hex << inData);
     m_trailerErrorBit++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::TrailerError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::TrailerError, errs, ctx));
     hasError = true;
   }
 
@@ -1232,7 +1238,7 @@ StatusCode SCT_RodDecoder::processTrailer(const uint16_t inData,
     // http://www-eng.lbl.gov/~jmjoseph/Atlas-SiROD/Manuals/usersManual-v164.pdf
     ATH_MSG_DEBUG("    Trailer: xxx Header-Trailer limit ERROR " << std::hex << inData);
     m_trailerErrorLimit++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::HeaderTrailerLimitError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::HeaderTrailerLimitError, errs, ctx));
     hasError = true;
   }
 
@@ -1240,7 +1246,7 @@ StatusCode SCT_RodDecoder::processTrailer(const uint16_t inData,
     // Not sure if there are hit elements before (probably yes but in principle they are fine)
     ATH_MSG_DEBUG("    Trailer: xxx Data Overflow ERROR " << std::hex << inData);
     m_trailerErrorOverflow++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::TrailerOverflowError, errs));
+    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::TrailerOverflowError, errs, ctx));
     hasError = true;
   }
   if (inData & 0xF) {
@@ -1264,7 +1270,7 @@ StatusCode SCT_RodDecoder::processTrailer(const uint16_t inData,
     // 6 means chip 5 is temporarily masked.
     // 7 means chips 6-11, 0-5 are temporarily masked.
     // 12 means chips 11, 0-5 are temporarily masked.
-    setFirstTempMaskedChip(data.linkIDHash, (inData & 0xF), errs).ignore();
+    setFirstTempMaskedChip(data.linkIDHash, (inData & 0xF), errs, ctx).ignore();
   }
 
   return sc;

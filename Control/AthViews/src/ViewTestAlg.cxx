@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ViewTestAlg.cxx 
@@ -14,14 +14,6 @@
 #include "AthViews/View.h"
 
 namespace AthViews {
-
-ViewTestAlg::ViewTestAlg( const std::string& name, ISvcLocator* pSvcLocator ) : AthAlgorithm( name, pSvcLocator )
-{
-}
-
-ViewTestAlg::~ViewTestAlg()
-{
-}
 
 StatusCode ViewTestAlg::initialize()
 {
@@ -46,17 +38,17 @@ StatusCode ViewTestAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ViewTestAlg::execute()
+StatusCode ViewTestAlg::execute(const EventContext& ctx) const
 {  
   ATH_MSG_DEBUG( "Executing " << name() << "..." );
 
-  auto theStore = Atlas::getExtendedEventContext( getContext() ).proxy();
+  auto theStore = Atlas::getExtendedEventContext( ctx ).proxy();
   ATH_MSG_INFO( name() << " running with store " << theStore->name() );
 
   // Make (optional) output
   if ( m_output.key() != "" )
   {
-    auto output = SG::makeHandle( m_output, getContext() );
+    auto output = SG::makeHandle( m_output, ctx );
     output = std::make_unique<int>( 1 );
   }
 

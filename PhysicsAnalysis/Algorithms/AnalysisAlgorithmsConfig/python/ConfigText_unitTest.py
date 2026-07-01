@@ -72,7 +72,13 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (jetCollection='AntiKt4EMPFlowJets')
     config.setOptions (runJvtUpdate=False)
     config.setOptions (runNNJvtUpdate=True)
+    config.setOptions (runJvtSelection=False)  # deprecated, done via JVTWorkingPoint block now
     config.setOptions (recalibratePhyslite=False)
+    # Jets.JVTWorkingPoint
+    config.addBlock('Jets.JVTWorkingPoint')
+    config.setOptions (containerName='AnaJets')
+    config.setOptions (selectionName='baselineJvt')
+    config.setOptions (jvtWP='FixedEffPt')
     # Jets.FlavourTagging
     config.addBlock( 'Jets.FlavourTagging')
     config.setOptions (containerName='AnaJets')
@@ -80,8 +86,6 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (btagger='GN2v01')
     config.setOptions (btagWP='FixedCutBEff_65')
     config.setOptions (saveScores='All')
-    # Jets.JVT
-    config.addBlock('Jets.JVT', containerName='AnaJets')
     # FTagJetTriggerMatching
     bjetTriggerChainsPerYear = {
         2022: ['HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
@@ -210,6 +214,18 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (containerName='AnaTauJets')
     config.setOptions (prefix='truth_')
 
+    # InDetTracks
+    config.addBlock ('InDetTracks')
+    config.setOptions (containerName='AnaTracks')
+    config.setOptions (minPt=500)
+    config.setOptions (maxEta=2.5)
+    config.setOptions (outputTrackSummaryInfo=True)
+    # InDetTracks.WorkingPoint
+    config.addBlock ('InDetTracks.WorkingPoint')
+    config.setOptions (containerName='AnaTracks')
+    config.setOptions (selectionName='tight')
+    config.setOptions (cutLevel='TightPrimary')
+
     config.addBlock ('SystObjectLink')
     config.setOptions (containerName='AnaJets')
     config.addBlock ('SystObjectLink')
@@ -237,6 +253,9 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (selectionName='medium')
     config.addBlock ('ObjectCutFlow')
     config.setOptions (containerName='AnaTauJets')
+    config.setOptions (selectionName='tight')
+    config.addBlock ('ObjectCutFlow')
+    config.setOptions (containerName='AnaTracks')
     config.setOptions (selectionName='tight')
 
     # GeneratorLevelAnalysis
@@ -321,6 +340,10 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.setOptions (jets='AntiKt4TruthDressedWZJets')
     config.setOptions (useRapidityForDeltaR=False)
 
+    # Parton history
+    config.addBlock ('PartonHistory')
+    config.setOptions (history='Ttbar')
+
     # Thinning
     config.addBlock ('Thinning')
     config.setOptions (containerName='AnaElectrons')
@@ -344,6 +367,10 @@ def compareTextBuilder(yamlPath='', *, checkOrder=False) :
     config.addBlock ('Thinning')
     config.setOptions (containerName='AnaLargeRJets')
     config.setOptions (outputName='OutLargeRJets')
+    config.addBlock ('Thinning')
+    config.setOptions (containerName='AnaTracks')
+    config.setOptions (selectionName='tight')
+    config.setOptions (outputName='OutTracks')
     config.addBlock ('Thinning')
     config.setOptions (containerName='TruthElectrons')
     config.setOptions (skipOnData=True)
@@ -406,15 +433,17 @@ MU_N medium 25000 > 0
 SAVE
 """
     }
-    config.addBlock ('EventSelection')
-    config.setOptions (electrons='AnaElectrons.loose')
-    config.setOptions (muons='AnaMuons.medium')
-    config.setOptions (jets='AnaJets.baselineJvt')
-    config.setOptions (met='AnaMET')
-    config.setOptions (btagDecoration='ftag_select_ftag')
-    config.setOptions (noFilter=True)
-    config.setOptions (cutFlowHistograms=True)
-    config.setOptions (selectionCutsDict=exampleSelectionCuts)
+    for sel_name,sel_cuts in exampleSelectionCuts.items():
+        config.addBlock ('EventSelection')
+        config.setOptions (electrons='AnaElectrons.loose')
+        config.setOptions (muons='AnaMuons.medium')
+        config.setOptions (jets='AnaJets.baselineJvt')
+        config.setOptions (met='AnaMET')
+        config.setOptions (btagDecoration='ftag_select_ftag')
+        config.setOptions (noFilter=True)
+        config.setOptions (cutFlowHistograms=True)
+        config.setOptions (selectionName=sel_name)
+        config.setOptions (selectionCuts=sel_cuts)
 
     # Bootstraps
     config.addBlock ('Bootstraps')
@@ -436,6 +465,7 @@ SAVE
         'jet_': 'OutJets',
         'larger_jet_': 'OutLargeRJets',
         'met_': 'AnaMET',
+        'trk_': 'OutTracks',
         '': 'EventInfo'}
     outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
                              'truth_el_' : 'OutTruthElectrons',

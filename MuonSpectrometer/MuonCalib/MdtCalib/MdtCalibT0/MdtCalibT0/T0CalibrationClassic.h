@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef T0CALIBRATIONCLASSIC_H
@@ -110,7 +110,7 @@ namespace MuonCalib {
         std::unique_ptr<TH1> time{nullptr};  //!< time spectrum
         std::unique_ptr<TH1> adc{nullptr};   //!< adc spectrum
                                              // TH2* adc_vs_time;
-        int id;                              //!< tube identifier
+        int id = 0;                          //!< tube identifier
     };
 
     /**@class T0CalibrationClassic

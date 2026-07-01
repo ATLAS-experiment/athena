@@ -34,6 +34,7 @@ TrigInDetAccelerationSvc::TrigInDetAccelerationSvc( const std::string& name, ISv
   m_module(0),
   m_detStore("DetectorStore", name),
   m_evtStore("StoreGateSvc",name), 
+  m_cudaCheckSvc("GPUSystemInfoSvc", "AthCUDA::GPUSystemInfoSvc"),
   m_factoryConfigured(false) {
 
   declareProperty( "NumberOfDCs", m_nDCs = 8 );
@@ -53,9 +54,41 @@ StatusCode TrigInDetAccelerationSvc::initialize() {
   
   ATH_CHECK (m_evtStore.retrieve() );
   ATH_CHECK (m_detStore.retrieve() );
+  ATH_CHECK (m_cudaCheckSvc.retrieve() );
+  
+  for(int i=0;i<3;i++) m_layerInfo[i].clear();
+  
+  /*    
+   * Ask to be informed at the beginning of a new run so that we    
+   * can collect geometry, conditions, etc. and copy them to on-GPU data structures   
+   * For athenaHLT this should be UpdateAfterFork
+   */   
+
+  SmartIF<IIncidentSvc> incsvc{service("IncidentSvc")};
+  const int priority = 100;
+  if( incsvc ) {
+    const bool is_multiprocess = (Gaudi::Concurrency::ConcurrencyFlags::numProcs() > 0);
+    if (is_multiprocess) {
+      incsvc->addListener( this, AthenaInterprocess::UpdateAfterFork::type(), priority);
+    }
+    else {
+      incsvc->addListener( this, "BeginRun", priority);
+    }
+  }
+  
+  return StatusCode::SUCCESS;
+} 
+
+
+StatusCode TrigInDetAccelerationSvc::initializeWorkFactory() {
+  // Check if CUDA device is available before creating a factory
+  if (m_cudaCheckSvc->getAvailableDevices().size() == 0) {
+    ATH_MSG_INFO("TrigInDetAccelerationSvc: no CUDA device available");
+    return StatusCode::FAILURE;
+  }
+
 
   //load the OffloadFactory library
-
   m_libHandle = dlopen(m_moduleName.c_str(), RTLD_LAZY);
   
   if(!m_libHandle) {
@@ -88,40 +121,11 @@ StatusCode TrigInDetAccelerationSvc::initialize() {
     return StatusCode::SUCCESS;
   }
   
-  bool cfgResult = m_pWF->configure();
-
-  if(!cfgResult) {
-    ATH_MSG_INFO("OffloadFactory config failed");
-    m_factoryConfigured = false;
-    return StatusCode::SUCCESS;
-  }
 
   m_factoryConfigured = true;
-  
-  for(int i=0;i<3;i++) m_layerInfo[i].clear();
-
   ATH_MSG_INFO("TrigInDetAccelerationSvc: created OffloadFactory, factory id = "<<std::hex<<m_pWF->getFactoryId()<<std::dec);
-  
-  /*    
-   * Ask to be informed at the beginning of a new run so that we    
-   * can collect geometry, conditions, etc. and copy them to on-GPU data structures   
-   * For athenaHLT this should be UpdateAfterFork
-   */   
-
-  SmartIF<IIncidentSvc> incsvc{service("IncidentSvc")};
-  const int priority = 100;
-  if( incsvc ) {
-    const bool is_multiprocess = (Gaudi::Concurrency::ConcurrencyFlags::numProcs() > 0);
-    if (is_multiprocess) {
-      incsvc->addListener( this, AthenaInterprocess::UpdateAfterFork::type(), priority);
-    }
-    else {
-      incsvc->addListener( this, "BeginRun", priority);
-    }
-  }
-  
   return StatusCode::SUCCESS;
-} 
+}
 
 ///////// 
 /// Finalize 
@@ -129,8 +133,10 @@ StatusCode TrigInDetAccelerationSvc::initialize() {
 StatusCode TrigInDetAccelerationSvc::finalize() {
 
   delete m_pWF;
-
-  dlclose(m_libHandle);
+  // in HLTMPPU the worker factory is only initialized in workers
+  if (m_libHandle) {
+    dlclose(m_libHandle);
+  }
 
   return StatusCode::SUCCESS; 
 }
@@ -143,6 +149,11 @@ StatusCode TrigInDetAccelerationSvc::finalize() {
 void TrigInDetAccelerationSvc::handle(const Incident&) {    
 
   ATH_MSG_INFO("OnBeginRun ");
+
+  if (initializeWorkFactory() != StatusCode::SUCCESS){
+    ATH_MSG_ERROR("Offloading Work Factory failed");
+    return;
+  }
 
   if (m_useITkGeometry) {
     // barrel ec, subdetector id, itk volume id, itk layer disk id

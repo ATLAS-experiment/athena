@@ -24,6 +24,8 @@ def BPHY16Cfg(flags):
     acc.addPublicTool(trackselect)
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     BPHY16JpsiFinder = CompFactory.Analysis.JpsiFinder(
           name                        = "BPHY16JpsiFinder",
           muAndMu                     = True,
@@ -38,8 +40,6 @@ def BPHY16Cfg(flags):
           useCombinedMeasurement      = False, # Only takes effect if combOnly=True
           muonCollectionKey           = "Muons",
           TrackParticleCollection     = "InDetTrackParticles",
-          V0VertexFitterTool          = None, # V0 vertex fitter
-          useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
           TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
           TrackSelectorTool           = trackselect,
           VertexPointEstimator        = vpest,
@@ -53,7 +53,7 @@ def BPHY16Cfg(flags):
           RefPVContainerName     = "BPHY16RefittedPrimaryVertices1",
           RefitPV                = True,
           V0Tools                = V0Tools,
-          PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+          PVRefitter             = PVrefit,
           MaxPVrefit             = 100000,
           DoVertexType           = 7)
 
@@ -95,7 +95,7 @@ def BPHY16Cfg(flags):
                                       RefPVContainerName       = "BPHY16RefittedPrimaryVertices2",
                                       RefitPV                  = True,
                                       V0Tools                  = V0Tools,
-                                      PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                      PVRefitter               = PVrefit,
                                       MaxPVrefit               = 10000, DoVertexType = 7)
 
     BPHY16_Select_FourTrack  = CompFactory.DerivationFramework.Select_onia2mumu(
@@ -113,7 +113,7 @@ def BPHY16Cfg(flags):
                                       InputVtxContainerName      = "BPHY16FourTrack",
                                       V0Tools                    = V0Tools,
                                       TrackIndices               = [ 2, 3 ],
-                                      PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                                      PVRefitter                 = PVrefit,
                                       TrkVertexFitterTool        = vkalvrt,
                                       OutputVtxContainerName     = "BPHY16TwoTrack")
     BPHY16_Select_TwoTrack  = CompFactory.DerivationFramework.Select_onia2mumu(

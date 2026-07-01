@@ -29,20 +29,26 @@ namespace BJT{
 
       // jet tagger tool
       ATH_CHECK(m_tagger.retrieve());
+      if(m_scalefactor)
+        ATH_CHECK(m_scalefactor.retrieve());
 
       return StatusCode::SUCCESS;
     }
 
-    StatusCode BoostedJetTaggerAlg::execute(){
+    StatusCode BoostedJetTaggerAlg::execute(const EventContext& ctx){
 
       for (const auto& sys : m_systematicsList.systematicsVector()){
 
         // Retrieve inputs
         const xAOD::JetContainer *jets = nullptr;
-        ANA_CHECK(m_jets.retrieve(jets, sys));
+        ANA_CHECK(m_jets.retrieve(jets, sys, ctx));
 
-        // jet tagger
+        // jet tagger WP tool
         ATH_CHECK(m_tagger -> decorate(*jets));
+
+        // scale factors tool
+        if(m_scalefactor)
+          ATH_CHECK(m_scalefactor -> decorate(*jets));
 
       }
 

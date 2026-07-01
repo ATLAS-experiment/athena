@@ -14,18 +14,15 @@ AnyVertexSkimmingTool::AnyVertexSkimmingTool(const std::string& t, const std::st
 AnyVertexSkimmingTool::~AnyVertexSkimmingTool() = default;
 
 StatusCode AnyVertexSkimmingTool::initialize(){
-    if(m_useHandles) for(const auto& str : m_containerNames) m_keyArray.emplace_back(str);
-    ATH_CHECK(m_keyArray.initialize(m_useHandles));
+    ATH_CHECK(m_keyArray.initialize());
     return StatusCode::SUCCESS;
 }
 
-bool AnyVertexSkimmingTool::eventPassesFilter() const{
-
-    if(m_useHandles){
+bool AnyVertexSkimmingTool::eventPassesFilter(const EventContext& ctx) const{
        bool pass = false;
        for(auto key : m_keyArray){
           ATH_MSG_DEBUG("Key Checking: " << key.key());
-          SG::ReadHandle<xAOD::VertexContainer> read(key);
+          SG::ReadHandle<xAOD::VertexContainer> read(key, ctx);
           if(!read.isValid()){
             std::string error("AnyVertexSkimmingTool - Failed to retrieve : ");
             error += key.key();
@@ -34,21 +31,6 @@ bool AnyVertexSkimmingTool::eventPassesFilter() const{
           if(not read->empty()) pass |= true;
        }
        return pass;
-    }else{
-       bool pass = false;
-       for(const std::string& name : m_containerNames){
-           ATH_MSG_DEBUG("Checking: " << name);
-           const xAOD::VertexContainer* container = nullptr;
-           if(evtStore()->retrieve(container, name).isFailure()){
-               std::string error("AnyVertexSkimmingTool - Failed to retrieve : ");
-               error += name;
-               throw  std::runtime_error(error);
-           }
-           if(not container->empty()) pass |= true;
-           //Not breaking from loop early to ensure all containers are written - avoids production bugs
-       }
-       return pass;
-    }
 }
 
 }

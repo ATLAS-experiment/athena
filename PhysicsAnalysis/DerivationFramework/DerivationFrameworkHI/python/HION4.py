@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # HION4.py  
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -36,25 +36,51 @@ def HION4SkimmingToolCfg(flags):
     trackRequirements = '(InDetTrackParticles.pt >= 0.2*GeV) && (abs(InDetTrackParticles.eta) < 2.5)'
     trackOnlySelection = '( count('+trackRequirements+') >= 2 && 5 >= count('+trackRequirements+') )' 
 
-    tightTrackRequirements = '(InDetTrackParticles.pt >= 1*GeV) && (abs(InDetTrackParticles.eta) < 2.5)'
-    tightTrackOnlySelection = '( count('+tightTrackRequirements+') == 2 )'
-
     objectSelection = '('+muonOnlySelection+' || '+electronOnlySelection+' || '+photonOnlySelection+' || '+electronPhotonSelection+' || '+trackOnlySelection+')'
-        
-    if flags.Trigger.EDMVersion != -1: # Only for files with trigger payload
-        from DerivationFrameworkHI import ListTriggers
-        VMtrigger=ListTriggers.HION4SkimmingTriggersVM()
-        triggers=ListTriggers.HION4SkimmingTriggersALL()
-        expression = '( (' + ' || '.join(triggers) + ') && '+objectSelection+') || ( '+ ' || '.join(VMtrigger)+ ' && '+tightTrackOnlySelection+')'
-    else:
-        expression = '( '+objectSelection+' ) || ( '+tightTrackOnlySelection+' )'
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
-    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-        flags, name = "HION4StringSkimmingTool", expression = expression)), primary = True)
-    
-    return(acc)
+    HION4ObjSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "HION4ObjSkimmingTool",
+                                  expression = objectSelection)))
+
+    tightTrackRequirements = '(InDetTrackParticles.pt >= 1*GeV) && (abs(InDetTrackParticles.eta) < 2.5)'
+    tightTrackOnlySelection = '( count('+tightTrackRequirements+') == 2 )'
+
+    HION4TightTrackSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "HION4TightTrackSkimmingTool",
+                                  expression = tightTrackOnlySelection)))
+    filterList = [HION4ObjSkimmingTool, HION4TightTrackSkimmingTool]
+
+    if flags.Trigger.EDMVersion != -1: # Only for files with trigger payload
+        from DerivationFrameworkHI import ListTriggers
+        triggers = ListTriggers.HION4SkimmingTriggersALL()
+        HION4TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "HION4TriggerSkimmingTool", TriggerListOR = triggers)
+        acc.addPublicTool(HION4TriggerSkimmingTool)
+        HION4ObjTriggerSkimmingTool = (
+            CompFactory.DerivationFramework.FilterCombinationAND(
+                name="HION4ObjTriggerSkimmingTool",
+                FilterList=[HION4TriggerSkimmingTool, HION4ObjSkimmingTool]))
+        acc.addPublicTool(HION4ObjTriggerSkimmingTool)
+
+        VMtrigger = ListTriggers.HION4SkimmingTriggersVM()
+        HION4VMTriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "HION4VMTriggerSkimmingTool", TriggerListOR = VMtrigger)
+        acc.addPublicTool(HION4VMTriggerSkimmingTool)
+        HION4TightTrackTriggerSkimmingTool = (
+            CompFactory.DerivationFramework.FilterCombinationAND(
+                name="HION4TightTrackTriggerSkimmingTool",
+                FilterList=[HION4VMTriggerSkimmingTool, HION4TightTrackSkimmingTool]))
+        acc.addPublicTool(HION4TightTrackTriggerSkimmingTool)
+
+        filterList = [HION4ObjTriggerSkimmingTool, HION4TightTrackTriggerSkimmingTool]
+
+    HION4SkimmingTool  = CompFactory.DerivationFramework.FilterCombinationOR(
+        name="HION4SkimmingTool",  FilterList=filterList)
+    acc.addPublicTool(HION4SkimmingTool, primary = True)
+    return acc
+
 
 def HION4AugmentationToolCfg(flags):
     """Configure the example augmentation tool"""

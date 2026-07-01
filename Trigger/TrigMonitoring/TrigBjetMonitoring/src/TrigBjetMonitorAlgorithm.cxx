@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBjetMonitorAlgorithm.h"
@@ -420,10 +420,9 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                             muonPhi = muon->phi();
                             ATH_MSG_DEBUG("        muonPhi : " << muonPhi);
                             // muonZ
-                            auto link = muon->combinedTrackParticleLink();    // TM and DG 18/06/22
-                            if (link.isValid()) {
+                            auto track = muon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle);    // TM and DG 18/06/22
+                            if (track) {
                                 plotDeltaZ = true;
-                                const xAOD::TrackParticle* track = *link;
                                 muonZ = track->z0() + track->vz();
                             } else {
                                 plotDeltaZ = false;
@@ -470,7 +469,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                                     jetPhi1 = jetPhi;
                                     jetZ1 = zPrmVtx;
 
-                                    auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30
+                                    auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(ctx, jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30
                                     const SG::AuxElement* obj_storing_btag = nullptr;
                                     if ( btaggingLinkInfo.isValid() ) {
                                         obj_storing_btag = *(btaggingLinkInfo.link);
@@ -622,7 +621,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 
                                 std::string vtxname = m_onlineVertexContainerKey.key();
                                 if ( vtxname.compare(0, 4, "HLT_")==0 ) vtxname.erase(0,4);
-                                auto vertexLinkInfo = TrigCompositeUtils::findLink<xAOD::VertexContainer>(jetLinkInfo.source, vtxname ); // CV 200120 & MS 290620
+                                auto vertexLinkInfo = TrigCompositeUtils::findLink<xAOD::VertexContainer>(ctx, jetLinkInfo.source, vtxname ); // CV 200120 & MS 290620
                                 ATH_CHECK( vertexLinkInfo.isValid() ) ; // TM 200120
                                 const xAOD::Vertex* vtx = *(vertexLinkInfo.link);
                                 NameH = "PVz_jet_"+trigName;
@@ -651,7 +650,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 
                             // Fetch and plot BTagging information
                             const SG::AuxElement* obj_storing_btag = nullptr;
-                            auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30
+                            auto btaggingLinkInfo = TrigCompositeUtils::findLink<xAOD::BTaggingContainer>(ctx, jetLinkInfo.source, m_btaggingLinkName); // TM 2021-10-30
                             if ( btaggingLinkInfo.isValid() ) {
                                 obj_storing_btag = *(btaggingLinkInfo.link);
                             }

@@ -1,22 +1,21 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: IEventInfoCnvTool.h 793563 2017-01-23 21:59:34Z leggett $
 #ifndef XAODCNVINTERFACES_IEVENTINFOCNVTOOL_H
 #define XAODCNVINTERFACES_IEVENTINFOCNVTOOL_H
 
 // Gaudi/Athena include(s):
 #include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 // Forward declaration(s):
 namespace xAOD {
     class EventInfo_v1;
     typedef EventInfo_v1 EventInfo;
 }
+class EventContext;
 class EventInfo;
 
 namespace xAODMaker {
@@ -34,18 +33,16 @@ namespace xAODMaker {
     *
     * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
     *
-    * $Revision: 793563 $
-    * $Date: 2017-01-23 22:59:34 +0100 (Mon, 23 Jan 2017) $
     */
    class IEventInfoCnvTool : public virtual IAlgTool {
 
    public:
       /// Function that fills an existing xAOD::EventInfo object with data
-      virtual StatusCode convert( const EventInfo* aod,
+      virtual StatusCode convert( const EventContext& ctx,
+                                  const EventInfo* aod,
                                   xAOD::EventInfo* xaod,
                                   bool pileUpInfo = false,
-                                  bool copyPileUpLinks = true,
-                                  const EventContext& ctx = Gaudi::Hive::currentContext()) const = 0;
+                                  bool copyPileUpLinks = true ) const = 0;
 
       /// Gaudi interface definition
       static const InterfaceID& interfaceID() {

@@ -29,7 +29,8 @@ def BPHY18Cfg(flags):
     acc.addPublicTool(trackselect)
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
-
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     skimmingTools = []
 
     if flags.Trigger.EDMVersion >= 0:
@@ -76,8 +77,6 @@ def BPHY18Cfg(flags):
                              electronCollectionKey       = "Electrons",
                              TrackParticleCollection     = "GSFTrackParticles",
                              useEgammaCuts               = True,
-                             V0VertexFitterTool          = None,
-                             useV0Fitter                 = False,
                              TrkVertexFitterTool         = vkalvrt,
                              TrackSelectorTool           = trackselect,
                              VertexPointEstimator        = vpest,
@@ -91,7 +90,7 @@ def BPHY18Cfg(flags):
                             OutputVtxContainerName = "BPHY18DiElectronCandidates",
                             PVContainerName        = "PrimaryVertices",
                             V0Tools                = V0Tools,
-                            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                            PVRefitter             = PVrefit,
                             RefPVContainerName     = "SHOULDNOTBEUSED",
                             DoVertexType           = 7
                             )
@@ -143,7 +142,7 @@ def BPHY18Cfg(flags):
                             RefPVContainerName     = "BPHY18RefittedPrimaryVertices",
                             RefitPV                = True,
                             V0Tools                = V0Tools,
-                            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                            PVRefitter             = PVrefit,
                             MaxPVrefit             = 10000,
                             DoVertexType           = 7
                             )
@@ -177,7 +176,7 @@ def BPHY18Cfg(flags):
                            name                   = "BPHY18_diMeson_revertex",
                            InputVtxContainerName  = "BeeKstCandidates",
                            V0Tools                = V0Tools,
-                           PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                           PVRefitter             = PVrefit,
                            TrackIndices           = [ 2, 3 ],
                            TrkVertexFitterTool    = vkalvrt,
                            OutputVtxContainerName = "BPHY18DiMeson"

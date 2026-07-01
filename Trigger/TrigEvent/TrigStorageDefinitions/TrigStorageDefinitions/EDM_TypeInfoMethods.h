@@ -1,77 +1,92 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTORAGEDEF_TYPEINFO_METHODS
 #define TRIGSTORAGEDEF_TYPEINFO_METHODS
-struct TypeInfo_EDM;
 
-#include "TrigStorageDefinitions/EDM_MasterSearch.h"
+#include "TrigStorageDefinitions/TypeInformation.h"
+
 #include <type_traits>
 
-template<class T, class EDMLIST = TypeInfo_EDM> struct IsKnownFeature{
-  typedef typename master_search<typename EDMLIST::map,
-    HLT::TypeInformation::get_feat,T>::result::search_result search_result;
-  static const bool value = !std::is_same<HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<T>,search_result>::value;
-  static_assert(value,"The following class is not a valid feature. Contact Trigger Core SW experts. Thanks.");
+// Forward declaration
+struct TypeInfo_EDM;
+
+
+/// Check if type T is known in EDMLIST. Compilation failure if not.
+template<class T, class EDMLIST = TypeInfo_EDM>
+struct IsKnownFeature {
+  static constexpr bool value = EDMLIST::map::template has<T, HLT::TypeInformation::MatchFeatures>;
 };
 
-template<class CONTAINER, class EDMLIST = TypeInfo_EDM> struct Container2Object{
-  typedef typename master_search<typename EDMLIST::map,
-                        HLT::TypeInformation::get_cont,
-                        CONTAINER
-				   >::result::search_result::object type;
+
+/// Get link type for feature
+template<class REQUESTED, class CONTAINER>
+using Features2LinkHelper_t = std::conditional_t<
+  std::is_same_v<REQUESTED, CONTAINER>,
+  DataLink<CONTAINER>,
+  ElementLink<CONTAINER>
+  >;
+
+
+//
+// Type "converters" from/to object, features and containers.
+//
+// Note that we cannot implement these as pure alias templates since TypeInfo_EDM
+// is only forward declared here. We provide the usual "_t" helper type.
+//
+
+/// Get object type within container
+template<class CONTAINER, class EDMLIST = TypeInfo_EDM>
+struct Container2Object {
+  using type = EDMLIST::map::template find<CONTAINER, HLT::TypeInformation::MatchContainer>::object;
 };
+template<class FEATURE, class EDMLIST = TypeInfo_EDM>
+using Container2Object_t = Container2Object<FEATURE, EDMLIST>::type;
 
-template<class CONTAINER, class EDMLIST = TypeInfo_EDM> struct Container2Aux{
-  typedef typename master_search<typename EDMLIST::map,
-                        HLT::TypeInformation::get_cont,
-                        CONTAINER
-				   >::result::search_result::aux type;
+
+/// Get Aux type for container
+template<class CONTAINER, class EDMLIST = TypeInfo_EDM>
+struct Container2Aux {
+  using type = EDMLIST::map::template find<CONTAINER, HLT::TypeInformation::MatchContainer>::aux;
 };
+template<class FEATURE, class EDMLIST = TypeInfo_EDM>
+using Container2Aux_t = Container2Aux<FEATURE, EDMLIST>::type;
 
-template<class OBJECT, class EDMLIST = TypeInfo_EDM> struct Object2Container{
-  typedef typename master_search<typename EDMLIST::map,
-                        HLT::TypeInformation::get_objt,
-                        OBJECT
-				   >::result::search_result::container type;
+
+/// Get container type for object
+template<class OBJECT, class EDMLIST = TypeInfo_EDM>
+struct Object2Container {
+  using type = EDMLIST::map::template find<OBJECT, HLT::TypeInformation::MatchObject>::container;
 };
+template<class FEATURE, class EDMLIST = TypeInfo_EDM>
+using Object2Container_t = Object2Container<FEATURE, EDMLIST>::type;
 
-template<class FEATURE, class EDMLIST = TypeInfo_EDM> struct Features2Container{
-  typedef typename master_search<typename EDMLIST::map,
-                        HLT::TypeInformation::get_feat,
-                        FEATURE
-		       >::result::search_result::container type;
+
+/// Get container type for feature
+template<class FEATURE, class EDMLIST = TypeInfo_EDM>
+struct Features2Container {
+  using type = EDMLIST::map::template find<FEATURE, HLT::TypeInformation::MatchFeatures>::container;
 };
+template<class FEATURE, class EDMLIST = TypeInfo_EDM>
+using Features2Container_t = Features2Container<FEATURE, EDMLIST>::type;
 
-template<class FEATURE, class EDMLIST = TypeInfo_EDM> struct Features2Object{
-  typedef typename master_search<typename EDMLIST::map,
-                        HLT::TypeInformation::get_feat,
-                        FEATURE
-		       >::result::search_result::object type;
+
+/// Get object type for feature
+template<class FEATURE, class EDMLIST = TypeInfo_EDM>
+struct Features2Object {
+  using type = EDMLIST::map::template find<FEATURE, HLT::TypeInformation::MatchFeatures>::object;
 };
+template<class FEATURE, class EDMLIST = TypeInfo_EDM>
+using Features2Object_t = Features2Object<FEATURE, EDMLIST>::type;
 
-template<class OBJECT, class EDMLIST = TypeInfo_EDM> struct Object2Features{
-  typedef typename master_search<typename EDMLIST::map,
-                        HLT::TypeInformation::get_objt,
-                        OBJECT
-		       >::result::search_result::list_of_features type;
+
+/// Get object type for feature list
+template<class OBJECT, class EDMLIST = TypeInfo_EDM>
+struct Object2Features {
+  using type = EDMLIST::map::template find<OBJECT, HLT::TypeInformation::MatchObject>::list_of_features;
 };
-
-template <class CONTAINER, bool isCont> struct lnk_helper;
-
-template <class CONTAINER> struct lnk_helper<CONTAINER,false>{
-  typedef ElementLink<CONTAINER> type;
-};
-
-template <class CONTAINER> struct lnk_helper<CONTAINER,true>{
-  typedef DataLink<CONTAINER> type;
-};
-
-template<class REQUESTED,class CONTAINER> struct Features2LinkHelper{
-  static const bool isCont = std::is_same<REQUESTED,CONTAINER>::value;
-  typedef typename lnk_helper<CONTAINER,isCont>::type type;
-};
-
+template<class FEATURE, class EDMLIST = TypeInfo_EDM>
+using Object2Features_t = Object2Features<FEATURE, EDMLIST>::type;
 
 #endif

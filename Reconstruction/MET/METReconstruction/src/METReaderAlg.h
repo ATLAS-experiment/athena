@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METReaderAlg.h
@@ -8,7 +8,6 @@
 #define METReaderAlg_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/DataHandle.h"
 #include "xAODMissingET/MissingETContainer.h"
 #include "xAODMissingET/MissingETComponentMap.h"
 

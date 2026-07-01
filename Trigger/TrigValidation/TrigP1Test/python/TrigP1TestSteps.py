@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -151,7 +151,7 @@ def default_check_steps_OHMon(test, hist_path):
         steps.remove(hm_step)
     return steps
 
-def filterBS(stream_name):
+def filterBS(stream_name, extra_args = ''):
     '''Extract ByteStream data for a given stream from a file with multiple streams'''
     from TrigValTools.TrigValSteering import ExecStep
     from TrigValTools.TrigValSteering.Common import find_file
@@ -159,7 +159,7 @@ def filterBS(stream_name):
     filterStep.type = 'other'
     filterStep.executable = 'trigbs_extractStream.py'
     filterStep.input = ''
-    filterStep.args = '-s ' + stream_name + ' ' + find_file('*_HLTMPPy_output.*.data')
+    filterStep.args = f'{extra_args} -s {stream_name} ' + find_file('data*_SingleStream.daq.RAW.*_output.*.data', max_files=None)
     return filterStep
 
 def decodeBS(stream_name, moduleID=0):
@@ -171,5 +171,5 @@ def decodeBS(stream_name, moduleID=0):
     decodeStep.executable = 'python'
     decodeStep.input = ''
     decodeStep.explicit_input = True
-    decodeStep.args = f'-m TrigP1Test.DecodeBS --moduleID={moduleID} --filesInput=' + find_file('*'+stream_name+'*._athenaHLT*.data')
+    decodeStep.args = f'-m TrigP1Test.DecodeBS --moduleID={moduleID} --filesInput=' + find_file(f'data*_{stream_name}.*.data')
     return decodeStep

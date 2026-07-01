@@ -60,23 +60,41 @@ def createMuonConfigFlags():
                                                                                prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     
     mcf.addFlag("Muon.AlignedGeoTrfCacheMode",  GeoTrfCacheMode.FullCacheCond, type = GeoTrfCacheMode)
+    
+    ### Activate the material blending of the material inside the chambers 
+    ### on to the portal surfaces
+    mcf.addFlag("Muon.trackGeometryActiveMaterial", True)
+    ### Activate the auxiliary surfaces in the tracking geometry carrying the material
+    ### of the coils and the ATLAS support structure
+    mcf.addFlag("Muon.trackGeometryPassiveMaterial", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
+                                                                       len(prevFlags.Muon.trackGeometryMaterialMap) > 0)
+
+    mcf.addFlag("Muon.trackGeometryMaterialMap", "")
     # 1. Digitization
     mcf.addFlag("Muon.doFastMMDigitization", False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
 
+    ### Setup the Phase II truth matching algorithms
+    mcf.addFlag("Muon.setupTruthAlgorithms", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
+                                                               prevFlags.Input.isMC and \
+                                                               not prevFlags.Trigger.doHLT)
+
+    mcf.addFlag("Muon.doFastRpcDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     
     # 2. Reco MuonRecFlags 
 
     #### If this flag is enabled, the phase II MS track 
     #### reconstruction algorithms are scheduled   
     try:
-        #### Use 
         from TrkConfig.TrkConfigFlags import TrackingComponent
         mcf.addFlag("Muon.scheduleActsReco", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
                             prevFlags.Tracking.recoChain[0] in [TrackingComponent.ActsChain , TrackingComponent.ActsLegacyChain ]) 
     except ImportError:
         mcf.addFlag("Muon.scheduleActsReco", False)
-        
+
+    #### Include pile-up muons from the background as truth muons and 
+    #### try to match the segments to them
+    mcf.addFlag("Muon.includePileUpTruth", False)
     #### Enable ML bucket filter inference for muon reconstruction
     mcf.addFlag("Muon.enableMLBucketFilter", False)
 

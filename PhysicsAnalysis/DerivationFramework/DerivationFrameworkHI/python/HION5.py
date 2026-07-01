@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # HION5.py  
+
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -10,37 +11,51 @@ def HION5SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
     acc = ComponentAccumulator()
     
+    # added: DF-prefixed jet containers to ExtraData
+    JetColl = flags.HeavyIon.HIJetPrefix
+    
     ExtraData  = []
     ExtraData += ['xAOD::MuonContainer/Muons']
     ExtraData += ['xAOD::ElectronContainer/Electrons']
     ExtraData += ['xAOD::PhotonContainer/Photons']
     ExtraData += ['xAOD::TrackParticleContainer/InDetTrackParticles']
+    ExtraData += ['xAOD::JetContainer/'+JetColl+'AntiKt2HIJets']
+    ExtraData += ['xAOD::JetContainer/'+JetColl+'AntiKt4HIJets']
     
     acc.addSequence( seqAND("HION5Sequence") )
     acc.getSequence("HION5Sequence").ExtraDataForDynamicConsumers = ExtraData
     acc.getSequence("HION5Sequence").ProcessDynamicDataDependencies = True
-    
-    from DerivationFrameworkHI import ListTriggers
-    
-    triggers = ListTriggers.HION5SkimmingTriggers()
+    filterList = []
     
     req_electrons = 'count( ( Electrons.pt > 15*GeV ) && ( abs(Electrons.eta) < 2.5) )>0'
     req_muons     = 'count( Muons.DFCommonMuonPassPreselection && (Muons.pt > 15*GeV) && ( abs(Muons.eta) < 2.7))>0'
     req_photons = 'count( Photons.DFCommonPhotonsIsEMLoose && (Photons.pt > 30*GeV) ) > 0'
     req_total = '(' + req_electrons + ' || ' + req_muons + ' || ' + req_photons + ')'
-
-    expression = ' ( ' +' || '.join(triggers) + ' )  && ' + req_total
-    
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
-    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
-        flags, name = "HION5StringSkimmingTool", expression = expression)), primary = True)
+    HION5StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(
+        xAODStringSkimmingToolCfg(flags, name = "HION5StringSkimmingTool",
+                                  expression = req_total)))
+    filterList += [HION5StringSkimmingTool]
     
+    from DerivationFrameworkHI import ListTriggers
+    triggers = ListTriggers.HION5SkimmingTriggers()
+    HION5TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+        name = "HION5TriggerSkimmingTool", TriggerListOR = triggers)
+    acc.addPublicTool(HION5TriggerSkimmingTool)
+    filterList += [HION5TriggerSkimmingTool]
+
+    HION5SkimmingTool  = CompFactory.DerivationFramework.FilterCombinationAND(
+        name="HION5SkimmingTool",  FilterList=filterList)
+    acc.addPublicTool(HION5SkimmingTool, primary = True)
     return acc
 
 def HION5Thinning(flags):    
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg,JetTrackParticleThinningCfg
     acc = ComponentAccumulator()
+
+    # added: DF-prefixed jet collection names
+    JetColl = flags.HeavyIon.HIJetPrefix
 
     # find collision type
     from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
@@ -65,16 +80,16 @@ def HION5Thinning(flags):
          flags,
          name                    = "AntiKt2HIJetsThinningTool",
          StreamName              = "StreamDAOD_HION5",
-         JetKey                  = "AntiKt2HIJets",
-         SelectionString         = "AntiKt2HIJets.pt > 15*GeV",
+         JetKey                  = JetColl+"AntiKt2HIJets",
+         SelectionString         = JetColl+"AntiKt2HIJets.pt > 15*GeV",
          InDetTrackParticlesKey  = "InDetTrackParticles"))
     
     AntiKt4HIJetsThinningTool  = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(
          flags,
          name                    = "AntiKt4HIJetsThinningTool",
          StreamName              = "StreamDAOD_HION5",
-         JetKey                  = "AntiKt4HIJets",
-         SelectionString         = "AntiKt4HIJets.pt > 15*GeV",
+         JetKey                  = JetColl+"AntiKt4HIJets",
+         SelectionString         = JetColl+"AntiKt4HIJets.pt > 15*GeV",
          InDetTrackParticlesKey  = "InDetTrackParticles"))
     
     acc.addPublicTool(TrackParticleThinningTool,primary = True)
@@ -88,34 +103,38 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     for HION5"""
     acc = ComponentAccumulator()
 
+    # added: DF-prefixed jet collection
+    JetColl = flags.HeavyIon.HIJetPrefix
+    JetKey = JetColl + 'AntiKt4HIJets'
+
     # Schedule extra jets collections
     from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track
     from JetRecConfig.JetRecConfig import JetRecCfg
-
     jetList = [AntiKt4PV0Track]
     for jd in jetList:
         acc.merge(JetRecCfg(flags, jd))
 
-    # Common augmentations
-    # cannot use PhysCommon sequence because
-    # - no triggers
-    # - no TauJets
-    # so we have to use a modified version here
-    from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
-    from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
+    # Common augmentations: reuse the same common MC/reco setup as other HION derivations
+    # (same pattern as HION15, which imports PhysAugmentationsHION7Cfg from HION7)
+    from DerivationFrameworkHI.HION7 import PhysAugmentationsHION7Cfg
+    acc.merge(PhysAugmentationsHION7Cfg(flags))
 
-    acc.merge(MuonsCommonCfg(flags))
-    acc.merge(EGammaCommonCfg(flags))
+    # HIJetRec configuration with DF-prefixed jet collection names
+    # moved here from HION5Cfg to mirror getDFJets pattern in HION7KernelCfg
+    from HIJetRec.HIJetRecConfigCA import HIJetRecCfg
+    acc.merge(HIJetRecCfg(flags))
+
+    # B-Tagging for HI jets — must be after HIJetRecCfg so DFAntiKt4HIJets exists
+    if flags.HeavyIon.doHIBTagging:
+        from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
+        acc.merge(FlavorTaggingCfg(flags, JetColl+"AntiKt4HIJets"))
+        from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
+        acc.merge(TrackLeptonDecorationCfg(flags))
+
+    # skimming -- must come BEFORE algOR so HION5Sequence is created first
+    skimmingTool = acc.getPrimaryAndMerge(HION5SkimmingToolCfg(flags))
 
     # jet cleaning
-    # standard way in PhysCommon is
-    # - calculate tau ID (needed for default jet OR)
-    # - decorate jets with overlap removal
-    # - do event cleaning
-    # but taus are missing in HI derivations so need to do differently
-
-    # NO JVT criteria in HI data (see pp config for details)
-
     # Decorate if jet passes OR and save decoration DFCommonJets_passOR
     # Use modified OR that does not check overlaps with taus
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
@@ -133,18 +152,15 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
         "OverlapRemovalGenUseAlg",
         OverlapLabel=outputLabel,
         OverlapRemovalTool=orTool,
-        JetKey = 'AntiKt4HIJets',
+        JetKey = JetKey,
         TauKey=tauKey,
         TauLabel=tauLabel,
         BJetLabel=bJetLabel,
     )
-    acc.addEventAlgo(algOR)
+    acc.addEventAlgo(algOR, sequenceName="HION5Sequence")
 
-    # skimming
-    skimmingTool = acc.getPrimaryAndMerge(HION5SkimmingToolCfg(flags))
-    
     # Thinning
-    thinningTool= acc.getPrimaryAndMerge(HION5Thinning(flags))
+    thinningTool = acc.getPrimaryAndMerge(HION5Thinning(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -153,12 +169,15 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
             SkimmingTools = [skimmingTool],
             ThinningTools = [thinningTool],
             AugmentationTools = [],
-            ))
+            ),
+        sequenceName="HION5Sequence")
 
     return acc
 
 def HION5Cfg(flags):
     acc = ComponentAccumulator()
+
+    JetColl = flags.HeavyIon.HIJetPrefix
 
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent
     from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ExtraElectronShowerShapes,ExtraElectronGSFVar
@@ -201,8 +220,8 @@ def HION5Cfg(flags):
                                                'MET_Track3000':'xAOD::MissingETContainer', 'MET_Track3000Aux':'xAOD::MissingETAuxContainer',
                                                'MET_Track4000':'xAOD::MissingETContainer', 'MET_Track4000Aux':'xAOD::MissingETAuxContainer',
                                                'MET_Track5000':'xAOD::MissingETContainer', 'MET_Track5000Aux':'xAOD::MissingETAuxContainer',
-                                              }
-     # Build track MET with ptCut in MeV and HItight Tracks
+                                            }
+    # Build track MET with ptCut in MeV and HItight Tracks
     from DerivationFrameworkHI.TrackMET_config import Cfg_METTrack
     met_ptCutList = [1000,2000,3000,4000,5000]
 
@@ -213,16 +232,38 @@ def HION5Cfg(flags):
     AllVariables += ListSlimming.HION5AllVariables(flags.Input.RunNumbers[0])
     AllVariables += ListSlimming.HION5ExtraContainersTrigger()
 
+    # B-Tagging slimming content
+    from DerivationFrameworkFlavourTag import FtagBaseContent
+
     if flags.Input.isMC:
-        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddStandardTruthContentsCfg
-        acc.merge(AddStandardTruthContentsCfg(flags))
+        # MC truth augmentation (charm, HF, standard truth nav links, PV) is handled by
+        # PhysAugmentationsHION7Cfg called in HION5KernelCfg — same as HION7/HION15.
         AllVariables += ListSlimming.HION5AllTruthVariables()
+        if flags.HeavyIon.doHIBTagging:
+            # Add b-tagging truth slimming content
+            FtagBaseContent.add_truth_to_slimming_helper(HION5SlimmingHelper)
+    
+    #Variables from FTAG
+    if flags.HeavyIon.doHIBTagging:
+        AllVariables += ListSlimming.HION7AllVarFromFTAG1()
 
     HION5SlimmingHelper.SmartCollections = ListSlimming.HION5SmartCollections()
     HION5SlimmingHelper.ExtraVariables   = ListSlimming.HION5ExtraVariables()
     HION5SlimmingHelper.ExtraVariables   += PhotonsCPDetailedContent
     HION5SlimmingHelper.ExtraVariables   += ExtraElectronShowerShapes
     HION5SlimmingHelper.ExtraVariables   += ExtraElectronGSFVar
+    
+    #Common Augmentation for FTAG and ExtraVariables
+    if flags.HeavyIon.doHIBTagging:
+        from DerivationFrameworkFlavourTag.FtagBaseContent import add_common_augmentation
+        add_common_augmentation(flags, acc, HION5SlimmingHelper, JetColl+"AntiKt4HIJets")
+        # Update AppendToDictionary
+        extra_AppendToDictionary = {}
+        FtagBaseContent.update_append_to_dictionary_in_slimming_helper(flags, HION5SlimmingHelper, extra_AppendToDictionary)
+        # Add ExtraVariables from B-tagging
+        HION5SlimmingHelper.ExtraVariables += ListSlimming.HION7ExtraVarForBtag(JetColl)
+        FtagBaseContent.add_extra_variables_to_slimming_helper(flags, HION5SlimmingHelper)
+    
     HION5SlimmingHelper.AllVariables     = AllVariables
 
     # Add egamma trigger objects
@@ -231,6 +272,16 @@ def HION5Cfg(flags):
     HION5SlimmingHelper.IncludeMuonTriggerContent = True
     
     HION5ItemList = HION5SlimmingHelper.GetItemList()
+
+    #DF-prefixed jet containers with b-tagging info
+    HIJetRemovedBranches = ListSlimming.makeHIJetRemovedBranchList()
+    jet_var_str = '.-'.join([''] + HIJetRemovedBranches)
+    
+    jetRlist = flags.HeavyIon.Jet.RValues  # Default [0.2, 0.4]
+    for jetR in jetRlist:
+        output = ["xAOD::JetContainer#"+JetColl+"AntiKt"+str(jetR)+"HIJets",
+                  "xAOD::JetAuxContainer#"+JetColl+"AntiKt"+str(jetR)+"HIJetsAux.-PseudoJet"+jet_var_str]
+        HION5ItemList += output
 
     acc.merge(OutputStreamCfg(flags, "DAOD_HION5", ItemList=HION5ItemList, AcceptAlgs=["HION5Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_HION5", AcceptAlgs=["HION5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))

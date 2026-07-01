@@ -8,6 +8,7 @@
 #include "IdDict/IdDictDictEntry.h"
 
 #include <string>
+#include <string_view>
 #include <map>
 #include <memory>
 
@@ -58,7 +59,7 @@ public:
                                      IdDictDictionary& dictionary) override;
     virtual void generate_implementation (const IdDictMgr& idd,
                                           IdDictDictionary& dictionary,
-                                          const std::string& tag = "") override;
+                                          std::string_view tag = "") override;
     virtual void reset_implementation () override;
     virtual bool verify () const override;
     virtual void clear () override;
@@ -68,7 +69,7 @@ public:
 
 
 private:
-    using map_type = std::map<std::string, std::unique_ptr<IdDictRegion> >;
+    using map_type = std::map<std::string, std::unique_ptr<IdDictRegion>, std::less<> >;
     using map_iterator = map_type::iterator;
     using value_type = map_type::value_type;
 

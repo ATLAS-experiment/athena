@@ -232,4 +232,40 @@ unsigned LArCalibParams::getNumberPatterns(const HWIdentifier calibModuleID) con
   }
 }
 
+unsigned LArCalibParams::getNumberDelays(const HWIdentifier calibModuleID) const
+{ //Number of configurations is nDAC*nDelay*nPattern
+  if ((m_uniqueConfig &&  m_mCalibBoards.size()==1) || // one calib board configured
+      calibModuleID == HWIdentifier(0)) { // assuming equal config for all b. boards configured
+    const unsigned nDel = m_mCalibBoards.begin()->second.m_Delay.size();
+    return nDel;
+  }
+  else {
+    const std::map<HWIdentifier, CalibBoard>::const_iterator map_it=m_mCalibBoards.find(calibModuleID);
+    if (map_it==m_mCalibBoards.end()) 
+      return 0; //Can't find Board configuration -> Assume board is not configured.
+    else {
+      const unsigned nDel = map_it->second.m_Delay.size();
+      return nDel;
+    }
+  }
+}
+
+unsigned LArCalibParams::getNumberDACs(const HWIdentifier calibModuleID) const
+{ //Number of configurations is nDAC*nDelay*nPattern
+  if ((m_uniqueConfig &&  m_mCalibBoards.size()==1) || // one calib board configured
+      calibModuleID == HWIdentifier(0)) { // assuming equal config for all b. boards configured
+    const unsigned nDac = m_mCalibBoards.begin()->second.m_DAC.size();
+    return nDac;
+  }
+  else {
+    const std::map<HWIdentifier, CalibBoard>::const_iterator map_it=m_mCalibBoards.find(calibModuleID);
+    if (map_it==m_mCalibBoards.end()) 
+      return 0; //Can't find Board configuration -> Assume board is not configured.
+    else {
+      const unsigned nDac = map_it->second.m_DAC.size();
+      return nDac;
+    }
+  }
+}
+
 

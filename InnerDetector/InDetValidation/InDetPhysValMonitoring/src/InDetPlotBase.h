@@ -16,6 +16,7 @@
 #include "InDetPhysValMonitoring/IHistogramDefinitionSvc.h"
 
 #include <string>
+#include <string_view>
 
 #define IDPVM_BOOK(name) mBook(name, #name)
 
@@ -36,9 +37,9 @@ public:
   InDetPlotBase(InDetPlotBase* pParent, const std::string& dirName);
 
   /// Retrieve a single histogram definition, given the unique string identifier
-  SingleHistogramDefinition retrieveDefinition(const std::string& histoIdentifier,
-                                               const std::string& folder = "default",
-                                               const std::string& nameOverride="");
+  SingleHistogramDefinition retrieveDefinition(std::string_view histoIdentifier,
+                                               std::string_view folder = "default",
+                                               std::string_view nameOverride="");
 
   /// Helper method to book histograms using an identifier string 
   /// @param pHisto: Pointer to the histogram to be booked (assumed to be initialized to nullptr)
@@ -46,9 +47,9 @@ public:
   /// @param nameOverride: Allows to override the histo name w.r.t the identifier. Leave empty for no override. This can be used to instantiate multiple, identically binned plots from a single entry in the XML. 
   /// @param folder: Folder to place the plot (if any)
   template <class Htype> void book (Htype* & pHisto, 
-                                    const std::string& histoIdentifier, 
-                                    const std::string & nameOverride="", 
-                                    const std::string& folder = "default");
+                                    std::string_view histoIdentifier, 
+                                    std::string_view nameOverride="", 
+                                    std::string_view folder = "default");
 
   /// Book a TH1 histogram
   void book(TH1*& pHisto, const SingleHistogramDefinition& hd);

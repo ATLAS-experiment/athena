@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedEvent/MuonCandidate.h"
@@ -24,7 +24,6 @@ namespace MuonCombined {
         m_extrapolatedParticleLink{msoeTrackLink},
         m_extrapolatedTrackLink{(*msoeTrackLink)->trackLink()},
         m_muonSpectrometerTrack{oldCandidate.m_muonSpectrometerTrack},
-        m_isCommissioning{oldCandidate.m_isCommissioning},
         m_assoc_segments{oldCandidate.m_assoc_segments},
         m_extContIdx{oldCandidate.m_extContIdx} {}
 
@@ -57,8 +56,6 @@ namespace MuonCombined {
 
     const ElementLink<TrackCollection>& MuonCandidate::extrapolatedTrackLink() const { return m_extrapolatedTrackLink; }
     size_t MuonCandidate::extrapolatedElementID() const { return m_extrapolatedTrackLink.isValid() ? m_extContIdx : -1; }
-    void MuonCandidate::setCommissioning(bool b) { m_isCommissioning = b; }
-    bool MuonCandidate::isCommissioning() const { return m_isCommissioning; }
 
     void MuonCandidate::setSegments(std::vector<const Muon::MuonSegment*>&& segments) { m_assoc_segments = std::move(segments); }
     const std::vector<const Muon::MuonSegment*>& MuonCandidate::getSegments() const { return m_assoc_segments; }

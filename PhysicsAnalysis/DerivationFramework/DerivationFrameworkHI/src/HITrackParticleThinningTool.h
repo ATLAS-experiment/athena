@@ -24,9 +24,6 @@
 #include "AsgTools/ToolHandle.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
-
-class IThinningSvc;
-
 namespace DerivationFramework {
 
   class HITrackParticleThinningTool : public extends<AthAlgTool, IThinningTool> {
@@ -43,7 +40,7 @@ namespace DerivationFramework {
     StatusCode finalize() override;
     
     // Check that the current event passes this filter 
-    virtual StatusCode doThinning() const override;
+    virtual StatusCode doThinning(const EventContext& ctx) const override;
  
   private:
     StringProperty m_streamName

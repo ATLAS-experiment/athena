@@ -47,7 +47,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual MissingET* createTransient();
+  virtual MissingET* createTransient(const Token* token);
 
 };
 

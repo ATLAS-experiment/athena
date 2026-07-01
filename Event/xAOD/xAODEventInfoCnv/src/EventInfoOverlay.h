@@ -35,6 +35,9 @@ public:
   virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
+#if !defined(XAOD_ANALYSIS)
+  StatusCode decorationsToKeep(const xAOD::EventInfo* signalEvent, std::vector<std::string>& keep_ids) const;
+#endif
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 #endif

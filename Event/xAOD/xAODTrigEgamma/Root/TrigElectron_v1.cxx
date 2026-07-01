@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TrigElectron_v1.cxx 797628 2017-02-16 21:31:00Z rwhite $
@@ -302,9 +302,7 @@ namespace xAOD {
 
          // EThad
          if( caloEta() != 0 ) {
-            const float ehad1 = clPtr->ehad1();
-            const float abseta = std::abs( caloEta() );
-            const float cl_EThad  = ehad1 / std::cosh( abseta ); // Ehad1/cosh(fabs(eta) */
+            const float cl_EThad  = clPtr->ehad1() / std::cosh( caloEta() ); // Ehad1/cosh(eta) */
             setEtHad( cl_EThad );
             setEtHad1( cl_EThad );
          } else {

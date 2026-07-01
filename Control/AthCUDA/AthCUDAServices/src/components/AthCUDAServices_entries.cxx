@@ -1,11 +1,33 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
+#include "../AsyncCopyTool.h"
+#include "../CopyTool.h"
 #include "../KernelRunnerSvc.h"
 #include "../StreamPoolSvc.h"
+#include "../GPUSystemInfoSvc.h"
+#include "../HostMemoryResourceTool.h"
+#include "../DeviceMemoryResourceTool.h"
+#include "../ManagedMemoryResourceTool.h"
+#include "../StreamSvcAdaptorTool.h"
+#include "../PerEventStreamSvc.h"
+#include "../SingleStreamSvc.h"
+#include "../PerComponentStreamTool.h"
+#include "../PerEventAndComponentStreamTool.h"
 
 // Declare the component(s) to Gaudi.
+DECLARE_COMPONENT( AthCUDA::AsyncCopyTool )
+DECLARE_COMPONENT( AthCUDA::CopyTool )
 DECLARE_COMPONENT( AthCUDA::KernelRunnerSvc )
 DECLARE_COMPONENT( AthCUDA::StreamPoolSvc )
+DECLARE_COMPONENT( AthCUDA::GPUSystemInfoSvc )
+DECLARE_COMPONENT( AthCUDA::HostMemoryResourceTool )
+DECLARE_COMPONENT( AthCUDA::DeviceMemoryResourceTool )
+DECLARE_COMPONENT( AthCUDA::ManagedMemoryResourceTool )
+DECLARE_COMPONENT( AthCUDA::StreamSvcAdaptorTool )
+DECLARE_COMPONENT( AthCUDA::PerEventStreamSvc )
+DECLARE_COMPONENT( AthCUDA::SingleStreamSvc )
+DECLARE_COMPONENT( AthCUDA::PerComponentStreamTool )
+DECLARE_COMPONENT( AthCUDA::PerEventAndComponentStreamTool )

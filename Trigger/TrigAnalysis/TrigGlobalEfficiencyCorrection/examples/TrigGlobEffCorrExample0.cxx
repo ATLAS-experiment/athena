@@ -226,8 +226,8 @@ int main(int argc, char* argv[])
             float pt = muon->pt();
             if(pt<10e3f || fabs(muon->eta())>=2.5) continue;
             auto mt = muon->muonType();
-            if(mt!=xAOD::Muon::Combined && mt!=xAOD::Muon::MuonStandAlone) continue;
-            auto& mtp = *(muon->primaryTrackParticle());
+            if(mt!=xAOD::Muon::MuonType::Combined && mt!=xAOD::Muon::MuonType::MuonStandAlone) continue;
+            auto& mtp = *(muon->trackParticle(xAOD::Muon::TrackParticleType::Primary));
             if(!truthType.isAvailable(mtp)) continue;
             if(!truthOrigin.isAvailable(mtp)) continue;
             int t = truthType(mtp), o = truthOrigin(mtp);

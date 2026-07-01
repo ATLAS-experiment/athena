@@ -50,7 +50,7 @@ public:
   {}
 protected:
   virtual TRT_RDO_Container_PERS*   createPersistent (TRT_RDO_Container* transCont);
-  virtual TRT_RDO_Container* createTransient ();
+  virtual TRT_RDO_Container* createTransient(const Token* token);
 
   // Must initialize ID helpers
   virtual StatusCode initialize();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolCollectionConverter.cxx
@@ -21,6 +21,7 @@
 #include "GaudiKernel/StatusCode.h"
 
 #include <exception>
+#include <stdexcept>
 #include <format>
 
 //______________________________________________________________________________
@@ -32,14 +33,12 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
 	m_inputCollection(inputCollection),
 	m_contextId(contextId),
 	m_poolSvc(svc),
-	m_poolCollection(nullptr),
-	m_collectionCursor(nullptr) {
+	m_poolCollection(nullptr) {
 }
 //______________________________________________________________________________
 PoolCollectionConverter::~PoolCollectionConverter() {
    if (m_poolCollection) {
       m_poolCollection->close();
-      delete m_collectionCursor; m_collectionCursor = nullptr;
       delete m_poolCollection; m_poolCollection = nullptr;
    }
 }
@@ -80,7 +79,9 @@ StatusCode PoolCollectionConverter::isValid() const {
 }
 //______________________________________________________________________________
 pool::ICollectionCursor& PoolCollectionConverter::selectAll() {
-   delete m_collectionCursor; m_collectionCursor = nullptr;
-   m_collectionCursor = &m_poolCollection->cursor();
+   if (m_poolCollection == nullptr)[[unlikely]] {
+     throw std::runtime_error("PoolCollectionConverter::selectAll: m_poolCollection is nullptr.");
+   }
+   m_collectionCursor = m_poolCollection->cursor();
    return *m_collectionCursor;
 }

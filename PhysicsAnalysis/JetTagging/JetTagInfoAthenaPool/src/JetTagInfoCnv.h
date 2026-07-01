@@ -32,7 +32,7 @@ public:
   JetTagInfoCnv (ISvcLocator *svcloc);
 protected:
   StatusCode initialize(void);
-  inline AthenaPoolTopLevelTPCnvBase *getTopLevelTPCnv(void)
+  inline TopLevelTPCnvBase *getTopLevelTPCnv(void)
     {
       return &m_TPConverter;
     }
@@ -40,7 +40,7 @@ protected:
     {
       return new JetTagInfoCnv(0);
     }
-  void readObjectFromPool (const std::string &obj);
+  void readObjectFromPool (const Token* token);
 
  private:
   Analysis::JetTagInfoCnv_tlp3 m_TPConverter;

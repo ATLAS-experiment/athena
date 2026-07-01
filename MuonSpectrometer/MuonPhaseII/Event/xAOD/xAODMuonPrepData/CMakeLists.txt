@@ -10,14 +10,14 @@ atlas_add_library( xAODMuonPrepData
     xAODMuonPrepData/*.h xAODMuonPrepData/versions/*.h Root/*.cxx
     PUBLIC_HEADERS xAODMuonPrepData
     LINK_LIBRARIES xAODCore GeoPrimitives MuonPrepRawData 
-                   xAODMeasurementBase Identifier 
-    PRIVATE_LINK_LIBRARIES MuonReadoutGeometryR4)
+                   xAODMeasurementBase Identifier MuonReadoutGeometryR4)
 
 
     atlas_add_xaod_smart_pointer_dicts(
     INPUT xAODMuonPrepData/selection.xml
     OUTPUT _selectionFile
-    CONTAINERS "xAOD::MdtDriftCircleContainer_v1" 
+    CONTAINERS "xAOD::MuonMeasurementContainer_v1"
+               "xAOD::MdtDriftCircleContainer_v1" 
                "xAOD::RpcStripContainer_v1" 
                "xAOD::TgcStripContainer_v1" 
                "xAOD::sTgcStripContainer_v1" 

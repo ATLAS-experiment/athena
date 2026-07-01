@@ -6,7 +6,6 @@
 #include <vector>
 #include "GaudiKernel/IToolSvc.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
-#include "AthenaBaseComps/AthLegacySequence.h"
 #include "TString.h"
 #include <cmath>
 #include <limits>
@@ -74,10 +73,9 @@ StatusCode GeneratorPhysValMonitoringTool::book(PlotBase& plots)
     return StatusCode::SUCCESS;
   }
 
-  StatusCode GeneratorPhysValMonitoringTool::fillHistograms()
+  StatusCode GeneratorPhysValMonitoringTool::fillHistograms(const EventContext& ctx)
   {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();    
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtInfoKey, ctx);
 
     m_EventInfoPlots.check_eventNumber(eventInfo);

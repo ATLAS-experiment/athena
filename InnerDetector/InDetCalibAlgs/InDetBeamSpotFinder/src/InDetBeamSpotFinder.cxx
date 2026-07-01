@@ -73,9 +73,9 @@ StatusCode InDet::InDetBeamSpotFinder::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode InDet::InDetBeamSpotFinder::execute(){
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
-  SG::ReadHandle<xAOD::VertexContainer> vertexContainer(m_vertexContainer);
+StatusCode InDet::InDetBeamSpotFinder::execute(const EventContext& ctx){
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo, ctx);
+  SG::ReadHandle<xAOD::VertexContainer> vertexContainer(m_vertexContainer, ctx);
   if ( !passEventSelection( *eventInfo ) ) return StatusCode::SUCCESS;
   BeamSpot::Event currentEvent = readEvent(*eventInfo, *vertexContainer);
 

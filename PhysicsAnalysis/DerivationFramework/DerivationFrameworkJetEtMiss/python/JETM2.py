@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM2.py
 #====================================================================
@@ -15,6 +15,10 @@ def JETM2KernelCfg(flags, name='JETM2Kernel', **kwargs):
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+
+
+    from AssociationUtils.AssociationUtilsConfig import FEAssociationCfg
+    acc.merge(FEAssociationCfg(flags))
 
     if flags.Input.isMC:
         # thinning tools: 
@@ -129,17 +133,17 @@ def JETM2Cfg(flags):
                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
                                         "CHSGlobalClusterMLCorrectedChargedParticleFlowObjects","CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects",
                                         "CSSKGChargedParticleFlowObjects","CSSKGNeutralParticleFlowObjects",
-                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape",
-                                        "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
+                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowNeutEventShape",
+                                        "Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
 
     # Low-level inputs
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables, UFOVariables, TrackingVariables,  TrackingVariablesHGTD, FELinks
     JETM2SlimmingHelper.ExtraVariables += [".".join(["CaloCalTopoClusters"] + ClusterVariables + ["clusterE_ML.clusterE_ML_unc"])]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["EMOriginTopoClusters"] + ['calM'])]
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables)]
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables)]
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedChargedParticleFlowObjects"] + FlowElementVariables)]
-    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedNeutralParticleFlowObjects"] + FlowElementVariables)]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalChargedParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"])]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalNeutralParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"])]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedChargedParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"])]
+    JETM2SlimmingHelper.ExtraVariables += [".".join(["GlobalClusterMLCorrectedNeutralParticleFlowObjects"] + FlowElementVariables + ["otherObjectWeights"])]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["UFO"] + UFOVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["UFOCSSK"] + UFOVariables)]
     JETM2SlimmingHelper.ExtraVariables += [".".join(["InDetTrackParticles"] + TrackingVariables)]
@@ -153,15 +157,21 @@ def JETM2Cfg(flags):
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ExtraJSSVariables
     JETM2SlimmingHelper.ExtraVariables += [".".join(["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"] + ExtraJSSVariables)]
 
-    JETM2SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
-                                           "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
-                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter.GhostTrack",
+    JETM2SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower.IsoFixedCone5Pt.IsoFixedCone5PtPUsub.constituentLinks",
+                                           "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub.constituentLinks",
+                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter.GhostTrack.constituentLinks",
                                            "GSFTrackParticles.particleHypothesis.vx.vy.vz",
                                            "PrimaryVertices.x.y.z.covariance.trackWeights",
                                            "TauJets.clusterLinks",
                                            "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy",
                                            "MuonSegments.x.y.z.px.py.pz"]
 
+    JETM2SlimmingHelper.AppendToDictionary.update({
+            "FEAssociationMap"   : "xAOD::MissingETAssociationMap",
+            "FEAssociationMapAux": "xAOD::AuxContainerBase",
+        })
+    JETM2SlimmingHelper.AllVariables += ["FEAssociationMap"]
+    
     JETM2SlimmingHelper.AppendToDictionary.update({'CSSKGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
                                                    'CSSKGNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
                                                    'CSSKGChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
@@ -199,14 +209,20 @@ def JETM2Cfg(flags):
         JETM2SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets",
                                              "TruthParticles", "TruthVertices","TruthEvents"]
-        JETM2SlimmingHelper.ExtraVariables += ["AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter"]
-        JETM2SlimmingHelper.SmartCollections += ["AntiKt4TruthJets","AntiKt10TruthJets","AntiKt4TruthWZJets","AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"]
 
-        JETM2SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTQuarksFinalCount.GhostHBosonsCount.GhostZBosonsCount.GhostWBosonsCount",
+        JETM2SlimmingHelper.SmartCollections += ["AntiKt4TruthJets","AntiKt4TruthWZJets",
+                                                 "AntiKt10TruthJets","AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"]
+
+        JETM2SlimmingHelper.ExtraVariables += ["AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter.constituentLinks",
+                                               "AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets.constituentLinks",
+                                               "AntiKt10TruthDressedWZJets.constituentLinks",
+                                               "AntiKt10TruthJets.constituentLinks",
+                                               "AntiKt4TruthJets.constituentLinks",
+                                               "AntiKt4TruthWZJets.IsoFixedCone5Pt.constituentLinks",
+                                               "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.constituentLinks",
+                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTQuarksFinalCount.GhostHBosonsCount.GhostZBosonsCount.GhostWBosonsCount",
                                                "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTQuarksFinalPt.GhostHBosonsPt.GhostZBosonsPt.GhostWBosonsPt",
-                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostBHadronsFinalPt.GhostCHadronsFinalPt",
-                                               "AntiKt4TruthWZJets.IsoFixedCone5Pt",
-                                               "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt"]
+                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostBHadronsFinalPt.GhostCHadronsFinalPt"]
 
     # Trigger content
     JETM2SlimmingHelper.IncludeTriggerNavigation = False
@@ -226,7 +242,7 @@ def JETM2Cfg(flags):
     # Output stream
     JETM2ItemList = JETM2SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_JETM2", ItemList=JETM2ItemList, AcceptAlgs=["JETM2Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM2", AcceptAlgs=["JETM2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM2", AcceptAlgs=["JETM2Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TruthMetaData]))
 
     return acc
 

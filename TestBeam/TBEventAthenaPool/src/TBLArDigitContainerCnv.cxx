@@ -22,25 +22,25 @@ TBLArDigitContainerPERS* TBLArDigitContainerCnv::createPersistent(TBLArDigitCont
     
 
 
-TBLArDigitContainer* TBLArDigitContainerCnv::createTransient() {
+TBLArDigitContainer* TBLArDigitContainerCnv::createTransient(const Token* token) {
    MsgStream log(msgSvc(), "TBLArDigitContainerCnv" );
    constexpr pool::Guid p0_guid("B15FFDA0-206D-4062-8B5F-582A1ECD5502"); // GUID of the transient object
    constexpr pool::Guid p1_guid("9F58DDD2-ACDC-4ECF-A714-779B05F94649");  // GUID of the persistent object
    auto trans = std::make_unique<TBLArDigitContainer>();
    TBLArDigitContainer* result{};
-   if (compareClassGuid(p0_guid)) {
-     log << MSG::DEBUG << "Read version p0 of TBLArDigitContainer. GUID=" 
-         << m_classID.toString() << endmsg;
-     result = poolReadObject<TBLArDigitContainer>();
-   } else if (compareClassGuid(p1_guid)) {
-     log << MSG::DEBUG << "Reading TBLArDigitContainer_p1. GUID=" 
-         << m_classID.toString() << endmsg;
-     std::unique_ptr<TBLArDigitContainer_p1> pers (poolReadObject<TBLArDigitContainer_p1>());
+   if (compareClassGuid(token, p0_guid)) {
+     log << MSG::DEBUG << "Read version p0 of TBLArDigitContainer. token=" 
+         << token->toString() << endmsg;
+     result = poolReadObject<TBLArDigitContainer>(token);
+   } else if (compareClassGuid(token, p1_guid)) {
+     log << MSG::DEBUG << "Reading TBLArDigitContainer_p1. token=" 
+         << token->toString() << endmsg;
+     std::unique_ptr<TBLArDigitContainer_p1> pers (poolReadObject<TBLArDigitContainer_p1>(token));
      m_converter.persToTrans(pers.get(),trans.get(), log);
      result = trans.release();
    } else {
-     log << MSG::ERROR << "Unsupported persistent version of TBLArDigitContainer. GUID="
-     << m_classID.toString() << endmsg;
+     log << MSG::ERROR << "Unsupported persistent version of TBLArDigitContainer. token="
+     << token->toString() << endmsg;
      throw std::runtime_error("Unsupported persistent version of Data Collection");
    }
    return result;

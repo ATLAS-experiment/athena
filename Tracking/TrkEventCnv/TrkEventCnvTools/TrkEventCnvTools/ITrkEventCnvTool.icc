@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/IdentifierHash.h"
@@ -17,7 +17,6 @@ void Trk::ITrkEventCnvTool::prepareRIO_OnTrackElementLink(const ROT* rot,
 {
   // verify pointer is ok
   // assume EL is correct
-  // get data handles to convertors
 
   key = rot->m_rio.dataID();
   index = rot->m_rio.index();
@@ -36,8 +35,8 @@ void Trk::ITrkEventCnvTool::prepareRIO_OnTrackElementLink(const ROT* rot,
     return;
   }
 
-  SG::ConstIterator<CONT> dh, dhEnd;
-  StatusCode sc = m_storeGate->retrieve(dh, dhEnd);
+  SG::ConstIterator<CONT> obj, objEnd;
+  StatusCode sc = m_storeGate->retrieve(obj, objEnd);
   if (sc.isFailure()) {
     MsgStream log(&(*m_msgSvc), name());
     log << MSG::WARNING <<"No containers found!"<< endmsg;
@@ -45,12 +44,12 @@ void Trk::ITrkEventCnvTool::prepareRIO_OnTrackElementLink(const ROT* rot,
   }
 
   // loop over dhs
-  for ( ; dh!=dhEnd; ++dh) {
+  for ( ; obj!=objEnd; ++obj) {
     const Trk::PrepRawData* prd     = rot->prepRawData();
     unsigned int            oindex  = prd->getHashAndIndex().objIndex(); // prd index within collection
     IdentifierHash          idHash  = prd->getHashAndIndex().collHash(); // idHash of collection
 
-    const CONT& cont = *dh; // container
+    const CONT& cont = *obj; // container
     auto coll = cont.indexFindPtr(idHash); //matching collection
 
     // does coll exist?
@@ -59,18 +58,24 @@ void Trk::ITrkEventCnvTool::prepareRIO_OnTrackElementLink(const ROT* rot,
     if ( (coll!=nullptr)&& (coll->size()>oindex) && (prd==(*coll)[oindex]) ) {
       // okay, so we found the correct PRD in the container.
       // Return EL components.
-      // dh.key() is the name of the container. oindex is the index within the collection. IdHash????
-      key = dh.key();
+      // objh.key() is the name of the container. oindex is the index within the collection. IdHash????
+      key = obj.key();
       index = prd->getHashAndIndex().hashAndIndex();
       return; //exit loop and function. We're done.
+    }
+    if (coll != nullptr) {
+      MsgStream log(m_msgSvc.get(), name());
+      for (const auto* prd : *coll) {
+        log<<MSG::ERROR<<"Available prd in collection: "<<(*prd)<<endmsg;
+      }
     }
   }
   // so, we obviously didn't have the correct container (or something else went wrong)
   MsgStream log(&(*m_msgSvc), name());
   log << MSG::ERROR<<"Could not find matching PRD container for this ROT. ROT will be written out in incomplete state. "
       << "Dumping ROT: "<<*rot<<endmsg;
+  throw std::runtime_error("Failed to persitify");
 
-  return;
 }
 
 template <class CONT, class ROT>

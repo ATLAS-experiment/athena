@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkHI/HITrackQualityAugmentationTool.h"
@@ -111,7 +111,7 @@ StatusCode HITrackQualityAugmentationTool::addBranches(const EventContext& ctx) 
           // Calculate chi2 to PV only for non-PV tracks
           float chi2ToPV = -999.0;  // Default for PV tracks
           if (!isFromPV && !m_trkToLeptonPVTool.empty()) {
-            std::unique_ptr<xAOD::Vertex> fittedVertex = m_trkToLeptonPVTool->matchTrkToPV(track, pv, eventInfo.cptr());
+            std::unique_ptr<xAOD::Vertex> fittedVertex = m_trkToLeptonPVTool->matchTrkToPV(ctx, track, pv, eventInfo.cptr());
             if (fittedVertex) {
               chi2ToPV = fittedVertex->chiSquared();
             } else {

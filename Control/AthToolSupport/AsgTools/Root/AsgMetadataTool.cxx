@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -17,7 +17,7 @@
 #ifdef XAOD_STANDALONE
 // xAOD include(s):
 #   include "xAODRootAccessInterfaces/TActiveEvent.h"
-#   include "xAODRootAccess/TEvent.h"
+#   include "xAODRootAccess/Event.h"
 #endif // XAOD_STANDALONE
 
 namespace asg {
@@ -30,8 +30,8 @@ namespace asg {
    AsgMetadataTool::AsgMetadataTool( const std::string& name )
       : AsgTool( name ),
 #ifdef XAOD_STANDALONE
-        m_inputMetaStore( SgTEventMeta::InputStore ),
-        m_outputMetaStore( SgTEventMeta::OutputStore ),
+        m_inputMetaStore( SgEventMeta::InputStore ),
+        m_outputMetaStore( SgEventMeta::OutputStore ),
 #else // XAOD_STANDALONE
         m_inputMetaStore( "StoreGateSvc/InputMetaDataStore", name ),
         m_outputMetaStore( "StoreGateSvc/MetaDataStore", name ),
@@ -41,11 +41,11 @@ namespace asg {
    {
 
 #ifdef XAOD_STANDALONE
-      // Try to access the current active TEvent:
+      // Try to access the current active Event:
       xAOD::TVirtualEvent* vevent = xAOD::TActiveEvent::event();
-      xAOD::TEvent* event = dynamic_cast< xAOD::TEvent* >( vevent );
+      xAOD::Event* event = dynamic_cast< xAOD::Event* >( vevent );
       if( ! event ) {
-         ATH_MSG_WARNING( "Couldn't find active xAOD::TEvent object" );
+         ATH_MSG_WARNING( "Couldn't find active xAOD::Event object" );
          ATH_MSG_WARNING( "Callbacks to the tool will not be available" );
          return;
       }
@@ -62,15 +62,15 @@ namespace asg {
    AsgMetadataTool::~AsgMetadataTool() {
 
 #ifdef XAOD_STANDALONE
-      // Try to access the active TEvent:
+      // Try to access the active Event:
       xAOD::TVirtualEvent* vevent = xAOD::TActiveEvent::event();
-      xAOD::TEvent* event = dynamic_cast< xAOD::TEvent* >( vevent );
+      xAOD::Event* event = dynamic_cast< xAOD::Event* >( vevent );
       // If we didn't succeed, fine. No need to complain about it...
       if( event ) {
-         // But if there is a TEvent, then let's try to de-register from it
+         // But if there is a Event, then let's try to de-register from it
          // properly.
          if( event->removeListener( this ).isFailure() ) {
-            ATH_MSG_WARNING( "Active xAOD::TEvent didn't have a callback for "
+            ATH_MSG_WARNING( "Active xAOD::Event didn't have a callback for "
                              "this tool" );
          }
       }

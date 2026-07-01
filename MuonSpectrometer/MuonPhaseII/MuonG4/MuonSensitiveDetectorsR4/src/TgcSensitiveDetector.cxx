@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TgcSensitiveDetector.h"
 #include "MuonSensitiveDetectorsR4/Utils.h"
 
 #include "G4ThreeVector.hh"
 
-#include "MCTruth/TrackHelper.h"
 #include <sstream>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
@@ -30,6 +29,7 @@ G4bool TgcSensitiveDetector::ProcessHits(G4Step* aStep, G4TouchableHistory*) {
     if (!readOutEle) {
        return false;
     }
+
     const ActsTrk::GeometryContext gctx{getGeoContext()};
     
     const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);

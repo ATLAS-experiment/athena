@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EXPRESSION_EVALUATOR_H
@@ -8,6 +8,7 @@
 #include "CLHEP/Evaluator/Evaluator.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <map>
 
@@ -32,8 +33,7 @@ public:
   	double EvaluateString(const std::string& str);
   	bool is_delimiter(char c);
   	bool is_real_variable(const std::string& var_name);
-  	double Eval( const std::string& expr );
-  	double Eval( const char* expr );
+  	double Eval( std::string_view expr );
 	
 	static std::string trim(const std::string&);
 	static std::vector<std::string> tokenize(const std::string&,const std::string&); 

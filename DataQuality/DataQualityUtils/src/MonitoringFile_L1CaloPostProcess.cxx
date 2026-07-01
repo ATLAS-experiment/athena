@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -59,7 +59,12 @@ namespace dqutils {
     //build iterator
     TIter next_run(f->GetListOfKeys());
     TKey* key_run(0);
-
+    static const std::string energies[6] = {
+        "10", "20", "30", "50", "100", "200"
+    };
+    static const double threshold[6] = {
+        3., 3., 3., 6., 4., 2.
+    };
     //loop over keys in root directory
     while ((key_run = dynamic_cast<TKey*>(next_run())) != 0) {
       TObject* obj_run = key_run->ReadObj();
@@ -89,12 +94,7 @@ namespace dqutils {
       // Trigger efficiency eta-phi histograms
       int items = 16;
       int binSkip = 8;
-      double threshold[6] = {
-        3., 3., 3., 6., 4., 2.
-      };
-      static const std::string energies[6] = {
-        "10", "20", "30", "50", "100", "200"
-      };
+      
       for (int i = 0; i < 3; ++i) {
         std::string effDir = runDirName + "/L1Calo/Reco/EmEfficiencies/ClusterRaw_"
                              + energies[i] + "GeV_EtaVsPhi";

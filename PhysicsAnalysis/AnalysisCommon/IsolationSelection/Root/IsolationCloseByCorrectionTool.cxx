@@ -500,7 +500,7 @@ namespace CP {
         TrackSet to_return{};
         if (P->type() == xAOD::Type::Muon) {
             const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(P);
-            if (mu->muonType() != xAOD::Muon::SiliconAssociatedForwardMuon)
+            if (mu->muonType() != xAOD::Muon::MuonType::SiliconAssociatedForwardMuon)
                 to_return.emplace(mu->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
         } else if (P->type() == xAOD::Type::TrackParticle) {
             const xAOD::TrackParticle* trk = static_cast<const xAOD::TrackParticle*>(P);
@@ -1012,7 +1012,7 @@ namespace CP {
         if (P->type() == xAOD::Type::ObjectType::Muon) {
             const xAOD::Muon* muon = static_cast<const xAOD::Muon*>(P);
             const xAOD::TrackParticle* idTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
-            return idTrk ? idTrk : muon->primaryTrackParticle();
+            return idTrk ? idTrk : muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         }
         return P;
     }

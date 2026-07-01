@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_EDM_CHECKER_H
@@ -39,10 +39,10 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    virtual ~TrigEDMChecker();
 
    virtual StatusCode initialize() override;
-   virtual StatusCode execute() override;
+   virtual StatusCode execute(const EventContext& ctx) override;
 
  private:
-   StatusCode do_execute ATLAS_NOT_THREAD_SAFE();
+   StatusCode do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& ctx);
 
    /** a handle on Store Gate for access to the Event Store */
    bool m_doDumpAll;
@@ -181,7 +181,7 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    std::vector<std::string> m_dumpTrigCompositeContainers;
 
    bool m_doDumpNavigation;
-   StatusCode dumpNavigation();
+   StatusCode dumpNavigation(const EventContext& ctx);
    Gaudi::Property<std::string> m_dumpNavForChain {this, "DumpNavigationForChain", "", "Optional chain to restrict navigation dump info."};
    Gaudi::Property<bool> m_excludeFailedHypoNodes {this, "excludeFailedHypoNodes", false,
     "Optional flag to exclude nodes which fail the hypothesis tool for a chain when dumping navigation graphs."};

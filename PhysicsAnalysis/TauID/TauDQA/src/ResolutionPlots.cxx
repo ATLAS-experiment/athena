@@ -16,11 +16,6 @@ namespace Tau{
   {
   }
   
-    ResolutionPlots::~ResolutionPlots()
-    {
-    }
-  
-  
   void ResolutionPlots::initializePlots(){
     m_ptResolution = Book1D("ptResolution",m_sTauJetContainerName + " pt Resolution; pt(TauReco)/pt(visTauTruth); # Part",100,0.5,1.5);
     m_etaResolution  = Book1D("etaResolution",m_sTauJetContainerName + " eta Resolution; eta(TauReco) - eta(visTauTruth); # Part",100,-0.1,0.1);

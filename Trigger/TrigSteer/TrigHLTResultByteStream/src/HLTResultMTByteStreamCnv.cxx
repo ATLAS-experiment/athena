@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -250,7 +250,7 @@ StatusCode HLT::HLTResultMTByteStreamCnv::createRep(DataObject* pObj, IOpaqueAdd
 // =============================================================================
 // CLID / storageType
 // =============================================================================
-const CLID& HLT::HLTResultMTByteStreamCnv::classID() {
+CLID HLT::HLTResultMTByteStreamCnv::classID() {
   return ClassID_traits<HLT::HLTResultMT>::ID();
 }
 

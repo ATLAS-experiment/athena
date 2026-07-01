@@ -22,15 +22,33 @@ public:
     using ClusterContainer = xAOD::HGTDClusterContainer;
     using ClusterAuxContainer = xAOD::HGTDClusterAuxContainer;
 
+    struct Cluster {
+        std::vector<Identifier::value_type> ids;
+        std::vector<int> tots;
+        std::vector<double> times;
+    };
+    using ClusterCollection = std::vector<Cluster>;
+
     virtual StatusCode
     clusterize(const EventContext& ctx,
 	       const RawDataCollection& RDOs,
-	       ClusterContainer& container) const = 0;
-    
+               std::vector<ClusterCollection>& collection) const = 0;
+
     virtual StatusCode
     clusterize(const EventContext& ctx,
         const HGTD_ALTIROC_RDO_Collection& RDOs,
-        ClusterContainer& container) const = 0;
+        std::vector<ClusterCollection>& collection) const = 0;
+
+    virtual std::any
+    createEventDataCache(xAOD::HGTDClusterContainer& cont,
+                         std::size_t nClusterRDOs) const = 0;
+
+    virtual StatusCode
+    makeClusters(const EventContext& ctx,
+                 const ClusterCollection& cluster,
+                 xAOD::HGTDClusterContainer& container,
+                 size_t& icluster,
+                 std::any& cache) const = 0;
 };
 
 }

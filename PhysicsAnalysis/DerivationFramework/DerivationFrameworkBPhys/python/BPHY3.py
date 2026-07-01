@@ -22,6 +22,8 @@ def BPHY3Cfg(flags):
     acc.addPublicTool(trackselect)
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
+    acc.addPublicTool(PVrefit)
     BPHY3JpsiFinder = CompFactory.Analysis.JpsiFinder(
                     name                        = "BPHY3JpsiFinder",
                     muAndMu                     = False,
@@ -36,8 +38,6 @@ def BPHY3Cfg(flags):
                     useCombinedMeasurement      = False, # Only takes effect if combOnly=True 
                     muonCollectionKey           = "Muons",
                     TrackParticleCollection     = "InDetTrackParticles",
-                    V0VertexFitterTool          = None,             # V0 vertex fitter
-                    useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
                     TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
                     TrackSelectorTool           = trackselect,
                     VertexPointEstimator        = vpest,
@@ -50,7 +50,7 @@ def BPHY3Cfg(flags):
                     VertexSearchTool             = BPHY3JpsiFinder,
                     OutputVtxContainerName = "BPHY3VertexCandidates",
                     V0Tools                = V0Tools,
-                    PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
+                    PVRefitter             = PVrefit,
                     PVContainerName        = "PrimaryVertices",
                     RefPVContainerName     = "BPHY3RefittedPrimaryVertices")
     BPHY3_Select_PiPi = CompFactory.DerivationFramework.Select_onia2mumu(

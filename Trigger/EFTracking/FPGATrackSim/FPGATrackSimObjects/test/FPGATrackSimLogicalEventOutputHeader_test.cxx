@@ -23,7 +23,7 @@ int main(int, char**)
   track.setQOverPt(qoverpt);
   track.setChi2(chi2);
   std::vector<FPGATrackSimTrack> trackvec;
-  trackvec.push_back(track);
+  trackvec.push_back(std::move(track));
   header.addFPGATrackSimTracks_1st(trackvec);
 
   FPGATrackSimRoad road;

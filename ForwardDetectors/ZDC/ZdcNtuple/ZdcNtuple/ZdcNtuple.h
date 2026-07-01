@@ -1,51 +1,48 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZdcNtuple_ZdcNtuple_H
 #define ZdcNtuple_ZdcNtuple_H
 
-//#include <EventLoop/Algorithm.h>
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgTools/AnaToolHandle.h>
+#include <TrigDecisionTool/TrigDecisionTool.h> //template parameter
 
-#include <TrigDecisionTool/TrigDecisionTool.h>
+#include <AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h> //template parameter
+#include "xAODTrigger/TrigDecision.h" //typedef
+#include "xAODTrigger/EnergySumRoI.h" //typedef
 
-
-#include "xAODEventInfo/EventInfo.h"
-#include <AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h>
-#include <TH1.h>
-#include <TH2.h>
-#include "xAODForward/MBTSModuleContainer.h"
-#include "xAODForward/ZdcModuleContainer.h"
-#include "xAODForward/ForwardEventInfoContainer.h"
-#include <TTree.h>
-#include <xAODHIEvent/HIEventShapeContainer.h>
-#include <xAODTracking/VertexContainer.h>
-#include <xAODTracking/TrackParticleContainer.h>
-#include <xAODTrigger/TrigDecision.h>
-#include <xAODTrigger/EnergySumRoI.h>
-
-#include <xAODTrigMinBias/TrigT2MbtsBitsContainer.h>
-#include "xAODCaloEvent/CaloClusterContainer.h"
-
-#include "xAODForward/MBTSModuleContainer.h"
-#include "xAODTruth/TruthParticleContainer.h"
-#include "PATInterfaces/SystematicVariation.h"
-#include "PATInterfaces/SystematicRegistry.h"
-#include "GeneratorObjects/McEventCollection.h"
-
-#include "ZdcAnalysis/IZdcAnalysisTool.h"
-
-#include "boost/unordered_map.hpp"
-#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
-
-#include "xAODForward/AFPProtonContainer.h"
+//container includes are all typedefs
+#include "xAODForward/ZdcModuleContainer.h" 
+#include "xAODTracking/VertexContainer.h" 
+#include "xAODTracking/TrackParticleContainer.h" 
+#include "xAODTrigMinBias/TrigT2MbtsBitsContainer.h" 
+#include "xAODCaloEvent/CaloClusterContainer.h" 
+#include "xAODForward/MBTSModuleContainer.h" 
+#include "xAODForward/ForwardEventInfoContainer.h" 
+#include "xAODHIEvent/HIEventShapeContainer.h" 
+#include "xAODTruth/TruthParticleContainer.h" 
+#include "xAODForward/AFPProtonContainer.h" 
 #include "xAODForward/AFPTrackContainer.h"
-#include <TLorentzVector.h>
+
+#include "GeneratorObjects/McEventCollection.h" //template parameter
+#include "ZdcAnalysis/IZdcAnalysisTool.h" //template parameter
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h" //template parameter
+
+#include <TLorentzVector.h> //data member
 #include "StoreGate/ReadHandleKey.h"
-#include <ZdcConditions/ZdcInjPulserAmpMap.h>
+#include "ZdcConditions/ZdcInjPulserAmpMap.h" //enum
+#include "xAODEventInfo/EventInfo.h" //typedef
+
+#include <vector>
+#include <cstdint>
+#include <string>
+#include <memory>
+
+class TH1;
+class TTree;
 
 class ZdcNtuple : public EL::AnaAlgorithm
 {
@@ -86,6 +83,7 @@ public:
   bool lhcf2022zdc;
   bool lhcf2022afp;
   bool pbpb2023;
+  bool oo2025;
   bool enableZDC; //
   bool enableRPD; //
   bool enableRPDAmp; //
@@ -216,10 +214,12 @@ public:
   std::vector< int > t_ZdcTruthParticleStatus;
   
   float t_ZdcModuleAmp[2][4];
+  float t_ZdcModuleAmpUncorr[2][4];
   float t_ZdcModuleTime[2][4];
   float t_ZdcModuleFitAmp[2][4];
   float t_ZdcModuleFitT0[2][4];
   float t_ZdcModuleChisq[2][4];
+  float t_ZdcModuleChisqRatio[2][4];
   unsigned int t_ZdcModuleStatus[2][4];
   float t_ZdcModuleCalibAmp[2][4];
   float t_ZdcModuleCalibTime[2][4];
@@ -327,7 +327,7 @@ public:
   float t_edgeGapC;
   float m_gapPtMin;
 
-  float m_gapThresholds[98] =
+  double m_gapThresholds[98] =
     {4.7426,5.11018,5.07498,5.0969,5.10695,5.04098,5.07106,4.98087,5.11647,5.08988,5.16267,
      5.17202,5.23803,5.25314,5.29551,5.35092,5.40863,5.44375,5.38075,5.25022,5.37933,5.25459,5.37719,5.25169,5.73985,
      5.79174,5.79266,5.79588,5.7963,5.81949,5.82273,5.85658,5.85442,5.84779,5.77679,5.83323,5.84524,5.84439,5.84488,

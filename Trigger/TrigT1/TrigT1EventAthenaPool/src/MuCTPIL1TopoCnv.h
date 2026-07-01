@@ -37,7 +37,7 @@ public:
   
 protected:
   virtual MuCTPIL1Topo_PERS* createPersistent( LVL1::MuCTPIL1Topo* transObj ) override;
-  virtual LVL1::MuCTPIL1Topo* createTransient() override;
+  virtual LVL1::MuCTPIL1Topo* createTransient(const Token* token) override;
   
 private:
   MuCTPIL1TopoCnv_p1 m_converter;

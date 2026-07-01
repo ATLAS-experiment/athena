@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWTRACKCALOEXTENSIONTOOL_H_
-#define EFLOWTRACKCALOEXTENSIONTOOL_H_
+#ifndef EFLOWREC_EFLOWTRACKCALOEXTENSIONTOOL_H
+#define EFLOWREC_EFLOWTRACKCALOEXTENSIONTOOL_H
 
 /********************************************************************
 
@@ -45,7 +45,7 @@ public:
   static const InterfaceID& interfaceID();
 
   virtual StatusCode initialize() override;
-  virtual std::unique_ptr<eflowTrackCaloPoints> execute(const xAOD::TrackParticle* track) const override;
+  virtual std::unique_ptr<eflowTrackCaloPoints> execute(const EventContext& ctx, const xAOD::TrackParticle* track) const override;
   virtual StatusCode finalize() override;
 
 private:

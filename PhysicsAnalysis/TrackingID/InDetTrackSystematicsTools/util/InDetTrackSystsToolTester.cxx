@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes:
@@ -22,6 +22,7 @@
 // EDM includes:
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "AthContainers/CurrentContext.h"
 
 // Local include(s):
 #include "InDetTrackSystematicsTools/InDetTrackSmearingTool.h"
@@ -113,7 +114,7 @@ int main( int argc, char* argv[] ) {
 
    InDet::JetTrackFilterTool jetFilterTool( "JetTrackFilterTool" );
    CHECK( jetFilterTool.setProperty("trackOriginTool", trackTruthOriginToolHandle) );
-   
+
    // Not a realistic set of systematics - we just want to make sure they can all be applied without breaking the tools
    CP::SystematicSet systSet = {
      CP::SystematicVariation("TRK_RES_D0_MEAS", -1),
@@ -171,7 +172,7 @@ int main( int argc, char* argv[] ) {
    } else {
      isSim = ei->eventType( xAOD::EventInfo::IS_SIMULATION );
    }
-   
+
 
    int debugN = 8; // number of tracks to print debug output for
    // Loop over the events:
@@ -179,18 +180,19 @@ int main( int argc, char* argv[] ) {
 
       // Tell the object which entry to look at:
       event.getEntry( entry );
-    
+
       // Create a shallow copy of InDetTrackParticles:
       const xAOD::TrackParticleContainer* ParticlesID = nullptr;
       CHECK( event.retrieve( ParticlesID , "InDetTrackParticles" ) );
-   
+
       const xAOD::JetContainer* jets = nullptr;
       if (doTIDE) {
         CHECK( event.retrieve( jets, jetCollectionName ) );
       }
 
-      std::pair< xAOD::TrackParticleContainer*, xAOD::ShallowAuxContainer* > ParticlesID_shallowCopy = xAOD::shallowCopyContainer( *ParticlesID );
-      for ( xAOD::TrackParticle* trkCpy : *(ParticlesID_shallowCopy.first) ) {
+      xAOD::ShallowCopyResult_t<xAOD::TrackParticleContainer> ParticlesID_shallowCopy =
+        xAOD::shallowCopy( *ParticlesID );
+      for ( xAOD::TrackParticle* trkCpy : *ParticlesID_shallowCopy.first ) {
 
          if ( isSim ) {
            if ( !filterTool.accept(trkCpy) ) continue;
@@ -239,12 +241,8 @@ int main( int argc, char* argv[] ) {
          z0_diff->Fill( z0d );
          qOverP_diff->Fill( qOverPd );
       }
-
-      delete ParticlesID_shallowCopy.first;
-      delete ParticlesID_shallowCopy.second;
-
    }
-   
+
    outfile->Write();
 
    // testing smart slimming feature:

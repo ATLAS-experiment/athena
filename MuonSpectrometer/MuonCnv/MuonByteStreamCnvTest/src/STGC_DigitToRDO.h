@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STGCDIGITTORDO_H
@@ -11,7 +11,6 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRDO/STGC_RawDataContainer.h"
 #include "NSWCalibTools/INSWCalibTool.h"
-#include "StoreGate/DataHandle.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonCablingData/Nsw_CablingMap.h"

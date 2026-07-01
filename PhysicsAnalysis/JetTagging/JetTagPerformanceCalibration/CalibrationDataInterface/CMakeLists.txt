@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CalibrationDataInterface )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint)
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO MathMore Minuit Minuit2 Matrix Physics HistPainter Rint)
 find_package( nlohmann_json )
 find_package( Boost ) # header-only so no libraries needed
 
@@ -19,7 +19,7 @@ atlas_add_root_dictionary( CalibrationDataInterfaceLib
                            CalibrationDataInterface/CalibrationDataEigenVariations.h
                            CalibrationDataInterface/CalibrationDataBackend.h
                            CalibrationDataInterface/CalibrationDataUtilities.h
-                           CalibrationDataInterface/CalibrationDataInternals.h 
+                           CalibrationDataInterface/CalibrationDataInternals.h
                            CalibrationDataInterface/CDIReader.h
                            Root/LinkDef.h
                            EXTERNAL_PACKAGES ROOT Boost )
@@ -36,7 +36,12 @@ atlas_add_executable( CDIReaderTester
                       src/CDIReaderTester.cxx
                       LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json CalibrationDataInterfaceLib)
 
+# Test that EigenVectorRecomposition() is side-effect free:
+atlas_add_test( CalibrationDataEigenRecomposition_test
+                SOURCES test/CalibrationDataEigenRecomposition_test.cxx
+                LINK_LIBRARIES ${ROOT_LIBRARIES} CalibrationDataInterfaceLib PathResolver
+                POST_EXEC_SCRIPT noerror.sh )
+
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py )
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgA.h"
@@ -7,12 +7,6 @@
 #include "StoreGate/WriteHandle.h"
 
 #include <memory>
-
-AlgA::AlgA( const std::string& name, 
-	    ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
-{
-}
 
 //---------------------------------------------------------------------------
 
@@ -28,19 +22,19 @@ StatusCode AlgA::initialize() {
 
 //---------------------------------------------------------------------------
 
-StatusCode AlgA::execute() {
+StatusCode AlgA::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
 
-  SG::ReadHandle<xAOD::EventInfo> evt(m_evt);
+  SG::ReadHandle<xAOD::EventInfo> evt(m_evt, ctx);
   ATH_MSG_INFO("   EventInfo:  r: " << evt->runNumber()
                << " e: " << evt->eventNumber()
-               << " evt: " << Gaudi::Hive::currentContextEvt() );
+               << " evt: " << ctx.evt() );
 
 
-  unsigned int i = Gaudi::Hive::currentContextEvt() + 1;
+  const unsigned int i = ctx.evt() + 1;
 
-  SG::WriteHandle<HiveDataObj> wh1(m_wrh1);
+  SG::WriteHandle<HiveDataObj> wh1(m_wrh1, ctx);
   ATH_CHECK( wh1.record( std::make_unique<HiveDataObj> 
                          ( 10000 + 
 			   evt->eventNumber()*100 + 
@@ -49,7 +43,7 @@ StatusCode AlgA::execute() {
   ATH_MSG_INFO("  write: " << wh1.key() << " = " << wh1->val() );
 
 
-  SG::WriteHandle<HiveDataObj> wh2(m_wrh2);
+  SG::WriteHandle<HiveDataObj> wh2(m_wrh2, ctx);
   ATH_CHECK( wh2.record( std::make_unique< HiveDataObj >( 10050+i ) ) );
   ATH_MSG_INFO("  write: " << wh2.key() << " = " << wh2->val() );
     

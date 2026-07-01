@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -25,6 +25,7 @@
 #include "TrigNavigation/Navigation.h"
 #include "TrigNavigation/Holder.icc"
 #include "TrigSteeringEvent/HLTResult.h"
+#include "TrigStorageDefinitions/EDM_TypeInformation.h"
 
 
 HLT_BEGIN_TYPE_REGISTRATION
@@ -36,16 +37,8 @@ HLT_BEGIN_TYPE_REGISTRATION
 HLT_END_TYPE_REGISTRATION(DataModelTest)
 
 
-struct class_DataModelTest
-{
-  typedef TypeInfo_DataModelTest map;
-  static const std::string package_name;
-};
-  
 struct TypeInfo_EDM {
-  typedef HLT::TypeInformation::newlist
-  ::add<class_DataModelTest> ::go
-  ::done map;
+  using map = TypeInfo_DataModelTest;
 };
 
 
@@ -92,9 +85,9 @@ StatusCode HLTResultReader::initialize ATLAS_NOT_THREAD_SAFE()
 /**
  * @brief Algorithm event processing.
  */
-StatusCode HLTResultReader::execute()
+StatusCode HLTResultReader::execute(const EventContext& ctx)
 {
-  SG::ReadHandle<HLT::HLTResult> result (m_resultKey);
+  SG::ReadHandle<HLT::HLTResult> result (m_resultKey, ctx);
   m_nav->prepare();
   if (!m_nav->deserialize (result->getNavigationResult()))
     return StatusCode::FAILURE;

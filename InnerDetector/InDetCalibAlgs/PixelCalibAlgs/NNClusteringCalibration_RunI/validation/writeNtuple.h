@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -12,24 +12,21 @@
 #ifndef writeNtuple_h
 #define writeNtuple_h
 
+#include "RIOs.h"
+
 #include <TROOT.h>
 #include <TSystem.h>
 #include <TChain.h>
 #include <TFile.h>
-#include "RIOs.h"
 #include <TString.h>
+#include <TChainElement.h>
 #include <vector>
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <TChainElement.h>
 
-using namespace std;
-
-
-#pragma link C++ class vector<int> +;
-#pragma link C++ class vector<double> +;
-#pragma link C++ class vector<float> +; Loader
+#pragma link C++ class std::vector<int> +;
+#pragma link C++ class std::vector<double> +;
+#pragma link C++ class std::vector<float> +; Loader
 
 
 
@@ -41,26 +38,26 @@ public :
    Int_t           fCurrent; //!current Tree number in a TChain
    RIOs		  *fOther;
    // Declaration of leaf types
-   vector<int>     *NN_sizeX;
-   vector<int>     *NN_sizeY;
-   vector<vector<float> > *NN_matrixOfToT;
-   vector<vector<float> > *NN_vectorOfPitchesY;
-   vector<int>     *NN_ClusterPixLayer;
-   vector<int>     *NN_ClusterPixBarrelEC;
-   vector<float>   *NN_phiBS;
-   vector<float>   *NN_thetaBS;
-   vector<float>   *NN_etaModule;
-   vector<bool>    *NN_useTrackInfo;
-   vector<int>     *NN_columnWeightedPosition;
-   vector<int>     *NN_rowWeightedPosition;
-   vector<double>  *NN_localColumnWeightedPosition;
-   vector<double>  *NN_localRowWeightedPosition;
-   vector<vector<float> > *NN_positionX;
-   vector<vector<float> > *NN_positionY;
-   vector<vector<float> > *NN_position_idX;
-   vector<vector<float> > *NN_position_idY;
-   vector<vector<float> > *NN_theta;
-   vector<vector<float> > *NN_phi;
+   std::vector<int>     *NN_sizeX;
+   std::vector<int>     *NN_sizeY;
+   std::vector<std::vector<float> > *NN_matrixOfToT;
+   std::vector<std::vector<float> > *NN_vectorOfPitchesY;
+   std::vector<int>     *NN_ClusterPixLayer;
+   std::vector<int>     *NN_ClusterPixBarrelEC;
+   std::vector<float>   *NN_phiBS;
+   std::vector<float>   *NN_thetaBS;
+   std::vector<float>   *NN_etaModule;
+   std::vector<bool>    *NN_useTrackInfo;
+   std::vector<int>     *NN_columnWeightedPosition;
+   std::vector<int>     *NN_rowWeightedPosition;
+   std::vector<double>  *NN_localColumnWeightedPosition;
+   std::vector<double>  *NN_localRowWeightedPosition;
+   std::vector<std::vector<float> > *NN_positionX;
+   std::vector<std::vector<float> > *NN_positionY;
+   std::vector<std::vector<float> > *NN_position_idX;
+   std::vector<std::vector<float> > *NN_position_idY;
+   std::vector<std::vector<float> > *NN_theta;
+   std::vector<std::vector<float> > *NN_phi;
 
    // List of branches
    TBranch        *b_NN_sizeX;   //!
@@ -125,11 +122,7 @@ public :
    mutable std::vector<float>* m_PixTrkQ;      //!< charge of the associated track UNIT:+/-1
    mutable std::vector<float>* m_PixTrkClusGroupSize;  //!< total size of the cluster UNIT:cells
    mutable std::vector<std::vector<float> >* m_PixChargeList;//!< Charge of the pixel UNIT:electrons
-   /*  mutable std::vector<std::vector<int> >*   m_PixToTList; //!< Time over Threshold of the pixel
-       mutable std::vector<std::vector<int> >*   m_PixLVL1AList; //!< Level 1 accept of the pixel
-       mutable std::vector<std::vector<int> >*   m_PixEtaIndex; //!< Cluster position converted into pixel column index (eta direction) UNIT:index
-       mutable std::vector<std::vector<int> >*   m_PixPhiIndex; //!< Cluster position converted into pixel row index (phi direction) UNIT:index
-   */
+   
    mutable int m_nPixelHits;
    mutable int m_nTRTHits;
    mutable int m_nSCTHits;
@@ -159,55 +152,7 @@ public :
 #endif
 
 #ifdef writeNtuple_cxx
-/*
-writeNtuple::writeNtuple(TTree *tree)
-{
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
 
-
-  TString fName = "dummy.root";//"root://castoratlas//castor/cern.ch/grid/atlas/atlasscratchdisk/user.lorenzi/user.lorenzi.T1.TRKVAL.NNtrain.clustersOnTrack.110701122007_sub022943841/user.lorenzi.000160.TRKVAL._00027.root";
-
-  if (tree == 0) {
-    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dummy.root");
-    if (!f) {
-      f = TFile::Open(fName);
-      
-    }
-    tree = (TTree*)gDirectory->Get("Validation/NNinput");
-    tree2=0;
-  }
-  Init(tree);
-  
-  if (tree2 == 0) {
-    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dummy.root");
-    if (!f) {
-      f = TFile::Open(fName);
-    }
-    tree2 = (TTree*)gDirectory->Get("Validation/PixelRIOs");
-    fOther = new RIOs( tree2 );
-    
-    
-  }else{
-
-    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("dummy.root");
-    if (!f) {
-      f = tree->GetCurrentFile();
-    }     
-    tree2 = (TTree*)gDirectory->Get("Validation/PixelRIOs");
-    fOther = new RIOs( tree2 );
-    
-  }
-
-
-
-
-
- 
-}
-
-
-*/
 
 writeNtuple::writeNtuple(TTree *tree)
   : m_PixChargeList(nullptr),
@@ -226,45 +171,6 @@ writeNtuple::writeNtuple(TTree *tree)
    }
    Init(tree);
 
-   /*
-   if (tree->IsA() == TChain::Class()) {
-     tree2 = (TTree*)tree->Clone("Validation/PixelRIOs");  // Create a copy of the TChain with a different name but the same list of files.
-   } else {
-     TFile *f = tree->GetTree()->GetCurrentFile();
-     tree2 = (TTree*)f->Get("Validation/PixelRIOs");
-     if (tree2 == 0) {
-       f = (TFile*)gROOT->GetListOfFiles()->FindObject("AnalysisSkeleton.aan.root");
-       if (!f) {
-	 f = new TFile("AnalysisSkeleton.aan.root");
-       }
-       tree2 = (TTree*)f->Get("Validation/PixelRIOs");
-     }
-    }*/
-/*
-     TFile *f1 = tree->GetTree()->GetCurrentFile();
-     tree2 = (TTree*)f1->Get("Validation/PixelRIOs");
-
-     tree2  = (TTree*)tree->Clone("Validation/PixelRIOs"); 
-*/
-
-/*
-   if (tree->IsA() == TChain::Class()) {
-     // Make a copy of the TChain with a new name to point to the other set of TTree.
-   tree2 = (TTree*)tree->Clone("Validation/PixelRIOs");
-//    tree2= new TChain("Validation/PixelRIOs");
-   } else {
-     // We have a real TTree.
-     TFile *f = tree->GetCurrentFile();
-     if (f == 0) {
-       cout << "Error in constructor" << endl; 
-       // Fatal("Constructor","The TTree we are being passed in not disk resident");
-     }
-     // This assumes that the other TTree (Photon) is located in the top level directory of the TFile.
-     tree2 = (TTree*)f->Get("Validation/PixelRIOs");
-   }
-   // Create the secondary MakeClass/MakeSelector object pointing to the secondary TTree.
-   */
-
 
    tree2 = new TChain("Validation/PixelRIOs");
    TIter next(static_cast<TChain*>(tree)->GetListOfFiles());
@@ -272,13 +178,7 @@ writeNtuple::writeNtuple(TTree *tree)
    while( ( obj = static_cast<TChainElement*> (next()) ) ) {
      tree2->Add(obj->GetTitle());
    }
-   
-
-   //  tree2->Print();
-
    fOther = new RIOs( tree2 );
-   //   fOther->fChain->Print();
-
 }
    
 
@@ -407,12 +307,6 @@ void writeNtuple::Init(TTree *tree)
   m_PixDeltaEta_t   = new std::vector<float>();
   m_PixOmegaPhi_t   = new std::vector<float>();
   m_PixOmegaEta_t   = new std::vector<float>();
-  /*    m_PixChargeList = new std::vector<std::vector<float> >();
-	m_PixToTList    = new std::vector<std::vector<int> >();
-	m_PixLVL1AList  = new std::vector<std::vector<int> >();
-	m_PixEtaIndex   = new std::vector<std::vector<int> >();
-	m_PixPhiIndex   = new std::vector<std::vector<int> >();
-  */
   m_PixTrkAngle   = new std::vector<float>();
   m_PixTrkThetaI  = new std::vector<float>();
   m_PixTrkEta     = new std::vector<float>();
@@ -454,56 +348,7 @@ Int_t writeNtuple::Cut(Long64_t entry)
 
 
 void writeNtuple::InitializeVectors(){
-  /*
-  m_PixDetType    = new std::vector<int>();
-  m_PixHasGanged  = new std::vector<int>();
-  m_PixIsFake     = new std::vector<int>();
-  m_PixLVL1A      = new std::vector<int>();
-  m_PixToT        = new std::vector<int>();
-  m_PixCharge     = new std::vector<float>();
-  m_PixTLorPhi    = new std::vector<float>();
-  m_PixTLorEta    = new std::vector<float>();
-  m_PixBiasVolt   = new std::vector<float>();
-  m_PixTemp       = new std::vector<float>();
-  m_PixDepVolt    = new std::vector<float>();
-  m_PixLocX       = new std::vector<float>();
-  m_PixLocY       = new std::vector<float>();
-  m_PixEtaModule_t= new std::vector<int>();
-  m_PixPhiModule_t= new std::vector<int>();
-  m_PixGloX       = new std::vector<float>();
-  m_PixGloY       = new std::vector<float>();
-  m_PixGloZ       = new std::vector<float>();
-  m_PixEta_t      = new std::vector<float>();
-  m_PixFirstRow   = new std::vector<float>();
-  m_PixFirstCol   = new std::vector<float>();
-  m_PixDigResPhi  = new std::vector<float>();
-  m_PixDigResEta  = new std::vector<float>();
-  m_PixErrPhi     = new std::vector<float>();
-  m_PixErrEta     = new std::vector<float>();
-  m_PixDeltaRow_t   = new std::vector<int>();
-  m_PixDeltaCol_t   = new std::vector<int>();
-  m_PixDeltaPhi_t   = new std::vector<float>();
-  m_PixDeltaEta_t   = new std::vector<float>();
-  m_PixOmegaPhi_t   = new std::vector<float>();
-  m_PixOmegaEta_t   = new std::vector<float>();
-  */  
-/*    m_PixChargeList = new std::vector<std::vector<float> >();
-	m_PixToTList    = new std::vector<std::vector<int> >();
-	m_PixLVL1AList  = new std::vector<std::vector<int> >();
-	m_PixEtaIndex   = new std::vector<std::vector<int> >();
-	m_PixPhiIndex   = new std::vector<std::vector<int> >();
-  */
-  /* m_PixTrkAngle   = new std::vector<float>();
-  m_PixTrkThetaI  = new std::vector<float>();
-  m_PixTrkEta     = new std::vector<float>();
-  m_PixTrkPt      = new std::vector<float>();
-  m_PixTrkQ       = new std::vector<float>();
-  m_PixTrkClusGroupSize = new std::vector<float>();
-  */
-
-
   return;
-
 }
 
 void writeNtuple::ResetVectors(){
@@ -541,12 +386,7 @@ void writeNtuple::ResetVectors(){
   m_PixDeltaCol_t->clear();
   m_PixOmegaPhi_t->clear();
   m_PixOmegaEta_t->clear();
-  
-/*   m_PixChargeList->clear(); */
-/*   m_PixToTList->clear(); */
-/*   m_PixLVL1AList->clear(); */
-/*   m_PixEtaIndex->clear(); */
-/*   m_PixPhiIndex->clear(); */
+
  
   m_PixTrkAngle->clear();
   m_PixTrkThetaI->clear();
@@ -567,31 +407,16 @@ void writeNtuple::ResetVectors(){
 }
 
 
-void writeNtuple::FillClusterInfo(int clus)
-{
-
-  
-
-
-
+void 
+writeNtuple::FillClusterInfo(int clus){
   m_PixEta_t->push_back( fOther->PixClusEta->at(clus)   );
   m_PixGloX->push_back(  fOther->PixClusGloX->at(clus)  );
   m_PixGloY->push_back(  fOther->PixClusGloY->at(clus)  );
   m_PixGloZ->push_back(  fOther->PixClusGloZ->at(clus)  );
-  
-
-
   m_PixEtaModule_t->push_back( fOther->PixEtaModule->at(clus));
   m_PixPhiModule_t->push_back( fOther->PixPhiModule->at(clus));
- 
-
-
   m_PixDeltaRow_t->push_back(fOther->PixDeltaRow->at(clus));
   m_PixDeltaCol_t->push_back(fOther->PixDeltaCol->at(clus));
-
-/*   m_PixDeltaPhi->push_back(fOther->PixDeltaPhi); */
-/*   m_PixDeltaEta->push_back(fOther->PixDeltaEta); */
-
   m_PixOmegaPhi_t->push_back(fOther->PixOmegaPhi->at(clus));
   m_PixOmegaEta_t->push_back(fOther->PixOmegaEta->at(clus));
 
@@ -601,23 +426,19 @@ void writeNtuple::FillClusterInfo(int clus)
   float PixTemp    = -1000.;
   float PixDepVolt    = -1000.;
   
-
   m_PixTLorPhi->push_back(PixTLorPhi);
   m_PixTLorEta->push_back(PixTLorEta);
   m_PixBiasVolt->push_back(PixBiasVolt);
   m_PixTemp->push_back(PixTemp);
   m_PixDepVolt->push_back(PixDepVolt);
   
-
   m_PixHasGanged->push_back(fOther->PixClusGanged->at(clus));
   m_PixIsFake->push_back(fOther->PixClusFake->at(clus));
   m_PixLVL1A->push_back(fOther->PixClusLvl1->at(clus));
   m_PixToT->push_back(fOther->PixClusToT->at(clus));
   m_PixCharge->push_back(fOther->PixClusCharge->at(clus));
 
-
   int   PixDetType    = 0;
-
 
 //!< Layer information (0, 1, 2 for barrel, 100, 101, 102 for endcap A side, -100, -101, -102 for endcap C side) it is 0 by default
 

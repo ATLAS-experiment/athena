@@ -17,6 +17,12 @@ def configureFlags(runArgs):
     from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
     commonRunArgsToFlags(runArgs, flags)
 
+    # Autoconfigure enabled subdetectors
+    if hasattr(runArgs, 'detectors'):
+        detectors = runArgs.detectors
+    else:
+        detectors = None
+
     # Input
     if hasattr(runArgs, 'inputRDOFile'):
         flags.Input.Files = runArgs.inputRDOFile
@@ -32,6 +38,13 @@ def configureFlags(runArgs):
 
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep=ProductionStep.Reconstruction
+
+    # Setup detector flags
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(flags, detectors, use_metadata=True, toggle_geometry=True, keep_beampipe=True)
+    # Print reco domain status
+    from RecJobTransforms.RecoConfigFlags import printRecoFlags
+    printRecoFlags(flags)
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
@@ -68,6 +81,16 @@ def fromRunArgs(runArgs):
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
     cfg.merge(ByteStreamWriteCfg(flags))
 
+    # Configure IOVDbMetaDataTool to serialize IOV metadata to ByteStream
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    iovca = ComponentAccumulator()
+    iovDbTool = CompFactory.IOVDbMetaDataTool("IOVDbMetaDataTool")
+    iovDbTool.FoldersToSerializeToBSMetadata = ["/Digitization/Parameters"]
+    iovca.addPublicTool(iovDbTool)
+    cfg.merge(iovca)
+    log.info("Configured IOVDbMetaDataTool to serialize folders to ByteStream metadata: %s",
+             iovDbTool.FoldersToSerializeToBSMetadata)
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

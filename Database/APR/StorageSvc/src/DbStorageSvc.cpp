@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //  ====================================================================
@@ -15,16 +15,17 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "DbStorageSvc.h"
-#include "POOLCore/DbPrint.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
-#include "StorageSvc/Transaction.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbTransform.h"
 #include "StorageSvc/DbConnection.h"
 #include "DbDatabaseObj.h"
 #include "StorageSvc/FileDescriptor.h"
+#include "StorageSvc/IOODatabase.h"
+
+#include "Gaudi/PluginService.h"
 
 #include <vector>
 #include <memory>
@@ -53,10 +54,10 @@ DbStorageSvc::DbStorageSvc(const string& name)
 : APRMessaging(name),
   m_name(name),
   m_refCount(0),
-  m_sesH(),
   m_domH(POOL_StorageType),
   m_ageLimit(2),
-  m_type(POOL_StorageType)
+  m_type(POOL_StorageType),
+  m_implementation(nullptr)
 {
   static const char * const als = getenv("POOL_STORAGESVC_DB_AGE_LIMIT");  
   if ( als )    {
@@ -75,7 +76,10 @@ DbStorageSvc::DbStorageSvc(const string& name)
 DbStorageSvc::~DbStorageSvc() {
   m_domH.close().ignore();
   m_domH = 0;
-  m_sesH = 0;
+  if( m_implementation ) {
+    m_implementation->release();
+    m_implementation = nullptr;
+  }
 }
 
 //--- IInterface::addRef
@@ -93,15 +97,6 @@ unsigned int DbStorageSvc::release()   {
   return count;
 }
 
-//--- IInterface::queryInterface
-StatusCode DbStorageSvc::queryInterface(const Guid& riid, void** ppvInterface)  {
-  if ( IStorageSvc::interfaceID() == riid )  {
-    *ppvInterface = static_cast<IStorageSvc*>(this);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
 /// IService implementation: Initilize Service                          
 StatusCode DbStorageSvc::initialize()   {
   return StatusCode::SUCCESS;
@@ -111,11 +106,10 @@ StatusCode DbStorageSvc::initialize()   {
 StatusCode DbStorageSvc::finalize()   {
   StatusCode rc = m_domH.close();
   m_domH = 0;
-  m_sesH = 0;
   return rc;
 }
 
-std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken)  {
+std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken) const {
   if ( m_domH.isValid() )   {
     DbDatabase dbH(DbDatabaseHNC(refDB.dbc()->handle()));
     if ( dbH.isValid() )  {
@@ -134,13 +128,20 @@ StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
   if ( /*0 != &fDesc &&*/ m_domH.isValid() )   {
     DbDatabase dbH(DbDatabaseHNC(fDesc.dbc()->handle()));
     if ( !dbH.isValid() )  {
-      StatusCode sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), pool::READ);
+      StatusCode sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), Io::READ);
       if ( !sc.isSuccess() )    {
         ATH_MSG_ERROR( "Failed to open the Database!" );
         return sc;
       }
     }
     if ( dbH.isValid() )  {
+      if ( !dbH.info() ) { // ageing may close DbDatabaseObj w/o invalidating DbDatabase
+        StatusCode sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), Io::READ);
+        if ( !sc.isSuccess() )    {
+          ATH_MSG_ERROR( "Failed to re-open the Database!" );
+          return sc;
+        }
+      }
       shape = dbH.objectShape(objType);
       if ( shape )  {
         return StatusCode::SUCCESS;
@@ -188,7 +189,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
                       refCont,
                       DbTypeInfoH(shape),
                       DbType(technology),
-                      pool::CREATE|pool::UPDATE);
+                      Io::WRITE);
       if ( sc.isSuccess() ) {
          Token* t = new Token(cntH.token());
          t->setClassID(shape->shapeID());
@@ -217,7 +218,7 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
                                void**                object)
 {
 
-  pool::AccessMode mode = pool::READ;
+  Io::IoFlag mode = Io::READ;
   if ( m_domH.isValid() ) {
     DbType typ(token.technology());
     if ( m_domH.type() == typ ) {
@@ -241,85 +242,45 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
 }
 
 /// Start a new Database Session.
-StatusCode DbStorageSvc::startSession(int accessmode,int technology,SessionH& refSession)  {
+StatusCode DbStorageSvc::startSession(Io::IoFlag accessmode, int technology, int ageLimit) {
   m_type   = DbType(technology).majorType();
-  int typ  = DbType(technology).majorType();
-  if ( m_type.majorType() == typ )  {  // Maybe implement this later
-    refSession = 0;
-    if ( m_sesH.open().isSuccess() )  {
-      if ( m_domH.open(m_sesH, m_type, accessmode).isSuccess() )  {
-        m_domH.setAgeLimit(m_ageLimit);
-        refSession = SessionH(m_domH.ptr());
-        return StatusCode::SUCCESS;
-      }
-      ATH_MSG_ERROR( "Cannot connect to the domain: " << DbType(technology).storageName() );
-      return StatusCode::FAILURE;
-    }
-    ATH_MSG_ERROR( "Cannot start the Database session." );
-    return StatusCode::FAILURE;
+  if( m_domH.open(db(), m_type, accessmode).isSuccess() )  {
+      m_domH.setAgeLimit(ageLimit==-1 ? m_ageLimit : ageLimit);
+      return StatusCode::SUCCESS;
   }
-  ATH_MSG_ERROR( "Cannot start database session, the technology type does not match." );
+  ATH_MSG_ERROR( "Cannot connect to the domain: " << DbType(technology).storageName() );
   return StatusCode::FAILURE;
 }
 
-/// End the Database session.
-StatusCode DbStorageSvc::endSession(const SessionH session) {
-  StatusCode sc = StatusCode::FAILURE;
-  if( session == SessionH(m_domH.ptr()) )  {
-    sc = m_domH.close();
-    m_sesH = 0;
-  }
-  return sc;
-}
-
 /// Check the existence of a logical Database unit.
-StatusCode 
-DbStorageSvc::existsConnection( const SessionH session, int /* mode */,const FileDescriptor& fDesc) {
-  if ( m_domH.isValid() && session == SessionH(m_domH.ptr()) )   {
-    DbDatabase dbH = m_domH.find(fDesc.FID());
-    if ( dbH.isValid() )  {  // Already connected to database ...
-      return StatusCode::SUCCESS;
-    }
-    if( m_domH.existsDbase(fDesc.PFN()) ) {
-      return StatusCode::SUCCESS;
-    }
+StatusCode DbStorageSvc::existsConnection(const FileDescriptor& fDesc) {
+  DbDatabase dbH = m_domH.find(fDesc.FID());
+  if ( dbH.isValid() )  {  // Already connected to database ...
+    return StatusCode::SUCCESS;
+  }
+  if( m_domH.existsDbase(fDesc.PFN()) ) {
+    return StatusCode::SUCCESS;
   }
   return StatusCode::FAILURE;
 }
 
 /// Connect to a logical Database unit.
-StatusCode DbStorageSvc::connect(const SessionH session,int mod,FileDescriptor& fDesc)  {
+StatusCode DbStorageSvc::connect(Io::IoFlag mod, FileDescriptor& fDesc) {
   StatusCode sc = StatusCode::FAILURE;
   fDesc.setDbc(0);
-  if ( m_domH.isValid() && session == SessionH(m_domH.ptr()) )   {
-    DbDatabase dbH = m_domH.find(fDesc.FID());
-    if ( dbH.isValid() )  {
-      int all = pool::READ + pool::CREATE + pool::UPDATE;
-      int wr  = pool::CREATE + pool::UPDATE;
-      int m   = dbH.openMode();
-      if ( (m&all) && mod == pool::READ )
-        ;
-      else if ( m&wr && mod&pool::CREATE )
-        ;
-      else if ( m&wr && mod&pool::UPDATE )
-        ;
-      else
-        dbH.close().ignore();
+  DbDatabase dbH = m_domH.find(fDesc.FID());
+  if ( !dbH.isValid() )  {
+    sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), mod);
+    if ( !sc.isSuccess() )    {
+      ATH_MSG_ERROR( "Cannot connect to Database: FID=" << fDesc.FID() << " PFN=" << fDesc.PFN() );
+      return sc;
     }
-    // No Else!
-    if ( !dbH.isValid() )  {
-      sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), mod);
-      if ( !sc.isSuccess() )    {
-        ATH_MSG_ERROR( "Cannot connect to Database: FID=" << fDesc.FID() << " PFN=" << fDesc.PFN() );
-        return sc;
-      }
-    }
-    else {
-      sc = StatusCode::SUCCESS;
-    }
-    DbConnection* dbc = new DbConnection(dbH.type().type(), dbH.name(), dbH.ptr());
-    fDesc.setDbc(dbc);
   }
+  else {
+    sc = StatusCode::SUCCESS;
+  }
+  DbConnection* dbc = new DbConnection(dbH.type().type(), dbH.name(), dbH.ptr());
+  fDesc.setDbc(dbc);
   return sc;
 }
 
@@ -338,7 +299,7 @@ StatusCode DbStorageSvc::disconnect(FileDescriptor& fDesc) {
 }
 
 /// Query the access mode of a Database unit.
-StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, int& mode) {
+StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, Io::IoFlag& mode) {
   DbConnection* dbc = dynamic_cast<DbConnection*>(refDB.dbc());
   if ( dbc )   {
     DbDatabase  dbH(DbDatabaseHNC(dbc->handle()));
@@ -347,34 +308,26 @@ StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, int& mode) {
       return StatusCode::SUCCESS;
     }
   }
-  mode = pool::NOT_OPEN;
+  mode = Io::INVALID;
   return StatusCode::FAILURE;
 }
-
 
 /// End/Finish an existing Transaction sequence.
-StatusCode DbStorageSvc::endTransaction( ConnectionH connection, Transaction::Action typ)
+StatusCode DbStorageSvc::endTransaction(FileDescriptor& refDB, Transaction::Action typ)
 {
-   return ( (DbDatabaseObj*)connection->handle() )->transAct( typ );
+   return refDB.dbc()->handle()->transAct( typ );
 }
 
-/// Access options for a given database domain.
-StatusCode DbStorageSvc::getDomainOption(const SessionH  sessionH, DbOption& opt)  {
-  if ( m_domH.isValid() && sessionH == SessionH(m_domH.ptr()) )   {
-    return m_domH.getOption(opt);
+/// Access technology implementations
+IOODatabase* DbStorageSvc::db() {
+  if( !m_implementation ) {
+    const std::string &nam = m_type.storageName();
+    m_implementation = Gaudi::PluginService::Factory<IOODatabase*()>::create(nam).release();
+    if( !m_implementation ) {
+      ATH_MSG_FATAL( "Failed to load plugin for " << nam << " storage type" );
+    }
   }
-  ATH_MSG_ERROR( "Cannot connect to proper technology domain." );
-  return StatusCode::FAILURE;
-}
-
-/// Set options for a given database domain.
-StatusCode
-DbStorageSvc::setDomainOption(const SessionH  sessionH, const DbOption& opt)  {
-  if ( m_domH.isValid() && sessionH == SessionH(m_domH.ptr()) )   {
-    return m_domH.setOption(opt);
-  }
-  ATH_MSG_ERROR( "Cannot connect to proper technology domain." );
-  return StatusCode::FAILURE;
+  return m_implementation;
 }
 
 } // namespace pool

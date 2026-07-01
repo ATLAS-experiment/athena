@@ -31,7 +31,7 @@ public:
    MuCTPI_RDOToRoIBResult( const std::string& name, ISvcLocator* pSvcLocator );
 
    /// Regular algorithm execure function
-   virtual StatusCode execute() override;
+   virtual StatusCode execute(const EventContext& ctx) override;
 
 private:
    /// Extract the BCID stored in the multiplicity word

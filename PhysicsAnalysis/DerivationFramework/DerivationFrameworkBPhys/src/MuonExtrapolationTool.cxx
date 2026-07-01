@@ -71,11 +71,11 @@ const xAOD::TrackParticle* MuonExtrapolationTool::getPreferredTrackParticle (con
   const xAOD::TrackParticle* muonTrack = dynamic_cast<const xAOD::TrackParticle*>(muon);
   if(!muonTrack && dynamic_cast<const xAOD::Muon*>(muon)) {
     const xAOD::Muon* theMuon = dynamic_cast<const xAOD::Muon*>(muon);
-    muonTrack = theMuon->trackParticle( xAOD::Muon::MuonSpectrometerTrackParticle );
+    muonTrack = theMuon->trackParticle( xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle );
     if(!muonTrack) {
-      muonTrack = theMuon->primaryTrackParticle();
+      muonTrack = theMuon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
       if(!muonTrack) {
-       muonTrack = theMuon->trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
+       muonTrack = theMuon->trackParticle( xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle );
       }
     }
   }

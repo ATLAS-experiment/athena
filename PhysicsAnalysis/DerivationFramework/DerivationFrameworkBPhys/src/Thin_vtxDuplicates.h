@@ -21,7 +21,7 @@ namespace DerivationFramework {
       ~Thin_vtxDuplicates();
       virtual StatusCode initialize();
       virtual StatusCode finalize();
-      virtual StatusCode doThinning() const;
+      virtual StatusCode doThinning(const EventContext& ctx) const;
 
     private:
       bool m_noFlags;

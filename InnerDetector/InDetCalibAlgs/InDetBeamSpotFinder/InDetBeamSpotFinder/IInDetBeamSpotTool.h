@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_IINDETBEAMSPOTTOOL_H
@@ -31,8 +31,8 @@ namespace BeamSpot {
 
 namespace BeamSpot{
   struct Event {
-    unsigned int pileup, runNumber, lumiBlock, bcid;
-    unsigned long long eventNumber, eventTime, eventTime_NS; 
+    unsigned int pileup=0, runNumber=0, lumiBlock=0, bcid=0;
+    unsigned long long eventNumber=0, eventTime=0, eventTime_NS=0;
     std::vector<BeamSpot::VrtHolder> vertices;
   };
 }

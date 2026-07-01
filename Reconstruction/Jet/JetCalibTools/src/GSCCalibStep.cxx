@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // GSCCalibStep.cxx 
@@ -38,7 +38,7 @@ StatusCode GSCCalibStep::initialize() {
 
 StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
-  ATH_MSG_DEBUG("calibrating jet collection.");
+  ATH_MSG_DEBUG("Calibrating jet collection with GSC.");
 
   // Retrieve the primary vertex location:
   int PVindex = 0;
@@ -78,10 +78,6 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
       PVindex = jet->getAssociatedObject<xAOD::Vertex>("OriginVertex")->index();
     }
 
-    xAOD::JetFourMom_t jetconstitP4 = jet->getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum");
-    std::vector<float> samplingFrac = jet->getAttribute<std::vector<float> >("EnergyPerSampling");
-    // get detector Eta
-    float detectorEta = jet->getAttribute<float>("DetectorEta");
     // get trackWIDTHPVX
     float trackWIDTHPVX = 0;
     static const SG::ConstAccessor<std::vector<float> > TrackWidthPt1000Acc ("TrackWidthPt1000");
@@ -91,6 +87,7 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
         ATH_MSG_DEBUG("trackWIDTHPVX found set to: " << trackWIDTHPVX);
     }
     jc.setValue("trackWIDTH", trackWIDTHPVX);
+
     // get nTrkPVX
     int nTrkPVX = 0;
     static const SG::ConstAccessor<std::vector<int>> NumTrkPt1000Acc ("NumTrkPt1000");
@@ -100,7 +97,9 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
         ATH_MSG_DEBUG("nTrkPVX found set to: " << nTrkPVX);
     }
     jc.setValue("nTrk", nTrkPVX);
+
     // get Charged Fraction
+    xAOD::JetFourMom_t jetconstitP4 = jet->getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum");
     float ChargedFraction = 0;
     static const SG::ConstAccessor<std::vector<float>> SumPtChargedPFOPt500Acc ("SumPtChargedPFOPt500");
     if(SumPtChargedPFOPt500Acc.isAvailable(*jet))
@@ -109,6 +108,8 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
         ATH_MSG_DEBUG("ChargedFraction found set to: " << ChargedFraction);
     }
     jc.setValue("ChargedFraction", ChargedFraction);
+
+    std::vector<float> samplingFrac = jet->getAttribute<std::vector<float> >("EnergyPerSampling");
     // get EM3
     float EM3 = (samplingFrac[3]+samplingFrac[7])/jetconstitP4.e();
     ATH_MSG_DEBUG("EM3 found set to: " << EM3);
@@ -117,28 +118,7 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     float Tile0 = (samplingFrac[12]+samplingFrac[18])/jetconstitP4.e();
     ATH_MSG_DEBUG("Tile0 found set to: " << Tile0);
     jc.setValue("Tile0", Tile0);
-    // get N90Constituents
-    double N90Constituents = 0;
-    static const SG::ConstAccessor<float> N90ConstituentsAcc ("N90Constituents");
-    if(N90ConstituentsAcc.isAvailable(*jet))
-    {
-        N90Constituents = N90ConstituentsAcc(*jet);
-        ATH_MSG_DEBUG("N90Constituents found set to: " << N90Constituents);
-    }
-    jc.setValue("N90Constituents", N90Constituents);
-    // get caloWIDTH
-    double caloWIDTH = 0;
-    static const SG::ConstAccessor<float> WidthAcc ("Width");
-    if(WidthAcc.isAvailable(*jet))
-    {
-        caloWIDTH = WidthAcc(*jet);
-        ATH_MSG_DEBUG("caloWIDTH found set to: " << caloWIDTH);
-    }
-    jc.setValue("caloWIDTH", caloWIDTH);
-    // get TG3
-    float TG3 = (samplingFrac[17])/jetconstitP4.e();
-    ATH_MSG_DEBUG("TG3 found set to: " << TG3);
-    jc.setValue("TG3", TG3);
+
     // get Muon segments
     int Nsegments = 0;
     static const SG::ConstAccessor<int> GhostMuonSegmentCountAcc ("GhostMuonSegmentCount");
@@ -150,6 +130,9 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
     jc.setValue("Nsegments", Nsegments);
 
     float getGSCCorrection = 1.0;
+
+    // get detector eta to determine bin
+    float detectorEta = jet->getAttribute<float>("DetectorEta");
     int etabin = std::abs(detectorEta)/0.1;// m_binSize in old version
 
     const xAOD::JetFourMom_t startingP4 = jet->getAttribute<xAOD::JetFourMom_t>(m_jetInScale);
@@ -165,14 +148,13 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
 
     getGSCCorrection*=1./getChargedFractionResponse(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
-    getGSCCorrection*=1./getTile0Response(*jet, jc, etabin); 
+    getGSCCorrection*=1./getTile0Response(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getEM3Response(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getNTrkResponse(*jet, jc, etabin);
     jet->setJetP4( startingP4*getGSCCorrection );
     getGSCCorrection*=1./getTrackWIDTHResponse(*jet, jc, etabin);
-
     if(m_applyPunchThrough && startingP4.Pt() >= m_punchThroughMinPt){
       jet->setJetP4( startingP4*getGSCCorrection );
       getGSCCorrection*=1./getPunchThroughResponse(*jet, jc, std::abs(detectorEta));

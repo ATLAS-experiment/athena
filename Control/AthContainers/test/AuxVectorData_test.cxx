@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxVectorData_test.cxx
@@ -377,6 +377,8 @@ public:
   virtual void* getDecoration (SG::auxid_t, size_t, size_t) override { std::abort(); }
   virtual const SG::auxid_set_t& getAuxIDs() const override { std::abort(); }
   virtual const SG::auxid_set_t& getDecorIDs() const override { std::abort(); }
+  virtual SG::auxid_set_t
+  getCopyIDs (bool /*warnUnlocked*/) const override { std::abort(); }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
   virtual void lock() override { std::abort(); }
   virtual void lockDecoration (SG::auxid_t) override { std::abort(); }
@@ -388,6 +390,7 @@ public:
   virtual void reserve (size_t) override { std::abort(); }
   virtual void shift (size_t, ptrdiff_t) override { std::abort(); }
   virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { std::abort(); }
+  virtual void toTransient (const EventContext&) override { std::abort(); }
 
   virtual bool setOption (SG::auxid_t auxid, const SG::AuxDataOption&  option) override
   {

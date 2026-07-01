@@ -8,10 +8,16 @@ import ROOT
 
 def EventSelectorAthenaPoolCfg(flags):
     result = ComponentAccumulator()
-    evSel = CompFactory.EventSelectorAthenaPool("EventSelector",
-                                                InputCollections=flags.Input.Files,
-                                                SkipEvents=flags.Exec.SkipEvents,
-                                                ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
+    if flags.MP.UseSharedReader:
+        evSel = CompFactory.EventSelectorAthenaPoolSharedIO("EventSelector",
+                                                            InputCollections=flags.Input.Files,
+                                                            SkipEvents=flags.Exec.SkipEvents,
+                                                            ConversionService="AthenaPoolSharedIOCnvSvc")
+    else:
+        evSel = CompFactory.EventSelectorAthenaPool("EventSelector",
+                                                    InputCollections=flags.Input.Files,
+                                                    SkipEvents=flags.Exec.SkipEvents,
+                                                    ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
     if flags.Input.OverrideRunNumber:
         if not flags.Input.RunAndLumiOverrideList:
             DataRunNumber = -1
@@ -107,6 +113,11 @@ def PoolReadCfg(flags):
         evSel = CompFactory.DoubleEventSelectorAthenaPool("EventSelector",
                                                           CollectionType="RootCollection",
                                                           InputCollections=flags.Input.Files)
+        if flags.Common.isOverlay and flags.Overlay.DataOverlay:
+            evSel.OverrideRunNumber = True
+            evSel.RunNumber = flags.Input.RunNumbers[0]
+            evSel.FirstLB = flags.Input.LumiBlockNumbers[0]
+            evSel.InitialTimeStamp = flags.Input.TimeStamps[0]
 
         # Overlay background RDOs are primary input
         evSel.SkipEvents = skipEventsSecondary

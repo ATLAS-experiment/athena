@@ -46,11 +46,10 @@ StatusCode gTowerMakerFromGfexTowers::initialize()
 }
 
 
-StatusCode gTowerMakerFromGfexTowers::execute() 
+StatusCode gTowerMakerFromGfexTowers::execute(const EventContext& ctx) 
 {
     ATH_MSG_DEBUG("Executing " << name() << ", input: " << m_gDataTowerKey.key() << ", output: " << m_gTowerContainerSGKey.key());
     
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //Reading the decoded Data gTower container
     SG::ReadHandle<xAOD::gFexTowerContainer> gDataTowerContainer;

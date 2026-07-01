@@ -2,7 +2,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
-from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
+from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, InDetParameterization, LArParameterization
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
@@ -14,6 +14,10 @@ def FastSimulationToolListCfg(flags):
         from G4FastSimulation.G4FastSimulationConfig import FastCaloSimCfg
         tools += [ result.popToolsAndMerge(FastCaloSimCfg(flags)) ]
 
+    if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
+        from G4FastSimulation.G4FastSimulationConfig import FatrasG4Cfg
+        tools += [ result.popToolsAndMerge(FatrasG4Cfg(flags)) ]
+    
     if flags.Detector.GeometryBpipe:
         if  not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
             # equivalent of simFlags.ForwardDetectors() == 2:

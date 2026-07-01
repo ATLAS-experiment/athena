@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAmbiguitySolver/TrkAmbiguitySolver.h"
@@ -37,7 +37,7 @@ Trk::TrkAmbiguitySolver::execute(const EventContext& ctx) const
   m_trackInCount += nInput;
 
   std::unique_ptr<const TrackCollection> resolvedTracks;
-  resolvedTracks.reset(m_ambiTool->process(scoredTracksHandle.cptr())); //note: take ownership and delete
+  resolvedTracks.reset(m_ambiTool->process(ctx, scoredTracksHandle.cptr())); //note: take ownership and delete
   m_trackOutCount += resolvedTracks->size();
 
   SG::WriteHandle<TrackCollection> resolvedTracksHandle(m_resolvedTracksKey, ctx);

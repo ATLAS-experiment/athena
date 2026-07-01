@@ -27,7 +27,10 @@ endif()
 
 # Generate and install the EventIndex proto file(s).
 if( Protobuf_FOUND )
-   protobuf_generate_python( PROTO_PYS "protocolB/EventIndex.proto" )
+   protobuf_generate(
+     LANGUAGE python
+     OUT_VAR PROTO_PYS
+     PROTOS "protocolB/EventIndex.proto" )
    set( _eiPythonFile
       "${CMAKE_PYTHON_OUTPUT_DIRECTORY}/EventIndexProducer/EventIndex_pb2.py" )
    add_custom_command(

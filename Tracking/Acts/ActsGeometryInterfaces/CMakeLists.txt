@@ -12,8 +12,14 @@ endif()
 
 # Component(s) in the package:
 atlas_add_library( ActsGeometryInterfacesLib
-                   src/DetectorAlignStore.cxx
+                   src/TransformStore.cxx
                    ActsGeometryInterfaces/*.h
                    PUBLIC_HEADERS ActsGeometryInterfaces
                    LINK_LIBRARIES ${extra_libs} AthenaBaseComps AthenaKernel GaudiKernel GeoModelUtilities GeoPrimitives 
                                   Identifier TrkEventPrimitives)
+
+
+atlas_add_dictionary( ActsGeometryInterfacesDict
+                      ActsGeometryInterfaces/GeometryDefs.h
+                      ActsGeometryInterfaces/selection.xml 
+                      LINK_LIBRARIES ActsGeometryInterfacesLib)

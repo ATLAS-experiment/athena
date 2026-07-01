@@ -1,13 +1,14 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of HI data 2023 workflow, runs athenaHLT with HI menu followed by filtering of HP stream and offline reco
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
+from TrigP1Test.TrigP1TestSteps import filterBS
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
@@ -33,20 +34,12 @@ hlt.args = '-o output'
 #====================================================================================================
 
 # Extract the physics_HardProbes stream out of the BS file with many streams
-filter_hp = ExecStep.ExecStep('FilterHP')
-filter_hp.type = 'other'
-filter_hp.executable = 'trigbs_extractStream.py'
-filter_hp.input = ''
-filter_hp.args = '-s HardProbes ' + find_file('*_HLTMPPy_output.*.data')
+filter_hp = filterBS('HardProbes')
 
 #====================================================================================================
 
 # Extract the physics_UPC stream out of the BS file with many streams
-filter_upc = ExecStep.ExecStep('FilterUPC')
-filter_upc.type = 'other'
-filter_upc.executable = 'trigbs_extractStream.py'
-filter_upc.input = ''
-filter_upc.args = '-s UPC ' + find_file('*_HLTMPPy_output.*.data')
+filter_upc = filterBS('UPC')
 
 #====================================================================================================
 # Tier-0 reco step (BS->AOD)
@@ -56,6 +49,8 @@ recoHPPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",
                            "flags.Trigger.AODEDMSet=\'AODFULL\'", 
                            "flags.Reco.HIMode=HIMode.HI",
                            "flags.Input.ProjectName='data23_hi'",
+                           "flags.Trigger.CTP.UseEDMxAOD=False",
+                           "flags.Trigger.CTP.UseRoibROB=True",
                            ])
 
 reco_hp = ExecStep.ExecStep('Tier0RecoHP')
@@ -65,7 +60,7 @@ reco_hp.concurrent_events = 4
 reco_hp.input = ''
 reco_hp.explicit_input = True
 reco_hp.max_events = 4
-reco_hp.args = '--inputBSFile=' + find_file('*.physics_HardProbes*._athenaHLT*.data')  # output of the previous step
+reco_hp.args = '--inputBSFile=' + find_file('data*.physics_HardProbes.*.data')  # output of the previous step
 reco_hp.args += ' --outputAODFile=HP_AOD.pool.root'
 reco_hp.args += ' --outputHISTFile=hist.root'
 reco_hp.args += f' --preExec="all:{recoHPPreExec}"'
@@ -80,6 +75,8 @@ recoUPCPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",
                            "flags.Trigger.AODEDMSet=\'AODFULL\'",
                            "flags.Reco.HIMode=HIMode.UPC",
                            "flags.Input.ProjectName='data23_hi'",
+                           "flags.Trigger.CTP.UseEDMxAOD=False",
+                           "flags.Trigger.CTP.UseRoibROB=True",
                            ])
 
 reco_upc = ExecStep.ExecStep('Tier0RecoUPC')
@@ -89,7 +86,7 @@ reco_upc.concurrent_events = 4
 reco_upc.input = ''
 reco_upc.explicit_input = True
 reco_upc.max_events = -1
-reco_upc.args = '--inputBSFile=' + find_file('*.physics_UPC*._athenaHLT*.data')  # output of the previous step
+reco_upc.args = '--inputBSFile=' + find_file('data*.physics_UPC.*.data')  # output of the previous step
 reco_upc.args += ' --outputAODFile=AOD_UPC.pool.root'
 reco_upc.args += ' --outputHISTFile=hist_UPC.root'
 reco_upc.args += f' --preExec="all:{recoUPCPreExec}"'

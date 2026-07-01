@@ -58,11 +58,6 @@ namespace EL
   const std::string Job::optD3PDCacheMinByteFraction = "nc_EventLoop_D3PDCacheMinByteFraction";
   const std::string Job::optPerfTree = "nc_EventLoop_PerfTree";
   const std::string Job::optXAODInput = "nc_EventLoop_XAODInput";
-  const std::string Job::optXaodAccessMode = "nc_EventLoop_XaodAccessMode";
-  const std::string Job::optOtherMetaDataTreeNamePattern = "nc_EventLoop_otherMetaDataTreeNamePattern";
-  const std::string Job::optXaodAccessMode_branch = "branch";
-  const std::string Job::optXaodAccessMode_class = "class";
-  const std::string Job::optXaodAccessMode_athena = "athena";
   const std::string Job::optXAODSummaryReport = "nc_xaod_summary_report";
   const std::string Job::optPrintPerFileStats = "nc_print_per_file_stats";
   const std::string Job::optDisableMetrics = "nc_disable_metrics";
@@ -334,6 +329,15 @@ namespace EL
   {
     RCU_READ_INVARIANT (this);
     return m_jobConfig.getAlgorithm (name) != nullptr;
+  }
+
+
+
+  void Job ::
+  startNewAlgSequence ()
+  {
+    RCU_CHANGE_INVARIANT (this);
+    m_jobConfig.startNewAlgSequence ();
   }
 
 

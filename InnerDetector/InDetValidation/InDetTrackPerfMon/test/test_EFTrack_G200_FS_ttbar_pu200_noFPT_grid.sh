@@ -1,8 +1,10 @@
 #!/bin/bash
 # art-description: Nightly test to compare G-200 vs C-000 (Full-scan) for EFTrack studies using ttbar pu200 noFPT sample
 # art-type: grid
-# art-include: main/Athena
-# art-architecture: '#&nvidia'
+# art-include: main/Athena/x86_64-el9-gcc15-opt
+# art-architecture: '&nvidia:model!=.*[PV]100.*'
+# art-pathena-flags-add: --site=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU,FZK-LCG2_GPU,CERN-GPU,UKI-SOUTHGRID-RALPP_GPU
+# art-memory: 4095
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml
@@ -24,8 +26,8 @@ refLabel="C-000"
 testLabel="G-200"
 
 ## search in $DATAPATH for matching files
-IDTPMjsonConfig='EFTrack_base_FS_noDoubleRatio_IDTPMconfig.json'
-dcubeXmlIDTPMconfig='dcube_config_EFTrack_base_FS_noDoubleRatio.xml'
+IDTPMjsonConfig='EFTrack_ttbar_FS_IDTPMconfig_EFsel.json'
+dcubeXmlIDTPMconfig='dcube_EFTrack_ttbar_pu200_EFsel.xml'
 
 IDTPMjsonConfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $IDTPMjsonConfig -print -quit 2>/dev/null )
 dcubeXmlIDTPMconfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXmlIDTPMconfig -print -quit 2>/dev/null )
@@ -42,13 +44,18 @@ run () {
     chmod 777 step_${name}.sh
     time $(pwd)/step_${name}.sh
     rc=$?
+    ## if _diffOK is in name, then we expect dcube differences, so don't flag as an error
+    if [[ $rc == 1 && "${name}" =~ "_diffOK" ]]; then
+      rc=0
+    fi
     rm step_${name}.sh
     echo "art-result: $rc ${name}"
     ## if _skipRC is in name skip exit condition
     if [[ "${name}" =~ "_skipRC" ]]; then
       return 0
     fi
-    if [ $rc != 0 ]; then
+    # don't exit only for ERRORs detected in reco logfile (rc=68)
+    if [ $rc != 0 -a $rc != 68 ]; then
         exit $rc
     fi
     return $rc
@@ -77,8 +84,7 @@ fi
 ## Copying json config in the output directory
 echo "Running IDTPM with the following json config:"
 ## change the name of the track collection to monitor and copy json config in work dir
-## FIXME - temporarily not producing teachnical efficiencies plots
-cat $IDTPMjsonConfig_absPath | sed "s|_TRKCOLLNAME_|${TrkCollName}|g" | grep -v "plotTechnicalEfficiencies" | tee ${cwd}/IDTPMconfig.json
+cat $IDTPMjsonConfig_absPath | sed "s|_TRKCOLLNAME_|${TrkCollName}|g" | tee ${cwd}/IDTPMconfig.json
 
 ## IDTPM step
 run "IDTPM" \
@@ -100,7 +106,7 @@ if [ ! -f "$referenceName_absPath" ]; then
 fi
 
 ## dcube step
-run "dcube_skipRC" \
+run "dcube_diffOK" \
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_cmp \
     -c ${dcubeXmlIDTPMconfig_absPath} \

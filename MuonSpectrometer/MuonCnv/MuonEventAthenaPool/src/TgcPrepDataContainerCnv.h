@@ -35,11 +35,11 @@ public:
     virtual ~TgcPrepDataContainerCnv();
     
     virtual TgcPrepDataContainer_PERS*   createPersistent (Muon::TgcPrepDataContainer* transCont);
-    virtual Muon::TgcPrepDataContainer*  createTransient ();
+    virtual Muon::TgcPrepDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();
-    virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
+    virtual TopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
         
 private:
     // Not bothering with being able to read 'old' PRDs yet. Ed

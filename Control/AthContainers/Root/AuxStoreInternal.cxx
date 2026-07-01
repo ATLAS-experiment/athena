@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/AuxStoreInternal.cxx
@@ -12,6 +12,7 @@
 #include <iostream>
 #include <sstream>
 #include <atomic>
+#include <algorithm>
 
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
@@ -142,7 +143,7 @@ void* AuxStoreInternal::getData (auxid_t auxid, size_t size, size_t capacity)
  *
  * For internal use.  The @c auxid must not already exist in the store.
  */
-void
+IAuxTypeVector*
 AuxStoreInternal::addVector (std::unique_ptr<IAuxTypeVector> vec,
                              bool isDecoration)
 {
@@ -176,6 +177,8 @@ AuxStoreInternal::addVector (std::unique_ptr<IAuxTypeVector> vec,
     std::atomic_thread_fence (std::memory_order_seq_cst);
   }
   addAuxID (auxid);
+
+  return m_vecs[auxid].get();
 }
 
 
@@ -424,6 +427,17 @@ const SG::auxid_set_t&
 AuxStoreInternal::getDecorIDs() const
 {
   return m_decorations;
+}
+
+
+/**
+ * @brief Return the set of variables to copy in a deep copy.
+ *
+ * This is getAuxIDs()-getDecorIDs().
+ */
+SG::auxid_set_t AuxStoreInternal::getCopyIDs (bool warnUnlocked) const
+{
+  return SG::getCopyIDs (m_auxids, m_decorations, warnUnlocked, {});
 }
 
 
@@ -808,6 +822,85 @@ const IAuxTypeVector* AuxStoreInternal::linkedVector (SG::auxid_t auxid) const
   if (linked_id < m_vecs.size())
     return m_vecs[linked_id].get();
   return nullptr;
+}
+
+
+/**
+ * @brief Perform post-read processing for a single variable.
+ * @param ctx The current event context.
+ * @param auxid The ID of the variable to process.
+ *
+ * Some object types require some processing after being read before
+ * they are usable.  This can be indicated by specializing SG::ToTransient
+ * for the vector type containing the variable.  This method will call
+ * such a ToTransient method for the single variable identified by AUXID.
+ */
+void AuxStoreInternal::toTransient (const EventContext& ctx, SG::auxid_t auxid)
+{
+  guard_t guard (m_mutex);
+  if (auxid < m_vecs.size() && m_vecs[auxid]) {
+    m_vecs[auxid]->toTransient (ctx);
+  }
+}
+
+
+/**
+ * @brief Perform post-read processing on this store.
+ * @param ctx The current event context.
+ *
+ * Some object types require some processing after being read before
+ * they are usable.  This can be indicated by specializing SG::ToTransient
+ * for the vector type containing the variable.  This method will call
+ * such a ToTransient method for all contained variables for which this
+ * is required.
+ */
+void AuxStoreInternal::toTransient (const EventContext& ctx)
+{
+  guard_t guard (m_mutex);
+  size_t sz = m_vecs.size();
+  for (SG::auxid_t id : m_auxids) {
+    if (id < sz && m_vecs[id]) {
+      m_vecs[id]->toTransient (ctx);
+    }
+  }
+}
+
+
+/**
+ * @brief Compute the set of variables to copy in a deep copy.
+ * @param auxids Set of all variables.
+ * @param decors Set of decorations.
+ * @param warnUnlocked If true, we warn about variables skipped on account
+ *                     of being decorations.
+ * @param noWarn Names of variables for which we should not issue such warnings.
+ *
+ * Returns auxids -  decors.
+ */
+SG::auxid_set_t getCopyIDs (const SG::auxid_set_t& auxids,
+                            const SG::auxid_set_t& decors,
+                            [[maybe_unused]] bool warnUnlocked,
+                            [[maybe_unused]] std::span<const std::string> noWarn)
+{
+  SG::auxid_set_t out = auxids;
+#ifndef XAOD_STANDALONE
+  if (warnUnlocked) {
+    SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+    for (SG::auxid_t decor : decors) {
+      if (out.test (decor)) {
+        out.reset (decor);
+        if (std::ranges::find (noWarn, r.getName (decor)) == noWarn.end()) {
+          std::ostringstream ss;
+          ss << "skipped unlocked decoration during copy " << r.getName(decor)
+             << " (" << decor << ")";
+          ATHCONTAINERS_WARNING("getCopyAuxIDs", ss.str());
+        }
+      }
+    }
+  }
+  else
+#endif
+    out -= decors;
+  return out;
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOUTILS_CALOLCOUTOFCLUSTERTOOL_H
@@ -24,24 +24,21 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 
-class CaloLCOutOfClusterTool : public AthAlgTool, virtual public IClusterCellWeightTool
+class CaloLCOutOfClusterTool : public extends<AthAlgTool, IClusterCellWeightTool>
 {
  public:
 
+  using base_class::base_class;
   virtual ~CaloLCOutOfClusterTool();
 
   virtual StatusCode weight(xAOD::CaloCluster* theCluster, const EventContext& ctx) const override;
   virtual StatusCode initialize() override;
 
-  CaloLCOutOfClusterTool(const std::string& type, 
-			 const std::string& name,
-			 const IInterface* parent);
-
  private:
 
   /**
    * @brief name of the key for out-of-cluster weights */
-  SG::ReadCondHandleKey<CaloLocalHadCoeff> m_key;
+  SG::ReadCondHandleKey<CaloLocalHadCoeff> m_key{this, "CorrectionKey", "OOCCorrection"};
 
   /**
    * @brief look for em-probability moment and apply relative weight only
@@ -49,7 +46,7 @@ class CaloLCOutOfClusterTool : public AthAlgTool, virtual public IClusterCellWei
    * The classification provides the probability p for the current cluster to 
    * be em-like. OOC weights are applied with the additional em-prob factor p
    * to all clusters for the cases EM and HAD. */
-  bool  m_useEmProbability;
+  Gaudi::Property<bool>  m_useEmProbability{this, "UseEmProbability", false};
 
   /**
    * @brief look for em-probability moment and apply relative weight only
@@ -57,7 +54,7 @@ class CaloLCOutOfClusterTool : public AthAlgTool, virtual public IClusterCellWei
    * The classification provides the probability p for the current cluster to 
    * be em-like. OOC weights are applied with the additional had-prob factor (1-p)
    * to all clusters for the cases EM and HAD. */
-  bool  m_useHadProbability;
+  Gaudi::Property<bool>  m_useHadProbability{this, "UseHadProbability", false};
 
   /** 
    * @brief vector of names of the calorimeter samplings not to use
@@ -66,7 +63,10 @@ class CaloLCOutOfClusterTool : public AthAlgTool, virtual public IClusterCellWei
    * The pre-sampler layers (barrel and endcap) and the
    * gap-scintillators should not receive out-of-cluster weights as
    * they mainly deal with dead-material corrections. */
-  std::vector<std::string>  m_invalidSamplingNames;         
+  Gaudi::Property<std::vector<std::string>>  m_invalidSamplingNames{this
+    , "InvalidSamplings"
+    , {"PreSamplerB", "PreSamplerE", "TileGap3"}
+  };
 
   /** 
    * @brief actual set of samplings to be ignored for out-of-cluster weights
@@ -77,16 +77,19 @@ class CaloLCOutOfClusterTool : public AthAlgTool, virtual public IClusterCellWei
 
   /**
    * @brief interpolate correction coefficients */
-  bool m_interpolate;
+  Gaudi::Property<bool> m_interpolate{this, "Interpolate", false};
 
   /**
    * @brief update also sampling variables */
-  bool m_updateSamplingVars;
-  
+  Gaudi::Property<bool> m_updateSamplingVars{this, "UpdateSamplingVars", false};
+
   /** 
    * @brief vector of names of dimensions in look-up tables to interpolate */
-  std::vector<std::string>  m_interpolateDimensionNames;
-
+  Gaudi::Property<std::vector<std::string>>  m_interpolateDimensionNames{this
+    , "InterpolateDimensionNames"
+    , {"DIMO_ENER", "DIMO_ETA", "DIMO_LAMBDA"}
+  };
+  
   /** 
    * @brief actual set of dimension id's to interpolate */
   std::vector<int> m_interpolateDimensions;

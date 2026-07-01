@@ -8,7 +8,7 @@
 #ifndef JETEVENTTPCNV_JETCOLLECTIONCNV_TLP2
 #define JETEVENTTPCNV_JETCOLLECTIONCNV_TLP2
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "JetEventTPCnv/JetCollection_tlp2.h"
 
 #include "JetEventTPCnv/JetCnv_p4.h"
@@ -16,7 +16,7 @@
 
 #include "JetEventTPCnv/JetCollectionCnv_p4.h"
 
-class JetCollectionCnv_tlp2 : public AthenaPoolTopLevelTPConverter<JetCollectionCnv_p4, JetCollection_tlp2>
+class JetCollectionCnv_tlp2 : public TopLevelTPConverter<JetCollectionCnv_p4, JetCollection_tlp2>
 {
  public:
   JetCollectionCnv_tlp2 (void);

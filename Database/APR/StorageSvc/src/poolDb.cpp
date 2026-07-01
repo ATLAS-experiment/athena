@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -62,24 +62,24 @@ void pool::debugBreak()   {
   if ( s_debug )    {
     startDebugger();
   }
-  else  {
-    //cout << "debugbreak (poolDb) However, breaks are DISABLED" 
-    //          << endl;
-  }
 }
 
 /// Translate access mode to string
-const char* pool::accessMode(pool::DbAccessMode mode)   {
-  if      ( mode & pool::READ      ) 
+const char* pool::accessMode(Io::IoFlag mode)   {
+  if      ( mode == Io::READ      ) 
     return "READ     ";
-  else if ( mode & pool::UPDATE && mode & pool::CREATE )
-    return "CREA/UPDA";
-  else if ( mode & pool::UPDATE    ) 
-    return "UPDATE   ";
-  else if ( mode & pool::CREATE    )
-    return "CREATE   ";
-  else if ( mode & pool::NOT_OPEN  ) 
+  else if ( mode == Io::WRITE     )
+    return "WRITE    ";
+  else if ( mode == Io::APPEND    )
+    return "APPEND   ";
+  else if ( mode == Io::INVALID  ) 
     return "NOT_OPEN ";
   else                                 
     return "UNKNOWN  ";
+}
+
+
+std::string pool::getEnvStr(const std::string& key) {
+  const char *var = getenv( key.c_str() );
+  return var? std::string(var) : std::string();
 }

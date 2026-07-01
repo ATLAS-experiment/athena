@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -55,18 +55,18 @@ namespace LArGeo {
 
   private:
 
-    int                 m_fcalVisLimit;
+    int                 m_fcalVisLimit{};
 
     EMECConstruction          m_emec;
     HEC2WheelConstruction     m_hec2;
     FCALConstruction          m_fcal;
 
-    bool                      m_fullGeo;  // true->FULL, false->RECO
+    bool                      m_fullGeo{};  // true->FULL, false->RECO
     std::string m_EMECVariantInner;
     std::string m_EMECVariantOuter;
 
-    bool m_activateFT;
-    bool m_enableMBTS;
+    bool m_activateFT{};
+    bool m_enableMBTS{true};
 
     friend class ::LArDetectorToolNV;
 

@@ -6,12 +6,83 @@
 #include "xAODInDetMeasurement/SpacePoint.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "Acts/Seeding/EstimateTrackParamsFromSeed.hpp"
+#include "Acts/SpacePointFormation2/StripSpacePointCalibration.hpp"
+#include "Acts/EventData/StripSpacePointCalibrationDetails.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
 
 #include <algorithm>
 #include <ranges>
 
 namespace ActsTrk {
+
+namespace {
+
+template <typename sp_range_t>
+Acts::FreeVector estimateTrackParamsFromSeed(
+    const sp_range_t& spRange,
+    const Acts::Vector3& bField,
+    const std::size_t stripCalibrationIterations) {
+  std::array<const xAOD::SpacePoint*, 3> spArray{};
+  std::array<Acts::Vector3, 3> spPositions{};
+
+  std::size_t i = 0;
+  for (const auto* sp : spRange) {
+    if (sp == nullptr) {
+      throw std::invalid_argument("Empty space point found.");
+    }
+    if (i >= spArray.size()) {
+      throw std::invalid_argument("More than 3 space points provided.");
+    }
+    spArray[i] = sp;
+    spPositions[i] = Acts::Vector3(sp->x(), sp->y(), sp->z());
+    ++i;
+  }
+  if (i < spArray.size()) {
+    throw std::invalid_argument("Less than 3 space points provided.");
+  }
+
+  const bool hasStrip = std::ranges::any_of(spArray, [](const xAOD::SpacePoint* sp) {
+    return sp->elementIdList().size() > 1;
+  });
+  if (hasStrip) {
+    std::array<Acts::Vector3, 3> spTangents{};
+
+    for (std::size_t i = 0; i < stripCalibrationIterations; ++i) {
+      Acts::estimateTrackParamsFromSeed(
+        spPositions[0], 0, spPositions[1], spPositions[2], bField,
+        &spTangents[0], &spTangents[1], &spTangents[2]);
+
+      for (std::size_t j = 0; j < spArray.size(); ++j) {
+        const xAOD::SpacePoint* sp = spArray[j];
+        const bool isStrip = sp->elementIdList().size() > 1;
+        if (!isStrip) {
+          continue;
+        }
+
+        Acts::OuterStripSpacePointCalibrationDetails calibrationDetails;
+        Eigen::Map<Eigen::Vector3f>(calibrationDetails.outerCenter.data()) = sp->topStripCenter();
+        Eigen::Map<Eigen::Vector3f>(calibrationDetails.innerToOuterSeparation.data()) = sp->stripCenterDistance();
+        Eigen::Map<Eigen::Vector3f>(calibrationDetails.outerHalfVector.data()) = sp->topHalfStripLength() * sp->topStripDirection();
+        Eigen::Map<Eigen::Vector3f>(calibrationDetails.innerHalfVector.data()) = sp->bottomHalfStripLength() * sp->bottomStripDirection();
+        const Acts::OuterStripSpacePointCalibrationDetailsDerived derivedCalibrationDetails =
+          Acts::deriveOuterStripSpacePointCalibrationDetails(calibrationDetails);
+
+        const std::optional<Eigen::Vector3f> calibratedPosition =
+          Acts::calibrateOuterStripSpacePoint(spTangents[j].cast<float>(), derivedCalibrationDetails);
+        if (!calibratedPosition.has_value()) {
+          continue;
+        }
+        spPositions[j] = calibratedPosition->cast<double>();
+      }
+    }
+  }
+
+  return Acts::estimateTrackParamsFromSeed(
+    spPositions[0], 0, spPositions[1], spPositions[2], bField);
+}
+
+}
+
   TrackParamsEstimationTool::TrackParamsEstimationTool(const std::string& type,
 						       const std::string& name,
 						       const IInterface* parent)
@@ -32,6 +103,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "   " << m_initialVarInflation );
     ATH_MSG_DEBUG( "   " << m_bFieldMode );
     ATH_MSG_DEBUG( "   " << m_firstSp );
+    ATH_MSG_DEBUG( "   " << m_stripCalibrationIterations );
 
     m_logger = makeActsAthenaLogger(this, "Acts");
 
@@ -91,18 +163,18 @@ namespace ActsTrk {
     if (nSp < 3) return std::nullopt;
 
     // Function to extract the values from sp_collection
-    auto sp_collection_extract = std::views::transform([&sp_collection, useTopSp](std::size_t i) {
+    const auto sp_collection_extract = std::views::transform([&sp_collection, useTopSp](std::size_t i) {
       return sp_collection.at(useTopSp ? sp_collection.size() - i - 1 : i);
     });
 
     // Compute free parameters
-    Acts::FreeVector freeParams = Acts::estimateTrackParamsFromSeed(m_spacePointIndicesFun(nSp) | sp_collection_extract, bField);
+    Acts::FreeVector freeParams = estimateTrackParamsFromSeed(m_spacePointIndicesFun(nSp) | sp_collection_extract, bField, m_stripCalibrationIterations);
 
     if (m_useLongSeeds == 1 && nSp > 3ul) {
-      auto spacePointIndicesFun2 = [](std::size_t nSp) -> std::array<std::size_t, 3> {
+      const auto spacePointIndicesFun2 = [](std::size_t nSp) -> std::array<std::size_t, 3> {
         return {0, nSp / 2ul, nSp - 1};
       };
-      Acts::FreeVector freeParams2 = Acts::estimateTrackParamsFromSeed(spacePointIndicesFun2(nSp) | sp_collection_extract, bField);
+      const Acts::FreeVector freeParams2 = estimateTrackParamsFromSeed(spacePointIndicesFun2(nSp) | sp_collection_extract, bField, m_stripCalibrationIterations);
       ATH_MSG_DEBUG("update seed p = " << 1.0 / freeParams[Acts::eFreeQOverP] << " to " << 1.0 / freeParams2[Acts::eFreeQOverP]);
       freeParams[Acts::eFreeQOverP] = freeParams2[Acts::eFreeQOverP];
     }

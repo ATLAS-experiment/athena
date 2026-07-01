@@ -12,7 +12,7 @@ endif()
 # Set up the build of the example library.
 atlas_add_component( AthExHIP
    src/*.h src/*.cxx src/*.hip src/components/*.cxx
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel )
+   LINK_LIBRARIES AthenaBaseComps AthenaInterprocess GaudiKernel )
 set_target_properties( AthExHIP PROPERTIES
    LINKER_LANGUAGE HIP )
 
@@ -22,4 +22,4 @@ atlas_install_python_modules( python/*.py )
 # Test(s) in the package.
 atlas_add_test( LinearTransformExample
    SCRIPT athena.py --threads=1 AthExHIP/LinearTransformExampleConfig.py
-   POST_EXEC_SCRIPT nopost.sh)
+   POST_EXEC_SCRIPT noerror.sh)

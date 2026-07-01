@@ -22,6 +22,13 @@
 #include <TTree.h>
 #include <TBranch.h>
 #include <TVirtualCollectionProxy.h>
+#include "Math/Vector4D.h"
+
+using ROOT::Math::PtEtaPhiEVector;
+using ROOT::Math::PtEtaPhiMVector;
+using ROOT::Math::PxPyPzEVector;
+using ROOT::Math::PxPyPzMVector;
+
 
 // System include(s):
 #include <regex>
@@ -77,7 +84,7 @@ namespace {
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxVectorBase* getVector( const std::string& key,
-                                       asg::SgTEvent& evtStore,
+                                       asg::SgEvent& evtStore,
                                        bool allowMissing,
                                        const TClass*& cl,
                                        MsgStream& msg ) {
@@ -126,7 +133,7 @@ namespace {
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
    const SG::AuxElement* getElement( const std::string& key,
-                                     asg::SgTEvent& evtStore,
+                                     asg::SgEvent& evtStore,
                                      bool allowMissing,
                                      MsgStream& msg ) {
       if( allowMissing &&
@@ -369,12 +376,16 @@ namespace CP
           SG::ConstAccessor<char> {nominalAuxName};
         else if (typeName == "float")
           SG::ConstAccessor<float> {nominalAuxName};
+        else if (typeName == "double")
+          SG::ConstAccessor<double> {nominalAuxName};
         else if (typeName == "int")
           SG::ConstAccessor<int> {nominalAuxName};
         else if (typeName == "unsigned")
           SG::ConstAccessor<unsigned> {nominalAuxName};
         else if (typeName == "unsigned_char")
           SG::ConstAccessor<unsigned char> {nominalAuxName};
+        else if (typeName == "unsigned_long")
+          SG::ConstAccessor<unsigned long> {nominalAuxName};
         else if (typeName == "unsigned_long_long")
           SG::ConstAccessor<unsigned long long> {nominalAuxName};
         else if (typeName == "int8")
@@ -401,6 +412,30 @@ namespace CP
           SG::ConstAccessor<std::vector<std::vector<float>>> {nominalAuxName};
         else if (typeName == "vector_vector_int")
           SG::ConstAccessor<std::vector<std::vector<int>>> {nominalAuxName};
+        else if (typeName == "PtEtaPhiEVector")
+          SG::ConstAccessor<PtEtaPhiEVector> {nominalAuxName};
+        else if (typeName == "PtEtaPhiMVector")
+          SG::ConstAccessor<PtEtaPhiMVector> {nominalAuxName};
+        else if (typeName == "PxPyPzEVector")
+          SG::ConstAccessor<PxPyPzEVector> {nominalAuxName};
+        else if (typeName == "PxPyPzMVector")
+          SG::ConstAccessor<PxPyPzMVector> {nominalAuxName};
+        else if (typeName == "vector_PtEtaPhiEVector")
+          SG::ConstAccessor<std::vector<PtEtaPhiEVector>> {nominalAuxName};
+        else if (typeName == "vector_PtEtaPhiMVector")
+          SG::ConstAccessor<std::vector<PtEtaPhiMVector>> {nominalAuxName};
+        else if (typeName == "vector_PxPyPzEVector")
+          SG::ConstAccessor<std::vector<PxPyPzEVector>> {nominalAuxName};
+        else if (typeName == "vector_PxPyPzMVector")
+          SG::ConstAccessor<std::vector<PxPyPzMVector>> {nominalAuxName};
+        else if (typeName == "vector_vector_PtEtaPhiEVector")
+          SG::ConstAccessor<std::vector<std::vector<PtEtaPhiEVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PtEtaPhiMVector")
+          SG::ConstAccessor<std::vector<std::vector<PtEtaPhiMVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PxPyPzEVector")
+          SG::ConstAccessor<std::vector<std::vector<PxPyPzEVector>>> {nominalAuxName};
+        else if (typeName == "vector_vector_PxPyPzMVector")
+          SG::ConstAccessor<std::vector<std::vector<PxPyPzMVector>>> {nominalAuxName};
         else
         {
           unsigned line = __LINE__ - 2;
@@ -701,6 +736,12 @@ namespace CP
       return StatusCode::SUCCESS;
     }
 
+    StatusCode ElementBranchProcessor::
+    setup ( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */, MsgStream& msg ) {
+      msg << MSG::ERROR << "ElementBranchProcessor::setup for RNTuple should not be called" << endmsg;
+      return StatusCode::FAILURE;
+    }
+
     StatusCode ContainerBranchProcessor::
     setup( TTree& tree, const BranchConfig& branchConfig, OutputBranchData& outputData, MsgStream& msg ) {
 
@@ -789,7 +830,11 @@ namespace CP
       return StatusCode::SUCCESS;
     }
 
-
+    StatusCode ContainerBranchProcessor::
+    setup ( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */, MsgStream& msg ) {
+      msg << MSG::ERROR << "ContainerBranchProcessor::setup for RNTuple should not be called" << endmsg;
+      return StatusCode::FAILURE;
+    }
 
 
 
@@ -832,6 +877,12 @@ namespace CP
 
       // Return gracefully.
       return StatusCode::SUCCESS;
+    }
+
+    StatusCode ElementProcessorRegular::
+    addBranch( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */ ) {
+      ATH_MSG_ERROR("ElementProcessorRegular::addBranch for RNTuple should not be called");
+      return StatusCode::FAILURE;
     }
 
     ContainerProcessorRegular::ContainerProcessorRegular(const std::string& sgName)
@@ -928,6 +979,12 @@ namespace CP
       return StatusCode::SUCCESS;
     }
 
+    StatusCode ContainerProcessorRegular::
+    addBranch( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */ ) {
+      ATH_MSG_ERROR("ContainerProcessorRegular::addBranch for RNTuple should not be called");
+      return StatusCode::FAILURE;
+    }
+
     ElementProcessorMet::ElementProcessorMet (const std::string& sgName, const std::string& termName)
     : asg::AsgMessaging( ("CP::TreeBranchHelpers::ElementProcessorMet/" + sgName).c_str() ),
       m_sgName(sgName),
@@ -959,6 +1016,12 @@ namespace CP
 
         // Return gracefully.
         return StatusCode::SUCCESS;
+    }
+
+    StatusCode ElementProcessorMet::
+    addBranch( ROOT::RNTupleModel& /* model */, const BranchConfig& /* branchConfig */, OutputBranchData& /* outputData */ ) {
+        ATH_MSG_ERROR("ElementProcessorMet::addBranch for RNTuple should not be called");
+        return StatusCode::FAILURE;
     }
 
 

@@ -76,7 +76,7 @@ StatusCode EtaHoughTransformAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(SG::get(spacePoints, m_spacePointKey, ctx));
 
     // book the output container
-    SG::WriteHandle<EtaHoughMaxContainer> writeMaxima(m_maxima, ctx);
+    SG::WriteHandle writeMaxima(m_maxima, ctx);
     ATH_CHECK(writeMaxima.record(std::make_unique<EtaHoughMaxContainer>()));
 
     const ActsTrk::GeometryContext* gctx{nullptr};
@@ -222,7 +222,7 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
                             re->multilayer(), clust->gasGap());   
              }
          } else {
-            seenChambers.insert(xAOD::muonReadoutElement(SP->primaryMeasurement()));
+            seenChambers.insert(SP->primaryMeasurement()->readoutElement());
          }
      }
      // loop over all chambers in the bucket    

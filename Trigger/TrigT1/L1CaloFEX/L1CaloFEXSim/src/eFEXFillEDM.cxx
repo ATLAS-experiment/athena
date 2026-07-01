@@ -30,7 +30,7 @@ namespace LVL1 {
 
   //----------------- Execute ----------------------------
 
-  StatusCode eFEXFillEDM::execute()
+  StatusCode eFEXFillEDM::execute(const EventContext& /*ctx*/)
   {
     return StatusCode::SUCCESS;
   }

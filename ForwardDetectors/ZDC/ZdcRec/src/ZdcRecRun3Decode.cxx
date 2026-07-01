@@ -30,9 +30,11 @@
 ZdcRecRun3Decode::ZdcRecRun3Decode(const std::string& name, ISvcLocator* pSvcLocator) :
 
 	AthAlgorithm(name, pSvcLocator),
-	m_ownPolicy(static_cast<int> (SG::OWN_ELEMENTS))
+	m_ownPolicy(static_cast<int> (SG::OWN_ELEMENTS)),
+	m_DecodeRunMode(0) // 0 = ZDC+RPD (default), 1 = LIS only, 2 = ZDC+RPD + LIS
 {
   declareProperty("OwnPolicy",m_ownPolicy) ;
+  declareProperty("DecodeRunMode",m_DecodeRunMode); // 0 = ZDC+RPD (default), 1 = LIS only, 2 = ZDC+RPD + LIS	
 }
 
 //==================================================================================================
@@ -49,6 +51,7 @@ StatusCode ZdcRecRun3Decode::initialize()
 	// Reconstruction Tool
 	ATH_CHECK( m_ChannelTool.retrieve() );
 
+
 	// Reconstruction Tool
 
 	ATH_CHECK( m_zdcModuleContainerName.initialize() );
@@ -62,6 +65,24 @@ StatusCode ZdcRecRun3Decode::initialize()
 	else
 		mLog << MSG::DEBUG << "...will VIEW its cells." << endmsg;
 
+	if(m_DecodeRunMode == 0){
+		mLog << MSG::DEBUG << "--> ZDC: Running in ZDC+RPD mode" << endmsg;
+		m_nFragments.set(6); // default	
+	}
+
+	else if(m_DecodeRunMode == 1){
+		mLog << MSG::DEBUG << "--> ZDC: Running in LIS only mode" << endmsg;
+		m_nFragments.set(1);
+		}	
+	else if(m_DecodeRunMode == 2){
+		mLog << MSG::DEBUG << "--> ZDC: Running in ZDC+RPD + LIS mode" << endmsg;
+		m_nFragments.set(7);
+	}	
+	else {
+		mLog << MSG::ERROR << "--> ZDC: Unknown DecodeRunMode " << m_DecodeRunMode << ", should be 0, 1, or 2. Exiting." << endmsg;
+		return StatusCode::FAILURE;
+	}
+
 
 	mLog << MSG::DEBUG << "--> ZDC: ZdcRecRun3Decode initialization complete" << endmsg;
 
@@ -70,12 +91,11 @@ StatusCode ZdcRecRun3Decode::initialize()
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRecRun3Decode::execute()
+StatusCode ZdcRecRun3Decode::execute(const EventContext& ctx)
 {
 
   ATH_MSG_DEBUG("In ZdRecRun3");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ATH_MSG_DEBUG ("--> ZDC: ZdcRecRun3Decode execute starting on "
                  << ctx.evt()
@@ -90,10 +110,12 @@ StatusCode ZdcRecRun3Decode::execute()
   SG::ReadHandle<ZdcLucrodDataContainer> zldContainer    (m_zldContainerName, ctx);
   ATH_MSG_DEBUG("Did I get LUCROD DATA?");
 
+
   if (zldContainer->size() < m_nFragments)
     {
       int zdcLucrod = 0;
       int rpdLucrod = 0;
+	  int lisLucrod = 0;	
       for (auto zld : *zldContainer)
 	{
 	  uint32_t lucrod_id =  zld->GetLucrodID();
@@ -108,12 +130,16 @@ StatusCode ZdcRecRun3Decode::execute()
 	    {
 	      rpdLucrod++;
 	    }
+		else if (lucrod_id == ZdcEventInfo::LucrodLIS) // LIS LUCROD
+	    {
+	      lisLucrod++;
+	    }
 	  else
 	    {
 	      ATH_MSG_WARNING("Unidentified LUCROD ID = " << lucrod_id);
 	    }
 	}
-      SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
+      SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
       if (!eventInfo->updateErrorState(xAOD::EventInfo::ForwardDet,xAOD::EventInfo::Error))
 	{
 	  ATH_MSG_WARNING( " cannot set EventInfo error state for ForwardDet "  );
@@ -122,18 +148,25 @@ StatusCode ZdcRecRun3Decode::execute()
 	{
 	  ATH_MSG_WARNING( " cannot set flag bit for ForwardDet "  );      
 	}
-      if (rpdLucrod < ZdcEventInfo::nTotalRpdLucrod)
+      if (rpdLucrod < ZdcEventInfo::nTotalRpdLucrod && m_DecodeRunMode != 1)
 	{
 	  if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::ForwardDet,ZdcEventInfo::RPDDECODINGERROR)) 
 	    {
 	      ATH_MSG_WARNING( " cannot set RPDDECODINGERROR flag bit for ForwardDet "  );      
 	    }
 	}
-      if (zdcLucrod < ZdcEventInfo::nTotalZdcLucrod)
+      if (zdcLucrod < ZdcEventInfo::nTotalZdcLucrod && m_DecodeRunMode != 1)
 	{
 	  if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::ForwardDet,ZdcEventInfo::ZDCDECODINGERROR)) 
 	    {
 	      ATH_MSG_WARNING( " cannot set ZDCDECODINGERROR flag bit for ForwardDet "  );      
+	    }
+	}
+      if (lisLucrod < ZdcEventInfo::nTotalLisLucrod && (m_DecodeRunMode == 1 || m_DecodeRunMode == 2))
+	{
+	  if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::ForwardDet,ZdcEventInfo::LISDECODINGERROR)) 
+	    {
+	      ATH_MSG_WARNING( " cannot set LISDECODINGERROR flag bit for ForwardDet "  );      
 	    }
 	}
     }

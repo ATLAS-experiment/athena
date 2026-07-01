@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthSegmentMaker.h"
 
@@ -13,8 +13,7 @@
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
-
-
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
@@ -35,6 +34,10 @@ namespace MuonR4{
             ATH_MSG_ERROR("No simulated hit containers have been parsed to build the segments from ");
             return StatusCode::FAILURE;
         }
+        for (const auto& truthLink : m_readKeys) {
+            m_segLinkKeys.emplace_back(truthLink, m_segLinkKey);
+        }
+        ATH_CHECK(m_segLinkKeys.initialize());
         ATH_CHECK(m_mdtCalibKey.initialize(m_idHelperSvc->hasMDT()));
         ATH_CHECK(m_nswUncertKey.initialize(m_idHelperSvc->hasMM() || m_idHelperSvc->hasSTGC()));
         
@@ -77,7 +80,7 @@ namespace MuonR4{
                 }
                 NswErrorCalibData::Input errorCalibInput{};
                 errorCalibInput.stripId= hitId;
-                errorCalibInput.locTheta = M_PI - hit.localDirection().theta();
+                errorCalibInput.locTheta = 180.*Gaudi::Units::deg - hit.localDirection().theta();
                 if (techIdx == STGC) {
                     errorCalibInput.clusterAuthor = 3; // centroid
                 } else {
@@ -113,7 +116,7 @@ namespace MuonR4{
                                                  const SimHitVec_t& simHits,
                                                  WriteDecorHolder& out)const {
         
-        ATH_MSG_VERBOSE("Assemble segments from "<<simHits.size()<<" background hits.");
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Assemble segments from "<<simHits.size()<<" background hits.");
         std::vector<char> alreadyUsed(simHits.size(), 0);
         for (std::size_t h = 0 ;h < simHits.size(); ++h) {
             if (alreadyUsed[h]) {
@@ -121,7 +124,8 @@ namespace MuonR4{
             }
             const auto& [refHit, refPos, refDir] = simHits[h];
             /// Closest beam spot approach
-            ATH_MSG_VERBOSE("Try to find other hits on trajectory given by "<<m_idHelperSvc->toString(refHit->identify())
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Try to find other hits on trajectory given by "
+                          <<m_idHelperSvc->toString(refHit->identify())
             <<", "<<Amg::toString(refPos)<<", "<<Amg::toString(refDir)<<", E: "<<refHit->kineticEnergy() / Gaudi::Units::GeV<<" [GeV] "
             <<", pt: "<<muonPt(*refHit, locToGlob.linear()* refDir)/ Gaudi::Units::GeV <<" [GeV].");
             std::vector<std::size_t> indicesOnSeg{h};
@@ -130,27 +134,28 @@ namespace MuonR4{
                     continue;
                 }
                 const auto&[testHit, testPos, testDir] = simHits[h1];
-
-                /// First compare the energies
-                if (std::abs(refHit->kineticEnergy() - testHit->kineticEnergy()) > m_pileUpHitELoss) {
-                    continue;
-                }
+                /// Reject different charges
                 if (MC::charge(refHit) != MC::charge(testHit)){
                     continue;
                 }
-                const double angleDir = Amg::angle(testDir, refDir);
-                const double hitSep = std::abs(Amg::signedDistance(refPos, refDir, testPos,testDir));
-                ATH_MSG_VERBOSE("Test hit "<<m_idHelperSvc->toString(testHit->identify())<<", "
-                              <<Amg::toString(testPos)<<", testDir: "<<Amg::toString(testDir)
-                              <<", E: "<<testHit->kineticEnergy() / (Gaudi::Units::GeV)<<", angle: "
-                              <<(angleDir / Gaudi::Units::deg) <<", distance: "<<hitSep<<".");
 
-                if (std::abs(angleDir) > m_pileUpHitAngleCone || hitSep > m_pileUpHitDistance) {
+                const double angleDir = Amg::angle(testDir, refDir);
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Test hit "<<m_idHelperSvc->toString(testHit->identify())<<", "
+                              <<Amg::toString(testPos)<<", testDir: "<<Amg::toString(testDir)
+                              <<", E: "<<(testHit->kineticEnergy() / Gaudi::Units::GeV)<<", angle: "
+                              <<(angleDir / Gaudi::Units::deg)<<", dE: "
+                              <<std::abs(refHit->kineticEnergy() - testHit->kineticEnergy())
+                              <<", "<<testHit->genParticleLink()<<".");
+
+                if (std::abs(angleDir) > m_pileUpHitAngleCone ||  
+                    testHit->genParticleLink().id() != refHit->genParticleLink().id() ||
+                    std::abs(refHit->kineticEnergy() - testHit->kineticEnergy()) > m_pileUpHitELoss) {
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Failed: "<<m_pileUpHitELoss<<", "<<m_pileUpHitAngleCone / Gaudi::Units::deg);
                     continue;
                 }
                 indicesOnSeg.push_back(h1);
             }
-            /// Calculate the approach to the cylinder
+            /// Calculate the approach to the sketching the ID
             const Amg::Vector3D globPos = locToGlob * refPos;
             const Amg::Vector3D globDir = locToGlob.linear() * refDir;
             const Amg::Vector3D perigee = globPos + Amg::intersect<3>(Amg::Vector3D::Zero(), Amg::Vector3D::UnitZ(),
@@ -163,6 +168,9 @@ namespace MuonR4{
                     [&simHits](const auto idx) {
                         return simHits[idx];
                     });
+            /** If the hits are outside the cylinder mark them as used to avoid that 
+             *  the second, third, fourth are again considered for a background pile-up segment
+             *  If a segment can be constructed, then  remove them from the list as well */
             if (perigee.perp() > m_idCylinderR || std::abs(perigee.z()) > m_idCylinderHalfZ  ||
                 constructSegmentFromHits(ctx, locToGlob, hitsOnSeg, out)){
                 std::ranges::for_each(indicesOnSeg,
@@ -331,7 +339,30 @@ namespace MuonR4{
                 constructSegmentFromHits(ctx, locToGlob, simHits, writerHolder);
             }
         }
+        ATH_CHECK(linkSegmentsToHits(ctx, *writeHandle));
         ATH_MSG_DEBUG("Constructed "<<writeHandle->size()<<" truth segments in total ");
+        return StatusCode::SUCCESS;
+    }
+    StatusCode TruthSegmentMaker::linkSegmentsToHits(const EventContext& ctx,
+                                                     const xAOD::MuonSegmentContainer& segments) const {
+        using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
+        using DecorHandle_t = SG::WriteDecorHandle<xAOD::MuonSimHitContainer, SegLink_t>;
+        std::unordered_map<const SG::AuxVectorData*, DecorHandle_t> handleMap{};
+        for (const auto& decorKey : m_segLinkKeys) {
+            DecorHandle_t decorHandle{decorKey, ctx};
+            if (decorHandle->empty()) {
+                ATH_MSG_DEBUG("Don't setup a decoration handle for "<<decorKey.fullKey());
+                continue;
+            }
+            decorHandle(*decorHandle->front()) = SegLink_t{};
+            handleMap.insert(std::make_pair(decorHandle.cptr(), std::move(decorHandle)));
+        }
+        for (const xAOD::MuonSegment* segment: segments) {
+            SegLink_t segLink{&segments, segment->index()};
+            for (const xAOD::MuonSimHit* simHit : getMatchingSimHits(*segment)) {
+                handleMap.at(simHit->container())(*simHit) = segLink;
+            }
+        }
         return StatusCode::SUCCESS;
     }
 }

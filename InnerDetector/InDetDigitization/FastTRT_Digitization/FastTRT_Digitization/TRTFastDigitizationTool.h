@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FASTTRT_DIGITIZATION_FASTTRT_DIGITIZATIONTOOL_H
 #define FASTTRT_DIGITIZATION_FASTTRT_DIGITIZATIONTOOL_H
 /** @file TRTFastDigitizationTool.h
  * @brief a sample implementation of IPileUpTool to test the framework
- * $Id: PileUpStream.h,v 1.18 2008-10-31 18:34:42 calaf Exp $
  * @author Paolo Calafiura - ATLAS Collaboration
  */
 
@@ -104,7 +103,7 @@ private:
   HepGeom::Point3D< double > getGlobalPosition( const TimedHitPtr< TRTUncompressedHit > &hit );
   bool isArgonStraw( const Identifier &straw_id ) const;
   int gasType( const Identifier &straw_id ) const;
-  double getProbHT( int particleEncoding, float kineticEnergy, const Identifier &straw_id, double driftRadiusLoc, double hitGlobalPosition ) const;
+  double getProbHT( const EventContext& ctx, int particleEncoding, float kineticEnergy, const Identifier &straw_id, double driftRadiusLoc, double hitGlobalPosition ) const;
   static double HTProbabilityElectron_high_pt( double eta );
   static double HTProbabilityElectron_low_pt( double eta );
   static double HTProbabilityMuon_5_20( double eta );

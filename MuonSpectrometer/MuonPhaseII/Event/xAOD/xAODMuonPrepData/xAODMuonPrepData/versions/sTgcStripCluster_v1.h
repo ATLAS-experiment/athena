@@ -39,7 +39,7 @@ class sTgcStripCluster_v1 : public sTgcMeasurement_v1 {
 
     
     /** @brief Which quality flag does the Measurement pass*/
-    using Quality = Muon::sTgcPrepData::Quality;
+    using Quality = ::Muon::sTgcPrepData::Quality;
     Quality quality() const;
     /** @brief Set the quality flag */
     void setQuality(Quality q);

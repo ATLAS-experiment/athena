@@ -6,7 +6,6 @@
 
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
@@ -15,7 +14,7 @@
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
@@ -169,16 +168,6 @@ struct AtlasMeasurementSelector
 
    using abstract_measurement_range_t = BASE::abstract_measurement_range_t;
 
-   // the delegate used for the final calibration
-   template <std::size_t DIM, typename measurement_t>
-   using Calibrator = Acts::Delegate<
-      std::pair < typename traits::template CalibratedMeasurement<DIM>,
-                  typename traits::template CalibratedMeasurementCovariance<DIM> >
-                (const Acts::GeometryContext&,
-                 const Acts::CalibrationContext&,
-                 const measurement_t &,
-                 const typename traits::BoundTrackParameters &)>;
-
    // helper to determine the calibrator type from the measurement container tyoe
    // and to define the types used for the calibrated measurement and covariance
    struct CalibratedMeasurementTraits {
@@ -193,6 +182,18 @@ struct AtlasMeasurementSelector
       using MeassurementContainerValueType = typename traits::template MeasurementContainerTraits<T_Container>::value_type;
    };
 
+   // the delegate used for the final calibration
+   template <std::size_t DIM, typename measurement_t>
+   using PreCalibrator = PreCalibratorTypeTraits<CalibratedMeasurementTraits,
+                                                 measurement_container_variant_t,
+                                                 typename traits::BoundTrackParameters>::template Calibrator<DIM,measurement_t>;
+
+   template <std::size_t DIM, typename measurement_t>
+   using Calibrator = CalibratorTypeTraits<CalibratedMeasurementTraits,
+                                           measurement_container_variant_t,
+                                           typename traits::TrackStateProxy>::template Calibrator<DIM,measurement_t>;
+   
+   
    const ActsTrk::detail::MeasurementRangeList *m_measurementRanges{};
    const ActsTrk::detail::MeasurementRangeListFlat *m_measurementRangesForced{};
 
@@ -204,10 +205,10 @@ struct AtlasMeasurementSelector
    // @TODO is the default projector always good enough or is there some dependency
    //       on the geoemtry ?
    ActsTrk::MeasurementParameterMap m_projector{};
-   CalibratorRegistry< CalibratedMeasurementTraits, typename traits::BoundTrackParameters, measurement_container_variant_t>  m_calibrators {};
+   CalibratorRegistry< CalibratedMeasurementTraits, measurement_container_variant_t,typename traits::TrackStateProxy>  m_calibrators {};
    struct Empty {};
    std::conditional<s_fullPreCalibration,
-      CalibratorRegistry< CalibratedMeasurementTraits, typename traits::BoundTrackParameters, measurement_container_variant_t>,
+                    PreCalibratorRegistry< CalibratedMeasurementTraits, measurement_container_variant_t, typename traits::BoundTrackParameters>,
                     Empty>::type m_preCalibrators {};
 
 
@@ -230,19 +231,10 @@ struct AtlasMeasurementSelector
                                                               typename traits::template CalibratedMeasurementCovariance<DIM> >::value;
 
    template < std::size_t DIM, typename T_ValueType >
-   void setPreCalibrator(typename std::enable_if<s_CanPreCalibrate<DIM>, const Calibrator<DIM, T_ValueType> &>::type calibrator) {
+   void setPreCalibrator(typename std::enable_if<s_CanPreCalibrate<DIM>, const PreCalibrator<DIM, T_ValueType> &>::type calibrator) {
       m_preCalibrators.template setCalibrator<DIM, T_ValueType>(calibrator);
    }
 
-   // helper to create a Acts::SourceLink from an uncalibrated measurement pointer
-   template <typename T_Value>
-   static Acts::SourceLink makeSourceLink(T_Value &&value) {
-      // value is pointer
-      static_assert( !std::is_same<std::remove_pointer_t<T_Value>, T_Value>::value );
-      // ... and pointer to xAOD::UncalibgratedMeasurement
-      static_assert(std::is_base_of_v< xAOD::UncalibratedMeasurement, std::remove_cv_t<std::remove_pointer_t<T_Value> > > );
-      return Acts::SourceLink{ ActsTrk::makeATLASUncalibSourceLink(value) };
-   }
 
    // helper to provide a map from bound parameters to coordinates
    template <std::size_t DIM>
@@ -276,9 +268,10 @@ struct AtlasMeasurementSelector
          //       above ConstVectorMapWithInvalidDef etc. Does this introduce some overhead ?
          return []( [[maybe_unused]] const Acts::GeometryContext&,
                     [[maybe_unused]] const Acts::CalibrationContext&,
+                    [[maybe_unused]] const Acts::Surface&,
                     const measurement_t &measurement,
                     [[maybe_unused]] const typename traits::BoundTrackParameters &) {
-               return std::make_pair( measurement.template localPosition<DIM>(), measurement.template localCovariance<DIM>() );
+               return std::make_tuple( measurement.template localPosition<DIM>(), measurement.template localCovariance<DIM>(), 0u );
              };
       }
    }
@@ -339,13 +332,13 @@ namespace {
 
    // Wrapper class which provides the actual measurement selector and
    // allows to connect it to the delegate used by the track finder
-   template <typename track_container_t>
+   template <typename traj_t>
    class AtlasActsMeasurmentSelector : public ActsTrk::IMeasurementSelector {
    public:
       using TheAtlasMeasurementSelector
                = AtlasMeasurementSelector<
                      gAbsoluteMaxBranchesPerSurface,
-                     typename track_container_t::TrackStateContainerBackend,
+                     traj_t,
                      ActsTrk::detail::AtlasMeasurementContainerList::measurement_container_variant_t
                      // where measurement_container_variant_t is e.g.
                      //   variant<  ContainerRefWithDim<xAOD::PixelClusterContainer,2>, ... >
@@ -354,7 +347,7 @@ namespace {
       using BoundState = std::tuple<Acts::BoundTrackParameters, Acts::BoundMatrix, double>;
       // the delegate used by the track finder to which the measurement selector needs to be connected to
 
-      AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator &&calibrator,
+      AtlasActsMeasurmentSelector(ActsTrk::MeasurementCalibrator<traj_t> &&calibrator,
                                   const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                   TheAtlasMeasurementSelector::Config &&config)
          : m_calibrator( std::move(calibrator)),
@@ -392,7 +385,7 @@ namespace {
       }
 
       // provides the calibrators
-      ActsTrk::MeasurementCalibrator         m_calibrator;
+      ActsTrk::MeasurementCalibrator<traj_t> m_calibrator;
 
       // the actual measurement selector
       TheAtlasMeasurementSelector            m_measurementSelector;
@@ -401,22 +394,24 @@ namespace {
 
 namespace ActsTrk::detail {
 // return a configured, wrapper for the measurement selector
-std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *pixelOnTrackCalibratorTool,
-                                                                       const ActsTrk::IOnBoundStateCalibratorTool *stripOnTrackCalibratorTool,
-                                                                       const ActsTrk::IOnBoundStateCalibratorTool *hgtdOnTrackCalibratorTool,
-                                                                       const ActsTrk::detail::MeasurementRangeList &measurementRanges,
-                                                                       const std::vector<float> &etaBinsf,
-                                                                       const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
-                                                                       const std::vector<size_t> &numMeasurementsCutOff,
-                                                                       double edge_hole_border_width) {
+std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const EventContext &ctx,
+       const ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer> *pixelOnTrackCalibratorTool,
+       const ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer> *stripOnTrackCalibratorTool,
+       const ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer> *hgtdOnTrackCalibratorTool,
+       const ActsTrk::detail::MeasurementRangeList &measurementRanges,
+       const std::vector<float> &etaBinsf,
+       const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
+       const std::vector<size_t> &numMeasurementsCutOff,
+       double edge_hole_border_width) {
 
     // set calibrators per measurement container type (order does not matter);
-    ActsTrk::MeasurementCalibrator atl_measurement_calibrator(pixelOnTrackCalibratorTool,
-                                                              stripOnTrackCalibratorTool,
-                                                              hgtdOnTrackCalibratorTool);
+    ActsTrk::MeasurementCalibrator<detail::RecoTrackStateContainer> atl_measurement_calibrator(ctx,
+                                                                                  pixelOnTrackCalibratorTool,
+                                                                                  stripOnTrackCalibratorTool,
+                                                                                  hgtdOnTrackCalibratorTool);
     using AtlMeasurementSelectorCuts = AtlasMeasurementSelectorCuts;
 
-    using AtlMeasurementSelector = AtlasActsMeasurmentSelector<RecoTrackContainer>;
+    using AtlMeasurementSelector = AtlasActsMeasurmentSelector<detail::RecoTrackStateContainer>;
     using AtlMeasurementSelectorConfig = AtlMeasurementSelector::TheAtlasMeasurementSelector::Config;
 
     std::unique_ptr<ActsTrk::IMeasurementSelector>

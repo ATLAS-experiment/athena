@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  BinsDiffFromStripMedian.h 
@@ -55,7 +55,7 @@ class colorbin{
   double m_eta{};
   double m_phi{};
   int    m_ix{};
-  int    m_iy;
+  int    m_iy{};
   double m_value{};
   color  m_color{};
   bool   m_status{};  // true: not in cluster  ; false: in cluster

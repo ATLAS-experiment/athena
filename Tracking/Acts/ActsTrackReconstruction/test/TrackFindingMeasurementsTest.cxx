@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
 
-#include <array>
-#include <string>
+
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
@@ -20,7 +19,9 @@
 
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 
-#include "../src/detail/TrackFindingMeasurements.cxx"
+#include <array>
+#include <string>
+#include <iostream>
 
 template <typename std::size_t N>
 void checkList(const ActsTrk::detail::TrackFindingMeasurements& measurements,
@@ -58,7 +59,9 @@ void checkList(const ActsTrk::detail::TrackFindingMeasurements& measurements,
   }
 }
 
-int main() {
+//coverity[UNCAUGHT_EXCEPT]
+//cppcheck-suppress throwInEntryPoint
+int test1() {
   constexpr std::size_t N = 3ul;
 
   // create containers
@@ -154,4 +157,17 @@ int main() {
   std::size_t index3 = measurementIndex.index(*hgtdContainer[0]);
   std::cout << "Checking index value : " << index3 << " with expected " << pixelContainer.size() + stripContainer.size() << std::endl;
   assert( index3 == pixelContainer.size() + stripContainer.size() );
+
+  return 0;
+}
+
+
+int main()
+{
+  try {
+    return test1();
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

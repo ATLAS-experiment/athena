@@ -18,6 +18,8 @@
 
 #include "TrigInDetAnalysis/TIDAVertex.h"
 
+typedef TIDA::Associator<TIDA::Vertex> VertexAssociator;
+
 
 class VertexNewMatcher : public BestMatcher<TIDA::Vertex> {
 
@@ -28,6 +30,8 @@ public:
   ~VertexNewMatcher() { }
 
   BestMatcher<TIDA::Vertex>* clone() override { return new VertexNewMatcher(*this); }
+
+  virtual std::unique_ptr<VertexAssociator> uclone() const override { return std::make_unique<VertexNewMatcher>(*this); }
   
   virtual double distance( const TIDA::Vertex* v0, const TIDA::Vertex* v1 ) const override {
 

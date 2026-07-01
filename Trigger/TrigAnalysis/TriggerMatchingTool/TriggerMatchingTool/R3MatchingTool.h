@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGERMATCHINGTOOL_R3MATCHINGTOOL_H
@@ -31,13 +31,13 @@ namespace Trig
 
     virtual bool match(
         const std::vector<const xAOD::IParticle *> &recoObjects,
-        const std::string &chain,
+        std::string_view chain,
         double matchThreshold,
         bool rerun) const override;
 
     virtual bool match(
         const xAOD::IParticle &recoObject,
-        const std::string &chain,
+        std::string_view chain,
         double matchThreshold,
         bool rerun) const override;
 

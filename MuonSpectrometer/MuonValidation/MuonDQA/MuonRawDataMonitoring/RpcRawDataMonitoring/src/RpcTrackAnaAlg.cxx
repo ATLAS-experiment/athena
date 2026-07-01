@@ -386,12 +386,12 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(
             triggerMatching(muon, m_trigTagDefs) == StatusCode::SUCCESS;
 
         // muon quality
-        if (muon->quality() > xAOD::Muon::Medium)
+        if (muon->quality() > xAOD::Muon::Quality::Medium)
             continue;
 
         //
         // calculate muon z0sin(\theta) and d0significance
-        auto track = muon->primaryTrackParticle();
+        auto track = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
         const double z0 = track->z0() + track->vz() - primaryVertexZ;
 
         double z0sin = z0 * std::sin(track->theta());

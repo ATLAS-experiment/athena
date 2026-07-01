@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TriggerTowerCnvAlg::execute() {
+   StatusCode TriggerTowerCnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const TriggerTowerCollection* esd = nullptr;

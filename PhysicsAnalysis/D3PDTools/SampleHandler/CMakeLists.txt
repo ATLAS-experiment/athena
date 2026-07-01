@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SampleHandler )
@@ -25,7 +25,7 @@ atlas_add_root_dictionary( SampleHandler
    SampleHandler/SampleComposite.h SampleHandler/SampleGrid.h
    SampleHandler/SampleHandler.h SampleHandler/SampleHist.h
    SampleHandler/SampleLocal.h SampleHandler/SampleMeta.h
-   SampleHandler/SamplePtr.h SampleHandler/ScanDir.h SampleHandler/TagList.h
+   SampleHandler/ScanDir.h SampleHandler/TagList.h
    SampleHandler/ToolsDiscovery.h SampleHandler/ToolsDuplicates.h
    SampleHandler/ToolsJoin.h SampleHandler/ToolsMeta.h
    SampleHandler/ToolsSplit.h SampleHandler/fetch.h Root/LinkDef.h
@@ -45,7 +45,7 @@ function( _add_gtest cxx_name )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} ${GTEST_LIBRARIES} RootCoreUtils
       AsgTestingLib AsgTools SampleHandler
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endfunction( _add_gtest )
 
 file( GLOB _gtests test/gt_*.cxx )
@@ -67,7 +67,7 @@ function( _add_test cxx_name )
       SOURCES test/${test_name}.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} RootCoreUtils SampleHandler
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endfunction( _add_test )
 
 file( GLOB _tests test/ut_*.cxx )

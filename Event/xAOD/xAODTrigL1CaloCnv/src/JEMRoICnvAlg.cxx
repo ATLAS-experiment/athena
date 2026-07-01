@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode JEMRoICnvAlg::execute() {
+   StatusCode JEMRoICnvAlg::execute(const EventContext& /*ctx*/) {
       
       // Retrieve the ESD container:
       const JEMRoICollection* esd = nullptr;

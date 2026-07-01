@@ -7,7 +7,6 @@
 #include "TTrainedNetworkCondAlg.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "PersistencySvc/IFileCatalog.h"
 
 #include "TFile.h"
 #include "TH1.h"
@@ -137,7 +136,7 @@ for(const auto & h: ownedRetrievedHistos){
     {
       std::string pfname;
       std::string tech;
-      m_poolsvc->catalog()->getFirstPFN(coolguid, pfname, tech );
+      m_poolsvc->lookupBestPfn(coolguid, pfname, tech );
       ATH_MSG_VERBOSE("Get NNs from file " << pfname.c_str() << " [" << coolguid << " <- " << readHandle.key() << "]." );
       std::unique_ptr<TFile> a_file( TFile::Open(pfname.c_str(),"READ") );
       if (!a_file || !a_file->IsOpen()) {

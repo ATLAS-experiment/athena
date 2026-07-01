@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Olivier Arnaez ( olivier.arnaez@cern.ch )
@@ -58,7 +58,7 @@ namespace DerivationFramework {
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey,ctx);
     CHECK( eventInfo.isValid() ? StatusCode::SUCCESS : StatusCode::FAILURE );
 
-    const MinBiasPRDAssociation* prdAssoc = m_UnassociatedHitsGetterTool->get();
+    const MinBiasPRDAssociation* prdAssoc = m_UnassociatedHitsGetterTool->get(ctx);
     std::vector<SG::WriteDecorHandle<xAOD::EventInfo,int> >
     intDecorators = createDecorators<xAOD::EventInfo,int>(m_intDecorKeys,ctx);
     if (prdAssoc) {

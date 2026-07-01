@@ -4,7 +4,9 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaConfiguration.Enums import LHCPeriod
-from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ExpertModeWarning
+from AnalysisAlgorithmsConfig.ConfigAccumulator import (
+    DataType, ExpertModeWarning,
+    Run4FallbackWarning, GeneratorWeightWarning)
 from enum import Enum
 import warnings
 
@@ -145,7 +147,7 @@ class CommonServicesConfig (ConfigBlock) :
                 etag = str(amiTags.split("_")[0])
             metadataHistAlg.etag = etag
 
-        if self.enableExpertMode and config._pass == 0:
+        if self.enableExpertMode:
             # set any expert-mode errors to be ignored instead
             warnings.simplefilter('ignore', ExpertModeWarning)
             # just warning users they might be doing something dangerous
@@ -204,6 +206,9 @@ class PileupReweightingBlock (ConfigBlock):
             "Alternative to auto-configuration.")
         self.addOption ('useDefaultConfig', True, type=bool,
             info="whether to use the central PRW files.")
+        self.addOption ('GRLSuffixDict', {}, type=dict,
+            info="a year-suffix dictionary to help with autoconfiguration of "
+            "GRL-specific PRW configuration, e.g. selecting 'BjetHLT'.")
         self.addOption ('userLumicalcFiles', None, type=list,
             info="user-provided lumicalc files (list of strings). Alternative "
             "to auto-configuration.")
@@ -222,6 +227,10 @@ class PileupReweightingBlock (ConfigBlock):
         self.addOption ('alternativeConfig', False, type=bool,
             info="whether this is used as an additional alternative config for `PileupReweighting`. "
             "Will only store the alternative pileup weight in that case.")
+        self.addOption ('unrepresentedDataWarningThreshold', 1e-4, type=float,
+            info="suppress the unrepresented-data WARNING when the unrepresented "
+            "fraction is below this value (default 0.01%). Set to 0 to always "
+            "warn.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
             info="whether to add `EventInfo` variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL).",
             expertMode=True)
@@ -236,25 +245,28 @@ class PileupReweightingBlock (ConfigBlock):
 
         log = logging.getLogger('makePileupAnalysisSequence')
 
-        eventInfoVar = ['runNumber', 'eventNumber', 'actualInteractionsPerCrossing', 'averageInteractionsPerCrossing']
+        eventInfoVar = [('runNumber','unsigned'),
+                        ('eventNumber','unsigned_long'),
+                        ('actualInteractionsPerCrossing','float'),
+                        ('averageInteractionsPerCrossing','float')]
         if config.dataType() is not DataType.Data:
-            eventInfoVar += ['mcChannelNumber']
+            eventInfoVar += [('mcChannelNumber','unsigned')]
         if self.writeColumnarToolVariables:
             # This is not strictly necessary, as the columnar users
             # could recreate this, but it is also a single constant int,
             # that should compress exceedingly well.
-            eventInfoVar += ['eventTypeBitmask']
+            eventInfoVar += [('eventTypeBitmask','int')]
 
         if config.isPhyslite() and not self.alternativeConfig:
             # PHYSLITE already has these variables defined, just need to copy them to the output
             log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite}')
-            for var in eventInfoVar:
-                config.addOutputVar ('EventInfo', var, var, noSys=True)
+            for var_name,var_type in eventInfoVar:
+                config.addOutputVar ('EventInfo', var_name, var_name, noSys=True, auxType=var_type)
 
             if config.dataType() is not DataType.Data:
                 config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup', auxType='float')
                 if config.geometry() is LHCPeriod.Run2:
-                    config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
+                    config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True, auxType='float')
             return
 
         # check files from flags
@@ -316,7 +328,8 @@ class PileupReweightingBlock (ConfigBlock):
                     toolConfigFiles = getConfigurationFiles(campaign=campaign,
                                                             files=self.files,
                                                             useDefaultConfig=self.useDefaultConfig,
-                                                            data_type=config.dataType())
+                                                            data_type=config.dataType(),
+                                                            GRLSuffixDict=self.GRLSuffixDict)
                     if self.useDefaultConfig:
                         log.info('Auto-configuring universal/default PRW config')
                     else:
@@ -340,7 +353,7 @@ class PileupReweightingBlock (ConfigBlock):
             else:
                 if campaign and campaign is not Campaign.Unknown:
                     from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
-                    toolLumicalcFiles = getLumicalcFiles(campaign)
+                    toolLumicalcFiles = getLumicalcFiles(campaign, self.GRLSuffixDict)
                     log.info('Using auto-configured lumicalc files')
                 else:
                     log.info('No campaign specified, no lumicalc files configured for PRW')
@@ -349,7 +362,9 @@ class PileupReweightingBlock (ConfigBlock):
 
         # Set up the only algorithm of the sequence:
         if config.geometry() is LHCPeriod.Run4:
-            log.warning ('Pileup reweighting is not yet supported for Run 4 geometry')
+            warnings.warn_explicit(
+                'Pileup reweighting is not yet supported for Run 4 geometry',
+                Run4FallbackWarning, filename='', lineno=0)
             alg = config.createAlgorithm( 'CP::EventDecoratorAlg', 'EventDecoratorAlg' )
             alg.uint32Decorations = { 'RandomRunNumber' :
                                       config.flags.Input.RunNumbers[0] }
@@ -366,17 +381,19 @@ class PileupReweightingBlock (ConfigBlock):
             else:
                 alg.pileupWeightDecoration = "PileupWeight" + self.postfix + "_%SYS%"
             alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
+            alg.pileupReweightingTool.UnrepresentedDataWarningThreshold = (
+                self.unrepresentedDataWarningThreshold)
 
         if not self.alternativeConfig:
-            for var in eventInfoVar:
-                config.addOutputVar ('EventInfo', var, var, noSys=True)
+            for var_name,var_type in eventInfoVar:
+                config.addOutputVar ('EventInfo', var_name, var_name, noSys=True, auxType=var_type)
 
             if config.dataType() is not DataType.Data and config.geometry() is LHCPeriod.Run2:
-                config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
+                config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True, auxType='float')
 
         if config.dataType() is not DataType.Data and toolConfigFiles:
             config.addOutputVar ('EventInfo', 'PileupWeight' + self.postfix + '_%SYS%',
-                                 'weight_pileup'+self.postfix)
+                                 'weight_pileup'+self.postfix, auxType='float')
 
 
 class GeneratorAnalysisBlock (ConfigBlock):
@@ -471,7 +488,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
             DSID = "000000"
 
             if not generatorInfo:
-                log.warning("No generator info found.")
+                warnings.warn_explicit(
+                    "No generator info found.",
+                    GeneratorWeightWarning, filename='', lineno=0)
                 DSID = "000000"
             elif isinstance(generatorInfo, dict):
                 if "Pythia8" in generatorInfo:
@@ -481,13 +500,25 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 elif "Sherpa" in generatorInfo and "2.2.10" in generatorInfo["Sherpa"]:
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.11" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.11. Using weights for Sherpa 2.2.10 instead.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.11. Using weights for Sherpa 2.2.10"
+                        " instead.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.12" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.12. Using weights for Sherpa 2.2.10 instead.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.12. Using weights for Sherpa 2.2.10"
+                        " instead.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "700122"
                 elif "Sherpa" in generatorInfo and "2.2.14" in generatorInfo["Sherpa"]:
-                    log.warning("HF production fraction reweighting is not configured for Sherpa 2.2.14. New weights need to be calculated.")
+                    warnings.warn_explicit(
+                        "HF production fraction reweighting is not configured"
+                        " for Sherpa 2.2.14. New weights need to be"
+                        " calculated.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "000000"
                 elif "Sherpa" in generatorInfo and "2.2.1" in generatorInfo["Sherpa"]:
                     DSID = "410250"
@@ -500,16 +531,24 @@ class GeneratorAnalysisBlock (ConfigBlock):
                 elif "amc@NLO" in generatorInfo:
                     DSID = "410464"
                 else:
-                    log.warning(f"HF production fraction reweighting is not configured for this generator: {generatorInfo}")
-                    log.warning("New weights need to be calculated.")
+                    warnings.warn_explicit(
+                        f"HF production fraction reweighting is not configured"
+                        f" for this generator: {generatorInfo}."
+                        f" New weights need to be calculated.",
+                        GeneratorWeightWarning, filename='', lineno=0)
                     DSID = "000000"
             else:
-                log.warning("Failed to determine generator from metadata")
+                warnings.warn_explicit(
+                    "Failed to determine generator from metadata",
+                    GeneratorWeightWarning, filename='', lineno=0)
                 DSID = "000000"
 
             log.info(f"Using HF production fraction weights calculated using DSID {DSID}")
             if DSID == "000000":
-                log.warning("HF production fraction reweighting will return dummy weights of 1.0")
+                warnings.warn_explicit(
+                    "HF production fraction reweighting will return dummy"
+                    " weights of 1.0",
+                    GeneratorWeightWarning, filename='', lineno=0)
 
             alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', f'SysTruthWeightAlg_{streamName}' )
             config.addPrivateTool( 'sysTruthWeightTool', 'PMGTools::PMGHFProductionFractionTool' )
@@ -629,52 +668,55 @@ class ObjectCutFlowBlock (ConfigBlock):
 class EventCutFlowBlock (ConfigBlock):
     """the ConfigBlock for an event-level cutflow"""
 
-    def __init__ (self) :
-        super (EventCutFlowBlock, self).__init__ ()
-        self.addOption ('containerName', '', type=str,
+    def __init__(self):
+        super(EventCutFlowBlock, self).__init__()
+        self.addOption('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the input container, typically `EventInfo`.")
-        self.addOption ('selectionName', '', type=str,
-            noneAction='error',
-            info="the name of an optional selection decoration to use.")
-        self.addOption ('customSelections', [], type=None,
-            info="the selections for which to generate cutflow histograms. If "
-            "a single string, corresponding to a particular event selection, "
-            "the event cutflow for that selection will be looked up. If a list "
-            "of strings, will use explicitly those selections. If left blank, "
-            "all selections attached to the container will be looked up.")
-        self.addOption ('postfix', '', type=str,
-            info="a postfix to apply in the naming of cutflow histograms. Set "
-            "it when defining multiple cutflows.")
+            info="the name of the event selection to generate cutflow histograms for. "
+            "If left blank, all selections on EventInfo will be used.")
+        self.addOption('customSelections', [], type=None,
+            info="explicit list of selection decorations to use for the cutflow. "
+            "If provided, takes precedence over selectionName.")
+        self.addOption('cutFlowHistograms', True, type=bool,
+            info="whether to generate cutflow histograms for the selection cuts.")
+        self.addOption('cutFlowHistogramsWithSystematics', True, type=bool,
+            info="whether to generate cutflow histograms for the selection cuts"
+                "when running with systematics.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save the cut bookkeeper in.")
 
-    def instanceName (self) :
-        """Return the instance name for this block"""
-        return self.containerName + '_' + self.selectionName + self.postfix
+    def instanceName(self):
+        return 'EventInfo_' + self.selectionName
 
-    def makeAlgs (self, config) :
+    def makeAlgs(self, config):
+        if not self.cutFlowHistograms:
+            return
 
-        postfix = self.postfix
-        if postfix != '' and postfix[0] != '_' :
-            postfix = '_' + postfix
+        if not config.noSystematics() and not self.cutFlowHistogramsWithSystematics:
+            return
 
-        alg = config.createAlgorithm( 'CP::EventCutFlowHistAlg', 'CutFlowDumperAlg' )
-        alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
-        # find out which selection decorations to use
-        if isinstance(self.customSelections, str):
-            # user provides a dynamic reference to selections, corresponding to an EventSelection alg
-            alg.selections = config.getEventCutFlow(self.customSelections)
-        elif len(self.customSelections) > 0:
-            # user provides a list of hardcoded selections
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
+
+        postfix = ('_' + self.selectionName) if self.selectionName else ''
+
+        alg = config.createAlgorithm('CP::EventCutFlowHistAlg', 'CutFlowDumperAlg')
+        alg.RootStreamName = streamName
+        alg.histPattern = 'cflow_EventInfo' + postfix + '_%SYS%'
+        alg.eventInfo = config.readName('EventInfo')
+        alg.histTitle = 'Event Cutflow: EventInfo.' + self.selectionName
+
+        if isinstance(self.customSelections, list) and len(self.customSelections) > 0:
+            # user provides a hardcoded list of selections
             alg.selections = self.customSelections
+        elif self.selectionName:
+            # resolve selectionName to the list of cuts registered by EventSelectionConfig
+            alg.selections = config.getEventCutFlow(self.selectionName)
         else:
-            # user provides nothing: get all available selections from EventInfo directly
-            alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
-        alg.selections = [sel+',as_char' for sel in alg.selections]
-        if self.selectionName:
-            alg.preselection = self.selectionName + '_%SYS%'
-        alg.eventInfo = config.readName (self.containerName)
-        alg.histTitle = "Event Cutflow: " + self.containerName + "." + self.selectionName
+            # fallback: get all available selections from EventInfo
+            alg.selections = config.getSelectionCutFlow('EventInfo', '')
 
+        alg.selections = [sel + ',as_char' for sel in alg.selections]
 
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
@@ -703,6 +745,8 @@ class OutputThinningBlock (ConfigBlock):
             info=r"whether to sort objects in $p_\mathrm{T}$.")
         self.addOption ('noUniformSelection', False, type=bool,
             info="do not run the union over all selections.")
+        self.addOption ('containerType', None, type=str,
+            info="the type of the container to thin. Only needed in AthenaMT, and only if subsequent code has a data dependency on the created container under that type.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -735,6 +779,8 @@ class OutputThinningBlock (ConfigBlock):
             config.addOutputContainer (self.containerName, self.outputName)
         else :
             alg.output = config.copyName (self.containerName)
+        if self.containerType is not None :
+            alg.outputType = self.containerType
         if selection != '' :
             alg.selection = [selection]
         else :
@@ -878,21 +924,3 @@ class SelectionDecorationBlock (ConfigBlock):
                                                             selectionName)
                 config.addOutputVar(
                     originContainerName, selectionDecoration, selectionName)
-
-def makeEventCutFlowConfig(seq, containerName,
-                            *, postfix=None, selectionName, customSelections=None):
-    """Create an event-level cutflow config
-
-    Keyword arguments:
-    containerName -- name of the container
-    postfix -- a postfix to apply to decorations and algorithm names.
-    selectionName -- the name of the selection to do the cutflow for
-    customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
-    """
-
-    config = EventCutFlowBlock()
-    config.setOptionValue('containerName', containerName)
-    config.setOptionValue('selectionName', selectionName)
-    config.setOptionValue('postfix', postfix)
-    config.setOptionValue('customSelections', customSelections)
-    seq.append(config)

@@ -28,7 +28,7 @@ public:
 protected:
 
    virtual TrigElectronContainer_PERS*  createPersistent(TrigElectronContainer* transCont);
-   virtual TrigElectronContainer*       createTransient ();
+   virtual TrigElectronContainer*       createTransient(const Token* token);
 
 private:
   TrigElectronContainerCnv_tlp1  m_converter_tlp1;

@@ -18,11 +18,12 @@
 #include "PersistentDataModel/TokenAddress.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/APRDefaults.h"
+
 #include <format>
+#include "CxxUtils/HexString.h"
 
 //__________________________________________________________________________
 AthenaPoolConverter::~AthenaPoolConverter() {
-   delete m_i_poolToken; m_i_poolToken = nullptr;
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::initialize() {
@@ -32,14 +33,6 @@ StatusCode AthenaPoolConverter::initialize() {
 
    // Retrieve AthenaPoolCnvSvc
    ATH_CHECK( m_athenaPoolCnvSvc.retrieve() );
-
-   // Retrieve PoolSvc
-   ATH_CHECK(m_poolSvc.retrieve());
-   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
-   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
-      propertyServer->getProperty(&defContainerType).ignore();
-   }
-   m_defContainerType = pool::DbType::getType(defContainerType).type();
 
    return StatusCode::SUCCESS;
 }
@@ -73,16 +66,10 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
       tokAddr = new TokenAddress(*genAddr, std::move(token));
    }
    if( tokAddr->ipar()[0] > 0 and tokAddr->getToken()->auxString().empty() ) {
-      char text[32];
-      const std::string contextStr = std::format("[CTXT={:08X}]", static_cast<int>(*(pAddr->ipar())));
-      std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
-      text[sizeof(text) - 1] = '\0';
-      tokAddr->getToken()->setAuxString(text);
+      tokAddr->getToken()->setAuxString(CxxUtils::HexString<"[CTXT={}]">(static_cast<int>(*(pAddr->ipar()))));
    }
    ATH_MSG_VERBOSE("createObj: " << tokAddr->getToken()->toString() << ", CTX=" << tokAddr->ipar()[0]
                    << ", auxStr=" << tokAddr->getToken()->auxString() );
-   std::lock_guard<CallMutex> lock(m_conv_mut);
-   m_i_poolToken = tokAddr->getToken();
    try {
       std::string key = pAddr->par()[1];
       if (!PoolToDataObject(pObj, tokAddr->getToken(), key).isSuccess()) {
@@ -99,7 +86,6 @@ StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pO
    if (ownTokAddr) {
       delete tokAddr; tokAddr = nullptr;
    }
-   m_i_poolToken = nullptr;
    if (pObj == nullptr) {
       return StatusCode::FAILURE;
    }
@@ -110,16 +96,6 @@ StatusCode AthenaPoolConverter::createRep(DataObject* pObj, IOpaqueAddress*& pAd
    const SG::DataProxy* proxy = dynamic_cast<SG::DataProxy*>(pObj->registry());
    if (proxy == nullptr) {
       ATH_MSG_ERROR("AthenaPoolConverter CreateRep failed to cast DataProxy, key = " << pObj->name());
-      return StatusCode::FAILURE;
-   }
-   try {
-      std::lock_guard<CallMutex> lock(m_conv_mut);
-      if (!DataObjectToPers(pObj, pAddr).isSuccess()) {
-         ATH_MSG_ERROR("CreateRep failed, key = " << pObj->name());
-         return StatusCode::FAILURE;
-      }
-   } catch (std::exception& e) {
-      ATH_MSG_ERROR("createRep - caught exception: " << e.what());
       return StatusCode::FAILURE;
    }
    const CLID clid = proxy->clID();
@@ -136,7 +112,6 @@ StatusCode AthenaPoolConverter::createRep(DataObject* pObj, IOpaqueAddress*& pAd
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::fillRepRefs(IOpaqueAddress* pAddr, DataObject* pObj) {
-   std::lock_guard<CallMutex> lock(m_conv_mut);
    try {
       if (!DataObjectToPool(pAddr, pObj).isSuccess()) {
          ATH_MSG_ERROR("FillRepRefs failed, key = " << pObj->name());
@@ -159,14 +134,7 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
     ::AthMessaging((pSvcLocator != nullptr ? msgSvc() : nullptr),
                                name ? name : "AthenaPoolConverter"),
   m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
-  m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
-  m_poolSvc("PoolSvc", name ? name : "AthenaPoolConverter"),
-  m_classDesc(),
-  m_className(),
-  m_classDescs(),
-  m_dataObject(nullptr),
-  m_i_poolToken(nullptr),
-  m_defContainerType(0) {
+  m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"){
 }
 //__________________________________________________________________________
 Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, const std::string& key, const std::string& output) {
@@ -179,8 +147,8 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    placement.setFileName(outputConnectionSpec);
 
    // Override streaming parameters from StreamTool if requested.
-   std::string containerPrefix{APRDefaults::getEventDataName()};
-   std::string dhContainerPrefix{APRDefaults::getDataHeaderName()};
+   std::string containerPrefix{APRDefaults::WriteConfig::getEventDataName()};
+   std::string dhContainerPrefix{APRDefaults::WriteConfig::getDataHeaderName()};
    std::string containerName{""};
    std::string containerNameHint{""};
    std::string branchNameHint{""};
@@ -205,9 +173,8 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    }
 
    // Extract the technology from the container prefix (if available)
-   int tech = m_defContainerType;
    if (auto colonPost = containerPrefix.find(':'); colonPost != std::string::npos) {
-      tech = pool::DbType::getType(containerPrefix.substr(0, colonPost)).type();
+      placement.setTechnology(pool::DbType::getType(containerPrefix.substr(0, colonPost)).type());
       containerPrefix.erase(0, colonPost + 1); // Note that DataHeader and EventTag bypass this...
    }
 
@@ -222,7 +189,7 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    // AttributeList - writing attributes separately to EventTag container group
    else if ( tname.starts_with(APRDefaults::EventTagTypeName) ) {
       containerName = std::format("{}({})",
-         APRDefaults::getEventTagName(),
+         APRDefaults::WriteConfig::getEventTagName(),
          key);
    }
    // all other object types
@@ -241,18 +208,13 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
       }
    }
 
-   // Set the container name and technology
+   // Set the container name
    placement.setContainerName(containerName);
-   placement.setTechnology(tech);
    return(placement);
 }
 //__________________________________________________________________________
-const DataObject* AthenaPoolConverter::getDataObject() const {
-   return(m_dataObject);
-}
-//__________________________________________________________________________
-bool AthenaPoolConverter::compareClassGuid(const Guid &guid) const {
-   return(m_i_poolToken ? (guid == m_i_poolToken->classID()) : false);
+bool AthenaPoolConverter::compareClassGuid(const Token* token, const Guid &guid) const {
+   return(token ? (guid == token->classID()) : false);
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::cleanUp(const std::string& /*output*/) {

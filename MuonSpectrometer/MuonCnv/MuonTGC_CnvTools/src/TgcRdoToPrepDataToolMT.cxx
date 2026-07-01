@@ -10,33 +10,46 @@
 #include <cfloat>
 #include <memory>
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "MuonDigitContainer/TgcDigit.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonTrigCoinData/TgcCoinData.h"
 #include "TrkSurfaces/Surface.h"
-#include "xAODMuonPrepData/TgcStripAuxContainer.h"
 
 namespace {
 using namespace xAOD::P4Helpers;
+
+constexpr std::uint16_t translateBC(const std::uint16_t bc) {
+    using namespace Muon;
+    switch(bc) {
+        case TgcDigit::BC_UNDEFINED:
+        case TgcDigit::BC_CURRENT:
+            return TgcPrepData::BCBIT_CURRENT;
+        case TgcDigit::BC_PREVIOUS:
+            return TgcPrepData::BCBIT_PREVIOUS;
+        case TgcDigit::BC_NEXT:
+            return TgcPrepData::BCBIT_NEXT;
+        default:
+          return 0;
+    }
+}
 }
 //================ Initialization =================
-
-StatusCode Muon::TgcRdoToPrepDataToolMT::initialize() {
+namespace Muon {
+StatusCode TgcRdoToPrepDataToolMT::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
 
-    m_outputprepdataKeys.resize(NBC_HIT + 1);
-    for (int ibc = 0; ibc < NBC_HIT + 1; ibc++) {
-        int bcTag = ibc + 1;
-        std::ostringstream location;
-        location << m_outputCollectionLocation.value()
-                 << (bcTag == TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
-                 << (bcTag == TgcDigit::BC_CURRENT ? "" : "")
-                 << (bcTag == TgcDigit::BC_NEXT ? "NextBC" : "")
-                 << (bcTag == (NBC_HIT + 1) ? "AllBCs" : "");
-        m_outputprepdataKeys.at(ibc) = location.str();
-    }
+   
+    ATH_CHECK(m_prdWriteKey.initialize());
+    ATH_CHECK(m_muDetMgrKey.initialize());
+    ATH_CHECK(m_cablingKey.initialize());
+
+    // check if initializing of DataHandle objects success
+    ATH_CHECK(m_rdoContainerKey.initialize());
+
+    ATH_CHECK(m_prdContainerCacheKey.initialize(SG::AllowEmpty));
+
+
 
     m_outputCoinKeys.resize(NBC_TRIG);
     for (int ibc = 0; ibc < NBC_TRIG; ibc++) {
@@ -48,38 +61,6 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::initialize() {
                  << (bcTag == TgcDigit::BC_NEXTNEXT ? "NextNextBC" : "");
         m_outputCoinKeys.at(ibc) = location.str();
     }
-
-    ATH_CHECK(m_outputCoinKeys.initialize());
-    ATH_CHECK(m_outputprepdataKeys.initialize());
-    ATH_CHECK(m_muDetMgrKey.initialize());
-
-    // check if initializing of DataHandle objects success
-    ATH_CHECK(m_rdoContainerKey.initialize());
-
-    // try to configure the cabling service
-    if (!getCabling()) {
-        // ??? Is this delayed initialization still needed?
-        ATH_MSG_INFO(
-            "MuonTGC_CablingSvc not yet retrieved; postpone TGCcabling "
-            "initialization at first event.");
-    }
-
-    // Build names for the keys same as done for output containers
-    if (not m_prdContainerCacheKeyStr.empty()) {
-        m_prdContainerCacheKeys.resize(NBC_HIT + 1);
-        for (int ibc = 0; ibc < NBC_HIT + 1; ibc++) {
-            int bcTag = ibc + 1;
-            std::ostringstream location;
-            location << m_prdContainerCacheKeyStr.value()
-                     << (bcTag == TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
-                     << (bcTag == TgcDigit::BC_CURRENT ? "" : "")
-                     << (bcTag == TgcDigit::BC_NEXT ? "NextBC" : "")
-                     << (bcTag == (NBC_HIT + 1) ? "AllBCs" : "");
-            m_prdContainerCacheKeys.at(ibc) = location.str();
-            ATH_MSG_DEBUG(location.str());
-        }
-    }
-
     if (not m_coinContainerCacheKeyStr.empty()) {
         m_coinContainerCacheKeys.resize(NBC_TRIG);
         for (int ibc = 0; ibc < NBC_TRIG; ibc++) {
@@ -93,20 +74,14 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::initialize() {
             ATH_MSG_DEBUG(location.str());
         }
     }
-
-    // Only initialise if we passed in the cache name
-    ATH_CHECK(m_prdContainerCacheKeys.initialize(
-        not m_prdContainerCacheKeyStr.empty()));
-    ATH_CHECK(m_coinContainerCacheKeys.initialize(
-        not m_coinContainerCacheKeyStr.empty()));
-
-    ATH_CHECK(m_xAODKey.initialize(!m_xAODKey.empty()));
+    ATH_CHECK(m_coinContainerCacheKeys.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_outputCoinKeys.initialize()); 
     return StatusCode::SUCCESS;
 }
 
 //================ Finalization ===================
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::finalize() {
+StatusCode TgcRdoToPrepDataToolMT::finalize() {
     ATH_MSG_INFO("finalize(): input RDOs->output PRDs ["
                  << "Hit: " << m_nHitRDOs << "->" << m_nHitPRDs << ", "
                  << "Tracklet: " << m_nTrackletRDOs << "->" << m_nTrackletPRDs
@@ -119,13 +94,13 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::finalize() {
 }
 
 //================ Decoding =================================================
-StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
+StatusCode TgcRdoToPrepDataToolMT::decode(
     const EventContext&, const std::vector<uint32_t>& /*robIds*/) const {
     ATH_MSG_FATAL("ROB based decoding is not supported....");
     return StatusCode::FAILURE;
 }
 template <class ContType, class CollType>
-StatusCode Muon::TgcRdoToPrepDataToolMT::transferData(
+StatusCode TgcRdoToPrepDataToolMT::transferData(
     ContType& container, std::vector<std::unique_ptr<CollType>>&& coll) const {
     for (std::unique_ptr<CollType>& toMove : coll) {
         if (!toMove) {
@@ -140,62 +115,36 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::transferData(
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::provideEmptyContainer(
+StatusCode TgcRdoToPrepDataToolMT::provideEmptyContainer(
     const EventContext& ctx) const {
-    if (!m_xAODKey.empty()) {
-        SG::WriteHandle handle{m_xAODKey, ctx};
-        ATH_CHECK(
-            handle.record(std::make_unique<xAOD::TgcStripContainer>(),
-                          std::make_unique<xAOD::TgcStripAuxContainer>()));
-    }
     State state{};
     return setupState(ctx, state);
 }
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::setupState(const EventContext& ctx,
+StatusCode TgcRdoToPrepDataToolMT::setupState(const EventContext& ctx,
                                                     State& state) const {
     /// clean up containers for Hits
     const unsigned hashMax = m_idHelperSvc->tgcIdHelper().module_hash_max();
 
-    for (unsigned int ibc = 0; ibc < NBC_HIT + 1; ibc++) {  //  +1 for AllBCs
-        // initialize with false
-        SG::WriteHandle<TgcPrepDataContainer> handle(m_outputprepdataKeys[ibc],
-                                                     ctx);
+    SG::WriteHandle prdHandle{m_prdWriteKey, ctx};
 
-        const bool externalCachePRD =
-            m_prdContainerCacheKeys.size() > ibc &&
-            !m_prdContainerCacheKeys[ibc].key().empty();
-        if (!externalCachePRD) {
-            // record the container in storeGate
-            ATH_CHECK(
-                handle.record(std::make_unique<TgcPrepDataContainer>(hashMax)));
-            ATH_MSG_DEBUG(
-                "TGC PrepData Container recorded in StoreGate with key "
-                << m_outputprepdataKeys[ibc].key());
-
-            // cache the pointer, storegate retains ownership
-            state.tgcPrepDataContainer[ibc] = handle.ptr();
-        } else {
-            // use the cache to get the container
-            SG::UpdateHandle<TgcPrepDataCollection_Cache> update(
-                m_prdContainerCacheKeys[ibc], ctx);
-            ATH_CHECK(update.isValid());
-
-            ATH_CHECK(handle.record(
-                std::make_unique<Muon::TgcPrepDataContainer>(update.ptr())));
-
-            state.tgcPrepDataContainer[ibc] = handle.ptr();
-            ATH_MSG_DEBUG("Created container using cache for "
-                          << m_prdContainerCacheKeys[ibc].key());
-        }
-        state.tgcPrepDataCollections[ibc].resize(hashMax);
+    if (m_prdContainerCacheKey.empty()) {
+        ATH_CHECK(prdHandle.record(std::make_unique<TgcPrepDataContainer>(hashMax)));
+        ATH_MSG_DEBUG("TGC PrepData Container recorded in StoreGate with key "
+                    << m_prdWriteKey.fullKey());
+    } else {
+        SG::UpdateHandle update{m_prdContainerCacheKey, ctx};
+        ATH_CHECK(update.isValid());
+        ATH_CHECK(prdHandle.record(std::make_unique<TgcPrepDataContainer>(update.ptr()))); 
     }
 
-    /// clean up containers for Coincidence
+    state.tgcPrepDataContainer = prdHandle.ptr();
+    state.tgcPrepDataCollections.resize(hashMax);
+
+    // clean up containers for Coincidence
     for (unsigned int ibc = 0; ibc < NBC_TRIG; ibc++) {
         // prepare write handle for this BC
-        SG::WriteHandle<TgcCoinDataContainer> handle(m_outputCoinKeys[ibc],
-                                                     ctx);
+        SG::WriteHandle handle{m_outputCoinKeys[ibc], ctx};
 
         const bool externalCacheCoin =
             m_coinContainerCacheKeys.size() > ibc &&
@@ -206,8 +155,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::setupState(const EventContext& ctx,
                 handle.record(std::make_unique<TgcCoinDataContainer>(hashMax)));
         } else {
             // Using the cache (trigger case)
-            SG::UpdateHandle<TgcCoinDataCollection_Cache> update(
-                m_coinContainerCacheKeys[ibc], ctx);
+            SG::UpdateHandle update{m_coinContainerCacheKeys[ibc], ctx};
             ATH_CHECK(update.isValid());
             ATH_CHECK(handle.record(
                 std::make_unique<TgcCoinDataContainer>(update.ptr())));
@@ -223,39 +171,27 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::setupState(const EventContext& ctx,
 
     }  // loop on BC_TRIG
 
-    SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_muDetMgrKey, ctx};
-    ATH_CHECK(detMgr.isValid());
-    state.muDetMgr = detMgr.cptr();
+    
+    ATH_CHECK(SG::get(state.muDetMgr, m_muDetMgrKey, ctx));
+    ATH_CHECK(SG::get(state.cabling, m_cablingKey, ctx));
     return StatusCode::SUCCESS;
 }
-StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
+StatusCode TgcRdoToPrepDataToolMT::decode(
     const EventContext& ctx,
     const std::vector<IdentifierHash>& requestedIdHashVect) const {
     // Object to hold the containers for this decode call
     State state{};
     ATH_CHECK(setupState(ctx, state));
 
-    SG::WriteHandle<xAOD::TgcStripContainer> xAODHandle{};
-    if (!m_xAODKey.empty()) {
-        xAODHandle = SG::WriteHandle<xAOD::TgcStripContainer>{m_xAODKey, ctx};
-        ATH_CHECK(
-            xAODHandle.record(std::make_unique<xAOD::TgcStripContainer>(),
-                              std::make_unique<xAOD::TgcStripAuxContainer>()));
-    }
 
     int sizeVectorRequested = requestedIdHashVect.size();
     ATH_MSG_DEBUG("decode for " << sizeVectorRequested
                                 << " offline collections called");
 
-    const CablingInfo* cinfo = getCabling();
-    if (!cinfo) {
-        return StatusCode::FAILURE;
-    }
-    const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
 
     std::set<const TgcRdo*> decodedRdoCollVec{}, rdoCollVec{};
-    std::vector<bool> decodedOnlineId(cinfo->m_MAX_N_ROD, false);
-
+    std::array<char, 24> decodedOnlineId{};
+  
     // if TGC decoding is switched off stop here
     if (!m_decodeData) {
         ATH_MSG_DEBUG(
@@ -268,8 +204,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
 
     // retrieve the collection of RDO
     ATH_MSG_DEBUG("Retrieving TGC RDO container from the store");
-    SG::ReadHandle<TgcRdoContainer> rdoContainer{m_rdoContainerKey, ctx};
-    ATH_CHECK(rdoContainer.isValid());
+    const TgcRdoContainer* rdoContainer{};
+    ATH_CHECK(SG::get(rdoContainer, m_rdoContainerKey, ctx));
     ///////////// here the RDO container is retrieved and filled -whatever input
     /// type we start with- => check the size
     if (rdoContainer->empty()) {
@@ -285,9 +221,16 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
     // select RDOs to be decoded when seeded mode is used
     if (sizeVectorRequested != 0) {
         unsigned int nRdo = 0;
-        for (IdentifierHash offlineCollHash : requestedIdHashVect) {
-            uint16_t onlineId = cinfo->m_hashToOnlineId.at(
-                static_cast<unsigned int>(offlineCollHash));
+        const IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();  // TGC context
+   
+        for (const IdentifierHash& offlineCollHash : requestedIdHashVect) {
+            Identifier elementId;
+            int subDetectorId = 0;  // 103(=0x67) for A side, 104(=0x68) for C side
+            int rodId = 0;          // 1 to 12 (12-fold cabling)
+            m_idHelperSvc->tgcIdHelper().get_id(offlineCollHash, elementId, &tgcContext);
+            state.cabling->getReadoutIDfromElementID(elementId, subDetectorId, rodId);
+            // onlineId: 0 to 11 on A side and 12 to 23 on C side (12-fold cabling)
+            const uint16_t onlineId = TgcRdo::calculateOnlineId(subDetectorId, rodId);
 
             if (decodedOnlineId.at(onlineId)) {
                 ATH_MSG_DEBUG("The ROB with onlineId "
@@ -297,8 +240,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
                 continue;
             }
 
-            decodedOnlineId.at(onlineId) =
-                true;  // The ROB with this onlineId will be decoded only once
+            decodedOnlineId.at(onlineId) = true;  // The ROB with this onlineId will be decoded only once
 
             for (const TgcRdo* rdoColl : *rdoContainer) {
                 if (rdoColl->identify() == onlineId) {
@@ -325,7 +267,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
                 // filtering on offline hashId to avoid decoding RDO outside of
                 // an RoI
                 Identifier offlineId{};
-                if (!cinfo->m_tgcCabling->getElementIDfromReadoutID(
+                if (!state.cabling->getElementIDfromReadoutID(
                         offlineId, rd->subDetectorId(), rd->rodId(),
                         rd->sswId(), rd->slbId(), rd->bitpos())) {
                     continue;
@@ -355,110 +297,36 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
             decodedRdoCollVec.insert(rdoColl);
         }
     }
-    // first collect up all the HashIDs in any of the containers
-    std::set<IdentifierHash> hashesInAnyBC;
-    for (unsigned int ibc = 0; ibc < NBC_HIT; ++ibc) {
 
-        uint16_t bcBitMap = 0;
-        if (ibc == 0) {
-            bcBitMap = TgcPrepData::BCBIT_PREVIOUS;
-        } else if (ibc == 1) {
-            bcBitMap = TgcPrepData::BCBIT_CURRENT;
-        } else if (ibc == 2) {
-            bcBitMap = TgcPrepData::BCBIT_NEXT;
+    /// Sort the all BC PRDs
+    for (std::unique_ptr<TgcPrepDataCollection>& allBcColl :
+             state.tgcPrepDataCollections) {
+        if (!allBcColl) {
+            continue;
         }
-
-        for (std::unique_ptr<TgcPrepDataCollection>& bcColl :
-             state.tgcPrepDataCollections[ibc]) {
-            if (!bcColl) {
-                continue;
-            }
-            std::unique_ptr<TgcPrepDataCollection>& allBcColl =
-                state.tgcPrepDataCollections[NBC_HIT][bcColl->identifyHash()];
-            if (!allBcColl) {
-                allBcColl = std::make_unique<TgcPrepDataCollection>(
-                    bcColl->identifyHash());
-                allBcColl->setIdentifier(bcColl->identify());
-            }
-            hashesInAnyBC.insert(bcColl->identifyHash());
-            for (const TgcPrepData* prdToUpdate : *bcColl) {
-                auto search_itr = std::find_if(
-                    allBcColl->begin(), allBcColl->end(),
-                    [prdToUpdate](const TgcPrepData* prd) {
-                        return prd->identify() == prdToUpdate->identify();
-                    });
-                if (search_itr == allBcColl->end()) {
-                    auto allBcPrd = std::make_unique<TgcPrepData>(*prdToUpdate);
-                    allBcPrd->setHashAndIndex(allBcColl->identifyHash(),
-                                              allBcColl->size());
-                    allBcPrd->setBcBitMap(bcBitMap);
-                    allBcColl->push_back(std::move(allBcPrd));
-                } else {
-                    TgcPrepData* allBcPrd = (*search_itr);
-                    const uint16_t bcBitMap_current = allBcPrd->getBcBitMap();
-                    ATH_MSG_VERBOSE(
-                        m_idHelperSvc->toString(allBcPrd->identify())
-                        << " Old bitmap " << bcBitMap_current << " adding "
-                        << bcBitMap << " to get "
-                        << (bcBitMap_current | bcBitMap));
-                    allBcPrd->setBcBitMap((bcBitMap_current | bcBitMap));
-                }
-            }
+        std::sort(allBcColl->begin(), allBcColl->end(), 
+                [](const TgcPrepData* a, const TgcPrepData* b){
+                    return a->identify() < b->identify();
+                });
+        for (std::size_t i = 0; i < allBcColl->size(); ++i) {
+            allBcColl->at(i)->setHashAndIndex(allBcColl->identifyHash(), i);
         }
     }
 
-    if (!m_xAODKey.empty()) {
-        for (std::unique_ptr<TgcPrepDataCollection>& allBcColl :
-             state.tgcPrepDataCollections[NBC_HIT]) {
-            if (!allBcColl) {
-                continue;
-            }
-            for (const TgcPrepData* allBcPrd : *allBcColl) {
-                xAOD::TgcStrip* tgcStrip =
-                    xAODHandle->push_back(std::make_unique<xAOD::TgcStrip>());
-                tgcStrip->setMeasuresPhi(
-                    idHelper.isStrip(allBcPrd->identify()));
-                tgcStrip->setGasGap(idHelper.gasGap(allBcPrd->identify()));
-                tgcStrip->setChannelNumber(
-                    idHelper.channel(allBcPrd->identify()));
-                tgcStrip->setBcBitMap(allBcPrd->getBcBitMap());
-                tgcStrip->setIdentifier(allBcPrd->identify().get_compact());
-                /// In the R4 layout both phi & eta measurements are expressed
-                /// on the same surface. However, the
-                //  rotation from eta -> phi is clockwise  --> minus sign in prd
-                //  creation
-                const double locPos = (tgcStrip->measuresPhi() ? -1. : 1.) *
-                                      allBcPrd->localPosition().x();
-                tgcStrip->setMeasurement(
-                    m_idHelperSvc->moduleHash(allBcPrd->identify()),
-                    xAOD::MeasVector<1>(locPos),
-                    xAOD::MeasMatrix<1>(allBcPrd->localCovariance()(0, 0)));
-            }
-        }
-    }
 
-    for (unsigned int k = 0; k < state.tgcPrepDataContainer.size(); ++k) {
-        ATH_CHECK(transferData(*state.tgcPrepDataContainer[k],
-                               std::move(state.tgcPrepDataCollections[k])));
-    }
+    ATH_CHECK(transferData(*state.tgcPrepDataContainer,
+                           std::move(state.tgcPrepDataCollections)));
+
     for (unsigned int k = 0; k < state.tgcCoinDataContainer.size(); ++k) {
         ATH_CHECK(transferData(*state.tgcCoinDataContainer[k],
                                std::move(state.tgcCoinDataCollections[k])));
     }
-    ATH_MSG_DEBUG("Found " << hashesInAnyBC.size()
-                           << " hashes that must be added to AllBC container");
-
     return StatusCode::SUCCESS;
 }
 
-void Muon::TgcRdoToPrepDataToolMT::selectDecoder(State& state,
+void TgcRdoToPrepDataToolMT::selectDecoder(State& state,
                                                  const TgcRawData& rd,
                                                  const TgcRdo* rdoColl) const {
-
-    const CablingInfo* cinfo = getCabling();
-    if (!cinfo) {
-        return;
-    }
 
     if (!rd.isCoincidence()) {
         if (!decodeHits(state, rd).isSuccess()) {
@@ -495,7 +363,7 @@ void Muon::TgcRdoToPrepDataToolMT::selectDecoder(State& state,
     }
 }
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(
+StatusCode TgcRdoToPrepDataToolMT::decodeHits(
     State& state, const TgcRawData& rd) const {
     // The channel hit by hardware-ROD supports only three-bunch readout. Data
     // of TgcDigit::BC_NEXTNEXT should be skipped in this function.
@@ -511,23 +379,14 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(
                                    << rd.sswId() << " slb=" << rd.slbId()
                                    << " bitpos=" << rd.bitpos());
 
-    const CablingInfo* cinfo = getCabling();
-
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
-
-    // select current Hits, =0 for backward compatibility
-    // BC_CURRENT=2, BC_UNDEFINED=0
-    int locId = (rd.bcTag() == TgcDigit::BC_CURRENT ||
-                 rd.bcTag() == TgcDigit::BC_UNDEFINED)
-                    ? 1
-                    : rd.bcTag() - 1;
 
     // repeat two times for ORed channel
     for (int iOr = 0; iOr < 2; iOr++) {
         bool orFlag = false;
         // check if this channel has ORed partner only when 2nd time
         if (iOr != 0) {
-            bool o_found = cinfo->m_tgcCabling->isOredChannel(
+            bool o_found = state.cabling->isOredChannel(
                 rd.subDetectorId(), rd.rodId(), rd.sswId(), rd.slbId(),
                 rd.bitpos());
             // set OR flag
@@ -540,7 +399,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(
 
         // get element ID
         Identifier elementId{};
-        bool e_found = cinfo->m_tgcCabling->getElementIDfromReadoutID(
+        bool e_found = state.cabling->getElementIDfromReadoutID(
             elementId, rd.subDetectorId(), rd.rodId(), rd.sswId(), rd.slbId(),
             rd.bitpos(), orFlag);
         if (!e_found) {
@@ -579,7 +438,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(
         const IdentifierHash tgcHashId = m_idHelperSvc->moduleHash(elementId);
 
         Identifier channelId{};
-        bool c_found = cinfo->m_tgcCabling->getOfflineIDfromReadoutID(
+        bool c_found = state.cabling->getOfflineIDfromReadoutID(
             channelId, rd.subDetectorId(), rd.rodId(), rd.sswId(), rd.slbId(),
             rd.bitpos(), orFlag);
         if (!c_found) {
@@ -592,20 +451,27 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(
             }
             continue;
         }
+        const std::uint16_t bcTag = translateBC(rd.bcTag());
+        if (!m_convertAllBCs && (bcTag != Muon::TgcPrepData::BCBIT_CURRENT)) {
+            continue;
+        }
 
-        std::unique_ptr<TgcPrepDataCollection>& collection =
-            state.tgcPrepDataCollections[locId][tgcHashId];
+
+        std::unique_ptr<TgcPrepDataCollection>& collection = state.tgcPrepDataCollections[tgcHashId];
         if (!collection) {
             collection = std::make_unique<TgcPrepDataCollection>(tgcHashId);
             collection->setIdentifier(elementId);
         }
-        const bool duplicate =
-            std::find_if(collection->begin(), collection->end(),
+        TgcPrepDataCollection::iterator duplicate_itr = 
+            std::ranges::find_if(*collection,
                          [&channelId](const TgcPrepData* prd) {
-                             return prd->identify() == channelId;
-                         }) != collection->end();
-        if (duplicate) {
-            isDuplicated = true;  // A converted PRD of this RDO is duplicated.
+                            return prd->identify() == channelId;
+                         });
+        if (duplicate_itr != collection->end()) {
+            const int newBCTag = (**duplicate_itr).getBcBitMap() | bcTag;
+            // A converted PRD of this RDO is duplicated.
+            isDuplicated |= (newBCTag == (**duplicate_itr).getBcBitMap());  
+            (**duplicate_itr).setBcBitMap(newBCTag);
             continue;
         }
 
@@ -628,7 +494,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(
         // the globalToLocal should not fail, if it does produce a WARNING
         if (!onSurface) {
             ATH_MSG_WARNING(
-                "Muon::TgcRdoToPrepDataToolMT::decodeHits Amg::Vector2D* "
+                "TgcRdoToPrepDataToolMT::decodeHits Amg::Vector2D* "
                 "hitPos is null.");
             continue;
         }
@@ -655,18 +521,17 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(
         mat.setIdentity();
         mat *= errPos * errPos;
 
-        // add the digit to the collection
-        // new TgcPrepRawData
-        TgcPrepData* newPrepData =
-            new TgcPrepData(channelId,       // Readout ID -> Offline ID
+        auto newPrepData =
+            std::make_unique<TgcPrepData>(channelId,       // Readout ID -> Offline ID
                             tgcHashId,       // Readout ID -> Element ID -> Hash
                             hitPos,          // determined from channelId
                             identifierList,  // holds channelId only
                             mat,             // determined from channelId
-                            descriptor);     // determined from channelId
+                            descriptor,
+                            translateBC(rd.bcTag()));     // determined from channelId
         newPrepData->setHashAndIndex(collection->identifyHash(),
                                      collection->size());
-        collection->push_back(newPrepData);
+        collection->push_back(std::move(newPrepData));
         isConverted = true;  // This RDO is converted to at least one PRD.
     }
 
@@ -679,17 +544,15 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTracklet(
+StatusCode TgcRdoToPrepDataToolMT::decodeTracklet(
     State& state, const TgcRawData& rd) const {
     ++m_nTrackletRDOs;  // Count the number of input Tracklet RDOs.
-
-    const CablingInfo* cinfo = getCabling();
 
     bool found = false;
 
     //*** Get OfflineId of pivot plane (TGC3) start ***//
     Identifier channelIdOut{};
-    found = cinfo->m_tgcCabling->getOfflineIDfromLowPtCoincidenceID(
+    found = state.cabling->getOfflineIDfromLowPtCoincidenceID(
         channelIdOut, rd.subDetectorId(), rd.rodId(), rd.sswId(), rd.slbId(),
         rd.subMatrix(), rd.position(), false);
     if (!found) {
@@ -705,7 +568,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTracklet(
         return StatusCode::SUCCESS;
     }
     Identifier channelIdIn{};
-    found = cinfo->m_tgcCabling->getOfflineIDfromLowPtCoincidenceID(
+    found = state.cabling->getOfflineIDfromLowPtCoincidenceID(
         channelIdIn, rd.subDetectorId(), rd.rodId(), rd.sswId(), tmp_slbId,
         tmp_subMatrix, tmp_position, true);
     if (!found) {
@@ -721,11 +584,9 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTracklet(
                     ? 1
                     : rd.bcTag() - 1;
 
-    std::unique_ptr<Muon::TgcCoinDataCollection>& coincollection =
-        state.tgcCoinDataCollections[locId][tgcHashId];
+    std::unique_ptr<TgcCoinDataCollection>& coincollection = state.tgcCoinDataCollections[locId][tgcHashId];
     if (!coincollection) {
-        coincollection =
-            std::make_unique<Muon::TgcCoinDataCollection>(tgcHashId);
+        coincollection = std::make_unique<TgcCoinDataCollection>(tgcHashId);
         coincollection->setIdentifier(m_idHelperSvc->chamberId(channelIdOut));
     }
 
@@ -781,7 +642,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTracklet(
     // the globalToLocal should not fail, if it does produce a WARNING
     if (!onSurface_o) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::decodeTracklet Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::decodeTracklet Amg::Vector2D* "
             "hitPos_o is null.");
         return StatusCode::SUCCESS;
     }
@@ -813,7 +674,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTracklet(
     // the globalToLocal should not fail, if it does produce a WARNING
     if (!onSurface_i) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::decodeTracklet Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::decodeTracklet Amg::Vector2D* "
             "hitPos_i is null.");
         return StatusCode::SUCCESS;
     }
@@ -851,12 +712,10 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTracklet(
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI(
+StatusCode TgcRdoToPrepDataToolMT::decodeTrackletEIFI(
     State& state, const TgcRawData& rd) const {
     // Count the number of input TrackletEIFI RDOs.
     m_nTrackletEIFIRDOs++;
-
-    const CablingInfo* cinfo = getCabling();
 
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
 
@@ -944,12 +803,12 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI(
 
     // Retrieve OfflineID from ReadoutID
     Identifier channelIdIn;
-    bool o_found = cinfo->m_tgcCabling->getOfflineIDfromReadoutID(
+    bool o_found = state.cabling->getOfflineIDfromReadoutID(
         channelIdIn, rd.subDetectorId(), rd.rodId(), rd.sswId(), rd.slbId(),
         bitpos, false /*orflag*/);
     if (!o_found) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI OfflineID not "
+            "TgcRdoToPrepDataToolMT::decodeTrackletEIFI OfflineID not "
             "found for "
             << " subDetectorId=" << rd.subDetectorId() << " rodId="
             << rd.rodId() << " sswId=" << rd.sswId() << " slbId=" << rd.slbId()
@@ -968,11 +827,11 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI(
                     ? 1
                     : rd.bcTag() - 1;
 
-    std::unique_ptr<Muon::TgcCoinDataCollection>& coincollection =
+    std::unique_ptr<TgcCoinDataCollection>& coincollection =
         state.tgcCoinDataCollections[locId][tgcHashId];
     if (!coincollection) {
         coincollection =
-            std::make_unique<Muon::TgcCoinDataCollection>(tgcHashId);
+            std::make_unique<TgcCoinDataCollection>(tgcHashId);
         coincollection->setIdentifier(m_idHelperSvc->chamberId(channelIdIn));
     }
 
@@ -992,7 +851,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI(
         state.muDetMgr->getTgcReadoutElement(channelIdIn);
     if (!isOfflineIdOKForTgcReadoutElement(descriptor, channelIdIn)) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI descriptor "
+            "TgcRdoToPrepDataToolMT::decodeTrackletEIFI descriptor "
             "doesn't contain "
             << m_idHelperSvc->toString(channelIdIn));
         return StatusCode::SUCCESS;
@@ -1006,7 +865,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI(
     // the globalToLocal should not fail, if it does produce a WARNING
     if (!onSurface) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::decodeTrackletEIFI Amg::Vector2D* "
             "hitPos is null.");
         return StatusCode::SUCCESS;
     }
@@ -1056,11 +915,9 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI(
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(
+StatusCode TgcRdoToPrepDataToolMT::decodeHiPt(
     State& state, const TgcRawData& rd0) const {
     m_nHiPtRDOs++;  // Count the number of input HiPt RDOs.
-
-    const CablingInfo* cinfo = getCabling();
 
     // conversion for Run3
     uint16_t tmprodId{}, tmpsector{};
@@ -1115,7 +972,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(
 
     //*** TGC3 start ***//
     // RDOHighPtID --> (Sim)HighPtID --> OfflineID --> ReadoutID --> getSLBID
-    found = getHiPtIds(rd, sswId_o, sbLoc_o, slbId_o);
+    found = getHiPtIds(state, rd, sswId_o, sbLoc_o, slbId_o);
     if (!found) {
         return StatusCode::SUCCESS;
     }
@@ -1127,7 +984,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(
         getBitPosOutStrip(rd, slbsubMatrix, bitpos_o);
     }
     for (int i = 0; i < 2; i++) {
-        found = cinfo->m_tgcCabling->getOfflineIDfromReadoutID(
+        found = state.cabling->getOfflineIDfromReadoutID(
             channelIdOut[i], rd.subDetectorId(), rd.rodId(), sswId_o, sbLoc_o,
             bitpos_o[i]);
         if (!found) {
@@ -1151,7 +1008,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(
                          sbLoc_i, sswId_i, bitpos_o, slbchannel_o);
     }
     for (int i = 0; i < 4; i++) {
-        found = cinfo->m_tgcCabling->getOfflineIDfromReadoutID(
+        found = state.cabling->getOfflineIDfromReadoutID(
             channelIdIn[i], rd.subDetectorId(), rd.rodId(), sswId_i,
             rd.isStrip() ? sbLoc_i : sbLoc_in[i], bitpos_i[i]);
         if (!found) {
@@ -1173,11 +1030,11 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(
                     ? 1
                     : rd.bcTag() - 1;
 
-    std::unique_ptr<Muon::TgcCoinDataCollection>& coincollection =
+    std::unique_ptr<TgcCoinDataCollection>& coincollection =
         state.tgcCoinDataCollections[locId][tgcHashId];
     if (!coincollection) {
         coincollection =
-            std::make_unique<Muon::TgcCoinDataCollection>(tgcHashId);
+            std::make_unique<TgcCoinDataCollection>(tgcHashId);
         coincollection->setIdentifier(
             m_idHelperSvc->chamberId(channelIdOut[1]));
     }
@@ -1329,14 +1186,10 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(
+StatusCode TgcRdoToPrepDataToolMT::decodeInner(
     State& state, const TgcRawData& rd) const {
     m_nHiPtRDOs++;  // Count the number of input HiPt RDOs.
 
-    const CablingInfo* cinfo = getCabling();
-    if (!cinfo) {
-        return StatusCode::FAILURE;
-    }
 
     int subDetectorId = rd.subDetectorId();
     // Protection against invalid subDetectorId and isForward
@@ -1359,59 +1212,59 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(
     bool isAside = false;
     bool isEndcap = false;
     if (rd.rodId() < 13) {  // Run2
-        cinfo->m_tgcCabling->getSLIDfromReadoutID(phi, isAside, isEndcap,
+        state.cabling->getSLIDfromReadoutID(phi, isAside, isEndcap,
                                                   subDetectorId, rd.rodId(),
                                                   sswId_o, sbLoc_o);
     } else {  // Run3
         sbLoc_o = rd.sector();
-        cinfo->m_tgcCabling->getSLIDfromSReadoutID(
+        state.cabling->getSLIDfromSReadoutID(
             phi, isAside, subDetectorId, rd.rodId(), sbLoc_o, rd.isForward());
         isEndcap = !rd.isForward();
         if (rd.type() == TgcRawData::TYPE_INNER_NSW) {
             isInner = true;
             isStrip = false;
-            inner = (rd.nsweta() << Muon::TgcCoinData::INNER_NSW_R_BITSHIFT) +
-                    (rd.nswphi() << Muon::TgcCoinData::INNER_NSW_PHI_BITSHIFT) +
+            inner = (rd.nsweta() << TgcCoinData::INNER_NSW_R_BITSHIFT) +
+                    (rd.nswphi() << TgcCoinData::INNER_NSW_PHI_BITSHIFT) +
                     (rd.nswdtheta()
-                     << Muon::TgcCoinData::INNER_NSW_DTHETA_BITSHIFT) +
+                     << TgcCoinData::INNER_NSW_DTHETA_BITSHIFT) +
                     (rd.nswphires()
-                     << Muon::TgcCoinData::INNER_NSW_PHIRES_BITSHIFT) +
+                     << TgcCoinData::INNER_NSW_PHIRES_BITSHIFT) +
                     (rd.nswlowres()
-                     << Muon::TgcCoinData::INNER_NSW_LOWRES_BITSHIFT) +
-                    (rd.nswid() << Muon::TgcCoinData::INNER_NSW_ID_BITSHIFT) +
+                     << TgcCoinData::INNER_NSW_LOWRES_BITSHIFT) +
+                    (rd.nswid() << TgcCoinData::INNER_NSW_ID_BITSHIFT) +
                     (((rd.nswcand() >> TgcRawData::NSW_BCID_BITSHIFT) &
                       TgcRawData::NSW_BCID_BIT)
-                     << Muon::TgcCoinData::INNER_NSW_BCID_BITSHIFT) +
+                     << TgcCoinData::INNER_NSW_BCID_BITSHIFT) +
                     (((rd.nswcand() >> TgcRawData::NSW_INPUT_BITSHIFT) &
                       TgcRawData::NSW_INPUT_BIT)
-                     << Muon::TgcCoinData::INNER_NSW_INPUT_BITSHIFT);
+                     << TgcCoinData::INNER_NSW_INPUT_BITSHIFT);
         } else if (rd.type() == TgcRawData::TYPE_INNER_BIS) {
             isInner = true;
             isStrip = true;
             inner =
-                (rd.rpceta() << Muon::TgcCoinData::INNER_RPC_ETA_BITSHIFT) +
-                (rd.rpcphi() << Muon::TgcCoinData::INNER_RPC_PHI_BITSHIFT) +
-                (rd.rpcdeta() << Muon::TgcCoinData::INNER_RPC_DETA_BITSHIFT) +
-                (rd.rpcdphi() << Muon::TgcCoinData::INNER_RPC_DPHI_BITSHIFT) +
+                (rd.rpceta() << TgcCoinData::INNER_RPC_ETA_BITSHIFT) +
+                (rd.rpcphi() << TgcCoinData::INNER_RPC_PHI_BITSHIFT) +
+                (rd.rpcdeta() << TgcCoinData::INNER_RPC_DETA_BITSHIFT) +
+                (rd.rpcdphi() << TgcCoinData::INNER_RPC_DPHI_BITSHIFT) +
                 (((rd.rpcflag() >> TgcRawData::RPC_FLAG_BITSHIFT) &
                   TgcRawData::RPC_FLAG_BIT)
-                 << Muon::TgcCoinData::INNER_RPC_FLAG_BITSHIFT) +
+                 << TgcCoinData::INNER_RPC_FLAG_BITSHIFT) +
                 (((rd.rpcflag() >> TgcRawData::RPC_BCID_BITSHIFT) &
                   TgcRawData::RPC_BCID_BIT)
-                 << Muon::TgcCoinData::INNER_RPC_BCID_BITSHIFT);
+                 << TgcCoinData::INNER_RPC_BCID_BITSHIFT);
         } else if (rd.type() == TgcRawData::TYPE_INNER_EIFI) {
             isInner = false;
             isStrip = false;
-            inner = (rd.ei() << Muon::TgcCoinData::INNER_EIFI_EI_BITSHIFT) +
-                    (rd.fi() << Muon::TgcCoinData::INNER_EIFI_FI_BITSHIFT) +
-                    (rd.cid() << Muon::TgcCoinData::INNER_EIFI_CID_BITSHIFT);
+            inner = (rd.ei() << TgcCoinData::INNER_EIFI_EI_BITSHIFT) +
+                    (rd.fi() << TgcCoinData::INNER_EIFI_FI_BITSHIFT) +
+                    (rd.cid() << TgcCoinData::INNER_EIFI_CID_BITSHIFT);
         } else if (rd.type() == TgcRawData::TYPE_INNER_TMDB) {
             isInner = false;
             isStrip = true;
             inner =
                 (rd.tmdbmod()
-                 << Muon::TgcCoinData::INNER_TILE_MODULE_BITSHIFT) +
-                (rd.tmdbbcid() << Muon::TgcCoinData::INNER_TILE_BCID_BITSHIFT);
+                 << TgcCoinData::INNER_TILE_MODULE_BITSHIFT) +
+                (rd.tmdbbcid() << TgcCoinData::INNER_TILE_BCID_BITSHIFT);
         }
     }
 
@@ -1434,11 +1287,11 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(
         stationName, stationEta, stationPhi, isValid);
     const IdentifierHash tgcHashId = m_idHelperSvc->moduleHash(elementId);
 
-    std::unique_ptr<Muon::TgcCoinDataCollection>& coincollection =
+    std::unique_ptr<TgcCoinDataCollection>& coincollection =
         state.tgcCoinDataCollections[locId][tgcHashId];
     if (!coincollection) {
         coincollection =
-            std::make_unique<Muon::TgcCoinDataCollection>(tgcHashId);
+            std::make_unique<TgcCoinDataCollection>(tgcHashId);
         coincollection->setIdentifier(elementId);
     }
 
@@ -1482,7 +1335,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
+StatusCode TgcRdoToPrepDataToolMT::decodeSL(State& state,
                                                   const TgcRawData& rd0,
                                                   const TgcRdo* rdoColl) const {
     m_nSLRDOs++;  // Count the number of input SL RDOs.
@@ -1510,7 +1363,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
     std::array<int, 3> bitpos_w{};
 
     //***  get OfflineID, center of ROI of R (wire) ***//
-    found = getSLIds(false, rd, channelId_wire, index_w, chip_w, hitId_w, sub_w,
+    found = getSLIds(state, false, rd, channelId_wire, index_w, chip_w, hitId_w, sub_w,
                      sswId_w, sbLoc_w, subMatrix_w, bitpos_w);
     if (!found) {
         return StatusCode::SUCCESS;
@@ -1522,7 +1375,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
     std::array<int, 3> bitpos_s{};
 
     //***  get OfflineID, center of ROI of phi (strip) ***//
-    found = getSLIds(true, rd, channelId_strip, index_s, chip_s, hitId_s, sub_s,
+    found = getSLIds(state, true, rd, channelId_strip, index_s, chip_s, hitId_s, sub_s,
                      sswId_s, sbLoc_s, subMatrix_s, bitpos_s,
                      isIncludedInChamberBoundary(rd), rdoColl, index_w, chip_w,
                      hitId_w, sub_w);
@@ -1541,11 +1394,11 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
                     ? 1
                     : rd.bcTag() - 1;
 
-    std::unique_ptr<Muon::TgcCoinDataCollection>& coincollection =
+    std::unique_ptr<TgcCoinDataCollection>& coincollection =
         state.tgcCoinDataCollections[locId][tgcHashId];
     if (!coincollection) {
         coincollection =
-            std::make_unique<Muon::TgcCoinDataCollection>(tgcHashId);
+            std::make_unique<TgcCoinDataCollection>(tgcHashId);
         coincollection->setIdentifier(
             m_idHelperSvc->chamberId(channelId_wire[1]));
     }
@@ -1594,7 +1447,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
     if (!isGoodEta) {
         ATH_MSG_WARNING(
             "Conversion from r and z to eta by "
-            "Muon::TgcRdoToPrepDataToolMT::getEtafromRZ failed.");
+            "TgcRdoToPrepDataToolMT::getEtafromRZ failed.");
         return StatusCode::SUCCESS;
     }
     if (tmp_wire_z < 0.) {
@@ -1629,10 +1482,9 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
     // If TGC A-lines with rotations are used, the z-coordinate of a chamber
     // depends on position. In this case, the global to local conversion fails.
     // Obtain the local position in a different way.
-    const Amg::Vector2D* hitPos =
-        !onSurface ? new Amg::Vector2D(tmp_hitPos)
+    const Amg::Vector2D* hitPos = new Amg::Vector2D(!onSurface ? tmp_hitPos
                    : getSLLocalPosition(descriptor_w2, channelId_wire[2],
-                                        tmp_eta, tmp_phi);
+                                        tmp_eta, tmp_phi));
 
     Amg::MatrixX mat(2, 2);
     mat.setIdentity();
@@ -1667,7 +1519,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
     return StatusCode::SUCCESS;
 }
 
-int Muon::TgcRdoToPrepDataToolMT::getbitpos(int channel,
+int TgcRdoToPrepDataToolMT::getbitpos(int channel,
                                             TgcRawData::SlbType slbType) {
     int bitpos = -BIT_POS_INPUT_SIZE + 1;
     if (slbType == TgcRawData::SLB_TYPE_TRIPLET_WIRE) {
@@ -1711,7 +1563,7 @@ int Muon::TgcRdoToPrepDataToolMT::getbitpos(int channel,
     }
 }
 
-int Muon::TgcRdoToPrepDataToolMT::getchannel(int bitpos,
+int TgcRdoToPrepDataToolMT::getchannel(int bitpos,
                                              TgcRawData::SlbType slbType) {
     int input = -1;
     if ((bitpos <= BIT_POS_A_INPUT_ORIGIN) &&
@@ -1759,7 +1611,7 @@ int Muon::TgcRdoToPrepDataToolMT::getchannel(int bitpos,
     }
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getRfromEtaZ(const double eta,
+bool TgcRdoToPrepDataToolMT::getRfromEtaZ(const double eta,
                                                 const double z, double& r) {
     r = exp(-eta);     // tan(theta/2)
     r = atan(r);       // theta/2
@@ -1769,7 +1621,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getRfromEtaZ(const double eta,
     return r >= 0.;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getEtafromRZ(const double r, const double z,
+bool TgcRdoToPrepDataToolMT::getEtafromRZ(const double r, const double z,
                                                 double& eta) {
     double r_tmp = std::abs(r);
     double z_tmp = std::abs(z);
@@ -1785,7 +1637,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getEtafromRZ(const double r, const double z,
     return true;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::isOfflineIdOKForTgcReadoutElement(
+bool TgcRdoToPrepDataToolMT::isOfflineIdOKForTgcReadoutElement(
     const MuonGM::TgcReadoutElement* descriptor,
     const Identifier channelId) const {
     if (!descriptor || !descriptor->containsId(channelId)) {
@@ -1796,7 +1648,7 @@ bool Muon::TgcRdoToPrepDataToolMT::isOfflineIdOKForTgcReadoutElement(
     return true;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getTrackletInfo(const TgcRawData& rd,
+bool TgcRdoToPrepDataToolMT::getTrackletInfo(const TgcRawData& rd,
                                                    int& tmp_slbId,
                                                    int& tmp_subMatrix,
                                                    int& tmp_position) const {
@@ -1897,12 +1749,12 @@ bool Muon::TgcRdoToPrepDataToolMT::getTrackletInfo(const TgcRawData& rd,
     return true;
 }
 
-int Muon::TgcRdoToPrepDataToolMT::getRoiRow(const TgcRawData& rd) {
+int TgcRdoToPrepDataToolMT::getRoiRow(const TgcRawData& rd) {
     int RoiRow = static_cast<int>(rd.roi() / 4);
     return RoiRow;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::isIncludedInChamberBoundary(
+bool TgcRdoToPrepDataToolMT::isIncludedInChamberBoundary(
     const TgcRawData& rd) const {
     int RoiRow = getRoiRow(rd);
 
@@ -1917,7 +1769,7 @@ bool Muon::TgcRdoToPrepDataToolMT::isIncludedInChamberBoundary(
     return false;
 }
 
-void Muon::TgcRdoToPrepDataToolMT::getBitPosOutWire(
+void TgcRdoToPrepDataToolMT::getBitPosOutWire(
     const TgcRawData& rd, int& slbsubMatrix, std::array<int, 2>& bitpos_o) {
     // This method is used by decodeHiPt
     if ((rd.hitId() % 2) == 1) {  // 1,3,5
@@ -1973,7 +1825,7 @@ void Muon::TgcRdoToPrepDataToolMT::getBitPosOutWire(
     // end of fixed------------------------------------------------
 }
 
-void Muon::TgcRdoToPrepDataToolMT::getBitPosInWire(
+void TgcRdoToPrepDataToolMT::getBitPosInWire(
     const TgcRawData& rd, const int deltaBeforeConvert,
     std::array<int, 4>& bitpos_i, std::array<int, 4>& slbchannel_i,
     std::array<int, 4>& slbId_in, std::array<int, 4>& sbLoc_in, int& sswId_i,
@@ -2066,7 +1918,7 @@ void Muon::TgcRdoToPrepDataToolMT::getBitPosInWire(
     }
 }
 
-void Muon::TgcRdoToPrepDataToolMT::getBitPosOutStrip(
+void TgcRdoToPrepDataToolMT::getBitPosOutStrip(
     const TgcRawData& rd, int& slbsubMatrix, std::array<int, 2>& bitpos_o) {
     // This method is used by decodeHiPt
     if ((rd.hitId() % 2) == 1) {  // 1,3,5::hitId:1-6 for EC, 2-3 for Fw
@@ -2098,7 +1950,7 @@ void Muon::TgcRdoToPrepDataToolMT::getBitPosOutStrip(
     }
 }
 
-void Muon::TgcRdoToPrepDataToolMT::getBitPosInStrip(
+void TgcRdoToPrepDataToolMT::getBitPosInStrip(
     const TgcRawData& rd, const int deltaBeforeConvert,
     std::array<int, 4>& bitpos_i, std::array<int, 4>& slbchannel_i,
     int& sbLoc_i, int& sswId_i, const std::array<int, 2>& bitpos_o,
@@ -2158,7 +2010,7 @@ void Muon::TgcRdoToPrepDataToolMT::getBitPosInStrip(
     }
 }
 
-void Muon::TgcRdoToPrepDataToolMT::getBitPosWire(
+void TgcRdoToPrepDataToolMT::getBitPosWire(
     const TgcRawData& rd, const int hitId_w, const int sub_w, int& subMatrix_w,
     std::array<int, 3>& bitpos_w) const {
     // This method is used by getSLIds
@@ -2223,7 +2075,7 @@ void Muon::TgcRdoToPrepDataToolMT::getBitPosWire(
     }
 }
 
-void Muon::TgcRdoToPrepDataToolMT::getBitPosStrip(
+void TgcRdoToPrepDataToolMT::getBitPosStrip(
     const int hitId_s, const int sub_s, int& subMatrix_s,
     std::array<int, 3>& bitpos_s) {
     // This method is used by getSLIds
@@ -2268,7 +2120,7 @@ void Muon::TgcRdoToPrepDataToolMT::getBitPosStrip(
     }
 }
 
-int Muon::TgcRdoToPrepDataToolMT::getDeltaBeforeConvert(const TgcRawData& rd) {
+int TgcRdoToPrepDataToolMT::getDeltaBeforeConvert(const TgcRawData& rd) {
     int deltaBeforeConvert = 0;
 
     if (rd.isStrip()) {  // strip
@@ -2336,7 +2188,7 @@ int Muon::TgcRdoToPrepDataToolMT::getDeltaBeforeConvert(const TgcRawData& rd) {
     return deltaBeforeConvert;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::isBackwardBW(const TgcRawData& rd) {
+bool TgcRdoToPrepDataToolMT::isBackwardBW(const TgcRawData& rd) {
     bool isBackward = false;
 
     if (!rd.isForward()) {  // Endcap
@@ -2359,7 +2211,7 @@ bool Muon::TgcRdoToPrepDataToolMT::isBackwardBW(const TgcRawData& rd) {
     return isBackward;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getSLWireGeometry(
+bool TgcRdoToPrepDataToolMT::getSLWireGeometry(
     const std::array<Identifier, 3>& channelId_wire, double& width_wire,
     double& r_wire, double& z_wire) const {
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{
@@ -2383,7 +2235,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLWireGeometry(
                            .globalToLocal(position_w, position_w, loc_hitPos_w);
     if (!onSurface_w) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::getSLWireGeometry Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::getSLWireGeometry Amg::Vector2D* "
             "loc_hitPos_w is null.");
         return false;
     }
@@ -2446,7 +2298,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLWireGeometry(
     return true;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getSLStripGeometry(
+bool TgcRdoToPrepDataToolMT::getSLStripGeometry(
     const std::array<Identifier, 3>& channelId_strip, const bool isBackward,
     const bool isAside, double& width_strip, double& theta_strip) const {
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{
@@ -2471,7 +2323,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLStripGeometry(
                            .globalToLocal(position_s, position_s, loc_hitPos_s);
     if (!onSurface_s) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::getSLStripGeometry Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::getSLStripGeometry Amg::Vector2D* "
             "loc_hitPos_s is null.");
         return false;
     }
@@ -2544,7 +2396,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLStripGeometry(
     return true;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdWireOut(
+bool TgcRdoToPrepDataToolMT::getPosAndIdWireOut(
     const std::array<const MuonGM::TgcReadoutElement*, 2>& descriptor_o,
     const std::array<Identifier, 2>& channelIdOut,
     const std::array<int, 2>& gasGap_o, const std::array<int, 2>& channel_o,
@@ -2603,7 +2455,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdWireOut(
             .globalToLocal(position_out, position_out, loc_hitPos_o);
     if (!onSurface_o) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::getPosAndIdWireOut Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::getPosAndIdWireOut Amg::Vector2D* "
             "loc_hitPos_o is null.");
         return false;
     }
@@ -2614,7 +2466,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdWireOut(
     return true;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdStripOut(
+bool TgcRdoToPrepDataToolMT::getPosAndIdStripOut(
     const std::array<const MuonGM::TgcReadoutElement*, 2>& descriptor_o,
     const std::array<Identifier, 2>& channelIdOut,
     const std::array<int, 2>& gasGap_o, const std::array<int, 2>& channel_o,
@@ -2678,7 +2530,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdStripOut(
             .globalToLocal(position_out, position_out, loc_hitPos_o);
     if (!onSurface_o) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::getPosAndIdStripOut Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::getPosAndIdStripOut Amg::Vector2D* "
             "loc_hitPos_o is null.");
         return false;
     }
@@ -2689,7 +2541,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdStripOut(
     return true;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdWireIn(
+bool TgcRdoToPrepDataToolMT::getPosAndIdWireIn(
     const std::array<const MuonGM::TgcReadoutElement*, 4>& descriptor_i,
     const std::array<Identifier, 4>& channelIdIn,
     const std::array<int, 4>& gasGap_i, const std::array<int, 4>& channel_i,
@@ -2814,7 +2666,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdWireIn(
             .globalToLocal(position_in, position_in, loc_hitPos_i);
     if (!onSurface_i) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::getPosAndIdWireIn Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::getPosAndIdWireIn Amg::Vector2D* "
             "loc_hitPos_i is null.");
         return false;
     }
@@ -2824,7 +2676,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdWireIn(
     return true;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdStripIn(
+bool TgcRdoToPrepDataToolMT::getPosAndIdStripIn(
     const std::array<const MuonGM::TgcReadoutElement*, 4>& descriptor_i,
     const std::array<Identifier, 4>& channelIdIn,
     const std::array<int, 4>& gasGap_i, const std::array<int, 4>& channel_i,
@@ -2921,7 +2773,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdStripIn(
             .globalToLocal(position_in, position_in, loc_hitPos_i);
     if (!onSurface_i) {
         ATH_MSG_WARNING(
-            "Muon::TgcRdoToPrepDataToolMT::getPosAndIdStripIn Amg::Vector2D* "
+            "TgcRdoToPrepDataToolMT::getPosAndIdStripIn Amg::Vector2D* "
             "loc_hitPos_i is null.");
         return false;
     }
@@ -2931,20 +2783,15 @@ bool Muon::TgcRdoToPrepDataToolMT::getPosAndIdStripIn(
 }
 
 // RDOHighPtID --> (Sim)HighPtID --> OfflineID --> ReadoutID --> getSLBID
-bool Muon::TgcRdoToPrepDataToolMT::getHiPtIds(const TgcRawData& rd,
+bool TgcRdoToPrepDataToolMT::getHiPtIds(const State& state, const TgcRawData& rd,
                                               int& sswId_o, int& sbLoc_o,
                                               int& slbId_o) const {
-    const CablingInfo* cinfo = getCabling();
-    if (!cinfo) {
-        return false;
-    }
-
     int index = static_cast<int>(rd.index());
     int chip = static_cast<int>(rd.chip());
     int hitId = static_cast<int>(rd.hitId());
 
     // getSimHighPtIDfromRDOHighPtID changes index, chip and hitId.
-    bool found = cinfo->m_tgcCabling->getSimHighPtIDfromRDOHighPtID(
+    bool found = state.cabling->getSimHighPtIDfromRDOHighPtID(
         rd.isForward(), rd.isStrip(), index, chip, hitId);
     if (!found) {
         ATH_MSG_DEBUG("Failed to get SimHighPtID from RDOHighPtID for Pivot "
@@ -2958,11 +2805,11 @@ bool Muon::TgcRdoToPrepDataToolMT::getHiPtIds(const TgcRawData& rd,
 
     Identifier dummyId;
     if (rd.rodId() > 12) {  // Run3
-        found = cinfo->m_tgcCabling->getOfflineIDfromHighPtID(
+        found = state.cabling->getOfflineIDfromHighPtID(
             dummyId, rd.subDetectorId(), tmprodId, tmpsector, rd.isStrip(),
             rd.isForward(), index, chip, hitId, rd.hsub());
     } else {
-        found = cinfo->m_tgcCabling->getOfflineIDfromHighPtID(
+        found = state.cabling->getOfflineIDfromHighPtID(
             dummyId, rd.subDetectorId(), rd.rodId(), rd.sector(), rd.isStrip(),
             rd.isForward(), index, chip, hitId, rd.hsub());
     }
@@ -2974,7 +2821,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getHiPtIds(const TgcRawData& rd,
     }
 
     std::array<int, 3> dummy_i{};
-    found = cinfo->m_tgcCabling->getReadoutIDfromOfflineID(
+    found = state.cabling->getReadoutIDfromOfflineID(
         dummyId, dummy_i[0], dummy_i[1], sswId_o, sbLoc_o, dummy_i[2]);
     if (!found) {
         ATH_MSG_DEBUG("Failed to get ReadoutID from OfflineID for Pivot "
@@ -2985,11 +2832,11 @@ bool Muon::TgcRdoToPrepDataToolMT::getHiPtIds(const TgcRawData& rd,
     std::array<int, 2> i_o{};
     std::array<bool, 2> b_o{false, false};
     if (rd.rodId() > 12) {  // Run3
-        found = cinfo->m_tgcCabling->getSLBIDfromReadoutID(
+        found = state.cabling->getSLBIDfromReadoutID(
             i_o[0], b_o[0], b_o[1], i_o[1], slbId_o, rd.subDetectorId(),
             tmprodId, sswId_o, sbLoc_o);
     } else {
-        found = cinfo->m_tgcCabling->getSLBIDfromReadoutID(
+        found = state.cabling->getSLBIDfromReadoutID(
             i_o[0], b_o[0], b_o[1], i_o[1], slbId_o, rd.subDetectorId(),
             rd.rodId(), sswId_o, sbLoc_o);
     }
@@ -3001,7 +2848,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getHiPtIds(const TgcRawData& rd,
 
     return true;
 }
-bool Muon::TgcRdoToPrepDataToolMT::getSLIds(
+bool TgcRdoToPrepDataToolMT::getSLIds(const State& state,
     const bool isStrip, const TgcRawData& rd,
     std::array<Identifier, 3>& channelId, int& index, int& chip, int& hitId,
     int& sub, int& sswId, int& sbLoc, int& subMatrix,
@@ -3010,12 +2857,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(
     const int sub_w) const
 
 {
-    const CablingInfo* cinfo = getCabling();
-    if (!cinfo) {
-        return false;
-    }
-
-    bool found = cinfo->m_tgcCabling->getHighPtIDfromROINumber(
+    bool found = state.cabling->getHighPtIDfromROINumber(
         rd.roi(), rd.isForward(),
         isStrip,  // get HitID of HPT Board
         index, chip, hitId, sub);
@@ -3025,7 +2867,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(
         return false;
     }
 
-    found = cinfo->m_tgcCabling->getSimHighPtIDfromRDOHighPtID(
+    found = state.cabling->getSimHighPtIDfromRDOHighPtID(
         rd.isForward(), isStrip, index, chip, hitId);
     if (!found) {
         ATH_MSG_DEBUG("Failed to get SimHighPtID from RDOHighPtID for "
@@ -3034,7 +2876,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(
     }
 
     Identifier offlineId;
-    found = cinfo->m_tgcCabling->getOfflineIDfromHighPtID(
+    found = state.cabling->getOfflineIDfromHighPtID(
         offlineId, rd.subDetectorId(), rd.rodId(), rd.sector(), isStrip,
         rd.isForward(), index, chip, hitId, sub);
     if (!found) {
@@ -3047,7 +2889,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(
                                     // chamber boundary
         channelId[1] = offlineId;
         std::array<int, 3> dummy_i{};
-        found = cinfo->m_tgcCabling->getReadoutIDfromOfflineID(
+        found = state.cabling->getReadoutIDfromOfflineID(
             channelId[1], dummy_i[0], dummy_i[1], sswId, sbLoc, dummy_i[2]);
         if (!found) {
             ATH_MSG_DEBUG("Failed to get ReadoutID from OfflineID for "
@@ -3059,12 +2901,12 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(
                                   // M3-EC phi2, SSW6: M3-EC phi3
 
         // Loop over all HiPt Strip to find an associated one to obtain sbLoc
-        bool exist_hipt_s = getSbLocOfEndcapStripBoundaryFromHiPt(
+        bool exist_hipt_s = getSbLocOfEndcapStripBoundaryFromHiPt(state,
             rd, sbLoc, rdoColl, index_w, chip_w, hitId_w, sub_w);
         if (!exist_hipt_s) {
             // Loop over all Tracklet Strip to find an associated one to obtain
             // sbLoc
-            bool exist_tracklet_s = getSbLocOfEndcapStripBoundaryFromTracklet(
+            bool exist_tracklet_s = getSbLocOfEndcapStripBoundaryFromTracklet(state,
                 rd, sbLoc, rdoColl, index_w, chip_w, hitId_w, sub_w);
             if (!exist_tracklet_s) {
                 ATH_MSG_DEBUG(
@@ -3085,7 +2927,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(
             continue;
         }
 
-        found = cinfo->m_tgcCabling->getOfflineIDfromReadoutID(
+        found = state.cabling->getOfflineIDfromReadoutID(
             channelId[i], rd.subDetectorId(), rd.rodId(), sswId, sbLoc,
             bitpos[i]);
         if (!found) {
@@ -3106,14 +2948,10 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(
     return true;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(
+bool TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(const State& state,
     const TgcRawData& rd, int& sbLoc, const TgcRdo* rdoColl, const int index_w,
     const int chip_w, const int hitId_w, const int sub_w) const {
-    const CablingInfo* cinfo = getCabling();
-    if (!cinfo) {
-        return false;
-    }
-
+  
     bool exist_hipt_s = false;
 
     // Get trackletIds of three candidates
@@ -3147,7 +2985,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(
 
             // Get sbLoc
             int sswId_o{0}, sbLoc_o{0}, slbId_o{0};
-            bool found = getHiPtIds(rdH, sswId_o, sbLoc_o, slbId_o);
+            bool found = getHiPtIds(state, rdH, sswId_o, sbLoc_o, slbId_o);
             if (!found) {
                 continue;
             }
@@ -3178,7 +3016,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(
             int chip_w_tmp = chip_w;
             int hitId_w_tmp = hitId_w;
             // Get RDO HighPt ID from SimHighPtID for wire
-            found = cinfo->m_tgcCabling->getRDOHighPtIDfromSimHighPtID(
+            found = state.cabling->getRDOHighPtIDfromSimHighPtID(
                 false,  // false for endcap
                 false,  // wire
                 index_w_tmp, chip_w_tmp, hitId_w_tmp);
@@ -3194,7 +3032,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(
             int hsub_s = static_cast<int>(rdH.hsub());
 
             int roi = 0;
-            found = cinfo->m_tgcCabling->getROINumberfromHighPtID(
+            found = state.cabling->getROINumberfromHighPtID(
                 roi,
                 false,        // false for Endcap
                 index_w_tmp,  // hpb_wire (not used)
@@ -3224,10 +3062,9 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(
     return exist_hipt_s;
 }
 
-bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(
+bool TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(const State& state,
     const TgcRawData& rd, int& sbLoc, const TgcRdo* rdoColl, const int index_w,
     const int chip_w, const int hitId_w, const int sub_w) const {
-    const CablingInfo* cinfo = getCabling();
 
     bool exist_tracklet_s = false;
 
@@ -3283,7 +3120,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(
 
             Identifier offlineId;
             bool found =
-                cinfo->m_tgcCabling->getOfflineIDfromLowPtCoincidenceID(
+                state.cabling->getOfflineIDfromLowPtCoincidenceID(
                     offlineId, rdS.subDetectorId(), rdS.rodId(), rdS.sswId(),
                     rdS.slbId(), rdS.subMatrix(), rdS.position(), false);
             if (!found) {
@@ -3295,7 +3132,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(
 
             std::array<int, 7> i{};
             std::array<bool, 2> b{};
-            found = cinfo->m_tgcCabling->getHighPtIDfromOfflineID(
+            found = state.cabling->getHighPtIDfromOfflineID(
                 offlineId, i[0], i[1], i[2], b[0], b[1], i[3], i[4], i[5],
                 i[6]);
             // i[0] subDetectorID, i[1] rodID, i[2] sectorInReadout, b[0]
@@ -3312,7 +3149,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(
             int index_w_tmp = index_w;
             int chip_w_tmp = chip_w;
             int hitId_w_tmp = hitId_w;
-            found = cinfo->m_tgcCabling->getRDOHighPtIDfromSimHighPtID(
+            found = state.cabling->getRDOHighPtIDfromSimHighPtID(
                 rd.isForward(),  // false for endcap
                 false,           // wire
                 index_w_tmp,     // hpb-index
@@ -3324,7 +3161,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(
                 continue;
             }
 
-            found = cinfo->m_tgcCabling->getRDOHighPtIDfromSimHighPtID(
+            found = state.cabling->getRDOHighPtIDfromSimHighPtID(
                 rd.isForward(),  // false for endcap
                 true,            // strip
                 i[3],            // hpb-index
@@ -3337,7 +3174,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(
             }
 
             int roi = 0;
-            found = cinfo->m_tgcCabling->getROINumberfromHighPtID(
+            found = state.cabling->getROINumberfromHighPtID(
                 roi,
                 rd.isForward(),  // false for endcap
                 index_w_tmp,     // hpb_wire (not used)
@@ -3367,7 +3204,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(
     return exist_tracklet_s;
 }
 
-void Muon::TgcRdoToPrepDataToolMT::getEndcapStripCandidateTrackletIds(
+void TgcRdoToPrepDataToolMT::getEndcapStripCandidateTrackletIds(
     const int roi, int& trackletIdStripFirst, int& trackletIdStripSecond,
     int& trackletIdStripThird) {
     constexpr int T9SscMax = 2;   // SSC 0 to SSC 2
@@ -3434,53 +3271,13 @@ void Muon::TgcRdoToPrepDataToolMT::getEndcapStripCandidateTrackletIds(
     }
 }
 
-const Muon::TgcRdoToPrepDataToolMT::CablingInfo*
-Muon::TgcRdoToPrepDataToolMT::getCabling() const {
-    if (m_cablingInfo.isValid()) {
-        return m_cablingInfo.ptr();
-    }
 
-    // get TGC Cabling Svc
-    CablingInfo cinfo;
-    if (cinfo.m_tgcCabling.retrieve().isFailure()) {
-        ATH_MSG_ERROR("Could not get MuonTGC_CablingSvc!");
-        return nullptr;
-    }
 
-    ATH_MSG_DEBUG(cinfo.m_tgcCabling->name() << " is OK");
-
-    // check the relation between hash and onlineId (onlineId depends on
-    // cabling)
-    unsigned int hashId_max = m_idHelperSvc->tgcIdHelper().module_hash_max();
-    cinfo.m_hashToOnlineId.reserve(hashId_max);
-    IdContext tgcContext =
-        m_idHelperSvc->tgcIdHelper().module_context();  // TGC context
-    Identifier elementId;
-    int subDetectorId = 0;  // 103(=0x67) for A side, 104(=0x68) for C side
-    int rodId = 0;          // 1 to 12 (12-fold cabling)
-    TgcRdo tgcRdo;          // For onlineId conversion
-    for (unsigned int hashId = 0; hashId < hashId_max; hashId++) {
-        IdentifierHash hash(hashId);
-        m_idHelperSvc->tgcIdHelper().get_id(hash, elementId, &tgcContext);
-        cinfo.m_tgcCabling->getReadoutIDfromElementID(elementId, subDetectorId,
-                                                      rodId);
-        // onlineId: 0 to 11 on A side and 12 to 23 on C side (12-fold cabling)
-        uint16_t onlineId = TgcRdo::calculateOnlineId(subDetectorId, rodId);
-        cinfo.m_hashToOnlineId.push_back(onlineId);
-    }
-
-    // initialize with false
-    cinfo.m_MAX_N_ROD = 2 * 12;
-
-    m_cablingInfo.set(std::move(cinfo));
-    return m_cablingInfo.ptr();
-}
-
-const Amg::Vector2D* Muon::TgcRdoToPrepDataToolMT::getSLLocalPosition(
+Amg::Vector2D TgcRdoToPrepDataToolMT::getSLLocalPosition(
     const MuonGM::TgcReadoutElement* readout, const Identifier identify,
     const double eta, const double phi) {
     if (!readout) {
-        return nullptr;
+        return Amg::Vector2D::Zero();
     }
 
     // Obtain the local coordinate by the secant method
@@ -3544,8 +3341,9 @@ const Amg::Vector2D* Muon::TgcRdoToPrepDataToolMT::getSLLocalPosition(
         }
     }
 
-    return new Amg::Vector2D(locX, locY);
+    return Amg::Vector2D(locX, locY);
 }
 
-const double Muon::TgcRdoToPrepDataToolMT::s_cutDropPrdsWithZeroWidth =
+const double TgcRdoToPrepDataToolMT::s_cutDropPrdsWithZeroWidth =
     0.1;  // 0.1 mm
+}

@@ -20,8 +20,7 @@
 #include <type_traits>
 #include <algorithm>
 #include <cstdint>
-
-#include "boost/integer.hpp"
+#include "CxxUtils/bit_int.h"
 
 namespace CxxUtils {
 /**
@@ -50,7 +49,7 @@ struct alignas(N*sizeof(T)) vec_fb
 // Helper: Given a vectorized class, find another vectorized class
 // that uses integers of the same size as the original class.
 template <typename T, size_t N>
-using ivec = vec_fb<typename boost::int_t<sizeof(T) * 8>::exact, N>;
+using ivec = vec_fb<CxxUtils::bit_int_t<sizeof(T) * 8>, N>;
 
 // Define binary operations.
 // For each operation, define

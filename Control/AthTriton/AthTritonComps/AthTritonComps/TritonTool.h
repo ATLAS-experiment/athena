@@ -1,73 +1,69 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#ifndef ATHTRITONCOMPS_TRITONTOOL_H
+#define ATHTRITONCOMPS_TRITONTOOL_H
 
-#pragma once
-
+// Project include(s).
 #include "AthOnnxInterfaces/IAthInferenceTool.h"
-#include "grpc_client.h"
-#include "grpc_service.pb.h"
-
-#include <string>
-#include <vector>
-#include <memory>
-
-
 #include "AthenaBaseComps/AthAlgTool.h"
 
-namespace tc = triton::client;
-
+// System include(s).
+#include <memory>
 
 namespace AthInfer {
 
-#define FAIL_IF_ERR(X, MSG)                                        \
-{                                                                \
-    tc::Error err = (X);                                          \
-    if (!err.IsOk()) {                                             \
-      ATH_MSG_ERROR(MSG);                                          \
-      return StatusCode::FAILURE;                                  \
-    }                                                              \
-}
+class TritonTool : public extends<AthAlgTool, IAthInferenceTool> {
 
-class TritonTool: public extends<AthAlgTool, IAthInferenceTool>
-{
+ public:
+  /// Constructor
+  TritonTool(const std::string& type, const std::string& name,
+             const IInterface* parent);
+  /// Destructor
+  virtual ~TritonTool();
 
-  public:
-    TritonTool(const std::string& type, const std::string& name, const IInterface* parent);
+  /// @name Function(s) inherited from @c AthAlgTool
+  /// @{
 
-    StatusCode initialize() override final;
+  /// Initialize the tool
+  virtual StatusCode initialize() override;
 
-    virtual StatusCode inference(InputDataMap& inputData, OutputDataMap& outputData) const override final;
+  /// @}
 
-    void print() const override final {} // nothing to print, but required by the interface.
+  /// @name Function(s) inherited from @c IAthInferenceTool
+  /// @{
 
-  protected:
-    TritonTool() = delete;
-    TritonTool(const TritonTool&) =delete;
-    TritonTool &operator=(const TritonTool&) = delete;
+  /// Run inference with multiple inputs and multiple outputs
+  virtual StatusCode inference(InputDataMap& inputData,
+                               OutputDataMap& outputData) const override final;
 
-    StringProperty m_modelName{this, "ModelName", "", "Model name"};
-    IntegerProperty m_port{this, "Port", 8001, "Port ID for Triton server"};
-    StringProperty m_modelVersion{this, "ModelVersion", "", "Model version, empty for latest"};
-    FloatProperty m_clientTimeout{this, "ClientTimeout", 0, "Client timeout in milliseconds, 0 for no timeout"};
-    StringProperty m_url{this, "URL", "", "Triton URL"};
-    BooleanProperty m_useSSL{this, "UseSSL", false, "Use SSL for Triton server connection"};
+  /// Print the tool's properties and configuration
+  virtual void print() const override;
 
-  private:
-    tc::InferenceServerGrpcClient* getClient() const;
-    std::unique_ptr<tc::InferOptions> m_options;
+  /// @}
 
-    template <typename T>
-    StatusCode prepareInput(const std::string& name,
-                            const std::vector<int64_t>& shape,
-                            const std::vector<T>& data,
-                            std::vector<std::shared_ptr<tc::InferInput>>& inputs) const;
+ private:
+  /// @name Tool properties
+  /// @{
 
-    template <typename T>
-    StatusCode extractOutput(const std::string& name,
-                            const std::shared_ptr<tc::InferResult>& result,
-                            std::vector<T>& outputVec) const;
+  StringProperty m_modelName{this, "ModelName", "", "Model name"};
+  IntegerProperty m_port{this, "Port", 8001, "Port ID for Triton server"};
+  StringProperty m_modelVersion{this, "ModelVersion", "",
+                                "Model version, empty for latest"};
+  FloatProperty m_clientTimeout{
+      this, "ClientTimeout", 0,
+      "Client timeout in milliseconds, 0 for no timeout"};
+  StringProperty m_url{this, "URL", "", "Triton URL"};
+  BooleanProperty m_useSSL{this, "UseSSL", false,
+                           "Use SSL for Triton server connection"};
 
-};
+  /// @}
 
-  #include "TritonTool.icc"
+  /// Implementation details for the tool
+  struct Impl;
+  /// Pointer to the implementation details
+  std::unique_ptr<Impl> m_impl;
 
-}
+};  // class TritonTool
+
+}  // namespace AthInfer
+
+#endif  // ATHTRITONCOMPS_TRITONTOOL_H

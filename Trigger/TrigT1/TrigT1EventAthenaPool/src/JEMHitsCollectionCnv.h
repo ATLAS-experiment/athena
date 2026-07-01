@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual JEMHitsCollection_PERS*   createPersistent (JEMHitsCollection* transCont);
-  virtual JEMHitsCollection*        createTransient ();
+  virtual JEMHitsCollection*        createTransient(const Token* token);
 
 private:
   

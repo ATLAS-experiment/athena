@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaTLAPhotonHypoAlg.h"
@@ -62,7 +62,7 @@ StatusCode TrigEgammaTLAPhotonHypoAlg::execute( const EventContext& ctx) const
 
     // get photons from the decision
         const xAOD::Photon *photonPrev = nullptr;
-        auto prevPhotons = TrigCompositeUtils::findLinks<xAOD::PhotonContainer>(previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
+        auto prevPhotons = TrigCompositeUtils::findLinks<xAOD::PhotonContainer>(ctx, previousDecision, TrigCompositeUtils::featureString(), TrigDefs::lastFeatureOfType);
         ATH_MSG_DEBUG("This decision has " << prevPhotons.size() << " photons");
         
         

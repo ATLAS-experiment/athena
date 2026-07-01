@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSCALIBBASE_DETAIL_MEASUREMENTCALIBRATORBASE_H
 #define ACTSCALIBBASE_DETAIL_MEASUREMENTCALIBRATORBASE_H
@@ -11,10 +11,22 @@
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackStateProxy.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
+#include "Acts/Utilities/PointerTraits.hpp"
+#include "Acts/Utilities/Helpers.hpp"
+#include "Acts/EventData/TrackStateProxyConcept.hpp"
 
 #include "ActsCalibBase/SourceLinkType.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementFwd.h"
+
 
 #include <array>
+#include <variant>
+namespace Trk{
+    class MeasurementBase;
+    class PrepRawData;
+}
+
+
 
 namespace ActsTrk::detail {
   /** @brief Base class providing the boiler code to fill the Acts multi trajectory track states. 
@@ -35,14 +47,38 @@ namespace ActsTrk::detail {
         e1DimRotWithTime = 4, /// Project out the locY & time coordinate - (Applies to Rpc, Tgc, sTgc)
         e2DimWithTime = 5,    /// Project out the two spatial coordinate & time - (Applies to HGTD)
     };
+    /** @brief Encode the source links supported by the Calibrator class as a variant of the
+     *         measurement class type pointer used within Athena. The std::monostate is 
+     *         used to encode nullptrs or not yet supported types */
+    using SourceLink_t = std::variant<std::monostate,
+                                      const xAOD::UncalibratedMeasurement*,
+                                      const Trk::PrepRawData*,
+                                      const Trk::MeasurementBase*>;
+    /** @brief Returns the enumeration corresponding to the object type
+     *         cached within the Acts::SourceLink. The SourceLink must
+     *         have been created by a MeasurementCalibrator to ensure that
+     *         the underlying variant is cached. If the variant is
+     *         a monostate, nTypes is returned
+     *  @param sl: Reference to the source link to unpack. */
+    static SourceLinkType getType(const Acts::SourceLink& sl);
+    /** @brief Unpack the SourceLink_t from the passed Acts source link
+     *  @param sl: Reference to the source link to unpack. */
+    static SourceLink_t unpackBase(const Acts::SourceLink& sl);
+    /** @brief Pack the measurement type pointer to an Acts::SourceLink including
+     *         the intermediate conversion into a SourceLink_t. Nullptrs are converted
+     *         to a std::monostate.
+     *  @param measurement: Pointer to the measurement to transform
+     *                      into a SourceLInk */
+    template <Acts::PointerConcept Ptr_t>
+    static Acts::SourceLink pack(const Ptr_t& measurement);
+    /** @brief Converts a vector measurement pointers to Acts::SourceLinks
+     *  @param measList: The list of measurement pointers for conversion
+     *  @param targetSL: The allocated SourceLink vectors to which the 
+     *                   Acts::SourceLink objects are appended. */
+    template<Acts::PointerConcept Ptr_t>
+    static void pack(const std::vector<Ptr_t>& measList,
+                     std::vector<Acts::SourceLink>& targetSL);
 
-    /** @brief Abbrivation of the track state proxy type */
-    template<typename trajectory_t>
-    using TrackState_t = typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy;
-    /** @brief Abbrivation of the const track state proxy type */
-    template<typename trajectory_t>
-    using ConstTrackState_t = typename Acts::MultiTrajectory<trajectory_t>::ConstTrackStateProxy;
-    
     /** @brief Copy the local position & covariance into the Acts track state proxy.
      *  @tparam Dim: Dimension of the measurement
      *  @tparam trajectory_t: Data type of the track state proxy backend
@@ -53,13 +89,26 @@ namespace ActsTrk::detail {
      *  @param cov: Calibrated local covariance
      *  @param link: Source link to associate with the state
      *  @param trackState: Refrence to the track state proxy to write.  */
-    template <std::size_t Dim, typename trajectory_t, 
+    template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t, 
               typename pos_t, typename cov_t>
       void setState(const ProjectorType projector,
                     const pos_t& locpos,
                     const cov_t& cov,
                     Acts::SourceLink link,
-                    TrackState_t<trajectory_t>& trackState) const;
+                    proxy_t& trackState) const;
+
+  protected:
+    /** @brief Queries the track proxy to allocate memory for the 
+     *         incoming calibration object. Defines the projector 
+     *         indices and allocates the source link to the state
+     *  @param projector: Projector configuration of the measurement
+     *  @param link: Source link to associate with the state
+     *  @param trackState: Refrence to the track state proxy to write.  */
+    template <std::size_t Dim, Acts::TrackStateProxyConcept proxy_t>
+    void prepareCalibratedState(const ProjectorType projector,
+                                Acts::SourceLink link,
+                                proxy_t& trackState) const;
+
   private:
     /** @brief Array to map the Projector types to the bound index configurations  used
      *         by the ATLAS detector measurements */

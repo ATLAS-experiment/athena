@@ -66,13 +66,15 @@ def createITkConfigFlags():
     itkcf.addFlag("ITk.checkDeadPixelsOnTrack", True)
     # defines if the X1X mode is used for the offline or not
     itkcf.addFlag("ITk.selectStripIntimeHits", lambda prevFlags:
-                  not(prevFlags.Beam.Type is BeamType.Cosmics))
+                  prevFlags.Beam.Type is not BeamType.Cosmics)
 
     # Save cluster information to Derivation
     itkcf.addFlag("ITk.DAODStorePixel", lambda prevFlags:
                   prevFlags.Detector.EnableITkPixel)
     itkcf.addFlag("ITk.DAODStoreStrip", lambda prevFlags:
                   prevFlags.Detector.EnableITkStrip)
+    itkcf.addFlag("ITk.DAODStorePLR", lambda prevFlags:
+                  prevFlags.Detector.EnablePLR)
     itkcf.addFlag("ITk.DAODStoreExtra", True)
 
     # Save SiHitCollections to RDO

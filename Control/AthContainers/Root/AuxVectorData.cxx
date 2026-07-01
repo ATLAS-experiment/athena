@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/AuxVectorData.cxx
@@ -206,6 +206,23 @@ const SG::auxid_set_t& AuxVectorData::getAuxIDs() const
   if (store)
     return store->getAuxIDs();
   return s_emptySet;
+}
+
+
+/**
+ * @brief Return the set of variables to copy in a deep copy.
+ * @param warnUnlocked If true, we warn about variables skipped on account
+ *                     of being decorations.
+ *
+ * This is usually getAuxIDs()-getDecorIDs(), but may be different
+ * for some special cases.
+ */
+SG::auxid_set_t AuxVectorData::getCopyIDs (bool warnUnlocked /*= false*/) const
+{
+  const SG::IConstAuxStore* store = getConstStore();
+  if (store)
+    return store->getCopyIDs (warnUnlocked);
+  return SG::auxid_set_t();
 }
 
 

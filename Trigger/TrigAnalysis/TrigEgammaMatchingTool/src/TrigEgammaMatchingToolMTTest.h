@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,7 +26,7 @@ class TrigEgammaMatchingToolMTTest : public AthMonitorAlgorithm {
   private:
 
             
-    void inspect(const std::string&, const xAOD::Egamma *) const ;
+    void inspect(const EventContext&, const std::string&, const xAOD::Egamma *) const ;
 
     SG::ReadHandleKey<xAOD::ElectronContainer> m_electronKey{this , "ElectronKey", "Electrons", ""};
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTOOLINTERFACES_IFITTERTOOL_H
@@ -8,15 +8,15 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 
-#include "ActsGeometry/ATLASSourceLink.h"
 
 #include "ActsEvent/TrackContainer.h"
 #include "ActsEvent/SeedContainer.h"
 
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "TrkTrack/Track.h"
 namespace ActsTrk {
@@ -62,7 +62,7 @@ namespace ActsTrk {
     virtual StatusCode fit(const EventContext& ctx,
                            const TrackContainer::ConstTrackProxy& track,          
                            MutableTrackContainer& trackContainer,
-			   const Acts::PerigeeSurface& pSurface) const = 0;
+	                         const Acts::PerigeeSurface& pSurface) const = 0;
     
   };
   

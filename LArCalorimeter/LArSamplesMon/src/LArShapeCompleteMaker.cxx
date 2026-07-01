@@ -54,7 +54,7 @@ StatusCode LArShapeCompleteMaker::initialize()
 }
 
 
-StatusCode LArShapeCompleteMaker::execute()
+StatusCode LArShapeCompleteMaker::execute(const EventContext& ctx)
 {
   if (m_template) return StatusCode::SUCCESS;
   m_template = new DataStore();
@@ -66,7 +66,7 @@ StatusCode LArShapeCompleteMaker::execute()
     return StatusCode::FAILURE;    
   };
 
-  SG::ReadCondHandle<LArOnOffIdMapping> onOffMap (m_onOffMapKey);
+  SG::ReadCondHandle<LArOnOffIdMapping> onOffMap (m_onOffMapKey, ctx);
 
   auto errorGetter = std::make_unique<TreeShapeErrorGetter>(m_shapeErrorFileName);
   

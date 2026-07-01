@@ -32,7 +32,7 @@ StatusCode WriteData::initialize(){
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode WriteData::execute() {
+StatusCode WriteData::execute(const EventContext& /*ctx*/) {
   //this example illustrates how to record objects into the StoreGate(SG)
   //with and without providing a key
   //It then covers the new DataLink class and its usage as a persistable

@@ -29,13 +29,11 @@ std::unique_ptr<TGCModuleId> TGCChannelSLBOut::getModule() const {
 }
 
 bool TGCChannelSLBOut::isValid() const {
-    if ((getSideType() > TGCId::NoSideType) &&
-        (getSideType() < TGCId::MaxSideType) &&
-        (getModuleType() > TGCId::NoModuleType) &&
-        (getModuleType() < TGCId::MaxModuleType) &&
-        (getRegionType() > TGCId::NoRegionType) &&
-        (getRegionType() < TGCId::MaxRegionType) && (getOctant() >= 0) &&
-        (getOctant() < 8) && (getId() >= 0) && (getBlock() >= 0) &&
+    if ((getSideType() < TGCId::SideType::MaxSideType) &&
+        (getModuleType() < TGCId::ModuleType::MaxModuleType) &&
+        (getRegionType() < TGCId::RegionType::MaxRegionType) &&
+        (getOctant() >= 0) && (getOctant() < 8) &&
+        (getId() >= 0) && (getBlock() >= 0) &&
         (getChannel() >= 0)) {
         return true;
     }
@@ -57,13 +55,13 @@ const int TGCChannelSLBOut::s_channelInBlockForST = 16;
 
 int TGCChannelSLBOut::getNumberOfBlock(TGCId::ModuleType moduleType) {
     switch (moduleType) {
-        case TGCId::WD:
+        case TGCId::ModuleType::WD:
             return s_numberOfBlockInWD;
-        case TGCId::SD:
+        case TGCId::ModuleType::SD:
             return s_numberOfBlockInSD;
-        case TGCId::WT:
+        case TGCId::ModuleType::WT:
             return s_numberOfBlockInWT;
-        case TGCId::ST:
+        case TGCId::ModuleType::ST:
             return s_numberOfBlockInST;
         default:
             break;
@@ -73,13 +71,13 @@ int TGCChannelSLBOut::getNumberOfBlock(TGCId::ModuleType moduleType) {
 
 int TGCChannelSLBOut::getNumberOfLayer(TGCId::ModuleType moduleType) {
     switch (moduleType) {
-        case TGCId::WD:
+        case TGCId::ModuleType::WD:
             return s_numberOfLayerInWD;
-        case TGCId::SD:
+        case TGCId::ModuleType::SD:
             return s_numberOfLayerInSD;
-        case TGCId::WT:
+        case TGCId::ModuleType::WT:
             return s_numberOfLayerInWT;
-        case TGCId::ST:
+        case TGCId::ModuleType::ST:
             return s_numberOfLayerInST;
         default:
             break;
@@ -89,13 +87,13 @@ int TGCChannelSLBOut::getNumberOfLayer(TGCId::ModuleType moduleType) {
 
 int TGCChannelSLBOut::getChannelInBlock(TGCId::ModuleType moduleType) {
     switch (moduleType) {
-        case TGCId::WD:
+        case TGCId::ModuleType::WD:
             return s_channelInBlockForWD;
-        case TGCId::SD:
+        case TGCId::ModuleType::SD:
             return s_channelInBlockForSD;
-        case TGCId::WT:
+        case TGCId::ModuleType::WT:
             return s_channelInBlockForWT;
-        case TGCId::ST:
+        case TGCId::ModuleType::ST:
             return s_channelInBlockForST;
         default:
             break;

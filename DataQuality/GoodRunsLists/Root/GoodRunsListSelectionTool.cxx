@@ -190,7 +190,7 @@ GoodRunsListSelectionTool::readXMLs( Root::TGRLCollection& grl,
 }
 
 #ifndef XAOD_STANDALONE
-bool GoodRunsListSelectionTool::eventPassesFilter() const {
+bool GoodRunsListSelectionTool::eventPassesFilter(const EventContext& /*ctx*/) const {
   const xAOD::EventInfo* ei = 0;
   if( evtStore()->retrieve( ei , "EventInfo" ).isFailure() ) {
     ATH_MSG_ERROR("Unable to retrieve EventInfo, returning false");

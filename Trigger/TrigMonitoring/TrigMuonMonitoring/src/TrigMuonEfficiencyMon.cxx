@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMuonEfficiencyMon.h"
@@ -37,13 +37,15 @@ bool TrigMuonEfficiencyMon :: selectEvents() const {
 
 
 
-StatusCode TrigMuonEfficiencyMon :: selectMuons(SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
+StatusCode TrigMuonEfficiencyMon :: selectMuons(const EventContext& ctx, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
 
   if(m_eff_method.value().find("TagAndProbe")!=std::string::npos){
-    return selectMuonsTagAndProbe(muons, probes);
+    return selectMuonsTagAndProbe(ctx, muons, probes);
   } else {
     for (const xAOD::Muon* mu : *muons) {
-      if( mu->muonType()<=m_muontype && (mu->author()==xAOD::Muon::Author::MuidCo || mu->author()==xAOD::Muon::Author::STACO) && mu->quality()==xAOD::Muon::Quality::Medium ){
+      if( static_cast<int>(mu->muonType())<=m_muontype && 
+          mu->author()==xAOD::Muon::Author::MuidCo && 
+          mu->quality()==xAOD::Muon::Quality::Medium ){
 	probes.push_back(mu);
       }
     }
@@ -77,7 +79,7 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
 
   if(m_doL1){
     bool activestate = false;
-    m_matchTool->matchL1(muEta, muPhi, 0.25, chain, activestate);
+    m_matchTool->matchL1(ctx, muEta, muPhi, 0.25, chain, activestate);
     L1pass = activestate;
   } else {
     L1pass = true;
@@ -87,7 +89,7 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
   if(L1pass){
     if(m_doL2SA){
       bool activestate = false;
-      m_matchTool->matchL2SA(mu, chain, activestate);
+      m_matchTool->matchL2SA(ctx, mu, chain, activestate);
       L2SApass = activestate;
     } else {
       L2SApass = true;
@@ -177,7 +179,7 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
 
 
 
-StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
+StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& ctx, SG::ReadHandle<xAOD::MuonContainer> &muons, std::vector<const xAOD::Muon*> &probes) const {
 
   std::vector<float> vec_invmass;
   vec_invmass.clear();
@@ -187,16 +189,12 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(SG::ReadHandle<xAOD::
   xAOD::MuonContainer::const_iterator mu1_end = muons->end();
   for(; mu1_it!=mu1_end; ++mu1_it){
     const xAOD::Muon *mu1 = *mu1_it;
-    if( mu1->muonType()>m_muontype ) continue;
-    if( mu1->author()==xAOD::Muon::Author::unknown || mu1->author()>xAOD::Muon::Author::STACO ) continue;
-    if( m_muonSelectionTool->getQuality(*mu1)>xAOD::Muon::Medium ) continue;
+    if( m_muonSelectionTool->getQuality(*mu1)>xAOD::Muon::Quality::Medium ) continue;
     xAOD::MuonContainer::const_iterator mu2_it = mu1_it;
     xAOD::MuonContainer::const_iterator mu2_end = mu1_end;
     for(++mu2_it; mu2_it!=mu2_end; ++mu2_it){
       const xAOD::Muon *mu2 = *mu2_it;
-      if( mu2->muonType()>m_muontype ) continue;
-      if( mu2->author()==xAOD::Muon::Author::unknown || mu2->author()>xAOD::Muon::Author::STACO ) continue;
-      if( m_muonSelectionTool->getQuality(*mu2)>xAOD::Muon::Medium ) continue;
+      if( m_muonSelectionTool->getQuality(*mu2)>xAOD::Muon::Quality::Medium ) continue;
       if( mu1->charge()*mu2->charge()>0 ) continue;
 
       TLorentzVector lvmu1 = mu1->p4();
@@ -206,10 +204,10 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(SG::ReadHandle<xAOD::
       bool bit_mass = (dimu_mass > m_mass_lowlim) && (dimu_mass < m_mass_highlim);
       bool bit_dR = lvmu1.DeltaR(lvmu2)>0.5;
       if(m_use_extrapolator){
-	const xAOD::TrackParticle *track1 = mu1->primaryTrackParticle();
-	const Trk::TrackParameters *extTrack1 = m_matchTool->extTrackToPivot(track1);
-	const xAOD::TrackParticle *track2 = mu2->primaryTrackParticle();
-	const Trk::TrackParameters *extTrack2 = m_matchTool->extTrackToPivot(track2);
+	const xAOD::TrackParticle *track1 = mu1->trackParticle(xAOD::Muon::TrackParticleType::Primary);
+	const Trk::TrackParameters *extTrack1 = m_matchTool->extTrackToPivot(ctx, track1);
+	const xAOD::TrackParticle *track2 = mu2->trackParticle(xAOD::Muon::TrackParticleType::Primary);
+	const Trk::TrackParameters *extTrack2 = m_matchTool->extTrackToPivot(ctx, track2);
 	if(extTrack1 && extTrack2){
 	  TLorentzVector lvext1 = lvmu1;
 	  TLorentzVector lvext2 = lvmu2;

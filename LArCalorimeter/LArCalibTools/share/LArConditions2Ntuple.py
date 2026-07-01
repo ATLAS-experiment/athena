@@ -57,7 +57,9 @@ if __name__=='__main__':
             "OFCCALI":"OFCCali",
             "ACORR":"AutoCorr",    
             "DSPTHR":"DSPThr",
+            "DSPTEMP":"DSPTemp",
             "MINBIAS":"MinBias",
+            "BCID":"PileupAverage",
             "PHYSAC":"PhysAutoCorr",    
           }
 
@@ -70,7 +72,7 @@ if __name__=='__main__':
       sys.exit(0)
 
     objects.add(objTable[objU])
-    if "OFCCALI" not in obj.upper() and 'WAVE' not in obj.upper() and 'DSPTHR' not in obj.upper() and 'MINBIAS' not in obj.upper() and not args.offline:
+    if all(txt not in obj.upper() for txt in ["OFCCALI", "WAVE", "DSP", "MINBIAS", "BCID"]) and not args.offline:
        objectsOnl.add(objTable[objU])
     
   flds=set()
@@ -110,8 +112,10 @@ if __name__=='__main__':
     flags.IOVDb.GlobalTag="OFLCOND-MC16-SDR-20"
   elif flags.IOVDb.DatabaseInstance == "COMP200":
     flags.IOVDb.GlobalTag="COMCOND-BLKPA-RUN1-09"
+  elif args.offline:  
+    flags.IOVDb.GlobalTag="CONDBR2-BLKPA-2026-01"
   else: 
-    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2024-01"
+    flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2026-01"
 
   flags.Exec.OutputLevel=args.olevel
   flags.Debug.DumpCondStore=True
@@ -152,8 +156,9 @@ if __name__=='__main__':
     #Setup SuperCell cabling
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg, LArCalibIdMappingSCCfg, LArLATOMEMappingCfg
     cfg.merge(LArOnOffIdMappingSCCfg(flags))
-    cfg.merge(LArCalibIdMappingSCCfg(flags))
-    cfg.merge(LArLATOMEMappingCfg(flags))
+    if not flags.Input.isMC:
+       cfg.merge(LArCalibIdMappingSCCfg(flags))
+       cfg.merge(LArLATOMEMappingCfg(flags))
     if not args.offline:
        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
        cfg.merge(LArElecCalibDBSCCfg(flags,objectsOnl))
@@ -167,7 +172,8 @@ if __name__=='__main__':
        cfg.merge(LArElecCalibDBCfg(flags,objectsOnl))
   
   from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
-  cfg.merge(LArBadChannelCfg(flags, isSC=flags.LArCalib.isSC))
+  bchtag = "LARBadChannelsBadChannelsSC-RUN3-UPD1-00" if flags.LArCalib.isSC else None
+  cfg.merge(LArBadChannelCfg(flags, tag=bchtag, isSC=flags.LArCalib.isSC))
 
   bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"
 
@@ -385,8 +391,17 @@ if __name__=='__main__':
        print('No PhysWave in MC yet')
     else:   
        fld = "/LAR/ElecCalibOflSC/PhysWaves/RTM" if flags.LArCalib.isSC else "/LAR/ElecCalibOfl/PhysWaves/RTM"   
+       if len(flds) > 0:
+          for fld1 in flds:
+             if 'PhysWave' in fld1:
+                fld=fld1
+                break
+                
+       if args.ftag:
+            from IOVDbSvc.IOVDbSvcConfig import addOverride
+            cfg.merge(addOverride(flags,fld,args.ftag))
        from IOVDbSvc.IOVDbSvcConfig import addFolders
-       cfg.merge(addFolders(flags,fld))
+       cfg.merge(addFolders(flags,fld,modifiers='<key>LArPhysWave</key>'))
        cfg.addEventAlgo(CompFactory.LArPhysWaves2Ntuple(KeyList = ["LArPhysWave"],
                                                  NtupleName = "PHYSWAVE",
                                                  AddFEBTempInfo = False,   
@@ -404,15 +419,23 @@ if __name__=='__main__':
      cfg.merge(addFoldersSplitOnline(flags,"LAR",f1,f2,splitMC=True))
      cfg.addEventAlgo(CompFactory.LArDSPThresholds2Ntuple(DumpFlat=True,FlatFolder=f2 if flags.Input.isMC else f1))
 
-  if "MinBias" in objects:
-     #FIXME different for MC
+  if "DSPTemp" in objects:
      from IOVDbSvc.IOVDbSvcConfig import addFolders
-     if args.offline:
-        myfld="/LAR/ElecCalibOfl/LArPileupAverage"
-        mydb="LAR_OFL"
+     cfg.merge(addFolders(flags,"/LAR/Configuration/DSPThresholdFlat/Templates",tag=args.ftag,detDb="LAR_ONL"))  
+     cfg.addEventAlgo(CompFactory.LArDSPThresholds2Ntuple(DumpFlat=True,FlatFolder="/LAR/Configuration/DSPThresholdFlat/Templates",OffId=True,RealGeometry=True))
+
+  if "PileupAverage" in objects:
+     from IOVDbSvc.IOVDbSvcConfig import addFolders
+     if flags.Input.isMC:
+           myfld="/LAR/ElecCalibMC/LArPileupAverage"
+           mydb="LAR_OFL"
      else:
-        myfld="/LAR/LArPileup/LArPileupAverage"
-        mydb="LAR_ONL"  
+        if args.offline:
+           myfld="/LAR/ElecCalibOfl/LArPileupAverage"
+           mydb="LAR_OFL"
+        else:
+           myfld="/LAR/LArPileup/LArPileupAverage"
+           mydb="LAR_ONL"  
      if args.ftag:
         cfg.merge(addFolders(flags,myfld,detDb=mydb,className="LArMinBiasAverageMC",tag="".join(myfld.split('/')) + args.ftag))  
      else:
@@ -422,6 +445,46 @@ if __name__=='__main__':
      cfg.addCondAlgo(LArMCSymCondAlg(ReadKey="LArOnOffIdMap"))
      cfg.addCondAlgo(LArMinBiasAverageSymAlg(ReadKey="LArPileupAverage",WriteKey="LArSymPileupAverage"))
      cfg.addEventAlgo(CompFactory.LArMinBias2Ntuple(ContainerKey="",ContainerKeyAv="LArSymPileupAverage"))
+  
+  if "MinBias" in objects:
+     # onlyfor MC
+     from IOVDbSvc.IOVDbSvcConfig import addFolders
+     if not flags.Input.isMC:
+        print("MinBias available only for MC")
+     elif flags.LArCalib.isSC:
+        myfld="/LAR/ElecCalibMCSC/MinBias"
+        myfldav="/LAR/ElecCalibMCSC/MinBiasAverage"
+        mydb="LAR_OFL"
+        if args.ftag:
+           cfg.merge(addFolders(flags,myfld,detDb=mydb,className="CondAttrListCollection",tag="".join(myfld.split('/')) + args.ftag))  
+           cfg.merge(addFolders(flags,myfldav,detDb=mydb,className="CondAttrListCollection",tag="".join(myfld.split('/')) + args.ftag))  
+        else:
+           cfg.merge(addFolders(flags,myfld,detDb=mydb,className="CondAttrListCollection"))  
+           cfg.merge(addFolders(flags,myfldav,detDb=mydb,className="CondAttrListCollection"))  
+
+        larMinBiasSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasSC>")   
+        larMinBiasAverageSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMinBiasAverageSC>")   
+        cfg.addCondAlgo(larMinBiasSCCondAlg(ReadKey=myfld, WriteKey="LArMinBiasSC"))
+        cfg.addCondAlgo(larMinBiasAverageSCCondAlg(ReadKey=myfldav, WriteKey="LArMinBiasAverageSC"))
+        cfg.addEventAlgo(CompFactory.LArMinBias2Ntuple(ContainerKey="LArMinBiasSC",ContainerKeyAv="LArMinBiasAverageSC",isSC=True, BadChanKey="LArBadChannelSC"))
+     else:
+        myfld="/LAR/ElecCalibMC/MinBias"
+        myfldav="/LAR/ElecCalibMC/MinBiasAverage"
+
+        mydb="LAR_OFL"
+        if args.ftag:
+           cfg.merge(addFolders(flags,myfld,detDb=mydb,className="LArMinBiasMC",tag="".join(myfld.split('/')) + args.ftag))  
+           cfg.merge(addFolders(flags,myfldav,detDb=mydb,className="LArMinBiasAverageMC",tag="".join(myfld.split('/')) + args.ftag))  
+        else:
+           cfg.merge(addFolders(flags,myfld,detDb=mydb,className="LArMinBiasMC"))  
+           cfg.merge(addFolders(flags,myfldav,detDb=mydb,className="LArMinBiasAverageMC"))  
+        LArMinBiasSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArMinBiasMC, LArMinBiasSym>")    
+        LArMinBiasAverageSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArMinBiasAverageMC, LArMinBiasAverageSym>")    
+        LArMCSymCondAlg=CompFactory.LArMCSymCondAlg
+        cfg.addCondAlgo(LArMCSymCondAlg(ReadKey="LArOnOffIdMap"))
+        cfg.addCondAlgo(LArMinBiasSymAlg(ReadKey="LArMinBias",WriteKey="LArSymMinBias"))
+        cfg.addCondAlgo(LArMinBiasAverageSymAlg(ReadKey="LArMinBiasAverage",WriteKey="LArSymMinBiasAverage"))
+        cfg.addEventAlgo(CompFactory.LArMinBias2Ntuple(ContainerKey="LArSymMinBias",ContainerKeyAv="LArSymMinBiasAverage"))
   
   rootfile=args.out
   if os.path.exists(rootfile):

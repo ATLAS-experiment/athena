@@ -11,7 +11,11 @@ Jets:
     jetCollection: AntiKt4EMPFlowJets
     runJvtUpdate: False
     runNNJvtUpdate: True
+    runJvtSelection: False # deprecated, done via JVTWorkingPoint block now
     recalibratePhyslite: False
+    JVTWorkingPoint:
+     - selectionName: baselineJvt
+       jvtWP: FixedEffPt
     FTagTriggerMatching:
       - containerName: AnaJets
         triggerChainsPerYear:
@@ -32,7 +36,6 @@ Jets:
             - HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25
           2023:
             - HLT_2j45_0eta290_020jvt_bgn160_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25
-    JVT: {}
   - containerName: AnaLargeRJets
     jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
     recalibratePhyslite: False
@@ -137,6 +140,15 @@ TauJets:
     MCTCClassification:
       prefix: truth_
 
+InDetTracks:
+  - containerName: 'AnaTracks'
+    minPt: 500
+    maxEta: 2.5
+    outputTrackSummaryInfo: True
+    WorkingPoint:
+      - selectionName: 'tight'
+        cutLevel: 'TightPrimary'
+
 SystObjectLink:
   - containerName: AnaJets
   - containerName: AnaLargeRJets
@@ -155,6 +167,8 @@ ObjectCutFlow:
   - containerName: AnaMuons
     selectionName: medium
   - containerName: AnaTauJets
+    selectionName: tight
+  - containerName: AnaTracks
     selectionName: tight
 
 GeneratorLevelAnalysis: {}
@@ -196,6 +210,9 @@ PL_OverlapRemoval:
   jets: AntiKt4TruthDressedWZJets
   useRapidityForDeltaR: False
 
+PartonHistory:
+  - history: Ttbar
+
 # containerName and selectionName must be defined in their respective blocks
 MissingET:
   - containerName: AnaMET
@@ -234,6 +251,9 @@ Thinning:
     outputName: OutJets
   - containerName: AnaLargeRJets
     outputName: OutLargeRJets
+  - containerName: AnaTracks
+    outputName: OutTracks
+    selectionName: tight
   - containerName: TruthElectrons
     outputName: OutTruthElectrons
     skipOnData: true
@@ -251,27 +271,32 @@ Thinning:
     skipOnData: true
 
 EventSelection:
-  - electrons: AnaElectrons.loose
+  - &common
+    electrons: AnaElectrons.loose
     muons: AnaMuons.medium
     jets: AnaJets.baselineJvt
     met: AnaMET
     btagDecoration: ftag_select_ftag
-    noFilter: True
     cutFlowHistograms: True
-    selectionCutsDict:
-      SUBcommon: |
+    noFilter: True
+    selectionName: SUBcommon
+    selectionCuts: |
         JET_N_BTAG >= 2
         JET_N 25000 >= 4
         MET >= 20000
         SAVE
-      ejets: |
+  - <<: *common
+    selectionName: ejets
+    selectionCuts: |
         IMPORT SUBcommon
         EL_N 5000 == 1
         MU_N 3000 == 0
         MWT < 170000
         MET+MWT > 40000
         SAVE
-      mujets: |
+  - <<: *common
+    selectionName: mujets
+    selectionCuts: |
         IMPORT SUBcommon
         EL_N 5000 == 0
         MU_N medium 25000 > 0
@@ -308,6 +333,7 @@ Output:
     jet_: OutJets
     larger_jet_: OutLargeRJets
     met_: AnaMET
+    trk_: OutTracks
     "": EventInfo
   containersOnlyForMC:
     truth_mu_: OutTruthMuons

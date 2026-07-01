@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -84,14 +84,15 @@ class ITrackTools: virtual public IAlgTool{
                                                    const CaloCellContainer* input,
                                                    ConstDataVector<CaloCellContainer>* output,
                                                    double cone,
-                                                   bool includelar) const = 0;
-        virtual double getPathInsideCell(const TRACK *track, const CaloCell *cell) const = 0;
+                                                   bool includelar,
+                                                   const EventContext& ctx) const = 0;
+        virtual double getPathInsideCell(const TRACK *track, const CaloCell *cell, const EventContext& ctx) const = 0;
         virtual double getPath(const CaloCell* cell, const Trk::TrackParameters *entrance, const Trk::TrackParameters *exit) const = 0;
-        virtual std::vector< double > getXYZEtaPhiInCellSampling(const TRACK* track, const CaloCell *cell) const = 0;
-        virtual std::vector< double > getXYZEtaPhiInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling) const = 0;
-        virtual std::unique_ptr<const Trk::TrackParameters> getTrackInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling) const = 0;
-        virtual std::vector< std::vector<double> > getXYZEtaPhiPerLayer(const TRACK* track) const = 0;
-        virtual std::vector< std::vector<double> > getXYZEtaPhiPerSampling(const TRACK* track) const = 0;
+        virtual std::vector< double > getXYZEtaPhiInCellSampling(const TRACK* track, const CaloCell *cell, const EventContext& ctx) const = 0;
+        virtual std::vector< double > getXYZEtaPhiInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling, const EventContext& ctx) const = 0;
+        virtual std::unique_ptr<const Trk::TrackParameters> getTrackInCellSampling(const TRACK* track, CaloSampling::CaloSample sampling, const EventContext& ctx) const = 0;
+        virtual std::vector< std::vector<double> > getXYZEtaPhiPerLayer(const TRACK* track, const EventContext& ctx) const = 0;
+        virtual std::vector< std::vector<double> > getXYZEtaPhiPerSampling(const TRACK* track, const EventContext& ctx) const = 0;
         virtual int retrieveIndex(int sampling, float eta) const = 0;
         virtual std::vector<float> getEnergyInCones(const xAOD::TrackParticle* track,
                                                     const xAOD::CaloClusterContainer* clusters,

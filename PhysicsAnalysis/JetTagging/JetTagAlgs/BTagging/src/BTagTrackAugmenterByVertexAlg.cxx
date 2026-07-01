@@ -132,7 +132,7 @@ namespace Analysis {
       // loop through vertices
       for (const xAOD::Vertex *primary: *verteces) {
         // get IP and extra pars
-        std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary) );
+        std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate(ctx, track, primary) );
         Trk::PerigeeSurface primary_surface( primary->position() );
         std::unique_ptr< const Trk::TrackParameters > extrap_pars( m_extrapolator->extrapolate(ctx,
                                                                                             track->perigeeParameters(),

@@ -36,7 +36,7 @@ DBReplicaSvc                     INFO Frontier server at (serverurl=http://atlas
 DBReplicaSvc                     INFO Read replica configuration from /cvmfs/atlas-nightlies.cern.ch/repo/sw/master/2019-02-07T2139/Athena/22.0.1/InstallArea/x86_64-centos7-gcc8-opt/share/dbreplica.config
 DBReplicaSvc                     INFO Total of 10 servers found for host lxplus054.cern.ch [ATLF ATLAS_COOLPROD atlas_dd ATLAS_CONFIG INT8R INTR ATONR_COOL ATONR_CONF DEVDB11 ATLF ]
 PoolSvc                          INFO Successfully setup replica sorting algorithm
-PoolSvc                          INFO Setting up APR FileCatalog and Streams
+PoolSvc                          INFO Setting up FileCatalog and Streams
 PoolSvc                          INFO POOL WriteCatalog is xmlcatalog_file:PoolFileCatalog.xml
 DbSession                        INFO     Open     DbSession    
 Domain[ROOT_All]                 INFO >   Access   DbDomain     READ      [ROOT_All] 

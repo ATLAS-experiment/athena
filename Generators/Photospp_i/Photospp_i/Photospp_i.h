@@ -25,7 +25,7 @@ public:
 
   /// Run Photos on one event
   /// Will require a pre-existing HepMC event in Storegate
-  StatusCode execute();
+  StatusCode execute(const EventContext& ctx);
 
   /// Set up the Photos class
   /// This may be called in the initialize method or directly before the

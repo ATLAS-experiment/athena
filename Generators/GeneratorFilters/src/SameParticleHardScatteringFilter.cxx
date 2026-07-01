@@ -19,7 +19,7 @@ StatusCode SameParticleHardScatteringFilter::filterInitialize() {
  return StatusCode::SUCCESS;
 }
 
-StatusCode SameParticleHardScatteringFilter::filterEvent() {
+StatusCode SameParticleHardScatteringFilter::filterEvent(const EventContext& ctx) {
   ATH_MSG_DEBUG(" SameParticleHardScattering filtering for: Parent --> " << m_PDGParent[0]
 		<< " and parent " << -m_PDGParent[0]
                 << ", Child --> " << m_PDGChild[0]);
@@ -27,7 +27,7 @@ StatusCode SameParticleHardScatteringFilter::filterEvent() {
   N_Parent[0] = 0;
   N_Parent[1] = 0;
 
-  for (const HepMC::GenEvent* genEvt : *events_const()) {
+  for (const HepMC::GenEvent* genEvt : *events_const(ctx)) {
       for (const auto& pitr: *genEvt) 
 	{
 	  int id = pitr->pdg_id();
@@ -40,14 +40,7 @@ StatusCode SameParticleHardScatteringFilter::filterEvent() {
 	  if (!productionVtx) continue;
 	  // Incoming particle range check
 	  if (productionVtx->particles_in_size() < 2) continue; //  we are looking for excited tau-leptons produced in b-quark b-antiquark scattering
-#ifdef HEPMC3
 	  for (const auto& thisParent:  productionVtx->particles_in()) {
-#else
-	  HepMC::GenVertex::particles_in_const_iterator firstParentIt = productionVtx->particles_in_const_begin();
-	  HepMC::GenVertex::particles_in_const_iterator endParentIt = productionVtx->particles_in_const_end();
-	  for (HepMC::GenVertex::particles_in_const_iterator thisParentIt = firstParentIt ; thisParentIt != endParentIt; ++thisParentIt) {
-		auto thisParent= *thisParentIt;
-#endif
 	    ATH_MSG_DEBUG(" SelectBQuarkScattering Filter: parent ==> " <<thisParent->pdg_id() << " child ===> "  << pitr->pdg_id());
 	    if ( thisParent->pdg_id()    == m_PDGParent[0] )
 	      {
@@ -60,7 +53,7 @@ StatusCode SameParticleHardScatteringFilter::filterEvent() {
 	  }
 	}
     }
-  setFilterPassed(N_Parent[0] >= 1 && N_Parent[1] >= 1);
+  setFilterPassed(N_Parent[0] >= 1 && N_Parent[1] >= 1, ctx);
   return StatusCode::SUCCESS;
 }
 

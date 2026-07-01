@@ -1,5 +1,5 @@
 #!/bin/env python3
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 """Updates reference files for a given MR, as well as related files (digest ref files, References.py)
@@ -40,6 +40,7 @@ class CITest:
         self.new_version_directory = new_version_directory
         self.copied_file_path = copied_file_path
         self.diff = diff
+        self.shared_ref = False  # uses ref from another test
         self.type = type
     
     def __repr__(self):
@@ -49,6 +50,7 @@ class CITest:
         extra = ''
         if self.type == 'DiffPool':
             extra = f' Data file change :  {self.existing_version} -> {self.new_version}'
+            if self.shared_ref: extra += ' (shared ref)'
         elif self.type == 'Digest':
             extra = f' Digest change: {self.existing_ref}'
         elif self.type == 'Content':
@@ -196,6 +198,10 @@ def update_reference_files(actually_update=True, update_local_files=False):
         for test in tests:
             print('Processing test: {} on branch {}'.format(test.name, branch))
             if test.type == 'DiffPool':
+                if test.shared_ref:
+                    print(' * This is a DiffPool test but uses a shared reference. No update needed.')
+                    continue
+
                 print(' * This is a DiffPool test, and currently has version {} of {}. Will update References.py with new version.'.format(test.existing_version, test.tag))
                 if actually_update:
                     print(' -> The new version is: {}. Creating directory and copying files on EOS now.'.format(test.new_version))
@@ -293,6 +299,11 @@ def create_dir_and_copy_refs(test, actually_update=False):
     If called with actually_update=False, this function will return a list of commands which would have been executed.
     """
     commands = []
+
+    # Nothing to do if test uses a shared reference
+    if test.shared_ref is True:
+        return commands
+
     if test.new_version_directory not in dirs_created:
         commands.append("mkdir -p " + test.new_version_directory)
         dirs_created.append(test.new_version_directory)
@@ -364,6 +375,36 @@ def extract_links_from_json(url):
     for project in data[1:]:
         process_CI_Builds_Summary(project)
 
+
+def handle_shared_refs():
+    # Tests that are allowed to use the same reference. The key is the test that uses the
+    # reference of its value.
+    shared_refs = {
+        'CITest_DerivationRun2Data_PHYS_MT-test': 'CITest_DerivationRun2Data_PHYS-test',
+        'CITest_DerivationRun2MC_PHYS_MT-test': 'CITest_DerivationRun2MC_PHYS-test',
+        'CITest_DerivationRun3Data_PHYS_MT-test': 'CITest_DerivationRun3Data_PHYS-test',
+        'CITest_DerivationRun3MC_PHYS_MT-test': 'CITest_DerivationRun3MC_PHYS-test',
+        'CITest_DerivationRun2Data_PHYSLITE_MT-test': 'CITest_DerivationRun2Data_PHYSLITE-test',
+        'CITest_DerivationRun2MC_PHYSLITE_MT-test': 'CITest_DerivationRun2MC_PHYSLITE-test',
+        'CITest_DerivationRun3Data_PHYSLITE_MT-test': 'CITest_DerivationRun3Data_PHYSLITE-test',
+        'CITest_DerivationRun3MC_PHYSLITE_MT-test': 'CITest_DerivationRun3MC_PHYSLITE-test',
+    }
+
+    for branch,tests in failing_tests.items():
+        # Create dictionary of ref vs tests
+        refs = defaultdict(list)  # tag : [test,...]
+        for test in tests:
+            refs[test.tag].append(test)
+
+        for r, dups in refs.items():
+            if len(dups) <= 1:
+                continue
+            for test in dups:
+                # Mark test as having shared ref if itself and its reference is in the list
+                if (name := shared_refs.get(test.name)) and any(name==t.name for t in dups):
+                    test.shared_ref = True
+
+
 def summarise_failing_tests(check_for_duplicates = True):
     print('Summary of tests which need work:')
 
@@ -387,12 +428,12 @@ def summarise_failing_tests(check_for_duplicates = True):
                     if input("%s (y/N) " % msg).lower() != 'y':
                         sys.exit(1)
 
-                if (test.existing_ref not in reference_folders):
+                if (not test.shared_ref and test.existing_ref not in reference_folders):
                     reference_folders.append(test.existing_ref)
-                elif check_for_duplicates:
+                elif check_for_duplicates and not test.shared_ref:
                     print('FATAL: Found two tests which both change the same reference file: {}, which is not supported.'.format(test.existing_ref))
                     print('Consider running again in --test-run mode, to get a copy of the copy commands that could be run.')
-                    print('The general advice is to take the largest file (since it will have the most events), and/or take the non-legacy one.')
+                    print('The general advice is to take the largest file (since it will have the most events).')
                     sys.exit(1)
             mr = test.mr
     return 'https://gitlab.cern.ch/atlas/athena/-/merge_requests/'+mr
@@ -416,6 +457,7 @@ if __name__ == '__main__':
     
     print('========================')
     extract_links_from_json(args.url)
+    handle_shared_refs()
     mr_url = summarise_failing_tests(not args.test_run)
     if not mr_url:
         sys.exit(1)

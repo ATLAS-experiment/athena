@@ -5,7 +5,7 @@
 #ifndef  V0CONTAINER_CNV_TLP1_TRK_H
 #define  V0CONTAINER_CNV_TLP1_TRK_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "V0Container_tlp1.h"
 
 //-----------------------------------------
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 #include "TrkEventTPCnv/TrkTrack/TrackCnv_p1.h"
 
-class V0ContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< V0ContainerCnv_p1, Trk::V0Container_tlp1 >
+class V0ContainerCnv_tlp1 : public TopLevelTPConverter< V0ContainerCnv_p1, Trk::V0Container_tlp1 >
 {
 
  public:
@@ -96,7 +96,7 @@ class T_TPCnv<V0Container, Trk::V0Container_tlp1 >
   : public V0ContainerCnv_tlp1
 {
 public:
-  // ??? Maybe this should be moved up to AthenaPoolTopLevelTPConverter...
+  // ??? Maybe this should be moved up to TopLevelTPConverter...
   virtual void persToTrans (const Trk::V0Container_tlp1* pers,
                             V0Container* trans,
                             MsgStream& msg);

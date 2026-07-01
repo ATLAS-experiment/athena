@@ -16,11 +16,9 @@
 #include "PersistencySvc/IFileCatalog.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
 #include "PersistencySvc/ITokenIterator.h"
-#include "PersistencySvc/IPersistencySvc.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -54,17 +52,11 @@ pool::TestDriver::write()
   pool::IFileCatalog& catalog = *m_fileCatalog;
 
   std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
+  auto dbsession = pool::createSession(catalog);
   catalog.start();
 
-  // Set up the policy.
-  pool::DatabaseConnectionPolicy policy;
-  policy.setWriteModeForNonExisting( pool::DatabaseConnectionPolicy::CREATE );
-  policy.setWriteModeForExisting( pool::DatabaseConnectionPolicy::OVERWRITE );
-  persistencySvc->session().setDefaultConnectionPolicy( policy );
-
   // Start an update transaction
-  if ( ! ( persistencySvc->session().transaction().start( pool::ITransaction::UPDATE ) ) ) {
+  if( !dbsession->start( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -85,7 +77,7 @@ pool::TestDriver::write()
     SimpleTestClass* object_SimpleTestClass = new SimpleTestClass();
     v_simpleTestClass.push_back( object_SimpleTestClass );
     object_SimpleTestClass->data = i;
-    Token* token_SimpleTestClass = persistencySvc->registerForWrite( placementHint_SimpleTestClass,
+    Token* token_SimpleTestClass = dbsession->registerForWrite( placementHint_SimpleTestClass,
 									   object_SimpleTestClass,
 									   class_SimpleTestClass );
     if ( ! token_SimpleTestClass ) {
@@ -95,7 +87,7 @@ pool::TestDriver::write()
   }
 
   std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
@@ -124,15 +116,15 @@ pool::TestDriver::read()
   pool::IFileCatalog& catalog = *m_fileCatalog;
 
   std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
+  auto dbsession = pool::createSession(catalog);
   catalog.start();
 
   // Starting a read transaction
-  if ( ! persistencySvc->session().transaction().start( pool::ITransaction::READ ) ) {
+  if( !dbsession->start( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  auto db = persistencySvc->session().databaseHandle( m_lfn1, pool::DatabaseSpecification::LFN );
+  auto db = dbsession->databaseHandle( m_lfn1, pool::DatabaseSpecification::LFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -158,7 +150,7 @@ pool::TestDriver::read()
 
   Token* token = tokenIterator->next();
   while ( token ) {
-    void* data_simpleTestClass = persistencySvc->readObject( *token );
+    void* data_simpleTestClass = dbsession->readObject( *token );
     if ( data_simpleTestClass == 0 ) {
       throw std::runtime_error( "Could not read the stored data" );
     }
@@ -176,7 +168,7 @@ pool::TestDriver::read()
   delete container;
 
   std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 

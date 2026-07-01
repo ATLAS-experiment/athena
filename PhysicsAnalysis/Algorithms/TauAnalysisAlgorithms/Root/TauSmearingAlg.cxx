@@ -37,13 +37,13 @@ namespace CP
 
 
   StatusCode TauSmearingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       ANA_CHECK (m_smearingTool->applySystematicVariation (sys));
       xAOD::TauJetContainer *taus = nullptr;
-      ANA_CHECK (m_tauHandle.getCopy (taus, sys));
+      ANA_CHECK (m_tauHandle.getCopy (taus, sys, ctx));
       for (xAOD::TauJet *tau : *taus)
       {
         if (m_preselection.getBool (*tau, sys))

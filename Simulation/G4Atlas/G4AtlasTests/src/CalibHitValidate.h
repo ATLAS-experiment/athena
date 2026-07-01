@@ -23,7 +23,7 @@ class CalibHitValidate: public AthAlgorithm
 
   CalibHitValidate(const std::string& name, ISvcLocator* pSvcLocator);
 
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode initialize() override;
 
  private:

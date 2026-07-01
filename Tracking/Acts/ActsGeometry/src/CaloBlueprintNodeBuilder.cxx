@@ -1,30 +1,45 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloBlueprintNodeBuilder.h"
+
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include "Acts/Geometry/Blueprint.hpp"
 #include "Acts/Geometry/PortalShell.hpp"
 #include "Acts/Geometry/Volume.hpp"
 #include "Acts/Geometry/StaticBlueprintNode.hpp"
-
+#include "Acts/Geometry/GeometryIdentifierBlueprintNode.hpp"
+#include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
+#include <Acts/Navigation/TryAllNavigationPolicy.hpp>
 #include <Acts/Utilities/AxisDefinitions.hpp>
 #include <Acts/Geometry/ContainerBlueprintNode.hpp>
+#include <Acts/Geometry/Extent.hpp>
+#include <Acts/Definitions/Units.hpp>
+#include <Acts/Geometry/LayerBlueprintNode.hpp>
+#include <Acts/Geometry/VolumeResizeStrategy.hpp>
+#include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
+#include <Acts/Geometry/TrackingVolume.hpp>
+#include <Acts/Geometry/CylinderVolumeBounds.hpp>
 
 #include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
 
-#include "Acts/Surfaces/Surface.hpp"
+#include <Acts/Surfaces/SurfaceArray.hpp>
 #include "CaloIdentifier/CaloCell_ID.h"
 
 using namespace Acts;
 using namespace Acts::Experimental;
+using namespace Acts::UnitLiterals;
+using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
+using ResizeStrategy = Acts::VolumeResizeStrategy;
+
+using namespace ActsTrk::detail::GeoVolIds;
 
 StatusCode ActsTrk::CaloBlueprintNodeBuilder::initialize() {
   ATH_MSG_DEBUG("Initializing CaloBlueprintNodeBuilder");
 
-  m_caloDetSecrMgr = buildCaloDetDescrNoAlign(serviceLocator()
-                                                                              , Athena::getMessageSvc());
+  m_caloDetSecrMgr = buildCaloDetDescrNoAlign(serviceLocator(), Athena::getMessageSvc());
   
   return StatusCode::SUCCESS;
 }
@@ -32,45 +47,115 @@ StatusCode ActsTrk::CaloBlueprintNodeBuilder::initialize() {
 std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprintNode(const GeometryContext& /*gctx*/,
                                       std::shared_ptr<BlueprintNode>&& childNode) {
 
-  caloSampleSurfaceMap_t caloSampleSurfaceMap;
-  caloSampleDDEElementsMap_t caloSampleDDEElementsMap;
-  fillMaps(caloSampleSurfaceMap, caloSampleDDEElementsMap);
+
+  std::map<caloRegion, caloSampleSurfaceMap_t> caloRegionSampleSurfaceMap;
+  std::map<caloRegion, caloSampleDDEElementsMap_t> caloRegionSampleDDEElementsMap;
+
+  fillMaps(caloRegionSampleSurfaceMap, caloRegionSampleDDEElementsMap);
 
   ATH_MSG_DEBUG("Have filled first two maps");
 
-  caloDimensionMap_t caloDimensionMap;
-  fillCaloDimensionsMap(caloDimensionMap, caloSampleDDEElementsMap);
-
-  ATH_MSG_DEBUG("Have filled calo dimensions map");
-
-  generateCylinderSurfaces(caloSampleSurfaceMap, caloSampleDDEElementsMap);
+  generateCylinderSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderSymmetricZZero], caloRegionSampleDDEElementsMap[caloRegion::CylinderSymmetricZZero],false);
+  generateCylinderSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ], caloRegionSampleDDEElementsMap[caloRegion::CylinderNegativeZ],true);
+  generateCylinderSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ], caloRegionSampleDDEElementsMap[caloRegion::CylinderPositiveZ],true);
+  generateDiscSurfaces(caloRegionSampleSurfaceMap[caloRegion::DiscNegativeZ], caloRegionSampleDDEElementsMap[caloRegion::DiscNegativeZ]);
+  generateDiscSurfaces(caloRegionSampleSurfaceMap[caloRegion::DiscPositiveZ], caloRegionSampleDDEElementsMap[caloRegion::DiscPositiveZ]);
 
   ATH_MSG_DEBUG("Have generated calorimeter cylindrical surfaces");
 
-  //The calo node is a container node that will hold the calo layers
-  auto caloNode = std::make_shared<CylinderContainerBlueprintNode>("CaloNode", AxisDirection::AxisR);
-  if (childNode) caloNode->addChild(std::move(childNode));
+  // The calo node is a container node that will hold the itk and calo nodes as children. 
+  // The calo cylinder is static in order to avoid merging issues with the itk portals 
+  // that are supposed to carry material.
+  // Given this node expands to encompass the sub-nodes added, we set the dimensions to nominal
+  // values of 0,100,100.
+  std::shared_ptr<StaticBlueprintNode> itkCaloNode{};
+  {
+    auto envelope = std::make_unique<TrackingVolume>(Amg::Transform3D::Identity(),
+                                                     std::make_shared<CylinderVolumeBounds>(0., 100.0, 100.0),"ITkCalo");
+    envelope->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID));
+    itkCaloNode = std::make_shared<StaticBlueprintNode>(std::move(envelope));
+  }
+  if (childNode) {
+    itkCaloNode->addChild(std::move(childNode));
+  }
 
   ATH_MSG_DEBUG("Top level calorimeter node created");
-
-  CylinderContainerBlueprintNode& EMBarrelCylinder = caloNode->addCylinderContainer("EMBarrel", AxisDirection::AxisR);
-  // Use Gap attachment strategy to fill gaps between layers
-  EMBarrelCylinder.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
-
+            
+  auto caloNode = std::make_shared<CylinderContainerBlueprintNode>("CaloNode", AxisDirection::AxisZ);
+  CylinderContainerBlueprintNode& caloBarrelCylinderNode = caloNode->addCylinderContainer("CaloBarrelSymmetricZZeroCylinders", AxisDirection::AxisR);
+  caloBarrelCylinderNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
+  caloBarrelCylinderNode.setResizeStrategy(ResizeStrategy::Gap);
+  
   ATH_MSG_DEBUG("EM Barrel container node created");
 
-  //Add all cylindrical layers that are symmetric about zero in Z.
-  addCylindricalTrackingVolumeToCaloNode(EMBarrelCylinder, caloDimensionMap, "PreSamplerB", caloSampleSurfaceMap[CaloCell_ID::PreSamplerB]);
-  addCylindricalTrackingVolumeToCaloNode(EMBarrelCylinder, caloDimensionMap, "EMB1", caloSampleSurfaceMap[CaloCell_ID::EMB1]);
-  addCylindricalTrackingVolumeToCaloNode(EMBarrelCylinder, caloDimensionMap, "EMB2", caloSampleSurfaceMap[CaloCell_ID::EMB2]);
-  addCylindricalTrackingVolumeToCaloNode(EMBarrelCylinder, caloDimensionMap, "EMB3", caloSampleSurfaceMap[CaloCell_ID::EMB3]);
-  addCylindricalTrackingVolumeToCaloNode(EMBarrelCylinder, caloDimensionMap, "TileBar0", caloSampleSurfaceMap[CaloCell_ID::TileBar0]);
-  addCylindricalTrackingVolumeToCaloNode(EMBarrelCylinder, caloDimensionMap, "TileBar1", caloSampleSurfaceMap[CaloCell_ID::TileBar1]);
-  addCylindricalTrackingVolumeToCaloNode(EMBarrelCylinder, caloDimensionMap, "TileBar2", caloSampleSurfaceMap[CaloCell_ID::TileBar2]);
+  //Barrel cylinders symmetric about z = 0
+  for (unsigned int sampleIndex = 0; sampleIndex < m_caloCylinderSymmetricSampleList.size(); ++sampleIndex) {
+    auto& sampleName = m_caloCylinderSymmetricSampleList.at(sampleIndex).first;
+    addCylindricalTrackingVolumeToCaloNode(caloBarrelCylinderNode, sampleName, caloRegionSampleSurfaceMap[caloRegion::CylinderSymmetricZZero].at({sampleName, getSampleEnum(sampleName)}), sampleIndex, false);
+  }
 
-  ATH_MSG_DEBUG("Have added all Barrel layers to EMBarrelCylinder node");
+  //now do asymmetric cylinders, first negative z
+  
+  CylinderContainerBlueprintNode& caloBarrelCylinderNegativeZNode = caloNode->addCylinderContainer("CaloBarrelNegativeZAsymmetricCylinders", AxisDirection::AxisR);
+  caloBarrelCylinderNegativeZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
+  caloBarrelCylinderNegativeZNode.setResizeStrategy(ResizeStrategy::Gap);
 
-  return caloNode;
+  //then positive z
+  CylinderContainerBlueprintNode& caloBarrelCylinderPositiveZNode = caloNode->addCylinderContainer("CaloBarrelPositiveZAsymmetricCylinders", AxisDirection::AxisR);
+  caloBarrelCylinderPositiveZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
+  caloBarrelCylinderPositiveZNode.setResizeStrategy(ResizeStrategy::Gap);
+
+  for (unsigned int sampleIndex = 0; sampleIndex < m_caloCylinderAsymmetricSampleList.size(); ++sampleIndex) {
+    auto& sampleName = m_caloCylinderAsymmetricSampleList.at(sampleIndex).first;
+    //We only add TileGap1 and 2 here, because the TileExt0,1,2
+    //will need a special treatment to avoid clashes in Z.
+    if (sampleIndex < 2){
+    addCylindricalTrackingVolumeToCaloNode(caloBarrelCylinderNegativeZNode, sampleName+"NegZ", caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}), sampleIndex+m_caloCylinderSymmetricSampleList.size(), false);
+    addCylindricalTrackingVolumeToCaloNode(caloBarrelCylinderPositiveZNode, sampleName+"PosZ", caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}), sampleIndex+m_caloCylinderSymmetricSampleList.size()+m_caloCylinderAsymmetricSampleList.size(), false);
+    }
+    else{
+      //Tile extended barrel surfaces must be added to top level node directly because they always overlap in R
+      //or Z with other calorimeter surfaces, volumes etc.
+      //Note there is a speed penalty to do it this way.
+      itkCaloNode->addLayer(sampleName+"NegZ" + "_Layer", [&](auto& layer) {
+        layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ].at({sampleName, getSampleEnum(sampleName)}));
+        layer.setEnvelope(Acts::ExtentEnvelope{{
+            .z = {0.1_mm, 0.1_mm},
+            .r = {2_mm, 2_mm},
+        }});
+      });
+      itkCaloNode->addLayer(sampleName+"PosZ" + "_Layer", [&](auto& layer) {
+        layer.setSurfaces(caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ].at({sampleName, getSampleEnum(sampleName)}));
+        layer.setEnvelope(Acts::ExtentEnvelope{{
+            .z = {0.1_mm, 0.1_mm},
+            .r = {2_mm, 2_mm},
+        }});
+      });
+    }
+  }
+  
+
+  CylinderContainerBlueprintNode& caloEndCapDiscNegativeZNode = caloNode->addCylinderContainer("CaloEndCapDiscNegativeZ", AxisDirection::AxisZ);
+  caloEndCapDiscNegativeZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
+  caloEndCapDiscNegativeZNode.setResizeStrategy(ResizeStrategy::Gap);
+
+  CylinderContainerBlueprintNode& caloEndCapDiscPositiveZNode = caloNode->addCylinderContainer("CaloEndCapDiscPositiveZ", AxisDirection::AxisZ);
+  caloEndCapDiscPositiveZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
+  caloEndCapDiscPositiveZNode.setResizeStrategy(ResizeStrategy::Gap);
+  
+  for (unsigned int sampleIndex = 0; sampleIndex < m_caloDiscSampleList.size(); ++sampleIndex) {
+    auto& sampleName = m_caloDiscSampleList.at(sampleIndex).first;
+    addCylindricalTrackingVolumeToCaloNode(caloEndCapDiscNegativeZNode, sampleName+"NegZ", caloRegionSampleSurfaceMap[caloRegion::DiscNegativeZ].at({sampleName, getSampleEnum(sampleName)}), sampleIndex+m_caloCylinderSymmetricSampleList.size()+(2*m_caloCylinderAsymmetricSampleList.size()), true);
+    addCylindricalTrackingVolumeToCaloNode(caloEndCapDiscPositiveZNode, sampleName+"PosZ", caloRegionSampleSurfaceMap[caloRegion::DiscPositiveZ].at({sampleName, getSampleEnum(sampleName)}), sampleIndex+m_caloCylinderSymmetricSampleList.size()+(2*m_caloCylinderAsymmetricSampleList.size())+m_caloDiscSampleList.size(), true);
+  }
+
+  ATH_MSG_DEBUG("Have added all Barrel layers to caloBarrelCylinderNode");
+
+  // Add calo barrel node to the top level calo node.
+  itkCaloNode->addChild(caloNode);
+
+  //return the top level calo node
+  return itkCaloNode;
 }
 
 StatusCode ActsTrk::CaloBlueprintNodeBuilder::finalize() {
@@ -78,7 +163,8 @@ StatusCode ActsTrk::CaloBlueprintNodeBuilder::finalize() {
   return StatusCode::SUCCESS;
 }
 
-void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const {
+void ActsTrk::CaloBlueprintNodeBuilder::fillMaps(std::map<caloRegion, caloSampleSurfaceMap_t>& caloRegionSampleSurfaceMap,
+                      std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap) const {
 
 
   //loop over all possible calo sampling layers
@@ -91,14 +177,23 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
   //a tolerance value
 
   //Use the same loop to create map bwteeen sampling and vectors of DDE
-  for (auto currentSample : m_caloCylinderSampleList) {
-    caloSampleSurfaceMap[currentSample] = std::vector<std::shared_ptr<Surface> >();
-    caloSampleDDEElementsMap[currentSample] = std::vector<const CaloDetDescrElement*>();
+  for (const auto & currentSample : m_caloCylinderSymmetricSampleList) {
+    caloRegionSampleSurfaceMap[caloRegion::CylinderSymmetricZZero][currentSample] = std::vector<std::shared_ptr<Surface> >();
+    caloRegionSampleDDEElementsMap[caloRegion::CylinderSymmetricZZero][currentSample] = std::vector<const CaloDetDescrElement*>();
   }
 
-  for (auto currentSample : m_caloDiscSampleList) {
-    caloSampleSurfaceMap[currentSample] = std::vector<std::shared_ptr<Surface> >();
-    caloSampleDDEElementsMap[currentSample] = std::vector<const CaloDetDescrElement*>();
+  for (const auto & currentSample : m_caloCylinderAsymmetricSampleList) {
+    caloRegionSampleSurfaceMap[caloRegion::CylinderNegativeZ][currentSample] = std::vector<std::shared_ptr<Surface> >();
+    caloRegionSampleDDEElementsMap[caloRegion::CylinderNegativeZ][currentSample] = std::vector<const CaloDetDescrElement*>();
+    caloRegionSampleSurfaceMap[caloRegion::CylinderPositiveZ][currentSample] = std::vector<std::shared_ptr<Surface> >();
+    caloRegionSampleDDEElementsMap[caloRegion::CylinderPositiveZ][currentSample] = std::vector<const CaloDetDescrElement*>();
+  }
+
+  for (const auto & currentSample : m_caloDiscSampleList) {
+    caloRegionSampleSurfaceMap[caloRegion::DiscNegativeZ][currentSample] = std::vector<std::shared_ptr<Surface> >();
+    caloRegionSampleDDEElementsMap[caloRegion::DiscNegativeZ][currentSample] = std::vector<const CaloDetDescrElement*>();
+    caloRegionSampleSurfaceMap[caloRegion::DiscPositiveZ][currentSample] = std::vector<std::shared_ptr<Surface> >();
+    caloRegionSampleDDEElementsMap[caloRegion::DiscPositiveZ][currentSample] = std::vector<const CaloDetDescrElement*>();
   }
 
   //for each calo sampling collect all the DDE in a vector    
@@ -107,31 +202,76 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
       ATH_MSG_ERROR("Null pointer to CaloDetDescrElement");
       continue;
     }
+
     CaloCell_ID::CaloSample currentSample=theDDE->getSampling();
-    caloSampleDDEElementsMap[currentSample].push_back(theDDE);
+    std::pair <std::string, CaloCell_ID::CaloSample> samplePair = std::make_pair(getSampleName(currentSample), currentSample);
+    
+    //check if have cylinder symmetric about z = 0
+    if (std::find(m_caloCylinderSymmetricSampleList.begin(), m_caloCylinderSymmetricSampleList.end(), samplePair) != m_caloCylinderSymmetricSampleList.end()){
+      caloRegionSampleDDEElementsMap[caloRegion::CylinderSymmetricZZero][{samplePair.first,samplePair.second}].push_back(theDDE);
+    }
+    
+    //check if have cylinder asymmetric about z = 0, if so check if in negative or positive z
+    if (std::find(m_caloCylinderAsymmetricSampleList.begin(), m_caloCylinderAsymmetricSampleList.end(), samplePair) != m_caloCylinderAsymmetricSampleList.end()){
+      if (theDDE->z() < 0.0) {
+        caloRegionSampleDDEElementsMap[caloRegion::CylinderNegativeZ][{samplePair.first,samplePair.second}].push_back(theDDE);
+      }
+      else {
+        caloRegionSampleDDEElementsMap[caloRegion::CylinderPositiveZ][{samplePair.first,samplePair.second}].push_back(theDDE);
+      }
+    }
+
+    //check if sampling is in disc list
+    if (std::find(m_caloDiscSampleList.begin(), m_caloDiscSampleList.end(), std::make_pair(samplePair.first,samplePair.second)) != m_caloDiscSampleList.end()) {
+      //check if in negative or positive z
+      if (theDDE->z() < 0.0) {
+        caloRegionSampleDDEElementsMap[caloRegion::DiscNegativeZ][{getSampleName(currentSample), currentSample}].push_back(theDDE);
+      }
+      else {
+        caloRegionSampleDDEElementsMap[caloRegion::DiscPositiveZ][{getSampleName(currentSample), currentSample}].push_back(theDDE);
+      }
+    }
+
   }
 
-  auto sortAllLayersInZ = [&caloSampleDDEElementsMap](const std::vector<CaloCell_ID::CaloSample>& caloSampleList) {
-    for (auto currentSample : caloSampleList) {
-      std::vector<const CaloDetDescrElement*> currentElements = caloSampleDDEElementsMap[currentSample];
+  auto sortAllLayersInZ = [&caloRegionSampleDDEElementsMap](const std::vector<std::pair<std::string, CaloCell_ID::CaloSample>>& caloSampleList, const caloRegion& region) {
+    for (const auto & currentSample : caloSampleList) {
+      std::vector<const CaloDetDescrElement*> currentElements = caloRegionSampleDDEElementsMap[region][currentSample];
       std::sort(currentElements.begin(), currentElements.end(), [](const CaloDetDescrElement* a, const CaloDetDescrElement* b) {return a->z() < b->z();});
-      caloSampleDDEElementsMap[currentSample] = std::move(currentElements);
+      caloRegionSampleDDEElementsMap[region][currentSample] = std::move(currentElements);
     }
   };
 
   //Sort the DDE, by Z, in all possible layers
-  sortAllLayersInZ(m_caloCylinderSampleList);
-  sortAllLayersInZ(m_caloDiscSampleList);
+  sortAllLayersInZ(m_caloCylinderSymmetricSampleList, caloRegion::CylinderSymmetricZZero);
+  sortAllLayersInZ(m_caloCylinderAsymmetricSampleList, caloRegion::CylinderNegativeZ);
+  sortAllLayersInZ(m_caloCylinderAsymmetricSampleList, caloRegion::CylinderPositiveZ);
+
+  auto sortAllLayersInR = [&caloRegionSampleDDEElementsMap](const std::vector<std::pair<std::string, CaloCell_ID::CaloSample>>& caloSampleList, const caloRegion& region) {
+    for (const auto& currentSample : caloSampleList) {
+      std::vector<const CaloDetDescrElement*> currentElements = caloRegionSampleDDEElementsMap[region][currentSample];
+      std::sort(currentElements.begin(), currentElements.end(), [](const CaloDetDescrElement* a, const CaloDetDescrElement* b) {return a->r() < b->r();});
+      caloRegionSampleDDEElementsMap[region][currentSample] = std::move(currentElements);
+    }
+  };
+
+  //Sort the DDE, by R, in all possible layers
+  sortAllLayersInR(m_caloDiscSampleList, caloRegion::DiscNegativeZ);
+  sortAllLayersInR(m_caloDiscSampleList, caloRegion::DiscPositiveZ);
 
 }
 
-void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const{
+void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap, bool asymmetricZ) const{
 
-  for (auto currentSample : m_caloCylinderSampleList) {
+  std::vector<std::pair<std::string, CaloCell_ID::CaloSample>> sampleList;
+  if (asymmetricZ) sampleList = m_caloCylinderAsymmetricSampleList;
+  else sampleList = m_caloCylinderSymmetricSampleList;
+
+  for (const auto & currentSample : sampleList) {
 
     std::vector<const CaloDetDescrElement*> currentElements = caloSampleDDEElementsMap[currentSample];
 
-    double maxLArBRadius = 0.0, minLArBRadius = 999999.0;
+    double maxLArBRadius = 0.0, minLArBRadius = std::numeric_limits<double>::max();
     double lowZLarB = 0.0, highZLarB = 0.0;
 
     //loop over cells runs from -z to +z in a given sampling layer
@@ -145,23 +285,26 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
     //each ring of cells in phi to the next ring of cells in phi
     bool firstPhiRing = true;
     double initialRadius = 0.0;
-    double initialZ = -999999.0;
+    double initialZ = -std::numeric_limits<double>::max();
+
+    //check if we ever move along in Z value
+    bool movedInZ = false;
 
     for (const CaloDetDescrElement* theDDE : currentElements){
 
       double z = theDDE->z();   
       double radius = theDDE->r();
 
-      ATH_MSG_DEBUG(" Calo Sampling is " << currentSample);            
+      ATH_MSG_DEBUG(" Calo Sampling is " << currentSample.first);
 
       if (firstCellInPhiRing) {
-        ATH_MSG_DEBUG("First Cell in phi ring " << currentSample << " has z = " << z << " and r = " << radius);
+        ATH_MSG_DEBUG("First Cell in phi ring " << currentSample.first << " has z = " << z << " and r = " << radius);
         initialZ = z;
         firstCellInPhiRing = false;
       }
 
       if (firstPhiRing) {
-        ATH_MSG_DEBUG("First Cell in layer " << currentSample << " has z = " << z << " and r = " << radius);
+        ATH_MSG_DEBUG("First Cell in layer " << currentSample.first << " has z = " << z << " and r = " << radius);
         initialRadius = theDDE->r();
         firstPhiRing = false;
         lowZLarB = z;
@@ -178,6 +321,7 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
         continue;
       }
       else {
+        movedInZ = true;
         firstCellInPhiRing = true;
         if (phiCounter > 0) {
           double cellRingRadius = totalRadiusFixedPhi / phiCounter;
@@ -192,16 +336,16 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
           highZLarB = z;
           ATH_MSG_DEBUG("Values of cellRingRadius, initialRadius, highZLarB and lowZLarB are " << cellRingRadius << ", " << initialRadius << ", " << highZLarB << " and " << lowZLarB);
           if (std::abs(cellRingRadius - initialRadius) > m_radiusTolerance && highZLarB - lowZLarB > 0.0) {
-            ATH_MSG_DEBUG("CYLINDER: Create cylinder for layer " << currentSample);                
+            ATH_MSG_DEBUG("CYLINDER: Create cylinder for layer " << currentSample.first);                
             ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B radius are " << minLArBRadius << " " << maxLArBRadius);
             ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B z are " << lowZLarB << " " << highZLarB);
 
-            caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB));
+            caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB, asymmetricZ));
 
             //reset the dimensions of the cylinder to the initial conditions, in 
            //preparation for the next cylinder
            firstPhiRing = true;
-           minLArBRadius = 999999.0;
+           minLArBRadius = std::numeric_limits<double>::max();
            maxLArBRadius = 0.0;
            lowZLarB = 0.0;
            highZLarB = 0.0;
@@ -212,15 +356,26 @@ void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfa
     }//loop over calorimeter DDE
 
     if (0 == caloSampleSurfaceMap[currentSample].size()){
-      ATH_MSG_DEBUG("CYLINDER: Zero size Vector: Create cylinder for layer " << currentSample);   
+      //If we never found any shift in Z whilst looping over the DDE
+      //then thee min/max Z and radius were not set
+      //so we set them here.
+      if (!movedInZ) {
+        lowZLarB = initialZ;
+        highZLarB = initialZ+0.001;
+        if (phiCounter > 0) {
+          maxLArBRadius = totalRadiusFixedPhi / phiCounter;
+          minLArBRadius = 0.0;
+        }
+      }
+      ATH_MSG_DEBUG("CYLINDER: Zero size Vector: Create cylinder for layer " << currentSample.first);   
       ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B radius are " << minLArBRadius << " " << maxLArBRadius);
       ATH_MSG_DEBUG("CYLINDER: Create Cylinder: Min and Max LAr B z are " << lowZLarB << " " << highZLarB);
-      caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB));
+      caloSampleSurfaceMap[currentSample].push_back(generateCylinderSurface(maxLArBRadius, minLArBRadius, lowZLarB, highZLarB, asymmetricZ));
     }
   }   
 }
 
-std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB) const{
+std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurface(const double& maxLArBRadius, const double& minLArBRadius, const double& lowZLarB, const double& highZLarB, bool asymmetricZ) const{
 
   //Characterise the dimensions of the  cylinder
   double LArBRadius = (maxLArBRadius + minLArBRadius) / 2.0;
@@ -228,115 +383,122 @@ std::shared_ptr<CylinderSurface> ActsTrk::CaloBlueprintNodeBuilder::generateCyli
 
   ATH_MSG_DEBUG("Cylinder radius and length are " << LArBRadius << " and " << LArBLength);
 
-  auto surface = Surface::makeShared<CylinderSurface>(Transform3::Identity(), LArBRadius, LArBLength);
-    
+  if (asymmetricZ) {
+    double zShift = (highZLarB + lowZLarB) / 2.0;
+    ATH_MSG_DEBUG("Cylinder is asymmetric in Z, with shift of " << zShift);
+     return Surface::makeShared<CylinderSurface>(Transform3(Translation3(0.0, 0.0, zShift)), LArBRadius, LArBLength/2);
+  }
+  else return Surface::makeShared<CylinderSurface>(Transform3::Identity(), LArBRadius, LArBLength/2);
+
+}
+
+void ActsTrk::CaloBlueprintNodeBuilder::generateDiscSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const{
+
+  for (const auto & currentSample : m_caloDiscSampleList) {
+
+        const std::vector<const CaloDetDescrElement*> & currentElements = caloSampleDDEElementsMap[currentSample];
+
+        double totalZFixedPhi = 0.0;
+        bool firstCellInPhiRing = true;
+        unsigned int phiCounter = 0;
+
+        bool firstPhiRing = true;
+        double initialRadius = 0.0;
+        double initialZ = -std::numeric_limits<double>::max();
+
+        //loop over cells runs from -z to +z in a given sampling layer
+        //There are many cells with the same z value, but different phi values
+        //We will find a min amd max radius in this phi ring.
+        double minDiscRadius = std::numeric_limits<double>::max(), maxDiscRadius = 0.0;
+
+        unsigned int currentElementsSize = currentElements.size();
+        unsigned int DDECounter = 0;
+
+        for (const CaloDetDescrElement* theDDE : currentElements){
+
+            bool isLastDDE = (DDECounter == (currentElementsSize-1));
+
+            ATH_MSG_DEBUG("Disc DDE with sampling, r and z of " << currentSample << ", " << theDDE->r() << ", " << theDDE->z());
+            ATH_MSG_DEBUG("isLastDDE is " << isLastDDE);
+
+            double z = theDDE->z();   
+            double radius = theDDE->r();
+
+            if (firstCellInPhiRing) {
+                initialRadius = radius;
+                firstCellInPhiRing = false;
+            }
+
+            if (firstPhiRing) {
+                initialZ = z;
+                firstPhiRing = false;
+                minDiscRadius = radius;
+            }
+
+            //if radius is unchanged then we add the z to the summed z for this phi ring
+            //and increment the counter of cells in this phi ring
+            if (std::abs(radius - initialRadius) < 0.0001 && !isLastDDE) {
+                totalZFixedPhi += z;
+                phiCounter++;
+                DDECounter++;
+                continue;
+            }
+            else {
+                firstCellInPhiRing = true;
+                if (phiCounter > 0) {
+                    double cellRingZ = totalZFixedPhi / phiCounter;
+                    totalZFixedPhi = 0.0;
+                    phiCounter = 0;
+
+                    //if z changes by more than tolerance, then we will create a disc
+                    //with the min and max radius found
+                    //if we reach the last DDE and no new surface has been created, then we also create a disc surface
+                    maxDiscRadius = radius;
+                    ATH_MSG_DEBUG("cellRingZ, initialZ and z tolerance are " << cellRingZ << ", " << initialZ << " and " << m_zTolerance);
+                    if (std::abs(cellRingZ - initialZ) > m_zTolerance || isLastDDE) {
+                      ATH_MSG_DEBUG("DISC: About to create disc surface for sampling " << currentSample);
+                        caloSampleSurfaceMap[currentSample].push_back(generateDiscSurface(cellRingZ,maxDiscRadius, minDiscRadius));
+                        //reset the dimensions of the disc to the initial conditions, in 
+                        //preparation for the next disc
+                        minDiscRadius = std::numeric_limits<double>::max();
+                        maxDiscRadius = 0.0;
+                        firstPhiRing = true; 
+                    }//if z changes by more than tolerance
+                }//if at least one cell in phi (should always be the case!)
+                else ATH_MSG_ERROR("phiCounter is zero!");
+            }//if radius has changed
+            DDECounter++;
+        }//loop over calorimeter DDE
+  }//loop over calo samplings        
+}
+
+std::shared_ptr<Acts::DiscSurface> ActsTrk::CaloBlueprintNodeBuilder::generateDiscSurface(const double& z, const double& maxLArBRadius, const double& minLArBRadius) const{
+
+  ATH_MSG_DEBUG("DISC: Disc min and max radius are " << minLArBRadius << " and " << maxLArBRadius << " with z of " << z);
+  auto surface = Surface::makeShared<DiscSurface>(Amg::getTranslateZ3D(z), minLArBRadius, maxLArBRadius);
+
   return surface;
 
 }
 
-void ActsTrk::CaloBlueprintNodeBuilder::fillCaloDimensionsMap(caloDimensionMap_t& caloDimensionsMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const{
- 
-  //initialise parameters we will use to find the dimensions of the calorimeter
-  double minR = 99999999999999;
-  double maxR = 0.0;
-  double minZ = 99999999999999;
-  double maxZ = -99999999999999;    
+void ActsTrk::CaloBlueprintNodeBuilder::addCylindricalTrackingVolumeToCaloNode(CylinderContainerBlueprintNode& containerNode, const std::string& volumeName,const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int layerIndex, const bool& isDisc) const{
 
-  //define functions we will use
-  auto checkMinR = [&minR](const CaloDetDescrElement* theDDE){double r = theDDE->r();if (r < minR) minR = r;};
-  auto checkMaxR = [&maxR](const CaloDetDescrElement* theDDE){double r = theDDE->r();if (r > maxR) maxR = r;};
-  auto checkMinMaxZ = [&minZ,&maxZ](const CaloDetDescrElement* theDDE){double z = theDDE->z();if (z > maxZ) maxZ = z;if (z < minZ) minZ = z;};
-  auto calcHalfLengthZ = [&minZ, &maxZ](){return (maxZ - minZ) / 2.0;};
+  // Construct the container node with geometry identifier and layer, and add the surfaces to the layer.
+  Acts::Experimental::GeometryIdentifierBlueprintNode& geoIdNode = containerNode.withGeometryIdentifier();
+  geoIdNode.setAllVolumeIdsTo(s_caloBarrelId +
+  layerIndex);
 
-  //function to use the above to get minR, maxR and halfLengthZ
-  auto getMinRMaxRHalfLengthZ = [&minR, &maxR, &minZ, &maxZ, &caloSampleDDEElementsMap, &checkMinR, &checkMaxR, &checkMinMaxZ, &calcHalfLengthZ](CaloCell_ID::CaloSample currentSample) {
+  AxisDirection axis = AxisDirection::AxisZ;
+  if (isDisc) axis = AxisDirection::AxisR;
+  CylinderContainerBlueprintNode& cylinder = geoIdNode.addCylinderContainer(volumeName,
+  axis);
 
-    minR = 99999999999999;
-    maxR = 0.0;
-    minZ = 99999999999999;
-    maxZ = -99999999999999;    
-
-    for (const CaloDetDescrElement* theDDE : caloSampleDDEElementsMap[currentSample]) {
-      checkMinR(theDDE);
-      checkMaxR(theDDE);   
-      checkMinMaxZ(theDDE);
-    }
-
-    return calcHalfLengthZ();
-  };
-
-  //find minR from PreSamplerB
-  for (const CaloDetDescrElement* theDDE : caloSampleDDEElementsMap[CaloCell_ID::PreSamplerB]) checkMinR(theDDE); 
-
-  //find maxR from TileBar2, TileGap2 and Tile Ext2
-  std::vector<const CaloDetDescrElement*> DDE_TileBar2 = caloSampleDDEElementsMap[CaloCell_ID::TileBar2];
-  std::vector<const CaloDetDescrElement*> DDE_TileGap2 = caloSampleDDEElementsMap[CaloCell_ID::TileGap2];
-  std::vector<const CaloDetDescrElement*> DDE_TileExt2 = caloSampleDDEElementsMap[CaloCell_ID::TileExt2];
-
-  for (auto currentSample : {CaloCell_ID::TileBar2, CaloCell_ID::TileGap2, CaloCell_ID::TileExt2}) {
-    for (const CaloDetDescrElement* theDDE : caloSampleDDEElementsMap[currentSample]) checkMaxR(theDDE);
-  }
-
-  ATH_MSG_DEBUG("Min R in PreSamplerB is " << minR);
-  ATH_MSG_DEBUG("Max R in TileBar2, TileGap2 and TileExt2 is " << maxR);
-
-  caloDimensionsMap["CaloMinR"] = minR;
-  caloDimensionsMap["CaloMaxR"] = maxR;
-
-  //find minZ and maxZ from all barrel samplings
-  for (auto currentSample : {CaloCell_ID::PreSamplerB, CaloCell_ID::EMB1, CaloCell_ID::EMB2, CaloCell_ID::EMB3, CaloCell_ID::TileBar0, CaloCell_ID::TileBar1, CaloCell_ID::TileBar2, CaloCell_ID::TileGap1, CaloCell_ID::TileGap2, CaloCell_ID::TileExt0, CaloCell_ID::TileExt1, CaloCell_ID::TileExt2}) {
-    for (const CaloDetDescrElement* theDDE : caloSampleDDEElementsMap[currentSample]) checkMinMaxZ(theDDE);
-  }
-
-  caloDimensionsMap["CaloMinZ"] = minZ;
-  caloDimensionsMap["CaloMaxZ"] = maxZ;
-
-  double halfLengthZ = calcHalfLengthZ();
-  ATH_MSG_DEBUG("Half length in Z for entire barrel is " << halfLengthZ);
-  caloDimensionsMap["CaloHalfLengthZ"] = halfLengthZ;
-
-  auto putMinRMaxRHalfLengthZInMap = [&caloDimensionsMap,&minR,&maxR,&halfLengthZ](const std::string& sampleString){
-    //PresamplerB, TileBar0/2, TileGap1/2, TileExt0/1/2 return the same radial value for all DDE, so need to make a small offset because a zero thickness
-    //cylinder is not allowed by Acts volumes etc.
-    float smallOffset = 0.1;
-    if (std::fabs((maxR - minR)) < smallOffset) maxR = minR + smallOffset;
-    caloDimensionsMap[sampleString + "MinR"] = minR;
-    caloDimensionsMap[sampleString + "MaxR"] = maxR;
-    caloDimensionsMap[sampleString + "HalfLengthZ"] = halfLengthZ;
-  };
-
-  halfLengthZ = getMinRMaxRHalfLengthZ(CaloCell_ID::PreSamplerB);
-  putMinRMaxRHalfLengthZInMap("PreSamplerB");
-  halfLengthZ = getMinRMaxRHalfLengthZ(CaloCell_ID::EMB1);
-  putMinRMaxRHalfLengthZInMap("EMB1");
-  halfLengthZ = getMinRMaxRHalfLengthZ(CaloCell_ID::EMB2);
-  putMinRMaxRHalfLengthZInMap("EMB2");
-  halfLengthZ = getMinRMaxRHalfLengthZ(CaloCell_ID::EMB3);
-  putMinRMaxRHalfLengthZInMap("EMB3");
-  halfLengthZ = getMinRMaxRHalfLengthZ(CaloCell_ID::TileBar0);
-  putMinRMaxRHalfLengthZInMap("TileBar0");
-  halfLengthZ = getMinRMaxRHalfLengthZ(CaloCell_ID::TileBar1);
-  putMinRMaxRHalfLengthZInMap("TileBar1");
-  halfLengthZ = getMinRMaxRHalfLengthZ(CaloCell_ID::TileBar2);
-  putMinRMaxRHalfLengthZInMap("TileBar2");
-  halfLengthZ = getMinRMaxRHalfLengthZ(CaloCell_ID::TileGap1);
-
-}
-
-void ActsTrk::CaloBlueprintNodeBuilder::addCylindricalTrackingVolumeToCaloNode(CylinderContainerBlueprintNode& containerNode, caloDimensionMap_t& caloDimensionMap, const std::string& volumeName,const std::vector<std::shared_ptr<Surface>>& surfaces) const{
-
-  CylinderContainerBlueprintNode& cylinder = containerNode.addCylinderContainer(volumeName, AxisDirection::AxisZ);
-
-  ATH_MSG_DEBUG("Creating TrackingVolume for " << volumeName << " with minR, maxR and halfLengthZ of " << caloDimensionMap[volumeName+"MinR"] << ", " << caloDimensionMap[volumeName+"MaxR"] << " and " << caloDimensionMap[volumeName+"HalfLengthZ"]);
-
-  auto trackingVolume = std::make_unique<TrackingVolume>(
-      Transform3::Identity(),
-      std::make_shared<CylinderVolumeBounds>(caloDimensionMap[volumeName+"MinR"], caloDimensionMap[volumeName+"MaxR"], caloDimensionMap[volumeName+"HalfLengthZ"]),
-      volumeName);
-
-  for (auto surface : surfaces) trackingVolume->addSurface(std::move(surface));
-
-
-  cylinder.addStaticVolume(std::move(trackingVolume));
+  cylinder.addLayer(volumeName + "_Layer", [&](auto& layer) {
+        layer.setSurfaces(surfaces);
+        layer.setEnvelope(Acts::ExtentEnvelope{{
+            .z = {0.1_mm, 0.1_mm},
+            .r = {2_mm, 2_mm},
+        }});
+    });
 
 }

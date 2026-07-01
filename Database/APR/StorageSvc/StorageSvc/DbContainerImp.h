@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -15,7 +15,7 @@
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/pool.h"
 #include "StorageSvc/IDbContainer.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 #include "GaudiKernel/StatusCode.h"
 
 // STL include files
@@ -73,7 +73,7 @@ namespace pool    {
     std::string           m_name;
 
     /// Standard destructor
-    virtual ~DbContainerImp();
+    virtual ~DbContainerImp() = default;
     /// Commit single entry to container
     virtual StatusCode writeObject(ActionList::value_type& /* entry */)  
     { return StatusCode::FAILURE;                                                   }

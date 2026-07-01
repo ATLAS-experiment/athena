@@ -41,7 +41,7 @@ namespace xAODMaker {
       return StatusCode::SUCCESS;
    }
 
-   StatusCode TrigEMClusterCnvAlg::execute() {
+   StatusCode TrigEMClusterCnvAlg::execute(const EventContext& /*ctx*/) {
 
       // Retrieve the AOD container:
       const TrigEMClusterContainer* aod = nullptr;

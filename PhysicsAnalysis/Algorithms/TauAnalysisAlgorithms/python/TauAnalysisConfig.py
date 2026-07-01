@@ -34,6 +34,9 @@ class TauCalibrationConfig (ConfigBlock):
             info="decorate the truth particle information on the reconstructed one.")
         self.addOption ('decorateExtraVariables', True, type=bool,
             info="decorate extra variables for the reconstructed tau-jet.")
+        self.addOption ('addGlobalFELinksDep', False, type=bool,
+            info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -57,6 +60,20 @@ class TauCalibrationConfig (ConfigBlock):
             inputContainer = self.inputContainer
         config.setSourceName (self.containerName, inputContainer)
 
+        # Set up a shallow copy to decorate
+        if config.wantCopy (self.containerName) :
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'TauShallowCopyAlg' )
+            alg.input = config.readName (self.containerName)
+            alg.output = config.copyName (self.containerName)
+            alg.outputType = 'xAOD::TauJetContainer'
+            decorations = []
+            if self.addGlobalFELinksDep:
+                decorations += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+            if config.dataType() is not DataType.Data:
+                decorations += ['IsTruthMatched', 'truthJetLink', 'truthParticleLink']
+            if decorations:
+                alg.declareDecorations = decorations
+
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::TauTruthMatchingAlg',
@@ -72,7 +89,7 @@ class TauCalibrationConfig (ConfigBlock):
             alg = config.createAlgorithm( 'CP::TauTruthDecorationsAlg',
                                           'TauTruthDecorationsAlg',
                                            reentrant=True )
-            alg.taus = config.readName (self.containerName)
+            alg.taus = config.readName (self.containerName, nominal=True)
             alg.doubleDecorations = ['pt_vis', 'pt_invis', 'eta_vis', 'eta_invis', 'phi_vis', 'phi_invis', 'm_vis', 'm_invis']
             alg.floatDecorations = []
             alg.intDecorations = ['pdgId']
@@ -94,7 +111,7 @@ class TauCalibrationConfig (ConfigBlock):
            alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg',
                                          'TauExtraVariablesAlg',
                                          reentrant=True )
-           alg.taus = config.readName (self.containerName)
+           alg.taus = config.readName (self.containerName, nominal=True)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' )
@@ -103,6 +120,7 @@ class TauCalibrationConfig (ConfigBlock):
         alg.smearingTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
+        config.setExtraOutputs ({('xAOD::IParticleContainer' , 'StoreGateSvc+' + config.readName(self.containerName, nominal=True) + '.RNNEleScoreSigTrans_v1')})
         alg.preselection = config.getPreselection (self.containerName, '')
 
         # Additional decorations
@@ -230,6 +248,7 @@ class TauWorkingPointSelectionConfig (ConfigBlock) :
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' )
         config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
+        alg.selectionTool.TauContainerName = config.readName (self.containerName, nominal=True)
         if self.useSelectionConfigFile:
             inputfile = nameFormat.format(self.quality.lower())
             alg.selectionTool.ConfigPath = inputfile
@@ -320,6 +339,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def __init__ (self) :
         super (TauWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('TauWorkingPointEfficiency')
         self.addDependency('TauWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)
@@ -574,6 +594,13 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
     def makeAlgs (self, config) :
 
         if config.dataType() is not DataType.Data:
+            log = logging.getLogger('TauTriggerAnalysisSF')
+
+            # Temporary skip for MC23e until SFs are available
+            if config.campaign() is Campaign.MC23e:
+                log.warning("Tau trigger scale factors are not available yet for MC23e")
+                return
+
             triggers = trigger_set(config, self.triggerChainsPerYear,
                                    self.includeAllYearsPerRun)
             for chain in triggers:

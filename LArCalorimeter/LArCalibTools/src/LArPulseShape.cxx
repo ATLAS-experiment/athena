@@ -380,16 +380,15 @@ StatusCode LArPulseShape::initialize() {
   return StatusCode::SUCCESS;
 }
 /////////////////////////////////////////////////////////////////////
-StatusCode LArPulseShape::execute() {
+StatusCode LArPulseShape::execute(const EventContext& ctx) {
 
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   short int bunchStr[8] = {1, 101, 201, 301, 1786, 1886, 1986, 2086}; //move to JO
   
   std::vector<std::string> chains = m_trigDec->getListOfTriggers();
   std::vector<std::string> myChains;
   
-  SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey);
+  SG::ReadCondHandle<LuminosityCondData> lumi (m_lumiDataKey, ctx);
 
   if (m_trigDec->isPassed("L1_RD1_BGRP10")) {   
 
@@ -424,7 +423,7 @@ StatusCode LArPulseShape::execute() {
       return StatusCode::SUCCESS;
     }
 
-    SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_cablingKey);
+    SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_cablingKey, ctx);
     const LArOnOffIdMapping* cabling=*larCablingHdl;
     if(!cabling) {
        ATH_MSG_ERROR("Could not get LArOnOffIdMapping !!");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -13,7 +13,6 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 namespace Prompt {
 //======================================================================================================
@@ -88,9 +87,8 @@ StatusCode PrimaryVertexReFitter::finalize()
 }
 
 //=============================================================================
-StatusCode PrimaryVertexReFitter::execute()
+StatusCode PrimaryVertexReFitter::execute(const EventContext& ctx)
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //
     // Start execute timer
@@ -171,7 +169,7 @@ StatusCode PrimaryVertexReFitter::execute()
 
     // Refit primary vertex
     std::unique_ptr<xAOD::Vertex> refittedPriVtx = m_vertexFitterTool->fitVertexWithSeed(
-        fittingInput, priVtx_tracks,
+        ctx, fittingInput, priVtx_tracks,
         fittingInput.priVtx->position(),
         Prompt::kRefittedPriVtx
     );
@@ -217,21 +215,15 @@ StatusCode PrimaryVertexReFitter::execute()
             tracklep = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(bestmatchedGSFElTrack);
         }
         else if(muon) {
-            if(muon->inDetTrackParticleLink().isValid()) {
-                tracklep = *(muon->inDetTrackParticleLink());
-            }
-            else {
-                ATH_MSG_DEBUG("PrimaryVertexReFitter::execute - skip muon without valid inDetTrackParticleLink()");
-                continue;
-            }
+            tracklep = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
         }
 
         if(!tracklep) {
-            ATH_MSG_WARNING("PrimaryVertexReFitter::execute - cannot find muon->inDetTrackParticleLink() nor electron->trackParticle()");
+            ATH_MSG_WARNING("PrimaryVertexReFitter::execute - cannot find muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle) nor electron->trackParticle()");
             continue;
         }
 
-        if (decorateLepWithReFitPrimaryVertex(fittingInput, tracklep, priVtx_tracks, refitVtxContainerRef))
+        if (decorateLepWithReFitPrimaryVertex(ctx, fittingInput, tracklep, priVtx_tracks, refitVtxContainerRef))
         {
           lepRefittedRMVtxLinkDec(*lepton) = ElementLink<xAOD::VertexContainer>(refitVtxContainerLink, refitVtxContainerRef.size()-1);
         }
@@ -249,6 +241,7 @@ StatusCode PrimaryVertexReFitter::execute()
 
 //=============================================================================
 bool Prompt::PrimaryVertexReFitter::decorateLepWithReFitPrimaryVertex(
+    const EventContext& ctx,
     const FittingInput &input,
     const xAOD::TrackParticle* tracklep,
     const std::vector<const xAOD::TrackParticle*> &tracks,
@@ -294,7 +287,7 @@ bool Prompt::PrimaryVertexReFitter::decorateLepWithReFitPrimaryVertex(
     }
 
     std::unique_ptr<xAOD::Vertex> refittedVtxRMLep = m_vertexFitterTool->fitVertexWithSeed(
-        input, priVtx_tracks_pass, input.priVtx->position(),
+        ctx, input, priVtx_tracks_pass, input.priVtx->position(),
         Prompt::kRefittedPriVtxWithoutLep);
 
     if(refittedVtxRMLep) {

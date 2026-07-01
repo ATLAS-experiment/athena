@@ -11,6 +11,9 @@
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "xAODMuonPrepData/CombinedMuonStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
+#include "xAODAuxiliaryMeasurement/AuxiliaryMeasurement.h"
+
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 #include "MuonSpacePoint/SpacePoint.h"
 #include "MuonPatternEvent/MuonPatternContainer.h"
@@ -128,10 +131,11 @@ namespace  MuonValR4 {
                          Acts::ObjVisualization3D& visualHelper,
                          const Acts::ViewConfig& viewConfig) {
         
-        const Acts::Surface& surf = xAOD::muonSurface(meas);
+        ActsTrk::detail::xAODUncalibMeasSurfAcc surfAcc{};
+        const Acts::Surface& surf{*surfAcc.get(meas)};
         const Acts::GeometryContext tgContext = gctx.context();
         const auto& bounds = surf.bounds();
-        if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
+        if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             const auto& lBounds = static_cast<const Acts::LineBounds&>(bounds);
             const auto* driftCirc = static_cast<const xAOD::MdtDriftCircle*>(meas);
             const double dR = driftCirc->driftRadius();
@@ -152,30 +156,9 @@ namespace  MuonValR4 {
             /// Combined pseudo measurement 
             case 0:{
                 const auto* cmbMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
-                if(cmbMeas->primaryStrip()->type() == xAOD::UncalibMeasType::sTgcStripType){
-                    // combined stgc space points can be strip/wire, strip/pad or pad/wire combinations.
-                    const auto* primMeas = static_cast<const xAOD::sTgcMeasurement*>(cmbMeas->primaryStrip());
-                    const auto* secMeas = static_cast<const xAOD::sTgcMeasurement*>(cmbMeas->secondaryStrip());
-                    if(primMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip){
-                        locPos[Amg::x] = primMeas->localPosition<1>()[0];
-                        dX = std::sqrt(primMeas->localCovariance<1>()(0,0));
-                    } else if (primMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                        locPos[Amg::x] = primMeas->localPosition<2>()[0];
-                        dX = std::sqrt(primMeas->localCovariance<2>()(0,0));
-                    }
-                    if(secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire){
-                        locPos[Amg::y] = secMeas->localPosition<1>()[0];
-                        dY = std::sqrt(secMeas->localCovariance<1>()(0,0));
-                    } else if (secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                        locPos[Amg::y] = secMeas->localPosition<2>()[1];
-                        dY = std::sqrt(secMeas->localCovariance<2>()(1,1));
-                    }
-                    break;
-                }
-                locPos[Amg::x] = cmbMeas->primaryStrip()->localPosition<1>()[0];
-                locPos[Amg::y] = cmbMeas->secondaryStrip()->localPosition<1>()[0];
-                dX = std::sqrt(cmbMeas->primaryStrip()->localCovariance<1>()(0,0));
-                dY = std::sqrt(cmbMeas->secondaryStrip()->localCovariance<1>()(0,0));
+                dX = std::sqrt(cmbMeas->localCovariance<2>()(0,0));
+                dY = std::sqrt(cmbMeas->localCovariance<2>()(1,1));
+                locPos.block<2,1>(0,0) = xAOD::toEigen(cmbMeas->localPosition<2>());
                 break;
             } case 1:{
                 /// Check whether the measurement is a phi measurement or not
@@ -210,6 +193,17 @@ namespace  MuonValR4 {
                         dY = std::sqrt(sTgcClus->localCovariance<1>()(0,0));
                         dX = 0.5*sTgcClus->readoutElement()->wireDesign(sTgcClus->measurementHash()).stripLength(sTgcClus->channelNumber());
                     }
+                } else if (meas->type() == xAOD::UncalibMeasType::Other) {
+                    const auto* pseudo = static_cast<const xAOD::AuxiliaryMeasurement*>(meas);
+                    using ProjectorType = xAOD::AuxiliaryMeasurement::ProjectorType;
+                    constexpr double measLength = 1._m;
+                    if (pseudo->calibProjector() == ProjectorType::e1DimNoTime) {
+                        dX = std::sqrt(meas->localCovariance<1>()(0,0));
+                        dY = measLength;
+                    } else if (pseudo->calibProjector() == ProjectorType::e1DimRotNoTime) {
+                        dY = std::sqrt(meas->localCovariance<1>()(0,0));
+                        dX = measLength;
+                    }
                 }
                 break;
             } 
@@ -221,10 +215,22 @@ namespace  MuonValR4 {
                 break;
             }
         }
-        auto newBounds = std::make_unique<Acts::RectangleBounds>(dX, dY);
-        auto dummySurf = Acts::Surface::makeShared<Acts::PlaneSurface>(surf.localToGlobalTransform(tgContext)*
-                                                                       Amg::getTranslate3D(locPos),
-                                                                       std::move(newBounds));
+
+        std::shared_ptr<Acts::Surface> dummySurf{};
+        
+        if (surf.type() == Acts::Surface::SurfaceType::Straw) {
+            auto newBounds = std::make_unique<Acts::LineBounds>(dX, dY);
+            dummySurf = Acts::Surface::makeShared<Acts::StrawSurface>(surf.localToGlobalTransform(tgContext)*
+                                                                      Amg::getTranslate3D(locPos),
+                                                                      std::move(newBounds));
+ 
+        } else {
+            auto newBounds = std::make_unique<Acts::RectangleBounds>(dX, dY);
+            dummySurf = Acts::Surface::makeShared<Acts::PlaneSurface>(surf.localToGlobalTransform(tgContext)*
+                                                                      Amg::getTranslate3D(locPos),
+                                                                      std::move(newBounds));
+
+        }
         Acts::GeometryView3D::drawSurface(visualHelper, *dummySurf, tgContext,
                                           Amg::Transform3D::Identity(), viewConfig);
     }
@@ -242,7 +248,7 @@ namespace  MuonValR4 {
                         const MuonR4::SpacePoint& spacePoint,
                         Acts::ObjVisualization3D& visualHelper,
                         const Acts::ViewConfig& viewConfig) {
-        if (spacePoint.dimension() == 2 && 
+        if (spacePoint.dimension() == 2 && !spacePoint.isStraw() &&
             spacePoint.primaryMeasurement() != spacePoint.secondaryMeasurement()) {
             const Amg::Transform3D& locToGlob =  spacePoint.msSector()->localToGlobalTransform(gctx);
             const double dX = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::phiCov)]);

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFRADIALENERGYCALCULATORTOOL_H
-#define PFRADIALENERGYCALCULATORTOOL_H
+#ifndef EFLOWREC_PFRADIALENERGYCALCULATORTOOL_H
+#define EFLOWREC_PFRADIALENERGYCALCULATORTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "eflowCaloObject.h"
@@ -17,7 +17,7 @@ class PFRadialEnergyCalculatorTool : public extends<AthAlgTool, IPFBaseTool> {
 
   ~PFRadialEnergyCalculatorTool() {};
 
-  virtual StatusCode execute(eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
+  virtual StatusCode execute(const EventContext& ctx, eflowCaloObjectContainer& theEflowCaloObjectContainer) override;
 
 };
 

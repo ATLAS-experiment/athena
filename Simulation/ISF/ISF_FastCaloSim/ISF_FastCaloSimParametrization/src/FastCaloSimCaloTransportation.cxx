@@ -6,6 +6,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IPartPropSvc.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "CxxUtils/inline_hints.h"
 /* Header include */
@@ -14,6 +15,7 @@
 /* ISF includes */
 #include "ISF_FastCaloSimEvent/FastCaloSim_CaloCell_ID.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 
 /* Tracking includes */
 #include "TrkGeometry/TrackingGeometry.h"
@@ -21,13 +23,11 @@
 /* Geometry primitives */
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
-/* Particle data */
-#include "HepPDT/ParticleDataTable.hh"
-
 /* Transport steps will be return as G4FieldTracks*/
 #include "G4FieldTrack.hh"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
+#include "TruthUtils/HepMCHelpers.h"
 
 FastCaloSimCaloTransportation::FastCaloSimCaloTransportation(const std::string& t, const std::string& n, const IInterface* p)
   : base_class(t,n,p)
@@ -57,13 +57,17 @@ StatusCode FastCaloSimCaloTransportation::finalize(){
 
 
 std::vector<G4FieldTrack> FastCaloSimCaloTransportation::transport(const TFCSTruthState* truth, bool forceNeutral) const{
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    Gaudi::Hive::setCurrentContext(eventInfo->GetEventContext());
+  }
+
   // Start calo extrapolation
   ATH_MSG_DEBUG ("[ fastCaloSim transport ] processing particle "<<truth->pdgid() );
 
   auto hitVector = std::make_unique<std::vector<Trk::HitInfo>>();
 
   int     pdgId    = truth->pdgid();
-  double  charge   = HepPDT::ParticleID(pdgId).charge();
+  double  charge   = MC::charge(pdgId);
   if (forceNeutral) charge   = 0.;
 
   // particle Hypothesis for the extrapolation

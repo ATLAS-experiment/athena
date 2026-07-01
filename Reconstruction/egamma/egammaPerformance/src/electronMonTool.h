@@ -78,7 +78,7 @@ class electronMonTool : public egammaMonToolBase
   virtual StatusCode bookHistograms() override;
   virtual StatusCode bookHistogramsForOneElectronType(electronHist& myHist);
 
-  virtual StatusCode fillHistograms() override;
+  virtual StatusCode fillHistograms(const EventContext& ctx) override;
   virtual StatusCode fillHistogramsForOneElectron(xAOD::ElectronContainer::const_iterator e_iter,
 						  electronHist& myHist);
 

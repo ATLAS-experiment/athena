@@ -1,21 +1,21 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDMaterialStore_H
 #define AGDDMaterialStore_H
 
 #include <string>
+#include <string_view>
 #include <map>
 
 class AGDDSimpleMaterial;
 class AGDDElement;
 
-#include <iostream>
 
 
-typedef std::map<std::string,AGDDSimpleMaterial* > AGDDMaterialMap;
-typedef std::map<std::string,AGDDElement* > AGDDElementMap;
+typedef std::map<std::string,AGDDSimpleMaterial*, std::less<> > AGDDMaterialMap;
+typedef std::map<std::string,AGDDElement*, std::less<> > AGDDElementMap;
 
 typedef AGDDMaterialMap::const_iterator MaterialIterator;
 typedef AGDDElementMap::const_iterator ElementIterator;
@@ -25,8 +25,8 @@ public:
 	AGDDMaterialStore();
 	void RegisterElement(AGDDElement *);
 	void RegisterMaterial(AGDDSimpleMaterial *);
-	AGDDSimpleMaterial* GetMaterial(std::string);
-	AGDDElement* GetElement(std::string);
+	AGDDSimpleMaterial* GetMaterial(std::string_view);
+	AGDDElement* GetElement(std::string_view);
 		
 	int NumberOfMaterials() {return m_nrOfMaterials;}
 	int NumberOfElements()  {return m_nrOfElements;}

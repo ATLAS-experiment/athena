@@ -39,7 +39,8 @@ namespace InDet {
     NoCut, Loose, LoosePrimary, TightPrimary,
       LooseMuon, LooseElectron, LooseTau,
       MinBias, HILoose, HITight,
-      HITightOptimized, HILooseOptimized
+      HITightOptimized, HILooseOptimized,
+      HILoosePixMod
       };
   
   /// Interface for track selection tool

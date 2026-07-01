@@ -65,7 +65,7 @@ atlas_add_citest( OverlayRun3DataChain
 #################################################################################
 
 atlas_add_citest( RecoRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11 --preExec pass' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-13 --preExec pass' )
 
 atlas_add_citest( RecoRun2MC
 	SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25 --conditionsTag OFLCOND-MC16-SDR-RUN2-12' )
@@ -91,7 +91,7 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
    DEPENDS_SUCCESS RecoRun3Data_Bulk )
 
 atlas_add_citest( RecoRun3Data_Express
-    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data24_13p6TeV.00477023.express_express.merge.RAW._lb0287._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2025-01 ' --no-output-checks
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x964 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data26_13p6TeV.00517465.express_express.merge.RAW._lb0821._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2026-01 ' --no-output-checks
   )
   
 atlas_add_citest( ZdcRec_ZDCCalib 
@@ -129,7 +129,7 @@ atlas_add_citest( RecoRun3Data_Overlay
    DEPENDS_SUCCESS OverlayRun3DataChain )
 
 atlas_add_citest( RecoRun4MC
-   SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root --conditionsTag OFLCOND-MC21-SDR-RUN4-03' --no-output-checks  # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root'  --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS SimulationRun4FullSim )
 
 #################################################################################
@@ -140,8 +140,16 @@ atlas_add_citest( DerivationRun2Data_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun2Data_PHYS_MT
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS_MT --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun2Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun2Data_PHYSLITE_MT
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2Data_PHYSLITE_from_PHYS
@@ -153,8 +161,16 @@ atlas_add_citest( DerivationRun2MC_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun2MC_PHYS_MT
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun2MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun2MC_PHYSLITE_MT
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2MC_PHYSLITE_from_PHYS
@@ -174,8 +190,16 @@ atlas_add_citest( DerivationRun3Data_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun3Data_PHYS_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_MT --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun3Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3Data_PHYSLITE_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE_from_PHYS
@@ -185,10 +209,6 @@ atlas_add_citest( DerivationRun3Data_PHYSLITE_from_PHYS
 
 atlas_add_citest( DerivationRun3Data_Train
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
-   PROPERTIES PROCESSORS 4 )
-
-atlas_add_citest( DerivationRun3Data_Train_RNTuple
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3Data_Train_RNTuple.sh
    PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
@@ -201,22 +221,21 @@ atlas_add_citest( DerivationRun3MC_PHYS
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYS_MT
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4 --no-output-checks
-   LOG_IGNORE_PATTERN "WARNING FPE" # Ignore FPEs for now
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun3MC_PHYSLITE_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE_MT --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun3MC_PHYSLITE_from_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
    PROPERTIES PROCESSORS 4
    DEPENDS_SUCCESS DerivationRun3MC_PHYS )
-
-atlas_add_citest( DerivationRun3MC_Train_RNTuple
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh
-   PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3MC_Train_SharedReader
@@ -350,6 +369,9 @@ atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
+ atlas_add_citest( ACTS_Production
+   SCRIPT ActsProduction.sh )
+ 
 atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
 
@@ -364,15 +386,6 @@ atlas_add_citest( ACTS_Workflow_HeavyIons
  
 atlas_add_citest( ACTS_ValidateClusters
    SCRIPT ActsValidateClusters.sh )
-
-atlas_add_citest( ACTS_ValidateSeeds
-   SCRIPT ActsValidateSeeds.sh )
-
-atlas_add_citest( ACTS_ValidateOrthogonalSeeds 
-   SCRIPT ActsValidateOrthogonalSeeds.sh )
-
-atlas_add_citest( ACTS_ValidateGbtsSeeds 
-   SCRIPT ActsValidateGbtsSeeds.sh )
 
 atlas_add_citest( ACTS_ActsPersistifyEDM 
    SCRIPT ActsPersistifyEDM.sh )
@@ -400,6 +413,9 @@ atlas_add_citest( ACTS_ActsEFTrackFit
 
 atlas_add_citest( ACTS_ActsGSFRefitting
    SCRIPT ActsGSFRefitting.sh )
+
+atlas_add_citest( ACTS_ActsGSFRefittingWithActsElectronExtrapolation
+   SCRIPT ActsGSFRefitWithActsElectronExtrapolation.sh )
 
 atlas_add_citest( ACTS_ActsGSFRefitLegacy
    SCRIPT ActsGSFRefitLegacy.sh )
@@ -448,11 +464,11 @@ atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd_Legacy
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts )
 
+atlas_add_citest( ACTS_CheckObjectCounts_Workflow_GbtsFtf
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbtsFtf )
+
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Gbts
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbts )
-
-atlas_add_citest( ACTS_CheckObjectCounts_Workflow_ActsGbts
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsActsGbts )
 
 atlas_add_citest( ACTS_TriggerC100
   SCRIPT test_trigAna_ActsTriggerC100_build.py )
@@ -464,7 +480,7 @@ atlas_add_citest( ACTS_TriggerC230
 #                 Muon Phase II CI tests
 #################################################################################
 atlas_add_citest( MuonR4_PatternRecognition
-         SCRIPT PatternRecognitionMuonR4.sh 1 100
+         SCRIPT PatternRecognitionMuonR4.sh 1 100 --noMonitorPlots
          PROPERTIES PROCESSOR 1
 )
 #################################################################################
@@ -472,7 +488,7 @@ atlas_add_citest( MuonR4_PatternRecognition
 #################################################################################
 
 atlas_add_citest( TriggerMC
-   SCRIPT test_trig_mc_v1Dev_ITk_ttbar200PU_build.py )
+   SCRIPT test_trigAna_RDOtoRDOTrig_v1Dev_Run4_build.py )
 
 atlas_add_citest( TriggerMC_Acts
    SCRIPT test_trig_mc_v1Dev_Run4_Acts_build.py )
@@ -485,8 +501,7 @@ atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
 atlas_add_citest( Trigger_athenaHLT_v1Dev
-   SCRIPT test_trigP1_v1Dev_decodeBS_build.py
-   LOG_IGNORE_PATTERN "chainComp ERROR.*Trigger counts differ from the reference" )
+   SCRIPT test_trigP1_v1Dev_decodeBS_build.py )
 
 atlas_add_citest( Trigger_athenaHLT_v1PhysP1
    SCRIPT test_trigP1_v1PhysP1_build.py )
@@ -508,3 +523,19 @@ atlas_add_citest( EFTracking_FPGATrackSim_CI
 atlas_add_citest (TrigInDetValidationMenu 
                SCRIPT TrigInDetValidation_menu_test.py
                POST_EXEC_SCRIPT nopost.sh )
+
+#################################################################################
+# RNTuple
+#################################################################################
+
+atlas_add_citest( FullChainRun3MC_RNTuple
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/FullChainRun3MC_RNTuple.sh
+   PROPERTIES PROCESSORS 8 )
+
+atlas_add_citest( DerivationRun3Data_Train_RNTuple
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3Data_Train_RNTuple.sh
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3MC_Train_RNTuple
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh
+   PROPERTIES PROCESSORS 4 )

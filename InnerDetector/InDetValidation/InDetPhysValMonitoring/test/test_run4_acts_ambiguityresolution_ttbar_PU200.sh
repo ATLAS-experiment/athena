@@ -38,9 +38,45 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
+
+# Run with full ACTS chain, including ACTS ambi. resolution
+run "Reconstruction-acts" \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
+    --preExec "all:flags.Scheduler.ShowDataDeps = True;flags.Scheduler.ShowDataFlow = True" \
+    --inputRDOFile ${ArtInFile} \
+    --outputAODFile AOD.acts.root \
+    --postExec "cfg.printConfig(withDetails=True, summariseProps=True);" \
+    --maxEvents ${n_events} \
+    --multithreaded
+
+reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.ACTS
+
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
+
+run "IDPVM-acts" \
+    runIDPVM.py \
+    --OnlyTrackingPreInclude \
+    --filesInput AOD.acts.root \
+    --outputFile idpvm.acts.root
+
+reco_rc=$?
+if [ $reco_rc != 0 ]; then
+    exit $reco_rc
+fi
+
+
 # Run with legacy Athena
 run "Reconstruction-athena" \
-    Reco_tf.py --CA \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit=False;flags.Reco.EnableHGTDExtension=False;" \
     --inputRDOFile ${ArtInFile} \
@@ -67,33 +103,6 @@ if [ $reco_rc != 0 ]; then
     exit $reco_rc
 fi
 
-# Run with full ACTS chain, including ACTS ambi. resolution
-run "Reconstruction-acts" \
-    Reco_tf.py --CA \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
-    --inputRDOFile ${ArtInFile} \
-    --outputAODFile AOD.acts.root \
-    --maxEvents ${n_events} \
-    --multithreaded
-
-reco_rc=$?
-
-mv log.RAWtoALL log.RAWtoALL.ACTS
-
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
-
-run "IDPVM-acts" \
-    runIDPVM.py \
-    --OnlyTrackingPreInclude \
-    --filesInput AOD.acts.root \
-    --outputFile idpvm.acts.root
-
-reco_rc=$?
-if [ $reco_rc != 0 ]; then
-    exit $reco_rc
-fi
 
 echo "download latest result..."
 art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -44,7 +44,7 @@ StatusCode PileupTruthParticleSlimmer::initialize() {
 }
 
 
-StatusCode PileupTruthParticleSlimmer::execute() {
+StatusCode PileupTruthParticleSlimmer::execute(const EventContext& /*ctx*/) {
     
     
     // If the containers already exist then assume that nothing needs to be done
@@ -99,13 +99,17 @@ StatusCode PileupTruthParticleSlimmer::execute() {
 
         // Fill with numerical content
         *xTruthParticle=*theParticle;
+	// set dummy element links for production and decay vertex, not to break pileup presampling (ATLASRECTS-8344)
+	ElementLink<xAOD::TruthVertexContainer> emptyEL;
+	xTruthParticle->setProdVtxLink(emptyEL);
+	xTruthParticle->setDecayVtxLink(emptyEL);
 
-unsigned int particleOutCome;
-unsigned int result;
-unsigned int particleType;
-unsigned int particleOrigin;
-int hadron_pdg;
-Common::classify(m_classifier,theParticle,particleOutCome,result,hadron_pdg,particleType,particleOrigin );
+	unsigned int particleOutCome;
+	unsigned int result;
+	unsigned int particleType;
+	unsigned int particleOrigin;
+	int hadron_pdg;
+	Common::classify(m_classifier,theParticle,particleOutCome,result,hadron_pdg,particleType,particleOrigin );
         typeDecorator(*xTruthParticle) = particleType;
         originDecorator(*xTruthParticle) = particleOrigin;
         outcomeDecorator(*xTruthParticle) = particleOutCome;  

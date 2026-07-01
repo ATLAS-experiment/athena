@@ -2,24 +2,16 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+/// @author Nils Krumnack
+
 #ifndef SAMPLE_HANDLER_SAMPLE_HH
 #define SAMPLE_HANDLER_SAMPLE_HH
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
-
 #include <SampleHandler/Global.h>
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <atomic>
 #include <TObject.h>
 #include <SampleHandler/TagList.h>
 
@@ -28,6 +20,9 @@ class TCollection;
 
 namespace SH
 {
+  class SampleLocal;
+
+
   /// \brief the debugging info of this object
   ///
   /// \return a string representation of the object content
@@ -81,20 +76,29 @@ namespace SH
     /// \brief set the value of \ref name
     ///
     /// \par Guarantee
-    ///   no-fail / strong
+    ///   strong
     /// \par Failures
     ///   out of memory II
-    /// \par Failures
-    ///   Sample already owned by SampleHandler
+    /// \pre `lockName()` or `SampleHandler::add` has not been called on
+    ///   this sample
     /// \par Rationale
     ///   setting the sample name can be beneficial, if the
     ///   sample auto-discovery set a duplicate (or otherwise
     ///   unsuitable) name.
-    /// \warning this must be done before adding it to the
-    ///   SampleHandler, or alternatively a clone must be made that
-    ///   can then be added to a new SampleHandler.
   public:
     void name (std::string val_name);
+
+
+    /// \brief prevent any further changes to \ref name
+    ///
+    /// This is called automatically by \ref SampleHandler::add when the
+    /// sample is registered in a name-keyed container. That avoids
+    /// cached names getting out of sync for the name-sample map.
+    ///
+    /// \par Guarantee
+    ///   no-fail
+  public:
+    void lockName ();
 
 
     /// \brief the number of files in the sample
@@ -131,7 +135,7 @@ namespace SH
     ///   out of memory III\n
     ///   can not make local sample
   public:
-    SamplePtr makeLocal () const;
+    std::unique_ptr<SampleLocal> makeLocal () const;
 
 
     /// \brief the tag list we are using
@@ -252,10 +256,11 @@ namespace SH
     ///   basic, may only add some
     /// \par Failures
     ///   out of memory II
+    /// \pre self.get() == this
     /// \par Rationale this is used with composite samples to find the
     ///   actual list of samples to run on.
   public:
-    void addSamples (SampleHandler& result);
+    void addSamples (SampleHandler& result, const std::shared_ptr<Sample>& self);
 
 
     /// \brief print the debugging output to the screen
@@ -377,6 +382,9 @@ namespace SH
   protected:
     Sample (const std::string& name);
 
+    /// \par standard copy constructor
+    Sample (const Sample& that);
+
 
 
     //
@@ -401,7 +409,7 @@ namespace SH
     /// \par Rationale
     ///   the virtual part of SH::Sample::makeLocal()
   protected:
-    virtual SamplePtr doMakeLocal () const = 0;
+    virtual std::unique_ptr<SampleLocal> doMakeLocal () const = 0;
 
 
     /// \copydoc makeFileList
@@ -437,33 +445,8 @@ namespace SH
     /// \par Rationale
     ///   the virtual part of SH::Sample::addSamples()
   protected:
-    virtual void doAddSamples (SampleHandler& result);
-
-
-
-    //
-    // friend interface for SamplePtr
-    //
-
-    friend class SamplePtr;
-  private:
-
-    /// \brief increase the reference count by one
-    ///
-    /// \par Guarantee
-    ///   no-fail
-    void alloc () const;
-
-
-    /// \brief decrease the reference count by one
-    ///
-    /// \par Side Effects
-    ///   release this sample if that was the last reference
-    /// \par Guarantee
-    ///   no-fail
-    /// \pre reference count > 0
-    void release () const;
-
+    virtual void doAddSamples (SampleHandler& result,
+                               const std::shared_ptr<Sample>& self);
 
 
     //
@@ -482,19 +465,18 @@ namespace SH
   private:
     MetaObject *m_meta;
 
-    /// \brief the reference count
+    /// \brief whether \ref name may still be changed; set by \ref lockName
+    ///
+    /// Transient — not persisted by ROOT I/O and not propagated by
+    /// `TObject::Clone()`, so a fresh clone or freshly loaded sample
+    /// always starts unlocked and can be re-registered cleanly.
   private:
-    mutable std::atomic<unsigned> m_references; //!
+    bool m_lockedName = false; //! transient
 
     /// \par Rationale
     ///   hiding this to avoid slicing
   private:
-    Sample (const Sample& that);
-
-    /// \par Rationale
-    ///   hiding this to avoid slicing
-  private:
-    Sample& operator = (const Sample& that);
+    Sample& operator = (const Sample& that) = delete;
 
     ClassDef(Sample, 2);
   };

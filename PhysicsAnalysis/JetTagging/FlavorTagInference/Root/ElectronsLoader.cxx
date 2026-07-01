@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/ElectronsLoader.h"
@@ -68,8 +68,51 @@ namespace FlavorTagInference {
 
                   if (std::abs(el->eta()) > 2.5) return false;
                   if (el->pt() <= 1000) return false;
-                  if (el->pt() >= 500000) return false;
-                  if (std::abs(track->d0()) >= 1) return false;
+                  if (el->pt() >= 500000) return false; 
+                  if (std::abs(track->d0()) >= 1) return false; // GN3
+                  if (std::abs(el->caloCluster()->e() * track->qOverP()) > 30) return false;
+                  if (std::abs(el->caloCluster()->e() / std::cosh(track->eta())) > 50000) return false;
+                  if (std::abs(iso_pt(*el) / el->pt()) > 40) return false;
+                  if (std::abs(el_ptrel) > 5000) return false;
+                  if (std::abs(el_rhad1) > 4) return false;
+                  if (std::abs(el_wstot) > 20) return false;
+                  if (std::abs(el_rphi) > 2) return false;
+                  if (std::abs(el_reta) > 2) return false;
+                  if (std::abs(el_deta1) > 10) return false;
+                  if (std::abs(el_dpop) > 5) return false;
+                  return true;
+              }, electron_deps
+            };
+          case ConstituentsSelection::R22_BJR:
+            return {
+                [iso_pt](const xAOD::IParticle& jet, const xAOD::Electron* el) {
+                  TLorentzVector jet_4vec = jet.p4();
+                  TLorentzVector el_4vec = el->p4();
+
+                  float el_dpop = -1;
+                  unsigned int index;
+                  auto track = el->trackParticle();
+                  if (track->indexOfParameterAtPosition(index, xAOD::LastMeasurement))
+                  {
+                      double refittedTrack_LMqoverp = track->charge() / std::sqrt(std::pow(track->parameterPX(index), 2) +
+                                                                                  std::pow(track->parameterPY(index), 2) +
+                                                                                  std::pow(track->parameterPZ(index), 2));
+                      el_dpop = 1 - track->qOverP() / (refittedTrack_LMqoverp);
+                  }
+
+                  float el_ptrel = el_4vec.Vect().Perp(jet_4vec.Vect());
+                  // Get shower shapes
+                  float el_rhad1 = el->showerShapeValue(xAOD::EgammaParameters::Rhad1);
+                  float el_wstot = el->showerShapeValue(xAOD::EgammaParameters::wtots1);
+                  float el_rphi  = el->showerShapeValue(xAOD::EgammaParameters::Rphi);
+                  float el_reta  = el->showerShapeValue(xAOD::EgammaParameters::Reta);
+                  float el_deta1 = el->trackCaloMatchValue(xAOD::EgammaParameters::deltaEta1);
+
+                  if (std::abs(el->eta()) > 2.5) return false;
+                  if (el->pt() <= 1000) return false;
+                  if (el->pt() >= 500000) return false; 
+                  if (jet.p4().DeltaR(el->p4()) > 0.4) return false; // bJR4
+                  if (std::abs(track->d0()) >= 5) return false; // bJR4
                   if (std::abs(el->caloCluster()->e() * track->qOverP()) > 30) return false;
                   if (std::abs(el->caloCluster()->e() / std::cosh(track->eta())) > 50000) return false;
                   if (std::abs(iso_pt(*el) / el->pt()) > 40) return false;
@@ -143,11 +186,9 @@ namespace FlavorTagInference {
         return only_electrons;
     }
 
-    std::tuple<Inputs, std::vector<const xAOD::IParticle*>> ElectronsLoader::getData(const xAOD::IParticle& jet) const {
+    Inputs ElectronsLoader::getData(const xAOD::IParticle& jet) const {
         Electrons sorted_electrons = getElectronsFromJet(jet);
-
-        // We return a dummy vector of IParticles as we don't decorate flow elements
-        return {m_seqGetter.getFeats(jet, sorted_electrons), std::vector<const xAOD::IParticle*>{}};
+        return m_seqGetter.getFeats(jet, sorted_electrons);
     }
 
     const FTagDataDependencyNames& ElectronsLoader::getDependencies() const {

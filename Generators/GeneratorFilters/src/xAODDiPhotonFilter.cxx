@@ -42,7 +42,7 @@ StatusCode xAODDiPhotonFilter::filterInitialize() {
 }
 
 
-StatusCode xAODDiPhotonFilter::filterEvent() {
+StatusCode xAODDiPhotonFilter::filterEvent(const EventContext& ctx) {
   // get min pt
   double ptcut = m_Ptmin_1st > m_Ptmin_2nd ? m_Ptmin_2nd : m_Ptmin_1st;
   if (ptcut > m_Ptmin_others) ptcut = m_Ptmin_others;
@@ -51,7 +51,7 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
 
  
  // Retrieve Photon container
- SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+ SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
  CHECK(xTruthParticleContainer.isValid());
  // find truth photons
  std::vector<const xAOD::TruthParticle *> MCTruthPhotonList;
@@ -109,9 +109,7 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
         double m2 = sumE*sumE-(sumPx*sumPx+sumPy*sumPy+sumPz*sumPz);
         double mGamGam = m2 >= 0. ? std::sqrt(m2) : -std::sqrt(-m2);
         ATH_MSG_DEBUG("mass(gamgam) = " << mGamGam << " (CLHEP::MeV)");
-        double deltaEta = MCTruthPhotonList2[0]->abseta() - MCTruthPhotonList2[1]->abseta();
-        double deltaPhi = MCTruthPhotonList2[0]->phi() - MCTruthPhotonList2[1]->phi();
-        double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+        double deltaR = MCTruthPhotonList2[0]->p4().DeltaR(MCTruthPhotonList2[1]->p4());
         ATH_MSG_DEBUG("deltaR(gamgam) = " << deltaR);
         int testMassDeltaRCuts = 0;
         
@@ -121,11 +119,11 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
 
         // apply diphoton pT cut
         if (m_diphoton_PtMin >= 0. && diphotonPt < m_diphoton_PtMin) {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             return StatusCode::SUCCESS;
         }
         if (m_diphoton_PtMax >= 0. && diphotonPt > m_diphoton_PtMax) {
-            setFilterPassed(false);
+            setFilterPassed(false, ctx);
             return StatusCode::SUCCESS;
         }
 
@@ -161,9 +159,7 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
             double m2 = sumE*sumE-(sumPx*sumPx+sumPy*sumPy+sumPz*sumPz);
             double mGamGam = m2 >= 0. ? std::sqrt(m2) : -std::sqrt(-m2);
             ATH_MSG_DEBUG("mass(gamgam) = " << mGamGam << " (CLHEP::MeV)");
-            double deltaEta = MCTruthPhotonList2[i]->abseta() - MCTruthPhotonList2[j]->abseta();
-            double deltaPhi = MCTruthPhotonList2[i]->phi() - MCTruthPhotonList2[j]->phi();
-            double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+            double deltaR = MCTruthPhotonList2[i]->p4().DeltaR(MCTruthPhotonList2[j]->p4());
             ATH_MSG_DEBUG("deltaR(gamgam) = " << deltaR);
             int testMassDeltaRCuts = 0;
             
@@ -207,6 +203,6 @@ StatusCode xAODDiPhotonFilter::filterEvent() {
   }
 
   ATH_MSG_DEBUG("flag(final decision) = " << isOK);
-  setFilterPassed(isOK);
+  setFilterPassed(isOK, ctx);
   return StatusCode::SUCCESS;
 }

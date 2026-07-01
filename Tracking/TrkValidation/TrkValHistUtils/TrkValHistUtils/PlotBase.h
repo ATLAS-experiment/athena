@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -11,6 +11,7 @@
 #define TRKVALHISTUTILS_PLOTBASE_H
 
 #include <string>
+#include <string_view>
 #include <utility> //for std::pair
 #include <vector>
 //should be possible to fwd-declare TH1F, TH2F, TH3F, TProfile, TProfile2D TTree .. why isn't this done?
@@ -33,7 +34,7 @@ typedef std::pair<TEfficiency*, std::string> EfficiencyData;
 
 class PlotBase {
 public:
-  PlotBase(PlotBase *parent, const std::string & sDir);
+  PlotBase(PlotBase *parent, std::string_view  sDir);
   virtual ~PlotBase(){}
   void initialize();
   void finalize();
@@ -51,39 +52,39 @@ public:
   ///@{
 
   /// Book a TH1D histogram
-  TH1D* Book1D(const std::string & name, const std::string & labels, int nBins, float start, float end, bool prependDir = true);
+  TH1D* Book1D(std::string_view  name, std::string_view  labels, int nBins, float start, float end, bool prependDir = true);
   /// Book a TH1D histogram using refHist as reference for number of bins and axis range
-  TH1D* Book1D(const std::string & name, TH1* refHist, const std::string & labels, bool prependDir = true);
+  TH1D* Book1D(std::string_view  name, TH1* refHist, std::string_view  labels, bool prependDir = true);
 
   /// Book a TH2F histogram
-  TH2F* Book2D(const std::string & name, const std::string & labels, int nBinsX, float startX, float endX, int nBinsY, float startY, float endY, bool prependDir = true);
+  TH2F* Book2D(std::string_view  name, std::string_view  labels, int nBinsX, float startX, float endX, int nBinsY, float startY, float endY, bool prependDir = true);
   /// Book a TH2D histogram using refHist as reference for number of bins and axis range
-  TH2F* Book2D(const std::string & name, TH2* refHist, const std::string & labels, bool prependDir = true);
+  TH2F* Book2D(std::string_view  name, TH2* refHist, std::string_view  labels, bool prependDir = true);
   /// Book a TH2F histogram with variable x axis binning
-  TH2F* Book2D(const std::string & name, const std::string & labels, int nBinsX, Double_t* binsX, int nBinsY, Double_t startY, Double_t endY, bool prependDir = true);
+  TH2F* Book2D(std::string_view  name, std::string_view  labels, int nBinsX, Double_t* binsX, int nBinsY, Double_t startY, Double_t endY, bool prependDir = true);
 
   /// Book a TH3F histogram
-  TH3F* Book3D(const std::string & name, const std::string & labels, int nBinsX, float startX, float endX, int nBinsY, float startY, float endY, int nBinsZ, float startZ, float endZ, bool prependDir = true);
+  TH3F* Book3D(std::string_view  name, std::string_view  labels, int nBinsX, float startX, float endX, int nBinsY, float startY, float endY, int nBinsZ, float startZ, float endZ, bool prependDir = true);
   /// Book a TH3F histogram using refHist as reference for number of bins and axis range
-  TH3F* Book3D(const std::string & name, TH3* refHist, const std::string & labels, bool prependDir = true);
+  TH3F* Book3D(std::string_view  name, TH3* refHist, std::string_view  labels, bool prependDir = true);
 
   /// Book a TProfile histogram
-  TProfile* BookTProfile(const std::string &name, const std::string & labels, int nBinsX, float startX, float endX, float startY=-1, float endY=-1, bool prependDir = true, bool useRMS=false);
+  TProfile* BookTProfile(std::string_view name, std::string_view  labels, int nBinsX, float startX, float endX, float startY=-1, float endY=-1, bool prependDir = true, bool useRMS=false);
   /// Book a TProfile histogram with variable binning in x-axis
-  TProfile* BookTProfile(const std::string &name, const std::string & labels, int nBinsX, float* binsX, bool prependDir = true);
+  TProfile* BookTProfile(std::string_view name, std::string_view  labels, int nBinsX, float* binsX, bool prependDir = true);
   /// Book a TProfile histogram with variable binning in x-axis and limits in y-values
-  TProfile* BookTProfileRangeY(const std::string &name, const std::string & labels, int nBinsX, double* binsX, double startY, double endY, bool prependDir = true); //cannot overload, conflicts with previous definitions
+  TProfile* BookTProfileRangeY(std::string_view name, std::string_view  labels, int nBinsX, double* binsX, double startY, double endY, bool prependDir = true); //cannot overload, conflicts with previous definitions
   /// Book a TProfile 2D histogram with variable binning in x-axis and limits in y-values
-  TProfile2D * BookTProfile2D(const std::string &name, const std::string & labels, const int nBinsX, const double xlo, const double xhi, const int nBinsY, const double ylo, const double yhi, bool prependDir=true, bool useRMS=false);
+  TProfile2D * BookTProfile2D(std::string_view name, std::string_view  labels, const int nBinsX, const double xlo, const double xhi, const int nBinsY, const double ylo, const double yhi, bool prependDir=true, bool useRMS=false);
   /// Book a TProfile 2D histogram with variable binning in x-axis and limits in y-values
-  TProfile2D * BookTProfile2D(const std::string &name, const std::string &labels, const int nBinsX, double* binsX, const int nBinsY, double* binsY, bool prependDir=true, bool useRMS=false);
+  TProfile2D * BookTProfile2D(std::string_view name, std::string_view labels, const int nBinsX, double* binsX, const int nBinsY, double* binsY, bool prependDir=true, bool useRMS=false);
   /// Book a (1-D) TEfficiency histogram
-  TEfficiency * BookTEfficiency(const std::string &name, const std::string & labels, const int nBinsX, const float xlo, const float xhi, const bool prependDir = true);
+  TEfficiency * BookTEfficiency(std::string_view name, std::string_view  labels, const int nBinsX, const float xlo, const float xhi, const bool prependDir = true);
   /// Book a (2-D) TEfficiency histogram
-  TEfficiency * BookTEfficiency(const std::string &name, const std::string & labels, const int nBinsX, const float xlo, const float xhi, const int nBinsy, const float ylo, const float yhi, const bool prependDir = true);
+  TEfficiency * BookTEfficiency(std::string_view name, std::string_view  labels, const int nBinsX, const float xlo, const float xhi, const int nBinsy, const float ylo, const float yhi, const bool prependDir = true);
   ///@}
   /// Book a TTree
-  TTree* BookTree(const std::string & name, bool prependDir = true);
+  TTree* BookTree(std::string_view  name, bool prependDir = true);
   
   const std::string& getDirectory(){return m_sDirectory;}
 

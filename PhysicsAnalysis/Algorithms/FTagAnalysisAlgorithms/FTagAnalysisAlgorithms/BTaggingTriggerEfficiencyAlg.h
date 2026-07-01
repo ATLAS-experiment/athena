@@ -33,7 +33,7 @@ namespace CP
     BTaggingTriggerEfficiencyAlg(const std::string &name,
 				 ISvcLocator *svcLoc = nullptr);
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
     /// \brief the smearing tool
   private:

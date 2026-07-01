@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -20,6 +20,8 @@ CREATED:  22nd November, 2004
 #include "eflowEEtaBinnedParameters.h"
 #include "eflowRingSubtractionManager.h"
 #include "PFEnergyPredictorTool.h"
+
+#include "GaudiKernel/EventContext.h"
 
 eflowCaloObject::~eflowCaloObject() = default;
 
@@ -61,18 +63,15 @@ double eflowCaloObject::getClusterEnergy() const {
   return clusterEnergy;
 }
 
-void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters,
+void eflowCaloObject::simulateShower(const EventContext& ctx, eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters,
 const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
 
   for (auto *thisEfRecTrack : m_eflowRecTracks) {
 
     std::vector<eflowRecCluster*> matchedClusters;
-    matchedClusters.clear();
-    std::vector<eflowTrackClusterLink*> links = thisEfRecTrack->getClusterMatches();
-    std::vector<eflowTrackClusterLink*>::iterator itLink = links.begin();
-    std::vector<eflowTrackClusterLink*>::iterator endLink = links.end();
-    for (; itLink != endLink; ++itLink) {
-      matchedClusters.push_back((*itLink)->getCluster());
+    const std::vector<eflowTrackClusterLink*>& links = thisEfRecTrack->getClusterMatches();
+    for (auto* itLink : links) {
+      matchedClusters.push_back(itLink->getCluster());
     }
 
     double trackEM1eta = thisEfRecTrack->getTrackCaloPoints().getEM1eta();
@@ -89,7 +88,7 @@ const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
     }
 
     /* Determine the LFI */
-    integrator->measureNewClus(matchedClusters, thisEfRecTrack);
+    integrator->measureNewClus(ctx, matchedClusters, thisEfRecTrack);
     eflowFirstIntENUM j1st = integrator->getFirstIntLayer();
     
     /*Save j1st info */
@@ -101,7 +100,7 @@ const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
 
     /* Set expected energy in the eflowRecTrack object */
     const double expectedEnergy = energyP ? energyP->nnEnergyPrediction(thisEfRecTrack) : cellSubtractionManager.fudgeMean() * thisEfRecTrack->getTrack()->e();     
-    const double expectedEnergySigma = fabs(cellSubtractionManager.fudgeStdDev() * thisEfRecTrack->getTrack()->e());
+    const double expectedEnergySigma = std::fabs(cellSubtractionManager.fudgeStdDev() * thisEfRecTrack->getTrack()->e());
 
     const std::vector<eflowTrackClusterLink*>* bestClusters_015 = thisEfRecTrack->getAlternativeClusterMatches("cone_015");
     const std::vector<eflowTrackClusterLink*>* bestClusters_02 = thisEfRecTrack->getAlternativeClusterMatches("cone_02");
@@ -143,10 +142,10 @@ const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
         //we use a larger cone of 0.2 for this
         std::vector<eflowRecCluster*> theBestEfRecClusters_02;
         for (eflowTrackClusterLink* thisLink : *bestClusters_02) if (thisLink->getCluster()->getCluster()->e() > 0.0) theBestEfRecClusters_02.push_back(thisLink->getCluster());
-        integrator->measureNewClus(theBestEfRecClusters_02, thisEfRecTrack);
+        integrator->measureNewClus(ctx, theBestEfRecClusters_02, thisEfRecTrack);
         j1st = integrator->getFirstIntLayer();
         cellSubtractionManager.getOrdering(binnedParameters, trackE, trackEM1eta, j1st,useLegacyEnergyBinIndexing);
-        thisEfRecTrack->setEExpect(cellSubtractionManager.fudgeMean() * trackE, fabs(cellSubtractionManager.fudgeStdDev()*trackE)*fabs(cellSubtractionManager.fudgeStdDev()*trackE));
+        thisEfRecTrack->setEExpect(cellSubtractionManager.fudgeMean() * trackE, std::fabs(cellSubtractionManager.fudgeStdDev()*trackE)*std::fabs(cellSubtractionManager.fudgeStdDev()*trackE));
       }
       else {
         thisEfRecTrack->setEExpect(expectedEnergy, expectedEnergySigma*expectedEnergySigma);
@@ -154,5 +153,3 @@ const PFEnergyPredictorTool* energyP, bool useLegacyEnergyBinIndexing){
     }
   }
 }
-
-

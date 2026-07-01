@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFSubtractionTool.h"
@@ -63,7 +63,7 @@ StatusCode PFSubtractionTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectContainer, eflowRecTrackContainer *recTrackContainer, eflowRecClusterContainer *recClusterContainer) const
+void PFSubtractionTool::execute(const EventContext& ctx, eflowCaloObjectContainer *theEflowCaloObjectContainer, eflowRecTrackContainer *recTrackContainer, eflowRecClusterContainer *recClusterContainer) const
 {
 
   ATH_MSG_DEBUG("Executing");
@@ -80,7 +80,7 @@ void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectCont
 
   ATH_MSG_DEBUG("This event has " << data.tracks.size() << " tracks " << data.clusters.size() << " clusters ");
 
-  unsigned int numMatches = matchAndCreateEflowCaloObj(data);
+  unsigned int numMatches = matchAndCreateEflowCaloObj(ctx, data);
 
   if (msgLvl(MSG::DEBUG)) printAllClusters(*recClusterContainer);
 
@@ -95,14 +95,13 @@ void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectCont
 
 }
 
-unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
+unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(const EventContext& ctx, PFData &data) const{
 
   //Counts up how many tracks found at least 1 calorimeter cluster matched to it.
   unsigned int nMatches(0);
 
   /* Cache the original number of eflowCaloObjects, if there were any */
   const unsigned int nCaloObj = data.caloObjects->size();
-  const EventContext &ctx = Gaudi::Hive::currentContext();
 
   /* loop tracks in data.tracks and do matching */
   for (auto *thisEfRecTrack : data.tracks)
@@ -129,7 +128,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
       const xAOD::TruthParticle* trackMatchedTruthParticle = nullptr;
       typedef ElementLink<xAOD::TruthParticleContainer> TruthLink;
 
-      const static SG::AuxElement::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
+      const static SG::Accessor<TruthLink> truthLinkAccessor("truthParticleLink");
       
       TruthLink truthLink = truthLinkAccessor(*(thisEfRecTrack->getTrack()));
       //if not valid don't print a WARNING because this is an expected condition as discussed here:
@@ -139,7 +138,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
       if (trackMatchedTruthParticle){
         double uniqueID = HepMC::uniqueID(trackMatchedTruthParticle);
 
-        SG::ReadDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterReadDecorHandleNLeadingTruthParticles(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles);
+        SG::ReadDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterReadDecorHandleNLeadingTruthParticles(m_caloClusterReadDecorHandleKeyNLeadingTruthParticles, ctx);
         if (!caloClusterReadDecorHandleNLeadingTruthParticles.isValid()){
           ATH_MSG_WARNING("Failed to retrieve CaloCluster decoration with key " << caloClusterReadDecorHandleNLeadingTruthParticles.key());
         }
@@ -152,7 +151,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
           std::string::size_type pos = decorHandleName.find(".");
           std::string decorName = decorHandleName.substr(pos+1);
 
-          SG::AuxElement::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
+          SG::Accessor< std::vector< std::pair<unsigned int, double> > > accessor(decorName);
 
           std::vector<std::pair<unsigned int, double > > uniqueIDTruthPairs = accessor(*(thisCluster->getCluster()));
 
@@ -190,7 +189,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
 
       //This matching scheme is used to match the calorimeter cluster(s) to be used in the charged showers subtraction for this track.
       std::vector<std::pair<eflowRecCluster *, float>> matchedClusters = m_theMatchingTool->doMatches(thisEfRecTrack, data.clusters,m_nClusterMatchesToUse);    
-      for (auto thePair : matchedClusters) {
+      for (const auto& thePair : matchedClusters) {
         bestClusters.push_back(eflowTrackClusterLink::getInstance(thisEfRecTrack, thePair.first, ctx));     
         if (m_addCPData) deltaRPrime.push_back(std::sqrt(thePair.second));
       }
@@ -268,7 +267,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
   //For each eflowCaloObject we calculate the expected energy deposit in the calorimeter and cell ordering for subtraction.  
   for (unsigned int iCalo = nCaloObj; iCalo < data.caloObjects->size(); ++iCalo) {  
     eflowCaloObject* thisEflowCaloObject = data.caloObjects->at(iCalo);
-    thisEflowCaloObject->simulateShower(&integrator, m_binnedParameters.get(), m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr, m_useLegacyEBinIndex);
+    thisEflowCaloObject->simulateShower(ctx, &integrator, m_binnedParameters.get(), m_useNNEnergy ? &(*m_NNEnergyPredictorTool) : nullptr, m_useLegacyEBinIndex);
     if (m_useTruthForChargedShowerSubtraction) m_theTruthShowerSimulator->simulateShower(*thisEflowCaloObject);    
 
   }
@@ -277,7 +276,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
   else return nCaloObj;
 }
 
-void PFSubtractionTool::performSubtraction(const unsigned int& startingPoint,PFData &data) const{
+void PFSubtractionTool::performSubtraction(unsigned int startingPoint,PFData &data) const{
   unsigned int nEFCaloObs = data.caloObjects->size();
   for (unsigned int iCalo = startingPoint; iCalo < nEFCaloObs; ++iCalo) {
     eflowCaloObject* thisEflowCaloObject = data.caloObjects->at(iCalo);
@@ -309,7 +308,7 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
 
   double expectedEnergy = thisEflowCaloObject.getExpectedEnergy();
   double clusterEnergy = thisEflowCaloObject.getClusterEnergy();
-  double expectedSigma = sqrt(thisEflowCaloObject.getExpectedVariance());
+  double expectedSigma = std::sqrt(thisEflowCaloObject.getExpectedVariance());
 
   /* Check e/p, if on first pass - return if e/p not consistent with expected e/p */
   if (!m_recoverSplitShowers){
@@ -349,7 +348,7 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
 
       ATH_MSG_DEBUG("We are going to annihilate. ExpectedEnergy, expectedSigma and clusterEnergy are " << expectedEnergy << ", " << expectedSigma << " and " << clusterEnergy);
       if (msgLevel(MSG::DEBUG))
-        for (auto thisPair : clusterList)
+        for (const auto& thisPair : clusterList)
           ATH_MSG_DEBUG("Annihilating cluster with E and eta " << thisPair.first->e() << " and " << thisPair.first->eta());
 
       m_pfSubtractionStatusSetter.markAllTracksAnnihStatus(thisEflowCaloObject);
@@ -360,7 +359,7 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
       Subtractor::annihilateClusters(clusterList);
 
       if (msgLevel(MSG::DEBUG))
-        for (auto thisPair : clusterList)
+        for (const auto& thisPair : clusterList)
           ATH_MSG_DEBUG("Have Annihilated cluster with E and eta " << thisPair.first->e() << " and " << thisPair.first->eta());
       
       /* Flag all tracks in this system as subtracted */
@@ -390,7 +389,7 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
 
       /* Get matched cluster via Links */
       std::vector<eflowRecCluster *> matchedClusters;
-      std::vector<eflowTrackClusterLink *> links = thisEfRecTrack->getClusterMatches();
+      const std::vector<eflowTrackClusterLink *>& links = thisEfRecTrack->getClusterMatches();
       matchedClusters.reserve(links.size());
       for (auto* thisEFlowTrackClusterLink : links)
         matchedClusters.push_back(thisEFlowTrackClusterLink->getCluster());
@@ -429,10 +428,10 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
       double totalClusterEnergy = std::accumulate(clusterSubtractionList.begin(),clusterSubtractionList.end(),0.0,sumClusEnergy);      
 
       /* Check if we can annihilate right away - true if matched cluster has only the expected energy deposit */
-      if(canAnnihilate(thisEfRecTrack->getEExpect(),sqrt(thisEfRecTrack->getVarEExpect()),totalClusterEnergy)){
+      if(canAnnihilate(thisEfRecTrack->getEExpect(),std::sqrt(thisEfRecTrack->getVarEExpect()),totalClusterEnergy)){
         
         if (msgLevel(MSG::DEBUG))
-          for (auto thisPair : clusterSubtractionList)
+          for (const auto& thisPair : clusterSubtractionList)
             ATH_MSG_DEBUG("Annihilating cluster with E and eta " << thisPair.first->e() << " and " << thisPair.first->eta());
 
         //before we remove all the cells, we create a list of the removed cells if in doCPData mode
@@ -455,10 +454,10 @@ void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject)
         totalClusterEnergy = std::accumulate(clusterSubtractionList.begin(),clusterSubtractionList.end(),0.0,sumClusEnergy);        
 
         /* Annihilate the cluster(s) if the remnant is small (i.e. below k*sigma) */
-        if (canAnnihilate(0.0,sqrt(thisEfRecTrack->getVarEExpect()), totalClusterEnergy)){
+        if (canAnnihilate(0.0,std::sqrt(thisEfRecTrack->getVarEExpect()), totalClusterEnergy)){
 
           if (msgLevel(MSG::DEBUG))
-          for (auto thisPair : clusterSubtractionList){
+          for (const auto& thisPair : clusterSubtractionList){
             ATH_MSG_DEBUG("Annihilating remnant cluster with E and eta " << thisPair.first->e() << " and " << thisPair.first->eta());
           }
           eflowSubtract::Subtractor::annihilateClusters(clusterSubtractionList);
@@ -514,7 +513,7 @@ void PFSubtractionTool::performTruthSubtraction(eflowCaloObject& thisEflowCaloOb
     thisEfRecTrack->setSubtracted();
 
     //get the set of matched clusters
-    std::vector<eflowTrackClusterLink *> links = thisEfRecTrack->getClusterMatches();
+    const std::vector<eflowTrackClusterLink *>& links = thisEfRecTrack->getClusterMatches();
 
     for (auto thisLink : links){
       xAOD::CaloCluster *thisCluster = thisLink->getCluster()->getCluster();
@@ -607,7 +606,7 @@ void PFSubtractionTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject,
 
   for (unsigned int iTrack = 0; iTrack < numTracks; ++iTrack){
     eflowRecTrack* thisTrack = thisEflowCaloObject.efRecTrack(iTrack);
-    for (auto thisPair : clusterList){
+    for (const auto& thisPair : clusterList){
       xAOD::CaloCluster* thisCluster = thisPair.first;
       const CaloClusterCellLink* theCellLink = thisCluster->getCellLinks();
       CaloClusterCellLink::const_iterator theCell = theCellLink->begin();

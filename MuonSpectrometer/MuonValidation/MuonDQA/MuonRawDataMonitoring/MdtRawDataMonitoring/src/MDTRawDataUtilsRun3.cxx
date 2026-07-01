@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////
@@ -377,11 +377,11 @@ bool MdtRawDataMonAlg::AinB(int A, std::vector<int>& B) {
 //   // protection against simulated cosmics when the trigger_info() of the event_info is not filled and returns a null pointer.
 //   //trigtype = eventInfo->level1TriggerType();
 
-void MdtRawDataMonAlg::setIsATLASReady() {
+void MdtRawDataMonAlg::setIsATLASReady(const EventContext& ctx) {
     bool filterresult(true);
     if (!m_DQFilterTools.empty()) {
         ToolHandleArray<IDQFilterTool>::const_iterator ifilter(m_DQFilterTools.begin()), filterend(m_DQFilterTools.end());
-        for (; filterresult && (ifilter != filterend); ++ifilter) { filterresult = (filterresult && (*ifilter)->accept()); }
+        for (; filterresult && (ifilter != filterend); ++ifilter) { filterresult = (filterresult && (*ifilter)->accept(ctx)); }
     }
     m_atlas_ready = filterresult;
 }

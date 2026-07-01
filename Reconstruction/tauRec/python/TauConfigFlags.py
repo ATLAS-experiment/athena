@@ -3,7 +3,7 @@
 import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 
 def createTauConfigFlags():
     tau_cfg = AthConfigFlags()
@@ -42,12 +42,13 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.tauRecToolsCVMFSPath", "tauRecTools/R22_preprod")
     tau_cfg.addFlag("Tau.tauRNNTrackClassConfig", lambda prevFlags: "RNNTrackClassifier_2021-07-19_14-25-14_90_25_30.json" if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else "Run4/RNNTrackClassifier_v1.json")
     tau_cfg.addFlag("Tau.CalibrateLCConfig", "CaloTES_R22_Round2.5.root")
-    tau_cfg.addFlag("Tau.CombinedTESConfig", "CombinedTES_R22_Round2.5.root")
+    tau_cfg.addFlag("Tau.CombinedTESConfig", lambda prevFlags: "CombinedTES_R22_Round2.5_v2.root" if prevFlags.Common.ProductionStep is ProductionStep.Derivation else "CombinedTES_R22_Round2.5.root")
     tau_cfg.addFlag("Tau.MvaTESConfig0p", "MvaTES_0p_R23.root")
     tau_cfg.addFlag("Tau.MvaTESConfig", "MvaTES_R23.root")
     tau_cfg.addFlag("Tau.MinPt0p", 9.25*Units.GeV)
     tau_cfg.addFlag("Tau.MinPt", 6.75*Units.GeV)
     tau_cfg.addFlag("Tau.MinPtDAOD", 13*Units.GeV)
+    tau_cfg.addFlag("Tau.MinPtLITE", 20*Units.GeV)
     tau_cfg.addFlag("Tau.MaxTracksDAOD", 5)
     tau_cfg.addFlag("Tau.TauJetRNNConfig", ["tauid_rnn_1p_R22_v1.json", "tauid_rnn_2p_R22_v1.json", "tauid_rnn_3p_R22_v1.json"])
     tau_cfg.addFlag("Tau.TauJetRNNWPConfig", ["tauid_rnnWP_1p_R22_v0.root", "tauid_rnnWP_2p_R22_v0.root", "tauid_rnnWP_3p_R22_v0.root"])
@@ -61,6 +62,7 @@ def createTauConfigFlags():
                         ["GNTauNAprune_flat_model_1p.root", "GNTauNAprune_flat_model_2p.root", "GNTauNAprune_flat_model_3p.root"],
                         ["GNTauNAtrunc_flat_model_1p.root", "GNTauNAtrunc_flat_model_2p.root", "GNTauNAtrunc_flat_model_3p.root"]
                     ])
+    tau_cfg.addFlag("Tau.TauDisplacedGNNConfig", ["GNdTau_pruned_MC23.onnx"])
     tau_cfg.addFlag("Tau.GNTauScoreName", ["GNTauScore_v0prune","GNTauScore_v1trunc"])
     tau_cfg.addFlag("Tau.GNTauTransScoreName", ["GNTauScoreSigTrans_v0prune","GNTauScoreSigTrans_v1trunc"])
     tau_cfg.addFlag("Tau.GNTauMaxTracks", [30,10])
@@ -80,12 +82,13 @@ def createTauConfigFlags():
     # create 2 flag categories, for standard taus and electron-subtracted taus
     tau_cfg.addFlagsCategory("Tau.TauRec", createTauRecConfigFlags, prefix=True)
     tau_cfg.addFlagsCategory("Tau.TauEleRM", createTauEleRMConfigFlags, prefix=True)
+    tau_cfg.addFlagsCategory("Tau.TauLRT", createTauLRTConfigFlags, prefix=True)
     # define ActiveConfig in TauConfigFlags.py so it exists for client code like DerivationFramework that don't want to define it via cloneAndReplace
     # FIXME: this looks more like a hack than good design, maybe dropping Tau.ActiveConfig and using Tau.TauRec as active config would be better?
     tau_cfg.addFlagsCategory("Tau.ActiveConfig", createTauRecConfigFlags, prefix=True)
 
     # e-had boosted ditaus, aka electron-subtracted taus
-    tau_cfg.addFlag("Tau.doTauEleRMRec", True)
+    tau_cfg.addFlag("Tau.doTauEleRMRec", lambda prevFlags : True  if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else False)
     # helper for derivations, TauJets_EleRM not available for AODs produced before 24.0.17
     tau_cfg.addFlag("Tau.TauEleRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_EleRM" in prevFlags.Input.TypedCollections)
     # helper for derivations, used in PHYSVAL monitoring
@@ -121,15 +124,17 @@ def createTauRecConfigFlags():
     # Input containers
     flags.addFlag("VertexCollection", "PrimaryVertices")
     flags.addFlag("TrackCollection", "InDetTrackParticles")
-    flags.addFlag("SeedJetCollection", "AntiKt4LCTopoJets")
+    flags.addFlag("SeedJetCollection", lambda prevFlags: "AntiKt4LCTopoJets" if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else "AntiKt4EMPFlowNoPtCutTauSeedJets")
     flags.addFlag("LargeD0TrackCollection", "InDetLargeD0TrackParticles")
-    flags.addFlag("EventShapeCollection", "Kt4LCTopoOriginEventShape")
+    flags.addFlag("EventShapeCollection", lambda prevFlags: "Kt4LCTopoOriginEventShape" if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else "Kt4EMPFlowEventShape")
 
     # Electron-subtracted tau flags appearing in standard tau reconstruction
     flags.addFlag("inTauEleRM", False)
     flags.addFlag("RemoveElectronCells",        False)
     flags.addFlag("RemovedElectronClusters",    "")
 
+    # Flags for LRT tau
+    flags.addFlag("inTauLRT", False)
     return flags
 
 
@@ -177,6 +182,33 @@ def createTauEleRMConfigFlags():
 
     return flags
 
+def createTauLRTConfigFlags():
+    flags = createTauRecConfigFlags()
+    flags.prefix                     = "TauLRT_"
+    _output_suffix                   = "LRT"
+
+    # Output containers
+    flags.TauJets                    = f"TauJets{_output_suffix}"
+    flags.TauTracks                  = f"TauTracks{_output_suffix}"
+    flags.TauShotClusters            = f"TauShotClusters{_output_suffix}"
+    flags.TauShotClustersLinks       = f"TauShotClusters{_output_suffix}_links"
+    flags.TauShotPFOs                = f"TauShotParticleFlowObjects{_output_suffix}"
+    flags.TauPi0Clusters             = f"TauPi0Clusters{_output_suffix}"
+    flags.TauPi0ClustersLinks        = f"TauPi0Clusters{_output_suffix}_links"
+    flags.TauHadronicPFOs            = f"TauHadronicParticleFlowObjects{_output_suffix}"
+    flags.TauNeutralPFOs             = f"TauNeutralParticleFlowObjects{_output_suffix}"
+    flags.TauChargedPFOs             = f"TauChargedParticleFlowObjects{_output_suffix}"
+    flags.TauSecondaryVertices       = f"TauSecondaryVertices{_output_suffix}"
+    flags.TauFinalPi0s               = f"TauFinalPi0s{_output_suffix}"
+
+    # Transient containers
+    flags.TauJets_tmp                = f"TauJets_tmp{_output_suffix}"
+    flags.TauCommonPi0Cells          = f"TauCommonPi0Cells{_output_suffix}"
+    flags.TauPi0Clusters_tmp         = f"TauPi0Clusters_tmp{_output_suffix}"
+
+    flags.inTauLRT                   = True
+
+    return flags
 
 # Self test
 

@@ -15,6 +15,8 @@
 // ACTS
 #include "ActsEvent/TrackContainer.h"
 #include "Acts/Utilities/Logger.hpp"
+#include "Acts/Utilities/Helpers.hpp"
+
 #include "Acts/AmbiguityResolution/GreedyAmbiguityResolution.hpp"
 
 // Athena
@@ -28,6 +30,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "ActsCalibBase/SourceLinkType.h"
+
 
 #include <string>
 #include <memory>
@@ -38,8 +42,7 @@ namespace ActsTrk
   class AmbiguityResolutionAlg : public AthReentrantAlgorithm
   {
   public:
-    AmbiguityResolutionAlg(const std::string &name,
-                           ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;

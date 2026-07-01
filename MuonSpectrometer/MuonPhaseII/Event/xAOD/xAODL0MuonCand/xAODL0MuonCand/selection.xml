@@ -1,0 +1,43 @@
+<!-- Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration -->
+<lcgdict>
+    
+    
+    <class name="xAOD::ICandData_v1" />
+
+  <!-- Run4 EDM -->
+
+  <!-- xAOD::RPCCandData interface type(s). -->
+    <class name="xAOD::RPCCandData_v1" />
+    <class name="xAOD::RPCCandDataContainer_v1"
+       id="55835F26-0FE2-4924-B17B-9F1128BFF976" />
+    <typedef name="xAOD::RPCCandData" />
+    <typedef name = "xAOD::RPCCandDataContainer" />
+      <!-- xAOD::RPCCandData auxiliary type(s). -->
+    <class name="xAOD::RPCCandDataAuxContainer_v1"
+       id="6E30CBF0-574C-491C-9F1F-45539B450D69" />
+    <typedef name = "xAOD::RPCCandDataAuxContainer" />
+
+    <!-- xAOD::TGCCandData interface type(s). -->
+    <class name="xAOD::TGCCandData_v1" />
+    <class name="xAOD::TGCCandDataContainer_v1"
+       id="630E4EB4-58D8-4D25-BA2D-062E98461269" />
+    <typedef name="xAOD::TGCCandData" />
+    <typedef name = "xAOD::TGCCandDataContainer" />
+    <!-- xAOD::TGCCandData auxiliary type(s). -->
+
+    <class name="xAOD::TGCCandDataAuxContainer_v1"
+       id="BC88723E-C5AE-446E-BF31-2F98625BD7DB" />
+    <typedef name = "xAOD::TGCCandDataAuxContainer" />
+
+    <!-- xAOD::MDTCandData interface type(s). -->
+    <class name="xAOD::MDTCandData_v1" />
+    <class name="xAOD::MDTCandDataContainer_v1"
+       id="60BE6D88-69FE-4B1A-850E-1E1A02493AB0" />
+    <typedef name="xAOD::MDTCandData" />
+    <typedef name = "xAOD::MDTCandDataContainer" />
+    <!-- xAOD::MDTCandData auxiliary type(s). -->  
+    <class name="xAOD::MDTCandDataAuxContainer_v1"
+       id="2BC4B152-8548-477A-B50F-7B44D3E0AAC2" />
+    <typedef name = "xAOD::MDTCandDataAuxContainer" />
+       
+</lcgdict>

@@ -11,6 +11,8 @@
 
 #include <ColumnarCore/ColumnInfoHelpers.h>
 
+#include <CxxUtils/crc64.h>
+
 #include <boost/core/demangle.hpp>
 
 #include <stdexcept>
@@ -63,10 +65,29 @@ namespace columnar
     if (!source.isOptional)
       target.isOptional = false;
 
-    if (target.linkTargetNames != source.linkTargetNames)
-      throw std::runtime_error ("mismatched linkTargetNames in mergeColumnInfo for column: " + target.name);
+    if (target.soleLinkTargetName != source.soleLinkTargetName)
+      throw std::runtime_error ("mismatched soleLinkTargetName in mergeColumnInfo for column: " + target.name);
 
-    if (target.variantLinkKeyColumn != source.variantLinkKeyColumn)
-      throw std::runtime_error ("mismatched variantLinkKeyColumn in mergeColumnInfo for column: " + target.name + ": " + target.variantLinkKeyColumn + " and " + source.variantLinkKeyColumn);
+    if (target.soleLinkTargetClid != source.soleLinkTargetClid)
+      throw std::runtime_error ("mismatched soleLinkTargetClid in mergeColumnInfo for column: " + target.name);
+
+    if (target.isVariantLink != source.isVariantLink)
+      throw std::runtime_error ("mismatched isVariantLink in mergeColumnInfo for column: " + target.name);
+
+    if (target.variantLinkTargetNames != source.variantLinkTargetNames)
+      throw std::runtime_error ("mismatched variantLinkTargetNames in mergeColumnInfo for column: " + target.name);
+
+    if (target.keyColumnForVariantLink != source.keyColumnForVariantLink)
+      throw std::runtime_error ("mismatched keyColumnForVariantLink in mergeColumnInfo for column: " + target.name + ": " + target.keyColumnForVariantLink + " and " + source.keyColumnForVariantLink);
+  }
+
+
+  SG::sgkey_t computeSgKey (const std::string& name, std::uint32_t clid)
+  {
+    std::uint64_t crc = CxxUtils::crc64 (name);
+    if (clid != 0)
+      crc = CxxUtils::crc64addint (crc, clid);
+    // mask to SG::StringPool::sgkey_t_nbits (30) bits
+    return static_cast<SG::sgkey_t> (crc & ((static_cast<std::uint64_t> (1) << 30) - 1));
   }
 }

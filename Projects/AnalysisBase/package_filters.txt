@@ -99,6 +99,7 @@
 - Reconstruction/Jet/JetMonitoring
 - Reconstruction/Jet/JetInputsMonitoring
 + Reconstruction/Jet/JetReclustering
++ Reconstruction/Jet/JetRecConfig
 - Reconstruction/Jet/JetRec.+
 - Reconstruction/Jet/JetSimTools
 - Reconstruction/Jet/JetValidation
@@ -114,7 +115,6 @@
 + Reconstruction/egamma/egammaRecEvent
 + Reconstruction/egamma/egammaUtils
 + Reconstruction/tauRecTools
-+ Reconstruction/DiTauRecTools
 + Reconstruction/PanTau/PanTauAlgs
 + Reconstruction/LwtnnUtils
 + Simulation/SimulationConfig

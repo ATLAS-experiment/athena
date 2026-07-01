@@ -51,7 +51,7 @@ class TileInfoDump: public AthAlgorithm {
     ~TileInfoDump();
 
     StatusCode initialize();
-    StatusCode execute();
+    StatusCode execute(const EventContext& ctx);
     StatusCode finalize();
 
   private:

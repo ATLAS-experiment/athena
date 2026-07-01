@@ -76,7 +76,6 @@ StatusCode CscCalibMonToolBase::initialize()
 
   //Loop through ids to find out what hash range we're working on, and to 
   //initialize histograms.
-  IdContext chanContext = m_idHelperSvc->cscIdHelper().channel_context();
   const std::vector<Identifier> & ids = m_idHelperSvc->cscIdHelper().idVector();
   m_maxHashId = 0;
   m_maxChamId = 0;
@@ -698,7 +697,7 @@ StatusCode CscCalibMonToolBase::bookHistograms()
   return StatusCode::SUCCESS;
 }//end bookHistograms
 
-StatusCode CscCalibMonToolBase::fillHistograms()
+StatusCode CscCalibMonToolBase::fillHistograms(const EventContext& /*ctx*/)
 {
 
   ATH_MSG_DEBUG( "CscCalibMonToolBase :: in fillHistograms()"  );

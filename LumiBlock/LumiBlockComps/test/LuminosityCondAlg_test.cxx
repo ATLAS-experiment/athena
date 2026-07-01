@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockComps/test/LuminosityAlg_test.cxx
@@ -24,8 +24,14 @@
 #include "CoolKernel/IObject.h"
 #include "CxxUtils/checker_macros.h"
 #include "xAODEventInfo/EventAuxInfo.h"
+#include <vector>
+#include <string>
+#include <utility>
+#include <cstdint>
 #include <iostream>
+#include <memory>
 #include <cassert>
+#include <bit>
 
 
 const unsigned int TOTAL_LHC_BCIDS = 3564;
@@ -73,15 +79,11 @@ EventIDBase runlbn (int run,
 
 void push_float (float x, std::vector<uint8_t>& data)
 {
-  union {
-    float f;
-    uint32_t i;
-  } cnv{};
-  cnv.f = x;
-  data.push_back (cnv.i & 0xff);
-  data.push_back ((cnv.i>>8) & 0xff);
-  data.push_back ((cnv.i>>16) & 0xff);
-  data.push_back ((cnv.i>>24) & 0xff);
+  uint32_t i = std::bit_cast<uint32_t>(x);
+  data.push_back (i & 0xff);
+  data.push_back ((i>>8) & 0xff);
+  data.push_back ((i>>16) & 0xff);
+  data.push_back ((i>>24) & 0xff);
 }
 
 
@@ -492,7 +494,7 @@ void test4 ATLAS_NOT_REENTRANT (ISvcLocator* svcloc)
 }
 
 
-// coverity[uncaught_except]
+// coverity[UNCAUGHT_EXCEPT]
 int main ATLAS_NOT_REENTRANT ()
 {
   std::cout << "LumiBlockComps/LuminosityCondAlg_test\n";

@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,23 +26,22 @@
    *
    */
                   
-// #include "eformat/RODHeader.h"
 #include "ByteStreamData/RawEvent.h"
+#include "GaudiKernel/MsgStream.h"
 #include <stdint.h>
 #include <iostream>
 #include <vector>
 #include <map>
 #include <utility>
 
-//#define LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
 
-//class LArCablingService; 
 class LArOnlineID; 
 class LArRawChannel; 
 class LArDigit;
 class LArAccumulatedDigit;
 class LArCalibDigit;
 class LArAccumulatedCalibDigit;
+class IMessageSvc;
 
 class LArRodBlockStructure
 {
@@ -60,7 +59,8 @@ protected:
 
 public : 
   // constructor
-  LArRodBlockStructure();
+  LArRodBlockStructure(IMessageSvc* msgSvc,
+                       const std::string& blockType);
   virtual ~LArRodBlockStructure();
 
   // ----------------- Encoding methods -----------------
@@ -90,7 +90,6 @@ public :
   virtual void sortDataVector( std::vector<const LArAccumulatedCalibDigit*>& );
   virtual void sortDataVector( std::vector<const LArAccumulatedDigit*>& );
   // build full ROD fragment
-  //  virtual void concatinateFEBs(RODHeader* fullHeader=NULL);
   virtual void concatinateFEBs( );
   //Check features of this RodBlock
   virtual bool canSetEnergy() { return false;}
@@ -104,7 +103,6 @@ public :
   // Never to be used while encoding!
   // set full ROD fragment before trying to get anything!
   inline bool     setFragment(const uint32_t* p, uint32_t n);
-  //   virtual bool nextFEB(RODHeader* fullHeader=NULL);
   inline bool     nextFEB ( );
   inline uint32_t getNumberOfWords() const;
   inline uint32_t getFEBID() const;
@@ -168,8 +166,6 @@ public :
   inline void setFirstSample(const int rearrangeFirstSample)
       {m_rearrangeFirstSample=rearrangeFirstSample;}
 
-  //inline uint32_t FebToOfflineGain(const uint32_t gain) const;
-  //inline uint32_t OfflineToFebGain(const uint32_t gain) const;
   inline uint32_t RawToOfflineGain(const uint32_t gain) const;
   inline uint32_t OfflineToRawGain(const uint32_t gain) const;
   virtual inline int FebToRodChannel(int ch) const
@@ -179,8 +175,8 @@ public :
  protected:
   // ----------------- Encoding methods -----------------
   // The following functions write to m_vFragment (vector)
-  inline void setHeader16(const unsigned n, const uint16_t w); // n should be choosen from the above enum  
-  inline void setHeader32(const unsigned n, const uint32_t w); // n should be choosen from the above enum
+  inline void setHeader16(const unsigned n, const uint16_t w); // n should be chosen from the above enum
+  inline void setHeader32(const unsigned n, const uint32_t w); // n should be chosen from the above enum
 
   // ----------------- Decoding methods -----------------
   // The method to call to reset pointers and counters
@@ -188,15 +184,15 @@ public :
   // The method to call to set pointers and counters
   virtual bool setPointers() { return true;}
   // The following functions read from m_vFragment (vector) (to be used during encoding)
-  inline uint16_t getVectorHeader16(const unsigned n) const; // n should be choosen from the above enum
-  inline uint32_t getVectorHeader32(const unsigned n) const; // n should be choosen from the above enum
+  inline uint16_t getVectorHeader16(const unsigned n) const; // n should be chosen from the above enum
+  inline uint32_t getVectorHeader32(const unsigned n) const; // n should be chosen from the above enum
   // The following functions read from m_FebBlock (uint32_t*) (to be used during decoding)
-  inline uint16_t getHeader16(const unsigned n) const; // n should be choosen from the above enum
-  inline uint32_t getHeader32(const unsigned n) const; // n should be choosen from the above enum
+  inline uint16_t getHeader16(const unsigned n) const; // n should be chosen from the above enum
+  inline uint32_t getHeader32(const unsigned n) const; // n should be chosen from the above enum
   // The following funcitons are Little Endian versions for backward compatibility
-  inline uint16_t LE_getHeader16(const unsigned n) const; // n should be choosen from the above enum
-  inline void LE_setHeader16(const unsigned n, const uint16_t w); // n should be choosen from the above enum  
-  inline uint16_t LE_getVectorHeader16(const unsigned n) const; // n should be choosen from the above enum
+  inline uint16_t LE_getHeader16(const unsigned n) const; // n should be chosen from the above enum
+  inline void LE_setHeader16(const unsigned n, const uint16_t w); // n should be chosen from the above enum
+  inline uint16_t LE_getVectorHeader16(const unsigned n) const; // n should be chosen from the above enum
 
   // set/read the bitmap for a ROD channel 
   inline void setBit(uint32_t *const p, const unsigned chan); 
@@ -219,8 +215,6 @@ public :
 
   //Offsets for the fixed size Blocks..
   unsigned short m_iHeadBlockSize; 
-  //Only for encoding: Block for Header
-  //std::vector<uint32_t>  m_HeaderBlock;
   //Number of channels per FEB
   int m_channelsPerFEB;
   //Full ROD fragment for decoding
@@ -246,6 +240,8 @@ public :
   int32_t m_ROB_to_decode;
   const uint32_t* m_virtualROBPointer;
   const uint32_t* m_virtualROBPointerLocal;
+
+  MsgStream m_logstr;
 };
 
 // Implementation of inline-functions:
@@ -258,19 +254,18 @@ inline bool LArRodBlockStructure::setFragment(const uint32_t* p, uint32_t n)
   uint32_t BlockSize = 0;
 
   if (n==0) {
-    std::cout << "Error while decoding LArByteStream: Got Rod block size 0" << std::endl;
+    m_logstr << MSG::ERROR << "Error while decoding LArByteStream: Got Rod block size 0" << endmsg;
     return false;
   }
 
   BlockSize = getNumberOfWords();
   if (BlockSize>n) {
-    std::cout << "Error while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << n << std::endl;
+    m_logstr << MSG::ERROR << "Error while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << n << endmsg;
     return false;
   }
   m_FebBlockSize = BlockSize;
   
   m_error_next_feb = false;
-  //std::cout << "1: FEB found with size " << m_FebBlockSize << std::endl;
 
   return setPointers();
 }
@@ -278,73 +273,68 @@ inline bool LArRodBlockStructure::setFragment(const uint32_t* p, uint32_t n)
 /* Decode the virtual ROB fragment. If data is inconsistent with
 	data size, return 0 */
 inline int LArRodBlockStructure::setFragmentVirtualROB(const uint32_t* p,
-		uint32_t n){
-	m_ROB_to_decode=0;
-	m_virtualROBPointer=0;
-	m_virtualROBPointerLocal=0;
-	m_virtualROBJump=0;
-	if ( n<2 ) { std::cout << "Error" << std::endl; return 0;}
-	m_virtualROBJump = ((*p)>>16)>>1; // Divide by two (two FEBs-1ROB)
-	m_ROB_to_decode = ( (*p) & 0xFFFF )<<1; // Multiply by two
-	if ( (n - m_virtualROBJump*m_ROB_to_decode-1) ){
-		std::cout << "Error AGAIN" << std::endl;
-		return 0;
-	}
-	m_virtualROBPointer = (uint32_t*)(p+1);
-	return m_ROB_to_decode;
+		uint32_t n)
+{
+  m_ROB_to_decode=0;
+  m_virtualROBPointer=0;
+  m_virtualROBPointerLocal=0;
+  m_virtualROBJump=0;
+  if ( n<2 ) { m_logstr << MSG::ERROR << "Error" << endmsg; return 0;}
+  m_virtualROBJump = ((*p)>>16)>>1; // Divide by two (two FEBs-1ROB)
+  m_ROB_to_decode = ( (*p) & 0xFFFF )<<1; // Multiply by two
+  if ( (n - m_virtualROBJump*m_ROB_to_decode-1) ){
+    m_logstr << MSG::ERROR << "Error AGAIN" << endmsg;
+    return 0;
+  }
+  m_virtualROBPointer = (uint32_t*)(p+1);
+  return m_ROB_to_decode;
 }
 
 inline uint32_t  LArRodBlockStructure::getFEBID() const
-{return getHeader32(FEBID);} 
+{
+  return getHeader32(FEBID);
+}
 
 inline uint32_t  LArRodBlockStructure::getFEBSN() const
-{return getHeader32(FEBSN);} 
+{
+  return getHeader32(FEBSN);
+}
 
 inline int32_t LArRodBlockStructure::getEx() const {
- return 0;
+  return 0;
 }
 
 inline int32_t LArRodBlockStructure::getEy() const {
- return 0;
+  return 0;
 }
 
 inline int32_t LArRodBlockStructure::getEz() const {
- return 0;
+  return 0;
 }
 
 inline int32_t LArRodBlockStructure::getSumE() const {
- return 0;
+  return 0;
 }
 
 inline uint32_t  LArRodBlockStructure::getVROBFebId(){
-return 0;
+  return 0;
 }
 
 inline int32_t  LArRodBlockStructure::getVROBEx() const{
-return 0;
+  return 0;
 }
 
 inline int32_t  LArRodBlockStructure::getVROBEy() const{
-return 0;
+  return 0;
 }
 
 inline int32_t  LArRodBlockStructure::getVROBEz() const{
-return 0;
+  return 0;
 }
 
 inline int32_t  LArRodBlockStructure::getVROBSumE() const{
-return 0;
+  return 0;
 }
-
-/*
-inline int LArRodBlockStructure::FebToRodChannel(int ch) const
-  //{return ch/8 + 16 * (ch%8);}
-{return (ch>>3) + ((ch&0x7)<<4);}
-
-inline int LArRodBlockStructure::RodToFebChannel(int ch) const
-  //{return ch/16 + 8 * (ch%16);}
-{return (ch>>4) + ((ch&0xf)<<3);}
-*/
 
 inline uint32_t LArRodBlockStructure::RawToOfflineGain(const uint32_t gain) const
 {return m_RawToOfflineGainMap[gain];} //For efficency, don't check range
@@ -352,40 +342,39 @@ inline uint32_t LArRodBlockStructure::RawToOfflineGain(const uint32_t gain) cons
 inline uint32_t LArRodBlockStructure::OfflineToRawGain(const uint32_t gain) const
 {return m_OfflineToRawGainMap[gain];} //For efficency, don't check range
 
-inline uint16_t LArRodBlockStructure::getHeader16(const unsigned n) const // n should be choosen from the above enum
+inline uint16_t LArRodBlockStructure::getHeader16(const unsigned n) const // n should be chosen from the above enum
 {
-  //  std::cout << "getHeader16: " << m_FebBlock << " " << m_FebBlock[5] << " "
-  //    << n << " " << (n>>1) << " " << (m_FebBlock[5]&0xffff) << std::endl;
- if (n&0x1) //n is a odd number 
+ if (n&0x1) //n is an odd number
    return m_FebBlock[n>>1] & 0xffff;  //1,3,5... are fetched from lower bits
  else //n is a even number
    return m_FebBlock[n>>1] >> 16;     //0,2,4... are fetched from higher bits
 }
 
-inline uint32_t LArRodBlockStructure::getHeader32(const unsigned n) const // n should be choosen from the above enum
+inline uint32_t LArRodBlockStructure::getHeader32(const unsigned n) const // n should be chosen from the above enum
 {return m_FebBlock[n>>1];}
 
-inline uint16_t LArRodBlockStructure::getVectorHeader16(const unsigned n) const // n should be choosen from the above enum
-{ if (n&0x1) //n is a odd number 
+inline uint16_t LArRodBlockStructure::getVectorHeader16(const unsigned n) const // n should be chosen from the above enum
+{
+  if (n&0x1) //n is an odd number
     return (std::as_const(*m_vFragment).at(n>>1) & 0xffff);
   else //n is a even number
     return (std::as_const(*m_vFragment).at(n>>1) >> 16);
 }
 
-inline uint32_t LArRodBlockStructure::getVectorHeader32(const unsigned n) const // n should be choosen from the above enum
+inline uint32_t LArRodBlockStructure::getVectorHeader32(const unsigned n) const // n should be chosen from the above enum
 {
- return (*m_vFragment)[n>>1];
+  return (*m_vFragment)[n>>1];
 }
 
 inline void LArRodBlockStructure::setHeader16(const unsigned n, const uint16_t w)
 {
 #ifdef LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
   if ((unsigned)n>=m_vFragment->size()*2) {
-    std::cout << "Error WRITE BEYOND ARRAY BONDARY!" << std::endl;
+    m_logstr << MSG::ERROR << "Error WRITE BEYOND ARRAY BOUNDARY!" << endmsg;
     std::abort();
   }
 #endif
-  if (n&0x1) // n is a odd number
+  if (n&0x1) // n is an odd number
     m_vFragment->at(n>>1)=((m_vFragment->at(n>>1) & 0xffff0000) | w);   
   else
     m_vFragment->at(n>>1)=((m_vFragment->at(n>>1) & 0xffff) | (w << 16)); 
@@ -395,19 +384,19 @@ inline void LArRodBlockStructure::setHeader32(const unsigned n, const uint32_t w
 { 
 #ifdef LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
   if ((unsigned)n>=m_vFragment->size()*2) {
-    std::cout << "Error WRITE BEYOND ARRAY BONDARY!" << std::endl;
+    m_logstr << MSG::ERROR << "Error WRITE BEYOND ARRAY BOUNDARY!" << endmsg
     std::abort();
   }
 #endif
   m_vFragment->at(n>>1) = w;
 }
 
-inline uint16_t LArRodBlockStructure::LE_getHeader16(const unsigned n) const // n should be choosen from the above enum
+inline uint16_t LArRodBlockStructure::LE_getHeader16(const unsigned n) const // n should be chosen from the above enum
 {
   return (reinterpret_cast<const uint16_t*>(m_FebBlock))[n];
 }
 
-inline uint16_t LArRodBlockStructure::LE_getVectorHeader16(const unsigned n) const // n should be choosen from the above enum
+inline uint16_t LArRodBlockStructure::LE_getVectorHeader16(const unsigned n) const // n should be chosen from the above enum
 {
   const uint32_t* data32 = std::as_const(*m_vFragment).data();
   const uint16_t* data16 = reinterpret_cast<const uint16_t*> (data32);
@@ -418,7 +407,7 @@ inline void LArRodBlockStructure::LE_setHeader16(const unsigned n, const uint16_
 {
 #ifdef LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
   if ((unsigned)n>=m_vFragment->size()*2) {
-    std::cout << "LArRodBlockStructure::LE_setHeader16 Error: WRITE BEYOND ARRAY BONDARY!" << std::endl;
+    m_logstr << MSG::ERROR << "LArRodBlockStructure::LE_setHeader16 Error: WRITE BEYOND ARRAY BOUNDARY!" << endmsg;
     std::abort();
   }
 #endif
@@ -455,43 +444,37 @@ inline void LArRodBlockStructure::setBit(uint32_t *const p, const unsigned chan)
 
 inline int  LArRodBlockStructure::getNextEnergy(int&, int32_t&, int32_t&, int32_t&,uint32_t&)
 {
- std::cout << "Error: Function getNextEnergy not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  m_logstr << MSG::ERROR << "Error: Function getNextEnergy not implemented in this instance of LArRodBlockStructure!" << endmsg;
+  return 0;
 }
                                   
 inline bool LArRodBlockStructure::getPulsed(unsigned) const 
 {
- std::cout << "Error: Function getPulsed not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  return 0;
 }
 
 inline uint16_t  LArRodBlockStructure::getDAC() const
 {
- std::cout << "Error: Function getDAC not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  return 0;
 }
 
 inline uint16_t  LArRodBlockStructure::getDelay() const
 {
- std::cout << "Error: Function getDelay not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  return 0;
 }
  
 inline uint16_t  LArRodBlockStructure::getNTrigger() const
 {
- std::cout << "Error: Function getNTrigger not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  return 0;
 }
 
 inline uint16_t  LArRodBlockStructure::getStepIndex() const
 {
- std::cout << "Error: Function getStepIndex not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  return 0;
 }
 inline uint16_t  LArRodBlockStructure::getNStep() const
 {
- std::cout << "Error: Function getNStep not implemented in this instance of LArRodBlockStructure!\n";
- return 0;
+  return 0;
 }
 
 inline bool LArRodBlockStructure::nextFEB()
@@ -504,18 +487,14 @@ inline bool LArRodBlockStructure::nextFEB()
 
   m_FebBlock += FebOffset; //Jump to the next FEB fragment
   const int32_t BlockSize = getNumberOfWords();
-  //std::cout << "LeftSize=" << LeftSize << " BlockSize=" << BlockSize << std::endl;
   if (BlockSize>LeftSize) {
-      std::cout << "Error while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << LeftSize << std::endl;
+      m_logstr << MSG::ERROR << "Error while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << LeftSize << endmsg;
       m_error_next_feb = true;
       return false;
     }
-  //std::cout << "Second FEB ok, size= " << LeftSize <<std::endl;
   
-  //m_FebBlockSize   = LeftSize; //should be =BlockSize;
   m_FebBlockSize=BlockSize;
 
-  //std::cout << "2: FEB found with size " << m_FebBlockSize << std::endl;
   setPointers();
   return true;
 }

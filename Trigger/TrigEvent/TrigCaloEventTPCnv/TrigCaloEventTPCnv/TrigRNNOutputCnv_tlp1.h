@@ -17,12 +17,12 @@
 #ifndef TRIGEVENTTPCNV_TRIGRNNOUTPUTCNV_TLP1_H
 #define TRIGEVENTTPCNV_TRIGRNNOUTPUTCNV_TLP1_H
 
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigCaloEventTPCnv/TrigRNNOutput_tlp1.h"
 #include "TrigCaloEventTPCnv/TrigRNNOutputCnv_p1.h"
 
-class TrigRNNOutputCnv_tlp1 : public AthenaPoolTopLevelTPConverter<TrigRNNOutputCnv_p1, TrigRNNOutput_tlp1> {
+class TrigRNNOutputCnv_tlp1 : public TopLevelTPConverter<TrigRNNOutputCnv_p1, TrigRNNOutput_tlp1> {
 
  public:
 

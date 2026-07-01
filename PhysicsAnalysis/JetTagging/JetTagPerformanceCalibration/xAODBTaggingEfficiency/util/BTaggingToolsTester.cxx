@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AsgTools/StandaloneToolHandle.h>
@@ -38,7 +38,7 @@ ANA_MSG_HEADER(testBTagSelection)
 ANA_MSG_SOURCE(testBTagSelection, "BtaggingToolsTester")
 using namespace testBTagSelection;
 
-int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
+int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   const char* TEST_NAME = argv[0];
 
@@ -206,4 +206,15 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
 
   root_file->Close();
   return 0;
+}
+
+
+int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

@@ -7,13 +7,16 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 
 #include "Acts/Utilities/MathHelpers.hpp"
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
 
 #include <format>
+
+
 
 namespace MuonR4 {
 
     std::ostream& operator<<(std::ostream& ostr, const MuonR4::MsTrackSeed& seed) {
-      ostr<<"MS Track seed @"<<Amg::toString(seed.position())<<", sector: "<<seed.sector()<<std::endl;
+      ostr<<"MS Track seed @"<<Amg::toString(seed.position())<<", sector: "<<seed.sector() << ", location: "<< Acts::toUnderlying(seed.location())<< std::endl;
       using namespace Muon::MuonStationIndex;
       for (const xAOD::MuonSegment* seg : seed.segments()) {
         ostr<<"  **** "<< printID(*seg)
@@ -25,11 +28,28 @@ namespace MuonR4 {
             <<", chi2: "<<(seg->chiSquared() / std::max(seg->numberDoF(), 1.f))
             <<", nPrec: "<<seg->nPrecisionHits()
             <<", nPhi: "<<seg->nPhiLayers()
-            <<", nTrigEta: "<<seg->nTrigEtaLayers()<<std::endl;
+            <<", nTrigEta: "<<seg->nTrigEtaLayers();
+
+            const xAOD::MuonSegment* truthSeg{getMatchedTruthSegment(*seg)};
+            if(truthSeg){
+                  ostr << " truth theta " << (truthSeg->direction().theta() / Gaudi::Units::degree)
+                       << " truth phi " << (truthSeg->direction().phi() / Gaudi::Units::degree);
+            }
+             
+            ostr <<std::endl;
       }
       return ostr;
     }
-    MsTrackSeed::MsTrackSeed(const Location loc, const int sector): 
+    std::string MsTrackSeed::toString(const Location loc) {
+        switch (loc) {
+          using enum Location;
+          case Undefined: return "Undefined";
+          case Barrel: return "Barrel";
+          case Endcap: return "Endcap";
+        }
+        return "";
+    }
+    MsTrackSeed::MsTrackSeed(const Location loc, const ExpandedSector sector): 
           m_loc{loc}, m_sector{sector}{}
     MsTrackSeed::Location MsTrackSeed::location() const { return m_loc; }
     std::vector<const SpacePointBucket*> MsTrackSeed::buckets() const { 

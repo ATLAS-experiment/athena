@@ -52,6 +52,12 @@ StatusCode GridTripletSeedingTool::initialize() {
   ATH_MSG_DEBUG("   " << m_deltaZMax);
   ATH_MSG_DEBUG("   " << m_collisionRegionMin);
   ATH_MSG_DEBUG("   " << m_collisionRegionMax);
+  ATH_MSG_DEBUG("   " << m_useHVCollisionRegion);
+  ATH_CHECK(m_inputHoughVtxKey.initialize(m_useHVCollisionRegion));
+  if(m_useHVCollisionRegion) {
+    ATH_MSG_DEBUG("   " << m_inputHoughVtxKey);
+    ATH_MSG_DEBUG("   " << m_hvCollisionRegionTolerance);
+  }
   ATH_MSG_DEBUG("   " << m_sigmaScattering);
   ATH_MSG_DEBUG("   " << m_maxPtScattering);
   ATH_MSG_DEBUG("   " << m_radLengthPerSeed);
@@ -226,14 +232,14 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_topDoubletFinderCfg.deltaRMax = m_deltaRMaxTopSP;
 
   m_tripletFinderCfg.useStripInfo = m_useDetailedDoubleMeasurementInfo;
-  m_tripletFinderCfg.sortedByCotTheta = !m_useDetailedDoubleMeasurementInfo;
+  m_tripletFinderCfg.sortedByCotTheta = true;
   m_tripletFinderCfg.minPt = m_minPt;
   m_tripletFinderCfg.sigmaScattering = m_sigmaScattering;
   m_tripletFinderCfg.radLengthPerSeed = m_radLengthPerSeed;
   m_tripletFinderCfg.impactMax = m_impactMax;
   m_tripletFinderCfg.helixCutTolerance = 1.;
   m_tripletFinderCfg.toleranceParam = m_toleranceParam;
-
+  m_tripletFinderCfg.cotThetaDiffMax = m_maxStripDeltaCotTheta;
   m_filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
   m_filterCfg.deltaRMin = m_deltaRMin;
   m_filterCfg.compatSeedWeight = m_compatSeedWeight;
@@ -273,6 +279,9 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_filterCfg.maxSeedsPerSpMConf = m_maxSeedsPerSpMConf;
   m_filterCfg.maxQualitySeedsPerSpMConf = m_maxQualitySeedsPerSpMConf;
   m_filterCfg.useDeltaRinsteadOfTopRadius = m_useDeltaRorTopRadius;
+  m_filterCfg.absDeltaEtaWeightFactor = m_absDeltaEtaWeightFactor;
+  m_filterCfg.absDeltaEtaMinImpact = m_absDeltaEtaMinImpact;
+
 
   m_finder = Acts::TripletSeeder(logger().cloneWithSuffix("Finder"));
 
@@ -383,7 +392,7 @@ std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
   return {m_rRangeMiddleSP[zBin][0], m_rRangeMiddleSP[zBin][1]};
 }
 
-StatusCode GridTripletSeedingTool::createSeeds2(
+StatusCode GridTripletSeedingTool::createSeeds(
     const EventContext& ctx,
     const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
     const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
@@ -433,9 +442,9 @@ StatusCode GridTripletSeedingTool::createSeeds2(
 
   Acts::SpacePointContainer2 selectedSpacePoints;
   selectedSpacePoints.createColumns(
-      Acts::SpacePointColumns::CopyFromIndex | Acts::SpacePointColumns::XY |
-      Acts::SpacePointColumns::ZR | Acts::SpacePointColumns::VarianceZ |
-      Acts::SpacePointColumns::VarianceR);
+      Acts::SpacePointColumns::CopyFromIndex |
+      Acts::SpacePointColumns::PackedXY | Acts::SpacePointColumns::PackedZR |
+      Acts::SpacePointColumns::VarianceZ | Acts::SpacePointColumns::VarianceR);
   if (m_useDetailedDoubleMeasurementInfo) {
     selectedSpacePoints.createColumns(Acts::SpacePointColumns::Strip);
   }
@@ -503,9 +512,22 @@ StatusCode GridTripletSeedingTool::createSeeds2(
     return {minRange, maxRange};
   }();
 
+  auto bottomDoubletFinderCfg = m_bottomDoubletFinderCfg;
+
+  if(m_useHVCollisionRegion) {
+    SG::ReadHandle<xAOD::VertexContainer> inputHoughVtx = SG::makeHandle(m_inputHoughVtxKey, ctx);
+    ATH_CHECK(inputHoughVtx.isValid());
+
+    if(inputHoughVtx->size() == 1) {
+      bottomDoubletFinderCfg.collisionRegionMin = inputHoughVtx->at(0)->z() - m_hvCollisionRegionTolerance;
+      bottomDoubletFinderCfg.collisionRegionMax = inputHoughVtx->at(0)->z() + m_hvCollisionRegionTolerance;
+    }
+    // in case HoughVtx is not found, keep the original collision region
+  }
+
   auto bottomDoubletFinder =
       Acts::DoubletSeedFinder::create(Acts::DoubletSeedFinder::DerivedConfig(
-          m_bottomDoubletFinderCfg, bFieldInZ));
+          bottomDoubletFinderCfg, bFieldInZ));
   auto topDoubletFinder = Acts::DoubletSeedFinder::create(
       Acts::DoubletSeedFinder::DerivedConfig(m_topDoubletFinderCfg, bFieldInZ));
   auto tripletFinder = Acts::TripletSeedFinder::create(
@@ -593,10 +615,12 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       continue;
     }
 
-    seedContainer.push_back(Acts::ConstSeedProxy2(seed),
-                            [&](const Acts::SpacePointIndex2 spIndex) {
-                              return selectedXAODSpacePoints[spIndex];
-                            });
+    seedContainer.push_back(
+        Acts::ConstSeedProxy2(seed), [&](const Acts::SpacePointIndex2 spIndex) {
+          const Acts::SpacePointIndex2 originalIndex =
+              selectedSpacePoints.at(spIndex).copyFromIndex();
+          return selectedXAODSpacePoints[originalIndex];
+        });
   }
 
   return StatusCode::SUCCESS;

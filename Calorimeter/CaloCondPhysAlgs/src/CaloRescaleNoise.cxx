@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloRescaleNoise.h"
@@ -13,33 +13,16 @@
 #include "TTree.h"
 #include <cstdio>
 
-
 //Constructor
 CaloRescaleNoise::CaloRescaleNoise(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name,pSvcLocator),
-  m_calo_id(nullptr),
-  m_iCool(0),
-  m_SubHash(0),
-  m_Hash(0),
-  m_OffId(0),
-  m_eta(0),
-  m_phi(0),
-  m_layer(0),
-  m_Gain(0),
-  m_elecNoise(0),
-  m_pileupNoise (0),
-  m_elecNoiseRescaled(0),
-  m_tree(nullptr)
+  AthAlgorithm(name,pSvcLocator)
 {
-  declareProperty("absScaling",m_absScaling=false);
 }
 
 //__________________________________________________________________________
 //Destructor
-CaloRescaleNoise::~CaloRescaleNoise()
-{
-  ATH_MSG_DEBUG ( "CaloRescaleNoise destructor called" );
-}
+CaloRescaleNoise::~CaloRescaleNoise() = default;
+
 //__________________________________________________________________________
 StatusCode CaloRescaleNoise::initialize()
 {
@@ -77,7 +60,7 @@ StatusCode CaloRescaleNoise::initialize()
   return StatusCode::SUCCESS; 
 }
 //__________________________________________________________________________
-StatusCode CaloRescaleNoise::execute()
+StatusCode CaloRescaleNoise::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloRescaleNoise execute()" );
   return StatusCode::SUCCESS; 
@@ -95,6 +78,10 @@ StatusCode CaloRescaleNoise::stop()
   }
 
   FILE* fp = std::fopen("calonoise.txt","w");
+  if (!fp) {
+    ATH_MSG_ERROR("Cannot open file calonoise.txt: " << strerror(errno));
+    return StatusCode::FAILURE;
+  }
 
   const ILArHVScaleCorr *scaleCorr = nullptr;
   if(!m_absScaling) {
@@ -224,7 +211,7 @@ StatusCode CaloRescaleNoise::stop()
           }
 
           // for SC debugging
-          if (iCool<48) fprintf(fp,"%10u %5d %5d %8.3f %8.3f\n",id.get_identifier32().get_compact(),ii,gain,m_elecNoiseRescaled,m_pileupNoise);
+          if (iCool<48) fprintf(fp,"%10d %5d %5d %5d %8.3f %8.3f\n",id.get_identifier32().get_compact(),iCool,ii,gain,m_elecNoiseRescaled,m_pileupNoise);
 
           m_tree->Fill();
 
@@ -236,7 +223,3 @@ StatusCode CaloRescaleNoise::stop()
   return StatusCode::SUCCESS;
  }
 
- StatusCode CaloRescaleNoise::finalize()
-{
-  return StatusCode::SUCCESS;
-}

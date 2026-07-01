@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKEVENT_SEEDCONTAINER_H
@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "Acts/EventData/Seed.hpp"  // only needed for conversion from Acts::Seed
 #include "Acts/EventData/SeedContainer2.hpp"
 #include "xAODInDetMeasurement/SpacePoint.h"
 
@@ -145,16 +144,6 @@ struct SeedContainer final {
                  const Acts::ConstSeedProxy2& seed) {
     return push_back(arbitrarySpacePoints, xAODspProjector, seed.quality(),
                      seed.vertexZ());
-  }
-
-  // convert from old Acts::Seed<Acts::SpacePointProxy> used by SeedingTool and
-  // OrthogonalSeedingTool
-  template <typename sp_proxy_t, std::size_t N>
-  Seed push_back(const Acts::Seed<sp_proxy_t, N>& pSeed) {
-    return push_back(
-        pSeed.sp(),
-        [](const sp_proxy_t* sp) { return &sp->externalSpacePoint(); },
-        pSeed.seedQuality(), pSeed.z());
   }
 
  private:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TrigEgammaMonitorAnalysisAlgorithm_H
 #define TrigEgammaMonitorAnalysisAlgorithm_H
@@ -21,15 +21,16 @@ class TrigEgammaMonitorAnalysisAlgorithm: public TrigEgammaMonitorBaseAlgorithm
   protected:
 
     void fillLabel( const ToolHandle<GenericMonitoringTool>& groupHandle, const std::string &histname, const std::string &label ) const;
-    void fillEfficiencies( const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo&, const bool ) const;
-    void fillDistributions( const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo& ) const;
-    void fillResolutions( const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs, const TrigInfo& info ) const;
+    void fillEfficiencies( const EventContext& ctx, const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo&, const bool ) const;
+    void fillDistributions( const EventContext& ctx, const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo& ) const;
+    void fillResolutions( const EventContext& ctx, const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs, const TrigInfo& info ) const;
     void fillInefficiency(  const std::string &pidword, const TrigInfo& info, const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs, const std::vector< asg::AcceptData >& acceptObjs) const;
 
   private:
 
     // Efficiency monitoring
-    void fillEfficiency( const std::string &subgroup, const std::string &level, const std::string &pidword, const TrigInfo& info, 
+    void fillEfficiency( const EventContext& ctx,
+                         const std::string &subgroup, const std::string &level, const std::string &pidword, const TrigInfo& info,
                          const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs,
                          const std::vector< asg::AcceptData >& acceptObjs, const std::string& dirname ) const;
 
@@ -41,15 +42,15 @@ class TrigEgammaMonitorAnalysisAlgorithm: public TrigEgammaMonitorBaseAlgorithm
     void fillL2Photon(const std::string &trigger, const std::vector<const xAOD::TrigPhoton*>& eg_vec) const;
     void fillEFCalo(const std::string &trigger, const std::vector<const xAOD::CaloCluster*>& clus_vec) const;
     void fillShowerShapes(const std::string &trigger, const std::vector<const xAOD::Egamma*>& eg_vec, bool online) const; 
-    void fillTracking(const std::string &trigger, const std::vector<const xAOD::Electron *>& eg_vec, bool online ) const;
+    void fillTracking(const EventContext& ctx, const std::string &trigger, const std::vector<const xAOD::Electron *>& eg_vec, bool online ) const;
 
 
     // Resolution monitoring
     void fillL1CaloResolution(const std::string &trigger, const std::vector< std::pair< const xAOD::Egamma*, const xAOD::EmTauRoI * >>& pairObjs ) const;
     void fillL1CaloAbsResolution(const std::string &trigger, const std::vector< std::pair< const xAOD::Egamma*, const xAOD::EmTauRoI * >>& pairObjs ) const;
     void fillL2CaloResolution(const std::string &trigger, const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs ) const;
-    void fillHLTElectronResolution(const std::string &trigger, const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs , const TrigInfo& info) const;
-    void fillHLTPhotonResolution(const std::string &trigger, const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs , const TrigInfo& info) const;
+    void fillHLTElectronResolution(const EventContext& ctx, const std::string &trigger, const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs , const TrigInfo& info) const;
+    void fillHLTPhotonResolution(const EventContext& ctx, const std::string &trigger, const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs , const TrigInfo& info) const;
 
 };
 

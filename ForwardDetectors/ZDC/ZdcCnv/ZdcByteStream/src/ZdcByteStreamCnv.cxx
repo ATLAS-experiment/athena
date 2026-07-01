@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -73,11 +73,9 @@ ZdcByteStreamCnv::~ZdcByteStreamCnv()
 
 
 //==================================================================================================
-const CLID& ZdcByteStreamCnv::classID()
+CLID ZdcByteStreamCnv::classID()
 {
-  //std::cout << "In ZdcByteStreamCnv::classID()" << std::endl;
   return ClassID_traits<ZdcDigitsCollection>::ID();
-  //return ClassID_traits<xAOD::TriggerTowerContainer>::ID();
 }
 //==================================================================================================
 
@@ -121,14 +119,10 @@ StatusCode ZdcByteStreamCnv::initialize()
 StatusCode ZdcByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pObj) const
 {
 	/// Create the RDO from bytestream.
-	ByteStreamAddress *pBS_Addr;
-	pBS_Addr = dynamic_cast<ByteStreamAddress *> (pAddr);
-	if (!pBS_Addr)
-	{
-                ATH_MSG_ERROR( "ZDC: Can not cast to ByteStreamAddress " );
-		return StatusCode::FAILURE;
-	}
+	ByteStreamAddress* pBS_Addr{};
+	ATH_CHECK( (pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
 
+	const EventContext& ctx = pBS_Addr->getEventContext();
 	const std::string nm = *(pBS_Addr->par());
 
         ATH_MSG_DEBUG( "ZDC: Creating Objects " << nm );
@@ -139,7 +133,7 @@ StatusCode ZdcByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& 
 
 	// get ROB fragments
 	IROBDataProviderSvc::VROBFRAG robFrags;
-	m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags);
+	m_robDataProvider->getROBData(ctx, vID, robFrags);
 
 	// size check
         ATH_MSG_DEBUG( "ZDC: Number of ROB fragments is " << robFrags.size() );

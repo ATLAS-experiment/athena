@@ -22,10 +22,10 @@ atlas_add_test( OverlayCopyAlgsConfigTest
                 SCRIPT test/OverlayCopyAlgs_test.py
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( OverlayCopyAlgsConfigTestMT
                 SCRIPT test/OverlayCopyAlgs_test.py -n 20 -t 3
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

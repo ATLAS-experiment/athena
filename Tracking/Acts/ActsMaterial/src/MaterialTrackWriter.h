@@ -10,7 +10,7 @@
 #include "StoreGate/ReadHandleKey.h"
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsEvent/RecordedMaterialTrackCollection.h"
+#include "ActsGeometry/RecordedMaterialTrackCollection.h"
 
 #include <ActsPlugins/Root/RootMaterialTrackIo.hpp>
 
@@ -33,7 +33,7 @@ namespace ActsTrk {
         public:
             using AthHistogramAlgorithm::AthHistogramAlgorithm;
             virtual StatusCode initialize() override;
-            virtual StatusCode execute () override;           
+            virtual StatusCode execute (const EventContext& ctx) override;           
             virtual ~MaterialTrackWriter();
 
         private:

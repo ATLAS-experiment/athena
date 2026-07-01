@@ -218,7 +218,7 @@ namespace xAOD {
     * @brief Set the L1Accept bunch position.
     * @param pos Bunch position.
     */
-    void setL1AcceptBunchPosition(const uint32_t pos);
+    void setL1AcceptBunchPosition(uint32_t pos);
 
     /**
     * @brief Get the TIP words for all bunch crossings.
@@ -413,6 +413,12 @@ namespace xAOD {
     * @param num Number of data words to set.
     */
     void setNumDataWords(const uint32_t num);
+
+    /**
+    * @brief Get whether the CTPResult object is in a good state (i.e. there were no issues with the ROB during BS decoding)
+    * @return A vector of strings which is either empty or contains warning messages
+    */
+    std::vector<std::string> checkForIssues() const;
 
   }; // class CTPResult_v1
   

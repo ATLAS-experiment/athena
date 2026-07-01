@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCellNoiseAlg.h"
@@ -22,21 +22,7 @@ using CLHEP::HepVector;
 
 //Constructor
 CaloCellNoiseAlg::CaloCellNoiseAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name,pSvcLocator),
-  m_ncell(0),
-  m_lumiblock(0),
-  m_lumiblockOld(0),
-  m_first(false),
-  m_tree(nullptr),
-  m_doMC(false),
-  m_readNtuple(false),
-  m_doFit(true),
-  m_doLumiFit(true),
-  m_nmin(10),
-  m_trigDecTool(""),
-  m_triggerChainProp(""),
-  m_addlumiblock(5),
-  m_deltaLumi(0.05)
+  AthAlgorithm(name,pSvcLocator)
 {
   std::vector<float> data(CaloSampling::Unknown);
   data[CaloSampling::PreSamplerB] = 300.;
@@ -65,25 +51,12 @@ CaloCellNoiseAlg::CaloCellNoiseAlg(const std::string& name, ISvcLocator* pSvcLoc
   data[CaloSampling::FCAL2]=10000.;
                                       
   m_cuts.setValue(data);
-  declareProperty("doMC",m_doMC);
-  declareProperty("readNtuple",m_readNtuple);
-  declareProperty("doFit",m_doFit);
-  declareProperty("nevtMin",m_nmin);
-  declareProperty("doLumiFit",m_doLumiFit);
-  declareProperty("TrigDecisionTool", m_trigDecTool );
-  declareProperty("TriggerChain", m_triggerChainProp );
-  declareProperty("EnergyCuts",m_cuts);
-  declareProperty("LumiFolderName",m_lumiFolderName="/TRIGGER/LUMI/LBLESTONL");
-  declareProperty("NAddLumiBlock",m_addlumiblock,"Number of consecutive lumiblocks to add together ");
-  declareProperty("DeltaLumi",m_deltaLumi);
 }
 
 //__________________________________________________________________________
 //Destructor
-CaloCellNoiseAlg::~CaloCellNoiseAlg()
-{
-  ATH_MSG_DEBUG ( "CaloCellNoiseAlg destructor called" );
-}
+CaloCellNoiseAlg::~CaloCellNoiseAlg() = default;
+
 //__________________________________________________________________________
 StatusCode CaloCellNoiseAlg::initialize()
 {
@@ -150,7 +123,7 @@ StatusCode CaloCellNoiseAlg::stop()
 }
 
 //__________________________________________________________________________
-StatusCode CaloCellNoiseAlg::execute()
+StatusCode CaloCellNoiseAlg::execute(const EventContext& ctx)
 {
   if (m_readNtuple) return StatusCode::SUCCESS;
 
@@ -173,7 +146,6 @@ StatusCode CaloCellNoiseAlg::execute()
 
   }
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   unsigned int lumiblock = ctx.eventID().lumi_block();
 
   ATH_MSG_DEBUG ( " lumiblock " << lumiblock );
@@ -215,7 +187,7 @@ StatusCode CaloCellNoiseAlg::execute()
       totalNoise = noiseH.cptr();
     }
 
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
 
     for (int i=0;i<m_ncell;i++) {
@@ -657,10 +629,5 @@ StatusCode CaloCellNoiseAlg::fitNoise()
  }    // loop over cells
 
  fclose(fp);
- return StatusCode::SUCCESS;
-}
-
-StatusCode CaloCellNoiseAlg::finalize()
-{
  return StatusCode::SUCCESS;
 }

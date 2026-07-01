@@ -86,10 +86,12 @@ def UseFrontier(flags):
     from os import environ
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-    if flags.IOVDb.UseCREST:
-        raise RuntimeError('Using PyJobTransforms.UseCREST (setting flags.IOVDb.UseCREST = True) and PyJobTransforms.UseFrontier in the same job is not supported!')
-
     cfg = ComponentAccumulator()
+    
+    if flags.IOVDb.UseCREST:
+        msg.warning('Using PyJobTransforms.UseCREST (setting flags.IOVDb.UseCREST = True) and PyJobTransforms.UseFrontier in the same job is not supported!')
+        return cfg
+
     if environ.get('FRONTIER_SERVER'):
         msg.info('Enabling FRONTIER DB access')
         from IOVDbSvc.IOVDbSvcConfig import DBReplicaSvcCfg
@@ -103,6 +105,7 @@ def UseFrontier(flags):
 def UseCREST(flags):
     """PreInclude to switch to using CREST rather than COOL
     """
+    msg.warning('CREST is now used by default for Run4 and beyond, Please remove this PreInclude from commands!')
     flags.IOVDb.UseCREST = True
     from os import environ
     msg.info('Enabling CREST DB access')

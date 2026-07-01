@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGATrackSimLayerStudyAlg.h"
 
@@ -42,7 +42,7 @@ FPGATrackSimLayerStudyAlg::FPGATrackSimLayerStudyAlg (const std::string& name, I
 }
 
 
-StatusCode FPGATrackSimLayerStudyAlg::initialize ATLAS_NOT_THREAD_SAFE()
+StatusCode FPGATrackSimLayerStudyAlg::initialize()
 {
     std::stringstream ss(m_description);
     std::string line;
@@ -87,9 +87,8 @@ StatusCode FPGATrackSimLayerStudyAlg::initialize ATLAS_NOT_THREAD_SAFE()
 //                          MAIN EXECUTE ROUTINE                             //
 ///////////////////////////////////////////////////////////////////////////////
 
-StatusCode FPGATrackSimLayerStudyAlg::execute ATLAS_NOT_THREAD_SAFE()
+StatusCode FPGATrackSimLayerStudyAlg::execute(const EventContext& ctx)
 {
-    const EventContext& ctx = getContext();
 
     // Get reference to hits from StoreGate.
     SG::ReadHandle<FPGATrackSimHitCollection> FPGAHits(m_FPGAHitKey, ctx);

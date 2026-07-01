@@ -348,11 +348,11 @@ JetChainParts = {
        'preselZ116XX3c20XX1c20bg85',
        'preselZ128XX4c85',
        'preselZ219XX6c20',
-       'preselZ197MAXMULT25cXX6c20',
+       'preselZ197MAXMULT10cXX6c20',
        'preselZ197XX6c20',
-       'preselZ182MAXMULT25cXX6c20',
+       'preselZ182MAXMULT10cXX6c20',
        'preselZ182XX6c20',
-       'preselZ142MAXMULT25cXX5c20',
+       'preselZ142MAXMULT10cXX5c20',
        'preselZ142XX5c20',
        'preselZ134XX5c20',
        'preselZ124XX5c20',
@@ -626,11 +626,11 @@ MuonChainParts = {
     'extra'          : ['noL1', 'lateMu', "muoncalib" ,'noL2Comb','vtx','mucombTag'],
     'IDinfo'         : [],
     'isoInfo'        : ['ivarloose', 'ivarmedium', 'ivarperf','iloosems'],
-    'l2AlgInfo'      : ['l2io','l2mt'],
+    'l2AlgInfo'      : ['l2io','l2mt', 'newFast'],
     'lrtInfo'        : ['d0loose','d0medium','d0tight'],
     'invMassInfo'    : ['invmJPsiOS','invmDimu'],
     'msonlyInfo'     : ['msonly'],
-    'addInfo'        : ['idperf','LRT','3layersEC','cosmic',"muonqual","nscan","nscan10","nscan20","nscan30","nscan40",'idtp','idReuse','fT'],
+    'addInfo'        : ['idperf','LRT','3layersEC','cosmic',"muonqual","nscan","nscan10","nscan20","nscan30","nscan40",'idtp','idReuse','fT','mlbkt'],
     'topo'           : AllowedTopos_mu,
     'flavour'        : [],
     'sigFolder'     : ['Muon'],
@@ -728,7 +728,10 @@ TauChainParts = {
                         'trackLRT', # RNNLLP triggers
                       ],
     'jet'           : ['lc', 'pf'], # Only use LCTopo jets for now
-    'preselection'  : [],
+    'calohitsPresel': [
+                        # CaloHits step preselection
+                        'idperfCHP', # No preselection, but still run all inferences
+                      ],
     'selection'     : [
                         'idperf', # No selection
                         'perf', # NTrk selection
@@ -736,11 +739,21 @@ TauChainParts = {
                         # GNTau ID WPs:
                         'verylooseGNTau', 'looseGNTau', 'mediumGNTau', 'tightGNTau',
 
+                        # GNTauExt ID WPs:
+                        'mediumnoperfGNTauDev1', 'mediumvar1noperfGNTauDev1', 'mediumvar2noperfGNTauDev1',
+
                         # RNN/DeepSet ID WPs (for tracktwoMVA/LLP/LRT reco with DeepSet/RNNLLP TauIDs):
                         'looseRNN', 'mediumRNN', 'tightRNN',
 
                         # Meson b-phys triggers (used with tracktwoMVA reco without cutting on the RNN/DeepSet score):
                         'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'dikaonmass', 'singlepion',
+                      ],
+    'hitz'          : [
+                        # Default HitZ option, with 10mm z0 sigma cut and 30mm RoI dz0 size
+                        'HitZ',
+
+                        # Test HitZ options: '<max_sigma>mmX<roi_dz>mmHitZ'
+                        # (require additional output containers and tracking RoI configs)
                       ],
     'multiplicity'  : '',
     'trigType'      : ['tau'],
@@ -759,8 +772,9 @@ TauChainParts_Default = {
     'threshold'     : '',
     'reconstruction': 'tracktwoMVA',
     'jet'           : 'lc',
-    'preselection'  : '',
+    'calohitsPresel': '',
     'selection'     : '',
+    'hitz'          : '',
     'multiplicity'  : '',
     'trigType'      : '',
     'tnpInfo'       : '',
@@ -1235,7 +1249,7 @@ CalibChainParts_Default = {
 #==========================================================
 # ---- MonitorDef chains -----
 #==========================================================
-AllowedMonitorChainIdentifiers = ['robrequest', 'timeburner',
+AllowedMonitorChainIdentifiers = ['robrequest', 'timeburner', 'timeburnerprocessing',
                                   'idmon','larsupercellmon',
                                   'l1calooverflow', 'l1topoPh1debug',
                                   'mistimemonl1bccorr','mistimemonl1bccorrnomu',
@@ -1409,6 +1423,7 @@ AllowedTopos_comb = [
     'anomdet','anomdetL','anomdetM','anomdetT',
     '115masswisoABC','115masswisoABC135',
     '29dphiAA', '29dphiAB', '30dphiAA', '30dphiAB', # g-2 tau triggers
+    '03dRCD30', '03dRCD', # bootstrapped di-tau triggers
     '90invmAB',# TEST
     '1invmAB5','50invmAB130','50invmBC130', # Jpsiee, Zee/Zeg
     '25dphiAA','25dphiBB','25dphiCC','invmAA80', # Low-mass diphoton

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -14,7 +14,6 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/pool.h"
-#include "StorageSvc/Transaction.h"
 
 #include <vector>
 #include <cstdint>
@@ -79,7 +78,7 @@ namespace pool    {
     virtual StatusCode open( DbDatabase&        dbH, 
                              const std::string& nam, 
                              const DbTypeInfo* info, 
-                             DbAccessMode mode) = 0;
+                             Io::IoFlag mode) = 0;
     /// Check if we can access the container for reading with the given type
     virtual StatusCode checkAccess(DbDatabase&        dbH,
                                  const std::string& nam) const = 0;

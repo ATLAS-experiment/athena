@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // PsiPlusPsiSingleVertex.cxx, (c) ATLAS Detector software
@@ -68,7 +68,7 @@ namespace DerivationFramework {
     m_constrPsi2(false),
     m_chi2cut(-1.0),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools")
   {
     declareProperty("Psi1Vertices",               m_vertexPsi1ContainerKey);
@@ -401,7 +401,7 @@ namespace DerivationFramework {
       if(m_vtx2Daug_num==4) inputTracks.push_back(psi2Vertex->trackParticle(3));
 
       // start the fit
-      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
       m_iVertexFitter->setMassInputParticles(massesInputTracks, *state);
       if (m_constrJpsi1) {
 	m_iVertexFitter->setMassForConstraint(m_mass_jpsi1, std::array<int,2>{1,2}, *state);

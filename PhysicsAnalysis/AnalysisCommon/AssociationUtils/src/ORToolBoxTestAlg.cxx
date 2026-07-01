@@ -49,7 +49,7 @@ StatusCode ORToolBoxTestAlg::initialize()
 //-----------------------------------------------------------------------------
 // Execute the algorithm
 //-----------------------------------------------------------------------------
-StatusCode ORToolBoxTestAlg::execute()
+StatusCode ORToolBoxTestAlg::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_INFO( "Executing " << name() );
 

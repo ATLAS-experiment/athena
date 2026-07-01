@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASHAREDMEMORYTOOL_H
@@ -13,8 +13,10 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthenaIPCTool.h"
+#include "AthenaKernel/InputFileIncidentGuard.h"
 
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 
@@ -71,6 +73,7 @@ private:
    bool m_isServer{false};
    bool m_isClient{false};
    ServiceHandle<IIncidentSvc> m_incidentSvc;
+   mutable std::optional<InputFileIncidentGuard> m_inputFileGuard ATLAS_THREAD_SAFE;
 };
 
 #endif

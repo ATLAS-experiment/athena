@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMeasurementUtilities/ClusterConversionUtilities.h"
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
-
-#include "xAODInDetMeasurement/Utilities.h"
 
 #include "HGTD_PrepRawData/HGTD_Cluster.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
@@ -86,23 +84,16 @@ namespace TrackingUtilities {
     const auto& ToTs = indetCluster.totList();
     const auto& charges = indetCluster.chargeList();
     const auto& width = indetCluster.width();
-    auto isSplit = indetCluster.isSplit();
-    auto splitProbability1 = indetCluster.splitProbability1();
-    auto splitProbability2 = indetCluster.splitProbability2();
 
     xaodCluster.setMeasurement<2>(idHash, localPosition, localCovariance);
     xaodCluster.setIdentifier( indetCluster.identify().get_compact() );
     xaodCluster.setRDOlist(RDOs);
     xaodCluster.globalPosition() = globalPosition;
     xaodCluster.setToTlist(ToTs);
-    xaodCluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(ToTs) );
     xaodCluster.setChargelist(charges);
-    xaodCluster.setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(charges) );
     xaodCluster.setLVL1A(indetCluster.LVL1A());
     xaodCluster.setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
     xaodCluster.setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));
-    xaodCluster.setIsSplit(isSplit);
-    xaodCluster.setSplitProbabilities(splitProbability1, splitProbability2);
 
     return StatusCode::SUCCESS;
   }
@@ -188,15 +179,18 @@ namespace TrackingUtilities {
     float qColMin = 0.f;
     float qColMax = 0.f;
     
-    const std::vector<Identifier>& rod_list_cluster = xaodCluster.rdoList();
-    const std::vector<float>& charge_list_cluster = xaodCluster.chargeList();
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+       rdo_list_cluster = xaodCluster.rdoList();
+    SG::ConstAccessor<SG::JaggedVecElt<float> >::element_type
+       charge_list_cluster = xaodCluster.chargeList();
+    std::vector<Identifier> rdo_list_new;
         
-    if (rod_list_cluster.size() == charge_list_cluster.size()) {
-      
-      for (std::size_t i(0); i<rod_list_cluster.size(); ++i) {
-        const Identifier& this_rdo = rod_list_cluster[i];
-        const float this_charge = charge_list_cluster[i];
-        
+    if (rdo_list_cluster.size() == charge_list_cluster.size()) {
+      rdo_list_new.reserve(rdo_list_cluster.size());
+      for (std::size_t i(0); i<rdo_list_cluster.size(); ++i) {
+        Identifier this_rdo(rdo_list_cluster[i]);
+        rdo_list_new.push_back(this_rdo);
+        const float this_charge=charge_list_cluster[i];
         const int row = pixelID.phi_index(this_rdo);
         if (row > rowmax) {
           rowmax = row;
@@ -241,22 +235,20 @@ namespace TrackingUtilities {
     double phiWidth = design->widthFromRowRange(rowmin, rowmax);
     InDet::SiWidth width( Amg::Vector2D(xaodCluster.channelsInPhi(), xaodCluster.channelsInEta()),
 			  Amg::Vector2D(phiWidth,etaWidth) );
-
+    auto tot_list = xaodCluster.totList();
     indetCluster = new InDet::PixelCluster(id,
 					   localPosition,
 					   globalPosition,
-					   std::vector<Identifier>(xaodCluster.rdoList()),
+					   std::move(rdo_list_new),
 					   xaodCluster.lvl1a(),
-					   std::vector<int>(xaodCluster.totList()),
-					   std::vector<float>(xaodCluster.chargeList()),
+					   std::vector<int>(tot_list.begin(), tot_list.end()),
+					   std::vector<float>(charge_list_cluster.begin(),charge_list_cluster.end()),
 					   width,
 					   &element,
 					   std::move(errorMatrix),
 					   omegax,
 					   omegay,
-					   xaodCluster.isSplit(),
-					   xaodCluster.splitProbability1(),
-					   xaodCluster.splitProbability2());
+					   false, 0, 0);
 
     return StatusCode::SUCCESS;
   }
@@ -282,15 +274,16 @@ namespace TrackingUtilities {
     const auto designShape = design->shape();
 
 
-    const auto& rdoList = xaodCluster.rdoList();
-    Identifier id = rdoList.front();
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+       rdo_list_cluster = xaodCluster.rdoList();
+    Identifier id(rdo_list_cluster.front());
 
     const auto& localPos = xaodCluster.localPosition<1>();
 
     double pos_x = localPos(0, 0);
     double pos_y = 0;
     if (not isBarrel) {
-      const Identifier firstStripId = rdoList.front();
+      const Identifier firstStripId(id);
       int firstStrip = stripID.strip(firstStripId);
       int stripRow = stripID.row(firstStripId);
       int clusterSizeInStrips = xaodCluster.channelsInPhi();
@@ -304,9 +297,9 @@ namespace TrackingUtilities {
     // Most of the following is taken from what is done in ClusterMakerTool
     // Need to make this computation instead of using the local pos
     // with local pos instead some differences w.r.t. reference are observed
-    const auto& firstStrip = stripID.strip(rdoList.front());
-    const auto& lastStrip = stripID.strip(rdoList.back());
-    const auto& row = stripID.row(rdoList.front());
+    const auto& firstStrip = stripID.strip(Identifier(rdo_list_cluster.front()));
+    const auto& lastStrip = stripID.strip(Identifier(rdo_list_cluster.back()));
+    const auto& row = stripID.row(Identifier(rdo_list_cluster.front()));
     const int firstStrip1D = design->strip1Dim (firstStrip, row );
     const int lastStrip1D = design->strip1Dim( lastStrip, row );
     const InDetDD::SiCellId cell1(firstStrip1D);
@@ -354,10 +347,14 @@ namespace TrackingUtilities {
       errorMatrix.fillSymmetric( 0, 1, sn * std::sqrt(cs2) * (v0 - v1) );
       errorMatrix.fillSymmetric( 1, 1, sn2 * v0 + cs2 * v1 );
     }
+    std::vector<Identifier> rdo_list_new;
+    for(Identifier::value_type rdo_id_value : rdo_list_cluster) {
+       rdo_list_new.emplace_back(rdo_id_value);
+    }
 
     indetCluster = new InDet::SCT_Cluster(id,
 					  locpos,
-					  std::vector<Identifier>(rdoList),
+					  std::move(rdo_list_new),
 					  width,
 					  &element,
 					  std::move(errorMatrix));
@@ -371,26 +368,32 @@ namespace TrackingUtilities {
 
     const auto& locPos = xaodCluster.localPosition<3>(); 
     Amg::Vector2D localPosition(locPos(0,0), locPos(1,0));
-    float time = locPos(2,0);
+    float time = xAOD::HGTDCluster::time(locPos);
 
     InDetDD::SiLocalPosition centroid(localPosition);
     const Identifier id = element.identifierOfPosition(centroid);
 
+    xAOD::ConstMatrixMap<3> local_covariance(xaodCluster.localCovariance<3>());
     auto errorMatrix = Amg::MatrixX(2,2);
     errorMatrix.setIdentity();
-    errorMatrix.fillSymmetric(0, 0, xaodCluster.localCovariance<3>()(0, 0));
-    errorMatrix.fillSymmetric(1, 1, xaodCluster.localCovariance<3>()(1, 1));    
-    float time_resolution = std::sqrt(xaodCluster.localCovariance<3>()(2, 2));
+    errorMatrix.fillSymmetric(0, 0, local_covariance(0, 0));
+    errorMatrix.fillSymmetric(1, 1, local_covariance(1, 1));
+    float time_resolution = std::sqrt(xAOD::HGTDCluster::timeCovariance(local_covariance));
 
     double etaWidth = 1.3;
     double phiWidth = 1.3;
     int channelsPhi = 1;
     int channelsEta = 1;
     InDet::SiWidth width( Amg::Vector2D(channelsPhi, channelsEta), Amg::Vector2D(phiWidth, etaWidth) );
+    std::vector<Identifier> rdo_list;
+    rdo_list.reserve(xaodCluster.rdoList().size());
+    for (const Identifier::value_type rdo_id_value : xaodCluster.rdoList()) {
+       rdo_list.emplace_back(rdo_id_value);
+    }
 
     indetCluster = new ::HGTD_Cluster(id,
 				      localPosition,
-				      std::vector<Identifier>(xaodCluster.rdoList()),
+				      std::move(rdo_list),
 				      width,
 				      &element,
 				      std::move(errorMatrix),

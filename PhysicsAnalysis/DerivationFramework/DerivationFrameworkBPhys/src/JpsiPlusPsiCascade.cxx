@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   Contact: Xin Chen <xin.chen@cern.ch>
 */
 #include "JpsiPlusPsiCascade.h"
@@ -286,7 +286,7 @@ namespace DerivationFramework {
     m_chi2cut(-1.0),
     m_maxCandidates(0),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter", this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools"),
     m_CascadeTools("DerivationFramework::CascadeTools")
   {
@@ -494,7 +494,7 @@ namespace DerivationFramework {
       if (p4_moth.M() < m_MassLower || p4_moth.M() > m_MassUpper) continue;
 
       // Apply the user's settings to the fitter
-      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState();
+      std::unique_ptr<Trk::IVKalState> state = m_iVertexFitter->makeState(ctx);
       // Robustness: http://cdsweb.cern.ch/record/685551
       int robustness = 0;
       m_iVertexFitter->setRobustness(robustness, *state);
@@ -564,7 +564,7 @@ namespace DerivationFramework {
       // do cascade fit again without any mass constraints
       if(pass) {
 	if(m_constrJpsi || m_constrPsi || m_constrJpsi2 || (m_constrDiTrk && m_vtx1Daug_num==4 && m_mass_diTrk>0)) {
-	  std::unique_ptr<Trk::IVKalState> state (m_iVertexFitter->makeState());
+	  std::unique_ptr<Trk::IVKalState> state (m_iVertexFitter->makeState(ctx));
 	  m_iVertexFitter->setRobustness(robustness, *state);
 	  std::vector<Trk::VertexID> vrtList_nc;
 	  // Psi vertex

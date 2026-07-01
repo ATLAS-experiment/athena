@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv.cxx
@@ -261,8 +261,9 @@ StatusCode DataHeaderCnv::updateRepRefs(IOpaqueAddress* pAddress, DataObject* pO
       */
       std::string dhid = pAddress->par()[1];
       if( pObject ) {
-         this->setToken( pAddress->par()[0] );
-         if( !compareClassGuid( DHForm_p6_Guid ) ) {
+         Token poolToken;
+	 poolToken.fromString( pAddress->par()[0] );
+	 if( !compareClassGuid(&poolToken,  DHForm_p6_Guid ) ) {
             ATH_MSG_ERROR( "updateRepRefs called without DataHeaderForm" );
             return StatusCode::FAILURE;
          }
@@ -292,6 +293,7 @@ StatusCode DataHeaderCnv::updateRepRefs(IOpaqueAddress* pAddress, DataObject* pO
 //______________________________________________________________________________
 StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pObj)
 {
+   std::lock_guard<AthenaPoolConverter::CallMutex> lock(this->m_conv_mut);
    DataHeader* obj = nullptr;
    if (!SG::fromStorable(pObj, obj) || obj == nullptr) {
       ATH_MSG_ERROR( "Failed to cast DataHeader to transient type" );
@@ -321,7 +323,7 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
       return(StatusCode::FAILURE);
    }
    // Queue the DH for write
-   std::unique_ptr<Token> dh_token (m_athenaPoolCnvSvc->registerForWrite(&dh_placement, persObj, m_classDesc));
+   std::unique_ptr<Token> dh_token(m_athenaPoolCnvSvc->registerForWrite(&dh_placement, persObj, m_classDesc));
    if (dh_token == nullptr) {
       ATH_MSG_FATAL("Failed to write DataHeader");
       return(StatusCode::FAILURE);
@@ -372,14 +374,15 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
 
    const coral::AttributeList* list = obj->getAttributeList();
    if (list != nullptr) {
+      static const std::string attributeListStr{"AttributeList"};
       obj->setEvtRefTokenStr(dh_token->toString());
-      Placement attr_placement = this->setPlacementWithType("AttributeList", "Token", *pAddr->par());
+      Placement attr_placement = this->setPlacementWithType(attributeListStr, "Token", *pAddr->par());
       const Token* ref_token = m_athenaPoolCnvSvc->registerForWrite(&attr_placement,
 	      obj->getEvtRefTokenStr().c_str(),
 	      RootType("Token"));
       delete ref_token; ref_token = nullptr;
       for (coral::AttributeList::const_iterator iter = list->begin(), last = list->end(); iter != last; ++iter) {
-         attr_placement = this->setPlacementWithType("AttributeList", (*iter).specification().name(), *pAddr->par());
+         attr_placement = this->setPlacementWithType(attributeListStr, (*iter).specification().name(), *pAddr->par());
          const Token* attr_token = m_athenaPoolCnvSvc->registerForWrite(&attr_placement,
 	         (*iter).addressOfData(),
                  RootType((*iter).specification().type()) );
@@ -396,19 +399,19 @@ StatusCode DataHeaderCnv::DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pO
 }
 
 //______________________________________________________________________________
-std::unique_ptr<DataHeader_p5> DataHeaderCnv::poolReadObject_p5()
+std::unique_ptr<DataHeader_p5> DataHeaderCnv::poolReadObject_p5(const Token* token)
 {
    void* voidPtr1 = nullptr;
-   m_athenaPoolCnvSvc->setObjPtr(voidPtr1, m_i_poolToken);
+   m_athenaPoolCnvSvc->setObjPtr(voidPtr1, token);
    if (voidPtr1 == nullptr) {
-      throw std::runtime_error("Could not get object for token = " + m_i_poolToken->toString());
+      throw std::runtime_error("Could not get object for token = " + token->toString());
    }
    std::unique_ptr<DataHeader_p5> header( reinterpret_cast<DataHeader_p5*>(voidPtr1) );
 
    void* voidPtr2 = nullptr;
    Token mapToken;
    mapToken.fromString( header->dhFormToken() );
-   mapToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
+   mapToken.setAuxString( token->auxString() );  // set PersSvc context
    if (mapToken.classID() != Guid::null()) {
       if( header->dhFormMdx() != m_dhFormMdx ) {
          m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &mapToken);
@@ -425,18 +428,18 @@ std::unique_ptr<DataHeader_p5> DataHeaderCnv::poolReadObject_p5()
 //______________________________________________________________________________
 // Read the persistent rep of DataHeader
 // Also read DataHeaderForm if not yet cached
-std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
+std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6(const Token* token)
 {
    void* voidPtr1 = nullptr;
    std::string error_message;
    try {
-      m_athenaPoolCnvSvc->setObjPtr(voidPtr1, m_i_poolToken);
+      m_athenaPoolCnvSvc->setObjPtr(voidPtr1, token);
    } catch(const std::exception& err) {
       voidPtr1 = nullptr;
       error_message = err.what();
    }
    if (voidPtr1 == nullptr) {
-      throw std::runtime_error("Could not get object for token = " + m_i_poolToken->toString() + ", " + error_message);
+      throw std::runtime_error("Could not get object for token = " + token->toString() + ", " + error_message);
    }
    std::unique_ptr<DataHeader_p6> header( reinterpret_cast<DataHeader_p6*>(voidPtr1) );
 
@@ -447,12 +450,12 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
       // we need to reconstruct the real Ref before checking in the Ref cache
       Placement dhf_placement;
       dhf_placement.fromString( dhFormToken );
-      formToken.setDb( m_i_poolToken->dbID() );
+      formToken.setDb( token->dbID() );
       formToken.setCont( dhf_placement.containerName() );
       formToken.setTechnology( dhf_placement.technology() );
       formToken.setAuxString( dhf_placement.auxString() );
       formToken.setClassID( DHForm_p6_Guid );
-      std::int64_t oid2 =  m_i_poolToken->oid().second;
+      std::int64_t oid2 =  token->oid().second;
       oid2 >>= 32; oid2 <<= 32;
       std::string swn = getSWNFromStr( dhFormToken );
       // add the row number from the SHForm Ref
@@ -478,11 +481,11 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
       void* voidPtr2 = nullptr;
       if( dhFormToken.empty() ) {
          // Some technologies can't set DHF token, use DH token with new CLID.
-         m_i_poolToken->setData(&formToken);
+         token->setData(&formToken);
          formToken.setClassID( DHForm_p6_Guid );
       } else {
          formToken.fromString( dhFormToken );
-         formToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
+         formToken.setAuxString( token->auxString() );  // set PersSvc context
       }
       if (formToken.classID() != Guid::null()) {
          try {
@@ -493,9 +496,9 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
          }
          if (voidPtr2 == nullptr) {
             // if there is no good lastGoodDHFRef then try reading DataHeaderForm Token from the first DataHeader
-            if( m_lastGoodDHFRef.find(m_i_poolToken->contID()) == m_lastGoodDHFRef.end() ) {
+            if( m_lastGoodDHFRef.find(token->contID()) == m_lastGoodDHFRef.end() ) {
                Token firstToken;
-               m_i_poolToken->setData(&firstToken);
+               token->setData(&firstToken);
                firstToken.setOid(Token::OID_t(firstToken.oid().first, 0));
                void* firstPtr1 = nullptr;
                try {
@@ -512,7 +515,7 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
 
                // Read DataHeaderForm and insert it to the cache
                formToken.fromString( dhFormToken );
-               formToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
+               formToken.setAuxString( token->auxString() );  // set PersSvc context
                try {
                   m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &formToken);
                } catch(const std::exception& err) {
@@ -520,20 +523,20 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
                   error_message = err.what();
                }
                if (voidPtr2 == nullptr) throw std::runtime_error("Could not get DataHeaderForm for token = " + formToken.toString() + ", " + error_message);
-               m_lastGoodDHFRef[m_i_poolToken->contID()] = dhFormToken;
+               m_lastGoodDHFRef[token->contID()] = dhFormToken;
                m_inputDHForms[dhFormToken].reset( reinterpret_cast<DataHeaderForm_p6*>(voidPtr2) );
                ATH_MSG_WARNING("DataHeaderForm read exception: " << error_message << " - reusing the last good DHForm");
             } else {
                // try to reuse the last good DHForm Ref (object is already cached)
                ATH_MSG_WARNING("DataHeaderForm read exception: " << error_message << " - reusing the last good DHForm");
             }
-            header->setDhFormToken(m_lastGoodDHFRef[m_i_poolToken->contID()]);
+            header->setDhFormToken(m_lastGoodDHFRef[token->contID()]);
             return header;
          }
          if (voidPtr2 == nullptr) {
             throw std::runtime_error("Could not get object for token = " + formToken.toString());
          }
-         m_lastGoodDHFRef[m_i_poolToken->contID()] = dhFormToken;
+         m_lastGoodDHFRef[token->contID()] = dhFormToken;
       }
       m_inputDHForms[dhFormToken].reset( reinterpret_cast<DataHeaderForm_p6*>(voidPtr2) );
    }
@@ -561,15 +564,15 @@ void DataHeaderCnv::removeBadElements(DataHeader* dh)
 }
 
 //______________________________________________________________________________
-DataHeader* DataHeaderCnv::createTransient() {
-   if (this->m_i_poolToken == nullptr) {
+DataHeader* DataHeaderCnv::createTransient(const Token* token) {
+   if (token == nullptr) {
       return(nullptr);
    }
-   if (this->m_i_poolToken->technology() == 0x00001000) { // Artificial ByteStream DataHeader Token
+   if (token->technology() == 0x00001000) { // Artificial ByteStream DataHeader Token
       DataHeader* dh = new DataHeader();
       std::string bestPfn, fileType;
-      m_athenaPoolCnvSvc->getPoolSvc()->lookupBestPfn(this->m_i_poolToken->dbID().toString(), bestPfn, fileType);
-      DataHeaderElement dhe(ClassID_traits<DataHeader>::ID(), bestPfn, Token(this->m_i_poolToken));
+      m_athenaPoolCnvSvc->getPoolSvc()->lookupBestPfn(token->dbID().toString(), bestPfn, fileType);
+      DataHeaderElement dhe(ClassID_traits<DataHeader>::ID(), bestPfn, Token(token));
       dh->insert(dhe);
       return(dh);
    }
@@ -578,23 +581,23 @@ DataHeader* DataHeaderCnv::createTransient() {
    static const pool::Guid p4_guid("9630EB7B-CCD7-47D9-A39B-CBBF4133CDF2");
    static const pool::Guid p3_guid("EC1318F0-8E28-45F8-9A2D-2597C1CC87A6");
    try {
-      if( compareClassGuid( p6_guid ) ) {
-         std::unique_ptr<DataHeader_p6> header( poolReadObject_p6() );
+      if( compareClassGuid(token,  p6_guid ) ) {
+         std::unique_ptr<DataHeader_p6> header( poolReadObject_p6(token) );
          auto dhForm = m_inputDHForms[ header->dhFormToken() ].get();
-         auto dh = m_tpInConverter.createTransient( header.get(), *dhForm, m_i_poolToken );
+         auto dh = m_tpInConverter.createTransient( header.get(), *dhForm, token );
          removeBadElements(dh);
          // To dump the DataHeader uncomment below
          // std::ostringstream ss;  dh->dump(ss); std::cout << ss.str() << std::endl;
          return dh;
-      } else if (this->compareClassGuid( p5_guid )) {
-         std::unique_ptr<DataHeader_p5> obj_p5( poolReadObject_p5() );
+      } else if (this->compareClassGuid(token,  p5_guid )) {
+         std::unique_ptr<DataHeader_p5> obj_p5( poolReadObject_p5(token) );
          return m_tpInConverter_p5.createTransient( *obj_p5, *m_dhInForm5 ).release();
-      } else if (this->compareClassGuid( p4_guid )) {
-         std::unique_ptr<DataHeader_p4> obj_p4(this->poolReadObject<DataHeader_p4>());
+      } else if (this->compareClassGuid(token,  p4_guid )) {
+         std::unique_ptr<DataHeader_p4> obj_p4(this->poolReadObject<DataHeader_p4>(token));
          DataHeaderCnv_p4 tPconverter_p4;
          return(tPconverter_p4.createTransient(obj_p4.get()));
-      } else if (this->compareClassGuid( p3_guid )) {
-         std::unique_ptr<DataHeader_p3> obj_p3(this->poolReadObject<DataHeader_p3>());
+      } else if (this->compareClassGuid(token,  p3_guid )) {
+         std::unique_ptr<DataHeader_p3> obj_p3(this->poolReadObject<DataHeader_p3>(token));
          DataHeaderCnv_p3 tPconverter_p3;
          return(tPconverter_p3.createTransient(obj_p3.get()));
       }

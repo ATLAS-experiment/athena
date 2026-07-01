@@ -104,10 +104,9 @@ namespace ActsTrk {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode ActsMuonTrackingGeometryTest::execute() {
+    StatusCode ActsMuonTrackingGeometryTest::execute(const EventContext& ctx) {
 
-        const EventContext& ctx = Gaudi::Hive::currentContext();
-
+        
         const ActsTrk::GeometryContext* gctx{nullptr};
         const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
         const MuonGM::MuonDetectorManager* detMgr{nullptr};

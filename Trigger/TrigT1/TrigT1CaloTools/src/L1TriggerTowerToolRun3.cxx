@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //////////////////////////////////////////////////////////////////////
 //  L1TriggerTowerToolRun3.cxx 
@@ -20,7 +20,6 @@
 #include "TrigT1CaloToolInterfaces/IL1DynamicPedestalProvider.h"
 
 #include "StoreGate/ReadHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include <cstdint>
 #include <tuple>
@@ -134,7 +133,8 @@ void L1TriggerTowerToolRun3::handle(const Incident& inc)
 
 /** All-in-one routine - give it the ADC counts and TT identifier, and
     it returns the results */
-void L1TriggerTowerToolRun3::process(const std::vector<int> &digits, double eta, double phi, int layer,
+void L1TriggerTowerToolRun3::process(const EventContext& ctx,
+             const std::vector<int> &digits, double eta, double phi, int layer,
              std::vector<int> &et, std::vector<int> &bcidResults,
              std::vector<int> &bcidDecisions, bool useJepLut /* = true */)
 {
@@ -142,13 +142,14 @@ void L1TriggerTowerToolRun3::process(const std::vector<int> &digits, double eta,
   L1CaloCoolChannelId id = channelID(eta, phi, layer);
 
   /// then process the tower
-  process(digits, id, et, bcidResults, bcidDecisions, useJepLut);
+  process(ctx, digits, id, et, bcidResults, bcidDecisions, useJepLut);
 }
 
 
 /** All-in-one routine - give it the ADC counts and TT identifier, and
     it returns the results */
-void L1TriggerTowerToolRun3::process(const std::vector<int> &digits, const L1CaloCoolChannelId& channelId,
+void L1TriggerTowerToolRun3::process(const EventContext& ctx,
+                                 const std::vector<int> &digits, const L1CaloCoolChannelId& channelId,
                                  std::vector<int> &et, std::vector<int> &bcidResults,
                                  std::vector<int> &bcidDecisions, bool useJepLut /* = true */)
 {
@@ -167,35 +168,35 @@ void L1TriggerTowerToolRun3::process(const std::vector<int> &digits, const L1Cal
      
   /// emulate FIR filter
   std::vector<int> filter;
-  fir(digits, channelId, filter);
+  fir(ctx, digits, channelId, filter);
   std::vector<int> lutInput;
-  dropBits(filter, channelId, lutInput);
+  dropBits(ctx, filter, channelId, lutInput);
 
   ATH_MSG_DEBUG( "::process: ---- BCID algorithms ----" );
 
   /// emulate the two BCID algorithms
-  bcid(filter, digits, channelId, bcidResults);
+  bcid(ctx, filter, digits, channelId, bcidResults);
 
   ATH_MSG_DEBUG( "::process: ---- BCID decisions ----" );
 
   /// evaluate BCID decisions
   std::vector<int> decisionRange;
-  bcidDecisionRange(lutInput, digits, channelId, decisionRange);
-  bcidDecision(bcidResults, decisionRange, bcidDecisions);
+  bcidDecisionRange(ctx, lutInput, digits, channelId, decisionRange);
+  bcidDecision(ctx, bcidResults, decisionRange, bcidDecisions);
 
   ATH_MSG_DEBUG( "::process: ---- LUT ET calculation ----" );
 
   /// LUT ET calculation
   std::vector<int> lutOutput;
-  if(useJepLut) jepLut(lutInput, channelId, lutOutput);
-  else cpLut(lutInput, channelId, lutOutput);
+  if(useJepLut) jepLut(ctx, lutInput, channelId, lutOutput);
+  else cpLut(ctx, lutInput, channelId, lutOutput);
   
 
   ATH_MSG_DEBUG( "::process: ---- use ET range ----" );
 
   /// Use ET range to return appropriate ET value
   /// do not test BCID here, since no guarantee enough ADC samples to evaluate it reliably
-  applyEtRange(lutOutput, decisionRange, channelId, et);
+  applyEtRange(ctx, lutOutput, decisionRange, channelId, et);
 
   ATH_MSG_DEBUG( "::process: ==== Leaving Process ====" );
 }
@@ -212,11 +213,11 @@ std::vector<DST> convertVectorType(const std::vector<SRC>& s) {
 }
 
 /** All-in-one routine - give it the TT identifier, and  it returns the results */
-void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::vector<int>& outCpLut, std::vector<int>& outJepLut, std::vector<int>& bcidResults, std::vector<int>& bcidDecisions) const {
+void L1TriggerTowerToolRun3::simulateChannel(const EventContext& ctx, const xAOD::TriggerTower& tt, std::vector<int>& outCpLut, std::vector<int>& outJepLut, std::vector<int>& bcidResults, std::vector<int>& bcidDecisions) const {
 
   //If we have 80 MHz readout, we need to extract the 40 MHz samples. The central 80 MHz sample is always a 40 MHz sample. We use the cool database (runParameters folder) to understand if we are in 80MHz readout
   
-  SG::ReadCondHandle<L1CaloRunParametersContainer> runParameters( m_runParametersContainer);
+  SG::ReadCondHandle<L1CaloRunParametersContainer> runParameters(m_runParametersContainer, ctx);
   unsigned int readoutConfigID   = runParameters->runParameters(1)->readoutConfigID(); 
   ATH_MSG_DEBUG("RunParameters:: readoutConfigID " <<  readoutConfigID);
   
@@ -264,7 +265,7 @@ void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::
   /// emulate FIR filter
   ATH_MSG_DEBUG( "::simulateChannel: ---- FIR filter ----" );
   std::vector<int> filter;
-  fir(digits, channelId, filter);
+  fir(ctx, digits, channelId, filter);
   
 
   /// apply pedestal correction
@@ -281,18 +282,18 @@ void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::
 
 
   std::vector<int> lutInput;
-  dropBits(filter, channelId, lutInput);
+  dropBits(ctx, filter, channelId, lutInput);
 
   ATH_MSG_DEBUG( "::simulateChannel: ---- BCID algorithms ---- ");
 
   /// emulate the two BCID algorithms
-  bcid(filter, digits, channelId, bcidResults);
+  bcid(ctx, filter, digits, channelId, bcidResults);
 
 
   /// evaluate BCID decisions
   std::vector<int> decisionRange;
-  bcidDecisionRange(lutInput, digits, channelId, decisionRange);
-  bcidDecision(bcidResults, decisionRange, bcidDecisions);
+  bcidDecisionRange(ctx, lutInput, digits, channelId, decisionRange);
+  bcidDecision(ctx, bcidResults, decisionRange, bcidDecisions);
   
   ATH_MSG_DEBUG( "::simulateChannel: bcidDecisionRange "  <<  decisionRange);
   ATH_MSG_DEBUG( "::simulateChannel: bcidDecisions "  <<  bcidDecisions);
@@ -303,8 +304,8 @@ void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::
 
   /// LUT ET calculation
   std::vector<int> cpLutOutput, jepLutOutput;
-  cpLut(lutInput, channelId, cpLutOutput);
-  jepLut(lutInput, channelId, jepLutOutput);
+  cpLut(ctx, lutInput, channelId, cpLutOutput);
+  jepLut(ctx, lutInput, channelId, jepLutOutput);
 
   ATH_MSG_DEBUG( "::simulateChannel: cpLut "  <<  cpLutOutput);
   ATH_MSG_DEBUG( "::simulateChannel: jepLut "  <<  jepLutOutput);
@@ -313,8 +314,8 @@ void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::
 
   /// Use ET range to return appropriate ET value
   /// do not test BCID here, since no guarantee enough ADC samples to evaluate it reliably
-  applyEtRange(cpLutOutput, decisionRange, channelId, outCpLut);
-  applyEtRange(jepLutOutput, decisionRange, channelId, outJepLut);
+  applyEtRange(ctx, cpLutOutput, decisionRange, channelId, outCpLut);
+  applyEtRange(ctx, jepLutOutput, decisionRange, channelId, outJepLut);
   
   ATH_MSG_DEBUG( "::simulateChannel: cpLut applyETRange "  <<  outCpLut);
   ATH_MSG_DEBUG( "::simulateChannel: jepLut applyETRange "  <<  outJepLut);
@@ -326,13 +327,13 @@ void L1TriggerTowerToolRun3::simulateChannel(const xAOD::TriggerTower& tt, std::
 /** Evaluate both peak-finder and saturated BCID algorithms and return
     vector of predicted BCID result words */
     
-void L1TriggerTowerToolRun3::bcid(const std::vector<int> &filter, const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
+void L1TriggerTowerToolRun3::bcid(const EventContext& ctx, const std::vector<int> &filter, const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {
   // Get decision flags for the 2 BCID algorithms
   std::vector<int> peak;
-  peakBcid(filter, channelId, peak);
+  peakBcid(ctx, filter, channelId, peak);
   std::vector<int> sat;
-  satBcid(digits, channelId, sat);
+  satBcid(ctx, digits, channelId, sat);
 
   output.clear();
   output.reserve(sat.size()); // avoid frequent reallocations
@@ -408,7 +409,7 @@ void L1TriggerTowerToolRun3::bcid(const std::vector<int> &filter, const std::vec
 
 namespace { // helper function
   template<class T>
-  const std::vector<short int>* getFirCoefficients(unsigned int coolId,  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2) {
+  const std::vector<short int>* getFirCoefficients(unsigned int coolId, SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>& pprConditionsRun2) {
     auto settings = pprConditionsRun2->pprConditions(coolId);
     if(!settings) return nullptr;
     return &(settings->firCoefficients());
@@ -418,10 +419,10 @@ namespace { // helper function
 /** This FIR simulation produces a vector of same length as digit vector,
     with peak positions corresponding. However, first 2 and last 2 FIR
     sums will be incomplete, and so are zeroed here */
-void L1TriggerTowerToolRun3::fir(const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
+void L1TriggerTowerToolRun3::fir(const EventContext& ctx, const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {   
   
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
 
   /// Get coefficients from COOL DB
   std::vector<int> firCoeffs;
@@ -481,16 +482,16 @@ void L1TriggerTowerToolRun3::fir(const std::vector<int> &digits, const std::vect
 
 namespace {
   template<typename T>
-  unsigned int getStrategy( SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2) {
+  unsigned int getStrategy( SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>& pprConditionsRun2) {
     return pprConditionsRun2->peakFinderCond();
   }
 }
 
 /** Peak finder BCID */
-void L1TriggerTowerToolRun3::peakBcid(const std::vector<int> &fir, const L1CaloCoolChannelId& /*channelId*/, std::vector<int> &output) const 
+void L1TriggerTowerToolRun3::peakBcid(const EventContext& ctx, const std::vector<int> &fir, const L1CaloCoolChannelId& /*channelId*/, std::vector<int> &output) const
 {
   unsigned int strategy = 0;
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
   
 
   if(!m_pprConditionsContainerRun2.empty()) {
@@ -529,7 +530,7 @@ void L1TriggerTowerToolRun3::peakBcid(const std::vector<int> &fir, unsigned int 
 
 namespace { // helper function
   template<class T>
-  std::tuple<bool, int, int, int> getSaturation(unsigned int coolId,  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2) {
+  std::tuple<bool, int, int, int> getSaturation(unsigned int coolId, SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>& pprConditionsRun2) {
     auto settings = pprConditionsRun2->pprConditions(coolId);
     if(!settings) return std::make_tuple(false, 0, 0, 0);
     return std::make_tuple(true, settings->satBcidLevel(), settings->satBcidThreshLow(), 
@@ -538,12 +539,12 @@ namespace { // helper function
 } // anonymous namespace
 
 /** Saturated pulse BCID */
-void L1TriggerTowerToolRun3::satBcid(const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const 
+void L1TriggerTowerToolRun3::satBcid(const EventContext& ctx, const std::vector<int> &digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {  
   int satLevel = 0;
   int satLow   = 0;
   int satHigh  = 0;
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
   
   if (!m_pprConditionsContainerRun2.empty()) {
     bool available = false;
@@ -605,23 +606,23 @@ void L1TriggerTowerToolRun3::satBcid(const std::vector<int> &digits, int satLow,
 /** Evaluate BCID decision range */
 namespace {
   template<typename T>
-  unsigned int getDecisionSource( SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2) {
+  unsigned int getDecisionSource( SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>& pprConditionsRun2) {
     return pprConditionsRun2->decisionSource();
   }
 }
 
-void L1TriggerTowerToolRun3::bcidDecisionRange(const std::vector<int>& lutInput, const std::vector<int>& digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const 
+void L1TriggerTowerToolRun3::bcidDecisionRange(const EventContext& ctx, const std::vector<int>& lutInput, const std::vector<int>& digits, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {
   int decisionSource = 0;
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
   
   if (!m_pprConditionsContainerRun2.empty()) {
     decisionSource = getDecisionSource<L1CaloPprConditionsContainerRun2>(pprConditionsRun2);
     
   } else ATH_MSG_WARNING( "::bcidDecisionRange: No Conditions Container retrieved" );
 
-  if (!(decisionSource&0x1)) etRange(digits, channelId, output);
-  else                     etRange(lutInput, channelId, output);
+  if (!(decisionSource&0x1)) etRange(ctx, digits, channelId, output);
+  else                       etRange(ctx, lutInput, channelId, output);
   
   ATH_MSG_DEBUG( "::bcidDecisionRange: decisionSource: " << decisionSource);
   ATH_MSG_DEBUG( "::bcidDecisionRange: output: " << output);
@@ -632,16 +633,16 @@ void L1TriggerTowerToolRun3::bcidDecisionRange(const std::vector<int>& lutInput,
 /** Evaluate BCID decision based on BCID word, ET range and channel ID */
 namespace { // helper function
   template<class T>
-  std::tuple<unsigned int, unsigned int, unsigned int> getBcidDecision( SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2) {
+  std::tuple<unsigned int, unsigned int, unsigned int> getBcidDecision( SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>& pprConditionsRun2) {
     return std::make_tuple(pprConditionsRun2->bcidDecision1(), pprConditionsRun2->bcidDecision2(), pprConditionsRun2->bcidDecision3());
   }
 } // anonymous namespace
-void L1TriggerTowerToolRun3::bcidDecision(const std::vector<int> &bcidResults, const std::vector<int> &range , std::vector<int> &output) const 
+void L1TriggerTowerToolRun3::bcidDecision(const EventContext& ctx, const std::vector<int> &bcidResults, const std::vector<int> &range , std::vector<int> &output) const
 {
   unsigned int decision1 = 0;
   unsigned int decision2 = 0;
   unsigned int decision3 = 0;
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
   
   if(!m_pprConditionsContainerRun2.empty()) {
     std::tie(decision1, decision2, decision3) = getBcidDecision<L1CaloPprConditionsContainerRun2>(pprConditionsRun2);
@@ -678,7 +679,7 @@ void L1TriggerTowerToolRun3::bcidDecision(const std::vector<int> &bcidResults, c
 }
 
 // TODO implement scale
-void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
+void L1TriggerTowerToolRun3::cpLut(const EventContext& ctx, const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {   
   int startBit = 0;
   int strategy = 0;
@@ -691,8 +692,7 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
   const std::vector<short int>* hwCoeffs;
 
 
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
 
   if(!m_pprConditionsContainerRun2.empty()) {
     auto settings = pprConditionsRun2->pprConditions(channelId.id());
@@ -721,7 +721,7 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
 		 << strategy << "/" << scale_menu << "/" << offset << "/" << slope << "/" << cut << "/" << pedMean << "/" << hwCoeffSum << "/" << startBit );
 
   unsigned int noiseCut = 0;
-  bool disabled = disabledChannel(channelId, noiseCut);
+  bool disabled = disabledChannel(ctx, channelId, noiseCut);
   if (noiseCut > 0) cut = noiseCut;
   if(strategy == 2) {
     // take the global scale into account - translate strategy to 1 for Run-1 compatible treatment
@@ -741,7 +741,7 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
   }
 }
 
-void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const 
+void L1TriggerTowerToolRun3::jepLut(const EventContext& ctx, const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {   
   int startBit = 0;
   int strategy   = 0;
@@ -758,14 +758,13 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
   short par3     = 0;
   short par4     = 0;
 
-  if(!isRun2()) {
+  if(!isRun2(ctx)) {
     // assert instead ?!
     ATH_MSG_WARNING("::jepLut: Run-1 data - behaviour undefined!");
   }
   
  
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx );
 
   if(! m_pprConditionsContainerRun2.empty()) {
     const auto settings = pprConditionsRun2->pprConditions(channelId.id());
@@ -802,7 +801,7 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
 		 << strategy << "/" << scale_menu << "/" << offset << "/" << slope << "/" << cut << "/" << pedMean << "/" << hwCoeffSum << "/" << startBit );
 
   unsigned int noiseCut = 0;
-  bool disabled = disabledChannel(channelId, noiseCut);
+  bool disabled = disabledChannel(ctx, channelId, noiseCut);
   if (noiseCut > 0) cut = noiseCut;
   
   if(strategy == 3) {
@@ -900,13 +899,13 @@ void L1TriggerTowerToolRun3::nonLinearLut(const std::vector<int> &fir, int slope
 /** Use ET range to return appropriate ET value
     Do not test BCID here, since no guarantee enough ADC samples to evaluate it reliably */
 
-void L1TriggerTowerToolRun3::applyEtRange(const std::vector<int>& lut, const std::vector<int>& range, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const 
+void L1TriggerTowerToolRun3::applyEtRange(const EventContext& ctx, const std::vector<int>& lut, const std::vector<int>& range, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {
-  bool disabled = disabledChannel(channelId);
+  bool disabled = disabledChannel(ctx, channelId);
   std::vector<int>::const_iterator itlut   = lut.begin();
   std::vector<int>::const_iterator itrange = range.begin();
   while ( itlut != lut.end() && itrange != range.end() ) {
-    if (!disabled && satOverride((*itrange))) output.push_back(s_saturationValue);
+    if (!disabled && satOverride(ctx, (*itrange))) output.push_back(s_saturationValue);
     else                                                 output.push_back(*itlut);
     ++itlut;
     ++itrange;
@@ -919,7 +918,7 @@ void L1TriggerTowerToolRun3::applyEtRange(const std::vector<int>& lut, const std
 /** Identify BCID decision range */
 namespace { // helper function
   template<class T>
-  std::tuple<bool, int, int> getBcidEnergyRange(unsigned int coolId, SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2) {
+  std::tuple<bool, int, int> getBcidEnergyRange(unsigned int coolId, SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>& pprConditionsRun2) {
     auto settings = pprConditionsRun2->pprConditions(coolId);
     if(!settings) return std::make_tuple(false, 0, 0);
     return std::make_tuple(true, settings->bcidEnergyRangeLow(), settings->bcidEnergyRangeHigh());
@@ -928,11 +927,11 @@ namespace { // helper function
 
 // anonymous namespace
 
-void L1TriggerTowerToolRun3::etRange(const std::vector<int> &et, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const 
+void L1TriggerTowerToolRun3::etRange(const EventContext& ctx, const std::vector<int> &et, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {
   int energyLow  = 0;
   int energyHigh = 0;
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
   
   if (!m_pprConditionsContainerRun2.empty()) {
     bool available = false;
@@ -966,17 +965,17 @@ void L1TriggerTowerToolRun3::etRange(const std::vector<int> &et, int energyLow, 
 /** Truncate FIR results for LUT input */
 namespace { // helper function
   template<class T>
-  std::tuple<bool, int> getFirStartBit(unsigned int coolId, SG::ReadCondHandle<L1CaloPprConditionsContainerRun2> pprConditionsRun2) {
+  std::tuple<bool, int> getFirStartBit(unsigned int coolId, SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>& pprConditionsRun2) {
     auto settings = pprConditionsRun2->pprConditions(coolId);
     if(!settings) return std::make_tuple(false, 0);
     return std::make_tuple(true, settings->firStartBit());
   }
 } // anonymous namespace
 
-void L1TriggerTowerToolRun3::dropBits(const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const 
+void L1TriggerTowerToolRun3::dropBits(const EventContext& ctx, const std::vector<int> &fir, const L1CaloCoolChannelId& channelId, std::vector<int> &output) const
 {
   unsigned int start = 0;
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
   
   if(!m_pprConditionsContainerRun2.empty()) {
     bool available = false;
@@ -1011,11 +1010,11 @@ void L1TriggerTowerToolRun3::dropBits(const std::vector<int> &fir, unsigned int 
 }
 
 /** Return FIR filter parameters for a channel */
-void L1TriggerTowerToolRun3::firParams(const L1CaloCoolChannelId& channelId, std::vector<int> &firCoeffs) const 
+void L1TriggerTowerToolRun3::firParams(const EventContext& ctx, const L1CaloCoolChannelId& channelId, std::vector<int> &firCoeffs) const
 {   
   /// Get coefficients from COOL DB
   firCoeffs.clear();
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
   if(!m_pprConditionsContainerRun2.empty()) {
     const std::vector<short int>* hwCoeffs = nullptr;
     hwCoeffs = getFirCoefficients<L1CaloPprConditionsContainerRun2>(channelId.id(), pprConditionsRun2 );
@@ -1036,7 +1035,7 @@ void L1TriggerTowerToolRun3::firParams(const L1CaloCoolChannelId& channelId, std
 }
 
 /** Return BCID parameters for a channel */
-void L1TriggerTowerToolRun3::bcidParams(const L1CaloCoolChannelId& channelId, int &energyLow, int &energyHigh, int &decisionSource, std::vector<unsigned int> &decisionConditions,
+void L1TriggerTowerToolRun3::bcidParams(const EventContext& ctx, const L1CaloCoolChannelId& channelId, int &energyLow, int &energyHigh, int &decisionSource, std::vector<unsigned int> &decisionConditions,
                                     unsigned int &peakFinderStrategy, int &satLow, int &satHigh, int &satLevel) const
 {
   energyLow          = 0;
@@ -1048,7 +1047,7 @@ void L1TriggerTowerToolRun3::bcidParams(const L1CaloCoolChannelId& channelId, in
   satLow             = 0;
   satHigh            = 0;
   
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
 
   if(!m_pprConditionsContainerRun2.empty()) {
     using std::get;
@@ -1084,7 +1083,7 @@ void L1TriggerTowerToolRun3::bcidParams(const L1CaloCoolChannelId& channelId, in
 
 }
 
-void L1TriggerTowerToolRun3::cpLutParams(const L1CaloCoolChannelId& channelId, int& startBit, int& slope, int& offset, int& cut, int& pedValue, float& pedMean, int& strategy, bool& disabled)
+void L1TriggerTowerToolRun3::cpLutParams(const EventContext& ctx, const L1CaloCoolChannelId& channelId, int& startBit, int& slope, int& offset, int& cut, int& pedValue, float& pedMean, int& strategy, bool& disabled)
 {
   startBit = 0;
   strategy = 0;
@@ -1098,12 +1097,12 @@ void L1TriggerTowerToolRun3::cpLutParams(const L1CaloCoolChannelId& channelId, i
   const std::vector<short int>* hwCoeffs;
 
   
-  if(!isRun2()) {
+  if(!isRun2(ctx)) {
     // assert instead ?!
     ATH_MSG_WARNING("::cpLutParams: Run-1 data - behaviour undefined!");
   }
 
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx);
   
   if(!m_pprConditionsContainerRun2.empty()) {
     const auto settings = pprConditionsRun2->pprConditions(channelId.id());
@@ -1132,11 +1131,11 @@ void L1TriggerTowerToolRun3::cpLutParams(const L1CaloCoolChannelId& channelId, i
   ATH_MSG_VERBOSE( "::cpLutParams: LUT startBit/strategy/offset/slope/cut/pedValue/pedMean: "
           << startBit << " " << strategy << " " << offset << " " << slope << " " << cut << " " << pedValue << " " << pedMean );
   unsigned int noiseCut = 0;
-  disabled = disabledChannel(channelId, noiseCut);
+  disabled = disabledChannel(ctx, channelId, noiseCut);
   if (noiseCut > 0) cut = noiseCut;
 }
 
-void L1TriggerTowerToolRun3::jepLutParams(const L1CaloCoolChannelId& channelId, int& startBit, int& slope, int& offset, int& cut, int& pedValue, float& pedMean, int& strategy, bool& disabled)
+void L1TriggerTowerToolRun3::jepLutParams(const EventContext& ctx, const L1CaloCoolChannelId& channelId, int& startBit, int& slope, int& offset, int& cut, int& pedValue, float& pedMean, int& strategy, bool& disabled)
 {
   startBit = 0;
   strategy = 0;
@@ -1149,12 +1148,12 @@ void L1TriggerTowerToolRun3::jepLutParams(const L1CaloCoolChannelId& channelId, 
   int hwCoeffSum = 0;
   const std::vector<short int>* hwCoeffs;
   
-  if(!isRun2()) {
+  if(!isRun2(ctx)) {
     // assert instead ?!
     ATH_MSG_WARNING("::jepLutParams: Run-1 data - behaviour undefined!");
   }
   
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx );
   if(!m_pprConditionsContainerRun2.empty()) {
     const auto settings = pprConditionsRun2->pprConditions(channelId.id());
     if(settings) {
@@ -1182,7 +1181,7 @@ void L1TriggerTowerToolRun3::jepLutParams(const L1CaloCoolChannelId& channelId, 
   ATH_MSG_VERBOSE( "::jepLutParams: LUT startBit/strategy/offset/slope/cut/pedValue/pedMean: "
           << startBit << " " << strategy << " " << offset << " " << slope << " " << cut << " " << pedValue << " " << pedMean );
   unsigned int noiseCut = 0;
-  disabled = disabledChannel(channelId, noiseCut);
+  disabled = disabledChannel(ctx, channelId, noiseCut);
   if (noiseCut > 0) cut = noiseCut;
 }
 
@@ -1275,15 +1274,15 @@ L1CaloCoolChannelId L1TriggerTowerToolRun3::channelID(const Identifier& id)
 /** Return saturation override flag for given channel & et range */
 namespace { // helper function
   template<class T>
-  std::tuple<bool, bool, bool> getSatOverride(SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2) {
+  std::tuple<bool, bool, bool> getSatOverride(SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>& pprConditionsRun2) {
     return std::make_tuple(pprConditionsRun2->satOverride1(), pprConditionsRun2->satOverride2(), pprConditionsRun2->satOverride3());
   }
 } // anonymous namespace
 
-bool L1TriggerTowerToolRun3::satOverride(int range) const 
+bool L1TriggerTowerToolRun3::satOverride(const EventContext& ctx, int range) const
 {
 
-  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2( m_pprConditionsContainerRun2);
+  SG::ReadCondHandle<L1CaloPprConditionsContainerRun2>  pprConditionsRun2(m_pprConditionsContainerRun2, ctx );
   
   bool override = false;
   if(!m_pprConditionsContainerRun2.empty()) {
@@ -1303,17 +1302,17 @@ bool L1TriggerTowerToolRun3::satOverride(int range) const
 
 /** Check for disabled channel */
 
-bool L1TriggerTowerToolRun3::disabledChannel(const L1CaloCoolChannelId& channelId) const
+bool L1TriggerTowerToolRun3::disabledChannel(const EventContext& ctx, const L1CaloCoolChannelId& channelId) const
 {
   unsigned int noiseCut = 0;
-  return disabledChannel(channelId, noiseCut);
+  return disabledChannel(ctx, channelId, noiseCut);
 }
 
 /** Check for disabled channel with noise cut */
-bool L1TriggerTowerToolRun3::disabledChannel(const L1CaloCoolChannelId& channelId, unsigned int& noiseCut) const 
+bool L1TriggerTowerToolRun3::disabledChannel(const EventContext& ctx, const L1CaloCoolChannelId& channelId, unsigned int& noiseCut) const
 {
 
-  SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel(m_pprDisabledChannelContainer);
+  SG::ReadCondHandle<L1CaloPprDisabledChannelContainerRun2>  pprDisabledChannel(m_pprDisabledChannelContainer, ctx);
   bool isDisabled = false;
   noiseCut = 0;
   if(!m_pprDisabledChannelContainer.empty()) {
@@ -1411,13 +1410,13 @@ double L1TriggerTowerToolRun3::FCalTTeta(const L1CaloCoolChannelId& channelId)
 
 
 
-std::pair<double, double> L1TriggerTowerToolRun3::refValues(const L1CaloCoolChannelId& channelId)
+std::pair<double, double> L1TriggerTowerToolRun3::refValues(const EventContext& ctx, const L1CaloCoolChannelId& channelId)
 {
   //method returning the fine time reference and calibration value
   //the fineTimeReference folder has to be loaded first using the method L1TriggerTowerToolRun3::loadFTRefs
   double reference = 0;
   double calib = 0;
-  SG::ReadCondHandle<L1CaloPpmFineTimeRefsContainer> ppmFineTimeRefs( m_ppmFineTimeRefsContainer);
+  SG::ReadCondHandle<L1CaloPpmFineTimeRefsContainer> ppmFineTimeRefs(m_ppmFineTimeRefsContainer, ctx);
   
   if (!m_ppmFineTimeRefsContainer.empty()) {
     const L1CaloPpmFineTimeRefs* ftref = ppmFineTimeRefs->ppmFineTimeRefs(channelId.id());
@@ -1460,9 +1459,8 @@ void L1TriggerTowerToolRun3::pedestalCorrection(std::vector<int>& firInOut, int 
 
 } 
 
-bool L1TriggerTowerToolRun3::isRun2() const
+bool L1TriggerTowerToolRun3::isRun2(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   if (ctx.eventID().run_number() >= 253377) return true;
 
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);

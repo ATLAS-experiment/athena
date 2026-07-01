@@ -15,10 +15,8 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysReadHandle.h>
 #include <xAODJet/JetContainer.h>
 #include <AsgTools/PropertyWrapper.h>
-#include <memory>
 
 namespace CP
 {
@@ -30,7 +28,7 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 

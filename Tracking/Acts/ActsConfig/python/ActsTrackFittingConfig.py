@@ -14,20 +14,26 @@ def ActsFitterCfg(flags,
     fitterKind = flags.Acts.trackFitterType  if fitterKind is None else fitterKind
 
     if flags.Acts.fitFromPRD:       
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
+        if flags.Detector.GeometryITk:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+            kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
+        elif flags.Detector.GeometryID:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
+            kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
 
 
     # Make sure this is set correctly!
     #  /eos/project-a/acts/public/MaterialMaps/ATLAS/material-maps-Pixel-SCT.json
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
     kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
 
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)))
 
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault('ATLASConverterTool', acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+    if "ATLASConverterTool" not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault('ATLASConverterTool', acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags)))
 
 
     if fitterKind is TrackFitterType.KalmanFitter:

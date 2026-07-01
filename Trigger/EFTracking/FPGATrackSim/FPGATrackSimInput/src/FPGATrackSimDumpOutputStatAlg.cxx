@@ -42,7 +42,7 @@ StatusCode FPGATrackSimDumpOutputStatAlg::BookHistograms(){
 }
 
 
-StatusCode FPGATrackSimDumpOutputStatAlg::execute() {
+StatusCode FPGATrackSimDumpOutputStatAlg::execute(const EventContext& /*ctx*/) {
   ATH_MSG_DEBUG ("Running on event ");   
   
   bool last=false;

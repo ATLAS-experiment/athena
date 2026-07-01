@@ -1137,12 +1137,28 @@
   <x title="Vertex Truth-Matched type" n="5" lo="-0.5" hi="4.5"/>
   <y title="Entries"/>
 </h>
+<h id="vx_x_diff" type="TH1F" title="PV selected-truth X difference">
+  <x title="Vertex Reco-Truth x difference" n="100" lo="-0.5" hi="0.5"/>
+  <y title="Entries"/>
+</h>
+<h id="vx_x_diff_pull" type="TH1F" title="PV selected-truth X difference pull">
+  <x title="Vertex Reco-Truth x pull" n="100" lo="-5.0" hi="5.0"/>
+  <y title="Entries"/>
+</h>
+<h id="vx_y_diff" type="TH1F" title="PV selected-truth Y difference">
+  <x title="Vertex Reco-Truth y difference" n="100" lo="-0.5" hi="0.5"/>
+  <y title="Entries"/>
+</h>
+<h id="vx_y_diff_pull" type="TH1F" title="PV selected-truth Y difference pull">
+  <x title="Vertex Reco-Truth y pull" n="100" lo="-5.0" hi="5.0"/>
+  <y title="Entries"/>
+</h>
 <h id="vx_z_diff" type="TH1F" title="PV selected-truth Z difference">
-  <x title="Vertex Truth-Matched type" n="100" lo="-0.5" hi="0.5"/>
+  <x title="Vertex Reco-Truth z difference" n="100" lo="-0.5" hi="0.5"/>
   <y title="Entries"/>
 </h>
 <h id="vx_z_diff_pull" type="TH1F" title="PV selected-truth Z difference pull">
-  <x title="Vertex Truth-Matched type" n="100" lo="-5.0" hi="5.0"/>
+  <x title="Vertex Reco-Truth z pull" n="100" lo="-5.0" hi="5.0"/>
   <y title="Entries"/>
 </h>
 <h id="vx_hs_classification" type="TH1F" title="Event hardscatter vertex classification">
@@ -2650,7 +2666,7 @@
 
 <h id="sigma_vs_eta_d0" type="TProfile" title="#sigma(d_{0}) vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma(d_{0}) [mm}" lo="0." hi="10."/>
+  <y title="#sigma(d_{0}) [mm]" lo="0." hi="10."/>
 </h>
 
 <h id="sigma_vs_eta_z0" type="TProfile" title="#sigma(z_{0}) vs #eta">
@@ -2879,6 +2895,10 @@
 </h>
 <h id="truth_prodZ" type="TH1F" title="truth_{prodZ} [mm]">
   <x title="truth_{prodZ} [mm]" n="100" lo="-300.0" hi="300.0"/>
+  <y title="Number of Entries"/>
+</h>
+<h id="truth_time" type="TH1F" title="truth_{time} [ns]">
+  <x title="truth_{time} [ns]" n="160" lo="-&TIMEPARA;" hi="&TIMEPARA;"/>
   <y title="Number of Entries"/>
 </h>
 
@@ -3187,52 +3207,6 @@
 <h id="vx_hs_mindz" type="TH1" title="#Delta z between the HS and the closest one">
    <x title="#Delta z" n="160" lo="-8.0" hi="8.0"/>
    <y title="Number of Entries"/>
-</h>
-
-<!-- Tracking Recommendation Plots -->
-<h id="TrkRec_eta" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#eta" n="&EtaBinsTrkRec;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_d0" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="d_{0} [mm]" n="&d0BinsTrkRec;" lo="-&d0TrkRec;" hi="&d0TrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_prodR" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="prodR [mm]" n="&prodRBinsTrkRec;" lo="0.0" hi="&prodRTrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_pT" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="p_{T} [GeV]" n="&pTBinsTrkRec;" lo="0.0" hi="&pTTrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_truthMu" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="Truth #mu" n="&muBinsTrkRec;" lo="0.5" hi="&muTrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_actualMu" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="Actual #mu" n="&muBinsTrkRec;" lo="0.5" hi="&muTrkRec;"/>
-  <y title="Efficiency" lo="0.0" hi="1.1"/>
-</h>
-
-<h id="TrkRec_eta_d0" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#eta"       n="&EtaBinsTrkRec;" lo="-&ETA;"      hi="&ETA;"/>
-  <y title="d_{0} [mm]" n="&d0BinsTrkRec;"  lo="-&d0TrkRec;" hi="&d0TrkRec;"/>
-</h>
-
-<h id="TrkRec_eta_prodR" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#eta"       n="&EtaBinsTrkRec;"   lo="-&ETA;" hi="&ETA;"/>
-  <y title="prodR [mm]" n="&prodRBinsTrkRec;" lo="0.0"    hi="&prodRTrkRec;"/>
-</h>
-
-<h id="TrkRec_eta_pT" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#eta"        n="&EtaBinsTrkRec;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="p_{T} [GeV]" n="&pTBinsTrkRec;"  lo="0.0"    hi="&pTTrkRec;"/>
 </h>
 
 <!-- Extra information about the sample -->

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictGroup.h"
@@ -78,7 +78,7 @@ IdDictGroup::resolve_references(IdDictMgr& idd,
 void
 IdDictGroup::generate_implementation(const IdDictMgr& idd,
                                      IdDictDictionary& dictionary,
-                                     const std::string& tag) {
+                                     std::string_view tag) {
   if (Debugger::debug()) {
     std::cout << "IdDictGroup::generate_implementation>" << std::endl;
   }

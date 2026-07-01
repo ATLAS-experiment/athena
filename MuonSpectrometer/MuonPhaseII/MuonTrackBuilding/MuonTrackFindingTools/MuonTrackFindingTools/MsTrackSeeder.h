@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRACKFINDINGTOOLS_MSTRACKSEEDER_H
 #define MUONTRACKFINDINGTOOLS_MSTRACKSEEDER_H
@@ -42,26 +42,21 @@ namespace MuonR4{
                 /** @brief Maximum separation of point on the cylinder to be picked up
                  *         onto a seed */
                 double seedHalfLength{25.*Gaudi::Units::cm};
+                /** @brief number of steps between two segments to integrate the magnetic field */
+                unsigned nFieldSteps{10};
                 /** @brief Detector manager to fetch the sector enevelope transforms */
                 const MuonGMR4::MuonDetectorManager* detMgr{};
                 /** @brief Pointer to the segement selection tool which compares
                  *         two segments for their compatibilitiy */
                 const ISegmentSelectionTool* selector{nullptr};
-                /** @brief Steps between two segments to integrate the magnetic field */
-                std::set<double> fieldExtpSteps{0.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1};
             };
             /** @brief Definition of the search tree class */
             using SearchTree_t = Acts::KDTree<3, const xAOD::MuonSegment*, double, std::array, 6>;
             /** @brief Enum toggling whether the segment is in the endcap or barrel */
             using Location = MsTrackSeed::Location;
-           
+            /** @brief Recycle the expanded sector */
+            using SectorProjector = ExpandedSector::SectorProjector;
             using VecOpt_t = std::optional<Amg::Vector3D>;
-            /** @brief Enumeration to select the sector projection */
-            enum class SectorProjector : std::int8_t {
-                leftOverlap = -1,   /// Project the segment onto the overlap with the previous sector
-                center = 0,         /// Project the segment onto the sector centre
-                rightOverlap = 1    /// Project the segment on the overlap with the next sector
-            };
             /** @brief Abrivation of the seed coordinates */
             enum class SeedCoords : std::uint8_t{
                 /** Encode the seed location (-1,1 -> endcaps, 0 -> barrel  */
@@ -77,63 +72,69 @@ namespace MuonR4{
              *  @param cfg: Configured cylinder dimensions, cuts & selection tool*/
             MsTrackSeeder(const std::string& msgName, Config&& cfg);   
             /** @brief Construct a complete search tree from a MuonSegment container
-             *  @param gctx: Geometry context to fetch the transforms of the associated 
-             *               sector envelope
              *  @param segments: Reference to the segment container to construct. */
-            SearchTree_t constructTree(const ActsTrk::GeometryContext& gctx,
-                                      const xAOD::MuonSegmentContainer& segments) const;
+            SearchTree_t constructTree(const xAOD::MuonSegmentContainer& segments) const;
             /** @brief Expresses the segment on the cylinder surface. 
-             *  @param gctx: Geometry context to fetch the transforms of the associated 
-             *               sector envelope
              *  @param segment: Reference to the segment of consideration
-             *  @param loc: Surface location: [barrel/endcap] */
-            Amg::Vector2D expressOnCylinder(const ActsTrk::GeometryContext& gctx, 
-                                            const xAOD::MuonSegment& segment,
+             *  @param loc: Surface location: [barrel/endcap]
+             *  @param expandedSector: The expanded sector number taking the
+             *         overlap regions between large and small sectors into 
+             *         account [0;32] */
+            Amg::Vector2D expressOnCylinder(const xAOD::MuonSegment& segment,
                                             const Location loc,
-                                            const SectorProjector proj) const;
-            
-            Amg::Vector3D projectOntoPhiPlane(const ActsTrk::GeometryContext& gctx, 
-                                              const xAOD::MuonSegment& segment,
-                                              const double projectPhi) const;
-            /** @brief Projects the segment's position onto the sector centre or onto the overlap point
-             *         with one of the neighbouring sector
-             * @param gctx: Geometry context to fetch the transforms of the associated sector envelope
-             * @param segment: Reference to the segment to project
-             * @param proj: Projector indicating onto which fix point of the sector the projection happens */
-            Amg::Vector3D projectOntoSector(const ActsTrk::GeometryContext& gctx, 
-                                            const xAOD::MuonSegment& segment,
-                                            const SectorProjector proj) const;
-             /** @brief Projects the segment's position onto the sector centre or onto the overlap point
-             *         with one of the neighbouring sector
-             * @param gctx: Geometry context to fetch the transforms of the associated sector envelope
-             * @param segment: Reference to the segment to project
-             * @param seed: Reference to the seed w.r.t. which the segment shall be projected */
-            Amg::Vector3D projectOntoSector(const ActsTrk::GeometryContext& gctx, 
-                                            const xAOD::MuonSegment& segment,
-                                            const MsTrackSeed& seed) const;
-            
-            /** @brief Estimate the q /p of the seed candidate from the contained segments. A circle from 
-             *         the inner, middle & outer segment points is constructed. To avoid side effects from
-             *         (non)-present phi measurements, the segments are expressed on the sector planes
-             *  @param gctx: Geometry context to fetch the transforms of the associated sector envelope
+                                            const ExpandedSector sector) const;
+            /** @brief Projects the segment position onto the plane with global phi = x
+             *         The local coordinate system is arranged such that the x-axis
+             *         is co-linear to the phi direction. The segment is moved along
+             *         the MDT's wire direction in that sector.
+             *  @param planeNorm: Normal of the phi plane onto which the segment is projected
+             *  @param Sector: Sector of the segment to be projected, needed to find the wire direction 
+             *  @param posToProject: Position to project */
+            static Amg::Vector3D segPosOntoPhiPlane(const Amg::Vector3D& planeNorm,
+                                                    const int Sector,
+                                                    const Amg::Vector3D& posToProject);
+            /** @brief Projects the segment direction onto the plane with global phi = x by
+             *         removing the component orthogonal to the plane.
+             *  @param planeNorm: Normal of the phi plane onto which the segment is projected
+             *  @param dirToProject: Direction to project */
+            static Amg::Vector3D segDirOntoPhiPlane(const Amg::Vector3D& planeNorm,
+                                                    const Amg::Vector3D& dirToProject);
+            using PosMomPair_t = std::pair<Amg::Vector3D, Amg::Vector3D>;
+            /** @brief Estimate the charge times momentum of a muon candidate when three points 
+             *         are available. The given position and direction of each point need to be projected onto the given 
+             *         phi plane, and the muon trajectory is approximated as 2D trajectory within this plane.
+             *  @param magField: Magnetic field
+             *  @param planeNorm: Normal of the bending plane containing the muon trajectory in this simplified approach
+             *  @param seg1: First segment
+             *  @param seg2: Second segment
+             *  @param seg3: Third segment
+             *  @return: Estimated Q*P value */
+            double estimateQtimesP(const AtlasFieldCacheCondObj& magField,
+                                   const Amg::Vector3D& planeNorm,
+                                   const PosMomPair_t& p1, 
+                                   const PosMomPair_t& p2,
+                                   const PosMomPair_t& p3) const;
+            /** @brief Estimate the charge times momentum of a muon candidate when two points are 
+             *         available. The position and direction of each point need to be projected onto the given phi plane,
+             *         and the muon trajectory is approximated as 2D trajectory within this plane.
+             *  @param magField: Magnetic field
+             *  @param planeNorm: Normal of the bending plane containing the muon trajectory in this simplified approach
+             *  @param seg1: First segment
+             *  @param seg2: Second segment
+             *  @return: Estimated Q*P value */
+            double estimateQtimesP(const AtlasFieldCacheCondObj& magField,
+                                   const Amg::Vector3D& planeNorm,
+                                   const PosMomPair_t& p1, 
+                                   const PosMomPair_t& p2) const;
+            /** @brief Estimate the charge times momentum of a muon track candidate from the 
+             *         contained segments. The position and direction of the segments are projected onto a 
+             *         given phi plane, defined by the segments with phi information or the sector plane.  
+             *         The muon trajectory is approximated as 2D trajectory within this plane to avoid side 
+             *         effects from (non)-present phi measurements.
              *  @param magFiel: Reference to the magnetic field holder
              *  @param seed: Reference to the seed of interest. */
-            double estimateQtimesP(const ActsTrk::GeometryContext& gctx,
-                                   const AtlasFieldCacheCondObj& magField,
+            double estimateQtimesP(const AtlasFieldCacheCondObj& magField,
                                    const MsTrackSeed& seed) const;
-            /** @brief Returns the projected phi for a given sector and projector.
-             *  @param sector: Sector of interest [1-16]
-             *  @param proj: Enum indicating whether the angle at the left/right overlap or
-             *               sector center shall be returned */
-            static double projectedPhi(const int sector,
-                                       const SectorProjector proj);
-            /** @brief Returns the Sector projector within the context of a MsTrackSeed 
-             *  @param seg: Reference to the segment for which the Sector projector shall be
-             *              returned
-             *  @param refSeed: Seed context in which the segment is embedded */
-            static SectorProjector projectorFromSeed(const xAOD::MuonSegment& seg,
-                                                     const MsTrackSeed& refSeed);
-
             /** @brief Returns whether the expression on the cylinder is within the surface bounds
              *  @param projPos: Projected position on the cylinder
              *  @param loc: Surface location: [barrel/endcap] */
@@ -143,36 +144,45 @@ namespace MuonR4{
              *  @param ctx: EventContext to access conditions / event data
              *  @param segments: Refrence to the overall event's segment container  */
             std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
-                                                                 const ActsTrk::GeometryContext& gctx,
                                                                  const xAOD::MuonSegmentContainer& segments) const;
-            /** @brief Returns the spectrometer envelope associated to the segment
-             *         (Coord system where the parameter are expressed)
-             *  @param segment: Reference to the segment of interest */
-            const MuonGMR4::SpectrometerSector* envelope(const xAOD::MuonSegment& segment) const;
         private:
-            /** @brief Calculates the radius of the bending circle from three points using the 
-             *         sagitta. If one point is not defined, the origin is inserted instead.
-             *         If two or more points are not set, a nullopt is returned */
-            std::optional<double> calculateRadius(VecOpt_t&& pI, VecOpt_t&& pM, VecOpt_t&& pO,
-                                                  const Amg::Vector3D& planeNorm) const;
-
+            /** @brief Compute the charge times momentum from the integral of lorentz force and the 
+             *         total change in direction
+             *  @param forceIntegral: Cumulative lorentz force
+             *  @param deltaDir: Change in direction
+             *  @return: Estimated Q*P value */
+            double getPtimesQ(const Amg::Vector3D& forceIntegral, 
+                              const Amg::Vector3D& deltaDir) const;
+            /** @brief Compute the integral of magnetic force (v x B ) dS along a trajectory, given the initial 
+             *         and final positions and directions of the trajectory. The trajectory is approximated as 
+             *         a straight line between the two positions, and the magnetic field is evaluated at several 
+             *         points along this line.
+             *  @param point1: Initial position and direction
+             *  @param point2: Final position and direction
+             *  @param planeNorm: Normal vector of the bending plane used for the momentum estimation, used to 
+             *         extract the orthogonal component to the field
+             *  @param fieldCache: Magnetic field cache
+             *  @return: Integral of magnetic force */
+            Amg::Vector3D forceIntegration(const PosMomPair_t& point1,
+                                           const PosMomPair_t& point2,
+                                           const Amg::Vector3D& planeNorm,
+                                           MagField::AtlasFieldCache& fieldCache) const;
             /** @brief Abbrivation of the KDTree raw data vector */
             using TreeRawVec_t = SearchTree_t::vector_t;
             /** @brief Append the to the raw data container. If the projection onto 
              *         the barrel cylinder / endcap discs exceeds the bounds, the segment is not added.
              *         Segments in sector 1/16 are mirrored into sector 0/17 to complete the search range
-             *  @param gctx: Geometry context to fetch the transforms of the associated sector envelope
              *  @param segment: Pointer to the segment to add
              *  @param loc: Switch whether the segment shall be projected onto barrel/endcap
              *  @param outContainer: Raw KDTree data vector where the segment is appended */
-            void appendSegment(const ActsTrk::GeometryContext& gctx,
-                               const xAOD::MuonSegment* segment,
+            void appendSegment(const xAOD::MuonSegment* segment,
                                const Location loc,
                                TreeRawVec_t& outContainer) const;
             /** @brief Removes exact duplciates or partial subsets of the MsTrackSeeds
              *  @param unresolved: Input MsTrackSeedContainer with duplicates */
             std::unique_ptr<MsTrackSeedContainer> resolveOverlaps(MsTrackSeedContainer&& unresolved) const;
-
+            
+            std::set<double> m_fieldExtpSteps{};
             Config m_cfg{};
     };
 }

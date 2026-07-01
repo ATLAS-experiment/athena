@@ -248,9 +248,9 @@ void PixelChargeInterpolationPlot::PlotDirection( const std::string& filename,
 		std::string title =  filename;
 		size_t found = title.find("PixelChargeInterpolationData");
 		if(found != std::string::npos) title = "PixelOfflineReco" + title.substr(title.find('-'));
-		if(m_oneconst) DrawLegendLatex(title.c_str(), 21 ,0.20, 0.83,
+		if(m_oneconst) DrawLegendLatex(title, 21 ,0.20, 0.83,
 					(*histograms)[i]->GetMarkerColor(),0.05);
-		else DrawTitleLatex(title.c_str(),0.15, 0.83,
+		else DrawTitleLatex(title,0.15, 0.83,
 					(*histograms)[i]->GetMarkerColor());
 	//}
 
@@ -262,11 +262,11 @@ void PixelChargeInterpolationPlot::PlotDirection( const std::string& filename,
 			std::string title =  ((*RefHistos)[j])[i]->GetTitle();
 			size_t found = title.find("PixelChargeInterpolationData");
 			if(found != std::string::npos) title = "PixelOfflineReco" + title.substr(title.find('-'));
-			if(m_oneconst) DrawLegendLatex(title.c_str(),
+			if(m_oneconst) DrawLegendLatex(title,
 				       	21+5*(j+1) ,
 					0.20, 0.83 - (j+1)*0.06,
 					((*RefHistos)[j])[i]->GetMarkerColor(),0.05);
-			else DrawTitleLatex(title.c_str(),
+			else DrawTitleLatex(title,
 					0.15, 0.83 - (j+1)*0.05,
 					((*RefHistos)[j])[i]->GetMarkerColor());
 
@@ -382,7 +382,7 @@ void PixelChargeInterpolationPlot::DrawLayerLegend(float xlegend,float ylegend){
 	names.push_back("Disk 3");
 
 	for(int i = 0; i < 2*m_nlayers; i++ )
-		DrawLegendLatex(names[i].c_str(), startmarker+i,
+		DrawLegendLatex(names[i], startmarker+i,
 				xlegend, ylegend - i*textsize,
 				color, textsize);
 

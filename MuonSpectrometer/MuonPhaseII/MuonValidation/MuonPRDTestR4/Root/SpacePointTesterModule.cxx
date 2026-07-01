@@ -63,7 +63,7 @@ namespace MuonValR4{
                                         idHelper.gasGap(id));
                     m_channel.push_back(idHelper.channel(id));
                     if (spacePoint.secondaryMeasurement()) {
-                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                        phiChannel = idHelper.channel(spacePoint.secondaryMeasurement()->identify());
                     }
                 }
                 break;
@@ -72,7 +72,7 @@ namespace MuonValR4{
                     m_layer.push_back(idHelper.gasGap(id));
                     m_channel.push_back(idHelper.channel(id));
                     if (spacePoint.secondaryMeasurement()) {
-                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                        phiChannel = idHelper.channel(spacePoint.secondaryMeasurement()->identify());
                     }
                 }
                 break;
@@ -81,7 +81,7 @@ namespace MuonValR4{
                     m_layer.push_back( (idHelper.multilayer(id) -1) * 4 + idHelper.gasGap(id));
                     m_channel.push_back(idHelper.channel(id));
                     if (spacePoint.secondaryMeasurement()) {
-                        phiChannel = idHelper.channel(xAOD::identify(spacePoint.secondaryMeasurement()));
+                        phiChannel = idHelper.channel(spacePoint.secondaryMeasurement()->identify());
                     }
                 }
                 break;

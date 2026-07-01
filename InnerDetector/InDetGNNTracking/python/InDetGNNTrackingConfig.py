@@ -86,6 +86,21 @@ def GNNTrackFinderTritonToolCfg(flags, name='GNNTrackFinderTritonTool', **kwargs
     return acc
 
 
+def ActsGnnModuleMapFinderToolCfg(flags, name='ActsGnnModuleMapFinderTool', **kwargs):
+    """Sets up an ActsGnnModuleMapFinderTool and returns it."""
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("moduleMapPath", flags.Tracking.GNN.ActsPipeline.moduleMapPath)
+    kwargs.setdefault("gnnPath", flags.Tracking.GNN.ActsPipeline.gnnPath)
+    kwargs.setdefault("edgeCut", flags.Tracking.GNN.ActsPipeline.edgeCut)
+    kwargs.setdefault("numTrtContexts", flags.Tracking.GNN.ActsPipeline.numTrtContexts)
+    kwargs.setdefault("minCandidateMeasurements", flags.Tracking.GNN.ActsPipeline.minCandidateMeasurements)
+    kwargs.setdefault("SpacepointFeatureTool", acc.popToolsAndMerge(SpacepointFeatureToolCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.InDet.ActsGnnModuleMapFinderTool(name, **kwargs))
+    return acc
+
+
 def SeedFitterToolCfg(flags, name="SeedFitterTool", **kwargs):
     """Sets up a SeedFitter tool and returns it."""
     acc = ComponentAccumulator()
@@ -155,11 +170,16 @@ def GNNEndToEndTrackMaker(flags, name="GNNEndToEndTrackMaker", **kwargs):
         InDetGNNTrackFinderTool = acc.popToolsAndMerge(GNNTrackFinderTritonToolCfg(flags))
         kwargs.setdefault("GNNTrackReaderTool", None)
         kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
+    elif flags.Tracking.GNN.ToolType == GNNTrackFinderToolType.ActsPipeline:
+        InDetGNNTrackFinderTool = acc.popToolsAndMerge(ActsGnnModuleMapFinderToolCfg(flags))
+        kwargs.setdefault("GNNTrackReaderTool", None)
+        kwargs.setdefault("GNNTrackFinderTool", InDetGNNTrackFinderTool)
     else:
         raise RuntimeError("GNNTrackFinder or GNNTrackReader must be enabled!")
 
     kwargs.setdefault("areInputClusters", flags.Tracking.GNN.useClusterTracks)
     kwargs.setdefault("doRecoTrackCuts", flags.Tracking.GNN.doRecoTrackCuts)
+    kwargs.setdefault("saveEdgeScore", flags.Tracking.GNN.ActsPipeline.saveEdgeScore)
 
     # add eta dependent cut service
     if "InDetEtaDependentCutSvc" not in kwargs:

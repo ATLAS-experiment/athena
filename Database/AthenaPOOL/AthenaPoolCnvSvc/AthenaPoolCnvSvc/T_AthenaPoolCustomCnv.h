@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLCUSTOMCNV_H
@@ -10,15 +10,16 @@
  *  @author Marcin.Nowak@cern.ch
  **/
 
-#include "GaudiKernel/ThreadLocalContext.h"
-#include "GaudiKernel/EventContext.h"
+#include "AthenaKernel/SlotSpecificObj.h"
+
 #include "T_AthenaPoolCustCnv.h"
 
+#include <unordered_map>
 #include <vector>
 
 // class TopLevelTPCnvBase;
 // need the TopLevelTPCnvBase typedef still
-#include "AthenaPoolTopLevelTPCnvBase.h"
+#include "TPTools/TopLevelTPCnvBase.h"
 
 // forward declarations:
 template <class T, class P> class T_AthenaPoolExtendingCnv;
@@ -66,7 +67,7 @@ protected:
       if the version 1 of poolReadObject is used, the persistent
       object HAS TO BE DELETED manually.
    */
-  virtual TRANS* createTransientWithKey(const std::string& key) = 0;
+  virtual TRANS* createTransientWithKey(const Token* token, const std::string& key) = 0;
 
    /** Read object of type P.  This is an exception-throwing version of poolToObject()
       plus reading of all extending objects.
@@ -74,7 +75,7 @@ protected:
       @return object read from POOL (by pointer)
    */
    template <class P>
-   P* poolReadObject();
+   P* poolReadObject(const Token* token);
 
    /** Read object of type P (plus all extending objects)
       using the indicated top-level TP converter.
@@ -83,7 +84,7 @@ protected:
       @param tlp_converter [IN] top-level TP converter to be used when reading
    */
    template <class P>
-   void poolReadObject(TopLevelTPCnvBase& tlp_converter);
+   void poolReadObject(TopLevelTPCnvBase& tlp_converter, const Token* token);
 
    /// Remember the POOL object to be written out (will be deleted after commit)
    /// @param obj [IN] persistent object
@@ -94,11 +95,6 @@ protected:
    virtual StatusCode transToPers(TRANS*, PERS*&) override { return(StatusCode::FAILURE); }
    /// obsolete
    virtual StatusCode persToTrans(TRANS*&, PERS*) override { return(StatusCode::FAILURE); }
-
-   /// Convert an object into Persistent.
-   /// @param pObj [IN] pointer to the transient object.
-   /// @param key [IN] StoreGate key (string) - placement hint to generate POOL container name
-   virtual StatusCode DataObjectToPers(DataObject* pObj, IOpaqueAddress*& pAddr) override;
 
    /// Write an object into POOL.
    /// @param pObj [IN] pointer to the transient object.
@@ -117,7 +113,8 @@ protected:
 
    /// Local cache for persistent objects created by this converter, grouped by processing slot
    /// These objects are deleted after a commit.
-   std::map<std::string, std::vector< std::unique_ptr<PERS> > > m_persObjLists;
+   using PersObjCache_t = std::unordered_map<std::string, std::vector<std::unique_ptr<PERS>>>;
+   SG::SlotSpecificObj<PersObjCache_t, SG::InvalidSlot::Enabled> m_persObjLists;
 
    /// protection mutex for m_persObjLists
    std::mutex  m_pListMutex;
@@ -136,8 +133,8 @@ protected:
   virtual PERS* createPersistent(TRANS* obj) = 0;
   virtual PERS* createPersistentWithKey(TRANS* obj, const std::string& /*key*/) override;
 
-  virtual TRANS* createTransient() = 0;
-  virtual TRANS* createTransientWithKey(const std::string& /*key*/) override;
+  virtual TRANS* createTransient(const Token* token) = 0;
+  virtual TRANS* createTransientWithKey(const Token* token, const std::string& /*key*/) override;
 };
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.icc"

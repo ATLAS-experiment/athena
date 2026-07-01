@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 import AthenaCommon.Constants
 from AthenaConfiguration.Enums import FlagEnum
 
@@ -19,6 +19,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('doMultiTruth', True)
     cf.addFlag('SetTruthParametersForTracks', -1)
     cf.addFlag('FPGATrackSimTestFiles', '')
+    cf.addFlag('SortTracks', False)
     cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
     cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
@@ -52,7 +53,6 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('slicesFile', 'eventSelectionSlices/v1.0/slices.txt')
     cf.addFlag('spacePoints', True)
     cf.addFlag('outputMonitorFile',"monitoring.root")
-    cf.addFlag('connectToToITkTracking',True)
     cf.addFlag('loglevel', AthenaCommon.Constants.INFO)
     cf.addFlag('msgLimit',-1)
     cf.addFlag('singleTrackSample',  True)
@@ -83,6 +83,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('varyingHitThresholds', [])
     cf.addFlag('MinSpacePointsPerSeed',3)
     cf.addFlag('MaxSpacePointsPerSeed',3)
+    cf.addFlag('runBaselineActs', False) # needed in case we want direct comparison with ACTS tracking (i.e. summary tables at the end of the workflow + InDetTrackParticles in the AOD output for IDTPM ratio plots)
 
     cf.addFlag('runF150hw', False)
 
@@ -148,6 +149,12 @@ def createFPGATrackSimConfigFlags():
     # ACTS Tracking
     cf.addFlag('runCKF',False)
     cf.addFlag('useFPGATruthTrackMatching',False)
+
+
+    # use cut on eta and phi specific chi2 for analytical fitter
+    cf.addFlag('applyEtaPhiChi2Cuts', False)
+    cf.addFlag('applyEtaPhiChi2Cuts4HitOnly', False)
+
     return cf
 
 
@@ -192,6 +199,7 @@ def createBasicFPGATrackSimConfigFlags():
     #pass lowest chi2 track
     cf.addFlag('passLowestChi2TrackOnly', False)
 
+    
     # hough
     cf.addFlag('xVar', 'phi')
     cf.addFlag('yVar', 'q/pt')
@@ -376,6 +384,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('layerMapFile','')
     cf.addFlag('useLayerRadiiFile',False)
     cf.addFlag('noCuts',False)
+    cf.addFlag('multiStepBinning',False)
 
     cf.addFlag('filterInBin', False)
     cf.addFlag('phiChi2Weight', 1.0)
@@ -392,6 +401,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('parMax', [ 1000,  1000, 1.0, 1.0, 10])
     cf.addFlag('parSet', "PhiSlicedKeyLyrPars")
     cf.addFlag('keepHitsStrategy', -1)
+    cf.addFlag('enableMonitoring', False)
     return cf
 
 def createSecondStageFPGATrackSimConfigFlags():
@@ -407,9 +417,11 @@ class graphTool(FlagEnum):
 
 class moduleMapType(FlagEnum):
     doublet = 'doublet'
+    triplet = 'triplet'
 
 class moduleMapFunc(FlagEnum):
     minmax = 'minmax'
+    meanrms = 'meanrms'
 
 class roadMakerTool(FlagEnum):
     ConnectedComponents = 'ConnectedComponents'
@@ -423,17 +435,21 @@ def createGNNFPGATrackSimConfigFlags():
     cf.addFlag("moduleMapType", moduleMapType.doublet, type=moduleMapType)
     cf.addFlag("moduleMapFunc", moduleMapFunc.minmax, type=moduleMapFunc)
     cf.addFlag("moduleMapTol",0.0000000001) # 1e-10
+    cf.addFlag("moduleMapRMSThresholdFactor",5.0)
     cf.addFlag("moduleMapPath",'')
     cf.addFlag("metricLearningR",0.1)
     cf.addFlag("metricLearningMaxN", 512)
     cf.addFlag("MLModelPath",'')
     cf.addFlag("GNNModelPath",'')
-    cf.addFlag("roadMakerTool", roadMakerTool.ConnectedComponents, type=roadMakerTool)
-    cf.addFlag("edgeScoreCut",0.8)
+    cf.addFlag("roadMakerTool", roadMakerTool.JunctionAwareCC, type=roadMakerTool)
+    cf.addFlag("edgeScoreCut",0.5)
     cf.addFlag("doGNNRootOutput",False)
     cf.addFlag("doGNNTracking",False)
     cf.addFlag("doGNNPixelSeeding",False)
     cf.addFlag("nInputsGNN",13)
+    cf.addFlag("doAllHits",False)
+    cf.addFlag("doPixelHits",True)
+    cf.addFlag("doStripHits",True)
     
     return cf
 

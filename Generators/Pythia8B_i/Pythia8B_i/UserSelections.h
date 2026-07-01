@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ======================================================================
@@ -13,6 +13,7 @@
 // ======================================================================
 #include "CLHEP/Vector/LorentzVector.h"
 #include "Pythia8B_i/BsJpsiPhiAngles.h"
+#include <cmath>
 
 CLHEP::HepLorentzVector convertVector(const Pythia8::Vec4 v) {
         CLHEP::HepLorentzVector vect;
@@ -23,7 +24,7 @@ CLHEP::HepLorentzVector convertVector(const Pythia8::Vec4 v) {
 	return vect;
 }
 
-double BsJpsiPhi_PDF(double *params, double *x, bool useHelicity) {
+double BsJpsiPhi_PDF(const double *params, double *x, bool useHelicity) {
 
 	//  if ( !checkInput(x) ) return 0.;
 
@@ -32,12 +33,12 @@ double BsJpsiPhi_PDF(double *params, double *x, bool useHelicity) {
 	double A0 = std::sqrt(params[0] * (1 - params[2]));
 	double Al = std::sqrt(params[1] * (1 - params[2]));
 	double As = std::sqrt(params[2]);
-	double &GammaS = params[3];
-	double &DeltaGamma = params[4];
-	double &DeltaM = params[5];
-	double &phiS = params[6];
-	double &delta_p = params[7];
-	double &delta_l = params[8];
+	const double &GammaS = params[3];
+	const double &DeltaGamma = params[4];
+	const double &DeltaM = params[5];
+	const double &phiS = params[6];
+	const double &delta_p = params[7];
+	const double &delta_l = params[8];
 	double delta_s = params[7] - params[9];
 
 	double &time = x[0];
@@ -233,8 +234,8 @@ double BsJpsiPhi_PDF(double *params, double *x, bool useHelicity) {
 //			mup_jpsi.vect().unit().dot(phi_direction));
 //}
 
-bool Pythia8B_i::userSelection(Pythia8::Event &event, std::string userString,
-		std::vector<double> userVars) {
+bool Pythia8B_i::userSelection(Pythia8::Event &event, const std::string & userString,
+		const std::vector<double> & userVars) {
 
         using CLHEP::HepLorentzVector;
 	bool accept(false);
@@ -296,7 +297,7 @@ bool Pythia8B_i::userSelection(Pythia8::Event &event, std::string userString,
 			// Get decay chain of the B; see if there is a J/psi
 			if (isB) {
 				descendThroughDecay(event, decayMembers, i);
-				std::vector<int> pdgCodes = getCodes(decayMembers);
+				const std::vector<int> & pdgCodes = getCodes(decayMembers);
 				for (unsigned int k = 0; k < pdgCodes.size(); ++k) {
 					if (pdgCodes[k] == 443)
 						isBtoJpsi = true;

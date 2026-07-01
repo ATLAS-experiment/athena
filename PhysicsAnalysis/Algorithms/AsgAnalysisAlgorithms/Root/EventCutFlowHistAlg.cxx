@@ -11,7 +11,6 @@
 
 #include <AsgAnalysisAlgorithms/EventCutFlowHistAlg.h>
 
-#include <RootCoreUtils/StringUtil.h>
 #include <TH1.h>
 
 //
@@ -49,12 +48,12 @@ namespace CP
   }
 
   StatusCode EventCutFlowHistAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::EventInfo *evtInfo = nullptr;
-      ANA_CHECK (m_eventInfoHandle.retrieve (evtInfo, sys));
+      ANA_CHECK (m_eventInfoHandle.retrieve (evtInfo, sys, ctx));
 
       auto histIter = m_hist.find (sys);
       if (histIter == m_hist.end())

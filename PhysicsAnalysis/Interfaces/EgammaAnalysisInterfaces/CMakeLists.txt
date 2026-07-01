@@ -9,7 +9,7 @@ atlas_add_library( EgammaAnalysisInterfacesLib
    INTERFACE
    PUBLIC_HEADERS EgammaAnalysisInterfaces
    LINK_LIBRARIES AsgTools AsgServicesLib xAODCaloEvent 
-   xAODEgamma xAODTracking AsgMessagingLib PATInterfaces PATCoreLib )
+   xAODEgamma xAODTracking AsgMessagingLib PATInterfaces PATCoreLib AsgAnalysisInterfaces)
 
 atlas_add_dictionary( EgammaAnalysisInterfacesDict
    EgammaAnalysisInterfaces/EgammaAnalysisInterfacesDict.h

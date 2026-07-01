@@ -55,17 +55,17 @@ StatusCode MuonTrackMonitorAlgorithm::FillTrackInformation(const std::string& sI
     auto D0sig = Monitored::Scalar<float>((sIdentifier+sTrack+"D0sig").c_str(), -9);
     auto chi2ndof = Monitored::Scalar<float>((sIdentifier+sTrack+"chi2ndof").c_str(), -9);
 
-    Author = muon->author();
-    Quality = muon->quality();
-    Type = muon->type();
+    Author  = static_cast<int>(muon->author());
+    Quality = static_cast<int>(muon->quality());
+    Type    = static_cast<int>(muon->type());
 
     // fill track particle hists
     const xAOD::TrackParticle *tp = nullptr;
     if (sTrack == "ME") {
-        tp = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+        tp = muon->trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
     }
     if (sTrack == "MS") {
-        tp = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+        tp = muon->trackParticle(xAOD::Muon::TrackParticleType::MuonSpectrometerTrackParticle);
     }    
     if (tp) {
         Eta = tp->eta();
@@ -150,9 +150,28 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
         const xAOD::TrackParticle *idtp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
         const xAOD::TrackParticle *mstp = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
 
+        LumiBlockTrackCategory = 1;
+        fill(tool, LumiBlock, LumiBlockTrackCategory);
+        {
+            using enum xAOD::Muon::Quality;
+            if (muonQuality <= Loose) {
+                LumiBlockTrackCategory = 2;
+                fill(tool, LumiBlock, LumiBlockTrackCategory);
+            }
+            if (muonQuality <= Medium) {
+                LumiBlockTrackCategory = 3;
+                fill(tool, LumiBlock, LumiBlockTrackCategory);
+            }
+            if (muonQuality == Tight) {
+                LumiBlockTrackCategory = 4;
+                fill(tool, LumiBlock, LumiBlockTrackCategory);
+            }
+        }
+
+        LumiBlockTrackCategory = getTrackCategoryID(sIdentifier);
         fill(tool, LumiBlock, LumiBlockTrackCategory);
 
-        if (muonType==xAOD::Muon::Combined) {
+        if (muonType==xAOD::Muon::MuonType::Combined) {
             const xAOD::TrackParticle *cbtp = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);
 
             if (cbtp) {
@@ -202,12 +221,12 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
 
                 /// Save Eta/Phi Information for medium and tight muons, 
                 /// to be used for lates efficiency studies
-                if (muonQuality==xAOD::Muon::Medium) {
+                if (muonQuality==xAOD::Muon::Quality::Medium) {
                     MuonEtaMedium = cbtp->eta();
                     MuonPhiMedium = cbtp->phi();
                     fill(tool, MuonEtaMedium, MuonPhiMedium);
                 }
-                if (muonQuality==xAOD::Muon::Tight) {
+                if (muonQuality==xAOD::Muon::Quality::Tight) {
                     MuonEtaTight = cbtp->eta();
                     MuonPhiTight = cbtp->phi();
                     fill(tool, MuonEtaTight, MuonPhiTight);
@@ -224,7 +243,7 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
             }
         }
         else {
-            const xAOD::TrackParticle *ptp = muon->primaryTrackParticle();
+            const xAOD::TrackParticle *ptp = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
             if (ptp) {
                 MuonZ0  = ptp->z0();
                 MuonD0  = ptp->d0();
@@ -338,9 +357,9 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::st
         fill(tool, MuonLumiBlock);
 
         /// General Muon Control Plots
-        MuonAuthor = muonAuthor;
-        MuonQuality = muonQuality;
-        MuonType = muonType;
+        MuonAuthor  = static_cast<int>(muonAuthor);
+        MuonQuality = static_cast<int>(muonQuality);
+        MuonType    = static_cast<int>(muonType);
         MuonEta = muon->eta();
         MuonPhi = muon->phi();
         MuonPt = muon->pt() * MeVtoGeV;
@@ -439,7 +458,7 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseCombinedTracks(const xAOD::MuonCon
         }
 
         xAOD::Muon::MuonType muonType = muon->muonType();
-        if (muonType==xAOD::Muon::Combined) {
+        if (muonType==xAOD::Muon::MuonType::Combined) {
             vecAllCombinedMuons.push_back(muon);
             if (isTriggered) {
                 vecCombinedMuons.push_back(muon);
@@ -518,8 +537,8 @@ StatusCode  MuonTrackMonitorAlgorithm::plotResonanceCandidates(const std::string
     auto MuonLumiBlock = Monitored::Scalar<float>((resonanceName+"MuonLumiBlock").c_str(), 0); 
     auto muMinusEta = Monitored::Scalar<float>((resonanceName+"muMinusEta").c_str(), -9);
     auto muPlusEta = Monitored::Scalar<float>((resonanceName+"muPlusEta").c_str(), -9);
-    auto Eta2D = Monitored::Scalar<const char*>((resonanceName+"Eta2D").c_str(), "outside");
-    auto Eta2 = Monitored::Scalar<int>((resonanceName+"Eta2").c_str(), -8);
+    auto Eta2 = Monitored::Scalar<const char*>((resonanceName+"Eta2").c_str(), "out");
+    auto Eta2D = Monitored::Scalar<int>((resonanceName+"Eta2D").c_str(), -9);
 
     /// Z Boson related plots   
     std::map<int, int>  mapTagged_Resonance;
@@ -552,91 +571,108 @@ StatusCode  MuonTrackMonitorAlgorithm::plotResonanceCandidates(const std::string
                 muMinusEta = tVec2.Eta();
                 muPlusEta = tVec1.Eta();
             }
-            const char* EtaReg = "";
-            int EtaRegio = -9;
+            int EtaReg = -9;
+            const char* EtaRegio = "out";
             if ((muMinusEta>1.05)&&(muPlusEta>1.05)){
-                EtaReg = "EA_EA";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                EtaReg = 1;
+                EtaRegio = "EA_EA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>1.05)&&(muPlusEta>0.)&&(muPlusEta<1.05)){
-                EtaReg = "EA_BA";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "EA_BA";
+                EtaReg = 2;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>1.05)&&(muPlusEta>-1.05)&&(muPlusEta<0.)){
-                EtaReg = "EA_BC";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "EA_BC";
+                EtaReg = 3;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>1.05)&&(muPlusEta<-1.05)){
-                EtaReg = "EA_EC";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "EA_EC";
+                EtaReg = 4;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>0.)&&(muMinusEta<1.05)&&(muPlusEta>1.05)){
-                EtaReg = "BA_EA";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "BA_EA";
+                EtaReg = 5;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>0.)&&(muMinusEta<1.05)&&(muPlusEta>0.)&&(muPlusEta<1.05)){
-                EtaReg = "BA_BA";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "BA_BA";
+                EtaReg = 6;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>0.)&&(muMinusEta<1.05)&&(muPlusEta>-1.05)&&(muPlusEta<0.)){
-                EtaReg = "BA_BC";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "BA_BC";
+                EtaReg = 7;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>0.)&&(muMinusEta<1.05)&&(muPlusEta<-1.05)){
-                EtaReg = "BA_EC";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "BA_EC";
+                EtaReg = 8;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>-1.05)&&(muMinusEta<0.)&&(muPlusEta>1.05)){
-                EtaReg = "BC_EA";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "BC_EA";
+                EtaReg = 9;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>-1.05)&&(muMinusEta<0.)&&(muPlusEta>0.)&&(muPlusEta<1.05)){
-                EtaReg = "BC_BA";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "BC_BA";
+                EtaReg = 10;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>-1.05)&&(muMinusEta<0.)&&(muPlusEta>-1.05)&&(muPlusEta<0.)){
-                EtaReg = "BC_BC";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "BC_BC";
+                EtaReg = 11;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta>-1.05)&&(muMinusEta<0.)&&(muPlusEta<-1.05)){
-                EtaReg = "BC_EC";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "BC_EC";
+                EtaReg = 12;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta<-1.05)&&(muPlusEta>1.05)){
-                EtaReg = "EC_EA";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "EC_EA";
+                EtaReg = 13;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta<-1.05)&&(muPlusEta>0.)&&(muPlusEta<1.05)){
-                EtaReg = "EC_BA";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "EC_BA";
+                EtaReg = 14;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta<-1.05)&&(muPlusEta>-1.05)&&(muPlusEta<0.)){
-                EtaReg = "EC_BC";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "EC_BC";
+                EtaReg = 15;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else if ((muMinusEta<-1.05)&&(muPlusEta<-1.05)){
-                EtaReg = "EC_EC";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "EC_EC";
+                EtaReg = 16;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
                 Mass2D = resonance_Mass;
                 fill(tool, Mass2D);
             } else {
-                EtaReg = "out";
-                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                //EtaReg = "out";
+                EtaReg = 19;
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaRegio).c_str(), 0);
             }
             Mass = resonance_Mass;
             Eta = resonance_Eta;
@@ -665,15 +701,12 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseResonanceCandidates(const xAOD::Mu
     /// Select Muons Relevant for Z
     for(const auto muon : Muons) {
         xAOD::Muon::MuonType muonType = muon->muonType();
-        if (muonType==xAOD::Muon::Combined) {
-            const xAOD::TrackParticle *cbtp = nullptr;
-            ElementLink<xAOD::TrackParticleContainer> cbtpLink = muon->combinedTrackParticleLink();
-            if (cbtpLink.isValid()) cbtp = *cbtpLink;
-
+        if (muonType==xAOD::Muon::MuonType::Combined) {
+            const xAOD::TrackParticle *cbtp =  muon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle);
             /// Select Z Boson and Jpsi
             if (cbtp) {
                 float trkiso  = muon->isolation(xAOD::Iso::ptcone30)/muon->pt();
-                if (muonType==xAOD::Muon::Combined &&
+                if (muonType==xAOD::Muon::MuonType::Combined &&
                     cbtp &&
                     muon->pt()>m_ZBosonSelection_minPt &&
                     std::abs(muon->eta())<m_ZBosonSelection_maxEta &&
@@ -681,7 +714,7 @@ StatusCode  MuonTrackMonitorAlgorithm::analyseResonanceCandidates(const xAOD::Mu
                     std::abs(cbtp->z0())<m_ZBosonSelection_Z0Cut &&
                     std::abs(cbtp->d0())<m_ZBosonSelection_D0Cut )
                         vecMuons_ZBoson_Candidates.push_back(muon);
-                if (muonType==xAOD::Muon::Combined &&
+                if (muonType==xAOD::Muon::MuonType::Combined &&
                     cbtp &&
                     muon->pt()>m_JpsiSelection_minPt &&
                     std::abs(muon->eta())<m_JpsiSelection_maxEta &&
@@ -755,30 +788,30 @@ int MuonTrackMonitorAlgorithm::getTrackCategoryID(const std::string& sIdentifier
 {
     int trackCategoryID = -1;
     
-    if (sIdentifier == "NoTrigNonCB") trackCategoryID = 1;
-    else if (sIdentifier == "NoTrigCB") trackCategoryID = 2;
-    else if (sIdentifier == "NonCB") trackCategoryID = 3;
-    else if (sIdentifier == "CB") trackCategoryID = 4;
-    else if (sIdentifier == "AllNonCB") trackCategoryID = 5;
-    else if (sIdentifier == "AllCB") trackCategoryID = 6;
+    if (sIdentifier == "NoTrigNonCB") trackCategoryID = 6;
+    else if (sIdentifier == "NoTrigCB") trackCategoryID = 7;
+    else if (sIdentifier == "NonCB") trackCategoryID = 8;
+    else if (sIdentifier == "CB") trackCategoryID = 9;
+    else if (sIdentifier == "AllNonCB") trackCategoryID = 10;
+    else if (sIdentifier == "AllCB") trackCategoryID = 11;
     // --------------------
-    else if (sIdentifier == "Z") trackCategoryID = 8;
-    else if (sIdentifier == "Jpsi") trackCategoryID = 9;
+    else if (sIdentifier == "Z") trackCategoryID = 13;
+    else if (sIdentifier == "Jpsi") trackCategoryID = 14;
     // --------------------
-    else if (sIdentifier == "ME_EC") trackCategoryID = 11;
-    else if (sIdentifier == "ME_BC") trackCategoryID = 12;
-    else if (sIdentifier == "ME_BA") trackCategoryID = 13;
-    else if (sIdentifier == "ME_EA") trackCategoryID = 14;
+    else if (sIdentifier == "ME_EC") trackCategoryID = 16;
+    else if (sIdentifier == "ME_BC") trackCategoryID = 17;
+    else if (sIdentifier == "ME_BA") trackCategoryID = 18;
+    else if (sIdentifier == "ME_EA") trackCategoryID = 19;
     // --------------------
-    else if (sIdentifier == "MS_EC") trackCategoryID = 16;
-    else if (sIdentifier == "MS_BC") trackCategoryID = 17;
-    else if (sIdentifier == "MS_BA") trackCategoryID = 18;
-    else if (sIdentifier == "MS_EA") trackCategoryID = 19;
+    else if (sIdentifier == "MS_EC") trackCategoryID = 21;
+    else if (sIdentifier == "MS_BC") trackCategoryID = 22;
+    else if (sIdentifier == "MS_BA") trackCategoryID = 23;
+    else if (sIdentifier == "MS_EA") trackCategoryID = 24;
     // --------------------
-    else if (sIdentifier == "ID_EC") trackCategoryID = 21;
-    else if (sIdentifier == "ID_BC") trackCategoryID = 22;
-    else if (sIdentifier == "ID_BA") trackCategoryID = 23;
-    else if (sIdentifier == "ID_EA") trackCategoryID = 24;
+    else if (sIdentifier == "ID_EC") trackCategoryID = 26;
+    else if (sIdentifier == "ID_BC") trackCategoryID = 27;
+    else if (sIdentifier == "ID_BA") trackCategoryID = 28;
+    else if (sIdentifier == "ID_EA") trackCategoryID = 29;
     
     return trackCategoryID;
 }

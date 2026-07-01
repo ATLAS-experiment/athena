@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/L1ThrExtraInfo.h"
 
-#include <stdexcept>
 #include <cmath>
 
 
@@ -214,19 +213,18 @@ TrigConf::L1ThrExtraInfo::thrExtraInfo(const std::string & thrTypeName) const
  * EM legacy extra info
  */
 const TrigConf::IsolationLegacy &
-TrigConf::L1ThrExtraInfo_EMTAULegacy::isolation(const std::string & thrType, size_t bit) const
+TrigConf::L1ThrExtraInfo_EMTAULegacy::isolation(std::string_view thrType, size_t bit) const
 {
-   if(bit<1 or bit>5) {
-      throw std::out_of_range("When accessing the legacy L1Calo EM or TAU isolation bit must be between 1 and 5, but bit=" 
-                              + std::to_string(bit) + " was requested");
-   }
-   try {
-      return m_isolation.at(thrType)[bit-1];
-   }
-   catch(std::exception & ex) {
-      std::cerr << "Threshold type " << name() << " does not have isolation parameters for type " << thrType << endl;
-      throw;
-   }
+  if(bit<1 or bit>5) {
+    throw std::out_of_range("When accessing the legacy L1Calo EM or TAU isolation bit must be between 1 and 5, but bit=" 
+                            + std::to_string(bit) + " was requested");
+  }
+  auto it  = m_isolation.find(thrType);
+  if (it == m_isolation.end()){
+    std::cerr << "Threshold type " << name() << " does not have isolation parameters for type " << thrType << endl;
+    throw std::out_of_range("No isolation parameters for threshold type " + std::string(thrType));
+  }
+  return it->second[bit - 1];
 }
 
 void
@@ -708,6 +706,12 @@ TrigConf::L1ThrExtraInfo_gXE::load()
          m_XEJWOJ_c_B = x.second.getValue<unsigned int>();
       } else if( x.first == "XEJWOJ_c_C" ){
          m_XEJWOJ_c_C = x.second.getValue<unsigned int>();
+      } else if( x.first == "XENOISECUT_noiseCutThrA" ){
+         m_noiseCutThrA = x.second.getValue<unsigned int>();
+      } else if( x.first == "XENOISECUT_noiseCutThrB" ){
+         m_noiseCutThrB = x.second.getValue<unsigned int>();
+      } else if( x.first == "XENOISECUT_noiseCutThrC" ){
+         m_noiseCutThrC = x.second.getValue<unsigned int>();
       }
    }
 }

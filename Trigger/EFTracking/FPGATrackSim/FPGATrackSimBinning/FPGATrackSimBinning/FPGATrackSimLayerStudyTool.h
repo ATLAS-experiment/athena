@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimLayerStudyTool_H
 #define FPGATrackSimLayerStudyTool_H
@@ -58,14 +58,14 @@ class TH2D;
 
     // Takes the truthtracks as input and parses it into a useful form for later use
     // (e.g. stores which bin the true track is in)
-    void parseTruthInfo ATLAS_NOT_THREAD_SAFE(std::vector<FPGATrackSimTruthTrack> const & truthtracks);
+    void parseTruthInfo(std::vector<FPGATrackSimTruthTrack> const & truthtracks);
     FPGATrackSimBinUtil::IdxSet& truthBin(unsigned stepnum) { return m_truthbin[stepnum]; }
     std::vector<FPGATrackSimBinUtil::IdxSet>& truthBin() { return m_truthbin; }
 
     // Fill methods
     void fillHitLevelInput(const FPGATrackSimHit* hit);
-    void fillBinLevelOutput ATLAS_NOT_THREAD_SAFE(const FPGATrackSimBinUtil::IdxSet &idx, const FPGATrackSimBinnedHits::BinEntry &data);
-    void fillBinningSummary ATLAS_NOT_THREAD_SAFE(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
+    void fillBinLevelOutput(const FPGATrackSimBinUtil::IdxSet &idx, const FPGATrackSimBinnedHits::BinEntry &data);
+    void fillBinningSummary(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits);
 
     // Error Checks
     void sliceCheck();
@@ -186,9 +186,9 @@ class TH2D;
     //////////////////////////////////////////////////////////////////////
     // make and register histogram or vector of histograms in one line...
     template <typename HistType, typename... HistDef>
-    StatusCode makeAndRegHist(HistType *&ptr, HistDef... histargs)
+    StatusCode makeAndRegHist(HistType *&ptr, HistDef&&... histargs)
     {
-        ptr = new HistType(histargs...);
+        ptr = new HistType(std::forward<HistDef>(histargs)...);
         ATH_CHECK(m_tHistSvc->regHist(m_dir + ptr->GetName(), ptr));
         return StatusCode::SUCCESS;
     }

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef T_ATHENAPOOLTPINTVECTORCNV_H
-#define T_ATHENAPOOLTPINTVECTORCNV_H
+#ifndef TPTOOLS_TPINTVECTORCNV_P2_H
+#define TPTOOLS_TPINTVECTORCNV_P2_H
 
 /** @file TPIntVectorCnv.h
  *  @brief This file contains TP converter template specializations 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AsgTools/StandaloneToolHandle.h>
@@ -29,7 +29,7 @@ using TEVENT = POOL::TEvent;
 using CP::CorrectionCode;
 using namespace asg::msgUserCode;
 
-int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
+int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
@@ -165,4 +165,15 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   root_file->Close();
   return 0;
+}
+
+
+int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

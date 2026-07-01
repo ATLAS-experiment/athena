@@ -46,9 +46,9 @@ protected:
   virtual StatusCode initialize() override;
   
   virtual TrackParticleContainer_PERS *createPersistent( Rec::TrackParticleContainer *transCont) override;
-  virtual Rec::TrackParticleContainer *createTransient() override;
+  virtual Rec::TrackParticleContainer *createTransient(const Token* token) override;
 
-  AthenaPoolTopLevelTPCnvBase*	getTopLevelTPCnv()
+  TopLevelTPCnvBase*	getTopLevelTPCnv()
   { return &m_TPConverter_tlp3; }
 
  

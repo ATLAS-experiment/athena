@@ -4,6 +4,7 @@
 #ifndef XAODMUONPREPDATA_sTgcMeasurementFWD_H
 #define XAODMUONPREPDATA_sTgcMeasurementFWD_H
 
+#include "xAODMuonPrepData/MuonMeasurementFwd.h"
 /** @brief Forward declaration of the xAOD::sTgcMeasurement */
 namespace xAOD{
    class sTgcMeasurement_v1;

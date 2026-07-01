@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DQDummyFilterTool.h"
@@ -12,7 +12,7 @@ DQDummyFilterTool::DQDummyFilterTool(const std::string& type,const std::string& 
         
 DQDummyFilterTool::~DQDummyFilterTool () {}
 
-bool DQDummyFilterTool::accept() const {
+bool DQDummyFilterTool::accept(const EventContext& /*ctx*/) const {
   return true;
 }
 

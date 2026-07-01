@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -11,9 +11,9 @@
 
 #include <TriggerAnalysisAlgorithms/TrigPrescalesAlg.h>
 
-#include <RootCoreUtils/StringUtil.h>
+#include <algorithm>
 #include <xAODEventInfo/EventInfo.h>
-
+#include <format>
 //
 // method implementations
 //
@@ -46,7 +46,10 @@ namespace CP
 
     if (!m_selectionDecoration.empty()) {
       for (const std::string &chain : m_trigList) {
-        m_selectionAccessors.emplace(chain, m_selectionDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
+        std::string chainfix = chain;
+        std::replace(chainfix.begin(), chainfix.end(), '.', 'p');
+        std::replace(chainfix.begin(), chainfix.end(), '-', '_');
+        m_selectionAccessors.emplace(chain, std::format("{}_{}", m_selectionDecoration.value(), chainfix));
       }
     }
 
@@ -62,7 +65,7 @@ namespace CP
       // the logic in `execute` does not have to change
       // depending on if `m_trigFormula` or `m_trigList` is used
       std::vector<std::string> formulaVector = {m_trigFormula.value()};
-      m_trigListAll = formulaVector;
+      m_trigListAll = std::move(formulaVector);
       return StatusCode::SUCCESS;
     }
 
@@ -70,10 +73,13 @@ namespace CP
     {
       m_trigListAll = m_trigList;
     }
-
+    const std::string prefix = m_prescaleDecoration + "_";
     for (const std::string &chain : m_trigListAll)
     {
-      m_prescaleAccessors.emplace_back(m_prescaleDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
+      std::string chainfix = chain;
+      std::replace(chainfix.begin(), chainfix.end(), '.', 'p');
+      std::replace(chainfix.begin(), chainfix.end(), '-', '_');
+      m_prescaleAccessors.emplace_back(prefix + chainfix);
 
       // Generate helper functions
       if (std::find(m_trigList.begin(), m_trigList.end(), chain) != m_trigList.end())
@@ -109,7 +115,7 @@ namespace CP
 
 
   StatusCode TrigPrescalesAlg ::
-  execute ()
+  execute (const EventContext& /*ctx*/)
   {
     const xAOD::EventInfo *evtInfo{};
     ANA_CHECK (evtStore()->retrieve(evtInfo, "EventInfo"));

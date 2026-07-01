@@ -39,7 +39,7 @@ public:
 
 protected:
   virtual TrigTrackCounts_PERS  *createPersistent(TrigTrackCounts *transObj);
-  virtual TrigTrackCounts       *createTransient();
+  virtual TrigTrackCounts       *createTransient(const Token* token);
 };
 
 

@@ -89,17 +89,7 @@ namespace {
 } //end of unnamed namespace
 
 // Default Constructor
-DataProxy::DataProxy():
-  m_refCount(0),
-  m_resetFlag(true),
-  m_boundHandles(false),
-  m_const(false),
-  m_origConst(false),
-  m_dObject(nullptr), 
-  m_dataLoader(nullptr),
-  m_t2p(nullptr),
-  m_store(nullptr),
-  m_errno(ALLOK)
+DataProxy::DataProxy()
 { 
 }
 
@@ -128,17 +118,11 @@ DataProxy::DataProxy(std::unique_ptr<TransientAddress> tAddr,
 DataProxy::DataProxy(TransientAddress&& tAddr, 
 		     IConverter* svc,
 		     bool constFlag, bool resetOnly):
-  m_refCount(0),
   m_resetFlag(resetOnly),
-  m_boundHandles(false),
   m_const(constFlag),
   m_origConst(constFlag),
-  m_dObject(0), 
   m_tAddress(std::move(tAddr)),
-  m_dataLoader(svc),
-  m_t2p(nullptr),
-  m_store(nullptr),
-  m_errno(ALLOK)
+  m_dataLoader(svc)
 {
   //assert( tAddr->clID() != 0 );
   if (svc) svc->addRef();
@@ -149,17 +133,10 @@ DataProxy::DataProxy(TransientAddress&& tAddr,
 DataProxy::DataProxy(DataObject* dObject, 
 		     TransientAddress* tAddr,
 		     bool constFlag, bool resetOnly):
-  m_refCount(0),
   m_resetFlag(resetOnly),
-  m_boundHandles(false),
   m_const(constFlag),
   m_origConst(constFlag),
-  m_dObject(0), 
-  m_tAddress(std::move(*tAddr)),
-  m_dataLoader(nullptr),
-  m_t2p(nullptr),
-  m_store(nullptr),
-  m_errno(ALLOK)
+  m_tAddress(std::move(*tAddr))
 {
   setObject(dObject);
   delete tAddr;
@@ -168,17 +145,10 @@ DataProxy::DataProxy(DataObject* dObject,
 DataProxy::DataProxy(DataObject* dObject, 
 		     TransientAddress&& tAddr,
 		     bool constFlag, bool resetOnly):
-  m_refCount(0),
   m_resetFlag(resetOnly),
-  m_boundHandles(false),
   m_const(constFlag),
   m_origConst(constFlag),
-  m_dObject(0), 
-  m_tAddress(std::move(tAddr)),
-  m_dataLoader(nullptr),
-  m_t2p(nullptr),
-  m_store(nullptr),
-  m_errno(ALLOK)
+  m_tAddress(std::move(tAddr))
 {
   setObject(dObject);
 }
@@ -228,11 +198,16 @@ bool DataProxy::bindHandle(IResetable* ir) {
 
 
 /// Drop the reference to the data object.
+inline
 void DataProxy::resetRef()
 {
-  DataObject* dobj = m_dObject;
-  resetGaudiRef(dobj);
-  m_dObject = dobj;
+  // Skip calling resetGaudiRef for the case where the proxy has never
+  // been defererenced.
+  if (m_dObject) {
+    DataObject* dobj = m_dObject;
+    resetGaudiRef(dobj);
+    m_dObject = dobj;
+  }
   m_tAddress.reset();
   m_const = m_origConst;
 }
@@ -358,7 +333,7 @@ bool DataProxy::requestRelease(bool force, bool hard) {
   }
   bool canRelease = force;
   if (!m_resetFlag) canRelease = true;
-#ifndef NDEBUG
+#if 0
   MsgStream gLog(m_ims, "DataProxy");
   if (gLog.level() <= MSG::VERBOSE) {
     gLog << MSG::VERBOSE << "requestRelease(): "
@@ -503,6 +478,14 @@ std::unique_ptr<DataObject> DataProxy::readData (objLock_t&, ErrNo* errNo)
   if (sc.isSuccess()) {
     if (errNo && *errNo == RECURSIVEREAD) *errNo = ALLOK;
     return std::unique_ptr<DataObject>(obj);
+  }
+  if (!address) {
+    MsgStream gLog(m_ims, "DataProxy");
+    gLog << MSG::ERROR
+         << "readData: no address for " << clID() << "/" << name()
+         << " but validAddress returned true.  You may be trying to retrieve"
+         << " alignments during initialization without having defined a campaign."
+         << endmsg;
   }
   if (errNo) *errNo = CNVFAILED;
   return nullptr;

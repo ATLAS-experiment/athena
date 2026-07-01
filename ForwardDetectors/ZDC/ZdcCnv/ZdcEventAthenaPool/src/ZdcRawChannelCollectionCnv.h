@@ -18,7 +18,7 @@ public:
         T_AthenaPoolCustomCnv<ZdcRawChannelCollection, ZdcRawChannelCollection_PERS >( svcloc) {}
 protected:
   ZdcRawChannelCollection_PERS*  createPersistent(ZdcRawChannelCollection* transCont);
-  ZdcRawChannelCollection*       createTransient ();
+  ZdcRawChannelCollection*       createTransient(const Token* token);
 };
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,7 +11,6 @@
 
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
@@ -45,19 +44,19 @@ public:
 
   /** Get the Lorentz shift correction in the local x (phiDist) direction
       Assumes the center of the detector and is generally cached. */
-  virtual double getLorentzShift(const IdentifierHash& elementHash, const EventContext& ctx ) const override;
+  virtual double getLorentzShift(const IdentifierHash& elementHash, const EventContext& ctx) const override;
 
   /** As above, but provide the local position. 
       More accurate but slower. */
-  virtual double getLorentzShift(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const override;
+  virtual double getLorentzShift(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, const EventContext& ctx) const override;
 
   /**Get the Lorentz shift correction in the local y (etaDist) direction
      Assumes the center of the detector and is generally cached. */
-  virtual double getLorentzShiftEta(const IdentifierHash& elementHash) const override;
+  virtual double getLorentzShiftEta(const IdentifierHash& elementHash, const EventContext& ctx) const override;
 
   /** As above, but provide the local position. 
       More accurate but slower. */
-  virtual double getLorentzShiftEta(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const override;
+  virtual double getLorentzShiftEta(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, const EventContext& ctx) const override;
 
   /** Get tan af the Lorentz angle in the local x (phiDist) direction
       Assumes the center of the detector and is generally cached. */
@@ -65,33 +64,33 @@ public:
 
   /** As above, but provide the local position. 
       More accurate but slower. */
-  virtual double getTanLorentzAngle(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const override;
+  virtual double getTanLorentzAngle(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, const EventContext& ctx) const override;
 
   /** Get tan af the Lorentz angle in the local y (etaDist) direction
       Assumes the center of the detector and is generally cached. */
-  virtual double getTanLorentzAngleEta(const IdentifierHash& elementHash) const override;
+  virtual double getTanLorentzAngleEta(const IdentifierHash& elementHash, const EventContext& ctx) const override;
 
   /** As above, but provide the local position. 
       More accurate but slower. */
-  virtual double getTanLorentzAngleEta(const IdentifierHash& elementHash, const Amg::Vector2D& locPos) const override;
+  virtual double getTanLorentzAngleEta(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, const EventContext& ctx) const override;
 
   /** Get bias voltage */
-  virtual double getBiasVoltage(const IdentifierHash& elementHash) const override;
+  virtual double getBiasVoltage(const IdentifierHash& elementHash, const EventContext& ctx) const override;
 
   /** Get temperature */
-  virtual double getTemperature(const IdentifierHash& elementHash) const override;
+  virtual double getTemperature(const IdentifierHash& elementHash, const EventContext& ctx) const override;
 
   /** Get depletion voltage */
-  virtual double getDepletionVoltage(const IdentifierHash& elementHash) const override;
+  virtual double getDepletionVoltage(const IdentifierHash& elementHash, const EventContext& ctx) const override;
 
 private:
   enum Variable {LorentzShift, LorentzShiftEta, TanLorentzAngle, TanLorentzAngleEta};
 
-  double getValue(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, Variable variable) const;
-  double getCorrectionFactor() const;
-  Amg::Vector3D getMagneticField(const Amg::Vector3D& pointvec) const;
+  double getValue(const IdentifierHash& elementHash, const Amg::Vector2D& locPos, Variable variable, const EventContext& ctx) const;
+  double getCorrectionFactor(const EventContext& ctx) const;
+  Amg::Vector3D getMagneticField(const Amg::Vector3D& pointvec, const EventContext& ctx) const;
   const SiLorentzAngleCondData* getCondData(const EventContext& ctx) const;
-  const InDetDD::SiDetectorElement* getDetectorElement(const IdentifierHash& waferHash) const;
+  const InDetDD::SiDetectorElement* getDetectorElement(const IdentifierHash& waferHash, const EventContext& ctx) const;
 
   // Properties
   std::string              m_detectorName;

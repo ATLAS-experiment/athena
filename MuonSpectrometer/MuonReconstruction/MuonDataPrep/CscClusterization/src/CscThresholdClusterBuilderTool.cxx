@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CscThresholdClusterBuilderTool.cxx
@@ -398,8 +398,7 @@ int CscThresholdClusterBuilderTool::make_clusters(bool measphi, const vector<con
             Identifier stripId = pstrip->identify();
             if (m_idHelperSvc->cscIdHelper().get_channel_hash(stripId, stripHash)) {
                 ATH_MSG_WARNING("Unable to get CSC striphash id "
-                                << " the identifier is ");
-                stripId.show();
+                                << " the identifier is \n" << stripId);
             }
 
             if (res.stripStatus == Muon::CscStrStatHot || res.stripStatus == Muon::CscStrStatDead) isBadChannel = true;

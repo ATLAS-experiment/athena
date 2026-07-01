@@ -38,7 +38,7 @@ class FPGATrackSimMatrixMergeAlgo : public AthAlgorithm
         virtual ~FPGATrackSimMatrixMergeAlgo() = default;
         StatusCode initialize() override;
 	// Execute does not do anything for this alg. This class does not process events, everything is done in init and finalize
-        StatusCode execute() override;
+        StatusCode execute(const EventContext& ctx) override;
         StatusCode finalize() override;
 
     private:

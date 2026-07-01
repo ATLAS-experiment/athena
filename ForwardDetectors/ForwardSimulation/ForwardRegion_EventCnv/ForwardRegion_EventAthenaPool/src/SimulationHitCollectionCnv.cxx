@@ -16,7 +16,7 @@ SimulationHitCollection_PERS* SimulationHitCollectionCnv::createPersistent(Simul
 	return pPersColl;
 }
 
-SimulationHitCollection* SimulationHitCollectionCnv::createTransient()
+SimulationHitCollection* SimulationHitCollectionCnv::createTransient(const Token* token)
 {
 	MsgStream mlog(msgSvc(), "SimulationHitCollectionConverter" );
 
@@ -26,8 +26,8 @@ SimulationHitCollection* SimulationHitCollectionCnv::createTransient()
 	SimulationHitCollectionCnv_p1 TPConverter_p1;
 	SimulationHitCollection *pTransColl=NULL;
 
-	if(this->compareClassGuid(p1_guid)){
-		std::unique_ptr<SimulationHitCollection_p1> col_vect(this->poolReadObject<SimulationHitCollection_p1>());
+	if(this->compareClassGuid(token, p1_guid)){
+		std::unique_ptr<SimulationHitCollection_p1> col_vect(this->poolReadObject<SimulationHitCollection_p1>(token));
 		pTransColl=TPConverter_p1.createTransient(col_vect.get(), mlog);
 	}
 	else{

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelBarrel.h"
@@ -25,8 +25,6 @@
 
 #include "InDetGeoModelUtils/VolumeBuilder.h"
 
-
-#include <sstream>
 #include <utility>
 
 using namespace std;
@@ -75,15 +73,24 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
     //cout << "Layer" << ii << endl;
     m_gmt_mgr->SetCurrentLD(ii);
     if(m_gmt_mgr->isLDPresent()){
-      std::ostringstream lname;
-      lname << "Layer" << ii;
-
       Identifier id = m_gmt_mgr->getIdHelper()->wafer_id(0,ii,0,0);
 
       if(m_sqliteReader) {
-	GeoAlignableTransform* xform = (*m_mapAX)[lname.str()];
+	// DD2 uses different names for Barrel Layers
+	std::string lnameDD2 = "Layer_PixelBarrel"+std::to_string(ii);
+
+	auto itAX = m_mapAX->find(lnameDD2);
+	if(itAX == m_mapAX->end())
+	  throw std::runtime_error("GeoPixelBarrel cannot find AX for the key " + lnameDD2);
+	GeoAlignableTransform* xform = itAX->second;
+
+	auto itFPV = m_mapFPV->find(lnameDD2);
+	if(itFPV == m_mapFPV->end())
+          throw std::runtime_error("GeoPixelBarrel cannot find FPV for the key " + lnameDD2);
+	GeoFullPhysVol* layerFPV = itFPV->second;
+
 	layer.Build();
-	GeoFullPhysVol* layerFPV = (*m_mapFPV) [lname.str()];
+
 	// Store the transform (at level 1)
 	m_DDmgr->addAlignableTransform(1, id, xform, layerFPV);
 
@@ -93,15 +100,15 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
 	// we have the GeoFullPhysVol available from the SQLite DB
 	InDetDD::ExtraMaterial xMat(m_gmt_mgr->distortedMatManager());
 	xMat.add(layerFPV,"PixelLayer");
-	std::ostringstream ostr; ostr << m_gmt_mgr->GetLD();
-	xMat.add(layerFPV,"PixelLayer"+ostr.str());
+	xMat.add(layerFPV,"PixelLayer"+std::to_string(m_gmt_mgr->GetLD()));
       }
       else {
 	// IBL layer shift ( 2mm shift issue )
 	double layerZshift = m_gmt_mgr->PixelLayerGlobalShift();
 	GeoAlignableTransform* xform = new GeoAlignableTransform(GeoTrf::Translate3D(0.,0.,layerZshift));
 	GeoVPhysVol* layerphys = layer.Build();
-	GeoNameTag *tag = new GeoNameTag(lname.str());         
+	std::string lname = "Layer" + std::to_string(ii);
+	GeoNameTag *tag = new GeoNameTag(lname);
 	barrelPhys->add(tag);
 	barrelPhys->add(new GeoIdentifierTag(ii));
 	barrelPhys->add(xform);

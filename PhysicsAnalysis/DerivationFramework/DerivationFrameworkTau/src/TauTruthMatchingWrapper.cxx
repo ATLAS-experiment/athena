@@ -15,6 +15,9 @@ namespace DerivationFramework {
   StatusCode TauTruthMatchingWrapper::initialize()
   {
     ATH_CHECK(m_tauKey.initialize());
+    ATH_CHECK(m_isTruthMatchedKey.initialize());
+    ATH_CHECK(m_truthJetLinkKey.initialize());
+    ATH_CHECK(m_truthParticleLinkKey.initialize());
     CHECK( m_tTauTruthMatchingTool.retrieve() );
     return StatusCode::SUCCESS;
   }

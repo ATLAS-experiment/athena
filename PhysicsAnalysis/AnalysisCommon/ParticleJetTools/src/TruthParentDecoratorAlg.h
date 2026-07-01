@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTH_PARENT_DECORATOR_ALG
 #define TRUTH_PARENT_DECORATOR_ALG
@@ -10,6 +10,10 @@
 #include "xAODBase/IParticleContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
+
+#include <atomic>
+#include <vector>
+#include <map>
 
 struct MatchedParent;
 
@@ -89,6 +93,11 @@ private:
   SG::WriteDecorHandleKey<JC> m_match_pdgid_key;
   SG::WriteDecorHandleKey<JC> m_match_children_key;
   SG::WriteDecorHandleKey<JC> m_match_link_key;
+  SG::WriteDecorHandleKey<JC> m_target_mass_key;
+  SG::WriteDecorHandleKey<JC> m_target_pt_key;
+  SG::WriteDecorHandleKey<JC> m_target_energy_key;
+  SG::WriteDecorHandleKey<JC> m_target_eta_key;
+  SG::WriteDecorHandleKey<JC> m_target_phi_key;
 
   Gaudi::Property<cascade_counter_property_t> m_counts_matching_cascade {
     this, "countChildrenInCascadeWithPdgIds", {},

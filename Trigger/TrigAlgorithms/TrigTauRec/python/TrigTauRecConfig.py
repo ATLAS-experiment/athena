@@ -1,9 +1,23 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
+from TrigTauRec.TrigTauRecToolsConfig import trigTauJetONNXEvaluatorCfg, trigTauWPDecoratorCfg
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigTauRecConfig')
 
-def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', input_tracks='', output_name=None):
+def trigTauRecMergedPrecisionMVACfg(
+    flags: AthConfigFlags,
+    name: str,
+    tau_ids: list[str] | None = None,
+    input_rois: str = '',
+    input_tracks: str = '',
+    input_taus: str = '',
+    input_tau_tracks: str = '',
+    output_name: str = '',
+    decors_to_copy: list[str] | None = None,
+) -> ComponentAccumulator:
     '''
     Reconstruct the precision TauJet, from the first-step CaloMVA TauJet and precision-refitted tracks.
 
@@ -19,19 +33,21 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
                     Otherwise, all scores and WPs will be stored as `{tau_id}_Score`, `{tau_id}_ScoreSigTrans`, and `{tau_id}_{wp_name}`.
     :param input_rois: RoIs container, where the reconstruction will be run.
     :param input_tracks: TrackParticle container, with the refitted precision tracks.
-    :param output_name: Suffix for the output TauJet and TauTrack collections. If `None`, `name` will be used.
+    :param input_taus: TauJet container, with the input tau jets.
+    :param input_tau_tracks: TauTrack container, with the input tau tracks (usually dummies from the CaloMVA or CaloHits steps).
+    :param output_name: Suffix for the output TauJet and TauTrack collections. If empty, `name` will be used.
+    :param decors_to_copy: List of decorated/aux variables to copy from the input to the output TauJet container.
 
     :return: CA with the TauJet Precision reconstruction sequence.
     '''
 
     # Output collections
-    if output_name is None: output_name = name
+    if not output_name: output_name = name
     from TrigEDMConfig.TriggerEDM import recordable
     trigTauJetOutputContainer = recordable(f'HLT_TrigTauRecMerged_{output_name}')
     trigTauTrackOutputContainer = recordable(f'HLT_tautrack_{output_name}')
 
     # Main CA
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
 
@@ -104,8 +120,6 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
         if is_onnx: # ONNX inference
             log.debug('Configuring TrigTauRecMerged with the ONNX Tau ID score inference: %s', tau_id)
 
-            from TrigTauRec.TrigTauRecToolsConfig import trigTauJetONNXEvaluatorCfg, trigTauWPDecoratorCfg
-
             # ONNX (GNTau) inference
             idtools.append(acc.popToolsAndMerge(trigTauJetONNXEvaluatorCfg(flags, tau_id=tau_id)))
             acc.addPublicTool(idtools[-1])
@@ -116,13 +130,13 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
 
 
         else: # LVNN inference
-            log.debug('Configuring TrigTauRecMerged with the LVNN Tau ID score inference: %s', tau_id)
+            log.debug('Configuring TrigTauRecMerged %s with the LVNN Tau ID score inference: %s', name, tau_id)
 
             from TriggerMenuMT.HLT.Tau.TauConfigurationTools import useBuiltInTauJetRNNScore
 
             # To support the legacy tracktwoMVA/LLP/LRT chains, only in those cases we store the
             # passed WPs in the built-in TauJet variables
-            use_builtin_rnnscore = useBuiltInTauJetRNNScore(tau_id, precision_sequence=name)
+            use_builtin_rnnscore = useBuiltInTauJetRNNScore(tau_id)
             if use_builtin_rnnscore:
                 if used_builtin_rnnscore:
                     log.error('Cannot store more than one TauID score in the built-in TauJet RNN score variables')
@@ -140,11 +154,10 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
                 idtools.append(acc.popToolsAndMerge(trigTauWPDecoratorRNNCfg(flags, tau_id=tau_id, precision_seq_name=name)))
                 acc.addPublicTool(idtools[-1])
             else:
-                from TrigTauRec.TrigTauRecToolsConfig import trigTauWPDecoratorCfg
                 idtools.append(acc.popToolsAndMerge(trigTauWPDecoratorCfg(flags, tau_id=tau_id, precision_seq_name=name, tauContainerName=trigTauJetOutputContainer)))
                 acc.addPublicTool(idtools[-1])
 
-        id_score_monitoring[tau_id] = getTauIDScoreVariables(tau_id, precision_sequence=name)
+        id_score_monitoring[tau_id] = getTauIDScoreVariables(tau_id)
 
 
     # Set trigger-specific configuration for all the reconstruction tools
@@ -166,8 +179,9 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
         MonitoredIDScores=id_score_monitoring,
         InputRoIs=input_rois,
         InputVertexContainer=flags.Tracking.ActiveConfig.vertex,
-        InputTauTrackContainer='HLT_tautrack_dummy',
-        InputTauJetContainer='HLT_TrigTauRecMerged_CaloMVAOnly',
+        InputTauTrackContainer=input_tau_tracks,
+        InputTauJetContainer=input_taus,
+        InputTauJetCopyDecorKeys=decors_to_copy if decors_to_copy else [],
         OutputTauTrackContainer=trigTauTrackOutputContainer,
         OutputTauJetContainer=trigTauJetOutputContainer,
     ))
@@ -175,7 +189,157 @@ def trigTauRecMergedPrecisionMVACfg(flags, name, tau_ids=None, input_rois='', in
     return acc
 
 
-def trigTauRecMergedCaloMVACfg(flags):
+
+def trigTauRecMergedCaloHitsCfg(
+    flags: AthConfigFlags, 
+    name: str, 
+    hitz_algs: list[str] | None = None, 
+    presel_algs: list[str] | None = None, 
+    input_rois: str = '', 
+) -> ComponentAccumulator:
+    '''
+    Reconstruct the precision TauJet, from the first-step CaloMVA TauJet and precision-refitted tracks.
+
+    :param flags: Config flags.
+    :param name: Suffix for the main TrigTauRecMerged algorithm name.
+    :param hitz_algs: List of hitz inference algorithms to execute, using the ONNX inference setup.
+                    The specific configuration will be loaded from the matching ConfigFlags (Trigger.Offline.Tau.<alg-name>)
+    :param presel_algs: List of preselection inference algorithms to execute, using the ONNX inference setup.
+                    The specific configuration will be loaded from the matching ConfigFlags (Trigger.Offline.Tau.<alg-name>).
+                    For these algorithms, the score flattening and WP decorator tools will be used.
+    :param input_rois: RoIs container, where the reconstruction will be run.
+
+    :return: CA with the TauJet Precision reconstruction sequence.
+    '''
+    from TrigEDMConfig.TriggerEDM import recordable
+    output_taus = recordable('HLT_TrigTauRecMerged_CaloHits')
+    output_tau_tracks = 'HLT_tautrack_CaloHits_dummy'
+
+    # Main CA
+    acc = ComponentAccumulator()
+
+    from AthenaConfiguration.ComponentFactory import CompFactory
+
+    # Decorate pixel hits with their local position relative to the beamspot
+    acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.HitBeamSpotDataDecoratorAlg(
+        name='TrigTauPixelHitsDecoratorAlg',
+        hitContainer='PixelClusters',
+        beamSpotKey='BeamSpotData', # Online beamspot conditions
+    ))
+
+
+    # Associate hits to the HLT TauJets
+    # We use the previous step's TauJets as input, because we will use the hits in the tools 
+    # executed within TrigTauRecMerged
+
+    # We first need to figure out how many hits we'll need to associate
+    max_hits = 0
+
+    if hitz_algs is None: hitz_algs = []
+    if presel_algs is None: presel_algs = []
+    for alg in hitz_algs + presel_algs:
+        # First check that the algorithm has the necesary config flags defined
+        try: alg_flags = getattr(flags.Trigger.Offline.Tau, alg)
+        except NameError: raise ValueError(f'Missing algorithm ConfigFlags: Trigger.Offline.Tau.{alg}')
+
+        if hasattr(alg_flags, 'MaxHits') and alg_flags.MaxHits > max_hits:
+            max_hits = alg_flags.MaxHits
+
+    if max_hits > 0:
+        hits_decoration = f'associatedHits_{name}'
+        acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.JetHitAssociationAlg(
+            name=f'TrigTauJetHitAssociationAlg_{name}',
+            jetContainer='HLT_TrigTauRecMerged_CaloMVAOnly',
+            hitContainer='PixelClusters',
+            hitAssociation=hits_decoration,
+            useWedgeSelection=True,
+            dphiHitToJet=flags.Tracking.ActiveConfig.phiHalfWidth,
+            detaHitToJet=flags.Tracking.ActiveConfig.etaHalfWidth,
+            dzHitToVertex=180, # Upper bound, still ok if the RoI is smaller
+            maxHits=max_hits,
+            removeBadIDPixelHits=False, # TODO: Test difference if enabled
+        ))
+    else:
+        hits_decoration = '' # Disabled
+
+
+    # The TauJet reconstruction is handled by a set of tools, executed in the following order:
+    tools = []          # Common tools
+
+    #---------------------------------------------------------------
+    # HitZ + CaloHits preselection inference
+    #---------------------------------------------------------------
+    # We can run multiple inferences at once. Each will be stored on different decorated variables
+
+    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getTauIDScoreVariables
+    hitz_monitoring = {}
+    hitz_shift_to_detector = {}
+    id_score_monitoring = {}
+
+    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getHitZVariables
+    for alg in hitz_algs + presel_algs:
+        log.debug('Configuring TrigTauRecMerged with the ONNX Tau inference: %s', alg)
+
+        ptau_sfx = None
+        if alg in hitz_algs:
+            hitz_monitoring[alg] = (z0_var, _) = getHitZVariables(alg)
+
+            # HitZ z0 regressions are w.r.t. beamspot; will shift it in TrigTauRec
+            alg_flags = getattr(flags.Trigger.Offline.Tau, alg)
+            if hasattr(alg_flags, 'BeamSpotCoordinates') and alg_flags.BeamSpotCoordinates:
+                ptau_sfx = 'wrt_beamspot'
+                hitz_shift_to_detector[f'{z0_var}_{ptau_sfx}'] = z0_var
+
+
+        # ONNX inference
+        tools.append(acc.popToolsAndMerge(trigTauJetONNXEvaluatorCfg(
+            flags, 
+            tau_id=alg, 
+            tau_container=output_taus,
+            hits_decoration_container=hits_decoration,
+            ptau_sfx=ptau_sfx,
+        )))
+        acc.addPublicTool(tools[-1])
+
+        if alg in presel_algs:
+            # ID score flattening and WPs
+            tools.append(acc.popToolsAndMerge(trigTauWPDecoratorCfg(flags, tau_id=alg, precision_seq_name=name)))
+            acc.addPublicTool(tools[-1])
+
+            id_score_monitoring[alg] = getTauIDScoreVariables(alg)
+
+
+    # Set trigger-specific configuration for all the reconstruction tools
+    for tool in tools:
+        tool.inTrigger = True
+        tool.calibFolder = flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath
+
+
+    from TrigTauRec.TrigTauRecMonitoring import tauMonitoringCaloHits
+    acc.addEventAlgo(CompFactory.TrigTauRecMerged(
+        name=f'TrigTauRecMerged_CaloHits_{name}',
+        CommonTools=tools,
+        MonTool=tauMonitoringCaloHits(
+            flags, 
+            f'CaloHits_{name}', 
+            hitz_algs=hitz_monitoring.keys(), 
+            tau_ids=id_score_monitoring.keys(), 
+        ),
+        MonitoredHitZRegressions=hitz_monitoring,
+        MonitoredIDScores=id_score_monitoring,
+        ShiftToDetectorCoordinates=hitz_shift_to_detector,
+        InputRoIs=input_rois,
+        InputTauJetContainer='HLT_TrigTauRecMerged_CaloMVAOnly',
+        InputTauJetHitsKey=hits_decoration,
+        OutputTauTrackContainer=output_tau_tracks,
+        OutputTauJetContainer=output_taus,
+    ))
+
+    return acc
+
+
+
+def trigTauRecMergedCaloMVACfg(flags: AthConfigFlags) -> ComponentAccumulator:
     '''
     Reconstruct the CaloMVA TauJet from the calo-clusters.
 
@@ -183,7 +347,6 @@ def trigTauRecMergedCaloMVACfg(flags):
     :return: CA with the TauJet CaloMVA reconstruction sequence.
     '''
     # Main CA
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
     tools = []

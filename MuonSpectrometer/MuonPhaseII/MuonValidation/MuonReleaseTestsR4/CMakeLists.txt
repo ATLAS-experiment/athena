@@ -9,8 +9,13 @@ atlas_install_scripts( test/*.sh )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-extensions=ATL900,ATL901 )
 
+if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+  set( NEVENTS 1 )
+else()
+  set( NEVENTS 3 )
+endif()
 atlas_add_test( SpotIntegrationTest
-                SCRIPT test_MuonR4Reco_spot.sh 1 3 --noPerfMon
+                SCRIPT test_MuonR4Reco_spot.sh 1 ${NEVENTS} --noPerfMon
                 PROPERTIES TIMEOUT 1800
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)

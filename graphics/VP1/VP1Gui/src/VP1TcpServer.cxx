@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -23,12 +23,12 @@
 //____________________________________________________________________
 class VP1TcpServer::Imp {
 public:
-  VP1TcpServer * tcpserv;
+  VP1TcpServer * tcpserv{};
   quint16 port;
   QTcpServer tcpserver;
   QMap<QTcpSocket *,quint16> sockets2blocksize;
   QTcpSocket * recognisedSocket(QObject*) const;
-  int lastemit_listen;
+  int lastemit_listen{};
 };
 
 //____________________________________________________________________

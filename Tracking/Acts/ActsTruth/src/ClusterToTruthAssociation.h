@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef ACTSTRK_CLUSTERTOTRUTHASSOCIATION_H
 #define ACTSTRK_CLUSTERTOTRUTHASSOCIATION_H 1
 
@@ -18,7 +21,7 @@
 // the xAODTruthParticleLink which pairs HepMcParticleLinks with the
 // corresponding xAOD::TruthParticle.
 
-#include <iostream>
+#include <stdexcept>
 
 class HepMcLinkToTruthParticleMap
 {
@@ -63,6 +66,7 @@ inline const char *ActsTrk::getInTruthPropertyName<xAODTruthParticleLinkVector>(
 
 // specialisation for the MeasurementToTruthAssociationAlg
 template <>
+//coverity[AUTO_CAUSES_COPY]
 inline auto ActsTrk::getSimDataDeposits([[maybe_unused]] const InDetSimDataCollection &sim_data_collection,
                                         InDetSimDataCollection::const_iterator sim_data_iter_for_identifier) {
    return sim_data_iter_for_identifier->second.getdeposits();

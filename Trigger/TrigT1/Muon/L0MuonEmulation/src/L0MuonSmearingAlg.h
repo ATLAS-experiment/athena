@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef L0MUON_SMEARINGALG_H
 #define L0MUON_SMEARINGALG_H 
@@ -10,6 +10,7 @@
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTrigger/MuonRoIContainer.h"
+#include <memory>
 
 namespace L0Muon {
 

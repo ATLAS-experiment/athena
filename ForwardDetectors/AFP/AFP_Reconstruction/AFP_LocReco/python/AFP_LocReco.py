@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_LocReco package
@@ -67,7 +67,7 @@ def AFP_LocReco_TD_Cfg(flags, kwargs={}):
                 acc.merge(addFolders(flags, "/FWD/AFP/ToFParameters/Local<tag>AFPMCToFLoc-ideal-01</tag>", 'FWD_OFL', className='CondAttrListCollection', db='OFLP200'))
                 tofLocParamTool  = CompFactory.getComp("AFP::ToFLocParamDBTool")("ToFLocParamDBTool", loc_param_key="/FWD/AFP/ToFParameters/Local")
         else:
-                acc.merge(addFolders(flags, "/FWD/Onl/AFP/ToFParameters/Local<tag>AFPToFLoc-01</tag>", 'FWD_ONL', className='CondAttrListCollection', db='CONDBR2'))
+                acc.merge(addFolders(flags, "/FWD/Onl/AFP/ToFParameters/Local", 'FWD_ONL', className='CondAttrListCollection', db='CONDBR2'))
                 tofLocParamTool  = CompFactory.getComp("AFP::ToFLocParamDBTool")("ToFLocParamDBTool", loc_param_key="/FWD/Onl/AFP/ToFParameters/Local")
         
         basicTool0 = CompFactory.getComp("AFPTDBasicTool")("AFPTDBasicTool0", stationID=0, tofLocParamDBTool=tofLocParamTool, **kwargs)

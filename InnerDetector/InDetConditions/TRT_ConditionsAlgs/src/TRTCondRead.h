@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTCONDITIONSALGS_TRTCONDREAD_H
@@ -19,7 +19,6 @@
 #include "GaudiKernel/ICondSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
-#include "StoreGate/DataHandle.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "TRT_ConditionsData/RtRelationMultChanContainer.h"
 #include "TRT_ConditionsData/StrawT0MultChanContainer.h"
@@ -40,7 +39,7 @@ public:
     virtual ~TRTCondRead() override = default;
 
     virtual StatusCode initialize(void) override;
-    virtual StatusCode execute(void) override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize(void) override;
 
     /// create an TRTCond::ExpandedIdentifier from a TRTID identifier

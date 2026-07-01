@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloHECRetriever.h"
@@ -23,33 +23,7 @@ using Athena::Units::GeV;
 namespace JiveXML {
 
   /**
-   * This is the standard AthAlgTool constructor
-   * @param type   AlgTool type name
-   * @param name   AlgTool instance name
-   * @param parent AlgTools parent owning this tool
-   **/
-  CaloHECRetriever::CaloHECRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_calocell_id(nullptr)
-  {
-    //Only declare the interface
-    declareInterface<IDataRetriever>(this);
-    
-    declareInterface<IDataRetriever>(this);
-    declareProperty("HEClCellThreshold", m_cellThreshold = 50.);
-    declareProperty("RetrieveHEC" , m_hec = true);
-    declareProperty("DoBadHEC",     m_doBadHEC = false);
-    declareProperty("DoHECCellDetails",  m_doHECCellDetails = false); 
-    declareProperty("CellConditionCut", m_cellConditionCut = false);
-    declareProperty("LArChannelsToIgnoreM5",  m_LArChannelsToIgnoreM5);
-    declareProperty("DoMaskLArChannelsM5", m_doMaskLArChannelsM5 = false);
-
-    declareProperty("CellEnergyPrec", m_cellEnergyPrec = 3);
-    declareProperty("CellTimePrec", m_cellTimePrec = 3);
-  }
-
-  /**
-   * Initialise the ToolSvc
+   * Initialise the Tool
    */
 
   StatusCode CaloHECRetriever::initialize() {

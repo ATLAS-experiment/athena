@@ -28,7 +28,7 @@ class TBPlaneTrackingAlgo : public AthAlgorithm {
 
   // public methods //
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
  private:

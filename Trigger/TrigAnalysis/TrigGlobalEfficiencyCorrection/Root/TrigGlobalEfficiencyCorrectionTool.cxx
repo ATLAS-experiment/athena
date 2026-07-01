@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -29,6 +29,17 @@ using Calculator = TrigGlobEffCorr::Calculator;
 using ImportData = TrigGlobEffCorr::ImportData;
 using Efficiencies = TrigGlobEffCorr::Efficiencies;
 using Lepton = TrigGlobEffCorr::Lepton;
+
+namespace {
+
+template <class CONT>
+auto nth (const CONT& c, size_t n)
+{
+  return *(c.begin() + n);
+}
+
+} // anonymous namespace
+
 
 TrigGlobalEfficiencyCorrectionTool::TrigGlobalEfficiencyCorrectionTool(
     const std::string& name)
@@ -1163,9 +1174,9 @@ TrigGlobalEfficiencyCorrectionTool::getTwoLoosestLegs(
     return {0, 0};
   }
   std::pair<std::size_t, std::size_t> looseLegs{0, 0};
-  looseLegs.first = *legs.nth(ranking & 0xF);
+  looseLegs.first = nth (legs, ranking & 0xF);
   if (legs.size() >= 2)
-    looseLegs.second = *legs.nth((ranking >> 4) & 0xF);
+    looseLegs.second = nth (legs, (ranking >> 4) & 0xF);
   return looseLegs;
 }
 
@@ -1184,7 +1195,7 @@ std::size_t TrigGlobalEfficiencyCorrectionTool::getLoosestLegAboveThreshold(
     success = false;
     return 0;
   }
-  return *legs.nth(ranking & 0xF);
+  return nth (legs, ranking & 0xF);
 }
 
 std::vector<std::size_t> TrigGlobalEfficiencyCorrectionTool::getSortedLegs(
@@ -1197,7 +1208,7 @@ std::vector<std::size_t> TrigGlobalEfficiencyCorrectionTool::getSortedLegs(
   }
   std::vector<std::size_t> sorted_legs(nLegs);
   for (int i = 0; i < nLegs; ++i) {
-    sorted_legs[i] = *legs.nth(ranking & 0xF);
+    sorted_legs[i] = nth (legs, ranking & 0xF);
     ranking >>= 4;
   }
   return sorted_legs;

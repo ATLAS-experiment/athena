@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/QCDTruthJetFilter.h"
@@ -55,24 +55,23 @@ StatusCode QCDTruthJetFilter::filterFinalize() {
 }
 
 
-StatusCode QCDTruthJetFilter::filterEvent() {
+StatusCode QCDTruthJetFilter::filterEvent(const EventContext& ctx) {
   m_total++; // Bookkeeping
 
   // Grab random number engine
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_WARNING("Failed to retrieve random number engine QCDTruthJetFilter");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
 
   // Get jet container out
     // Get jet container out
-  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName};
+  SG::ReadHandle<xAOD::JetContainer>  truthjetTES{m_TruthJetContainerName, ctx};
   if (!truthjetTES.isValid()) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName.key());
-    setFilterPassed(m_minPtCut < 1);
+    setFilterPassed(m_minPtCut < 1, ctx);
     return StatusCode::SUCCESS;
   }
 
@@ -93,21 +92,21 @@ StatusCode QCDTruthJetFilter::filterEvent() {
   // See if the leading jet is in the right range
   if ((pt_lead<=m_minPtCut || (pt_lead>m_maxPtCut && m_maxPtCut>0)) && !(pt_lead<=m_minPtCut && m_minPtCut<1)) {
     m_ptfailed++;
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG("Failed filter on jet pT: " << pt_lead << " is not between " << m_minPtCut << " and " << m_maxPtCut);
     return StatusCode::SUCCESS;
   }
 
 // If appropriate, check the phi of the lead jet as well
   if (m_MinPhi > -999.0 || m_MaxPhi < 999.0) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
 
     if (phi_lead < m_MinPhi || phi_lead > m_MaxPhi) {
       ATH_MSG_DEBUG("Failed filter on jet phi: " << phi_lead << " not between " << m_MinPhi << " and " << m_MaxPhi);
       return StatusCode::SUCCESS;
     }
     else {
-      setFilterPassed(true);
+      setFilterPassed(true, ctx);
     }
   }
 
@@ -117,14 +116,14 @@ StatusCode QCDTruthJetFilter::filterEvent() {
   if (m_doShape) w = fitFn(pt_lead);
   double rnd = rndm->flat();
   if (m_high/w < rnd) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG("Event failed weighting cut. Weight is " << w << " for pt_lead of " << pt_lead << " high end is " << m_high << " rnd is " << rnd);
     return StatusCode::SUCCESS;
   }
 
   // Made it to the end - success!
   m_passed++;
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
 
   // Get MC event collection for setting weight
   const McEventCollection* mecc = 0;
@@ -138,9 +137,7 @@ StatusCode QCDTruthJetFilter::filterEvent() {
     if ((*mec)[i]->weights().size()>0) (*mec)[i]->weights()[0] = orig*w*m_norm;
     else (*mec)[i]->weights().push_back( w*m_norm*orig );
     
-#ifdef HEPMC3
-      (*mec)[i]->add_attribute("filterWeight", std::make_shared<HepMC3::DoubleAttribute>(w*m_norm));
-#endif
+      (*mec)[i]->add_attribute(HepMCStr::filterWeight, std::make_shared<HepMC3::DoubleAttribute>(w*m_norm));
 
   }
   return StatusCode::SUCCESS;

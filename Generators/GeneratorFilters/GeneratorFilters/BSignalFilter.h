@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ----------------------------------------------
@@ -16,14 +16,11 @@
 #define GENERATORFILTERSBSIGNALFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
-#include "GaudiKernel/NTuple.h"
-#include <vector>
+#include "GeneratorModules/GenData.h"
+#include <memory>
 
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "TTree.h"
-#include "TLorentzVector.h"
+
+class TLorentzVector;
 
 class BSignalFilter : public GenFilter
 {
@@ -33,7 +30,7 @@ class BSignalFilter : public GenFilter
   BSignalFilter(const std::string& name, ISvcLocator* pSvcLocator);
   //
   virtual StatusCode filterFinalize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
  
  private:
 
@@ -85,6 +82,7 @@ class BSignalFilter : public GenFilter
   
   // Print child (for debug)
   void PrintChild(const HepMC::ConstGenParticlePtr& child, const std::string& treeIDStr, const bool fromFinalB) const; 
+  std::shared_ptr<GenData> m_gendata{nullptr};
   
 };
 

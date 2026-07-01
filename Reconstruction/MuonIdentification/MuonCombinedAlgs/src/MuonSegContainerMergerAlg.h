@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDALGS_MUONSEGMENETMERGERALG_H
@@ -22,7 +22,7 @@
 
 class MuonSegContainerMergerAlg : public AthReentrantAlgorithm {
 public:
-    MuonSegContainerMergerAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     ~MuonSegContainerMergerAlg() = default;
 

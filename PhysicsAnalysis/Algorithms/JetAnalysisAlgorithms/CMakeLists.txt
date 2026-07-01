@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( JetAnalysisAlgorithms )
@@ -13,12 +13,12 @@ atlas_add_library( JetAnalysisAlgorithmsLib
    LINK_LIBRARIES xAODJet xAODMuon SelectionHelpersLib SystematicsHandlesLib
    AnaAlgorithmLib JetCalibToolsLib JetInterface
    JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib ${FASTJET_LIBRARIES}
+   TrigBtagEmulationToolLib TrigCompositeUtilsLib TrigConfHLTData TrigDecisionToolLib
    PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODMuon )
 
 atlas_add_component( JetAnalysisAlgorithms
    src/*.h src/*.cxx src/components/*.cxx
-   LINK_LIBRARIES AnaAlgorithmLib JetAnalysisInterfacesLib JetCPInterfaces JetCalibToolsLib
-   JetInterface SelectionHelpersLib SystematicsHandlesLib xAODJet JetAnalysisAlgorithmsLib )
+   LINK_LIBRARIES JetAnalysisAlgorithmsLib )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )

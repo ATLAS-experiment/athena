@@ -54,6 +54,8 @@
 #include <deque>
 #include <functional>
 #include <optional>
+#include <map>
+#include <cstdint> //for uint8_t
 
 
 /** Forward declarations **/
@@ -89,15 +91,16 @@ namespace VKalVrtAthena {
     VrtSecInclusive(const std::string& name, ISvcLocator* pSvcLocator);
 
     /** Default Destructor */
-    ~VrtSecInclusive();
+    virtual ~VrtSecInclusive() override;
 
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
-    virtual StatusCode execute();
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode initEvent();
 
   private:
-
+    StatusCode defineDummyCollections(const EventContext& ctx);
+    StatusCode dummyVertexContainer(const EventContext& ctx,
+				    const SG::WriteHandleKey<xAOD::VertexContainer>& handleKey);
     /////////////////////////////////////////////////////////
     //
     //  Member Variables
@@ -106,10 +109,10 @@ namespace VKalVrtAthena {
     // JO: GeoModel
     Gaudi::Property<int> m_geoModel{this, "GeoModel", VKalVrtAthena::GeoModel::Run2};
 
-    Gaudi::Property<std::string> m_TrackLocation{this, "TrackLocation", "InDetTrackParticles"};
-    Gaudi::Property<std::string> m_MuonLocation{this, "MuonLocation",  "Muons"};
-    Gaudi::Property<std::string> m_ElectronLocation{this, "ElectronLocation", "Electrons"};
-    Gaudi::Property<std::string> m_PrimVrtLocation{this, "PrimVrtLocation", "PrimaryVertices"};
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackLocation{this, "TrackLocation", "InDetTrackParticles"};
+    SG::ReadHandleKey<xAOD::MuonContainer> m_MuonLocation{this, "MuonLocation",  "Muons"};
+    SG::ReadHandleKey<xAOD::ElectronContainer> m_ElectronLocation{this, "ElectronLocation", "Electrons"};
+    SG::ReadHandleKey<xAOD::VertexContainer> m_PrimVrtLocation{this, "PrimVrtLocation", "PrimaryVertices"};
     Gaudi::Property<std::string> m_truthParticleContainerName{this, "McParticleContainer", "TruthParticles"};
     Gaudi::Property<std::string> m_mcEventContainerName{this, "MCEventContainer", "TruthEvents"};
     Gaudi::Property<std::string> m_augVerString{this, "AugmentingVersionString", "_VSI"};
@@ -293,8 +296,12 @@ namespace VKalVrtAthena {
 
     /** Read/Write Handle Keys **/
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey", "EventInfo", "EventInfo name"};
-    SG::WriteDecorHandleKey<xAOD::EventInfo> m_vertexingStatusKey;
-
+    SG::WriteHandleKey<xAOD::VertexContainer> m_vertexKey {this, "VertexKey", "", "Vertex key"};
+    SG::WriteHandleKey<xAOD::VertexContainer> m_twoTrksVertexKey {this, "TwoTracksVertexKey", "", "Two Tracks Vertex key"};
+    std::map<std::string, SG::WriteHandleKey<xAOD::VertexContainer>> m_intermediateVertexKey;
+    
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_vertexingStatusKey {this, "VertexingStatusKey", m_eventInfoKey, ""};
+    
     using IPDecoratorType = SG::AuxElement::Decorator< std::vector< std::vector<float> > >;
     std::vector< IPDecoratorType > m_ipDecors;
 
@@ -376,12 +383,12 @@ namespace VKalVrtAthena {
 
     /** select tracks which become seeds for vertex finding */
     void selectTrack( const xAOD::TrackParticle* );
-    StatusCode selectTracksInDet();
-    StatusCode selectTracksFromMuons();
-    StatusCode selectTracksFromElectrons();
-    StatusCode selectInDetAndGSFTracks();
+    StatusCode selectTracksInDet(const EventContext& ctx);
+    StatusCode selectTracksFromMuons(const EventContext& ctx);
+    StatusCode selectTracksFromElectrons(const EventContext& ctx);
+    StatusCode selectInDetAndGSFTracks(const EventContext& ctx);
 
-    using TrackSelectionAlg = StatusCode (VrtSecInclusive::*)();
+    using TrackSelectionAlg = StatusCode (VrtSecInclusive::*)(const EventContext&);
     std::vector<TrackSelectionAlg> m_trackSelectionAlgs;
 
     /** track selection */
@@ -403,33 +410,33 @@ namespace VKalVrtAthena {
     bool selectTrack_LRTR3Cut        ( const xAOD::TrackParticle* ) const;
 
     /** related to the graph method and verte finding */
-    StatusCode extractIncompatibleTrackPairs( std::vector<WrkVrt>* );
-    StatusCode findNtrackVertices(std::vector<WrkVrt>* );
-    StatusCode rearrangeTracks( std::vector<WrkVrt>* );
+    StatusCode extractIncompatibleTrackPairs( const EventContext& ctx, std::vector<WrkVrt>* );
+    StatusCode findNtrackVertices( const EventContext& ctx, std::vector<WrkVrt>* );
+    StatusCode rearrangeTracks( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** attempt to merge vertices when all tracks of a vertex A is close to vertex B in terms of impact parameter */
-    StatusCode reassembleVertices( std::vector<WrkVrt>* );
+    StatusCode reassembleVertices( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** attempt to merge splitted vertices when they are significantly distant
         due to the long-tail behavior of the vertex reconstruction resolution */
-    StatusCode mergeByShuffling( std::vector<WrkVrt>* );
+    StatusCode mergeByShuffling( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** attempt to merge vertices by lookng at the distance between two vertices */
-    StatusCode mergeFinalVertices( std::vector<WrkVrt>* ); // Kazuki
+    StatusCode mergeFinalVertices( const EventContext& ctx, std::vector<WrkVrt>* ); // Kazuki
 
     /** in addition to selected tracks, associate as much tracks as possible */
-    StatusCode associateNonSelectedTracks( std::vector<WrkVrt>* );
+    StatusCode associateNonSelectedTracks( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** finalization of the vertex and store to xAOD::VertexContainer */
-    StatusCode refitAndSelectGoodQualityVertices( std::vector<WrkVrt>* );
+    StatusCode refitAndSelectGoodQualityVertices( const EventContext& ctx, std::vector<WrkVrt>* );
 
     /** get secondary vertex impact parameters **/
-    bool getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors);
+    bool getSVImpactParameters(const EventContext& ctx, const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors);
 
     enum TrkParameter    { k_d0=0, k_z0=1, k_theta=2, k_phi=3, k_qOverP=4 ,k_nTP=5 };
     enum TrkParameterUnc { k_d0d0=0, k_z0z0=1, k_nTPU=2 };
 
-    using vertexingAlg = StatusCode (VrtSecInclusive::*)( std::vector<WrkVrt>* );
+    using vertexingAlg = StatusCode (VrtSecInclusive::*)( const EventContext&, std::vector<WrkVrt>* );
     std::vector< std::pair<std::string, vertexingAlg> > m_vertexingAlgorithms;
     unsigned m_vertexingAlgorithmStep = 0U;
 
@@ -442,22 +449,22 @@ namespace VKalVrtAthena {
     void printWrkSet(const std::vector<WrkVrt> *WrkVrtSet, const std::string& name);
 
     /** refit the vertex. */
-    StatusCode refitVertex( WrkVrt& );
+    StatusCode refitVertex( const EventContext&, WrkVrt& );
     StatusCode refitVertex( WrkVrt&, Trk::IVKalState& istate );
 
     /** refit the vertex with suggestion */
-    StatusCode refitVertexWithSuggestion( WrkVrt&, const Amg::Vector3D& );
+    StatusCode refitVertexWithSuggestion( const EventContext& ctx, WrkVrt&, const Amg::Vector3D& );
     StatusCode refitVertexWithSuggestion( WrkVrt&, const Amg::Vector3D&, Trk::IVKalState& istate );
 
     /** attempt to improve the vertex chi2 by removing the most-outlier track one by one until
         the vertex chi2 satisfies a certain condition. */
-    double improveVertexChi2( WrkVrt& );
+    double improveVertexChi2( const EventContext&, WrkVrt& );
 
     static void removeTrackFromVertex(std::vector<WrkVrt>*,
                                       std::vector< std::deque<long int> > *,
                                       const long int & ,const long int & );
 
-    StatusCode disassembleVertex(std::vector<WrkVrt> *, const unsigned& vertexIndex );
+    StatusCode disassembleVertex(const EventContext& ctx, std::vector<WrkVrt> *, const unsigned& vertexIndex );
 
     void trackClassification(std::vector< WrkVrt >* , std::map< long int, std::vector<long int> >& );
 
@@ -481,7 +488,7 @@ namespace VKalVrtAthena {
     static double findMinVerticesNextPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>& );
 
     /** the 2nd vertex is merged into the 1st vertex. A destructive operation. */
-    StatusCode mergeVertices( WrkVrt& destination, WrkVrt& source );
+    StatusCode mergeVertices( const EventContext& ctx, WrkVrt& destination, WrkVrt& source );
 
     enum mergeStep { RECONSTRUCT_NTRK, REASSEMBLE, SHUFFLE1, SHUFFLE2, SHUFFLE3, FINAL };
 
@@ -542,7 +549,8 @@ namespace VKalVrtAthena {
     template<class Track> void setIntersection(Track *trk, IntersectionPos *bec, const Trk::Perigee* per);
 
     /** monitor the intermediate status of vertexing */
-    StatusCode monitorVertexingAlgorithmStep( std::vector<WrkVrt>*, const std::string& name, bool final = false );
+    StatusCode monitorVertexingAlgorithmStep( const EventContext& ctx,
+					      std::vector<WrkVrt>*, const std::string& name, bool final = false );
 
     ////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -565,13 +573,14 @@ namespace VKalVrtAthena {
     //
 
     template<class LeptonFlavor>
-    StatusCode augmentDVimpactParametersToLeptons( const std::string& containerName );
+    StatusCode augmentDVimpactParametersToLeptons( const EventContext& ctx, const std::string& containerName );
 
     /** lock decorations at the end of the algorithm */
     void lockTrackDecorations( const xAOD::TrackParticle* trk, bool onlySelection ) const;
     void lockLeptonDecorations( const SG::AuxVectorData* cont ) const;
-    StatusCode lockTrackDecorations( bool onlySelection ) const;
+    StatusCode lockTrackDecorations( bool onlySelection, const EventContext& ctx ) const;
 
+    std::unordered_map<std::string, bool> m_vertexCollectionsDefinitions;
   };
 
 } // end of namespace bracket

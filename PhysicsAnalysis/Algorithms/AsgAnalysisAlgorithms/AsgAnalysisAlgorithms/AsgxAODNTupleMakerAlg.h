@@ -72,7 +72,7 @@ namespace CP {
       StatusCode initialize() override;
 
       /// Function executed once per event
-      StatusCode execute() override;
+      StatusCode execute(const EventContext& ctx) override;
 
       /// Function executed as part of the job finalisation
       StatusCode finalize() override;

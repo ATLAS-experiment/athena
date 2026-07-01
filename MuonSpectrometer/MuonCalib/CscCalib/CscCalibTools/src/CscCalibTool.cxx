@@ -3,7 +3,6 @@
 */
 
 #include "CscCalibTool.h"
-#include "StoreGate/DataHandle.h"
 
 #include <sstream>
 #include <cmath>

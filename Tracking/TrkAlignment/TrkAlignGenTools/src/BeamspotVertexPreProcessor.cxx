@@ -621,6 +621,8 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
   // configuration of the material effects needed for track fitter
   ParticleHypothesis particleHypothesis = Trk::ParticleSwitcher::particle[m_particleNumber];
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   // initialization the GX2 track fitter
   ToolHandle<Trk::IGlobalTrackFitter> fitter = m_trackFitter;
   if (!m_useSingleFitter && AlignTrack::isSLTrack(track) )
@@ -663,7 +665,7 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
   // @TODO This is a little inefficienct and should
   // be addressed when the alignment code is made MT safe
   if(newTrack){
-    Trk::Track* tmpTrk =  fitter->alignmentFit(alignCache,*newTrack,m_runOutlierRemoval,particleHypothesis);
+    Trk::Track* tmpTrk =  fitter->alignmentFit(ctx,alignCache,*newTrack,m_runOutlierRemoval,particleHypothesis);
     delete newTrack;
     newTrack = tmpTrk;
     if(!tmpTrk){
@@ -680,7 +682,7 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
   }
 
   if(!newTrack && m_doNormalRefit){
-      newTrack = fitter->alignmentFit(alignCache,*track,m_runOutlierRemoval,particleHypothesis);
+      newTrack = fitter->alignmentFit(ctx,alignCache,*track,m_runOutlierRemoval,particleHypothesis);
       type = AlignTrack::NormalRefitted;
       // this track failed the normal refit
       if (!newTrack)   {

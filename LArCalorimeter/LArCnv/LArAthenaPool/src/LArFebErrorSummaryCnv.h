@@ -19,7 +19,7 @@ class LArFebErrorSummaryCnv : public LArFebErrorSummaryCnvBase
 public:
   LArFebErrorSummaryCnv(ISvcLocator*);
  protected:
-  virtual LArFebErrorSummary* createTransient();
+  virtual LArFebErrorSummary* createTransient(const Token* token);
   virtual LArFebErrorSummary_PERSISTENT* createPersistent(LArFebErrorSummary*);
  private:
 

@@ -46,7 +46,7 @@ protected:
 
   virtual Lvl1Result_PERS* createPersistent (LVL1CTP::Lvl1Result* transCont);
 
-  virtual LVL1CTP::Lvl1Result* createTransient ();
+  virtual LVL1CTP::Lvl1Result* createTransient(const Token* token);
 
  private:
 

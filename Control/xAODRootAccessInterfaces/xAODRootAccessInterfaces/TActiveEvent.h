@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODROOTACCESSINTERFACES_TACTIVEEVENT_H
@@ -11,7 +11,6 @@ namespace xAOD {
 
    // Forward declaration(s):
    class TVirtualEvent;
-   class TEvent;
    class Event;
 
    /// @short Helper class for finding the active TVirtualEvent object
@@ -27,8 +26,7 @@ namespace xAOD {
    ///
    class TActiveEvent {
 
-      /// Allow the TEvent class to register itself at the right time
-      friend class TEvent;
+      /// Allow the Event class to register itself at the right time
       friend class Event;
 
    public:

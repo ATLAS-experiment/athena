@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaKernel/BaseInfo.icc
@@ -403,6 +403,7 @@ BaseInfoImpl<T>& BaseInfo<T>::instance()
   return s_instance;
 }
 
+//coverity[GLOBAL_INIT_ORDER]
 template <class T>
 BaseInfoImpl<T> BaseInfo<T>::s_instance;
 

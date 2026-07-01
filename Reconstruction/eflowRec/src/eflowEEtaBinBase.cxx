@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -40,7 +40,7 @@ int eflowEEtaBinBase::getEBinIndexLegacy(double e) const {
   int nEBins = getNumEBins();
   int bin = 0;
   for (int i = nEBins - 1; i > 0; i--) {
-    if (e > sqrt(m_eBinBounds[i - 1] * m_eBinBounds[i])) {
+    if (e > std::sqrt(m_eBinBounds[i - 1] * m_eBinBounds[i])) {
       bin = i;
       break;
     }
@@ -50,7 +50,7 @@ int eflowEEtaBinBase::getEBinIndexLegacy(double e) const {
 }
 
 int eflowEEtaBinBase::getEtaBinIndex(double eta) const {
-  if (m_useAbsEta) eta = fabs(eta);
+  if (m_useAbsEta) eta = std::fabs(eta);
 
   /* If eta is outside bin range, return highest/lowest bin to avoid binning failures
    * (in practice we always use absEta, so it can only be too high) */

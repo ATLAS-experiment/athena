@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_COMPONENTFACTORY_H
@@ -34,13 +34,10 @@ public:
 
   const std::string & getName() const {return m_name;}
 
-  // utility function to covert int to string
-  std::string intToString(int i) const;
-
 protected: 
-  InDetDD::SCT_DetectorManager* m_detectorManager;
-  SCT_GeometryManager* m_geometryManager;
-  SCT_MaterialManager* m_materials;
+  InDetDD::SCT_DetectorManager* m_detectorManager{};
+  SCT_GeometryManager* m_geometryManager{};
+  SCT_MaterialManager* m_materials{};
 
   double epsilon() const;
   virtual ~SCT_ComponentFactory();
@@ -60,14 +57,13 @@ public:
                              InDetDD::SCT_DetectorManager* detectorManager,
                              SCT_GeometryManager* geometryManager,
                              SCT_MaterialManager* materials=nullptr) :
-    SCT_ComponentFactory(name, detectorManager, geometryManager, materials),
-    m_physVolume(nullptr)
+    SCT_ComponentFactory(name, detectorManager, geometryManager, materials)
   {};
   
   GeoVPhysVol * getVolume() {return  m_physVolume;}
 
 protected:
-  GeoVPhysVol * m_physVolume;
+  GeoVPhysVol * m_physVolume{};
   virtual GeoVPhysVol * build() = 0;
 
 };
@@ -87,8 +83,8 @@ public:
   virtual GeoVPhysVol * build(SCT_Identifier id) = 0;
 
 protected:
-  const GeoLogVol * m_logVolume;
-  GeoModelIO::ReadGeoModel* m_sqliteReader;
+  const GeoLogVol * m_logVolume{};
+  GeoModelIO::ReadGeoModel* m_sqliteReader{};
 
   virtual const GeoLogVol * preBuild() = 0;
 

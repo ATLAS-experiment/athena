@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_MUON1.py
 # This defines the component accumulator version of DAOD_MUON1 
@@ -77,6 +77,7 @@ def Muon1SelectionCfg(flags,
         ### Accept every muon around a truth particle
         acc.merge(DiMuonTaggingAlgCfg(flags,
                                       name                    = "MuonTruthTagging",
+                                      TruthKey                = "TruthMuons",
                                       Mu1PtMin                = 2.*Units.GeV,
                                       Mu1RequireQual          = True,
                                       Mu2PtMin                = 60.*Units.TeV, # Dummy value
@@ -96,6 +97,7 @@ def Muon1SelectionCfg(flags,
 def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for MUON1"""
     acc = ComponentAccumulator()
+    stream_name= 'StreamDAOD_MUON1'
     
     kwargs.setdefault("MuonContainer", "Muons")
     kwargs.setdefault("IdTrkContainer", "InDetTrackParticles")
@@ -146,29 +148,28 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
     ### Track isolation deccorations
     from DerivationFrameworkMuons.TrackIsolationDecoratorConfig import TrackIsolationCfg
     acc.merge(TrackIsolationCfg(flags, 
-                                TrackCollection=kwargs["IdTrkContainer"], 
-                                TrackSelections = trkThinFlags))
+                                TrackCollection=kwargs["IdTrkContainer"]))
     acc.merge(TrackIsolationCfg(flags,
                                 TrackCollection=kwargs["MsTrkContainer"]))
     
     ### Calo deposits 
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonCaloDepositAlgCfg
     acc.merge(MuonCaloDepositAlgCfg(flags,
-                                    ContainerKey= kwargs["MuonContainer"],
-                                    TrackSelections = muonThinFlags))    
+                                    name = "MuonCaloDepositAlg",
+                                    ContainerKey= kwargs["MuonContainer"]))    
     acc.merge(MuonCaloDepositAlgCfg(flags,
-                                     name = "IdTrkCaloDepsitDecorator",
-                                     ContainerKey= kwargs["IdTrkContainer"],
-                                     TrackSelections = trkThinFlags))
+                                     name = "IdTrkCaloDepositDecorator",
+                                     ContainerKey= kwargs["IdTrkContainer"]))
     
     #### Extrapolation of the ID tracks to the trigger plane
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonTPExtrapolationAlgCfg 
     acc.merge(MuonTPExtrapolationAlgCfg(flags,
+                                        name = "MuonTPExtrapolationAlgMUON1",
                                         ContainerKey= kwargs["MuonContainer"],
                                         TrackSelections = ["passMuon1JPsi"]))
     
     acc.merge(MuonTPExtrapolationAlgCfg(flags,
-                                        name = "MuonTPTrigExtrapolation",
+                                        name = "MuonTPTrigExtrapolationMUON1",
                                         ContainerKey= kwargs["IdTrkContainer"],
                                         TrackSelections = ["passMuon1JPsi"]))
 
@@ -190,7 +191,6 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
 
     # Thinning tools
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
-    from DerivationFrameworkCalo.CaloCellDFGetterConfig import thinCaloCellsForDFCfg
     from DerivationFrameworkMuons.MuonsToolsConfig import AnalysisMuonThinningAlgCfg
     MUON1ThinningTools = [] 
     if kwargs["scheduleThinning"]:
@@ -198,18 +198,19 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
         if fwdTracks not in flags.Input.Collections:
           fwdTracks = ""
         acc.merge(AnalysisMuonThinningAlgCfg(flags,
-                                             MuonPassFlags = ["{cont}.{passDecor}".format(cont = kwargs["MuonContainer"],
-                                                                                          passDecor = passDecor) for passDecor in muonThinFlags],
-                                             TrkPassFlags =["{cont}.{passDecor}".format(cont = kwargs["IdTrkContainer"],
-                                                                                        passDecor = passDecor) for passDecor in trkThinFlags],
-                                             IdTrkFwdThinning=fwdTracks,
-                                             StreamName = kwargs['StreamName']))
+                             name = "AnalysisMuonThinningAlgMUON1",
+                             MuonPassFlags = ["{cont}.{passDecor}".format(cont = kwargs["MuonContainer"],
+                                                  passDecor = passDecor) for passDecor in muonThinFlags],
+                             TrkPassFlags =["{cont}.{passDecor}".format(cont = kwargs["IdTrkContainer"],
+                                                passDecor = passDecor) for passDecor in trkThinFlags],
+                             IdTrkFwdThinning=fwdTracks,
+                             StreamName = stream_name))
 
 
         # keep topoclusters around muons
         MUON1ThinningTool1 = acc.getPrimaryAndMerge(CaloClusterThinningCfg(flags,
                                                                            name                    = "MUON1ThinningTool4",
-                                                                           StreamName              = kwargs['StreamName'],
+                                                                           StreamName              = stream_name,
                                                                            SGKey                   = "Muons",
                                                                            SelectionString         = "Muons.pt>4*GeV",
                                                                            TopoClCollectionSGKey   = "CaloCalTopoClusters",
@@ -217,16 +218,19 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
         MUON1ThinningTools.append(MUON1ThinningTool1)
     
         ### cell thinning
-        acc.merge(thinCaloCellsForDFCfg(flags,
-                                        inputClusterKeys = ["MuonClusterCollection"],
-                                        streamName       = kwargs['StreamName'],
-                                        outputCellKey    = "DFMUONCellContainer"))
+        muon1CellThinAlg = CompFactory.CaloThinCellsByClusterAlg(
+            'MUON1_CaloThinCellsByClusterAlg_MuonClusterCollection',
+            StreamName = stream_name,
+            Clusters   = 'MuonClusterCollection',
+            Cells      = 'AllCalo')
+        acc.addEventAlgo(muon1CellThinAlg)
+                                        
 
         ### Tracks associated with fitted vertices
         from DerivationFrameworkBPhys.commonBPHYMethodsCfg import Thin_vtxTrkCfg 
         MUON1Thin_vtxTrk = acc.getPrimaryAndMerge(Thin_vtxTrkCfg(flags,
                                                                  name                       = "MUON1Thin_vtxTrk",
-                                                                 StreamName                 = kwargs['StreamName'],
+                                                                 StreamName                 = stream_name,
                                                                  TrackParticleContainerName = "InDetTrackParticles",
                                                                  VertexContainerNames       = ["Muon1JpsiCandidates"],
                                                                  PassFlags                  = ["passed_Jpsi"] ))
@@ -237,7 +241,7 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
             from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import MenuTruthThinningCfg
             MUON1TruthThinningTool = acc.getPrimaryAndMerge(MenuTruthThinningCfg(flags,
                                                                                  name                            = "MUON1TruthThinningTool",
-                                                                                 StreamName                      = kwargs['StreamName'],
+                                                                                 StreamName                      = stream_name,
                                                                                  WritePartons                    = False,
                                                                                  WriteHadrons                    = False,
                                                                                  WriteCHadrons                   = False,
@@ -335,7 +339,6 @@ def MUON1Cfg(flags):
                                             "TauJets_MuonRM",
                                             "DiTauJets",
                                             "DiTauJetsLowPt",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                           ]
     
@@ -357,8 +360,8 @@ def MUON1Cfg(flags):
     from IsolationSelection.IsolationSelectionConfig import setupIsoCloseBySlimmingVariables
     setupIsoCloseBySlimmingVariables(MUON1SlimmingHelper)
     # Extra content
-    MUON1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                           "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+    MUON1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+                                           "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                            "TruthPrimaryVertices.t.x.y.z",
                                            "PrimaryVertices.trackWeights",
                                            "MuonSegments.chiSquared.numberDoF.nPrecisionHits.x.y.z",

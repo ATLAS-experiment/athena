@@ -26,12 +26,10 @@
 #include "CLHEP/Vector/LorentzVector.h"
 #include "TestTools/leakcheck.h"
 #include "TestTools/random.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "CxxUtils/checker_macros.h"
 #include <cassert>
 
 
-#include "AthenaPoolCnvSvc/Compressor.h"
 #include "CaloClusterContainerCnvTest_p7.icc"
 #include "CaloClusterContainerCnvTest_p6.icc"
 
@@ -308,7 +306,6 @@ void testit (const CaloClusterContainer& clust, int version)
 int main ATLAS_NOT_THREAD_SAFE ()
 {
   errorcheck::ReportMessage::hideErrorLocus();
-  (void)Gaudi::Hive::currentContext();
   auto store = SGTest::getTestStore();
   Athena::getMessageSvc();
   AthenaBarCodeImpl abci;

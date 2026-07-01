@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.cxx - helper class for IOVDbSvc to manage folder & data cache
 // Richard Hawkings, started 24/11/08
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 #include "GaudiKernel/GenericAddress.h"
@@ -107,8 +108,26 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_cachepar = folderprop.cache();
   // check for <noover> - disables using tag override read from input file
   m_notagoverride=folderprop.noTagOverride();
+
+  std::string dbconn;
+  folderprop.getKey("db", "",dbconn);
+  if (dbconn.find("crest")!=std::string::npos) {
+    //CREST override for this folder
+    m_source="CREST";
+    //strip crest_fs prefix ... 
+    const std::string fsPrefix("crest_fs:");
+    if (dbconn.starts_with(fsPrefix)) dbconn=dbconn.substr(fsPrefix.size());
+    ATH_MSG_INFO("Crest server for folder " << m_foldername << " overridden to " << dbconn);
+    m_crestServer=dbconn;  
+    if (!m_jotag.empty()) {
+      ATH_MSG_INFO("Crest Tag " << m_crestTag << " overridden by job options to " << m_jotag);
+      m_crestTag=m_jotag;
+    }
+  }
+
+
   if (m_source == "CREST"){
-    m_crest_mng.emplace(CoralCrestManager(crestServer,m_crestTag));
+    m_crest_mng.emplace(CoralCrestManager(m_crestServer,m_crestTag));
   }
   if (m_notagoverride) ATH_MSG_INFO( "Inputfile tag override disabled for " << m_foldername );
 
@@ -1018,7 +1037,7 @@ IOVDbFolder::resolveTag(const cool::IFolderPtr& fptr,const std::string& globalTa
       if (IOVDbNamespace::looksLikeMagicTag(restag) and not magicTag(restag)) return false;
       tag=std::move(restag);
     }catch (cool::Exception& e) {
-      ATH_MSG_ERROR( "Tag " << tag <<" cannot be resolved for folder " << m_foldername );
+      ATH_MSG_ERROR( "Tag " << tag <<" cannot be resolved for folder " << m_foldername << ": " << e.domain() << "/" << e.what() );
       return false;
     }
   }
@@ -1061,6 +1080,7 @@ IOVDbFolder::addMetaAttrList(const coral::AttributeList& atrlist,
 
 bool 
 IOVDbFolder::addMetaAttrListColl(const CondAttrListCollection* coll) {
+  if (!coll) return false;
   // send given payload to folder metadata
   // make a new CondAttrListCollection for the payload
   CondAttrListCollection* flmdColl=new CondAttrListCollection(*coll);
@@ -1162,18 +1182,18 @@ void IOVDbFolder::dumpFile(const std::string& dumpName
   myFile<<s_openJson;
   if(json) {
     // Dump COOL data
-    myFile<<json->description()<<s_delimiterJson<<std::endl;
-    myFile<<json->payloadSpec()<<s_delimiterJson<<std::endl;
+    myFile<<json->description()<<s_delimiterJson<<'\n';
+    myFile<<json->payloadSpec()<<s_delimiterJson<<'\n';
     if(!skipCoolIoV) {
-      myFile<<json->iov()<<s_delimiterJson<<std::endl;
+      myFile<<json->iov()<<s_delimiterJson<<'\n';
     }
-    myFile<<json->payload()<<std::endl;
+    myFile<<json->payload()<<'\n';
   }
   else {
     // Dump CREST data
-    myFile<<"\"node_description\" : \""<<m_folderDescription<< '\"'<<s_delimiterJson<<std::endl;
-    myFile<<"\"folder_payloadspec\": \""<<mng->getPayloadSpec()<< '\"'<<s_delimiterJson<<std::endl;
-    myFile<<"\"data_array\" : "<<mng->dumpPayload(crestVkey)<<std::endl;
+    myFile<<"\"node_description\" : \""<<m_folderDescription<< '\"'<<s_delimiterJson<<'\n';
+    myFile<<"\"folder_payloadspec\": \""<<mng->getPayloadSpec()<< '\"'<<s_delimiterJson<<'\n';
+    myFile<<"\"data_array\" : "<<mng->dumpPayload(crestVkey)<<'\n';
   }
   myFile<<s_closeJson;
 }

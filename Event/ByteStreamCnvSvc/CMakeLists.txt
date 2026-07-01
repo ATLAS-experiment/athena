@@ -85,6 +85,23 @@ atlas_add_test( ByteStreamMetadataToolTest
     TestTools
   POST_EXEC_SCRIPT noerror.sh )
 
+atlas_add_test( MCEventInfoByteStreamToolTest
+  SOURCES test/MCEventInfoByteStreamTool_test.cxx
+  INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
+  LINK_LIBRARIES
+    ${TDAQ-COMMON_LIBRARIES}
+    AthenaBaseComps
+    AthenaKernel
+    ByteStreamCnvSvcBaseLib
+    ByteStreamData
+    GaudiKernel
+    GoogleTestTools
+    StoreGateLib
+    TestTools
+    CxxUtils
+    xAODEventInfo
+  POST_EXEC_SCRIPT noerror.sh )
+
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -133,10 +133,9 @@ StatusCode VertexSeedFinderTestAlg::initialize()
 /**
  * @brief Standard Gaudi execute method.
  */
-StatusCode VertexSeedFinderTestAlg::execute()
+StatusCode VertexSeedFinderTestAlg::execute(const EventContext& ctx)
 {
   ATH_MSG_INFO ("execute");
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   double vx = 0;
   double vy = 0;

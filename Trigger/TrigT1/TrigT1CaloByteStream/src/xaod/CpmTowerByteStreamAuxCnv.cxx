@@ -60,7 +60,7 @@ CpmTowerByteStreamAuxCnv::CpmTowerByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& CpmTowerByteStreamAuxCnv::classID() {
+CLID CpmTowerByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::CPMTowerAuxContainer>::ID();
 }
 
@@ -88,6 +88,7 @@ StatusCode CpmTowerByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   ByteStreamAddress *pBS_Addr = dynamic_cast<ByteStreamAddress *>(pAddr);
   if (not pBS_Addr) return StatusCode::FAILURE;
   // -------------------------------------------------------------------------
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *(pBS_Addr->par());
   ATH_MSG_DEBUG("Creating Objects " << nm);
 
@@ -96,7 +97,7 @@ StatusCode CpmTowerByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   cpmCollection.setStore(aux);
   // -------------------------------------------------------------------------
   DataVector<LVL1::CPMTower> cpmTowerVector;
-  StatusCode sc = m_cpmReadTool->convert(nm, &cpmTowerVector);
+  StatusCode sc = m_cpmReadTool->convert(ctx, nm, &cpmTowerVector);
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to create objects");
     delete aux;

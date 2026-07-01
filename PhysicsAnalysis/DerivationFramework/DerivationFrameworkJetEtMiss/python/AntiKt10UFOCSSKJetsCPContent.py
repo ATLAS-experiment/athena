@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 AntiKt10UFOCSSKJetsCPContent = [
 "AntiKt10UFOCSSKJets",
+"AntiKt10UFOCSSKJetsAux.pt.eta.phi.m.numConstit",
 "AntiKt10UFOCSSKJetsAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m",
 "AntiKt10UFOCSSKJetsAux.PartonTruthLabelID.DetectorEta.DetectorY",
 "AntiKt10UFOCSSKJetsAux.GhostBHadronsFinalCount.GhostHBosonsCount.GhostTQuarksFinalCount.GhostTrack.GhostWBosonsCount.GhostZBosonsCount",

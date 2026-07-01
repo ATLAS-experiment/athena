@@ -17,7 +17,7 @@ def LArRawDataReadingCfg(flags, **kwargs):
     if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("LArDigitKey", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
         kwargs.setdefault("LArFebHeaderKey", "LArFebHeader")
-    if flags.LAr.RawChannelSource is RawChannelSource.Calculated or flags.Overlay.DataOverlay:
+    elif flags.LAr.RawChannelSource is RawChannelSource.Calculated or flags.Overlay.DataOverlay:
         kwargs.setdefault("LArRawChannelKey", "")
 
     print('LArRawDataReadingCfg flags.LAr.RawChannelSource ',flags.LAr.RawChannelSource)
@@ -34,10 +34,12 @@ if __name__=="__main__":
     from AthenaCommon.Constants import DEBUG
     log.setLevel(DEBUG)
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags, defaultConditionsTags
     flags.LAr.doAlign=False
     flags.Exec.OutputLevel=DEBUG
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_DATA
     flags.lock()
 
     acc = MainServicesCfg( flags )
@@ -48,5 +50,5 @@ if __name__=="__main__":
     acc.merge(LArOnOffIdMappingCfg(flags))
     acc.addEventAlgo(DumpLArRawChannels(LArRawChannelContainerName="LArRawChannels",))
 
-    acc.run(2)
+    acc.run(10)
 

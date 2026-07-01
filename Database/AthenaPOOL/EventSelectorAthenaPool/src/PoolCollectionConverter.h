@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLCOLLECTIONCONVERTER_H
@@ -11,6 +11,7 @@
  **/
 
 #include <string>
+#include <memory>
 
 // Forward declarations
 class IPoolSvc;
@@ -57,7 +58,7 @@ private: // data
    unsigned int m_contextId;
    const IPoolSvc* m_poolSvc;
    pool::ICollection* m_poolCollection;
-   pool::ICollectionCursor* m_collectionCursor;
+   std::unique_ptr<pool::ICollectionCursor> m_collectionCursor;
 
 private: // hide copy and assignment
    PoolCollectionConverter(const PoolCollectionConverter& rhs);

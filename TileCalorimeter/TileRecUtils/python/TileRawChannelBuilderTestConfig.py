@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileRecUtils/python/TileRawChannelBuilderTestConfig.py
 # Author: sss
@@ -225,6 +225,7 @@ class PrepareDataAlg (Alg):
                 chan = ROOT.TileRawChannel (hwid, *data)
             chan.setPedestal (0)
             coll.push_back (chan)
+            ROOT.SetOwnership (chan, False)
 
         return coll
 
@@ -354,6 +355,7 @@ class TestAlg (Alg):
                 hwid = ROOT.HWIdentifier (addr)
                 chan = ROOT.TileDigits (hwid, TestAlg.make_vec (data))
             coll.push_back (chan)
+            ROOT.SetOwnership (chan, False)
 
         return coll
 

@@ -61,14 +61,14 @@ StatusCode TrackVertexAssoTestAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrackVertexAssoTestAlg::execute()
+StatusCode TrackVertexAssoTestAlg::execute(const EventContext& ctx)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   // retrieve containers
-  SG::ReadHandle<xAOD::TrackParticleContainer> trkCont(m_trkContname);
+  SG::ReadHandle<xAOD::TrackParticleContainer> trkCont(m_trkContname, ctx);
 
-  SG::ReadHandle<xAOD::VertexContainer> vxCont(m_vertexContname);
+  SG::ReadHandle<xAOD::VertexContainer> vxCont(m_vertexContname, ctx);
 
   if (!trkCont.isValid() || !vxCont.isValid()) {
     if (!trkCont.isValid()) ATH_MSG_ERROR("TrackParticle container not found");

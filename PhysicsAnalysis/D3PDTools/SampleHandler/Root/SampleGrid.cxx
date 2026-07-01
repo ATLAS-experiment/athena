@@ -2,14 +2,7 @@
   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -23,7 +16,6 @@
 #include <SampleHandler/MetaFields.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/SampleLocal.h>
-#include <SampleHandler/SamplePtr.h>
 #include <memory>
 
 //
@@ -79,7 +71,7 @@ namespace SH
 
 
 
-  SamplePtr SampleGrid ::
+  std::unique_ptr<SampleLocal> SampleGrid ::
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
@@ -87,7 +79,7 @@ namespace SH
     std::unique_ptr<SampleLocal> result (new SampleLocal (name()));
     for (auto& file : makeFileList ())
       result->add (file.c_str());
-    return SamplePtr (result.release());
+    return result;
   }
 
 

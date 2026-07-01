@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -14,7 +14,6 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbTypeInfo.h"
-#include "StorageSvc/Transaction.h"
 
 // Local implementation files
 #include "RNTupleContainer.h"
@@ -57,8 +56,7 @@ const std::string RNTupleContainer::FieldDesc::typeName() {
 /// Standard constructor
 RNTupleContainer::RNTupleContainer(const std::string& name) :
    DbContainerImp(name),
-   m_type(nullptr),
-   m_dbH(POOL_StorageType), m_rootDb(nullptr),
+   m_dbH(pool::POOL_StorageType), m_rootDb(nullptr),
    m_ioBytes(0), m_isDirty(false),
    m_index(0), m_indexSize(0), m_indexBump(0), m_indexMulti( getpid() )
 { }
@@ -76,7 +74,7 @@ uint64_t RNTupleContainer::size() {
 
 /// Open the container for object access
 StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
-                                   const DbTypeInfo* info, DbAccessMode mode)
+                                   const DbTypeInfo* info, Io::IoFlag mode)
 {
    m_name = nam;
    m_fieldDescs.clear();
@@ -127,7 +125,7 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       }
    }
 
-   if( mode & pool::CREATE ) {
+   if( mode == Io::WRITE || mode == Io::APPEND ) {
       m_ntupleWriter = m_rootDb->getNTupleWriter(ntupleName, true);
       if( m_ntupleWriter ) {
          ATH_MSG_DEBUG("Created container " << m_name
@@ -144,7 +142,7 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          m_ntupleWriter->addField( dsc.fieldname, dsc.typeName() );
       }
    }
-   else if( mode & (pool::READ | pool::UPDATE) ) {
+   else if( mode == Io::READ ) {
       // create (and keep in the description object) the rntuple field for reading
       m_ntupleReader = m_rootDb->getNTupleReader(ntupleName);
       if( m_ntupleReader ) {
@@ -154,12 +152,7 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          return StatusCode::FAILURE;
       }
       for( auto& dsc : m_fieldDescs ) {
-         if( info->clazz().Name()=="pool::DbString" ) {
-            dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, typeid(std::string));
-         } else {
-            // Can't use type_info because of default template argument in DataVectors ATEAM-1087
-            dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, info->clazz().Name());
-         }
+         dsc.view = m_ntupleReader->GetView(dsc.fieldname, nullptr, dsc.typeName());
          if( dsc.auxdyn_writer ) {
             // Attach RNTuple Reader (owned by the DB)
             const std::string type_name = dsc.view->GetField().GetTypeName();
@@ -176,7 +169,6 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
    ATH_MSG_DEBUG("Opened container " << m_name << " of type "
        << ROOTRNTUPLE_StorageType.storageName());
    m_dbH = dbH;
-   m_type = info;
    return StatusCode::SUCCESS;
 }
 
@@ -299,7 +291,8 @@ StatusCode RNTupleContainer::writeObject( ActionList::value_type& action )
       m_ntupleWriter->addFieldValue( dsc.fieldname, ptr );
       // fill the index field
       m_index = action.link.second;
-      m_ntupleWriter->addFieldValue( "index_ref", &m_index );
+      const static std::string idxRefStr{"index_ref"};
+      m_ntupleWriter->addFieldValue( idxRefStr, &m_index );
       ATH_MSG_VERBOSE("Setting index for " << dsc.fieldname << " to " << std::hex << m_index << std::dec);
       m_indexSize++;
    }
@@ -369,25 +362,25 @@ StatusCode RNTupleContainer::getOption(DbOption& opt) {
         desc.auxdyn_reader->resetBytesRead();
       }
     }
-    return opt._setValue((int)m_ioBytes);
+    return opt.setValue((int)m_ioBytes);
   } else if (::toupper(n[0]) == 'T' and opt.name().length() > 9) {
     switch (::toupper(n[8])) {
       case 'E':
         if (!strcasecmp(n + 5, "ENTRIES"))
-          return opt._setValue(int(m_ntupleReader->GetNEntries()));
+          return opt.setValue(int(m_ntupleReader->GetNEntries()));
         break;
       case 'T':
         if (!strcasecmp(n + 5, "TOTAL_BYTES")) {
           // metrics must be enabled
           // MN: need to learn how to use Metrics
           // const Detail::RNTupleMetrics& metr = m_ntupleReader->GetMetrics();
-          return opt._setValue((double)0);
+          return opt.setValue((double)0);
         }
         break;
       case 'Z':
         if (!strcasecmp(n + 5, "ZIP_BYTES")) {
           // MN TODO
-          return opt._setValue(double(0));
+          return opt.setValue(double(0));
         }
         break;
     }
@@ -404,7 +397,7 @@ StatusCode RNTupleContainer::setOption(const DbOption& opt) {
         if (!strcasecmp(n + 8, "SOME_RNTUPLE_OPTION")) {
           // so far no real options to set
           int val = 1;
-          StatusCode sc = opt._getValue(val);
+          StatusCode sc = opt.getValue(val);
           if( sc.isSuccess() ) {
             ATH_MSG_VERBOSE("Setting SOME_RNTUPLE_OPTION to " << val);
           }
@@ -439,7 +432,7 @@ StatusCode RNTupleContainer::store(const void* object, DbContainer& cntH, ShapeH
 
 /// Close the container and deallocate resources
 StatusCode RNTupleContainer::close() {
-  m_dbH = DbDatabase(POOL_StorageType);
+  m_dbH = DbDatabase(pool::POOL_StorageType);
   m_fieldDescs.clear();
   m_rootDb = nullptr;
   return DbContainerImp::close();

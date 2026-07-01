@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package's name.
 atlas_subdir( AthExTriton )
@@ -13,14 +13,22 @@ atlas_add_component( AthExTriton
 atlas_install_python_modules( python/*.py
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-# disabled the unit tests for now  as they require a Triton server available.
-
 # Test the packages
-# atlas_add_test( AthExTritonTest
-#    SCRIPT python -m AthExTriton.AthExTriton_test
-#    POST_EXEC_SCRIPT noerror.sh )
+atlas_add_test( AthExTritonTest
+   SCRIPT python -m AthExTriton.AthExTriton_test
+   LOG_IGNORE_PATTERN "ERROR Locating dev file"  # OK for this example unit test
+   PROPERTIES SKIP_RETURN_CODE 2
+   POST_EXEC_SCRIPT noerror.sh )
 
+# This is still disabled because it would fail if the above test is skipped
 # atlas_add_test( AthExTritonTest_pkl
 #    SCRIPT athena --evtMax 2 test_AthExTritonCfg.pkl
 #    DEPENDS AthExTritonTest
-#    POST_EXEC_SCRIPT noerror.sh )
+#    PROPERTIES SKIP_RETURN_CODE 2
+#    POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( AthExTritonAsyncTest
+   SCRIPT python -m AthExTriton.AthExTritonAsync_test
+   LOG_IGNORE_PATTERN "ERROR Locating dev file"  # OK for this example unit test
+   PROPERTIES SKIP_RETURN_CODE 2
+   POST_EXEC_SCRIPT noerror.sh )

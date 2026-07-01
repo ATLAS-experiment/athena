@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -12,8 +12,12 @@
 namespace Gep {
 
 
-EratioMaker::EratioMaker(const GepCellMap& caloCellsMap)
-    : m_caloCellsMap{caloCellsMap}
+EratioMaker::EratioMaker(const GepCellMap& caloCellsMap,
+                         unsigned int etaWindowHalfSize,
+                         unsigned int phiWindowHalfSize)
+    : m_caloCellsMap{caloCellsMap},
+      m_etaWindowHalfSize{etaWindowHalfSize},
+      m_phiWindowHalfSize{phiWindowHalfSize}
 {
 
 }
@@ -26,7 +30,12 @@ EratioMaker::EratioMaker(const GepCellMap& caloCellsMap)
 std::vector<std::vector<GepCaloCell>>
 EratioMaker::makeWindow(const ROOT::Math::PtEtaPhiEVector &seed) const
 {
-    std::vector<std::vector<GepCaloCell>> window(17, std::vector<GepCaloCell>(3));
+
+    // Window dimensions set based on configured half sizes
+    unsigned int etaWindowSize = 2 * m_etaWindowHalfSize + 1;
+    unsigned int phiWindowSize = 2 * m_phiWindowHalfSize + 1;  
+
+    std::vector<std::vector<GepCaloCell>> window(etaWindowSize, std::vector<GepCaloCell>(phiWindowSize));
 
     auto cellMap = m_caloCellsMap.getCellMap();
     

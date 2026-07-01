@@ -270,11 +270,7 @@ bool iGeant4::Geant4TruthIncident::particleAlive(const G4Track *track) const {
   return true;
 }
 
-#ifdef HEPMC3
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const int, const bool secondary) const {
-#else
-HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const int barcode, const bool secondary) const {
-#endif
 
   const G4ThreeVector & mom =  track->GetMomentum();
   const double energy =  track->GetTotalEnergy();
@@ -302,23 +298,6 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
     // that we want to be able to easily identify such particles.
   }
   HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(fourMomentum, pdgCode, status);
-
-#ifndef HEPMC3
-  // This should be a *secondary* track.  If it has a primary, it was a decay and
-  //  we are running with quasi-stable particle simulation.  Note that if the primary
-  //  track is passed in as a secondary that survived the interaction, then this was
-  //  *not* a decay and we should not treat it in this way
-  if (secondary &&
-      track->GetDynamicParticle() &&
-      track->GetDynamicParticle()->GetPrimaryParticle() &&
-      track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation()){
-    // Then the new particle should use the same barcode as the old one!!
-    PrimaryParticleInformation* primaryPartInfo = dynamic_cast<PrimaryParticleInformation*>( track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation() );
-    HepMC::suggest_barcode( newParticle, primaryPartInfo->GetParticleBarcode() );
-  } else {
-    HepMC::suggest_barcode( newParticle, barcode );
-  }
-#endif
 
   return newParticle;
 }

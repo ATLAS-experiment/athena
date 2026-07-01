@@ -19,7 +19,7 @@ CaloCalibrationHitContainer_PERS* CaloCalibrationHitContainerCnv::createPersiste
 }
 
 
-CaloCalibrationHitContainer* CaloCalibrationHitContainerCnv::createTransient() {
+CaloCalibrationHitContainer* CaloCalibrationHitContainerCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "CaloCalibrationHitContainerConverter" );
     CaloCalibrationHitContainerCnv_p1   converter_p1;
     CaloCalibrationHitContainerCnv_p2   converter_p2;
@@ -33,25 +33,25 @@ CaloCalibrationHitContainer* CaloCalibrationHitContainerCnv::createTransient() {
     static const pool::Guid  p4_guid("0191C6F6-90B5-7B57-861D-6865CE3FDF69");
     static const pool::Guid  p0_guid("33CDAED0-F472-47D2-8F28-27C6D6761F35");
 
-    if( this->compareClassGuid(p4_guid)) {
-      std::unique_ptr< CaloCalibrationHitContainer_p4 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p4 >() );
+    if( this->compareClassGuid(token, p4_guid)) {
+      std::unique_ptr< CaloCalibrationHitContainer_p4 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p4 >(token) );
       trans_cont = converter_p4.createTransient( col_vect.get(), mlog );
     }
-    else if( this->compareClassGuid(p3_guid)) {
-      std::unique_ptr< CaloCalibrationHitContainer_p3 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p3 >() );
+    else if( this->compareClassGuid(token, p3_guid)) {
+      std::unique_ptr< CaloCalibrationHitContainer_p3 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p3 >(token) );
       trans_cont = converter_p3.createTransient( col_vect.get(), mlog );
     }
-    else if( this->compareClassGuid(p2_guid)) {
-      std::unique_ptr< CaloCalibrationHitContainer_p2 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p2 >() );
+    else if( this->compareClassGuid(token, p2_guid)) {
+      std::unique_ptr< CaloCalibrationHitContainer_p2 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p2 >(token) );
       trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
     }
-    else if( this->compareClassGuid(p1_guid)) {
-        std::unique_ptr< CaloCalibrationHitContainer_p1 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p1 >() );
+    else if( this->compareClassGuid(token, p1_guid)) {
+        std::unique_ptr< CaloCalibrationHitContainer_p1 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p1 >(token) );
         trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
     }
-    else if( this->compareClassGuid(p0_guid)) {
+    else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation, just return it
-        trans_cont = this->poolReadObject<CaloCalibrationHitContainer>();
+        trans_cont = this->poolReadObject<CaloCalibrationHitContainer>(token);
     }  else {
         throw std::runtime_error("Unsupported persistent version of Data container");
     }

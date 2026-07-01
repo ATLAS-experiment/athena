@@ -6,11 +6,14 @@
 #include "TrackWriteFastSim/TrackFastSimSD.h"
 
 // Athena headers
+#include "HitManagement/HitCollectionMap.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 // Geant4 headers
 #include "G4ChargedGeantino.hh"
 #include "G4DynamicParticle.hh"
+#include "G4EventManager.hh"
 #include "G4Geantino.hh"
 #include "G4Track.hh"
 #include "G4VPhysicalVolume.hh"
@@ -18,18 +21,19 @@
 
 // STL headers
 #include <cmath>
+#include <memory>
 
 TrackFastSimSD::TrackFastSimSD(const std::string& name, const std::string& outputCollectionName, const int SD_type)
   : G4VSensitiveDetector( name )
-  , m_trackRecordCollection( outputCollectionName )
+  , m_outputCollectionName( outputCollectionName )
   , m_SD_type( SD_type )
 {
 }
 
-// Initialize from G4 - necessary to new the write handle for now
+// Initialize from G4.
 void TrackFastSimSD::Initialize(G4HCofThisEvent *)
 {
-  if (!m_trackRecordCollection.isValid()) m_trackRecordCollection = std::make_unique<TrackRecordCollection>(m_trackRecordCollection.name());
+  m_trackRecordCollection = getTrackRecordCollection();
 }
 
 G4bool TrackFastSimSD::ProcessHits(G4Step* aStep,G4TouchableHistory* )
@@ -80,18 +84,15 @@ G4bool TrackFastSimSD::ProcessHits(G4Step* aStep,G4TouchableHistory* )
   const int status = trHelp.GetStatus();
 
   //create the TimedTrackRecord
-  m_trackRecordCollection->Emplace(
-                                   pdgcode,
-                                   status,
-                                   ener,
-                                   mom,
-                                   pos,
-                                   time,
-                                   barcode, // FIXME barcode based
-                                   id,
-                                   preVol->GetName());
-
-  return true;
+  return AddHit(pdgcode,
+                status,
+                ener,
+                mom,
+                pos,
+                time,
+                barcode, // FIXME barcode based
+                id,
+                preVol->GetName());
 }
 
 void TrackFastSimSD::WriteTrack(const G4Track* track, const bool originPos, const bool originMom)
@@ -117,15 +118,31 @@ void TrackFastSimSD::WriteTrack(const G4Track* track, const bool originPos, cons
   const int status = trHelp.GetStatus();
 
   //create the TimedTrackRecord
-  m_trackRecordCollection->Emplace(
-                                   pdgcode,
-                                   status,
-                                   ener,
-                                   mom,
-                                   pos,
-                                   time,
-                                   barcode, // FIXME barcode based
-                                   id,
-                                   preVol?preVol->GetName():"Unknown");
+  AddHit(pdgcode,
+         status,
+         ener,
+         mom,
+         pos,
+         time,
+         barcode, // FIXME barcode based
+         id,
+         preVol ? preVol->GetName() : "Unknown");
 }
 
+TrackRecordCollection* TrackFastSimSD::getTrackRecordCollection() const
+{
+  auto* eventManager = G4EventManager::GetEventManager();
+  if (!eventManager) {
+    return nullptr;
+  }
+
+  auto* eventInfo =
+    dynamic_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation());
+  if (!eventInfo) {
+    return nullptr;
+  }
+
+  std::shared_ptr<HitCollectionMap> hitCollections = eventInfo->GetHitCollectionMap();
+  return hitCollections ? hitCollections->Find<TrackRecordCollection>(m_outputCollectionName)
+                        : nullptr;
+}

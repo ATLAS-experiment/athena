@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the project's name and version.
 atlas_subdir( JetTagDerivationUtils )
@@ -41,8 +41,11 @@ atlas_install_python_modules(
   python/CopyJetParentInfoConfig.py
   POST_BUILD_CMD ${ATLAS_FLAKE8}
   )
-atlas_install_scripts( bin/ftag-test-metadata bin/ftag-test-TrigCopy )
+atlas_install_scripts(
+  bin/ftag-test-metadata
+  bin/ftag-test-metadata-merge
+  bin/ftag-test-TrigCopy )
 
 atlas_add_test( JetTagMetadataAlg
-  SCRIPT ftag-test-metadata -m 10 --h5-output test.h5 --json-output test.json
-  POST_EXEC_SCRIPT nopost.sh )
+  SCRIPT ftag-test-metadata-merge
+  POST_EXEC_SCRIPT noerror.sh )

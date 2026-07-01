@@ -65,7 +65,7 @@ StatusCode NSWDataMonAlg::fillHistograms(const EventContext& ctx) const
 
 
 	  if(!(mu -> author() == xAOD::Muon::Author::MuidCo || (mu -> author() == xAOD::Muon::Author::MuidSA && std::abs(mu->eta()) > 2.5) ) ) continue;
-	  const xAOD::TrackParticle* saTP = mu->primaryTrackParticle();
+	  const xAOD::TrackParticle* saTP = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary);
 	  if(saTP == nullptr) continue;
 	  const Trk::Track* saTrack = saTP->track();
 	  if(!saTrack) continue;

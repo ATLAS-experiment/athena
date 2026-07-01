@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_SGTESTS_H
@@ -40,8 +40,6 @@ namespace Athena_test
   void testRetrievePrivateCopy(StoreGateSvc& rSG);
 
   void testRemove(StoreGateSvc& rSG);
-
-  void testBind ATLAS_NOT_THREAD_SAFE (StoreGateSvc& rSG);
 
   void testClear(StoreGateSvc& rSG);
 

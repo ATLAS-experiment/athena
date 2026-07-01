@@ -443,6 +443,93 @@ namespace AthONNX {
 
   } // end retrieve constituents score ----  
 
+  // constituents transformer based with const/mask/inter variables
+  std::vector<float> JSSMLTool::retrieveConstituentsScoreMultiClass(const std::vector<std::vector<float>>& constituents, const std::vector<std::vector<std::vector<float>>>& interactions, const std::vector<std::vector<float>>& mask) const {
+      
+    // the format of the constituents/interaction variables is:
+    // constituents       ---> (nConstituents, 9)
+    // interactions       ---> (i, j, 4), with i, j in {nConstituents}
+    // masks              ---> (nConstituents, 1)
+    // the packing can be done for any kind of low level inputs
+    // i.e. PFO/UFO constituents, topo-towers, tracks, etc
+    // they can be concatened one after the other in case of multiple inputs
+
+    //*************************************************************************
+    // Score the model using sample data, and inspect values
+    // loading input data
+
+    // input info
+    const int nParticleVariables = 9;
+    const int nInteractionVariables = 4;
+
+    std::vector<int> output_tensor_values_ = ReadOutputLabels();
+    
+    int testSample = 0;    
+    
+    //preparing container to hold output data
+    int output_tensor_values = output_tensor_values_[testSample]; 
+
+    // prepare the inputs
+    auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    std::vector<Ort::Value> input_tensors;
+
+    // unroll the inputs
+    std::vector<float> constituents_values; 
+    for (const auto& c : constituents)
+      constituents_values.insert(constituents_values.end(), c.begin(), c.end());
+
+    std::vector<float> interactions_values; 
+    for (const auto& inter_i : interactions) {
+      for (const auto& inter_j : inter_i)
+        interactions_values.insert(interactions_values.end(), inter_j.begin(), inter_j.end());
+    }
+
+    std::vector<uint8_t> mask_values; 
+    for (const auto& m : mask)
+       mask_values.push_back(m[0]);
+
+    std::vector<int64_t> const_dim = {1, static_cast<int64_t>(constituents.size()), nParticleVariables};
+    input_tensors.push_back(Ort::Value::CreateTensor<float>(
+      memory_info, 
+      constituents_values.data(), constituents_values.size(), const_dim.data(), const_dim.size()
+      )
+    );
+
+    std::vector<int64_t> inter_dim = {1, static_cast<int64_t>(interactions.size()), static_cast<int64_t>(interactions.size()), nInteractionVariables};
+    input_tensors.push_back(Ort::Value::CreateTensor<float>(
+      memory_info, 
+      interactions_values.data(), interactions_values.size(), inter_dim.data(), inter_dim.size()
+      )
+    );
+
+    std::vector<int64_t> mask_dim = {1, static_cast<int64_t>(mask.size())};
+    input_tensors.push_back(Ort::Value::CreateTensor<bool>(
+      memory_info, 
+      reinterpret_cast<bool*>(mask_values.data()),
+      mask_values.size(), mask_dim.data(), mask_dim.size()
+      )
+    );
+
+    std::vector<Ort::Value> output_tensors = m_session->Run(Ort::RunOptions{nullptr}, m_input_node_names.data(), input_tensors.data(), m_input_node_names.size(), m_output_node_names.data(), m_output_node_names.size());
+    assert(output_tensors.front().IsTensor());
+
+    // Get pointer to output tensor float values
+    float* floatarr = output_tensors.front().GetTensorMutableData<float>();
+    auto info = output_tensors.front().GetTensorTypeAndShapeInfo();
+    size_t arrSize = info.GetElementCount();
+
+    // show  true label for the test input
+    ATH_MSG_DEBUG("Label for the input test data  = "<<output_tensor_values);
+    std::vector<float> ConstScores;
+    for (long unsigned int i = 0; i < arrSize; i++){
+      ATH_MSG_VERBOSE(" +++ Score for class " << i << " = " << floatarr[i]);
+      ConstScores.push_back(floatarr[i]);
+    }
+
+    return ConstScores;
+
+  } // end retrieve constituents score ----  
+
   // dedicated DisCo/DNN method ---
   double JSSMLTool::retrieveHighLevelScore(std::map<std::string, double> JSSVars) const {
         

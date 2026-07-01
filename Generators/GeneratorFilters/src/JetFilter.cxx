@@ -63,7 +63,7 @@ StatusCode JetFilter::filterInitialize() {
 }
 
 
-StatusCode JetFilter::filterEvent() {
+StatusCode JetFilter::filterEvent(const EventContext& ctx) {
   // Init grid
   //coverity[STACK_USE]
   double etgrid[m_grphi][m_greta]; // clean it out before we start
@@ -216,7 +216,7 @@ StatusCode JetFilter::filterEvent() {
       return StatusCode::SUCCESS;
     }
   }
-  setFilterPassed(false); // it failed to find any useful jets
+  setFilterPassed(false, ctx); // it failed to find any useful jets
   m_Jets.clear(); //clean out the found jets
   return StatusCode::SUCCESS;
 }

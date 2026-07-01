@@ -1,9 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from ElectronPhotonSelectorTools.EgammaPIDdefs import egammaPID
 from egammaTools.EMTrackMatchBuilderConfig import EMTrackMatchBuilderCfg
 from ElectronPhotonSelectorTools.AsgForwardElectronIsEMSelectorsConfig import (
     AsgForwardElectronIsEMSelectorCfg)
+from ElectronPhotonSelectorTools.ForwardElectronSelectorConfig import (
+    AsgForwardElectronSelectorToolCfg, AsgForwardElectronCalibrationToolCfg)
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -13,11 +15,50 @@ from egammaTools.egammaOQFlagsBuilderConfig import egammaOQFlagsBuilderCfg
 def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
 
     acc = ComponentAccumulator()
+    extraInputs = []
 
     if flags.Detector.GeometryITk:
         kwargs["doTrackMatching"] = True
         kwargs["doCookieCutting"] = True
+        if flags.Reco.EnableHGTDExtension:
+            extraInputs += [
+                ("xAOD::TrackParticleContainer",
+                 "StoreGateSvc+GSFTrackParticles.time")
+            ]
+            if "forwardelectronNNselectors" not in kwargs:
+                LooseFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+                    flags,
+                    "LooseForwardNNElectronSelector",
+                    "Loose")
+                MediumFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+                    flags,
+                    "MediumForwardNNElectronSelector",
+                    "Medium")
+                TightFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+                    flags,
+                    "TightForwardNNElectronSelector",
+                    "Tight")
+                
+                kwargs["dofwdDNN"] = True
+                kwargs.setdefault("forwardelectronNNselectors",
+                                  [LooseFwdElectronSelector_NN.popPrivateTools(),
+                                   MediumFwdElectronSelector_NN.popPrivateTools(),
+                                   TightFwdElectronSelector_NN.popPrivateTools()])
+                kwargs.setdefault(
+                    "forwardelectronNNselectorResultNames",
+                    ["Loose", "Medium", "Tight"])
+                acc.merge(LooseFwdElectronSelector_NN)
+                acc.merge(MediumFwdElectronSelector_NN)
+                acc.merge(TightFwdElectronSelector_NN)
+        
+            kwargs["dopTCal"] = True
+            forward_elecpTCalib = AsgForwardElectronCalibrationToolCfg (flags,
+                                                                    "forwardelectronNNpTCalib")
+            kwargs.setdefault("forwardelectronNNCalib",forward_elecpTCalib.popPrivateTools())
+        kwargs.setdefault("ExtraInputs", extraInputs)
         kwargs.setdefault("TrackMatchBuilderTool", acc.popToolsAndMerge(EMTrackMatchBuilderCfg(flags)))
+        
+
     if "forwardelectronIsEMselectors" not in kwargs:
         LooseFwdElectronSelector = AsgForwardElectronIsEMSelectorCfg(
             flags,
@@ -43,6 +84,8 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         acc.merge(LooseFwdElectronSelector)
         acc.merge(MediumFwdElectronSelector)
         acc.merge(TightFwdElectronSelector)
+
+
 
     if "ObjectQualityTool" not in kwargs and not flags.Common.isOnline:
         egOQ = egammaOQFlagsBuilderCfg(flags)

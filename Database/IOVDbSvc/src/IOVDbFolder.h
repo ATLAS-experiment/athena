@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.h
@@ -11,6 +11,7 @@
 
 #include <string>
 #include "GaudiKernel/IClassIDSvc.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IOVRange.h"
@@ -60,6 +61,8 @@ public:
   // access methods to various internal information
   const std::string& folderName() const;
   const std::string& key() const;
+  const std::string& source() const;
+
   IOVDbConn* conn();
   bool multiVersion() const;
   bool timeStamp() const;
@@ -317,15 +320,16 @@ private:
   IOVDbNamespace::IovStore m_iovs;
   const bool m_outputToFile{false};
   const bool m_crestCoolToFile{false};
-  const std::string m_source;
-  const std::string m_crestServer;
-  const std::string m_crestTag;
+  std::string m_source;
+  std::string m_crestServer;
+  std::string m_crestTag;
 
   std::optional<CoralCrestManager> m_crest_mng;
 };
 
 inline const std::string& IOVDbFolder::folderName() const {return m_foldername;}
 inline const std::string& IOVDbFolder::key() const { return m_key;}
+inline const std::string& IOVDbFolder::source() const { return m_source; }
 
 inline IOVDbConn* IOVDbFolder::conn() { return m_conn;}
 
@@ -338,6 +342,8 @@ inline bool IOVDbFolder::tagOverride() const { return m_tagoverride; }
 inline bool IOVDbFolder::noOverride() const { return m_notagoverride; }
 
 inline bool IOVDbFolder::retrieved() const { return m_retrieved; }
+
+
 
 inline IOVDbNamespace::FolderType IOVDbFolder::folderType() const 
 {return m_foldertype;}

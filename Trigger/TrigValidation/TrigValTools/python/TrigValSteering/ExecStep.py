@@ -104,6 +104,14 @@ class ExecStep(Step):
             del_env('ATHENA_NPROC_NUM')
             del_env('ATHENA_CORE_NUMBER')
 
+    def _is_good_file(self, path):
+        if os.path.isfile(path):
+            return True
+        from ROOT import TFile
+        with TFile.Open(path, "READ") as f:
+            if not f.IsOpen() or f.IsZombie():
+                return False
+        return True
     def configure_input(self):
         self.log.debug('Configuring input for step %s', self.name)
         if self.input is None:
@@ -125,8 +133,8 @@ class ExecStep(Step):
         # Try to interpret explicit paths
         input_paths = self.input.split(',')
         for path in input_paths:
-            if not os.path.isfile(path):
-                self.misconfig_abort('The provided input does not exist: %s', self.input)
+            if not self._is_good_file(path):
+                self.misconfig_abort(f"The provided input does not exist: {path}")
         self.log.debug('Using explicit input: %s', self.input)
 
     def configure_job_options(self):

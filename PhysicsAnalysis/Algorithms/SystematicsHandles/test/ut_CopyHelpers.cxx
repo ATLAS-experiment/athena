@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -8,12 +8,12 @@
 #include <memory>
 
 // Infrastructure include(s):
-#include "xAODRootAccess/TEvent.h"
+#include "xAODRootAccess/Event.h"
 #include "xAODRootAccess/TStore.h"
 #include "xAODRootAccess/Init.h"
 #include "AsgMessaging/MsgStream.h"
 #include "AsgMessaging/MessageCheck.h"
-#include "AsgTools/SgTEvent.h"
+#include <xAODRootAccess/TEvent.h>
 
 // EDM include(s):
 #include "xAODBase/IParticleHelpers.h"
@@ -40,7 +40,6 @@ int main() {
    // Create the transient store objects.
    xAOD::TEvent event;
    xAOD::TStore store;
-   asg::SgTEvent sgEvent( &event, &store );
 
    // Create a message stream, to be used later on in the code.
    MsgStream msgStream( "ut_CopyHelpers" );
@@ -70,11 +69,10 @@ int main() {
    // Make a copy of this simple container.
    xAOD::JetContainer* copiedJets = nullptr;
    ANA_CHECK( ShallowCopy< xAOD::JetContainer >::getCopy( msgStream,
-                                                          sgEvent,
+                                                          Gaudi::Hive::currentContext(),
                                                           copiedJets,
                                                           originalJetsPtr,
-                                                          "CopiedJets",
-                                                          "CopiedJetsAux." ) );
+                                                          "CopiedJets" ) );
 
    // Make sure that the copied objects point to the originals.
    ANA_CHECK( copiedJets->size() == originalJetsPtr->size() );
@@ -97,11 +95,10 @@ int main() {
    // Now make a shallow copy of this view copy.
    xAOD::JetContainer* copiedViewJets = nullptr;
    ANA_CHECK( ShallowCopy< xAOD::JetContainer >::getCopy( msgStream,
-                                                          sgEvent,
+                                                          Gaudi::Hive::currentContext(),
                                                           copiedViewJets,
                                                           viewCopyPtr,
-                                                          "CopyOfViewJets",
-                                                          "CopyOfViewJetsAux." ) );
+                                                          "CopyOfViewJets" ) );
 
    // Check the copy. The logic here is a bit complicated, since the original
    // objects of the copies of the view container are still the objects in the

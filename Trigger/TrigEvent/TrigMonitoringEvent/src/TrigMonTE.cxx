@@ -1,15 +1,18 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+
+
+#include "TrigMonitoringEvent/TrigMonTE.h"
+#include "AthenaKernel/errorcheck.h"
 
 // C/C++
 #include <cassert>
 #include <iostream>
 #include <sstream>
 #include <set>
-
-#include "TrigMonitoringEvent/TrigMonTE.h"
-#include "AthenaKernel/errorcheck.h"
+#include <array>
 
 namespace SeqBits
 {
@@ -19,12 +22,6 @@ namespace SeqBits
   const uint32_t shiftType  = 22;         // shift 2 type bits
 }
 
-//--------------------------------------------------------------------------------------      
-TrigMonTE::TrigMonTE()
-  :m_id(0),
-   m_encoded(0x0)
-{
-}
 
 //--------------------------------------------------------------------------------------      
 TrigMonTE::TrigMonTE(uint32_t id, uint16_t index)
@@ -70,17 +67,8 @@ TrigMonTE::Type TrigMonTE::getType() const
   // Return trigger element type
   //
   const unsigned int val = (m_encoded & SeqBits::maskType) >> SeqBits::shiftType;
-
-  switch (val) {
-  case 0: return kELEM;
-  case 1: return kINIT;
-  case 2: return kROI;
-  case 3: return kL1TH;
-  default: break;
-  }
-  REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "TrigMonTE")
-    << "getType error! Bad value";
-  return kELEM;
+  static constexpr std::array<Type,4> types{kELEM, kINIT, kROI, kL1TH};
+  return types.at(val);
 }
 
 //--------------------------------------------------------------------------------------      
@@ -119,6 +107,12 @@ void TrigMonTE::print(std::ostream &os)
 {
   os << str(*this) << std::endl;
 }
+
+void TrigMonTE::print()
+{
+  std::cout << str(*this) << std::endl;
+}
+
 
 //--------------------------------------------------------------------------------------      
 std::string str(const TrigMonTE &o)

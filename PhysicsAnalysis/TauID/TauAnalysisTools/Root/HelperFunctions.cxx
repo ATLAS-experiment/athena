@@ -333,7 +333,7 @@ void TauAnalysisTools::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector
     //Get sum of the chargedPFO (i.e. tau track) p4
     TLorentzVector Sum_ChrgPFOP4;
     for(const xAOD::TauTrack* track : xTau->tracks()) {
-      Sum_ChrgPFOP4 += track->p4();
+      Sum_ChrgPFOP4 += track->track()->p4();
     }
     
     //Get tau FinalCalib P4 (explicitly requiring p4(xAOD::TauJetParameters::TauCalibType::FinalCalib) should be superfluous, as FinalCalib is the default p4)
@@ -412,7 +412,7 @@ void TauAnalysisTools::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector
 
   //Calculate the new tau P4
   for(const xAOD::TauTrack* track : xTau->tracks()) {
-    TauP4 += track->p4();
+    TauP4 += track->track()->p4();
   }
 
   for(unsigned int iPi0=0; iPi0 < correctedPi0s.size(); iPi0++) {

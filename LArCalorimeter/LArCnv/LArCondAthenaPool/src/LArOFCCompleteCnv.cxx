@@ -24,24 +24,24 @@ LArOFCCompleteCnv::createPersistent (LArOFCTransType* transObj)
 }
 
 LArConditionsSubset<LArOFCP1>*
-LArOFCCompleteCnv::createTransient () {
+LArOFCCompleteCnv::createTransient(const Token* token) {
     static const pool::Guid   p1_guid("0A1DE2E2-90E4-4A24-BC6E-2092EDC9FDF6");
     static const pool::Guid   p0_guid("3E5389EF-D163-4099-91D9-D3F0EE06C1CD");
 
-    if( compareClassGuid(p1_guid) ) {
+    if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< LArOFCSubset_p1 > col_vect( poolReadObject< LArOFCSubset_p1 >() );
+        std::unique_ptr< LArOFCSubset_p1 > col_vect( poolReadObject< LArOFCSubset_p1 >(token) );
         MsgStream log(msgSvc(), "LArOFCCompleteCnv" ); 
         //log << MSG::INFO << "Reading LArOFCSubset_p1" << endmsg; 
         return TPconverter.createTransientConst( col_vect.get(), log );
     }
-    else if( compareClassGuid(p0_guid) ) {
+    else if( compareClassGuid(token, p0_guid) ) {
         // subset from before TP separation
 
         MsgStream log(msgSvc(), "LArOFCCompleteCnv" ); 
         log << MSG::DEBUG << "Reading LArOFCSubset (original)" << endmsg; 
 
-        std::unique_ptr< LArConditionsSubset<LArOFCP> > subset ( poolReadObject< LArConditionsSubset<LArOFCP> >() );
+        std::unique_ptr< LArConditionsSubset<LArOFCP> > subset ( poolReadObject< LArConditionsSubset<LArOFCP> >(token) );
         // Here we must convert from LArOFCP to LArOFCP1
         
         log << MSG::DEBUG << "subset ptr " << subset.get() << endmsg; 

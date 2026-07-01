@@ -34,7 +34,7 @@ private:
 };
 
 
-StatusCode MonitoredAlg::execute() 
+StatusCode MonitoredAlg::execute(const EventContext& /*ctx*/) 
 {
   std::vector<Track> tracks;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // @file RefitTracksAndVertex.cxx
@@ -120,7 +120,7 @@ StatusCode RefitTracksAndVertex::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode RefitTracksAndVertex::execute() {
+StatusCode RefitTracksAndVertex::execute(const EventContext& ctx) {
 
   TrackCollection* outputtracks = new TrackCollection() ;
 
@@ -191,13 +191,12 @@ StatusCode RefitTracksAndVertex::execute() {
 
       Amg::Vector3D position = primaryVertex->position();
       // Fit and store vertex
-      auto vertex =  m_vertexFitter->fit(trackParametersToFit, position );
+      auto vertex =  m_vertexFitter->fit(ctx, trackParametersToFit, position );
       if(vertex){
-        theVertexContainer->push_back (vertex);
-        vertex->setVertexType(xAOD::VxType::PriVtx);
-
         ATH_MSG_DEBUG("Old Vtx " << primaryVertex->position());
         ATH_MSG_DEBUG("New Vtx " << vertex->position());
+        vertex->setVertexType(xAOD::VxType::PriVtx);
+        theVertexContainer->push_back (std::move(vertex));
       }
     }
   }

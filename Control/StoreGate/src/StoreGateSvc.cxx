@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/IIncidentSvc.h"
@@ -150,9 +150,10 @@ StatusCode StoreGateSvc::initialize()    {
   // Don't retrieve m_activeStoreSvc here to prevent a possible
   // initialization loop.
 
-  const int PRIORITY=100;
-  m_incSvc->addListener(this, "EndEvent",PRIORITY);
-  m_incSvc->addListener(this, "BeginEvent", PRIORITY);
+  if (m_DumpStore) {
+    const int PRIORITY=100;
+    m_incSvc->addListener(this, "EndEvent",PRIORITY);
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -425,6 +426,21 @@ StatusCode
 StoreGateSvc::clearStore(bool forceRemove)
 {
   StatusCode sc = currentStore()->clearStore(forceRemove);
+
+  // See if we want to send a ClearStore incident.
+  // If m_pruneIncidents is true then we check the first time
+  // to see if there are any listeners.  If not, then we avoid
+  // sending these incidents for the rest of the job.
+  if (m_pruneIncidents) {
+    if (m_listenerState == UNCHECKED) {
+      std::vector<IIncidentListener*> l;
+      m_incSvc->getListeners (l, "StoreCleared");
+      m_listenerState = l.empty() ? NO_LISTENERS : HAVE_LISTENERS;
+    }
+    if (m_listenerState == NO_LISTENERS) {
+      return sc;
+    }
+  }
 
   // Send a notification that the store was cleared.
   if (sc.isSuccess()) {

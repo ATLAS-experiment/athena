@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCaloEvent/TrigT2MbtsBits.h"
+#include "GaudiKernel/MsgStream.h"
 #include <iostream>
+#include <sstream>
 
-TrigT2MbtsBits::TrigT2MbtsBits(): m_triggerEnergies(TrigT2MbtsBits::NUM_MBTS,0.), 
-                                  m_triggerTimes(TrigT2MbtsBits::NUM_MBTS,0) {
-}
+
 
 TrigT2MbtsBits::TrigT2MbtsBits(const std::vector<float>& triggerEnergies, 
                                const std::vector<float>& triggerTimes):
@@ -18,29 +18,10 @@ TrigT2MbtsBits::TrigT2MbtsBits(const std::vector<float>& triggerEnergies,
   m_triggerTimes.resize(TrigT2MbtsBits::NUM_MBTS,0);
 }
 
-TrigT2MbtsBits::~TrigT2MbtsBits() {
-}
 
-// Simple debug method using MsgStream
+// Simple debug method using cout
 void TrigT2MbtsBits::print(void) const {
-  std::vector<float>::const_iterator itr;
-  std::vector<float>::const_iterator itr_end;
-
-  itr=m_triggerEnergies.begin();
-  itr_end=m_triggerEnergies.end();
-  std::cout << "m_triggerEnergies = {";
-  for(;itr != itr_end; ++itr) {
-    std::cout << (*itr) << ",";
-  }
-  std::cout << "}" << std::endl;
-
-  itr = m_triggerTimes.begin();
-  itr_end = m_triggerTimes.end();
-  std::cout << "m_triggerTimes = {";
-  for(;itr != itr_end; ++itr) {
-    std::cout << (*itr) << ",";
-  }
-  std::cout << "}" << std::endl;
+  std::cout << str(*this) << std::endl;
 }
 
 // Simple debug method using MsgStream
@@ -54,7 +35,7 @@ void TrigT2MbtsBits::print(MsgStream& log) const {
   for(;itr != itr_end; ++itr) {
     log << MSG::DEBUG << (*itr) << ",";
   }
-  log << MSG::DEBUG << "}" << endmsg;  
+  log << MSG::DEBUG << "}\n";  
 
   itr = m_triggerTimes.begin();
   itr_end = m_triggerTimes.end();
@@ -79,7 +60,7 @@ std::string str(const TrigT2MbtsBits& trigT2MbtsBits) {
   for(;itr != itr_end; ++itr) {
     sstream << (*itr) << ",";
   }
-  sstream << "}" << std::endl;
+  sstream << "}\n";
 
   counterValues = trigT2MbtsBits.triggerTimes();
   itr = counterValues.begin();

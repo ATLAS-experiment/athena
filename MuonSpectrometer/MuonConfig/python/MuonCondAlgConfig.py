@@ -413,3 +413,15 @@ def sTgcDigitEffiCondAlgCfg(flags, **kwargs):
     alg = CompFactory.Muon.sTgcDigitEffiCondAlg("sTgcDigitEffiCondAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc
+
+def RpcDigitEffiCondAlgCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    if not flags.Input.isMC: return acc
+
+    #There is currently no database folder for the RPC efficiency maps
+    # So we can set the data base read key to empty
+    kwargs.setdefault("ReadKey","")  
+
+    alg = CompFactory.Muon.RpcDigitEffiCondAlg("RpcDigitEffiCondAlg", **kwargs)
+    acc.addCondAlgo(alg)
+    return acc

@@ -107,21 +107,6 @@ match any unpatterns, will be returned.
 
 Returns a dict or list of analysis objects depending on the asdict argument.
 
-## readAIDA(...)
-readAIDA(file_or_filename, asdict=True, patterns=None, unpatterns=None)
-
-Read data objects from the provided AIDA-format file.
-
-The loaded data objects can be filtered on their path strings, using the
-optional patterns and unpatterns arguments. These can be strings, compiled
-regex objects with a 'match' method, or any iterable of those types. If
-given, only analyses with paths which match at least one pattern, and do not
-match any unpatterns, will be returned.
-
-Returns a dict or list of analysis objects depending on the asdict argument.
-
-DEPRECATED: AIDA is a dead format. At some point we will stop supporting it.
-
 ## readFLAT(...)
 readFLAT(file_or_filename, asdict=True, patterns=None, unpatterns=None)
 
@@ -165,11 +150,6 @@ write(ana_objs, filename)
 
 Write data objects to the provided filename,
 auto-determining the format from the file extension.
-
-## writeAIDA(...)
-writeAIDA(ana_objs, file_or_filename)
-
-Write data objects to the provided file in AIDA format.
 
 ## writeFLAT(...)
 writeFLAT(ana_objs, file_or_filename)

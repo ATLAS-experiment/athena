@@ -10,7 +10,6 @@
 
 #include "DerivationFrameworkTools/GenericObjectThinning.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <vector>
 #include <string>
 
@@ -60,9 +59,8 @@ StatusCode DerivationFramework::GenericObjectThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::GenericObjectThinning::doThinning() const
+StatusCode DerivationFramework::GenericObjectThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     // Retrieve main object collection
     SG::ThinningHandle<xAOD::IParticleContainer> particles (m_SGKey, ctx);

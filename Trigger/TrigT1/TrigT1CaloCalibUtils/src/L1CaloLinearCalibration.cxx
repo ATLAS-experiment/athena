@@ -40,7 +40,7 @@ StatusCode L1CaloLinearCalibration::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode L1CaloLinearCalibration::execute()
+StatusCode L1CaloLinearCalibration::execute(const EventContext& /*ctx*/)
 {
     return StatusCode::SUCCESS;
 }

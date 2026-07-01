@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CxxUtils/MurmurHash2.h"
 #include "CxxUtils/crc64.h"
-#include "crc_combine.h"
+#include "CxxUtils/crc_combine.h"
 
   /// Set the random seed using a string (e.g. algorithm name) and
   /// the current slot, event, and run numbers and an optional
@@ -14,10 +14,10 @@
   /// thread-unsafe random number services
 size_t ATHRNG::calculateSeedMC16(const std::string& algName, uint64_t ev, uint64_t run, uint32_t offset) {
   uint32_t theHash = static_cast<uint32_t>(ev);
-  if (0 != offset) theHash=crc_combine(theHash, offset);
+  if (0 != offset) theHash = CxxUtils::crc_combine(theHash, offset);
   uint32_t runNumber = static_cast<uint32_t>(run);
-  theHash=crc_combine(theHash, runNumber);
-  theHash=crc_combine(theHash, algName);
+  theHash = CxxUtils::crc_combine(theHash, runNumber);
+  theHash = CxxUtils::crc_combine(theHash, algName);
   return theHash;
 }
 
@@ -101,22 +101,22 @@ void ATHRNG::RNGWrapper::setSeedMC21(const std::string& algName, size_t slot,
   setSeeds(slot, seeds, evt);
 }
 
-void ATHRNG::RNGWrapper::setSeedLegacy(const std::string& algName, size_t slot,
-                                       uint64_t ev, uint64_t run, uint64_t offset, SeedingOptionType seeding,
+void ATHRNG::RNGWrapper::setSeedLegacy(const std::string& algName, const EventContext& ctx,
+                                       uint32_t offset, SeedingOptionType seeding,
                                        EventContext::ContextEvt_t evt /*= EventContext::INVALID_CONTEXT_EVT*/)
 {
   if(seeding==MC16Seeding) {
     // Use MC16 legacy seeding
-    setSeedMC16(algName, slot, ev, run, offset, evt);
+    setSeedMC16(algName, ctx.slot(), ctx.eventID().event_number(), ctx.eventID().run_number(), offset, evt);
     return;
   }
   if(seeding==MC20Seeding) {
     // Use MC20 seeding
-    setSeedMC20(algName, slot, ev, run, evt);
+    setSeedMC20(algName, ctx.slot(), ctx.eventID().event_number(), ctx.eventID().run_number(), evt);
     return;
   }
   // Use MC21 seeding
-  setSeedMC21(algName, slot, ev, run, offset, evt);
+  setSeedMC21(algName, ctx.slot(), ctx.eventID().event_number(), ctx.eventID().run_number(), offset, evt);
 }
 
 void ATHRNG::RNGWrapper::setSeedMC16(const std::string& algName, size_t slot, uint64_t ev, uint64_t run, uint32_t offset,

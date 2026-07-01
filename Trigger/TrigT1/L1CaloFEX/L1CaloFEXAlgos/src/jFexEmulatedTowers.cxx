@@ -67,6 +67,13 @@ StatusCode jFexEmulatedTowers::initialize() {
     ATH_CHECK( m_jtowerEtMeVdecorKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_jtowerEtTimingMeVdecorKey.initialize(SG::AllowEmpty) );
 
+    // Check if ApplyTimingCut and ApplyTimingCutAll flags are both enabled
+    if (m_applyTimingCut && m_applyTimingCutAll) {
+        ATH_MSG_FATAL(
+            "ApplyTimingCut and ApplyTimingCutAll flags cannot both be enabled");
+        return StatusCode::FAILURE;
+    }
+
 
     return StatusCode::SUCCESS;
 }
@@ -220,6 +227,14 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                     val = 0;
                     //countMasked++;
                 } else if( isInvalid ) {
+                    val = 0;
+                }
+                // Apply timing cut to MC if the respective flags are set
+                if (!m_isDATA && m_applyTimingCut && !passTiming && source != 3) {
+                    // Applying timing cut everywhere but HEC if m_applyTimingCut set
+                    val = 0;
+                } else if (!m_isDATA && m_applyTimingCutAll && !passTiming) {
+                    // Applying timing cut on all SCells if m_applyTimingCutAll set
                     val = 0;
                 }
                 

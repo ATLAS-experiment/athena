@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimDETECTORTOOL_H
@@ -19,7 +19,6 @@
 #include <set>
 #include <fstream>
 
-#include "StoreGate/DataHandle.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorManager.h"
 

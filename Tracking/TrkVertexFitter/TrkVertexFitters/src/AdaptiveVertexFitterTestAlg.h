@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexFitters/src/AdaptiveVertexFitterTestAlg.h
@@ -14,7 +14,7 @@
 #define TRKVERTEXFITTERS_ADAPTIVEVERTEXFITTERTESTALG_H
 
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "GaudiKernel/ToolHandle.h"
 
@@ -24,26 +24,23 @@ namespace Trk {
 
 
 class AdaptiveVertexFitterTestAlg
-  : public AthAlgorithm
+  : public AthReentrantAlgorithm
 {
 public:
-  using AthAlgorithm::AthAlgorithm;
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
 
   /// Standard Gaudi initialize method.
   virtual StatusCode initialize() override;
 
   /// Execute the algorithm.
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 
 private:
-  StatusCode test1();
-  StatusCode test2();
-  StatusCode test3();
-  StatusCode test4();
-  StatusCode test5();
-  StatusCode test6();
+  StatusCode test1(const EventContext& ctx) const;
+  StatusCode test2(const EventContext& ctx) const;
+  StatusCode test3(const EventContext& ctx) const;
 
 
   ToolHandle<Trk::IVertexFitter> m_fitter

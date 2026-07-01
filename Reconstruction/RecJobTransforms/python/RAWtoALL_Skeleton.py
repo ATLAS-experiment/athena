@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
@@ -21,9 +21,6 @@ def fromRunArgs(runArgs):
 
     import time
     timeStart = time.time()
-
-    from PyUtils.Helpers import ROOTSetup
-    ROOTSetup(batch=True)
 
     log.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

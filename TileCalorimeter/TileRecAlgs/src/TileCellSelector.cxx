@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -372,10 +372,9 @@ StatusCode TileCellSelector::initialize() {
 }
 
 
-StatusCode TileCellSelector::execute() {
+StatusCode TileCellSelector::execute(const EventContext& ctx) {
   //ATH_MSG_DEBUG ("execute()");
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   ++m_counter;
 
@@ -562,7 +561,7 @@ StatusCode TileCellSelector::execute() {
   if (m_readCells) {
 
     // Get Calo cell container
-    SG::ReadHandle<CaloCellContainer> cellContainer(m_cellContainerKey);
+    SG::ReadHandle<CaloCellContainer> cellContainer(m_cellContainerKey, ctx);
 
     if (!cellContainer.isValid()) {
       
@@ -921,7 +920,7 @@ StatusCode TileCellSelector::execute() {
   if (m_readRawChannels) {
 
     // Get Tile RawChannel container
-    SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey);
+    SG::ReadHandle<TileRawChannelContainer> rawChannelContainer(m_rawChannelContainerKey, ctx);
 
     if ( !rawChannelContainer.isValid() ) {
       ATH_MSG_WARNING("Unable to read TileRawChannelContainer from EventStore, disable reading of this container");
@@ -1393,7 +1392,7 @@ StatusCode TileCellSelector::execute() {
   if (m_readDigits) {
 
     // Pointer to a Tile digits container
-    SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey);
+    SG::ReadHandle<TileDigitsContainer> digitsContainer(m_digitsContainerKey, ctx);
 
     if (!digitsContainer.isValid()) {
       ATH_MSG_WARNING("Unable to read TileDigitsContainer from EventStore, disable reading of this container");
@@ -1997,9 +1996,9 @@ StatusCode TileCellSelector::execute() {
   }
 
   if (m_printOnly)
-    this->setFilterPassed (false);
+    this->setFilterPassed (false, ctx);
   else
-    this->setFilterPassed (statusOk);
+    this->setFilterPassed (statusOk, ctx);
 
   if (statusOk) {
     ++m_accept;

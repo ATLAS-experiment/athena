@@ -50,7 +50,7 @@ def addMyArgs(parser):
                                                       countable=False), 
                         help='Input DQ histogram file', group='DQHistMerge_tf')
     parser.add_argument('--outputHIST_MRGFile', '--outputHISTFile',nargs='+', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', countable=False), 
+                        type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', countable=True), 
                         help='Output DQ monitoring file', group='DQHistMerge_tf')
     
     parser.add_argument('--excludeDir', help='Regex pattern for directories to exclude from merge',group='DQHistMerge_tf')

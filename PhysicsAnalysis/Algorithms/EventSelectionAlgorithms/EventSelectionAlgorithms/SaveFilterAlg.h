@@ -12,7 +12,6 @@
 #include <AsgTools/PropertyWrapper.h>
 #include <SystematicsHandles/SysFilterReporterParams.h>
 #include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysReadDecorHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
@@ -30,7 +29,7 @@ namespace CP {
     public:
       SaveFilterAlg(const std::string &name, ISvcLocator *pSvcLocator);
       virtual StatusCode initialize() override;
-      virtual StatusCode execute() override;
+      virtual StatusCode execute(const EventContext& ctx) override;
       virtual StatusCode finalize() override;
 
     private:

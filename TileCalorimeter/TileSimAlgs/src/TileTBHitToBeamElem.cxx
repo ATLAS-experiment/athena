@@ -71,7 +71,7 @@ StatusCode TileTBHitToBeamElem::initialize() {
 //
 // Alg standard execute function
 //
-StatusCode TileTBHitToBeamElem::execute() {
+StatusCode TileTBHitToBeamElem::execute(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "Executing TileTBHitToBeamElem" );
 
@@ -82,7 +82,7 @@ StatusCode TileTBHitToBeamElem::execute() {
   //**
   //* Get TileHits from TileHitVector
   //**
-  SG::ReadHandle<TileHitVector> hitVector(m_hitVectorKey);
+  SG::ReadHandle<TileHitVector> hitVector(m_hitVectorKey, ctx);
   ATH_CHECK( hitVector.isValid() );
 
   //**
@@ -115,7 +115,7 @@ StatusCode TileTBHitToBeamElem::execute() {
     ATH_CHECK( beamElemContainer->push_back(std::move(beamElem)) );
   }
 
-  SG::WriteHandle<TileBeamElemContainer> beamElemCnt(m_beamElemContainerKey);
+  SG::WriteHandle<TileBeamElemContainer> beamElemCnt(m_beamElemContainerKey, ctx);
   ATH_CHECK( beamElemCnt.record(std::move(beamElemContainer)) );
 
   // Execution completed.

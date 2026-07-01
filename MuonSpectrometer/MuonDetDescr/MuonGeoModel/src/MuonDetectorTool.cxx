@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MuonDetectorTool.h"
@@ -33,15 +33,11 @@ MuonDetectorTool::MuonDetectorTool(const std::string &type, const std::string &n
     declareInterface<IGeoModelTool>(this);
 }
 
+MuonDetectorTool::~MuonDetectorTool() = default;
+
 StatusCode MuonDetectorTool::initialize() {
     ATH_MSG_INFO("Initializing ...");
     return StatusCode::SUCCESS;
-}
-MuonDetectorTool::~MuonDetectorTool() { 
-    if (m_detector) {
-        delete m_detector;
-        m_detector = nullptr;
-    } 
 }
 
 /**
@@ -59,12 +55,10 @@ StatusCode MuonDetectorTool::create() {
     GeoIntrusivePtr<GeoPhysVol> world{theExpt->getPhysVol()};
     ATH_CHECK(createFactory(mgr, world));
 
-    if (!m_detector) {
-        ATH_CHECK(detStore()->record(mgr,mgr->getName()));
-        theExpt->addManager(mgr);
+    ATH_CHECK(detStore()->record(mgr,mgr->getName()));
+    theExpt->addManager(mgr);
 
-        m_manager = mgr;
-    }
+    m_manager = mgr;
 
     if (m_dumpMemoryBreakDown) {
         umem = GeoPerfUtils::getMem();
@@ -96,7 +90,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
     std::ofstream geoModelStats;
     int mem{0}, umem{0};
     float cpu{0.f}, ucpu{0.f};
-
 
     if (m_dumpMemoryBreakDown) {
         geoModelStats.open("MuonGeoModelStatistics_MuonDetectorTool");
@@ -172,40 +165,32 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
     theFactory.disableBEEShift(m_beeNoShiftInDefault);
 
 
-    if (MuonVersion == "CUSTOM")
-        ATH_MSG_WARNING("Detector Information coming from a custom configuration !!");
-    else {
+    ATH_MSG_DEBUG("Detector Information coming from the database (job options IGNORED)");
 
-        ATH_MSG_DEBUG("Detector Information coming from the database (job options IGNORED)");
-
-        IRDBRecordset_ptr switchSet = accessSvc->getRecordsetPtr("MuonSwitches", detectorKey, detectorNode);
-        if ((*switchSet).size() == 0)
-            return StatusCode::FAILURE;
-        const IRDBRecord *switches = (*switchSet)[0];
-
-        // m_layout                = switches->getString("LAYOUTNAME");
-        tempLayout = switches->getString("LAYOUTNAME");
-        //       m_includeInertMaterials = switches->getInt("BUILDINERTMATERIALS");
-        //       m_minimalgeo            = switches->getInt("MINIMALGEO");
-        if (MuonVersion.empty()) {
-            MuonVersion = accessSvc->getChildTag("MuonSpectrometer", detectorKey, detectorNode);
-            ATH_MSG_INFO("(from GeoModelSvc) in AtlasVersion = <" << AtlasVersion << ">  default MuonVersion is <" << MuonVersion << ">");
-        }
-
-        ATH_MSG_DEBUG(" m_altAsztFile: " << m_altAsztFile);
-        // use ascii file to read in ASZT parameters
-        if (m_altAsztFile != "")
-            altAsciiDBMap.insert(std::make_pair("ASZT", m_altAsztFile));
-        if (m_altCscIntAlinesFile != "")
-            altAsciiDBMap.insert(std::make_pair("IACSC", m_altCscIntAlinesFile));
+    IRDBRecordset_ptr switchSet = accessSvc->getRecordsetPtr("MuonSwitches", detectorKey, detectorNode);
+    if (switchSet->size() == 0) {
+      ATH_MSG_ERROR("Failed to retrieve MuonSwitches from the database!");
+      return StatusCode::FAILURE;
     }
+    const IRDBRecord *switches = (*switchSet)[0];
+
+    tempLayout = switches->getString("LAYOUTNAME");
+    if (MuonVersion.empty()) {
+      MuonVersion = accessSvc->getChildTag("MuonSpectrometer", detectorKey, detectorNode);
+      ATH_MSG_INFO("(from GeoModelSvc) in AtlasVersion = <" << AtlasVersion << ">  default MuonVersion is <" << MuonVersion << ">");
+    }
+
+    ATH_MSG_DEBUG(" m_altAsztFile: " << m_altAsztFile);
+    // use ascii file to read in ASZT parameters
+    if (m_altAsztFile != "")
+      altAsciiDBMap.insert(std::make_pair("ASZT", m_altAsztFile));
+    if (m_altCscIntAlinesFile != "")
+      altAsciiDBMap.insert(std::make_pair("IACSC", m_altCscIntAlinesFile));
 
     //
     // Locate the top level experiment node
     //
-
     ATH_MSG_INFO("Properties have been set as follows: " << endmsg
-                                                         // <<"    LayoutName                     "<< m_layout.substr(0,1) <<endmsg
                                                          << "    LayoutName                     " << tempLayout.substr(0, 1) << endmsg 
                                                          << "    IncludeCutouts                 " << m_includeCutouts << endmsg 
                                                          << "    IncludeCutoutsBog              " << m_includeCutoutsBog << endmsg
@@ -221,17 +206,15 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
                                                     << " **** SelectedStJff    size =" << m_selectedStations.size() << endmsg << " **** while StationSelection = 1");
             return (StatusCode::FAILURE);
         }
-        for (unsigned int i = 0; i < m_selectedStations.size(); i++) {
-            ATH_MSG_INFO("          Selected stations      " << m_selectedStations[i]);
+	for (const std::string& station : m_selectedStations) {
+	  ATH_MSG_INFO("          Selected stations      " << station);
         }
 
-        if (m_selectedStEta.size() > 0) {
-            for (unsigned int i = 0; i < m_selectedStEta.size(); i++)
-                ATH_MSG_INFO("          Selected Jzz locations  " << m_selectedStEta[i]);
+	for (int stEta : m_selectedStEta) {
+	  ATH_MSG_INFO("          Selected Jzz locations  " << stEta);
         }
-        if (m_selectedStPhi.size() > 0) {
-            for (unsigned int i = 0; i < m_selectedStPhi.size(); i++)
-                ATH_MSG_INFO("          Selected Jff locations  " << m_selectedStPhi[i]);
+	for (int stPhi : m_selectedStPhi) {
+	  ATH_MSG_INFO("          Selected Jff locations  " << stPhi);
         }
     }
 
@@ -244,57 +227,37 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
         cpu = ucpu;
     }
 
-    if (nullptr == m_detector) {
+    theFactory.setDBAtlasVersion(AtlasVersion);
+    theFactory.setDBMuonVersion(MuonVersion);
+    theFactory.setDBkey(detectorKey);
+    theFactory.setDBnode(detectorNode);
+    theFactory.setLayout(tempLayout);
+    theFactory.setCutoutsFlag(m_includeCutouts);
+    theFactory.setCutoutsBogFlag(m_includeCutoutsBog);
+    theFactory.setCtbBisFlag(m_includeCtbBis);
+    theFactory.setMinimalGeoFlag(m_minimalGeoFlag);
+    theFactory.setDumpMemoryBreakDown(m_dumpMemoryBreakDown);
+    theFactory.setFineClashFixingFlag(m_enableFineClashFixing);
+    theFactory.hasCSC(m_hasCSC);
+    theFactory.hasSTgc(m_hasSTgc);
+    theFactory.hasMM(m_hasMM);
+    if (m_stationSelection > 0)
+      theFactory.setSelection(m_selectedStations, m_selectedStEta, m_selectedStPhi);
 
-        theFactory.setDBAtlasVersion(AtlasVersion);
-        theFactory.setDBMuonVersion(MuonVersion);
-        theFactory.setDBkey(detectorKey);
-        theFactory.setDBnode(detectorNode);       
-        theFactory.setLayout(tempLayout);
-        theFactory.setCutoutsFlag(m_includeCutouts);
-        theFactory.setCutoutsBogFlag(m_includeCutoutsBog);
-        theFactory.setCtbBisFlag(m_includeCtbBis);
-        theFactory.setMinimalGeoFlag(m_minimalGeoFlag);
-        theFactory.setDumpMemoryBreakDown(m_dumpMemoryBreakDown);
-        theFactory.setFineClashFixingFlag(m_enableFineClashFixing);
-        theFactory.hasCSC(m_hasCSC);
-        theFactory.hasSTgc(m_hasSTgc);
-        theFactory.hasMM(m_hasMM);
-        if (m_stationSelection > 0)
-            theFactory.setSelection(m_selectedStations, m_selectedStEta, m_selectedStPhi);
+    theFactory.setRDBAccess(accessSvc.get());
+    theFactory.setAltAsciiDBMap(altAsciiDBMap);
 
-        theFactory.setRDBAccess(accessSvc.get());
-        // theFactory.setUseRDB(1);
-        theFactory.setAltAsciiDBMap(altAsciiDBMap);
-        try {
-            //
-            // This strange way of casting is to avoid an
-            // utterly brain damaged compiler warning.
-            //
-            theFactory.create(world);
-        } catch (const std::bad_alloc &) {
-            ATH_MSG_FATAL("Could not create new MuonDetectorNode!");
-            return StatusCode::FAILURE;
-        }
+    theFactory.create(world);
 
-        if (m_dumpMemoryBreakDown) {
-            umem = GeoPerfUtils::getMem();
-            ucpu = float(GeoPerfUtils::getCpu() / 100.);
-            geoModelStats << "At MuonDetectorTool::factory created     \t SZ= " << umem << " Kb \t Time = " << ucpu << " seconds  ---- \t DeltaM = " << umem - mem
-                          << " \t Delta T =" << ucpu - cpu << std::endl;
-            mem = umem;
-            cpu = ucpu;
-        }
-
-        if (m_dumpMemoryBreakDown) {
-            umem = GeoPerfUtils::getMem();
-            ucpu = float(GeoPerfUtils::getCpu() / 100.);
-            geoModelStats << "At MuonDetectorTool::trk cache done      \t SZ= " << umem << " Kb \t Time = " << ucpu << " seconds  ---- \t DeltaM = " << umem - mem
-                          << " \t Delta T =" << ucpu - cpu << std::endl;
-            mem = umem;
-            cpu = ucpu;
-        }
+    if (m_dumpMemoryBreakDown) {
+      umem = GeoPerfUtils::getMem();
+      ucpu = float(GeoPerfUtils::getCpu() / 100.);
+      geoModelStats << "At MuonDetectorTool::factory created     \t SZ= " << umem << " Kb \t Time = " << ucpu << " seconds  ---- \t DeltaM = " << umem - mem
+		    << " \t Delta T =" << ucpu - cpu << std::endl;
+      mem = umem;
+      cpu = ucpu;
     }
+
     mgr=theFactory.getDetectorManager();
     mgr->fillCache();
     return StatusCode::SUCCESS;

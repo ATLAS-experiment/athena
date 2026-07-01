@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,7 +47,7 @@ MuCTPIByteStreamCnv::MuCTPIByteStreamCnv( ISvcLocator* svcloc )
  * Function telling the framework the Class ID of the object that this converter
  * is for (MuCTPI_RDO).
  */
-const CLID& MuCTPIByteStreamCnv::classID() {
+CLID MuCTPIByteStreamCnv::classID() {
 
   return ClassID_traits<MuCTPI_RDO>::ID();
 
@@ -118,12 +118,10 @@ StatusCode MuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
   MsgStream log( msgSvc(), "MuCTPIByteStreamCnv" );
   log << MSG::DEBUG << "createObj() called" << endmsg;
 
-  ByteStreamAddress *pBS_Addr;
-  pBS_Addr = dynamic_cast< ByteStreamAddress* >( pAddr );
-  if ( !pBS_Addr ) {
-    log << MSG::ERROR << " Can not cast to ByteStreamAddress " << endmsg ;
-    return StatusCode::FAILURE;
-  }
+  ByteStreamAddress* pBS_Addr{};
+  ATH_CHECK( (pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pBS_Addr->getEventContext();
 
   log << MSG::DEBUG << " Creating Objects " << *( pBS_Addr->par() ) << endmsg;
 
@@ -142,7 +140,7 @@ StatusCode MuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
   // Get ROB fragment:
   //
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
+  m_robDataProvider->getROBData(ctx, vID, robFrags );
 
   //
   // Size check:
@@ -159,7 +157,7 @@ StatusCode MuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
 #ifdef CTP_MUCTPI_HAVE_SAME_ROS
     vID.push_back( robId | 0x00000a );
 #endif
-    m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags );
+    m_robDataProvider->getROBData(ctx, vID, robFrags );
 
     if( robFrags.size() == 0 ) {
       // yet another temporary hack!!! - for some time the ROB ID was 0!
@@ -167,7 +165,7 @@ StatusCode MuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*& p
 #ifdef CTP_MUCTPI_HAVE_SAME_ROS
       vID[1] = 0x00000a;
 #endif
-      m_robDataProvider->getROBData(Gaudi::Hive::currentContext(),  vID, robFrags );
+      m_robDataProvider->getROBData(ctx,  vID, robFrags );
       
       if( robFrags.size() == 0 ) {
         log << MSG::WARNING << "No MuCTPI ROB fragments found!" << endmsg;

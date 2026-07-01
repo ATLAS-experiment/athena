@@ -62,6 +62,7 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.Calib.SuperClusterCorrectionVersion",
                  'v12phiflip_supercluster')
     egcf.addFlag("Egamma.Calib.MVAVersion", 'egammaMVACalib/offline/v7')
+    egcf.addFlag("Egamma.Calib.TransformerVersion", 'egammaMVACalib/offline/v11/')
 
     # The input keys
     egcf.addFlag("Egamma.Keys.Input.CaloCells",
@@ -156,9 +157,18 @@ def createEgammaConfigFlags():
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.GSFTrackParticles + 'Fwd'))
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticlesSuppESD", '')
+
+    def GSFTrackParticlesSuppAOD(flags):
+        suppAOD = ""
+        if not flags.Acts.EDM.PersistifyTracks:
+            suppAOD = "-actsTrack"
+        if flags.Egamma.Keys.Output.GSFTrackParticlesSuppESD:
+            if suppAOD:
+                suppAOD += '.'
+            suppAOD += flags.Egamma.Keys.Output.GSFTrackParticlesSuppESD
+        return suppAOD
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticlesSuppAOD",
-                 lambda prevFlags: (
-                     prevFlags.Egamma.Keys.Output.GSFTrackParticlesSuppESD))
+                 GSFTrackParticlesSuppAOD)
 
     egcf.addFlag("Egamma.Keys.Output.TruthParticles", 'egammaTruthParticles')
     egcf.addFlag("Egamma.Keys.Output.TruthParticlesSuppESD", '')

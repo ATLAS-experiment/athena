@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1Topo_L1TopoSimulation
@@ -37,7 +37,7 @@ namespace LVL1 {
 
       virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE() override;
       virtual StatusCode start() override;
-      virtual StatusCode execute() override;
+      virtual StatusCode execute(const EventContext& ctx) override;
       virtual StatusCode finalize() override;
      
       // make algorithm is clonable

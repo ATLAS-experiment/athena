@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKFINDING_SCOREBASEDAMBIGUITYRESOLUTIONALG_H
@@ -8,10 +8,7 @@
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-// Gaudi includes
-#include "Gaudi/Property.h"
-#include "GaudiKernel/ToolHandle.h"
-
+#include "GeoPrimitives/GeoPrimitives.h"
 // ACTS
 #include "src/ScoreBasedSolverCutsImpl.h"
 #include "Acts/AmbiguityResolution/ScoreBasedAmbiguityResolution.hpp"
@@ -31,8 +28,7 @@ namespace ActsTrk {
 
 class ScoreBasedAmbiguityResolutionAlg : public AthReentrantAlgorithm {
  public:
-  ScoreBasedAmbiguityResolutionAlg(const std::string &name,
-                                   ISvcLocator *pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;

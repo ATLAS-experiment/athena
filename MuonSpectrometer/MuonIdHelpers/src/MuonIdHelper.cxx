@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MuonIdHelper.h"
@@ -363,7 +363,6 @@ int MuonIdHelper::init_hashes() {
     m_module_hash_max = m_full_module_range.cardinality();
     ATH_MSG_INFO("The element hash max is " << m_module_hash_max);
     m_module_vec.resize(m_module_hash_max);
-    IdContext context = module_context();
     unsigned int nids = 0;
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_module_range.size(); ++i) {
@@ -409,7 +408,6 @@ int MuonIdHelper::init_detectorElement_hashes() {
     m_detectorElement_hash_max = m_full_detectorElement_range.cardinality();
     ATH_MSG_INFO("The detector element hash max is " << m_detectorElement_hash_max);
     m_detectorElement_vec.resize(m_detectorElement_hash_max);
-    IdContext context = detectorElement_context();
     unsigned int nids = 0;
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_detectorElement_range.size(); ++i) {
@@ -455,7 +453,6 @@ int MuonIdHelper::init_channel_hashes() {
     m_channel_hash_max = m_full_channel_range.cardinality();
     ATH_MSG_INFO("The channel hash max is " << m_channel_hash_max);
     m_channel_vec.resize(m_channel_hash_max);
-    IdContext context = channel_context();
     unsigned int nids = 0;
     std::set<Identifier> ids;
     for (unsigned int i = 0; i < m_full_channel_range.size(); ++i) {
@@ -570,7 +567,7 @@ int MuonIdHelper::init_neighbors() {
             }
 
             // index for the subsequent arrays
-            unsigned short index = hash_id;
+            IdentifierHash::value_type index = hash_id;
             assert(hash_id < m_prev_phi_module_vec.size());
             assert(hash_id < m_next_phi_module_vec.size());
             assert(hash_id < m_prev_eta_module_vec.size());

@@ -58,7 +58,7 @@ JemTobRoiByteStreamAuxCnv::JemTobRoiByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& JemTobRoiByteStreamAuxCnv::classID() {
+CLID JemTobRoiByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::JEMTobRoIAuxContainer>::ID();
 }
 
@@ -86,6 +86,7 @@ StatusCode JemTobRoiByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   ByteStreamAddress *pBS_Addr = dynamic_cast<ByteStreamAddress *>(pAddr);
   if (not pBS_Addr) return StatusCode::FAILURE;
   // -------------------------------------------------------------------------
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *(pBS_Addr->par());
   ATH_MSG_DEBUG("Creating Objects " << nm);
 
@@ -94,7 +95,7 @@ StatusCode JemTobRoiByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   container.setStore(aux);
   // -------------------------------------------------------------------------
   DataVector<LVL1::JEMTobRoI> vec;
-  StatusCode sc = m_readTool->convert(nm, &vec);
+  StatusCode sc = m_readTool->convert(ctx, nm, &vec);
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to create objects");
     delete aux;

@@ -21,7 +21,7 @@ namespace Muon {
 
         return StatusCode::SUCCESS;
     }
-    StatusCode RpcToyCablingJsonDumpAlg::execute() {
+    StatusCode RpcToyCablingJsonDumpAlg::execute(const EventContext& /*ctx*/) {
         std::ofstream outStream{m_cablingJSON};
         if (!outStream.good()) {
             ATH_MSG_FATAL("Failed to create JSON file " << m_cablingJSON);

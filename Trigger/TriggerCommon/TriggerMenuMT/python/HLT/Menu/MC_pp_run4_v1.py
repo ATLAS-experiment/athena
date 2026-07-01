@@ -67,6 +67,8 @@ def addMCSignatures(chains):
     chainsMC['Muon'] = [
         # Single Muon Run-3 primaries
         ChainProp(name='HLT_mu24_ivarmedium_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='HLT_mu24_msonly_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu24_msonly_newFast_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
         ChainProp(name='HLT_mu50_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
         ChainProp(name='HLT_mu60_0eta105_msonly_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
         ChainProp(name='HLT_mu60_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup),
@@ -114,6 +116,14 @@ def addMCSignatures(chains):
         # Phase-II Support
         ChainProp(name='HLT_mu20_idperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
         ChainProp(name='HLT_mu20_ivarperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
+
+        # ML bucket filter test chains
+        ChainProp(name='HLT_mu20_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu24_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_2mu14_mlbkt_L12MU8F', groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_3mu6_mlbkt_L13MU5VF', l1SeedThresholds=['MU5VF'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online']),
 
         # HL-LHC TDR inspired chains
         ChainProp(name="HLT_mu3vtx_L12MU8F", groups=PrimaryPhIGroup+SingleTauGroup),
@@ -166,8 +176,8 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_2g15_tight_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M', l1SeedThresholds=['eEM15'], groups=PrimaryPhIGroup+MultiPhotonGroup+Topo2Group),
 
         # No PID e/gamma chains for Ringer NN studies # ATR-30937 
-        ChainProp(name='HLT_e5_nopid_L1eEM5', l1SeedThresholds=['eEM5'], groups=SingleElectronGroup+SupportPhIGroup+['RATE:CPS_eEM5']+['PS:NoBulkMCProd']),
-        ChainProp(name='HLT_g5_nopid_L1eEM5', l1SeedThresholds=['eEM5'], groups=SinglePhotonGroup+SupportPhIGroup+['RATE:CPS_eEM5']+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e5_nopid_L1eEM5', l1SeedThresholds=['eEM5'], groups=SingleElectronGroup+SupportPhIGroup+['RATE:CPS_eEM5']),
+        ChainProp(name='HLT_g5_nopid_L1eEM5', l1SeedThresholds=['eEM5'], groups=SinglePhotonGroup+SupportPhIGroup+['RATE:CPS_eEM5']),
 
         # T&P chains for displaced electrons
         ChainProp(name='HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L',l1SeedThresholds=['PROBEeEM5','eEM24L'],groups=SupportPhIGroup+SingleElectronGroup),
@@ -621,7 +631,7 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_g25_medium_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','eTAU12'], groups=PrimaryPhIGroup+EgammaTauGroup),
         ChainProp(name='HLT_g25_medium_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','eTAU12'], groups=PrimaryPhIGroup+EgammaTauGroup),
         ChainProp(name='HLT_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','eTAU12'], groups=PrimaryPhIGroup+EgammaTauGroup),
-        ChainProp(name='HLT_g35_medium_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','TAU8'], groups=PrimaryPhIGroup+EgammaTauGroup),
+        ChainProp(name='HLT_g35_medium_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','eTAU12'], groups=PrimaryPhIGroup+EgammaTauGroup),
 
         # Support
         ChainProp(name='HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['idMon:t0']),

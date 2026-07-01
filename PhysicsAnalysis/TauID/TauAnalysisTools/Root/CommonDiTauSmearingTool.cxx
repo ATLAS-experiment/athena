@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -19,10 +19,13 @@ using namespace TauAnalysisTools;
 
 //______________________________________________________________________________
 CommonDiTauSmearingTool::CommonDiTauSmearingTool(const std::string& sName)
-  : CommonSmearingTool( sName )
+  : asg::AsgMetadataTool( sName ) 
+  , m_sSystematicSet(nullptr)	
   , m_fX(&TruthLeadPt)
   , m_fY(&TruthSubleadPt)
   , m_fZ(&TruthDeltaR)
+  , m_bIsData(false)
+  , m_eCheckTruth(TauAnalysisTools::Unknown)	
 {}
 
 /*
@@ -63,7 +66,7 @@ StatusCode CommonDiTauSmearingTool::initialize()
   non-const tau.
 */
 //______________________________________________________________________________
-CP::CorrectionCode CommonDiTauSmearingTool::applyCorrection( xAOD::DiTauJet& xDiTau )
+CP::CorrectionCode CommonDiTauSmearingTool::applyCorrection( xAOD::DiTauJet& xDiTau ) const
 {
   // step out here if we run on data
   if (m_bIsData)
@@ -134,7 +137,7 @@ CP::CorrectionCode CommonDiTauSmearingTool::applyCorrection( xAOD::DiTauJet& xDi
  */
 //______________________________________________________________________________
 CP::CorrectionCode CommonDiTauSmearingTool::correctedCopy( const xAOD::DiTauJet& xDiTau,
-    xAOD::DiTauJet*& xDiTauCopy )
+    xAOD::DiTauJet*& xDiTauCopy ) const
 {
 
   // A sanity check:
@@ -150,6 +153,94 @@ CP::CorrectionCode CommonDiTauSmearingTool::correctedCopy( const xAOD::DiTauJet&
 
   // Use the other function to modify this object:
   return applyCorrection( *xDiTauCopy );
+}
+
+/*
+  standard check if a systematic is available
+*/
+//______________________________________________________________________________
+bool CommonDiTauSmearingTool::isAffectedBySystematic( const CP::SystematicVariation& systematic ) const
+{
+  CP::SystematicSet sys = affectingSystematics();
+  return sys.find(systematic) != sys.end();
+}
+
+/*
+  standard way to return systematics that are available (including recommended
+  systematics)
+*/
+//______________________________________________________________________________
+CP::SystematicSet CommonDiTauSmearingTool::affectingSystematics() const
+{
+  return m_sAffectingSystematics;
+}
+
+/*
+  standard way to return systematics that are recommended
+*/
+//______________________________________________________________________________
+CP::SystematicSet CommonDiTauSmearingTool::recommendedSystematics() const
+{
+  return m_sRecommendedSystematics;
+}
+
+/*
+  Configure the tool to use a systematic variation for further usage, until the
+  tool is reconfigured with this function. The passed systematic set is checked
+  for sanity:
+    - unsupported systematics are skipped
+    - only combinations of up or down supported systematics is allowed
+    - don't mix recommended systematics with other available systematics, cause
+      sometimes recommended are a quadratic sum of the other variations,
+      e.g. TOTAL=(SYST^2 + STAT^2)^0.5
+*/
+//______________________________________________________________________________
+StatusCode CommonDiTauSmearingTool::applySystematicVariation ( const CP::SystematicSet& sSystematicSet )
+{
+  // first check if we already know this systematic configuration
+  auto itSystematicSet = m_mSystematicSets.find(sSystematicSet);
+  if (itSystematicSet != m_mSystematicSets.end())
+  {
+    m_sSystematicSet = &itSystematicSet->first;
+    return StatusCode::SUCCESS;
+  }
+
+  // sanity checks if systematic set is supported
+  double dDirection = 0.;
+  CP::SystematicSet sSystematicSetAvailable;
+  for (auto& sSyst : sSystematicSet)
+  {
+    // check if systematic is available
+    auto it = m_mSystematicsHistNames.find(sSyst.basename());
+    if (it == m_mSystematicsHistNames.end())
+    {
+      ATH_MSG_VERBOSE("unsupported systematic variation: "<< sSyst.basename()<<"; skipping this one");
+      continue;
+    }
+
+    if (sSyst.parameter() * dDirection < 0)
+    {
+      ATH_MSG_ERROR("unsupported set of systematic variations, you should either use only \"UP\" or only \"DOWN\" systematics in one set!");
+      ATH_MSG_ERROR("systematic set will not be applied");
+      return StatusCode::FAILURE;
+    }
+    dDirection = sSyst.parameter();
+
+    if ((m_sRecommendedSystematics.find(sSyst.basename()) != m_sRecommendedSystematics.end()) and sSystematicSet.size() > 1)
+    {
+      ATH_MSG_ERROR("unsupported set of systematic variations, you should not combine \"TAUS_{TRUE|FAKE}_SME_TOTAL\" with other systematic variations!");
+      ATH_MSG_ERROR("systematic set will not be applied");
+      return StatusCode::FAILURE;
+    }
+
+    // finally add the systematic to the set of systematics to process
+    sSystematicSetAvailable.insert(sSyst);
+  }
+
+  // store this calibration for future use, and make it current
+  m_sSystematicSet = &m_mSystematicSets.insert(std::pair<CP::SystematicSet,std::string>(sSystematicSetAvailable, sSystematicSet.name())).first->first;
+
+  return StatusCode::SUCCESS;
 }
 
 //=================================PRIVATE-PART=================================

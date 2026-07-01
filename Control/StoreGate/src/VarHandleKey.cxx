@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 /**
  * @file StoreGate/src/VarHandleKey.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -20,7 +19,6 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/StoreID.h"
-#include <boost/tokenizer.hpp>
 
 #include <sstream>
 

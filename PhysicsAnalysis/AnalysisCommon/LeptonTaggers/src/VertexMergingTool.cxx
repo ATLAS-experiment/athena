@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // C/C++
@@ -33,6 +33,7 @@ StatusCode Prompt::VertexMergingTool::initialize()
 
 //=============================================================================
 Prompt::MergeResultNotOwner Prompt::VertexMergingTool::mergeInitVertices(
+  const EventContext& ctx,
   const FittingInput &input,
   const xAOD::TrackParticle *tracklep,
   std::vector<std::unique_ptr<xAOD::Vertex>> &init_vtxs,
@@ -128,7 +129,7 @@ Prompt::MergeResultNotOwner Prompt::VertexMergingTool::mergeInitVertices(
     //
     // Fit cluster of vertices to obtain one merged vertex
     //
-    fitVertexCluster(input, tracklep, *cluster);
+    fitVertexCluster(ctx, input, tracklep, *cluster);
 
     if(cluster->vtxMerged) {
       result.vtxsNewMerged.push_back(std::move(cluster->vtxMerged));
@@ -280,6 +281,7 @@ bool Prompt::VertexMergingTool::addInitVtxToCluster(
 
 //=============================================================================
 bool Prompt::VertexMergingTool::fitVertexCluster(
+  const EventContext& ctx,
   const FittingInput &input,
   const xAOD::TrackParticle *tracklep,
   VtxCluster &cluster
@@ -303,7 +305,7 @@ bool Prompt::VertexMergingTool::fitVertexCluster(
   }
 
   std::unique_ptr<xAOD::Vertex> secVtx = m_vertexFitterTool->fitVertexWithPrimarySeed(
-    input, cluster.trksCurr, kDeepMergedVtx
+    ctx, input, cluster.trksCurr, kDeepMergedVtx
   );
 
   if(!secVtx) {

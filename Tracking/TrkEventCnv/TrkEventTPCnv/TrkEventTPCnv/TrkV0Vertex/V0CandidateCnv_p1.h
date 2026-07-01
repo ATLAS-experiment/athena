@@ -23,7 +23,7 @@
    void  persToTrans(const Trk::V0Candidate_p1 * persObj, Trk::V0Candidate * transObj, MsgStream &log); 
    void  transToPers(const Trk::V0Candidate * transObj, Trk::V0Candidate_p1 * persObj, MsgStream &log);     
 
-   virtual void initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv ) {
+   virtual void initPrivateConverters( TopLevelTPCnvBase *topCnv ) {
        m_v0HypothesisVectorCnv.setTopConverter( topCnv, 0 );
    }   
      

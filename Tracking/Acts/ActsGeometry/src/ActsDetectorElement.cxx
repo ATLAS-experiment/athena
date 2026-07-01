@@ -250,13 +250,14 @@ IdentityHelper ActsDetectorElement::identityHelper() const {
 }
 
 const Acts::Transform3 &ActsDetectorElement::localToGlobalTransform(const Acts::GeometryContext &anygctx) const {
-    return m_trfCache.localToGlobalTransform(anygctx);
+    return m_trfCache.getTransform(anygctx);
+}
+const Acts::Transform3 &ActsDetectorElement::localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const {
+    return m_trfCache.getTransform(store);
 }
 
-unsigned int ActsDetectorElement::storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const {
-    if (store.detType != detectorType()) return 0;
-    m_trfCache.getTransform(&store);
-    return 1;
+unsigned int ActsDetectorElement::storeAlignedTransforms(ActsTrk::DetectorAlignStore& store) const {
+    return m_trfCache.storeTransform(store);
 }
 
 const Acts::Transform3 & ActsDetectorElement::getDefaultTransform() const {

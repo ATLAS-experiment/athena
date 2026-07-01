@@ -21,7 +21,8 @@ def METCfg(inputFlags):
     outputList.append("xAOD::MissingETAuxContainer#MET_TrackAux.")
 
     # Truth MET
-    if inputFlags.Input.isMC:
+    from AthenaConfiguration.Enums import Format
+    if inputFlags.Input.isMC and inputFlags.Input.Format!=Format.BS:
         from METReconstruction.METTruth_Cfg import METTruth_Cfg
         result.merge(METTruth_Cfg(inputFlags))
         outputList.append("xAOD::MissingETContainer#MET_Truth")

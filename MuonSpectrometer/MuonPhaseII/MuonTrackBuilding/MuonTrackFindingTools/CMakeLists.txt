@@ -8,11 +8,12 @@
 atlas_subdir( MuonTrackFindingTools )
 
 find_package( Acts COMPONENTS Core )
+find_package( TBB )
 atlas_add_library(MuonTrackFindingToolsLib
-                   Root/*.cxx 
+                   Root/*.cxx
                    PUBLIC_HEADERS MuonTrackFindingTools
-                   LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternHelpers
-                                  xAODMuon MuonSpacePoint MuonStationIndexLib MuonTrackEvent
+                   LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternHelpers FourMomUtils 
+                                 xAODMuon MuonSpacePoint MuonStationIndexLib MuonTrackEvent TBB::tbb
                    PRIVATE_LINK_LIBRARIES MuonTruthHelpers Identifier MuonPatternEvent MuonDetDescrUtils)
 
 

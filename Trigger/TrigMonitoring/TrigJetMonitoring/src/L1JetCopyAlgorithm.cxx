@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigJetMonitoring/L1JetCopyAlgorithm.h"
 #include "xAODCore/ShallowCopy.h"
@@ -15,7 +15,7 @@ L1JetCopyAlgorithm<T>::L1JetCopyAlgorithm( const std::string& name, ISvcLocator*
 
 template<typename T>
 StatusCode L1JetCopyAlgorithm<T>::initialize() {
-  
+
   ATH_MSG_INFO(" Initializing " << name());
   ATH_CHECK( m_jetInContainerKey.initialize() );
   ATH_CHECK( m_jetOutContainerKey.initialize() );
@@ -42,9 +42,7 @@ StatusCode L1JetCopyAlgorithm<T>::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Shallow-copying "<<m_jetInContainerKey);
   SG::WriteHandle<JetContainer> jetsOut(m_jetOutContainerKey,ctx);
 
-  auto shallowcopy = xAOD::shallowCopyContainer(*inputJetsHandle);
-  std::unique_ptr<JetContainer> copiedjets(shallowcopy.first);
-  std::unique_ptr<xAOD::ShallowAuxContainer> shallowaux(shallowcopy.second);
+  auto [copiedjets, shallowaux] = xAOD::shallowCopy(*inputJetsHandle, ctx);
 
   if(copiedjets.get() == nullptr || shallowaux.get() == nullptr) {
       ATH_MSG_ERROR("Failed to make shallow copy of "<<m_jetInContainerKey<<".");

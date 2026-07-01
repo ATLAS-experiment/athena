@@ -16,7 +16,6 @@
 #include "AthAllocators/DataPool.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include <cassert>
 #include <iostream>
@@ -79,7 +78,6 @@ void compare (const CompositeParticleContainer& c1,
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   AthenaBarCodeImpl dumbc; // Get services created.
   dumbc.getVersion();
   ElementLink<VxContainer> origlink ("orig", 10);

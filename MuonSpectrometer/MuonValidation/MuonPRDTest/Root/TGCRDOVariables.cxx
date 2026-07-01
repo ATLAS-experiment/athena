@@ -4,6 +4,7 @@
 
 #include "MuonPRDTest/TGCRDOVariables.h"
 #include "MuonSimData/MuonSimDataCollection.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonRDO/TgcRdo.h"
 

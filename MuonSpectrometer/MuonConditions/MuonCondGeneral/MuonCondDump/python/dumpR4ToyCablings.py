@@ -14,7 +14,8 @@ def MdtToyCablingJsonDumpAlgCfg(flags, name="MdtToyCablingJsonDumpAlg", **kwargs
     result.addEventAlgo(the_alg, primary = True)
     return result
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.set_defaults(nEvents = 1)
     parser.set_defaults(noMM=True)

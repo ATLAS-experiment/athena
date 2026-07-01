@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -366,10 +366,10 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
 
         double probability;
         if ( abs( particleEncoding ) == 11 && kineticEnergy > 5000. ) {  // electron
-           probability = m_trtHighProbabilityBoostEle*getProbHT( particleEncoding, kineticEnergy, straw_id, smearedRadius, position);
+          probability = m_trtHighProbabilityBoostEle*getProbHT( ctx, particleEncoding, kineticEnergy, straw_id, smearedRadius, position);
         }
         else{
-           probability = m_trtHighProbabilityBoostBkg*getProbHT( particleEncoding, kineticEnergy, straw_id, smearedRadius, position);
+          probability = m_trtHighProbabilityBoostBkg*getProbHT( ctx, particleEncoding, kineticEnergy, straw_id, smearedRadius, position);
         }
 
         if ( CLHEP::RandFlat::shoot( rndmEngine ) < probability ) word |= maskHT;
@@ -744,7 +744,7 @@ int TRTFastDigitizationTool::gasType( const Identifier &straw_id ) const
 }
 
 
-double TRTFastDigitizationTool::getProbHT( int particleEncoding, float kineticEnergy, const Identifier &straw_id, double rTrkWire, double hitGlobalPosition ) const {
+double TRTFastDigitizationTool::getProbHT( const EventContext& ctx, int particleEncoding, float kineticEnergy, const Identifier &straw_id, double rTrkWire, double hitGlobalPosition ) const {
 
   Trk::ParticleHypothesis hypothesis = Trk::pion;
 
@@ -812,7 +812,7 @@ double TRTFastDigitizationTool::getProbHT( int particleEncoding, float kineticEn
 
   double Occupancy = 0.11+0.014*m_NCollPerEvent;
 
-  double probHT = m_trtElectronPidTool->probHTRun2( pTrk, hypothesis, trtPart, gasType( straw_id ), strawLayer, hitGlobalPosition, rTrkWire, Occupancy );
+  double probHT = m_trtElectronPidTool->probHTRun2( ctx, pTrk, hypothesis, trtPart, gasType( straw_id ), strawLayer, hitGlobalPosition, rTrkWire, Occupancy );
   if ( probHT == 0.5 || probHT == 1. ) probHT = 0.;
   if(hypothesis == Trk::electron) probHT *= 1.3;
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonRPC_CnvTools )
@@ -17,4 +17,4 @@ atlas_add_component( MuonRPC_CnvTools
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} MuonRPC_CnvToolsLib ByteStreamData GaudiKernel AthenaBaseComps AthenaKernel StoreGateLib ByteStreamCnvSvcBaseLib MuonCondData MuonCablingData MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonRDO xAODMuonRDO MuonPrepRawData MuonTrigCoinData TrkSurfaces TrigT1RPChardwareLib RPC_CondCablingLib MuonCnvToolInterfacesLib xAODEventInfo xAODMuonPrepData )
+                     LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} MuonRPC_CnvToolsLib ByteStreamData GaudiKernel AthenaBaseComps AthenaKernel StoreGateLib ByteStreamCnvSvcBaseLib MuonCondData MuonCablingData MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonRDO xAODMuonRDO MuonPrepRawData MuonTrigCoinData TrkSurfaces TrigT1RPChardwareLib RPC_CondCablingLib MuonCnvToolInterfacesLib )

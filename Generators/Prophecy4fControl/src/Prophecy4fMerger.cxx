@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "Prophecy4fMerger.h"
 #include "TLorentzRotation.h"
@@ -14,6 +14,7 @@ using Writer = Pythia8::Writer;
 #include <cmath>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 #include <AsgMessaging/MessageCheck.h>
 
 using namespace asg::msgUserCode;
@@ -152,7 +153,7 @@ int Prophecy4fMerger::rescms(double *p, double *p1, double *p2, double m1, doubl
         pcmo = alupcm(m, mo1, mo2);
     }
     pcm = alupcm(m, m1, m2);
-  
+    if (pcmo == 0.) [[unlikely]] throw std::runtime_error("Prophecy4fMerger::rescms: pcmo value is zero.");
     //rescale the cms momenta, po1 and po2, to account for the new masses used 
     for (int il = 0; il < 4; il++) {
         po1[il] = pcm / pcmo * po1[il];
@@ -457,6 +458,8 @@ void Prophecy4fMerger::merge(){
                 }  
                 writeLHE.hepeup.MOTHUP[nup_org+jp].first=3;//i-1;
                 writeLHE.hepeup.MOTHUP[nup_org+jp].second=3;//i-1;
+                //daughter2 is defined as 'double daughter2[5][5]', coverity defect 10700
+                if (jp>=5) throw std::runtime_error("Prophecy4fMerger::merge: jp index out of range for array 'daughter2'.");
                 writeLHE.hepeup.PUP[nup_org+jp][0]=daughter2[jp][0];
                 writeLHE.hepeup.PUP[nup_org+jp][1]=daughter2[jp][1];
                 writeLHE.hepeup.PUP[nup_org+jp][2]=daughter2[jp][2];

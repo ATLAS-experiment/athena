@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AnaAlgorithm.DualUseConfig import isAthena
 from AnaAlgorithm.Logging import logging
 import argparse
@@ -10,20 +10,22 @@ import os
 logCPGridRun = logging.getLogger('CPGridRun')
 class CPGridRun:
     def __init__(self):
-        self.gridParser = self._parseGridArguments()
-        self.prunArgsDict = self._createPrunArgsDict()
+        self._errorCollector = {} # Delay the error collection until the end of the script for better user experience
         self._runscript = None
-        if self.args.help:
-            self._initRunscript()
-            self.printHelp()
-            sys.exit(0)
         self._tarfile = 'cpgrid.tar.gz'
         self._isFirstRun = True
         self._tarballRecreated = False
         self._inputList = None 
-        self._errorCollector = {} # Delay the error collection until the end of the script for better user experience
         self._yamlPath = None
         self.cmd = {} # sample name -> command
+
+        self.gridParser = self._parseGridArguments()
+        self.prunArgsDict = self._createPrunArgsDict()
+
+        if self.args.help:
+            self._initRunscript()
+            self.printHelp()
+            sys.exit(0)
 
     def _initRunscript(self):
         if self._runscript is not None:
@@ -94,6 +96,8 @@ class CPGridRun:
 
     @property
     def inputList(self):
+        if not self.args.input_list:
+            raise ValueError('No input list provided, use --input-list to specify the input containers')
         if self._inputList is None:
             if self.args.input_list.endswith('.txt'):
                 self._inputList = CPGridRun._parseInputFileList(self.args.input_list)
@@ -126,7 +130,7 @@ class CPGridRun:
 
     # This function do all the checking, cleaning and preparing the command to be submitted to the grid
     # separated for client to be able to change the behavior
-    def configureSumbission(self):
+    def configureSubmission(self):
         for input in self.inputList:
             cmd = self.configureSubmissionSingleSample(input)
             self.cmd[input] = cmd
@@ -415,11 +419,14 @@ class CPGridRun:
         return sourceDir
 
     def execFormatter(self):
+        if not self.args.exec:
+            raise ValueError('No exec command provided, use --exec to specify the command to run on the grid')
+
         # Check if the execution command starts with 'CPRun.py' or '-'
         isCPRunDefault = self.args.exec.startswith('-') or self.args.exec.startswith('CPRun.py')
         formatingClause = {
             'input_list': 'in.txt',
-            'merge_output_files': True,
+            'merge_output_files': len(self.args.output_files) == 1,
         }
         if not isCPRunDefault:
             if self._isFirstRun: logCPGridRun.warning("Non-CPRun.py is detected, please ensure the exec string is formatted correctly. Exec string will not be automatically formatted.")
@@ -485,7 +492,7 @@ class CPGridRun:
                 f"Or if you are only using central packages, please use the `--useCentralPackage` flag."
 
     def outputsFormatter(self):
-        outputs = [f'{output.split(".")[0]}:{output}' for output in self.args.output_files]
+        outputs = [f'{output.split(".")[0]}:{output}' if ":" not in output else output for output in self.args.output_files]
         return ','.join(outputs)
 
     def hasPrun(self) -> bool:
@@ -511,8 +518,12 @@ class CPGridRun:
 
     @staticmethod
     def isAtlasProductionFormat(name):
+        if ":" in name:
+            name = name.split(":")[1]
+
         if name.startswith('mc') or name.startswith('data'):
             return True
+
         logCPGridRun.warning("Name is not in the Atlas production format, assuming it is a user production")
         return False
 
@@ -572,6 +583,15 @@ class CPGridRun:
         else:
             datasetPart = filename
             filePart = None
+
+        # Remove the scope
+        if ':' in datasetPart:
+            datasetPart = datasetPart.split(':')[1]
+
+        # Do not try to parse user datasets
+        if datasetPart.startswith('user') or datasetPart.startswith('group'):
+            result['datasetName'] = datasetPart
+            return result
 
         # Split the dataset part by dots
         datasetParts = datasetPart.split('.')
@@ -639,15 +659,11 @@ class CPGridRun:
             sys.exit(1)
         
     def checkExternalTools(self):
-        if self.args.noSubmit:
-            return
         self.hasPrun()
         if self.args.checkInputDS:
             self.checkInputInPyami()
         
     def askSubmission(self):
-        if self.args.noSubmit:
-            return
         if self.args.agreeAll:
             logCPGridRun.info("You have agreed to all the submission details. Jobs will be submitted without confirmation.")
             self.submit()
@@ -662,7 +678,7 @@ class CPGridRun:
 
 if __name__ == '__main__':
     cpgrid = CPGridRun()
-    cpgrid.configureSumbission()
+    cpgrid.configureSubmission()
     cpgrid.printInputDetails()
     cpgrid.checkExternalTools()
     cpgrid.printDelayedErrorCollection()

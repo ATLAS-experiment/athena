@@ -1,17 +1,22 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrackSummaryTool.h"
 
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
-#include "xAODMuonPrepData/UtilFunctions.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
+#include "ActsGeoUtils/SurfaceCache.h"
+
 #include "xAODMuon/versions/MuonTrackSummaryAccessors_v1.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "Acts/Utilities/StringHelpers.hpp"
+
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
+
+#include "xAODMuonPrepData/UtilFunctions.h"
 #include "xAODMuonPrepData/CombinedMuonStrip.h"
+
 
 using namespace ActsTrk::detail;
 using namespace Muon::MuonStationIndex;
@@ -25,8 +30,71 @@ namespace MuonR4 {
         ATH_CHECK(m_idHelperSvc.retrieve());
         return StatusCode::SUCCESS;
     }
-    HitSummary TrackSummaryTool::makeSummary(const EventContext& /*ctx*/,
-                                             const ConstTrack_t trackProxy) const  {
+    void TrackSummaryTool::complementaryHole(const Identifier& gasGapId,
+                                           const MuonGMR4::MuonReadoutElement* reEle,
+                                           HitSummary& summary) const {
+        if (!reEle) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" No readout element associated "
+                            <<m_idHelperSvc->toString(gasGapId));
+            return;
+        }
+        const bool measPhi = m_idHelperSvc->measuresPhi(gasGapId);
+        switch(reEle->detectorType()) {
+            using enum ActsTrk::DetectorType;
+            case Rpc:{
+                const auto* castRE = static_cast<const MuonGMR4::RpcReadoutElement*>(reEle);
+                if (castRE->nPhiStrips() || measPhi) {
+                    const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
+                    const Identifier holeId = idHelper.panelID(gasGapId, idHelper.gasGap(gasGapId), !measPhi);
+                    incrementSummary(holeId, Stat_t::Hole, 1, summary);
+                }
+                break;
+            } case Tgc: {
+                const auto* castRE = static_cast<const MuonGMR4::TgcReadoutElement*>(reEle);
+                const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+                const Identifier holeId = idHelper.channelID(gasGapId, 
+                                                             idHelper.gasGap(gasGapId), !measPhi, 1);
+
+                if (castRE->numChannels(castRE->measurementHash(holeId))){
+                    incrementSummary(holeId, Stat_t::Hole, 1, summary);
+                }
+                break;
+            } case sTgc: {
+                const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+                switch (idHelper.channelType(gasGapId)) {
+                    using enum sTgcIdHelper::sTgcChannelTypes;
+                    case Strip:
+                        incrementSummary(idHelper.channelID(gasGapId, 
+                                                            idHelper.multilayer(gasGapId),
+                                                            idHelper.gasGap(gasGapId), Wire, 1), 
+                                         Stat_t::Hole, 1, summary);
+                        break;
+                    case Wire:
+                        incrementSummary(idHelper.channelID(gasGapId, 
+                                                            idHelper.multilayer(gasGapId),
+                                                            idHelper.gasGap(gasGapId), Strip, 1), 
+                                         Stat_t::Hole, 1, summary);
+                    default:
+                        break;
+                }
+            }
+            default: 
+                break;
+        }
+    }
+    HitSummary TrackSummaryTool::makeSummary(const EventContext& ctx,
+                                             const ConstTrack_t trackProxy) const {
+        return makeSummaryImpl(ctx, trackProxy);
+    }
+    HitSummary TrackSummaryTool::makeSummary(const EventContext& ctx,
+                                             const Track_t trackProxy) const {
+        return makeSummaryImpl(ctx, trackProxy);
+    }
+
+
+    template <Acts::TrackProxyConcept T>
+    HitSummary TrackSummaryTool::makeSummaryImpl(const EventContext& /*ctx*/,
+                                             const T& trackProxy) const  {
         HitSummary summary{};
         trackProxy.container().trackStateContainer().visitBackwards(trackProxy.tipIndex(), 
             [&](const auto& state){
@@ -37,25 +105,30 @@ namespace MuonR4 {
                     status = Stat_t::Hole;
                 }
                 if (state.hasUncalibratedSourceLink()) {
-                    const auto* meas = xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-                    // for the combined sTgc space point we have to fill the primary and secodnray measuremment seperately to resolve the strip/pad/wire combinations
-                    if(meas->type() == xAOD::UncalibMeasType::sTgcStripType && meas->numDimensions() == 0){
-                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
-                        incrementSummary(xAOD::identify(combinedMeas->primaryStrip()), status, combinedMeas->primaryStrip()->numDimensions(), summary);
-                        incrementSummary(xAOD::identify(combinedMeas->secondaryStrip()), status, combinedMeas->secondaryStrip()->numDimensions(), summary);
-                        
+                    const auto* uncalib = dynamic_cast<const xAOD::MuonMeasurement*>(xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink()));
+                    // for the combined sTgc space point we have to fill the primary and secondary measuremment seperately to resolve the strip/pad/wire combinations
+                    if(uncalib->numDimensions() == 0) {
+                        const auto* combinedMeas = dynamic_cast<const xAOD::CombinedMuonStrip*>(uncalib);
+                        incrementSummary(combinedMeas->primaryStrip()->identify(), status, combinedMeas->primaryStrip()->numDimensions(), summary);
+                        incrementSummary(combinedMeas->secondaryStrip()->identify(), status, combinedMeas->secondaryStrip()->numDimensions(), summary);
                     } else {
-                        incrementSummary(xAOD::identify(meas), status, meas->numDimensions(), summary);
+                        incrementSummary(uncalib->identify(), status, uncalib->numDimensions(), summary);
+                        complementaryHole(uncalib->identify(), uncalib->readoutElement(), summary);
                     }
                 } else if (state.hasReferenceSurface()) {
                     const Acts::Surface& surf{state.referenceSurface()};
                     /// Surface is not active
-                    const Acts::SurfacePlacementBase* detEl = surf.surfacePlacement();
+                    if (!surf.isSensitive() || !surf.isAlignable()) {
+                        return;
+                    }
+                    const auto* detEl = dynamic_cast<const ActsTrk::SurfaceCache*>(surf.surfacePlacement());
                     if (!detEl) {
                         return;
                     }
-                    incrementSummary(static_cast<const ActsTrk::IDetectorElementBase*>(detEl)->identify(),
-                                     status, 1, summary);
+                    incrementSummary(detEl->identify(), status, 1, summary);
+                    complementaryHole(detEl->identify(), 
+                        dynamic_cast<const MuonGMR4::MuonReadoutElement*>(detEl->transformCache()->parent()), 
+                        summary);
                 }
         });
         ATH_MSG_DEBUG("Obtained track summary from track with "<<Acts::toString(trackProxy.fourMomentum())
@@ -98,26 +171,34 @@ namespace MuonR4 {
                 cat1 = Cat_t::TriggerEta;
             }
         } else if (techIdx == TechIdx::STGC) {
-            if(m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Pad){
-                cat1 = Cat_t::sTgcPad;
-            } else if (m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Wire){
-                cat1 = Cat_t::TriggerPhi;
-            } else if (m_idHelperSvc->stgcIdHelper().channelType(hitId) == sTgcIdHelper::sTgcChannelTypes::Strip){
-                cat1 = Cat_t::Precision;
-            }
+            switch(m_idHelperSvc->stgcIdHelper().channelType(hitId)) {
+                case sTgcIdHelper::sTgcChannelTypes::Pad:{
+                    cat1 = Cat_t::sTgcPad;
+                    break;
+                } case sTgcIdHelper::sTgcChannelTypes::Wire: {
+                    cat1 = Cat_t::TriggerPhi;
+                    break;
+                }  case sTgcIdHelper::sTgcChannelTypes::Strip:{
+                    cat1 = Cat_t::Precision;
+                    break;
+                } default: {
+                    ATH_MSG_ERROR(__FILE__ << ":" << __LINE__ << " Unknown stgc channel type");
+                    break;
+                }
+            }            
         } else {
-            ATH_MSG_ERROR(__FILE__ << ":" << __LINE__ << "  Unkown technology index "<<static_cast<int>(techIdx));
+            ATH_MSG_ERROR(__FILE__ << ":" << __LINE__ << "  Unkown technology index "<<techIdx);
             return;
         }
 
         if (cat1 != Cat_t::nCategories){
-            ATH_MSG_VERBOSE("Increment "<<summary.toString(cat1)<<", "<<summary.toString(status)<<", layer: "
-                <<Muon::MuonStationIndex::layerName(layer)<<", small: "<<(small ? "yes" : "no"));
+            ATH_MSG_VERBOSE("Increment "<<cat1<<", "<<status<<", layer: "
+                <<layer<<", small: "<<(small ? "yes" : "no"));
             ++summary.value(cat1, status, layer, small);
         }
         if (cat2 != Cat_t::nCategories) {
-            ATH_MSG_VERBOSE("Increment "<<summary.toString(cat2)<<", "<<summary.toString(status)<<", layer: "
-                    <<Muon::MuonStationIndex::layerName(layer)<<", small: "<<(small ? "yes" : "no"));
+            ATH_MSG_VERBOSE("Increment "<<cat2<<", "<<status<<", layer: "
+                    <<layer<<", small: "<<(small ? "yes" : "no"));
             ++summary.value(cat2, status, layer, small);
         }
     }
@@ -136,15 +217,15 @@ namespace MuonR4 {
                 const std::size_t nHits = nMeasurements(*seg);
                 for (std::size_t hit = 0; hit < nHits; ++hit) {
                     Stat_t state = isOutlierMeasurement(*seg, hit) ? Stat_t::Outlier : Stat_t::OnTrack;
-                    const auto * meas = getMeasurement(*seg, hit);
+                    const auto* uncalibMeas = dynamic_cast<const xAOD::MuonMeasurement*>(getMeasurement(*seg, hit));
                     // for the combined sTgc space point we have to fill the primary and secodnray measuremment seperately to resolve the strip/pad/wire combinations
-                    if(meas->type() == xAOD::UncalibMeasType::sTgcStripType && meas->numDimensions() == 0){
-                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(meas);
-                        incrementSummary(xAOD::identify(combinedMeas->primaryStrip()), state, combinedMeas->primaryStrip()->numDimensions(), summary);
-                        incrementSummary(xAOD::identify(combinedMeas->secondaryStrip()), state, combinedMeas->secondaryStrip()->numDimensions(), summary);
+                    if(uncalibMeas->type() == xAOD::UncalibMeasType::sTgcStripType && uncalibMeas->numDimensions() == 0){
+                        const auto* combinedMeas = static_cast<const xAOD::CombinedMuonStrip*>(uncalibMeas);
+                        incrementSummary(combinedMeas->primaryStrip()->identify(), state, combinedMeas->primaryStrip()->numDimensions(), summary);
+                        incrementSummary(combinedMeas->secondaryStrip()->identify(), state, combinedMeas->secondaryStrip()->numDimensions(), summary);
                         
                     } else {
-                        incrementSummary(xAOD::identify(meas), state, meas->numDimensions(), summary);
+                        incrementSummary(uncalibMeas->identify(), state, uncalibMeas->numDimensions(), summary);
                     }
                 }
             }
@@ -209,68 +290,58 @@ namespace MuonR4 {
             acc(extendedLargeHoles) = summary.value(Cat_t::Precision, Stat_t::Hole, LayerIndex::Extended, false);
         }
         if (m_fillOutliers) {
-            acc(innerOutBoundsPrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Inner, false)
-                                             + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Inner, true);
+            acc(innerClosePrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Inner, false)
+                                         + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Inner, true);
 
-            acc(middleOutBoundsPrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Middle, false)
-                                              + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Middle, true);
+            acc(middleClosePrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Middle, false)
+                                          + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Middle, true);
 
-            acc(outerOutBoundsPrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Outer, false)
-                                             + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Outer, true);
+            acc(outerClosePrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Outer, false)
+                                         + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Outer, true);
 
-            acc(extendedOutBoundsPrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Extended, false)
-                                                + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Extended, true);
+            acc(extendedClosePrecisionHits) = summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Extended, false)
+                                            + summary.value(Cat_t::Precision, Stat_t::Outlier, LayerIndex::Extended, true);
         }
 
         /// Trigger hits
-        acc(etaLayer1Hits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Inner, true)
-                           + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Inner, false);
+        acc(innerTriggerEtaHits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Inner, true)
+                                 + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Inner, false);
 
-        acc(etaLayer2Hits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Middle, true)
-                           + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Middle, false);
+        acc(middleTriggerEtaHits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Middle, true)
+                                  + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Middle, false);
 
-        acc(etaLayer3Hits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Outer, true)
-                          + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Outer, false);
+        acc(outerTriggerEtaHits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Outer, true)
+                                 + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Outer, false);
 
-        acc(etaLayer4Hits) = summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Extended, true)
-                           + summary.value(Cat_t::TriggerEta, Stat_t::OnTrack, LayerIndex::Extended, false);
 
          if (m_fillHoles) {
-            acc(etaLayer1Holes) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Inner, true)
-                                + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Inner, false);
+            acc(innerTriggerEtaHoles) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Inner, true)
+                                      + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Inner, false);
 
-            acc(etaLayer2Holes) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Middle, true)
-                                + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Middle, false);
+            acc(middleTriggerEtaHoles) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Middle, true)
+                                       + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Middle, false);
 
-            acc(etaLayer3Holes) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Outer, true)
-                                + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Outer, false);
-
-            acc(etaLayer4Holes) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Extended, true)
-                                + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Extended, false);
+            acc(outerTriggerEtaHoles) = summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Outer, true)
+                                      + summary.value(Cat_t::TriggerEta, Stat_t::Hole, LayerIndex::Outer, false);
         }
-        acc(phiLayer1Hits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Inner, true)
-                           + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Inner, false);
+        acc(innerTriggerPhiHits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Inner, true)
+                                 + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Inner, false);
 
-        acc(phiLayer2Hits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Middle, true)
-                           + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Middle, false);
+        acc(middleTriggerPhiHits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Middle, true)
+                                  + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Middle, false);
 
-        acc(phiLayer3Hits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Outer, true)
-                           + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Outer, false);
+        acc(outerTriggerPhiHits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Outer, true)
+                                 + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Outer, false);
 
-        acc(phiLayer4Hits) = summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Extended, true)
-                           + summary.value(Cat_t::TriggerPhi, Stat_t::OnTrack, LayerIndex::Extended, false);
         if (m_fillHoles) {
-            acc(phiLayer1Holes) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Inner, true)
-                                + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Inner, false);
+            acc(innerTriggerPhiHoles) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Inner, true)
+                                      + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Inner, false);
 
-            acc(phiLayer2Holes) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Middle, true)
-                                + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Middle, false);
+            acc(middleTriggerPhiHoles) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Middle, true)
+                                       + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Middle, false);
 
-            acc(phiLayer3Holes) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, true)
-                                + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, false);
-
-            acc(phiLayer4Holes) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Extended, true)
-                                + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Extended, false);
+            acc(outerTriggerPhiHoles) = summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, true)
+                                      + summary.value(Cat_t::TriggerPhi, Stat_t::Hole, LayerIndex::Outer, false);
         }
     }     
 }

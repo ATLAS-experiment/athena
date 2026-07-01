@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -21,16 +21,15 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CalibratedTracksProvider::execute() {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    StatusCode CalibratedTracksProvider::execute(const EventContext& ctx) {
         SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_inputKey, ctx};
         if (!tracks.isValid()) {
             ATH_MSG_FATAL("No muon container found");
             return StatusCode::FAILURE;
         }
-      
-        std::pair<std::unique_ptr<xAOD::TrackParticleContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> output =
-            xAOD::shallowCopyContainer(*tracks, ctx);
+
+        xAOD::ShallowCopyResult_t<xAOD::TrackParticleContainer> output =
+            xAOD::shallowCopy(*tracks, ctx);
 
         if (!output.first || !output.second) {
             ATH_MSG_FATAL("Creation of shallow copy failed");

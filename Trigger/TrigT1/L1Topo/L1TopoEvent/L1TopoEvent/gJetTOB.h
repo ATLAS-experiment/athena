@@ -1,12 +1,12 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef GJETTOB_H
 #define GJETTOB_H
 
-#include <iostream>
 
 #include "L1TopoEvent/BaseTOB.h"
 #include "L1TopoEvent/Heap.h"
+#include <iosfwd>
 
 
 // TODO implement sizecheck lile in ClusterTOB
@@ -19,13 +19,13 @@ namespace TCS {
    public:
       
       // default constructor
-      gJetTOB(uint32_t roiWord = 0, const std::string& tobName = "gJetTOB");
+      gJetTOB(uint32_t roiWord = 0, std::string_view tobName = "gJetTOB");
 
       // copy constructor
       gJetTOB(const gJetTOB & jet);
 
       // constructor with initial values
-      gJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, const std::string& tobName = "gJetTOB" );
+      gJetTOB(unsigned int Et, int eta, unsigned phi, uint32_t roiWord = 0, std::string_view tobName = "gJetTOB" );
 
       // destructor
       virtual ~gJetTOB();

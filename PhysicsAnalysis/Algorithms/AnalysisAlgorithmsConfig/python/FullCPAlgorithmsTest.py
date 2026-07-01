@@ -83,6 +83,7 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                         'tau_': 'OutTauJets',
                         'jet_': 'OutJets',
                         'met_': 'AnaMET',
+                        'trk_': 'OutTracks',
                         ''    : 'EventInfo'}
     outputContainersForMC = {'truth_mu_' : 'OutTruthMuons',
                              'truth_el_' : 'OutTruthElectrons',
@@ -124,15 +125,18 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq.setOptionValue ('.triggerMatchingChainsPerYear', triggerMatchingChainsPerYear)
 
     # Include, and then set up the jet analysis algorithm sequence:
-    configSeq += config.makeConfig( 'Jets',
-        containerName='AnaJets',
-        jetCollection='AntiKt4EMPFlowJets')
+    configSeq += config.makeConfig( 'Jets' )
+    configSeq.setOptionValue ('.containerName', 'AnaJets')
+    configSeq.setOptionValue ('.jetCollection', 'AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', False )
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
+    configSeq.setOptionValue ('.runJvtSelection', False )  # deprecated, done via JVTWorkingPoint block now
     configSeq.setOptionValue ('.recalibratePhyslite', False)
 
-    configSeq += config.makeConfig( 'Jets.JVT' )
-    configSeq.setOptionValue ('.containerName', 'AnaJets')
+    configSeq += config.makeConfig('Jets.JVTWorkingPoint')
+    configSeq.setOptionValue ('.containerName' ,'AnaJets')
+    configSeq.setOptionValue ('.selectionName', 'baselineJvt')
+    configSeq.setOptionValue ('.jvtWP', 'FixedEffPt')
 
     configSeq += config.makeConfig( 'Jets.FTagTriggerMatching' )
     configSeq.setOptionValue('.containerName', 'AnaJets')
@@ -158,11 +162,31 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                                  bjetTriggerChainsPerYear)
 
     if largeRJets :
-        configSeq += config.makeConfig( 'Jets',
-            containerName='AnaLargeRJets',
-            jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' )
+        configSeq += config.makeConfig( 'Jets' )
+        configSeq.setOptionValue ('.containerName', 'AnaLargeRJets')
+        configSeq.setOptionValue ('.jetCollection', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
         outputContainers['larger_jet_'] = 'OutLargeRJets'
         configSeq.setOptionValue ('.recalibratePhyslite', False)
+
+
+    # set up the muon analysis algorithm sequence:
+    configSeq += config.makeConfig ('Muons')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq.setOptionValue ('.decorateTruth', True)
+    configSeq.setOptionValue ('.writeTrackD0Z0', True)
+    configSeq.setOptionValue ('.recalibratePhyslite', False)
+
+    configSeq += config.makeConfig ('Muons.WorkingPoint')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq.setOptionValue ('.selectionName', 'medium')
+    configSeq.setOptionValue ('.quality', 'Medium')
+    configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
+
+    configSeq += config.makeConfig ('Muons.IFFClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq += config.makeConfig ('Muons.MCTCClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq.setOptionValue ('.prefix', 'truth_')
 
 
     # Include, and then set up the electron analysis algorithm sequence:
@@ -224,26 +248,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.minPt', photonMinPt)
 
 
-    # set up the muon analysis algorithm sequence:
-    configSeq += config.makeConfig ('Muons')
-    configSeq.setOptionValue ('.containerName', 'AnaMuons')
-    configSeq.setOptionValue ('.decorateTruth', True)
-    configSeq.setOptionValue ('.writeTrackD0Z0', True)
-    configSeq.setOptionValue ('.recalibratePhyslite', False)
-
-    configSeq += config.makeConfig ('Muons.WorkingPoint')
-    configSeq.setOptionValue ('.containerName', 'AnaMuons')
-    configSeq.setOptionValue ('.selectionName', 'medium')
-    configSeq.setOptionValue ('.quality', 'Medium')
-    configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
-
-    configSeq += config.makeConfig ('Muons.IFFClassification')
-    configSeq.setOptionValue ('.containerName', 'AnaMuons')
-    configSeq += config.makeConfig ('Muons.MCTCClassification')
-    configSeq.setOptionValue ('.containerName', 'AnaMuons')
-    configSeq.setOptionValue ('.prefix', 'truth_')
-
-
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
     # configSeq += config.makeConfig ('Muons.Selection', 'AnaMuons.tight')
     # configSeq.setOptionValue ('.quality', 'Tight')
@@ -266,6 +270,19 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('TauJets.MCTCClassification')
     configSeq.setOptionValue ('.containerName', 'AnaTauJets')
     configSeq.setOptionValue ('.prefix', 'truth_')
+
+
+    # Include, and then set up the tracks analysis algorithm sequence:
+    configSeq += config.makeConfig ('InDetTracks')
+    configSeq.setOptionValue ('.containerName', 'AnaTracks')
+    configSeq.setOptionValue ('.minPt', 500)
+    configSeq.setOptionValue ('.maxEta', 2.5)
+    configSeq.setOptionValue ('.outputTrackSummaryInfo', True)
+
+    configSeq += config.makeConfig ('InDetTracks.WorkingPoint')
+    configSeq.setOptionValue ('.containerName', 'AnaTracks')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq.setOptionValue ('.cutLevel', 'TightPrimary')
 
 
     # Add systematic object links
@@ -345,7 +362,9 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.jets', 'AntiKt4TruthDressedWZJets')
     configSeq.setOptionValue ('.useRapidityForDeltaR', False)
 
-
+    # Parton history
+    configSeq += config.makeConfig ('PartonHistory')
+    configSeq.setOptionValue ('.history', 'Ttbar')
 
     # Include, and then set up the met analysis algorithm config:
     configSeq += config.makeConfig ('MissingET')
@@ -395,20 +414,23 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('ObjectCutFlow')
     configSeq.setOptionValue ('.containerName', 'AnaTauJets')
     configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq += config.makeConfig ('ObjectCutFlow')
+    configSeq.setOptionValue ('.containerName', 'AnaTracks')
+    configSeq.setOptionValue ('.selectionName', 'tight')
 
     # Include and set up a basic run of the event selection algorithm config:
     if geometry is not LHCPeriod.Run4:
-        # configSeq += config.makeConfig( 'EventSelection', None )
-        # configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
-        # configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
-        # configSeq.setOptionValue ('.jets',        'AnaJets')
-        # configSeq.setOptionValue ('.met',         'AnaMET')
-        # configSeq.setOptionValue ('.selectionCutsDict', exampleSelectionCuts)
-        from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
-        makeMultipleEventSelectionConfigs(configSeq, electrons = 'AnaElectrons.loose', muons = 'AnaMuons.medium', jets = 'AnaJets.baselineJvt',
-                                          met = 'AnaMET', btagDecoration = 'ftag_select_ftag',
-                                          selectionCutsDict = exampleSelectionCuts, noFilter = True,
-                                          cutFlowHistograms = True)
+        for sel_name, sel_cuts in exampleSelectionCuts.items():
+            configSeq += config.makeConfig( 'EventSelection' )
+            configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
+            configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
+            configSeq.setOptionValue ('.jets',        'AnaJets.baselineJvt')
+            configSeq.setOptionValue ('.met',         'AnaMET')
+            configSeq.setOptionValue ('.btagDecoration', 'ftag_select_ftag')
+            configSeq.setOptionValue ('.selectionName', sel_name)
+            configSeq.setOptionValue ('.selectionCuts', sel_cuts)
+            configSeq.setOptionValue ('.cutFlowHistograms', True)
+            configSeq.setOptionValue ('.noFilter', True)
 
     if dataType is not DataType.Data :
         # Include, and then set up the generator analysis sequence:
@@ -450,6 +472,10 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq += config.makeConfig ('Thinning')
         configSeq.setOptionValue ('.containerName', 'AnaLargeRJets')
         configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
+    configSeq += config.makeConfig ('Thinning')
+    configSeq.setOptionValue ('.containerName', 'AnaTracks')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq.setOptionValue ('.outputName', 'OutTracks')
 
     configSeq += config.makeConfig ('Thinning')
     configSeq.setOptionValue ('.containerName', 'TruthElectrons')

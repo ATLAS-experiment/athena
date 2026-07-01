@@ -32,18 +32,18 @@ public:
     virtual StatusCode initialize();
     virtual StatusCode finalize();
     //@}
-    SingleHistogramDefinition definition(const std::string &name, const std::string & dirName="") const final;
-    std::string histoType(const std::string &name, const std::string & dirName="") const final;
-    std::string title(const std::string &name, const std::string &dirName="") const final;
-    unsigned int nBinsX(const std::string &name, const std::string &dirName="") const final;
-    unsigned int nBinsY(const std::string &name, const std::string &dirName="") const final;
-    unsigned int nBinsZ(const std::string &name, const std::string &dirName="") const final;
-    IHistogramDefinitionSvc::axesLimits_t xLimits(const std::string &name, const std::string &dirName="") const final;
-    IHistogramDefinitionSvc::axesLimits_t yLimits(const std::string &name, const std::string &dirName="") const final;
-    IHistogramDefinitionSvc::axesLimits_t zLimits(const std::string &name, const std::string &dirName="") const final;
-    std::string xTitle(const std::string &name, const std::string &dirName="") const final;
-    std::string yTitle(const std::string &name, const std::string &dirName="") const final;
-    std::string zTitle(const std::string &name, const std::string &dirName="") const final;
+    SingleHistogramDefinition definition(std::string_view name, std::string_view  dirName="") const final;
+    std::string histoType(std::string_view name, std::string_view  dirName="") const final;
+    std::string title(std::string_view name, std::string_view dirName="") const final;
+    unsigned int nBinsX(std::string_view name, std::string_view dirName="") const final;
+    unsigned int nBinsY(std::string_view name, std::string_view dirName="") const final;
+    unsigned int nBinsZ(std::string_view name, std::string_view dirName="") const final;
+    IHistogramDefinitionSvc::axesLimits_t xLimits(std::string_view name, std::string_view dirName="") const final;
+    IHistogramDefinitionSvc::axesLimits_t yLimits(std::string_view name, std::string_view dirName="") const final;
+    IHistogramDefinitionSvc::axesLimits_t zLimits(std::string_view name, std::string_view dirName="") const final;
+    std::string xTitle(std::string_view name, std::string_view dirName="") const final;
+    std::string yTitle(std::string_view name, std::string_view dirName="") const final;
+    std::string zTitle(std::string_view name, std::string_view dirName="") const final;
     
 private:
     StringProperty m_source{this, "DefinitionSource"};

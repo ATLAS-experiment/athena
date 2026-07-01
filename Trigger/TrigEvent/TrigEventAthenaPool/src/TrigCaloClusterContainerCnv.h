@@ -29,7 +29,7 @@ protected:
  
    
    virtual TrigCaloClusterContainer_PERS *createPersistent( TrigCaloClusterContainer *transObj);
-   virtual TrigCaloClusterContainer      *createTransient();
+   virtual TrigCaloClusterContainer      *createTransient(const Token* token);
 
 private:
    TrigCaloClusterContainerCnv_p3 m_converter;

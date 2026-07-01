@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
@@ -84,7 +84,8 @@ namespace ActsTrk
                         std::size_t& ntracks,
                         std::size_t iseed,
                         std::size_t category_i,
-                        const char *seedType) const;
+                        const char *seedType,
+                        std::optional<std::vector<unsigned int>>& trackCategories) const;
 
     StatusCode storeTrackCollectionToStoreGate(const EventContext& ctx,
                                                Acts::VectorTrackContainer&& originalTrackBackend,
@@ -164,7 +165,8 @@ namespace ActsTrk
      * @param event_stat - stats, just for this event
      */
     StatusCode
-    findTracks(const DetectorContextHolder& detContext,
+    findTracks(const EventContext &ctx,
+               const DetectorContextHolder& detContext,
                const detail::TrackFindingMeasurements &measurements,
                const detail::MeasurementIndex &measurementIndex,
                detail::SharedHitCounter &sharedHits,
@@ -176,7 +178,8 @@ namespace ActsTrk
                const char *seedType,
                EventStats &event_stat,
                std::vector<int>* destiny,
-               const Acts::PerigeeSurface& pSurface) const;
+               const Acts::PerigeeSurface& pSurface,
+               std::optional<std::vector<unsigned int>>& trackCategories) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,

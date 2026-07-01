@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARABBADDECODER_H
@@ -22,8 +22,6 @@
 #include <vector>
 #include <string>
 #include "eformat/index.h"
-//#include "eformat/ROBFragment.h"
-//class ROBFragment;
 
 
 class LArABBADecoder : public AthAlgTool {

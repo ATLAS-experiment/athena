@@ -19,7 +19,7 @@ TrigT2MbtsBitsContainer_PERS * TrigT2MbtsBitsContainerCnv::createPersistent( Tri
  
 
 //createTransient
-TrigT2MbtsBitsContainer* TrigT2MbtsBitsContainerCnv::createTransient()
+TrigT2MbtsBitsContainer* TrigT2MbtsBitsContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigT2MbtsBitsContainerConverter" );
   
@@ -30,26 +30,26 @@ TrigT2MbtsBitsContainer* TrigT2MbtsBitsContainerCnv::createTransient()
   static const pool::Guid p1_guid( "139D9BFE-0944-44A6-8D9E-10CEEF8B30B9" );
   static const pool::Guid trans_guid( "BBB00ED0-1D5C-4C73-8785-6BF239D07816" );
 
- if( compareClassGuid( p3_guid ) ){
+ if( compareClassGuid(token,  p3_guid ) ){
 
-         std::unique_ptr< TrigT2MbtsBitsContainer_p3 > col_vect( poolReadObject< TrigT2MbtsBitsContainer_p3 >() );
+         std::unique_ptr< TrigT2MbtsBitsContainer_p3 > col_vect( poolReadObject< TrigT2MbtsBitsContainer_p3 >(token) );
          //         std::cout << "Reading IMFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-  } else if(compareClassGuid(tlp1_guid)) {
+  } else if(compareClassGuid(token, tlp1_guid)) {
 
-         std::unique_ptr< TrigT2MbtsBitsContainer_tlp1 > col_vect( poolReadObject< TrigT2MbtsBitsContainer_tlp1 >() );
+         std::unique_ptr< TrigT2MbtsBitsContainer_tlp1 > col_vect( poolReadObject< TrigT2MbtsBitsContainer_tlp1 >(token) );
          //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter_tlp1.createTransient( col_vect.get(), mlog );
 
-  } else if(compareClassGuid(p1_guid)) {
+  } else if(compareClassGuid(token, p1_guid)) {
 
-         std::unique_ptr< TrigT2MbtsBitsContainer_p1 > col_vect( poolReadObject< TrigT2MbtsBitsContainer_p1 >() );
+         std::unique_ptr< TrigT2MbtsBitsContainer_p1 > col_vect( poolReadObject< TrigT2MbtsBitsContainer_p1 >(token) );
          return m_converter_p1.createTransient( col_vect.get(), mlog );
 
-  } else if(compareClassGuid(trans_guid)) {
+  } else if(compareClassGuid(token, trans_guid)) {
 
-         return poolReadObject<TrigT2MbtsBitsContainer>();
+         return poolReadObject<TrigT2MbtsBitsContainer>(token);
 
   } else  {
 

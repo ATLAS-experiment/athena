@@ -29,15 +29,15 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( Units
    SCRIPT test/test_units.py
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ActsLogger
    SOURCES test/LoggerTest.cxx
    LINK_LIBRARIES ActsInteropLib AthenaBaseComps TestTools
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TableUtils_test
    SOURCES test/TableUtils_test.cxx
    LINK_LIBRARIES ActsInteropLib
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
 )

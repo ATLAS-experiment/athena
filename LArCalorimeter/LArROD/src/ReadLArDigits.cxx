@@ -82,18 +82,17 @@ StatusCode ReadLArDigits::initialize()
 }
 
 
-StatusCode ReadLArDigits::execute()
+StatusCode ReadLArDigits::execute(const EventContext& ctx)
 {
  m_count++; 
  ATH_MSG_VERBOSE( "======== executing event "<< m_count << " ========"  );
  ATH_MSG_VERBOSE( "Retrieving LArDigitContainer. Key= " << m_containerKey.key()  );
- const EventContext& ctx = Gaudi::Hive::currentContext();
  SG::ReadHandle<LArDigitContainer> larDigitContIn (m_containerKey, ctx);
 
  // View container copy.
  LArDigitContainer larDigitCont (*larDigitContIn);
 
- SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+ SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
  const LArOnOffIdMapping* cabling{*cablingHdl};
  if(!cabling) {
     ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key());

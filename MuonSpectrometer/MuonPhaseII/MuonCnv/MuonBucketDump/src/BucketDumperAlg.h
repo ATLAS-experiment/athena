@@ -7,7 +7,6 @@
 
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 
-#include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/ReadDecorHandleKeyArray.h"
 
@@ -27,6 +26,10 @@
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "CLHEP/Random/RandomEngine.h"
 
+#include "MuonInferenceInterfaces/IGraphInferenceTool.h"
+
+#include <unordered_map>
+
 
 namespace MuonR4{
 class BucketDumperAlg: public AthHistogramAlgorithm {
@@ -37,7 +40,7 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
 
     virtual StatusCode initialize() override final;
     virtual StatusCode finalize() override final;
-    virtual StatusCode execute() override final;
+    virtual StatusCode execute(const EventContext& ctx) override final;
 
    private:
       /** @brief Dumps the space point container with the associated muon segment container
@@ -47,19 +50,31 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
                                const SG::ReadHandleKey<SpacePointContainer>& spacePointKey,
                                const SG::ReadHandleKey<xAOD::MuonSegmentContainer>& segmentKey);
 
+      /** @brief Computes ML bucket scores using the inference tool for a specific container */
+      StatusCode computeAllBucketScores(const EventContext& ctx,
+                                        const SpacePointContainer* spContainer,
+                                        std::unordered_map<const SpacePointBucket*, std::vector<float>>& bucketScoreMap) const;
+
     SG::ReadHandleKeyArray<SpacePointContainer> m_spacePointKeys{this, "SpacePointKeys", {"MuonSpacePoints"}, 
                                                      "Key to the space point container"};
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     SG::ReadHandleKeyArray<xAOD::MuonSegmentContainer> m_inSegmentKeys{this, "SegmentKey", {"MuonSegmentsFromR4"}};
 
     SG::ReadDecorHandleKeyArray<xAOD::MuonSegmentContainer> m_truthDecorKeys{this, "TruthDecorLinks", {}};
-    SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+    ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
     
     Gaudi::Property<bool> m_isMC{this, "isMC", true};
     Gaudi::Property<double> m_fracToKeep{this,"dataFracToKeep", 1.}; // 0.055 to balanced dataset without MC
     Gaudi::Property<std::string> m_streamName{this, "StreamName", ""};
+    Gaudi::Property<bool> m_doMLBucketScore{this, "DoMLBucketScore", false, 
+        "Enable ML bucket score computation and dumping (requires InferenceTool to be configured)"};
+    Gaudi::Property<bool> m_doMLBucketFilter{this, "DoMLBucketFilter", false,
+        "Skip dumping buckets classified as class 0 (reject) by ML model. Requires DoMLBucketScore=true."};
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};
+
+    /// Inference tool for ML bucket scoring (optional)
+    ToolHandle<MuonML::IGraphInferenceTool> m_inferenceTool{this, "InferenceTool", "",
+        "Optional ML inference tool for computing bucket scores. If not provided, scores will be empty."};
 
     /// Pattern visualization tool
     ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
@@ -80,6 +95,11 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<uint8_t>&         m_bucket_sector{m_tree.newScalar<uint8_t>("bucket_sector")};
     MuonVal::ScalarBranch<uint8_t>&         m_bucket_chamberIdx{m_tree.newScalar<uint8_t>("bucket_chamberIndex")};
     MuonVal::ScalarBranch<Char_t>&          m_bucket_side{m_tree.newScalar<Char_t>("bucket_side")};
+
+    /// ML bucket filter scores (3 classes for the filter model)
+    MuonVal::VectorBranch<float>&           m_bucket_ml_score_class0{m_tree.newVector<float>("bucket_ml_score_class0", false)};
+    MuonVal::VectorBranch<float>&           m_bucket_ml_score_class1{m_tree.newVector<float>("bucket_ml_score_class1", false)};
+    MuonVal::VectorBranch<float>&           m_bucket_ml_score_class2{m_tree.newVector<float>("bucket_ml_score_class2", false)};
 
     MuonVal::ThreeVectorBranch              m_spoint_localPosition{m_tree, "localPosition"}; 
     MuonVal::ThreeVectorBranch              m_spoint_globalPosition{m_tree, "globalPosition"}; 

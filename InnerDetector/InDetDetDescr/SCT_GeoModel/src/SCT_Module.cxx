@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_Module.h"
@@ -339,7 +339,7 @@ SCT_Module::build(SCT_Identifier id)
         GeoAlignableTransform * innerTransform = new GeoAlignableTransform(*m_innerSidePos);
         module->add(innerTransform);
         int innerSideNumber = (m_upperSide) ? 0 : 1;
-        module->add(new GeoNameTag("Side#"+intToString(innerSideNumber))); // Identifier side=0
+        module->add(new GeoNameTag(std::format("Side#{}",innerSideNumber))); // Identifier side=0
         module->add(new GeoIdentifierTag(innerSideNumber));
         id.setSide(innerSideNumber);
         Identifier innerId = id.getWaferId();
@@ -352,7 +352,7 @@ SCT_Module::build(SCT_Identifier id)
         GeoAlignableTransform * outerTransform = new GeoAlignableTransform(*m_outerSidePos);
         module->add(outerTransform);
         int outerSideNumber = m_upperSide;
-        module->add(new GeoNameTag("Side#"+intToString(outerSideNumber))); // Identifier side=1
+        module->add(new GeoNameTag(std::format("Side#{}",outerSideNumber))); // Identifier side=1
         module->add(new GeoIdentifierTag(outerSideNumber));
         id.setSide(outerSideNumber);
         Identifier outerId = id.getWaferId();
@@ -360,9 +360,8 @@ SCT_Module::build(SCT_Identifier id)
         module->add(outerSide);
         // Store alignable transform
         m_detectorManager->addAlignableTransform(0, outerId, outerTransform, outerSide);
-    } else
-    {
-        
+    }
+    else {
         // Add innerside
         int innerSideNumber = (m_upperSide) ? 0 : 1;
         id.setSide(innerSideNumber);
@@ -370,9 +369,8 @@ SCT_Module::build(SCT_Identifier id)
         Identifier innerId = id.getWaferId();
         m_innerSide->build(id);
         
-        std::string key="Side#"+intToString(innerSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+        std::string key=std::format("Side#{}_{}_{}_{}_{}",innerSideNumber,id.getBarrelEC(),id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
         m_detectorManager->addAlignableTransform(0, innerId, (*m_mapAX)[key], (*m_mapFPV)[key]);
-       
         
         // Add outerside
         int outerSideNumber = m_upperSide;
@@ -381,9 +379,8 @@ SCT_Module::build(SCT_Identifier id)
         Identifier outerId = id.getWaferId();
         m_outerSide->build(id);
         
-        key="Side#"+intToString(outerSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+        key=std::format("Side#{}_{}_{}_{}_{}",outerSideNumber,id.getBarrelEC(),id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
         m_detectorManager->addAlignableTransform(0, outerId, (*m_mapAX)[key], (*m_mapFPV)[key]);
-        
     }
     return module;
 }

@@ -31,12 +31,7 @@ ToolsPhys ToolsMath ToolsYaml ToolsOrg
 YFSCEEX YFSMain YFSNLO YFSTools
 )
 
-if (HEPMC3_USE)
 find_package( hepmc3 )
-else()
-find_package( HepMC )
-endif()
-
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
 
@@ -58,8 +53,8 @@ atlas_add_component( Sherpa_i
 
 # Install file(s) from the package.
 atlas_install_joboptions( share/common/*.py )
-atlas_install_python_modules( python/sherpaTarCreator)
-atlas_install_scripts( python/*.py )
+atlas_install_python_modules( python/*.py )
+atlas_install_scripts( share/sherpaTarCreator.py )
 
 # Set (a) Sherpa specific environment variable(s).
 set( SherpaEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
@@ -70,4 +65,3 @@ find_package( SherpaEnvironment )
 set( OpenLoopsEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of OpenLoopsEnvironment.cmake" )
 find_package( OpenLoopsEnvironment )
-

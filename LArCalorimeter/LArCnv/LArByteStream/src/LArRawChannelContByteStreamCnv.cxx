@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArRawChannelContByteStreamCnv.h"
@@ -29,7 +29,7 @@ LArRawChannelContByteStreamCnv::LArRawChannelContByteStreamCnv(ISvcLocator* svcl
   m_contSize(0)
 {}
 
-const CLID& LArRawChannelContByteStreamCnv::classID(){
+CLID LArRawChannelContByteStreamCnv::classID(){
   return ClassID_traits<LArRawChannelContainer>::ID() ;
 }
 
@@ -57,14 +57,11 @@ StatusCode
 LArRawChannelContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pObj)  const
 { //Convert RawChannels from ByteStream to StoreGate
     
-  ByteStreamAddress *pRE_Addr;
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr); 
-  if(!pRE_Addr) {
-    ATH_MSG_ERROR( " Can not cast to ByteStreamAddress " );
-    return StatusCode::FAILURE;    
-  }
-  
-  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext());
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
+  const RawEvent* re = m_rdpSvc->getEvent(ctx);
   if (!re) {
     ATH_MSG_ERROR( "Could not get raw event from ByteStreamInputSvc" );
     return StatusCode::FAILURE;

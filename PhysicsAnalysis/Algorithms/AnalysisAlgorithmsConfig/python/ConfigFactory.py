@@ -248,14 +248,27 @@ class ConfigFactory():
         from TriggerAnalysisAlgorithms.TriggerAnalysisSFConfig import TriggerAnalysisSFBlock
         self.addAlgConfigBlock(algName="TriggerMatching", alg=TriggerAnalysisSFBlock)
 
+        # HSTP filter for dijet MC
+        from AsgAnalysisAlgorithms.HSTPFilterConfig import HSTPFilterBlock
+        self.addAlgConfigBlock(algName="HSTPFilter", alg=HSTPFilterBlock)
+
         # jets
-        from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
-        self.addAlgConfigBlock(algName="Jets", alg=makeJetAnalysisConfig)
+        from JetAnalysisAlgorithms.JetAnalysisConfig import Jets
+        self.addAlgConfigBlock(algName="Jets", alg=Jets)
+        from JetAnalysisAlgorithms.JetAnalysisConfig import JvtWorkingPoint
+        self.addAlgConfigBlock(algName="JVTWorkingPoint", alg=JvtWorkingPoint,
+            superBlocks="Jets")
+        from JetAnalysisAlgorithms.JetAnalysisConfig import FJvtWorkingPoint
+        self.addAlgConfigBlock(algName="FJVTWorkingPoint", alg=FJvtWorkingPoint,
+            superBlocks="Jets")
         from JetAnalysisAlgorithms.JetJvtAnalysisConfig import JetJvtAnalysisConfig
         self.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig,
             superBlocks="Jets")
         from JetAnalysisAlgorithms.BJetCalibAnalysisConfig import BJetCalibAnalysisConfig
         self.addAlgConfigBlock(algName="BJetCalib", alg=BJetCalibAnalysisConfig,
+                               superBlocks="Jets")
+        from JetAnalysisAlgorithms.JetTriggerAnalysisConfig import JetTriggerMatchingBlock
+        self.addAlgConfigBlock(algName="TriggerMatching", alg=JetTriggerMatchingBlock,
                                superBlocks="Jets")
         from FTagAnalysisAlgorithms.FTagTrigMatchAnalysisConfig import FTagJetTrigMatchingBlock
         self.addAlgConfigBlock(algName="FTagTriggerMatching", alg=FTagJetTrigMatchingBlock,
@@ -264,21 +277,34 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
+        from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
+        self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
+                               superBlocks="Jets")
         from FTagAnalysisAlgorithms.FTagSFAnalysisConfig import FlavourTaggingEventSF
         self.addAlgConfigBlock(algName="FlavourTaggingEventSF",
                                alg=FlavourTaggingEventSF,
                                defaults={'selectionName': ''},
                                superBlocks="Jets")
-        from FTagAnalysisAlgorithms.XbbAnalysisConfig import XbbConfig
-        self.addAlgConfigBlock(algName="XbbTagging", alg=XbbConfig,
-                               superBlocks="Jets")
-        from JetAnalysisAlgorithms.JetUncertaintiesConfig import JetUncertaintiesConfig 
-        self.addAlgConfigBlock(algName="Uncertainties", alg=JetUncertaintiesConfig,
-            superBlocks="Jets")
+
+        # muons
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibration
+        self.addAlgConfigBlock(algName="Muons", alg=MuonCalibration)
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPoint
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPoint,
+            superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonTriggerAnalysisSFBlock
+        self.addAlgConfigBlock(algName="TriggerSF", alg=MuonTriggerAnalysisSFBlock,
+                               superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonLRTMergedConfig
+        self.addAlgConfigBlock(algName="LRTMerging", alg=MuonLRTMergedConfig,
+                               superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonContainerMergingConfig
+        self.addAlgConfigBlock(algName="ContainerMerging", alg=MuonContainerMergingConfig,
+                               superBlocks="Muons")
 
         # electrons
-        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig
-        self.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibrationConfig)
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibration
+        self.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibration)
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPoint
         self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPoint,
             superBlocks="Electrons")
@@ -298,22 +324,6 @@ class ConfigFactory():
         from EgammaAnalysisAlgorithms.PhotonExtraVariablesConfig import PhotonExtraVariablesBlock
         self.addAlgConfigBlock(algName="ExtraVariables", alg=PhotonExtraVariablesBlock,
             superBlocks="Photons")
-
-        # muons
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
-        self.addAlgConfigBlock(algName="Muons", alg=MuonCalibrationConfig)
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPoint
-        self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPoint,
-            superBlocks="Muons")
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonTriggerAnalysisSFBlock
-        self.addAlgConfigBlock(algName="TriggerSF", alg=MuonTriggerAnalysisSFBlock,
-                               superBlocks="Muons")
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonLRTMergedConfig
-        self.addAlgConfigBlock(algName="LRTMerging", alg=MuonLRTMergedConfig,
-                               superBlocks="Muons")
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonContainerMergingConfig
-        self.addAlgConfigBlock(algName="ContainerMerging", alg=MuonContainerMergingConfig,
-                               superBlocks="Muons")
 
         # tauJets
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauCalibrationConfig
@@ -364,6 +374,10 @@ class ConfigFactory():
         from TruthParticleLevelAnalysisAlgorithms.ParticleLevelOverlapRemovalConfig import ParticleLevelOverlapRemovalBlock
         self.addAlgConfigBlock(algName="PL_OverlapRemoval", alg=ParticleLevelOverlapRemovalBlock)
 
+        # Parton-level truth algorithms
+        from TruthPartonLevelAnalysisAlgorithms.PartonHistoryConfig import PartonHistoryBlock
+        self.addAlgConfigBlock(algName="PartonHistory", alg=PartonHistoryBlock)
+
         # IFF truth classification
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IFFLeptonDecorationBlock
         self.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
@@ -405,13 +419,12 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="ReclusteredJetCalibration", alg=ReclusteredJetCalibrationBlock)
 
         # event selection
-        from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
-        self.addAlgConfigBlock(algName='EventSelection', alg=makeMultipleEventSelectionConfigs)
+        from EventSelectionAlgorithms.EventSelectionConfig import EventSelection
+        self.addAlgConfigBlock(algName='EventSelection', alg=EventSelection)
 
         # event-based cutflow
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
-        self.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock,
-            defaults={'containerName': 'EventInfo', 'selectionName': ''})
+        self.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock)
 
         # generator level analysis
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock
@@ -450,6 +463,10 @@ class ConfigFactory():
         # VGamma overlap removal
         from AsgAnalysisAlgorithms.VGammaORConfig import VGammaORBlock
         self.addAlgConfigBlock(algName='VGammaOR', alg=VGammaORBlock)
+
+        # Event shape density
+        from AsgAnalysisAlgorithms.EventShapeDensityDumperConfig import EventShapeDensityDumperBlock
+        self.addAlgConfigBlock(algName='EventShape', alg=EventShapeDensityDumperBlock)
 
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig

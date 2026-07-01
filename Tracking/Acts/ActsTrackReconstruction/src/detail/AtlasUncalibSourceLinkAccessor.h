@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-  */
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef ATLASUNCALIBSROUCELINACCESOR_H
 #define ATLASUNCALIBSROUCELINACCESOR_H
 
-#include "ActsGeometry/ATLASSourceLink.h"
-
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
+
+#include "ActsCalibBase/MeasurementCalibratorBase.h"
+#include "Acts/Surfaces/Surface.hpp"
 
 #include "src/detail/MeasurementContainerWithDimension.h"
 #include <variant>
@@ -178,10 +180,11 @@ namespace ActsTrk::detail {
       {
          // @TODO avoid double indirection
          const xAOD::UncalibratedMeasurementContainer *base_container
-            = std::visit([](const auto &a) -> const xAOD::UncalibratedMeasurementContainer *{return  a.containerPtr(); },
-                         (*m_containerList)[m_containerIndex] );
+            = std::visit([](const auto &a) -> const xAOD::UncalibratedMeasurementContainer* {
+                            return  a.containerPtr(); 
+                  }, (*m_containerList)[m_containerIndex] );
          assert( m_index < base_container->size());
-         return Acts::SourceLink{ makeATLASUncalibSourceLink( (*base_container)[m_index] )};
+         return MeasurementCalibratorBase::pack((*base_container)[m_index]);
       }
 
       const std::vector< MeasurementContainer > &measurementContainerList() const { return *m_containerList; }

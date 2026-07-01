@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonSelectorTools )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Hist RIO TMVA )
-find_package( onnxruntime REQUIRED )
+find_package( onnxruntime )
 
 # Libraries in the package:
 atlas_add_library( MuonSelectorToolsLib
@@ -48,15 +48,15 @@ else()
 endif()
 
 
-# Test(s) in the package: 
+# Test(s) in the package:
 atlas_add_test( ut_MuonSelectorToolsTester_data
    SCRIPT test/ut_MuonSelectorToolsTester_data.sh
    PROPERTIES TIMEOUT 450
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 atlas_add_test( ut_MuonSelectorToolsTester_MC
    SCRIPT test/ut_MuonSelectorToolsTester_MC.sh
    PROPERTIES TIMEOUT 450
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

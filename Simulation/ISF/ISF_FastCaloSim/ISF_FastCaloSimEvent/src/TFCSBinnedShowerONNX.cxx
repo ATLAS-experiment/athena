@@ -7,7 +7,6 @@
 #include <cmath>
 #include <cstdlib>
 
-#include "HepPDT/ParticleData.hh"
 #include "ISF_FastCaloSimEvent/TFCSMLCalorimeterSimulator.h"
 #include "ISF_FastCaloSimEvent/TFCSBinnedShowerBase.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
@@ -530,7 +529,8 @@ void TFCSBinnedShowerONNX::load_sub_bin_distribution(
   m_use_upscaling = true;
   TFile *file = TFile::Open(filename.c_str(), "READ");
   if (!file || file->IsZombie()) {
-    std::cerr << "Failed to open file: " << filename << std::endl;
+    ATH_MSG_ERROR("Failed to open file: " << filename);
+    delete file;
     return;
   }
 

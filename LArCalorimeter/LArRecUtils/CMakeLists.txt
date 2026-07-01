@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArRecUtils )
@@ -41,4 +41,4 @@ atlas_add_test( LArADC2MeVCondAlgConfig_test
 
 atlas_add_test( LArADC2MeVSCCondAlgConfig_test
                 SCRIPT python -m LArRecUtils.LArADC2MeVSCCondAlgConfig
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

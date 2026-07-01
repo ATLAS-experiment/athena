@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigNavigation/NavigationInit.h"
@@ -10,7 +10,7 @@
 template<typename CONTAINER>
 struct register_feature{
   template<class FEATURE>
-  void do_it() const {
+  void operator()() const {
     //std::cout << "\t\t registering feature: " << typeid(FEATURE).name() <<  " -> ";
     //std::cout << "container: " << typeid(CONTAINER).name() << std::endl;
     
@@ -37,7 +37,7 @@ struct register_aux<HLT::TypeInformation::no_aux>{
 
 struct registertype{
   template<class typeinfo_element>
-  void do_it() const {
+  void operator()() const {
     typedef typename typeinfo_element::list_of_features FEATURES;
     typedef typename typeinfo_element::container CONTAINER;
     typedef typename typeinfo_element::aux AUX;
@@ -46,7 +46,7 @@ struct registertype{
     //HLT::TypeInformation::for_each_type<FEATURES,HLT::TypeInformation::simple_printer >::do_it();
     //std::cout<< std::endl;
 
-    HLT::TypeInformation::for_each_type<FEATURES,register_feature<CONTAINER> >::do_it();
+    FEATURES::for_each(register_feature<CONTAINER>{});
     register_aux<AUX>::do_it();
   }
 };
@@ -60,12 +60,8 @@ struct registertype{
 
 template <typename TYPELIST>
 struct a_default_ctor{
-  a_default_ctor(){
-    //std::cout << "registering package with navi, packae typelist has size: " << TYPELIST::last_index + 1 << std::endl;
-    //we need to do this by hand unfortunately because we hit the template instantiaton depth of 99
-    HLT::TypeInformation::for_each_type<typename TYPELIST::template range< 0, 9>::type,registertype>::do_it();
-    HLT::TypeInformation::for_each_type<typename TYPELIST::template range<10,19>::type,registertype>::do_it();
-    HLT::TypeInformation::for_each_type<typename TYPELIST::template range<20,29>::type,registertype>::do_it();
+  a_default_ctor() {
+    TYPELIST::for_each(registertype{});
    }
 };
 

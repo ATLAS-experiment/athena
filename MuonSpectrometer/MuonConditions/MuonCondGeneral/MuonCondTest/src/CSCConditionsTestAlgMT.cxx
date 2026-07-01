@@ -18,13 +18,13 @@ StatusCode CSCConditionsTestAlgMT::initialize() {
 }
 
 // Execute
-StatusCode CSCConditionsTestAlgMT::execute() {
+StatusCode CSCConditionsTestAlgMT::execute(const EventContext& ctx) {
     StatusCode sc(StatusCode::SUCCESS);
 
     ATH_MSG_INFO("Calling execute");
     std::stringstream ss;
     ss << "Now setting up read handle: ";
-    SG::ReadCondHandle<CscCondDbData> readHandle{m_readKey};
+    SG::ReadCondHandle<CscCondDbData> readHandle{m_readKey, ctx};
     const CscCondDbData* readCdo{*readHandle};
     if (readCdo == nullptr) {
         ss << "DID NOT WORK!";

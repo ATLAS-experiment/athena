@@ -19,7 +19,6 @@
 #include "CoralBase/AttributeListSpecification.h"
 
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
-//#include "CoolKernel/types.h"
 #include "CoolKernel/StorageType.h"
 
 LArDSPThresholdFillInline::LArDSPThresholdFillInline(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -54,7 +53,6 @@ LArDSPThresholdFillInline::LArDSPThresholdFillInline(const std::string& name, IS
 
   declareProperty("Dump",m_dump=false);
   declareProperty("OutFile",m_outFileName="out.txt");
-  //declareProperty("InFile",m_inFileName="");
 }
 
 LArDSPThresholdFillInline::~LArDSPThresholdFillInline() {}
@@ -117,6 +115,7 @@ StatusCode LArDSPThresholdFillInline::initialize() {
 StatusCode LArDSPThresholdFillInline::stop() {
 
   ATH_MSG_DEBUG ( "start stop()" );
+  if( m_scaleIW > 0.) {  ATH_MSG_INFO (" Scaling EMECIW by: "<<m_scaleIW);}
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
@@ -127,7 +126,6 @@ StatusCode LArDSPThresholdFillInline::stop() {
     unsigned hashMax=m_onlineID->channelHashMax();
   
     coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
-    //cool::RecordSpecification* spec = new cool::RecordSpecification(); 
     spec->extend("tQThr", "blob");
     spec->extend("samplesThr", "blob");
     spec->extend("trigSumThr", "blob");
@@ -203,7 +201,6 @@ StatusCode LArDSPThresholdFillInline::stop() {
       }
 
       if (m_workmode==FIXED) {
-	//cont->set(chid,m_tqThrsh,m_samplesThrsh,m_tqThrsh); 
 	ptQThrBlob[hs]=m_tqThrsh;
 	psamplesBlob[hs]=m_samplesThrsh;
 	ptrigSumBlob[hs]=m_tqThrsh;
@@ -221,19 +218,6 @@ StatusCode LArDSPThresholdFillInline::stop() {
 	  ATH_MSG_ERROR ( "Failed to return CaloDetDescrElement" );
 	  return StatusCode::FAILURE;
 	}
-	/*
-	  if(caloDDE->is_lar_em_barrel())
-	  log << MSG::DEBUG << "EM barrel" << endmsg;
-	  
-	  if(caloDDE->is_lar_em_endcap())
-	  log << MSG::DEBUG << "EM endcap" << endmsg;
-	  
-	  if(caloDDE->is_lar_hec())
-	  log << MSG::DEBUG << "HEC" << endmsg;
-
-	  if(caloDDE->is_lar_fcal())
-	  log << MSG::DEBUG << "FCAL" << endmsg;
-	*/
 	CaloGain::CaloGain igain = CaloGain::INVALIDGAIN;
 
 	if(caloDDE->is_lar_fcal())
@@ -256,7 +240,6 @@ StatusCode LArDSPThresholdFillInline::stop() {
 	else
 	  QtThr = elecNoise->getNoise(id,igain);
 
-	//cont->set(chid,QtThr*m_sigmaNoiseQt,samplesThr*m_sigmaNoiseSamples,QtThr*m_sigmaNoiseQt);
 	ptQThrBlob[hs]=QtThr*m_sigmaNoiseQt;
 	psamplesBlob[hs]=samplesThr*m_sigmaNoiseSamples;
 	ptrigSumBlob[hs]=QtThr*m_sigmaNoiseQt;
@@ -265,10 +248,7 @@ StatusCode LArDSPThresholdFillInline::stop() {
 
       if( m_scaleIW > 0.) {
          int slot = m_onlineID->slot(chid);
-         if (m_onlineID->isEMECIW(chid) || m_onlineID->isFCALchannel(chid) || 
-               (m_onlineID->isHECchannel(chid) && (slot==9 || slot==10) )  ||
-               (m_onlineID->isEMECchannel(chid) && (slot==6||slot==7||slot==14||slot==15))
-            ) {
+         if (m_onlineID->isEMECIW(chid) ) {
             ptQThrBlob[hs] *= m_scaleIW;
             psamplesBlob[hs] *= m_scaleIW;
             ptrigSumBlob[hs] *= m_scaleIW;
@@ -288,10 +268,12 @@ StatusCode LArDSPThresholdFillInline::stop() {
     const AthenaAttributeList* attr=0;
 
     ATH_CHECK( detStore()->retrieve(attr,m_key) );
-
+   
     LArDSPThresholdsFlat cont(attr);
-
-
+    if (!cont.good()){
+      ATH_MSG_ERROR("LArDSPThresholdsFlat did not initialise.");
+      return StatusCode::FAILURE;
+    }
     std::ofstream outfile;
     if (!m_outFileName.size()) {
       ATH_MSG_ERROR("No output file specified");

@@ -847,8 +847,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 if (m_idHelper->get_hash(elemId, coll_hash, &rpcContext)) {
                     ATH_MSG_ERROR("Unable to get RPC hash id from RPC Digit collection "
                                   << "context begin_index = " << rpcContext.begin_index()
-                                  << " context end_index  = " << rpcContext.end_index() << " the identifier is ");
-                    elemId.show();
+                                  << " context end_index  = " << rpcContext.end_index() << " the identifier is \n"<<elemId);
                 }
 
                 // make new digit

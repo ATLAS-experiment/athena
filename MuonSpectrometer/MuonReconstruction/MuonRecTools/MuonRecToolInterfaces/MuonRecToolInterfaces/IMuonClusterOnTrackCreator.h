@@ -5,7 +5,6 @@
 #ifndef MUON_IMUONCLUSTERONTRACKCREATOR_H
 #define MUON_IMUONCLUSTERONTRACKCREATOR_H
 
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"

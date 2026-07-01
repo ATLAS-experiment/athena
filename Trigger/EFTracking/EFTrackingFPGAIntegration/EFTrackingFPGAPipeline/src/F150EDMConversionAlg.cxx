@@ -32,14 +32,12 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(seedHandle.record(std::make_unique<ActsTrk::SeedContainer>()));
         ActsTrk::SeedContainer* seeds = seedHandle.ptr();
 
-        std::multimap<xAOD::DetectorIDHashType, Acts::SpacePointIndex2> spacePointMap;
-        seeds->spacePoints().reserve(spacePointsHandle->size());
+        std::multimap<xAOD::DetectorIDHashType, const xAOD::SpacePoint*> spacePointMap;
         // Populate the multimap with Pixel cluster hashID as key.
         // Only space points with one measurement are considered (i.e. pixels)
         for (const xAOD::SpacePoint* spacePoint : *spacePointsHandle) {
             if (!spacePoint->measurements().empty()) {
-                seeds->spacePoints().push_back(spacePoint);
-                spacePointMap.emplace(spacePoint->measurements().at(0)->identifierHash(), seeds->spacePoints().size()-1ul);
+                spacePointMap.emplace(spacePoint->measurements().at(0)->identifierHash(), spacePoint);
             }
         }
 
@@ -54,7 +52,7 @@ namespace EFTrackingFPGAIntegration
                 auto gtrack_w2 = FPGADataFormatUtilities::get_bitfields_GTRACK_HDR_w2(trackOutput->at(++i));
                 auto gtrack_w3 = FPGADataFormatUtilities::get_bitfields_GTRACK_HDR_w3(trackOutput->at(++i));
             
-                std::vector<Acts::SpacePointIndex2> spacePointsToStoreInSeed;
+                std::vector<const xAOD::SpacePoint*> spacePointsToStoreInSeed;
                 //Look for GHITz, till we have a last hit
                 bool isLast = false;
                 unsigned int hitsInTrack = 0;
@@ -77,11 +75,11 @@ namespace EFTrackingFPGAIntegration
                     auto range = spacePointMap.equal_range(identifierHashW2);
                     for (auto it = range.first; it != range.second; ++it) {
                         constexpr float kEpsilon = 0.1;
-                        const xAOD::SpacePoint* spacePoint = seeds->spacePoints().at(it->second);
+                        const xAOD::SpacePoint* spacePoint = it->second;
                         if (std::abs(x - spacePoint->x()) < kEpsilon &&
                             std::abs(y - spacePoint->y()) < kEpsilon&&
                             std::abs(z - spacePoint->z()) < kEpsilon) {
-                            spacePointsToStoreInSeed.push_back(it->second);
+                            spacePointsToStoreInSeed.push_back(spacePoint);
                             if (spacePointsToStoreInSeed.size() == m_maxSpacePointsPerSeed) break; // stop if max reached
                         }
                     }
@@ -94,14 +92,11 @@ namespace EFTrackingFPGAIntegration
                 }
                 // construct seed based on the space points stored in the vector
                 if (spacePointsToStoreInSeed.size() >= m_minSpacePointsPerSeed) { // check that seeds contains at least the minimum number of desired space points
-                    auto seed = seeds->push_back(spacePointsToStoreInSeed);
-                    seed.vertexZ() = gtrack_w2.z0/FPGADataFormatUtilities::GTRACK_HDR_W2_Z0_mf;
-                    auto chiSquare = gtrack_w2.score/FPGADataFormatUtilities::GTRACK_HDR_W2_SCORE_mf;
-                    if (chiSquare != 0.0) {
-                        seed.quality() = 1.0 / chiSquare;
-                    } else {
-                        seed.quality() = 0.0;
-                    }
+                    const float vertexZ = gtrack_w2.z0/FPGADataFormatUtilities::GTRACK_HDR_W2_Z0_mf;
+                    const auto chiSquare = gtrack_w2.score/FPGADataFormatUtilities::GTRACK_HDR_W2_SCORE_mf;
+                    const float quality = (chiSquare != 0.0) ? 1.0 / chiSquare : 0.0;
+                    
+                    seeds->push_back(spacePointsToStoreInSeed, quality, vertexZ);
                 }
 
             }

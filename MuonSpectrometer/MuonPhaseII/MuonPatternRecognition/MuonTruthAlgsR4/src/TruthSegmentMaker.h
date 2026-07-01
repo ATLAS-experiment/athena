@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRUTHSEGMENTMAKER_TRUTHSEGMENTMAKER_H
 #define MUONTRUTHSEGMENTMAKER_TRUTHSEGMENTMAKER_H
@@ -9,6 +9,7 @@
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
@@ -57,7 +58,7 @@ namespace MuonR4{
           using LinkDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, HitLinkVec_t>;
           using FloatDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, float>;
 
-          using SegPars_t = xAOD::MeasVector<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>;
+          using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>::element_type;
           using SegParDecor_t = SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t>;
         
           /** @brief Helper struct to ship the write DecorHandles and the reference to the output
@@ -67,7 +68,7 @@ namespace MuonR4{
               *         the truth segments, the refefrence to the TruthSegmentMaker to initialize the
               *         WriteDecorHandles and the event context */
               WriteDecorHolder(xAOD::MuonSegmentContainer& outContainer,
-                                const TruthSegmentMaker& parent,
+                               const TruthSegmentMaker& parent,
                                const EventContext& ctx):
                   segments{outContainer},
                   paramDecor{parent.m_locParKey, ctx},
@@ -119,12 +120,16 @@ namespace MuonR4{
            * @param ctx: EventContext to fetch the constants from store gate
            * @param hit: Reference to the sim hit */
           float hitUncertainty(const EventContext& ctx, const xAOD::MuonSimHit& hit) const;
+          /** @brief Establish the link from the simulated hit -> truth segment
+           *  @param ctx: EventContext to setup the write decor handles
+           *  @param segments: The completed truth segment container */
+          StatusCode linkSegmentsToHits(const EventContext& ctx, const xAOD::MuonSegmentContainer& segments) const;
           /** @brief IdHelperSvc to decode the Identifiers */
           ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
           /** @brief List of sim hit containers from which the truth segments shall be retrieved */
           SG::ReadHandleKeyArray<xAOD::MuonSimHitContainer> m_readKeys{this, "SimHitKeys", {}};
           /** @brief Key to the geometry context. Needed to align the hits inside ATLAS */
-          SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+          ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
           /** @brief Key under which the segment Container will be recorded in StoreGate */
           SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "WriteKey", "MuonTruthSegments"};
           /** @brief Decoration key of the associated sim hit links */
@@ -135,18 +140,20 @@ namespace MuonR4{
           SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_locParKey{this, "LocParKey", m_segmentKey,"localSegPars"};
           /** @brief Decoration key of the muon charge  */
           SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_qKey{this, "qKey", m_segmentKey, "charge"};
+          /** @brief Decorate the truth segment link to the simHit */
+          SG::WriteDecorHandleKeyArray<xAOD::MuonSimHitContainer> m_segLinkKeys{this, "SimHitToSegLinkKey", {}};
+          /** @brief Name of the link to the truth segment */
+          Gaudi::Property<std::string> m_segLinkKey{this, "SegmentLink", "truthSegmentLink"};
           /** @brief Build segments from muon hits only */
           Gaudi::Property<bool> m_useOnlyMuonHits{this, "useOnlyMuonHits", true};
           /** @brief Construct segments from pile-up hits without GenParticleLink */
-          Gaudi::Property<bool> m_includePileUpHits{this, "includePileUpHits", true};
+          Gaudi::Property<bool> m_includePileUpHits{this, "includePileUpHits", false};
           /** @brief Minimum energy threshold for pile up hits to be converted  */
           Gaudi::Property<float> m_pileUpHitMinE{this, "energyThresholdPileUp", 1.*Gaudi::Units::GeV};
           /** @brief Maximum energy loss between two pile-up hits */
-          Gaudi::Property<float> m_pileUpHitELoss{this, "pileUpHitELoss", 5.*Gaudi::Units::MeV};
+          Gaudi::Property<float> m_pileUpHitELoss{this, "pileUpHitELoss", 50.*Gaudi::Units::MeV};
           /** @brief Maximum scattering angle between two pile-up hits */
           Gaudi::Property<float> m_pileUpHitAngleCone{this, "pileUpHitAngleCone", 1.*Gaudi::Units::deg};
-          /** @brief Maximum separation between two pile-up hits */
-          Gaudi::Property<float> m_pileUpHitDistance{this, "pileUpHitDistance", 2.*Gaudi::Units::m};
           /** @brief ID / ITk cylinder radius */
           Gaudi::Property<float> m_idCylinderR{this, "IdCylinderR", 1.1*Gaudi::Units::m};
           /**  @brief ID / Itk cylinder half length */

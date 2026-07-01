@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -26,11 +26,12 @@ class TTree;
 
 namespace asg
 {
-  class SgTEvent;
+  class SgEvent;
 }
 
 namespace xAOD
 {
+  class Event;
   class TEvent;
   class TStore;
 }
@@ -76,7 +77,10 @@ namespace EL
 
       /// \brief the entry in the input tree we are currently looking
       /// at
-      uint64_t m_inputTreeEntry {0};
+      uint64_t m_inputEntry {0};
+
+      /// \brief flag whether the most recently opened input file has events or not
+      bool m_hasInputEvents = false;
 
       /// \brief whether we are skipping the current event
       bool m_skipEvent = false;
@@ -93,14 +97,14 @@ namespace EL
       /// \brief Tree saving per-job statistics information
       std::unique_ptr<TTree> m_jobStats;
 
-      /// \brief the TEvent structure, if we use one
-      xAOD::TEvent *m_tevent {nullptr};
+      /// \brief the Event object, if we use one
+      xAOD::Event *m_event {nullptr};
 
       /// \brief the TStore structure, if we use one
       xAOD::TStore *m_tstore {nullptr};
 
-      /// \brief the SgTEvent structure, if we use one
-      asg::SgTEvent *m_evtStore {nullptr};
+      /// \brief the SgEvent structure, if we use one
+      asg::SgEvent *m_evtStore {nullptr};
 
       /// \brief the worker (to pass on to the algorithms)
       Worker *m_worker {nullptr};

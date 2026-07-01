@@ -18,8 +18,7 @@ namespace MuonValR4{
         std::string lName = layerName(layer);
         lName[0] = std::tolower(lName[0]);
         return std::format("{:}{:}{:}{:}",
-                    lName, (isSmall ? "Small" :"Large"),
-                    HitSummary::toString(cat),
+                    lName, (isSmall ? "Small" :"Large"), cat,
                     (status == Status::OnTrack ? std::string{"Hits"} 
                                                : HitSummary::toString(status) +"s"));
     }

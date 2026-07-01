@@ -17,14 +17,14 @@ EventShapeStore_PERS* EventShapeStoreCnv::createPersistent(EventShapeStore* tran
   return persObj;
 }
 
-EventShapeStore* EventShapeStoreCnv::createTransient()
+EventShapeStore* EventShapeStoreCnv::createTransient(const Token* token)
 {
   static const pool::Guid   p1_guid("730C49D9-47C2-45D4-A755-1313F4A2ACB1");
-  if( compareClassGuid(p1_guid) )
+  if( compareClassGuid(token, p1_guid) )
     {
       EventShapeStoreCnv_p1   TPconverter;
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr<EventShapeStore_p1> shapestore( poolReadObject< EventShapeStore_p1 >() );
+      std::unique_ptr<EventShapeStore_p1> shapestore( poolReadObject< EventShapeStore_p1 >(token) );
       MsgStream report( msgSvc(), "EventShapeStoreCnv" );
       report << MSG::INFO << "Reading EventShapeStore_p1" << endmsg; 
       return TPconverter.createTransient( shapestore.get(), report );

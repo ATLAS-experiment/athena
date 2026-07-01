@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/DecaysFinalStateFilter
@@ -30,6 +30,7 @@
 // Frank Siegert Nov 2014
 
 #include "GeneratorFilters/DecaysFinalStateFilter.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
 
 
@@ -52,7 +53,7 @@ DecaysFinalStateFilter::DecaysFinalStateFilter(const std::string& name, ISvcLoca
 }
 
 
-StatusCode DecaysFinalStateFilter::filterEvent() {
+StatusCode DecaysFinalStateFilter::filterEvent(const EventContext& ctx) {
   int nChargedLeptons = 0;
   int nQuarks = 0;
   int nbQuarks = 0;
@@ -75,33 +76,37 @@ StatusCode DecaysFinalStateFilter::filterEvent() {
       if (!part->end_vertex()) continue;
 
       for (const auto& opitr: *(part->end_vertex())) {
-        int apid = std::abs(opitr->pdg_id());
-        if (apid == 1 || apid == 2 || apid == 3 || apid == 4 || apid ==5) nQuarks++;
-        if (apid == 5) nbQuarks++;
-        if (apid == 11 || apid == 13 || apid == 15) nChargedLeptons++;
-        if (apid == 12 || apid == 14 || apid == 16) nNeutrinos++;
-        if (apid == 22) nPhotons++;
+        const int apid = std::abs(opitr->pdg_id());
+        if ( apid <=  MC::BQUARK ) {
+          nQuarks++;
+          if (MC::isBottom(apid)) nbQuarks++;
+        }
+        else if (MC::isSMLepton(apid)) {
+          if (MC::isSMNeutrino(apid)) nNeutrinos++;
+          else nChargedLeptons++;
+        }
+        else if (MC::isPhoton(apid)) nPhotons++;
       }
     }
   }
 
   if (nQuarks < m_MinNQuarks || (m_NQuarks != -1 && nQuarks != m_NQuarks)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   }
   else if (nbQuarks < m_MinNbQuarks || (m_NbQuarks != -1 && nbQuarks != m_NbQuarks)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   }
   else if (nChargedLeptons < m_MinNChargedLeptons || (m_NChargedLeptons != -1 && nChargedLeptons != m_NChargedLeptons)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nNeutrinos < m_MinNNeutrinos || (m_NNeutrinos != -1 && nNeutrinos != m_NNeutrinos)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else if (nPhotons < m_MinNPhotons || (m_NPhotons != -1 && nPhotons != m_NPhotons)) {
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
   } 
   else {
-    setFilterPassed(true);
+    setFilterPassed(true, ctx);
   }
   return StatusCode::SUCCESS;
 }

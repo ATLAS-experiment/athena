@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// a simple testing macro for the MuonSelectorTools_xAOD package
@@ -11,7 +11,6 @@
 #include <map>
 #include <memory>
 #include <string>
-
 // ROOT include(s):
 #include <TError.h>
 #include <TFile.h>
@@ -132,22 +131,7 @@ int main(int argc, char* argv[]) {
     // Obtain summary information also split by muon type
     const int Ntype = 5;
 
-    std::string typeNames[Ntype];
-    for (int type = 0; type < Ntype; type++) {
-        if (type == xAOD::Muon::Combined)
-            typeNames[type] = "combined";
-        else if (type == xAOD::Muon::MuonStandAlone)
-            typeNames[type] = "stand-alone";
-        else if (type == xAOD::Muon::SegmentTagged)
-            typeNames[type] = "segment-tagged";
-        else if (type == xAOD::Muon::CaloTagged)
-            typeNames[type] = "calo-tagged";
-        else if (type == xAOD::Muon::SiliconAssociatedForwardMuon)
-            typeNames[type] = "forward";
-        else
-            typeNames[type] = "unknown";
-    }
-
+   
     // Muon counters for each type
     int allMuonsType[Ntype];
     for (int type = 0; type < Ntype; type++) allMuonsType[type] = 0;
@@ -161,52 +145,15 @@ int main(int argc, char* argv[]) {
     for (int type = 0; type < Ntype; type++)
         for (int wp = 0; wp < Nwp; wp++) selectedMuonsTypeNotBad[type][wp] = 0;
 
-
-    // Obtain summary information also split by primary author
-    const int Nauthor = xAOD::Muon::NumberOfMuonAuthors;
-
-    std::string authorNames[Nauthor];
-    for (int author = 0; author < Nauthor; author++) {
-        if (author == xAOD::Muon::MuidCo)
-            authorNames[author] = "MuidCo";
-        else if (author == xAOD::Muon::STACO)
-            authorNames[author] = "STACO";
-        else if (author == xAOD::Muon::MuTag)
-            authorNames[author] = "MuTag";
-        else if (author == xAOD::Muon::MuTagIMO)
-            authorNames[author] = "MuTagIMO";
-        else if (author == xAOD::Muon::MuidSA)
-            authorNames[author] = "MuidSA";
-        else if (author == xAOD::Muon::MuGirl)
-            authorNames[author] = "MuGirl";
-        else if (author == xAOD::Muon::MuGirlLowBeta)
-            authorNames[author] = "MuGirlLowBeta";
-        else if (author == xAOD::Muon::CaloTag)
-            authorNames[author] = "CaloTag";
-        else if (author == xAOD::Muon::CaloLikelihood)
-            authorNames[author] = "CaloLikelihood";
-        else if (author == xAOD::Muon::CaloScore)
-            authorNames[author] = "CaloScore";
-        else if (author == xAOD::Muon::ExtrapolateMuonToIP)
-            authorNames[author] = "ExtrapolateMuonToIP";
-        else
-            authorNames[author] = "unknown";
-    }
-
+ 
     // Muon counters for each author
-    int allMuonsAuthor[Nauthor];
-    for (int author = 0; author < Nauthor; author++) allMuonsAuthor[author] = 0;
-
+    constexpr std::size_t nAuthor = static_cast<int>(xAOD::Muon::Author::NumberOfMuonAuthors);
+    std::array<int, nAuthor> allMuonsAuthor{};
+   
     // Muon counters for muons of each author passing each working point
-    int selectedMuonsAuthor[Nauthor][Nwp];
-    for (int author = 0; author < Nauthor; author++)
-        for (int wp = 0; wp < Nwp; wp++) selectedMuonsAuthor[author][wp] = 0;
-
-    int selectedMuonsAuthorNotBad[Nauthor][Nwp];
-    for (int author = 0; author < Nauthor; author++)
-        for (int wp = 0; wp < Nwp; wp++) selectedMuonsAuthorNotBad[author][wp] = 0;
-
-
+    std::array<std::array<int, Nwp>, nAuthor> selectedMuonsAuthor{}, selectedMuonsAuthorNotBad{};
+   
+    
     // Obtain summary information also split by muon |eta|
     const int Neta = 4;
     double etaCuts[Neta - 1] = {1.0, 2.0, 2.5};
@@ -337,8 +284,8 @@ int main(int argc, char* argv[]) {
                 }
 
             allMuons++;
-            allMuonsType[(*mu_itr)->muonType()]++;
-            allMuonsAuthor[(*mu_itr)->author()]++;
+            allMuonsType[static_cast<int>((*mu_itr)->muonType())]++;
+            allMuonsAuthor[static_cast<int>((*mu_itr)->author())]++;
             allMuonsEta[etaIndex]++;
             muCounter++;
 
@@ -376,10 +323,20 @@ int main(int argc, char* argv[]) {
             if (isMC) Info(APP_NAME, "Muon truthType:       %d (%s)", truthClass, truthTypeNames[truthType].c_str());
             Info(APP_NAME, "Muon pT [GeV]:        %g ", std::abs((*mu_itr)->pt()) / 1000.);
             Info(APP_NAME, "Muon eta, phi:        %g, %g ", (*mu_itr)->eta(), (*mu_itr)->phi());
-            Info(APP_NAME, "Muon muonType:        %d (%s)", (*mu_itr)->muonType(), typeNames[(*mu_itr)->muonType()].c_str());
-            Info(APP_NAME, "Muon primary author:  %d (%s)", (*mu_itr)->author(), authorNames[(*mu_itr)->author()].c_str());
-
-            Info(APP_NAME, "Muon quality (from tool, from xAOD):      %d, %d", my_quality, (*mu_itr)->quality());
+            {
+                std::stringstream sstr{};
+                sstr<<"Muon muonType:        "<<(*mu_itr)->muonType();
+                Info(APP_NAME, "%s", sstr.str().c_str());
+            }
+            {
+                std::stringstream sstr{};
+                sstr<<"Muon primary author:  "<<(*mu_itr)->author();
+                Info(APP_NAME, "%s", sstr.str().c_str());
+            }{
+                std::stringstream sstr{};
+                sstr<<"Muon quality (from tool, from xAOD):      "<<my_quality<<", "<<(*mu_itr)->quality();
+                Info(APP_NAME, "%s", sstr.str().c_str());
+            }
             Info(APP_NAME, "Muon passes cuts (ID hits, preselection): %d, %d", passesIDRequirements, passesPreselectionCuts);
 
 
@@ -389,11 +346,12 @@ int main(int argc, char* argv[]) {
             std::string badMuonResults = "Bad muon flag:              ";
 
             for (int wp = 0; wp < Nwp; wp++) {
+                using namespace Muon::MuonStationIndex;
                 if (selectorTools[wp]->accept(*mu_itr)) {
                     selectedMuons[wp]++;
                     selectedMuonsEvent[wp]++;
-                    selectedMuonsType[(*mu_itr)->muonType()][wp]++;
-                    selectedMuonsAuthor[(*mu_itr)->author()][wp]++;
+                    selectedMuonsType[toInt((*mu_itr)->muonType())][wp]++;
+                    selectedMuonsAuthor[toInt((*mu_itr)->author())][wp]++;
                     selectedMuonsTruthType[truthType][wp]++;
                     selectedMuonsEta[etaIndex][wp]++;
                     selectionResults += "pass     ";
@@ -401,8 +359,8 @@ int main(int argc, char* argv[]) {
                     if (!selectorTools[wp]->isBadMuon(**mu_itr)) {
                         selectedMuonsNotBad[wp]++;
                         selectedMuonsEventNotBad[wp]++;
-                        selectedMuonsTypeNotBad[(*mu_itr)->muonType()][wp]++;
-                        selectedMuonsAuthorNotBad[(*mu_itr)->author()][wp]++;
+                        selectedMuonsTypeNotBad[toInt((*mu_itr)->muonType())][wp]++;
+                        selectedMuonsAuthorNotBad[toInt((*mu_itr)->author())][wp]++;
                         selectedMuonsTruthTypeNotBad[truthType][wp]++;
                         selectedMuonsEtaNotBad[etaIndex][wp]++;
                     }
@@ -463,29 +421,25 @@ int main(int argc, char* argv[]) {
     Info(APP_NAME, "Selected muons by type and working point (numbers in parenthesis include bad muon veto):");
     Info(APP_NAME, "---------------------------------------------------------------------------------------");
     for (int l = 0; l < Nwp + 2; l++) {
-        std::string line = "";
+        std::stringstream line{};
         if (l == 0) {  // line with type names
-            line += "              ";
-            for (int type = 0; type < Ntype; type++) line += typeNames[type] + "     ";
+            line << "              ";
+            for (int type = 0; type < Ntype; type++) line <<static_cast<xAOD::Muon::MuonType>(type) << "     ";
         } else if (l == 1) {  // line for all muons inclusive
-            line += "All muons:      ";
+            line << "All muons:      ";
             for (int type = 0; type < Ntype; type++) {
-                std::stringstream ss;
-                ss << std::left << std::setw(16) << std::to_string(allMuonsType[type]);
-                line += ss.str();
+                line << std::left << std::setw(16) << allMuonsType[type];
             }
         } else {  // lines for each of the working points
             int wp = l - 2;
-            line += WPnames[wp] + ":" + padding[wp] + "     ";
+            line << WPnames[wp] << ":" << padding[wp] << "     ";
             for (int type = 0; type < Ntype; type++) {
-                std::stringstream ss;
-                ss << std::left << std::setw(16)
-                   << (std::to_string(selectedMuonsType[type][wp]) + " (" + std::to_string(selectedMuonsTypeNotBad[type][wp]) + ")");
-                line += ss.str();
+                line << std::left << std::setw(16)
+                   << selectedMuonsType[type][wp]<<" ("<<selectedMuonsTypeNotBad[type][wp] << ")";
             }
         }
 
-        Info(APP_NAME, "%s", line.c_str());
+        Info(APP_NAME, "%s", line.str().c_str());
     }
     Info(APP_NAME, "---------------------------------------------------------------------------------------");
 
@@ -494,45 +448,38 @@ int main(int argc, char* argv[]) {
     Info(APP_NAME, "Selected muons by primary author and working point (numbers in parenthesis include bad muon veto):");
     Info(APP_NAME, "---------------------------------------------------------------------------------------");
     for (int l = 0; l < Nwp + 2; l++) {
-        std::string line = "";
+        std::stringstream line{};
         if (l == 0) {  // line with author names
-            line += "               ";
-            for (int author = 0; author < Nauthor; author++) {
+            line << "               ";
+            for (unsigned author = 0; author < nAuthor; author++) {
 
               //Do not print unrepresented authors, since the table can be quite wide
               if (allMuonsAuthor[author] == 0) continue;
 
-              std::stringstream ss;
-              ss << std::left << std::setw(16);
-              ss << authorNames[author];
-              line += ss.str();
+              line <<  static_cast<xAOD::Muon::Author>(author);
             }
         } else if (l == 1) {  // line for all muons inclusive
-            line += "All muons:      ";
-            for (int author = 0; author < Nauthor; author++) {
+            line << "All muons:      ";
+            for (unsigned author = 0; author < nAuthor; author++) {
 
               if (allMuonsAuthor[author] == 0) continue;
 
-              std::stringstream ss;
-              ss << std::left << std::setw(16);
-              ss << std::to_string(allMuonsAuthor[author]);
-              line += ss.str();
+              line << std::left << std::setw(16)<<allMuonsAuthor[author];
             }
         } else {  // lines for each of the working points
             int wp = l - 2;
-            line += WPnames[wp] + ":" + padding[wp] + "     ";
-            for (int author = 0; author < Nauthor; author++) {
+            line << WPnames[wp] << ":"<< padding[wp] << "     ";
+            for (unsigned author = 0; author < nAuthor; author++) {
 
               if (allMuonsAuthor[author] == 0) continue;
 
-              std::stringstream ss;
-              ss << std::left << std::setw(16);
-              ss << (std::to_string(selectedMuonsAuthor[author][wp]) + " (" + std::to_string(selectedMuonsAuthorNotBad[author][wp]) + ")");
-              line += ss.str();
+              line << std::left << std::setw(16);
+              line << selectedMuonsAuthor[author][wp]<< " (" 
+                  << selectedMuonsAuthorNotBad[author][wp]<< ")";
             }
         }
 
-        Info(APP_NAME, "%s", line.c_str());
+        Info(APP_NAME, "%s", line.str().c_str());
     }
     Info(APP_NAME, "---------------------------------------------------------------------------------------");
 

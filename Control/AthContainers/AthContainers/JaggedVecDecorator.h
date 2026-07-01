@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/JaggedVecDecorator.h
@@ -110,8 +110,15 @@ public:
   /// Const span resulting from the conversion.
   using element_type = typename ConstConverter_t::element_type;
 
+  /// Type referencing an item (const).
+  using const_reference_type = element_type;
+
   /// The writable type we return.
   using reference_type = JVecProxy;
+
+  /// A const reference type that can appear on the RHS of an assignment
+  /// to an application of a Decorator of this type.
+  using rhs_const_reference_type = std::span<const Payload_t>;
 
   /// Not supported.
   using container_pointer_type = void;
@@ -320,7 +327,7 @@ protected:
    * @brief Constructor.
    * @param name Name of this aux variable.
    * @param clsname The name of its associated class.  May be blank.
-   * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+   * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
    *
    * The name -> auxid lookup is done here.
    */

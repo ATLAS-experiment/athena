@@ -1,43 +1,9 @@
 """Define methods to construct configured Tracking conversion algorithms
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-######################################
-###   RecTrackParticleContainerCnvTool
-######################################
-
-def RecTrackParticleContainerCnvToolCfg(flags, name="RecTrackParticleContainerCnvTool", **kwargs):
-    result = ComponentAccumulator()
-
-    if "TrackParticleCreator" not in kwargs:
-        from TrkConfig.TrkParticleCreatorConfig import (
-            TrackParticleCreatorToolCfg)
-        TrackParticleCreator = result.popToolsAndMerge(
-            TrackParticleCreatorToolCfg(flags))
-        result.addPublicTool(TrackParticleCreator)
-        kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
-
-    result.setPrivateTools(
-        CompFactory.xAODMaker.RecTrackParticleContainerCnvTool(name, **kwargs))
-    return result
-
-def MuonRecTrackParticleContainerCnvToolCfg(flags, name = "MuonRecTrackParticleContainerCnvTool", **kwargs):
-    result = ComponentAccumulator()
-
-    if "TrackParticleCreator" not in kwargs:
-        from TrkConfig.TrkParticleCreatorConfig import (
-            MuonCombinedParticleCreatorCfg)
-        TrackParticleCreator = result.popToolsAndMerge(
-            MuonCombinedParticleCreatorCfg(flags))
-        result.addPublicTool(TrackParticleCreator)
-        kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
-
-    result.setPrivateTools(
-        CompFactory.xAODMaker.RecTrackParticleContainerCnvTool(name, **kwargs))
-    return result
 
 ######################################
 ###   TrackCollectionCnvTool
@@ -107,7 +73,6 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
 
     result = ComponentAccumulator()
     kwargs.setdefault("ConvertTracks", True)
-    kwargs.setdefault("ConvertTrackParticles", False)
     kwargs.setdefault("TrackContainerName", "CombinedInDetTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
 
@@ -157,13 +122,12 @@ def TrigTrackParticleCnvAlgCfg(flags, name="TrigTrackParticleCnvAlg",
     
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
-        return ITkTrackParticleCnvAlgCfg(flags, name,
-                                         ClusterSplitProbabilityName,
-                                         AssociationMapName,
-                                         **kwargs)
+        return TrigITkTrackParticleCnvAlgCfg(flags, name,
+                                             ClusterSplitProbabilityName,
+                                             AssociationMapName,
+                                             **kwargs)
 
     kwargs.setdefault("ConvertTracks", True)
-    kwargs.setdefault("ConvertTrackParticles", False)
     kwargs.setdefault("TrackContainerName", "CombinedInDetTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
     kwargs.setdefault("AddTruthLink", False)
@@ -291,7 +255,6 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
     result = ComponentAccumulator()
 
     kwargs.setdefault("ConvertTracks", True)
-    kwargs.setdefault("ConvertTrackParticles", False)
     kwargs.setdefault("TrackContainerName", "CombinedITkTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
     if flags.Tracking.perigeeExpression == "Vertex":
@@ -329,6 +292,52 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
     result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
     return result
 
+def TrigITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
+                                  ClusterSplitProbabilityName = "",
+                                  AssociationMapName = "",
+                                  isActsAmbi: bool = False,
+                                  **kwargs):
+    result = ComponentAccumulator()
+
+    kwargs.setdefault("ConvertTracks", True)
+    kwargs.setdefault("TrackContainerName", "CombinedITkTracks")
+    kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
+    
+    if flags.Tracking.ActiveConfig.perigeeExpression == "Vertex":
+        kwargs.setdefault('PrimaryVerticesName', 'PrimaryVertices')
+    
+    if "TrackParticleCreator" not in kwargs:
+        from TrkConfig.TrkParticleCreatorConfig import ITkTrackParticleCreatorToolCfg
+        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
+            ITkTrackParticleCreatorToolCfg(
+                flags,
+                name = kwargs["xAODTrackParticlesFromTracksContainerName"] \
+                + "CreatorTool",
+                ClusterSplitProbabilityName = ClusterSplitProbabilityName if not isActsAmbi else "",
+                AssociationMapName = AssociationMapName)))
+
+    if "TrackCollectionCnvTool" not in kwargs:
+        result.addPublicTool(kwargs["TrackParticleCreator"])
+        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(
+            ITkTrackCollectionCnvToolCfg(
+                flags,
+                TrackParticleCreator = kwargs["TrackParticleCreator"],
+                isActsAmbi = isActsAmbi)))
+
+    if flags.Tracking.ActiveConfig.doTruth:
+        kwargs.setdefault("TrackTruthContainerName",
+                          kwargs["TrackContainerName"]+"TruthCollection")
+        kwargs.setdefault("AddTruthLink", True)
+        if "MCTruthClassifier" not in kwargs:
+            from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
+            kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(
+                MCTruthClassifierCfg(flags)))
+    else:
+        kwargs.setdefault("AddTruthLink", False)
+
+    result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
+    return result
+
 def MuonStandaloneTrackParticleCnvAlgCfg(flags, name = "MuonStandaloneTrackParticleCnvAlg",**kwargs):
     from TrkConfig.TrkParticleCreatorConfig import MuonParticleCreatorToolCfg
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
@@ -340,41 +349,13 @@ def MuonStandaloneTrackParticleCnvAlgCfg(flags, name = "MuonStandaloneTrackParti
     result.addPublicTool(muonparticlecreatortool) # Public in TrackCollectionCnvTool
 
     kwargs.setdefault("TrackParticleCreator", muonparticlecreatortool)
-    kwargs.setdefault("RecTrackParticleContainerCnvTool", result.popToolsAndMerge(
-        MuonRecTrackParticleContainerCnvToolCfg(flags, TrackParticleCreator = muonparticlecreatortool)))
     muontrackcollectioncnvtool = result.popToolsAndMerge(
         MuonTrackCollectionCnvToolCfg(flags, TrackParticleCreator = muonparticlecreatortool))
     kwargs.setdefault("TrackCollectionCnvTool", muontrackcollectioncnvtool)
 
     kwargs.setdefault("TrackContainerName", "MuonSpectrometerTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "MuonSpectrometerTrackParticles")
-    kwargs.setdefault("AODContainerName", "")
-    kwargs.setdefault("AODTruthContainerName", "")
     kwargs.setdefault("xAODTruthLinkVector",  "")
-    kwargs.setdefault("ConvertTrackParticles", False)
-    kwargs.setdefault("ConvertTracks", True)
-    kwargs.setdefault("AddTruthLink", False)
-
-    result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
-    return result
-
-def MuonTrackParticleCnvCfg(flags, name = "MuonTrackParticleCnvAlg",**kwargs):
-    result=ComponentAccumulator()
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    result.merge(BeamSpotCondAlgCfg(flags))
-
-
-    if "TrackParticleCreator" not in kwargs:
-        from TrkConfig.TrkParticleCreatorConfig import MuonCombinedParticleCreatorCfg
-        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(MuonCombinedParticleCreatorCfg(flags)))
-
-    if "TrackCollectionCnvTool" not in kwargs:
-        from xAODTrackingCnv.xAODTrackingCnvConfig import MuonTrackCollectionCnvToolCfg
-        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(MuonTrackCollectionCnvToolCfg(flags)))
-
-    kwargs.setdefault("TrackContainerName", "MuonSpectrometerTracks")
-    kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "MuonSpectrometerTrackParticles")
-    kwargs.setdefault("ConvertTrackParticles", False)
     kwargs.setdefault("ConvertTracks", True)
     kwargs.setdefault("AddTruthLink", False)
 

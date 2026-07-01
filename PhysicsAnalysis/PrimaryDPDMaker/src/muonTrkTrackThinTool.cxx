@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -15,9 +15,7 @@
 // FrameWork includes
 #include "Gaudi/Property.h"
 // StoreGate
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 
 #include "PrimaryDPDMaker/muonTrkTrackThinTool.h"

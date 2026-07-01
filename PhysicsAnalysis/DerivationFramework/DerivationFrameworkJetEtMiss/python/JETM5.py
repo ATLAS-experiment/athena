@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_JETM5.py
 #====================================================================
@@ -136,7 +136,8 @@ def JETM5Cfg(flags):
                                         "UFOCSSK"]
 
 
-    JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1"]
+    JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.constituentLinks",
+                                            "AntiKt4EMTopoJets.constituentLinks"]
 
     if flags.Input.isMC:
         JETM5SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
@@ -161,7 +162,7 @@ def JETM5Cfg(flags):
     # Output stream    
     JETM5ItemList = JETM5SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(flags, "DAOD_JETM5", ItemList=JETM5ItemList, AcceptAlgs=["JETM5Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM5", AcceptAlgs=["JETM5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_JETM5", AcceptAlgs=["JETM5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData,MetadataCategory.TruthMetaData]))
 
     return acc
 

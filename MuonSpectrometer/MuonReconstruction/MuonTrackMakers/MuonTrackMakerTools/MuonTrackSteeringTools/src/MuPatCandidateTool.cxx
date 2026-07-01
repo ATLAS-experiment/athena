@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatCandidateTool.h"
@@ -287,7 +287,9 @@ namespace Muon {
         else {
             const CompetingMuonClustersOnTrack* compclus = dynamic_cast<const CompetingMuonClustersOnTrack*>(&meas);
             if (compclus) {
-                rots.insert(rots.end(), compclus->containedROTs().begin(), compclus->containedROTs().end());
+                std::ranges::transform(compclus->containedROTs(),std::back_inserter(rots), [](const auto& rot){
+                    return rot.get();
+                });
             } else {
                 Identifier id = m_edmHelperSvc->getIdentifier(meas);
                 ATH_MSG_WARNING(" Trigger Measurement is not a MuonClusterOnTrack or CompetingMuonClustersOnTrack!!  "
@@ -360,7 +362,9 @@ namespace Muon {
                 ATH_MSG_WARNING(" could not create CompetingMuonClustersOnTrack in chamber   " << m_idHelperSvc->toString(chit->first));
                 continue;
             }
+            // cppcheck-suppress danglingLifetime
             hits.push_back(comprot.get());
+            // cppcheck-suppress danglingLifetime
             allHits.push_back(comprot.get());
 
             // add to garbage collection
@@ -432,8 +436,9 @@ namespace Muon {
             if (!rot) {
                 const CompetingMuonClustersOnTrack* crot = dynamic_cast<const CompetingMuonClustersOnTrack*>(&meas);
                 if (crot) {
-                    const std::vector<const MuonClusterOnTrack*>& rots = crot->containedROTs();
-                    if (!rots.empty()) rot = rots.front();
+                    if (!crot->containedROTs().empty()) {
+                        rot = crot->containedROTs().front().get();
+                    }
                 }
             }
             if (rot) {

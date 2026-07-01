@@ -24,10 +24,10 @@ StatusCode CscRawDataContainerCnv::initialize() {
   return StatusCode::SUCCESS;
 }
 
-CscRawDataContainer* CscRawDataContainerCnv::createTransient()
+CscRawDataContainer* CscRawDataContainerCnv::createTransient(const Token* token)
 {
   MsgStream log(msgSvc(), "CscRawDataContainerCnv" );
-  if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** Entered createTransient() "<< endmsg;
+  if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** Entered createTransient(const Token* token) "<< endmsg;
 
   // the use of auto pointers ensures that the persistent object is deleted
   // using the correct persistent type pointer
@@ -40,24 +40,24 @@ CscRawDataContainer* CscRawDataContainerCnv::createTransient()
   static const pool::Guid p1_guid("3586FE6B-0504-4E78-BD9F-AF839C50F931");
   static const pool::Guid p0_guid("D7600810-31BC-4344-A3C6-9C59F47E5551");
 
-  if( compareClassGuid(p4_guid) ) {
+  if( compareClassGuid(token, p4_guid) ) {
     // from this version onwards, the CSC identifier hashes are actually the position of the identifiers in the vector of identifiers
     // thus, no conversion inside CscRawDataCnv_p... is needed anymore
-    std::unique_ptr< CscRawDataContainer_p4 > col_vect( poolReadObject< CscRawDataContainer_p4 >() );
+    std::unique_ptr< CscRawDataContainer_p4 > col_vect( poolReadObject< CscRawDataContainer_p4 >(token) );
     trans_cont = m_TPconverter.createTransient( col_vect.get(), log );
-  } else if( compareClassGuid(p3_guid) ) {
-    std::unique_ptr< CscRawDataContainer_p3 > col_vect( poolReadObject< CscRawDataContainer_p3 >() );
+  } else if( compareClassGuid(token, p3_guid) ) {
+    std::unique_ptr< CscRawDataContainer_p3 > col_vect( poolReadObject< CscRawDataContainer_p3 >(token) );
     trans_cont = m_converter_p3.createTransient( col_vect.get(), log );
-  } else if( compareClassGuid(p2_guid) ) {
-    std::unique_ptr< CscRawDataContainer_p2 > col_vect( poolReadObject< CscRawDataContainer_p2 >() );
+  } else if( compareClassGuid(token, p2_guid) ) {
+    std::unique_ptr< CscRawDataContainer_p2 > col_vect( poolReadObject< CscRawDataContainer_p2 >(token) );
     trans_cont = m_converter_p2.createTransient( col_vect.get(), log );
-  } else if( compareClassGuid(p1_guid) ) {
-    std::unique_ptr< CscRawDataContainer_p1 > col_vect( poolReadObject< CscRawDataContainer_p1 >() );
+  } else if( compareClassGuid(token, p1_guid) ) {
+    std::unique_ptr< CscRawDataContainer_p1 > col_vect( poolReadObject< CscRawDataContainer_p1 >(token) );
     trans_cont = m_converter_p1.createTransient( col_vect.get(), log );
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     // old version from before TP separation
-    std::unique_ptr< COLL_vector >	col_vect( this->poolReadObject< COLL_vector >() );
+    std::unique_ptr< COLL_vector >	col_vect( this->poolReadObject< COLL_vector >(token) );
     trans_cont = createTransientFrom_p0( col_vect.get(), log );
   }
   else {

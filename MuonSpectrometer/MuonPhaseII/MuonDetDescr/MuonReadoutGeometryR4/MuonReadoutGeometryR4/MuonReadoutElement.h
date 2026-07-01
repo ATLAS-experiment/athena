@@ -205,6 +205,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /** @brief Returns whether the detector element is sensitive */
     virtual bool isSensitive() const final override { return true; }
 #endif
+    const Amg::Transform3D& localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const override final;
     /** @brief Returns the thickness in normal direction of the strip readout
      *         planes */
     virtual double thickness() const = 0;
@@ -213,7 +214,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     void releaseUnAlignedTrfs() const;
     /** @brief Construct the final aligned transformations and store them in the alignment store.
      *         Returns the number of how many transformations have been stored */
-    unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const override final;
+    unsigned int storeAlignedTransforms(ActsTrk::DetectorAlignStore& store) const override final;
     /** @brief Allow the transform cache access to the private / protected data members */
     friend class ActsTrk::TransformCacheDetEle<MuonGMR4::MuonReadoutElement>;
   protected:

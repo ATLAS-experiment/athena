@@ -79,7 +79,7 @@ PFLeptonSelector::selectElectrons(
           else
             ATH_MSG_WARNING(
               "Do not have valid WriteHandle for ElectronContainer with name: " << selectedElectronsWriteHandle.key());
-          if (true == m_storeLeptonCells)
+          if (m_storeLeptonCells)
             this->storeElectronCells(*theElectron, leptonCaloCellsWriteHandle);
         } // mediumPP
       }   // 10GeV pt cut
@@ -123,16 +123,14 @@ PFLeptonSelector::selectMuons(SG::WriteHandle<ConstDataVector<xAOD::MuonContaine
     // We only care about muons with ID tracks. Of the muon types which could be medium, only Combined have ID tracks
     // (for looser selections other muon types could have ID tracks)
 
-    xAOD::Muon::Quality muonQuality = theMuon->quality();
-    if (muonQuality <= xAOD::Muon::Medium) {
-      xAOD::Muon::MuonType muonType = theMuon->muonType();
-      if (xAOD::Muon::Combined == muonType) {
+    if (theMuon->quality() <= xAOD::Muon::Quality::Medium) {
+      if (xAOD::Muon::MuonType::Combined == theMuon->muonType()) {
         if (selectedMuonsWriteHandle.isValid())
           selectedMuonsWriteHandle->push_back(theMuon);
         else
           ATH_MSG_WARNING(
             "Do not have valid WriteHandle for MuonContainer with name: " << selectedMuonsWriteHandle.key());
-        if (true == m_storeLeptonCells)
+        if (m_storeLeptonCells)
           this->storeMuonCells(*theMuon, leptonCaloCellsWriteHandle);
       } // combined muons
     }   // Medium muons
@@ -146,13 +144,9 @@ PFLeptonSelector::storeMuonCells(const xAOD::Muon& muon,
                                  SG::WriteHandle<ConstDataVector<CaloCellContainer>> leptonCaloCellsWriteHandle) const
 {
 
-  const ElementLink<xAOD::CaloClusterContainer>& theLink = muon.clusterLink(); 
-  if (theLink.isValid()){
-    const xAOD::CaloCluster* muonCluster = *theLink;
-    if (muonCluster){
+  if (const xAOD::CaloCluster* muonCluster = muon.cluster(); muonCluster != nullptr){
       this->storeLeptonCells(*muonCluster,std::move(leptonCaloCellsWriteHandle));
-    }
-    else ATH_MSG_WARNING("This muon has an invalid pointer to its cluster ");
+    
   }
   else ATH_MSG_WARNING("This muon has an invalid element link to its cluster");
 }
@@ -194,7 +188,7 @@ PFLeptonSelector::recordLeptonContainers(
     return sc;
   }
 
-  if (true == m_storeLeptonCells) {
+  if (m_storeLeptonCells) {
 
     //record the cell container
     sc =  leptonCaloCellsWriteHandle.record(std::make_unique<ConstDataVector<CaloCellContainer> >(SG::VIEW_ELEMENTS));

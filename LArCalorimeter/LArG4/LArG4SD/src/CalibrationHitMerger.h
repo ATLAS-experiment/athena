@@ -34,7 +34,7 @@ namespace LArG4 {
 
     /** Athena algorithm's interface methods */
     virtual StatusCode  initialize() override final;
-    virtual StatusCode  execute()    override final;
+    virtual StatusCode  execute(const EventContext& ctx)    override final;
 
   private:
     class LessHit {

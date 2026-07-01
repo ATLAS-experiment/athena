@@ -27,7 +27,6 @@
 
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/EventData/ParticleHypothesis.hpp"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
@@ -57,6 +56,8 @@
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 static double surfaceThickness = 0.1;
 
@@ -404,11 +405,9 @@ void AscObj_TrackState::addMeasurementToShapes(SoSeparator*& shape_simple,
     }
 
     // Handle measurements
-    auto sl = m_trackstate.getUncalibratedSourceLink()
-                  .get<ActsTrk::ATLASUncalibSourceLink>();
+    auto sl = ActsTrk::detail::xAODUncalibMeasCalibrator::unpack(m_trackstate.getUncalibratedSourceLink());
     assert(sl != nullptr);
-    const xAOD::UncalibratedMeasurement& uncalibMeas =
-        (ActsTrk::getUncalibratedMeasurement(sl));
+    const xAOD::UncalibratedMeasurement& uncalibMeas = *sl;
 
     const xAOD::UncalibMeasType measurementType = uncalibMeas.type();
 

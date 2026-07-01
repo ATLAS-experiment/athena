@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelId.h"
@@ -45,7 +45,7 @@ int TGCChannelId::getGasGap() const {
         getLayer() == 8) {
         return 2;
     }
-    if (getLayer() == 2) {
+    if (getLayer() == 2 || getLayer() == 9) {   // getLayer() == 9 is only possible for Run 4+
         return 3;
     }
     return -1;
@@ -58,20 +58,16 @@ void TGCChannelId::setChannelIdType(ChannelIdType idtype) {
 void TGCChannelId::setLayer(int v_layer) {
     m_layer = v_layer;
     if (m_layer >= 0 && m_layer <= 2) {
-        setMultipletType(Triplet);
-        setStation(0);
+        setStation(StationType::M1);
     }
     if (m_layer >= 3 && m_layer <= 4) {
-        setMultipletType(Doublet);
-        setStation(1);
+        setStation(StationType::M2);
     }
     if (m_layer >= 5 && m_layer <= 6) {
-        setMultipletType(Doublet);
-        setStation(2);
+        setStation(StationType::M3);
     }
-    if (m_layer >= 7 && m_layer <= 8) {
-        setMultipletType(Inner);
-        setStation(3);
+    if (m_layer >= 7 && m_layer <= 9) {
+        setStation(StationType::M4);
         if (m_sector != -1) {
             m_octant = m_sector / 3;
         }
@@ -84,6 +80,43 @@ void TGCChannelId::setBlock(int block) {
 
 void TGCChannelId::setChannel(int channel) {
     m_channel = channel;
+}
+
+void TGCChannelId::setSignalAndLayer(TGCId::SignalType signal, int layer) {
+    m_signal = signal;
+    m_layer = layer;
+   if (m_layer >= 0 && m_layer <= 2) {
+        setStation(StationType::M1);
+        if (m_signal == SignalType::Wire) {
+            m_module = ModuleType::WT;
+        } else if (m_signal == SignalType::Strip) {
+            m_module = ModuleType::ST;
+        }
+    } else if (m_layer >= 3 && m_layer <= 4) {
+        setStation(StationType::M2);
+        if (m_signal == SignalType::Wire) {
+            m_module = ModuleType::WD;
+        } else if (m_signal == SignalType::Strip) {
+            m_module = ModuleType::SD;
+        }
+    } else if (m_layer >= 5 && m_layer <= 6) {
+        setStation(StationType::M3);
+        if (m_signal == SignalType::Wire) {
+            m_module = ModuleType::WD;
+        } else if (m_signal == SignalType::Strip) {
+            m_module = ModuleType::SD;
+        }
+    } else if (m_layer >= 7 && m_layer <= 9) {
+        setStation(StationType::M4);
+        if (m_signal == SignalType::Wire) {
+            m_module = ModuleType::WI;
+        } else if (m_signal == SignalType::Strip) {
+            m_module = ModuleType::SI;
+        }
+        if (m_sector != -1) {
+            m_octant = m_sector / 3;
+        }
+    }
 }
 
 bool TGCChannelId::isBackward() const {

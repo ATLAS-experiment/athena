@@ -10,6 +10,8 @@
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetIdentifier/PixelID.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODTracking/VertexContainer.h"
 
 // ACTS CORE
 #include "Acts/EventData/SeedContainer2.hpp"
@@ -32,7 +34,7 @@ class GridTripletSeedingTool
 
   virtual StatusCode initialize() override;
 
-  StatusCode createSeeds2(const EventContext& ctx,
+  StatusCode createSeeds(const EventContext& ctx,
                           const std::vector<const xAOD::SpacePointContainer*>&
                               spacePointCollections,
                           const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
@@ -118,6 +120,12 @@ class GridTripletSeedingTool
   Gaudi::Property<float> m_collisionRegionMax{
       this, "collisionRegionMax", 200. * Acts::UnitConstants::mm,
       "limiting location of collision region in z"};
+  Gaudi::Property<bool> m_useHVCollisionRegion{
+      this, "useHVCollisionRegion", false, 
+      "restrict collision region by Hough vertex position"};
+  Gaudi::Property<float> m_hvCollisionRegionTolerance{
+      this, "hvCollisionRegionTolerance", 10. * Acts::UnitConstants::mm,
+      "size of collision region when using Hough vertex"};  
   Gaudi::Property<float> m_sigmaScattering{
       this, "sigmaScattering", 2.,
       "how many sigmas of scattering angle should be considered"};
@@ -225,6 +233,11 @@ class GridTripletSeedingTool
       this, "toleranceParam", 1.1 * Acts::UnitConstants::mm,
       "tolerance parameter used to check the compatibility of SPs coordinates "
       "in xyz"};
+  Gaudi::Property<float> m_maxStripDeltaCotTheta{
+      this, "maxStripDeltaCotTheta", 1e10f,
+      "maximum allowed |cotTheta_bottom - cotTheta_top| pre-filter for strip "
+      "triplets before expensive coordinate checks"};
+
   Gaudi::Property<float> m_phiMin{this, "phiMin", -std::numbers::pi_v<float>,
                                   ""};
   Gaudi::Property<float> m_phiMax{this, "phiMax", std::numbers::pi_v<float>,
@@ -272,6 +285,14 @@ class GridTripletSeedingTool
       this, "deltaInvHelixDiameter", 0.00003 * 1. / Acts::UnitConstants::mm,
       "the allowed delta between two inverted seed radii for them to be "
       "considered compatible"};
+  Gaudi::Property<float> m_absDeltaEtaWeightFactor{
+      this, "absDeltaEtaWeightFactor", 0.,
+      "weight factor for abs(delta-eta) penalty between seed direction and "
+      "beamspot-to-PCA direction (0 = disabled, typical LRT value: 10)"};
+  Gaudi::Property<float> m_absDeltaEtaMinImpact{
+      this, "absDeltaEtaMinImpact", 2. * Acts::UnitConstants::mm,
+      "minimum impact parameter to apply abs(delta-eta) weight"};
+
 
   // Properties to set other objects used in seeding algorithm
   Gaudi::Property<std::vector<std::pair<int, int>>> m_zBinNeighborsTop{
@@ -360,6 +381,8 @@ class GridTripletSeedingTool
   std::pair<float, float> retrieveRadiusRangeForMiddle(
       const Acts::ConstSpacePointProxy2& spM,
       const Acts::Range1D<float>& rMiddleSpRange) const;
+
+  SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{this, "inputHoughVtx", "", "input vertex container"};
 };
 
 }  // namespace ActsTrk

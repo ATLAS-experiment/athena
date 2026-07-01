@@ -21,7 +21,7 @@
 class PLR_ID final: public PixelID
 {
 public:
-  PLR_ID();
+  PLR_ID(const std::string & name = "PLR_ID", const std::string & group = "pixel");
    ///This is an PLR_ID helper
   AtlasDetectorID::HelperType helper() const override final{
     return AtlasDetectorID::HelperType::PLR;

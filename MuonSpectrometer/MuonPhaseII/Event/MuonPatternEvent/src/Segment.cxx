@@ -26,8 +26,10 @@ namespace MuonR4{
                 case xAOD::UncalibMeasType::Other:
                 case xAOD::UncalibMeasType::RpcStripType:
                 case xAOD::UncalibMeasType::TgcStripType:
-                    m_summary.nEtaTrigHits += meas->measuresEta();
-                    m_summary.nPhiHits += meas->measuresPhi();
+                    if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
+                        m_summary.nPhiHits += meas->measuresPhi();
+                        m_summary.nEtaTrigHits += meas->measuresEta();
+                    }
                     break;
                 case xAOD::UncalibMeasType::sTgcStripType: {
                     auto* prd = static_cast<const xAOD::sTgcMeasurement*>(meas->spacePoint()->primaryMeasurement());
@@ -38,12 +40,20 @@ namespace MuonR4{
                             m_summary.tech = meas->type();
                             break;
                         case sTgcIdHelper::sTgcChannelTypes::Pad:
-                            ++m_summary.nEtaTrigHits;
-                            ++m_summary.nPhiHits;
+                            if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
+                                ++m_summary.nEtaTrigHits;
+                                ++m_summary.nPhiHits;
+                            }
                             break;
                         case sTgcIdHelper::sTgcChannelTypes::Wire:
-                            ++m_summary.nPhiHits;
+                            if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
+                                ++m_summary.nPhiHits;
+                            }
                             break;
+                    }
+                    if (meas->spacePoint()->secondaryMeasurement() && 
+                        meas->fitState() == CalibratedSpacePoint::State::Valid) {
+                        ++m_summary.nPhiHits;
                     }
                 }
                 default:

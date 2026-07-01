@@ -49,7 +49,7 @@ public:
   
 protected:
   virtual TrigMuonClusterFeatureContainer_PERS *createPersistent( TrigMuonClusterFeatureContainer *transObj);
-  virtual TrigMuonClusterFeatureContainer      *createTransient();
+  virtual TrigMuonClusterFeatureContainer      *createTransient(const Token* token);
   
  
  private:

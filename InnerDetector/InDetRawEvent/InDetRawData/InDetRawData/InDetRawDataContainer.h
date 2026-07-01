@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -42,15 +42,16 @@ public:
   virtual ~InDetRawDataContainer();
 
    /** return class ID */
-   static const CLID& classID() 
+   static CLID classID()
    {
      return ClassID_traits< InDetRawDataContainer <CollectionT> > ::ID();
    }
 
    /** return class ID */
-   virtual const CLID& clID() const
+   virtual const CLID& clID() const override
     {
-      return classID();
+      static const CLID cid = classID();
+      return cid;
     }
 
   ///////////////////////////////////////////////////////////////////

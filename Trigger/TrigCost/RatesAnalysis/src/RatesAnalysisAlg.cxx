@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RatesAnalysis includes
@@ -386,6 +386,7 @@ StatusCode RatesAnalysisAlg::initialize() {
   }
 
   ATH_CHECK( m_enhancedBiasRatesTool.retrieve() ); 
+  ATH_CHECK( m_additionalWeights.retrieve() );
 
   ATH_CHECK( m_eventInfoKey.initialize());
   ATH_CHECK( m_truthHS_jets_RHKey.initialize( m_enhancedBiasRatesTool->isMC() && m_doMultiSliceDiJet));
@@ -631,12 +632,22 @@ StatusCode RatesAnalysisAlg::pass_HstpFilter(bool &pass){
   return StatusCode::SUCCESS;
 }
 
-StatusCode RatesAnalysisAlg::execute() {  
+StatusCode RatesAnalysisAlg::execute(const EventContext& ctx) {  
   ATH_MSG_VERBOSE("Executing " << name() << " on event " << m_eventCounter << "...");
   if (m_eventCounter++ == 0) { // First time in execute loop - cannot access TDT before this.
     ATH_CHECK( populateTriggers() );
+    if (!m_configSvc.empty() && m_configSvc.isValid()) {
+      m_metadataMasterKey = m_configSvc->masterKey();
+      m_metadataHLTPSK    = m_configSvc->hltPrescaleKey();
+      m_metadataL1PSK     = m_configSvc->lvl1PrescaleKey();
+
+      ATH_MSG_INFO("Cached metadata trigger keys: SMK="
+                   << m_metadataMasterKey
+                   << " L1PSK=" << m_metadataL1PSK
+                   << " HLTPSK=" << m_metadataHLTPSK);
+      m_metadataKeysCached = true;
+    }    
   }
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Get event characteristics
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
   ATH_CHECK( eventInfo.isValid() );
@@ -663,14 +674,23 @@ StatusCode RatesAnalysisAlg::execute() {
     return StatusCode::SUCCESS;
   }
 
-  const double weightedEvents = (isMC ? eventInfo->mcEventWeight() : m_weightingValues.m_enhancedBiasWeight);
-  m_weightedEventCounter += weightedEvents;
+  // Apply any additional weights multiplicatively if required
+  if (!m_additionalWeights.empty()) {
+    for (const auto& addWeight : m_additionalWeights) {
+      double wt = 1.0;
+      ATH_CHECK(addWeight->getValue(wt));
+      ATH_MSG_DEBUG("Additional weight from [" << addWeight->name() << "], value = " << wt);
+      m_weightingValues.m_enhancedBiasWeight *= wt;
+    }
+  }
+
+  m_weightedEventCounter += m_weightingValues.m_enhancedBiasWeight;
 
   double ratesDenominator = 0.0;
   if (m_doMultiSliceDiJet) {
-    ratesDenominator = eventInfo->mcEventWeight(); // In multi-slice mode we only normalize to the weighted number of events
+    ratesDenominator = m_weightingValues.m_enhancedBiasWeight; // In multi-slice mode we only normalize to the weighted number of events
   } else {
-    ratesDenominator = m_weightingValues.m_eventLiveTime * (isMC ? eventInfo->mcEventWeight() : 1.0); // Otherwise, we need to keep track of elapsed walltime as well
+    ratesDenominator = m_weightingValues.m_eventLiveTime; // Otherwise, we need to keep track of elapsed walltime as well
   }
   m_ratesDenominator += ratesDenominator;
 
@@ -678,7 +698,7 @@ StatusCode RatesAnalysisAlg::execute() {
     m_bcidHist->Fill(eventInfo->bcid(), m_weightingValues.m_enhancedBiasWeight);
     m_scalingHist->Fill(0.5, ratesDenominator); // Walltime
     m_scalingHist->Fill(1.5, 1.); // Total events
-    m_scalingHist->Fill(2.5, weightedEvents ); // Total weighted events
+    m_scalingHist->Fill(2.5, m_weightingValues.m_enhancedBiasWeight ); // Total weighted events
   }
 
   // HSTP filter check
@@ -710,7 +730,7 @@ StatusCode RatesAnalysisAlg::execute() {
     ATH_MSG_INFO( "Event " << m_eventCounter << " " << m_weightingValues.print() << " currentWallTime:" << m_ratesDenominator );
   }
 
-  setFilterPassed(true); //if got here, assume that means algorithm passed
+  setFilterPassed(true, ctx); //if got here, assume that means algorithm passed
   return StatusCode::SUCCESS;
 }
 
@@ -925,6 +945,13 @@ void RatesAnalysisAlg::writeMetadata() {
   if(!m_enhancedBiasRatesTool->isMC()){
   	bunchGroups = m_enhancedBiasRatesTool->getBunchGroups();
   }
+
+  if (m_metadataKeysCached) {
+    masterKey       = m_metadataMasterKey;
+    hltPrescaleKey  = m_metadataHLTPSK;
+    lvl1PrescaleKey = m_metadataL1PSK;
+  }
+
   if(!m_configSvc.empty() && m_configSvc.isValid() ){
     if  ((bunchGroups.size() == 0 || std::all_of(bunchGroups.begin(), bunchGroups.end(), [](int i) { return i==0; }) ) && (!m_enhancedBiasRatesTool->isMC())) {
       const TrigConf::L1BunchGroupSet& bgs = m_configSvc->l1BunchGroupSet(Gaudi::Hive::currentContext());
@@ -932,9 +959,11 @@ void RatesAnalysisAlg::writeMetadata() {
         bunchGroups.push_back(bgs.getBunchGroup(i)->size());
       }
     }
-    masterKey = m_configSvc->masterKey();
-    hltPrescaleKey = m_configSvc->hltPrescaleKey();
-    lvl1PrescaleKey = m_configSvc->lvl1PrescaleKey();
+    if (!m_metadataKeysCached){
+      masterKey = m_configSvc->masterKey();
+      hltPrescaleKey = m_configSvc->hltPrescaleKey();
+      lvl1PrescaleKey = m_configSvc->lvl1PrescaleKey();
+    }
   }
 
 	  

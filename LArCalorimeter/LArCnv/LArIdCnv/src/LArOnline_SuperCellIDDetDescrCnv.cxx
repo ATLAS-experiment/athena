@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdCnv/LArOnline_SuperCellIDDetDescrCnv.h"
@@ -59,7 +59,7 @@ LArOnline_SuperCellIDDetDescrCnv::storageType()
 }
 
 //--------------------------------------------------------------------
-const CLID& 
+CLID
 LArOnline_SuperCellIDDetDescrCnv::classID() { 
     return ClassID_traits<LArOnline_SuperCellID>::ID(); 
 }

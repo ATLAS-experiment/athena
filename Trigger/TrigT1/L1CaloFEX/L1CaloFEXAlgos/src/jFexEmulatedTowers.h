@@ -61,6 +61,8 @@ class jFexEmulatedTowers : public AthReentrantAlgorithm{
         Gaudi::Property<bool> m_apply_masking {this, "SCellMasking", true, "Applies masking. Only use for data"};
         Gaudi::Property<bool> m_isDATA        {this, "isDATA"      , true, "Tells the algorithm if it is data. Used for xAOD::TriggerTower WARNING due to the 0 supresion"};
         Gaudi::Property<bool> m_doThinning    {this, "DoThinning"  , true, "Remove overlapped towers. Only FPGA Core region is saved"};
+        Gaudi::Property<bool> m_applyTimingCut {this, "ApplyTimingCut", false, "If true, will apply a timing cut to supercells in MC (but not in HEC). In data this property has no effect"};
+        Gaudi::Property<bool> m_applyTimingCutAll {this, "ApplyTimingCutAll", false, "If true, will apply a timing cut to supercells in MC. In data this property has no effect"};
         
         //property for jFEX mapping
         Gaudi::Property<std::string> m_jFEX2Scellmapping {this, "jFEX2SCmapping"  , PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jfex_SCID.txt")  , "Text file to convert from simulation ID to SuperCell Identifier"};

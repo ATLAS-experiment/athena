@@ -15,7 +15,7 @@ StatusCode LArConditionsMergerAlg<T,T1>::initialize() {
 
 
 template<class T, class T1>
-StatusCode LArConditionsMergerAlg<T,T1>::execute() {
+StatusCode LArConditionsMergerAlg<T,T1>::execute(const EventContext& ctx) {
 	   
   if (m_readKeys.empty()) {
      if(m_detStoreKeys.empty()) return StatusCode::FAILURE;
@@ -48,7 +48,7 @@ StatusCode LArConditionsMergerAlg<T,T1>::execute() {
      ATH_CHECK(out->initialize());
   
      for (const auto & key : m_readKeys) {
-       SG::ReadCondHandle<T> handle{key};
+       SG::ReadCondHandle<T> handle{key, ctx};
        const T* obj=*handle;
        bool stat=out->merge(*obj);
        if (stat) {

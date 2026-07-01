@@ -1,19 +1,18 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
   This is a virtual class to represent loader of any type of constituents.
   It defines the interface for loading constituents from a jet 
   and extracting their features for the NN evaluation.
 */
 
-#ifndef CONTITUENTS_LOADER_H
-#define CONTITUENTS_LOADER_H
+#ifndef CONSTITUENTS_LOADER_H
+#define CONSTITUENTS_LOADER_H
 
 // local includes
 #include "FlavorTagInference/FlipTagEnums.h"
 #include "FlavorTagInference/SaltModel.h"
 #include "FlavorTagInference/FTagDataDependencyNames.h"
-#include "FlavorTagInference/StringUtils.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -22,7 +21,7 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <tuple>
+#include <limits>
 
 namespace FlavorTagInference {
 
@@ -42,6 +41,7 @@ namespace FlavorTagInference {
         DIPS_LOOSE_202102,
         LOOSE_202102_NOIP,
         R22_DEFAULT,
+        R22_BJR,
         R22_LOOSE,
         TAUTRACK_CLASSIFIED
     };
@@ -52,13 +52,16 @@ namespace FlavorTagInference {
         ELECTRON,
         TAUTRACK,
         TAUCLUSTER,
+        MUON,
+        CALO_CLUSTER,
+        TOWER,
         UNKNOWN
     };
 
     struct InputVariableConfig {
         std::string name;
-        ConstituentsEDMType type;
-        bool flip_sign;
+        ConstituentsEDMType type {};
+        bool flip_sign = false;
     };
 
     struct ConstituentsInputConfig {
@@ -85,7 +88,8 @@ namespace FlavorTagInference {
             {
             };
             virtual ~IConstituentsLoader() = default;
-            virtual std::tuple<Inputs, std::vector<const xAOD::IParticle*>> getData(const xAOD::IParticle& jet) const = 0;
+            virtual Inputs getData(const xAOD::IParticle& jet) const = 0;
+            virtual void setDefaults(const xAOD::IParticle&) const {}
             virtual const FTagDataDependencyNames& getDependencies() const = 0;
             virtual const std::set<std::string>& getUsedRemap() const = 0;
             virtual const std::string& getName() const = 0;

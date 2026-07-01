@@ -1,18 +1,23 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#include <TSystem.h>
-#include <TFile.h>
-#include "xAODRootAccess/tools/Message.h"
-#include "xAODRootAccess/Init.h"
-#include "xAODRootAccess/TEvent.h"
-#include "xAODCore/ShallowCopy.h"
-#include "AthContainers/ConstAccessor.h"
 
 #include <ZdcNtuple/ZdcNtuple.h>
 #include <ZdcUtils/ZdcEventInfo.h>
 #include <ZdcConditions/ZdcInjPulserAmpMap.h>
+
+#include "xAODRootAccess/tools/Message.h"
+#include "xAODRootAccess/Init.h"
+#include "xAODRootAccess/TEvent.h"
+#include "xAODCore/ShallowCopy.h"
+
+#include "AthContainers/ConstAccessor.h"
+
+#include <TTree.h>
+#include <TH1.h>
+#include <TSystem.h>
+#include <TFile.h>
+
 
 // this is needed to distribute the algorithm to the workers
 //ClassImp(ZdcNtuple)
@@ -50,7 +55,7 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("zdcLaser",  zdcLaser = false, "Run 2 ZDC Laser");
   declareProperty("zdcOnly", zdcOnly = false, "comment");
   declareProperty("zdcLowGainMode",  zdcLowGainMode = 0, "comment");
-
+  declareProperty("gapPtMin", m_gapPtMin  = 200, "minimum pT of cluster used in gaps");
   declareProperty("flipDelay",  flipDelay = 0, "comment");
   declareProperty("reprocZdc",  reprocZdc = 0, "comment");
   declareProperty("auxSuffix",  auxSuffix = "", "comment");
@@ -58,7 +63,8 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("lhcf2022", lhcf2022 = false,"LHCf2022 general config");
   declareProperty("lhcf2022afp", lhcf2022afp = false,"LHCf2022 AFP-specific config");
   declareProperty("lhcf2022zdc", lhcf2022zdc = false,"LHCf2022 ZDC-specific config");
-  declareProperty("pbpb2023", pbpb2023 = true, "PbPb2023 config");
+  declareProperty("pbpb2023", pbpb2023 = false, "PbPb2023 config");
+  declareProperty("oo2025", oo2025 = false, "OO and NeNe 2025 config");
   declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
   declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
   declareProperty("enableZDC", enableZDC = true);
@@ -67,6 +73,8 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("enableCentroid",enableCentroid = false,"enable reading centroid decorations (also requires enableRPD)");
 
   declareProperty( "TrackSelectionTool", m_selTool );
+
+  trackLimitReject = false;
 
   m_zdcAnalysisTool.declarePropertyFor (this, "zdcAnalysisTool");
   
@@ -106,7 +114,9 @@ StatusCode ZdcNtuple :: initialize ()
 
   if (enableOutputTree)
   {
-
+    h_TCSigCut = new TH1D("_gapSigCut_", "", 98, -4.9, 4.9);
+    h_TCSigCut->SetContent(&m_gapThresholds[0]);
+    
     ANA_CHECK( book(TTree("zdcTree", "ZDC Tree")));
     m_outputTree = tree( "zdcTree" );
 
@@ -182,11 +192,13 @@ StatusCode ZdcNtuple :: initialize ()
 	m_outputTree->Branch("zdc_ZdcLucrodTriggerSideAmpLG",&t_ZdcLucrodTriggerSideAmpLG,"zdc_ZdcLucrodTriggerSideAmpLG[2]/S");
 	
 	m_outputTree->Branch("zdc_ZdcModuleAmp", &t_ZdcModuleAmp, "zdc_ZdcModuleAmp[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleAmpUncorr", &t_ZdcModuleAmpUncorr, "zdc_ZdcModuleAmpUncorr[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleTime", &t_ZdcModuleTime, "zdc_ZdcModuleTime[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleFitAmp", &t_ZdcModuleFitAmp, "zdc_ZdcModuleFitAmp[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleFitT0", &t_ZdcModuleFitT0, "zdc_ZdcModuleFitT0[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleStatus", &t_ZdcModuleStatus, "zdc_ZdcModuleStatus[2][4]/i");
 	m_outputTree->Branch("zdc_ZdcModuleChisq", &t_ZdcModuleChisq, "zdc_ZdcModuleChisq[2][4]/F");
+	m_outputTree->Branch("zdc_ZdcModuleChisqRatio", &t_ZdcModuleChisqRatio, "zdc_ZdcModuleChisqRatio[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleCalibAmp", &t_ZdcModuleCalibAmp, "zdc_ZdcModuleCalibAmp[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleCalibTime", &t_ZdcModuleCalibTime, "zdc_ZdcModuleCalibTime[2][4]/F");
 	m_outputTree->Branch("zdc_ZdcModuleBkgdMaxFraction", &t_ZdcModuleBkgdMaxFraction, "zdc_ZdcModuleBkgdMaxFraction[2][4]/F");
@@ -514,6 +526,12 @@ StatusCode ZdcNtuple :: initialize ()
       {
 	ANA_CHECK(m_zdcAnalysisTool.setProperty("Configuration", "PbPb2015"));
       }
+    else if (zdcConfig == "OONeNe2025")
+      {	
+	ANA_CHECK(m_zdcAnalysisTool.setProperty("DoTrigEff", false)); // for now
+	ANA_CHECK(m_zdcAnalysisTool.setProperty("DoTimeCalib", true)); // for now
+	ANA_CHECK(m_zdcAnalysisTool.setProperty("Configuration", "OONeNe2025"));
+      }
     
     if (flipDelay)
       ANA_MSG_INFO("FLIP ZDC DELAY IN EM MODULES");
@@ -558,20 +576,6 @@ StatusCode ZdcNtuple :: execute ()
   	processVInjInfo();
   }
 
-  //tracks used to go here
-
-  m_trackParticles = 0;
-
-  if ((!(zdcCalib || zdcLaser || zdcOnly || zdcInj)) && enableID)
-  {
-    ANA_MSG_DEBUG("Trying to extract InDetTrackParticles from evtStore()=" << evtStore());
-    ANA_CHECK(evtStore()->retrieve( m_trackParticles, "InDetTrackParticles") );
-    size_t n = m_trackParticles->size();
-    ANA_MSG_DEBUG("Done w/ extracting InDetTrackParticles with size = " << n);
-
-    if (n > trackLimit && trackLimitReject)  return StatusCode::SUCCESS;
-  }
-
   bool passTrigger = true;
   m_trigDecision = 0;
   if (enableTrigger)
@@ -579,6 +583,13 @@ StatusCode ZdcNtuple :: execute ()
     ANA_CHECK(evtStore()->retrieve( m_trigDecision, "xTrigDecision"));
     if (!m_setupTrigHist) setupTriggerHistos();
     passTrigger = processTriggerDecision();
+  }
+
+  // if trigger enabled, only write out events which pass one of them, unless using MC
+  //
+  if (enableTrigger && !passTrigger && !m_isMC && writeOnlyTriggers) {
+    ANA_MSG_DEBUG ("Event failed trigger");
+    return StatusCode::SUCCESS;
   }
 
   if (reprocZdc){
@@ -592,6 +603,20 @@ StatusCode ZdcNtuple :: execute ()
 
   if(m_isMC){
     processMCEventCollection();
+  }
+
+  //tracks used to go here
+
+  m_trackParticles = 0;
+
+  if ((!(zdcCalib || zdcLaser || zdcOnly || zdcInj)) && enableID)
+  {
+    ANA_MSG_DEBUG("Trying to extract InDetTrackParticles from evtStore()=" << evtStore());
+    ANA_CHECK(evtStore()->retrieve( m_trackParticles, "InDetTrackParticles") );
+    size_t n = m_trackParticles->size();
+    ANA_MSG_DEBUG("Done w/ extracting InDetTrackParticles with size = " << n);
+
+    if (n > trackLimit && trackLimitReject)  return StatusCode::SUCCESS;
   }
 
   if (!(zdcCalib || zdcLaser || zdcOnly || zdcInj))
@@ -629,18 +654,13 @@ StatusCode ZdcNtuple :: execute ()
     }
 
     // Gaps will require some evaluation of Run 3 performance of the clusters
-    //processGaps();
+    processGaps();
 
     if( lhcf2022||lhcf2022zdc||lhcf2022afp ){
       ANA_CHECK(evtStore()->retrieve( m_afpProtons, "AFPProtonContainer"));
       processProtons();
     }
   }
-
-  // if trigger enabled, only write out events which pass one of them, unless using MC
-
-  if (enableTrigger && !passTrigger && !m_isMC && writeOnlyTriggers) return StatusCode::SUCCESS;
-
 
   if (enableOutputTree)
   {
@@ -682,9 +702,10 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcTruthEscaped[iside] = 0;
       for (int imod = 0; imod < 4; imod++)
 	{
-	  t_ZdcModuleAmp[iside][imod] = 0; t_ZdcModuleTime[iside][imod] = 0; t_ZdcModuleStatus[iside][imod] = 0;
+	  t_ZdcModuleAmp[iside][imod] = 0; t_ZdcModuleAmpUncorr[iside][imod] = 0;
+	  t_ZdcModuleTime[iside][imod] = 0; t_ZdcModuleStatus[iside][imod] = 0;
 	  
-	  t_ZdcModuleCalibAmp[iside][imod] = 0; t_ZdcModuleCalibTime[iside][imod] = 0; t_ZdcModuleChisq[iside][imod] = 0; t_ZdcModuleFitAmp[iside][imod] = 0;
+	  t_ZdcModuleCalibAmp[iside][imod] = 0; t_ZdcModuleCalibTime[iside][imod] = 0; t_ZdcModuleChisq[iside][imod] = 0; t_ZdcModuleChisqRatio[iside][imod] = 0; t_ZdcModuleFitAmp[iside][imod] = 0;
 	  t_ZdcModuleFitT0[iside][imod] = 0; t_ZdcModuleBkgdMaxFraction[iside][imod] = 0; t_ZdcModuleAmpError[iside][imod] = 0;
 	  t_ZdcModuleMinDeriv2nd[iside][imod] = 0; t_ZdcModulePresample[iside][imod] = 0; t_ZdcModulePreSampleAmp[iside][imod] = 0;
 	  t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcLucrodTriggerAmpLG[iside][imod] = 0;
@@ -805,8 +826,10 @@ void ZdcNtuple::processZdcNtupleFromModules()
   static const SG::ConstAccessor<unsigned int> nPhotonsAcc("nPhotons" + auxSuffix);
   static const SG::ConstAccessor<float> CalibTimeAcc("CalibTime" + auxSuffix);
   static const SG::ConstAccessor<float> AmplitudeAcc("Amplitude" + auxSuffix);
+  static const SG::ConstAccessor<float> AmplitudeNoNonLinAcc("AmpNoNonLin" + auxSuffix);
   static const SG::ConstAccessor<float> TimeAcc("Time" + auxSuffix);
   static const SG::ConstAccessor<float> ChisqAcc("Chisq" + auxSuffix);
+  static const SG::ConstAccessor<float> ChisqRatioAcc("ChisqRatio" + auxSuffix);
   static const SG::ConstAccessor<float> FitAmpAcc("FitAmp" + auxSuffix);
   static const SG::ConstAccessor<float> FitAmpErrorAcc("FitAmpError" + auxSuffix);
   static const SG::ConstAccessor<float> FitT0Acc("FitT0" + auxSuffix);
@@ -898,9 +921,10 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    {
 	      t_ZdcEnergy[iside] = CalibEnergyAcc(*zdcSum);
 	      t_ZdcEnergyErr[iside] = CalibEnergyErrAcc(*zdcSum);
-	      t_ZdcNLEnergy[iside] = NLCalibEnergyAcc(*zdcSum);
-	      t_ZdcNLEnergyErr[iside] = NLCalibEnergyErrAcc(*zdcSum);
-	      
+	      if (NLCalibEnergyAcc.isAvailable(*zdcSum)) {
+		t_ZdcNLEnergy[iside] = NLCalibEnergyAcc(*zdcSum);
+		t_ZdcNLEnergyErr[iside] = NLCalibEnergyErrAcc(*zdcSum);
+	      }
 	      t_ZdcAmp[iside] = UncalibSumAcc(*zdcSum);
 	      t_ZdcAmpErr[iside] = UncalibSumErrAcc(*zdcSum);
 	      if (LucrodTriggerSideAmpAcc.isAvailable(*zdcSum))
@@ -989,9 +1013,11 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	      if (t_ZdcModuleAmp[iside][imod] != 0.)
 		Warning("processZdcNtupleFromModules", "overwriting side %d module %d!", iside, imod);
 	      t_ZdcModuleAmp[iside][imod] = AmplitudeAcc(*zdcMod);
+	      t_ZdcModuleAmpUncorr[iside][imod] = AmplitudeNoNonLinAcc(*zdcMod);
 	      t_ZdcModuleTime[iside][imod] = TimeAcc(*zdcMod);
 	      
 	      t_ZdcModuleChisq[iside][imod] = ChisqAcc(*zdcMod);
+	      t_ZdcModuleChisqRatio[iside][imod] = ChisqRatioAcc(*zdcMod);
 	      t_ZdcModuleFitAmp[iside][imod] = FitAmpAcc(*zdcMod);
 	      t_ZdcModuleAmpError[iside][imod] = FitAmpErrorAcc(*zdcMod);
 	      t_ZdcModuleFitT0[iside][imod] = FitT0Acc(*zdcMod);
@@ -1122,7 +1148,7 @@ void ZdcNtuple::processMCEventCollection(){
   /******************************************
    * Get the McEventCollection (input)
    ******************************************/
-  SG::ReadHandle<McEventCollection> mcEventCollection (m_mcEventCollectionName, getContext());
+  SG::ReadHandle<McEventCollection> mcEventCollection (m_mcEventCollectionName);
   if (!mcEventCollection.isValid()){
     ANA_MSG_ERROR("Could not retrieve HepMC with key:" << m_mcEventCollectionName.key());
     return;
@@ -1150,16 +1176,8 @@ void ZdcNtuple::processMCEventCollection(){
   ******************************************/  
   for (unsigned int cntr = 0; cntr < mcEventCollection->size(); ++cntr){
     const HepMC::GenEvent *genEvt = (*mcEventCollection)[cntr];
-#ifdef HEPMC3
     for (const auto &vertex : genEvt->vertices()){
       for (const auto &particle : vertex->particles_in()){
-#else
-    for (const auto &vertex : genEvt->vertex_range()){
-      for (auto ip = vertex->particles_in_const_begin();
-           ip != vertex->particles_in_const_end();
-           ++ip) {
-        auto particle = *ip;
-#endif
         t_ZdcTruthParticlePosx.push_back(vertex->position().x());
         t_ZdcTruthParticlePosy.push_back(vertex->position().y());
         t_ZdcTruthParticlePosz.push_back(vertex->position().z());
@@ -1693,7 +1711,7 @@ void ZdcNtuple::processGaps()
     float sig = cl->getMomentValue(xAOD::CaloCluster::CELL_SIGNIFICANCE);
     int cl_cell_sig_samp = static_cast<int>(cl->getMomentValue(xAOD::CaloCluster::CELL_SIG_SAMPLING));
 
-    ANA_MSG_VERBOSE ("gapclus: etabin " << etabin << " sig_cut=" << sig_cut << " sig=" << sig << " samp=" << cl_cell_sig_samp);
+    //    ANA_MSG_VERBOSE ("gapclus: etabin " << etabin << " sig_cut=" << sig_cut << " sig=" << sig << " samp=" << cl_cell_sig_samp);
 
     if (sig < sig_cut) continue;
 
@@ -1812,21 +1830,23 @@ void ZdcNtuple::processMBTS()
       int iside = (side == 0) ? 1 : 0; // code maps side 1 into first 16 bits and side -1 into second set
 
       ANA_MSG_VERBOSE ("imbts=" << imbts << " isInner=" << isInner << " iside=" << iside << " index=" << index << " e=" << energies.at(imbts) << " t=" << times.at(imbts));
-      if (isInner)
-      {
-        t_T2mbts_in_e[iside][index] = energies.at(imbts);
-        t_T2mbts_in_t[iside][index] = times.at(imbts);
-        if (TMath::Abs(times.at(imbts)) < 12.0 && energies.at(imbts) > 40 / 222.)
-        {
-          if (iside == 0) t_T2mbts_countCin++;
-          if (iside == 1) t_T2mbts_countAin++;
+      if (iside < 2 and index < 8){ //indices in range?
+        if (isInner)
+        { 
+          t_T2mbts_in_e[iside][index] = energies.at(imbts);
+          t_T2mbts_in_t[iside][index] = times.at(imbts);
+          if (TMath::Abs(times.at(imbts)) < 12.0 && energies.at(imbts) > 40 / 222.)
+          {
+            if (iside == 0) t_T2mbts_countCin++;
+            if (iside == 1) t_T2mbts_countAin++;
+          }
         }
-      }
-      else
-      {
-        t_T2mbts_out_e[iside][index] = energies.at(imbts);
-        t_T2mbts_out_t[iside][index] = times.at(imbts);
-      }
+        else
+        {
+          t_T2mbts_out_e[iside][index] = energies.at(imbts);
+          t_T2mbts_out_t[iside][index] = times.at(imbts);
+        }
+      } //indices check
     }
   }
 
@@ -2025,24 +2045,24 @@ void ZdcNtuple::setupTriggerHistos()
       {
 	if (lhcf2022)
 	  {
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+	    triggers.push_back("L1_LHCF");
+	    triggers.push_back("L1_ZDC_OR");
 	  }
 
 	if (pbpb2023)
 	  {
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_A_UNPAIRED_NONISO");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_EMPTY");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_C_UNPAIRED_NONISO");
+ 	    triggers.push_back("L1_ZDC_OR");
+	    triggers.push_back("L1_ZDC_A");
+	    triggers.push_back("L1_ZDC_C");
+	    triggers.push_back("L1_ZDC_A_C");
+	    triggers.push_back("L1_ZDC_OR_EMPTY");
+	    triggers.push_back("L1_ZDC_A_EMPTY");
+	    triggers.push_back("L1_ZDC_C_EMPTY");
+	    triggers.push_back("L1_ZDC_A_C_EMPTY");
+	    triggers.push_back("L1_ZDC_OR_UNPAIRED_NONISO");
+	    triggers.push_back("L1_ZDC_A_UNPAIRED_NONISO");
+	    triggers.push_back("L1_ZDC_C_UNPAIRED_NONISO");
+	    triggers.push_back("L1_ZDC_A_C_UNPAIRED_NONISO");
 	  }
       }
     else // lists for physics data
@@ -2072,6 +2092,30 @@ void ZdcNtuple::setupTriggerHistos()
             triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
             triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
           }
+	if (oo2025) {
+	  triggers = {
+	    "HLT_mb_sptrk_L1TRT_ZDC_A", "HLT_mb_sptrk_L1TRT_ZDC_C", "HLT_mb_sptrk_L1TRT_ZDC_A_C",
+	    "HLT_mb_sptrk_L1TRT_ZDC_OR", "HLT_mb_sptrk_L1TRT_ZDC_LOR",
+	    "HLT_mb_sptrk_L1ZDC_A", "HLT_mb_sptrk_L1ZDC_C", "HLT_mb_sptrk_L1ZDC_A_C",
+	    "HLT_mb_sptrk_L1ZDC_LOR", "HLT_mb_sptrk_L1ZDC_OR",
+	    "HLT_mb_sptrk_L1ZDC_XN", "HLT_mb_sptrk_L1ZDC_YN", "HLT_mb_sptrk_L1ZDC_ZN",
+	    "HLT_mb_sptrk_L1ZDC_XNXN", "HLT_mb_sptrk_L1ZDC_XNYN", "HLT_mb_sptrk_L1ZDC_XNZN",
+	    "HLT_mb_sptrk_L1ZDC_XN_XOR", "HLT_mb_sptrk_L1ZDC_YNYN", "HLT_mb_sptrk_L1ZDC_YN_XOR",
+	    "HLT_mb_sptrk_L1ZDC_ZN_XOR",
+	    "HLT_noalg_L1TRT_ZDC_A", "HLT_noalg_L1TRT_ZDC_C", "HLT_noalg_L1TRT_ZDC_A_C",
+	    "HLT_noalg_L1TRT_ZDC_OR", "HLT_noalg_L1TRT_ZDC_LOR", 
+	    "HLT_noalg_L1TRT_ZDC_YN", "HLT_noalg_L1TRT_ZDC_ZN",
+	    "HLT_noalg_L1TRT_ZDC_XNXN", "HLT_noalg_L1TRT_ZDC_XNYN", "HLT_noalg_L1TRT_ZDC_XNZN",
+	    "HLT_noalg_L1TRT_ZDC_XN_XOR", "HLT_noalg_L1TRT_ZDC_YNYN", "HLT_noalg_L1TRT_ZDC_YN_XOR",
+	    "HLT_noalg_L1TRT_ZDC_ZN_XOR",
+	    "HLT_noalg_L1ZDC_A", "HLT_noalg_L1ZDC_C", "HLT_noalg_L1ZDC_A_C",
+	    "HLT_noalg_L1ZDC_OR", "HLT_noalg_L1ZDC_LOR", 
+	    "HLT_noalg_L1ZDC_YN", "HLT_noalg_L1ZDC_ZN",
+	    "HLT_noalg_L1ZDC_XNXN", "HLT_noalg_L1ZDC_XNYN", "HLT_noalg_L1ZDC_XNZN",
+	    "HLT_noalg_L1ZDC_XN_XOR", "HLT_noalg_L1ZDC_YNYN", "HLT_noalg_L1ZDC_YN_XOR",
+	    "HLT_noalg_L1ZDC_ZN_XOR"
+	  };
+	}
       }
   }
 

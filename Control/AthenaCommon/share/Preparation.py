@@ -45,23 +45,6 @@ if not "POOL_OUTMSG_LEVEL" in os.environ:
 ## basic job configuration
 import AthenaCommon.AtlasUnixStandardJob
 
-from PyUtils.Helpers import ROOTSetup
-ROOTSetup(batch=not opts.interactive)
-# Make sure that batch mode gets set properly.
-# ROOTSetup will set things up so that whenever we do an `import ROOT',
-# then gROOT.SetBatch will be called properly.
-# However, if someone instead writes `from ROOT import gSystem'
-# (or anything other than gROOT), then the ROOT python update thread
-# will be started before ROOTSetup calls SetBatch.
-# (This was then problematic for some MP jobs which used python
-# algorithms.)
-# So include the import here explictly to ensure that batch mode gets set.
-# The following call to SetBatch is strictly redundant, but included
-# for clarity.
-import ROOT
-ROOT.gROOT.SetBatch(not opts.interactive)
-
-
 ## now import the top-level module which eases interactive work and/or
 ## python-based components: a pure python module
 ## we have to put it there as some jobOptions might steal the event loop...

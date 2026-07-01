@@ -15,7 +15,6 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
-#include <SystematicsHandles/SysReadHandle.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <xAODMuon/MuonContainer.h>
 #include <AsgTools/PropertyWrapper.h>
@@ -31,7 +30,7 @@ namespace CP
     MuonTriggerEfficiencyScaleFactorAlg (const std::string& name,
                                          ISvcLocator* svcLoc = nullptr);
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 

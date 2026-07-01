@@ -37,9 +37,9 @@ class CoordSystemsBranch: public MuonTesterBranch {
         bool init() override final;
     private:
         MuonVal::ThreeVectorBranch m_translation{parent(), name() + "Translation"};
-        MuonVal::ThreeVectorBranch m_linearCol1{parent(), name() + "LinearCol1"};
-        MuonVal::ThreeVectorBranch m_linearCol2{parent(), name() + "LinearCol2"};
-        MuonVal::ThreeVectorBranch m_linearCol3{parent(), name() + "LinearCol3"};
+        MuonVal::UnitThreeVectorBranch m_linearCol1{parent(), name() + "LinearCol0"};
+        MuonVal::UnitThreeVectorBranch m_linearCol2{parent(), name() + "LinearCol1"};
+        MuonVal::UnitThreeVectorBranch m_linearCol3{parent(), name() + "LinearCol2"};
 };
 
 

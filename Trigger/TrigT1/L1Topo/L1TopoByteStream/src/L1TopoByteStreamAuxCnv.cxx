@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ============================================================================
@@ -55,7 +55,7 @@ L1TopoByteStreamAuxCnv::L1TopoByteStreamAuxCnv(ISvcLocator* svcloc)
       m_name("L1TopoByteStreamAuxCnv"),
       m_readTool("L1TopoByteStreamTool/L1TopoByteStreamTool") {}
 
-const CLID& L1TopoByteStreamAuxCnv::classID() {
+CLID L1TopoByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::L1TopoRawDataAuxContainer>::ID();
 }
 
@@ -82,7 +82,9 @@ StatusCode L1TopoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   ByteStreamAddress* pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr);
   CHECK(pBS_Addr != nullptr);
   // -------------------------------------------------------------------------
+  //coverity[FORWARD_NULL:FALSE]
   const std::string nm = *(pBS_Addr->par());
+  const EventContext& ctx = pBS_Addr->getEventContext();
   ATH_MSG_DEBUG("Creating Objects " << nm);
 
   auto aux = new xAOD::L1TopoRawDataAuxContainer;
@@ -90,7 +92,7 @@ StatusCode L1TopoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   topoContainer.setStore(aux);
   // -------------------------------------------------------------------------
   L1TopoRDOCollection topoRDOCollection;
-  StatusCode sc = m_readTool->convert(nm, &topoRDOCollection);
+  StatusCode sc = m_readTool->convert(ctx, nm, &topoRDOCollection);
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Failed to create objects");
     delete aux;

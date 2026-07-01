@@ -23,14 +23,14 @@ ClusterSplitProbabilityContainer_PERS * ClusterSplitProbabilityContainerCnv::cre
 //-----------------------------------------------------------------------------
 // Create transient collection
 //-----------------------------------------------------------------------------
-Trk::ClusterSplitProbabilityContainer *ClusterSplitProbabilityContainerCnv::createTransient()
+Trk::ClusterSplitProbabilityContainer *ClusterSplitProbabilityContainerCnv::createTransient(const Token* token)
 {
     MsgStream log(msgSvc(), s_name );
     static const pool::Guid p1_guid( "33129502-20BC-44F9-ACFF-62E5C3670D46" );
 
     Trk::ClusterSplitProbabilityContainer *p_collection = nullptr;
-    if( compareClassGuid( p1_guid )){
-       std::unique_ptr<ClusterSplitProbabilityContainer_PERS> pers( poolReadObject< ClusterSplitProbabilityContainer_PERS >() );
+    if( compareClassGuid(token,  p1_guid )){
+       std::unique_ptr<ClusterSplitProbabilityContainer_PERS> pers( poolReadObject< ClusterSplitProbabilityContainer_PERS >(token) );
        p_collection = m_converter.createTransient( pers.get(), log );
     }
     else

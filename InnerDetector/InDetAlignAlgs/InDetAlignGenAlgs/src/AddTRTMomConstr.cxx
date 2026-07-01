@@ -114,7 +114,7 @@ StatusCode AddTRTMomConstr::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode AddTRTMomConstr::execute() {
+StatusCode AddTRTMomConstr::execute(const EventContext& /*ctx*/) {
   if( !m_trackListOutput.empty() && !m_trackListInput.empty() ) {
     const TrackCollection* inputtracks = nullptr;
     ATH_CHECK(evtStore()->retrieve( inputtracks, m_trackListInput) );

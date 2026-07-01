@@ -22,8 +22,8 @@ StripRDO_Container_PERS* PhaseIIStripRawDataContainerCnv::createPersistent(Phase
   persObj->m_collections.reserve( transCont->size() );
   unsigned int n_rdos=0;
   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(*transCont);
-  using StripRawDataContainerProxy = PhaseII::StripRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-  using StripRawDataProxy = PhaseII::StripRawDataContainerCollectionTypes<>::RawDataProxy;
+  using StripRawDataContainerProxy = PhaseII::StripRawDataTypeTraits<>::RawDataContainerProxy;
+  using StripRawDataProxy = PhaseII::StripRawDataTypeTraits<>::RawDataProxy;
   // convert element index and count total number of elements in all containers.
   for (StripRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
      if (!module_rdo_container_proxy.empty()) {
@@ -81,13 +81,13 @@ StripRDO_Container_PERS* PhaseIIStripRawDataContainerCnv::createPersistent(Phase
   return persObj.release();
 }
 
-PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient() {
+PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient(const Token* token) {
   //  @TODO support  p0_guid 7F2C09B6-0B47-4957-8BBA-EDC665A290AC i.e. initial container
   //  @TOOD support TP1_guid DA76970C-E019-43D2-B2F9-25660DCECD9D i.e. t/p separated version with InDetRawDataContainer_p1
   static const pool::Guid   SCT_TP4_guid("6C7540BE-E85C-4777-BC1C-A9FF11460F54"); // for t/p separated version with SCT_RawDataContainer_p4
 
-  if( compareClassGuid(SCT_TP4_guid) ) {
-     std::unique_ptr< SCT_RawDataContainer_p4 >   persCont( poolReadObject< SCT_RawDataContainer_p4 >() );
+  if( compareClassGuid(token, SCT_TP4_guid) ) {
+     std::unique_ptr< SCT_RawDataContainer_p4 >   persCont( poolReadObject< SCT_RawDataContainer_p4 >(token) );
     std::unique_ptr<PhaseIIStripRawDataContainer> transCont(std::make_unique<PhaseIIStripRawDataContainer>(m_idHelper->wafer_hash_max(),
                                                                                                            1 /* one container only */ ));
 

@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/HeavyFlavorHadronFilter.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CxxUtils/BasicTypes.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include <cmath>
@@ -64,7 +65,7 @@ StatusCode HeavyFlavorHadronFilter::filterFinalize() {
 }
 
 
-StatusCode HeavyFlavorHadronFilter::filterEvent() {
+StatusCode HeavyFlavorHadronFilter::filterEvent(const EventContext& ctx) {
   bool pass = false;
   bool bPass = false;
   bool cPass = false;
@@ -98,7 +99,7 @@ StatusCode HeavyFlavorHadronFilter::filterEvent() {
       // between the final quark in the decay chain and intermediates
       // That means the code is NOT appropriate for counting the number
       // of heavy flavor quarks!
-      if (m_Request_bQuark && std::abs(part->pdg_id())==5 &&
+      if (m_Request_bQuark && MC::isBottom(part) &&
           part->momentum().perp()>m_bPtMin &&
           std::abs(part->momentum().pseudoRapidity())<m_bEtaMax) {
         if (m_RequireTruthJet) {
@@ -120,7 +121,7 @@ StatusCode HeavyFlavorHadronFilter::filterEvent() {
       // That means the code is NOT appropriate for counting the number
       // of heavy flavor quarks!
       if (m_Request_cQuark &&
-          std::abs(part->pdg_id())==4 &&
+          MC::isCharm(part) &&
           part->momentum().perp()>m_cPtMin &&
           std::abs(part->momentum().pseudoRapidity())<m_cEtaMax) {
         if (m_RequireTruthJet) {
@@ -201,7 +202,7 @@ StatusCode HeavyFlavorHadronFilter::filterEvent() {
   if (BHadronPass) m_NBHadronPass++;
   if (DHadronPass) m_NDHadronPass++;
   if (PDGIDPass)   m_NPDGIDPass++;
-  setFilterPassed(pass);
+  setFilterPassed(pass, ctx);
 
   return StatusCode::SUCCESS;
 }

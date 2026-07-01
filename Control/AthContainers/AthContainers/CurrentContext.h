@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -31,7 +31,7 @@ namespace Gaudi
 }
 
 /// \warn this is a dummy class, do not try to use it for anything,
-/// except passing arround a reference to it where needed.
+/// except passing around a reference to it where needed.
 ///
 /// This may be turned into a more meaningful class at some point, but
 /// for now, just get a reference to an `EventContext` object via

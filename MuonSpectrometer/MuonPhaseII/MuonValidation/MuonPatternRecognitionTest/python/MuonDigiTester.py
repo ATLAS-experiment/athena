@@ -8,6 +8,8 @@ if __name__=="__main__":
 
     parser.add_argument("--doFullsTGCDigi", default=False, action='store_true')
     parser.add_argument("--doFullMMDigi", default=False, action='store_true')
+    parser.add_argument("--doFullRpcDigi", default=False, action='store_true')
+    
     
     parser.set_defaults(nEvents = -1)
  
@@ -21,6 +23,7 @@ if __name__=="__main__":
 
     flags.Muon.doFastMMDigitization = not args.doFullMMDigi
     flags.Muon.doFastsTGCDigitization = not args.doFullsTGCDigi
+    flags.Muon.doFastRpcDigitization = not args.doFullRpcDigi
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
   

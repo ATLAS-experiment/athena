@@ -362,12 +362,7 @@ namespace Trk {
             Sprout current_sprout;
             std::queue<HepMC::ConstGenParticlePtr> tmp;
             unsigned eventIndex = link.eventIndex();
-#ifdef HEPMC3
             HepMC::ConstGenParticlePtr current = link.scptr();
-#else
-            const HepMC::GenParticle* current = link.cptr();
-#endif
-
             do {
                 HepMcParticleLink curlink(HepMC::uniqueID(current), eventIndex, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
 
@@ -822,12 +817,7 @@ namespace Trk {
             Sprout current_sprout;
             std::queue<HepMC::ConstGenParticlePtr> tmp;
             unsigned eventIndex = link.eventIndex();
-#ifdef HEPMC3
             HepMC::ConstGenParticlePtr current = link.scptr();
-#else
-            const HepMC::GenParticle* current = link.cptr();
-#endif
-
             do {
                 HepMcParticleLink curlink(HepMC::uniqueID(current), eventIndex, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
 
@@ -1033,11 +1023,7 @@ namespace Trk {
             Sprout current_sprout;
             std::queue<HepMC::ConstGenParticlePtr> tmp;
             unsigned eventIndex = link.eventIndex();
-#ifdef HEPMC3
             HepMC::ConstGenParticlePtr current = link.scptr();
-#else
-            const HepMC::GenParticle* current = link.cptr();
-#endif
 
             do {
                 HepMcParticleLink curlink(HepMC::uniqueID(current), eventIndex, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_ID);
@@ -1123,11 +1109,7 @@ namespace Trk {
         std::vector<MuonSimData::Deposit>::const_iterator dit = simData.getdeposits().begin();
         std::vector<MuonSimData::Deposit>::const_iterator dit_end = simData.getdeposits().end();
         for (; dit != dit_end; ++dit) {
-#ifdef HEPMC3
             HepMC::ConstGenParticlePtr gp = dit->first.scptr();
-#else
-            const HepMC::GenParticle* gp = dit->first;
-#endif
             if (gp == genPart) {
                 deposit = &*dit;
                 break;

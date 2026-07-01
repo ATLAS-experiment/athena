@@ -29,13 +29,10 @@ public:
 
   virtual ~ILArCalibCalculatorSvc() {};
 
-
-  virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
-                            std::vector<G4double> & energies,
+  virtual G4bool Process (const G4Step* step,
+                            LArG4Identifier & identifier,
+                            LArG4Identifier & identifier_sr,
+                            std::vector<double> & energies,
                             const LArG4::eCalculatorProcessing process = LArG4::kEnergyAndID) const = 0;
-
-
-
 };
-
 #endif

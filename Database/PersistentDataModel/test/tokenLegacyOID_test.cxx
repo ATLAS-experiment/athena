@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -118,11 +118,16 @@ int main() {
 
     std::cout << "Running Token legacy OID format tests...\n\n";
 
-    test_legacy_oid_format_ffffffff();
-    test_modern_oid_format();
-    test_legacy_oid_format_regular_values();
-    test_roundtrip_serialization();
-    test_oid_format_detection();
+    try {
+      test_legacy_oid_format_ffffffff();
+      test_modern_oid_format();
+      test_legacy_oid_format_regular_values();
+      test_roundtrip_serialization();
+      test_oid_format_detection();
+    } catch (const std::exception& e) {
+      std::cerr << "exception: " << e.what() << "\n";
+      return 1;
+    }
 
     std::cout << "\nAll Token legacy OID format tests passed!\n";
     return 0;

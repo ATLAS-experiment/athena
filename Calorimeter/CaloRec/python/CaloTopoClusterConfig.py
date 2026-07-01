@@ -4,6 +4,96 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import MeV
 
+def CaloCalibClusterTruthMapMakerTool(flags, name="CaloCalibClusterTruthMapMakerTool", **kwargs):
+
+    TruthMapMakerTool = CompFactory.CaloCalibClusterTruthMapMakerTool
+    truthMapTool = TruthMapMakerTool()
+
+    return truthMapTool
+
+def CaloCalibHitDecoratorTool(flags, name="CaloCalibClusterDecoratorTool", **kwargs):
+
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticles",
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Visible"
+    )
+
+
+    TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool
+    truth_tool = TruthAttributerTool("CaloCalibClusterTruthAttributerTool")
+    DecoratorTool = CompFactory.CaloCalibClusterDecoratorTool
+    decoratorTool = DecoratorTool(name,TruthAttributerTool=truth_tool,**kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
+    return decoratorTool
+
+def CaloCalibHitDecoratorFullEnergyTool(flags, name="CaloCalibClusterDecoratorTool_Full", **kwargs):
+
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticles",
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Full"
+    )
+    TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool
+    truth_tool = TruthAttributerTool("CaloCalibClusterTruthAttributerTool")
+    DecoratorTool = CompFactory.CaloCalibClusterDecoratorTool
+    decoratorTool = DecoratorTool(name, TruthAttributerTool=truth_tool, **kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
+
+    return decoratorTool
+
+
+def CaloCalibHitDecoratorToolOOC(flags, name="CaloCalibClusterDecoratorToolOOC", **kwargs):
+
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesL",
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_L",
+    )
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesT",
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_T",
+    )
+
+    DecoratorTool = CompFactory.CaloCalibClusterDecoratorToolOOC
+    decoratorTool = DecoratorTool(name,**kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
+    decoratorTool.CalibrationHitContainerNames = [
+    "LArCalibrationHitInactive",
+    "LArCalibrationHitActive",
+    "TileCalibHitActiveCell",
+    "TileCalibHitInactiveCell"
+    ]
+    return decoratorTool
+
+def CaloCalibHitDecoratorToolDM(flags, name="CaloCalibClusterDecoratorToolDM", **kwargs):
+
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesDM",
+        "CaloCalTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_DM",
+    )
+
+    DecoratorTool = CompFactory.CaloCalibClusterDecoratorToolDM
+    decoratorTool = DecoratorTool(
+        name,
+        **kwargs,
+        ExtraInputs={('CaloCellContainer', 'StoreGateSvc+AllCalo')}
+    )
+
+    decoratorTool.CalibrationHitContainerNames = [
+        "LArCalibrationHitInactive",
+        "LArCalibrationHitActive",
+        "TileCalibHitActiveCell",
+        "TileCalibHitInactiveCell",
+    ]
+
+    decoratorTool.DMCalibrationHitContainerNames = [
+        "LArCalibrationHitDeadMaterial",
+        "TileCalibHitDeadMaterial",
+    ]
+
+    return decoratorTool
+
+
+
+
+
+
+
 def caloTopoCoolFolderCfg(flags):
     result=ComponentAccumulator()
     from IOVDbSvc.IOVDbSvcConfig import addFolders
@@ -321,9 +411,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     If output writing is enabled (ESD,AOD) the topo clusters are added to them
     """
-
     doLCCalib = flags.Calo.TopoCluster.doTopoClusterLocalCalib
-        
     if clustersname is None:
         clustersname = "CaloCalTopoClusters" if doLCCalib else "CaloTopoClusters"
 
@@ -371,9 +459,41 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
     momentsMaker=result.popToolsAndMerge(getTopoMoments(flags))
     CaloTopoCluster.ClusterCorrectionTools += [momentsMaker]
 
+   
     if flags.Calo.TopoCluster.doCalibHitMoments:
-        calibHitsMomentsMaker=getTopoCalibMoments(flags)
-        CaloTopoCluster.ClusterCorrectionTools += [calibHitsMomentsMaker]
+            calibHitsMomentsMaker=getTopoCalibMoments(flags)
+            CaloTopoCluster.ClusterCorrectionTools += [calibHitsMomentsMaker]
+            caloCalibTruthMapMaker = CaloCalibClusterTruthMapMakerTool(flags)
+            caloCalibDecorator = CaloCalibHitDecoratorTool(flags)
+            caloCalibDecorator.CaloClusterWriteDecorHandleKey_NLeadingTruthParticles = (
+            clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Visible"
+            )
+            caloCalibDecoratorFullEnergy = CaloCalibHitDecoratorFullEnergyTool(flags)
+            caloCalibDecoratorFullEnergy.CaloClusterWriteDecorHandleKey_NLeadingTruthParticles = (
+            clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Full"
+            )
+            caloCalibDecoratorOOC = CaloCalibHitDecoratorToolOOC(flags)
+            caloCalibDecoratorOOC.CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesL = (
+                clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_L"
+            )
+            caloCalibDecoratorOOC.CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesT = (
+                clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_T"
+            )
+
+            caloCalibDecoratorDM = CaloCalibHitDecoratorToolDM(flags)
+            caloCalibDecoratorDM.CaloClusterWriteDecorHandleKey_NLeadingTruthParticlesDM = (
+                clustersname + "." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_DM"
+            )
+
+            CaloTopoCluster.ClusterCorrectionTools += [
+                caloCalibTruthMapMaker,
+                caloCalibDecorator,
+                caloCalibDecoratorFullEnergy,
+                caloCalibDecoratorOOC,
+                caloCalibDecoratorDM,
+            ]
+
+
     
     if doLCCalib:
         theCaloClusterSnapshot=CaloClusterSnapshot(OutputName=clustersnapname,SetCrossLinks=True,FinalClusterContainerName=clustersname)        
@@ -452,7 +572,13 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     AODMoments.append("CellLink") #Add data-link to cell-link container
     if flags.Calo.TopoCluster.addCalibrationHitDecoration: #Add calib hit deco if requried 
-        AODMoments.append(flags.Calo.TopoCluster.CalibrationHitDecorationName)
+       AODMoments += [
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Visible",
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Full",
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_L",
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_OOC_T",
+                    flags.Calo.TopoCluster.CalibrationHitDecorationName + "_DM",
+                    ]
 
     if flags.Calo.TopoCluster.addCPData:
         AODMoments += ["ClusterWidthEta","ClusterWidthPhi"]
@@ -496,7 +622,6 @@ def CaloTopoClusterConfigTest(flags=None):
         flags.Input.Files = defaultTestFiles.ESD_RUN3_MC
         flags.Output.ESDFileName="esdOut.pool.root"
         flags.Exec.MaxEvents = 10
-
         flags.fillFromArgs()
         flags.lock()
 
@@ -507,9 +632,11 @@ def CaloTopoClusterConfigTest(flags=None):
     cfg.merge(PoolReadCfg(flags))
 
     topoAcc = CaloTopoClusterCfg(flags)
+    #topoAcc = CaloTopoClusterCfg(flags)
     topoAlg = topoAcc.getPrimary()
     topoAlg.ClustersOutputName = "CaloCalTopoClustersNew"
     cfg.merge(topoAcc)
+
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge(OutputStreamCfg(flags,"xAOD", ItemList =  ["xAOD::CaloClusterContainer#CaloCalTopoClusters*",
@@ -531,11 +658,13 @@ def CaloTopoClusterConfigTest(flags=None):
     return cfg.run().isSuccess()
 
 if __name__=="__main__":
+    
     import sys, subprocess
     stat=CaloTopoClusterConfigTest()
     if stat==0: 
         print ("Executing returned StatusCode FAILURE")
         sys.exit(-1)
+    
     else:
         from AthenaCommon.Utils.unixtools import find_datafile
         import os

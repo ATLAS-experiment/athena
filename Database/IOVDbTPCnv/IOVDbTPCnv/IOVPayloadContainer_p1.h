@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVDBDATAMODEL_IOVPAYLOADCONTAINER_P1_H
@@ -63,9 +63,9 @@ public:
     {
     public:
 
-        unsigned int                      m_channelNumber;
-        unsigned int                      m_firstIndex;
-        unsigned int                      m_lastIndex;
+        unsigned int                      m_channelNumber = 0;
+        unsigned int                      m_firstIndex = 0;
+        unsigned int                      m_lastIndex = 0;
         IOVRange_p1                       m_range;
         std::string                       m_name;
     };

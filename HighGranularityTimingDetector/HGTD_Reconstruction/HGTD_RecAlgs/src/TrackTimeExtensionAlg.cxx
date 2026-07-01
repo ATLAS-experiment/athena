@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TrackTimeExtensionAlg.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -44,7 +44,7 @@ StatusCode TrackTimeExtensionAlg::initialize() {
   ATH_CHECK(m_layerPrimaryExpectedKey.initialize());
   ATH_CHECK(m_extrapXKey.initialize());
   ATH_CHECK(m_extrapYKey.initialize());
-
+  ATH_CHECK(m_holesHGTDKey.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -159,7 +159,8 @@ TrackTimeExtensionAlg::DecorHandles::DecorHandles
       layerClusterMergedHandle (tool.m_layerClusterMergedKey, ctx),
       layerPrimaryExpectedHandle (tool.m_layerPrimaryExpectedKey, ctx),
       extrapXHandle (tool.m_extrapXKey, ctx),
-      extrapYHandle (tool.m_extrapYKey, ctx)
+      extrapYHandle (tool.m_extrapYKey, ctx),
+      holesHGTDHandle(tool.m_holesHGTDKey, ctx)
 {
 }
 
@@ -169,7 +170,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
     const InDetSimDataCollection* sdo_collection,
     const HepMC::GenEvent* hs_event, bool skip_deco) const {
 
-  std::vector<bool> has_cluster_vec;
+  std::vector<char> has_cluster_vec;
   has_cluster_vec.reserve(n_hgtd_layers);
   std::vector<float> chi2_vec;
   chi2_vec.reserve(n_hgtd_layers);
@@ -179,11 +180,11 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
   time_vec.reserve(n_hgtd_layers);
   std::vector<int> truth_vec;
   truth_vec.reserve(n_hgtd_layers);
-  std::vector<bool> is_shadowed_vec;
+  std::vector<char> is_shadowed_vec;
   is_shadowed_vec.reserve(n_hgtd_layers);
-  std::vector<bool> is_merged_vec;
+  std::vector<char> is_merged_vec;
   is_merged_vec.reserve(n_hgtd_layers);
-  std::vector<bool> primary_exists_vec;
+  std::vector<char> primary_exists_vec;
   primary_exists_vec.reserve(n_hgtd_layers);
 
   for (unsigned short i = 0; i < n_hgtd_layers; i++) {
@@ -192,7 +193,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
         extension.m_hits.at(i);
     const HGTD_Cluster* primary_cluster = extension.m_truth_primary_hits.at(i);
 
-    primary_exists_vec.push_back(primary_cluster != nullptr);
+    primary_exists_vec.push_back(primary_cluster != nullptr);   
 
     if (trk_state) {
       ATH_MSG_DEBUG("[decorateTrackParticle] extension found");
@@ -265,6 +266,7 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
   dh.layerPrimaryExpectedHandle(*track_ptkl) = primary_exists_vec;
   dh.extrapXHandle(*track_ptkl) = extension.m_extrap_x;
   dh.extrapYHandle(*track_ptkl) = extension.m_extrap_y;
+  dh.holesHGTDHandle(*track_ptkl) = extension.m_holes_hgtd;
 
   return StatusCode::SUCCESS;
 }

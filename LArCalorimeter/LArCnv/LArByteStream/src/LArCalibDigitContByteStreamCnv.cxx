@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArCalibDigitContByteStreamCnv.h"
@@ -35,7 +35,7 @@ LArCalibDigitContByteStreamCnv::LArCalibDigitContByteStreamCnv(ISvcLocator* svcl
 LArCalibDigitContByteStreamCnv::~LArCalibDigitContByteStreamCnv() {
 }
 
-const CLID& LArCalibDigitContByteStreamCnv::classID(){
+CLID LArCalibDigitContByteStreamCnv::classID(){
   return ClassID_traits<LArCalibDigitContainer>::ID() ;
 }
 
@@ -67,14 +67,12 @@ LArCalibDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject
     ATH_MSG_ERROR( " ROBDataProviderSvc not loaded. Can't read ByteStream." );
     return StatusCode::FAILURE;
   }
-  ByteStreamAddress *pRE_Addr;
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr); //Cast from OpaqueAddress to ByteStreamAddress
-  if (!pRE_Addr) {
-    ATH_MSG_ERROR( "dynamic_cast of OpaqueAdress to ByteStreamAddress failed!" );
-    return StatusCode::FAILURE;
-  }
- 
-  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext());
+
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
+  const RawEvent* re = m_rdpSvc->getEvent(ctx);
   if (!re) {
     ATH_MSG_ERROR( "Could not get raw event from ByteStreamInputSvc" );
     return StatusCode::FAILURE;

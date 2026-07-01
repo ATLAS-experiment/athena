@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetAlignTrackSelTool.h
@@ -42,13 +42,13 @@ class InDetAlignTrackSelTool: virtual public IInDetAlignTrackSelTool, public Ath
   virtual StatusCode initialize();
   virtual StatusCode finalize();
 
-  virtual int getStatus(const Trk::Track&) const;
+  virtual int getStatus(const EventContext& ctx, const Trk::Track&) const;
 
  private:
   double Momentum(const Trk::Track&) const;
   double Pt(const Trk::Track&) const;
-  int nShared(const Trk::Track&) const;
-  int nHoles(const Trk::Track&) const;
+  int nShared(const EventContext& ctx, const Trk::Track&) const;
+  int nHoles(const EventContext& ctx, const Trk::Track&) const;
   double chi2Prob(const Trk::Track&) const;
   
   ToolHandle <Trk::ITrackParticleCreatorTool> m_particleCreator; //!< Pointer to track particle creator tool

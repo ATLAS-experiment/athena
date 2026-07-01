@@ -76,7 +76,7 @@ MuonTrackParticleAssociationTool::get (const xAOD::Muon& p)
 {
   switch (m_type) {
   case PRIMARY:
-    return p.primaryTrackParticle();
+    return p.trackParticle(xAOD::Muon::TrackParticleType::Primary);
   case COMBINED:
     return p.trackParticle (xAOD::Muon::CombinedTrackParticle);
   case INDET:
@@ -87,7 +87,7 @@ MuonTrackParticleAssociationTool::get (const xAOD::Muon& p)
     {
       const xAOD::TrackParticle* t = p.trackParticle (xAOD::Muon::InnerDetectorTrackParticle);
       if (!t)
-        t = p.primaryTrackParticle();
+        t = p.trackParticle(xAOD::Muon::TrackParticleType::Primary);
       return t;
     }
   }

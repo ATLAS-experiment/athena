@@ -110,7 +110,7 @@ StatusCode IDAlignMonPVBiasesAlg::fillHistograms( const EventContext& ctx ) cons
     // require at least 10 tracks associated
     if (foundVertex->nTrackParticles() < 10) continue;
 
-    std::unique_ptr<const Trk::ImpactParametersAndSigma> myIPandSigma(m_trackToVertexIPEstimator->estimate(trackPart, foundVertex, true));
+    std::unique_ptr<const Trk::ImpactParametersAndSigma> myIPandSigma(m_trackToVertexIPEstimator->estimate(ctx, trackPart, foundVertex, true));
 
     // require d0_pv to be smaller than 4
     if(myIPandSigma.get()==nullptr || std::abs(myIPandSigma->IPd0) > 4.0) continue;

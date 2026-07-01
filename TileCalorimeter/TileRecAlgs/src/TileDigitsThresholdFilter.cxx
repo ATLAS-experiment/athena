@@ -74,13 +74,13 @@ StatusCode TileDigitsThresholdFilter::initialize() {
 //
 // Begin Execution Phase.
 //
-StatusCode TileDigitsThresholdFilter::execute() {
+StatusCode TileDigitsThresholdFilter::execute(const EventContext& ctx) {
 
   // Create new container for filtered digits
-  SG::WriteHandle<TileDigitsContainer> outputDigitsContainer(m_outputDigitsContainerKey);
+  SG::WriteHandle<TileDigitsContainer> outputDigitsContainer(m_outputDigitsContainerKey, ctx);
   ATH_CHECK( outputDigitsContainer.record(std::make_unique<TileDigitsContainer>(false, SG::VIEW_ELEMENTS)) );
   
-  SG::ReadHandle<TileDigitsContainer> inputDigitsContainer(m_inputDigitsContainerKey);
+  SG::ReadHandle<TileDigitsContainer> inputDigitsContainer(m_inputDigitsContainerKey, ctx);
   ATH_CHECK( inputDigitsContainer.isValid() );
 
   outputDigitsContainer->set_unit(inputDigitsContainer->get_unit());

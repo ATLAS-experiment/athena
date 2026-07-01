@@ -12,14 +12,14 @@ atlas_disable_as_needed()
 
 # Component(s) in the package:
 atlas_add_library( Hijing_iLib
-   Hijing_i/*.h src/*.cxx src/*.F src/Hijing_modified/*.f
+   Hijing_i/*.h src/*.cxx src/Hijing_modified/*.f
    PUBLIC_HEADERS Hijing_i
    INCLUDE_DIRS ${HIJING_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
    PRIVATE_DEFINITIONS HIJINGVERSION=\"${HIJING_VERSION}\"
                        FVOIDP=INTEGER*${CMAKE_SIZEOF_VOID_P}
    LINK_LIBRARIES ${HIJING_LIBRARIES} ${CLHEP_LIBRARIES}
-   GeneratorFortranCommonLib GeneratorModulesLib StoreGateLib
+   GeneratorModulesLib StoreGateLib
    PRIVATE_LINK_LIBRARIES AtlasHepMCLib AthenaKernel GaudiKernel
    GeneratorObjects CxxUtils TruthUtils )
 

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IdDict/IdDictMgr.h"
@@ -154,7 +154,7 @@ void IdDictMgr::resolve_references() {
   }
 }
 
-void IdDictMgr::generate_implementation(const std::string& tag) {
+void IdDictMgr::generate_implementation(std::string_view tag) {
   if (Debugger::debug()) {
     std::cout << "IdDictMgr::generate_implementation>" << std::endl;
   }
@@ -164,7 +164,7 @@ void IdDictMgr::generate_implementation(const std::string& tag) {
   if (m_generated_implementation && tag != m_tag) reset_implementation();
 
   if (!m_generated_implementation) {
-    m_tag = tag;
+    m_tag = std::string(tag);
     for (auto& p : m_dictionaries) {
       // From mgr, only generate impl for top-level dictionaries
       IdDictDictionary& dictionary = *p.second;

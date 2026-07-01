@@ -174,8 +174,9 @@ StatusCode MuonCreatorAlg::execute(const EventContext& ctx) const {
 
         std::vector<float> MDT_R, MDT_dR;
         for( const auto mu : *wh_muons ) {
-            if (!(mu->muonType() == xAOD::Muon::CaloTagged || mu->muonType() == xAOD::Muon::SegmentTagged)) {
-                const Trk::Track* trk = mu->primaryTrackParticle()->track();
+            if (!(mu->muonType() == xAOD::Muon::MuonType::CaloTagged || 
+                  mu->muonType() == xAOD::Muon::MuonType::SegmentTagged)) {
+                const Trk::Track* trk = mu->trackParticle(xAOD::Muon::TrackParticleType::Primary)->track();
                 for (const Trk::TrackStateOnSurface* tsos : *trk->trackStateOnSurfaces()) {
                     const Muon::MdtDriftCircleOnTrack* mdt = dynamic_cast <const Muon::MdtDriftCircleOnTrack*>(tsos->measurementOnTrack());
                     if (!mdt) continue;

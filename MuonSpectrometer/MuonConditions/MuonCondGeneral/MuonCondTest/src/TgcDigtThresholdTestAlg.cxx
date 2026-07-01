@@ -19,10 +19,10 @@ StatusCode TgcDigtThresholdTestAlg::initialize() {
 }
 
 // Execute
-StatusCode TgcDigtThresholdTestAlg::execute() {  
+StatusCode TgcDigtThresholdTestAlg::execute(const EventContext& ctx) {  
 
     ATH_MSG_INFO("Calling execute");   
-    SG::ReadCondHandle<TgcDigitThresholdData> readHandle{m_readKey};
+    SG::ReadCondHandle<TgcDigitThresholdData> readHandle{m_readKey, ctx};
     if (!readHandle.isValid()) {
         ATH_MSG_ERROR("Null pointer to the read conditions object");
         return StatusCode::FAILURE;

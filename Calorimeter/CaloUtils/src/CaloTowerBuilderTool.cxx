@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -262,11 +262,12 @@ StatusCode CaloTowerBuilderTool::checkSetup(MsgStream& /*log*/) {
   return StatusCode::SUCCESS;
 }
 
-void CaloTowerBuilderTool::setCalos(const std::vector<CaloCell_ID::SUBCALO>& v)
+void CaloTowerBuilderTool::setCalos(const EventContext& ctx,
+                                    const std::vector<CaloCell_ID::SUBCALO>& v)
 {
   if (m_caloIndices != v) {
     if (m_cellStore.size() > 0) {
-      if (rebuildLookup(Gaudi::Hive::currentContext()).isFailure()) {
+      if (rebuildLookup(ctx).isFailure()) {
         ATH_MSG_ERROR("rebuildLookup failed.");
       }
     }

@@ -2,28 +2,20 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
+/// @author Nils Krumnack
+
 #ifndef SAMPLE_HANDLER_TOOLS_DISCOVERY_H
 #define SAMPLE_HANDLER_TOOLS_DISCOVERY_H
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
 /// This module defines utility functions used for scanning the local
-/// data storage.  The interface provided in this module is intended
-/// for the general user.  The module is considered to be in the
-/// pre-alpha stage.
+/// data storage.
 
 
 
 //protect
 #include <SampleHandler/Global.h>
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -156,7 +148,7 @@ namespace SH
   /// guarantee: strong
   /// failures: out of memory III
   /// failures: i/o errors
-  void scanForTrees (SampleHandler& sh, Sample& sample,
+  void scanForTrees (SampleHandler& sh, std::shared_ptr<Sample>& sample,
 		     const std::string& pattern = ".*");
   void scanForTrees (SampleHandler& sh, const std::string& pattern = ".*");
 

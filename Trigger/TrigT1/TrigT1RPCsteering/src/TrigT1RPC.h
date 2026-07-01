@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCMuonTrigger_H
@@ -10,7 +10,6 @@
 #include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/NTuple.h"
 
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 
 #include "RPC_CondCabling/RpcCablingCondData.h"

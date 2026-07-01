@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloDM_ID.h"
@@ -287,7 +287,7 @@ int  CaloDM_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   int size = (1 << bits);
 
   //      std::cout << "pnz_reg        "  
-  //  	    << m_pnz_reg_impl.show_to_string() << std::endl; 
+  //  	    << m_pnz_reg_impl << std::endl; 
   //      std::cout << "size " << size << std::endl;
     
   //    std::cout << "pnz_reg "  << m_pnz_reg_impl.decode_index()  << " " 
@@ -628,13 +628,13 @@ int   CaloDM_ID::initLevelsFromDict()
   m_phi_impl      = region.implementation(m_PHI_INDEX);
 
   ATH_MSG_DEBUG("decode index and bit fields for each level: ");
-  ATH_MSG_DEBUG("calo      "  << m_calo_impl.show_to_string());
-  ATH_MSG_DEBUG("detzside  "  << m_calodm_impl.show_to_string());
-  ATH_MSG_DEBUG("dmat      "  << m_dmat_impl.show_to_string());
-  ATH_MSG_DEBUG("samp      "  << m_sampling_impl.show_to_string());
-  ATH_MSG_DEBUG("reg       "  << m_region_impl.show_to_string());
-  ATH_MSG_DEBUG("eta       "  << m_eta_impl.show_to_string());
-  ATH_MSG_DEBUG("phi       "  << m_phi_impl.show_to_string());
+  ATH_MSG_DEBUG("calo      "  << m_calo_impl);
+  ATH_MSG_DEBUG("detzside  "  << m_calodm_impl);
+  ATH_MSG_DEBUG("dmat      "  << m_dmat_impl);
+  ATH_MSG_DEBUG("samp      "  << m_sampling_impl);
+  ATH_MSG_DEBUG("reg       "  << m_region_impl);
+  ATH_MSG_DEBUG("eta       "  << m_eta_impl);
+  ATH_MSG_DEBUG("phi       "  << m_phi_impl);
 
   return(0) ;
 }

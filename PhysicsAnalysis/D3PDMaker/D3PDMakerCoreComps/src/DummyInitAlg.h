@@ -53,7 +53,7 @@ public:
 
 
   /// Standard Gaudi @c execute method.
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
 private:

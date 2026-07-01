@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonSpacePoint/SpacePoint.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
@@ -13,6 +13,7 @@
 
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include <memory>
+#include <cassert>
 
 namespace {
     /**  @brief Helper function to overwrite the existing prd multiplicity counts */
@@ -29,14 +30,16 @@ namespace {
 namespace MuonR4{
     using Cov_t = SpacePoint::Cov_t;
     
-    SpacePoint::SpacePoint(const xAOD::UncalibratedMeasurement* primMeas,
-                           const xAOD::UncalibratedMeasurement* secondMeas) : 
+    SpacePoint::SpacePoint(const xAOD::MuonMeasurement* primMeas,
+                           const xAOD::MuonMeasurement* secondMeas): 
         m_primaryMeas{primMeas},
         m_secondaryMeas{secondMeas} {
+
+        assert(m_primaryMeas != nullptr);
         /// In case of 2D measurements like sTgc-pads or BI-RPC strips we can directly take the covariance
         /// from the measurement itself. To indicate that the space point measures both, eta & phi coordinate
         /// set the secondary measurement to be the primary one
-        if (primMeas->numDimensions() == 2) {
+        if (!secondMeas && primMeas->numDimensions() == 2) {
             m_secondaryMeas = m_primaryMeas;
         } 
     }
@@ -65,21 +68,20 @@ namespace MuonR4{
     }
     void SpacePoint::setPosition(const Amg::Vector3D& pos){ m_pos = pos; }
             
-    const xAOD::UncalibratedMeasurement* SpacePoint::primaryMeasurement() const {
+    const xAOD::MuonMeasurement* SpacePoint::primaryMeasurement() const {
        return m_primaryMeas;
     }
-    const xAOD::UncalibratedMeasurement* SpacePoint::secondaryMeasurement() const {
+    const xAOD::MuonMeasurement* SpacePoint::secondaryMeasurement() const {
        return m_secondaryMeas;
     }
     const MuonGMR4::Chamber* SpacePoint::chamber() const {
-        return m_chamber;
+        return m_primaryMeas->readoutElement()->chamber();
     }
     const MuonGMR4::SpectrometerSector* SpacePoint::msSector() const {
-        return m_msSector;
+        return m_primaryMeas->readoutElement()->msSector();
     }
-
     xAOD::UncalibMeasType SpacePoint::type() const {
-        return primaryMeasurement()->type();
+        return m_primaryMeas->type();
     }
     bool SpacePoint::measuresPhi() const {
         return secondaryMeasurement() || !m_measEta;
@@ -88,7 +90,7 @@ namespace MuonR4{
         return secondaryMeasurement() || m_measEta;
     }
     const Identifier& SpacePoint::identify() const {
-        return xAOD::identify(m_primaryMeas);
+        return m_primaryMeas->identify();
     }
     void SpacePoint::setInstanceCounts(std::shared_ptr<unsigned int> etaCounts, 
                                        std::shared_ptr<unsigned int> phiCounts) {
@@ -101,7 +103,6 @@ namespace MuonR4{
         return (secondaryMeasurement() != nullptr) + 1;
     }
     void SpacePoint::print(std::ostream& ostr) const {
-
         ostr<<"Uncalibrated SP "<<msSector()->idHelperSvc()->toString(identify());        
         ostr<<" @ "<<Amg::toString(localPosition());
         if (type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
@@ -122,5 +123,12 @@ namespace MuonR4{
              <<", "<<m_measCovariance[Acts::toUnderlying(CovIdx::phiCov)]
              <<", "<<m_measCovariance[Acts::toUnderlying(CovIdx::timeCov)]<<")"; 
     }
-
+    std::string SpacePoint::toString(const CovIdx idx) {
+        switch (idx){
+            case CovIdx::etaCov: return "etaCov";
+            case CovIdx::phiCov: return "phiCov";
+            case CovIdx::timeCov: return "timeCov";
+        }
+        return "";
+    }
 }

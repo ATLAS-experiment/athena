@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKEVENT_TRACKPARAMETERSCONTAINER_H
 #define ACTSTRKEVENT_TRACKPARAMETERSCONTAINER_H 1
 
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "AthContainers/DataVector.h"
 
 namespace ActsTrk {

@@ -13,48 +13,45 @@
 
 namespace columnar
 {
-  namespace ContainerId
+  struct ParticleDef : RegularContainerId<xAOD::IParticle,xAOD::IParticleContainer>
   {
-    struct particle : regularCIBase<xAOD::IParticle,xAOD::IParticleContainer>
-    {
-      static constexpr std::string_view idName = "particle";
-    };
-    using particle0 = particle;
+    static constexpr std::string_view idName = "particle";
+  };
+  using Particle0Def = ParticleDef;
 
-    struct particle1 : particle
-    {
-      static constexpr std::string_view idName = "particle1";
-    };
+  struct Particle1Def : ParticleDef
+  {
+    static constexpr std::string_view idName = "particle1";
+  };
 
-    struct particle2 : particle
-    {
-      static constexpr std::string_view idName = "particle2";
-    };
-  }
+  struct Particle2Def : ParticleDef
+  {
+    static constexpr std::string_view idName = "particle2";
+  };
 
-  using ParticleRange = ObjectRange<ContainerId::particle>;
-  using ParticleId = ObjectId<ContainerId::particle>;
-  using OptParticleId = OptObjectId<ContainerId::particle>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ParticleAccessor  = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ParticleDecorator = AccessorTemplate<ContainerId::particle,CT,ColumnAccessMode::output,CM>;
+  using ParticleRange = ObjectRange<ParticleDef>;
+  using ParticleId = ObjectId<ParticleDef>;
+  using OptParticleId = OptObjectId<ParticleDef>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ParticleAccessor  = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using ParticleDecorator = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::output,CM>;
 
-  using Particle0Range = ObjectRange<ContainerId::particle0>;
-  using Particle0Id = ObjectId<ContainerId::particle0>;
-  using OptParticle0Id = OptObjectId<ContainerId::particle0>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle0Accessor  = AccessorTemplate<ContainerId::particle0,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle0Decorator = AccessorTemplate<ContainerId::particle0,CT,ColumnAccessMode::output,CM>;
+  using Particle0Range = ObjectRange<Particle0Def>;
+  using Particle0Id = ObjectId<Particle0Def>;
+  using OptParticle0Id = OptObjectId<Particle0Def>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle0Accessor  = AccessorTemplate<Particle0Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle0Decorator = AccessorTemplate<Particle0Def,CT,ColumnAccessMode::output,CM>;
 
-  using Particle1Range = ObjectRange<ContainerId::particle1>;
-  using Particle1Id = ObjectId<ContainerId::particle1>;
-  using OptParticle1Id = OptObjectId<ContainerId::particle1>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle1Accessor  = AccessorTemplate<ContainerId::particle1,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle1Decorator = AccessorTemplate<ContainerId::particle1,CT,ColumnAccessMode::output,CM>;
+  using Particle1Range = ObjectRange<Particle1Def>;
+  using Particle1Id = ObjectId<Particle1Def>;
+  using OptParticle1Id = OptObjectId<Particle1Def>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle1Accessor  = AccessorTemplate<Particle1Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle1Decorator = AccessorTemplate<Particle1Def,CT,ColumnAccessMode::output,CM>;
 
-  using Particle2Range = ObjectRange<ContainerId::particle2>;
-  using Particle2Id = ObjectId<ContainerId::particle2>;
-  using OptParticle2Id = OptObjectId<ContainerId::particle2>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle2Accessor  = AccessorTemplate<ContainerId::particle2,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using Particle2Decorator = AccessorTemplate<ContainerId::particle2,CT,ColumnAccessMode::output,CM>;
+  using Particle2Range = ObjectRange<Particle2Def>;
+  using Particle2Id = ObjectId<Particle2Def>;
+  using OptParticle2Id = OptObjectId<Particle2Def>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle2Accessor  = AccessorTemplate<Particle2Def,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle2Decorator = AccessorTemplate<Particle2Def,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

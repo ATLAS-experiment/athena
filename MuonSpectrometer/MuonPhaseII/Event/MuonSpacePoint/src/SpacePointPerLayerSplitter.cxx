@@ -18,7 +18,6 @@ namespace MuonR4 {
             return;
         }
         const Muon::IMuonIdHelperSvc* idHelperSvc {hits.front()->msSector()->idHelperSvc()};
-        const MdtIdHelper& idHelper {idHelperSvc->mdtIdHelper()};
         const SpacePointPerLayerSorter laySorter{};
 
         HitVec::const_iterator itr = hits.begin();
@@ -33,6 +32,7 @@ namespace MuonR4 {
             const bool isMdt = (*itr)->type() == xAOD::UncalibMeasType::MdtDriftCircleType;
             HitLayVec& pushMe{isMdt ? m_mdtLayers : m_stripLayers};
             if (isMdt && !pushMe.empty()){
+                const MdtIdHelper& idHelper = idHelperSvc->mdtIdHelper();
                 if (idHelper.multilayer((*itr)->identify()) != idHelper.multilayer(pushMe.back().front()->identify())) {
                     m_tubeLaySwitch = pushMe.size();
                 }

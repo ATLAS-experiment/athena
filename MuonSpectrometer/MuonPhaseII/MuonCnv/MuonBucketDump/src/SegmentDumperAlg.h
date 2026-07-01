@@ -27,7 +27,7 @@ public:
   ~SegmentDumperAlg() override = default;
 
   StatusCode initialize() override final;
-  StatusCode execute() override final;
+  StatusCode execute(const EventContext& ctx) override final;
   StatusCode finalize() override final;
 
 private:
@@ -44,7 +44,17 @@ private:
   SG::ReadDecorHandleKeyArray<xAOD::MuonSegmentContainer> m_truthDecorKeys{
       this, "TruthDecorLinks", {}, "truthParticleLink decoration on segments"};
 
-  SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{
+  /// Allow the dumper to label otherwise-unmatched reco segments from sim-hit G4/HepMC ids.
+  Gaudi::Property<bool> m_includeG4TrackTruth{
+      this, "IncludeG4TrackTruth", false,
+      "Use sim-hit HepMC/G4 track identifiers for reco segment truth labels"};
+
+  /// Minimum number of reco segments that must share the same G4/HepMC id 
+  Gaudi::Property<unsigned int> m_minG4TrackTruthSegments{
+      this, "MinG4TrackTruthSegments", 2,
+      "Require a G4/HepMC track id to appear in at least this many reco segments"};
+
+  ActsTrk::GeoContextReadKey_t m_geoCtxKey{
       this, "AlignmentKey", "ActsAlignment", "Geometry alignment context"};
 
   /// Output tree
@@ -70,15 +80,25 @@ private:
   MuonVal::VectorBranch<float>& m_segment_numberDoF{
       m_tree.newVector<float>("segment_numberDoF")};
 
-  // NEW: reco η/φ derived from the segment direction (always filled)
+  // NEW: reco eta/phi derived from the segment direction (always filled)
   MuonVal::VectorBranch<float>& m_segmentRecoEta{
       m_tree.newVector<float>("segmentEta")};
   MuonVal::VectorBranch<float>& m_segmentRecoPhi{
       m_tree.newVector<float>("segmentPhi")};
 
-  // Truth labels & kinematics (filled only when a truth match exists)
+  // Truth labels & kinematics (one entry per dumped segment; -1/NaN if unmatched)
   MuonVal::VectorBranch<int32_t>& m_segmentTruthIdx{
       m_tree.newVector<int32_t>("segmentTruthPart")};
+  MuonVal::VectorBranch<int32_t>& m_segmentTruthSource{
+      m_tree.newVector<int32_t>("segmentTruthSource")};
+  MuonVal::VectorBranch<uint8_t>& m_segmentTruthAmbiguous{
+      m_tree.newVector<uint8_t>("segmentTruthAmbiguous")};
+  MuonVal::VectorBranch<int32_t>& m_segmentTruthAltPartOffsets{
+      m_tree.newVector<int32_t>("segmentTruthAltPartOffsets")};
+  MuonVal::VectorBranch<int32_t>& m_segmentTruthAltParts{
+      m_tree.newVector<int32_t>("segmentTruthAltParts")};
+  MuonVal::VectorBranch<float>& m_segmentTruthLabelWeight{
+      m_tree.newVector<float>("segmentTruthLabelWeight")};
   MuonVal::VectorBranch<int32_t>& m_segmentTruthPDGId{
       m_tree.newVector<int32_t>("segmentTruthPDGId")};
   MuonVal::VectorBranch<float>& m_segmentTruthPt{

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventUtils includes
@@ -172,8 +172,9 @@ StatusCode ParticleRemoverAlg::finalize()
 
 
 
-StatusCode ParticleRemoverAlg::execute()
+StatusCode ParticleRemoverAlg::execute(const EventContext& ctx)
 {
+
   ATH_MSG_DEBUG ("Executing " << name() << "...");
   // Let's first clear some stuff
   m_inContList.clear();
@@ -236,40 +237,40 @@ StatusCode ParticleRemoverAlg::execute()
 
   // Do the heavy lifting of actually creating the new and reduced output container(s)
   if ( m_contType == PHOTON ){
-    ATH_CHECK( this->removeParticles<xAOD::PhotonContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::PhotonContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == ELECTRON ){
-    ATH_CHECK( this->removeParticles<xAOD::ElectronContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::ElectronContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == MUON ){
-    ATH_CHECK( this->removeParticles<xAOD::MuonContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::MuonContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == TAU ){
-    ATH_CHECK( this->removeParticles<xAOD::TauJetContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::TauJetContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == JET ){
-    ATH_CHECK( this->removeParticles<xAOD::JetContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::JetContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == TRUTHPARTICLE ){
-    ATH_CHECK( this->removeParticles<xAOD::TruthParticleContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::TruthParticleContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == COMPOSITEPARTICLE ){
-    ATH_CHECK( this->removeParticles<xAOD::CompositeParticleContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::CompositeParticleContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == PARITCLEFLOW ){
-    ATH_CHECK( this->removeParticles<xAOD::PFOContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::PFOContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == NEUTRALPARTICLE ){
-    ATH_CHECK( this->removeParticles<xAOD::NeutralParticleContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::NeutralParticleContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == TRACKPARTICLE ){
-    ATH_CHECK( this->removeParticles<xAOD::TrackParticleContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::TrackParticleContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == PARTICLE ){
-    ATH_CHECK( this->removeParticles<xAOD::ParticleContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::ParticleContainer>(keepParticleVec, ctx) );
   }
   else if ( m_contType == CALOCLUSTER ){
-    ATH_CHECK( this->removeParticles<xAOD::CaloClusterContainer>(keepParticleVec) );
+    ATH_CHECK( this->removeParticles<xAOD::CaloClusterContainer>(keepParticleVec, ctx) );
   }
 
   return StatusCode::SUCCESS;

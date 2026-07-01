@@ -41,7 +41,6 @@
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
 
 
@@ -61,6 +60,7 @@ StatusCode KalmanFitterTool::initialize() {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_ATLASConverterTool.retrieve());
+  ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{m_doReFitFromPRD}));
   m_logger = makeActsAthenaLogger(this, "KalmanRefit");
 
@@ -103,27 +103,27 @@ StatusCode KalmanFitterTool::initialize() {
 
   /// Configure the fit extensions for Trk::MeasuremenBase pass through fits.
   {
-    m_trkSurfAcc = detail::TrkMeasSurfaceAccessor{m_ATLASConverterTool.get()};
+    m_trkSurfAcc = detail::TrkMeasSurfaceAccessor{m_geometryConvTool.get()};
 
-    FitterExtension_t& configureMe = m_kfExtensions[static_cast<int>(detail::SourceLinkType::TrkMeasurement)];
+    FitterExtension_t& configureMe = m_kfExtensions[Acts::toUnderlying(detail::SourceLinkType::TrkMeasurement)];
     configureMe = extensionTemplate;
-    configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<MutableTrackStateBackend>>(&m_trkCalibrator);
+    configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<TrackState_t>>(&m_trkCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_trkSurfAcc);
   }
   /// Configure the fit extensions for the Trk::PrepRawData fits
   {
-     m_prdCalibrator = detail::TrkPrepRawDataCalibrator{m_ATLASConverterTool.get(), m_ROTcreator.get()};
-     m_prdSurfAcc = detail::TrkPrepRawDataSurfaceAcc{m_ATLASConverterTool.get()};
-     FitterExtension_t& configureMe = m_kfExtensions[static_cast<int>(detail::SourceLinkType::TrkPrepRawData)];
+     m_prdCalibrator = detail::TrkPrepRawDataCalibrator{m_geometryConvTool.get(), m_ROTcreator.get()};
+     m_prdSurfAcc = detail::TrkPrepRawDataSurfaceAcc{m_geometryConvTool.get()};
+     FitterExtension_t& configureMe = m_kfExtensions[Acts::toUnderlying(detail::SourceLinkType::TrkPrepRawData)];
      configureMe = extensionTemplate;
-     configureMe.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<MutableTrackStateBackend>>(&m_prdCalibrator);
+     configureMe.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<TrackState_t>>(&m_prdCalibrator);
      configureMe.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&m_prdSurfAcc);
   }
   /// Configure the fit extensions for the uncalibrated measurement fits
   {
     m_unalibMeasSurfAcc = detail::xAODUncalibMeasSurfAcc{m_trackingGeometryTool.get()}; 
     m_uncalibMeasCalibrator = xAODUnCalibrator_t::NoCalibration(m_trackingGeometryTool.get());
-    FitterExtension_t& configureMe = m_kfExtensions[static_cast<int>(detail::SourceLinkType::xAODUnCalibMeas)];
+    FitterExtension_t& configureMe = m_kfExtensions[Acts::toUnderlying(detail::SourceLinkType::xAODUnCalibMeas)];
     configureMe = extensionTemplate;
     configureMe.surfaceAccessor.connect<&detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
     configureMe.calibrator.connect<&xAODUnCalibrator_t::calibrate>(&m_uncalibMeasCalibrator);
@@ -140,7 +140,7 @@ KalmanFitterTool::FitterOptions_t
                                    detail::SourceLinkType slType) const {
   
   
-  const auto& kfExtensions = m_kfExtensions[static_cast<int>(slType)];
+  const auto& kfExtensions = m_kfExtensions[Acts::toUnderlying(slType)];
 
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -189,7 +189,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
     return nullptr;
   }
 
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *inputTrack.perigeeParameters());
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
@@ -212,9 +212,8 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               scaledInitialParams, kfOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
-                                      Trk::TrackInfo::TrackFitter::KalmanFitter,
-                                      detail::SourceLinkType::TrkMeasurement);
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
+                                      Trk::TrackInfo::TrackFitter::KalmanFitter);
 }
 
 // fit a set of MeasurementBase objects
@@ -243,14 +242,14 @@ KalmanFitterTool::fit(const EventContext& ctx,
                                                      detail::SourceLinkType::TrkMeasurement);
 
   std::vector<Acts::SourceLink> trackSourceLinks;
-  m_ATLASConverterTool->toSourceLinks(inputMeasSet, trackSourceLinks);
+  detail::MeasurementCalibratorBase::pack(inputMeasSet, trackSourceLinks);
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
     return nullptr;
   }
 
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, estimatedStartParameters); 
 
   ActsTrk::MutableTrackBackend trackContainerBackEnd;
   ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
@@ -260,9 +259,8 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               initialParams, kfOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
-                                                Trk::TrackInfo::TrackFitter::KalmanFitter,
-                                                detail::SourceLinkType::TrkMeasurement);
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
+                                                Trk::TrackInfo::TrackFitter::KalmanFitter);
 }
 
 // fit a set of PrepRawData objects
@@ -286,7 +284,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
                                                        detail::SourceLinkType::TrkPrepRawData);
 
     std::vector<Acts::SourceLink> trackSourceLinks;
-    m_ATLASConverterTool->toSourceLinks(inputPRDColl, trackSourceLinks);
+    detail::MeasurementCalibratorBase::pack(inputPRDColl, trackSourceLinks);
     // protection against error in the conversion from Atlas masurement to Acts source link
     if (trackSourceLinks.empty()) {
       ATH_MSG_WARNING("input contain measurement but no source link created, probable issue with the converter, reject fit ");
@@ -294,7 +292,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
     }
     //
 
-    const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
+    const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, estimatedStartParameters); 
 
     ActsTrk::MutableTrackBackend trackContainerBackEnd;
     ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
@@ -304,15 +302,14 @@ KalmanFitterTool::fit(const EventContext& ctx,
     // Perform the fit
     auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                                 initialParams, kfOptions, tracks);
-    return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
-                                                  Trk::TrackInfo::TrackFitter::KalmanFitter,
-                                                  detail::SourceLinkType::TrkPrepRawData);
+    return m_ATLASConverterTool->convertFitResult(ctx, result,
+                                                  Trk::TrackInfo::TrackFitter::KalmanFitter);
 }
 
 // fit a set of PrepRawData objects
 // --------------------------------
 std::unique_ptr< MutableTrackContainer >
-KalmanFitterTool::fit(const std::vector< ATLASUncalibSourceLink> & clusterList,
+KalmanFitterTool::fit(const std::vector< const xAOD::UncalibratedMeasurement*> & clusterList,
                       const Acts::BoundTrackParameters& initialParams,
                       const Acts::GeometryContext& tgContext,
                       const Acts::MagneticFieldContext& mfContext,
@@ -327,8 +324,8 @@ KalmanFitterTool::fit(const std::vector< ATLASUncalibSourceLink> & clusterList,
   surfaces.reserve(clusterList.size());
 
 
-  for (const ATLASUncalibSourceLink& el : clusterList) {
-    sourceLinks.emplace_back( el );
+  for (const xAOD::UncalibratedMeasurement* el : clusterList) {
+    sourceLinks.emplace_back(detail::MeasurementCalibratorBase::pack(el));
     surfaces.push_back(m_unalibMeasSurfAcc.get(el));
   }
 
@@ -409,14 +406,14 @@ KalmanFitterTool::fit(const EventContext& ctx,
                                                      detail::SourceLinkType::TrkMeasurement);
      
   std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(inputTrack);
-  m_ATLASConverterTool->toSourceLinks(addMeasColl, trackSourceLinks);
+  detail::MeasurementCalibratorBase::pack(addMeasColl, trackSourceLinks);
 
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
     return nullptr;
   }
-  const auto initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *inputTrack.perigeeParameters());
 
   ActsTrk::MutableTrackBackend trackContainerBackEnd;
   ActsTrk::MutableTrackStateBackend multiTrajBackEnd;
@@ -426,9 +423,8 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               initialParams, kfOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
-                                                Trk::TrackInfo::TrackFitter::KalmanFitter,
-                                                detail::SourceLinkType::TrkMeasurement);
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
+                                                Trk::TrackInfo::TrackFitter::KalmanFitter);
 }
 
 // extend a track fit to include an additional set of PrepRawData objects
@@ -496,7 +492,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
     return nullptr;
   }
 
-  const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
+  const auto initialParams = m_geometryConvTool->convertTrackParametersToActs(ctx, *intrk1.perigeeParameters());
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
@@ -519,9 +515,8 @@ KalmanFitterTool::fit(const EventContext& ctx,
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
                               scaledInitialParams, kfOptions, tracks);
-  return m_ATLASConverterTool->convertFitResult(ctx, tracks, result,
-                                                Trk::TrackInfo::TrackFitter::KalmanFitter,
-                                                detail::SourceLinkType::TrkMeasurement);
+  return m_ATLASConverterTool->convertFitResult(ctx, result,
+                                                Trk::TrackInfo::TrackFitter::KalmanFitter);
 }
 
 std::unique_ptr< MutableTrackContainer >
@@ -532,14 +527,14 @@ KalmanFitterTool::fit(const Seed &seed,
                       const Acts::CalibrationContext& calContext,
 		      const Acts::Surface& targetSurface) const {
   
-  std::vector<ATLASUncalibSourceLink> sourceLinks;
+  std::vector<const xAOD::UncalibratedMeasurement*> sourceLinks;
   sourceLinks.reserve(6);
 
   const auto& sps = seed.sp();
   for (const xAOD::SpacePoint* sp : sps) {
     const auto& measurements = sp->measurements();
     for (const xAOD::UncalibratedMeasurement *umeas : measurements) {     
-      sourceLinks.emplace_back(umeas);
+      sourceLinks.push_back(umeas);
     }
   }
   return fit(sourceLinks, initialParams, tgContext, mfContext, calContext, &targetSurface);

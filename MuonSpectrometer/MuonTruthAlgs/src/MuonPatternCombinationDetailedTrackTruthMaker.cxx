@@ -29,7 +29,7 @@ StatusCode MuonPatternCombinationDetailedTrackTruthMaker::initialize() {
 }
 
 // -----------------------------------------------------------------------------------------------------
-StatusCode MuonPatternCombinationDetailedTrackTruthMaker::execute() {
+StatusCode MuonPatternCombinationDetailedTrackTruthMaker::execute(const EventContext& /*ctx*/) {
     ATH_MSG_DEBUG("MuonPatternCombinationDetailedTrackTruthMaker::execute()");
 
     StatusCode sc;

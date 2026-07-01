@@ -1,12 +1,12 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 extraArgs=$1
 ignore_pattern=$2
 
 n_events=1
-input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
-
+input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 echo "*** Running ACTS reconstruction with extra args: "${extraArgs}
 
@@ -20,6 +20,7 @@ Reco_tf.py \
 	       ${extraArgs}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
     --ignorePatterns "${ignore_pattern}" \
+    --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \

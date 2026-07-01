@@ -324,7 +324,7 @@ std::vector <TCanvas*> *PixelResidualHistograms::DrawProfiles(int color, int mar
 		}
 		if(labely != 0){
 			if(legend == "") legend = swap->GetTitle();
-			DrawLegendLatex(legend.c_str(),marker,0.7,labely,color,0.04);
+			DrawLegendLatex(legend, marker,0.7,labely,color,0.04);
 		}
 
 		// rms profile!
@@ -349,7 +349,7 @@ std::vector <TCanvas*> *PixelResidualHistograms::DrawProfiles(int color, int mar
 		}
 		if(labely != 0){
 			if(legend == "") legend = swap->GetTitle();
-			DrawLegendLatex(legend.c_str(),marker,0.7,labely,color,0.04);
+			DrawLegendLatex(legend,marker,0.7,labely,color,0.04);
 		}
 
 	}

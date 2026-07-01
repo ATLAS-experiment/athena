@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -37,7 +37,7 @@ namespace CP
 
 
   StatusCode SysListDumperAlg ::
-  execute ()
+  execute (const EventContext& /*ctx*/)
   {
     if (!m_firstEvent)
     {
@@ -47,15 +47,19 @@ namespace CP
     m_firstEvent = false;
 
     const std::vector<CP::SystematicSet> systematics = makeSystematicsVector (m_regex);
+    if (systematics.empty()) {
+      return StatusCode::SUCCESS;
+    }
 
     ANA_CHECK (book (TH1F (m_histogramName.value().c_str(), "systematics", systematics.size(), 0, systematics.size())));
     TH1 *histogram = hist (m_histogramName);
 
     int i = 1;
-    for (const auto& sys : systematics)
+    const std::string sysSignatureStr{"%SYS%"};
+    for (const SystematicSet& sys : systematics)
     {
       std::string name;
-      ANA_CHECK (m_systematicsService->makeSystematicsName (name, "%SYS%", sys));
+      ANA_CHECK (m_systematicsService->makeSystematicsName (name, sysSignatureStr, sys));
 
       histogram->GetXaxis()->SetBinLabel(i, name.c_str());
       i++;
@@ -91,8 +95,14 @@ namespace CP
   StatusCode SysListDumperAlg ::
   finalize ()
   {
-    ANA_MSG_INFO("Systematics regex '" << m_regex << "' matched:");
-    for(const CP::SystematicSet& mysys : makeSystematicsVector(m_regex)) {
+    const std::vector<CP::SystematicSet> systematics = makeSystematicsVector (m_regex);
+    if (systematics.empty()) {
+      ANA_MSG_INFO ("systematics regex '" << m_regex.value() << "' did not match any systematics");
+      return StatusCode::SUCCESS;
+    }
+
+    ANA_MSG_INFO("Systematics regex '" << m_regex.value() << "' matched:");
+    for(const CP::SystematicSet& mysys : systematics) {
       ANA_MSG_INFO ("  '" << mysys.name() << "'");
     }
     return StatusCode::SUCCESS;

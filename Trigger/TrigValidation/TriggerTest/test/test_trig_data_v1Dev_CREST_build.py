@@ -3,7 +3,7 @@
 
 # art-description: Trigger BS->RDO_TRIG athena test of the Dev_pp_run3_v1 menu using CREST
 # art-type: build
-# art-include: main/Athena/x86_64-el9-gcc14-opt
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 

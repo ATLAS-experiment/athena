@@ -19,7 +19,7 @@ PhotonFilter::PhotonFilter(const std::string& name, ISvcLocator* pSvcLocator)
 }
 
 
-StatusCode PhotonFilter::filterEvent() {
+StatusCode PhotonFilter::filterEvent(const EventContext& ctx) {
   int NPhotons = 0;
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
@@ -30,6 +30,6 @@ StatusCode PhotonFilter::filterEvent() {
           std::abs(pitr->momentum().pseudoRapidity()) <= m_EtaRange) NPhotons++;
     }
   }
-  setFilterPassed(NPhotons >= m_NPhotons);
+  setFilterPassed(NPhotons >= m_NPhotons, ctx);
   return StatusCode::SUCCESS;
 }

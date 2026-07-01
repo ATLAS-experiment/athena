@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -37,7 +37,7 @@ TileBeamElemContByteStreamCnv::TileBeamElemContByteStreamCnv(ISvcLocator* svcloc
 {
 }
 
-const CLID& TileBeamElemContByteStreamCnv::classID() {return ClassID_traits<TileBeamElemContainer>::ID();}
+CLID TileBeamElemContByteStreamCnv::classID() {return ClassID_traits<TileBeamElemContainer>::ID();}
 
 long TileBeamElemContByteStreamCnv::storageType() { return ByteStreamAddress::storageType(); }
 
@@ -65,20 +65,18 @@ StatusCode TileBeamElemContByteStreamCnv::createObjConst (IOpaqueAddress* pAddr,
 {
   ATH_MSG_DEBUG( " Executing createObj method" );
 
-  ByteStreamAddress* pRE_Addr;
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr); 
-  if(!pRE_Addr) {
-    ATH_MSG_ERROR( " Can not cast to ByteStreamAddress " );
-    return StatusCode::FAILURE;    
-  }
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
 
   std::vector<uint32_t> robid(1);
   robid[0] = 0;
   std::vector<const ROBDataProviderSvc::ROBF*> robf;
 
   // keep pointer to whole event and to CIS PAR frag internally
-  m_event = m_robSvc->getEvent(Gaudi::Hive::currentContext());
-  m_robSvc->getROBData(Gaudi::Hive::currentContext(), m_ROBID, robf);
+  m_event = m_robSvc->getEvent(ctx);
+  m_robSvc->getROBData(ctx, m_ROBID, robf);
   m_robFrag = (robf.size() > 0 ) ? robf[0] : 0;
 
   TileMutableBeamElemContainer* cont = m_queue.get (true);
@@ -95,7 +93,7 @@ StatusCode TileBeamElemContByteStreamCnv::createObjConst (IOpaqueAddress* pAddr,
     if (newrob != robid[0]) {
       robid[0] = newrob;
       robf.clear();
-      m_robSvc->getROBData(Gaudi::Hive::currentContext(), robid, robf);
+      m_robSvc->getROBData(ctx, robid, robf);
     }
     
     // unpack ROB data

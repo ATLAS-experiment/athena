@@ -55,9 +55,10 @@ protected:
 
   virtual TrackCollection_PERS *createPersistentWithKey( TrackCollection *transCont,
                                                          const std::string& key) override;
-  virtual TrackCollection      *createTransientWithKey (const std::string& key) override;
+  virtual TrackCollection      *createTransientWithKey ( const Token* token,
+                                                         const std::string& key) override;
 
-  virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() override { return & m_TPConverter; }
+  virtual TopLevelTPCnvBase*  getTopLevelTPCnv() override { return & m_TPConverter; }
 
 
 private: 

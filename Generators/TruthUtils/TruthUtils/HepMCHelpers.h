@@ -16,18 +16,6 @@
 ///
 /// ATLAS-specific HepMC functions
 
-#if !defined(HEPMC3) && !defined(XAOD_ANALYSIS)
-#include "AtlasHepMC/GenVertex.h"
-#include <ranges>
-namespace MC {
-inline
-auto particles_in (const HepMC::GenVertex* p) {
-  return std::ranges::subrange (p->particles_in_const_begin(),
-                                p->particles_in_const_end());
-}
-}
-#endif
-
 namespace MC
 {
  template <class VTX>
@@ -281,31 +269,9 @@ namespace MC
   }
 #if !defined(XAOD_ANALYSIS)
 #include "AtlasHepMC/GenEvent.h"
-#ifdef HEPMC3
 inline void GeVToMeV(HepMC::GenEvent* evt) { for (auto& p: evt->particles()) { p->set_momentum(p->momentum()*1000); p->set_generated_mass(1000* p->generated_mass());}}
 inline void MeVToGeV(HepMC::GenEvent* evt) { for (auto& p: evt->particles()) { p->set_momentum(p->momentum()*1.0/1000); p->set_generated_mass(1.0/1000* p->generated_mass());} }
-#else
-inline void GeVToMeV(HepMC::GenEvent* evt) {
-  for (HepMC::GenEvent::particle_iterator p = evt->particles_begin(); p != evt->particles_end(); ++p) {
-    const HepMC::FourVector fv((*p)->momentum().px() * 1000,
-                               (*p)->momentum().py() * 1000,
-                               (*p)->momentum().pz() * 1000,
-                               (*p)->momentum().e()  * 1000);
-    (*p)->set_momentum(fv);
-    (*p)->set_generated_mass(1000 * (*p)->generated_mass());
-  }
-}
-inline void MeVToGeV(HepMC::GenEvent* evt) {
-  for (HepMC::GenEvent::particle_iterator p = evt->particles_begin(); p != evt->particles_end(); ++p) {
-    const HepMC::FourVector fv((*p)->momentum().px() / 1000,
-                               (*p)->momentum().py() / 1000,
-                               (*p)->momentum().pz() / 1000,
-                               (*p)->momentum().e()  / 1000);
-    (*p)->set_momentum(fv);
-    (*p)->set_generated_mass((*p)->generated_mass() / 1000);
-  }
-}
-#endif
+
 #endif
 }
 #endif

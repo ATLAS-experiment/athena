@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArDigitContByteStreamCnv.h"
@@ -40,7 +40,7 @@ LArDigitContByteStreamCnv::LArDigitContByteStreamCnv(ISvcLocator* svcloc) :
 LArDigitContByteStreamCnv::~LArDigitContByteStreamCnv() {
 }
 
-const CLID& LArDigitContByteStreamCnv::classID(){
+CLID LArDigitContByteStreamCnv::classID(){
   return ClassID_traits<LArDigitContainer>::ID() ;
 }
 
@@ -71,16 +71,14 @@ LArDigitContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject*& pO
     ATH_MSG_ERROR( " ROBDataProviderSvc not loaded. Can't read ByteStream." );
     return StatusCode::FAILURE;
   }
-  ByteStreamAddress *pRE_Addr;
-  pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr); //Cast from OpaqueAddress to ByteStreamAddress
-  if (!pRE_Addr) {
-    ATH_MSG_ERROR( "dynamic_cast of OpaqueAdress to ByteStreamAddress failed!" );
-    return StatusCode::FAILURE;
-  }
+  ByteStreamAddress* pRE_Addr{};
+  ATH_CHECK( (pRE_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
+
+  const EventContext& ctx = pRE_Addr->getEventContext();
 
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFrags;
-  m_rdpSvc->getROBData(Gaudi::Hive::currentContext(), LArByteStream::s_allROBIDs_LATOME, robFrags ); 
-  const RawEvent* re = m_rdpSvc->getEvent(Gaudi::Hive::currentContext()); 
+  m_rdpSvc->getROBData(ctx, LArByteStream::s_allROBIDs_LATOME, robFrags );
+  const RawEvent* re = m_rdpSvc->getEvent(ctx);
   const std::string& key = *(pAddr->par()); // Get key used in the StoreGateSvc::retrieve function
   // get gain and pass to convert function.
   CaloGain::CaloGain gain=CaloGain::LARNGAIN; //At this place, LARNGAINS means Automatic gain.

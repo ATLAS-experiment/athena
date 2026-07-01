@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
  ////////////////////////////////////
@@ -20,8 +20,8 @@ class ITRT_DriftTimeData {
 public:
 
   virtual double MaxTabulatedField() const = 0;
-  virtual double DriftTimeAtNoField(const double& distance) const = 0;
-  virtual double DriftTimeAtMaxField(const double& distance) const = 0;
+  virtual double DriftTimeAtNoField(double distance) const = 0;
+  virtual double DriftTimeAtMaxField(double distance) const = 0;
 
   virtual ~ITRT_DriftTimeData() {};
 

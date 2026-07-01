@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimDATAFLOWTOOL_H
 #define FPGATrackSimDATAFLOWTOOL_H
@@ -9,8 +9,10 @@
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 
 #include "TH1.h"
-
+#include "CxxUtils/transparent_string_hash.h"
 #include <fstream>
+#include <string_view>
+
 
 class FPGATrackSimDataFlowInfo;
 class FPGATrackSimHit;
@@ -26,7 +28,9 @@ class IFPGATrackSimMappingSvc;
 class FPGATrackSimDataFlowTool: public AthAlgTool
 {
     public:
-
+        template<typename T>
+        using DataFlowMap_t = std::unordered_map<std::string, T, CxxUtils::TransparentStringHash, std::equal_to<>>;
+        
         FPGATrackSimDataFlowTool(std::string const &, std::string const &, IInterface const *);
         virtual ~FPGATrackSimDataFlowTool() = default;
 
@@ -45,7 +49,7 @@ class FPGATrackSimDataFlowTool: public AthAlgTool
 
         StatusCode makeDataFlowTable();
 
-        StatusCode addDataFlow(float const n, std::string const & key, bool const isInt = true);
+        StatusCode addDataFlow(float const n, std::string_view key, bool const isInt = true);
         StatusCode printDataFlow(std::string const & key, int const div = 1);
 
         void addTableBreak(unsigned const n = 1);
@@ -85,13 +89,13 @@ class FPGATrackSimDataFlowTool: public AthAlgTool
         unsigned const m_tableDataWidth = 9;
         double   const m_max_frac = 0.99; // Maximum acceptance fraction of data mimicking data loss
 
-        std::unordered_map<std::string, int>   m_dataFlowDataI_min;
-        std::unordered_map<std::string, int>   m_dataFlowDataI_max;
-        std::unordered_map<std::string, float> m_dataFlowDataF_min;
-        std::unordered_map<std::string, float> m_dataFlowDataF_max;
+        DataFlowMap_t<int>   m_dataFlowDataI_min;
+        DataFlowMap_t<int>   m_dataFlowDataI_max;
+        DataFlowMap_t<float> m_dataFlowDataF_min;
+        DataFlowMap_t<float> m_dataFlowDataF_max;
 
-        std::unordered_map<std::string, TH1I*> m_dataFlowHistsI;
-        std::unordered_map<std::string, TH1F*> m_dataFlowHistsF;
+        DataFlowMap_t<TH1I*> m_dataFlowHistsI;
+        DataFlowMap_t<TH1F*> m_dataFlowHistsF;
 };
 
 #endif // FPGATrackSimDataFlowTool_h

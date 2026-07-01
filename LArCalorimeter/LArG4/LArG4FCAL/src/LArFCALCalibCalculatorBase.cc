@@ -114,7 +114,7 @@ namespace LArG4 {
       return StatusCode::SUCCESS;
     }
 
-    G4bool LArFCALCalibCalculatorBase::Process(const G4Step* step, LArG4Identifier & identifier,
+    G4bool LArFCALCalibCalculatorBase::Process(const G4Step* step, LArG4Identifier & identifier, LArG4Identifier &,
                                                std::vector<G4double> & energies,
                                                const eCalculatorProcessing process) const
     {

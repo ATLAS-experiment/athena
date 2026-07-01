@@ -237,16 +237,23 @@ namespace PhaseII {
       }
    };
 
+   // assumed cache line size
+   static constexpr std::size_t CACHELINE = 64ul;
+
    /// @brief Base raw data container which provides coordinates of a certain dimension and a data word per RDO (raw data object).
    ///
    /// The class implements the basic container methods to allow its usage together with  proxy container objects
    /// It also provides methods to bit-pack and unpack information into and from a single data word.
+   // In case the raw data is filled concurrently, there will be multiple containers which may be
+   // adjacent to one-another. to ensure that concurrent modification of the content of adjacent
+   // containers will not change the same cache line, an alignment requirement of the the assumed
+   // cache line size is chosen.
    template <std::size_t NDim>
-   class InDetRawDataContainer {
+   class alignas(CACHELINE) InDetRawDataContainer {
    public:
 
       /// @brief return true if the index refers to an element in the container
-      bool isValid(unsigned int index) const      { assert( m_coordinates.size() == m_word.size()); return index < m_coordinates.size(); }
+      bool isValid(unsigned int index) const      { return index < m_coordinates.size() && index < m_word.size(); }
 
       /// @brief return the coordinates i.e. column, row or strip  of a certain RDO (read only).
       const std::array<std::int16_t,NDim> &coordinates(unsigned int index) const { assert(isValid(index)); return m_coordinates[index]; }
@@ -262,9 +269,9 @@ namespace PhaseII {
       bool isSane() const          { return m_coordinates.size() == m_word.size(); }
 
       /// @brief total number of RDOs which are in this container.
-      std::size_t size() const     { assert(isSane()); return m_coordinates.size(); }
+      std::size_t size() const     { return m_coordinates.size(); }
       /// @brief test whether the container is empty i.e. does not contain any RDOs
-      bool empty() const           { assert(isSane()); return m_coordinates.empty(); }
+      bool empty() const           { return m_coordinates.empty(); }
       /// @brief the maximum number RDOs this container can hold without reallocation.
       std::size_t capacity() const { assert(m_coordinates.capacity() == m_word.capacity()); return m_coordinates.capacity(); }
 
@@ -349,22 +356,22 @@ namespace PhaseII {
    /// for the data stored in the base container.
    /// It provides access to hit coordinates of a single hit and an associated data word, but
    /// lacks the means to interpret the data word.
-   template <class T_RawDataContainer, AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
-   class RawDataProxyBase : public ContainerProxyBase<T_RawDataContainer, unsigned int, accessPolicy >::template ElementProxyBase<accessPolicy> {
+   template <class T_RawDataContainer>
+   class RawDataProxyBase : public Utils::ElementProxyBase<T_RawDataContainer, unsigned int> {
    public:
-      using BASE = typename ContainerProxyBase<T_RawDataContainer, unsigned int, accessPolicy >::template ElementProxyBase<accessPolicy>;
+      using BASE = Utils::ElementProxyBase<T_RawDataContainer, unsigned int>;
       using BASE::BASE;
 
       const auto &coordinates() const {
          return this->container().coordinates(this->index());
       }
-      auto &coordinates() requires (accessPolicy == AccessPolicy::ReadWrite)  {
+      auto &coordinates() requires (!BASE::isConst)  {
          return this->container().coordinates(this->index());
       }
       const auto &dataWord() const {
          return this->container().dataWord(this->index());
       }
-      auto &dataWord() requires (accessPolicy == AccessPolicy::ReadWrite)  {
+      auto &dataWord() requires (!BASE::isConst)  {
          return this->container().dataWord(this->index());
       }
    };
@@ -375,18 +382,16 @@ namespace PhaseII {
    ///                    and is returned for each child element this proxy provides.
    /// The proxy represents a child element range i.e. RDO range, and will provide a proxy
    /// object for each of its children.
-   template <class T_RawDataContainer, class T_RawDataProxy, AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
+   template <class T_RawDataContainer, class T_RawDataProxy>
    class RawDataContainerProxy :  public ContainerProxy<T_RawDataContainer,
-                                                  RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy, accessPolicy>,
+                                                  RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy>,
                                                   T_RawDataProxy,
-                                                  IndexWithRange,
-                                                  accessPolicy >  {
+                                                  IndexWithRange>  {
    public:
       using BASE = ContainerProxy<T_RawDataContainer,
-                                  RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy, accessPolicy>,
+                                  RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy>,
                                   T_RawDataProxy,
-                                  IndexWithRange,
-                                  accessPolicy > ;
+                                  IndexWithRange> ;
 
       using BASE::BASE;
 
@@ -423,7 +428,7 @@ namespace PhaseII {
    template <class T_RawDataContainer>
    struct traits  {
       template <AccessPolicy accessPolicy>
-      using RawDataProxy = RawDataProxyBase<T_RawDataContainer, accessPolicy>;
+      using RawDataProxy = RawDataProxyBase<typename Utils::ContainerAccessHelper<T_RawDataContainer, accessPolicy>::ContainerType >;
    };
    }
    }
@@ -436,11 +441,10 @@ namespace PhaseII {
    /// @tparam T_RawDataProxy a proxy class which provides access to the properties of a single hit
    ///     and is returned for each child element this proxy provides.
    // @TODO add concepts for T_RawDataContainerCollection
-   template <class T_RawDataContainerCollection, class T_RawDataProxy, AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
-   class ContainerProxyAdapter : public ContainerProxyBase<T_RawDataContainerCollection,
-                                                            unsigned int,
-                                                            accessPolicy >::template ElementProxyBase<accessPolicy>
+   template <class T_RawDataContainerCollection, class T_RawDataProxy>
+   class ContainerProxyAdapter : public Utils::ElementProxyBase<T_RawDataContainerCollection,unsigned int >
    {
+      using BASE = Utils::ElementProxyBase<T_RawDataContainerCollection,unsigned int >;
       using T_Range = typename T_RawDataContainerCollection::T_RangeTypeBase;
       using T_RawDataContainer = std::remove_cvref_t<decltype(std::declval<T_RawDataContainerCollection>().data(std::uint32_t{}))>;
       // Create a special index which also provided the child element range.
@@ -457,36 +461,35 @@ namespace PhaseII {
       }
       // Get from this container collection the actual container which contains the hit data (read/write).
       static T_RawDataContainer *getRawDataContainer(T_RawDataContainerCollection &container, unsigned int module_index)
-         requires( accessPolicy == AccessPolicy::ReadWrite)
+         requires(!BASE::isConst)
       {
          T_Range range = container.range(module_index);
          return &(container.data(range.containerIndex()));
       }
    public:
-      using BASE = typename ContainerProxyBase<T_RawDataContainerCollection, unsigned int, accessPolicy >::template ElementProxyBase<accessPolicy>;
       using BASE::BASE;
 
       /// @brief Create the actual container proxy for the elements this proxy refers to.
       /// This is contraction of creating this proxy and converting it into a new one. It can result in a read/write or read only proxy.
-      static RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy, accessPolicy>
+      static RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy>
       create(T_RawDataContainerCollection *container, unsigned int module_index)
       {
          assert(container);
-         RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy, accessPolicy> proxy( getRawDataContainer(*container,module_index),
-                                                                            getIndexWithRange(*container,module_index) );
+         RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy> proxy( getRawDataContainer(*container,module_index),
+                                                                           getIndexWithRange(*container,module_index) );
          return proxy;
       }
 
       /// @brief Create the actual container proxy for the elements this proxy refers to.
       ///
       /// This is contraction of creating this proxy and converting it into a new one. It will result in a read only proxy.
-      static RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy, AccessPolicy::ReadOnly>
+      static RawDataContainerProxy<const T_RawDataContainer, T_RawDataProxy>
       create(const T_RawDataContainerCollection *container, unsigned int module_index)
-         requires(accessPolicy==AccessPolicy::ReadOnly)
+         requires(BASE::isConst)
       {
          assert(container);
-         RawDataContainerProxy<T_RawDataContainer, T_RawDataProxy, accessPolicy> proxy( getRawDataContainer(*container,module_index),
-                                                                            getIndexWithRange(*container,module_index) );
+         RawDataContainerProxy<const T_RawDataContainer, T_RawDataProxy> proxy( getRawDataContainer(*container,module_index),
+                                                                                 getIndexWithRange(*container,module_index) );
          return proxy;
       }
 
@@ -500,42 +503,57 @@ namespace PhaseII {
    };
 
    /// @brief Helper class to represent the top level proxy which provides  per module proxy objects which provide the hit element proxies.
-   template <class T_RawDataContainerCollection, class T_RawDataProxy, AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
+   template <class T_RawDataContainerCollection, class T_RawDataProxy>
    class ContainerCollectionProxy : public ContainerProxy<T_RawDataContainerCollection,
-                                                             ContainerCollectionProxy<T_RawDataContainerCollection, T_RawDataProxy, accessPolicy>,
-                                                             ContainerProxyAdapter<T_RawDataContainerCollection, T_RawDataProxy,accessPolicy>,
-                                                             RootNodeIndex,
-                                                             accessPolicy > {
+                                                          ContainerCollectionProxy<T_RawDataContainerCollection, T_RawDataProxy>,
+                                                          ContainerProxyAdapter<T_RawDataContainerCollection, T_RawDataProxy>,
+                                                          RootNodeIndex > {
       using BASE=ContainerProxy<T_RawDataContainerCollection,
-                                ContainerCollectionProxy<T_RawDataContainerCollection, T_RawDataProxy, accessPolicy>,
-                                ContainerProxyAdapter<T_RawDataContainerCollection, T_RawDataProxy,accessPolicy>,
-                                RootNodeIndex,
-                                accessPolicy >;
+                                ContainerCollectionProxy<T_RawDataContainerCollection, T_RawDataProxy>,
+                                ContainerProxyAdapter<T_RawDataContainerCollection, T_RawDataProxy>,
+                                RootNodeIndex >;
       using BASE::BASE;
    };
 
    /// @brief helper class to define all the proxies for a RDO container.
-   template <class T_RawDataContainer, AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
-   struct RawDataCollectionTypes {
-      using ContainerCollection = PhaseII::IndexedRanges<T_RawDataContainer, std::atomic<PhaseII::DataRange> >;
-      using RawDataProxy = typename RawData::details::traits<T_RawDataContainer>::template RawDataProxy<accessPolicy>;
-      using RawDataContainerProxy  = PhaseII::RawDataContainerProxy<T_RawDataContainer, RawDataProxy, accessPolicy>;
-      using ContainerProxyAdapter  = PhaseII::ContainerProxyAdapter<ContainerCollection, RawDataProxy, accessPolicy>;
-      using ContainerCollectionProxy = PhaseII::ContainerCollectionProxy<ContainerCollection, RawDataProxy, accessPolicy>;
+   template <class T_RawDataContainer>
+   struct RawDataTypeTraits {
+      static constexpr bool isConst = std::is_const_v<T_RawDataContainer>;
+      static constexpr Utils::AccessPolicy accessPolicy=AccessPolicyHelper<isConst>::accessPolicy;
+      using ContainerNonConst = std::remove_cvref_t<T_RawDataContainer>;
+
+      // the collection should be based on the non const container
+      using ContainerCollection = typename Utils::ContainerAccessHelper<PhaseII::IndexedRanges<ContainerNonConst, std::atomic<PhaseII::DataRange> >,
+                                                                        accessPolicy>::ContainerType;
+      // but the proxies if (const) refer to the const collection and finally the const container.
+      using RawDataProxy = typename RawData::details::traits<ContainerNonConst>::template RawDataProxy<accessPolicy>;
+      using RawDataContainerProxy  = PhaseII::RawDataContainerProxy<typename Utils::ContainerAccessHelper<T_RawDataContainer,
+                                                                                                          accessPolicy>::ContainerType,
+                                                                    RawDataProxy >;
+      using ContainerProxyAdapter  = PhaseII::ContainerProxyAdapter<typename Utils::ContainerAccessHelper<ContainerCollection,
+                                                                                                          accessPolicy>::ContainerType,
+                                                                    RawDataProxy>;
+      using ContainerCollectionProxy = PhaseII::ContainerCollectionProxy<typename Utils::ContainerAccessHelper<ContainerCollection,
+                                                                                                               accessPolicy>::ContainerType,
+                                                                         RawDataProxy>;
    };
 
    /// @brief Create the top level container proxy for an RDO container collection (read only).
    template <class T_RawDataContainerCollection>
    inline auto makeRawDataCollectionProxy(const T_RawDataContainerCollection &collection) {
       using T_RawDataContainer = typename T_RawDataContainerCollection::DataContainerType;
-      return typename RawDataCollectionTypes<T_RawDataContainer, AccessPolicy::ReadOnly>::ContainerCollectionProxy(&collection);
+      static_assert( RawDataTypeTraits<const T_RawDataContainer>::ContainerCollectionProxy::isConst);
+      using ContainerNonConst = std::remove_cvref_t<T_RawDataContainerCollection>;
+      static_assert( std::is_base_of_v<typename RawDataTypeTraits<const T_RawDataContainer>::ContainerCollectionProxy::ContainerNonConst,
+                                       ContainerNonConst>);
+      return typename RawDataTypeTraits<const T_RawDataContainer>::ContainerCollectionProxy(&collection);
    }
 
    /// @brief  Create the top level container proxy for an RDO container collection (read/write).
    template <class T_RawDataContainerCollection>
    inline auto makeRawDataCollectionProxy(T_RawDataContainerCollection &collection) {
       using T_RawDataContainer = typename T_RawDataContainerCollection::DataContainerType;
-      return typename RawDataCollectionTypes<T_RawDataContainer, AccessPolicy::ReadWrite>::ContainerCollectionProxy(&collection);
+      return typename RawDataTypeTraits<T_RawDataContainer>::ContainerCollectionProxy(&collection);
    }
 }
 #endif

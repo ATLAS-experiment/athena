@@ -25,6 +25,13 @@ namespace CP
     ANA_CHECK (m_matchingTool.retrieve());
     ANA_CHECK (m_tauHandle.initialize (m_systematicsList));
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_tauHandle, SG::AllowEmpty));
+
+    // Declare output decorations for MT dependency tracking
+    // (actual writing is done by the tool, handles just register dependencies)
+    ANA_CHECK (m_isTruthMatchedDecor.initialize (m_systematicsList, m_tauHandle));
+    ANA_CHECK (m_truthJetLinkDecor.initialize (m_systematicsList, m_tauHandle));
+    ANA_CHECK (m_truthParticleLinkDecor.initialize (m_systematicsList, m_tauHandle));
+
     ANA_CHECK (m_systematicsList.initialize());
     return StatusCode::SUCCESS;
   }
@@ -32,12 +39,12 @@ namespace CP
 
 
   StatusCode TauTruthMatchingAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::TauJetContainer *taus = nullptr;
-      ANA_CHECK (m_tauHandle.retrieve (taus, sys));
+      ANA_CHECK (m_tauHandle.retrieve (taus, sys, ctx));
       for (const xAOD::TauJet *tau : *taus)
       {
         if (m_preselection.getBool (*tau, sys))

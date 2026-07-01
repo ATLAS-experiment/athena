@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -67,12 +67,34 @@ namespace xAOD {
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, x, setX )
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, y, setY )
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, z, setZ )
-   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, time, setTime )
-   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, timeResolution, setTimeResolution )
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, uint8_t, hasValidTime, setHasValidTime )
 
    AUXSTORE_OBJECT_SETTER_AND_GETTER( Vertex_v1, std::vector< float >,
                                       covariance, setCovariance )
+
+   float Vertex_v1::time() const {
+      static const SG::AuxElement::Accessor< uint8_t > acc("hasValidTime");
+      if( !acc.isAvailable( *this) || !static_cast<bool>(hasValidTime()) ) throw std::runtime_error( "Unavailable Vertex time requested" );
+      static const SG::AuxElement::Accessor< float > accTime("time");
+      return accTime( *this );
+   }
+
+   float Vertex_v1::timeResolution() const {
+     static const SG::AuxElement::Accessor< uint8_t > acc("hasValidTime");
+     if( !acc.isAvailable( *this) || !static_cast<bool>(hasValidTime()) ) throw std::runtime_error( "Unavailable Vertex timeResolution requested" );
+     static const SG::AuxElement::Accessor< float > accTimeRes("timeResolution");
+     return accTimeRes( *this );
+   }
+
+   void Vertex_v1::setTime(float time) {
+     static const SG::AuxElement::Accessor< float > acc("time");
+     acc( *this ) = time;
+   }
+
+   void Vertex_v1::setTimeResolution(float timeRes) {
+     static const SG::AuxElement::Accessor< float > acc("timeResolution");
+     acc( *this ) = timeRes;
+   }
 
    //
    /////////////////////////////////////////////////////////////////////////////

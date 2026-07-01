@@ -76,7 +76,7 @@ namespace pool {
          throw std::runtime_error( "Could not retrieve a database handle (APR: \" ImplicitCollection::ImplicitCollection \" from \" ImplicitCollection \")" );
       }
 
-      if ( database->openMode() == IDatabase::CLOSED ) {
+      if ( database->openMode() == Io::INVALID ) {
          // The following fix was added to allow the reading of an implicit 
          // collection in the absence of a POOL file catalog. For now, it assumes 
          // a ROOT persistency storage type if no other type can be found. 
@@ -92,20 +92,16 @@ namespace pool {
          }
       }
 
-      const std::string& ttreeName = std::format("{}(DataHeader)", APRDefaults::getDataHeaderName(APRDefaults::NamingScheme::Historical));
-      const std::string& rntupleName = std::format("{}(DataHeader)", APRDefaults::getDataHeaderName(APRDefaults::NamingScheme::Canonical));
-      const std::string& oldTtreeName = std::format("{}_DataHeader", APRDefaults::getDataHeaderName(APRDefaults::NamingScheme::Historical));
+      const std::string& newName = std::format("{}(DataHeader)", APRDefaults::ReadConfig::getDataHeaderName( database->fid() ));
+      const std::string& oldName = std::format("{}_DataHeader", APRDefaults::ReadConfig::getDataHeaderName( database->fid() ));
       std::vector< std::string > containers = database->containers();
       for( std::vector< std::string >::const_iterator iContainer = containers.begin();
            iContainer != containers.end(); ++iContainer ) {
-         if( ttreeName == *iContainer ) {
-            m_container = database->containerHandle( ttreeName );
+         if( newName == *iContainer ) {
+            m_container = database->containerHandle( newName );
             break;
-         } else if( rntupleName == *iContainer ) {
-            m_container = database->containerHandle( rntupleName );
-            break;
-         } else if( oldTtreeName == *iContainer ) {
-            m_container = database->containerHandle( oldTtreeName );
+         } else if( oldName == *iContainer ) {
+            m_container = database->containerHandle( oldName );
             break;
          }
       }
@@ -131,34 +127,13 @@ namespace pool {
    }
 
 
-   void
-   ImplicitCollection::commit(bool)
-   {
-   }
-
-
-   void
-   ImplicitCollection::close()
-   {
-      // can't be closed
-   }
-
-
-   void
-   ImplicitCollection::open()
-   {
-      // hmm, no-op at the moment  //MN
-   }
-
-
    const CollectionDescription& ImplicitCollection::description() const
    {
       return m_description;
    }
 
-   ICollectionCursor& ImplicitCollection::cursor()
+   std::unique_ptr<ICollectionCursor> ImplicitCollection::cursor()
    {
-      ImplicitCollectionIterator* cursor = new ImplicitCollectionIterator( *m_container );
-      return *cursor;
+      return std::make_unique<ImplicitCollectionIterator>( *m_container );
    }
 }

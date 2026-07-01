@@ -69,6 +69,7 @@ public:
   virtual StatusCode retrieveTruthTaus() override;
   virtual StatusCode retrieveTruthTaus(ITruthTausEvent& truthTausEvent, const EventContext& ctx) const override;
 
+  Gaudi::Property<bool> m_bForceCheckTruthMatch{ this, "ForceCheckTruthMatch", false};
 
 protected:
   StatusCode retrieveTruthTausImpl(TruthTausEvent& truthTausEvent, const EventContext& ctx) const;
@@ -90,7 +91,9 @@ private:
     // truth visible kinematic variables
     TLorentzVector m_vTruthVisTLV;
     TLorentzVector m_vTruthVisTLVCharged;
+    std::vector<TLorentzVector> m_TLVCharged;
     TLorentzVector m_vTruthVisTLVNeutral;
+    std::vector<TLorentzVector> m_TLVNeutral;
 
     // truth vertices
     TVector3 m_vDecayVertex;
@@ -117,7 +120,9 @@ private:
   // properties
   Gaudi::Property<bool> m_bWriteInvisibleFourMomentum{ this, "WriteInvisibleFourMomentum", false};
   Gaudi::Property<bool> m_bWriteVisibleChargedFourMomentum{ this, "WriteVisibleChargedFourMomentum", false};
+  Gaudi::Property<bool> m_bWriteVisibleChargedFourMomentumComponent{ this, "WriteVisibleChargedFourMomentumComponent",  false};
   Gaudi::Property<bool> m_bWriteVisibleNeutralFourMomentum{ this, "WriteVisibleNeutralFourMomentum", false};
+  Gaudi::Property<bool> m_bWriteVisibleNeutralFourMomentumComponent{ this, "WriteVisibleNeutralFourMomentumComponent",  false}; 
   Gaudi::Property<bool> m_bWriteDecayModeVector{ this, "WriteDecayModeVector", true};
   Gaudi::Property<bool> m_bWriteVertices{ this, "WriteVertices", true}; 
 

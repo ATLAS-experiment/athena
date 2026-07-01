@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 // TrkToLeptonPVTool.h - Description
@@ -39,8 +39,8 @@
       virtual StatusCode finalize() override;
 
 
-      virtual std::unique_ptr<xAOD::Vertex> matchTrkToPV(const xAOD::TrackParticle *trk, const xAOD::Vertex * PV, const xAOD::EventInfo * =0) const override final;
-      virtual std::unique_ptr<xAOD::Vertex> npartVertex(const std::vector<const xAOD::TrackParticle*>&, const xAOD::EventInfo * =0) const override final;
+      virtual std::unique_ptr<xAOD::Vertex> matchTrkToPV(const EventContext& ctx, const xAOD::TrackParticle *trk, const xAOD::Vertex * PV, const xAOD::EventInfo * =0) const override final;
+      virtual std::unique_ptr<xAOD::Vertex> npartVertex(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>&, const xAOD::EventInfo * =0) const override final;
 //------------------------------------------------------------------------------------------------------------------
 // Private data and functions
 //

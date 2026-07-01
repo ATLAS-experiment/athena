@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigDecisionTool_ChainGroupFunctions_h
@@ -17,6 +17,7 @@
  *
  ***********************************************************************************/
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "TrigDecisionInterface/GroupProperties.h"
@@ -38,7 +39,7 @@ namespace Trig {
                                             TrigDefs::Group props = TrigDefs::Group::Default) const;
 
       /// Create/get chain group (@see CacheGlobalMemory)
-      const Trig::ChainGroup* getChainGroup(const std::string& pattern,
+      const Trig::ChainGroup* getChainGroup(std::string_view pattern,
                                             TrigDefs::Group props = TrigDefs::Group::Default) const;
 
     protected:

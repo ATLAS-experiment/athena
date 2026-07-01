@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,9 +24,11 @@
 #include "ThePEG/PDF/PDF.h"
 
 #include "Herwig/API/HerwigAPI.h"
+#include "Herwig/Utilities/HerwigStrategy.h"
 
 #include "PathResolver/PathResolver.h"
 
+#include <fstream>
 #include <thread>
 #include <chrono>
 #include <filesystem>
@@ -43,6 +45,7 @@ Herwig7::Herwig7(const std::string& name, ISvcLocator* pSvcLocator) :
   m_pdfname_me("UNKNOWN"), m_pdfname_mpi("UNKNOWN") // m_pdfname_ps("UNKONWN"),
 {
   declareProperty("RunFile", m_runfile="Herwig7");
+  declareProperty("RunSettings", m_runSettings="");
   declareProperty("SetupFile", m_setupfile="");
 
   declareProperty("UseRandomSeedFromGeneratetf", m_use_seed_from_generatetf);
@@ -123,24 +126,66 @@ StatusCode Herwig7::genInitialize() {
   // Use PathResolver to find default Hw7 ThePEG repository file.
   const std::string repopath = PathResolver::find_file_from_list("HerwigDefaults.rpo", datapath);
   ATH_MSG_DEBUG("Loading Herwig default repo from " << repopath);
-  ThePEG::Repository::load(std::move(repopath));
+  ThePEG::Repository::load(repopath);
   ATH_MSG_DEBUG("Successfully loaded Herwig default repository");
+
+  const std::string share_path = std::filesystem::path(std::move(repopath)).parent_path().string();
+
+  if (!m_runSettings.empty()) {
+    ATH_CHECK(writeRunFileFromText(share_path));
+  }
 
   ATH_MSG_INFO("Setting runfile name '"+m_runfile+"'");
   m_api.inputfile(m_runfile);
 
   ATH_MSG_INFO("starting to prepare the run from runfile '"+m_runfile+"'...");
 
-#ifdef HEPMC3
   m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
   /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
-  struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Herwig7"), std::string("7"), std::string("Used generator")};
+  struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Herwig7"), Herwig::HerwigStrategy::version, std::string("Used generator")};
   m_runinfo->tools().push_back(std::move(generator));  
-#endif
   // read in a Herwig runfile and obtain the event generator
   m_gen = Herwig::API::prepareRun(m_api);
   ATH_MSG_DEBUG("preparing the run...");
 
+  return StatusCode::SUCCESS;
+}
+
+
+StatusCode Herwig7::writeRunFileFromText(const std::string& share_path) {
+  if (m_runSettings.empty()) {
+    return StatusCode::SUCCESS;
+  }
+
+  std::string inputfile_name = m_runfile;
+  const std::string runfile_suffix = ".run";
+  const auto suffix_pos = inputfile_name.rfind(runfile_suffix);
+  if (suffix_pos != std::string::npos) {
+    inputfile_name.replace(suffix_pos, runfile_suffix.size(), ".in");
+  } else {
+    std::filesystem::path inputfile_path(m_runfile);
+    inputfile_path.replace_extension(".in");
+    inputfile_name = inputfile_path.string();
+  }
+
+  ATH_MSG_INFO("Writing CA infile text to '"+inputfile_name+"'");
+  std::ofstream infile_stream(inputfile_name);
+  infile_stream << m_runSettings;
+  if (!infile_stream) {
+    ATH_MSG_ERROR("Failed to write CA infile text to '"+inputfile_name+"'");
+    return StatusCode::FAILURE;
+  }
+
+  if (share_path.empty()) {
+    ATH_MSG_ERROR("Could not determine the Herwig share path for CA infile materialisation");
+    return StatusCode::FAILURE;
+  }
+
+  ATH_MSG_INFO("Preparing Herwig runfile from CA infile '"+inputfile_name+"'");
+  m_api.prependReadDirectory(share_path);
+  m_api.inputfile(inputfile_name);
+  Herwig::API::read(m_api);
+  ATH_MSG_INFO("Finished materialising runfile '"+m_runfile+"'");
   return StatusCode::SUCCESS;
 }
 
@@ -167,10 +212,8 @@ StatusCode Herwig7::callGenerator() {
 StatusCode Herwig7::fillEvt(HepMC::GenEvent* evt) {
   // Convert the Herwig event into the HepMC GenEvent
   ATH_MSG_DEBUG("Converting ThePEG::Event to HepMC::GenEvent");
-#ifdef HEPMC3
   if (!evt->run_info()) evt->set_run_info(m_runinfo);
   evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
-#endif
   convert_to_HepMC(*m_event, *evt, false, ThePEG::MeV, ThePEG::millimeter);
   ATH_MSG_DEBUG("Converted ThePEG::Event to HepMC::GenEvent");
 
@@ -212,23 +255,14 @@ StatusCode Herwig7::fillEvt(HepMC::GenEvent* evt) {
   double pdf1 = pdfs.first.xfx(sub->incoming().first ->dataPtr(), scale, x1);
   double pdf2 = pdfs.first.xfx(sub->incoming().second->dataPtr(), scale, x2);
   // Create the PDFinfo object
-#ifdef HEPMC3
   HepMC3::GenPdfInfoPtr pdfi = std::make_shared<HepMC3::GenPdfInfo>();
   pdfi->set(id1, id2, x1, x2, Q, pdf1, pdf2);
-#else
-  HepMC::PdfInfo pdfi(id1, id2, x1, x2, Q, pdf1, pdf2);
-#endif
   evt->set_pdf_info(std::move(pdfi));
   ATH_MSG_DEBUG("Added PDF info to HepMC");
 
 //uncomment to list HepMC events
-//#ifdef HEPMC3
 //    std::cout << " print::listing Herwig7 " << std::endl;
 //    HepMC3::Print::listing(std::cout, *evt);
-//#else
-//    std::cout << " print::printing Herwig7 " << std::endl;
-//    evt->print();
-//#endif
 
   return StatusCode::SUCCESS;
 }
@@ -268,4 +302,3 @@ StatusCode Herwig7::genFinalize() {
 
   return StatusCode::SUCCESS;
 }
-

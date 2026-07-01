@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -21,6 +21,8 @@
 //
 //*****************************************************************************
 
+#include "CalibHitToCaloCell.h"
+
 // Calo include
 #include "CaloIdentifier/CaloDM_ID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -28,9 +30,7 @@
 #include "CaloEvent/CaloCell.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"  
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
-#include "CaloCalibHitRec/CalibHitToCaloCell.h"
 
 // Tile includes
 #include "TileEvent/TileCell.h"
@@ -40,39 +40,11 @@
 
 
 CalibHitToCaloCell::CalibHitToCaloCell(const std::string& name, ISvcLocator* pSvcLocator)
-   : AthAlgorithm(name, pSvcLocator),
-     m_tileActiveHitCnt ("TileCalibHitActiveCell"),
-     m_tileInactiveHitCnt ("TileCalibHitInactiveCell"),
-     m_tileDMHitCnt ("TileCalibHitDeadMaterial"),
-     m_larInactHitCnt ("LArCalibrationHitInactive"),
-     m_larActHitCnt ("LArCalibrationHitActive"),
-     m_larDMHitCnt ("LArCalibrationHitDeadMaterial"),
-     m_store_Tot(false),
-     m_store_Vis(false),
-     m_store_Em(false),
-     m_store_NonEm(false),
-     m_storeUnknown(false),
-     m_caloCell_Tot("TotalCalibCell"), m_caloCell_Vis("VisCalibCell"), 
-     m_caloCell_Em(""), m_caloCell_NonEm(""),
-     m_nchan(0)
-
-//      The names suggestion if one needs to have them
-//
-//      m_caloCell_Em("EmCalibCell"), m_caloCell_NonEm("NonEmCalibCell")
-
+  : AthAlgorithm(name, pSvcLocator)
 {
-  declareProperty("StoreUnknownCells", m_storeUnknown);
-
-  declareProperty("CellTotEne",    m_caloCell_Tot);
-  declareProperty("CellVisEne",    m_caloCell_Vis);
-  declareProperty("CellEmEne",     m_caloCell_Em);
-  declareProperty("CellNonEmEne",  m_caloCell_NonEm);
 }
 
-
-CalibHitToCaloCell::~CalibHitToCaloCell()
-= default;
-
+CalibHitToCaloCell::~CalibHitToCaloCell() = default;
 
 ////////////////   INITIALIZE   ///////////////////////
 StatusCode CalibHitToCaloCell::initialize() 
@@ -95,9 +67,9 @@ StatusCode CalibHitToCaloCell::initialize()
 
 
 /////////////////   EXECUTE   //////////////////////
-StatusCode CalibHitToCaloCell::execute()
+StatusCode CalibHitToCaloCell::execute(const EventContext& ctx)
 {
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
     const CaloDetDescrManager* caloDDMgr = *caloMgrHandle;
 
@@ -686,22 +658,4 @@ StatusCode CalibHitToCaloCell::execute()
  
     ATH_MSG_DEBUG("execute() completed successfully" );
     return StatusCode::SUCCESS;
-}
-
-
-/////////////////   FINALIZE   //////////////////////
-StatusCode CalibHitToCaloCell::finalize()
-{
-  ATH_MSG_INFO("finalize() successfully" );
-  return StatusCode::SUCCESS;
-}
-
-
-//needed only when developing 
-void CalibHitToCaloCell::test_energy(Energy* energy)
-{
-  ATH_MSG_INFO( "Total   =  "<<(*energy)[0]    <<"  |  "
-                << "Visible =  "<<(*energy)[1]    <<"  |  "    
-                << "Em      =  "<<(*energy)[2]    <<"  |  " 
-                << "NonEm   =  "<<(*energy)[3]     );
 }

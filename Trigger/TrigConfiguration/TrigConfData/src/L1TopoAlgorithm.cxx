@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/L1TopoAlgorithm.h"
@@ -34,8 +34,9 @@ TrigConf::L1TopoAlgorithm::load()
             m_inputs.push_back(inp.getValue());
          }
       } else if( hasChild("fixedParameters.inputs") ) { // backwards compatibility, to be removed when we stop using DEV db
+         const std::string valueStr{"value"};
          for( auto & inp : getList("fixedParameters.inputs")) {
-            m_inputs.push_back(inp["value"]);
+            m_inputs.push_back(inp[valueStr]);
          }
       }
       for( auto & o : getList("output")) {
@@ -55,6 +56,8 @@ TrigConf::L1TopoAlgorithm::load()
          m_inputs.push_back( getAttribute("input") );
       } else if( hasChild("fixedParameters.input") ) { // backwards compatibility, to be removed when we stop using DEV db
          auto inp = getObject("fixedParameters.input");
+         //exits on first iteration; increment is not reached
+         //coverity[UNREACHABLE]
          for( auto & k : inp.getKeys() ) {
             m_inputs.push_back(inp[k]);
             break;

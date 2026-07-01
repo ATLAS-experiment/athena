@@ -1,15 +1,8 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -105,7 +98,8 @@ namespace SH
     {
       if (num > 0 && num + nentries->value[file] > nevt)
       {
-	result.add (res.release());
+	result.add (std::move (res));
+	res.reset();
 	num = 0;
       }
       if (res.get() == 0)
@@ -124,7 +118,7 @@ namespace SH
       num += nentries->value[file];
     }
     if (num > 0)
-      result.add (res.release());
+      result.add (std::move (res));
     return result;
   }
 }

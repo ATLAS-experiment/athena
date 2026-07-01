@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,9 +16,9 @@
 #ifndef IOVDbSvc_IOVDbSvc_h
 #define IOVDbSvc_IOVDbSvc_h
 
-#include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/IService.h"
-#include "AthenaBaseComps/AthService.h"
+#include "IOVDbConn.h"
+#include "IOVDbFolder.h"
+
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/IIncidentListener.h"
@@ -26,38 +26,28 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IAddressCreator.h"
 #include "GaudiKernel/IIoComponent.h"
-#include "SGTools/DataProxy.h"
-#include "EventInfoMgt/ITagInfoMgr.h"
-#include "PoolSvc/IPoolSvc.h"
-#include "IOVDbMetaDataTools/IIOVDbMetaDataTool.h"
 
+#include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/IIOVSvc.h"
 #include "AthenaKernel/IIOVDbSvc.h"
-#include "IOVDbSvc/IIOVCondDbSvc.h"
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IAddressProvider.h"
-
 #include "CoolKernel/IDatabase.h"
 #include "CoolKernel/ValidityKey.h"
-
-#include "IOVDbConn.h"
-
+#include "EventInfoMgt/ITagInfoMgr.h"
+#include "IOVDbMetaDataTools/IIOVDbMetaDataTool.h"
+#include "IOVDbSvc/IIOVCondDbSvc.h"
+#include "PoolSvc/IPoolSvc.h"
 
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 
-class IOVSvc;
-class IOVTime;
 class IOVRange;
 class StoreGateSvc; 
 class IClassIDSvc;
-
 class EventID;
-class ITagInfoMgr;
-
-class IOVDbFolder;
-
 class IOVMetaDataContainer;
 class CondAttrListCollection;
 
@@ -84,8 +74,7 @@ public:
   
   /// Forward base class ctor
   using base_class::base_class;
-  virtual ~IOVDbSvc();
-  
+
   /// Service init
   virtual StatusCode initialize() override;
   StatusCode io_reinit() override final;
@@ -107,17 +96,17 @@ public:
   /// Get all addresses that the provider wants to preload in SG maps
   virtual StatusCode preLoadAddresses( StoreID::type storeID,
                                        tadList& list ) override;
-    
+
   /// Get all new addresses from Provider for this Event.
   virtual StatusCode loadAddresses( StoreID::type storeID,
                                     tadList& list ) override;
-      
+
   /// Update a transient Address
   virtual StatusCode updateAddress( StoreID::type storeID,
                                     SG::TransientAddress* tad,
                                     const EventContext& ctx ) override;
   //@}
-  
+
 
   /// \name IOV range access
   //@{
@@ -274,10 +263,10 @@ private:
   cool::ValidityKey m_iovslop{};
 
   // vector of managed connections
-  typedef std::vector<IOVDbConn*> ConnVec;
-  ConnVec m_connections;
+  std::vector<std::unique_ptr<IOVDbConn>> m_connections;
+
   // map of SG keyname to folder objects
-  typedef std::map<std::string,IOVDbFolder*> FolderMap;
+  typedef std::map<std::string, std::unique_ptr<IOVDbFolder>> FolderMap;
   FolderMap m_foldermap;
   // gloal abort flag
   bool m_abort{false};

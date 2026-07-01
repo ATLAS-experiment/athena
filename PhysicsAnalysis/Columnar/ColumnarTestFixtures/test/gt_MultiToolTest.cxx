@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,6 +17,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <AsgTools/AsgToolConfig.h>
 #include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 #include <xAODCore/ShallowCopy.h>
+#include <AthContainers/CurrentContext.h>
 
 #include <ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h>
 #include <ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h>
@@ -57,10 +58,10 @@ public:
   {
     if (!m_data.electronsCopy)
       {
-      auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_data.electrons);
-      m_data.electronsCopy = electronsCopy;
-      ANA_CHECK (evtStore.record (electronsCopy, m_name + postfix));
-      ANA_CHECK (evtStore.record (electronsAuxCopy, m_name + postfix + "Aux."));
+        auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopy (*m_data.electrons);
+        m_data.electronsCopy = electronsCopy.get();
+        ANA_CHECK (evtStore.record (std::move(electronsCopy), m_name + postfix));
+        ANA_CHECK (evtStore.record (std::move(electronsAuxCopy), m_name + postfix + "Aux."));
     }
     return StatusCode::SUCCESS;
   }
@@ -106,10 +107,10 @@ public:
   {
     if (!m_data.electronsCopy)
     {
-      auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopyContainer (*m_data.electrons);
-      m_data.electronsCopy = electronsCopy;
-      ANA_CHECK (evtStore.record (electronsCopy, m_name + postfix));
-      ANA_CHECK (evtStore.record (electronsAuxCopy, m_name + postfix + "Aux."));
+      auto [electronsCopy, electronsAuxCopy] = xAOD::shallowCopy (*m_data.electrons);
+      m_data.electronsCopy = electronsCopy.get();
+      ANA_CHECK (evtStore.record (std::move(electronsCopy), m_name + postfix));
+      ANA_CHECK (evtStore.record (std::move(electronsAuxCopy), m_name + postfix + "Aux."));
     }
     return StatusCode::SUCCESS;
   }

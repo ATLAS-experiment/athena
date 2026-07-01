@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxTypeVector.h
@@ -186,6 +186,18 @@ public:
 
 
   /**
+   * @brief Perform post-read processing on this auxiliary variable.
+   * @param ctx The current event context.
+   *
+   * Some object types require some processing after being read before
+   * they are usable.  This can be indicated by specializing SG::ToTransient
+   * for the vector type containing the variable.  This method will call
+   * such a ToTransient method on the contents, if one is defined.
+   */
+  virtual void toTransient (const EventContext& ctx) override;
+
+
+  /**
    * @brief Shift the elements of the vector.
    * @param pos The starting index for the shift.
    * @param offs The (signed) amount of the shift.
@@ -222,12 +234,8 @@ public:
    * @param src_n Number of elements to insert.
    * @param srcStore The source store.
    *
-   * @c beg and @c end define a range of container elements, with length
-   * @c len defined by the difference of the pointers divided by the
-   * element size.
-   *
-   * The size of the container will be increased by @c len, with the elements
-   * starting at @c pos copied to @c pos+len.
+   * The size of the container will be increased by @c src_n, with the elements
+   * starting at @c pos copied to @c pos+src_n.
    *
    * The contents of the source range will then be moved to our vector
    * starting at @c pos.  This will be done via move semantics if possible;

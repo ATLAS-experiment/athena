@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODHIEvent/HIEventShape.h"
@@ -42,11 +42,13 @@ const HIEventShapeIndex* HIEventShapeMapTool::getIndexFromShape(const xAOD::HIEv
   if(shape->size() == HI::BinningScheme::TOWER){
     //TOWER
     auto itr = m_map.find( HI::BinningScheme::TOWER );
+    if (itr == m_map.end()) return nullptr;
     return &(itr->second);
   }
   else if(shape->size() == HI::BinningScheme::COMPACT){
     //COMPACT
     auto itr = m_map.find( HI::BinningScheme::COMPACT );
+    if (itr == m_map.end()) return nullptr;
     return &(itr->second);
   }
   else {

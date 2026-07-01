@@ -39,7 +39,6 @@
 #include "AthenaKernel/StoreID.h"
 #include "AthenaKernel/IProxyProviderSvc.h"
 #include "AthenaKernel/IHiveStoreMgr.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "CxxUtils/RefCountedPtr.h"
 
@@ -231,18 +230,20 @@ public:
 
   //@}
 
+  using IProxyDict::proxy;
+
   /// get proxy for a given data object address in memory
   virtual SG::DataProxy* proxy(const void* const pTransient) const override final;
 
   /// get default proxy with given id. Returns 0 to flag failure
   /// Deprecated for the event store.
-  virtual SG::DataProxy* proxy(const CLID& id) const final;
+  SG::DataProxy* proxy(const CLID& id) const;
 
   /// get proxy with given id and key. Returns 0 to flag failure
   virtual SG::DataProxy* proxy(const CLID& id, const std::string& key) const override final;
   /// get proxy with given id and key. Returns 0 to flag failure
   /// (overload to prevent a char* to be interpreted as a bool.)
-  virtual SG::DataProxy* proxy(const CLID& id, const char* key) const final
+  SG::DataProxy* proxy(const CLID& id, const char* key) const
   { return this->proxy(id, std::string(key)); }
 
   /// Raw addition of a proxy to the store.
@@ -287,14 +288,14 @@ public:
   //@{
   /// get default proxy with given id, optionally checking validity.
   ///  @returns 0 to flag failure
-  virtual SG::DataProxy* proxy(const CLID& id, bool checkValid) const;
+  SG::DataProxy* proxy(const CLID& id, bool checkValid) const;
   /// get proxy with given id and key, optionally checking validity.
   ///  @returns 0 to flag failure
-  virtual SG::DataProxy* proxy(const CLID& id, const std::string& key, bool checkValid) const;
+  SG::DataProxy* proxy(const CLID& id, const std::string& key, bool checkValid) const;
   /// get proxy with given id and key, optionally checking validity.
   ///  @returns 0 to flag failure
   /// (overload to prevent a char* to be interpreted as a bool.)
-  virtual SG::DataProxy* proxy(const CLID& id, const char* key, bool checkValid) const
+  SG::DataProxy* proxy(const CLID& id, const char* key, bool checkValid) const
   { return this->proxy(id, std::string(key), checkValid); }
 
   /// return the list of all current proxies in store
@@ -611,19 +612,6 @@ private:
   ///throw away bad objects
   void emptyTrash();                   
   
-  ///name says it all
-  bool bindHandleToProxy(const CLID& id, const std::string& key,
-                         IResetable* ir, SG::DataProxy*& dp);
-
-  /// Also do registration with IOVSvc.
-  bool bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                     IResetable* ir, SG::DataProxy *&dp);
-  bool bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                     IResetable* ir, SG::DataProxy *&dp,
-                                     const CallBackID& c,
-                                     const IOVSvcCallBackFcn& fcn,
-                                     bool trigger);
-
 /// remove proxy from store, unless it is reset only.         
   /// provide pTrans!=0 (must match proxy...) to save time
   /// @param forceRemove remove the proxy no matter what        

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PassThroughTool.cxx
@@ -8,7 +8,7 @@
  */
 
 #include "EFTrackingFPGAUtility/PassThroughTool.h"
-
+#include "xAODInDetMeasurement/Utilities.h"
 
 StatusCode PassThroughTool::initialize()
 {
@@ -473,7 +473,7 @@ StatusCode PassThroughTool::getInputClusterData(
 
         for (unsigned long j = 0; j < sc->at(i)->rdoList().size(); j++)
         {
-            cache.rdoList[j] = sc->at(i)->rdoList().at(j).get_compact();
+            cache.rdoList[j] = sc->at(i)->rdoList().at(j);
         }
 
         cache.channelsInPhi = sc->at(i)->channelsInPhi();
@@ -501,6 +501,8 @@ StatusCode PassThroughTool::getInputClusterData(
     ATH_MSG_DEBUG("Making vector of pixel clusters...");
     for (unsigned long i = 0; i < N; i++)
     {
+        // Local variable cache uses 16096 bytes of stack space
+        //coverity[STACK_USE]
         EFTrackingTransient::PixelCluster cache;
         // Get the data from the input xAOD::PixelClusterContainer and set it to the
         // cache
@@ -516,7 +518,7 @@ StatusCode PassThroughTool::getInputClusterData(
 
         for (long unsigned int j = 0; j < pc->at(i)->rdoList().size(); j++)
         {
-            cache.rdoList[j] = pc->at(i)->rdoList().at(j).get_compact();
+            cache.rdoList[j] = pc->at(i)->rdoList().at(j);
         }
 
         cache.channelsInPhi = pc->at(i)->channelsInPhi();
@@ -528,18 +530,18 @@ StatusCode PassThroughTool::getInputClusterData(
             cache.totList[j] = pc->at(i)->totList().at(j);
         }
 
-        cache.totalToT = pc->at(i)->totalToT();
+        cache.totalToT = xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*pc->at(i));
 
         for (long unsigned int j = 0; j < pc->at(i)->chargeList().size(); j++)
         {
             cache.chargeList[j] = pc->at(i)->chargeList().at(j);
         }
 
-        cache.totalCharge = pc->at(i)->totalCharge();
+        cache.totalCharge = xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(*pc->at(i));
         cache.energyLoss = pc->at(i)->energyLoss();
-        cache.isSplit = pc->at(i)->isSplit();
-        cache.splitProbability1 = pc->at(i)->splitProbability1();
-        cache.splitProbability2 = pc->at(i)->splitProbability2();
+        cache.isSplit = false;
+        cache.splitProbability1 = 0;
+        cache.splitProbability2 = 0;
         cache.lvl1a = pc->at(i)->lvl1a();
         cache.sizeOfRDOList = pc->at(i)->rdoList().size();
         cache.sizeOfTotList = pc->at(i)->totList().size();

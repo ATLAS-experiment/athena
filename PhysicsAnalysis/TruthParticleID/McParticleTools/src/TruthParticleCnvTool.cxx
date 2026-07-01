@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -261,16 +261,14 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   TruthParticleContainer::Map_t bcToMcPart = container->m_particles;
 
   
-#ifdef HEPMC3
   // Process particles in barcode order.
-  auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>("barcodes");
-  if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute"); 
+  auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>(HepMCStr::barcodes);
+  if (!bcmapatt){
+    ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute");
+    return StatusCode::FAILURE;
+  } 
   std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
   for (const auto &[bc,hepMcPart]: bcmap) {
-#else
-  for (auto hepMcPart: *evt) {
-    int bc = HepMC::barcode(hepMcPart);
-#endif
 
     TruthParticle * mcPart = new TruthParticle( hepMcPart, container );
     container->push_back( mcPart );

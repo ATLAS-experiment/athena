@@ -71,15 +71,9 @@ def ITkActsTrackParticleCreationCfg(flags,
     # to Vertex we need to create a temporary track particle collection wrt the BeamLine
     # which does not need to be persistified
     if persistifyCollection:
-        toAOD = []
-        trackparticles_shortlist = [] if flags.Acts.EDM.PersistifyTracks else ['-actsTrack']
-        trackparticles_variables = ".".join(trackparticles_shortlist)
-        toAOD += [f"xAOD::TrackParticleContainer#{TrackParticleContainer}",
-                  f"xAOD::TrackParticleAuxContainer#{TrackParticleContainer}Aux." + trackparticles_variables]
-        
-        from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
-        acc.merge(addToAOD(flags, toAOD))
-    
+        from ActsConfig.ActsPersistificationConfig import PersistifyTrackParticles
+        acc.merge(PersistifyTrackParticles(flags,
+                                           trackParticleCollections=[TrackParticleContainer]))
     return acc
 
 

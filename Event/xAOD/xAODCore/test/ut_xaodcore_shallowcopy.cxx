@@ -1,37 +1,24 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// System include(s):
-#include <iostream>
-#include <cmath>
+// Local include(s).
+#include "xAODCore/AuxContainerBase.h"
+#include "xAODCore/AuxInfoBase.h"
+#include "xAODCore/ShallowCopy.h"
 
-// EDM include(s):
-#ifdef XAOD_STANDALONE
-#ifdef __clang__
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wkeyword-macro"
-#endif
-#define private public
-#define protected public
-#   include "AthLinks/DataLink.h"
-#undef protected
-#undef private
-#ifdef __clang__
-# pragma clang diagnostic pop
-#endif
-#else
-# include "AthLinks/DataLink.h"
-#endif
+// EDM include(s)
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/DataVector.h"
 #include "AthContainers/ConstAccessor.h"
 #include "AthContainers/Accessor.h"
 #include "AthContainers/Decorator.h"
+#include "AthContainers/CurrentContext.h"
 
-// Local include(s):
-#include "xAODCore/AuxContainerBase.h"
-#include "xAODCore/ShallowAuxContainer.h"
+// System include(s).
+#include <iostream>
+#include <cmath>
+#include <type_traits>
 
 /// Helper macro for evaluating logical tests
 #define SIMPLE_ASSERT( EXP )                                                 \
@@ -45,15 +32,9 @@
    } while( 0 )
 
 
-int testCopy (const DataVector<SG::AuxElement>& origVec,
-               xAOD::ShallowAuxContainer& copyAux)
+int testCopy (DataVector<SG::AuxElement>& copyVec,
+              xAOD::ShallowAuxContainer& copyAux)
 {
-   DataVector< SG::AuxElement > copyVec;
-   for( size_t i = 0; i < origVec.size(); ++i ) {
-      copyVec.push_back( new SG::AuxElement() );
-   }
-   copyVec.setStore( &copyAux );
-
    // Some starting tests:
    copyAux.setShallowIO( true );
    SIMPLE_ASSERT( copyAux.getAuxIDs().size() == 4 );
@@ -128,7 +109,108 @@ int testCopy (const DataVector<SG::AuxElement>& origVec,
    return 0;
 }
 
+int testCopy(SG::AuxElement& copyObj, xAOD::ShallowAuxInfo& copyAux) {
 
+  // Some starting tests.
+  copyAux.setShallowIO(true);
+  SIMPLE_ASSERT(copyAux.getAuxIDs().size() == 4);
+  SIMPLE_ASSERT(copyAux.getDynamicAuxIDs().empty());
+  SIMPLE_ASSERT(copyAux.getSelectedAuxIDs().empty());
+  copyAux.setShallowIO(false);
+  SIMPLE_ASSERT(copyAux.getAuxIDs().size() == 4);
+  SIMPLE_ASSERT(copyAux.getDynamicAuxIDs().size() == 4);
+  SIMPLE_ASSERT(copyAux.getSelectedAuxIDs().size() == 4);
+
+  SG::ConstAccessor<int> IntVarConst("IntVar");
+  SG::ConstAccessor<int> Int2VarConst("Int2Var");
+  SG::ConstAccessor<int> Int3VarConst("Int3Var");
+  SG::ConstAccessor<float> FloatVarConst("FloatVar");
+  SG::ConstAccessor<double> DoubleVarConst("DoubleVar");
+  SIMPLE_ASSERT(IntVarConst(copyObj) == 1);
+  SIMPLE_ASSERT(Int2VarConst(copyObj) == 2);
+  SIMPLE_ASSERT(Int3VarConst(copyObj) == 3);
+  SIMPLE_ASSERT(std::abs(FloatVarConst(copyObj) - 4.f) < 0.001f);
+
+  // Create some modifications.
+  SG::Accessor<int> IntVar("IntVar");
+  SG::Accessor<int> Int2Var("Int2Var");
+  SG::Accessor<double> DoubleVar("DoubleVar");
+  IntVar(copyObj) = 2;
+  DoubleVar(copyObj) = 3.14;
+
+  SG::Decorator<int> Int3Decor("Int3Var");
+  Int3Decor(copyObj) = 6;
+
+  // Check what happened.
+  copyAux.setShallowIO(true);
+  SIMPLE_ASSERT(copyAux.getAuxIDs().size() == 5);
+  SIMPLE_ASSERT(copyAux.getDynamicAuxIDs().size() == 3);
+  SIMPLE_ASSERT(copyAux.getSelectedAuxIDs().size() == 3);
+  copyAux.setShallowIO(false);
+  SIMPLE_ASSERT(copyAux.getAuxIDs().size() == 5);
+  SIMPLE_ASSERT(copyAux.getDynamicAuxIDs().size() == 5);
+  SIMPLE_ASSERT(copyAux.getSelectedAuxIDs().size() == 5);
+
+  SIMPLE_ASSERT(IntVarConst(copyObj) == 2);
+  SIMPLE_ASSERT(std::abs(FloatVarConst(copyObj) - static_cast<float>(4.f)) <
+                0.001f);
+  SIMPLE_ASSERT(std::abs(DoubleVarConst(copyObj) - 3.14) < 0.0001);
+  SIMPLE_ASSERT(Int3VarConst(copyObj) == 6);
+
+  // Finally, test variable filtering:
+  xAOD::AuxSelection sel;
+  sel.selectAux(std::set<std::string>({"FloatVar", "DoubleVar"}));
+  copyAux.setShallowIO(true);
+  SIMPLE_ASSERT(sel.getSelectedAuxIDs(copyAux.getSelectedAuxIDs()).size() == 1);
+  copyAux.setShallowIO(false);
+  SIMPLE_ASSERT(sel.getSelectedAuxIDs(copyAux.getSelectedAuxIDs()).size() == 2);
+
+  return 0;
+}
+
+
+void test_copyIDs()
+{
+  xAOD::AuxContainerBase origAux;
+  DataVector< SG::AuxElement > origVec;
+  origVec.setStore( &origAux );
+  origVec.push_back (std::make_unique<SG::AuxElement>());
+  SG::Accessor< int > IntVar( "IntVar" );
+  SG::Accessor< int > Int3Var( "Int3Var" );
+  IntVar(*origVec.back()) = 1;
+  Int3Var(*origVec.back()) = 3;
+  origVec.lock();
+
+  SG::Decorator< int > Int2Var( "Int2Var" );
+  Int2Var(*origVec.back()) = 2;
+
+  DataLink< SG::IConstAuxStore > link (&origAux, Gaudi::Hive::currentContext());
+
+  xAOD::ShallowAuxContainer copyAux;
+  copyAux.setParent( link );
+
+  SG::auxid_set_t exp;
+  exp.set (IntVar.auxid());
+  exp.set (Int3Var.auxid());
+
+  {
+    SG::auxid_set_t out = copyAux.getCopyIDs();
+    assert (out == exp);
+  }
+
+  SG::Decorator< int > Int4Var( "Int4Var" );
+  copyAux.lock();
+  copyAux.getDecoration (Int4Var.auxid(), 1, 1);
+  Int4Var(*origVec.back()) = 4;
+
+  {
+    SG::auxid_set_t out = copyAux.getCopyIDs();
+    assert (out == exp);
+  }
+}
+
+
+//coverity[UNCAUGHT_EXCEPT]
 int main() {
 
    // Create a test container that we'll make a copy of later on:
@@ -148,32 +230,65 @@ int main() {
       FloatVar( *e ) = i + 1;
    }
 
-#ifdef XAOD_STANDALONE
-   DataLink< SG::IConstAuxStore > link;
-   link.m_object = &origAux;
-#else
-   DataLink< SG::IConstAuxStore > link (&origAux);
-#endif
-
    // Make a shallow copy of it:
    {
-     xAOD::ShallowAuxContainer copyAux;
-     copyAux.setParent( link );
-     if (testCopy (origVec, copyAux))
+     auto [copyVec, copyAux] = xAOD::shallowCopy(origVec);
+     static_assert(std::is_same_v<decltype(copyVec),
+                                  std::unique_ptr<DataVector<SG::AuxElement>>>);
+     static_assert(std::is_same_v<decltype(copyAux),
+                                  std::unique_ptr<xAOD::ShallowAuxContainer>>);
+     if (testCopy (*copyVec, *copyAux)) {
        return 1;
+     }
    }
 
    {
-     xAOD::ShallowAuxContainer copyAux (link);
-     if (testCopy (origVec, copyAux))
+     auto [copyVec, copyAux] = xAOD::shallowCopy(origVec);
+     if (testCopy (*copyVec, *copyAux)) {
        return 1;
-     xAOD::ShallowAuxContainer copyAux2 (copyAux);
-     SIMPLE_ASSERT( copyAux2.getAuxIDs().size() == 5 );
+     }
+     auto [copyVec2, copyAux2] = xAOD::shallowCopy(*copyVec);
+     SIMPLE_ASSERT( copyAux2->getAuxIDs().size() == 5 );
    }
+
+   test_copyIDs();
 
    // Tell the user that everything went okay:
    std::cout << "All tests with xAOD::ShallowAuxContainer succeeded"
              << std::endl;
+
+   // Create a test object that we'll make a copy of later on.
+   xAOD::AuxInfoBase origAuxInfo;
+   SG::AuxElement origObj;
+   origObj.setStore(&origAuxInfo);
+   IntVar(origObj) = 1;
+   Int2Var(origObj) = 2;
+   Int3Var(origObj) = 3;
+   FloatVar(origObj) = 4.f;
+
+   // Make a shallow copy of it.
+   {
+     auto [copyObj, copyAux] = xAOD::shallowCopy(origObj);
+     static_assert(
+         std::is_same_v<decltype(copyObj), std::unique_ptr<SG::AuxElement>>);
+     static_assert(std::is_same_v<decltype(copyAux),
+                                  std::unique_ptr<xAOD::ShallowAuxInfo>>);
+     if (testCopy(*copyObj, *copyAux)) {
+       return 1;
+     }
+   }
+
+   {
+     auto [copyObj, copyAux] = xAOD::shallowCopy(origObj);
+     if (testCopy(*copyObj, *copyAux)) {
+       return 1;
+     }
+     auto [copyObj2, copyAux2] = xAOD::shallowCopy(*copyObj);
+     SIMPLE_ASSERT(copyAux2->getAuxIDs().size() == 5);
+   }
+
+   // Tell the user that everything went okay:
+   std::cout << "All tests with xAOD::ShallowAuxInfo succeeded" << std::endl;
 
    // Return gracefully:
    return 0;

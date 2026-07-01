@@ -101,12 +101,10 @@ StatusCode Pythia8_i::genInitialize() {
 
   ATH_MSG_INFO("XML Path is " + xmlpath());
   m_pythia = std::make_unique<Pythia8::Pythia> (xmlpath());
-#ifdef HEPMC3
   m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
   /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
   struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Pythia8"),py8version(),std::string("Used generator")};
   m_runinfo->tools().push_back(std::move(generator));   
-#endif
 
   bool canInit = true;
 
@@ -450,21 +448,16 @@ StatusCode Pythia8_i::fillEvt(HepMC::GenEvent *evt){
 
   m_pythiaToHepMC.fill_next_event(*m_pythia, evt, m_internal_event_number);
 
-  // In case we're asked, save the LHE event as an attribute. This only works in HEPMC3.
+  // In case we're asked, save the LHE event as an attribute.
   if(m_saveLHE){
-#ifdef HEPMC3
     auto evtlhe = std::make_shared<HepMC::GenEvent>();
     m_pythiaToHepMC.fill_next_event(m_pythia->process, evtlhe.get(), m_internal_event_number, &m_pythia->info, &m_pythia->settings);
     auto extra = std::make_shared<HepMC::ShortEventAttribute>(evtlhe.get());
-    evt->add_attribute("LHERecord", extra);
-#else
-    ATH_MSG_WARNING("LHE record saving requested, but not implemented with HEPMC2 functionality.");
-#endif
+    evt->add_attribute(HepMCStr::LHERecord, extra);
   }
 
   // in debug mode you can check whether the pdf information is stored
   if(evt->pdf_info()){
-#ifdef HEPMC3
     ATH_MSG_DEBUG("PDFinfo id1:" << evt->pdf_info()->parton_id[0]);
     ATH_MSG_DEBUG("PDFinfo id2:" << evt->pdf_info()->parton_id[1]);
     ATH_MSG_DEBUG("PDFinfo x1:" << evt->pdf_info()->x[0]);
@@ -472,15 +465,6 @@ StatusCode Pythia8_i::fillEvt(HepMC::GenEvent *evt){
     ATH_MSG_DEBUG("PDFinfo scalePDF:" << evt->pdf_info()->scale);
     ATH_MSG_DEBUG("PDFinfo pdf1:" << evt->pdf_info()->pdf_id[0]);
     ATH_MSG_DEBUG("PDFinfo pdf2:" << evt->pdf_info()->pdf_id[1]);
-#else
-    ATH_MSG_DEBUG("PDFinfo id1:" << evt->pdf_info()->id1());
-    ATH_MSG_DEBUG("PDFinfo id2:" << evt->pdf_info()->id2());
-    ATH_MSG_DEBUG("PDFinfo x1:" << evt->pdf_info()->x1());
-    ATH_MSG_DEBUG("PDFinfo x2:" << evt->pdf_info()->x2());
-    ATH_MSG_DEBUG("PDFinfo scalePDF:" << evt->pdf_info()->scalePDF());
-    ATH_MSG_DEBUG("PDFinfo pdf1:" << evt->pdf_info()->pdf1());
-    ATH_MSG_DEBUG("PDFinfo pdf2:" << evt->pdf_info()->pdf2());
-#endif
   }
   else
     ATH_MSG_DEBUG("No PDF information available in HepMC::GenEvent!");
@@ -613,7 +597,6 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
   }
 
   // The following depends on the specific hepmc2/3 implementation
-#ifdef HEPMC3
   if (!evt->run_info()) {
      evt->set_run_info(m_runinfo);
   }
@@ -639,16 +622,6 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
 //    std::cout << " print::listing Pythia8 " << std::endl;
 //    HepMC3::Print::listing(std::cout, *evt); 
 
-#else
-  evt->weights().clear();
-  for (const auto& w: m_weightNames ) {evt->weights()[w]=fWeights[w];}
-  auto beams=evt->beam_particles();
-  ATH_MSG_DEBUG( " Energy of the beams " << beams.first->momentum().e() );
-
-//uncomment to list HepMC events
-//    std::cout << " print::listing Pythia8 " << std::endl;
-//    evt->print();
-#endif
 
   return StatusCode::SUCCESS;
 }

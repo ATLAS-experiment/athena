@@ -21,6 +21,7 @@
 #include <xAODJet/JetContainer.h>
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
+#include "BoostedJetTaggers/ScaleFactors.h"
 
 namespace BJT{
 
@@ -34,17 +35,20 @@ namespace BJT{
             /// configs
             virtual StatusCode initialize() override;
             /// \brief Execute method, for actions to be taken in the event loop
-            virtual StatusCode execute() override;
+            virtual StatusCode execute(const EventContext& ctx) override;
             /// We use default finalize() -- this is for cleanup, and we don't do any
 
         private:
 
             CP::SysListHandle m_systematicsList{this};
             CP::SysReadHandle<xAOD::JetContainer> m_jets{ this, "jets", "", "jet container to read"};
-
-            // jet tagger
+            
+            // jet tagger WP tool
             // ToDo: should add interface?
             ToolHandle<JSSTaggerBase> m_tagger {this, "tagger", "", "Tagger Tool"};
+            
+            // scale factors tool
+            ToolHandle<IJetDecorator> m_scalefactor {this, "scalefactor", "", "Scale Factors Tool"};
 
     };
 }

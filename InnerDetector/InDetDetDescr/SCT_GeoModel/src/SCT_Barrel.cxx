@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_Barrel.h"
@@ -127,8 +127,8 @@ SCT_Barrel::build(SCT_Identifier id)
             // Create the layers
             
             layerLength = 0.;
-            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
-            barrel->add(new GeoNameTag("Layer#"+intToString(iLayer)));
+            SCT_Layer layer(std::format("Layer{}",iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
+            barrel->add(new GeoNameTag(std::format("Layer#{}",iLayer)));
             barrel->add(new GeoIdentifierTag(iLayer)); // Identifier layer= iLayer
             id.setLayerDisk(iLayer);
             GeoAlignableTransform * transform = new GeoAlignableTransform(GeoTrf::Transform3D::Identity());
@@ -174,25 +174,22 @@ SCT_Barrel::build(SCT_Identifier id)
         InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
         xMat.add(barrel, "SCTBarrel");
         
-    }else
-    {
-        
-        // There is only one type of module. So we create it just the once and pass it to the layers.
-        SCT_Module module("Module", m_detectorManager, m_geometryManager, nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
-    
-        for (int iLayer = 0; iLayer < m_numLayers; iLayer++) {
-            // Create the layers
-            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
-            id.setLayerDisk(iLayer);
-            layer.build(id); //MB to verify
-            // Store alignable transform
-            m_detectorManager->addAlignableTransform(2, id.getWaferId(), (*m_mapAX)["Layer#"+intToString(iLayer)], (*m_mapFPV)["Layer#"+intToString(iLayer)]);
-    
-        }
+    }
+    else {
+      // There is only one type of module. So we create it just the once and pass it to the layers.
+      SCT_Module module("Module", m_detectorManager, m_geometryManager, nullptr, m_sqliteReader, m_mapFPV, m_mapAX);
+
+      for (int iLayer = 0; iLayer < m_numLayers; iLayer++) {
+	// Create the layers
+	SCT_Layer layer(std::format("Layer{}",iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
+	id.setLayerDisk(iLayer);
+	layer.build(id); //MB to verify
+	// Store alignable transform
+	m_detectorManager->addAlignableTransform(2, id.getWaferId(), (*m_mapAX)[std::format("Layer#{}",iLayer)], (*m_mapFPV)[std::format("Layer#{}",iLayer)]);
+      }
     }
     
     return barrel;
-    
 }
 
 void SCT_Barrel::buildThermalShield(GeoFullPhysVol * parent)

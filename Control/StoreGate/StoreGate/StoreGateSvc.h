@@ -40,7 +40,6 @@
 #include <type_traits>
 
 #include "AthenaKernel/StoreID.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "AthAllocators/Arena.h"
 
@@ -52,7 +51,6 @@
 #include "AthenaKernel/IResetable.h"
 #include "AthenaKernel/IIOVSvc.h"
 #include "StoreGate/SGIterator.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/SGWPtr.h"
 #include "StoreGate/SGObjectWithVersion.h"
 #include "CxxUtils/checker_macros.h"
@@ -252,22 +250,6 @@ public:
   ///
   template <typename T, typename TKEY> 
   bool contains(const TKEY& key) const;
-
-  /** A "once-per-job" retrieve that binds a data object to a DataHandle,
-   *  typically a data member of an Algorithm/AlgTool. 
-   *  At the end of every event, or more in general
-   *  when the data object is not valid anymore, the DataHandle is reset,
-   *  so that the next time the handle is accessed it will point to the
-   *  current version of that data object.
-   *  For example if MyAlg.h has a data member
-   *    DataHandle<Foo> m_myFoo;
-   *  after bind is called once per job, usually in MyAlg::initialize:
-   *    sc = p_store->bind(m_myFoo, "MyFoo");
-   *  m_myFoo will provide to access the current MyFoo e.g. in MyAlg::execute():
-   *    m_myFoo->useMe();
-   */
-  template <typename T, typename TKEY> 
-  StatusCode bind ATLAS_NOT_THREAD_SAFE (const DataHandle<T>& handle, const TKEY& key);
 
   //@}
 
@@ -499,30 +481,6 @@ public:
   void setDefaultStore(SGImplSvc* pStore);                    
 
 
-  /////////////////////////////////////////////////////////////////////////
-  /// \name IOVSvc interface
-  //@{
-
-  template <typename H, typename TKEY>
-  StatusCode regHandle ATLAS_NOT_THREAD_SAFE ( const DataHandle<H>& handle, const TKEY& key );
-
-  /// non-const method - will return an error
-  template <typename H, typename TKEY>
-  StatusCode regHandle( DataHandle<H>& handle, const TKEY& key);
-
-  /// register a callback function, with handle + key
-  template <typename T, typename H, typename TKEY>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
-                                           const T* obj, const DataHandle<H>& handle, 
-                                           const TKEY& key, bool trigger=false);
-
-  /// register a callback function, with handle + key. Non const. Error
-  template <typename T, typename H, typename TKEY>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
-                                           const T* obj, DataHandle<H>& handle, 
-                                           const TKEY& key, bool trigger=false);
-
-  //@}
   /////////////////////////////////////////////////////////////////////////
 
   /// get proxy for a given data object address in memory
@@ -791,6 +749,7 @@ private:
   Gaudi::Property<bool> m_DumpStore{this, "Dump", false, "Dump contents at EndEvent"};
   Gaudi::Property<bool> m_ActivateHistory{this, "ActivateHistory", false, "record DataObjects history"};
   Gaudi::Property<bool> m_DumpArena{this, "DumpArena", false, "Dump Arena usage stats"};
+  Gaudi::Property<bool> m_pruneIncidents{this, "PruneIncidents", false, "Don't send StoreCleared incidents if there are no registered listeners on the first event."};
   //@}
 
   /// Cache store type in the facade class.
@@ -924,6 +883,14 @@ private:
   typedef std::mutex mutex_t;
   typedef std::lock_guard<mutex_t> lock_t;
   mutable mutex_t m_badMutex;
+
+
+  // State of PruneIncidents checking.
+  // HAVE_LISTENERS means that there are listeners for the ClearStore
+  // incident; NO_LISTENERS means that there aren't any.
+  // UNCHECKED means that we haven't checked yet.
+  enum ListenerState { UNCHECKED, HAVE_LISTENERS, NO_LISTENERS };
+  std::atomic<ListenerState> m_listenerState { UNCHECKED };
 
 
   /**

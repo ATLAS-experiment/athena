@@ -405,7 +405,8 @@ namespace met {
       }
 
       //Do special overlap removal for calo tagged muons
-      if(m_orCaloTaggedMuon && !removeOverlap && orig->type()==xAOD::Type::Muon && static_cast<const xAOD::Muon*>(orig)->muonType()==xAOD::Muon::CaloTagged) {
+      if(m_orCaloTaggedMuon && !removeOverlap && 
+         orig->type()==xAOD::Type::Muon && static_cast<const xAOD::Muon*>(orig)->muonType()==xAOD::Muon::MuonType::CaloTagged) {
         for (size_t i = 0; i < assocs.size(); i++) {
           std::vector<size_t> ind = assocs[i]->overlapIndices(orig);
           std::vector<const xAOD::IParticle*> allObjects = assocs[i]->objects();
@@ -899,11 +900,12 @@ namespace met {
         } // end muon-jet overlap-removal
 
         switch(mu_in_jet->energyLossType()) {
-          case xAOD::Muon::Parametrized:
-          case xAOD::Muon::MOP:
-          case xAOD::Muon::Tail:
-          case xAOD::Muon::FSRcandidate:
-          case xAOD::Muon::NotIsolated:
+          using enum xAOD::Muon::EnergyLossType;
+          case Parametrized:
+          case MOP:
+          case Tail:
+          case FSRcandidate:
+          case NotIsolated:
             // For now don't differentiate the behaviour
             // Remove the Eloss assuming the parameterised value
             // The correction is limited to the selected clusters
@@ -1112,11 +1114,12 @@ namespace met {
         if(MissingETComposition::objSelected(helper,mu_test)) { //
           float mu_Eloss = acc_Eloss(*mu_test);
           switch(mu_test->energyLossType()) {
-          case xAOD::Muon::Parametrized:
-          case xAOD::Muon::MOP:
-          case xAOD::Muon::Tail:
-          case xAOD::Muon::FSRcandidate:
-          case xAOD::Muon::NotIsolated:
+          using enum xAOD::Muon::EnergyLossType;
+          case Parametrized:
+          case MOP:
+          case Tail:
+          case FSRcandidate:
+          case NotIsolated:
             // For now don't differentiate the behaviour
             // Remove the Eloss assuming the parameterised value
             // The correction is limited to the selected clusters

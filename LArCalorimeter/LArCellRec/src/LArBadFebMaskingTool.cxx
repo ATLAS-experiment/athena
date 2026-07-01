@@ -24,7 +24,6 @@ PURPOSE:
 #include "LArIdentifier/LArOnlineID.h" 
 #include "LArRecConditions/LArBadFeb.h"
 #include "LArRecEvent/LArEventBitInfo.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "LArElecCalib/LArProvenance.h"
 

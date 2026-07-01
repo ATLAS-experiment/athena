@@ -51,7 +51,7 @@ StatusCode L1CaloPedestalGenerator::initialize()
 //----------------------------------------
 // Execute
 //----------------------------------------
-StatusCode L1CaloPedestalGenerator::execute()
+StatusCode L1CaloPedestalGenerator::execute(const EventContext& /*ctx*/)
 {
     ATH_MSG_DEBUG("From Execute...");
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from typing import Any, cast
 from AthenaCommon.Logging import logging
@@ -85,7 +85,6 @@ def _createJsonMenuFiles(run, lb, crestServer: str | None = None) -> dict[str, i
 # This interprets the Trigger.triggerConfig flag according to
 # https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag#triggerConfig_in_Run_3
 def getTrigConfigFromFlag( flags ):
-    flags.dump("Input", evaluate=True)
     # run and lb are only needed if source is DB
     run: int = flags.Input.RunNumbers[0] if flags.Input.RunNumbers else -1
     lb: int = flags.Input.LumiBlockNumbers[0] if flags.Input.LumiBlockNumbers else 0
@@ -420,7 +419,7 @@ if __name__ == "__main__":
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.lock()
-            TrigConfigSvcCfg( flags )
+            TrigConfigSvcCfg( flags ).wasMerged()
 
         def test_legacyMenu(self):
             from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -428,7 +427,7 @@ if __name__ == "__main__":
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             flags.Input.Files = defaultTestFiles.RAW_RUN2
             flags.lock()
-            TrigConfigSvcCfg( flags )
+            TrigConfigSvcCfg( flags ).wasMerged()
 
         def test_jsonConverter(self):
             keys = _createJsonMenuFiles(run=360026, lb=151, crestServer=None)

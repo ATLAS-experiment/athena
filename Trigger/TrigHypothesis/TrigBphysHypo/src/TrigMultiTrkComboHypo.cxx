@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -30,6 +30,7 @@
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "AthViews/View.h"
 #include "AthViews/ViewHelper.h"
@@ -305,7 +306,7 @@ StatusCode TrigMultiTrkComboHypo::mergeLeptonsFromDecisions(TrigMultiTrkState<T>
       leptonEL = decision->objectLink<T>(TrigCompositeUtils::featureString());
     }
     else {
-      auto leptonLinkInfo = TrigCompositeUtils::findLink<T>(decision, TrigCompositeUtils::featureString(), true);
+      auto leptonLinkInfo = TrigCompositeUtils::findLink<T>(state.context(), decision, TrigCompositeUtils::featureString(), true);
       ATH_CHECK( leptonLinkInfo.isValid() );
       leptonEL = leptonLinkInfo.link;
     }
@@ -393,7 +394,7 @@ StatusCode TrigMultiTrkComboHypo::mergeTracksFromViews(TrigMultiTrkStateBase& st
   for (const Decision* decision : state.previousDecisions()) {
     if (!TrigCompositeUtils::isAnyIDPassing(decision, m_allowedIDs)) continue;
 
-    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(decision, TrigCompositeUtils::viewString(), true);
+    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(state.context(), decision, TrigCompositeUtils::viewString(), true);
     ATH_CHECK( viewLinkInfo.isValid() );
     const SG::View* view = *viewLinkInfo.link;
     if (views.find(view) != views.end()) continue;  // tracks from this view have already been fetched
@@ -452,7 +453,7 @@ StatusCode TrigMultiTrkComboHypo::mergeTracksFromDecisions(TrigMultiTrkStateBase
     if constexpr(std::is_same<CONTAINER, xAOD::MuonContainer>::value) {
       if (!lepton->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) continue;
       if (!lepton->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle)) continue;
-      trackEL = lepton->inDetTrackParticleLink();
+       trackEL = linkTrack(lepton->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
     }
     else if constexpr(std::is_same<CONTAINER, xAOD::L2CombinedMuonContainer>::value) {
       if (!lepton->idTrack()) continue;
@@ -641,7 +642,7 @@ StatusCode TrigMultiTrkComboHypo::findMultiLeptonCandidates(TrigMultiTrkState<T>
         charge += static_cast<int>(lround(leg->charge()));
         ElementLink<xAOD::TrackParticleContainer> trackEL;
         if constexpr(std::is_same<T, xAOD::MuonContainer>::value) {
-          trackEL = leg->inDetTrackParticleLink();
+          trackEL = linkTrack(leg->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
         }
         else {
           trackEL = leg->trackParticleLink();
@@ -735,7 +736,7 @@ StatusCode TrigMultiTrkComboHypo::processMergedElectrons(TrigMultiTrkState<xAOD:
     leptons.push_back({electronEL, std::vector<ElementLink<DecisionContainer>>(1, decisionEL), decisionIDs});
 
     // get initialRoI this electron originating from
-    auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(decision, TrigCompositeUtils::initialRoIString(), true);
+    auto roiInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(state.context(), decision, TrigCompositeUtils::initialRoIString(), true);
     ATH_CHECK( roiInfo.isValid() );
     auto initialRoI = *roiInfo.link;
 
@@ -791,7 +792,7 @@ StatusCode TrigMultiTrkComboHypo::findMuTrkCandidates(TrigMultiTrkState<xAOD::Mu
 
     ATH_MSG_DEBUG( "Found muon (CombinedTrackParticle): " << muon->pt() << " / " << muon->eta() << " / " << muon->phi() << " / " << muon->charge() );
 
-    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(decision, TrigCompositeUtils::viewString(), true);
+    auto viewLinkInfo = TrigCompositeUtils::findLink<ViewContainer>(state.context(), decision, TrigCompositeUtils::viewString(), true);
     ATH_CHECK( viewLinkInfo.isValid() );
     auto view = *viewLinkInfo.link;
 
@@ -801,7 +802,10 @@ StatusCode TrigMultiTrkComboHypo::findMuTrkCandidates(TrigMultiTrkState<xAOD::Mu
 
     // try to fit muon and track into common vertex: first track is always muon, second tracks comes from the same SG::View
     std::vector<ElementLink<xAOD::TrackParticleContainer>> tracklist(2);
-    tracklist[0] = muon->inDetTrackParticleLink();
+    if (const auto* idTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle); idTrk != nullptr){
+    tracklist[0] = ElementLink<xAOD::TrackParticleContainer>{*static_cast<const xAOD::TrackParticleContainer*>(idTrk->container()),
+                                                             idTrk->index()};
+    }
     for (size_t idx = 0; idx < tracksHandle->size(); ++idx) {
       const xAOD::TrackParticle* track = tracksHandle->at(idx);
 
@@ -1020,7 +1024,8 @@ bool TrigMultiTrkComboHypo::isIdenticalTracks(const xAOD::TrackParticle* lhs, co
 
 bool TrigMultiTrkComboHypo::isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const {
 
-  return isIdenticalTracks(*lhs->inDetTrackParticleLink(), *rhs->inDetTrackParticleLink());
+  return isIdenticalTracks(lhs->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle), 
+                           rhs->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
 }
 
 bool TrigMultiTrkComboHypo::isIdenticalTracks(const xAOD::Electron* lhs, const xAOD::Electron* rhs) const {

@@ -19,7 +19,7 @@ TrigEMClusterContainer_PERS * TrigEMClusterContainerCnv::createPersistent( TrigE
 }//end of create persistent method
 
 //createTransient
-TrigEMClusterContainer * TrigEMClusterContainerCnv::createTransient()
+TrigEMClusterContainer * TrigEMClusterContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigEMClusterContainerConverter" );
   
@@ -29,15 +29,15 @@ TrigEMClusterContainer * TrigEMClusterContainerCnv::createTransient()
   static const pool::Guid p4_guid( "7B430CA8-5D16-4E26-B0A4-461F983610EB" );
   static const pool::Guid tlp1_guid( "CAA8145E-F382-4727-A114-26E137D4B27E" );
 
- if( compareClassGuid( p4_guid ) ){
-         std::unique_ptr< TrigEMClusterContainer_p4 > col_vect( poolReadObject< TrigEMClusterContainer_p4 >() );
+ if( compareClassGuid(token,  p4_guid ) ){
+         std::unique_ptr< TrigEMClusterContainer_p4 > col_vect( poolReadObject< TrigEMClusterContainer_p4 >(token) );
          //         std::cout << "Reading IMFC p4" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
- } else if( compareClassGuid( p3_guid ) ){
-         std::unique_ptr< TrigEMClusterContainer_p3 > col_vect( poolReadObject< TrigEMClusterContainer_p3 >() );
+ } else if( compareClassGuid(token,  p3_guid ) ){
+         std::unique_ptr< TrigEMClusterContainer_p3 > col_vect( poolReadObject< TrigEMClusterContainer_p3 >(token) );
          return m_converter_p3.createTransient( col_vect.get(), mlog ) ;
-  } else if( compareClassGuid( tlp1_guid ) ) {
-        std::unique_ptr< TrigEMClusterContainer_tlp1 > col_vect( poolReadObject< TrigEMClusterContainer_tlp1 >() );
+  } else if( compareClassGuid(token,  tlp1_guid ) ) {
+        std::unique_ptr< TrigEMClusterContainer_tlp1 > col_vect( poolReadObject< TrigEMClusterContainer_tlp1 >(token) );
         return m_converter_tlp1.createTransient( col_vect.get(), mlog );
   } else { throw std::runtime_error( "Unsupported persistent version of TrigEMClusterContainer" ); }
    

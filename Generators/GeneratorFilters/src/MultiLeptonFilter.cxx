@@ -15,7 +15,7 @@ MultiLeptonFilter::MultiLeptonFilter(const std::string& name, ISvcLocator* pSvcL
 }
 
 
-StatusCode MultiLeptonFilter::filterEvent() {
+StatusCode MultiLeptonFilter::filterEvent(const EventContext& ctx) {
   McEventCollection::const_iterator itr;
   int numLeptons = 0;
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
@@ -30,6 +30,6 @@ StatusCode MultiLeptonFilter::filterEvent() {
 	}
   }
   ATH_MSG_DEBUG("Found " << numLeptons << " Leptons");
-  setFilterPassed(numLeptons >= m_NLeptons);
+  setFilterPassed(numLeptons >= m_NLeptons, ctx);
   return StatusCode::SUCCESS;
 }

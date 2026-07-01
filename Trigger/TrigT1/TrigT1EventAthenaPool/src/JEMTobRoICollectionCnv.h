@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual JEMTobRoICollection_PERS*   createPersistent (JEMTobRoICollection* transCont);
-  virtual JEMTobRoICollection*        createTransient ();
+  virtual JEMTobRoICollection*        createTransient(const Token* token);
 
 private:
   

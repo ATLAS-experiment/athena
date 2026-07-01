@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file JetTagDQAConfig.py
@@ -39,8 +39,7 @@ def PhysValBTagCfg(flags, **kwargs):
         kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
             InDetTrackTruthOriginToolCfg(flags)))
 
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        kwargs.setdefault("GN2v01TaggerName", "GN2HL")
+    kwargs.setdefault("GN2v01TaggerName", flags.BTagging.AK4TaggerName)
 
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)

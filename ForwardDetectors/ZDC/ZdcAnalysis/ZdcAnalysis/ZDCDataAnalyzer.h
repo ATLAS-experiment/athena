@@ -77,7 +77,7 @@ private:
   std::array<float, 2> m_calibModSumBkgdFrac{};
 
   bool m_haveNLcalib{false};
-  std::array< std::array< std::array<float,6>, 3>, 2> m_NLcalibFactors{}; // 3 POL5s for each side
+  std::array< std::array< std::vector<float>, 3>, 2> m_NLcalibFactors{}; // 3 POL5s for each side
   
   std::array<float, 2> m_NLcalibModuleSum{};
   std::array<float, 2> m_NLcalibModuleSumErrSq{};
@@ -93,7 +93,7 @@ private:
 public:
 
   ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr messageFunc_p, int nSample, float deltaTSample,
-                  size_t preSampleIdx, std::string fitFunction,
+                  size_t preSampleIdx, const std::string &fitFunction,
                   const ZDCModuleIntArray& peak2ndDerivMinSamples,
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsHG,
                   const ZDCModuleFloatArray& peak2ndDerivMinThresholdsLG,
@@ -177,12 +177,13 @@ public:
 
   void SetFitTimeMax(float tmax);
 
-  void SetSaveFitFunc(bool save);
-
   void SetADCOverUnderflowValues(const ZDCModuleFloatArray& HGOverflowADC, const ZDCModuleFloatArray& HGUnderflowADC,
                                  const ZDCModuleFloatArray& LGOverflowADC);
 
   void SetNoiseSigmas(const ZDCModuleFloatArray& noiseSigmasHG, const ZDCModuleFloatArray& noiseSigmasLG);
+
+  void setPerSampleNoiseSigmas(const std::array<std::array<std::vector<float>,4>,2>& sampleNoiseVecsHG,
+			       const std::array<std::array<std::vector<float>,4>,2>& sampleNoiseVecsLG);
 
   void SetTauT0Values(const ZDCModuleBoolArray& fxiTau1, const ZDCModuleBoolArray& fxiTau2,
                       const ZDCModuleFloatArray& tau1, const ZDCModuleFloatArray& tau2,
@@ -197,6 +198,13 @@ public:
                     const ZDCModuleFloatArray& deltaT0MinHG, const ZDCModuleFloatArray& deltaT0MaxHG,
                     const ZDCModuleFloatArray&  deltaT0MinLG, const ZDCModuleFloatArray& deltaT0MaxLG);
 
+  void SetTimeCuts(const ZDCModuleFloatArray& deltaT0MinHG, const ZDCModuleFloatArray& deltaT0MaxHG,
+		   const ZDCModuleFloatArray&  deltaT0MinLG, const ZDCModuleFloatArray& deltaT0MaxLG);
+
+  void SetChisqCuts(const ZDCModuleFloatArray& chisqDivAmpCutHG, const ZDCModuleFloatArray& chisqDivAmpScaleHG,
+		    const ZDCModuleFloatArray& chisqDivAmpOffsetHG, const ZDCModuleFloatArray& chisqDivAmpPowerHG, 
+		    const ZDCModuleFloatArray& chisqDivAmpCutLG, const ZDCModuleFloatArray& chisqDivAmpScaleLG,
+		    const ZDCModuleFloatArray& chisqDivAmpOffsetLG, const ZDCModuleFloatArray& chisqDivAmpPowerLG);
 
   void SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrMode mode, float refADC, float refScale,
 			   const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
@@ -206,11 +214,12 @@ public:
 			   const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams,
 			   const std::array<std::array<std::vector<float>, 4>, 2>& LHGNonlinCorrParams);
 
-  void SetNLcalibParams(std::array< std::array< std::array<float,6>, 3>, 2>& nlcalibParams);
+  void SetNLcalibParams(std::array< std::array< std::vector<float>, 3>, 2>& nlcalibParams);
   
   void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
 
-
+  void enablePostPulseCheck(unsigned int postPulseSampleDelta, float postPulseDerivMinSig, float postPulseAbsDer2ndMinSig, float minMainDer2ndRatio);
+  
   void enableTimeSigCut(bool AND, float sigCut, const std::string& TF1String,
 			const std::array<std::array<std::vector<double>, 4>, 2>& parsHGArr, 
 			const std::array<std::array<std::vector<double>, 4>, 2>& parsLGArr);
@@ -248,6 +257,13 @@ public:
                           const std::vector<float>& HGSamplesDelayed, const std::vector<float>& LGSamplesDelayed);
 
   bool FinishEvent();
+
+  void saveFitFunc(bool save);
+
+  void setQuietFits(bool quiet) {
+    if (quiet) invokeAll([](ZDCPulseAnalyzer* pa){pa->setQuietFits();});
+    else invokeAll([](ZDCPulseAnalyzer* pa){pa->setUnquietFits();});
+  }
 
 };
 #endif

@@ -323,7 +323,7 @@ class argBool(argument):
         return self._value
 
     ## @brief Value setter function.
-    #  @details The argument can be a @c bool or a string with value @c true or @c false (case independent).
+    #  @details The argument can be a @c bool or a string with value @c true or @c false (case-insensitive).
     #  @param value Value to set.
     #  @throw trfExceptions.TransformArgException Exception thrown if the float conversion fails.
     #  @throw trfExceptions.TransformArgException Exception thrown if value is outside of the given range.
@@ -2644,7 +2644,7 @@ def strToBool(string):
         elif string.lower() == 'true':
             return True
         else:
-            raise trfExceptions.TransformArgException(trfExit.nameToCode('TRF_ARG_CONV_FAIL'), 'Failed to convert value {0} to bool'.format(string))
+            raise trfExceptions.TransformArgException(trfExit.nameToCode('TRF_ARG_CONV_FAIL'), 'Failed to convert string "{0}" to bool (expected "false" or "true" case-insensitive )'.format(string))
     except AttributeError:
         raise trfExceptions.TransformArgException(trfExit.nameToCode('TRF_ARG_CONV_FAIL'), 'Failed to convert value {0} to bool'.format(string))
 

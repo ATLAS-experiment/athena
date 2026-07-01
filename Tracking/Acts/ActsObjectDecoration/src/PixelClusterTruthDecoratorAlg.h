@@ -15,6 +15,7 @@
 #define PIXELCLUSTERTRUTHDECORATORALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadHandleKeyArray.h"
@@ -91,6 +92,9 @@ namespace ActsTrk {
     
     Gaudi::Property<bool> m_useTruthInfo {this, "UseTruthInfo", true};
     Gaudi::Property<bool> m_keepOnlyOnTrackMeasurements {this, "KeepOnlyOnTrackMeasurements", false, "Keep on on-track measurements instead of the full collection"};
+    Gaudi::Property<std::string> m_idHelperName {
+      this, "IDHelperName", "PixelID",
+      "DetectorStore key of the identifier helper (e.g. PixelID, PLR_ID)"};
 
     const PixelID *m_PixelHelper {nullptr};
   };

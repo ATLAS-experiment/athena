@@ -9,6 +9,7 @@
 
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "Acts/Utilities/Helpers.hpp"
+#include "Acts/Utilities/OstreamFormatter.hpp"
 
 #include <ostream>
 #include <cstdint>
@@ -43,8 +44,16 @@ namespace MuonR4{
             };
             /** @brief Converts the hit category to a string */
             static std::string toString(const HitCategory c);
+
+            friend std::ostream& operator<<(std::ostream& ostr, const HitCategory c) {
+                return (ostr<<toString(c));
+            }
             /** @brief Converts the status to a string */
             static std::string toString(const Status s);
+
+            friend std::ostream& operator<<(std::ostream& ostr, const Status s) {
+                return (ostr<<toString(s));
+            }
             /** @brief Returns the value type for a defined hit category & layer
              *  @param cat: Hit category
              *  @param status: Contribution to the fit
@@ -70,6 +79,9 @@ namespace MuonR4{
                 sum.print(ostr);
                 return ostr;
             }
+            /** @brief Returns the number of precision stations with at least 3 precision hits */
+            value_type nPrecisionStations() const;
+
         private:
             /** @brief Translates the 4 classification indices to a unique consecutive number
              *         (used for storage access)
@@ -91,5 +103,8 @@ namespace MuonR4{
             Counter_t m_counts{};
     };
 }
+ACTS_OSTREAM_FORMATTER(MuonR4::HitSummary::Status);
+ACTS_OSTREAM_FORMATTER(MuonR4::HitSummary::HitCategory);
+
 
 #endif

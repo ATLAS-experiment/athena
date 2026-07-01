@@ -198,12 +198,11 @@ StatusCode LArSC2Ntuple::initialize() {
   
 }
 
-StatusCode LArSC2Ntuple::execute()
+StatusCode LArSC2Ntuple::execute(const EventContext& ctx)
 {
 
   StatusCode	sc;
   
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadHandle<xAOD::EventInfo>evt (m_eventInfoKey, ctx);
   ATH_CHECK(evt.isValid());
@@ -305,7 +304,7 @@ StatusCode LArSC2Ntuple::execute()
       ATH_MSG_DEBUG( "Got LArRawSCContainer with key SC_ET_ID" );
   }
   
-  SG::ReadHandle<LArLATOMEHeaderContainer> hdrCont(m_LArLatomeHeaderContainerKey);
+  SG::ReadHandle<LArLATOMEHeaderContainer> hdrCont(m_LArLatomeHeaderContainerKey, ctx);
   if (! hdrCont.isValid()) {
      ATH_MSG_WARNING( "No LArLATOME container found in TDS" );
   } else {
@@ -328,13 +327,13 @@ StatusCode LArSC2Ntuple::execute()
   const LArOnOffIdMapping* cabling=nullptr;
   const LArOnOffIdMapping* cablingROD=nullptr;
   if(m_fillRawChan){
-     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{cablingKey()};
+     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{cablingKey(), ctx};
      cabling=*cablingHdl;
      if(!cabling) {
         ATH_MSG_ERROR( "Do not have cabling for SC!" );
         return StatusCode::FAILURE;
      }
-     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdlROD{m_cablingKeyAdditional};
+     SG::ReadCondHandle<LArOnOffIdMapping> cablingHdlROD{m_cablingKeyAdditional, ctx};
      cablingROD=*cablingHdlROD;
      if(!cablingROD) {
         ATH_MSG_ERROR( "Do not have cabling for ROD!" );
@@ -365,7 +364,7 @@ StatusCode LArSC2Ntuple::execute()
   }
 
   if(m_ETThresh > 0. || m_ETThreshMain > 0.) {
-     SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSCMgrKey};
+     SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloMgrHandle{m_caloSCMgrKey, ctx};
      ATH_CHECK(caloMgrHandle.isValid());
      m_caloMgrSC = *caloMgrHandle;
   }
@@ -397,19 +396,22 @@ StatusCode LArSC2Ntuple::execute()
   if (DigitContainer_next){
     if ( cellsno == 0 ){ 
       cellsno	   = DigitContainer_next->size();
-    }else	if(DigitContainer_next->size()	  != (unsigned)cellsno ){ ATH_MSG_ERROR(" NOOOOOOO! Different number of entries in DigitContainer_next"<< cellsno << " " << DigitContainer_next->size() );
+    }else	if(DigitContainer_next->size()	  != (unsigned)cellsno ){ ATH_MSG_WARNING(" NOOOOOOO! Different number of entries in DigitContainer_next"<< cellsno << " " << DigitContainer_next->size() );
+       return StatusCode::SUCCESS;
     }
   }
   if (etcontainer){
     if ( cellsno == 0 ){ 
       cellsno	   = etcontainer->size();
-    }else	if(etcontainer->size()  != (unsigned)cellsno ){ ATH_MSG_ERROR(" NOOOOOOO! Different number of entries in etcontainer"<< cellsno << " " << etcontainer->size() );
+    }else	if(etcontainer->size()  != (unsigned)cellsno ){ ATH_MSG_WARNING(" NOOOOOOO! Different number of entries in etcontainer"<< cellsno << " " << etcontainer->size() );
+       return StatusCode::SUCCESS;
     }
   }
   if (etcontainer_next){
     if ( cellsno == 0 ){ 
       cellsno	   = etcontainer_next->size();
-    }else	if(etcontainer_next->size()  != (unsigned)cellsno ){ ATH_MSG_ERROR(" NOOOOOOO! Different number of entries in etcontainer_next"<< cellsno << " " << etcontainer_next->size() );
+    }else	if(etcontainer_next->size()  != (unsigned)cellsno ){ ATH_MSG_WARNING(" NOOOOOOO! Different number of entries in etcontainer_next"<< cellsno << " " << etcontainer_next->size() );
+       return StatusCode::SUCCESS;
     }
   }
   unsigned	cellCounter	   = 0;

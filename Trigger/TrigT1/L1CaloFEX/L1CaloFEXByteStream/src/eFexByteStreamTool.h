@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -22,16 +22,18 @@
 
 #include "xAODTrigger/eFexEMRoIContainer.h"
 #include "xAODTrigger/eFexTauRoIContainer.h"
-
 #include "xAODTrigL1Calo/eFexTowerContainer.h"
 
-#include "bytestreamDecoder/L1CaloRdoEfexTob.h"
 #include "bytestreamDecoder/L1CaloBsDecoderRun3.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
 // Gaudi includes
 #include "Gaudi/Property.h"
+
+#include <cstdint>
+#include <vector>
+#include <memory>
 
 /** @class eFEXRoIByteStreamTool
  *  @brief Implementation of a tool for L1 RoI conversion from BS to xAOD and from xAOD to BS
@@ -49,8 +51,10 @@ class eFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         /// BS->xAOD conversion
         virtual StatusCode convertFromBS(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vrobf, const EventContext& eventContext)const override;
 
-        /// xAOD->BS conversion
-        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf, const EventContext& eventContext) override;
+        /// xAOD->BS conversion: reads the RoI containers reachable via the TrigCompositeContainer.
+        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                       const xAOD::TrigCompositeContainer* tc,
+                                       const EventContext& eventContext) override;
 
         /// Declare ROB IDs for conversion
         virtual const std::vector<uint32_t>& robIds() const override {
@@ -93,15 +97,6 @@ class eFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
     // inputs (eTowers)
     SG::WriteHandleKey<xAOD::eFexTowerContainer> m_eTowerWriteKey {
             this, "eTowerContainerWriteKey", "", "Write handle key to ETower container for conversion from ByteStream"};
-
-    // Only read keys should be set to non-empty string in python configuration if the tool is in xAOD->BS mode of operation
-    SG::ReadHandleKey<xAOD::eFexEMRoIContainer> m_eEMReadKey {
-            this, "eEMContainerReadKey", "", "Read handle key to eEM (x)TOB container for conversion to ByteStream"};
-    SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eTAUReadKey {
-            this, "eTAUContainerReadKey", "", "Read handle key to eTAU (x)TOB container for conversion to ByteStream"};
-
-
-
 
 
     std::unique_ptr<L1CaloBsDecoderRun3> m_decoder;

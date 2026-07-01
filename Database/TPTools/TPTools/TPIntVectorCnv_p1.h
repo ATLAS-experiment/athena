@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLTPVECTORCNV_H
-#define ATHENAPOOLCNVSVC_T_ATHENAPOOLTPVECTORCNV_H
+#ifndef TPTOOLS_TPINTVECTORCNV_P1_H
+#define TPTOOLS_TPINTVECTORCNV_P1_H
 
 #include "AthenaPoolUtilities/TPIntegerVector.h"
 #include "TPConverter.h"

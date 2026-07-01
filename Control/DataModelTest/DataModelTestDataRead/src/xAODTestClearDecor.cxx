@@ -45,7 +45,7 @@ StatusCode xAODTestClearDecor::initialize()
 /**
  * @brief Algorithm event processing.
  */
-StatusCode xAODTestClearDecor::execute()
+StatusCode xAODTestClearDecor::execute(const EventContext& /*ctx*/)
 {
   const CVec* vec = 0;
   CHECK( evtStore()->retrieve (vec, m_readPrefix + "cvec") );

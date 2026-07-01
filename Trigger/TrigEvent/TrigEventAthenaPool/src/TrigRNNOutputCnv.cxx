@@ -31,7 +31,7 @@ TrigRNNOutput_PERS* TrigRNNOutputCnv::createPersistent(TrigRNNOutput* transCont)
 }
 
 
-TrigRNNOutput* TrigRNNOutputCnv::createTransient() 
+TrigRNNOutput* TrigRNNOutputCnv::createTransient(const Token* token) 
 {
   MsgStream mlog(msgSvc(), "TrigRNNOutputConverter" );
   mlog << MSG::DEBUG << "TrigRNNOutputCnv::createTransient " << endmsg;
@@ -40,9 +40,9 @@ TrigRNNOutput* TrigRNNOutputCnv::createTransient()
   
   TrigRNNOutput       *trans_cont(0);
   
-  if (compareClassGuid(tlp1_guid)) {
+  if (compareClassGuid(token, tlp1_guid)) {
     mlog << MSG::DEBUG << "TrigRNNOutputCnv::reading tlp1 persistent object" << endmsg;
-    std::unique_ptr< TrigRNNOutput_tlp1 >   col_vect( this->poolReadObject< TrigRNNOutput_tlp1 >() );
+    std::unique_ptr< TrigRNNOutput_tlp1 >   col_vect( this->poolReadObject< TrigRNNOutput_tlp1 >(token) );
     trans_cont = m_impl->m_TPConverter.createTransient( col_vect.get(), mlog );
   }  else {
     throw std::runtime_error("Unsupported persistent version of Data container");

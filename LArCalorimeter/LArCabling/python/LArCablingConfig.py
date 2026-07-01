@@ -39,24 +39,12 @@ def _larLatomeCfg(configFlags,algo,folder,outkey):
 
     result.merge(IOVDbSvcCfg(configFlags))
 
-    #MC folder-tag hack 
-    tagsperFolder={"/LAR/IdentifierSC/LatomeMapping":"LARIdentifierSCLatomeMapping-UPD1-00"
-                   }
-
     if configFlags.Input.isMC:
-        db='LAR_OFL'
-        if folder in tagsperFolder:
-            ft=tagsperFolder[folder]
-            folderwithtag=folder+"<tag>"+ft+"</tag>"
-        else:    
-            folderwithtag=folder
+        result.merge(addFolders(configFlags,folder,tag="CONDBR2-BLKPA-2026-01-02",detDb="LAR_ONL",db="CONDBR2",className="CondAttrListCollection"))
     else:
-        db='LAR_ONL'
-        folderwithtag=folder
+        result.merge(addFolders(configFlags,folder,className="CondAttrListCollection",detDb='LAR_ONL'))
 
     result.addCondAlgo(algo(ReadKey=folder,WriteKey=outkey),primary=True)
-    result.merge(addFolders(configFlags,folderwithtag,className="CondAttrListCollection",detDb=db))
-    #print (result)
     return result
 
 def LArOnOffIdMappingCfg(configFlags):
@@ -90,11 +78,12 @@ def LArCalibIdMappingSCCfg(configFlags):
        result.getCondAlgo("LArCalibLineMappingAlgSC").WriteKey="LArCalibIdMapSC"
        result.getCondAlgo("LArCalibLineMappingAlgSC").isSuperCell=True
        result.getCondAlgo("LArCalibLineMappingAlgSC").MaxCL=16
-       return result
+    return result
 
 def LArLATOMEMappingCfg(configFlags):
-    if not configFlags.Input.isMC:
-       return _larLatomeCfg(configFlags,LArLATOMEMappingAlg,"/LAR/Identifier/LatomeMapping","LArLATOMEMap")
+    result = ComponentAccumulator()
+    result.merge(_larLatomeCfg(configFlags,LArLATOMEMappingAlg,"/LAR/Identifier/LatomeMapping","LArLATOMEMap"))
+    return result
 
 def LArIdMapCfg(configFlags):
     """Return ComponentAccumulator configured with Identifier Map in POOL/COOL"""

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_TRACKPARTICLETRUTHDECORATIONALG_H
@@ -18,6 +18,7 @@
 #include "TrackTruthMatchingBaseAlg.h"
 #include "ActsEvent/TrackToTruthParticleAssociation.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "MCTruthClassifier/IMCTruthClassifier.h"
 
 namespace ActsTrk
 {
@@ -39,8 +40,19 @@ namespace ActsTrk
         {this,"TrackParticleContainerName", "InDetTrackParticles",""};
 
      enum FloatDecorations { kMatchingProbability, kHitPurity, kHitEfficiency, kNFloatDecorators};
-     std::vector<SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> >   m_linkDecor;
      std::vector<SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> >   m_floatDecor;
+
+     enum IntDecorations {kTruthType, kTruthOrigin, kNIntDecorators};
+     std::vector<SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> > m_intDecor;
+     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_truthClassDecor
+       {this, "TruthClassification", m_trkParticleName, "truthClassification"};
+
+     ToolHandle<IMCTruthClassifier> m_truthClassifier
+       {this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier"};
+
+     SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_linkDecor
+       {this, "LinkDecoration", m_trkParticleName, "truthParticleLink"};
+
   };
 
 } // namespace

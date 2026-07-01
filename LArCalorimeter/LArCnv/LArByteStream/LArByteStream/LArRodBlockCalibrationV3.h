@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKCALIBRATIONV3_H
@@ -74,10 +74,10 @@ public:
     feb_ssw7
   };
   // constructor
-  LArRodBlockCalibrationV3();
+  LArRodBlockCalibrationV3(IMessageSvc* msgSvc);
  
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockCalibrationV3");}
+  static std::string BlockType() { return std::string("RodBlockCalibrationV3");}
  public:
   //void dumpFragment() { dumpFragment(m_FebBlock); }
   // ----------------- Encoding methods -----------------
@@ -105,9 +105,6 @@ public:
   virtual inline  uint32_t  hasRawDataBlock() const {return getHeader16(RawDataBlkOff);} ;
   virtual inline  uint32_t  hasControlWords() const {return getHeader16(RawDataBlkOff);} ;
 
-  // ----------------- Printing methods -----------------
-  // print the full ROD fragment
-  //virtual void dumpFragment();
 private:
   void clearBlocks();
   virtual void resetPointers();
@@ -142,13 +139,6 @@ public:
 
 inline int LArRodBlockCalibrationV3::setGain(const int GainValue)
 {//This RodBlockStructure allows only predefined gains 
-  /*
-  std::cout << " Set fixed gain Value " << GainValue << std::endl;
-  std::cout << " Number of words in Gain Block " << std::endl;
-  std::cout << "\tHigh (1): " << getHeader16(NWRawData1) << std::endl;
-  std::cout << "\tMedium (2): " << getHeader16(NWRawData2) << std::endl;
-  std::cout << "\tLow (3): " << getHeader16(NWRawData3) << std::endl;
-  */
   if (GainValue<0 || GainValue>3)
     return 0;
   m_fixedGain=GainValue;

@@ -240,7 +240,7 @@ StatusCode TrigEDMChecker::initialize() {
 }
 
 
-StatusCode TrigEDMChecker::execute() {
+StatusCode TrigEDMChecker::execute(const EventContext& ctx) {
 
   /* fwinkl, Mar 20222:
      Some attempt was made to make the code pass the thread-checker. Methods that
@@ -252,11 +252,11 @@ StatusCode TrigEDMChecker::execute() {
      being checked and will hopefully be written in a thread-safe manner, i.e. using
      ReadHandleKeys. If someone is very eager they could migrate all uses of DataHandles...
   */
-  StatusCode sc ATLAS_THREAD_SAFE = do_execute();
+  StatusCode sc ATLAS_THREAD_SAFE = do_execute(ctx);
   return sc;
 }
 
-StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE() {
+StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE(const EventContext& ctx) {
 
   ATH_MSG_INFO( " ==========START of event===========" );
 
@@ -546,7 +546,7 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE() {
   }
 
   if (m_doDumpAll || m_doDumpNavigation) {
-    StatusCode sc = dumpNavigation();
+    StatusCode sc = dumpNavigation(ctx);
     if ( sc.isFailure() ) {
       ATH_MSG_ERROR("The method dumpNavigation() failed");
     }
@@ -564,8 +564,7 @@ StatusCode TrigEDMChecker::do_execute ATLAS_NOT_THREAD_SAFE() {
     std::string trigCompositeSteering;
     bool pass;
     ATH_CHECK(TrigCompositeNavigationToDot(trigCompositeSteering, pass));
-    const EventContext& context = Gaudi::Hive::currentContext();
-    const std::string evtNumber = std::to_string(context.eventID().event_number());
+    const std::string evtNumber = std::to_string(ctx.eventID().event_number());
     const std::string passStr = (pass ? "Pass" : "Fail"); 
     std::ofstream ofile(std::string("NavGraph_" + m_dumpNavForChain + "_Ev" + evtNumber + "_" + passStr + ".dot").c_str());
     ofile << trigCompositeSteering;
@@ -4434,7 +4433,7 @@ StatusCode TrigEDMChecker::TrigCompositeNavigationToDot(std::string& returnValue
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigEDMChecker::dumpNavigation()
+StatusCode TrigEDMChecker::dumpNavigation(const EventContext& ctx)
 {
   // Get object from store
   const xAOD::TrigNavigation * navigationHandle = nullptr;
@@ -4534,7 +4533,7 @@ StatusCode TrigEDMChecker::dumpNavigation()
   }
 
   // Make the decision container
-  SG::WriteHandle< TrigCompositeUtils::DecisionContainer > outputNavigation = TrigCompositeUtils::createAndStore( m_decisionsKey, getContext() ); 
+  SG::WriteHandle< TrigCompositeUtils::DecisionContainer > outputNavigation = TrigCompositeUtils::createAndStore( m_decisionsKey, ctx );
   auto decisionOutput = outputNavigation.ptr();
 
   // Find unique chains associated with a feature

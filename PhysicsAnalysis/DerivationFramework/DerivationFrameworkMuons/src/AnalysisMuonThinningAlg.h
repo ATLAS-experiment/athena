@@ -25,7 +25,8 @@ namespace DerivationFramework {
 
     private:
         ToolHandle<CP::IMuonSelectionTool> m_muonSelTool{this, "SelectionTool", "", "Configured instance of the MuonSelectionTool"};
-        Gaudi::Property<int> m_quality{this, "QualityWP", xAOD::Muon::Loose,
+        Gaudi::Property<int> m_quality{this, "QualityWP", 
+                                       static_cast<int>(xAOD::Muon::Quality::Loose),
                                        "Minimum working point that the muon has to satisfy in order to be survive"};
 
         SG::ReadDecorHandleKeyArray<xAOD::MuonContainer> m_MuonPassKeys{

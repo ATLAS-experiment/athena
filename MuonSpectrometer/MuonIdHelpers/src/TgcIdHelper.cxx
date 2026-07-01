@@ -86,14 +86,14 @@ int TgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_cha_impl = region.implementation(m_CHANNEL_INDEX);
 
     ATH_MSG_DEBUG(" TGC decode index and bit fields for each level: " << std::endl
-                                                                      << " muon        " << m_muon_impl.show_to_string() << std::endl
-                                                                      << " station     " << m_sta_impl.show_to_string() << std::endl
-                                                                      << " eta         " << m_eta_impl.show_to_string() << std::endl
-                                                                      << " phi         " << m_phi_impl.show_to_string() << std::endl
-                                                                      << " technology  " << m_tec_impl.show_to_string() << std::endl
-                                                                      << " gas gap     " << m_gap_impl.show_to_string() << std::endl
-                                                                      << " is strip    " << m_ist_impl.show_to_string() << std::endl
-                                                                      << " channel     " << m_cha_impl.show_to_string());
+                                                                      << " muon        " << m_muon_impl << std::endl
+                                                                      << " station     " << m_sta_impl << std::endl
+                                                                      << " eta         " << m_eta_impl << std::endl
+                                                                      << " phi         " << m_phi_impl << std::endl
+                                                                      << " technology  " << m_tec_impl << std::endl
+                                                                      << " gas gap     " << m_gap_impl << std::endl
+                                                                      << " is strip    " << m_ist_impl << std::endl
+                                                                      << " channel     " << m_cha_impl);
     // Build multirange for the valid set of identifiers
     //
 

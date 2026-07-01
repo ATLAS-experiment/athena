@@ -12,6 +12,7 @@ def BunchCrossingCondAlgCfg(flags):
     cfgsvc = None
     folder = ''
     bgkey = ''
+    bsmdkey = ''
 
     if flags.Beam.BunchStructureSource == BunchStructureSource.MC:
         # Only read digitization parameters from conditions DB if NOT ByteStream input
@@ -25,6 +26,8 @@ def BunchCrossingCondAlgCfg(flags):
         else:
             # For ByteStream input, don't set folder key - will read from BS metadata
             folder = ''
+            bsmdkey = 'InputMetaDataStore+ByteStreamMetadata'
+
     elif flags.Beam.BunchStructureSource == BunchStructureSource.FILLPARAMS:
         folder = '/TDAQ/OLC/LHC/FILLPARAMS'
         from IOVDbSvc.IOVDbSvcConfig import addFolders
@@ -57,7 +60,8 @@ def BunchCrossingCondAlgCfg(flags):
                                             FillParamsFolderKey=folder,
                                             Mode=flags.Beam.BunchStructureSource.value,
                                             TrigConfigSvc=cfgsvc,
-                                            L1BunchGroupCondData=bgkey)
+                                            L1BunchGroupCondData=bgkey,
+                                            ByteStreamMetadataKey=bsmdkey)
 
     result.addCondAlgo(alg)
 

@@ -24,7 +24,6 @@
 #include "AthenaBaseComps/AthService.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "TRT_ConditionsServices/ITRT_AlignDbSvc.h"
 #include "TRT_ConditionsServices/ITRT_StrawAlignDbSvc.h"
 #include "DetDescrConditions/AlignableTransformContainer.h"
@@ -164,7 +163,6 @@ class TRT_AlignDbSvc: public extends<AthService, ITRT_AlignDbSvc>
   std::string m_par_alitextfile;         //!< input text file
   std::vector<std::string> m_alignobjs;  //!< folder names
   std::vector<int> m_alignchans;         //!< channels
-  const DataHandle<AlignableTransformContainer> m_aligncontainerhandle;
   ToolHandle<IAthenaOutputStreamTool> m_streamer; //!< OutputStreamTool
   mutable std::vector<Amg::Transform3D*> m_amgTransformCache;
 

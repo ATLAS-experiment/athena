@@ -1,20 +1,25 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRAWSCCALIBDATAREADINDINGALG_H
 #define LARBYTESTREAM_LARRAWSCCALIBDATAREADINDINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "LArByteStream/LArLATOMEDecoder.h"
+
+#include "LArCabling/LArOnOffIdMapping.h"
+#include "LArCabling/LArLATOMEMapping.h"
+#include "LArRecConditions/LArCalibLineMapping.h"
+
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadCondHandle.h"
-#include "LArCabling/LArOnOffIdMapping.h"
+#include "StoreGate/ReadCondHandleKey.h"
+
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include "StoreGate/ReadCondHandleKey.h"
-#include "LArRecConditions/LArCalibLineMapping.h"
-#include "LArByteStream/LArLATOMEDecoder.h"
+
 
 
 //Event classes

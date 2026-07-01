@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFEnergyPredictorTool.h"
@@ -91,8 +91,6 @@ StatusCode PFEnergyPredictorTool::initialize()
 }
 
 float PFEnergyPredictorTool::runOnnxInference(std::vector<float> &tensor) const {
-    using std::endl;
-    using std::cout;
     auto memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
     auto input_tensor_size = tensor.size();
 
@@ -148,7 +146,7 @@ float PFEnergyPredictorTool::nnEnergyPrediction(const eflowRecTrack *ptr) const{
      std::vector<float> inputnn;
      inputnn.assign(5430, 0.0);
      std::vector<eflowRecCluster*> matchedClusters;
-     std::vector<eflowTrackClusterLink*> links = ptr->getClusterMatches();
+     const std::vector<eflowTrackClusterLink*>& links = ptr->getClusterMatches();
 
     std::array<double, 19> etatotal = getEtaTrackCalo(ptr->getTrackCaloPoints());
     std::array<double, 19> phitotal = getPhiTrackCalo(ptr->getTrackCaloPoints());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,7 +43,7 @@ RodHeaderByteStreamCnv::~RodHeaderByteStreamCnv()
 
 // CLID
 
-const CLID& RodHeaderByteStreamCnv::classID()
+CLID RodHeaderByteStreamCnv::classID()
 {
   return ClassID_traits<DataVector<LVL1::RODHeader> >::ID();
 }
@@ -76,10 +76,11 @@ StatusCode RodHeaderByteStreamCnv::createObjConst( IOpaqueAddress* pAddr,
     return StatusCode::FAILURE;
   }
 
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *( pBS_Addr->par() );
   // size check
   auto rhCollection = std::make_unique<DataVector<LVL1::RODHeader> >();
-  ATH_CHECK( m_tool->convert(nm, rhCollection.get()) );
+  ATH_CHECK( m_tool->convert(ctx, nm, rhCollection.get()) );
 
   pObj = SG::asStorable(std::move(rhCollection));
 

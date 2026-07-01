@@ -27,7 +27,7 @@ class ISvcLocator;
 template <class TYPE> class SvcFactory;
 
 // Map of recordset pointers by table name
-typedef std::map<std::string, IRDBRecordset_ptr> RecordsetPtrMap;
+typedef std::map<std::string, IRDBRecordset_ptr, std::less<>> RecordsetPtrMap;
 
 /**
  * @class SqliteReadSvc
@@ -49,23 +49,23 @@ class SqliteReadSvc final : public extends<AthService, IRDBAccessSvc>
   /// This method has no effect if the connection has already been opened
   /// @param connName [IN] path to the SQLite database file
   /// @return success/failure
-  bool connect(const std::string& connName) override;
+  bool connect(std::string_view connName) override;
 
   /// Dummy overrider of the virtual function
   /// @return success/failure
-  bool disconnect(const std::string&) override;
+  bool disconnect(std::string_view connName) override;
 
   /// Closes the database connection
   /// @return success/failure
-  bool shutdown(const std::string&) override;
+  bool shutdown(std::string_view connName) override;
 
   /// Provides access to the Recordset object containing HVS-tagged data.
   /// @param node [IN] name of the table. Other input parameters are dummy
   /// @return pointer to the recordset object
-  IRDBRecordset_ptr getRecordsetPtr(const std::string& node
-				    , const std::string& 
-				    , const std::string& 
-				    , const std::string&) override;
+  IRDBRecordset_ptr getRecordsetPtr(std::string_view node
+				    , std::string_view tag
+				    , std::string_view tag2node 
+				    , std::string_view connName) override;
 
   /// Dummy overrider of the virtual function
   /// @param childNode [IN] the name of the table

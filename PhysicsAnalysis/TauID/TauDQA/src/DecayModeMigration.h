@@ -34,7 +34,7 @@ namespace Tau{
     class DecayModeMigration: public PlotBase {
     public:
 	DecayModeMigration(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-	virtual ~DecayModeMigration();
+	virtual ~DecayModeMigration() = default;
 
 	/* void fill(const xAOD::TauJet& tau,int nProng, int nNeu); */
 	void fill(const xAOD::TauJet& tau, xAOD::TauJetParameters::DecayMode trueMode, float weight);

@@ -13,8 +13,6 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
-#include <SystematicsHandles/SysReadDecorHandle.h>
-#include <SystematicsHandles/SysWriteDecorHandle.h>
 
 // Framework includes
 #include <xAODEgamma/ElectronContainer.h>
@@ -34,7 +32,7 @@ namespace CP {
      /// \brief the standard constructor
       ChargeSelectorAlg(const std::string &name, ISvcLocator *pSvcLocator);
       virtual StatusCode initialize() override;
-      virtual StatusCode execute() override;
+      virtual StatusCode execute(const EventContext& ctx) override;
 
     private:
 

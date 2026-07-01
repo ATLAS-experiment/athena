@@ -40,7 +40,7 @@ public:
 protected:
   TrigTauClusterDetails_PERS*  createPersistent(TrigTauClusterDetails* transCont);
 
-  TrigTauClusterDetails*       createTransient ();
+  TrigTauClusterDetails*       createTransient(const Token* token);
 
  private:
 

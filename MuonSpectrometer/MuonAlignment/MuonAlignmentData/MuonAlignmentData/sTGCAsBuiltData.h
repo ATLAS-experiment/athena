@@ -37,6 +37,7 @@ class sTGCAsBuiltData: public AthMessaging {
           double rotation{0.};
           double scale{0.};
           double nonPara {0.};
+          double stripBending {0.}; // banana shape of the strips modeled as a parabola
         };
         
         StatusCode setParameters(const Identifier& gasGapId, const Parameters& pars);

@@ -23,9 +23,9 @@ atlas_add_component( AthExSYCL
    LINK_LIBRARIES AthenaBaseComps GaudiKernel )
 
 # Install extra files from the package.
-atlas_install_joboptions( share/*.py )
+atlas_install_python_modules( python/*.py )
 
 # Test(s) in the package.
 atlas_add_test( LinearTransformExample
-   SCRIPT athena.py --stdcmalloc AthExSYCL/LinearTransformExample_jobOptions.py
-   POST_EXEC_SCRIPT nopost.sh )
+   SCRIPT athena.py --threads=1 AthExSYCL/LinearTransformExampleConfig.py
+   POST_EXEC_SCRIPT noerror.sh)

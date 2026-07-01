@@ -48,7 +48,7 @@ StatusCode DumpLArDigits::initialize()
 }
 
 
-StatusCode DumpLArDigits::execute()
+StatusCode DumpLArDigits::execute(const EventContext& ctx)
 {
  m_count++; 
  ATH_MSG_INFO ( "======== executing event "<< m_count << " ========" );
@@ -68,7 +68,7 @@ StatusCode DumpLArDigits::execute()
  else
    ATH_CHECK( evtStore()->retrieve(digit_cont) );
  ATH_MSG_INFO ( "Retrieved LArDigitContainer from StoreGate! key=" << m_key );
- SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+ SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
  const LArOnOffIdMapping* cabling{*cablingHdl};
  if(!cabling){
      ATH_MSG_ERROR("Do not have mapping object " << m_cablingKey.key() );

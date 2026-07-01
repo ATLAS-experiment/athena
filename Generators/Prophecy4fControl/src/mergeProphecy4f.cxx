@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "Prophecy4fMerger.h"
 #include <iostream>
 #include <AsgMessaging/MessageCheck.h>
 
 using namespace asg::msgUserCode;
-
 
 int main(int argc, char*argv[]){
 
@@ -54,7 +53,12 @@ int main(int argc, char*argv[]){
     Prophecy4fMerger merger;
     merger.setIO(powheg, prophecy4e, prophecy4mu, prophecy2e2mu, out, debug);
     merger.setRandomSeed(seed);
-    merger.merge();
+  try{
+    merger.merge(); /// this can throw a 'std::runtime_error'
+  } catch (const std::runtime_error & e){
+    ANA_MSG_ERROR("Prophecy4fMerger: Exception thrown in merger.merge() step: " << e.what());
+    return 1;
+  }
 
     return 0;
   

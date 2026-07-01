@@ -34,6 +34,7 @@ class SubjetBuilder : public DiTauToolBase {
 
  private:
 
+  Gaudi::Property<float> m_maxEta{this, "maxEta", 2.7}; //Run2/3: choose 2.7 as max since ditau uses tracks in each subjet so there is a limit at 2.5.
   Gaudi::Property<float> m_Rsubjet{this, "Rsubjet", 0.2};
   Gaudi::Property<float> m_ptmin{this, "ptminsubjet", 10000};
 

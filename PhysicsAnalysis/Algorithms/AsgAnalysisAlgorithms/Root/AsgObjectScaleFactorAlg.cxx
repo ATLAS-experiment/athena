@@ -26,13 +26,13 @@ namespace CP
   }
 
   StatusCode AsgObjectScaleFactorAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
 
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys, ctx));
       for (const xAOD::IParticle *particle : *particles)
       {
 	float scaleFactor = 1.;

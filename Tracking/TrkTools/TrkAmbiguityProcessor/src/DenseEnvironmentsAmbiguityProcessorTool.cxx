@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DenseEnvironmentsAmbiguityProcessorTool.h"
@@ -125,14 +125,13 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::statistics(){
     and then returns the tracks which have been selected*/
 
 const TrackCollection*
-Trk::DenseEnvironmentsAmbiguityProcessorTool::process(const TracksScores *trackScoreTrackMap) const{
+Trk::DenseEnvironmentsAmbiguityProcessorTool::process(const EventContext& ctx, const TracksScores *trackScoreTrackMap) const{
   if (!trackScoreTrackMap) return nullptr;
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // clear prdAssociationTool via selection tool
   // @TODO remove :
   std::unique_ptr<Trk::PRDtoTrackMap> prdToTrackMap( m_assoTool->createPRDtoTrackMap() );
   if (!m_assoMapName.key().empty()) {
-     SG::ReadHandle<Trk::PRDtoTrackMap> input_prd_map(m_assoMapName);
+     SG::ReadHandle<Trk::PRDtoTrackMap> input_prd_map(m_assoMapName, ctx);
      if (!input_prd_map.isValid()) {
         ATH_MSG_ERROR("Failed to retrieve prd to track map " << m_assoMapName.key() );
      }
@@ -147,7 +146,7 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::process(const TracksScores *trackS
   {
      Counter stat(m_etaBounds);
      stat.newEvent();
-     solveTracks(*trackScoreTrackMap, *prdToTrackMap, *finalTracks, trackDustbin,stat);
+     solveTracks(ctx, *trackScoreTrackMap, *prdToTrackMap, *finalTracks, trackDustbin,stat);
      {
         std::lock_guard<std::mutex> lock(m_statMutex);
         m_stat += stat;
@@ -180,11 +179,12 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::process(const TracksScores *trackS
 
 
 void
-Trk::DenseEnvironmentsAmbiguityProcessorTool::solveTracks(const TracksScores &trackScoreTrackMap,
-                                                               Trk::PRDtoTrackMap &prdToTrackMap,
-                                                               TrackCollection &finalTracks,
-                                                               std::vector<std::unique_ptr<const Trk::Track> > &trackDustbin,
-                                                               Counter &stat) const{
+Trk::DenseEnvironmentsAmbiguityProcessorTool::solveTracks(const EventContext& ctx,
+                                                          const TracksScores &trackScoreTrackMap,
+                                                          Trk::PRDtoTrackMap &prdToTrackMap,
+                                                          TrackCollection &finalTracks,
+                                                          std::vector<std::unique_ptr<const Trk::Track> > &trackDustbin,
+                                                          Counter &stat) const{
   TrackScoreMap scoreTrackFitflagMap;
   for(const std::pair< const Trk::Track *, float> &scoreTrack: trackScoreTrackMap){
      if (AmbiguityProcessorBase::m_observerTool.isEnabled()){
@@ -200,7 +200,6 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::solveTracks(const TracksScores &tr
      }
      stat.incrementCounterByRegion(CounterIndex::kNcandidates,scoreTrack.first);
   }
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   UniqueClusterSplitProbabilityContainerPtr splitProbContainer(createAndRecordClusterSplitProbContainer(ctx));
   ATH_MSG_DEBUG ("Starting to solve tracks");
   // now loop as long as map is not empty
@@ -236,13 +235,13 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::solveTracks(const TracksScores &tr
       // track can be kept as is, but is not yet fitted
       ATH_MSG_DEBUG ("Good track ("<< atrack.track() << ") but need to fit this track first, score, add it into map again and retry ! ");
       int refittedTrack_uid = AmbiguityProcessor::getUid();
-      Trk::Track * pRefittedTrack = refitTrack(atrack.track(),prdToTrackMap, stat, uid, refittedTrack_uid);
+      Trk::Track * pRefittedTrack = refitTrack(ctx, atrack.track(),prdToTrackMap, stat, uid, refittedTrack_uid);
       if(pRefittedTrack) {
         /// If we want to keep the holes from before the refit (instead of triggering a new search),
         /// copy over the existing summary to prevent a new hole search.
         /// Not done in default tracking, only relevant when using holes from pattern recognition.
         if (m_keepHolesFromBeforeFit && atrack.track()->trackSummary()) pRefittedTrack->setTrackSummary(std::make_unique<Trk::TrackSummary>(*atrack.track()->trackSummary()));
-        addTrack( pRefittedTrack, true , scoreTrackFitflagMap, trackDustbin, stat, refittedTrack_uid);
+        addTrack(ctx, pRefittedTrack, true , scoreTrackFitflagMap, trackDustbin, stat, refittedTrack_uid);
       }
       // remove original copy, but delay removal since some pointer to it or its constituents may still be in used
       if (atrack.newTrack()) {
@@ -252,7 +251,7 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::solveTracks(const TracksScores &tr
       ATH_MSG_DEBUG ("Candidate excluded, add subtrack to map. Track "<<cleanedTrack.get());
       stat.incrementCounterByRegion(CounterIndex::kNsubTrack,cleanedTrack.get());
       // for this case clenedTrack is a new created object.
-      addTrack(cleanedTrack.release(), false, scoreTrackFitflagMap, trackDustbin, stat, cleanedTrack_uid);
+      addTrack(ctx, cleanedTrack.release(), false, scoreTrackFitflagMap, trackDustbin, stat, cleanedTrack_uid);
       // remove original copy, but delay removal since some pointer to it or its constituents may still be in used
       if (atrack.newTrack()) {
          trackDustbin.emplace_back(atrack.release() );
@@ -275,7 +274,8 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::solveTracks(const TracksScores &tr
 //==================================================================================================
 
 Trk::Track*
-Trk::DenseEnvironmentsAmbiguityProcessorTool::refitPrds( const Trk::Track* track,
+Trk::DenseEnvironmentsAmbiguityProcessorTool::refitPrds( const EventContext& ctx,
+                                                 const Trk::Track* track,
                                                  Trk::PRDtoTrackMap &prdToTrackMap,
                                                  Counter &stat) const{
   // get vector of PRDs
@@ -296,17 +296,17 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::refitPrds( const Trk::Track* track
     ATH_MSG_VERBOSE ("Brem track, refit with electron brem fit");
     //revert once GlobalChi2Fitter properly handles brem fits when starting from prds
     // newTrack = fit(prds, *par, true, Trk::electron);
-    newTrack = doBremRefit(*track);
+    newTrack = doBremRefit(ctx, *track);
   } else {
     stat.incrementCounterByRegion(CounterIndex::kNfits,track);
     ATH_MSG_VERBOSE ("Normal track, refit");
-    newTrack = fit(prds, *par, true, m_particleHypothesis);
+    newTrack = fit(ctx, prds, *par, true, m_particleHypothesis);
     if ((not newTrack) and shouldTryBremRecovery(*track, par)){
       stat.incrementCounterByRegion(CounterIndex::kNrecoveryBremFits,track);
       ATH_MSG_VERBOSE ("Normal fit failed, try brem recovery");
       //revert once GlobalChi2Fitter properly handles brem fits when starting from prds
       //newTrack = fit(prds, *par, true, Trk::electron);
-      newTrack = doBremRefit(*track);
+      newTrack = doBremRefit(ctx, *track);
     }
   }
   if(newTrack) {
@@ -384,7 +384,7 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::dumpStat(MsgStream &out) const{
 }
 
 std::unique_ptr<Trk::Track>
-Trk::DenseEnvironmentsAmbiguityProcessorTool::doBremRefit(const Trk::Track & track) const{
-  return std::unique_ptr<Trk::Track>(fit(track,true,Trk::electron));
+Trk::DenseEnvironmentsAmbiguityProcessorTool::doBremRefit(const EventContext& ctx, const Trk::Track & track) const{
+  return std::unique_ptr<Trk::Track>(fit(ctx,track,true,Trk::electron));
 }
 

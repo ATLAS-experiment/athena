@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_ZDCModule.h"
@@ -241,15 +241,15 @@ void ZDC_ZDCModule::create(GeoFullPhysVol* mother, StoredMaterialManager *materi
                 }else{// Unpopulated holes
                     id = zdcID->channel_id(m_side,m_module,ZdcIDType::INACTIVE,ZdcIDVolChannel::AIR);
                     sprintf(volName, "ZDC::Pixel_Hole %s", id.getString().c_str());
-
+                    const std::string volNameStr{volName};
                     // Place an unpopulated hole in the tungsten plate
-                    Abs_Plate->add(new GeoNameTag(volName));
+                    Abs_Plate->add(new GeoNameTag(volNameStr));
                     Abs_Plate->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
                     Abs_Plate->add(new GeoAlignableTransform(GeoTrf::Translate3D(pixelX * Gaudi::Units::mm, pixelY * Gaudi::Units::mm, 0.0 * Gaudi::Units::mm)));
                     Abs_Plate->add(Pixel_Hole_Abs_Empty);
 
                     // Place an unpopulated hole in the housing
-                    Housing_Physical->add(new GeoNameTag(volName));
+                    Housing_Physical->add(new GeoNameTag(volNameStr));
                     Housing_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
                     Housing_Physical->add(new GeoAlignableTransform(GeoTrf::Translate3D(pixelX * Gaudi::Units::mm, 0.5 * floorThickness + pixelY * Gaudi::Units::mm, inner_wall_z * Gaudi::Units::mm)));
                     Housing_Physical->add(Pixel_Hole_House_Empty);

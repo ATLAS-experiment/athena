@@ -58,7 +58,7 @@ class JetConverterBase<Jet_p5> : public T_AthenaPoolTPCnvConstBase<Jet, Jet_p5> 
   /// Init the converter so that it knows about its "parents" when it
   /// has to walk the lookup chain.
   inline
-  virtual void initPrivateConverters(AthenaPoolTopLevelTPCnvBase *topCnv) override
+  virtual void initPrivateConverters(TopLevelTPCnvBase *topCnv) override
   {
     m_taginfoCnv.setTopConverter(topCnv, 0);
     m_tagAssCnv.setTopConverter(topCnv,0);

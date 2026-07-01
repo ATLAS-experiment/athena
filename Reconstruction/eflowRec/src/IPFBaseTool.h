@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef IPFBASETOOL_H
-#define IPFBASETOOL_H
+#ifndef EFLOWREC_IPFBASETOOL_H
+#define EFLOWREC_IPFBASETOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
 
+class EventContext;
 class eflowCaloObjectContainer;
 
 class IPFBaseTool : virtual public IAlgTool {
@@ -14,7 +15,7 @@ class IPFBaseTool : virtual public IAlgTool {
  public:
 
   /** Execute method to use eflowCaloObjectContainer */
-  virtual StatusCode execute(eflowCaloObjectContainer&) = 0;
+  virtual StatusCode execute(const EventContext& ctx, eflowCaloObjectContainer&) = 0;
 
   DeclareInterfaceID(IPFBaseTool,1,0);
 

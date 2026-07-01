@@ -8,6 +8,14 @@
 
 #include <ColumnarToolWrapperPython/PythonToolHandle.h>
 #include <ColumnarCore/ColumnarDef.h>
+#include <ColumnarCore/ColumnInfoHelpers.h>
+#include <CxxUtils/crc64.h>
+
+#ifdef XAOD_STANDALONE
+#include <AsgMessaging/IMessagePrinter.h>
+#include <AsgMessaging/MessagePrinterOverlay.h>
+#endif
+#include <AsgMessaging/MsgLevel.h>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/ndarray.h>
@@ -76,6 +84,27 @@ void setProperty(columnar::PythonToolHandle &self, const std::string& key, nb::o
     }
 }
 
+nb::object getColumnVoid(columnar::PythonToolHandle &self, const std::string& key) {
+  auto [size, ptr, type] = self.getColumnVoid(key);
+  // Wrap the raw pointer in a numpy array without copying.  The caller is
+  // responsible for keeping the PythonToolHandle alive while using the result.
+#define MAKE_NDARRAY(T) \
+  nb::ndarray<nb::numpy, T, nb::ro>(static_cast<const T*>(ptr), {size}).cast()
+  if (*type == typeid(float))          return MAKE_NDARRAY(float);
+  if (*type == typeid(double))         return MAKE_NDARRAY(double);
+  if (*type == typeid(char))           return MAKE_NDARRAY(char);
+  if (*type == typeid(int))            return MAKE_NDARRAY(int);
+  if (*type == typeid(std::uint8_t))   return MAKE_NDARRAY(std::uint8_t);
+  if (*type == typeid(std::uint16_t))  return MAKE_NDARRAY(std::uint16_t);
+  if (*type == typeid(std::uint32_t))  return MAKE_NDARRAY(std::uint32_t);
+  if (*type == typeid(std::uint64_t))  return MAKE_NDARRAY(std::uint64_t);
+  if (*type == typeid(std::int16_t))   return MAKE_NDARRAY(std::int16_t);
+  if (*type == typeid(std::int32_t))   return MAKE_NDARRAY(std::int32_t);
+  if (*type == typeid(std::int64_t))   return MAKE_NDARRAY(std::int64_t);
+#undef MAKE_NDARRAY
+  throw std::runtime_error("getColumnVoid: unsupported column type: " + std::string(type->name()));
+}
+
 void setColumnVoid(columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<> column, bool is_const = true) {
   // TODO: figure out how to get type_info from handle instead...
   // nb::handle handle = column.handle();
@@ -123,6 +152,45 @@ void setImmutableColumnVoid(columnar::PythonToolHandle &self, const std::string&
   setColumnVoid(self, key, column, true);
 };
 
+namespace {
+
+#ifdef XAOD_STANDALONE
+/// Routes C++ IMessagePrinter::print() calls to a Python callable.
+/// callback signature: (level_int: int, tool_name: str, text: str)
+struct PyMessagePrinter : public asg::IMessagePrinter {
+    nb::callable m_callback;
+
+    explicit PyMessagePrinter(nb::callable cb)
+        : m_callback(std::move(cb)) {}
+
+    void print(MSG::Level lvl, const std::string& name,
+               const std::string& text) override {
+        // Guard against Python interpreter shutdown
+        if (!Py_IsInitialized())
+            return;
+        nb::gil_scoped_acquire gil;
+        m_callback(static_cast<int>(lvl), name, text);
+    }
+};
+
+// Global state for printer management
+static std::unique_ptr<PyMessagePrinter> g_printer;
+static std::unique_ptr<asg::MessagePrinterOverlay> g_overlay;
+
+void set_printer_from_callable(nb::callable cb) {
+    g_printer = std::make_unique<PyMessagePrinter>(std::move(cb));
+    g_overlay.reset();
+    g_overlay = std::make_unique<asg::MessagePrinterOverlay>(g_printer.get());
+}
+
+void clear_printer() {
+    g_overlay.reset();
+    g_printer.reset();
+}
+#endif  // XAOD_STANDALONE
+
+}  // anonymous namespace
+
 
 NB_MODULE(python_tool_handle, module) {
     module.doc() = "Nanobind bindings for PythonToolHandle";
@@ -130,7 +198,49 @@ NB_MODULE(python_tool_handle, module) {
     if (columnar::columnarAccessMode != 2)
         throw nb::import_error("This module can only be used in columnar access mode. Try setting up a ColumnarAnalysis release instead.");
 
-    module.attr("numberOfEventsName") = &columnar::numberOfEventsName;
+    module.attr("numberOfEventsName") = &columnar::eventRangeColumnName;
+    module.attr("eventRangeColumnName") = &columnar::eventRangeColumnName;
+
+    // the value used for an invalid (null/empty) element link in array mode
+    module.attr("invalid_link_value") = columnar::ColumnarModeArray::invalidLinkValue;
+
+    module.def("crc64",
+        [](const std::string& data) { return CxxUtils::crc64(data); },
+        "data"_a,
+        "CRC-64 of a string, using the Athena default polynomial "
+        "(CxxUtils::crc64).");
+
+    module.def("crc64addint", &CxxUtils::crc64addint,
+        "crc"_a, "x"_a,
+        "Extend a previously-calculated CRC-64 to include an integer "
+        "(CxxUtils::crc64addint).");
+
+    module.def("sg_key",
+        &columnar::computeSgKey,
+        "name"_a, "clid"_a = 0,
+        "StoreGate hash (sgkey) of a container name, optionally mixed with "
+        "its CLID. ElementLink m_persKey values in Athena-written files are "
+        "sg_key(container_name, container_clid).");
+
+    // Install a Python callable as the global C++ message printer.
+#ifdef XAOD_STANDALONE
+    // Overload 1: with callback function
+    module.def("set_python_printer", &set_printer_from_callable, nb::arg("callback"),
+    "Install a Python callable(level: int, name: str, text: str) as the global "
+    "C++ message printer.");
+
+    // Overload 2: reset (no argument)
+    module.def("set_python_printer", &clear_printer,
+    "Reset to the default stdout message printer.");
+#else
+    // In Athena/AthAnalysis builds IMessagePrinter does not exist; expose the
+    // function so Python code doesn't get AttributeError, but raise at call time.
+    module.def("set_python_printer", [](nb::args, nb::kwargs) {
+        throw std::runtime_error(
+            "set_python_printer is only available in standalone "
+            "(AnalysisBase/ColumnarAnalysis) builds, not in Athena/AthAnalysis.");
+    }, "Not available in Athena/AthAnalysis builds.");
+#endif  // XAOD_STANDALONE
 
     /// load in the ColumnAccessMode enum
     nb::enum_<columnar::ColumnAccessMode>(module, "ColumnAccessMode")
@@ -151,6 +261,16 @@ NB_MODULE(python_tool_handle, module) {
       })
       .export_values(); // Makes the enum values accessible without namespace in Python
 
+    nb::enum_<MSG::Level>(module, "MsgLevel", nb::is_arithmetic())
+        .value("NIL",     MSG::NIL)
+        .value("VERBOSE", MSG::VERBOSE)
+        .value("DEBUG",   MSG::DEBUG)
+        .value("INFO",    MSG::INFO)
+        .value("WARNING", MSG::WARNING)
+        .value("ERROR",   MSG::ERROR)
+        .value("FATAL",   MSG::FATAL)
+        .export_values();
+
     nb::class_<columnar::ColumnInfo>(module, "ColumnInfo")
         .def(nb::init<>()) // Default constructor
         .def_ro("name", &columnar::ColumnInfo::name)
@@ -161,8 +281,11 @@ NB_MODULE(python_tool_handle, module) {
         .def_ro("access_mode", &columnar::ColumnInfo::accessMode)
         .def_ro("offset_name", &columnar::ColumnInfo::offsetName)
         .def_ro("fixed_dimensions", &columnar::ColumnInfo::fixedDimensions)
-        .def_ro("link_target_names", &columnar::ColumnInfo::linkTargetNames)
-        .def_ro("variant_link_key_column", &columnar::ColumnInfo::variantLinkKeyColumn)
+        .def_ro("sole_link_target_name", &columnar::ColumnInfo::soleLinkTargetName)
+        .def_ro("sole_link_target_clid", &columnar::ColumnInfo::soleLinkTargetClid)
+        .def_ro("is_variant_link", &columnar::ColumnInfo::isVariantLink)
+        .def_ro("variant_link_target_names", &columnar::ColumnInfo::variantLinkTargetNames)
+        .def_ro("key_column_for_variant_link", &columnar::ColumnInfo::keyColumnForVariantLink)
         .def_ro("is_offset", &columnar::ColumnInfo::isOffset)
         .def_ro("replaces_column", &columnar::ColumnInfo::replacesColumn)
         .def_ro("is_optional", &columnar::ColumnInfo::isOptional)
@@ -197,8 +320,11 @@ NB_MODULE(python_tool_handle, module) {
             d["access_mode"] = static_cast<int>(self.accessMode);
             d["offset_name"] = self.offsetName;
             d["fixed_dimensions"] = self.fixedDimensions;
-            d["link_target_names"] = self.linkTargetNames;
-            d["variant_link_key_column"] = self.variantLinkKeyColumn;
+            d["sole_link_target_name"] = self.soleLinkTargetName;
+            d["sole_link_target_clid"] = self.soleLinkTargetClid;
+            d["is_variant_link"] = self.isVariantLink;
+            d["variant_link_target_names"] = self.variantLinkTargetNames;
+            d["key_column_for_variant_link"] = self.keyColumnForVariantLink;
             d["is_offset"] = self.isOffset;
             d["replaces_column"] = self.replacesColumn;
             d["is_optional"] = self.isOptional;
@@ -335,6 +461,14 @@ NB_MODULE(python_tool_handle, module) {
         .def("__setitem__", &setImmutableColumnVoid,
              "key"_a, "column"_a,
              "Set a void immutable column pointer (nanobind version).")
+
+        .def("__getitem__", &getColumnVoid,
+             "key"_a,
+             "Get a column as a numpy array (zero-copy view into the tool's buffer).")
+
+        .def("keys",
+             &columnar::PythonToolHandle::getColumnNames,
+             "Return the column names (enables dict(handle)).")
 
         .def("call",
              &columnar::PythonToolHandle::call,

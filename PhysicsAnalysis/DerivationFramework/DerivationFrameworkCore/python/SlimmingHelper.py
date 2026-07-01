@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ####################################################################
 # SlimmingHelper.py
@@ -266,9 +266,7 @@ class SlimmingHelper:
                         theDictionary = self.NamesAndTypes.copy()
                         theDictionary.update (self.AppendToDictionary)
                         if item in theDictionary.keys():
-                                if (theDictionary[item]=='xAOD::JetAuxContainer'):
-                                        entry = "xAOD::JetAuxContainer#"+item+"."
-                                elif (theDictionary[item]=='xAOD::ShallowAuxContainer'):
+                                if (theDictionary[item]=='xAOD::ShallowAuxContainer'):
                                         entry = "xAOD::ShallowAuxContainer#"+item+"."
                                 elif (theDictionary[item]=='xAOD::MissingETAuxAssociationMap'):
                                         entry = "xAOD::MissingETAuxAssociationMap#"+item+"."
@@ -276,6 +274,8 @@ class SlimmingHelper:
                                         entry = "xAOD::JetTrigAuxContainer#"+item+"."
                                 elif ("AuxInfo" in theDictionary[item]):
                                         entry = "xAOD::AuxInfoBase!#"+item+"."
+                                elif (theDictionary[item]=='xAOD::SpacePointAuxContainer'):
+                                        entry = "xAOD::SpacePointAuxContainer#"+item+"."
                                 else:
                                         entry = "xAOD::AuxContainerBase!#"+item+"."
                                 for element in auxEntries[item]:
@@ -291,6 +291,8 @@ class SlimmingHelper:
                                         entry+=excludedAuxData
                                 if ('xAOD::JetAuxContainer' in theDictionary[item] and auxEntries[item]=="" and self.CheckDoubleTrigAuxInstruction(item)):
                                         entry+=excludedAuxData
+                                if (theDictionary[item]=='xAOD::SpacePointAuxContainer' and auxEntries[item]==""):
+                                        entry+="-measurements.-measurementLink"
                                 self.FinalItemList.append(entry)
 
                 # Add compulsory items not covered by smart slimming (so no expansion)
@@ -401,6 +403,18 @@ class SlimmingHelper:
                 elif collectionName=="TauJets_EleRM":
                         from DerivationFrameworkTau.TauJets_LepRMCPContent import TauJets_EleRMCPContent
                         items.extend(TauJets_EleRMCPContent)
+                elif collectionName=="TauJetsLRT":
+                        if "TauJetsLRT" not in self.AppendToDictionary:
+                                self.AppendToDictionary["TauJetsLRT"]                          = 'xAOD::TauJetContainer'
+                                self.AppendToDictionary["TauJetsLRTAux"]                       = 'xAOD::TauJetAuxContainer'
+                                self.AppendToDictionary["TauTracksLRT"]                        = 'xAOD::TauTrackContainer'
+                                self.AppendToDictionary["TauTracksLRTAux"]                     = 'xAOD::TauTrackAuxContainer'
+                                self.AppendToDictionary["TauSecondaryVerticesLRT"]             = 'xAOD::VertexContainer'
+                                self.AppendToDictionary["TauSecondaryVerticesLRTAux"]          = 'xAOD::VertexAuxContainer'
+                                self.AppendToDictionary["TauNeutralParticleFlowObjectsLRT"]    = 'xAOD::PFOContainer'
+                                self.AppendToDictionary["TauNeutralParticleFlowObjectsLRTAux"] = 'xAOD::PFOAuxContainer'
+                        from DerivationFrameworkTau.TauJetsLRTCPContent import TauJetsLRTCPContent
+                        items.extend(TauJetsLRTCPContent)
                 elif collectionName=="MET_Baseline_AntiKt4EMTopo":
                         from DerivationFrameworkJetEtMiss.MET_Baseline_AntiKt4EMTopoCPContent import MET_Baseline_AntiKt4EMTopoCPContent
                         items.extend(MET_Baseline_AntiKt4EMTopoCPContent)
@@ -425,6 +439,8 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt4LCTopoJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4LCTopoJetsCPContent import AntiKt4LCTopoJetsCPContent
                         items.extend(AntiKt4LCTopoJetsCPContent)
+                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
+                        items.extend(BTaggingStandardContent(self.flags, "AntiKt4LCTopoJets"))
                 elif collectionName=="AntiKt4EMTopoJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMTopoJetsCPContent import AntiKt4EMTopoJetsCPContent
                         items.extend(AntiKt4EMTopoJetsCPContent)
@@ -470,36 +486,15 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt10LCTopoJets":
                         from DerivationFrameworkJetEtMiss.AntiKt10LCTopoJetsCPContent import AntiKt10LCTopoJetsCPContent
                         items.extend(AntiKt10LCTopoJetsCPContent)
-                elif collectionName=="AntiKt10TrackCaloClusterJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt10TrackCaloClusterJetsCPContent import AntiKt10TrackCaloClusterJetsCPContent
-                        items.extend(AntiKt10TrackCaloClusterJetsCPContent)
                 elif collectionName=="AntiKt10UFOCSSKJets":
                         from DerivationFrameworkJetEtMiss.AntiKt10UFOCSSKJetsCPContent import AntiKt10UFOCSSKJetsCPContent
                         items.extend(AntiKt10UFOCSSKJetsCPContent)
-                elif collectionName=="AntiKt10UFOCHSJets":
-                        from DerivationFrameworkJetEtMiss.AntiKt10UFOCHSJetsCPContent import AntiKt10UFOCHSJetsCPContent
-                        items.extend(AntiKt10UFOCHSJetsCPContent)
-                elif collectionName=="AntiKt10TruthTrimmedPtFrac5SmallR20Jets":
-                        from DerivationFrameworkJetEtMiss.AntiKt10TruthTrimmedPtFrac5SmallR20JetsCPContent import AntiKt10TruthTrimmedPtFrac5SmallR20JetsCPContent
-                        items.extend(AntiKt10TruthTrimmedPtFrac5SmallR20JetsCPContent)
-                elif collectionName=="AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets":
-                        from DerivationFrameworkJetEtMiss.AntiKt10LCTopoTrimmedPtFrac5SmallR20JetsCPContent import AntiKt10LCTopoTrimmedPtFrac5SmallR20JetsCPContent
-                        items.extend(AntiKt10LCTopoTrimmedPtFrac5SmallR20JetsCPContent)
-                elif collectionName=="AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets":
-                        from DerivationFrameworkJetEtMiss.AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20JetsCPContent import AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20JetsCPContent
-                        if "AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets" not in self.AppendToDictionary:
-                                self.AppendToDictionary["AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20Jets"]='xAOD::JetContainer'
-                                self.AppendToDictionary["AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20JetsAux"]='xAOD::JetAuxContainer'
-                        items.extend(AntiKt10TrackCaloClusterTrimmedPtFrac5SmallR20JetsCPContent)
                 elif collectionName=="AntiKt10TruthSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent import AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10TruthSoftDropBeta100Zcut10JetsCPContent)
                 elif collectionName=="AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsCPContent import AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsCPContent)
-                elif collectionName=="AntiKt10UFOCHSSoftDropBeta100Zcut10Jets":
-                        from DerivationFrameworkJetEtMiss.AntiKt10UFOCHSSoftDropBeta100Zcut10JetsCPContent import AntiKt10UFOCHSSoftDropBeta100Zcut10JetsCPContent
-                        items.extend(AntiKt10UFOCHSSoftDropBeta100Zcut10JetsCPContent)
                 elif collectionName=="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets":
                         from DerivationFrameworkJetEtMiss.AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent import AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent
                         items.extend(AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent)
@@ -547,6 +542,12 @@ class SlimmingHelper:
                 elif collectionName=="InDetSiSPSeededTracksParticles":
                         from DerivationFrameworkInDet.InDetSiSPSeededTracksParticlesCPContent import InDetSiSPSeededTracksParticlesCPContent
                         items.extend(InDetSiSPSeededTracksParticlesCPContent)
+                elif collectionName=="InDetLowPtRoITrackParticles":
+                        from DerivationFrameworkInDet.InDetLowPtRoITrackParticlesCPContent import InDetLowPtRoITrackParticlesCPContent
+                        items.extend(InDetLowPtRoITrackParticlesCPContent)
+                elif collectionName=="RoIVerticesLowPtRoI":
+                        from DerivationFrameworkInDet.InDetLowPtRoIVerticesCPContent import InDetLowPtRoIVerticesCPContent
+                        items.extend(InDetLowPtRoIVerticesCPContent)
                 elif collectionName=="InDetLargeD0TrackParticles":
                         from DerivationFrameworkInDet.InDetLargeD0TrackParticlesCPContent import InDetLargeD0TrackParticlesCPContent
                         items.extend(InDetLargeD0TrackParticlesCPContent)

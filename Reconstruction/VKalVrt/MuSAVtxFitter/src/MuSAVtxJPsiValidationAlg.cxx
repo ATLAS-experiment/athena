@@ -60,9 +60,8 @@ StatusCode MuSAVtxJPsiValidationAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuSAVtxJPsiValidationAlg::execute() {
+StatusCode MuSAVtxJPsiValidationAlg::execute(const EventContext& ctx) {
     
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ReadHandle<xAOD::MuonContainer> muonContainer(m_muonContainer, ctx);
   ATH_CHECK(muonContainer.isValid());

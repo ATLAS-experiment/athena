@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGAudSvc.cxx 
@@ -25,7 +25,6 @@
 
 // StoreGate includes
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 
 // SGAudSvc includes
 #include "SGAudSvc.h"

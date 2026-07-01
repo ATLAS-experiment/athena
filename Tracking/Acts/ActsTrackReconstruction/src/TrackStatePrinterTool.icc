@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ATHENA
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
-#include "ActsGeometry/ATLASSourceLink.h"
+ #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
 // ACTS CORE
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 
 // Other
 #include <iostream>
@@ -100,9 +100,8 @@ namespace ActsTrk
 
     if (state.hasUncalibratedSourceLink())
     {
-      ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-      const xAOD::UncalibratedMeasurement &umeas = getUncalibratedMeasurement(sl);
-      index = measurementIndexer.index(umeas);
+      const xAOD::UncalibratedMeasurement* umeas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
+      index = measurementIndexer.index(*umeas);
     }
 
     std::cout << std::setw(5) << state.index() << ' ';

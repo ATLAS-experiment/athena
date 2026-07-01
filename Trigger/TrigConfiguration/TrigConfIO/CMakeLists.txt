@@ -38,7 +38,7 @@ atlas_install_scripts( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 # Tests:
 atlas_add_test( CrestReadTest
   SCRIPT test/readAccessCrestPy.sh
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 # => disabling this test for now until I find a better way to store the test menus
 # Test(s) in the package.
@@ -46,6 +46,6 @@ atlas_add_test( CrestReadTest
 #   SOURCES test/read_config_info.cxx
 #   LINK_LIBRARIES TrigConfData TrigConfIO
 #   ENVIRONMENT "TESTFILEPATH=${CMAKE_CURRENT_SOURCE_DIR}/test/data"
-#   POST_EXEC_SCRIPT nopost.sh
+#   POST_EXEC_SCRIPT noerror.sh
 #   )
 

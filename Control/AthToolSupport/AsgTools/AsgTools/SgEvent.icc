@@ -1,0 +1,177 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef ASGTOOLS_SGEVENT_ICC
+#define ASGTOOLS_SGEVENT_ICC
+
+// System include(s):
+#include <iostream>
+
+#include <CxxUtils/AthUnlikelyMacros.h>
+
+// xAOD include(s):
+#ifdef XAOD_STANDALONE
+#   include "xAODRootAccess/Event.h"
+#   include "xAODRootAccess/TStore.h"
+#endif // XAOD_STANDALONE
+
+namespace asg {
+
+   /// A constant used in the error message printouts
+   static const char* ERROR_SRC = "asg::SgEvent              ERROR   ";
+
+   template< typename T >
+   bool SgEvent::contains( const std::string& name ) const {
+
+      // Make sure the object is initialised:
+      if( ATH_UNLIKELY ( ! m_pevm ) && initialize().isFailure() ) {
+         std::cout << ERROR_SRC << "Couldn't initialise the tool"
+                   << std::endl;
+         return false;
+      }
+
+      // Check if the object is in the transient store:
+      if ( m_ptds && m_ptds->template contains< T >( name ) ) {
+         return true;
+      }
+
+      // Check if the object is in the event store:
+      return m_pevm->template contains< T >( name );
+   }
+
+   template< typename T >
+   bool SgEvent::transientContains( const std::string& name ) const {
+
+      // Make sure the object is initialised:
+      if( ATH_UNLIKELY ( ! m_pevm ) && initialize().isFailure() ) {
+         std::cout << ERROR_SRC << "Couldn't initialise the tool"
+                   << std::endl;
+         return false;
+      }
+
+      // Check if the object is in the transient store:
+      if ( m_ptds && m_ptds->template contains< T >( name ) ) {
+         return true;
+      }
+
+      // Check if the object is in the event store:
+      return m_pevm->template transientContains< T >( name );
+   }
+
+   template< typename T >
+   T* SgEvent::retrieve( const std::string& name ) const {
+
+      // Make sure the object is initialised:
+      if( ATH_UNLIKELY ( ! m_pevm ) && initialize().isFailure() ) {
+         std::cout << ERROR_SRC << "Couldn't initialise the tool"
+                   << std::endl;
+         return 0;
+      }
+
+      // Pointer used in the retrieval:
+      T* pobj = 0;
+
+      // Check the transient store first:
+      if( m_ptds && m_ptds->template contains< T >( name ) ) {
+         if( m_ptds->retrieve( pobj, name ).isSuccess() ) {
+            return pobj;
+         } else {
+            return 0;
+         }
+      }
+
+      // If it's not there, then check the event store:
+      if( m_pevm->retrieve( pobj, name ).isSuccess() ) {
+         return pobj;
+      } else {
+         return 0;
+      }
+   }
+
+   template< typename T >
+   StatusCode SgEvent::retrieve( T*& pobj, const std::string& name ) {
+
+      pobj = retrieve< T >( name );
+      if( ATH_LIKELY( pobj ) ) {
+         return StatusCode::SUCCESS;
+      } else {
+         return StatusCode::FAILURE;
+      }
+   }
+
+   template< typename T >
+   StatusCode SgEvent::retrieve( const T*& pobj,
+                                  const std::string& name ) const {
+
+      pobj = retrieve< const T >( name );
+      if( ATH_LIKELY( pobj ) ) {
+         return StatusCode::SUCCESS;
+      } else {
+         return StatusCode::FAILURE;
+      }
+   }
+
+   template< typename T >
+   StatusCode SgEvent::record( std::unique_ptr<T> pobj, const std::string& name ) {
+
+      // Make sure the object is initialised:
+      if( ATH_UNLIKELY ( ! m_pevm ) && initialize().isFailure() ) {
+         std::cout << ERROR_SRC << "Couldn't initialise the tool"
+                   << std::endl;
+         return StatusCode::FAILURE;
+      }
+
+      // If a transient store is available, try recording it there:
+      if( m_ptds ) {
+         if( m_ptds->record( std::move( pobj ), name ).isSuccess() ) {
+            return StatusCode::SUCCESS;
+         } else {
+            return StatusCode::FAILURE;
+         }
+      }
+
+      // If not, then let's try with the event store:
+      if( m_pevm->record( std::move( pobj ), name ).isSuccess() ) {
+         return StatusCode::SUCCESS;
+      } else {
+         return StatusCode::FAILURE;
+      }
+   }
+
+   template< typename T >
+   StatusCode SgEvent::record( T* pobj, const std::string& name ) {
+     // this is the legacy interface, forwarding it to new one
+     return record( std::unique_ptr<T>(pobj), name );
+   }
+
+   /// Container overwriting is not allowed in standalone mode. The function is
+   /// just here to allow the compilation of code that was mainly written for
+   /// the offline environment. (In case the behaviour of the code is chosen
+   /// according to its runtime configuration.)
+   ///
+   /// As it's a dummy, function parameters are not described here. They are
+   /// modeled after the <code>StoreGateSvc::overwrite</code> function.
+   ///
+   template< typename T >
+   StatusCode SgEvent::overwrite( T* /*obj*/, const std::string& /*name*/,
+                                   bool /*allowMods*/, bool /*resetOnly*/,
+                                   bool /*noHist*/ ) {
+
+      std::cout << ERROR_SRC << "Can't use overwrite in standalone mode"
+                << std::endl;
+      return StatusCode::FAILURE;
+   }
+
+   template< typename T >
+   void SgEvent::keys( std::vector< std::string >& vkeys ) const {
+      if ( m_ptds ) {
+         m_ptds->keys< T >(vkeys);
+      } else if ( m_pevm ) {
+         m_pevm->keys< T >(vkeys);
+      }
+   }
+
+} // namespace asg
+
+#endif // ASGTOOLS_SGEVENT_ICC

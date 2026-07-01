@@ -11,7 +11,6 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/GenRanges.h"
 
 /**
 // @brief This defines the McEventCollection, which is really just an 
@@ -65,7 +64,6 @@ inline McEventCollection& McEventCollection::operator=(const McEventCollection& 
     for (const HepMC::GenEvent* ev : in)
     {
       HepMC::GenEvent* nev = new HepMC::GenEvent(*ev);
-#ifdef HEPMC3
       auto ri = ev->run_info();
       if (ri) {
         std::shared_ptr<HepMC3::GenRunInfo> nri =  std::make_shared<HepMC3::GenRunInfo>(*(ri.get()));
@@ -73,7 +71,6 @@ inline McEventCollection& McEventCollection::operator=(const McEventCollection& 
       }
       // Fill barcodes attribute in copied GenEvent
       HepMC::fillBarcodesAttribute(nev);
-#endif
       DataVector<HepMC::GenEvent>::push_back(nev);
     }
   }

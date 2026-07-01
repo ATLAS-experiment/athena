@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*  Parameter.h
  *  L1TopoInterfaces
@@ -13,8 +13,9 @@
 #ifndef L1TOPOINTERFACES_PARAMETER_H
 #define L1TOPOINTERFACES_PARAMETER_H
 
-#include <iostream>
+#include <iosfwd>
 #include <string>
+#include <string_view>
 #include <stdint.h>
 
 namespace TCS {
@@ -24,8 +25,8 @@ namespace TCS {
    class Parameter {
    public:
       
-      Parameter(const std::string & name, TCS::parType_t value);
-      Parameter(const std::string & name, TCS::parType_t value, unsigned int selection);
+      Parameter(std::string_view name, TCS::parType_t value);
+      Parameter(std::string_view name, TCS::parType_t value, unsigned int selection);
 
       ~Parameter(){};
       

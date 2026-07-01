@@ -385,6 +385,8 @@ private:
   /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
   Gaudi::Property<bool> m_useCTag{this, "useCTagging", false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging"};
   Gaudi::Property<bool> m_readFromBTaggingObject{this, "readFromBTaggingObject", false, "Enabled to access btagging scores from xAOD::BTagging object; Can be disabled for GN2v01 to access the scores from the jet itself."};
+  //if true, eigenvvector decomposition will be split for tau-jets and charm-jets
+  Gaudi::Property<bool> m_splitTauCharmEff{this, "splitTauCharmEff", false, "[Expert mode]. If false (recommended value), tau-jets and charm-jets will be treated as a single category in the eigenvector decomposition. If true (not recommended), eigenvector decomposition will be split for tau-jets and charm-jets efficiencies. PLEASE CONTACT FTAG GROUP BEFORE TURNING FLAG TO TRUE FOR YOUR ANALYSIS"};  
   /// if this string is empty, the onnx tool won't be created
   Gaudi::Property<std::string> m_pathToONNX{this, "pathToONNX", "", "path to the onnx file that will be used for inference"};
   /// @}

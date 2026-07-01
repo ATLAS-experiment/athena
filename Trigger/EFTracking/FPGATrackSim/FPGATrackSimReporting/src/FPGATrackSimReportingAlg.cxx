@@ -548,12 +548,9 @@ void FPGATrackSim::FPGATrackSimReportingAlg::processFPGAPrototracks(SG::ReadHand
     for (auto const& prototrack : *FPGAPrototracks)
     {
         nPixelMeasurements = 0, nStripMeasurements = 0;
-        const std::vector<ActsTrk::ATLASUncalibSourceLink>* measurements = &prototrack.measurements;
-        for (const ActsTrk::ATLASUncalibSourceLink& measurementLink : *measurements)
-        {
-            const xAOD::UncalibratedMeasurement& measurement = ActsTrk::getUncalibratedMeasurement(measurementLink);
-            if (measurement.type() == xAOD::UncalibMeasType::PixelClusterType) ++nPixelMeasurements;
-            else if (measurement.type() == xAOD::UncalibMeasType::StripClusterType) ++nStripMeasurements;
+        for (const xAOD::UncalibratedMeasurement*  measurement : prototrack.measurements) {
+            if (measurement->type() == xAOD::UncalibMeasType::PixelClusterType) ++nPixelMeasurements;
+            else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType) ++nStripMeasurements;
         }
         m_pixelClustersPerPrototrack.push_back(nPixelMeasurements);
         m_stripClustersPerPrototrack.push_back(nStripMeasurements);
@@ -584,9 +581,8 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGAPrototracks(SG::ReadHandle
         parameters[Acts::eBoundLoc0],
         parameters[Acts::eBoundLoc1]);
 
-        const std::vector<ActsTrk::ATLASUncalibSourceLink>* measurements = &prototrack.measurements;
         unsigned int measurementCounter = 0;
-        if (measurements->size())
+        if (prototrack.measurements.size())
         {
             mainTable +=
                 "|        _____________________________________________________________________________________|\n"
@@ -595,12 +591,11 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGAPrototracks(SG::ReadHandle
                 "|        |        |...........................................................................|\n";
 
         }
-        for (const ActsTrk::ATLASUncalibSourceLink& measurementLink : *measurements)
+        for (const xAOD::UncalibratedMeasurement* measurement : prototrack.measurements)
         {
             ++measurementCounter;
-            const xAOD::UncalibratedMeasurement& measurement = ActsTrk::getUncalibratedMeasurement(measurementLink);
-            if (measurement.type() == xAOD::UncalibMeasType::PixelClusterType) {
-                const xAOD::PixelCluster* pixelCluster = dynamic_cast<const xAOD::PixelCluster*>(&measurement);
+            if (measurement->type() == xAOD::UncalibMeasType::PixelClusterType) {
+                const xAOD::PixelCluster* pixelCluster = dynamic_cast<const xAOD::PixelCluster*>(measurement);
                 mainTable += std::format("|        | {:>6} |   Pixel  | {:>8.3f} | {:>8.3f} | {:>8.3f} | {:>7} | {:>19} |\n",
                     measurementCounter,
                     pixelCluster->globalPosition().cast<double>().x(),
@@ -609,8 +604,8 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGAPrototracks(SG::ReadHandle
                     pixelCluster->identifierHash(),
                     pixelCluster->identifier());
             }
-            else if (measurement.type() == xAOD::UncalibMeasType::StripClusterType) {
-                const xAOD::StripCluster* stripCluster = dynamic_cast<const xAOD::StripCluster*>(&measurement);
+            else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType) {
+                const xAOD::StripCluster* stripCluster = dynamic_cast<const xAOD::StripCluster*>(measurement);
                 mainTable += std::format("|        | {:>6} |   Strip  | {:>8.3f} | {:>8.3f} | {:>8.3f} | {:>7} | {:>19} |\n",
                     measurementCounter,
                     stripCluster->globalPosition().cast<double>().x(),

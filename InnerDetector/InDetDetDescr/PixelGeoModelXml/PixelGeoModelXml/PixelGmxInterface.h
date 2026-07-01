@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODELXML_PIXELGMXINTERFACE_H
@@ -50,7 +50,7 @@ public:
    void buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccessSvc, GeoModelIO::ReadGeoModel* sqlreader);
 
 protected:
-  std::map<std::string, int> m_geometryMap;
+  std::map<std::string, int, std::less<>> m_geometryMap;
 
   void makePixelModule(const std::string& typeName,
                        const std::map<std::string, std::string> &parameters);

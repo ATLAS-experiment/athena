@@ -24,7 +24,7 @@ public:
 protected:
 
   TileHitVector_PERS*  createPersistent(TileHitVector* transCont);
-  TileHitVector*       createTransient ();
+  TileHitVector*       createTransient(const Token* token);
 };
 
 

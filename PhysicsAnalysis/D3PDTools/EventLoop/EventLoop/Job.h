@@ -1,23 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+/// @author Nils Krumnack
 
 #ifndef EVENT_LOOP_JOB_HH
 #define EVENT_LOOP_JOB_HH
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
 /// This module defines a class that manages a complete job
-/// description.  The interface provided in this module is intended
-/// for the general user.  The module is considered to be in the
-/// pre-alpha stage.
+/// description.
 
 
 
@@ -129,6 +120,11 @@ namespace EL
     bool algsHas (const std::string& name) const;
 
 
+    /// @brief start a new sub-sequence of algorithms
+  public:
+    void startNewAlgSequence ();
+
+
     /// description: the list of output datasets used
     /// guarantee: no-fail / strong
     /// failures(3): out of memory II
@@ -157,7 +153,7 @@ namespace EL
     /// effects: register this job to use XAODs
     /// guarantee: strong
     /// failures: out of memory II
-    /// failures: TEventSvc not available
+    /// failures: EventSvc not available
   public:
     void useXAOD ();
 
@@ -391,23 +387,6 @@ namespace EL
     /// \brief the option to select whether our input is xAODs
   public:
     static const std::string optXAODInput;
-
-    /// description: the option to select the access mode for xAODs.
-    ///   this can be "branch" for branch access, or "class" for
-    ///   access.  if this option isn't specified EventLoop will pick
-    ///   whatever is currently recommended.
-  public:
-    static const std::string optXaodAccessMode;
-    static const std::string optXaodAccessMode_branch;
-    static const std::string optXaodAccessMode_class;
-    static const std::string optXaodAccessMode_athena;
-
-  public:
-    /// Pattern for other MetaData tree name in input xAODs 
-    /// Can be useful for augmented file reading or excluding non real MetaData trees 
-    /// i.e. trees not containing a branch called EventFormat*
-    static const std::string optOtherMetaDataTreeNamePattern;
-
 
     /// \brief the option to turn on/off the xAOD summary reporting at
     /// the end of the job

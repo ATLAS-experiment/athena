@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -25,8 +25,6 @@
 
 #include "AthContainers/AuxVectorBase.h"
 #include "AthContainers/AuxElement.h"
-#include "SGTools/DataHandleBase.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/SGWPtr.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
@@ -137,11 +135,14 @@ public:
   virtual void shift (size_t /*pos*/, ptrdiff_t /*offs*/) override {}
   virtual bool insertMove (size_t, IAuxStore&, const SG::auxid_set_t&) override { std::abort(); }
   virtual void* getDecoration (auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/) override { std::abort(); }
+  virtual SG::auxid_set_t
+  getCopyIDs (bool /*warnUnlocked*/) const override { std::abort(); }
   virtual bool isDecoration(SG::auxid_t /*auxid*/) const override { std::abort(); }
   virtual void lock() override { m_locked = true; }
   virtual bool clearDecorations() override { std::abort(); }
   virtual size_t size() const override { std::abort(); }
   virtual void lockDecoration (SG::auxid_t) override { std::abort(); }
+  virtual void toTransient (const EventContext&) override { std::abort(); }
 
   bool m_locked;
 
@@ -356,25 +357,6 @@ namespace Athena_test
     assert(rSG.retrieve(base).isSuccess());
     assert(rSG.retrieve(base, "UnLocked").isSuccess());
     SGASSERTERROR(rSG.retrieve(base, "modSully").isSuccess());
-
-#ifdef TEST_DEPRECATED
-    const DataHandle<Base> chBase;
-    assert(rSG.retrieve(chBase).isSuccess());
-    assert(rSG.retrieve(chBase, "UnLocked").isSuccess());
-
-    DataHandle<Base> hBase;
-    assert(rSG.retrieve(hBase).isSuccess());
-    assert(rSG.retrieve(hBase, "UnLocked").isSuccess());
-
-    const DataHandle<Base> chBaseBeg, chBaseEnd;
-    assert(rSG.retrieve(chBaseBeg, chBaseEnd).isSuccess());
-    assert(chBaseBeg != chBaseEnd);
-#endif
-#ifdef DHR_COMPILEERROR
-    DataHandle<Base> hBaseBeg, hBaseEnd;
-    assert(rSG.retrieve(hBaseBeg, hBaseEnd).isSuccess());
-    assert(hBaseBeg != hBaseEnd);
-#endif
 
     SG::ConstIterator<Base> ciBaseBeg,ciBaseEnd;
     assert(rSG.retrieve(ciBaseBeg, ciBaseEnd).isSuccess());
@@ -641,23 +623,6 @@ namespace Athena_test {
     assert (rSG.retrieve<const Foo> ("UnLocked") == cFoo);
     SGASSERTERROR(rSG.retrieve<const Foo> ("UnLockedxxx") != 0);
 
-#ifdef TEST_DEPRECATED
-    const DataHandle<Foo> chFoo;
-    const DataHandle<NotThere> chNotThere;
-    SGASSERTERROR(rSG.retrieve(chFoo).isSuccess());
-    SGASSERTERROR(rSG.retrieve(chNotThere).isSuccess());
-
-    assert(rSG.retrieve(chFoo, "UnLocked").isSuccess());
-    SGASSERTERROR(rSG.retrieve(chFoo, "modSully").isSuccess());
-
-    DataHandle<Foo> hFoo;
-    SGASSERTERROR(rSG.retrieve(hFoo).isSuccess());
-
-    assert(rSG.retrieve(hFoo, "silly").isSuccess());
-    assert(rSG.setConst(hFoo.cptr()).isSuccess());
-    SGASSERTERROR(rSG.retrieve(hFoo, "silly").isSuccess());
-#endif
-
     SG::ConstIterator<Foo> ciFooBeg, ciFooEnd;
     assert(rSG.retrieve(ciFooBeg, ciFooEnd).isSuccess());
     assert(ciFooBeg != ciFooEnd);
@@ -694,46 +659,6 @@ namespace Athena_test {
     cout << "*** StoreGateSvcClient_test retrievePrivateCopy OK ***" <<endl;
   }
 
-
-  void testBind ATLAS_NOT_THREAD_SAFE (::StoreGateSvc& rSG) {
-
-    cout << "*** StoreGateSvcClient_test bind BEGINS ***" <<endl;
-    const DataHandle<Foo> chFoo;
-    Foo *cFoo = new Foo;
-    std::string dbKey="fooKey";
-
-    assert(rSG.record(cFoo,dbKey).isSuccess());
-
-    assert(rSG.bind(chFoo,dbKey).isSuccess());
-    assert(chFoo.cptr() == cFoo);
-
-//FIXME      cout << "** bind it a second time with same key" << endl;
-//      // try to bind it twice
-//FIXME      assert(rSG.bind(chFoo,dbKey).isSuccess());
-
-//FIXME      Foo *cFoo2 = new Foo;
-//FIXME      std::string dbKey2="fooKey2";
-//FIXME      assert(rSG.record(cFoo2,dbKey2).isSuccess());
-//FIXME      cout << "** bind it a third time with a different key, obj: " 
-//FIXME    	 << hex << cFoo << "  " << cFoo2 << dec << endl;
-//      // try to bind it twice with a different key
-//FIXME      assert(rSG.bind(chFoo,dbKey2).isSuccess());
-
-    SmartIF<IProxyProviderSvc> pIPPSvc{rSG.serviceLocator()->service("ProxyProviderSvc")};
-    assert(pIPPSvc.isValid());
-
-//FIXME      TransientID id(ClassID_traits<Foo>::ID(), dbKey);
-//FIXME      DataProxy *dp = pIPPSvc->getProxy(id, rSG);
-//FIXME      assert (dp != 0);
-
-//FIXME      //    rSG.clearStore().ignore();
-//FIXME      dp->reset();
-
-//FIXME      SGASSERTERROR(chFoo.ptr() != 0);
-
-    cout << "*** StoreGateSvcClient_test bind OK ***\n\n" <<endl;
-
-  }
 
   void testClear(::StoreGateSvc& rSG) {
 
@@ -932,12 +857,6 @@ namespace Athena_test {
     // a regular retrieve ignores a missing aux store
     cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec");
     assert( 0 != cpVec );
-    
-    //deprecated but we need to test it nonetheless...
-#ifdef TEST_DEPRECATED
-    DataHandle<TestVector<BBX> > hBBX;
-    assert(rSG.retrieve(hBBX, "BBVec").isSuccess());    
-#endif
     
     // Test standalone object.
     BX* pb = new BX;

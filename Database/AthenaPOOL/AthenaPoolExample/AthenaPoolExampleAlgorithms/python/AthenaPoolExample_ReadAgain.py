@@ -25,6 +25,11 @@ flags.Exec.MaxEvents = -1
 flags.Common.MsgSuppression = False
 flags.Exec.DebugMessageComponents = ["ReadData", "PoolSvc",
                                      "AthenaPoolAddressProviderSvc", "MetaDataSvc", "EventSelector"]
+
+#Run3 for now
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
 flags.lock()
 
 # Main services
@@ -48,13 +53,10 @@ evSelector.SkipEventSequence = [ 9, 10 ] # // skip two more events
 #Switch Off for TAG - start
 poolAttribs = acc.getService("AthenaPoolCnvSvc").InputPoolAttributes
 # Turn on the tree cache for the CollectionTree - tree cache only works for one tree.
-# Set number of events for learning before turning on cache - default is 5
-poolAttribs += [ "DatabaseName = '*'; TREE_CACHE_LEARN_EVENTS = '6'" ]
 # And set tree cache size - default is 10 MB (10 000 000)
 poolAttribs += [ "DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '100000'" ]
 
 # Print out values - must have PoolSvc in info mode
-poolAttribs += [ "DatabaseName = '*'; TREE_CACHE_LEARN_EVENTS = 'int'" ]
 poolAttribs += [ "DatabaseName = '*'; TREE_CACHE_SIZE = 'int'" ]
 
 # Print out for each event the number of bytes read and the number of

@@ -11,10 +11,10 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-#include "ActsEvent/RecordedMaterialTrackCollection.h"
+#include "ActsGeometry/RecordedMaterialTrackCollection.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 
-#include "Acts/Material/MaterialValidater.hpp"
+#include "Acts/Material/MaterialValidator.hpp"
 
 namespace ActsTrk {
     /// @class MaterialValidation
@@ -32,8 +32,8 @@ namespace ActsTrk {
             virtual ~MaterialValidation();
 
         private:
-            /// The material validater from the ACTS core components
-            std::shared_ptr<Acts::MaterialValidater> m_materialValidater;
+            /// The material validator from the ACTS core components
+            std::shared_ptr<Acts::MaterialValidator> m_materialValidator;
             /// The random number service
             ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "AthRNGSvc", "AthRNGSvc", "The random number service"};
             /// The number of tracks to use per event

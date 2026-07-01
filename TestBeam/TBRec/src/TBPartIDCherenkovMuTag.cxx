@@ -30,7 +30,7 @@ StatusCode TBPartIDCherenkovMuTag::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TBPartIDCherenkovMuTag::execute() {
+StatusCode TBPartIDCherenkovMuTag::execute(const EventContext& /*ctx*/) {
   const TBScintillatorCont *scintCont;
   StatusCode sc = evtStore()->retrieve(scintCont, m_SGkeyscint);
   if (sc.isFailure()){

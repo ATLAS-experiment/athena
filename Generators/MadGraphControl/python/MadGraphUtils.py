@@ -15,7 +15,7 @@ from MCJobOptionUtils.LHAPDFsupport import get_lhapdf_id_and_name # noqa: F401
 from MCJobOptionUtils.LHAPDFsupport import get_LHAPDF_PATHS # noqa: F401
 from MCJobOptionUtils.JOsupport import get_physics_short 
 from AthenaCommon import Logging
-from MadGraphControl.MGC import MGControl
+from MadGraphControl.MGC import MGControl,MADGRAPH_PDFSETTING
 mglog = Logging.logging.getLogger('MadGraphUtils')
 my_MGC_instance = None
 
@@ -30,16 +30,14 @@ MADGRAPH_GRIDPACK_LOCATION='madevent'
 MADGRAPH_RUN_NAME='run_01'
 # For error handling
 MADGRAPH_CATCH_ERRORS=True
-# PDF setting (global setting)
-MADGRAPH_PDFSETTING=None
 MADGRAPH_COMMAND_STACK = []
 
 
 import shutil
 
 
-from MadGraphControl.MadGraphUtilsHelpers import checkSettingExists,checkSetting,checkSettingIsTrue,get_runArgs_info,error_check,setup_path_protection,get_mg5_version
-from MadGraphControl.MadGraphSystematicsUtils import setup_pdf_and_systematic_weights
+from MadGraphControl.MadGraphUtilsHelpers import error_check,get_mg5_version
+from MadGraphControl.MadGraphSystematicsUtils import systematics_run_card_options,get_pdf_and_systematic_settings
 from MadGraphControl.MadGraphParamHelpers import check_PMG_updates
 
 def stack_subprocess(command,**kwargs):
@@ -72,10 +70,42 @@ def generate_prep(process_dir):
             mglog.warning('Way too many Cards_bkup* directories found. Giving up -- standalone script may not work.')
 
 
-def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs=False, usePMGSettings=False):
+def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs=False, usePMGSettings=False, pdf_setting=None, devices=None, catch_errors=MADGRAPH_CATCH_ERRORS):
     global my_MGC_instance
-    my_MGC_instance = MGControl(process, plugin, keepJpegs, usePMGSettings)
+    my_MGC_instance = MGControl(
+        process,
+        plugin,
+        keepJpegs,
+        usePMGSettings,
+        pdf_setting=pdf_setting,
+        devices=devices,
+        catch_errors=catch_errors,
+    )
     return my_MGC_instance.process_dir
+
+
+def _should_catch_errors():
+    if my_MGC_instance is not None and hasattr(my_MGC_instance, 'catch_errors'):
+        return bool(my_MGC_instance.catch_errors)
+    return MADGRAPH_CATCH_ERRORS
+
+
+def _write_run_card(runArgs=None, flags=None):
+    global my_MGC_instance # noqa: F824
+    if flags is not None:
+        my_MGC_instance.write_runCard(flags=flags)
+    elif runArgs is not None:
+        my_MGC_instance.write_runCard(runArgs=runArgs)
+    else:
+        my_MGC_instance.write_runCard()
+
+
+def get_pdf_setting(pdf_setting=None):
+    if pdf_setting is not None:
+        return pdf_setting
+    if my_MGC_instance is not None and hasattr(my_MGC_instance, 'pdf_setting'):
+        return my_MGC_instance.pdf_setting
+    return MADGRAPH_PDFSETTING
 
 def get_default_runcard(process_dir=MADGRAPH_GRIDPACK_LOCATION):
     """ Copy the default runcard from one of several locations
@@ -98,12 +128,12 @@ def get_default_runcard(process_dir=MADGRAPH_GRIDPACK_LOCATION):
             raise RuntimeError('Cannot find default run_card.dat or run_card_default.dat! I was looking here: %s'%run_card)
 
 
-def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False, extlhapath=None, required_accuracy=0.01, runArgs=None, bias_module=None, requirePMGSettings=False):
+def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False, extlhapath=None, required_accuracy=0.01, runArgs=None, flags=None, bias_module=None, requirePMGSettings=False, pdf_setting=None):
     global my_MGC_instance # noqa: F824
 
     
     # Just in case
-    setup_path_protection()
+    my_MGC_instance.setup_path_protection()
     
     # Set consistent mode and number of jobs
     mode = 0
@@ -119,22 +149,24 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
     if is_gen_from_gridpack():
         mglog.info('Running event generation from gridpack (using smarter mode from generate() function)')
-        generate_from_gridpack(runArgs=runArgs,extlhapath=extlhapath,gridpack_compile=gridpack_compile,requirePMGSettings=requirePMGSettings)
+        if flags is not None:
+            generate_from_gridpack(flags=flags,extlhapath=extlhapath,gridpack_compile=gridpack_compile,requirePMGSettings=requirePMGSettings,pdf_setting=pdf_setting)
+        else:
+            generate_from_gridpack(runArgs=runArgs,extlhapath=extlhapath,gridpack_compile=gridpack_compile,requirePMGSettings=requirePMGSettings,pdf_setting=pdf_setting)
         return
     else:
         mglog.info('Did not identify an input gridpack.')
         if grid_pack:
             mglog.info('The grid_pack flag is set, so I am expecting to create a gridpack in this job')
 
-    # Now get a variety of info out of the runArgs
-    beamEnergy,random_seed = get_runArgs_info(runArgs)
+    # Now get beam energy and random seed out of runArgs or flags
+    beamEnergy,random_seed = get_runArgs_info(runArgs=runArgs, flags=flags)
 
     # Check if process is NLO or LO
     isNLO = my_MGC_instance.isNLO 
 
     # Setup PDF and systematics
-    setup_pdf_and_systematic_weights(MADGRAPH_PDFSETTING,my_MGC_instance.runCardDict,isNLO)
-
+    setup_pdf_and_systematic_weights(get_pdf_setting(pdf_setting),my_MGC_instance.runCardDict,isNLO)
 
     # temporary fix of makefile, needed for 3.3.1., remove in future
     if isNLO:
@@ -256,13 +288,13 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     
     # Writing cards to disk
     my_MGC_instance.write_configCard()
-    my_MGC_instance.write_runCard(runArgs=runArgs)
+    _write_run_card(runArgs=runArgs, flags=flags)
 
     print_cards_from_dir(process_dir=my_MGC_instance.process_dir)
     
     
     generate_prep(process_dir=os.getcwd())
-    generate = stack_subprocess(command,stdin=subprocess.PIPE, stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+    generate = stack_subprocess(command,stdin=subprocess.PIPE, stderr=subprocess.PIPE if _should_catch_errors() else None)
     (out,err) = generate.communicate()
     error_check(err,generate.returncode)
 
@@ -281,7 +313,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         # Return the setting for the systematics_program
         my_MGC_instance.runCardDict.update({'systematics_program':original_systematics_program})
         # Write out run Card Dictionary
-        my_MGC_instance.write_runCard(runArgs=runArgs)
+        _write_run_card(runArgs=runArgs, flags=flags)
         
         if not isNLO:
             # At LO, no events are generated. That means we need to move the MS card aside and back.
@@ -303,10 +335,10 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
                 mglog.info('compile and clean up')
                 MADGRAPH_COMMAND_STACK += ['cd madevent']
                 os.chdir('madevent/')
-                compilep = stack_subprocess(['./bin/compile'],stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+                compilep = stack_subprocess(['./bin/compile'],stderr=subprocess.PIPE if _should_catch_errors() else None)
                 (out,err) = compilep.communicate()
                 error_check(err,compilep.returncode)
-                clean = stack_subprocess(['./bin/clean4grid'],stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+                clean = stack_subprocess(['./bin/clean4grid'],stderr=subprocess.PIPE if _should_catch_errors() else None)
                 (out,err) = clean.communicate()
                 error_check(err,clean.returncode)
                 clean.wait()
@@ -324,7 +356,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
                 mglog.info('Tidying up complete!')
 
         else:
-            my_MGC_instance.write_runCard(runArgs=runArgs)
+            _write_run_card(runArgs=runArgs, flags=flags)
             ### NLO RUN ###
             mglog.info('Package up process_dir')
             MADGRAPH_COMMAND_STACK += ['mv '+process_dir+' '+MADGRAPH_GRIDPACK_LOCATION]
@@ -335,9 +367,10 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
             os.rename(MADGRAPH_GRIDPACK_LOCATION,process_dir)
 
         mglog.info('Gridpack sucessfully created, exiting the transform')
-        if hasattr(runArgs,'outputTXTFile'):
+        output_txt_file = get_output_txt_file(runArgs=runArgs, flags=flags)
+        if output_txt_file:
             mglog.info('Touching output TXT (LHE) file for the transform')
-            open(runArgs.outputTXTFile, 'w').close()
+            open(output_txt_file, 'w').close()
         from AthenaCommon.AppMgr import theApp
         theApp.finalize()
         theApp.exit()
@@ -346,14 +379,14 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     return 0
 
 
-def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None, requirePMGSettings=False):
+def generate_from_gridpack(runArgs=None, flags=None, extlhapath=None, gridpack_compile=None, requirePMGSettings=False, pdf_setting=None):
     global my_MGC_instance # noqa: F824
 
-    # Get of info out of the runArgs
-    beamEnergy,random_seed = get_runArgs_info(runArgs)
+    # Get beam energy and random seed out of runArgs or flags
+    beamEnergy,random_seed = get_runArgs_info(runArgs=runArgs, flags=flags)
 
     # Just in case
-    setup_path_protection()
+    my_MGC_instance.setup_path_protection()
 
     isNLO = my_MGC_instance.isNLO 
 
@@ -415,13 +448,12 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
 
     if isNLO:
         #turn off systematics for gridpack generation and store settings for standalone run
-        run_card_dict= my_MGC_instance.runCardDict 
         systematics_settings=None
-        if checkSetting('systematics_program','systematics',run_card_dict):
-            if not checkSettingIsTrue('store_rwgt_info',run_card_dict):
+        if my_MGC_instance.runCardDict.get('systematics_program',None) == 'systematics':
+            if not my_MGC_instance.runCardDict.get('store_rwgt_info',None):
                 raise RuntimeError('Trying to run NLO systematics but reweight info not stored')
-            if checkSettingExists('systematics_arguments',run_card_dict):
-                systematics_settings=MadGraphControl.MadGraphSystematicsUtils.parse_systematics_arguments(run_card_dict['systematics_arguments'])
+            if 'systematics_arguments' in my_MGC_instance.runCardDict:
+                systematics_settings=MadGraphControl.MadGraphSystematicsUtils.parse_systematics_arguments(my_MGC_instance.runCardDict['systematics_arguments'])
             else:
                 systematics_settings={}
             mglog.info('Turning off systematics for now, running standalone later')
@@ -429,7 +461,7 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
             my_MGC_instance.runCardDict['systematics_program'] = 'none'
 
     # Writing run card to disk
-    my_MGC_instance.write_runCard(runArgs=runArgs)
+    _write_run_card(runArgs=runArgs, flags=flags)
     
     global MADGRAPH_COMMAND_STACK
     if not isNLO:
@@ -446,7 +478,7 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
         new_ld_path=":".join([os.environ['LD_LIBRARY_PATH'],os.getcwd()+'/'+MADGRAPH_GRIDPACK_LOCATION+'/madevent/lib',os.getcwd()+'/'+MADGRAPH_GRIDPACK_LOCATION+'/HELAS/lib'])
         os.environ['LD_LIBRARY_PATH']=new_ld_path
         MADGRAPH_COMMAND_STACK+=["export LD_LIBRARY_PATH="+":".join(['${LD_LIBRARY_PATH}',new_ld_path])]
-        generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/gridrun',str(int(nevents)),str(int(random_seed)),str(granularity)],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)        
+        generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/gridrun',str(int(nevents)),str(int(random_seed)),str(granularity)],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)        
         (out,err) = generate.communicate()
         error_check(err,generate.returncode)
         gp_events=MADGRAPH_GRIDPACK_LOCATION+"/Events/GridRun_{}/unweighted_events.lhe.gz".format(int(random_seed))
@@ -490,7 +522,7 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
             shutil.copy(os.environ['MADPATH']+'/Template/LO/Source/make_opts',MADGRAPH_GRIDPACK_LOCATION+'/Source/')
 
             generate_prep(MADGRAPH_GRIDPACK_LOCATION)
-            generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/generate_events','--parton','--nocompile','--only_generation','-f','--name='+gridpack_run_name],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+            generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/generate_events','--parton','--nocompile','--only_generation','-f','--name='+gridpack_run_name],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)
             (out,err) = generate.communicate()
             error_check(err,generate.returncode)
         else:
@@ -500,7 +532,7 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
                 os.unlink(MADGRAPH_GRIDPACK_LOCATION+'/lib/libLHAPDF.a')
 
             generate_prep(MADGRAPH_GRIDPACK_LOCATION)
-            generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/generate_events','--parton','--only_generation','-f','--name='+gridpack_run_name],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+            generate = stack_subprocess([python,MADGRAPH_GRIDPACK_LOCATION+'/bin/generate_events','--parton','--only_generation','-f','--name='+gridpack_run_name],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)
             (out,err) = generate.communicate()
             error_check(err,generate.returncode)
     if isNLO and systematics_settings is not None:
@@ -583,6 +615,34 @@ def setupFastjet(process_dir=None):
 
     return
 
+def get_runArgs_info(runArgs=None, flags=None):
+    """Return beam energy and random seed from runArgs or flags.
+    Adding flags compatibility while clients migrate.
+    """
+    global my_MGC_instance # noqa: F824
+    if runArgs is not None:
+        if flags is not None:
+            mglog.warning('Both runArgs and flags were provided to get_runArgs_info. Using flags.')
+            my_MGC_instance.get_flags_info(flags)
+        else:
+            my_MGC_instance.get_runArgs_info(runArgs)
+    elif flags is not None:
+        my_MGC_instance.get_flags_info(flags)
+    else:
+        raise RuntimeError('Must provide runArgs or flags to get run information.')
+
+    return my_MGC_instance.beamEnergy, my_MGC_instance.random_seed
+
+
+def get_output_txt_file(runArgs=None, flags=None):
+    """Return output TXT file path from runArgs or flags if available."""
+    if flags is not None:
+        if flags.Output.TXTFileName:
+            return flags.Output.TXTFileName
+    if runArgs is not None and hasattr(runArgs, 'outputTXTFile'):
+        if runArgs.outputTXTFile:
+            return runArgs.outputTXTFile
+    return None
 
 
 def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
@@ -778,7 +838,7 @@ add_time_of_flight '''+run+((' --threshold='+str(threshold)) if threshold is not
 
     mglog.info('Started adding time of flight info '+str(time.asctime()))
 
-    generate = stack_subprocess([python,me_exec,'time_of_flight_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+    generate = stack_subprocess([python,me_exec,'time_of_flight_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)
     (out,err) = generate.communicate()
     error_check(err,generate.returncode)
 
@@ -831,7 +891,7 @@ decay_events '''+run)
 
     mglog.info('Started running madspin at '+str(time.asctime()))
 
-    generate = stack_subprocess([python,me_exec,'madspin_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+    generate = stack_subprocess([python,me_exec,'madspin_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)
     (out,err) = generate.communicate()
     error_check(err,generate.returncode)
     if len(glob.glob(process_dir+'/Events/'+run+'_decayed_*/')) == 0:
@@ -888,7 +948,7 @@ def madspin_on_lhe(input_LHE,madspin_card,runArgs=None,keep_original=False):
     if not os.access(madpath+'/MadSpin/madspin',os.R_OK):
         raise RuntimeError('madspin executable not found in '+madpath)
     mglog.info('Starting madspin at '+str(time.asctime()))
-    generate = stack_subprocess([python,madpath+'/MadSpin/madspin','madspin_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+    generate = stack_subprocess([python,madpath+'/MadSpin/madspin','madspin_exec_card'],stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)
     (out,err) = generate.communicate()
     error_check(err,generate.returncode)
     mglog.info('Done with madspin at '+str(time.asctime()))
@@ -939,7 +999,7 @@ def madspin_on_lhe(input_LHE,madspin_card,runArgs=None,keep_original=False):
         runArgs.inputGeneratorFile=outputDS
 
 
-def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveProcDir=False,runArgs=None,fixEventWeightsForBridgeMode=False):
+def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveProcDir=False,runArgs=None,flags=None,fixEventWeightsForBridgeMode=False,pdf_setting=None):
 
     # NLO is not *really* the question here, we need to know if we should look for weighted or
     #  unweighted events in the output directory.  MadSpin (above) only seems to give weighted
@@ -1159,7 +1219,7 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
     
     mglog.info("The following  "+str(len(lhe_weights))+" weights have been written to the LHE file: "+",".join(lhe_weights))
     expected_weights=get_expected_reweight_names(get_reweight_card(process_dir))
-    expected_weights+=get_expected_systematic_names(MADGRAPH_PDFSETTING)
+    expected_weights+=get_expected_systematic_names(get_pdf_setting(pdf_setting))
     mglog.info("Checking whether the following expected weights are in LHE file: "+",".join(expected_weights))
     for w in expected_weights:
         if w not in lhe_weights:
@@ -1181,21 +1241,40 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
         mod_output2.close()
 
     # Actually move over the dataset
-    if runArgs is None:
-        raise RuntimeError('Must provide runArgs to arrange_output')
-
-    if hasattr(runArgs,'outputTXTFile'):
-        outputDS = runArgs.outputTXTFile
-    else:
+    outputDS = get_output_txt_file(runArgs=runArgs, flags=flags)
+    if outputDS is None:
         outputDS = 'tmp_LHE_events.tar.gz'
+        if flags is not None and hasattr(flags, 'Generator') and hasattr(flags.Generator, 'avoidExtracting') and flags.Generator.avoidExtracting:
+            outputDS = 'tmp_LHE_events.gz'
+        elif runArgs is not None and hasattr(runArgs, 'avoidExtracting') and runArgs.avoidExtracting:
+            outputDS = 'tmp_LHE_events.gz'
 
-    mglog.info('Moving file over to '+outputDS.split('.tar.gz')[0]+'.events')
+    outputStem = outputDS
+    if '.tar.gz' in outputDS:
+        outputStem = outputDS.split('.tar.gz')[0]
+    elif '.tgz' in outputDS:
+        outputStem = outputDS.split('.tgz')[0]
+    elif '.gz' in outputDS:
+        outputStem = outputDS.split('.gz')[0]
+    else:
+        mglog.warning(f'Could not figure out what output file type {outputDS} refers to')
+        outputStem = outputDS.split('.')[0]
+    outputStem += '.events'
 
-    shutil.move(os.getcwd()+'/events.lhe',outputDS.split('.tar.gz')[0]+'.events')
+    mglog.info('Moving file over to '+outputStem)
+    shutil.move(os.getcwd()+'/events.lhe',outputStem)
 
-    mglog.info('Re-zipping into dataset name '+outputDS)
-    rezip = stack_subprocess(['tar','cvzf',outputDS,outputDS.split('.tar.gz')[0]+'.events'])
-    rezip.wait()
+    if '.tar.gz' in outputDS or '.tgz' in outputDS:
+        mglog.info('Re-zipping + tarring into dataset name '+outputDS)
+        rezip = stack_subprocess(['tar','cvzf',outputDS,outputStem])
+        rezip.wait()
+    elif '.gz' in outputDS:
+        mglog.info('Re-zipping into dataset name '+outputDS)
+        rezip = stack_subprocess(['gzip',outputStem])
+        rezip.wait()
+        shutil.move(outputStem+'.gz',outputDS)
+    else:
+        mglog.info(f'Could not understand output type for {outputDS} - will leave uncompressed')
 
     if not saveProcDir:
         mglog.info('Removing the process directory')
@@ -1204,8 +1283,8 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
         if os.path.isdir('MGC_LHAPDF/'):
             shutil.rmtree('MGC_LHAPDF/',ignore_errors=True)
 
-    # shortening the outputDS in the case of an output TXT file
-    if hasattr(runArgs,'outputTXTFile') and runArgs.outputTXTFile is not None:
+    # shortening the outputDS in the case of an output LHE file
+    if runArgs is not None and hasattr(runArgs,'outputTXTFile') and runArgs.outputTXTFile is not None:
         outputDS = outputDS.split('.TXT')[0]
     # Do some fixing up for them
     if runArgs is not None:
@@ -1234,7 +1313,7 @@ def get_expected_reweight_names(reweight_card_loc):
 def get_expected_systematic_names(syst_setting):
     names=[]
     if syst_setting is None or 'central_pdf' not in syst_setting:
-        mglog.warning("Systematics have not been defined via base fragment or 'MADGRAPH_PDFSETTING', cannot check for expected weights")
+        mglog.warning("Systematics have not been defined via base fragment or explicit PDF settings; cannot check for expected weights")
         return []
     if 'pdf_variations' in syst_setting and isinstance(syst_setting['pdf_variations'],list):
         names+=[MadGraphControl.MadGraphSystematicsUtils.SYSTEMATICS_WEIGHT_INFO%{'mur':1.0,'muf':1.0,'pdf':syst_setting['central_pdf']}]
@@ -1512,7 +1591,7 @@ def is_gen_from_gridpack():
 
 
 
-def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOCATION,runArgs=None,settings={},skipBaseFragment=False):
+def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOCATION,runArgs=None,flags=None,settings={},skipBaseFragment=False,pdf_setting=None):
     """Build a new run_card.dat from an existing one.
     This function can get a fresh runcard from DATAPATH or start from the process directory.
     Settings is a dictionary of keys (no spaces needed) and values to replace.
@@ -1541,11 +1620,11 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
     isNLO = my_MGC_instance.isNLO 
     # add gobal PDF and scale uncertainty config to extras, except PDF or weights for syscal config are explictly set
     if not skipBaseFragment:
-        setup_pdf_and_systematic_weights(MADGRAPH_PDFSETTING,settings_lower,isNLO)
+        setup_pdf_and_systematic_weights(get_pdf_setting(pdf_setting),settings_lower,isNLO)
 
-    # Get some info out of the runArgs
-    if runArgs is not None:
-        beamEnergy,rand_seed = get_runArgs_info(runArgs)
+    # Get some info out of runArgs or flags
+    if runArgs is not None or flags is not None:
+        beamEnergy,rand_seed = get_runArgs_info(runArgs=runArgs, flags=flags)
         if 'iseed' not in settings_lower:
             settings_lower['iseed']=rand_seed
         if not isNLO and 'python_seed' not in settings_lower:
@@ -1566,12 +1645,19 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
     if 'custom_fcts' in settings_lower and settings_lower['custom_fcts']:
         raw_name = str(settings_lower['custom_fcts']).split()[0]
         # Determine jobConfig directory
-        if runArgs is not None and hasattr(runArgs, 'jobConfig'):
+        cfgdir = None
+        if flags is not None and hasattr(flags, 'Generator') and hasattr(flags.Generator, 'jobConfig') and flags.Generator.jobConfig:
+            cfgdir = flags.Generator.jobConfig[0] if isinstance(flags.Generator.jobConfig, (list, tuple)) else flags.Generator.jobConfig
+        elif runArgs is not None and hasattr(runArgs, 'jobConfig'):
             cfgdir = runArgs.jobConfig[0] if isinstance(runArgs.jobConfig, (list, tuple)) else runArgs.jobConfig
+        elif flags is not None and 'JOBOPTSEARCHPATH' in os.environ:
+            cfgdir = os.environ['JOBOPTSEARCHPATH'].split(':')[0]
+
+        if cfgdir:
             # Build full path and make absolute
             full_path = os.path.join(cfgdir, raw_name)
             settings_lower['custom_fcts'] = os.path.abspath(full_path)
-            print(f"Using custom function(s), specified in custom_fcts with path: {settings_lower['custom_fcts']}")
+            mglog.info(f"Using custom function(s), specified in custom_fcts with path: {settings_lower['custom_fcts']}")
         else:
             # For internal tests, where jobConfig is not set
             settings_lower['custom_fcts'] = os.path.abspath(raw_name)
@@ -1716,7 +1802,7 @@ def add_reweighting(run_name,reweight_card=None,process_dir=MADGRAPH_GRIDPACK_LO
         mglog.info('Copying new reweight card from '+reweight_card)
         shutil.move(reweight_card,process_dir+'/Cards/reweight_card.dat')
     reweight_cmd='{}/bin/madevent reweight {} -f'.format(process_dir,run_name)
-    reweight = stack_subprocess([python]+reweight_cmd.split(),stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+    reweight = stack_subprocess([python]+reweight_cmd.split(),stdin=subprocess.PIPE,stderr=subprocess.PIPE if _should_catch_errors() else None)
     (out,err) = reweight.communicate()
     error_check(err,reweight.returncode)
     mglog.info('Finished reweighting')
@@ -1755,3 +1841,46 @@ def fix_fks_makefile(process_dir):
             fout.write(line)
     fin.close()
     fout.close()
+
+#==================================================================================
+# this function is called during build_run card to check the consistency of user-provided arguments with the inlude
+# and throw errors, warnings, or corrects the input as is appropriate
+def setup_pdf_and_systematic_weights(the_base_fragment,extras,isNLO):
+    ### options in run cards that affect PDF and systematics weights behavior
+    global my_MGC_instance # noqa: F824
+    
+    ### set all relevant keys to lowercase and clean them up
+    list = []
+    tmp_dict = {}
+    for k in extras:
+        k_clean=k.lower().replace("'",'').replace('"','')
+        if k_clean!=k and k_clean in systematics_run_card_options(isNLO):
+            list.append(k)
+            tmp_dict[k_clean] = extras[k]
+    # Removing systematics with incorrect formatting 
+    for o in list:
+        if o in extras:
+            extras.pop(o,None)
+    # Adding cleaned up systematics into dictionary
+    extras.update(tmp_dict)
+    ### Check compatibility of user setting and base fragment inclusion
+    if my_MGC_instance.base_fragment_setup_check(the_base_fragment,extras,isNLO):
+        return
+
+    new_settings=get_pdf_and_systematic_settings(the_base_fragment,isNLO)
+    ### backup extras (user set parameters for run_card)
+    user_set_extras=dict(extras)
+    for s in new_settings:
+        if s is not None:
+            extras[s]=new_settings[s]
+
+    ### Make sure everything has been set
+    mglog.info('PDF and scale settings were set as follows:')
+    for p in systematics_run_card_options(isNLO):
+        user_set='not set'
+        if p in user_set_extras:
+            user_set=str(user_set_extras[p])
+        new_value='not set'
+        if p in extras:
+            new_value=str(extras[p])   
+        mglog.info('MadGraphUtils set '+str(p)+' to "'+new_value+'", was set to "'+user_set+'"')

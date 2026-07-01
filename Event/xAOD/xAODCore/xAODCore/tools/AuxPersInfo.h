@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: AuxPersInfo.h 793737 2017-01-24 20:11:10Z ssnyder $
 #ifndef XAODCORE_TOOLS_AUXPERSINFO_H
 #define XAODCORE_TOOLS_AUXPERSINFO_H
 
@@ -13,6 +12,7 @@
 
 // EDM include(s):
 #include "AthContainersInterfaces/IAuxTypeVector.h"
+#include "AthContainersInterfaces/ToTransient.h"
 #include "CxxUtils/checker_macros.h"
 
 namespace xAOD {
@@ -87,6 +87,11 @@ namespace xAOD {
      {
        void* beg ATLAS_THREAD_SAFE = &m_info;
        return SG::AuxDataSpanBase( const_cast<void*> (beg), 1 );
+     }
+
+     virtual void toTransient (const EventContext& ctx) override final
+     {
+       SG::ToTransient<T>::toTransient (m_info, ctx);
      }
 
    private:

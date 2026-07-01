@@ -52,7 +52,7 @@ namespace CP {
 
   //**********************************************************************
 
-  StatusCode PhotonVertexSelectionAlg::execute() { 
+  StatusCode PhotonVertexSelectionAlg::execute(const EventContext& /*ctx*/) { 
     ATH_MSG_VERBOSE("Executing " << name() << "...");
 
     VertexContainer* vxOut(new VertexContainer);

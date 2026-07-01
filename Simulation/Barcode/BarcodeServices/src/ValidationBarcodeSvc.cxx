@@ -2,7 +2,7 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "BarcodeServices/ValidationBarcodeSvc.h"
+#include "ValidationBarcodeSvc.h"
 // framework include
 #include "GaudiKernel/IIncidentSvc.h"
 #include "TruthUtils/MagicNumbers.h"

@@ -13,15 +13,14 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include <gtest/gtest_prod.h>
 
-#include <set>
-
 // Forward declarations
 class LArEM_ID;
 class LArFCAL_ID;
 class LArHEC_ID;
 
 class ILArCalculatorSvc;
-class LArHitContainer;
+class LArHitContainerBuilder;
+class G4HCofThisEvent;
 
 class StoreGateSvc;
 
@@ -31,20 +30,17 @@ class StoreGateSvc;
 ///
 /// This SD implementation saves the standard LArHits.
 /// See LArG4CalibSD for an SD that handles calibration hits.
+/// Event state is owned by `LArHitContainerBuilder`; the SD registers its
+/// regular-SD partition during `Initialize()` and then writes hits through the
+/// builder for the current Athena event.
 ///
 class LArG4SimpleSD : public G4VSensitiveDetector
 {
 FRIEND_TEST( LArG4SimpleSDtest, ProcessHits );
-FRIEND_TEST( LArG4SimpleSDtest, EndOfAthenaEvent );
 FRIEND_TEST( LArG4SimpleSDtest, setupHelpers );
 FRIEND_TEST( LArG4SimpleSDtest, getTimeBin );
 FRIEND_TEST( LArG4SimpleSDtest, SimpleHit );
 FRIEND_TEST( LArG4SimpleSDtest, ConvertID );
-FRIEND_TEST( SDWrappertest, Initialize );
-FRIEND_TEST( SDWrappertest, EndOfAthenaEvent );
-FRIEND_TEST( SDWrappertest, addSD );
-FRIEND_TEST( SDWrappertest, addFastSimSD );
-FRIEND_TEST( SDWrappertest, ProcessHits );
 public:
 
   enum LArHitTimeBins
@@ -55,23 +51,25 @@ public:
 
   /// Constructor
   LArG4SimpleSD(G4String a_name, ILArCalculatorSvc* calc,
+                std::string hitCollectionName,
                 const std::string& type="Default",
                 const float width=2.5*CLHEP::ns);
 
   /// Alternative constructor, particularly for fast simulations.
-  LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore);
+  LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore,
+                std::string hitCollectionName);
 
   /// Destructor
   virtual ~LArG4SimpleSD();
+
+  /// Register this regular SD with the event-owned builder.
+  void Initialize(G4HCofThisEvent*) override;
 
   /// Main processing method
   G4bool ProcessHits(G4Step* a_step, G4TouchableHistory*) override;
 
   /// First method translates to this - also for fast sims
   G4bool SimpleHit( const LArG4Identifier& lar_id , G4double time , G4double energy );
-
-  /// End of athena event processing
-  void EndOfAthenaEvent( LArHitContainer* hitContnainer );
 
   /// Sets the ID helper pointers
   void setupHelpers( const LArEM_ID* EM ,
@@ -95,29 +93,6 @@ protected:
   /// Count the number of invalid hits.
   G4int m_numberInvalidHits;
 
-  // We need two types containers for hits:
-
-  // The set defined below is used to tell us if we've already had a
-  // hit in a cell.  We store these hits in a set, so we can quickly
-  // search it.  Note the use of a custom definition of a "less"
-  // function for the set, so we're not just comparing hit pointers.
-
-  class LessHit {
-  public:
-    bool operator() ( LArHit* const& p, LArHit* const& q ) const
-    {
-      return p->Less(q);
-    }
-  };
-
-  typedef std::set< LArHit*, LessHit >  hits_t;
-
-  // The hits are grouped into time bins, with the width of a bin
-  // determined by a user parameter.  This map is used to associate a
-  // time bin with its corresponding set of hits.
-
-  typedef std::map < G4int, hits_t* >   timeBins_t;
-
   // Two types of LAr hit time binning
   // 1. 'Default'
   //
@@ -136,13 +111,16 @@ protected:
   /// Width of the time bins for summing hits - for the uniform binning
   G4float m_timeBinWidth;
 
-  /// The map of hit sets binned in time
-  timeBins_t m_timeBins;
-
   /// Pointers to the identifier helpers
   const LArEM_ID*       m_larEmID;
   const LArFCAL_ID*     m_larFcalID;
   const LArHEC_ID*      m_larHecID;
+
+  LArHitContainerBuilder* getHitContainer() const;
+
+private:
+  std::string m_hitCollectionName;
+  std::string m_hitSourceName;
 
 };
 

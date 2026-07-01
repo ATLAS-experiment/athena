@@ -37,6 +37,8 @@ namespace AthONNX {
     virtual double retrieveConstituentsScore(std::vector<std::vector<float>> constituents, std::vector<std::vector<std::vector<float>>> interactions, std::vector<std::vector<float>> mask) const = 0;
     virtual double retrieveHighLevelScore(std::map<std::string, double> JSSVars) const = 0;
 
+    virtual std::vector<float> retrieveConstituentsScoreMultiClass(const std::vector<std::vector<float>>& constituents, const std::vector<std::vector<std::vector<float>>>& interactions, const std::vector<std::vector<float>>& mask) const = 0;
+
     virtual StatusCode SetScaler(std::map<std::string, std::vector<double>> scaler) = 0;
 
   };

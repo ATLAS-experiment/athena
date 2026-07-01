@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKTRANSPARENTV0_H
@@ -53,9 +53,9 @@ class LArRodBlockTransparentV0 : public LArRodBlockStructure
 {
 public:
   // constructor
-  LArRodBlockTransparentV0();
+  LArRodBlockTransparentV0(IMessageSvc* msgSvc);
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockTransparentV0");}
+  static std::string BlockType() { return std::string("RodBlockTransparentV0");}
   // ----------------- Encoding methods -----------------
   // Never to be used while decoding!
   virtual void initializeFragment(std::vector<uint32_t>& fragment);
@@ -112,13 +112,6 @@ public:
 template<class DSPHEADER>
 inline int LArRodBlockTransparentV0<DSPHEADER>::setGain(const int GainValue)
 {//This RodBlockStructure allows only predefined gains 
-  /*
-  std::cout << " Set fixed gain Value " << GainValue << std::endl;
-  std::cout << " Number of words in Gain Block " << std::endl;
-  std::cout << "\tHigh (1): " << getHeader16(NWRawData1) << std::endl;
-  std::cout << "\tMedium (2): " << getHeader16(NWRawData2) << std::endl;
-  std::cout << "\tLow (3): " << getHeader16(NWRawData3) << std::endl;
-  */
    if (GainValue<0 || GainValue>3)
     return 0;
    m_fixedGain=GainValue;

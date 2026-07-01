@@ -26,7 +26,6 @@
 #include "CaloDetDescr/CaloDetectorElements.h"
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
   //Constructor
   LArHV2Ntuple:: LArHV2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
@@ -90,9 +89,8 @@
 
   }
   //__________________________________________________________________________
-  StatusCode LArHV2Ntuple::execute()
+  StatusCode LArHV2Ntuple::execute(const EventContext& ctx)
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     //.............................................
 

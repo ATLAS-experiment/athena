@@ -83,11 +83,11 @@ StatusCode TileRawChannelVerify::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileRawChannelVerify::execute() {
+StatusCode TileRawChannelVerify::execute(const EventContext& ctx) {
 
   // step1: read two cell containers from TES
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer1(m_rawChannelContainer1Key);
-  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer2(m_rawChannelContainer2Key);
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer1(m_rawChannelContainer1Key, ctx);
+  SG::ReadHandle<TileRawChannelContainer> rawChannelContainer2(m_rawChannelContainer2Key, ctx);
 
   SelectAllObject<TileRawChannelContainer> selAll1(rawChannelContainer1.cptr());
   SelectAllObject<TileRawChannelContainer>::const_iterator rawItr1 = selAll1.begin();

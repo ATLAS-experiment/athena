@@ -19,7 +19,6 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("name",                 "")
   flags.addFlag("suffix",               "")
 
-  flags.addFlag("pTmin",                1.*Units.GeV)      #fix - consolidate pTmin and minPT
   flags.addFlag("TripletDoPPS",         True)
   flags.addFlag("Triplet_D0Max",        4.0)
   flags.addFlag("Triplet_D0_PPS_Max",   1.7)
@@ -54,7 +53,7 @@ def defaultTrigTrackingFlags(flags : AthConfigFlags):
   flags.addFlag("vertex",               "")
   flags.addFlag("adaptiveVertex",       False)
   flags.addFlag("addSingleTrackVertices", False)
-  flags.addFlag("TracksMaxZinterval",   1) #mm
+  flags.addFlag("TracksMaxZinterval",   1*Units.mm) 
   flags.addFlag("minNSiHits_vtx",       10)        #from vtxCuts
   flags.addFlag("vertex_jet",           "")
   flags.addFlag("adaptiveVertex_jet",   False)
@@ -97,8 +96,7 @@ def defaultInDetTrigTrackingFlags() -> AthConfigFlags:
   flags = createTrackingPassFlags()
   defaultTrigTrackingFlags(flags)
   
-  flags.minPT = flags.pTmin   #hack to sync pT threshold used in offline and trigger
-    
+  flags.minPT               = 1.0*Units.GeV 
   flags.minClusters         = 7   #hardcoded to preserve trigger settings (not used for FTF config)
   flags.minSiNotShared      = 5
   flags.maxShared           = 2
@@ -149,24 +147,26 @@ def defaultITkTrigTrackingFlags() -> AthConfigFlags:
   flags.doCaloSeededAmbiSi  = False
   flags.DoubletDR_Max       = 150.0
   flags.useTIDE_Ambi        = False  
-  flags.maxEta = 4.0
+  flags.maxEta              = 4.0
+
   return flags
 
 def defaultITkActsTrigTrackingFlags() -> AthConfigFlags:
-    flags = createActsTrackingPassFlags()
-    defaultTrigTrackingFlags(flags)
+  flags = createActsTrackingPassFlags()
+  defaultTrigTrackingFlags(flags)
+  
+  flags.minPT               = [0.9*Units.GeV, 0.4*Units.GeV, 0.4*Units.GeV]
+  flags.minClusters         = [9, 8, 7]
+  flags.doTRT               = False
+  flags.maxEta              = 4.0
+  flags.maxShared           = [2]
+  flags.maxHoles            = [1]
+  flags.maxPixelHoles       = [2]
+  flags.maxSctHoles         = [2]
+  flags.maxShared           = [2]
+  flags.maxDoubleHoles      = [1]
     
-    flags.minPT               = [0.9*Units.GeV, 0.4*Units.GeV, 0.4*Units.GeV]
-    flags.minClusters         = [9, 8, 7]
-    flags.doTRT = False
-    flags.maxEta = 4.0
-    flags.maxShared = [2]
-    flags.maxHoles = [1]
-    flags.maxPixelHoles = [2]
-    flags.maxSctHoles = [2]
-    flags.maxShared = [2]
-    flags.maxDoubleHoles = [1]
-    return flags
+  return flags
 
 def defaultModeTrigTrackingFlags(flags: AthConfigFlags) -> AthConfigFlags:
   return flags
@@ -186,6 +186,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     
     "tauCore"       : tauCore,
     "tauIso"        : tauIso,
+    "tauHitsHitZ"   : tauHitsHitZ,
+    "tauCoreHitZ"   : tauCoreHitZ,
+    "tauIsoHitZ"    : tauIsoHitZ,
     
     "diTau"         : diTau,
     
@@ -278,8 +281,22 @@ def tsetter(var, value):
       var = [value]
 
   return var
-    
-  
+
+def processEtaDepSettings(var, settings):
+  """ depending on the destination flag type either keep list of values or flatten to a single value
+  """
+  type2set = type(var)
+  typeOfValue = type(settings)
+  if type2set == typeOfValue:
+    var = settings
+  else:
+    if isinstance(settings, list):
+      var = settings[0] if settings else None
+    else:
+      var = settings
+
+  return var
+
 @signatureActions
 def electron(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
   
@@ -324,21 +341,37 @@ def muonIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 @signatureActions
-def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+def tauHitsHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  # RoI used only for SP-formation (no tracking)
+
+  flags.input_name = instanceName
+  flags.name     = "tauHitsHitZ"
+  flags.suffix   = "TauHits"
+  flags.roi      = "HLT_Roi_TauHitsHitZ"
+  return flags
   
+@signatureActions
+def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+
   flags.input_name = instanceName
   flags.name     = "tauCore"
   flags.suffix   = "TauCore"
   flags.roi      = "HLT_Roi_TauCore"
-  flags.pTmin    = 0.8*Units.GeV
-  flags.minPT    = tsetter(flags.minPT, flags.pTmin)
-
+  flags.minPT    = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
   flags.holeSearch_FTF = True
+  return flags
+
+@signatureActions
+def tauCoreHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  flags = tauCore(flags, instanceName, recoMode)
+  flags.name     = "tauCoreHitZ"
+  flags.roi      = "HLT_Roi_TauCoreHitZ"
+  flags.zedHalfWidth   = 30.0
   return flags
   
 @signatureActions
 def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
-  
+
   flags.input_name = instanceName
   flags.name     = "tauIso"
   flags.suffix   = "TauIso"
@@ -350,8 +383,14 @@ def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.addSingleTrackVertices = True
   flags.vertex         = "HLT_IDVertex_Tau"
   flags.electronPID    = False
-  flags.pTmin          = 0.8*Units.GeV
-  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.minPT          = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
+  return flags
+
+@signatureActions
+def tauIsoHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  flags = tauIso(flags, instanceName, recoMode)
+  flags.name     = "tauIsoHitZ"
+  flags.roi      = "HLT_Roi_TauIsoHitZ"
   return flags
 
 @signatureActions
@@ -368,8 +407,7 @@ def diTau(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigF
   flags.addSingleTrackVertices = True
   flags.vertex         = "HLT_IDVertex_DiTau"
   flags.electronPID    = False
-  flags.pTmin          = 0.8*Units.GeV
-  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.minPT          = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
   return flags
 
 @signatureActions
@@ -382,8 +420,7 @@ def bjet(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFl
   flags.etaHalfWidth    = 0.4
   flags.phiHalfWidth    = 0.4
   flags.zedHalfWidth    = 10.0
-  flags.pTmin           = 0.8*Units.GeV
-  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.minPT  = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
   flags.Xi2max = tsetter(flags.Xi2max,12.)
   return flags
 
@@ -400,8 +437,8 @@ def jetSuper(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
   flags.etaHalfWidth = 0.3
   flags.phiHalfWidth = 0.3
   flags.doFullScan   = True
-  flags.pTmin        = 1*Units.GeV
-  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.minPT  = processEtaDepSettings(flags.minPT,[1.*Units.GeV])
+
   #-----
   flags.doTRT           = False
   flags.DoubletDR_Max   = 200
@@ -417,12 +454,11 @@ def jetSuper(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConf
 def minBias(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
-  flags.name     = "minBias"
-  flags.suffix   = "MinBias"
-  flags.roi      = "HLT_Roi_MinBias"
-  flags.doFullScan      = True
-  flags.pTmin    = 0.1*Units.GeV # TODO: double check
-  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.name       = "minBias"
+  flags.suffix     = "MinBias"
+  flags.roi        = "HLT_Roi_MinBias"
+  flags.doFullScan = True
+  flags.minPT      = processEtaDepSettings(flags.minPT,[0.1*Units.GeV])
 
   flags.doTRT           = False
   flags.etaHalfWidth    = 3
@@ -443,12 +479,11 @@ def minBias(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
 def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
 
   flags.input_name = instanceName
-  flags.name     = "minBiasPixel"
-  flags.suffix   = "MinBiasPixel"
-  flags.roi      = "HLT_Roi_MinBias"
-  flags.doFullScan      = True
-  flags.pTmin    = 0.1*Units.GeV # this is good for HI which is the client of this setup
-  flags.minPT    = tsetter(flags.minPT, flags.pTmin)
+  flags.name       = "minBiasPixel"
+  flags.suffix     = "MinBiasPixel"
+  flags.roi        = "HLT_Roi_MinBias"
+  flags.doFullScan = True
+  flags.minPT      = processEtaDepSettings(flags.minPT,[0.1*Units.GeV])
 
 
   flags.maxHoles         = 0 # HI setup
@@ -574,7 +609,7 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.etaHalfWidth    = 3
   flags.phiHalfWidth    = math.pi
 
-  flags.minPT = tsetter(flags.minPT, 0.5*Units.GeV)
+  flags.minPT  = processEtaDepSettings(flags.minPT,[0.5*Units.GeV])
 
   flags.nClustersMin        = 4
   flags.minSiNotShared      = 3
@@ -589,13 +624,13 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.Xi2maxNoAdd    = tsetter(flags.Xi2maxNoAdd,   100.)
   flags.maxDoubleHoles = tsetter(flags.maxDoubleHoles,1)
   
-  flags.nWeightedClustersMin= 8
-  flags.useSeedFilter       = True
-  flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
-  flags.roadWidth =        75.
-  flags.maxZImpact=        tsetter(flags.maxZImpact,    10000.*Units.mm)
+  flags.nWeightedClustersMin = 8
+  flags.useSeedFilter        = True
+  flags.usePrdAssociationTool= False     #for backward compatibility #2023fix?
+  flags.roadWidth            =        75.
+  flags.maxZImpact           =        tsetter(flags.maxZImpact,    10000.*Units.mm)
   if recoMode=="InDet":
-    flags.minTRTonTrk         = 20
+    flags.minTRTonTrk        = 20
 
   return flags
 
@@ -627,8 +662,8 @@ def bhh(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFla
   flags.etaHalfWidth        = 2.5
   flags.phiHalfWidth        = math.pi-1.e-5
   flags.zedHalfWidth        = 30.
-  flags.pTmin               = 2*Units.GeV
-  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.minPT               = processEtaDepSettings(flags.minPT,[2*Units.GeV])
+
   flags.doSeedRedundancyCheck = True
   flags.SuperRoI = True
   return flags
@@ -696,8 +731,8 @@ def tauLRT(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.suffix   = "TauLRT"
   flags.roi      = "HLT_Roi_TauLRT"
   flags.vertex   = "HLT_IDVertex_Tau" # TODO: does this need renaming?
-  flags.pTmin    = 0.8*Units.GeV
-  flags.minPT = tsetter(flags.minPT, flags.pTmin)
+  flags.minPT    = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
+
   flags.etaHalfWidth = 0.4
   flags.phiHalfWidth = 0.4
   flags.zedHalfWidth = 225.
@@ -837,7 +872,8 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
   flags.tracks_FTF    = collToRecordable(flags, f'HLT_IDTrack_{flags.suffix}_FTF')
   # ToDo: shouldn't be setting flags using this if type structures, the flags should be
   #       actually set somewhere in appropriate config functions
-  flags.tracks_IDTrig = collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name != "tauIso" else "Tau"))
+  flags.tracks_IDTrig = \
+    collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name not in ['tauIso', 'tauIsoHitZ'] else "Tau"))
 
   if recoMode == "Acts":
     flags.trkTracks_FTF     = f'HLT_Acts_{flags.suffix}_Tracks'
@@ -869,11 +905,11 @@ def collToRecordable(flags,name):
   firstStage = True if "FTF" in name else False
   record = True
   if firstStage:
-    if signature in ["minBias","minBiasPixel","bjetLRT",
+    if signature in ["tauHitsHitZ","minBias","minBiasPixel","bjetLRT",
                      "beamSpot","BeamSpot"]:
       record = False
   else:
-    if signature in ["tauCore","tauIso","tauIsoBDT",
+    if signature in ["tauHitsHitZ","tauCore","tauCoreHitZ","tauIso","tauIsoHitZ","tauIsoBDT",
                      "jet","fullScan","FS","jetSuper","bhh",
                      "beamSpot", "BeamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:
@@ -912,16 +948,22 @@ class FlagValuesTest(unittest.TestCase):
     def setUp(self):
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
-        flags.Trigger.InDetTracking.electron.pTmin=3.
-        self.newflags = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.electron',  
+        flags.Trigger.InDetTracking.electron.minPT=3.
+        flags.Trigger.ITkTracking.muonLRT.maxEta=5.
+        flags.Trigger.ITkTracking.jetSuper.minPT=[3.,2.,1.]
+        self.newflags1 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.electron',  
                                               keepOriginal = True)
-        self.newflags2 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.InDetTracking.muonLRT',
+        self.newflags2 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.ITkTracking.muonLRT',
+                                               keepOriginal = True)
+        self.newflags3 = flags.cloneAndReplace('Tracking.ActiveConfig', 'Trigger.ITkTracking.jetSuper',
                                                keepOriginal = True)
         
     def runTest(self):
-        self.assertEqual(self.newflags.Tracking.ActiveConfig.pTmin,  3.,             msg="Preset value lost")        
-        self.assertEqual(self.newflags.Tracking.ActiveConfig.input_name, "electron", msg="Incorrect config")
-        self.assertEqual(self.newflags2.Tracking.ActiveConfig.input_name, "muonLRT", msg="Incorrect config")
+        self.assertEqual(self.newflags1.Tracking.ActiveConfig.minPT,  3.,             msg="Preset value lost")        
+        self.assertEqual(self.newflags1.Tracking.ActiveConfig.input_name, "electron", msg="Incorrect version of flags")
+        self.assertEqual(self.newflags2.Tracking.ActiveConfig.input_name, "muonLRT",  msg="Incorrect version of flags")
+        self.assertEqual(self.newflags2.Tracking.ActiveConfig.maxEta, 5.,             msg="Preset value lost")
+        self.assertEqual(self.newflags3.Tracking.ActiveConfig.minPT, [3.,2.,1.],      msg="Preset value lost")        
 
   
 if __name__ == "__main__":

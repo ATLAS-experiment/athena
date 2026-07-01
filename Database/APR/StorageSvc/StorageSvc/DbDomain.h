@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -79,43 +79,27 @@ namespace pool    {
     /// Access reference counter
     int refCount() const;
 
-    /// Check for the existence of a domain within a session
+    /// Open the domain
     /**
-      * @param  sesH          [IN]  Handle to the database session
-      *                             this database domain belongs to.
-      * @param  technology    [IN]  Technology identifier of the domain.
-      *
-      * @return boolean value indicating if the database was found.
-      */
-    bool exist(DbSession& sesH, int technology) const;
-
-    /// Open domain within a session environment
-    /**
-      * @param  context       [IN]  Handle to user defined domain context
-      * @param  sesH          [IN]  Handle to the database session
-      *                             this database domain belongs to.
+      * @param  imp           [IN]  Implementation object.
       * @param  technology    [IN]  Technology identifier of this domain.
       * @param  mod           [IN]  Access mode: READ, UPDATE, CREATE etc.
       *
       * @return StatusCode code indicating success or failure.
       */
-    StatusCode open(DbSession&  sesH, 
-                  const DbType&     technology,
-                  DbAccessMode      mod=pool::READ);
+    StatusCode open(IOODatabase* imp, const DbType& technology, Io::IoFlag mod = Io::READ);
     /// Close domain
     StatusCode close();
     /// Access to access mode
-    DbAccessMode openMode() const;
-    /// Access to session handle
-    DbSession containedIn() const;
+    Io::IoFlag openMode() const;
     /// Check if Database exists within the domain
     bool existsDbase(const std::string& db_name);
     /// Find Database in domain
     const DbDatabaseObj* find(const std::string& db_name) const;
           DbDatabaseObj* find(const std::string& db_name);
-    /// Add domain to session
+    /// Add database to the domain
     StatusCode add(const std::string& nam, DbDatabaseObj* db);
-    /// Find domain in session
+    /// Remove a database from the domain
     StatusCode remove(DbDatabaseObj* db);
     /// Increase the age of all open databases
     StatusCode ageOpenDbs();

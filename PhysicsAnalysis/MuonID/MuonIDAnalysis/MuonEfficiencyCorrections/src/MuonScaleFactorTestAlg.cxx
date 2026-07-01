@@ -60,8 +60,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonScaleFactorTestAlg::execute() {
-        const EventContext& ctx{Gaudi::Hive::currentContext()};        
+    StatusCode MuonScaleFactorTestAlg::execute(const EventContext& ctx) {
         // Retrieve the muons:
         SG::ReadHandle<xAOD::MuonContainer> muons{m_sgKey, ctx};       
         // Retrieve the EventInfo:
@@ -75,7 +74,7 @@ namespace CP {
         for (const xAOD::Muon* mu : *muons) {
             if (mu->pt() < m_pt_cut || (m_eta_cut > 0 && std::abs(mu->eta()) >= m_eta_cut)) continue;
             // reject all loose muons
-            if (m_sel_tool->getQuality(*mu) > m_muon_quality) continue;          
+            if (Muon::MuonStationIndex::toInt(m_sel_tool->getQuality(*mu)) > m_muon_quality) continue;          
             
             m_muonPt = mu->pt() * MeVtoGeV;
             m_muonEta = mu->eta();

@@ -24,6 +24,8 @@
   <class name="ORUtils::MuJetGhostDRMatcher" />
   <class name="ORUtils::OverlapDecorationHelper" />
   <class name="ORUtils::OverlapLinkHelper" />
+  <class name="ORUtils::FEAssociationTool" />
+  <class name="ORUtils::FEAssociationAlg" />
 
   <!-- Dual-use alg -->
   <class name="OverlapRemovalGenUseAlg" />

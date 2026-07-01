@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////
@@ -66,6 +66,17 @@ namespace dqutils {
     dir0->cd();
 
     std::string run_dir;
+    static constexpr int nlayer = 8;
+    static const std::string layerName[nlayer] = {
+        "IBL", "B0", "B1", "B2", "ECA", "ECC", "IBL2D", "IBL3D"
+    };
+    static const float npixel[nlayer] = {
+        26880, 46080, 46080, 46080, 46080, 46080, 26880, 26880
+      };
+    static const float nmodule[nlayer] = {
+        280., 286., 494., 676., 144., 144., 168., 112.
+      };
+    
     int times = 1;
     while (times--) {  // just once
       run_dir = dir0->GetName();
@@ -105,17 +116,9 @@ namespace dqutils {
         return;
       }
 
-      const static int nlayer = 8;
+      
       float nevents = h_norm->Integral(0, h_norm->GetNbinsX() + 1);
-      std::string layerName[nlayer] = {
-        "IBL", "B0", "B1", "B2", "ECA", "ECC", "IBL2D", "IBL3D"
-      };
-      float npixel[nlayer] = {
-        26880, 46080, 46080, 46080, 46080, 46080, 26880, 26880
-      };
-      float nmodule[nlayer] = {
-        280., 286., 494., 676., 144., 144., 168., 112.
-      };
+      
 
       const static int nerror = 5;
       //std::string errorName[nerror] = {"OpticalErrors_", "SEUErrors_", "SyncErrors_", "TimeoutErrors_", "TruncErrors_"};

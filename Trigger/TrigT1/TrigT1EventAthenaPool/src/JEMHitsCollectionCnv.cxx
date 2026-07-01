@@ -26,7 +26,7 @@ JEMHitsCollection_PERS * JEMHitsCollectionCnv::createPersistent( JEMHitsCollecti
  
 
 //createTransient
-JEMHitsCollection * JEMHitsCollectionCnv::createTransient()
+JEMHitsCollection * JEMHitsCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "JEMHitsCollectionConverter" );
   
@@ -35,10 +35,10 @@ JEMHitsCollection * JEMHitsCollectionCnv::createTransient()
   static const pool::Guid tlp1_guid( "A9D89195-219E-4F33-9B19-4684639CCA5B" );
  
   JEMHitsCollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< JEMHitsCollection_PERS > pers_ref( poolReadObject< JEMHitsCollection_PERS >() );
+      std::unique_ptr< JEMHitsCollection_PERS > pers_ref( poolReadObject< JEMHitsCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
       
     }else  throw std::runtime_error( "Unsupported persistent version of JEMHitsCollection" );

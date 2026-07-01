@@ -1,74 +1,59 @@
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
-//
-// includes
-//
-
-#include <RootCoreUtils/StringUtil.h>
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 
 #include <RootCoreUtils/Assert.h>
-
-//
-// method implementations
-//
+#include <RootCoreUtils/StringUtil.h>
+#include <RootCoreUtils/Assert.h>
+#include <string>
+#include <string_view>
+#include <regex>
 
 namespace RCU
 {
-  std::string substitute (const std::string& str, const std::string& pattern,
-			  const std::string& with)
+  std::string substitute(std::string_view str, std::string_view pattern,
+                         std::string_view with)
   {
-    RCU_REQUIRE (!pattern.empty());
+    RCU_REQUIRE(!pattern.empty());
 
-    std::string result = str;
-    std::string::size_type pos;
-    while ((pos = result.find (pattern)) != std::string::npos) {
-      // cppcheck-suppress uselessCallsSubstr
-      result = result.substr (0, pos) + with + result.substr (pos + pattern.size());
+    std::string result(str);
+    std::string::size_type pos = 0;
+    
+    while ((pos = result.find(pattern, pos)) != std::string::npos) {
+      result.replace(pos, pattern.size(), with);
+      pos += with.size();
     }
     return result;
   }
 
-
-  bool match_expr(const std::regex& expr, const std::string& str) 
+  bool match_expr(const std::regex& expr, std::string_view str) 
   {
-    std::match_results<std::string::const_iterator> what;
-    std::size_t count = std::regex_match(str.begin(), str.end(), what, expr);
-    for (std::size_t iter = 0; iter != count; ++iter) 
-    {
-      if (what[iter].matched && what[iter].first == str.begin() &&
-      what[iter].second == str.end())
-    return true;
-    }
-    return false;
+    return std::regex_match(str.begin(), str.end(), expr);
   }
 
-  std::string glob_to_regexp (const std::string& glob)
+  std::string glob_to_regexp(std::string_view glob)
   {
     std::string result;
+    result.reserve(glob.size() * 2);
 
-    for (std::string::const_iterator iter = glob.begin(),
-	   end = glob.end(); iter != end; ++ iter)
+    for (char c : glob)
     {
-      if (*iter == '*')
+      switch (c) 
       {
-	result += ".*";
-      } else if (*iter == '?')
-      {
-	result += ".";
-      } else if (*iter == '^' || *iter == '$' || *iter == '+' || *iter == '.')
-      {
-	result += '\\';
-	result += *iter;
-      } else
-      {
-	result += *iter;
+        case '*': 
+          result += ".*"; 
+          break;
+        case '?': 
+          result += '.'; 
+          break;
+        case '^': case '$': case '+': case '.': case '\\': 
+        case '(': case ')': case '[': case ']': case '{': case '}': case '|':
+          result += '\\';
+          result += c;
+          break;
+        default:
+          result += c;
+          break;
       }
     }
     return result;

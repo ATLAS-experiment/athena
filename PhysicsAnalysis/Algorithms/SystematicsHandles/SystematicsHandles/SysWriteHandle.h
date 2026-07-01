@@ -9,140 +9,133 @@
 #define SYSTEMATICS_HANDLES__SYS_WRITE_HANDLE_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <AsgDataHandles/VarHandleKey.h>
+#include <AsgDataHandles/WriteHandleKey.h>
 #include <AsgMessaging/AsgMessagingForward.h>
+#include <AthContainers/CurrentContext.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <SystematicsHandles/ISysHandleBase.h>
-#include <SystematicsHandles/SysListHandle.h>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 
 class StatusCode;
 
 namespace CP
 {
+  class SysListHandle;
   class SystematicSet;
+
 
   /// \brief a data handle for writing systematics varied input data
 
   template<typename T,typename Aux = void> class SysWriteHandle final
-    : public ISysHandleBase, public asg::AsgMessagingForward
+    : public ISysObjectHandleBase, public asg::AsgMessagingForward
   {
-    //
-    // public interface
-    //
-
-    /**
-     * @brief Standard constructor
-     * @tparam T2 The type of the owner
-     * @param owner Used to declare the property and for its messaging
-     * @param propertyName The name of the property to declare
-     * @param propertyValue The default value for the property
-     * @param propertyDescription The description of the property
-     *
-     * This version of the constructor declares a property on the parent object
-     * and should usually be preferred when the container to be written should
-     * be configurable
-     */
+    /// Public Members
+    /// ==============
   public:
+
+    /// \brief Standard constructor
+    /// \tparam T2 The type of the owner
+    /// \param owner Used to declare the property and for its messaging
+    /// \param propertyName The name of the property to declare
+    /// \param propertyValue The default value for the property
+    /// \param propertyDescription The description of the property
+    ///
+    /// This version of the constructor declares a property on the parent object
+    /// and should usually be preferred when the container to be written should
+    /// be configurable
     template<typename T2>
     SysWriteHandle (T2 *owner, const std::string& propertyName,
                     const std::string& propertyValue,
                     const std::string& propertyDescription);
 
     /// \brief Direct constructor which doesn't declare a property
-    template <typename T2>
+    template<typename T2>
     SysWriteHandle (const std::string &outputName, T2 *owner);
 
-
     /// \brief whether we have a name configured
-  public:
     virtual bool empty () const noexcept override;
 
     /// \brief !empty()
-  public:
     explicit operator bool () const noexcept;
 
     /// \brief get the name pattern before substitution
-  public:
     virtual std::string getNamePattern () const override;
 
 
     /// \brief initialize this handle
     /// \{
-  public:
     StatusCode initialize (SysListHandle& sysListHandle);
     StatusCode initialize (SysListHandle& sysListHandle, SG::AllowEmptyEnum);
     /// \}
 
 
     /// \brief get the name we record to the event store
-  public:
     const std::string& getName (const CP::SystematicSet& sys) const;
 
 
     /// \brief record the object for the given systematic
-  public:
     template<typename X = Aux,typename = std::enable_if_t<std::is_same_v<X,void>>>
     ::StatusCode record (std::unique_ptr<T> object,
-                         const CP::SystematicSet& sys) const;
+                         const CP::SystematicSet& sys,
+                         const EventContext& ctx = Gaudi::Hive::currentContext()) const;
 
 
-    /// \brief retrieve the object for the given name
-  public:
+    /// \brief record the object and aux store for the given systematic
     template<typename X = Aux,typename = std::enable_if_t<!std::is_same_v<X,void>>>
     ::StatusCode record (std::unique_ptr<T> object,
                          std::unique_ptr<Aux> aux,
-                         const CP::SystematicSet& sys) const;
+                         const CP::SystematicSet& sys,
+                         const EventContext& ctx = Gaudi::Hive::currentContext()) const;
 
 
 
-    //
-    // inherited interface
-    //
-
+    /// Inherited Members
+    /// ================
   private:
+
     virtual CP::SystematicSet
     getInputAffecting (const ISystematicsSvc& svc) const override;
     virtual StatusCode
     fillSystematics (const ISystematicsSvc& svc,
                      const CP::SystematicSet& fullAffecting,
                      const std::vector<CP::SystematicSet>& sysList) override;
+    virtual StatusCode
+    addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite) override;
 
 
 
-    //
-    // private interface
-    //
+    /// Private Members
+    /// ===============
+  private:
 
     /// \brief the output name we use
-  private:
     std::string m_outputName;
 
-    /// \brief the cache of names we use
-  private:
-    std::unordered_map<CP::SystematicSet,std::string> m_outputNameCache;
+    /// \brief the explicit list of type names for output dependencies
+    std::string m_outputType;
+
+    /// \brief the data held per-systematic (filled in `initialize`)
+    struct SysData
+    {
+      /// the write handle key for the (expanded) output container
+      SG::WriteHandleKey<T> writeHandle;
+    };
+    std::unordered_map<CP::SystematicSet,SysData> m_sysData;
+
+    /// \brief get the write handle key for the given systematic
+    const SG::WriteHandleKey<T>& getWriteHandle (const CP::SystematicSet& sys) const;
 
 
-    /// \brief the type of the event store we use
-  private:
-    typedef std::decay<decltype(
-      *(std::declval<EL::AnaAlgorithm>().evtStore()))>::type StoreType;
-
-    /// \brief the event store we use
-  private:
-    StoreType *m_evtStore = nullptr;
-
-    /// \brief the function to retrieve the event store
+#ifndef XAOD_STANDALONE
+    /// \brief a function to add a data dependency to the parent algorithm
     ///
-    /// This is an std::function to allow the parent to be either a
-    /// tool or an algorithm.  Though we are not really supporting
-    /// tools as parents when using \ref SysListHandle, so in
-    /// principle this could be replaced with a pointer to the
-    /// algorithm instead.
-  private:
-    std::function<StoreType*()> m_evtStoreGetter;
+    /// This wraps the owner's addDependency call and is used by
+    /// addDecorationDependency to register MT dependencies.
+    std::function<void(const DataObjID&, Gaudi::DataHandle::Mode)> m_addAlgDependency;
+#endif
   };
 }
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonReadoutGeometry
@@ -43,7 +43,7 @@ foreach(_theTestSource ${tests})
 
     atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
     LINK_LIBRARIES MuonReadoutGeometry 
-    POST_EXEC_SCRIPT nopost.sh 
+    POST_EXEC_SCRIPT noerror.sh
     )
     
 

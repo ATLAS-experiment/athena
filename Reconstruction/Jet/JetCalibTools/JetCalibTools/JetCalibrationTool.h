@@ -6,7 +6,6 @@
 
 // JetCalibrationTool.h 
 // Header file for class JetCalibrationTool
-// Author: Joe Taenzer <joseph.taenzer@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 #ifndef JETCALIBTOOLS_APPLYJETCALIBRATION_H
 #define JETCALIBTOOLS_APPLYJETCALIBRATION_H 1

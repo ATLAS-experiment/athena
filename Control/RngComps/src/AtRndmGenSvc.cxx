@@ -13,7 +13,7 @@
 
 #include "interpretSeeds.h"
 #include "AtRndmGenSvc.h"
-#include "crc_combine.h"
+#include "CxxUtils/crc_combine.h"
 
 #include <cassert>
 #include <iostream>
@@ -343,9 +343,9 @@ AtRndmGenSvc::setOnDefinedSeeds(uint32_t eventNumber, uint32_t runNumber,
   uint32_t theHash(eventNumber);
   map<string, uint32_t>::const_iterator citer(m_reseedingOffsets.find(streamName));
   bool hasOffset(citer != m_reseedingOffsets.end() && 0 != citer->second);
-  if (hasOffset) theHash=crc_combine(theHash, citer->second);
+  if (hasOffset) theHash = CxxUtils::crc_combine(theHash, citer->second);
 
-  theHash=crc_combine(theHash, runNumber);
+  theHash = CxxUtils::crc_combine(theHash, runNumber);
   ATH_MSG_VERBOSE( "Reseeding stream " << streamName 
 		   << " with eventNumber " << eventNumber 
 		   << " runNumber " << runNumber);
@@ -365,7 +365,7 @@ AtRndmGenSvc::setOnDefinedSeeds(uint32_t theSeed,
     m_engines.insert(engineValType(streamName, 
 				   new CLHEP::RanecuEngine() ) );
   engineIter iter = m_engines.find(streamName);
-  theSeed=crc_combine(theSeed, streamName);
+  theSeed = CxxUtils::crc_combine(theSeed, streamName);
   ATH_MSG_DEBUG("Reseeding stream " << streamName << " with " << theSeed);
   //Ranecu takes a long as seed and makes a test on the sign of the seed
   //so let's make sure that our seed is presented to Ranecu as a 32 bit

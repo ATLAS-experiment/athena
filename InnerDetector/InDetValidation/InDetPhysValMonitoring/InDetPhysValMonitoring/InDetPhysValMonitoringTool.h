@@ -72,7 +72,7 @@ public:
     //@{
     virtual StatusCode initialize();
     virtual StatusCode bookHistograms();
-    virtual StatusCode fillHistograms();
+    virtual StatusCode fillHistograms(const EventContext& ctx);
     virtual StatusCode procHistograms();
     //@}
 private:
@@ -203,6 +203,7 @@ private:
     FloatProperty m_jetPtMax{this, "JetPtMax", 5000.0f, "Maximum Jet pT for jet selection in GeV"};
 
     BooleanProperty m_isITk{this, "isITk", false, "Whether config is set for ITk, to enable/disable some plots"};
+    BooleanProperty m_hasHGTDReco{this, "hasHGTDReco", false, "Whether config is set for HGTD reco, to enable/disable some plots"};
   
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectionTool{this, "TrackSelectionTool", "InDet::InDetTrackSelectionTool/TrackSelectionTool", "Track selection tool to use"};
     ToolHandle<IInDetVertexTruthMatchTool> m_vtxValidTool{this, "VertexTruthMatchTool", "InDetVertexTruthMatchTool/VtxTruthMatchTool", "Vertex truth matching tool to use"};

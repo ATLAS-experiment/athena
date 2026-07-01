@@ -12,7 +12,6 @@
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 // GeoPrimitives
 #include "GeoPrimitives/GeoPrimitives.h"
 // Trk

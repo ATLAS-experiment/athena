@@ -202,10 +202,10 @@ void TRTProcessingOfStraw::Initialize(const ITRT_CalDbTool* calDbTool)
 }
 
 //________________________________________________________________________________
-void TRTProcessingOfStraw::addClustersFromStep ( const double& scaledKineticEnergy, const double& particleCharge,
-                                                 const double& timeOfHit,
-                                                 const double& prex, const double& prey, const double& prez,
-                                                 const double& postx, const double& posty, const double& postz,
+void TRTProcessingOfStraw::addClustersFromStep ( double scaledKineticEnergy, double particleCharge,
+                                                 double timeOfHit,
+                                                 double prex, double prey, double prez,
+                                                 double postx, double posty, double postz,
                                                  std::vector<cluster>& clusterlist, int strawGasType,
                                                  CLHEP::HepRandomEngine* rndmEngine,
                                                  CLHEP::HepRandomEngine* paiRndmEngine)
@@ -520,10 +520,10 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
 }
 
 //________________________________________________________________________________
-void TRTProcessingOfStraw::ClustersToDeposits (MagField::AtlasFieldCache& fieldCache, const int& hitID,
+void TRTProcessingOfStraw::ClustersToDeposits (MagField::AtlasFieldCache& fieldCache, int hitID,
 					       const std::vector<cluster>& clusters,
 					       std::vector<TRTElectronicsProcessing::Deposit>& deposits,
-					       Amg::Vector3D TRThitGlobalPos,
+					       const Amg::Vector3D& TRThitGlobalPos,
 					       double cosmicEventPhase, // was const ComTime* m_ComTime,
                                                int strawGasType,
                                                CLHEP::HepRandomEngine* rndmEngine)

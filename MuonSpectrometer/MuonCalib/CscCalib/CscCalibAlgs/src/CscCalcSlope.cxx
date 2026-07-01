@@ -240,7 +240,7 @@ namespace MuonCalib {
   }//end initialize
 
   //Execute loops through all strips and fills histograms
-  StatusCode CscCalcSlope::execute()
+  StatusCode CscCalcSlope::execute(const EventContext& /*ctx*/)
   {
     ATH_MSG_INFO("Begin execute");	
     //collectEventInfo collects infomation about each event by filling ampHistCollection and peaktHist.
@@ -383,6 +383,10 @@ namespace MuonCalib {
             Identifier stripId =m_cscRdoDecoderTool->channelIdentifier(cluster, &m_idHelperSvc->cscIdHelper(), stripItr);
             IdentifierHash cscChannelHashId;
             m_idHelperSvc->cscIdHelper().get_channel_hash(stripId, cscChannelHashId);
+            if (!cscChannelHashId.is_valid())[[unlikely]]{
+              ATH_MSG_WARNING("Hash "<< cscChannelHashId <<" is invalid");
+              continue;
+            }
             int stripHash = cscChannelHashId;
             ATH_MSG_VERBOSE("The eta of this strip is: " << m_idHelperSvc->cscIdHelper().stationEta(stripId));
 
@@ -447,7 +451,6 @@ namespace MuonCalib {
                 //Need to convert vector from ints to floats to pass to findCharge 
                 std::vector<float> floatSamples; 
                 for(const auto & thisSample:samples){
-
                   floatSamples.push_back(thisSample-ped);
                   if(m_doBitHists){
                     if(!fillBitHist(m_bitHists[stripHash],thisSample)){

@@ -20,14 +20,13 @@ class sTgcWireAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining sTgcStrip parameters
     /// @{
-    std::vector<DetectorIdentType> identifier{};
     std::vector<DetectorIDHashType> identifierHash{};
     std::vector<PosAccessor<1>::element_type> localPosition{};
     std::vector<CovAccessor<1>::element_type> localCovariance{};
     /// 
-    std::vector<uint8_t> author{};
-    std::vector<uint8_t> gasGap{};
-    std::vector<uint16_t> channelNumber{};
+    std::vector<std::uint8_t> author{};
+    std::vector<std::uint8_t> gasGap{};
+    std::vector<std::uint16_t> channelNumber{};
     std::vector<short int> time{};
     std::vector<int> charge{};
     /// @}

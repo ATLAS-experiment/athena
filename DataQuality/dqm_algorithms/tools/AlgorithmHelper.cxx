@@ -26,6 +26,13 @@
 #include <dqm_core/AlgorithmManager.h>
 #include <dqm_core/LibraryManager.h>
 
+namespace {
+  const std::string chi2Str{"Chi2_per_NDF"};
+  const std::string setHistoTitle{"SetHistogramTitle"};
+  const std::string multiplyHistoStr{"MultiplyHistogramByValue"};
+  const std::string divideHistoStr{"DivideHistogramByValue"};
+}
+
 std::map<std::string, double > 
 dqm_algorithms::tools::GetFitParams(const TF1 * func )
 {
@@ -309,9 +316,9 @@ dqm_algorithms::tools::GetFitResult (const TF1 * func, const dqm_core::Algorithm
 {  
   std::map<std::string, double > params = GetFitParams(func);
   std::map<std::string, double > greenthresh=config.getGreenThresholds();
-  std::map<std::string,double>::const_iterator ait = greenthresh.find("Chi2_per_NDF");
+  std::map<std::string,double>::const_iterator ait = greenthresh.find(chi2Str);
   if ( ait != greenthresh.end()  ) {
-    params["Chi2_per_NDF"]=func->GetChisquare()/ func->GetNDF();
+    params[chi2Str]=func->GetChisquare()/ func->GetNDF();
   } 
   double subtractfrommean = GetFirstFromMap( "SubtractFromMean", config.getParameters(), 0 );
     
@@ -664,20 +671,20 @@ dqm_algorithms::tools::ModifyHistogram(TH1 * histogram, const dqm_core::Algorith
     //Nothing to do
     return;
   }
-  std::map<std::string,double > confParams = config.getParameters();//Copy is necessary as AlgorithmConfig does not return map by reference (bug?)
+  std::map<std::string,double > confParams = config.getParameters();//Copy is necessary as AlgorithmConfig does not return map by reference 
   for ( std::map<std::string,double >::const_iterator itr = confParams.begin();itr != confParams.end();++itr ) {
-    if ( itr->first.find("MultiplyHistogramByValue") != std::string::npos ){
+    if ( itr->first.find(multiplyHistoStr) != std::string::npos ){
       histogram->Scale(itr->second);
       continue;
     }
-    if ( itr->first.find("DivideHistogramByValue") != std::string::npos ){
+    if ( itr->first.find(divideHistoStr) != std::string::npos ){
       histogram->Scale( (1./itr->second) );
       continue;
     }
     size_t stringPos;
-    std::string configTag = "SetHistogramTitle";
-    if  ( (stringPos = itr->first.find(configTag)) != std::string::npos ){
-      stringPos += configTag.length();
+    
+    if  ( (stringPos = itr->first.find(setHistoTitle)) != std::string::npos ){
+      stringPos += setHistoTitle.length();
       histogram->SetTitle( (itr->first.substr(stringPos)).c_str() );
       continue;
     }

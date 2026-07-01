@@ -216,13 +216,11 @@ StatusCode TileTBDump::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TileTBDump::execute() {
+StatusCode TileTBDump::execute(const EventContext& ctx) {
 
   static std::atomic<bool> notFirst = false;
 
   ATH_MSG_DEBUG( "execute()" );
-
-  const EventContext &ctx = Gaudi::Hive::currentContext();
 
   // take full event
   const eformat::FullEventFragment<const uint32_t*> * event = m_RobSvc->getEvent(ctx);

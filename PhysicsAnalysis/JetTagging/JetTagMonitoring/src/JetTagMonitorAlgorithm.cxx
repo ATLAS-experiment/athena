@@ -209,7 +209,7 @@ StatusCode JetTagMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
     bool inAcceptance = TMath::Abs(muonItr->eta()) < m_MuonEtaCut;
     if (!inAcceptance) continue;
     //Select medium muons
-    if (muonItr->quality() > 1) continue; // 0 tight, 1 medium, medium <= 1 (includes 0)
+    if (muonItr->quality() > xAOD::Muon::Quality::Medium) continue;
     //Select isolated muons
     float topoetcone20_value = -999.;
     float ptvarcone30_value = -999.;
@@ -562,12 +562,9 @@ StatusCode JetTagMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
 	if (softMuonItr->pt() / Gaudi::Units::GeV < m_SoftMuonPtMin) continue;
 	if (softMuonItr->pt() / Gaudi::Units::GeV > m_SoftMuonPtMax) continue;
 	// NO QUALITY (previously tight muons)
-	//if (softMuonItr->quality() > 0) continue; // 0 tight, 1 medium, 1 & 0 tight & medium
-	const ElementLink< xAOD::TrackParticleContainer >& pMuIDTrack=softMuonItr->inDetTrackParticleLink();
-	const ElementLink< xAOD::TrackParticleContainer >& pMuMSTrack=softMuonItr->muonSpectrometerTrackParticleLink();
-	if ( !pMuIDTrack.isValid() || !pMuMSTrack.isValid()) continue;
-	if (softMuonItr->muonType()!= xAOD::Muon::Combined) continue; //combined
-	if (softMuonItr->primaryTrackParticle()->d0() > 0.4) continue; // d0 cut < 0.4 mm
+	if (softMuonItr->muonType()!= xAOD::Muon::MuonType::Combined ||
+      softMuonItr->author() == xAOD::Muon::Author::STACO) continue; //combined
+	if (softMuonItr->trackParticle(xAOD::Muon::TrackParticleType::Primary)->d0() > 0.4) continue; // d0 cut < 0.4 mm
 	//this need to be done at jet level
 	SMTJets_dr = (jetItr->p4()).DeltaR(softMuonItr->p4());
 	if ( SMTJets_dr >= 0.4) continue; //jet muon DR < 0.4

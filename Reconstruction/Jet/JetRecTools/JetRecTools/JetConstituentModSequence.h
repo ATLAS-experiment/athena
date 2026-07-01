@@ -1,7 +1,7 @@
 // this file is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //JetConstituentModSequence.h
@@ -28,6 +28,7 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "xAODCore/ShallowCopy.h"
+#include "AthContainers/CurrentContext.h"
 #include "AsgTools/PropertyWrapper.h"
 
 #include "xAODPFlow/PFO.h"
@@ -52,7 +53,7 @@ class JetConstituentModSequence: public asg::AsgTool, virtual public IJetExecute
   // Changed from IJetExecute
   ASG_TOOL_CLASS(JetConstituentModSequence, IJetExecuteTool)
   public:
-  JetConstituentModSequence(const std::string &name); // MEN: constructor 
+  JetConstituentModSequence(const std::string &name); // MEN: constructor
   StatusCode initialize();
   int execute() const;
 
@@ -65,15 +66,15 @@ protected:
   // P-A : the actual type
   // Define as a basic integer type because Gaudi
   // doesn't support arbitrary property types
-  unsigned short m_inputType; // 
-  
-  
+  unsigned short m_inputType; //
+
+
   ToolHandleArray<IJetConstituentModifier> m_modifiers{this , "Modifiers" , {} , "List of constit modifier tools."};
 
 #ifndef XAOD_ANALYSIS
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
 #endif
-  
+
   bool m_saveAsShallow = true;
 
   // note: not all keys will be used for a particular instantiation
@@ -121,33 +122,35 @@ StatusCode
 JetConstituentModSequence::copyModRecord(const SG::ReadHandleKey<T>& inKey,
                                          const SG::WriteHandleKey<T>& outKey) const {
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   /* Read in a container of (type is template parameter),
      optionally modify the elements of this container, and store.
      This puts a (modified) copy of the container  into storegate.
   */
-  
-  auto inHandle = makeHandle(inKey);
+
+  auto inHandle = makeHandle(inKey, ctx);
   if(!inHandle.isValid()){
     ATH_MSG_WARNING("Unable to retrieve input container from " << inKey.key());
     return StatusCode::FAILURE;
   }
 
-  std::pair< T*, xAOD::ShallowAuxContainer* > newconstit =
-    xAOD::shallowCopyContainer(*inHandle);    
+  xAOD::ShallowCopyResult_t<T> newconstit = xAOD::shallowCopy(*inHandle);
   newconstit.second->setShallowIO(m_saveAsShallow);
 
-  for (auto t : m_modifiers) {ATH_CHECK(t->process(newconstit.first));}
+  for (auto t : m_modifiers) {ATH_CHECK(t->process(newconstit.first.get()));}
 
-  auto handle = makeHandle(outKey);
-  ATH_CHECK(handle.record(std::unique_ptr<T>(newconstit.first),
-                          std::unique_ptr<xAOD::ShallowAuxContainer>(newconstit.second)));
-  
+  auto handle = makeHandle(outKey, ctx);
+  ATH_CHECK(handle.record(std::move(newconstit.first), std::move(newconstit.second)));
+
   xAOD::setOriginalObjectLink(*inHandle, *handle);
-  
+
   return StatusCode::SUCCESS;
 }
 
 template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFlowLike(const SG::ReadHandleKey<T>& inNeutralKey, const SG::ReadHandleKey<T>& inChargedKey, const SG::WriteHandleKey<T>& outNeutralKey, const SG::WriteHandleKey<T>& outChargedKey, const SG::WriteHandleKey<T>& outAllKey) const {
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Cannot be handled the same way as other objects (e.g. clusters),
   // because the data is split between two containers, but we need
@@ -161,8 +164,8 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
   //   4. Modify the combined container
 
   // 1. Retrieve the input containers
-  SG::ReadHandle<T> inNeutralHandle = makeHandle(inNeutralKey);
-  SG::ReadHandle<T> inChargedHandle = makeHandle(inChargedKey);
+  SG::ReadHandle<T> inNeutralHandle = makeHandle(inNeutralKey, ctx);
+  SG::ReadHandle<T> inChargedHandle = makeHandle(inChargedKey, ctx);
   if(!inNeutralHandle.isValid()){
     ATH_MSG_WARNING("Unable to retrieve input containers \""
                     << inNeutralKey.key() << "\" and \""
@@ -178,38 +181,40 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
         ATH_MSG_WARNING(" This event has no primary vertex container" );
         return StatusCode::FAILURE;
     }
-    
+
     const xAOD::VertexContainer* vertices = handle.cptr();
     if(vertices->empty()){
         ATH_MSG_WARNING(" Failed to retrieve valid primary vertex container" );
         return StatusCode::FAILURE;
-    } 
+    }
     numNeutralCopies = static_cast<unsigned>(vertices->size());
   }
 
   // Copy the input containers individually, set I/O option and record
   // Charged elements
-  SG::WriteHandle<T> outChargedHandle = makeHandle(outChargedKey);
+  SG::WriteHandle<T> outChargedHandle = makeHandle(outChargedKey, ctx);
 
-  std::pair<T*, xAOD::ShallowAuxContainer* > chargedCopy = xAOD::shallowCopyContainer(*inChargedHandle);
+  xAOD::ShallowCopyResult_t<T> chargedCopy =
+    xAOD::shallowCopy(*inChargedHandle, ctx);
   chargedCopy.second->setShallowIO(m_saveAsShallow);
   xAOD::setOriginalObjectLink(*inChargedHandle, *chargedCopy.first);
 
-  ATH_CHECK(outChargedHandle.record(std::unique_ptr<T>(chargedCopy.first),
-                                    std::unique_ptr<xAOD::ShallowAuxContainer>(chargedCopy.second)));
+  ATH_CHECK(outChargedHandle.record(std::move(chargedCopy.first),
+                                    std::move(chargedCopy.second)));
 
   // Neutral elements
-  SG::WriteHandle<T> outNeutralHandle = makeHandle(outNeutralKey);
+  SG::WriteHandle<T> outNeutralHandle = makeHandle(outNeutralKey, ctx);
 
   // Shallow copy
   if (m_saveAsShallow){
 
-    std::pair<T*, xAOD::ShallowAuxContainer* > neutralCopy = xAOD::shallowCopyContainer(*inNeutralHandle);
-    chargedCopy.second->setShallowIO(true);
+    xAOD::ShallowCopyResult_t<T> neutralCopy =
+      xAOD::shallowCopy(*inNeutralHandle, ctx);
+    neutralCopy.second->setShallowIO(true);
     xAOD::setOriginalObjectLink(*inNeutralHandle, *neutralCopy.first);
 
-    ATH_CHECK(outNeutralHandle.record(std::unique_ptr<T>(neutralCopy.first),
-                                      std::unique_ptr<xAOD::ShallowAuxContainer>(neutralCopy.second)));
+    ATH_CHECK(outNeutralHandle.record(std::move(neutralCopy.first),
+                                      std::move(neutralCopy.second)));
 
   }
   // Deep copy
@@ -235,17 +240,17 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
     }
 
     ATH_CHECK(outNeutralHandle.record(std::move(neutralCopies),
-                                        std::move(neutralCopiesAux))
+                                      std::move(neutralCopiesAux))
     );
   }
 
 
   // 2. Set up output handle for merged (view) container and record
-  SG::WriteHandle<T> outAllHandle = makeHandle(outAllKey);
+  SG::WriteHandle<T> outAllHandle = makeHandle(outAllKey, ctx);
   ATH_CHECK(outAllHandle.record(std::make_unique<T>(SG::VIEW_ELEMENTS)));
   (*outAllHandle).assign((*outNeutralHandle).begin(), (*outNeutralHandle).end());
   (*outAllHandle).insert((*outAllHandle).end(),
-      (*outChargedHandle).begin(), 
+      (*outChargedHandle).begin(),
       (*outChargedHandle).end());
 
   // 3. Now process modifications on all elements

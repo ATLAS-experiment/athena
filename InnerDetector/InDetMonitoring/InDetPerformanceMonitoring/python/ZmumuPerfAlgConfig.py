@@ -5,7 +5,7 @@
 """
 @file ZmumuPerfAlgConfig.py
 @author Salvador Marti
-@date 2024
+@date 2026
 @brief Configuration for Run 3 IDAlignment performance based on Zmumu events
 """
 
@@ -79,8 +79,6 @@ def ZmumuPerfAlgCfg(flags, **kwargs):
                                                     TrackToVertexTool        = TrackToVertexTool,
                                                     TrackToVertexIPEstimator = TrackToVertexIPEstimatorTool,
                                                     commonTreeFolder         = "/ZmumuValidationUserSel/common",
-                                                    MinLumiBlock             = 0, # if MaxLumiBlock == MinLumiBlock --> no LumiBlock selection
-                                                    MaxLumiBlock             = 0,
                                                     doZmumuEventDebug        = False, # default False
                                                     useCustomMuonSelector    = True, ## default selector need calibrated pT --> needed for MC
                                                     MuonSelector             = MuonSelectorIDAl,

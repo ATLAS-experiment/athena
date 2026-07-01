@@ -118,7 +118,7 @@ namespace ZeeValidation {
     return StatusCode::SUCCESS;     
   }
   
-  StatusCode ZeeValidationMonitoringTool::fillHistograms()
+  StatusCode ZeeValidationMonitoringTool::fillHistograms(const EventContext& /*ctx*/)
   {
     ATH_MSG_DEBUG ("Filling hists " << name() << "...");
     if (m_detailLevel < 10) return StatusCode::SUCCESS;

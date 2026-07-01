@@ -9,7 +9,6 @@ atlas_subdir( ISF_FastCaloSimSD )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( XercesC )
 
 # Component(s) in the package:
 atlas_add_library( ISF_FastCaloSimSD
@@ -17,8 +16,8 @@ atlas_add_library( ISF_FastCaloSimSD
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} StoreGateLib GaudiKernel G4AtlasInterfaces G4AtlasToolsLib CaloDetDescrLib CaloIdentifier GeneratorObjects LArG4Code ISF_FastCaloSimEvent Identifier TileG4InterfacesLib )
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} StoreGateLib GaudiKernel G4AtlasInterfaces G4AtlasToolsLib CaloDetDescrLib CaloIdentifier GeneratorObjects LArG4Code ISF_FastCaloSimEvent Identifier TileG4InterfacesLib )
 set_target_properties( ISF_FastCaloSimSD PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:

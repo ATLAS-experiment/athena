@@ -44,7 +44,9 @@ namespace LArG4 {
       return StatusCode::SUCCESS;
     }
 
-    G4bool CalibrationCalculator::Process(const G4Step* step, LArG4Identifier & identifier,
+    G4bool CalibrationCalculator::Process(const G4Step* step,
+                                          LArG4Identifier & identifier,
+                                          LArG4Identifier & identifier_sr,
                                           std::vector<G4double> & energies,
                                           const eCalculatorProcessing process) const
     {
@@ -64,15 +66,28 @@ namespace LArG4 {
       }
 
 
-      if ( process == kEnergyAndID  ||  process == kOnlyID ) {
-	// Calculate the identifier.
-	identifier = m_geometryCalculator->CalculateIdentifier( step );
-      }
-      else {
+      if ( process == kEnergyAndID  ||  process == kOnlyID )
+        {
+          // Calculate the identifier.
+          identifier = m_geometryCalculator->CalculateIdentifier( step );
+          if ( m_calculateSuperResolutionIdentifier )
+            {
+              identifier_sr = m_geometryCalculator->CalculateSuperResolutionIdentifier( step );
+            }
+        }
+      else{
         identifier = LArG4Identifier();
+        identifier_sr = LArG4Identifier();
       }
+      
+        [[maybe_unused]] unsigned short sr_value = 0;
+        if (identifier_sr.fields() > 0) {
+            sr_value = static_cast<unsigned short>(identifier_sr[0]); // Get the first field as unsigned
+        }
 
-
+        else{
+          sr_value = 0; // Default value if no fields
+        }
 #ifdef DEBUG_HITS
       G4double energy = accumulate(energies.begin(),energies.end(),0.);
       std::cout << "LArG4::Barrel::CalibrationCalculator::Process"
@@ -84,9 +99,9 @@ namespace LArG4 {
                 << "," << energies[3] << ")"
                 << std::endl;
 #endif
-
+        
       // Check for bad result.
-      return ( identifier != LArG4Identifier() );
+      return ( identifier != LArG4Identifier() && ( !m_calculateSuperResolutionIdentifier || identifier_sr != LArG4Identifier() ) ) ;
     }
 
   } // namespace Barrel

@@ -15,7 +15,7 @@ StatusCode CscDigitToCscRDO::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode CscDigitToCscRDO::execute() {
+StatusCode CscDigitToCscRDO::execute(const EventContext& ctx) {
     ATH_MSG_DEBUG("in execute()");
-    return m_digTool->digitize(Gaudi::Hive::currentContext());
+    return m_digTool->digitize(ctx);
 }

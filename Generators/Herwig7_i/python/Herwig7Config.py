@@ -34,7 +34,6 @@ class Hw7Config(object):
     self.set_printout_commands            = False
     self.set_physics_parameter_commands   = False
     self.set_technical_parameter_commands = False
-    self.use_PDGparams = False
 
     self.default_commands = hw7Utils.ConfigurationCommands()
     self.commands         = hw7Utils.ConfigurationCommands()
@@ -137,40 +136,6 @@ set /Herwig/Samplers/Sampler:Verbose Yes
     ## Now the PDG API is used to set the parameters via the python file Generators/EvgenProdTools/python/physics_parameters.py that generates the dictionary offline_dict.py with the parameters
 
   def physics_parameter_commands(self):
-    if self.use_PDGparams:
-       paramlist = []
-       self.physics_parameter_commands = True
-    
-       paramlist.append("## Masses and widths: PDG 2019 values")
-    
-    ## Load the dictionary and extract the values of the variables that were defined here before (top quark, W and Z boson)
-       from EvgenProdTools.offline_dict import parameters
-       for k,v in parameters.items():
-         if k == 'particles':
-           for key,value in v.items():
-             if int(key) == 24:
-               paramlist.append("set /Herwig/Particles/"+value['name']+"+:NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"+:Width "+value['width'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"-:NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"-:Width "+value['width'])
-             if int(key) == 23:
-               paramlist.append("set /Herwig/Particles/"+value['name']+"0:NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"0:Width "+value['width'])
-             if int(key) == 6:
-               paramlist.append("set /Herwig/Particles/"+value['name']+"bar:NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+"bar:Width "+value['width'])         
-               paramlist.append("set /Herwig/Particles/"+value['name']+":NominalMass "+value['mass'])
-               paramlist.append("set /Herwig/Particles/"+value['name']+":Width "+value['width'])
-   
-    ## Take the value of sin2thetaW from the EW_parameters dictionary      
-         if k == 'EW_parameters':
-           for key,value in v.items():
-             if key[2] == "Sin2ThetaW":
-               paramlist.append("set /Herwig/Model:EW/"+str(key[2])+" "+str(value))
-       paramstring = '\n'.join(paramlist)
-       return(paramstring)
-
-    else:
        self.physics_parameter_commands = True
 
        return("""
@@ -321,10 +286,8 @@ set /Herwig/Partons/RemnantPDF:MaxFlav {}
 
   ## \brief Commands for setting PS/hadronization and UE/MPI tune simultaneously
   ##
-  ## \param[in] ps_tune_name name identifying the PS/hadronization tune
-  ## \param[in] ue_tune_name name identifying the UE/MPI tune
   ## \return    Nothing, adds the corresponding commands directly to the generator configuration object
-  def tune_commands(self, ps_tune_name = "H7-PS-MMHT2014LO", ue_tune_name = "H7.2-Default"):
+  def tune_commands(self):
 
     cmds = """
 ## -------------
@@ -332,34 +295,21 @@ set /Herwig/Partons/RemnantPDF:MaxFlav {}
 ## -------------
 """
     self.commands += cmds
-    # self.ps_tune_commands(tune_name = ps_tune_name) # the name of the default PS tune may be obsolete
-    self.ue_tune_commands(tune_name = ue_tune_name)
 
 
   ## \brief Commands for only setting the PS/hadronization tune
   ##
-  ## \param[in] tune_name name identifying the PS/hadronization tune
   ## \return    Nothing, adds the corresponding commands directly to the generator configuration object
-  def ps_tune_commands(self, tune_name = "H7-PS-MMHT2014LO"):
+  def ps_tune_commands(self):
 
     cmds = """
 ## Parton shower / hadronization tune settings
 """
 
-    if tune_name == "H7-PS-MMHT2014LO":
-      cmds += """
-# > The parton shower / hadronization tune "H7-MMHT2014LO" is already
-# > configured in Herwig7 via the default settings.
-"""
-    # elif tune_name == "some-other-name":
-    #   cmds += self.load_PS_tune(tune_name)
-    else:
-      raise Exception("Parton shower tune name '{}' unknown".format(tune_name))
-
     self.commands += cmds
 
 
-  def load_PS_tune(self, tune_name):
+  def load_PS_tune(self):
 
     return """
 ## some commands
@@ -368,28 +318,17 @@ set /Herwig/Partons/RemnantPDF:MaxFlav {}
 
   ## \brief Commands for only setting the UE/MPI tune
   ##
-  ## \param[in] tune_name name identifying the UE/MPI tune
   ## \return    Nothing, adds the corresponding commands directly to the generator configuration object
-  def ue_tune_commands(self, tune_name = "H7.2-Default"):
+  def ue_tune_commands(self):
 
     cmds = """
 ## Underlying event tune settings
 """
 
-    if tune_name == "H7.2-Default":
-      cmds += """
-# > The underlying event tune "H7.2-Default" is already
-# > configured in Herwig7 via the default settings.
-"""
-    # elif tune_name == "some-other-name":
-    #   cmds = self.UE_tune_commands(tune_name)
-    else:
-      raise Exception("Underlying event tune name '{}' unknown".format(tune_name))
-
     self.commands += cmds
 
 
-  def load_ue_tune(self, tune_name):
+  def load_ue_tune(self):
 
     return """
 ## some commands

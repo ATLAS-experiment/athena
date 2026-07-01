@@ -2,14 +2,7 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -19,7 +12,7 @@
 
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ThrowMsg.h>
-#include <SampleHandler/SamplePtr.h>
+#include <SampleHandler/SampleLocal.h>
 
 //
 // method implementations
@@ -74,12 +67,12 @@ namespace SH
 
 
 
-  SamplePtr SampleMeta ::
+   std::unique_ptr<SampleLocal> SampleMeta ::
   doMakeLocal () const
   {
     RCU_READ_INVARIANT (this);
     RCU_THROW_MSG ("makeLocal() should not be called on SampleMeta");
-    return 0; //compiler dummy
+    return {}; //compiler dummy
   }
 
 

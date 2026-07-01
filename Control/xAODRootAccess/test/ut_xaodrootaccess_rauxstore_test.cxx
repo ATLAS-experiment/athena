@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -14,7 +14,10 @@
 #include "AsgMessaging/MessageCheck.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/CurrentContext.h"
 #include "AthContainers/exceptions.h"
+
+#include "CxxUtils/checker_macros.h"
 
 // ROOT include(s):
 #include <TFile.h>
@@ -22,6 +25,7 @@
 // System include(s):
 #include <filesystem>
 #include <memory>
+#include <iostream>
 
 /// Helper macro for evaluating logical tests
 #define SIMPLE_ASSERT(EXP)                                             \
@@ -40,6 +44,25 @@ static const char* const INPUT_FILE_NAME = "InputNtuple.root";
 static const char* const INPUT_NTUPLE_NAME = "InputNtuple";
 static const char* const OUTPUT_FILE_NAME = "OutputNtuple.root";
 static const char* const OUTPUT_NTUPLE_NAME = "OutputNtuple";
+
+
+class TTest
+{
+public:
+  const EventContext* m_ctx = nullptr;
+};
+namespace SG {
+template <> class ATLAS_CHECK_THREAD_SAFETY ToTransient<std::vector<TTest> > {
+public:
+  static void toTransient (std::vector<TTest>& v, const EventContext& ctx)
+  {
+    for (TTest& e : v) {
+      e.m_ctx = &ctx;
+    }
+  }
+};
+}
+
 
 StatusCode test_linked() {
 
@@ -270,6 +293,40 @@ StatusCode test_insertmove() {
   return StatusCode::SUCCESS;
 }
 
+
+StatusCode test_copyIDs()
+{
+  xAOD::RAuxStore s("fooAux:");
+
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t i1 = r.getAuxID<int> ("i1");
+  SG::auxid_t i2 = r.getAuxID<int> ("i2");
+  SG::auxid_t i3 = r.getAuxID<int> ("i3");
+
+  (void)s.getData(i1, 5, 5);
+  (void)s.getData(i3, 5, 5);
+  s.lock();
+  (void)s.getDecoration(i2, 5, 5);
+
+  SG::auxid_set_t exp;
+  exp.set (i1);
+  exp.set (i3);
+
+  {
+    SG::auxid_set_t out = s.getCopyIDs();
+    assert (out == exp);
+  }
+
+  {
+    std::cout << "Expect a warning here (except in standalone):\n";
+    SG::auxid_set_t out = s.getCopyIDs (true);
+    assert (out == exp);
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+
 void createAndFillNtuple(const char* ntupleName, const char* fileName) {
   // Create an RNTuple model
   auto model = ROOT::RNTupleModel::Create();
@@ -290,6 +347,31 @@ void createAndFillNtuple(const char* ntupleName, const char* fileName) {
   *var2Field = std::move(var2);
   ntuple->Fill();
 }
+
+
+StatusCode test_toTransient()
+{
+  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+  SG::auxid_t auxid1 = r.getAuxID<int> ("itest1");
+  SG::auxid_t auxid2 = r.getAuxID<TTest> ("ttest1");
+
+  xAOD::RAuxStore s( "fooAux." );
+
+  int* vp1 = reinterpret_cast<int*> (s.getData (auxid1, 3, 3));
+  TTest* vp2 = reinterpret_cast<TTest*> (s.getData (auxid2, 3, 3));
+
+  assert (vp1[0] == 0);
+  assert (vp2[0].m_ctx == nullptr);
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  s.toTransient (ctx);
+  assert (vp1[0] == 0);
+  assert (vp2[0].m_ctx == &ctx);
+  assert (vp2[2].m_ctx == &ctx);
+
+  return StatusCode::SUCCESS;
+}
+
 
 int main() {
 
@@ -460,6 +542,8 @@ int main() {
 
   SIMPLE_ASSERT(test_linked().isSuccess());
   SIMPLE_ASSERT(test_insertmove().isSuccess());
+  SIMPLE_ASSERT(test_copyIDs().isSuccess());
+  SIMPLE_ASSERT(test_toTransient().isSuccess());
 
   // Clean up.
   std::filesystem::remove(INPUT_FILE_NAME);

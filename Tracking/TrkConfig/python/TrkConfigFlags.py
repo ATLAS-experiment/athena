@@ -17,6 +17,7 @@ class PrimaryPassConfig(FlagEnum):
     HIP = 'HIP'
     MinBias = 'MinBias'
     Default = 'Main'
+    Acts = 'Acts'
 
 
 class ITkPrimaryPassConfig(FlagEnum):
@@ -52,10 +53,6 @@ class TrackingComponent(FlagEnum):
     ActsHeavyIon = "ActsHeavyIon"
     # Validation options
     ActsValidateClusters = "ActsValidateClusters"
-    ActsValidateSpacePoints = "ActsValidateSpacePoints"
-    ActsValidateSeeds = "ActsValidateSeeds"
-    ActsValidateConversionSeeds = "ActsValidateConversionSeeds"
-    ActsValidateLargeRadiusSeeds = "ActsValidateLargeRadiusSeeds"
     ActsValidateLargeRadiusStandalone = "ActsValidateLargeRadiusStandalone"
     ActsValidateTracks = "ActsValidateTracks"
     ActsValidateAmbiguityResolution = "ActsValidateAmbiguityResolution"
@@ -110,12 +107,12 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doSharedHits", True)
     # Switch for running TIDE Ambi
     icf.addFlag("Tracking.doTIDE_Ambi", lambda prevFlags:
-                not (prevFlags.Beam.Type is BeamType.Cosmics))
+                prevFlags.Beam.Type is not BeamType.Cosmics)
     # Use simple position and error estimate for on-track pixel cluster
     icf.addFlag("Tracking.doPixelDigitalClustering", False)
     # Try to split pixel clusters
     icf.addFlag("Tracking.doPixelClusterSplitting",
-                lambda prevFlags: not (prevFlags.Beam.Type is BeamType.Cosmics))
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     # choose splitter type: NeuralNet or AnalogClus
     icf.addFlag("Tracking.pixelClusterSplittingType", lambda prevFlags:
                 PixelClusterSplittingType.NeuralNet
@@ -136,6 +133,9 @@ def createTrackingConfigFlags():
     # Guaranteed not-subtracted topo clusters even in heavy ions
     icf.addFlag("Tracking.TopoClusters", "CaloTopoClusters")
     icf.addFlag("Tracking.EgammaTopoClusters", "egammaTopoClusters")
+    icf.addFlag("Tracking.ForwardTopoClusters",
+                lambda prevFlags: (
+                     prevFlags.Egamma.Keys.Internal.EgammaTopoClusters + 'Fwd'))
 
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
@@ -442,8 +442,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doITkFastTracking", False)
 
     # Turn running of Conversion second tracking pass on and off
-    icf.addFlag("Tracking.doITkConversion",
-                lambda prevFlags: not prevFlags.Tracking.doITkFastTracking)
+    icf.addFlag("Tracking.doITkConversion", lambda prevFlags: (
+        not prevFlags.Tracking.doITkFastTracking and prevFlags.Detector.EnableCalo))
 
     # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing
     # SiSPSeededTrackFinder
@@ -476,6 +476,8 @@ def createTrackingConfigFlags():
         createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags)
 
     def primaryPass(flags):
+        if TrackingComponent.ActsChain in flags.Tracking.recoChain:
+            return PrimaryPassConfig.Acts
         if flags.Beam.Type is BeamType.Cosmics:
             return PrimaryPassConfig.Cosmics
         elif flags.Reco.EnableHI:
@@ -594,20 +596,19 @@ def createTrackingConfigFlags():
         createActsConversionTrackingPassFlags,
         createActsLowPtTrackingPassFlags,
         createActsValidateClustersTrackingPassFlags,
-        createActsValidateSpacePointsTrackingPassFlags,
-        createActsValidateSeedsTrackingPassFlags,
-        createActsValidateConversionSeedsTrackingPassFlags,
-        createActsValidateLargeRadiusSeedsTrackingPassFlags,
         createActsValidateLargeRadiusStandaloneTrackingPassFlags,
         createActsValidateTracksTrackingPassFlags,
         createActsValidateAmbiguityResolutionTrackingPassFlags,
         createActsHeavyIonTrackingPassFlags,
         createEFValidateF100TrackingPassFlags,
-        createEFValidateF150TrackingPassFlags
+        createEFValidateF150TrackingPassFlags,
+        createACTSInnerDetectorTrackingPassFlags
     )
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ActsPass",
+                          createACTSInnerDetectorTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLegacyPass",
                           createActsLegacyTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsLargeRadiusPass",
@@ -618,14 +619,6 @@ def createTrackingConfigFlags():
                           createActsLowPtTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateClustersPass",
                           createActsValidateClustersTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateSpacePointsPass",
-                          createActsValidateSpacePointsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateSeedsPass",
-                          createActsValidateSeedsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateConversionSeedsPass",
-                          createActsValidateConversionSeedsTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusSeedsPass",
-                          createActsValidateLargeRadiusSeedsTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateLargeRadiusStandalonePass",
                           createActsValidateLargeRadiusStandaloneTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsValidateTracksPass",

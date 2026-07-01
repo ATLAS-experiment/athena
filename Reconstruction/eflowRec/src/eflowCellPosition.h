@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EFLOWCELLPOSITION_H
-#define EFLOWCELLPOSITION_H
+#ifndef EFLOWREC_EFLOWCELLPOSITION_H
+#define EFLOWREC_EFLOWCELLPOSITION_H
 
 /********************************************************************
 

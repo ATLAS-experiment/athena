@@ -21,8 +21,7 @@ StatusCode CSCSensitiveDetectorCosmicsTool::SetupEvent(HitCollectionMap& hitColl
 
 StatusCode CSCSensitiveDetectorCosmicsTool::Gather(HitCollectionMap& hitCollections)
 {
-  hitCollections.Record<CSCSimHitCollection>(m_outputCollectionNames[0]);
-  return StatusCode::SUCCESS;
+  return hitCollections.Record<CSCSimHitCollection>(m_outputCollectionNames[0]);
 }
 
 G4VSensitiveDetector* CSCSensitiveDetectorCosmicsTool::makeSD() const

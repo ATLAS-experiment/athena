@@ -19,7 +19,7 @@ class ATLAS_NOT_THREAD_SAFE TBXCryYTableRead : public AthAlgorithm {
   TBXCryYTableRead(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TBXCryYTableRead();
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
   
  private: 

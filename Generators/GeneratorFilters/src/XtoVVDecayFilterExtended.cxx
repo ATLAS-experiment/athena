@@ -47,7 +47,7 @@ StatusCode XtoVVDecayFilterExtended::filterFinalize() {
 }
 
 
-StatusCode XtoVVDecayFilterExtended::filterEvent() {
+StatusCode XtoVVDecayFilterExtended::filterEvent(const EventContext& ctx) {
   bool okPDGChild1 = false;
   bool okPDGChild2 = false;
   int nGoodParent = 0;
@@ -77,7 +77,7 @@ StatusCode XtoVVDecayFilterExtended::filterEvent() {
   }
 
   // If we get here we have failed
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }
 
@@ -89,8 +89,6 @@ bool XtoVVDecayFilterExtended::RunHistory(const HepMC::ConstGenParticlePtr& inpu
     ATH_MSG_DEBUG("No History for this case");
     return false;
   }
-#ifdef HEPMC3
-
   if (pitr->production_vertex()->particles_in().size()==0) {
     ATH_MSG_DEBUG("No mother for this case");
     return false;
@@ -112,29 +110,6 @@ bool XtoVVDecayFilterExtended::RunHistory(const HepMC::ConstGenParticlePtr& inpu
 
     if (result == m_PDGGrandParent) return true;
   }
-#else
-  HepMC::GenVertex::particle_iterator firstMother = pitr->production_vertex()->particles_begin(HepMC::parents);
-  HepMC::GenVertex::particle_iterator endMother = pitr->production_vertex()->particles_end(HepMC::parents);
-  HepMC::GenVertex::particle_iterator thisMother = firstMother;
-  if (firstMother == endMother) {
-    ATH_MSG_DEBUG("No mother for this case");
-    return false;
-  }
-  int result = 999;
-  // Check if the first mother is ok
-  pitr = CheckGrandparent(pitr, result);
-  ATH_MSG_DEBUG("Pointer PDG ID: " << pitr->pdg_id());
-  if(std::abs(pitr->pdg_id()) != m_PDGGrandParent && std::abs(pitr->pdg_id()) != m_PDGParent) return false;
-  if (result == m_PDGGrandParent) return true;
-
-  HepMC::ConstGenParticlePtr pitr_current = (*firstMother);
-  while ( result >= 0 ) {
-    pitr_current = CheckGrandparent(pitr_current, result);
-    ATH_MSG_DEBUG("Pointer PDG ID: " << pitr->pdg_id());
-    if(std::abs(pitr_current->pdg_id()) != m_PDGGrandParent && std::abs(pitr_current->pdg_id()) != m_PDGParent) return false;
-    if (result == m_PDGGrandParent) return true;
-  }
-#endif
 
   return false;
 }
@@ -150,7 +125,6 @@ HepMC::ConstGenParticlePtr   XtoVVDecayFilterExtended::CheckGrandparent(const He
     return NULL;
   }
   bool isGrandParentOK = false;
-#ifdef HEPMC3
   if (pitr->production_vertex()->particles_in().size()==0)   {
     ATH_MSG_DEBUG("No mother for this case");
     result = -2;
@@ -175,34 +149,6 @@ HepMC::ConstGenParticlePtr   XtoVVDecayFilterExtended::CheckGrandparent(const He
   }
 
   return pitr->production_vertex()->particles_in()[0];
-#else
-  HepMC::GenVertex::particle_iterator firstMother = pitr->production_vertex()->particles_begin(HepMC::parents);
-  HepMC::GenVertex::particle_iterator endMother = pitr->production_vertex()->particles_end(HepMC::parents);
-  HepMC::GenVertex::particle_iterator thisMother = firstMother;
-  if (firstMother == endMother)   {
-    ATH_MSG_DEBUG("No mother for this case");
-    result = -2;
-    return NULL;
-  }
-
-  int n_mothers = 1;
-
-  for (; thisMother != endMother; ++thisMother) {
-    ATH_MSG_DEBUG("Now on this mother: " << (*thisMother)->pdg_id() << " " << n_mothers);
-    if ( (*thisMother)->pdg_id() != m_PDGGrandParent && std::abs((*thisMother)->pdg_id()) != m_PDGParent)
-       break;
-    if ( (*thisMother)->pdg_id() == m_PDGGrandParent && n_mothers == 1) { isGrandParentOK = true; }
-    n_mothers++;
-
-  }
-  if (isGrandParentOK) {
-     result = m_PDGGrandParent;
-  }
-  else {
-     result = 0;
-  }
-  return (*firstMother);
-#endif
 }
 
 

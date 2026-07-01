@@ -10,3 +10,4 @@ RootAuxVectorFa...  ERROR ../RootAuxVectorFactory.cxx: Cannot apply thinning for
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 RootAuxVectorFa...  ERROR ../RootAuxVectorFactory.cxx: Cannot apply thinning for ElementLink with non-pointer element: vector<vector<ElementLink<vector<AthContainersRootTest::Foo> > > >
 test7
+test8

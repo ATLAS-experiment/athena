@@ -1,14 +1,19 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_HIT_ANALYSIS_H
 #define ALFA_HIT_ANALYSIS_H
 
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
-#include "CxxUtils/ArrayHelper.h"
 #include "ALFA_SimEv/ALFA_HitCollection.h"
 #include "StoreGate/ReadHandleKey.h"
+
+#include <array>
+#include <vector>
+class TH1;
+class TTree;
+
 
 class ALFAHitAnalysis : public AthHistogramAlgorithm {
 
@@ -18,15 +23,15 @@ class ALFAHitAnalysis : public AthHistogramAlgorithm {
    ~ALFAHitAnalysis() = default;
 
    virtual StatusCode initialize();
-   virtual StatusCode execute();
+   virtual StatusCode execute(const EventContext& ctx);
 
  private:
 
    /** Some variables**/
-   std::array<TH1*, 8> m_h_E_full_sum_h{make_array<TH1*, 8>(nullptr)};
-   std::array<TH1*, 8> m_h_E_layer_sum_h{make_array<TH1*, 8>(nullptr)};
-   std::array<TH1*, 8> m_h_hit_layer{make_array<TH1*, 8>(nullptr)};
-   std::array<TH1*, 8> m_h_hit_fiber{make_array<TH1*, 8>(nullptr)};
+   std::array<TH1*, 8> m_h_E_full_sum_h{};
+   std::array<TH1*, 8> m_h_E_layer_sum_h{};
+   std::array<TH1*, 8> m_h_hit_layer{};
+   std::array<TH1*, 8> m_h_hit_fiber{};
    
    std::vector<int>* m_station{nullptr};
    std::vector<int>* m_plate{nullptr};

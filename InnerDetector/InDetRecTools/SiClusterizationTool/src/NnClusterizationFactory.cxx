@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,6 +21,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "TrkNeuralNetworkUtils/TTrainedNetwork.h"
 #include "SiClusterizationTool/NnClusterizationFactory.h"
+#include <onnxruntime_cxx_api.h>
 #include "SiClusterizationTool/NnNormalization.h"
 
 //for position estimate and clustering
@@ -46,6 +47,12 @@ namespace {
     
     return {static_cast<int>(d), d != v};
   }
+
+  // Placeholder (mm) for an unset coordinate in correctedRMS.
+  constexpr double unsetPos = -100.;
+
+  // Nominal pixel phi pitch (mm) for the lwtnn X position error.
+  constexpr double legacyPhiPitch = 0.05;
 }
 
 
@@ -143,9 +150,18 @@ namespace InDet {
 	      ATH_MSG_VERBOSE("Expect NN " << s_nnTypeNames[type_i] << " for " << n_particles << " particle(s) at index " << a_nn_id );
       }
     }
+    // The X pitches are only fed to the ONNX network; the lwtnn and TTN
+    // variable orders have no slot for them.
+    if (m_useXPitches && !m_useONNX) {
+      ATH_MSG_FATAL("useXPitches=True is only supported with the ONNX backend "
+                    "(useONNX=True): the lwtnn VariableOrder and the "
+                    "TTrainedNetwork inputs do not include the X pitches.");
+      return StatusCode::FAILURE;
+    }
     ATH_CHECK( m_readKeyWithoutTrack.initialize( !m_readKeyWithoutTrack.key().empty() ) );
     ATH_CHECK( m_readKeyWithTrack.initialize( !m_readKeyWithTrack.key().empty() ) );
     ATH_CHECK( m_readKeyJSON.initialize( !m_readKeyJSON.key().empty() ) );
+    ATH_CHECK( m_readKeyONNX.initialize( !m_readKeyONNX.key().empty() ) );
     return StatusCode::SUCCESS;
   }
 
@@ -210,13 +226,15 @@ namespace InDet {
 
   NnClusterizationFactory::InputVector 
   NnClusterizationFactory::eigenInput(NNinput & input) const{
-    // we know the size to be
-    //  - m_sizeX x m_sizeY pixel ToT values
-    //  - m_sizeY pitch sizes in y
-    //  - 2 values: detector location 
-    //  - 2 values: track incidence angles 
-    //  - optional: eta module
-    const auto vecSize{calculateVectorDimension(input.useTrackInfo)};
+    // Input layout: m_sizeX x m_sizeY ToT values, m_sizeY y pitches, the
+    // detector location and the track incidence angles. The no-track lwtnn
+    // networks also take eta module as a trailing value; the ONNX networks do
+    // not. When m_useXPitches is set, the ONNX layout adds the m_sizeX x pitches
+    // after the y pitches, for a matching (60 + m_sizeX)-input model.
+    const bool appendEtaModule{!m_useONNX && !input.useTrackInfo};
+    const auto vecSize{(m_useONNX ? calculateVectorDimension(true)
+                                  : calculateVectorDimension(input.useTrackInfo))
+                       + (m_useXPitches ? m_sizeX.value() : 0u)};
     Eigen::VectorXd valuesVector( vecSize );
     // Fill it!
     // Variable names here need to match the ones in the configuration...
@@ -231,6 +249,11 @@ namespace InDet {
     for (const auto & pitch : input.vectorOfPitchesY) {
       valuesVector[location++] = pitch;
     }
+    if (m_useXPitches) {
+      for (const auto & pitch : input.vectorOfPitchesX) {
+        valuesVector[location++] = pitch;
+      }
+    }
     valuesVector[location] = input.ClusterPixLayer;
     location++;
     valuesVector[location] = input.ClusterPixBarrelEC;
@@ -239,7 +262,7 @@ namespace InDet {
     location++;
     valuesVector[location] = input.theta;
     location++;
-    if (!input.useTrackInfo) { 
+    if (appendEtaModule) {
       valuesVector[location] = input.etaModule;
       location++;
     }
@@ -267,19 +290,22 @@ namespace InDet {
       }
       return estimateNumberOfParticlesTTN(**nn_collection, inputData);
     }
-    // Otherwise, prepare lwtnn input map and use new networks.
+    // Otherwise, prepare input vector and use ONNX or LWTNN networks.
     NnClusterizationFactory::InputVector nnInputVector = eigenInput(input);
+    if (m_useONNX) {
+      return estimateNumberOfParticlesONNX(nnInputVector[0]);
+    }
     return estimateNumberOfParticlesLWTNN(nnInputVector);
   }
 
-  std::vector<double> 
+  std::vector<double>
   NnClusterizationFactory::estimateNumberOfParticles(const InDet::PixelCluster& pCluster,
                                                      const Trk::Surface& pixelSurface,
                                                      const Trk::TrackParameters& trackParsAtSurface) const{
     Amg::Vector3D dummyBS(0,0,0);
     double tanl=0;
     NNinput input( createInput(pCluster,dummyBS,tanl) );
-    
+
     if (!input) return {};
     addTrackInfoToInput(input,pixelSurface,trackParsAtSurface,tanl);
     std::vector<double> inputData=(this->*m_assembleInput)(input);
@@ -293,8 +319,11 @@ namespace InDet {
       }
       return estimateNumberOfParticlesTTN(**nn_collection, inputData);
     }
-    // Otherwise, prepare lwtnn input map and use new networks.
+    // Otherwise, prepare input vector and use ONNX or LWTNN networks.
     NnClusterizationFactory::InputVector nnInputVector = eigenInput(input);
+    if (m_useONNX) {
+      return estimateNumberOfParticlesONNX(nnInputVector[0]);
+    }
     return estimateNumberOfParticlesLWTNN(nnInputVector);
   }
 
@@ -375,13 +404,16 @@ namespace InDet {
       // *(ReadCondHandle<>) returns a pointer rather than a reference ...
       return estimatePositionsTTN(**nn_collection, inputData,input,pCluster,numberSubClusters,errors);
     }
-    // Otherwise, prepare lwtnn input map and use new networks.
+    // Otherwise, prepare input vector and use ONNX or LWTNN networks.
     NnClusterizationFactory::InputVector nnInputVector = eigenInput(input);
+    if (m_useONNX) {
+      return estimatePositionsONNX(nnInputVector[0],input,pCluster,numberSubClusters,errors);
+    }
     return estimatePositionsLWTNN(nnInputVector,input,pCluster,numberSubClusters,errors);
   }
 
 
-  std::vector<Amg::Vector2D> 
+  std::vector<Amg::Vector2D>
   NnClusterizationFactory::estimatePositions(const InDet::PixelCluster& pCluster,
                                              const Trk::Surface& pixelSurface,
                                              const Trk::TrackParameters& trackParsAtSurface,
@@ -404,8 +436,11 @@ namespace InDet {
       }
       return estimatePositionsTTN(**nn_collection, inputData,input,pCluster,numberSubClusters,errors);
     }
-    // Otherwise, prepare lwtnn input map and use new networks.
+    // Otherwise, prepare input vector and use ONNX or LWTNN networks.
     NnClusterizationFactory::InputVector nnInputVector = eigenInput(input);
+    if (m_useONNX) {
+      return estimatePositionsONNX(nnInputVector[0],input,pCluster,numberSubClusters,errors);
+    }
     return estimatePositionsLWTNN(nnInputVector,input,pCluster,numberSubClusters,errors);
   }
 
@@ -534,10 +569,12 @@ namespace InDet {
       // Values returned by NN are inverse of variance, and we want variances.
       const float rawRmsX = std::sqrt(1.0/position[3]); //prec_x
       const float rawRmsY = std::sqrt(1.0/position[4]); //prec_y
-      // Now convert to real space units
-      const double rmsX = correctedRMSX(rawRmsX);
-      const double rmsY = correctedRMSY(rawRmsY, rawInput.vectorOfPitchesY);
-      ATH_MSG_DEBUG(" Estimated RMS errors (1) x: " << rmsX << ", y: " << rmsY);  
+      // Convert to real space units: x uses the nominal pixel pitch, y
+      // integrates the actual pitches. (estimatePositionsONNX uses correctedRMS
+      // for both directions.)
+      const double rmsX = rawRmsX * legacyPhiPitch;
+      const double rmsY = correctedRMS(rawRmsY, rawInput.vectorOfPitchesY, m_sizeY);
+      ATH_MSG_DEBUG(" Estimated RMS errors (1) x: " << rmsX << ", y: " << rmsY);
       // Fill matrix    
       Amg::MatrixX erm(2,2);
       erm.setZero();
@@ -551,28 +588,24 @@ namespace InDet {
     return myPositions;
   }
 
-  double 
-  NnClusterizationFactory::correctedRMSX(double posPixels) {
-    // This gives location in pixels
-    constexpr double pitch = 0.05;
-    const double corrected = posPixels * pitch;
-    return corrected;
-  }
-
-  double 
-  NnClusterizationFactory::correctedRMSY(double posPixels,
-                                         std::vector<float>& pitches) const{
-    double p = posPixels + (m_sizeY - 1) * 0.5;
-    double p_Y = -100;
-    double p_center = -100;
+  double
+  NnClusterizationFactory::correctedRMS(double posPixels,
+                                        const std::vector<float>& pitches,
+                                        unsigned int size) const{
+    // Convert a pixel-unit RMS to a distance by integrating the actual pitches,
+    // so non-uniform pitch (ITk long/end pixels, 25 um modules) is handled.
+    // size is m_sizeX in phi (x), m_sizeY in eta (y).
+    double p = posPixels + (size - 1) * 0.5;
+    double p_pos = unsetPos;
+    double p_center = unsetPos;
     double p_actual = 0;
-    for (unsigned int  i = 0; i < m_sizeY; i++) {
-      if (p >= i and p <= (i + 1)) p_Y = p_actual + (p - i + 0.5) * pitches.at(i);
-      if (i == (m_sizeY - 1) / 2) p_center = p_actual + 0.5 * pitches.at(i);
+    for (unsigned int  i = 0; i < size; i++) {
+      if (p >= i and p <= (i + 1)) p_pos = p_actual + (p - i + 0.5) * pitches.at(i);
+      if (i == (size - 1) / 2) p_center = p_actual + 0.5 * pitches.at(i);
       p_actual += pitches.at(i);
     }
-    return std::abs(p_Y - p_center);
-  }  
+    return std::abs(p_pos - p_center);
+  }
 
   void 
   NnClusterizationFactory::getErrorMatrixFromOutput(std::vector<double>& outputX,
@@ -887,7 +920,15 @@ namespace InDet {
     for (unsigned int  a=0;a<m_sizeX;a++){
       input.matrixOfToT.emplace_back(m_sizeY, 0.0);
     }
-    input.vectorOfPitchesY.assign(m_sizeY, 0.4);
+    // Seed the pitches for cells with no hit. For ONNX (ITk) take the nominal
+    // from the design, so non-uniform sensors (e.g. 50x50 or 25x100 um) get the
+    // right value; for lwtnn keep the 0.4 eta seed the models were trained with.
+    if (m_useXPitches) {
+      input.vectorOfPitchesY.assign(m_sizeY, design->etaPitch());
+      input.vectorOfPitchesX.assign(m_sizeX, design->phiPitch());
+    } else {
+      input.vectorOfPitchesY.assign(m_sizeY, 0.4);
+    }
     rdosBegin = rdos.begin();
     charge = chListRecreated.begin();
     chargeEnd = chListRecreated.end();
@@ -912,6 +953,7 @@ namespace InDet {
       InDetDD::SiCellId cellId = element->cellIdFromIdentifier(*rdosBegin);
       InDetDD::SiDiodesParameters diodeParameters = design->parameters(cellId);
       double pitchY = diodeParameters.width().xEta();
+      double pitchX = diodeParameters.width().xPhi();
       if (not m_useToT) {
         input.matrixOfToT[absrow][abscol]=*charge;
       } else {
@@ -929,7 +971,11 @@ namespace InDet {
         }
        
       }
-      if (std::abs(pitchY-0.4)>1e-5){
+      if (m_useXPitches) {
+        input.vectorOfPitchesY[abscol]=pitchY;
+        input.vectorOfPitchesX[absrow]=pitchX;
+      } else if (std::abs(pitchY-0.4)>1e-5){
+        // lwtnn: only override the 0.4 seed for long pixels
         input.vectorOfPitchesY[abscol]=pitchY;
       }
     }//end iteration on rdos
@@ -965,8 +1011,189 @@ namespace InDet {
     return input;
   }//end create NNinput function
 
-  size_t 
+  size_t
   NnClusterizationFactory::calculateVectorDimension(const bool useTrackInfo) const{
     return (m_sizeX * m_sizeY) + m_sizeY + (useTrackInfo ? 4 : 5);
   }
+
+  // ======================================================================
+  // ONNX inference methods
+  // ======================================================================
+
+  std::vector<double>
+  NnClusterizationFactory::estimateNumberOfParticlesONNX(
+      const Eigen::VectorXd& input) const {
+
+    std::vector<double> result(3, 0.0);
+    SG::ReadCondHandle<OnnxNNCollection> onnxCollection(m_readKeyONNX);
+    if (!onnxCollection.isValid()) {
+      ATH_MSG_FATAL("Failed to get ONNX network collection with key " << m_readKeyONNX.key());
+      return result;
+    }
+    Ort::Session& session = *onnxCollection->numberNetwork;
+
+    // Get expected input dimension from the model
+    auto inputTypeInfo = session.GetInputTypeInfo(0);
+    auto tensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
+    const int64_t expectedDim = tensorInfo.GetShape()[1];
+
+    // Convert Eigen double vector to float
+    if (static_cast<int64_t>(input.size()) != expectedDim) {
+      ATH_MSG_FATAL("ONNX number network expects input dimension " << expectedDim
+                    << " but got " << input.size() << " — check model/configuration");
+      return result;
+    }
+    std::vector<float> inputData(expectedDim);
+    for (int i = 0; i < expectedDim; ++i) {
+      inputData[i] = static_cast<float>(input[i]);
+    }
+
+    // Create input tensor
+    Ort::MemoryInfo memInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    std::vector<int64_t> inputShape = {1, expectedDim};
+    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+      memInfo, inputData.data(), inputData.size(),
+      inputShape.data(), inputShape.size());
+    Ort::AllocatorWithDefaultOptions allocator;
+    auto inputName = session.GetInputNameAllocated(0, allocator);
+    auto outputName = session.GetOutputNameAllocated(0, allocator);
+    const char* inputNames[] = {inputName.get()};
+    const char* outputNames[] = {outputName.get()};
+
+    // Run inference
+    auto outputTensors = session.Run(
+      Ort::RunOptions{nullptr},
+      inputNames, &inputTensor, 1,
+      outputNames, 1);
+
+    // Extract output
+    const float* outputData = outputTensors[0].GetTensorData<float>();
+    double num0 = outputData[0];
+    double num1 = outputData[1];
+    double num2 = outputData[2];
+
+    // Normalize
+    const double sum = num0 + num1 + num2;
+    if (sum <= 0.0) {
+      ATH_MSG_WARNING("ONNX number network output sum is non-positive: " << sum);
+      return result;
+    }
+    const double inverseSum = 1.0 / sum;
+    result[0] = num0 * inverseSum;
+    result[1] = num1 * inverseSum;
+    result[2] = num2 * inverseSum;
+
+    ATH_MSG_VERBOSE("ONNX Prob of n. particles (1): " << result[0]
+                    << " (2): " << result[1]
+                    << " (3): " << result[2]);
+    return result;
+  }
+
+  std::vector<Amg::Vector2D>
+  NnClusterizationFactory::estimatePositionsONNX(
+      const Eigen::VectorXd& input,
+      NNinput& rawInput,
+      const InDet::PixelCluster& pCluster,
+      int numberSubClusters,
+      std::vector<Amg::MatrixX>& errors) const {
+
+    std::vector<Amg::Vector2D> allPositions;
+    if (numberSubClusters < 1 || numberSubClusters > static_cast<int>(m_maxSubClusters)) {
+      return allPositions;
+    }
+
+    SG::ReadCondHandle<OnnxNNCollection> onnxCollection(m_readKeyONNX);
+    if (!onnxCollection.isValid()) {
+      ATH_MSG_FATAL("Failed to get ONNX network collection with key " << m_readKeyONNX.key());
+      return allPositions;
+    }
+    Ort::Session* posNet = nullptr;
+    if      (numberSubClusters == 1) posNet = onnxCollection->positionNetwork1.get();
+    else if (numberSubClusters == 2) posNet = onnxCollection->positionNetwork2.get();
+    else if (numberSubClusters == 3) posNet = onnxCollection->positionNetwork3.get();
+
+    if (!posNet) {
+      ATH_MSG_FATAL("ONNX position network for " << numberSubClusters
+                    << " sub-clusters not found in collection");
+      return allPositions;
+    }
+
+    Ort::Session& session = *posNet;
+
+    // Get expected input dimension from the model
+    auto inputTypeInfo = session.GetInputTypeInfo(0);
+    auto tensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
+    const int64_t expectedDim = tensorInfo.GetShape()[1];
+
+    // Convert input to float
+    if (static_cast<int64_t>(input.size()) != expectedDim) {
+      ATH_MSG_FATAL("ONNX position network (" << numberSubClusters
+                    << " sub-clusters) expects input dimension " << expectedDim
+                    << " but got " << input.size() << " — check model/configuration");
+      return allPositions;
+    }
+    std::vector<float> inputData(expectedDim);
+    for (int i = 0; i < expectedDim; ++i) {
+      inputData[i] = static_cast<float>(input[i]);
+    }
+
+    // Create input tensor
+    Ort::MemoryInfo memInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    std::vector<int64_t> inputShape = {1, expectedDim};
+    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+      memInfo, inputData.data(), inputData.size(),
+      inputShape.data(), inputShape.size());
+    Ort::AllocatorWithDefaultOptions allocator;
+    auto inputName = session.GetInputNameAllocated(0, allocator);
+    auto outputName = session.GetOutputNameAllocated(0, allocator);
+    const char* inputNames[] = {inputName.get()};
+    const char* outputNames[] = {outputName.get()};
+
+    // Run inference
+    auto outputTensors = session.Run(
+      Ort::RunOptions{nullptr},
+      inputNames, &inputTensor, 1,
+      outputNames, 1);
+
+    // Extract output: expect [1, 5*numberSubClusters]
+    // Format per sub-cluster: [alpha, mean_x, mean_y, prec_x, prec_y]
+    const float* outputData = outputTensors[0].GetTensorData<float>();
+
+    std::vector<double> positionValues;
+    positionValues.reserve(numberSubClusters * 2);
+
+    for (int iSub = 0; iSub < numberSubClusters; ++iSub) {
+      const int offset = iSub * 5;
+      // outputData[offset+0] = alpha (unused)
+      const double mean_x = outputData[offset + 1];
+      const double mean_y = outputData[offset + 2];
+      const double prec_x = outputData[offset + 3];
+      const double prec_y = outputData[offset + 4];
+
+      positionValues.push_back(mean_x);
+      positionValues.push_back(mean_y);
+
+      // Convert precision to RMS and build error matrix
+      if (prec_x <= 0 || prec_y <= 0) {
+        ATH_MSG_WARNING("ONNX position network returned non-positive precision for sub-cluster "
+                        << iSub << " (prec_x=" << prec_x << ", prec_y=" << prec_y
+                        << "); using fallback RMS of 0.01");
+      }
+      const float rawRmsX = (prec_x > 0) ? std::sqrt(1.0f / prec_x) : 0.01f;
+      const float rawRmsY = (prec_y > 0) ? std::sqrt(1.0f / prec_y) : 0.01f;
+      const double rmsX = correctedRMS(rawRmsX, rawInput.vectorOfPitchesX, m_sizeX);
+      const double rmsY = correctedRMS(rawRmsY, rawInput.vectorOfPitchesY, m_sizeY);
+
+      Amg::MatrixX erm(2, 2);
+      erm.setZero();
+      erm(0, 0) = rmsX * rmsX;
+      erm(1, 1) = rmsY * rmsY;
+      errors.push_back(erm);
+    }
+
+    // Convert raw position outputs to detector coordinates
+    allPositions = getPositionsFromOutput(positionValues, rawInput, pCluster);
+    return allPositions;
+  }
+
 }//end InDet namespace

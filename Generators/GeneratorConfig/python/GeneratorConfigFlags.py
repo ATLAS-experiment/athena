@@ -15,14 +15,20 @@ def createGeneratorConfigFlags():
     
     # Input Generator File
     gencf.addFlag("Generator.inputGeneratorFile", '')
+
+    # JobConfig argument list from transform 
+    gencf.addFlag("Generator.jobConfig", [])
     
     # Number of input files per job
-    gencf.addFlag("Generator.inputFilesPerJob", 1)
+    gencf.addFlag("Generator.inputFilesPerJob", 0)
+
+    # Matrix element generator name for jobs using input LHE files
+    gencf.addFlag("Generator.MEgenerator", "")
     
     # Events per job
     gencf.addFlag("Generator.nEventsPerJob", 10000)
 
-    # Events per job
+    # Data-Set ID
     gencf.addFlag("Generator.DSID", 999999)
 
     # First event
@@ -37,8 +43,8 @@ def createGeneratorConfigFlags():
     # Output yoda file for jobs that require Rivet
     gencf.addFlag("Generator.rivetAnalyses", '')
 
-    # Default PDG parameter settings
-    gencf.addFlag("Generator.PDGparams", True)
+    # Avoid extracting zip files
+    gencf.addFlag("Generator.avoidExtracting", True)
 
     return gencf
 
@@ -59,14 +65,20 @@ def generatorRunArgsToFlags(runArgs, flags):
     if hasattr(runArgs, "inputGeneratorFile"):
         flags.Generator.inputGeneratorFile = runArgs.inputGeneratorFile
 
+    if hasattr(runArgs, "jobConfig"):
+        flags.Generator.jobConfig = runArgs.jobConfig
+
     if hasattr(runArgs, "firstEvent"):
         flags.Generator.firstEvent = runArgs.firstEvent
     
     if hasattr(runArgs, "printEvts"):
         flags.Generator.printEvts = runArgs.printEvts
-    
+
     if hasattr(runArgs, "outputYODAFile"):
         flags.Generator.outputYODAFile = runArgs.outputYODAFile
     
     if hasattr(runArgs, "rivetAnas"):
         flags.Generator.rivetAnalyses = runArgs.rivetAnas
+
+    if hasattr(runArgs, "avoidExtracting"):
+        flags.Generator.avoidExtracting = runArgs.avoidExtracting

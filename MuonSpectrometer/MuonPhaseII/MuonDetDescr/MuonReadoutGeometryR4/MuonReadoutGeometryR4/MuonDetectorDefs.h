@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELR4_MUONDETECTORDEFS_H
 #define MUONGEOMODELR4_MUONDETECTORDEFS_H
@@ -7,8 +7,10 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 ///
+
 #include <ActsGeometryInterfaces/GeometryContext.h>
 
+#include <MuonStationIndex/MuonStationIndex.h>
 #include <CxxUtils/ArrayHelper.h>
 #include <CxxUtils/StringUtils.h>
 
@@ -20,10 +22,14 @@
 
 #ifndef SIMULATIONBASE
 #   include "Acts/Geometry/VolumeBounds.hpp"
+#   include "Acts/Surfaces/Surface.hpp"
+#   include "Acts/Utilities/OstreamFormatter.hpp"
 #endif
 
 namespace Acts{
     class VolumeBounds;
+    class Surface;
+    class TrackingVolume;
 }
 
 //// This header contains common helper utilities and definitions
@@ -44,8 +50,27 @@ namespace MuonGMR4 {
           *         into the AMDB coordinate system */
         Amg::Transform3D rotationToAMDB(const ActsTrk::DetectorType type);
     }
+
+    /** @brief Returns whether the parsed type is muon
+     *  @param type: The DetectorType enum */
+    bool isMuon(const ActsTrk::DetectorType type);
+
+    /** @brief Returns the boundary surface parallel to the x-y plane at negative local z
+     *  @param volume: Reference to the tracking volume from which the surface is retrieved */
+    const Acts::Surface* bottomBoundary(const Acts::TrackingVolume& volume);
+    /** @brief Returns the boundary surface parallel to the x-y plane at positive local z
+     *  @param volume: Reference to the tracking volume from which the surface is retrieved */
+    const Acts::Surface* topBoundary(const Acts::TrackingVolume& volume);
+
 }  // namespace MuonGMR4
 
-
-
+#ifndef SIMULATIONBASE
+/* Probably we should find a better place for this one. */
+ACTS_OSTREAM_FORMATTER(Muon::MuonStationIndex::StIndex);
+ACTS_OSTREAM_FORMATTER(Muon::MuonStationIndex::ChIndex);
+ACTS_OSTREAM_FORMATTER(Muon::MuonStationIndex::PhiIndex);
+ACTS_OSTREAM_FORMATTER(Muon::MuonStationIndex::DetectorRegionIndex);
+ACTS_OSTREAM_FORMATTER(Muon::MuonStationIndex::LayerIndex);
+ACTS_OSTREAM_FORMATTER(Muon::MuonStationIndex::TechnologyIndex);
+#endif
 #endif

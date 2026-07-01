@@ -12,9 +12,7 @@ if __name__ == "__main__":
     
     parser.add_argument("--noPerfMon", help="If set to true, full perfmonMT is enabled",
                         default=False, action='store_true')
-    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=None,
-                       help="Use GPU for ONNX inference (default: True)")
-    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
+    parser.add_argument("--use-cpu", action="store_true", default=False,
                        help="Use CPU for ONNX inference")
     
     args = parser.parse_args()
@@ -27,8 +25,7 @@ if __name__ == "__main__":
     flags.PerfMon.doFullMonMT = not args.noPerfMon
     
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
-    # Use command line argument if provided, otherwise default to True
-    use_gpu_requested = args.use_gpu if args.use_gpu is not None else True
+    use_gpu_requested = not args.use_cpu
     # Runtime check for GPU availability. Prefer ONNXRuntime provider list,
     # fall back to PyTorch if ONNX runtime isn't available.
     gpu_available = False

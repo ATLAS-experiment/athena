@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcDigitMaker.h"
@@ -135,7 +135,6 @@ TgcDigitCollection* TgcDigitMaker::executeDigi(
                         << "context begin_index = " << tgcContext.begin_index()
                         << " context end_index  = " << tgcContext.end_index()
                         << " the identifier is " << elemId);
-        elemId.show();
     }
 
     std::unique_ptr<TgcDigitCollection> digits =

@@ -5,15 +5,14 @@ atlas_subdir( LArG4Validation )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( HepPDT )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
 atlas_add_component( LArG4Validation
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} 
-                     LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel CaloDetDescrLib CaloIdentifier AthenaBaseComps CxxUtils StoreGateLib GeneratorObjects LArSimEvent MagFieldConditions egammaEvent GeoModelUtilities)
+                     INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} 
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} TruthUtils GaudiKernel CaloDetDescrLib CaloIdentifier AthenaBaseComps CxxUtils StoreGateLib GeneratorObjects LArSimEvent MagFieldConditions egammaEvent GeoModelUtilities)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -17,6 +17,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "TauAnalysisTools/ITauTruthMatchingTool.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTau/TauJetContainer.h"
 
 /**
@@ -38,6 +39,15 @@ namespace DerivationFramework {
          {this, "TauContainerName", "TauJets", "ReadHandleKey for input TauJetContainer"};
 
       ToolHandle < TauAnalysisTools::ITauTruthMatchingTool > m_tTauTruthMatchingTool{this, "TauTruthMatchingTool", "TauAnalysisTools::TauTruthMatchingTool"};
+
+      SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_isTruthMatchedKey
+         {this, "IsTruthMatchedKey", m_tauKey, "IsTruthMatched", "WriteDecorHandleKey for IsTruthMatched decoration"};
+
+      SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_truthJetLinkKey
+         {this, "TruthJetLinkKey", m_tauKey, "truthJetLink", "WriteDecorHandleKey for truthJetLink decoration"};
+
+      SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_truthParticleLinkKey
+         {this, "TruthParticleLinkKey", m_tauKey, "truthParticleLink", "WriteDecorHandleKey for truthParticleLink decoration"};
 
   };
 }

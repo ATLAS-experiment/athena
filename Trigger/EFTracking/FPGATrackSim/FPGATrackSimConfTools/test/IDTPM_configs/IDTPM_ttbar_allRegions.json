@@ -1,6 +1,5 @@
 
 {
-
     "TrkAnaEF" : {
         "enabled" : true,
         "TestType"  : "EFTrigger",
@@ -19,7 +18,7 @@
 
     },
     "TrkAnaOffl" : {
-        "enabled" : true,
+        "enabled" : false,
         "TestType"  : "Offline",
         "RefType"   : "Truth",
         "MatchingType"  : "TruthMatch",
@@ -34,7 +33,7 @@
         "truthMaxQoPT"  : 0.001
     },
     "TrkAnaDoubleRatio" : {
-        "enabled" : true,
+        "enabled" : false,
         "TestType"  : "EFTrigger",
         "RefType"   : "Offline",
         "TrigTrkKey": "FPGATrackParticles",

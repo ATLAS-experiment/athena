@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigmuCombHypoAlg.h"
+
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "AthViews/ViewHelper.h"
 
 using namespace TrigCompositeUtils; 
@@ -75,7 +77,7 @@ StatusCode TrigmuCombHypoAlg::execute(const EventContext& context) const
       TrigCompositeUtils::linkToPrevious( newd, previousDecision, context);
 
       //set roi link (to use same roi in EF CB step)
-      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(newd, "roi");
+      auto roiLink = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(context, newd, "roi");
       newd->setObjectLink(m_roiLinkName.value(), roiLink.link);
 
       // DEBUG

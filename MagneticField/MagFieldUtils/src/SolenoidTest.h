@@ -33,7 +33,7 @@ class SolenoidTest : public AthAlgorithm {
  public:
   SolenoidTest(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
 
  private:
   // Read Magnetic Field

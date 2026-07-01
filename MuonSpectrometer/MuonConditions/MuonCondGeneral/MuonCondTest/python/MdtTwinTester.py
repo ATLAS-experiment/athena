@@ -10,7 +10,8 @@ def MdtTwinCablingTestCfg(flags, name="MdtTwinMappingTestAlg", **kwargs):
 
 
 if __name__ == "__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
     parser.add_argument("--cablingJSON", help="Location of the twin tube cabling file to test", type=str, default="")
     parser.set_defaults(nEvents = 1)

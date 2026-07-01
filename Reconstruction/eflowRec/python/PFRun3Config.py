@@ -82,7 +82,7 @@ def PFCfg(inputFlags,**kwargs):
     result.merge(PFTrackSelectorAlgCfg(inputFlags,"PFTrackSelector",useCaching))
 
     from eflowRec.PFCfg import getOfflinePFAlgorithm
-    result.merge(getOfflinePFAlgorithm(inputFlags))    
+    result.merge(getOfflinePFAlgorithm(inputFlags, **kwargs))    
 
     from eflowRec.PFCfg import getChargedFlowElementCreatorAlgorithm,getNeutralFlowElementCreatorAlgorithm,getLCNeutralFlowElementCreatorAlgorithm
     result.addEventAlgo(getChargedFlowElementCreatorAlgorithm(inputFlags,""))
@@ -151,7 +151,9 @@ def PFOClusterMLCorrectionAlgorithmBuilder(inputFlags,spec):
     correctionTool_cfg = getNeutralPFOClusterMLCorrectionToolCfg(
         inputFlags,
         toolName = "NeutralPFOClusterMLCorrectionTool",
-        clusterMLCorrectedEnergyDecorationKey = "clusterE_ML"
+        ClusterMLCorrectedEnergyDecorationKey = "CaloCalTopoClusters.clusterE_ML",
+        MaxAllowedChargedCorrectionFraction = 0.001,
+        MinAllowedEMEnergyMeV = 300
     )
     alg.PFOContainerCorrectionTool = result.popToolsAndMerge(correctionTool_cfg)
 

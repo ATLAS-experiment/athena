@@ -9,6 +9,10 @@
  **/
 
 
+/// We Don't need these "non-best" matcher versions now 
+
+
+#if 0
 
 #ifndef TrigInDetAnalysisUtils_Associator_DeltaR_H
 #define TrigInDetAnalysisUtils_Associator_DeltaR_H
@@ -24,10 +28,7 @@
 
 
 
-/// We Don't need these "non-best" matcher versions now 
 
-
-#if 0
 
 class Associator_DeltaR : public TrackAssociator {
 
@@ -84,6 +85,7 @@ private:
   double m_deltaR2;
   
 };
-#endif
 
 #endif  // TrigInDetAnalysisUtils_Associator_DeltaR_H
+
+#endif

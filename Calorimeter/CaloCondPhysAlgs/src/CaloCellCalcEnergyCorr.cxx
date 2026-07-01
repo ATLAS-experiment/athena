@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloCellCalcEnergyCorr.cxx 
@@ -68,27 +68,13 @@ CaloCellCalcEnergyCorr::HVData::HVData (const LArHVManager& manager,
 
 
 CaloCellCalcEnergyCorr::CaloCellCalcEnergyCorr( const std::string& name, 
-						ISvcLocator* pSvcLocator ) : 
-  AthAlgorithm( name, pSvcLocator ),
-  m_larem_id(nullptr),
-  m_larhec_id(nullptr),
-  m_larfcal_id(nullptr)
+						ISvcLocator* pSvcLocator ):
+  AthAlgorithm( name, pSvcLocator )
 {
-  declareProperty("Folder",m_folder="/LAR/CellCorrOfl/EnergyCorr");
-  std::vector<int> ivec; ivec.push_back(-1);
-  declareProperty("CaloSamples",m_calosample=ivec);
-  std::vector<float> fvec; fvec.push_back(1.0);
-  declareProperty("SampleValues",m_value=fvec);
-  std::vector<int> iivec; iivec.push_back(-1);
-  declareProperty("HVLines",m_hvlines=iivec);
-  std::vector<float> ffvec; ffvec.push_back(1.0);
-  declareProperty("HVvalues",m_hvvalue=ffvec);
 }
-
 
 CaloCellCalcEnergyCorr::~CaloCellCalcEnergyCorr()
 = default;
-
 
 StatusCode CaloCellCalcEnergyCorr::initialize()
 {
@@ -122,7 +108,7 @@ StatusCode CaloCellCalcEnergyCorr::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CaloCellCalcEnergyCorr::execute()
+StatusCode CaloCellCalcEnergyCorr::execute(const EventContext& /*ctx*/)
 {  
   return StatusCode::SUCCESS;
 }

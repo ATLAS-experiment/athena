@@ -238,7 +238,7 @@ def DQWebDisplay( inputFilePath, runAccumulating, c ):
 
             if (doUpload):
                 print('isESn?', isESn)
-                _local_apply(hancool, (int(rN),outputHanResultsDir,c.dbConnection,isESn))
+                _local_apply(hancool, (int(rN),outputHanResultsDir,c.dbConnection,isESn,stream,amitag))
     
     ## Archive han results - 090422 : PUEO
     if c.server != []:

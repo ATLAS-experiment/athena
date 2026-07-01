@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/Bootstrap.h"
@@ -40,9 +40,15 @@ TgcRdoContainer::idToHash(unsigned int id)
 }
 
 // Class ID
-const CLID& TgcRdoContainer::classID()
+CLID TgcRdoContainer::classID()
 {
   return ClassID_traits<TgcRdoContainer>::ID();       
+}
+
+const CLID& TgcRdoContainer::clID() const
+{
+  static const CLID cid = classID();
+  return cid;
 }
 
 const TgcRdoIdHash&

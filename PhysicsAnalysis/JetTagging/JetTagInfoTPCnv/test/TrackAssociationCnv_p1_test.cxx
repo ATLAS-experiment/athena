@@ -15,7 +15,6 @@
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <cassert>
 #include <iostream>
 
@@ -60,7 +59,6 @@ void testit (const Analysis::TrackAssociation& trans1)
 void test1 ATLAS_NOT_THREAD_SAFE (SGTest::TestStore* store)
 {
   std::cout << "test1\n";
-  (void)Gaudi::Hive::currentContext();
   Analysis::TrackAssociation trans0a ("name0");
   Analysis::TrackAssociation trans0b ("name1");
   Athena::getMessageSvc();

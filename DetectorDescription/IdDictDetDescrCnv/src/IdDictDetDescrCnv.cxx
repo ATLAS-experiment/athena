@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -255,7 +255,7 @@ long int IdDictDetDescrCnv::storageType() {
 }
 
 //--------------------------------------------------------------------
-const CLID &IdDictDetDescrCnv::classID() {
+CLID IdDictDetDescrCnv::classID() {
     return ClassID_traits<IdDictManager>::ID();
 }
 

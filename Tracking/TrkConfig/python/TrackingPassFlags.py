@@ -154,6 +154,7 @@ def createITkTrackingPassFlags():
     icf.addFlag("maxPrimaryImpactSeed"      , 2.0 * Units.mm)
     icf.addFlag("maxZImpactSeed"            , 200.0 * Units.mm)
     icf.addFlag("useSeedFilter"             , True)
+    icf.addFlag("useHoughVertexFilter"      , False) # experimental, keep False
 
     # --- cluster cuts
     icf.addFlag("minClusters"             , lambda pcf :
@@ -212,7 +213,6 @@ def createITkTrackingPassFlags():
     # Acts -> Athena EDM converters
     icf.addFlag("doActsToAthenaCluster", False)
     icf.addFlag("doActsToAthenaSpacePoint", False)
-    icf.addFlag("doActsToAthenaSeed", False)
     icf.addFlag("doActsToAthenaTrack", False)
     icf.addFlag("doActsToAthenaResolvedTrack", False)
 
@@ -230,9 +230,6 @@ def createITkTrackingPassFlags():
     #     Enable for other passes with dedicated output container, if desired.
     icf.addFlag("storeTrackSeeds", False)
     icf.addFlag("storeSiSPSeededTracks", False)
-
-    # --- flags for ACTS tracking
-    icf.addFlag("isSecondaryPass", False)
 
     return icf
 
@@ -992,6 +989,7 @@ def createTRTStandaloneTrackingPassFlags():
     icf.doBremRecoverySi        = False
 
     return icf
+
 
 #####################################################################
 

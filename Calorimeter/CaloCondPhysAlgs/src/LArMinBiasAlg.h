@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -44,8 +44,7 @@ class ITHistSvc;
     ~LArMinBiasAlg();
     
     virtual StatusCode  initialize() override;
-    virtual StatusCode  execute() override;
-    virtual StatusCode  finalize() override;
+    virtual StatusCode  execute(const EventContext& ctx) override;
     virtual StatusCode  stop() override;
 
     
@@ -57,10 +56,10 @@ class ITHistSvc;
   //---------------------------------------------------
   // Member variables
   //---------------------------------------------------
-  int m_datasetID_lowPt;
-  int m_datasetID_highPt;
-  double m_weight_lowPt;
-  double m_weight_highPt;
+  Gaudi::Property<int> m_datasetID_lowPt{this, "datasetID_lowPt", 119995};
+  Gaudi::Property<int> m_datasetID_highPt{this, "datasetID_highPt", 119996};
+  Gaudi::Property<double> m_weight_lowPt{this, "weight_highPt", 39.8606};
+  Gaudi::Property<double> m_weight_highPt{this, "weight_lowPt", 0.138128};
   SG::ReadCondHandleKey<LArMCSym> m_mcSymKey
   { this, "MCSymKey", "LArMCSym", "SG Key of LArMCSym object" };
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
@@ -101,20 +100,20 @@ class ITHistSvc;
 
 
   struct CellInfo {
-      int layer;
-      int region;
-      int ieta;
-      float eta;
-      float phi;
-      Identifier identifier;
-      double nevt;
-      double average;
-      double rms;
-      double offset;
+      int layer{};
+      int region{};
+      int ieta{};
+      float eta{};
+      float phi{};
+      Identifier identifier{};
+      double nevt{};
+      double average{};
+      double rms{};
+      double offset{};
   };
   std::vector<CellInfo> m_CellList;
   std::vector<int> m_symCellIndex;
-  float m_first;
+  float m_first{true};
   int m_ncell = 0;
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EvtInfo", "EventInfo", "EventInfo name"};
   StringArrayProperty m_inputKeys{this, "InputHitContainers", {"LArHitEMB", "LArHitEMEC", "LArHitHEC", "LArHitFCAL"}, 

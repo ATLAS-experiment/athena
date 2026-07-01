@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************************************************
@@ -14,6 +14,8 @@
 //
 //*************************************************************************************
 
+#include "CalibHitIDCheck.h"
+
 //Gaudi Includes
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -22,41 +24,16 @@
 
 // Calo include
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
-#include "CaloCalibHitRec/CalibHitIDCheck.h"
 
 #include "AtlasDetDescr/AtlasDetectorID.h" 
 
-#include <iostream>
-
-
 // Constructor & destructor
 CalibHitIDCheck::CalibHitIDCheck(const std::string& name, ISvcLocator* pSvcLocator)
-  :AthAlgorithm(name, pSvcLocator), 
-   m_Merge(false),
-   m_LArDMHitCnt(nullptr),
-   m_ActiveHitCnt(nullptr),
-   m_InactiveHitCnt(nullptr),
-   m_TileActiveHitCnt(nullptr),
-   m_TileInactiveHitCnt(nullptr),
-   m_TileDMHitCnt(nullptr),
-   m_id_helper(nullptr)
+  : AthAlgorithm(name, pSvcLocator)
 {
-  declareProperty("InactiveCalibHitCnt", m_larInactiveHitContainer = "LArCalibrationHitInactive");    
-  declareProperty("ActiveCalibHitCnt",   m_larActiveHitContainer = "LArCalibrationHitActive");
-  declareProperty("LArDMCalibHitCnt",    m_larDMHitContainer = "LArCalibrationHitDeadMaterial"); 
-  declareProperty("TileActiveHitCnt",    m_tileActiveHitContainer = "TileCalibHitActiveCell");
-  declareProperty("TileInactiveHitCnt",  m_tileInactiveHitContainer = "TileCalibHitInactiveCell");
-  declareProperty("TileDMCalibHitCnt",   m_tiledmHitContainer = "TileCalibHitDeadMaterial");
-
-  declareProperty("Check",    m_Check    = true);
-  declareProperty("ShowAll",  m_ShowAll  = false);  
-  declareProperty("CheckAll", m_CheckAll = false);
-
 }
 
 CalibHitIDCheck::~CalibHitIDCheck() = default;
-
-
 
 /////////////////   INITIALIZE   /////////////////////
 StatusCode CalibHitIDCheck::initialize() 
@@ -70,7 +47,7 @@ StatusCode CalibHitIDCheck::initialize()
 
 
 ////////////////   EXECUTE   //////////////////////
-StatusCode CalibHitIDCheck::execute()
+StatusCode CalibHitIDCheck::execute(const EventContext& /*ctx*/)
 {
   ATH_CHECK( evtStore()->retrieve(m_LArDMHitCnt,        m_larDMHitContainer) );
   ATH_CHECK( evtStore()->retrieve(m_ActiveHitCnt,       m_larActiveHitContainer) );
@@ -110,19 +87,6 @@ StatusCode CalibHitIDCheck::execute()
   ATH_MSG_DEBUG("execute() completed successfully" );
   return StatusCode::SUCCESS;
 }
-
-
-
-
-///////////////   FINALIZE   ////////////////////
-StatusCode CalibHitIDCheck::finalize()
-{
-  ATH_MSG_INFO("finalize() successfully" );
-  return StatusCode::SUCCESS;
-}
-
-
-
 
 
 //**********************************************************
@@ -489,9 +453,9 @@ void CalibHitIDCheck::check_all_cnts() {
 
   for (size_t i=0; i < m_id_vec.size(); i++) {
 
-    ID::iterator it_end = std::remove (m_id_vec.begin()+i+1,
-                                       m_id_vec.end(),
-                                       m_id_vec[i]);
+    auto it_end = std::remove (m_id_vec.begin()+i+1,
+			       m_id_vec.end(),
+			       m_id_vec[i]);
     int same = m_id_vec.end() - it_end;
     m_id_vec.erase (it_end, m_id_vec.end());
 

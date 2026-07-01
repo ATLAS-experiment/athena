@@ -20,19 +20,14 @@
 namespace met {
 
   using namespace xAOD;
-  static const SG::AuxElement::Decorator<std::vector<ElementLink<IParticleContainer> > > dec_softConst("softConstituents");
+  static const SG::Decorator<std::vector<ElementLink<IParticleContainer> > > dec_softConst("softConstituents"); // TODO Should this be a set of WriteDecorHandles?
 
   // Constructors
   ////////////////
   METSoftAssociator::METSoftAssociator(const std::string& name) :
     AsgTool(name),
-    METAssociator(name),
-    m_lcmodclus_key("LCOriginTopoClusters"),
-    m_emmodclus_key("EMOriginTopoClusters")
+    METAssociator(name)
   {
-    declareProperty("DecorateSoftConst", m_decorateSoftTermConst=false);
-    declareProperty("LCModClusterKey",   m_lcmodclus_key);
-    declareProperty("EMModClusterKey",   m_emmodclus_key);
   }
 
   // Destructor
@@ -60,7 +55,7 @@ namespace met {
 
   // executeTool
   ////////////////
-  StatusCode METSoftAssociator::executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const
+  StatusCode METSoftAssociator::executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const
   {
 
     // Add MET terms to the container
@@ -72,7 +67,7 @@ namespace met {
 
     ATH_MSG_VERBOSE ("In execute: " << name() << "...");
     met::METAssociator::ConstitHolder constits;
-    if (retrieveConstituents(constits).isFailure()) {
+    if (retrieveConstituents(constits, ctx).isFailure()) {
       ATH_MSG_WARNING("Unable to retrieve constituent containers");
       return StatusCode::FAILURE;
     }
@@ -92,7 +87,7 @@ namespace met {
           if (pfo->isCharged()) { // Charged PFOs
             // We set a small -ve pt for cPFOs that were rejected
             // by the ChargedHadronSubtractionTool
-            const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");        
+            const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");        
             if (PVMatchedAcc(*pfo) && ( !m_cleanChargedPFO || isGoodEoverP(static_cast<const xAOD::TrackParticle*>(pfo->chargedObject(0))) ) ) {
               // For the TST, we add the track pt, as this need not be
               // corrected for nearby energy in the calo
@@ -129,7 +124,7 @@ namespace met {
           if (pfo->isCharged()) { // Charged PFOs
             // We set a small -ve pt for cPFOs that were rejected
             // by the ChargedHadronSubtractionTool
-            const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");        
+            const static SG::ConstAccessor<char> PVMatchedAcc("matchedToPV");        
             if (PVMatchedAcc(*pfo) && ( !m_cleanChargedPFO || isGoodEoverP(pfo->track(0)) ) ) {
               // For the TST, we add the track pt, as this need not be
               // corrected for nearby energy in the calo
@@ -165,8 +160,8 @@ namespace met {
         dec_softConst(*metCoreCl) = std::vector<ElementLink<IParticleContainer> >();
         dec_softConst(*metCoreCl).reserve(uniqueClusters->size());
       }
-      SG::ReadHandle<xAOD::CaloClusterContainer> lctc(m_lcmodclus_key);
-      SG::ReadHandle<xAOD::CaloClusterContainer> emtc(m_emmodclus_key);
+      SG::ReadHandle<xAOD::CaloClusterContainer> lctc(m_lcmodclus_key, ctx);
+      SG::ReadHandle<xAOD::CaloClusterContainer> emtc(m_emmodclus_key, ctx);
 
       for(const auto *const cl : *uniqueClusters) {
         if (cl->e()>FLT_MIN) {

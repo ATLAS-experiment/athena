@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -9,8 +9,8 @@
  *      Author: zhangrui
  */
 
-#ifndef EFLOWCALOOBJECTMAKER_H_
-#define EFLOWCALOOBJECTMAKER_H_
+#ifndef EFLOWREC_EFLOWCALOOBJECTMAKER_H
+#define EFLOWREC_EFLOWCALOOBJECTMAKER_H
 
 #include <vector>
 
@@ -41,4 +41,4 @@ private:
 
 };
 
-#endif /* EFLOWCALOOBJECTMAKER_H_ */
+#endif /* EFLOWREC_EFLOWCALOOBJECTMAKER_H */

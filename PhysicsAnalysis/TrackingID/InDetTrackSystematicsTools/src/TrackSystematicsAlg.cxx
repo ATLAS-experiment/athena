@@ -5,6 +5,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "TrackSystematicsAlg.h"
+#include "xAODTracking/TrackingPrimitives.h"
 
 namespace InDet {
   TrackSystematicsAlg::TrackSystematicsAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
@@ -46,7 +47,7 @@ namespace InDet {
       bool passFilter = false;
 
       // LRT track
-      if(patternReco.test(49)) {
+      if(patternReco.test(xAOD::SiSpacePointsSeedMaker_LargeD0)) {
         passFilter = m_trackFilterToolLRT->accept(track);
       }
       // standard track

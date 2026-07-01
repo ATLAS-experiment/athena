@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1RESULTBYTESTREAM_ROIBRESULTBYTESTREAMCNV_ICC
@@ -35,7 +35,7 @@ RoIBResultByteStreamCnv< ROBF >::RoIBResultByteStreamCnv( ISvcLocator* svcloc )
  * is for (RoIBResult).
  */
 template< class ROBF >
-const CLID& RoIBResultByteStreamCnv< ROBF >::classID(){
+CLID RoIBResultByteStreamCnv< ROBF >::classID(){
   return ClassID_traits< ROIB::RoIBResult >::ID();
 }
 
@@ -129,7 +129,7 @@ StatusCode RoIBResultByteStreamCnv< ROBF >::createRep( DataObject* pObj, IOpaque
   // the tool retrieves the RoIBResult from event store using a ReadHandle which ensures correct
   // data dependencies and integration with other uses of the same interface.
   std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*> vrobf;
-  ATH_CHECK(m_tool->convertToBS(vrobf, Gaudi::Hive::currentContext())); // TODO: find a way to avoid ThreadLocalContext
+  ATH_CHECK(m_tool->convertToBS(vrobf, nullptr, Gaudi::Hive::currentContext())); // TODO: find a way to avoid ThreadLocalContext
   ATH_MSG_DEBUG("Created " << vrobf.size() << " ROB Fragments");
   for (OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment* rob : vrobf) {
     // Set LVL1 Trigger Type from the full event

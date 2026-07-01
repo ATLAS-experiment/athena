@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataModelTestDataCommon/src/xAODTestShallowCopy.cxx
@@ -65,7 +65,7 @@ StatusCode xAODTestShallowCopy::initialize()
   ATH_CHECK( m_cinfoReadKeyBase.initialize( !m_cinfoReadKeyBase.empty() ) );
   ATH_CHECK( m_cinfoWriteKeyBase.initialize( !m_cinfoReadKeyBase.empty() ) );
   ATH_CHECK( m_cinfoDecorDepsBase.initialize( m_cinfoReadKeyBase, m_cinfoWriteKeyBase, !m_cinfoReadKeyBase.empty() ) );
-  
+
   if (m_ctrigReadKey.empty()) {
     m_ctrigWriteKey = "";
     m_ctrigAnInt10Key = "";
@@ -88,47 +88,44 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
   if (!m_cvecReadKey.empty()) {
     SG::ReadHandle<CVec> vec (m_cvecReadKey, ctx);
-    auto ret = xAOD::shallowCopyContainer (*vec);
+    auto ret = xAOD::shallowCopy (*vec, ctx);
 
     SG::WriteHandle<DMTest::CVec> copy (m_cvecWriteKey, ctx);
-    ATH_CHECK( copy.record (std::unique_ptr<DMTest::CVec>(ret.first),
-                            std::unique_ptr<xAOD::ShallowAuxContainer>(ret.second)) );
+    ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
 
     ATH_CHECK( m_cvecDecorDeps.linkDecors (m_cvecReadKey, ctx) );
 
     SG::WriteDecorHandle<DMTest::CVec, int> anInt10 (m_cvecAnInt10Key, ctx);
-    for (C* c : *ret.first)
+    for (C* c : *copy)
       anInt10(*c) = count * 20000 + c->anInt() * 100;
   }
 
   if (!m_cvecWDReadKey.empty()) {
     SG::ReadHandle<CVecWithData> vec (m_cvecWDReadKey, ctx);
-    auto ret = xAOD::shallowCopyContainer (*vec);
+    auto ret = xAOD::shallowCopy (*vec, ctx);
     ret.first->meta1 = vec->meta1;
 
     SG::WriteHandle<DMTest::CVecWithData> copy (m_cvecWDWriteKey, ctx);
-    ATH_CHECK( copy.record (std::unique_ptr<DMTest::CVecWithData>(ret.first),
-                            std::unique_ptr<xAOD::ShallowAuxContainer>(ret.second)) );
+    ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
 
     ATH_CHECK( m_cvecWDDecorDeps.linkDecors (m_cvecWDReadKey, ctx) );
 
     SG::WriteDecorHandle<DMTest::CVecWithData, int> anInt10 (m_cvecWDAnInt10Key, ctx);
-    for (C* c : *ret.first)
+    for (C* c : *copy)
       anInt10(*c) = count * 20000 + c->anInt() * 100;
   }
 
   if (!m_cinfoReadKey.empty()) {
     SG::ReadHandle<DMTest::C> cinfo (m_cinfoReadKey, ctx);
-    auto ret = xAOD::shallowCopyObject (*cinfo);
+    auto ret = xAOD::shallowCopy (*cinfo, ctx);
 
     SG::WriteHandle<DMTest::C> copy (m_cinfoWriteKey, ctx);
-    ATH_CHECK( copy.record (std::unique_ptr<DMTest::C>(ret.first),
-                            std::unique_ptr<xAOD::ShallowAuxInfo>(ret.second)) );
+    ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
 
     ATH_CHECK( m_cinfoDecorDeps.linkDecors (m_cinfoReadKey, ctx) );
 
     SG::WriteDecorHandle<DMTest::C, int> anInt10 (m_cinfoAnInt10Key, ctx);
-    anInt10(*ret.first) = count * 20000 + ret.first->anInt() * 200;
+    anInt10(*copy) = count * 20000 + copy->anInt() * 200;
   }
 
   if (!m_cinfoReadKeyBase.empty()) {
@@ -137,16 +134,15 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
   if (!m_ctrigReadKey.empty()) {
     SG::ReadHandle<CVec> ctrig (m_ctrigReadKey, ctx);
-    auto ret = xAOD::shallowCopyContainer (*ctrig);
+    auto ret = xAOD::shallowCopy (*ctrig, ctx);
 
     SG::WriteHandle<DMTest::CVec> copy (m_ctrigWriteKey, ctx);
-    ATH_CHECK( copy.record (std::unique_ptr<DMTest::CVec>(ret.first),
-                            std::unique_ptr<xAOD::ShallowAuxContainer>(ret.second)) );
+    ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
 
     ATH_CHECK( m_ctrigDecorDeps.linkDecors (m_ctrigReadKey, ctx) );
 
     SG::WriteDecorHandle<DMTest::CVec, int> anInt10 (m_ctrigAnInt10Key, ctx);
-    for (C* c : *ret.first)
+    for (C* c : *copy)
       anInt10(*c) = count * 20000 + c->anInt() * 300;
   }
 
@@ -155,4 +151,3 @@ StatusCode xAODTestShallowCopy::execute (const EventContext& ctx) const
 
 
 } // namespace DMTest
-

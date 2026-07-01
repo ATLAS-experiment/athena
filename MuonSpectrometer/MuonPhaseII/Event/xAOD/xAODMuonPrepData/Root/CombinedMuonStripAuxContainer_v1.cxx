@@ -12,6 +12,7 @@ CombinedMuonStripAuxContainer_v1::CombinedMuonStripAuxContainer_v1()
     : AuxContainerBase() {
   AUX_VARIABLE(MuonStripLink1);
   AUX_VARIABLE(MuonStripLink2);
-
+  AUX_MEASUREMENTVAR(localPosition, 2)
+  AUX_MEASUREMENTVAR(localCovariance, 2)
 }
 }  // namespace xAOD

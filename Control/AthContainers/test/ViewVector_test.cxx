@@ -15,7 +15,6 @@
 
 
 #undef NDEBUG
-#include <boost/preprocessor/stringize.hpp>
 #include "AthContainers/ViewVector.h"
 #include "AthContainers/ConstDataVector.h"
 #include "AthContainers/DataVector.h"

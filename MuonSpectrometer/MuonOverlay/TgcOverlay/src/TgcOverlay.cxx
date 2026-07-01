@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Andrei Gaponenko <agaponenko@lbl.gov>, 2006, 2007
@@ -25,7 +25,7 @@ StatusCode TgcOverlay::initialize()
 {
   ATH_MSG_DEBUG("Initializing...");
 
-  ATH_CHECK(m_bkgInputKey.initialize());
+  ATH_CHECK(m_bkgInputKey.initialize(!m_bkgInputKey.empty()));
   ATH_MSG_VERBOSE("Initialized ReadHandleKey: " << m_bkgInputKey );
   ATH_CHECK(m_signalInputKey.initialize());
   ATH_MSG_VERBOSE("Initialized ReadHandleKey: " << m_signalInputKey );
@@ -39,15 +39,19 @@ StatusCode TgcOverlay::initialize()
 StatusCode TgcOverlay::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("TgcOverlay::execute() begin");
 
+  const TgcDigitContainer *bkgContainerPtr = nullptr;
+  if (!m_bkgInputKey.empty()) {
+    SG::ReadHandle<TgcDigitContainer> bkgContainer (m_bkgInputKey, ctx);
+    if (!bkgContainer.isValid()) {
+      ATH_MSG_ERROR("Could not get background TgcDigitContainer called " << bkgContainer.name() << " from store " << bkgContainer.store());
+      return StatusCode::FAILURE;
+    }
+    bkgContainerPtr = bkgContainer.cptr();
 
-  SG::ReadHandle<TgcDigitContainer> bkgContainer (m_bkgInputKey, ctx);
-  if (!bkgContainer.isValid()) {
-    ATH_MSG_ERROR("Could not get background TgcDigitContainer called " << bkgContainer.name() << " from store " << bkgContainer.store());
-    return StatusCode::FAILURE;
+    ATH_MSG_DEBUG("Found background TgcDigitContainer called " << bkgContainer.name() << " in store " << bkgContainer.store());
+    ATH_MSG_DEBUG("TGC Background = " << Overlay::debugPrint(bkgContainer.cptr()));
+    ATH_MSG_VERBOSE("TGC background has digit_size " << bkgContainer->digit_size());
   }
-  ATH_MSG_DEBUG("Found background TgcDigitContainer called " << bkgContainer.name() << " in store " << bkgContainer.store());
-  ATH_MSG_DEBUG("TGC Background = " << Overlay::debugPrint(bkgContainer.cptr()));
-  ATH_MSG_VERBOSE("TGC background has digit_size " << bkgContainer->digit_size());
 
   SG::ReadHandle<TgcDigitContainer> signalContainer(m_signalInputKey, ctx);
   if (!signalContainer.isValid() ) {
@@ -59,7 +63,7 @@ StatusCode TgcOverlay::execute(const EventContext& ctx) const {
   ATH_MSG_VERBOSE("TGC signal has digit_size " << signalContainer->digit_size());
 
   SG::WriteHandle<TgcDigitContainer> outputContainer(m_outputKey, ctx);
-  ATH_CHECK(outputContainer.record(std::make_unique<TgcDigitContainer>(bkgContainer->size())));
+  ATH_CHECK(outputContainer.record(std::make_unique<TgcDigitContainer>(signalContainer->size())));
   if (!outputContainer.isValid()) {
     ATH_MSG_ERROR("Could not record output TgcDigitContainer called " << outputContainer.name() << " to store " << outputContainer.store());
     return StatusCode::FAILURE;
@@ -67,7 +71,7 @@ StatusCode TgcOverlay::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Recorded output TgcDigitContainer called " << outputContainer.name() << " in store " << outputContainer.store());
 
   // Do the actual overlay
-  ATH_CHECK(overlayMultiHitContainer(bkgContainer.cptr(), signalContainer.cptr(), outputContainer.ptr()));
+  ATH_CHECK(overlayMultiHitContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr()));
   ATH_MSG_DEBUG("TGC Result     = " << Overlay::debugPrint(outputContainer.cptr()));
 
 

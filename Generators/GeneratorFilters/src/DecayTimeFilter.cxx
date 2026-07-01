@@ -38,7 +38,7 @@ double DecayTimeFilter::tau(const HepMC::ConstGenParticlePtr& ptr) const {
     return (1000./299.792458) * (length * ptr->generated_mass() / calcmag(p));
 }
 
-StatusCode DecayTimeFilter::filterEvent() {
+StatusCode DecayTimeFilter::filterEvent(const EventContext& ctx) {
   int nPassPDG = 0;
   bool passed = true;
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
@@ -53,6 +53,6 @@ StatusCode DecayTimeFilter::filterEvent() {
        }
     }
   }
-  setFilterPassed((nPassPDG > 0) & passed);
+  setFilterPassed((nPassPDG > 0) & passed, ctx);
   return StatusCode::SUCCESS;
 }

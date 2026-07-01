@@ -23,7 +23,7 @@ StatusCode DerivationFramework::SkimmingToolExample::finalize()
 
 
 // The filter itself
-bool DerivationFramework::SkimmingToolExample::eventPassesFilter() const
+bool DerivationFramework::SkimmingToolExample::eventPassesFilter(const EventContext& /*ctx*/) const
 {
   ++m_ntot;
 
@@ -38,7 +38,7 @@ bool DerivationFramework::SkimmingToolExample::eventPassesFilter() const
   // Loop over muons, count up and set decision
   unsigned int nGoodMu{0};
   for (const xAOD::Muon* muon : *muons) {
-    if ( muon->muonType() == xAOD::Muon::Combined && muon->pt() > m_muonPtCut ) ++nGoodMu;
+    if ( muon->muonType() == xAOD::Muon::MuonType::Combined && muon->pt() > m_muonPtCut ) ++nGoodMu;
   }
   bool acceptEvent{false};
   if (nGoodMu >= m_nMuons) {

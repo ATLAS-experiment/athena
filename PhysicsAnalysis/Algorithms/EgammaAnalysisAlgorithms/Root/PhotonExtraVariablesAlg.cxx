@@ -20,12 +20,12 @@ namespace CP {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode PhotonExtraVariablesAlg::execute() {
+  StatusCode PhotonExtraVariablesAlg::execute(const EventContext& ctx) {
 
     for (const auto &sys : m_systematicsList.systematicsVector()) {
 
       const xAOD::PhotonContainer *photons = nullptr;
-      ANA_CHECK(m_photonsHandle.retrieve(photons, sys));
+      ANA_CHECK(m_photonsHandle.retrieve(photons, sys, ctx));
 
       for (const xAOD::Photon *photon : *photons) {
         int conversionType = photon->conversionType();

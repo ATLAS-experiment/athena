@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventDecisionAlg.cxx
@@ -65,7 +65,7 @@ StatusCode EventDecisionAlg::finalize()
 
 
 
-StatusCode EventDecisionAlg::execute()
+StatusCode EventDecisionAlg::execute(const EventContext& ctx)
 {
   // Simple status message at the beginning of each event execute,
   ATH_MSG_DEBUG ( "==> execute " << name() );
@@ -77,13 +77,13 @@ StatusCode EventDecisionAlg::execute()
   for ( const std::string& streamName : m_streamNames.value() ){
     // Ensure that the even passes if no stream name is given
     eventPasses = false;
-    eventPasses = m_decSvc->isEventAccepted(streamName);
+    eventPasses = m_decSvc->isEventAccepted(streamName, ctx);
     if (eventPasses){
       ATH_MSG_DEBUG("Got an event accept from stream name " << streamName);
       break;
     }
   }
-  this->setFilterPassed( eventPasses );
+  this->setFilterPassed( eventPasses, ctx );
   ATH_MSG_DEBUG("Event passes/fails: " << eventPasses );
 
   return StatusCode::SUCCESS;

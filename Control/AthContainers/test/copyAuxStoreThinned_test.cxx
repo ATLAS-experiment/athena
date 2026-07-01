@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -231,7 +231,7 @@ void test2()
   float* fptr = reinterpret_cast<float*> (src.getData (ftyp, 5, 5));
   std::vector<float>* fvptr = reinterpret_cast<std::vector<float>*> (src.getData (fvtyp, 5, 5));
 
-  // Fill some random valus
+  // Fill some random values
   for (int i=0; i < 5; i++) {
     fptr[i] = i + 0.512345;
     fvptr[i].push_back(i + 0.512345);
@@ -250,7 +250,7 @@ void test2()
   float* rfptr = reinterpret_cast<float*> (dst1.getData (ftyp, 5, 5));
   std::vector<float>* rfvptr = reinterpret_cast<std::vector<float>*> (dst1.getData (fvtyp, 5, 5));
 
-  // Instentiate a new compressor and check against the result
+  // Instantiate a new compressor and check against the result
   const CxxUtils::FloatCompressor fc( nmantissa );
   CxxUtils::FloatCompressor::floatint_t uni;
   uint32_t result{0};

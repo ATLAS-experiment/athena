@@ -18,13 +18,13 @@
 #ifndef  TRIGPARTICLETPCNV_TRIGL2BJETCONTAINER_CNV_TLP1_H
 #define  TRIGPARTICLETPCNV_TRIGL2BJETCONTAINER_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 
 #include "TrigParticleTPCnv/TrigL2BjetContainer_tlp1.h"
  
 #include "TrigParticleTPCnv/TrigL2BjetContainerCnv_p1.h"   
  
-class TrigL2BjetContainerCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigL2BjetContainerCnv_p1, TrigL2BjetContainer_tlp1 >
+class TrigL2BjetContainerCnv_tlp1 : public TopLevelTPConverter< TrigL2BjetContainerCnv_p1, TrigL2BjetContainer_tlp1 >
 {
  
  public:

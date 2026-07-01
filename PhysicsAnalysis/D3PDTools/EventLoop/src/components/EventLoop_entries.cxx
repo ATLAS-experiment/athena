@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026  CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,7 +18,7 @@
 #include <EventLoop/MemoryMonitorModule.h>
 #include <EventLoop/StopwatchModule.h>
 #include <EventLoop/PostClosedOutputsModule.h>
-#include <EventLoop/TEventModule.h>
+#include <EventLoop/EventModule.h>
 #include <EventLoop/TreeCacheModule.h>
 #include <EventLoop/WorkerConfigModule.h>
 
@@ -38,6 +38,6 @@ DECLARE_COMPONENT(EL::Detail::LeakCheckModule)
 DECLARE_COMPONENT(EL::Detail::MemoryMonitorModule)
 DECLARE_COMPONENT(EL::Detail::StopwatchModule)
 DECLARE_COMPONENT(EL::Detail::PostClosedOutputsModule)
-DECLARE_COMPONENT(EL::Detail::TEventModule)
+DECLARE_COMPONENT(EL::Detail::EventModule)
 DECLARE_COMPONENT(EL::Detail::TreeCacheModule)
 DECLARE_COMPONENT(EL::Detail::WorkerConfigModule)

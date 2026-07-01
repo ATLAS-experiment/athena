@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EGAMMAALGS_EMBREMCOLLECTIONBUILDER_H
@@ -127,7 +127,7 @@ private:
                     bool isRefitted) const;
 
   /** @brief Option to do truth*/
-  Gaudi::Property<bool> m_doTruth{ this, "DoTruth", false, "do truth" };
+  Gaudi::Property<bool> m_doTruth{ this, "doTruth", false, "do truth" };
 
   /** @brief Option to copy SCT holes estimation*/
   Gaudi::Property<bool> m_doSCT{ this, "useSCT", true, "do SCT" };

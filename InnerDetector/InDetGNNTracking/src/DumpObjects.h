@@ -57,7 +57,7 @@ public:
   ~DumpObjects() {}
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) override final;
   virtual StatusCode finalize() override final;
 
 private:
@@ -71,8 +71,6 @@ private:
   const InDetDD::SCT_DetectorManager *m_SCT_Manager{};
   int m_event{};
   int m_selected{};
-  ServiceHandle<IPartPropSvc> m_particlePropSvc;
-  const HepPDT::ParticleDataTable *m_particleDataTable{};
   std::string m_name;
 
   // ReadHandleKeys

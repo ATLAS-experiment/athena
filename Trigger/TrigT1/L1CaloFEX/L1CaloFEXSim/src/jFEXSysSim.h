@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -44,22 +44,18 @@ namespace LVL1 {
       It will need to interact with jTowers and produce the eTOBs
   */
 
-  class jFEXSysSim : public AthAlgTool, virtual public IjFEXSysSim {
+  class jFEXSysSim : public extends<AthAlgTool, IjFEXSysSim> {
     
   public:
-    
     /** Constructors */
-
-    jFEXSysSim(const std::string& type,const std::string& name,const IInterface* parent);
-    /** Destructor */
-    jFEXSysSim&& operator= (const jFEXSysSim& ) = delete;
+    using base_class::base_class;
 
     /** standard Athena-Algorithm method */
     virtual StatusCode initialize() override;
     /** standard Athena-Algorithm method */
     virtual StatusCode finalize  () override;
 
-    virtual StatusCode execute(jFEXOutputCollection* inputOutputCollection) override ;
+    virtual StatusCode execute(const EventContext& ctx, jFEXOutputCollection* inputOutputCollection) override ;
 
     virtual void init() const override;
 

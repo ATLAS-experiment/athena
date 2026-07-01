@@ -29,11 +29,11 @@ StatusCode SCT_FastDigitization::initialize() {
 // Execute method:
 //----------------------------------------------------------------------
 
-StatusCode SCT_FastDigitization::execute() {
+StatusCode SCT_FastDigitization::execute(const EventContext& ctx) {
 
   ATH_MSG_VERBOSE ( " SCT_FastDigitization : execute()" );
 
-  ATH_CHECK (m_digTool->processAllSubEvents(Gaudi::Hive::currentContext()));
+  ATH_CHECK (m_digTool->processAllSubEvents(ctx));
 
   ATH_MSG_VERBOSE ( " SCT_FastDigitization : m_digTool->processAllSubEvents()" );
 

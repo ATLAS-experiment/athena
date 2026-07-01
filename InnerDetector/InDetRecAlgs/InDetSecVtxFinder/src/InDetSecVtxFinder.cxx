@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                          InDetSecVtxFinder.cxx  -  Description
@@ -15,51 +15,34 @@
 // forward declares
 
 #include "xAODTracking/Vertex.h"
+#include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 // normal includes
 #include "TrkParticleBase/TrackParticleBaseCollection.h"
 #include "AthContainers/ConstAccessor.h"
+#include "GaudiKernel/EventContext.h"
+
 
 namespace InDet
 {
 
-  InDetSecVtxFinder::InDetSecVtxFinder ( const std::string &n, ISvcLocator *pSvcLoc )
-    : AthAlgorithm ( n, pSvcLoc ),
-      
+  InDetSecVtxFinder::InDetSecVtxFinder ( const std::string &n, ISvcLocator *pSvcLoc ) : AthAlgorithm ( n, pSvcLoc ),
       // for summary output at the end
       m_numEventsProcessed(0),
       m_totalNumVerticesWithoutDummy(0)
-
   {}
 
   
-
   StatusCode InDetSecVtxFinder::initialize()
   {
     /* Get the VertexFinderTool */
-    
-    ATH_CHECK(m_InclusiveVertexFinderTool.retrieve());
-    
     ATH_CHECK( m_AdaptiveMultiVertexFinderTool.retrieve());
-    
-    
-    /*Get the Vertex Merging Tool*/
-    if (m_doVertexMerging)
-    {
-      if(m_FinderTool == "AMVF"){ 
-        ATH_MSG_ERROR("AMVF finding and vertex merging is not possible");
-        return StatusCode::FAILURE;
-      }  
-      ATH_CHECK( m_VertexMergingTool.retrieve());
-      
-    }
 
     /**  There is no good motivation to do Vertex Collection Sorting yet **/
 
-    ATH_CHECK(m_inputTrackCollection.initialize(!m_useTrackParticles));
-    ATH_CHECK(m_inputTrackParticles.initialize(m_useTrackParticles));
+    ATH_CHECK(m_inputTrackParticles.initialize());
     ATH_CHECK(m_outputSecondaryVertices.initialize());
     ATH_CHECK(m_inputPrimaryVertices.initialize());
    
@@ -69,11 +52,10 @@ namespace InDet
   }
 
 
-  StatusCode InDetSecVtxFinder::execute()
+  StatusCode InDetSecVtxFinder::execute(const EventContext& ctx)
   {
     m_numEventsProcessed++;
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
 
     SG::WriteHandle<xAOD::VertexContainer> outputVertices (m_outputSecondaryVertices, ctx);
 
@@ -93,15 +75,7 @@ namespace InDet
         ATH_MSG_WARNING(" Illed Primary vertex, keeping privtx_z0 = 0  ");
       }
       else{
-        if(m_FinderTool == "ISV"){ 
-          m_InclusiveVertexFinderTool->setPriVtxPosition( privtx->position().x(), privtx->position().y(), privtx->position().z());
-        }
-        else if(m_FinderTool == "AMVF"){
-          m_AdaptiveMultiVertexFinderTool->setPrimaryVertexPosition( privtx->position().x(), privtx->position().y(), privtx->position().z());
-        } 
-        else{
-          ATH_MSG_WARNING("Please specify a valid FinderTool");
-        }
+	m_AdaptiveMultiVertexFinderTool->setPrimaryVertexPosition( privtx->position().x(), privtx->position().y(), privtx->position().z());
       }  
     }
 
@@ -110,46 +84,9 @@ namespace InDet
     }
 
     std::unique_ptr<Trk::VxSecVertexInfo> foundVrts;
-    if(m_useTrackParticles){
-      SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleCollection(m_inputTrackParticles, ctx);
-      if(trackParticleCollection.isValid()){
-        
-        if(m_FinderTool == "ISV"){
-          theXAODContainers = m_InclusiveVertexFinderTool->findVertex ( trackParticleCollection.cptr());
-        }
-        else if(m_FinderTool == "AMVF"){
-          theXAODContainers = m_AdaptiveMultiVertexFinderTool->findVertex ( trackParticleCollection.cptr());
-        }
-        else{
-          ATH_MSG_WARNING("Please specify a Finder Tool");
-        }
-        
-      }
-      else{
-        ATH_MSG_DEBUG("No TrackParticle Collection with key "<<m_inputTrackParticles.key()<<" exists in StoreGate. No Vertexing Possible");
-        return StatusCode::SUCCESS;
-      }
-    }
-    else{
-      SG::ReadHandle<TrackCollection> trackCollection(m_inputTrackCollection, ctx);
-      if(trackCollection.isValid()){
-        
-        if(m_FinderTool == "ISV"){
-          theXAODContainers = m_InclusiveVertexFinderTool->findVertex ( trackCollection.cptr() );
-        }
-        else{
-          ATH_MSG_WARNING("Please use ISV for vertex finding with trackCollection ");
-        }
-        
-        
-      }
-      else{
-        ATH_MSG_DEBUG("No Trk::Track Collection with key "<< m_inputTrackCollection.key()<<" exists in StoreGate. No Vertexing Possible");
-        return StatusCode::SUCCESS;
-      }
-
-    }
-  
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleCollection(m_inputTrackParticles, ctx);
+    ATH_CHECK(trackParticleCollection.isValid());
+    theXAODContainers = m_AdaptiveMultiVertexFinderTool->findVertex ( trackParticleCollection.cptr());
     
     // now  re-merge and resort the vertex container and store to SG
     xAOD::VertexContainer* myVertexContainer = nullptr;
@@ -158,13 +95,6 @@ namespace InDet
     ATH_MSG_DEBUG("Vertexing done, sorting the vertex container");
     if (theXAODContainers.first) {
       //sort xAOD::Vertex container
-
-      if( m_doVertexMerging && theXAODContainers.first->size() > 1) {
-        myVxContainers = m_VertexMergingTool->mergeVertexContainer( *theXAODContainers.first );
-        delete theXAODContainers.first; //also cleans up the aux store
-        delete theXAODContainers.second; 
-        theXAODContainers = myVxContainers;
-      }
       
       myVxContainers.first = theXAODContainers.first;
       myVxContainers.second = theXAODContainers.second;

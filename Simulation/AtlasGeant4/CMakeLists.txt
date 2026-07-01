@@ -3,6 +3,8 @@
 # Declare the package name:
 atlas_subdir( AtlasGeant4 )
 
+find_package( AtlasGeant4Utilities )
+
 # Generations correspond to topologically sorted list:
 # - https://its.cern.ch/jira/secure/attachment/282935/topologically_sorted_package_generations.txt
 set( AtlasGeant4_TARGET_OBJECTS
@@ -88,7 +90,6 @@ set( AtlasGeant4Component_TARGET_OBJECTS
     Monopole
     Quirks
     Sleptons
-    G4HiveEx
     G4DebuggingTools
     G4FastSimulation
     G4ProfilingTools
@@ -132,7 +133,6 @@ if( NOT SIMULATIONBASE )
 	LUCID_OpProcess
 	ZDC_SD
 	LArG4GenShowerLib
-	LArG4H6SD
 	G4AtlasTests
 	G4HitFilter
 	RHadrons
@@ -148,13 +148,22 @@ if( NOT SIMULATIONBASE )
 	TrkG4UserActions )
 endif()
 
+set( AtlasGeant4_DUMMY_SOURCES dummy.cc )
+
+# Determine if we are using CUDA in simulation
+# If we are, then we need to resolve device symbols in the final shared object(s).
+# It appears we need to add a .cu file to the build to force CMake to do this.
+if( ATLAS_BUILD_SIM_CUDA )
+  list( APPEND AtlasGeant4_DUMMY_SOURCES dummy.cu )
+endif()
+
 # Need to disable as-needed, as libraries are not necessarily
 # ordered correctly with respect to objects.
 atlas_disable_as_needed()
 
 # Shared library that only tests should link to, composed of library OBJECTs
 atlas_add_library( AtlasGeant4Lib
-                   dummy.cc
+                   ${AtlasGeant4_DUMMY_SOURCES}
                    SHARED
                    NO_PUBLIC_HEADERS
                    LINK_LIBRARIES ${AtlasGeant4_TARGET_OBJECTS} )
@@ -162,12 +171,20 @@ set_target_properties( AtlasGeant4Lib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${
 
 # Primary "big" component composed of all library/component OBJECT libs
 atlas_add_component( AtlasGeant4
-                     dummy.cc
+                     ${AtlasGeant4_DUMMY_SOURCES}
                      LINK_LIBRARIES "-Wl,--exclude-libs,ALL" ${AtlasGeant4Component_TARGET_OBJECTS} ${AtlasGeant4_TARGET_OBJECTS} )
 set_target_properties( AtlasGeant4 PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+
 if( ATLAS_GEANT4_USE_LTO AND CMAKE_COMPILER_IS_GNUCXX )
   # Suppress spurious warnings seen in the LTO build.
   set_target_properties( AtlasGeant4Lib PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized -Wno-uninitialized "  )
   set_target_properties( AtlasGeant4 PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized -Wno-uninitialized "  )
 endif()
+
+# Resolve device symbols if needed
+atlas_configure_g4_targets( TARGETS AtlasGeant4 AtlasGeant4Lib )
+
+# Install the CMake code from the package:
+atlas_install_generic( cmake/AtlasGeant4UtilitiesConfig.cmake
+   DESTINATION ${CMAKE_INSTALL_CMAKEDIR} )
 

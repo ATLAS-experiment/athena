@@ -1,23 +1,16 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_MMCluster_V1_H
 #define XAODMUONPREPDATA_VERSION_MMCluster_V1_H
 
-#include "GeoPrimitives/GeoPrimitives.h"
-#include "Identifier/Identifier.h"
-#include "Identifier/IdentifierHash.h"
-#include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
-#include "CxxUtils/CachedValue.h"
+#include "xAODMuonPrepData/versions/MuonMeasurement_v1.h"
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
 #include "MuonPrepRawData/MMPrepData.h"
-
-namespace MuonGMR4{
-    class MmReadoutElement;
-}
 
 namespace xAOD {
 
-class MMCluster_v1 : public UncalibratedMeasurement_v1 {
+class MMCluster_v1 : public MuonMeasurement_v1 {
 
    public:
     /// Default constructor
@@ -30,38 +23,38 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
         return xAOD::UncalibMeasType::MMClusterType;
     }
     /** @brief Returns the local measurement position as 3-vector */
-    Amg::Vector3D localMeasurementPos() const;
-    /** @brief: Returns the Athena identifier of the micro mega cluster 
-     *          It's constructed from the measurementHash & passed to the associated readoutElement */
-    const Identifier& identify() const;
-    unsigned int numDimensions() const override final { return 1; }
+    Amg::Vector3D localMeasurementPos() const override final;
+
+    std::uint8_t measuresPhi() const override final { return 0; }
+
+    unsigned numDimensions() const override final { return 1; }
 
     /** @brief  Returns the gas gap number to which the clsuter*/
-    uint8_t gasGap() const;
+    std::uint8_t gasGap() const;
 
-    void setGasGap(uint8_t gap);
+    void setGasGap(std::uint8_t gap);
     /** @brief returns the number of the central strip*/
-    uint16_t channelNumber() const;
-
-    void setChannelNumber(uint16_t strip);
+    std::uint16_t channelNumber() const;
+    /** @brief Set the channel number of the central strip */
+    void setChannelNumber(std::uint16_t strip);
     
     /** @brief Returns the hash of the measurement channel*/
-    IdentifierHash measurementHash() const;
+    IdentifierHash measurementHash() const override final;
     /** @brief Returns the hash of the associated layer (Needed for surface retrieval)*/
-    IdentifierHash layerHash() const;
+    IdentifierHash layerHash() const override final;
 
     /** @brief Returns the time  (ns). 
     The time is calibrated, i.e. it is in units of ns, after t0 subtraction.*/
-    uint16_t time() const;
+    std::uint16_t time() const;
     /** @brief Sets the TDC counts */
-    void setTime(uint16_t value);
+    void setTime(std::uint16_t value);
 
     /** @brief Returns the charge
      * The charge is calibrated, i.e. it is in units of electrons, after pedestal subtraction.
     */
-    uint32_t charge() const;
+    std::uint32_t charge() const;
     /** @brief Sets the calibrated charge */
-    void setCharge(uint32_t value);
+    void setCharge(std::uint32_t value);
 
     /** @brief Returns the Drift Distance*/
     float driftDist() const;
@@ -87,12 +80,12 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     void setQuality(Quality quality);
 
     /** @brief returns the list of strip numbers */
-    const std::vector<uint16_t>& stripNumbers() const;
-    void setStripNumbers(const std::vector<uint16_t>& stripNumbers);
+    const std::vector<std::uint16_t>& stripNumbers() const;
+    void setStripNumbers(const std::vector<std::uint16_t>& stripNumbers);
 
     /** @brief returns the list of times */
-    const std::vector<int16_t>& stripTimes() const;
-    void setStripTimes(const std::vector<int16_t>& stripTimes);
+    const std::vector<std::int16_t>& stripTimes() const;
+    void setStripTimes(const std::vector<std::int16_t>& stripTimes);
 
     /** @brief returns the list of charges */
     const std::vector<int>& stripCharges() const;
@@ -114,11 +107,7 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Retrieve the associated MmReadoutElement. 
         If the element has not been set before, it's tried to load it on the fly. 
         Exceptions are thrown if that fails as well */
-    const MuonGMR4::MmReadoutElement* readoutElement() const;
-
-    private:
-        CxxUtils::CachedValue<const MuonGMR4::MmReadoutElement *> m_readoutEle{};
-        CxxUtils::CachedValue<Identifier> m_identifier{};
+    const MuonGMR4::MmReadoutElement* readoutElement() const override final;
 };
 
 }  // namespace xAOD

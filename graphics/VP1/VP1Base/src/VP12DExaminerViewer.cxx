@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -25,9 +25,9 @@
 //____________________________________________________________________
 class VP12DExaminerViewer::Imp {
 public:
-  VP12DExaminerViewer * theclass;
-  Ui::VP12DExaminerViewerForm * ui;
-  bool singleviewmode;
+  VP12DExaminerViewer * theclass{};
+  Ui::VP12DExaminerViewerForm * ui{};
+  bool singleviewmode{};
 
   //Common init stuff for the constructors:
   void init1();//Before the views are setup in the stackwidget

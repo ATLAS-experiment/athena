@@ -6,7 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
+from AthenaConfiguration.Enums import MetadataCategory, LHCPeriod
 
 # Main algorithm config
 def STDM17SkimmingToolCfg(flags):
@@ -33,11 +33,15 @@ def STDM17SkimmingToolCfg(flags):
     lepTriggers = elTriggers+muTriggers
 
     #xAODStringSkimmingTool cannot handle electron trigger names, therefore need to use TriggerSkimmingTool
-    tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
+    tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
 
     trackRequirements = '(InDetTrackParticles.pt > 9.*GeV && '+tracks+' )'
     #b-jet requirement FixedCutBEff_85 of GN2v01
     jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV && log(AntiKt4EMPFlowJets.GN2v01_pb/(0.2*AntiKt4EMPFlowJets.GN2v01_pc+0.01*AntiKt4EMPFlowJets.GN2v01_ptau+(1.0-0.2-0.01)*AntiKt4EMPFlowJets.GN2v01_pu)) > -0.378)'
+    # Drop FTAG requirement for Run 4 as WPs are not available
+    # Should ultimately be reworked into a precomputed flag with an FTAG tool rather than hardcoding the FTAG discriminant cut
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        jetRequirementsTtbar = '(AntiKt4EMPFlowJets.pt > 18*GeV)'
 
     muonsRequirements = '(Muons.pt >= 24.*GeV) && (abs(Muons.eta) < 2.6) && (Muons.DFCommonMuonPassPreselection)'
     electronsRequirements = '(Electrons.pt > 24.*GeV) && (abs(Electrons.eta) < 2.6) && ((Electrons.Loose) || (Electrons.DFCommonElectronsLHLoose))'
@@ -155,7 +159,7 @@ def STDM17KernelCfg(flags, name='STDM17Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
 
     # Increased cut (w.r.t. R21) on abs(z0) for new TTVA working points
-    STDM17_thinning_expression = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    STDM17_thinning_expression = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     STDM17TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         flags,
         name                    = "STDM17TrackParticleThinningTool",
@@ -206,7 +210,7 @@ def STDM17KernelCfg(flags, name='STDM17Kernel', **kwargs):
 
     #CaloClusterThinning
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
-    selectionString = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    selectionString = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     STDM17CaloThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(flags,
                                                                            name                  = "STDM17CaloClusterThinning",
                                                                            StreamName            = kwargs['StreamName'],

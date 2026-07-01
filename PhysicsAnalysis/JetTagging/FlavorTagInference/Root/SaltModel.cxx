@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/SaltModel.h"
@@ -103,7 +103,7 @@ namespace FlavorTagInference {
         if (underscore_pos != std::string::npos) {
           model_names.insert(name.substr(0, underscore_pos));
         } else {
-          return std::string("UnknownModelName");
+          return std::string("");
         }
       }
       if (model_names.size() != 1) {
@@ -131,8 +131,7 @@ namespace FlavorTagInference {
   }
 
 
-  InferenceOutput SaltModel::runInference(
-    std::map<std::string, Inputs>& gnn_inputs) const {
+  InferenceOutput SaltModel::runInference(InputMap & gnn_inputs) const {
 
     std::vector<float> input_tensor_values;
 

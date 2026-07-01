@@ -6,16 +6,12 @@
 #include "../LArCellContFakeReader.h"
 #include "../AthenaPoolTestDataWriter.h"
 #include "../AthenaPoolTestDataReader.h"
-#include "../AthenaPoolTestAttrWriter.h"
-#include "../AthenaPoolTestAttrReader.h"
 #include "../EventInfoWriter.h"
 #include "../EventInfoReader.h"
 #include "../RDOReaderDoubleSelector.h"
 
 DECLARE_COMPONENT( AthenaPoolTestDataWriter )
 DECLARE_COMPONENT( AthenaPoolTestDataReader )
-DECLARE_COMPONENT( AthenaPoolTestAttrWriter )
-DECLARE_COMPONENT( AthenaPoolTestAttrReader )
 DECLARE_COMPONENT( InDetRawDataFakeWriter )
 DECLARE_COMPONENT( InDetRawDataFakeReader )
 DECLARE_COMPONENT( TrkTrackFakeWriter )

@@ -1,21 +1,23 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackFindingAlg.h"
 #include "src/AmbiguityResolutionAlg.h"
 #include "src/ScoreBasedAmbiguityResolutionAlg.h"
 #include "src/ReFitterAlg.h"
-#include "src/TrackToTrackParticleCnvAlg.h"
 #include "src/ProtoTrackCreationAndFitAlg.h"
 #include "src/TrackExtensionAlg.h"
 #include "src/ProtoTrackReportingAlg.h"
 #include "src/HGTDTrackExtensionAlg.h"
 #include "src/HGTDTruthTrackDecorationAlg.h"
-#include "src/ActsToXAODTrackConverterAlg.h"
+#ifdef ACTS_GNN_WITH_MODULEMAP
+#include "src/TrackFindingGNNAlg.h"
+#endif
 
 // Tools
 #include "src/ITkAnalogueClusteringTool.h"
+#include "src/ITkNNClusterCalibratorTool.h"
 #include "src/ITkStripCalibrationTool.h"
 #include "src/TrackStatePrinterTool.h"
 #include "src/KalmanFitterTool.h"
@@ -33,13 +35,15 @@ DECLARE_COMPONENT( ActsTrk::ScoreBasedAmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
 DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
-DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
 DECLARE_COMPONENT( ActsTrk::HGTDTrackExtensionAlg)
 DECLARE_COMPONENT( ActsTrk::HGTDTruthTrackDecorationAlg )
-DECLARE_COMPONENT( ActsTrk::ActsToXAODTrackConverterAlg )
+#ifdef ACTS_GNN_WITH_MODULEMAP
+DECLARE_COMPONENT( ActsTrk::TrackFindingGNNAlg )
+#endif
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
+DECLARE_COMPONENT( ActsTrk::ITkNNClusterCalibratorTool )
 DECLARE_COMPONENT( ActsTrk::ITkStripCalibrationTool )
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinterTool )
 DECLARE_COMPONENT( ActsTrk::KalmanFitterTool )

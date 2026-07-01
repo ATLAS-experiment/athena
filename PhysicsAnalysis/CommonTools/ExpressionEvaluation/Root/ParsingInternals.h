@@ -148,7 +148,7 @@ namespace ExpressionParsing
   class VirtualMachine
   {
     public:
-      VirtualMachine(unsigned stackSize = 4096)
+      VirtualMachine(unsigned stackSize = 124)
         : m_stackSize(stackSize)
       { }
 

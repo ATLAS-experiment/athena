@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloRescaleNoise.h
@@ -7,8 +7,6 @@
 
 #ifndef CALOCONDPHYSALGS_CALORESCALENOISE_H
 #define CALOCONDPHYSALGS_CALORESCALENOISE_H
-
-
 
 // Gaudi includes
 
@@ -40,9 +38,7 @@ class CaloRescaleNoise : public AthAlgorithm {
     /** standard Athena-Algorithm method */
     virtual StatusCode          initialize() override;
     /** standard Athena-Algorithm method */
-    virtual StatusCode          execute() override;
-    /** standard Athena-Algorithm method */
-    virtual StatusCode          finalize() override;
+    virtual StatusCode          execute(const EventContext& ctx) override;
     /** standard Athena-Algorithm method */
     virtual StatusCode          stop() override;
     
@@ -69,22 +65,23 @@ class CaloRescaleNoise : public AthAlgorithm {
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey
     { this, "CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
-  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSCMgrKey {this,"CaloSuperCellDetDescrManager", "CaloSuperCellDetDescrManager", "SG Key for CaloSuperCellDetDescrManager in the Condition Store" };
+  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSCMgrKey
+    {this,"CaloSuperCellDetDescrManager", "CaloSuperCellDetDescrManager", "SG Key for CaloSuperCellDetDescrManager in the Condition Store" };
 
-  BooleanProperty  m_isSC{this, "SuperCell", false};
-
-  int m_iCool{};
-  int m_SubHash{};
-  int m_Hash{};
-  int m_OffId{};
-  float m_eta{};
-  float m_phi{};
-  int m_layer{};
-  int m_Gain{};
-  float m_elecNoise{};
-  float m_pileupNoise{}; 
-  float m_elecNoiseRescaled{};
+  BooleanProperty m_isSC{this, "SuperCell", false};
+  BooleanProperty m_absScaling{this, "absScaling", false};
+  
+  int m_iCool{0};
+  int m_SubHash{0};
+  int m_Hash{0};
+  int m_OffId{0};
+  float m_eta{0.};
+  float m_phi{0.};
+  int m_layer{0};
+  int m_Gain{0};
+  float m_elecNoise{0.};
+  float m_pileupNoise{0.}; 
+  float m_elecNoiseRescaled{0.};
   TTree* m_tree{};
-  bool m_absScaling{};
 };
 #endif

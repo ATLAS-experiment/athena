@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -46,7 +46,7 @@ CpReadByteStreamV1V2Cnv::~CpReadByteStreamV1V2Cnv()
 
 // CLID
 
-const CLID& CpReadByteStreamV1V2Cnv::classID()
+CLID CpReadByteStreamV1V2Cnv::classID()
 {
   return ClassID_traits<DataVector<LVL1::CPMTower> >::ID();
 }
@@ -74,13 +74,10 @@ StatusCode CpReadByteStreamV1V2Cnv::initialize()
 StatusCode CpReadByteStreamV1V2Cnv::createObjConst( IOpaqueAddress* pAddr,
                                                     DataObject*& pObj ) const
 {
-  ByteStreamAddress *pBS_Addr;
-  pBS_Addr = dynamic_cast<ByteStreamAddress *>( pAddr );
-  if ( !pBS_Addr ) {
-    ATH_MSG_ERROR( " Can not cast to ByteStreamAddress " );
-    return StatusCode::FAILURE;
-  }
+  ByteStreamAddress* pBS_Addr{};
+  ATH_CHECK( (pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr)) != nullptr );
 
+  const EventContext& ctx = pBS_Addr->getEventContext();
   const std::string nm = *( pBS_Addr->par() );
 
   ATH_MSG_DEBUG( " Creating Objects " << nm );
@@ -91,9 +88,9 @@ StatusCode CpReadByteStreamV1V2Cnv::createObjConst( IOpaqueAddress* pAddr,
 
   // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags1;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID1, robFrags1 );
+  m_robDataProvider->getROBData(ctx, vID1, robFrags1 );
   IROBDataProviderSvc::VROBFRAG robFrags2;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID2, robFrags2 );
+  m_robDataProvider->getROBData(ctx, vID2, robFrags2 );
 
   // size check
   auto towerCollection = std::make_unique<DataVector<LVL1::CPMTower> >();
@@ -111,7 +108,7 @@ StatusCode CpReadByteStreamV1V2Cnv::createObjConst( IOpaqueAddress* pAddr,
   }
   // Post-LS1 data
   if (robFrags2.size() > 0) {
-    ATH_CHECK( m_tool2->convert(nm, robFrags2, towerCollection.get()) ); 
+    ATH_CHECK( m_tool2->convert(nm, robFrags2, towerCollection.get()) );
  }
 
   pObj = SG::asStorable(std::move(towerCollection));

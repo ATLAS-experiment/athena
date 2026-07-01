@@ -29,7 +29,7 @@ class MallocAlg : public AthAlgorithm
  public: 
   using AthAlgorithm::AthAlgorithm;
 
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
  private: 
 

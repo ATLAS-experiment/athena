@@ -83,6 +83,11 @@ flags.addFlag(f"Output.{stream1name}FileName", file1Name)
 flags.addFlag(f"Output.{stream2name}FileName", file2Name)
 flags.addFlag(f"Output.{stream3name}FileName", file3Name)
 flags.Exec.DebugMessageComponents = [ outputStreamName(stream1name) , "PoolSvc", "AthenaPoolCnvSvc", "WriteData" ]
+
+#Run3 for now
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
 flags.lock()
 
 # Main services

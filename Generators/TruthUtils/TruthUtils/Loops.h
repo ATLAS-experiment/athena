@@ -97,16 +97,7 @@ public:
                     // If the production vertex of a particle exclusively has particles not
                     // in loops, then this particle cannot be in a loop either
                     bool goodi = true;
-#ifdef HEPMC3
                     for (auto& pi: ev->particles_in()) goodi = goodi && (incycle[pi] == -1);
-#else
-                    for (auto ip = ev->particles_in_const_begin();
-                         ip != ev->particles_in_const_end();
-                         ++ip)
-                    {
-                      goodi = goodi && (incycle[*ip] == -1);
-                    }
-#endif
                     if (goodi) incycle[p] = -1;
                 }
             }
@@ -124,24 +115,12 @@ public:
         }
 
         // Now loop over all vertices.
-#ifdef HEPMC3
         for (auto & v: m_evt->vertices()) {
-#else
-        for (auto iv = m_evt->vertices_begin(); iv != m_evt->vertices_end(); ++iv) {
-            auto v = *iv;
-#endif
             bool push = false;
             // First check incoming particles.
             // If any incoming are in loops, consider this vertex to be in a loop.
-#ifdef HEPMC3
             for ( auto& pin: v->particles_in()){
                 if (incycle[pin] == 1) {
-#else
-            for ( auto ipin = v->particles_in_const_begin();
-                  ipin != v->particles_in_const_end();
-                  ++ipin){
-                if (incycle[*ipin] == 1) {
-#endif
                       push = true;
                       break;
                 }

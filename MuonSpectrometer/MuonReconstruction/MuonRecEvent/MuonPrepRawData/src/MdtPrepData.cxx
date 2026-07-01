@@ -94,6 +94,7 @@ MsgStream& MdtPrepData::dump( MsgStream&    stream) const
     stream <<"TDC = "<<tdc()<<", ";
     stream <<"ADC = "<<adc()<<", ";
     stream <<"status = "<<status()<<", ";
+    stream <<"Id = "<<detectorElement()->idHelperSvc()->toString(identify())<<", ";
     stream<<"} End MdtPrepData"<<endmsg;
 
     return stream;
@@ -109,6 +110,7 @@ MsgStream& MdtPrepData::dump( MsgStream&    stream) const
     stream <<"TDC = "<<tdc()<<", ";
     stream <<"ADC = "<<adc()<<", ";
     stream <<"status = "<<status()<<", ";
+    stream <<"Id = "<<detectorElement()->idHelperSvc()->toString(identify())<<", ";
     stream<<"} End MdtPrepData"<<std::endl;
     return stream;
   }

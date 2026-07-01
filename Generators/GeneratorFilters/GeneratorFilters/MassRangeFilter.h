@@ -25,7 +25,7 @@ public:
 
   MassRangeFilter(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode filterInitialize();
-  virtual StatusCode filterEvent();
+  virtual StatusCode filterEvent(const EventContext& ctx);
 
 private:
 

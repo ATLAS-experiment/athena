@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -40,13 +40,14 @@ namespace LVL1 {
     }
 
 
-    StatusCode eFEXegAlgo::safetyTest() const {
+    StatusCode eFEXegAlgo::safetyTest(const EventContext& ctx) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
+        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey, ctx);
         if(!eTowerContainer.isValid()){
             ATH_MSG_FATAL("Could not retrieve container " << m_eTowerContainerKey.key() );
             return StatusCode::FAILURE;
         }
+        m_eTowers = eTowerContainer.cptr();
 
         return StatusCode::SUCCESS;
     }
@@ -65,32 +66,25 @@ namespace LVL1 {
 
     void LVL1::eFEXegAlgo::getCoreEMTowerET(unsigned int & et) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
-        const LVL1::eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1]);
+        const LVL1::eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1]);
         et = tmpTower->getLayerTotalET(0) + tmpTower->getLayerTotalET(1) + tmpTower->getLayerTotalET(2) + tmpTower->getLayerTotalET(3);
     }
 
     void LVL1::eFEXegAlgo::getCoreHADTowerET(unsigned int & et) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
-        const LVL1::eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1]);
+        const LVL1::eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1]);
         et = tmpTower->getLayerTotalET(4);
     }
 
     void LVL1::eFEXegAlgo::getRealPhi(float & phi) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-        phi = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1])->phi();
+        phi = m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1])->phi();
 
     }
 
     void LVL1::eFEXegAlgo::getRealEta(float & eta) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
-        eta = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1])->eta() * eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1])->getPosNeg();
+        eta = m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1])->eta() * m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1])->getPosNeg();
 
     }
 
@@ -153,8 +147,6 @@ namespace LVL1 {
         int iCoreStart  = m_seedID-1;
         int iCoreEnd    = m_seedID+1;
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
         if(m_algoVersion==0) {
             // 3x3 Towers Had ; 1x3 L0 + 1x3 L3 EM
             for (int i=0; i<3; ++i) { // phi
@@ -162,7 +154,7 @@ namespace LVL1 {
                     if (((m_efexid%3 == 0) && (m_fpgaid == 0) && (m_central_eta == 0) && (j == 0)) || ((m_efexid%3 == 2) && (m_fpgaid == 3) && (m_central_eta == 5) && (j == 2))) {
                         continue;
                     } else {
-                        const eTower * tTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[i][j]);
+                        const eTower * tTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[i][j]);
                         hadsum += tTower->getLayerTotalET(4);
                         if (j==1) {
                             emsum += ( tTower->getLayerTotalET(0) + tTower->getLayerTotalET(3) );
@@ -195,7 +187,7 @@ namespace LVL1 {
                         ((m_efexid % 3 == 2) && (m_fpgaid == 3) && (m_central_eta == 5) && (j == 2))) {
                         continue;
                     } else {
-                        const eTower *tTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[i][j]);
+                        const eTower *tTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[i][j]);
                         hadsum += tTower->getLayerTotalET(4) + (((i==0&&j==0)||(i==2&&j==2)||(i==0&&j==2)||(i==2&&j==0)) ? 0 : tTower->getLayerTotalET(3));
                         // For PS add central tower + UnD phi neighbour
                         if (j == 1 && (i == 1 || i == phi2)) {
@@ -301,7 +293,7 @@ namespace LVL1 {
 
     }
 
-    unsigned int LVL1::eFEXegAlgo::getET() {
+    unsigned int LVL1::eFEXegAlgo::getET(const EventContext& ctx) {
 
         /// Get cells used in cluster
         std::vector<unsigned int> clusterCells;
@@ -312,27 +304,27 @@ namespace LVL1 {
         unsigned int PS_ET = 0;
 
         if(m_algoVersion==0) {
-            PS_ET = dmCorrection(clusterCells[0], 0)
-                    + dmCorrection(clusterCells[1], 0);
+            PS_ET = dmCorrection(ctx, clusterCells[0], 0)
+                    + dmCorrection(ctx, clusterCells[1], 0);
         } else {
             // 2025 algoVersion only uses 1 PS scell, except at most extreme eta values
-            PS_ET = dmCorrection(clusterCells[0], 0);
+            PS_ET = dmCorrection(ctx, clusterCells[0], 0);
             if ( ((m_efexid%3) == 0 && m_fpgaid == 0) || ((m_efexid%3) == 2 && m_fpgaid == 3)) {
-                PS_ET += dmCorrection(clusterCells[1], 0);
+                PS_ET += dmCorrection(ctx, clusterCells[1], 0);
             }
         }
-        unsigned int L1_ET = dmCorrection(clusterCells[2], 1)
-                             + dmCorrection(clusterCells[3], 1)
-                             + dmCorrection(clusterCells[4], 1)
-                             + dmCorrection(clusterCells[5], 1)
-                             + dmCorrection(clusterCells[6], 1)
-                             + dmCorrection(clusterCells[7], 1);
-        unsigned int L2_ET = dmCorrection(clusterCells[8], 2)
-                             + dmCorrection(clusterCells[9], 2)
-                             + dmCorrection(clusterCells[10], 2)
-                             + dmCorrection(clusterCells[11], 2)
-                             + dmCorrection(clusterCells[12], 2)
-                             + dmCorrection(clusterCells[13], 2);
+        unsigned int L1_ET = dmCorrection(ctx, clusterCells[2], 1)
+                             + dmCorrection(ctx, clusterCells[3], 1)
+                             + dmCorrection(ctx, clusterCells[4], 1)
+                             + dmCorrection(ctx, clusterCells[5], 1)
+                             + dmCorrection(ctx, clusterCells[6], 1)
+                             + dmCorrection(ctx, clusterCells[7], 1);
+        unsigned int L2_ET = dmCorrection(ctx, clusterCells[8], 2)
+                             + dmCorrection(ctx, clusterCells[9], 2)
+                             + dmCorrection(ctx, clusterCells[10], 2)
+                             + dmCorrection(ctx, clusterCells[11], 2)
+                             + dmCorrection(ctx, clusterCells[12], 2)
+                             + dmCorrection(ctx, clusterCells[13], 2);
         unsigned int L3_ET = clusterCells[14] + clusterCells[15];
 
         /// Final ET sum
@@ -362,7 +354,7 @@ namespace LVL1 {
       }
     }
 
-    unsigned int LVL1::eFEXegAlgo::dmCorrection (unsigned int ET, unsigned int layer) {
+  unsigned int LVL1::eFEXegAlgo::dmCorrection (const EventContext& ctx, unsigned int ET, unsigned int layer) {
         /// Check corrections are required and layer is valid, otherwise do nothing
         if ( !m_dmCorr || layer > 2 ) return ET;
 
@@ -392,9 +384,9 @@ namespace LVL1 {
 
             if (!m_dmCorrectionsKey.empty()) {
                 // replace m_corrections values with values from database ... only try this once
-                SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey/*, ctx*/ };
+                SG::ReadCondHandle <CondAttrListCollection> dmCorrections{m_dmCorrectionsKey, ctx};
                 if (dmCorrections.isValid()) {
-                    if(dmCorrections->size()==0 && Gaudi::Hive::currentContext().eventID().time_stamp()>1672527600) { // not an error for data before 2023 (will include MC21 and MC23a)
+                    if(dmCorrections->size()==0 && ctx.eventID().time_stamp()>1672527600) { // not an error for data before 2023 (will include MC21 and MC23a)
                         ATH_MSG_ERROR("No dead material corrections found in conditions database for this event in folder " << m_dmCorrectionsKey.key());
                         throw std::runtime_error("No dead material corrections found in database for this event");
                     }
@@ -423,10 +415,10 @@ namespace LVL1 {
     }
 
 
-    std::unique_ptr<eFEXegTOB> LVL1::eFEXegAlgo::geteFEXegTOB() {
+    std::unique_ptr<eFEXegTOB> LVL1::eFEXegAlgo::geteFEXegTOB(const EventContext& ctx) {
 
         std::unique_ptr<eFEXegTOB> out = std::make_unique<eFEXegTOB>();
-        out->setET(getET());
+        out->setET(getET(ctx));
 
         std::vector<unsigned int> temvector;
         getWstot(temvector);
@@ -448,14 +440,14 @@ namespace LVL1 {
 
     void LVL1::eFEXegAlgo::getWindowET(int layer, int jPhi, int SCID, unsigned int & outET) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
+        //SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
 
         if (SCID<0) { // left towers in eta
             if ((m_efexid%3 == 0) && (m_fpgaid == 0) && (m_central_eta == 0)) {
                 outET = 0;
             } else {
                 int etaID = 4+SCID;
-                const eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[jPhi][0]);
+                const eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[jPhi][0]);
                 if (layer==1 || layer==2) {
                     outET = tmpTower->getET(layer,etaID);
                 } else if (layer==0 || layer==3 || layer==4) {
@@ -463,7 +455,7 @@ namespace LVL1 {
                 }
             }
         } else if (SCID>=0 && SCID<4) { // central towers in eta
-            const eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[jPhi][1]);
+            const eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[jPhi][1]);
             if (layer==1 || layer==2) {
                 outET = tmpTower->getET(layer,SCID);
             } else if (layer==0 || layer==3 || layer==4) {
@@ -474,7 +466,7 @@ namespace LVL1 {
                 outET = 0;
             } else {
                 int etaID = SCID-4;
-                const eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[jPhi][2]);
+                const eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[jPhi][2]);
                 if (layer==1 || layer==2) {
                     outET = tmpTower->getET(layer,etaID);
                 } else if (layer==0 || layer==3 || layer==4) {

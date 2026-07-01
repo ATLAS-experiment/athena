@@ -115,13 +115,7 @@ public:
     double quantityVal(const VertexCommonFlags::QUANTITY& q) {
       //Find total 4-momentum of incoming particles
       double px(0), py(0), pz(0), e(0);//HepMC::FourVector does NOT support operators + or += !!!!!!
-#ifdef HEPMC3
       for (const auto& PartIn:  m_vertex->particles_in()){
-#else
-      HepMC::GenVertex::particles_in_const_iterator itPartIn,itPartInE(m_vertex->particles_in_const_end());
-      for ( itPartIn = m_vertex->particles_in_const_begin();itPartIn!=itPartInE;++itPartIn) {
-      auto PartIn=*itPartIn;
-#endif
 	px +=PartIn->momentum().px();
 	py +=PartIn->momentum().py();
 	pz +=PartIn->momentum().pz();
@@ -255,13 +249,7 @@ bool VP1TruthVertexCollection::load()
     if (!genEvent)
       continue;
 
-#ifdef HEPMC3
      for (const auto& vtx:  genEvent->vertices()) {
-#else
-    HepMC::GenEvent::vertex_const_iterator itVertex, itVertexEnd(genEvent->vertices_end());
-    for (itVertex = genEvent->vertices_begin(); itVertex != itVertexEnd; ++itVertex ) {
-      auto  vtx=*itVertex;
-#endif
       if (!vtx)
 	continue;
       m_d->vertices << new Imp::VertexHandle(vtx,m_d);
@@ -295,13 +283,7 @@ QStringList VP1TruthVertexCollection::infoOnClicked(SoPath* pickedPath)
 
     //Make output:
     l <<"Truth vertex from collection "+text()+":" ;
-#ifdef HEPMC3
      for (const auto& PartIn: vtx->particles_in()) {
-#else
-    HepMC::GenVertex::particles_in_const_iterator itPartIn,itPartInE(vtx->particles_in_const_end());
-    for ( itPartIn = vtx->particles_in_const_begin();itPartIn!=itPartInE;++itPartIn) {
-      auto PartIn=*itPartIn;
-#endif
       const int pdg = PartIn->pdg_id();
       bool ok;
       QString name = VP1ParticleData::particleName(pdg,ok);
@@ -309,13 +291,7 @@ QStringList VP1TruthVertexCollection::infoOnClicked(SoPath* pickedPath)
 	name = "<unknown>";
       l << "--> In: "+name+" ("+str(pdg)+")  [ P = "+str(m_d->mag(PartIn->momentum())/Gaudi::Units::GeV)+" GeV ]";
     }
-#ifdef HEPMC3
      for (const auto& PartOut: vtx->particles_out()) {
-#else
-    HepMC::GenVertex::particles_out_const_iterator itPartOut,itPartOutE(vtx->particles_out_const_end());
-    for ( itPartOut = vtx->particles_out_const_begin();itPartOut!=itPartOutE;++itPartOut) {
-      auto PartOut=*itPartOut;
-#endif
       const int pdg = PartOut->pdg_id();
       bool ok;
       QString name = VP1ParticleData::particleName(pdg,ok);

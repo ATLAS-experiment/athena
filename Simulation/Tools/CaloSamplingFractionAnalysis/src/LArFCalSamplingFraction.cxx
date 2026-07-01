@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFCalSamplingFraction.h"
@@ -801,7 +801,7 @@ void LArFCalSamplingFraction::TruthImpactPosition(const HepMC::GenEvent *e)
 ///////////////////////////////////////////////////////////////////////////////
 /// The main FCal analysis method
 
-StatusCode LArFCalSamplingFraction::doFCal()
+StatusCode LArFCalSamplingFraction::doFCal(const EventContext& ctx)
 {
     ATH_MSG_INFO("Starting main FCal analysis");
 
@@ -812,7 +812,7 @@ StatusCode LArFCalSamplingFraction::doFCal()
 
     // ACCESSING EVENT INFORMATION
     // Get the basic event information (run number, event number).
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey,getContext());
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     ATH_CHECK(eventInfo.isValid());
     m_runNumber = eventInfo->runNumber();
     m_eventNumber = eventInfo->eventNumber();
@@ -849,7 +849,7 @@ StatusCode LArFCalSamplingFraction::doFCal()
 
     ATH_MSG_DEBUG("LArHitFCAL container successfully retrieved");
 
-    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+    SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey, ctx};
     ATH_CHECK(caloMgrHandle.isValid());
     const CaloDetDescrManager* caloMgr = *caloMgrHandle;
 
@@ -959,7 +959,7 @@ void LArFCalSamplingFraction::FillCellInfo(const CaloDetDescrElement* caloDDE, d
 //////////////////////////////////////////////////////////////////////////////////
 /// Execute (event by event)
 
-StatusCode LArFCalSamplingFraction::execute()
+StatusCode LArFCalSamplingFraction::execute(const EventContext& ctx)
 {
     ATH_MSG_DEBUG(" in execute()");
 
@@ -971,9 +971,9 @@ StatusCode LArFCalSamplingFraction::execute()
     if (sc.isFailure())
         ATH_MSG_WARNING("initEvent failed. Continue");
 
-    sc = doFCal();
+    sc = doFCal(ctx);
 
-    sc = addEventInfo();
+    sc = addEventInfo(ctx);
 
     if (sc.isFailure()) {
         ATH_MSG_WARNING("Failure in getEventInfo() ");
@@ -986,7 +986,7 @@ StatusCode LArFCalSamplingFraction::execute()
 }
 
 
-StatusCode LArFCalSamplingFraction::addEventInfo()
+StatusCode LArFCalSamplingFraction::addEventInfo(const EventContext& ctx)
 {
     ATH_MSG_DEBUG("in addEventInfo()");
 
@@ -994,7 +994,7 @@ StatusCode LArFCalSamplingFraction::addEventInfo()
     // I have the actual EventNumber, but skipped the sequential count of event #
 
     // Get EventInfo for run and event number
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey,getContext());
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     ATH_CHECK(eventInfo.isValid());
     m_runNumber = eventInfo->runNumber();
     m_eventNumber = eventInfo->eventNumber();

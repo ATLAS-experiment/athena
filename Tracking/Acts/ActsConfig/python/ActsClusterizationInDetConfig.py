@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -24,7 +24,7 @@ def ActsIDPixelClusteringToolCfg(flags,
 
     kwargs.setdefault("CheckGanged", True)
     kwargs.setdefault('UseWeightedPosition',False) #     not (flags.Tracking.doPixelDigitalClustering or flags.Beam.Type is BeamType.Cosmics)
-    kwargs.setdefault('UseBroadErrors', flags.Beam.Type is BeamType.Cosmics)
+    kwargs.setdefault('UseBroadErrors', True) #flags.Beam.Type is BeamType.Cosmics
 
     acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
     return acc
@@ -40,11 +40,6 @@ def ActsIDStripClusteringToolCfg(flags,
         from SiLorentzAngleTool.SCT_LorentzAngleConfig import SCT_LorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(SCT_LorentzAngleToolCfg(flags)))
 
-    if "conditionsTool" not in kwargs:
-        from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
-        kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(
-            SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False)))
-
     if "StripDetElStatus" not in kwargs :
         from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import  (
             SCT_DetectorElementStatusAlgWithoutFlaggedCfg)
@@ -53,6 +48,7 @@ def ActsIDStripClusteringToolCfg(flags,
 
     # Disable noisy modules suppression
     kwargs.setdefault("maxFiredStrips", 384)
+    kwargs.setdefault("errorStrategy", 2) # use pitch
     
     if flags.InDet.selectSCTIntimeHits:
         coll_25ns = (flags.Beam.BunchSpacing <= 25 and
@@ -262,7 +258,7 @@ def ActsIDClusterizationCfg(flags,
     # Name of the RoI to be used
     roisName = f'{flags.Tracking.ActiveConfig.extension}RegionOfInterest'
     # Large Radius Tracking uses full scan RoI created in the primary pass
-    if flags.Tracking.ActiveConfig.extension == 'ActsLargeRadius':
+    if flags.Tracking.ActiveConfig.isLargeD0 and flags.Tracking.ActiveConfig.isSecondaryPass:
         roisName = 'ActsRegionOfInterest'
         
     # Name of the Cluster container -> ITk + extension without "Acts" + Pixel or Strip + Clusters
@@ -315,6 +311,16 @@ def ActsIDClusterizationCfg(flags,
             else:
                 kwargs.setdefault('StripClusterPreparationAlg.InputCollection', '')
                 kwargs.setdefault('StripClusterPreparationAlg.InputIDC', f'{flags.Tracking.ActiveConfig.extension}StripClustersCache')
+
+    # Persistification
+    if flags.Acts.EDM.PersistifyClusters and kwargs['runReconstruction']:
+        from ActsConfig.ActsPersistificationConfig import PersistifyClusters
+        pixelClusterCollections = None if not kwargs['processPixels'] else [kwargs['PixelClusterizationAlg.ClustersKey']]
+        stripClusterCollections = None if not kwargs['processStrips'] else [kwargs['StripClusterizationAlg.ClustersKey']]
+        acc.merge(PersistifyClusters(flags,
+                                     pixelClusterCollections=pixelClusterCollections,
+                                     stripClusterCollections=stripClusterCollections,
+                                     hgtdClusterCollections=None))
 
     acc.merge(ActsIDMainClusterizationCfg(flags, RoIs=roisName, **kwargs))
     return acc

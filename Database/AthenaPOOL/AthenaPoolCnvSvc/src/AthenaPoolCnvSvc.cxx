@@ -29,13 +29,10 @@
 #include <format>
 #include <iomanip>
 #include <sstream>
-
+#include "CxxUtils/HexString.h"
 //______________________________________________________________________________
 // Initialize the service.
 StatusCode AthenaPoolCnvSvc::initialize() {
-   // Initialize DataModelCompatSvc
-   ServiceHandle<IService> dmcsvc("DataModelCompatSvc", this->name());
-   ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
    // Retrieve ClassIDSvc
@@ -48,8 +45,8 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       return(StatusCode::FAILURE);
    }
    // Global POOL container naming scheme
-   if (auto scheme = APRDefaults::parseNamingScheme(m_containerNamingSchemeProp.value())) {
-      APRDefaults::setNamingScheme(*scheme);
+   if (auto scheme = APRDefaults::WriteConfig::parseNamingScheme(m_containerNamingSchemeProp.value())) {
+      APRDefaults::WriteConfig::setNamingScheme(*scheme);
    } else {
       ATH_MSG_ERROR(std::format("Invalid PoolContainerNamingScheme: {}, see APRDefaults.h for the full list.", m_containerNamingSchemeProp.value()));
       return StatusCode::FAILURE;
@@ -156,11 +153,7 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
                ATH_MSG_DEBUG("setInputAttribute failed setting POOL database/container attributes.");
             }
          }
-         char text[32];
-         const std::string contextStr = std::format("[CTXT={:08X}]", auxContext);
-         std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
-         text[sizeof(text) - 1] = '\0';
-         tokAddr->getToken()->setAuxString(text);
+         tokAddr->getToken()->setAuxString(CxxUtils::HexString<"[CTXT={}]">(auxContext));
       }
    }
    // Forward to base class createObj
@@ -231,17 +224,13 @@ StatusCode AthenaPoolCnvSvc::fillRepRefs(IOpaqueAddress* pAddress, DataObject* p
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSpec,
-		const std::string& /*openMode*/) {
-   return(connectOutput(outputConnectionSpec));
-}
-//______________________________________________________________________________
-StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
-// This is called before DataObjects are being converted.
+		const std::string& openMode) {
    std::string outputConnection = outputConnectionSpec.substr(0, outputConnectionSpec.find('['));
    unsigned int contextId = outputContextId(outputConnection);
+   Io::IoFlag mode = openMode == "APPEND" ? Io::APPEND : Io::WRITE;
    try {
-      if (!m_poolSvc->connect(pool::ITransaction::UPDATE, contextId).isSuccess()) {
-         ATH_MSG_ERROR("connectOutput FAILED to open an UPDATE transaction.");
+      if (!m_poolSvc->connect(mode, contextId).isSuccess()) {
+         ATH_MSG_ERROR("connectOutput FAILED to open an " << openMode << " transaction.");
          return(StatusCode::FAILURE);
       }
    } catch (std::exception& e) {
@@ -260,6 +249,11 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
       ATH_MSG_DEBUG("connectOutput failed process POOL database attributes.");
    }
    return(StatusCode::SUCCESS);
+}
+//______________________________________________________________________________
+StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
+// This is called before DataObjects are being converted.
+   return(connectOutput(outputConnectionSpec, "UPDATE"));
 }
 
 //______________________________________________________________________________
@@ -328,14 +322,13 @@ Token* AthenaPoolCnvSvc::registerForWrite(Placement* placement, const void* obj,
    // StopWatch listens from here until the end of this current scope
    PMonUtils::BasicStopWatch stopWatch("cRepR_ALL", m_chronoMap);
    Token* token = nullptr;
-         if (m_persSvcPerOutput) { // Use separate PersistencySvc for each output stream/file
-            char text[32];
-            const std::string contextStr = std::format("[CTXT={:08X}]", m_poolSvc->getOutputContext(placement->fileName()));
-            std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
-            text[sizeof(text) - 1] = '\0';
-            placement->setAuxString(text);
-         }
-         token = m_poolSvc->registerForWrite(placement, obj, classDesc);
+   if (m_persSvcPerOutput) { // Use separate PersistencySvc for each output stream/file
+      placement->setAuxString(CxxUtils::HexString<"[CTXT={}]">(m_poolSvc->getOutputContext(placement->fileName())));
+   }
+   if(placement->technology() == 0) { // No technology specified, use the default
+      placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
+   }
+   token = m_poolSvc->registerForWrite(placement, obj, classDesc);
    return(token);
 }
 //______________________________________________________________________________
@@ -370,7 +363,11 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
       RootType classDesc = RootType::ByNameNoQuiet(par[2]);
       token->setClassID(pool::DbReflex::guid(classDesc));
    } else {
-      token.reset(m_poolSvc->getToken(par[0], par[1], ip[0]));
+      Token *t = m_poolSvc->getToken(par[0], par[1], ip[0]);
+      if( t ) {
+         token = std::make_unique<Token>(t);
+         t->release();
+      }
    }
    if (token == nullptr) {
       return(StatusCode::RECOVERABLE);

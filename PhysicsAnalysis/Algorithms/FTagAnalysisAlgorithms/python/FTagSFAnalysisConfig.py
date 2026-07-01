@@ -172,7 +172,7 @@ class FTagJetSFBlock(ConfigBlock):
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
         else:
-            bTagCalibFile = getRecommendedBTagCalib(config.geometry())
+            bTagCalibFile = getRecommendedBTagCalib(config.geometry(), self.btagWP)
 
         DSID = "default"
         if config.dataType() is not DataType.Data:
@@ -218,7 +218,7 @@ class FTagJetSFBlock(ConfigBlock):
                 bTagConditionalWP = self.btagWP
 
                 alg = config.createAlgorithm( 'CP::BTaggingTriggerEfficiencyAlg',
-                                              'FTagEfficiencyTriggerScaleFactorAlg' + chain )
+                                              'FTagEfficiencyTriggerScaleFactorAlg' + chain_out )
                 config.addPrivateTool( 'offlineEfficiencyTool',
                                        'BTaggingEfficiencyTool' )
                 self.configureEfficiencyTool(

@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
+#undef NDEBUG
 // System include(s):
 #include <iostream>
+#include <cassert>
 
 // Local include(s):
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
@@ -13,21 +14,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "xAODMeasurementBase/MeasurementDefs.h"
-
-template< typename T >
-std::ostream& operator<< ( std::ostream& out,
-                           const std::vector< T >& vec ) {
-
-   out << "[";
-   for( size_t i = 0; i < vec.size(); ++i ) {
-      out << vec[ i ];
-      if( i < vec.size() - 1 ) {
-         out << ", ";
-      }
-   }
-   out << "]";
-   return out;
-}
 
 /// Function fill one HGTD cluster with information
 
@@ -60,7 +46,30 @@ void fill( xAOD::HGTDCluster& HGTDCluster) {
     std::vector < int > tots = {1, 2, 3, 4, 5, 6};
 
     HGTDCluster.setToTlist(tots);
+    assert( HGTDCluster.time() == xAOD::HGTDCluster::time( HGTDCluster.localPosition<3>()));
+    assert( HGTDCluster.timeCovariance() == xAOD::HGTDCluster::timeCovariance( HGTDCluster.localCovariance<3>()));
     return;
+}
+
+namespace {
+template <typename T>
+auto trans(T &&a) { return a; }
+
+template <>
+auto trans(const unsigned long long &a) { return Identifier(a); }
+
+template <typename T>
+std::ostream &operator<<(std::ostream &out, CxxUtils::range_with_conv<CxxUtils::span<T> > elements) {
+   out << "[";
+   for( size_t i = 0; i < elements.size(); ++i ) {
+      out << trans(elements[ i ]);
+      if( i < elements.size() - 1 ) {
+         out << ", ";
+      }
+   }
+   out << "]";
+   return out;
+}
 }
 
 void print ( const xAOD::HGTDCluster& HGTDCluster) {

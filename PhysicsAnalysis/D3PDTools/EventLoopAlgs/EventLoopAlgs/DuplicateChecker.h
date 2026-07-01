@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,7 +17,7 @@
 
 namespace xAOD
 {
-  class TEvent;
+  class Event;
 }
 
 class TObjString;
@@ -189,7 +189,7 @@ namespace EL
 
     /// \brief the event we are reading from
   private:
-    xAOD::TEvent *m_event = nullptr; //!
+    xAOD::Event *m_event = nullptr; //!
 
 
     /// \brief the output tree, if we are creating one

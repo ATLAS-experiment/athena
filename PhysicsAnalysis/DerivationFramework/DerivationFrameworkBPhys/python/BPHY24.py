@@ -81,8 +81,6 @@ def BPHY24Cfg(flags):
                                              useCombinedMeasurement      = False, # Only takes effect if combOnly=True
                                              muonCollectionKey           = "Muons",
                                              TrackParticleCollection     = "InDetTrackParticles",
-                                             V0VertexFitterTool          = None,
-                                             useV0Fitter                 = False,
                                              TrkVertexFitterTool         = vkalvrt,
                                              TrackSelectorTool           = trackselect,
                                              VertexPointEstimator        = vpest,
@@ -161,8 +159,6 @@ def BPHY24Cfg(flags):
         electronCollectionKey       = "Electrons",
         TrackParticleCollection     = "GSFTrackParticles",
         useEgammaCuts               = True,
-        V0VertexFitterTool          = None,
-        useV0Fitter                 = False,
         TrkVertexFitterTool         = vkalvrt,
         TrackSelectorTool           = trackselect,
         VertexPointEstimator        = vpest,

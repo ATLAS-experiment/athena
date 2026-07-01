@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloFillCellPositionShift.h
@@ -38,9 +38,7 @@ class CaloFillCellPositionShift : public AthAlgorithm {
     /** standard Athena-Algorithm method */
     virtual StatusCode          initialize() override;
     /** standard Athena-Algorithm method */
-    virtual StatusCode          execute() override;
-    /** standard Athena-Algorithm method */
-    virtual StatusCode          finalize() override;
+    virtual StatusCode          execute(const EventContext& ctx) override;
     /** standard Athena-Algorithm method */
     virtual StatusCode          stop() override;
     
@@ -49,11 +47,12 @@ class CaloFillCellPositionShift : public AthAlgorithm {
   //---------------------------------------------------
   // Member variables
   //---------------------------------------------------
-  const CaloCell_ID*       m_calo_id;
+  const CaloCell_ID*       m_calo_id{};
 
-  CaloRec::CaloCellPositionShift* m_cellPos;
+  CaloRec::CaloCellPositionShift* m_cellPos{};
 
-  std::string m_key;
+  Gaudi::Property<std::string> m_key{this, "outputKey", "LArCellPositionShift"
+    , "Key for output CaloCellPositionShift"};
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey
     {this,"CaloDetDescrManager","CaloDetDescrManager","SG Key for CaloDetDescrManager in the Condition Store" };

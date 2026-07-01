@@ -3,6 +3,7 @@
 */
 
 #include "PLRDetectorTool.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "PLRGmxInterface.h"
 
 #include <PixelReadoutGeometry/PixelDetectorManager.h>
@@ -34,7 +35,7 @@ StatusCode PLRDetectorTool::create()
 
   m_commonItems = std::make_unique<InDetDD::SiCommonItems>(idHelper);
 
-  const GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
+  GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
 
   std::string node{"InnerDetector"};
   std::string table{"PLRXDD"};
@@ -63,14 +64,20 @@ StatusCode PLRDetectorTool::create()
   InDetDD::PLRGmxInterface gmxInterface(manager, m_commonItems.get(), &m_moduleTree);
 
   const GeoVPhysVol * topVol = createTopVolume(world, gmxInterface, node, table, m_containingDetectorName, m_envelopeVolumeName,sqlreader);
+
+  // if we are using SQLite inputs,
+  if (sqlreader) {
+    ATH_MSG_INFO("Building PLR Readout Geometry from SQLite using "<<m_geoDbTagSvc->getParamSvcName());
+    gmxInterface.buildReadoutGeometryFromSqlite(m_sqliteReadSvc.operator->(), sqlreader);
+  }
+
   if(topVol){
     manager->addTreeTop(topVol);
     manager->initNeighbours();
-    }
-    else{
-        ATH_MSG_FATAL("Could not find the Top Volume!!!");
-        return StatusCode::FAILURE;
-   }
+  } else {
+    ATH_MSG_FATAL("Could not find the Top Volume!!!");
+    return StatusCode::FAILURE;
+  }
 
   // set the manager
   m_detManager = manager;

@@ -60,10 +60,9 @@ namespace Analysis {
         std::vector<JpsiCandidate> getPairs2Colls(const std::vector<const xAOD::TrackParticle*>&, const std::vector<const xAOD::Muon*>&, bool) const;
         double getInvariantMass(const JpsiCandidate&, std::span<const double> ) const;
         std::vector<JpsiCandidate> selectCharges(const std::vector<JpsiCandidate>&) const;
-        xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer* importedTrackCollection) const;
+        std::unique_ptr<xAOD::Vertex> fit(const EventContext& ctx, const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer* importedTrackCollection) const;
         bool passesMCPCuts(const xAOD::Muon*) const;
         bool isContainedIn(const xAOD::TrackParticle*, const xAOD::TrackParticleContainer*) const;
-        TVector3 trackMomentum(const xAOD::Vertex * vxCandidate, int trkIndex) const;
         //-------------------------------------------------------------------------------------
         
     private:
@@ -74,7 +73,6 @@ namespace Analysis {
         bool m_combOnly;
         bool m_atLeastOneComb;
         bool m_useCombMeasurement;
-        bool m_useV0Fitter;
         bool m_diMuons;
         double m_trk1M;
         double m_trk2M;
@@ -93,7 +91,6 @@ namespace Analysis {
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection {this, "TrackParticleCollection", "InDetTrackParticles" };
         SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_MuonTrackKeys{this, "MuonTrackKeys", {}};
         PublicToolHandle < Trk::IVertexFitter > m_iVertexFitter{this, "TrkVertexFitterTool", "Trk::TrkVKalVrtFitter"};
-        PublicToolHandle < Trk::IVertexFitter > m_iV0VertexFitter{this, "V0VertexFitterTool", "Trk::V0VertexFitter"};
         PublicToolHandle < Trk::ITrackSelectorTool > m_trkSelector{this, "TrackSelectorTool", "InDet::TrackSelectorTool"};
         PublicToolHandle < InDet::VertexPointEstimator > m_vertexEstimator{this, "VertexPointEstimator", "InDet::VertexPointEstimator"};
         ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};

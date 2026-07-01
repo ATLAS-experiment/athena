@@ -5,20 +5,13 @@
 #include "MaterialTrackReader.h"
 #include "GaudiKernel/IInterface.h"
 
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+
 #include "TTree.h"
 #include "TFile.h"
 
 
-ActsTrk::MaterialTrackReader::MaterialTrackReader(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator),
-    m_accessor({false, m_readCachedSurfaceInformation})
-{}
-
-ActsTrk::MaterialTrackReader::~MaterialTrackReader()
-{
-
-
-}
+ActsTrk::MaterialTrackReader::~MaterialTrackReader() = default;
 
 StatusCode ActsTrk::MaterialTrackReader::initialize()
 {
@@ -35,74 +28,105 @@ StatusCode ActsTrk::MaterialTrackReader::initialize()
     // loop over the input files
     for (const auto& inputFile : m_fileNames) {
         // add file to the input chain
-        m_inputChain->Add(inputFile.c_str());
         ATH_MSG_DEBUG("Adding File " << inputFile << " to tree '" << m_treeName << "'.");
+        if (!m_inputChain->Add(inputFile.c_str())) {
+            ATH_MSG_ERROR("Failed to load file "<<inputFile);
+            return StatusCode::FAILURE;
+        }
     }
 
     // Connect the branches
     m_accessor.connectForRead(*m_inputChain);
-
     // get the number of events, which also loads the tree
-    std::size_t nentries = m_inputChain->GetEntries();
-    m_events = static_cast<std::size_t>(m_inputChain->GetMaximum("event_id") + 1);
-    m_batchSize = nentries / m_events;
+    m_nTreeEntries = m_inputChain->GetEntries();
+  
+    if (m_skipEvents >0ul) {
+        std::optional<std::uint32_t> evt{0ul};
+        std::size_t procEvts{0ul};
+        ATH_MSG_DEBUG("Skip "<<m_skipEvents<<" events. ");
+        for (; m_currEntry < m_nTreeEntries; ++m_currEntry) {
+            m_inputChain->GetEntry(m_currEntry);
+            if (!evt) {
+                evt = m_accessor.eventId();
+            } else if ((*evt) != m_accessor.eventId()) {
+                ++procEvts;
+                evt = m_accessor.eventId();
+            }
+            if (procEvts == m_skipEvents) {
+                break;
+            }
+        }
+        ATH_MSG_INFO("Skipped "<<procEvts<<" events. Corresponding to "
+                      <<m_currEntry<<" tree entries");
+    }
+    if (!m_nTreeEntries) {
+        ATH_MSG_ERROR("Input does not contain any recorded track");
+        return StatusCode::FAILURE;
+    }
+    ATH_MSG_INFO("Material files contain " << m_nTreeEntries << " entries. Process "
+                <<m_batchSize.value()<<" material events per athena event. Until "
+                <<m_maxEvents.value()<<" events are processed or the tree is finished");
+    return StatusCode::SUCCESS;
+}
 
-    ATH_MSG_DEBUG("The full chain has " << nentries << " entries for " << m_events
-                  << " events this corresponds to a batch size of: " << m_batchSize);
-
+StatusCode ActsTrk::MaterialTrackReader::finalize() {
+    if (m_inputChain) {
+        ATH_MSG_ERROR("Not all entries / events have been processed. Processed entries: "
+                <<(m_currEntry+ 1)<<"/"<<m_nTreeEntries<<", processed events: "
+                <<m_procEvents<<"/"<<m_maxEvents.value());
+    }
     return StatusCode::SUCCESS;
 }
 
 StatusCode
-ActsTrk::MaterialTrackReader::execute (const EventContext& ctx) const
-{
-    if (m_inputChain == nullptr) {
-        ATH_MSG_DEBUG("Invalid pointer to input chain");
-        return StatusCode::SUCCESS;
-    }
-
-    if (ctx.evt() >= m_events) {
-        ATH_MSG_INFO("Maximum number of events in file reached, nothing to be done...");
-        return StatusCode::SUCCESS;
-    }
-
+ActsTrk::MaterialTrackReader::execute (const EventContext& ctx) {
     // Write to the collection to the EventStore
-    SG::WriteHandle<ActsTrk::RecordedMaterialTrackCollection> materialTracks(m_materialTrackCollectionKey, ctx);
+    SG::WriteHandle materialTracks{m_materialTrackCollectionKey, ctx};
 
     // Record the collection once per event if not already there
     if (!materialTracks.isPresent()) {
-        auto coll = std::make_unique<ActsTrk::RecordedMaterialTrackCollection>();
-        ATH_CHECK(materialTracks.record(std::move(coll)));
+        ATH_CHECK(materialTracks.record(std::make_unique<ActsTrk::RecordedMaterialTrackCollection>()));
     }
 
-    // Add the track to the recorded collection
-    auto* coll = materialTracks.ptr();
-    if (!coll) {
-        ATH_MSG_ERROR("RecordedMaterialTrackCollection ptr() is null for key "
-                      << m_materialTrackCollectionKey.key());
-        return StatusCode::FAILURE;
+    if (m_currEntry >= m_nTreeEntries) {
+        m_inputChain.reset();
+        return StatusCode::SUCCESS;
     }
 
-    // lock the mutex
-    std::lock_guard<std::mutex> lock(m_readMutex);
-    for (std::size_t index = 0; index < m_batchSize; index++) {
-        // evaluate the entry number based on the batch size
-        auto entry = m_batchSize * ctx.evt() + index;
+    std::size_t nProcEvents{0ul};
+    std::size_t nCurrentEvt{m_accessor.eventId()};
 
-        ATH_MSG_DEBUG("Reading event / entry (in batch) : " << ctx.evt() << " / " << entry << "(" << index << ")");
-
+    for (; m_currEntry< m_nTreeEntries; ++m_currEntry) {
+        ATH_MSG_VERBOSE("Fetched entry "<<m_currEntry<<", eventId: "<<m_accessor.eventId());       
         // get the correspoing entry and read it
-        m_inputChain->GetEntry(entry);
+        m_inputChain->GetEntry(m_currEntry);
         Acts::RecordedMaterialTrack rmTrack = m_accessor.read();
+        m_accessor.eventId();
 
-        ATH_MSG_DEBUG("Track vertex:  " << rmTrack.first.first);
-        ATH_MSG_DEBUG("Track momentum:" << rmTrack.first.second);
+       ATH_MSG_VERBOSE("Track vertex:  " << Amg::toString(rmTrack.first.first)
+                    <<", momentum:" << Amg::toString(rmTrack.first.second));
 
+        if (nCurrentEvt != m_accessor.eventId()) {
+            ++nProcEvents;
+            ++m_procEvents;
+            nCurrentEvt = m_accessor.eventId();
+        }
+
+        if (m_procEvents >= m_maxEvents) {
+            ATH_MSG_INFO("All "<<m_maxEvents<<" events have been processed");
+            m_currEntry = m_nTreeEntries;
+            return StatusCode::SUCCESS;
+        }
+ 
+        if (nProcEvents >=m_batchSize) {
+            ATH_MSG_DEBUG("Batch processing "<<nProcEvents<<" completed. ");
+            break;
+        }
+      
         // filling the collection
-        coll->push_back(std::move(rmTrack));
+        materialTracks->push_back(std::move(rmTrack));
+ 
     }
-
     return StatusCode::SUCCESS;
-
 }
 

@@ -4,7 +4,9 @@
 
 #include "InDetTrackSystematicsTools/InclusiveTrackFilterTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/TrackingPrimitives.h"
 #include "AthContainers/ConstAccessor.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace InDet {
 
@@ -55,7 +57,7 @@ namespace InDet {
     static const SG::ConstAccessor<unsigned long> patternRecoInfoAcc ("patternRecoInfo");
     if (patternRecoInfoAcc.isAvailable(*track) ) {
       const std::bitset<xAOD::NumberOfTrackRecoInfo> patternReco = track->patternRecoInfo();
-      if(not patternReco.test(49)) {
+      if(not patternReco.test(xAOD::SiSpacePointsSeedMaker_LargeD0)) {
         ATH_MSG_DEBUG( "Applying LRT uncertainties to non-LRT track! Skipping" );
         return true;
       }
@@ -100,5 +102,17 @@ namespace InDet {
     return InDetTrackSystematicsTool::applySystematicVariation(systs);
   }
 
+  bool InclusiveTrackFilterTool::accept(
+      const xAOD::TrackParticle* track,
+      const CP::SystematicSet& syst) const
+  {
+    std::lock_guard<std::mutex> lock(m_rndMutex);
+    InclusiveTrackFilterTool* nc_this ATLAS_THREAD_SAFE =
+        const_cast<InclusiveTrackFilterTool*>(this);
+    if (nc_this->applySystematicVariation(syst).isFailure())
+      throw std::invalid_argument("Systematic '" + syst.name()
+          + "' was not pre-registered in initialize()");
+    return accept(track);
+  }
 
 } // namespace InDet

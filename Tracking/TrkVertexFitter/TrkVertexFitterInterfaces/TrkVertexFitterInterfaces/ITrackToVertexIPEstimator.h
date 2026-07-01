@@ -13,7 +13,7 @@
 //
 #include <memory>
 
-#include "CLHEP/Vector/ThreeVector.h"
+#include "GaudiKernel/EventContext.h"
 /**
  * An abstract base class  for algorithms estimating the transverse impact
  * parameter d0 and its error of a given track wrt to the reconstructed vertex.
@@ -48,25 +48,29 @@ class ITrackToVertexIPEstimator : virtual public IAlgTool {
  public:
   DeclareInterfaceID(ITrackToVertexIPEstimator, 1, 0);
 
-  virtual ~ITrackToVertexIPEstimator(){};
+  virtual ~ITrackToVertexIPEstimator()=default;
 
   /**
    * Estimate methods returning a d0 and its calculated sigma.
    * All  methods do check whether a track is actually fitted to a vertex
    */
   virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+      const EventContext &ctx,
       const xAOD::TrackParticle* track, const xAOD::Vertex* vtx,
       bool doRemoval) const = 0;
 
   virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+      const EventContext &ctx,
       const Trk::TrackParameters* track, const xAOD::Vertex* vtx,
       bool doRemoval) const = 0;
 
   virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+      const EventContext &ctx,
       const xAOD::TrackParticle* track, const xAOD::TrackParticle* newtrack,
       const xAOD::Vertex* vtx, bool doRemoval) const = 0;
 
   virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+      const EventContext &ctx,
       const Trk::TrackParameters* track, const Trk::TrackParameters* newtrack,
       const xAOD::Vertex* vtx, bool doRemoval) const = 0;
 
@@ -75,32 +79,27 @@ class ITrackToVertexIPEstimator : virtual public IAlgTool {
   virtual xAOD::Vertex* getUnbiasedVertex(const Trk::TrackParameters* track,
                                           const xAOD::Vertex* vtx) const = 0;
 
-  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(const EventContext &ctx,
       const xAOD::TrackParticle* track, const xAOD::Vertex* vtx) const = 0;
 
-  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(
+  virtual std::unique_ptr<ImpactParametersAndSigma> estimate(const EventContext &ctx,
       const Trk::TrackParameters* track, const xAOD::Vertex* vtx) const = 0;
 
   virtual double get3DLifetimeSignOfTrack(
+      const EventContext &ctx,
       const Trk::TrackParameters& track, const Amg::Vector3D& jetMomentum,
-      const xAOD::Vertex& primaryVertex) const = 0;
-  virtual double get3DLifetimeSignOfTrack(
-      const Trk::TrackParameters& track, const CLHEP::Hep3Vector& jetMomentum,
       const xAOD::Vertex& primaryVertex) const = 0;
 
   virtual double get2DLifetimeSignOfTrack(
+      const EventContext &ctx,
       const Trk::TrackParameters& track, const Amg::Vector3D& jetMomentum,
-      const xAOD::Vertex& primaryVertex) const = 0;
-  virtual double get2DLifetimeSignOfTrack(
-      const Trk::TrackParameters& track, const CLHEP::Hep3Vector& jetMomentum,
       const xAOD::Vertex& primaryVertex) const = 0;
 
   virtual double getZLifetimeSignOfTrack(
+      const EventContext &ctx,
       const Trk::TrackParameters& track, const Amg::Vector3D& jetMomentum,
       const xAOD::Vertex& primaryVertex) const = 0;
-  virtual double getZLifetimeSignOfTrack(
-      const Trk::TrackParameters& track, const CLHEP::Hep3Vector& jetMomentum,
-      const xAOD::Vertex& primaryVertex) const = 0;
+
 
 };  // end of class definitions
 

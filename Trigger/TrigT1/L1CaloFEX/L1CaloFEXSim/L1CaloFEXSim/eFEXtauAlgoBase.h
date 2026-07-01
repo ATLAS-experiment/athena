@@ -36,7 +36,7 @@ public:
   /** Destructor */
   virtual ~eFEXtauAlgoBase();
 
-  virtual StatusCode safetyTest();
+  virtual StatusCode safetyTest(const EventContext& ctx);
 
   virtual void compute() {};
   virtual bool isCentralTowerSeed() const;
@@ -72,6 +72,8 @@ public:
   protected:
    SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey{
       this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
+   const LVL1::eTowerContainer* m_eTowers = nullptr;
+
   bool m_cellsSet = false;
 
   int m_eFexalgoTowerID[3][3]{};

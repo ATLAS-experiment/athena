@@ -28,11 +28,11 @@ StatusCode PixelFastDigitization::initialize() {
 //----------------------------------------------------------------------
 // Execute method:
 //----------------------------------------------------------------------
-StatusCode PixelFastDigitization::execute() {
+StatusCode PixelFastDigitization::execute(const EventContext& ctx) {
 
   ATH_MSG_VERBOSE ( " PixelFastDigitization : execute()" );
 
-  ATH_CHECK (m_digTool->processAllSubEvents(Gaudi::Hive::currentContext()));
+  ATH_CHECK (m_digTool->processAllSubEvents(ctx));
 
   ATH_MSG_VERBOSE ( " PixelFastDigitization : m_digTool->processAllSubEvents()" );
 

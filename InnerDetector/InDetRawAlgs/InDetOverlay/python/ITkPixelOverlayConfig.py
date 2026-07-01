@@ -11,13 +11,14 @@ def ITkPixelOverlayAlgCfg(flags, name="ITkPixelOverlay", **kwargs):
     """Return a ComponentAccumulator for ITk PixelOverlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}ITkPixelRDOs")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}ITkPixelRDOs" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}ITkPixelRDOs")
     kwargs.setdefault("OutputKey", "ITkPixelRDOs")
 
     # Input setup
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do Pixel overlay
     acc.addEventAlgo(CompFactory.PixelOverlay(name, **kwargs))

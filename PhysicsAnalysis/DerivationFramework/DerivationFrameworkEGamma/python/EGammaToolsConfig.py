@@ -51,6 +51,21 @@ def EGElectronLikelihoodToolWrapperCfg(flags, name, **kwargs):
     acc.setPrivateTools(CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name, **kwargs))
     return acc
 
+# Photon BDT selection tool wrapper
+def EGPhotonBDTToolWrapperCfg(flags, name, **kwargs):
+    """Configure the E-gamma selection tool wrapper"""
+    acc = ComponentAccumulator()
+    sgName = kwargs.pop("StoreGateEntryName", "")
+    if not sgName:
+        raise AttributeError("StoreGateEntryName not set")
+    wpName = kwargs.pop("WorkingPointName", "")
+    if not wpName:
+        raise AttributeError("WorkingPointName not set")
+    kwargs.setdefault("decoratorPass", sgName+wpName)
+    kwargs.setdefault("decoratorIsEM", sgName+wpName + "IsEMValue")
+    kwargs.setdefault("decoratorScore", sgName + "Score")
+    acc.setPrivateTools(CompFactory.DerivationFramework.EGPhotonBDTToolWrapper(name, **kwargs))
+    return acc
 
 # Photon cleaning tool wrapper
 def EGPhotonCleaningWrapperCfg(flags, name, **kwargs):
@@ -172,4 +187,20 @@ def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
     acc.setPrivateTools(
         CompFactory.DerivationFramework.EGammaCookieCutClusterTool(
             name, **kwargs))
+    return acc
+
+def EGammaEnergyCalibrationWrapperCfg(
+        flags,
+        name="TransformerEnergyCalibration",
+        **kwargs):
+    acc = ComponentAccumulator()
+
+    from egammaMVACalib.egammaMVACalibConfig import egammaTransformerSvcCfg
+
+    kwargs.setdefault("decoratorTransformerEnergy", "TransformerEnergy")
+    kwargs.setdefault("decoratorTransformerEnergyPhoton", "TransformerEnergy")
+    kwargs.setdefault("TransformerCalibSvc", acc.getPrimaryAndMerge(egammaTransformerSvcCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.DerivationFramework.EGammaEnergyCalibrationWrapper(name, **kwargs))
+
     return acc

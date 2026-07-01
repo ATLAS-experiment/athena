@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef PFCLUSTERSELECTORTOOL_H
-#define PFCLUSTERSELECTORTOOL_H
+#ifndef EFLOWREC_PFCLUSTERSELECTORTOOL_H
+#define EFLOWREC_PFCLUSTERSELECTORTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
@@ -21,7 +21,6 @@ public:
   /** Default destructor */
   ~PFClusterSelectorTool() {};
 
-  /** Gaudi AthAlgorithm hooks */
   StatusCode initialize();
   StatusCode execute(eflowRecClusterContainer& theEFlowRecClusterContainer,
                      xAOD::CaloClusterContainer& theCaloClusterContainer) const;
@@ -31,8 +30,8 @@ private:
   /** for EM mode, LC weight for cells are retrieved before doing any
    * subtraction; they will be used after subtraction */
   void retrieveLCCalCellWeight(
-    const double& energy,
-    const unsigned& index,
+    double energy,
+    unsigned index,
     std::map<IdentifierHash, double>& cellsWeight,
     const xAOD::CaloClusterContainer& caloCalClustersContainer,
     const CaloDetDescrManager& calo_dd_man) const;

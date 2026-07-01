@@ -12,49 +12,6 @@
 
 #include "LArRawConditions/LArAutoCorrComplete.h"
 
-LArAutoCorrTotalCondAlg::LArAutoCorrTotalCondAlg(const std::string &name,
-                                                 ISvcLocator *pSvcLocator)
-    : ::AthCondAlgorithm(name, pSvcLocator),
-      m_LArADC2MeVObjKey("LArADC2MeV"),
-      m_LArOnOffIdMappingObjKey("LArOnOffIdMap"),
-      m_LArShapeObjKey("LArShapeSym"),
-      m_LArAutoCorrObjKey("LArAutoCorrSym"),
-      m_LArNoiseObjKey("LArNoiseSym"),
-      m_LArPedestalObjKey("LArPedestal"),
-      m_LArfSamplObjKey("LArfSamplSym"),
-      m_LArMinBiasObjKey("LArMinBiasSym"),
-      m_LArAutoCorrTotalObjKey("LArAutoCorrTotal"),
-      m_NoPile(false), m_isMC(true),
-      m_isSuperCell(false), m_Nsamples(5),
-      m_firstSample(0), m_deltaBunch(1) {
-  declareProperty("LArADC2MeVObjKey", m_LArADC2MeVObjKey,
-                  "Key to read LArADC2MeV object");
-  declareProperty("LArOnOffIdMappingObjKey", m_LArOnOffIdMappingObjKey,
-                  "Key to read LArOnOffIdMapping object");
-  declareProperty("LArShapeObjKey", m_LArShapeObjKey,
-                  "Key to read LArShape object");
-  declareProperty("LArAutoCorrObjKey", m_LArAutoCorrObjKey,
-                  "Key to read LArAutoCorr object");
-  declareProperty("LArNoiseObjKey", m_LArNoiseObjKey,
-                  "Key to read LArNoise object");
-  declareProperty("LArPedestalObjKey", m_LArPedestalObjKey,
-                  "Key to read LArPedestal object");
-  declareProperty("LArfSamplObjKey", m_LArfSamplObjKey,
-                  "Key to read LArfSampl object");
-  declareProperty("LArMinBiasObjKey", m_LArMinBiasObjKey,
-                  "Key to read LArMinBias object");
-  declareProperty("LArAutoCorrTotalObjKey", m_LArAutoCorrTotalObjKey,
-                  "Key to write LArAutoCorrTotal object");
-  declareProperty("NoPileUp", m_NoPile);
-  declareProperty("isMC", m_isMC);
-  declareProperty("isSuperCell", m_isSuperCell);
-  declareProperty("Nsamples", m_Nsamples, "Max number of samples to use");
-  declareProperty(
-      "firstSample", m_firstSample,
-      "First sample to use for in-time event on the full pulse shape");
-  declareProperty("deltaBunch", m_deltaBunch,
-                  "Delta between filled bunches in 25 ns units");
-}
 
 LArAutoCorrTotalCondAlg::~LArAutoCorrTotalCondAlg() {}
 
@@ -74,11 +31,9 @@ StatusCode LArAutoCorrTotalCondAlg::initialize() {
   ATH_CHECK(m_LArfSamplObjKey.initialize(!m_NoPile));
   ATH_CHECK(m_LArMinBiasObjKey.initialize(!m_NoPile));
 
-  // Number of gains (does this have to be in initialize now b/c of AthenaMT?)
+  // Supercells have only one gain
   if (m_isSuperCell) {
     m_nGains = 1;
-  } else {
-    m_nGains = 3;
   }
 
   ATH_MSG_DEBUG("settings: m_NoPile " << m_NoPile);

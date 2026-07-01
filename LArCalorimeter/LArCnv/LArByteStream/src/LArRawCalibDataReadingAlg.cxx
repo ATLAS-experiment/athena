@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawCalibDataReadingAlg.h"
@@ -105,7 +105,6 @@ LArRawCalibDataReadingAlg::LArRawCalibDataReadingAlg(const std::string& name, IS
       for (const unsigned iPN: m_vPosNegPreselection) {
 	for (const unsigned iFT: m_vFTPreselection) {
 	  HWIdentifier finalFTId=m_onlineId->feedthrough_Id(iBE,iPN,iFT);
-	  //unsigned int finalFTId32 = finalFTId.get_identifier32().get_compact();
 	  ATH_MSG_INFO("Adding feedthrough Barrel/Endcap=" << iBE << " pos/neg=" << iPN << " FT=" << iFT 
 		       << " (0x" << std::hex << finalFTId.get_identifier32().get_compact() << std::dec << ")");
 	  m_vFinalPreselection.insert(finalFTId);
@@ -143,7 +142,6 @@ LArRawCalibDataReadingAlg::LArRawCalibDataReadingAlg(const std::string& name, IS
       ATH_MSG_ERROR("Configuration problem, property 'SubCaloPreselection' set to " << m_subCaloPreselection.value() << ", expect 'EM', 'HEC' or 'FCAL'");
       return StatusCode::FAILURE;
     }
-    std::cout << "set sizes:" << subcaloFTs.size() << ", " << m_vFinalPreselection.size() << std::endl;
     if (m_vFinalPreselection.size()>0) {
       //Form the intersection of the preselection give as subdet and side/FT/slot
       for(auto it = m_vFinalPreselection.begin(); it != m_vFinalPreselection.end(); ) {
@@ -258,11 +256,11 @@ StatusCode LArRawCalibDataReadingAlg::execute(const EventContext& ctx) const {
       rodBlockType=rob.rod_detev_type()&0xff;
       ATH_MSG_VERBOSE("Found version " << rodMinorVersion <<  " of Rod Block Type  " <<  rodBlockType);
       if (rodBlockType==10) { // Accumulated  digits
-	  rodBlock.reset(new LArRodBlockAccumulatedV3);
+         rodBlock.reset(new LArRodBlockAccumulatedV3 (this->msgSvc().get()));
       }//end of rodBlockType ==10
       else if (rodBlockType==7 || rodBlockType==2) { // Calib. digits
          if(rodMinorVersion>=6) { // Accumulated calib. digits
-            rodBlock.reset(new LArRodBlockCalibrationV3);
+            rodBlock.reset(new LArRodBlockCalibrationV3 (this->msgSvc().get()));
          } else {
             ATH_MSG_ERROR("Found unsupported ROD Block version " << rodMinorVersion
                         << " of ROD block type " << rodBlockType);

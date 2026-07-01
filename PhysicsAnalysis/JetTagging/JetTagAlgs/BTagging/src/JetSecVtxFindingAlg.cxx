@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTagging/JetSecVtxFindingAlg.h"
@@ -128,7 +128,7 @@ namespace Analysis {
 
       ATH_MSG_DEBUG("#BTAG#  Running " << m_secVertexFinderToolHandle);
 
-      Trk::VxSecVertexInfo* myVertexInfo = m_secVertexFinderToolHandle->findSecVertex(PrimaryVtx, jetIter->p4(), inputIParticles);
+      Trk::VxSecVertexInfo* myVertexInfo = m_secVertexFinderToolHandle->findSecVertex(ctx, PrimaryVtx, jetIter->p4(), inputIParticles);
       ATH_MSG_DEBUG("#BTAG# Number of vertices found: " << myVertexInfo->vertices().size());
       h_VxSecVertexInfoName->push_back(myVertexInfo); 
     }// for loop on jets

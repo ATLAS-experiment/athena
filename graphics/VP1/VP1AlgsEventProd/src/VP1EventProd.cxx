@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1AlgsEventProd/VP1EventProd.h"
@@ -70,7 +70,7 @@ StatusCode VP1EventProd::initialize()
   return result;
 }
 
-StatusCode VP1EventProd::execute()
+StatusCode VP1EventProd::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG(" in execute(). Nothing to do here...");
 
@@ -171,7 +171,7 @@ void VP1EventProd::handle(const Incident& inc)
   m_nEvent++;
 
   // Update run_number/event_number/time_stamp
-  const EventContext& context = getContext();
+  const EventContext& context = inc.context();
   m_eventNumber = context.eventID().event_number();
   m_runNumber = context.eventID().run_number();
   m_timeStamp = context.eventID().time_stamp();

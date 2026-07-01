@@ -35,7 +35,7 @@ private:
     std::streambuf * m_old;
 };
 
-static const std::string sctDictFilename{"InDetIdDictFiles/IdDictInnerDetector_IBL3D25-03.xml"};
+static const std::string sctDictFilename{"IdDictInnerDetector.xml"};
 
 
 BOOST_AUTO_TEST_SUITE(IdDictParserTest)

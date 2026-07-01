@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -15,7 +15,6 @@
 #include "D3PDMakerUtils/TypeNameConversions.h"
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/errorcheck.h"
-#include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/System.h"
 #include "TClass.h"
 
@@ -33,7 +32,7 @@ namespace D3PD {
 StatusCode nameToTypeinfo (const std::string& name,
                            std::type_info const* &ti,
                            const std::string& context,
-                           ServiceHandle<IClassIDSvc> clidsvc
+                           const ServiceHandle<IClassIDSvc> & clidsvc
                              /*= ServiceHandle<IClassIDSvc>("ClassIDSvc")*/)
 {
   ti = 0;
@@ -47,7 +46,7 @@ StatusCode nameToTypeinfo (const std::string& name,
 
   // Try to look it up using BaseInfo.  First need to convert to a CLID.
   CLID clid;
-  if (nameToCLID (name, clid, context, std::move(clidsvc)).isSuccess()) {
+  if (nameToCLID (name, clid, context, clidsvc).isSuccess()) {
     const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (clid);
     if (bib) {
       ti = &bib->typeinfo();
@@ -72,7 +71,7 @@ StatusCode nameToTypeinfo (const std::string& name,
 StatusCode nameToCLID (const std::string& name,
                        CLID& clid,
                        const std::string& context,
-                       ServiceHandle<IClassIDSvc> clidsvc
+                       const ServiceHandle<IClassIDSvc> & clidsvc
                          /*= ServiceHandle<IClassIDSvc>("ClassIDSvc")*/)
 {
   clid = CLID_NULL;

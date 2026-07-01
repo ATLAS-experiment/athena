@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -14,17 +14,22 @@ using json = nlohmann::json;
 
 Analysis::CDIReader::CDIReader(const std::string& cdipath, bool verbose) :  m_use_json(false), m_cdipath(cdipath), m_CDIFile(TFile::Open(m_cdipath.c_str(), "READ"))
 {
-    TObjString* s;
+    if (!m_CDIFile)[[unlikely]]{
+      std::cout << "Analysis::CDIReader::CDIReader: " << m_cdipath << " could not be opened."<<std::endl;
+      return;
+    }
+    TObjString* s{};
     m_CDIFile->GetObject("VersionInfo/BuildNumber", s);
     if (s && verbose){
         std::cout << " CDI file build number: " << s->GetName() << std::endl;
     }
     TList* taggerkeys = m_CDIFile->GetListOfKeys();
     for (const auto tagger : *taggerkeys){
-      const char* taggername = tagger->GetName();
-      if(strcmp(taggername, "VersionInfo") != 0){
+      if (!tagger)[[unlikely]] continue;
+      const std::string taggername{tagger->GetName()};
+      if(taggername != "VersionInfo"){
         // now we have the top-level tagger name, we want to add this to our overall meta data
-        TDirectoryFile* taggerDir = (TDirectoryFile*)m_CDIFile->Get(taggername);
+        auto* taggerDir = static_cast<TDirectoryFile*>(m_CDIFile->Get(taggername.c_str()));
         record_metadata(taggername, 0);
         crawlCDI(taggerDir, 0, taggername);
       }

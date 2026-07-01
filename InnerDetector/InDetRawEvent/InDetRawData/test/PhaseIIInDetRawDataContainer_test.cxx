@@ -1,679 +1,1003 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-  */
-#undef NDEBUG
-#include <atomic>
-#include <array>
-#include <vector>
-#include <cassert>
-#include <iostream>
-#include <limits>
-#include <cstdint>
-#include <type_traits>
-#include <span>
-
+*/
 #include "InDetRawData/PhaseIIPixelRawDataContainerMT.h"
 
-#include <memory>
-#include <algorithm>
-#include <cstring>
 #include <thread>
+#include <memory>
+#include <atomic>
+#include <array>
+#include <chrono>
+#include <cstdint>
+#include <cassert>
+#include <iostream>
+#include <cstring>
+#include <cstdlib>
+
 #include "FNVHash.h"
 
-// create toy ROIs i.e. collections of unique random module indices.
-std::vector< std::vector< unsigned int> > makeROIs( unsigned int max_modules, unsigned int max_ROIs, unsigned int max_modules_per_ROI ) {
-   std::vector< std::vector< unsigned int> >  rois;
-   rois.resize( max_ROIs );
-   for ( std::vector<unsigned int> &roi : rois ) {
-      //coverity[DC.WEAK_CRYPTO]
-      unsigned int n_modules = rand() % max_modules_per_ROI;
-      roi.reserve(n_modules);
-      for (unsigned int module_i=0; module_i<n_modules; ++module_i) {
-         //coverity[DC.WEAK_CRYPTO]
-         unsigned int a_module =  rand() % max_modules;
-         if (std::find(roi.begin(), roi.end(), a_module) == roi.end()) {
-            roi.push_back(a_module);
+using namespace std::literals::chrono_literals;
+struct Work {
+   std::uint32_t eventIndex = std::numeric_limits<unsigned int>::max();
+   std::uint16_t roiIndex = std::numeric_limits<std::uint16_t>::max();
+   std::uint8_t  slotIndex  = std::numeric_limits<std::uint8_t>::max();
+   enum Type : std::uint8_t {
+      kNoWork,
+      kOk,
+      kAbort
+   } status {};
+   Work(Type a_type,
+        unsigned int an_event = std::numeric_limits<std::uint32_t>::max(),
+        unsigned int a_roi = std::numeric_limits<std::uint16_t>::max(),
+        unsigned int a_slot = std::numeric_limits<std::uint8_t>::max())
+      : eventIndex(an_event), roiIndex(a_roi), slotIndex(a_slot), status(a_type)
+   {}
+};
+
+// Ring buffer based work queue supporting one writer and multiple readers
+struct WorkQueue {
+   WorkQueue(unsigned int n_slots) {
+      m_ringQueue.resize(n_slots,Work(Work::kNoWork));
+   }
+   // Get work descriptor from the queue
+   Work getWork() {
+      for (unsigned int current=m_read; current!= m_write; ) {
+         Work current_work = m_ringQueue[ current % m_ringQueue.size() ];
+         if (m_read.compare_exchange_weak(current, current+1)) {
+            ++m_retrievedWorked;
+            return current_work;
+         }
+      }
+      return Work(m_abort ? Work::kAbort : Work::kNoWork);
+   }
+   // Push a new work descriptor to the queue
+   bool pushWork(Work &&work) {
+      if (m_write - m_read>=m_ringQueue.size()) return false;
+      unsigned int current_write_index = m_write;
+      m_ringQueue[current_write_index % m_ringQueue.size() ]=std::move(work);
+      if (!m_write.compare_exchange_strong(current_write_index, current_write_index+1, std::memory_order::seq_cst)) return false;
+      ++m_pushedWorked;
+      return true;
+   }
+   // Wait for a new slot becomes available to push new work
+   void waitForFreeSlot() {
+      unsigned int current = m_read;
+      if (m_write - current>=m_ringQueue.size()) {
+         while (current == m_read && !m_abort) {
+            ++m_waitForPush;
+            std::this_thread::sleep_for(m_sleepForFreeSlot);
          }
       }
    }
-   return rois;
+   // Wait until new work becomes available
+   void waitForWork() {
+      unsigned int current_write = m_write;
+      while (current_write == m_write && !m_abort) {
+         ++m_waitForEvent;
+         std::this_thread::sleep_for(m_sleepForWork);
+      }
+   }
+   // Mark abort status
+   // the readers and writers should honor the status and abort.
+   void abort() {
+      m_abort=true;
+   }
+   std::vector<Work> m_ringQueue;
+   std::atomic<unsigned int> m_read {};
+   std::atomic<unsigned int> m_write {};
+
+   static std::chrono::duration<std::int64_t, std::nano> sleepForFreeSlot() {
+      using namespace std::chrono_literals;
+      return 1us;
+   }
+   static std::chrono::duration<std::int64_t, std::nano> sleepForWork() {
+      using namespace std::chrono_literals;
+      return 1us;
+   }
+
+   std::chrono::duration<std::int64_t, std::nano> m_sleepForFreeSlot=sleepForFreeSlot();
+   std::chrono::duration<std::int64_t, std::nano> m_sleepForWork=sleepForWork();
+   std::atomic<unsigned int > m_pushedWorked{};
+   std::atomic<unsigned int > m_retrievedWorked{};
+   std::atomic<unsigned int > m_waitForPush{};
+   std::atomic<unsigned int > m_waitForEvent{};
+
+   bool m_abort=false;
+};
+
+// structure to hold toy data of one event
+struct Event {
+   std::vector<std::vector<unsigned int> > rois;                // module hashes of modules relevant for an ROI per ROI
+   std::vector<std::vector<std::array<std::int16_t,2> > > hits; // hit coordinates per module
+   std::vector<std::vector<unsigned int > > dataWord;           // hit data word per module
+};
+
+// structure to hold toy events
+// toy events are used multiple times in random order
+struct EventList {
+   std::size_t size() const {
+      return eventIndex.size();
+   }
+   auto begin() const {
+      return eventIndex.begin();
+   }
+   auto end()const {
+      return eventIndex.end();
+   }
+   Event &getEvent(unsigned int event_index) {
+      assert( event_index < eventIndex.size() );
+      assert( eventIndex[event_index] < events.size() );
+      return events[eventIndex[event_index]];
+   }
+   const Event &getEvent(unsigned int event_index) const {
+      assert( event_index < eventIndex.size() );
+      assert( eventIndex[event_index] < events.size() );
+      return events[eventIndex[event_index]];
+   }
+   std::vector<unsigned int> eventIndex; // the order in which the toy events should appear
+   std::vector<Event> events;            // the pool of toy events
+};
+
+// inequality operator to compare a vector and span of const atomics of the same type.
+template<typename T>
+bool operator!=(const std::vector<T> &a, std::span<const std::atomic<T> > b) {
+   if (a.size() != b.size()) return true;
+   for (unsigned int i=0; i<a.size(); ++i) {
+      if (a[i] != b[i]) return true;
+   }
+   return false;
+}
+// inequality operator to compare a vector and span of atomics of the same type.
+template<typename T>
+bool operator!=(const std::vector<T> &a, std::span<std::atomic<T> > b) {
+   if (a.size() != b.size()) return true;
+   for (unsigned int i=0; i<a.size(); ++i) {
+      if (a[i] != b[i]) return true;
+   }
+   return false;
 }
 
-// create from toy ROIs, non overlapping "ROIs"
-// create from collections of unique module indices non-overlapping collections of unique module indices
-// i.e. each module index is at most in one of the collections.
-std::vector<std::vector<unsigned int> > removeOverlap(unsigned int max_modules, const std::vector<std::vector<unsigned int> > &rois) {
-   std::vector<std::vector<unsigned int> > rois_out;
-   rois_out.resize(rois.size());
-   std::vector<bool> used(max_modules,false);
-   unsigned int roi_i=0;
-   for (const std::vector<unsigned int> &an_roi : rois ) {
-      std::vector<unsigned int> &dest = rois_out[roi_i];
-      dest.reserve( an_roi.size());
-      for (unsigned int module_i : an_roi) {
-         if (!used.at(module_i)) {
-            used[module_i]=true;
-            dest.push_back(module_i);
+// structure to store the results of the processing
+// the result is one hash per ROI and event.
+struct Results {
+   static std::vector<unsigned int> makeOffsets(const EventList &events) {
+      std::vector<unsigned int> offset;
+      offset.reserve( events.size());
+      offset.push_back(0u);
+      for (unsigned int event_index : events) {
+         assert( event_index < events.events.size());
+         const Event& event = events.events[event_index];
+         offset.push_back(offset.back()+event.rois.size());
+      }
+      return offset;
+   }
+
+   // The constructor will alllocate storage for the results per ROI and event.
+   Results(const EventList &events) : resultOffset(makeOffsets(events)), results(resultOffset.back()) {}
+
+   // compute a hash for one event and ROI using the toy data.
+   static unsigned int computeHash(const Event &event, unsigned int roi_i) {
+      assert( roi_i < event.rois.size() );
+      const std::vector<unsigned int> & roi = event.rois[roi_i];
+      FNVHash hash;
+      for (unsigned int module_i : roi) {
+         assert( module_i < event.hits.size());
+         for (unsigned int hit_i=0; hit_i<event.hits[module_i].size(); ++hit_i) {
+            hash.add(event.hits[module_i][hit_i]);
+            hash.add(event.dataWord[module_i][hit_i]);
          }
       }
-      ++roi_i;
+      return hash.value();
    }
-   return rois_out;
-}
-
-// create from non overlapping ROIs a simple association which associates a module index to the ROI index which contains the module index
-std::vector<std::pair<unsigned int, unsigned int> > findContainer(unsigned int max_modules, const std::vector<std::vector<unsigned int> > &rois) {
-   std::vector<std::pair<unsigned int,unsigned int> > used_modules;
-   std::vector<unsigned int> container_index(max_modules, std::numeric_limits<unsigned int>::max());
-   unsigned int n_modules_used=0;
-   unsigned int roi_i=0;
-   for (const std::vector<unsigned int> &an_roi : rois ) {
-      for (unsigned int module_i : an_roi) {
-         if (container_index[module_i]==std::numeric_limits<unsigned int>::max()) {
-            container_index[module_i]=roi_i;
-            ++n_modules_used;
+   // compute a hash for one event and the given ROIs using the data stored in the output container (MT-version).
+   static unsigned int computeHash(const PhaseIIPixelRawDataContainerMT &raw_data_container, const std::vector<unsigned int> &roi) {
+      FNVHash hash;
+      PhaseII::PixelRawDataTypeTraits<>::ContainerCollectionProxy
+         rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(raw_data_container);
+      for (unsigned int module_i : roi) {
+         assert( module_i < rdo_container_collection_proxy.size());
+         PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy
+            module_proxy = rdo_container_collection_proxy[module_i];
+         for (PhaseII::PixelRawDataTypeTraits<>::RawDataProxy
+                 rdo_proxy : module_proxy) {
+            hash.add(rdo_proxy.coordinates());
+            hash.add(rdo_proxy.dataWord());
          }
       }
-      ++roi_i;
+      return hash.value();
    }
-   used_modules.reserve(n_modules_used);
-   unsigned int module_i=0;
-   for(unsigned int container_i : container_index ) {
-      if (container_index[module_i]!=std::numeric_limits<unsigned int>::max()) {
-         used_modules.push_back(std::make_pair(module_i, container_i) );
+   // compute a hash for one event and the given ROIs using the data stored in the output container (nonMT-version).
+   static unsigned int computeHash(const PhaseIIPixelRawDataContainer &raw_data_container, const std::vector<unsigned int> &roi) {
+      FNVHash hash;
+      PhaseII::PixelRawDataTypeTraits<>::ContainerCollectionProxy
+         rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(raw_data_container);
+      for (unsigned int module_i : roi) {
+         assert( module_i < rdo_container_collection_proxy.size());
+      PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy
+            module_proxy = rdo_container_collection_proxy[module_i];
+         for (PhaseII::PixelRawDataTypeTraits<>::RawDataProxy
+                 rdo_proxy : module_proxy) {
+            hash.add(rdo_proxy.coordinates());
+            hash.add(rdo_proxy.dataWord());
+         }
       }
-      ++module_i;
+      return hash.value();
    }
 
-   return used_modules;
+   // compute hashes for one event using the toy data.
+   static std::vector<unsigned int> computeHash(const Event &event) {
+      std::vector<unsigned int> hash_codes;
+      hash_codes.reserve( event.rois.size());
+      for (unsigned int roi_i=0; roi_i < event.rois.size(); ++roi_i) {
+         hash_codes.push_back(computeHash(event, roi_i));
+      }
+      return hash_codes;
+   }
+   // get the results for one event obtained from the output container (non-const version)
+   std::span<std::atomic<unsigned int> > eventResults(unsigned int event_index) {
+      assert( event_index+1 < resultOffset.size() );
+      return std::span(results.begin() + resultOffset[event_index], results.begin() + resultOffset[event_index+1]);
+   }
+   // get the results for one event obtained from the output container (const version)
+   std::span<const std::atomic<unsigned int> > eventResults(unsigned int event_index) const {
+      assert( event_index+1 < resultOffset.size());
+      return std::span(results.begin() + resultOffset[event_index], results.begin() + resultOffset[event_index+1]);
+   }
+   // compare the results with the expectation from the toy data.
+   // return true if the results agree with the expectation.
+   bool compareResults(const EventList &events) const {
+      std::vector<unsigned int> tmp_hashes;
+      for (unsigned int event_index=0; event_index < events.eventIndex.size(); ++event_index) {
+         const Event& event = events.getEvent(event_index);
+         tmp_hashes = computeHash(event);
+         if (tmp_hashes != eventResults(event_index)) return false;
+      }
+      return true;
+   }
+
+   std::vector< unsigned int> resultOffset; // offset to the results for the first ROI of an event.
+   std::vector< std::atomic<unsigned int> > results; //the results of all evnets and ROIs
+};
+
+struct AtomicTypelessPtr {
+   void *set(void *new_ptr) {
+      void *old_ptr = m_ptr;
+      if (!m_ptr.compare_exchange_strong(old_ptr, new_ptr, std::memory_order::seq_cst)) return new_ptr;
+      return old_ptr;
+   }
+   std::atomic<void *> m_ptr{};
+};
+
+// unique_ptr
+// setting is atomic.
+template <typename T>
+struct AtomicUniquePtr : private AtomicTypelessPtr {
+   AtomicUniquePtr() = default;
+
+   // try to set a new pointer
+   // will either delete the new or old pointer
+   void set(std::unique_ptr<T> &&new_ptr) {
+      std::unique_ptr<T> ptr( static_cast<T *>(AtomicTypelessPtr::set(new_ptr.release())) );
+   }
+   std::unique_ptr<T> release() {
+      std::unique_ptr<T> ptr( static_cast<T *>(AtomicTypelessPtr::set(nullptr)) );
+      return ptr;
+   }
+   T *ptr() { return static_cast< T *>(this->m_ptr.load()); }
+   const T *ptr() const { return static_cast< T *>(this->m_ptr.load()); }
+};
+
+// structure to provide output containers for multiple concurrent events.
+template <bool MT>
+struct EventStoreImpl {
+   EventStoreImpl(unsigned int concurrent_events)
+      : eventData(concurrent_events),
+        toProcess(concurrent_events)
+   {}
+   // get a free slot id
+   unsigned int freeSlot() {
+      unsigned int slot_i=0;
+      for (uint64_t value : toProcess) {
+         if (value == 0ul) {
+            return slot_i;
+         }
+         ++slot_i;
+      }
+      return std::numeric_limits<unsigned int>::max();
+   }
+   // create a new event
+   unsigned int getNewEvent(unsigned int max_modules, [[maybe_unused]] unsigned int container_list_size, unsigned int n_rois) {
+      unsigned int slot_i=freeSlot();
+      assert( eventData.size() == toProcess.size() );
+      std::uint64_t should_to_process=0ul;
+      if (slot_i < eventData.size() && toProcess[slot_i].compare_exchange_strong(should_to_process, static_cast<std::uint64_t>(n_rois),  std::memory_order::seq_cst)) {
+         if constexpr(MT) {
+            eventData[slot_i].set(std::make_unique< PhaseIIPixelRawDataContainerMT>(max_modules,
+                                                                                    container_list_size));
+         }
+         else {
+            eventData[slot_i].clear();
+            eventData[slot_i].reserve(n_rois);
+            for (unsigned int roi_i=0; roi_i < n_rois; ++roi_i) {
+               eventData[slot_i].emplace_back( std::make_unique<PhaseIIPixelRawDataContainer>(max_modules,1u));
+            }
+         }
+         return slot_i;
+      }
+      return std::numeric_limits<unsigned int>::max();
+   }
+   // get the output container to be used for a certain event slot and eventually ROI.
+   auto getEventDataValidForRoi(unsigned int slotIndex, [[maybe_unused]] unsigned int roiIndex) {
+      assert(slotIndex < eventData.size() );
+      if constexpr(MT) {
+         return eventData[slotIndex].ptr();
+      }
+      else {
+         assert(roiIndex < eventData[slotIndex].size() );
+         return eventData[slotIndex][roiIndex].get();
+      }
+   }
+
+   std::conditional<MT,
+                    std::vector< AtomicUniquePtr<PhaseIIPixelRawDataContainerMT> >,
+                    std::vector< std::vector<std::unique_ptr<PhaseIIPixelRawDataContainer>> > >::type eventData;
+   std::vector< std::atomic< uint64_t > > toProcess;
+};
+
+using EventStoreMT=EventStoreImpl<true>;       // event store which provides an output container which supports concurrent filling
+using EventStoreNonMT=EventStoreImpl<false>;   // event store which provides an output container per ROI.
+
+// function which pushes all the events to the work queue.
+template <typename T_EventStore>
+void eventLoop(const EventList &events, unsigned int max_modules, unsigned int initial_container_list_size, WorkQueue &queue, T_EventStore &store) {
+   unsigned int wait_for_free_slot=0; // for debugging
+   for (unsigned int event_index=0; event_index < events.size(); ++event_index) {
+      const Event &event= events.getEvent(event_index);
+      unsigned int slot_i;
+      for (;;) {
+         slot_i=store.getNewEvent(max_modules, std::max(initial_container_list_size, static_cast<unsigned int>(event.rois.size())), event.rois.size());
+         if (slot_i<store.eventData.size()) break;
+         std::this_thread::sleep_for(queue.m_sleepForFreeSlot);
+         ++wait_for_free_slot;
+      }
+      assert( slot_i == static_cast<std::uint8_t>(slot_i));
+      assert( event.rois.size() == static_cast<std::uint16_t>(event.rois.size()));
+      for (unsigned int roi_i=0; roi_i < event.rois.size(); ++roi_i) {
+         while (!queue.pushWork(Work(Work::kOk, event_index, static_cast<std::uint16_t>(roi_i), static_cast<std::uint8_t>(slot_i)))) {
+            queue.waitForFreeSlot();
+         }
+      }
+   }
+   queue.abort();
+   (void) wait_for_free_slot;
 }
 
-// create a new pixel hit container for at most max_modules which can be distributed over at most container_list_size
-// independent data containers
-std::unique_ptr< PhaseIIPixelRawDataContainer>  createPixelRawDataContainer(unsigned int max_modules,
-                                                                            unsigned int container_list_size) {
-   std::unique_ptr< PhaseIIPixelRawDataContainer> ret = std::make_unique< PhaseIIPixelRawDataContainer>(max_modules,
-                                                                                                        container_list_size);
-   return ret;
+// function which copies the toy data of an ROI of one event to an output container (MT version)
+void storeEventData(const EventList &events, EventStoreMT &store, unsigned int eventIndex, std::uint16_t roiIndex, std::uint8_t slotIndex) {
+   unsigned int n_rejected_work=0u; // for debugging
+   assert( slotIndex < store.eventData.size() );
+   PhaseIIPixelRawDataContainerMT *a_roi_rdo_container = store.eventData[slotIndex].ptr();
+   assert( a_roi_rdo_container );
+   PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest = a_roi_rdo_container->getNewContainerPtr();
+   const Event &event= events.getEvent(eventIndex);
+   assert(roiIndex < event.rois.size());
+   // "estimate" number of RDOs for this ROI
+   unsigned int n_rdos=0u;
+   for (unsigned int module_i : event.rois[roiIndex]) {
+      n_rdos += event.hits[module_i].size();
+   }
+   // fill output container
+   using CoordType = std::array<std::int16_t,2>;
+   rdo_container_dest->reserve(n_rdos);
+   for (unsigned int module_i : event.rois[roiIndex]) {
+      PhaseII::ContainerRangeGuard<PhaseII::DataRange, PhaseIIPixelRawDataContainerMT::ContainerPtr>
+         dest_range_guard(rdo_container_dest);
+      assert(module_i < event.hits.size() && module_i < event.dataWord.size());
+      assert(event.hits[module_i].size() == event.dataWord[module_i].size());
+      for (unsigned int hit_i=0; hit_i < event.hits[module_i].size(); ++hit_i) {
+         unsigned int event_data_word = event.dataWord[module_i][hit_i];
+         addDataForModule(*a_roi_rdo_container,
+                          dest_range_guard,
+                          CoordType(event.hits[module_i][hit_i]),
+                          PhaseII::PixelRawDataContainer::makeWord( PhaseII::PixelRawDataContainer::getToT(event_data_word ),
+                                                                    PhaseII::PixelRawDataContainer::getBCID(event_data_word ),
+                                                                    PhaseII::PixelRawDataContainer::getLVL1A(event_data_word ),
+                                                                    PhaseII::PixelRawDataContainer::getLVL1ID(event_data_word )));
+      }
+
+      if (!dest_range_guard.empty()) {
+         // register the RDO range for this module, or erase the newly added
+         if (!a_roi_rdo_container->registerOrEraseNewData(module_i,dest_range_guard.range())) {
+            ++n_rejected_work;
+         }
+         // in the process of adding hits to the original container, its capacity may have
+         // been exceeded and the container may have been changed for the current module. To
+         // ensure that the same container is used for the next module get the container, that
+         // contains the hits for the current module from the the range_guard.
+         rdo_container_dest = dest_range_guard.ptr();
+      }
+   }
+   (void) n_rejected_work;
 }
 
-// create toy pixel hit data for the given set of modules, where at most max_hits_per_module are added per module
-// the hits will get coordinates on a matrix n_cols x n_rows, where no attempt is made to avoid hit overlaps
-// the hit data will be stored in the hit data container of the specified container.
-void fillPixelRawDataContainer ( unsigned int container_i,
-                        std::span<unsigned int> modules,
-                        unsigned int max_hits_per_module,
-                        unsigned int n_cols,
-                        unsigned int n_rows,
-                        PhaseIIPixelRawDataContainer &container) {
-   [[maybe_unused]] unsigned int n_rejected_ranges=0u;
+template<typename T>
+struct ContainerPtrWithId {
+   unsigned int containerId() const { return id; }
 
-   // get the actual hit data container for the given container index
-   PhaseII::PixelRawDataContainer &rdo_data = container.data(container_i);
-   rdo_data.reserve( max_hits_per_module * modules.size());
-   for (unsigned int module : modules) {
+   T *operator->() { return m_ptr; }
+   const T *operator->() const { return m_ptr; }
+   T &operator*() { return *m_ptr; }
+   const T &operator*() const { return *m_ptr; }
 
-      // test that the no hit data was registered for this module
-      PhaseII::DataRange range = container.range(module);
-      if (!range.empty()) continue;
+   T *m_ptr;
+   unsigned int id;
+};
 
-      // throw number of hits to be generated for this module
-      //coverity[DC.WEAK_CRYPTO]
-      unsigned int n_rdos = rand() % max_hits_per_module;
-      if (n_rdos>0) {
-         // reserve storage and initialize range data pointing to the first element to be used for this module
-         // the range is empty initially.
-         rdo_data.reserve( rdo_data.size() + n_rdos);
-         using RangeSize_t = PhaseII::DataRange::RangeSize_t;
-         using ContainerIndex_t = PhaseII::DataRange::ContainerIndex_t;
-         PhaseII::DataRange new_range( rdo_data.size(),
-                              static_cast<RangeSize_t>( 0u) ,
-                              static_cast<ContainerIndex_t>(container_i));
+// function which copies the toy data of an ROI of one event to an output container (non-MT version)
+void storeEventData(const EventList &events, EventStoreNonMT &store, unsigned int eventIndex, std::uint16_t roiIndex, std::uint8_t slotIndex) {
+   unsigned int n_rejected_work=0u; // for debugging
+   assert( slotIndex < store.eventData.size() );
+   assert( roiIndex < store.eventData[slotIndex].size() );
+   PhaseIIPixelRawDataContainer *a_roi_rdo_container = store.eventData[slotIndex][roiIndex].get();
+   assert( a_roi_rdo_container );
+   //   assert( a_roi_rdo_container->containerListCapacity()>slotIndex);
+   using ContainerPtr = ContainerPtrWithId<PhaseIIPixelRawDataContainer::DataContainerType>;
+   PhaseIIPixelRawDataContainer::DataContainerType *rdo_container_dest = &(a_roi_rdo_container->data(0u));
 
-         // fill the random hit data
-         for (unsigned int rdo_i=0; rdo_i< n_rdos; ++rdo_i) {
-            //coverity[DC.WEAK_CRYPTO]
-            unsigned int coordinate_pair = rand();
-            //coverity[DC.WEAK_CRYPTO]
+   const Event &event= events.getEvent(eventIndex);
+   assert(roiIndex < event.rois.size());
+   // "estimate" number of RDOs for this ROI
+   unsigned int n_rdos=0u;
+   for (unsigned int module_i : event.rois[roiIndex]) {
+      n_rdos += event.hits[module_i].size();
+   }
+   // fill output container
+   using CoordType = std::array<std::int16_t,2>;
+   rdo_container_dest->reserve(n_rdos);
+   for (unsigned int module_i : event.rois[roiIndex]) {
+      PhaseII::ContainerRangeGuard<PhaseII::DataRange, ContainerPtr >
+         dest_range_guard(ContainerPtr{rdo_container_dest,0u});
+      assert(module_i < event.hits.size() && module_i < event.dataWord.size());
+      assert(event.hits[module_i].size() == event.dataWord[module_i].size());
+      for (unsigned int hit_i=0; hit_i < event.hits[module_i].size(); ++hit_i) {
+         // store the data of one hit
+         unsigned int event_data_word = event.dataWord[module_i][hit_i];
+         rdo_container_dest->emplace_back(CoordType(event.hits[module_i][hit_i]),
+                                          PhaseII::PixelRawDataContainer::makeWord( PhaseII::PixelRawDataContainer::getToT(event_data_word ),
+                                                                                    PhaseII::PixelRawDataContainer::getBCID(event_data_word ),
+                                                                                    PhaseII::PixelRawDataContainer::getLVL1A(event_data_word ),
+                                                                                    PhaseII::PixelRawDataContainer::getLVL1ID(event_data_word )));
+
+      }
+      if (!dest_range_guard.empty()) {
+         // register the RDO range for this module, or erase the newly added
+         if (!a_roi_rdo_container->registerOrEraseNewData(module_i,dest_range_guard.range())) {
+            ++n_rejected_work;
+         }
+         // in the process of adding hits to the original container, its capacity may have
+         // been exceeded and the container may have been changed for the current module. To
+         // ensure that the same container is used for the next module get the container, that
+         // contains the hits for the current module from the the range_guard.
+         rdo_container_dest = dest_range_guard.ptr().m_ptr;
+      }
+   }
+   (void) n_rejected_work;
+}
+
+// process the work of the work queue
+template <typename T_EventStore>
+void processEvent(const EventList &events, WorkQueue &queue, Results &results, T_EventStore &store) {
+   unsigned int n_processed=0; // for debugging
+   unsigned int n_waited=0;    // for debugging
+
+   for(;;) {
+      // get the work descriptor
+      Work work = queue.getWork();
+      if (work.status == Work::kOk) {
+         // get the toy event specified by the work descriptor
+         const Event &event= events.getEvent(work.eventIndex);
+
+         // copy the toy data of the specified ROI to the output container of this event.
+         assert( work.roiIndex < event.rois.size());
+         storeEventData(events, store, work.eventIndex, work.roiIndex, work.slotIndex);
+         // compute the hash for the ROI and store it in the results container
+         const auto  *a_roi_rdo_container = store.getEventDataValidForRoi(work.slotIndex, work.roiIndex);
+         assert( a_roi_rdo_container );
+         unsigned int hash = Results::computeHash(*a_roi_rdo_container, event.rois[work.roiIndex]);
+         auto event_results = results.eventResults(work.eventIndex);
+         assert( work.roiIndex < event_results.size());
+
+         event_results[work.roiIndex]=hash;
+         ++n_processed;
+         assert( store.toProcess[work.slotIndex] > 0 );
+         --store.toProcess[work.slotIndex];
+      }
+      else if (work.status == Work::kAbort) {
+         break;
+      }
+      else {
+         queue.waitForWork();
+         ++n_waited;
+      }
+   }
+   (void) n_processed;
+   (void) n_waited;
+}
+
+// create toy events
+// a toy event contains a certain random number of hits at random locations per module,
+// has a certain random number of ROis consisting of a certain random number of modules.
+EventList makeEvents(unsigned int n_modules, unsigned int n_rows, unsigned int n_columns, unsigned int n_events, unsigned int n_event_indices,
+                     unsigned int min_rois, unsigned int max_rois,
+                     unsigned int min_modules_per_roi, unsigned int max_modules_per_roi,
+                     unsigned int min_hits_per_module, unsigned int max_hits_per_module) {
+   EventList events;
+   events.events.reserve( n_events);
+   unsigned int n_extra_hits=max_hits_per_module - min_hits_per_module;
+   unsigned int n_extra_rois=max_rois - min_rois;
+   unsigned int n_extra_modules = max_modules_per_roi - min_modules_per_roi;
+   for (unsigned int event_i=0; event_i<n_events; ++event_i) {
+      events.events.emplace_back();
+      events.events.back().hits.resize(n_modules);
+      events.events.back().dataWord.resize(n_modules);
+      for (unsigned int module_i=0; module_i<events.events.back().hits.size(); ++module_i) {
+         std::vector<std::array<std::int16_t,2> > &module_hits=events.events.back().hits[module_i];
+         std::vector<unsigned int> &module_data_word=events.events.back().dataWord[module_i];
+         unsigned int n_hits= (n_extra_hits > 0 ? rand() % (n_extra_hits) : 0u) + min_hits_per_module;
+         module_hits.reserve(n_hits);
+         for (unsigned int  hit_i=0; hit_i< n_hits; ++hit_i) {
+            module_hits.push_back( std::array<std::int16_t, 2> { static_cast<std::int16_t>(rand() % n_rows),
+                                                                 static_cast<std::int16_t>(rand() % n_columns) });
+
             unsigned int rand_data_word = rand();
-            rdo_data.emplace_back(std::array<std::int16_t, 2>{ static_cast<std::int16_t>((coordinate_pair >>16) % n_cols),
-                                                               static_cast<std::int16_t>((coordinate_pair) % n_rows) },
-                                  PhaseII::PixelRawDataContainer::makeWord( PhaseII::PixelRawDataContainer::getToT(rand_data_word ),
-                                                                   PhaseII::PixelRawDataContainer::getBCID(rand_data_word ),
-                                                                   PhaseII::PixelRawDataContainer::getLVL1A(rand_data_word ),
-                                                                   PhaseII::PixelRawDataContainer::getLVL1ID(rand_data_word )));
-
+            module_data_word.push_back(PhaseII::PixelRawDataContainer::makeWord( PhaseII::PixelRawDataContainer::getToT(rand_data_word ),
+                                                                                 PhaseII::PixelRawDataContainer::getBCID(rand_data_word ),
+                                                                                 PhaseII::PixelRawDataContainer::getLVL1A(rand_data_word ),
+                                                                                 PhaseII::PixelRawDataContainer::getLVL1ID(rand_data_word )));
          }
-         assert( rdo_data.size() >= new_range.beginIndex()
-                 && static_cast<std::size_t>(rdo_data.size() - new_range.beginIndex()) < std::numeric_limits<RangeSize_t>::max());
-
-         // update range to the final number of elements
-         new_range.setSize( static_cast<RangeSize_t>( rdo_data.size() - new_range.beginIndex()) );
-         // ... and register the new hit range, or if somehow a range was already registered in the mean time
-         // erase the hit data which was just added here to the end of the container.
-         static_assert( std::is_same_v<PhaseIIPixelRawDataContainer::T_RangeTypeBase, PhaseII::DataRange>);
-         n_rejected_ranges += !(container.registerOrEraseNewData( module, new_range));
+      }
+      unsigned int n_rois = min_rois + (n_extra_rois > 0 ? rand() % n_extra_rois : 0u);
+      events.events.back().rois.reserve(n_rois);
+      for (unsigned int roi_i=0; roi_i< n_rois; ++roi_i) {
+         unsigned int n_modules_per_roi = min_modules_per_roi + (n_extra_modules>0 ? rand() % n_extra_modules : 0u);
+         events.events.back().rois.emplace_back();
+         events.events.back().rois.back().reserve( n_modules);
+         for (unsigned int module_i=0; module_i<n_modules_per_roi; ++module_i) {
+            events.events.back().rois.back().push_back( rand() % n_modules);
+         }
       }
    }
-   assert( n_rejected_ranges==0);
+   events.eventIndex.reserve( n_event_indices);
+   assert( static_cast<unsigned int>(events.events.size()) == events.events.size());
+   for (unsigned int event_i=0; event_i< n_event_indices; ++event_i) {
+      events.eventIndex.push_back( rand() % events.events.size());
+   }
+   return events;
 }
 
-// dump the contents of the entire hit container collection
-void dump(const PhaseIIPixelRawDataContainer &rdo_container) {
-   // first create a proxy representing the entire hit data collection.
-   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
-   // this proxy can be used to iterate over the modules
-   for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
-      // Each of the proxy representing the hits of a module can be used to
-      for (PixelRawDataProxy rdo_proxy : module_rdo_container_proxy) {
-         std::cout << module_rdo_container_proxy.index().rangeIndex() << " :";
-         for (auto elm :  rdo_proxy.coordinates()) {
-            std::cout << " " << elm;
-         }
-         std::cout << std::endl;
-      }
-   }
-}
+template <typename T_RDOProxy>
+concept canModifyRDO = requires( T_RDOProxy &&a) { a.dataWord() = 0u;};
+
+#define always_assert(expr) if (!(expr)) { throw std::runtime_error(std::string("assert failed: ")+#expr); } do {} while (0)
 
 // test: proxy read write to read only conversion; module proxy adapter; child index computation.
-void conversionTest(PhaseIIPixelRawDataContainer &rdo_container ) {
+void conversionTest(PhaseIIPixelRawDataContainerMT &rdo_container ) {
    if (rdo_container.empty()) return;
 
-   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataContainerProxyRW = PhaseII::PixelRawDataContainerCollectionTypes<Utils::AccessPolicy::ReadWrite>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
-   using PixelRawDataProxyRW = PhaseII::PixelRawDataContainerCollectionTypes<Utils::AccessPolicy::ReadWrite>::RawDataProxy;
+   PhaseII::PixelRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::ContainerCollectionProxy
+      rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
+   using PixelRawDataContainerProxyRW = PhaseII::PixelRawDataTypeTraits<Utils::AccessPolicy::Mutable>::RawDataContainerProxy;
+   using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
+   using PixelRawDataProxyRW = PhaseII::PixelRawDataTypeTraits<Utils::AccessPolicy::Mutable>::RawDataProxy;
 
    static_assert( Utils::isConvertableToReadOnlyProxy<PixelRawDataProxy,PixelRawDataProxyRW> );
 
    {
+      // find a module with hits
+      unsigned int module_i=0;
+      for (; module_i < rdo_container_collection_proxy.size(); ++module_i) {
+         if (!rdo_container_collection_proxy[module_i].empty()) break;
+      }
+      always_assert( module_i < rdo_container_collection_proxy.size());
+      if (module_i>=rdo_container_collection_proxy.size()) {
+         throw std::runtime_error("An empty event/ROI should not exist.");
+      }
       // test proxy conversion and index recovery
-      auto a_module_proxy = rdo_container_collection_proxy[0];
-      static_assert( std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxy> || std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxyRW>);
-#ifndef NDEBUG
-      auto a_module_proxy_back = rdo_container_collection_proxy.back();
+      PhaseII::PixelRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::RawDataContainerProxy
+         a_module_proxy = rdo_container_collection_proxy[module_i];
+      static_assert( std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxyRW>);
+      PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy
+         const_module_proxy(a_module_proxy);
+      assert( const_module_proxy.size() == a_module_proxy.size() );
+      FNVHash hash_non_const;
+      for (PhaseII::PixelRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::RawDataProxy rdo_proxy: a_module_proxy) {
+         static_assert( canModifyRDO<decltype(rdo_proxy)>);
+         hash_non_const.add(rdo_proxy.coordinates());
+         hash_non_const.add(rdo_proxy.dataWord());
+      }
+      FNVHash hash_const;
+      for (PhaseII::PixelRawDataTypeTraits<>::RawDataProxy  rdo_proxy : const_module_proxy) {
+         static_assert( !canModifyRDO<decltype(rdo_proxy)>);
+         hash_const.add(rdo_proxy.coordinates());
+         hash_const.add(rdo_proxy.dataWord());
+      }
+      always_assert( hash_non_const.value() != 0u);
+      always_assert( hash_non_const.value() == hash_const.value() );
+
+      //      static_assert( std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxy> || std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxyRW>);
+      PhaseII::PixelRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::RawDataContainerProxy
+         a_module_proxy_back = rdo_container_collection_proxy.back();
 
       // get the index which can be used as index for the access operator [] of the parent proxy
       std::size_t index0 = rdo_container_collection_proxy.computeChildElementIndex(a_module_proxy);
       std::size_t back_index = rdo_container_collection_proxy.computeChildElementIndex(a_module_proxy_back);
 
       // test that these indices indeed recover the same element
-      auto element0 = rdo_container_collection_proxy[index0];
-      auto element_back = rdo_container_collection_proxy[back_index];
-      assert( element0.index() == a_module_proxy.index() && &element0.container() == &a_module_proxy.container());
-      assert( element_back.index() == a_module_proxy_back.index() && &element_back.container() == &a_module_proxy_back.container());
-#endif
+      PhaseII::PixelRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::RawDataContainerProxy
+         element0 = rdo_container_collection_proxy[index0];
+      PhaseII::PixelRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::RawDataContainerProxy
+         element_back = rdo_container_collection_proxy[back_index];
+      always_assert( element0.index() == a_module_proxy.index() && &element0.container() == &a_module_proxy.container());
+      always_assert( element_back.index() == a_module_proxy_back.index() && &element_back.container() == &a_module_proxy_back.container());
    }
 
-   for (auto module_proxy : rdo_container_collection_proxy) {
+   for (PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy module_proxy : rdo_container_collection_proxy) {
       if (!module_proxy.empty()) {
-         auto pixel_proxy = module_proxy[0];
+         PhaseII::PixelRawDataTypeTraits<>::RawDataProxy
+            pixel_proxy(module_proxy[0]);
          static_assert( std::is_same_v<decltype(pixel_proxy), PixelRawDataProxy> || std::is_same_v<decltype(pixel_proxy), PixelRawDataProxyRW>);
 
-#ifndef NDEBUG
-         auto pixel_proxy_back = module_proxy.back();
+         PhaseII::PixelRawDataTypeTraits<>::RawDataProxy
+            pixel_proxy_back(module_proxy.back());
 
          // get the index which can be used as index for the access operator [] of the parent proxy
          std::size_t index0 = module_proxy.computeChildElementIndex(pixel_proxy);
          std::size_t back_index = module_proxy.computeChildElementIndex(pixel_proxy_back);
 
          // test that these indices indeed recover the same element
-         auto element0 = module_proxy[index0];
-         auto element_back = module_proxy[back_index];
-         assert( element0.index() == pixel_proxy.index() && &element0.container() == &pixel_proxy.container());
-         assert( element_back.index() == pixel_proxy_back.index() && &element_back.container() == &pixel_proxy_back.container());
-#endif
-
-
+         PhaseII::PixelRawDataTypeTraits<>::RawDataProxy
+            element0 = module_proxy[index0];
+         PhaseII::PixelRawDataTypeTraits<>::RawDataProxy
+            element_back = module_proxy[back_index];
+         always_assert( element0.index() == pixel_proxy.index() && &element0.container() == &pixel_proxy.container());
+         always_assert( element_back.index() == pixel_proxy_back.index() && &element_back.container() == &pixel_proxy_back.container());
          break;
       }
    }
 }
 
-// test iteration over all pixel hits using proxies
-std::size_t test(const PhaseIIPixelRawDataContainer &rdo_container) {
-   std::size_t sum{};
-   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
-   for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
-      for (PixelRawDataProxy rdo_proxy : module_rdo_container_proxy) {
-         for (auto elm :  rdo_proxy.coordinates()) {
-            sum+= elm;
-         }
-      }
-   }
-   return sum;
-}
 
-// test iteration over all pixel hits using read-write proxies
-std::size_t testNonConst(PhaseIIPixelRawDataContainer &rdo_container) {
-   std::size_t sum{};
-   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataContainerProxyRW = PhaseII::PixelRawDataContainerCollectionTypes<Utils::AccessPolicy::ReadWrite>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
-   using PixelRawDataProxyRW = PhaseII::PixelRawDataContainerCollectionTypes<Utils::AccessPolicy::ReadWrite>::RawDataProxy;
-
-   auto a_module_proxy = rdo_container_collection_proxy[0];
-   static_assert( std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxy> || std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxyRW>);
-
-   static_assert( Utils::isConvertableToReadOnlyProxy<PixelRawDataProxy,PixelRawDataProxyRW> );
-   for (auto module_rdo_container_proxy : rdo_container_collection_proxy) {
-      for (auto rdo_proxy : module_rdo_container_proxy) {
-         // just to check that the proxy allows to modify the data.
-         [[maybe_unused]] std::array<std::int16_t,2> &coordinates = rdo_proxy.coordinates();
-         for (auto elm :  rdo_proxy.coordinates()) {
-            sum+= elm;
-         }
-      }
-   }
-   return sum;
-}
-
-
-// alternative test which iterates explicitly over the hit data
-std::size_t testAlt(const PhaseIIPixelRawDataContainer &rdo_container) {
-   std::size_t sum{};
-   for (unsigned int module_i =0; module_i<rdo_container.size(); ++ module_i) {
-      PhaseII::DataRange range = rdo_container.range(module_i);
-      const PhaseII::PixelRawDataContainer &data = rdo_container.data(range.containerIndex());
-      for (unsigned int rdo_i=range.beginIndex(); rdo_i < range.endIndex(); ++rdo_i) {
-         for (auto elm :  data.coordinates(rdo_i)) {
-            sum += elm;
-         }
-      }
-   }
-   return sum;
-}
-
-// count hits in the pixel hit container
-std::size_t countHits(const PhaseIIPixelRawDataContainer &rdo_container) {
-   std::size_t sum{};
-   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
-      sum += module_rdo_container_proxy.size();
-   }
-   return sum;
-}
-
-// count modules in the given non overlapping ROIs (or double count otherwise)
-std::size_t countModules(const std::vector< std::vector< unsigned int> > &rois) {
-   std::size_t sum{};
-   for (const std::vector<unsigned int> &roi : rois) {
-      sum += roi.size();
-   }
-   return sum;
-}
-
-
-// Test which fills one pixel hit container per ROI for several ROIs in one thread per ROI.
-// The input data is read from a hit container.
-// Meant to compare the performance wrt. to an implementation which only fills the ROI hit
-// data of the various ROIs into a single pixel hit container.
-std::size_t roiFillNonMT(const PhaseIIPixelRawDataContainer &rdo_container,
-                         const std::vector<std::vector<unsigned int> > &rois,
-                         const std::vector<std::pair<unsigned int, unsigned int> > &used_modules) {
-   // container for which the Range is not atomic
-   using PixelRawDataContainerNonMT = PhaseII::IndexedRanges<PhaseII::PixelRawDataContainer, PhaseII::DataRange >;
-   using RangeNType  = decltype(PhaseII::DataRange().size());
-   using RangeContainerIndexType  = decltype(PhaseII::DataRange().containerIndex());
-
-   // create one hit container per ROI (or thread) without an atomic range structure
-   std::vector<PixelRawDataContainerNonMT> roi_rdo_container;
-   roi_rdo_container.reserve(rois.size());
-   for (unsigned int roi_i=0; roi_i< rois.size() ; ++roi_i) {
-      roi_rdo_container.emplace_back(rdo_container.size(), 1);
-   }
-
-   // create one thread per ROI which fills the per thread hit container from the shared input hit container with the
-   // hit data of that particular ROI.
+// concurrency test
+// will split the toy data into work pacakges each comprising a single ROI,
+// the work packages are processed by n-threads.
+// during each processing step the toy data of one ROI of one event is compied
+// to the output container then hashes are computed for the total data of one ROI.
+// and stored.
+// Once all work packages are process the results are compared to the expectation.
+template <class T_EventStore>
+unsigned int threadTest(const EventList &events,
+                        unsigned int n_modules,
+                        unsigned int initial_container_list_size,
+                        unsigned int n_queue_slots,
+                        const std::vector<unsigned int> &n_threads) {
+   std::vector<unsigned int>::const_iterator max_n_threads_iter = std::max_element(n_threads.begin(),n_threads.end());
+   if (max_n_threads_iter == n_threads.end()) return 1;
+   unsigned int total_error_count=0u;
    std::vector<std::thread> threads;
-   threads.reserve(rois.size());
-   unsigned int roi_i=0;
-   std::atomic<unsigned int> n_container_changes=0u;
-   for (const std::vector<unsigned int> &roi : rois) {
-      // create a new thread
-      threads.emplace_back( [&a_roi_rdo_container=roi_rdo_container[roi_i], &roi, &rdo_container, &n_container_changes] () {
-         // the thread will iterate over the modules of a single ROI. For each ROI a separate container collection
-         // is used, so all threads fill their containers completely independently of each other, and only
-         // a single container will be used for all modules of an ROI.
-         PhaseII::PixelRawDataContainer *rdo_container_dest = &a_roi_rdo_container.data(0);
-         unsigned int n_container_changes_per_roi=0u;
-         for (unsigned int module_i : roi ) {
-            // get the hit range
-            const PhaseII::DataRange &range = rdo_container.range(module_i);
-            const PhaseII::PixelRawDataContainer &rdo_data_src = rdo_container.data(range.containerIndex());
-            // iterate over the hit range  and copy the hit data into the per ROI output hit container
-            // The range guard will keep track of the element range.
-            PhaseII::ContainerRangeGuard<PhaseII::DataRange, PhaseII::PixelRawDataContainer *>
-               dest_range_guard(rdo_container_dest);
-            for (unsigned int rdo_idx = range.beginIndex(); rdo_idx <range.endIndex(); ++rdo_idx) {
-               using CoordType = std::remove_cvref_t<decltype( rdo_data_src.coordinates(rdo_idx) )>;
-               const auto orig_ptr=dest_range_guard.ptr();
-               addDataForModule(a_roi_rdo_container,
-                                dest_range_guard,
-                                CoordType(rdo_data_src.coordinates(rdo_idx)),
-                                rdo_data_src.dataWord(rdo_idx));
-               n_container_changes_per_roi += (dest_range_guard.ptr() != orig_ptr);
-            }
-            if (!dest_range_guard.empty()) {
-               // now register the new hit range. No range will have been registered for the module
-               // so the just filled hit data is never erased.
-               a_roi_rdo_container.registerOrEraseNewData(module_i,dest_range_guard.range());
-               // the container will stay the same for all modules for the non MT container collection
-               // but to remain consistent with the MT version the currently used pointer is
-               // retrieved from the guard to ensure that the same container is used for the
-               // next module.
-               rdo_container_dest = dest_range_guard.ptr();
-            }
-         }
-         n_container_changes += n_container_changes_per_roi;
-      });
-      ++roi_i;
-   }
-   // wait for all threads to finish
-   for (std::thread &a_thread : threads) {
-      a_thread.join();
-   }
-   // only a single container is used per ROI, i.e. the container will not change when processing the modules
-   // of a single ROI:
-   assert( n_container_changes == 0 );
-   // compute a FNV hash from the coordinates of all hits of all modules of all ROIs, in the module index order
-   // only using the data of each module at most once.
-   FNVHash fnvHash;
-   if (!rois.empty()) {
-   for (auto [module_index, container_index]  : used_modules) {
-      assert( container_index < roi_rdo_container.size());
-      const PhaseII::DataRange &range = roi_rdo_container[container_index].range(module_index);
-      const PhaseII::PixelRawDataContainer &data = roi_rdo_container[container_index].data( range.containerIndex());
-      for (unsigned int rdo_idx = range.beginIndex(); rdo_idx <range.endIndex(); ++rdo_idx) {
-         for (auto elm :  data.coordinates(rdo_idx)) {
-            fnvHash.add(elm);
-         }
+   threads.reserve(std::max(*max_n_threads_iter,1u)+1);
+
+   // run the test using a certain number worker threads + one thread which fills the work
+   // package into the queue.
+   for (unsigned int n_worker_threads : n_threads ) {
+      threads.clear();
+      threads.reserve(n_worker_threads+1);
+
+      Results results(events);
+      T_EventStore store(n_worker_threads);
+
+      std::cout << "Start processing " << n_worker_threads << std::endl;
+      auto start = std::chrono::steady_clock::now();
+      WorkQueue queue(n_queue_slots);
+      // create the worker threads
+      for (unsigned int work_i=0; work_i<n_worker_threads; ++work_i) {
+         threads.emplace_back([&events,&queue, &results, &store]() {
+            processEvent(events, queue, results,store);
+         });
       }
-   }
-   }
+      // create the work provider thread.
+      threads.emplace_back([&events,n_modules, initial_container_list_size, &queue, &store]() {
+         eventLoop(events, n_modules, initial_container_list_size, queue,store);
+      } );
+      for (std::thread &a_thread : threads) {
+         a_thread.join();
+      }
+      auto end = std::chrono::steady_clock::now();
+      std::chrono::duration<double> elapsed_seconds = end-start;
+      unsigned int n_nonzero_results{};
+      for (const std::atomic<unsigned int> &elm : results.results) {
+         n_nonzero_results += (elm>0);
+      }
+      std::cout << "Finished processing. Elapsed time " << elapsed_seconds.count()
+                << " s * " << (threads.size() -1) << " (threads)"
+                << " = " << (elapsed_seconds.count() * (threads.size() -1)) << " s "
+                << " work " << queue.m_pushedWorked << " -> " << queue.m_retrievedWorked
+                << " non zero results " << n_nonzero_results << " / " << results.results.size()
+                << " wait: push " << queue.m_waitForPush << " retrieve " << queue.m_waitForEvent
+                << std::endl;
 
-   // return the result FNV hash
-   return fnvHash.value();
-}
+      // compare the results.
+      threads.clear();
+      std::vector<std::atomic<std::uint64_t> > errors(threads.capacity());
+      for (std::atomic<std::uint64_t> &an_error : errors) {
+         an_error=0u;
+      }
+      unsigned int batch_size = (events.eventIndex.size() + errors.size()-1) / errors.size();
+      for (unsigned int part_i=0; part_i<errors.size(); ++part_i) {
+         threads.emplace_back([part_i,&errors,&events, &results,batch_size](){
+            unsigned int error_counter=0u;
+            unsigned int start_event_index = batch_size * part_i;
+            unsigned int end_event_index = std::min(start_event_index + batch_size, static_cast<unsigned int>(events.eventIndex.size()));
 
+            std::vector<unsigned int> tmp_hashes;
 
-// The same test as above, but use a single container collection, which provides at least one container per ROI. The
-// the module range is now atomic, and newly filled hit data will be erased if hit data was already
-// registered for the module by a different thread, which may happen if the ROIs overlap.
-std::size_t roiFillMT(const PhaseIIPixelRawDataContainer &rdo_container,
-                      const std::vector<std::vector<unsigned int> > &rois) {
-   static_assert( std::atomic<PhaseII::DataRange>::is_always_lock_free );
-   using RangeNType  = decltype(PhaseII::DataRange().size());
-   using RangeContainerIndexType  = decltype(PhaseII::DataRange().containerIndex());
-   std::atomic<unsigned int> n_rejected_work=0u;
-
-
-   // to match work of nonMT version, unused containers are created per ROI
-   using PixelRawDataContainerNonMT = PhaseII::IndexedRanges<PhaseII::PixelRawDataContainer, PhaseII::DataRange >;
-   std::vector<PixelRawDataContainerNonMT> dummy;
-   dummy.reserve(rois.size()-1); // one less because, also the real output container is created (below)
-   for (unsigned int roi_i=0; roi_i< rois.size() ; ++roi_i) {
-      dummy.emplace_back(rdo_container.size(), 1);
-   }
-
-   // create the actual output container
-   // the first argument is the max wafer hash
-   // the second argument the best estimate of the number processes which fill the container concurrently
-   // i.e. 1 for offline reco, and O(50) for HLT.
-   PhaseIIPixelRawDataContainerMT roi_rdo_container(rdo_container.size(), rois.size());
-
-   // create one thread per ROI which fills the per thread hit container from the shared input hit container with the
-   // hit data of that particular ROI.
-   std::vector<std::thread> threads;
-   threads.reserve(rois.size());
-   std::atomic<unsigned int> n_container_changes=0;
-   for (const std::vector<unsigned int> &roi : rois) {
-      threads.emplace_back( [&a_roi_rdo_container=roi_rdo_container, &roi, &rdo_container, &n_rejected_work, &n_container_changes] () {
-         // each thread will try to copy the input hit data of all modules of an ROI to the output hit container
-         PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest = a_roi_rdo_container.getNewContainerPtr();
-         // estimate the number RDOs for this container (rdo_container_dest)
-         std::size_t n_rdos_expected=0;
-         unsigned int multiplier=1;
-         for (unsigned int module_i : roi ) {
-            const PhaseII::DataRange &range = rdo_container.range(module_i);
-            n_rdos_expected+=range.size();
-         }
-         n_rdos_expected *= multiplier;
-
-         // to test the situation in which the container capacity is exceeded, reserve fewer elements than
-         // needed i.e. "n_rdos_expected/3" instead of "n_rdos_expected"
-         rdo_container_dest->reserve(n_rdos_expected/3);
-
-         unsigned int n_container_changes_per_roi=0u;
-         for (unsigned int module_i : roi ) {
-            // module_i is the ID hash
-
-            // skip if there is already RDO data registered for this module
-            if (!a_roi_rdo_container.range(module_i).load().empty()) continue;
-
-            // the input range
-            // @TODO should use the proxies for retrieving the input hit data
-            const PhaseII::DataRange &range = rdo_container.range(module_i);
-            const PhaseII::PixelRawDataContainer &rdo_data_src = rdo_container.data(range.containerIndex());
-
-            // The range guard keeps track of the element range and the container which will
-            // contain the hits for the current module. In the best case the container will be the
-            // same as the container which is passed to the range guard below, but if the
-            // container capacity is exceeded the container may change.
-            PhaseII::ContainerRangeGuard<PhaseII::DataRange, PhaseIIPixelRawDataContainerMT::ContainerPtr>
-               dest_range_guard(rdo_container_dest);
-            for (unsigned int rdo_idx = range.beginIndex(); rdo_idx <range.endIndex(); ++rdo_idx) {
-               using CoordType = std::remove_cvref_t<decltype( rdo_data_src.coordinates(rdo_idx) )>;
-               // add coordinates and data word for one hit, and if the capacity of the RDO container
-               // is exceeded create a new container, copy the already added data for the current module
-               // to this new container, From this moment on, the data will be added to the new container.
-               unsigned int is_id=dest_range_guard.ptr().containerId();
-               addDataForModule(a_roi_rdo_container,
-                                dest_range_guard,
-                                CoordType(rdo_data_src.coordinates(rdo_idx)),
-                                rdo_data_src.dataWord(rdo_idx));
-               n_container_changes_per_roi += (dest_range_guard.ptr().containerId() != is_id);
-            }
-            if (!dest_range_guard.empty()) {
-               // register the RDO range for this module, or erase the newly added
-               if (!a_roi_rdo_container.registerOrEraseNewData(module_i,dest_range_guard.range())) {
-                  ++n_rejected_work;
+            for (unsigned int event_index=start_event_index; event_index < end_event_index; ++event_index) {
+               const Event& event = events.getEvent(event_index);
+               tmp_hashes = Results::computeHash(event);
+               if (tmp_hashes != results.eventResults(event_index)) {
+                  ++error_counter;
                }
-               // in the process of adding hits to the original container, its capacity may have
-               // been exceeded and the container may have been changed for the current module. To
-               // ensure that the same container is used for the next module get the container, that
-               // contains the hits for the current module from the the range_guard.
-               rdo_container_dest = dest_range_guard.ptr();
             }
-         }
-         n_container_changes += n_container_changes_per_roi;
-      });
-   }
-   // wait for all threads to finish
-   for (std::thread &a_thread : threads) {
-      a_thread.join();
-   }
-
-   // compute a FNV hash  from the coordinates of all hits of all modules of all ROIs, in the module index order
-   // only using the data of each module at most once.
-   FNVHash fnvHash;
-   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(roi_rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
-
-   for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
-      for (PixelRawDataProxy rdo_proxy : module_rdo_container_proxy) {
-         for (auto elm :  rdo_proxy.coordinates()) {
-            fnvHash.add(elm);
-         }
+            errors[part_i]=error_counter;
+         });
+      }
+      for (std::thread &a_thread : threads) {
+         a_thread.join();
+      }
+      unsigned int total_error_count_this=0u;
+      for (const std::atomic<std::uint64_t> &an_error_count : errors) {
+         total_error_count_this+=an_error_count.load();
+      }
+      total_error_count += total_error_count_this;
+      std::cout << "errors " << total_error_count_this << std::endl;
+      if (total_error_count!= 0u) {
+         return total_error_count;
       }
    }
-   std::cout << "rejected work " << n_rejected_work << ", container changes " << n_container_changes << std::endl;
-   return fnvHash.value();
+   return total_error_count;
 }
 
-// test skeleton which does some of the work of the roiFillMT or roiFillNonMT, which is not to
-// be considered when comparing the timing.
-// this method will create one hit container per ROI, create one thread per ROI, which will not
-// do any work, wait for the threads to finish and compute the FNV hash using the input
-// hit data.
-std::size_t roiFillOverhead(const PhaseIIPixelRawDataContainer &rdo_container,
-                    const std::vector<std::vector<unsigned int> > &rois,
-                    const std::vector<std::pair<unsigned int, unsigned int> > &used_modules) {
-   // create one hit container per ROI (unused)
-   std::vector<PhaseIIPixelRawDataContainer> roi_rdo_container;
-   roi_rdo_container.reserve(rois.size());
-   for (unsigned int roi_i=0; roi_i< rois.size() ; ++roi_i) {
-      roi_rdo_container.emplace_back(rdo_container.size(), 1);
+std::unique_ptr<PhaseIIPixelRawDataContainerMT> makeTestContainer(const EventList &events, unsigned int event_index, unsigned int roi_index) {
+   EventStoreMT store(1);
+   const Event &event  = events.getEvent(event_index);
+   unsigned int slot_i=store.getNewEvent(event.hits.size(), 1, event.rois.size());
+   storeEventData(events, store, event_index, roi_index, slot_i);
+   assert( store.eventData.size() > 0);
+   std::unique_ptr<PhaseIIPixelRawDataContainerMT> test_container( store.eventData[0].release() );
+   assert( !test_container->empty() );
+   PhaseII::PixelRawDataTypeTraits<>::ContainerCollectionProxy
+      rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(*test_container);
+   unsigned int n_hits=0u;
+   for (PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy module_proxy : rdo_container_collection_proxy) {
+      n_hits += module_proxy.size();
    }
-
-   // create and start one thread per ROI, where non of the threads will do any work
-   std::vector<std::thread> threads;
-   threads.reserve( rois.size());
-   for (const std::vector<unsigned int> &roi : rois) {
-      (void) roi;
-      threads.emplace_back( [] () {
-      });
-   }
-
-   // wait for the threads to finish
-   for (std::thread &a_thread : threads) {
-      a_thread.join();
-   }
-
-   // compute the FNV hash using the coordinates of all hits of all modules of all ROIs, but
-   // get the hit data from the input collection. The per module hit data is process in module
-   // index order and each module is only counted once.
-   FNVHash fnvHash;
-   for (auto [module_index, container_index] : used_modules) {
-      assert( container_index < roi_rdo_container.size());
-      const PhaseII::DataRange &range = rdo_container.range(module_index);
-      const PhaseII::PixelRawDataContainer &data = rdo_container.data( range.containerIndex());
-      for (unsigned int rdo_idx = range.beginIndex(); rdo_idx <range.endIndex(); ++rdo_idx) {
-         for (auto elm :  data.coordinates(rdo_idx)) {
-            fnvHash.add(elm);
-         }
-      }
-   }
-   // return the FNV hash
-   return fnvHash.value();
+   always_assert( n_hits>0);
+   return test_container;
 }
 
-using CheckSum=std::size_t;
-using Param1=const PhaseIIPixelRawDataContainer *;
-using Param2=std::vector< std::vector< unsigned int> >;
-using Param4=std::vector< std::pair<unsigned int,unsigned int> >;
+struct EventGenParams {
+   unsigned int n_modules=2164;
+   unsigned int n_rows=384;
+   unsigned int n_columns=400;
+   unsigned int n_events=100;
+   unsigned int n_event_indices=1000;
+
+   unsigned int min_rois=10;
+   unsigned int max_rois=100;
+   unsigned int min_modules_per_roi=10;
+   unsigned int max_modules_per_roi=100;
+   unsigned int min_hits_per_module=10;
+   unsigned int max_hits_per_module=200;
+};
+
+EventGenParams blitzParams() {
+   return EventGenParams{ .n_modules=50,
+      .n_rows=384,
+      .n_columns=400,
+      .n_events=10,
+      .n_event_indices=30,
+      .min_rois=10,
+      .max_rois=30,
+      .min_modules_per_roi=10,
+      .max_modules_per_roi=50,
+      .min_hits_per_module=10,
+      .max_hits_per_module=200 };
+}
+EventGenParams shortParams() {
+   return EventGenParams{.n_modules=2164,
+                         .n_rows=384,
+                         .n_columns=400,
+                         .n_events=1000,
+                         .n_event_indices=1000,
+                         .min_rois=10,
+                         .max_rois=200,
+                         .min_modules_per_roi=10,
+                         .max_modules_per_roi=200,
+                         .min_hits_per_module=10,
+                         .max_hits_per_module=200};
+}
+
+EventGenParams midParams() {
+   return EventGenParams{ .n_modules=8164,
+                          .n_rows=384,
+                          .n_columns=400,
+                          .n_events=1000,
+                          .n_event_indices=1000,
+                          .min_rois=10,
+                          .max_rois=200,
+                          .min_modules_per_roi=10,
+                          .max_modules_per_roi=200,
+                          .min_hits_per_module=10,
+                          .max_hits_per_module=200};
+}
+
 int main(int argc, char **argv) {
-   // default arguments
-    unsigned int max_modules=6;
-    unsigned int max_hits_per_module=6;
-    unsigned int max_modules_per_ROI=4;
-    unsigned int max_ROIs=2;
-    unsigned int n_columns = 32;
-    unsigned int n_rows = 16;
+   try {
+   std::vector<unsigned int> n_threads;
+   unsigned int initial_container_list_size=1;
+   unsigned int n_queue_slots=256;
+   EventGenParams params=blitzParams();
 
-    // by default do not run the multi-threaded tests to avoid spawning threads during the CI.
-    bool thread_test=false;
+   bool do_non_mt_test=false;
+   bool do_mt_test=true;
+   bool do_conversion_test=true;
 
-    //process command line arguments for running benchmarks
-    for (int arg_i=1; arg_i<argc; ++arg_i) {
-      if ((strcmp(argv[arg_i],"--dim")==0) && arg_i+2<argc) {
-         n_columns = static_cast<unsigned int>(atoi(argv[++arg_i]));
-         n_rows = static_cast<unsigned int>(atoi(argv[++arg_i]));
+   unsigned int n_args=static_cast<unsigned int>(argc);
+   for (unsigned int arg_i=1; arg_i<n_args; ++arg_i) {
+      if (strcmp(argv[arg_i],"--threads")==0 && arg_i+1 <n_args) {
+         char *ptr=argv[++arg_i];
+         bool is_range=false;
+         for(;;) {
+            char *end_ptr=ptr;
+            n_threads.push_back(strtol(ptr, &end_ptr, 10));
+            if (is_range) {
+               unsigned int end=n_threads.back();
+               n_threads.pop_back();
+               for (unsigned int thread_i=n_threads.back(); thread_i++<end; ) {
+                  n_threads.push_back(thread_i);
+               }
+            }
+            if (*end_ptr=='-' && !is_range) {
+               is_range=true;
+            }
+            else if (*end_ptr!=',') {
+               break;
+            }
+            else {
+               is_range=false;
+            }
+            ptr=end_ptr+1;
+         }
       }
-      else if ((strcmp(argv[arg_i],"--n-modules")==0) && arg_i+1<argc) {
-         max_modules = static_cast<unsigned int>(atoi(argv[++arg_i]));
+      else if (strcmp(argv[arg_i],"--event-pool-size")==0 && arg_i+1 <n_args) {
+         params.n_events=static_cast<unsigned int>(atoi(argv[++arg_i]));
       }
-      else if ((strcmp(argv[arg_i],"--n-rois")==0) && arg_i+1<argc) {
-         max_ROIs = static_cast<unsigned int>(atoi(argv[++arg_i]));
+      else if (strcmp(argv[arg_i],"--events")==0 && arg_i+1 <n_args) {
+         params.n_event_indices=static_cast<unsigned int>(atoi(argv[++arg_i]));
       }
-      else if ((strcmp(argv[arg_i],"--n-rois")==0) && arg_i+1<argc) {
-         max_ROIs = static_cast<unsigned int>(atoi(argv[++arg_i]));
+      else if (strcmp(argv[arg_i],"--modules")==0 && arg_i+1 <n_args) {
+         params.n_modules=static_cast<unsigned int>(atoi(argv[++arg_i]));
       }
-      else if ((strcmp(argv[arg_i],"--max-hits")==0 || strcmp(argv[arg_i],"--max-hits-per-module")==0) && arg_i+1<argc) {
-         max_hits_per_module = static_cast<unsigned int>(atoi(argv[++arg_i]));
+      else if (strcmp(argv[arg_i],"--sensor-size")==0 && arg_i+2 <n_args) {
+         params.n_rows=static_cast<unsigned int>(atoi(argv[++arg_i]));
+         params.n_columns=static_cast<unsigned int>(atoi(argv[++arg_i]));
       }
-      else if ((strcmp(argv[arg_i],"--max-modules-per-ROI")==0 || strcmp(argv[arg_i],"--modules-per-ROI")==0) && arg_i+1<argc) {
-         max_modules_per_ROI = static_cast<unsigned int>(atoi(argv[++arg_i]));
+      else if (strcmp(argv[arg_i],"--rois")==0 && arg_i+2 <n_args) {
+         params.min_rois=static_cast<unsigned int>(atoi(argv[++arg_i]));
+         params.max_rois=static_cast<unsigned int>(atoi(argv[++arg_i]));
       }
-      else if ((strcmp(argv[arg_i],"--thread-test")==0)) {
-         thread_test=true;
+      else if (strcmp(argv[arg_i],"--roi-size")==0 && arg_i+2 <n_args) {
+         params.min_modules_per_roi=static_cast<unsigned int>(atoi(argv[++arg_i]));
+         params.max_modules_per_roi=static_cast<unsigned int>(atoi(argv[++arg_i]));
+      }
+      else if (strcmp(argv[arg_i],"--hits")==0 && arg_i+2 <n_args) {
+         params.min_hits_per_module=static_cast<unsigned int>(atoi(argv[++arg_i]));
+         params.max_hits_per_module=static_cast<unsigned int>(atoi(argv[++arg_i]));
+      }
+      else if (strcmp(argv[arg_i],"--init-raw-size")==0 && arg_i+1 <n_args) {
+         initial_container_list_size=static_cast<unsigned int>(atoi(argv[++arg_i]));
+      }
+      else if (strcmp(argv[arg_i],"--short-test-params")==0 || strcmp(argv[arg_i],"--short-test")==0) {
+         params=shortParams();
+      }
+      else if (strcmp(argv[arg_i],"--mid-test-params")==0 || strcmp(argv[arg_i],"--mid-test")==0) {
+         params=midParams();
+      }
+      else if (strcmp(argv[arg_i],"--blitz-test-params")==0 || strcmp(argv[arg_i],"--blitz-test")==0) {
+         params=blitzParams();
+      }
+      else if (strcmp(argv[arg_i],"--show-params")==0 || strcmp(argv[arg_i],"--show")==0) {
+         std::cout << std::setw(-20) << "modules " << params.n_modules <<"\n"
+                   << std::setw(-20) << "sensor " <<  params.n_rows << " x " << params.n_columns << "\n"
+                   << std::setw(-20) << "event pool size " <<  params.n_events <<"\n"
+                   << std::setw(-20) << "events " <<  params.n_event_indices << "\n"
+                   << std::setw(-20) << "rois " <<  params.min_rois << " .. " << params.max_rois << "\n"
+                   << std::setw(-20) << "roi size " <<  params.min_modules_per_roi << " .. " << params.max_modules_per_roi << "\n"
+                   << std::setw(-20) << "hits " <<  params.min_hits_per_module << " .. " << params.max_hits_per_module << "\n"
+                   << std::endl;
+      }
+      else if (strcmp(argv[arg_i],"--do-non-mt")==0) {
+         do_non_mt_test=true;
+      }
+      else if (strcmp(argv[arg_i],"--no-mt")==0) {
+         do_mt_test=false;
+      }
+      else if (strcmp(argv[arg_i],"--no-conversion-test")==0) {
+         do_conversion_test=false;
       }
       else {
-         // provide some help in case of incorrect arguments
-         std::cerr << "ERROR unhandled arg " << arg_i << " / " << (argc-1) << " : " << argv[arg_i] << std::endl;
-         std::cerr << "USAGE: " << argv[0]
-                   << " [--dim cols rows] [--n-modules N] [--n-rois N] [--max-hits/--max-hits-per-module] [--max-modules-per-ROI/--modules-per-ROI N]"
-                   << " [--thread-test]"
-                   << "\n\n"
-                   << "EXAMPLE: " << argv[0] << " --dim 800 768 --n-modules 18192 --n-rois 200 --max-hits 200 --max-modules-per-ROI 500 --thread-test"
+         if (strcmp(argv[arg_i],"--help")!=0
+             && strcmp(argv[arg_i],"-h")!=0) {
+            std::cout << "ERROR unhandled argument " << argv[arg_i] << "\n";
+         }
+         std::cout << "USAGE " << argv[0]
+                   << " [--threads n-worker-threads[-n-worker-threads-end][,n-worker-threads]]"
+                   << " [--events n-events]"
+                   << " [--event-prool-size n-physical-events]"
+                   << " [--modules n-modules]"
+                   << " [--sensor-size rows cols]"
+                   << " [--rois min max-rois-per-event]"
+                   << " [--roi-size min max-modules-per-roi]"
+                   << " [--hits min max-hits-per-module]"
+                   << " [--init-raw-size initial-container-list-size]"
+                   << " [--do-non-mt] [--no-mt] [--no-conversion-test]"
+                   << " [ / --blitz-test-params / --mid-test-params / --short-test-params]"
+                   << " [--show-params]"
                    << std::endl;
          return 1;
       }
-    }
-    if (max_modules == 0){
-      std::cerr << "Max modules cannot be zero.\n";
-      return 1;
-    }
-    
-    // create toy data
-    unsigned int max_containers=max_ROIs;
-    //coverity[TAINTED_SCALAR]
-    //first create random ROIs
-    std::vector< std::vector< unsigned int> > rois = makeROIs( max_modules, max_ROIs, max_modules_per_ROI );
+   }
+   if (n_threads.empty()) {
+      n_threads.push_back(1u);
+   }
+   if (params.n_modules == 0){
+     std::cout <<"modules parameter cannot be zero!"<<std::endl;
+     return 1;
+   }
+   if ((params.n_columns == 0) or (params.n_rows == 0)){
+     std::cout <<"neither rows nor columns parameters can be zero!"<<std::endl;
+     return 1;
+   }
+   EventList events = makeEvents(params.n_modules, params.n_rows, params.n_columns, params.n_events, params.n_event_indices,
+                                 params.min_rois, params.max_rois,
+                                 params.min_modules_per_roi, params.max_modules_per_roi,
+                                 params.min_hits_per_module,params.max_hits_per_module);
 
-    // create auxiliary containers from the ROI collection, which are overlap free:
-    std::vector< std::vector< unsigned int> > rois_no_overlap=removeOverlap(max_modules, rois);
-    // .. and provide pairs of module index and associated ROI index for all modules in module index order
-    std::vector< std::pair<unsigned int,unsigned int> > container_index=findContainer(max_modules, rois_no_overlap);
+   if (do_conversion_test) {
+      // test the container proxies.
+      std::unique_ptr<PhaseIIPixelRawDataContainerMT> test_container = makeTestContainer(events, 0u, 0u);
+      conversionTest( *test_container);
+   }
 
-    // copy the toy data to RDO containers, which is used as an input in the tests.
-    std::unique_ptr< PhaseIIPixelRawDataContainer>  rdo_container = createPixelRawDataContainer(max_modules, max_containers);
-    // @TODO could use rois_no_overlap, but hit data only created if nothing had been registered yet for the corresponding
-    // module, so this does not matter.
-    if (max_hits_per_module == 0 or n_columns == 0){
-      std::cerr << "Neither max_hits_per_module nor n_columns cannot be zero.\n";
-      return 1;
-    }
-    for (unsigned int roi_i=0; roi_i<rois.size(); ++roi_i) {
-       fillPixelRawDataContainer(roi_i, rois[roi_i], max_hits_per_module, n_columns, n_rows, *rdo_container);
-    }
+   // threading test using a single container
+   unsigned int total_error_count = do_mt_test ? threadTest<EventStoreMT>(events,
+                                                                          params.n_modules,
+                                                                          initial_container_list_size,
+                                                                          n_queue_slots,
+                                                                          n_threads) : 0u;
+   if (total_error_count!=0u) return 1;
+   if (do_non_mt_test) {
+      // reference threading test using one container per roi
+      total_error_count = threadTest<EventStoreNonMT>(events,
+                                                      params.n_modules,
+                                                      initial_container_list_size,
+                                                      n_queue_slots,
+                                                      n_threads);
+   }
 
-    std::cout << "Hits total " << countHits(*rdo_container) << " total modules in ROis " << countModules(rois) << std::endl;
-
-    if (!thread_test) {
-       // only run the iteration tests once and compare the resulting output
-       conversionTest(*rdo_container);
-       std::size_t sum0 =testNonConst(*rdo_container);
-       std::size_t sum1 =test(*rdo_container);
-       std::size_t sum2 =testAlt(*rdo_container);
-       std::cout << " sum " << sum1 << " alt " << sum2 << std::endl;
-       return sum0 == sum1 && sum1 == sum2 ? 0 :  1;
-    }
-    else {
-       // @TODO restore the original benchmark functionality and optionally run each test multiple times
-       //       and measure the time ?
-       // only run the thread tests once and compare the resulting check sums
-       // To estimate the overhead of creating the one container collection per ROI for the non-MT version,
-       // the thread creation and the computation of the FNV hash at the end, run a dummy.
-       std::size_t checksum0 = roiFillOverhead(*rdo_container,rois_no_overlap,container_index);
-       // for the non-MT version use input data for which the overlap region in some ROIs are removed
-       // such that a module appears at most once in all ROIs together.
-       std::size_t checksum1 = roiFillNonMT(*rdo_container,rois_no_overlap,container_index);
-       // for the MT version the input data may contain overlapping ROIs, As a consequence part of the
-       // work is eventually done multiple times, although only one result is stored.
-       std::size_t checksum2 = roiFillMT(*rdo_container,rois);
-       std::cout << "thread test check sum overhead: " << checksum0
-                 << " non-MT " << checksum1 << (checksum1==checksum0 ? " (ok)" : " (DIFFERS)")
-                 << " MT "     << checksum2 << (checksum2==checksum0 ? " (ok)" : " (DIFFERS)")
-                 << std::endl;
-       return (checksum0 == checksum1 && checksum0 == checksum2 ? 0 : 1);
-    }
- }
+   return total_error_count==0u ? 0 : 1;
+   }
+   catch(std::exception &error) {
+      std::cout << "Exception: " << error.what() << std::endl;
+      abort();
+   }
+}

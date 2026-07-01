@@ -26,7 +26,7 @@ JEMEtSumsCollection_PERS * JEMEtSumsCollectionCnv::createPersistent( JEMEtSumsCo
  
 
 //createTransient
-JEMEtSumsCollection * JEMEtSumsCollectionCnv::createTransient()
+JEMEtSumsCollection * JEMEtSumsCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "JEMEtSumsCollectionConverter" );
   
@@ -35,10 +35,10 @@ JEMEtSumsCollection * JEMEtSumsCollectionCnv::createTransient()
   static const pool::Guid tlp1_guid( "FFEF6FF1-31E5-492A-9A44-4AD5B79DB22B" );
  
   JEMEtSumsCollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< JEMEtSumsCollection_PERS > pers_ref( poolReadObject< JEMEtSumsCollection_PERS >() );
+      std::unique_ptr< JEMEtSumsCollection_PERS > pers_ref( poolReadObject< JEMEtSumsCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
    
     }else  throw std::runtime_error( "Unsupported persistent version of JEMEtSumsCollection" );

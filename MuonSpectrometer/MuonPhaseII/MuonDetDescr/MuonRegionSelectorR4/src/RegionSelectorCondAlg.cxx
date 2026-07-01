@@ -9,6 +9,14 @@
 #include <AthenaKernel/IOVInfiniteRange.h>
 
 #include "Acts/Surfaces/PlanarBounds.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Geometry/Volume.hpp"
+#include "Acts/Geometry/CuboidVolumeBounds.hpp"
+#include "Acts/Geometry/TrapezoidVolumeBounds.hpp"
+#include "Acts/Visualization/ObjVisualization3D.hpp"
+#include "Acts/Visualization/GeometryView3D.hpp"
+
 
 #include "MuonNSWCommonDecode/NSWOfflineHelper.h"
 #include "FourMomUtils/xAODP4Helpers.h"
@@ -57,7 +65,7 @@ namespace MuonR4{
             case sTgc:
                 return m_idHelperSvc->stgcIdHelper();
             default:
-                THROW_EXCEPTION("Unknown detector type "<<ActsTrk::to_string(type));
+                THROW_EXCEPTION("Unknown detector type "<<type<<".");
         }
     }
 
@@ -144,6 +152,7 @@ namespace MuonR4{
         std::vector<TempSelTable> luts(idHelper.module_hash_max());
         IdentifierHash modHash{};
         /** Fill the geometric part of the reg sel table */
+        std::vector<std::unique_ptr<Acts::Volume>> objVolumes{};
         for (const MuonGMR4::MuonReadoutElement* reEle: m_detMgr->getAllReadoutElements(alignDeltas->detType)) {
             
             const Acts::Surface& surface{reEle->surface()};
@@ -159,6 +168,33 @@ namespace MuonR4{
                         localVertices.emplace_back(v.x(), v.y(), halfTck);
                         localVertices.emplace_back(v.x(), v.y(), -halfTck);
                     });
+            
+            if (m_dumpObjVolumes) {
+                std::unique_ptr<Acts::VolumeBounds> volBounds{};
+                switch (surface.bounds().type()) {
+                    using enum Acts::SurfaceBounds::BoundsType;
+                    case eRectangle:{
+                        using vEnum = Acts::RectangleBounds::BoundValues;
+                        const auto& bounds{static_cast<const Acts::RectangleBounds&>(surface.bounds())};
+                        volBounds = std::make_unique<Acts::CuboidVolumeBounds>(bounds.get(vEnum::eMaxX),
+                                                                               bounds.get(vEnum::eMaxY), 
+                                                                               halfTck);
+                        break;
+                    } case eTrapezoid: {
+                        using vEnum = Acts::TrapezoidBounds::BoundValues;
+                        const auto& bounds{static_cast<const Acts::TrapezoidBounds&>(surface.bounds())};
+                        volBounds = std::make_unique<Acts::TrapezoidVolumeBounds>(bounds.get(vEnum::eHalfLengthXnegY),
+                                                                                  bounds.get(vEnum::eHalfLengthXposY),
+                                                                                  bounds.get(vEnum::eHalfLengthY), 
+                                                                                  halfTck);
+                        break;
+                    } default:
+                        THROW_EXCEPTION("Unsupported bounds "<<surface.bounds());
+                }
+                objVolumes.emplace_back(std::make_unique<Acts::Volume>(surface.localToGlobalTransform(gctx.context()),
+                                                                       std::move(volBounds)));
+            }
+                    
             ATH_MSG_VERBOSE(__LINE__<<" - Fetched "<<localVertices.size()<<" vertices.");
             const Amg::Transform3D& loc2Glob{surface.localToGlobalTransform(gctx.context())};
             idHelper.get_module_hash(reEle->identify(), modHash);
@@ -210,6 +246,15 @@ namespace MuonR4{
             if (const auto *lut = dynamic_cast<const RegSelSiLUT*>(writeCdo.get())) {
                 lut->write(std::format("{:}.map", name()));
             }
+        }
+        if (!objVolumes.empty()) {  
+            Acts::ObjVisualization3D visualHelper{};
+            for (const auto& volume : objVolumes) {
+                Acts::GeometryView3D::drawVolume(visualHelper, *volume,
+                                                 gctx.context());
+            }
+            visualHelper.write(std::format("RegSelVolumes_{:}.obj", alignDeltas->detType));
+
         }
 
         ATH_CHECK(writeHandle.record(std::make_unique<IRegSelLUTCondData>(std::move(writeCdo))));

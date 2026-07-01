@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Alias script for "athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py".
 #
@@ -9,5 +9,11 @@
 set -e
 
 # Run the command.
-echo "Executing: athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py ... "
-athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py "$@"
+if [ -f "L1CaloPhase1Monitoring.py" ]; then
+  # allows for local override of underlying script (e.g. from get_files L1CaloPhase1Monitoring.py)
+  echo "Executing: athena L1CaloPhase1Monitoring.py $@ "
+  athena L1CaloPhase1Monitoring.py "$@"
+else
+  echo "Executing: athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py $@ "
+  athena TrigT1CaloMonitoring/L1CaloPhase1Monitoring.py "$@"
+fi

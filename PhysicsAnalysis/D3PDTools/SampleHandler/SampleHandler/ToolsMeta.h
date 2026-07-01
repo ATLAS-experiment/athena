@@ -8,12 +8,6 @@
 #ifndef SAMPLE_HANDLER__TOOLS_META_H
 #define SAMPLE_HANDLER__TOOLS_META_H
 
-// This module still needs to be documented.  The interface provided
-// in this module is intended for experts only.  The module is
-// considered to be in the pre-alpha stage.
-
-
-
 #include <SampleHandler/Global.h>
 
 #include <string>

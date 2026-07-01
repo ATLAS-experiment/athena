@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCSC_CNVTOOL_CSCRODREADOUTV0_H
 #define MUONCSC_CNVTOOL_CSCRODREADOUTV0_H
 
-#include <stdint.h>
 
-#include <cmath>
-#include <vector>
 
 #include "MuonIdHelpers/CscIdHelper.h"
+#include <stdint.h>
+#include <cmath>
+#include <vector>
 
 // CSC ROD encoder/decoder for CscRDO
 // Author Ketevi A. Assamagan
@@ -170,7 +170,7 @@ inline double CscRODReadOutV0::signal_amplitude(double samplingTime) const {
 
 // signal amplitude as a function of the time bin z
 inline double CscRODReadOutV0::signal(double z) const {
-    double amplitude = (1.0 - z / (1 + m_NUMBER_OF_INTEGRATION)) * std::pow(z, m_NUMBER_OF_INTEGRATION) * exp(-z);
+    double amplitude = (1.0 - z / (1 + m_NUMBER_OF_INTEGRATION)) * std::pow(z, m_NUMBER_OF_INTEGRATION) * std::exp(-z);
     return amplitude;
 }
 

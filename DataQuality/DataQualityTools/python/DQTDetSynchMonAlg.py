@@ -166,8 +166,6 @@ if __name__ == '__main__':
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     cfg = MainServicesCfg(flags)
     cfg.merge(ByteStreamReadCfg(flags))
-    from TrigInDetConfig.InDetConfig import TrigInDetConfig
-    cfg.merge(TrigInDetConfig(flags))
 
     cfg.merge(DQTDetSynchMonAlgConfig(flags))
 

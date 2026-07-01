@@ -79,11 +79,11 @@ StatusCode GaussianDensityTestAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode GaussianDensityTestAlg::execute()
+StatusCode GaussianDensityTestAlg::execute(const EventContext& ctx)
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-  SG::ReadHandle<xAOD::TrackParticleContainer> trackParticles(m_trackParticlesKey);
+  SG::ReadHandle<xAOD::TrackParticleContainer> trackParticles(m_trackParticlesKey, ctx);
 
   ATH_MSG_VERBOSE("Selecting tracks");
   std::vector<Trk::ITrackLink*> trackVector;
@@ -328,7 +328,7 @@ GaussianDensityTestAlg::findTruth(double mode,
     v.setFitQuality(0., 0.);
 
     double significance = 0.0;
-    std::unique_ptr<ImpactParametersAndSigma> ipas = m_ipEstimator->estimate( params, &v );
+    std::unique_ptr<ImpactParametersAndSigma> ipas = m_ipEstimator->estimate(Gaudi::Hive::currentContext(), params, &v );
     if ( ipas != nullptr )
     {  
       if ( ipas->sigmad0 > 0 && ipas->sigmaz0 > 0)

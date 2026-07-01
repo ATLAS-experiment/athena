@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataModelTestDataRead/src/xAODTestShallowCopyHVec.cxx
@@ -45,14 +45,13 @@ StatusCode xAODTestShallowCopyHVec::execute (const EventContext& ctx) const
 
   {
     SG::ReadHandle<DMTest::HVec> vec (m_readKey, ctx);
-    auto ret = xAOD::shallowCopyContainer (*vec);
+    auto ret = xAOD::shallowCopy (*vec, ctx);
 
     SG::WriteHandle<DMTest::HVec> copy (m_writeKey, ctx);
-    ATH_CHECK( copy.record (std::unique_ptr<DMTest::HVec>(ret.first),
-                            std::unique_ptr<xAOD::ShallowAuxContainer>(ret.second)) );
+    ATH_CHECK( copy.record (std::move(ret.first), std::move(ret.second)) );
 
     SG::WriteDecorHandle<DMTest::HVec, float> aFloat20 (m_aFloat20Key, ctx);
-    for (H* h : *ret.first)
+    for (H* h : *copy)
       aFloat20(*h) = count * 20000 + h->aFloat();
   }
 
@@ -61,4 +60,3 @@ StatusCode xAODTestShallowCopyHVec::execute (const EventContext& ctx) const
 
 
 } // namespace DMTest
-

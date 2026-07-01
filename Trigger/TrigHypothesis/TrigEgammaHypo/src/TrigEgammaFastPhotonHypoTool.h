@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_TrigEgammaFastPhotonHypoTool_H
 #define TRIGEGAMMAHYPO_TrigEgammaFastPhotonHypoTool_H 1
@@ -7,12 +7,12 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODTrigCalo/TrigEMCluster.h"
-#include "xAODTrigEgamma/TrigPhotonContainer.h"
+#include "xAODTrigEgamma/TrigPhoton.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
+#include <vector>
 
 /**
  * @class Implementation of the Egamma selection for CaloClusters
@@ -29,9 +29,9 @@ class TrigEgammaFastPhotonHypoTool : virtual public ::AthAlgTool
     virtual StatusCode initialize() override;
 
     struct PhotonInfo {
-      TrigCompositeUtils::Decision* decision;
-      const xAOD::TrigPhoton* photon;
-      const xAOD::TrigEMCluster* cluster;
+      TrigCompositeUtils::Decision* decision{};
+      const xAOD::TrigPhoton* photon{};
+      const xAOD::TrigEMCluster* cluster{};
       const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
     };
 

@@ -46,18 +46,8 @@ namespace met {
   // Constructors
   ////////////////
   METRecoTool::METRecoTool(const std::string& name) : 
-    AsgTool(name),
-    m_doMetSum(false),
-    m_metbuilders(this),
-    m_metrefiners(this),
-    m_nevt(0)
+    AsgTool(name)
   {
-    declareProperty( "METBuilders",        m_metbuilders         );
-    declareProperty( "METRefiners",        m_metrefiners         );
-    declareProperty( "METContainer",       m_contname = "MET"    );
-    declareProperty( "METComponentMap",    m_mapname  = "METMap" );
-    declareProperty( "WarnIfDuplicate",    m_warnOfDupes = true  );
-    declareProperty( "METFinalName",       m_metfinalname = ""   );
   }
 
   // Athena algtool's Hooks
@@ -96,12 +86,12 @@ namespace met {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode METRecoTool::execute() const
+  StatusCode METRecoTool::execute(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG ("In execute: " << name() << "...");
 
     // Create a MissingETContainer with its aux store
-    auto metHandle= SG::makeHandle (m_contname); 
+    auto metHandle= SG::makeHandle (m_contname, ctx);
     //note that the method below automatically creates the MET container and its corresponding aux store (which will be named "m_contname+Aux.")
     ATH_CHECK( metHandle.record (std::make_unique<xAOD::MissingETContainer>(),                      std::make_unique<xAOD::MissingETAuxContainer>()) );
     xAOD::MissingETContainer* metCont=metHandle.ptr();
@@ -109,7 +99,7 @@ namespace met {
 
     // Create a MissingETComponentMap with its aux store
 
-    auto metMapHandle= SG::makeHandle (m_mapname); 
+    auto metMapHandle= SG::makeHandle (m_mapname, ctx);
     //note that the method below automatically creates the MET container and its corresponding aux store (which will be named "m_contname+Aux.")
     ATH_CHECK( metMapHandle.record (std::make_unique<xAOD::MissingETComponentMap>(),                      std::make_unique<xAOD::MissingETAuxComponentMap>()) );
     xAOD::MissingETComponentMap* metMap=metMapHandle.ptr();

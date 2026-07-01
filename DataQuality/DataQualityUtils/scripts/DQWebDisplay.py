@@ -28,7 +28,7 @@ from DataQualityUtils.DQWebDisplayMod import DQWebDisplay
 
 def importConfiguration(modname):
     from DataQualityConfigurations import getmodule
-    print('getting configuration', modname)
+    print('Getting configuration', modname)
     return getmodule(modname)
 
 def usage():
@@ -43,7 +43,6 @@ def usage():
   print("")
 
 if __name__ == "__main__":
-  print(len(sys.argv))
   if len(sys.argv) < 5 or len(sys.argv) > 7:
     usage()
     sys.exit(64)

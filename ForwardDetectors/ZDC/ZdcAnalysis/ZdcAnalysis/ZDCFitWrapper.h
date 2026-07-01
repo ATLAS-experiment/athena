@@ -11,9 +11,13 @@
 //
 #include <TF1.h>
 #include <memory>
+#include <cmath>
+#include <stdexcept>
+#include <algorithm> //std::max
 
 inline double ZDCFermiExpFit(const double* xvec, const double* pvec);
 inline double ZDCFermiExpFitRefl(const double* xvec, const double* pvec);
+inline double ZDCFermiExpFitInduct(const double* xvec, const double* pvec);
 
 class ZDCFitWrapper
 {
@@ -103,6 +107,7 @@ public:
 
   virtual float GetBkgdMaxFraction() const = 0;
 
+  virtual unsigned int GetNumShapeParameters() const = 0;
   virtual float GetShapeParameter(size_t index) const = 0;
 
   virtual double operator()(const double *x, const double *p) = 0;
@@ -196,10 +201,11 @@ public:
     return fitT0;
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 1;}
+      
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index == 0) return GetWrapperTF1()->GetParameter(2);
-    else if (index == 1) return GetWrapperTF1()->GetParameter(3);
+    if (index == 0) return GetWrapperTF1()->GetParameter(4);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -263,10 +269,11 @@ public:
     return fitT0;
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 5;}
+
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index == 0) return GetWrapperTF1()->GetParameter(2);
-    else if (index == 1) return GetWrapperTF1()->GetParameter(3);
+    if (index < 5) return GetWrapperTF1()->GetParameter(5+index);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -282,6 +289,68 @@ public:
 
   virtual double operator()(const double *x, const double *p)  override{
     return ZDCFermiExpFitRefl(x, p);
+  }
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
+};
+
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTausInduct : public ZDCFitWrapper
+{
+protected:
+  bool m_fixTau1{false};
+  bool m_fixTau2{false};
+
+  float m_tau1{0};
+  float m_tau2{0};
+
+public:
+
+  ZDCFitExpFermiVariableTausInduct(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
+
+  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
+  virtual void SetT0FitLimits(float tMin, float tMax) override;
+
+  virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
+  virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
+
+  virtual float GetTau1() const override {return GetWrapperTF1()->GetParameter(2);}
+  virtual float GetTau2() const override {return GetWrapperTF1()->GetParameter(3);}
+
+  virtual float GetTime() const override {
+    const TF1* theTF1 = GetWrapperTF1();
+
+    float fitT0 =  theTF1->GetParameter(1);
+
+    float tau1 = theTF1->GetParameter(2);
+    float tau2 = theTF1->GetParameter(3);
+
+    // Correct the time to the maximum
+    //
+    if (tau2 > tau1) fitT0 += tau1 * std::log(tau2 / tau1 - 1.0);
+    return fitT0;
+  }
+
+  virtual unsigned int GetNumShapeParameters() const override {return 5;}
+
+  virtual float GetShapeParameter(size_t index) const override
+  {
+    if (index < 5) return GetWrapperTF1()->GetParameter(4+index);
+    else throw std::runtime_error("Fit parameter does not exist.");
+  }
+
+  virtual float GetBkgdMaxFraction() const override
+  {
+    const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
+    double amp = theTF1->GetParameter(0);
+    double constant = theTF1->GetParameter(4);
+
+    if (amp > 1e-6) return constant / amp;
+    else return 1;
+  }
+
+  virtual double operator()(const double *x, const double *p)  override{
+    return ZDCFermiExpFitInduct(x, p);
   }
 
   virtual void ConstrainFit() override;
@@ -327,6 +396,8 @@ public:
     return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 2;}
+    
   virtual float GetShapeParameter(size_t index) const override
   {
     if (index == 0) return m_tau1;
@@ -408,11 +479,11 @@ public:
     return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 1;}
+    
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index == 0) return m_tau1;
-    else if (index == 1) return m_tau2;
-    else if (index < 5) return GetWrapperTF1()->GetParameter(index);
+    if (index < 1) return GetWrapperTF1()->GetParameter(4);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -519,11 +590,11 @@ public:
     return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 1;}
+  
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index == 0) return m_tau1;
-    else if (index == 1) return m_tau2;
-    else if (index < 5) return GetWrapperTF1()->GetParameter(index);
+    if (index < 1) return GetWrapperTF1()->GetParameter(6);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -584,7 +655,7 @@ private:
   float m_tau1{0};
   float m_tau2{0};
   float m_timeCorr{0};
-  double m_norm;
+  double m_norm{};
   
   std::shared_ptr<TF1> m_expFermiFunc{0};
   std::shared_ptr<TF1> m_expFermiPreFunc{0};
@@ -618,11 +689,11 @@ public:
   virtual float GetExpAmp() const override {return GetWrapperTF1()->GetParameter(2);}
   virtual float GetExpTau() const override {return GetWrapperTF1()->GetParameter(3);}
 
+  virtual unsigned int GetNumShapeParameters() const override {return 2;}
+
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index == 0) return m_tau1;
-    else if (index == 1) return m_tau2;
-    else if (index < 5) return GetWrapperTF1()->GetParameter(index);
+    if (index < 2) return GetWrapperTF1()->GetParameter(index + 4);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -702,7 +773,7 @@ public:
   virtual float GetTau2() const override {return m_tau2;}
 
   virtual float GetTime() const override {
-        const TF1* theTF1 = GetWrapperTF1();
+    const TF1* theTF1 = GetWrapperTF1();
 
     float fitT0 =  theTF1->GetParameter(1);
 
@@ -718,11 +789,10 @@ public:
   virtual float GetExpAmp() const override {return GetWrapperTF1()->GetParameter(4);}
   virtual float GetExpTau() const override {return GetWrapperTF1()->GetParameter(5);}
 
+  virtual unsigned int GetNumShapeParameters() const override {return 1;}
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index == 0) return m_tau1;
-    else if (index == 1) return m_tau2;
-    else if (index < 5) return GetWrapperTF1()->GetParameter(index);
+    if (index < 1) return GetWrapperTF1()->GetParameter(5);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -781,15 +851,118 @@ public:
   }
 };
 
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPreExp : public ZDCPreExpFitWrapper
+{
+private:
+  float m_tau1{0};
+  float m_tau2{0};
+  float m_timeCorr{0};
+  
+  std::shared_ptr<TF1> m_expFermiInductFunc{0};
+  std::shared_ptr<TF1> m_expFermiPreFunc{0};
+
+public:
+  ZDCFitExpFermiInductPreExp(const std::string& tag, float tmin, float tmax, float tau1, float tau2,
+			   float defExpTau, float fixExpTau);
+  ~ZDCFitExpFermiInductPreExp() {}
+
+  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
+  virtual void SetT0FitLimits(float tMin, float tMax) override;
+
+  virtual void SetInitialExpPulse(float amp) override
+  {
+    GetWrapperTF1()->SetParameter(2, std::max(amp, (float) 0.5)); //0.5 here ensures that we're above lower limit (0)   
+  }
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
+
+  virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
+  virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
+
+  virtual float GetTau1() const override {return m_tau1;}
+  virtual float GetTau2() const override {return m_tau2;}
+
+  virtual float GetTime() const override {
+    return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
+  }
+
+  virtual float GetExpAmp() const override {return GetWrapperTF1()->GetParameter(2);}
+  virtual float GetExpTau() const override {return GetWrapperTF1()->GetParameter(3);}
+
+  virtual unsigned int GetNumShapeParameters() const override {return 3;}
+
+  virtual float GetShapeParameter(size_t index) const override
+  {
+    if (index < 3) {
+      if (index == 0) return GetWrapperTF1()->GetParameter(4);
+      if (index == 1) return GetWrapperTF1()->GetParameter(6);
+      if (index == 2) return GetWrapperTF1()->GetParameter(7);
+    }
+    throw std::runtime_error("Fit parameter does not exist.");
+  }
+
+  virtual float GetBkgdMaxFraction() const override
+  {
+    const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
+    double amp = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
+
+    double maxTime = GetTime();
+    
+    double expAmp = theTF1->GetParameter(2);
+    double expTau = theTF1->GetParameter(3);
+    double bexpSqrt = theTF1->GetParameter(4);
+
+    double tRef = GetTMinAdjust();
+    double expPre = expAmp * (std::exp(-maxTime/expTau - bexpSqrt*maxTime*maxTime) - std::exp(-tRef/expTau - bexpSqrt*tRef*tRef));
+
+    return expPre / (amp + expPre);
+  }
+
+  virtual double operator() (const double *x, const double *p) override
+  {
+    double t = x[0];
+
+    double amp = p[0];
+    double t0 = p[1];
+
+    double expAmp = p[2];
+    double expTau = p[3];
+    double bexpSqrt = p[4];
+    double C = p[5];
+    double inductA = p[6];
+    double inductB = p[7];
+
+    m_expFermiInductFunc->SetParameter(0, amp);
+    m_expFermiInductFunc->SetParameter(6, inductA);
+    m_expFermiInductFunc->SetParameter(7, inductB);
+
+    double deltaT = t - t0;
+    double pulse = m_expFermiInductFunc->operator()(deltaT);
+
+    // We subtract off the value of the exponential pulse at the minimum time (nominally 0),
+    //   because it would have been included in the baseline subtraction
+    //
+    double tRef = GetTMinAdjust();
+    double expPre = 0;
+
+    expPre = expAmp * (std::exp(-t/expTau - bexpSqrt*t*t) - std::exp(-tRef/expTau - bexpSqrt*tRef*tRef));
+      
+    return pulse + C + expPre;
+   }
+};
+
+
 // ----------------------------------------------------------------------
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiLinearFixedTaus : public ZDCFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
+  float m_tau1{};
+  float m_tau2{};
 
-  float m_norm;
-  float m_timeCorr;
+  float m_norm{};
+  float m_timeCorr{};
 
   std::shared_ptr<TF1> m_expFermiFunc;
 
@@ -815,10 +988,10 @@ public:
     return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 2;}
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index == 0) return m_tau1;
-    else if (index == 1) return m_tau2;
+    if (index < 2) return GetWrapperTF1()->GetParameter(index + 2);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -852,10 +1025,10 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiLinearPrePulse : public ZDCPrePulseFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{};
+  float m_tau2{};
+  float m_norm{};
+  float m_timeCorr{};
   std::shared_ptr<TF1> m_expFermiFunc;
 
 public:
@@ -904,11 +1077,11 @@ public:
     return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 1;}
+
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index == 0) return m_tau1;
-    else if (index == 1) return m_tau2;
-    else if (index < 5) return GetWrapperTF1()->GetParameter(index);
+    if (index < 1) return GetWrapperTF1()->GetParameter(index + 4);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -967,10 +1140,10 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitComplexPrePulse : public ZDCPrePulseFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{};
+  float m_tau2{};
+  float m_norm{};
+  float m_timeCorr{};
   std::shared_ptr<TF1> m_expFermiFunc;
 
 public:
@@ -1020,11 +1193,11 @@ public:
     return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 3;}
+    
   virtual float GetShapeParameter(size_t index) const override
   {
-    if      (index == 0) return m_tau1;
-    else if (index == 1) return m_tau2;
-    else if (index <  5) return GetWrapperTF1()->GetParameter(index);
+    if (index <  3) return GetWrapperTF1()->GetParameter(4 + index);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -1084,10 +1257,10 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitGeneralPulse : public ZDCPrePulseFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{};
+  float m_tau2{};
+  float m_norm{};
+  float m_timeCorr{};
   std::shared_ptr<TF1> m_expFermiFunc;
 
 public:
@@ -1152,11 +1325,11 @@ public:
     return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
   }
 
+  virtual unsigned int GetNumShapeParameters() const override {return 5;}
+    
   virtual float GetShapeParameter(size_t index) const override
   {
-    if      (index == 0) return m_tau1;
-    else if (index == 1) return m_tau2;
-    else if (index <  5) return GetWrapperTF1()->GetParameter(index);
+    if (index <  5) return GetWrapperTF1()->GetParameter(index + 4);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
@@ -1273,6 +1446,45 @@ double ZDCFermiExpFitRefl(const double* xvec, const double* pvec)
   double reflTerm =  -reflFrac*amp*std::exp(-0.5*deltaTRefl*deltaTRefl/reflwidth/reflwidth);
 
   return amp * expTerm * fermiTerm / norm + C + reflTerm; 
+}
+
+double ZDCFermiExpFitInduct(const double* xvec, const double* pvec)
+{
+  double t = xvec[0];
+
+  double amp = pvec[0];
+  double t0 = pvec[1];
+  double tau1 = pvec[2];
+  double tau2 = pvec[3];
+  double C = pvec[4];
+  
+  double period = pvec[5];
+  double Acos = pvec[6];
+  double Bsin = pvec[7];
+  double delta = pvec[8];
+  
+  double tauRatio = tau2 / tau1;
+  double tauRatioMinunsOne = tauRatio - 1;
+
+  double norm = std::pow(1. / tauRatioMinunsOne, 1. / (1.0 + tauRatio)) /
+    ( 1.0 + std::pow(1. / tauRatioMinunsOne, 1. / (1.0 + 1.0 / tauRatio))) ;
+
+  double deltaT = t - t0;
+  double deltaTInduct = deltaT - tau1 * std::log(tauRatioMinunsOne);
+  
+  if (deltaT < 0) deltaT = 0;
+  if (deltaTInduct < 0) deltaTInduct = 0;
+    
+  //  Note: the small constant added here accounts for the very long tail on the pulse 
+  //  which doesn't go to zero over the time range that we sample
+  
+  double twoPiOverPeriod = 2.0*M_PI/period;
+  double inductTerm = (1.0 + Acos*std::cos(deltaTInduct*twoPiOverPeriod) +
+		       Bsin*std::sin(deltaTInduct*twoPiOverPeriod))/(1+Acos);
+  double expTerm = delta + std::exp(-deltaT / tau2)*inductTerm;
+  double fermiTerm = 1. / (1. + std::exp(-(t - t0) / tau1));
+
+  return amp * expTerm * fermiTerm / norm + C; 
 }
 
 #endif

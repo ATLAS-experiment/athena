@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -163,10 +163,18 @@ namespace xAOD {
 
    /**
     * @brief Called after one of these objects is read.
-    *        Locks any detector flag words that appear to have already
+    * @param ctx Current event context.
+    *        Make contained variables usable after reading.
+    *        Also locks any detector flag words that appear to have already
     *        been set.
     */
-   void EventAuxInfo_v1::toTransient()
+   void EventAuxInfo_v1::toTransient( const EventContext& ctx )
+   {
+     AuxInfoBase::toTransient( ctx );
+     toTransient( );
+   }
+
+   void EventAuxInfo_v1::toTransient(  )
    {
      /// List of all detector flag aux IDs.
      static const std::vector<SG::auxid_t> flagIds (m_decorFlags.begin(),

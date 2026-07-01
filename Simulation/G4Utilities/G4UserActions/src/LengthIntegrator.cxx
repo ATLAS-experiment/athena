@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LengthIntegrator.h"
@@ -8,6 +8,7 @@
 #include "TProfile.h"
 #include "TProfile2D.h"
 #include "TTree.h"
+#include "TString.h"
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
@@ -111,13 +112,13 @@ namespace G4UA
     if(m_doHistos){
       // Register the RZ profiles. The other profiles need to wait until the end
       // of the events as they are created only if used.
-      const char* radName = "/lengths/radLen/RZRadLen";
+      const std::string radName = "/lengths/radLen/RZRadLen";
       if(!getHist(m_hSvc, radName, m_rzProfRL)) {
 	m_rzProfRL = new TProfile2D("RZRadLen","RZRadLen",1000,-25000.,25000.,2000,0.,15000.);
 	regHist(m_hSvc, radName, m_rzProfRL);
       }
       
-      const char* intName = "/lengths/intLen/RZIntLen";
+      const std::string intName = "/lengths/intLen/RZIntLen";
       if(!getHist(m_hSvc, intName, m_rzProfIL)) {
 	m_rzProfIL = new TProfile2D("RZIntLen","RZIntLen",1000,-25000.,25000.,2000,0.,15000.);
 	regHist(m_hSvc, intName, m_rzProfIL);
@@ -322,10 +323,6 @@ namespace G4UA
     if(name.find("CFoam") != std::string::npos) return "SupportStructure";
     if(name.find("K13D2U") != std::string::npos) return "SupportStructure";
     if(name.find("BoratedPolyethylene") != std::string::npos) return "Moderator";
-
-
-    if(name.find("TiMetal") != std::string::npos) return "Titanium";
-    if(name.find("CuMetal") != std::string::npos) return "Copper";
       
     if(name.find("Alpine") != std::string::npos) return "SupportStructure";
     
@@ -347,8 +344,6 @@ namespace G4UA
     if(name.find("pix::Hybrid") != std::string::npos) return "PixelChips";
     if(name.find("PP0") != std::string::npos) return "PP0";
     if(name.find("PP1") != std::string::npos) return "PP1";
-
-    if(name.find("PP0") != std::string::npos) return "PP1"; //Grouping PP0 and PP1
     
     if(name.find("PST") != std::string::npos) return "SupportStructure";
     if(name.find("IST") != std::string::npos) return "SupportStructure";

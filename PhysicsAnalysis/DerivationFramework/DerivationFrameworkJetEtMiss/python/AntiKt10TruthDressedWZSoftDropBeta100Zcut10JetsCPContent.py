@@ -1,12 +1,12 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsCPContent = [
 "AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets",
-"AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.SizeParameter.Parent",
+"AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.SizeParameter.Parent.numConstit",
 "AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsAux.GhostBHadronsFinalCount.GhostCHadronsFinalCount.GhostTQuarksFinalCount.GhostHBosonsCount.GhostZBosonsCount.GhostWBosonsCount",
 "AntiKt10TruthDressedWZSoftDropBeta100Zcut10JetsAux.GhostBHadronsFinalPt.GhostCHadronsFinalPt.GhostTQuarksFinalPt.GhostHBosonsPt.GhostZBosonsPt.GhostWBosonsPt",
 "AntiKt10TruthDressedWZJets",
 "AntiKt10TruthDressedWZJetsAux.GhostBHadronsFinalCount.GhostCHadronsFinalCount.GhostTQuarksFinalCount.GhostHBosonsCount.GhostZBosonsCount.GhostWBosonsCount",
 "AntiKt10TruthDressedWZJetsAux.GhostBHadronsFinalPt.GhostCHadronsFinalPt.GhostTQuarksFinalPt.GhostHBosonsPt.GhostZBosonsPt.GhostWBosonsPt",
-"AntiKt10TruthDressedWZJetsAux.pt.eta.phi.m.Split12.Split23"
+"AntiKt10TruthDressedWZJetsAux.pt.eta.phi.m.numConstit.Split12.Split23"
 ]

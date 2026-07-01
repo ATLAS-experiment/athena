@@ -21,7 +21,7 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
 
   // Standard algorithm methods
   virtual StatusCode initialize();
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx);
 
  protected:
 

@@ -138,8 +138,9 @@ def createRecoConfigFlags():
 
     flags.addFlag("Reco.PostProcessing.TRTAloneThinning",
                   lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
-                  prevFlags.Reco.EnableTracking and
+                  prevFlags.Detector.EnableID and
                   prevFlags.Output.doWriteAOD)
+
     flags.addFlag("Reco.PostProcessing.GeantTruthThinning",
                   lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
                   prevFlags.Input.isMC and

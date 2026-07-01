@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: AtlasGeoPoint.h 689815 2015-08-17 15:39:55Z wsfreund $ 
@@ -26,15 +26,16 @@ class AtlasGeoPoint {
       m_phi(phi)
     {;}
 
+    ~AtlasGeoPoint() = default;
+    AtlasGeoPoint(const AtlasGeoPoint &p) = default;
+    AtlasGeoPoint& operator=(const AtlasGeoPoint &p) = default;
+
     static const float PHI_MIN;
     static const float PHI_MAX;
     // static constexpr float PHI_MIN = CaloPhiRange::phi_min(); <- not constexpr
     // static constexpr float PHI_MAX = CaloPhiRange::phi_max(); <- not constexpr
     static constexpr float ETA_MIN = -5;
     static constexpr float ETA_MAX = 5;
-
-    // Assign operator
-    AtlasGeoPoint& operator=(const AtlasGeoPoint &p);
 
     // Check if AtlasGeoPoint is within bounds
     bool isValid() const;
@@ -59,27 +60,13 @@ class AtlasGeoPoint {
 };
 
 //==============================================================================
-// @name RingSet_v1::AtlasGeoPoint operator=:
-inline
-AtlasGeoPoint& AtlasGeoPoint::operator=(const AtlasGeoPoint &p)
-{
-  if(this==&p){
-    return *this;
-  }
-  m_eta = p.eta(); 
-  m_phi = p.phi();
-  return *this;
-}
-
-//==============================================================================
 inline
 bool AtlasGeoPoint::isValid() const 
 {
-  if ( ( m_eta >= ETA_MIN && m_phi >= PHI_MIN ) &&
-      ( m_eta <= ETA_MAX && m_phi <= PHI_MAX ) ){
-    return true;
-  }
-  return false;
+  return m_eta >= ETA_MIN
+    && m_eta <= ETA_MAX
+    && m_phi >= PHI_MIN
+    && m_phi <= PHI_MAX;
 }
 
 //==============================================================================

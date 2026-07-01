@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripSurfaceChargesGenerator.h"
@@ -517,7 +517,7 @@ void StripSurfaceChargesGenerator::processSiHit(const SiDetectorElement* element
             h.m_h_zhit->Fill(zhit);
           }
           double trap_pos{-999999.}, drift_time{-999999.}; // FIXME need better default values
-          if (chargeIsTrapped(spess, element, trap_pos, drift_time)) {
+          if (chargeIsTrapped(spess, element, trap_pos, drift_time, ctx)) {
             if (not m_doRamo) {
               break;
             } else {  // if we want to take into account also Ramo Potential
@@ -538,7 +538,7 @@ void StripSurfaceChargesGenerator::processSiHit(const SiDetectorElement* element
               double yfin{dstrip * stripPitch}; // mm
               double zfin{thickness - trap_pos}; // mm
 
-              m_radDamageTool->holeTransport(y0, z0, yfin, zfin, Q_m2, Q_m1, Q_00, Q_p1, Q_p2);
+              m_radDamageTool->holeTransport(y0, z0, yfin, zfin, Q_m2, Q_m1, Q_00, Q_p1, Q_p2, ctx);
               for (int strip{-2}; strip<=2; strip++) {
                 const double ystrip{yd + strip * stripPitch}; // mm
                 const SiLocalPosition position(element->hitLocalToLocal(xd, ystrip));
@@ -622,14 +622,15 @@ void StripSurfaceChargesGenerator::processSiHit(const SiDetectorElement* element
 bool StripSurfaceChargesGenerator::chargeIsTrapped(double spess,
                                                   const SiDetectorElement* element,
                                                   double& trap_pos,
-                                                  double& drift_time) const {
+                                                  double& drift_time,
+                                                  const EventContext& ctx) const {
   if (element==nullptr) {
     ATH_MSG_ERROR("StripSurfaceChargesGenerator::chargeIsTrapped element is nullptr");
     return false;
   }
   bool isTrapped{false};
   const IdentifierHash hashId{element->identifyHash()};
-  const SCT_ChargeTrappingCondData condData{m_radDamageTool->getCondData(hashId, spess)};
+  const SCT_ChargeTrappingCondData condData{m_radDamageTool->getCondData(hashId, spess, ctx)};
   const double electric_field{condData.getElectricField()};
 
   if (m_doHistoTrap) {

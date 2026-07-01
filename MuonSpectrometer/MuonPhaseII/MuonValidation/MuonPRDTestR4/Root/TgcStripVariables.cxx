@@ -31,8 +31,7 @@ namespace MuonValR4{
         }
         /// Then parse the rest. If there's any
         for (const xAOD::TgcStrip* strip : *inContainer) {
-            const MuonGMR4::TgcReadoutElement* re = strip->readoutElement();
-            const Identifier id{re->measurementId(strip->measurementHash())};
+            const Identifier id{strip->identify()};
             if ((m_applyFilter && !m_filteredChamb.count(idHelperSvc()->chamberId(id))) ||
                 m_idOutIdxMap.find(id) != m_idOutIdxMap.end()){
                 ATH_MSG_VERBOSE("Skip "<<idHelperSvc()->toString(id));
@@ -55,8 +54,7 @@ namespace MuonValR4{
     }
     unsigned int TgcStripVariables::push_back(const xAOD::TgcStrip& strip){
         m_applyFilter = true;
-        const MuonGMR4::TgcReadoutElement* re = strip.readoutElement();
-        const Identifier id{re->measurementId(strip.measurementHash())};
+        const Identifier id{strip.identify()};
         
         const auto insert_itr = m_idOutIdxMap.insert(std::make_pair(id, m_idOutIdxMap.size()));
         if (insert_itr.second) {

@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef MEASUREMENTCALIBRATOR2_H
 #define MEASUREMENTCALIBRATOR2_H
 
@@ -12,9 +11,10 @@
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "xAODInDetMeasurement/HGTDCluster.h"
+#include "AthenaKernel/Units.h"
 
 #include "Acts/EventData/MultiTrajectory.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
@@ -22,12 +22,18 @@
 #include "Acts/Utilities/AlgebraHelpers.hpp"
 #include <Eigen/Core>
 
-#include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsToolInterfaces/IOnBoundStateCalibratorTool.h"
+#include "ActsToolInterfaces/IPixelOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IStripOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IHGTDOnTrackCalibratorTool.h"
+#include "ActsInterop/UnitConverters.h"
+#include "ActsEvent/TrackContainer.h"
+
+#include "boost/container/static_vector.hpp"
 
 #include <stdexcept>
 #include <string>
 #include <cassert>
+#include <tuple>
 
 namespace ActsTrk {
    // helper to create map from nound track parameters to measurements
@@ -98,91 +104,109 @@ namespace ActsTrk {
       };
    };
 
+
+   template <typename traj_t>
    struct MeasurementCalibrator {
       using PixelPos = xAOD::MeasVector<2>;
       using PixelCov = xAOD::MeasMatrix<2>;
       // @TODO should pass through bound state
-      using PixelCalibrator = Acts::Delegate<
-         std::pair<PixelPos, PixelCov>(const Acts::GeometryContext&,
-                                       const Acts::CalibrationContext&,
-                                       const xAOD::PixelCluster &,
-                                       const Acts::BoundTrackParameters &)>;
+      template <typename T_Cluster, std::size_t NDIM>
+      using PreCalibratorDelegate = Acts::Delegate<
+         std::tuple<xAOD::MeasVector<NDIM>, xAOD::MeasMatrix<NDIM>,unsigned int>(const Acts::GeometryContext&,
+                                                                                 const Acts::CalibrationContext&,
+                                                                                 const Acts::Surface&,
+                                                                                 const T_Cluster &,
+                                                                                 const Acts::BoundTrackParameters &)>;
 
+      template <typename T_Cluster, std::size_t NDIM>
+      using CalibratorDelegate = Acts::Delegate<
+         void(const Acts::GeometryContext&,
+              const Acts::CalibrationContext&,
+              const T_Cluster &,
+              typename traj_t::TrackStateProxy &)>;
+      
       using StripPos = xAOD::MeasVector<1>;
       using StripCov = xAOD::MeasMatrix<1>;
-      using StripCalibrator = Acts::Delegate<
-         std::pair<StripPos, StripCov>(const Acts::GeometryContext&,
-                                       const Acts::CalibrationContext&,
-                                       const xAOD::StripCluster &,
-                                       const Acts::BoundTrackParameters &)>;
       using hgtdPos = xAOD::MeasVector<3>;
       using hgtdCov = xAOD::MeasMatrix<3>;
-      using HGTDCalibrator = Acts::Delegate<
-         std::pair<hgtdPos, hgtdCov>(const Acts::GeometryContext&,
-                                       const Acts::CalibrationContext&,
-                                       const xAOD::HGTDCluster &,
-                                       const Acts::BoundTrackParameters &)>;
+
+      using PixelPreCalibrator = PreCalibratorDelegate<xAOD::PixelCluster,2>;
+      using StripPreCalibrator = PreCalibratorDelegate<xAOD::StripCluster,1>;
+      using HGTDPreCalibrator  = PreCalibratorDelegate<xAOD::HGTDCluster,3>;
+      using PixelCalibrator = CalibratorDelegate<xAOD::PixelCluster,2>;
+      using StripCalibrator = CalibratorDelegate<xAOD::StripCluster,1>;
+      using HGTDCalibrator  = CalibratorDelegate<xAOD::HGTDCluster,3>;
 
       PixelCalibrator pixel_postCalibrator;
       StripCalibrator strip_postCalibrator;
       HGTDCalibrator hgtd_postCalibrator;
-      PixelCalibrator pixel_preCalibrator;
-      StripCalibrator strip_preCalibrator;
-      HGTDCalibrator hgtd_preCalibrator;
+      PixelPreCalibrator pixel_preCalibrator;
+      StripPreCalibrator strip_preCalibrator;
+      HGTDPreCalibrator hgtd_preCalibrator;
+      boost::container::static_vector<std::unique_ptr<ClusterCalibratorBase >, 3> m_calibrators;
 
-      MeasurementCalibrator(const IOnBoundStateCalibratorTool *pixelCalibratorTool,
-                            const IOnBoundStateCalibratorTool *stripCalibratorTool,
-                            const IOnBoundStateCalibratorTool *hgtdCalibratorTool)
+      template <typename T_CalibratorTool, typename T_PreDelegate, typename T_PostDelegate>
+      void connect(const EventContext &ctx,
+                   const T_CalibratorTool *calibrator_tool,
+                   T_PreDelegate &pre_calibrator,
+                   T_PostDelegate &post_calibrator) {
+         bool calibrate_after_measurement_selection=true;
+         if (calibrator_tool) {
+            calibrate_after_measurement_selection = calibrator_tool->calibrateAfterMeasurementSelection();
+            auto calibrator = calibrator_tool->createOnTrackCalibrator(ctx);
+            if (calibrate_after_measurement_selection) {
+               calibrator->connectOnTrackCalibrator( post_calibrator);
+            }
+            else {
+               calibrator->connectCalibrator( pre_calibrator );
+            }
+            m_calibrators.push_back(std::move(calibrator));
+         }
+         if (calibrate_after_measurement_selection) {
+            using CalibratorBase_t = typename decltype( calibrator_tool->create(ctx) )::element_type;
+            pre_calibrator.template connect<&MeasurementCalibrator::passthrough<CalibratorBase_t::ClusterDIM,
+                                                                                typename CalibratorBase_t::ClusterType>>(this);
+         }
+      }
+
+      MeasurementCalibrator(const EventContext &ctx,
+                            const ActsTrk::IPixelOnTrackCalibratorTool<traj_t> *pixelCalibratorTool,
+                            const ActsTrk::IStripOnTrackCalibratorTool<traj_t> *stripCalibratorTool,
+                            const ActsTrk::IHGTDOnTrackCalibratorTool<traj_t> *hgtdCalibratorTool)
       {
-
-         if (pixelCalibratorTool) {
-             bool calibrate_after_measurement_selection = pixelCalibratorTool->calibrateAfterMeasurementSelection();
-             pixelCalibratorTool->connectPixelCalibrator( calibrate_after_measurement_selection ?
-                                                          pixel_postCalibrator : pixel_preCalibrator );
-             if (calibrate_after_measurement_selection)
-                pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, xAOD::PixelCluster>>(this);
-          } else
-             pixel_preCalibrator.template connect<&MeasurementCalibrator::passthrough<2, xAOD::PixelCluster>>(this);
-
-          if (stripCalibratorTool) {
-             bool calibrate_after_measurement_selection = stripCalibratorTool->calibrateAfterMeasurementSelection();
-             stripCalibratorTool->connectStripCalibrator( calibrate_after_measurement_selection ?
-                                                          strip_postCalibrator : strip_preCalibrator );
-             if (calibrate_after_measurement_selection)
-                strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
-          } else
-             strip_preCalibrator.template connect<&MeasurementCalibrator::passthrough<1, xAOD::StripCluster>>(this);
-
-
-          if (hgtdCalibratorTool) {
-             bool calibrate_after_measurement_selection = hgtdCalibratorTool->calibrateAfterMeasurementSelection();
-             hgtdCalibratorTool->connectHGTDCalibrator( calibrate_after_measurement_selection ?
-                                                        hgtd_postCalibrator : hgtd_preCalibrator );
-             if(calibrate_after_measurement_selection)
-                hgtd_preCalibrator.template connect<&MeasurementCalibrator::passthrough<3, xAOD::HGTDCluster>>(this);
-          } else
-             hgtd_preCalibrator.template connect<&MeasurementCalibrator::passthrough<3, xAOD::HGTDCluster>>(this);
-
+         assert( m_calibrators.capacity() >= 3); // if capacity was constexpr should turn into static_assert
+         connect(ctx,pixelCalibratorTool,pixel_preCalibrator,pixel_postCalibrator);
+         connect(ctx,stripCalibratorTool,strip_preCalibrator,strip_postCalibrator);
+         connect(ctx,hgtdCalibratorTool, hgtd_preCalibrator, hgtd_postCalibrator);
       }
 
       const PixelCalibrator &pixelPostCalibrator() const  { return pixel_postCalibrator; }
       const StripCalibrator &stripPostCalibrator() const { return strip_postCalibrator; }
       const HGTDCalibrator &hgtdPostCalibrator() const { return hgtd_postCalibrator; }
-      const PixelCalibrator &pixelPreCalibrator() const { return pixel_preCalibrator; }
-      const StripCalibrator &stripPreCalibrator() const { return strip_preCalibrator; }
-      const HGTDCalibrator &hgtdPreCalibrator() const { return hgtd_preCalibrator; }   
+      const PixelPreCalibrator &pixelPreCalibrator() const { return pixel_preCalibrator; }
+      const StripPreCalibrator &stripPreCalibrator() const { return strip_preCalibrator; }
+      const HGTDPreCalibrator &hgtdPreCalibrator() const { return hgtd_preCalibrator; }
 
 
       template <std::size_t Dim, typename Cluster>
-      std::pair<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>>
+      std::tuple<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>, unsigned int>
       passthrough([[maybe_unused]] const Acts::GeometryContext& gctx,
                   [[maybe_unused]] const Acts::CalibrationContext& cctx,
+                  [[maybe_unused]] const Acts::Surface& surface,
                   const Cluster &cluster,
                   const Acts::BoundTrackParameters &) const
       {
-         return std::make_pair(cluster.template localPosition<Dim>(),
-                               cluster.template localCovariance<Dim>());
+         auto ret = std::make_tuple<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>, unsigned int>(cluster.template localPosition<Dim>(),
+                                                                                                cluster.template localCovariance<Dim>(),
+                                                                                                0u);
+         if constexpr(std::is_same_v<xAOD::HGTDCluster, std::remove_cvref_t<Cluster> >) {
+            std::get<0>(ret)(2,0)  = ActsTrk::timeToActs(std::get<0>(ret)(2,0));
+            assert(std::get<1>(ret)(2,1)==0. && std::get<1>(ret)(2,0)==0.);
+            std::get<1>(ret)(2,2) = ActsTrk::timeCovToActs(std::get<1>(ret)(2,2));
+         }
+         return ret;
       }
+
    };
 
 }

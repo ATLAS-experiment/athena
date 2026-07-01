@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_PPMBYTESTREAMREADV1V2TOOL_H
@@ -68,8 +68,8 @@ public:
 
   // =========================================================================
   /// Convert ROB fragments to trigger towers
-  StatusCode convert(xAOD::TriggerTowerContainer* const ttCollection) const;
-  StatusCode convert(const std::string& sgKey, xAOD::TriggerTowerContainer* const ttCollection) const;
+  StatusCode convert(const EventContext& ctx, xAOD::TriggerTowerContainer* const ttCollection) const;
+  StatusCode convert(const EventContext& ctx, const std::string& sgKey, xAOD::TriggerTowerContainer* const ttCollection) const;
   // =========================================================================
 
 private:

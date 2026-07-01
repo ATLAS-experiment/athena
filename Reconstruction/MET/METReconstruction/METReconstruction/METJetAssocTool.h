@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METJetAssocTool.h 
@@ -16,9 +16,6 @@
 
 // METReconstruction includes
 #include "METReconstruction/METAssociator.h"
-
-//Includes for DataHandles
-#include "StoreGate/DataHandle.h"
 
 namespace met{
   class METJetAssocTool final
@@ -46,19 +43,19 @@ namespace met{
     protected: 
 
     virtual
-    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap) const override;
+    StatusCode executeTool(xAOD::MissingETContainer* metCont, xAOD::MissingETAssociationMap* metMap, const EventContext& ctx) const override;
 
     virtual
     StatusCode extractPFO(const xAOD::IParticle*,
                           std::vector<const xAOD::IParticle*>&,
                           const met::METAssociator::ConstitHolder&,
-                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t>&) const override
+                          std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t>&, const EventContext&) const override
     {return StatusCode::FAILURE;} // should not be called
     virtual
     StatusCode extractFE(const xAOD::IParticle*,
                          std::vector<const xAOD::IParticle*>&,
                          const met::METAssociator::ConstitHolder&,
-                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t>&) const override
+                         std::map<const xAOD::IParticle*,MissingETBase::Types::constvec_t>&, const EventContext&) const override
     {return StatusCode::FAILURE;} // should not be called
     virtual
     StatusCode extractTracks(const xAOD::IParticle*,
@@ -68,7 +65,7 @@ namespace met{
     virtual
     StatusCode extractTopoClusters(const xAOD::IParticle*,
                                    std::vector<const xAOD::IParticle*>&,
-                                   const met::METAssociator::ConstitHolder&) const override
+                                   const met::METAssociator::ConstitHolder&, const EventContext&) const override
     {return StatusCode::FAILURE;} // should not be called
 
     private:

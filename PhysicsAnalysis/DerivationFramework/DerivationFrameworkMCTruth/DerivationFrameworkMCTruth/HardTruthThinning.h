@@ -52,7 +52,7 @@ namespace DerivationFramework {
     virtual ~HardTruthThinning();
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
-    virtual StatusCode doThinning() const override;
+    virtual StatusCode doThinning(const EventContext& ctx) const override;
 
     static int getDescendants(const xAOD::TruthParticle* p,
                        std::vector<const xAOD::TruthParticle*>& d) ;

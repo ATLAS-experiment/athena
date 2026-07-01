@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,18 +14,16 @@
  */
 
 #ifndef REGISTRATIONSERVICES_IIOVREGISTRATIONSVC_H
-# define REGISTRATIONSERVICES_IIOVREGISTRATIONSVC_H
+#define REGISTRATIONSERVICES_IIOVREGISTRATIONSVC_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
-
 #include <stdint.h>
+#include <string_view>
 
 class IOVTime;
 
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
 /** 
  ** @class IIOVRegistrationSvc
@@ -58,25 +56,25 @@ public:
     /// Register IOV DB for an object given its typeName - run/LB numbers
     ///   interval or times interval  and tag are taken from JobOptions
     ///   Choice between run/LB and timestamp given in JobOptions
-    virtual StatusCode registerIOV(const std::string& typeName) const = 0;
+    virtual StatusCode registerIOV(std::string_view typeName) const = 0;
     
     /// Register IOV DB for an object given its typeName - run/LB numbers
     ///   interval or times interval taken from JobOptions
     ///   tag is specified
     ///   Choice between run/LB and timestamp given in JobOptions
-    virtual StatusCode registerIOV( const std::string& typeName, const std::string& tag ) const = 0;
+    virtual StatusCode registerIOV( std::string_view typeName, std::string_view tag ) const = 0;
     
     /// Register IOV DB for an object given its typeName and its key
     ///   run/LB numbers interval or times interval  and tag are taken
     ///   from JobOptions
     ///   Choice between run/LB and timestamp given in JobOptions
-    virtual StatusCode registerIOV( const std::string& typeName, const std::string& key,
-				    const std::string& tag ) const = 0;
+    virtual StatusCode registerIOV( std::string_view typeName, std::string_view key,
+				    std::string_view tag ) const = 0;
     
     /// Register IOV DB for an object given its typeName, tag and run/LB
     /// numbers interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view tag,
 				    unsigned int beginRun, 
 				    unsigned int endRun, 
 				    unsigned int beginLB, 
@@ -84,16 +82,16 @@ public:
     
     /// Register IOV DB for an object given its typeName, tag and
     /// times interval
-    virtual StatusCode registerIOV( const std::string& typeName, 
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName, 
+				    std::string_view tag,
 				    uint64_t beginTime, 
 				    uint64_t endTime ) const = 0;
 
     /// Register IOV DB for an object given its typeName, key, tag and run/LB
     /// numbers interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& key,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view key,
+				    std::string_view tag,
 				    unsigned int beginRun, 
 				    unsigned int endRun, 
 				    unsigned int beginLB, 
@@ -101,18 +99,18 @@ public:
     
     /// Register IOV DB for an object given its typeName, key, tag and
     /// times interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& key,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view key,
+				    std::string_view tag,
 				    uint64_t beginTime, 
 				    uint64_t endTime ) const = 0;
 
     /// Register IOV DB for an object given its typeName, key, folder, tag 
     ///  and run/LB numbers interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& key,
-				    const std::string& folder,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view key,
+				    std::string_view folder,
+				    std::string_view tag,
 				    unsigned int beginRun, 
 				    unsigned int endRun, 
 				    unsigned int beginLB, 
@@ -120,10 +118,10 @@ public:
 
     /// Register IOV DB for an object given its typeName, key, folder, tag and
     /// times interval
-    virtual StatusCode registerIOV( const std::string& typeName,
-				    const std::string& key,
-				    const std::string& folder,
-				    const std::string& tag,
+    virtual StatusCode registerIOV( std::string_view typeName,
+				    std::string_view key,
+				    std::string_view folder,
+				    std::string_view tag,
 				    uint64_t beginTime, 
 				    uint64_t endTime ) const = 0;
 };

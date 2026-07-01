@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBSExtraction/TrigBStoxAODTool.h"
@@ -100,21 +100,21 @@
 #include "xAODBTagging/BTaggingContainer.h"
 #include "TrigParticle/TrigEFBjetContainer.h"
 
-template<typename element,typename list,int index> struct get_strictly_feat{
-  static const bool result = HLT::TypeInformation::at<list,index>::type::list_of_features::template has<element>::result;
-};
+namespace {
+  /// Helper for EDM search
+  template <typename T, typename Element>
+  struct MatchFeaturesStrict {
+    static constexpr bool value = Element::list_of_features::template has<T>;
+  };
 
-template<class T, class EDMLIST = TypeInfo_EDM> struct known{
-  typedef typename master_search<typename EDMLIST::map,
-				 get_strictly_feat,T>::result::search_result search_result;
-  static const bool value = !std::is_same<HLT::TypeInformation::ERROR_THE_FOLLOWING_TYPE_IS_NOT_KNOWN_TO_THE_EDM<T>,search_result>::value;
-};
-
-
-template<typename T, bool = known<T>::value> struct getCLID;
-template<typename T> struct getCLID<T,true>{static int ID(){return ClassID_traits<T>::ID();}};
-template<typename T> struct getCLID<T,false>{static int ID(){return -1;}};
-
+  /// Get CLID for type T if known to Trigger EDM
+  template<typename T>
+  constexpr int getCLID() {
+    constexpr bool known = TypeInfo_EDM::map::template has<T, MatchFeaturesStrict>;
+    if constexpr (known) return ClassID_traits<T>::ID();
+    else                 return -1;
+  }
+}
 
 namespace BStoXAODHelper{
 
@@ -128,7 +128,7 @@ namespace BStoXAODHelper{
       return StatusCode::SUCCESS;
     };
     
-    virtual StatusCode help(const std::string& label, const std::string& newLabel) = 0;
+    virtual StatusCode help(const EventContext& ctx, const std::string& label, const std::string& newLabel) = 0;
 
     //we need this method, because for creating converted xAOD::TrigPassBits, one needs access to the corresponding xaod container
     //with physics objects. This leads to a partial duplication of the code for the muon helper
@@ -175,19 +175,19 @@ namespace BStoXAODHelper{
   };
   
   //this is the most vanilla case
-  template<typename AOD,typename XAOD, typename CnvTool>
+  template<typename AOD,typename XAOD, typename CnvTool, bool withCtx = false>
   struct DefaultHelper : public ToolHolder<CnvTool> {
-    typedef typename Container2Aux<XAOD>::type xAODAux;
+    using xAODAux = Container2Aux_t<XAOD>;
     
     DefaultHelper(const ToolHandle<CnvTool>& tool) : ToolHolder<CnvTool>(tool){;}
 
-    CLID AODContainerClid(){return getCLID<AOD>::ID();}    
-    CLID xAODContainerClid(){return getCLID<XAOD>::ID();}
+    CLID AODContainerClid(){return getCLID<AOD>();}
+    CLID xAODContainerClid(){return getCLID<XAOD>();}
 
-    CLID AODElementClid(){return getCLID<typename Container2Object<AOD>::type>::ID();}    
-    CLID xAODElementClid(){return getCLID<typename Container2Object<XAOD>::type>::ID();}
+    CLID AODElementClid(){return getCLID<Container2Object_t<AOD>>();}
+    CLID xAODElementClid(){return getCLID<Container2Object_t<XAOD>>();}
 
-    virtual StatusCode help(const std::string& label, const std::string& newLabel){
+    virtual StatusCode help(const EventContext& ctx, const std::string& label, const std::string& newLabel){
       typedef IHelper IH;
       std::string fmtkey_AOD = IH::template format<AOD>(label);
       std::string fmtkey_xAOD = IH::template format<XAOD>(newLabel);
@@ -195,23 +195,24 @@ namespace BStoXAODHelper{
 
       const AOD* aod = this->m_sg->template tryConstRetrieve<AOD>(fmtkey_AOD);
       if(!aod){
-	ATH_MSG_WARNING("AOD key: " <<  fmtkey_AOD << " not found for xAOD conversion");
-	return StatusCode::SUCCESS;
+        ATH_MSG_WARNING("AOD key: " <<  fmtkey_AOD << " not found for xAOD conversion");
+        return StatusCode::SUCCESS;
       }
       
       ATH_MSG_DEBUG("attempting to convert " << fmtkey_AOD << " of size " << aod->size() << " to " << fmtkey_xAOD);
 
       XAOD* xaod = this->m_sg->template tryRetrieve<XAOD>(fmtkey_xAOD);
       if(!xaod){
-	ATH_MSG_WARNING("xAOD key: " <<  fmtkey_xAOD << " not found for xAOD conversion");
-	return StatusCode::SUCCESS;
+        ATH_MSG_WARNING("xAOD key: " <<  fmtkey_xAOD << " not found for xAOD conversion");
+        return StatusCode::SUCCESS;
       }
-      CHECK( this->m_tool->convert(aod,xaod));
+      if constexpr (withCtx) CHECK( this->m_tool->convert(ctx, aod,xaod));
+      else                   CHECK( this->m_tool->convert(aod,xaod));
       ATH_MSG_DEBUG("AOD container has size: " << aod->size());
       ATH_MSG_DEBUG("xAOD container has size: " << xaod->size());
       if(aod->size() != xaod->size()){
-	ATH_MSG_ERROR("conversion resulted in differently sized containers");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("conversion resulted in differently sized containers");
+        return StatusCode::FAILURE;
       }
       return StatusCode::SUCCESS;
     }    
@@ -273,13 +274,13 @@ namespace BStoXAODHelper{
   struct MuonHelper : public ToolHolder<ITrigMuonEFInfoToMuonCnvTool> {
     MuonHelper(const ToolHandle<ITrigMuonEFInfoToMuonCnvTool>& tool) : ToolHolder(tool){;}
 
-    CLID AODContainerClid(){return getCLID<TrigMuonEFInfoContainer>::ID();}
-    CLID xAODContainerClid(){return getCLID<xAOD::MuonContainer>::ID();}
+    CLID AODContainerClid(){return getCLID<TrigMuonEFInfoContainer>();}
+    CLID xAODContainerClid(){return getCLID<xAOD::MuonContainer>();}
 
-    CLID AODElementClid(){return getCLID<Container2Object<TrigMuonEFInfoContainer>::type>::ID();}
-    CLID xAODElementClid(){return getCLID<Container2Object<xAOD::MuonContainer>::type >::ID();}
+    CLID AODElementClid(){return getCLID<Container2Object_t<TrigMuonEFInfoContainer>>();}
+    CLID xAODElementClid(){return getCLID<Container2Object_t<xAOD::MuonContainer>>();}
 
-    virtual StatusCode help(const std::string& label, const std::string& newLabel){
+    virtual StatusCode help(const EventContext& /*ctx*/, const std::string& label, const std::string& newLabel){
       xAOD::MuonContainer* xaodMuon = this->m_sg->tryRetrieve<xAOD::MuonContainer>(format<xAOD::MuonContainer>(newLabel));
       if(!xaodMuon){
 	ATH_MSG_WARNING("muon label: " << format<xAOD::MuonContainer>(newLabel) << " not found for xAOD conversion");
@@ -408,8 +409,8 @@ TrigBStoxAODTool::TrigBStoxAODTool(const std::string& type, const std::string& n
   declareProperty("caloClusterTool", m_caloClusterTool);
   declareProperty("trigPassBitsTool", m_trigPassBitsTool);
 
-  m_CLID_xAODPhotonContainer = getCLID<xAOD::PhotonContainer>::ID();
-  m_CLID_xAODElectronContainer = getCLID<xAOD::ElectronContainer>::ID();
+  m_CLID_xAODPhotonContainer = getCLID<xAOD::PhotonContainer>();
+  m_CLID_xAODElectronContainer = getCLID<xAOD::ElectronContainer>();
 }
 
 TrigBStoxAODTool::~TrigBStoxAODTool() {
@@ -497,7 +498,7 @@ StatusCode TrigBStoxAODTool::initialize(){
 
   m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
 		    TrigTrackCountsCollection,xAOD::TrigTrackCountsContainer,xAODMaker::ITrigTrackCountsCnvTool>* >
-		    (getCLID<TrigTrackCountsCollection>::ID(), 
+		    (getCLID<TrigTrackCountsCollection>(),
 		     new BStoXAODHelper::DefaultHelper<
 		     TrigTrackCountsCollection,xAOD::TrigTrackCountsContainer,xAODMaker::ITrigTrackCountsCnvTool>(m_trigTrackCtsTool)) );
 
@@ -508,16 +509,11 @@ StatusCode TrigBStoxAODTool::initialize(){
 		     TrigVertexCountsCollection,xAOD::TrigVertexCountsContainer,xAODMaker::ITrigVertexCountsCnvTool>(m_trigVtxCtsTool)) );
 
   m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
-		    TrackCollection,xAOD::TrackParticleContainer,xAODMaker::ITrackCollectionCnvTool>* >
+		    TrackCollection,xAOD::TrackParticleContainer,xAODMaker::ITrackCollectionCnvTool,true>* >
 		    (ClassID_traits<TrackCollection>::ID(),
 		     new BStoXAODHelper::DefaultHelper<
-		     TrackCollection,xAOD::TrackParticleContainer,xAODMaker::ITrackCollectionCnvTool>(m_trackCollectionTool)) );
+		     TrackCollection,xAOD::TrackParticleContainer,xAODMaker::ITrackCollectionCnvTool,true>(m_trackCollectionTool)) );
   
-  m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
-		    Rec::TrackParticleContainer,xAOD::TrackParticleContainer,xAODMaker::IRecTrackParticleContainerCnvTool>* >
-		    (ClassID_traits<Rec::TrackParticleContainer>::ID(),
-		     new BStoXAODHelper::DefaultHelper<
-		     Rec::TrackParticleContainer,xAOD::TrackParticleContainer,xAODMaker::IRecTrackParticleContainerCnvTool>(m_recTrackParticleContTool)) );
   
   m_helpers.insert( std::pair<CLID,BStoXAODHelper::DefaultHelper<
 		    Analysis::TauJetContainer,xAOD::TauJetContainer,xAODMaker::ITauJetCnvTool>* >
@@ -586,7 +582,7 @@ StatusCode TrigBStoxAODTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigBStoxAODTool::convert(HLT::Navigation* nav) {
+StatusCode TrigBStoxAODTool::convert(const EventContext& ctx, HLT::Navigation* nav) {
     std::vector<std::pair<CLID,std::string> >::const_iterator clidlabel;
     std::vector<std::pair<CLID,std::string> >::const_iterator clidNewLabel = m_clid_newLabels.begin();
     for(clidlabel =m_clid_labels.begin();clidlabel!=m_clid_labels.end();++clidlabel, ++clidNewLabel){
@@ -594,8 +590,8 @@ StatusCode TrigBStoxAODTool::convert(HLT::Navigation* nav) {
       HLTNavDetails::IHolder* holder = nav->getHolder(clidlabel->first,clidlabel->second);
       
       if(!holder){
-	ATH_MSG_WARNING("couldn't find holder for " << clidlabel->first << " " << clidlabel->second);
-	continue;
+        ATH_MSG_WARNING("couldn't find holder for " << clidlabel->first << " " << clidlabel->second);
+        continue;
       }
 
       ATH_MSG_VERBOSE("container corresponding to feature CLID " << clidlabel->first << " has CLID " << holder->containerClid());
@@ -607,13 +603,13 @@ StatusCode TrigBStoxAODTool::convert(HLT::Navigation* nav) {
       CHECK(findHelper( m_helpers, holder->containerClid(), clabel, hit ));
       
       if(hit!=m_helpers.end()){
-	ATH_MSG_DEBUG("attempting convertion of clid " << holder->containerClid() 
-		      << " for label " << clidlabel->second << ", new label " << clidNewLabel->second);
-	CHECK(hit->second->help(clidlabel->second,clidNewLabel->second));//get aod container and convert
-	ATH_MSG_DEBUG("converted clid " << holder->containerClid() << " for label " << clidlabel->second);
+        ATH_MSG_DEBUG("attempting convertion of clid " << holder->containerClid()
+                      << " for label " << clidlabel->second << ", new label " << clidNewLabel->second);
+        CHECK(hit->second->help(ctx, clidlabel->second,clidNewLabel->second));//get aod container and convert
+        ATH_MSG_DEBUG("converted clid " << holder->containerClid() << " for label " << clidlabel->second);
       }
       else{
-	ATH_MSG_DEBUG("couldn't find converters for clid: " << clidlabel->first);
+        ATH_MSG_DEBUG("couldn't find converters for clid: " << clidlabel->first);
       }
     }
     return StatusCode::SUCCESS;

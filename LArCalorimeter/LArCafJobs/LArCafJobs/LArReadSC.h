@@ -27,7 +27,7 @@ class  ATLAS_NOT_THREAD_SAFE LArReadSC: public ::AthAlgorithm {
   virtual ~LArReadSC(); 
 
   virtual StatusCode  initialize();
-  virtual StatusCode  execute();
+  virtual StatusCode  execute(const EventContext& ctx);
   virtual StatusCode  finalize();
 
  private: 

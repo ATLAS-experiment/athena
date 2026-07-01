@@ -40,37 +40,37 @@ TrackParticleTruthCollectionPERS* TrackParticleTruthCollectionCnv::createPersist
 }
 
 //================================================================
-TrackParticleTruthCollection* TrackParticleTruthCollectionCnv::createTransient() {
+TrackParticleTruthCollection* TrackParticleTruthCollectionCnv::createTransient(const Token* token) {
   MsgStream log(msgSvc(), "TrackParticleTruthCollectionCnv" );
   std::unique_ptr<TrackParticleTruthCollection> trans(new TrackParticleTruthCollection());
   
-  if (compareClassGuid(s_p3_guid)) {
-    log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p3. GUID="<<m_classID.toString()<<endmsg;
-    Rec::TrackParticleTruthCollection_p3* pers=poolReadObject<Rec::TrackParticleTruthCollection_p3>();
+  if (compareClassGuid(token, s_p3_guid)) {
+    log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p3. token="<<token->toString()<<endmsg;
+    Rec::TrackParticleTruthCollection_p3* pers=poolReadObject<Rec::TrackParticleTruthCollection_p3>(token);
     m_converter_p3.persToTrans(pers, trans.get(), log);
     delete pers;
   }
-  else if (compareClassGuid(s_p2_guid)) {
-    log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p2. GUID="<<m_classID.toString()<<endmsg;
-    Rec::TrackParticleTruthCollection_p2* pers=poolReadObject<Rec::TrackParticleTruthCollection_p2>();
+  else if (compareClassGuid(token, s_p2_guid)) {
+    log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p2. token="<<token->toString()<<endmsg;
+    Rec::TrackParticleTruthCollection_p2* pers=poolReadObject<Rec::TrackParticleTruthCollection_p2>(token);
     m_converter_p2.persToTrans(pers, trans.get(), log);
     delete pers;
   }
-  else if (compareClassGuid(s_p1_guid)) {
-    log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p1. GUID="<<m_classID.toString()<<endmsg;
-    Rec::TrackParticleTruthCollection_p1* pers=poolReadObject<Rec::TrackParticleTruthCollection_p1>();
+  else if (compareClassGuid(token, s_p1_guid)) {
+    log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p1. token="<<token->toString()<<endmsg;
+    Rec::TrackParticleTruthCollection_p1* pers=poolReadObject<Rec::TrackParticleTruthCollection_p1>(token);
     m_converter_p1.persToTrans(pers, trans.get(), log);
     delete pers;
   }
-  else if (compareClassGuid(s_p0_guid)) {
-    log<<MSG::DEBUG<<"Read version p0 of TrackParticleTruthCollection. GUID="<<m_classID.toString()<<endmsg;
-    TrackParticleTruthVector *pers = poolReadObject<TrackParticleTruthVector>();
+  else if (compareClassGuid(token, s_p0_guid)) {
+    log<<MSG::DEBUG<<"Read version p0 of TrackParticleTruthCollection. token="<<token->toString()<<endmsg;
+    TrackParticleTruthVector *pers = poolReadObject<TrackParticleTruthVector>(token);
     m_converter_p0.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else {
-    log<<MSG::ERROR<<"Unsupported persistent version of TrackParticleTruthCollection. GUID="
-       <<m_classID.toString()<<endmsg;
+    log<<MSG::ERROR<<"Unsupported persistent version of TrackParticleTruthCollection. token="
+       <<token->toString()<<endmsg;
     throw std::runtime_error("Unsupported persistent version of Data Collection");
   }
   

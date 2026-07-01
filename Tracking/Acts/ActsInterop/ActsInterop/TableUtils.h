@@ -269,6 +269,26 @@ namespace TableUtils {
       bool               m_dumpHeader=true;
       bool               m_dumpFooter=true;
       bool               m_separateLastRow=false;
+
+      // convenience method to dump wrapped two dimensional arrays in table form to a std output stream
+      // Usage:   out << makeTable( array2d, row_labels, column_labels);
+
+      friend inline std::ostream &operator<<(std::ostream &out,
+                                      const MultiColumnTable &stat) {
+         return dumpTable(out,
+                          stat.m_counter,
+                          stat.m_rowLabel,
+                          stat.m_columnLabel,
+                          stat.m_topLeftLable,
+                          stat.m_labelPrefix,
+                          stat.m_columnWidth,
+                          stat.m_minLabelWidth,
+                          stat.m_dumpHeader,
+                          stat.m_dumpFooter,
+                          stat.m_separateLastRow,
+                          stat.m_precision);
+      }
+
    };
 
    template <typename T_index, class T_string>
@@ -702,24 +722,6 @@ inline std::ostream &operator<<(std::ostream &out,
                     stat.m_precision);
 }
 
-// convenience method to dump wrapped two dimensional arrays in table form to a std output stream
-// Usage:   out << makeTable( array2d, row_labels, column_labels);
-template <typename T>
-inline std::ostream &operator<<(std::ostream &out,
-                                const TableUtils::MultiColumnTable<T> &stat)
-{
-   return dumpTable(out,
-                    stat.m_counter,
-                    stat.m_rowLabel,
-                    stat.m_columnLabel,
-                    stat.m_topLeftLable,
-                    stat.m_labelPrefix,
-                    stat.m_columnWidth,
-                    stat.m_minLabelWidth,
-                    stat.m_dumpHeader,
-                    stat.m_dumpFooter,
-                    stat.m_separateLastRow,
-                    stat.m_precision);
-}
+
 
 #endif

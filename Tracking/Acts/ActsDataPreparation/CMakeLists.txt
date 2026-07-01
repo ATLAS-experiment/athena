@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir(ActsDataPreparation)
@@ -15,6 +15,7 @@ atlas_add_component( ActsDataPreparation
    ActsGeometryLib
    ActsGeometryInterfacesLib
    ActsToolInterfacesLib
+   AthContainers
    AthenaBaseComps
    AthenaMonitoringKernelLib
    BeamSpotConditionsData
@@ -43,12 +44,12 @@ atlas_add_component( ActsDataPreparation
 # Unit tests
 atlas_add_test( ActsRegionalDataPrep_CompositeRoI
   SCRIPT test/runCompositeRoICode.py
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ActsRegionalDataPrep_FullScanRoI
   SCRIPT test/runFullScanRoICode.py
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ActsRegionalDataPrep_SingleRoI
   SCRIPT test/runSingleRoICode.py
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )

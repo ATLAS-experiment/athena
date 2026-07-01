@@ -10,7 +10,6 @@
 #+ ForwardDetectors/ZDC/ZdcNtuple
 #+ PhysicsAnalysis/BPhys/BPhysTools
 #+ PhysicsAnalysis/DerivationFramework/DerivationFrameworkAnalysisTests
-#+ Trigger/TriggerSimulation/TrigBtagEmulationTool
 
 
 
@@ -99,6 +98,7 @@
 - Reconstruction/Jet/JetMonitoring
 - Reconstruction/Jet/JetInputsMonitoring
 + Reconstruction/Jet/JetReclustering
++ Reconstruction/Jet/JetRecConfig
 - Reconstruction/Jet/JetRec.+
 - Reconstruction/Jet/JetSimTools
 - Reconstruction/Jet/JetValidation
@@ -114,7 +114,6 @@
 + Reconstruction/egamma/egammaRecEvent
 + Reconstruction/egamma/egammaUtils
 + Reconstruction/tauRecTools
-+ Reconstruction/DiTauRecTools
 + Reconstruction/PanTau/PanTauAlgs
 + Reconstruction/LwtnnUtils
 + Simulation/SimulationConfig
@@ -142,6 +141,7 @@
 + Trigger/TrigEvent/TrigSteeringEvent
 + Trigger/TrigSteer/TrigCompositeUtils
 + Trigger/TrigT1/TrigT1MuctpiBits
++ Trigger/TrigEmulation/TrigBtagEmulationTool
 #+ Trigger/TrigValidation/TrigAnalysisTest
 
 #

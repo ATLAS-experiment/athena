@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CopyTrackCollection.h"
@@ -44,6 +44,7 @@ StatusCode CopyTrackCollection::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Recorded output TrackCollection container " << outputContainer.name() << " in store " << outputContainer.store());
 
   // Copy pileup tracks
+  outputContainer->reserve(inputContainer->size());
   for (const Trk::Track* track : *inputContainer) {
     outputContainer->push_back(new Trk::Track(*track));
   }

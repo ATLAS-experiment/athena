@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -34,12 +34,6 @@ namespace {
 
 }
 namespace MuonCombined {
-
-    MuonCombinedFitTagTool::MuonCombinedFitTagTool(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {
-        declareInterface<IMuonCombinedTagTool>(this);
-    }
-
     StatusCode MuonCombinedFitTagTool::initialize() {
         ATH_MSG_INFO("Initializing MuonCombinedFitTagTool");
 
@@ -119,7 +113,7 @@ namespace MuonCombined {
             Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack);
 
             // add fit info into tag object
-            currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::MuidCo, muonCandidate, score);
+            currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::Author::MuidCo, muonCandidate, score);
 
             // re-fit standalone track (if needed) and store output into tag object
             METrack = evaluateMatchProperties(ctx, combinedTrack.get(), *currentTag, cand_prob.second->indetTrackParticle());
@@ -147,7 +141,7 @@ namespace MuonCombined {
                     Trk::TrackScore score = m_trackScoringTool->score(*combinedTrack);
 
                     // add fit info into tag object
-                    currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::MuidCo, muonCandidate, score);
+                    currentTag = std::make_unique<CombinedFitTag>(xAOD::Muon::Author::MuidCo, muonCandidate, score);
 
                     if (msgLevel() >= MSG::DEBUG) {
                         dumpCaloEloss(ctx, combinedTrack.get(), "Recovery Combined Track ");

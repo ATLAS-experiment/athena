@@ -43,7 +43,7 @@ public:
   /**
    * @brief Algorithm execute method.
    */
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
 
 
 private:

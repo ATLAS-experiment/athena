@@ -78,12 +78,12 @@ StatusCode PhysValFE::bookHistograms(){
    
 }
 
-StatusCode PhysValFE::fillHistograms(){
+StatusCode PhysValFE::fillHistograms(const EventContext& ctx){
 
   const xAOD::Vertex* theVertex = nullptr;
   
   if (!m_useNeutralFE){
-    SG::ReadHandle<xAOD::VertexContainer> vertexContainerReadHandle(m_vertexContainerReadHandleKey);
+    SG::ReadHandle<xAOD::VertexContainer> vertexContainerReadHandle(m_vertexContainerReadHandleKey, ctx);
     if(!vertexContainerReadHandle.isValid()){
       ATH_MSG_WARNING("Invalid ReadHandle for xAOD::VertexContainer with key: " << vertexContainerReadHandle.key());
     }
@@ -102,12 +102,12 @@ StatusCode PhysValFE::fillHistograms(){
     }//if valid read handle
   }
 
-  SG::ReadHandle<xAOD::EventInfo> eventInfoReadHandle(m_eventInfoReadHandleKey);
+  SG::ReadHandle<xAOD::EventInfo> eventInfoReadHandle(m_eventInfoReadHandleKey, ctx);
   if (!eventInfoReadHandle.isValid()){
     ATH_MSG_WARNING("Invalid ReadHandle for xAOD::EventInfo with key: " << eventInfoReadHandle.key());
   }
 
-  SG::ReadHandle<xAOD::FlowElementContainer> FEContainerReadHandle(m_FEContainerHandleKey);
+  SG::ReadHandle<xAOD::FlowElementContainer> FEContainerReadHandle(m_FEContainerHandleKey, ctx);
   if(!FEContainerReadHandle.isValid()){
      ATH_MSG_WARNING("Invalid ReadHandle for xAOD::FlowElementContainer with key: " << FEContainerReadHandle.key());
      return StatusCode::SUCCESS;
@@ -122,7 +122,7 @@ StatusCode PhysValFE::fillHistograms(){
   }  
 
   if(!m_useNeutralFE){
-    SG::ReadDecorHandle<xAOD::MuonContainer,std::vector<ElementLink<xAOD::FlowElementContainer> > > MuonContainerReadDecorHandle(m_muonChargedFEReadHandleKey);
+    SG::ReadDecorHandle<xAOD::MuonContainer,std::vector<ElementLink<xAOD::FlowElementContainer> > > MuonContainerReadDecorHandle(m_muonChargedFEReadHandleKey, ctx);
     if(!MuonContainerReadDecorHandle.isValid()){
       ATH_MSG_WARNING("Muon readhandle is a dud");    
     }
@@ -131,7 +131,7 @@ StatusCode PhysValFE::fillHistograms(){
     } 
   }
   else{
-    SG::ReadDecorHandle<xAOD::MuonContainer, std::vector<ElementLink<xAOD::FlowElementContainer> > > MuonContainerReadDecorHandle(m_muonNeutralFEReadHandleKey);
+    SG::ReadDecorHandle<xAOD::MuonContainer, std::vector<ElementLink<xAOD::FlowElementContainer> > > MuonContainerReadDecorHandle(m_muonNeutralFEReadHandleKey, ctx);
     if(!MuonContainerReadDecorHandle.isValid()){
       ATH_MSG_WARNING("Muon readhandle is a dud");    
     }
@@ -141,7 +141,7 @@ StatusCode PhysValFE::fillHistograms(){
   }
 
   if(!m_useNeutralFE){
-    SG::ReadDecorHandle<xAOD::ElectronContainer,std::vector<ElementLink<xAOD::FlowElementContainer> > > ElectronContainerReadDecorHandle(m_electronChargedFEReadHandleKey);
+    SG::ReadDecorHandle<xAOD::ElectronContainer,std::vector<ElementLink<xAOD::FlowElementContainer> > > ElectronContainerReadDecorHandle(m_electronChargedFEReadHandleKey, ctx);
     if(!ElectronContainerReadDecorHandle.isValid()){
       ATH_MSG_WARNING("Electron readhandle is a dud");    
     }
@@ -150,7 +150,7 @@ StatusCode PhysValFE::fillHistograms(){
     } 
   }
   else{
-    SG::ReadDecorHandle<xAOD::ElectronContainer, std::vector<ElementLink<xAOD::FlowElementContainer> > > ElectronContainerReadDecorHandle(m_electronNeutralFEReadHandleKey);
+    SG::ReadDecorHandle<xAOD::ElectronContainer, std::vector<ElementLink<xAOD::FlowElementContainer> > > ElectronContainerReadDecorHandle(m_electronNeutralFEReadHandleKey, ctx);
     if(!ElectronContainerReadDecorHandle.isValid()){
       ATH_MSG_WARNING("Electron readhandle is a dud");    
     }
@@ -160,7 +160,7 @@ StatusCode PhysValFE::fillHistograms(){
   }
 
   if(!m_useNeutralFE){
-    SG::ReadDecorHandle<xAOD::PhotonContainer,std::vector<ElementLink<xAOD::FlowElementContainer> > > PhotonContainerReadDecorHandle(m_photonChargedFEReadHandleKey);
+    SG::ReadDecorHandle<xAOD::PhotonContainer,std::vector<ElementLink<xAOD::FlowElementContainer> > > PhotonContainerReadDecorHandle(m_photonChargedFEReadHandleKey, ctx);
     if(!PhotonContainerReadDecorHandle.isValid()){
       ATH_MSG_WARNING("Photon readhandle is a dud");    
     }
@@ -169,7 +169,7 @@ StatusCode PhysValFE::fillHistograms(){
     } 
   }
   else{
-    SG::ReadDecorHandle<xAOD::PhotonContainer, std::vector<ElementLink<xAOD::FlowElementContainer> > > PhotonContainerReadDecorHandle(m_photonNeutralFEReadHandleKey);
+    SG::ReadDecorHandle<xAOD::PhotonContainer, std::vector<ElementLink<xAOD::FlowElementContainer> > > PhotonContainerReadDecorHandle(m_photonNeutralFEReadHandleKey, ctx);
     if(!PhotonContainerReadDecorHandle.isValid()){
       ATH_MSG_WARNING("Photon readhandle is a dud");    
     }
@@ -179,7 +179,7 @@ StatusCode PhysValFE::fillHistograms(){
   }
 
   if(!m_useNeutralFE){
-    SG::ReadDecorHandle<xAOD::TauJetContainer,std::vector<ElementLink<xAOD::FlowElementContainer> > > TauJetContainerReadDecorHandle(m_tauJetChargedFEReadHandleKey);
+    SG::ReadDecorHandle<xAOD::TauJetContainer,std::vector<ElementLink<xAOD::FlowElementContainer> > > TauJetContainerReadDecorHandle(m_tauJetChargedFEReadHandleKey, ctx);
     if(!TauJetContainerReadDecorHandle.isValid()){
       ATH_MSG_WARNING("TauJet readhandle is a dud");    
     }
@@ -188,7 +188,7 @@ StatusCode PhysValFE::fillHistograms(){
     } 
   }
   else{
-    SG::ReadDecorHandle<xAOD::TauJetContainer, std::vector<ElementLink<xAOD::FlowElementContainer> > > TauJetContainerReadDecorHandle(m_tauJetNeutralFEReadHandleKey);
+    SG::ReadDecorHandle<xAOD::TauJetContainer, std::vector<ElementLink<xAOD::FlowElementContainer> > > TauJetContainerReadDecorHandle(m_tauJetNeutralFEReadHandleKey, ctx);
     if(!TauJetContainerReadDecorHandle.isValid()){
       ATH_MSG_WARNING("TauJet readhandle is a dud");    
     }

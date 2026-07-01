@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,7 +43,7 @@ class LArReadParamsFromFile : public AthAlgorithm
 
   //standard algorithm methods
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) override {return StatusCode::SUCCESS;}
   virtual StatusCode stop ATLAS_NOT_THREAD_SAFE () override;
 
  private:
@@ -124,18 +124,18 @@ class LArReadParamsFromFile : public AthAlgorithm
   // define symLink for all classes
   //--------------------------------
 
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCaliPulseParamsComplete* data) { return detStore()->symLink(data,static_cast<const ILArCaliPulseParams*>(data)).ignore() ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArDetCellParamsComplete* data)   { return detStore()->symLink(data,static_cast<const ILArDetCellParams*>(data)).ignore()   ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArPhysCaliTdiffComplete* data)   { return detStore()->symLink(data,static_cast<const ILArPhysCaliTdiff*>(data)).ignore()   ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArTdriftComplete* data)          { return detStore()->symLink(data,static_cast<const ILArTdrift*>(data)).ignore()          ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArMphysOverMcalComplete* data)   { return detStore()->symLink(data,static_cast<const ILArMphysOverMcal*>(data)).ignore()   ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArRinjComplete* data)            { return detStore()->symLink(data,static_cast<const ILArRinj*>(data)).ignore()            ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArTshaperComplete* data)         { return detStore()->symLink(data,static_cast<const ILArTshaper*>(data)).ignore()         ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_CphiComplete* data)       { return detStore()->symLink(data,static_cast<const ILArEMEC_Cphi*>(data)).ignore()       ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_HValphaComplete* data)    { return detStore()->symLink(data,static_cast<const ILArEMEC_HValpha*>(data)).ignore()    ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_HVbetaComplete* data)     { return detStore()->symLink(data,static_cast<const ILArEMEC_HVbeta*>(data)).ignore()     ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCableLengthComplete* data)     { return detStore()->symLink(data,static_cast<const ILArCableLength*>(data)).ignore()     ; } ;
-  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCableAttenuationComplete* data){ return detStore()->symLink(data,static_cast<const ILArCableAttenuation*>(data)).ignore(); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCaliPulseParamsComplete* data) { return detStore()->symLink(data,static_cast<const ILArCaliPulseParams*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArDetCellParamsComplete* data)   { return detStore()->symLink(data,static_cast<const ILArDetCellParams*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArPhysCaliTdiffComplete* data)   { return detStore()->symLink(data,static_cast<const ILArPhysCaliTdiff*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArTdriftComplete* data)          { return detStore()->symLink(data,static_cast<const ILArTdrift*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArMphysOverMcalComplete* data)   { return detStore()->symLink(data,static_cast<const ILArMphysOverMcal*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArRinjComplete* data)            { return detStore()->symLink(data,static_cast<const ILArRinj*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArTshaperComplete* data)         { return detStore()->symLink(data,static_cast<const ILArTshaper*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_CphiComplete* data)       { return detStore()->symLink(data,static_cast<const ILArEMEC_Cphi*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_HValphaComplete* data)    { return detStore()->symLink(data,static_cast<const ILArEMEC_HValpha*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArEMEC_HVbetaComplete* data)     { return detStore()->symLink(data,static_cast<const ILArEMEC_HVbeta*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCableLengthComplete* data)     { return detStore()->symLink(data,static_cast<const ILArCableLength*>(data)); } ;
+  StatusCode do_symLink ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const LArCableAttenuationComplete* data){ return detStore()->symLink(data,static_cast<const ILArCableAttenuation*>(data)); } ;
 
 };
 

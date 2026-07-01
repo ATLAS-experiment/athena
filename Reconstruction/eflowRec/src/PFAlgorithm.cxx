@@ -1,23 +1,28 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PFAlgorithm.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
+#include "PFClusterFiller.h"
+#include "PFTrackFiller.h"
 
 PFAlgorithm::PFAlgorithm(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
   , m_IPFSubtractionTools(this)
   , m_IPFBaseTools(this)
+  , m_IPFUnifiedBaseTools(this)
 {
   declareProperty("SubtractionToolList", m_IPFSubtractionTools, "List of Private Subtraction IPFSubtractionTools");
   declareProperty("BaseToolList", m_IPFBaseTools, "List of Private IPFBaseTools");
+  declareProperty("UnifiedBaseTools", m_IPFUnifiedBaseTools, "List of Private IPFUnifiedBaseTools");
 }
 
 StatusCode PFAlgorithm::initialize(){
 
   ATH_CHECK(m_IPFClusterSelectorTool);
   ATH_CHECK(m_IPFSubtractionTools.retrieve());
-  ATH_CHECK( m_IPFBaseTools.retrieve());
+  ATH_CHECK(m_IPFBaseTools.retrieve());
+  ATH_CHECK(m_IPFUnifiedBaseTools.retrieve());
   
   ATH_CHECK(m_eflowRecTracksReadHandleKey.initialize());
 
@@ -64,30 +69,50 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
   // Explicitly start/stop the timer around the subtraction tool calls
   t_subtract.start();
   /* Run the SubtractionTools */
-  for (auto thisIPFSubtractionTool : m_IPFSubtractionTools){
-    thisIPFSubtractionTool->execute(theElowCaloObjectContainer,&localEFlowRecTrackContainer,&theEFlowRecClusterContainerReference);
-  }
-  t_subtract.stop();
 
-  if (msgLvl(MSG::DEBUG)) {
-    for (auto thisEFTrack : localEFlowRecTrackContainer) {
-      msg() << "This efRecTrack has E,pt,eta and phi of " << thisEFTrack->getTrack()->e() << ", "
-            << thisEFTrack->getTrack()->pt() << ", " << thisEFTrack->getTrack()->eta() << " and "
-            << thisEFTrack->getTrack()->phi() << endmsg;
-    }
+  if (m_useUnified){
+    PFData data;
+    data.caloObjects = theElowCaloObjectContainer;
 
-    for (auto thisEFCluster : *(eflowRecClustersWriteHandle.ptr())) {
-      msg() << "This efRecCluster has E,pt,eta and phi of " << thisEFCluster->getCluster()->e() << ","
-            << thisEFCluster->getCluster()->pt() << ", " << thisEFCluster->getCluster()->eta() << " and "
-            << thisEFCluster->getCluster()->phi() << endmsg;
+    PFTrackFiller::fillTracksToConsider(data, localEFlowRecTrackContainer);
+
+    PFClusterFiller::fillClustersToConsider(data, theEFlowRecClusterContainerReference);
+
+    for (const auto& thisIPFUnifiedBaseTool : m_IPFUnifiedBaseTools){
+      ATH_CHECK(thisIPFUnifiedBaseTool->processPFlowData(ctx, data));
     }
   }
+  
+  else{
+    for (auto thisIPFSubtractionTool : m_IPFSubtractionTools){
+      thisIPFSubtractionTool->execute(
+        ctx,
+        theElowCaloObjectContainer,
+        &localEFlowRecTrackContainer,
+        &theEFlowRecClusterContainerReference);
+    }
+    t_subtract.stop();
 
-  N_efrClusters = theEFlowRecClusterContainerReference.size();
+    if (msgLvl(MSG::DEBUG)) {
+      for (auto thisEFTrack : localEFlowRecTrackContainer) {
+        msg() << "This efRecTrack has E,pt,eta and phi of " << thisEFTrack->getTrack()->e() << ", "
+              << thisEFTrack->getTrack()->pt() << ", " << thisEFTrack->getTrack()->eta() << " and "
+              << thisEFTrack->getTrack()->phi() << endmsg;
+      }
 
-  /* Run the other AglTools */
-  for (auto thisIPFBaseTool :  m_IPFBaseTools){
-    ATH_CHECK(thisIPFBaseTool->execute(*theElowCaloObjectContainer));
+      for (auto thisEFCluster : *(eflowRecClustersWriteHandle.ptr())) {
+        msg() << "This efRecCluster has E,pt,eta and phi of " << thisEFCluster->getCluster()->e() << ","
+              << thisEFCluster->getCluster()->pt() << ", " << thisEFCluster->getCluster()->eta() << " and "
+              << thisEFCluster->getCluster()->phi() << endmsg;
+      }
+    }
+
+    N_efrClusters = theEFlowRecClusterContainerReference.size();
+
+    /* Run the other AglTools */
+    for (auto thisIPFBaseTool :  m_IPFBaseTools){
+      ATH_CHECK(thisIPFBaseTool->execute(ctx, *theElowCaloObjectContainer));
+    }
   }
 
   auto mon = Monitored::Group(m_monTool, t_exec, t_subtract, N_efrClusters);

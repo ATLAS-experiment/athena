@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigNavigationThinningSvc.h"
@@ -13,7 +13,6 @@
 #include "AthenaKernel/ThinningDecisionBase.h"
 #include "AthenaKernel/getThinningCache.h"
 #include "CxxUtils/checker_macros.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 #include <sstream>
 #include <iostream>
 
@@ -120,7 +119,7 @@ StatusCode TrigNavigationThinningSvc::initialize() {
 
 
 StatusCode
-TrigNavigationThinningSvc::drop(State& state) const
+TrigNavigationThinningSvc::drop(const EventContext& /*ctx*/, State& state) const
 {
   state.destinationNavigation.clear();
   ATH_MSG_DEBUG ( "Navigation dropped entirely" );
@@ -128,7 +127,7 @@ TrigNavigationThinningSvc::drop(State& state) const
 }
 
 StatusCode
-TrigNavigationThinningSvc::reload (State& state) const
+TrigNavigationThinningSvc::reload (const EventContext& /*ctx*/, State& state) const
 {
   state.destinationNavigation.clear();
   std::vector<unsigned int> cuts;
@@ -142,7 +141,7 @@ TrigNavigationThinningSvc::reload (State& state) const
 }
 
 
-StatusCode TrigNavigationThinningSvc::save(State& state) const {
+StatusCode TrigNavigationThinningSvc::save(const EventContext& /*ctx*/, State& state) const {
   std::vector<unsigned int> cuts;
   state.navigation.serialize(state.destinationNavigation, cuts);
   ATH_MSG_DEBUG ( "Saved the slimmed navigation" );
@@ -150,7 +149,7 @@ StatusCode TrigNavigationThinningSvc::save(State& state) const {
 }
 
 StatusCode
-TrigNavigationThinningSvc::restore(State& state) const
+TrigNavigationThinningSvc::restore(const EventContext& /*ctx*/, State& state) const
 {
   state.navigation.reset();
   state.navigation.prepare();
@@ -161,12 +160,12 @@ TrigNavigationThinningSvc::restore(State& state) const
 
 
 
-StatusCode TrigNavigationThinningSvc::print(State& state) const {
+StatusCode TrigNavigationThinningSvc::print(const EventContext& /*ctx*/, State& state) const {
   ATH_MSG_DEBUG ( "Navigation printout \n" << state.navigation );
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigNavigationThinningSvc::squeeze(State& state) const {  
+StatusCode TrigNavigationThinningSvc::squeeze(const EventContext& /*ctx*/, State& state) const {
   for ( auto te: state.navigation.getAllTEs() ) {
     if ( state.navigation.isInitialNode(te) 
 	 or state.navigation.isRoINode(te) 
@@ -182,7 +181,7 @@ StatusCode TrigNavigationThinningSvc::squeeze(State& state) const {
 }
 
 
-StatusCode TrigNavigationThinningSvc::dropFeatures(State& state) const
+StatusCode TrigNavigationThinningSvc::dropFeatures(const EventContext& /*ctx*/, State& state) const
 {
   // turn the inclusion and exclusion lists into set of pairs <CLID, SubTypeIndex> of this collections which needs to be dropped
   // in fact this a bit waste of time that we reclaulate this each time, but, one can imagine slimming events from different runs/configurations
@@ -238,7 +237,7 @@ StatusCode TrigNavigationThinningSvc::dropFeatures(State& state) const
 }
 
 
-StatusCode TrigNavigationThinningSvc::dropRoIs(State& state) const {
+StatusCode TrigNavigationThinningSvc::dropRoIs(const EventContext& /*ctx*/, State& state) const {
   for ( auto te: state.navigation.getAllTEs() ) {
     if ( state.navigation.isRoINode(te) )
       CHECK( removeTriggerElement(state, te) );
@@ -246,7 +245,7 @@ StatusCode TrigNavigationThinningSvc::dropRoIs(State& state) const {
   return StatusCode::SUCCESS;  
 }
 
-StatusCode TrigNavigationThinningSvc::dropEmptyRoIs(State& state) const {
+StatusCode TrigNavigationThinningSvc::dropEmptyRoIs(const EventContext& /*ctx*/, State& state) const {
   for ( auto te: state.navigation.getAllTEs() ) {
     if ( state.navigation.isRoINode(te) 
 	 and te->getRelated(TriggerElement::seedsRelation).empty() )
@@ -255,7 +254,7 @@ StatusCode TrigNavigationThinningSvc::dropEmptyRoIs(State& state) const {
   return StatusCode::SUCCESS;  
 }
 
-StatusCode TrigNavigationThinningSvc::dropFeatureless(State& state) const {
+StatusCode TrigNavigationThinningSvc::dropFeatureless(const EventContext& /*ctx*/, State& state) const {
   for ( auto te: state.navigation.getAllTEs() ) {
     if ( te->getFeatureAccessHelpers().empty() )
       CHECK( removeTriggerElement(state, te) );
@@ -264,7 +263,7 @@ StatusCode TrigNavigationThinningSvc::dropFeatureless(State& state) const {
 }
 
 
-StatusCode TrigNavigationThinningSvc::dropChains(State& state) const {
+StatusCode TrigNavigationThinningSvc::dropChains(const EventContext& /*ctx*/, State& state) const {
   if ( m_chainsRegex.empty() ) {
     return StatusCode::SUCCESS;
   }
@@ -315,7 +314,7 @@ StatusCode TrigNavigationThinningSvc::doSlimming( const EventContext& ctx,
     auto ifunc = m_actionsMap.find (action);
     if (ifunc != m_actionsMap.end()) {
       auto function = ifunc->second;
-      CHECK( (this->*function)(state) );
+      CHECK( (this->*function)(ctx, state) );
     }
   }
   ATH_MSG_DEBUG(name() << " is releasing the TrigNavigationThinningSvc lock");
@@ -736,8 +735,7 @@ namespace {
   };
 }
 
-StatusCode TrigNavigationThinningSvc::syncThinning(State& state) const {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode TrigNavigationThinningSvc::syncThinning(const EventContext& ctx, State& state) const {
   ATH_MSG_DEBUG ( "Running the syncThinning" );
 
   std::lock_guard<std::recursive_mutex> lock(state.navigation.getMutex());

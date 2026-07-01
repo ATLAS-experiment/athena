@@ -48,7 +48,7 @@ public:
 
 protected:
     virtual TrigDecision_PERS*     createPersistent (TrigDec::TrigDecision* transCont);
-    virtual TrigDec::TrigDecision* createTransient ();
+    virtual TrigDec::TrigDecision* createTransient(const Token* token);
 };
 
 #endif

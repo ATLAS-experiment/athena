@@ -29,15 +29,11 @@ namespace CTPResultUtils {
   void initialize(xAOD::CTPResult& ctpRes, const uint32_t ctpVersionNumber, std::vector<uint32_t>& data, const uint32_t nExtraWords=0);
 
   /**
-  * @brief Print object content to default message stream
+  * @brief Print object content in human readable format in a string.
+  * @param ctpRes Reference to the CTPResult object to initialize.
+  * @return Human readable output as a string.
   */
-  void dumpData(xAOD::CTPResult& ctpRes);
-
-  /**
-  * @brief Print object content to given message stream
-  * @param log Message stream.
-  */
-  void dumpData(xAOD::CTPResult& ctpRes, MsgStream& log);
+  const std::string print(const xAOD::CTPResult& ctpRes);
 
 } // namespace CTPResultUtils
 

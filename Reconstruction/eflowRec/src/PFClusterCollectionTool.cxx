@@ -14,7 +14,7 @@ StatusCode PFClusterCollectionTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<eflowRecClusterContainer> PFClusterCollectionTool::retrieve(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) {
+std::unique_ptr<eflowRecClusterContainer> PFClusterCollectionTool::retrieve(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) const {
 
   std::unique_ptr<eflowRecClusterContainer> result =  std::make_unique<eflowRecClusterContainer>();
 
@@ -38,7 +38,7 @@ std::unique_ptr<eflowRecClusterContainer> PFClusterCollectionTool::retrieve(eflo
 }
 
 
-std::unique_ptr<xAOD::CaloClusterContainer> PFClusterCollectionTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) {
+std::unique_ptr<xAOD::CaloClusterContainer> PFClusterCollectionTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) const {
 
   std::unique_ptr<xAOD::CaloClusterContainer> result = std::make_unique<xAOD::CaloClusterContainer>(SG::VIEW_ELEMENTS);
 

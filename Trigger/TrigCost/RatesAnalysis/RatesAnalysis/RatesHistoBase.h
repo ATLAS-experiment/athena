@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RATESANALYSIS_RATESHISTOBASE_H
@@ -16,10 +16,11 @@
 #include <unordered_map>
 #include <set>
 #include <sstream>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <iomanip>
 #include <memory>
+#include <limits>
 
 class ITHistSvc; // Forward
 
@@ -54,17 +55,17 @@ enum RatesBinIdentifier_t{
  */
 struct WeightingValuesSummary_t {
   // Event property weights
-  double   m_enhancedBiasWeight; //!< A property of the event derived from online enhanced bias prescales
-  double   m_eventMu; //!< The actual number of interactions in the event
-  double   m_eventLumi; //!< The instantaneous lumi in cm-2s-1
-  bool     m_isUnbiased; //!< If the event was taken online with a RD trigger
-  uint32_t m_distanceInTrain; //!< How far into the bunch train the event was, in bunch crossings 
-  double   m_eventLiveTime; //!< How much wall-time at P1 did this event represent
+  double   m_enhancedBiasWeight{}; //!< A property of the event derived from online enhanced bias prescales
+  double   m_eventMu{}; //!< The actual number of interactions in the event
+  double   m_eventLumi{}; //!< The instantaneous lumi in cm-2s-1
+  bool     m_isUnbiased{}; //!< If the event was taken online with a RD trigger
+  uint32_t m_distanceInTrain{}; //!< How far into the bunch train the event was, in bunch crossings 
+  double   m_eventLiveTime{}; //!< How much wall-time at P1 did this event represent
   // Lumi weights
-  double   m_bunchFactor; //!< What weight needs to be applied to extrapolate rates linear in number of bunches
-  double   m_muFactor; //!< What weight needs to be applied to extrapolate rates linear in mu
-  double   m_linearLumiFactor; //!< What weight needs to be applied to extrapolate rates linear in mu and bunches 
-  double   m_expoMuFactor; //!< What weight needs to be applied to extrapolate rates linear in bunches and exponential in mu.
+  double   m_bunchFactor{}; //!< What weight needs to be applied to extrapolate rates linear in number of bunches
+  double   m_muFactor{}; //!< What weight needs to be applied to extrapolate rates linear in mu
+  double   m_linearLumiFactor{}; //!< What weight needs to be applied to extrapolate rates linear in mu and bunches 
+  double   m_expoMuFactor{}; //!< What weight needs to be applied to extrapolate rates linear in bunches and exponential in mu.
   const double m_noScaling = 1.; //!< Weight for no scaling.
   const std::string print() {
     std::stringstream ss;
@@ -100,7 +101,7 @@ class RatesHistoBase : public AthMessaging {
   const std::string& getExtrapolationFactorString(ExtrapStrat_t strat) const;
   double getExtrapolationFactor(const WeightingValuesSummary_t& weights, const ExtrapStrat_t strat) const;
 
-  static bool isZero(double v) { return abs(v) < std::numeric_limits<double>::min(); } //<! Helper fn
+  static bool isZero(double v) { return std::abs(v) < std::numeric_limits<double>::min(); } //<! Helper fn
   static bool isNotPositive(double v) { return v < std::numeric_limits<double>::min(); } //<! Helper fn to check if the value is non positive = trigger is disabled
   void setDataName(const std::string& newName);
   void setRateVsMuName(const std::string& newName);

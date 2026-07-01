@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Misc includes
@@ -156,9 +156,21 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER(TrackParticle_v1, float, theta)
   AUXSTORE_PRIMITIVE_GETTER(TrackParticle_v1, float, qOverP)
 
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, float, time, setTime)
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, float, timeResolution, setTimeResolution)
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, uint8_t, hasValidTime, setHasValidTime )
+
+  float TrackParticle_v1::time() const {
+    static const SG::AuxElement::Accessor< uint8_t > acc("hasValidTime");
+    if( !acc.isAvailable( *this) || !static_cast<bool>(hasValidTime()) ) throw std::runtime_error( "Unavailable TrackParticle time requested" );
+    static const SG::AuxElement::Accessor< float > accTime("time");
+    return accTime( *this );
+  }
+
+  float TrackParticle_v1::timeResolution() const {
+    static const SG::AuxElement::Accessor< uint8_t > acc("hasValidTime");
+    if( !acc.isAvailable( *this) || !static_cast<bool>(hasValidTime()) ) throw std::runtime_error( "Unavailable TrackParticle timeResolution requested" );
+    static const SG::AuxElement::Accessor< float > accTimeRes("timeResolution");
+    return accTimeRes( *this );
+  }
 
   DefiningParameters_t TrackParticle_v1::definingParameters() const{
     DefiningParameters_t tmp;
@@ -195,6 +207,16 @@ namespace xAOD {
     setDefiningParameters(d0, z0, phi0, theta, qOverP);
     setTime(time);
     return;
+  }
+
+  void TrackParticle_v1::setTime(float time) {
+    static const SG::AuxElement::Accessor< float > acc("time");
+    acc( *this ) = time;
+  }
+
+  void TrackParticle_v1::setTimeResolution(float timeRes) {
+    static const SG::AuxElement::Accessor< float > acc("timeResolution");
+    acc( *this ) = timeRes;
   }
 
   static const SG::AuxElement::Accessor< std::vector< float > >

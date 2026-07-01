@@ -23,14 +23,14 @@ StatusCode TrigFastCalibWithRings::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode TrigFastCalibWithRings::execute() const {
+StatusCode TrigFastCalibWithRings::execute(const EventContext& /*ctx*/) const {
 
     return StatusCode::SUCCESS;
 }
 
 bool TrigFastCalibWithRings::checkRings(const EventContext& ctx ) const {
    SG::ReadHandle<xAOD::TrigRingerRingsContainer> rgCont( m_ringerKey, ctx);
-   if (rgCont.isValid()){
+   if (!rgCont.isValid()){
     ATH_MSG_DEBUG("No valid Ringer Container");
     return false;
    }

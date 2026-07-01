@@ -22,97 +22,90 @@ using WROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
 
 namespace gPos = LVL1::gFEXPos;
 
+namespace {
+    // std::less<> (transparent comparator) enables heterogeneous lookup, so the
+    // encoder can pass string_view / string literals to find() without
+    // constructing a temporary std::string at every call site.
+    template<typename ContT>
+    using NamedContainerMap = std::map<std::string, const ContT*, std::less<>>;
+
+    // Index every container of type ContT inside the TrigComposite by its link name,
+    // so the encoder can look up gRho / gBlock / gJet (all gFexJetRoIContainer) and
+    // the 10 Global containers (all gFexGlobalRoIContainer) by their L1_* SG name.
+    template<typename ContT>
+    NamedContainerMap<ContT> indexByName(const xAOD::TrigComposite& l1) {
+        NamedContainerMap<ContT> out;
+        for (const std::string& name : l1.getObjectNames<ContT>()) {
+            auto link = l1.objectLink<ContT>(name);
+            if (!link.isValid()) continue;
+            if (const ContT* c = link.getStorableObjectPointer()) out[name] = c;
+        }
+        return out;
+    }
+
+    // Return the i-th entry's word() from a named container, or 0 if missing/out-of-range.
+    template<typename ContT>
+    uint32_t wordAtOrZero(const NamedContainerMap<ContT>& m,
+                          std::string_view name, size_t idx) {
+        auto it = m.find(name);
+        if (it == m.end() || !it->second || idx >= it->second->size()) return 0u;
+        return it->second->at(idx)->word();
+    }
+
+    // Convenience for Global containers, which carry a single TOB per slice.
+    template<typename ContT>
+    uint32_t firstWord(const NamedContainerMap<ContT>& m, std::string_view name) {
+        return wordAtOrZero(m, name, 0);
+    }
+
+    // Repack gFexGlobalRoI::word() (decoder's METword: sum_y in bits 0-11,
+    // sum_x in bits 12-23, status/type in bits 24-30) into the per-FPGA TOB
+    // layout the decoder's fillGlobal() expects on re-read (Y in bits 0-15,
+    // X in bits 16-31). The whole value goes on FPGA-A; FPGA-B/C stay 0 so
+    // the decoder's per-FPGA sum reproduces sum_x / sum_y.
+    //
+    // `signed12bit` controls sign extension of the 12-bit fields:
+    //   true  for vector-component containers (METx/y, MHTx/y, MSTx/y) where
+    //         the value is signed in [-2048, 2047]
+    //   false for scalar-energy containers (SCALAR EJwoJ, Espresso, Ristretto,
+    //         NoiseCut/Rms Scalar) where the decoder stores an unsigned value
+    //         in [0, 4095]; sign-extending here would flip values >= 2048 to
+    //         negative and the SCALAR decoder branch then force-zeroes them.
+    uint32_t globalRoIWordToPerFpgaTob(uint32_t metWord, bool signed12bit) {
+        int16_t y = static_cast<int16_t>(metWord & 0xFFF);
+        if (signed12bit && (y & 0x800)) y |= 0xF000;  // sign-extend 12→16
+        int16_t x = static_cast<int16_t>((metWord >> 12) & 0xFFF);
+        if (signed12bit && (x & 0x800)) x |= 0xF000;
+        return (static_cast<uint32_t>(static_cast<uint16_t>(x)) << 16)
+             | static_cast<uint32_t>(static_cast<uint16_t>(y));
+    }
+}
+
 gFexByteStreamTool::gFexByteStreamTool(const std::string& type,
         const std::string& name,
         const IInterface* parent)
     : base_class(type, name, parent) {}
 
 StatusCode gFexByteStreamTool::initialize() {
-    // Conversion mode for gRho TOBs
+
     ATH_MSG_DEBUG(" ROB IDs: " << MSG::hex << m_robIds.value() << MSG::dec);
 
-    ConversionMode gRhomode = getConversionMode(m_gFexRhoReadKey, m_gFexRhoWriteKey, msg());
-    ATH_CHECK(gRhomode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gFexRhoWriteKey.initialize(gRhomode==ConversionMode::Decoding));
-    ATH_CHECK(m_gFexRhoReadKey.initialize(gRhomode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gRhomode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gRho ");
-
-    // Conversion mode for gSJ TOBs
-    ConversionMode gSJmode = getConversionMode(m_gFexBlockReadKey, m_gFexBlockWriteKey, msg());
-    ATH_CHECK(gSJmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gFexBlockWriteKey.initialize(gSJmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gFexBlockReadKey.initialize(gSJmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gSJmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gSJ ");
-
-    // Conversion mode for gLJ TOBs
-    ConversionMode gLJmode = getConversionMode(m_gFexJetReadKey, m_gFexJetWriteKey, msg());
-    ATH_CHECK(gLJmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gFexJetWriteKey.initialize(gLJmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gFexJetReadKey.initialize(gLJmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gLJmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gLJ ");
-
-    // Conversion mode for gScalarEJwoj TOBs
-    ConversionMode gScalarEJwojmode = getConversionMode(m_gScalarEJwojReadKey, m_gScalarEJwojWriteKey, msg());
-    ATH_CHECK(gScalarEJwojmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gScalarEJwojWriteKey.initialize(gScalarEJwojmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gScalarEJwojReadKey.initialize(gScalarEJwojmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gScalarEJwojmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gScalarEJwoj ");
-
-    // Conversion mode for gEspresso TOBs
-    ConversionMode gEspressomode = getConversionMode(m_gEspressoReadKey, m_gEspressoWriteKey, msg());
-    ATH_CHECK(gEspressomode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gEspressoWriteKey.initialize(gEspressomode==ConversionMode::Decoding));
-    ATH_CHECK(m_gEspressoReadKey.initialize(gEspressomode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gEspressomode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gEspresso ");
-
-    // Conversion mode for gMETComponentsJwoj TOBs
-    ConversionMode gMETComponentsJwojmode = getConversionMode(m_gMETComponentsJwojReadKey, m_gMETComponentsJwojWriteKey, msg());
-    ATH_CHECK(gMETComponentsJwojmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gMETComponentsJwojWriteKey.initialize(gMETComponentsJwojmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gMETComponentsJwojReadKey.initialize(gMETComponentsJwojmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gMETComponentsJwojmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gMETComponentsJwoj ");
-
-    // Conversion mode for gMHTComponentsJwoj TOBs
-    ConversionMode gMHTComponentsJwojmode = getConversionMode(m_gMHTComponentsJwojReadKey, m_gMHTComponentsJwojWriteKey, msg());
-    ATH_CHECK(gMHTComponentsJwojmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gMHTComponentsJwojWriteKey.initialize(gMHTComponentsJwojmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gMHTComponentsJwojReadKey.initialize(gMHTComponentsJwojmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gMHTComponentsJwojmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gMHTComponentsJwoj ");
-
-   // Conversion mode for gMSTComponentsJwoj TOBs
-    ConversionMode gMSTComponentsJwojmode = getConversionMode(m_gMSTComponentsJwojReadKey, m_gMSTComponentsJwojWriteKey, msg());
-    ATH_CHECK(gMSTComponentsJwojmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gMSTComponentsJwojWriteKey.initialize(gMSTComponentsJwojmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gMSTComponentsJwojReadKey.initialize(gMSTComponentsJwojmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gMSTComponentsJwojmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gMSTComponentsJwoj ");
-
-    // Conversion mode for gMETComponentsNoiseCut TOBs
-    ConversionMode gMETComponentsNoiseCutmode = getConversionMode(m_gMETComponentsNoiseCutReadKey, m_gMETComponentsNoiseCutWriteKey, msg());
-    ATH_CHECK(gMETComponentsNoiseCutmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gMETComponentsNoiseCutWriteKey.initialize(gMETComponentsNoiseCutmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gMETComponentsNoiseCutReadKey.initialize(gMETComponentsNoiseCutmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gMETComponentsNoiseCutmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gMETComponentsNoiseCut ");
-
-    // Conversion mode for gMETRms TOBs
-    ConversionMode gMETComponentsRmsmode = getConversionMode(m_gMETComponentsRmsReadKey, m_gMETComponentsRmsWriteKey, msg());
-    ATH_CHECK(gMETComponentsRmsmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gMETComponentsRmsWriteKey.initialize(gMETComponentsRmsmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gMETComponentsRmsReadKey.initialize(gMETComponentsRmsmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gMETComponentsRmsmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gMETComponentsRms ");
- 
-    // Conversion mode for gScalarENoiseCut TOBs
-    ConversionMode gScalarENoiseCutmode = getConversionMode(m_gScalarENoiseCutReadKey, m_gScalarENoiseCutWriteKey, msg());
-    ATH_CHECK(gScalarENoiseCutmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gScalarENoiseCutWriteKey.initialize(gScalarENoiseCutmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gScalarENoiseCutReadKey.initialize(gScalarENoiseCutmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gScalarENoiseCutmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gScalarENoiseCut ");
-
-    // Conversion mode for gScalarERms TOBs
-    ConversionMode gScalarERmsmode = getConversionMode(m_gScalarERmsReadKey, m_gScalarERmsWriteKey, msg());
-    ATH_CHECK(gScalarERmsmode!=ConversionMode::Undefined);
-    ATH_CHECK(m_gScalarERmsWriteKey.initialize(gScalarERmsmode==ConversionMode::Decoding));
-    ATH_CHECK(m_gScalarERmsReadKey.initialize(gScalarERmsmode==ConversionMode::Encoding));
-    ATH_MSG_DEBUG((gScalarERmsmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gScalarERms ");
+    // Decoder write keys (BS->xAOD); each one is initialised only if configured.
+    // xAOD->BS mode now consumes RoIs from the TrigCompositeContainer passed to
+    // convertToBS(), so no ReadHandleKey/ConversionMode bookkeeping is needed.
+    ATH_CHECK(m_gFexRhoWriteKey                .initialize(!m_gFexRhoWriteKey                .empty()));
+    ATH_CHECK(m_gFexBlockWriteKey              .initialize(!m_gFexBlockWriteKey              .empty()));
+    ATH_CHECK(m_gFexJetWriteKey                .initialize(!m_gFexJetWriteKey                .empty()));
+    ATH_CHECK(m_gScalarEJwojWriteKey           .initialize(!m_gScalarEJwojWriteKey           .empty()));
+    ATH_CHECK(m_gMETComponentsJwojWriteKey     .initialize(!m_gMETComponentsJwojWriteKey     .empty()));
+    ATH_CHECK(m_gMHTComponentsJwojWriteKey     .initialize(!m_gMHTComponentsJwojWriteKey     .empty()));
+    ATH_CHECK(m_gMSTComponentsJwojWriteKey     .initialize(!m_gMSTComponentsJwojWriteKey     .empty()));
+    ATH_CHECK(m_gEspressoWriteKey              .initialize(!m_gEspressoWriteKey              .empty()));
+    ATH_CHECK(m_gRistrettoWriteKey             .initialize(!m_gRistrettoWriteKey             .empty()));
+    ATH_CHECK(m_gMETComponentsNoiseCutWriteKey .initialize(!m_gMETComponentsNoiseCutWriteKey .empty()));
+    ATH_CHECK(m_gMETComponentsRmsWriteKey      .initialize(!m_gMETComponentsRmsWriteKey      .empty()));
+    ATH_CHECK(m_gScalarENoiseCutWriteKey       .initialize(!m_gScalarENoiseCutWriteKey       .empty()));
+    ATH_CHECK(m_gScalarERmsWriteKey            .initialize(!m_gScalarERmsWriteKey            .empty()));
 
     // Initialize multi-slice write handle keys (only if configured with non-empty key)
     ATH_CHECK(m_gFexRhoSliceWriteKey.initialize(!m_gFexRhoSliceWriteKey.empty()));
@@ -123,6 +116,7 @@ StatusCode gFexByteStreamTool::initialize() {
     ATH_CHECK(m_gMHTComponentsJwojSliceWriteKey.initialize(!m_gMHTComponentsJwojSliceWriteKey.empty()));
     ATH_CHECK(m_gMSTComponentsJwojSliceWriteKey.initialize(!m_gMSTComponentsJwojSliceWriteKey.empty()));
     ATH_CHECK(m_gEspressoSliceWriteKey.initialize(!m_gEspressoSliceWriteKey.empty()));
+    ATH_CHECK(m_gRistrettoSliceWriteKey.initialize(!m_gRistrettoSliceWriteKey.empty()));
     ATH_CHECK(m_gMETComponentsNoiseCutSliceWriteKey.initialize(!m_gMETComponentsNoiseCutSliceWriteKey.empty()));
     ATH_CHECK(m_gScalarENoiseCutSliceWriteKey.initialize(!m_gScalarENoiseCutSliceWriteKey.empty()));
     ATH_CHECK(m_gMETComponentsRmsSliceWriteKey.initialize(!m_gMETComponentsRmsSliceWriteKey.empty()));
@@ -140,17 +134,11 @@ StatusCode gFexByteStreamTool::initialize() {
     ATH_CHECK(m_gMHTComponentsJwojOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gMSTComponentsJwojOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gEspressoOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
+    ATH_CHECK(m_gRistrettoOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gMETComponentsNoiseCutOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gScalarENoiseCutOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gMETComponentsRmsOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
     ATH_CHECK(m_gScalarERmsOOTDecorKey.initialize(!m_gFexJetSliceWriteKey.empty()));
-
-    //checking all Conversion modes.. avoid misconfigurations
-    const std::array<ConversionMode,2> modes{gSJmode,gLJmode};
-    if (std::any_of(modes.begin(),modes.end(),[&gRhomode](ConversionMode m) { return m!=gRhomode;  } )) {
-        ATH_MSG_ERROR("Inconsistent conversion modes");
-        return StatusCode::FAILURE;
-    }
     
     ATH_CHECK(m_l1MenuKey.initialize());
     
@@ -198,65 +186,69 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         
     //WriteHandle for gFEX EDMs
     
-    //---Rho Container
-    SG::WriteHandle<xAOD::gFexJetRoIContainer> gRhoContainer(m_gFexRhoWriteKey, ctx);
-    ATH_CHECK(gRhoContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetRoIContainer with key " << gRhoContainer.key());
-    
-    //---Small Jets Container
-    SG::WriteHandle<xAOD::gFexJetRoIContainer> gSJContainer(m_gFexBlockWriteKey, ctx);
-    ATH_CHECK(gSJContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetRoIContainer with key " << gSJContainer.key());
+    // Check if standard L1A containers should be decoded (TOBs=True mode)
+    // or are disabled (TOBs=False mode, standard containers come from HLT result)
+    const bool decodeStdTOBs = !m_gFexRhoWriteKey.key().empty();
 
-    //---Large Jets Container
-    SG::WriteHandle<xAOD::gFexJetRoIContainer> gLJContainer(m_gFexJetWriteKey, ctx);
-    ATH_CHECK(gLJContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetRoIContainer with key " << gLJContainer.key());
+    //---Standard L1A TOB containers (only created and recorded when decodeStdTOBs is true)
+    SG::WriteHandle<xAOD::gFexJetRoIContainer> gRhoContainer;
+    SG::WriteHandle<xAOD::gFexJetRoIContainer> gSJContainer;
+    SG::WriteHandle<xAOD::gFexJetRoIContainer> gLJContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarEJwojContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsJwojContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMHTComponentsJwojContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMSTComponentsJwojContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsNoiseCutContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsRmsContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarENoiseCutContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarERmsContainer;
 
-    //---Scalar MET and SumET JwoJ Container
-    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarEJwojContainer(m_gScalarEJwojWriteKey, ctx);
-    ATH_CHECK(gScalarEJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarEJwojContainer.key());
+    if (decodeStdTOBs) {
+        gRhoContainer = SG::WriteHandle<xAOD::gFexJetRoIContainer>(m_gFexRhoWriteKey, ctx);
+        gSJContainer = SG::WriteHandle<xAOD::gFexJetRoIContainer>(m_gFexBlockWriteKey, ctx);
+        gLJContainer = SG::WriteHandle<xAOD::gFexJetRoIContainer>(m_gFexJetWriteKey, ctx);
+        gScalarEJwojContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gScalarEJwojWriteKey, ctx);
+        gMETComponentsJwojContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMETComponentsJwojWriteKey, ctx);
+        gMHTComponentsJwojContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMHTComponentsJwojWriteKey, ctx);
+        gMSTComponentsJwojContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMSTComponentsJwojWriteKey, ctx);
+        gMETComponentsNoiseCutContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMETComponentsNoiseCutWriteKey, ctx);
+        gMETComponentsRmsContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMETComponentsRmsWriteKey, ctx);
+        gScalarENoiseCutContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gScalarENoiseCutWriteKey, ctx);
+        gScalarERmsContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gScalarERmsWriteKey, ctx);
 
-    //---gEspresso Container
+        ATH_CHECK(gRhoContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetRoIContainer with key " << gRhoContainer.key());
+        ATH_CHECK(gSJContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetRoIContainer with key " << gSJContainer.key());
+        ATH_CHECK(gLJContainer.record(std::make_unique<xAOD::gFexJetRoIContainer>(), std::make_unique<xAOD::gFexJetRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetRoIContainer with key " << gLJContainer.key());
+        ATH_CHECK(gScalarEJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarEJwojContainer.key());
+        ATH_CHECK(gMETComponentsJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMETComponentsJwojContainer.key());
+        ATH_CHECK(gMHTComponentsJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMHTComponentsJwojContainer.key());
+        ATH_CHECK(gMSTComponentsJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMSTComponentsJwojContainer.key());
+        ATH_CHECK(gMETComponentsNoiseCutContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMETComponentsNoiseCutContainer.key());
+        ATH_CHECK(gMETComponentsRmsContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMETComponentsRmsContainer.key());
+        ATH_CHECK(gScalarENoiseCutContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarENoiseCutContainer.key());
+        ATH_CHECK(gScalarERmsContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarERmsContainer.key());
+    }
+
+    //---gEspresso Container (always decoded - not in HLT result)
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gEspressoContainer(m_gEspressoWriteKey, ctx);
     ATH_CHECK(gEspressoContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
     ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gEspressoContainer.key());
 
-    //---MET Components JwoJ Container
-    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsJwojContainer(m_gMETComponentsJwojWriteKey, ctx);
-    ATH_CHECK(gMETComponentsJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMETComponentsJwojContainer.key());
-
-    //---MHT Components JwoJ Container
-    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMHTComponentsJwojContainer(m_gMHTComponentsJwojWriteKey, ctx);
-    ATH_CHECK(gMHTComponentsJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMHTComponentsJwojContainer.key());
-
-    //---MST Components JwoJ Container
-    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMSTComponentsJwojContainer(m_gMSTComponentsJwojWriteKey, ctx);
-    ATH_CHECK(gMSTComponentsJwojContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMSTComponentsJwojContainer.key());
-
-    //---MET Components NoiseCut Container
-    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsNoiseCutContainer(m_gMETComponentsNoiseCutWriteKey, ctx);
-    ATH_CHECK(gMETComponentsNoiseCutContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMETComponentsNoiseCutContainer.key());
-
-    //---MET Components Rms Container
-    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsRmsContainer(m_gMETComponentsRmsWriteKey, ctx);
-    ATH_CHECK(gMETComponentsRmsContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gMETComponentsRmsContainer.key());
-
-    //---Scalar MET and SumET NoiseCut Container
-    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarENoiseCutContainer(m_gScalarENoiseCutWriteKey, ctx);
-    ATH_CHECK(gScalarENoiseCutContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarENoiseCutContainer.key());
-
-    //---Scalar MET and SumET Rms Container
-    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarERmsContainer(m_gScalarERmsWriteKey, ctx);
-    ATH_CHECK(gScalarERmsContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarERmsContainer.key());
+    //---gRistretto Container (always decoded - not in HLT result)
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gRistrettoContainer(m_gRistrettoWriteKey, ctx);
+    ATH_CHECK(gRistrettoContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+    ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gRistrettoContainer.key());
 
     // Determine if multi-slice mode is enabled (slice 0 = L1A, slices 1,2 = out-of-time)
     const bool multiSlice = !m_gFexJetSliceWriteKey.empty();
@@ -271,6 +263,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMHTComponentsJwojSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMSTComponentsJwojSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gEspressoSliceContainer;
+    SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gRistrettoSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsNoiseCutSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarENoiseCutSliceContainer;
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gMETComponentsRmsSliceContainer;
@@ -309,6 +302,10 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         ATH_CHECK(gEspressoSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
         ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gEspressoSliceContainer.key());
 
+        gRistrettoSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gRistrettoSliceWriteKey, ctx);
+        ATH_CHECK(gRistrettoSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
+        ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gRistrettoSliceContainer.key());
+
         gMETComponentsNoiseCutSliceContainer = SG::WriteHandle<xAOD::gFexGlobalRoIContainer>(m_gMETComponentsNoiseCutSliceWriteKey, ctx);
         ATH_CHECK(gMETComponentsNoiseCutSliceContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
         ATH_MSG_DEBUG("Recorded gFexGlobalRoIContainer (out-of-time) with key " << gMETComponentsNoiseCutSliceContainer.key());
@@ -345,6 +342,11 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         // Starting to loop over the gFEX words
 
         unsigned int n_words = rob->rod_ndata();
+        // The 2-word ROD trailer at the end of rod_data is not part of the
+        // subblock stream; skip it so the parse loop below doesn't read 0/0
+        // as a subblock header and spin forever.
+        constexpr unsigned int ROD_TRAILER_WORDS = 2;
+        if (n_words >= ROD_TRAILER_WORDS) n_words -= ROD_TRAILER_WORDS;
 
         //saving Jet TOBs into the EDM container
         for(unsigned int iWord=0; iWord<n_words; iWord++) {
@@ -361,6 +363,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         std::vector<std::array<uint32_t, 3>> JWOJ_MET;
         std::vector<std::array<uint32_t, 3>> JWOJ_SCALAR;
         std::vector<std::array<uint32_t, 3>> GESPRESSO;
+        std::vector<std::array<uint32_t, 3>> GRISTRETTO;
         std::vector<std::array<uint32_t, 3>> NC_MET;
         std::vector<std::array<uint32_t, 3>> NC_SCALAR;
         std::vector<std::array<uint32_t, 3>> RMS_MET;
@@ -378,6 +381,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                 JWOJ_MET.resize(newSize, {0, 0, 0});
                 JWOJ_SCALAR.resize(newSize, {0, 0, 0});
                 GESPRESSO.resize(newSize, {0, 0, 0});
+                GRISTRETTO.resize(newSize, {0, 0, 0});
                 NC_MET.resize(newSize, {0, 0, 0});
                 NC_SCALAR.resize(newSize, {0, 0, 0});
                 RMS_MET.resize(newSize, {0, 0, 0});
@@ -465,7 +469,8 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
 
                 for(unsigned int iWord=0; iWord<gPos::WORDS_PER_SLICE; iWord++) {
 
-                    if (isJet) {
+                    // Skip jet TOB fill at slice 0 when standard containers are disabled
+                    if (isJet && (sliceNumber != 0 || decodeStdTOBs)) {
                         //Skipping the unused words
                         if (std::find(gPos::JET_UNUSED_POSITION.begin(),gPos::JET_UNUSED_POSITION.end(),iWord)!=gPos::JET_UNUSED_POSITION.end()){
                             continue;
@@ -547,6 +552,12 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                             if (blockType == 0x2) {GESPRESSO[sliceNumber][1] = dataArray[index+iWord];}
                             if (blockType == 0x3) {GESPRESSO[sliceNumber][2] = dataArray[index+iWord];}
                         }
+                        //Saving gRistretto TOBs into the EDM container
+                        if (iWord == gPos::GRISTRETTO_POSITION){
+                            if (blockType == 0x1) {GRISTRETTO[sliceNumber][0] = dataArray[index+iWord];}
+                            if (blockType == 0x2) {GRISTRETTO[sliceNumber][1] = dataArray[index+iWord];}
+                            if (blockType == 0x3) {GRISTRETTO[sliceNumber][2] = dataArray[index+iWord];}
+                        }
                         //Saving Noise Cut MET TOBs into the EDM container
                         if (iWord == gPos::NC_MET_POSITION){
                             if (blockType == 0x1) {NC_MET[sliceNumber][0] = dataArray[index+iWord];}
@@ -590,11 +601,17 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                     }
 
                     // Select target containers based on slice (slice 0 = L1A, others = out-of-time)
+                    if (slice == 0 && !decodeStdTOBs) {
+                        // Only fill gEspresso and gRistretto when standard TOBs are disabled
+                        fillGlobal(GESPRESSO[slice], 1, gEspressoContainer, slice, 0);
+                        fillGlobal(GRISTRETTO[slice], 1, gRistrettoContainer, slice, 0);
+                    } else {
                     auto& targetMHTContainer = (slice == 0) ? gMHTComponentsJwojContainer : gMHTComponentsJwojSliceContainer;
                     auto& targetMSTContainer = (slice == 0) ? gMSTComponentsJwojContainer : gMSTComponentsJwojSliceContainer;
                     auto& targetMETContainer = (slice == 0) ? gMETComponentsJwojContainer : gMETComponentsJwojSliceContainer;
                     auto& targetScalarContainer = (slice == 0) ? gScalarEJwojContainer : gScalarEJwojSliceContainer;
                     auto& targetEspressoContainer = (slice == 0) ? gEspressoContainer : gEspressoSliceContainer;
+                    auto& targetRistrettoContainer = (slice == 0) ? gRistrettoContainer : gRistrettoSliceContainer;
                     auto& targetNCMETContainer = (slice == 0) ? gMETComponentsNoiseCutContainer : gMETComponentsNoiseCutSliceContainer;
                     auto& targetNCScalarContainer = (slice == 0) ? gScalarENoiseCutContainer : gScalarENoiseCutSliceContainer;
                     auto& targetRMSMETContainer = (slice == 0) ? gMETComponentsRmsContainer : gMETComponentsRmsSliceContainer;
@@ -607,11 +624,14 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
 
                     fillGlobal(GESPRESSO[slice], 1, targetEspressoContainer, slice, 0);
 
+                    fillGlobal(GRISTRETTO[slice], 1, targetRistrettoContainer, slice, 0);
+
                     scalar = fillGlobal(NC_MET[slice], 2, targetNCMETContainer, slice);
                     fillGlobal(NC_SCALAR[slice], 1, targetNCScalarContainer, slice, scalar);
 
                     scalar = fillGlobal(RMS_MET[slice], 2, targetRMSMETContainer, slice);
                     fillGlobal(RMS_SCALAR[slice], 1, targetRMSScalarContainer, slice, scalar);
+                    } // end else (standard TOBs enabled or out-of-time slice)
 
                     global_counter[slice] = 0;
                 }
@@ -648,9 +668,9 @@ int16_t gFexByteStreamTool::fillGlobal(const std::array<uint32_t, 3> &tob, const
         sum_y += y;
     }
 
-    // Special case for gEspresso: in the readout the gEspresso quantity is stored in x. We need to move it to y to armonize this with the other scalar quantities
+    // Special case for gEspresso/gRistretto: in the readout these quantities are stored in x. We need to move them to y to armonize this with the other scalar quantities
     // This is true for the readout only. On the realtime path gEspresso is sent to Topo on y (see https://docs.google.com/spreadsheets/d/15YVVtGofhXMtV7jXRFzWO0FVUtUAjS-X-aQjh3FKE_w/edit?gid=1546010783#gid=1546010783).
-    if  (container.key() == "L1_gEspresso" ) {
+    if  (container.key() == "L1_gEspresso" || container.key() == "L1_gRistretto" ) {
         sum_y = sum_x; 
     }
 
@@ -708,10 +728,102 @@ int16_t gFexByteStreamTool::fillGlobal(const std::array<uint32_t, 3> &tob, const
 
 
 /// xAOD->BS conversion
-StatusCode gFexByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {
+uint32_t gFexByteStreamTool::buildBlockHeader(uint32_t blockType, uint32_t numSlices) const {
+    constexpr uint32_t headerSize = 1;
+    constexpr uint32_t errorFlag  = 0;
+    const     uint32_t dataSize   = numSlices * gPos::WORDS_PER_SLICE;
+    return ((blockType  & gPos::BLOCK_TYPE_MASK ) << gPos::BLOCK_TYPE_BIT )
+         | ((headerSize & gPos::HEADER_SIZE_MASK) << gPos::HEADER_SIZE_BIT)
+         | ((errorFlag  & gPos::ERROR_FLAG_MASK ) << gPos::ERROR_FLAG_BIT )
+         | ( dataSize   & gPos::DATA_SIZE_MASK  );
+}
+
+/// xAOD->BS conversion
+StatusCode gFexByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
+                                           const xAOD::TrigCompositeContainer* tc,
+                                           const EventContext& eventContext) {
+
+    NamedContainerMap<xAOD::gFexJetRoIContainer>    jetMap;
+    NamedContainerMap<xAOD::gFexGlobalRoIContainer> globalMap;
+    if (tc && !tc->empty()) {
+        const xAOD::TrigComposite& l1 = *tc->at(0);
+        jetMap    = indexByName<xAOD::gFexJetRoIContainer   >(l1);
+        globalMap = indexByName<xAOD::gFexGlobalRoIContainer>(l1);
+    }
+
+    constexpr uint32_t numSlices = 1; // slice 0 = L1A; out-of-time slices not emitted in v1
+    std::vector<uint32_t> words;
+    words.reserve(6 * (1 + numSlices * gPos::WORDS_PER_SLICE) + 2);
+
+    // Shared across both subblock loops; reset to 0 at the start of each iteration.
+    std::array<uint32_t, gPos::WORDS_PER_SLICE> slice{};
+
+    // ---- Jet subblocks: blockType 0xA / 0xB / 0xC for FPGA A / B / C ----
+    // The xAOD gBlock / gJet / gRho containers concatenate all three FPGAs' TOBs;
+    // we slice them back deterministically (TOBs 0..3 -> FPGA-A pos 1,2,8,9, etc.)
+    // so a decode -> encode -> decode cycle reproduces the original xAOD content.
+    constexpr std::array<uint32_t, 3> jetBlockTypes = {0xA, 0xB, 0xC};
+    for (uint32_t fpga = 0; fpga < 3; ++fpga) {
+        slice.fill(0);
+        words.push_back(buildBlockHeader(jetBlockTypes[fpga], numSlices));
+        for (size_t s = 0; s < gPos::GBLOCK_POSITION.size(); ++s) {
+            slice[gPos::GBLOCK_POSITION[s]] =
+                wordAtOrZero(jetMap, "L1_gFexSRJetRoI",
+                             fpga * gPos::GBLOCK_POSITION.size() + s);
+        }
+        for (size_t s = 0; s < gPos::GJET_POSITION.size(); ++s) {
+            slice[gPos::GJET_POSITION[s]] =
+                wordAtOrZero(jetMap, "L1_gFexLRJetRoI",
+                             fpga * gPos::GJET_POSITION.size() + s);
+        }
+        slice[gPos::GRHO_POSITION] = wordAtOrZero(jetMap, "L1_gFexRhoRoI", fpga);
+        // Trailer (pos 6, 13) and unused (pos 0, 4, 5, 11, 12) stay 0: the
+        // decoder skips both groups, so any value would be discarded anyway.
+        for (uint32_t w : slice) words.push_back(w);
+    }
+
+    // ---- Global subblocks: blockType 0x1 / 0x2 / 0x3 for FPGA A / B / C ----
+    // Each xAOD Global RoI carries the sum across the three FPGAs in its word();
+    // we place that sum in the FPGA-A slot and leave FPGA-B/C zero so the decoder's
+    // sum across blockType 0x1 + 0x2 + 0x3 reproduces the xAOD value exactly.
+    constexpr std::array<uint32_t, 3> globalBlockTypes = {0x1, 0x2, 0x3};
+    for (uint32_t fpga = 0; fpga < 3; ++fpga) {
+        slice.fill(0);
+        words.push_back(buildBlockHeader(globalBlockTypes[fpga], numSlices));
+        if (fpga == 0) {
+            // Vector components (signed 12-bit, can be negative)
+            slice[gPos::JWOJ_MHT_POSITION]    = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gMHTComponentsJwoj"),       /*signed12bit=*/true);
+            slice[gPos::JWOJ_MST_POSITION]    = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gMSTComponentsJwoj"),       /*signed12bit=*/true);
+            slice[gPos::JWOJ_MET_POSITION]    = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gMETComponentsJwoj"),       /*signed12bit=*/true);
+            slice[gPos::NC_MET_POSITION]      = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gMETComponentsNoiseCut"),   /*signed12bit=*/true);
+            slice[gPos::RMS_MET_POSITION]     = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gMETComponentsRms"),        /*signed12bit=*/true);
+            // Scalar energies (unsigned 12-bit, decoder clamps to [0, 0xFFF])
+            slice[gPos::JWOJ_SCALAR_POSITION] = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gScalarEJwoj"),              /*signed12bit=*/false);
+            slice[gPos::GRISTRETTO_POSITION]  = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gRistretto"),                /*signed12bit=*/false);
+            slice[gPos::GESPRESSO_POSITION]   = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gEspresso"),                 /*signed12bit=*/false);
+            slice[gPos::NC_SCALAR_POSITION]   = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gScalarENoiseCut"),          /*signed12bit=*/false);
+            slice[gPos::RMS_SCALAR_POSITION]  = globalRoIWordToPerFpgaTob(firstWord(globalMap, "L1_gScalarERms"),               /*signed12bit=*/false);
+        }
+        for (uint32_t w : slice) words.push_back(w);
+    }
+
+    ATH_MSG_DEBUG("gFex encoder: jetContainers=" << jetMap.size()
+                  << " globalContainers=" << globalMap.size()
+                  << " words=" << words.size());
+
+    // ROD trailer (decoder only reads the 7-bit error flag in word1 -- write 0/0)
+    words.push_back(0);
+    words.push_back(0);
+
+    clearCache(eventContext);
+    uint32_t* data = newRodData(eventContext, words.size());
+    std::copy(words.begin(), words.end(), data);
+
+    // gFex packs all 6 subblocks (3 Jet + 3 Global) into a single ROB.
+    eformat::helper::SourceIdentifier sid(eformat::TDAQ_CALO_FEAT_EXTRACT_ROI, 0x3000);
+    vrobf.push_back(newRobFragment(eventContext, sid.code(), words.size(), data, 0));
 
     return StatusCode::SUCCESS;
-    
 }
 
 

@@ -36,7 +36,7 @@ namespace G4UA
     /// Per-thread results for merging at end of run.
     struct Report
     {
-      int killCount=0;
+      long killCount=0;
       void merge(const Report& rep){
         killCount+=rep.killCount;
       }

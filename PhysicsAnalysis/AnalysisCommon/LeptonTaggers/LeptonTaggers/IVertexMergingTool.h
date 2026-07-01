@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PROMPT_IVERTEXMERGINGTOOL_H
@@ -74,6 +74,7 @@ namespace Prompt
     DeclareInterfaceID(Prompt::IVertexMergingTool, 1, 0);
 
     virtual MergeResultNotOwner mergeInitVertices(
+      const EventContext& ctx,
       const FittingInput &input,
       const xAOD::TrackParticle *tracklep,
       std::vector<std::unique_ptr<xAOD::Vertex>> &initVtxs,

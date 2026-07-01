@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILEL2_BYTESTREAMCNV_H
@@ -79,7 +79,7 @@ class TileL2ContByteStreamCnv
     /// Storage type and class ID
     virtual long repSvcType() const override { return i_repSvcType(); }
     static long storageType();
-    static const CLID& classID();
+    static CLID classID();
     
   private: 
     //    BYTESTREAMTOOL* m_tool ;

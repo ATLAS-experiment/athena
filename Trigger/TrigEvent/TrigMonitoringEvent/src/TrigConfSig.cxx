@@ -1,23 +1,19 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// C/C++
-#include <algorithm>
-#include <sstream>
+
 
 // Local
 #include "TrigMonitoringEvent/TrigConfSig.h"
+// C/C++
+#include <algorithm> //std::find
+#include <sstream>
+#include <iostream>
 
 using namespace std;
 
-//--------------------------------------------------------------------------------------  
-TrigConfSig::TrigConfSig() 
-  :m_counter(0),
-   m_logic(0),
-   m_label()
-{
-}
+
 
 //--------------------------------------------------------------------------------------  
 TrigConfSig::TrigConfSig(uint32_t counter, int logic, const std::string &label) 
@@ -46,6 +42,11 @@ bool TrigConfSig::matchOutputTE(uint32_t te_id) const
 void TrigConfSig::print(std::ostream &os) const
 {
   os << str(*this) << endl;
+}
+
+void TrigConfSig::print() const
+{
+  std::cout << str(*this) << endl;
 }
 
 //--------------------------------------------------------------------------------------  

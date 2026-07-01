@@ -28,7 +28,7 @@ public:
 protected:
 
   virtual IsoMuonFeatureContainer_PERS *createPersistent( IsoMuonFeatureContainer *transObj);
-  virtual IsoMuonFeatureContainer      *createTransient();
+  virtual IsoMuonFeatureContainer      *createTransient(const Token* token);
 
 private:
   IsoMuonFeatureContainerCnv_tlp1   m_converter1;

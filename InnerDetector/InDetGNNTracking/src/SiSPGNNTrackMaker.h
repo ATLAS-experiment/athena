@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SiSPGNNTrackMaker_H
@@ -8,7 +8,6 @@
 #include <string>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/DataHandle.h"
 
 // data containers
 #include "InDetPrepRawData/PixelClusterContainer.h"
@@ -73,6 +72,10 @@ namespace InDet {
       // output container
       SG::WriteHandleKey<TrackCollection> m_outputTracksKey{
         this, "TracksLocation", "SiSPGNNTracks"};
+      
+      // temporary output container for edge scores
+      SG::WriteHandleKey<std::vector<std::vector<float>>> m_outputEdgeScoresKey{
+        this, "EdgeScoresKey", "GNNEdgeScores"};
 
       /// --------------------
       /// @name Tool handles
@@ -122,6 +125,8 @@ namespace InDet {
       BooleanProperty m_doRecoverFailedFits{this, "doRecoverFailedFits", true,
 	"Try to recover failed track fits by removing hits, at the end of the track"};
 
+      BooleanProperty m_saveEdgeScore{this, "saveEdgeScore", false, "Save edge scores in a temporary container"};
+
   
       std::tuple<bool, int, std::unique_ptr<Trk::Track>> doFitAndCut(
         const EventContext& ctx,
@@ -139,7 +144,7 @@ namespace InDet {
         int trackCounter
       ) const;
 
-      std::vector<const Trk::SpacePoint*> getSpacePoints (
+      std::pair<std::vector<const Trk::SpacePoint*>, std::vector<uint32_t> > getSpacePoints (
         const std::vector<uint32_t>& trackIndices,
         const std::vector<const Trk::SpacePoint*>& allSpacePoints
       ) const;
@@ -174,10 +179,13 @@ namespace InDet {
         int eventNumber
       ) const;
 
-
+      std::vector<float> getEdgeScores(
+        const std::vector<uint32_t>& sortedID,
+        const std::unordered_map<int, std::unordered_map<int, float>>& edgeMap
+      ) const;
 
     };
-      
+
     MsgStream&    operator << (MsgStream&   ,const SiSPGNNTrackMaker&);
     std::ostream& operator << (std::ostream&,const SiSPGNNTrackMaker&); 
 }

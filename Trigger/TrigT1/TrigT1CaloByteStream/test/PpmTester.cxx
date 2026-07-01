@@ -47,7 +47,7 @@ StatusCode PpmTester::initialize()
 
 // Execute
 
-StatusCode PpmTester::execute()
+StatusCode PpmTester::execute(const EventContext& ctx)
 {
   if ( !msgLvl(MSG::INFO) ) return StatusCode::SUCCESS;
   msg(MSG::INFO);

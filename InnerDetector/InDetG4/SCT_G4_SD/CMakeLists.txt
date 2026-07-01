@@ -4,6 +4,7 @@
 atlas_subdir( SCT_G4_SD )
 
 # External dependencies:
+find_package( AtlasGeant4Utilities )
 find_package( CLHEP )
 find_package( Geant4 )
 find_package( GTest )
@@ -26,19 +27,19 @@ atlas_add_library( SCT_G4_SD
 # Test(s) in the package:
 atlas_add_test( SCT_G4_SDToolConfig_test
                 SCRIPT test/SCT_G4_SDToolConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( SctSensorSD_gtest
                 SOURCES test/SctSensorSD_gtest.cxx
                 INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib TestTools SCT_G4_SDLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( SctSensor_CTB_gtest
                 SOURCES test/SctSensor_CTB_gtest.cxx
                 INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GTEST_LIBRARIES} G4AtlasToolsLib InDetSimEvent MCTruth StoreGateLib TestTools SCT_G4_SDLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Turn on/off LTO for all targets in the package.
 set_target_properties(
@@ -48,6 +49,11 @@ set_target_properties(
    SCT_G4_SD_SctSensor_CTB_gtest
    PROPERTIES
    INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
+
+# Turn on/off CUDA device symbol resolution for tests (Geant4 links to VecGeom, which is CUDA-enabled)
+atlas_configure_g4_targets( TARGETS
+   SCT_G4_SD_SctSensorSD_gtest
+   SCT_G4_SD_SctSensor_CTB_gtest )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

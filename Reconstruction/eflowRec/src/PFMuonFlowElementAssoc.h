@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -10,13 +10,11 @@
  */
 
 
-#ifndef PFMUONFLOWELEMENTASSOC_H
-#define PFMUONFLOWELEMENTASSOC_H
+#ifndef EFLOWREC_PFMUONFLOWELEMENTASSOC_H
+#define EFLOWREC_PFMUONFLOWELEMENTASSOC_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODPFlow/FlowElementContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
@@ -94,4 +92,4 @@ private:
  **/
   Gaudi::Property<bool> m_useMuonTopoClusters{this,"useMuonTopoClusters",false,"Toggle usage of linker of muon associated topoclusters to flow elements - false by default (EXPERIMENTAL)"};
 };
-#endif // PFMUONFLOWELEMENTASSOC.H
+#endif // EFLOWREC_PFMUONFLOWELEMENTASSOC_H

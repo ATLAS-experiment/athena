@@ -10,22 +10,27 @@
 #include <utility>
 #include <memory>
 
-#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IPixelOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IStripOnTrackCalibratorTool.h"
+#include "ActsToolInterfaces/IHGTDOnTrackCalibratorTool.h"
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
+#include "Definitions.h"
 
 #include <vector>
 #include <utility>
 
 namespace ActsTrk::detail {
    class IOnBoundStateCalibratorTool;
-   std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *pixelOnTrackCalibratorTool,
-                                                                          const ActsTrk::IOnBoundStateCalibratorTool *stripOnTrackCalibratorTool,
-                                                                          const ActsTrk::IOnBoundStateCalibratorTool *hgtdOnTrackCalibratorTool,
-                                                                          const ActsTrk::detail::MeasurementRangeList &measurementRanges,
-                                                                          const std::vector<float> &etaBinsf,
-                                                                          const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
-                                                                          const std::vector<size_t> &numMeasurementsCutOff,
-                                                                          double edge_hole_border_width);
+   std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(
+           const EventContext &ctx,
+           const ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer> *pixelOnTrackCalibratorTool,
+           const ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer> *stripOnTrackCalibratorTool,
+           const ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer> *hgtdOnTrackCalibratorTool,
+           const ActsTrk::detail::MeasurementRangeList &measurementRanges,
+           const std::vector<float> &etaBinsf,
+           const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
+           const std::vector<size_t> &numMeasurementsCutOff,
+           double edge_hole_border_width);
 
 }
 

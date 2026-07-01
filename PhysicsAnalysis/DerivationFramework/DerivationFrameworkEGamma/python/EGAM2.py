@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM2.py
 # This defines DAOD_EGAM2, a skimmed DAOD format for Run 3.
@@ -20,6 +20,7 @@ from DerivationFrameworkEGamma.TriggerContent import (
     ExtraContainersTrigger,
     ExtraContainersElectronTrigger,
     JPsiTriggers,
+    JPsiDelayedTriggers,
 )
 
 
@@ -54,12 +55,19 @@ def EGAM2SkimmingToolCfg(flags):
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
 
+    triggersHLTonly = []
     if MenuType:
         triggers = JPsiTriggers[MenuType]
+        print("Input trigger stream is:  ", flags.Input.TriggerStream)
+        if flags.Input.TriggerStream in ("physics_BphysDelayed", "BphysLS") or flags.Input.isMC:
+            triggers += JPsiDelayedTriggers[MenuType]
+            if MenuType == "Run2":
+                triggersHLTonly = triggers
         print("EGAM2 trigger skimming list (OR): ", triggers)
 
         EGAM2_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
-            name="EGAM2_TriggerSkimmingTool", TriggerListOR=triggers
+            # passing also TriggerListORHLTOnly is required by Run2 Beex triggers
+            name="EGAM2_TriggerSkimmingTool", TriggerListOR=triggers, TriggerListORHLTOnly=triggersHLTonly
         )
         acc.addPublicTool(EGAM2_TriggerSkimmingTool)
         skimmingTools += [EGAM2_TriggerSkimmingTool]
@@ -307,7 +315,7 @@ def EGAM2KernelCfg(flags, name="EGAM2Kernel", **kwargs):
         thinning_expression = " && ".join(
             [
                 "(InDetTrackParticles.DFCommonTightPrimary)",
-                "(abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3*mm)",
+                "(abs(InDetTrackParticles.DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta)<3*mm)",
                 "(InDetTrackParticles.pt > 10*GeV)",
             ]
         )

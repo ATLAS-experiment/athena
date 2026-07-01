@@ -4,8 +4,12 @@
 #include "MuonDigitizationR4/MuonDigitizationTool.h"
 
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
+#include <xAODMuonViews/FillContainer.h>
 #include <AthenaKernel/RNGWrapper.h>
 #include <GeoModelKernel/throwExcept.h>
+
+using SDOFiller_t = xAOD::FillContainer<xAOD::MuonSimHitContainer,
+                                        xAOD::MuonSimHitAuxContainer>;
 
 namespace MuonR4{
     StatusCode MuonDigitizationTool::initialize(){
@@ -80,25 +84,17 @@ namespace MuonR4{
             ATH_CHECK(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList));
         }
         ATH_CHECK(fillTimedHits(std::move(hitCollList), timedHits));
-        SG::WriteHandle<xAOD::MuonSimHitContainer> sdoContainer{};
-        if (!m_sdoKey.empty()) {
-             sdoContainer = SG::WriteHandle<xAOD::MuonSimHitContainer>{m_sdoKey, ctx};
-             ATH_CHECK(sdoContainer.record(std::make_unique<xAOD::MuonSimHitContainer>(),
-                                           std::make_unique<xAOD::MuonSimHitAuxContainer>()));
-        }
-        ATH_CHECK(digitize(ctx, timedHits, !m_sdoKey.empty() ? sdoContainer.ptr() : nullptr));
+        SDOFiller_t sdoContainer{};
+        ATH_CHECK(digitize(ctx, timedHits, !m_sdoKey.empty() ? sdoContainer.get() : nullptr));
+        ATH_CHECK(sdoContainer.record(m_sdoKey, ctx));
         return StatusCode::SUCCESS;
     }
     StatusCode MuonDigitizationTool::mergeEvent(const EventContext& ctx) {
         ATH_MSG_DEBUG("mergeEvent()");
         
-        SG::WriteHandle<xAOD::MuonSimHitContainer> sdoContainer{};
-        if (!m_sdoKey.empty()) {
-             sdoContainer = SG::WriteHandle<xAOD::MuonSimHitContainer>{m_sdoKey, ctx};
-             ATH_CHECK(sdoContainer.record(std::make_unique<xAOD::MuonSimHitContainer>(),
-                                           std::make_unique<xAOD::MuonSimHitAuxContainer>()));
-        }
-        ATH_CHECK(digitize(ctx, m_timedHits, !m_sdoKey.empty() ? sdoContainer.ptr() : nullptr));
+        SDOFiller_t sdoContainer{};
+        ATH_CHECK(digitize(ctx, m_timedHits, !m_sdoKey.empty() ? sdoContainer.get() : nullptr));
+        ATH_CHECK(sdoContainer.record(m_sdoKey, ctx));
         m_timedHits.clear();
         m_simHits.clear();
         return StatusCode::SUCCESS;

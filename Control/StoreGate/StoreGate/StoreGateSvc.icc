@@ -10,11 +10,9 @@
 #ifndef STOREGATE_STOREGATESVC_ICC
 #define STOREGATE_STOREGATESVC_ICC
 #include "StoreGate/constraints/KeyConcept.h"
-#include "SGTools/CallBackID.h"
 #include "AthContainersInterfaces/AuxStore_traits.h"
 #include "AthenaKernel/ClassName.h"
 #include "CxxUtils/checker_macros.h"
-#include "boost/bind/bind.hpp"
 #include <vector>
 
 /// macro to help writing the function calls.
@@ -64,73 +62,6 @@ inline
 SG::DataProxy* 
 StoreGateSvc::proxy_exact (SG::sgkey_t sgkey) const { 
   _SGXCALL( proxy_exact, (sgkey), 0 ); 
-}
-
-template <typename H, typename TKEY>
-StatusCode 
-StoreGateSvc::regHandle ATLAS_NOT_THREAD_SAFE ( const DataHandle<H>& handle, const TKEY& key )
-{
-  CLID clid = ClassID_traits<H>::ID();
-  IResetable *ir = const_cast<IResetable*> (static_cast<const IResetable*> (&handle));
-  SG::DataProxy *dp = 0;
-
-  bool ret = this->currentStore()->bindHandleToProxyAndRegister (clid, key, ir, dp);
-  if (!ret) {
-    return StatusCode::FAILURE;
-  }
-
-  return handle.setState(dp); // FIXME - should be retrieve?
-}
-
-/// non-const method - will return an error
-template <typename H, typename TKEY>
-StatusCode 
-StoreGateSvc::regHandle( DataHandle<H>& /*handle*/, const TKEY& key)
-{
-  error() << "regHandle(): DataHandle must be const: "
-          << ClassName<H>::name() << "[" + key + "]"
-          << endmsg;
-
-  return StatusCode::FAILURE;
-}
-
-/// register a callback function, with handle + key
-template <typename T, typename H, typename TKEY>
-StatusCode 
-StoreGateSvc::regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
-                                            const T* obj, const DataHandle<H>& handle, 
-                                            const TKEY& key, bool trigger)
-{
-  CLID clid = ClassID_traits<H>::ID();
-  IResetable *ir = const_cast<IResetable*> (static_cast<const IResetable*> (&handle));
-  SG::DataProxy *dp = 0;
-
-  const CallBackID c(updFcn,obj);
-  using namespace boost::placeholders;
-  IOVSvcCallBackFcn fcn(boost::bind(updFcn,const_cast<T*>(obj), _1, _2));
-
-  bool ret = this->currentStore()->bindHandleToProxyAndRegister
-                                    (clid, key, ir, dp, c, fcn, trigger);
-
-  if (!ret) {
-    return StatusCode::FAILURE;
-  }
-
-  return handle.setState(dp); // FIXME - should be retrieve?
-}
-
-/// register a callback function, with handle + key. Non const. Error
-template <typename T, typename H, typename TKEY>
-StatusCode 
-StoreGateSvc::regFcn(StatusCode (T::* /*updFcn*/)(IOVSVC_CALLBACK_ARGS), 
-                     const T* /*obj*/, DataHandle<H>& /*handle*/, 
-                     const TKEY& key, bool /*trigger*/)
-{
-  error() << "regHandle(): DataHandle must be const: "
-          << ClassName<H>::name() << "[" + key + "]"
-          << endmsg;
-
-  return StatusCode::FAILURE;
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -590,20 +521,6 @@ StoreGateSvc::keys(std::vector<std::string>& vkeys,
   return this->keys(ClassID_traits<T>::ID(), vkeys, includeAlias, onlyValid);
 } 
 
-
-template <typename T, typename TKEY>
-StatusCode 
-StoreGateSvc::bind ATLAS_NOT_THREAD_SAFE (const DataHandle<T>& handle, const TKEY& key) {
-  CLID clid = ClassID_traits<T>::ID();
-  IResetable *ir = const_cast<IResetable*> (static_cast<const IResetable*> (&handle));
-  SG::DataProxy *dp = 0;
-  bool ret = this->currentStore()->bindHandleToProxy (clid, key, ir, dp);
-  if (!ret) {
-    return StatusCode::FAILURE;
-  }
-
-  return handle.setState(dp); // FIXME - should be retrieve?
-}
 
 //-------------------------------------------------------------------
 template <typename T, typename TKEY> 

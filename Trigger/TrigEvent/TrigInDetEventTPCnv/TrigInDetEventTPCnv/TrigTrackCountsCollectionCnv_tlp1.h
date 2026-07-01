@@ -18,14 +18,14 @@
 #ifndef  TRIGINDETEVENTTPCNV_TRIGTRACKCOUNTSCOLLECTION_CNV_TLP1_H
 #define  TRIGINDETEVENTTPCNV_TRIGTRACKCOUNTSCOLLECTION_CNV_TLP1_H
  
-#include "AthenaPoolCnvSvc/AthenaPoolTopLevelTPConverter.h"
+#include "TPTools/TopLevelTPConverter.h"
 #include "TrigInDetEventTPCnv/TrigTrackCountsCollection_tlp1.h"
  
 #include "TrigInDetEventTPCnv/TrigTrackCountsCollectionCnv_p1.h"   
 #include "TrigInDetEventTPCnv/TrigTrackCountsCnv_p1.h"
 #include "TrigInDetEventTPCnv/TrigTrackCountsCnv_p2.h"
  
-class TrigTrackCountsCollectionCnv_tlp1 : public AthenaPoolTopLevelTPConverter< TrigTrackCountsCollectionCnv_p1, TrigTrackCountsCollection_tlp1 >
+class TrigTrackCountsCollectionCnv_tlp1 : public TopLevelTPConverter< TrigTrackCountsCollectionCnv_p1, TrigTrackCountsCollection_tlp1 >
 {
  
  public:

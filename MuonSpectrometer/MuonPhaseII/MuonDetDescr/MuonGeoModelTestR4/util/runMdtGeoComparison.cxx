@@ -17,6 +17,8 @@
 #include <GaudiKernel/SystemOfUnits.h>
 #include <iostream>
 
+#include "Acts/Utilities/UnitVectors.hpp"
+#include "Acts/Definitions/Units.hpp"
 
 #include <PathResolver/PathResolver.h>
 #include <TFile.h>
@@ -24,6 +26,11 @@
 
 using namespace MuonGMR4;
 using namespace ActsTrk;
+
+Amg::Vector3D makeDir(const double theta, const double phi) {
+    using namespace Acts::UnitLiterals;
+    return Acts::makeDirectionFromPhiTheta(phi *1._degree, theta* 1._degree);
+}
 /// Helper struct to represent a full Mdt chamber
 struct MdtChamber{
     /// Default constructor
@@ -167,17 +174,14 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> tubeTransformTransY{treeReader, "tubeTransformTranslationY"};
     TTreeReaderValue<std::vector<float>> tubeTransformTransZ{treeReader, "tubeTransformTranslationZ"};
     
-    TTreeReaderValue<std::vector<float>> tubeTransformCol0X{treeReader, "tubeTransformLinearCol1X"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol0Y{treeReader, "tubeTransformLinearCol1Y"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol0Z{treeReader, "tubeTransformLinearCol1Z"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol0Theta{treeReader, "tubeTransformLinearCol0Theta"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol0Phi{treeReader, "tubeTransformLinearCol0Phi"};
+
+    TTreeReaderValue<std::vector<float>> tubeTransformCol1Theta{treeReader, "tubeTransformLinearCol1Theta"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol1Phi{treeReader, "tubeTransformLinearCol1Phi"};
  
-    TTreeReaderValue<std::vector<float>> tubeTransformCol1X{treeReader, "tubeTransformLinearCol2X"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol1Y{treeReader, "tubeTransformLinearCol2Y"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol1Z{treeReader, "tubeTransformLinearCol2Z"};
- 
-    TTreeReaderValue<std::vector<float>> tubeTransformCol2X{treeReader, "tubeTransformLinearCol3X"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol2Y{treeReader, "tubeTransformLinearCol3Y"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol2Z{treeReader, "tubeTransformLinearCol3Z"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol2Theta{treeReader, "tubeTransformLinearCol2Theta"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol2Phi{treeReader, "tubeTransformLinearCol2Phi"};
  
     TTreeReaderValue<std::vector<float>> readOutPosX{treeReader, "readOutPosX"};
     TTreeReaderValue<std::vector<float>> readOutPosY{treeReader, "readOutPosY"};
@@ -221,9 +225,9 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
             newTube.tubeLength = (*tubeLength)[t];
             newTube.wireLength = (*wireLength)[t];
             Amg::RotationMatrix3D tubeRot{Amg::RotationMatrix3D::Identity()};
-            tubeRot.col(0) = Amg::Vector3D((*tubeTransformCol0X)[t],(*tubeTransformCol0Y)[t], (*tubeTransformCol0Z)[t]);
-            tubeRot.col(1) = Amg::Vector3D((*tubeTransformCol1X)[t],(*tubeTransformCol1Y)[t], (*tubeTransformCol1Z)[t]);
-            tubeRot.col(2) = Amg::Vector3D((*tubeTransformCol2X)[t],(*tubeTransformCol2Y)[t], (*tubeTransformCol2Z)[t]);
+            tubeRot.col(0) = makeDir((*tubeTransformCol0Theta)[t], (*tubeTransformCol0Phi)[t]);
+            tubeRot.col(1) = makeDir((*tubeTransformCol1Theta)[t], (*tubeTransformCol1Phi)[t]);
+            tubeRot.col(2) = makeDir((*tubeTransformCol2Theta)[t], (*tubeTransformCol2Phi)[t]);
             Amg::Vector3D tubeTrans{(*tubeTransformTransX)[t],(*tubeTransformTransY)[t], (*tubeTransformTransZ)[t]};
             newTube.localToGlobal = Amg::getTransformFromRotTransl(std::move(tubeRot), std::move(tubeTrans));
             newTube.readoutPos = Amg::Vector3D{(*readOutPosX)[t],(*readOutPosY)[t],(*readOutPosZ)[t]};

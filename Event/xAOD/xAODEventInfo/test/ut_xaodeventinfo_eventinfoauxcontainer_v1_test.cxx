@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file xAODEventInfo/test/ut_xoadeventinfo_eventinfoauxcontainer_v1_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -17,6 +15,13 @@
 #include "TestTools/expect_exception.h"
 #include <cassert>
 #include <iostream>
+
+
+#ifndef XAOD_STANDALONE
+#include "GaudiKernel/EventContext.h"
+#else
+class EventContext{};
+#endif
 
 
 void test1()
@@ -61,12 +66,13 @@ void test1()
   assert (pix == eiac.getDecoration(pixid, 5, 5));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, eiac.getDecoration(sctid, 5, 5));
 
-  eiac.toTransient();
+  EventContext ctx;
+  eiac.toTransient( ctx );
   assert (trt == eiac.getDecoration(trtid, 5, 5));
   assert (lar == eiac.getDecoration(larid, 5, 5));
 
   lar[2] = 1;
-  eiac.toTransient();
+  eiac.toTransient( ctx );
   assert (trt == eiac.getDecoration(trtid, 5, 5));
   EXPECT_EXCEPTION (SG::ExcStoreLocked, eiac.getDecoration(larid, 5, 5));
 }

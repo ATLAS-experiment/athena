@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/JaggedVecVectorFactory.h
@@ -145,25 +145,6 @@ public:
   virtual void clear (SG::auxid_t auxid,
                       AuxVectorData& dst, size_t dst_index,
                       size_t n) const override;
-
-
-private:
-  /**
-   * @brief Copy elements between vectors.
-   * @param auxid The aux data item being operated on.
-   * @param dst Container for the destination vector.
-   * @param dst_index Index of the first destination element in the vector.
-   * @param src Container for the source vector.
-   * @param src_index Index of the first source element in the vector.
-   * @param n Number of elements to copy.
-   * @param for_output If true, apply thinning.
-   *
-   * @c dst and @ src can be either the same or different.
-   */
-  void copyImpl (SG::auxid_t auxid,
-                 AuxVectorData& dst,        size_t dst_index,
-                 const AuxVectorData& src,  size_t src_index,
-                 size_t n,                  bool for_output) const;
 };
 
 

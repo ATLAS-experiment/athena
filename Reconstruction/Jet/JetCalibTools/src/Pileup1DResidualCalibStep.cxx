@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgDataHandles/ReadDecorHandle.h"
@@ -66,7 +66,7 @@ StatusCode Pileup1DResidualCalibStep::initialize() {
   CHECK_THEN_ERROR(m_doNJetOnly && m_doNPVOnly, 
 		   "It was requested to apply NJet-based and NPV calibrations.");
 
-  if(m_doJetArea) ATH_MSG_INFO("Jet area pile up correction will be applied.");
+  if(m_doJetArea) ATH_MSG_DEBUG("Jet area pile up correction will be applied.");
 
 
   CHECK_THEN_ERROR( (m_mu_ref==-99 && !m_doNPVOnly && !m_doNJetOnly),
@@ -106,6 +106,8 @@ StatusCode Pileup1DResidualCalibStep::initialize() {
 
 StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) const {
 
+  ATH_MSG_DEBUG("Calibrating jet collection with 1D pile-up correction");
+
   SG::ReadDecorHandle<xAOD::EventInfo,float> eventInfoDecor(m_muKey);
   CHECK_THEN_ERROR( ! eventInfoDecor.isPresent() , "EventInfo decoration not available! "<< m_muKey.key() );
   double mu = eventInfoDecor(0) ;
@@ -116,7 +118,7 @@ StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) con
   double NPV = JetCalibUtils::countNPV(*PVCont);
 
   SG::ReadHandle<xAOD::EventShape> eventShape(m_rhoKey);
-  CHECK_THEN_ERROR( ! eventShape.isValid() , "Could not retrieve xAOD::EventShape DataHandle : "<< m_rhoKey.key());
+  CHECK_THEN_ERROR( ! eventShape.isValid() , "Could not retrieve xAOD::EventShape : "<< m_rhoKey.key());
   double rho=0;
   CHECK_THEN_ERROR( ! eventShape->getDensity(xAOD::EventShape::Density, rho ),
 		  "Could not retrieve xAOD::EventShape::Density from xAOD::EventShape "<< m_rhoKey.key() );
@@ -137,11 +139,9 @@ StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) con
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> areaAcc("ActiveArea4vec");  
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> outScaleMomAcc(m_jetOutScale);  
   const xAOD::JetAttributeAccessor::AccessorWrapper<xAOD::JetFourMom_t> startScaleMomAcc(m_jetInScale);  
-  SG::AuxElement::Accessor<int> puCorrectedAcc("PileupCorrected");
  
   for( xAOD::Jet * jet : jetCont){
 
-    
     xAOD::JetFourMom_t jetStartP4 = startScaleMomAcc.getAttribute(*jet);
     
     const double E_det = jetStartP4.e();
@@ -191,8 +191,6 @@ StatusCode Pileup1DResidualCalibStep::calibrate(xAOD::JetContainer& jetCont) con
       
     }
 
-    //Attribute to track if a jet has received the pileup subtraction (always true if this code was run)
-    puCorrectedAcc(*jet) = 1 ;    
     //Transfer calibrated jet properties to the Jet object
     outScaleMomAcc.setAttribute(*jet, calibP4 );
     jet->setJetP4( calibP4 );        

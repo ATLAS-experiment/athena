@@ -27,7 +27,7 @@ public:
   using GenFilter::GenFilter;
 
   virtual StatusCode filterInitialize() override final;
-  virtual StatusCode filterEvent() override final;
+  virtual StatusCode filterEvent(const EventContext& ctx) override final;
 
 private:
   // Setable Properties:-

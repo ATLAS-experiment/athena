@@ -1,0 +1,41 @@
+<?xml version = "1.0" encoding="UTF-8"?>
+<GlobalSimAlgConfig>
+  <desc>Set up GlobalSim with various test AlgTools</desc>
+  <!-- TOB Writers-->
+  <TOBWriters>
+    <AlgTool class="eFexCvtrAlgTool" name="eFexCvtrAlgTool"/>
+    <!-- <AlgTool class="EMB1CellsFromCaloCells" name="EMB1CellsFromCaloCells"/> -->
+    <AlgTool class="Egamma1BDTAlgTool" name="Egamma1BDTAlgTool"/>
+  </TOBWriters>
+  <!-- TIP Writers-->
+  <TIPWriters>
+    <AlgTool class="eEmMultAlgTool" name="eEmMultAlgTool_0">
+      <!-- rhad-->
+      <property name="rhad" value="0"/>
+      <property name="rhad_op" value="&lt;="/>
+      <!-- reta-->
+      <property name="reta" value="0"/>
+      <property name="reta_op" value="&lt;="/>
+      <!-- wstot-->
+      <property name="wstot" value="0"/>
+      <property name="wstot_op" value="&lt;="/>
+      <property name="TIPposition" value="0" type="int"/>
+      <property name="TIPwidth" value="3" type="int"/>
+      <child class="eFexCvtrAlgTool" name="eFexCvtrAlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="eEmMultAlgTool" name="eEmMultAlgTool_1">
+      <!-- rhad-->
+      <property name="rhad" value="0"/>
+      <property name="rhad_op" value="&lt;="/>
+      <!-- reta-->
+      <property name="reta" value="0"/>
+      <property name="reta_op" value="&lt;="/>
+      <!-- wstot-->
+      <property name="wstot" value="0"/>
+      <property name="wstot_op" value="&lt;="/>
+      <property name="TIPposition" value="5" type="int" />
+      <property name="TIPwidth" value="3" type="int" />
+      <child class="Egamma1BDTAlgTool" name="Egamma1BDTAlgTool" slot="in0"/>
+    </AlgTool>
+  </TIPWriters>
+</GlobalSimAlgConfig>

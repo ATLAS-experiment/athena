@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -19,7 +19,6 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
      
 // Athena-related includes
-#include "StoreGate/DataHandle.h"
 #include "GaudiKernel/MsgStream.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/IChronoStatSvc.h"
@@ -192,7 +191,7 @@ IdDictCnvTest::initialize()
 
 /////////////////////////////////////////////////////////////////////
 StatusCode 
-IdDictCnvTest::execute()
+IdDictCnvTest::execute(const EventContext& /*ctx*/)
 {
     return StatusCode::SUCCESS;
 }

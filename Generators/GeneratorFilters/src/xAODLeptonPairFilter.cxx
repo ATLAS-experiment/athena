@@ -33,7 +33,7 @@ StatusCode xAODLeptonPairFilter::filterInitialize() {
 }
 
 //---------------------------------------------------------------------------
-StatusCode xAODLeptonPairFilter::filterEvent() {
+StatusCode xAODLeptonPairFilter::filterEvent(const EventContext& ctx) {
 //---------------------------------------------------------------------------
 
   // Loop over all events in McEventCollection
@@ -44,7 +44,7 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Loop over all particles in the event 
@@ -164,7 +164,7 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
   }
 
   // if we get here we have failed
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   ATH_MSG_INFO("Fail"  );
   return StatusCode::SUCCESS;
 }

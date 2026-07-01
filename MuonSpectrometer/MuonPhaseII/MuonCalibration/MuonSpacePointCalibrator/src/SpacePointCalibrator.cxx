@@ -24,7 +24,6 @@
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 
-
 #include "Acts/Utilities/MathHelpers.hpp"
 #include "Acts/Utilities/Enumerate.hpp"
 
@@ -99,7 +98,7 @@ namespace MuonR4{
                                                        const double timeDelay) const {
         const ActsTrk::GeometryContext* gctx{nullptr};
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
-            return nullptr;
+            return CalibSpacePointPtr{};
         }
         const Amg::Vector3D& spPos{spacePoint->localPosition()};
         const Amg::Transform3D& locToGlob{spacePoint->msSector()->localToGlobalTransform(*gctx)};
@@ -114,7 +113,8 @@ namespace MuonR4{
         CalibSpacePointPtr calibSP{};
         ATH_MSG_VERBOSE("Calibrate "<<(*spacePoint) <<" -> updated pos "<<Amg::toString(calibSpPos));
         switch (spacePoint->type()) {
-            case xAOD::UncalibMeasType::MdtDriftCircleType: {
+           using enum xAOD::UncalibMeasType;
+           case MdtDriftCircleType: {
                 const Amg::Vector3D locClosestApproach = posInChamb 
                                                        + Amg::intersect<3>(spPos, chDir,
                                                                            posInChamb, dirInChamb).value_or(0) * dirInChamb;
@@ -188,7 +188,7 @@ namespace MuonR4{
                 }
                 break;
            }
-           case xAOD::UncalibMeasType::RpcStripType: {
+           case RpcStripType: {
                 auto* strip = static_cast<const xAOD::RpcMeasurement*>(spacePoint->primaryMeasurement());
 
                 /// Transform the space point into the local frame to calculate the propagation time towards the readout
@@ -196,8 +196,10 @@ namespace MuonR4{
                 const Amg::Vector3D lPos = toGasGap * calibSpPos;
                 using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
-        
-                cov[Acts::toUnderlying(AxisDefs::timeCov)] = Acts::square(ActsTrk::timeToActs(m_rpcTimeResolution));
+
+                // @TODO the constants could be converted to what is needed here (units, inverse) at initialization/construction time
+                //       in particular 1/m_rpcSignalVelocity
+                cov[Acts::toUnderlying(AxisDefs::timeCov)] = Acts::square(ActsTrk::timeToActs(m_rpcTimeResolution.value()));
 
                 const double time1 = strip->time() 
                                    - strip->readoutElement()->distanceToEdge(strip->layerHash(), lPos,
@@ -222,12 +224,22 @@ namespace MuonR4{
                                 <<", time Uncert: "<<ActsTrk::timeToAthena(std::sqrt(calibSP->covariance()[Acts::toUnderlying(AxisDefs::timeCov)])));
                 break;
            }
-           case xAOD::UncalibMeasType::TgcStripType: {
+           case TgcStripType: {
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
+                /// Update the covariance of the strip measurements along the strip
+                if (spacePoint->primaryMeasurement()->measuresPhi()) {
+                    const auto* strip = static_cast<const xAOD::TgcStrip*>(spacePoint->primaryMeasurement());
+                    const Amg::Transform3D toGasGap{strip->readoutElement()->globalToLocalTransform(*gctx, strip->layerHash()) * locToGlob};
+                    const Amg::Vector3D lPos = toGasGap * calibSP->localPosition();
+                    const auto& sensorPlane = strip->readoutElement()->sensorLayout(strip->layerHash());
+                    const auto& radialDesign = strip->readoutElement()->stripLayout(strip->layerHash());
+                    cov[Acts::toUnderlying(AxisDefs::phiCov)] = Acts::square(
+                        radialDesign.stripPitch(strip->channelNumber(), sensorPlane->to2D(lPos,true))) / 12.;
+                }
                 calibSP->setCovariance(cov);
                 break;
            }
-           case xAOD::UncalibMeasType::MMClusterType: {
+           case MMClusterType: {
                 const xAOD::MMCluster* cluster = static_cast<const xAOD::MMCluster*>(spacePoint->primaryMeasurement());
                 Amg::Vector3D globalPos{locToGlob * posInChamb};
                 Amg::Vector3D globalDir{locToGlob.linear() * dirInChamb};
@@ -251,7 +263,7 @@ namespace MuonR4{
                                 
                 break;
            }
-           case xAOD::UncalibMeasType::sTgcStripType: {
+           case sTgcStripType: {
                 const auto* cluster = static_cast<const xAOD::sTgcMeasurement*>(spacePoint->primaryMeasurement());
 
                 // We do not apply any correction for pads or wire only space points
@@ -392,97 +404,46 @@ namespace MuonR4{
                                                     const xAOD::CombinedMuonStrip* combinedPrd,
                                                     ActsTrk::MutableTrackContainer::TrackStateProxy state) const {
         const auto sl = ActsTrk::detail::xAODUncalibMeasCalibrator::pack(combinedPrd);
+
+        Amg::Vector2D cmbPos = xAOD::toEigen(combinedPrd->localPosition<2>());
+        AmgSymMatrix(2) cmbCov = xAOD::toEigen(combinedPrd->localCovariance<2>());
         if (combinedPrd->type() == xAOD::UncalibMeasType::RpcStripType) {
             if (m_useRpcTime) {
                 ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Implement me");
             }
-            Amg::Vector2D cmbPos{combinedPrd->primaryStrip()->localPosition<1>()[0],
-                                 combinedPrd->secondaryStrip()->localPosition<1>()[0]};
-            AmgSymMatrix(2) cmbCov{AmgSymMatrix(2)::Identity()};
-            cmbCov (0, 0) = combinedPrd->primaryStrip()->localCovariance<1>()(0,0);
-            cmbCov (1, 1) = combinedPrd->secondaryStrip()->localCovariance<1>()(0,0);
-            setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, cmbPos, cmbCov, sl, state);
-
-            
+            setState<2>(ProjectorType::e2DimNoTime, cmbPos, cmbCov, sl, state);
+     
         } else if (combinedPrd->type() == xAOD::UncalibMeasType::TgcStripType) {
             if (m_useTgcTime) {
                 ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Implement me");
             }
-            const auto* wireMeas = static_cast<const xAOD::TgcStrip*>(combinedPrd->primaryStrip());
-            const auto* stripMeas = static_cast<const xAOD::TgcStrip*>(combinedPrd->secondaryStrip());
-            
-            const auto& radialDesign = stripMeas->readoutElement()->stripLayout(stripMeas->layerHash());
-            const auto& wireDesign = wireMeas->readoutElement()->wireGangLayout(wireMeas->layerHash());            
-            
-            const double dirDots = radialDesign.stripDir(stripMeas->channelNumber()).dot(wireDesign.stripNormal());
-            /// Apply the stereo transform to the covariance
-            AmgSymMatrix(2) stereoTrf{AmgSymMatrix(2)::Identity()};
-            const double invDist = 1. / (1. - Acts::square(dirDots));
-            stereoTrf(0, 0) = stereoTrf(1, 1) = invDist;
-            stereoTrf(0, 1) = stereoTrf(1, 0) = -dirDots * invDist;
 
-            Amg::Vector2D cmbPos{wireMeas->localPosition<1>()[0],
-                                 stripMeas->localPosition<1>()[0]};
-            AmgSymMatrix(2) cmbCov{AmgSymMatrix(2)::Identity()};
-            cmbCov (0, 0) = wireMeas->localCovariance<1>()(0,0);
-            cmbCov (1, 1) = stripMeas->localCovariance<1>()(0,0);
-
-            setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, cmbPos, 
-                                                           stereoTrf*cmbCov*stereoTrf.transpose(), sl, state);
+            setState<2>(ProjectorType::e2DimNoTime, cmbPos, cmbCov, sl, state);
 
         } else if(combinedPrd->type() == xAOD::UncalibMeasType::sTgcStripType) {
             if (m_usesTgcTime) {
                 ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Implement me");
             }
-            Amg::Vector2D cmbPos {Amg::Vector2D::Zero()};
-            AmgSymMatrix(2) cmbCov{AmgSymMatrix(2)::Identity()};
-
             // combined sTGC Space points can be strip/wire, strip/pad or pad/wire combinations.
             const auto* primMeas = static_cast<const xAOD::sTgcMeasurement*>(combinedPrd->primaryStrip());
-            const auto* secMeas = static_cast<const xAOD::sTgcMeasurement*>(combinedPrd->secondaryStrip());
+
             if(primMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Strip) {
                 const auto* primStripMeas = static_cast<const xAOD::sTgcStripCluster*>(primMeas);
                 /** Construct bound track parameters to fetch the global track position */
                 const Acts::BoundTrackParameters trackPars{state.referenceSurface().getSharedPtr(), 
                                                            state.parameters(), state.covariance(), 
                                                            Acts::ParticleHypothesis::muon()};
-                std::pair<double, double> calibPosCov{calibratesTGC(ctx, gctx, *primStripMeas, cmbPos[1] , trackPars.position(gctx.context()), trackPars.direction())};
+                std::pair<double, double> calibPosCov{calibratesTGC(ctx, gctx, *primStripMeas, cmbPos[1] , 
+                                                                    trackPars.position(gctx.context()), 
+                                                                    trackPars.direction())};
                 cmbPos[0] = calibPosCov.first;
                 cmbCov(0,0) = calibPosCov.second;
-
-                if(secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire){
-                    cmbPos[1] = secMeas->localPosition<1>()[0];
-                    cmbCov(1,1) = secMeas->localCovariance<1>()(0,0);
-                } else if (secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad){
-                    cmbPos[1] = secMeas->localPosition<2>()[1];
-                    cmbCov(1,1) = secMeas->localCovariance<2>()(1,1);
-                } else {
-                    THROW_EXCEPTION("Unexpected secondary measurement type for combined sTGC space point "
-                                    <<m_idHelperSvc->toString(xAOD::identify(combinedPrd))
-                                    << "secondary measurement " << m_idHelperSvc->toString(xAOD::identify(secMeas)));
-                }
-            } else if (primMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                cmbPos[0] = primMeas->localPosition<2>()[0];
-                cmbCov(0,0) = primMeas->localCovariance<2>()(0,0);
-
-                if (secMeas->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire){
-                    cmbPos[1] = secMeas->localPosition<1>()[0];
-                    cmbCov(1,1) = secMeas->localCovariance<1>()(0,0);
-                } else {
-                    THROW_EXCEPTION("Unexpected secondary measurement type for combined sTGC space point "
-                                    << m_idHelperSvc->toString(xAOD::identify(combinedPrd)) 
-                                    << "secondary measurement " << m_idHelperSvc->toString(xAOD::identify(secMeas)));
-                }
-            } else {
-                THROW_EXCEPTION("Unexpected primary measurement type for combined sTGC space point "
-                                <<m_idHelperSvc->toString(xAOD::identify(combinedPrd)));
             }
-
-            setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, cmbPos, cmbCov, sl, state);
+            setState<2>(ProjectorType::e2DimNoTime, cmbPos, cmbCov, sl, state);
         
         } else {
             THROW_EXCEPTION("Undefined uncalibrated measurement "
-                            <<m_idHelperSvc->toString(xAOD::identify(combinedPrd)));
+                            <<m_idHelperSvc->toString(combinedPrd->identify()));
         }
     }
     void SpacePointCalibrator::calibrateSourceLink(const Acts::GeometryContext& geoctx,
@@ -538,7 +499,7 @@ namespace MuonR4{
                         pos[Acts::eBoundLoc0] = driftSign*calibOutput.driftRadius();
                         cov(Acts::eBoundLoc0, Acts::eBoundLoc0) = std::pow(calibOutput.driftRadiusUncert(), 2);
                     }
-                    setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, pos, cov, link, trackState);
+                    setState<1>(ProjectorType::e1DimNoTime, pos, cov, link, trackState);
                 } 
                 /** Twin tube case */
                 else {
@@ -563,7 +524,7 @@ namespace MuonR4{
                         locPos[Acts::eBoundLoc0] = driftSign*calibOutput.primaryDriftR();
                         locPos[Acts::eBoundLoc1] = calibOutput.locZ();
                     }
-                    setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, locPos, locCov, link, trackState);
+                    setState<2>(ProjectorType::e2DimNoTime, locPos, locCov, link, trackState);
                 }
                 break;
             } case RpcStripType: {
@@ -574,9 +535,8 @@ namespace MuonR4{
                     if (!m_useRpcTime) {
                         const auto proj = rpcClust->measuresPhi() ? ProjectorType::e1DimRotNoTime
                                                                   : ProjectorType::e1DimNoTime;
-                        setState<1, ActsTrk::MutableTrackStateBackend>(proj, 
-                                                                       rpcClust->localPosition<1>(), 
-                                                                       rpcClust->localCovariance<1>(), link, trackState);
+                        setState<1>(proj,  rpcClust->localPosition<1>(), 
+                                    rpcClust->localCovariance<1>(), link, trackState);
                     } else {
                         AmgVector(2) measPars{AmgVector(2)::Zero()};
                         AmgSymMatrix(2) measCov{AmgSymMatrix(2)::Identity()};
@@ -586,16 +546,15 @@ namespace MuonR4{
                         measCov(1,1) = std::pow(m_rpcTimeResolution, 2);
                         const auto proj = rpcClust->measuresPhi() ? ProjectorType::e1DimRotWithTime
                                                                   : ProjectorType::e1DimWithTime;
-                        setState<2, ActsTrk::MutableTrackStateBackend>(proj, 
-                                                                       measPars, measCov, link, trackState);
+                        setState<2>(proj, measPars, measCov, link, trackState);
                     }
                 } 
                 /** BI clusters */
                 else {
                     if (!m_useRpcTime) {
-                        setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, 
-                                                                       rpcClust->localPosition<2>(), 
-                                                                       rpcClust->localCovariance<2>(), link, trackState);
+                        setState<2>(ProjectorType::e2DimNoTime, 
+                                    rpcClust->localPosition<2>(), 
+                                    rpcClust->localCovariance<2>(), link, trackState);
                     } else {
                         AmgVector(3) measPars{AmgVector(3)::Zero()};
                         AmgSymMatrix(3) measCov{AmgSymMatrix(3)::Identity()};
@@ -603,19 +562,24 @@ namespace MuonR4{
                         measCov.block<2,2>(0,0) = xAOD::toEigen(rpcClust->localCovariance<2>());
                         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"Please fix me using the ActsInterops package");
                         measCov(2,2) = std::pow(m_rpcTimeResolution, 2);
-                        setState<3, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimWithTime, 
-                                                                       measPars, measCov, link, trackState);
+                        setState<3>(ProjectorType::e2DimWithTime, measPars, measCov, link, trackState);
                     }
                 }
                 break;
             } case TgcStripType: {
                 const auto* tgcClust = static_cast<const xAOD::TgcStrip*>(muonMeas);
                 if (!m_useTgcTime) {
-                    const auto proj = tgcClust->measuresPhi() ? ProjectorType::e1DimRotNoTime
-                                                              : ProjectorType::e1DimNoTime;
-                    setState<1, ActsTrk::MutableTrackStateBackend>(proj, 
-                                                                   tgcClust->localPosition<1>(), 
-                                                                   tgcClust->localCovariance<1>(), link, trackState);
+                    if (!tgcClust->measuresPhi()) {
+                        setState<1>(ProjectorType::e1DimNoTime, 
+                                    tgcClust->localPosition<1>(), 
+                                    tgcClust->localCovariance<1>(), 
+                                    link, trackState);
+
+                    } else {
+                        const auto [pos, cov] = xAOD::positionAndCovariance(tgcClust);
+                        setState<2>(ProjectorType::e1DimRotNoTime, pos, cov, link, trackState);
+
+                    }
                     } else {
                         ATH_MSG_WARNING("Tgc time calibration to be implemented...");
                     }
@@ -627,28 +591,26 @@ namespace MuonR4{
                 AmgVector(1) pos{AmgVector(1)(calibPosCov.first)};
                 AmgSymMatrix(1) cov{AmgSymMatrix(1)(calibPosCov.second)};
 
-                setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
-                                                               pos, cov, link, trackState);
+                setState<1>(ProjectorType::e1DimNoTime, pos, cov, link, trackState);
                 break;
             } case sTgcStripType: {
                 const auto* stgcClust = static_cast<const xAOD::sTgcMeasurement*>(muonMeas);
 
                 if(stgcClust->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
-                        setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
-                                                                       muonMeas->localPosition<1>(), 
-                                                                       muonMeas->localCovariance<1>(), link, trackState);
+                        setState<1>(ProjectorType::e1DimNoTime, 
+                                    muonMeas->localPosition<1>(), 
+                                    muonMeas->localCovariance<1>(), link, trackState);
                 } else if (stgcClust->channelType() == sTgcIdHelper::sTgcChannelTypes::Pad) {
-                        setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e2DimNoTime, 
-                                                                       stgcClust->localPosition<2>(), 
-                                                                       stgcClust->localCovariance<2>(), link, trackState);
+                        setState<2>(ProjectorType::e2DimNoTime, 
+                                    stgcClust->localPosition<2>(), 
+                                    stgcClust->localCovariance<2>(), link, trackState);
                 } else { // strips
                     const auto stgCluster = static_cast<const xAOD::sTgcStripCluster*>(muonMeas);
                     std::pair<double, double> calibPosCov{calibratesTGC(*ctx, *gctx, *stgCluster, std::nullopt, trackPos, trackDir)};
                     if(!m_usesTgcTime) {
                         AmgVector(1) pos{calibPosCov.first};
                         AmgSymMatrix(1) cov{calibPosCov.second};
-                        setState<1, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimNoTime, 
-                                                                       pos, cov, link, trackState);
+                        setState<1>(ProjectorType::e1DimNoTime, pos, cov, link, trackState);
                     } else {
                         ATH_MSG_WARNING("sTGC time calibration to be implemented...");
                         AmgVector(2) pos{AmgVector(2)::Zero()};
@@ -659,10 +621,13 @@ namespace MuonR4{
                         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"Please fix me using the ActsInterops package");
                         cov(1,1) = std::pow(25 /*ns*/, 2);
 
-                        setState<2, ActsTrk::MutableTrackStateBackend>(ProjectorType::e1DimWithTime, 
-                                                                       pos, cov, link, trackState);
+                        setState<2>(ProjectorType::e1DimWithTime, pos, cov, link, trackState);
                     }
                 }
+                break;
+            } case Other: {
+                ActsTrk::detail::xAODUncalibMeasCalibrator auxCalibrator{};
+                auxCalibrator.calibrate(geoctx, cctx, link, trackState);
                 break;
             } default: {
                 THROW_EXCEPTION("The parsed measurement is not a muon measurement. Please check.");

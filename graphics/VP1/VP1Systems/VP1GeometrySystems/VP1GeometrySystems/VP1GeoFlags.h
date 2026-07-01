@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -65,10 +65,10 @@ public:
     MuonEndcapStationNSW    = 0x01000000, // 24
     ForwardRegion           = 0x02000000, // 25
     AFP                     = 0x04000000, // 26
-    // free                 = 0x08000000, // 27
+    ITkPixel                = 0x08000000, // 27
     
-    // free                 = 0x10000000, // 28
-    // free                 = 0x20000000, // 29
+    ITkStrip                = 0x10000000, // 28
+    HGTD                 = 0x20000000, // 29
     // free                 = 0x40000000, // 30
     AllUnrecognisedVolumes  = 0x80000000  // bit 31
   };

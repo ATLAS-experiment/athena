@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -42,7 +42,7 @@ StatusCode jFEXDriver::finalize()
 }
 
 
-StatusCode jFEXDriver::execute() {
+StatusCode jFEXDriver::execute(const EventContext& ctx) {
     
     
     // STEP 1 - Set up the jFEXSysSim
@@ -53,14 +53,14 @@ StatusCode jFEXDriver::execute() {
     my_jFEXOutputCollection->setdooutput(true);  
     
     // STEP 3 - Run the jFEXSysSim
-    ATH_CHECK(m_jFEXSysSimTool->execute(my_jFEXOutputCollection));      
+    ATH_CHECK(m_jFEXSysSimTool->execute(ctx, my_jFEXOutputCollection));
     
     // STEP 4 - Close and clean the event  
     m_jFEXSysSimTool->cleanup();
     
     // STEP 5 - Write the completed jFEXOutputCollection into StoreGate (move the local copy in memory)
     std::unique_ptr<jFEXOutputCollection> local_jFEXOutputCollection = std::unique_ptr<jFEXOutputCollection>(my_jFEXOutputCollection);
-    SG::WriteHandle<LVL1::jFEXOutputCollection> jFEXOutputCollectionSG(m_jFEXOutputCollectionSGKey);
+    SG::WriteHandle<LVL1::jFEXOutputCollection> jFEXOutputCollectionSG(m_jFEXOutputCollectionSGKey, ctx);
     ATH_CHECK(jFEXOutputCollectionSG.record(std::move(local_jFEXOutputCollection)));
     
     return StatusCode::SUCCESS;

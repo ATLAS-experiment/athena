@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FLAVORTAGINFERENCE_ISALTMODEL_H
@@ -19,6 +19,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <cstdint>
 
 namespace FlavorTagInference {
 
@@ -33,6 +34,7 @@ namespace FlavorTagInference {
 
   // Inputs: the first element is the input data, the second is the shape
   using Inputs = std::pair<std::vector<float>, std::vector<int64_t>>;
+  using InputMap = std::map<std::string, Inputs, std::less<>>;
   using OutputConfig = std::vector<SaltModelOutput>;
 
   struct InferenceOutput {
@@ -44,7 +46,7 @@ namespace FlavorTagInference {
   class ISaltModel
   {
   public:
-    virtual InferenceOutput runInference(std::map<std::string, Inputs>& gnn_inputs) const =0;
+    virtual InferenceOutput runInference(InputMap& gnn_inputs) const =0;
     virtual const SaltModelGraphConfig::GraphConfig getGraphConfig() const = 0;
     virtual const OutputConfig& getOutputConfig() const = 0;
     virtual SaltModelVersion getSaltModelVersion() const = 0;

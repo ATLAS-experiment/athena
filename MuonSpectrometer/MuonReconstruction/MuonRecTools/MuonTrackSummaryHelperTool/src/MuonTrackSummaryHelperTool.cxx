@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSummaryHelperTool.h"
@@ -40,7 +40,7 @@ StatusCode Muon::MuonTrackSummaryHelperTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-void Muon::MuonTrackSummaryHelperTool::analyse(const Trk::Track& /**trk*/, const Trk::RIO_OnTrack* rot,
+void Muon::MuonTrackSummaryHelperTool::analyse(const EventContext& /**ctx*/, const Trk::Track& /**trk*/, const Trk::RIO_OnTrack* rot,
                                                const Trk::TrackStateOnSurface* tsos, std::vector<int>& information,
                                                std::bitset<Trk::numberOfDetectorTypes>& /**hitPattern*/) const {
     using namespace Trk;
@@ -82,7 +82,7 @@ void Muon::MuonTrackSummaryHelperTool::analyse(const Trk::Track& /**trk*/, const
     }
     }
 
-void Muon::MuonTrackSummaryHelperTool::analyse(const Trk::Track& trk, const Trk::CompetingRIOsOnTrack* crot,
+void Muon::MuonTrackSummaryHelperTool::analyse(const EventContext& ctx, const Trk::Track& trk, const Trk::CompetingRIOsOnTrack* crot,
                                                const Trk::TrackStateOnSurface* tsos, std::vector<int>& information,
                                                std::bitset<Trk::numberOfDetectorTypes>& hitPattern) const {
     // For competing ROTs we *only* count hits that are on different layers.
@@ -95,7 +95,7 @@ void Muon::MuonTrackSummaryHelperTool::analyse(const Trk::Track& trk, const Trk:
         if (pr.second) {
             // layer not seen before
             ATH_MSG_DEBUG("Have found hit on new layer. # of layers for this cROT currently=" << layIds.size());
-            analyse(trk, rot, tsos, information, hitPattern);
+            analyse(ctx, trk, rot, tsos, information, hitPattern);
         }
     }
 }
@@ -112,12 +112,12 @@ void Muon::MuonTrackSummaryHelperTool::searchForHoles(const Trk::Track& /**track
     ATH_MSG_WARNING("searchForHoles is not implemented in MuonTrackSummaryHelperTool");
 }
 
-void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const Trk::Track& track,  Trk::TrackSummary& summary) const {
+void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const EventContext& ctx, const Trk::Track& track,  Trk::TrackSummary& summary) const {
     if (summary.m_muonTrackSummary) {
         ATH_MSG_DEBUG("TrackSummary already has detailed muon track summary, not adding a new one");
         return;
     }
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey, ctx};
     const MuonGM::MuonDetectorManager* MuonDetMgr{*DetectorManagerHandle};
     if (MuonDetMgr == nullptr) {
@@ -288,11 +288,9 @@ void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const Trk::Track&
                 id = crot->containedROTs().front()->identify();
 
                 // count layers in competing rot
-                std::vector<const Muon::MuonClusterOnTrack*>::const_iterator cl_it = crot->containedROTs().begin();
-                std::vector<const Muon::MuonClusterOnTrack*>::const_iterator cl_it_end = crot->containedROTs().end();
-                for (; cl_it != cl_it_end; ++cl_it) {
+                for (const auto& cl_it : crot->containedROTs()) {
                     // get layer Identifier and insert it into set
-                    Identifier layId = m_idHelperSvc->layerId((*cl_it)->identify());
+                    Identifier layId = m_idHelperSvc->layerId(cl_it->identify());
                     layIds.insert(layId);
                     if (m_idHelperSvc->isCsc(id)) {
                         const Muon::CscClusterOnTrack* cscClus = dynamic_cast<const Muon::CscClusterOnTrack*>(rot);

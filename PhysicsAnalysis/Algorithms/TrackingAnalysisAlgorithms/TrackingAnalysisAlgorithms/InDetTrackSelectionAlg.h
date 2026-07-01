@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Daniel Werner
@@ -10,6 +10,8 @@
 #define TRACKING_ANALYSIS_ALGORITHMS__INDET_TRACK_SELECTION_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgDataHandles/ReadHandleKey.h>
+#include <AsgDataHandles/ReadHandle.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <InDetTrackSelectionTool/IInDetTrackSelectionTool.h>
 #include <InDetTrackSystematicsTools/IInDetTrackTruthFilterTool.h>
@@ -19,6 +21,7 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODTracking/TrackParticleContainer.h>
+#include <xAODTracking/VertexContainer.h>
 
 namespace CP
 {
@@ -30,49 +33,44 @@ namespace CP
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) override;
 
 
 
-    /// \brief the smearing tool
   private:
+    /// \brief the smearing tool
     ToolHandle<InDet::IInDetTrackSelectionTool> m_selectionTool {this, "selectionTool", "", "the selection tool we apply"};
 
     /// \brief the filter tool
-  private:
     ToolHandle<InDet::IInDetTrackTruthFilterTool> m_filterTool {this, "filterTool", "", "the truth filter tool we apply"};
 
     /// \brief the systematics list we run
-  private:
     SysListHandle m_systematicsList {this};
 
     /// \brief the track collection we run on
-  private:
     SysReadHandle<xAOD::TrackParticleContainer> m_tracksHandle {
       this, "inDetTracks", "", "the track collection to run on"};
 
+    /// \brief the vertex collection to use for the selection (optional)
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey{
+      this, "vertices", "", "the vertex container to use"};
+
     /// \brief the preselection we apply to our input
-  private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
     /// \brief the decoration for the asg selection
-  private:
     SysWriteSelectionHandle m_selectionHandle {
       this, "selectionDecoration", "", "the decoration for the asg selection"};
 
     /// \brief the ISelectionNameSvc
-  private:
     ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "InDetTrackSelectionAlg"};
 
     /// \brief the bits to set for an object failing the preselection
-  private:
-    SelectionType m_setOnFail;
+    SelectionType m_setOnFail{};
 
-  private:
     asg::AcceptInfo m_acceptInfo;
 
-  private:
     Gaudi::Property<std::string> m_filterWP{this, "filterWP", ""};
   };
 }

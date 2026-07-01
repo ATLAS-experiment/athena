@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -16,13 +16,11 @@ namespace LVL1 {
 Interface definition for gFEXSysSim
 */
 
-  static const InterfaceID IID_IgFEXSysSim("LVL1::IgFEXSysSim", 1, 0);
-
   class IgFEXSysSim : virtual public IAlgTool {
   public:
-    static const InterfaceID& interfaceID( ) ;
+    DeclareInterfaceID(IgFEXSysSim, 1, 0);
 
-    virtual StatusCode execute(gFEXOutputCollection* gFEXOutputs) = 0;
+    virtual StatusCode execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs) = 0;
 
     virtual void cleanup() = 0;
 
@@ -54,11 +52,6 @@ Interface definition for gFEXSysSim
   private:
 
   };
-
-  inline const InterfaceID& LVL1::IgFEXSysSim::interfaceID()
-  {
-    return IID_IgFEXSysSim;
-  }
 
 } // end of namespace
 

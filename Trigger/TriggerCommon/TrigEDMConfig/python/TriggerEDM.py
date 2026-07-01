@@ -34,7 +34,7 @@ from TrigEDMConfig import DataScoutingInfo
 AllowedOutputFormats.extend(DataScoutingInfo.getAllDataScoutingIdentifiers())
 
 _allowedEDMPrefixes = ['HLT_', 'L1_', 'LVL1']
-def recordable( arg, runVersion=3 ):
+def recordable(arg):
     """
     Verify that the name is in the list of recorded objects and conform to the name convention
 
@@ -62,13 +62,13 @@ def recordable( arg, runVersion=3 ):
         if "Aux" in name and not name[-1] != ".":
             raise RuntimeError( f"The collection name {name} is Aux but the name does not end with the '.'" )
 
-    if runVersion >= 3:
-        for entry in TriggerHLTListRun3:
-            if entry[0].split( "#" )[1] == name:
-                return arg
-        msg = "The collection name {0} is not declared to be stored by HLT. Add it to TriggerEDMRun3.py".format( name )
-        log.error("ERROR in recordable() - see following stack trace.")
-        raise RuntimeError( msg )
+    #TODO Remove TriggerHLTListRun3 once full Trigger EDM Run 4 list defined.
+    for entry in TriggerHLTListRun3 + TriggerHLTListRun4:
+        if entry[0].split( "#" )[1] == name:
+            return arg
+    msg = "The collection name {0} is not declared to be stored by HLT. Add it to TriggerEDMRun4.py".format( name )
+    log.error("ERROR in recordable() - see following stack trace.")
+    raise RuntimeError( msg )
 
 def _addExtraCollectionsToEDMList(edmList, extraList):
     """
@@ -154,8 +154,6 @@ def getRawTriggerEDMList(flags, runVersion=-1):
         lenPostMerge = len(edm4ListCopy)
         edmListCopy = edm4ListCopy
         log.info(f"Added TriggerHLTListRun4 to TriggerHLTListRun3. EDM entries {lenPreMerge} -> {lenPostMerge}")
-        if testEDMList(edmListCopy, error_on_edmdetails=False):
-            log.error("edmList contains inconsistencies!")
     else:
         errMsg="ERROR the getRawTriggerEDMList function supports runs 3 and 4."
         log.error(errMsg)

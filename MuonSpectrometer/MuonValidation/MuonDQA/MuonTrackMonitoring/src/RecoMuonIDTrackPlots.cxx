@@ -26,11 +26,8 @@ void RecoMuonIDTrackPlots::initializePlots(){
 //get's the corresponding link and fill it
 void RecoMuonIDTrackPlots::fill(const xAOD::Muon& mu, int component){
   if (component == 2 ){
-    const ElementLink<xAOD::TrackParticleContainer>& Mu_idtrack = mu.inDetTrackParticleLink();
-    if(Mu_idtrack.isValid()){
-      const xAOD::TrackParticle* trk = *Mu_idtrack;
-      fill(*trk);
-    }
+    const xAOD::TrackParticle* trk = mu.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);;
+    fill(*trk);
   } 
 }
 

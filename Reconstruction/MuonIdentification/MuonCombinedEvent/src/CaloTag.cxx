@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedEvent/CaloTag.h"
@@ -8,48 +8,21 @@ namespace MuonCombined {
 
     /** constructors */
     CaloTag::CaloTag(void) :
-        TagBase(xAOD::Muon::CaloTag, xAOD::Muon::CaloTagged),
-        Trk::EnergyLoss(0, 0, 0, 0),
-        m_caloLRLikelihood(0),
-        m_caloMuonScore(0),
-        m_caloMuonIdTag(0),
-        m_fsrCandidateEnergy(0),
-        m_deposits(),
-        m_etCore(0.0),
-        m_author2(xAOD::Muon::unknown),
-        m_author3(xAOD::Muon::unknown) {
-        m_energyLossType = static_cast<CaloTag::EnergyLossType>(0);
-    }
+        TagBase(xAOD::Muon::Author::CaloTag, xAOD::Muon::MuonType::CaloTagged),
+        Trk::EnergyLoss(0, 0, 0, 0) {}
 
     CaloTag::CaloTag(const Trk::EnergyLoss& eloss) :
-        TagBase(xAOD::Muon::CaloTag, xAOD::Muon::CaloTagged),
-        Trk::EnergyLoss(eloss),
-        m_energyLossType (static_cast<CaloTag::EnergyLossType>(0)),
-        m_caloLRLikelihood(0),
-        m_caloMuonScore(0),
-        m_caloMuonIdTag(0),
-        m_fsrCandidateEnergy(0),
-        m_deposits(),
-        m_etCore(0.0),
-        m_author2(xAOD::Muon::unknown),
-        m_author3(xAOD::Muon::unknown)
-    {
-    }
+        TagBase(xAOD::Muon::Author::CaloTag, xAOD::Muon::MuonType::CaloTagged),
+        Trk::EnergyLoss(eloss) {}
 
     CaloTag::CaloTag(xAOD::Muon::Author author, float deltaE, float sigmaDeltaE, float sigmaMinusDeltaE, float sigmaPlusDeltaE,
                      unsigned short energyLossType, float likelihood, float muonScore, unsigned short tag) :
-        TagBase(author, xAOD::Muon::CaloTagged),
+        TagBase(author, xAOD::Muon::MuonType::CaloTagged),
         Trk::EnergyLoss(deltaE, sigmaDeltaE, sigmaMinusDeltaE, sigmaPlusDeltaE),
         m_energyLossType (static_cast<CaloTag::EnergyLossType>(energyLossType)),
         m_caloLRLikelihood(likelihood),
         m_caloMuonScore(muonScore),
-        m_caloMuonIdTag(tag),
-        m_fsrCandidateEnergy (0.0),
-        m_deposits(),
-        m_etCore(0.0),
-        m_author2(xAOD::Muon::unknown),
-        m_author3(xAOD::Muon::unknown)
-    {
+        m_caloMuonIdTag(tag) {
     }
 
     CaloTag::CaloTag(xAOD::Muon::Author author, float deltaE, float sigmaDeltaE, float sigmaMinusDeltaE, float sigmaPlusDeltaE,
@@ -57,19 +30,13 @@ namespace MuonCombined {
                      const std::vector<DepositInCalo>& deposits)
 
         :
-        TagBase(author, xAOD::Muon::CaloTagged),
+        TagBase(author, xAOD::Muon::MuonType::CaloTagged),
         Trk::EnergyLoss(deltaE, sigmaDeltaE, sigmaMinusDeltaE, sigmaPlusDeltaE),
         m_energyLossType (static_cast<CaloTag::EnergyLossType>(energyLossType)),
         m_caloLRLikelihood(likelihood),
         m_caloMuonScore(muonScore),
         m_caloMuonIdTag(tag),
-        m_fsrCandidateEnergy (0.0),
-        m_deposits (deposits),
-        m_etCore(0.0),
-        m_author2(xAOD::Muon::unknown),
-        m_author3(xAOD::Muon::unknown)
-    {
-    }
+        m_deposits (deposits) {}
 
     CaloTag::~CaloTag() = default;
 

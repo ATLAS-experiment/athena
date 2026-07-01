@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef IPFCLUSTERCOLLECTIONTOOL_H
-#define IPFCLUSTERCOLLECTIONTOOL_H
+#ifndef EFLOWREC_IPFCLUSTERCOLLECTIONTOOL_H
+#define EFLOWREC_IPFCLUSTERCOLLECTIONTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
@@ -15,8 +15,8 @@ class IPFClusterCollectionTool : virtual public IAlgTool {
 
   public:
    /** Put all clusters into a temporary container - then we use this to calculate moments, some of which depend on configuration of nearby clusters */
-  virtual std::unique_ptr<xAOD::CaloClusterContainer> execute(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) = 0;
-  virtual std::unique_ptr<eflowRecClusterContainer> retrieve(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) = 0;
+  virtual std::unique_ptr<xAOD::CaloClusterContainer> execute(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) const = 0;
+  virtual std::unique_ptr<eflowRecClusterContainer> retrieve(eflowCaloObjectContainer& theEflowCaloObjectContainer, bool useNonModifiedClusters) const = 0;
 
   DeclareInterfaceID(IPFClusterCollectionTool,1,0);
   

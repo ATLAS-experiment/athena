@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_EVENTINFOBYTESTREAMAUXCNV_H
@@ -10,18 +10,24 @@
  *
  * @class EventInfoByteStreamAuxCnv
  *
- * @brief This is the class definition of ByteStream converter for xAOD::EventInfoAux
- * Event Info is built from RawEvent when reading. Nothing is done when writing ByteStream
+ * @brief ByteStream converter for xAOD::EventAuxInfo
  *
- */ 
+ * Reading: EventInfo is built from the RawEvent header. For MC ByteStream files,
+ * MC-specific fields are decoded from a dedicated ROB fragment via MCEventInfoByteStreamTool.
+ *
+ * Writing: For MC files, MC-specific EventInfo fields are encoded to a dedicated
+ * ROB fragment via MCEventInfoByteStreamTool.
+ */
 
 #include "GaudiKernel/Converter.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthMessaging.h"
 
 class ByteStreamCnvSvcBase;
 class IROBDataProviderSvc;
 class StoreGateSvc;
+class IMCEventInfoByteStreamTool;
 
 // Abstract factory to create the converter
 template <class TYPE> class CnvFactory;
@@ -43,13 +49,14 @@ class EventInfoByteStreamAuxCnv : public Converter, public AthMessaging
   /// Storage type and class ID
   virtual long repSvcType() const override { return i_repSvcType(); }
   static long storageType();
-  static const CLID& classID();
+  static CLID classID();
 
  private:
   std::string ascTime(unsigned int t);    //!< convert timestamp to ascii time.
   ServiceHandle<IROBDataProviderSvc> m_robDataProvider; //!< RODDataProviderSvc handle
   ServiceHandle<StoreGateSvc> m_mdSvc;                  //!< TDS handle
-  
+  ToolHandle<IMCEventInfoByteStreamTool> m_mcEventInfoTool{"MCEventInfoByteStreamTool"}; //!< Tool for decoding MC EventInfo from ROB
+
   // flags for EventType
   bool m_isSimulation;
   bool m_isTestbeam;

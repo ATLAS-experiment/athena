@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1THREXTRAINFO_H
@@ -9,8 +9,10 @@
 #include "TrigConfData/L1ThresholdBase.h"
 
 #include <map>
+#include <string>
+#include <string_view>
 #include <vector>
-#include <iostream>
+#include <stdexcept>
 
 namespace TrigConf {
 
@@ -84,13 +86,13 @@ namespace TrigConf {
       float ptMinToTopo() const { return m_ptMinToTopoMeV/1000.0f; }
       unsigned int ptMinToTopoMeV() const { return m_ptMinToTopoMeV; }
       unsigned int ptMinToTopoCounts() const { return energyInCounts( m_ptMinToTopoMeV, resolutionMeV() ); }
-      const IsolationLegacy & isolation(const std::string & thrType, size_t bit) const;
+      const IsolationLegacy & isolation(std::string_view thrType, size_t bit) const;
    private:
       /** Update the internal members */
       void load();
       /** EM specific data */
       unsigned int m_ptMinToTopoMeV{0}; // in MeV
-      std::map<std::string,std::vector<IsolationLegacy>> m_isolation{};
+      std::map<std::string,std::vector<IsolationLegacy>, std::less<>> m_isolation{};
    };
 
 
@@ -620,6 +622,14 @@ namespace TrigConf {
           if(fpga=='C' && param=='c') return m_XEJWOJ_c_C;
           throw std::runtime_error(std::string("L1ThrExtraInfo: ") + fpga + " and " + param  + " not recongnised for gXE JWOJ_param");
       }
+
+      unsigned int noiseCutThr(const char fpga) const {
+          if(fpga=='A') return m_noiseCutThrA;
+          if(fpga=='B') return m_noiseCutThrB;
+          if(fpga=='C') return m_noiseCutThrC;
+          throw std::runtime_error(std::string("L1ThrExtraInfo: FPGA ") + fpga + " not recongnised for gXE noiseCutThr");
+      }
+
    private:
       /** Update the internal members */
       void load();
@@ -642,6 +652,9 @@ namespace TrigConf {
       unsigned int m_XEJWOJ_c_A{0};
       unsigned int m_XEJWOJ_c_B{0};
       unsigned int m_XEJWOJ_c_C{0};
+      unsigned int m_noiseCutThrA{0};
+      unsigned int m_noiseCutThrB{0};
+      unsigned int m_noiseCutThrC{0};
    };
 
    class L1ThrExtraInfo_gTE final : public L1ThrExtraInfoBase {

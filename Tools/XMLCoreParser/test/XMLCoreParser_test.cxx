@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,7 +18,6 @@
 #include "XMLCoreParser/XMLCoreParser.h"
 
 #include "PathResolver/PathResolver.h"
-#include "src/DOMNode.h"
 #include <string>
 namespace utf = boost::unit_test;
 
@@ -33,28 +32,23 @@ BOOST_AUTO_TEST_SUITE(XMLCoreParserTest)
     const std::string fName= "XMLCoreParser/WellFormed.xml";
     std::string file = PathResolver::find_file (fName, "DATAPATH");
     BOOST_TEST_MESSAGE("Filename: "+ file);
-    BOOST_CHECK_NO_THROW( [[maybe_unused]] XMLCoreNode n = p.parse(file));
-    XMLCoreNode n{p.parse(file)};
-    const auto & m = n.get_node();
-    BOOST_TEST(m.get_type() ==  CoreParser::DOMNode::NodeType::DOCUMENT_NODE);
+    std::unique_ptr<XMLCoreNode> n;
+    BOOST_CHECK_NO_THROW( n = p.parse(file));
+    BOOST_TEST(n->get_type() ==  XMLCoreNode::DOCUMENT_NODE);
   }
   
-  BOOST_AUTO_TEST_CASE(XMLCoreParserErrorCondition, *utf::expected_failures(1)){
+  BOOST_AUTO_TEST_CASE(XMLCoreParserErrorCondition){
     XMLCoreParser s;
     const std::string noFile= "Inexistent.xml";
-    BOOST_CHECK_THROW( [[maybe_unused]] XMLCoreNode n = s.parse(noFile), std::runtime_error);
+    BOOST_CHECK_THROW( [[maybe_unused]] std::unique_ptr<XMLCoreNode> n = s.parse(noFile), std::runtime_error);
     //
     XMLCoreParser p;
     const std::string fName= "XMLCoreParser/IllFormed.xml";
     std::string file = PathResolver::find_file (fName, "DATAPATH");
     BOOST_TEST_MESSAGE("Filename: "+ file);
-    BOOST_CHECK_THROW( [[maybe_unused]] XMLCoreNode n = p.parse(file), std::runtime_error);
-    //the following should not work, as the xml file is ill-formed
-    //but expat is a *stream* parser, so might not fail until it explicitly tries
-    //to parse the ill-formed element
-    XMLCoreNode n{p.parse(file)};
-    const auto & m = n.get_node();
-    BOOST_TEST(m.get_type() ==  CoreParser::DOMNode::NodeType::DOCUMENT_NODE);
+    std::unique_ptr<XMLCoreNode> n;
+    BOOST_CHECK_THROW( n = p.parse(file), std::runtime_error);
+    BOOST_TEST( n == nullptr);
   }
   
   

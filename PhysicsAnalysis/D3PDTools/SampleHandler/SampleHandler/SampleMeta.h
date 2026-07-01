@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+/// @author Nils Krumnack
 
 #ifndef SAMPLE_HANDLER__SAMPLE_META_H
 #define SAMPLE_HANDLER__SAMPLE_META_H
-
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
-
 
 #include <SampleHandler/Global.h>
 
@@ -27,7 +19,7 @@ namespace SH
   /// SampleHandler with just Meta-Information and then pull the data
   /// for the samples you are actually using into your local sample
   /// via SampleHandler::fetchDefaults().
-  class SampleMeta : public Sample
+  class SampleMeta final : public Sample
   {
     //
     // public interface
@@ -70,19 +62,19 @@ namespace SH
 
     /// \copydoc Sample::getNumFiles
   private:
-    virtual std::size_t getNumFiles () const;
+    virtual std::size_t getNumFiles () const override;
 
     /// \copydoc Sample::getFileName
   private:
-    virtual std::string getFileName (std::size_t index) const;
+    virtual std::string getFileName (std::size_t index) const override;
 
     /// \copydoc Sample::doMakeLocal
   private:
-    virtual SamplePtr doMakeLocal () const;
+    virtual std::unique_ptr<SampleLocal> doMakeLocal () const override;
 
     /// \copydoc Sample::doMakeFileList
   protected:
-    virtual std::vector<std::string> doMakeFileList () const;
+    virtual std::vector<std::string> doMakeFileList () const override;
 
 
 
@@ -90,7 +82,7 @@ namespace SH
     // private interface
     //
 
-    ClassDef (SampleMeta, 1);
+    ClassDefOverride (SampleMeta, 1);
   };
 }
 

@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 /**
  * @file StoreGate/src/VarHandleKeyProperty.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -13,7 +12,6 @@
 // STL includes
 #include <sstream>
 #include <map>
-#include <boost/tokenizer.hpp>
 
 // StoreGate includes
 #include "StoreGate/VarHandleKeyProperty.h"

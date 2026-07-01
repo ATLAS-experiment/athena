@@ -46,14 +46,17 @@ StatusCode DetectorAlignCondAlg::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
     writeHandle.addDependency(readHandle);
+
+    DetectorAlignStore::Mode mode{m_fillAlignStoreCache ? DetectorAlignStore::Mode::Block
+                                                        : DetectorAlignStore::Mode::LazyFill};
     /// Create the new alignment
-    auto newAlignment = std::make_unique<DetectorAlignStore>(m_Type);
+    auto newAlignment = std::make_unique<DetectorAlignStore>(m_Type, mode);
     newAlignment->geoModelAlignment = std::make_unique<GeoAlignmentStore>(**readHandle);
     newAlignment->geoModelAlignment->clearPosCache();
     /// Process using the tracking geometry
     if (m_fillAlignStoreCache) {        
         if(!m_trackingGeoSvc->populateAlignmentStore(*newAlignment)) {
-            ATH_MSG_WARNING("No detector elements of " << to_string(m_Type) << " are part of the tracking geometry");
+            ATH_MSG_WARNING("No detector elements of " << m_Type << " are part of the tracking geometry");
         }
         /// There's no need of the absolute transform cache anymore
         newAlignment->geoModelAlignment.reset();

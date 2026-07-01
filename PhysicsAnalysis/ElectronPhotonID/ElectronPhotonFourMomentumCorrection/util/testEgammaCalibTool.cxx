@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //simple macro to test the xAOD-based calibration tool
@@ -127,7 +127,7 @@ int main( int argc, char* argv[] ) {
      CHECK( event.retrieve(photons, "Photons") );
 
      //Clone
-     std::pair<xAOD::PhotonContainer*, xAOD::ShallowAuxContainer* > photons_shallowCopy = xAOD::shallowCopyContainer(*photons);
+     xAOD::ShallowCopyResult_t<xAOD::PhotonContainer> photons_shallowCopy = xAOD::shallowCopy(*photons);
 
      //Iterate over the shallow copy
      for (xAOD::Photon* ph : *photons_shallowCopy.first) {
@@ -154,7 +154,7 @@ int main( int argc, char* argv[] ) {
 	 if (tool->applySystematicVariation(sys) != StatusCode::SUCCESS) {
 	   Error(APP_NAME, "Cannot configure calibration tool for systematics");
 	 }
-	 
+
 	 CHECK(tool->applyCorrection(*ph));
 	 std::cout << "\nCalibrated pt with systematic " << sys.name() << " = " << ph->pt();
        }
@@ -167,7 +167,7 @@ int main( int argc, char* argv[] ) {
      CHECK( event.retrieve(electrons, "Electrons") );
 
      //Clone
-     std::pair< xAOD::ElectronContainer*, xAOD::ShallowAuxContainer* > electrons_shallowCopy = xAOD::shallowCopyContainer( *electrons );
+     xAOD::ShallowCopyResult_t<xAOD::ElectronContainer> electrons_shallowCopy = xAOD::shallowCopy( *electrons );
 
      //Iterate over the shallow copy
      for (xAOD::Electron* el : *electrons_shallowCopy.first) {
@@ -194,7 +194,7 @@ int main( int argc, char* argv[] ) {
 	 if (tool->applySystematicVariation(sys) != StatusCode::SUCCESS) {
 	   Error(APP_NAME, "Cannot configure calibration tool for systematics");
 	 }
-	 
+
 	 CHECK(tool->applyCorrection(*el));
 	 std::cout << "\nCalibrated pt with systematic " << sys.name() << " = " << el->pt();
        }

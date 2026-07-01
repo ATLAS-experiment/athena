@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EventSelectorAthenaPool )
@@ -8,17 +8,10 @@ find_package( CORAL COMPONENTS CoralBase )
 find_package( Boost )
 
 # Component(s) in the package:
-atlas_add_component( EventSelectorAthenaPool
-                     src/AthenaPoolAddressProviderSvc.cxx
-                     src/CondProxyProvider.cxx
-                     src/DoubleEventSelectorAthenaPool.cxx
-                     src/EventSelectorAthenaPool.cxx
-                     src/PoolCollectionConverter.cxx
-                     src/registerKeys.cxx
-                     src/components/*.cxx
+atlas_add_component( EventSelectorAthenaPool src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolCnvSvcLib AthenaPoolUtilities CxxUtils GaudiKernel PersistencySvc PersistentDataModel PoolSvcLib StoreGateLib
-		     PRIVATE_LINK_LIBRARIES CollectionSvc )
+                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolCnvSvcLib AthenaPoolUtilities CxxUtils GaudiKernel PersistentDataModel PoolSvcLib StoreGateLib
+		     PRIVATE_LINK_LIBRARIES CollectionSvc StorageSvc )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileCalibBlobObjs/TileCalibDrawerBase.h"
 #include "TileCalibBlobObjs/TileCalibType.h"
 #include <time.h>
 #include <algorithm>
+#include <iostream>
 
 //
 //_____________________________________________________________
@@ -90,8 +91,8 @@ TileCalibDrawerBase::createBlob(uint16_t objType,
 				uint32_t nObjs,
 				uint16_t nChans,
 				uint16_t nGains,
-				const std::string& author,
-				const std::string& comment,
+				std::string_view author,
+				std::string_view comment,
 				uint64_t timeStamp)
 {
   //=== blob data length including header in bytes
@@ -131,7 +132,7 @@ TileCalibDrawerBase::createBlob(uint16_t objType,
     uint64_t* pTimeStamp = reinterpret_cast<uint64_t*>(blobStart32+dataSizeByte/sizeof(uint32_t));
     pTimeStamp[0] = timeStamp;
     char* pChar = reinterpret_cast<char*>(++pTimeStamp); 
-    std::string::const_iterator iStr = author.begin();
+    auto iStr = author.begin();
     for(; iStr!=author.end(); ++iStr){ *pChar = *iStr; ++pChar; }
     *pChar = 0; 
     for(iStr=comment.begin(); iStr!=comment.end(); ++iStr){ *(++pChar) = *iStr; }
@@ -214,4 +215,8 @@ TileCalibDrawerBase::dumpHeader(std::ostream& stm) const
     stm << "Date           : " << getDate() << " ("<< getTimeStamp() << ")" << std::endl;
     stm << "Comment:       : " << getComment()     << std::endl;
   }  
+}
+
+void TileCalibDrawerBase::dump() const {
+ dumpHeader(std::cout); 
 }

@@ -85,12 +85,12 @@ void CaloCalibClusterTruthMapMakerAlgorithm::fillIdentifierToCaloHitMap(std::map
         continue;
       }
 
-      //fill the map
       Identifier thisIdentifier = thisCalibrationHit->cellID();
-      //count returns 1 if the key exists, otherwise it returns 0
-      int count = identifierToCaloHitMap.count(thisIdentifier);
-      if (0 == count) identifierToCaloHitMap[thisIdentifier] = std::vector<const CaloCalibrationHit*>{thisCalibrationHit};
-      else identifierToCaloHitMap[thisIdentifier].push_back(thisCalibrationHit);
+
+      auto [it, inserted] =
+          identifierToCaloHitMap.try_emplace(thisIdentifier);
+
+      it->second.push_back(thisCalibrationHit);
       
     }//loop on calibration hits in a container
   }//loop over calibration hit containers

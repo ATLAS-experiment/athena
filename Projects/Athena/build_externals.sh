@@ -9,11 +9,13 @@
 ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthenaExternals"
 ATLAS_BUILDTYPE="Release"
-ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=108
-                        -DLCG_VERSION_POSTFIX="a_ATLAS_9"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r2.001/Gaudi-v40r2.001.tar.gz;URL_MD5;e292ba3d71e4a88675d8632c2001cfb1"
-                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v45.2.0/acts-v45.2.0.tar.gz;URL_HASH;SHA256=7a43620e33dda0ecb6c3d02440ae66907b1f5e3456e2f7929a427df3dc7b8f2f"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.24.0/GeoModel-6.24.0.tar.bz2;URL_MD5;5d436565dd92671aa58cef737bbc2ab6"
+ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=109
+                        -DLCG_VERSION_POSTFIX="a_ATLAS_11"
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r4.002/Gaudi-v40r4.002.tar.gz;URL_MD5;72a2fa2008f37c0dc88fb1e5b039f295"
+                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v46.8.1/acts-v46.8.1.tar.gz;URL_HASH;SHA256=6fa1d54166d452859316fd20c4e75e60f9b830d961f071e0f0eab92409f8c4e6"
+                        -DATLAS_ACTS_TRACCC_SOURCE="URL;https://github.com/acts-project/traccc/archive/refs/tags/v1.4.0.tar.gz;URL_MD5;f6ab62be5f23730fdc84444cc98196ac"
+                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.27.0/GeoModel-6.27.0.tar.bz2;URL_MD5;2e6fb12f85e37636ecdfc5d1053745c1"
+                        -DATLAS_VECMEM_SOURCE="URL;http://cern.ch/atlas-software-dist-eos/externals/vecmem/v1.25.0.tar.gz;https://github.com/acts-project/vecmem/archive/refs/tags/v1.25.0.tar.gz;URL_MD5;31c1c2db4273b47f021798ea9de31733"
                         -DATLAS_GEANT4_USE_LTO=TRUE
                         -DATLAS_VECGEOM_USE_LTO=TRUE
                         -DATLAS_ONNXRUNTIME_USE_CUDA=TRUE

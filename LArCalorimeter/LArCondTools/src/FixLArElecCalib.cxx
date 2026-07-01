@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -101,12 +101,16 @@
 
 #include "CaloDetDescr/ICaloSuperCellIDTool.h"
 
-#include <fstream>
+
 #include "TTree.h"
 #include "TFile.h"
 
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CoralBase/Blob.h"
+
+#include <fstream>
+#include <cstdint>
+
 
 FixLArElecCalib::FixLArElecCalib(const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name,pSvcLocator),
@@ -140,9 +144,7 @@ StatusCode FixLArElecCalib::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::execute() {
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();  
+StatusCode FixLArElecCalib::execute(const EventContext& ctx) {
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   const LArOnOffIdMapping* cabling{*cablingHdl};
@@ -593,7 +595,7 @@ StatusCode FixLArElecCalib::updateEMfSampl ATLAS_NOT_THREAD_SAFE (const std::str
    // read in the file
 
    ATH_MSG_INFO(" opening file "<< filename );
-   std::ifstream infile( filename.c_str() );
+   std::ifstream infile( filename);
    if(! infile.good() ) 
      {
        ATH_MSG_ERROR(" fail to open file ");
@@ -658,7 +660,7 @@ StatusCode FixLArElecCalib::updateEM_DACuAMeV ATLAS_NOT_THREAD_SAFE (const std::
    ATH_CHECK( detStore()->retrieve(ua2mev_c) );
    LAruA2MeVMC* ua2mevMC = const_cast<LAruA2MeVMC*>(ua2mev_c);
 
-   std::ifstream infile(filename.c_str() ) ; 
+   std::ifstream infile(filename) ; 
 
    if(! infile.good() ) 
      {
@@ -798,7 +800,7 @@ StatusCode FixLArElecCalib::fix5 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping 
 
     std::string filename("FCal_noise_minbias.txt");
  
-    std::ifstream infile(filename.c_str() ) ; 
+    std::ifstream infile(filename ) ; 
 
     if(! infile.good() ) 
       {
@@ -880,7 +882,7 @@ StatusCode FixLArElecCalib::updateMinBias ATLAS_NOT_THREAD_SAFE (const std::stri
    // read in the file
 
    ATH_MSG_INFO(" opening file "<< filename );
-   std::ifstream infile( filename.c_str() );
+   std::ifstream infile( filename);
    if(! infile.good() ) 
      {
        ATH_MSG_ERROR(" fail to open file ");
@@ -1011,7 +1013,7 @@ StatusCode FixLArElecCalib::fix6 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping 
     int n=0;
 
     std::string filename("FCal_noise_minbias_adc2mev.txt");
-    std::ifstream infile(filename.c_str() ) ; 
+    std::ifstream infile(filename) ; 
 
     if(! infile.good() ) 
       {
@@ -1141,7 +1143,7 @@ StatusCode FixLArElecCalib::fix8 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping 
 
 StatusCode FixLArElecCalib::ReadFile(const std::string& filename, const LArOnOffIdMapping *cabling, bool EM, bool withGain, int nvar ) {
 
-   std::ifstream infile(filename.c_str() ) ; 
+   std::ifstream infile(filename) ; 
 
    if(! infile.good() ) 
      {
@@ -1213,7 +1215,7 @@ StatusCode FixLArElecCalib::ReadFile(const std::string& filename, const LArOnOff
 
 StatusCode FixLArElecCalib::ReadFileAll(const std::string& filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar ) {
 
-   std::ifstream infile(filename.c_str() ) ; 
+   std::ifstream infile(filename) ; 
 
    if(! infile.good() ) 
      {
@@ -1278,7 +1280,7 @@ StatusCode FixLArElecCalib::ReadFileAll(const std::string& filename, const LArOn
    return StatusCode::SUCCESS; 
 }
 
-void FixLArElecCalib::print_object(const std::string& msg, const LArNoiseMC::LArCondObj& obj)
+void FixLArElecCalib::print_object(std::string_view msg, const LArNoiseMC::LArCondObj& obj)
 {
   if( obj.isEmpty()){
     ATH_MSG_INFO(" LArNoiseMC " << msg << " is empty" );
@@ -1298,7 +1300,7 @@ void FixLArElecCalib::set_object(LArNoiseMC::LArCondObj& obj, const std::vector<
   return;
 } 
 
-void FixLArElecCalib::print_object(const std::string& s, const LArAutoCorrMC::LArCondObj& obj)
+void FixLArElecCalib::print_object(std::string_view s, const LArAutoCorrMC::LArCondObj& obj)
 {
   if( obj.isEmpty()){
     ATH_MSG_INFO(" LArAutoCorrMC " << s << " is empty" );
@@ -1325,7 +1327,7 @@ void FixLArElecCalib::set_object(LArAutoCorrMC::LArCondObj& obj, const std::vect
   return;
 } 
 
-void FixLArElecCalib::print_object(const std::string& s, const LArRampMC::LArCondObj& obj)
+void FixLArElecCalib::print_object(std::string_view s, const LArRampMC::LArCondObj& obj)
 {
   if( obj.isEmpty()){
     ATH_MSG_INFO(" LArRampMC " << s << " is empty" );
@@ -1354,7 +1356,7 @@ void FixLArElecCalib::set_object(LArRampMC::LArCondObj& obj, const std::vector<f
   return;
 } 
 
-void FixLArElecCalib::print_object(const std::string& s, const LArShape32MC::LArCondObj& obj)
+void FixLArElecCalib::print_object(std::string_view s, const LArShape32MC::LArCondObj& obj)
 {
   if( obj.isEmpty()){
     ATH_MSG_INFO(" LArShape32MC " << s << " is empty" );
@@ -1398,7 +1400,7 @@ void FixLArElecCalib::set_object(LArShape32MC::LArCondObj& obj, const std::vecto
 
 
 
-void FixLArElecCalib::print_object(const std::string& msg, const LArSingleFloatP& obj)
+void FixLArElecCalib::print_object(std::string_view msg, const LArSingleFloatP& obj)
 {
   if( obj.isEmpty()){
     ATH_MSG_INFO(" LArSingleFloatP " << msg << " is empty" );
@@ -1436,7 +1438,7 @@ StatusCode FixLArElecCalib::addMphysOverMcal(const LArOnOffIdMapping *cabling) {
 
     std::string filename("FCal_noise_minbias_adc2mev.txt");
  
-    std::ifstream infile(filename.c_str() ) ; 
+    std::ifstream infile(filename ) ; 
 
     if(! infile.good() ) 
       {
@@ -1758,7 +1760,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
 	else continue;
 	HWIdentifier hwid = cabling->createSignalChannelID(chid);
 	if ( i == 0 ){
-        of << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << std::endl;
+        of << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << '\n';
 	}
 	of << chid.get_identifier32().get_compact() << "\t0x" <<
 		SCID.get_identifier32().get_compact() << "\t0x" <<
@@ -1820,7 +1822,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
 	of << " " << m_online_idhelper->channel_name(hwid) << " " << m_sonline_idhelper->channel_name(shwid);
 	of << std::dec;
 	of << " " << onl_hash << " " << off_hash;
-	of << std::endl;
+	of << '\n';
 
 	if ( m_scell_idhelper->calo_cell_hash( SCID ).value() < 40000 )
 	OrderOffHash_OnlID[m_scell_idhelper->calo_cell_hash( SCID ).value()]  =  shwid.get_identifier32().get_compact();
@@ -1828,7 +1830,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
 	OrderOnlHash_OffID[m_sonline_idhelper->channel_Hash( shwid ).value()]  =  SCID.get_identifier32().get_compact();
     }
     of << "Hash check.  Onl : " << min_onl_hash << " " << max_onl_hash;
-    of << ";   Off : " << min_off_hash << " " << max_off_hash << std::endl;;
+    of << ";   Off : " << min_off_hash << " " << max_off_hash << '\n';;
     of.close();
 
     channel_size = m_hec_idhelper->channel_hash_max();
@@ -1838,7 +1840,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
     max_off_hash = 0;
     std::ofstream of1("AllChannels_HEC.txt");
 
-    of1 << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << std::endl;
+    of1 << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << '\n';
     for(size_t i = 0; i < channel_size ; i++) {
         Identifier chid = m_hec_idhelper->channel_id(i);
         if ( ! ( m_hec_idhelper->is_lar_hec( chid )  ) ) continue;
@@ -1894,7 +1896,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
         of1 << " " << m_online_idhelper->channel_name(hwid) << " " << m_sonline_idhelper->channel_name(shwid);
         of1 << std::dec;
         of1 << " " << onl_hash << " " << off_hash;
-        of1 << std::endl;
+        of1 << '\n';
 
         OrderOffHash_OnlID[m_scell_idhelper->calo_cell_hash( SCID ).value()]  =  shwid.get_identifier32().get_compact();
         OrderOnlHash_OffID[m_sonline_idhelper->channel_Hash( shwid ).value()]  =  SCID.get_identifier32().get_compact();
@@ -1907,7 +1909,7 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
     max_off_hash = 0;
     std::ofstream of3("AllChannels_FCAL.txt");
 
-    of3 << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << std::endl;
+    of3 << "Off ID\t\tSCID\t\tOnl ID\t\tFT\tslot\tB-E pos_neg\tSamp\teta\tphi\tFEB_ID\t\tSHWID\t" << '\n';
     for(size_t i = 0; i < channel_size ; i++) {
         Identifier chid = m_fcal_idhelper->channel_id(i);
         if ( ! ( m_fcal_idhelper->is_lar_fcal( chid )  ) ) continue;
@@ -1948,14 +1950,14 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
         of3 << " " << m_online_idhelper->channel_name(hwid) << " " << m_sonline_idhelper->channel_name(shwid);
         of3 << std::dec;
         of3 << " " << onl_hash << " " << off_hash;
-        of3 << std::endl;
+        of3 << '\n';
 
         OrderOffHash_OnlID[m_scell_idhelper->calo_cell_hash( SCID ).value()]  =  shwid.get_identifier32().get_compact();
         OrderOnlHash_OffID[m_sonline_idhelper->channel_Hash( shwid ).value()]  =  SCID.get_identifier32().get_compact();
     }
 
     of3 << "Hash check.  Onl : " << min_onl_hash << " " << max_onl_hash;
-    of3 << ";   Off : " << min_off_hash << " " << max_off_hash << std::endl;;
+    of3 << ";   Off : " << min_off_hash << " " << max_off_hash << '\n';;
     of3.close();
 
 
@@ -1985,10 +1987,10 @@ StatusCode FixLArElecCalib::fix13(const LArOnOffIdMapping *cabling) {
 
     ATH_CHECK( detStore()->record(std::move(al_onOff),"/LAR/IdentifierOfl/OnOffIdMap_SC") );
 
-    hashes << "idx \t Off2OnlId \t Onl2OffId" << std::endl;
+    hashes << "idx \t Off2OnlId \t Onl2OffId" << '\n';
     for(size_t ii=0;ii<40000;ii++)
       if ( (OrderOffHash_OnlID[ii] != 0) || ( OrderOnlHash_OffID[ii] != 0 ) )
-	hashes << std::dec << ii << std::hex << " \t " << OrderOffHash_OnlID[ii]  << " \t\t " << OrderOnlHash_OffID[ii]  << std::endl;
+	hashes << std::dec << ii << std::hex << " \t " << OrderOffHash_OnlID[ii]  << " \t\t " << OrderOnlHash_OffID[ii]  << '\n';
     hashes.close();
 
     return StatusCode::SUCCESS;

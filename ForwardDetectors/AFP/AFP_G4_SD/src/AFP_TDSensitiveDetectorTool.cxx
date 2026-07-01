@@ -7,7 +7,9 @@
 #include "AFP_TDSensitiveDetectorTool.h"
 
 // For the SD itself
+#include "AFP_HitCollectionBuilders.h"
 #include "AFP_TDSensitiveDetector.h"
+#include "HitManagement/HitCollectionMap.h"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -18,46 +20,19 @@ AFP_TDSensitiveDetectorTool::AFP_TDSensitiveDetectorTool(const std::string& type
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode AFP_TDSensitiveDetectorTool::SetupEvent()
+StatusCode AFP_TDSensitiveDetectorTool::SetupEvent(HitCollectionMap& hitCollections)
 {
-  if(!getSD())
-    {
-      ATH_MSG_ERROR ("SetupEvent: AFP_TDSensitiveDetector never created!");
-      return StatusCode::FAILURE;
-    }
-  else
-    {
-      AFP_TDSensitiveDetector *localSD = dynamic_cast<AFP_TDSensitiveDetector*>(getSD());
-      if(!localSD)
-        {
-          ATH_MSG_ERROR ("SetupEvent: Failed to cast m_SD into AFP_TDSensitiveDetector.");
-          return StatusCode::FAILURE;
-        }
-      localSD->StartOfAthenaEvent();
-    }
+  hitCollections.Emplace<AFP_TDSimHitCollectionBuilder>(m_outputCollectionNames[0],
+                                                        m_outputCollectionNames[0]);
   return StatusCode::SUCCESS;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-StatusCode AFP_TDSensitiveDetectorTool::Gather()
+StatusCode AFP_TDSensitiveDetectorTool::Gather(HitCollectionMap& hitCollections)
 {
   ATH_MSG_VERBOSE( "AFP_TDSensitiveDetectorTool::Gather()" );
-  if(!getSD())
-    {
-      ATH_MSG_ERROR ("Gather: AFP_TDSensitiveDetector never created!");
-      return StatusCode::FAILURE;
-    }
-  else
-    {
-      AFP_TDSensitiveDetector *localSD = dynamic_cast<AFP_TDSensitiveDetector*>(getSD());
-      if(!localSD)
-        {
-          ATH_MSG_ERROR ("Gather: Failed to cast m_SD into AFP_TDSensitiveDetector.");
-          return StatusCode::FAILURE;
-        }
-      localSD->EndOfAthenaEvent();
-    }
+  CHECK(hitCollections.Record<AFP_TDSimHitCollection>(m_outputCollectionNames[0]));
   return StatusCode::SUCCESS;
 }
 
@@ -69,4 +44,3 @@ G4VSensitiveDetector* AFP_TDSensitiveDetectorTool::makeSD() const
   // Create a fresh SD
   return new AFP_TDSensitiveDetector(name(), m_outputCollectionNames[0]);
 }
-

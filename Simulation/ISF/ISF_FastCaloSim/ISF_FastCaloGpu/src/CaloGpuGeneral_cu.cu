@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include "ISF_FastCaloGpu/CaloGpuGeneral_cu.h"
 #include "ISF_FastCaloGpu/GeoRegion.h"
 #include "ISF_FastCaloGpu/GeoGpu_structs.h"
@@ -14,7 +17,7 @@ using namespace CaloGpuGeneral_fnc;
 
 namespace CaloGpuGeneral_cu {
 
-  __global__ void simulate_A( float E, int nhits, Chain0_Args args, bool reweight ) {
+  __global__ void simulate_A( float E, int nhits, Chain0_Args & args, bool reweight ) {
 
     long t = threadIdx.x + blockIdx.x * blockDim.x;
     if ( t < nhits ) {
@@ -26,7 +29,7 @@ namespace CaloGpuGeneral_cu {
     }
   }
 
-  __global__ void simulate_ct( Chain0_Args args ) {
+  __global__ void simulate_ct( Chain0_Args & args ) {
 
     unsigned long tid = threadIdx.x + blockIdx.x * blockDim.x;
     if ( tid < args.ncells ) {
@@ -40,7 +43,7 @@ namespace CaloGpuGeneral_cu {
     }
   }
 
-  __global__ void simulate_clean( Chain0_Args args ) {
+  __global__ void simulate_clean( Chain0_Args & args ) {
     unsigned long tid = threadIdx.x + blockIdx.x * blockDim.x;
     if ( tid < args.ncells ) { args.cells_energy[tid] = 0.0; }
     if ( tid == 0 ) args.hitcells_ct[0] = 0;

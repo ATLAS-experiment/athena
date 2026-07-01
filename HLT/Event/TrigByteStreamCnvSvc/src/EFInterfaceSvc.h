@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EFINTERFACESVC_H
@@ -65,15 +65,15 @@ private:
     "Timeout for getting the next event (in milliseconds)"};
   Gaudi::Property<int> m_stride {this, "Stride", 1,
     "Stride for the event retrieval"};
-  Gaudi::Property<int> m_fileOffset {this, "FileOffset", 0,
-    "File offset for the event retrieval"};
+  Gaudi::Property<int> m_fileOffset {this, "FileOffset", -1,
+    "File offset for the event retrieval. If single file: -1"};
   Gaudi::Property<int> m_numEvents {this, "NumEvents", 100,
     "Number of events to process"};
   Gaudi::Property<int> m_skipEvents {this, "SkipEvents", 0,
     "Number of events to skip"};
   Gaudi::Property<bool> m_loopOverFiles {this, "LoopOverFiles", true,
     "Flag to enable looping over files"};
-  Gaudi::Property<std::string> m_outputFileName {this, "OutputFileName", "test_output.data",
+  Gaudi::Property<std::string> m_outputFileName {this, "OutputFileName", "",
     "Name of the output file"};
   Gaudi::Property<std::vector<std::string>> m_files {this, "Files", {""},
     "List of input files"};
@@ -87,7 +87,7 @@ private:
     "Beam energy"};
   Gaudi::Property<std::string> m_detMask {this, "DetMask", "00000000000000000000000000000000",
     "Detector mask"};
-  Gaudi::Property<std::string> m_T0_project_tag {this, "T0ProjectTag", "T0_project_tag",
+  Gaudi::Property<std::string> m_T0_project_tag {this, "T0ProjectTag", "",
     "T0 project tag"};
   Gaudi::Property<std::string> m_stream {this, "Stream", "stream",
     "Stream name"};

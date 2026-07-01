@@ -73,6 +73,7 @@
        <hist1D name="truth_lowpt" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
        <hist1D name="truth_prodR" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
        <hist1D name="truth_prodZ" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+       <hist1D name="truth_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
       </TDirectory>
       <TDirectory name="HitsOnTracks">
        <hist1D name="nPixelHits" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
@@ -225,6 +226,19 @@
         <hist1D name="pullmean_vs_pt_z0sin" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
         <hist1D name="sigma_vs_eta_z0sin" plotopts="" tests="KSnorm,bbb,chi2,meany" type="TProfile"/>
         <hist1D name="sigma_vs_pt_z0sin" plotopts="" tests="KSnorm,bbb,chi2,meany" type="TProfile"/>
+        <hist1D name="pull_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="res_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="sigma_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="resolution_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="resmean_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="resolution_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="resmean_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="pullwidth_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="pullmean_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="pullwidth_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="pullmean_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="sigma_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2,meany" type="TProfile"/>
+        <hist1D name="sigma_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2,meany" type="TProfile"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -235,12 +249,6 @@
       <graph name="fakerate_vs_phi" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
       <graph name="fakerate_vs_d0" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
       <graph name="fakerate_vs_z0" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
-     </TDirectory>
-     <TDirectory name="Unlinked">
-      <TDirectory name="FakeRate">
-       <graph name="fakerate_vs_eta" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
-       <graph name="fakerate_vs_pt" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
-      </TDirectory>
      </TDirectory>
      <TDirectory name="Efficiency">
       <graph name="efficiency_vs_eta" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
@@ -272,6 +280,9 @@
       <graph name="technical_efficiency_vs_z0" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
       <graph name="technical_efficiency_vs_truthMu" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
       <graph name="technical_efficiency_vs_actualMu" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
+      <graph name="technical_efficiency_vs_R" plotopts="" test="KSnorm,bbb,chi2" type="TEfficiency"/>
+      <graph name="technical_efficiency_vs_prodR" plotopts="" test="KSnorm,bbb,chi2" type="TEfficiency"/>
+      <graph name="technical_efficiency_vs_prodR_extended" plotopts="" test="KSnorm,bbb,chi2" type="TEfficiency"/>
      </TDirectory>
     </TDirectory>
     <TDirectory name="Vertices">
@@ -303,7 +314,7 @@
       <hist1D name="vx_z_diff_pull" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
      </TDirectory>
     </TDirectory>
-    <TDirectory name="SiSPSeededTracksActsValidateTracksTracks">
+    <TDirectory name="SiSPSeedSegmentsActsPixelTracks">
      <TDirectory name="Tracks">
       <TDirectory name="Selected">
         <TDirectory name="Parameters">
@@ -332,6 +343,7 @@
         <hist1D name="truth_lowpt" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
         <hist1D name="truth_prodR" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
         <hist1D name="truth_prodZ" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+        <hist1D name="truth_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
         </TDirectory>
         <TDirectory name="HitsOnTracks">
         <hist1D name="nPixelHits" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
@@ -484,6 +496,19 @@
           <hist1D name="pullmean_vs_pt_z0sin" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
           <hist1D name="sigma_vs_eta_z0sin" plotopts="" tests="KSnorm,bbb,chi2,meany" type="TProfile"/>
           <hist1D name="sigma_vs_pt_z0sin" plotopts="" tests="KSnorm,bbb,chi2,meany" type="TProfile"/>
+          <hist1D name="pull_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="res_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="sigma_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="resolution_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="resmean_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="resolution_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="resmean_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="pullwidth_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="pullmean_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="pullwidth_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="pullmean_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2" type="TH1F"/>
+          <hist1D name="sigma_vs_eta_time" plotopts="" tests="KSnorm,bbb,chi2,meany" type="TProfile"/>
+          <hist1D name="sigma_vs_pt_time" plotopts="" tests="KSnorm,bbb,chi2,meany" type="TProfile"/>
         </TDirectory>
         </TDirectory>
       </TDirectory>
@@ -494,12 +519,6 @@
         <graph name="fakerate_vs_phi" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
         <graph name="fakerate_vs_d0" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
         <graph name="fakerate_vs_z0" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
-      </TDirectory>
-      <TDirectory name="Unlinked">
-        <TDirectory name="FakeRate">
-        <graph name="fakerate_vs_eta" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
-        <graph name="fakerate_vs_pt" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>
-        </TDirectory>
       </TDirectory>
       <TDirectory name="Efficiency">
         <graph name="efficiency_vs_eta" plotopts="" tests="KSnorm,bbb,chi2" type="TEfficiency"/>

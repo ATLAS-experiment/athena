@@ -135,9 +135,9 @@ SingleHistogramDefinition::titleDigest() const {
 }
 
 std::string
-SingleHistogramDefinition::stringIndex(const std::string& thisname, const std::string& thisfolder) {
+SingleHistogramDefinition::stringIndex(std::string_view thisname, std::string_view thisfolder) {
   if (thisfolder.empty()) {
-    return thisname;
+    return std::string{thisname};
   }
   const std::string delimiter("/");
   std::string result(thisfolder);
@@ -148,5 +148,5 @@ SingleHistogramDefinition::stringIndex(const std::string& thisname, const std::s
   if ((result.substr(lastChar, 1) != delimiter)) {
     result = result + delimiter; // add a slash: "myfolder" => "myfolder/"
   }
-  return result + thisname;
+  return result.append(thisname);
 }

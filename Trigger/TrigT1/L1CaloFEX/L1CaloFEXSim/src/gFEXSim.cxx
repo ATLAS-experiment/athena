@@ -295,14 +295,19 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    m_gMHTComponentsJwojTobWords[0] = outJwojTOB[2];//
    m_gMSTComponentsJwojTobWords[0] = outJwojTOB[3];//
 
+   //Parameters related to altMet (noise cut and rho+RMS algorithms)
+   auto & thr_gXE_altMet = l1Menu->thrExtraInfo().gXE();
+   int noiseCutThrA = thr_gXE_altMet.noiseCutThr('A');
+   int noiseCutThrB = thr_gXE_altMet.noiseCutThr('B');
+   int noiseCutThrC = thr_gXE_altMet.noiseCutThr('C');
 
-   //Set constants for noise cut and rho+RMS and run the algorithms
-   std::vector<int> thr_A (12, 0);//To be retrieved from COOL database in the future
-   std::vector<int> thr_B (12, 0);//To be retrieved from COOL database in the future
+   std::vector<int> thr_A(12, noiseCutThrA);
+   std::vector<int> thr_B(12, noiseCutThrB);
+   std::vector<int> thr_C(16, noiseCutThrC);   
 
-   m_gFEXaltMetAlgoTool->setAlgoConstant(std::move(thr_A) , std::move(thr_B), 10000/200);
-      
-   m_gFEXaltMetAlgoTool->altMetAlgo(Atwr, Btwr, outAltMetTOB);
+   m_gFEXaltMetAlgoTool->setAlgoConstant(std::move(thr_A) , std::move(thr_B), std::move(thr_C), 10000/200);
+
+   m_gFEXaltMetAlgoTool->altMetAlgo(Atwr, Btwr, Ctwr, outAltMetTOB);
 
    m_gMETComponentsNoiseCutTobWords.resize(1);
    m_gMETComponentsRmsTobWords.resize(1);

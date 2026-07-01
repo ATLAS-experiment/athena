@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -38,25 +38,35 @@ def EMBremCollectionBuilderCfg(flags,
         "useSCT",
         flags.Detector.EnableSCT or flags.Detector.EnableITkStrip)
     kwargs.setdefault("useTRT", flags.Detector.EnableTRT)
-    kwargs.setdefault("DoTruth", flags.Input.isMC)
+    kwargs.setdefault("doTruth", flags.Input.isMC)
     kwargs.setdefault("slimTrkTracks", flags.Egamma.slimGSFTrkTracks)
+    kwargs.setdefault("TrackParticleContainerName", "InDetTrackParticles")
     kwargs.setdefault("useHGTD", flags.Reco.EnableHGTDExtension)
 
+    extraInputs = []
     # P->T conversion extra dependencies
     if flags.Detector.GeometryITk:
-        kwargs.setdefault("ExtraInputs", [
+        extraInputs += [
             ("InDetDD::SiDetectorElementCollection",
              "ConditionStore+ITkPixelDetectorElementCollection"),
             ("InDetDD::SiDetectorElementCollection",
              "ConditionStore+ITkStripDetectorElementCollection"),
-        ])
+        ]
     else:
-        kwargs.setdefault("ExtraInputs", [
+        extraInputs += [
             ("InDetDD::SiDetectorElementCollection",
              "ConditionStore+PixelDetectorElementCollection"),
             ("InDetDD::SiDetectorElementCollection",
              "ConditionStore+SCT_DetectorElementCollection"),
-        ])
+        ]
+
+    if flags.Reco.EnableHGTDExtension:
+        extraInputs += [
+            ("xAOD::TrackParticleContainer",
+             "StoreGateSvc+" + kwargs["TrackParticleContainerName"] + ".time")
+        ]
+
+    kwargs.setdefault("ExtraInputs", extraInputs)
 
     alg = CompFactory.EMBremCollectionBuilder(name, **kwargs)
     acc.addEventAlgo(alg)

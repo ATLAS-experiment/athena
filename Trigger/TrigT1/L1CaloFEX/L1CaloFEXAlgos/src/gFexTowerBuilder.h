@@ -19,6 +19,7 @@
 
 #include "AsgTools/ToolHandle.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "xAODEventInfo/EventInfo.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -26,6 +27,7 @@
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "xAODTrigL1Calo/gFexTowerAuxContainer.h"
 #include "xAODTrigL1Calo/gFexTowerContainer.h"
+#include "L1CaloFEXByteStream/gFexPos.h"
 
 namespace LVL1 {
 
@@ -41,18 +43,15 @@ namespace LVL1 {
       private:
         // ------------------------- Properties --------------------------------------
         // Readhandle for Scell container
-        SG::ReadHandleKey<CaloCellContainer> m_SCellKey{this, "SCell", "SCell",
-                                                        "SCell container"};
+        SG::ReadHandleKey<CaloCellContainer> m_SCellKey{this, "SCell", "SCell", "SCell container"};
 
         // Readhandle for TriggerTower container
         SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_triggerTowerKey{
-                this, "xODTriggerTowers", "xAODTriggerTowers",
-                "xAODTriggerTowers container"};
+                this, "xODTriggerTowers", "xAODTriggerTowers", "xAODTriggerTowers container"};
 
         // Writehandle for EmulatedTowers container
         SG::WriteHandleKey<xAOD::gFexTowerContainer> m_gTowersWriteKey{
-                this, "gTowersWriteKey", "L1_gFexDataTowers",
-                "Write gFexEDM Trigger Tower container"};
+                this, "gTowersWriteKey", "L1_gFexDataTowers", "Write gFexEDM Trigger Tower container"};
 
         // FiberMapping property required by the interface
         Gaudi::Property<std::string> m_FiberMapping{
@@ -62,12 +61,15 @@ namespace LVL1 {
                 "Text file to convert from hardware fiber to eta-phi location"};
 
         // property for gFEX mapping
-        Gaudi::Property<bool> m_apply_masking{this, "SCellMasking", true,
-                                              "Applies masking. Only use for data"};
-        Gaudi::Property<bool> m_isDATA{
-                this, "isDATA", true,
-                "Tells the algorithm if it is data. Used for xAOD::TriggerTower WARNING "
-                "due to the 0 supression"};
+        Gaudi::Property<bool> m_apply_masking{this, "SCellMasking", true, "Applies masking. Only use for data"};
+
+        Gaudi::Property<bool> m_applyTimingCut{this,"ApplyTimingCut", false,
+                "If true, will apply a timing cut to supercells in MC (but not in HEC). In data this property has no effect"};
+
+        Gaudi::Property<bool> m_applyTimingCutAll{this,"ApplyTimingCutAll", false,
+                "If true, will apply a timing cut to supercells in MC. In data this property has no effect"};
+
+        Gaudi::Property<bool> m_isDATA{ this, "isDATA", true, "Tells the algorithm if it is data."};
 
         Gaudi::Property<std::string> m_gFEX2Scellmapping{
                 this, "gFEX2SCmapping",
@@ -79,7 +81,6 @@ namespace LVL1 {
                 "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gCaloTowers_to_tile_v1.txt",
                 "Text file to convert from simulation ID to Tile Identifier"};
 
-
         // Read mapping functions
         StatusCode ReadFibersfromFile(const std::string&);
         StatusCode ReadTilefromFile(const std::string&);
@@ -89,7 +90,6 @@ namespace LVL1 {
 
         std::unordered_map<uint32_t, std::vector<uint64_t> > m_map_TTower2SCells;
         std::unordered_map<uint32_t, std::vector<uint32_t> > m_map_TTower2Tile;
-
         std::unordered_map<unsigned int, std::array<float, 4> > m_Firm2Tower_map;  /// {map index(towerid), {fpga, eta, phi, source}}
 
     };

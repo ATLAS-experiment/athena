@@ -13,6 +13,8 @@
 // STL includes
 #include <string>
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthEventContainer.h"
+#include "xAODTruth/TruthPileupEventContainer.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -48,6 +50,7 @@ private:
                                             bool > > &float_decor,
                      const Amg::Vector3D& beamPos,
                      const std::vector<std::array<uint16_t, kNClusterTypes> > &counts) const;
+  bool decorateTruthTime(std::vector<std::pair<SG::WriteDecorHandle<xAOD::TruthParticleContainer, float>, bool>>& float_decor) const;
 
   PublicToolHandle<Trk::IExtrapolator> m_extrapolator
      {this,"Extrapolator","Trk::Extrapolator/AtlasExtrapolator",""};
@@ -55,12 +58,6 @@ private:
      {this, "BeamSpotDecoKeys",
         {"EventInfo.beamPosX", "EventInfo.beamPosY", "EventInfo.beamPosZ"},
 	"Beamspot position decoration keys"};
-
-  PublicToolHandle<IAthSelectionTool>         m_truthSelectionTool
-     {this,"TruthSelectionTool","",""};
-
-  mutable std::mutex m_mutex;
-  mutable CutFlow m_cutFlow ATLAS_THREAD_SAFE; // Guarded by m_mutex
 
   mutable std::atomic<std::size_t> m_nMissingTruthParticles = 0u;
   mutable std::atomic<bool> m_errorEmitted{false};
@@ -81,7 +78,13 @@ private:
 
   SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthParticleIndexDecor
     {this, "TruthParticleIndexDecoration", m_truthParticleName, "origTruthIndex", "decoration name for the original truth particle index."};
-   
+
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventName
+    {this, "TruthEventContainerName", "TruthEvents", ""};
+
+  SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileupEventName
+    {this, "TruthPileupEventContainerName", "TruthPileupEvents", ""};
+
   // decoration helper
   enum EDecorations {
     kDecorD0,
@@ -93,6 +96,7 @@ private:
     kDecorProdR,
     kDecorProdZ,
     kDecorNSilHits,
+    kDecorTime,
     kNDecorators
   };
   std::vector< std::pair<SG::WriteDecorHandleKey<xAOD::TruthParticleContainer>,SG::AuxElement::ConstAccessor<float> > > m_decor;

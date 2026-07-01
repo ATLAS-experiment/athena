@@ -1,16 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgE.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
-
-AlgE::AlgE( const std::string& name, 
-            ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
-{
-}
 
 //---------------------------------------------------------------------------
 
@@ -34,10 +28,10 @@ StatusCode AlgE::initialize() {
 
 //---------------------------------------------------------------------------
 
-StatusCode AlgE::execute() {
+StatusCode AlgE::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("execute " << name());
 
-  SG::ReadHandle<HiveDataObj> rh1(m_rdh1);
+  SG::ReadHandle<HiveDataObj> rh1(m_rdh1, ctx);
   if (!rh1.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << m_rdh1.key());
     return StatusCode::FAILURE;
@@ -45,13 +39,10 @@ StatusCode AlgE::execute() {
 
   ATH_MSG_INFO("  read: " << rh1.key() << " = " << rh1->val() );
 
-  SG::ReadCondHandle<CondDataObj>  ch1( m_rch1 );
-  SG::ReadCondHandle<CondDataObjY> ch2( m_rch2 );
-  SG::ReadCondHandle<CondDataObjY> ch3( m_rch3 );
-  SG::ReadCondHandle<CondDataObjZ> ch4( m_rch4 );
-
-  EventIDBase t( getContext().eventID() );
-  
+  SG::ReadCondHandle<CondDataObj>  ch1( m_rch1, ctx );
+  SG::ReadCondHandle<CondDataObjY> ch2( m_rch2, ctx );
+  SG::ReadCondHandle<CondDataObjY> ch3( m_rch3, ctx );
+  SG::ReadCondHandle<CondDataObjZ> ch4( m_rch4, ctx );
 
   float val {0.0};
   
@@ -92,7 +83,7 @@ StatusCode AlgE::execute() {
   }
 
   
-  ATH_MSG_INFO("TEST: " << getContext().eventID().event_number() << " "
+  ATH_MSG_INFO("TEST: " << ctx.eventID().event_number() << " "
                << rh1->val() << " " << **ch1 << " " << **ch2 << " " << **ch3
                << " " << **ch4);
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -248,6 +248,9 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   std::string tune = resolve_alias(tuneIn);
 
   if (tune.empty()) { }
+  else if ("es2025_run3_extrapolate_gnn_v0" == tune) {
+    add_scale("run3_partial_ofc_extrapolate_gnn_v0");
+  }
   else if ("es2024_run3_extrapolate_v0" == tune) {
     add_scale("run3_partial_ofc_extrapolate_v0");
   }
@@ -281,6 +284,11 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE3(InputModifier::SUBTRACT), new GetAmountPileupE3(m_pileup_tool));
   }
   // Run3 2022+2023
+  else if ("run3_partial_ofc_extrapolate_gnn_v0" == tune) {
+    add_scale("layer2_run3_ofc_extrapolate_v0");
+    add_scale("ps_run3_ofc_extrapolate_v0");
+    if(m_doSaccCorrections) add_scale("acc_zee_run3_gnn_v0");
+  }
   else if ("run3_partial_ofc_extrapolate_v0" == tune) {
     add_scale("layer2_run3_ofc_extrapolate_v0");
     add_scale("ps_run3_ofc_extrapolate_v0");
@@ -518,6 +526,14 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     }
     add_scale(new ScaleE0(InputModifier::ZEROBASED), new GetAmountHisto1D(h_presampler));
     add_scale(new ScaleE1(InputModifier::ZEROBASED), new GetAmountFixed(0.01));
+  }
+  else if ("acc_zee_run3_gnn_v0" == tune){
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v14/egammaLayerRecalibTunes_transformerTune.root");
+    TFile f(file.c_str());
+    TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel23_gnn"));
+    assert(histo_acc);
+    add_scale(new ScaleEaccordion(InputModifier::ZEROBASED_ALPHA),
+              new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));    
   }
   else if ("acc_zee_run3_v0" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v13/egammaLayerRecalibTunes.root");
@@ -846,7 +862,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_run3_ofc_extrapolate_v0" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_MuonLowMu_rel21_run3ofc"));
+    TH1* histo_ps_tot_error = static_cast<TH1*>(f.Get("hPS_MuonLowMu_rel21_run3ofc"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
               new GetAmountHisto1D(*histo_ps_tot_error));
@@ -854,7 +870,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_mu_r21_v0" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v11/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_MuonLowMu_rel21"));
+    TH1* histo_ps_tot_error = static_cast<TH1*>(f.Get("hPS_MuonLowMu_rel21"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
               new GetAmountHisto1D(*histo_ps_tot_error));
@@ -1007,7 +1023,13 @@ CP::CorrectionCode egammaLayerRecalibTool::scale_inputs(StdCalibrationInputs & i
   return status;
 }
 
-CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particle, const xAOD::EventInfo& event_info) const
+CP::CorrectionCode egammaLayerRecalibTool::read_and_scale_inputs( const xAOD::Egamma& particle,
+                                                                  const xAOD::EventInfo& event_info,
+                                                                  StdCalibrationInputs& inputs,
+                                                                  bool& isData,
+                                                                  std::string& fixT,
+                                                                  double& addE2,
+                                                                  double& addE3 ) const
 {
   const xAOD::CaloCluster* cluster = particle.caloCluster();
   if (!cluster) {
@@ -1015,8 +1037,6 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
     return CP::CorrectionCode::Error;
   }
 
-  std::string fixT = "";
-  double addE2 = 0, addE3 = 0;
   if (m_aodFixMissingCells &&
       event_info.runNumber() > m_Run2Run3runNumberTransition) {
     fixT = "_egFixForTopoTimingCut";
@@ -1046,21 +1066,39 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
     eta_calo=cluster->eta();
   }
 
-  StdCalibrationInputs inputs {
+  inputs = StdCalibrationInputs{
     event_info.averageInteractionsPerCrossing(),
-      event_info.runNumber(),
-      cluster->eta(),
-      cluster->phi(),
-      cluster->energyBE(0),
-      cluster->energyBE(1),
-      cluster->energyBE(2) + addE2,
-      cluster->energyBE(3) + addE3,
-      eta_calo };
+    event_info.runNumber(),
+    cluster->eta(),
+    cluster->phi(),
+    cluster->energyBE(0),
+    cluster->energyBE(1),
+    cluster->energyBE(2) + addE2,
+    cluster->energyBE(3) + addE3,
+    eta_calo};
 
-  bool isData = !event_info.eventType(xAOD::EventInfo::IS_SIMULATION);
+  isData = !event_info.eventType(xAOD::EventInfo::IS_SIMULATION);
   CP::CorrectionCode status = CP::CorrectionCode::Ok;
   if (isData || m_scaleMC)
     status = scale_inputs(inputs);
+
+  return status;
+}
+
+CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particle, const xAOD::EventInfo& event_info) const
+{
+
+  StdCalibrationInputs inputs{};
+  bool isData = true;
+  std::string fixT;
+  double addE2 = 0.0, addE3 = 0.0;
+
+  CP::CorrectionCode status = read_and_scale_inputs(particle, event_info, inputs, isData, fixT, addE2, addE3);
+
+  if ( !m_doLayerclEdecoration )
+    return status;
+
+  const xAOD::CaloCluster* cluster = particle.caloCluster();
 
   static const SG::AuxElement::Decorator<double> deco_E0("correctedcl_Es0");
   static const SG::AuxElement::Decorator<double> deco_E1("correctedcl_Es1");
@@ -1098,6 +1136,34 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
 
 }
 
+std::array<double,4> egammaLayerRecalibTool::getLayerCorrections(const xAOD::Egamma& particle, const xAOD::EventInfo& event_info) const
+{
+  StdCalibrationInputs inputs{};
+  bool isData = true;
+  std::string fixT;
+  double addE2 = 0.0, addE3 = 0.0;
+
+  CP::CorrectionCode status = read_and_scale_inputs(particle, event_info, inputs, isData, fixT, addE2, addE3);
+
+  if (status != CP::CorrectionCode::Ok) {
+    if (status == CP::CorrectionCode::Error) {
+      ATH_MSG_ERROR("Failed to read inputs, returning 1 for all layers, please check if this is expected!");
+    }
+    else if (status == CP::CorrectionCode::OutOfValidityRange) {
+      ATH_MSG_WARNING("Some inputs are out of validity range, returning 1 for all layers; object eta: " << inputs.eta);
+    }
+    return {1.,1.,1.,1.};
+  }
+  
+  auto safe_divide = [](float a, float b) { return b != 0 ? a/b : 1.f; };
+  return {
+    safe_divide(inputs.E0raw, particle.caloCluster()->energyBE(0)),
+    safe_divide(inputs.E1raw, particle.caloCluster()->energyBE(1)),
+    safe_divide(inputs.E2raw, particle.caloCluster()->energyBE(2) + addE2),
+    safe_divide(inputs.E3raw, particle.caloCluster()->energyBE(3) + addE3) 
+  };
+
+}
 
 void egammaLayerRecalibTool::clear_corrections()
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoHardware/L1TopoHardware.h"
@@ -20,6 +20,8 @@
 
 
 const std::map<std::string, TCS::HardwareParam>& TCS::L1TopoHWParameters::get() {
+   //Local variable uses 10336 bytes of stack space
+   //coverity[STACK_USE]
    static const std::map<std::string, TCS::HardwareParam> _hw = {
 
       DEF_HW(eEmInputWidth),

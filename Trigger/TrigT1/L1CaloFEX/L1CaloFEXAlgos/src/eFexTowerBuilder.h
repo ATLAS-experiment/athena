@@ -76,10 +76,14 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
     ToolHandle<eFEXSuperCellTowerIdProvider> m_eFEXSuperCellTowerIdProviderTool {this, "eFEXSuperCellTowerIdProviderTool", "LVL1::eFEXSuperCellTowerIdProvider", "Tool that provides tower-FOGA mapping"};
 
     Gaudi::Property<bool> m_applyMasking{this,"ApplyMasking",true,"Apply masking of supercells based on provenance bits. Should be set to False for MC"};
-    Gaudi::Property<bool> m_applyTimingCut{this,"ApplyTimingCut",false,"If true, will apply a timing cut to supercells in MC. In data this property has no effect"};
+    Gaudi::Property<bool> m_applyTimingCutAll{this,"ApplyTimingCutAll",false,"If true, will apply a timing cut to supercells in MC. In data this property has no effect"};
+    Gaudi::Property<bool> m_applyTimingCut{this,"ApplyTimingCut",false,"If true, will apply a timing cut to supercells in MC except HEC. In data this property has no effect"};
 
     Gaudi::Property<bool> m_v6Mapping{this,"UseLATOMEv6Mapping",false,"If true, will use the LATOME v6 mapping if cannot determine from latome header"};
     SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LArLatomeHeaderContainerKey { this, "LArLatomeHeaderKey", "SC_LATOME_HEADER" };
+
+  // Tower decorations
+  SG::WriteDecorHandleKey<xAOD::eFexTowerContainer> m_tauTimingDecorKey{ this, "tauTimingDecorKey", m_outKey, "", "eFex tower SCell tau timing"};
 
 };
 

@@ -14,7 +14,7 @@ TrackRecordCollection_PERS* TrackRecordCollectionCnv::createPersistent(TrackReco
 }
 
 
-TrackRecordCollection* TrackRecordCollectionCnv::createTransient() {
+TrackRecordCollection* TrackRecordCollectionCnv::createTransient(const Token* token) {
 
     MsgStream mlog(msgSvc(), "TrackRecordCollectionConverter" );
     TrackRecordCollectionCnv_p1   converter;
@@ -25,13 +25,13 @@ TrackRecordCollection* TrackRecordCollectionCnv::createTransient() {
     static const pool::Guid   p1_guid("1B1EEE3B-4647-41B4-B1D4-495DF77F0D3C");
     static const pool::Guid   p2_guid("22D044AD-A13A-42BF-B2A4-BDAF5BE2D819");
 
-   if( this->compareClassGuid(p1_guid))  {
-      std::unique_ptr< TrackRecordCollection_p1 >   col_vect( this->poolReadObject< TrackRecordCollection_p1 >() );
+   if( this->compareClassGuid(token, p1_guid))  {
+      std::unique_ptr< TrackRecordCollection_p1 >   col_vect( this->poolReadObject< TrackRecordCollection_p1 >(token) );
       trans_cont = converter.createTransient( col_vect.get(), mlog );
    }
    // New _p2 version faster and smaller
-   else  if( this->compareClassGuid(p2_guid))  {
-      std::unique_ptr< TrackRecordCollection_p2 >   col_vect( this->poolReadObject< TrackRecordCollection_p2 >() );
+   else  if( this->compareClassGuid(token, p2_guid))  {
+      std::unique_ptr< TrackRecordCollection_p2 >   col_vect( this->poolReadObject< TrackRecordCollection_p2 >(token) );
       trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
    }
    else 

@@ -1,88 +1,76 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "XMLCoreParser/XMLCoreParser.h" 
 
 #include "ExpatCoreParser.h"
-
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
+#include "XMLParserUtilities.h"
 #include <expat.h>
+#include <fstream>
+#include <cstdlib>
+#include <sstream>
+#include <array>
+#include <iostream>
+#include <filesystem>
 
-#include <string>
-#include <vector>
-#include <iostream> 
-#include <map> 
+namespace {
+  constexpr std::size_t BUFFSIZE = 1000;
+  //empty string to use in returns
+  const std::string emptyString;
+  constexpr int errorValue{0};
+  constexpr int ok{1};
+}
 
-
+using namespace XmlParser;
 
 std::mutex ExpatCoreParser::s_mutex;
 ExpatCoreParser::ExternalEntityMap ExpatCoreParser::s_entities;
 ExpatCoreParser::ExternalEntityMap ExpatCoreParser::s_text_entities;
 
-class ExpatCoreParserDebugger{ 
-public: 
-  static bool get_debug_state() {
-    return ::getenv ("XMLDEBUG") != 0;
-  }
-  static bool debug () {
-    static const bool debug_state = get_debug_state();
-    return debug_state;
-  }
-}; 
-
-
-
-#define BUFFSIZE 1000
 
 void 
 ExpatCoreParser::start (void* user_data, const char* el, const char** attr){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *static_cast<ExpatCoreParser*> (user_data);
   me.do_start (el, attr);
 }
 
 void 
 ExpatCoreParser::end (void* user_data, const char* el){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *static_cast<ExpatCoreParser*> (user_data);
   me.do_end (el);
 }
 
 void 
 ExpatCoreParser::char_data (void* user_data, const XML_Char* s, int len){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *static_cast<ExpatCoreParser*> (user_data);
   me.do_char_data (s, len);
 }
 
 void 
 ExpatCoreParser::default_handler (void* user_data, const XML_Char* s, int len){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *static_cast<ExpatCoreParser*> (user_data);
   me.do_default_handler (s, len);
 }
 
 void 
 ExpatCoreParser::comment (void* user_data, const XML_Char* s){
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *static_cast<ExpatCoreParser*> (user_data);
   me.do_comment (s);
 }
 
 int 
-ExpatCoreParser::external_entity (XML_Parser parser,
-				      const XML_Char* context,
-				      const XML_Char* /*base*/,
-				      const XML_Char* systemId,
-				      const XML_Char* /*publicId*/){
+ExpatCoreParser::external_entity (XML_Parser parser, const XML_Char* context,
+    const XML_Char* /*base*/,const XML_Char* systemId, const XML_Char* /*publicId*/){
   void* user_data = XML_GetUserData (parser);
-  ExpatCoreParser& me = *reinterpret_cast<ExpatCoreParser*> (user_data);
+  auto& me = *static_cast<ExpatCoreParser*> (user_data);
   return (me.do_external_entity (parser, context, systemId));
 }
   
 void 
 ExpatCoreParser::register_external_entity (const std::string& name, const std::string& file_name) {
-  if (ExpatCoreParserDebugger::debug ()){
-    std::cout << "ExpatCoreParser::register_external_entity> name=" << name
-		  << " file_name=" << file_name << std::endl; 
+  if (debug_enabled()){
+    std::cout << label()<<"> name=" << name << " file_name=" << file_name << "\n"; 
   }
   lock_t lock (s_mutex);
   s_entities[name] = file_name; 
@@ -90,44 +78,15 @@ ExpatCoreParser::register_external_entity (const std::string& name, const std::s
   
 void 
 ExpatCoreParser::register_text_entity (const std::string& name, const std::string& text) {
-  if (ExpatCoreParserDebugger::debug ()) {
-    std::cout << "ExpatCoreParser::register_text_entity> name=" << name
-		  << std::endl; 
+  if (debug_enabled()) {
+    std::cout << label()<<"> name=" << name<< "\n"; 
   }
   lock_t lock (s_mutex);
   s_text_entities[name] = text; 
 } 
 
-void 
-ExpatCoreParser::entity (void* /*userData*/,
-			      const XML_Char* entityName,
-			      int is_parameter_entity,
-			      const XML_Char* value,
-			      int value_length,
-			      const XML_Char* base,
-			      const XML_Char* systemId,
-			      const XML_Char* publicId,
-			      const XML_Char* /*notationName*/){
-  if (!base) base = "none";
-  if (!systemId) systemId = "none";
-  if (!publicId) publicId = "none";
-  std::string temp = "none";
-  if (value) {
-      temp.assign (value, strnlen(value, value_length));
-  }
-  
-  if (ExpatCoreParserDebugger::debug ()){
-    std::cout << "ExpatCoreParser::entity[" << 0 << "]> " << entityName;
-    std::cout << " is_parameter=" << is_parameter_entity;
-    std::cout << " value=[" << temp << "]";
-    std::cout << " base=[" << base << "]";
-    std::cout << " systemId=[" << systemId << "]";
-    std::cout << " publicId=[" << publicId << "]";
-    std::cout << std::endl;
-  }
-}
 
-std::unique_ptr<CoreParser::DOMNode> 
+std::unique_ptr<XMLCoreNode>
 ExpatCoreParser::get_document (){
   return std::move(m_top);
 }
@@ -139,288 +98,209 @@ ExpatCoreParser::ExpatCoreParser (const std::string& prefix)
 }
 
 void 
-ExpatCoreParser::do_start (const char* el, const char** attr){
-  int i;
-  std::map <std::string, std::string> a;
+ExpatCoreParser::configure_parser(XML_Parser p) {
+  XML_SetParamEntityParsing(p, XML_PARAM_ENTITY_PARSING_ALWAYS);
+  XML_SetElementHandler(p, start, end);
+  XML_SetCharacterDataHandler(p, char_data);
+  XML_SetExternalEntityRefHandler(p, external_entity);
+  XML_SetCommentHandler(p, comment);
+  XML_SetUserData(p, this);
+}
+
+XMLCoreNode*
+ExpatCoreParser::add_node (std::unique_ptr<XMLCoreNode> node){
   if (!m_top){
-    m_top = std::make_unique<CoreParser::DOMNode> ();
+    m_top = std::make_unique<XMLCoreNode> (XMLCoreNode::DOCUMENT_NODE);
     m_last = m_top.get();
   }
-  CoreParser::DOMNode* node = new CoreParser::DOMNode (CoreParser::DOMNode::ELEMENT_NODE, el, m_last);
-  if (ExpatCoreParserDebugger::debug ()) {
-    std::cout << "ExpatCoreParser::do_start> el=" << el << " top=" << m_top.get() << " last=" << m_last << " node=" << node << std::endl; 
+
+  return m_last->add_child (std::move(node));
+}
+
+void
+ExpatCoreParser::do_start (const char* el, const char** attr){
+  auto node = std::make_unique<XMLCoreNode> (XMLCoreNode::ELEMENT_NODE, el);
+  if (debug_enabled()) {
+    std::cout << label()<< "> el=" << el << " top=" << m_top.get() << " last=" << m_last << " node=" << node << "\n"; 
   }
-  m_last = node;
-  for (i = 0; attr[i]; i += 2) {
+  for (int i = 0; attr[i]; i += 2) {
     const char* name = attr[i];
     const char* value = attr[i+1];
-    node->m_attributes[name] = value;
+    node->set_attrib (name, value);
   }
+  m_last = add_node (std::move(node));
 }
 
 void 
 ExpatCoreParser::do_end (const char* el){
-  if (ExpatCoreParserDebugger::debug ()){
-    std::cout << "ExpatCoreParser::do_end> el=" << el << std::endl; 
+  if (debug_enabled()){
+    std::cout <<label()<<"> el=" << el << "\n"; 
   }
-  m_last = m_last->m_parent;
+  m_last = m_last->get_parent();
 }
 
 void 
 ExpatCoreParser::do_char_data (const XML_Char* s, int len){
-  if (len == 0) return;
-  while ((len > 0) && (s[len-1] == '\n')) len--;
-  if (len == 0) return;
-  std::string temp (s, len);
-  if (ExpatCoreParserDebugger::debug ()) {
-    std::cout << "ExpatCoreParser::do_char_data> [" << temp << "]" << std::endl;
+  std::string text = rtrim(s, len);
+  if (text.empty()) return;
+  if (debug_enabled()) {
+    std::cout << label()<<"> [" << text << "]\n";
   }
+  add_node (std::make_unique<XMLCoreNode>(XMLCoreNode::TEXT_NODE, "", text));
 }
 
 void 
 ExpatCoreParser::do_default_handler (const XML_Char* s, int len){
-  if (len == 0) return;
-  while ((len > 0) && (s[len-1] == '\n')) len--;
-  if (len == 0) return;
-  std::string temp (s, len);
-  if (ExpatCoreParserDebugger::debug ()) {
-      std::cout << "ExpatCoreParser::do_default_handler> [" << temp << "]" << std::endl;
+  std::string text = rtrim(s, len);
+  if (text.empty()) return;
+  if (debug_enabled()) {
+      std::cout << label()<<"> [" << text << "]\n";
   }
 }
   
 void 
 ExpatCoreParser::do_comment (const XML_Char* s){
-  if (!m_top)  {
-    m_top = std::make_unique<CoreParser::DOMNode> ();
-    m_last = m_top.get();
+  auto node = std::make_unique<XMLCoreNode> (XMLCoreNode::COMMENT_NODE, "", s);
+  if (debug_enabled()) {
+    std::cout << label()<<"> s=" << s << " top=" << m_top.get() << " last=" << m_last << " node=" << node << "\n"; 
   }
-  CoreParser::DOMNode* node = new CoreParser::DOMNode (CoreParser::DOMNode::COMMENT_NODE, s, m_last);
-  if (ExpatCoreParserDebugger::debug ()) {
-    std::cout << "ExpatCoreParser::do_comment> s=" << s << " top=" << m_top.get() << " last=" << m_last << " node=" << node << std::endl; 
-  }
-  // Node is owned by m_last.
-  // cppcheck-suppress memleak
-  node = nullptr;
+  add_node (std::move(node));
 }
 
 int 
-ExpatCoreParser::generic_parse (XML_Parser p, const std::string& file_name){
-  FILE* docfd;
-  if (ExpatCoreParserDebugger::debug ()){
-    std::cout << "ExpatCoreParser::generic_parse> file_name=" << file_name << " prefix=" << m_prefix << std::endl; 
+ExpatCoreParser::stream_parse(XML_Parser p, std::istream& is, const std::string & source_name){
+  int result = ok;
+  configure_parser(p);
+  if (debug_enabled()) {
+    std::cout << label() << "> starting\n";
   }
-  
-  std::string temp_name = file_name;
-  docfd = fopen (temp_name.c_str (), "r");
-  if (!docfd){
-    temp_name = m_prefix + "/" + file_name;
-    docfd = fopen (temp_name.c_str (), "r");
-  }
-  
-  if (docfd == 0){
-    const char* xmlpathenv = ::getenv ("XMLPATH");
-    if (xmlpathenv == 0) return (0);
-    std::string xmlpath = xmlpathenv;
-    std::string::size_type pos = 0;
-    while (pos != std::string::npos){
-      std::string::size_type sep = xmlpath.find (":", pos);
-      if (sep == std::string::npos){
-        temp_name = xmlpath.substr (pos);
-        pos = std::string::npos;
-      } else {
-        temp_name = xmlpath.substr (pos, sep - pos);
-        pos = sep + 1;
-      }
-      if (temp_name.empty()) continue;
-      std::string last_temp_name = temp_name;
-      temp_name += "/";
-      temp_name += file_name;
-      if (ExpatCoreParserDebugger::debug ()) {
-          std::cout << "ExpatCoreParser::generic_parse> file_name=" << file_name
-            << " xmlpath=" << xmlpath
-            << " temp_name=" << temp_name
-            << std::endl; 
-        }
-  
-      docfd = fopen (temp_name.c_str (), "r");
-      if (docfd != 0) break;
-      // Test whether prefix is a relative path and if so use it
-      if (m_prefix != "" && '/' != m_prefix[0]) {
-        temp_name =  std::move(last_temp_name);
-        temp_name += "/";
-        temp_name += m_prefix;
-        temp_name += "/";
-        temp_name += file_name;
-        if (ExpatCoreParserDebugger::debug ()){
-          std::cout << "ExpatCoreParser::generic_parse> file_name=" << file_name
-              << " xmlpath=" << xmlpath
-              << " temp_name=" << temp_name
-              << std::endl; 
-        }
-        docfd = fopen (temp_name.c_str (), "r");
-        if (docfd != 0) break;
-      }
-    }
-  }
-
-  if (docfd == 0){
-    return (0);
-  }
-  int result = 1;
-  XML_SetParamEntityParsing (p, XML_PARAM_ENTITY_PARSING_ALWAYS);
-  XML_SetElementHandler (p, start, end);
-  XML_SetCharacterDataHandler (p, char_data);
-  XML_SetExternalEntityRefHandler (p, external_entity);
-  XML_SetCommentHandler (p, comment);
-  XML_SetUserData (p, this);
-  if (ExpatCoreParserDebugger::debug ()) {
-    std::cout << "ExpatCoreParser::generic_parse> starting" << std::endl;
-  }
+  std::array<char, BUFFSIZE> buff{};
   for (;;) {
-    int items;
-    char* buff = (char*) XML_GetBuffer (p, BUFFSIZE + 1);
-    items = fread (buff, 1, BUFFSIZE, docfd);
-    if (ferror (docfd)){
-      std::cout << "Read error" << std::endl;
-      result = 0;
+    is.read(buff.data(), buff.size());
+    const auto nbytes = is.gcount();
+    const bool done = is.eof();
+    if (is.bad()) {
+      std::cout << "Read error";
+      if (!source_name.empty()) {
+        std::cout << " in " << source_name;
+      }
+      std::cout << "\n";
+      result = errorValue;
       break;
     }
-    int done = feof (docfd);
-    buff[items] = 0;
-    if (XML_ParseBuffer (p, BUFFSIZE, done) == XML_STATUS_ERROR) {
-      if (!done) {
-        std::cout << "ExpatCoreParser::Parse error at line " << XML_GetCurrentLineNumber(p)
-          << " of file " << file_name
-          << ":" << std::endl
-          << XML_ErrorString (XML_GetErrorCode(p)) << std::endl;
-        result = 0;
-        }
-      /* handle parse error */
-    }
-    if (done) break;
-  }  
-  fclose (docfd);
-  return (result);
-}
-
-int 
-ExpatCoreParser::generic_text_parse (XML_Parser p, const std::string& text){
-  if (ExpatCoreParserDebugger::debug ()){
-      std::cout << "ExpatCoreParser::generic_text_parse> " << std::endl; 
-  }
-  int result = 1;
-  XML_SetParamEntityParsing (p, XML_PARAM_ENTITY_PARSING_ALWAYS);
-  XML_SetElementHandler (p, start, end);
-  XML_SetCharacterDataHandler (p, char_data);
-  XML_SetExternalEntityRefHandler (p, external_entity);
-  XML_SetCommentHandler (p, comment);
-  XML_SetUserData (p, this);
-  if (ExpatCoreParserDebugger::debug ()) {
-    std::cout << "ExpatCoreParser::generic_text_parse> starting" << std::endl;
-  }
-  {
-    char* buff = (char*) XML_GetBuffer (p, text.size() + 1);
-    strcpy (buff, text.c_str ());
-    int done = 1;
-    if (XML_ParseBuffer (p, text.size(), done) == XML_STATUS_ERROR) {
-      std::cout << "ExpatCoreParser::Parse error at line " << XML_GetCurrentLineNumber(p)
-        << ":" << std::endl
-        << XML_ErrorString (XML_GetErrorCode(p)) << std::endl;
-      result = 0;
-	    /* handle parse error */
-	  }
-  }  
-  return (result);
-}
-
-int 
-ExpatCoreParser::do_external_entity (XML_Parser parser,
-					 const XML_Char* context, const XML_Char* systemId){
-  std::string context_str;
-  if (context == 0) context_str = "none";
-  else context_str = context;
-  bool done = false;
-  int status = 0;
-  if (context != 0) {
-    std::string replacement = find_text_entity (context_str);
-    if (replacement != "") {
-      if (ExpatCoreParserDebugger::debug ()) {
-        std::cout << "ExpatCoreParser::do_external_entity> "
-          << " context=[" << context_str << "]"
-          << " replacement=[" << replacement << "]"
-          << std::endl;
+    if (XML_Parse(p, buff.data(), static_cast<int>(nbytes), done) == XML_STATUS_ERROR) {
+      std::cout << "ExpatCoreParser::Parse error at line "
+                << XML_GetCurrentLineNumber(p);
+      if (!source_name.empty()) {
+        std::cout << " of " << source_name;
       }
-      XML_Parser p = XML_ExternalEntityParserCreate (parser, context, NULL);
-      status = generic_text_parse (p, replacement);
-      XML_ParserFree (p);
-      done = true;
+      std::cout << ":\n" << XML_ErrorString(XML_GetErrorCode(p)) << "\n";
+      result = errorValue;
+      break;
+    }
+    if (done) {
+      break;
     }
   }
-  if (!done) {
-    std::string replacement = find_external_entity (context_str);
-    if (replacement == "NULL") {
-	    return (1);
-	  }
-    if (replacement != "") {
-	    systemId = replacement.c_str ();
-	  }
-
-    if (ExpatCoreParserDebugger::debug ()){
-      std::cout << "ExpatCoreParser::do_external_entity> "
-        << " context=[" << context_str << "]"
-        << " systemId=[" << systemId << "]"
-        << " replacement=[" << replacement << "]"
-        << std::endl;
-    }
-    XML_Parser p = XML_ExternalEntityParserCreate (parser, context, NULL);
-    status = generic_parse (p, systemId);
-    XML_ParserFree (p);
-  }
-  return (status);
+  return result;
 }
 
-const std::string& 
-ExpatCoreParser::find_external_entity (const std::string& name){ 
+
+int 
+ExpatCoreParser::generic_parse(XML_Parser p, const std::string& file_name){
+  const std::string& path = xmlFileName(file_name, m_prefix);
+  if (path.empty()) return errorValue;
+  if (debug_enabled()) {
+    std::cout << label() << "> file_name=" << file_name
+              << " prefix=" << m_prefix << "\n";
+  }
+  std::ifstream fs{path, std::ios::binary};
+  if (!fs) {
+    std::cout << "Could not open file " << path << "\n";
+    return errorValue;
+  }
+  return stream_parse(p, fs, file_name);
+}
+
+int 
+ExpatCoreParser::generic_text_parse(XML_Parser p, const std::string& text){
+  if (debug_enabled()) {
+    std::cout << label() << ">\n";
+  }
+  std::istringstream is(text);
+  return stream_parse(p, is, {});
+}
+
+int
+ExpatCoreParser::do_external_entity(XML_Parser parser, const XML_Char* context, const XML_Char* systemId){
+  const std::string context_str = context ? context : "none";
+  if (context != nullptr) {
+    const std::string replacement = find_text_entity(context_str);
+    if (!replacement.empty()) {
+      if (debug_enabled()) {
+        std::cout << label() << ">  context=[" << context_str
+                  << "] replacement=[" << replacement << "]\n";
+      }
+      XMLParserPtr p{XML_ExternalEntityParserCreate(parser, context, nullptr)};
+      if (!p)  return errorValue;
+      return generic_text_parse(p.get(), replacement);
+    }
+  }
+  std::string replacement = find_external_entity(context_str);
+  if (replacement == "NULL") {
+    return ok;
+  }
+  std::string originalSystemId = systemId ? systemId : "";
+  std::string effectiveSystemId = originalSystemId;
+  if (!replacement.empty()) {
+    effectiveSystemId = replacement;
+  }
+  if (debug_enabled()) {
+    std::cout << label() << ">  context=[" << context_str
+              << "]  systemId=[" << originalSystemId
+              << "] replacement=[" << replacement << "]\n";
+  }
+  XMLParserPtr p{XML_ExternalEntityParserCreate(parser, context, nullptr)};
+  if (!p) return errorValue;
+  return generic_parse(p.get(), effectiveSystemId);
+}
+
+std::string 
+ExpatCoreParser::find_entity (const std::string& name, const ExternalEntityMap& mapChoice){ 
+  //lock is held here, doesn't need to be held by caller
   lock_t lock (s_mutex);
-  ExternalEntityMap::const_iterator it = s_entities.find (name); 
-  if (it == s_entities.end ())  {
-    static const std::string empty;
-    return (empty); 
-  } else { 
-    return ((*it).second); 
-  } 
+  ExternalEntityMap::const_iterator it = mapChoice.find(name); 
+  return (it == mapChoice.end()) ? emptyString : it->second;
+}
+std::string 
+ExpatCoreParser::find_external_entity (const std::string& name){
+  //coverity[MISSING_LOCK:FALSE] 
+  return find_entity(name, s_entities);
 } 
 
-const std::string& 
-ExpatCoreParser::find_text_entity (const std::string& name){ 
-  lock_t lock (s_mutex);
-  ExternalEntityMap::const_iterator it = s_text_entities.find (name); 
-  if (it == s_text_entities.end ()) {
-    static const std::string empty;
-    return (empty); 
-  } else { 
-    return ((*it).second); 
-  } 
+std::string 
+ExpatCoreParser::find_text_entity (const std::string& name){
+  //coverity[MISSING_LOCK:FALSE]
+  return find_entity(name, s_text_entities);
 } 
 
-std::unique_ptr<CoreParser::DOMNode>
-ExpatCoreParser::parse (const std::string& file_name){
-  std::string name = file_name;
-  std::string::size_type pos = file_name.rfind ('/');
-  std::string prefix;
-  if (pos != std::string::npos){
-    prefix = file_name.substr (0, pos);
-    name = file_name.substr (pos + 1);
-  }
-  ExpatCoreParser me (prefix);
-  XML_Parser p = XML_ParserCreate (NULL);
-  if (!p)  {
-    std::cout << "ExpatCoreParser::Couldn't allocate memory for parser" << std::endl;
-    std::abort();
-  }
-  int result = me.generic_parse (p, name);
-  XML_ParserFree (p);
-  if (result == 0) return nullptr;
+std::unique_ptr<XMLCoreNode>
+ExpatCoreParser::parse (std::string_view file_name){
+  const std::filesystem::path path{file_name};
+  ExpatCoreParser me{path.parent_path().string()};
+  auto p = make_parser();
+  int result = me.generic_parse (p.get(), path.filename().string());
+  if (result == errorValue) return nullptr;
+  return me.get_document ();
+}
+
+
+std::unique_ptr<XMLCoreNode>
+ExpatCoreParser::parse_string (const std::string& text){
+  ExpatCoreParser me ("");
+  auto p = make_parser();
+  int result = me.generic_text_parse (p.get(), text);
+  if (result == errorValue) return nullptr;
   return me.get_document ();
 }
 

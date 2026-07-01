@@ -15,10 +15,8 @@
 #include "PersistencySvc/IFileCatalog.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
-#include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
-#include "PersistencySvc/IPersistencySvc.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -62,16 +60,10 @@ pool::TestDriver::write(pool::DbType storageType)
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
-
-  // Set up the policy.
-  pool::DatabaseConnectionPolicy policy;
-  policy.setWriteModeForNonExisting( pool::DatabaseConnectionPolicy::CREATE );
-  policy.setWriteModeForExisting( pool::DatabaseConnectionPolicy::OVERWRITE );
-  persistencySvc->session().setDefaultConnectionPolicy( policy );
+  auto dbsession = pool::createSession(catalog);
 
   // Start an update transaction
-  if ( ! ( persistencySvc->session().transaction().start( pool::ITransaction::UPDATE ) ) ) {
+  if( !dbsession->start( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -91,7 +83,7 @@ pool::TestDriver::write(pool::DbType storageType)
        TestClassSTLContainersExt* object_TestClassSTLContainersExt = new TestClassSTLContainersExt();
        v_testClassSTLContainersExt.push_back( object_TestClassSTLContainersExt );
        object_TestClassSTLContainersExt->setNonZero();
-       Token* token_TestClassSTLContainersExt = persistencySvc->registerForWrite( placementHint_TestClassSTLContainersExt,
+       Token* token_TestClassSTLContainersExt = dbsession->registerForWrite( placementHint_TestClassSTLContainersExt,
                                                                                   object_TestClassSTLContainersExt,
                                                                                   class_TestClassSTLContainersExt );
        if ( ! token_TestClassSTLContainersExt ) {
@@ -102,26 +94,26 @@ pool::TestDriver::write(pool::DbType storageType)
     
     // Commit and hold the transaction every few rows
     if( ( i + 1 ) % m_eventsToCommitAndHold == 0 or storageType.exactMatch(pool::ROOTRNTUPLE_StorageType) ) {
-      if( ! persistencySvc->session().transaction().commitAndHold() ) {
+      if( ! dbsession->commitAndHold() ) {
         throw std::runtime_error( "Could not commit and hold the transaction." );
       }
     }
   }
   // Finally, commit at the end
   std::cout << "Finished writing, committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
   for( auto ptr : v_testClassSTLContainersExt ) delete ptr;
   v_testClassSTLContainersExt.clear();
 
   // Start an update transaction
-  if ( ! ( persistencySvc->session().transaction().start( pool::ITransaction::UPDATE ) ) ) {
+  if( !dbsession->start( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
@@ -136,10 +128,10 @@ pool::TestDriver::read()
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
+  auto dbsession = pool::createSession(catalog);
 
   // Starting a read transaction
-  if ( ! persistencySvc->session().transaction().start( pool::ITransaction::READ ) ) {
+  if( !dbsession->start( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
@@ -149,7 +141,7 @@ pool::TestDriver::read()
     Guid STLContainersExtClassID;
     STLContainersExtClassID.fromString("4E1F4DBB-1973-1974-2000-204F37331A02");
     if( token.classID() == STLContainersExtClassID ) {
-       void* data_testClassSTLContainersExt = persistencySvc->readObject(token);
+       void* data_testClassSTLContainersExt = dbsession->readObject(token);
        if ( data_testClassSTLContainersExt == 0 ) {
           throw std::runtime_error( "Could not read the stored data" );
        }
@@ -168,7 +160,7 @@ pool::TestDriver::read()
 
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !dbsession->transaction().commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 

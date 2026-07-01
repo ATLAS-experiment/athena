@@ -14,6 +14,8 @@
 #define TRK_IGLOBALTRACKFITTER_H
 
 #include "TrkFitterInterfaces/ITrackFitter.h"
+
+#include "GaudiKernel/extend_interfaces.h"
 #include "TrkParameters/TrackParameters.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include <memory>
@@ -28,13 +30,14 @@ namespace Trk {
         provided from global-least-squares track fit algorithms working
         in the ATLAS EDM.
     */
-    class IGlobalTrackFitter : virtual public ITrackFitter {
+    class IGlobalTrackFitter : virtual public extend_interfaces<ITrackFitter> {
 
 
     friend class ShiftingDerivCalcTool;
     friend class Chi2DerivCalcTool;
 
   public:
+    DeclareInterfaceID(IGlobalTrackFitter, 1, 0);
 
     struct AlignmentCache{
 
@@ -59,7 +62,8 @@ namespace Trk {
     /** RE-FIT A TRACK FOR ALIGNMENT.
         Since it is not our but the fitter model's decision if to
         re-fit on PRD or ROT level, it is made pure virtual. */
-    virtual Track* alignmentFit( AlignmentCache&,
+    virtual Track* alignmentFit( const EventContext&,
+                        AlignmentCache&,
                         const Track&,
                         const RunOutlierRemoval  runOutlier=false,
                         const ParticleHypothesis matEffects=Trk::nonInteracting) const = 0;

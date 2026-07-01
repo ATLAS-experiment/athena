@@ -18,7 +18,7 @@ TrigHisto1D_p1* TrigHisto1DCnv::createPersistent(TrigHisto1D* transObj)  {
   return persObj;
 }
 
-TrigHisto1D* TrigHisto1DCnv::createTransient() {
+TrigHisto1D* TrigHisto1DCnv::createTransient(const Token* token) {
   MsgStream mlog(msgSvc(), "TrigHisto1DConverter" );
   mlog << MSG::DEBUG << "TrigHisto1DCnv::createTransient " << endmsg;
  
@@ -26,9 +26,9 @@ TrigHisto1D* TrigHisto1DCnv::createTransient() {
 
   TrigHisto1D *transObj = 0;
   
-  if( compareClassGuid(p1_guid) ) {   
+  if( compareClassGuid(token, p1_guid) ) {   
     mlog << MSG::DEBUG << "TrigHisto1DCnv::reading p1 persistent object" << endmsg;
-    std::unique_ptr<TrigHisto1D_p1> pers_ptr( poolReadObject<TrigHisto1D_p1>() );
+    std::unique_ptr<TrigHisto1D_p1> pers_ptr( poolReadObject<TrigHisto1D_p1>(token) );
     TrigHisto1DCnv_p1 converter;
     transObj = converter.createTransient(pers_ptr.get(), mlog);
   }

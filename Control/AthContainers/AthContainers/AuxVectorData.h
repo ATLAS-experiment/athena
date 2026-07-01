@@ -424,6 +424,17 @@ public:
 
 
   /**
+   * @brief Return the set of variables to copy in a deep copy.
+   * @param warnUnlocked If true, we warn about variables skipped on account
+   *                     of being decorations.
+   *
+   * This is usually getAuxIDs()-getDecorIDs(), but may be different
+   * for some special cases.
+   */
+  SG::auxid_set_t getCopyIDs (bool warnUnlocked = false) const;
+
+
+  /**
    * @brief Return a set of identifiers for writable data items
    *        in this store.
    *

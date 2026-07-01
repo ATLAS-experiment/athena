@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_JEPROIBYTESTREAMV2TOOL_H
@@ -61,12 +61,14 @@ class JepRoiByteStreamV2Tool : public AthAlgTool {
    virtual StatusCode finalize() override;
 
    /// Convert ROB fragments to JEM RoIs
-   StatusCode convert(const std::string& name,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& name,
                       DataVector<LVL1::JEMTobRoI>* jeCollection) const;
    StatusCode convert(const IROBDataProviderSvc::VROBFRAG& robFrags,
                       DataVector<LVL1::JEMTobRoI>* jeCollection) const;
    /// Convert ROB fragments to CMX RoIs
-   StatusCode convert(const std::string& name,
+   StatusCode convert(const EventContext& ctx,
+                      const std::string& name,
                       LVL1::CMXRoI* cmCollection) const;
    
    StatusCode convert(const IROBDataProviderSvc::VROBFRAG& robFrags,

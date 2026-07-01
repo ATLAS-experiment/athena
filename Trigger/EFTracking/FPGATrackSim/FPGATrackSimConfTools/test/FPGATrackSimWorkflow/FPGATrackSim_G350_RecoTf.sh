@@ -1,0 +1,138 @@
+#!/bin/bash
+
+usage () {
+    [ $# -gt 1 ] && echo $2
+    echo "
+    Command line script to run track reconstruction
+    for the G-350 pipeline as offline-like algorithms (Full-Scan)
+
+    Usage:
+    FPGATrackSim_G350_RecoTF.sh -i <your_input_RDO_file> -o <your_output_AOD_file_name> [options]
+
+    Options:
+    -i  |  --inputRDO           STRING      full path to input RDO file (mandatory)
+    -o  |  --outputAOD          STRING      name of the output AOD file (mandatory)
+    -n  |  --nEvents            INT         Number of events to run on (default = -1 aka All)
+    -d  |  --skipEvents         INT         Number of events to skip at start (default = 0)
+    -s  |  --skipCheck                      skip checks on output AOD file
+    -k  |  --doSeeds                        persistify track seeds (default off)
+    -w  |  --writeAdditionalOutputData      write extra FPGATrackSim outputs (default off)
+    -h  |  --help                           this help
+
+    Examples:
+      FPGATrackSim_G350_RecoTF.sh -i /path/in.root -o AOD.root -r \"[34,98,162]\"
+      FPGATrackSim_G350_RecoTF.sh -i /path/in.root -o AOD.root -r 34,98,162 -g 2
+    "
+    [ $# -gt 0 ] && exit $1
+    exit 0
+}
+
+# Defaults
+#inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"
+inputRDO="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EFTracking/ATLAS-P2-RUN4-03-00-00/RDO/rdo_singleMu_alleta.root"
+outputAOD="AOD.root"
+nEvents="-1"
+skipCheck=0
+doSeeds="0"
+skipEvents=0
+particleType="skipTruth"  # default if user doesn't specify
+
+## parsing flags
+while [ $# -ge 1 ]; do
+    case "$1" in
+        --) shift ; break ;;
+        -i  | --inputRDO )      if [ $# -lt 2 ] ; then usage 1 "Missing value for --inputRDO"; fi ; inputRDO="$2"  ; shift ;;
+        -o  | --outputAOD )     if [ $# -lt 2 ] ; then usage 1 "Missing value for --outputAOD"; fi ; outputAOD="$2" ; shift ;;
+        -n  | --nEvents )       if [ $# -lt 2 ] ; then usage 1 "Missing value for --nEvents"; fi ; nEvents="$2"   ; shift ;;
+        -d  | --skipEvents )    if [ $# -lt 2 ] ; then usage 1 "Missing value for --skipEvents"; fi ; skipEvents="$2" ; shift ;;
+        -s  | --skipCheck )     skipCheck=1 ;;
+        -k  | --doSeeds )       doSeeds="1" ;;
+        -p  | --particleType )  if [ $# -lt 2 ] ; then usage 1 "Missing value for --particleType"; fi ; particleType="$2" ; shift ;;
+        -h  | --help )          usage 0 ;;
+        *) shift ; continue ;;
+    esac
+    shift
+done
+
+## checking valid inputs
+if [ -z "$inputRDO" ]; then usage 1 "Input RDO not provided"; fi
+if [ -z "$outputAOD" ]; then usage 1 "Output AOD not provided"; fi
+
+# Handle inputRDO patterns or check files
+if [[ "$inputRDO" == *"*"* ]]; then
+    inputRDO_arg="$inputRDO"
+else
+    IFS=',' read -ra FILES <<< "$inputRDO"
+    for file in "${FILES[@]}"; do
+        if [[ "$file" == root://* ]]; then
+            # Remote file, skip -f check
+            continue
+        fi
+        if [[ ! -f "$file" ]]; then
+            echo "Error: File not found: $file"
+            exit 1
+        fi
+    done
+    inputRDO_arg="$inputRDO"
+fi
+
+export ATHENA_CORE_NUMBER=1
+source FPGATrackSim_CommonEnv.sh
+
+# New MM and GNN model for G350 
+GNN_MODULE_MAP="GNN/v0.14/merged_ttbar_plus_singles_mmg1.3.0_cleaned_mean_rms_computed.triplets_MH"
+GNN_ONNX_MODEL="GNN/v0.14/edge_classifier-InteractionGNN2-pixelOnly_128hd_8mp_WeightPt"
+
+# Prepare preExec flags
+preExecFlags="flags.Tracking.doPixelDigitalClustering=True;\
+              flags.Tracking.ITkActsValidateF150Pass.storeTrackSeeds=${doSeeds};\
+              flags.Trigger.FPGATrackSim.mapsDir=\"${MAPS_5L}\";\
+              flags.Trigger.FPGATrackSim.bankDir=\"${BANKS_5L}\";\
+              flags.Trigger.FPGATrackSim.Hough.GNN=True;\
+              flags.Trigger.FPGATrackSim.GNN.moduleMapPath=\"${GNN_MODULE_MAP}\";\
+              from FPGATrackSimConfTools.FPGATrackSimConfigFlags import moduleMapType,moduleMapFunc;\
+              flags.Trigger.FPGATrackSim.GNN.moduleMapType=moduleMapType.triplet;\
+              flags.Trigger.FPGATrackSim.GNN.moduleMapFunc=moduleMapFunc.meanrms;\
+              flags.Trigger.FPGATrackSim.GNN.moduleMapTol=0.0000000001;\
+              flags.Trigger.FPGATrackSim.GNN.MLModelPath=\"${GNN_METRIC_LEARNING}\";\
+              flags.Trigger.FPGATrackSim.GNN.GNNModelPath=\"${GNN_ONNX_MODEL}\";\
+              flags.Trigger.FPGATrackSim.GNN.edgeScoreCut=0.5;\
+              flags.Trigger.FPGATrackSim.GNN.doGNNPixelSeeding=True;\
+              flags.Trigger.FPGATrackSim.doOverlapRemoval=False;\
+              flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions=False;\
+              flags.Trigger.FPGATrackSim.sampleType='${particleType}';\
+              flags.Trigger.FPGATrackSim.GNN.doGNNRootOutput=True;\
+              flags.Trigger.FPGATrackSim.MaxSpacePointsPerSeed=5;\
+              flags.Trigger.FPGATrackSim.regionToWriteDPTree=34;\
+              flags.Trigger.FPGATrackSim.writeToAOD=False;\
+              flags.Trigger.FPGATrackSim.writeClustersToAOD=False;\
+              flags.Trigger.FPGATrackSim.writeAdditionalOutputData=True;\
+              flags.Trigger.FPGATrackSim.GNN.doAllHits=True;\
+              flags.Trigger.FPGATrackSim.GNN.doPixelHits=True;\
+              flags.Trigger.FPGATrackSim.GNN.doStripHits=False;"
+postExecFlags="from AthenaCommon.CFElements import findAlgorithm;\
+               findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').ptMinMeasurements=[];\
+               findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').absEtaMaxMeasurements=[];\
+               findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').maxHoles=[2,1,1];\
+               findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').chi2CutOff=[200,50,50];\
+               findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').chi2OutlierCutOff=[200,100,100];"
+
+Reco_tf.py --CA \
+    --maxEvents ${nEvents} \
+    --skipEvents ${skipEvents} \
+    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateF150Flags,FPGATrackSimConfTools.FPGATrackSimAnalysisConfig.FPGATrackSimF150FlagCfg' \
+    --preExec "${preExecFlags}" \
+    --postExec "${postExecFlags}" \
+    --postInclude "ActsConfig.ActsPostIncludes.ACTSClusterPostInclude" \
+    --steering 'doRAWtoALL' \
+    --inputRDOFile "${inputRDO_arg}" \
+    --outputAODFile ${outputAOD}
+
+rc=$?
+echo "Reco_tf.py result: $rc"
+if [ $rc != 0 ]; then exit $rc; fi
+
+if [ "$skipCheck" == "0" ]; then
+    checkxAOD.py ${outputAOD} > ${outputAOD}.checkxAOD.log
+    checkFile.py ${outputAOD} > ${outputAOD}.checkFile.log
+fi

@@ -27,8 +27,7 @@ FCSReturnCode TFCSLateralShapeTuning::initFromModelFile(
   int layer = TFCSLateralShapeParametrization::calosample();
 
   // load file containing model parameters
-  std::unique_ptr<TFile> modelParametersFile = std::unique_ptr<TFile>(
-      TFile::Open(pathToModelParameters.c_str(), "READ"));
+  std::unique_ptr<TFile> modelParametersFile (TFile::Open(pathToModelParameters.c_str(), "READ"));
   modelParametersFile->cd();
 
   // set parameter model names depending on layer

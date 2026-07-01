@@ -7,7 +7,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/ISkimmingTool.h"
 #include "xAODTracking/VertexContainerFwd.h"
-#include <vector>
 //*This class is written as a stop gap because the standard expression parser isn't working with the cascade vertices
 //***When this is resolved it can be deleted
 
@@ -16,12 +15,10 @@ namespace DerivationFramework {
     public:
       AnyVertexSkimmingTool(const std::string&, const std::string&, const IInterface*);
       StatusCode initialize() override;
-      virtual bool eventPassesFilter() const override;
+      virtual bool eventPassesFilter(const EventContext& ctx) const override;
       ~AnyVertexSkimmingTool();
     private:
-       Gaudi::Property<std::vector<std::string>> m_containerNames{ this, "VertexContainerNames", {} };
-       SG::ReadHandleKeyArray<xAOD::VertexContainer> m_keyArray {this, "ReadHandles", {} };
-       Gaudi::Property<bool> m_useHandles{ this, "UseHandles", false };
+       SG::ReadHandleKeyArray<xAOD::VertexContainer> m_keyArray {this, "VertexContainerNames", {} };
   };
 }
 

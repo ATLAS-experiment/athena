@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,8 @@ namespace InDet {
     virtual bool toLower(const Trk::TrackSegment&) const = 0;
 
     /** Add track into the track-score multimap */
-    virtual void addNewTrack(Trk::Track*,
+    virtual void addNewTrack(const EventContext&,
+                             Trk::Track*,
                              ITRT_SegmentToTrackTool::EventData &event_data) const = 0;
 
     /** Resolve the standalone TRT tracks based on the number of shared TRT hits */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCellEnergyCorr2Ntuple.h"
@@ -19,8 +19,6 @@
 CaloCellEnergyCorr2Ntuple::CaloCellEnergyCorr2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name,pSvcLocator),
   m_calo_id(nullptr),
-  m_key("EnergyCorr"), 
-  m_FolderName("/LAR/CellCorrOfl/EnergyCorr"), 
   m_Hash(0),
   m_OffId(0),
   m_eta(0),
@@ -28,19 +26,14 @@ CaloCellEnergyCorr2Ntuple::CaloCellEnergyCorr2Ntuple(const std::string& name, IS
   m_layer(0),
   m_detector(0),
   m_corr(0),
-  m_tree(nullptr),
-  m_runNumber(0),
-  m_lumiBlock(0)
+  m_tree(nullptr)
 {
-   declareProperty("InputKey",m_key,"Key for EnergyCorr");
-   declareProperty("FolderName",m_FolderName);
 }
 
 //__________________________________________________________________________
 //Destructor
 CaloCellEnergyCorr2Ntuple::~CaloCellEnergyCorr2Ntuple()
 {
-  ATH_MSG_DEBUG ( "CaloCellEnergyCorr2Ntuple destructor called" );
 }
 //__________________________________________________________________________
 StatusCode CaloCellEnergyCorr2Ntuple::initialize()
@@ -54,8 +47,7 @@ StatusCode CaloCellEnergyCorr2Ntuple::initialize()
   m_calo_id      = mgr->getCaloCell_ID();
 
   ATH_CHECK(m_caloMgrKey.initialize());
-
-  ATH_CHECK( detStore()->regHandle(m_AttrListColl,m_key) );
+  ATH_CHECK(m_attrListCollKey.initialize());
 
   m_tree = new TTree("mytree","Calo Noise ntuple");
   m_tree->Branch("iHash",&m_Hash,"iHash/I");
@@ -72,17 +64,9 @@ StatusCode CaloCellEnergyCorr2Ntuple::initialize()
 
 }
 //__________________________________________________________________________
-StatusCode CaloCellEnergyCorr2Ntuple::execute()
+StatusCode CaloCellEnergyCorr2Ntuple::execute(const EventContext& /*ctx*/)
 {
   ATH_MSG_DEBUG ("CaloCellEnergyCorr2Ntuple execute()" );
-  
-  const xAOD::EventInfo* eventInfo = nullptr;
-  if (evtStore()->retrieve(eventInfo).isFailure()) {
-    ATH_MSG_WARNING ( " Cannot access to event info " );
-    return StatusCode::SUCCESS;
-  }
-  m_lumiBlock = eventInfo->lumiBlock();
-  m_runNumber = eventInfo->runNumber();
 
   return StatusCode::SUCCESS; 
 }
@@ -90,9 +74,8 @@ StatusCode CaloCellEnergyCorr2Ntuple::execute()
 //__________________________________________________________________________
 StatusCode CaloCellEnergyCorr2Ntuple::stop()
 {
-  ATH_MSG_INFO ( "  Run Number, lumiblock " << m_runNumber << " " << m_lumiBlock );
-
-  const coral::Blob& blob=(*m_AttrListColl)["CaloCondBlob16M"].data<coral::Blob>();
+  SG::ReadCondHandle<AthenaAttributeList> attrListColl (m_attrListCollKey);
+  const coral::Blob& blob=(**attrListColl)["CaloCondBlob16M"].data<coral::Blob>();
   std::unique_ptr<const CaloCondBlobFlt> flt (CaloCondBlobFlt::getInstance(blob));
 
   int nobj=flt->getNObjs();
@@ -142,7 +125,3 @@ StatusCode CaloCellEnergyCorr2Ntuple::stop()
   return StatusCode::SUCCESS;
  }
 
-StatusCode CaloCellEnergyCorr2Ntuple::finalize()
-{
- return StatusCode::SUCCESS;
-}

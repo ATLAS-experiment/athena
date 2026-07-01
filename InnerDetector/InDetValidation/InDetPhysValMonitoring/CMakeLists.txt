@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetPhysValMonitoring )
@@ -12,9 +12,9 @@ find_package( XercesC )
 atlas_add_library( InDetPhysValMonitoringLib
                    src/*.cxx
                    PUBLIC_HEADERS InDetPhysValMonitoring
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${XercesC_INCLUDE_DIRS}
 		   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib AtlasDetDescr BeamSpotConditionsData CxxUtils GaudiKernel InDetIdentifier InDetTrackSelectionToolLib InDetTruthVertexValidationLib MCTruthClassifierLib TrkValHistUtils TRT_ReadoutGeometry xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrkTruthTrackInterfaces FourMomUtils
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${XERCESC_LIBRARIES} AsgAnalysisInterfaces AsgTools AthContainers EventPrimitives GeoPrimitives InDetPrepRawData InDetRIO_OnTrack PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack TruthUtils )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${XercesC_LIBRARIES} AsgAnalysisInterfaces AsgTools AthContainers EventPrimitives GeoPrimitives InDetPrepRawData InDetRIO_OnTrack PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack TruthUtils )
 
 atlas_add_component( InDetPhysValMonitoring
                      src/components/*.cxx
@@ -23,7 +23,7 @@ atlas_add_component( InDetPhysValMonitoring
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
 atlas_install_joboptions( share/*.txt )
-atlas_install_runtime( share/*.xml share/*.dtd share/*.xsd)
+atlas_install_runtime( share/*.xml share/*.dtd share/*.xsd share/*.json share/*.txt)
 atlas_install_scripts( scripts/*.py scripts/histdef_bookkeep/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( share/test_*.sh share/clean_up_outdir.sh)
 
@@ -37,7 +37,7 @@ atlas_add_test( SingleHistogramDefinition_test
                 test/SingleHistogramDefinition_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} InDetPhysValMonitoringLib
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( HistogramDefinitionSvc_test
@@ -45,7 +45,7 @@ atlas_add_test( HistogramDefinitionSvc_test
                 test/HistogramDefinitionSvc_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils TestTools InDetPhysValMonitoringLib
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( XmlEntityInclusion_test
@@ -53,7 +53,7 @@ atlas_add_test( XmlEntityInclusion_test
                 test/XmlEntityInclusion_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils TestTools InDetPhysValMonitoringLib
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( InDetPlotBase_test
@@ -61,12 +61,12 @@ atlas_add_test( InDetPlotBase_test
                 test/InDetPlotBase_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                 LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils TestTools xAODTracking InDetPhysValMonitoringLib
-                POST_EXEC_SCRIPT "nopost.sh"
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 atlas_add_test( ValidateXml_test
                 SCRIPT "xmllint ${CMAKE_CURRENT_SOURCE_DIR}/share/InDetPVMPlotDefRun2.xml --schema ${CMAKE_CURRENT_SOURCE_DIR}/share/hdefSchema.xsd --loaddtd --noent --noout"
-                POST_EXEC_SCRIPT "nopost.sh" 
+                POST_EXEC_SCRIPT noerror.sh
 )
 
 

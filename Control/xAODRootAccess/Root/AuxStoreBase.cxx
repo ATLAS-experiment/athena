@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "xAODRootAccess/tools/AuxStoreBase.h"
@@ -190,6 +190,12 @@ void* AuxStoreBase::getDecoration(SG::auxid_t auxid, std::size_t size,
   return result;
 }
 
+SG::auxid_set_t AuxStoreBase::getCopyIDs (bool warnUnlocked /*= false*/) const
+{
+  return SG::getCopyIDs (getAuxIDs(), getDecorIDs(), warnUnlocked, {});
+}
+
+
 bool AuxStoreBase::isDecoration(SG::auxid_t auxid) const {
   if (m_locked) {
     if (auxid < m_data.m_isDecoration.size() && m_data.m_isDecoration[auxid]) {
@@ -303,6 +309,20 @@ SG::IAuxTypeVector* AuxStoreBase::linkedVector(SG::auxid_t auxid) {
     return m_data.m_transientStore->linkedVector(auxid);
   }
   return nullptr;
+}
+
+void AuxStoreBase::toTransient( const EventContext& ctx ) {
+  // Guard against multi-threaded execution:
+  guard_t guard(m_mutex1);
+
+  for (auto& v : m_data.m_vecs) {
+    if (v) {
+      v->toTransient( ctx );
+    }
+  }
+  if (m_data.m_transientStore) {
+    m_data.m_transientStore->toTransient(ctx);
+  }
 }
 
 void* AuxStoreBase::getData(SG::auxid_t auxid, std::size_t size,

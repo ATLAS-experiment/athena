@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_BADTILERETRIEVER_H
 #define JIVEXML_BADTILERETRIEVER_H
-
-
 
 #include "CaloEvent/CaloCellContainer.h"
 
@@ -36,33 +34,29 @@ namespace JiveXML{
    *    - location in phi and eta
    *    - identifier and energy of each cell 
    */
-  class BadTileRetriever : virtual public IDataRetriever,
-                                   public AthAlgTool {
+  class BadTileRetriever : public extends<AthAlgTool,IDataRetriever> {
     
     public:
-      
-      /// Standard Constructor
-      BadTileRetriever(const std::string& type,const std::string& name,const IInterface* parent);
-      
+      using base_class::base_class;
       /// Retrieve all the data
-      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool); 
+      virtual StatusCode retrieve(ToolHandle<IFormatTool> &FormatTool) override;
       const DataMap getBadTileData(const CaloCellContainer* cellContainer);
 
       /// Return the name of the data type
-      virtual std::string dataTypeName() const { return "BadTILE"; };
+      virtual std::string dataTypeName() const override{ return "BadTILE"; };
 	
       ///Default AthAlgTool methods
-      StatusCode initialize();
+      virtual StatusCode initialize() override;
 
     private:
       void calcTILELayerSub(Identifier&);
-      const CaloCell_ID*   m_calocell_id;
+      const CaloCell_ID*   m_calocell_id{};
     
       SG::ReadHandleKey<CaloCellContainer> m_sgKey{this, "StoreGateKey", "AllCalo", "Name of the CaloCellContainer"};
-      double m_cellThreshold;
-      int m_cellEnergyPrec;
-      bool m_tile;
-      bool m_doBadTile;
+      Gaudi::Property<double> m_cellThreshold{this, "CellThreshold", 50.};
+      Gaudi::Property<int> m_cellEnergyPrec{this, "CellEnergyPrec", 3};
+      Gaudi::Property<bool> m_tile{this, "RetrieveTILE", true};
+      Gaudi::Property<bool> m_doBadTile{this, "DoBadTile", false};
 
       DataVect m_sub;
   };

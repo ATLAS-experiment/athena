@@ -130,78 +130,78 @@ typedef struct _GL2PSbsptree2d GL2PSbsptree2d;
 
 struct _GL2PSbsptree2d {
   GL2PSplane plane;
-  GL2PSbsptree2d *front, *back;
+  GL2PSbsptree2d *front{}, *back{};
 };
 
-typedef struct {
+struct GL2PSlist {
   GLint nmax, size, incr, n;
-  char *array;
-} GL2PSlist;
+  char *array{};
+};
 
 typedef struct _GL2PSbsptree GL2PSbsptree;
 
 struct _GL2PSbsptree {
   GL2PSplane plane;
-  GL2PSlist *primitives;
-  GL2PSbsptree *front, *back;
+  GL2PSlist *primitives{};
+  GL2PSbsptree *front{}, *back{};
 };
 
-typedef struct {
+struct GL2PSvertex {
   GL2PSxyz xyz;
   GL2PSrgba rgba;
-} GL2PSvertex;
+};
 
-typedef struct {
+struct GL2PStriangle {
   GL2PSvertex vertex[3];
-  int prop;
-} GL2PStriangle;
+  int prop{};
+};
 
-typedef struct {
+struct GL2PSstring {
   GLshort fontsize;
-  char *str, *fontname;
+  char *str{}, *fontname{};
   /* Note: for a 'special' string, 'alignment' holds the format
      (PostScript, PDF, etc.) of the special string */
   GLint alignment;
   GLfloat angle;
-} GL2PSstring;
+};
 
-typedef struct {
+struct GL2PSimage {
   GLsizei width, height;
   /* Note: for an imagemap, 'type' indicates if it has already been
      written to the file or not, and 'format' indicates if it is
      visible or not */
   GLenum format, type;
-  GLfloat *pixels;
-} GL2PSimage;
+  GLfloat *pixels{};
+};
 
 typedef struct _GL2PSimagemap GL2PSimagemap;
 
 struct _GL2PSimagemap {
-  GL2PSimage *image;
-  GL2PSimagemap *next;
+  GL2PSimage *image{};
+  GL2PSimagemap *next{};
 };
 
-typedef struct {
+struct  GL2PSprimitive {
   GLshort type, numverts;
   GLushort pattern;
-  char boundary, offset, culled;
+  char boundary{}, offset{}, culled{};
   GLint factor;
   GLfloat width;
-  GL2PSvertex *verts;
+  GL2PSvertex *verts{};
   union {
     GL2PSstring *text;
     GL2PSimage *image;
-  } data;
-} GL2PSprimitive;
+  } data{};
+};
 
-typedef struct {
+struct  GL2PScompress {
 #if defined(GL2PS_HAVE_ZLIB)
-  Bytef *dest, *src, *start;
+  Bytef *dest{}, *src{}, *start{};
   uLongf destLen, srcLen;
 #else
   int dummy;
 #endif
-} GL2PScompress;
+};
 
 struct GL2PSpdfgroup {
   GL2PSlist* ptrlist{};
@@ -209,19 +209,19 @@ struct GL2PSpdfgroup {
   int gsobjno{}, fontobjno{}, imobjno{}, shobjno{}, maskshobjno{}, trgroupobjno{};
 };
 
-typedef struct {
+struct  GL2PScontext {
   /* General */
   GLint format, sort, options, colorsize, colormode, buffersize;
-  char *title, *producer, *filename;
+  char *title{}, *producer{}, *filename{};
   GLboolean boundary, blending;
-  GLfloat *feedback, offset[2], lastlinewidth;
+  GLfloat *feedback{}, offset[2], lastlinewidth;
   GLint viewport[4], blendfunc[2], lastfactor;
-  GL2PSrgba *colormap, lastrgba, threshold, bgcolor;
+  GL2PSrgba *colormap{}, lastrgba, threshold, bgcolor;
   GLushort lastpattern;
   GL2PSvertex lastvertex;
-  GL2PSlist *primitives, *auxprimitives;
-  FILE *stream;
-  GL2PScompress *compress;
+  GL2PSlist *primitives{}, *auxprimitives{};
+  FILE *stream{};
+  GL2PScompress *compress{};
   GLboolean header;
 
   /* BSP-specific */
@@ -229,36 +229,36 @@ typedef struct {
 
   /* Occlusion culling-specific */
   GLboolean zerosurfacearea;
-  GL2PSbsptree2d *imagetree;
-  GL2PSprimitive *primitivetoadd;
+  GL2PSbsptree2d *imagetree{};
+  GL2PSprimitive *primitivetoadd{};
 
   /* PDF-specific */
-  int streamlength;
-  GL2PSlist *pdfprimlist, *pdfgrouplist;
-  int *xreflist;
-  int objects_stack; /* available objects */
-  int extgs_stack; /* graphics state object number */
-  int font_stack; /* font object number */
-  int im_stack; /* image object number */
-  int trgroupobjects_stack; /* xobject numbers */
-  int shader_stack; /* shader object numbers */
-  int mshader_stack; /* mask shader object numbers */
+  int streamlength{};
+  GL2PSlist *pdfprimlist{}, *pdfgrouplist{};
+  int *xreflist{};
+  int objects_stack{}; /* available objects */
+  int extgs_stack{}; /* graphics state object number */
+  int font_stack{}; /* font object number */
+  int im_stack{}; /* image object number */
+  int trgroupobjects_stack{}; /* xobject numbers */
+  int shader_stack{}; /* shader object numbers */
+  int mshader_stack{}; /* mask shader object numbers */
 
   /* for image map list */
-  GL2PSimagemap *imagemap_head;
-  GL2PSimagemap *imagemap_tail;
-} GL2PScontext;
+  GL2PSimagemap *imagemap_head{};
+  GL2PSimagemap *imagemap_tail{};
+};
 
-typedef struct {
-  void  (*printHeader)(void);
-  void  (*printFooter)(void);
-  void  (*beginViewport)(GLint viewport[4]);
-  GLint (*endViewport)(void);
-  void  (*printPrimitive)(void *data);
-  void  (*printFinalPrimitive)(void);
-  const char *file_extension;
-  const char *description;
-} GL2PSbackend;
+struct GL2PSbackend {
+  void  (*printHeader)(void){};
+  void  (*printFooter)(void){};
+  void  (*beginViewport)(GLint viewport[4]){};
+  GLint (*endViewport)(void){};
+  void  (*printPrimitive)(void *data){};
+  void  (*printFinalPrimitive)(void){};
+  const char *file_extension{};
+  const char *description{};
+};
 
 /* The gl2ps context. gl2ps is not thread safe (we should create a
    local GL2PScontext during gl2psBeginPage) */

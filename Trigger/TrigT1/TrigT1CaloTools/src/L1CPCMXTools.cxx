@@ -1,27 +1,30 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <map>
-#include <memory>
-#include <numeric>
-#include <utility> // Temporary
+
 
 #include "TrigConfL1Data/CTPConfig.h"
+#include "L1CPCMXTools.h"
 #include "TrigConfL1Data/ClusterThresholdValue.h"
 #include "TrigConfL1Data/L1DataDef.h"
 #include "TrigConfL1Data/Menu.h"
 #include "TrigConfL1Data/TriggerThreshold.h"
 #include "TrigConfL1Data/TriggerThresholdValue.h"
+#include "TrigConfData/L1Menu.h"
 #include "TrigT1CaloEvent/CPMTobRoI.h"
 #include "TrigT1CaloEvent/EmTauROI.h"
-#include "L1CPCMXTools.h"
 #include "TrigT1CaloUtils/ClusterProcessorModuleKey.h"
 #include "TrigT1CaloUtils/DataError.h"
 #include "TrigT1Interfaces/CPRoIDecoder.h"
 #include "TrigT1Interfaces/CoordinateRange.h"
 #include "TrigT1Interfaces/RecEmTauRoI.h" //// for new getHits function
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
+
+#include <map>
+#include <memory>
+#include <numeric>
+#include <utility> // Temporary
 
 namespace LVL1 {
 
@@ -430,6 +433,8 @@ void L1CPCMXTools::formCMXCPHitsTopo(
     uint8_t crate = tob->crate();
     uint8_t cmx = tob->cmx();
     const uint8_t cpm = tob->cpm();
+    if (cpm<1) continue;
+    //
     const uint8_t chip = tob->chip() >> 1;
     const uint8_t loc = ((tob->chip() & 0x1) << 2) | tob->location();
     const int index = (crate * 2 + cmx) * 4;

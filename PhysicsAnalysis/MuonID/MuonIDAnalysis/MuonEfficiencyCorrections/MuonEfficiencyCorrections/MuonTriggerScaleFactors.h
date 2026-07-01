@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONTRIGGERSCALEFACTORS_H_
@@ -7,19 +7,15 @@
 
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
 #include "AsgTools/AsgTool.h"
-#include "AsgTools/ToolHandle.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
-#include "PATInterfaces/ISystematicsTool.h"
-#include "PATInterfaces/SystematicRegistry.h"
-#include <stdexcept>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <memory>
 
 #include "TDirectory.h"
 
+#include <map>
+#include <memory>
+#include <string>
 #include <unordered_map>
 
 class TH1;
@@ -37,7 +33,7 @@ namespace CP {
             virtual ~MuonTriggerScaleFactors();
 
             virtual StatusCode initialize(void);
-            
+
             // for single lepton triggers
             virtual CorrectionCode getTriggerScaleFactor(const xAOD::MuonContainer& mucont, Double_t& triggersf, const std::string& trigger) const;
 
@@ -56,8 +52,8 @@ namespace CP {
             virtual int getBinNumber(const xAOD::Muon& muon, const std::string& trigger) const;
 
             virtual int getReplica_index(const std::string& sysBaseName, const std::string& trigStr) const;
-      
-            /// Returns whether the trigger is supported by the tool or not. The decision depends on the present (random)RunNumber 
+
+            /// Returns whether the trigger is supported by the tool or not. The decision depends on the present (random)RunNumber
             virtual bool isTriggerSupported(const std::string& trigger) const;
         private:
 
@@ -76,10 +72,10 @@ namespace CP {
             }
 
             StatusCode registerSystematics();
-            
+
             StatusCode LoadTriggerMap(unsigned int year);
 
-            //This function is needed during initialization to parse the histograms to the cache 
+            //This function is needed during initialization to parse the histograms to the cache
             unsigned int encodeHistoName(const std::string &period, const std::string& Trigger, bool isData, const std::string& Systematic, bool isBarrel = true) const;
             //This function is the equivalent during run time to retrieve the histograms from the cache
             unsigned int encodeHistoName(const std::string& Trigger, const TrigMuonEff::Configuration& configuration, const std::string& Systematic, bool isBarrel = true) const;
@@ -94,10 +90,10 @@ namespace CP {
             CorrectionCode getThreshold(Int_t& threshold, const std::string& trigger) const;
 
             std::string getTriggerCorrespondingToDimuonTrigger(const std::string& trigger) const;
-        protected:      
+        protected:
 
             std::string getDataPeriod() const;
-            unsigned int getRunNumber() const;     
+            unsigned int getRunNumber() const;
             unsigned int getYear(unsigned int run) const;
             std::string getDataPeriod(unsigned int run) const;
             std::string getDataPeriod(unsigned int runNumber, unsigned int year) const;
@@ -112,30 +108,32 @@ namespace CP {
 
             std::unordered_map<CP::SystematicSet, CP::SystematicSet> m_systFilter;
 
-            CP::SystematicSet* m_appliedSystematics;
-            std::string m_fileName;
+            CP::SystematicSet *m_appliedSystematics{};
             EfficiencyMap m_efficiencyMap;
             std::map<EffiHistoIdent, std::vector<TH1_Ptr> > m_efficiencyMapReplicaArray;
 
-            std::string m_muonquality;
+            Gaudi::Property<std::string> m_muonQuality {this, "MuonQuality", "Medium", "the muon quality to get the scale factors for"};
+            Gaudi::Property<std::string> m_campaign {this, "Campaign", "", "the MC campaign to get the scale factors for"};
 
             // subfolder to load from the calibration db
-            std::string m_calibration_version;
-            std::string m_custom_dir;
-            std::string m_binning;
-            bool m_allowZeroSF;
-            bool m_experimental;
-      int m_forceYear;
-      std::string m_forcePeriod;
-            //Variables for toy replicas setup
-            std::vector<std::string> m_replicaTriggerList;
-            std::set<std::string> m_replicaSet; //set of triggers for replicas, for fast searching
-            int m_nReplicas;
-            int m_ReplicaRandomSeed ;
+            Gaudi::Property<std::string> m_calibrationVersion {this, "CalibrationVersion", "250731_SummerUpdate", "the calibration version to use"};
+            Gaudi::Property<std::string> m_customInputFolder {this, "CustomInputFolder", "", "the custom input folder to use (debugging only)"};
+            Gaudi::Property<std::map<unsigned int, std::string>> m_customInputFilePerYear {this, "CustomInputFilePerYear", {}, "the custom input file to use per year (debugging only)"};
+            Gaudi::Property<std::string> m_binning {this, "Binning", "fine", "the binning to use"};
 
-            //// Map connecting run and year:
-            static const std::map<unsigned int,int> m_runNumber_year;
+            Gaudi::Property<bool> m_allowZeroSF {this, "AllowZeroSF", false, "if a trigger is not available will return 0 instead of throwing an error. More difficult to spot configuration issues. Use at own risk"};
+            Gaudi::Property<bool> m_experimental {this, "UseExperimental", false, "enable experimental features like single muon SF"};
+            Gaudi::Property<int> m_forceYear {this, "ForceYear", -1, "Only for developers. Never use this in any analysis!!!!!!"};
+            Gaudi::Property<std::string> m_forcePeriod {this, "ForcePeriod", "", "Only for developers. Never use this in any analysis!!!!!!"};
 
+            // Variables for toy replicas setup
+            Gaudi::Property<std::vector<std::string>> m_replicaTriggerList {this, "ReplicaTriggerList", {}, "List of triggers on which we want to generate stat. uncertainty toy replicas."};
+            std::set<std::string> m_replicaSet; // set of triggers for replicas, for fast searching
+            Gaudi::Property<int> m_nReplicas {this, "NReplicas", 100, "Number of generated toy replicas, if replicas are required."};
+            Gaudi::Property<int> m_ReplicaRandomSeed {this, "ReplicaRandomSeed", 12345, "Random seed for toy replica generation."};
+
+            // Map connecting run and year:
+            static const std::map<unsigned int, int> m_runNumber_year;
     };
 
 }

@@ -13,7 +13,6 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "StoreGate/ThinningHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TruthUtils/HepMCHelpers.h"
 
@@ -82,9 +81,8 @@ StatusCode DerivationFramework::GenericTruthThinning::finalize()
 }
 
 // The thinning itself
-StatusCode DerivationFramework::GenericTruthThinning::doThinning() const
+StatusCode DerivationFramework::GenericTruthThinning::doThinning(const EventContext& ctx) const
 {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     
     // Retrieve truth collections
     SG::ThinningHandle<xAOD::TruthParticleContainer> importedTruthParticles

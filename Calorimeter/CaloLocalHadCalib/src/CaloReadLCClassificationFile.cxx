@@ -145,7 +145,7 @@ StatusCode CaloReadLCClassificationFile::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode  CaloReadLCClassificationFile::execute() 
+StatusCode  CaloReadLCClassificationFile::execute(const EventContext& /*ctx*/) 
 { 
   return StatusCode::SUCCESS;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/TTOnlineID.h"
@@ -452,12 +452,12 @@ int TTOnlineID::initLevelsFromDict()
   m_channel_impl   = region.implementation(m_channel_index);
 
   ATH_MSG_DEBUG("[initLevelsFromDict] (11) decode index and bit fields for each level: ");
-  ATH_MSG_DEBUG("[initLevelsFromDict] > calo          " << m_calo_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > detzside  "  << m_calo_detzside_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > crate         " << m_crate_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > module        " << m_module_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > submodule     " << m_submodule_impl.show_to_string());
-  ATH_MSG_DEBUG("[initLevelsFromDict] > channel       " << m_channel_impl.show_to_string());
+  ATH_MSG_DEBUG("[initLevelsFromDict] > calo          " << m_calo_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > detzside  "  << m_calo_detzside_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > crate         " << m_crate_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > module        " << m_module_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > submodule     " << m_submodule_impl);
+  ATH_MSG_DEBUG("[initLevelsFromDict] > channel       " << m_channel_impl);
 
   return(0) ;
 }

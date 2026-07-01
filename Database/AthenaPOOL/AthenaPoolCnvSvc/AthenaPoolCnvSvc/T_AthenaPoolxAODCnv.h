@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaPoolCnvSvc/T_AthenaPoolxAODCnv.h
@@ -34,6 +34,8 @@
  * For reading, we read the object either directly
  * or using one of the TP converters, depending on the saved GUID.
  * The link to the aux store is then set based on the SG key.
+ * We also call SG::ToTransient<T>::toTransient (without an EventContext)
+ * on the object we read.
  */
 template <class XAOD, class ... TPCNVS>
 class T_AthenaPoolxAODCnv
@@ -73,7 +75,7 @@ public:
    * Returns a newly-allocated transient object.
    * Errors are reported by raising exceptions.
    */
-  virtual XAOD* createTransientWithKey (const std::string& key) override;
+  virtual XAOD* createTransientWithKey (const Token* token, const std::string& key) override;
 
   
 private:

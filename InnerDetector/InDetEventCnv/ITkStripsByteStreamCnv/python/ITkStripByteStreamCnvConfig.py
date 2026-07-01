@@ -26,6 +26,8 @@ def ITkStripRawContByteStreamToolProviderToolCfg(flags, name="SCTRawContByteStre
 def ITkStripsRodEncoderCfg(flags, name='ITkStripRodEncoder', **kwargs):
     acc = ComponentAccumulator()    
     acc.merge(ITkStripReadoutGeometryCfg(flags))
+    if "DataRateMonitoringTool" not in kwargs:
+        kwargs.setdefault("DataRateMonitoringTool", acc.getPrimaryAndMerge(ITkStripDataRateMonToolCfg(flags, doExpertPlots=False)))    
     kwargs.setdefault("ITkStripCablingTool", acc.popToolsAndMerge(ITkStripCablingToolCfg(flags)))
     acc.setPrivateTools(CompFactory.ITkStripsRodEncoder(name,**kwargs))
     return acc
@@ -64,3 +66,19 @@ def ITkStripsEventFlagWriterCfg(flags, **kwargs):
 
     return acc
 
+def ITkStripDataRateMonToolCfg(flags,
+                               name = "ITkStripDataRateMonTool",
+                               doExpertPlots = False,
+                               HistogramGroup: str="DataRateMon",
+                               FileName: str='ITkStripEncodingMonitoring.root') -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    histSvc = CompFactory.THistSvc(Output = [f"{HistogramGroup} DATAFILE='{FileName}', OPT='RECREATE'"] )
+    acc.addService(histSvc)
+
+    monitor = CompFactory.ITkStripDataRateMonTool(name)
+    monitor.HistSvc = histSvc
+    monitor.DoExpertPlots = doExpertPlots
+
+    acc.addPublicTool(monitor, primary=True)
+    return acc

@@ -1,6 +1,6 @@
 """The function in this module you should look to be using is meta_diff"""
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # This script reads metadata from a given file
 
 import logging
@@ -195,7 +195,7 @@ def print_diff_dict_keys(parent_key, obj1, obj2, diff_format, filter_key, key_on
     return result
 
 
-def compare(obj1, obj2, parent_key=None, ordered=False, diff_format="simple", filter_key=None, key_only=False):
+def compare(obj1, obj2, parent_key=None, ordered=False, diff_format="simple", filter_key=None, filter_metadata_items=None, key_only=False):
     """Caclulate difference between two objects
 
     Keyword arguments:
@@ -218,6 +218,12 @@ def compare(obj1, obj2, parent_key=None, ordered=False, diff_format="simple", fi
     if isinstance(obj1, type(obj2)):
 
         if isinstance(obj1, dict):
+            # filter out ignored metadata items
+            if parent_key == "metadata_items":
+                for key in set(list(obj1.keys()) + list(obj2.keys())):
+                    if filter_metadata_items is not None and filter_metadata_items(key) is False:
+                        obj1.pop(key, None)
+                        obj2.pop(key, None)
 
             if sorted(obj1.keys()) != sorted(obj2.keys()):
                 result += [
@@ -230,7 +236,7 @@ def compare(obj1, obj2, parent_key=None, ordered=False, diff_format="simple", fi
                     else:
                         child_key = key
                     result += compare(
-                        obj1[key], obj2[key], child_key, ordered, diff_format, filter_key, key_only
+                        obj1[key], obj2[key], child_key, ordered, diff_format, filter_key, filter_metadata_items, key_only
                     )
 
         else:
@@ -242,7 +248,7 @@ def compare(obj1, obj2, parent_key=None, ordered=False, diff_format="simple", fi
     return result
 
 
-def compare_dicts(test, reference, ordered=False, diff_format="simple", filter_key = None, key_only = False):
+def compare_dicts(test, reference, ordered=False, diff_format="simple", filter_key=None, filter_metadata_items=None, key_only=False):
     """Show the differences between two dictionaries
 
     Args:
@@ -272,6 +278,7 @@ def compare_dicts(test, reference, ordered=False, diff_format="simple", filter_k
             ordered=ordered,
             diff_format=diff_format,
             filter_key=filter_key,
+            filter_metadata_items=filter_metadata_items,
             key_only=key_only
         )
     return result
@@ -333,6 +340,30 @@ def meta_diff(
         for i in range(len(drop)):
             drop[i] = re.compile( drop[i] )
 
+    def filter_metadata_items(key):
+        key_str = str(key)  # force conversion to plain Python string
+
+        if drop is not None:
+            for drop_key in drop:
+                if not regex:
+                    if not drop_key.startswith("metadata_items/"):
+                        continue
+
+                    drop_key = drop_key[len("metadata_items/"):]
+
+                    if key_str.startswith(drop_key):
+                        return False
+                else:
+                    if not drop_key.pattern.startswith("metadata_items/"):
+                        continue
+
+                    drop_key = re.compile(drop_key.pattern[len("metadata_items/"):])
+
+                    if drop_key.match(key_str):
+                        return False
+
+        return True
+
     def filter_key(key):
         key_str = str(key)  # force conversion to plain Python string
 
@@ -358,6 +389,7 @@ def meta_diff(
         ordered=ordered,
         diff_format=diff_format,
         filter_key=filter_key,
+        filter_metadata_items=filter_metadata_items,
         key_only=key_only
     )
 

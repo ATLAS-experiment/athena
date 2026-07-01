@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscRdoToCscDigit.h"
@@ -99,8 +99,8 @@ StatusCode CscRdoToCscDigit::decodeCsc(const CscRawDataCollection* rdoColl, CscD
             if (m_idHelperSvc->cscIdHelper().get_hash(stationId, coll_hash, &cscContext)) {
                 ATH_MSG_WARNING("Unable to get CSC digiti collection hash id "
                                 << "context begin_index = " << cscContext.begin_index()
-                                << " context end_index  = " << cscContext.end_index() << " the identifier is ");
-                stationId.show();
+                                << " context end_index  = " << cscContext.end_index() << " the identifier is "
+                                <<stationId);
             }
 
             if (oldId != stationId) {

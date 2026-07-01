@@ -6,10 +6,10 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from AthenaCommon import Logging
 
-from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
+from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, InDetParameterization, LArParameterization
 
 #the physics region tools
-from G4AtlasTools.G4PhysicsRegionConfig import SX1PhysicsRegionToolCfg, BedrockPhysicsRegionToolCfg, CavernShaftsConcretePhysicsRegionToolCfg, PixelPhysicsRegionToolCfg, SCTPhysicsRegionToolCfg, TRTPhysicsRegionToolCfg, TRT_ArPhysicsRegionToolCfg,ITkPixelPhysicsRegionToolCfg,ITkStripPhysicsRegionToolCfg,HGTDPhysicsRegionToolCfg,BeampipeFwdCutPhysicsRegionToolCfg, FWDBeamLinePhysicsRegionToolCfg, CALOPhysicsRegionToolCfg, EMBPhysicsRegionToolCfg, EMECPhysicsRegionToolCfg, HECPhysicsRegionToolCfg, FCALPhysicsRegionToolCfg, FCAL2ParaPhysicsRegionToolCfg, EMECParaPhysicsRegionToolCfg, FCALParaPhysicsRegionToolCfg, PreSampLArPhysicsRegionToolCfg, DeadMaterialPhysicsRegionToolCfg #, FwdRegionPhysicsRegionToolCfg
+from G4AtlasTools.G4PhysicsRegionConfig import SX1PhysicsRegionToolCfg, BedrockPhysicsRegionToolCfg, CavernShaftsConcretePhysicsRegionToolCfg, PixelPhysicsRegionToolCfg, SCTPhysicsRegionToolCfg, TRTPhysicsRegionToolCfg, TRT_ArPhysicsRegionToolCfg,ITkPixelPhysicsRegionToolCfg,ITkStripPhysicsRegionToolCfg,HGTDPhysicsRegionToolCfg,BeampipeFwdCutPhysicsRegionToolCfg, FWDBeamLinePhysicsRegionToolCfg, InDetPhysicsRegionToolCfg, CALOPhysicsRegionToolCfg, EMBPhysicsRegionToolCfg, EMECPhysicsRegionToolCfg, HECPhysicsRegionToolCfg, FCALPhysicsRegionToolCfg, FCAL2ParaPhysicsRegionToolCfg, EMECParaPhysicsRegionToolCfg, FCALParaPhysicsRegionToolCfg, PreSampLArPhysicsRegionToolCfg, DeadMaterialPhysicsRegionToolCfg #, FwdRegionPhysicsRegionToolCfg
 from G4AtlasTools.G4PhysicsRegionConfig import DriftWallPhysicsRegionToolCfg, DriftWall1PhysicsRegionToolCfg, DriftWall2PhysicsRegionToolCfg, MuonSystemFastPhysicsRegionToolCfg
 
 #the field config tools
@@ -532,6 +532,8 @@ def ATLAS_RegionCreatorListCfg(flags):
                 # TODO: should we support old geometry tags with Run == "UNDEFINED" and flags.GeoModel.IBLLayout not in ["noIBL", "UNDEFINED"]?
                 regionCreatorList += [result.popToolsAndMerge(TRT_ArPhysicsRegionToolCfg(flags))] #'TRT_KrPhysicsRegionTool'
         # FIXME dislike the ordering here, but try to maintain the same ordering as in the old configuration.
+        if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
+                regionCreatorList += [result.popToolsAndMerge(InDetPhysicsRegionToolCfg(flags))]
         if flags.Detector.GeometryBpipe:
             if flags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
                 regionCreatorList += [result.popToolsAndMerge(BeampipeFwdCutPhysicsRegionToolCfg(flags))]

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaPython/python/Bindings.py
 # @author: Sebastien Binet <binet@cern.ch>
@@ -121,7 +121,7 @@ def py_svc(svcName, createIf=True, iface=None):
     from GaudiPython.Bindings import gbl,InterfaceCast
     svcLocator = gbl.Gaudi.svcLocator()
     svc = gbl.GaudiPython.Helper.service(svcLocator, fullName, createIf)
-    if svc and not(iface is None):
+    if svc and iface is not None:
         svc = InterfaceCast(iface).cast(svc)
 
     # if the component is actually a py-component,
@@ -173,7 +173,7 @@ def py_tool(toolName, createIf=True, iface=None):
     _py_tool = gbl.GaudiPython.Helper.tool
     toolSvc = py_svc('ToolSvc', iface='IToolSvc')
     tool = _py_tool(toolSvc, toolType, toolName, 0, createIf)
-    if tool and not(iface is None):
+    if tool and iface is not None:
         tool = InterfaceCast(iface).cast(tool)
 
     # if the component is actually a py-component,
@@ -354,6 +354,11 @@ def _py_init_THistSvc():
     ITHistSvc._cpp_regEfficiency = ITHistSvc.regEfficiency
     ITHistSvc._cpp_regTree = ITHistSvc.regTree
 
+    _cpp_getHist = ROOT.AthenaInternal.getHist
+    _cpp_getGraph = ROOT.AthenaInternal.getGraph
+    _cpp_getEfficiency = ROOT.AthenaInternal.getEfficiency
+    _cpp_getTree = ROOT.AthenaInternal.getTree
+
     def book(self, oid, obj=None, *args, **kw):
         """book a histogram, profile or tree
          @param oid is the unique object identifier even across streams,
@@ -429,10 +434,9 @@ def _py_init_THistSvc():
             return self._py_cache[oid]
         except KeyError:
             pass
-        def _get_helper(klass, hsvc, meth, oid, update_cache=True):
-            makeNullPtr = ROOT.MakeNullPointer
-            o = makeNullPtr(klass)
-            if meth(oid, o).isSuccess():
+        def _get_helper(hsvc, func, oid, update_cache=True):
+            sc, o = func(hsvc, oid)
+            if sc.isSuccess():
                 if update_cache:
                     hsvc._py_cache[oid] = o
                 return o
@@ -441,13 +445,13 @@ def _py_init_THistSvc():
             if isinstance(klass, str):
                 klass = getattr(ROOT, klass)
             if issubclass(klass, (ROOT.TH1,)):
-                return _get_helper(klass, self, self.getHist, oid)
+                return _get_helper(self, _cpp_getHist, oid)
             if issubclass(klass, (ROOT.TGraph,)):
-                return _get_helper(klass, self, self.getGraph, oid)
+                return _get_helper(self, _cpp_getGraph, oid)
             if issubclass(klass, (ROOT.TEfficiency,)):
-                return _get_helper(klass, self, self.getEfficiency, oid)
+                return _get_helper(self, _cpp_getEfficiency, oid)
             if issubclass(klass, (ROOT.TTree,)):
-                return _get_helper(klass, self, self.getTree, oid)
+                return _get_helper(self, _cpp_getTree, oid)
             raise RuntimeError('unsupported type [%r]'%klass)
 
         # as we are sentenced to crawl through all these std::vector<str>
@@ -456,27 +460,26 @@ def _py_init_THistSvc():
         # first update histos
         oids = [n for n in self.getHists() if n not in self._py_cache.keys()]
         for name in oids:
-            obj = _get_helper(ROOT.TH1, self, self.getHist, name,
-                              update_cache=False)
+            obj = _get_helper(self, _cpp_getHist, name, update_cache=False)
             if obj:
                 # now try with real class
                 klass = getattr(ROOT, obj.ClassName())
-                obj = _get_helper(klass, self, self.getHist, name)
+                obj = _get_helper(self, _cpp_getHist, name)
 
         # then graphs
         oids = [n for n in self.getGraphs() if n not in self._py_cache.keys()]
         for name in oids:
-            _get_helper(ROOT.TGraph, self, self.getGraph, name)
+            _get_helper(self, _cpp_getGraph, name)
 
         # then efficiencies
         oids = [n for n in self.getEfficiencies() if n not in self._py_cache.keys()]
         for name in oids:
-            _get_helper(ROOT.TEfficiency, self, self.getEfficiency, name)
+            _get_helper(self, _cpp_getEfficiency, name)
         
         # finally try ttrees
         oids = [n for n in self.getTrees() if n not in self._py_cache.keys()]
         for name in oids:
-            _get_helper(ROOT.TTree, self, self.getTree, name)
+            _get_helper(self, _cpp_getTree, name)
 
         ## all done, crossing fingers
         return self._py_cache[oid]

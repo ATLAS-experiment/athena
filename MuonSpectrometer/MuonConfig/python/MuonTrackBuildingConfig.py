@@ -344,7 +344,7 @@ def MuonChamberHoleRecoveryToolCfg(flags, name="MuonChamberHoleRecoveryTool", **
     if not flags.Detector.GeometryMM:
         kwargs.setdefault("MMPrepDataContainer","")
 
-    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')    
+    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs')    
     kwargs.setdefault("EDMPrinter", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags) ))
 
     if "PullCalculator" not in kwargs:
@@ -355,12 +355,6 @@ def MuonChamberHoleRecoveryToolCfg(flags, name="MuonChamberHoleRecoveryTool", **
     
     result.setPrivateTools(CompFactory.Muon.MuonChamberHoleRecoveryTool(name, **kwargs))
     return result
-
-def EMEO_MuonChamberHoleRecoveryToolCfg(flags, name = "MuonChamberRecovery_EMEO"):   
-    return MuonChamberHoleRecoveryToolCfg(flags,
-                                         name=name,
-                                         sTgcPrepDataContainer="",
-                                         MMPrepDataContainer="")
 
 def MuonTrackSteeringCfg(flags, name="MuonTrackSteering", **kwargs):
     Muon__MuonTrackSteering=CompFactory.Muon.MuonTrackSteering
@@ -457,29 +451,6 @@ def MuonTrackSelectorCfg(flags, name = "MuonTrackSelectorTool", **kwargs):
     result.setPrivateTools(theTool)
     return result
 
-def EMEO_MuPatTrackBuilderCfg(flags, name="MuPatTrackBuilder_EMEO", **kwargs):
-    result = ComponentAccumulator()
-
-    recovery_tool = result.getPrimaryAndMerge(EMEO_MuonChamberHoleRecoveryToolCfg(flags))
-    acc = MooTrackBuilderCfg(flags, 
-                             name = "MooMuonTrackBuilder_EMEO",
-                             ChamberHoleRecoveryTool = recovery_tool)
-    
-    track_builder= result.getPrimaryAndMerge(acc)
-
-    acc = MuonTrackSteeringCfg(flags,
-                               name = "MuonTrackSteering_EMEO",
-                               TrackBuilderTool = track_builder)
-    track_steering = acc.getPrimary()
-    result.merge(acc)
-
-    kwargs.setdefault("TrackSteering", track_steering)
-    kwargs.setdefault("MuonSegmentCollection", "TrackMuonSegmentsEMEO")
-    kwargs.setdefault("SpectrometerTrackOutputLocation", "EMEO_MuonSpectrometerTracks")
-
-    the_alg = CompFactory.MuPatTrackBuilder(name = name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
 
 def MuPatTrackBuilderCfg(flags, name = "MuPatTrackBuilder", **kwargs):
     result=ComponentAccumulator()
@@ -510,8 +481,6 @@ def MuonTrackBuildingCfg(flags, name = "MuPatTrackBuilder", **kwargs):
     result.merge(MuonSegmentNameFixCfg(flags))    
     result.merge(MuPatTrackBuilderCfg(flags))
     
-    if flags.Muon.runCommissioningChain:
-        result.merge(EMEO_MuPatTrackBuilderCfg(flags))      
     return result
     
 

@@ -1,12 +1,14 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultConditionsTags, defaultGeometryTags
     flags = initConfigFlags()
     flags.Input.isMC = True
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
     flags.Input.Files = defaultTestFiles.RDO_RUN4
     flags.Detector.GeometryITkStrip = True
 
@@ -15,7 +17,8 @@ if __name__ == "__main__":
     # for debugging
     #from AthenaCommon.Constants import DEBUG
     #flags.Exec.OutputLevel=DEBUG
-    
+
+    flags.fillFromArgs()
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

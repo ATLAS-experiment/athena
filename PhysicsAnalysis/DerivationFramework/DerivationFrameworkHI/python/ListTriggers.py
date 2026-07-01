@@ -473,6 +473,53 @@ def HION4SkimmingTriggers2024():
 
     return triggers
 
+def HION4SkimmingTriggers2025():
+    '''primary and backup triggers for yy2ll and yy2yy processes'''
+    triggers  = []
+    triggers += ["HLT_mu3_hi_FgapAC5_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu3_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu4_hi_FgapAC5_L1MU3V_VjTE50"]
+    triggers += ["HLT_mu4_L1MU3V_VjTE50"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_1XOR5_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM5_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt0p8_L1eEM2_TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt0p8_L1eTAU2_TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_hi_FgapAC5_L123INVM-27DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sptrk_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_hi_FgapAC5_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt0p5_hi_FgapAC5_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eEM2_TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1eTAU2_TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1CALMTEA_eEM2_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1CALMTEA_DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1DPHI-2eEM1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1CALMTEA_DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1DPHI-2eEM1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_2g0_etcut_L1CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eEM1_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1CALMTEA_eEM2_VjTE200"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1CALMTEA_23INVM-27DPHI-2eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1CALMTEA_DPHI-2eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1DPHI-2eTAU1_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM2_VjTE200_EMPTY"]
+    triggers += ["HLT_mb_sp_vpix60_hi_FgapAC5_L1eEM5_VjTE200_EMPTY"]
+
+    return triggers
+
 def HION4SkimmingTriggersALL():
     triggers  = HION4SkimmingTriggers2015()
     triggers += HION4SkimmingTriggers2016()
@@ -480,6 +527,7 @@ def HION4SkimmingTriggersALL():
     triggers += HION4SkimmingTriggers2018Support()
     triggers += HION4SkimmingTriggers2023()
     triggers += HION4SkimmingTriggers2024()
+    triggers += HION4SkimmingTriggers2025()
 
     return triggers
 
@@ -853,7 +901,262 @@ def HION12triggers2018():
 
     return triggers
 
-def HION12nJetCuts2018():
+def HION12SkimmingTriggersRun2():
+    triggers  = HION12MBtriggers2018()
+    triggers += HION12triggers2018()
+
+    return triggers
+
+
+def HION12MBtriggers2023():
+    triggers  = []
+
+    # Photo-nuclear min-bias triggers
+    triggers += ["HLT_mb_sptrk_L1VTE50"]
+    triggers += ["HLT_mb_sptrk_L1TRT_VTE20"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_A_C_VTE50"]
+    triggers += ["HLT_mb_sptrk_L1MBTS_1_1_VTE50"]
+    triggers += ["HLT_noalg_L1ZDC_XOR_VTE200"]
+    triggers += ["HLT_noalg_L1MBTS_1_VTE50"]
+    triggers += ["HLT_noalg_L1TRT_VTE20"]
+    triggers += ["HLT_noalg_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_noalg_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_noalg_L11ZDC_NZDC_TE5_VTE200"]
+
+    return triggers
+
+def HION12MBtriggers2024():
+    triggers  = []
+
+    # Photo-nuclear min-bias triggers
+    triggers += ["HLT_mb_sptrk_L1ZDC_A_C_VjTE50"]
+    triggers += ["HLT_mb_sptrk_L1MBTS_1_1_VjTE50"]
+    triggers += ["HLT_noalg_L1TRT_VjTE50"]
+    triggers += ["HLT_mb_sptrk_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1TRT_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L11ZDC_A_1ZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_1XOR5_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1TRT_1ZDC_NZDC_VjTE200"]
+
+    return triggers
+
+def HION12MBtriggers2025():
+    triggers  = []
+
+    # Photo-nuclear min-bias triggers with vpix800
+    triggers += ["HLT_mb_sptrk_sp_vpix800_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt0p8_sp_vpix800_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt0p8_sp_vpix800_trk2_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt1_sp_vpix800_trk2_L1TRT_ZDC_OR_VjTE200"]
+    # Photo-nuclear min-bias triggers without vpix800
+    triggers += ["HLT_mb_sptrk_pt1_trk2_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt0p8_trk2_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_pt0p8_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1ZDC_XOR_VjTE200"]
+    # with ZDC veto
+    triggers += ["HLT_mb_sptrk_pt1_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_mb_sptrk_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+
+    return triggers
+
+def HION12triggers2023():
+    triggers  = []
+ 
+    # UPC jet triggers: pflow jets and HT cut, used starting from run 462576
+    triggers += ["HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j15a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j15a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j15a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j30a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j40a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200"]
+
+    # supporting jet triggers - Pflow version only
+    triggers += ["HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j15a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j30a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j40a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200_UNPAIRED_ISO"]
+    triggers += ["HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200_UNPAIRED_ISO"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j15a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200_UNPAIRED_ISO"]
+    triggers += ["HLT_j0_HT300XX15ptXX0eta490XXveto_j15a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200_UNPAIRED_ISO"]
+    triggers += ["HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_VTE200"]
+    triggers += ["HLT_j0_HT300XX10ptXX0eta490XXveto_j10a_pf_jes_ftf_L1ZDC_XOR_VTE200"]
+    triggers += ["HLT_j40a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200"]
+
+    # EM topo jet triggers, primary in runs up to 462022
+    triggers += ["HLT_j20a_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j20a_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j20a_L11ZDC_NZDC_TE5_VTE200"]
+    triggers += ["HLT_j15a_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j15a_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j15a_L11ZDC_NZDC_TE5_VTE200"]
+    triggers += ["HLT_j10a_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j10a_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j10a_L11ZDC_NZDC_TE5_VTE200"]
+
+    # EM PFlow jet triggers without HT, used from run 462107
+    triggers += ["HLT_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j10a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j10a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200"]
+    triggers += ["HLT_j15a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j15a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j15a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200"]
+    triggers += ["HLT_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200"]
+    triggers += ["HLT_j20a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200"]
+    triggers += ["HLT_j20a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200"]
+
+    return triggers
+
+def HION12triggers2024():
+    triggers  = []
+
+    # UPC jet triggers
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10_pf_jes_ftf_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10_pf_jes_ftf_L1TRT_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j20a_pf_jes_ftf_L1ZDC_XOR_jTE10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j20a_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1ZDC_XOR_jTE10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1ZDC_XOR_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L11ZDC_NZDC_jJ10_VjTE200"]
+
+    # supporting
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j20a_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j40a_pf_jes_ftf_L15ZDC_A_5ZDC_C_jTE5_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200_UNPAIRED_ISO"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1VZDC_A_VZDC_C_jTE5_VjTE200_UNPAIRED_ISO"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200_UNPAIRED_ISO"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1ZDC_XOR_jTE5_VjTE200_UNPAIRED_ISO"]
+
+    return triggers
+
+def HION12triggers2025():
+    triggers  = []
+
+    # UPC jet triggers
+    # 0n0n chains with jJ10
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ10_VjTE200"]
+
+    triggers += ["HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ10_VjTE200"]
+    # 0n0n fwd jets
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10f_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15f_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j20f_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30f_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ10p30ETA49_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j40f_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ10p30ETA49_VjTE200"]
+
+    triggers += ["HLT_j10f_preselVETOMULT11a10_pf_jes_ftf_L1ESP_VZDC_A_VZDC_C_jJ5p30ETA49_VjTE200"]
+
+    # Xn0n chains
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1ZDC_XOR_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1ZDC_XOR_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j20a_pf_jes_ftf_L1ZDC_XOR_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L1ESP_ZDC_XOR_jJ10_VjTE200"]
+
+    triggers += ["HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_ZDC_XOR_jJ10_VjTE200"]
+    # Xn0n fwd jets
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10f_pf_jes_ftf_L1ESP_ZDC_XOR_jJ5p30ETA49_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15f_pf_jes_ftf_L1ESP_ZDC_XOR_jJ5p30ETA49_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15f_pf_jes_ftf_L1ESP_ZDC_XOR_jJ5p30ETA49_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30f_pf_jes_ftf_L1ESP_ZDC_XOR_jJ10p30ETA49_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j40f_pf_jes_ftf_L1ESP_ZDC_XOR_jJ10p30ETA49_VjTE200"]
+
+    # Xn0n chains with ASYM (unprescaled?)
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1ESP_ASYM0_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1ESP_ASYM1_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1ESP_ASYM3_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1ESP_ASYM0_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1ESP_ASYM1_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1ESP_ASYM3_ZDC_XOR_VjTE200"]
+
+    triggers += ["HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ESP_ASYM0_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ESP_ASYM1_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1ESP_ASYM3_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_ASYM0_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_ASYM1_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_ASYM3_ZDC_XOR_VjTE200"]
+
+    # breakup chains - needed with jTE10?
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j20a_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j40a_pf_jes_ftf_L11ZDC_NZDC_jTE10_VjTE200"]
+    # breakup chains with jJ10
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L11ZDC_NZDC_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L11ZDC_NZDC_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j20a_pf_jes_ftf_L11ZDC_NZDC_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L1ESP_1ZDC_NZDC_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L1ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j30a_pf_jes_ftf_L1ESP_ZDC_5XOR_jJ10_VjTE200"]
+
+    triggers += ["HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_1ZDC_NZDC_jJ10_VjTE200"]
+    triggers += ["HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_5ZDC_A_5ZDC_C_jJ10_VjTE200"]
+    triggers += ["HLT_j30a_preselVETOMULT11a15_pf_jes_ftf_L1ESP_ZDC_5XOR_jJ10_VjTE200"]
+
+    # TRT based triggers
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1TRT_VZDC_A_VZDC_C_VjTE200"] # booseted L1
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1TRT_ZDC_OR_VjTE200"] # boosted L1
+    triggers += ["HLT_j0_MULT0mult11XX10ptXX0eta490_j10a_pf_jes_ftf_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1TRT_VZDC_A_VZDC_C_VjTE200"] # boosted L1
+    triggers += ["HLT_j0_MULT0mult11XX15ptXX0eta490_j15a_pf_jes_ftf_L1TRT_ZDC_OR_VjTE200"] # boosted L1
+
+    triggers += ["HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1TRT_ZDC_OR_VjTE200"]
+    triggers += ["HLT_j10a_preselVETOMULT11a10_pf_jes_ftf_L1TRT_ZDC_XOR_VjTE200"]
+    triggers += ["HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1TRT_VZDC_A_VZDC_C_VjTE200"]
+    triggers += ["HLT_j15a_preselVETOMULT11a15_pf_jes_ftf_L1TRT_ZDC_OR_VjTE200"]
+
+    return triggers
+
+def HION12SkimmingTriggers2023():
+    triggers  = HION12MBtriggers2023()
+    triggers += HION12triggers2023()
+
+    return triggers
+
+def HION12SkimmingTriggers2024():
+    triggers  = HION12MBtriggers2024()
+    triggers += HION12triggers2024()
+
+    return triggers
+
+def HION12SkimmingTriggers2025():
+    triggers  = HION12MBtriggers2025()
+    triggers += HION12triggers2025()
+
+    return triggers
+
+def GetHION12Triggers(project_tag):
+    switcher_HION12 = {
+        'data15_hi': HION12SkimmingTriggersRun2(),
+        'data18_hi': HION12SkimmingTriggersRun2(),
+        'data23_hi': HION12SkimmingTriggers2023(),
+        'data24_hi': HION12SkimmingTriggers2024(),
+        'data25_hi': HION12SkimmingTriggers2025(),
+        }
+
+    return  switcher_HION12.get(project_tag, "Invalid project tag")
+
+def HION12nJetCutsRun2():
     nJetCuts  = [] 
     nJetCuts += ["(count(AntiKt4EMTopoJets.pt > 7.0*GeV) > 0)"]
     nJetCuts += ["(count(AntiKt4LCTopoJets.pt > 7.0*GeV) > 0)"]
@@ -861,12 +1164,31 @@ def HION12nJetCuts2018():
     nJetCuts += ["(count(AntiKt4HIJets.pt > 7.0*GeV) > 0)"]
     nJetCuts += ["(count(AntiKt4HITrackJets.pt > 7.0*GeV) > 0)"]
     nJetCuts += ["(count(AntiKt10LCTopoJets.pt > 7.0*GeV) > 0)"]
-    
+
     return nJetCuts
+
+def HION12nJetCutsRun3():
+    nJetCuts  = []
+    nJetCuts += ["(count(AntiKt4EMPFlowJets.pt > 7.0*GeV) > 0)"]
+    nJetCuts += ["(count(AntiKt4HIJets.pt > 7.0*GeV) > 0)"]
+    nJetCuts += ["(count(AntiKt4HITrackJets.pt > 7.0*GeV) > 0)"]
+
+    return nJetCuts
+
+def GetHION12nJetCuts(project_tag):
+    switcher_HION12 = {
+        'data15_hi': HION12nJetCutsRun2(),
+        'data18_hi': HION12nJetCutsRun2(),
+        'data23_hi': HION12nJetCutsRun3(),
+        'data24_hi': HION12nJetCutsRun3(),
+        'data25_hi': HION12nJetCutsRun3(),
+        }
+
+    return  switcher_HION12.get(project_tag, "Invalid project tag")
 
 def HION14SkimmingTriggersOpenData():
     triggers = []
-    
+
     # Eliminate UCC peak
     triggers += ['HLT_mb_sptrk_ion_L1ZDC_A_C_VTE50']
     triggers += ['HLT_noalg_mb_L1TE50']

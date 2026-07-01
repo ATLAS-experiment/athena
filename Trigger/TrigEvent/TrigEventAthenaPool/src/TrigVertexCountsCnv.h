@@ -35,7 +35,7 @@ public:
   
 protected:
   TrigVertexCounts_PERS* createPersistent(TrigVertexCounts* transObj);
-  TrigVertexCounts* createTransient();
+  TrigVertexCounts* createTransient(const Token* token);
 };
 
 

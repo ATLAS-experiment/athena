@@ -5,7 +5,7 @@
 #define ACTSCALIBRATION_DETAIL_TRKMEASSURFACEACCESSOR_H
 
 #include "Acts/EventData/SourceLink.hpp"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 
 namespace ActsTrk::detail {
     /** @brief  Helper class to access the Acts::Surface for a given Acts::SourceLink which is
@@ -17,11 +17,11 @@ namespace ActsTrk::detail {
             TrkMeasSurfaceAccessor() = default;
             /** @brief Standard constructor taking the pointer to a configured surface
              *         conversion tool. */
-            TrkMeasSurfaceAccessor(const IActsToTrkConverterTool* trkConvTool);
+            TrkMeasSurfaceAccessor(const IGeometryRealmConvTool* trkConvTool);
             /** @brief Operator called by the Acts API to fetch the surface. */
             const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
         private:
-            const IActsToTrkConverterTool* m_trkConvTool{nullptr};
+            const IGeometryRealmConvTool* m_trkConvTool{nullptr};
     };
 }
 #endif

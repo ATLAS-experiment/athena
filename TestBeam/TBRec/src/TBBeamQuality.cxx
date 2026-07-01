@@ -67,7 +67,7 @@ StatusCode TBBeamQuality::initialize()
 }//init
 
 /*---------------EXECUTE---------------*/
-StatusCode TBBeamQuality::execute()
+StatusCode TBBeamQuality::execute(const EventContext& ctx)
 { // execute
   ATH_MSG_DEBUG ("Execute" );
   
@@ -103,7 +103,7 @@ StatusCode TBBeamQuality::execute()
 	}
     }
   
-  setFilterPassed(successFlag);
+  setFilterPassed(successFlag, ctx);
   return StatusCode::SUCCESS;
 } //execute
 

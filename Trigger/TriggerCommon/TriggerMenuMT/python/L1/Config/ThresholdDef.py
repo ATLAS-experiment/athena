@@ -116,7 +116,7 @@ class ThresholdDef:
         NSWMonThreshold('NSWMon')
 
         # eEM
-        eEM_cuts = [1, 2, 5, 7, 9, 12, 15, 18, 26]
+        eEM_cuts = [1, 2, 3, 5, 7, 9, 12, 15, 18, 26]
         # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value 
         ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eEM')
         ptMin = ttconfig["ptMinToTopo"]
@@ -263,10 +263,13 @@ class ThresholdDef:
             gLJetThreshold('gLJSPARE%i' % thrV, 'gLJ').addThrValue(thrVal_SPARE)
 
         # gXE
-
         gXE_cuts = [60, 70, 80, 100, 110, 120, 500]
         for thrV in gXE_cuts:
             XEThreshold('gXEJWOJ%i' % thrV, 'gXE').setXE(get_threshold_cut('gXEJWOJ', thrV))
+
+        gXENC_cuts = [100, 110]
+        for thrV in gXENC_cuts:
+            XEThreshold('gXENC%i' % thrV, 'gXE').setXE(get_threshold_cut('gXENC', thrV))
 
         # gMHT
         for thrV in [500]:
@@ -279,7 +282,11 @@ class ThresholdDef:
         #gTE from BC+2 (for HI anti-shadowing)
         for thrV in [280]:
             TEThreshold('gESPRESSO%i' % thrV, 'gTE').setTE(thrV)
-            
+        
+        #gTE from BC+1 (for HI anti-shadowing in special 25ns runs)
+        for thrV in [280]:
+            TEThreshold('gRISTRETTO%i' % thrV, 'gTE').setTE(thrV)
+             
         # jXE
         jXE_cuts = [60, 70, 80, 90, 100, 110, 120, 500]
         for thrV in jXE_cuts:

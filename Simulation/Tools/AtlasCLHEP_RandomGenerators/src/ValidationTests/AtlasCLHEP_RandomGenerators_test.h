@@ -25,7 +25,7 @@ namespace AtlasCLHEP_RandomGenerators {
     ~AtlasCLHEP_RandomGenerators_test();
     
     StatusCode          initialize();
-    StatusCode          execute();
+    StatusCode          execute(const EventContext& ctx);
     StatusCode          finalize();
 
   private:

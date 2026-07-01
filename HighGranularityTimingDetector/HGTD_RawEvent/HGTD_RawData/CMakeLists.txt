@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #Declare the package name:
 atlas_subdir( HGTD_RawData )
@@ -18,13 +18,13 @@ atlas_add_test(test_HGTD_RDO
            SOURCES test/test_HGTD_RDO.cxx
            INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
            LINK_LIBRARIES ${Boost_LIBRARIES} HGTD_RawData
-           POST_EXEC_SCRIPT nopost.sh)
+           POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(test_HGTD_RDO_Collection
           SOURCES test/test_HGTD_RDO_Collection.cxx
           INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
           LINK_LIBRARIES ${Boost_LIBRARIES} HGTD_RawData
-          POST_EXEC_SCRIPT nopost.sh)
+          POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(test_HGTD_RDO_Container
           SOURCES test/test_HGTD_RDO_Container.cxx
@@ -32,19 +32,19 @@ atlas_add_test(test_HGTD_RDO_Container
           LINK_LIBRARIES ${Boost_LIBRARIES} HGTD_RawData TestTools SGTools
           GaudiKernel StoreGateLib
           ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}"
-          POST_EXEC_SCRIPT nopost.sh)
+          POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(test_HGTD_ALTIROC_RDO
           SOURCES test/test_HGTD_ALTIROC_RDO.cxx
           INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
           LINK_LIBRARIES ${Boost_LIBRARIES} HGTD_RawData
-          POST_EXEC_SCRIPT nopost.sh)
+          POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(test_HGTD_ALTIROC_RDO_Collection
          SOURCES test/test_HGTD_ALTIROC_RDO_Collection.cxx
          INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
          LINK_LIBRARIES ${Boost_LIBRARIES} HGTD_RawData
-         POST_EXEC_SCRIPT nopost.sh)
+         POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(test_HGTD_ALTIROC_RDO_Container
          SOURCES test/test_HGTD_ALTIROC_RDO_Container.cxx
@@ -52,4 +52,4 @@ atlas_add_test(test_HGTD_ALTIROC_RDO_Container
          LINK_LIBRARIES ${Boost_LIBRARIES} HGTD_RawData TestTools SGTools
          GaudiKernel StoreGateLib
          ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}"
-         POST_EXEC_SCRIPT nopost.sh)
+         POST_EXEC_SCRIPT noerror.sh)

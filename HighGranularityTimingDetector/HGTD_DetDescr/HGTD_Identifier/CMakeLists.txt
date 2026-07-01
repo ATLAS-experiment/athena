@@ -5,7 +5,7 @@ atlas_subdir( HGTD_Identifier )
 
 # Component(s) in the package:
 atlas_add_library( HGTD_Identifier
-   HGTD_Identifier/*.h src/HGTD_ID.cxx
+   HGTD_Identifier/*.h src/*.cxx
    PUBLIC_HEADERS HGTD_Identifier
    LINK_LIBRARIES AthenaKernel AtlasDetDescr IdDict Identifier
    PRIVATE_LINK_LIBRARIES GaudiKernel )

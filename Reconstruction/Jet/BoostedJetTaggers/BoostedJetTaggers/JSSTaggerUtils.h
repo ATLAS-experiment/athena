@@ -33,6 +33,7 @@ class JSSTaggerUtils :
       StatusCode GetQGConstScore(const xAOD::JetContainer& jets) const override;
       StatusCode GetTopConstScore(const xAOD::JetContainer& jets) const override;
       StatusCode GetWConstScore(const xAOD::JetContainer& jets) const override;
+      StatusCode GetPolarisationScore(const xAOD::JetContainer& jets) const override;
 
       // HighLevel tagger
       StatusCode GetHLScore(const xAOD::JetContainer& jets) const override;
@@ -65,6 +66,20 @@ class JSSTaggerUtils :
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decHLScoreKey{this, "HLScoreName", "HLScore", "SG key for HLScore"};
 
       std::unique_ptr<SG::ConstAccessor<float>> m_constScoreAcc = nullptr;
+
+      // write decor handles
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreQGKey{this, "ConstScoreQGNameDec", "ConstScore_qg", "SG key for qg node"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreWLKey{this, "ConstScoreWLNameDec", "ConstScore_wl", "SG key for WL node"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreWTKey{this, "ConstScoreWTNameDec", "ConstScore_wt", "SG key for WT node"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreZLKey{this, "ConstScoreZLNameDec", "ConstScore_zl", "SG key for ZL node"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreZTKey{this, "ConstScoreZTNameDec", "ConstScore_zt", "SG key for ZT node"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreCosTKey{this, "ConstScoreCosTNameDec", "ConstScore_cosT", "SG key for cosT regress"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScorePT1Key{this, "ConstScorePT1NameDec", "ConstScore_pT1", "SG key for pT1 regress"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreEta1Key{this, "ConstScoreEta1NameDec", "ConstScore_eta1", "SG key for eta1 regress"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScorePhi1Key{this, "ConstScorePhi1NameDec", "ConstScore_phi1", "SG key for phi1 regress"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScorePT2Key{this, "ConstScorePT2NameDec", "ConstScore_pT2", "SG key for pT2 regress"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScoreEta2Key{this, "ConstScoreEta2NameDec", "ConstScore_eta2", "SG key for eta2 regress"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decConstScorePhi2Key{this, "ConstScorePhi2NameDec", "ConstScore_phi2", "SG key for phi2 regress"};
 
   };
 

@@ -53,7 +53,7 @@ Reco_tf.py --CA \
     --maxEvents ${nEvents} \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2;flags.Tracking.doPixelDigitalClustering=True; " \
+    --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;flags.Tracking.doPixelDigitalClustering=True; " \
     --steering 'doRAWtoALL' \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD}
@@ -61,10 +61,13 @@ Reco_tf.py --CA \
 
 rc=$?
 echo "Reco_tf.py result: $rc"
-if [ $rc != 0 ]; then exit $rc; fi
+# don't exit only for ERRORs detected in logfile (rc=68)
+if [ $rc != 0 -a $rc != 68 ]; then exit $rc; fi
 
 ## check output
 if [ "$skipCheck" == "0" ]; then
     checkxAOD.py ${outputAOD} > ${outputAOD}.checkxAOD.log
     checkFile.py ${outputAOD} > ${outputAOD}.checkFile.log
 fi
+
+exit $rc

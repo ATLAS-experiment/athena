@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSPROPSTEPROOTWRITERSVC_H
@@ -11,7 +11,6 @@
 
 #include "ActsGeometry/IActsPropStepRootWriterSvc.h"
 
-#include "Acts/EventData/TrackParameters.hpp"
 
 #include <vector>
 #include <deque>

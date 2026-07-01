@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -41,7 +41,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors)
 
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
@@ -89,7 +89,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors_systematic)
 
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
@@ -139,7 +139,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors_multiEvent)
 
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
@@ -194,10 +194,10 @@ public:
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto [muonsCopy, auxCopy] = xAOD::shallowCopyContainer (*m_muons);
-    m_muons = muonsCopy;
-    evtStore.record (muonsCopy, m_inputContainer + postfix + "Copy").ignore();
-    evtStore.record (auxCopy, m_inputContainer + postfix + "CopyAux.").ignore();
+    auto [muonsCopy, auxCopy] = xAOD::shallowCopy (*m_muons);
+    m_muons = muonsCopy.get();
+    evtStore.record (std::move(muonsCopy), m_inputContainer + postfix + "Copy").ignore();
+    evtStore.record (std::move(auxCopy), m_inputContainer + postfix + "CopyAux.").ignore();
     return StatusCode::SUCCESS;
   }
 
@@ -220,7 +220,7 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors)
 {
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<CP::MuonEfficiencyScaleFactors> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
@@ -235,7 +235,7 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors_systematics)
 {
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
-  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2"));
+  ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<CP::MuonEfficiencyScaleFactors> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));

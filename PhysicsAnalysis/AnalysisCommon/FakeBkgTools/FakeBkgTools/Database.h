@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FAKEBKGTOOLS_DATABASE_H
@@ -79,7 +79,7 @@ public:
         std::vector<Efficiency> m_efficiencies;
         std::vector<BoundType> m_bounds;
         std::vector<Dimension> m_dimensions;
-        InputType inputType;
+        InputType inputType {};
         unsigned numberOfBins() const
         {
             unsigned nBins = 1;

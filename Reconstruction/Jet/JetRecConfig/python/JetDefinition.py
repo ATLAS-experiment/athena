@@ -113,14 +113,15 @@ class JetDefinition(object):
         self.extrainputs = extrainputs # Any extra input dependencies
 
         self.standardRecoMode = standardRecoMode
-        
+
+        self.byVertex = byVertex
+
         # used internally to resolve dependencies
         self._prereqDic = {}
         self._prereqOrder = [] 
         self._internalAtt = {}
         self._cflags = None # pointer to AthenaConfiguration.ConfigFlags. Mainly to allow to invoke building of input dependencies which are outside Jet domain during std reco
         self._contextDic = None # pointer to the context dictionnary. Convenient shortcut used to configure input or modifier dependencies 
-        self.byVertex = byVertex
         self._locked = lock
 
             
@@ -200,6 +201,8 @@ class JetDefinition(object):
     def basename(self,v):
         raise Exception("Can NOT set property basename of JetDefinition ",self," Change prefix, infix or suffix instead.")
         
+    @make_lproperty
+    def ptmin(self): pass
 
     @make_lproperty
     def ghostdefs(self): pass
@@ -209,6 +212,8 @@ class JetDefinition(object):
     def extrainputs(self): pass
     @make_lproperty
     def standardRecoMode(self): pass
+    @make_lproperty
+    def byVertex(self): pass
 
     @make_lproperty
     def VRMinRadius(self): pass

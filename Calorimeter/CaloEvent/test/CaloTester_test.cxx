@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloEvent/test/CaloTester_test.cxx
@@ -63,6 +63,11 @@ int main (int /*argc*/, char** argv)
   Athena_test::setupStoreGate (argv[0]);
   auto tester = std::make_unique<CaloTester>();
   assert( tester->record_mgr().isSuccess() );
-  test1 (*tester);
+  try {
+    test1 (*tester);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }

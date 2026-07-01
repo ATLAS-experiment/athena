@@ -40,7 +40,7 @@ public:
 protected:
   RingerRings_PERS*  createPersistent(RingerRings* transCont);
 
-  RingerRings*       createTransient ();
+  RingerRings*       createTransient(const Token* token);
 
  private:
 

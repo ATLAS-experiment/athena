@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_IDATABASE_H
 #define INCLUDE_PERSISTENCYSVC_IDATABASE_H
+
+#include "StorageSvc/pool.h"
 
 // includes
 #include <string>
@@ -12,9 +14,19 @@
 namespace pool {
 
   // forward declarations
-  class DatabaseConnectionPolicy;
   class IContainer;
   class ITechnologySpecificAttributes;
+
+  struct DatabaseSpecification {
+    /** Enumeration type specifying the database name field,
+     * wherever the latter is used in methods accessing a database.
+     */
+    enum NameType { UNDEFINED,
+                    PFN,    /// Physical File Name
+                    FID,    /// File IDentifier
+                    LFN     /// Logical File Name
+    };
+  };
 
   /** @class IDatabase IDatabase.h PersistencySvc/IDatabase.h
    *
@@ -24,11 +36,6 @@ namespace pool {
 
   class IDatabase {
   public:
-    /// Current open mode enumeration
-    typedef enum { CLOSED,
-		   READ,
-		   UPDATE } OpenMode;
-
     /// Empty destructor
     virtual ~IDatabase() {};
 
@@ -42,7 +49,7 @@ namespace pool {
     virtual void disconnect() = 0;
 
     /// Returns the opening mode. It can be used to check whether the database is connected.
-    virtual OpenMode openMode() const = 0;
+    virtual Io::IoFlag openMode() const = 0;
 
     /// Returns the file identifier of this database
     virtual const std::string& fid() = 0;

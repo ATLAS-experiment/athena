@@ -355,7 +355,7 @@ void test_perf (const int n, const LArOnlineID& online_id)
   dotime (n, "old", [&]() { calc_old (hwids, online_id, ofcs, shapes, minbias, lumi); });
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main (int argc, char** argv)
 {
   std::cout << "CaloLumiConditions/CaloBCIDCoeffs_test\n";

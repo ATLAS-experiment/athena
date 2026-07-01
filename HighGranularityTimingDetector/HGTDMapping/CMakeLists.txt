@@ -1,7 +1,11 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
 # Declare the package name:
 atlas_subdir( HGTDMapping )
 
-find_package( ROOT COMPONENTS Core PyROOT Tree MathCore Hist RIO pthread )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
+find_package( Boost COMPONENTS unit_test_framework )
+
 # Add the shared library:
 atlas_add_library (HGTDMappingLib
             HGTDMapping/*.h src/*.cxx
@@ -27,23 +31,23 @@ atlas_add_test( HGTDOnlineID_test
   test/HGTDOnlineID_test.cxx
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} HGTDMappingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
-atlas_add_test( HGTDMappingData_test	
-  SOURCES 
-  test/HGTDMappingData_test.cxx 
-  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
+atlas_add_test( HGTDMappingData_test
+  SOURCES
+  test/HGTDMappingData_test.cxx
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} HGTDMappingLib
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )
 
-atlas_add_test( HGTDMappingAlg_test	
-  SOURCES 
-  src/HGTDMappingAlg.cxx src/components/*.cxx test/HGTDMappingAlg_test.cxx 
-  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
+atlas_add_test( HGTDMappingAlg_test
+  SOURCES
+  src/HGTDMappingAlg.cxx src/components/*.cxx test/HGTDMappingAlg_test.cxx
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel
     PathResolver StoreGateLib Identifier IdDictParser HGTDMappingLib
     HGTD_Identifier
-  POST_EXEC_SCRIPT nopost.sh
+  POST_EXEC_SCRIPT noerror.sh
 )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/ReadHandle.h"
@@ -53,23 +53,23 @@ StatusCode TrigBSExtraction::initialize() {
 }
 
 
-StatusCode TrigBSExtraction::execute() {
+StatusCode TrigBSExtraction::execute(const EventContext& ctx) {
 
   const bool isRun1 = m_navToolL2.isEnabled();
   if ( isRun1 ) {
-    if ( repackFeaturesToSG(*m_navToolL2, m_l2ResultKeyIn, m_l2ResultKeyOut, false, false).isFailure() )
+    if ( repackFeaturesToSG(ctx, *m_navToolL2, m_l2ResultKeyIn, m_l2ResultKeyOut, false, false).isFailure() )
       ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_l2ResultKeyIn  );
   }
   
   if ( !m_hltResultKeyIn.empty() ) {
     // unpack, merge with L2 result and do xAOD conversion
     // xAOD conversion is only done for HLTResult_EF in Run-1
-    if ( repackFeaturesToSG(*m_navTool, m_hltResultKeyIn, m_hltResultKeyOut, isRun1, isRun1).isFailure() )
+    if ( repackFeaturesToSG(ctx, *m_navTool, m_hltResultKeyIn, m_hltResultKeyOut, isRun1, isRun1).isFailure() )
       ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_hltResultKeyIn  );
   }
 
   for (size_t i = 0; i<m_dataScoutingKeysIn.size(); i++ ) {
-    if ( repackFeaturesToSG(*m_navTool, m_dataScoutingKeysIn[i], m_dataScoutingKeysOut[i], false, false).isFailure() )
+    if ( repackFeaturesToSG(ctx, *m_navTool, m_dataScoutingKeysIn[i], m_dataScoutingKeysOut[i], false, false).isFailure() )
       ATH_MSG_WARNING( "failed unpacking features from BS to SG for: " << m_dataScoutingKeysIn[i] );
   }
 
@@ -80,14 +80,15 @@ StatusCode TrigBSExtraction::execute() {
 }
 
 
-StatusCode TrigBSExtraction::repackFeaturesToSG (HLT::Navigation& navTool,
+StatusCode TrigBSExtraction::repackFeaturesToSG (const EventContext& ctx,
+                                                 HLT::Navigation& navTool,
                                                  const SG::ReadHandleKey<HLT::HLTResult>& key,
                                                  SG::WriteHandleKey<HLT::HLTResult>& keyOut,
                                                  bool equalize,
                                                  bool xAODCnv) {
 
   ATH_MSG_DEBUG( "Trying to deserialize content of " << key );
-  auto cresult = SG::makeHandle(key);
+  auto cresult = SG::makeHandle(key, ctx);
 
   if ( !cresult.get() ) {
     ATH_MSG_WARNING( "No HLTResult found with key " << key );
@@ -114,7 +115,7 @@ StatusCode TrigBSExtraction::repackFeaturesToSG (HLT::Navigation& navTool,
   // optional xAOD conversion for Run-1 AOD containers
   if ( xAODCnv && m_xAODTool.isEnabled() ) {
 
-    ATH_CHECK( m_xAODTool->convert(&navTool) );
+    ATH_CHECK( m_xAODTool->convert(ctx, &navTool) );
 
     // after AOD TrigPassBitsCollection was converted to xAOD::TrigPassBitsContainer,
     // let's fill new xAOD::TrigPassBits objects with the proper pointers to
@@ -132,7 +133,7 @@ StatusCode TrigBSExtraction::repackFeaturesToSG (HLT::Navigation& navTool,
   bool status = navTool.serialize(result->getNavigationResult(), result->getNavigationResultCuts());
   ATH_MSG_DEBUG( "New serialized navigation for " << keyOut << " has size " << result->getNavigationResult().size() );
 
-  ATH_CHECK( SG::makeHandle(keyOut).record(std::move(result)) );
+  ATH_CHECK( SG::makeHandle(keyOut, ctx).record(std::move(result)) );
 
   return StatusCode(status);
 }

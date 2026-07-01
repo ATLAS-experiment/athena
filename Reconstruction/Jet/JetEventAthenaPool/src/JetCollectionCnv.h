@@ -83,7 +83,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual JetCollection* createTransient();
+  virtual JetCollection* createTransient(const Token* token);
 
   /** Connect up the sub-converters that we use to do the
       actual work.
@@ -93,7 +93,7 @@ protected:
   /** Return our top level converter. Used by other converters
       that want to extend this converter.
   */
-  inline AthenaPoolTopLevelTPCnvBase *getTopLevelTPCnv(void);
+  inline TopLevelTPCnvBase *getTopLevelTPCnv(void);
 
 private:
   /** The master translator.
@@ -119,7 +119,7 @@ private:
 /// Inline methods: 
 /////////////////////////////////////////////////////////////////// 
 
-AthenaPoolTopLevelTPCnvBase *JetCollectionCnv::getTopLevelTPCnv(void)
+TopLevelTPCnvBase *JetCollectionCnv::getTopLevelTPCnv(void)
 {
   return &m_TPConverter;
 }

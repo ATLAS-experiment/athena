@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLCOOLMULTCHANCNV_H
@@ -17,6 +17,7 @@
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustCnv.h"
 #include "PersistentDataModel/Token.h"
 
+#include <memory>
 #include <string>
 
 class DataObject;
@@ -98,13 +99,10 @@ protected:
         if the version 1 of poolReadObject is used, the persistent
         object HAS TO BE DELETED manually.
     */
-    virtual ELEM_T* createTransient();
+    virtual ELEM_T* createTransient(const Token* token);
 
     //-------------------------------------------------------------------
     // Helper methods intended to by used when implementing createTransient()
-
-    /// specialized version that adds persistency contextID to tokens (for reading)
-    virtual void setToken(const std::string& token) override final;
 
     /** Read object of type P.  This is an exception-throwing version of poolToObject()
         plus reading of all extending objects.
@@ -112,9 +110,9 @@ protected:
         @return object read from POOL (by pointer)
     */
     template <class P>
-    P*                 poolReadObject();
+    P*                 poolReadObject(const Token* token);
 
-    ELEM_T*            poolReadObject();
+    ELEM_T*            poolReadObject(const Token* token);
 
     /// Dummy methods not needed here
     virtual StatusCode transToPers(COLL_T* obj, ELEM_T*& persObj) override;

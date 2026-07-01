@@ -188,15 +188,11 @@ bool ExpressionEvaluator::RegisterExpression( std::string& name, const std::stri
   return true;
 }
 
-double ExpressionEvaluator::Eval( const std::string& expr )
-{
-  return Eval( expr.c_str() );
-}
 
-double ExpressionEvaluator::Eval( const char* expr_mod )
+double ExpressionEvaluator::Eval( std::string_view expr_mod )
 {
   
-  std::string expr = expr_mod;
+  std::string expr {expr_mod};
   std::string::size_type start_index = 0;
   std::string::size_type end_index = 0;
   while(true)

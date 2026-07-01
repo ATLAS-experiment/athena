@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,6 +11,7 @@
 #include "EFTrackingFPGAUtility/TestVectorTool.h"
 #include "EFTrackingFPGAUtility/FPGADataFormatUtilities.h"
 #include "InDetMeasurementUtilities/Helpers.h"
+#include "xAODInDetMeasurement/Utilities.h"
 #include <fstream>
 
 StatusCode TestVectorTool::initialize()
@@ -194,7 +195,7 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
         rdoListSize = rdoListSize > 4 ? 4 : rdoListSize; // restrict to 4 RDOs if more
         for (unsigned int j = 0; j < rdoListSize; j++)
         {
-            rdoList[j] = pixelClusters->at(i)->rdoList().at(j).get_compact();
+            rdoList[j] = pixelClusters->at(i)->rdoList().at(j);
         }
 
         // Pixel cluster w2
@@ -243,7 +244,7 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
         // Pixel cluster w10
         isLast = i == (pixelClusters->size() - 1) ? 1 : 0;
         auto pixelCluster_w10 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w10(pixelClusters->at(i)->globalPosition()[2],
-                                                                                   pixelClusters->at(i)->totalToT(),
+                                                                                   xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*pixelClusters->at(i)),
                                                                                    isLast,
                                                                                    0);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w10(pixelCluster_w10));
@@ -302,7 +303,7 @@ StatusCode TestVectorTool::encodeStripL2G(const xAOD::StripClusterContainer *str
         rdoListSize = rdoListSize > 4 ? 4 : rdoListSize; // restrict to 4 RDOs if more
         for (unsigned int j = 0; j < rdoListSize; j++)
         {
-            rdoList[j] = stripClusters->at(i)->rdoList().at(j).get_compact();
+            rdoList[j] = stripClusters->at(i)->rdoList().at(j);
         }
 
         // Strip cluster w3

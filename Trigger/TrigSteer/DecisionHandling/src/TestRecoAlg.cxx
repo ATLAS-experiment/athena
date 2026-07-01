@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -79,11 +79,11 @@ namespace HLTTest {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TestRecoAlg::execute() {  
+  StatusCode TestRecoAlg::execute(const EventContext& ctx) {  
     using namespace TrigCompositeUtils;
     ATH_MSG_DEBUG ("Executing " << name() << "...");
 
-    const EventContext& context = Gaudi::Hive::currentContext();
+    const EventContext& context = ctx;
     const size_t eventNo = context.evt() % m_data.size();
     auto objects= m_data[eventNo];
 
@@ -92,10 +92,10 @@ namespace HLTTest {
     output->setStore( aux.get() );
 
     
-    auto inputHandle = SG::makeHandle(m_input);
+    auto inputHandle = SG::makeHandle(m_input, ctx);
     ATH_MSG_DEBUG("Input " << m_input.key() << " has "<<inputHandle->size() <<" elements, scanning it");
     for ( auto i: *inputHandle.cptr() ) {     
-      auto featureInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( i, "initialRoI"  );
+      auto featureInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>( ctx, i, "initialRoI"  );
       auto roiLink = featureInfo.link;
       CHECK( roiLink.isValid() );
       if ( roiLink.isValid() ) {
@@ -137,7 +137,7 @@ namespace HLTTest {
 
     ATH_MSG_DEBUG("Reconstructed "<<output->size() <<" objects");
   
-    auto handle = SG::makeHandle(m_output);
+    auto handle = SG::makeHandle(m_output, ctx);
     CHECK( handle.record( std::move(output), std::move(aux) ) );
 
     return StatusCode::SUCCESS;

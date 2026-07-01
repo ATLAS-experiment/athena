@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauMonitorAlgorithm.h"
@@ -25,7 +25,7 @@ StatusCode tauMonitorAlgorithm::initialize() {
 
   m_offlineGNTauScoreDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauScoreDecorKey.key();
   ATH_CHECK(m_offlineGNTauScoreDecorKey.initialize());
- 
+
   m_offlineGNTauTransScoreDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauTransScoreDecorKey.key();
   ATH_CHECK(m_offlineGNTauTransScoreDecorKey.initialize());
 
@@ -33,7 +33,7 @@ StatusCode tauMonitorAlgorithm::initialize() {
   ATH_CHECK(m_offlineGNTauLooseWPDecorKey.initialize());
 
   m_offlineGNTauMediumWPDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauMediumWPDecorKey.key();
-  ATH_CHECK(m_offlineGNTauMediumWPDecorKey.initialize());  
+  ATH_CHECK(m_offlineGNTauMediumWPDecorKey.initialize());
 
   m_offlineGNTauTightWPDecorKey = m_TauContainerKey.key() + "." + m_offlineGNTauTightWPDecorKey.key();
   ATH_CHECK(m_offlineGNTauTightWPDecorKey.initialize());
@@ -51,9 +51,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     return StatusCode::FAILURE;
   }
 
-  auto shallowCopy = xAOD::shallowCopyContainer(*taus);
-  std::unique_ptr<xAOD::TauJetContainer> shallowTaus(shallowCopy.first);
-  std::unique_ptr<xAOD::ShallowAuxContainer> shallowTausAux(shallowCopy.second);
+  auto [shallowTaus, shallowTausAux] = xAOD::shallowCopy(*taus,ctx);
 
   const int lowerEtThreshold = 15;
   const int higherEtThreshold = 75;
@@ -121,8 +119,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
   auto LB = Monitored::Scalar<int>("LB", 0.0);
 
-  auto EMRadius = Monitored::Scalar<float>("EMRadius", 0.0);
-  auto hadRadius = Monitored::Scalar<float>("hadRadius", 0.0);
   auto isolFrac = Monitored::Scalar<float>("isolFrac", 0.0);
   auto etEMAtEMScale = Monitored::Scalar<float>("etEMAtEMScale", 0.0);
 
@@ -258,8 +254,6 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     LB = GetEventInfo(ctx)->lumiBlock();
 
     // calo
-    EMRadius = tau->detail<float>(xAOD::TauJetParameters::EMRadius);
-    hadRadius = tau->detail<float>(xAOD::TauJetParameters::hadRadius);
     isolFrac = tau->detail<float>(xAOD::TauJetParameters::isolFrac);
     etEMAtEMScale = tau->detail<float>(xAOD::TauJetParameters::etEMAtEMScale);
     etHadAtEMScale = tau->detail<float>(xAOD::TauJetParameters::etHadAtEMScale);
@@ -277,11 +271,11 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
     // check to understand which TauID we can use
     SG::ReadDecorHandle<xAOD::TauJetContainer, float> trans_score{m_offlineGNTauTransScoreDecorKey, ctx};
-    if( trans_score.isAvailable()) { 
-      
+    if( trans_score.isAvailable()) {
+
       // we are using a special container decorated with GNTau
       SG::ReadDecorHandle<xAOD::TauJetContainer, float> score{m_offlineGNTauScoreDecorKey, ctx};
-      JetScore = score.isAvailable() ? score(*tau) : -1234; 
+      JetScore = score.isAvailable() ? score(*tau) : -1234;
 
       JetScoreSigTrans = trans_score(*tau);
 
@@ -329,7 +323,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
     if (m_etaMin < std::abs(tauEta) && std::abs(tauEta) < m_etaMax) {
 
-      if( tauEt > lowerEtThreshold) {	    
+      if( tauEt > lowerEtThreshold) {
         nTauCandidates += 1;
       }
 
@@ -706,8 +700,7 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
         fill(tool, tauPhiEt15, tauEtaEt15);
       }
 
-      fill(tool, tauPhi, tauEta, LB, tauEt, centFrac, isolFrac, EMRadius,
-           hadRadius, etEMAtEMScale, etHadAtEMScale,
+      fill(tool, tauPhi, tauEta, LB, tauEt, centFrac, isolFrac,etEMAtEMScale, etHadAtEMScale,
            tauCharge, JetScore, JetScoreSigTrans, RNNEleScore, RNNEleScoreSigTrans,
 	   muonVeto, tauLoose, tauMedium, tauTight, PSSFrac, EMFrac, EMFracTrk, nNeutPFO,
            nShot, NumTracks, nClusters, jetSeedEta, jetSeedPhi, jetSeedPt,

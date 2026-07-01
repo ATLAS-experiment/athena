@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //#include <AsgTools/ToolHandle.h>
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
@@ -50,7 +50,7 @@ ANA_MSG_HEADER(testSysStratComp)
 ANA_MSG_SOURCE(testSysStratComp, "BTaggingSystematicStrategyComparison")
 using namespace testSysStratComp;
 
-int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
+int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
@@ -149,7 +149,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     int jet_index = 0;
     for(const xAOD::Jet* jet : *jets){
       // skip jet as any lower than this and you start seeing failed SF/Eff retrieval
-      if(jet->pt() < 20000 or std::abs(jet->eta()) > 2.4) break;
+      if(jet->pt() < 20000 or std::abs(jet->eta()) > 2.4) continue;
       int truthlabel = -999;
       jet->getAttribute("HadronConeExclTruthLabelID",truthlabel);
       ANA_MSG_INFO("\n- - - - - - - - - - -  Jet " << jet_index << " - - - - - - - - - - - -");
@@ -205,4 +205,15 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   root_file->Close();
 
   return 0;
+}
+
+
+int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

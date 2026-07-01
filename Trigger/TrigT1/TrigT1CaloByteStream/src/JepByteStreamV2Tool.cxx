@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include <numeric>
-#include <set>
-#include <utility>
+
 
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/MsgStream.h"
@@ -34,6 +32,10 @@
 #include "ModifySlices.h"
 
 #include "JepByteStreamV2Tool.h"
+
+#include <numeric>
+#include <set>
+#include <utility>
 
 namespace LVL1BS {
 
@@ -126,13 +128,14 @@ StatusCode JepByteStreamV2Tool::finalize()
 // Conversion bytestream to jet elements
 
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::JetElement>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -148,13 +151,14 @@ StatusCode JepByteStreamV2Tool::convert(
 
 // Conversion bytestream to energy sums
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::JEMEtSums>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -170,13 +174,14 @@ StatusCode JepByteStreamV2Tool::convert(
 
 // Conversion bytestream to CMX TOBs
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::CMXJetTob>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -192,13 +197,14 @@ StatusCode JepByteStreamV2Tool::convert(
 
 // Conversion bytestream to CMX hits
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::CMXJetHits>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -215,13 +221,14 @@ StatusCode JepByteStreamV2Tool::convert(
 // Conversion bytestream to CMX energy sums
 
 StatusCode JepByteStreamV2Tool::convert(
+    const EventContext& ctx,
     const std::string& sgKey,
     DataVector<LVL1::CMXEtSums>* collection) const
 {
   const std::vector<uint32_t>& vID(sourceIDs());
   // // get ROB fragments
   IROBDataProviderSvc::VROBFRAG robFrags;
-  m_robDataProvider->getROBData(Gaudi::Hive::currentContext(), vID, robFrags, "JepByteStreamV2Tool");
+  m_robDataProvider->getROBData(ctx, vID, robFrags, "JepByteStreamV2Tool");
   ATH_MSG_DEBUG("Number of ROB fragments:" << robFrags.size());
   return convert(sgKey, robFrags, collection);
 }
@@ -958,9 +965,6 @@ void JepByteStreamV2Tool::decodeCmxEnergy(CmxEnergySubBlock* subBlock,
 	exErrBits.set(LVL1::DataError::Parity, exErr >> 1);
 	eyErrBits.set(LVL1::DataError::Parity, eyErr >> 1);
 	etErrBits.set(LVL1::DataError::Parity, etErr >> 1);
-        exErr = exErrBits.error();
-        eyErr = eyErrBits.error();
-        etErr = etErrBits.error();
       } else {
 	CmxEnergySubBlock::SourceType srcType = CmxEnergySubBlock::MAX_SOURCE_TYPE;
 	CmxEnergySubBlock::SumType    sumType = CmxEnergySubBlock::MAX_SUM_TYPE;

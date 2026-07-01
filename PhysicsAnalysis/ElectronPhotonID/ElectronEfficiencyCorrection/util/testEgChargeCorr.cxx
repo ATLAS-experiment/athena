@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // System include(s):
@@ -39,7 +39,7 @@
 
 namespace asg{
   ANA_MSG_HEADER (testEgChargeCorr)
-  ANA_MSG_SOURCE (testEgChargeCorr, "") 
+  ANA_MSG_SOURCE (testEgChargeCorr, "")
 }
 
 
@@ -152,11 +152,11 @@ main(int argc, char* argv[])
     ANA_CHECK(event.retrieve(electrons, "Electrons"));
 
     // Create shallow copy for this systematic
-    std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*>
-      electrons_shallowCopy = xAOD::shallowCopyContainer(*electrons);
+    xAOD::ShallowCopyResult_t<xAOD::ElectronContainer>
+      electrons_shallowCopy = xAOD::shallowCopy(*electrons);
 
     // Iterate over the shallow copy
-    xAOD::ElectronContainer* elsCorr = electrons_shallowCopy.first;
+    xAOD::ElectronContainer* elsCorr = electrons_shallowCopy.first.get();
     xAOD::ElectronContainer::iterator el_it = elsCorr->begin();
     xAOD::ElectronContainer::iterator el_it_last = elsCorr->end();
 

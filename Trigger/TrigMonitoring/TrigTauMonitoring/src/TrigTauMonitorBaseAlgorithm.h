@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUMONITORING_TRIGTAUMONITORBASEALGORITHM_H
@@ -51,8 +51,8 @@ protected:
     inline const TrigTauInfo& getTrigInfo(const std::string& trigger) const { return m_trigInfo.at(trigger); }
 
     // Get online 0P, 1P and MP TauJets
-    std::vector<const xAOD::TauJet*> getOnlineTausAll(const std::string& trigger, bool include_0P=true) const;
-    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOnlineTaus(const std::string& trigger) const;
+    std::vector<const xAOD::TauJet*> getOnlineTausAll(const std::string& trigger, bool include_0P=true, bool filter_legs=false) const;
+    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> getOnlineTaus(const EventContext& ctx, const std::string& trigger) const;
 
     // Get offline 1P and 3P TauJet objects that pass the quality selection cuts
     std::vector<const xAOD::TauJet*> getOfflineTausAll(const EventContext& ctx, const float threshold = 20.0) const;
@@ -113,19 +113,15 @@ protected:
       return false;
     }
 
-    std::vector<const xAOD::TauJet*> classifyTausAll(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
-    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
-    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
+    std::vector<const xAOD::TauJet*> classifyTausAll(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
+    std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOfflineTaus(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0, const TauID tau_id = TauID::None) const;
+    std::tuple<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> classifyOnlineTaus(const EventContext& ctx, const std::vector<const xAOD::TauJet*>& taus, const float threshold = 0.0) const;
 
     // StorageGate keys, accessible by subclasses
     SG::ReadHandleKey<xAOD::TauJetContainer> m_offlineTauJetKey{this, "OfflineTauJetKey", "TauJets", "Offline taujet container key"};
+    std::unordered_map<std::string, SG::ReadHandleKey<xAOD::TauJetContainer>> m_hltTauJetKeysMap;
 
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetKey{this, "HLTTauJetKey", "HLT_TrigTauRecMerged_MVA", "HLT tracktwoMVA taujet container key"};
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetLLPKey{this, "HLTTauJetLLPKey", "HLT_TrigTauRecMerged_LLP", "HLT tracktwoLLP taujet container key"};
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetLRTKey{this, "HLTTauJetLRTKey", "HLT_TrigTauRecMerged_LRT", "HLT trackLRT taujet container key"};
-    SG::ReadHandleKey<xAOD::TauJetContainer> m_hltTauJetCaloMVAOnlyKey{this, "HLTTauJetCaloMVAOnlyKey", "HLT_TrigTauRecMerged_CaloMVAOnly", "HLT ptonly taujet container key"};
-
-    const SG::ReadHandleKey<xAOD::TauJetContainer>& getOnlineContainerKey(const std::string& sequence) const;
+    const SG::ReadHandleKey<xAOD::TauJetContainer>& getOnlineContainerKey(const std::string& container_suffix) const;
 
 private:
     std::map<std::string, TrigTauInfo> m_trigInfo; // TauTrigInfo cache

@@ -133,7 +133,7 @@ JetHypoExerciserCompareAlg::execute_(ToolHandle<ITrigJetHypoToolHelper>& helper,
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-StatusCode JetHypoExerciserCompareAlg::execute() {
+StatusCode JetHypoExerciserCompareAlg::execute(const EventContext& /*ctx*/) {
   
   // Part 1: print where you are
   ATH_MSG_INFO ("execute()");

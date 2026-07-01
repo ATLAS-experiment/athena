@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONMONITORING_MUONMATCHINGTOOL_H
@@ -40,7 +40,7 @@ class MuonMatchingTool : public AthAlgTool {
    * @param pass True if a candidate is found.
    * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
    */
-  const xAOD::MuonRoI* matchL1(const xAOD::Muon *mu, const std::string& trigger, bool &pass) const;
+  const xAOD::MuonRoI* matchL1(const EventContext& ctx, const xAOD::Muon *mu, const std::string& trigger, bool &pass) const;
 
    /**
    * @brief Function that searches for a Level 1 truth muon candidate and judges if it is matched to a given offline muon.
@@ -49,7 +49,7 @@ class MuonMatchingTool : public AthAlgTool {
    * @param pass True if a candidate is found.
    * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
    */
-  const xAOD::MuonRoI* matchL1(const xAOD::TruthParticle *mu, const std::string& trigger, bool &pass) const;
+  const xAOD::MuonRoI* matchL1(const EventContext& ctx, const xAOD::TruthParticle *mu, const std::string& trigger, bool &pass) const;
 
   /**
    * @brief Function that dR matches L1 muon candidates.
@@ -60,7 +60,7 @@ class MuonMatchingTool : public AthAlgTool {
    * @param pass True if a candidate is found.
    * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
    */
-  const xAOD::MuonRoI* matchL1(double eta, double phi, double dR, const std::string& trigger, bool &pass) const;
+  const xAOD::MuonRoI* matchL1(const EventContext& ctx, double eta, double phi, double dR, const std::string& trigger, bool &pass) const;
 
   /**
    * @brief Function that searches for an L2 standalone muon (L2MuonSA) candidate and judges if it is matched to a given offline muon.
@@ -70,7 +70,7 @@ class MuonMatchingTool : public AthAlgTool {
    * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
    * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
    */
-  const xAOD::L2StandAloneMuon* matchL2SA(const xAOD::Muon *mu, const std::string& trigger, bool &pass) const;
+  const xAOD::L2StandAloneMuon* matchL2SA(const EventContext& ctx, const xAOD::Muon *mu, const std::string& trigger, bool &pass) const;
 
   /**
    * @brief Function that searches for the L2 standalone muon (L2MuonSA) candidate closest to a given offline muon.
@@ -325,12 +325,13 @@ class MuonMatchingTool : public AthAlgTool {
   /**
    * @brief Function to extrapolate a Inner Detector track to the pivot plane i.e. the middle layers of the Muon Spectrometer where the level 1 RoI is defined.
    * This functionality is not available yet.
+   * @param ctx Reference to the @c EventContext
    * @param track Inner Detector track that is extrapolated.
    * @return Pointer to the extrapolated track parameters.
    * @see @c reqdRL1byPt
    * @todo Return std::unique_ptr when this is available.
    */
-  const Trk::TrackParameters* extTrackToPivot(const xAOD::TrackParticle *track) const;
+  const Trk::TrackParameters* extTrackToPivot(const EventContext& ctx, const xAOD::TrackParticle *track) const;
 
   /**
    * @brief Function compute dR used for matching offline muons and level 1 RoIs at the pivot plane.
@@ -428,10 +429,10 @@ class MuonMatchingTool : public AthAlgTool {
                                                std::tuple<bool,double,double> (*trigPosForMatchFunc)(const T*) = &MuonMatchingTool::trigPosForMatch<T>) const;
 
 
-  const Amg::Vector3D offlineMuonAtPivot(const xAOD::Muon *mu) const;
+  const Amg::Vector3D offlineMuonAtPivot(const EventContext& ctx, const xAOD::Muon *mu) const;
   static double FermiFunction(double x, double x0, double w) ;
-  const Trk::TrackParameters* extTrackToTGC(const xAOD::TrackParticle *track) const;
-  const Trk::TrackParameters* extTrackToRPC(const xAOD::TrackParticle *track) const;
+  const Trk::TrackParameters* extTrackToTGC(const EventContext& ctx, const xAOD::TrackParticle *track) const;
+  const Trk::TrackParameters* extTrackToRPC(const EventContext& ctx, const xAOD::TrackParticle *track) const;
 
   // static methods
   // Template methods that perform different matching schemes for T=xAOD::L2StandAloneMuon, xAOD::L2CombinedMuon and xAOD::Muon (EF).

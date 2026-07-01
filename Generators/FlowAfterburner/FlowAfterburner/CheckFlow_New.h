@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburner/CheckFlow.h
@@ -17,7 +17,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GeneratorObjects/HijingEventParams.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include <string>
 
 namespace TruthHelper{
@@ -30,7 +29,7 @@ class CheckFlow_New:public AthAlgorithm {
 public:
   CheckFlow_New(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
 
 private:

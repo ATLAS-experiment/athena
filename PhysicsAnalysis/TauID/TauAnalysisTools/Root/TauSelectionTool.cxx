@@ -35,16 +35,13 @@ TauSelectionTool::~TauSelectionTool()
 StatusCode TauSelectionTool::initialize()
 {
 
-  m_vPtRegion = m_vecPtRegion.value();	
   m_vAbsEtaRegion = m_vecAbsEtaRegion.value();
   m_vAbsCharges = m_vecAbsCharges.value(); 
   m_vNTracks = m_vecNTracks.value();
 
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
-  if (!bConfigViaProperties and !m_vPtRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dPtMin.value()))         bConfigViaProperties = true;
-  if (!bConfigViaProperties and !std::isnan(m_dPtMax.value()))         bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())     bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMin.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMax.value())) bConfigViaProperties = true;
@@ -100,23 +97,11 @@ StatusCode TauSelectionTool::initialize()
 
     for (const std::string& sCut : vCuts)
     {
-      if (sCut == "PtRegion")
-      {
-        iSelectionCuts = iSelectionCuts | CutPt;
-        if (m_vPtRegion.empty())
-           TauAnalysisTools::split(rEnv,"PtRegion", ';', m_vPtRegion);		
-      }
-      else if (sCut == "PtMin")
+      if (sCut == "PtMin")
       {
         iSelectionCuts = iSelectionCuts | CutPt;
         if (std::isnan(m_dPtMin.value()))
           m_dPtMin = rEnv.GetValue("PtMin",NAN);
-      }
-      else if (sCut == "PtMax")
-      {
-        iSelectionCuts = iSelectionCuts | CutPt;
-        if (std::isnan(m_dPtMax.value()))
-          m_dPtMax = rEnv.GetValue("PtMax",NAN);
       }
       else if (sCut == "AbsEtaRegion")
       {
@@ -185,7 +170,8 @@ StatusCode TauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | CutJetIDWP;
         if (m_iJetIDWP == JETIDNONE){
-          m_iJetIDWP = convertStrToJetIDWP(rEnv.GetValue("JetIDWP","JETIDNONE"));
+          m_sJetIDWP = rEnv.GetValue("JetIDWP","JETIDNONE");		
+          m_iJetIDWP = convertStrToJetIDWP(m_sJetIDWP);
         }	  
 	// check for possible mis-config in Tau selection
         for (const std::string& checkCut : vCuts){
@@ -198,8 +184,10 @@ StatusCode TauSelectionTool::initialize()
       else if (sCut == "EleIDWP")
       {
         iSelectionCuts = iSelectionCuts | CutEleIDWP;
-        if (m_iEleIDWP == ELEIDNONEUNCONFIGURED)
-          m_iEleIDWP = convertStrToEleIDWP(rEnv.GetValue("EleIDWP","ELEIDNONE"));
+        if (m_iEleIDWP == ELEIDNONEUNCONFIGURED){
+          m_sEleIDWP = rEnv.GetValue("EleIDWP","ELEIDNONE");		
+          m_iEleIDWP = convertStrToEleIDWP(m_sEleIDWP);
+	}
       }
       else if (sCut == "MuonOLR")
       {
@@ -213,9 +201,6 @@ StatusCode TauSelectionTool::initialize()
     if (m_iSelectionCuts == NoCut)
       m_iSelectionCuts = iSelectionCuts;
   }
-
-  m_sJetIDWP = convertJetIDWPToStr(m_iJetIDWP);
-  m_sEleIDWP = convertEleIDWPToStr(m_iEleIDWP);
 
   // check if using GNTau  
   if(m_sJetIDWP.find("GNTAU") != std::string::npos)
@@ -259,7 +244,7 @@ StatusCode TauSelectionTool::initialize()
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
   
   ATH_MSG_INFO( "Initializing TauSelectionTool" );
-  FillRegionVector(m_vPtRegion, m_dPtMin.value(), m_dPtMax.value());
+  FillRegionVector(m_vPtRegion, m_dPtMin.value(), NAN);
   FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
   FillRegionVector(m_vJetRNNSigTransRegion, m_dJetRNNSigTransMin.value(), NAN );
   FillRegionVector(m_vGNTauSigTransRegion, m_dGNTauSigTransMin.value(), NAN );
@@ -535,53 +520,3 @@ int TauSelectionTool::convertStrToEleIDWP(const std::string& sEleIDWP) const
   return -1;
 }
 
-//______________________________________________________________________________
-std::string TauSelectionTool::convertJetIDWPToStr(int iJetIDWP) const
-{
-  switch (iJetIDWP)
-  {
-  case JETIDNONE:
-    return "JETIDNONE";
-  case JETIDRNNVERYLOOSE:
-    return "JETIDRNNVERYLOOSE";
-  case JETIDRNNLOOSE:
-    return "JETIDRNNLOOSE";
-  case JETIDRNNMEDIUM:
-    return "JETIDRNNMEDIUM";
-  case JETIDRNNTIGHT:
-    return "JETIDRNNTIGHT";
-  case JETIDGNTAUVERYLOOSE:
-    return "JETIDGNTAUVERYLOOSE";
-  case JETIDGNTAULOOSE:
-    return "JETIDGNTAULOOSE";
-  case JETIDGNTAUMEDIUM:
-    return "JETIDGNTAUMEDIUM";
-  case JETIDGNTAUTIGHT:
-    return "JETIDGNTAUTIGHT";
-
-  default:
-    ATH_MSG_WARNING( "JetID working point with enum " << iJetIDWP << " is unknown, the JetIDWP cut will not accept any tau!" );
-    return "";
-  }
-}
-
-//______________________________________________________________________________
-std::string TauSelectionTool::convertEleIDWPToStr(int iEleIDWP) const
-{
-  switch (iEleIDWP)
-  {
-  case ELEIDNONEUNCONFIGURED:
-    return "ELEIDNONE";
-  case ELEIDNONE:
-    return "ELEIDNONE";
-  case ELEIDRNNLOOSE:
-    return "ELEIDRNNLOOSE";
-  case ELEIDRNNMEDIUM:
-    return "ELEIDRNNMEDIUM";
-  case ELEIDRNNTIGHT:
-    return "ELEIDRNNTIGHT";
-  default:
-    ATH_MSG_WARNING( "EleID working point with enum " << iEleIDWP << " is unknown, the EleIDWP cut will not accept any tau!" );
-    return "";
-  }
-}

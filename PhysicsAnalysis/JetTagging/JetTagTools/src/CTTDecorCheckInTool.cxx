@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cassert>
@@ -46,21 +46,21 @@ StatusCode CTTDecorCheckInTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode CTTDecorCheckInTool::execute()
+StatusCode CTTDecorCheckInTool::execute(const EventContext& ctx)
 {
   ATH_MSG_DEBUG( "Executing..." );
 
-  SG::ReadDecorHandle< xAOD::JetContainer, float > jetReadDecorHandle (m_jetReadDecorKey);
+  SG::ReadDecorHandle< xAOD::JetContainer, float > jetReadDecorHandle (m_jetReadDecorKey, ctx);
 
   // Retrieve the track particles:
-  SG::ReadHandle<xAOD::TrackParticleContainer> trackTES(m_particlesKey);
+  SG::ReadHandle<xAOD::TrackParticleContainer> trackTES(m_particlesKey, ctx);
   if ( !trackTES.isValid() ) {
     ATH_MSG_WARNING( "No TrackParticle container found in TDS" );
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG( "TrackParticleContainer successfully retrieved" );
 
-  SG::ReadHandle<xAOD::VertexContainer> pvTES(m_verticesKey);
+  SG::ReadHandle<xAOD::VertexContainer> pvTES(m_verticesKey, ctx);
   if ( !pvTES.isValid() ) {
     ATH_MSG_WARNING( "No Primary Vertices container found in TDS" );
     return StatusCode::SUCCESS;
@@ -69,7 +69,7 @@ StatusCode CTTDecorCheckInTool::execute()
   const xAOD::Vertex *primVertex=*(pvTES->begin());
 
   //==========================================================================
-  SG::ReadHandle<xAOD::JetContainer> jetTES(m_jetsKey);
+  SG::ReadHandle<xAOD::JetContainer> jetTES(m_jetsKey, ctx);
   if ( !jetTES.isValid() ) {
     ATH_MSG_WARNING( "No AntiKt4EMPflow jet container found in TDS" );
     return StatusCode::SUCCESS;
@@ -83,11 +83,11 @@ StatusCode CTTDecorCheckInTool::execute()
   }
 
   //first decorate all jets with the CTT method
-  m_classifiedTrackTagger->decorateJets(trkparticles, *primVertex, *jetTES);
+  m_classifiedTrackTagger->decorateJets(ctx, trkparticles, *primVertex, *jetTES);
 
   for(const auto curjet : *jetTES){
     ATH_MSG_DEBUG( " Jet  pt: " << curjet->pt()<<" eta: "<<curjet->eta()<<" phi: "<< curjet->phi() );
-    float CTTScore = m_classifiedTrackTagger->bJetWgts(trkparticles, *primVertex, curjet->p4());
+    float CTTScore = m_classifiedTrackTagger->bJetWgts(ctx, trkparticles, *primVertex, curjet->p4());
     ATH_MSG_DEBUG ("Retrieved CTT score from CTT tool: " << CTTScore);
     ATH_MSG_DEBUG("CTT score of decorated xAOD::Jet : " << jetReadDecorHandle(*curjet));
     assert(Athena_test::isEqual(CTTScore,jetReadDecorHandle(*curjet)));

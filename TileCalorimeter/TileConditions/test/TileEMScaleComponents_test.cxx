@@ -111,7 +111,7 @@ class DummyAlgorithm: public AthAlgorithm {
 
     }
 
-    virtual StatusCode execute() override {
+    virtual StatusCode execute(const EventContext&) override {
       return StatusCode::SUCCESS;
     }
 };
@@ -519,7 +519,7 @@ void testTileCondToolEmscale(ISvcLocator* svcLoc, const EventContext& ctx) {
 
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main ATLAS_NOT_THREAD_SAFE () {
 
 

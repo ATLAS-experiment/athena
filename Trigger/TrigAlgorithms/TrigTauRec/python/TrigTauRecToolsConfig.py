@@ -110,7 +110,14 @@ def trigTauJetLVNNEvaluatorCfg(flags, tau_id='', use_taujet_rnnscore=True):
 
     return acc
 
-def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
+def trigTauJetONNXEvaluatorCfg(
+    flags,
+    tau_id: str,
+    tau_container: str = '',
+    hits_decoration_container: str = '',
+    ptau_sfx: str | None = None,
+    pjet_sfx: str | None = None,
+):
     '''TauJet identification inference based on ONNX models, for GNNs, transformers, etc...'''
     acc = ComponentAccumulator()
 
@@ -128,8 +135,17 @@ def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
     else:
         raise ValueError(f'Invalid {tau_id} ONNX network config file')
 
+    name = f'TrigTau_TauJetONNXEvaluator_{tau_id}'
+    if tau_container: name += f'_{tau_container}'
+    if hits_decoration_container: name += f'_{hits_decoration_container}'
+
+    ptau_decor = id_flags.OutputPTau if hasattr(id_flags, 'OutputPTau') else f'{tau_id}_ProbTau'
+    if ptau_sfx: ptau_decor += f'_{ptau_sfx}'
+    pjet_decor = id_flags.OutputPJet if hasattr(id_flags, 'OutputPJet') else f'{tau_id}_ProbJet'
+    if pjet_sfx: pjet_decor += f'_{pjet_sfx}'
+
     acc.setPrivateTools(CompFactory.TauGNNEvaluator(
-        name                = f'TrigTau_TauJetONNXEvaluator_{tau_id}',
+        name                = name,
         useTRT              = flags.Detector.EnableTRT,
 
         # Network config:
@@ -137,22 +153,25 @@ def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
         InputLayerScalar    = 'tau_vars',
         InputLayerTracks    = 'track_vars',
         InputLayerClusters  = 'cluster_vars',
+        InputLayerHits      = 'hit_vars',
         NodeNameTau         = id_flags.NodeNameTau if hasattr(id_flags, 'NodeNameTau') else 'pTau',
         NodeNameJet         = id_flags.NodeNameJet if hasattr(id_flags, 'NodeNameJet') else 'pJet',
 
-
         # Inputs:
-        MaxTracks           = id_flags.MaxTracks,
-        MaxClusters         = id_flags.MaxClusters,
+        MaxTracks           = id_flags.MaxTracks if hasattr(id_flags, 'MaxTracks') else 0,
+        MaxClusters         = id_flags.MaxClusters if hasattr(id_flags, 'MaxClusters') else 0,
         MaxClusterDR        = 1.0,
+        MaxHits             = id_flags.MaxHits if hasattr(id_flags, 'MaxHits') else 0,
+        TauContainerName    = tau_container,
+        HitsHandleKey       = hits_decoration_container,
         VertexCorrection    = False,
         TrackClassification = False,
 
         # Decorated TauJet variable names:
         OutputVarname       = f'{tau_id}_Score',
         OutputDiscriminant  = id_flags.OutputDiscriminant,
-        OutputPTau          = f'{tau_id}_ProbTau',
-        OutputPJet          = f'{tau_id}_ProbJet',
+        OutputPTau          = ptau_decor,
+        OutputPJet          = pjet_decor,
 
         # Tau prongness selection
         MinProngTrackPt     = id_flags.MinProngTrackPt if hasattr(id_flags, 'MinProngTrackPt') else 0,
@@ -213,7 +232,7 @@ def trigTauWPDecoratorCfg(flags, tau_id: str, precision_seq_name: str, tauContai
             'flatteningFile1Prong': id_flags.ScoreFlatteningConfig,
             'flatteningFile3Prong': id_flags.ScoreFlatteningConfig,
         }
-    elif isinstance(id_flags.ScoreFlatteningConfig, (list, tuple)) and len(id_flags.ONNXConfig) == 3:
+    elif isinstance(id_flags.ScoreFlatteningConfig, (list, tuple)) and len(id_flags.ScoreFlatteningConfig) == 3:
         cfg = {
             'flatteningFile0Prong': id_flags.ScoreFlatteningConfig[0],
             'flatteningFile1Prong': id_flags.ScoreFlatteningConfig[1],

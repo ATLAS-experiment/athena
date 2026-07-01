@@ -34,6 +34,8 @@ def fromRunArgs(runArgs):
     flags.Common.ProductionStep = ProductionStep.Simulation
     # Set BeamType
     flags.Beam.Type = BeamType.TestBeam
+    # Set temporary measure - do not use CREST for Test Beam jobs for now
+    flags.IOVDb.UseCREST=False
     # Set Default ParticleGun configuration
     flags.Sim.GenerationConfiguration="ParticleGun.ParticleGunConfig.ParticleGun_TestBeam_SingleParticleCfg"
     flags.IOVDb.DatabaseInstance = "TMCP200"

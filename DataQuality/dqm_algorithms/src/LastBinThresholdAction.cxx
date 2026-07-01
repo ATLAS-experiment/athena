@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <dqm_core/AlgorithmConfig.h>
@@ -18,6 +18,7 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <dqm_core/AlgorithmManager.h>
 
 namespace {
+  const std::string actionStr{"Action"};
 
 
   dqm_algorithms::LastBinThresholdAction<dqm_algorithms::GreaterThan, dqm_algorithms::NoAction>
@@ -99,7 +100,7 @@ dqm_algorithms::LastBinThresholdAction<Exceed, Action>::execute(const std::strin
   const int nBinsForAction = static_cast<int>( dqm_algorithms::tools::GetFirstFromMap( "NBinsForAction", config.getParameters(), 99999) );
 
   std::string action("");
-  std::map<std::string, std::string>::const_iterator itAction = config.getGenericParameters().find("Action");
+  std::map<std::string, std::string>::const_iterator itAction = config.getGenericParameters().find(actionStr);
   if (itAction != config.getGenericParameters().end()) {
     action = itAction->second;
   }

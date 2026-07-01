@@ -57,7 +57,7 @@ include( "TBRec/H6MWPCRec_jobOptions.py" )
 # NtupleSvc.Output=["FILE1 DATAFILE='TBLArDigits.root' TYP='ROOT' OPT='NEW'"]
 
 # #--- Monitoring ---------------------------
-theApp.TopAlg += [ "TBAlgoSequencer/Seq1" ]
+theApp.TopAlg += [ "AthSequencer/Seq1" ]
 theApp.Dlls += [ "GaudiAlg"]
 
 theApp.Dlls += [ "AthenaMonitoring"]

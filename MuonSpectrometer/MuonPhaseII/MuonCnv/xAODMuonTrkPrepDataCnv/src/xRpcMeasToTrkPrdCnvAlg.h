@@ -1,5 +1,6 @@
 /*
-*/
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/  
 #ifndef XAODMUONTRKPREPDATACNV_xRPCTOPRDCNVALG_H
 #define XAODMUONTRKPREPDATACNV_xRPCTOPRDCNVALG_H
 
@@ -14,23 +15,22 @@
 
 namespace MuonR4{
     /** @brief Conversion algorithm to turn xAOD::RpcMeasurements into Trk::RpcPrepData */
-    class xRpcMeasToRpcTrkPrdCnvAlg : public AthReentrantAlgorithm{
+    class xRpcMeasToTrkPrdCnvAlg : public AthReentrantAlgorithm{
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
   
-            virtual ~xRpcMeasToRpcTrkPrdCnvAlg() = default;
+            virtual ~xRpcMeasToTrkPrdCnvAlg() = default;
 
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
         private:
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-
             SG::ReadHandleKey<xAOD::RpcMeasurementContainer> m_readKey{this, "ReadKey", "xRpcMeasurements"};
 
             SG::WriteHandleKey<Muon::RpcPrepDataContainer>  m_writeKey{this, "WriteKey", "RPC_Measurements", "Key for RPC PRD Container"};
 
-             SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "DetectorManagerKey", "MuonDetectorManager",
+            SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "DetectorManagerKey", "MuonDetectorManager",
                                                                             "Key of input MuonDetectorManager condition data"};
 
    

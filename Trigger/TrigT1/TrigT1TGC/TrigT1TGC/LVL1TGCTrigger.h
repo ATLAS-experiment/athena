@@ -1,16 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1TGC_LVL1TGCTRIGGER_H
 #define TRIGT1TGC_LVL1TGCTRIGGER_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-
-// STL
-#include <string>
-#include <vector>
-#include <map>
 
 // Gaudi includes
 #include "Gaudi/Property.h"
@@ -51,6 +46,11 @@
 // RPC BIS78 Trigger Output
 #include "MuonRDO/RpcBis78_TrigRawDataContainer.h"
 
+// STL
+#include <string>
+#include <vector>
+#include <map>
+
 class TgcRdo;
 class TgcRawData;
 
@@ -75,7 +75,7 @@ class LVL1TGCTrigger : public AthAlgorithm
     // standard algorithm methods:
     virtual StatusCode initialize() override;
     virtual StatusCode start() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
  private:
     StatusCode processOneBunch(const Muon::TgcCablingMap& cabling,

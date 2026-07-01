@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LEPTONTAGGERS_IVertexFittingTool_H
@@ -74,12 +74,14 @@ namespace Prompt
     DeclareInterfaceID( Prompt::IVertexFittingTool, 1, 0 );
 
     virtual std::unique_ptr<xAOD::Vertex> fitVertexWithPrimarySeed(
+      const EventContext& ctx,
       const FittingInput &input,
       const std::vector<const xAOD::TrackParticle* > &tracks,
       VtxType vtx
     ) = 0;
 
     virtual std::unique_ptr<xAOD::Vertex> fitVertexWithSeed(
+      const EventContext& ctx,
       const FittingInput &input,
       const std::vector<const xAOD::TrackParticle* > &tracks,
       const Amg::Vector3D& seed,

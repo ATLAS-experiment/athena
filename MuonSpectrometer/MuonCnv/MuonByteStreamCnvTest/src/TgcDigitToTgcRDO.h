@@ -10,7 +10,6 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoContainer.h"
-#include "StoreGate/DataHandle.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 
 /////////////////////////////////////////////////////////////////////////////

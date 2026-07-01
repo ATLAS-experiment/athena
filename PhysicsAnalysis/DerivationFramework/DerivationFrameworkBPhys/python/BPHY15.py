@@ -50,8 +50,6 @@ def BPHY15Cfg(flags):
        useCombinedMeasurement     = False, # Only takes effect if combOnly=True  
        muonCollectionKey          = "Muons",
        TrackParticleCollection    = "InDetTrackParticles",
-       V0VertexFitterTool         = None,             # V0 vertex fitter
-       useV0Fitter                = False,
        TrkVertexFitterTool        = vkalvrt,        # VKalVrt vertex fitter
        TrackSelectorTool          = trackselect,
        VertexPointEstimator       = vpest,
@@ -178,8 +176,6 @@ def BPHY15Cfg(flags):
        useCombinedMeasurement     = False, # Only takes effect if combOnly=True  
        muonCollectionKey          = "Muons",
        TrackParticleCollection    = "InDetTrackParticles",
-       V0VertexFitterTool         = None,
-       useV0Fitter                = False,
        TrkVertexFitterTool        = vkalvrt,        # VKalVrt vertex fitter
        TrackSelectorTool          = trackselect,
        VertexPointEstimator       = vpest,
@@ -387,9 +383,7 @@ def BPHY15Cfg(flags):
        useCombinedMeasurement     = False, # Only takes effect if combOnly=True
        muonCollectionKey          = "Muons",
        TrackParticleCollection    = "InDetTrackParticles",
-       V0VertexFitterTool         = v0Vertexfit,             # V0 vertex fitter
-       useV0Fitter                = True,                   # if False a TrkVertexFitterTool will be used
-       TrkVertexFitterTool        = vkalvrt,        # VKalVrt vertex fitter
+       TrkVertexFitterTool        = v0Vertexfit,        # V0 vertex fitter
        TrackSelectorTool          = trackselect,
        VertexPointEstimator       = vpest,
        useMCPCuts                 = False,
@@ -475,7 +469,7 @@ def BPHY15Cfg(flags):
             flags, name = "BPHY15_SelectBcJpsipiEvent",
             expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc) > 0)"))
 
-      BPHY15_AnyVertexSkimmingTool = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY15_AnyVertexSkimmingTool", UseHandles = True,
+      BPHY15_AnyVertexSkimmingTool = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY15_AnyVertexSkimmingTool",
                                                                         VertexContainerNames =CascadeCollections )
       acc.addPublicTool(BPHY15_AnyVertexSkimmingTool)
       #====================================================================

@@ -22,7 +22,7 @@ public:
         T_AthenaPoolCustomCnv<CaloCalibrationHitContainer, CaloCalibrationHitContainer_PERS >( svcloc) {}
 protected:
   CaloCalibrationHitContainer_PERS*  createPersistent(CaloCalibrationHitContainer* transCont);
-  CaloCalibrationHitContainer*       createTransient ();
+  CaloCalibrationHitContainer*       createTransient(const Token* token);
 };
 
 #endif

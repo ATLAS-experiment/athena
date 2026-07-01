@@ -87,7 +87,7 @@ namespace ORUtils
       //
 
       /// Helper used to reset decorations
-      std::unique_ptr<OverlapDecorationHelper<columnar::ContainerId::particle1>> m_decHelper;
+      std::unique_ptr<OverlapDecorationHelper<columnar::Particle1Def>> m_decHelper;
 
       //
       // Overlap tool handles

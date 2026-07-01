@@ -3,6 +3,7 @@
 */
 
 #include "AthenaKernel/SlotSpecificObj.h"
+#include "IRegionSelector/IRoiDescriptor.h"
 #include "TrigConfHLTUtils/HLTUtils.h"
 
 #include "TrigCostSvc.h"
@@ -519,7 +520,7 @@ StatusCode TrigCostSvc::checkSlot(const EventContext& context) const {
 
 int32_t TrigCostSvc::getROIID(const EventContext& context) {
   if (Atlas::hasExtendedEventContext(context)) {
-    const TrigRoiDescriptor* roi = Atlas::getExtendedEventContext(context).roiDescriptor();
+    const IRoiDescriptor* roi = Atlas::getExtendedEventContext(context).roiDescriptor();
     if (roi) return static_cast<int32_t>(roi->roiId());
   }
   return AlgorithmIdentifier::s_noView;

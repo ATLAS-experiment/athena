@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -12,7 +12,6 @@
 
 #include "AthenaKernel/errorcheck.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "StoreGate/DataHandle.h"
 #include "CaloConditions/CaloNoise.h"
 
 #include "boost/chrono/chrono.hpp"

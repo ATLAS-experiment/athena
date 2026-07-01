@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -60,13 +60,12 @@ StatusCode L1CaloTriggerTowerDecoratorAlg::initialize() {
 }
 
 StatusCode
-L1CaloTriggerTowerDecoratorAlg::execute()
+L1CaloTriggerTowerDecoratorAlg::execute(const EventContext& ctx)
 {
   // use decorators to avoid the costly name -> auxid lookup
 
   // Shall I proceed?
   if (!m_triggerTowerContainerKey.empty()) {
-     const EventContext& ctx = Gaudi::Hive::currentContext();
      SG::ReadHandle<xAOD::TriggerTowerContainer> tts(m_triggerTowerContainerKey,
                                                     ctx);
      CHECK(m_ttTools->initCaloCells());

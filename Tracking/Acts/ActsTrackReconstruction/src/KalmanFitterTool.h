@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_KALMANFITTERTOOL_H
@@ -15,7 +15,7 @@
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
 // ACTS
-#include "Acts/EventData/TrackParameters.hpp"
+#include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/TrackFitting/KalmanFitter.hpp"
 #include "Acts/MagneticField/MagneticFieldProvider.hpp"
 #include "Acts/Propagator/SympyStepper.hpp"
@@ -31,7 +31,8 @@
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsToolInterfaces/IActsToTrkConverterTool.h"
+#include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
+#include "ActsToolInterfaces/ITrackConverterTool.h"
 
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsCalibrators/TrkMeasSurfaceAccessor.h"
@@ -101,7 +102,7 @@ public:
   //! fit a set of xAOD uncalibrated Measurements
   virtual  
       std::unique_ptr< ActsTrk::MutableTrackContainer >
-      fit(const std::vector<ActsTrk::ATLASUncalibSourceLink> & clusterList,
+      fit(const std::vector<const xAOD::UncalibratedMeasurement*> & clusterList,
       const Acts::BoundTrackParameters& initialParams,
       const Acts::GeometryContext& tgContext,
       const Acts::MagneticFieldContext& mfContext,
@@ -146,7 +147,8 @@ public:
   // Private methods:
   ///////////////////////////////////////////////////////////////////
 private:
-
+    /** @brief Abrivate the track state proxy */
+    using TrackState_t = MutableTrackStateBackend::TrackStateProxy;
     /** @brief Abbrivation of the fitter extensions */
     using FitterExtension_t = Acts::KalmanFitterExtensions<MutableTrackStateBackend>;
     /** @brief Abbrivation of the configuration to launch the fit  */
@@ -166,9 +168,10 @@ private:
                                  detail::SourceLinkType slType) const;
 
 
-  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
-  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-  ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
+  ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+  PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
+  PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
+  ToolHandle<ITrackConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   // the settable job options
   Gaudi::Property< double > m_option_outlierChi2Cut {this, "OutlierChi2Cut", 12.5, 
       "Chi2 cut used by the outlier finder" };

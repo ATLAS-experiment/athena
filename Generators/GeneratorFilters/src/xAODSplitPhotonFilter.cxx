@@ -11,14 +11,14 @@ StatusCode xAODSplitPhotonFilter::filterInitialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode xAODSplitPhotonFilter::filterEvent()
+StatusCode xAODSplitPhotonFilter::filterEvent(const EventContext& ctx)
 {
   int NPhotons = 0;
   bool GoodFlav = m_dauPdg.size() == 0 ? true : false;
 
   // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
   // duplicated barcode ones
-  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey};
+  SG::ReadHandle<xAOD::TruthParticleContainer> xTruthParticleContainer{m_truthPartContKey, ctx};
   CHECK(xTruthParticleContainer.isValid());
 
   // Check for a photon with desired kinematics
@@ -68,6 +68,6 @@ StatusCode xAODSplitPhotonFilter::filterEvent()
 
   if (NPhotons >= m_NPhotons && GoodFlav)
     return StatusCode::SUCCESS;
-  setFilterPassed(false);
+  setFilterPassed(false, ctx);
   return StatusCode::SUCCESS;
 }

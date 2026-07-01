@@ -48,7 +48,6 @@ if [ -z "$dcubeshiftercfg_rec" ]; then
 fi
 
 run Sim_tf.py \
-    --CA \
     --conditionsTag "default:${condition}" \
     --simulator 'FullG4MT' \
     --preExec "default:flags.Output.HISTFileName='${dcubemon_sim}';" \
@@ -84,7 +83,6 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
 
 
  run Digi_tf.py \
-    --CA \
     --conditionsTag "default:${condition}" \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion "default:${geometry}" \
@@ -119,8 +117,7 @@ if [ $sim_tf_exit_code -eq 0 ]  ;then
 
  run Reco_tf.py --CA \
     --inputRDOFile $rdo \
-    --outputAODFile $aod \
-    --steering doRAWtoALL
+    --outputAODFile $aod
  rec_tf_exit_code=$?
  echo "art-result: $rec_tf_exit_code reco"
 

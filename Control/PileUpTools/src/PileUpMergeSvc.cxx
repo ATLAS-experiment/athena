@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PileUpTools/PileUpMergeSvc.h"
@@ -108,8 +108,10 @@ PileUpMergeSvc::initialize()    {
 }
 
 
-const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const std::string& einame ) const
+const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const std::string& einame )
 {
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+
    if( !sg ) sg = p_overStore.get();
    const xAOD::EventInfo* xAODEventInfo = einame.empty()?
       sg->tryConstRetrieve<xAOD::EventInfo>()
@@ -136,7 +138,7 @@ const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const s
          std::unique_ptr< xAOD::EventAuxInfo > pxAODEventAuxInfo(new xAOD::EventAuxInfo());
          pxAODEventInfo->setStore( pxAODEventAuxInfo.get() );
          pxAODEventInfo->setEvtStore( sg );
-         if( !m_xAODCnvTool->convert( pEvent, pxAODEventInfo.get(), true, false ).isSuccess() ) {
+         if( !m_xAODCnvTool->convert( ctx, pEvent, pxAODEventInfo.get(), true, false ).isSuccess() ) {
             ATH_MSG_ERROR("Failed to convert  xAOD::EventInfo in SG");
             return nullptr;
          }
@@ -179,7 +181,7 @@ const xAOD::EventInfo* PileUpMergeSvc::getPileUpEvent( StoreGateSvc* sg, const s
                // Create a new xAOD::EventInfo object:
                std::unique_ptr< xAOD::EventInfo > ei( new xAOD::EventInfo() );
                // Fill it with information:
-               if( ! m_xAODCnvTool->convert( pu_itr->pSubEvt, ei.get(), true, false ).isSuccess() ) {
+               if( ! m_xAODCnvTool->convert( ctx, pu_itr->pSubEvt, ei.get(), true, false ).isSuccess() ) {
                   ATH_MSG_ERROR("Failed to convert EventInfo to xAOD::EventInfo");
                   continue;
                }

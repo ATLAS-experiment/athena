@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <string_view>
 #include <cmath>
 
 #include <TStyle.h>
@@ -104,7 +105,7 @@ inline void DrawATLASLabel(float x,float y, float textsize = 0.05,bool Prelimina
 
 
 
-inline void DrawTitleLatex(const char* chartitle,
+inline void DrawTitleLatex(std::string_view chartitle,
 				float x, float y,
 				int color = 1,
 				float textsize = 0.04){
@@ -130,7 +131,7 @@ inline void DrawTitleLatex(const char* chartitle,
 
 }
 
-inline void DrawLegendLatex(const char* chartitle,
+inline void DrawLegendLatex(std::string_view chartitle,
 				int markertype,
 				float x, float y,
 				int color = 1,

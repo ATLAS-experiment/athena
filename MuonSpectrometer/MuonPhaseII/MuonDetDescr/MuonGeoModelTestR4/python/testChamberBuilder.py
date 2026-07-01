@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
@@ -11,20 +11,21 @@ def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
     return result
 
 if __name__=="__main__":
-    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
+    from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser
+    from MuonConfig.MuonConfigUtils import executeTest
     parser = SetupArgParser()
 
     args = parser.parse_args()
-
      
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Acts.TrackingGeometry.UseBlueprint=True
     flags.Acts.TrackingGeometry.ObjDebugOutput = False
+    flags.Muon.trackGeometryPassiveMaterial= True
     flags, cfg = setupGeoR4TestCfg(args,flags)    
+   
     ###
     cfg.merge(MuonChamberToolTestCfg(flags))
-    cfg.getService("MessageSvc").verboseLimit = 100000
     executeTest(cfg)
 
 

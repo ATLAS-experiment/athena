@@ -54,13 +54,12 @@ StatusCode M4MuIntervalFilter::filterFinalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode M4MuIntervalFilter::filterEvent() {
+StatusCode M4MuIntervalFilter::filterEvent(const EventContext& ctx) {
   // Get random number engine
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_ERROR("Failed to retrieve random number engine M4MuIntervalFilter");
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     return StatusCode::FAILURE;
   }
 
@@ -84,7 +83,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
   std::sort(MCTruthMuonList.begin(), MCTruthMuonList.end(), High2LowByPt());
 
   if(MCTruthMuonList.size()<4){
-    setFilterPassed(false);
+    setFilterPassed(false, ctx);
     ATH_MSG_DEBUG("Less than 4 muons. The muon number is " << MCTruthMuonList.size());
     return StatusCode::SUCCESS;
   }
@@ -100,7 +99,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
     eventWeight = getEventWeight(m4mu);
     double rnd = rndm->flat();
     if (1.0/eventWeight < rnd) {
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_DEBUG("Event failed weighting. Weight is " << eventWeight);
       return StatusCode::SUCCESS;
     }
@@ -108,7 +107,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
     // Get MC event collection for setting weight
     const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
-      setFilterPassed(false);
+      setFilterPassed(false, ctx);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
       return StatusCode::FAILURE;
     }
@@ -126,7 +125,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
     }
   }
   // Made it to the end - success!
-  setFilterPassed(true);
+  setFilterPassed(true, ctx);
   return StatusCode::SUCCESS;
 }
 

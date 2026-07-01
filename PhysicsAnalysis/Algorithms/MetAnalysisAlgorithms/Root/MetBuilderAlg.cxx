@@ -13,7 +13,6 @@
 #include <MetAnalysisAlgorithms/MetBuilderAlg.h>
 
 #include <METUtilities/METHelpers.h>
-#include <xAODMissingET/MissingETAuxContainer.h>
 
 //
 // method implementations
@@ -37,12 +36,12 @@ namespace CP
 
 
   StatusCode MetBuilderAlg ::
-  execute ()
+  execute (const EventContext& ctx)
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       xAOD::MissingETContainer *met {};
-      ANA_CHECK (m_metHandle.getCopy (met, sys));
+      ANA_CHECK (m_metHandle.getCopy (met, sys, ctx));
 
       xAOD::MissingET *softTerm = (*met)[m_softTerm];
       if (softTerm == nullptr)

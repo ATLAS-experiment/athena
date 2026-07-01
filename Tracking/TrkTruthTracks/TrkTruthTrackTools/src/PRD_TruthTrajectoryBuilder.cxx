@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////
@@ -56,40 +56,34 @@ StatusCode  Trk::PRD_TruthTrajectoryBuilder::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::PRD_TruthTrajectoryBuilder::refreshEvent()  {
 
-   ATH_MSG_INFO("Calling refreshEvent() to reset cache and retrieve collections");
-   // clear the cache & reserve
-   m_prdMultiTruthCollections.clear();
-   m_prdMultiTruthCollections.reserve(m_prdMultiTruthCollectionNames.size());
-   // load the PRD collections from SG
-   for(const auto& pmtCollNameIter:m_prdMultiTruthCollectionNames){
-     // try to retrieve the PRD multi truth collection
-     SG::ReadHandle<PRD_MultiTruthCollection> curColl (pmtCollNameIter);
-     if (!curColl.isValid()){
-       ATH_MSG_WARNING("Could not retrieve " << pmtCollNameIter << ". Ignoring ... ");
-     }
-     else{
-       ATH_MSG_INFO("Added " << pmtCollNameIter << " to collection list for truth track creation.");
-       m_prdMultiTruthCollections.push_back(curColl.cptr());
-     }
-   }
-   // all good
-   return StatusCode::SUCCESS;
-   
-}
-
-std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTrajectoryBuilder::truthTrajectories() const {
+std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTrajectoryBuilder::truthTrajectories(const EventContext& ctx) const {
     // ndof
     size_t ndofTotal = 0;
     size_t ndof      = 0;
 
     std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory > gpPrdTruthTrajectories;
 
+    std::vector<const PRD_MultiTruthCollection*> prdMultiTruthCollections;
+
+    // load the PRD collections from SG
+    prdMultiTruthCollections.reserve(m_prdMultiTruthCollectionNames.size());
+    for(const auto& pmtCollNameIter:m_prdMultiTruthCollectionNames){
+      // try to retrieve the PRD multi truth collection
+      SG::ReadHandle<PRD_MultiTruthCollection> curColl (pmtCollNameIter, ctx);
+      if (!curColl.isValid()){
+        ATH_MSG_WARNING("Could not retrieve " << pmtCollNameIter << ". Ignoring ... ");
+      }
+      else{
+        ATH_MSG_INFO("Added " << pmtCollNameIter << " to collection list for truth track creation.");
+        prdMultiTruthCollections.push_back(curColl.cptr());
+      }
+    }
+
     // PART 1 --------------------------------------------------------------------------------------------------------
     // loop over the PRD_MultiTruthCollection, search for the PRD and create (if necessary and entry in the return map)
-    std::vector<const PRD_MultiTruthCollection*>::const_iterator pmtCollIter  = m_prdMultiTruthCollections.begin();
-    std::vector<const PRD_MultiTruthCollection*>::const_iterator pmtCollIterE = m_prdMultiTruthCollections.end();
+    std::vector<const PRD_MultiTruthCollection*>::const_iterator pmtCollIter  = prdMultiTruthCollections.begin();
+    std::vector<const PRD_MultiTruthCollection*>::const_iterator pmtCollIterE = prdMultiTruthCollections.end();
     for ( ; pmtCollIter != pmtCollIterE; ++pmtCollIter ){
         // loop over the map and get the identifier, GenParticle relation
         PRD_MultiTruthCollection::const_iterator prdMtCIter  = (*pmtCollIter)->begin();
@@ -97,12 +91,7 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
         for ( ; prdMtCIter != prdMtCIterE; ++ prdMtCIter ){
 
             // check if entry exists and if   
-#ifdef HEPMC3
             HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second.scptr();
-#else
-//AV Looks like an implicit conversion
-            HepMC::ConstGenParticlePtr curGenP       = (*prdMtCIter).second;
-#endif
             Identifier                curIdentifier = (*prdMtCIter).first;
             // apply the min pT cut 
             if ( curGenP->momentum().perp() < m_minPt ) continue;
@@ -158,11 +147,3 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
     // return the truth trajectories and leave it to the TruthTrack creation to proceed further
     return gpPrdTruthTrajectories;
 }
-                                    
-StatusCode  Trk::PRD_TruthTrajectoryBuilder::finalize()
-{
-    // clear the cache a last time
-    m_prdMultiTruthCollections.clear();
-    return StatusCode::SUCCESS;
-}
-

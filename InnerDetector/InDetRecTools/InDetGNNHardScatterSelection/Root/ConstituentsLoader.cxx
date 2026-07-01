@@ -56,7 +56,7 @@ namespace InDetGNNHardScatterSelection {
           // iparticle variables
           // ConstituentsEDMType picked correspond to the first matching regex
   //        {"(photon_deltaZ|photon_deltaZ_wBeamSpot)"_r, ConstituentsEDMType::FLOAT},
-          {"(pt|eta|phi|energy|deltaZ0|vertexWeight|ntracks_ga|photon_deltaZ|photon_deltaZ_wBeamSpot)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+          {"(pt|eta|phi|energy|deltaZ0|trkpt|trketa|trkphi|gsftrkpt|gsftrketa|gsftrkphi|cluster_eta|cluster_phi|isAmbiguous|vertexWeight|ntracks_ga|photon_deltaZ|photon_deltaZ_wBeamSpot|d0|z0)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       
       if (name.find("tracks_all_sd0sort") != std::string::npos){

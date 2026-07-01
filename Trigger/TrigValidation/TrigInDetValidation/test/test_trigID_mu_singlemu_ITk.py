@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # art-description: art job for mu_singlemu_ITk
 # art-type: grid
-# art-include: main/Athena/x86_64-el9-gcc14-opt
-# art-input: mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
+# art-include: main/Athena/x86_64-el9-gcc15-opt
+# art-input: mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4494_r16632
 # art-input-nfiles: 20
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=

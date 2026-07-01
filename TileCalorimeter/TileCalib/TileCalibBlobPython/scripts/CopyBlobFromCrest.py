@@ -167,7 +167,7 @@ def save_calib_data_to_file(blobs, output_file, requested_channels=None):
             blobs_to_save = blobs
 
         with open(output_file, "w") as f:
-            json.dump(blobs_to_save, f)
+            json.dump(blobs_to_save, f, separators=(',', ':'))
 
         log.info("Calibration data successfully written to output file.")
 

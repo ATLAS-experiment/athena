@@ -69,7 +69,7 @@ StatusCode Trk::MaterialValidation::initialize()
 }
 
 
-StatusCode Trk::MaterialValidation::execute()
+StatusCode Trk::MaterialValidation::execute(const EventContext& /*ctx*/)
 {
     ATH_MSG_VERBOSE( "MaterialValidation execute() start ================================================" );
 

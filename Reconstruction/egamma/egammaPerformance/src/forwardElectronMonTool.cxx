@@ -181,13 +181,11 @@ StatusCode forwardElectronMonTool::bookHistograms()
   return StatusCode::SUCCESS;
 }
 
-StatusCode forwardElectronMonTool::fillHistograms()
+StatusCode forwardElectronMonTool::fillHistograms(const EventContext& ctx)
 {
   ATH_MSG_DEBUG("forwardElectronMonTool::fillHistograms()");
 
   if (!hasGoodTrigger("forward electron")) return StatusCode::SUCCESS; 
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   //check whether Lar signalled event bad
   if(hasBadLar(ctx)) {
@@ -210,7 +208,7 @@ StatusCode forwardElectronMonTool::fillHistograms()
   }
 
   // Get electron container
-  SG::ReadHandle<xAOD::ElectronContainer> electron_container{m_ForwardElectronContainer};
+  SG::ReadHandle<xAOD::ElectronContainer> electron_container{m_ForwardElectronContainer, ctx};
   ATH_CHECK(electron_container.isValid());
 
   xAOD::ElectronContainer::const_iterator e_iter = electron_container->begin();

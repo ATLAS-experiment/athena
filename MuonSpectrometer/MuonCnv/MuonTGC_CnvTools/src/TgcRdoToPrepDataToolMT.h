@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCRDOTOPREPDATATOOLMT_H
@@ -19,14 +19,12 @@
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonTrigCoinData/MuonTrigCoinData_Cache.h"
 #include "MuonTrigCoinData/TgcCoinDataContainer.h"
-#include "StoreGate/HandleKeyArray.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/UpdateHandle.h"
 #include "StoreGate/UpdateHandleKey.h"
-#include "xAODMuonPrepData/TgcStripContainer.h"
 
 namespace MuonGM {
 class TgcReadoutElement;
@@ -36,14 +34,10 @@ namespace Muon {
 // Typedef the two update handle arrays that can be used to match handle key
 // functionality Requested to not use StoreGate template for
 // UpdateHandleKeyArray
-typedef SG::HandleKeyArray<SG::UpdateHandle<TgcPrepDataCollection_Cache>,
-                           SG::UpdateHandleKey<TgcPrepDataCollection_Cache>,
-                           Gaudi::DataHandle::Reader>
-    TgcPrdUpdateHandles;
-typedef SG::HandleKeyArray<SG::UpdateHandle<TgcCoinDataCollection_Cache>,
+using TgcCoinUpdateHandles = 
+        SG::HandleKeyArray<SG::UpdateHandle<TgcCoinDataCollection_Cache>,
                            SG::UpdateHandleKey<TgcCoinDataCollection_Cache>,
-                           Gaudi::DataHandle::Reader>
-    TgcCoinUpdateHandles;
+                           Gaudi::DataHandle::Reader>;
 
 /** @class TgcRdoToPrepDataToolMT
  *  This is the algorithm that convert TGCRdo To TGCPrepdata as a tool.
@@ -96,12 +90,11 @@ class TgcRdoToPrepDataToolMT
 
     struct State {
         /** TgcPrepRawData (hit PRD) containers */
-        std::array<TgcPrepDataContainer*, NBC_HIT + 1>
-            tgcPrepDataContainer{};  // +1 for AllBCs
+        TgcPrepDataContainer* tgcPrepDataContainer{};
 
         using TempPrepDataContainer =
             std::vector<std::unique_ptr<TgcPrepDataCollection>>;
-        std::array<TempPrepDataContainer, NBC_HIT + 1> tgcPrepDataCollections{};
+        TempPrepDataContainer tgcPrepDataCollections{};
         /** TgcCoinData (coincidence PRD) containers */
         std::array<TgcCoinDataContainer*, NBC_TRIG> tgcCoinDataContainer{};
 
@@ -109,10 +102,9 @@ class TgcRdoToPrepDataToolMT
             std::vector<std::unique_ptr<TgcCoinDataCollection>>;
         std::array<TempCoinDataContainer, NBC_TRIG> tgcCoinDataCollections{};
 
-        /// Handle for the xAOD container
-        SG::WriteHandle<xAOD::TgcStripContainer> m_xaodHandle{};
-
         const MuonGM::MuonDetectorManager* muDetMgr{nullptr};
+
+        const TgcCablingMap* cabling{nullptr};
     };
     template <class ContType, class CollType>
     StatusCode transferData(
@@ -120,15 +112,6 @@ class TgcRdoToPrepDataToolMT
         std::vector<std::unique_ptr<CollType>>&& coll) const;
 
     StatusCode setupState(const EventContext& ctx, State& state) const;
-
-    struct CablingInfo {
-        ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling{
-            "MuonTGC_CablingSvc", "TgcRdoToPrepDataToolMT"};
-        /** Conversion from hash to onlineId */
-        std::vector<uint16_t> m_hashToOnlineId;
-        int m_MAX_N_ROD = 0;
-    };
-    CxxUtils::CachedValue<CablingInfo> m_cablingInfo;
 
     /** Sub detector IDs are 103 and 104 for TGC A side and C side, respectively
      */
@@ -364,11 +347,11 @@ class TgcRdoToPrepDataToolMT
         const bool isAside) const;
 
     /** Get ReadoutID of HiPt from RDOHighPtID */
-    bool getHiPtIds(const TgcRawData& rd, int& sswId_o, int& sbLoc_o,
-                    int& slbId_o) const;
+    bool getHiPtIds(const State& state, const TgcRawData& rd, int& sswId_o,
+                    int& sbLoc_o, int& slbId_o) const;
 
     /** Get ReadoutID of SL from RDO */
-    bool getSLIds(const bool isStrip, const TgcRawData& rd,
+    bool getSLIds(const State& state, const bool isStrip, const TgcRawData& rd,
                   std::array<Identifier, 3>& channelId, int& index, int& chip,
                   int& hitId, int& sub, int& sswId, int& sbLoc, int& subMatrix,
                   std::array<int, 3>& bitpos, const bool isBoundary = false,
@@ -376,17 +359,15 @@ class TgcRdoToPrepDataToolMT
                   const int chip_w = -1, const int hitId_w = -1,
                   const int sub_w = -1) const;
     /** Get strip sbLoc of Endcap chamber boundary from HiPt Strip */
-    bool getSbLocOfEndcapStripBoundaryFromHiPt(const TgcRawData& rd, int& sbLoc,
-                                               const TgcRdo* rdoColl,
-                                               const int index_w,
-                                               const int chip_w,
-                                               const int hitId_w,
-                                               const int sub_w) const;
+    bool getSbLocOfEndcapStripBoundaryFromHiPt(
+        const State& state, const TgcRawData& rd, int& sbLoc,
+        const TgcRdo* rdoColl, const int index_w, const int chip_w,
+        const int hitId_w, const int sub_w) const;
     /** Get strip sbLoc of Endcap chamber boundary from Tracklet Strip */
     bool getSbLocOfEndcapStripBoundaryFromTracklet(
-        const TgcRawData& rd, int& sbLoc, const TgcRdo* rdoColl,
-        const int index_w, const int chip_w, const int hitId_w,
-        const int sub_w) const;
+        const State& state, const TgcRawData& rd, int& sbLoc,
+        const TgcRdo* rdoColl, const int index_w, const int chip_w,
+        const int hitId_w, const int sub_w) const;
     /** Get trackletIds of three Tracklet Strip candidates in the Endcap boudary
      */
     static void getEndcapStripCandidateTrackletIds(const int roi,
@@ -394,10 +375,8 @@ class TgcRdoToPrepDataToolMT
                                                    int& trackletIdStripSecond,
                                                    int& trackletIdStripThird);
 
-    const CablingInfo* getCabling() const;
-
     /** Get SL local position */
-    static const Amg::Vector2D* getSLLocalPosition(
+    static Amg::Vector2D getSLLocalPosition(
         const MuonGM::TgcReadoutElement* readout, const Identifier,
         const double eta, const double phi);
 
@@ -405,10 +384,13 @@ class TgcRdoToPrepDataToolMT
         this, "DetectorManagerKey", "MuonDetectorManager",
         "Key of input MuonDetectorManager condition data"};
 
+    SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{
+        this, "CablingKey", "MuonTgc_CablingMap"};
+
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    /** TgcPrepRawData container key for current BC */
+    /** TgcPrepRawData container key for curfrent BC */
     Gaudi::Property<std::string> m_outputCollectionLocation{
         this, "OutputCollection", "TGC_Measurements"};
 
@@ -459,29 +441,26 @@ class TgcRdoToPrepDataToolMT
         this, "outputCoinKey", {}};
     // Write handle keys for PrepDataContainers, need 4, for current, previous,
     // next and all BC
-    SG::WriteHandleKeyArray<Muon::TgcPrepDataContainer> m_outputprepdataKeys{
-        this, "prepDataKeys", {}};
+    SG::WriteHandleKey<Muon::TgcPrepDataContainer> m_prdWriteKey{
+        this, "prepDataKey",  "TGC_MeasurementsAllBCs"};
 
-    SG::WriteHandleKey<xAOD::TgcStripContainer> m_xAODKey{
-        this, "xAODKey", "",
-        "If empty, do not produce xAOD, otherwise this is the key of the "
-        "output xAOD MDT PRD container"};
 
     /// Keys for the PRD cache containers, 4 needed for different BC
-    TgcPrdUpdateHandles m_prdContainerCacheKeys{this, "UpdateKeysPrd", {}};
+    SG::UpdateHandleKey<TgcPrepDataCollection_Cache> m_prdContainerCacheKey{this, "UpdateKeyPrd", "", "Optional external cache for the sTGC PRD container"};
     /// Keys for the Coin cache containers, 3 needed for different BC
     TgcCoinUpdateHandles m_coinContainerCacheKeys{this, "UpdateKeysCoin", {}};
 
     // TgcPrepRawData container cache key prefix (code automatically creates
     // three keys with from this string if it is non-empty)
-    Gaudi::Property<std::string> m_prdContainerCacheKeyStr{
-        this, "PrdCacheString", "",
-        "Prefix for names of PRD cache collections"};
+
     // TgcCoinData container cache key prefix (code automatically creates three
     // keys with from this string if it is non-empty)
     Gaudi::Property<std::string> m_coinContainerCacheKeyStr{
         this, "CoinCacheString", "",
         "Prefix for names of Coin cache collections"};
+    /** @brief Convert hits from all bunch crossings. If false only the current BC 
+     *         is converted */
+    Gaudi::Property<bool> m_convertAllBCs{this, "convertAllBCs", true};
 
     /** Avoid compiler warning **/
     StatusCode decode(const EventContext& ctx,

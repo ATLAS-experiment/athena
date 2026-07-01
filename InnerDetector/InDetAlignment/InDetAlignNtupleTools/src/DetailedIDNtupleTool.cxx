@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "DetailedIDNtupleTool.h"
@@ -103,10 +103,9 @@ namespace InDet {
   }
 
 //________________________________________________________________________
-  void DetailedIDNtupleTool::dumpTrack(int /* itrk*/, const Trk::AlignTrack* alignTrack) {
+  void DetailedIDNtupleTool::dumpTrack(const EventContext& ctx, int /* itrk*/, const Trk::AlignTrack* alignTrack) {
     ATH_MSG_DEBUG("In dumpTrack()");
     Trk::AlignTrack::AlignTrackType type = alignTrack->type();
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     // if hope to dump all the tracks, should set:
     // m_storeNormalRefittedOnly = false, m_storeConstrainedOnly=false
     if ((m_storeNormalRefittedOnly && (type != Trk::AlignTrack::NormalRefitted)) ||
@@ -398,11 +397,7 @@ namespace InDet {
       const HepMcParticleLink& HMPL = trtruth.particleLink();
 
       if (HMPL.isValid()) {
-#ifdef HEPMC3
         HepMC::ConstGenParticlePtr genparptr = HMPL.scptr();
-#else
-        const HepMC::GenParticle* genparptr = HMPL.cptr();
-#endif
 
         if (genparptr) {
           if (genparptr->production_vertex()) {

@@ -142,10 +142,9 @@ StatusCode LArDigits2Ntuple::initialize()
   
 }
 
-StatusCode LArDigits2Ntuple::execute()
+StatusCode LArDigits2Ntuple::execute(const EventContext& ctx)
 {
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   if(!m_contKey.key().size() && !m_accContKey.key().size() && !m_accCalibContKey.key().size()) return StatusCode::SUCCESS;
 
   StatusCode	sc;
@@ -334,7 +333,7 @@ StatusCode LArDigits2Ntuple::execute()
       ATH_MSG_WARNING( "Unable to retrieve LArAccumulatedDigitContainer with key " << m_accContKey << " from DetectorStore. " );
       return StatusCode::SUCCESS;
     } else
-      ATH_MSG_DEBUG( "Got LArAccumulatedDigitContainer with key " << m_accContKey.key() );
+      ATH_MSG_DEBUG( "Got LArAccumulatedDigitContainer with key " << m_accContKey.key() << " size: " << hdlDigit->size());
  
     const LArAccumulatedDigitContainer DigitContainer = *hdlDigit;
  

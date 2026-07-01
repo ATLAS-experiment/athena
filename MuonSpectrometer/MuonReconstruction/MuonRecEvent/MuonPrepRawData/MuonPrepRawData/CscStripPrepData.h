@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ namespace Muon
       }
 
       /** returns the IdentifierHash corresponding to the channel. */
-      virtual const IdentifierHash collectionHash() const final;
+      const IdentifierHash collectionHash() const;
 
       /** Return the time samples. */
       const std::vector<float>& sampleCharges() const;

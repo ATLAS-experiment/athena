@@ -29,7 +29,7 @@ StatusCode BoostEvent::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode BoostEvent::execute()
+StatusCode BoostEvent::execute(const EventContext& /*ctx*/)
 {
   const McEventCollection* input_collection = nullptr;
   if ( evtStore()->retrieve(input_collection, m_inkey).isFailure() )

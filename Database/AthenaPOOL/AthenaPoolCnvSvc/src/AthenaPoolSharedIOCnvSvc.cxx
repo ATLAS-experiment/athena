@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolSharedIOCnvSvc.cxx
@@ -17,6 +17,7 @@
 
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "AthenaKernel/IAthMetaDataSvc.h"
+#include "AthenaKernel/InputFileIncidentGuard.h"
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
@@ -86,8 +87,8 @@ StatusCode AthenaPoolSharedIOCnvSvc::finalize() {
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConnectionSpec,
-               const std::string& /*openMode*/) {
-   return(connectOutput(outputConnectionSpec));
+                                                   const std::string& openMode) {
+   return AthenaPoolCnvSvc::connectOutput(outputConnectionSpec, openMode);
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
@@ -119,6 +120,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::connectOutput(const std::string& outputConn
    std::size_t apend = outputConnectionSpec.find('[');
    if (apend != std::string::npos) {
       outputConnection += outputConnectionSpec.substr(apend);
+   }
+   if (outputConnectionSpec.find("[PoolContainerPrefix=" + m_metadataContainerProp.value() + "]") != std::string::npos) {
+      return AthenaPoolCnvSvc::connectOutput(outputConnection, "APPEND");
    }
    return AthenaPoolCnvSvc::connectOutput(outputConnection);
 }
@@ -221,10 +225,9 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                   if (m_metadataClient != num) {
                      if (m_metadataClient != 0) {
                         std::string memName = std::format("SHM[NUM={}]", m_metadataClient);
-                        FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
-                        incSvc->fireIncident(beginInputIncident);
-                        FileIncident endInputIncident(name(), "EndInputMemFile", std::move(memName));
-                        incSvc->fireIncident(endInputIncident);
+                        auto guard = InputFileIncidentGuard::begin(*incSvc, name(),
+                                         memName, {}, /*endFileName=*/memName,
+                                         "BeginInputMemFile", "EndInputMemFile");
                      }
                      m_metadataClient = num;
                   }
@@ -366,10 +369,11 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
       if (sc.isFailure() || fileName.empty()) {
          ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
          std::string memName = std::format("SHM[NUM={}]", m_metadataClient);
-         FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
-         incSvc->fireIncident(beginInputIncident);
-         FileIncident endInputIncident(name(), "EndInputMemFile", std::move(memName));
-         incSvc->fireIncident(endInputIncident);
+         {
+            auto guard = InputFileIncidentGuard::begin(*incSvc, name(),
+                              memName, {}, /*endFileName=*/memName,
+                              "BeginInputMemFile", "EndInputMemFile");
+         }
          if (sc.isFailure()) {
             ATH_MSG_INFO("All SharedWriter clients stopped - exiting");
          } else {
@@ -524,13 +528,16 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
          tempToken->setClassID(pool::DbReflex::guid(classDesc));
          token = tempToken; tempToken = nullptr;
       } else if (!m_outputStreamingTool.empty() && !m_outputStreamingTool->isClient() && !m_streamServerActive) {
+         if(placement->technology() == 0) { // No technology specified, use the default
+            placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
+         }
          ATH_MSG_DEBUG("Requested write object for: " << placement->toString());
          token = getPoolSvc()->registerForWrite(placement, obj, classDesc);
       } else {
          if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient() && m_parallelCompression) {
             placement->setFileName(placement->fileName() + m_streamPortString.value());
          }
-	 token = AthenaPoolCnvSvc::registerForWrite(placement, obj, classDesc);
+         token = AthenaPoolCnvSvc::registerForWrite(placement, obj, classDesc);
       }
    }
    return(token);
@@ -766,13 +773,13 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
       }
    } else if (token.dbID() != Guid::null()) {
       std::string returnToken;
-      const Token* metadataToken = getPoolSvc()->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
-      if (metadataToken != nullptr) {
+      Token* metadataToken = getPoolSvc()->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
+      if( metadataToken ) {
          returnToken = metadataToken->toString();
+         metadataToken->release(); metadataToken = nullptr;
       } else {
          returnToken = token.toString();
       }
-      delete metadataToken; metadataToken = nullptr;
       // Share token
       sc = m_inputStreamingTool->putObject(returnToken.c_str(), returnToken.size() + 1, num);
       if (!sc.isSuccess() || !m_inputStreamingTool->putObject(nullptr, 0, num).isSuccess()) {

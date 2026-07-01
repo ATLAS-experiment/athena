@@ -10,40 +10,37 @@
 // Geant4 includes
 #include "G4LogicalVolumeStore.hh"
 
-namespace
-{
-  //---------------------------------------------------------------------------
-  /// @brief Helper function for matching strings with wildcards.
-  /// It's a recursive function that checks if two given strings match.
-  /// The first string may contain wildcard characters.
-  //---------------------------------------------------------------------------
-  bool matchStrings(const char* first, const char* second)
-  {
-    // If we reach at the end of both strings, we are done
-    if (*first == '\0' && *second == '\0')
-      return true;
-
-    // Make sure that the characters after '*' are present in second string.
-    // This function assumes that the first string will not contain two
-    // consecutive '*'
-    if (*first == '*' && *(first+1) != '\0' && *second == '\0')
-      return false;
-
-    // If the current characters of both strings match
-    if (*first == *second)
-      return matchStrings(first+1, second+1);
-
-    // If there is *, then there are two possibilities
-    // a) We consider current character of second string
-    // b) We ignore current character of second string.
-    if (*first == '*')
-      return matchStrings(first+1, second) || matchStrings(first, second+1);
-    return false;
-  }
-}
 
 namespace LArG4
 {
+
+  //---------------------------------------------------------------------------
+  /// @brief Helper function for matching strings with wildcards.
+  /// It's a iterative function that checks if two given strings match.
+  /// The first string may contain wildcard characters.
+  //---------------------------------------------------------------------------
+  bool matchStrings(std::string_view pattern, std::string_view text) noexcept {
+      size_t n = text.size(), m = pattern.size();
+      size_t i = 0, j = 0, startIndex = std::string_view::npos, match = 0;
+  
+      while (i < n) {
+          if (j < m && pattern[j] == '*') {
+              startIndex = j++;
+              match = i;
+          } else if (j < m && (pattern[j] == text[i])) {
+              i++;
+              j++;
+          } else if (startIndex != std::string_view::npos) {
+              j = startIndex + 1;
+              i = ++match;
+          } else {
+              return false;
+          }
+      }
+  
+      while (j < m && pattern[j] == '*') j++;
+      return j == m;
+  }
 
   //---------------------------------------------------------------------------
   // Search for logical volumes in the G4 volume store
@@ -56,8 +53,9 @@ namespace LArG4
     // Iterate over the G4 volumes and look for matches
     auto *logicalVolumeStore = G4LogicalVolumeStore::GetInstance();
     for(auto *logvol : *logicalVolumeStore) {
-      if( matchStrings( pattern.data(), logvol->GetName() ) ) {
-        foundVolumes.insert( logvol->GetName() );
+      auto name = logvol->GetName();
+      if( matchStrings( pattern, name) ) {
+        foundVolumes.emplace( std::move(name) );
       }
     }
 

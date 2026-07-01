@@ -7,12 +7,14 @@
 
 #include "AsgServices/IAsgService.h"
 
+#include "FlavorTagInference/GNNOptions.h"
+#include "FlavorTagInference/GNN.h"
+#include "src/hash.h"
+
 #include <memory>
 
 namespace FlavorTagInference
 {
-  class GNN;
-  struct GNNOptions;
   class INNSharingSvc: virtual public asg::IAsgService
   {
   public:

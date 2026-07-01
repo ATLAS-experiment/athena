@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNNTUPLETOOLS_DETAILEDIDNTUPLETOOL_H
@@ -43,7 +43,7 @@ namespace InDet
     virtual StatusCode finalize() override;
 
     /** fills track information to ntuple */
-    virtual void dumpTrack(int itrk, const Trk::AlignTrack * alignTrack) override;
+    virtual void dumpTrack(const EventContext& ctx, int itrk, const Trk::AlignTrack * alignTrack) override;
 
     virtual void storeHitmap() override;
     virtual void fillHitmap() override;

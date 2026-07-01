@@ -34,6 +34,7 @@ public:
   static bool hasGeoModelExperiment();//If GeoModelExperiment/"ATLAS" can be retrieved
 
   static bool hasITkGeometry();
+  static bool hasHGTDGeometry();
 
   static bool hasPixelGeometry();
   static bool hasSCTGeometry();

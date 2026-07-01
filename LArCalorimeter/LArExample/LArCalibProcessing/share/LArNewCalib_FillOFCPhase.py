@@ -11,7 +11,7 @@ if __name__=='__main__':
   import argparse
   import subprocess
   from AthenaCommon import Logging
-  log = Logging.logging.getLogger( 'LArSC2Ntuple' )
+  log = Logging.logging.getLogger( 'LArSCFillPhase' )
   
   parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -24,6 +24,7 @@ if __name__=='__main__':
   parser.add_argument('-t','--tag', dest='tag', default="LArOFCPhase-01", help='folder tag', type=str)
   parser.add_argument('-o','--outsql', dest='outsql', default="OFCPhase.db", help='output sqlite filename', type=str)
   parser.add_argument('-p','--outp', dest='outpool', default="ofc_phase.pool.root", help='output pool filename', type=str)
+  parser.add_argument('-r','--run', dest='run', default=0, help='Starting IOV run ', type=int)
   parser.add_argument('--poolcat', dest='poolcat', default="PoolFileCatalog.xml", help='Catalog of POOL files', type=str)
 
 
@@ -52,6 +53,8 @@ if __name__=='__main__':
   flags.LArCalib.Input.RunNumbers = [9999999]
 
   flags.LArCalib.IOVStart=0
+  if args.run > 0:
+     flags.LArCalib.IOVStart = args.run
 
   flags.LArCalib.isSC = args.supercells
 

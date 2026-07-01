@@ -29,11 +29,12 @@ atlas_add_component( ActsPatternRecognition
                SiSPSeededTrackFinderData
                SiSpacePoint
                StoreGateLib
+               TrigInDetToolInterfacesLib
                TrkEventUtils
                TrkParameters
                TrkSpacePoint
                xAODInDetMeasurement
-               TrigInDetToolInterfacesLib )
+               xAODTracking )
 
 
 
@@ -41,7 +42,6 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
   set_source_files_properties(
      ${CMAKE_CURRENT_SOURCE_DIR}/src/SeedingTool.cxx
      ${CMAKE_CURRENT_SOURCE_DIR}/src/GbtsSeedingTool.cxx
-     ${CMAKE_CURRENT_SOURCE_DIR}/src/OrthogonalSeedingTool.cxx
      PROPERTIES
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -UNDEBUG -fvisibility-inlines-hidden "
      COMPILE_DEFINITIONS "FLATTEN" )

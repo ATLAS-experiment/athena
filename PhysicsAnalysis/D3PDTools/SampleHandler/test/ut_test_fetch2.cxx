@@ -2,14 +2,7 @@
   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
-//          
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
-
+/// @author Nils Krumnack
 
 //
 // includes
@@ -36,7 +29,7 @@ void addSample (SH::SampleHandler& sh, const std::string& name)
   std::unique_ptr<SH::SampleGrid> sample (new SH::SampleGrid (name));
   sample->meta()->setString (SH::MetaFields::gridName, name);
   sample->meta()->setString (SH::MetaFields::gridFilter, SH::MetaFields::gridFilter_default);
-  sh.add (sample.release());
+  sh.add (std::move (sample));
 }
 
 int main ()

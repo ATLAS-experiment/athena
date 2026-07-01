@@ -7,6 +7,7 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#include <cassert>
 
 // Helper type to associate the measurement dimension to the pointer to a measurement container
 template <typename container_t, std::size_t DIM>
@@ -96,20 +97,19 @@ protected:
          }
       }
    }
-public:
+protected:
    template <std::size_t N= std::variant_size_v< measurement_container_variant_t > >
-   static void dumpVariantTypes(std::ostream &out) {
+   static void dumpVariantTypesImpl(std::ostream &out) {
       if constexpr(N>0) {
          using a_type = decltype( lvalue(std::get<N-1>(measurement_container_variant_t{}) ) );
          out << N-1 << ": " << typeid(a_type).name() << std::endl;
-         dumpVariantTypes<N-1>(out);
+         dumpVariantTypesImpl<N-1>(out);
       }
    }
-protected:
    static void throwContainerNotInVariant(const char *a) {
       std::stringstream msg;
       msg << "Container "  << a << " not in variant:" << std::endl;
-      dumpVariantTypes(msg);
+      dumpVariantTypesImpl(msg);
       throw std::runtime_error(msg.str());
    }
 
@@ -269,8 +269,8 @@ public:
    static constexpr std::size_t getMeasurementDimMax() {
       return Base::dimMax();
    }
-   static void dumpVariantTypes() {
-      Base::dumpVariantTypes();
+   static void dumpVariantTypes(std::ostream &out) {
+      Base::template dumpVariantTypesImpl<>(out);
    }
 
    std::size_t size() const {

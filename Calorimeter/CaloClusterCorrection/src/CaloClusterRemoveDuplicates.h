@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTERCORRECTION_CALOCLUSTERREMOVEDUPLICATES_H
@@ -42,11 +42,9 @@ class CaloClusterRemoveDuplicates :  public AthAlgTool, virtual public CaloClust
   
   int compare( xAOD::CaloCluster* clus1 , xAOD::CaloCluster* clus2 ) const;
   
-  CaloClusterRemoveDuplicates();
-  
   // If two cluster are within deta_cut and dphi_cut, lower ET one will be removed
-  float m_deta_cut;
-  float m_dphi_cut;
+  Gaudi::Property<float> m_deta_cut{this, "deta_cut", 0.05};
+  Gaudi::Property<float> m_dphi_cut{this, "dphi_cut", 0.05};
 };
 
 #endif

@@ -26,7 +26,6 @@ atlas_add_library ( powhegHerwig
    LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} CxxUtils )
 
 # Component(s) in the package:
-if (HEPMC3_USE)
 find_package( hepmc3 )
 atlas_add_component( Herwig7_i
    Herwig7_i/Herwig7.h src/Herwig7.cxx src/Herwig7HepMC.cxx src/components/*.cxx
@@ -34,32 +33,14 @@ atlas_add_component( Herwig7_i
    ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${OPENLOOPS_INCLUDE_DIRS} ${HEPMC3_INCLUDE_DIRS}
    DEFINITIONS -DHWVERSION=\"${HERWIG3_LCGVERSION}\"
    -DHWVER_IS_72=\"${HW3_VER_IS_72}\"
-   -DHAVE_HEPMC3
    LINK_LIBRARIES ${HERWIG3_LIBRARIES}
    ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
    GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
-
-else()
-find_package( HepMC )
-atlas_add_component( Herwig7_i
-   Herwig7_i/Herwig7.h src/Herwig7.cxx src/Herwig7HepMC.cxx src/components/*.cxx
-   INCLUDE_DIRS ${HERWIG3_INCLUDE_DIRS}
-   ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${OPENLOOPS_INCLUDE_DIRS}
-   DEFINITIONS -DHWVERSION=\"${HERWIG3_LCGVERSION}\"
-   -DHWVER_IS_72=\"${HW3_VER_IS_72}\"
-   LINK_LIBRARIES ${HERWIG3_LIBRARIES}
-   ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
-   GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
-endif()
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/common/*.py )
 atlas_install_runtime( share/file/*.pdt )
-
-
-set (ATLAS_POWHEGPATHFORH7 "/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-07-05-${CMAKE_HOST_SYSTEM_PROCESSOR}")
-
 
 add_library( HwShower SHARED IMPORTED )
 set_target_properties( HwShower PROPERTIES IMPORTED_LOCATION ${HERWIG3_LCGROOT}/lib/Herwig/HwShower.so)
@@ -67,7 +48,7 @@ set_target_properties( HwShower PROPERTIES IMPORTED_LOCATION ${HERWIG3_LCGROOT}/
 add_library( powhegSOforHerwig SHARED IMPORTED )
 set_target_properties( powhegSOforHerwig
    PROPERTIES IMPORTED_LOCATION 
-   ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified/Pwhg-so-ATLAS/powhegSOforHerwig.so
+   ${COMPILEBOX_LCGROOT}/POWHEG-BOX-RES/b_bbar_4l_modified/lib64/libpowhegSOforHerwig.so
 )
 
 atlas_add_library ( powhegHerwigBB4L
@@ -82,7 +63,7 @@ atlas_add_library ( powhegHerwigBB4L
   BB4LHerwig/powhegAnalysis.h
   NO_PUBLIC_HEADERS
   SHARED
-  INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/include ${ATLAS_POWHEGPATHFORH7}/POWHEG-BOX-RES/b_bbar_4l_modified
+  INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} BB4LHerwig
   LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
 
 
@@ -95,4 +76,3 @@ find_package( Herwig7Environment )
 set( TheP8IEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of TheP8IEnvironment.cmake" )
 find_package( TheP8IEnvironment )
-

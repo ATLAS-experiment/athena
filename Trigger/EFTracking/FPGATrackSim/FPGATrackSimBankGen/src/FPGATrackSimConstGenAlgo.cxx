@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimConstGenAlgo.cxx
@@ -734,7 +734,7 @@ geo_constants FPGATrackSimConstGenAlgo::calculate_gcorth(geo_constants geo, int 
 }
 
 
-StatusCode FPGATrackSimConstGenAlgo::execute()
+StatusCode FPGATrackSimConstGenAlgo::execute(const EventContext& /*ctx*/)
 {
   // Do nothing; this class does not process events. The main algorithm is
   // called in initialize() and finalize().

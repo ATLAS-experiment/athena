@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,6 +16,7 @@
 #include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "TrkExInterfaces/IIntersector.h"
 #include "TrkExInterfaces/IPropagator.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"

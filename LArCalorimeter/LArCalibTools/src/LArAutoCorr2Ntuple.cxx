@@ -99,7 +99,7 @@ StatusCode LArAutoCorr2Ntuple::stop() {
 
  unsigned cellCounter=0;
  unsigned cellZeroCounter=0;
- for ( unsigned igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN ; ++igain ) {
+ for ( int igain=CaloGain::LARHIGHGAIN; igain<m_NGains ; ++igain ) {
    for (HWIdentifier hwid : m_onlineId->channel_range()) {
      ILArAutoCorr::AutoCorrRef_t corr=larAutoCorr->autoCorr(hwid,igain);
      if (corr.size()>0) {
@@ -121,7 +121,7 @@ StatusCode LArAutoCorr2Ntuple::stop() {
  }//end if loop over gains
  
   if (m_addCorrUndo) {
-    for ( unsigned igain=CaloGain::LARHIGHGAIN; igain<CaloGain::LARNGAIN ; ++igain ) {
+    for ( int igain=CaloGain::LARHIGHGAIN; igain<m_NGains.value(); ++igain ) {
       LArAutoCorrComplete::ConstCorrectionIt itUndo=larAutoCorr_c->undoCorrBegin(igain);
       LArAutoCorrComplete::ConstCorrectionIt itUndo_e=larAutoCorr_c->undoCorrEnd(igain);
       for(;itUndo!=itUndo_e;++itUndo) {

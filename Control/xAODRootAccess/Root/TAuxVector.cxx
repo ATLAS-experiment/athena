@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TClass.h>
@@ -222,6 +222,18 @@ namespace xAOD {
                 src_n);
      this->storeDataSpan(); 
      return this->getDataSpan().beg == orig;
+   }
+
+
+   /**
+    * @brief Perform post-read processing on this auxiliary variable.
+    * @param ctx The current event context.
+    *
+    * This is a no-op; we can't implement this for types that don't
+    * have compile-time information available.
+    */
+void TAuxVector::toTransient (const EventContext& /*ctx*/)
+   {
    }
 
 

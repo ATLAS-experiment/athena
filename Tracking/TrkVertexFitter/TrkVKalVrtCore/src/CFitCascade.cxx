@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/CFitCascade.h"
@@ -33,7 +33,7 @@ namespace Trk {
 //
 int setVTrackMass(VKVertex * vk)
 {
-   double vBx,vBy,vBz;
+   double vBx,vBy,vBz,effectiveField;
    int it, NTRK;
    VectMOM totP{};
 
@@ -45,7 +45,8 @@ int setVTrackMass(VKVertex * vk)
    NTRK = vk->TrackList.size();                   // Number of tracks at vertex
    totP.Px=0.;totP.Py=0.;totP.Pz=0.;totP.E=0.;
    for(it=0; it<NTRK; it++){
-       std::array<double, 4> pp = getFitParticleMom( vk->TrackList[it].get(), vBz );
+       effectiveField = Trk::vkalMagFld::getEffField(vBx, vBy, vBz, vk->TrackList[it]->fitP[1], vk->TrackList[it]->fitP[0]); 
+       std::array<double, 4> pp = getFitParticleMom( vk->TrackList[it].get(), effectiveField );
        totP.Px += pp[0];
        totP.Py += pp[1];
        totP.Pz += pp[2];
@@ -121,6 +122,7 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
    applyConstraints(vk);                                         //apply all constraints in vertex
    int IERR = vtcfit( vk );
    if(IERR) return IERR;
+   if(vk->Chi2 > 1.e4) return -1;  //Protection against bad input vertex candididate
 //
 //fit vertex once more with resolved constraints to prevent oscillations
 //   if(Pointing){
@@ -189,8 +191,12 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
       }
 //
 //  Particle creation and propagation
-      double localField=Trk::vkalMagFld::getMagFld(fittedVrt,(vk->vk_fitterControl).get());
-      combinedTrack( Charge, dptot, VrtMomCov, localField, parV0, covParV0);
+      double vBx,vBy,vBz;
+      Trk::vkalMagFld::getMagFld(fittedVrt[0], fittedVrt[1], fittedVrt[2],vBx,vBy,vBz,(vk->vk_fitterControl).get());
+      double lPhi   = atan2(dptot[1], dptot[0]);
+      double lTheta = acos(dptot[2] / sqrt(dptot[0]*dptot[0]+dptot[1]*dptot[1]+dptot[2]*dptot[2]));
+      double effectiveField = Trk::vkalMagFld::getEffField(vBx, vBy, vBz, lPhi, lTheta); 
+      combinedTrack( Charge, dptot, VrtMomCov, effectiveField, parV0, covParV0);
       covParV0[0]=std::abs(covParV0[0]); covParV0[2]=std::abs(covParV0[2]); covParV0[5]=std::abs(covParV0[5]);
       covParV0[9]=std::abs(covParV0[9]); covParV0[14]=std::abs(covParV0[14]);  //VK protection against numerical problems
       Trk::vkalPropagator::Propagate(-999, Charge, parV0, covParV0, fittedVrt,
@@ -701,7 +707,7 @@ void getFittedCascade( CascadeEvent & cascadeEvent_,
    std::vector< std::vector<double> > cascadeCovarFit;
    setFittedMatrices(cascadeEvent_.fullCovMatrix.get(), getCascadeNPar(cascadeEvent_), cascadeEvent_.matrixPnt, cascadeCovarFit, cascadeEvent_);
 //
-   double vBx,vBy,vBz,pp2,pt,invR;
+   double vBx,vBy,vBz,pp2,pt,invR,effectiveField;
    int iv,it,jt, NTRK, pnt;
 //
    int PDIM=getCascadeNPar(cascadeEvent_, 1); // number of physics parametrs
@@ -735,7 +741,8 @@ void getFittedCascade( CascadeEvent & cascadeEvent_,
      Trk::vkalMagFld::getMagFld(vk->refIterV[0]+vk->fitV[0], vk->refIterV[1]+vk->fitV[1], vk->refIterV[2]+vk->fitV[2],
                                                       vBx,vBy,vBz,(vk->vk_fitterControl).get());
      for(it=0; it<NTRK; it++){
-       std::array<double, 4> pp = getFitParticleMom( vk->TrackList[it].get(), vBz );
+       effectiveField = Trk::vkalMagFld::getEffField(vBx, vBy, vBz, vk->TrackList[it]->fitP[1], vk->TrackList[it]->fitP[0]); 
+       std::array<double, 4> pp = getFitParticleMom( vk->TrackList[it].get(), effectiveField );
        prtMom.Px=pp[0]; prtMom.Py=pp[1]; prtMom.Pz=pp[2]; prtMom.E=pp[3];
        momCollector.push_back( prtMom );
        if(vk->TrackList[it]->Id >= 0) particleChi2.push_back( vk->TrackList[it]->Chi2 ); //Only real tracks

@@ -26,9 +26,8 @@ StatusCode DerivationFramework::EGammaTracksThinning::finalize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::EGammaTracksThinning::doThinning() const
+StatusCode DerivationFramework::EGammaTracksThinning::doThinning(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // retrieve the tracks collection
 

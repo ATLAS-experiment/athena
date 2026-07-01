@@ -80,11 +80,13 @@ bool Calib::totFitting    (const pix::PixelMapping &pm, const std::string &inTot
             std::array<std::array<float, m_ncharge>, m_nFE> totErrLongArrI{};             
             
             // loop over charges
+            static const std::string totMeanStr{"TOT_MEAN"};
+            static const std::string totSigmaStr{"TOT_SIGMA"};
             for (int c=0; c<m_ncharge; ++c) {
                 
                 // Get TH2 for a given charge
-                std::unique_ptr<TH2F> h2dTOTmean(get2DHistogramFromPath(rodDir,modName, "TOT_MEAN", c));
-                std::unique_ptr<TH2F> h2dTOTsig(get2DHistogramFromPath(rodDir,modName, "TOT_SIGMA", c));
+                std::unique_ptr<TH2F> h2dTOTmean(get2DHistogramFromPath(rodDir,modName, totMeanStr, c));
+                std::unique_ptr<TH2F> h2dTOTsig(get2DHistogramFromPath(rodDir,modName, totSigmaStr, c));
                 if(!h2dTOTmean or !h2dTOTsig)  {
                     return false;
                 }
@@ -394,7 +396,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
         }
     } 
 
-    //Will strat looping over the RODs
+    //Start looping over the RODs
     TIter rodItr = getRodIterator(timFile);
     TKey* rodKey;
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
@@ -404,6 +406,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
         TIter modItr=getModuleIterator(rodDir);
 
         // Looping over the MODs of each ROD
+        static const std::string sCurveMeanStr{"SCURVE_MEAN"};
         while ((modKey=static_cast<TKey*>(modItr()))) {
             std::string modName(modKey->GetName());
             
@@ -419,7 +422,7 @@ bool Calib::fillTiming(const pix::PixelMapping &pm, const std::string &inTimFile
                 continue;
             }           
             
-            std::unique_ptr<TH2F> h2dTim(get2DHistogramFromPath(rodDir,modName, "SCURVE_MEAN"));
+            std::unique_ptr<TH2F> h2dTim(get2DHistogramFromPath(rodDir,modName, sCurveMeanStr));
             h2dTim->SetDirectory(0);
             
             for (unsigned int ieta = 0; ieta < m_etaBins; ieta++) {
@@ -583,6 +586,8 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
     //Will start looping over the RODs
     TIter rodItr = getRodIterator(riThrFile);
     TKey* rodKey;
+    static const std::string sCurveMeanStr{"SCURVE_MEAN"};
+    static const std::string sCurveSigmaStr{"SCURVE_SIGMA"};
     while ((rodKey=static_cast<TKey*>(rodItr()))) {
         const std::string rodName(rodKey->GetName());
         TDirectoryFile* rodDir = (TDirectoryFile*)rodKey->ReadObj();
@@ -606,11 +611,11 @@ bool Calib::fillThresholds(const pix::PixelMapping &pm, const std::string &inThr
             } 
             
             // pixel discriminator threshold
-            std::unique_ptr<TH2F> h2dThr(get2DHistogramFromPath(rodDir,modName, "SCURVE_MEAN"));
+            std::unique_ptr<TH2F> h2dThr(get2DHistogramFromPath(rodDir,modName, sCurveMeanStr));
             h2dThr->SetDirectory(0);
             
             // Getting histogram for noise
-            std::unique_ptr<TH2F>h2dSig(get2DHistogramFromPath(rodDir,modName, "SCURVE_SIGMA"));
+            std::unique_ptr<TH2F>h2dSig(get2DHistogramFromPath(rodDir,modName, sCurveSigmaStr));
             h2dSig->SetDirectory(0);
             
             for (unsigned int ieta = 0; ieta < m_etaBins; ieta++) {

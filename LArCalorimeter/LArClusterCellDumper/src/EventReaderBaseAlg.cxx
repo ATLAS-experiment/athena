@@ -21,7 +21,7 @@ EventReaderBaseAlg::~EventReaderBaseAlg() {}
 StatusCode EventReaderBaseAlg::initialize(){
     return StatusCode::SUCCESS;
 }
-StatusCode EventReaderBaseAlg::execute(){
+StatusCode EventReaderBaseAlg::execute(const EventContext& /*ctx*/){
     return StatusCode::SUCCESS;
 }
 StatusCode EventReaderBaseAlg::finalize(){
