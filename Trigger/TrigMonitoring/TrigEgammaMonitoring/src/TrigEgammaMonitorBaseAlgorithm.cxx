@@ -922,22 +922,10 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfoR3(const std::string& trigger){
 }
 
 
-
-
-
-
-
-
-
-
-
 // For Run-3, all triggers must have the L1 seed in name (last part)
 std::string TrigEgammaMonitorBaseAlgorithm::getL1Item(const std::string& trigger) const{
-    std::vector<std::string> parts;
-    boost::split(parts,trigger,boost::is_any_of("_"));
-    // L1EMXX
-    std::string l1seed = parts.back();
-    return l1seed;
+  const auto pos = trigger.rfind('_');
+  return pos == std::string::npos ? trigger : trigger.substr(pos + 1);
 }
 
 
