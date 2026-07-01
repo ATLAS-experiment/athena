@@ -14,12 +14,14 @@ namespace CP {
         Reco = 1,
         TTVA = 2,
         Iso = 3,
-        BadMuonVeto = 4
+        BadMuonVeto = 4,
+	PLIT = 5
     };
     inline static std::string EfficiencyTypeName(CP::MuonEfficiencyType M) {
         if (M == CP::MuonEfficiencyType::Reco) return "RECO";
         if (M == CP::MuonEfficiencyType::TTVA) return "TTVA";
         if (M == CP::MuonEfficiencyType::Iso) return "ISO";
+	if (M == CP::MuonEfficiencyType::PLIT) return "PLIT";
         if (M == CP::MuonEfficiencyType::BadMuonVeto) return "BADMUON";
         return "Unknown";
     }
@@ -27,6 +29,7 @@ namespace CP {
         if (S == "RECO") return CP::MuonEfficiencyType::Reco;
         if (S == "TTVA") return CP::MuonEfficiencyType::TTVA;
         if (S == "ISO") return CP::MuonEfficiencyType::Iso;
+	if (S == "PLIT") return CP::MuonEfficiencyType::PLIT;
         if (S == "BADMUON") return CP::MuonEfficiencyType::BadMuonVeto;
         return CP::MuonEfficiencyType::Undefined;
     }

@@ -148,7 +148,8 @@ namespace CP {
         }
         if (m_wp.find("Iso") != std::string::npos) {
             m_Type = CP::MuonEfficiencyType::Iso;
-
+	} else if (m_wp.find("PLIT") != std::string::npos) {//carcange
+	  m_Type = CP::MuonEfficiencyType::PLIT;//carcange
         } else if (m_wp.find("BadMuon") != std::string::npos) {
             m_Type = CP::MuonEfficiencyType::BadMuonVeto;
             ///Overwrite the property in case of the bad muon veto
@@ -173,9 +174,9 @@ namespace CP {
             }
         }
 
-        /// for isolation efficiencies, we don't use a low pt component for now - set the low pt threshold to -1
+        /// for isolation efficiencies,as well as PLIT, we don't use a low pt component for now - set the low pt threshold to -1
         /// same holds for TTVA SF, and for the HighPt WP
-        if (m_Type == CP::MuonEfficiencyType::Iso || m_Type == CP::MuonEfficiencyType::TTVA || m_Type == MuonEfficiencyType::BadMuonVeto || (m_Type == CP::MuonEfficiencyType::Reco && m_wp.find("HighPt") != std::string::npos)) {
+        if (m_Type == CP::MuonEfficiencyType::Iso || m_Type == CP::MuonEfficiencyType::PLIT || m_Type == CP::MuonEfficiencyType::TTVA || m_Type == MuonEfficiencyType::BadMuonVeto || (m_Type == CP::MuonEfficiencyType::Reco && m_wp.find("HighPt") != std::string::npos)) {//carcange
             ATH_MSG_DEBUG("We are running Isolation or TTVA or High Pt reco SF, so we use Zmumu based SF for the whole pt range!");
             m_lowpt_threshold = -1;
         } else if (m_lowpt_threshold <= 0) {
@@ -385,13 +386,15 @@ namespace CP {
     std::string MuonEfficiencyScaleFactors::filename_Central() const{
         if (!m_custom_file_Combined.empty()) return (resolve_file_location(m_custom_file_Combined));
         else if (m_Type == CP::MuonEfficiencyType::Iso) {
-            return resolve_file_location(Form("Iso_%s_Z.root", m_wp.c_str()));
-        } else if (m_Type == CP::MuonEfficiencyType::TTVA) {
-            return resolve_file_location("TTVA_Z.root");
+	  return resolve_file_location(Form("Iso_%s_Z.root", m_wp.c_str()));
+	} else if (m_Type == CP::MuonEfficiencyType::PLIT) {//carcange
+	  return resolve_file_location(Form("PLIT_%s_Z.root", m_wp.c_str()));//carcange
+	} else if (m_Type == CP::MuonEfficiencyType::TTVA) {
+	  return resolve_file_location("TTVA_Z.root");
         } else if (m_Type == CP::MuonEfficiencyType::BadMuonVeto) {
-            return resolve_file_location("BadMuonVeto_HighPt_Z.root");
+	  return resolve_file_location("BadMuonVeto_HighPt_Z.root");
         } else if (m_Type == CP::MuonEfficiencyType::Reco) {
-            return resolve_file_location(Form("Reco_%s_Z.root", m_wp.c_str()));
+	  return resolve_file_location(Form("Reco_%s_Z.root", m_wp.c_str()));
         }
         ATH_MSG_ERROR("What?");
         return "";
@@ -399,16 +402,19 @@ namespace CP {
     std::string MuonEfficiencyScaleFactors::filename_LRTCentral() const{
         if (!m_custom_file_LRTCombined.empty()) return (resolve_file_location(m_custom_file_LRTCombined));
         else if (m_Type == CP::MuonEfficiencyType::Iso) {
-            ATH_MSG_WARNING("Using standard isolation SF for LRT muons");
-            return resolve_file_location(Form("Iso_%s_Z.root", m_wp.c_str()));
-        } else if (m_Type == CP::MuonEfficiencyType::TTVA) {
-            ATH_MSG_WARNING("Using standard TTVA SF for LRT muons");
-            return resolve_file_location("TTVA_Z.root");
+	  ATH_MSG_WARNING("Using standard isolation SF for LRT muons");
+	  return resolve_file_location(Form("Iso_%s_Z.root", m_wp.c_str()));
+        } else if (m_Type == CP::MuonEfficiencyType::PLIT) {
+	  ATH_MSG_WARNING("Using standard PLIT SF for LRT muons");//carcange
+	  return resolve_file_location(Form("PLIT_%s_Z.root", m_wp.c_str()));//carcange
+	} else if (m_Type == CP::MuonEfficiencyType::TTVA) {
+	  ATH_MSG_WARNING("Using standard TTVA SF for LRT muons");
+	  return resolve_file_location("TTVA_Z.root");
         } else if (m_Type == CP::MuonEfficiencyType::BadMuonVeto) {
-            ATH_MSG_WARNING("Using standard BadMuonVeto SF for LRT muons");
-            return resolve_file_location("BadMuonVeto_HighPt_Z.root");
+	  ATH_MSG_WARNING("Using standard BadMuonVeto SF for LRT muons");
+	  return resolve_file_location("BadMuonVeto_HighPt_Z.root");
         } else if (m_Type == CP::MuonEfficiencyType::Reco) {
-            return resolve_file_location(Form("Reco_%sLRT_Z.root", m_wp.c_str()));
+	  return resolve_file_location(Form("Reco_%sLRT_Z.root", m_wp.c_str()));
         }
         ATH_MSG_ERROR("What?");
         return "";

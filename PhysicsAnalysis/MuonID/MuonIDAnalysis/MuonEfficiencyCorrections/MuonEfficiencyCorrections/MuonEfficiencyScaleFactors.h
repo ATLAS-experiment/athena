@@ -122,7 +122,7 @@ namespace CP {
             /// map is used given that it's available.
             float lowPtTransition() const;
             
-            /// Returns the type of the measurement to be carried out... E.g. Reco/TTVA/Iso
+            /// Returns the type of the measurement to be carried out... E.g. Reco/TTVA/Iso/PLIT
             CP::MuonEfficiencyType measurement() const; 
             
             /// The apply<Blah> methods decorate their result directly to the muon. The name of the decorators
