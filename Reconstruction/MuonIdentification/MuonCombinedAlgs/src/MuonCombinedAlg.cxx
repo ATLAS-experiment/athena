@@ -1,42 +1,30 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCombinedAlg.h"
 
-MuonCombinedAlg::MuonCombinedAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
+#include "FourMomUtils/xAODP4Helpers.h"
+
+using namespace MuonCombined;
 
 StatusCode MuonCombinedAlg::initialize() {
-    ATH_CHECK(m_muonCombinedTool.retrieve());
     ATH_CHECK(m_indetCandidateCollectionName.initialize());
     ATH_CHECK(m_muonCandidateCollectionName.initialize());
     ATH_CHECK(m_combTagMaps.initialize());
     ATH_CHECK(m_muidCombinedTracks.initialize());
     ATH_CHECK(m_muidMETracks.initialize());
-
+    ATH_CHECK(m_printer.retrieve());
+    ATH_CHECK(m_muonCombinedTagTools.retrieve());
     return StatusCode::SUCCESS;
 }
 
 StatusCode MuonCombinedAlg::execute(const EventContext& ctx) const {
-    SG::ReadHandle<InDetCandidateCollection> inDetCandidateCollection(m_indetCandidateCollectionName, ctx);
-    if (!inDetCandidateCollection.isValid()) {
-        ATH_MSG_ERROR("Could not read " << m_indetCandidateCollectionName);
-        return StatusCode::FAILURE;
-    }
-    if (!inDetCandidateCollection.isPresent()) {
-        ATH_MSG_WARNING(m_indetCandidateCollectionName << " not present");
-        return StatusCode::SUCCESS;
-    }
+    const InDetCandidateCollection* inDetCandidates{nullptr};
+    ATH_CHECK(SG::get(inDetCandidates, m_indetCandidateCollectionName, ctx));
 
-    SG::ReadHandle<MuonCandidateCollection> muonCandidateCollection(m_muonCandidateCollectionName, ctx);
-    if (!muonCandidateCollection.isValid()) {
-        ATH_MSG_ERROR("Could not read " << m_muonCandidateCollectionName);
-        return StatusCode::FAILURE;
-    }
-    if (!muonCandidateCollection.isPresent()) {
-        ATH_MSG_WARNING(m_muonCandidateCollectionName << " not present");
-        return StatusCode::SUCCESS;
-    }
+    const MuonCandidateCollection* muonCandidates{nullptr};
+    ATH_CHECK(SG::get(muonCandidates, m_muonCandidateCollectionName, ctx));
 
     std::vector<SG::WriteHandle<MuonCombined::InDetCandidateToTagMap> > tagMaps = m_combTagMaps.makeHandles(ctx);
     std::vector<MuonCombined::InDetCandidateToTagMap*> maps;
@@ -45,16 +33,121 @@ StatusCode MuonCombinedAlg::execute(const EventContext& ctx) const {
         maps.push_back(h.ptr());
     }
 
-    SG::WriteHandle<TrackCollection> muidCombTracks(m_muidCombinedTracks, ctx);
+    SG::WriteHandle muidCombTracks(m_muidCombinedTracks, ctx);
     ATH_CHECK(muidCombTracks.record(std::make_unique<TrackCollection>()));
 
-    SG::WriteHandle<TrackCollection> muidMETracks(m_muidMETracks, ctx);
+    SG::WriteHandle muidMETracks(m_muidMETracks, ctx);
     ATH_CHECK(muidMETracks.record(std::make_unique<TrackCollection>()));
 
-    if (inDetCandidateCollection->empty() || muonCandidateCollection->empty()) return StatusCode::SUCCESS;
+    if (inDetCandidates->empty() || muonCandidates->empty()) {
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - InDetCandidates "<<inDetCandidates->size()
+        <<", MuonCandidates: "<<muonCandidates->size()<<"... One of them is empty");
+        return StatusCode::SUCCESS;
+    }
 
-    // note that STACO does not create new Trk::Tracks so it doesn't need collections here
-    m_muonCombinedTool->combine(*muonCandidateCollection, *inDetCandidateCollection, maps, muidCombTracks.ptr(), muidMETracks.ptr(), ctx);
-
+    for (const MuonCandidate* muonCandidate : *muonCandidates) {
+        const Trk::Track& muonTrack = muonCandidate->extrapolatedTrack() ? 
+                                            *muonCandidate->extrapolatedTrack() : 
+                                            muonCandidate->muonSpectrometerTrack();
+        ATH_MSG_DEBUG("MuonCandidate " << m_printer->print(muonTrack) << std::endl << m_printer->printStations(muonTrack));
+        // preselect ID candidates close to the muon
+        std::vector<const InDetCandidate*> associatedIdCandidates{};
+        associatedIdCandidates.reserve(inDetCandidates->size());
+        std::copy_if(inDetCandidates->begin(),inDetCandidates->end(), std::back_inserter(associatedIdCandidates),  
+                     [&](const InDetCandidate* assocMe) {
+                        return pass_prematching(*muonCandidate, *assocMe);
+                     });
+       
+       
+        if (associatedIdCandidates.empty()) {
+            continue;
+        }
+        ATH_MSG_DEBUG("Associated ID candidates " << associatedIdCandidates.size());
+        // build combined muons
+        unsigned count{0u};
+        for (const auto& tool : m_muonCombinedTagTools) {
+            tool->combine(*muonCandidate, associatedIdCandidates, *tagMaps.at(count), muidCombTracks.ptr(), muidMETracks.ptr(), ctx);
+            ++count;
+        }
+    }
     return StatusCode::SUCCESS;
+}
+
+bool MuonCombinedAlg::pass_prematching(const MuonCandidate& muonCandidate, const InDetCandidate& idCandidate) const {
+    const bool hasExtr = muonCandidate.extrapolatedTrack() != nullptr;
+    const Trk::Track* ms_trk = &muonCandidate.muonSpectrometerTrack();
+    const Trk::Track* msoe_trk = muonCandidate.extrapolatedTrack();
+    const Trk::Track* id_trk = idCandidate.indetTrackParticle().track();
+    if (!ms_trk && !msoe_trk) {
+        ATH_MSG_WARNING("Muon candidate without any Trk::Track");
+        return false;
+    }
+
+    const Trk::TrackParameters* muonPars = (msoe_trk ? msoe_trk : ms_trk)->perigeeParameters();
+    if (!muonPars) {
+        ATH_MSG_WARNING("MuonCandidate without Perigee, skipping");
+        return false;
+    }
+
+    const Trk::TrackStateOnSurface *id_exit{nullptr}, *dummy{nullptr}, *ms_entrance{nullptr}, *msoe_entrance{nullptr};
+    //// The MuonSystem extension tool extrapolated already the ID candidate to the MS
+    const Trk::CaloExtension* calo_extension = idCandidate.getCaloExtension();
+    const Trk::TrackParameters* id_extension = calo_extension ? calo_extension->muonEntryLayerIntersection() : nullptr;
+    /// Use the alignment uncertainty tool to find the last ID measurement and the
+    /// first MS measurement
+    if (!m_alignUncertTool.empty()) {
+        if (id_trk && !id_extension) m_alignUncertTool->get_track_state_measures(id_trk, id_exit, dummy, dummy, dummy);
+        if (ms_trk) m_alignUncertTool->get_track_state_measures(ms_trk, dummy, dummy, dummy, ms_entrance);
+        if (msoe_trk) m_alignUncertTool->get_track_state_measures(msoe_trk, dummy, dummy, dummy, msoe_entrance);
+
+        if (!msoe_entrance) msoe_entrance = ms_entrance;
+        if (!ms_entrance) ms_entrance = msoe_entrance;
+    }
+
+    /// One of the two is not found use the old approach as a fallback
+    if ((!id_exit && !id_extension) || !ms_entrance) {
+        /// The reason is that the IDTrackParticle does not have an associated Trk::Track. That should
+        /// never happen during reconstruction
+        if (!id_trk) ATH_MSG_WARNING("Trk::Track not found for InDetTrack candidate!");
+        const Amg::Vector3D muon_p3 = hasExtr ? muonPars->momentum() : muonPars->position();
+        const Amg::Vector3D idtr_p3 = idCandidate.indetTrackParticle().perigeeParameters().momentum();
+
+        const double deltaPhi = std::abs(xAOD::P4Helpers::deltaPhi(muon_p3.phi(), idtr_p3.phi()));
+        if (deltaPhi > m_deltaPhiPreSelection) return false;
+
+        const double deltaEta = std::abs(muon_p3.eta() - idtr_p3.eta());
+        if (deltaEta > m_deltaEtaPreSelection) return false;
+
+        const double muonPt = muon_p3.perp();
+        const double indetPt = idtr_p3.perp();
+        const double ptBal = muonPt > 0. ? std::abs(muonPt - indetPt) / muonPt : 1.;
+        if (m_ptBalance > 0. && ptBal > m_ptBalance) return false;
+    } else {
+        /// Retrieve the position of the ID exit and the MS entrance
+        const Amg::Vector3D id_ex_pos = (id_extension ? id_extension : id_exit->trackParameters())->position();
+        const Amg::Vector3D ms_en_pos = ms_entrance->trackParameters()->position();
+        const Amg::Vector3D msoe_en_pos = msoe_entrance->trackParameters()->position();
+
+        const double deltaPhi = std::abs(xAOD::P4Helpers::deltaPhi(id_ex_pos.phi(), ms_en_pos.phi()));
+        const double deltaEta = std::abs(id_ex_pos.eta() - ms_en_pos.eta());
+
+        const double deltaPhiMSOE = std::abs(xAOD::P4Helpers::deltaPhi(id_ex_pos.phi(), msoe_en_pos.phi()));
+        const double deltaEtaMSOE = std::abs(id_ex_pos.eta() - msoe_en_pos.eta());
+
+        /// Check that both tracklets are actually out of range. That helps us
+        /// to recover tracks in the endcaps where the MSOE vertex constraint
+        /// worsens the compability
+        if ((deltaPhi > m_deltaPhiPreSelection || deltaEta > m_deltaEtaPreSelection) &&
+            (deltaPhiMSOE > m_deltaPhiPreSelection || deltaEtaMSOE > m_deltaEtaPreSelection)
+
+        )
+            return false;
+
+        const double muonPt = muonPars->momentum().perp();
+        const double indetPt = idCandidate.indetTrackParticle().pt();
+        const double ptBal = muonPt > 0. ? std::abs(muonPt - indetPt) / muonPt : 1.;
+        if (m_ptBalance > 0. && ptBal > m_ptBalance) return false;
+    }
+
+    return true;
 }
