@@ -424,6 +424,7 @@ StatusCode InDetAlignCog::finalize() {
   }
 
   // Save a text file with Si new constants
+  std::cout << "InDetAlignCog.cxx 427" << std::endl;
   if(m_SiTxtOutput) m_IDAlignDBTool->writeFile(false,m_sitxtfile);
 
   // Fill the SQLite file (silicon)
