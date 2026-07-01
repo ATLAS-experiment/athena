@@ -17,4 +17,4 @@ pix_waferID_to_hashID_maker.py
 
 The pix_waferID_to_hashID_maker.py script converts the geometry.dat file output obtained from the run of InnerDetector/InDetExample/InDetDetDescrExample/tools/RunPrintSiDetElements.py into a JSON file which maps Pixel wafer hashes to Pixel wafer IDs.
 
-It utilizes a PixelGeometry.dat file from RunPrintSiDetElements.py to create a map between Pixel wafer IDs and hashes. If using RunPrintSiDetElements.py, make sure that the geometry tags are set to the appropriate value. (Currently, its default is Run 4.)
+It utilizes a PixelGeometry.dat file from RunPrintSiDetElements.py to create a map between Pixel wafer IDs and hashes. If using RunPrintSiDetElements.py, make sure that the geometry tags are set to the appropriate value. (Currently, the default of RunPrintSiDetElements.py is Run 4.)

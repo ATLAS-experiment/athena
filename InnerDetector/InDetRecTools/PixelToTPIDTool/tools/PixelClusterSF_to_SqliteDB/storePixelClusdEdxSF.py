@@ -2,6 +2,8 @@
 #Utilized InnerDetector/InDetRecTools/TRT_ElectronPidTools/DatabaseTools/WritePyCoolAll.py and /afs/cern.ch/user/a/alhroob/public/UpdateChargeCalibration.py as a reference
 
 #to-do
+#Sort hash IDs
+#Cut precision
 #Fix min max bound issue
 from CoolConvUtilities import AtlCoolLib
 import collections
@@ -14,7 +16,7 @@ import json
 import logging
 
 #Constants
-FOLDER_DB_NAME = "/PIXEL/test" 
+FOLDER_DB_NAME = "/PIXEL/dEdxCalibration" 
 FIELD_NAMES = ["data_array"]
 FIELD_TYPES = [cool.StorageType.String16M]
 
@@ -80,7 +82,7 @@ def parse_pixelClusSF_file_data(input_file_path):
 
         #Get map between wafer id and hash id
         #Values are in order: bec, ld, phi, eta, side, ID
-        with open("pixWafer_id_hash_map.json", "r") as map_file:
+        with open("pixel_wafer_id_hash_map.json", "r") as map_file:
             hash_id_map = json.load(map_file)
 
         #Grab approrpriate bec, layer, eta, sf for the run
@@ -133,10 +135,9 @@ def payload_to_json_string_converter(payload_data):
 
 if __name__ == "__main__":
     #Define input parameters
-    local_db_file = "TEST_TOOL.db"
+    local_db_file = "TEST_TOOLv4p4.db"
     local_db_name = "CONDBR2" #Must match what sample meta-data expects for testing
-    tag = "PixelTest"
-
+    tag = "PixelChargeCalibration-DATA-UPD4-000-01"
     #Prepare output database   
     output_folder, output_data, output_db = prepare_output_database(local_db_name, local_db_file)
 
@@ -146,27 +147,17 @@ if __name__ == "__main__":
 
     #Define validity keys
     #Structure is int(run_number) << 32 | int(lumi_block)
-    validity_key_min = 0 << 32 | 0
-
-    for i, run in enumerate(pixelClusSF_data_pairs.keys()): 
-
-        pixelClusSF_data = pixelClusSF_data_pairs[run] 
-
-        #validity_key_max = int(run) << 32 | int(2**32 -1)
-
+    #validity_key_max = cool.ValidityKeyMax
+    for i, run in enumerate(pixelClusSF_data_pairs.keys()):  
+        if i > 0: break
+        validity_key_min = int(run) << 32 | 0
         validity_key_max = cool.ValidityKeyMax
-        #Sort the payload data
-        #sorted_payload_data = collections.OrderedDict(sorted(pixelClusSF_data.items()))
-
+        pixelClusSF_data = pixelClusSF_data_pairs[run] 
         #Convert payload data to JSON string
-        #json_string_payload = payload_to_json_string_converter(sorted_payload_data)
         json_string_payload = payload_to_json_string_converter(pixelClusSF_data)
         #Store data in the output folder
         output_data[FIELD_NAMES[0]] = json_string_payload
         output_folder.storeObject(validity_key_min, validity_key_max, output_data, 0, tag, True)
         
-        validity_key_min = int(run) << 32 | 0
-
-        if i > 0: break
     output_db.closeDatabase()
 
