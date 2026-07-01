@@ -440,8 +440,8 @@ def PixelClusterdEdxCondAlgCfg(flags, name="PixelClusterdEdxCondAlg", **kwargs):
     acc.merge(PixelConfigCondAlgCfg(flags))
     kwargs.setdefault("ConfigFlag", flags.InDet.PixelConfig.clusterdEdxCalib) #Default is false
     if (flags.InDet.PixelConfig.clusterdEdxCalib):
-        kwargs.setdefault("ReadKey", "/PIXEL/test")
-        acc.merge(addFolders(flags, "/PIXEL/test",  className="CondAttrListCollection"))
+        kwargs.setdefault("ReadKey", "/PIXEL/dEdxCalibration")
+        acc.merge(addFolders(flags, "/PIXEL/dEdxCalibration",  className="CondAttrListCollection"))
     else:
         kwargs.setdefault("ReadKey", " ")
     kwargs.setdefault("WriteKey","PixelClusterdEdxCondData")

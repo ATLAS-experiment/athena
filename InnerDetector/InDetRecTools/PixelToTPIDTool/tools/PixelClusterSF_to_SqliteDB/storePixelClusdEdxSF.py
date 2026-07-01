@@ -1,5 +1,8 @@
 #!/bin/env python
 #Utilized InnerDetector/InDetRecTools/TRT_ElectronPidTools/DatabaseTools/WritePyCoolAll.py and /afs/cern.ch/user/a/alhroob/public/UpdateChargeCalibration.py as a reference
+
+#to-do
+#Fix min max bound issue
 from CoolConvUtilities import AtlCoolLib
 import collections
 import sys
@@ -77,9 +80,7 @@ def parse_pixelClusSF_file_data(input_file_path):
 
         #Get map between wafer id and hash id
         #Values are in order: bec, ld, phi, eta, side, ID
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        json_path = os.path.join(script_dir, "data", "pixel_wafer_id_hash_map.json")
-        with open(json_path, "r") as map_file:
+        with open("pixWafer_id_hash_map.json", "r") as map_file:
             hash_id_map = json.load(map_file)
 
         #Grab approrpriate bec, layer, eta, sf for the run
@@ -98,7 +99,10 @@ def parse_pixelClusSF_file_data(input_file_path):
             for hash_val in hash_id_map.keys():
                 waferID = list(hash_id_map[hash_val])
                 waferID.pop(2) #Remove Phi coordinate
-                if abs(waferID[0]) == 4: continue
+                if abs(waferID[0]) == 4: 
+                    payload[hash_val] = 1
+                    run_data_pairs[key] = payload
+                    continue
                 #SF are grouped in particular way in IBL
                 if ((waferID[0] == 0) & (waferID[1] == 0)) :
                     if waferID[2] < 0:
@@ -111,8 +115,13 @@ def parse_pixelClusSF_file_data(input_file_path):
                         waferID_val = (waferID[0], waferID[1], etaSlice)
                 else:
                     waferID_val = tuple([abs(i) for i in waferID])
-                payload[hash_val] = coordinate_sf_pairs[tuple(waferID_val)]
-                run_data_pairs[key] = payload
+                sf = round(coordinate_sf_pairs[tuple(waferID_val)]*1000000,-1)
+                payload[hash_val] = sf/1000000
+                #payload[hash_val] = coordinate_sf_pairs[tuple(waferID_val)] 
+            payload = {int(key): value for key, value in payload.items()}
+            sorted_payload = collections.OrderedDict(sorted(payload.items() ))
+            run_data_pairs[key] = sorted_payload
+            #run_data_pairs[key] = payload
     return run_data_pairs     
  
 
@@ -124,7 +133,7 @@ def payload_to_json_string_converter(payload_data):
 
 if __name__ == "__main__":
     #Define input parameters
-    local_db_file = "TEST.db"
+    local_db_file = "TEST_TOOL.db"
     local_db_name = "CONDBR2" #Must match what sample meta-data expects for testing
     tag = "PixelTest"
 
@@ -132,7 +141,7 @@ if __name__ == "__main__":
     output_folder, output_data, output_db = prepare_output_database(local_db_name, local_db_file)
 
     #Parse data from pixel cluster scale factors input file
-    pixelClusSF_input_file_path = sys.argv[1]
+    pixelClusSF_input_file_path = "sf_input_files/data23_sf_flat.root"
     pixelClusSF_data_pairs = parse_pixelClusSF_file_data(pixelClusSF_input_file_path)
 
     #Define validity keys
@@ -143,20 +152,21 @@ if __name__ == "__main__":
 
         pixelClusSF_data = pixelClusSF_data_pairs[run] 
 
-        validity_key_max = int(run) << 32 | int(2**32 -1)
+        #validity_key_max = int(run) << 32 | int(2**32 -1)
 
+        validity_key_max = cool.ValidityKeyMax
         #Sort the payload data
-        sorted_payload_data = collections.OrderedDict(sorted(pixelClusSF_data.items()))
+        #sorted_payload_data = collections.OrderedDict(sorted(pixelClusSF_data.items()))
 
         #Convert payload data to JSON string
-        json_string_payload = payload_to_json_string_converter(sorted_payload_data)
-
+        #json_string_payload = payload_to_json_string_converter(sorted_payload_data)
+        json_string_payload = payload_to_json_string_converter(pixelClusSF_data)
         #Store data in the output folder
         output_data[FIELD_NAMES[0]] = json_string_payload
         output_folder.storeObject(validity_key_min, validity_key_max, output_data, 0, tag, True)
         
         validity_key_min = int(run) << 32 | 0
 
-
+        if i > 0: break
     output_db.closeDatabase()
 

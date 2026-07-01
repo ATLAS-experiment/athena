@@ -25,7 +25,7 @@ class PixelClusterdEdxCondAlg : public AthReentrantAlgorithm {
 
   private:
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKey
-      {this, "ReadKey", "/PIXEL/test", "Input Pixel cluster dEdx equalization scale factors folder"};
+      {this, "ReadKey", "/PIXEL/dEdxCalibration", "Input Pixel cluster dEdx equalization scale factors folder"};
   
     SG::WriteCondHandleKey<PixelClusterdEdxCondData> m_writeKey 
       {this, "WriteKey", "PixelClusterdEdxCondData", "Output Pixel cluster dEdx equalization scale factors"};  
