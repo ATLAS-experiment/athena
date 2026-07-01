@@ -44,12 +44,12 @@ atlas_add_component( ActsDataPreparation
 # Unit tests
 atlas_add_test( ActsRegionalDataPrep_CompositeRoI
   SCRIPT test/runCompositeRoICode.py
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ActsRegionalDataPrep_FullScanRoI
   SCRIPT test/runFullScanRoICode.py
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ActsRegionalDataPrep_SingleRoI
   SCRIPT test/runSingleRoICode.py
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
