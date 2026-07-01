@@ -5,11 +5,11 @@
 #ifndef VALKYRIE_VALGRINDAUDITOR_H
 #define VALKYRIE_VALGRINDAUDITOR_H
 
-// STL/Boost includes
+// STL includes
+#include <regex>
 #include <string>
 #include <vector>
 #include <utility>
-#include <boost/regex.hpp>
 
 // FrameWork includes
 #include "Gaudi/Auditor.h"
@@ -61,7 +61,7 @@ public:
 
 public:
   /// Typedef for algorithm/event pair, e.g. ("MyAlg","initialize")
-  typedef std::pair<boost::regex,std::string> NameEvt;
+  typedef std::pair<std::regex,std::string> NameEvt;
 
 
 private:
@@ -84,7 +84,7 @@ private:
   unsigned int m_eventCounter;
 
   /// Regular expressions for algorithm name matching
-  std::vector<boost::regex> m_algsRegEx;
+  std::vector<std::regex> m_algsRegEx;
 
   /// Internal storage of intervals
   std::vector< std::pair<NameEvt,NameEvt> > m_hooks;
