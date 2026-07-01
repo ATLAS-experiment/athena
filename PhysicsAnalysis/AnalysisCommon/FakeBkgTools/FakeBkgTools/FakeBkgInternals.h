@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FAKEBKGTOOLS_FAKEBKGINTERNALS_H
@@ -85,8 +85,8 @@ struct ParticleData
 {
     Efficiency real_efficiency, fake_efficiency;
     FakeFactor fake_factor;
-    bool tight;
-    int8_t charge;
+    bool tight = false;
+    int8_t charge = 0;
     xAOD::Type::ObjectType type;
 };
 
