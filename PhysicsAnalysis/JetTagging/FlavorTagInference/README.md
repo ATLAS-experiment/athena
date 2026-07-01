@@ -1,9 +1,17 @@
 FlavorTagInference
 ==================
 
-We aim for this package to serve as a universal inference package across workflows. 
-If you want to run deploy salt models in Athena, please do not copy/paste code from this package. 
-If you need this package to be more flexible to accommodate your needs, email atlas-cp-flavtag-recoalgs-conveners@cern.ch.
+We aim for this package to serve as a universal inference package across ATLAS ML inference workflows. 
+For now, it is focused on flavor-tagging and hadronic tauID applications, but we hope to expand to other use cases in the future.
+Currently, the package support ONNX models exported by [SALT](https://gitlab.cern.ch/aft/algorithms/salt/-/tree/main/salt?ref_type=heads), 
+with an experimental Triton backend for remote (Inference as a Service) inference.
+SALT models include metadata that allows this package to automatically map EDM inputs and model outputs, these I/O mappings follow the LWTNN convention. 
+In priciple, any ONNX model with compatible metadata could be supported by this package, but SALT is the only supported export tool for now.
+
+If you want to deploy ML models in Athena, please try to use this package as your runtime and decorator implementation.
+If you face any issues, please feel free to reach out to atlas-cp-flavtag-recoalgs-conveners@cern.ch.
+You can also find useful information in the [FTAG ATLAS Talk](https://atlas-talk.web.cern.ch/c/ftag/12) forum and the [FTAG Documents page](https://ftag.docs.cern.ch/).
+
 
 FlavorTagInference provides the runtime used by ATLAS flavor-tagging and hadronic tauID neural networks to:
 
