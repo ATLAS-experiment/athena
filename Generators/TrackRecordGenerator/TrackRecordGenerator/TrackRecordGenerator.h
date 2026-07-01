@@ -16,6 +16,8 @@
 #define TRACKRECORDGENERATOR_H
 
 #include "GeneratorModules/GenModule.h"
+#include "GeneratorModules/GenData.h"
+#include <memory>
 
 // Members
 #include "CLHEP/Vector/LorentzVector.h"
@@ -48,6 +50,7 @@ class TrackRecordGenerator : public GenModule {
    bool m_stopParticles;      //!< Stop particles before simulation
    float m_stopped_tminus, m_stopped_tplus; //!< Bounds for random time
    bool m_add_cL; //!< For stopped particles, add c*L to the time
+   std::shared_ptr<GenData> m_gendata{nullptr};
 };
 
 #endif

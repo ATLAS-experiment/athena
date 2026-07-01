@@ -92,6 +92,7 @@ StatusCode BSignalFilter::filterEvent(const EventContext& ctx)
   ATH_MSG_INFO(" >>> BSignalFilter::FilterEvent <<< ");
   ATH_MSG_INFO(" ---------------------------------- ");
   ATH_MSG_INFO("");
+  m_gendata = std::make_shared<GenData>();
 
   // ** Return ERROR and exit if the user has not selected the PDGid of the B-meson/hadron signal **
   if ( m_cuts_f_e_on || m_cuts_f_mu_on || m_cuts_f_had_on || m_cuts_f_gam_on || m_cuts_f_K0_on )
@@ -215,12 +216,9 @@ StatusCode BSignalFilter::filterEvent(const EventContext& ctx)
 	      // ** New B-signal found, output message and find whole decay tree **
 	      if( newBChain )
                 {
-		  const HepPDT::ParticleData* HadronData = particleData(particleID);
-		  std::string HadronName = "unknown particle";
-		  if (HadronData){
-		    HadronName = HadronData->name();
-		    if (particleID < 0) HadronName = "anti - " + HadronName;
-		  }
+                  const auto HadronData = m_gendata->particleName(std::abs(particleID));
+                    std::string HadronName = "unknown particle";
+                  if (HadronData) HadronName = ((particleID < 0) ? std::string("anti - ") : std::string("")) + *HadronData;
 		  ATH_MSG_DEBUG("");
 		  ATH_MSG_DEBUG(" ------------------------------------------ ");
 		  ATH_MSG_DEBUG(" *** BSignalFilter.cxx: B-signal found ***  ");
@@ -624,12 +622,9 @@ void BSignalFilter::PrintChild(const HepMC::ConstGenParticlePtr& child,
 {
   int pID = child->pdg_id();
   // ** Find name **
-  const HepPDT::ParticleData* pData = particleData(std::abs(pID));
+  const auto pData = m_gendata->particleName(std::abs(pID));
   std::string pName = "unknown particle";
-  if (pData){
-    pName = pData->name();
-    if (pID < 0) pName = "anti - " + pName;
-  }
+  if (pData) pName = ((pID < 0) ? std::string("anti - ") : std::string("")) + *pData;
   ATH_MSG_DEBUG("    " << treeIDStr << "   " << "Child  (" << pName
 		<< ") " << child<<" , from final B = " << fromFinalB);
 

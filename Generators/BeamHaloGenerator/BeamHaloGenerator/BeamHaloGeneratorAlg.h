@@ -9,8 +9,10 @@
 #include "GeneratorModules/GenModule.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "TH1F.h"
+#include "GeneratorModules/GenData.h"
 
 #include <string>
+#include <memory>
 
 class BeamHaloGenerator;
 
@@ -104,6 +106,7 @@ private:
 
   /** An array of TH1F pointers for validation plots */
   TH1F *m_validationPlots[NPLOTS];
+  std::shared_ptr<GenData> m_gendata{nullptr};
 
 };
 

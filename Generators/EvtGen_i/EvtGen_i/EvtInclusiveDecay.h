@@ -24,7 +24,6 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 
-#include "HepPDT/ParticleDataTable.hh"
 
 #include "EvtGenBase/EvtParticle.hh"
 #include "EvtGen/EvtGen.hh"
