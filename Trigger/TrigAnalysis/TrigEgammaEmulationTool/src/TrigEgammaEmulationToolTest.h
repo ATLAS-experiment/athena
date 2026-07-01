@@ -22,11 +22,11 @@ class TrigEgammaEmulationToolTest : public AthMonitorAlgorithm
     struct TrigInfo{
       std::string trigger;
       std::string type;
-      float threshold;
-      bool etcut;
-      bool idperf;
-      bool gsf;
-      bool lrt;
+      float threshold{};
+      bool etcut{};
+      bool idperf{};
+      bool gsf{};
+      bool lrt{};
     };
 
 
