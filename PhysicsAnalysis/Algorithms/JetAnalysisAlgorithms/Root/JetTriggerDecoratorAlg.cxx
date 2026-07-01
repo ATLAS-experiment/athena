@@ -156,7 +156,7 @@ namespace CP
 
         if (legInfo.legName().find("gsc") != std::string::npos)
         {
-          for (auto part : legInfo.legParts)
+          for (const std::string& part : legInfo.legParts)
           {
             if (part.find("gsc") != std::string::npos)
             {
