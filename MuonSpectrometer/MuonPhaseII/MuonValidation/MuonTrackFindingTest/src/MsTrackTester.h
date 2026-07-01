@@ -41,18 +41,14 @@ namespace MuonValR4{
         using SectorProjector = MuonR4::MsTrackSeeder::SectorProjector;
         /** @brief Construct MS track seed from the truth associated segments. A nullopt is returned
          *         if either no segment is matched to the particle or no valid seed could be constructed
-        *  @param gctx: Geometry context to project the segments onto the sector centers
         *  @param truthMuon: Reference to the truth muon for which a seed should be constructed */
-        std::optional<MuonR4::MsTrackSeed> makeSeedFromTruth(const ActsTrk::GeometryContext& gctx,
-                                                             const xAOD::TruthParticle& truthMuon) const;
+        std::optional<MuonR4::MsTrackSeed> makeSeedFromTruth(const xAOD::TruthParticle& truthMuon) const;
         /** @brief Calculate the length of the seed and the theta deflection angle
          *         The length is defined as the spread of the seed's segments in the
         *         cylinder coordinate. The deflection angle is calculates as the spread
         *         of the theta angles of the individual segments
-        *  @param gctx: Geometry context to retrieve the reference positions
         *  @param seed: The seed with the contributing segments */
-        std::pair<double, double>  calcSeedLength(const ActsTrk::GeometryContext& gctx, 
-                                                  const MuonR4::MsTrackSeed& seed) const;
+        std::pair<double, double>  calcSeedLength(const MuonR4::MsTrackSeed& seed) const;
 
         /** @brief Dumps the legacy containers to the TTree */
         StatusCode dumpLegacyTracks(const EventContext& ctx);

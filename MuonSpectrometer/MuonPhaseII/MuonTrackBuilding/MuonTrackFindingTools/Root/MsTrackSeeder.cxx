@@ -3,44 +3,24 @@
 */
 #include "MuonTrackFindingTools/MsTrackSeeder.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
-#include "MuonTrackEvent/Circle.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Definitions/Tolerance.hpp"
-#include "Acts/Surfaces/detail/LineHelper.hpp"
 #include "Acts/Definitions/Units.hpp"
 
-#include "GaudiKernel/PhysicalConstants.h"
+#include "FourMomUtils/P4Helpers.h"
 namespace {
-    constexpr double straightlineMom = 5.*Gaudi::Units::TeV;
-
     using namespace Acts::UnitLiterals;
-    constexpr double inDeg(const double a) {
-        return a / 1._degree;
-    }
-    /** @brief Average position */
-    void average(const Amg::Vector3D& segPos, std::optional<Amg::Vector3D>& posSlot) {
-        if (!posSlot) {
-            posSlot = segPos;
-        } else {
-            *posSlot = 0.5 * (*posSlot + segPos);
-        }
-    }
-    /** @brief return the segment theta */
-    inline Amg::Vector3D dirForBField(const xAOD::MuonSegment& seg,
-                                      const double circPhi) {
-        //if (seg.nPhiLayers() > 0) {
-        //    return seg.direction();
-        //}
-        const double theta = std::atan2(Acts::fastHypot(seg.px(), seg.py()), seg.pz());
-        return Acts::makeDirectionFromPhiTheta(circPhi, theta);
-    }
-    std::string print(const Amg::Vector3D& v){
-        return std::format("r: {:.2f}, z: {:.2f}, phi: {:.2f}, theta: {:.2f}",
-                            v.perp(), v.z(), inDeg((v.phi())), inDeg(v.theta()));
-    }
-
+    /** @brief Check if the charges of two PtimesQ estimates agree */
+    constexpr bool chargeAgree(double PtimesQ1, double PtimesQ2) {
+        return PtimesQ1 * PtimesQ2 > 0;
+    };
+    /** @brief Calculate the momentum deviation between two PtimesQ estimates. The function is symmetric. */
+    double momentumDev(double PtimesQ1, double PtimesQ2) {
+        const double denom {std::max(std::abs(PtimesQ1) + std::abs(PtimesQ2), Acts::s_epsilon)};
+        return std::abs(PtimesQ1 - PtimesQ2) / denom;
+    };
     float reducedChi2(const xAOD::MuonSegment& seg) {
         return seg.chiSquared() / std::max(1.f, seg.numberDoF());
     }
@@ -55,46 +35,33 @@ namespace MuonR4{
     MsTrackSeeder::MsTrackSeeder(const std::string& msgName, Config&& cfg):
         AthMessaging{msgName},
         m_cfg{std::move(cfg)}{
-        auto& v{m_cfg.fieldExtpSteps};
-        v.insert(0.); v.insert(1.);
-        if (std::ranges::any_of(v, [](const double x){
-            return x < 0. || x > 1.;
-        })) {
-            THROW_EXCEPTION("Found invalid extrapolation steps.");
+       
+        /** Initialize the field extraction steps */
+        const double stepSize {1. / static_cast<double>(m_cfg.nFieldSteps)};
+        for (std::size_t i = 0; i < m_cfg.nFieldSteps; ++i) {
+            m_fieldExtpSteps.insert((static_cast<double>(i) + 0.5) * stepSize);
         }
     }
-    const MuonGMR4::SpectrometerSector* 
-        MsTrackSeeder::envelope(const xAOD::MuonSegment& segment) const{
-        return m_cfg.detMgr->getSectorEnvelope(segment.chamberIndex(), 
-                                               segment.sector(), 
-                                               segment.etaIndex());
+    Amg::Vector3D MsTrackSeeder::segPosOntoPhiPlane(const Amg::Vector3D& planeNorm,
+                                                    const int Sector,
+                                                    const Amg::Vector3D& posToProject) {
+        // Find the sensor direction
+        Amg::Vector3D projDir {
+            ExpandedSector{static_cast<unsigned>(Sector), 
+                           ExpandedSector::SectorProjector::center}.normalDir()};
+        return Acts::PlanarHelper::intersectPlane(
+            posToProject, projDir, planeNorm, Amg::Vector3D::Zero()).position();                                
     }
-    Amg::Vector3D MsTrackSeeder::projectOntoPhiPlane(const ActsTrk::GeometryContext& gctx, 
-                                                     const xAOD::MuonSegment& segment,
-                                                     const double projectPhi) const {
-        using enum SectorProjector;
-        const Amg::Vector3D segPos3D{segment.position()};
-        /// Recall that the sector coordinate system is defined such that the x-axis 
-        /// is aligned with the nominal wire direction
-        const Amg::Vector3D dirAlongTube{envelope(segment)->localToGlobalTransform(gctx).linear().col(0)};
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Project onto phi: "<<inDeg(projectPhi));
-        const Amg::Vector3D radialDir = Acts::makeDirectionFromPhiTheta(projectPhi, 90._degree);
-        using namespace Acts::detail::LineHelper;
-        /// Calculate the proper intersection point
-        const auto isect = lineIntersect<3>(segPos3D.z()*Amg::Vector3D::UnitZ(), radialDir,
-                                            segPos3D, dirAlongTube);
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Projected "<<printID(segment) 
-            <<" segment in @"<<Amg::toString(segPos3D)<<" + "
-            <<Amg::toString(segment.direction())<<", chi2: "<<(segment.chiSquared() / std::max(1.f, segment.numberDoF()))
-            <<", nDoF: "<<segment.numberDoF()<<" --> "<<Amg::toString(isect.position()));
-        return isect.position();
+    Amg::Vector3D MsTrackSeeder::segDirOntoPhiPlane(const Amg::Vector3D& planeNorm,
+                                                    const Amg::Vector3D& dirToProject) {
+        return (dirToProject - dirToProject.dot(planeNorm) * planeNorm).unit();                                                
     }
-    Amg::Vector2D MsTrackSeeder::expressOnCylinder(const ActsTrk::GeometryContext& gctx,
-                                                   const xAOD::MuonSegment& segment,
+    Amg::Vector2D MsTrackSeeder::expressOnCylinder(const xAOD::MuonSegment& segment,
                                                    const Location loc,
                                                    const ExpandedSector sector) const {
         /// extrapolated position
-        const Amg::Vector3D pos{projectOntoPhiPlane(gctx, segment, sector.phi())};
+        const Amg::Vector3D pos{segPosOntoPhiPlane(
+            sector.normalDir(), segment.sector(), segment.position())};
         const Amg::Vector3D dir{segment.direction()};
  
         const Amg::Vector2D projPos{pos.perp(), pos.z()};
@@ -134,262 +101,203 @@ namespace MuonR4{
         }
         return true;
     }
-    std::optional<double> MsTrackSeeder::calculateRadius(VecOpt_t&& pI, VecOpt_t&& pM, VecOpt_t&& pO,
-                                                         const Amg::Vector3D& planeNorm) const {
-        if (!pI || !pM || !pO) {
-            return std::nullopt;
-        }
-        // Circle momCirc{*pI, *pM, *pO};
-        // return momCirc.radius()* std::copysign(1., planeNorm.dot(momCirc.normal()));
-
-        const Amg::Vector3D leverL = (*pO) - (*pI);
-
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Construct sagitta from "
-                <<"\n --- Inner:  "<<print(*pI) <<"\n --- Middle: "<<print(*pM)
-                <<"\n --- Outer:  "<<print(*pO));
-        if (std::abs(planeNorm.dot(leverL)) > Acts::s_onSurfaceTolerance || 
-            std::abs(planeNorm.dot( (*pM) - (*pI))) > Acts::s_onSurfaceTolerance) {
-            THROW_EXCEPTION("The lever arm is in the bending plane: "<<Amg::toString(planeNorm)
-                        <<", "<<Amg::toString(leverL.unit())<<", "<<Amg::toString( ((*pM) - (*pI)).unit()));
-        }
-        const Amg::Vector3D sagittaDir = leverL.cross(planeNorm).unit();
-        std::optional<double> sagitta = Amg::intersect<3>(*pI, leverL.unit(), *pM, sagittaDir);
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Estimated sagitta: "<<(sagitta ? 
-                     std::to_string(sagitta.value_or(0.)) : "---")<<", lever arm: "
-                    <<(leverL.mag() / Gaudi::Units::m)<<" [m]"  );
-        if (!sagitta) {
-            return std::nullopt;
-        }
-        /// Derive the radius from the two equations. The line connecting pI and pO divides up
-        /// the radius in the sagitta and the complementary section H
-        ///  R = S + H
-        /// Also H is the catheter of the triangle <R, L / 2, H> 
-        ///         R^{2} = L^{2} / 4 + H^{2}
-        /// --->    R^{2} = L^{2} / 4 + (R-S)^{2} 
-        /// --->    2*S*R = L^{2} / 4 + S^{2} (Approximating S^{2} = 0)
-        /// --->    R = L^{2} / (8 * s)
-        return leverL.dot(leverL) / (8. * (*sagitta));
-    }
-
-    double MsTrackSeeder::estimateTwoStationP(const xAOD::MuonSegment& segment1,
-                                              const xAOD::MuonSegment& segment2,
-                                              const AtlasFieldCacheCondObj& magField) const {
-        
-        MagField::AtlasFieldCache fieldCache{};
-        magField.getInitializedCache(fieldCache); 
-
-        Amg::Vector3D pos1 = segment1.position();
-        Amg::Vector3D pos2 = segment2.position();
-        const double phi = segment1.nPhiLayers() > segment2.nPhiLayers() ? 
-                           pos1.phi() : pos2.phi();
-        const Amg::Vector3D norm = Acts::makeDirectionFromPhiTheta(phi + 90._degree, 90._degree);
-        auto projector = [&norm](const Amg::Vector3D& d) -> Amg::Vector3D {
-            return d - d.dot(norm) * norm;
+    double MsTrackSeeder::estimateQtimesP(const AtlasFieldCacheCondObj& magField,
+                                          const Amg::Vector3D& planeNorm,
+                                          const PosMomPair_t& p1, 
+                                          const PosMomPair_t& p2,
+                                          const PosMomPair_t& p3) const {
+        // When 3 points are available, we can use each pair of segments to estimate 
+        // the momentum and charge, and then combine the estimates. To make the 
+        // combination, we define a struct to hold each PtimesQ estimate
+        struct Estimate {
+            double PtimesQ{0.};
+            // Weighting factor based on the magnitude of the integrated force.
+            double weight{0.};
+            // Scores as a combination of charge agreement and momentum deviation.
+            double score{0.};
         };
-
-        pos1 = projector(pos1);
-        pos2 = projector(pos2);
-
-        const Amg::Vector3D e1 = (pos2-pos1).unit();
-        const Amg::Vector3D e2 = norm.cross(e1);
-
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "
-                     <<Amg::toString(e1)<<" |e1|="<<e1.mag()<<", "<<Amg::toString(e2)
-                     <<" |e2|="<<e2.mag()<<", "<<Amg::toString(norm));
-        Amg::Vector3D dir1 = projector(segment1.direction());
-        Amg::Vector3D dir2 = projector(segment2.direction());
-
-        Amg::Vector3D locField{Amg::Vector3D::Zero()};
-        double avgForce{0.};
-        for (double fieldStep : m_cfg.fieldExtpSteps) {
-            const Amg::Vector3D extPos =  (1.-fieldStep) * pos1 + fieldStep * pos2;
-            const Amg::Vector3D extDir =  ((1.-fieldStep) * dir1 + fieldStep * dir2).unit();
-            fieldCache.getField(extPos.data(), locField.data());
-            const Amg::Vector3D force = locField.cross(extDir);
-           
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - sample point: "<<Amg::toString(extPos)
-                <<", sample dir: "<<Amg::toString(extDir)<<" --> B-field: "
-            <<Amg::toString(locField * 1.e3)<<", direction: "<<
-             std::copysign(1., force.dot(e2))<<", force: "<<force.mag()*1.e3);
-            avgForce += force.mag();
-        }
-        avgForce /= m_cfg.fieldExtpSteps.size();
-        const double alpha = std::copysign(Amg::angle(dir1, dir2), (dir2-dir1).dot(e2));
-        const double P = avgForce * (pos1-pos2).mag() / 
-                        (std::abs(std::sin(pos1.theta())) * 
-                        (std::abs(alpha) > Acts::s_epsilon ? alpha : Acts::s_epsilon) );
         
-        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Deflection angle between\n"
-            <<" *** "<<print(segment1)<<"\n"<<" *** "<<print(segment2)<<"\n"
-            <<" is "<<inDeg(alpha)<<" degree. Field projection: "<<avgForce*1.E3
-            <<", momentum: "<<P<<"\n"
-            <<", angle 1: "<<inDeg(Amg::angle(pos1, dir1))
-            <<", angle 2: "<<inDeg(Amg::angle(pos2, dir2)));
-        return P;
-    }
-    inline std::pair<double, unsigned> MsTrackSeeder::averageBField(const PosMomPair_t& start,
-                                                                    const PosMomPair_t& end,
-                                                                    const AtlasFieldCacheCondObj& magField,
-                                                                    const bool skipFirst) const {
         MagField::AtlasFieldCache fieldCache{};
-        magField.getInitializedCache(fieldCache); 
+        magField.getInitializedCache(fieldCache);
 
-        double avgBField{0.};
-        unsigned nBFieldPoints{0};
-        Amg::Vector3D locField{Amg::Vector3D::Zero()};
-        for (double fieldStep : m_cfg.fieldExtpSteps) {
-            /// The first field step may be skipped if it's already accumulated in a 
-            /// previous averaging where the start of this call is the end 
-            /// of the previous call
-            if (fieldStep == 0. && skipFirst) {
-                continue;
+        const Amg::Vector3D force12 {forceIntegration(p1, p2, planeNorm, fieldCache)};
+        const Amg::Vector3D force23 {forceIntegration(p2, p3, planeNorm, fieldCache)};
+        const Amg::Vector3D force13 {force12 + force23};
+        
+        std::vector<Estimate> estimates{};
+        const double weightNorm {force12.mag() + force23.mag()};
+        // Pairwise momentum estimates: 12 and 23
+        estimates.emplace_back(getPtimesQ(force12, p2.second - p1.second), force12.mag()/weightNorm, 0.);
+        estimates.emplace_back(getPtimesQ(force23, p3.second - p2.second), force23.mag()/weightNorm, 0.);
+        // Two estimates for pair 13: using segment directions and using position differences
+        const double weight13 {force13.mag()/weightNorm};
+        estimates.emplace_back(getPtimesQ(force13, p3.second - p1.second), weight13, 0.);
+        const Amg::Vector3D t12 {(p2.first - p1.first).unit()};
+        const Amg::Vector3D t23 {(p3.first - p2.first).unit()};
+        estimates.emplace_back(getPtimesQ(force13, t23 - t12), weight13, 0.);
+
+        for (std::size_t i {0}; i < estimates.size(); ++i) {
+            Estimate& est1 {estimates[i]};
+            for (std::size_t j {i+1}; j < estimates.size(); ++j) {
+                Estimate& est2 {estimates[j]};
+                // Compute the charge agreement score & momentum deviation
+                double w {std::min(est1.weight, est2.weight)};
+                double chargeScore {chargeAgree(est1.PtimesQ, est2.PtimesQ) ? 1. : -1.};
+                double pDevPenalty {momentumDev(est1.PtimesQ, est2.PtimesQ)};
+                // Update the scores
+                est1.score += w * (chargeScore - pDevPenalty);
+                est2.score += w * (chargeScore - pDevPenalty);
             }
-            const Amg::Vector3D extPos =  (1. -fieldStep) * start.first + fieldStep * end.first;
-            const Amg::Vector3D extDir = ((1. -fieldStep) * start.second + fieldStep * end.second).unit();
-                  
-            fieldCache.getField(extPos.data(), locField.data());
-            const double localB = extDir.cross(locField).mag();
-
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - step: "<<fieldStep
-                <<", position: "<<Amg::toString(extPos)<<", dir: "<<Amg::toString(extDir)
-                <<" --> localB: "<<(localB * 1000.)<<" T."
-                <<", B: "<<Amg::toString(locField* 1000.)
-                <<", PxB:"<<Amg::toString(extDir.cross(locField).unit()));
-                avgBField += localB;
-                ++nBFieldPoints;
         }
-        return std::make_pair(avgBField, nBFieldPoints);
+        if (msgLvl(MSG::VERBOSE)) {
+            std::vector<std::string> names {"Pair01", "Pair12", "Pair02Seg", "Pair02Pos"};
+            for (const auto& [i, est] : Acts::enumerate(estimates)) {
+                ATH_MSG_VERBOSE(__func__<<"() Estimate "<<names[i]<<": PtimesQ: "<<est.PtimesQ*1e-3
+                    <<", weight: "<<est.weight<<", score: "<<est.score);
+            }
+        }
+        // Find the best charge estimate and estimate the final momentum as a weighted average of the 
+        // estimates that agree with the best charge
+        const Estimate& bestEstimate {*std::ranges::max_element(estimates, 
+            std::ranges::less{}, &Estimate::score)};
+        const double charge {std::copysign(1., bestEstimate.PtimesQ)};
+
+        double totalSum {0.}, totalWeight {0.};
+        for (const Estimate& est : estimates) {
+            if (chargeAgree(est.PtimesQ, charge)) {
+                totalSum += est.PtimesQ * est.weight;
+                totalWeight += est.weight;
+            }
+        }
+        assert(totalWeight > Acts::s_epsilon);
+        return totalSum / totalWeight;
     }
-    double MsTrackSeeder::estimateQtimesP(const ActsTrk::GeometryContext& gctx,
-                                          const AtlasFieldCacheCondObj& magField,
+    double MsTrackSeeder::estimateQtimesP(const AtlasFieldCacheCondObj& magField,
+                                          const Amg::Vector3D& planeNorm,
+                                          const PosMomPair_t& p1,
+                                          const PosMomPair_t& p2) const {
+        MagField::AtlasFieldCache fieldCache{};
+        magField.getInitializedCache(fieldCache);
+
+        return getPtimesQ(forceIntegration(p1, p2, planeNorm, fieldCache),
+                          p2.second - p1.second);
+    }
+    Amg::Vector3D MsTrackSeeder::forceIntegration(const PosMomPair_t& point1,
+                                                  const PosMomPair_t& point2,
+                                                  const Amg::Vector3D& planeNorm,
+                                                  MagField::AtlasFieldCache& fieldCache) const {
+        const auto& [pos1, dir1] = point1;
+        const auto& [pos2, dir2] = point2;
+
+        Amg::Vector3D locField{Amg::Vector3D::Zero()};
+        Amg::Vector3D accumForce{Amg::Vector3D::Zero()};
+        for (double fieldStep : m_fieldExtpSteps) {
+            const Amg::Vector3D extPos {(1. - fieldStep) * pos1 + fieldStep * pos2};
+            const Amg::Vector3D extDir {((1. - fieldStep) * dir1 + fieldStep * dir2).unit()};
+                    
+            fieldCache.getField(extPos.data(), locField.data());
+            const Amg::Vector3D locForce {locField.dot(planeNorm) * extDir.cross(planeNorm)};
+            accumForce += locForce;
+
+            ATH_MSG_VERBOSE(__func__<<"() step: "<<fieldStep
+                <<", pos: "<<Amg::toString(extPos)<<", dir: "<<Amg::toString(extDir)
+                <<" --> local |B|: "<<locField.mag()*1e3 << " [T]"<<", |Bnorm|: "<<locField.dot(planeNorm)*1e3
+                <<" [T], local |v x Bnorm|: "<<locForce.mag()*1e3<<" [T].");
+        }
+        const double dS {(pos2 - pos1).mag() / static_cast<double>(m_fieldExtpSteps.size())};
+        return accumForce * dS;
+    }
+    double MsTrackSeeder::getPtimesQ(const Amg::Vector3D& forceIntegral, 
+                                     const Amg::Vector3D& deltaDir) const {
+        const double PtimesQ {0.3 * Gaudi::Units::GeV * forceIntegral.mag2() / deltaDir.dot(forceIntegral)};
+
+        ATH_MSG_VERBOSE("estimateQtimesP() force integral: "<<forceIntegral.mag()<<" [T*m], deltaDir: "
+            <<deltaDir.mag()<<", cos: "<<deltaDir.dot(forceIntegral)/ (deltaDir.mag() * forceIntegral.mag())
+            <<", PtimesQ: "<<PtimesQ/Gaudi::Units::GeV <<" [GeV].");
+        return PtimesQ;                                    
+    }
+    double MsTrackSeeder::estimateQtimesP(const AtlasFieldCacheCondObj& magField,
                                           const MsTrackSeed& seed) const {
-        
+        using namespace Muon::MuonStationIndex;
         MagField::AtlasFieldCache fieldCache{};
         magField.getInitializedCache(fieldCache); 
-        
+
         /** Calculate the averaged phi from the segments */
-        double circPhi{0.};
+        double deltaPhiAcc {0.};
+        std::optional<double> centralPhi {};
         unsigned nSegsWithPhi{0};
         for (const xAOD::MuonSegment* segment : seed.segments()) {
             if (segment->nPhiLayers() > 0) {
-                circPhi += segment->position().phi();
+                if (!centralPhi) centralPhi = segment->position().phi();
+                deltaPhiAcc += P4Helpers::deltaPhi(*centralPhi, segment->position().phi());
                 ++nSegsWithPhi;
             }
         }
-        if (!nSegsWithPhi){
-            circPhi = seed.sector().phi();
-        } else {
-            circPhi /=nSegsWithPhi;
-        }
-        auto layerPos{Acts::filledArray<VecOpt_t, 6>(std::nullopt)};
-        double avgBField{0.}, avgTheta{0.};
+        const double circPhi {nSegsWithPhi > 0 
+            ? P4Helpers::deltaPhi(*centralPhi + deltaPhiAcc / nSegsWithPhi, 0.) 
+            : seed.sector().phi()};
 
-        const Amg::Vector3D planeNorm = Acts::makeDirectionFromPhiTheta(circPhi+ 90._degree, 90._degree);
-
-        {
-            Amg::Vector3D projPos = projectOntoPhiPlane(gctx, *seed.segments()[0], circPhi);
-            Amg::Vector3D projDir = dirForBField(*seed.segments()[0], circPhi); 
-            Amg::Vector3D locField{Amg::Vector3D::Zero()};
-            unsigned nBFieldPoints{0};
-            const unsigned nSeedSeg = seed.segments().size();
-            using namespace Muon::MuonStationIndex;
-            for (unsigned int s = 0; s < nSeedSeg; ++s) {
-                avgTheta += projDir.theta();
-                /** Calculate the sagitta points */
-                const xAOD::MuonSegment& segment{*seed.segments()[s]};
-                switch (toStationIndex(segment.chamberIndex())) {
-                    using enum StIndex;
-                    case BI:
-                    case BE:{
-                        average(projPos, layerPos[0]);
-                        break;
-                    } case BM: {
-                        average(projPos, layerPos[1]);
-                        break;
-                    } case BO: {
-                        average(projPos, layerPos[2]);
-                        break;
-                    } case EI:
-                      case EE: {
-                        average(projPos, layerPos[3]);
-                        break;
-                    } case EM : {
-                        average(projPos, layerPos[4]);
-                        break;
-                    } case EO : {
-                        average(projPos, layerPos[5]);
-                        break;
-                    } default: {
-                        break;
+        std::array<const xAOD::MuonSegment*, 3> segmentsToUse{};
+        // Try first to find segments in the inner, middle and outer layers. If both a barrel
+        // and endcap segments are present in the same layer, the barrel segment is preferred.
+        for (const xAOD::MuonSegment* segment : seed.segments()) {
+            ChIndex chIndex {segment->chamberIndex()};
+            switch(toLayerIndex(chIndex)) {
+                case LayerIndex::Inner:
+                    if (!segmentsToUse[0] || isBarrel(chIndex)) {
+                        segmentsToUse[0] = segment;
                     }
+                    break;
+                case LayerIndex::Middle:
+                    if (!segmentsToUse[1] || isBarrel(chIndex)) {
+                        segmentsToUse[1] = segment;
+                    }
+                    break;
+                case LayerIndex::Outer:
+                    if (!segmentsToUse[2] || isBarrel(chIndex)) {
+                        segmentsToUse[2] = segment;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        unsigned nSegments = std::ranges::count_if(segmentsToUse, 
+            [](const xAOD::MuonSegment* seg) { return seg != nullptr; });
+
+        /** If less than 3 segments are found check whether the track crosses the BEE or EE chamber and use that segment as the third one. */
+        if (nSegments < 3) {
+            auto missingSeg = std::ranges::find(segmentsToUse, nullptr);
+            for (const xAOD::MuonSegment* segment : seed.segments()) {
+                LayerIndex layIndex {toLayerIndex(segment->chamberIndex())};
+                if (layIndex != LayerIndex::Extended && layIndex != LayerIndex::BarrelExtended) {
+                    continue;
                 }
-                if (s + 1 == nSeedSeg) {
+                assert(missingSeg != segmentsToUse.end());
+                *missingSeg = segment;
+                nSegments++;
+                if (nSegments == 3) {
                     break;
                 }
-                /** Sample the magnetic field */
-                Amg::Vector3D nextDir = dirForBField(*seed.segments()[s+1], circPhi);
-                Amg::Vector3D nextPos = projectOntoPhiPlane(gctx, *seed.segments()[s+1], circPhi);
-                const auto [bFieldSeg, nPointsSeg] =  averageBField(std::make_pair(projPos, projDir),
-                                                                    std::make_pair(nextPos, nextDir),
-                                                                    magField, s>0);
-                
-                avgBField += bFieldSeg;
-                nBFieldPoints += nPointsSeg;
-                projPos = std::move(nextPos);
-                projDir = std::move(nextDir);
+                missingSeg = std::ranges::find(segmentsToUse, nullptr);
             }
-            avgBField /= std::max(nBFieldPoints, 1u);
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - averaged field: "<<(avgBField * 1000.)
-                        <<" T, number of points: "<<nBFieldPoints<<".");
+            std::ranges::sort(segmentsToUse, [](const xAOD::MuonSegment* seg1, const xAOD::MuonSegment* seg2) {
+                if (!seg1 || !seg2) {
+                    return seg1 != nullptr;
+                }
+                return seg1->position().perp() < seg2->position().perp();
+            });
         }
-        avgTheta /= seed.segments().size();
-        /// Calculate the radius from the barrel segments
-        std::optional<double> barrelR = calculateRadius(std::move(layerPos[0]), 
-                                                        std::move(layerPos[1]), 
-                                                        std::move(layerPos[2]), planeNorm);
-        /// Calculate the radius from the endcap segments
-        std::optional<double> endcapR = calculateRadius(std::move(layerPos[3]), 
-                                                        std::move(layerPos[4]), 
-                                                        std::move(layerPos[5]), planeNorm);
-        /// If no radius could be calculated return the straight line estimator
-        if (!barrelR && !endcapR) {
-            /** Fall back via the angular estimator */
-            const xAOD::MuonSegment* frontSeg = seed.segments().front();
-            const xAOD::MuonSegment* backSeg = seed.segments().back();
-            using namespace Muon::MuonStationIndex;
-            /// Magnetic field is too weak for the EM / EO case -> return straight line
-            if (toStationIndex(frontSeg->chamberIndex()) == StIndex::EM && 
-                toStationIndex(backSeg->chamberIndex()) == StIndex::EO) {
-                return straightlineMom;
-            }
-            /// Calculate the momentum via the deflection angle
-            const Amg::Vector3D innerDir = dirForBField(*frontSeg, circPhi);
-            const Amg::Vector3D innerPos = projectOntoPhiPlane(gctx, *frontSeg, circPhi);
-
-            const Amg::Vector3D outerDir = dirForBField(*backSeg, circPhi);
-            const Amg::Vector3D outerPos = projectOntoPhiPlane(gctx, *backSeg, circPhi);
-
-            const double alpha = outerDir.theta() - innerDir.theta();
-            const double P = avgBField * (outerPos-innerPos).mag() / (
-                (std::abs(alpha) > Acts::s_epsilon ? alpha : Acts::s_epsilon) * 
-                std::abs(std::sin(avgTheta)));
-            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Angular difference between "
-                <<printID(*frontSeg)<<" & "<<printID(*backSeg)<<" is "<<inDeg(alpha)
-                <<" -> estimated momentum: "<<P);
-            return P;
-        }
-        const double r = 0.5* ((barrelR ? *barrelR : *endcapR) +
-                               (endcapR ? *endcapR : *barrelR));
-        ///
-        const double P = 0.3* Gaudi::Units::GeV* avgBField * r / std::abs(std::sin(avgTheta)); 
-
-        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Estimated radius "<<r / Gaudi::Units::m<<" [m] --> P: "<<
-                        (P / Gaudi::Units::GeV)<<" [GeV]");        
-
-        return P;
+        const Amg::Vector3D planeNorm {Acts::makeDirectionFromPhiTheta(circPhi + 90._degree, 90._degree)};
+        auto point = [&planeNorm](const xAOD::MuonSegment* seg) {
+            return std::make_pair(segPosOntoPhiPlane(planeNorm, seg->sector(), seg->position()),
+                                  segDirOntoPhiPlane(planeNorm, seg->direction()));
+        };
+        return nSegments == 3 
+            ? estimateQtimesP(magField, planeNorm, point(segmentsToUse[0]), point(segmentsToUse[1]), point(segmentsToUse[2]))
+            : estimateQtimesP(magField, planeNorm, point(segmentsToUse[0]), point(segmentsToUse[1]));
     }
-    void MsTrackSeeder::appendSegment(const ActsTrk::GeometryContext& gctx,
-                                      const xAOD::MuonSegment* segment,
+    void MsTrackSeeder::appendSegment(const xAOD::MuonSegment* segment,
                                       const Location loc,
                                       TreeRawVec_t& outContainer) const {
         
@@ -402,7 +310,7 @@ namespace MuonR4{
                     <<" is not in sector "<<projSector);
                 continue;
             }
-            const Amg::Vector2D refPoint{expressOnCylinder(gctx, *segment, loc, projSector)};
+            const Amg::Vector2D refPoint{expressOnCylinder(*segment, loc, projSector)};
             if (!withinBounds(refPoint, loc)) {
                  continue;
             }
@@ -423,21 +331,19 @@ namespace MuonR4{
             outContainer.emplace_back(std::move(coords), segment);
         }
     }
-    SearchTree_t MsTrackSeeder::constructTree(const ActsTrk::GeometryContext& gctx,
-                                              const xAOD::MuonSegmentContainer& segments) const{
+    SearchTree_t MsTrackSeeder::constructTree(const xAOD::MuonSegmentContainer& segments) const{
         TreeRawVec_t rawData{};
         rawData.reserve(3*segments.size());
         for (const xAOD::MuonSegment* segment : segments){
-            appendSegment(gctx, segment, Location::Barrel, rawData);
-            appendSegment(gctx, segment, Location::Endcap, rawData);
+            appendSegment(segment, Location::Barrel, rawData);
+            appendSegment(segment, Location::Endcap, rawData);
         }
         ATH_MSG_VERBOSE("Create a new tree with "<<rawData.size()<<" entries. ");
         return SearchTree_t{std::move(rawData)};
     }
     std::unique_ptr<MsTrackSeedContainer> MsTrackSeeder::findTrackSeeds(const EventContext& ctx,
-                                                                        const ActsTrk::GeometryContext& gctx,
                                                                         const xAOD::MuonSegmentContainer& segments) const {
-        SearchTree_t orderedSegs{constructTree(gctx, segments)};
+        SearchTree_t orderedSegs{constructTree(segments)};
         MsTrackSeedContainer trackSeeds{};
         using enum SeedCoords;
         for (const auto& [coords, seedCandidate] : orderedSegs) {

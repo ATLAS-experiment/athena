@@ -345,7 +345,7 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
                 }
 
                 for (const Location loc : {Barrel, Endcap}) {
-                    const Amg::Vector2D projPos{seeder.expressOnCylinder(*gctx, *segment, loc, sector)};
+                    const Amg::Vector2D projPos{seeder.expressOnCylinder(*segment, loc, sector)};
                     if (!seeder.withinBounds(projPos, loc)) {
                         continue;
                     }
@@ -432,7 +432,7 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
             using enum MsTrackSeeder::SectorProjector;
             ExpandedSector sector{segment->position().phi()};
             for (const Location loc : {Barrel, Endcap}) {
-                const Amg::Vector2D projected{seeder.expressOnCylinder(*gctx, *segment, loc, sector)};
+                const Amg::Vector2D projected{seeder.expressOnCylinder(*segment, loc, sector)};
                 if (!seeder.withinBounds(projected, loc)) {
                     continue;
                 }
