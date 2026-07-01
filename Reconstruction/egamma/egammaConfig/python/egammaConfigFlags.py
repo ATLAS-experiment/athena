@@ -157,9 +157,18 @@ def createEgammaConfigFlags():
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.GSFTrackParticles + 'Fwd'))
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticlesSuppESD", '')
+
+    def GSFTrackParticlesSuppAOD(flags):
+        suppAOD = ""
+        if not flags.Acts.EDM.PersistifyTracks:
+            suppAOD = "-actsTrack"
+        if flags.Egamma.Keys.Output.GSFTrackParticlesSuppESD:
+            if suppAOD:
+                suppAOD += '.'
+            suppAOD += flags.Egamma.Keys.Output.GSFTrackParticlesSuppESD
+        return suppAOD
     egcf.addFlag("Egamma.Keys.Output.GSFTrackParticlesSuppAOD",
-                 lambda prevFlags: (
-                     prevFlags.Egamma.Keys.Output.GSFTrackParticlesSuppESD))
+                 GSFTrackParticlesSuppAOD)
 
     egcf.addFlag("Egamma.Keys.Output.TruthParticles", 'egammaTruthParticles')
     egcf.addFlag("Egamma.Keys.Output.TruthParticlesSuppESD", '')
