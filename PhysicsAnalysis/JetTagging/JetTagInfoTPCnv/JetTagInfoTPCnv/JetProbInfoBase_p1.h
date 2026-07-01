@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_JETPROBINFOBASE_P1_H
@@ -25,7 +25,7 @@ namespace Analysis {
     TPObjRef m_baseTagInfo;
 
     /// All of this data will be written out.
-    int m_ntrk;
+    int m_ntrk = 0;
   };
 }
 

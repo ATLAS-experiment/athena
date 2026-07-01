@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_TruthInfo_P1_H
@@ -25,10 +25,10 @@ namespace Analysis {
 
     /// All of this data will be written out.
     std::string m_jetTruthLabel;
-    float m_distanceToBQuark;
-    float m_distanceToCQuark;
-    float m_distanceToTLepton;
-    int m_BHadronPdg;
+    float m_distanceToBQuark = 0;
+    float m_distanceToCQuark = 0;
+    float m_distanceToTLepton = 0;
+    int m_BHadronPdg = 0;
     Eigen::Vector3d m_BHadronDecayVertex;
   };
 }

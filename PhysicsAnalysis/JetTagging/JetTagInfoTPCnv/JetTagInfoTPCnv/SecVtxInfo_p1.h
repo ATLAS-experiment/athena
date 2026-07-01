@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_SECVTXINFO_P1_H
@@ -24,17 +24,17 @@ namespace Analysis
       /// Info stored in the SecVtxInfo subclass:
 
       // Unused, but shouldn't delete it since it's part of the persistent data.
-      int ATH_UNUSED_MEMBER(m_numSelTracksForFit);
-      float m_dist;
-      float m_rphidist;
-      float m_prob;
-      float m_mass;
-      float m_energyFraction;
-      int m_mult;
-      int m_NGood2TrackVertices;
+      int ATH_UNUSED_MEMBER(m_numSelTracksForFit) = 0;
+      float m_dist = 0;
+      float m_rphidist = 0;
+      float m_prob = 0;
+      float m_mass = 0;
+      float m_energyFraction = 0;
+      int m_mult = 0;
+      int m_NGood2TrackVertices = 0;
 
       /// Translates to enum FitTYpe.
-      int m_fitType;
+      int m_fitType = 0;
 
       /// Translates to a Trk::RecVertex
       TPObjRef m_secVtxPos;

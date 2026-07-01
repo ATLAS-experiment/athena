@@ -60,8 +60,8 @@ namespace FlavorTagInference {
 
     struct InputVariableConfig {
         std::string name;
-        ConstituentsEDMType type;
-        bool flip_sign;
+        ConstituentsEDMType type {};
+        bool flip_sign = false;
     };
 
     struct ConstituentsInputConfig {

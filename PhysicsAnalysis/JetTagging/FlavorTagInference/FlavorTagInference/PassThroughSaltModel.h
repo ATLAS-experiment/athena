@@ -68,7 +68,7 @@ namespace FlavorTagInference {
     struct ConstituentNode {
       std::string node_name;       ///< e.g. "tracks_r22loose_sd0sort" (drives ConstituentsLoader sort/select regex)
       std::string input_key;       ///< key in gnn_inputs, read from JSON "input_key" (e.g. "tracks", "flows")
-      size_t num_vars;             ///< number of variables in this node
+      size_t num_vars = 0;         ///< number of variables in this node
       std::vector<std::string> output_names; ///< per-variable output names
       std::vector<std::string> var_types;  ///< per-variable: "float", "int", or "char"
     };
