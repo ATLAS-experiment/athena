@@ -39,6 +39,12 @@ InDetPerfPlot_TrackParameters::initializePlots() {
   book(m_reco_author,  "reco_author");
   if(m_hasHGTDReco){
     book(m_reco_time,    "reco_time");
+    if (m_iDetailLevel >= 100){
+       book(m_reco_HGTDChi2,             "reco_HGTDChi2");
+       book(m_reco_timeResolution,       "reco_timeResolution");
+       book(m_reco_meanTime,             "reco_meanTime");
+       book(m_reco_meanTimeResolution,   "reco_meanTimeResolution");
+    }
     book(m_reco_hasValidTime_eff_vs_eta, "reco_hasValidTime_eff_vs_eta");
   }
 
@@ -162,6 +168,20 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TrackParticle& particle, float w
     if( accValidTime.isAvailable(particle) && accTime.isAvailable(particle) ) {
       if (particle.hasValidTime()) {
 	fillHisto(m_reco_time, particle.time(), weight);
+        if (m_iDetailLevel >= 100){
+          static const SG::Accessor<float> hgtdMeanTime("HGTDMeanTime");
+          static const SG::Accessor<float> hgtdMeanTimeResolution("HGTDMeanTimeResolution");
+          static const SG::Accessor<float> hgtdTimeResolution("timeResolution");
+          static const SG::ConstAccessor<float> hgtdChi2("HGTDChi2");
+
+          if (hgtdMeanTime.isAvailable(particle)) {
+            float chi2 = hgtdChi2(particle);
+            fillHisto(m_reco_HGTDChi2, chi2>0 ? log10(chi2) : -std::numeric_limits<float>::infinity(), weight);
+            fillHisto(m_reco_meanTime, hgtdMeanTime(particle), weight);
+            fillHisto(m_reco_meanTimeResolution, hgtdMeanTimeResolution(particle), weight);
+            fillHisto(m_reco_timeResolution, hgtdTimeResolution(particle), weight);
+          }
+        }
       }
     }
 

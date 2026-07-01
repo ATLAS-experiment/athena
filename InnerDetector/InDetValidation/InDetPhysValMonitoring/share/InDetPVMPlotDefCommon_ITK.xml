@@ -547,6 +547,22 @@ end of hit residuals & cluster width plots
   <x title="reco_{time} [ns]" n="160" lo="-&TIMEPARA;" hi="&TIMEPARA;"/>
   <y title="Number of Entries"/>
 </h>
+<h id="reco_HGTDChi2" type="TH1F" title="HGTD log_{10}#chi^{2}">
+  <x title="# HGTD log_{10} #chi^{2}" n="100" lo="0." hi="4"/>
+  <y title="Entries"/>
+</h>
+<h id="reco_meanTime" type="TH1F" title="reco_{av. time}">
+  <x title="reco_{time} [ns]" n="100" lo="-20." hi="20."/>
+  <y title="Number of Entries"/>
+</h>
+<h id="reco_meanTimeResolution" type="TH1F" title="#sigma_{mean time}">
+  <x title="#sigma_{time} [ns]" n="100" lo="0." hi="1."/>
+  <y title="Number of Entries"/>
+</h>
+<h id="reco_timeResolution" type="TH1F" title="#sigma_{time}">
+  <x title="#sigma_{time} [ns]" n="100" lo="0." hi="1."/>
+  <y title="Number of Entries"/>
+</h>
 
 <h id="reco_hasValidTime_eff_vs_eta" type="TEfficiency" title="hasValidTime efficiency vs eta">
   <x title="#eta" n="100" lo="-&ETA;" hi="&ETA;"/>
