@@ -46,24 +46,13 @@ Core inference stack:
 - `GNN`
   - Central runtime wrapper that combines EDM input loading and model inference.
   - Delegates model execution to an `ISaltModel` implementation.
-  - Handles output decoration types:
-    - scalar float,
-    - vector float,
-    - vector char,
-    - vector int,
-    - vector reduced-precision float (`VECTRUNCFLOAT`).
-  - Supports defaults for zero-input cases (`defaultZeroTracks` path).
 
 - `GNNDataLoader`
   - Builds scalar and sequence inputs from model graph metadata.
-  - Instantiates constituent loaders per input-sequence node.
-  - Supports constituent output keys:
-    - `tracks`, `flows`, `hits`, `electrons`, `muons`, `clusters`, `towers`.
 
 - `SaltModel`
   - Local ONNX Runtime backend.
   - Reads `gnn_config` metadata from the ONNX file.
-  - Supports ONNX model metadata versions `V0`, `V1`, `V2`.
 
 - `SaltModelTriton` (EXPERIMENTAL)
   - Triton gRPC backend.
@@ -76,14 +65,6 @@ User-Facing Tools and Services
 
 - `GNNTool`
   - ASG tool wrapper around `GNN`.
-  - Main properties include:
-    - `nnFile`,
-    - `flipTagConfig`,
-    - `variableRemapping`,
-    - `defaultOutputValue`,
-    - `defaultOutputValues`,
-    - `defaultZeroTracks`,
-    - `nnSharingService`.
 
 - `MultifoldGNNTool`
   - Wraps multiple networks (`nnFiles`) and picks fold by hash decoration
