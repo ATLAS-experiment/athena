@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AlgT.h"
@@ -44,9 +44,9 @@ StatusCode AlgT::execute(const EventContext& ctx) {
   ATH_MSG_INFO("  write: " << wh1.key() << " = " << wh1->val() );
 
 
-  ATH_CHECK(m_tool1->doSomething());
-  ATH_CHECK(m_tool2->doSomething());
-  ATH_CHECK(m_tool3->doSomething());
+  ATH_CHECK(m_tool1->doSomething(ctx));
+  ATH_CHECK(m_tool2->doSomething(ctx));
+  ATH_CHECK(m_tool3->doSomething(ctx));
   
 
   return StatusCode::SUCCESS;

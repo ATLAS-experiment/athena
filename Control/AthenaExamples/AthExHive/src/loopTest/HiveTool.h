@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXHIVE_HIVETOOL_H
@@ -21,7 +21,7 @@ public:
   virtual StatusCode initialize();
   virtual StatusCode finalize();
 
-  virtual StatusCode doSomething() const;
+  virtual StatusCode doSomething(const EventContext& ctx) const;
 
 private:
 
