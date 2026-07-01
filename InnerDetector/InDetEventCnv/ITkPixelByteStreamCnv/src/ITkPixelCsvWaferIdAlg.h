@@ -40,8 +40,8 @@ public:
     const std::vector<CsvRow>& rows() const { return m_rows; }
 
     StatusCode loadCsv();
-    std::tuple<Identifier,int,unsigned long> waferId(const CsvRow& row) const;
-    unsigned long onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
+    std::tuple<Identifier,int,std::bitset<32>> waferId(const CsvRow& row) const;
+    std::bitset<32> onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const;
 
 private:
     static std::string trim(const std::string& input);
