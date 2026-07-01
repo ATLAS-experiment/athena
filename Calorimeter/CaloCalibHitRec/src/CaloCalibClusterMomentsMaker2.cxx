@@ -24,12 +24,7 @@
 //---------------
 // C++ Headers --
 //---------------
-#include <array>
-#include <iterator>
-#include <sstream>
-#include <set>
-#include <string_view>
-#include <utility>
+
 
 #include "CaloEvent/CaloCell.h"
 #include "CaloSimEvent/CaloCalibrationHit.h"
@@ -43,7 +38,11 @@
 #include "TruthUtils/MagicNumbers.h"
 
 #include <CLHEP/Vector/LorentzVector.h>
-#include <cmath>
+
+#include <iterator>
+#include <sstream>
+#include <string_view>
+#include <utility>
 
 
 using CLHEP::HepLorentzVector;
@@ -120,14 +119,14 @@ CaloCalibClusterMomentsMaker2::CaloCalibClusterMomentsMaker2(const std::string& 
   // Name(s) of Moments to calculate
   declareProperty("MomentsNames", m_momentsNames);
   m_validNames.reserve(s_validMomentNames.size());
-  for (const auto& [name, moment] : s_validMomentNames) {
-    m_validNames.emplace_back(std::string{name.data(), name.size()}, moment);
+  for (const auto& [thisName, moment] : s_validMomentNames) {
+    m_validNames.emplace_back(thisName, moment);
   }
 
   // Name(s) of Moments which can be stored on the AOD - all others go to ESD
   m_momentsNamesAOD.reserve(s_aodMomentNames.size());
-  for (const std::string_view name : s_aodMomentNames) {
-    m_momentsNamesAOD.emplace_back(name.data(), name.size());
+  for (const std::string_view thisName : s_aodMomentNames) {
+    m_momentsNamesAOD.emplace_back(thisName);
   }
 
   declareProperty("AODMomentsNames", m_momentsNamesAOD);
