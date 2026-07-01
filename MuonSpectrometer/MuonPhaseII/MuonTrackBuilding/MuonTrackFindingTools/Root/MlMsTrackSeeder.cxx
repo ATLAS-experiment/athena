@@ -16,7 +16,6 @@ MlMsTrackSeeder::MlMsTrackSeeder(const std::string& msgName, Config&& cfg)
     m_baselineSeeder{msgName + ".BaselineMsTrackSeeder", MsTrackSeeder::Config{m_cfg.baselineSeeder}} {}
 
 std::unique_ptr<MsTrackSeedContainer> MlMsTrackSeeder::findTrackSeeds(const EventContext& ctx,
-                                                                      const ActsTrk::GeometryContext& gctx,
                                                                       const xAOD::MuonSegmentContainer& segments) const {
   SG::AuxElement::ConstAccessor<std::vector<unsigned>> acc{m_cfg.candidateDecoration};
   std::unordered_map<unsigned, std::vector<const xAOD::MuonSegment*>> groups;
@@ -32,7 +31,7 @@ std::unique_ptr<MsTrackSeedContainer> MlMsTrackSeeder::findTrackSeeds(const Even
   if (!sawDecor) {
     ATH_MSG_DEBUG("MlMsTrackSeeder: no ML decoration found on any segment."
                   << (m_cfg.fallbackToBaselineIfUndecorated ? " Falling back to baseline seeder." : " Returning empty seed set."));
-    if (m_cfg.fallbackToBaselineIfUndecorated) return m_baselineSeeder.findTrackSeeds(ctx, gctx, segments);
+    if (m_cfg.fallbackToBaselineIfUndecorated) return m_baselineSeeder.findTrackSeeds(ctx, segments);
     return std::make_unique<MsTrackSeedContainer>();
   }
 
@@ -70,7 +69,7 @@ std::unique_ptr<MsTrackSeedContainer> MlMsTrackSeeder::findTrackSeeds(const Even
     for (const xAOD::MuonSegment* seg : segs) {
       viewCont.push_back(seg);
     }
-    results[idx].seeds = m_baselineSeeder.findTrackSeeds(ctx, gctx, *viewCont.asDataVector());
+    results[idx].seeds = m_baselineSeeder.findTrackSeeds(ctx, *viewCont.asDataVector());
   };
 
   if (m_cfg.runCandidatesInParallel && orderedIds.size() > 1) {
@@ -112,7 +111,7 @@ std::unique_ptr<MsTrackSeedContainer> MlMsTrackSeeder::findTrackSeeds(const Even
 
   ATH_MSG_DEBUG("MlMsTrackSeeder: total seeds produced = " << out->size()
                 << (out->empty() && m_cfg.fallbackToBaselineIfNoCandidates ? " — falling back to baseline seeder" : ""));
-  if (out->empty() && m_cfg.fallbackToBaselineIfNoCandidates) return m_baselineSeeder.findTrackSeeds(ctx, gctx, segments);
+  if (out->empty() && m_cfg.fallbackToBaselineIfNoCandidates) return m_baselineSeeder.findTrackSeeds(ctx, segments);
   return out;
 }
 

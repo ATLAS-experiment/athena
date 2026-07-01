@@ -124,7 +124,7 @@ namespace MuonR4{
         MsTrackFindingAlg::findTrackSeeds(const EventContext& ctx,
                                           const xAOD::MuonSegmentContainer& segments) const {
 
-        auto seedContainer = m_seeder->findTrackSeeds(ctx, m_trackingGeometryTool->getGeometryContext(ctx), segments);
+        auto seedContainer = m_seeder->findTrackSeeds(ctx, segments);
 
         if (!m_visualizationTool.empty()) {
             m_visualizationTool->displaySeeds(ctx, *m_seeder, segments, *seedContainer);
@@ -308,8 +308,7 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                                   std::vector<const xAOD::UncalibratedMeasurement_v1*>{});
         }
         auto fourPos = ActsTrk::convertPosToActs(*pIsect, (*pIsect).mag() / Gaudi::Units::c_light);
-        const double qOverP = 1./ ActsTrk::energyToActs(m_seeder->estimateQtimesP(*tgContext.get<const ActsTrk::GeometryContext*>(),
-                                                                                 *mfContext.get<const AtlasFieldCacheCondObj*>(), seed));
+        const double qOverP = 1./ ActsTrk::energyToActs(m_seeder->estimateQtimesP(*mfContext.get<const AtlasFieldCacheCondObj*>(), seed));
         auto initialPars = Acts::BoundTrackParameters::create(tgContext, targetSurf, fourPos, 
                                                               seedDir, qOverP,
                                                               Acts::BoundMatrix::Identity(), 

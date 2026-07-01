@@ -12,7 +12,7 @@ find_package( TBB )
 atlas_add_library(MuonTrackFindingToolsLib
                    Root/*.cxx
                    PUBLIC_HEADERS MuonTrackFindingTools
-                   LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternHelpers
+                   LINK_LIBRARIES Acts::Core Identifier MuonReadoutGeometryR4 MuonPatternHelpers FourMomUtils 
                                  xAODMuon MuonSpacePoint MuonStationIndexLib MuonTrackEvent TBB::tbb
                    PRIVATE_LINK_LIBRARIES MuonTruthHelpers Identifier MuonPatternEvent MuonDetDescrUtils)
 
