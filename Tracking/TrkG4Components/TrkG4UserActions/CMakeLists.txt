@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkG4UserActions )
@@ -25,4 +25,5 @@ atlas_install_scripts( scripts/*.py )
 # Test(s) in the package:
 atlas_add_test( Geantino_ITk
                 SCRIPT RunGeantinoStepRecordingITk.py
-                POST_EXEC_SCRIPT nopost.sh )
+                LOG_IGNORE_PATTERN "FPE OVERFLOW in .Execute. of .ITkG4AtlasAlg."
+                POST_EXEC_SCRIPT noerror.sh )
