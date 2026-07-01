@@ -59,7 +59,7 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         const auto w_and_fe_id = waferId(row);
         const Identifier& id = std::get<0>(w_and_fe_id);
         const int fe = std::get<1>(w_and_fe_id);
-        const unsigned long onlineId = std::get<2>(w_and_fe_id);
+        std::bitset<32> onlineId = std::get<2>(w_and_fe_id);
         const std::string waferId_str = id.get_identifier32().getString();
         const auto bec = m_pixIdHelper->barrel_ec(id);
         const auto ld = m_pixIdHelper->layer_disk(id);
@@ -87,15 +87,15 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
                    << ld << "\t"
                    << phi << "\t"
                    << eta << "\t"
-                   << onlineId << "\t";
+                   << std::hex<< onlineId.to_ulong() << "\t";
         }
         //convert back to hex
         std::stringstream res;
         res << std::hex << std::uppercase << b.to_ulong();
         // keep this, might be useful later
         //output << res.str() << "\n";
-        output << std::hex << b.to_ulong() + onlineId << ","
-                << b.to_ulong() + onlineId << ","
+        output << std::hex << (b| onlineId).to_ulong() << ","
+                << (b| onlineId).to_ulong() << ","
                 << row.flx_card_device << ","
                 << row.fiber << ","
                 << dma_buffer_vec[i] << ","
@@ -155,9 +155,9 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
     return StatusCode::SUCCESS;
 }
 
-std::tuple< Identifier, int, unsigned long > ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
-    ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
-                    << ", module " << row.md << ", FE " << row.fe);
+std::tuple< Identifier, int, std::bitset<32> > ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
+    //ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
+    //                << ", module " << row.md << ", FE " << row.fe);
 
     //SP chain is like G-IS-L05-R05-A-SP2
     std::vector<std::string> spChain_cur = parseSPChain(row.spChain);
@@ -167,7 +167,7 @@ std::tuple< Identifier, int, unsigned long > ITkPixelCsvWaferIdAlg::waferId(cons
     int phi = phi_module(spChain_cur, row.md, row.fe );
     int eta = eta_module(spChain_cur, row.md, row.fe );
     int fe_n = feID(spChain_cur, row.fe );
-    unsigned long online_id = onlineId(spChain_cur, row.md, row.fe);
+    std::bitset<32> online_id = onlineId(spChain_cur, row.md, row.fe);
     
     return std::make_tuple(m_pixIdHelper->wafer_id(bec, ld, phi, eta), fe_n, online_id);
 }
@@ -409,7 +409,7 @@ int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe)
     
 }
 
-unsigned long ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const {
+std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& spchain, const std::string& mod, int fe) const {
     // onlineID = chipID (4b) chipID ON/OFF (1b) RD53C (1b)
     std::bitset<32> febits(0);
     int ld = layer_disk(spchain);
@@ -470,8 +470,8 @@ unsigned long ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& sp
             }
         }
     }
-    febits |= 0x01100000;
-    return febits.to_ulong();
+    febits |= std::bitset<32>("00001100000000000000000000000000");
+    return febits;
 }
 
 
