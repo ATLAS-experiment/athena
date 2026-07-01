@@ -372,8 +372,6 @@ def fromRunArgsITk(runArgs, flags):
 
     ##----- Run the setup -----##
 
-    print("runArgs.inputTFile =", runArgs.inputTFile)
-    print("flags.ITk.Align.inputTFiles =", flags.ITk.Align.inputTFiles)
                 
     if runArgs.dryRun:
         cfg.printConfig()
