@@ -168,7 +168,7 @@ ByteStreamEventStorageOutputSvc::putEvent(
   cache->size = re->fragment_size_word();
   ATH_MSG_DEBUG("event size = " << cache->size << ", start = " << re->start());
 
-  cache->buffer = std::make_unique< DataType[] >(cache->size);
+  cache->buffer = std::make_unique_for_overwrite< DataType[] >(cache->size);
   std::copy(re->start(), re->start() + cache->size, cache->buffer.get());
 
   {
