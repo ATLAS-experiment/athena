@@ -470,7 +470,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const EventContext& 
         std::vector<const xAOD::EmTauRoI*> l1_vec;
         for( auto &initRoi: initRois ){               
             if( !initRoi.link.isValid() ) continue;      
-            const auto *feat = match()->getL1Feature( initRoi.source );
+            const auto *feat = match()->getL1Feature( ctx, initRoi.source );
             if(feat) l1_vec.push_back(feat);
         }
         fillL1Calo( trigger, l1_vec );
@@ -478,7 +478,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const EventContext& 
         std::vector<const xAOD::eFexEMRoI*> l1_vec;
         for( auto &initRoi: initRois ){               
             if( !initRoi.link.isValid() ) continue;      
-            const auto *feat = match()->getL1eEMFeature( initRoi.source );
+            const auto *feat = match()->getL1eEMFeature( ctx, initRoi.source );
             if(feat) l1_vec.push_back(feat);
         }
         fillL1eEM( trigger, l1_vec );
@@ -978,7 +978,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillResolutions( const EventContext& ct
       //
       // Get only off and l1 where the offline object passed by the offline pid selector
       //
-      const auto *l1 = match()->getL1Feature( feat  );
+      const auto *l1 = match()->getL1Feature( ctx, feat  );
       if(eg->type()==xAOD::Type::Electron){
         const xAOD::Electron* el = static_cast<const xAOD::Electron*>(eg);
         float et = getEt(el)/Gaudi::Units::GeV;

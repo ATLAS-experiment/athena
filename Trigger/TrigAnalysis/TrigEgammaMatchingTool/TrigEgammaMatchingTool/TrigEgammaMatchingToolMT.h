@@ -62,11 +62,11 @@ class TrigEgammaMatchingToolMT : public asg::AsgTool
                                                                                     unsigned int condition=TrigDefs::Physics ) const;
         
         // access the feature from the container
-        const xAOD::EmTauRoI*  getL1Feature( const TrigCompositeUtils::Decision * ) const;
-        const xAOD::eFexEMRoI* getL1eEMFeature( const TrigCompositeUtils::Decision * ) const;
+        const xAOD::EmTauRoI*  getL1Feature( const EventContext &, const TrigCompositeUtils::Decision * ) const;
+        const xAOD::eFexEMRoI* getL1eEMFeature( const EventContext &, const TrigCompositeUtils::Decision * ) const;
 
         // access the feature from the container
-        const xAOD::TrigRingerRings* getRingsFeature( const TrigCompositeUtils::Decision * ) const;
+        const xAOD::TrigRingerRings* getRingsFeature( const EventContext &, const TrigCompositeUtils::Decision * ) const;
         // get the container key
         std::string key( const std::string& ) const;
 

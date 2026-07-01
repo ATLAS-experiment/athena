@@ -224,13 +224,13 @@ bool TrigEgammaMatchingToolMT::matchL1( const xAOD::Egamma* eg, const std::strin
 
 //!=======================================================================
  
-const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(dec, "initialRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(ctx, dec, "initialRoI");
   if( !initRoi.isValid() ) return nullptr;
 
-  SG::ReadHandle<xAOD::EmTauRoIContainer> l1_cont( m_emTauRoIKey, Gaudi::Hive::currentContext());
+  SG::ReadHandle<xAOD::EmTauRoIContainer> l1_cont( m_emTauRoIKey, ctx );
   if( !l1_cont.isValid() ) return nullptr;
 
   for( const auto *l1 : *l1_cont ){
@@ -244,23 +244,23 @@ const xAOD::EmTauRoI* TrigEgammaMatchingToolMT::getL1Feature( const TrigComposit
 
 //!=======================================================================
 
-const xAOD::eFexEMRoI* TrigEgammaMatchingToolMT::getL1eEMFeature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::eFexEMRoI* TrigEgammaMatchingToolMT::getL1eEMFeature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<xAOD::eFexEMRoIContainer>(dec, "initialRecRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<xAOD::eFexEMRoIContainer>(ctx, dec, "initialRecRoI");
   if( !initRoi.isValid() ) return nullptr;
   return *(initRoi.link);
 } 
 
 //!=======================================================================
 
-const xAOD::TrigRingerRings* TrigEgammaMatchingToolMT::getRingsFeature( const TrigCompositeUtils::Decision *dec ) const
+const xAOD::TrigRingerRings* TrigEgammaMatchingToolMT::getRingsFeature( const EventContext& ctx, const TrigCompositeUtils::Decision *dec ) const
 {
   if( !dec )  return nullptr;
-  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(dec, "initialRoI"); 
+  auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(ctx, dec, "initialRoI");
   if( !initRoi.isValid() ) return nullptr;
   
-  SG::ReadHandle<xAOD::TrigRingerRingsContainer> rg_cont( m_ringerKey, Gaudi::Hive::currentContext() );
+  SG::ReadHandle<xAOD::TrigRingerRingsContainer> rg_cont( m_ringerKey, ctx );
 
   if( !rg_cont.isValid() ) return nullptr;
 
