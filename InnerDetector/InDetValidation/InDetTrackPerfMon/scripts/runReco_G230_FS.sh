@@ -66,6 +66,7 @@ run Reco_tf.py --CA \
                flags.addFlagsCategory("Trigger.EFTracking.GPU", createGpuEFTrackingConfigFlags, prefix=True); \
                flags.Trigger.EFTracking.GPU.inputDirectory="'"$PWD"'/ITk_data/"; \
                flags.Trigger.EFTracking.GPU.pipeline="g230"; \
+               flags.Trigger.EFTracking.GPU.checkSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf;' \
     --steering 'doRAWtoALL' \
