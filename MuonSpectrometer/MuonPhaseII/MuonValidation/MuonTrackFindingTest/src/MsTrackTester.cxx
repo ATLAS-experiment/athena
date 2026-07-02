@@ -34,7 +34,7 @@ namespace {
 namespace MuonValR4 {
     std::optional<MsTrackSeed> MsTrackTester::makeSeedFromTruth(const xAOD::TruthParticle& truthMuon) const {
         std::vector<const xAOD::MuonSegment*> matchedSegs = MuonR4::getTruthSegments(truthMuon);
-        if (matchedSegs.empty()) {
+        if (matchedSegs.empty() || toLayerIndex(matchedSegs.front()->chamberIndex()) == toLayerIndex(matchedSegs.back()->chamberIndex())) {
             return std::nullopt;
         }
         ExpandedSector sector{matchedSegs[0]->position().phi()};
