@@ -15,7 +15,7 @@ set( TDAQ-COMMON_ATROOT
    CACHE PATH "The directory to pick up tdaq-common from" )
 
 # Find the ATLAS CMake code:
-find_package( AtlasCMake QUIET )
+find_package( AtlasCMake )
 
 # Set compiler defaults. Usually this is done in the externals project,
 # but since DetCommon does not have one, we need to do it here:
