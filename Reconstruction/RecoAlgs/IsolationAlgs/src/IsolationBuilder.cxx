@@ -57,17 +57,18 @@ IsolationBuilder::initialize()
     declareIso(m_phTrackIso);
   }
 
-  if (m_feisoInts.size()) {
+  if (m_fwdelisoInts.size()) {
     ATH_MSG_DEBUG("Initializing forward electrons");
     ATH_CHECK(initializeIso(runIsoType,
-			    &m_feCaloIso,
-			    nullptr,
+			    &m_fwdelCaloIso,
+			    &m_fwdelTrackIso,
 			    m_FwdElectronContainerName,
-			    m_feisoInts,
-			    m_fecorInts,
-			    m_fecorIntsExtra,
+			    m_fwdelisoInts,
+			    m_fwdelcorInts,
+			    m_fwdelcorIntsExtra,
 			    m_customConfigFwd));
-    declareIso(m_feCaloIso);
+    declareIso(m_fwdelCaloIso);
+    declareIso(m_fwdelTrackIso);
   }
 
   if (m_muisoInts.size()) {
@@ -132,7 +133,6 @@ StatusCode
 IsolationBuilder::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("Executing " << name() << "...");
-
   // For etcone, needs the cells
 
   const CaloCellContainer* cellColl = nullptr;
@@ -146,7 +146,6 @@ IsolationBuilder::execute(const EventContext& ctx) const
     cellColl = cellcoll.cptr();
   }
   // Compute isolations
-
   if (m_elCaloIso.size()) {
     ATH_MSG_DEBUG("About to execute Electron calo iso");
     ATH_CHECK(executeCaloIso(m_elCaloIso, cellColl));
@@ -155,9 +154,9 @@ IsolationBuilder::execute(const EventContext& ctx) const
     ATH_MSG_DEBUG("About to execute Photon calo iso");
     ATH_CHECK(executeCaloIso(m_phCaloIso, cellColl));
   }
-  if (m_feCaloIso.size()) {
+  if (m_fwdelCaloIso.size()) {
     ATH_MSG_DEBUG("About to execute Forward Electron calo iso");
-    ATH_CHECK(executeCaloIso(m_feCaloIso, cellColl));
+    ATH_CHECK(executeCaloIso(m_fwdelCaloIso, cellColl));
   }
   if (m_muCaloIso.size()) {
     ATH_MSG_DEBUG("About to execute muon calo iso");
@@ -171,6 +170,10 @@ IsolationBuilder::execute(const EventContext& ctx) const
   if (m_phTrackIso.size()) {
     ATH_MSG_DEBUG("About to execute Photon track iso");
     ATH_CHECK(executeTrackIso(m_phTrackIso));
+  }
+  if (m_fwdelTrackIso.size()) {
+    ATH_MSG_DEBUG("About to execute forward electron track iso");
+    ATH_CHECK(executeTrackIso(m_fwdelTrackIso));
   }
   if (m_muTrackIso.size()) {
     ATH_MSG_DEBUG("About to execute Muon track iso");
@@ -281,6 +284,7 @@ IsolationBuilder::initializeIso(
 
   std::string prefix = containerName + ".";
 
+  
   for (size_t flavor = 0; flavor < isoInts.size(); flavor++) {
     // iterate over the flavor (cell, topo, eflow, track
     //   Note: it is a configuration error if different types
@@ -292,6 +296,8 @@ IsolationBuilder::initializeIso(
     // std::vector<SG::AuxElement::Decorator<float>*> Deco;
     xAOD::Iso::IsolationFlavour isoFlav = xAOD::Iso::numIsolationFlavours;
     xAOD::Iso::IsolationFlavour oldIsoFlav = xAOD::Iso::numIsolationFlavours;
+
+
 
     for (size_t type = 0; type < isoInts[flavor].size(); type++) {
       // iterate over the cone sizes for a given flavor.
@@ -334,6 +340,7 @@ IsolationBuilder::initializeIso(
       }
     }
 
+
     // check that there were isolations configured
     if (isoFlav == xAOD::Iso::numIsolationFlavours) {
       ATH_MSG_WARNING("The configuration was malformed: an empty inner vector "
@@ -348,18 +355,20 @@ IsolationBuilder::initializeIso(
     // and finally add it to the IsoMap.
     ///////////////////////////////
 
+
     if (isoFlav == xAOD::Iso::etcone || isoFlav == xAOD::Iso::topoetcone ||
         isoFlav == xAOD::Iso::neflowisol) {
 
+      
       // let's initialize the decos
       ATH_MSG_DEBUG("Initializing cisoH.isoDeco");
+
       ATH_CHECK(cisoH.isoDeco.initialize());
 
       ATH_CHECK(addCaloIsoCorrections(
-        flavor, isoFlav, cisoH, corInts, false, prefix, customConfig));
+				      flavor, isoFlav, cisoH, corInts, false, prefix, customConfig));
       ATH_CHECK(addCaloIsoCorrections(
-        flavor, isoFlav, cisoH, corIntsExtra, true, prefix, customConfig));
-
+				      flavor, isoFlav, cisoH, corIntsExtra, true, prefix, customConfig));
       if (caloIsoMap) {
         caloIsoMap->push_back(std::make_pair(isoFlav, cisoH));
       } else {
@@ -407,7 +416,7 @@ IsolationBuilder::addCaloIsoCorrections(
   const std::string& prefix,
   const std::string& customConfig)
 {
-
+  
   if (!corrsAreExtra) {
     std::string bitsetName =
       prefix + xAOD::Iso::toString(isoFlav) + "CorrBitset";
@@ -422,6 +431,7 @@ IsolationBuilder::addCaloIsoCorrections(
 
   for (size_t corrType = 0; corrType < corInts[flavor].size(); corrType++) {
     // iterate over the calo isolation corrections
+    
     const auto cor = static_cast<unsigned int>(corInts[flavor][corrType]);
     if (!corrsAreExtra)
       cisoH.CorrList.calobitset.set(cor);
@@ -465,6 +475,7 @@ IsolationBuilder::addCaloIsoCorrections(
       ATH_CHECK(vec.initialize());
     }
   }
+
   return StatusCode::SUCCESS;
 }
 
@@ -519,6 +530,7 @@ IsolationBuilder::executeCaloIso(
     caloIsoMap,
   const CaloCellContainer* cellColl) const
 {
+
   for (const auto& pr : caloIsoMap) {
 
     const xAOD::Iso::IsolationFlavour flav = pr.first;
@@ -671,7 +683,7 @@ IsolationBuilder::executeTrackIso(
         ATH_MSG_DEBUG("Doing track isolation on an egamma particle");
 	std::unique_ptr<xAOD::Vertex> trigVtx = nullptr;
         std::set<const xAOD::TrackParticle*> tracksToExclude;
-        if (xAOD::EgammaHelpers::isElectron(eg)) {
+        if (xAOD::EgammaHelpers::isElectron(eg) || xAOD::EgammaHelpers::isFwdElectron(eg)) {
           tracksToExclude =
             xAOD::EgammaHelpers::getTrackParticles(eg, m_useBremAssoc);
 	  if (m_isTrigger) {

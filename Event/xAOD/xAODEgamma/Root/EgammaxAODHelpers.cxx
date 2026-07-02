@@ -134,7 +134,7 @@ std::set<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticles(cons
 										  bool allParticles /* = true */){
 
   if (eg) {
-    if (eg->type()==xAOD::Type::Electron) {
+    if (eg->type()==xAOD::Type::Electron || eg->type()==xAOD::EgammaParameters::AuthorFwdElectron) {
       const xAOD::Electron* el = static_cast<const xAOD::Electron*> (eg);
       if (el) {
         return getTrackParticles(el, useBremAssoc, allParticles);
@@ -143,7 +143,7 @@ std::set<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticles(cons
     else if (eg->type()==xAOD::Type::Photon) {
       const xAOD::Photon* ph = static_cast<const xAOD::Photon*> (eg);
       if (ph) {
-        return getTrackParticles(ph, useBremAssoc);
+	return getTrackParticles(ph, useBremAssoc);
       }
     }
   }
@@ -154,7 +154,7 @@ std::vector<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticlesVe
 											bool useBremAssoc /* = true */,
 											bool allParticles /* = true */){
   if (eg) {
-    if (eg->type()==xAOD::Type::Electron) {
+    if (eg->type()==xAOD::Type::Electron || eg->type()==xAOD::EgammaParameters::AuthorFwdElectron) {
       const xAOD::Electron* el = static_cast<const xAOD::Electron*> (eg);
       if (el) {
         return getTrackParticlesVec(el, useBremAssoc, allParticles);

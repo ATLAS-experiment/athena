@@ -20,8 +20,11 @@ def egIsolationCfg(flags, name='egIsolation', noCalo=False, **kwargs):
     elif name.find('electron') >= 0:
         suff = 'electron'
         pref = 'El'
+    elif name.find('forwardElectron') >= 0:
+        suff = 'forwardElectron'
+        pref = 'FwdEl'
     else:
-        mlog.error('Name '+name+' should contain electron or photon')
+        mlog.error('Name '+name+' should contain electron, forwardelectron or photon')
         return acc
         
     from xAODPrimitives.xAODIso import xAODIso as isoPar
@@ -33,7 +36,7 @@ def egIsolationCfg(flags, name='egIsolation', noCalo=False, **kwargs):
     isoCor   = []
     isoExCor = []
 
-    if flags.Detector.EnableID or flags.Detector.EnableITk:
+    if (flags.Detector.EnableID and suff!='forwardElectron') or flags.Detector.EnableITk :
         isoType.append([ isoPar.ptcone30, isoPar.ptcone20 ])
         isoCor.append([ isoPar.coreTrackPtr ])
         isoExCor.append([])
@@ -48,8 +51,12 @@ def egIsolationCfg(flags, name='egIsolation', noCalo=False, **kwargs):
     if flags.Detector.EnableCalo and not noCalo:
         isoType.append(
             [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ])
-        isoCor.append(
-            [ isoPar.core57cells, isoPar.ptCorrection, isoPar.pileupCorrection ])
+        if suff!='forwardElectron':
+            isoCor.append(
+                [ isoPar.core57cells, isoPar.ptCorrection, isoPar.pileupCorrection ])
+        else:
+            isoCor.append(
+                [ isoPar.ptCorrection, isoPar.pileupCorrection ])
         # do not do pileup correction if HI with subtracted clusters
         if flags.HeavyIon.Egamma.doSubtractedClusters:
             isoCor[-1] = [ x for x in isoCor[-1] if x != isoPar.pileupCorrection ]
