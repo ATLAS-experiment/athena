@@ -1078,6 +1078,7 @@ def HIONHPODExtraVariablesJets():
     
     for c in containers:
         variables += [".".join([c,field]) for field in [
+            "pt.eta.phi.m",
             *(f"JetConstitScaleMomentum_{x}" for x in ["pt","eta","phi","m"]),
             "Width",
             "DetectorEta.EMFrac",
@@ -1103,6 +1104,7 @@ def HIONHPODExtraTruthVariablesJets():
 
     for c in containers:
         variables += [".".join([c,field]) for field in [
+            "pt.eta.phi.m",
             *(f"JetConstitScaleMomentum_{x}" for x in ["pt","eta","phi","m"]),
             "ConeTruthLabelID.HadronConExclTruthLabelID.PartonTruthLabelID",
             *(f"Ghost{x}HadronsFinalCount" for x in ["B","C"]),
