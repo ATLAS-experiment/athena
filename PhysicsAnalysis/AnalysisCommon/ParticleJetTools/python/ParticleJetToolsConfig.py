@@ -287,11 +287,11 @@ def getJetTruthLabelToolPrereqs(jetdef, modspec):
             "R4TruthLabel": "input:AntiKt4TruthJets",
             "R4TruthDressedWZLabel": "input:AntiKt4TruthDressedWZJets",
             "R4InTimeTruthLabel": "input:InTimeAntiKt4TruthJets",
+            "R4OutOfTimeTruthLabel": "input:OutOfTimeAntiKt4TruthJets",
             "R10TruthLabel_R21Precision_2022v1": "input:AntiKt10TruthJets",
             "R10TruthLabel_R22v1": "input:AntiKt10TruthSoftDropBeta100Zcut10Jets",
         }[labelconfig])
     return prereqs
-
 
 def getJetPileupLabelTool(jetdef, modspec):
 

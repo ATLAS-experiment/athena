@@ -19,6 +19,7 @@
 #include "AthLinks/ElementLink.h"
 #include "JetInterface/IJetDecorator.h"
 #include "ParticleJetTools/LargeRJetLabelEnum.h"
+#include "ParticleJetTools/SmallRJetPileupLabelEnum.h"
 #include <optional>
 
 class JetTruthLabelingTool :
@@ -55,9 +56,12 @@ protected:
   SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EventInfoKey", "EventInfo", "Name of EventInfo object"};
 
   /// parameters for truth labeling
+  SG::ReadHandleKey<xAOD::JetContainer> m_OOTJetName{ this, "OOTJetContainer", "OutOfTimeAntiKt4TruthJets", "Do not configure manually!" };
+  SG::ReadHandleKey<xAOD::JetContainer> m_ITJetName{ this, "ITJetContainer", "InTimeAntiKt4TruthJets", "Do not configure manually!" };
   SG::ReadHandleKey<xAOD::JetContainer> m_truthJetCollectionKey{this, "TruthJetContainer", "", "Do not configure manually!"};
   SG::ReadHandleKey<xAOD::JetContainer> m_truthGroomedJetCollectionKey{this, "TruthGroomedJetContainer", "", "Do not configure manually!"};
   bool m_useGhostJetMatch{}; /// Use ghost association to match reco to truth jets, dR otherwise
+  bool m_isSmallR{}; /// Is the reco jet collection small or large R, default large.
   bool m_matchUngroomedParent{}; /// Use the ungroomed reco jet parent to match to truth jet
   bool m_getTruthGroomedJetValues{}; /// When truth jet matching to ungroomed truth, allow saving properties of groomed truth jets
   double m_dRTruthJet{}; /// dR to match truth jet to reco jet
@@ -76,6 +80,8 @@ protected:
     IntHandleOp_t nbHandle;
     IntHandleOp_t labelRecoHandle;
     IntHandleOp_t nbRecoHandle;
+    IntHandleOp_t matchedPileupTagHandle;
+
     using FloatHandle_t = SG::WriteDecorHandle<xAOD::JetContainer, float>;
     using FloatHandleOp_t = std::optional<FloatHandle_t>;
     FloatHandleOp_t split23Handle;
@@ -85,10 +91,14 @@ protected:
     ELHandleOp_t matchedTruthJetHandle;
     FloatHandleOp_t matchedTruthJetMassHandle;
     FloatHandleOp_t matchedTruthJetPtHandle;
-    FloatHandleOp_t matchedTruthJetEtaHandle;
+    FloatHandleOp_t matchedTruthJetRapidityHandle;
     FloatHandleOp_t matchedTruthJetPhiHandle;
+    FloatHandleOp_t matchedTruthJetEHandle;
     FloatHandleOp_t matchedTruthJetDRHandle;
     FloatHandleOp_t matchedTruthJetGFHandle;
+    FloatHandleOp_t sumPtMatchedHSJetsHandle;
+    FloatHandleOp_t sumPtMatchedOOTJetsHandle;
+    FloatHandleOp_t sumPtMatchedITJetsHandle;
     FloatHandleOp_t matchedTruthGroomedMassHandle;
     FloatHandleOp_t matchedTruthGroomedPtHandle;
   };
@@ -132,6 +142,7 @@ protected:
       R4TruthLabel,
       R4TruthDressedWZLabel,
       R4InTimeTruthLabel,
+      R4OutOfTimeTruthLabel,
       Unknown
   };
 
@@ -148,16 +159,19 @@ protected:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit12_recoKey{this, "TruthSplit12_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit23_recoKey{this, "TruthSplit23_RecoKey", "", "Do not configure manually!"};
 
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJet_recoKey{this, "MatchedTruthJet_RecoKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetMass_recoKey{this, "MatchedTruthJetMass_RecoKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetPt_recoKey{this, "MatchedTruthJetPt_RecoKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetEta_recoKey{ this, "MatchedTruthJetEta_RecoKey", "", "Do not configure manually!" };
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetPhi_recoKey{ this, "MatchedTruthJetPhi_RecoKey", "", "Do not configure manually!" };
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetDR_recoKey{ this, "MatchedTruthJetDR_RecoKey", "", "Do not configure manually!" };
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetGF_recoKey{ this, "MatchedTruthJetGF_RecoKey", "", "Do not configure manually!" };
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJet_recoKey{this, "TruthMatch_Jet_RecoKey", "", "Do not configure manually!"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetMass_recoKey{this, "TruthMatch_m_RecoKey", "", "Do not configure manually!"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetPt_recoKey{this, "TruthMatch_pt_RecoKey", "", "Do not configure manually!"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetRapidity_recoKey{ this, "TruthMatch_rapidity_RecoKey", "", "Do not configure manually!" };
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetPhi_recoKey{ this, "TruthMatch_phi_RecoKey", "", "Do not configure manually!" };
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthJetDR_recoKey{ this, "TruthMatch_dR_RecoKey", "", "Do not configure manually!" };
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedPileupTag_recoKey{ this, "TruthMatch_PileupLabel_RecoKey", "", "Do not configure manually!" };
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_sumPtMatchedHSJets_recoKey{ this, "TruthMatch_HSSumPt_RecoKey", "", "Do not configure manually!" };
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_sumPtMatchedOOTJets_recoKey{ this, "TruthMatch_OOTSumPt_RecoKey", "", "Do not configure manually!" };
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_sumPtMatchedITJets_recoKey{ this, "TruthMatch_ITSumPt_RecoKey", "", "Do not configure manually!" };
 
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthGroomedJetMass_recoKey{this, "MatchedTruthGroomedJetMass_RecoKey", "", "Do not configure manually!"};
-  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthGroomedJetPt_recoKey{this, "MatchedTruthGroomedJetPt_RecoKey", "", "Do not configure manually!"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthGroomedJetMass_recoKey{this, "TruthMatch_GroomedJetMass_RecoKey", "", "Do not configure manually!"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_matchedTruthGroomedJetPt_recoKey{this, "TruthMatch_GroomedJetPt_RecoKey", "", "Do not configure manually!"};
 };
 
 #endif
