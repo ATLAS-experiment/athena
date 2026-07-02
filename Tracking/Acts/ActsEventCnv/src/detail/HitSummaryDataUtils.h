@@ -37,10 +37,11 @@ namespace ActsTrk::detail {
          stripBarrel         = 3,
          stripEndcap         = 4,
          unknown             = 5,
-         pixelTotal          = 6,
-         stripTotal          = 7,
-         unknownTotal        = 8,
-         Total               = 9
+         pixelBarrel         = 6,
+         pixelTotal          = 7,
+         stripTotal          = 8,
+         unknownTotal        = 9,
+         Total               = 10
       };
  
       constexpr static unsigned short LAYER_REGION_MASK   = 0x1FF; // bits 0-8
@@ -170,6 +171,9 @@ namespace ActsTrk::detail {
             m_sharedHits.at(Total) += m_sharedHits[region_i];
             m_layers.at(Total) += m_layers[region_i];
          }
+         m_hits.at(pixelBarrel) = m_hits.at(pixelBarrelFlat) + m_hits.at(pixelBarrelInclined);
+         m_outlierHits.at(pixelBarrel) = m_outlierHits.at(pixelBarrelFlat) + m_outlierHits.at(pixelBarrelInclined);
+         m_sharedHits.at(pixelBarrel) = m_hits.at(pixelBarrelFlat) + m_sharedHits.at(pixelBarrelInclined);
       }
  
       /** @brief return the number of layers contributing to the hit collection in the given detector region.

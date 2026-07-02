@@ -105,15 +105,16 @@ namespace xAOD {
         DEFINE_ACCESSOR( uint8_t, numberOfOutliersOnTrack           );
         DEFINE_ACCESSOR( uint8_t, standardDeviationOfChi2OS         );
         DEFINE_ACCESSOR( uint8_t, numberOfGoodPrecisionLayers       );
-        DEFINE_ACCESSOR( uint8_t, numberOfContribPixelBarrelFlatLayers    );
-        DEFINE_ACCESSOR( uint8_t, numberOfContribPixelBarrelInclinedLayers);
-        DEFINE_ACCESSOR( uint8_t, numberOfContribPixelEndcap              );
-        DEFINE_ACCESSOR( uint8_t, numberOfPixelBarrelFlatHits             );
-        DEFINE_ACCESSOR( uint8_t, numberOfPixelBarrelInclinedHits         );
-        DEFINE_ACCESSOR( uint8_t, numberOfPixelEndcapHits                 );
-        DEFINE_ACCESSOR( uint8_t, numberOfPixelBarrelFlatHoles            );
-        DEFINE_ACCESSOR( uint8_t, numberOfPixelBarrelInclinedHoles        );
-        DEFINE_ACCESSOR( uint8_t, numberOfPixelEndcapHoles                );
+        DEFINE_ACCESSOR( uint8_t, numberOfContribPixelBarrelLayers  );
+        DEFINE_ACCESSOR( uint8_t, numberOfContribPixelEndcap        );
+        DEFINE_ACCESSOR( uint8_t, numberOfPixelBarrelHits           );
+        DEFINE_ACCESSOR( uint8_t, numberOfPixelEndcapHits           );
+        DEFINE_ACCESSOR( uint8_t, numberOfPixelBarrelHoles          );
+        DEFINE_ACCESSOR( uint8_t, numberOfPixelEndcapHoles          );
+        DEFINE_ACCESSOR( uint8_t, numberOfHGTDHits                 );
+        DEFINE_ACCESSOR( uint8_t, numberOfHGTDOutliers             );
+        DEFINE_ACCESSOR( uint8_t, numberOfHGTDHoles                );
+        DEFINE_ACCESSOR( uint8_t, numberOfHGTDSharedHits           );
 
       default:                  
          std::cerr << "xAOD::TrackParticle_v1 ERROR Unknown SummaryType ("
