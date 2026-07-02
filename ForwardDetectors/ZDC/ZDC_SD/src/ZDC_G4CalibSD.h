@@ -17,6 +17,7 @@
 #include <gtest/gtest_prod.h>
 
 class G4Step;
+class G4Track;
 class CaloCalibrationHitContainer;
 
 class ZDC_G4CalibSD : public G4VSensitiveDetector
@@ -41,7 +42,7 @@ public:
   G4bool SpecialHit(G4Step* a_step, const std::vector<G4double>& a_energies);
 protected:
   //Add hit either from ProcessHits or SpecialHit to the collection
-  G4bool SimpleHit( const Identifier& id, const std::vector<double>& energies );
+  G4bool SimpleHit( const Identifier& id, const std::vector<double>& energies, const G4Track* track = nullptr );
   
  private:
   ZDC_CalibrationHitContainerBuilder* getHitCollection() const;

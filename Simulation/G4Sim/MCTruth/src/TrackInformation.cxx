@@ -9,6 +9,7 @@
 TrackInformation::TrackInformation()
   : m_regenerationNr(0)
   , m_currentGenParticle(nullptr)
+  , m_generationZeroGenParticle(nullptr)
   , m_theBaseISFParticle(nullptr)
   , m_returnedToISF(false)
 {
@@ -16,7 +17,8 @@ TrackInformation::TrackInformation()
 
 TrackInformation::TrackInformation(HepMC::GenParticlePtr p, ISF::ISFParticle* baseIsp)
   : m_regenerationNr(0)
-  , m_currentGenParticle(std::move(p))
+  , m_currentGenParticle(p)
+  , m_generationZeroGenParticle(std::move(p))
   , m_theBaseISFParticle(baseIsp)
   , m_returnedToISF(false)
 {
@@ -56,6 +58,11 @@ void TrackInformation::SetCurrentGenParticle(HepMC::GenParticlePtr p)
   m_currentGenParticle = std::move(p);
   m_barcode = HepMC::INVALID_PARTICLE_BARCODE;
   m_uniqueID = HepMC::INVALID_PARTICLE_BARCODE;
+}
+
+void TrackInformation::SetGenerationZeroGenParticle(HepMC::GenParticlePtr p)
+{
+  m_generationZeroGenParticle = std::move(p);
 }
 
 void TrackInformation::SetBaseISFParticle(ISF::ISFParticle* p)

@@ -18,7 +18,6 @@
 #include "AtlasDetDescr/AtlasRegion.h"
 #include "CxxUtils/checker_macros.h"
 
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/PrimaryParticleInformation.h"
 #include "MCTruth/TrackHelper.h"
 #include "MCTruth/TrackInformation.h"
@@ -33,7 +32,6 @@
 #include "G4TransportationManager.hh"
 #include "G4LogicalVolumeStore.hh"
 
-#include "G4EventManager.hh"
 #include "G4Event.hh"
 #include "G4PrimaryParticle.hh"
 
@@ -48,14 +46,12 @@ namespace iGeant4 {
 void TrackProcessorUserActionBase::BeginOfEventAction(const G4Event*)
 {
   m_curBaseISP = nullptr;
-  m_atlasG4EvtUserInfo = ::iGeant4::ISFG4Helper::getAtlasG4EventUserInfo();
   return;
 }
 
 void TrackProcessorUserActionBase::EndOfEventAction(const G4Event*)
 {
   m_curBaseISP = nullptr;
-  m_atlasG4EvtUserInfo = nullptr;
   return;
 }
 
@@ -172,8 +168,10 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
 
   int regenerationNr = primaryPartInfo->GetRegenerationNr();
 
-  HepMC::GenParticlePtr primaryGenParticle = truthBinding->getGenerationZeroGenParticle();
+  // Keep the legacy classification based on generation-zero identity; the
+  // true primary is stored separately on TrackInformation by ISFG4Helper.
   HepMC::GenParticlePtr generationZeroGenParticle = truthBinding->getGenerationZeroGenParticle();
+  HepMC::GenParticlePtr primaryGenParticle = generationZeroGenParticle;
   HepMC::GenParticlePtr currentGenParticle = truthBinding->getCurrentGenParticle();
 
   auto classification = classify(primaryGenParticle,
@@ -187,9 +185,7 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
                                                                  generationZeroGenParticle );
   newTrackInfo->SetRegenerationNr(regenerationNr);
 
-  updateCachedParticleInfo(baseISP,
-                     primaryGenParticle,
-                     currentGenParticle);
+  updateCurrentBaseISFParticle(baseISP);
 
   return;
 }
@@ -198,22 +194,16 @@ void TrackProcessorUserActionBase::setupSecondary(const G4Track& aTrack)
 {
   auto* trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(aTrack);
 
-  HepMC::GenParticlePtr currentGenParticle = trackInfo->GetCurrentGenParticle();
-  HepMC::GenParticlePtr primaryGenParticle = trackInfo->GetPrimaryGenParticle();
   ISF::ISFParticle* baseISFParticle = trackInfo->GetBaseISFParticle();
 
-  updateCachedParticleInfo(baseISFParticle, primaryGenParticle, currentGenParticle);
+  updateCurrentBaseISFParticle(baseISFParticle);
 
   return;
 }
 
-void TrackProcessorUserActionBase::updateCachedParticleInfo(ISF::ISFParticle* baseISFParticle,
-                                                      HepMC::ConstGenParticlePtr primaryGenParticle,
-                                                      HepMC::GenParticlePtr currentGenParticle)
+void TrackProcessorUserActionBase::updateCurrentBaseISFParticle(ISF::ISFParticle* baseISFParticle)
 {
   m_curBaseISP = baseISFParticle;
-  m_atlasG4EvtUserInfo->SetCurrentPrimaryGenParticle( primaryGenParticle );
-  m_atlasG4EvtUserInfo->SetCurrentGenParticle( currentGenParticle );
   return;
 }
 

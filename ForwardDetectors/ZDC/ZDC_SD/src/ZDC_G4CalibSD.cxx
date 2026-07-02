@@ -7,10 +7,11 @@
 #include "CaloSimEvent/CaloCalibrationHit.h"
 #include "CaloG4Sim/SimulationEnergies.h"
 #include "CaloG4Sim/EscapedEnergyRegistry.h"
-#include "G4RunManager.hh"
 #include "G4Step.hh"
 #include "HitManagement/HitCollectionMap.h"
 #include "MCTruth/AtlasG4EventUserInfo.h"
+#include "MCTruth/TrackHelper.h"
+#include "AtlasHepMC/GenParticle.h"
 
 ZDC_G4CalibSD::ZDC_G4CalibSD(const G4String &a_name, const G4String& hitCollectionName, bool doPID)
     : G4VSensitiveDetector(a_name), m_hitCollectionName(hitCollectionName), m_numberInvalidHits(0), m_doPID(doPID)
@@ -53,11 +54,11 @@ G4bool ZDC_G4CalibSD::ProcessHits(G4Step *a_step, G4TouchableHistory *)
   id = a_step->GetPreStepPoint()->GetPhysicalVolume()->GetCopyNo();
 
   // build calibHit. check if we've had a hit in this cell already. if we havent add it to the set of cells. If we have add energies to existing energies. ie can't distinguish b/w different hits in single cell so must integrate all this information
-  return SimpleHit (id, m_energies );
+  return SimpleHit (id, m_energies, a_step->GetTrack() );
 }
 
 
-G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>& energies )
+G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>& energies, const G4Track* track )
 {
   if (!m_HitColl) {
     m_HitColl = getHitCollection();
@@ -70,10 +71,10 @@ G4bool ZDC_G4CalibSD::SimpleHit(const Identifier& id, const std::vector<double>&
   int particleID = HepMC::UNDEFINED_ID;
   int particleUID = HepMC::UNDEFINED_ID;
   if( m_doPID ) {
-    AtlasG4EventUserInfo * atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
-    if (atlasG4EvtUserInfo) {
-      particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
-      particleUID = HepMC::uniqueID(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+    HepMC::ConstGenParticlePtr primary = TrackHelper(track).GetPrimaryGenParticle();
+    if (primary) {
+      particleID = HepMC::barcode(primary); // FIXME Barcode-based
+      particleUID = HepMC::uniqueID(primary);
     }
   }
 
@@ -113,7 +114,7 @@ G4bool ZDC_G4CalibSD::SpecialHit(G4Step *a_step,
   Identifier id;
   id = a_step->GetPreStepPoint()->GetPhysicalVolume()->GetCopyNo();
 
-  return SimpleHit(id, a_energies);
+  return SimpleHit(id, a_energies, a_step->GetTrack());
 }
 
 ZDC_CalibrationHitContainerBuilder* ZDC_G4CalibSD::getHitCollection() const

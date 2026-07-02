@@ -29,12 +29,12 @@ atlas_install_joboptions( share/optionForTest.txt )
 # Tests in the package:
 atlas_add_test( ZDC_FiberSD_gtest
                 SOURCES test/ZDC_FiberSD_gtest.cxx
-                LINK_LIBRARIES TestTools ZDC_SDLib G4AtlasToolsLib CxxUtils CaloG4SimLib
+                LINK_LIBRARIES TestTools ZDC_SDLib G4AtlasToolsLib CxxUtils CaloG4SimLib MCTruth
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ZDC_G4CalibSD_gtest
                 SOURCES test/ZDC_G4CalibSD_gtest.cxx
-                LINK_LIBRARIES TestTools ZDC_SDLib G4AtlasToolsLib CxxUtils CaloG4SimLib
+                LINK_LIBRARIES TestTools ZDC_SDLib G4AtlasToolsLib CxxUtils CaloG4SimLib MCTruth
                 POST_EXEC_SCRIPT noerror.sh )
 
 # Turn on/off LTO for all targets in the package.

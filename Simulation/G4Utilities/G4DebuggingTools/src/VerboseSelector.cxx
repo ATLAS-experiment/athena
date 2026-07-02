@@ -4,7 +4,6 @@
 
 #include "VerboseSelector.h"
 
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 
 #include "G4EventManager.hh"
@@ -103,14 +102,10 @@ namespace G4UA
         int trackID = aTrack->GetTrackID();
         TrackHelper trackHelper(aTrack);
 
-        AtlasG4EventUserInfo* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*>
-          (G4EventManager::GetEventManager()->GetConstCurrentEvent()->
-           GetUserInformation());
-
         int currentBarcode(0);
 
         if (trackHelper.IsPrimary() || trackHelper.IsRegisteredSecondary()) {
-          currentBarcode = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentGenParticle()); // FIXME Barcode-based
+          currentBarcode = trackHelper.GetBarcode(); // FIXME Barcode-based
         }
 
         bool p1 = m_config.targetTrack<0 && m_config.targetBarcode<0 && m_config.targetPdgIDs.empty();
