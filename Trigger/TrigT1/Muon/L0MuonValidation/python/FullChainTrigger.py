@@ -15,8 +15,8 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Detector.GeometryRPC = True  
     flags.Detector.GeometryTGC = False
-    flags.Detector.GeometryMM = False
-    flags.Detector.GeometrysTGC = False
+    flags.Detector.GeometryMM = True
+    flags.Detector.GeometrysTGC = True
     
     flags.Common.MsgSuppression = False
     flags.Output.RDOFileName = "test.RDO.pool.root"
@@ -50,6 +50,17 @@ if __name__ == "__main__":
                              RegSel_MDT = acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags))
                             ))
 
+    from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg, MM_RdoToDigitCfg
+    
+    if flags.Detector.GeometrysTGC:
+        acc.merge(STGC_RdoToDigitCfg(flags, sTgcRdoContainer="sTGCRDO", sTgcDigitContainer="sTGC_DIGITS"))
+
+    if flags.Detector.GeometryMM:
+        acc.merge(MM_RdoToDigitCfg(flags, MmRdoContainer="MMRDO", MmDigitContainer="MM_DIGITS"))
+
+    from L0MuonNSW.L0MuonNSWConfig import L0MuonNSWSimCfg
+    acc.merge(L0MuonNSWSimCfg(flags, name="L0MuonNSWSim", OutputLevel=DEBUG))
+
     print("=== Registered services ===")
     for svc in acc.getServices():
         print(svc.name)
@@ -57,7 +68,9 @@ if __name__ == "__main__":
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     itemList = [
         "xAOD::RPCCandDataContainer#RPCCandData",
-        "xAOD::RPCCandDataAuxContainer#RPCCandDataAux."
+        "xAOD::RPCCandDataAuxContainer#RPCCandDataAux.",
+        "xAOD::NSWCandDataContainer#NSWCandData",      
+        "xAOD::NSWCandDataAuxContainer#NSWCandDataAux." 
     ]
 
     acc.merge(OutputStreamCfg(flags,
