@@ -17,6 +17,10 @@ set( TDAQ-COMMON_ATROOT
 # Find the ATLAS CMake code:
 find_package( AtlasCMake QUIET )
 
+# Set compiler defaults. Usually this is done in the externals project,
+# but since DetCommon does not have one, we need to do it here:
+atlas_set_compiler_defaults()
+
 # Build the project against LCG:
 set( LCG_VERSION_POSTFIX "a"   # Needs to match tdaq release (NO layer, ATLINFR-3977)
    CACHE STRING "Version postfix for the LCG release to use" )
