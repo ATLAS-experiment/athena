@@ -439,10 +439,14 @@ namespace MuonCombined {
 
                     const xAOD::TrackParticle &id_track_particle = candidate->indetTrackParticle();
                     for (const std::unique_ptr< SG::Accessor<float> > &accessor  : m_copyFloatSummaryAccessors ) {
-                       (*accessor)( *tp ) = (*accessor)( id_track_particle );
-		    }
+                        if (accessor->isAvailable(id_track_particle)) {
+                            (*accessor)( *tp ) = (*accessor)( id_track_particle );
+                        }
+                    }
                     for (const std::unique_ptr< SG::Accessor<uint8_t> > &accessor  : m_copyCharSummaryAccessors ) {
-                       (*accessor)( *tp ) = (*accessor)( id_track_particle );
+                        if (accessor->isAvailable(id_track_particle)) {
+                            (*accessor)( *tp ) = (*accessor)( id_track_particle );
+                        }
                     }
 
                 }
@@ -548,7 +552,7 @@ namespace MuonCombined {
             std::vector<float>& errorVec = errorAcc(*slowMuon);
             std::vector<float>& shiftVec = shiftAcc(*slowMuon);
             std::vector<float>& propagationTimeVec = propTimeAcc(*slowMuon);
-	    std::vector<uint8_t>& passesMDTBetaCutVec = hitPassesMDTBetaCutAcc(*slowMuon);
+        std::vector<uint8_t>& passesMDTBetaCutVec = hitPassesMDTBetaCutAcc(*slowMuon);
 
             for (const auto& hit : stauExtras->hits) {
                 eTechVec.push_back(hit.eTech);
