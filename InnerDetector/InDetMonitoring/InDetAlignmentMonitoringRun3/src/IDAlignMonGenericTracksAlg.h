@@ -79,7 +79,11 @@ private:
 
   // Building Tool Maps for the Hit Maps 
   static const int m_nSiBlayers{4}; 
-  static const int m_nSCTEClayers{9}; 
+  static const int m_nSCTEClayers{9};
+  static const int m_nSiBlayers_ITk{5};
+  static const int m_nPixEClayers_ITk{9};
+  static const int m_nSCTBlayers_ITk{4};
+  static const int m_nSCTEClayers_ITk{6}; 
   std::vector<int> m_measurements_vs_Eta_Phi_pix_b;
   std::vector<int> m_measurements_vs_Eta_Phi_pix_ec;
   std::vector<int> m_measurements_vs_Eta_Phi_sct_b_s0;
@@ -88,7 +92,14 @@ private:
   std::vector<int> m_measurements_vs_Eta_Phi_sct_eca_s1;
   std::vector<int> m_measurements_vs_Eta_Phi_sct_ecc_s0;
   std::vector<int> m_measurements_vs_Eta_Phi_sct_ecc_s1;
-  
+ 
+  Gaudi::Property<bool> m_useITkGeometry{
+  this,
+  "UseITkGeometry",
+  false,
+  "Use ITk-specific histogram mapping instead of Run-3 ID Pixel/SCT mapping"
+  };
+ 
   bool  m_extendedPlots{};
   float m_d0Range{};
   float m_d0BsRange{};

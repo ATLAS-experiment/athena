@@ -124,15 +124,19 @@ StatusCode IDAlignMonGenericTracksAlg::initialize()
   ATH_CHECK(m_tracksName.initialize());
   ATH_CHECK(m_tracksKey.initialize());
 
-  // Building Tool Maps for the Hit Maps 
-  m_measurements_vs_Eta_Phi_pix_b = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_pix_b", m_nSiBlayers);
+  // Building Tool Maps for the Hit Maps
+  const int nSiBlayers = m_useITkGeometry ? m_nSiBlayers_ITk : m_nSiBlayers;
+  // const int nPixEClayers = m_useITkGeometry ? m_nPixEClayers_ITk : m_nPixEClayers;
+  const int nSCTBlayers =  m_useITkGeometry ? m_nSCTBlayers_ITk : m_nSiBlayers;
+  const int nSCTEClayers =  m_useITkGeometry ? m_nSCTEClayers_ITk : m_nSCTEClayers; 
+  m_measurements_vs_Eta_Phi_pix_b = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_pix_b", nSiBlayers);
   m_measurements_vs_Eta_Phi_pix_ec = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_pix_ec", 2);
-  m_measurements_vs_Eta_Phi_sct_b_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_b_s0", m_nSiBlayers);
-  m_measurements_vs_Eta_Phi_sct_b_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_b_s1", m_nSiBlayers);
-  m_measurements_vs_Eta_Phi_sct_eca_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_eca_s0", m_nSCTEClayers);
-  m_measurements_vs_Eta_Phi_sct_eca_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_eca_s1", m_nSCTEClayers);
-  m_measurements_vs_Eta_Phi_sct_ecc_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_ecc_s0", m_nSCTEClayers);
-  m_measurements_vs_Eta_Phi_sct_ecc_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_ecc_s1", m_nSCTEClayers); 
+  m_measurements_vs_Eta_Phi_sct_b_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_b_s0", nSCTBlayers);
+  m_measurements_vs_Eta_Phi_sct_b_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_b_s1", nSCTBlayers);
+  m_measurements_vs_Eta_Phi_sct_eca_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_eca_s0", nSCTEClayers);
+  m_measurements_vs_Eta_Phi_sct_eca_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_eca_s1", nSCTEClayers);
+  m_measurements_vs_Eta_Phi_sct_ecc_s0 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_ecc_s0", nSCTEClayers);
+  m_measurements_vs_Eta_Phi_sct_ecc_s1 = Monitored::buildToolMap<int>(m_tools, "measurements_vs_Eta_Phi_sct_ecc_s1", nSCTEClayers); 
 
   ATH_MSG_DEBUG("Initialize -- completed --");
   return AthMonitorAlgorithm::initialize();

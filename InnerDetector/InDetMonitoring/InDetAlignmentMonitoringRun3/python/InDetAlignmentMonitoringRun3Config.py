@@ -33,6 +33,7 @@ def InDetAlignmentMonitoringRun3Config(flags, **kwargs):
         kwargsIDAlignMonGenericTracksAlg = {}
         kwargsIDAlignMonGenericTracksAlg.update({'vxPrimContainerName' : 'PrimaryVertices'}) #InDetKeys.xAODVertexContainer())
         kwargsIDAlignMonGenericTracksAlg.update({'TrackName'  : trackCollectionName} )
+        kwargsIDAlignMonGenericTracksAlg.update({'UseITkGeometry': UseITkGeometry})
         if ("NONE" not in trackCollectionName2): kwargsIDAlignMonGenericTracksAlg.update({'TrackName2' : trackCollectionName2})
             
         from InDetAlignmentMonitoringRun3.IDAlignMonGenericTracksAlgCfg import IDAlignMonGenericTracksAlgCfg
@@ -50,7 +51,7 @@ def InDetAlignmentMonitoringRun3Config(flags, **kwargs):
    
 
         ########### here starts InDetAlignMonResidualsAlgs ###########
-        kwargsIDAlignMonResidualsAlg = { 'TrackName'  : kwargsIDAlignMonGenericTracksAlg["TrackName"]}  #for residuals, use the same track collections as for track monitoring
+        kwargsIDAlignMonResidualsAlg = { 'TrackName'  : kwargsIDAlignMonGenericTracksAlg["TrackName"], 'UseITkGeometry': UseITkGeometry,}  #for residuals, use the same track collections as for track monitoring
         if ("NONE" not in trackCollectionName2): kwargsIDAlignMonResidualsAlg.update({'TrackName2' : trackCollectionName2})
         
         from InDetAlignmentMonitoringRun3.IDAlignMonResidualsAlgCfg import IDAlignMonResidualsAlgCfg

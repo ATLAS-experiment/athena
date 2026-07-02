@@ -128,12 +128,50 @@ def ITkAlignTrackCollSplitterCfg(flags, name="ITkAlignTrackCollSplitter", **kwar
 
 
 def ITkAccumulateCfg(flags, **kwargs):
+
     cfg = ITkAlignAlgCfg(flags)
+
     cfg.merge(ITkAlignTrackCollSplitterCfg(flags))
-    
+
+    print("Outsideeeeeeeee")
+
     if flags.ITk.Align.doMonitoring:
+
+        print("Insideeeeeeeeeeeeee")
+
         from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import (
             InDetAlignmentMonitoringRun3Config)
-        cfg.merge(InDetAlignmentMonitoringRun3Config(flags))
-    
+
+        monCfg = InDetAlignmentMonitoringRun3Config(
+            flags,
+            TrackName=flags.ConstrainedTrackProvider.InputTracksCollection,
+            UseITkGeometry=flags.Detector.GeometryITk,
+        )
+
+        print("DEBUG monCfg was built")
+
+        monCfg.printConfig(
+            withDetails=True,
+            summariseProps=True,
+            onlyComponents=[
+                "IDAlignMonResidualsAlg",
+                "GenericTracksAlg",
+                "InDetAlignmentMonitoringRun3"
+            ],
+        )
+
+        cfg.merge(monCfg)
+
+        print("DEBUG after merge monitoring")
+
+        cfg.printConfig(
+            withDetails=True,
+            summariseProps=True,
+            onlyComponents=[
+                "IDAlignMonResidualsAlg",
+                "GenericTracksAlg",
+                "InDetAlignmentMonitoringRun3"
+            ],
+        )
+
     return cfg
