@@ -26,6 +26,12 @@
 #include "xAODL0MuonCand/versions/MDTCandDataContainer_v1.h"
 #include "xAODL0MuonCand/versions/MDTCandDataAuxContainer_v1.h"
 
+#include "xAODL0MuonCand/NSWCandData.h"
+#include "xAODL0MuonCand/NSWCandDataContainer.h"
+#include "xAODL0MuonCand/versions/NSWCandData_v1.h"
+#include "xAODL0MuonCand/versions/NSWCandDataContainer_v1.h"
+#include "xAODL0MuonCand/versions/NSWCandDataAuxContainer_v1.h"
+
 #include "xAODCore/tools/DictHelpers.h"
 
 // Instantiate all necessary types for the dictionary.
@@ -37,6 +43,7 @@ namespace {
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, RPCCandDataContainer_v1 );
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, TGCCandDataContainer_v1 );
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, MDTCandDataContainer_v1 );
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, NSWCandDataContainer_v1 );
 
   };
 }
