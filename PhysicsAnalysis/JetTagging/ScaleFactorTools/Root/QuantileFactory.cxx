@@ -38,20 +38,20 @@ std::vector<float> QuantileFactory::parseEdges(const json& cfg){
 QuantileFactory::QuantileFunc QuantileFactory::makeCategory(const json& cfg) {
   VariableFactory::IntFunc var = VariableFactory::intVariableFactory(cfg.at("variable"));
   std::vector<int> values = cfg.at("values").get<std::vector<int>>();
+  int default_bin = cfg.at("default").get<int>();
 
   std::unordered_map<int,int> mapping;
   for (int i = 0; i < (int)values.size(); ++i) {
     mapping[values[i]] = i;
   }
 
-  auto func = [var, mapping](const SG::AuxElement& el) -> int {
+  auto func = [var, mapping, default_bin](const SG::AuxElement& el) -> int {
     int v = static_cast<int>(var(el));
     auto it = mapping.find(v);
     if (it != mapping.end()) {
       return it->second;
     }
-    // need to decide what values to return here
-    return 0;
+    return default_bin;
   };
 
   return {values.size(), func};
@@ -64,35 +64,28 @@ QuantileFactory::QuantileFunc QuantileFactory::makeEnumerate(const json& cfg) {
 
   const bool useAbs = cfg.value("abs", false);
 
-  bool hasRangeHandling = cfg.contains("validRange");
-  float minRange = 0.0;
-  float maxRange = 0.0;
-  std::string mode;
-  if (hasRangeHandling) {
-    const auto& r = cfg.at("validRange");
-    minRange = r[0];
-    maxRange = r[1];
-    mode = cfg.at("OutOfRangeTreatment");
-  }
+  int underflow_bin = cfg.value("underflow_bin", -1);
+  int overflow_bin  = cfg.value("overflow_bin", -1);
 
-  auto func = [var, edges, useAbs, mode, hasRangeHandling, minRange, maxRange] (const SG::AuxElement& el) -> int {
+  auto func = [var, edges, useAbs, underflow_bin, overflow_bin] (const SG::AuxElement& el) -> int {
     float v = var(el);
     if (useAbs)  v = std::abs(v);
     int nBins = edges.size() - 1;
 
-    if ( !hasRangeHandling || (v >= minRange && v < maxRange) )  {
-      for (int i = 0; i < nBins; ++i) {
-        if (v >= edges[i] && v < edges[i+1]) {
-          return i;
-        }
-      }
-    } else {
-      if (mode == "neighboring") {
-        if (v < edges[0])  return 0;
-        if (v >= edges[nBins])  return nBins - 1;
+    if (v < edges.front()) {
+      return underflow_bin;
+    }
+    if (v >= edges.back()) {
+      return overflow_bin;
+    }
+
+    for (int i = 0; i < nBins; ++i) {
+      if (v >= edges[i] && v < edges[i + 1]) {
+        return i;
       }
     }
-    return -1;
+
+    throw std::runtime_error( "Failed to determine enumerate bin." );
   };
 
   return {edges.size() - 1, func};
@@ -165,13 +158,11 @@ QuantileFactory::QuantileFunc QuantileFactory::makeDense (const json& cfg) {
 
   auto func = [axes, strides](const SG::AuxElement& el) -> int {
     int index = 0;
-
     for (size_t i = 0; i < axes.size(); ++i) {
       int bin = axes[i](el);
       if (bin < 0) {return -1;}
       index += bin * strides[i];
     }
-
     return index;
   };
 
@@ -181,7 +172,6 @@ QuantileFactory::QuantileFunc QuantileFactory::makeDense (const json& cfg) {
   }
 
   return {total_size, func};
-
 }
 
 QuantileFactory::QuantileFunc QuantileFactory::quantileFactory(const json& cfg) {

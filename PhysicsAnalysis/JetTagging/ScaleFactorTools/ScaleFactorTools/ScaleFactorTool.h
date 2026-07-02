@@ -43,6 +43,7 @@ class ScaleFactorTool: public asg::AsgTool,
   std::unordered_map<std::string, std::unordered_set<int>> m_wp_bins;
   std::map<CP::SystematicSet, std::vector<float>> m_sf_systematics;
 
+  int m_invalid_sf_value;
   std::vector<float> m_sf_values;
 };
 #endif // CP_SCALEFACTORTOOL_H

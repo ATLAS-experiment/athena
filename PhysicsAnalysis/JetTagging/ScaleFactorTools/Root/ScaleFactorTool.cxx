@@ -43,6 +43,7 @@ StatusCode ScaleFactorTool::initialize(){
   // pre-load json file
   // =====================
   m_sf_values = m_json_config.at("scale_factors").get<std::vector<float>>();
+  m_invalid_sf_value = m_json_config.at("invalid_sf_value").get<int>();
 
   std::tie(m_n_sf_bins, m_sf_func) = QuantileFactory::quantileFactory(m_json_config.at("sf_bins"));
   std::tie(m_n_pct_bins, m_pct_func) = QuantileFactory::quantileFactory(m_json_config.at("pct_bins"));
@@ -53,6 +54,11 @@ StatusCode ScaleFactorTool::initialize(){
       bins.insert(b);
     }
     m_wp_bins[name] = std::move(bins);
+  }
+
+  if (m_sf_values.size() != m_n_sf_bins * m_n_pct_bins) {
+    ATH_MSG_ERROR( "Nominal SF size mismatch: expected " << m_n_sf_bins * m_n_pct_bins << " bins but found " << m_sf_values.size());
+    return StatusCode::FAILURE;
   }
 
   for (const auto& [name, values] : m_json_config.at("systematics").items()) {
@@ -87,9 +93,9 @@ std::map<CP::SystematicSet, float> ScaleFactorTool::getSF(const xAOD::IParticle*
   int sf_bin = m_sf_func(el);
 
   if (sf_bin < 0) {
-    result[CP::SystematicSet()] = -99999.;
+    result[CP::SystematicSet()] = m_invalid_sf_value;
     for (const auto& [set, _] : m_sf_systematics) {
-      result[set] = -99999.;
+      result[set] = m_invalid_sf_value;
     }
     return result;
   }
