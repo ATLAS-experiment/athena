@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 # # Example to add additional algorithms:
@@ -52,7 +52,8 @@ if __name__=="__main__":
 
 
    # example runs pixel clusterization
-   from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelTranslatorAlgCfg
+   from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelTranslatorAlgCfg, ITkPixelCnvToolCfg
+   cfg.merge( ITkPixelCnvToolCfg(flags) )
    cfg.merge( ITkPixelTranslatorAlgCfg(flags) )
 
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
