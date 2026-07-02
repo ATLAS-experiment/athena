@@ -2,6 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ScaleFactorTools/ScaleFactorTool.h"
+#include "ScaleFactorTools/QuantileFactory.h"
 #include "PathResolver/PathResolver.h"
 #include <fstream>
 
@@ -43,9 +44,8 @@ StatusCode ScaleFactorTool::initialize(){
   // =====================
   m_sf_values = m_json_config.at("scale_factors").get<std::vector<float>>();
 
-  m_sf_func   = QuantileFactory::quantileFactory(m_json_config.at("sf_bins"));
-  m_pct_func = QuantileFactory::quantileFactory(m_json_config.at("pct_bins"));
-  m_n_pct_bins = inferPCTBins(m_json_config.at("pct_bins"));
+  std::tie(m_n_sf_bins, m_sf_func) = QuantileFactory::quantileFactory(m_json_config.at("sf_bins"));
+  std::tie(m_n_pct_bins, m_pct_func) = QuantileFactory::quantileFactory(m_json_config.at("pct_bins"));
 
   for (const auto& [name, wp_cfg] : m_json_config.at("working_points").items()) {
     std::unordered_set<int> bins;
@@ -126,23 +126,6 @@ std::unordered_map<std::string, int> ScaleFactorTool::inferWPs(const xAOD::IPart
 
 }
 
-// ==========================
-// Infer total number of PCT bins
-// ==========================
-int ScaleFactorTool::inferPCTBins(const json& cfg)
-{
-  if (cfg.at("type") == "enumerate"){
-    return cfg.at("edges").size() - 1;
-  }
-  if (cfg.at("type") == "nodes"){
-    int total = 0;
-    for (const auto& node : cfg.at("nodes")) {
-      total += node.at("edges").size() - 1;
-    }
-    return total;
-  }
-  throw std::runtime_error("Cannot infer pct bins");
-}
 
 CP::SystematicSet ScaleFactorTool::affectingSystematics() const
 {

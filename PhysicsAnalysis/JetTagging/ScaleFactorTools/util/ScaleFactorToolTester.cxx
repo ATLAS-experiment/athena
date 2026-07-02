@@ -22,7 +22,7 @@ using namespace testSFTool;
 
 int main(int argc, char* argv[]) {
 
-  if (argc < 4) {
+  if (argc < 5) {
     ANA_MSG_ERROR (  "No right inputs received!" );
     return 1;
   }

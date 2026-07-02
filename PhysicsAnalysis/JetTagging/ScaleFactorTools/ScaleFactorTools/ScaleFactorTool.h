@@ -8,7 +8,6 @@
 #include "AsgTools/AsgTool.h"
 #include <AsgTools/PropertyWrapper.h>
 #include "xAODBase/IParticle.h"
-#include "ScaleFactorTools/QuantileFactory.h"
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -21,7 +20,7 @@ class ScaleFactorTool: public asg::AsgTool,
   StatusCode initialize() override;
 
   std::map<CP::SystematicSet, float> getSF(const xAOD::IParticle* p) const override;
-  std::unordered_map<std::string, int> inferWPs(const xAOD::IParticle* p) const;
+  std::unordered_map<std::string, int> inferWPs(const xAOD::IParticle* p) const override;
 
   // systeamtic stuff
   virtual CP::SystematicSet affectingSystematics() const override;
@@ -34,13 +33,13 @@ class ScaleFactorTool: public asg::AsgTool,
   Gaudi::Property<std::string> m_obj_container {this, "ObjContainer", "", "object container"};
   Gaudi::Property<std::string> m_pct_Name {this, "PCTName", "", "pseudo-continuous tagger name"};
 
-  QuantileFactory::QuantileFunc m_sf_func;
-  QuantileFactory::QuantileFunc m_pct_func;
+  size_t m_n_sf_bins;
+  size_t m_n_pct_bins;
+  std::function<int(const SG::AuxElement&)> m_sf_func;
+  std::function<int(const SG::AuxElement&)> m_pct_func;
 
   json m_json_config;
 
-  int m_n_pct_bins;
-  int inferPCTBins(const json& cfg);
   std::unordered_map<std::string, std::unordered_set<int>> m_wp_bins;
   std::map<CP::SystematicSet, std::vector<float>> m_sf_systematics;
 

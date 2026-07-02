@@ -44,7 +44,7 @@ QuantileFactory::QuantileFunc QuantileFactory::makeCategory(const json& cfg) {
     mapping[values[i]] = i;
   }
 
-  return [var, mapping](const SG::AuxElement& el) -> int {
+  auto func = [var, mapping](const SG::AuxElement& el) -> int {
     int v = static_cast<int>(var(el));
     auto it = mapping.find(v);
     if (it != mapping.end()) {
@@ -53,6 +53,8 @@ QuantileFactory::QuantileFunc QuantileFactory::makeCategory(const json& cfg) {
     // need to decide what values to return here
     return 0;
   };
+
+  return {values.size(), func};
 
 }
 
@@ -73,7 +75,7 @@ QuantileFactory::QuantileFunc QuantileFactory::makeEnumerate(const json& cfg) {
     mode = cfg.at("OutOfRangeTreatment");
   }
 
-  return [var, edges, useAbs, mode, hasRangeHandling, minRange, maxRange] (const SG::AuxElement& el) -> int {
+  auto func = [var, edges, useAbs, mode, hasRangeHandling, minRange, maxRange] (const SG::AuxElement& el) -> int {
     float v = var(el);
     if (useAbs)  v = std::abs(v);
     int nBins = edges.size() - 1;
@@ -92,6 +94,8 @@ QuantileFactory::QuantileFunc QuantileFactory::makeEnumerate(const json& cfg) {
     }
     return -1;
   };
+
+  return {edges.size() - 1, func};
 }
 
 // for 2-d tagging
@@ -99,9 +103,16 @@ QuantileFactory::QuantileFunc QuantileFactory::makeNodes(const json& cfg) {
   VariableFactory::FloatFunc var = VariableFactory::floatVariableFactory(cfg.at("variable"));
   std::vector<float> edges = QuantileFactory::parseEdges(cfg.at("edges"));
 
-  std::vector<QuantileFactory::QuantileFunc> sub_nodes;
+  std::vector<std::function<int(const SG::AuxElement&)>> sub_nodes;
+  std::vector<size_t> sub_sizes;
+
+  size_t totalSize = 0;
+
   for (const auto& node : cfg.at("nodes")) {
-    sub_nodes.push_back(QuantileFactory::quantileFactory(node));
+    auto [size, func] = QuantileFactory::quantileFactory(node);
+    sub_nodes.push_back(func);
+    sub_sizes.push_back(size);
+    totalSize += size;
   }
 
   std::string numbering = cfg.value("numbering", "sequential");
@@ -109,12 +120,11 @@ QuantileFactory::QuantileFunc QuantileFactory::makeNodes(const json& cfg) {
   std::vector<int> offsets(sub_nodes.size(), 0);
   if (numbering == "sequential") {
     for (size_t i = 1; i < sub_nodes.size(); ++i) {
-      int size = cfg.at("nodes")[i-1].at("edges").size() - 1;
-      offsets[i] = offsets[i-1] + size;
+      offsets[i] = offsets[i-1] + sub_sizes[i-1];
     }
   }
 
-  return [var, edges, sub_nodes, offsets, numbering]
+  auto func = [var, edges, sub_nodes, offsets, numbering]
          (const SG::AuxElement& el) -> int {
     float v = var(el);
 
@@ -133,49 +143,27 @@ QuantileFactory::QuantileFunc QuantileFactory::makeNodes(const json& cfg) {
     }
     return local;
   };
+
+  return {totalSize, func};
 }
 
 // turn the already computed per-axis bin indices into a flattened index
 QuantileFactory::QuantileFunc QuantileFactory::makeDense (const json& cfg) {
-  std::vector<QuantileFactory::QuantileFunc> axes;
+  std::vector<std::function<int(const SG::AuxElement&)>> axes;
+  std::vector<size_t> axis_sizes;
 
   for (const auto& axis : cfg.at("axes")) {
-    axes.push_back(QuantileFactory::quantileFactory(axis));
+    auto [size, func] = QuantileFactory::quantileFactory(axis);
+    axes.push_back(func);
+    axis_sizes.push_back(size);
   }
 
   std::vector<int> strides(axes.size(), 1);
-
-  auto getSize = [](const json& axis) -> int {
-    std::string type = axis.at("type");
-    if (type == "enumerate") {
-    return axis.at("edges").size() - 1;
-    }
-    if (type == "category") {
-      return axis.at("values").size();
-    }
-
-    if (type == "nodes") {
-      int total = 0;
-      for (const auto& sub : axis.at("nodes")) {
-        std::string subType = sub.at("type");
-        if (subType == "enumerate")
-          total += sub.at("edges").size() - 1;
-        else if (subType == "category")
-          total += sub.at("values").size();
-        else
-          throw std::runtime_error("Unsupported node subtype");
-      }
-      return total;
-    }
-    throw std::runtime_error("Unsupported axis type in dense: " + type);
-  };
-
   for (int i = (int)axes.size() - 2; i >= 0; --i) {
-    int size = getSize(cfg.at("axes")[i+1]);
-    strides[i] = strides[i+1] * size;
+    strides[i] = strides[i+1] * axis_sizes[i+1];
   }
 
-  return [axes, strides](const SG::AuxElement& el) -> int {
+  auto func = [axes, strides](const SG::AuxElement& el) -> int {
     int index = 0;
 
     for (size_t i = 0; i < axes.size(); ++i) {
@@ -186,6 +174,14 @@ QuantileFactory::QuantileFunc QuantileFactory::makeDense (const json& cfg) {
 
     return index;
   };
+
+  size_t total_size = 1;
+  for (size_t size : axis_sizes) {
+    total_size *= size;
+  }
+
+  return {total_size, func};
+
 }
 
 QuantileFactory::QuantileFunc QuantileFactory::quantileFactory(const json& cfg) {
