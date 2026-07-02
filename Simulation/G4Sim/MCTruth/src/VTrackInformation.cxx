@@ -25,6 +25,12 @@ void VTrackInformation::SetCurrentGenParticle(HepMC::GenParticlePtr /*p*/)
   std::cerr<<"ERROR  VTrackInformation::SetCurrentGenParticle() not supported  "<<std::endl;
 }
 
+void VTrackInformation::SetGenerationZeroGenParticle(HepMC::GenParticlePtr /*p*/)
+{
+  // you should not call this, perhaps throw an exception?
+  std::cerr<<"ERROR  VTrackInformation::SetGenerationZeroGenParticle() not supported  "<<std::endl;
+}
+
 void VTrackInformation::SetBaseISFParticle(ISF::ISFParticle* /*p*/)
 {
   // you should not call this, perhaps throw an exception?

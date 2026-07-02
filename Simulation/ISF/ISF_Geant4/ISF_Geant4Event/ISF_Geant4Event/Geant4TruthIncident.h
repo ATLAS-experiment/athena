@@ -17,7 +17,6 @@
 
 #include "AtlasDetDescr/AtlasRegion.h" //enum
 
-#include "CxxUtils/checker_macros.h" //ATLAS_THREAD_SAFE
 // std
 #include <vector>
 
@@ -25,7 +24,6 @@
 // forward declarations
 class G4Step;
 class G4Track;
-class AtlasG4EventUserInfo;
 
 namespace ISF {
   class ISFParticle;
@@ -44,9 +42,7 @@ namespace iGeant4 {
   class Geant4TruthIncident : public ISF::ITruthIncident {
     public:
       Geant4TruthIncident( const G4Step*,
-                           const ISF::ISFParticle& baseISP,
-                           AtlasDetDescr::AtlasRegion geoID,
-                           AtlasG4EventUserInfo* atlasG4EvtUserInfo);
+                           AtlasDetDescr::AtlasRegion geoID);
       virtual ~Geant4TruthIncident() {};
 
       /** Return HepMC position of the truth vertex */
@@ -120,9 +116,7 @@ namespace iGeant4 {
       bool                          m_positionSet;
       HepMC::FourVector             m_position;
       const G4Step*                 m_step{};
-      const ISF::ISFParticle&       m_baseISP;
 
-      AtlasG4EventUserInfo*         m_atlasG4EvtUserInfo ATLAS_THREAD_SAFE{};
       std::vector<const G4Track*>   m_children;
 
       HepMC::GenParticlePtr         m_parentParticleAfterIncident{};

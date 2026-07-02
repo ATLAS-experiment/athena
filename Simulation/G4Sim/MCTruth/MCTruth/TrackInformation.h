@@ -18,20 +18,23 @@ namespace ISF {
  * @brief Implementation of VTrackInformation. Instances of this class
  * are attached as UserInformation to G4Tracks.
 
- * The GenParticlePtr m_currentGenParticle held by the
- * TrackInformation object points to the GenParticle corresponding to
- * the current G4Track and can change during simulation (i.e. each
- * time the track undergoes a non-destructive interaction).
+ * The GenParticlePtr m_currentGenParticle held by the TrackInformation
+ * object points to the current GenParticle corresponding to the
+ * current G4Track and can change during simulation (i.e. each time the
+ * track undergoes a non-destructive interaction). The
+ * m_generationZeroGenParticle member keeps the pre-regeneration truth
+ * particle stable.
 
  * The other member variables are: m_theBaseISFParticle - a pointer to
  * the ISFParticle corresponding to the current G4Track,
  * m_returnedToISF - a flag indicating whether the ISFParticle
  * corresponding to the current G4Track scheduled to be returned to
- * the ISF, m_regenerationNr - the number of times the particle
- * represented by the G4Track has undergone a non-destructive
- * interaction that was recorded in the HepMC::GenEvent, m_barcode and
- * m_uniqueID - convenience variables corresponding to the barcode and
- * id of m_currentGenParticle.
+   * the ISF, m_regenerationNr - the number of times the particle
+   * represented by the G4Track has undergone a non-destructive
+   * interaction that was recorded in the HepMC::GenEvent,
+   * m_generationZeroGenParticle - the truth particle before any such
+   * regeneration, m_barcode and m_uniqueID - convenience variables
+   * corresponding to the barcode and id of m_currentGenParticle.
  * The member variables are m_classify: a classification of the
  * current G4Track (Primary, Regenerated Primary, Registered
  * Secondary, Secondary) and m_primaryGenParticle: a pointer to the
@@ -56,6 +59,18 @@ public:
    * m_barcode and m_uniqueID.
    */
   virtual void SetCurrentGenParticle(HepMC::GenParticlePtr) override;
+
+  /**
+   * @brief return a pointer to the simulation truth particle before any
+   * regeneration happened.
+   */
+  virtual HepMC::ConstGenParticlePtr GetGenerationZeroGenParticle() const override {return m_generationZeroGenParticle;}
+  virtual HepMC::GenParticlePtr GetGenerationZeroGenParticle() override {return m_generationZeroGenParticle;}
+  /**
+   * @brief set m_generationZeroGenParticle, the pointer to the
+   * simulation truth particle before any regeneration happened.
+   */
+  virtual void SetGenerationZeroGenParticle(HepMC::GenParticlePtr) override;
 
   /**
    * @brief return a pointer to the ISFParticle corresponding to the
@@ -101,6 +116,7 @@ public:
 private:
   int m_regenerationNr{0};
   HepMC::GenParticlePtr m_currentGenParticle{};
+  HepMC::GenParticlePtr m_generationZeroGenParticle{};
   mutable int m_barcode ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE; // TODO Drop this once UniqueID and Status are used instead
   mutable int m_uniqueID ATLAS_THREAD_SAFE = HepMC::INVALID_PARTICLE_BARCODE;
   ISF::ISFParticle *m_theBaseISFParticle{};

@@ -3,13 +3,12 @@
 */
 
 #include "TrackWriteFastSim/NeutronFastSim.h"
-#include "MCTruth/AtlasG4EventUserInfo.h"
+#include "MCTruth/TrackHelper.h"
+#include "AtlasHepMC/GenParticle.h"
 
-#include "G4Event.hh"
 #include "G4Neutron.hh"
 #include "G4SDManager.hh"
 #include "G4VSensitiveDetector.hh"
-#include "G4EventManager.hh"
 #include "TrackWriteFastSim/TrackFastSimSD.h"
 
 #include "TruthUtils/MagicNumbers.h"
@@ -52,8 +51,11 @@ G4bool NeutronFastSim::ModelTrigger(const G4FastTrack& fastTrack)
   }
 
   // Not a neutron... Pick it up if the primary had eta>6.0
-  AtlasG4EventUserInfo *atlasG4EvtUserInfo=static_cast<AtlasG4EventUserInfo*>(G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-  HepMC::ConstGenParticlePtr primaryGenParticle = atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle();
+  TrackHelper trackHelper(fastTrack.GetPrimaryTrack());
+  HepMC::ConstGenParticlePtr primaryGenParticle = trackHelper.GetPrimaryGenParticle();
+  if (!primaryGenParticle) {
+    return false;
+  }
   if (std::abs(primaryGenParticle->momentum().eta())>m_etaCut && !HepMC::is_simulation_particle(primaryGenParticle)){
     return true;
   } else {

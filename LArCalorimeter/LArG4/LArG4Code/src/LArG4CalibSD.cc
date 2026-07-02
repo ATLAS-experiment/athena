@@ -16,10 +16,11 @@
 #include "CaloIdentifier/CaloDM_ID.h"
 
 
-#include "G4RunManager.hh"
 #include "G4EventManager.hh"
 #include "MCTruth/AtlasG4EventUserInfo.h"
+#include "MCTruth/TrackHelper.h"
 #include "HitManagement/HitCollectionMap.h"
+#include "AtlasHepMC/GenParticle.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "G4Step.hh"
 
@@ -89,31 +90,32 @@ G4bool LArG4CalibSD::ProcessHits(G4Step* a_step,G4TouchableHistory*)
   // Process SR hit if provided
   // Probably want to add a flag to enable/disable this
   if(identifier_sr != LArG4Identifier()) {
-      SrHit(identifier, identifier_sr, energies);
+      SrHit(identifier, identifier_sr, energies, a_step->GetTrack());
     }
 
   if(m_id_helper) {
     Identifier id = this->ConvertID( identifier );
     if(id.is_valid() && m_id_helper->is_lar_dm(id)) {
-      return SimpleHit(identifier, energies, true);
+      return SimpleHit(identifier, energies, true, a_step->GetTrack());
     }
   }
-  return SimpleHit(identifier, energies, false);
+  return SimpleHit(identifier, energies, false, a_step->GetTrack());
 }
 
 G4bool LArG4CalibSD::SimpleHit(const LArG4Identifier& a_ident,
                                const std::vector<double>& energies,
-                               bool deadMaterialHit)
+                               bool deadMaterialHit,
+                               const G4Track* track)
 {
 
   // retreive particle ID
   int particleID{HepMC::UNDEFINED_ID};
   int particleUID{HepMC::UNDEFINED_ID};
   if( m_doPID ) {
-    AtlasG4EventUserInfo * atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
-    if (atlasG4EvtUserInfo) {
-      particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle()); // FIXME Barcode-based
-      particleUID = HepMC::uniqueID(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+    HepMC::ConstGenParticlePtr primary = TrackHelper(track).GetPrimaryGenParticle();
+    if (primary) {
+      particleID = HepMC::barcode(primary); // FIXME Barcode-based
+      particleUID = HepMC::uniqueID(primary);
     }
   }
 
@@ -164,27 +166,27 @@ G4bool LArG4CalibSD::SpecialHit(G4Step* a_step,
     return false;
 }
   if (identifier_sr != LArG4Identifier()) {
-      SrHit(identifier, identifier_sr, a_energies);
+      SrHit(identifier, identifier_sr, a_energies, a_step->GetTrack());
     }
   else {
     // G4cout << "SpecialHit: No SR identifier provided." << G4endl;
   }
 
-  return SimpleHit(identifier, a_energies, false);
+  return SimpleHit(identifier, a_energies, false, a_step->GetTrack());
 } 
 
 G4bool LArG4CalibSD::SrHit(const LArG4Identifier& a_ident, const LArG4Identifier& sr_id,
-                           const std::vector<double>& energies)
+                           const std::vector<double>& energies,
+                           const G4Track* track)
 {
   // Get particle ID (same as in SimpleHit)
   int particleID{HepMC::UNDEFINED_ID};
   int particleUID{HepMC::UNDEFINED_ID};
   if(m_doPID) {
-    AtlasG4EventUserInfo* atlasG4EvtUserInfo = dynamic_cast<AtlasG4EventUserInfo*>(
-    G4RunManager::GetRunManager()->GetCurrentEvent()->GetUserInformation());
-    if(atlasG4EvtUserInfo) {
-      particleID = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
-      particleUID = HepMC::uniqueID(atlasG4EvtUserInfo->GetCurrentPrimaryGenParticle());
+    HepMC::ConstGenParticlePtr primary = TrackHelper(track).GetPrimaryGenParticle();
+    if(primary) {
+      particleID = HepMC::barcode(primary);
+      particleUID = HepMC::uniqueID(primary);
     }
   }
 

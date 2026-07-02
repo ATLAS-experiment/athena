@@ -18,7 +18,6 @@
 //#include "FadsActions/TrackingAction.h"
 
 // MCTruth includes
-#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackInformation.h"
 #include "MCTruth/TrackHelper.h"
 
@@ -97,10 +96,8 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
 
     AtlasDetDescr::AtlasRegion geoID = baseIsp->nextGeoID();
 
-    auto* atlasG4EvtUserInfo = ISFG4Helper::getAtlasG4EventUserInfo();
-    if (atlasG4EvtUserInfo->GetCurrentGenParticle() &&
-        atlasG4EvtUserInfo->GetCurrentGenParticle()->end_vertex()) {
-      HepMC::GenParticlePtr currentGenParticle = atlasG4EvtUserInfo->GetCurrentGenParticle();
+    HepMC::GenParticlePtr currentGenParticle = trackInfo->GetCurrentGenParticle();
+    if (currentGenParticle && currentGenParticle->end_vertex()) {
       G4ExceptionDescription description;
       description << G4String("AppendStep: ") + "Currently Traced Particle has an end vertex!\n";
       description <<  "G4Track Properties: trackID = " << track->GetTrackID()<< ", Step Number = "<<track->GetCurrentStepNumber() << ", parentID = " << track->GetParentID() << ", TrackStatus = " <<  track->GetTrackStatus() << "\n";
@@ -123,7 +120,7 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
       }
       G4Exception("iGeant4::ISFTrajectory", "EndVertexExists", FatalException, description);
     }
-    iGeant4::Geant4TruthIncident truth(aStep, *baseIsp, geoID, atlasG4EvtUserInfo);
+    iGeant4::Geant4TruthIncident truth(aStep, geoID);
 
     if (m_truthRecordSvcQuick) {
       m_truthRecordSvcQuick->registerTruthIncident(truth);
@@ -134,7 +131,7 @@ void iGeant4::ISFTrajectory::AppendStep(const G4Step* aStep)
         // make sure that the TruthBinding of the ISFParticle points to the newest
         // HepMC::GenParticle instance in case it got updated by the
         // ITruthSvc::registerTruthIncident call above
-        auto currentGenPart = atlasG4EvtUserInfo->GetCurrentGenParticle();
+        auto currentGenPart = trackInfo->GetCurrentGenParticle();
         baseIsp->getTruthBinding()->setCurrentGenParticle( currentGenPart );
         int newBarcode = HepMC::barcode(currentGenPart); // FIXME barcode-based
         baseIsp->setBarcode( newBarcode ); // FIXME barcode-based

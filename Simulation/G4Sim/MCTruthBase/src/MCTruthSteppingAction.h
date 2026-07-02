@@ -61,6 +61,9 @@ namespace G4UA
       /// Setup the list of RecordingEnvelope helpers
       void setupRecEnvelopes();
 
+      /// Propagate parent primary truth attribution to ordinary secondaries.
+      void propagatePrimaryInfoToSecondaries(const G4Step*) const;
+
       /// Used to delay initialization until the event loop, after geo is ready
       bool m_isInitialized;
 

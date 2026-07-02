@@ -19,10 +19,6 @@
 #include "G4VPhysicalVolume.hh"
 #include "G4VSolid.hh"
 
-// Truth-related includes
-#include "MCTruth/AtlasG4EventUserInfo.h"
-#include "MCTruth/TrackHelper.h"
-
 // ISF includes
 #include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Interfaces/IGeoIDSvc.h"
@@ -65,23 +61,7 @@ bool TruthStrategyManager::CreateTruthIncident(const G4Step* aStep, int subDetVo
 {
   AtlasDetDescr::AtlasRegion geoID = iGeant4::ISFG4GeoHelper::nextGeoId(aStep, subDetVolLevel, m_geoIDSvc);
 
-  auto* atlasG4EvtUserInfo = static_cast<AtlasG4EventUserInfo*> (G4EventManager::GetEventManager()->GetConstCurrentEvent()->GetUserInformation());
-
-  // This is pretty ugly and but necessary because the Geant4TruthIncident
-  // requires an ISFParticle at this point.
-  // TODO: cleanup Geant4TruthIncident to not require an ISFParticle instance any longer
-  const Amg::Vector3D myPos(0,0,0);
-  const Amg::Vector3D myMom(0,0,0);
-  const double myMass = 0.0;
-  const double myCharge = 0.0;
-  const int myPdgCode = 0;
-  const int mystatus = 3333;
-  const double myTime =0.;
-  const int myID = HepMC::UNDEFINED_ID;
-  const ISF::DetRegionSvcIDPair origin(geoID, ISF::fUndefinedSimID);
-  ISF::ISFParticle myISFParticle(myPos, myMom, myMass, myCharge, myPdgCode, mystatus, myTime, origin, myID);
-
-  iGeant4::Geant4TruthIncident truth(aStep, myISFParticle, geoID, atlasG4EvtUserInfo);
+  iGeant4::Geant4TruthIncident truth(aStep, geoID);
 
   m_truthSvc->registerTruthIncident(truth);
   return false;
