@@ -85,15 +85,18 @@ class JetTriggerMatchingBlock (ConfigBlock):
                                    if config.campaign() is Campaign.MC20a or config.dataYear()==2016
                                    else 'HLT_xAOD__JetContainer_a4tcemsubjesISFS')
                 alg.trigEmulationTool.JM_a4tcemsubjes_CNT.JetContainerName = a4tcemsubjesJet
+                alg.trigEmulationTool.JM_a4tcemsubjes_CNT.LHCPeriod = 2
 
                 config.addPrivateTool( 'trigEmulationTool.JM_Split_CNT',
                                        'Trig::JetManagerTool' )
                 alg.trigEmulationTool.JM_Split_CNT.JetContainerName = 'HLT_xAOD__JetContainer_SplitJet'
+                alg.trigEmulationTool.JM_Split_CNT.LHCPeriod = 2
 
                 if not(config.campaign() is Campaign.MC20a or config.dataYear()==2016):
                     config.addPrivateTool( 'trigEmulationTool.JM_GSC_CNT',
                                            'Trig::JetManagerTool' )
                     alg.trigEmulationTool.JM_GSC_CNT.JetContainerName = 'HLT_xAOD__JetContainer_GSCJet'
+                    alg.trigEmulationTool.JM_GSC_CNT.LHCPeriod = 2
 
             if self.runL1Matching:
                 alg.L1Et = "match_" + chain_out + "_L1et_%SYS%"
