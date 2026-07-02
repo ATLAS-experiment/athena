@@ -138,6 +138,37 @@ def ManagedMemoryResourceToolCfg(flags, **kwargs):
     return result
 
 
+def MemoryResourcesToolCfg(flags, **kwargs):
+    '''Default tool providing the IMemoryResourcesTool interface for CUDA
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the main tool that would provide the
+    # AthDevice::IMemoryResourcesTool interface.
+    tool = CompFactory.AthDevice.MemoryResourcesAdaptorTool(**kwargs)
+
+    # Set up the main tool according to the received flags.
+    if flags.Device.Memory.Shared:
+        mainMRTool = ManagedMemoryResourceToolCfg(flags)
+        tool.MainMRTool = mainMRTool.getPrimary()
+        result.merge(mainMRTool)
+    else:
+        mainMRTool = DeviceMemoryResourceToolCfg(flags)
+        tool.MainMRTool = mainMRTool.getPrimary()
+        result.merge(mainMRTool)
+
+        hostMRTool = HostMemoryResourceToolCfg(flags)
+        tool.HostMRTool = hostMRTool.getPrimary()
+        result.merge(hostMRTool)
+        pass
+
+    # Return the adaptor tool as the main component of the CA.
+    result.setPrivateTools(tool)
+    return result
+
+
 def SingleStreamToolCfg(flags, **kwargs):
     '''Tool providing a single CUDA stream for all components in the entire job
     '''
