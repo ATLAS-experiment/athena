@@ -202,7 +202,7 @@ public:
 private:
     /**@brief Sets the local parameters.
     @warning Only intended for use by the Muon::MdtDriftCircleOnTrackCreator*/
-    virtual void setLocalParameters( const Trk::LocalParameters& locPos);
+    void setLocalParameters( const Trk::LocalParameters& locPos);
 
     /**@brief Sets the DetElement and Trk::PrepRawData pointers after reading from disk.
     @warning Only intended for use by persistency convertors*/
