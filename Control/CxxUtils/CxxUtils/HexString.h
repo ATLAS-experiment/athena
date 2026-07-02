@@ -107,8 +107,10 @@ public:
         UnsignedT value = static_cast<UnsignedT>(context);
 
         // 2. Write prefix
-        for (std::size_t i = 0; i < s_PrefixLen; ++i) {
-            m_text[i] = FormatStr.buf[i];
+        if constexpr (s_PrefixLen>0){
+          for (std::size_t i = 0; i < s_PrefixLen; ++i) {
+              m_text[i] = FormatStr.buf[i];
+          }
         }
         
         // 3. Write hex digits dynamically based on type size
@@ -118,8 +120,10 @@ public:
         }
 
         // 4. Write postfix
-        for (std::size_t i = 0; i < s_PostfixLen; ++i) {
-            m_text[s_PrefixLen + HexDigits + i] = FormatStr.buf[s_PrefixLen + 2 + i];
+        if constexpr (s_PostfixLen>0){
+          for (std::size_t i = 0; i < s_PostfixLen; ++i) {
+              m_text[s_PrefixLen + HexDigits + i] = FormatStr.buf[s_PrefixLen + 2 + i];
+          }
         }
 
         // 5. Null terminator
