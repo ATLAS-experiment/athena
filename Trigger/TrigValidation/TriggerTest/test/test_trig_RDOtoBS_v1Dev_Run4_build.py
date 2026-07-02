@@ -29,7 +29,6 @@ rdo2bs.args += ' --preExec="flags.Detector.EnableITkStrip=False"'
 # BSRDO -> RAW step
 ex = ExecStep.ExecStep('BSRDOtoRAW')
 ex.type = 'athena'
-ex.log_file_name = 'athena_run.log' #Need a different log file name for merging
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.threads = 1 
 ex.input = ''
