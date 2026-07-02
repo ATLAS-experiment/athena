@@ -22,14 +22,13 @@ run.input = 'ttbar_pu200_Run4'
 
 actsTracking = True
 
-run.flags = [f'Trigger.useActsTracking={actsTracking}',
+run.flags += [f'Trigger.useActsTracking={actsTracking}',
              f'Acts.GsfRefitActs={actsTracking}',
              f'Acts.useCache={actsTracking}',
              'Tracking.doITkFastTracking=True',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
-             f'IOVDb.GlobalTag={defaultConditionsTags.RUN4_MC}',
              ]
 
 # The full test configuration

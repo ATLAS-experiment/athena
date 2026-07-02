@@ -32,7 +32,7 @@ ex = MCGridStep(
 )
 ex.input = 'ttbar_pu200_Run4'
 
-ex.flags = [
+ex.flags += [
     'ITk.doTruth=False',
     'Tracking.doTruth=False',
 ]
