@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef CP_SCALEFACTORTOOL_H
-#define CP_SCALEFACTORTOOL_H
+#ifndef SCALEFACTORTOOLS_SCALEFACTORTOOL_H
+#define SCALEFACTORTOOLS_SCALEFACTORTOOL_H
 
 #include "FTagAnalysisInterfaces/IScaleFactorTool.h"
 #include "AsgTools/AsgTool.h"
@@ -33,8 +33,9 @@ class ScaleFactorTool: public asg::AsgTool,
   Gaudi::Property<std::string> m_obj_container {this, "ObjContainer", "", "object container"};
   Gaudi::Property<std::string> m_pct_Name {this, "PCTName", "", "pseudo-continuous tagger name"};
 
-  size_t m_n_sf_bins;
-  size_t m_n_pct_bins;
+  size_t m_n_sf_bins = 0;
+  size_t m_n_pct_bins = 0;
+  int m_invalid_sf_value = -1;
   std::function<int(const SG::AuxElement&)> m_sf_func;
   std::function<int(const SG::AuxElement&)> m_pct_func;
 
@@ -43,7 +44,6 @@ class ScaleFactorTool: public asg::AsgTool,
   std::unordered_map<std::string, std::unordered_set<int>> m_wp_bins;
   std::map<CP::SystematicSet, std::vector<float>> m_sf_systematics;
 
-  int m_invalid_sf_value;
   std::vector<float> m_sf_values;
 };
-#endif // CP_SCALEFACTORTOOL_H
+#endif // SCALEFACTORTOOLS_SCALEFACTORTOOL_H

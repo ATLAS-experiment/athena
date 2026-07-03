@@ -129,6 +129,10 @@ QuantileFactory::QuantileFunc QuantileFactory::makeNodes(const json& cfg) {
       }
     }
 
+    if (region < 0) {
+      throw std::runtime_error("Failed to find region");
+    }
+
     int local = sub_nodes[region](el);
 
     if (numbering == "sequential") {

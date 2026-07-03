@@ -36,9 +36,14 @@ atlas_add_dictionary( ScaleFactorToolsDict
   LINK_LIBRARIES ScaleFactorToolsLib
 )
 
+if( XAOD_STANDALONE )
+  set(XAOD_ACCESS_LIB xAODRootAccess)
+else()
+  set(XAOD_ACCESS_LIB POOLRootAccessLib)
+endif()
 atlas_add_executable(
   ScaleFactorToolTester
   util/ScaleFactorToolTester.cxx
-  LINK_LIBRARIES xAODRootAccess AsgTools ScaleFactorToolsLib
+  LINK_LIBRARIES xAODRootAccess AsgTools ScaleFactorToolsLib ${XAOD_ACCESS_LIB}
 )
 

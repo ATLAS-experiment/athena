@@ -10,20 +10,26 @@ VariableFactory::FloatFunc VariableFactory::floatVariableFactory(const json& cfg
   // for simple variables
   if (cfg.is_string()) {
     std::string name = cfg.get<std::string>();
-    return [name](const SG::AuxElement& el) -> float {
-      return el.auxdata<float>(name);
+    return [acc = SG::ConstAccessor<float>(name)](const SG::AuxElement& el) -> float {
+      return acc(el);
     };
   }
 
   // structured variables
   if (cfg.is_object()) {
     auto buildTerm = [](const json& terms) {
-      return [terms](const SG::AuxElement& el) -> float {
+      std::vector<std::pair<float, SG::ConstAccessor<float>>> accessors;
+
+      for (const auto& t : terms) {
+        std::string var = t[0];
+        float weight = t[1];
+        accessors.emplace_back(weight, SG::ConstAccessor<float>(var));
+      }
+
+      return [accessors](const SG::AuxElement& el) -> float {
         float sum = 0.0f;
-        for (const auto& t : terms) {
-          std::string var = t[0];
-          float weight    = t[1];
-          sum += weight * el.auxdata<float>(var);
+        for (const auto& [weight, acc] : accessors) {
+          sum += weight * acc(el);
         }
         return sum;
       };
@@ -52,8 +58,8 @@ VariableFactory::FloatFunc VariableFactory::floatVariableFactory(const json& cfg
 VariableFactory::IntFunc VariableFactory::intVariableFactory(const json& cfg) {
   if (cfg.is_string()) {
     std::string name = cfg.get<std::string>();
-    return [name](const SG::AuxElement& el) -> int {
-      return el.auxdata<int>(name);
+    return [acc = SG::ConstAccessor<int>(name)](const SG::AuxElement& el) -> int {
+      return acc(el);
     };
   }
   throw std::runtime_error("Invalid variable config");
