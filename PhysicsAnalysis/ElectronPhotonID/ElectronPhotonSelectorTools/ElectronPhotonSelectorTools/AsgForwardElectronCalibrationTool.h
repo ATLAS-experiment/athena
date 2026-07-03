@@ -77,7 +77,7 @@ private:
         Bin 1: 2.7 < |eta| <= 3.2
         Bin 2: 3.2 < |eta| <= 4.0
       Returns -1 if out of range. */
-  int getEtaBin(double absEta) const;
+  static int getEtaBin(double absEta) ;
 
   /** Get 25 input variables
       Returns false on failure. */
@@ -85,7 +85,7 @@ private:
                  std::vector<float>& inputs) const;
 
   /** Sftplus: log(1 + exp(x)) */
-  double softplus(double x) const;
+  static double softplus(double x) ;
 
   /** Undo MinMax pT scaling used during training */
   double unscalePt(double x) const;
