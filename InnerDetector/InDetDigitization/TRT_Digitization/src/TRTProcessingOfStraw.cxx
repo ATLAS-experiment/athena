@@ -404,7 +404,6 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
       }
       else { // It's not a photon, monopole or Qball with charge > 10, so we proceed with regular ionization using the PAI model
 
-        // Lookup mass and charge from the PDG info in CLHEP HepPDT:
         const HepPDT::ParticleData *particle(m_pParticleTable->particle(HepPDT::ParticleID(abs(particleEncoding))));
         double particleCharge(0.);
         double particleMass(0.);

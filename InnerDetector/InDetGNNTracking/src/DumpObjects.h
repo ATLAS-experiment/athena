@@ -31,8 +31,6 @@
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
-#include "GaudiKernel/IPartPropSvc.h"
-
 class PixelID;
 class SCT_ID;
 class TTree;
@@ -41,10 +39,6 @@ namespace InDetDD {
 class PixelDetectorManager;
 class SCT_DetectorManager;
 } // namespace InDetDD
-
-namespace HepPDT {
-class ParticleDataTable;
-}
 
 namespace InDet {
 

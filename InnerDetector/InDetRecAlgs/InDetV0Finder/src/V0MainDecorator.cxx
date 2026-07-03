@@ -3,10 +3,10 @@
 */
 #include "InDetV0Finder/V0MainDecorator.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "GeneratorModules/GenData.h"
 namespace InDet
 {
 V0MainDecorator::V0MainDecorator(const std::string& t, const std::string& n, const IInterface* p)
@@ -72,21 +72,12 @@ StatusCode V0MainDecorator::initialize(){
 
 
   if (m_masses == 1) {
-    // get the Particle Properties Service
-    ATH_CHECK(m_partPropSvc.retrieve());
-    auto *particleDataTable = m_partPropSvc->PDT();
-  
-    const HepPDT::ParticleData* pd_pi = particleDataTable->particle(MC::PIPLUS);
-    const HepPDT::ParticleData* pd_p  = particleDataTable->particle(MC::PROTON);
-    const HepPDT::ParticleData* pd_e  = particleDataTable->particle(MC::ELECTRON);
-    const HepPDT::ParticleData* pd_K  = particleDataTable->particle(MC::K0S);
-    const HepPDT::ParticleData* pd_L  = particleDataTable->particle(MC::LAMBDA0);
-    
-    m_masspi     = pd_pi->mass();
-    m_massp      = pd_p->mass();
-    m_masse      = pd_e->mass();
-    m_massK0S    = pd_K->mass();
-    m_massLambda = pd_L->mass();
+   auto gendata = std::make_shared<GenData>();
+   m_masspi     = gendata->particleMass(MC::PIPLUS).value();
+   m_massp      = gendata->particleMass(MC::PROTON).value();
+   m_masse      = gendata->particleMass(MC::ELECTRON).value();
+   m_massK0S    = gendata->particleMass(MC::K0S).value();
+   m_massLambda = gendata->particleMass(MC::LAMBDA0).value();
   }
    return StatusCode::SUCCESS;
 }
