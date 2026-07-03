@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -40,7 +40,7 @@ public:
 
   SoMaterial * highlightmaterial = nullptr;
 
-  PRDCollHandleBase::COLOURMETHOD last_colourMethod;
+  PRDCollHandleBase::COLOURMETHOD last_colourMethod{};
   bool last_drawErrors = false;
   bool last_drawRDOs = false;
   bool last_highLightOutliers = false;

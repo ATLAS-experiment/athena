@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -58,8 +58,8 @@ public:
   //Vector of track handles:
   std::vector<TrackHandleBase*> trackhandles;
   //For iteration:
-  std::vector<TrackHandleBase*>::iterator itTrackHandles;
-  std::vector<TrackHandleBase*>::iterator itTrackHandlesEnd;
+  std::vector<TrackHandleBase*>::iterator itTrackHandles{};
+  std::vector<TrackHandleBase*>::iterator itTrackHandlesEnd{};
 
   Trk::IExtrapolator *  lastUsedPropagator = nullptr;
   bool notifystatesave = false;
