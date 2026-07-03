@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -146,11 +146,11 @@ int main( int argc, char* argv[] ) {
 
   bool isRun3 = false;
   if ((fileName.Contains("mc23") || fileName.Contains("mc21") || fileName.Contains("data2")) && fileName.Contains("13p6TeV")) isRun3 = true;
-  std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
-  if (fileName.Contains("LITE")) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_LITE.conf")).c_str();
+  std::string config_file = PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf");
+  if (fileName.Contains("LITE")) config_file = PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_LITE.conf");
   if (isRun3) {
-    config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
-    if (fileName.Contains("LITE")) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3_LITE.conf")).c_str();
+    config_file = PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf");
+    if (fileName.Contains("LITE")) config_file = PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3_LITE.conf");
     ANA_MSG_INFO("Configuring for Run 3");
   }
   std::string prw_file = "DUMMY";
@@ -167,7 +167,7 @@ int main( int argc, char* argv[] ) {
     if (strcmp(key, "isAtlfast") == 0) isAtlfast = atoi(val);
     if (strcmp(key, "NoSyst") == 0) NoSyst = atoi(val);
     if (strcmp(key, "Debug") == 0) debug = atoi(val);
-    if (strcmp(key, "ConfigFile") == 0) config_file = (PathResolverFindCalibFile(val)).c_str();
+    if (strcmp(key, "ConfigFile") == 0) config_file = PathResolverFindCalibFile(val);
     if (strcmp(key, "PRWFile") == 0) prw_file = std::string(val);
     if (strcmp(key, "ilumicalcFile") == 0) ilumicalc_file = std::string(val);
     if (strcmp(key, "maxEvents") == 0) entries = atoi(val);
