@@ -35,9 +35,9 @@ ex = MCGridStep(
 
 ex.input = 'ttbar_pu200_Run4'
 
-ex.flags = [ 'CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
-             'ITk.doTruth=False',
-             'Tracking.doTruth=False']
+ex.flags += [ 'CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
+              'ITk.doTruth=False',
+              'Tracking.doTruth=False']
 
 test = Test.Test()
 test.art_type = 'grid'
