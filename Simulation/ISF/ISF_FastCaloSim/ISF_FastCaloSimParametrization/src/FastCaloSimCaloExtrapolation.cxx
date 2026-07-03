@@ -5,7 +5,6 @@
 /* Athena includes */
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 
 #include "CxxUtils/inline_hints.h"
 /* Header include */

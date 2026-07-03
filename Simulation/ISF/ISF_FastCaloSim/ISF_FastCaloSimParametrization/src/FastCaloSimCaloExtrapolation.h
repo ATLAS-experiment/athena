@@ -116,7 +116,6 @@ protected:
   double zpos (int sample, double eta, int subpos = CaloSubPos::SUBPOS_MID) const;
   double rzpos(int sample, double eta, int subpos = CaloSubPos::SUBPOS_MID) const;
 
-  HepPDT::ParticleDataTable*     m_particleDataTable{nullptr};
 
   //uniquely defined ID-Calo surfaces
   FloatArrayProperty m_CaloBoundaryR{this, "CaloBoundaryR", {1148.0,120.0,41.0}};
