@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
 from Campaigns.Utils import Campaign
 from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
@@ -27,6 +28,14 @@ class JetTriggerMatchingBlock (ConfigBlock):
                         info="Add L1 matching decorations")
         self.addOption ('runHLTMatching', True, type=bool,
                         info="Add HLT matching decorations")
+        self.addOption ('l1dR', 0.4, type=float,
+                        info="ΔR cone for the L1 (jFEX) trigger matching "
+                        "(sets CP::JetTriggerDecoratorAlg.l1dR). Default 0.4 "
+                        "matches the algorithm's own default.")
+        self.addOption ('hltDR', 0.4, type=float,
+                        info="ΔR cone for the HLT trigger matching "
+                        "(sets CP::JetTriggerDecoratorAlg.hltDR). Default 0.4 "
+                        "matches the algorithm's own default.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -61,7 +70,18 @@ class JetTriggerMatchingBlock (ConfigBlock):
             alg.doL1Matching = self.runL1Matching
             alg.doHLTMatching = self.runHLTMatching
             alg.jets = config.readName (self.containerName)
-        
+
+            # Phase-I L1Calo (jFEX) vs legacy L1Calo is not a user choice — it is
+            # fixed by the data-taking year (data 2024+) and the MC campaign
+            # (mc23e/mc23g). Determine it automatically from the config metadata.
+            if config.dataType() is DataType.Data:
+                usePhaseIL1 = config.dataYear() >= 2024
+            else:
+                usePhaseIL1 = config.campaign() in (Campaign.MC23e, Campaign.MC23g)
+            alg.usePhaseIL1 = usePhaseIL1
+            alg.l1dR = self.l1dR
+            alg.hltDR = self.hltDR
+
             if config.geometry() is LHCPeriod.Run2 and self.runHLTMatching:
                 # Configuration adapted from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigEmulation/TrigBtagEmulationTool/python/TrigBtagEmulationToolConfig.py
@@ -108,7 +128,7 @@ class JetTriggerMatchingBlock (ConfigBlock):
                     config.addOutputVar (self.containerName,
                                          "match_" + chain_out + "_" + var + "_%SYS%",
                                          "match_" + chain_out + "_" + var, noSys=True)
-            
+
             if self.runHLTMatching:
                 alg.HLTPt = "match_" + chain_out + "_HLTpt_%SYS%"
                 alg.HLTEta = "match_" + chain_out + "_HLTeta_%SYS%"
