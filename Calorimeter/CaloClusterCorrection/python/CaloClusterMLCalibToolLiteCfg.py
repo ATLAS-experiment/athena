@@ -12,6 +12,9 @@ def CaloClusterMLCalibToolLiteCfg(
     name="CaloClusterMLCalibToolLite",
     config_file="CaloClusterCorrection/config_hgm_mc20.yaml",
 ):
+    if flags.Input.MCCampaign.value.startswith("mc23"):
+        config_file = "CaloClusterCorrection/config_hgm_mc23.yaml"
+
     with open(PathResolver.FindCalibFile(config_file)) as f:
         config = yaml.safe_load(f)
 
@@ -35,3 +38,4 @@ def CaloClusterMLCalibToolLiteCfg(
     ca.setPrivateTools(CaloClusterMLCalibToolLite)
 
     return ca
+
