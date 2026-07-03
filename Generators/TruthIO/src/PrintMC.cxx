@@ -7,10 +7,10 @@
 // Updated 18.06.2020 by <andrii.verbytskyi@mpp.mpg.de>
 #include "TruthIO/PrintMC.h"
 #include "GeneratorObjects/McEventCollection.h"
+#include "GeneratorModules/GenData.h"
 
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
 #include "AtlasHepMC/GenEvent.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 inline void drawLine(std::ostream& os) {
@@ -33,6 +33,7 @@ PrintMC::PrintMC(const std::string& name, ISvcLocator* pSvcLocator)
 
 StatusCode PrintMC::initialize() {
   CHECK(GenBase::initialize());
+  m_gendata = std::make_shared<GenData>();
   if(!m_trustHepMC) ATH_CHECK(m_evtInfoKey.initialize());
 
   // Check settings
@@ -167,13 +168,13 @@ StatusCode PrintMC::execute(const EventContext& ctx) {
         // Access the PDG table to get the particle name (and mass?)
         std::string sname;
         double p_mass = p->generated_mass();
-        const HepPDT::ParticleData* ap = m_gendata->particleData(std::abs(p_pdg_id));
+        auto ap = m_gendata->particleMass(std::abs(p_pdg_id));
         if (!ap) {
           ATH_MSG_DEBUG("PID " << std::abs(p_pdg_id) << " is not in particle data table");
         } else {
-          const double p_charge = ap->charge() * (p_pdg_id < 0 ? -1 : 1); // assuming that charged leptons are in the PDT...
+          const double p_charge = MC::charge(p_pdg_id);
           // Build particle name string
-          sname = ap->name();
+          sname = m_gendata->particleName(std::abs(p_pdg_id)).value();
           if (p_charge < 0) {
             const size_t plusidx = sname.rfind("+");
             if (plusidx != std::string::npos) {
