@@ -36,11 +36,11 @@ run = MCGridStep(
 
 run.input = 'Single_mu_Run4'
 
-run.flags = ['Trigger.doRuntimeNaviVal=True',
-             'ITk.doTruth=False',
-             'Tracking.doTruth=False',
-             'Trigger.InDetTracking.doGPU=True',
-             'Trigger.enabledSignatures=[\\\"Muon\\\"]']
+run.flags += ['Trigger.doRuntimeNaviVal=True',
+              'ITk.doTruth=False',
+              'Tracking.doTruth=False',
+              'Trigger.InDetTracking.doGPU=True',
+              'Trigger.enabledSignatures=[\\\"Muon\\\"]']
 
 # The full test configuration
 test = Test.Test()
