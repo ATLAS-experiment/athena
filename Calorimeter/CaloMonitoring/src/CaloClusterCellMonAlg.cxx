@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloClusterCellMonAlg.h"
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloIdentifier/CaloGain.h"
+#include "LArIdentifier/LArOnlineID.h"
 #include "Identifier/Identifier.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
@@ -152,6 +153,7 @@ StatusCode CaloClusterCellMonAlg::fillHistograms(const EventContext& ctx) const{
         iLyr=caloDDE->getSampling();
         if (iLyr<12 || iLyr>20 ) {
            ATH_MSG_ERROR("Unexpected tile sampling " << iLyr);
+           return StatusCode::FAILURE;
         }
         layerName=m_tileNames[iLyr-12];
         layerName += (celleta>0) ? "A" : "C";
