@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TElectronLikelihoodTool.h"
@@ -708,7 +708,8 @@ Root::TElectronLikelihoodTool::evaluateLikelihood(
   double ip) const
 {
   std::vector<double> vec;
-  for (unsigned int var = 0; var < s_fnVariables; var++) {
+  vec.reserve(s_fnVariables);
+for (unsigned int var = 0; var < s_fnVariables; var++) {
     vec.push_back(varVector[var]);
   }
   return evaluateLikelihood(vec, et, eta, ip);

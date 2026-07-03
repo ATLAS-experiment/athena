@@ -244,7 +244,7 @@ float AsgPhotonBDTSelector::getCut(const bool converted, const size_t iEta, cons
   return cut;
 }
 
-asg::AcceptData AsgPhotonBDTSelector::makeReject(const asg::AcceptInfo& info) const {
+asg::AcceptData AsgPhotonBDTSelector::makeReject(const asg::AcceptInfo& info) {
   asg::AcceptData acc(&info);
   for (unsigned i = 0; i < info.getNCuts(); ++i) acc.setCutResult(i, false);
   return acc;
