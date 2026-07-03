@@ -134,7 +134,7 @@ std::set<const xAOD::TrackParticle*> xAOD::EgammaHelpers::getTrackParticles(cons
 										  bool allParticles /* = true */){
 
   if (eg) {
-    if (eg->type()==xAOD::Type::Electron || eg->type()==xAOD::EgammaParameters::AuthorFwdElectron) {
+    if (eg->type()==xAOD::Type::Electron){
       const xAOD::Electron* el = static_cast<const xAOD::Electron*> (eg);
       if (el) {
         return getTrackParticles(el, useBremAssoc, allParticles);
