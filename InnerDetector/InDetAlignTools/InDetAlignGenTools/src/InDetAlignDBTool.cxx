@@ -383,7 +383,7 @@ bool InDetAlignDBTool::idToDetSet(const Identifier ident, int& det, int& bec,
 
     
     bec=m_pixid->barrel_ec(ident)/2;
-    std::cout << "bec: " << bec << std::endl;
+    std::cout << "bec : " << bec << std::endl;
 
     layer=m_pixid->layer_disk(ident);
     std::cout << "layer: " << layer << std::endl;
