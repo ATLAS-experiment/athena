@@ -2,24 +2,24 @@
 
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
-# Run script for the GPU EDM input conversion chain:
-#   RDO -> traccc cells
+# Run script for the full GPU clusterization chain:
+#   RDO -> traccc cells -> traccc measurements -> xAOD clusters
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Constants import DEBUG
 
-from AthCUDAServices.AthCUDAServicesConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg
+from AthCUDAServices.AthCUDAServicesConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg, StreamToolCfg
 
-from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import ActsDeviceDetectorDescriptionProviderSvcCfg
-from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
+from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import JSONDeviceDetectorDescriptionProviderSvcCfg, CUDAClusterizerToolCfg,  DeviceClusterizationAlgCfg
+from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
 
-def RDOtoTracccCellConverterTest(flags) -> ComponentAccumulator:
+def GPUClusterizationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     hostMR   = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags, name="HostMR"))
     deviceMR = acc.popToolsAndMerge(DeviceMemoryResourceToolCfg(flags, name="DeviceMR"))
     copyTool = acc.popToolsAndMerge(CopyToolCfg(flags, name="CopyProviderTool"))
+    streamTool = acc.popToolsAndMerge(StreamToolCfg(flags, name="StreamTool"))
 
     # Service runs first — loads all device detector description data into detStore
     acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
@@ -27,10 +27,25 @@ def RDOtoTracccCellConverterTest(flags) -> ComponentAccumulator:
         DeviceMR = deviceMR,
         CopyProviderTool = copyTool))
 
+    clusterizerTool = acc.popToolsAndMerge(CUDAClusterizerToolCfg(flags,
+        HostMR  = hostMR,
+        DeviceMR = deviceMR,
+        CopyProviderTool = copyTool,
+        StreamTool = streamTool))
+
     acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
         HostMR  = hostMR,
         DeviceMR = deviceMR,
         CopyProviderTool = copyTool))
+
+    acc.merge(DeviceClusterizationAlgCfg(flags,
+        ClusteringAlgProviderTool = clusterizerTool,
+        CopyProviderTool = copyTool,
+        DeviceMR = deviceMR))
+
+    acc.merge(TracccMeasurementConverterAlgCfg(flags,
+        CopyProviderTool = copyTool,
+        HostMR  = hostMR))
 
     return acc
 
@@ -43,8 +58,8 @@ if __name__ == "__main__":
     flags.Input.Files = [
         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14697/RDO.33629020._000001.pool.root.1"
     ]
-
     flags.fillFromArgs()
+
 
     # ---- Conditions and geometry ----
     from AthenaConfiguration.TestDefaults import defaultConditionsTags
@@ -66,7 +81,7 @@ if __name__ == "__main__":
     flags.lock()
     flags.dump()
 
-    acc = RDOtoTracccCellConverterTest(flags)
+    acc = GPUClusterizationCfg(flags)
     acc.printConfig(withDetails=True, summariseProps=True)
 
     statusCode = acc.run(flags.Exec.MaxEvents)

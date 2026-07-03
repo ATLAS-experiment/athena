@@ -26,7 +26,7 @@
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
-#include "ActsGPUInterfaces/IActsDeviceDetectorDescriptionProviderSvc.h"
+#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -61,8 +61,8 @@ private:
     this, "HostMR", "", "Host memory resource tool"};
   ToolHandle<AthDevice::ICopyTool> m_copy{
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
-  ServiceHandle<ActsTrk::IActsDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
-    this, "DetectorDescriptionSvc", "ActsTrk::ActsDeviceDetectorDescriptionProviderSvc"};
+  ServiceHandle<ActsTrk::IDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
+    this, "DetectorDescriptionSvc", "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"};
 
   // ---- object counters ----
   mutable std::atomic<int> m_nPix = 0;

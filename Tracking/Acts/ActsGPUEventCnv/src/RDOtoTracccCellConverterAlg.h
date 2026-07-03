@@ -20,7 +20,7 @@
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "Identifier/Identifier.h"
 
-#include "ActsGPUInterfaces/IActsDeviceDetectorDescriptionProviderSvc.h"
+#include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include <unordered_map>
 #include <cstdint>
@@ -62,8 +62,11 @@ private:
   ToolHandle<AthDevice::ICopyTool> m_copy{
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
-  ServiceHandle<ActsTrk::IActsDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
-    this, "DetectorDescriptionSvc", "ActsTrk::ActsDeviceDetectorDescriptionProviderSvc"};
+  ServiceHandle<ActsTrk::IDeviceDetectorDescriptionProviderSvc> m_detDescSvc{
+    this, "DetectorDescriptionSvc", "ActsTrk::JSONDeviceDetectorDescriptionProviderSvc"};
+  Gaudi::Property<std::string> m_hostCondObjectName{
+      this, "HostConditionsObjectName", "",
+      "Traccc host conditions object"};
 
   const traccc::detector_conditions_description::host* m_hostCond{nullptr};
 
