@@ -313,7 +313,7 @@ namespace ActsTrk {
     };
     static constexpr BranchState s_branchState{};
 
-    static void addCounts(detail::RecoTrackContainer &tracksContainer);
+    static void addCountsAndProperties(detail::RecoTrackContainer &tracksContainer, bool add_counts);
     static void initCounts(const detail::RecoTrackContainer::TrackProxy &track);
     static void updateCounts(const detail::RecoTrackContainer::TrackProxy &track,
                              Acts::ConstTrackStateTypeMap typeFlags,

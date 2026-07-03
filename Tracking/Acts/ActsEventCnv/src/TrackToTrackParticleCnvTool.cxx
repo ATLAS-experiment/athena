@@ -21,6 +21,7 @@
 #include "src/detail/CurvilinearCovarianceHelper.h"
 #include "src/detail/HitSummaryDataUtils.h"
 #include "ActsEvent/ExpectedHitUtils.h"
+#include "ActsEvent/TrackContainerUtils.h"
 #include "MuonTrackEvent/HitSummary.h"
 
 #include <Acts/Definitions/TrackParametrization.hpp>
@@ -186,7 +187,12 @@ namespace ActsTrk {
       // fit info, quality
       track_particle.setFitQuality(track.chi2(), track.nDoF());
       track_particle.setPatternRecognitionInfo(m_patternRecognitionInfo.value());
-      track_particle.setTrackFitter(static_cast<xAOD::TrackFitter>(m_trackFitter.value()));
+      if (ActsTrk::TrackContainerUtils::hasFitterType(track)) {
+         track_particle.setTrackFitter(ActsTrk::TrackContainerUtils::fitterType(track));
+      }
+      else {
+         track_particle.setTrackFitter(static_cast<xAOD::TrackFitter>(m_trackFitter.value()));
+      }
 
       const Acts::ParticleHypothesis& hypothesis = track.particleHypothesis();
       track_particle.setParticleHypothesis(ParticleHypothesis::convert(hypothesis));

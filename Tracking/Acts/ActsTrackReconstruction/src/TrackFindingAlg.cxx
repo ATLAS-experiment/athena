@@ -25,6 +25,7 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsEvent/ExpectedHitUtils.h"
+#include "ActsEvent/TrackContainerUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
 
@@ -243,9 +244,7 @@ namespace ActsTrk
     detail::RecoTrackContainer actsTracksContainer(actsTrackBackend,
                                                    actsTrackStateBackend);
 
-    if (m_addCounts) {
-      addCounts(actsTracksContainer);
-    }
+    addCountsAndProperties(actsTracksContainer, m_addCounts.value());
 
     detail::ExpectedLayerPatternHelper::add(actsTracksContainer);
 
@@ -333,9 +332,7 @@ namespace ActsTrk
     detail::RecoTrackContainer resolvedTracksContainer(resolvedTrackBackend, resolvedTrackStateBackend);
     detail::ExpectedLayerPatternHelper::add(resolvedTracksContainer);
 
-    if (m_addCounts) {
-      addCounts(resolvedTracksContainer);
-    }
+    addCountsAndProperties(resolvedTracksContainer, m_addCounts.value());
 
     // Start ambiguity resolution
     Acts::GreedyAmbiguityResolution::State state;
@@ -429,9 +426,7 @@ namespace ActsTrk
     Acts::VectorMultiTrajectory trackStateBackend;
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
 
-    if (m_addCounts) {
-      addCounts(tracksContainerTemp);
-    }
+    addCountsAndProperties(tracksContainerTemp, m_addCounts.value());
 
     detail::ExpectedLayerPatternHelper::add(tracksContainerTemp);
 
@@ -488,6 +483,8 @@ namespace ActsTrk
 
         // Check if the seed is a duplicate seed
         const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
+        xAOD::TrackFitter current_fitter = xAOD::KalmanFitter;
+        // @TODO introduce additional enums to distinguish Acts CKF from other implementations?
 
         if (isDupSeed) {
           ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
@@ -574,6 +571,7 @@ namespace ActsTrk
         // loop on the tracks we have just found from the seed
         std::size_t nfirst = 0;
         for (TrkProxy &firstTrack : tracksForSeed) {
+          ActsTrk::TrackContainerUtils::setFitterType(firstTrack,current_fitter);
           // smoothing
           auto smoothingResult = Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
           if (!smoothingResult.ok()) {
