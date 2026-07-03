@@ -1,7 +1,7 @@
 //Dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LARADC2MEV
@@ -35,11 +35,12 @@ class LArADC2MeV {
   }
 
   const LArVectorProxy ADC2MEV(const IdentifierHash& hid, int gain) const {
-    if (!m_adc2MeV[gain].valid.test(hid)) {
+    const auto & energyMeV = m_adc2MeV.at(gain); //gain may be 'UNKNOWN', = -1
+    if (!energyMeV.valid.test(hid)) {
       return LArVectorProxy();
     }
     else {
-      const float* ptr1=&(m_adc2MeV[gain].data[hid*m_rampDegree]);
+      const float* ptr1=&(energyMeV.data[hid*m_rampDegree]);
       return LArVectorProxy(ptr1,ptr1+m_rampDegree);
     }
   };
@@ -58,11 +59,11 @@ class LArADC2MeV {
     std::bitset<200000> valid;
   };
 
-  std::array<validVec_t,CaloGain::LARNGAIN> m_adc2MeV; 
+  std::array<validVec_t,CaloGain::LARNGAIN> m_adc2MeV{}; 
   
-  const LArOnlineID_Base* m_onlineID;
-  const LArOnOffIdMapping* m_cabling;
-  const unsigned m_rampDegree;
+  const LArOnlineID_Base* m_onlineID{};
+  const LArOnOffIdMapping* m_cabling{};
+  const unsigned m_rampDegree{};
 };
 
 #include "AthenaKernel/CLASS_DEF.h"
