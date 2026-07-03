@@ -26,8 +26,10 @@ namespace Acts {
 namespace xAOD{ 
     /** @brief Returns the associated Acts surface to the measurement */
     const Acts::Surface& muonSurface(const UncalibratedMeasurement* meas);
-     /** @brief Returns the associated identifier from the muon measurement */
+    /** @brief Returns the associated identifier from the muon measurement */
     const Identifier& identify(const UncalibratedMeasurement* meas);
+    /** @brief Returns whether the measurement is a NSW measurement */
+    bool isNSW(const UncalibMeasType aodType);
     /** @brief Transforms the uncalibrated measurement type to a technology index
         @param aodType Uncalibrated measurement type */
     ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType);

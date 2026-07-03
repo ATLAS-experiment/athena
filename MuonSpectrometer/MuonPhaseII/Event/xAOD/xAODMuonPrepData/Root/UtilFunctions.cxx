@@ -256,4 +256,8 @@ namespace xAOD{
         }
         return std::make_pair(std::move(cmbPos), std::move(cmbCov));
     }
+    bool isNSW(const UncalibMeasType aodType) {
+        return aodType == UncalibMeasType::MMClusterType || 
+               aodType == UncalibMeasType::sTgcStripType;
+    }
 }
