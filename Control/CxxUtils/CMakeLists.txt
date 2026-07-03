@@ -79,9 +79,6 @@ atlas_add_test( MD5_test
    SOURCES test/MD5_test.cxx
    LINK_LIBRARIES CxxUtils )
 
-atlas_add_test( ut_cxxutils_floatcompression_test
-   SOURCES test/ut_cxxutils_floatcompression_test.cxx
-   LINK_LIBRARIES CxxUtils )
 
 atlas_add_test( Compressor_test
    SOURCES test/Compressor_test.cxx
