@@ -40,7 +40,7 @@ namespace Trk{
   class TrackParticleBase;
 
   struct PartialMassConstraint{
-    VertexID VRT;
+    VertexID VRT{};
     std::vector<int> trkInVrt;              // positions of participating tracks in common track list
     std::vector<VertexID> pseudoInVrt;      // VertexIDs of pseudos
     double Mass{};
@@ -372,10 +372,10 @@ namespace Trk{
         {
           // Track reference point(hit) in global ATLAS frame
           Amg::Vector3D trkRefGlobPos;
-          int extrapolationType;
-          int TrkID;
-          const TrackParameters* TrkPnt;
-          double prtMass;
+          int extrapolationType = 0;
+          int TrkID = 0;
+          const TrackParameters* TrkPnt = nullptr;
+          double prtMass = 0;
           Amg::Vector3D trkSavedLocalVertex; // Local VKalVrtCore vertex
         };
 

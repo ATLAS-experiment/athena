@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./ISF_HitAnalysis.h"
@@ -382,12 +382,12 @@ StatusCode ISF_HitAnalysis::finalize ATLAS_NOT_THREAD_SAFE ()
 
  /** now add branches and leaves to the tree */
 
- using GEOCELL = struct
+ struct GEOCELL
  {
-  Long64_t identifier;
-  Int_t calosample;
-  float eta,phi,r,eta_raw,phi_raw,r_raw,x,y,z,x_raw,y_raw,z_raw;
-  float deta,dphi,dr,dx,dy,dz;
+  Long64_t identifier = 0;
+  Int_t calosample = 0;
+  float eta = 0,phi = 0,r = 0,eta_raw = 0,phi_raw = 0,r_raw = 0,x = 0,y = 0,z = 0,x_raw = 0,y_raw = 0,z_raw = 0;
+  float deta = 0,dphi = 0,dr = 0,dx = 0,dy = 0,dz = 0;
  };
 
  static GEOCELL geocell;
