@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -60,8 +60,8 @@ public:
   QList<AODHandleBase*> handlesList;
 
   //For iteration:
-  std::vector<IParticleHandleBase*>::iterator itHandles;
-  std::vector<IParticleHandleBase*>::iterator itHandlesEnd;
+  std::vector<IParticleHandleBase*>::iterator itHandles{};
+  std::vector<IParticleHandleBase*>::iterator itHandlesEnd{};
   
   // N.B. Material button defined in children.
 };
