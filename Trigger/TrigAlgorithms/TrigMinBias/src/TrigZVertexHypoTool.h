@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGMINBIAS_TRIGZVERTEXHYPOTOOL_H
 #define TRIGMINBIAS_TRIGZVERTEXHYPOTOOL_H
@@ -22,8 +22,8 @@ public:
   TrigZVertexHypoTool(const std::string& type, const std::string& name, const IInterface* parent);
 
   struct ZVertexInfo {
-    TrigCompositeUtils::Decision* decision;
-    const xAOD::TrigCompositeContainer* vertices;
+    TrigCompositeUtils::Decision* decision = nullptr;
+    const xAOD::TrigCompositeContainer* vertices = nullptr;
     const TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
   };
 
