@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Robert Les (robert.les@cern.ch)
@@ -8,6 +8,8 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include <vector>
 #include <string>
+#include <cmath>
+#include <array>
 
 namespace DerivationFramework {
 
@@ -36,11 +38,12 @@ namespace DerivationFramework {
     }
 
     // loop over jet collection
+    const std::array<std::string,3> ECF{"ECF1","ECF2","ECF3"};
     for( const auto *jet: *largeRjets){
       //get ECF
-      float ecf1 = jet->getAttribute<float>("ECF1");
-      float ecf2 = jet->getAttribute<float>("ECF2");
-      float ecf3 = jet->getAttribute<float>("ECF3");
+      float ecf1 = jet->getAttribute<float>(ECF[0]);
+      float ecf2 = jet->getAttribute<float>(ECF[1]);
+      float ecf3 = jet->getAttribute<float>(ECF[2]);
 
       //calculate D2 and decorate
       float D2=-999;
