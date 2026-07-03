@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTANALYSIS_COUNTERBASE_H
@@ -11,6 +11,13 @@
 
 #include "CostData.h"
 #include "Variable.h"
+
+#include "CxxUtils/transparent_string_hash.h"
+#include <cstdint>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+
 
 class MonitorBase; //!< Forward declare
 class TH1; //!< Forward declare
@@ -76,7 +83,7 @@ class CounterBase {
      * @param[in] name Variable to return
      * @return Mutable reference to Variable
      */
-    Variable& getVariable(const std::string& name);
+    Variable& getVariable(std::string_view name);
 
     /**
      * @brief Fill (for per-Call) or accumulate in a buffer (for per-Event) a quantity histogrammed by a named Variable 
@@ -84,7 +91,7 @@ class CounterBase {
      * @param[in] value The payload value
      * @param[in] weight Global event weight
      */
-    StatusCode fill(const std::string& name, float value, float weight = 1.0);
+    StatusCode fill(std::string_view name, float value, float weight = 1.0);
 
     /**
      * @brief Fill (for per-Call) or accumulate in a buffer (for per-Event) a quantity histogrammed by a named Variable 
@@ -93,14 +100,14 @@ class CounterBase {
      * @param[in] yvalue The payload y-axis value
      * @param[in] weight Global event weight
      */
-    StatusCode fill(const std::string& name, float xvalue, float yvalue, float weight);
+    StatusCode fill(std::string_view name, float xvalue, float yvalue, float weight);
 
     /**
      * @brief Convenience function. Equivalent to fill(name, 1.0, weight);
      * @param[in] name Variable to increment
      * @param[in] weight Global event weight
      */
-    StatusCode increment(const std::string& name, float weight = 1.0);
+    StatusCode increment(std::string_view name, float weight = 1.0);
 
     /**
      * @brief Optional for per-Event Variables. Sets a denominator to divide the value through by before filling. 
@@ -201,8 +208,8 @@ class CounterBase {
   private:
 
     const std::string m_name; //!< Counter's name
-    const MonitorBase* m_parent; //!< Counter's parent Monitor. Cached non-owning const pointer.
-    std::unordered_map< std::string, Variable > m_variables; //!< Store of Counter's Variables. These wrap a histogram pointer. Keyed by name.
+    const MonitorBase* m_parent{}; //!< Counter's parent Monitor. Cached non-owning const pointer.
+    std::unordered_map< std::string, Variable, CxxUtils::TransparentStringHash, std::equal_to<> > m_variables; //!< Store of Counter's Variables. These wrap a histogram pointer. Keyed by name.
 };
 
 #endif // TRIGCOSTANALYSIS_COUNTERBASE_H
