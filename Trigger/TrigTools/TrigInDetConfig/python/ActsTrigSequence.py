@@ -165,7 +165,6 @@ class ActsTrigSequence(InnerTrackerTrigSequence):
                                               ACTSTracksLocation=self.flags.Tracking.ActiveConfig.trkTracks_FTF,
                                               SeedLabels=["PPP"],
                                               SeedContainerKeys=["ActsPixelSeeds"],
-                                              DetectorElementsKeys=['ITkPixelDetectorElementCollection'],
                                               UncalibratedMeasurementContainerKeys=measurements)
      
     acc.merge(trackfinding)

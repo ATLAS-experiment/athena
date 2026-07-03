@@ -88,7 +88,6 @@ def ActsMainTrackFindingAlgCfg(flags,
     # Maybe it is best to start with strips where the occupancy is lower.
     kwargs.setdefault("SeedLabels", seedOrder(flags, pixel=["PPP"], strip=["SSS"]))
     kwargs.setdefault("SeedContainerKeys", seedOrder(flags, pixel=["ActsPixelSeeds"], strip=["ActsStripSeeds"]))
-    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=['ITkPixelDetectorElementCollection'], strip=['ITkStripDetectorElementCollection']))
     if flags.Acts.Tracks.doAnalysis:
         kwargs.setdefault("SeedDestiny", [f'{seedkey}Destiny' for seedkey in kwargs["SeedContainerKeys"]])
 
@@ -159,9 +158,12 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("ptMinMeasurements", seedOrder(flags, pixel=[3], strip=[6]))
         kwargs.setdefault("absEtaMaxMeasurements", seedOrder(flags, pixel=[3], strip=[999999]))
     
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
 
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
@@ -289,7 +291,6 @@ def ActsTrackFindingCfg(flags,
     kwargs.setdefault('UncalibratedMeasurementContainerKeys', isdet(flags, pixel=[pixelClusters], strip=[stripClusters], hgtd=[hgtdClusters]))
     kwargs.setdefault('SeedLabels', seedOrder(flags, pixel=pixelSeedLabels, strip=stripSeedLabels))
     kwargs.setdefault('SeedContainerKeys', seedOrder(flags, pixel=pixelSeedKeys, strip=stripSeedKeys))
-    kwargs.setdefault('DetectorElementsKeys', seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements))
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=pixelRefit, strip=stripRefit))
 
     acc.merge(ActsMainTrackFindingAlgCfg(flags,
@@ -304,12 +305,13 @@ def ActsTrackFindingCfg(flags,
                                           TracksLocation=f"{flags.Tracking.ActiveConfig.extension}Tracks"))
 
         # Seed To Track Monitoring
-        if len(kwargs["SeedContainerKeys"]) != len(kwargs["DetectorElementsKeys"]):
+        DetectorElementsKeys=seedOrder(flags, pixel=pixelDetElements, strip=stripDetElements)
+        if len(kwargs["SeedContainerKeys"]) != len(DetectorElementsKeys):
             raise AttributeError("SeedContainerKeys and DetectorElementsKeys must have same size")
 
         for i in range(0, len(kwargs["SeedContainerKeys"])):
             seedKey = kwargs["SeedContainerKeys"][i]
-            detElKey = kwargs["DetectorElementsKeys"][i]
+            detElKey = DetectorElementsKeys[i]
 
             # make seed params
             from ActsConfig.ActsAnalysisConfig import ActsBaseSeedsToTrackParamsAlgCfg

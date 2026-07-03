@@ -84,7 +84,6 @@ namespace ActsTrk
 
     ATH_CHECK(m_paramEstimationTool.retrieve());
     ATH_CHECK(m_seedContainerKeys.initialize());
-    ATH_CHECK(m_detEleCollKeys.initialize());
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
     ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
     ATH_CHECK(m_detElStatus.initialize());
@@ -92,18 +91,6 @@ namespace ActsTrk
 
     m_storeDestinies = not m_seedDestiny.empty();
     ATH_CHECK(m_seedDestiny.initialize(m_storeDestinies));
-
-    if (m_seedContainerKeys.size() != m_detEleCollKeys.size())
-      {
-        ATH_MSG_FATAL("There are " << m_detEleCollKeys.size() << " DetectorElementsKeys, but " << m_seedContainerKeys.size() << " SeedContainerKeys");
-        return StatusCode::FAILURE;
-      }
-
-    if (m_detEleCollKeys.size() != m_seedLabels.size())
-      {
-        ATH_MSG_FATAL("There are " << m_seedLabels.size() << " SeedLabels, but " << m_detEleCollKeys.size() << " DetectorElementsKeys");
-        return StatusCode::FAILURE;
-      }
 
     if (m_useTopSpRZboundary.size() != 2)
       {
@@ -242,9 +229,6 @@ namespace ActsTrk
     // ===================== CONDS ====================== //
     // ================================================== //
 
-    std::vector<const InDetDD::SiDetectorElementCollection*> detElementsCollections;
-    std::size_t total_detElems = 0;
-    ATH_CHECK(getContainersFromKeys(ctx, m_detEleCollKeys, detElementsCollections, total_detElems));
 
     // ================================================== //
     // ===================== COMPUTATION ================ //
@@ -289,7 +273,6 @@ namespace ActsTrk
                              sharedHits,
                              duplicateSeedDetector,
                              *seedContainers.at(icontainer),
-                             *detElementsCollections.at(icontainer),
                              actsTracksContainer,
                              icontainer,
                              icontainer < m_seedLabels.size() ? m_seedLabels[icontainer].c_str() : m_seedContainerKeys[icontainer].key().c_str(),
@@ -429,7 +412,6 @@ namespace ActsTrk
                               detail::SharedHitCounter &sharedHits,
                               detail::DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::SeedContainer &seeds,
-                              const InDetDD::SiDetectorElementCollection& detElements,
                               detail::RecoTrackContainer &actsTracksContainer,
                               std::size_t typeIndex,
                               const char *seedType,
@@ -476,12 +458,17 @@ namespace ActsTrk
 
     // Function for Estimate Track Parameters
     auto retrieveSurfaceFunction =
-      [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
+       [detectorElementToGeometryIdMapPtr=m_trackingGeometryTool->surfaceIdMap(),
+        actsTrackingGeometryPtr=m_trackingGeometryTool->trackingGeometry().get()] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
         const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
-        const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(useTopSp ? sp->elementIdList().back()
-                                                                                   : sp->elementIdList().front());
-        const Trk::Surface& atlas_surface = element->surface();
-        return *m_geometryConvTool->convertSurfaceToActs(atlas_surface);
+        const xAOD::UncalibratedMeasurement* meas = useTopSp ? sp->measurements().back() : sp->measurements().front();
+        const auto geoid_iter = detectorElementToGeometryIdMapPtr->find(ActsTrk::makeDetectorElementKey(meas->type(), meas->identifierHash()));
+        if (geoid_iter == detectorElementToGeometryIdMapPtr->end()) {
+           throw std::runtime_error("measurement not linked to Acts surface.");
+        }
+        const Acts::Surface *surface = actsTrackingGeometryPtr->findSurface( DetectorElementToActsGeometryIdMap::getValue(*geoid_iter) );
+        assert(surface);
+        return *surface;
       };
 
 

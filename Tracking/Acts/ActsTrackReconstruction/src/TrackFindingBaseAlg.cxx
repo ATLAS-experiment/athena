@@ -75,7 +75,6 @@ namespace ActsTrk {
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_extrapolationTool.retrieve());
     ATH_CHECK(m_trackStatePrinter.retrieve(EnableTool{not m_trackStatePrinter.empty()}));
-    ATH_CHECK(m_geometryConvTool.retrieve());
     ATH_CHECK(m_fitterTool.retrieve());
     ATH_CHECK(m_pixelCalibTool.retrieve(EnableTool{not m_pixelCalibTool.empty()}));
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
