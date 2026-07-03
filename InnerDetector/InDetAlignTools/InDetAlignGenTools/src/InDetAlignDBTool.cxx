@@ -378,22 +378,25 @@ bool InDetAlignDBTool::idToDetSet(const Identifier ident, int& det, int& bec,
   bool resok=false;
   if (m_pixman && m_pixid->is_pixel(ident)) {
     det=1;
-    std::cout << "barel" << std::endl;
-    bec=m_pixid->barrel_ec(ident)/2;
-    std::cout << "layer" << std::endl;
-    layer=m_pixid->layer_disk(ident);
-    std::cout << "eta" << std::endl;
-
     std::cout << "ident = " << ident.get_compact() << std::endl;
-
     std::cout << "show = " << m_pixid->show_to_string(ident) << std::endl;
 
+    
+    bec=m_pixid->barrel_ec(ident)/2;
+    std::cout << "bec: " << bec << std::endl;
+
+    layer=m_pixid->layer_disk(ident);
+    std::cout << "layer: " << layer << std::endl;
+
     ring=m_pixid->eta_module(ident);
-    std::cout << "phi" << std::endl;
+    std::cout << "ring: " << ring << std::endl;
+
     sector=m_pixid->phi_module(ident);
+    std::cout << "sector: " << sector << std::endl;
+
     side=0;
     resok=true;
-    std::cout << "if" << std::endl;
+
   } else if (m_sctman && m_sctid->is_sct(ident)) {
     det=2;
     bec=m_sctid->barrel_ec(ident)/2;
