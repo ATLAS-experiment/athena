@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: FloatCompressor.h 789425 2016-12-13 10:50:12Z krasznaa $
@@ -9,9 +9,9 @@
 #define CXXUTILS_FLOATCOMPRESSOR_H
 
 // System include(s):
-extern "C" {
-#   include <stdint.h>
-}
+
+#include <cstdint>
+
 
 namespace CxxUtils {
 
@@ -44,17 +44,17 @@ namespace CxxUtils {
 
    private:
       /// Number of mantissa bits to keep
-      unsigned int m_mantissaBits;
+      unsigned int m_mantissaBits{};
       /// Bitmask for zeroing out the non-interesting bits
-      uint32_t m_mantissaBitmask;
+      uint32_t m_mantissaBitmask{};
 
       /// @name Magic numbers
       /// @{
 
       // Half of the LSB-value after cutting the lower 32 - Ntotal bits
-      uint32_t m_rounding;
+      uint32_t m_rounding{};
       /// Largest possible positive 32bit float minus the rounding
-      uint32_t m_vmax;
+      uint32_t m_vmax{};
 
       /// @}
 

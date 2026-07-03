@@ -165,6 +165,11 @@ atlas_add_test( transparent_string_hash_test
   LINK_LIBRARIES CxxUtils Boost::unit_test_framework
   POST_EXEC_SCRIPT noerror.sh
 )
+atlas_add_test( FloatCompressor_test
+  SOURCES test/FloatCompressor_test.cxx
+  LINK_LIBRARIES CxxUtils Boost::unit_test_framework
+  POST_EXEC_SCRIPT noerror.sh
+)
 
 
 # Set up the "simple" tests:

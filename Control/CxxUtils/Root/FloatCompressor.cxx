@@ -1,19 +1,20 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: FloatCompressor.cxx 789425 2016-12-13 10:50:12Z krasznaa $
 
-// System include(s):
-#include <cmath>
+
 
 // Local include(s):
 #include "CxxUtils/FloatCompressor.h"
+// System include(s):
+#include <cmath>
 
 namespace CxxUtils {
 
    /// Total number of total mantissa bits
-   static const unsigned int NMANTISSA = 23;
+   constexpr unsigned int NMANTISSA = 23;
 
    FloatCompressor::FloatCompressor( unsigned int mantissaBits )
       : m_mantissaBits( mantissaBits ), m_mantissaBitmask( 0 ) {
