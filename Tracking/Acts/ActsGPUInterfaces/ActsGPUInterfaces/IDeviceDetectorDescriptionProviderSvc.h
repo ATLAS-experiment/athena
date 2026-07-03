@@ -12,24 +12,18 @@
 
 namespace ActsTrk {
 
-class IActsDeviceDetectorDescriptionProviderSvc : virtual public IService {
+class IDeviceDetectorDescriptionProviderSvc : virtual public IService {
 public:
-    DeclareInterfaceID(IActsDeviceDetectorDescriptionProviderSvc, 1, 0);
+    DeclareInterfaceID(IDeviceDetectorDescriptionProviderSvc, 1, 0);
 
-    virtual ~IActsDeviceDetectorDescriptionProviderSvc() = default;
+    virtual ~IDeviceDetectorDescriptionProviderSvc() = default;
 
     virtual const std::unordered_map<uint64_t, Identifier>&
         detrayToAthenaMap() const = 0;
 
     virtual const std::unordered_map<Identifier, uint64_t>&
         athenaToDetrayMap() const = 0;
-    virtual const traccc::detector_design_description::buffer&
-      designDescriptionBuffer() const = 0;
 
-    virtual const traccc::detector_conditions_description::buffer&
-      conditionsDescriptionBuffer() const = 0;
-
-    virtual const traccc::detector_conditions_description::host& hostConditions() const = 0;
 };
 
 } // namespace ActsTrk

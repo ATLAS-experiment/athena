@@ -44,7 +44,7 @@ StatusCode RDOtoTracccCellConverterAlg::initialize()
   ATH_CHECK(m_copy.retrieve());
 
   m_athenaToDetray = &m_detDescSvc->athenaToDetrayMap();
-  ATH_CHECK(detStore()->retrieve(m_hostCond, "TracccHostConditionsConfig"));
+  ATH_CHECK(detStore()->retrieve(m_hostCond, m_hostCondObjectName.value()));
 
   const auto& gids = m_hostCond->geometry_id();
   m_DetrayIdToDetDescrIndexMap.reserve(gids.size());

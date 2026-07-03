@@ -14,6 +14,7 @@ def RDOtoTracccCellConverterAlgCfg(flags,
     kwargs.setdefault("PixelRDO",    "ITkPixelRDOs")
     kwargs.setdefault("StripRDO",    "ITkStripRDOs")
     kwargs.setdefault("TracccCells", "TracccCells")
+    kwargs.setdefault("HostConditionsObjectName", "TracccHostCondConfig")
     acc.addEventAlgo(
         CompFactory.ActsTrk.RDOtoTracccCellConverterAlg(name, **kwargs))
     return acc
