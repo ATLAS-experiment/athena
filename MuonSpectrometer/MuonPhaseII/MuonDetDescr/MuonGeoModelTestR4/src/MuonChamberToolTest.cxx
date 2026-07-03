@@ -470,7 +470,7 @@ namespace MuonGMR4 {
                 saveEnvelope(gctx, std::format("Chamber_{:}{:}{:}{:}{:}", 
                                                 chamber.detectorType(),
                                                 chName(chamber.chamberIndex()),
-                                                Acts::abs(chamber.stationEta()),
+                                                std::abs(chamber.stationEta()),
                                                 chamber.stationEta() > 0 ? 'A' : 'C',
                                                 chamber.stationPhi()), 
                             chamberBounds, extractSurfaces(chamber.readoutEles()));
@@ -717,7 +717,7 @@ namespace MuonGMR4 {
                 const int eta = m_idHelperSvc->stationEta(volId);
                 saveEnvelope(gctx, std::format("TrackingVolume_{:}{:}{:}{:}_{:}", 
                                                  chName(m_idHelperSvc->chamberIndex(volId)),
-                                                 Acts::abs(eta), eta > 0 ? 'A' : 'C',
+                                                 std::abs(eta), eta > 0 ? 'A' : 'C',
                                                  m_idHelperSvc->stationPhi(volId), vIdx), 
                             *testVol, surfaces , chamberVolumes(*testVol));
 
