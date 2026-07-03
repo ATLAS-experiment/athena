@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -36,7 +36,6 @@
 
 // STL include(s):
 #include <sstream>
-#include <map>
 #include <cstdlib>
 
 using CLHEP::Hep3Vector;
@@ -412,29 +411,29 @@ void LArG4GenShowerLib::addingTagsToLibrary()
   else {
     atlasReleaseTag += std::string("Unknown");
   }
-
+  
+  // get geometry version
+  ServiceHandle<IGeoModelSvc> geoModelSvc("GeoModelSvc", this->name());
+  const auto & version = geoModelSvc->atlasVersion();
+  //
+  // get geant4 version and strip off CVS Name tag
+  std::string g4Version = G4Version;
+  size_t pos = g4Version.find("$Name: ");
+  if (pos != std::string::npos) {
+    g4Version.erase(pos, 7);
+  }
+  pos = g4Version.find(" $");
+  if (pos != std::string::npos) {
+    g4Version.erase(pos, 2);
+  }
   libMap::iterator itr;
   for (itr = m_libraries.begin();itr != m_libraries.end();++itr){
     // release
     (*itr).second->release(atlasReleaseTag);
-
-    // get geometry version
-    ServiceHandle<IGeoModelSvc> geoModelSvc("GeoModelSvc", this->name());
-    (*itr).second->geometry(geoModelSvc->atlasVersion());
-
+    (*itr).second->geometry(version);
     // get Physics list
     (*itr).second->physicsList(m_physicslist_name);
-
-    // get geant4 version and strip off CVS Name tag
-    std::string g4Version = G4Version;
-    size_t pos = g4Version.find("$Name: ");
-    if (pos != std::string::npos) {
-      g4Version.erase(pos, 7);
-    }
-    pos = g4Version.find(" $");
-    if (pos != std::string::npos) {
-      g4Version.erase(pos, 2);
-    }
+    //
     (*itr).second->geantVersion(g4Version);
   }
 }
