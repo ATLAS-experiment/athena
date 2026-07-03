@@ -1,9 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "ScaleFactorTools/VariableFactory.h"
-#include "ScaleFactorTools/QuantileFactory.h"
-#include "PathResolver/PathResolver.h"
+#include "VariableFactory.h"
+#include "QuantileFactory.h"
 #include <iostream>
 
 std::vector<float> QuantileFactory::parseEdges(const json& cfg){

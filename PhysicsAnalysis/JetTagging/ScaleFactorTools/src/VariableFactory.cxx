@@ -1,8 +1,7 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "ScaleFactorTools/VariableFactory.h"
-#include "PathResolver/PathResolver.h"
+#include "VariableFactory.h"
 #include <iostream>
 
 VariableFactory::FloatFunc VariableFactory::floatVariableFactory(const json& cfg) {

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ScaleFactorTools/ScaleFactorTool.h"
-#include "ScaleFactorTools/QuantileFactory.h"
+#include "QuantileFactory.h"
 #include "PathResolver/PathResolver.h"
 #include <fstream>
 

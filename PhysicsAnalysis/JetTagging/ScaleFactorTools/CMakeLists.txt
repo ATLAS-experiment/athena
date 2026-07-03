@@ -7,8 +7,10 @@ atlas_subdir( ScaleFactorTools )
 find_package( nlohmann_json )
 
 atlas_add_library ( ScaleFactorToolsLib
-  Root/*.cxx
+  Root/*.cxx 
+  src/*.cxx
   PUBLIC_HEADERS ScaleFactorTools
+  PRIVATE_INCLUDE_DIRS src
   LINK_LIBRARIES
     AsgTools
     PathResolver
@@ -16,19 +18,10 @@ atlas_add_library ( ScaleFactorToolsLib
   PRIVATE_LINK_LIBRARIES CxxUtils nlohmann_json::nlohmann_json
 )
 
-if( NOT XAOD_STANDALONE )
-  atlas_add_component( ScaleFactorTools
-    src/*.h
-    src/*.cxx
-    src/components/*.cxx
-    LINK_LIBRARIES ScaleFactorToolsLib
-  )
-else()
-  atlas_add_component( ScaleFactorTools
-    src/components/*.cxx
-    LINK_LIBRARIES ScaleFactorToolsLib
-  )
-endif()
+atlas_add_component( ScaleFactorTools
+  src/components/*.cxx
+  LINK_LIBRARIES ScaleFactorToolsLib
+)
 
 atlas_add_dictionary( ScaleFactorToolsDict
   ScaleFactorTools/ScaleFactorToolsDict.h
