@@ -10,10 +10,11 @@ atlas_add_library( JetAnalysisAlgorithmsLib
    JetAnalysisAlgorithms/*.h JetAnalysisAlgorithms/*.icc Root/*.cxx
    INCLUDE_DIRS ${FASTJET_INCLUDE_DIRS}
    PUBLIC_HEADERS JetAnalysisAlgorithms
-   LINK_LIBRARIES xAODJet xAODMuon SelectionHelpersLib SystematicsHandlesLib
+   LINK_LIBRARIES xAODJet xAODMuon xAODTrigger SelectionHelpersLib SystematicsHandlesLib
    AnaAlgorithmLib JetCalibToolsLib JetInterface
    JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib ${FASTJET_LIBRARIES}
    TrigBtagEmulationToolLib TrigCompositeUtilsLib TrigConfHLTData TrigDecisionToolLib
+   TrigConfData TrigConfInterfaces
    PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODMuon )
 
 atlas_add_component( JetAnalysisAlgorithms

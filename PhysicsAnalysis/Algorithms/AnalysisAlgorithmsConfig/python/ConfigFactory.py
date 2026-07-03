@@ -273,6 +273,10 @@ class ConfigFactory():
         from FTagAnalysisAlgorithms.FTagTrigMatchAnalysisConfig import FTagJetTrigMatchingBlock
         self.addAlgConfigBlock(algName="FTagTriggerMatching", alg=FTagJetTrigMatchingBlock,
                                superBlocks="Jets")
+        from JetAnalysisAlgorithms.L1jFexJetThresholdsDecoratorConfig import L1jFexJetThresholdsDecoratorBlock
+        self.addAlgConfigBlock(algName="L1jFexJetThresholdsDecorator",
+                               alg=L1jFexJetThresholdsDecoratorBlock,
+                               superBlocks="Jets")
         from FTagAnalysisAlgorithms.FTagAnalysisConfig import FTagConfig
         self.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig,
             defaults={'selectionName': ''},
