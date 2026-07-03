@@ -10,6 +10,7 @@
 #include "CxxUtils/FloatCompressor.h"
 // System include(s):
 #include <cmath>
+#include <bit>
 
 namespace CxxUtils {
 
@@ -108,19 +109,17 @@ namespace CxxUtils {
          return value;
       }
 
-      // Create the helper object:
-      floatint_t fi;
-      fi.fvalue = value;
+      auto ivalue = std::bit_cast<std::uint32_t>( value );
 
       //safety-check if value (omitting the sign-bit) is lower than vmax
       //(avoid overflow)
-      if( ( fi.ivalue & 0x7fffffff ) < m_vmax ) {
-         fi.ivalue += m_rounding;
+      if( ( ivalue & std::uint32_t{0x7fffffff} ) < m_vmax ) {
+         ivalue += m_rounding;
       }
 
       // Do the compression:
-      fi.ivalue &= m_mantissaBitmask;
-      return fi.fvalue;
+      ivalue &= m_mantissaBitmask;
+      return std::bit_cast<float>( ivalue );
    }
 
 } // namespace CxxUtils

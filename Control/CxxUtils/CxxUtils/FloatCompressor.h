@@ -13,6 +13,7 @@
 #include <cstdint>
 
 
+
 namespace CxxUtils {
 
    /// Class implementing a lossy float compression
@@ -36,11 +37,6 @@ namespace CxxUtils {
       /// Function returning a reduced precision float value
       float reduceFloatPrecision( float value ) const;
 
-      /// Type used in the compression
-      union floatint_t {
-         float fvalue;
-         uint32_t ivalue;
-      };
 
    private:
       /// Number of mantissa bits to keep

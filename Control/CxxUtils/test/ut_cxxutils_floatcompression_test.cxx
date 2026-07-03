@@ -10,6 +10,7 @@
 // System include(s):
 #include <iostream>
 #include <iomanip>
+#include <bit>
 
 // Local include(s):
 #include "CxxUtils/FloatCompressor.h"
@@ -18,11 +19,10 @@
 void testCompression( const CxxUtils::FloatCompressor& fc, float value ) {
 
    std::cout << "Original value: " << std::dec << value << std::endl;
-   CxxUtils::FloatCompressor::floatint_t compressed;
-   compressed.fvalue = fc.reduceFloatPrecision( value );
-   std::cout << "Compressed value: " << compressed.fvalue
+   auto fvalue = fc.reduceFloatPrecision( value );
+   std::cout << "Compressed value: " << fvalue
              << " (hex: " << std::hex << std::setw( 8 ) << std::setfill( '0' )
-             << compressed.ivalue << ")" << std::endl;
+             << std::bit_cast<std::uint32_t>(fvalue) << ")" << std::endl;
    return;
 }
 
