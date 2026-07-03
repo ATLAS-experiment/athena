@@ -462,7 +462,7 @@ namespace MuonR4::SegmentFit{
                 const double dist = signedDistance(locPos, locDir, hit->localPosition(), hit->sensorDirection());
                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(hit->primaryMeasurement());
                 // Check whether the tube is crossed by the hit 
-                if (Acts::abs(dist) >= dc->readoutElement()->innerTubeRadius()) {
+                if (std::abs(dist) >= dc->readoutElement()->innerTubeRadius()) {
                     continue;
                 }
             } else {

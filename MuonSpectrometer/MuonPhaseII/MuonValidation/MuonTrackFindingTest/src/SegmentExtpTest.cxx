@@ -272,7 +272,7 @@ namespace MuonValR4{
 
                     /// Ensure that the fast chi2 term and the segment chi2 term
                     /// match with each other
-                    if (Acts::abs(segChi2 - fastChi2Term) > 1.e-3) {
+                    if (std::abs(segChi2 - fastChi2Term) > 1.e-3) {
                         ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" - The fast & full chi2 calculations from ACTS don't match for "
                             <<(*meas)<<" - full: "<<segChi2<<", fast: "<<fastChi2Term);
                         retCode = StatusCode::FAILURE;

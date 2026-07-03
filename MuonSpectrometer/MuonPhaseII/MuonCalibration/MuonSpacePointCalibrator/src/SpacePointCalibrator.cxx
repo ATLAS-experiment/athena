@@ -126,7 +126,7 @@ namespace MuonR4{
                     auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
                     calibInput.setTrackDirection(locToGlob.linear() * dirInChamb,
-                                                 Acts::abs(dirInChamb.phi() - 90._degree) > 1.e-7 );
+                                                 std::abs(dirInChamb.phi() - 90._degree) > 1.e-7 );
                     calibInput.setTimeOfFlight(timeOfArrival);
                     calibInput.setClosestApproach(std::move(closestApproach));
                     ATH_MSG_VERBOSE("Parse hit calibration "<<m_idHelperSvc->toString(dc->identify())<<", "<<calibInput);
