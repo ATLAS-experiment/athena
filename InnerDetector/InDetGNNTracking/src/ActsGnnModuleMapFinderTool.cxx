@@ -12,6 +12,7 @@
 #include "ActsPlugins/Gnn/OnnxEdgeClassifier.hpp"
 #include "ActsPlugins/Gnn/TensorRTEdgeClassifier.hpp"
 #include "ActsPlugins/Gnn/TorchEdgeClassifier.hpp"
+#include "ActsPlugins/Gnn/EdgeLayerConnector.hpp"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "TrkPrepRawData/PrepRawData.h"
@@ -85,11 +86,21 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::initialize() {
   }
 
   // 3. Track builder
+  std::shared_ptr<ActsPlugins::TrackBuildingBase> tb;
   ATH_MSG_INFO("Configure CC&JunctionRemoval as graph segmentation algorithm");
-  ActsPlugins::CudaTrackBuilding::Config tbCfg;
-  tbCfg.doJunctionRemoval = true;
-  auto tb = std::make_shared<ActsPlugins::CudaTrackBuilding>(
-      tbCfg, m_logger->cloneWithSuffix("CC&JR"));
+  if( m_useEdgeLayerConnector ) {
+    ActsPlugins::EdgeLayerConnector::Config tbCfg;
+    tbCfg.maxHitsPerTrack = m_elcMaxHitsPerTrack;
+    tbCfg.blockSize = 512;
+    tbCfg.weightsCut = m_edgeCut;
+    tb = std::make_shared<ActsPlugins::EdgeLayerConnector>(
+        tbCfg, m_logger->cloneWithSuffix("ELC"));
+  } else {
+    ActsPlugins::CudaTrackBuilding::Config tbCfg;
+    tbCfg.doJunctionRemoval = true;
+    tb = std::make_shared<ActsPlugins::CudaTrackBuilding>(
+        tbCfg, m_logger->cloneWithSuffix("CC&JR"));
+  }
 
   // 4. Assemble pipeline
   m_gnnPipeline = std::make_unique<ActsPlugins::GnnPipeline>(

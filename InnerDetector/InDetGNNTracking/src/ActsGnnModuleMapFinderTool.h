@@ -71,6 +71,8 @@ namespace InDet {
     FloatProperty m_edgeCut{this, "edgeCut", 0.5, "Edge classification cut"};
     UnsignedIntegerProperty m_numTrtContexts{this, "numTrtContexts", 1, "Number of TensorRT execution contexts (controls concurrency)"};
     UnsignedIntegerProperty m_minCandidateMeasurements{this, "minCandidateMeasurements", 7, "Min measurements per candidate"};
+    BooleanProperty m_useEdgeLayerConnector{this, "useEdgeLayerConnector", false, "Use the EdgeLayerConnector instead of CC&JR as graph segmentation algorithm"};
+    IntegerProperty m_elcMaxHitsPerTrack{this, "elcMaxHitsPerTrack", 30, "Max hits per track config for the EdgeLayerConnector"};
 
     // Tool handles
     ToolHandle<ISpacepointFeatureTool> m_spacepointFeatureTool{
