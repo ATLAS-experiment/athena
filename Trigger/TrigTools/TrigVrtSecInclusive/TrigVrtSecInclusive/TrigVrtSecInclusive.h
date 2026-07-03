@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGTOOLS_TRIGVRTSECINCLUSIVE_H
 #define TRIGTOOLS_TRIGVRTSECINCLUSIVE_H
@@ -103,13 +103,13 @@ private:
       Amg::Vector3D        vertex;                    //! VKalVrt fit vertex position
       TLorentzVector       vertexMom;                 //! VKalVrt fit vertex 4-momentum
       std::vector<double>  vertexCov;                 //! VKalVrt fit covariance
-      double               chi2;                      //! VKalVrt fit chi2 result
-      double               chi2Core;                  //! VKalVrt fit chi2 result
+      double               chi2 = 0;                  //! VKalVrt fit chi2 result
+      double               chi2Core = 0;              //! VKalVrt fit chi2 result
       std::vector<double>  chi2PerTrk;                //! list of VKalVrt fit chi2 for each track
-      long int             charge;                    //! total charge of the vertex
+      long int             charge = 0;                //! total charge of the vertex
       std::vector< std::vector<double> > trkAtVrt;    //! list of track parameters wrt the reconstructed vertex
-      unsigned long        closestWrkVrtIndex;        //! stores the index of the closest WrkVrt in std::vector<WrkVrt>
-      double               closestWrkVrtValue;        //! stores the value of some observable to the closest WrkVrt ( observable = e.g. significance )
+      unsigned long        closestWrkVrtIndex = 0;    //! stores the index of the closest WrkVrt in std::vector<WrkVrt>
+      double               closestWrkVrtValue = 0;    //! stores the value of some observable to the closest WrkVrt ( observable = e.g. significance )
 
       inline double ndof() const { return 2.0*( m_selectedTrackIndices.size() + m_associatedTrackIndices.size() ) - 3.0; }
       inline double ndofCore() const { return 2.0*( m_selectedTrackIndices.size() ) - 3.0; }
