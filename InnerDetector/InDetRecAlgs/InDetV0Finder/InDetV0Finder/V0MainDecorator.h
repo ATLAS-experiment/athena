@@ -9,7 +9,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODTracking/VertexContainerFwd.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "GaudiKernel/IPartPropSvc.h"
 
 namespace InDet
 {
@@ -130,8 +129,6 @@ namespace InDet
                     { this, "Py_lb", ".py", "Py for Lambdabar" };
     SG::WriteDecorHandleKey<xAOD::VertexContainer>  m_decorPz_lb 
                     { this, "Pz_lb", ".pz", "Pz for Lambdabar" };
-
-    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
   };
 
 }
