@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #define BOOST_TEST_MODULE FloatCompressor_test
 #include <boost/test/unit_test.hpp>
 

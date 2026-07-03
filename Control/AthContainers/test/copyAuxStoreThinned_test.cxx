@@ -252,7 +252,6 @@ void test2()
 
   // Instantiate a new compressor and check against the result
   const CxxUtils::FloatCompressor fc( nmantissa );
-  //CxxUtils::FloatCompressor::floatint_t uni;
   uint32_t result{0};
 
   // Helper to print int in binary w/ a nicer format
