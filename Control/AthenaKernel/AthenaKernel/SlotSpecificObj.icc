@@ -43,14 +43,15 @@ SlotSpecificObj<T, S>::SlotSpecificObj (size_t nslots)
  * @param ctx Event context giving the desired slot.
  */
 template <class T, InvalidSlot S>
+template <class Self>
 inline
-T* SlotSpecificObj<T, S>::get (const EventContext& ctx)
+auto* SlotSpecificObj<T, S>::get (this Self&& self, const EventContext& ctx)
 {
   if constexpr (S==InvalidSlot::Disabled) {
-    return &m_slots.at(ctx.slot());
+    return &self.m_slots.at(ctx.slot());
   }
   else {
-    return ctx.valid() ? &m_slots.at(ctx.slot()) : &m_slots.back();
+    return ctx.valid() ? &self.m_slots.at(ctx.slot()) : &self.m_slots.back();
   }
 }
 
@@ -61,40 +62,11 @@ T* SlotSpecificObj<T, S>::get (const EventContext& ctx)
  * The slot number is found by retrieving the global current context.
  */
 template <class T, InvalidSlot S>
+template <class Self>
 inline
-T* SlotSpecificObj<T, S>::get()
+auto* SlotSpecificObj<T, S>::get(this Self&& self)
 {
-  return get (Gaudi::Hive::currentContext());
-}
-
-
-/**
- * @brief Return pointer to the object for slot given by @c ctx.
- * @param ctx Event context giving the desired slot.
- */
-template <class T, InvalidSlot S>
-inline
-const T* SlotSpecificObj<T, S>::get (const EventContext& ctx) const
-{
-  if constexpr (S==InvalidSlot::Disabled) {
-    return &m_slots.at(ctx.slot());
-  }
-  else {
-    return ctx.valid() ? &m_slots.at(ctx.slot()) : &m_slots.back();
-  }
-}
-
-
-/**
- * @brief Return pointer to the object for the current slot.
- *
- * The slot number is found by retrieving the global current context.
- */
-template <class T, InvalidSlot S>
-inline
-const T* SlotSpecificObj<T, S>::get() const
-{
-  return get (Gaudi::Hive::currentContext());
+  return self.get (Gaudi::Hive::currentContext());
 }
 
 
@@ -104,10 +76,11 @@ const T* SlotSpecificObj<T, S>::get() const
  * The slot number is found by retrieving the global current context.
  */
 template <class T, InvalidSlot S>
+template <class Self>
 inline
-T& SlotSpecificObj<T, S>::operator* ()
+auto& SlotSpecificObj<T, S>::operator* (this Self&& self)
 {
-  return *get();
+  return *self.get();
 }
 
 
@@ -117,58 +90,23 @@ T& SlotSpecificObj<T, S>::operator* ()
  * The slot number is found by retrieving the global current context.
  */
 template <class T, InvalidSlot S>
+template <class Self>
 inline
-const T& SlotSpecificObj<T, S>::operator* () const
+auto* SlotSpecificObj<T, S>::operator-> (this Self&& self)
 {
-  return *get();
+  return self.get();
 }
 
 
-/**
- * @brief Dereference the pointer.
- *
- * The slot number is found by retrieving the global current context.
- */
-template <class T, InvalidSlot S>
-inline
-T* SlotSpecificObj<T, S>::operator-> ()
-{
-  return get();
-}
-
-
-/**
- * @brief Dereference the pointer.
- *
- * The slot number is found by retrieving the global current context.
- */
-template <class T, InvalidSlot S>
-inline
-const T* SlotSpecificObj<T, S>::operator-> () const
-{
-  return get();
-}
-
-  
 /**
  * @brief Begin iterator.
  */
 template <class T, InvalidSlot S>
+template <class Self>
 inline
-typename SlotSpecificObj<T, S>::iterator SlotSpecificObj<T, S>::begin()
+auto SlotSpecificObj<T, S>::begin(this Self&& self)
 {
-  return m_slots.begin();
-}
-
-
-/**
- * @brief Const begin iterator.
- */
-template <class T, InvalidSlot S>
-inline
-typename SlotSpecificObj<T, S>::const_iterator SlotSpecificObj<T, S>::begin() const
-{
-  return m_slots.begin();
+  return self.m_slots.begin();
 }
 
 
@@ -176,21 +114,11 @@ typename SlotSpecificObj<T, S>::const_iterator SlotSpecificObj<T, S>::begin() co
  * @brief End iterator.
  */
 template <class T, InvalidSlot S>
+template <class Self>
 inline
-typename SlotSpecificObj<T, S>::iterator SlotSpecificObj<T, S>::end()
+auto SlotSpecificObj<T, S>::end(this Self&& self)
 {
-  return m_slots.end();
-}
-
-
-/**
- * @brief Const end iterator.
- */
-template <class T, InvalidSlot S>
-inline
-typename SlotSpecificObj<T, S>::const_iterator SlotSpecificObj<T, S>::end() const
-{
-  return m_slots.end();
+  return self.m_slots.end();
 }
 
 

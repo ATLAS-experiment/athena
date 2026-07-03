@@ -102,7 +102,8 @@ public:
    * @brief Return pointer to the object for slot given by @c ctx.
    * @param ctx Event context giving the desired slot.
    */
-  T* get (const EventContext& ctx);
+  template <class Self>
+  auto* get (this Self&& self, const EventContext& ctx);
 
 
   /**
@@ -110,22 +111,8 @@ public:
    *
    * The slot number is found by retrieving the global current context.
    */
-  T* get();
-
-
-  /**
-   * @brief Return pointer to the object for slot given by @c ctx.
-   * @param ctx Event context giving the desired slot.
-   */
-  const T* get (const EventContext& ctx) const;
-
-
-  /**
-   * @brief Return pointer to the object for the current slot.
-   *
-   * The slot number is found by retrieving the global current context.
-   */
-  const T* get() const;
+  template <class Self>
+  auto* get(this Self&& self);
 
 
   /**
@@ -133,7 +120,8 @@ public:
    *
    * The slot number is found by retrieving the global current context.
    */
-  T& operator* ();
+  template <class Self>
+  auto& operator* (this Self&& self);
 
 
   /**
@@ -141,23 +129,8 @@ public:
    *
    * The slot number is found by retrieving the global current context.
    */
-  const T& operator* () const;
-
-
-  /**
-   * @brief Dereference the pointer.
-   *
-   * The slot number is found by retrieving the global current context.
-   */
-  T* operator-> ();
-
-
-  /**
-   * @brief Dereference the pointer.
-   *
-   * The slot number is found by retrieving the global current context.
-   */
-  const T* operator-> () const;
+  template <class Self>
+  auto* operator-> (this Self&& self);
 
 
   //**********************************************************************
@@ -173,27 +146,17 @@ public:
   /**
    * @brief Begin iterator.
    */
-  iterator begin();
-
-
-  /**
-   * @brief Const begin iterator.
-   */
-  const_iterator begin() const;
+  template <class Self>
+  auto begin(this Self&& self);
 
 
   /**
    * @brief End iterator.
    */
-  iterator end();
+  template <class Self>
+  auto end(this Self&& self);
 
 
-  /**
-   * @brief Const end iterator.
-   */
-  const_iterator end() const;
-
-  
 private:
   /// Set of per-slot objects.
   std::vector<T> m_slots;
