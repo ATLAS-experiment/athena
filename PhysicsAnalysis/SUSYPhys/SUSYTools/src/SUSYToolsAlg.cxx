@@ -209,7 +209,7 @@ StatusCode SUSYToolsAlg::initialize() {
   // retrieve SUSYTools config file
   TEnv rEnv;
   int success = -1;
-  m_configFile = (PathResolverFindCalibFile(m_configFile)).c_str();
+  m_configFile = PathResolverFindCalibFile(m_configFile);
   success = rEnv.ReadFile(m_configFile.c_str(), kEnvAll);
   if(success != 0){
     ATH_MSG_ERROR( "Cannot open config file!");

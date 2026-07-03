@@ -929,7 +929,7 @@ StatusCode SUSYObjDef_xAOD::initialize() {
   }
 #endif
 
-  m_configFile = (PathResolverFindCalibFile(m_configFile)).c_str();
+  m_configFile = PathResolverFindCalibFile(m_configFile);
 
   //Read configuration from file (stored as Property)
   ATH_CHECK( readConfig() );

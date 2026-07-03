@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SUSYTOOLS_SUSYOBJDEF_XAODTOOL_H
@@ -63,9 +63,9 @@ namespace ST {
 
   struct SystInfo{
     CP::SystematicSet systset;
-    bool affectsKinematics;
-    bool affectsWeights;
-    unsigned int affectsType;
+    bool affectsKinematics = false;
+    bool affectsWeights = false;
+    unsigned int affectsType = 0;
     std::set<unsigned int> affectedWeights;
   };
 
