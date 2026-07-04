@@ -81,7 +81,7 @@ namespace MuonValR4{
     void fillTruthInfo(const ActsTrk::GeometryContext& gctx,
                        const xAOD::MuonSegment* truthSegment);
     /** @brief Fill the hit summary info of the associated bucket */
-    void fillBucketInfo(const MuonR4::SpacePointBucket& bucket);
+    void fillBucketInfo(const MuonR4::SpacePointBucket& bucket, const xAOD::MuonSegment* truthSegment = nullptr);
     
     /** @brief Fill the info associated to the seed 
      *  @param obj: Pointer to the matching object connecting the seeds & segment & truth */
@@ -129,9 +129,15 @@ namespace MuonValR4{
     /// phi index of the station
     MuonVal::ScalarBranch<int>& m_out_stationPhi{m_tree.newScalar<int>("stationPhi")};
 
+    /// @brief Note these quantities are only filled for the 0th seed! 
     MuonVal::ScalarBranch<float>& m_out_bucketStart{m_tree.newScalar<float>("bucketStart", 1)};
     MuonVal::ScalarBranch<float>& m_out_bucketEnd{m_tree.newScalar<float>("bucketEnd", -1)};
     MuonVal::ScalarBranch<float>& m_out_bucketEtaHitGap{m_tree.newScalar<float>("bucketEtaHitGap", 0.)};
+    /// @brief These bucket quantities are based only on the truth hit information inside the bucket. They are used to compare the truth segment with the bucket properties. Note these quantities are only filled for the 0th seed! 
+    MuonVal::ScalarBranch<float>& m_out_bucketTruthStart{ m_tree.newScalar<float>("bucketTruthStart", 1.F) };
+    MuonVal::ScalarBranch<float>& m_out_bucketTruthEnd{ m_tree.newScalar<float>("bucketTruthEnd", -1.F) };
+
+
 
     /// @brief Branch dumping all the space points from the difference buckets
     std::shared_ptr<SpacePointTesterModule> m_spTester{};
@@ -185,54 +191,20 @@ namespace MuonValR4{
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMmHits{m_tree.newScalar<unsigned short>("genNMmHits",0)};
     MuonVal::ScalarBranch<unsigned short>& m_out_gen_nSTGCHits{m_tree.newScalar<unsigned short>("genNsTgcHits",0)};
 
-
     /**
      * Sim-hit-level truth content.
      * Unlike genNHits, these branches count unique xAOD::MuonSimHit
      * pointers returned by MuonR4::getMatchingSimHits(truthSegment).
      */
-    //MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedSimHits{
-    //    m_tree.newScalar<unsigned short>("genNMatchedSimHits", 0)};
 
-    //MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedPrecisionSimHits{
-    //    m_tree.newScalar<unsigned short>("genNMatchedPrecisionSimHits", 0)};
-
-    //MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedOtherSimHits{
-    //    m_tree.newScalar<unsigned short>("genNMatchedOtherSimHits", 0)};
-
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedMdtSimHits{
-        m_tree.newScalar<unsigned short>("genNMatchedMdtSimHits", 0)};
-
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedRpcSimHits{
-        m_tree.newScalar<unsigned short>("genNMatchedRpcSimHits", 0)};
-
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedTgcSimHits{
-        m_tree.newScalar<unsigned short>("genNMatchedTgcSimHits", 0)};
-
-    //MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedMmSimHits{
-    //    m_tree.newScalar<unsigned short>("genNMatchedMmSimHits", 0)};
-
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedMmEtaSimHits{
-        m_tree.newScalar<unsigned short>("genNMatchedMmEtaSimHits", 0)};
-
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedMmStereoSimHits{
-        m_tree.newScalar<unsigned short>("genNMatchedMmStereoSimHits", 0)};
-
-    //MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedsTgcSimHits{
-    //    m_tree.newScalar<unsigned short>("genNMatchedsTgcSimHits", 0)};
-
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedsTgcStripSimHits{
-        m_tree.newScalar<unsigned short>("genNMatchedsTgcStripSimHits", 0)};
-
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedsTgcWireSimHits{
-        m_tree.newScalar<unsigned short>("genNMatchedsTgcWireSimHits", 0)};
-
-    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedsTgcPadSimHits{
-        m_tree.newScalar<unsigned short>("genNMatchedsTgcPadSimHits", 0)};
-
-   // MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedUnknownSimHits{
-   //     m_tree.newScalar<unsigned short>("genNMatchedUnknownSimHits", 0)};
-
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedMdtSimHits{ m_tree.newScalar<unsigned short>("genNMatchedMdtSimHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedRpcSimHits{ m_tree.newScalar<unsigned short>("genNMatchedRpcSimHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedTgcSimHits{ m_tree.newScalar<unsigned short>("genNMatchedTgcSimHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedMmEtaSimHits{ m_tree.newScalar<unsigned short>("genNMatchedMmEtaSimHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedMmStereoSimHits{ m_tree.newScalar<unsigned short>("genNMatchedMmStereoSimHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedsTgcStripSimHits{ m_tree.newScalar<unsigned short>("genNMatchedsTgcStripSimHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedsTgcWireSimHits{ m_tree.newScalar<unsigned short>("genNMatchedsTgcWireSimHits", 0)};
+    MuonVal::ScalarBranch<unsigned short>& m_out_gen_nMatchedsTgcPadSimHits{ m_tree.newScalar<unsigned short>("genNMatchedsTgcPadSimHits", 0)};
 
     /**
      * All sim hits reachable from the seed, independent of truth segment.
@@ -246,64 +218,16 @@ namespace MuonValR4{
      * These are split using the same classification as the truth-side
      * denominator.
      */
-    //MuonVal::VectorBranch<unsigned short>&
-    //    m_out_seed_truthMatchedPrecisionSimHits{
-    //        m_tree.newVector<unsigned short>(
-    //            "seedTruthMatchedPrecisionSimHits", 0)};
 
-    //MuonVal::VectorBranch<unsigned short>&
-    //    m_out_seed_truthMatchedOtherSimHits{
-    //        m_tree.newVector<unsigned short>(
-    //            "seedTruthMatchedOtherSimHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedMdtSimHits{ m_tree.newVector<unsigned short>( "seedTruthMatchedMdtSimHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedRpcSimHits{ m_tree.newVector<unsigned short>( "seedTruthMatchedRpcSimHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedTgcSimHits{ m_tree.newVector<unsigned short>( "seedTruthMatchedTgcSimHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedMmEtaSimHits{ m_tree.newVector<unsigned short>( "seedTruthMatchedMmEtaSimHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedMmStereoSimHits{ m_tree.newVector<unsigned short>( "seedTruthMatchedMmStereoSimHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedsTgcStripSimHits{ m_tree.newVector<unsigned short>( "seedTruthMatchedsTgcStripSimHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedsTgcWireSimHits{ m_tree.newVector<unsigned short>( "seedTruthMatchedsTgcWireSimHits", 0)};
+    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedsTgcPadSimHits{ m_tree.newVector<unsigned short>( "seedTruthMatchedsTgcPadSimHits", 0)};
 
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedMdtSimHits{
-        m_tree.newVector<unsigned short>(
-            "seedTruthMatchedMdtSimHits", 0)};
-
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedRpcSimHits{
-        m_tree.newVector<unsigned short>(
-            "seedTruthMatchedRpcSimHits", 0)};
-
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedTgcSimHits{
-        m_tree.newVector<unsigned short>(
-            "seedTruthMatchedTgcSimHits", 0)};
-
-    //MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedMmSimHits{
-    //    m_tree.newVector<unsigned short>(
-    //        "seedTruthMatchedMmSimHits", 0)};
-
-    MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedMmEtaSimHits{
-        m_tree.newVector<unsigned short>(
-            "seedTruthMatchedMmEtaSimHits", 0)};
-
-    MuonVal::VectorBranch<unsigned short>&
-        m_out_seed_truthMatchedMmStereoSimHits{
-            m_tree.newVector<unsigned short>(
-                "seedTruthMatchedMmStereoSimHits", 0)};
-
-    //MuonVal::VectorBranch<unsigned short>& m_out_seed_truthMatchedsTgcSimHits{
-    //    m_tree.newVector<unsigned short>(
-    //        "seedTruthMatchedsTgcSimHits", 0)};
-
-    MuonVal::VectorBranch<unsigned short>&
-        m_out_seed_truthMatchedsTgcStripSimHits{
-            m_tree.newVector<unsigned short>(
-                "seedTruthMatchedsTgcStripSimHits", 0)};
-
-    MuonVal::VectorBranch<unsigned short>&
-        m_out_seed_truthMatchedsTgcWireSimHits{
-            m_tree.newVector<unsigned short>(
-                "seedTruthMatchedsTgcWireSimHits", 0)};
-
-    MuonVal::VectorBranch<unsigned short>&
-        m_out_seed_truthMatchedsTgcPadSimHits{
-            m_tree.newVector<unsigned short>(
-                "seedTruthMatchedsTgcPadSimHits", 0)};
-
-    //MuonVal::VectorBranch<unsigned short>&
-    //    m_out_seed_truthMatchedUnknownSimHits{
-    //        m_tree.newVector<unsigned short>(
-    //            "seedTruthMatchedUnknownSimHits", 0)};
 
 
     

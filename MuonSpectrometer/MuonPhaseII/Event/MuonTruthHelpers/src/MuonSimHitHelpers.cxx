@@ -65,20 +65,57 @@ namespace MuonR4 {
         return hits;
     }
 
-    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const SpacePoint*>& spacePoints) {
-        std::unordered_set<const xAOD::MuonSimHit*> hits{};
-        for (const SpacePoint* sp : spacePoints) {
-            const xAOD::MuonSimHit* primHit{getTruthMatchedHit(*sp->primaryMeasurement())};
-            const xAOD::MuonSimHit* secHit{sp->dimension() == 2 ? getTruthMatchedHit(*sp->secondaryMeasurement()) : nullptr};
-            if(primHit){
-                hits.insert(primHit);
-            }
-            if (secHit && secHit != primHit) {
-                hits.insert(secHit);
-            }
+    void addMatchingSimHits( const SpacePoint& sp, std::unordered_set<const xAOD::MuonSimHit*>& hits) {
+    
+        const xAOD::MuonSimHit* primHit{
+            getTruthMatchedHit(*sp.primaryMeasurement())
+        };
+    
+        const xAOD::MuonSimHit* secHit{
+            sp.dimension() == 2
+                ? getTruthMatchedHit(*sp.secondaryMeasurement())
+                : nullptr
+        };
+    
+        if (primHit) {
+            hits.insert(primHit);
         }
+    
+        if (secHit && secHit != primHit) {
+            hits.insert(secHit);
+        }
+    }
+    
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const SpacePoint& sp) {
+        std::unordered_set<const xAOD::MuonSimHit*> hits{};
+        addMatchingSimHits(sp, hits);
         return hits;
     }
+    
+    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const SpacePoint*>& spacePoints) {
+        std::unordered_set<const xAOD::MuonSimHit*> hits{};
+    
+        for (const SpacePoint* sp : spacePoints) {
+            addMatchingSimHits(*sp, hits);
+        }
+    
+        return hits;
+    }
+
+   // std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const SpacePoint*>& spacePoints) {
+   //     std::unordered_set<const xAOD::MuonSimHit*> hits{};
+   //     for (const SpacePoint* sp : spacePoints) {
+   //         const xAOD::MuonSimHit* primHit{getTruthMatchedHit(*sp->primaryMeasurement())};
+   //         const xAOD::MuonSimHit* secHit{sp->dimension() == 2 ? getTruthMatchedHit(*sp->secondaryMeasurement()) : nullptr};
+   //         if(primHit){
+   //             hits.insert(primHit);
+   //         }
+   //         if (secHit && secHit != primHit) {
+   //             hits.insert(secHit);
+   //         }
+   //     }
+   //     return hits;
+   // }
 
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const CalibratedSpacePoint*>& measurements) {
         std::unordered_set<const xAOD::MuonSimHit*> hits{};
