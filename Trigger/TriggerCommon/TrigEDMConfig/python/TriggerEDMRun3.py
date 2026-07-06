@@ -917,8 +917,11 @@ TriggerHLTListRun3 = [
 
     # TLA jets + PEB jets
     ('TrigRoiDescriptorCollection#HLT_Roi_DarkJetPEBTLA',             'BS ESD DarkJetPEBTLA',  'Jet'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_Selected_DarkJetPEBTLA',             'BS ESD DarkJetPEBTLA',  'Jet'),
     ('TrigRoiDescriptorCollection#HLT_Roi_FTagPEBTLA',             'BS ESD FTagPEBTLA',  'Jet'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_Selected_FTagPEBTLA',             'BS ESD FTagPEBTLA',  'Jet'),
     ('TrigRoiDescriptorCollection#HLT_Roi_EgammaPEBTLA',             'BS ESD EgammaPEBTLA',  'Jet'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_Selected_EgammaPEBTLA',             'BS ESD EgammaPEBTLA',  'Jet'),
 
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',                                 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet' ),
     ('xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',         'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'    ),

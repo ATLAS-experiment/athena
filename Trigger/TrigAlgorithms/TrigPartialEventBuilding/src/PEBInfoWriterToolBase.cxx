@@ -65,6 +65,10 @@ StatusCode PEBInfoWriterToolBase::decide(const EventContext& ctx, std::vector<In
     // Create new PEB Info for this input (empty if max RoIs limit is reached)
     PEBInfo pebInfo = maxRoIsReached ? PEBInfo{} : createPEBInfo(ctx, input);
 
+    //output RoIs only if haven't reached maximum number, and if not MET RoI (which should have 0 robs in list)
+    ElementLink<TrigRoiDescriptorCollection> outputRoI = input.roiEL;
+    if(!maxRoIsReached && pebInfo.robs.size()>0){ ATH_CHECK(input.decision->setDetail("outputRoIs", outputRoI)); ATH_MSG_INFO("ADDING ROI");}
+
     // Merge with previous ROBs    
     std::vector<uint32_t> previousRobs;
     ATH_CHECK(input.decision->getDetail(robListKey(), previousRobs));

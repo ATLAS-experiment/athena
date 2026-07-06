@@ -2,6 +2,7 @@
 
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from RecJobTransforms.RecoSteering import RecoSteering
+from AthenaConfiguration.ComponentFactory import CompFactory 
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('RAWtoDAOD_TLA')
@@ -19,9 +20,14 @@ def configureFlags(runArgs):
         log.warning("Enters the inputBSFile if")
         flags.Input.Files = runArgs.inputBSFile
 
+    if hasattr(runArgs, 'inputRDOFile'):
+        log.warning("Enters the inputRDOFile if")
+        flags.Input.Files = runArgs.inputRDOFile
+
     from TrigEDMConfig.DataScoutingInfo import getDataScoutingTypeFromStream, getDataScoutingStreams
     if flags.Input.TriggerStream in getDataScoutingStreams():
        dstype = getDataScoutingTypeFromStream(flags.Input.TriggerStream)
+
 
     # Output
     if hasattr(runArgs, 'outputDAOD_TLAFile'):
@@ -143,6 +149,49 @@ def fromRunArgs(runArgs):
     if flags.Trigger.AODEDMSet == 'FTagPEBTLA':
         from TLARecoConfig.FTagPEBRecoConfig import FTagPEBJetTagConfig
         cfg.merge(FTagPEBJetTagConfig(flags))
+
+    #For MC, set up seeded decoding + online CaloCellMaker
+    ebType=flags.Trigger.AODEDMSet
+    if flags.Input.isMC:
+        if flags.Detector.GeometryMDT:
+            cfg.getEventAlgo('MdtRdoToMdtPrepData').DoSeededDecoding=True
+            cfg.getEventAlgo('MdtRdoToMdtPrepData').RoIs='HLT_Roi_Selected_'+ebType
+        if flags.Detector.GeometryRPC:
+            cfg.getEventAlgo('RpcRdoToRpcPrepData').DoSeededDecoding=True
+            cfg.getEventAlgo('RpcRdoToRpcPrepData').RoIs='HLT_Roi_Selected_'+ebType
+        if flags.Detector.GeometryTGC:
+            cfg.getEventAlgo('TgcRdoToTgcPrepData').DoSeededDecoding=True
+            cfg.getEventAlgo('TgcRdoToTgcPrepData').RoIs='HLT_Roi_Selected_'+ebType
+        if flags.Detector.GeometryMM:
+            cfg.getEventAlgo('MM_RdoToMM_PrepData').DoSeededDecoding=True
+            cfg.getEventAlgo('MM_RdoToMM_PrepData').RoIs='HLT_Roi_Selected_'+ebType
+        if flags.Detector.GeometrysTGC:
+            cfg.getEventAlgo('StgcRdoToStgcPrepData').DoSeededDecoding=True
+            cfg.getEventAlgo('StgcRdoToStgcPrepData').RoIs='HLT_Roi_Selected_'+ebType
+
+        if flags.Detector.GeometryPixel:
+            cfg.getEventAlgo('InDetPixelClusterization').isRoI_Seeded=True
+            cfg.getEventAlgo('InDetPixelClusterization').RoIs='HLT_Roi_Selected_'+ebType
+            from RegionSelector.RegSelToolConfig import regSelTool_Pixel_Cfg
+            cfg.getEventAlgo('InDetPixelClusterization').RegSelTool=cfg.popToolsAndMerge(regSelTool_Pixel_Cfg(flags))
+        if flags.Detector.GeometrySCT:
+            cfg.getEventAlgo('InDetSCT_Clusterization').isRoI_Seeded=True
+            cfg.getEventAlgo('InDetSCT_Clusterization').RoIs='HLT_Roi_Selected_'+ebType
+            from RegionSelector.RegSelToolConfig import regSelTool_SCT_Cfg
+            cfg.getEventAlgo('InDetSCT_Clusterization').RegSelTool=cfg.popToolsAndMerge(regSelTool_SCT_Cfg(flags))
+        if flags.Detector.GeometryTRT:
+            cfg.getEventAlgo('InDetTRT_RIO_Maker').isRoI_Seeded=True
+            cfg.getEventAlgo('InDetTRT_RIO_Maker').RoIs='HLT_Roi_Selected_'+ebType
+            from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
+            cfg.getEventAlgo('InDetTRT_RIO_Maker').RegSelTool=cfg.popToolsAndMerge(regSelTool_TRT_Cfg(flags))
+
+        if flags.Detector.GeometryCalo:
+            from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
+            cfg.merge(hltCaloCellMakerCfg(flags,name='RoICaloCellmaker', roisKey='HLT_Roi_Selected_'+ebType, CellsName='AllCalo'))
+        else:
+            #needed to read SCell container in RDO files (maybe could get away with a more minimal set of algorithms)
+            from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
+            cfg.merge(trigCaloDataAccessSvcCfg(flags))
 
     # setup Metadata writer
     from AthenaConfiguration.Enums import MetadataCategory

@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -40,8 +40,10 @@ def CaloRecoCfg(flags, clustersname=None):
 
 
     #Configure cell-building
-    from CaloRec.CaloCellMakerConfig import CaloCellMakerCfg
-    result.merge(CaloCellMakerCfg(flags))
+    #For MC Partial Event Building we use the HLT Cell Making instead
+    if not (flags.Trigger.AODEDMSet=="DarkJetPEBTLA" or flags.Trigger.AODEDMSet=="FTagPEBTLA" or flags.Trigger.AODEDMSet=="EgammaPEBTLA") or not flags.Input.isMC:
+        from CaloRec.CaloCellMakerConfig import CaloCellMakerCfg
+        result.merge(CaloCellMakerCfg(flags))
 
     #Configure topo-cluster builder
     from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg

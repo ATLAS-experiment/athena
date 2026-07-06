@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import re
 import GaudiConfig2
@@ -493,12 +493,33 @@ def triggerPOOLOutputCfg(flags):
         itemsToRecord.append('xAOD::EventInfo#EventInfo')
         itemsToRecord.append('xAOD::EventAuxInfo#EventInfoAux.')
 
+        acceptAlgs=[]
+        ebType = flags.Trigger.AODEDMSet
+        if ebType=="DarkJetPEBTLA" or ebType=="FTagPEBTLA" or ebType=="EgammaPEBTLA":
+            chainsToFilter=[]
+            from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
+            for chainName, chainDict in HLTMenuConfig.dicts().items():
+                if ebType in chainDict['eventBuildType']:
+                    chainsToFilter.append(chainName)
+            from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+            tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+            from EventBookkeeperTools.EventBookkeeperToolsConfig import (
+                CutFlowSvcCfg,
+                BookkeeperToolCfg,
+            )
+        
+            acc.merge(CutFlowSvcCfg(flags))
+            acc.merge(BookkeeperToolCfg(flags))
+            acc.addEventAlgo(CompFactory.CP.TrigEventSelectionAlg(name= "TrigEventSelectionAlg", triggers=chainsToFilter,tool=tdt))
+            acceptAlgs=["TrigEventSelectionAlg"]
 
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
         acc.merge(OutputStreamCfg(flags, outputType, ItemList=itemsToRecord,
+                                  AcceptAlgs=acceptAlgs,
                                   disableEventTag=True, takeItemsFromInput=(outputType == 'RDO')))
         from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
         acc.merge(SetupMetaDataForStreamCfg(flags, outputType,
+                                            AcceptAlgs=acceptAlgs,
                                             createMetadata=[MetadataCategory.TriggerMenuMetaData]))
 
         alg = acc.getEventAlgo(outputStreamName(outputType))

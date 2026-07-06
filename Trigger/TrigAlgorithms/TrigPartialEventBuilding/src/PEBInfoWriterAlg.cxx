@@ -38,6 +38,8 @@ StatusCode PEBInfoWriterAlg::initialize() {
   ATH_MSG_DEBUG("Initialising " << name());
   ATH_CHECK(m_hypoTools.retrieve());
   ATH_CHECK(m_eventInfoKey.initialize());
+  ATH_CHECK(m_superRoisWriteHandleKey.initialize(!m_superRoisWriteHandleKey.empty()));
+
   return StatusCode::SUCCESS;
 }
 
@@ -76,6 +78,15 @@ StatusCode PEBInfoWriterAlg::execute(const EventContext& eventContext) const {
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, eventContext);
   const uint8_t tt = (uint8_t) eventInfo->level1TriggerType();
 
+  SG::WriteHandle<TrigRoiDescriptorCollection> superRoisWriteHandle;
+  if(!m_superRoisWriteHandleKey.empty()){
+    superRoisWriteHandle = TrigCompositeUtils::createAndStoreNoAux(m_superRoisWriteHandleKey, eventContext);
+  }
+  std::unique_ptr<TrigRoiDescriptor> superRoI = std::make_unique<TrigRoiDescriptor>();
+  superRoI->setComposite(true);
+  superRoI->manageConstituents(false);
+
+
   size_t counter = 0;
   for (const Decision* previousDecision: *previousDecisionsHandle) {
     // Get RoI
@@ -113,6 +124,20 @@ StatusCode PEBInfoWriterAlg::execute(const EventContext& eventContext) const {
     ATH_MSG_DEBUG("Calling " << tool);
     ATH_CHECK(tool->decide(eventContext, toolInputs));
   }
+
+  if(!m_superRoisWriteHandleKey.empty()){
+    //write out a super RoI from selected RoIs
+    ElementLink<TrigRoiDescriptorCollection> roi;
+    for(auto input : toolInputs){
+      ATH_CHECK(input.decision->getDetail("outputRoIs", roi));
+      if(roi.isValid()){
+	superRoI->push_back(new TrigRoiDescriptor(*roi));
+	superRoI->manageConstituents(true);
+      }
+    }
+    superRoisWriteHandle->push_back(superRoI.release());
+  }
+  //else superRoI.release();
 
   // ---------------------------------------------------------------------------
   // Print the passing decisions
