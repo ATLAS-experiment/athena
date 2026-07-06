@@ -20,9 +20,13 @@ namespace ActsTrk::detail {
                               HitSummaryData &hit_info_out,
                               std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType > &param_state_idx_out,
                               std::array<std::array<uint8_t, Acts::toUnderlying(HitCategory::N)>,
-			      Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> &special_hit_counts_out)
+			      Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> &special_hit_counts_out,
+                              TimeInfo &time_info)
   {
      chi2_stat_out.reset();
+
+     using TimeInfoHelper_t = struct { double sum{}; double sumInv2{}; double chi2{}; unsigned int n=0u;};
+     TimeInfoHelper_t time_info_helper;
 
      hit_info_out.reset();
      param_state_idx_out.clear();
@@ -34,7 +38,8 @@ namespace ActsTrk::detail {
            &chi2_stat_out,
            &hit_info_out,
            &param_state_idx_out,
-           &special_hit_counts_out
+           &special_hit_counts_out,
+           &time_info_helper
            ](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
 
@@ -57,7 +62,7 @@ namespace ActsTrk::detail {
                }
                return;
 
-            }  
+            }
             // do not consider material states       
             if (!flag.hasMeasurement() || !state.hasUncalibratedSourceLink()) {
                return;
@@ -77,13 +82,25 @@ namespace ActsTrk::detail {
                if (flag.isSharedHit()) {
                   hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHit);
                }
-               const InDetDD::SiDetectorElement* siDet{nullptr};
+               const InDetDD::SolidStateDetectorElementBase* siDet{nullptr};
                if (const auto* idDetEl = dynamic_cast<const ActsDetectorElement*>(detEl); idDetEl != nullptr) {
-                  siDet = dynamic_cast<const InDetDD::SiDetectorElement*>(idDetEl->upstreamDetectorElement());
+                  siDet = dynamic_cast<const InDetDD::SolidStateDetectorElementBase*>(idDetEl->upstreamDetectorElement());
                }
-               hit_info_out.addHit(siDet, hit_selection);
-                   
-                
+               hit_info_out.addHit(det_type, siDet, hit_selection);
+
+               if (det_type == xAOD::UncalibMeasType::HGTDClusterType) {
+                  if (!flag.isOutlier() && state.hasCalibrated()) {
+                     // compute HGTD calibrated
+                     assert( state.calibratedSize()==3);
+                     auto pos = state.calibrated<3>();
+                     auto cov = state.calibratedCovariance<3>();
+                     time_info_helper.sum += pos[2]; // Acts time
+                     time_info_helper.sumInv2 += 1./cov(2,2);  // Acts time
+                     time_info_helper.chi2 += state.chi2();
+                     ++time_info_helper.n;
+                  }
+               }
+
                if (state.calibratedSize()>0 && !flag.isOutlier()) {
                    // from Tracking/TrkTools/TrkTrackSummaryTool/src/TrackSummaryTool.cxx
                    //       processTrackState
@@ -94,6 +111,16 @@ namespace ActsTrk::detail {
 
           });
      hit_info_out.computeSummaries();
+     if (time_info_helper.n>1) {
+        time_info.mean = static_cast<float>(ActsTrk::timeToAthena( time_info_helper.sum / time_info_helper.n));
+        time_info.resolution = static_cast<float>(ActsTrk::timeToAthena(std::sqrt(1./time_info_helper.sumInv2)));
+        time_info.chi2 = time_info_helper.chi2;
+     }
+     else {
+        time_info.mean = static_cast<float>(ActsTrk::timeToAthena(time_info_helper.sum));
+        time_info.resolution = time_info_helper.n>0 ? static_cast<float>(ActsTrk::timeToAthena(std::sqrt(1./time_info_helper.sumInv2))) : 0.f;
+        time_info.chi2 = time_info_helper.chi2;
+     }
   }
 
 }
