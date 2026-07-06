@@ -8,6 +8,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 
 #include "xAODMuonPrepData/RpcMeasurementContainer.h"
 #include "MuonPrepRawData/RpcPrepDataContainer.h"
@@ -27,6 +28,8 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
             SG::ReadHandleKey<xAOD::RpcMeasurementContainer> m_readKey{this, "ReadKey", "xRpcMeasurements"};
+
+            SG::WriteDecorHandleKey<xAOD::RpcMeasurementContainer> m_linkKey{this, "PrdLinkKey", m_readKey, "rpcTrkPrdLink"};
 
             SG::WriteHandleKey<Muon::RpcPrepDataContainer>  m_writeKey{this, "WriteKey", "RPC_Measurements", "Key for RPC PRD Container"};
 
