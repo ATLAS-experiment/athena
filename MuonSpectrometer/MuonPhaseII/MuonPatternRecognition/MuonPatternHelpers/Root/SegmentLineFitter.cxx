@@ -607,23 +607,22 @@ namespace MuonR4::SegmentFit{
                 if (!isGoodHit(*hit)) {
                     continue;
                 }
+                
                 if (hit->type() == xAOD::UncalibMeasType::sTgcStripType) {
                     nStrips[0] += isPrecisionHit(*hit);
                     nPhiHits += hit->measuresPhi();
                     continue;
-                }
-            
-                const auto* mmClust = 
-                    dynamic_cast<const xAOD::MMCluster*>(hit->spacePoint()->primaryMeasurement());
-                assert(mmClust);
-                const auto& design = 
-                    mmClust->readoutElement()->stripLayer(mmClust->measurementHash()).design();
-                if (!design.hasStereoAngle()) {
-                    ++nStrips[0];
-                } else if (design.stereoAngle() > 0.) {
-                    ++nStrips[1];
-                } else {
-                    ++nStrips[2];
+                } else if (hit->type() == xAOD::UncalibMeasType::MMClusterType) {
+                    const auto* mmClust = dynamic_cast<const xAOD::MMCluster*>(hit->spacePoint()->primaryMeasurement());
+                    assert(mmClust);
+                    const auto& design = mmClust->readoutElement()->stripLayer(mmClust->measurementHash()).design();
+                    if (!design.hasStereoAngle()) {
+                        ++nStrips[0];
+                    } else if (design.stereoAngle() > 0.) {
+                        ++nStrips[1];
+                    } else {
+                        ++nStrips[2];
+                    }
                 }
             }
             /** Check whether there is at least one of each micromega strip type.
