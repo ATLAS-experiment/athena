@@ -116,9 +116,6 @@ std::vector<const xAOD::TauJet*> TrigTauMonitorBaseAlgorithm::getOfflineTausAll(
         // Consider only offline taus outside of the crack region
         if(std::abs(tau->eta()) > 1.37 && std::abs(tau->eta()) < 1.52) continue;
 
-        // Consider only offline taus which pass RNN medium WP
-        if(!tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
-
         // Consider only offline taus which pass thinning
         static const SG::ConstAccessor<char> passThinningAcc("passThinning");
         if(!passThinningAcc.withDefault(*tau, true)) continue;
