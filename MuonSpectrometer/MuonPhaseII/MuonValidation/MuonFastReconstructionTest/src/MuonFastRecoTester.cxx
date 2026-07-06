@@ -104,6 +104,7 @@ namespace MuonValR4 {
             m_tree.disableBranch(m_roi_ZMax.name());
         }
         ATH_CHECK(m_patternKey.initialize());
+        ATH_CHECK(m_fastMuonKey.initialize());
         ATH_CHECK(m_truthSegmentKey.initialize(!m_truthSegmentKey.empty()));   
         ATH_CHECK(m_tree.init(this)); 
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -116,7 +117,7 @@ namespace MuonValR4 {
     }
     StatusCode MuonFastRecoTester::execute(const EventContext& ctx) {
         
-                //const ActsTrk::GeometryContext* gctxPtr{nullptr};
+        //const ActsTrk::GeometryContext* gctxPtr{nullptr};
         //ATH_CHECK(SG::get(gctxPtr, m_geoCtxKey, ctx));
 
         const SpacePointContainer* spContainer {nullptr};
@@ -127,6 +128,9 @@ namespace MuonValR4 {
 
         const GlobalPatternContainer* globPatterns{nullptr};
         ATH_CHECK(SG::get(globPatterns, m_patternKey, ctx));
+
+        const xAOD::MuonContainer* fastMuons{nullptr};
+        ATH_CHECK(SG::get(fastMuons, m_fastMuonKey, ctx));
 
         const xAOD::MuonSegmentContainer* readTruthSegments{nullptr};
         if(m_isMC){
@@ -153,6 +157,8 @@ namespace MuonValR4 {
         }
         fillGlobPatternInfo(globPatterns, truthMap, 
             std::vector<const MuonR4::SpacePointContainer*>{spContainer, NSWspContainer});
+
+        fillFastRecoMuonInfo(fastMuons, globPatterns);
 
         ATH_CHECK(m_tree.fill(ctx));
         return StatusCode::SUCCESS;
@@ -398,7 +404,7 @@ namespace MuonValR4 {
                     }
                 }
                 // Save the matched truth particle index in the tree, either is a signal or pileup particle
-                std::ranges::transform(sortedTPs, std::back_inserter(m_pat_MatchedToTruth[patternIdx]), [](const auto& tp){ return tp; });
+                std::ranges::transform(sortedTPs, std::back_inserter(m_pat_MatchedToTruth[patternIdx]), [](const std::size_t& tp){ return tp; });
             }
             // Loop over the space point containers to count the number of hits in the buckets crossed by the pattern
             for (const SpacePointContainer* spContainer : spContainers) {
@@ -448,7 +454,27 @@ namespace MuonValR4 {
             patternIdx++;
         }                        
     }
+    void MuonFastRecoTester::fillFastRecoMuonInfo(const xAOD::MuonContainer* fastMuons,
+                                                  const GlobalPatternContainer* patternCont) {
+        if (!fastMuons) return;
 
+        for (const xAOD::Muon* mu : *fastMuons) {
+            m_muon_Eta.push_back(mu->eta());
+            m_muon_Phi.push_back(mu->phi());
+            m_muon_Pt.push_back(mu->pt());
+            m_muon_Q.push_back(mu->charge());
+
+            SG::Accessor<ElementLink<GlobalPatternContainer>> patLinkAcc{"globalPatternLink"};
+
+            auto patItr {std::ranges::find(*patternCont, *patLinkAcc(*mu))};
+            assert(patItr != patternCont->end());
+            const std::size_t patIdx = std::distance(patternCont->begin(), patItr);
+            m_muon_MatchedToPattern.push_back(patIdx);
+
+            ATH_MSG_VERBOSE("FastMuonSA eta: "<<mu->eta()<<", phi[Deg]: "<<inDegrees(mu->phi())
+                <<", pt[GeV]: "<<mu->pt()/Gaudi::Units::GeV<<", q: "<<mu->charge());
+        }
+    }
     void MuonFastRecoTester::updatePatHitInfo(const ePatBranchType type, 
                                               const std::size_t patIdx,
                                               const Muon::MuonStationIndex::StIndex hitSt,

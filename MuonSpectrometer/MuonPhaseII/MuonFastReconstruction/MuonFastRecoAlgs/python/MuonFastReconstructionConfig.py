@@ -5,10 +5,19 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonFastReconstructionAlgCfg(flags, name = "MuonFastReconstructionAlg", **kwargs):
     result = ComponentAccumulator()
+    # Set defaults input space point containers
     SpacePointContainers = ["MuonSpacePoints"]
     if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
         SpacePointContainers += ["NswSpacePoints"]
     kwargs.setdefault("InSpacePoints", SpacePointContainers)
+    # Set SP calibrator tool
+    from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
+    kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
+
+    kwargs.setdefault("MinBendingTriggerLayers", 1)
+    kwargs.setdefault("MinBendingPrecisionLayers", 8)
+    kwargs.setdefault("MinPhiLayers", 1)
+
     theAlg = CompFactory.MuonR4.FastReconstructionAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result

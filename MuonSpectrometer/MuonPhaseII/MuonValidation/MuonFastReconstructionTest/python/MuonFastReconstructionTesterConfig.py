@@ -89,11 +89,12 @@ if __name__=="__main__":
                                     writeSpacePoints = args.writeSpacePoints))
 
     # Schedule the pattern recognition algs either on the space points from the fast reco or from the standard space point maker
-    if args.useFastRecoSpacePoints:
-        cfg.merge(PatternRecognitionFromFastRecoCfg(flags))
-    else:
-        from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-        cfg.merge(MuonPatternRecognitionCfg(flags))
+    if args.runHoughTest or args.runMSTrackTest:
+        if args.useFastRecoSpacePoints:
+            cfg.merge(PatternRecognitionFromFastRecoCfg(flags))
+        else:
+            from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
+            cfg.merge(MuonPatternRecognitionCfg(flags))
 
     # If desired, schedule the hough transform test
     if args.runHoughTest:
