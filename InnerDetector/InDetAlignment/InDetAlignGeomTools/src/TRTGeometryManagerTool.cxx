@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -757,14 +757,13 @@ void TRTGeometryManagerTool::buildL2Endcaps()
       }
 
       int iRing(-1);
-      Trk::AlignModule * mod = nullptr;
+      std::unique_ptr<Trk::AlignModule> mod;
       for (unsigned int iWheel = 0; iWheel < m_trtDetManager->getNumerology()->getNEndcapWheels(); iWheel++) {
          ATH_MSG_DEBUG("Wheel : "<<iWheel);
          for (unsigned int iStrawLayer = 0; iStrawLayer < m_trtDetManager->getNumerology()->getNEndcapLayers(iWheel); iStrawLayer++) {
             ATH_MSG_DEBUG("StrawLayer : "<<iStrawLayer);
 
             if(iStrawLayer%4==0) {
-
                if(iRing >= 0) {
                   // before creating module for new ring we set the alignment
                   // frame for the previous one and add it to the list of modules
@@ -778,7 +777,7 @@ void TRTGeometryManagerTool::buildL2Endcaps()
                   mod->setGlobalFrameToAlignFrameTransform(localToGlobal.inverse());
 
                   // add AlignModule to the geometry
-                  m_alignModuleListPtr->push_back(mod);
+                  m_alignModuleListPtr->push_back(mod.get());
                }
 
                // new ring
@@ -786,7 +785,7 @@ void TRTGeometryManagerTool::buildL2Endcaps()
 
                ATH_MSG_DEBUG("Ring : "<<iRing);
                // create the AlignModule
-               mod = new Trk::AlignModule(this);
+               mod.reset(new Trk::AlignModule(this));
                mod->setIdHash(getNextIDHash());
                // Identifier for a ring is the Identifier for the first Straw layer in that ring
                // one ring has 4 straw layers
@@ -797,10 +796,8 @@ void TRTGeometryManagerTool::buildL2Endcaps()
                name<<"TRT/Endcap/Module_"<<(iSide ? 2:-2)<<"_"<<iRing;
                mod->setName(name.str());
 
-               if(!moduleSelected(mod)) {
+               if(!moduleSelected(mod.get())) {
                   ATH_MSG_DEBUG("Module "<<mod->name()<<" NOT selected");
-                  delete mod;
-                  mod=nullptr;
                   continue;
                }
 
@@ -818,7 +815,7 @@ void TRTGeometryManagerTool::buildL2Endcaps()
                   mod->addDetElement(Trk::AlignModule::TRT,element,transform);
 
                   // and fill the corresponding map
-                  (*trtIdHashMap)[element->identifyHash()] = mod;
+                  (*trtIdHashMap)[element->identifyHash()] = mod.get();
                }
                else
                   ATH_MSG_DEBUG("No TRT_EndcapElement with side-wheel-strawLayer-phi:" <<iSide<<"-"<<iWheel<<"-"<<iStrawLayer<<"-"<<iPhi);
@@ -840,7 +837,7 @@ void TRTGeometryManagerTool::buildL2Endcaps()
       mod->setGlobalFrameToAlignFrameTransform(localToGlobal.inverse());
 
       // add AlignModule to the geometry
-      m_alignModuleListPtr->push_back(mod);
+      m_alignModuleListPtr->push_back(mod.release());
    }
 }
 

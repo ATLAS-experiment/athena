@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -1784,10 +1784,10 @@ namespace InDet {
         telescope = int(4+m_idHelper->phi_module(id));
         mod = mod_list.at(telescope);
       }
-
+      
       // get the element via hash
       const SiDetectorElement * element2 = m_detManager->getDetectorElement(id);
-      if (element2) {
+      if (element2 && mod) {
         const Trk::TrkDetElementBase * element = static_cast<const Trk::TrkDetElementBase*> (element2);
 
         // add element to the AlignModule

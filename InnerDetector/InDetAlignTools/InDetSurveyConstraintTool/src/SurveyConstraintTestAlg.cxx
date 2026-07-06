@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SurveyConstraintTestAlg.h"
@@ -66,12 +66,12 @@ return StatusCode::SUCCESS;
   void SurveyConstraintTestAlg::CreateMisAlignNtuple(){
     StatusCode sc;
     // initialize AlignResults NTuple
-    
+    const std::string resultPath{"NTUPLES/FILE1/InitialAlignment"};
     NTupleFilePtr file1(ntupleSvc(), "/NTUPLES/FILE1");
     
-    NTuplePtr nt(ntupleSvc(), "/NTUPLES/FILE1/InitialAlignment");
+    NTuplePtr nt(ntupleSvc(), resultPath);
     if ( !nt )    {    // Check if already booked
-      nt = ntupleSvc()->book("/NTUPLES/FILE1/InitialAlignment", CLID_ColumnWiseTuple, "InitialAlignment");
+      nt = ntupleSvc()->book(resultPath, CLID_ColumnWiseTuple, "InitialAlignment");
       if ( nt )    {
   ATH_MSG_INFO( "InitialAlignment ntuple booked." );
   
@@ -132,7 +132,7 @@ return StatusCode::SUCCESS;
       m_AlignResults_nModules++;
     
       // Write out AlignResults ntuple
-      sc = ntupleSvc()->writeRecord("NTUPLES/FILE1/InitialAlignment");
+      sc = ntupleSvc()->writeRecord(resultPath);
       if (sc.isFailure()) {
         ATH_MSG_ERROR( "Could not write InitialAlignment ntuple." );
       }
