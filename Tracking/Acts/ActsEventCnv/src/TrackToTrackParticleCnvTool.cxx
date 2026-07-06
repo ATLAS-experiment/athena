@@ -332,59 +332,69 @@ namespace ActsTrk {
       parametersVec.clear();
       parametersVec.reserve(tmp_param_state_idx.size());
 
-      for (std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType>::const_reverse_iterator
-              idx_iter = tmp_param_state_idx.rbegin();
-           idx_iter != tmp_param_state_idx.rend();
-           ++idx_iter) {
-         ActsTrk::TrackStateBackend::ConstTrackStateProxy
-            state = track.container().trackStateContainer().getTrackState(*idx_iter);
-         const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
+      // Check if this is a seed track (TSOS mask = None, no Predicted/Filtered/Calibrated)
+      // For seed tracks, perigee parameters are already set from SeedsToTrackParamsAlg, skip per-TSOS loop
+      bool isSeedTrack = tmp_param_state_idx.empty() ? false
+         : track.container().trackStateContainer().getTrackState(tmp_param_state_idx.front()).getMask() == Acts::TrackStatePropMask::None;
 
-         Acts::Vector3 position = actsParam.position(gctx.context());
-         Acts::Vector3 momentum = actsParam.momentum();
-
-         // scaling from Acts momentum units (GeV) to Athena Units (MeV)
-         for (unsigned int i = 0; i < momentum.rows(); ++i) {
-            momentum(i) *= inv_1_MeV;
-         }
-
-         if (actsParam.covariance()) {
-            Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
-            Acts::GeometryContext tgContext = gctx.context();
-
-            magnFieldVect.setZero();
-            fieldCache.getField(position.data(), magnFieldVect.data());
-            // scaling from Athena magnetic field units kT to Acts units T
-            {
-               using namespace Acts::UnitLiterals;
-               magnFieldVect *= 1000_T;
-            }
-
-            auto curvilinear_cov_result = ActsTrk::detail::convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
-            if (curvilinear_cov_result.has_value()) {
-               Acts::BoundMatrix& curvilinear_cov = curvilinear_cov_result.value();
-
-               // convert q/p components from GeV (Acts) to MeV (Athena)
-               for (unsigned int col_i = 0; col_i < 4; ++col_i) {
-                  curvilinear_cov(col_i, 4) *= 1_MeV;
-                  curvilinear_cov(4, col_i) *= 1_MeV;
-               }
-               curvilinear_cov(4, 4) *= (1_MeV * 1_MeV);
-
-               std::size_t param_idx = parametersVec.size();
-               // only use the 5x5 sub-matrix of the full covariance matrix
-               lowerTriangleToVector<5>(curvilinear_cov, tmp_cov_vector);
-               if (tmp_cov_vector.size() != 15) {
-                  ATH_MSG_ERROR("Invalid size of lower triangle cov " << tmp_cov_vector.size() << " != 15"
-                                << " input matrix : " << curvilinear_cov.rows() << " x " << curvilinear_cov.cols());
-               }
-               track_particle.setTrackParameterCovarianceMatrix(param_idx, tmp_cov_vector);
-            }
-         }
-         parametersVec.emplace_back(std::vector<float>{
-            static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2]),
-            static_cast<float>(momentum[0]), static_cast<float>(momentum[1]), static_cast<float>(momentum[2]) });
+      if (isSeedTrack) {
+         ATH_MSG_DEBUG("Seed track detected, skipping per-TSOS parameter extraction");
       }
+      else {
+         for (std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType>::const_reverse_iterator
+            idx_iter = tmp_param_state_idx.rbegin();
+            idx_iter != tmp_param_state_idx.rend();
+            ++idx_iter) {
+            ActsTrk::TrackStateBackend::ConstTrackStateProxy
+               state = track.container().trackStateContainer().getTrackState(*idx_iter);
+            const Acts::BoundTrackParameters actsParam = track.createParametersFromState(state);
+
+            Acts::Vector3 position = actsParam.position(gctx.context());
+            Acts::Vector3 momentum = actsParam.momentum();
+
+            // scaling from Acts momentum units (GeV) to Athena Units (MeV)
+            for (unsigned int i = 0; i < momentum.rows(); ++i) {
+               momentum(i) *= inv_1_MeV;
+            }
+
+            if (actsParam.covariance()) {
+               Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+               Acts::GeometryContext tgContext = gctx.context();
+
+               magnFieldVect.setZero();
+               fieldCache.getField(position.data(), magnFieldVect.data());
+               // scaling from Athena magnetic field units kT to Acts units T
+               {
+                  using namespace Acts::UnitLiterals;
+                  magnFieldVect *= 1000_T;
+               }
+
+               auto curvilinear_cov_result = ActsTrk::detail::convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
+               if (curvilinear_cov_result.has_value()) {
+                  Acts::BoundMatrix& curvilinear_cov = curvilinear_cov_result.value();
+
+                  // convert q/p components from GeV (Acts) to MeV (Athena)
+                  for (unsigned int col_i = 0; col_i < 4; ++col_i) {
+                     curvilinear_cov(col_i, 4) *= 1_MeV;
+                     curvilinear_cov(4, col_i) *= 1_MeV;
+                  }
+                  curvilinear_cov(4, 4) *= (1_MeV * 1_MeV);
+
+                  std::size_t param_idx = parametersVec.size();
+                  // only use the 5x5 sub-matrix of the full covariance matrix
+                  lowerTriangleToVector<5>(curvilinear_cov, tmp_cov_vector);
+                  if (tmp_cov_vector.size() != 15) {
+                     ATH_MSG_ERROR("Invalid size of lower triangle cov " << tmp_cov_vector.size() << " != 15"
+                        << " input matrix : " << curvilinear_cov.rows() << " x " << curvilinear_cov.cols());
+                  }
+                  track_particle.setTrackParameterCovarianceMatrix(param_idx, tmp_cov_vector);
+               }
+            }
+            parametersVec.emplace_back(std::vector<float>{
+               static_cast<float>(position[0]), static_cast<float>(position[1]), static_cast<float>(position[2]),
+                  static_cast<float>(momentum[0]), static_cast<float>(momentum[1]), static_cast<float>(momentum[2]) });
+         }
+      }  // end else (isSeedTrack)
       for (const std::vector<float>& param : parametersVec) {
          if (param.size() != 6) {
             ATH_MSG_ERROR("Invalid size of param element " << param.size() << " != 6");

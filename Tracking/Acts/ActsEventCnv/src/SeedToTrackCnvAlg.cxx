@@ -81,6 +81,7 @@ StatusCode SeedToTrackCnvAlg::execute(const EventContext& context) const {
             auto actsTSOS = trackStateContainer.getTrackState(trackStateContainer.addTrackState(Acts::TrackStatePropMask::None, tsosPreviousIndex));
             actsTSOS.setReferenceSurface(surf->getSharedPtr());
             actsTSOS.setUncalibratedSourceLink(detail::MeasurementCalibratorBase::pack(umeas));
+            actsTSOS.typeFlags().setIsMeasurement();
             actsTrack.tipIndex() = actsTSOS.index();
             tsosPreviousIndex = actsTrack.tipIndex();
           }

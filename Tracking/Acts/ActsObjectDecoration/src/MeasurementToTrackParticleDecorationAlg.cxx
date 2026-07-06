@@ -375,7 +375,12 @@ namespace ActsTrk {
     }
   
   float MeasurementToTrackParticleDecorationAlg::getChi2Contribution(const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) const {
-    
+
+    // Seed tracks (TSOS mask = None) have no predicted parameters — return 0
+    if (state.getMask() == Acts::TrackStatePropMask::None) {
+      return 0.f;
+    }
+
     auto pred  = state.predicted();
     auto predC = state.predictedCovariance();
 
