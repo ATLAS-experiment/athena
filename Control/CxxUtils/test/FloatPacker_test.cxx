@@ -10,17 +10,18 @@
  * @brief Regression tests for FloatPacker.
  */
 
-#ifndef __APPLE__
+
 
 #undef NDEBUG
 
 #include "CxxUtils/FloatPacker.h"
 #include <iostream>
 #include <cmath>
+#include <cstring>
 #include <cassert>
-#include <ieee754.h>
+#include <limits>
 #include <fenv.h>
-#include <string.h>
+#include <string>
 
 
 using CxxUtils::FloatPacker;
@@ -46,15 +47,11 @@ bool almost_equal (double a, double b, int bits)
 void test1 ()
 {
   // Set up some special numbers for testing.
-  ieee754_double d;
-  d.d = 0;
-  d.ieee.negative = 1;
-  double neg_zero = d.d;
+  double neg_zero = -0.0;
 
-  d.d = 0;
-  d.ieee.exponent = (1<<ieee754_double_exponent_bits) - 1;
-  double infinity = d.d;
-
+  const double infinity = std::numeric_limits<double>::infinity();
+  // If the x86/SSE DAZ (Denormals Are Zero) mode is enabled,
+  // subnormal input values may be treated as zero.
 #ifndef __alpha
   // Can we handle denormals?
   bool have_denormal = false;
@@ -261,7 +258,6 @@ void test1 ()
   unpacked = 1023. / 1024;
   packed = tf8.pack (unpacked, &err);
   assert (packed == 0xff);
-  d.d = unpacked;
   assert (err == "Float overflow during packing: 0.999023");
   err.clear();
   out = tf8.unpack (packed, &err);
@@ -294,13 +290,7 @@ void test1 ()
 }
 
 
-#else
 
-
-void test1() {}
-
-
-#endif // not __APPLE__
 
 
 int main ()
