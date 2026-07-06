@@ -39,6 +39,35 @@ def TrackSummaryToolCfg(flags, name="MuonTrackSummaryTool", **kwargs) :
     result.setPrivateTools(theTool)
     return result
 
+def TrackSummaryLockCfg(flags,inContainer="", fillHoles = True, fillOutliers = True, **kwargs):
+    
+    summaryDecors = [ "innerSmallHits", "innerLargeHits", 
+                     "middleSmallHits", "middleLargeHits", 
+                     "outerSmallHits", "outerLargeHits", 
+                     "extendedSmallHits", "extendedLargeHits",  
+                     "innerTriggerEtaHits", "innerTriggerPhiHits", 
+                     "middleTriggerEtaHits", "middleTriggerPhiHits", 
+                     "outerTriggerEtaHits", "outerTriggerPhiHits"]
+    if fillHoles: 
+        summaryDecors +=["innerSmallHoles", "innerLargeHoles", 
+                         "middleSmallHoles", "middleLargeHoles", 
+                         "outerSmallHoles", "outerLargeHoles",
+                         "extendedSmallHoles", "extendedLargeHoles",
+                         "innerTriggerEtaHoles", "innerTriggerPhiHoles", 
+                         "middleTriggerEtaHoles", "middleTriggerPhiHoles", 
+                         "outerTriggerEtaHoles", "outerTriggerPhiHoles" ]
+    if fillOutliers: 
+        summaryDecors += ["innerClosePrecisionHits", "middleClosePrecisionHits", 
+                           "outerClosePrecisionHits", "extendedClosePrecisionHits"]
+
+    
+    result = ComponentAccumulator()
+    kwargs.setdefault("Decorations", [f"{inContainer}.{decor}" for decor in summaryDecors])                
+    the_alg= CompFactory.DerivationFramework.LockDecorations(name=f"MuonTrackSummaryLockAlg_{inContainer}", **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+
 def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
     result = ComponentAccumulator()
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
@@ -83,7 +112,6 @@ def MuonActsToTrkConvCfg(flags, name="MuonActsToTrkConverterAlg", **kwargs):
 
 def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):
     result = ComponentAccumulator()
-    from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
     the_alg = CompFactory.MuonCombinedR4.StandaloneMuonTagAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
