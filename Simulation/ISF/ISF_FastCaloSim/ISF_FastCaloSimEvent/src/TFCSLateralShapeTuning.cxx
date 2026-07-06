@@ -4,6 +4,7 @@
 
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeTuning.h"
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 //=============================================
 //======= TFCSLateralShapeTuning ==============
@@ -90,7 +91,7 @@ TFCSLateralShapeTuning::simulate_hit(Hit &hit, TFCSSimulationState &,
 
   // retrieve particle data
   const int pdgId = truth->pdgid();
-  const double charge = HepPDT::ParticleID(pdgId).charge();
+  const double charge = MC::charge(pdgId);
 
   // retreive hit information
   const double centerEta = hit.center_eta();

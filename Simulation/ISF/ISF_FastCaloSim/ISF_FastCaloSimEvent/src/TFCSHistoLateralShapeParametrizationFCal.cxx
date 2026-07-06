@@ -11,8 +11,7 @@
 
 #include "TMath.h"
 
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 //=============================================
 //======= TFCSHistoLateralShapeParametrizationFCal =========
@@ -34,7 +33,7 @@ FCSReturnCode TFCSHistoLateralShapeParametrizationFCal::simulate_hit(
   }
 
   const int pdgId = truth->pdgid();
-  const double charge = HepPDT::ParticleID(pdgId).charge();
+  const double charge =MC::charge(pdgId);
 
   const int cs = calosample();
   // const double center_phi=0.5*( extrapol->phi(cs, CaloSubPos::SUBPOS_ENT) +

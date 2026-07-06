@@ -9,9 +9,6 @@
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitBase.h"
 /*Truth state include*/
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
-/*Particle data includes*/
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
 /*TFile include*/
 #include <TFile.h>
 /*Pieciewise linear interpolation class include*/

@@ -6,8 +6,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
-#include "HepPDT/ParticleData.hh"
-#include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/ParticleConstants.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
@@ -124,7 +123,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   }
 
   const int pdgId = truth->pdgid();
-  const float charge = HepPDT::ParticleID(pdgId).charge();
+  const float charge = MC::charge(pdgId);
 
   float Einit;
   const float Ekin = truth->Ekin();
