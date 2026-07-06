@@ -89,10 +89,25 @@ namespace {
       return 0;
     }
   }
-  //This function used to avoid FPE divide by zero or overflow by limiting the q/p values to a
-  //more limited range
-  double
-  limitInversePValue(double qOverP){
+
+  bool correctAngles(double& phi, double& theta) {
+    if (theta > M_PI) {
+      theta = M_PI - theta;
+      phi += M_PI;
+    }
+    if (theta < 0) {
+      theta = -theta;
+      phi += M_PI;
+    }
+
+    phi = -std::remainder(-phi, 2 * M_PI);
+
+    return theta >= 0 && theta <= M_PI && phi >= -M_PI && phi <= M_PI;
+  }
+
+  // This function used to avoid FPE divide by zero or overflow by limiting the
+  // q/p values to a more limited range
+  double limitInversePValue(double qOverP) {
     const double magnitude = std::abs(qOverP);
     //limits found empirically to leave the 25-event q431 digest unchanged
     constexpr double maxP{100.*10e6*MeV};
@@ -102,7 +117,6 @@ namespace {
     const double limited = std::clamp(magnitude, lo, hi);
     return std::copysign(limited, qOverP);
   }
-
 
   std::pair<const Trk::TrackParameters *, const Trk::TrackParameters *> getFirstLastIdPar(const Trk::Track & track) {
     const Trk::TrackParameters *firstidpar = nullptr;
@@ -8433,31 +8447,6 @@ namespace Trk {
 
     }
     return jac;
-  }
-
-  int
-    GlobalChi2Fitter::iterationsOfLastFit() const {
-    return 0;
-  } void
-    GlobalChi2Fitter::setMinIterations(int) {
-    ATH_MSG_WARNING
-      ("Configure the minimum number of Iterations via jobOptions");
-  }
-
-  bool
-    GlobalChi2Fitter::correctAngles(double &phi, double &theta) {
-    if (theta > M_PI) {
-      theta = M_PI - theta;
-      phi += M_PI;
-    }
-    if (theta < 0) {
-      theta = -theta;
-      phi += M_PI;
-    }
-
-    phi = -std::remainder(-phi, 2 * M_PI);
-
-    return theta >= 0 && theta <= M_PI && phi >= -M_PI && phi <= M_PI;
   }
 
   bool
