@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloSwPhimod_v2.cxx
@@ -117,7 +117,9 @@ void CaloSwPhimod_v2::makeTheCorrection (const Context& myctx,
                                               the_aeta, adj_phi, nabs),
                                      m_energies(myctx),
                                      m_energy_degree(myctx));
-
+  if (corr == 0.) [[unlikely]]{
+    throw std::runtime_error("CaloSwPhimod_v2::makeTheCorrection: denominator 'corr' is zero.");
+  }
   // set energy, and rescale each sampling
   setenergy (cluster, cluster->e() / corr);
 }
