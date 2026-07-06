@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTRUTHALGSR4_TRUTHHITSUMMARYALG_H
 #define MUONTRUTHALGSR4_TRUTHHITSUMMARYALG_H
@@ -14,6 +14,12 @@
 
 #include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
 namespace MuonR4{
+    /*** @brief Algorithm that takes the hit summaries from the truth segments
+     *          associated to the muon truth particles and transforms them into
+     *          a TrackSummary object. The track summary object is then decorated 
+     *          onto the TruthParticle. @note The summary decorations are not locked
+     *          and need to be locked by the `LockDecorations` algorithm. Its scheduling
+     *          needs to be explicitly configured */
     class TruthHitSummaryAlg : public AthReentrantAlgorithm {
         public:
            using AthReentrantAlgorithm::AthReentrantAlgorithm;
@@ -25,8 +31,6 @@ namespace MuonR4{
             SG::ReadHandleKey<xAOD::TruthParticleContainer> m_readKey{this, "ReadKey", "MuonTruthParticles"};
             /** @brief Dependency on the truth -> segment decoration */
             SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_segLinkKey{this, "SegLinkKey", m_readKey, "truthSegmentLinks"};
-            /** @brief Declare the decorations written by this algorithm */
-            SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer> m_hitDecorKeys{this, "HitDecors", {}};
             /** @brief The track summary tool filling the summary state from the associated segments */
             ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" ,""};
     };

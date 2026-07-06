@@ -15,15 +15,6 @@ namespace MuonR4{
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_segLinkKey.initialize());
         ATH_CHECK(m_summaryTool.retrieve());
-
-        for (const auto hitSumm :{
-                "innerSmallHits", "innerLargeHits", "middleSmallHits", "middleLargeHits",
-                "outerSmallHits", "outerLargeHits", "extendedSmallHits", "extendedLargeHits",
-                "etaLayer1Hits", "phiLayer1Hits", "etaLayer2Hits", "phiLayer2Hits",
-                "etaLayer3Hits", "phiLayer3Hits", "etaLayer4Hits", "phiLayer4Hits"}){
-            m_hitDecorKeys.emplace_back(m_readKey, hitSumm);
-        }
-        ATH_CHECK(m_hitDecorKeys.initialize());
         return StatusCode::SUCCESS;
     }
     StatusCode TruthHitSummaryAlg::execute(const EventContext& ctx) const {
