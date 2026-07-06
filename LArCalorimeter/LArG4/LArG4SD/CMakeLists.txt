@@ -22,7 +22,7 @@ set_target_properties( LArG4SD PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_G
 
 atlas_add_test( LArG4SDToolConfig_test
                 SCRIPT test/LArG4SDToolConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

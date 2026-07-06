@@ -13,7 +13,7 @@ atlas_add_alias( athenaHLT "athenaHLT.py" )
 # Tests:
 atlas_add_test( test_AthHLT
    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/AthHLT.py
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( athenaHLT_jo_noopts
