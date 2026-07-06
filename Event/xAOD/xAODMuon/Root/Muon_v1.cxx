@@ -398,7 +398,6 @@ bool Muon_v1::isolationCaloCorrection(  float& value, const Iso::IsolationFlavou
   }
   
   const ElementLink< TrackParticleContainer >& Muon_v1::trackParticleLink( TrackParticleType type) const{
-    using LinkAcc_t = SG::Accessor<ElementLink< TrackParticleContainer >>;
     switch ( type ) {
       case Primary :
         return primaryTrackParticleLink();
