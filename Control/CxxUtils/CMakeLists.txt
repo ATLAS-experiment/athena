@@ -79,9 +79,6 @@ atlas_add_test( MD5_test
    SOURCES test/MD5_test.cxx
    LINK_LIBRARIES CxxUtils )
 
-atlas_add_test( ut_cxxutils_floatcompression_test
-   SOURCES test/ut_cxxutils_floatcompression_test.cxx
-   LINK_LIBRARIES CxxUtils )
 
 atlas_add_test( Compressor_test
    SOURCES test/Compressor_test.cxx
@@ -162,6 +159,11 @@ atlas_add_test( close_to_zero_test
   
 atlas_add_test( transparent_string_hash_test
   SOURCES test/transparent_string_hash_test.cxx
+  LINK_LIBRARIES CxxUtils Boost::unit_test_framework
+  POST_EXEC_SCRIPT noerror.sh
+)
+atlas_add_test( FloatCompressor_test
+  SOURCES test/FloatCompressor_test.cxx
   LINK_LIBRARIES CxxUtils Boost::unit_test_framework
   POST_EXEC_SCRIPT noerror.sh
 )
