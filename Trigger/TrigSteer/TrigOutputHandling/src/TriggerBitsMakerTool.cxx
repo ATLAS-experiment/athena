@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigOutputHandling/TriggerBitsMakerTool.h"
@@ -36,6 +36,7 @@ StatusCode TriggerBitsMakerTool::start() {
 
   // This block allows extra mappings to be supplied by python, e.g. for testing purposes
   for (const auto& chainAndBit: m_extraChainToBit ) {
+    // cppcheck-suppress uninitMemberVarNoCtor
     struct { std::string chain; uint32_t bit; } conf { chainAndBit.first, chainAndBit.second };    
     ATH_MSG_DEBUG( "Extra Chain " << conf.chain << " will flip  " << conf.bit <<  " bit" );
     ATH_CHECK(preInsertCheck(conf.chain, conf.bit));
