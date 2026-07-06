@@ -11,6 +11,7 @@
 #include "RNTupleAuxDynWriter.h"
 #include "TBranchAuxDynReader.h"
 #include "TBranchAuxDynWriter.h"
+#include "AuxDiscoverySvc.h"
 
 #include "TBranch.h"
 #include "TClass.h"
@@ -116,6 +117,13 @@ namespace RootAuxDynIO
    FactoryTool::getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type,
                                       ROOT::RNTupleReader* reader) const {
       return std::make_unique<RNTupleAuxDynReader>(field_name, field_type, reader);
+   }
+
+
+   //  ---------------------  Dynamic Aux Attribute Share 
+
+   std::unique_ptr<IAuxDynShare> FactoryTool::getAuxDynShare(const IAthenaSerializeSvc* serSvc, IAthenaIPCTool* ipcTool) const {
+      return std::make_unique<AuxDiscoverySvc>(serSvc, ipcTool);
    }
 
 }

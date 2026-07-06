@@ -1,8 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef IROOTAUXDYN_IO_H
 #define IROOTAUXDYN_IO_H
+
+#include "GaudiKernel/StatusCode.h"
 
 #include "RootAuxDynIO/RootAuxDynDefs.h"
 
@@ -19,6 +21,8 @@ class TTree;
 class TFile;
 class TClass;
 
+class IAthenaSerializeSvc;
+class IAthenaIPCTool;
 
 // Forward declarations
 namespace ROOT { class RNTupleReader; }
@@ -30,7 +34,7 @@ namespace RootAuxDynIO
 
    class IRootAuxDynReader
    {
-   public :
+   public:
       /**
        * @brief Attach specialized AuxStore for reading dynamic attributes
        * @param object object instance to which the store will be attached to - has to be an instance of the type the reader was created for
@@ -81,6 +85,18 @@ namespace RootAuxDynIO
    };
 
 
+   class IAuxDynShare {
+   public:
+      /// Default Destructor
+      virtual ~IAuxDynShare() = default;
+
+      /// Receive dynamic aux store variables from streaming tool
+      virtual StatusCode receiveStore(TClass* cl, void* obj, int num = 0) = 0;
+
+      /// Send dynamic aux store variables to streaming tool
+      virtual StatusCode sendStore(TClass* cl, const void* obj, const std::string& classId, const std::string& contName, int num = 0) = 0;
+   };
+
 
    class IFactoryTool
    {
@@ -101,6 +117,7 @@ namespace RootAuxDynIO
       getNTupleAuxDynReader(const std::string& field_name, const std::string& field_type,
                             ROOT::RNTupleReader* reader) const = 0;
 
+      virtual std::unique_ptr<IAuxDynShare> getAuxDynShare(const IAthenaSerializeSvc* serSvc, IAthenaIPCTool* ipcTool) const = 0;
 
       /// check if a field/branch with fieldname and type tc has IAuxStore interface
       virtual bool hasAuxStore(std::string_view fieldname, TClass *tc) const = 0;
