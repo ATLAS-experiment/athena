@@ -12,3 +12,4 @@ atlas_add_component( MuonCombinedAlgsR4
                                     MuonAnalysisInterfacesLib MuonRecToolInterfacesR4
                                     ActsToolInterfacesLib InDetTrackSelectionToolLib
                                     FourMomUtils)
+atlas_install_scripts(test/runR4_MuonCombRecoSPOTTest.sh)
