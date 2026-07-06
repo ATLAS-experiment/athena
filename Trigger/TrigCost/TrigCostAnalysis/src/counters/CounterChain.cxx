@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTrigger/TrigCompositeContainer.h"
@@ -73,7 +73,7 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
   std::map<std::string, int> nRobsPerRosPerEvent; // Accumulate how many ROBs ROS requested per this event
   const std::string slotStr{"slot"};
   const std::string startStr{"start"};
-  const std::string stopStr{"stopStr"};
+  const std::string stopStr{"stop"};
   for (const size_t algIndex : data.chainToAlgMap().at(getName())){
     const xAOD::TrigComposite* alg = data.costCollection().at(algIndex);
     const uint32_t slot = alg->getDetail<uint32_t>(slotStr);
