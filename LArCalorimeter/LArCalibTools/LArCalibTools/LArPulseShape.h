@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARPULSESHAPE_H
@@ -35,15 +35,16 @@ namespace Trig{
    class TrigDecisionTool;
 }
 
+// Not reentrant --- fills histograms in execute().
 class LArPulseShape : public AthAlgorithm {
 
  public:
-  LArPulseShape(const std::string & name, ISvcLocator * pSvcLocator);
-  ~LArPulseShape();
+  using AthAlgorithm::AthAlgorithm;
+  virtual ~LArPulseShape();
 
   //Standard algo methods
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const EventContext& ctx) override; 
+  virtual StatusCode execute(const EventContext& ctx) override;
   //Finalize needs to be implemented by the deriving class
   virtual StatusCode stop() override;
 
@@ -56,27 +57,19 @@ class LArPulseShape : public AthAlgorithm {
  std::map<std::string, TH1*>::const_iterator THend()   const { return m_histos.end(); }
 
  private:
-   bool m_initialized;
-   std::string m_ntname; 
+   bool m_initialized = false;
    std::string m_folder;
-   const CaloCell_ID*       m_calo_id;
+   const CaloCell_ID*       m_calo_id = nullptr;
    NTuple::Item<short> m_peakSample;
    NTuple::Item<short> m_useHgIntercept;
    NTuple::Item<short> m_useMgIntercept;
    NTuple::Item<short> m_useLgIntercept;
-   int m_OffId = 0;  
-   int m_OffId_conv = 0;     
-   int m_isample = 0;
-   int m_mindist = 0;
-   int m_closestBC = 0;
 
    PublicToolHandle<Trig::TrigDecisionTool>m_trigDec{this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool"};  
 
    SG::ReadCondHandleKey<LuminosityCondData> m_lumiDataKey{this,"LumiKey", "LuminosityCondData","SG Key of LuminosityCondData object"};  
    SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
    SG::ReadCondHandleKey<LArBadChannelCont> m_BCKey{this, "BadChanKey", "LArBadChannel", "SG bad channels key"};
-
-   const ILArPedestal* m_larPedestal = nullptr;
 
    std::map<std::string, TProfile*> m_effhistos;
    std::map<int, TProfile*> m_cellHistos;     
@@ -98,10 +91,11 @@ class LArPulseShape : public AthAlgorithm {
   bool  m_addBC = false, m_addFEBTemp = false;
   enum {NOT_VALID = -999};
 
-  std::string m_ntpath, m_ntTitle;
+  std::string m_ntpath = "/NTUPLES/PULSE/";
+  StringProperty m_ntTitle { this, "NtupleTitle", "Pulse shape" };
 
   //Ntuple pointer
-  NTuple::Tuple* m_nt;
+  NTuple::Tuple* m_nt = nullptr;
 
   //Ntuple variables:
   NTuple::Item<long> m_detector, m_region, m_layer, m_eta, m_phi, m_onlChanId, m_oflChanId;

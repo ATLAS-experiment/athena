@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArBlockCorrections.h"
 #include "LArRawConditions/LArConditionsContainerBase.h"
-
-LArBlockCorrections::LArBlockCorrections(const std::string& name, ISvcLocator* pSvcLocator) : 
-  AthAlgorithm(name,pSvcLocator) {}
 
 StatusCode LArBlockCorrections::initialize() {
   bool setFlag =   LArConditionsContainerBase::applyCorrectionsAtInit(true, false);

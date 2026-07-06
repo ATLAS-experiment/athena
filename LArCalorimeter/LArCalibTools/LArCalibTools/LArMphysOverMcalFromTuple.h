@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARMPHYSOVERMCALFROMTuple_H
 #define LARMPHYSOVERMCALFROMTuple_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 
 
@@ -26,30 +26,27 @@ The root tree should be named "outfit" and contain the following branches :
  */
 
 
-class LArMphysOverMcalFromTuple : public AthAlgorithm
+class LArMphysOverMcalFromTuple : public AthReentrantAlgorithm
 {
  public:
-  LArMphysOverMcalFromTuple(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-  ~LArMphysOverMcalFromTuple();
+  virtual ~LArMphysOverMcalFromTuple();
 
   //standard algorithm methods
-  /// implements IAlgorithm::initialize() 
-  StatusCode initialize() ; 
 
   /// implements IAlgorithm::execute()  : Does nothing
-  StatusCode execute(const EventContext&) {return StatusCode::SUCCESS;}
+  virtual StatusCode execute(const EventContext&) const override {return StatusCode::SUCCESS;}
 
-  /// IAlgorithm::finalize() : Where the action takes place...
-  StatusCode finalize(){return StatusCode::SUCCESS;}
-  StatusCode stop();
+  /// IAlgorithm::stop() : Where the action takes place...
+  virtual StatusCode stop() override;
  
  private:
   /// list of input ntuple file names 
-  std::vector<std::string> m_root_file_names;
+  StringArrayProperty m_root_file_names { this, "FileNames", {} };
 
   /// key of the PhysWave collection in StoreGate
-  std::string m_store_key;
+  StringProperty m_store_key { this, "StoreKey", "FROMTUPLE" };
 
 };
 
