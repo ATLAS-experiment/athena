@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruncationAnalysisAlg.h"
@@ -12,8 +12,8 @@
 namespace {
   struct CollectionDebugInfo {
     std::string_view name;
-    uint32_t size;
-    bool isRecorded;
+    uint32_t size = 0;
+    bool isRecorded = false;
   };
   bool cmpCollections(const CollectionDebugInfo& a, const CollectionDebugInfo& b) {
     return a.size > b.size;
