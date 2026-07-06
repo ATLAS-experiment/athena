@@ -6,7 +6,6 @@ atlas_subdir( ISF_FastCaloSimEvent )
 #External dependencies:
 find_package( Boost )
 find_package( CLHEP )
-find_package( HepPDT )
 find_package( ROOT COMPONENTS Core Tree MathCore MathMore Hist RIO Matrix Physics )
 find_package( lwtnn )
 find_package( onnxruntime )
@@ -104,7 +103,7 @@ atlas_add_root_dictionary( ISF_FastCaloSimEvent _dictSource
                            ISF_FastCaloSimEvent/TFCSONNXHandler.h
                            ISF_FastCaloSimEvent/TFCSNetworkFactory.h
 			   ISF_FastCaloSimEvent/LinkDef.h
-			   EXTERNAL_PACKAGES HepPDT)
+			   )
 
 
 if(USE_GPU AND CMAKE_CUDA_COMPILER)
@@ -112,10 +111,10 @@ if(USE_GPU AND CMAKE_CUDA_COMPILER)
   atlas_add_library( ISF_FastCaloSimEvent
     ISF_FastCaloSimEvent/*.h ${_dictSource} src/*.cxx
     PUBLIC_HEADERS ISF_FastCaloSimEvent
-    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
     DEFINITIONS ${CLHEP_DEFINITIONS}
-    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
-    CaloGeoHelpers CxxUtils TileSimEvent ISF_FastCaloGpuLib TruthUtils
+    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
+    CaloGeoHelpers CxxUtils TileSimEvent ISF_FastCaloGpuLib TruthUtils GeneratorModulesLib
     PRIVATE_DEFINITIONS ${HDF5_CXX_DEFINITIONS}
     PRIVATE_INCLUDE_DIRS ${HDF5_INCLUDE_DIRS}
     PRIVATE_LINK_LIBRARIES XMLCoreParser GaudiKernel ${HDF5_LIBRARIES})
@@ -123,10 +122,10 @@ else()
   atlas_add_library( ISF_FastCaloSimEvent
     ISF_FastCaloSimEvent/*.h ${_dictSource} src/*.cxx
     PUBLIC_HEADERS ISF_FastCaloSimEvent
-    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}  ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
     DEFINITIONS ${CLHEP_DEFINITIONS}
-    LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
-    CaloGeoHelpers CxxUtils TileSimEvent TruthUtils
+    LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES}
+    CaloGeoHelpers CxxUtils TileSimEvent TruthUtils GeneratorModulesLib
     PRIVATE_DEFINITIONS ${HDF5_CXX_DEFINITIONS}
     PRIVATE_INCLUDE_DIRS ${HDF5_INCLUDE_DIRS}
     PRIVATE_LINK_LIBRARIES XMLCoreParser GaudiKernel ${HDF5_LIBRARIES})
