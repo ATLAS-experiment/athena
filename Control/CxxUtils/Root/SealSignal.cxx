@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,7 +17,6 @@
  *
  */
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "CxxUtils/SealCommon.h"               // wlav
 #include "CxxUtils/SealSignal.h"               // wlav
@@ -1144,6 +1143,7 @@ Signal::dumpInfo (IOFD fd, char *buf, unsigned int buf_size, int sig, const sigi
 
     // These are set if the signal was sent by kill, POSIX signal
     // send or SIGCHLD.
+    //coverity[INCONSISTENT_UNION_ACCESS]
     MYWRITE (fd, buf, snprintf (buf, buf_size, "  pid    = %ld, uid = %ld\n",
                                 (long) info->si_pid, (long) info->si_uid));
 
@@ -1152,6 +1152,7 @@ Signal::dumpInfo (IOFD fd, char *buf, unsigned int buf_size, int sig, const sigi
        // Create temporary variables, as MacOS/clang doesn't want to
        // accept the on-the-fly conversion of the following variables
        // without printing some warnings.
+       //coverity[INCONSISTENT_UNION_ACCESS]
        const long status = info->si_status;
        const long utime = info->si_utime;
        const long stime = info->si_stime;
@@ -1161,16 +1162,19 @@ Signal::dumpInfo (IOFD fd, char *buf, unsigned int buf_size, int sig, const sigi
     }
 
     // These are set if the POSIX signal sender passed them.
+    //coverity[INCONSISTENT_UNION_ACCESS]
     MYWRITE (fd, buf, snprintf (buf, buf_size, "  value  = (%d, %p)\n",
                                 info->si_int, info->si_ptr));
 
     // This is the interesting address for memory faults.
     if (sig == SIGILL || sig == SIGFPE || sig == SIGSEGV || sig == SIGBUS)
+    //coverity[INCONSISTENT_UNION_ACCESS]
 	MYWRITE (fd, buf, snprintf (buf, buf_size, "  addr   = %p\n", info->si_addr));
 
 # ifdef SIGPOLL // not darwin
     // SIGPOLL status data.
     if (sig == SIGPOLL)
+    //coverity[INCONSISTENT_UNION_ACCESS]
 	MYWRITE (fd, buf, snprintf (buf, buf_size, "  band   = %ld, fd = %d\n",
                                     (long) info->si_band, info->si_fd));
 # endif
