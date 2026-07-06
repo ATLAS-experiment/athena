@@ -133,12 +133,10 @@ int InDetAlignTrackSelTool::nShared(const EventContext& ctx, const Trk::Track& t
   else{
     nshpix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelSharedHits) ? iSummaryValue : 0;
     nshsct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTSharedHits) ? iSummaryValue : 0;
-
-    if(nshpix==-1) 
-      nshpix=0;
-
-    if(nshsct==-1) 
-      nshsct=0;
+    //At condition nhpix == -1, the following bits of nhsct are known to be unset: 8-31.
+    //The condition nhpix == -1 cannot be true.
+    //At condition nhsct == -1, the following bits of nhsct are known to be unset: 8-31.
+    //The condition nhsct == -1 cannot be true.
 
     nshared = nshpix + nshsct;
   }
@@ -149,7 +147,7 @@ int InDetAlignTrackSelTool::nShared(const EventContext& ctx, const Trk::Track& t
 int InDetAlignTrackSelTool::nHoles(const EventContext& ctx, const Trk::Track& track) const {
   ////////////////////////////////////////////////////////////////////////////////////////
   ATH_MSG_DEBUG( "in nHoles() " ) ;
-  int nholes=0, nhpix, nhsct;
+  int nholes{}, nhpix{}, nhsct{};
 
   xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(ctx, track);
   uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
@@ -161,13 +159,10 @@ int InDetAlignTrackSelTool::nHoles(const EventContext& ctx, const Trk::Track& tr
   else{
     nhpix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelHoles) ? iSummaryValue : 0;
     nhsct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTHoles) ? iSummaryValue : 0;
-
-    if(nhpix==-1)
-      nhpix = 0;
-
-    if(nhsct==-1)
-      nhsct = 0;
-
+    //At condition nhpix == -1, the following bits of nhsct are known to be unset: 8-31.
+    //The condition nhpix == -1 cannot be true.
+    //At condition nhsct == -1, the following bits of nhsct are known to be unset: 8-31.
+    //The condition nhsct == -1 cannot be true.
     nholes =  nhpix + nhsct;
   }
   return nholes;
