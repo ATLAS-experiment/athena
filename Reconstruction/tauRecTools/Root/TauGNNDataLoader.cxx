@@ -96,7 +96,7 @@ TauGNNDataLoader::TauGNNDataLoader(
         FlavorTagInference::ConstituentsInputConfig cls_config;
         cls_config.name = "tauhits";
         cls_config.output_name = config.input_layer_hits;
-        cls_config.type = FcolavorTagInference::ConstituentsType::HIT;
+        cls_config.type = FlavorTagInference::ConstituentsType::HIT;
         cls_config.order = FlavorTagInference::ConstituentsSortOrder::UNDEFINED;
         cls_config.max_n_constituents = config.n_max_hits;
         cls_config.selection = FlavorTagInference::ConstituentsSelection::ALL;
