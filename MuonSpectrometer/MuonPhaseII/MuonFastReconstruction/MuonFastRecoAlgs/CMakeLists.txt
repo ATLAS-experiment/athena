@@ -10,8 +10,8 @@ find_package( Acts COMPONENTS Core )
 
 atlas_add_component( MuonFastRecoAlgs
                      src/components/*.cxx src/*.cxx
-                     LINK_LIBRARIES MuonVisualizationHelpersR4 AthenaKernel StoreGateLib
-                                    xAODMuonPrepData MuonSpacePoint MuonRecToolInterfacesR4 
+                     LINK_LIBRARIES MuonVisualizationHelpersR4 AthenaKernel StoreGateLib xAODMuon 
+                                    xAODMuonPrepData MuonSpacePoint MuonRecToolInterfacesR4 xAODMuonViews 
                                     ActsToolInterfacesLib  MuonTrackFindingToolsLib MuonDetDescrUtils
                                     ActsEventLib MuonFastRecoEvent MuonFastRecoHelpers)
 

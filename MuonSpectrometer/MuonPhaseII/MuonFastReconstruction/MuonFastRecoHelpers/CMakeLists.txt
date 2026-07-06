@@ -9,7 +9,7 @@ find_package( Acts COMPONENTS Core )
 atlas_add_library( MuonFastRecoHelpers
                    src/*.cxx
                    PUBLIC_HEADERS MuonFastRecoHelpers
-                   LINK_LIBRARIES xAODMuonPrepData MuonSpacePoint MuonFastRecoEvent MuonReadoutGeometryR4
-                                  MuonRecToolInterfacesR4 MuonDetDescrUtils MuonTrackFindingToolsLib
-                                  MuonVisualizationHelpersR4 MuonPatternHelpers
-                                  ActsToolInterfacesLib ActsEventLib AthenaKernel StoreGateLib)
+                   LINK_LIBRARIES xAODMuonPrepData MuonSpacePoint MuonFastRecoEvent MuonPatternEvent MuonReadoutGeometryR4
+                                  MuonRecToolInterfacesR4 MuonDetDescrUtils MuonTrackEvent MuonTrackFindingToolsLib
+                                  MuonVisualizationHelpersR4 MuonPatternHelpers ActsCalibratorsLib ActsEventLib xAODMuonViews
+                                  ActsToolInterfacesLib ActsEventLib AthenaKernel StoreGateLib FourMomUtils )

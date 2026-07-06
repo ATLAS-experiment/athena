@@ -6,6 +6,7 @@
 #define MUONR4_MUONFASTRECOEVENT_GLOBALPATTERN__H
 
 #include "MuonSpacePoint/SpacePoint.h"
+#include "MuonSpacePoint/SpacePointContainer.h"
 #include "MuonStationIndex/MuonStationIndex.h"
 #include "MuonTrackEvent/ExpandedSector.h"
 #include "AthContainers/DataVector.h"
@@ -17,9 +18,11 @@ class GlobalPattern {
     using HitType = const SpacePoint*;
     using StIndex = Muon::MuonStationIndex::StIndex;
     using HitCollection = std::unordered_map<StIndex, std::vector<HitType>>;
+    using BucketCollection = std::unordered_map<StIndex, std::vector<const SpacePointBucket*>>;
     
     /// @brief c-tor consuming the hit collection per station
-    GlobalPattern(HitCollection&& hitPerStation);
+    GlobalPattern(HitCollection&& hitPerStation, 
+                  BucketCollection&& bucketPerStation);
     GlobalPattern() = delete;
     /// @brief Copy c-tor
     GlobalPattern(const GlobalPattern& other) = default;
@@ -50,12 +53,16 @@ class GlobalPattern {
     unsigned secondarySector() const { return m_sector.adjacentMsSector(); }
     /// @brief Return whether the pattern is located in the overlap region between two sectors
     bool isSectorOverlap() const { return sector() != secondarySector(); }
+    /// @brief Return the expanded sector of the pattern
+    const ExpandedSector& expSector() const { return m_sector; }
     /// @brief Return the sector phi of the pattern. It is the central phi of the sector or the the value at the edge in case of overlap
     double sectorPhi() const;
     /// @brief Return the associated stations to the pattern
     std::vector<StIndex> getStations() const;
     /// @brief Return the pattern hits in the given station
     const std::vector<HitType>& hitsInStation(StIndex station) const;
+    /// @brief Return the parent buckets of the pattern in the given station
+    const std::vector<const SpacePointBucket*>& bucketsInStation(StIndex station) const;
     /// @brief Return the number of precision layers in the pattern
     unsigned nPrecisionLayers() const { return m_nPrecisionLayers; }
     /// @brief Return the number of trigger layers in the pattern
@@ -98,6 +105,8 @@ class GlobalPattern {
 
     /** Hits of the pattern organized per station */
     const HitCollection m_hitsInStation{};
+    /** Collection of parent buckets */
+    const BucketCollection m_parentBuckets{};
 };
 /** @brief Abrivation of the GlobalPattern container type */
 using GlobalPatternContainer = DataVector<GlobalPattern>;
