@@ -50,6 +50,8 @@ class PixelSensorGmxSD : public G4VSensitiveDetector
   SiHitCollection* m_HitColl{nullptr};
   AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
   GeoModelIO::ReadGeoModel * m_sqlreader{nullptr};
+  int m_bcmPrimeInitDiagCount{0};
+  bool m_reportedBCMPrimeHit{false};
 
 };
 

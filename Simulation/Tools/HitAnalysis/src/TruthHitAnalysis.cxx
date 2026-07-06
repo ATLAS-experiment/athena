@@ -233,11 +233,17 @@ StatusCode TruthHitAnalysis::execute(const EventContext& ctx) {
       int nvtx_sec=0;
 
       const auto &procVtx = HepMC::signal_process_vertex(*currentGenEventIter);
-    const auto &barcodes = (*currentGenEventIter)->attribute<HepMC::GenEventBarcodes> (HepMCStr::barcodes);
+#ifdef HEPMC3
+    const auto &barcodes = (*currentGenEventIter)->attribute<HepMC::GenEventBarcodes>("barcodes");
     std::map<int,int> id_to_barcode_map;
     if (barcodes) id_to_barcode_map = barcodes->id_to_barcode_map();
     for (const auto& vtx: (*currentGenEventIter)->vertices()) {
     int bcode = id_to_barcode_map[vtx->id()];
+#else
+    for (HepMC::GenEvent::vertex_const_iterator vtxit=(*currentGenEventIter)->vertices_begin(); vtxit!=(*currentGenEventIter)->vertices_end(); ++vtxit) {
+    auto vtx=*vtxit;
+        int bcode = HepMC::barcode(*vtx);
+#endif
 	double x = vtx->position().x();
 	double y = vtx->position().y();
 	double z = vtx->position().z();
@@ -297,7 +303,11 @@ StatusCode TruthHitAnalysis::execute(const EventContext& ctx) {
 
       for (auto currentGenParticle: *(*currentGenEventIter)) {
 	const HepMC::FourVector mom = currentGenParticle->momentum();
+#ifdef HEPMC3
     int currentGenParticlebarcode = id_to_barcode_map[currentGenParticle->id()];
+#else
+        int currentGenParticlebarcode=HepMC::barcode(currentGenParticle);
+#endif
 	m_h_truth_px->Fill(mom.x());
 	m_h_truth_py->Fill(mom.y());
 	m_h_truth_pz->Fill(mom.z());

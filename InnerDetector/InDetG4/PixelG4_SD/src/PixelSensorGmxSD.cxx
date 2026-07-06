@@ -18,6 +18,7 @@
 // Geant4 headers
 #include "G4ChargedGeantino.hh"
 #include <G4EventManager.hh>
+#include "G4Event.hh"
 #include "G4Geantino.hh"
 #include "G4SDManager.hh"
 #include "G4Step.hh"
@@ -32,23 +33,85 @@
 
 #include <InDetSimEvent/SiHitIdHelper.h>
 
+namespace {
+bool isBCMPrimeHitCollectionName(const std::string& name)
+{
+  return name == "BCMPrimeHits" || name == "BCMPrimeHits_G4";
+}
+
+SiHitCollection* findBCMPrimeHitCollection(AtlasG4EventUserInfo* eventInfo,
+                                          const std::string& primaryName)
+{
+  if (!eventInfo) {
+    return nullptr;
+  }
+  auto hitMap = eventInfo->GetHitCollectionMap();
+  if (!hitMap) {
+    return nullptr;
+  }
+  if (auto* coll = hitMap->Find<SiHitCollection>(primaryName)) {
+    return coll;
+  }
+  if (primaryName == "BCMPrimeHits") {
+    return hitMap->Find<SiHitCollection>("BCMPrimeHits_G4");
+  }
+  if (primaryName == "BCMPrimeHits_G4") {
+    return hitMap->Find<SiHitCollection>("BCMPrimeHits");
+  }
+  return nullptr;
+}
+} // namespace
+
 
 PixelSensorGmxSD::PixelSensorGmxSD(const std::string& name, const std::string& hitCollectionName,GeoModelIO::ReadGeoModel * sqlreader)
   : G4VSensitiveDetector( name )
   , m_HitCollName( hitCollectionName )
 {
     m_sqlreader = sqlreader;
+    if (isBCMPrimeHitCollectionName(m_HitCollName)) {
+      G4cout << "BCMPrimeSensorSD diagnostic: constructed PixelSensorGmxSD name=" << name
+             << " collection=" << m_HitCollName
+             << " sqlreader=" << (m_sqlreader ? "set" : "null") << G4endl;
+    }
 }
 
 // Initialize from G4 - cache the hit collection for the current event
 void PixelSensorGmxSD::Initialize(G4HCofThisEvent *)
 {
+  m_HitColl = nullptr;
+  m_g4UserEventInfo = nullptr;
+
   // ISF calls G4SDManager::PrepareNewEvent() before the Geant4 event loop starts...
-  if(auto* eventManger = G4EventManager::GetEventManager()){
-    if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
-      m_HitColl = eventInfo->GetHitCollectionMap()->Find<SiHitCollection>(m_HitCollName);
-      m_g4UserEventInfo = eventInfo;
+  auto* eventManager = G4EventManager::GetEventManager();
+  auto* eventInfo = eventManager
+                        ? static_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation())
+                        : nullptr;
+  if (eventInfo) {
+    m_g4UserEventInfo = eventInfo;
+    m_HitColl = findBCMPrimeHitCollection(eventInfo, m_HitCollName);
+  }
+
+  if (isBCMPrimeHitCollectionName(m_HitCollName) && m_bcmPrimeInitDiagCount < 3) {
+    const int eventNumber = eventManager && eventManager->GetConstCurrentEvent()
+                              ? eventManager->GetConstCurrentEvent()->GetEventID()
+                              : -1;
+    G4cout << "BCMPrimeSensorSD diagnostic: Initialize event=" << eventNumber
+           << " requestedCollection=" << m_HitCollName
+           << " eventInfo=" << (eventInfo ? "set" : "null")
+           << " hitMap=" << (eventInfo && eventInfo->GetHitCollectionMap() ? "set" : "null")
+           << " hitCollection=" << (m_HitColl ? "set" : "null");
+    if (auto hitMap = eventInfo ? eventInfo->GetHitCollectionMap() : nullptr) {
+      G4cout << " lookupBCMPrimeHits="
+             << (hitMap->Find<SiHitCollection>("BCMPrimeHits") ? "set" : "null")
+             << " lookupBCMPrimeHits_G4="
+             << (hitMap->Find<SiHitCollection>("BCMPrimeHits_G4") ? "set" : "null")
+             << " lookupITkPixelHits="
+             << (hitMap->Find<SiHitCollection>("ITkPixelHits") ? "set" : "null")
+             << " lookupPLR_Hits="
+             << (hitMap->Find<SiHitCollection>("PLR_Hits") ? "set" : "null");
     }
+    G4cout << G4endl;
+    ++m_bcmPrimeInitDiagCount;
   }
 
 }
@@ -56,6 +119,11 @@ void PixelSensorGmxSD::Initialize(G4HCofThisEvent *)
 
 G4bool PixelSensorGmxSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
 {
+  if (isBCMPrimeHitCollectionName(m_HitCollName) && !m_reportedBCMPrimeHit) {
+    G4cout << "BCMPrimeSensorSD diagnostic: first ProcessHits call for "
+           << m_HitCollName << G4endl;
+    m_reportedBCMPrimeHit = true;
+  }
   if (verboseLevel>5) G4cout << "Process Hit" << G4endl;
 
   G4double edep = aStep->GetTotalEnergyDeposit();

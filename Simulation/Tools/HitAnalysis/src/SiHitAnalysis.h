@@ -13,6 +13,11 @@
 #include <string>
 #include <vector>
 
+class BCMPrime_ID;
+namespace InDetDD {
+  class BCMPrimeDetectorManager;
+}
+
 class TH1;
 class TH2;
 class TTree;
@@ -77,6 +82,10 @@ private:
   Gaudi::Property<std::string> m_ntuplePath {this, "NtuplePath", "/SiHitAnalysis/ntuples/", ""};
   Gaudi::Property<bool> m_expert {this, "ExpertMode", false, ""};
   Gaudi::Property<bool> m_extraTruthBranches {this, "ExtraTruthBranches", false, ""};
+
+  bool m_isBCMPrime{false};
+  const BCMPrime_ID* m_bcmPrimeId{nullptr};
+  const InDetDD::BCMPrimeDetectorManager* m_bcmPrimeMgr{nullptr};
 };
 
 #endif // SI_HIT_ANALYSIS_H
