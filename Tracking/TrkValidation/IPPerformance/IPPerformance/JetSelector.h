@@ -36,7 +36,8 @@ public:
 private:
 
   int m_pvLocation;       //!
-
+  //FOR TEST-------
+  int m_numEvent;
   // obtain StoreGateSvc
   StoreGateSvc* m_storeGate = nullptr;
 

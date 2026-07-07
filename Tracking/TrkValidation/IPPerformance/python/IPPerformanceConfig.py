@@ -3,15 +3,8 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
-def EventSelectorAlgCfg(flags, name="EventSelectorAlg", **kwargs):
-
-    acc = ComponentAccumulator()
-    eventSelectorAlg = CompFactory.EventSelectorAlg("EventSelectorAlg", **kwargs)
-    eventSelectorAlg.isMC = flags.Input.isMC
-    acc.addEventAlgo(eventSelectorAlg)
-    
-    return acc
-
+from AthenaCommon.CFElements import seqAND
+#from AthenaConfiguration.Enums import LHCPeriod
 
 def EventStatusSelection_And_VertexSelectionCfg(flags):
 
@@ -19,7 +12,30 @@ def EventStatusSelection_And_VertexSelectionCfg(flags):
     if not flags.Input.isMC:
         acc.addEventAlgo(CompFactory.CP.EventStatusSelectionAlg("EventStatusSelectionAlg"))
 
-    acc.addEventAlgo(CompFactory.CP.VertexSelectionAlg("VertexSelectionAlg",VertexContainer="PrimaryVertices",MinTracks=3))
+    vertexSelectionAlg = CompFactory.CP.VertexSelectionAlg("VertexSelectionAlg",VertexContainer="PrimaryVertices",MinTracks=3)
+    vertexSelectionAlg.CutFlowSvc = None
+    acc.addEventAlgo(vertexSelectionAlg)
+    return acc
+
+def JetCalibrationAlgCfg(flags):
+    acc = ComponentAccumulator()
+    acc.addService(CompFactory.CP.SystematicsSvc("SystematicsSvc"))
+    from JetCalibTools.JetCalibToolsConfig import defineJetCalibTool
+    config = "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"
+    if flags.Input.isMC:
+        if not flags.Sim.ISF.Simulator.isFullSim():
+            config = "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config"
+    if flags.Input.isMC:
+        CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
+    else:
+        CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
+    jct = defineJetCalibTool(jetcollection="AntiKt4EMTopo",context="AnalysisLatest",configfile=config,calibarea="00-04-82",calibseq=CalibSequence,data_type = "mc" if flags.Input.isMC else "data",
+          rhoname="auto", pvname="PrimaryVertices", gscdepth="auto")
+    jetCalibrationAlg = CompFactory.CP.JetCalibrationAlg("JetCalibrationAlg")
+    jetCalibrationAlg.calibrationTool = jct    
+    jetCalibrationAlg.jets = "AntiKt4EMTopoJets"
+    acc.addEventAlgo(jetCalibrationAlg)
+    #acc.addEventAlgo(CompFactory.CP.JetCalibrationAlg("JetCalibrationAlg"))
     return acc
 
 def JetCalibratorCfg(flags, name="JetCalibrator", **kwargs):
@@ -95,10 +111,13 @@ def IPNtupleDumperCfg(flags,name="IPNtupleDumper", **kwargs):
             acc.popToolsAndMerge(InDetTrackSelectionTool_LoosePrimary_Cfg(flags)),
             acc.popToolsAndMerge(InDetTrackSelectionTool_TightPrimary_Cfg(flags)) ])
     
-    #from AthenaConfiguration.ComponentFactory import CompFactory
-    #nnjvt_tool = CompFactory.CP.NNJvtSelectionTool("NNJvtTool",JetContainer="AntiKt4EMTopoJets_Selected",WorkingPoint="FixedEffPt",MaxPtForJvt=60e3,MaxEtaForJvt=2.4)
-    #kwargs.setdefault("NNJvtTool", nnjvt_tool) 
-    acc.addEventAlgo(CompFactory.IPNtupleDumper(name, **kwargs))
+    ipNtupleDumper = CompFactory.IPNtupleDumper(name, **kwargs)
+#    if flags.GeoModel.Run == LHCPeriod.Run2:
+#      ipNtupleDumper.JetsKey = "AntiKt4EMTopoJets_Selected"
+#    else:
+#      ipNtupleDumper.JetsKey = "AntiKt4EMPFlowJets"   
+    acc.addEventAlgo(ipNtupleDumper) 
+#    acc.addEventAlgo(CompFactory.IPNtupleDumper(name, **kwargs))
     return acc
 
 
@@ -110,18 +129,19 @@ def IPPerformanceCfg(flags,name="IPPerformance", **kwargs):
     histSvc.Output += ["MYSTREAM DATAFILE='IPPerformance.root' OPT='RECREATE'"]
     acc.addService(histSvc)
     
-    from IPPerformance.IPPerformanceConfig import EventSelectorAlgCfg
-    acc.merge(EventSelectorAlgCfg(flags))
-    #from IPPerformance.IPPerformanceConfig import EventStatusSelection_And_VertexSelectionCfg
-    #acc.merge(EventStatusSelection_And_VertexSelectionCfg(flags))
+    seqName = "IPPerformanceSequence"
+    acc.addSequence(seqAND(seqName))
+    
+    from IPPerformance.IPPerformanceConfig import EventStatusSelection_And_VertexSelectionCfg
+    acc.merge(EventStatusSelection_And_VertexSelectionCfg(flags),sequenceName=seqName)
 
-    from IPPerformance.IPPerformanceConfig import JetCalibratorCfg
-    acc.merge(JetCalibratorCfg(flags))
+    from IPPerformance.IPPerformanceConfig import JetCalibrationAlgCfg
+    acc.merge(JetCalibrationAlgCfg(flags),sequenceName=seqName)
 
     from IPPerformance.IPPerformanceConfig import JetSelectorCfg
-    acc.merge(JetSelectorCfg(flags))
+    acc.merge(JetSelectorCfg(flags),sequenceName=seqName)
 
     from IPPerformance.IPPerformanceConfig import IPNtupleDumperCfg
-    acc.merge(IPNtupleDumperCfg(flags))
+    acc.merge(IPNtupleDumperCfg(flags),sequenceName=seqName)
 
     return acc

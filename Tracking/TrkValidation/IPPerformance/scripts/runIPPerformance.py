@@ -6,8 +6,9 @@ from glob import glob
 def get_args():
     from argparse import ArgumentParser
     parser = ArgumentParser(description='Parser for IPPerformance configuration')
-    #parser.add_argument("--filesInput", help="Input file", default="/eos/atlas/atlascerngroupdisk/perf-idtracking/CTIDEOfficial/CI_samples/DAOD_IDTIDE.28461204._000175.pool.root.1")  #default DAOD_IDTIDE file
-    parser.add_argument("--filesInput", help="Input file", default="/eos/home-w/wenjingw/public/athena/run/Data_DAOD/DAOD_IDTIDE.34111069._000147.pool.root.1")
+    parser.add_argument("--filesInput", help="Input file", default="/eos/atlas/atlascerngroupdisk/perf-idtracking/CTIDEOfficial/CI_samples/DAOD_IDTIDE.28461204._000175.pool.root.1")  #default DAOD_IDTIDE file
+    #parser.add_argument("--filesInput", help="Input file", default="/eos/home-w/wenjingw/public/athena/run/mc23_13p6TeV/DAOD_IDTIDE.43036379._000577.pool.root.1")
+    #parser.add_argument("--filesInput", help="Input file", default="/eos/home-w/wenjingw/public/athena/run/Data_DAOD/DAOD_IDTIDE.34111069._000147.pool.root.1")
     parser.add_argument("--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int)
     parser.add_argument("--skipEvents", help="Skip this number of events. Default: no events are skipped", default=0, type=int)
     parser.add_argument("--outputFile", help='Name of output file',default="IPPerformanceHists.root")
@@ -26,7 +27,6 @@ if __name__=='__main__':
         flags.Input.Files += glob(path)
     #Does this work? 
     #flags.Output.HISTFileName = args.outputFile
-
 
     flags.Exec.SkipEvents = args.skipEvents
     flags.Exec.MaxEvents = args.maxEvents

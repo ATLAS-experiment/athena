@@ -1,4 +1,4 @@
-#include "IPPerformance/EventSelectorAlg.h"
+//#include "IPPerformance/EventSelectorAlg.h"
 #include "IPPerformance/IPNtupleDumper.h"
 #include "AthContainers/ConstDataVector.h"
 
@@ -29,6 +29,7 @@ IPNtupleDumper::IPNtupleDumper(const std::string& name, ISvcLocator* pSvcLocator
   m_vtxContainer       = "PrimaryVertices";
   m_deltaRCut          = 0.4;
   m_IPhistos           = nullptr;
+  m_ip_cutflowHist = nullptr;
   
 }
 
@@ -47,7 +48,20 @@ StatusCode IPNtupleDumper :: initialize ()
   // input events.
 
   ATH_MSG_INFO("initialize(): Initializing IPNtupleDumper..." );
-
+  //FOR TEST-----
+  m_numEvent =0;
+  ServiceHandle<ITHistSvc> histSvc("THistSvc","IPNtupleDumper");
+  ATH_CHECK( histSvc.retrieve() );
+  m_ip_cutflowHist = new TH1D("cutflow_ip", "cutflow_ip", 1, 1, 2);
+  ATH_CHECK( histSvc->regHist("/MYSTREAM/cutflow_ip",m_ip_cutflowHist) );
+  m_ip_cutflowHist->SetCanExtend(TH1::kAllAxes);
+  m_ip_cutflowHist_1    = m_ip_cutflowHist->GetXaxis()->FindBin("1");
+  m_ip_cutflowHist_2 = m_ip_cutflowHist->GetXaxis()->FindBin("2");
+  m_ip_cutflowHist_3= m_ip_cutflowHist->GetXaxis()->FindBin("3");
+  m_ip_cutflowHist_4    = m_ip_cutflowHist->GetXaxis()->FindBin("4");
+  m_ip_cutflowHist_5  = m_ip_cutflowHist->GetXaxis()->FindBin("5");
+  m_ip_cutflowHist_6   = m_ip_cutflowHist->GetXaxis()->FindBin("6");
+  m_ip_cutflowHist_7   = m_ip_cutflowHist->GetXaxis()->FindBin("7");
   if (m_jetKey.empty()) {
     ATH_MSG_INFO("IPNtupleDumper::configure(): InputJetContainer is empty!");
     return StatusCode::FAILURE;
@@ -83,8 +97,8 @@ StatusCode IPNtupleDumper :: initialize ()
   ANA_MSG_INFO( "   truth matching probability: " << m_TruthMatchProb );
   
   if(!m_isMC) ATH_CHECK( m_trigDecTool.retrieve());
-  ServiceHandle<ITHistSvc> histSvc ("THistSvc","IPNtupleDumper");
-  ATH_CHECK( histSvc.retrieve() );
+  //ServiceHandle<ITHistSvc> histSvc ("THistSvc","IPNtupleDumper");
+  //ATH_CHECK( histSvc.retrieve() );
   if (!m_ipSaveHistosOnly) {
     m_t1 = new TTree("IPtree", "IPtree");
     SetBranches(m_t1);
@@ -157,7 +171,10 @@ StatusCode IPNtupleDumper :: finalize ()
   // gets called on worker nodes that processed input events.
 
   ATH_MSG_INFO("finalize(): Deleting tool instances...");
-
+  ATH_MSG_INFO("IPNtupleDumper: Processed events = " << m_numEvent);
+  ATH_MSG_INFO("Total selected jets = " << m_totalJets);
+  ATH_MSG_INFO("Total ghost tracks = " << m_totalGhostTracks);
+  
   m_trackselectionTools.clear();
 
   return StatusCode::SUCCESS;
@@ -174,12 +191,13 @@ StatusCode IPNtupleDumper :: execute ()
     ATH_MSG_ERROR("execute(): Failed to retrieve event info. Exiting.");
     return StatusCode::FAILURE;
   }
+  m_numEvent++;
+  m_ip_cutflowHist->Fill(m_ip_cutflowHist_1,1);
   
   // Check if we are running on MC
   m_isMC = evtInfo->eventType( xAOD::EventInfo::IS_SIMULATION );
   ATH_MSG_INFO("initialize(): Is MC? :"<<m_isMC);
 
-  // Set event weight to MC event weight on MC
   if( m_isMC ) evtW = evtInfo->mcEventWeight();
   else evtW = 1;
   
@@ -214,6 +232,7 @@ StatusCode IPNtupleDumper :: execute ()
     return StatusCode::FAILURE;
   }
   SG::ReadDecorHandle<xAOD::JetContainer, float> jet_constit_scale_pt{m_jetConstitScalePtKey, ctx};
+  m_totalJets += inJets_Selected->size();
 
   
   // Retrieve trackParticles
@@ -234,7 +253,7 @@ StatusCode IPNtupleDumper :: execute ()
     ATH_MSG_ERROR("execute(): IP decorations not available. Exiting.");
     return StatusCode::FAILURE;
   }
-
+  m_ip_cutflowHist->Fill(m_ip_cutflowHist_2,1);
   // General events quantities
   lb       = evtInfo->lumiBlock();
   runN     = evtInfo->runNumber();
@@ -368,6 +387,7 @@ StatusCode IPNtupleDumper :: execute ()
         Warning("execute()","No ghost-associated tracks");
         continue;
       }
+      m_totalGhostTracks += jetTracks.size();
       ntracks = jetTracks.size();
       for (auto *trk : jetTracks)
         ProcessTrack_GhostAssoc(trk, jet, vtxContainer);
@@ -780,11 +800,12 @@ bool IPNtupleDumper::ProcessTrack_DeltaR(const xAOD::TrackParticle* track, const
 
 bool IPNtupleDumper::ProcessTrack_GhostAssoc(const xAOD::TrackParticle* track, const xAOD::Jet* jet, const xAOD::VertexContainer* vtxCont) 
 {
+  m_ip_cutflowHist->Fill(m_ip_cutflowHist_3,1);
   // Remove nullptrs
   if (!track ) {
     return false;
   }
-
+  m_ip_cutflowHist->Fill(m_ip_cutflowHist_4,1);
     //Check if track has at least one associated primary vertex
     bool hasMatch = false;
     bool hasMatchFirst = false;
@@ -798,18 +819,20 @@ bool IPNtupleDumper::ProcessTrack_GhostAssoc(const xAOD::TrackParticle* track, c
       if( hasMatch && count_vtx == 1 ) hasMatchFirst = true;
       if( hasMatch ) break;
     }
+    m_ip_cutflowHist->Fill(m_ip_cutflowHist_5,1);
     // Remove tracks without associated vertices
     if( !hasMatch ) {
       Warning("IPNtupleDumper::ProcessTrack_GhostAssoc", "No vertex found for track.");
       return false;
     }
-
+    m_ip_cutflowHist->Fill(m_ip_cutflowHist_6,1);
     // Remove tracks not associated to first primary vertex
     // KB: assume this is the vertex of the jet --> is there a way of checking this on the fly?
     if ( !(hasMatchFirst) ){
       Warning("IPNtupleDumper::ProcessTrack_GhostAssoc", "Track not associated to primary vertex.");
       return false;
     }
+    m_ip_cutflowHist->Fill(m_ip_cutflowHist_7,1);
 
   float deltaR_trk_jet = jet->p4().DeltaR(track->p4());
   float pTjet  = jet->pt() *  0.001;
@@ -853,6 +876,20 @@ void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float de
     if (m_trackselectionTools[i_selTool]->accept(track))
       selBits |= 0x1<<i_selTool;
   }
+  //FOR TEST--------------------
+  if (m_numEvent <= 5 && trk_pt.size() < 5) {
+  ATH_MSG_INFO("evt=" << evtN
+               << " track=" << trk_pt.size()
+               << " pt=" << track->pt()
+               << " eta=" << track->eta()
+               << " phi=" << track->phi()
+               << " d0=" << track->d0()
+               << " d0PV=" << d0PV
+               << " d0SigmaPV=" << d0SigmaPV
+               << " z0=" << track->z0()
+               << " z0PV=" << z0PV);
+}
+
   
   selectionBits.push_back(selBits);
   trk_pt.push_back(track->pt());
@@ -982,7 +1019,7 @@ void IPNtupleDumper::FillTreeVariables(const xAOD::TrackParticle* track,float de
   static const SG::Accessor<unsigned char> mAcc_numberOfPixelHits ("numberOfPixelHits");
   static const SG::Accessor<unsigned char> mAcc_numberOfPixelHoles ("numberOfPixelHoles");
   static const SG::Accessor<unsigned char> mAcc_numberOfPixelOutliers ("numberOfPixelOutliers");
-  static const SG::Accessor<unsigned char> mAcc_numberOfPixelSharedHits ("numberOfPixelOutliers");
+  static const SG::Accessor<unsigned char> mAcc_numberOfPixelSharedHits ("numberOfPixelSharedHits");
   static const SG::Accessor<unsigned char> mAcc_numberOfPixelSplitHits ("numberOfPixelSplitHits");
   static const SG::Accessor<unsigned char> mAcc_numberOfSCTHits ("numberOfSCTHits");
   static const SG::Accessor<unsigned char> mAcc_numberOfSCTHoles ("numberOfSCTHoles");
@@ -1052,6 +1089,9 @@ StatusCode IPNtupleDumper::FillIPHistograms()
 
   for (unsigned int i = 0; i < trk_pt.size(); ++i) {
     float weight = evtW;
+    if(!m_isMC){
+      weight =1;
+    }
     
     // Selection on jetPt
     if (jetPt.at(i) > 300 && selectionBits.at(i) > 1) { // Tight selection

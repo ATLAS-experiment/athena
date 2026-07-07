@@ -168,6 +168,8 @@ StatusCode JetCalibrator :: finalize ()
   // gets called on worker nodes that processed input events.
 
   ATH_MSG_INFO("finalize(): Deleting tool instances...");
+  //For TEST-----------
+  ATH_MSG_INFO("JetCalibrator: Processed events = " << m_numEvent);
 
   return StatusCode::SUCCESS;
 }
@@ -176,13 +178,17 @@ StatusCode JetCalibrator :: finalize ()
 StatusCode JetCalibrator ::execute ()
 {
   const EventContext& ctx = Gaudi::Hive::currentContext();
+  
+  const xAOD::EventInfo* eventInfo = 0;
+  ATH_CHECK(evtStore()->retrieve(eventInfo, "EventInfo"));
   m_numEvent++;
-
   SG::ReadHandle<xAOD::JetContainer> inJets{m_inContainKey, ctx};
   if (!inJets.isValid()) {
     ATH_MSG_ERROR ("Couldn't retrieve xAOD::JetContainer with key: " << m_inContainKey.key() );
     return StatusCode::FAILURE;
   }
+  //FOR TEST----------------
+  ATH_MSG_INFO("1: Input jet container size = " << inJets->size());
   // loop over available systematics - remember syst == "Nominal" --> baseline
   std::vector< std::string >* vecOutContainerNames = new std::vector< std::string >;
   for ( const auto& syst_it : m_systList ) {
@@ -266,10 +272,6 @@ StatusCode JetCalibrator ::execute ()
   return StatusCode::SUCCESS;
 }
 
-
-bool JetCalibrator::sort_pt(xAOD::IParticle* partA, xAOD::IParticle* partB){
-  return partA->pt() > partB->pt();
-}
 
 // Get the subset of systematics to consider
 // can also return full set if systName = "All"

@@ -63,13 +63,24 @@ class IPNtupleDumper : public AthAlgorithm
 
 private:
   PublicToolHandle<Trig::TrigDecisionTool>        m_trigDecTool{this, "trigDecTool", "Trig::TrigDecisionTool/TrigDecisionTool"};
-
+  //FOR TEST-----
+  int m_numEvent;
+  int m_totalJets = 0;
+  int m_totalGhostTracks = 0;
   // put your configuration variables here as public variables.
   // that way they can be set directly from CINT and python.
 public:
  
   //ToolHandle<CP::NNJvtSelectionTool> m_nnjvtTool{this, "NNJvtTool", "CP::NNJvtSelectionTool/NNJvt", "NNJvt tool"};
-
+  //cutflow
+  TH1D* m_ip_cutflowHist;
+  int   m_ip_cutflowHist_1;
+  int   m_ip_cutflowHist_2;
+  int   m_ip_cutflowHist_3;
+  int   m_ip_cutflowHist_4;
+  int   m_ip_cutflowHist_5;
+  int   m_ip_cutflowHist_6;
+  int   m_ip_cutflowHist_7;
   //Config variables
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackKey{this, "TrackParticlesKey", "InDetTrackParticles"};
   std::string m_vtxContainer;                     //! vtx container name
