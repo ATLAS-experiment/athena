@@ -17,6 +17,7 @@
 #include "SCT_ConditionsData/SCT_ModuleGainCalibData.h"
 #include "SCT_ConditionsData/SCT_ModuleNoiseCalibData.h"
 #include "SCT_ConditionsTools/SCT_ReadCalibChipDefs.h"
+#include <stdexcept>
 
 using namespace SCT_ConditionsData;
 using namespace SCT_ReadCalibChipDefs;
@@ -92,6 +93,9 @@ SCT_ReadCalibChipDataTool::isGood(const IdentifierHash& elementHashId, const Eve
       ++nChips;
     }
   }
+  if (nChips == 0)[[unlikely]]{
+    throw std::runtime_error("SCT_ReadCalibChipDataTool::isGood: nChips is zero.");
+  }
   const float meanNoiseValue{sum/nChips};
   ATH_MSG_DEBUG("Module mean noise: " << meanNoiseValue);
   return (meanNoiseValue < m_noiseLevel);
@@ -114,8 +118,8 @@ SCT_ReadCalibChipDataTool::getDetectorElementStatus(const EventContext& ctx, InD
      status.resize(m_id_sct->wafer_hash_max(),true);
   }
   unsigned int element_i=0;
+  const int occ_index{noiseOccIndex("NoiseByChip")};
   for (const SCT_ModuleNoiseCalibData& noiseOccData : *condDataNoise) {
-     const int occ_index{noiseOccIndex("NoiseByChip")};
      if (occ_index<0) {
         ATH_MSG_ERROR("This NoiseOccupancy noise data does not exist");
         return;
