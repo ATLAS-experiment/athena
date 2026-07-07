@@ -565,8 +565,7 @@ bool TrackingGeometrySvc::runConsistencyChecks() const {
 
   m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
       nTotalSensors++;
-
-      const auto* actsDetElem = dynamic_cast<const ActsDetectorElement*>(surface->surfacePlacement());
+      const auto* actsDetElem = getActsDetectorElement(surface);
       if(actsDetElem == nullptr) {
         ATH_MSG_ERROR("Invalid detector element found");
         result = false;
@@ -833,10 +832,9 @@ ActsLayerBuilder::Config TrackingGeometrySvc::makeLayerBuilderConfig(
   auto matcher = [](const Acts::GeometryContext & /*gctx*/,
                     Acts::AxisDirection aDir, const Acts::Surface *aS,
                     const Acts::Surface *bS) -> bool {
-    auto a = dynamic_cast<const ActsDetectorElement *>(
-        aS->surfacePlacement());
-    auto b = dynamic_cast<const ActsDetectorElement *>(
-        bS->surfacePlacement());
+    auto* a = getActsDetectorElement(aS);
+    auto* b = getActsDetectorElement(bS);
+
     if ((not a) or (not b)) {
       throw std::runtime_error(
           "Cast of surface associated element to ActsDetectorElement failed "

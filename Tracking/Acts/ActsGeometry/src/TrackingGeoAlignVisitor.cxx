@@ -4,8 +4,8 @@
 
 #include "TrackingGeoAlignVisitor.h"
 ///
-#include "ActsGeometryInterfaces/IDetectorElement.h"
 #include "ActsGeometryInterfaces/IVolumePlacement.h"
+#include "ActsGeometryInterfaces/ISurfacePlacement.h"
 //
 
 #include "Acts/Geometry/TrackingVolume.hpp"
@@ -27,14 +27,16 @@ namespace ActsTrk{
     }
 
     void TrackingGeoAlignVisitor::visitSurface(const Acts::Surface& surface) {
-        if (!surface.isAlignable()) {
+        // Alignment of the portals is taking care by the VolumePlacement.
+        if (!surface.isAlignable() || !surface.isSensitive()) {
             return;
         }
-        const auto* placement = dynamic_cast<const IDetectorElement*>(surface.surfacePlacement());
+
+        const auto* placement = dynamic_cast<const ISurfacePlacement*>(surface.surfacePlacement());
         if(!placement) {
             return;
         }
-        m_aligned += placement->storeAlignedTransforms(m_store);
+        m_aligned += placement->detectorElement()->storeAlignedTransforms(m_store);
     }
     unsigned TrackingGeoAlignVisitor::alignedObjects() const { return m_aligned; }
 }

@@ -12,7 +12,6 @@
 #include <GeoModelKernel/GeoAlignableTransform.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 
-#include <ActsGeoUtils/Defs.h>
 #include <ActsGeometryInterfaces/IDetectorElement.h>
 #include <ActsGeoUtils/TransformCache.h>
 #include <GeoModelUtilities/TransientConstSharedPtr.h>
@@ -156,7 +155,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /** @brief Returns the transformation from the local coordinate system  of the readout
      *         element into the global ATLAS coordinate system (inverse of globalToLocal).
      *  @param ctx: Geometry context to take the alignment corrections into account. */
-    const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& ctx) const;
+    const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& ctx) const override final;
     /** @brief Returns the transformation from the local coordinate system  of the readout
      *         element into the global ATLAS coordinate system (inverse of globalToLocal).
      *  @param ctx: Geometry context to take the alignment corrections into account
@@ -171,15 +170,15 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
                                                    const IdentifierHash& id) const;
 
 #ifndef SIMULATIONBASE
-    /** @brief Wrapper function of the localToGlobalTransform method to satisfy the 
-     *         Acts::IDetectorElementBase interface
+    /** @brief Wrapper function of the localToGlobalTransform method to align
+     *         with the Acts interface
      *  @param gctx: Acts representation of the GeometryContext */
-    const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final;
+    const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const;
     /** @brief Returns the surface associated with the readout element. It is placed in the 
      *         center of the readout element's volume and has the volumes surface bounds */
-    const Acts::Surface& surface() const override final;
+    const Acts::Surface& surface() const;
     /** @brief Returns the mutable surface associated with the readout element. */
-    Acts::Surface& surface() override final;
+    Acts::Surface& surface();
     /** @brief Returns the surface associated with the transform of a given
       *         readout layer. (E.g. tube or  the strip plane)
       * @param hash: Hash of the surface to fetch (Measurement or layer hash). */
@@ -202,8 +201,6 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     const SpectrometerSector* msSector() const;
     /** @brief Returns the pointer to the chamber enclosing this readout element */
     const Chamber* chamber() const;
-    /** @brief Returns whether the detector element is sensitive */
-    virtual bool isSensitive() const final override { return true; }
 #endif
     const Amg::Transform3D& localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const override final;
     /** @brief Returns the thickness in normal direction of the strip readout
@@ -216,7 +213,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *         Returns the number of how many transformations have been stored */
     unsigned int storeAlignedTransforms(ActsTrk::DetectorAlignStore& store) const override final;
     /** @brief Allow the transform cache access to the private / protected data members */
-    friend class ActsTrk::TransformCacheDetEle<MuonGMR4::MuonReadoutElement>;
+    friend class ActsTrk::ReadoutSurfacePositioning<MuonGMR4::MuonReadoutElement>;
   protected:
     /** @brief Returns the transformation from the GeoModel tree and applies the A-lines if 
      *         a valid alignment store pointer is provided. The local coordinate system in GeoModel
@@ -230,13 +227,13 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     const Amg::Transform3D& toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
     /** @brief Constructs the TransformDetEleCache associated with the hash of the 
      *         given Mdt tube or strip layer. The method is templated over the specific
-    *         implementation of the readout element as the `TransformCacheDetEle` implements
+    *         implementation of the readout element as the `ReadoutSurfacePositioning` implements
     *         the assembly of the final transforms. The method returns a failure of an instance
     *         for the same hash has already been invoked earlier
     *  @param hash: Measurement / layer hash to identifier the transform of the readout layer */
     template <class MuonDetImpl> 
             StatusCode insertTransform(const IdentifierHash& hash);
-    /** @brief Creates the `TransformCacheDetEle` corresponding the generic local -> global transformation
+    /** @brief Creates the `ReadoutSurfacePositioning` corresponding the generic local -> global transformation
      *         of the readout element. Needs to be called by each technology during initialization */
     StatusCode createGeoTransform();
 #ifndef SIMULATIONBASE
@@ -255,7 +252,10 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
    private:
     /** @brief Returns the pointer to the TransformCache associated with this measurement hash
      *  @param measHash: Measurement hash for which the cache shall be returned */
-    const ActsTrk::TransformCache* transformCache(const IdentifierHash& measHash) const;
+    const ActsTrk::IReadoutSurfacePositioning* transformCache(const IdentifierHash& measHash) const;
+    /** @brief Returns the pointer to the TransformCache associated with this measurement hash
+     *  @param measHash: Measurement hash for which the cache shall be returned */
+    ActsTrk::IReadoutSurfacePositioning* transformCache(const IdentifierHash& measHash);
     /** @brief IdHelperSvc for Identifier manipulation */
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonReadoutElement"};
 
@@ -269,17 +269,15 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /** @brief Cache the station phi of the identifier */
     int m_stPhi{-1};
     /** @brief The transform caches corresponding to the surfaces of the tubes and gas gap planes */
-    using TransformCacheMap = std::vector<std::unique_ptr<ActsTrk::TransformCache>>;
+    using TransformCacheMap = std::vector<std::unique_ptr<ActsTrk::IReadoutSurfacePositioning>>;
     TransformCacheMap m_localToGlobalCaches{};
     /** @brief Cache of the transform of the readout element itself */
-    std::unique_ptr<ActsTrk::TransformCache> m_centralTrfCache{};
-    // ActsTrk::TransformCacheDetEle<MuonReadoutElement> m_centralTrfCache{geoTransformHash(), this};
+    std::unique_ptr<ActsTrk::IReadoutSurfacePositioning> m_centralTrfCache{};
+    // ActsTrk::ReadoutSurfacePositioning<MuonReadoutElement> m_centralTrfCache{geoTransformHash(), this};
     /** @brief Cache the chamber index of the Identifier */
     Muon::MuonStationIndex::ChIndex m_chIdx{Muon::MuonStationIndex::ChIndex::ChUnknown};   
 
 #ifndef SIMULATIONBASE
-    ///Cache of all associated surfaces
-    ActsTrk::SurfaceCacheSet m_surfaces;
     /// Pointer to the associated MS-sector & MuonChamber
     const SpectrometerSector* m_msSectorLink{};
     const Chamber* m_chambLink{nullptr};
@@ -289,7 +287,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
 namespace ActsTrk{
     template <> Amg::Transform3D 
-        TransformCacheDetEle<MuonGMR4::MuonReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+        ReadoutSurfacePositioning<MuonGMR4::MuonReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
 }
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.icc>

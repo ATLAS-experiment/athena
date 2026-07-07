@@ -5,7 +5,7 @@
 
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "ActsGeometryInterfaces/IDetectorElement.h"
-#include "ActsGeoUtils/SurfaceCache.h"
+#include "ActsGeometryInterfaces/ISurfacePlacement.h"
 
 #include "xAODMuon/versions/MuonTrackSummaryAccessors_v1.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
@@ -121,13 +121,13 @@ namespace MuonR4 {
                     if (!surf.isSensitive() || !surf.isAlignable()) {
                         return;
                     }
-                    const auto* detEl = dynamic_cast<const ActsTrk::SurfaceCache*>(surf.surfacePlacement());
+                    const auto* detEl = dynamic_cast<const ActsTrk::ISurfacePlacement*>(surf.surfacePlacement());
                     if (!detEl) {
                         return;
                     }
                     incrementSummary(detEl->identify(), status, 1, summary);
                     complementaryHole(detEl->identify(), 
-                        dynamic_cast<const MuonGMR4::MuonReadoutElement*>(detEl->transformCache()->parent()), 
+                        dynamic_cast<const MuonGMR4::MuonReadoutElement*>(detEl->detectorElement()), 
                         summary);
                 }
         });

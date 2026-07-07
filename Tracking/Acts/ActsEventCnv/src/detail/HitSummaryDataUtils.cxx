@@ -3,6 +3,7 @@
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
+
 #include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 
@@ -10,6 +11,7 @@
 #include "src/detail/HitSummaryDataUtils.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "ActsEvent/EnumConversion.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 namespace ActsTrk::detail {
 
@@ -48,9 +50,9 @@ namespace ActsTrk::detail {
                return;
             }
             xAOD::UncalibMeasType det_type = xAOD::UncalibMeasType::Other;
-            const auto* detEl = dynamic_cast<const IDetectorElementBase*>(state.referenceSurface().surfacePlacement());
-            if (detEl != nullptr) {
-               det_type = toMeasType(detEl->detectorType());
+            const auto* placement = dynamic_cast<const ISurfacePlacement*>(state.referenceSurface().surfacePlacement());
+            if (placement != nullptr) {
+               det_type = toMeasType(placement->detectorType());
             }
 
             if (flag.isHole()) {
@@ -82,11 +84,10 @@ namespace ActsTrk::detail {
                if (flag.isSharedHit()) {
                   hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHit);
                }
-               const InDetDD::SolidStateDetectorElementBase* siDet{nullptr};
-               if (const auto* idDetEl = dynamic_cast<const ActsDetectorElement*>(detEl); idDetEl != nullptr) {
-                  siDet = dynamic_cast<const InDetDD::SolidStateDetectorElementBase*>(idDetEl->upstreamDetectorElement());
+               if (const auto* idDetEl = getActsDetectorElement(state.referenceSurface()); idDetEl != nullptr) {
+                  const auto* siDet = dynamic_cast<const InDetDD::SolidStateDetectorElementBase*>(idDetEl->upstreamDetectorElement());
+                  hit_info_out.addHit(det_type, siDet, hit_selection);
                }
-               hit_info_out.addHit(det_type, siDet, hit_selection);
 
                if (det_type == xAOD::UncalibMeasType::HGTDClusterType) {
                   if (!flag.isOutlier() && state.hasCalibrated()) {

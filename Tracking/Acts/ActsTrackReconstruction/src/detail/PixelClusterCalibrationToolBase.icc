@@ -16,9 +16,8 @@ namespace ActsTrk::detail {
 
 template <typename traj_t>
 const InDetDD::SiDetectorElement&
-PixelClusterCalibratorCommon<traj_t>::getDetectorElement(const Acts::Surface &surface) const
-{
-    const ActsDetectorElement* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
+PixelClusterCalibratorCommon<traj_t>::getDetectorElement(const Acts::Surface &surface) const {
+    const auto* detElem = getActsDetectorElement(surface);
     const InDetDD::SiDetectorElement *
        siDetElement = detElem ? dynamic_cast<const InDetDD::SiDetectorElement *>(detElem->upstreamDetectorElement())
                               : nullptr;

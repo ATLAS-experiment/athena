@@ -83,7 +83,7 @@ namespace ActsTrk{
             Amg::Transform3D localToGlobalTransform(const DetectorAlignStore* store) const;
             /** @brief Auxiliary class to store the aligned transforms of the volume and 
              *         of the associated portals */
-            class AlignedCache: public ActsTrk::TransformCacheBase {
+            class VolumeGeoPositioning: public AlignableGeoPositioning {
                 public:
                     /** @brief Flag to indicate which kind of transform is handled by the AlignedCache */
                     enum class CacheFlags: std::uint8_t {
@@ -96,15 +96,15 @@ namespace ActsTrk{
                      * @param flags: Flag indicating local -> global or global -> local
                      * @param type: In which detector transform store is the cache appended
                      * @param parent: Pointer to the parent creating the cache */
-                    explicit AlignedCache(const CacheFlags flags,
-                                          const DetectorType type,
-                                          const VolumePlacement* parent);
+                    explicit VolumeGeoPositioning(const CacheFlags flags,
+                                                  const DetectorType type,
+                                                  const VolumePlacement* parent);
                     /** @brief Constructor for the cache storing the transform of 
                      *         the alignable portals.
                      * @param parent: Pointer to the parent creating the cache
                      * @param portalidx: Index of the portal represented by the cache */
-                    explicit AlignedCache(const VolumePlacement* parent,
-                                          const std::size_t portalIdx);
+                    explicit VolumeGeoPositioning(const VolumePlacement* parent,
+                                                  const std::size_t portalIdx);
                     /** @brief Fetch the transform to store it in the detector alignment cache */
                     virtual Amg::Transform3D fetchTransform(const DetectorAlignStore* store) const override;
                 private:
@@ -118,15 +118,15 @@ namespace ActsTrk{
             /** @brief Additional shift on top of the parent position */
             GeoIntrusivePtr<GeoTransform> m_refShift{}; 
             /** @brief Cache to handle the local -> global transform of the volume */
-            std::unique_ptr<AlignedCache> m_locToGlobCache{};
+            std::unique_ptr<VolumeGeoPositioning> m_locToGlobCache{};
             /** @brief Cache to handle the global -> local transform of the volume */
-            std::unique_ptr<AlignedCache> m_globToLocCache{};
+            std::unique_ptr<VolumeGeoPositioning> m_globToLocCache{};
             /** @brief Cache to handle the local -> global transforms of the associated portals */
-            std::vector<std::unique_ptr<AlignedCache>> m_portalCaches{};
+            std::vector<std::unique_ptr<VolumeGeoPositioning>> m_portalCaches{};
             /** @brief Children spawning from this VolumePlacement */
-            std::vector<std::unique_ptr<VolumePlacement>> m_children{};
+            std::vector<std::shared_ptr<VolumePlacement>> m_children{};
             /** @brief Pipe the local -> global transform to a surface*/
-            std::unique_ptr<Acts::detail::PortalPlacement> m_surfacePlacement{};
+            std::shared_ptr<Acts::detail::PortalPlacement> m_surfacePlacement{};
     };
 }
 

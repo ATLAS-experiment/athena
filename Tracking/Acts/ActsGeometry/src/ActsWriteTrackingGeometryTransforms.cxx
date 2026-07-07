@@ -60,10 +60,10 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute(const EventContext& ctx)
   std::ofstream os(m_outputName, std::ios_base::app);
 
   trackingGeometry->visitSurfaces([&] (const Acts::Surface* srf) {
-    const Acts::SurfacePlacementBase *detElem = srf->surfacePlacement();
-    const auto *gmde = static_cast<const ActsDetectorElement *>(detElem);
-
-
+    const auto *gmde = getActsDetectorElement(srf);
+    if (!gmde) {
+        return;
+    }
     if(dynamic_cast<const InDetDD::TRT_BaseElement*>(gmde->upstreamDetectorElement()) != nullptr) { 
       return;
     }

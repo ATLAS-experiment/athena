@@ -9,7 +9,7 @@
 namespace ActsTrk {
     ATH_FLATTEN
     inline const Amg::Transform3D& 
-        TransformCacheBase::getTransform(const ActsTrk::DetectorAlignStore* alignStore) const {    
+        AlignableGeoPositioning::getTransform(const ActsTrk::DetectorAlignStore* alignStore) const {    
         /// Valid alignment store is given -> Take the transformation from the cache there
         if (alignStore) {
             const Amg::Transform3D* cache = alignStore->trackingAlignment->getTransform(m_clientNo);
@@ -27,29 +27,32 @@ namespace ActsTrk {
         }
         return (*m_nomCache);
     }
-    inline IdentifierHash TransformCacheBase::hash() const { return m_hash; }
+    inline IdentifierHash AlignableGeoPositioning::hash() const { return m_hash; }
 #ifndef SIMULATIONBASE
     ATH_FLATTEN
-    inline const Amg::Transform3D& TransformCacheBase::getTransform(const Acts::GeometryContext& anygctx) const {
-        const GeometryContext* gctx = anygctx.get<const GeometryContext*>();    
+    inline const Amg::Transform3D& AlignableGeoPositioning::getTransform(const Acts::GeometryContext& tgContext) const {
+        const GeometryContext* gctx = tgContext.get<const GeometryContext*>();    
         // unpack the alignment store from the context
         return getTransform(gctx->getStore(m_type).get());
-
+    }
+    ATH_FLATTEN
+    inline const Amg::Transform3D& AlignableGeoPositioning::getTransform(const GeometryContext& gctx) const {
+        return getTransform(gctx.getStore(m_type).get());
     }
 #endif
 
 
 template<typename CachingDetectorEle>
-   TransformCacheDetEle<CachingDetectorEle>::TransformCacheDetEle(const IdentifierHash& hash,
-                                                                  const CachingDetectorEle* parentEle):
-        TransformCache{hash, parentEle->detectorType()},
+   ReadoutSurfacePositioning<CachingDetectorEle>::ReadoutSurfacePositioning(const IdentifierHash& hash,
+                                                                            const CachingDetectorEle* parentEle):
+        IReadoutSurfacePositioning{hash, parentEle->detectorType()},
         m_parent{parentEle} {}
 template<typename CachingDetectorEle>
-    const IDetectorElement* TransformCacheDetEle<CachingDetectorEle>::parent()  const {
+    const CachingDetectorEle* ReadoutSurfacePositioning<CachingDetectorEle>::parent()  const {
         return m_parent;
     }
 template <typename CachingDetectorEle>
-    Identifier TransformCacheDetEle<CachingDetectorEle>::identify() const {
+    Identifier ReadoutSurfacePositioning<CachingDetectorEle>::identify() const {
         return parent()->identify();
     }
 }

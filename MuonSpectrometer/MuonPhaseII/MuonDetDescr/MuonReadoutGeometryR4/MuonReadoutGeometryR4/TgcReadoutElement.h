@@ -100,7 +100,7 @@ class TgcReadoutElement : public MuonReadoutElement {
     /// Returns access to the strip design of the given gasGap [1-3]
     /// If the gap does not have strips an exception is thrown
     const RadialStripDesign& stripLayout(const IdentifierHash& layHash) const;
-    friend class ActsTrk::TransformCacheDetEle<TgcReadoutElement>;
+    friend class ActsTrk::ReadoutSurfacePositioning<TgcReadoutElement>;
    private:
         parameterBook m_pars{};
         const TgcIdHelper& m_idHelper{idHelperSvc()->tgcIdHelper()};
@@ -134,9 +134,9 @@ std::ostream& operator<<(std::ostream& ostr, const TgcReadoutElement::parameterB
 
 namespace ActsTrk{
     template <> Amg::Transform3D 
-        TransformCacheDetEle<MuonGMR4::TgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+        ReadoutSurfacePositioning<MuonGMR4::TgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     template <> Identifier
-        TransformCacheDetEle<MuonGMR4::TgcReadoutElement>::identify() const;
+        ReadoutSurfacePositioning<MuonGMR4::TgcReadoutElement>::identify() const;
 }
 
 #include <MuonReadoutGeometryR4/TgcReadoutElement.icc>

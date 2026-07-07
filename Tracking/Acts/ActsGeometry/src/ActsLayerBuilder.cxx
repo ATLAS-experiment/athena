@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // ATHENA
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -553,8 +553,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
 
     // want to figure out bins in phi
     for (const auto &srf : pl.surfaces()) {
-      auto elm = dynamic_cast<const ActsDetectorElement *>(
-          srf->surfacePlacement());
+      auto* elm = getActsDetectorElement(srf);
       if (elm) {
         auto id = elm->identityHelper();
         int ring_number;
