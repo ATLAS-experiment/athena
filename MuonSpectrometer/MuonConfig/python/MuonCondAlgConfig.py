@@ -357,7 +357,7 @@ def MuonStationIntersectCondAlgCfg(flags, name='MuonStationIntersectCondAlg',**k
 
 def NswDcsDbAlgCfg(flags, **kwargs):
     acc = ComponentAccumulator()
-    if flags.GeoModel.Run!=LHCPeriod.Run3: return acc
+    if flags.GeoModel.Run < LHCPeriod.Run3: return acc
     if flags.Input.isMC: return acc
     kwargs.setdefault("LoadTdaq", False)
     kwargs.setdefault("LoadEltx", False) 
