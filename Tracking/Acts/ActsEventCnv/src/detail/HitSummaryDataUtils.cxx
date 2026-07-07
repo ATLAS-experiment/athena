@@ -3,15 +3,11 @@
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
-
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "xAODMeasurementBase/MeasurementDefs.h"
-
 #include "xAODTracking/TrackingPrimitives.h"
 #include "src/detail/HitSummaryDataUtils.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "ActsEvent/EnumConversion.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 namespace ActsTrk::detail {
 
@@ -27,8 +23,8 @@ namespace ActsTrk::detail {
   {
      chi2_stat_out.reset();
 
-     using TimeInfoHelper_t = struct { double sum{}; double sumInv2{}; double chi2{}; unsigned int n=0u;};
-     TimeInfoHelper_t time_info_helper;
+     struct TimeInfoHelper { double sum{}; double sumInv2{}; double chi2{}; unsigned int n=0u;};
+     TimeInfoHelper time_info_helper;
 
      hit_info_out.reset();
      param_state_idx_out.clear();
