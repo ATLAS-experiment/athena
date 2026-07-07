@@ -45,7 +45,7 @@ StatusCode MmReadoutElement::initElement() {
                 m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(m_pars.halfShortWidth, 
                                                                       m_pars.halfLongWidth, 
                                                                       m_pars.halfHeight,
-                                                                      90.*Gaudi::Units::deg)));
+                                                                      0)));
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
