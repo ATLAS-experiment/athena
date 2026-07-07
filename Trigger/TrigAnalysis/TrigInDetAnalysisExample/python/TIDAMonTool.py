@@ -362,12 +362,13 @@ def monGroup( analysis_chain ) :
 def _th1(m,n):   return f"{m};{n}"
 def _tprof(m,n): return f"{m},{m}_weight;{n}"
 def _txy(m,n):   return f"{m}__x,{m}__y;{n}"
+def _tyx(m,n):   return f"{m}__y,{m}__x;{n}"
 
 _FORMATTERS = {
     "TH1F":        _th1,
     "TProfile":    _tprof,
     "TH2F":        _txy,
-    "TEfficiency": _txy
+    "TEfficiency": _tyx
 }
 
 
