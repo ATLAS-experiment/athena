@@ -153,6 +153,7 @@ namespace MuonR4{
         IdentifierHash modHash{};
         /** Fill the geometric part of the reg sel table */
         std::vector<std::unique_ptr<Acts::Volume>> objVolumes{};
+        std::vector<std::shared_ptr<const Acts::Surface>> objSurfaces{};
         for (const MuonGMR4::MuonReadoutElement* reEle: m_detMgr->getAllReadoutElements(alignDeltas->detType)) {
             
             const Acts::Surface& surface{reEle->surface()};
@@ -171,6 +172,7 @@ namespace MuonR4{
             
             if (m_dumpObjVolumes) {
                 std::unique_ptr<Acts::VolumeBounds> volBounds{};
+                objSurfaces.emplace_back(surface.getSharedPtr());
                 switch (surface.bounds().type()) {
                     using enum Acts::SurfaceBounds::BoundsType;
                     case eRectangle:{
@@ -252,6 +254,10 @@ namespace MuonR4{
             for (const auto& volume : objVolumes) {
                 Acts::GeometryView3D::drawVolume(visualHelper, *volume,
                                                  gctx.context());
+            }
+            for (const auto& surface : objSurfaces) {
+                Acts::GeometryView3D::drawSurface(visualHelper, *surface,
+                                                  gctx.context());
             }
             visualHelper.write(std::format("RegSelVolumes_{:}.obj", alignDeltas->detType));
 

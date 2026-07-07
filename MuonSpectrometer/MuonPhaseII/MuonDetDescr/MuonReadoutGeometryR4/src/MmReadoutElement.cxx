@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 
@@ -44,8 +44,7 @@ StatusCode MmReadoutElement::initElement() {
     ATH_CHECK(planeSurfaceFactory(geoTransformHash(), 
                 m_pars.layerBounds->makeBounds<Acts::TrapezoidBounds>(m_pars.halfShortWidth, 
                                                                       m_pars.halfLongWidth, 
-                                                                      m_pars.halfHeight,
-                                                                      0)));
+                                                                      m_pars.halfHeight)));
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
