@@ -249,7 +249,7 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
       return StatusCode::FAILURE;
     }
 
-    dPhi_cluSeed = CxxUtils::wrapToPi(muonClu0[sel_cl].phi)-CxxUtils::wrapToPi(muonClu[sel_cl].phi);
+    dPhi_cluSeed = CxxUtils::wrapToPi(muonClu0[sel_cl].phi-muonClu[sel_cl].phi);
     dEta_cluSeed = muonClu0[sel_cl].eta-muonClu[sel_cl].eta;
     dR_cluSeed   = DeltaR(muonClu0[sel_cl],muonClu[sel_cl]);
 
@@ -296,7 +296,7 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
     return StatusCode::SUCCESS;
 }
 
-float MuonCluster::DeltaR(lvl1_muclu_roi p_roi,lvl1_muclu_roi q_roi) const{
+float MuonCluster::DeltaR(const lvl1_muclu_roi& p_roi, const lvl1_muclu_roi& q_roi) const{
 
     float delPhi = CxxUtils::wrapToPi((p_roi).phi-(q_roi).phi);
     float delEta = (p_roi).eta-(q_roi).eta;
