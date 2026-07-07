@@ -37,7 +37,10 @@ private:
   Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", "", "jet collection"};
   Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "operating point"};
   Gaudi::Property<std::string> m_json_config_path {this, "JsonConfigFile", "", "Path to JSON config file"};
-  
+  Gaudi::Property<bool> m_allowBinCountMismatch {this, "AllowBinCountMismatch", false,
+    "If true, downgrade inconsistent pT/mass bin counts in loadBinConfig() from an ERROR "
+    "(initialisation failure) to a WARNING and continue. Default false (fail on inconsistency)."};
+
   std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_massAcc;
   std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_ptAcc;
 
