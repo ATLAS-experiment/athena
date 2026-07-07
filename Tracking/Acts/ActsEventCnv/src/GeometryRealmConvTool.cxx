@@ -62,7 +62,7 @@ namespace ActsTrk{
              if (!surface->isSensitive()) {
                 return;
             }
-            const auto *actsElement = dynamic_cast<const IDetectorElementBase*>(surface->surfacePlacement());
+            const auto *actsElement = dynamic_cast<const ISurfacePlacement*>(surface->surfacePlacement());
             if (!actsElement) {
                return;
             }
@@ -160,17 +160,17 @@ namespace ActsTrk{
 
     SurfacePtr_t GeometryRealmConvTool::convertSurfaceToTrk(const EventContext& ctx,
                                                                 const Acts::Surface& actsSurface) const{
-        const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.surfacePlacement());
-        if (!detEleBase) {
+        const auto *placement = dynamic_cast<const ISurfacePlacement*>(actsSurface.surfacePlacement());
+        if (!placement) {
            return translateFreeSurface(ctx, actsSurface);
         }
-        switch (detEleBase->detectorType()) {
+        switch (placement->detectorType()) {
             using enum DetectorType;
             case Pixel:
             case Sct:
             case Hgtd:
             case Trt: {
-                const auto actsElement = dynamic_cast<const ActsDetectorElement*>(detEleBase);
+                const auto* actsElement = getActsDetectorElement(actsSurface);
                 if (actsElement) {
                     return SurfacePtr_t{&actsElement->atlasSurface()};
                 }
@@ -185,7 +185,7 @@ namespace ActsTrk{
                 if (!SG::get(detMgr, m_muonMgrKey, ctx).isSuccess() || !detMgr) {
                     THROW_EXCEPTION("Failed to retrieve the muon detector manager");
                 }
-                return SurfacePtr_t{&detMgr->getReadoutElement(detEleBase->identify())->surface(detEleBase->identify())};
+                return SurfacePtr_t{&detMgr->getReadoutElement(placement->identify())->surface(placement->identify())};
             } default:
                 break;
         }

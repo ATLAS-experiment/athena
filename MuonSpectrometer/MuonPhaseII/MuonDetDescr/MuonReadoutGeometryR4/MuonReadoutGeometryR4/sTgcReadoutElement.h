@@ -191,7 +191,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
                                      const unsigned channelType, 
                                      const unsigned channel,
                                      const unsigned wireInGrp = 0);
-    friend class ActsTrk::TransformCacheDetEle<sTgcReadoutElement>;
+    friend class ActsTrk::ReadoutSurfacePositioning<sTgcReadoutElement>;
 
     bool isEtaZero(const IdentifierHash& measurementHash, const Amg::Vector2D& localPosition) const;
 
@@ -216,9 +216,9 @@ std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::sTgcReadoutElement:
 
 namespace ActsTrk{
     template <> Amg::Transform3D 
-        TransformCacheDetEle<MuonGMR4::sTgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
+        ReadoutSurfacePositioning<MuonGMR4::sTgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     template <> Identifier
-        TransformCacheDetEle<MuonGMR4::sTgcReadoutElement>::identify() const;
+        ReadoutSurfacePositioning<MuonGMR4::sTgcReadoutElement>::identify() const;
 }
 
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.icc>

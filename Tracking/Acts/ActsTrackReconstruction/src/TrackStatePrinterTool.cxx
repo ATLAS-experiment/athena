@@ -92,8 +92,7 @@ namespace ActsTrk
   atlasSurfaceName(const Acts::Surface *measurement_surface)
   {
      if (measurement_surface) {
-        const ActsDetectorElement *
-           acts_detector_element = dynamic_cast<const ActsDetectorElement *>(measurement_surface->surfacePlacement());
+        const auto* acts_detector_element = getActsDetectorElement(measurement_surface);
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
            if (detElem) {
@@ -247,10 +246,8 @@ namespace ActsTrk
       auto glob = surface->localToGlobal(tgContext, loc, Acts::Vector3::Zero());
       printVec3(glob);
 
-      if (compareMeasurementTransforms)
-      {
-        const ActsDetectorElement *
-            acts_detector_element = dynamic_cast<const ActsDetectorElement *>(surface->surfacePlacement());
+      if (compareMeasurementTransforms) {
+        const auto* acts_detector_element = getActsDetectorElement(surface);
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
 

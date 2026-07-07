@@ -284,7 +284,7 @@ namespace ActsTrk {
 
   xAOD::UncalibMeasType TrackFindingBaseAlg::measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState) {
     if (trackState.hasReferenceSurface()) {
-      if (const auto *actsDetElem = dynamic_cast<const IDetectorElementBase *>(trackState.referenceSurface().surfacePlacement())) {
+      if (const auto *actsDetElem = dynamic_cast<const ISurfacePlacement*>(trackState.referenceSurface().surfacePlacement())) {
         switch (actsDetElem->detectorType()) {
         case DetectorType::Pixel:
           return xAOD::UncalibMeasType::PixelClusterType;

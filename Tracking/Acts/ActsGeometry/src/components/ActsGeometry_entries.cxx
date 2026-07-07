@@ -5,9 +5,8 @@
 #include "EventPrimitives/EventPrimitives.h"
 // needed here to get the ATLAS eigen plugins in before the ACTS eigen plugins
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
-#include "ActsGeometry/ActsExtrapolationAlg.h"
+
 #include "ActsGeometry/ExtrapolationTool.h"
-#include "ActsGeometry/ActsPropStepRootWriterSvc.h"
 
 
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
@@ -20,12 +19,8 @@
 #include "../TrackingGeometryTool.h"
 #include "../TrackingGeometrySvc.h"
 
-
-DECLARE_COMPONENT(ActsExtrapolationAlg)
 DECLARE_COMPONENT(ActsWriteTrackingGeometryTransforms)
 
-
-DECLARE_COMPONENT(ActsPropStepRootWriterSvc)
 DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
 DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)
 
@@ -36,3 +31,4 @@ DECLARE_COMPONENT(ActsTrk::ITkMaterialDecoratorTool)
 DECLARE_COMPONENT(ActsTrk::WriteTrackingGeometry)
 DECLARE_COMPONENT(ActsTrk::TrackingGeometrySvc)
 DECLARE_COMPONENT(ActsTrk::TrackingGeometryTool)
+

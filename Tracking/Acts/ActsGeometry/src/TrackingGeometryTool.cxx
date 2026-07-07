@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackingGeometryTool.h"
@@ -67,8 +67,8 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
             return;
         }
         ++counter.n_sensitive_elements;
-        const auto* detEl = dynamic_cast<const IDetectorElementBase*>(surface->surfacePlacement());
-        if (!detEl) {           
+        const auto* placement = dynamic_cast<const ISurfacePlacement*>(surface->surfacePlacement());
+        if (!placement) {           
             return;
         }
 
@@ -78,19 +78,19 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
                                                              DetectorElementToActsGeometryIdMap::makeValue(surface->geometryId())));
             ++counter.n_detector_elements;
         };
-        switch(detEl->detectorType()) {
+        switch(placement->detectorType()) {
             using enum DetectorType;
             case Pixel:
                 insert_id(xAOD::UncalibMeasType::PixelClusterType,
-                          dynamic_cast<const ActsDetectorElement*>(detEl)->identifyHash());
+                          getActsDetectorElement(surface)->identifyHash());
                 break;
             case Sct:
                 insert_id(xAOD::UncalibMeasType::StripClusterType,
-                          dynamic_cast<const ActsDetectorElement*>(detEl)->identifyHash());
+                          getActsDetectorElement(surface)->identifyHash());
                 break;
             case Hgtd:
-                insert_id(xAOD::UncalibMeasType::HGTDClusterType,
-                         dynamic_cast<const ActsDetectorElement*>(detEl)->identifyHash());
+                insert_id(xAOD::UncalibMeasType::HGTDClusterType, 
+                         getActsDetectorElement(surface)->identifyHash());
                 break;
             case Trt: {
                 break;

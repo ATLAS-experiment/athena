@@ -5,7 +5,7 @@
 
 
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include  "ActsGeometryInterfaces/IDetectorElement.h"
+#include  "ActsGeometryInterfaces/ISurfacePlacement.h"
 namespace ActsTrk {
 
     StatusCode ReadoutGeoDumpAlg::initialize() {
@@ -37,10 +37,10 @@ namespace ActsTrk {
         
         trackingGeo->visitSurfaces([&](const Acts::Surface* surface){
             // We only want alignable surfaces
-            if (!surface->isAlignable()) {
+            if (!surface->isAlignable() || !surface->isSensitive()) {
                 return;
             }
-            const auto* detEl = dynamic_cast<const IDetectorElement*>(surface->surfacePlacement());
+            const auto* detEl = dynamic_cast<const ISurfacePlacement*>(surface->surfacePlacement());
             // Somehow it's not a known detector element
             if (!detEl) {
                 return;

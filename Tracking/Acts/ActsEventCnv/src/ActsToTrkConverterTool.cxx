@@ -33,7 +33,7 @@
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeoUtils/SurfaceCache.h"
+#include "ActsGeometryInterfaces/ISurfacePlacement.h"
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
@@ -310,7 +310,7 @@ template <typename Proxy_t>
           return;
         }
 
-        if (const auto* associatedDetEl = dynamic_cast<const IDetectorElementBase*>(
+        if (const auto* associatedDetEl = dynamic_cast<const ISurfacePlacement*>(
                                         state.referenceSurface().surfacePlacement());
             associatedDetEl != nullptr) {
             ATH_MSG_VERBOSE("Associated det: "<<associatedDetEl->detectorType());

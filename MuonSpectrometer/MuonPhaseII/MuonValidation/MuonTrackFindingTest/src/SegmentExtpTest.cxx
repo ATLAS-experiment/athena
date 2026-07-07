@@ -21,7 +21,7 @@
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-
+#include "ActsGeometryInterfaces/ISurfacePlacement.h"
 #include "Acts/Visualization/ObjVisualization3D.hpp"
 #include "Acts/Visualization/GeometryView3D.hpp"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
@@ -71,7 +71,7 @@ namespace MuonValR4{
                                                             start.direction(), n,
                                                              n.dot(target.center(tgContext)));
 
-            const auto* detEl = static_cast<const ActsTrk::IDetectorElementBase*>(target.surfacePlacement());
+            const auto* detEl = static_cast<const ActsTrk::ISurfacePlacement*>(target.surfacePlacement());
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Propagate "<<Amg::toString(start.position(tgContext))<<" + "
                   <<Amg::toString(start.direction())<<" onto surface: "<<target.toString(tgContext)
                   <<"\n, "<<m_idHelperSvc->toString(detEl->identify())

@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ActsGeometry/ActsExtrapolationAlg.h"
+#include "ExtrapolationTestAlg.h"
 
 // ATHENA
-#include "AthenaKernel/IAthRNGSvc.h"
-#include "AthenaKernel/RNGWrapper.h"
-#include "GaudiKernel/EventContext.h"
-#include "GaudiKernel/ISvcLocator.h"
+
 
 // ACTS
 #include "Acts/Propagator/MaterialInteractor.hpp"
@@ -20,7 +17,6 @@
 
 // PACKAGE
 #include "ActsGeometryInterfaces/GeometryContext.h"
-#include "ActsGeometry/IActsPropStepRootWriterSvc.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
 
@@ -33,20 +29,24 @@
 
 using namespace Acts::UnitLiterals;
 
-StatusCode ActsExtrapolationAlg::initialize() {
+namespace ActsTrk{
+StatusCode ExtrapolationTestAlg::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
   ATH_CHECK(m_rndmGenSvc.retrieve());
   ATH_CHECK(m_extrapolationTool.retrieve());
-  ATH_CHECK(m_propStepWriterSvc.retrieve());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK( m_materialTrackCollectionKey.initialize() );
-
+  ATH_CHECK(m_tree.init(this));
   return StatusCode::SUCCESS;
 }
 
-StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
+StatusCode ExtrapolationTestAlg::finalize() {
+    ATH_CHECK(m_tree.write());
+    return StatusCode::SUCCESS;
+}
+StatusCode ExtrapolationTestAlg::execute(const EventContext &ctx) {
 
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__);
 
@@ -57,26 +57,20 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
   ATH_MSG_VERBOSE("Extrapolating " << m_nParticlePerEvent << " particles");
 
   // Write to the collection to the EventStore
-  SG::WriteHandle<ActsTrk::RecordedMaterialTrackCollection> materialTracks(m_materialTrackCollectionKey, ctx);
+  SG::WriteHandle materialTracks{m_materialTrackCollectionKey, ctx};
 
   // Record the collection once per event if not already there
   if (!materialTracks.isPresent()) {
-      auto coll = std::make_unique<ActsTrk::RecordedMaterialTrackCollection>();
-      ATH_CHECK(materialTracks.record(std::move(coll)));
+      ATH_CHECK(materialTracks.record(std::make_unique<ActsTrk::RecordedMaterialTrackCollection>()));
   }
 
   // Add the track to the recorded collection
   auto* coll = materialTracks.ptr();
-  if (!coll) {
-      ATH_MSG_ERROR("RecordedMaterialTrackCollection ptr() is null for key "
-                    << m_materialTrackCollectionKey.key());
-      return StatusCode::FAILURE;
-  }
 
-  for (size_t i = 0; i < m_nParticlePerEvent; i++) {
+  for (size_t i = 0; i < m_nParticlePerEvent; ++i) {
     double d0 = 0;
     double z0 = 0;
-    double phi = rngEngine->flat() * 2 * M_PI - M_PI;
+    double phi = rngEngine->flat() * 2 * std::numbers::pi - std::numbers::pi;
     std::vector<double> etaRange = m_etaRange;
     double etaMin = etaRange.at(0);
     double etaMax = etaRange.at(1);
@@ -91,15 +85,13 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
     Acts::Vector3 momentum(pt * std::cos(phi), pt * std::sin(phi),
                             pt * std::sinh(eta));
 
-    double theta = Acts::VectorHelpers::theta(momentum);
+    double theta = momentum.theta();
 
     double charge = rngEngine->flat() > 0.5 ? -1 : 1;
 
     double qop = charge / momentum.norm();
 
-    std::shared_ptr<Acts::PerigeeSurface> surface =
-        Acts::Surface::makeShared<Acts::PerigeeSurface>(
-            Acts::Vector3(0, 0, 0));
+    auto surface = Acts::Surface::makeShared<Acts::PerigeeSurface>(Amg::Vector3D::Zero());
 
     double t = 0;
     ATH_MSG_VERBOSE("Pseudo-particle: eta: " << eta << " phi: " << phi);
@@ -123,7 +115,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
         ATH_MSG_WARNING("Got ZERO steps from the extrapolation tool");
       }
       if (m_writePropStep) {
-        m_propStepWriterSvc->write(output.first);
+         ATH_CHECK(writePropagationSteps(ctx, output.first));
       }
 
       if(m_writeMaterialTracks){
@@ -141,23 +133,43 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
   return StatusCode::SUCCESS;
 }
 
+StatusCode ExtrapolationTestAlg::writePropagationSteps(const EventContext& ctx, const StepVector& steps) {
+      m_eventNum = ctx.eventID().event_number();
+      for(const auto& step : steps) {
+      Acts::GeometryIdentifier::Value volumeID    = 0;
+      Acts::GeometryIdentifier::Value boundaryID  = 0;
+      Acts::GeometryIdentifier::Value layerID     = 0;
+      Acts::GeometryIdentifier::Value approachID  = 0;
+      Acts::GeometryIdentifier::Value sensitiveID = 0;
+      // get the identification from the surface first
+      if (step.surface) {
+        auto geoID  = step.surface->geometryId();
+        sensitiveID = geoID.sensitive();
+        approachID  = geoID.approach();
+        layerID     = geoID.layer();
+        boundaryID  = geoID.boundary();
+        volumeID    = geoID.volume();
+      }
+      // a current volume overwrites the surface tagged one
+      if (step.geoID != Acts::GeometryIdentifier()) {
+        volumeID = step.geoID.volume();
+      }
+      // now fill
+      m_s_sensitiveID.push_back(sensitiveID);
+      m_s_approachID.push_back(approachID);
+      m_s_layerID.push_back(layerID);
+      m_s_boundaryID.push_back(boundaryID);
+      m_s_volumeID.push_back(volumeID);
 
-void ActsExtrapolationAlg::writeStepsObj(
-    const std::vector<Acts::detail::Step>& steps) const {
-
-  std::lock_guard<std::mutex> lock(m_writeMutex);
-
-  static std::ofstream out ATLAS_THREAD_SAFE ("steps.obj");
-  std::stringstream lstr;
-  lstr << "l";
-  for (const auto &step : steps) {
-    const auto &pos = step.position;
-    out << "v " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
-    lstr << " " << m_objVtxCount;
-    m_objVtxCount++;
+      m_s_pX.push_back(step.position.x());
+      m_s_pY.push_back(step.position.y());
+      m_s_pZ.push_back(step.position.z());
+      m_s_pR.push_back(Acts::VectorHelpers::perp(step.position));
   }
 
-  lstr << std::endl;
+  
 
-  out << lstr.str() << std::endl;
+    return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
+}
+  
 }

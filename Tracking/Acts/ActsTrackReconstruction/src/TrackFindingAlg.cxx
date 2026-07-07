@@ -760,27 +760,28 @@ namespace ActsTrk
       if (det_el_status) {
         ++counter.n_volumes_with_status;
         volume_ptr->visitSurfaces([&counter, det_el_status, &measurements,this](const Acts::Surface *surface_ptr) {
-          if (!surface_ptr) return;
-          const Acts::Surface &surface = *surface_ptr;
-          const Acts::SurfacePlacementBase* detector_element = surface.surfacePlacement();
-          if (detector_element) {
-            ++counter.n_detector_elements;
-            const ActsDetectorElement *acts_detector_element = static_cast<const ActsDetectorElement*>(detector_element);
-            if (!det_el_status->isGood( acts_detector_element->identifyHash() )) {
-              ActsTrk::detail::MeasurementRange old_range = measurements.markSurfaceInsensitive(surface_ptr->geometryId());
-              if (!old_range.empty()) {
-                auto geoid_to_string = [](const Acts::GeometryIdentifier &id) -> std::string  {
-                  std::stringstream amsg;
-                  amsg << id;
-                  return amsg.str();
-                };
-                std::string a_msg ( geoid_to_string(surface_ptr->geometryId()));
-                ATH_MSG_WARNING("Reject " << (old_range.elementEndIndex() - old_range.elementBeginIndex())
-                                << " measurements because surface " << a_msg);
-              }
-              ++counter.n_disabled_detector_elements;
-            }
+
+          const auto* acts_detector_element = getActsDetectorElement(surface_ptr);
+          if (!acts_detector_element) {
+            return;
           }
+          ++counter.n_detector_elements;
+         
+          if (!det_el_status->isGood( acts_detector_element->identifyHash() )) {
+            ActsTrk::detail::MeasurementRange old_range = measurements.markSurfaceInsensitive(surface_ptr->geometryId());
+            if (!old_range.empty()) {
+              auto geoid_to_string = [](const Acts::GeometryIdentifier &id) -> std::string  {
+                std::stringstream amsg;
+                amsg << id;
+                return amsg.str();
+              };
+              std::string a_msg ( geoid_to_string(surface_ptr->geometryId()));
+              ATH_MSG_WARNING("Reject " << (old_range.elementEndIndex() - old_range.elementBeginIndex())
+                              << " measurements because surface " << a_msg);
+            }
+            ++counter.n_disabled_detector_elements;
+          }
+          
         }, true /*only sensitive surfaces*/);
       }
       else {
@@ -838,13 +839,11 @@ struct Collector {
     }
 
     assert(result != nullptr && "Result type is nullptr");
-
-    if (currentSurface->surfacePlacement() != nullptr) {
-      const auto* detElem = dynamic_cast<const ActsDetectorElement*>(currentSurface->surfacePlacement());
-      if(detElem != nullptr) {
-        detail::addToExpectedLayerPattern(*result, *detElem);
-      }
+    const auto* detElem = getActsDetectorElement(currentSurface);
+    if(detElem != nullptr) {
+      detail::addToExpectedLayerPattern(*result, *detElem);
     }
+    
 
     return Acts::Result<void>::success();
   }
@@ -958,12 +957,9 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
     // Before trimming, inspect encountered surfaces from all track states
     for(const auto ts : track.trackStatesReversed()) {
-      const auto& surface = ts.referenceSurface();
-      if(surface.surfacePlacement() != nullptr) {
-        const auto* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
-        if(detElem != nullptr) {
-          detail::addToExpectedLayerPattern(expectedLayerPattern, *detElem);
-        }
+      const auto* detElem = getActsDetectorElement(ts.referenceSurface());
+      if(detElem != nullptr) {
+        detail::addToExpectedLayerPattern(expectedLayerPattern, *detElem);
       }
     }
 

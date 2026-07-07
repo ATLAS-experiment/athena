@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsMuonTrackingGeometryTest.h"
@@ -11,9 +11,9 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "ActsInterop/LoggerUtils.h"
 #include "ActsInterop/UnitConverters.h" 
-#include "ActsGeoUtils/SurfaceCache.h"
 
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
+#include "ActsGeometryInterfaces/ISurfacePlacement.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthVertex.h"
@@ -281,7 +281,7 @@ namespace ActsTrk {
                     continue;
                 }
 
-                const SurfaceCache* sCache = dynamic_cast<const SurfaceCache *>(step.surface->surfacePlacement());
+                const auto* sCache = dynamic_cast<const ISurfacePlacement*>(step.surface->surfacePlacement());
                 if(!sCache) {
                     ATH_MSG_VERBOSE("Surface found but it's a portal, continuing..");
                     continue;

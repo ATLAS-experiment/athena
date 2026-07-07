@@ -8,7 +8,7 @@
 #include <cassert>
 namespace ActsTrk{
     template <> inline Amg::Transform3D 
-        TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
+        ReadoutSurfacePositioning<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
             using RE = MuonGMR4::MdtReadoutElement;
             const unsigned layerTube = m_parent->tubeNumber(RE::measurementHash(1, 0));
             /// Check whether the hash represents a tube or the central layer
@@ -22,7 +22,7 @@ namespace ActsTrk{
                    m_parent->fromIdealToDeformed(hash(), store) * m_parent->toTubeFrame(hash());
         }
      template <> inline Identifier
-        TransformCacheDetEle<MuonGMR4::MdtReadoutElement>::identify() const {
+        ReadoutSurfacePositioning<MuonGMR4::MdtReadoutElement>::identify() const {
             using RE = MuonGMR4::MdtReadoutElement;
             const unsigned layerTube = m_parent->tubeNumber(RE::measurementHash(1, 0));
             /// Check whether the hash represents a tube or the central layer

@@ -156,15 +156,6 @@ def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) ->
     result.setPrivateTools(the_tool)
     return result
 
-
-def ActsPropStepRootWriterSvcCfg(flags,
-                                 name: str = "ActsPropStepRootWriterSvc",
-                                 **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    acc.addService(CompFactory.ActsPropStepRootWriterSvc(name, **kwargs))
-    return acc
-
-
 def ActsTrackingGeometryToolCfg(flags,
                                 name: str = "ActsTrackingGeometryTool" ) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -208,9 +199,9 @@ def ActsExtrapolationAlgCfg(flags,
 
   if "ExtrapolationTool" not in kwargs:
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags))) # PrivateToolHandle
-
-  acc.merge(ActsPropStepRootWriterSvcCfg(flags, FilePath="propsteps.root", TreeName="propsteps"))
-  acc.addEventAlgo(CompFactory.ActsExtrapolationAlg(name, **kwargs))
+  from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+  acc.merge(setupHistSvcCfg(flags, outFile="propsteps.root", outStream = "ActsExtrapolationRecord"))
+  acc.addEventAlgo(CompFactory.ActsTrk.ExtrapolationTestAlg(name, **kwargs))
   return acc
 
 def ActsWriteTrackingGeometryCfg(flags,

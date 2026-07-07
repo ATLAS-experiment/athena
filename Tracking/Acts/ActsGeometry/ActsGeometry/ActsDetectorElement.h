@@ -13,9 +13,11 @@
 #include "ActsGeometryInterfaces/GeometryContext.h"
 // ATHENA INCLUDES
 #include "ActsGeoUtils/TransformCache.h"
+#include "ActsGeoUtils/SurfacePlacement.h"
 
 // ACTS
 #include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Utilities/PointerTraits.hpp"
 
 // STL
 #include <memory>
@@ -34,9 +36,22 @@ namespace Acts {
 class SurfaceBounds;
 }
 
-class ActsTrackingGeometrySvc;
 class IdentityHelper;
 
+
+class ActsDetectorElement;
+/** @brief Attempts to retrieve the ActsDetectorElement associated to the
+ *         passed ActsSurface
+ * @param surf: The surface for which the detector element shall be retrieved */
+const ActsDetectorElement* getActsDetectorElement(const Acts::Surface& surf);
+template <Acts::PointerConcept ptr_t>
+const ActsDetectorElement* getActsDetectorElement(const ptr_t& surf) 
+  requires(std::is_base_of_v<Acts::Surface, Acts::RemovePointer_t<ptr_t>>) {
+      if (!surf) {
+         return nullptr;
+      }
+      return getActsDetectorElement(*surf);
+  }
 /// @class ActsDetectorElement
 ///
 
@@ -75,18 +90,17 @@ public:
 
   virtual unsigned int storeAlignedTransforms(ActsTrk::DetectorAlignStore& alignStore) const override;
   
-  virtual const Acts::Transform3 &
-  localToGlobalTransform(const Acts::GeometryContext &gctx) const final override;
+  const Acts::Transform3& localToGlobalTransform(const Acts::GeometryContext& tgContext) const;
+
+  const Acts::Transform3& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
 
   virtual const Acts::Transform3 &
   localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const final override;
   /// Return surface associated with this identifier, which should come from the
-  virtual const Acts::Surface &surface() const final override;
-  /// Returns whether the detector element is sensitive
-  virtual bool isSensitive() const final override { return true; }
-
+  const Acts::Surface &surface() const;
+  
   /// Mutable surface to this detector element
-  virtual Acts::Surface &surface() final override;
+  Acts::Surface &surface();
 
   /// Return a shared pointer on the ATLAS surface associated with this
   /// identifier,
@@ -110,16 +124,15 @@ public:
 private:
   IdentifierHash m_idHash {};
   DetectorType m_type{DetectorType::UnDefined};
-  ActsTrk::TransformCacheDetEle<ActsDetectorElement> m_trfCache{0, this};
+  ActsTrk::ReadoutSurfacePositioning<ActsDetectorElement> m_trfCache{0, this};
 
+  std::shared_ptr<ActsTrk::SurfacePlacement> m_surfHolder{};
   /// Detector element as variant
   const GeoVDetectorElement *m_detElement{nullptr};
   /// Boundaries of the detector element
   std::shared_ptr<const Acts::SurfaceBounds> m_bounds{};
   ///  Thickness of this detector element
   double m_thickness{0.};
-  /// Corresponding Surface
-  std::shared_ptr<Acts::Surface> m_surface{};
 
   std::unique_ptr<const Amg::Transform3D> m_trtTrf{};
 
@@ -128,7 +141,7 @@ private:
 
 namespace ActsTrk{
     template <> inline Amg::Transform3D 
-        TransformCacheDetEle<ActsDetectorElement>::fetchTransform(const DetectorAlignStore* store) const{
+        ReadoutSurfacePositioning<ActsDetectorElement>::fetchTransform(const DetectorAlignStore* store) const{
         return m_parent->localToGlobal(store);
    }
 }

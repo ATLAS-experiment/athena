@@ -16,6 +16,8 @@
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
+
+#include  <ActsGeometryInterfaces/ISurfacePlacement.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
 #include "Acts/Geometry/TrapezoidVolumeBounds.hpp"
@@ -83,7 +85,7 @@ namespace{
     }
 
     Identifier identify(const Acts::Surface& surface) {
-        const auto* detEl = dynamic_cast<const ActsTrk::IDetectorElementBase*>(surface.surfacePlacement());
+        const auto* detEl = dynamic_cast<const ActsTrk::ISurfacePlacement*>(surface.surfacePlacement());
         return detEl ? detEl->identify(): Identifier{};
     }
 

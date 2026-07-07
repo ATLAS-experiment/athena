@@ -197,7 +197,7 @@ namespace ActsTrk {
 		
 		// Check the location of the state
 		if (state.hasReferenceSurface() and state.referenceSurface().isSensitive()) {
-		    const ActsDetectorElement * detectorElement = dynamic_cast<const ActsDetectorElement *>(state.referenceSurface().surfacePlacement());
+		    const auto* detectorElement = getActsDetectorElement(state.referenceSurface());
 		    if (!detectorElement) {
 		      ATH_MSG_WARNING("--- TrackState reference surface returned an invalid associated detector element");
 		      continue;
