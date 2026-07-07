@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Flags used in CI tests
 
 from TrkConfig.TrkConfigFlags import TrackingComponent
@@ -16,7 +16,6 @@ def actsProductionFlags(flags) -> None:
     # - seeding strategy set by the user: default is GridTriplet
     flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4    
     # e-gamma components
-    flags.Egamma.doTracking = True
     flags.Acts.GsfRefitActs = True
     flags.Acts.GsfDirectNavigation = True
     # HGTD components
