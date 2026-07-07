@@ -1,22 +1,33 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef NNCLUSTERINGTOOLIMPL_ICC
-#define NNCLUSTERINGTOOLIMPL_ICC
+#ifndef NNCLSUTERCALIBRATORTOOLIMPL_ICC
+#define NNCLSUTERCALIBRATORTOOLIMPL_ICC
 
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
+#include <onnxruntime_cxx_api.h>
 
+#include <cmath>
 #include <limits>
+#include <set>
 #include <stdexcept>
 
+#include "Acts/Utilities/Zip.hpp"
 #include "ActsGeometry/ActsDetectorElement.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "Identifier/Identifier.h"
 #include "InDetMeasurementUtilities/Helpers.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
-
+#include "NNPixelClusterCalibratorHelpers.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "ReadoutGeometryBase/SiCellId.h"
+#include "src/detail/TrackStateFlagHelper.h"
+#include "xAODMeasurementBase/MeasurementDefs.h"
 namespace ActsTrk::detail {
 
 template <typename calib_data_t, typename traj_t>
 StatusCode NNClusterCalibratorToolImpl<calib_data_t, traj_t>::initialize() {
+  ATH_CHECK(m_readKeyONNX.initialize());
   ATH_MSG_DEBUG("Initializing ...");
 
   ATH_CHECK(BASE::initialize());
@@ -25,38 +36,291 @@ StatusCode NNClusterCalibratorToolImpl<calib_data_t, traj_t>::initialize() {
 }
 
 template <typename calib_data_t, typename traj_t>
-std::pair<std::optional<float>, std::optional<float>>
-NNClusterCalibrator<calib_data_t, traj_t>::getCorrectedPosition(
-    const EventContext& ctx, const xAOD::PixelCluster& cluster,
-    const error_data_t& errorData, const InDetDD::SiDetectorElement& element,
-    const std::pair<float, float>& tan_angles) const {
-  return BASE::getCorrectedPosition(ctx, cluster, errorData, element,
-                                    tan_angles);
+NNClusterCalibratorOptions<calib_data_t, traj_t>
+NNClusterCalibratorToolImpl<calib_data_t, traj_t>::createOptions(
+    const EventContext& ctx) const {
+  NNClusterCalibratorOptions<calib_data_t, traj_t> opt;
+  opt.m_minClusterSizeForNN = m_minClusterSizeForNN;
+  SG::ReadCondHandle<OnnxNNCollection> onnxCollection(m_readKeyONNX, ctx);
+  if (!onnxCollection.isValid()) {
+    ATH_MSG_FATAL("Failed to get ONNX network collection with key "
+                  << m_readKeyONNX.key());
+    return opt;  // this options will be invalid
+  } else {
+    ATH_MSG_DEBUG("Obtained NN models for this event");
+  }
+
+  opt.m_models = onnxCollection.cptr();
+
+  auto barePointer = BASE::createOnTrackCalibrator(ctx).release();
+  auto downCast =
+      dynamic_cast<AnalogueClusteringCalibrator<calib_data_t, traj_t>*>(
+          barePointer);
+  opt.m_fallback =
+      std::unique_ptr<AnalogueClusteringCalibrator<calib_data_t, traj_t>>(
+          downCast);
+  return opt;
 }
 
 template <typename calib_data_t, typename traj_t>
-std::pair<std::optional<float>, std::optional<float>>
-NNClusterCalibrator<calib_data_t, traj_t>::getCorrectedError(
-    const error_data_t& errorData,
-    [[maybe_unused]] const InDetDD::SiDetectorElement& element,
-    const std::pair<float, float>& tan_angles,
-    const xAOD::PixelCluster& cluster) const {
-
-  return BASE::getCorrectedError(errorData, element, tan_angles, cluster);
-}
-
-template <typename calib_data_t, typename traj_t>
-std::tuple<
-    typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos,
-    typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Cov, 
-    unsigned int>
+std::tuple<typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos,
+           typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Cov,
+           unsigned int>
 NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
     const EventContext& ctx, const Acts::GeometryContext& gctx,
     const Acts::CalibrationContext& cctx, const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& detElement,
     const std::pair<float, float>& tan_incidence_angles) const {
-  return BASE::calibrate(ctx, gctx, cctx, cluster, detElement, tan_incidence_angles);
+
+  if (static_cast<int>(cluster.chargeList().size()) <
+      m_options.m_minClusterSizeForNN) {
+
+    return m_options.m_fallback->calibrate(ctx, gctx, cctx, cluster,
+                                             detElement, tan_incidence_angles);
+  }
+
+  ActsTrk::NNinput nnInput;
+  fillClusterData(nnInput, cluster, detElement);
+
+  nnInput.set(NNinput::Index::phi, std::atan(tan_incidence_angles.first));
+  nnInput.set(NNinput::Index::theta, std::atan(tan_incidence_angles.second));
+
+  // 1st call to
+  std::vector<float> probabilities = predictNumberOfClusters(nnInput);
+  // pick max probability
+  const int maxProbNumberIndex = NumberNNoutput::maxProbIndex(probabilities);
+  const int maxProbNumberOfClusters = maxProbNumberIndex + 1;
+
+  PositionNNoutput positions =
+      predictPositions(nnInput, maxProbNumberOfClusters);
+  // these are deltas w.r.t. cluster center
+  typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos pos;
+  pos(0) = nnInput.indexCoordToRealCoord(positions.x(maxProbNumberIndex),
+                                         NNinput::Index::pitchXOffset);
+  pos(1) = nnInput.indexCoordToRealCoord(positions.y(maxProbNumberIndex),
+                                         NNinput::Index::pitchYOffset);
+
+  // TODO the values of covaraince seems too large - this needs investigation
+  typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Cov cov;
+  cov(1, 0) = cov(0, 1) = 0.0f;
+  cov(0, 0) = nnInput.precisionToRealCoord(positions.xprec(maxProbNumberIndex),
+                                           NNinput::Index::pitchXOffset);
+  cov(1, 1) = nnInput.precisionToRealCoord(positions.yprec(maxProbNumberIndex),
+                                           NNinput::Index::pitchYOffset);
+
+  unsigned int splitFlag =
+      positions.numberOfSubClusters() > 1
+          ? detail::setTrackStateFlag(Acts::TrackStateFlag::IsSplitHit)
+          : 0;
+  return {pos, cov, splitFlag};
 }
+
+template <typename calib_data_t, typename traj_t>
+std::tuple<int, int, int, int>
+NNClusterCalibrator<calib_data_t, traj_t>::clusterIndexRanges(
+    const xAOD::PixelCluster& cluster) const {
+  int xMin = std::numeric_limits<int>::max();
+  int xMax = std::numeric_limits<int>::min();
+  int yMin = std::numeric_limits<int>::max();
+  int yMax = std::numeric_limits<int>::min();
+  for (const auto& rdoID : cluster.rdoList()) {
+    const Identifier singlePixelID(rdoID);
+    const int x = static_cast<int>(this->pixelID().phi_index(singlePixelID));
+    const int y = static_cast<int>(this->pixelID().eta_index(singlePixelID));
+    xMin = std::min(x, xMin);
+    xMax = std::max(x, xMax);
+    yMin = std::min(y, yMin);
+    yMax = std::max(y, yMax);
+  }
+  return {xMin, xMax, yMin, yMax};
+}
+
+template <typename calib_data_t, typename traj_t>
+InDetDD::SiCellId
+NNClusterCalibrator<calib_data_t, traj_t>::weightedClusterCenter(
+    const xAOD::PixelCluster& cluster,
+    const InDetDD::PixelModuleDesign* design) const {
+
+  // obtain weighted position
+  double sum = 0;
+  InDetDD::SiLocalPosition position(0, 0);
+  auto idvals = Acts::zip(cluster.rdoList(), cluster.chargeList());
+  for (auto [rdoID, charge] : idvals) {
+    const Identifier singlePixelID(rdoID);
+    const int x = static_cast<int>(this->pixelID().phi_index(singlePixelID));
+    const int y = static_cast<int>(this->pixelID().eta_index(singlePixelID));
+
+    InDetDD::SiLocalPosition siLocalPosition(
+        design->positionFromColumnRow(y, x));
+    position += siLocalPosition * charge;
+    sum += charge;
+  }
+  position /= sum;
+
+  InDetDD::SiCellId centerCell = design->cellIdOfPosition(position);
+
+  return centerCell;
+}
+
+template <typename calib_data_t, typename traj_t>
+void NNClusterCalibrator<calib_data_t, traj_t>::fillClusterData(
+    NNinput& nn, const xAOD::PixelCluster& cluster,
+    const InDetDD::SiDetectorElement& detElement) const {
+
+  const Identifier moduleID(
+      static_cast<Identifier::value_type>(cluster.identifier()));
+  nn.set(NNinput::Index::layer, (float)this->pixelID().layer_disk(moduleID));
+  nn.set(NNinput::Index::bec, (float)this->pixelID().barrel_ec(moduleID));
+
+  // need to decide how to center the cluster in 7 x 7 matrix
+  // this implementation will center it w/o taking into account the charge
+  // (will be revisited)
+  // reminder: row <-> phi <-> x, column <-> eta <-> y
+  auto [xMin, xMax, yMin, yMax] = clusterIndexRanges(cluster);
+
+  // this is a particular way of truncating cluster to 7x7
+  // TODO test if picking the center would work better for large clusters
+  xMax = std::clamp(xMax, xMin,
+                    xMin + static_cast<int>(NNinput::Index::windowSize));
+  yMax = std::clamp(yMax, yMin,
+                    yMin + static_cast<int>(NNinput::Index::windowSize));
+
+  const InDetDD::PixelModuleDesign* design(
+      dynamic_cast<const InDetDD::PixelModuleDesign*>(&detElement.design()));
+
+  nn.centerCell = weightedClusterCenter(cluster, design);
+  nn.centerPosition = design->localPositionOfCell(nn.centerCell);
+  const int xCenter = nn.centerCell.phiIndex();
+  const int yCenter = nn.centerCell.etaIndex();
+
+  auto idvals = Acts::zip(cluster.rdoList(), cluster.chargeList());
+  for (auto [rdoID, charge] : idvals) {
+    const Identifier singlePixelID(rdoID);
+    const int x = static_cast<int>(this->pixelID().phi_index(singlePixelID));
+    const int y = static_cast<int>(this->pixelID().eta_index(singlePixelID));
+
+    const int xNN = NNinput::toNNinputIndex(x, xCenter);
+    const int yNN = NNinput::toNNinputIndex(y, yCenter);
+
+    if (NNinput::inWindow(xNN, yNN)) {
+      nn.setPixelCharge(xNN, yNN, charge);
+    } else {
+      // this happens, we need to understand frequency and impact
+    }
+  }
+
+  for (int i = 0; i < static_cast<int>(NNinput::Index::windowSize); ++i) {
+    nn.setPixelXPitch(i, 0.1);
+    nn.setPixelYPitch(i, 0.1);
+    const int x = NNinput::toModuleIndex(i, xCenter);
+    const int y = NNinput::toModuleIndex(i, yCenter);
+    const InDetDD::SiCellId cell(x, y);
+    if (x >= 0)  // TODO missing max value cap, it is module dependent and needs additional query of design
+      nn.setPixelXPitch(i, design->parameters(cell).width().xPhi());
+    if (y >= 0)
+      nn.setPixelYPitch(i, design->parameters(cell).width().xEta());
+  }
+}
+
+template <typename calib_data_t, typename traj_t>
+std::vector<float>
+NNClusterCalibrator<calib_data_t, traj_t>::predictNumberOfClusters(
+    NNinput& nn) const {
+  Ort::Session& session = *m_options.m_models->numberNetwork;
+  auto inputTypeInfo = session.GetInputTypeInfo(0);
+  auto tensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
+  const int64_t expectedDim = tensorInfo.GetShape()[1];
+
+  // TODO investigate streamlining this
+  // this is copy paste from NnClusterizationFactory
+  // seems to be a lot of preps to be repeated for each invocation
+  // maybe it can be spared?
+  Ort::MemoryInfo memInfo =
+      Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+
+  std::vector<int64_t> inputShape = {1, expectedDim};
+  Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+      memInfo, nn.payload().data(), nn.payload().size(), inputShape.data(),
+      inputShape.size());
+
+  Ort::AllocatorWithDefaultOptions allocator;
+  auto inputName = session.GetInputNameAllocated(0, allocator);
+  auto outputName = session.GetOutputNameAllocated(0, allocator);
+  const char* inputNames[] = {inputName.get()};
+  const char* outputNames[] = {outputName.get()};
+
+  // Run inference
+  auto outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames,
+                                   &inputTensor, 1, outputNames, 1);
+
+  // Extract output
+  const float* outputData = outputTensors[0].GetTensorData<float>();
+  return std::vector<float>(outputData, outputData + 3);
+}
+
+template <typename calib_data_t, typename traj_t>
+Ort::Session& NNClusterCalibrator<calib_data_t, traj_t>::selectPositionNetwork(
+    int number) const {
+  if (number == 1) {
+    return *m_options.m_models->positionNetwork1;
+  } else if (number == 2) {
+    return *m_options.m_models->positionNetwork2;
+  }
+  return *m_options.m_models->positionNetwork3;
+}
+
+template <typename calib_data_t, typename traj_t>
+PositionNNoutput NNClusterCalibrator<calib_data_t, traj_t>::predictPositions(
+    NNinput& nn, int number) const {
+
+  Ort::Session& session = selectPositionNetwork(number);
+  auto inputTypeInfo = session.GetInputTypeInfo(0);
+  auto tensorInfo = inputTypeInfo.GetTensorTypeAndShapeInfo();
+  const int64_t expectedDim = tensorInfo.GetShape()[1];
+
+  // TODO investigate streamlining this
+  // at least part of preparation can be shared between Number and Posion (this)
+  // this is copy paste from NnClusterizationFactory
+  // seems to be a lot of preps to be repeated for each invocation
+  // maybe it can be spared?
+  Ort::MemoryInfo memInfo =
+      Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+
+  std::vector<int64_t> inputShape = {1, expectedDim};
+  Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+      memInfo, nn.payload().data(), nn.payload().size(), inputShape.data(),
+      inputShape.size());
+
+  Ort::AllocatorWithDefaultOptions allocator;
+  auto inputName = session.GetInputNameAllocated(0, allocator);
+  auto outputName = session.GetOutputNameAllocated(0, allocator);
+  const char* inputNames[] = {inputName.get()};
+  const char* outputNames[] = {outputName.get()};
+
+  Ort::TypeInfo typeInfo = session.GetOutputTypeInfo(0);
+  auto tensorInfoOutput = typeInfo.GetTensorTypeAndShapeInfo();
+  std::vector<int64_t> shape = tensorInfoOutput.GetShape();
+
+  // this shape is supposed to always be: [number*5]
+  assert(shape[1] == 5 * number);
+
+  // TODO investiage if the ONNX can pack the output directly into predefined memory
+  // Run inference
+  auto outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames,
+                                   &inputTensor, 1, outputNames, 1);
+
+  // Extract output
+  const float* outputData = outputTensors[0].GetTensorData<float>();
+
+  // NN outputs 5 numbers
+  return PositionNNoutput(outputData, outputData + (number * 5));
+}
+
+template <typename calib_data_t, typename traj_t>
+typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos
+NNClusterCalibrator<calib_data_t, traj_t>::computeOutputPostion(
+    const PositionNNoutput& positions, int bestIndex,
+    const NNinput& input) const {}
 
 }  // namespace ActsTrk::detail
 

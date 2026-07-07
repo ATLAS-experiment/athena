@@ -70,19 +70,19 @@ namespace InDet {
     operator bool() const {
       return !matrixOfToT.empty();
     }
-    int sizeX = 0;
-    int sizeY = 0;
-    std::vector<std::vector<float> > matrixOfToT;
-    std::vector<float> vectorOfPitchesY;
-    std::vector<float> vectorOfPitchesX;
-    int ClusterPixLayer = 0;
-    int ClusterPixBarrelEC = 0;
-    float phi = 0;
-    float theta = 0;
-    float etaModule = 0;
-    bool useTrackInfo = 0;
-    int columnWeightedPosition = 0;
-    int rowWeightedPosition = 0;
+    int sizeX = 0; //! cluster span measured in pixels (seems unfilled)
+    int sizeY = 0; //! cluster span measured in pixels (seems unfilled)
+    std::vector<std::vector<float> > matrixOfToT; //! 2D array of charges or ToTs (depending on filling tool configuration)
+    std::vector<float> vectorOfPitchesY; //! dimensions of pixels in mm along Y
+    std::vector<float> vectorOfPitchesX; //! same along X
+    int ClusterPixLayer = 0; //! layer index: as returned by PixelID::layer_disk
+    int ClusterPixBarrelEC = 0; //! global cluster location barrel vs endcap: as returned by: PixelID::barrel_ec
+    float phi = 0; //! azimuthal incidence angle 
+    float theta = 0; //! polar incidence angle
+    float etaModule = 0; //! module eta index as returned by PixelID:eta_module
+    bool useTrackInfo = 0; //! flag to indicate if incidence angles (phi, theta) should be used in inference
+    int columnWeightedPosition = 0; //! mean position along y
+    int rowWeightedPosition = 0; //! mean position along x
   };
 
   static const InterfaceID IID_NnClusterizationFactory("InDet::NnClusterizationFactory", 1, 0);

@@ -38,9 +38,15 @@ def ActsAnalogueClusteringToolCfg(flags,
     ClusteringToolType = None
     if flags.Acts.PixelCalibrationStrategy is  PixelCalibrationStrategy.NNClustering:
         ClusteringToolType = CompFactory.ActsTrk.ITkNNClusterCalibratorTool
+        from InDetConfig.SiClusterizationToolConfig import OnnxNNCondAlgCfg
+        acc.merge(OnnxNNCondAlgCfg(flags,
+                                   NumberNetworkPath=flags.Acts.PixelNNCalibrationModelsFolder+'number.onnx',
+                                   PositionNetwork1Path=flags.Acts.PixelNNCalibrationModelsFolder+'pos1.onnx',
+                                   PositionNetwork2Path=flags.Acts.PixelNNCalibrationModelsFolder+'pos2.onnx',
+                                   PositionNetwork3Path=flags.Acts.PixelNNCalibrationModelsFolder+'pos3.onnx'))
     else:
         ClusteringToolType = CompFactory.ActsTrk.ITkAnalogueClusteringTool
-        
+
 
     acc.setPrivateTools(ClusteringToolType(name, **kwargs))
     return acc

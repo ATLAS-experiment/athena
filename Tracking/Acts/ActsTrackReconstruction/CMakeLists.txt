@@ -66,7 +66,8 @@ atlas_add_component( ActsTrackReconstruction
                xAODMeasurementBase
                xAODTracking
                PathResolver
-               InDetMeasurementUtilitiesLib)
+               InDetMeasurementUtilitiesLib
+               SiClusterizationToolLib)
              
 atlas_add_test ( TrackFindingMeasurementsTest
   SOURCES test/TrackFindingMeasurementsTest.cxx src/detail/TrackFindingMeasurements.cxx
@@ -78,4 +79,8 @@ atlas_add_test ( DuplicateSeedDetectorTest
   LINK_LIBRARIES ActsEventLib xAODInDetMeasurement ActsCalibratorsLib
   POST_EXEC_SCRIPT noerror.sh)
 
+atlas_add_test ( NNHelpersTest
+  SOURCES test/NNHelpersTest.cxx
+  LINK_LIBRARIES xAODInDetMeasurement InDetIdentifier Identifier TestTools InDetReadoutGeometry
+  POST_EXEC_SCRIPT noerror.sh)
 
