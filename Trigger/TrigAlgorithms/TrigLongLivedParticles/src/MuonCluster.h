@@ -81,9 +81,9 @@ private:
 protected:
 
   typedef struct  {
-    float eta;
-    float phi;
-    int nroi;
+    float eta{};
+    float phi{};
+    int nroi{};
   } lvl1_muclu_roi;
 
   // JobOption properties
@@ -92,7 +92,7 @@ protected:
   Gaudi::Property<std::string> m_featureLabel{"MuonCluLabel", "MuonClusterInput", "label for the MuonCluster feature in the HLT Navigation, for the xAOD::TrigCompositeContainer"};
 
   /** calculcate the deltaR between two Rois */
-  float DeltaR(lvl1_muclu_roi , lvl1_muclu_roi ) const;
+  float DeltaR(const lvl1_muclu_roi& , const lvl1_muclu_roi& ) const;
 
 };
 
