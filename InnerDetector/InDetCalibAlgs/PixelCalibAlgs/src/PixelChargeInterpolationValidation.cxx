@@ -583,10 +583,11 @@ void PixelChargeInterpolationValidation::WriteErrorsFile(const std::string& name
 		}
 	int ntotyconstny = ncsx * ncsy * neta;
 	globalindex = 0;
+	const static std::string etaStr{"#eta_{i}"};
 	for(int i = 0; i < neta && globalindex < ntotyconstny; i++)
 		for(int j = 0; j < ncsx && globalindex < ntotyconstny; j++)
 			for(int k = 0; k < ncsy  && globalindex < ntotyconstny; k++, globalindex++){
-				double value = m_eta_Clustersize[k]->GetRMSProfile("#eta_{i}")->GetBinContent(i+1)/1000;
+				double value = m_eta_Clustersize[k]->GetRMSProfile(etaStr)->GetBinContent(i+1)/1000;
 				if (value == 0) value = (k+1)*400/sqrt(12)/1000;
 				parameters->setPixelBarrelEtaError(globalindex,value);
 			}

@@ -198,9 +198,9 @@ StatusCode InDet::TRT_StrawStatus::execute(const EventContext& ctx){
 
 			const Trk::TrackStateOnSurface& hit = **trackStatesIt;
 
-			const Trk::TrackParameters* unbiased_track_parameters = m_updator->removeFromState( *(hit.trackParameters()),
+			std::unique_ptr<Trk::TrackParameters> unbiased_track_parameters = m_updator->removeFromState( *(hit.trackParameters()),
                                                                                           hit.measurementOnTrack()->localParameters(),
-                                                                                          hit.measurementOnTrack()->localCovariance()).release();
+                                                                                          hit.measurementOnTrack()->localCovariance());
 
 			double unbiased_locR = unbiased_track_parameters->parameters()[Trk::locR];
 			if ( std::abs(unbiased_locR) > m_locR_cut ) continue; // same cut as the default hole search cut
@@ -283,7 +283,7 @@ StatusCode InDet::TRT_StrawStatus::execute(const EventContext& ctx){
 
 void InDet::TRT_StrawStatus::clear() {
     m_nEvents = 0;
-    *m_accumulateHits = {};
+    std::memset(m_accumulateHits.get(), 0, sizeof(ACCHITS_t));
     return;
 }
 

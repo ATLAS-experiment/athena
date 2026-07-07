@@ -27,7 +27,7 @@ unsigned int bec2Index(const int bec);
 std::string normalizeList(std::string strList);
 
 template <class T>
-std::string xmlValue(const std::string& name, const T value) {
+std::string xmlValue(std::string_view name, const T value) {
    std::ostringstream os;
    os << "  <value name=\"" << name << "\">" << value << "</value>";
    return os.str();

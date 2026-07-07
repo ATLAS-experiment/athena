@@ -48,6 +48,7 @@
 
 // STL headers
 #include <string>
+#include <string_view>
 #include <vector>
 #include <utility>
 #include <map>
@@ -272,7 +273,7 @@ class SCTCalib : public AthAlgorithm {
       // To handle XML file for DB
       StatusCode openXML4DB(std::ofstream&, const char*, const char*, const IOVTime&, const IOVTime&) const;
       StatusCode closeXML4DB(std::ofstream&) const;
-      StatusCode addToXML4DB(std::ofstream&, const Identifier&, const char*, float, const char*) const;
+      StatusCode addToXML4DB(std::ofstream&, const Identifier&, std::string_view, float, std::string_view) const;
 
       // To handle XML file for Summary
       StatusCode openXML4MonSummary(std::ofstream&, const char*) const;
