@@ -206,23 +206,34 @@ namespace ActsTrk {
                              time_info);
 
       // pixel summaries
-      std::array<std::tuple<uint8_t, uint8_t, uint8_t, bool>, 4> copy_summary {
+      static constexpr std::array<std::tuple<uint8_t, uint8_t, uint8_t, bool>, 5> copy_summary {
          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelTotal),
                          static_cast<uint8_t>(xAOD::numberOfContribPixelLayers),
                          static_cast<uint8_t>(xAOD::numberOfPixelHits),
                          false),
-
          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrel),
                          static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelLayers),
                          static_cast<uint8_t>(xAOD::numberOfPixelBarrelHits),
                          true),
-
          std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelEndcap),
                          static_cast<uint8_t>(xAOD::numberOfContribPixelEndcap),
                          static_cast<uint8_t>(xAOD::numberOfPixelEndcapHits),
-                         true) };
+                         true),
+         std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrelFlat),
+                         static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelFlatLayers),
+                         static_cast<uint8_t>(xAOD::numberOfPixelBarrelFlatHits),
+                         true),
+         std::make_tuple(static_cast<uint8_t>(ActsTrk::detail::HitSummaryData::pixelBarrelInclined),
+                         static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelInclinedLayers),
+                         static_cast<uint8_t>(xAOD::numberOfPixelBarrelInclinedHits),
+                         true)
+      };
 
-      for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : copy_summary) {
+      // if not adding expert level decorations only set the total
+      for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : std::span(copy_summary.begin(),
+                                                                                                       m_itkDecorationLevel>=s_expertLevel
+                                                                                                       ? copy_summary.end()
+                                                                                                       : copy_summary.begin()+1)) {
          setSummaryValue(track_particle,
                          hitInfo.contributingLayers(static_cast<ActsTrk::detail::HitSummaryData::DetectorRegion>(src_region)),
                          static_cast<xAOD::SummaryType>(dest_xaod_summary_layer));

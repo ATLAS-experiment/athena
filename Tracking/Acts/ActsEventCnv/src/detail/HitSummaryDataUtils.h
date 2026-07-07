@@ -50,7 +50,7 @@ namespace ActsTrk::detail {
          SharedHit,
          NCountTypes
       };
- 
+
       constexpr static unsigned short LAYER_REGION_MASK   = 0xFF;  // bits 0-7
       constexpr static unsigned short REGION_BITS = 4;             // bits 0-3
       constexpr static unsigned short REGION_MASK = 0xF;           // 4 bits
