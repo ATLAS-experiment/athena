@@ -319,8 +319,8 @@ PositionNNoutput NNClusterCalibrator<calib_data_t, traj_t>::predictPositions(
 template <typename calib_data_t, typename traj_t>
 typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos
 NNClusterCalibrator<calib_data_t, traj_t>::computeOutputPostion(
-    const PositionNNoutput& positions, int bestIndex,
-    const NNinput& input) const {}
+    const PositionNNoutput& /*positions*/, int /*bestIndex*/,
+    const NNinput& /*input*/) const {}
 
 }  // namespace ActsTrk::detail
 
