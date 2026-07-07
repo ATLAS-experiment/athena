@@ -48,7 +48,6 @@ namespace ActsTrk::detail {
           m_options(std::move(options))
      {}
 
-  protected:
      const error_data_t* getErrorData() const {
         return m_options.m_errorData;
      }
@@ -63,6 +62,7 @@ namespace ActsTrk::detail {
                const InDetDD::SiDetectorElement& detElement,
                const std::pair<float, float>& angles) const;
 
+   protected:
      std::pair<float, float> getCentroid(const EventContext& ctx,
                                          const xAOD::PixelCluster& cluster,
                                          const InDetDD::SiDetectorElement& element) const;

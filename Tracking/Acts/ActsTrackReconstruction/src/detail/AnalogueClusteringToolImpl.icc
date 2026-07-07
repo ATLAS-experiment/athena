@@ -7,6 +7,7 @@
 #include <limits>
 #include "ActsGeometry/ActsDetectorElement.h"
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetMeasurementUtilities/Helpers.h"
 
@@ -256,10 +257,9 @@ AnalogueClusteringCalibrator<calib_data_t, traj_t>::calibrate(
     const xAOD::PixelCluster& cluster,
     const InDetDD::SiDetectorElement& detElement,
     const std::pair<float, float>& tan_incidence_angles) const
-{
+{  
     typename BASE::Pos pos = cluster.template localPosition<2>();
     typename BASE::Cov cov = cluster.template localCovariance<2>();
-
     assert(!cluster.rdoList().empty());
 
     const error_data_t *errorData = getErrorData();
