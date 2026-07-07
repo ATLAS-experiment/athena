@@ -129,8 +129,8 @@ LArCoherentNoisefractionMonAlg::fillHistograms(const EventContext& ctx) const
   if(m_FEBlist.size() == 0) return StatusCode::SUCCESS;
 
   /** check trigger */
-  bool passTrig = m_isCalibrationRun;
-  if(!m_isCalibrationRun) { 
+  bool passTrig = m_isCalibrationRun || !m_checkTrigger;;
+  if(!m_isCalibrationRun && m_checkTrigger) { 
     ATH_MSG_DEBUG( "Parsing trigger chain list" ); 
     const ToolHandle<Trig::TrigDecisionTool> trigTool=getTrigDecisionTool();
 
@@ -204,7 +204,10 @@ LArCoherentNoisefractionMonAlg::fillHistograms(const EventContext& ctx) const
 
     for(unsigned group=0; group < m_processGroup.size(); ++group) {
  
-      if(!m_processGroup[group]) continue;
+      if(!m_processGroup[group]) {
+         ATH_MSG_DEBUG("Not filling group "<<group<<" !!");
+         continue;
+      }
       if(div_array.count(std::make_pair(febID,group)) > 0) {
         try {
          std::vector<float> &tmparr=div_array.at(std::make_pair(febID,group));
@@ -257,6 +260,7 @@ LArCoherentNoisefractionMonAlg::fillHistograms(const EventContext& ctx) const
         std::string febstr = febString(feb_entry);
         auto chanSumDev = Monitored::Scalar<double>("SumDev",calc_sum_dev(&div_array[std::make_pair(feb_entry,group)]));   
         auto chanDev = Monitored::Scalar<double>("Dev",calc_dev(&div_array[std::make_pair(feb_entry,group)]));   
+        ATH_MSG_DEBUG("G "<<group<<" filled for "<<febstr<<" : "<<chanSumDev<<" "<<chanDev);
         fill(m_tools[m_histoGroups.at(group).at(febstr)],chanSumDev,chanDev);
      }
   }

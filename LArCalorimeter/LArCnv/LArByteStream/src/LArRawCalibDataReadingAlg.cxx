@@ -315,7 +315,9 @@ StatusCode LArRawCalibDataReadingAlg::execute(const EventContext& ctx) const {
 	if (m_vFinalPreselection.find(ftId)==m_vFinalPreselection.end()) {
 	  ATH_MSG_DEBUG("Feedthrough with id 0x" << MSG::hex << ftId << MSG::dec <<" not in preselection. Ignored.");
 	  continue;
-	}
+	} else {
+	  ATH_MSG_DEBUG("Feedthrough with id 0x" << MSG::hex << ftId << MSG::dec <<" is preselected.");
+        }
       }
 
 

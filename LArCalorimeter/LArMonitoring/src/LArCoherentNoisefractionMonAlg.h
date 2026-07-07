@@ -72,6 +72,7 @@ private:
 
   /** to avoid asking for triggers in case of a calibration run*/
   Gaudi::Property<bool> m_isCalibrationRun {this, "IsCalibrationRun", false};
+  Gaudi::Property<bool> m_checkTrigger {this, "CheckTrigger", true};
 
   /** Handle to digits */
   SG::ReadHandleKey<LArDigitContainer> m_LArDigitContainerKey{this,"LArDigitContainerKey","FREE","SG key of LArDigitContainer read from Bytestream"};
