@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -15,7 +15,7 @@
 #undef NDEBUG
 
 #include "CxxUtils/FloatPacker.h"
-#include <iostream>
+
 #include <cmath>
 #include <cstring>
 #include <cassert>
@@ -25,11 +25,7 @@
 
 
 using CxxUtils::FloatPacker;
-using std::cout;
 using std::abs;
-
-
-const int ieee754_double_exponent_bits = 11;
 
 
 bool bitwise_equal (double a, double b)
