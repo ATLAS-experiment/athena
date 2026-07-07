@@ -35,6 +35,10 @@ if __name__=='__main__':
    parser.add_argument('-x','--ignoreBarrel', dest='ignoreB', default=False, action="store_true", help='ignore Barrel channels ?')
    parser.add_argument('-v','--ignoreEndcap', dest='ignoreE', default=False, action="store_true", help='ignore Endcap channels ?')
    parser.add_argument('-w','--doValid', dest='doValid', default=False, action="store_true", help='run vcalidation ?')
+   parser.add_argument('--pattdir', dest='pdir', default="", help='Full input pattern dir string', type=str)
+   parser.add_argument('--ntrigg', dest='ntrig', default=100, help='Number of trigger per step', type=int)
+   parser.add_argument('--nsteps', dest='nstep', default=5, help='Number of delay steps', type=int)
+   parser.add_argument('--nsubstep', dest='nsubstep', default=1, help='Number of subststeps', type=int)
    parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
    parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
 
@@ -176,19 +180,31 @@ if __name__=='__main__':
    
    # patterns file searching
    if args.rawdata:
-      pdir='/afs/cern.ch/user/l/lardaq/public/detlar/athena/P1CalibrationProcessing/run/Patterns/P1/'
+      # nsteps      
+      flags.LArCalib.CaliWave.Nsteps=args.nstep
+      # patterns file 
+      if args.pdir:
+         pdir=args.pdir
+      else:   
+         pdir='/afs/cern.ch/user/l/lardaq/public/detlar/athena/P1CalibrationProcessing/run/Patterns/P1/'
       if args.supercells:
          pdir += 'LatomeRuns/'
          if 'Emec' in args.partition:
-            pfile = pdir + 'emec-std/SC_HighRamp/parameters.dat'
+            pfile = pdir + 'emec-std/SC_HighRamp'
          else:   
-            pfile = pdir + 'barrel/Ramp_' + args.partition[:-4] + '/parameters.dat'
+            pfile = pdir + 'barrel/Ramp_' + args.partition[:-4] 
 
          flags.LArCalib.Input.paramsFile = pfile
-      else:   
-         pdir += 'Delay/'
          #FIXME create search also for main readout
       pass
+        
+      pfile = pdir + '/parameters.dat'
+      flags.LArCalib.Input.paramsFile = pfile
+      # number of triggers (misusing OFC flags, which are not use in this job)
+      flags.LArCalib.OFC.Ncoll = args.ntrig
+      # number of substeps
+      flags.LArCalib.CaliWave.NSubSteps = args.nsubstep
+
 
    #Define the global output Level:
    

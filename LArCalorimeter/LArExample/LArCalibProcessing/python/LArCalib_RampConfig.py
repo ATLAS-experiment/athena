@@ -35,8 +35,19 @@ def LArRampCfg(flags):
     
 
     if not flags.LArCalib.isSC:
-       result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawDataReadingAlg(LArRawChannelKey="", LArDigitKey=digKey, LArFebHeaderKey="LArFebHeader",
+                                                               #OutputLevel=2,
+                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
+                                                               PosNegPreselection=flags.LArCalib.Preselection.Side,
+                                                               BEPreselection=flags.LArCalib.Preselection.BEC,
+                                                               FTNumPreselection=flags.LArCalib.Preselection.FT))
+          from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
+          result.merge(LArCalibDigitsMakerCfg(flags,DigitsKey=digKey,ntrigg=flags.LArCalib.OFC.Ncoll))
+       else:
+          result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
                                                               LArFebHeaderKey="LArFebHeader",
+                                                              #OutputLevel = 2,
                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
                                                               PosNegPreselection=flags.LArCalib.Preselection.Side,
                                                               BEPreselection=flags.LArCalib.Preselection.BEC,
