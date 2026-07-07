@@ -378,7 +378,7 @@ StatusCode TRT_AlignDbSvc::readAlignTextFile(const std::string & file) {
       std::string linestring(line) ;
       if( linestring.find('/') != std::string::npos) {
 	// this must be a line with a container name
-	atname = linestring ;
+	atname = std::move(linestring) ;
 	ATH_MSG_INFO( "now reading container: " << atname  );
 	pat=getTransPtr(atname);
 	if (!pat) {
@@ -493,7 +493,7 @@ StatusCode TRT_AlignDbSvc::streamOutAlignObjects() const{
   
   IAthenaOutputStreamTool::TypeKeyPairs  typeKeys;
   IAthenaOutputStreamTool::TypeKeyPair arraypair("AlignableTransformContainer",m_alignroot);
-  typeKeys.push_back(arraypair);
+  typeKeys.push_back(std::move(arraypair));
   ATH_CHECK( m_detStore->contains<AlignableTransformContainer>(m_alignroot) );
   
   ATH_CHECK( streamer->streamObjects(typeKeys) );
