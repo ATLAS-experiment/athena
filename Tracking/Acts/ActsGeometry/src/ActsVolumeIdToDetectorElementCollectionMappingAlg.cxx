@@ -1,15 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 #include "ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 
-// PACKAGE
-#include "ActsGeometryInterfaces/GeometryContext.h"
-
 // ATHENA
 #include "AthenaKernel/IOVInfiniteRange.h"
-#include "StoreGate/ReadHandle.h"
-#include "StoreGate/WriteHandle.h"
 
 #include "StoreGate/WriteCondHandle.h"
 
@@ -80,9 +75,9 @@ ActsVolumeIdToDetectorElementCollectionMappingAlg::createDetectorElementToVolume
                                                                                                          unsigned int> &detector_element_to_volume_id)
 const
 {
-   using Counter = struct { unsigned int n_detector_elements{0}; 
-                            unsigned int n_missing_detector_elements{0};
-                            unsigned int n_wrong_type{0}; };
+   struct Counter { unsigned int n_detector_elements{0}; 
+                    unsigned int n_missing_detector_elements{0};
+                    unsigned int n_wrong_type{0}; };
    Counter counter {0u,0u,0u};
    acts_tracking_geometry.visitSurfaces([&counter, &detector_element_to_volume_id](const Acts::Surface *surface_ptr) {
       const auto* acts_detector_element = getActsDetectorElement(surface_ptr);

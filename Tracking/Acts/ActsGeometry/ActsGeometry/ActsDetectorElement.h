@@ -92,7 +92,7 @@ public:
   
   const Acts::Transform3& localToGlobalTransform(const Acts::GeometryContext& tgContext) const;
 
-  const Acts::Transform3& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
+  const Acts::Transform3& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const override;
 
   virtual const Acts::Transform3 &
   localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const final override;
