@@ -35,11 +35,12 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CLHEP/Units/PhysicalConstants.h" // for pi
 #include <cmath>
+#include <numbers>
 
 
 using xAOD::CaloCluster;
 using CaloClusterCorr::interpolate;
-using CLHEP::pi;
+using std::numbers::pi;
 using std::atan;
 using std::abs;
 using std::cos;
