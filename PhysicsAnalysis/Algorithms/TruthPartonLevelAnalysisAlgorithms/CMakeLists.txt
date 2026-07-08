@@ -22,6 +22,6 @@ atlas_install_data( data/* )
 
 atlas_add_test( TestCPRunParton
    SCRIPT CPRun.py --text-config TruthPartonLevelAnalysisAlgorithms/test_configuration_Run2_Parton.yaml -e 30 --input-list $ASG_TEST_FILE_MC
-   POST_EXEC_SCRIPT nopost.sh
+   POST_EXEC_SCRIPT noerror.sh
    PROPERTIES TIMEOUT 400
 )
