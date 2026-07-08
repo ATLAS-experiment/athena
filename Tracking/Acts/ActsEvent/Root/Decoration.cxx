@@ -24,7 +24,7 @@ std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy>
     if (!actsTrk) {
         return std::nullopt;
     }
-    for (const auto& state : actsTrk->trackStatesReversed()) {
+    for (const auto state : actsTrk->trackStatesReversed()) {
         if ((state.typeFlags().isOutlier() && skipOutlier) ||
               !state.hasUncalibratedSourceLink()) {
             continue;
@@ -41,7 +41,7 @@ std::optional<ActsTrk::TrackContainer::ConstTrackStateProxy>
     if (!actsTrk) {
         return std::nullopt;
     }
-    for (const auto& state : actsTrk->trackStates()) {
+    for (const auto state : actsTrk->trackStates()) {
         if ((state.typeFlags().isOutlier() && skipOutlier) ||
               !state.hasUncalibratedSourceLink()) {
             continue;
