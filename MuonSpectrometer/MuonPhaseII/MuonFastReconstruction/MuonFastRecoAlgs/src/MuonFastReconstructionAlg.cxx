@@ -16,6 +16,8 @@ namespace {
             <<"Associated GlobalPattern: "<< **acc(muon);
         return oss.str();
     }
+    //defined here to avoid repeated string construction in loop
+    const std::string patternLinkStr{"globalPatternLink"};
 }
 
 namespace MuonR4{
@@ -167,6 +169,8 @@ StatusCode FastReconstructionAlg::execute(const EventContext& ctx) const {
     FastMuonSABuilder::MuonCont_t fillMuons;
     ATH_CHECK(fillMuons.record(m_outMuons, ctx));
     std::size_t patIdx{0};
+    using Patternlink = ElementLink<GlobalPatternContainer>;
+    SG::Accessor<Patternlink> acc{patternLinkStr};
     for (const GlobalPattern* pat : *patWriteHandle) {
 
         xAOD::Muon* newMuon {m_saBuilder->buildMuonCandidate(ctx, *gctx, *fieldCondObj, *pat, fillMuons)};
@@ -176,10 +180,7 @@ StatusCode FastReconstructionAlg::execute(const EventContext& ctx) const {
             continue;
         }
         // Add the link to the global pattern to the muon
-        using Patternlink = ElementLink<GlobalPatternContainer>;
-        SG::Accessor<Patternlink> acc{"globalPatternLink"};
         acc(*newMuon) = Patternlink{*patWriteHandle, patIdx};
-
         ATH_MSG_DEBUG("Add new muon candidate: " << printMuon(*newMuon));
         patIdx++;
     }
