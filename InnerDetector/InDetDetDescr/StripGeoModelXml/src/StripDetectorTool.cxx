@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "StripDetectorTool.h"
 #include "StripGmxInterface.h"
@@ -174,7 +174,7 @@ void StripDetectorTool::doNumerology(InDetDD::SCT_DetectorManager * manager)
     }
   }
   ATH_MSG_INFO("Total number of wafers added is " << totalWafers);
-  const SCT_ID *sctIdHelper = dynamic_cast<const SCT_ID *> (m_commonItems->getIdHelper());
+  const SCT_ID *sctIdHelper = static_cast<const SCT_ID *> (m_commonItems->getIdHelper());
   ATH_MSG_INFO("Total number of wafer identifiers is " << sctIdHelper->wafer_hash_max());
   //
   // Used in digitization to create one vector big enough to hold all strips, whichever detector is in consideration.
@@ -188,7 +188,7 @@ void StripDetectorTool::doNumerology(InDetDD::SCT_DetectorManager * manager)
   ATH_MSG_INFO("Max. phi cells is " << n.maxNumPhiCells());
   ATH_MSG_INFO("Max. no. strips is " << n.maxNumStrips());
 
-  manager->numerology() = n;
+  manager->numerology() = std::move(n);
 
   ATH_MSG_INFO("End of numerology\n");
 
