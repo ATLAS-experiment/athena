@@ -56,6 +56,7 @@
 #include "TFile.h"
 
 #include <cmath>
+#include <memory>
 
 using namespace InDetDD;
 
@@ -644,70 +645,85 @@ StatusCode SiSmearedDigitizationTool::mergeClusters(Pixel_detElement_RIO_map * c
   return StatusCode::SUCCESS;
 }
 
-StatusCode SiSmearedDigitizationTool::mergeClusters(SCT_detElement_RIO_map * cluster_map)
+StatusCode
+SiSmearedDigitizationTool::mergeClusters(SCT_detElement_RIO_map* cluster_map)
 {
-  // The idea is first to check how many cluster we have to merge and then merge them.
-  // The loop is done until there aren't any clusters to merge
+  ATH_MSG_DEBUG("--- SiSmearedDigitizationTool: in mergeClusters() using SCT_Clusters ---");
 
-  ATH_MSG_DEBUG( "--- SiSmearedDigitizationTool: in mergeClusters() using SCT_Clusters --- ");
-
-  SCT_detElement_RIO_map::iterator i = cluster_map->begin();
-  SCT_detElement_RIO_map::iterator e = cluster_map->end();
-
-  for (; i != e; i = cluster_map->upper_bound(i->first)){
-    IdentifierHash current_id = i->first;
-    // Check if clusters with current_id have been already considered
-    bool NewMerge = true;
-
-    while (NewMerge) {
-      NewMerge = false;
-
-      std::pair <SCT_detElement_RIO_map::iterator, SCT_detElement_RIO_map::iterator> range = cluster_map->equal_range(current_id);
-      for ( SCT_detElement_RIO_map::iterator iter = range.first; iter != range.second;  ++iter){
-        for ( SCT_detElement_RIO_map::iterator inner_iter = std::next(iter); inner_iter != range.second; ++inner_iter){
-
-          double dist = calculateDistance((*iter).second,(*inner_iter).second);
-
-          double sigma = calculateSigma((*iter).second,(*inner_iter).second);
-
-          if( dist <= m_nSigma * sigma) {
-
-            std::vector<Identifier> rdoList;
-
-            Amg::Vector2D intersection;
-            InDet::SiWidth siWidth;
-            Amg::MatrixX clusterErr;
-            std::tie( intersection, siWidth, clusterErr ) = calculateNewCluster( iter->second, inner_iter->second );
-
-            const InDetDD::SiDetectorElement* hitSiDetElement = (((*inner_iter).second)->detectorElement());
-            Identifier intersectionId = hitSiDetElement->identifierOfPosition(intersection);
-
-            rdoList.push_back(intersectionId);
-
-            InDetDD::SiCellId currentCellId = hitSiDetElement->cellIdFromIdentifier(intersectionId);
-
-            if ( !currentCellId.isValid() ) {
-              continue;
-            }
-
-            InDet::SCT_Cluster* sctCluster = new InDet::SCT_Cluster(intersectionId,
-                                                                    intersection,
-                                                                    std::vector<Identifier>(rdoList),
-                                                                    siWidth,
-                                                                    hitSiDetElement,
-                                                                    Amg::MatrixX(clusterErr));
-            ((*inner_iter).second) = sctCluster;
-
-            cluster_map->erase(iter);
-            NewMerge = true;
-            goto REPEAT_LOOP;
-          }
-        }
-      }
-    REPEAT_LOOP: ;
-    }
+  if (!cluster_map) {
+    ATH_MSG_FATAL("Null SCT cluster map passed to mergeClusters()");
+    return StatusCode::FAILURE;
   }
 
+  for (auto i = cluster_map->begin(); i != cluster_map->end(); ) {
+    const IdentifierHash current_id = i->first;
+
+    bool newMerge = true;
+    while (newMerge) {
+      newMerge = false;
+      bool mergedThisPass = false;
+
+      const auto range = cluster_map->equal_range(current_id);
+
+      for (auto iter = range.first; iter != range.second && !mergedThisPass; ++iter) {
+        for (auto inner_iter = std::next(iter);
+             inner_iter != range.second && !mergedThisPass;
+             ++inner_iter) {
+
+          const double dist = calculateDistance(iter->second, inner_iter->second);
+          const double sigma = calculateSigma(iter->second, inner_iter->second);
+
+          if (dist > m_nSigma * sigma) {
+            continue;
+          }
+
+          Amg::Vector2D intersection;
+          InDet::SiWidth siWidth;
+          Amg::MatrixX clusterErr;
+          std::tie(intersection, siWidth, clusterErr) =
+            calculateNewCluster(iter->second, inner_iter->second);
+
+          const InDetDD::SiDetectorElement* hitSiDetElement =
+            inner_iter->second->detectorElement();
+
+          const Identifier intersectionId =
+            hitSiDetElement->identifierOfPosition(intersection);
+
+          std::vector<Identifier> rdoList;
+          rdoList.push_back(intersectionId);
+
+          const InDetDD::SiCellId currentCellId =
+            hitSiDetElement->cellIdFromIdentifier(intersectionId);
+
+          if (!currentCellId.isValid()) {
+            continue;
+          }
+
+          auto sctCluster = std::make_unique<InDet::SCT_Cluster>(
+            intersectionId,
+            intersection,
+            std::move(rdoList),
+            siWidth,
+            hitSiDetElement,
+            std::move(clusterErr));
+
+          auto* oldIterCluster = iter->second;
+          auto* oldInnerCluster = inner_iter->second;
+
+          inner_iter->second = sctCluster.release();
+
+          delete oldIterCluster;
+          delete oldInnerCluster;
+
+          cluster_map->erase(iter);
+
+          newMerge = true;
+          mergedThisPass = true;
+        }
+      }
+    }
+    i = cluster_map->upper_bound(current_id);
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -983,7 +999,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
         // create the cluster
         pixelCluster = new InDet::PixelCluster(intersectionId,
                                                intersection,
-                                               std::vector<Identifier>(rdoList),
+                                               std::move(rdoList),
                                                siWidth,
                                                hitSiDetElement,
                                                Amg::MatrixX(covariance));
@@ -1082,7 +1098,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
 
         sctCluster = new InDet::SCT_Cluster(intersectionId,
                                              intersection,
-                                             std::vector<Identifier>(rdoList),
+                                             std::move(rdoList),
                                              siWidth,
                                              hitSiDetElement,
                                              Amg::MatrixX(mat));

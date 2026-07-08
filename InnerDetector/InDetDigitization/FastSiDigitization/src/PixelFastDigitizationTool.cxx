@@ -652,6 +652,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
       }
 
       // weight the cluster position
+      //accumulatedPathLength was checked in previous lines
+      //coverity[DIVIDE_BY_ZERO:FALSE]
       clusterPosition *= 1./accumulatedPathLength;
       Identifier clusterId = hitSiDetElement->identifierOfPosition(clusterPosition);
 
@@ -751,8 +753,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
         // use the cluster maker from the offline software
         pixelCluster =
             std::make_unique<PixelCluster>(m_clusterMaker->pixelCluster(
-                clusterId, clusterPosition, std::vector<Identifier>(rdoList),
-                lvl1a, std::vector<int>(totList), siWidth,
+                clusterId, clusterPosition, std::move(rdoList),
+                lvl1a, std::move(totList), siWidth,
                 hitSiDetElement, isGanged, m_pixErrorStrategy, *m_pixel_ID,
                 false, 0.0, 0.0, calibData, *offlineCalibData, ctx));
         if (isGanged) {
@@ -827,47 +829,31 @@ StatusCode PixelFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx
   Pixel_detElement_RIO_map::iterator i = m_pixelClusterMap->begin();
   Pixel_detElement_RIO_map::iterator e = m_pixelClusterMap->end();
 
-  InDet::PixelClusterCollection* clusterCollection = nullptr;
+  //InDet::PixelClusterCollection* clusterCollection = nullptr;
   IdentifierHash waferHash;
 
   for (; i != e; i = m_pixelClusterMap->upper_bound(i->first)){
-
     std::pair <Pixel_detElement_RIO_map::iterator, Pixel_detElement_RIO_map::iterator> range;
     range = m_pixelClusterMap->equal_range(i->first);
-
     Pixel_detElement_RIO_map::iterator firstDetElem;
     firstDetElem = range.first;
-
     waferHash = firstDetElem->first;
-
     const InDetDD::SiDetectorElement* detElement = elements->getDetectorElement(waferHash);
-
-    clusterCollection = new InDet::PixelClusterCollection(waferHash);
+    auto clusterCollection = std::make_unique<InDet::PixelClusterCollection>(waferHash);
     clusterCollection->setIdentifier(detElement->identify());
-
-
     for ( Pixel_detElement_RIO_map::iterator iter = range.first; iter != range.second; ++iter){
-
       InDet::PixelCluster* pixelCluster = (*iter).second;
       pixelCluster->setHashAndIndex(clusterCollection->identifyHash(),clusterCollection->size());
       clusterCollection->push_back(pixelCluster);
-
     }
-
-
-    if (clusterCollection) {
-      if (!clusterCollection->empty()) {
-        ATH_MSG_DEBUG ( "Filling ambiguities map" );
-        m_gangedAmbiguitiesFinder->execute(clusterCollection,*m_ambiguitiesMap);
-        ATH_MSG_DEBUG ( "Ambiguities map: " << m_ambiguitiesMap->size() << " elements" );
-        if ((m_pixelClusterContainer->addCollection(clusterCollection, waferHash)).isFailure()){
-          ATH_MSG_WARNING( "Could not add collection to Identifyable container !" );
-        }
+    if (!clusterCollection->empty()) {
+      ATH_MSG_DEBUG ( "Filling ambiguities map" );
+      m_gangedAmbiguitiesFinder->execute(clusterCollection.get(),*m_ambiguitiesMap);
+      ATH_MSG_DEBUG ( "Ambiguities map: " << m_ambiguitiesMap->size() << " elements" );
+      if ((m_pixelClusterContainer->addCollection(clusterCollection.release(), waferHash)).isFailure()){
+        ATH_MSG_WARNING( "Could not add collection to Identifyable container !" );
       }
-      else {delete clusterCollection;}
     }
-
-
   } // end for
 
   m_pixelClusterMap->clear();
