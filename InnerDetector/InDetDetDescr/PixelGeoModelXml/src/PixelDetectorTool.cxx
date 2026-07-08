@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelGeoModelXml/PixelDetectorTool.h"
@@ -203,7 +203,7 @@ void PixelDetectorTool::doNumerology(InDetDD::PixelDetectorManager * manager)
       }
   }
   ATH_MSG_INFO("Total number of wafers added is " << totalWafers);
-  const PixelID *pixelIdHelper = dynamic_cast<const PixelID *> (m_commonItems->getIdHelper());
+  const PixelID *pixelIdHelper = static_cast<const PixelID *> (m_commonItems->getIdHelper());
   ATH_MSG_INFO("Total number of wafer identifiers is " << pixelIdHelper->wafer_hash_max());
 
   //    Used in digitization to create one vector big enough to hold all pixels
@@ -215,7 +215,7 @@ void PixelDetectorTool::doNumerology(InDetDD::PixelDetectorManager * manager)
   ATH_MSG_INFO("Max. eta cells is " << n.maxNumEtaCells());
   ATH_MSG_INFO("Max. phi cells is " << n.maxNumPhiCells());
 
-  manager->numerology() = n;
+  manager->numerology() = std::move(n);
 
   ATH_MSG_INFO("End of numerology\n");
 }

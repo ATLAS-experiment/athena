@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <utility>
+
 
 #include "GeoPixelPigtail.h"
 #include "GeoModelKernel/GeoTubs.h"
@@ -10,7 +10,7 @@
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoTransform.h"
-
+#include <utility>
 GeoPixelPigtail::GeoPixelPigtail(InDetDD::PixelDetectorManager* ddmgr,
                                  PixelGeometryManager* mgr,
 				 GeoModelIO::ReadGeoModel* sqliteReader,
@@ -37,14 +37,14 @@ GeoVPhysVol* GeoPixelPigtail::Build() {
   GeoLogVol * thePigtail = new GeoLogVol("PigtailCylEnv",tubs,air);
   //
   GeoPhysVol* pigtailPhys = new GeoPhysVol(thePigtail);
+  const std::string pigtailStr{"PigtailCyl"};
   for (int iModule = 0; iModule<m_gmt_mgr->PixelNModule(); iModule++) {
     int moduleEta =  m_gmt_mgr->PixelModuleEtaFromIndex(iModule);
     double zShift = m_gmt_mgr->PixelModuleZPosition(moduleEta);
-    std::string logName = "PigtailCyl";
     const GeoTubs* tubs  = new GeoTubs(rmin,rmax,0.5*width,phi,dphi);
-    std::string matName = m_gmt_mgr->getMaterialName("PigtailCyl", m_gmt_mgr->GetLD());
+    std::string matName = m_gmt_mgr->getMaterialName(pigtailStr, m_gmt_mgr->GetLD());
     const GeoMaterial* cyliMat = m_mat_mgr->getMaterialForVolume(matName,tubs->volume());
-    GeoLogVol* theTubs   = new GeoLogVol(logName,tubs,cyliMat);
+    GeoLogVol* theTubs   = new GeoLogVol(pigtailStr,tubs,cyliMat);
     GeoPhysVol* pigtailPart = new GeoPhysVol(theTubs);
 
     double zpos = posZ + zShift;

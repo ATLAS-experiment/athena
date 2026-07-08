@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef PIXELFEUTILS_H
 #define PIXELFEUTILS_H
@@ -11,6 +11,8 @@
 #include <tuple>
 #include <limits>
 #include <cassert>
+#include <array>
+#include <cstdint>
 
 namespace Pixel {
 
@@ -61,7 +63,9 @@ namespace Pixel {
     * @return word with readout technology bit set to given value
     */
    inline unsigned int makeReadoutTechnologyBit( InDetDD::PixelReadoutTechnology technology, unsigned int bit_val=1 ) {
-      assert(static_cast<unsigned int>(technology) < 31);
+      assert(static_cast<unsigned int>(technology) < 31); //technology can be -1
+      //shift amount ( = technology) is checked in dbg build
+      //coverity[BAD_SHIFT]
       return bit_val << static_cast<unsigned int>(technology);
    }
 
