@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKINGGEOMETRY_STAGEDTRACKINGGEOMETRYBUILDERIMPL_H
@@ -308,8 +308,8 @@ struct LayerSetup
 
     // range into non-overlapping layers
 
-    if (!radii.size()) radii.push_back(std::pair<double,double>(rmin,rmax));
-
+    if (radii.empty()) radii.push_back(std::pair<double,double>(rmin,rmax));
+    //now radii has at least one element
     unsigned int ir=0;
     while ( ir != radii.size() && rmin > radii[ir].second ) ir++;
 
@@ -322,6 +322,7 @@ struct LayerSetup
       if (rmin<radii[ir].first) radii[ir].first=rmin;
       // resolve upper edge
       unsigned int imerge = ir;
+      //coverity[INTEGER_OVERFLOW:FALSE]
       while (imerge<radii.size()-1 && rmax>radii[imerge+1].first) imerge++;
       radii[ir].second = rmax > radii[imerge].second ? rmax : radii[imerge].second;
       if (imerge>ir) radii.erase(radii.begin()+ir+1,radii.begin()+imerge);
