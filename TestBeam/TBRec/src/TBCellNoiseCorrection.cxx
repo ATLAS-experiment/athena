@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCellNoiseCorrection.h"
@@ -59,7 +59,7 @@ StatusCode TBCellNoiseCorrection::initialize()
         ATH_MSG_FATAL( "Could not open file  xcryo_ytable.txt"  );
 	return StatusCode::FAILURE;
      }
-     int runnumber;
+     int runnumber = 0;
      float x,y,en=-1;
      std::string line;
      while (getline(xfile, line, '\n')) {
