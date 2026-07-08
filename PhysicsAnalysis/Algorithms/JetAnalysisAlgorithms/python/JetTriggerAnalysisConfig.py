@@ -30,11 +30,11 @@ class JetTriggerMatchingBlock (ConfigBlock):
                         info="Add HLT matching decorations")
         self.addOption ('l1dR', 0.4, type=float,
                         info="ΔR cone for the L1 (jFEX) trigger matching "
-                        "(sets CP::JetTriggerDecoratorAlg.l1dR). Default 0.4 "
+                        "(sets CP::JetTriggerDecoratorAlg.l1dR_cut). Default 0.4 "
                         "matches the algorithm's own default.")
         self.addOption ('hltDR', 0.4, type=float,
                         info="ΔR cone for the HLT trigger matching "
-                        "(sets CP::JetTriggerDecoratorAlg.hltDR). Default 0.4 "
+                        "(sets CP::JetTriggerDecoratorAlg.hltDR_cut). Default 0.4 "
                         "matches the algorithm's own default.")
 
     def instanceName (self) :
@@ -79,8 +79,8 @@ class JetTriggerMatchingBlock (ConfigBlock):
             else:
                 usePhaseIL1 = config.campaign() in (Campaign.MC23e, Campaign.MC23g)
             alg.usePhaseIL1 = usePhaseIL1
-            alg.l1dR = self.l1dR
-            alg.hltDR = self.hltDR
+            alg.l1dR_cut = self.l1dR
+            alg.hltDR_cut = self.hltDR
 
             if config.geometry() is LHCPeriod.Run2 and self.runHLTMatching:
                 # Configuration adapted from
