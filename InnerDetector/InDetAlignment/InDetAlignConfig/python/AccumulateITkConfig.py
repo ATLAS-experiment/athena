@@ -133,8 +133,6 @@ def ITkAccumulateCfg(flags, **kwargs):
 
     cfg.merge(ITkAlignTrackCollSplitterCfg(flags))
 
-    print("Outsideeeeeeeee")
-
     if flags.ITk.Align.doMonitoring:
 
         print("Insideeeeeeeeeeeeee")
