@@ -6,7 +6,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
-from AthenaCommon.Constants import INFO
 from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
 
 def ActsFatrasWriteHandlerCfg(flags, name="ActsFatrasWriteHandler", **kwargs):
@@ -72,15 +71,13 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     from ISF_Services.ISF_ServicesCoreConfig import ATLFAST_GeoIDSvcCfg
     kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)))
 
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    acc.merge(ActsTrackingGeometrySvcCfg(flags))
+ 
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)))
-
-    tgSvc = acc.getService("ActsTrackingGeometrySvc")
-    tgSvc.OutputLevel = INFO
-    if flags.Detector.EnableITk:
-      tgSvc.printGeometry = False
-      tgSvc.UseBlueprint = True
-      tgSvc.BuildSubDetectors = ["Calo", "ITkPixel","ITkStrip","HGTD"]
 
     kwargs.setdefault("ActsFatrasWriteHandler", acc.popToolsAndMerge(ActsFatrasWriteHandlerCfg(flags)))
     writtenContainers =[]
