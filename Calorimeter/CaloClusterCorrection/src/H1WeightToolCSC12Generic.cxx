@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************
@@ -19,6 +19,7 @@ Created  : Feb 2007
 
 #include <cmath>
 #include <string>
+#include <numbers>
 
 using CLHEP::millimeter;
 using CLHEP::GeV;
@@ -42,9 +43,8 @@ double H1WeightToolCSC12Generic::wtCell(const CaloCell* thisCell) const
 {
   Context myctx = context (Gaudi::Hive::currentContext());
 
-  const double mm3 = millimeter*millimeter*millimeter;
-  const double log2 = 0.69314718056;
-  const double inv_log2 = 1. / log2;
+  constexpr double mm3 = millimeter*millimeter*millimeter;
+  constexpr double inv_log2 = 1. / std::numbers::ln2;
   
   int dim=m_wtEMB1(myctx).size(); //FIXME: Assume same size for all m_wtXXXXX
 
