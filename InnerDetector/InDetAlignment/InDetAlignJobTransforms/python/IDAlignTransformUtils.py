@@ -10,6 +10,8 @@ from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeome
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
 def addIDAlignArguments(parser):
+
+    print("in addIDAlignArguments !!!!!")
     parser.defineArgGroup('ID alignment', 'ID alignment job flags')
     
     ## Type of running mode
@@ -41,8 +43,8 @@ def addIDAlignArguments(parser):
     parser.add_argument("--localDatabase", type = trfArgClasses.argFactory(trfArgClasses.argFile, io = "input", type = "db"), group = "ID alignment", help='Local database to use')
     
     ## Local DB File (ITk ??)
-    parser.add_argument("--localDB", default = "", help='Use local DB file rather than from conditions tag')
-
+    # parser.add_argument("--localDB", default = "MisalignmentSet3.db", help='Use local DB file rather than from conditions tag')
+    parser.add_argument("--localDB", default=trfArgClasses.argString(""), type=trfArgClasses.argFactory(trfArgClasses.argString), group="ID alignment", help="Use local DB file rather than from conditions tag")
     ## Tier0 specific tags
     parser.add_argument("--eosT0Dir", default = trfArgClasses.argString(""), type = trfArgClasses.argFactory(trfArgClasses.argString), group = "ID alignment", help='Tier0 eos output dir, used to determine solve output while running the CL on Tier0')
     

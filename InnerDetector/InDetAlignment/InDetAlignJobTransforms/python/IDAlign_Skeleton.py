@@ -306,13 +306,22 @@ def configureITkFlags(runArgs, flags):
         flags.BField.barrelToroidOn = False
         flags.BField.endcapToroidOn = False
 
+    print(dir(runArgs))
 
-
+    print(hasattr(runArgs, "localDB"))
+    print(runArgs.localDB)
     if hasattr(runArgs, "localDB") and runArgs.localDB:
+        print("localDB!!!")
         flags.ITk.Align.useLocalDatabase = True
         DBFile = runArgs.localDB
         flags.IOVDb.DBConnection = (f"sqlite://;schema={runArgs.localDB};dbname=OFLCOND")
         flags.ITk.Geometry.alignmentFolder = "/Indet/AlignITk"
+
+
+    # databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
+    # flags.IOVDb.DBConnection="sqlite://;schema=%s;dbname=OFLCOND" % (databaseFilename) 
+    # flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
+
 
 
 
@@ -343,8 +352,8 @@ def fromRunArgsITk(runArgs, flags):
 
     if flags.ITk.Align.useLocalDatabase:
         from IOVDbSvc.IOVDbSvcConfig import addFolders, getSqliteContent
-        print("Adding Align Folder "+flags.ITk.Geometry.alignmentFolder+" from local "+DBName+" Database in file "+DBFile)
-        cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=DBFile,tag=tag, className="AlignableTransformContainer")) 
+        print("Adding Align Folder "+flags.ITk.Geometry.alignmentFolder+" from local "+DBName+" Database in file "+runArgs.localDB)
+        cfg.merge(addFolders(flags,flags.ITk.Geometry.alignmentFolder,db=DBName,detDb=runArgs.localDB,tag=tag, className="AlignableTransformContainer")) 
             
     
 
@@ -506,7 +515,6 @@ def fromRunArgs(runArgs):
 
     # Check if the input file is specified as RDO (parser argument)
     # If not, it is assumed to be the RAW file as default
-    if hasattr(runArgs, "inputRDOFile"):
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRDOFile]
     else:
         flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
