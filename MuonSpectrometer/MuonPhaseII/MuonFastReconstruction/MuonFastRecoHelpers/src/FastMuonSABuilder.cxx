@@ -57,7 +57,7 @@ constexpr auto y0Idx {Acts::toUnderlying(ParamDefs::y0)};
 constexpr auto etaCovIdx {Acts::toUnderlying(SpacePoint::CovIdx::etaCov)};
 
 FastMuonSABuilder::FastMuonSABuilder(const std::string& name, Config&& config) :
-    AthMessaging{name}, m_cfg{std::move(config)} {
+    AthMessaging{name}, m_cfg{config} {
         /** Initialize the segment line fitter */
         SegmentLineFitter::Config fitCfg{};
         fitCfg.calibrator = config.calibrator;
@@ -97,6 +97,7 @@ FastMuonSABuilder::FastMuonSABuilder(const std::string& name, Config&& config) :
         m_trackSeeder = std::make_unique<MsTrackSeeder>(name, std::move(trackCfg));
 
     }
+//coverity[RW.ROUTINE_NOT_EMITTED:FALSE]
 xAOD::Muon*
 FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx, 
                                       const ActsTrk::GeometryContext& gctx,
@@ -175,6 +176,7 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
 
             Segment_t segment {fitSegment(ctx, sector->localToGlobalTransform(gctx), parentBucket, std::move(hitsPerSector[sector]))};
             if (segment) {
+                //coverity[RW.NO_MATCHING_FUNCTION:FALSE]
                 ATH_MSG_VERBOSE(__func__<<"() Successfully fitted segment in station "<< st <<": Pos: "
                     << Amg::toString(segment->position())<< ", dir: "<< Amg::toString(segment->direction()) 
                     << ", chi2: "<< segment->chi2()<<", nDoF: "<<segment->nDoF()<<std::endl << print(segment->measurements()));
@@ -233,7 +235,8 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
     newMuon->setMuonType(xAOD::Muon::MuonType::MuonStandAlone);
     return newMuon;
 }
-FastMuonSABuilder::Segment_t 
+FastMuonSABuilder::Segment_t
+//coverity[routine_not_emitted:FALSE]
 FastMuonSABuilder::fitSegment(const EventContext& ctx,
                               const Amg::Transform3D& localToGlobal,
                               Bucket_t parentBucket,
@@ -287,6 +290,7 @@ FastMuonSABuilder::fitSegment(const EventContext& ctx,
     MdtSegmentSeeder::State_t seedState{initialPars, houghSeed.get(), m_cfg.calibrator, m_cfg.recalibSeed};
 
     ATH_MSG_VERBOSE(__func__<<"() Start segment seed search");
+    //coverity[routine_not_emitted:FALSE]
     while (auto seed = m_mdtSeeder->nextSeed(cctx, seedState)) {
         ATH_MSG_VERBOSE(__func__<<"() Found a seed. Try to fit the segment...");
 
@@ -301,6 +305,7 @@ FastMuonSABuilder::fitSegment(const EventContext& ctx,
         ATH_MSG_VERBOSE(__func__<<"() In total "<<segments.size()<<" segment were constructed. Keep the best one.");
         if (msgLvl(MSG::VERBOSE) && segments.size() > 1) {
             for (const Segment_t& seg : segments) {
+                //coverity[RW.NO_MATCHING_FUNCTION:FALSE]
                 ATH_MSG_VERBOSE(__func__<<"() Segment: Pos: "<<Amg::toString(seg->position())
                     <<", dir: "<<Amg::toString(seg->direction())<<", chi2: "<<seg->chi2()
                     <<", nDoF: "<<seg->nDoF()<<std::endl<<print(seg->measurements()));
@@ -340,7 +345,7 @@ FastMuonSABuilder::estimateBendingPars(HitVec_t&& hits,
     const double det {S * Szz - Sz * Sz};
 
     if (std::abs(det) < 1e-6) {
-        ATH_MSG_VERBOSE(__func__<<"() Degenerate weigthed regression, using furthest hits...");
+        ATH_MSG_VERBOSE(__func__<<"() Degenerate weighted regression, using furthest hits...");
         const auto [minZHit, maxZHit] = std::ranges::minmax_element(hits, std::ranges::less{}, 
             [](const Hit_t& h) { return h->localPosition().z(); });
         const Amg::Vector3D& minLocPos {(*minZHit)->localPosition()};
@@ -353,7 +358,9 @@ FastMuonSABuilder::estimateBendingPars(HitVec_t&& hits,
         pars[y0Idx] = minLocPos.y() - std::tan(pars[thetaIdx]) * minLocPos.z();
         return validHits;
     }
+    //coverity[DIVIDE_BY_ZERO:FALSE]
     const double slope { (S * Syz - Sz * Sy) / det };
+    //coverity[DIVIDE_BY_ZERO:FALSE]
     const double intercept { (Szz * Sy - Sz * Syz) / det };
 
     pars[thetaIdx] = std::atan(slope);

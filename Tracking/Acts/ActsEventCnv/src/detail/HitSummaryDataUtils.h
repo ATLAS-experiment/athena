@@ -151,6 +151,7 @@ namespace ActsTrk::detail {
             break;
          }
          case xAOD::UncalibMeasType::HGTDClusterType: {
+            if (!detEl) { return false; }
             assert(detEl ->getIdHelper()->is_hgtd(id));
             const HGTD_ID* hgtd_id = static_cast<const HGTD_ID *>(detEl->getIdHelper());
             region=hgtdTotal;

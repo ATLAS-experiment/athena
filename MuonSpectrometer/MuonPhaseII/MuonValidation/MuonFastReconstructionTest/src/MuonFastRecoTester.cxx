@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonFastRecoTester.h"
@@ -457,14 +457,14 @@ namespace MuonValR4 {
     void MuonFastRecoTester::fillFastRecoMuonInfo(const xAOD::MuonContainer* fastMuons,
                                                   const GlobalPatternContainer* patternCont) {
         if (!fastMuons) return;
-
+        const std::string patLinkStr{"globalPatternLink"};
         for (const xAOD::Muon* mu : *fastMuons) {
             m_muon_Eta.push_back(mu->eta());
             m_muon_Phi.push_back(mu->phi());
             m_muon_Pt.push_back(mu->pt());
             m_muon_Q.push_back(mu->charge());
 
-            SG::Accessor<ElementLink<GlobalPatternContainer>> patLinkAcc{"globalPatternLink"};
+            SG::Accessor<ElementLink<GlobalPatternContainer>> patLinkAcc{patLinkStr};
 
             auto patItr {std::ranges::find(*patternCont, *patLinkAcc(*mu))};
             assert(patItr != patternCont->end());
