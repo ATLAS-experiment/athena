@@ -287,8 +287,8 @@ namespace xAOD {
 
     numberOfHGTDHits               =69,  //!< number of HGTD hits [unit8_t].
     numberOfHGTDOutliers           =72,  //!< number of HGTD outliers [unit8_t].
-    numberOfHGTDHoles              =75,  //!< number of pixel layers on track with absence of hits [unit8_t].
-    numberOfHGTDSharedHits         =86,  //!< number of Pixel all-layer hits shared by several tracks [unit8_t].
+    numberOfHGTDHoles              =75,  //!< number of HGTD layers on track with absence of hits [unit8_t].
+    numberOfHGTDSharedHits         =86,  //!< number of HGTD all-layer hits shared by several tracks [unit8_t].
 
     // --- Muon Spectrometer
     numberOfPrecisionLayers = 7,       //!< layers with at least 3 hits [unit8_t].
