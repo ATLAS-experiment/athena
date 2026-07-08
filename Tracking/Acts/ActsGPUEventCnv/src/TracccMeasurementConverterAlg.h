@@ -43,7 +43,7 @@ public:
 
 private:
   // ---- Input ----
-  SG::ReadHandleKey<traccc::edm::measurement_collection::buffer> m_inputMeasKey{
+  SG::ReadHandleKey<traccc::edm::measurement_collection::const_view> m_inputMeasKey{
       this, "InputMeasurements", "TracccMeasurements",
       "Input traccc measurement collection buffer"};
 

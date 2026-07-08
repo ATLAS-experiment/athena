@@ -40,10 +40,11 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
 
   // Record device and host objects
   // Host objects are needed for EDM conversions
-  ATH_CHECK(m_detStore->record(std::move(deviceDesign), m_deviceDesignObjectName.value()));
-  ATH_CHECK(m_detStore->record(std::move(deviceCond), m_deviceCondObjectName.value()));
-  ATH_CHECK(m_detStore->record(std::move(hostDesign), m_hostDesignObjectName.value()));
-  ATH_CHECK(m_detStore->record(std::move(hostCond), m_hostCondObjectName.value()));
+  constexpr bool allowMods = false;
+  ATH_CHECK(m_detStore->record(std::move(deviceDesign), m_deviceDesignObjectName.value(), allowMods));
+  ATH_CHECK(m_detStore->record(std::move(deviceCond), m_deviceCondObjectName.value(), allowMods));
+  ATH_CHECK(m_detStore->record(std::move(hostDesign), m_hostDesignObjectName.value(), allowMods));
+  ATH_CHECK(m_detStore->record(std::move(hostCond), m_hostCondObjectName.value(), allowMods));
 
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;

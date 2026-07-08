@@ -41,8 +41,7 @@ StatusCode TracccMeasurementConverterAlg::initialize()
 StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
 {
   // ---- Read input ----
-  SG::ReadHandle<traccc::edm::measurement_collection::buffer>
-      measurements{m_inputMeasKey, ctx};
+  auto measurements = SG::makeHandle(m_inputMeasKey, ctx);
   ATH_CHECK(measurements.isValid());
 
   auto copy = m_copy->copy(ctx);

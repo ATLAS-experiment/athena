@@ -1,0 +1,31 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
+// Local include(s).
+#include "ActsGPUEventTestFixture.h"
+#include "TestedCollectionTypes.h"
+
+// Boost include(s).
+#define BOOST_TEST_MODULE ActsGPUEvent
+#include <boost/test/included/unit_test.hpp>
+
+// System include(s).
+#include <memory>
+
+BOOST_FIXTURE_TEST_CASE_TEMPLATE(BufferToView, COLLECTION,
+                                 TestedCollectionTypes,
+                                 ActsGPUEventTestFixture) {
+
+  // Type specific name for the recorded object.
+  const std::string key = typeid(COLLECTION).name();
+
+  // Create a buffer object.
+  auto buffer = std::make_unique<typename COLLECTION::buffer>();
+
+  // Record it into StoreGate.
+  constexpr bool allowMods = false;
+  BOOST_TEST(m_sg->record(std::move(buffer), key, allowMods).isSuccess());
+
+  // Try to retrieve it as a view object.
+  const typename COLLECTION::view* view = nullptr;
+  BOOST_TEST(m_sg->retrieve(view, key).isSuccess());
+}
