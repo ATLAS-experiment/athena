@@ -63,9 +63,9 @@ namespace CP
     Gaudi::Property<std::vector<std::string>> m_triggerNavBug{
       this, "triggerBugList", {}, "List of buggy triggers"
     };
-    Gaudi::Property<float> m_l1dR{this, "l1dR", 0.4,
+    Gaudi::Property<float> m_l1dR{this, "l1dR_cut", 0.4,
         "ΔR cone for L1 (jFEX) matching"};
-    Gaudi::Property<float> m_hltDR{this, "hltDR", 0.4,
+    Gaudi::Property<float> m_hltDR{this, "hltDR_cut", 0.4,
         "ΔR cone for HLT matching"};
 
     // PublicToolHandle: TrigDecisionTool is a shared singleton; a private
