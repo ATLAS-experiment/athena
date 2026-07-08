@@ -182,7 +182,7 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
         std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(&(detElement->surface())),
                                                       Trk::do_not_delete<Trk::Surface>);
         Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
-        discSurfaces[currentlayer].push_back(surfaceOrder);
+        discSurfaces[currentlayer].push_back(std::move(surfaceOrder));
 
      } else if (!(*sidetIter))
         ATH_MSG_WARNING("nullptr to Endcap module given by SCT_DetectorManager! Please check db & dict.xml");
@@ -569,7 +569,7 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
         std::shared_ptr<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(&(chosenSide->surface())),
                                                       [](Trk::Surface*){});
         Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
-        if (takeIt) (discSurfaces[currentlayer]).push_back(surfaceOrder);
+        if (takeIt) (discSurfaces[currentlayer]).push_back(std::move(surfaceOrder));
     }
   } //end of filling
 
@@ -951,7 +951,7 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
            zboundaries.push_back(layerMaxZ[currentlayer]);
 
            // complex z binning mode
-           layerZboundaries[currentlayer] = zboundaries;
+           layerZboundaries[currentlayer] = std::move(zboundaries);
            // chose which one to register for the split mode (SLHC)
            layerHalfLength[currentlayer] =  layerMinZ[currentlayer]*layerMinZ[currentlayer] > layerMaxZ[currentlayer]*layerMaxZ[currentlayer] ?
                std::abs(layerMinZ[currentlayer]) : layerMaxZ[currentlayer];
@@ -1003,7 +1003,7 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
                                                      Trk::do_not_delete<Trk::Surface>);
 
        Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
-       if (takeIt) (layerSurfaces[currentlayer]).push_back(surfaceOrder);
+       if (takeIt) (layerSurfaces[currentlayer]).push_back(std::move(surfaceOrder));
 
      } else if (!(*sidetIter)) // barrel check and screen output
         ATH_MSG_WARNING("nullptr to Barrel module given by SiDetectorManager! Please check db & dict.xml");
@@ -1257,7 +1257,7 @@ InDet::SiLayerBuilderImpl::barrelLayerMaterial(double r, double hz) const
                                                  Trk::closed,
                                                  Trk::binRPhi);
       layerBinUtilityRPhiZ += layerBinUtilityZ;
-      layerBinUtility =  layerBinUtilityRPhiZ;
+      layerBinUtility =  std::move(layerBinUtilityRPhiZ);
   }
   // --------------- material estimation ----------------------------------------------------------------
   return Trk::BinnedLayerMaterial(layerBinUtility);

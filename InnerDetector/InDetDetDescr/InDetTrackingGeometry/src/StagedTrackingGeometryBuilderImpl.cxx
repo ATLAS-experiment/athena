@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDet
@@ -328,7 +328,7 @@ InDet::StagedTrackingGeometryBuilderImpl::createTrackingVolume(
       std::vector< std::vector<Trk::Layer*> > mergedLayers;
       std::vector< float > mergedRmax;
       std::vector< std::vector< int > > merge;
-      std::vector<int> laySet(1,0); merge.push_back(laySet);
+      std::vector<int> laySet(1,0); merge.push_back(std::move(laySet));
       double rCurr = ringRmaxa[0];
       mergedRmax.push_back(rCurr);
       for (int idset = 1; idset < int(groupedDiscs.size()); idset++){
@@ -858,7 +858,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
   for ( auto *  sf : surfs ) {
     std::shared_ptr<Trk::Surface> sharedSurface(sf,Trk::do_not_delete<Trk::Surface>);
     std::pair< std::shared_ptr<Trk::Surface>, Amg::Vector3D >  surfaceOrder(sharedSurface, sf->center());
-    surfaces.push_back(surfaceOrder);
+    surfaces.push_back(std::move(surfaceOrder));
   }
 
   // create merged binned array
@@ -895,6 +895,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderImpl::mergeDiscLayers (std::vect
   // register the layer to the surfaces
   for (const auto *sf : layerSurfaces) {
     const InDetDD::SiDetectorElement* detElement = dynamic_cast<const InDetDD::SiDetectorElement*>(sf->associatedDetectorElement());
+    if (!detElement) continue;
     const std::vector<const Trk::Surface*>& allSurfacesVector = detElement->surfaces();
     for (const auto *subsf : allSurfacesVector){
       const_cast<Trk::Surface&>(*subsf).associateLayer(*layer);
