@@ -577,8 +577,8 @@ def runDataPrepChain():
     
     
     ############################################    
-    from ActsConfig.ActsCIFlags import actsWorkflowFlags
-    actsWorkflowFlags(flags)
+    from ActsConfig.ActsCIFlags import actsProductionFlags
+    actsProductionFlags(flags)
     
     ############################################
     flags.Concurrency.NumThreads=1

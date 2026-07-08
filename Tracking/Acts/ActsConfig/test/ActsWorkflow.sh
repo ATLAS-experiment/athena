@@ -17,7 +17,7 @@ Reco_tf.py \
              flags.HGTD.doActs=True; \
 	     flags.Reco.EnableHGTDExtension=True; \
 	     flags.Detector.EnableCalo=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \

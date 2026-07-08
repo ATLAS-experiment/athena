@@ -76,7 +76,7 @@ fi
 # Run ACTS
 run "Reconstruction-acts" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
 	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
     --conditionsTag "default:${conditionsTag}" \

@@ -19,11 +19,10 @@ Reco_tf.py \
     	       flags.DQ.useTrigger=False; \
 	       flags.Output.HISTFileName=\"ActsMonitoringOutput.root\"; \
 	       ${extraArgs}" \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
     --ignorePatterns "${ignore_pattern}" \
     --conditionsTag ${conditions_tag} \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \
     --multithreaded
-

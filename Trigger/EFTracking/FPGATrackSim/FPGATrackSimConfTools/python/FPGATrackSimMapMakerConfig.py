@@ -112,8 +112,8 @@ if __name__ == "__main__":
     flags.fillFromArgs()
 
     
-    from ActsConfig.ActsCIFlags import actsWorkflowFlags
-    actsWorkflowFlags(flags)
+    from ActsConfig.ActsCIFlags import actsProductionFlags
+    actsProductionFlags(flags)
 
     flags.lock()
     flags = flags.cloneAndReplace("Tracking.ActiveConfig", "Tracking.ITkActsPass")

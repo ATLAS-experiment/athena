@@ -7,7 +7,7 @@ n_events=10
 
 Reco_tf.py --CA \
   --preExec "flags.Exec.FPE=-2;from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
   --inputRDOFile ${input_rdo} \
   --outputAODFile test.AOD.pool.root  \
   --maxEvents ${n_events}

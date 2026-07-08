@@ -949,8 +949,8 @@ if __name__ == "__main__":
     FinalProtoTrackChainxAODTracksKey="FPGA"
     flags.Detector.EnableCalo = False 
 
-    from ActsConfig.ActsCIFlags import actsWorkflowFlags
-    actsWorkflowFlags(flags)
+    from ActsConfig.ActsCIFlags import actsProductionFlags
+    actsProductionFlags(flags)
 
     if not flags.Trigger.FPGATrackSim.runBaselineActs:
         flags.Tracking.ITkActsPass.doActsSpacePoint = False

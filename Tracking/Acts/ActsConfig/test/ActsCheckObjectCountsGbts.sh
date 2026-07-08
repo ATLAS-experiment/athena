@@ -14,11 +14,10 @@ Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
        from ActsConfig.ActsConfigFlags import SeedingStrategy; \
        flags.Acts.SeedingStrategy=SeedingStrategy.Gbts; \
-       flags.Tracking.doTruth=False; \
        flags.Tracking.doPixelDigitalClustering=True; \
        from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
        flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \

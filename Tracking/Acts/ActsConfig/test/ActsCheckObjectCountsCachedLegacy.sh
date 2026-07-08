@@ -12,12 +12,11 @@ ignore_pattern=""
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-       	     flags.Detector.EnableMuon=False; \
-	     flags.Tracking.doTruth=False; \
-	     flags.Tracking.doITkConversion=False; \
-	     flags.Acts.doLargeRadius=True; \
-	     flags.Acts.doLowPt=True; \
-	     flags.Acts.useCache=True;" \
+       flags.Detector.EnableMuon=False; \
+       flags.Tracking.doITkConversion=False; \
+       flags.Acts.doLargeRadius=True; \
+       flags.Acts.doLowPt=True; \
+       flags.Acts.useCache=True;" \
   --preInclude "ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \

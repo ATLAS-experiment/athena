@@ -12,13 +12,12 @@ ignore_pattern=""
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-             from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-             flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf; \
-             flags.Tracking.doTruth=False; \
-             flags.Tracking.doPixelDigitalClustering=True; \
-             from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
-             flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+       from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+       flags.Acts.SeedingStrategy=SeedingStrategy.GbtsFtf; \
+       flags.Tracking.doPixelDigitalClustering=True; \
+       from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
+       flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated;" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
   --conditionsTag ${conditions_tag} \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \
