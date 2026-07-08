@@ -55,7 +55,7 @@ private:
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
   // ---------- data handles ----------
-  SG::ReadHandleKey<traccc::edm::silicon_cell_collection::buffer> m_inputCellsKey{
+  SG::ReadHandleKey<traccc::edm::silicon_cell_collection::const_view> m_inputCellsKey{
       this, "InputTracccCells", "",
       "Input traccc cell collection buffer"};
   SG::WriteHandleKey<traccc::edm::measurement_collection::buffer> m_outputMeasKey{
@@ -66,8 +66,8 @@ private:
       "Output uncalibrated traccc cluster collection buffer"};
 
   // Device buffers — retrieved from detStore
-  const traccc::detector_design_description::buffer*   m_deviceDesign;
-  const traccc::detector_conditions_description::buffer* m_deviceCond;
+  const traccc::detector_design_description::const_view* m_deviceDesign;
+  const traccc::detector_conditions_description::const_view* m_deviceCond;
 
 };
 
