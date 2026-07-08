@@ -112,7 +112,7 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
   struct HLTCaloEventCache {
     std::mutex mutex;    
     std::unique_ptr<LArCellCont> larContainer;
-    LArRodBlockStructure* larRodBlockStructure_per_slot; // LAr Rod Block to ease decoding
+    LArRodBlockStructure* larRodBlockStructure_per_slot = nullptr; // LAr Rod Block to ease decoding
     uint16_t rodMinorVersion = 0;
     uint32_t robBlockType = 0;
     std::unique_ptr<TileCellCont> tileContainer;

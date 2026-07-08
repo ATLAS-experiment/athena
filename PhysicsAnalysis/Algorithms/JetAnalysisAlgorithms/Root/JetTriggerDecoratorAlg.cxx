@@ -69,7 +69,7 @@ getL1JetThresholds(const xAOD::jFexSRJetRoI* roi,
 // rather than re-parsed for every candidate RoI.
 struct L1LegToken {
   std::string name;  // legName_noMultiplicity, e.g. "jJ50"
-  int threshold;
+  int threshold = 0;
 };
 
 // Parse the L1 lower-chain name into (name, threshold) leg tokens. Splits
