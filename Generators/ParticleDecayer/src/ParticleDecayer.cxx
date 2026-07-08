@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUMMARY: This code implements a "particle decayer" to allow us to augment the standard 
@@ -22,6 +22,7 @@
 //
 
 #include "ParticleDecayer/ParticleDecayer.h"
+#include "GaudiKernel/IPartPropSvc.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "GeneratorObjects/McEventCollection.h"
 #include "CLHEP/Random/RandomEngine.h"
