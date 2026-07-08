@@ -218,7 +218,7 @@ try:
         JetPtAssociation = JetModifier("JetPtAssociationTool", "jetPtAssociation",
                                        filterfn=isMC,
                                        createfn=JetMomentToolsConfig.getJetPtAssociationTool,
-                                       prereqs=["ghost:Truth"],
+                                       prereqs=["ghost:Truth","input:AntiKt4TruthJets"],
                                        JetContainer = _jetname
                                        ),
 
