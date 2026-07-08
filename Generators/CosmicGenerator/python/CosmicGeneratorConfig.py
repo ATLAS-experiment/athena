@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -147,9 +147,6 @@ class CavernPropertyCalculator(object):
 def CosmicGeneratorCfg(flags, name="CosmicGenerator", **kwargs):
     ## Configuring the Athena application for a 'generator' job
     result = ComponentAccumulator()
-
-    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    kwargs.setdefault('PartPropSvc', result.getPrimaryAndMerge(PartPropSvcCfg(flags))) # Property from GenBase
 
     ## Set up random seeds FIXME
     from RngComps.RngCompsConfig import AthRNGSvcCfg

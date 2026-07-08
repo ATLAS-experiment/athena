@@ -7,7 +7,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "AthenaKernel/errorcheck.h"
 #include "CxxUtils/checker_macros.h"
