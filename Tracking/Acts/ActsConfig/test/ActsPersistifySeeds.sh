@@ -35,7 +35,7 @@ Reco_tf.py \
     --inputRDOFile  ${input_rdo} \
     --outputAODFile AOD.acts.pool.root \
     --outputESDFile ESD.acts.pool.root \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
     --preExec "flags.Exec.FPE=-1; \
     	       flags.Tracking.doStoreTrackSeeds=True; \
     	       flags.Tracking.doStoreSiSPSeededTracks=True; \

@@ -79,7 +79,7 @@ fi
 # Run with Acts
 run "Reconstruction-acts" \
     Reco_tf.py \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Acts.doLargeRadius=True;" \
     --conditionsTag "default:${conditionsTag}" \

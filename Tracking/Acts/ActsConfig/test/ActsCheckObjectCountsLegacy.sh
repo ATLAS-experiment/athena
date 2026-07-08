@@ -12,15 +12,14 @@ ignore_pattern=""
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-	     flags.Tracking.doTruth=False; \
-	     flags.Tracking.doITkConversion=False; \
-	     flags.Detector.EnableCalo=True; \
-	     flags.Detector.GeometryCalo=True; \
-	     flags.Detector.EnableLAr=True; \
-	     flags.Detector.EnableTile=True; \
-       	     flags.Detector.EnableMuon=False; \
-	     flags.Acts.doLargeRadius=True; \
-	     flags.Acts.doLowPt=True;" \
+       flags.Tracking.doITkConversion=False; \
+       flags.Detector.EnableCalo=True; \
+       flags.Detector.GeometryCalo=True; \
+       flags.Detector.EnableLAr=True; \
+       flags.Detector.EnableTile=True; \
+       flags.Detector.EnableMuon=False; \
+       flags.Acts.doLargeRadius=True; \
+       flags.Acts.doLowPt=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
