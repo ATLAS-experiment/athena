@@ -658,7 +658,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           fill(residualGroup, modPhiShift_ecc_m, residualX_ecc_m, residualY_ecc_m);
 	}
       }
-      else if (!m_useITkGeometry && detType==1) {//filling SCT histograms
+      else if (detType==1) {//filling SCT histograms
         si_residualx_m = residualX;
         fill(residualGroup, si_residualx_m);
         

@@ -699,9 +699,9 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
 
     # Define local X 3D histograms (not really 3D histograms but TProfile 2D)
     if UseITkGeometry:
-        layersECsct = ['0', '1', '2', '3', '4', '5']
-    else:
         layersECsct = ['0', '1', '2', '3', '4', '5', '6', '7', '8']
+    else:
+        layersECsct = ['0', '1', '2', '3', '4', '5']
     residualSCTECAX2DProfArray = helper.addArray([len(layersECsct)], alg, 'SCTECAResidualX_2DProf', topPath = pathResiduals)
     for postfix, tool in residualSCTECAX2DProfArray.Tools.items():
         layer = layersECsct[int( postfix.split('_')[1] )]
