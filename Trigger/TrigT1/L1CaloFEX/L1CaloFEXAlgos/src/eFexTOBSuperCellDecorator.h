@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -13,7 +13,7 @@
 #ifndef EFEXTOBMLDECORATORTOOL_H
 #define EFEXTOBMLDECORATORTOOL_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AsgTools/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandle.h"
@@ -25,14 +25,14 @@
 
 namespace LVL1 {
     
-  class eFexTOBSuperCellDecorator : public AthAlgorithm{
+  class eFexTOBSuperCellDecorator : public AthReentrantAlgorithm {
   public:
     eFexTOBSuperCellDecorator(const std::string& name, ISvcLocator* svc);
 
     // Function initialising the algorithm
     virtual StatusCode initialize();
     // Function executing the algorithm
-    virtual StatusCode execute(const EventContext& ctx);
+    virtual StatusCode execute(const EventContext& ctx) const;
     	
   private:
     // Readhandles for eFEX TOBs

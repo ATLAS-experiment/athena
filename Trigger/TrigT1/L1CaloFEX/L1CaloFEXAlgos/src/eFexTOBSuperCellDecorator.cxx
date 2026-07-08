@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -15,7 +15,7 @@
 
 namespace LVL1 {
 
-  eFexTOBSuperCellDecorator::eFexTOBSuperCellDecorator(const std::string& name, ISvcLocator* svc) : AthAlgorithm(name, svc){}
+  eFexTOBSuperCellDecorator::eFexTOBSuperCellDecorator(const std::string& name, ISvcLocator* svc) : AthReentrantAlgorithm(name, svc){}
 
   StatusCode eFexTOBSuperCellDecorator::initialize() {
     ATH_MSG_INFO( "L1CaloFEXTools/eFexTOBSuperCellDecorator::initialize()");
@@ -33,7 +33,7 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode eFexTOBSuperCellDecorator::execute(const EventContext& ctx) {
+  StatusCode eFexTOBSuperCellDecorator::execute(const EventContext& ctx) const {
     
     // read the TOB containers
     SG::ReadHandle<xAOD::eFexEMRoIContainer> eFEXegEDMContainerObj{m_eFEXegEDMContainerKey, ctx};
