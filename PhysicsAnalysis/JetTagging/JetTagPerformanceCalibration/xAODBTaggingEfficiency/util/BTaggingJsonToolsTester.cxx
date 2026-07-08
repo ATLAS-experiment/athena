@@ -42,10 +42,12 @@ bool containNoSF(const std::string& str) {
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
+  #ifdef XAOD_STANDALONE
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
   // In principle you should NOT call this line for your regular code 
   ANA_CHECK_SET_TYPE (int);
+  #endif
 
   const char* TEST_NAME = argv[0];
 
