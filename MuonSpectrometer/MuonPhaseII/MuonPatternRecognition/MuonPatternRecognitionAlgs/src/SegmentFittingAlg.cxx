@@ -152,7 +152,27 @@ namespace MuonR4 {
 
         using State_t = MdtSegmentSeedGenerator::State_t;
         // Make sure patternSeed->parameters() are in ACTS units!
-        State_t seedState{patternSeed->parameters(), patternSeed, m_calibTool.get(), m_recalibSeed};
+        State_t seedState{patternSeed->parameters(), patternSeed, m_calibTool.get(), m_recalibSeed,
+                          [&](const Amg::Vector3D& tangentSeedPos, const Amg::Vector3D& tangentSeedDir){
+                                if (!m_doBeamspotConstraint) {
+                                    return true;
+                                }
+                                using namespace Acts::detail::LineHelper;
+                                const Acts::Intersection3D bsExtp = lineIntersect<3>(Amg::Vector3D::Zero(),
+                                                                                      Amg::Vector3D::UnitZ(),
+                                                                                      locToGlob*tangentSeedPos, 
+                                                                                      locToGlob.linear()*tangentSeedDir);
+                                const Amg::Vector3D closePoint = bsExtp.position();
+                                if (closePoint.perp() > 2.*m_beamSpotR ||
+                                    std::abs(closePoint.z()) > 2.*m_beamSpotL){
+                                    ATH_MSG_DEBUG("fitSegmentSeed() - Reject parameters "<<Amg::toString(tangentSeedPos)
+                                                  <<" + "<<Amg::toString(tangentSeedDir)
+                                                  <<" as extrapolation to beamspot is too far "<<Amg::toString(closePoint)
+                                                  <<", r: "<<closePoint.perp());
+                                    return false;
+                                }
+                                return true;
+                          }};
 
         const auto* seeder = patternSeed->parameters()[toUnderlying(ParamDefs::theta)] > 50 * Gaudi::Units::deg ?
                              m_seederBEE.get() : m_seeder.get();
@@ -176,25 +196,6 @@ namespace MuonR4 {
             ATH_MSG_VERBOSE("fitSegmentHits() - Found a seed. Try to fit the segment...");
             // Back convert the seed parameters to athena units
             seed->parameters[toUnderlying(ParamDefs::t0)] = ActsTrk::timeToAthena(seed->parameters[toUnderlying(ParamDefs::t0)]);
-            
-            if (m_doBeamspotConstraint) {
-                const auto [pos, dir] = makeLine(seed->parameters);
-                using namespace Acts::detail::LineHelper;
-
-                const Acts::Intersection3D bsExtp = lineIntersect<3>(Amg::Vector3D::Zero(),
-                                                                     Amg::Vector3D::UnitZ(),
-                                                                     locToGlob*pos, 
-                                                                     locToGlob.linear()*dir);
-                const Amg::Vector3D closePoint = bsExtp.position();
-                if (closePoint.perp() > 2.*m_beamSpotR ||
-                    std::abs(closePoint.z()) > 2.*m_beamSpotL){
-                    ATH_MSG_DEBUG("fitSegmentSeed() - Reject parameters "<<toString(seed->parameters)
-                                    <<" as extrapolation to beamspot is too far "<<Amg::toString(closePoint)
-                                    <<", r: "<<closePoint.perp());
-                    continue;
-                }
-            }
-            
             
             auto segment = m_fitter->fitSegment(ctx, patternSeed, seed->parameters,
                                                 locToGlob, std::move(seed->hits));
