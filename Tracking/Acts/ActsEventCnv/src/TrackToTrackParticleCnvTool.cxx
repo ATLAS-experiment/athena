@@ -265,6 +265,9 @@ namespace ActsTrk {
                       specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::Hole)],
                       xAOD::numberOfPixelHoles);
       setSummaryValue(track_particle,
+                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::DeadSensor)],
+                      xAOD::numberOfPixelDeadSensors);
+      setSummaryValue(track_particle,
                       hitInfo.sum<ActsTrk::detail::HitSummaryData::SharedHit>(ActsTrk::detail::HitSummaryData::pixelEndcap, 0),
                       xAOD::numberOfInnermostPixelLayerSharedEndcapHits);
       setSummaryValue(track_particle,
@@ -337,6 +340,9 @@ namespace ActsTrk {
       setSummaryValue(track_particle,
                       specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::Hole)],
                       xAOD::numberOfSCTHoles);
+      setSummaryValue(track_particle,
+                      specialHitCounts[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)][Acts::toUnderlying(ActsTrk::detail::HitCategory::DeadSensor)],
+                      xAOD::numberOfSCTDeadSensors);
       if (m_hgtdDecorationLevel>0) {
         setSummaryValue(
               track_particle,
