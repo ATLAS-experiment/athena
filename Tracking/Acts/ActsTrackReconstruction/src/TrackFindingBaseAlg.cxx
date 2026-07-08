@@ -13,6 +13,8 @@
 #include "ActsInterop/TableUtils.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
+#include "ActsEvent/TrackContainerUtils.h"
+
 namespace ActsTrk {
   struct TrackFindingBaseAlg::CKF_pimpl : public detail::CKF_config {};
 
@@ -405,17 +407,20 @@ namespace ActsTrk {
   }
 
 
-  void TrackFindingBaseAlg::addCounts(detail::RecoTrackContainer& tracksContainer)
+   void TrackFindingBaseAlg::addCountsAndProperties(detail::RecoTrackContainer& tracksContainer,bool addCounts)
   {
-    tracksContainer.addColumn<unsigned int>("nPixelHits");
-    tracksContainer.addColumn<unsigned int>("nStripHits");
-    tracksContainer.addColumn<unsigned int>("nHgtdHits");
-    tracksContainer.addColumn<unsigned int>("nPixelHoles");
-    tracksContainer.addColumn<unsigned int>("nStripHoles");
-    tracksContainer.addColumn<unsigned int>("nHgtdHoles");
-    tracksContainer.addColumn<unsigned int>("nPixelOutliers");
-    tracksContainer.addColumn<unsigned int>("nStripOutliers");
-    tracksContainer.addColumn<unsigned int>("nHgtdOutliers");
+    if (addCounts) {
+       tracksContainer.addColumn<unsigned int>("nPixelHits");
+       tracksContainer.addColumn<unsigned int>("nStripHits");
+       tracksContainer.addColumn<unsigned int>("nHgtdHits");
+       tracksContainer.addColumn<unsigned int>("nPixelHoles");
+       tracksContainer.addColumn<unsigned int>("nStripHoles");
+       tracksContainer.addColumn<unsigned int>("nHgtdHoles");
+       tracksContainer.addColumn<unsigned int>("nPixelOutliers");
+       tracksContainer.addColumn<unsigned int>("nStripOutliers");
+       tracksContainer.addColumn<unsigned int>("nHgtdOutliers");
+    }
+    ActsTrk::TrackContainerUtils::addFitterTypeProperty(tracksContainer);
   }
 
   void TrackFindingBaseAlg::initCounts(const detail::RecoTrackContainer::TrackProxy &track)
