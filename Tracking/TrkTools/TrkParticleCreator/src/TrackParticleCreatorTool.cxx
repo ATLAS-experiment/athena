@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -1039,8 +1039,14 @@ TrackParticleCreatorTool::addDetailedHitInformation(const Trk::TrackStates* trac
   tp.setSummaryValue(nContribPixelLayers, xAOD::numberOfContribPixelLayers);
   tp.setSummaryValue(nContribPixelBarrelLayers, xAOD::numberOfContribPixelBarrelLayers);
   tp.setSummaryValue(nContribPixelEndcap, xAOD::numberOfContribPixelEndcap);
-  tp.setSummaryValue(nPixelBarrelHits, xAOD::numberOfPixelBarrelHits);
-  tp.setSummaryValue(nPixelEndcapHits, xAOD::numberOfPixelEndcapHits);
+  if (m_itkDecorationLevel>=s_expertLevel) {
+     tp.setSummaryValue(nPixelBarrelHits, xAOD::numberOfPixelBarrelHits);
+     tp.setSummaryValue(nContribPixelBarrelFlatLayers, xAOD::numberOfContribPixelBarrelFlatLayers);
+     tp.setSummaryValue(nContribPixelBarrelInclinedLayers, xAOD::numberOfContribPixelBarrelInclinedLayers);
+     tp.setSummaryValue(nPixelBarrelFlatHits, xAOD::numberOfPixelBarrelFlatHits);
+     tp.setSummaryValue(nPixelBarrelInclinedHits, xAOD::numberOfPixelBarrelInclinedHits);
+     tp.setSummaryValue(nPixelEndcapHits, xAOD::numberOfPixelEndcapHits);
+  }
   tp.setSummaryValue(nInnermostPixelLayerEndcapHits, xAOD::numberOfInnermostPixelLayerEndcapHits);
   tp.setSummaryValue(nNextToInnermostPixelLayerEndcapHits, xAOD::numberOfNextToInnermostPixelLayerEndcapHits);
 
