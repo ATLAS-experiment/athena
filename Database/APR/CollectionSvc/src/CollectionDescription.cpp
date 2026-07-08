@@ -51,7 +51,6 @@ copyFrom( const pool::CollectionDescription& rhs )
    for( int col_id = 0; col_id < rhs.numberOfAttributeColumns(); col_id++ ) {
      const CollectionColumn& column = rhs.attributeColumn(col_id);
      insertColumn(column.name(), column.type());
-     setColumnId(column.name(), column.id());
    }
 }
 
@@ -64,7 +63,6 @@ pool::CollectionDescription::clearAll()
    }
    m_attributeColumnForColumnName.clear();
    m_attributeColumns.clear();
-   m_columnIdForColumnName.clear();
 }
 
 
@@ -97,38 +95,6 @@ pool::CollectionDescription::setConnection( const std::string& connection )
   m_connection = connection;
 }
 
-// set new column ID
-// return the ID
-int
-pool::CollectionDescription::setColumnId( const std::string& columnName, int id )
-{
-   auto iColumn = m_attributeColumnForColumnName.find( columnName );
-   if( iColumn == m_attributeColumnForColumnName.end() ) {
-      std::string errorMsg = "Attribute column with name `" + columnName + "' does NOT exist.";
-      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription \" from \" CollectionSvc" );
-   }
-   return setColumnId( iColumn->second, id );
-}
-
-
-// set or assign new column ID
-// return the ID
-int pool::CollectionDescription::setColumnId(pool::CollectionColumn* column, int id) {
-  if (id < 0) {
-    // find the highest column ID in the collection
-    std::map<std::string, int>::const_iterator column_iter = m_columnIdForColumnName.begin();
-    while (column_iter != m_columnIdForColumnName.end()) {
-      if (id < column_iter->second)
-        id = column_iter->second;
-      ++column_iter;
-    }
-    id++;
-  }
-  column->setId(id);
-  m_columnIdForColumnName[column->name()] = id;
-  return id;
-}
-
 
 const pool::CollectionColumn&
 pool::CollectionDescription::
@@ -144,7 +110,6 @@ insertColumn( const std::string& columnName, const std::string& columnType )
 
   // Create and record a description object for new column.
   CollectionColumn* column = new CollectionColumn( columnName, columnType );
-  setColumnId( column );
   m_attributeColumns.push_back( column );
   m_attributeColumnForColumnName[ columnName ] = column;
   return *column;
