@@ -8,12 +8,13 @@
 #  Class-based version of MadGraph Control
 #    written by Kael Kemp <kael.kemp@cern.ch>
 
-import os,time,subprocess,glob,re,sys # noqa: F401 
+import os,time,subprocess,glob 
 from AthenaCommon import Logging
 from AthenaCommon.SystemOfUnits import GeV
-from MadGraphControl.MadGraphUtilsHelpers import error_check,modify_param_card # noqa: F401
-from MadGraphControl.MadGraphParamHelpers import do_PMG_updates # noqa: F401
+from MadGraphControl.MadGraphUtilsHelpers import error_check
+from MadGraphControl.MGClassParamHelpers import do_PMG_updates
 from MadGraphControl.MadGraphSystematicsUtils import convertSysCalcArguments,get_pdf_and_systematic_settings,parse_systematics_arguments,SYSTEMATICS_WEIGHT_INFO_ALTDYNSCALES,SYSTEMATICS_WEIGHT_INFO,write_systematics_arguments # noqa: F401
+
 
 mglog = Logging.logging.getLogger('MadGraphUtils')
 
@@ -35,7 +36,9 @@ MADGRAPH_PDFSETTING = None
 MADGRAPH_DEVICES = None
 
 class MGControl:
-    def __init__(self, process='generate p p > t t~\noutput -f', plugin=None, keepJpegs=False, usePMGSettings=False, pdf_setting=None, devices=None, catch_errors=MADGRAPH_CATCH_ERRORS):
+
+    def __init__(self, process=None, plugin=None, keepJpegs=False, usePMGSettings=False, pdf_setting=None, devices=None, catch_errors=MADGRAPH_CATCH_ERRORS):
+
         """ Generate a new process in madgraph.
         Pass a process string.
         Optionally request JPEGs to be kept and request for PMG settings to be used in the param card
@@ -53,88 +56,101 @@ class MGControl:
         self.beamEnergy = 0
         #is_gen_from gridpack
         self.is_gen_from_gridpack = os.access(MADGRAPH_GRIDPACK_LOCATION,os.R_OK)
+        
+        # Make sure our paths are sorted
+        self.MADGRAPH_COMMAND_STACK = []
+        self.setup_path_protection()
+
+
         # Don't run if generating events from gridpack
         if self.is_gen_from_gridpack:
-            self.process_dir = MADGRAPH_GRIDPACK_LOCATION      
+            self.process_dir = MADGRAPH_GRIDPACK_LOCATION
+            #Get Config card
+            self.get_config_cardloc()
+            self.getConfigFromPath(self.config_path)
+            #Get paramCard dictionary set up
+            self.paramCard = ParamCard(process_dir = self.process_dir)
+            #load up the run card dictionary
+            self.getRunCardDict()
+            
             return
-        # Actually just sent the process card contents - let's make a card
-        card_loc = 'proc_card_mg5.dat'
-        mglog.info('Writing process card to '+card_loc)
-        a_card = open( card_loc , 'w' )
-        for l in process.split('\n'):
-            if 'output' not in l:
-                a_card.write(l+'\n')
-            else:
-                # Special handling for output line
-                outline = l.strip()
-                if '-nojpeg' not in l and not keepJpegs:
-                    # We need to add -nojpeg somehow
-                    if '#' in l:
-                        outline = outline.split('#')[0]+' -nojpeg #'+outline.split('#')[1]
-                    else:
-                        outline = outline + ' -nojpeg'
-                # Special handling for devises
-                if self.devices is not None:
-                    if self.devices.lower() in ['madevent_simd','madevent_gpu']:
-                        outline = 'output '+self.devices.lower()+' '+outline.split('output')[1]
-                    elif self.devices.lower() == 'max':
-                        self.mglog.warning('Not fully implemented yet; setting avx')
-                        outline = 'output madevent_simd '+outline.split('output')[1]
-                a_card.write(outline+'\n')
-        a_card.close()
+        else:
+            # Actually just sent the process card contents - let's make a card
+            card_loc = 'proc_card_mg5.dat'
+            mglog.info('Writing process card to '+card_loc)
+            a_card = open( card_loc , 'w' )
+            for l in process.split('\n'):
+                if 'output' not in l:
+                    a_card.write(l+'\n')
+                else:
+                    # Special handling for output line
+                    outline = l.strip()
+                    if '-nojpeg' not in l and not keepJpegs:
+                        # We need to add -nojpeg somehow
+                        if '#' in l:
+                            outline = outline.split('#')[0]+' -nojpeg #'+outline.split('#')[1]
+                        else:
+                            outline = outline + ' -nojpeg'
+                    # Special handling for devises
+                    if self.devices is not None:
+                        if self.devices.lower() in ['madevent_simd','madevent_gpu']:
+                            outline = 'output '+self.devices.lower()+' '+outline.split('output')[1]
+                        elif self.devices.lower() == 'max':
+                            self.mglog.warning('Not fully implemented yet; setting avx')
+                            outline = 'output madevent_simd '+outline.split('output')[1]
+                    a_card.write(outline+'\n')
+            a_card.close()
 
-        madpath = os.environ['MADPATH']
-        self.MADGRAPH_COMMAND_STACK = []
-        # Just in case
-        self.setup_path_protection()
+            madpath = os.environ['MADPATH']
         
-        # Check if we have a special output directory
-        process_dir = ''
-        for l in process.split('\n'):
-            # Look for an output line
-            if 'output' not in l.split('#')[0].split():
-                continue
-            # Check how many things before the options start
-            tmplist = l.split('#')[0].split(' -')[0]
-            # if two things, second is the directory
-            if len(tmplist.split())==2:
-                process_dir = tmplist.split()[1]
-            # if three things, third is the directory (second is the format)
-            elif len(tmplist.split())==3:
-                process_dir = tmplist.split()[2]
-            # See if we got a directory
-            if ''!=process_dir:
-                mglog.info('Saw that you asked for a special output directory: '+str(process_dir))
-            break
+            # Check if we have a special output directory
+            process_dir = ''
+            for l in process.split('\n'):
+                # Look for an output line
+                if 'output' not in l.split('#')[0].split():
+                    continue
+                # Check how many things before the options start
+                tmplist = l.split('#')[0].split(' -')[0]
+                # if two things, second is the directory
+                if len(tmplist.split())==2:
+                    process_dir = tmplist.split()[1]
+                    # if three things, third is the directory (second is the format)
+                elif len(tmplist.split())==3:
+                    process_dir = tmplist.split()[2]
+                    # See if we got a directory
+                    if ''!=process_dir:
+                        mglog.info('Saw that you asked for a special output directory: '+str(process_dir))
+                    break
 
-        mglog.info('Started process generation at '+str(time.asctime()))
+            mglog.info('Started process generation at '+str(time.asctime()))
 
-        plugin_cmd = '--mode='+plugin if plugin is not None else ''
+            plugin_cmd = '--mode='+plugin if plugin is not None else ''
 
-        # Note special handling here to explicitly print the process
-        self.MADGRAPH_COMMAND_STACK += ['# All jobs should start in a clean directory']
-        self.MADGRAPH_COMMAND_STACK += ['mkdir standalone_test; cd standalone_test']
-        self.MADGRAPH_COMMAND_STACK += [' '.join([python,madpath+'/bin/mg5_aMC '+plugin_cmd+' << EOF\n'+process+'\nEOF\n'])]
-        generate = subprocess.Popen([python,madpath+'/bin/mg5_aMC',plugin_cmd,card_loc],stdin=subprocess.PIPE,stderr=subprocess.PIPE if self.catch_errors else None)
-        (out,err) = generate.communicate()
-        error_check(err,generate.returncode)
 
-        mglog.info('Finished process generation at '+str(time.asctime()))
+            # Note special handling here to explicitly print the process
+            self.MADGRAPH_COMMAND_STACK += ['# All jobs should start in a clean directory']
+            self.MADGRAPH_COMMAND_STACK += ['mkdir standalone_test; cd standalone_test']
+            self.MADGRAPH_COMMAND_STACK += [' '.join([python,madpath+'/bin/mg5_aMC '+plugin_cmd+' << EOF\n'+process+'\nEOF\n'])]
+            generate = subprocess.Popen([python,madpath+'/bin/mg5_aMC',plugin_cmd,card_loc],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+            (out,err) = generate.communicate()
+            error_check(err,generate.returncode)
 
-        # at this point process_dir is for sure defined - it's equal to '' in the worst case
-        if process_dir == '': # no user-defined value, need to find the directory created by MadGraph5
-            for adir in sorted(glob.glob( os.getcwd()+'/*PROC*' ),reverse=True):
-                if os.access('%s/SubProcesses/subproc.mg'%adir,os.R_OK):
-                    if process_dir=='':
-                        process_dir = adir
-                    else:
-                        mglog.warning('Additional possible process directory, '+adir+' found. Had '+process_dir)
-                        mglog.warning('Likely this is because you did not run from a clean directory, and this may cause errors later.')
-        else: # user-defined directory
-            if not os.access('%s/SubProcesses/subproc.mg'%process_dir,os.R_OK):
-                raise RuntimeError('No diagrams for this process in user-define dir='+str(process_dir))
-        if process_dir=='':
-            raise RuntimeError('No diagrams for this process from list: '+str(sorted(glob.glob(os.getcwd()+'/*PROC*'),reverse=True)))
+            mglog.info('Finished process generation at '+str(time.asctime()))
+
+            # at this point process_dir is for sure defined - it's equal to '' in the worst case
+            if process_dir == '': # no user-defined value, need to find the directory created by MadGraph5
+                for adir in sorted(glob.glob( os.getcwd()+'/*PROC*' ),reverse=True):
+                    if os.access('%s/SubProcesses/subproc.mg'%adir,os.R_OK):
+                        if process_dir=='':
+                            process_dir = adir
+                        else:
+                            mglog.warning('Additional possible process directory, '+adir+' found. Had '+process_dir)
+                            mglog.warning('Likely this is because you did not run from a clean directory, and this may cause errors later.')
+            else: # user-defined directory
+                if not os.access('%s/SubProcesses/subproc.mg'%process_dir,os.R_OK):
+                    raise RuntimeError('No diagrams for this process in user-define dir='+str(process_dir))
+            if process_dir=='':
+                raise RuntimeError('No diagrams for this process from list: '+str(sorted(glob.glob(os.getcwd()+'/*PROC*'),reverse=True)))
 
         self.process_dir = process_dir
         self.get_config_cardloc()
@@ -143,9 +159,12 @@ class MGControl:
         #load up the run card dictionary
         self.getRunCardDict()
 
+        # Initialise ParamCard class
+        self.paramCard = ParamCard(process_dir = self.process_dir)
+
         # If requested, apply PMG default settings
         if usePMGSettings:
-            do_PMG_updates(self.process_dir)
+            do_PMG_updates(self.paramCard)
             
         if not self.isNLO: 
             mglog.info('Setting default sde_strategy to old default (1)')
@@ -599,7 +618,7 @@ class MGControl:
                         run_card_updates = {'asrwgtflavor': 5, 'maxjetflavor': 5, 'pdgs_for_merging_cut': '1, 2, 3, 4, 5, 21'}
                         #If there is an inconsistency, update to be consistent with Process card
                         self.runCardDict.update( run_card_updates )
-                        modify_param_card(process_dir=self.process_dir, params={'MASS': {'5': '0.000000e+00'}})
+                        self.paramCard.modify_paramCardDict(params={'MASS': {'5': '0.000000e+00'}})
                     else:
                         mglog.debug('Consistent 5-flavor scheme setup detected.')
 
@@ -611,7 +630,7 @@ class MGControl:
                         run_card_updates = {'asrwgtflavor': 4, 'maxjetflavor': 4, 'pdgs_for_merging_cut': '1, 2, 3, 4, 21'}
                         #update cards to be consistent with Process Card
                         self.runCardDict.update( run_card_updates )
-                        modify_param_card(process_dir=self.process_dir, params={'MASS': {'5': '4.700000e+00'}})
+                        self.paramCard.modify_paramCardDict(params={'MASS': {'5': '4.700000e+00'}})
                     else:
                         mglog.debug('Consistent 4-flavor scheme setup detected.')
             else:
@@ -619,14 +638,23 @@ class MGControl:
                 if FS_updates['asrwgtflavor'] == 4:
                     # Warn the users and add the settings according to process card
                     mglog.warning('Flavor scheme setup is missing, adding by hand according to process card - b and b~ not included in p and j, 4-flavor scheme setup will be used; adjusting run card.')
-                    run_card_updates = {'asrwgtflavor': 4, 'maxjetflavor': 4, 'pdgs_for_merging_cut': '1, 2, 3, 4, 21'}
+                    if self.isNLO:
+                        run_card_updates = {'maxjetflavor': 4}
+                    else:
+                        run_card_updates = {'asrwgtflavor': 4, 'maxjetflavor': 4, 'pdgs_for_merging_cut': '1, 2, 3, 4, 21'}
+
                     self.runCardDict.update( run_card_updates )
-                    modify_param_card(process_dir=self.process_dir, params={'MASS': {'5': '4.700000e+00'}})
+                    self.paramCard.modify_paramCardDict(params={'MASS': {'5': '4.700000e+00'}})
                 elif FS_updates['asrwgtflavor'] == 5:
                     mglog.warning('Flavor scheme setup is missing, adding by hand according to process card - b and b~ included in p and j, 5-flavor scheme setup will be used; adjusting run card.')
-                    run_card_updates = {'asrwgtflavor': 5, 'maxjetflavor': 5, 'pdgs_for_merging_cut': '1, 2, 3, 4, 5, 21'}
+                    if self.isNLO:
+                        run_card_updates = {'maxjetflavor': 5}
+                    else:
+                        run_card_updates = {'asrwgtflavor': 5, 'maxjetflavor': 5, 'pdgs_for_merging_cut': '1, 2, 3, 4, 5, 21'}
+
+                            
                     self.runCardDict.update( run_card_updates )
-                    modify_param_card(process_dir=self.process_dir, params={'MASS': {'5': '0.000000e+00'}})
+                    self.paramCard.modify_paramCardDict(params={'MASS': {'5': '0.000000e+00'}})
 
         # Check scale consistency
         if '91.188' not in self.runCardDict.get('scale','91.188') and self.runCardDict.get('fixed_ren_scale','f').lower() in ['f','false']:
@@ -681,3 +709,306 @@ class MGControl:
         ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
         
         return ca
+
+
+
+class ParamCard:
+    def __init__(self, param_card_input=None, param_card_backup=None, process_dir=MADGRAPH_GRIDPACK_LOCATION,output_location=None):
+
+        if param_card_input is None:
+            self.paramCard_loc = process_dir+'/Cards/param_card.dat'
+        elif param_card_input is not None and not os.access(param_card_input, os.R_OK):
+            self.paramCard_loc = param_card_input
+
+
+
+        self.paramCard_default_loc = param_card_backup
+        self.output_location = output_location
+        self.process_dir = process_dir
+
+        #read in the paramCard and store as a dictionary
+        self.read_paramCard()
+
+    def read_paramCard(self):
+        if os.access(self.paramCard_loc, os.R_OK):
+            mglog.info('Copying default param card from '+str(self.paramCard_loc))
+            param_card = self.paramCard_loc
+        elif os.access(self.paramCard_default_loc, os.R_OK):
+            mglog.info('Copying default param card from '+str(self.paramCard_default_loc))
+            param_card = self.paramCard_default_loc
+        else:
+            raise RuntimeError('Cannot find defualt param_card.dat or param_card_default.dat! I was looking here: %s'%self.paramCard_loc)
+
+        with open(param_card, 'r') as f:
+            card = f.read()
+
+        param_blocks = card.split('\n\n')
+
+        self.paramCardDict = {}
+        for block in param_blocks:
+            name = None
+            nParams = 0
+            setting = {}
+            for line in block.split('\n'):
+                if line.lower().startswith('block'):
+                    if name is not None and setting != {}:
+                        self.paramCardDict[name] = setting
+                        nParams = 0
+                    name = line.split(' ',1)[1].strip()
+                    setting ={}
+                    nParams+=1
+                elif line.startswith('#'):
+                    continue
+                elif line.lower().startswith('decay'):
+                    continue #temp while I write function to get DECAY params
+                else:
+                    l = line.strip()
+                    if len(l.split(' ',3)) >= 4:
+                        if l.split(' ',3)[1] == '' and not l.split(' ',3)[2].strip().startswith('#'): #checks if the the parameter has numerous keys
+                            key = l.split(' ',3)[0] +' ' +l.split(' ',3)[1] + l.split(' ',3)[2]
+                            value = l.split(' ',3)[3]
+                        else:
+                            key = l.split(' ',3)[0] +' ' +l.split(' ',3)[1]
+                            value = l.split(' ',3)[2] + ' '+ l.split(' ',3)[3]
+                    elif len(l.split(' ',3)) == 3:
+                        key = l.split(' ',3)[0]
+                        value = l.split(' ',3)[1] + ' '+ l.split(' ',3)[2]
+                    elif len(l.split(' ',3)) == 2:
+                        key = l.split(' ',3)[0]
+                        value = l.split(' ',3)[1]
+                    else:
+                        key = l.split(' ',3)[0]
+                        value = None
+
+                    setting.update({key.strip() : value})
+            
+            if name is not None and setting != {}:
+                self.paramCardDict[name] = setting
+                nParams = 0
+
+        self.read_decayParams(cardloc = param_card)
+        mglog.info("Successully read param_card.dat as a dictionary paramCardDict")
+                
+                
+    def read_decayParams(self, cardloc = None):
+        """ The DECAY parameters are written out differently in param_card.dat compared to the other parameter blocks
+        This funciton reads in the Decay parameters and adds them to the self.paramCardDict
+        """
+
+        if cardloc is None:
+            if os.access(self.paramCard_loc, os.R_OK):
+                mglog.info('Copying default param card from '+str(self.paramCard_loc))
+                cardloc = self.paramCard_loc
+            elif os.access(self.paramCard_default_loc, os.R_OK):
+                mglog.info('Copying default param card from '+str(self.paramCard_default_loc))
+                cardloc = self.paramCard_default_loc
+            else:
+                raise RuntimeError('You did not give a card location for reading in DECAY parameters and we cannot find defualt param_card.dat or param_card_default.dat! I was looking here: %s'%self.paramCard_loc)
+            
+        with open(cardloc, 'r') as f:
+            card = f.read()
+        # Break the card up by lines
+        param_lines = card.split('\n')
+        decay_params = {}
+        setting = {}
+        key = None
+        value = None
+        for line in param_lines:
+            # Get rid of and leading or trailing spaces
+            l = line.strip()
+            
+            # If the Line starts with Decay 
+            if l.lower().startswith('decay'):
+                decay = l[:5].strip()
+                #check to see if there is already a key and value 
+                if key is not None and value is not None: # In other words, if we have already recorded a decay parameter, we want to add that to the settings
+                    setting.update({key:value})
+                    # Reset the key and value
+                    key = None
+                    value = None
+                # Record the PDG ID for the particular decay
+                key = l[5:].strip().split(' ',1)[0]
+                # We keep the entire line as the value
+                value = l
+            # Sometimes the decay parameter spans several lines, we want to make sure we get all of it.
+            # If the line is not a a new Decay parameter, it is not an empty line and we do have a key + value saved:
+            elif not l.lower().startswith('decay') and not l == '\n' and key is not None and value is not None and not l.lower().startswith('block'):
+                # Add the current line to the value (making sure we include the new line)
+                value = value + '\n' + l
+            elif l.lower().startswith('block') and len(setting) != 0: # if we reach a new block after reading in the decays then we can just stop running
+                # add the last setting before adding to a decay_params dictionary 
+                setting.update({key:value})
+
+                decay_params[decay] = setting
+                # add the decay parameters to the paramCardDict
+                self.paramCardDict.update(decay_params)
+                
+                mglog.info("Successfully read in Decay parameters")
+                return
+            else: 
+                continue
+            # if the decay block is the last block in the card, add the last setting before adding to a decay_params dictionary 
+            setting.update({key:value})
+
+        decay_params[decay] = setting
+        # add the decay parameters to the paramCardDict
+        self.paramCardDict.update(decay_params)
+
+        mglog.info("Successfully read in Decay parameters")
+
+    def modify_paramCardDict(self,params={}):
+        """ Simple function to update the paramCardDictionary that uses nested dictionaries.
+        The input params should also be a set of nested dictionaries
+        """
+
+        dict_lower = [v.lower() for v in self.paramCardDict]
+        for block in params: #for each block in the params dictionary
+            if block.strip().lower() in dict_lower:# if the block is found
+                # need to make this case-insensitive
+                for value in self.paramCardDict:
+                    if block.strip().lower() == value.strip().lower():
+                        name = value
+                
+                for key in params[block]: #look at each key in the block sub-dictionary 
+                    k = key.strip()
+                    if k in self.paramCardDict[name]: # if the key is in the paramCardDict block then update it
+                        self.paramCardDict[name][key] = params[block][key]
+                    elif len(k.split(' ',1)) > 1:
+                        new_k = k.split(' ',1)[0].strip() + ' ' + k.split(' ',1)[1].strip()
+                        if new_k in self.paramCardDict[name]:
+                            self.paramCardDict[name][new_k] = params[block][key]
+                        else:
+                            mglog.warning("Looks like the parameter "+str(block)+" : "+str(key)+" isn't in the parameter card dictionary. Adding now!")
+                            self.paramCardDict[name][new_k] = params[block][key]
+                    else:
+                        # if we can't find it we may be trying to update the parameter based on the name, not the block number
+                        for value in self.paramCardDict[name]: 
+                            found = False
+                            if '# '+str(key)+' ' in str(self.paramCardDict[str(name)][str(value)]): # look at the values for each element in the sub-dictionary 
+                                self.paramCardDict[name][value] = params[block][key] # if we find the key in the value, we will update that value
+                                found = True
+                                continue
+                        if not found: # if we can't find that value, we will add a new one
+                            mglog.warning("Looks like the parameter "+str(block)+" : "+str(key)+" isn't in the parameter card dictionary. Adding now!")
+                            self.paramCardDict[name][key] = params[block][key]
+                                
+            else:# if the block is not in the paramCardDict, we will add the whole block
+                self.paramCardDict[block] = params[block]
+                
+                         
+    def write_paramCard(self):
+        """Write out paramCardDict to disk. 
+        The function will copy the layout and format from the default card. 
+        """
+        if self.paramCard_default_loc is None or not os.path.isfile(self.paramCard_default_loc):
+            self.paramCard_default_loc = self.paramCard_loc +'.old_to_be_deleted'
+            os.rename(self.paramCard_loc, self.paramCard_default_loc)
+
+        with open(self.paramCard_default_loc,'r') as f:
+            oldCard = f.read()
+
+        newCard = open(self.paramCard_loc,'w')
+        dict_blocks = [v.lower() for v in self.paramCardDict]
+
+        oldCard_blocks = oldCard.split('\n\n')
+
+        for block in oldCard_blocks:
+            name = None
+            nParams = []
+            
+            for line in block.split('\n'):
+                l = line.strip()
+                if l.startswith('#'):
+                    newCard.write(f"{line} \n")
+                elif l == '':
+                    newCard.write("\n")
+                elif l.lower().startswith('block'):
+                    if name is not None and len(nParams) == len(self.paramCardDict[name]):
+                        name = None
+                        nParams = []
+                    # If we are at a new block and we have not finished writing all the params from the dictionary
+                    elif name is not None and len(nParams) != len(self.paramCardDict[name]):
+                        # going through each entry in the param card dictionary
+                        for key in self.paramCardDict[name]:
+                            # if key is in nParams, it means we have already written it
+                            if key in nParams:
+                                continue
+                            elif key not in nParams:
+                                newCard.write(f"    {key} {self.paramCardDict[name][key]}\n")
+                                nParams.append(key)
+
+                    name = l.split(' ',1)[1].strip()
+                    nParams = []
+                    if name.lower() not in dict_blocks:
+                        raise RuntimeError("Cannot find %s in paramCardDict"%str(name))
+                    elif name not in self.paramCardDict:
+                        for b in self.paramCardDict:
+                            if b.lower() == name.lower():
+                                name = b
+                            else:
+                                continue
+                            
+                    newCard.write(f"Block {name}\n")
+                elif l.lower().startswith('decay'):
+                    # just to make sure we have written everthing down from the previous section
+                    if name is not None and name.lower() != 'decay':
+                        if len(nParams) == len(self.paramCardDict[name]):
+                            continue
+                        elif len(nParams) != len(self.paramCardDict[name]):
+                            # going through each entry in the param card dictionary
+                            for key in self.paramCardDict[name]:
+                                # if key is in nParams, it means we have already written it
+                                if key in nParams:
+                                    continue
+                                elif key not in nParams:
+                                    newCard.write(f"    {key} {self.paramCardDict[name][key]}\n")
+                                    nParams.append(key)
+                                    
+                        nParams = []
+                                        
+                    name = l[:5].strip()
+                    
+                    command = l[5:].strip()
+                    ID = command.split(' ',1)[0]
+                    nParams.append(ID)
+                   
+                    newCard.write(f"{self.paramCardDict[name][ID]} \n")
+
+                elif l == '\n':
+                    newCard.write(l)
+
+                else:
+                    if name.lower() == 'decay':
+                        continue
+                    else:
+                        if len(l.split(' ',3)) >= 4:
+                            ID = (l.split(' ',3)[0] +' ' +l.split(' ',3)[1]).strip()
+                        elif len(l.split(' ',3)) == 3:
+                            ID = l.split(' ',3)[0].strip()
+                        elif len(l.split(' ',3)) == 2:
+                            ID = l.split(' ',3)[0].strip()
+                        else:
+                            ID = l.split(' ',3)[0].strip()
+                        newCard.write(f"    {ID} {self.paramCardDict[name][ID]}\n")
+                        nParams.append(ID)
+                    
+    
+            # at end of block
+            if name is not None and len(nParams) == len(self.paramCardDict[name]):
+                name = None
+                nParams = []
+                # If we are at a new block and we have not finished writing all the params from the dictionary
+            elif name is not None and len(nParams) != len(self.paramCardDict[name]):
+                # going through each entry in the param card dictionary
+                for key in self.paramCardDict[name]:
+                    # if key is in nParams, it means we have already written it
+                    if key in nParams:
+                        continue
+                    elif key not in nParams and key is not None and key.strip() != '':
+                        newCard.write(f"    {key} {self.paramCardDict[name][key]}\n")
+                        nParams.append(key)
+                    elif key is None or key.strip() == '':
+                        continue
+                    
+        mglog.info("Finished writing paramCardDict to param_card.dat")
+
