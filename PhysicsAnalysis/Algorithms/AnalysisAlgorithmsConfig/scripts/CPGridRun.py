@@ -1,11 +1,13 @@
 #! /usr/bin/env python
 
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+import argparse
+import os
+import sys
+from pathlib import Path
+
 from AnaAlgorithm.DualUseConfig import isAthena
 from AnaAlgorithm.Logging import logging
-import argparse
-import sys
-import os
 
 logCPGridRun = logging.getLogger('CPGridRun')
 class CPGridRun:
@@ -16,8 +18,10 @@ class CPGridRun:
         self._isFirstRun = True
         self._tarballRecreated = False
         self._inputList = None 
+        self._inputNames = None
         self._yamlPath = None
         self.cmd = {} # sample name -> command
+        self.outputs = {} # sample name -> output dataset name
 
         self.gridParser = self._parseGridArguments()
         self.prunArgsDict = self._createPrunArgsDict()
@@ -48,6 +52,7 @@ class CPGridRun:
 
         ioGroup = parser.add_argument_group('Input/Output file configuration')
         ioGroup.add_argument('-i','--input-list', dest='input_list', help='Path to the text file containing list of containers on the panda grid. Each container will be passed to prun as --inDS and is run individually')
+        ioGroup.add_argument('--bulk-submission', dest='bulk_submission', action='store_true', help='Submit all containers in the input list as one task.')
         ioGroup.add_argument('--output-files', dest='output_files', nargs='+', default=['output.root'],
                              help='The output files of the grid job. Example: --output-files A.root B.txt B.root results in A/A.root, B/B.txt, B/B.root in the output directory. No need to specify if using CPRun.py')
         ioGroup.add_argument('--destSE', dest='destSE', default='', type=str, help='Destination storage element (PanDA)')
@@ -99,15 +104,19 @@ class CPGridRun:
         if not self.args.input_list:
             raise ValueError('No input list provided, use --input-list to specify the input containers')
         if self._inputList is None:
-            if self.args.input_list.endswith('.txt'):
-                self._inputList = CPGridRun._parseInputFileList(self.args.input_list)
-            elif self.args.input_list.endswith('.json'):
-                raise NotImplementedError('JSON input list parsing is not implemented')
+            input_list_path = Path(self.args.input_list)
+            if input_list_path.exists():
+                if input_list_path.suffix == '.txt':
+                    self._inputList, self._inputNames = CPGridRun._parseInputFileList(input_list_path, self.args.bulk_submission)
+                elif input_list_path.suffix == '.json':
+                    raise NotImplementedError('JSON input list parsing is not implemented')
+                else:
+                    raise ValueError('Unsupported input list format, only .txt files are supported.')
             elif CPGridRun.isAtlasProductionFormat(self.args.input_list):
                 self._inputList = [self.args.input_list]
+                self._inputNames = [None]
             else:
-                raise ValueError(
-                    'use --input-list to specify input containers')
+                raise ValueError('use --input-list to specify input containers')
         return self._inputList
 
     def outputFilesParsing(self):
@@ -131,15 +140,16 @@ class CPGridRun:
     # This function do all the checking, cleaning and preparing the command to be submitted to the grid
     # separated for client to be able to change the behavior
     def configureSubmission(self):
-        for input in self.inputList:
-            cmd = self.configureSubmissionSingleSample(input)
+        for input, name in zip(self.inputList, self._inputNames):
+            cmd, config = self.configureSubmissionSingleSample(input, name)
             self.cmd[input] = cmd
+            self.outputs[input] = config["outDS"]
             self._isFirstRun = False
 
-    def configureSubmissionSingleSample(self, input):
+    def configureSubmissionSingleSample(self, input, name):
         config = {
             'inDS': input,
-            'outDS': self.args.outDS if self.args.outDS else self.outputDSFormatter(input) ,
+            'outDS': self.args.outDS if self.args.outDS else self.outputDSFormatter(input, name),
             'cmtConfig': os.environ["CMTCONFIG"],
             'writeInputToTxt': 'IN:in.txt',
             'outputs': self.outputsFormatter(),
@@ -187,7 +197,7 @@ class CPGridRun:
                 cmd += f'--{k} \\\n'
             elif v is not None and v != '':
                 cmd += f'--{k} {v} \\\n'
-        return cmd.rstrip(' \\\n')
+        return cmd.rstrip(' \\\n'), config
     
     def _unknownArgsDict(self)->dict:
         '''
@@ -323,12 +333,12 @@ class CPGridRun:
     
     def _hasCompressedTarball(self):
         return os.path.exists(self._tarfile) or self._tarballRecreated
-    
-    def outputDSFormatter(self, name):
-        if CPGridRun.isAtlasProductionFormat(name):
+
+    def outputDSFormatter(self, name, label):
+        if CPGridRun.isAtlasProductionFormat(name) and not label:
             return self._outputDSFormatter(name)
         else:
-            return self._customOutputDSFormatter(name)
+            return self._customOutputDSFormatter(name, label)
 
     def _outputDSFormatter(self, name):
         '''
@@ -347,18 +357,18 @@ class CPGridRun:
         result = [base, username, prefix, dsid, fileFormat, tags, suffix]
         return ".".join(filter(None, result))
 
-    def _customOutputDSFormatter(self, name):
+    def _customOutputDSFormatter(self, name, label):
         '''
-        {group/user}.{username}.{main}.outputDS.{suffix}
+        {group/user}.{username}.{prefix}.{main}.{suffix}
         '''
         parts = name.split('.')
         base = 'group' if self.args.groupProduction else 'user'
         username = self.args.gridUsername
-        main = parts[2]
-        outputDS = 'outputDS'
-        suffix = parts[-1]
+        main = label if label else parts[2]
+        main = f"{self.args.prefix}.{main}" if self.args.prefix else main
+        main = f"{main}.{self.args.suffix}" if self.args.suffix else main
 
-        result  = [base, username,main, outputDS, suffix]
+        result  = [base, username, main]
         return ".".join(filter(None, result))
 
     def _suffixFormatter(self):
@@ -513,6 +523,7 @@ class CPGridRun:
     def submit(self):
         import subprocess
         for key, cmd in self.cmd.items():
+            logCPGridRun.info(f"Submitting: {self.outputs[key]}")
             process = subprocess.Popen(cmd, shell=True, stdout=sys.stdout, stderr=sys.stderr)
             process.communicate()
 
@@ -521,7 +532,7 @@ class CPGridRun:
         if ":" in name:
             name = name.split(":")[1]
 
-        if name.startswith('mc') or name.startswith('data'):
+        if name.startswith("mc") or name.startswith("data"):
             return True
 
         logCPGridRun.warning("Name is not in the Atlas production format, assuming it is a user production")
@@ -637,17 +648,37 @@ class CPGridRun:
         return result
 
     @staticmethod
-    def _parseInputFileList(path):
+    def _parseInputFileList(path: Path, bulk_submission: bool = False) -> tuple[list[str], list[str]]:
         files = []
-        with open(path, 'r') as inputText:
+        with path.open('r') as inputText:
             for line in inputText.readlines():
                 # skip comments and empty lines
-                if line.startswith('#') or not line.strip():
+                if line.startswith("#") or not line.strip():
                     continue
-                files += line.split(',')
+                files += line.split(",")
             # remove leading/trailing whitespaces, and \n
             files = [file.strip() for file in files]
-        return files
+        
+        # bulk submission
+        if bulk_submission:
+            if any((path.parent / file).exists() or (path.parent / f"{file}.txt").exists() for file in files):
+                files_bulk = []
+                names_bulk = []
+                for file in files:
+                    file_path = path.parent / file
+                    if not file_path.exists():
+                        file_path = path.parent / f"{file}.txt"
+                    if not file_path.exists():
+                        logCPGridRun.error(f"File {file} or {file}.txt does not exist in the input list directory.")
+                        raise FileNotFoundError(f"File {file} or {file}.txt does not exist in the input list directory.")
+                    files_current, names_current = CPGridRun._parseInputFileList(file_path, bulk_submission=True)
+                    files_bulk.extend(files_current)
+                    names_bulk.extend(names_current)
+                return files_bulk, names_bulk
+            else:
+                return [','.join(files)], [path.stem.replace("+", "")]
+
+        return files, [None]
 
     def printDelayedErrorCollection(self):
         if self._errorCollector:
