@@ -12,6 +12,7 @@
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 
 #include "../ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
+#include "../BeamPipeBlueprintNodeBuilder.h"
 #include "../ItkBlueprintNodeBuilder.h"
 #include "../CaloBlueprintNodeBuilder.h"
 #include "../ITkMaterialDecoratorTool.h"
@@ -24,6 +25,7 @@ DECLARE_COMPONENT(ActsWriteTrackingGeometryTransforms)
 DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
 DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)
 
+DECLARE_COMPONENT(ActsTrk::BeamPipeBlueprintNodeBuilder)
 DECLARE_COMPONENT(ActsTrk::ItkBlueprintNodeBuilder)
 DECLARE_COMPONENT(ActsTrk::ExtrapolationTool)
 DECLARE_COMPONENT(ActsTrk::CaloBlueprintNodeBuilder)
