@@ -72,18 +72,21 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["Muon::MdtPrepDataContainer#MDT_DriftCircles"]
 
     if flags.Muon.writexAODPRD:
-        esd_items += ["xAOD::MdtDriftCircleContainer#xMdtDriftCircles", "xAOD::MdtDriftCircleAuxContainer#xMdtDriftCirclesAux." ]
-        esd_items += ["xAOD::MdtTwinDriftCircleContainer#xMdtTwinDriftCircles", "xAOD::MdtTwinDriftCircleAuxContainer#xMdtTwinDriftCirclesAux." ]
-        esd_items += ["xAOD::sTgcStripContainer#xAODsTgcStrips", "xAOD::sTgcStripAuxContainer#xAODsTgcStripsAux." ]
-        esd_items += ["xAOD::sTgcPadContainer#xAODsTgcPads", "xAOD::sTgcPadAuxContainer#xAODsTgcPadsAux." ]
-        esd_items += ["xAOD::sTgcWireContainer#xAODsTgcWires", "xAOD::sTgcWireAuxContainer#xAODsTgcWiresAux." ]
-        esd_items += ["xAOD::MMClusterContainer#xAODMMClusters", "xAOD::MMClusterAuxContainer#xAODMMClustersAux." ]
-        esd_items += ["xAOD::TgcStripContainer#xTgcStrips", "xAOD::TgcStripAuxContainer#xTgcStripsAux." ]
-        esd_items += ["xAOD::RpcStripContainer#xRpcStrips", "xAOD::RpcStripAuxContainer#xRpcStripsAux." ]
-        esd_items += ["xAOD::RpcStrip2DContainer#xRpcBILStrips", "xAOD::RpcStrip2DAuxContainer#xRpcBILStripsAux." ]
-        esd_items += ["xAOD::CombinedMuonStripContainer#CombinedMuonPrds", "xAOD::CombinedMuonStripAuxContainer#CombinedMuonPrdsAux."]
-
-
+        exclude = ["", "mdtTrkPrdLink", "rpcTrkPrdLink", "tgcTrkPrdLink"]
+        for cont_t, cont_name in [("MdtDriftCircle", "xMdtDriftCircles"),
+                                  ("MdtTwinDriftCircle", "xMdtTwinDriftCircles"),
+                                  ("sTgcStrip", "xAODsTgcStrips"),
+                                  ("sTgcPad", "xAODsTgcPads"),
+                                  ("sTgcWire", "xAODsTgcWires"),
+                                  ("MMCluster", "xAODMMClusters"),
+                                  ("TgcStrip", "xTgcStrips"),
+                                  ("RpcStrip", "xRpcStrips" ),
+                                  ("RpcStrip2D", "xRpcBILStrips"),
+                                  ("CombinedMuonStrip", "CombinedMuonPrds" )]:
+            esd_items+=[f"xAOD::{cont_t}Container#{cont_name}",
+                        "xAOD::{cont_t}AuxContainer#{cont_name}Aux{exclude}".format(
+                            cont_t = cont_t,cont_name = cont_name,
+                            exclude = ".-".join(exclude))]
 
     # trigger related info for offline DQA
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
