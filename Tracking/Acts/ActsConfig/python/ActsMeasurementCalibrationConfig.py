@@ -17,7 +17,6 @@ def ActsAnalogueClusteringToolCfg(flags,
 
     from ActsConfig.ActsConfigFlags import PixelErrorStrategy
 
-    kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
     kwargs.setdefault("PerformCovarianceCalibration", flags.Acts.OnTrackCalibration.performCovarianceCalibration)
     kwargs.setdefault("PixelOfflineCalibData", "ITkPixelOfflineCalibData")
     kwargs.setdefault("errorStrategy", PixelErrorStrategy.PITCH.value if flags.Acts.Clusters.UsePixelBroadErrors

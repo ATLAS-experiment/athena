@@ -11,9 +11,18 @@ namespace TrackingUtilities {
   {    
     SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
        rdo_list_cluster = cluster.rdoList();
-    const std::vector<float>& charge_list_cluster = cluster.chargeList();
-    
-    if (rdo_list_cluster.size() != charge_list_cluster.size()) {
+    SG::ConstAccessor<SG::JaggedVecElt<float> >::element_type
+       charge_list_cluster = cluster.chargeList();
+    SG::ConstAccessor<SG::JaggedVecElt<int> >::element_type
+       tot_list_cluster = cluster.totList();
+
+    // Prefer the calibrated charge for the omega weights. When charge calibration
+    // is unavailable (e.g. digital clustering) the charge list is left empty, so
+    // fall back to the ToT list, mirroring InDet::ClusterMakerTool. This keeps the
+    // analogue charge-interpolation correction defined instead of silently
+    // disabling it (returning -1) whenever the charge list is missing.
+    const bool useCharge = rdo_list_cluster.size() == charge_list_cluster.size();
+    if (not useCharge and rdo_list_cluster.size() != tot_list_cluster.size()) {
       return {-1.f, -1.f};
     }
 
@@ -29,7 +38,8 @@ namespace TrackingUtilities {
     
     for (std::size_t i(0); i<rdo_list_cluster.size(); ++i) {
       Identifier this_rdo(rdo_list_cluster.at(i));
-      const float this_charge = charge_list_cluster.at(i);
+      const float this_charge = useCharge ? charge_list_cluster.at(i)
+                                          : static_cast<float>(tot_list_cluster.at(i));
       
       const int row = pixelID.phi_index(this_rdo);
       if (row > rowmax) {
