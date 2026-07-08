@@ -4,9 +4,8 @@
 #    written by Zach Marshall <zach.marshall@cern.ch>
 
 # Helper functions we need in MadGraphControl
-from MadGraphControl.MadGraphUtils import (generate, generate_from_gridpack, modify_run_card,
-                                           add_lifetimes, arrange_output, MADGRAPH_GRIDPACK_LOCATION,
-                                           is_gen_from_gridpack, new_process, modify_param_card)
+from MadGraphControl.MadGraphUtils import (generate, generate_from_gridpack,my_MGC_instance, add_lifetimes, arrange_output, MADGRAPH_GRIDPACK_LOCATION,is_gen_from_gridpack, new_process ) # noqa: F401
+
 
 # For moving files around
 import shutil
@@ -187,6 +186,8 @@ def SUSY_Generation(runArgs: RunArguments | None = None, process: str | None = N
     returns:
         the setting of the matching scale to be provided to Pythia8
     """
+
+    global my_MGC_instance  # noqa: F824
     ktdurham = run_settings['ktdurham'] if 'ktdurham' in run_settings else None
     ktdurham = get_SUSY_variations( process, params['MASS'] , syst_mod , ktdurham=ktdurham )
 
@@ -197,21 +198,21 @@ def SUSY_Generation(runArgs: RunArguments | None = None, process: str | None = N
     susylog.info('Using process directory '+str(process_dir))
 
     # Grab the param card and move the new masses into place
-    modify_param_card(param_card_input=param_card,process_dir=process_dir,params=params)
+    my_MGC_instance.paramCard.modify_paramCardDict(params=params)
 
     # Set up the extras dictionary
     settings = {'ktdurham':ktdurham}
     settings.update(run_settings) # This allows explicit settings in the input to override these settings
 
     # Set up the run card
-    modify_run_card(process_dir=process_dir,runArgs=runArgs,settings=settings)
+    my_MGC_instance.runCardDict.update(settings)
 
     # Set up madspin if needed
     if madspin_card is not None:
         if not os.access(madspin_card,os.R_OK):
             raise RuntimeError('Could not locate madspin card at '+str(madspin_card))
         shutil.copy(madspin_card,process_dir+'/Cards/madspin_card.dat')
-    
+        
     # Generate events!
     if is_gen_from_gridpack():
         generate_from_gridpack(runArgs=runArgs)
