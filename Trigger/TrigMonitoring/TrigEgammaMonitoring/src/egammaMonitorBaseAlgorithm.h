@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef egammaMonitorBaseAlgorithm_h 
@@ -15,7 +15,6 @@
 #include "xAODEgamma/PhotonContainer.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "egammaRecEvent/egammaRec.h"
 #include "egammaRecEvent/egammaRecContainer.h"

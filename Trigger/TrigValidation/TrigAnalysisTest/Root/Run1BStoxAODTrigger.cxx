@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
 // Fill histograms for some of HLT xAOD containers from converted Run 1 data, to
 // compare them with the AOD reference.
 //
-
-//#include "AthenaBaseComps/AthAlgorithm.h"
-//#include "GaudiKernel/ToolHandle.h"
 
 #include "TrigAnalysisTest/Run1BStoxAODTrigger.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -24,7 +21,6 @@
 #include "xAODTrigBphys/TrigBphysContainer.h"
 
 // Root headers
-#include "TMath.h"
 #include "TH1F.h"
 #include "TFile.h"
 #include <iostream>
@@ -132,7 +128,7 @@ namespace TrigAnalysisTest {
     for(TrigMissingET_iter = HLT_xAOD__TrigMissingETContainer_TrigEFMissingET->begin(); TrigMissingET_iter != HLT_xAOD__TrigMissingETContainer_TrigEFMissingET->end(); ++TrigMissingET_iter) {
       Double_t ex = (*TrigMissingET_iter)->ex();
       Double_t ey = (*TrigMissingET_iter)->ey();
-      Double_t et = TMath::Sqrt(ex*ex + ey*ey);
+      Double_t et = std::sqrt(ex*ex + ey*ey);
       cout << " missing et = " << et << endl;
       m_HLT_TrigEFMissingET->Fill( et / 1000. );
     }
@@ -143,7 +139,7 @@ namespace TrigAnalysisTest {
     for(TrigMissingET_iter = HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_FEB->begin(); TrigMissingET_iter != HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_FEB->end(); ++TrigMissingET_iter) {
       Double_t ex = (*TrigMissingET_iter)->ex();
       Double_t ey = (*TrigMissingET_iter)->ey();
-      Double_t et = TMath::Sqrt(ex*ex + ey*ey);
+      Double_t et = std::sqrt(ex*ex + ey*ey);
       cout << " missing et = " << et << endl;
       m_HLT_TrigEFMissingET_FEB->Fill( et / 1000. );
     }
@@ -154,7 +150,7 @@ namespace TrigAnalysisTest {
     for(TrigMissingET_iter = HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_topocl->begin(); TrigMissingET_iter != HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_topocl->end(); ++TrigMissingET_iter) {
       Double_t ex = (*TrigMissingET_iter)->ex();
       Double_t ey = (*TrigMissingET_iter)->ey();
-      Double_t et = TMath::Sqrt(ex*ex + ey*ey);
+      Double_t et = std::sqrt(ex*ex + ey*ey);
       cout << " missing et = " << et << endl;
       m_HLT_TrigEFMissingET_topocl->Fill( et / 1000. );
     }
