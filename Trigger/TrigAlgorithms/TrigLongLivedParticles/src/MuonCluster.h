@@ -14,8 +14,6 @@
   Clustering of LVL1 muon RoIs, access to LVL2 jets and SITRACK tracks.
 */
 
-
-#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -80,11 +78,11 @@ private:
 
 protected:
 
-  typedef struct  {
+  struct lvl1_muclu_roi {
     float eta{};
     float phi{};
     int nroi{};
-  } lvl1_muclu_roi;
+  };
 
   // JobOption properties
   /** A property which specifies the radius of the cluster */
