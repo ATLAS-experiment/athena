@@ -21,7 +21,7 @@
 #include <cstring>
 #include <iomanip>
 #include <cmath>
-#include "boost/io/ios_state.hpp"
+#include <format>
 
 #include "CaloConditions/CaloLocalHadDefs.h"
 #include "CaloUtils/CaloWeightInterpolator.h"
@@ -162,7 +162,6 @@ void CaloLCCoeffHelper::PrintData(CaloLocalHadCoeff *data, const char *fname)
 **************************************************************************** */
 void CaloLCCoeffHelper::PrintData(CaloLocalHadCoeff *data, std::ostream &fout)
 {
-  boost::io::ios_base_all_saver ifs (fout);
   const char *comments = 
   {
     "# Coefficients for local hadronic calibration .\n\n"
@@ -203,15 +202,15 @@ void CaloLCCoeffHelper::PrintData(CaloLocalHadCoeff *data, std::ostream &fout)
         std::cout << "CaloLCCoeffHelper::PrintData() -> Error! Wrong bin number" << std::endl;
         return;
       }
-      fout << std::setw(5) << indx << "   ";
+      fout << std::format("{:>5}   ", indx);
       std::vector<int > v_dim_indexes;
       data->bin2indexes(indx, v_dim_indexes);
       for(unsigned int i_dim=0; i_dim<v_dim_indexes.size(); i_dim++){
-        fout << std::setw(4) << v_dim_indexes[i_dim]  << " ";
+        fout << std::format("{:>4} ", v_dim_indexes[i_dim]);
       }
       fout << "     ";
       for(unsigned int i_par=0; i_par<(*pars).size(); i_par++) {
-        fout << std::fixed << std::setprecision(6) << std::setw(12) << (*pars)[i_par] << " ";
+        fout << std::format("{:>12.6f} ", (*pars)[i_par]);
       }
       fout << std::endl;
     }

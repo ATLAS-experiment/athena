@@ -43,12 +43,8 @@
 #include <cmath>
 #include <ctime>
 #include <algorithm>
+#include <format>
 #include <iterator>
-
-//restore ostream 
-#include <boost/io/ios_state.hpp>
-
-
 
 #include <sys/resource.h>
 
@@ -1577,8 +1573,6 @@ namespace Trk {
   //________________________________________________________________________
   void MatrixTool::printModuleSolution(std::ostream & os, const AlignModule * module, const CLHEP::HepSymMatrix * cov) const
   {
-    boost::io::ios_all_saver  ias( os ); //save the stream state    
-
     os << "--------------------------------------------------------------------------------" << std::endl;
     os << "Alignment parameters for module: " << module->name() << std::endl;
     os << "Number of tracks passing: " << module->nTracks() << std::endl;
@@ -1600,19 +1594,15 @@ namespace Trk {
       os << "No active parameters" << std::endl;
     else
     {
-      //RestoreIOSFlags restore_flags(os);
-
-      os.unsetf(std::ios_base::floatfield);
-      os << std::setiosflags(std::ios_base::left) << std::setprecision(5);
-
       // output alignment parameters and errors
       DataVector<AlignPar>::const_iterator ipar     = alignPars->begin();
       DataVector<AlignPar>::const_iterator ipar_end = alignPars->end();
       for ( ; ipar != ipar_end; ++ipar) {
         const AlignPar * par = *ipar;
-        os << std::setw(10) << par->dumpType()
-           << std::setw(12) << par->par() << " +/- " << std::setw(12) << par->err()
-           << std::endl;
+        os << std::format("{:<10}{:<12.5g} +/- {:<12.5g}\n",
+                          par->dumpType(),
+                          par->par(),
+                          par->err());
       }
 
       if(cov) {
@@ -1624,7 +1614,6 @@ namespace Trk {
         os << "Local correlation matrix: " << corrsub << std::flush;
       }
     }
-    ias.restore(); //restore the stream state
   }
 
   //________________________________________________________________________

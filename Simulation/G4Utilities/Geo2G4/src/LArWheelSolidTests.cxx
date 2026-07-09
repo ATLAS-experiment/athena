@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <stdexcept>
-#include "boost/io/ios_state.hpp"
+#include <format>
 #include <map>
 
 #include "TRandom3.h"
@@ -395,7 +395,6 @@ G4double LArWheelSolid::GetSurfaceArea(void)
 
 void LArWheelSolid::test(void)
 {
-  boost::io::ios_all_saver ias(std::cout);
   const char *on = getenv("LARWHEELSOLID_TEST");
   if(on == 0) return;
   std::string test_mode = on;
@@ -404,15 +403,13 @@ void LArWheelSolid::test(void)
             << std::endl;
   std::cout << "Solid of type " << LArWheelSolidTypeString(m_Type)
             << std::endl;
-  std::cout.precision(6);
-  std::cout << std::fixed;
   const char *prec = getenv("LARWHEELSOLID_TEST_INTPRECISION");
   if(prec) IntPrecision = atof(prec);
-  std::cout << "Int. precision " << IntPrecision << std::endl;
+  std::cout << std::format("Int. precision {:.6f}\n", IntPrecision);
   std::cout << "test mode " << test_mode << std::endl;
 
-  std::cout << "m_Rmin = " << m_Rmin << " m_Rmax = " << m_Rmax << std::endl
-            << "m_Zmin = " << m_Zmin << " m_Zmax = " << m_Zmax << std::endl;
+  std::cout << std::format("m_Rmin = {:.6f} m_Rmax = {:.6f}\n", m_Rmin, m_Rmax)
+            << std::format("m_Zmin = {:.6f} m_Zmax = {:.6f}\n", m_Zmin, m_Zmax);
 
   //	TFile *F = new TFile("LArWheelSolid_test.root", "RECREATE");
   TFile *F = 0;
@@ -480,7 +477,6 @@ void LArWheelSolid::test(void)
   if(m_Type == OuterAbsorberWheel) {
     if(test_mode.find("once") != std::string::npos) exit(0); }
 
-  ias.restore();
 }
 
 void LArWheelSolid::clean_tests(void) {
