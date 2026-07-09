@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetEventTPCnv/SCT_ClusterContainerCnv_p2.h"
@@ -83,26 +83,16 @@ void SCT_ClusterContainerCnv_p2::transToPers(const InDet::SCT_ClusterContainer* 
         chanEnd   += collection.size();
         InDet::InDetPRD_Collection_p2& pcollection = persCont->m_collections[collIndex];
         unsigned int deltaId = (collection.identifyHash()-idLast);
-        //        unsigned int deltaId = (collection.identify().get_compact()-idLast)/IDJUMP;
-        // if(deltaId*IDJUMP != collection.identify().get_compact()-idLast ) 
-        //   log << MSG::FATAL << "THere is a mistake in Identifiers of the collection" << endmsg;
-        // if(deltaId > 0xFFFF) {
-        //   log << MSG::FATAL << "Fixme!!! This is too big, something needs to be done " << endmsg;
-        // }
-        // pcollection.m_idDelta = (unsigned short) deltaId;
-        // idLast = collection.identify().get_compact(); // then update the last identifier 
+       
         pcollection.m_hashId = deltaId;
         idLast=collection.identifyHash();
         pcollection.m_size = collection.size();
         // Add in channels
-        //persCont->m_rawdata.resize(chanEnd);
-        //persCont->m_prdDeltaId.resize(chanEnd);
-        //        if (log.level() <= MSG::VERBOSE) log << MSG::VERBOSE << "Reading collections with " <<  collection.size() << "PRDs " << endmsg;
+        
         for (unsigned int i = 0; i < collection.size(); ++i) {
             InDet::SCT_Cluster_p2* pchan = &(persCont->m_rawdata[i + chanBegin]);
-            const InDet::SCT_Cluster* chan = dynamic_cast<const InDet::SCT_Cluster*>(collection[i]);
+            const InDet::SCT_Cluster* chan = static_cast<const InDet::SCT_Cluster*>(collection[i]);
             chanCnv.transToPers(chan, pchan, log);
-            //persCont->m_prdDeltaId[i+chanBegin]=chan->m_clusId.get_compact()-collection.identify().get_compact();
             persCont->m_prdDeltaId[i+chanBegin]=m_sctId->calc_offset(collection.identify(), chan->identify() );
         }
     }

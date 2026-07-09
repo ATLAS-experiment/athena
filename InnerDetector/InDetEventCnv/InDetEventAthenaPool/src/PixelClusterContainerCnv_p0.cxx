@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelClusterContainerCnv_p0.h"
@@ -15,13 +15,10 @@
 // Gaudi
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Service.h"
-#include "GaudiKernel/StatusCode.h"
 
-#include <iostream>
-#include <sstream>
 #include <string>
+#include <memory>
 
 //================================================================
 
@@ -49,7 +46,7 @@ StatusCode PixelClusterContainerCnv_p0::initialize(MsgStream &log ) {
 
 InDet::PixelClusterContainer* PixelClusterContainerCnv_p0::createTransient(PixelClusterContainer_p0* persObj, MsgStream& log) {
 
-  std::unique_ptr<InDet::PixelClusterContainer> trans(std::make_unique<InDet::PixelClusterContainer>(m_pixId->wafer_hash_max()) );
+  auto trans = std::make_unique<InDet::PixelClusterContainer>(m_pixId->wafer_hash_max()) ;
   MSG_DEBUG(log,"Read PRD vector, size " << persObj->size());
 
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey);
@@ -71,8 +68,8 @@ InDet::PixelClusterContainer* PixelClusterContainerCnv_p0::createTransient(Pixel
 	 MSG_DEBUG(log,"PRD " << num);
          (*itColl)->m_detEl = de;
       }
-
-      StatusCode sc= trans? trans->addCollection(dcColl, collHash): StatusCode::FAILURE;
+      //trans cannot be nullptr at this point
+      StatusCode sc= trans->addCollection(dcColl, collHash);
       if (sc.isSuccess()){
 	 MSG_VERBOSE(log,"PixelClusterContainer successfully added to Container !");
       } else {

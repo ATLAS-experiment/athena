@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_DriftCircleContainerCnv_p0.h"
@@ -17,8 +17,6 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include <string>
-#include <iostream>
-#include <sstream>
 
 //================================================================
 
@@ -43,7 +41,7 @@ StatusCode TRT_DriftCircleContainerCnv_p0::initialize(MsgStream &log ) {
 
 InDet::TRT_DriftCircleContainer* TRT_DriftCircleContainerCnv_p0::createTransient(TRT_DriftCircleContainer_p0* persObj, MsgStream& log) {
 
-  std::unique_ptr<InDet::TRT_DriftCircleContainer> trans(std::make_unique<InDet::TRT_DriftCircleContainer>(m_trtId->straw_layer_hash_max()) );
+  auto trans = std::make_unique<InDet::TRT_DriftCircleContainer>(m_trtId->straw_layer_hash_max());
   MSG_DEBUG(log,"Read PRD vector, size " << persObj->size());
 
   SG::ReadCondHandle<InDetDD::TRT_DetElementContainer> trtDetEleHandle(m_trtDetEleContKey);
@@ -66,7 +64,7 @@ InDet::TRT_DriftCircleContainer* TRT_DriftCircleContainerCnv_p0::createTransient
          (*itColl)->m_detEl = de;
       }
 
-      StatusCode sc= trans ? trans->addCollection(dcColl, collHash): StatusCode::FAILURE;
+      StatusCode sc =  trans->addCollection(dcColl, collHash);
       if (sc.isSuccess()){
 	 MSG_VERBOSE(log,"TRT_DriftCircleContainer successfully added to Container !");
       } else {

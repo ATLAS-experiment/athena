@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena
@@ -19,7 +19,6 @@
 // Gaudi
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -78,7 +77,7 @@ void PixelClusterContainerCnv_p2::transToPers(const InDet::PixelClusterContainer
         log << MSG::VERBOSE << "Reading collections with " <<  collection.size() << "PRDs " << endmsg;
         for (unsigned int i = 0; i < collection.size(); ++i) {
             InDet::PixelCluster_p2* pchan = &(persCont->m_rawdata[i + chanBegin]);
-            const InDet::PixelCluster* chan = dynamic_cast<const InDet::PixelCluster*>(collection[i]);
+            const InDet::PixelCluster* chan = static_cast<const InDet::PixelCluster*>(collection[i]);
             chanCnv.transToPers(chan, pchan, log);
         }
     }
