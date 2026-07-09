@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -305,7 +305,7 @@ void TRTDigSettings::defineNewVariable(const std::string & name, double * datame
   p.okrange_high = highrange*unitval;
   p.valueSetByUser = m_propertyNotSetMagicNumber;
 
-  m_doubleparMap[name] = p;
+  m_doubleparMap[name] = std::move(p);
 
 }
 
@@ -332,7 +332,7 @@ void TRTDigSettings::defineNewUIntVariable(const std::string &name,unsigned int 
   p.okrange_high = static_cast<int>(highrange);
   p.valueSetByUser = m_propertyNotSetMagicNumber_int;
 
-  m_intboolparMap[name] = p;
+  m_intboolparMap[name] = std::move(p);
 
 }
 
@@ -359,7 +359,7 @@ void TRTDigSettings::defineNewIntVariable(const std::string & name,int * datamem
   p.okrange_high = highrange;
   p.valueSetByUser = m_propertyNotSetMagicNumber_int;
 
-  m_intboolparMap[name] = p;
+  m_intboolparMap[name] = std::move(p);
 
 }
 
@@ -381,7 +381,7 @@ void TRTDigSettings::defineNewBoolVariable(const std::string & name,bool * datam
   p.okrange_high = 1;
   p.valueSetByUser = m_propertyNotSetMagicNumber_int;
 
-  m_intboolparMap[name] = p;
+  m_intboolparMap[name] = std::move(p);
 
 }
 
