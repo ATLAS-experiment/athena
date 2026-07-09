@@ -13,6 +13,7 @@
 
 namespace {
     static const Muon::MuonSectorMapping sectorMap{};
+    static const SG::ConstAccessor<ElementLink<MuonR4::GlobalPatternContainer>> patLinkAcc{"globalPatternLink"};
 
     void resize_all (const std::size_t nEle, const std::size_t size, auto&&... vecs) {
         for (std::size_t idx = 0; idx < nEle; ++idx) {
@@ -457,14 +458,13 @@ namespace MuonValR4 {
     void MuonFastRecoTester::fillFastRecoMuonInfo(const xAOD::MuonContainer* fastMuons,
                                                   const GlobalPatternContainer* patternCont) {
         if (!fastMuons) return;
-        const std::string patLinkStr{"globalPatternLink"};
+
+       
         for (const xAOD::Muon* mu : *fastMuons) {
             m_muon_Eta.push_back(mu->eta());
             m_muon_Phi.push_back(mu->phi());
             m_muon_Pt.push_back(mu->pt());
             m_muon_Q.push_back(mu->charge());
-
-            SG::Accessor<ElementLink<GlobalPatternContainer>> patLinkAcc{patLinkStr};
 
             auto patItr {std::ranges::find(*patternCont, *patLinkAcc(*mu))};
             assert(patItr != patternCont->end());
