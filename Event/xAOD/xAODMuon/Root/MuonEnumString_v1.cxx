@@ -35,6 +35,7 @@ namespace xAOD {
           RETURN_CASE(SegmentTagged)
           RETURN_CASE(CaloTagged)
           RETURN_CASE(SiliconAssociatedForwardMuon)
+          RETURN_CASE(ZeroPixelHit)
         }
         return "";
     }
