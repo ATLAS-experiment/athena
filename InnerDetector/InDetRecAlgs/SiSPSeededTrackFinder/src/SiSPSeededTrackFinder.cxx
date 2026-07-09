@@ -148,6 +148,7 @@ StatusCode InDet::SiSPSeededTrackFinder::execute(const EventContext& ctx) const
   * For example, run-3 central offline Si tracking has m_useNewStrategy=false, 
   * but m_useZBoundaryFinding true --> newStrategy
   **/
+  ATH_MSG_INFO("IS THIS NEW STRATEGY? " << (m_useNewStrategy?"YES":"NO"));
   if (m_ITKGeometry and m_doFastTracking) return itkFastTrackingStrategy(ctx);
   else if (m_useITkConvSeeded) return itkConvStrategy(ctx);
   else if (not m_useNewStrategy and not m_useZBoundaryFinding and not m_ITKGeometry) {
@@ -186,6 +187,24 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
   }
 
   SiSpacePointsSeedMakerEventData seedEventData;
+  if (m_useVertexPosition) {
+    SG::ReadHandle<xAOD::VertexContainer> verticesHandle = SG::makeHandle(m_vertices, ctx);
+    ATH_CHECK( verticesHandle.isValid() );
+    const xAOD::VertexContainer *vertices = verticesHandle.cptr();
+
+    const xAOD::Vertex* primaryVertex = nullptr;
+    for (const xAOD::Vertex* vtx : *vertices) {
+      if (vtx->vertexType() != xAOD::VxType::VertexType::PriVtx) continue;
+      primaryVertex = vtx;
+      break;
+    }
+
+    ATH_CHECK(primaryVertex != nullptr);
+
+    seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
+    seedEventData.zCollisionMaximum = primaryVertex->z() + m_collisionTollerance;
+  }
+  
   bool ZVE = false;
   if (m_useZvertexTool) {
     std::list<Trk::Vertex> vertices = m_zvertexmaker->newEvent(ctx, seedEventData);
@@ -293,11 +312,6 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
     
     seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
     seedEventData.zCollisionMaximum = primaryVertex->z() + m_collisionTollerance;
-
-    ATH_MSG_ERROR(name() << " is using vertex constraint!");
-    ATH_MSG_ERROR("- Vertex collection: " << m_vertices.key());
-    ATH_MSG_ERROR("- collision region: " << seedEventData.zCollisionMinimum << ", " << seedEventData.zCollisionMaximum);
-    return StatusCode::FAILURE;
   }
   /** 
    * We run two passes of seeding & track finding. 
