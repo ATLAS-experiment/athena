@@ -37,7 +37,7 @@ namespace GlobalSim {
     virtual StatusCode countPassingTOBs(const EventContext&, unsigned int&) const = 0;
 
     // For TIP alg initialize to check for overlaps
-    TIPword getFullTIPWord() const;
+    TIPword getFullTIPWord() const override;
 
   protected:
   
