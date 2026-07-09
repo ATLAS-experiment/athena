@@ -57,24 +57,24 @@ constexpr auto y0Idx {Acts::toUnderlying(ParamDefs::y0)};
 constexpr auto etaCovIdx {Acts::toUnderlying(SpacePoint::CovIdx::etaCov)};
 
 FastMuonSABuilder::FastMuonSABuilder(const std::string& name, Config&& config) :
-    AthMessaging{name}, m_cfg{config} {
+    AthMessaging{name}, m_cfg{std::move(config)} {
         /** Initialize the segment line fitter */
         SegmentLineFitter::Config fitCfg{};
-        fitCfg.calibrator = config.calibrator;
-        fitCfg.visionTool = config.visionTool;
-        fitCfg.idHelperSvc = config.idHelperSvc;
+        fitCfg.calibrator = m_cfg.calibrator;
+        fitCfg.visionTool = m_cfg.visionTool;
+        fitCfg.idHelperSvc = m_cfg.idHelperSvc;
         fitCfg.fitT0 = false;
         fitCfg.calcAlongStrip = false;
-        fitCfg.recalibrate = config.recalibInFit;
-        fitCfg.useFastFitter = config.useFastFitter;
-        fitCfg.fastPreFitter = config.fastPreFitter;
-        fitCfg.ignoreFailedPreFit = config.ignoreFailedPreFit;
-        fitCfg.useHessian = config.useHessianResidual;
+        fitCfg.recalibrate = m_cfg.recalibInFit;
+        fitCfg.useFastFitter = m_cfg.useFastFitter;
+        fitCfg.fastPreFitter = m_cfg.fastPreFitter;
+        fitCfg.ignoreFailedPreFit = m_cfg.ignoreFailedPreFit;
+        fitCfg.useHessian = m_cfg.useHessianResidual;
         fitCfg.doBeamSpot = false;
-        fitCfg.outlierRemovalCut = config.outlierRemovalCut;
-        fitCfg.recoveryPull = config.recoveryPull;
-        fitCfg.nPrecHitCut = config.precHitCut;
-        fitCfg.maxIter = config.maxIter;
+        fitCfg.outlierRemovalCut = m_cfg.outlierRemovalCut;
+        fitCfg.recoveryPull = m_cfg.recoveryPull;
+        fitCfg.nPrecHitCut = m_cfg.precHitCut;
+        fitCfg.maxIter = m_cfg.maxIter;
         fitCfg.parsToUse = {ParamDefs::y0, ParamDefs::theta};
 
         /** Initialize the NSW segment fitter */
@@ -86,18 +86,18 @@ FastMuonSABuilder::FastMuonSABuilder(const std::string& name, Config&& config) :
 
         /** Initialize the L-R segment seeder */
         MdtSegmentSeeder::Config genCfg{};
-        genCfg.hitPullCut = config.seedHitChi2;
+        genCfg.hitPullCut = m_cfg.seedHitChi2;
         genCfg.busyLayerLimit = 3.;
         genCfg.startWithPattern = false;
         m_mdtSeeder = std::make_unique<MdtSegmentSeeder>(std::move(genCfg), makeActsAthenaLogger(this, name));
 
         /** Initialize the track seeder */
         MsTrackSeeder::Config trackCfg{};
-        trackCfg.nFieldSteps = config.nFieldSteps;
+        trackCfg.nFieldSteps = m_cfg.nFieldSteps;
         m_trackSeeder = std::make_unique<MsTrackSeeder>(name, std::move(trackCfg));
 
     }
-//coverity[RW.ROUTINE_NOT_EMITTED:FALSE]
+
 xAOD::Muon*
 FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx, 
                                       const ActsTrk::GeometryContext& gctx,
