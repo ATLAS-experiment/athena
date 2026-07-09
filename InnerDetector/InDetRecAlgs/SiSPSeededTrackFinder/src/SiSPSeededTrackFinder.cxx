@@ -72,12 +72,16 @@ InDet::SiSPSeededTrackFinder::SiSPSeededTrackFinder
 
 StatusCode InDet::SiSPSeededTrackFinder::initialize() 
 {
+  ATH_MSG_INFO("Initializing " << name() << " ...");
   ATH_CHECK(m_evtKey.initialize());
   ATH_CHECK(m_mbtsKey.initialize(m_useMBTS));
   ATH_CHECK(m_SpacePointsPixelKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_SpacePointsSCTKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_outputTracksKey.initialize());
 
+  ATH_CHECK(m_vertices.initialize(m_useVertexPosition));
+  ATH_MSG_INFO("m_useVertexPosition is " << m_useVertexPosition);
+  
   /// optional PRD to track association map
   ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty() ) );
 
@@ -259,6 +263,7 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
 
 StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) const
 {
+  ATH_MSG_INFO("NEW STRATEGY IS USED");
   SG::WriteHandle<TrackCollection> outputTracks{m_outputTracksKey, ctx};
   ATH_CHECK(outputTracks.record(std::make_unique<TrackCollection>()));
   /// For HI events we can use MBTS information from calorimeter
@@ -271,7 +276,29 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
   Trk::PerigeeSurface beamPosPerigee(beamSpotHandle->beamPos());
 
   SiSpacePointsSeedMakerEventData seedEventData;
-  
+
+  if (m_useVertexPosition) {
+    SG::ReadHandle<xAOD::VertexContainer> verticesHandle = SG::makeHandle(m_vertices, ctx);
+    ATH_CHECK( verticesHandle.isValid() );
+    const xAOD::VertexContainer *vertices = verticesHandle.cptr();
+
+    const xAOD::Vertex* primaryVertex = nullptr;
+    for (const xAOD::Vertex* vtx : *vertices) {
+      if (vtx->vertexType() != xAOD::VxType::VertexType::PriVtx) continue;
+      primaryVertex = vtx;
+      break;
+    }
+
+    ATH_CHECK(primaryVertex != nullptr);
+    
+    seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
+    seedEventData.zCollisionMaximum = primaryVertex->z() + m_collisionTollerance;
+
+    ATH_MSG_ERROR(name() << " is using vertex constraint!");
+    ATH_MSG_ERROR("- Vertex collection: " << m_vertices.key());
+    ATH_MSG_ERROR("- collision region: " << seedEventData.zCollisionMinimum << ", " << seedEventData.zCollisionMaximum);
+    return StatusCode::FAILURE;
+  }
   /** 
    * We run two passes of seeding & track finding. 
    * 
