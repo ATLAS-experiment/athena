@@ -146,9 +146,6 @@ class TrigEDMChecker : public AthAnalysisAlgorithm  {
    bool m_doDumpHLTResult;
    StatusCode dumpHLTResult();
 
-   bool m_doDumpTrigInDetTrackCollection;
-   StatusCode dumpTrigInDetTrackCollection();
-
    bool m_doDumpTrigVertexCollection;
    StatusCode dumpTrigVertexCollection ATLAS_NOT_THREAD_SAFE();
 
