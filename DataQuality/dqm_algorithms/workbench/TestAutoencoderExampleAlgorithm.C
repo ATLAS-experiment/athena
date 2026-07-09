@@ -16,7 +16,7 @@ void TestAutoencoderExampleAlgorithm()
 
     // Load the root file from its native location. Make sure you have permissions to access that location.
     // NOTE: eos does not have guaranteed availability so PathResolver is used to find asg-calibdev area for non-production development.
-    const std::string PathResolverFindCalibFile("dev/ONNXfiles/data25_13p6TeV.00502502.physics_Main.merge.HIST.f1608_h531._0001.1")
+    const std::string PathResolverFindCalibFile("ONNXfiles/data25_13p6TeV.00502502.physics_Main.merge.HIST.f1608_h531._0001.1")
 
     TFile *file = TFile::Open(test_file_path);
     if (!file || file->IsZombie()) {
