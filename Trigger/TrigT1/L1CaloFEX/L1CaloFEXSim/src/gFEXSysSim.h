@@ -52,66 +52,32 @@ namespace LVL1 {
     virtual int calcTowerID(int eta, int phi, int nphi, int mod) const override ;
 
     /**Create and fill a new gFexJetRoI object, and return a pointer to it*/
-    virtual StatusCode fillgRhoEDM(uint32_t tobWord, int scale) override ;
+    virtual StatusCode fillgRhoEDM(xAOD::gFexJetRoIContainer* gRhoContainer, uint32_t tobWord, int scale) const override ;
 
-    virtual StatusCode fillgBlockEDM(uint32_t tobWord, int scale) override ;
+    virtual StatusCode fillgBlockEDM(xAOD::gFexJetRoIContainer* gBlockContainer, uint32_t tobWord, int scale) const override ;
 
-    virtual StatusCode fillgJetEDM(uint32_t tobWord, int scale) override ;
+    virtual StatusCode fillgJetEDM(xAOD::gFexJetRoIContainer* gJetContainer, uint32_t tobWord, int scale) const override ;
 
-    virtual StatusCode fillgScalarEJwojEDM(uint32_t tobWord, int scale1, int scale2) override ;
+    virtual StatusCode fillgScalarEJwojEDM(xAOD::gFexGlobalRoIContainer* gScalarEJwojContainer, uint32_t tobWord, int scale1, int scale2) const override ;
 
-    virtual StatusCode fillgMETComponentsJwojEDM(uint32_t tobWord, int scale1, int scale2) override ;
+    virtual StatusCode fillgMETComponentsJwojEDM(xAOD::gFexGlobalRoIContainer* gMETComponentsJwojContainer, uint32_t tobWord, int scale1, int scale2) const override ;
 
-    virtual StatusCode fillgMHTComponentsJwojEDM(uint32_t tobWord, int scale1, int scale2) override ;
+    virtual StatusCode fillgMHTComponentsJwojEDM(xAOD::gFexGlobalRoIContainer* gMHTComponentsJwojContainer, uint32_t tobWord, int scale1, int scale2) const override ;
 
-    virtual StatusCode fillgMSTComponentsJwojEDM(uint32_t tobWord, int scale1, int scale2) override ;
+    virtual StatusCode fillgMSTComponentsJwojEDM(xAOD::gFexGlobalRoIContainer* gMSTComponentsJwojContainer, uint32_t tobWord, int scale1, int scale2) const override ;
 
-    virtual StatusCode fillgMETComponentsNoiseCutEDM(uint32_t tobWord, int scale1, int scale2) override ;
+    virtual StatusCode fillgMETComponentsNoiseCutEDM(xAOD::gFexGlobalRoIContainer* gMETComponentsNoiseCutContainer, uint32_t tobWord, int scale1, int scale2) const override ;
   
-    virtual StatusCode fillgMETComponentsRmsEDM(uint32_t tobWord, int scale1, int scale2) override ;
+    virtual StatusCode fillgMETComponentsRmsEDM(xAOD::gFexGlobalRoIContainer* gMETComponentsRmsContainer, uint32_t tobWord, int scale1, int scale2) const override ;
 
-    virtual StatusCode fillgScalarENoiseCutEDM(uint32_t tobWord, int scale1, int scale2) override ;
+    virtual StatusCode fillgScalarENoiseCutEDM(xAOD::gFexGlobalRoIContainer* gScalarENoiseCutContainer, uint32_t tobWord, int scale1, int scale2) const override ;
  
-    virtual StatusCode fillgScalarERmsEDM(uint32_t tobWord, int scale1, int scale2) override ;
+    virtual StatusCode fillgScalarERmsEDM(xAOD::gFexGlobalRoIContainer* gScalarERmsContainer, uint32_t tobWord, int scale1, int scale2) const override ;
 
 
     /** Internal data */
   private:
-    std::unique_ptr< xAOD::gFexJetRoIContainer > m_gRhoContainer;
-    std::unique_ptr< xAOD::gFexJetRoIAuxContainer > m_gRhoAuxContainer;
 
-    std::unique_ptr< xAOD::gFexJetRoIContainer > m_gBlockContainer;
-    std::unique_ptr< xAOD::gFexJetRoIAuxContainer > m_gBlockAuxContainer;
-
-    std::unique_ptr< xAOD::gFexJetRoIContainer > m_gJetContainer;
-    std::unique_ptr< xAOD::gFexJetRoIAuxContainer > m_gJetAuxContainer;
-
-    std::unique_ptr< xAOD::gFexGlobalRoIContainer > m_gScalarEJwojContainer;
-    std::unique_ptr< xAOD::gFexGlobalRoIAuxContainer > m_gScalarEJwojAuxContainer;
-
-    std::unique_ptr< xAOD::gFexGlobalRoIContainer > m_gMETComponentsJwojContainer;
-    std::unique_ptr< xAOD::gFexGlobalRoIAuxContainer > m_gMETComponentsJwojAuxContainer;
-
-    std::unique_ptr< xAOD::gFexGlobalRoIContainer > m_gMHTComponentsJwojContainer;
-    std::unique_ptr< xAOD::gFexGlobalRoIAuxContainer > m_gMHTComponentsJwojAuxContainer;
-
-    std::unique_ptr< xAOD::gFexGlobalRoIContainer > m_gMSTComponentsJwojContainer;
-    std::unique_ptr< xAOD::gFexGlobalRoIAuxContainer > m_gMSTComponentsJwojAuxContainer;
-
-    std::unique_ptr< xAOD::gFexGlobalRoIContainer > m_gMETComponentsNoiseCutContainer;
-    std::unique_ptr< xAOD::gFexGlobalRoIAuxContainer > m_gMETComponentsNoiseCutAuxContainer;
-
-    std::unique_ptr< xAOD::gFexGlobalRoIContainer > m_gMETComponentsRmsContainer;
-    std::unique_ptr< xAOD::gFexGlobalRoIAuxContainer > m_gMETComponentsRmsAuxContainer;
-
-    std::unique_ptr< xAOD::gFexGlobalRoIContainer > m_gScalarENoiseCutContainer;
-    std::unique_ptr< xAOD::gFexGlobalRoIAuxContainer > m_gScalarENoiseCutAuxContainer;
-
-    std::unique_ptr< xAOD::gFexGlobalRoIContainer > m_gScalarERmsContainer;
-    std::unique_ptr< xAOD::gFexGlobalRoIAuxContainer > m_gScalarERmsAuxContainer;
-
-
-    std::vector<gFEXSim*> m_gFEXCollection;
 
     ToolHandle<IgFEXSim> m_gFEXSimTool       {this, "gFEXSimTool",    "LVL1::gFEXSim",    "Tool that creates the gFEX Simulation"};
 
@@ -132,21 +98,6 @@ namespace LVL1 {
     SG::WriteHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarERmsOutKey {this,"Key_gScalarERmsOutputContainer","L1_gScalarERms","Output Scalar MET and SumET (from RMS algo) container"};
 
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 
-
-    std::vector<uint32_t>  m_allgRhoTobs;
-    std::vector<uint32_t>  m_allgBlockTobs;
-    std::vector<uint32_t>  m_allgJetTobs;
-
-    std::vector<int32_t>  m_allgScalarEJwojTobs;
-    std::vector<uint32_t>  m_allgMETComponentsJwojTobs;
-    std::vector<uint32_t>  m_allgMHTComponentsJwojTobs;
-    std::vector<uint32_t>  m_allgMSTComponentsJwojTobs;
-
-    std::vector<uint32_t>  m_allgMETComponentsNoiseCutTobs;
-    std::vector<uint32_t>  m_allgMETComponentsRmsTobs;
-    std::vector<uint32_t>  m_allgScalarENoiseCutTobs;
-    std::vector<uint32_t>  m_allgScalarERmsTobs;
-
 
   };
 

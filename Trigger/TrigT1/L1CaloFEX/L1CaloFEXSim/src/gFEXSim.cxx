@@ -349,57 +349,57 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
 }
 
 
-std::vector<uint32_t> gFEXSim::getgRhoTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgRhoTOBs() const
 {
   return m_gRhoTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgBlockTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgBlockTOBs() const
 {
   return m_gBlockTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgJetTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgJetTOBs() const
 {
   return m_gJetTobWords;
 }
 
-std::vector<int32_t> gFEXSim::getgScalarEJwojTOBs() const
+const std::vector<int32_t>& gFEXSim::getgScalarEJwojTOBs() const
 {
   return m_gScalarEJwojTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgMETComponentsJwojTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgMETComponentsJwojTOBs() const
 {
   return m_gMETComponentsJwojTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgMHTComponentsJwojTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgMHTComponentsJwojTOBs() const
 {
   return m_gMHTComponentsJwojTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgMSTComponentsJwojTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgMSTComponentsJwojTOBs() const
 {
   return m_gMSTComponentsJwojTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgMETComponentsNoiseCutTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgMETComponentsNoiseCutTOBs() const
 {
   return m_gMETComponentsNoiseCutTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgMETComponentsRmsTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgMETComponentsRmsTOBs() const
 {
   return m_gMETComponentsRmsTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgScalarENoiseCutTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgScalarENoiseCutTOBs() const
 {
   return m_gScalarENoiseCutTobWords;
 }
 
-std::vector<uint32_t> gFEXSim::getgScalarERmsTOBs() const
+const std::vector<uint32_t>& gFEXSim::getgScalarERmsTOBs() const
 {
   return m_gScalarERmsTobWords;
 }

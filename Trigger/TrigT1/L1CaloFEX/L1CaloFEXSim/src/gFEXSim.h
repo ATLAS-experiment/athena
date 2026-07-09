@@ -53,27 +53,27 @@ namespace LVL1 {
 
     virtual StatusCode executegFEXSim(const gTowersIDs& tmp, gFEXOutputCollection* gFEXOutputs) override;
 
-    virtual std::vector<uint32_t> getgRhoTOBs() const override;
+    virtual const std::vector<uint32_t>& getgRhoTOBs() const override;
 
-    virtual std::vector<uint32_t> getgBlockTOBs() const override;
+    virtual const std::vector<uint32_t>& getgBlockTOBs() const override;
 
-    virtual std::vector<uint32_t> getgJetTOBs() const override;
+    virtual const std::vector<uint32_t>& getgJetTOBs() const override;
 
-    virtual std::vector<int32_t> getgScalarEJwojTOBs() const override;
+    virtual const std::vector<int32_t>& getgScalarEJwojTOBs() const override;
  
-    virtual std::vector<uint32_t> getgMETComponentsJwojTOBs() const override;
+    virtual const std::vector<uint32_t>& getgMETComponentsJwojTOBs() const override;
 
-    virtual std::vector<uint32_t> getgMHTComponentsJwojTOBs() const override;
+    virtual const std::vector<uint32_t>& getgMHTComponentsJwojTOBs() const override;
 
-    virtual std::vector<uint32_t> getgMSTComponentsJwojTOBs() const override;
+    virtual const std::vector<uint32_t>& getgMSTComponentsJwojTOBs() const override;
 
-    virtual std::vector<uint32_t> getgMETComponentsNoiseCutTOBs() const override;
+    virtual const std::vector<uint32_t>& getgMETComponentsNoiseCutTOBs() const override;
 
-    virtual std::vector<uint32_t> getgMETComponentsRmsTOBs() const override;
+    virtual const std::vector<uint32_t>& getgMETComponentsRmsTOBs() const override;
 
-    virtual std::vector<uint32_t> getgScalarENoiseCutTOBs() const override;
+    virtual const std::vector<uint32_t>& getgScalarENoiseCutTOBs() const override;
 
-    virtual std::vector<uint32_t> getgScalarERmsTOBs() const override;
+    virtual const std::vector<uint32_t>& getgScalarERmsTOBs() const override;
 
 
 
