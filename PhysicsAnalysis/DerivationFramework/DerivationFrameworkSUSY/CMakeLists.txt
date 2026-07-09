@@ -7,7 +7,7 @@ find_package( Boost COMPONENTS unit_test_framework)
 # Component(s) in the package:
 atlas_add_component( DerivationFrameworkSUSY
                      src/*.cxx src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps AthenaKernel DerivationFrameworkInterfaces ExpressionEvaluationLib GaudiKernel MCTruthClassifierLib RecoToolInterfaces xAODAssociations xAODEventInfo xAODJet xAODTracking xAODTruth ReweightUtilsLib TruthUtils)
+                     LINK_LIBRARIES AthenaBaseComps AthenaKernel DerivationFrameworkInterfaces ExpressionEvaluationLib GaudiKernel  RecoToolInterfaces xAODAssociations xAODEventInfo xAODJet xAODTracking xAODTruth ReweightUtilsLib TruthUtils)
 
 atlas_add_test (PdgConditional_test
                 SOURCES src/PdgConditional.cxx test/PdgConditional_test.cxx
