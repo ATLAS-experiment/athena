@@ -191,15 +191,19 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
     SG::ReadHandle<xAOD::VertexContainer> verticesHandle = SG::makeHandle(m_vertices, ctx);
     ATH_CHECK( verticesHandle.isValid() );
     const xAOD::VertexContainer *vertices = verticesHandle.cptr();
+    ATH_CHECK(vertices->size() != 0);
 
     const xAOD::Vertex* primaryVertex = nullptr;
     for (const xAOD::Vertex* vtx : *vertices) {
-      if (vtx->vertexType() != xAOD::VxType::VertexType::PriVtx) continue;
+      if (vtx->vertexType() != xAOD::VxType::PriVtx) continue;
       primaryVertex = vtx;
       break;
     }
 
-    ATH_CHECK(primaryVertex != nullptr);
+    if (primaryVertex == nullptr) {
+      ATH_MSG_WARNING("Could not find the primary vertex");
+      primaryVertex = vertices->front();
+    }
 
     seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
     seedEventData.zCollisionMaximum = primaryVertex->z() + m_collisionTollerance;
@@ -303,12 +307,15 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
 
     const xAOD::Vertex* primaryVertex = nullptr;
     for (const xAOD::Vertex* vtx : *vertices) {
-      if (vtx->vertexType() != xAOD::VxType::VertexType::PriVtx) continue;
+      if (vtx->vertexType() != xAOD::VxType::PriVtx) continue;
       primaryVertex = vtx;
       break;
     }
 
-    ATH_CHECK(primaryVertex != nullptr);
+    if (primaryVertex == nullptr) {
+      ATH_MSG_WARNING("Could not find the primary vertex");
+      primaryVertex = vertices->front();
+    }
     
     seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
     seedEventData.zCollisionMaximum = primaryVertex->z() + m_collisionTollerance;
