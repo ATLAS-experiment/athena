@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetEventTPCnv/SCT_ClusterContainerCnv_p3.h"
@@ -20,7 +20,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/Service.h"
-#include "GaudiKernel/StatusCode.h"
 
 void SCT_ClusterContainerCnv_p3::transToPers(const InDet::SCT_ClusterContainer* transCont, InDet::SCT_ClusterContainer_p3* persCont, MsgStream &log) {
 
@@ -91,7 +90,7 @@ void SCT_ClusterContainerCnv_p3::transToPers(const InDet::SCT_ClusterContainer* 
 
         for (unsigned int i = 0; i < collection.size(); ++i) {
             InDet::SCT_Cluster_p3* pchan = &(persCont->m_rawdata[i + chanBegin]);
-            const InDet::SCT_Cluster* chan = dynamic_cast<const InDet::SCT_Cluster*>(collection[i]);
+            const InDet::SCT_Cluster* chan = static_cast<const InDet::SCT_Cluster*>(collection[i]);
             chanCnv.transToPers(chan, pchan, log);
 
             persCont->m_prdDeltaId[i+chanBegin]=m_sctId->calc_offset(collection.identify(), chan->identify() );

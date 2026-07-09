@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena
@@ -80,17 +80,18 @@ void  InDet::PixelClusterContainerCnv_p1::persToTrans(const InDet::InDetPRD_Cont
     //   1) all collections, and
     //   2) all channels
     //
-    // The persistent collections, then only maintain indexes into the
+    // The persistent collections then only maintain indices into the
     // container's vector of all channels. 
     //
     // So here we loop over all collection and extract their channels
     // from the vector.
 
-    const InDetDD::SiDetectorElementCollection* elements(nullptr);
+    //see: coverity issue 22632, elements is unused. Left here to highlight this.
+    //const InDetDD::SiDetectorElementCollection* elements(nullptr);
     if (m_useDetectorElement) {
         SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey);
-        const InDetDD::SiDetectorElementCollection* elements = *pixelDetEleHandle;
-        if (not pixelDetEleHandle.isValid() or elements==nullptr) {
+        const InDetDD::SiDetectorElementCollection* theseElements = *pixelDetEleHandle;
+        if (not pixelDetEleHandle.isValid() or theseElements==nullptr) {
             log << MSG::FATAL << m_pixelDetEleCollKey.fullKey() << " is not available." << endmsg;
             return;
         }
@@ -104,14 +105,14 @@ void  InDet::PixelClusterContainerCnv_p1::persToTrans(const InDet::InDetPRD_Cont
     for (unsigned int icoll = 0; icoll < persCont->m_collections.size(); ++icoll) {
 
         // Create trans collection - is NOT owner of PixelCluster (SG::VIEW_ELEMENTS)
-	// IDet collection don't have the Ownership policy c'tor
+	      // IDet collection don't have the Ownership policy c'tor
         const InDet::InDetPRD_Collection_p1& pcoll = persCont->m_collections[icoll];        
         IdentifierHash collIDHash(IdentifierHash(pcoll.m_hashId));
         coll = new InDet::PixelClusterCollection(collIDHash);
         coll->setIdentifier(Identifier(pcoll.m_id));
         unsigned int nchans           = pcoll.m_end - pcoll.m_begin;
         coll->resize(nchans);
-        const InDetDD::SiDetectorElement * de = (elements ? elements->getDetectorElement(collIDHash) : nullptr);
+        const InDetDD::SiDetectorElement * de = nullptr;//elements is nullptr, so this is also
         // Fill with channels
         for (unsigned int ichan = 0; ichan < nchans; ++ ichan) {
             const TPObjRef pchan = persCont->m_PRD[ichan + pcoll.m_begin];
