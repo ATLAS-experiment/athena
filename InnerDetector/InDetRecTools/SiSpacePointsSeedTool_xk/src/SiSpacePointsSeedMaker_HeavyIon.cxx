@@ -40,7 +40,8 @@ StatusCode InDet::SiSpacePointsSeedMaker_HeavyIon::initialize()
   ATH_CHECK(m_spacepointsPixel.initialize(m_pixel));
   ATH_CHECK(m_spacepointsSCT.initialize(m_sct));
   ATH_CHECK(m_spacepointsOverlap.initialize(m_useOverlap));
-
+  // vertex
+  ATH_CHECK(m_vertices.initialize(m_useVertexPosition));
   // Get beam geometry
   //
   ATH_CHECK(m_beamSpotKey.initialize());

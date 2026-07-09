@@ -203,6 +203,7 @@ def createTrackingPassFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     icf = AthConfigFlags()
 
+    icf.addFlag("useVertexPositionDuringSeeding", False)
     icf.addFlag("extension", "" ) ### for extension
 
     icf.addFlag("usePrdAssociationTool", False)
@@ -1014,7 +1015,8 @@ def createHeavyIonLowPtTrackingPassFlags():
     icf.extension        = "HeavyIonLowPt"
     icf.maxPT            = lambda pcf: 0.6 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
     icf.minPT            = lambda pcf: 0.2 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
-
+    icf.useVertexPositionDuringSeeding = True
+    
     icf.usePrdAssociationTool = True
     icf.isLowPt          = True
     icf.minClusters      = 5

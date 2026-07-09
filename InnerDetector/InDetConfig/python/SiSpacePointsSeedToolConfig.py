@@ -20,6 +20,7 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
         flags, name="InDetSpSeedsMaker_HeavyIon", **kwargs):
     acc = ComponentAccumulator()
 
+    kwargs.setdefault("useVertexPosition", flags.Tracking.ActiveConfig.useVertexPositionDuringSeeding)
     kwargs.setdefault("maxdImpact",
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
