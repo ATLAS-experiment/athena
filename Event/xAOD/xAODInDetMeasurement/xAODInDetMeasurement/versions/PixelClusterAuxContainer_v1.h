@@ -13,6 +13,7 @@
 #include "xAODCore/JaggedVec.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
 #include "AthContainers/JaggedVecAccessor.h"
+#include "xAODInDetMeasurement/ArrayFloat3.h"
 
 namespace xAOD {
 /// Auxiliary store for pixel clusters
@@ -33,7 +34,7 @@ class PixelClusterAuxContainer_v1 : public AuxContainerBase {
 
     /// @name Defining pixel cluster parameters
     /// @{
-    std::vector<PosAccessor<3>::element_type> globalPosition;
+    std::vector<xAOD::ArrayFloat3> globalPosition;
     AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoList);
     std::vector<int> channelsInPhi;
     std::vector<int> channelsInEta;

@@ -10,21 +10,11 @@
 #include "EventPrimitives/EventPrimitives.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "xAODInDetMeasurement/ArrayFloat3.h"
 
 #include <array>
 
 namespace xAOD {
-  /// @brief A struct mimicking std::array<float ,3>
-  /// this structure is a temporary solution for our dynamic variables.
-  /// There is an issue with ROOT's handling of std::vector<std::array<T, N> >,
-  /// followed in https://github.com/root-project/root/issues/12007, that prevents 
-  /// us from using std::vector< std::array<float, 3> > for dynamic variables.
-  /// This structure bypass the issue.
-  struct ArrayFloat3 {
-    float* data() { return &values[0]; }
-    const float* data() const { return &values[0]; }
-    float values[3]; 
-  };
 
   class SpacePoint_v1 : public SG::AuxElement {
   public:

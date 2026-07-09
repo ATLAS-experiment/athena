@@ -293,6 +293,11 @@ class SlimmingHelper:
                                         entry+=excludedAuxData
                                 if (theDictionary[item]=='xAOD::SpacePointAuxContainer' and auxEntries[item]==""):
                                         entry+="-measurements.-measurementLink"
+                                elif ("ITkPixelSpacePointsAux" in item or \
+                                      "ITkStripSpacePointsAux" in item or \
+                                      "ITkStripOverlapSpacePointsAux" in item) and \
+                                      auxEntries[item]=="":
+                                        entry+="globalPosition"
                                 self.FinalItemList.append(entry)
 
                 # Add compulsory items not covered by smart slimming (so no expansion)

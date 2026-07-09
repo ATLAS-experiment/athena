@@ -6,8 +6,9 @@
 #include "xAODCore/AuxStoreAccessorMacros.h"
 // Local include(s):
 #include "xAODInDetMeasurement/versions/PixelCluster_v1.h"
+#include "xAODInDetMeasurement/ArrayFloat3.h"
 
-static const SG::AuxElement::Accessor<std::array<float, 3> > globalPosAcc(
+static const SG::AuxElement::Accessor<xAOD::ArrayFloat3> globalPosAcc(
     "globalPosition");
 const SG::AuxElement::Accessor<SG::JaggedVecElt<Identifier::value_type> >
     xAOD::PixelCluster_v1::s_rdoListAcc("rdoList");
