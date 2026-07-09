@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -29,27 +29,27 @@ Interface definition for gFEXSim
 
     virtual StatusCode executegFEXSim(const gTowersIDs& tmp, gFEXOutputCollection* gFEXOutputs) = 0;
 
-    virtual std::vector<uint32_t> getgRhoTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgRhoTOBs() const =0;
 
-    virtual std::vector<uint32_t> getgBlockTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgBlockTOBs() const =0;
 
-    virtual std::vector<uint32_t> getgJetTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgJetTOBs() const =0;
 
-    virtual std::vector<int32_t> getgScalarEJwojTOBs() const =0;
+    virtual const std::vector<int32_t>& getgScalarEJwojTOBs() const =0;
  
-    virtual std::vector<uint32_t> getgMETComponentsJwojTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgMETComponentsJwojTOBs() const =0;
 
-    virtual std::vector<uint32_t> getgMHTComponentsJwojTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgMHTComponentsJwojTOBs() const =0;
 
-    virtual std::vector<uint32_t> getgMSTComponentsJwojTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgMSTComponentsJwojTOBs() const =0;
 
-    virtual std::vector<uint32_t> getgMETComponentsNoiseCutTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgMETComponentsNoiseCutTOBs() const =0;
 
-    virtual std::vector<uint32_t> getgMETComponentsRmsTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgMETComponentsRmsTOBs() const =0;
 
-    virtual std::vector<uint32_t> getgScalarENoiseCutTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgScalarENoiseCutTOBs() const =0;
 
-    virtual std::vector<uint32_t> getgScalarERmsTOBs() const =0;
+    virtual const std::vector<uint32_t>& getgScalarERmsTOBs() const =0;
 
 
   private:
