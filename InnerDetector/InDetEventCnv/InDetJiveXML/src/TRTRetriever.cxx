@@ -162,20 +162,20 @@ namespace JiveXML {
         
     //Add everything to our data map
     DataMap dataMap;
-    dataMap["rhoz"]=rhoz;
-    dataMap["phi"]=phi;
-    dataMap["driftR"]=driftR;
-    dataMap["threshold"]=threshold;
-    dataMap["id"]=ident;
-    dataMap["sub"]=sub;
-    dataMap["noise"]=noise;
-    dataMap["timeOverThreshold"]=timeOverThreshold;
-    dataMap["bitPattern"]=bitPattern;
+    dataMap["rhoz"]= std::move(rhoz);
+    dataMap["phi"]= std::move(phi);
+    dataMap["driftR"]= std::move(driftR);
+    dataMap["threshold"]= std::move(threshold);
+    dataMap["id"]= std::move(ident);
+    dataMap["sub"]= std::move(sub);
+    dataMap["noise"]= std::move(noise);
+    dataMap["timeOverThreshold"]= std::move(timeOverThreshold);
+    dataMap["bitPattern"]= std::move(bitPattern);
 
     //Only write truth association tags if we processed truth
     if ( numBarcodes.size() > 0 ){
       //Add barcodes counter
-      dataMap["numBarcodes"]=numBarcodes;
+      dataMap["numBarcodes"]= std::move(numBarcodes);
       // Compute the "multiple" for barcodes and put the vector in the map.
       std::string bctag = "barcodes multiple=\""+DataType(barcodes.size()/double(numBarcodes.size())).toString()+"\"";
       dataMap[bctag]=barcodes;

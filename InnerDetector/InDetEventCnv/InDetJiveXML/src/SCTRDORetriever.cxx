@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTRDORetriever.h"
@@ -141,23 +141,23 @@ namespace JiveXML {
 
     //Finally add the data to our map
     DataMap dataMap;
-    dataMap["id"] = ident;
-    dataMap["x0"] = x0;
-    dataMap["y0"] = y0;
-    dataMap["z0"] = z0;
-    dataMap["x1"] = x1;
-    dataMap["y1"] = y1;
-    dataMap["z1"] = z1;
-    dataMap["phiModule"] = phiModule;
-    dataMap["etaModule"] = etaModule;
-    dataMap["timeBin"] = timeBin;
-    dataMap["firstHitError"] = firstHitError ;
-    dataMap["secondHitError"] = secondHitError ;
-    dataMap["syncError"] = syncError;
-    dataMap["preambleError"] = preambleError;
-    dataMap["lvl1Error"] = lvl1Error;
-    dataMap["BCIDError"] = BCIDError;
-    dataMap["formatterError"] = formatterError;
+    dataMap["id"] =std::move( ident);
+    dataMap["x0"] =std::move( x0);
+    dataMap["y0"] =std::move( y0);
+    dataMap["z0"] =std::move( z0);
+    dataMap["x1"] =std::move( x1);
+    dataMap["y1"] =std::move( y1);
+    dataMap["z1"] =std::move( z1);
+    dataMap["phiModule"] =std::move( phiModule);
+    dataMap["etaModule"] =std::move( etaModule);
+    dataMap["timeBin"] =std::move( timeBin);
+    dataMap["firstHitError"] =std::move( firstHitError );
+    dataMap["secondHitError"] =std::move( secondHitError );
+    dataMap["syncError"] =std::move( syncError);
+    dataMap["preambleError"] =std::move( preambleError);
+    dataMap["lvl1Error"] =std::move( lvl1Error);
+    dataMap["BCIDError"] =std::move( BCIDError);
+    dataMap["formatterError"] =std::move( formatterError);
 
     //Be verbose
     ATH_MSG_DEBUG( dataTypeName() << ": " << ident.size() );

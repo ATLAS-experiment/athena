@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelClusterRetriever.h"
@@ -154,23 +154,23 @@ namespace JiveXML {
 
     //Now generate a DataMap for the output
     DataMap dataMap;
-    dataMap["x0"] = x0;
-    dataMap["y0"] = y0;
-    dataMap["z0"] = z0;
-    dataMap["widthx"] = widthx;
-    dataMap["widthy"] = widthy;
-    dataMap["eloss"] = eloss;
-    dataMap["id"] = ident;
-    dataMap["phiModule"] = phiModule;
-    dataMap["etaModule"] = etaModule;
+    dataMap["x0"] = std::move(x0);
+    dataMap["y0"] = std::move(y0);
+    dataMap["z0"] = std::move(z0);
+    dataMap["widthx"] = std::move(widthx);
+    dataMap["widthy"] = std::move(widthy);
+    dataMap["eloss"] = std::move(eloss);
+    dataMap["id"] = std::move(ident);
+    dataMap["phiModule"] = std::move(phiModule);
+    dataMap["etaModule"] = std::move(etaModule);
 
     //Only store truth association if we processed them
     if ( numBarcodes.size() > 0 ){
       //Add barcodes counter
-      dataMap["numBarcodes"] = numBarcodes;
+      dataMap["numBarcodes"] = std::move(numBarcodes);
       //Calculate multiplicy for barcodes of truth tracks
       std::string bctag = "barcodes multiple=\""+DataType(barcodes.size()/double(numBarcodes.size())).toString()+"\"";
-      dataMap[bctag] = barcodes;
+      dataMap[bctag] = std::move(barcodes);
     }
 
     //Be verbose
