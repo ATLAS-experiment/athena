@@ -15,7 +15,7 @@
 // AlgTools which write to the TIP word.
 
 namespace GlobalSim {
-  class ITIPwriterAlgTool : virtual public ::IAlgTool {
+  class ITIPWriterAlgTool : virtual public ::IAlgTool {
 
   public:
     
@@ -23,17 +23,18 @@ namespace GlobalSim {
     /// results from Global, and sends to the the CTP.
     static constexpr std::size_t s_nbits_TIP{1024};
     
-    DeclareInterfaceID(ITIPwriterAlgTool, 1, 0);
-    virtual ~ITIPwriterAlgTool() = default;
+    DeclareInterfaceID(ITIPWriterAlgTool, 1, 0);
+    virtual ~ITIPWriterAlgTool() = default;
 
     virtual StatusCode updateTIP(std::bitset<s_nbits_TIP>&,
 				 const EventContext& ) const = 0;
 
+    virtual std::bitset<s_nbits_TIP> getFullTIPWord() const = 0;
 
     virtual std::string toString() const = 0;
   };
 
-  using TIPword = std::bitset<ITIPwriterAlgTool::s_nbits_TIP>;
+  using TIPword = std::bitset<ITIPWriterAlgTool::s_nbits_TIP>;
 
 }
 #endif
