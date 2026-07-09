@@ -13,10 +13,9 @@
 #include <cmath>
 
 FlukaHaloGenerator::FlukaHaloGenerator(int type,
-                                       const HepPDT::ParticleDataTable* particleTable,
                                        const std::string& inputFile,
                                        const std::vector<std::string>& generatorSettings):
-  BeamHaloGenerator(particleTable, inputFile, generatorSettings),
+  BeamHaloGenerator(inputFile, generatorSettings),
   m_sameEvent(true),
   m_firstEvent(true),
   m_flukaParticle(type),
@@ -106,7 +105,7 @@ int FlukaHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent,
     // copy the last particle into the vector of those in this event.
     if(!m_sameEvent) {
       // Fill the BeamHaloParticle with the data in the FlukaParticle
-      if(beamHaloParticle.fill(m_particleTable, &m_lastFlukaParticle)) {
+      if(beamHaloParticle.fill(&m_lastFlukaParticle)) {
         std::cout << "Error: Conversion from FlukaParticle to BeamHaloParticle failed." << std::endl;
         return 1;
       }
@@ -159,7 +158,7 @@ int FlukaHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent,
     if(m_sameEvent) {
 
       // Fill the BeamHaloParticle with the data in the FlukaParticle
-      if(beamHaloParticle.fill(m_particleTable, &m_flukaParticle)) {
+      if(beamHaloParticle.fill(&m_flukaParticle)) {
         std::cout << "Error: Conversion from FlukaParticle to BeamHaloParticle failed." << std::endl;
         return 1;
       }

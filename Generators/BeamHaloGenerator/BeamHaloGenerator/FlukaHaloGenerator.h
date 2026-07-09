@@ -19,7 +19,6 @@ class FlukaHaloGenerator: public BeamHaloGenerator {
  public:
   
   FlukaHaloGenerator(int type, // Type of input Fluka particle record
-                     const HepPDT::ParticleDataTable* particleTable,
                      const std::string& inputFile,
                      const std::vector<std::string>& generatorSettings);
 

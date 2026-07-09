@@ -18,7 +18,7 @@
 class MarsHaloGenerator: public BeamHaloGenerator {
  public:
 
-  MarsHaloGenerator(const HepPDT::ParticleDataTable* particleTable,
+  MarsHaloGenerator(
 		    const std::string& inputFile,
 		    const std::vector<std::string>& generatorSettings);
 
