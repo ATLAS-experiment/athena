@@ -102,6 +102,10 @@ namespace DerivationFramework {
       }
 
       for (const auto& cluster : clusterAssociation->caloClusterLinks()) {
+        if ( !cluster.isValid() ) {
+          ATH_MSG_DEBUG("Invalid caloClusterLink on TrackParticleClusterAssociation - skipping");
+          continue;
+        }
         const CaloClusterCellLink* cellLinks = (*cluster)->getCellLinks();
 
         trackCellEta.clear();
