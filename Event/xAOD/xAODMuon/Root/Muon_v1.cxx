@@ -432,7 +432,8 @@ bool Muon_v1::isolationCaloCorrection(  float& value, const Iso::IsolationFlavou
               } case SegmentTagged:
                 case CaloTagged : {
                   return trackParticle(TrackParticleType::InnerDetectorTrackParticle);
-              } case MuonStandAlone : {
+              } case MuonStandAlone :
+                case ZeroPixelHit : {
                   for (const auto MsType : {ExtrapolatedMuonSpectrometerTrackParticle,
                                             MSOnlyExtrapolatedMuonSpectrometerTrackParticle,
                                             MuonSpectrometerTrackParticle}) {
