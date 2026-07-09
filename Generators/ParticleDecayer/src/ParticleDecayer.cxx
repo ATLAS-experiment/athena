@@ -22,8 +22,6 @@
 //
 
 #include "ParticleDecayer/ParticleDecayer.h"
-#include "GaudiKernel/IPartPropSvc.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "GeneratorObjects/McEventCollection.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include <cmath> //M_PI
@@ -224,6 +222,7 @@ StatusCode ParticleDecayer::setDecayPosition( CLHEP::HepRandomEngine* engine, He
 ParticleDecayer::ParticleDecayer(const std::string& name, ISvcLocator* pSvcLocator) : 
    GenModule(name, pSvcLocator),
    m_truthParticleContainerName("GEN_EVENT"),
+   m_gendata(std::unique_ptr<GenData>()),
    m_eventCounter(0)
 {
   declareProperty("McEventCollection",     m_truthParticleContainerName);  
@@ -458,7 +457,7 @@ void ParticleDecayer::addParticle(HepMC::GenVertexPtr prod_vtx, int pdg, HepMC::
         mass = m_particleMass;
      }else
      {
-        mass = getParticleMass(pdg);
+        mass = m_gendata->particleMass(pdg).value();
      }
   double energy=std::sqrt(std::pow(momentum.x(),2)+std::pow(momentum.y(),2)+std::pow(momentum.z(),2)+mass*mass);   
 HepMC::GenParticlePtr aParticle = HepMC::newGenParticlePtr (HepMC::FourVector(momentum.x(), momentum.y(), momentum.z(), energy), 
@@ -466,18 +465,6 @@ HepMC::GenParticlePtr aParticle = HepMC::newGenParticlePtr (HepMC::FourVector(mo
 
   prod_vtx->add_particle_out(std::move(aParticle));
 }
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-double ParticleDecayer::getParticleMass(int pid) {
-  SmartIF<IPartPropSvc> partPropSvc(Gaudi::svcLocator()->service("PartPropSvc"));
-  if (!partPropSvc) throw GaudiException("PartPropSvc error", "I_ParticleDecayer", StatusCode::FAILURE);
-  m_particleTable = partPropSvc->PDT();
-
-  const HepPDT::ParticleData* particle = m_particleTable->particle(HepPDT::ParticleID(std::abs(pid)));
-  return particle->mass().value();
-} 
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 StatusCode ParticleDecayer::DFTwoBodyDecay( CLHEP::HepRandomEngine* engine, HepMC::GenParticlePtr genpart, int Polarization ) {
@@ -501,7 +488,7 @@ StatusCode ParticleDecayer::DFTwoBodyDecay( CLHEP::HepRandomEngine* engine, HepM
    ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- decayMode = " << ModeOfDecay);
    
    //Now that we have a decay mode. get the associated particle mass
-   double decayPartMass = getParticleMass(ModeOfDecay);
+   double decayPartMass = m_gendata->particleMass(ModeOfDecay).value();
 
    //Choose how to decay
    //angular distribution handling, see pag.6 of http://arxiv.org/pdf/hep-ph/0605296v2.pdf
