@@ -25,6 +25,7 @@ rdo2aod.max_events = 800
 rdo2aod.threads = 4
 rdo2aod.concurrent_events = 4
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG"'
+rdo2aod.args += ' --CA "default:True"'
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 rdo2aod.args += ' --conditionsTag {:s}'.format(defaultConditionsTags.RUN3_MC)
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
