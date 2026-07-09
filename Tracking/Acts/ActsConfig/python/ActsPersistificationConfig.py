@@ -45,13 +45,19 @@ def PersistifySpacePoints(flags,
                           pixelSpacePointCollections: list[str] = None,
                           stripSpacePointCollections: list[str] = None) -> ComponentAccumulator:
     toAOD = []
+    aux_container_type = "xAOD::SpacePointAuxContainer"
+    if flags.Acts.EDM.SlimContent:
+        aux_container_type = "xAOD::AuxContainerBase!"
+
     if pixelSpacePointCollections is not None:
         pixel_spacepoint_shortlist = ['-measurements',
                                       '-pixelSpacePointLink']
+        if flags.Acts.EDM.SlimContent:
+            pixel_spacepoint_shortlist = ['globalPosition']
         pixel_spacepoint_variables = '.'.join(pixel_spacepoint_shortlist)
         for pixelSpacePointCollection in pixelSpacePointCollections:
             toAOD += [f'xAOD::SpacePointContainer#{pixelSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{pixelSpacePointCollection}Aux.{pixel_spacepoint_variables}"]
+                      f"{aux_container_type}#{pixelSpacePointCollection}Aux.{pixel_spacepoint_variables}"]
 
     if stripSpacePointCollections is not None:
         strip_spacepoint_shortlist = ['topHalfStripLength', 
@@ -61,10 +67,12 @@ def PersistifySpacePoints(flags,
                                       'stripCenterDistance',
                                       'topStripCenter',
                                       'measurementLink']
+        if flags.Acts.EDM.SlimContent:
+            strip_spacepoint_shortlist = ['globalPosition']
         strip_spacepoint_variables = '.'.join(strip_spacepoint_shortlist)
         for stripSpacePointCollection in stripSpacePointCollections:
             toAOD += [f'xAOD::SpacePointContainer#{stripSpacePointCollection}',
-                      f"xAOD::SpacePointAuxContainer#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
+                      f"{aux_container_type}#{stripSpacePointCollection}Aux.{strip_spacepoint_variables}"]
             
     acc = ComponentAccumulator()
     if len(toAOD) == 0:

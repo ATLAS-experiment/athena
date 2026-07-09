@@ -627,7 +627,7 @@ def createTrackingConfigFlags():
                           createActsValidateAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsHeavyIonPass",
                           createActsHeavyIonTrackingPassFlags, prefix=True)
-    
+
     # Acts F100 validation pass
     icf.addFlagsCategory ("Tracking.ITkActsValidateF100Pass",
                           createEFValidateF100TrackingPassFlags, prefix=True)
@@ -645,7 +645,9 @@ def createTrackingConfigFlags():
     icf.addFlagsCategory ("Tracking.ITkFPGAPass",
                           createFPGATrackingPassFlags, prefix=True)    
 
-
+    # ACTS Derivation flags
+    icf.addFlag("Tracking.StoreSlimmedDataPreparation", False)
+    
     ####################################################################
 
     # Vertexing flags
