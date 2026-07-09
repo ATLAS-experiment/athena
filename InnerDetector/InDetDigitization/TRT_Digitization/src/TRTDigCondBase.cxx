@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTDigCondBase.h"
 #include "TRTDigSettings.h"
 #include "TRTDigiHelper.h"
-
-#include <cmath>
-#include <cstdlib>
-#include <utility>
 
 #include "TRT_ReadoutGeometry/TRT_DetElementCollection.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
@@ -20,13 +16,17 @@
 
 // For the random numbers.
 #include "CLHEP/Random/RandFlat.h"
+//
+#include <cmath>
+#include <cstdlib>
+#include <utility>
 
 //________________________________________________________________________________
 TRTDigCondBase::TRTDigCondBase( const TRTDigSettings* digset,
                                 const InDetDD::TRT_DetectorManager* detmgr,
                                 const TRT_ID* trt_id,
                                 int UseGasMix,
-                                ToolHandle<ITRT_StrawStatusSummaryTool> sumTool
+                                const ToolHandle<ITRT_StrawStatusSummaryTool> & sumTool
                                 )
   : AthMessaging("TRTDigCondBase"),
     m_settings(digset),

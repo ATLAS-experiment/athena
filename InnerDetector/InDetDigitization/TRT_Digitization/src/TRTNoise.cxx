@@ -44,7 +44,7 @@ TRTNoise::TRTNoise( const TRTDigSettings* digset,
                     TRTElectronicsNoise * electronicsnoise,
                     const TRT_ID* trt_id,
                     int UseGasMix,
-                    ToolHandle<ITRT_StrawStatusSummaryTool> sumTool
+                    const ToolHandle<ITRT_StrawStatusSummaryTool> &sumTool
                     )
 : AthMessaging("TRTNoise"),
   m_settings(digset),
