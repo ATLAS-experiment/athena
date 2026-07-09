@@ -46,7 +46,8 @@
   </test_desc>
   <plimit fail="0.75" warn="0.95"/>
   <TDirectory name="/">
-   <TDirectory name="SquirrelPlots">
+    <TDirectory name="SquirrelPlots">
+      <TDirectory name="InDetHeavyIonLowPtTracks">
     <TDirectory name="Tracks">
      <TDirectory name="Selected">
       <TDirectory name="Parameters">
@@ -317,6 +318,7 @@
       <hist1D name="vx_track_z0" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="vx_track_err_z0" plotopts="" tests="KS" type="TH1F"/>
      </TDirectory>
+    </TDirectory>
     </TDirectory>
    </TDirectory>
   </TDirectory>
