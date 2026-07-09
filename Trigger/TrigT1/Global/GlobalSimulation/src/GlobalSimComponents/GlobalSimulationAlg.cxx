@@ -25,13 +25,13 @@ namespace GlobalSim {
       std::stringstream ss;
       ss << "\nTOB creators (" << m_algTools.size() << ")\n";
       for (const auto& tool : m_algTools) {
-	ss << tool->toString() << '\n';
-	ss << "=========\n";
+        ss << tool->toString() << '\n';
+        ss << "=========\n";
       }
       ss << "\nTIP writers (" << m_TIPwriters.size() << ")\n";
       for (const auto& tool : m_TIPwriters) {
-	ss << tool->toString() << '\n';
-	ss << "=========\n";
+        ss << tool->toString() << '\n';
+        ss << "=========\n";
       }
  
       std::ofstream out(name() + "_init.log");
@@ -39,6 +39,19 @@ namespace GlobalSim {
       out.close();
     }
     
+    // Test that TIPwriters don't clash
+    TIPword tip_test;
+    for (const auto& tool : m_TIPwriters) {
+      ATH_MSG_VERBOSE("Current TIP word: " << tip_test);
+      TIPword tip_tmp{tool->getFullTIPWord()};
+      ATH_MSG_VERBOSE("TIP writer " << tool.name() << " produces: " << tip_tmp);
+      if((tip_tmp & tip_test).any()) {
+        ATH_MSG_ERROR("TIP word clash from " << tool->toString());
+        return StatusCode::FAILURE;
+      }
+      tip_test |= tip_tmp;
+    }
+
     return StatusCode::SUCCESS;
   }
       
@@ -51,14 +64,14 @@ namespace GlobalSim {
       ATH_MSG_INFO ("Dumping StoreGate\n" << evtStore()->dump());
     }
 
-    using TipWord = std::bitset<ITIPwriterAlgTool::s_nbits_TIP>;
+    using TIPWord = std::bitset<ITIPWriterAlgTool::s_nbits_TIP>;
 
     for (const auto& tool : m_algTools) {
       ATH_MSG_DEBUG("Running Algtool " << tool.name());
       CHECK(tool -> run(ctx));
     }
 
-    auto tipword = std::make_unique<TipWord>(); // all zeros
+    auto tipword = std::make_unique<TIPWord>(); // all zeros
     for (const auto& tool : m_TIPwriters) {
       ATH_MSG_DEBUG("Collecting TIP bits  " << tool.name());
       CHECK(tool -> updateTIP(*tipword, ctx));
@@ -77,7 +90,7 @@ namespace GlobalSim {
     ATH_MSG_DEBUG("TIP " << *tipword);
     
     // write out the selection result
-    SG::WriteHandle<TipWord> h_write(m_tipWordKey, ctx);
+    SG::WriteHandle<TIPWord> h_write(m_tipWordKey, ctx);
     CHECK(h_write.record(std::move(tipword)));
     
     return StatusCode::SUCCESS;

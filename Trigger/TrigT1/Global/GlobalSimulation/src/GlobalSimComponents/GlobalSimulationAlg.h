@@ -20,7 +20,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "IGlobalSimAlgTool.h"
-#include "ITIPwriterAlgTool.h"
+#include "ITIPWriterAlgTool.h"
 #include "../IO/TipWord_clid.h"
 
 namespace GlobalSim {
@@ -52,7 +52,7 @@ namespace GlobalSim {
       {},
       "ordered sequence of GlobalSim AlgTools"};
 
-    ToolHandleArray<ITIPwriterAlgTool> m_TIPwriters{
+    ToolHandleArray<ITIPWriterAlgTool> m_TIPwriters{
       this,
       "TIPwriters",
       {},
