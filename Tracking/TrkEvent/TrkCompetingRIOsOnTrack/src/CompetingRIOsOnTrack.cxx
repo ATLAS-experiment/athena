@@ -11,7 +11,7 @@
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "GaudiKernel/MsgStream.h"
-#include <boost/io/ios_state.hpp>
+#include <format>
 #include <iostream>
 
 // default constructor
@@ -113,8 +113,6 @@ Trk::CompetingRIOsOnTrack::indexOfMaxAssignProb() const
 MsgStream&
 Trk::CompetingRIOsOnTrack::dump(MsgStream& out) const
 {
-
-  boost::io::ios_all_saver ias(out.stream());
   out << "  - effective pars   locX : ";
   if (m_localParams.contains(Trk::locX)) {
     out << (m_localParams)[Trk::locX];
@@ -127,9 +125,7 @@ Trk::CompetingRIOsOnTrack::dump(MsgStream& out) const
   ////out << std::endl<<"  - effective error dLocX : " << m_localErrMat.error(Trk::locX);
   if (m_localParams.contains(Trk::locY)) {
     ////out << " and " << m_localErrMat.error(Trk::locY);
-    out << std::endl // << std::setiosflags(ios::right)<<std::setiosflags(ios::adjustfield)
-        << std::setiosflags(std::ios::fixed) << std::resetiosflags(std::ios::scientific)
-        << std::setprecision(6);
+    out << std::endl;
   }
   unsigned int indexOfMaxProb = indexOfMaxAssignProb();
   out << "  - Contains: |ROT# identifier    locX      dLocX       locY       dlocY     "
@@ -138,27 +134,27 @@ Trk::CompetingRIOsOnTrack::dump(MsgStream& out) const
     out << std::endl
         << "              | " << i << "  " << this->rioOnTrack(i).identify() << "  ";
     if (this->rioOnTrack(i).localParameters().contains(Trk::locX)) {
-      out << std::setw(10) << this->rioOnTrack(i).localParameters()[Trk::locX] << "  "
-          << 1 / this->rioOnTrack(i).localCovariance()(Trk::locX, Trk::locX);
+      out << std::format("{:>10.6f}  {}",
+                         this->rioOnTrack(i).localParameters()[Trk::locX],
+                         1 / this->rioOnTrack(i).localCovariance()(Trk::locX, Trk::locX));
     } else {
       out << "                         ";
     }
     if (this->rioOnTrack(i).localParameters().contains(Trk::locY)) {
-      out << "  " << std::setw(10) << this->rioOnTrack(i).localParameters()[Trk::locY] << "  "
-          << 1 / this->rioOnTrack(i).localCovariance()(Trk::locY, Trk::locY) << "  ";
+      out << std::format("  {:>10.6f}  {}  ",
+                         this->rioOnTrack(i).localParameters()[Trk::locY],
+                         1 / this->rioOnTrack(i).localCovariance()(Trk::locY, Trk::locY));
     } else {
       out << "                         ";
     }
     out << "  " << m_assignProb.at(i) << (indexOfMaxProb == i ? " **|" : "   |");
   }
-  ias.restore();
   return out;
 }
 
 std::ostream&
 Trk::CompetingRIOsOnTrack::dump(std::ostream& out) const
 {
-  boost::io::ios_all_saver ias(out);
   out << "  - effective pars   locX : ";
   if (m_localParams.contains(Trk::locX)) {
     out << (m_localParams)[Trk::locX];
@@ -171,9 +167,7 @@ Trk::CompetingRIOsOnTrack::dump(std::ostream& out) const
   ////out <<std::endl<< "  - effective error dLocX : " << m_localErrMat.error(Trk::locX);
   if (m_localParams.contains(Trk::locY)) {
     ////out <<" and "<< m_localErrMat.error(Trk::locY);
-    out << std::endl // << std::setiosflags(ios::right)<<std::setiosflags(ios::adjustfield)
-        << std::setiosflags(std::ios::fixed) << std::resetiosflags(std::ios::scientific)
-        << std::setprecision(6);
+    out << std::endl;
   }
 
   unsigned int indexOfMaxProb = indexOfMaxAssignProb();
@@ -183,19 +177,20 @@ Trk::CompetingRIOsOnTrack::dump(std::ostream& out) const
     out << std::endl
         << "              | " << i << "  " << this->rioOnTrack(i).identify() << "  ";
     if (this->rioOnTrack(i).localParameters().contains(Trk::locX)) {
-      out << std::setw(10) << this->rioOnTrack(i).localParameters()[Trk::locX] << "  "
-          << 1 / this->rioOnTrack(i).localCovariance()(Trk::locX, Trk::locX);
+      out << std::format("{:>10.6f}  {}",
+                         this->rioOnTrack(i).localParameters()[Trk::locX],
+                         1 / this->rioOnTrack(i).localCovariance()(Trk::locX, Trk::locX));
     } else {
       out << "                         ";
     }
     if (this->rioOnTrack(i).localParameters().contains(Trk::locY)) {
-      out << "  " << std::setw(10) << this->rioOnTrack(i).localParameters()[Trk::locY] << "  "
-          << 1 / this->rioOnTrack(i).localCovariance()(Trk::locY, Trk::locY) << "  ";
+      out << std::format("  {:>10.6f}  {}  ",
+                         this->rioOnTrack(i).localParameters()[Trk::locY],
+                         1 / this->rioOnTrack(i).localCovariance()(Trk::locY, Trk::locY));
     } else {
       out << "                         ";
     }
     out << "  " << m_assignProb.at(i) << (indexOfMaxProb == i ? " **|" : "   |");
   }
-  ias.restore();
   return out;
 }
