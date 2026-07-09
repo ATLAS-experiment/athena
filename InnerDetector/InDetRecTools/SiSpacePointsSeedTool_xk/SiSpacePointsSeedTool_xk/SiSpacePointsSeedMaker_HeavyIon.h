@@ -145,7 +145,6 @@ namespace InDet {
     SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
                                                                           "Name of the Magnetic Field conditions object key"};
     //@}
-    SG::ReadHandleKey<xAOD::VertexContainer> m_vertices {this, "VertexContainer", "PrimaryVertices", "vertex for impact region determination"};
 
     /// @name Properties, which will not be changed after construction
     //@{
@@ -172,7 +171,6 @@ namespace InDet {
     FloatProperty m_diverpps{this, "maxdImpactPPS", 1.7};
     FloatProperty m_diversss{this, "maxdImpactSSS", 1000.};
     BooleanProperty m_useVertexPosition {this, "useVertexPosition", false};
-    FloatProperty m_collisionRegionTolerance {this, "collisionRegionTolerance", 10. * Gaudi::mm};
     //@}
 
     /// @name Properties, which can be updated in initialize

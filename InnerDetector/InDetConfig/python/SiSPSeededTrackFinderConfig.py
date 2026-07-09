@@ -48,6 +48,7 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
         # Optimization from Igor
         kwargs.setdefault("FreeClustersCut", 2)
         kwargs.setdefault("useMBTSTimeDiff", True)
+        kwargs.setdefault("useVertexPosition", flags.Tracking.ActiveConfig.useVertexPositionDuringSeeding)
 
         # Z-coordinates primary vertices finder (only for collisions)
         if "ZvertexTool" not in kwargs:

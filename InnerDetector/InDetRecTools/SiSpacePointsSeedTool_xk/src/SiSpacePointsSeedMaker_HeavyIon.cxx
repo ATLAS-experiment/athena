@@ -40,8 +40,6 @@ StatusCode InDet::SiSpacePointsSeedMaker_HeavyIon::initialize()
   ATH_CHECK(m_spacepointsPixel.initialize(m_pixel));
   ATH_CHECK(m_spacepointsSCT.initialize(m_sct));
   ATH_CHECK(m_spacepointsOverlap.initialize(m_useOverlap));
-  // vertex
-  ATH_CHECK(m_vertices.initialize(m_useVertexPosition));
   // Get beam geometry
   //
   ATH_CHECK(m_beamSpotKey.initialize());
@@ -1408,7 +1406,12 @@ const InDet::SiSpacePointsSeed* InDet::SiSpacePointsSeedMaker_HeavyIon::next(con
 bool InDet::SiSpacePointsSeedMaker_HeavyIon::isZCompatible  
 (EventData& data, float& Zv, float& R, float& T) const
 {
-  if (Zv < m_zmin || Zv > m_zmax) return false;
+  if (m_useVertexPosition) {
+    if (Zv < data.zCollisionMinimum || Zv > data.zCollisionMaximum) return false;
+  }
+  else {
+    if (Zv < m_zmin || Zv > m_zmax) return false;
+  }
   if (!data.izvertex) return true;
 
   float dZmin = std::numeric_limits<float>::max();
