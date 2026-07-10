@@ -15,6 +15,7 @@
 #include "TClass.h"
 #include "TBuffer.h"
 #include "TClassEdit.h"
+#include "ESTLType.h"
 #include "CxxUtils/checker_macros.h"
 #include "TMemberStreamer.h"
 #include "TStreamerElement.h"
@@ -298,7 +299,7 @@ void diddle_dv_streaminfo (RootUtils::ILogger* logfn,
     // Should be fixed in root 6.26.02.
     R__WRITE_LOCKGUARD(ROOT::gCoreMutex);
     if (std::abs(TClassEdit::IsSTLCont (vec_name.c_str(), 0)) !=
-        TClassEdit::kVector)
+        ROOT::kSTLvector)
     {
       isvec = false;
     }
@@ -420,7 +421,7 @@ void test_dv (RootUtils::ILogger* logfn,
     // Should be fixed in root 6.26.02.
     R__WRITE_LOCKGUARD(ROOT::gCoreMutex);
     if (std::abs(TClassEdit::IsSTLCont (sie0->GetTypeName(), 0)) !=
-        TClassEdit::kVector)
+        ROOT::kSTLvector)
     {
       isvec = false;
     }
