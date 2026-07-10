@@ -26,7 +26,7 @@ class G4FatrasTransportTool : virtual public extends<AthAlgTool, IG4FatrasTransp
 
   public:
 
-    G4FatrasTransportTool(const std::string&, const std::string&, const IInterface*);
+    using base_class::base_class;
 
     // Algorithm finalize at begin of job
     virtual StatusCode finalize() override final;
