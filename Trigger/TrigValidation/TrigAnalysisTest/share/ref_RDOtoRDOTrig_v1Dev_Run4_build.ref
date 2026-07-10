@@ -3183,9 +3183,11 @@ HLT_mu24_msonly_L1MU14FCH:
 HLT_mu24_msonly_newFast_L1MU14FCH:
   eventCount: 2
   stepCounts:
-    0: 2
+    0: 4
+    1: 2
   stepFeatures:
-    0: 3
+    0: 5
+    1: 3
 HLT_mu26_ivarmedium_L1MU14FCH:
   eventCount: 2
   stepCounts:

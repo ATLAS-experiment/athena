@@ -83,4 +83,9 @@ TriggerHLTListRun4 = [
     ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', 'BS ESD', 'Jet'),
     ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), 'BS ESD', 'Jet'),
 
+# New EDM for Run 4 muons
+    #xAOD L2 muons (SA)
+    ('xAOD::MuonContainer#HLT_FastMuonsInfo',                                       'BS ESD AODFULL AODSLIM', 'Muon', [InViews('L2MuFastRecoPhIIViews')]),
+    ('xAOD::MuonAuxContainer#HLT_FastMuonsInfoAux.',                                'BS ESD AODFULL AODSLIM', 'Muon'),
+
 ]
