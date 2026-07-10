@@ -31,6 +31,12 @@ DEP_RE = re.compile(r"o\s+(INPUT|OUTPUT)\s+\(\s*'([^']*)'\s*,\s*'([^']*)'\s*\)")
 # Algorithm header: exactly two leading spaces, then a bare name (no "o INPUT/..").
 ALG_HEADER_RE = re.compile(r"^  (\S.*?)\s*$")
 
+# Optional per-line log prefix, as added when the block is echoed through a job
+# transform, e.g. "Derivation 13:27:00 " (transform stdout) or "13:27:00 "
+# (the clean athena log). The raw CPRun log has no such prefix (no timestamp),
+# so this leaves it untouched.
+PREFIX_RE = re.compile(r"^(?:\S+ )?\d{2}:\d{2}:\d{2} ")
+
 BLOCK_START = "Data Dependencies for Algorithms:"
 
 
@@ -45,15 +51,20 @@ def parse_log(path):
     in_block = False
     current = None
 
-    with open(path) as f:
+    with open(path, errors="replace") as f:
         for line in f:
+            # Strip an optional transform/athena log prefix so the same parser
+            # works on raw CPRun logs and on Derivation_tf/athena logs.
+            line = PREFIX_RE.sub("", line, count=1)
+
             if not in_block:
                 if BLOCK_START in line:
                     in_block = True
                 continue
 
-            # The block is emitted with no log-line prefix; the next prefixed
-            # line (e.g. "AvalancheSchedulerSvc ... INFO ...") ends it.
+            # Within the block the (de-prefixed) lines carry no log component
+            # marker; the next line that does (e.g. "AvalancheSchedulerSvc ...
+            # INFO ...") ends it.
             if line.startswith("AvalancheSchedulerSvc"):
                 break
 
