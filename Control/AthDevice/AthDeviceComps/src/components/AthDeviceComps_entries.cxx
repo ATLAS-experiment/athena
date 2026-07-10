@@ -4,6 +4,7 @@
 
 // Local include(s).
 #include "../BinaryPageMemoryResourceSvc.h"
+#include "../CopiesAdaptorTool.h"
 #include "../DebugMemoryResourceTool.h"
 #include "../HostCopyTool.h"
 #include "../HostMemoryResourceTool.h"
@@ -13,6 +14,7 @@
 
 // Declare the components in the package.
 DECLARE_COMPONENT(AthDevice::BinaryPageMemoryResourceSvc)
+DECLARE_COMPONENT(AthDevice::CopiesAdaptorTool)
 DECLARE_COMPONENT(AthDevice::DebugMemoryResourceTool)
 DECLARE_COMPONENT(AthDevice::HostCopyTool)
 DECLARE_COMPONENT(AthDevice::HostMemoryResourceTool)
