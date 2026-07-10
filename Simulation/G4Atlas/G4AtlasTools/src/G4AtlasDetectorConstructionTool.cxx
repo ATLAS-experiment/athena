@@ -69,6 +69,8 @@ StatusCode G4AtlasDetectorConstructionTool::initialize( )
   ATH_CHECK( m_fieldManagers.retrieve() );
 
   ATH_CHECK( m_G4CaloTransportTool.retrieve( DisableTool{ m_G4CaloTransportTool.empty() } ) ); 
+  ATH_CHECK( m_G4FatrasTransportTool.retrieve( DisableTool{ m_G4FatrasTransportTool.empty() } ) ); 
+
 
   return StatusCode::SUCCESS;
 }
@@ -173,6 +175,16 @@ void G4AtlasDetectorConstructionTool::G4AtlasDetectorConstruction::
       return;
     }
   }
+
+  if (m_detConstructionTool->m_G4FatrasTransportTool.isEnabled()) {
+    ATH_MSG_DEBUG("Setting up G4FatrasTransportTool");
+    if (m_detConstructionTool->m_G4FatrasTransportTool->initializePropagator()
+            .isFailure()) {
+      ATH_MSG_FATAL("Failed to initialize G4FatrasTransportTool for worker thread.");
+      return;
+    }
+  }
+
 
   return;
 }

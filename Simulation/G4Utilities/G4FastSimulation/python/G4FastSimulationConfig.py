@@ -20,19 +20,16 @@ def DeadMaterialShowerCfg(flags, **kwargs):
 
 def FatrasG4Cfg(flags, **kwargs):
     result = ComponentAccumulator()
+
+    # Set the G4FatrasTransportTool
+    from G4AtlasTools.G4AtlasToolsConfig import G4FatrasTransportToolCfg
+    kwargs.setdefault("G4FatrasTransportTool", result.addPublicTool(result.popToolsAndMerge(G4FatrasTransportToolCfg(flags))))
+    kwargs.setdefault('doG4Transport', True)
+
     # Name of region where FatrasG4 will be triggered
     kwargs.setdefault("RegionName", "InDet")
 
-    # Set the ActsFatrasG4Tool part
-    from G4AtlasTools.G4AtlasToolsConfig import ActsFatrasG4ToolCfg
-    if "ActsFatrasG4Tool" not in kwargs:        
-        kwargs.setdefault("ActsFatrasG4Tool", result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags))))
-    
-    fatrasG4Tool = CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs)
-    # declare produced data
-    # ExtraOutputs is now declared in SimHitContainerListCfg in G4AtlasToolsConfig.py, and called from G4AtlasAlgConfig.py
-    result.setPrivateTools(fatrasG4Tool)
-
+    result.setPrivateTools(CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs))
     return result
 
 def AFatrasG4Cfg(flags, **kwargs):
@@ -51,6 +48,7 @@ def AFatrasG4Cfg(flags, **kwargs):
     result.setPrivateTools(aFatrasG4Tool)
 
     return result
+
 
 def FastCaloSimCfg(flags, **kwargs):
     result = ComponentAccumulator()

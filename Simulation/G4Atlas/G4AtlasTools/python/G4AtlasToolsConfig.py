@@ -564,3 +564,24 @@ def EmptySensitiveDetectorMasterToolCfg(name="EmptySensitiveDetectorMasterTool",
     tool = result.popToolsAndMerge(CompFactory.SensitiveDetectorMasterTool(name, **kwargs))
     result.setPrivateTools(tool)
     return result
+
+def G4FatrasTransportToolCfg(flags, name='G4FatrasTransportTool', **kwargs):
+    result = ComponentAccumulator()
+    # Use simplified geometry if path to simplified geometry is provided
+    # Otherwise, use the full geometry for the transport (Note that this will be very slow) 
+    kwargs.setdefault("UseSimplifiedGeo", bool(flags.Sim.SimplifiedGeoPath))
+    if flags.Sim.SimplifiedGeoPath:
+        # What is the name of the logical world volume of the simplified geometry?
+        kwargs.setdefault('SimplifiedWorldLogName', "WorldLog")
+        # At what volume will we stop the transport?
+        kwargs.setdefault('TransportLimitVolume', "Envelope")
+        # What is the maximum number of Geant4 steps taken in the transport?
+        kwargs.setdefault('MaxSteps', 1)
+    else:
+        # At what volume will be stop the transport? 
+        kwargs.setdefault('TransportLimitVolume', "LAr")
+        # What is the maximum number of Geant4 steps taken in the transport?
+        kwargs.setdefault('MaxSteps', 1)
+    
+    result.setPrivateTools(CompFactory.G4FatrasTransportTool(name, **kwargs))
+    return result

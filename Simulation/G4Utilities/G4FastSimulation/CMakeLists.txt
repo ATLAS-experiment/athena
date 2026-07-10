@@ -12,15 +12,13 @@ find_package( Geant4 )
 # Possible extra dependencies:
 set( extra_lib )
 if( NOT SIMULATIONBASE )
-   set( extra_lib ISF_FastCaloSimInterfaces 
-                  ISF_FastCaloSimParametrizationLib TruthUtils 
-                  StoreGateLib InDetSimEvent    # for ActsFatrasG4 (StoreGate/WriteHandleKeyArray)
-       )
+   set( extra_lib ISF_FastCaloSimInterfaces ISF_FastCaloSimParametrizationLib TruthUtils
+                  StoreGateLib InDetSimEvent )
 endif()
 # FastCaloSim G4VFastSimulationModel should only be used in Athena builds
 set ( extra_src )
 if( NOT SIMULATIONBASE )
-	set( extra_src src/FastCaloSim.cxx src/FastCaloSimTool.cxx src/FatrasG4.cxx src/FatrasG4Tool.cxx src/AFatrasG4.cxx src/AFatrasG4Tool.cxx )
+	set( extra_src src/FastCaloSim.cxx src/FastCaloSimTool.cxx src/FatrasG4.cxx src/FatrasG4Tool.cxx src/AFatrasG4.cxx src/AFatrasG4Tool.cxx  src/FatrasG4PhotonConversion.cxx )
 endif()
 
 # Component(s) in the package:
