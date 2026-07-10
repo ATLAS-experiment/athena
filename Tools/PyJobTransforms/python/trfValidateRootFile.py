@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @Package PyJobTransforms.trfValidateRootFile
 # @brief Functionality to test a Root file for corruption
@@ -133,6 +133,8 @@ def checkNTupleFieldWise(ntuple):
                 values = bulk.ReadBulk(clusterRange)
                 if msg.isEnabledFor(logging.DEBUG):
                     msg.debug(f"        values array at {values}")
+                # Be sure that this gets destroyed before field.
+                del bulk
 
     except RException as err:
         from traceback import format_exception
