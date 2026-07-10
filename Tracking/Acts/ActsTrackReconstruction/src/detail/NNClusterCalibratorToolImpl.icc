@@ -86,13 +86,14 @@ NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
   nnInput.set(NNinput::Index::theta, std::atan(tan_incidence_angles.second));
 
   // 1st call to
-  std::vector<float> probabilities = predictNumberOfClusters(nnInput);
+  std::array<float, 3> probabilities = predictNumberOfClusters(nnInput);
   // pick max probability
   const int maxProbNumberIndex = NumberNNoutput::maxProbIndex(probabilities);
   const int maxProbNumberOfClusters = maxProbNumberIndex + 1;
 
   PositionNNoutput positions =
       predictPositions(nnInput, maxProbNumberOfClusters);
+
   // these are deltas w.r.t. cluster center
   typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos pos;
   pos(0) = nnInput.indexCoordToRealCoord(positions.x(maxProbNumberIndex),
@@ -100,7 +101,6 @@ NNClusterCalibrator<calib_data_t, traj_t>::calibrate(
   pos(1) = nnInput.indexCoordToRealCoord(positions.y(maxProbNumberIndex),
                                          NNinput::Index::pitchYOffset);
 
-  // TODO the values of covaraince seems too large - this needs investigation
   typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Cov cov;
   cov(1, 0) = cov(0, 1) = 0.0f;
   cov(0, 0) = nnInput.precisionToRealCoord(positions.xprec(maxProbNumberIndex),
@@ -157,9 +157,7 @@ NNClusterCalibrator<calib_data_t, traj_t>::weightedClusterCenter(
   }
   position /= sum;
 
-  InDetDD::SiCellId centerCell = design->cellIdOfPosition(position);
-
-  return centerCell;
+  return design->cellIdOfPosition(position);
 }
 
 template <typename calib_data_t, typename traj_t>
@@ -215,15 +213,13 @@ void NNClusterCalibrator<calib_data_t, traj_t>::fillClusterData(
     const int x = NNinput::toModuleIndex(i, xCenter);
     const int y = NNinput::toModuleIndex(i, yCenter);
     const InDetDD::SiCellId cell(x, y);
-    if (x >= 0)  // TODO missing max value cap, it is module dependent and needs additional query of design
+    if (cell.isValid())
       nn.setPixelXPitch(i, design->parameters(cell).width().xPhi());
-    if (y >= 0)
-      nn.setPixelYPitch(i, design->parameters(cell).width().xEta());
   }
 }
 
 template <typename calib_data_t, typename traj_t>
-std::vector<float>
+std::array<float, 3>
 NNClusterCalibrator<calib_data_t, traj_t>::predictNumberOfClusters(
     NNinput& nn) const {
   Ort::Session& session = *m_options.m_models->numberNetwork;
@@ -246,16 +242,16 @@ NNClusterCalibrator<calib_data_t, traj_t>::predictNumberOfClusters(
   Ort::AllocatorWithDefaultOptions allocator;
   auto inputName = session.GetInputNameAllocated(0, allocator);
   auto outputName = session.GetOutputNameAllocated(0, allocator);
-  const char* inputNames[] = {inputName.get()};
-  const char* outputNames[] = {outputName.get()};
+  std::array<const char*, 1> inputNames({inputName.get()});
+  std::array<const char*, 1> outputNames({outputName.get()});
 
   // Run inference
-  auto outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames,
-                                   &inputTensor, 1, outputNames, 1);
+  auto outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames.data(),
+                                   &inputTensor, 1, outputNames.data(), 1);
 
   // Extract output
   const float* outputData = outputTensors[0].GetTensorData<float>();
-  return std::vector<float>(outputData, outputData + 3);
+  return std::array<float, 3>({*outputData, *(outputData+1),  *(outputData+2)});
 }
 
 template <typename calib_data_t, typename traj_t>
@@ -294,8 +290,8 @@ PositionNNoutput NNClusterCalibrator<calib_data_t, traj_t>::predictPositions(
   Ort::AllocatorWithDefaultOptions allocator;
   auto inputName = session.GetInputNameAllocated(0, allocator);
   auto outputName = session.GetOutputNameAllocated(0, allocator);
-  const char* inputNames[] = {inputName.get()};
-  const char* outputNames[] = {outputName.get()};
+  std::array<const char*, 1> inputNames({inputName.get()});
+  std::array<const char*, 1> outputNames({outputName.get()});
 
   Ort::TypeInfo typeInfo = session.GetOutputTypeInfo(0);
   auto tensorInfoOutput = typeInfo.GetTensorTypeAndShapeInfo();
@@ -304,10 +300,9 @@ PositionNNoutput NNClusterCalibrator<calib_data_t, traj_t>::predictPositions(
   // this shape is supposed to always be: [number*5]
   assert(shape[1] == 5 * number);
 
-  // TODO investiage if the ONNX can pack the output directly into predefined memory
   // Run inference
-  auto outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames,
-                                   &inputTensor, 1, outputNames, 1);
+  auto outputTensors = session.Run(Ort::RunOptions{nullptr}, inputNames.data(),
+                                   &inputTensor, 1, outputNames.data(), 1);
 
   // Extract output
   const float* outputData = outputTensors[0].GetTensorData<float>();
@@ -316,11 +311,6 @@ PositionNNoutput NNClusterCalibrator<calib_data_t, traj_t>::predictPositions(
   return PositionNNoutput(outputData, outputData + (number * 5));
 }
 
-template <typename calib_data_t, typename traj_t>
-typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos
-NNClusterCalibrator<calib_data_t, traj_t>::computeOutputPostion(
-    const PositionNNoutput& /*positions*/, int /*bestIndex*/,
-    const NNinput& /*input*/) const {}
 
 }  // namespace ActsTrk::detail
 
