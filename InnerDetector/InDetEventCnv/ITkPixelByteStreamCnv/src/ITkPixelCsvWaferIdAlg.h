@@ -30,6 +30,11 @@ public:
         std::string flx_card_device;
         unsigned int fiber = 0;
     };
+    struct FelixCsvRow {
+        std::string host;
+        unsigned int card1 = 999;
+        unsigned int card2 = 999;
+    };
 
     ITkPixelCsvWaferIdAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~ITkPixelCsvWaferIdAlg() = default;
@@ -64,6 +69,10 @@ private:
                                            "CsvFile",
                                            "AT2-IP-ES-0016_v1.41_INCOMPLETE-ModuleA_slim.csv",
                                            "CSV file containing SP chain, Module and FE columns"};
+    Gaudi::Property<std::string> m_FelixCardFile{this,
+                                           "FelixCardFile",
+                                           "FELIXRackAllocation_20260709_slim.csv",
+                                           "CSV file containing SP chain, Module and FE columns"};
     Gaudi::Property<std::string> m_outputFile{this,
                                               "OutputFile",
                                               "ITkPixelWaferIds.txt",
@@ -71,6 +80,7 @@ private:
 
     const PixelID* m_pixIdHelper = nullptr;
     std::vector<CsvRow> m_rows;
+    std::vector<FelixCsvRow> m_felix_rows;
 
     mutable std::atomic<bool> m_done{false};
 };

@@ -113,17 +113,26 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
         ATH_MSG_FATAL("Could not resolve CSV file: " << m_csvFile.value());
         return StatusCode::FAILURE;
     }
-
-
     std::ifstream input(resolvedCsv);
     if (!input.good()) {
         ATH_MSG_FATAL("Could not open CSV file: " << resolvedCsv);
         return StatusCode::FAILURE;
     }
+    const std::string resolvedFelixCsv = PathResolver::find_file(m_FelixCardFile.value(), "DATAPATH");
+    if (resolvedFelixCsv.empty()) {
+        ATH_MSG_FATAL("Could not resolve FELIX CSV file: " << m_FelixCardFile.value());
+        return StatusCode::FAILURE;
+    }
+    std::ifstream inputFelix(resolvedFelixCsv);
+    if (!inputFelix.good()) {
+        ATH_MSG_FATAL("Could not open FELIX CSV file: " << resolvedFelixCsv);
+        return StatusCode::FAILURE;
+    }
 
+    //Load and store module CSV sheet
     m_rows.clear();
 
-    ATH_MSG_INFO("Loading CSV");
+    ATH_MSG_INFO("Loading FE chips CSV");
     std::string line;
     bool firstLine = true;
     while (std::getline(input, line)) {
@@ -137,7 +146,7 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
         }
         const std::vector<std::string> fields = splitCsvLine(line);
         if (fields.size() < 5) {
-            ATH_MSG_WARNING("Skipping malformed CSV line: " << line);
+            ATH_MSG_WARNING("Skipping malformed Chips CSV line: " << line);
             continue;
         }
 
@@ -151,13 +160,44 @@ StatusCode ITkPixelCsvWaferIdAlg::loadCsv() {
         m_rows.push_back(std::move(row));
     }
 
-    ATH_MSG_INFO("Loaded " << m_rows.size() << " CSV rows from " << resolvedCsv);
+    ATH_MSG_INFO("Loaded " << m_rows.size() << " Front-End Chips CSV rows from " << resolvedCsv);
+
+
+    //Load and store FELIX CSV sheet
+
+
+    m_felix_rows.clear();
+
+    ATH_MSG_INFO("Loading FELIX CSV");
+    firstLine = true;
+    while (std::getline(inputFelix, line)) {
+        if (line.empty()) {
+            continue;
+        }
+        if (firstLine) {
+            firstLine = false;
+            continue;
+        }
+        const std::vector<std::string> fields = splitCsvLine(line);
+        if (fields.size() < 3) {
+            ATH_MSG_WARNING("Skipping malformed FELIX CSV line: " << line);
+            continue;
+        }
+
+        FelixCsvRow row;
+        row.host = trim(fields[0]);
+        row.card1 = (unsigned int) std::stoi(trim(fields[1]));
+        row.card2 = (unsigned int) std::stoi(trim(fields[2]));
+        m_felix_rows.push_back(std::move(row));
+    }
+
+    ATH_MSG_INFO("Loaded " << m_felix_rows.size() << " FELIX CSV rows from " << resolvedFelixCsv);
     return StatusCode::SUCCESS;
 }
 
 std::tuple< Identifier, int, std::bitset<32> > ITkPixelCsvWaferIdAlg::waferId(const CsvRow& row) const {
-    //ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
-    //                << ", module " << row.md << ", FE " << row.fe);
+    ATH_MSG_DEBUG("waferId lookup for SP chain " << row.spChain
+                    << ", module " << row.md << ", FE " << row.fe);
 
     //SP chain is like G-IS-L05-R05-A-SP2
     std::vector<std::string> spChain_cur = parseSPChain(row.spChain);
@@ -239,6 +279,8 @@ int ITkPixelCsvWaferIdAlg::layer_disk(const std::vector<std::string>& spchain) c
     else{ // endcap and barrel rings - all considered as 'endcap' disks
         if (spchain[2] == "L01" &&
             (spchain.at(5) == "SP1" || spchain.at(5) == "SP3")) { // barrel vertical small combined rings, disk 0
+            ATH_MSG_DEBUG("added layer 0 barrel vertical combined ring: SP chain "
+                << spchain[1]<< spchain[2]<< spchain[3]<< spchain[4]<< spchain[5]);
             return 0;
         }
         else if (spchain[2] == "L01" &&
@@ -283,13 +325,14 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
         }
     }
     else{ // endcap and barrel rings - all considered as disks
-        if (spchain[2] == "L01" &&
-            (spchain.at(5) == "SP1" || spchain.at(5) == "SP3")) { // barrel vertical small combined rings, disk 0
+        if (ld == 0) { // barrel vertical small combined rings, disk 0
             std::string sp_str(1, (spchain.at(5)[2])); // SP=1 and SP=3 alternate in phi
             if(sp_str == "1"){
+                ATH_MSG_DEBUG( "return phi = " << 6 * (stoi(mod) - 1 ) + 2 * (fe - 1));
                 return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1); // probably wrong offset, TOCHECK
             }
             else if(sp_str == "3"){
+                ATH_MSG_DEBUG( "return phi = " << 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) + 1);
                 return 6 * (stoi(mod) - 1 ) + 2 * (fe - 1) + 1; // probably wrong offset, TOCHECK
             }
             else{
@@ -314,8 +357,8 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
         }
         //barrel inclined rings
         else if(ld == 3 || ld == 5 || ld ==7){ //OB inclined rings, disks 3, 5, 7
-            std::string phi_str = mod.substr(3,2); 
-            int phi = std::stoi(phi_str);
+            std::string phi_str = mod.substr(2,2); 
+            int phi = std::stoi(phi_str)-1;
             return phi;
         }
         else if(ld == 1){  //end-cap intermediate rings, inner system, disk 1 - triplets: one module per FE /!\ 0-17
@@ -329,11 +372,10 @@ int ITkPixelCsvWaferIdAlg::phi_module(const std::vector<std::string>& spchain, c
             else if(sp_str == "2"){
                 return 2 * (stoi(mod) - 1 ) + 1; // probably wrong offset, TODO need to revisit
             }
-            //return stoi(mod) * fe; 
         }
         else if(ld == 4 || ld == 6 || ld ==8){ //Outer EC disks 4, 6, 8
             std::string phi_str = mod.substr(2,2); 
-            int phi = std::stoi(phi_str);
+            int phi = std::stoi(phi_str) - 1;
             return phi;
         }
         else{
@@ -371,7 +413,7 @@ int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, c
     else{
         if(spchain[2] == "L01"){ // barrel vertical small and large combined rings, disk 0
             std::string eta_str = (spchain.at(3)).substr(1,2);
-            return std::stoi(eta_str);
+            return std::stoi(eta_str)-1;
         }
         else if(ld == 3 || ld == 5 || ld ==7){ //OB inclined rings, disks 3, 5, 7
             std::string eta_str = (spchain.at(3)).substr(1,2);
@@ -399,8 +441,9 @@ int ITkPixelCsvWaferIdAlg::eta_module(const std::vector<std::string>& spchain, c
 
 
 int ITkPixelCsvWaferIdAlg::feID(const std::vector<std::string>& spchain, int fe) const {
+    int b_ec = barrel_ec(spchain);
     int ld = layer_disk(spchain);
-    if(ld < 2){ //triplets
+    if(ld ==0 || (ld == 1 && fabs(b_ec) == 2 ) ){ //triplets
         return 0;
     }
     else{ // quads
@@ -416,7 +459,7 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& 
     int fe_id = feID(spchain, fe);
     int b_ec = barrel_ec(spchain);
     int etamod = eta_module(spchain, mod, fe);
-
+    //these bits encode the merging scheme of modules
     if( b_ec == 0 ){ // barrel
         if(ld == 1 || ld ==2 ){ //L1, L2 flat, 4 to 2 merging
             if(fe_id < 2){
@@ -470,6 +513,7 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& 
             }
         }
     }
+    //add the chip ID ON/OFF (1b) and RD53c (1b) bits
     febits |= std::bitset<32>("00001100000000000000000000000000");
     return febits;
 }
@@ -481,11 +525,14 @@ std::vector<int> ITkPixelCsvWaferIdAlg::DmaBuffer() const {
 
     size_t i = 0;
     while (i < m_rows.size()) {
-        // find contiguous block for the same felix card device
+        // find contiguous block for the same felix card device -- NOT CORRECT 
         const std::string& card = m_rows[i].flx_card_device;
         size_t j = i;
         unsigned int minFiber = std::numeric_limits<unsigned int>::max();
-        for (; j < m_rows.size() && m_rows[j].flx_card_device == card; ++j) {
+        for (; j < m_rows.size() ; ++j) {
+            if(m_rows[j].flx_card_device != card){
+                continue;
+            }
             if (m_rows[j].fiber > 0 && m_rows[j].fiber < minFiber){
                 minFiber = m_rows[j].fiber;
             }
