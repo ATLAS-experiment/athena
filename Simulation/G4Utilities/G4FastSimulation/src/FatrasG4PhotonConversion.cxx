@@ -74,7 +74,7 @@ std::pair<double, double> FatrasG4PhotonConversion::generatePathLimits(
   constexpr double p2 = -6.07682e-01;
 
   // Calculate xi
-  const double xi = p0 + p1 * std::pow(p, p2);
+  constexpr double xi = p0 + p1 * std::pow(p, p2);
 
   double u = generator.flat();
   // This is a transformation of eq. 3.75

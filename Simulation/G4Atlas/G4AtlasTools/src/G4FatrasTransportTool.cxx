@@ -112,7 +112,7 @@ G4PropagatorInField* G4FatrasTransportTool::makePropagator() {
   return propagator;
 }
 
-void G4FatrasTransportTool::doStep(G4FieldTrack& fieldTrack) {
+void G4FatrasTransportTool::doStep(G4FieldTrack& fieldTrack) const {
 
   // Get the propagator and navigator for the current thread
   auto navigator = s_propagator->GetNavigatorForPropagating();
@@ -150,7 +150,7 @@ void G4FatrasTransportTool::doStep(G4FieldTrack& fieldTrack) {
 }
 
 std::vector<G4FieldTrack> G4FatrasTransportTool::transport(
-    const G4Track& G4InputTrack) {
+    const G4Track& G4InputTrack) const {
 
   // Get the PDG ID of the particle
   int pdgId = G4InputTrack.GetDefinition()->GetPDGEncoding();
