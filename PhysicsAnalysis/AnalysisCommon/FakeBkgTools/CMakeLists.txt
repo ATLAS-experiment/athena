@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 atlas_subdir( FakeBkgTools )
 
 find_package( ROOT COMPONENTS Core Tree RIO MathCore Gpad Hist MathMore Minuit Matrix )
@@ -38,5 +38,5 @@ endforeach()
 
 atlas_add_test( ut_fbtTestBasics
       SCRIPT $<TARGET_FILE:fbtTestBasics>
-      POST_EXEC_SCRIPT nopost.sh
+      POST_EXEC_SCRIPT noerror.sh
 )

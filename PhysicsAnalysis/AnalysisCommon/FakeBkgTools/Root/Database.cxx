@@ -62,7 +62,7 @@ bool Database::needEventInfo() const
     return false;
 }
 
-bool Database::fillEfficiencies(ParticleData& pd, const xAOD::IParticle& p, const xAOD::EventInfo& eventInfo, std::string& error) const
+bool Database::fillEfficiencies(ParticleData& pd, const xAOD::IParticle& p, const xAOD::EventInfo* eventInfo, std::string& error) const
 {
     std::map<unsigned, EfficiencyTable::BoundType> cachedParamVals;
     /// Loop over all the type of efficiencies (real, fake, fake factor) that were requested to be filled
@@ -127,7 +127,7 @@ bool Database::fillEfficiencies(ParticleData& pd, const xAOD::IParticle& p, cons
     return true;
 }
 
-int Database::readEfficiencyFromTable(Efficiency& eff, const EfficiencyTable& table, std::map<unsigned, EfficiencyTable::BoundType>& cachedParamVals, const xAOD::IParticle& p, const xAOD::EventInfo& eventInfo, std::string& error) const
+int Database::readEfficiencyFromTable(Efficiency& eff, const EfficiencyTable& table, std::map<unsigned, EfficiencyTable::BoundType>& cachedParamVals, const xAOD::IParticle& p, const xAOD::EventInfo* eventInfo, std::string& error) const
 {
     /// Check if the particle falls in one bin of this table
     int bin = 0;
@@ -185,7 +185,8 @@ int Database::readEfficiencyFromTable(Efficiency& eff, const EfficiencyTable& ta
 
 void Database::importXML(std::string filename)
 {
-    filename = PathResolverFindCalibFile(filename);
+    if (filename[0] != '/')
+      filename = PathResolverFindCalibFile(filename);
 
     std::ifstream xml;
     xml.open(filename, std::ios_base::binary);
@@ -746,7 +747,9 @@ void Database::importDefaultROOT(std::string filename)
     const std::regex rxTH2(prefix + "2D_(el|mu|tau|e2y)_([[:alnum:]]+)" + suffix);
     const std::regex rxTH3(prefix + "3D_(el|mu|tau)_([[:alnum:]]+)_([[:alnum:]]+)" + suffix);
     
-    filename = PathResolverFindCalibFile(filename);
+    if (filename[0] != '/')
+      filename = PathResolverFindCalibFile(filename);
+
     TFile* file = TFile::Open(filename.c_str(), "READ");
     if(!file || !file->IsOpen())
     {
@@ -1009,7 +1012,7 @@ void Database::importSystTH1(const TH1* hist, EfficiencyType type, const std::st
     }
 }
 
-bool Database::retrieveParameterValue(const xAOD::IParticle& p, const xAOD::EventInfo& eventInfo, const Param& param, EfficiencyTable::BoundType& val) const
+bool Database::retrieveParameterValue(const xAOD::IParticle& p, const xAOD::EventInfo* eventInfo, const Param& param, EfficiencyTable::BoundType& val) const
 {
   #ifdef FAKEBKGTOOLS_ATLAS_ENVIRONMENT
     float energy_scale = (m_useGeV? 0.001f : 1.f);  
@@ -1038,13 +1041,16 @@ bool Database::retrieveParameterValue(const xAOD::IParticle& p, const xAOD::Even
     }
     else if(param.level == Param::Level::EVENT)
     {
+        if (!eventInfo) {
+          throw(GenericError() << "unexpected error: No EventInfo, but asked for event parameter");
+        }
         if(param.type == Param::Type::CUSTOM_FLOAT) {
           SG::ConstAccessor<float> acc(param.name);
-          val.as_float = acc(eventInfo);
+          val.as_float = acc(*eventInfo);
         }
         else if(param.type == Param::Type::CUSTOM_INT) {
           SG::ConstAccessor<int> acc(param.name);
-          val.as_int = acc(eventInfo);
+          val.as_int = acc(*eventInfo);
         }
         else return false;
     }
