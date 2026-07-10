@@ -1,5 +1,3 @@
-#include "../TestSender.h"
-#include "../TestReciever.h"
+#include "../AsyncgRPCComputeAlg.h"
 
-DECLARE_COMPONENT( TestSender )
-DECLARE_COMPONENT( TestReciever )
+DECLARE_COMPONENT( AsyncgRPCComputeAlg )

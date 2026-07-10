@@ -11,7 +11,7 @@ find_package(gRPC REQUIRED)
 message(STATUS "gRPC_DIR = ${gRPC_DIR}")
 
 atlas_add_library(EFTrackingDataTransferLib
-  src/*.cxx src/*.cc
+  src/*.cxx EFTrackingDataTransfer/*.pb.cc
   NO_PUBLIC_HEADERS
   LINK_LIBRARIES AnaAlgorithmLib protobuf::libprotobuf gRPC::grpc++)
 

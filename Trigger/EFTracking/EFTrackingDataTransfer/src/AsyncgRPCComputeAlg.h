@@ -1,0 +1,48 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef EFTRACKINGDATATRANSFER_ASYNCGRPCOMPUTEALG_H
+#define EFTRACKINGDATATRANSFER_ASYNCGRPCOMPUTEALG_H
+
+// Framework includes
+#include "AthenaBaseComps/AthAsynchronousAlgorithm.h"
+
+// STL includes
+#include <grpcpp/grpcpp.h>
+
+#include <string>
+
+#include "EFTrackingDataTransfer/Message.pb.h"
+using grpc::Channel;
+using grpc::ClientContext;
+using grpc::Status;
+
+#include "EFTrackingDataTransfer/Message.grpc.pb.h"
+
+/**
+ * @class AsyncgRPCComputeAlg
+ * @brief
+ **/
+class AsyncgRPCComputeAlg : public AthAsynchronousAlgorithm {
+ public:
+  AsyncgRPCComputeAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  virtual ~AsyncgRPCComputeAlg() override;
+
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext& context) const override;
+  virtual StatusCode restoreAfterSuspend() const override;
+  virtual StatusCode finalize() override;
+
+ private:
+  // the end goal is that this message is actually provided/fille by a tool
+  // for now it has a dummy implementation
+  void encodeMessage(OffloadMessage&) const;
+
+  // the end goal is that decoding is done by a tool
+  // for now it has a dummy implementation
+  void decodeMessage(const OffloadMessage&) const;
+
+  mutable std::unique_ptr<UniversalOffloadService::Stub> m_stub;
+};
+
+#endif  // EFTRACKINGDATATRANSFER_ASYNCGRPCOMPUTEALG_H

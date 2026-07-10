@@ -2,35 +2,36 @@
 #include <memory>
 #include <grpcpp/grpcpp.h>
 
-#include "../src/TestMessages.pb.h"
-#include "../src/TestMessages.grpc.pb.h"
+#include "EFTrackingDataTransfer/Message.pb.h"
+#include "EFTrackingDataTransfer/Message.grpc.pb.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-class TestServiceImpl final : public TestService::Service {
+class TestServiceImpl final : public UniversalOffloadService::Service {
 public:
     int increment=0;
     Status doComputation(ServerContext* context,
-                   const TestInputData* request,
-                   TestOutputData* response) override {
+                   const OffloadMessage* request,
+                   OffloadMessage* response) override {
 
-        std::cout << "... TestServiceImpl::Received request of ID: " << request->id() << "\n";
+        std::cout << "... TestServiceImpl::Received request of ID: " << request->identifier() << "\n";
         
         // Copy context
-        *response->mutable_eventinfo() = request->eventinfo();
+        *response->mutable_event() = request->event();
 
         // Copy ID
-        response->set_id("TestServiceImpl back to "+request->id());
+        response->set_identifier("TestServiceImpl back to "+request->identifier());
 
         // Process data
-        for (int v : request->data()) {
-            response->add_data(v * 2+increment);
+        auto& x = request->float_branches().at("x").values();
+        for (int v : x) {
+            response->mutable_float_branches()->at("x").add_values(v+1);
         }
         increment++;
-        std::cout << "... TestServiceImpl::Returing response with: " << response->id() << "\n";
+        std::cout << "... TestServiceImpl::Returing response with: " << response->identifier() << "\n";
 
         return Status::OK;
     }

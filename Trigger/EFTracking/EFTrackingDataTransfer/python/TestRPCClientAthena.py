@@ -16,35 +16,11 @@ acc = MainServicesCfg(flags)
 
 acc.merge(PoolReadCfg(flags))
 
-acc.addEventAlgo(CompFactory.TestSender("Sender1",
-    OutputLevel=DEBUG,
-    ValueToSend=7, 
-    SizeToSend=12, 
-    OutputKey="Data1"
-))
+acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("A1",
+    OutputLevel=DEBUG ))
 
-acc.addEventAlgo(CompFactory.TestSender("Sender2",
-    OutputLevel=DEBUG,
-    ValueToSend=-20, 
-    SizeToSend=2, 
-    OutputKey="Data2"
-))
-
-
-
-acc.addEventAlgo(CompFactory.TestReciever("Reciever1",
-    OutputLevel=DEBUG,
-    InputKey="Data1" # this is the synchronisation mechanism between the Sender1 and this alg
-))
-
-
-acc.addEventAlgo(CompFactory.TestReciever("Reciever2",
-    OutputLevel=DEBUG,
-    InputKey="Data2" # this is the synchronisation mechanism between the Sender2 and this alg
-))
-
-
-
+acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("A2",
+    OutputLevel=DEBUG ))
 
 
 

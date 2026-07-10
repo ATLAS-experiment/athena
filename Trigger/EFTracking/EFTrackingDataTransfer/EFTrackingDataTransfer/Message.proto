@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+
+message EventInfo {
+   uint32  runNumber         = 1;
+   uint64  eventNumber       = 2;
+   uint32  lumiBlock         = 3;
+   uint32  timeStamp         = 4;
+   uint32  timeStampNSOffset = 5;
+   uint32  bcid              = 6;
+   uint32  extendedLevel1ID  = 7;
+}
+
+// protobuf maps cannot directly contain repeated fields,
+// so we wrap the vectors.
+message UIntVector {
+  repeated uint32 values = 1;
+}
+
+message IntVector {
+  repeated sint32 values = 1;
+}
+
+message FloatVector {
+  repeated float values = 1;
+}
+
+message DoubleVector {
+  repeated double values = 1;
+}
+
+
+message OffloadMessage {
+  string identifier = 1;
+  EventInfo event = 2;
+  map<string, UIntVector> uint_branches  = 10;
+  map<string, IntVector>  int_branches   = 11;
+  map<string, FloatVector> float_branches = 12;
+  map<string, DoubleVector> double_branches = 13;
+}
+
+service UniversalOffloadService {
+  rpc doComputation(OffloadMessage) returns (OffloadMessage) {}
+}
+
+/*
+plugin=$LCG_RELEASE_BASE/grpc/1.62.3-d3268/x86_64-el9-gcc14-opt/bin/grpc_cpp_plugin
+protoc -I=. \
+ --cpp_out=. \
+ --grpc_out=. \
+ --plugin=protoc-gen-grpc=$plugin \
+Message.proto
+*/
