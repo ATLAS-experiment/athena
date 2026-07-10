@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PMGTools )
@@ -60,13 +60,13 @@ if( XAOD_STANDALONE )
       SOURCES test/ut_PMGSherpa22VJetsWeightTool_test.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} PMGToolsLib ${xaod_access_lib}
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( ut_PMGSherpaVjetsSysTool_test
       SOURCES test/ut_PMGSherpaVjetsSysTool_test.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} PMGToolsLib ${xaod_access_lib}
-      POST_EXEC_SCRIPT nopost.sh )
+      POST_EXEC_SCRIPT noerror.sh )
 endif()
 # ... AthAnalysis/AnalysisBase
 # Athena tests only with POOL access (ATEAM-681), AnalysisBase tests with xAOD access
@@ -74,9 +74,11 @@ atlas_add_test( ut_PMGTruthWeightTool_test
    SOURCES test/ut_PMGTruthWeightTool_test.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AsgTools PMGAnalysisInterfacesLib PMGToolsLib xAODTruth ${xaod_access_lib}
-   POST_EXEC_SCRIPT nopost.sh )
+   # Expected errors.
+   LOG_IGNORE_PATTERN "non-existent-name"
+   POST_EXEC_SCRIPT noerror.sh )
 
 # Run tests:
 #atlas_add_test( WeightHelpersTest
 #                SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testWeightHelpers.py
-#                POST_EXEC_SCRIPT nopost.sh )
+#                POST_EXEC_SCRIPT noerror.sh )
