@@ -1,42 +1,41 @@
-DQDefects.tests.test_database_creation ... ok
-DQDefects.tests.test_database_creation_unicode ... ok
-DQDefects.tests.test_database_retrieval ... ok
-DQDefects.tests.test_defect_creation ... ok
-Testing virtual defects involving inversion ... ok
-DQDefects.tests.test_defect_insertion_retrieval ... ok
-DQDefects.tests.test_defect_insertion_retrieval_unicode ... ok
-Check that we raise an error if the defect name is not ASCII ... ok
-Check that we recover if any of the string payloads are bad UTF-8 ... ok
-DQDefects.tests.test_defect_empty_retrieval ... ok
-DQDefects.tests.test_virtual_defect_creation ... ok
-Check that the defect name list is updated when a defect is created ... ok
-Check that the virtual defect name list is updated when a defect is created ... ok
-DQDefects.tests.test_virtual_defect_creation_unicode ... ok
-Check that we raise an error if the virtual defect name is not ASCII ... ok
-DQDefects.tests.test_nonpresent ... ok
-Testing many virtual channels with sparsely placed IoVs ... ok
-Testing virtual defect basics ... ok
-DQDefects.tests.test_virtual_defects_deep ... ok
-DQDefects.tests.test_virtual_defects_stress ... ok
-DQDefects.tests.test_virtual_defect_hiding ... ok
-DQDefects.tests.test_update_virtual_defect ... ok
-DQDefects.tests.test_tagging_unicode ... ok
-DQDefects.tests.test_rename_defects ... ok
-DQDefects.tests.test_ignore_defects ... ok
-DQDefects.tests.test_query_with_primary_dependencies ... ok
-DQDefects.tests.test_independent_tags ... ok
-Checking with_primary_dependencies + ignore ... ok
-Checking that virtual flags don't depend on non-existent flags ... ok
-DQDefects.tests.test_iov_tag_defects ... ok
-DQDefects.tests.test_intersect ... ok
-DQDefects.tests.test_normalize_defect_names ... ok
-DQDefects.tests.test_reject_duplicate_names ... ok
-Check that the intolerable defect listing function works ... ok
-Checking that listing a tag works even if the tag is empty ... ok
-Test that defects are inserted correctly into non-contiguous ranges ... ok
-Test that return types are appropriate ... ok
+test_database_creation (DQDefects.tests.test_database_creation.test_database_creation) ... ok
+test_database_creation_unicode (DQDefects.tests.test_database_creation_unicode.test_database_creation_unicode) ... ok
+test_database_retrieval (DQDefects.tests.test_database_retrieval.test_database_retrieval) ... ok
+test_defect_creation (DQDefects.tests.test_defect_creation.test_defect_creation) ... ok
+test_defect_empty_retrieval (DQDefects.tests.test_defect_empty_retrieval.test_defect_empty_retrieval) ... ok
+testfunc (DQDefects.tests.testfunc.testfunc) ... ok
+test_defect_insertion_retrieval (DQDefects.tests.test_defect_insertion_retrieval.test_defect_insertion_retrieval) ... ok
+test_defect_insertion_retrieval_unicode (DQDefects.tests.test_defect_insertion_retrieval_unicode.test_defect_insertion_retrieval_unicode) ... ok
+test_defect_list_update_on_creation (DQDefects.tests.test_defect_list_update_on_creation.test_defect_list_update_on_creation) ... ok
+test_defect_mangle_bad_stored_unicode (DQDefects.tests.test_defect_mangle_bad_stored_unicode.test_defect_mangle_bad_stored_unicode) ... ok
+test_get_intolerable_defects (DQDefects.tests.test_get_intolerable_defects.test_get_intolerable_defects) ... ok
+test_ignore_defects (DQDefects.tests.test_ignore_defects.test_ignore_defects) ... ok
+test_independent_tags (DQDefects.tests.test_independent_tags.test_independent_tags) ... ok
+test_intersect (DQDefects.tests.test_intersect.test_intersect) ... ok
+test_iov_tag_defects (DQDefects.tests.test_iov_tag_defects.test_iov_tag_defects) ... ok
+test_list_empty_tag (DQDefects.tests.test_list_empty_tag.test_list_empty_tag) ... ok
+test_many_sparse_channels (DQDefects.tests.test_many_sparse_channels.test_many_sparse_channels) ... ok
+test_noncontiguous_defectid_creation (DQDefects.tests.test_noncontiguous_defectid_creation.test_noncontiguous_defectid_creation) ... ok
+test_nonpresent (DQDefects.tests.test_nonpresent.test_nonpresent) ... ok
+test_normalize_defect_names (DQDefects.tests.test_normalize_defect_names.test_normalize_defect_names) ... ok
+test_query_with_primary_dependencies (DQDefects.tests.test_query_with_primary_dependencies.test_query_with_primary_dependencies) ... ok
+test_query_with_primary_dependencies_with_ignore (DQDefects.tests.test_query_with_primary_dependencies_with_ignore.test_query_with_primary_dependencies_with_ignore) ... ok
+test_reject_duplicate_names (DQDefects.tests.test_reject_duplicate_names.test_reject_duplicate_names) ... ok
+test_rename_defects (DQDefects.tests.test_rename_defects.test_rename_defects) ... ok
+test_return_types (DQDefects.tests.test_return_types.test_return_types) ... ok
+test_tagging_unicode (DQDefects.tests.test_tagging_unicode.test_tagging_unicode) ... ok
+test_update_virtual_defect (DQDefects.tests.test_update_virtual_defect.test_update_virtual_defect) ... ok
+test_virtual_defect_creation (DQDefects.tests.test_virtual_defect_creation.test_virtual_defect_creation) ... ok
+test_virtual_defect_creation_unicode (DQDefects.tests.test_virtual_defect_creation_unicode.test_virtual_defect_creation_unicode) ... ok
+testfunc (DQDefects.tests.testfunc.testfunc) ... ok
+test_virtual_defect_hiding (DQDefects.tests.test_virtual_defect_hiding.test_virtual_defect_hiding) ... ok
+test_virtual_defect_list_update_on_creation (DQDefects.tests.test_virtual_defect_list_update_on_creation.test_virtual_defect_list_update_on_creation) ... ok
+test_virtual_defects (DQDefects.tests.test_virtual_defects.test_virtual_defects) ... ok
+test_virtual_defects_deep (DQDefects.tests.test_virtual_defects_deep.test_virtual_defects_deep) ... ok
+test_virtual_defects_invert (DQDefects.tests.test_virtual_defects_invert.test_virtual_defects_invert) ... ok
+test_virtual_defects_stress (DQDefects.tests.test_virtual_defects_stress.test_virtual_defects_stress) ... ok
 
 ----------------------------------------------------------------------
-Ran 37 tests in 26.579s
+Ran 36 tests in 9.735s
 
 OK
