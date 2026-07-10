@@ -10,6 +10,7 @@ class AthenaCPRunScript(CPBaseRunner):
         self._cfg = None
         self.addCustomArguments()
         self.configSeq = None
+        self._algSeqName = None
         # Avoid putting call to parse_args() here! Otherwise it is hard to retrieve the parser infos
 
     @property
@@ -30,11 +31,19 @@ class AthenaCPRunScript(CPBaseRunner):
         derivedGroup.add_argument('--test-mt-dependencies', dest='test_mt_dependencies',
                                  type=int, default=None,
                                  help='Print out multithreading dependencies, and run with the given number of threads')
+        derivedGroup.add_argument('--invert-alg-order', dest='invert_alg_order',
+                                 metavar='DEPFILE', default=None,
+                                 help='Reorder the analysis algorithm sequence into a '
+                                      'maximally-inverted order that still respects the '
+                                      'dependencies in the given JSON file (produced by '
+                                      'extract_alg_dependencies.py), as a check that the '
+                                      'declared dependencies enforce a correct ordering')
         return
 
     def makeAlgSequence(self):
         from AthenaConfiguration.ComponentFactory import CompFactory
         algSeq = CompFactory.AthSequencer()
+        self._algSeqName = algSeq.getName()
         self.logger.info("Configuring algorithms based on YAML file")
         configSeq =  self.config.configure()
         self.logger.info("Configuring common services")
@@ -90,6 +99,13 @@ class AthenaCPRunScript(CPBaseRunner):
 
         # Make the main analysis configuration
         self.cfg.merge(self.makeAlgSequence())
+
+        # Optionally invert the algorithm order to check that the declared
+        # dependencies by themselves enforce a correct ordering.
+        if self.args.invert_alg_order:
+            from AnalysisAlgorithmsConfig.InvertAlgOrder import invertAlgOrder
+            invertAlgOrder(self.cfg, self.args.invert_alg_order,
+                           sequenceName=self._algSeqName, logger=self.logger)
 
         # Performance monitoring and profiling:
         if self.flags.PerfMon.doFastMonMT or self.flags.PerfMon.doFullMonMT:
