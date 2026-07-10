@@ -22,9 +22,8 @@
 #include "CoolKernel/IFolder.h"
 #include "SGTools/TransientAddress.h"
 #include "IOVDbParser.h"
+#include <CoolKernel/IObjectIterator.h>
 
-#include "CoraCool/CoraCoolObjectIter.h"
-#include "CoraCool/CoraCoolObject.h"
 #include <memory>
 #include <algorithm>
 #include "FolderTypes.h"
@@ -172,7 +171,7 @@ private:
   //setup cache length according to whether timestamp==ns of epoch
   void setCacheLength(const bool timeIs_nsOfEpoch, const unsigned int cacheRun, const unsigned int cacheTime);
   
-  //update the cache using either a Cool or CoraCool object (templated)
+  //update the cache using either a Cool object (templated)
   template<class T>
   unsigned int 
   cacheUpdateImplementation(T & obj, const ServiceHandle<IIOVSvc>& iovSvc){
@@ -219,16 +218,8 @@ private:
   objectIteratorIsValid( cool::IObjectIteratorPtr & objItr){
     return objItr->goToNext();
   }
- 
-  bool
-  objectIteratorIsValid(CoraCoolObjectIterPtr & objItr){
-    return objItr->hasNext();
-  }
-  
 
   // cache update for online mode
-  void 
-  specialCacheUpdate(CoraCoolObject & obj,const ServiceHandle<IIOVSvc>& iovSvc);
 
   void 
   specialCacheUpdate(const cool::IObject& obj,const ServiceHandle<IIOVSvc>& iovSvc);
