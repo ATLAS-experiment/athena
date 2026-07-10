@@ -18,7 +18,12 @@ def SiSpacePointsSeedMaker_CosmicCfg(
 
 def SiSpacePointsSeedMaker_HeavyIonCfg(
         flags, name="InDetSpSeedsMaker_HeavyIon", **kwargs):
+    print("DEBUG: we are setting SiSpacePointsSeedMaker_HeavyIonCfg")
     acc = ComponentAccumulator()
+
+    # if flags.Tracking.ActiveConfig.extension == "HeavyIonLowPt":
+    #     print(f'DEBUG: Setting useZBoundFinding to True for {flags.Tracking.ActiveConfig.extension} pass')
+    #     kwargs.setdefault("useZBoundFinding", True)
 
     kwargs.setdefault("useVertexPosition", flags.Tracking.ActiveConfig.useVertexPositionDuringSeeding)
     kwargs.setdefault("maxdImpact",
@@ -150,12 +155,14 @@ def SiSpacePointsSeedMakerCfg(flags, **kwargs):
     #
     # --- Space points seeds maker, use different ones for cosmics and collisions
     #
+    print(f"DEBUG: flags.Tracking.ActiveConfig.isLowPt is {flags.Tracking.ActiveConfig.isLowPt}")
+    print(f"DEBUG: extension is {flags.Tracking.ActiveConfig.extension}")
     if flags.Beam.Type is BeamType.Cosmics:
         return SiSpacePointsSeedMaker_CosmicCfg(flags, **kwargs)
+    elif flags.Tracking.ActiveConfig.extension in ["HeavyIon", "HeavyIonLowPt"]:
+        return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
     elif flags.Tracking.ActiveConfig.isLowPt:
         return SiSpacePointsSeedMaker_LowMomentumCfg(flags, **kwargs)
-    elif flags.Tracking.ActiveConfig.extension == "HeavyIon":
-        return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
     elif flags.Tracking.ActiveConfig.extension == "BeamGas":
         return SiSpacePointsSeedMaker_BeamGasCfg(flags, **kwargs)
     else:

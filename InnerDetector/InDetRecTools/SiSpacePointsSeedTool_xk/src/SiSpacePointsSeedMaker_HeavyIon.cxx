@@ -36,7 +36,8 @@ InDet::SiSpacePointsSeedMaker_HeavyIon::SiSpacePointsSeedMaker_HeavyIon
 StatusCode InDet::SiSpacePointsSeedMaker_HeavyIon::initialize()
 {
   StatusCode sc = AlgTool::initialize();
-
+  ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty()));
+  
   ATH_CHECK(m_spacepointsPixel.initialize(m_pixel));
   ATH_CHECK(m_spacepointsSCT.initialize(m_sct));
   ATH_CHECK(m_spacepointsOverlap.initialize(m_useOverlap));
@@ -113,6 +114,16 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
   float irstep = 1./m_r_rstep;
   int   irmax  = m_r_size-1  ;
 
+  /// read the prd to track map, in case we want to use it. 
+  const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
+  if (not m_prdToTrackMap.key().empty()) {
+    SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map = SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
+    if (!prd_to_track_map.isValid()) {
+      ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
+    }
+    prd_to_track_map_cptr = prd_to_track_map.cptr();
+  }
+
   // Get pixels space points containers from store gate 
   //
   if (m_pixel) {
@@ -124,6 +135,8 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
         for (const Trk::SpacePoint* sp: *spc) {	  
 	  float r = sp->r();
           if (r < 43. || r>=m_r_rmax) continue;
+	  if (prd_to_track_map_cptr and isUsed(sp,*prd_to_track_map_cptr)) continue;
+	  
 	  InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
 	  int ir = static_cast<int>(sps->radius()*irstep);
           if (ir>irmax) ir = irmax;
@@ -147,6 +160,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
         for (const Trk::SpacePoint* sp: *spc) {
 	  float r = sp->r();
           if (r<0. || r>=m_r_rmax) continue;
+	  if (prd_to_track_map_cptr and isUsed(sp,*prd_to_track_map_cptr)) continue;
 	  InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
 	  int ir = static_cast<int>(sps->radius()*irstep);
           if (ir>irmax) ir = irmax;
@@ -1407,6 +1421,7 @@ bool InDet::SiSpacePointsSeedMaker_HeavyIon::isZCompatible
 (EventData& data, float& Zv, float& R, float& T) const
 {
   if (m_useVertexPosition) {
+    ATH_MSG_INFO("Using vertex position for constraint: " << data.zCollisionMinimum << ", " << data.zCollisionMaximum);
     if (Zv < data.zCollisionMinimum || Zv > data.zCollisionMaximum) return false;
   }
   else {

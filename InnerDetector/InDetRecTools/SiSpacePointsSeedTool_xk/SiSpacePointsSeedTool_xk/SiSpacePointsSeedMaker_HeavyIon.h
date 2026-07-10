@@ -21,6 +21,7 @@
 #include "SiSPSeededTrackFinderData/SiSpacePointsSeedMakerEventData.h"
 #include "TrkSpacePoint/SpacePointContainer.h" 
 #include "TrkSpacePoint/SpacePointOverlapCollection.h"
+#include "TrkEventUtils/PRDtoTrackMap.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MagField cache
@@ -142,8 +143,8 @@ namespace InDet {
     SG::ReadHandleKey<SpacePointOverlapCollection> m_spacepointsOverlap{this, "SpacePointsOverlapName", "OverlapSpacePoints"};
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
     // Read handle for conditions object to get the field cache
-    SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
-                                                                          "Name of the Magnetic Field conditions object key"};
+    SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
+    SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap{this,"PRDtoTrackMap","","option PRD-to-track association"};
     //@}
 
     /// @name Properties, which will not be changed after construction
@@ -266,8 +267,20 @@ namespace InDet {
     static void convertToBeamFrameWork(EventData& data, const Trk::SpacePoint*const&,float*) ;
 
     void initializeEventData(EventData& data) const;
+
+    bool isUsed(const Trk::SpacePoint* sp, const Trk::PRDtoTrackMap &prd_to_track_map) const;
   };
 
+  inline
+  bool SiSpacePointsSeedMaker_HeavyIon::isUsed(const Trk::SpacePoint* sp, const Trk::PRDtoTrackMap &prd_to_track_map) const
+  {
+    const Trk::PrepRawData* d = sp->clusterList().first;
+    if (!d || !prd_to_track_map.isUsed(*d)) return false;
+    d = sp->clusterList().second;
+    if (!d || prd_to_track_map.isUsed(*d)) return true;
+    return false;
+  }
+  
 } // end of name space
 
 #endif // SiSpacePointsSeedMaker_HeavyIon_H
