@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( HIEventUtils )
@@ -37,28 +37,28 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( HIEventSelectionRun3_25OO
                 SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25OO
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( HIEventSelectionRun3_25NeNe
                 SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25NeNe
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( HIEventSelectionRun3_25pO
                 SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25pO
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( HIEventSelectionRun3_23PbPb
                 SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=23PbPb
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # this test will be enabled once we have cuts implemented
 # atlas_add_test( HIEventSelectionRun3_24PbPb
 #                 SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=24PbPb
 #                 PROPERTIES TIMEOUT 300
-#                 POST_EXEC_SCRIPT nopost.sh )
+#                 POST_EXEC_SCRIPT noerror.sh )
 
 
 endif()

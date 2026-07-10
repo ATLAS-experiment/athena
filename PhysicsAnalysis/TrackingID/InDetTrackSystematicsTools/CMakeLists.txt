@@ -54,13 +54,13 @@ if( NOT XAOD_STANDALONE )
 
    atlas_add_test( TrackSmearingAlg
       SCRIPT test_TrackSmearingAlg.py
-      POST_EXEC_SCRIPT nopost.sh
+      POST_EXEC_SCRIPT noerror.sh
       PRIVATE_WORKING_DIRECTORY
       PROPERTIES TIMEOUT 300 )
 
    atlas_add_test( JetTrackFilteringAlg
       SCRIPT test_JetTrackFilteringAlg.py
-      POST_EXEC_SCRIPT nopost.sh
+      POST_EXEC_SCRIPT noerror.sh
       PRIVATE_WORKING_DIRECTORY
       PROPERTIES TIMEOUT 300 )
 endif()
