@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( PhotonEfficiencyCorrection )
@@ -50,7 +50,7 @@ if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
    #Tests
    atlas_add_test(ut_RunOnASGAOD
 	          SCRIPT TestxAODPhotonAlg $ASG_TEST_FILE_MC
-		  POST_EXEC_SCRIPT nopost.sh)
+		  POST_EXEC_SCRIPT noerror.sh)
    
 
 endif()
@@ -60,4 +60,4 @@ atlas_add_test( gt_ColumnarToolTests
                 SOURCES test/gt_ColumnarToolTests.cxx
                 LINK_LIBRARIES ColumnarTestFixturesLib PhotonEfficiencyCorrectionLib
                 PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
