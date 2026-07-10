@@ -18,6 +18,9 @@
 thread_local std::unique_ptr<G4PropagatorInField, G4FatrasTransportTool::Deleter> G4FatrasTransportTool::s_propagator;
 
 void G4FatrasTransportTool::Deleter::operator()(G4PropagatorInField* ptr) const {
+  if (!ptr) {
+     return;
+  }
   delete ptr->GetNavigatorForPropagating();
   delete ptr;
 }
