@@ -31,6 +31,7 @@ class muonNames(object):
     #produced in RoIs only.
 
     self.L2SAName = recordable("HLT_MuonL2SAInfo")
+    self.L2SANamePhII = recordable("HLT_FastMuonsInfo")
     self.L2CBName = recordable("HLT_MuonL2CBInfo")
     self.EFSAName = "Muons"
     self.EFCBName = "MuonsCB"
@@ -191,6 +192,11 @@ def muonDecodeCfg(flags, RoIs):
       mmAcc = MMRDODecodeCfg( flags, name="MMRdoToMMPrepData_"+RoIs, RoIs =  RoIs, DoSeededDecoding = doSeededDecoding)
       acc.merge( mmAcc )
 
+    # SpacePoint formation
+    if flags.Muon.usePhaseIIGeoSetup and flags.Muon.scheduleActsReco:
+      from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
+      acc.merge( MuonSpacePointFormationCfg( flags, suffix =f'_{RoIs}' ) )
+      
     return acc
 
 def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
@@ -229,7 +235,7 @@ def muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads):
   result.addEventAlgo(ViewVerify)
   return result
 
-def muFastRecoSequenceCfg( flags, RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False ):
+def muFastRecoSequenceCfg( flags, RoIs, doFullScanID = False, InsideOutMode=False, extraLoads=None, l2mtmode=False, calib=False, useNewFast=False ):
 
   acc = ComponentAccumulator()
   postFix = ""
@@ -242,18 +248,22 @@ def muFastRecoSequenceCfg( flags, RoIs, doFullScanID = False, InsideOutMode=Fals
 
   acc.merge(muFastVDVCfg(flags, RoIs, postFix, InsideOutMode, extraLoads))
 
-
-  ### set up MuFastSteering ###
-  from TrigL2MuonSA.TrigL2MuonSAConfig import l2MuFastAlgCfg
-  acc.merge(l2MuFastAlgCfg(flags,
-                           roisKey = RoIs,
-                           setup = postFix,
-                           FILL_FSIDRoI = doFullScanID,
-                           MuonL2SAInfo = muNames.L2SAName+postFix,
-                           L2IOCB = muNames.L2CBName+postFix,
-                           forID = muNames.L2forIDName+postFix,
-                           forMS = "forMS"+postFix,
-                           TrackParticlesContainerName = getIDTracks(flags)))
+  if useNewFast:
+    from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonFastReconstructionAlgCfg
+    acc.merge(MuonFastReconstructionAlgCfg(flags, name=f"MuonFastReconstructionAlg_{RoIs}",
+                                                  OutMuons=muNames.L2SANamePhII))
+  else:
+    ### set up MuFastSteering ###
+    from TrigL2MuonSA.TrigL2MuonSAConfig import l2MuFastAlgCfg
+    acc.merge(l2MuFastAlgCfg(flags,
+                             roisKey = RoIs,
+                             setup = postFix,
+                             FILL_FSIDRoI = doFullScanID,
+                             MuonL2SAInfo = muNames.L2SAName+postFix,
+                             L2IOCB = muNames.L2CBName+postFix,
+                             forID = muNames.L2forIDName+postFix,
+                             forMS = "forMS"+postFix,
+                             TrackParticlesContainerName = getIDTracks(flags)))
 
 
   return acc
@@ -387,10 +397,7 @@ def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
             acc.merge(RecoSegmentTruthAssocCfg(flags, name=f"MuonSegmentsFromR4TruthMatching{name}",
                                                       SegmentKey="MuonSegmentsFromR4"))
 
-        # Schedule muon EF reco
-        from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
-        acc.merge( MuonSpacePointFormationCfg( flags, suffix =f'_{name}' ) )
-    
+        # ML bucket filter
         if useBucketFilter:
             from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
             bucketTool = acc.popToolsAndMerge(GraphBucketFilterToolCfg(flags, name=f"GraphBucketFilterTool_{name}", 

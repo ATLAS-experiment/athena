@@ -45,6 +45,8 @@ class TrigMuonEFHypoTool: public ::AthAlgTool {
 
   HLT::Identifier m_decisionId;
   // Properties:
+  Gaudi::Property< bool > m_isFastReco {
+    this, "IsFastReco", false, "Whether it's fast reconstruction" };
   Gaudi::Property< bool > m_nscan {
     this, "NarrowScan", false, "Apply narrow scan" };
   Gaudi::Property< float > m_conesize {

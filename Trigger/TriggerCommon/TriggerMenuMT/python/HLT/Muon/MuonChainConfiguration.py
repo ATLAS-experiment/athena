@@ -81,14 +81,11 @@ class MuonChainConfiguration(ChainConfigurationBase):
                 efCBStep = None
 
         useNewFast = 'newFast' in self.chainPart['l2AlgInfo']
-        L2SAStep = 'getmuFast'
         if useNewFast:
-            # TEMPORARY: the new Fast is scheduled in the EFSA until development is finalized. Then it will be moved to the L2 step
-            L2SAStep = 'getmuFastEmpty' 
             muCombStep = 'getmuMSEmpty'
 
         stepDictionary = {            
-            "":[L2SAStep, muCombStep, 'getmuEFSA',efCBStep, isoStep], #RoI-based triggers
+            "":['getmuFast', muCombStep, 'getmuEFSA',efCBStep, isoStep], #RoI-based triggers
             "noL1":['getFSmuEFSA'] if doMSonly else ['getFSmuEFSA', 'getFSmuEFCB'], #full scan triggers
             "lateMu":['getLateMuRoI','getLateMu'], #late muon triggers
             "muoncalib":['getmuFast'], #calibration
@@ -102,12 +99,18 @@ class MuonChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getmuFast(self, flags, is_probe_leg=False):
 
+        # useNewFast only if we are in PhaseII and ACTS reco is scheduled
+        useNewFast = ('newFast' in self.chainPart['l2AlgInfo'] and 
+                      flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and 
+                      flags.Trigger.Offline.SA.Muon.scheduleActsReco)
+
         if 'muoncalib' in self.chainPart['extra']:
            return self.getStep(flags, "mufastcalib", [muFastCalibSequenceGenCfg], is_probe_leg=is_probe_leg )
         elif 'l2mt' in self.chainPart['l2AlgInfo']:
             return self.getStep(flags, "mufastl2mt", [mul2mtSAOvlpRmSequenceGenCfg], is_probe_leg=is_probe_leg )
         else:
-           return self.getStep(flags, "mufast", [muFastSequenceGenCfg], is_probe_leg=is_probe_leg )
+            stepName = "mufastPhII" if useNewFast else "mufast"
+            return self.getStep(flags, stepName, [muFastSequenceGenCfg], useNewFast=useNewFast, is_probe_leg=is_probe_leg )
 
 
     # --------------------
