@@ -22,10 +22,6 @@ void G4FatrasTransportTool::Deleter::operator()(G4PropagatorInField* ptr) const 
   delete ptr;
 }
 
-G4FatrasTransportTool::G4FatrasTransportTool(const std::string& type,
-                                         const std::string& name,
-                                         const IInterface* parent)
-    : base_class(type, name, parent) {}
 
 StatusCode G4FatrasTransportTool::finalize() {
 
