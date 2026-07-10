@@ -198,7 +198,12 @@ void ActsToTrkConverterTool::convertTrkToActsContainer(const EventContext& ctx,
             actsTSOS.setReferenceSurface(parameters.referenceSurface().getSharedPtr());
             // Since we're converting final Trk::Tracks, let's assume they're smoothed
             actsTSOS.smoothed() = parameters.parameters();
-            actsTSOS.smoothedCovariance() = *parameters.covariance();
+            if (parameters.covariance().has_value()) {
+              actsTSOS.smoothedCovariance() = *parameters.covariance();
+            }
+            else {
+              actsTSOS.smoothedCovariance() = Acts::BoundMatrix::Zero();
+            }
             // Not yet implemented in MultiTrajectory.icc
             // actsTSOS.typeFlags().setHasParameters();
             if (!(actsTSOS.hasSmoothed() && actsTSOS.hasReferenceSurface())) {
