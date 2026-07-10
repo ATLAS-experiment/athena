@@ -26,7 +26,7 @@ class NNClusterCalibrator;
 /// calibrator
 template <typename calib_data_t, typename traj_t>
 struct NNClusterCalibratorOptions {
-  int m_minClusterSizeForNN;  ///! minimum number of hits to run NN
+  int m_minClusterSizeForNN = 0;  ///! minimum number of hits to run NN
   const OnnxNNCollection* m_models =
       nullptr;  ///! set of models for inference (non owning pointer)
   std::unique_ptr<AnalogueClusteringCalibrator<calib_data_t, traj_t>>

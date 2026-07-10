@@ -425,7 +425,7 @@ namespace MuonR4::FastReco{
 
             struct PatternPrintView {
                 const PatternState& pat;
-                bool detailed;
+                bool detailed = false;
             };
             /** @brief Print the pattern candidate and stream operator */
             static PatternPrintView brief(const PatternState& p);
