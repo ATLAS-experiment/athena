@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -28,6 +28,7 @@
 #include "TBufferFile.h"
 #include "TVirtualArray.h"
 #include "TROOT.h"
+#include "ESTLType.h"
 #include <cassert>
 #include <cstdlib>
 
@@ -885,10 +886,10 @@ Int_t TConvertingBranchElement::GetEntry(Long64_t entry, Int_t getall)
     bool dont_reset = fConvDontReset;
     fConvDontReset = false;
     switch(fSTLtype) {
-    case TClassEdit::kSet:
-    case TClassEdit::kMultiSet:
-    case TClassEdit::kMap:
-    case TClassEdit::kMultiMap:
+    case ROOT::kSTLset:
+    case ROOT::kSTLmultiset:
+    case ROOT::kSTLmap:
+    case ROOT::kSTLmultimap:
       break;
     default:
       // Read non-container composite and list/vector.
@@ -1001,7 +1002,7 @@ void TConvertingBranchElement::ReadLeavesCollectionConverting(TBuffer& b)
    TVirtualCollectionProxy* proxy = GetCollectionProxy();
    TVirtualCollectionProxy::TPushPop helper(proxy, fObject);
    void* alternate = proxy->Allocate(fNdata, true);
-   if(fSTLtype != TClassEdit::kVector && proxy->HasPointers() && fSplitLevel > TTree::kSplitCollectionOfPointers ) {
+   if(fSTLtype != ROOT::kSTLvector && proxy->HasPointers() && fSplitLevel > TTree::kSplitCollectionOfPointers ) {
       fPtrIterators->CreateIterators(alternate, proxy);
    } else {
       fIterators->CreateIterators(alternate, proxy);
@@ -1009,10 +1010,10 @@ void TConvertingBranchElement::ReadLeavesCollectionConverting(TBuffer& b)
    
    //Int_t nbranches = fBranches.GetEntriesFast();
    switch (fSTLtype) {
-      case TClassEdit::kSet:
-      case TClassEdit::kMultiSet:
-      case TClassEdit::kMap:
-      case TClassEdit::kMultiMap:
+      case ROOT::kSTLset:
+      case ROOT::kSTLmultiset:
+      case ROOT::kSTLmap:
+      case ROOT::kSTLmultimap:
         {
           // Change for conversions:
           // Use @c ReadSubBranches and obey @c fConvDontReset.
