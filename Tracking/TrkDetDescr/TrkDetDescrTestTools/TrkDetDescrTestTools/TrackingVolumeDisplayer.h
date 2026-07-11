@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -37,9 +37,7 @@ namespace Trk {
       public:
 
         /** Constructor */
-        TrackingVolumeDisplayer(const std::string&,const std::string&,const IInterface*);
-        /** Destructor */
-        virtual ~TrackingVolumeDisplayer();
+        using RecursiveGeometryProcessor::RecursiveGeometryProcessor;
 
         /** AlgTool initialize method */
         StatusCode initialize();
@@ -64,20 +62,30 @@ namespace Trk {
         /** calculate the color code from the Material */
         static int colorCodeFromMaterial(const Trk::MaterialProperties* prop, std::ofstream& output) ;
 
-        mutable int                         m_volumeCounter;                      //!< volume counter
+        mutable int                         m_volumeCounter = 0;                      //!< volume counter
 
         mutable std::ofstream               m_fileVolumeOutput;                   //!< file output for visualization action
-        mutable std::string                 m_fileVolumeOutputName;               //!< file name for visualization action
-        mutable bool                        m_fileVolumeOutputMode;               //!< steer writing
+        Gaudi::Property<std::string> m_fileVolumeOutputName
+          {this, "TrackingVolumeOutputFile", "TrackingGeometryVolumeDisplay.C",
+           "file name for visualization action"};
+        Gaudi::Property<bool> m_fileVolumeOutputMode
+          {this, "TrackingVolumeOutput", true, "steer writing"};
 
         mutable std::ofstream               m_fileLayerOutput;                    //!< file output for visualization action
-        mutable std::string                 m_fileLayerOutputName;                //!< file name for visualization action
-        mutable bool                        m_fileLayerOutputMode;                //!< steer writing
+        Gaudi::Property<std::string> m_fileLayerOutputName
+          {this, "LayerOutputFile", "TrackingGeometryLayerDisplay.C",
+           "file name for visualization action"};
+        Gaudi::Property<bool> m_fileLayerOutputMode
+          {this, "LayerOutput", true, "steer writing"};
 
         mutable std::ofstream               m_fileSurfaceOutput;                  //!< file output for visualization action
-        mutable std::string                 m_fileSurfaceOutputName;              //!< file name for visualization action
-        mutable bool                        m_fileSurfaceOutputMode;              //!< steer writing
-        mutable bool                        m_fileSurfaceOutputSplit;             //!< use one file for each layer
+        Gaudi::Property<std::string> m_fileSurfaceOutputName
+          {this, "SurfaceOutputFile", "TrackingGeometrySurfaceDisplay.C",
+           "file name for visualization action"};
+        Gaudi::Property<bool> m_fileSurfaceOutputMode
+          {this, "SurfaceOutput", true, "steer writing"};
+        Gaudi::Property<bool> m_fileSurfaceOutputSplit
+          {this, "SurfaceOutputSplit", false, "use one file for each layer"};
 
         static int                          s_displaySurfaces;                    //!< static surface counter
 

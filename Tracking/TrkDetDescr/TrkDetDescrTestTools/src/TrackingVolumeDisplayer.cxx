@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,32 +31,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 int Trk::TrackingVolumeDisplayer::s_displaySurfaces = 0;
-
-// constructor
-Trk::TrackingVolumeDisplayer::TrackingVolumeDisplayer(const std::string& t, const std::string& n, const IInterface* p) : 
-  Trk::RecursiveGeometryProcessor(t,n,p),
-  m_volumeCounter(0),
-  m_fileVolumeOutputName("TrackingGeometryVolumeDisplay.C"),
-  m_fileVolumeOutputMode(true),
-  m_fileLayerOutputName("TrackingGeometryLayerDisplay.C"),
-  m_fileLayerOutputMode(true),
-  m_fileSurfaceOutputName("TrackingGeometrySurfaceDisplay.C"),
-  m_fileSurfaceOutputMode(true),
-  m_fileSurfaceOutputSplit(false)
-{
-    // set name and output type
-    declareProperty("TrackingVolumeOutputFile",  m_fileVolumeOutputName);
-    declareProperty("TrackingVolumeOutput",      m_fileVolumeOutputMode);
-    declareProperty("LayerOutputFile",           m_fileLayerOutputName);
-    declareProperty("LayerOutput",               m_fileLayerOutputMode);
-    declareProperty("SurfaceOutputFile",         m_fileSurfaceOutputName);
-    declareProperty("SurfaceOutput",             m_fileSurfaceOutputMode);
-    declareProperty("SurfaceOutputSplit",        m_fileSurfaceOutputSplit);
-}
-
-// destructor
-Trk::TrackingVolumeDisplayer::~TrackingVolumeDisplayer()
-= default;
 
 
 // the interface methods

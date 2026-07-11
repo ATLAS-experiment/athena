@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -37,10 +37,7 @@ namespace Trk {
 
       public:
         /** Constructor */
-        LayerMaterialInspector(const std::string&,const std::string&,const IInterface*);
-
-        /** Destructor */
-        virtual ~LayerMaterialInspector();
+        using RecursiveGeometryProcessor::RecursiveGeometryProcessor;
 
       private:
 
@@ -53,7 +50,7 @@ namespace Trk {
         /** Processor Action to work on Surfaces */
         virtual StatusCode processNode(const Surface& surf, size_t level = 0) const;
 
-        std::string m_treeFolder;
+        std::string m_treeFolder = "/val/";
 
     };
 

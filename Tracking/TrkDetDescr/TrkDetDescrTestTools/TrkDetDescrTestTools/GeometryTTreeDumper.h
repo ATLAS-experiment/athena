@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -40,10 +40,7 @@ namespace Trk {
   
     public:
         /** Constructor */
-        GeometryTTreeDumper(const std::string&,const std::string&,const IInterface*);
-
-        /** Destructor */
-        virtual ~GeometryTTreeDumper();
+        using RecursiveGeometryProcessor::RecursiveGeometryProcessor;
 
       private:
 
@@ -56,8 +53,8 @@ namespace Trk {
         /** Current implementation: write root visualization to file stream */
         StatusCode processNode(const Surface&, size_t level=0) const;
 
-        mutable TTree*      m_currentTree; //!< the tree for the currently processed tracking Volume
-        std::string         m_treeFolder;  //!< where the tree is written to  
+        mutable TTree*      m_currentTree = nullptr; //!< the tree for the currently processed tracking Volume
+        std::string         m_treeFolder = "/val/";  //!< where the tree is written to
 
     };
 }

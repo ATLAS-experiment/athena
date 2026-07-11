@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -29,7 +29,6 @@ class ISvcLocator;
 template <class TYPE> class SvcFactory;
 
 namespace Trk {
-  class IGeometryProcessor;
   class TrackingGeometry;
   class Layer;
   class LayerMaterialProperties;
@@ -65,10 +64,7 @@ namespace Trk {
       friend class SvcFactory<TrackingGeometrySvc>;
   
       //!< Standard Constructor
-      TrackingGeometrySvc(const std::string& name, ISvcLocator* svc);
-  
-      //!< Standard Destructor
-      virtual ~TrackingGeometrySvc();
+      using base_class::base_class;
   
 
     private:
@@ -81,7 +77,7 @@ namespace Trk {
       //!< the cached TrackingGeometry
       Gaudi::Property<std::string>                m_trackingGeometryName {this, "TrackingGeometryName", "AtlasTrackingGeometry"};
       //!< the name of the TrackingGeometry
-      ToolHandleArray<Trk::IGeometryProcessor>    m_geometryProcessors;  // Currently doesn't work: {this, "GeometryProcessors", {}, "Tools to process geometry"};
+      ToolHandleArray<Trk::IGeometryProcessor>    m_geometryProcessors {this, "GeometryProcessors", {}, "Tools to process geometry"};
       //!< processors to help 
       
   #ifdef TRKDETDESCR_MEMUSAGE
