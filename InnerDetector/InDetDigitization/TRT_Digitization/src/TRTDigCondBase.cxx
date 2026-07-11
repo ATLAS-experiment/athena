@@ -36,7 +36,7 @@ TRTDigCondBase::TRTDigCondBase( const TRTDigSettings* digset,
     m_crosstalk_noiselevel(-1.0),
     m_crosstalk_noiselevel_other_end(-1.0),
     m_UseGasMix(UseGasMix),
-    m_sumTool(std::move(sumTool))
+    m_sumTool(sumTool)
 {
   m_crosstalk_noiselevel = m_settings->crossTalkNoiseLevel();
   m_crosstalk_noiselevel_other_end = m_settings->crossTalkNoiseLevelOtherEnd();

@@ -118,12 +118,8 @@ void TRT_DetDescrDB_ParameterInterface::SetValues() {
   if (!oldConfiguration) {
     IRDBRecordset_ptr topLevelTable = iAccessSvc->getRecordsetPtr("TRTTopLevel", detectorKey, detectorNode);
     m_placements = new TopLevelPlacements(topLevelTable);
-  } else {
-    auto ptr = IRDBRecordset_ptr();
-    if (!ptr)[[unlikely]]{
-      throw std::runtime_error("TRT_DetDescrDB_ParameterInterface::SetValues: nullptr for Recordset.");
-    }
-    m_placements = new TopLevelPlacements(ptr);
+  } else {    
+    m_placements = new TopLevelPlacements(nullptr);
   }
   /////////////////////////////////////////////////////////////////////////////////////////
   //                                   Extra Scaled Material                             //
