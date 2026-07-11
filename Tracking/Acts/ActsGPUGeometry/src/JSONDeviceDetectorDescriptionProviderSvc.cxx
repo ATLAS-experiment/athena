@@ -28,15 +28,65 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::initialize()
   ATH_CHECK(m_hostMR.retrieve());
   ATH_CHECK(m_deviceMR.retrieve());
   ATH_CHECK(m_copy.retrieve());
+  ATH_CHECK(loadIdMaps());
 
-  std::unique_ptr<traccc::detector_design_description::host>     hostDesign;
-  std::unique_ptr<traccc::detector_conditions_description::host> hostCond;
-  std::unique_ptr<traccc::detector_design_description::buffer>    deviceDesign;
+  auto hostDesign = std::make_unique<traccc::detector_design_description::host>(m_hostMR->mr());
+  auto hostCond   = std::make_unique<traccc::detector_conditions_description::host>(m_hostMR->mr());
+
+  std::unique_ptr<traccc::detector_design_description::buffer>     deviceDesign;
   std::unique_ptr<traccc::detector_conditions_description::buffer> deviceCond;
 
-  ATH_CHECK(loadIdMaps());
   auto copy = m_copy->copy(EventContext{});
-  ATH_CHECK(buildFromFile(m_hostMR->mr(), m_deviceMR->mr(), *copy, hostDesign, hostCond, deviceDesign, deviceCond));
+
+  if (m_geometryFile.value().empty() ||
+      m_digitizationFile.value().empty() ||
+      m_conditionsFile.value().empty()) {
+    ATH_MSG_FATAL("GeometryFile, " << m_geometryFile.value() <<
+                            ", DigitizationFile, " << m_digitizationFile.value() << " or ConditionsFile, " << m_conditionsFile.value() << ", is empty!");
+    return StatusCode::FAILURE;
+  }
+
+  ATH_MSG_INFO("Reading detector description from files:"
+      << "  geometry:     " << m_geometryFile.value()
+      << ",  digitization: " << m_digitizationFile.value()
+      << ",  conditions:   " << m_conditionsFile.value());
+
+  traccc::io::read_detector_description(
+      *hostDesign, *hostCond,
+      PathResolverFindCalibFile(m_geometryFile.value()),
+      PathResolverFindCalibFile(m_digitizationFile.value()),
+      PathResolverFindCalibFile(m_conditionsFile.value()),
+      traccc::data_format::json);
+
+  ATH_MSG_DEBUG(hostDesign->size() << " design entries, "
+                << hostCond->size() << " conditions entries");
+
+  // Copy design to device
+  std::vector<unsigned int> sizes;
+  sizes.reserve(hostDesign->size());
+  for (std::size_t i = 0; i < hostDesign->size(); ++i) {
+    const auto& e = hostDesign->at(i);
+    sizes.push_back(static_cast<unsigned int>(
+        std::max(e.bin_edges_x().size(), e.bin_edges_y().size())));
+  }
+
+  deviceDesign =
+        std::make_unique<traccc::detector_design_description::buffer>(
+          sizes, m_deviceMR->mr(), &(m_hostMR->mr()),
+          vecmem::data::buffer_type::resizable);
+  (*copy).setup(*deviceDesign)->wait();
+  (*copy)(vecmem::get_data(*hostDesign), *deviceDesign)->wait();
+
+  // Copy conditions to device
+  deviceCond =
+      std::make_unique<traccc::detector_conditions_description::buffer>(
+          static_cast<traccc::detector_conditions_description::buffer::size_type>(
+              hostCond->size()),
+          m_deviceMR->mr());
+  (*copy).setup(*deviceCond)->wait();
+  (*copy)(vecmem::get_data(*hostCond), *deviceCond)->wait();
+
+  ATH_MSG_INFO("Detector description built from files");
 
   // Record device and host objects
   // Host objects are needed for EDM conversions
@@ -103,70 +153,6 @@ StatusCode JSONDeviceDetectorDescriptionProviderSvc::loadIdMaps()
 
   ATH_MSG_INFO("Loaded " << m_athenaToDetray.size()
                        << " detray<->Athena module mappings");
-  return StatusCode::SUCCESS;
-}
-
-StatusCode JSONDeviceDetectorDescriptionProviderSvc::buildFromFile(
-    std::pmr::memory_resource& hostMR,
-    std::pmr::memory_resource& deviceMR,
-    const vecmem::copy& copy,
-    std::unique_ptr<traccc::detector_design_description::host>& hostDesign,
-    std::unique_ptr<traccc::detector_conditions_description::host>& hostCond,
-    std::unique_ptr<traccc::detector_design_description::buffer>& deviceDesign,
-    std::unique_ptr<traccc::detector_conditions_description::buffer>& deviceCond)
-{
-  if (m_geometryFile.value().empty() ||
-      m_digitizationFile.value().empty() ||
-      m_conditionsFile.value().empty()) {
-    ATH_MSG_FATAL("GeometryFile, " << m_geometryFile.value() <<
-                            ", DigitizationFile, " << m_digitizationFile.value() << " or ConditionsFile, " << m_conditionsFile.value() << ", is empty!");
-    return StatusCode::FAILURE;
-  }
-
-  ATH_MSG_INFO("Reading detector description from files:"
-      << "  geometry:     " << m_geometryFile.value()
-      << ",  digitization: " << m_digitizationFile.value()
-      << ",  conditions:   " << m_conditionsFile.value());
-
-  hostDesign = std::make_unique<traccc::detector_design_description::host>(hostMR);
-  hostCond   = std::make_unique<traccc::detector_conditions_description::host>(hostMR);
-
-  traccc::io::read_detector_description(
-      *hostDesign, *hostCond,
-      PathResolverFindCalibFile(m_geometryFile.value()),
-      PathResolverFindCalibFile(m_digitizationFile.value()),
-      PathResolverFindCalibFile(m_conditionsFile.value()),
-      traccc::data_format::json);
-
-  ATH_MSG_DEBUG(hostDesign->size() << " design entries, "
-                << hostCond->size() << " conditions entries");
-
-  // Copy design to device
-  std::vector<unsigned int> sizes;
-  sizes.reserve(hostDesign->size());
-  for (std::size_t i = 0; i < hostDesign->size(); ++i) {
-    const auto& e = hostDesign->at(i);
-    sizes.push_back(static_cast<unsigned int>(
-        std::max(e.bin_edges_x().size(), e.bin_edges_y().size())));
-  }
-
-  deviceDesign =
-        std::make_unique<traccc::detector_design_description::buffer>(
-          sizes, deviceMR, &hostMR,
-          vecmem::data::buffer_type::resizable);
-  copy.setup(*deviceDesign)->wait();
-  copy(vecmem::get_data(*hostDesign), *deviceDesign)->wait();
-
-  // Copy conditions to device
-  deviceCond =
-      std::make_unique<traccc::detector_conditions_description::buffer>(
-          static_cast<traccc::detector_conditions_description::buffer::size_type>(
-              hostCond->size()),
-          deviceMR);
-  copy.setup(*deviceCond)->wait();
-  copy(vecmem::get_data(*hostCond), *deviceCond)->wait();
-
-  ATH_MSG_INFO("Detector description built from files");
   return StatusCode::SUCCESS;
 }
 
