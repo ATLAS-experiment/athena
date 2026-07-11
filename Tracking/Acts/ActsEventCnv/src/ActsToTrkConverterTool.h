@@ -51,9 +51,9 @@ public:
 
   /** @copydoc ITrackConverterTool::trkTrackToSourceLinks  */
   virtual std::vector<Acts::SourceLink> trkTrackToSourceLinks(const Trk::Track& track) const override;
-  /** @copydoc ITrackConverterTool::convertFitResult  */
-  virtual std::unique_ptr<Trk::Track> convertFitResult(const EventContext& ctx,
-                                                       TrackFitResult_t& fitResult,
+  /** @copydoc ITrackConverterTool::convertActsToTrk  */
+  virtual std::unique_ptr<Trk::Track> convertActsToTrk(const EventContext& ctx,
+                                                       const ActsTrack_t& actsTrack,
                                                        const Trk::TrackInfo::TrackFitter fitAuthor) const override final;
   /** @copydoc ITrackConverterTool::convertTrkToActsContainer  */
   virtual void convertTrkToActsContainer(const EventContext& ctx,
