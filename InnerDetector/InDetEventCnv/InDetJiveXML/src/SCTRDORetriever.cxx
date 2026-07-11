@@ -141,7 +141,7 @@ namespace JiveXML {
 
     //Finally add the data to our map
     DataMap dataMap;
-    dataMap["id"] =std::move( ident);
+    dataMap["id"] = ident;
     dataMap["x0"] =std::move( x0);
     dataMap["y0"] =std::move( y0);
     dataMap["z0"] =std::move( z0);

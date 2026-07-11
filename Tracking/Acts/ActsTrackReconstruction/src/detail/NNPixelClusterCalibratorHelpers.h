@@ -226,8 +226,8 @@ class PositionNNoutput {
 
   PositionNNoutput(const float* begin, const float* end)
       : m_payload(begin, end) {}
-  PositionNNoutput(int nPos)
-      : m_payload(nPos = static_cast<index_t>(Index::outputUnitSize)) {}
+  PositionNNoutput(int /*nPos*/)
+      : m_payload(static_cast<index_t>(Index::outputUnitSize)) {}
 
   std::vector<payload_t>& payload() { return m_payload; }
 

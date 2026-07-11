@@ -253,8 +253,8 @@ TBXMLCaloCellWriterTool::writeEvent(std::ostream& outStream,
 		  outStream << "     ";
 		}
 	      theIndex -= (int)baseIndex;
-
-            outStream << std::format("{:>10} {:>3} {:>3} {:>3} {:>3} {:>3} {:>10.5g}",
+	      //coverity[RW.CONSTEVAL_CALL_NONCONSTANT:FALSE]
+        outStream << std::format("{:>10} {:>3} {:>3} {:>3} {:>3} {:>3} {:>10.5g}",
                                      theIndex.value(),
                                      subIndex,
                                      lyrIndex,

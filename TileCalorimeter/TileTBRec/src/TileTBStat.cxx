@@ -74,6 +74,7 @@ double StatDouble::getChi2() {
 void StatDouble::print(const char* s, bool minMaxOnly) {
   if (minMaxOnly) {
     if (Counter > 0) {
+      //coverity[RW.CONSTEVAL_CALL_NONCONSTANT:FALSE]
       std::cout << std::format("{} {:4.1f} - {:4.1f}\n", s, Min, Max);
   } else {
       std::cout << std::format("{} ---- - ----\n", s);
