@@ -5,26 +5,18 @@
 #include "ActsToTrkConverterTool.h"
 
 // Trk
-#include "TRT_ReadoutGeometry/TRT_BaseElement.h"
-#include "TrkSurfaces/AnnulusBounds.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/Track.h"
 
 // ATHENA
-#include "GaudiKernel/IInterface.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
-#include "TrkExUtils/RungeKuttaUtils.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkSurfaces/Surface.h"
-#include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 #include "InDetPrepRawData/PixelClusterCollection.h"
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
 
-#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/MuonReadoutElement.h"
-#include "xAODMuonPrepData/MuonMeasurement.h"
 #include "xAODMuonPrepData/CombinedMuonStrip.h"
 #include "MuonCompetingRIOsOnTrack/CompetingMuonClustersOnTrack.h"
 // PACKAGE
@@ -32,50 +24,22 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
-#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/ISurfacePlacement.h"
-#include "ActsInterop/IdentityHelper.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
 // ACTS
-#include "Acts/Surfaces/StrawSurface.hpp"
-#include "Acts/Surfaces/PerigeeSurface.hpp"
-#include "Acts/Surfaces/PlaneSurface.hpp"
-
-#include "Acts/Surfaces/RectangleBounds.hpp"
-#include "Acts/Surfaces/TrapezoidBounds.hpp"
-#include "Acts/Surfaces/CylinderBounds.hpp"
-#include "Acts/Surfaces/DiscBounds.hpp"
-#include "Acts/Surfaces/LineBounds.hpp"
-#include "Acts/Surfaces/RadialBounds.hpp"
-#include "Acts/Surfaces/DiamondBounds.hpp"
-
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/EventData/BoundTrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/Propagator/detail/JacobianEngine.hpp"
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
 
 #include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/EventData/SourceLink.hpp"
 
-#include "TrkSurfaces/DiscBounds.h"
-#include "TrkSurfaces/TrapezoidBounds.h"
-#include "TrkSurfaces/CylinderBounds.h"
-#include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/StraightLineSurface.h"
-#include "TrkSurfaces/CylinderSurface.h"
-#include "TrkSurfaces/DiamondBounds.h"
-
-// STL
-#include <cmath>
-#include <iostream>
-#include <memory>
-#include <random>
-#include <format>
 
 namespace ActsTrk {
 
@@ -273,15 +237,10 @@ bool ActsToTrkConverterTool::actsTrackParameterPositionCheck(
   return true;
 }
 
-std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const EventContext& ctx,
-                                                                     TrackFitResult_t& fitResult,
+std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertActsToTrk(const EventContext& ctx,
+                                                                     const ActsTrack_t& actsTrack,
                                                                      const Trk::TrackInfo::TrackFitter fitAuthor) const {
-
-    if (not fitResult.ok()) {
-      ATH_MSG_VERBOSE("Fit did not converge");  
-      return nullptr;    
-    }
-    return convertActsTrack(ctx, fitResult.value(), fitAuthor);
+    return convertActsTrack<ActsTrack_t>(ctx, actsTrack, fitAuthor);
 }
 
 template <typename Proxy_t>

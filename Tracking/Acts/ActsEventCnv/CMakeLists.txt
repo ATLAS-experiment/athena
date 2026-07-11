@@ -32,6 +32,7 @@ atlas_add_component(ActsEventCnv
     MuonCompetingRIOsOnTrack
     MuonTrackEvent
     StoreGateLib
+    TrkFitterInterfaces
     TrkEventPrimitives
     TrkExUtils
     TrkMeasurementBase

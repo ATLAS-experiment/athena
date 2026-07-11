@@ -52,9 +52,9 @@ class ITrackConverterTool : virtual public IAlgTool {
    * @param ctx: EventContext to construct the Geometry & calibration context inside
    * @param fitResult: Outcome from the Acts fitter
    * @param fitAuthor: Author flag to be put into the Trk::Track meta data */
-  using TrackFitResult_t = Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>;
-  virtual std::unique_ptr<Trk::Track> convertFitResult(const EventContext& ctx,
-                                                       TrackFitResult_t& fitResult,
+  using ActsTrack_t = ActsTrk::MutableTrackContainer::TrackProxy;
+  virtual std::unique_ptr<Trk::Track> convertActsToTrk(const EventContext& ctx,
+                                                       const ActsTrack_t& actsTrack,
                                                        const Trk::TrackInfo::TrackFitter fitAuthor) const = 0;
   /** @brief Convert the passed Trk::TrackCollection into an Acts Track object
    *         and appends the result to the passed 

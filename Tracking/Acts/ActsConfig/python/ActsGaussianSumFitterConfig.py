@@ -1,50 +1,39 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 
 def ActsGaussianSumFitterToolCfg(flags,
                                  name: str = "ActsGaussianSumFitterTool",
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("RefitOnly", True) # Track summary will be added in the algorithm
-
     kwargs.setdefault("UseDirectNavigation", flags.Acts.GsfDirectNavigation) # direct navigation used for refitting measurements
     kwargs.setdefault("ComponentMergeMethod", flags.Acts.GsfComponentMergeMethod) # Mean or MaxWeight
     kwargs.setdefault("MaxComponents", flags.Acts.GsfMaxComponents)
     kwargs.setdefault("OutlierChi2Cut", flags.Acts.GsfOutlierChi2Cut)
 
-    if flags.Detector.GeometryITk:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(ITkRotCreatorCfg(flags)))
-    elif flags.Detector.GeometryID:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
-        kwargs.setdefault('RotCreatorTool', acc.popToolsAndMerge(InDetRotCreatorCfg(flags)))
+    from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+    from ActsConfig.ActsConfigFlags import TrackFitterType
+    the_tool = acc.popToolsAndMerge(ActsFitterCfg(flags,
+                                                  fitterKind = TrackFitterType.GaussianSumFitter,
+                                                  name=name,
+                                                  **kwargs))
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg, ActsGeometryRealmConvTool
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault("GeometryRealmConvTool", acc.getPrimaryAndMerge(ActsGeometryRealmConvTool(flags)))
+    acc.setPrivateTools(the_tool)
+    return acc
 
-    if "ExtrapolationTool" not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        kwargs["ExtrapolationTool"] = acc.popToolsAndMerge(
-            ActsExtrapolationToolCfg(flags, MaxSteps=10000)
-        ) # PrivateToolHandle
+def ActsTrkGaussianSumFitterToolCfg(flags,
+                                    name: str = "ActsTrkGaussianSumFitterTool",
+                                    **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
 
-    if 'ATLASConverterTool' not in kwargs:
-        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-        kwargs["ATLASConverterTool"] = acc.getPrimaryAndMerge(ActsToTrkConverterToolCfg(flags))
+    kwargs.setdefault("ActsFitterTool", 
+                      acc.popToolsAndMerge(ActsGaussianSumFitterToolCfg(flags)))
+    
+    from ActsConfig.ActsTrackFittingConfig import ActsToTrkFitterCfg
+    the_tool = acc.popToolsAndMerge(ActsToTrkFitterCfg(flags, name, **kwargs))
 
-    if 'BoundaryCheckTool' not in kwargs:    
-        if flags.Detector.GeometryITk:
-            from InDetConfig.InDetBoundaryCheckToolConfig import ITkBoundaryCheckToolCfg            
-            kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(ITkBoundaryCheckToolCfg(flags)))
-        else:
-            from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
-            kwargs.setdefault("BoundaryCheckTool", acc.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags)))
-
-    acc.setPrivateTools(CompFactory.ActsTrk.GaussianSumFitterTool(name, **kwargs))
+    acc.setPrivateTools(the_tool)
     return acc
 
 

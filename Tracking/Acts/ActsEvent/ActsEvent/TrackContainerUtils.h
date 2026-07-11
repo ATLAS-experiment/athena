@@ -23,14 +23,14 @@ struct TrackContainerUtils
 
    /// get fitter type of a track
    /// @tparam consttrackproxy_t should be of type Acts::ConstTrackProxy<...>
-   template <Acts::detail::ConstProxyType consttrackproxy_t>
+   template <Acts::detail::ProxyType consttrackproxy_t>
    static xAOD::TrackFitter fitterType(const consttrackproxy_t &trackProxy) {
       return s_constFitterAccessor(trackProxy);
    }
 
    /// test whether a track has a fitter type
    /// @tparam consttrackproxy_t should be of type Acts::ConstTrackProxy<...>
-   template <Acts::detail::ConstProxyType consttrackproxy_t>
+   template <Acts::detail::ProxyType consttrackproxy_t>
    static bool hasFitterType(const consttrackproxy_t &trackProxy) {
       return s_constFitterAccessor.hasColumn(trackProxy);
    }

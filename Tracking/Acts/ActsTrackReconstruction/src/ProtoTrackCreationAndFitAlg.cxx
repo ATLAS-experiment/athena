@@ -71,6 +71,8 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
   Acts::VectorTrackContainer trackBackend;
   Acts::VectorMultiTrajectory trackStateBackend;
   ActsTrk::detail::RecoTrackContainer trackContainer( trackBackend, trackStateBackend );
+  
+  bool initializedColumns = false;
 
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
@@ -85,6 +87,10 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     if (not trackProxy.hasReferenceSurface()) {
       ATH_MSG_INFO("There is not reference surface for this track");
       continue;
+    }
+    if (!initializedColumns) {
+      trackContainer.ensureDynamicColumns(*res);
+      initializedColumns = true;
     }
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
     destProxy.copyFrom(trackProxy);

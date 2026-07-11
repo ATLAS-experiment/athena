@@ -14,11 +14,8 @@ def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     from ActsConfig.ActsConfigFlags import TrackFitterType
     from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon = True)))
     kwargs.setdefault("fitterKind", TrackFitterType.GlobalChiSquareFitter)
     kwargs.setdefault("OutlierChi2Cut", 200000)
-    kwargs.setdefault("DoReFitFromPRD", False)
     kwargs.setdefault("IncludeScattering", flags.Muon.trackGeometryPassiveMaterial)
     kwargs.setdefault("IncludeELoss",  flags.Muon.trackGeometryPassiveMaterial)
     
