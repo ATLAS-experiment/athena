@@ -24,7 +24,6 @@ set( _libraries
   vecmem::core
   traccc::core
   traccc::device_common
-  traccc::io
   GaudiKernel
   AthenaBaseComps
   AthDeviceInterfacesLib

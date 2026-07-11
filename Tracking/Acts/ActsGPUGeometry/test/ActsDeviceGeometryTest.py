@@ -2,19 +2,25 @@
 
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
-# Run script for the full GPU clusterization chain:
-#   RDO -> traccc cells -> traccc measurements -> xAOD clusters
+# Run script for GPU geometry creation:
+# JSON geometry file -> detray geometry (required)
+# JSON digitization file -> traccc digitization config (required)
+# JSON conditions file -> traccc conditions config (required)
+# CSV map file -> athena<->detray ID map (required)
+# JSON material file -> detray material (optional)
+# JSON surface grid file -> detray surface grid (optional)
+# CVF magnetic field -> covfie magnetic field (required)
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthCUDAServices.AthCUDAServicesConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg, StreamToolCfg
 
+from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
 from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import CUDAClusterizerToolCfg,  DeviceClusterizationAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
-from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
 
-def GPUClusterizationCfg(flags) -> ComponentAccumulator:
+def GPUGeometryCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     hostMR   = acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags, name="HostMR"))
@@ -27,26 +33,6 @@ def GPUClusterizationCfg(flags) -> ComponentAccumulator:
         HostMR   = hostMR,
         DeviceMR = deviceMR,
         CopyProviderTool = copyTool))
-
-    clusterizerTool = acc.popToolsAndMerge(CUDAClusterizerToolCfg(flags,
-        HostMR  = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool,
-        StreamTool = streamTool))
-
-    acc.merge(RDOtoTracccCellConverterAlgCfg(flags,
-        HostMR  = hostMR,
-        DeviceMR = deviceMR,
-        CopyProviderTool = copyTool))
-
-    acc.merge(DeviceClusterizationAlgCfg(flags,
-        ClusteringAlgProviderTool = clusterizerTool,
-        CopyProviderTool = copyTool,
-        DeviceMR = deviceMR))
-
-    acc.merge(TracccMeasurementConverterAlgCfg(flags,
-        CopyProviderTool = copyTool,
-        HostMR  = hostMR))
 
     return acc
 
@@ -71,13 +57,7 @@ if __name__ == "__main__":
     msg_svc = acc.getService('MessageSvc')
     msg_svc.Format = "%t % F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)
 
-    # Needed for PixelID and SCT_ID
-    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-    acc.merge(ITkPixelReadoutGeometryCfg(flags))
-    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-    acc.merge(ITkStripReadoutGeometryCfg(flags))
-
-    acc.merge(GPUClusterizationCfg(flags))
+    acc.merge(GPUGeometryCfg(flags))
     acc.printConfig(withDetails=True, summariseProps=True)
 
     statusCode = acc.run(flags.Exec.MaxEvents)
