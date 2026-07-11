@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,7 +9,6 @@
 // Trk
 #include "TrkDetDescrSvc/TrackingGeometrySvc.h"
 #include "TrkDetDescrInterfaces/IGeometryBuilder.h"
-#include "TrkDetDescrInterfaces/IGeometryProcessor.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
 #include "TrkGeometry/Layer.h"
 #include "TrkGeometry/LayerMaterialProperties.h"
@@ -25,17 +24,6 @@
 #include <unistd.h>
 #endif
 
-/** Constructor **/
-Trk::TrackingGeometrySvc::TrackingGeometrySvc(const std::string& name, ISvcLocator* svc)
-  : base_class(name, svc)
-  , m_geometryProcessors(this)
-{
-  // geometry processors to validation / distort the TrackingGeometry ------------
-  declareProperty("GeometryProcessors", m_geometryProcessors);
-}
-
-/** Destructor **/
-Trk::TrackingGeometrySvc::~TrackingGeometrySvc() = default;
 
 /** Initialize Service */
 StatusCode

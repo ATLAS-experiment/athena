@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,15 +23,6 @@
 // Gaudi
 #include "GaudiKernel/ITHistSvc.h"
 
-// constructor
-Trk::LayerMaterialInspector::LayerMaterialInspector(const std::string& t, const std::string& n, const IInterface* p) : 
-  Trk::RecursiveGeometryProcessor(t,n,p),
-  m_treeFolder("/val/")
-{}
-
-// destructor
-Trk::LayerMaterialInspector::~LayerMaterialInspector()
-= default;
 
 StatusCode Trk::LayerMaterialInspector::processNode(const Trk::TrackingVolume& , size_t) const
 {

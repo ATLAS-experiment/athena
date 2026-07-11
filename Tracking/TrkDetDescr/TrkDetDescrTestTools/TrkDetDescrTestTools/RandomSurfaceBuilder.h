@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,12 +54,11 @@ namespace Trk {
      private :
         /** random number engine used */
         SmartIF<IRndmGenSvc>                    m_rndmSvc;
-        Rndm::Numbers*                          m_gaussDist;
-        Rndm::Numbers*                          m_flatDist;
+        Rndm::Numbers*                          m_flatDist = nullptr;
 
-        size_t                                  m_numberOfSurfaces;
-        bool                                    m_enableCones;
-        std::vector<double>                     m_worldDimensions;
+        Gaudi::Property<size_t> m_numberOfSurfaces{this, "NumberOfSurfaces", 100};
+        Gaudi::Property<std::vector<double>> m_worldDimensions
+	  {this, "WorldDimensions", {}, "the active dimensions"};
     };
 
 } // end of namespace

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,15 +48,6 @@ namespace Trk {
                      const std::string&,
                      const IInterface*);
 
-        /**Virtual destructor*/
-        virtual ~VertexMapper();
-
-        /** AlgTool initialize method */
-        StatusCode initialize();
-        
-        /** AlgTool finalize method */
-        StatusCode finalize();
-
         /** Record the vertex into the local frame of the closest module  */
         MappedVertex mapToLocal(const Amg::Vector3D& vertex) const;
 
@@ -71,8 +62,10 @@ namespace Trk {
         //!< return and retrieve
         const TrackingGeometry& trackingGeometry() const;          //!< retrieve the tracking geometry
 
-        mutable const TrackingGeometry*                      m_trackingGeometry;          //!< the tracking geometry owned by the navigator
-        std::string                                          m_trackingGeometryName;      //!< Name of the TrackingGeometry as given in Detector Store
+        mutable const TrackingGeometry* m_trackingGeometry = nullptr;          //!< the tracking geometry owned by the navigator
+        Gaudi::Property<std::string> m_trackingGeometryName
+          {this, "TrackingGeometry", "AtlasTrackingGeometry",
+           "Name of the TrackingGeometry as given in Detector Store"};
 
     };
     
