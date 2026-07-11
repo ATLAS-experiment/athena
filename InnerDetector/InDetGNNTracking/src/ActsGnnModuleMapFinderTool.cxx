@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGnnModuleMapFinderTool.h"
@@ -104,7 +104,7 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::initialize() {
 
   // 4. Assemble pipeline
   m_gnnPipeline = std::make_unique<ActsPlugins::GnnPipeline>(
-      gc, std::vector{gnn}, tb, m_logger->cloneWithSuffix("Pipeline"));
+      gc, std::vector{std::move(gnn)}, tb, m_logger->cloneWithSuffix("Pipeline"));
 
   return StatusCode::SUCCESS;
 }
@@ -194,10 +194,10 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::getTracks(
 }
 
 MsgStream& InDet::ActsGnnModuleMapFinderTool::dump(MsgStream& out) const {
-  out << std::endl;
-  out << "|---------------------------------------------------------------------|" << std::endl;
-  out << "| ActsGnnModuleMapFinderTool                                          |" << std::endl;
-  out << "|---------------------------------------------------------------------|" << std::endl;
+  out << "\n";
+  out << "|---------------------------------------------------------------------|\n" ;
+  out << "| ActsGnnModuleMapFinderTool                                          |\n" ;
+  out << "|---------------------------------------------------------------------|\n" ;
   return out;
 }
 

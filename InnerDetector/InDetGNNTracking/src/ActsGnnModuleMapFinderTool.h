@@ -1,16 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ActsGnnModuleMapFinderTool_H
 #define ActsGnnModuleMapFinderTool_H
 
-#include <array>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <string>
-#include <vector>
+
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetRecToolInterfaces/IGNNTrackFinder.h"
@@ -18,6 +13,13 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsPlugins/Gnn/GnnPipeline.hpp"
 
+#include <array>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <string>
+#include <vector>
+#include <cstdint>
 
 class MsgStream;
 
