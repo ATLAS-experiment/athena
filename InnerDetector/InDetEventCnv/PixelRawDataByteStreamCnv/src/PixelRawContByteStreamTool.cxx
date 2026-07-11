@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ StatusCode PixelRawContByteStreamTool::convert(PixelRDO_Container* cont) const {
       for(; it_b!=it_e; ++it_b){ RDOs.push_back((*it_b)); }
 
       theROD = fea->getRodData(rodId); 
-      fillROD( *theROD, RDOs, m_BCs_per_LVL1ID);  
+      fillROD( *theROD, std::move(RDOs), m_BCs_per_LVL1ID);  
 
     }
     else {
@@ -155,7 +155,7 @@ void PixelRawContByteStreamTool::fillROD(std::vector<uint32_t>& v32rod, std::vec
   // ordering of the elements of the RDOs vector by offlineId, n5
   if (rdo_it != rdo_it_end) {
     OrderInitialRdos orderInitialRdos(m_pixelReadout, m_PixelID, pixCabling); 
-    std::sort(rdo_it, rdo_it_end, orderInitialRdos); 
+    std::sort(rdo_it, rdo_it_end, std::move(orderInitialRdos)); 
   }  
   // end of ordering of the elements of the RDOs vector by offlineId, n5 
   // NOW the RDOs should be ordered following (1) the offlineId, (2) the FE number
@@ -413,7 +413,7 @@ void PixelRawContByteStreamTool::fillROD(std::vector<uint32_t>& v32rod, std::vec
 
         // Order the RDOs within the vector rdos_sameIBL_offlineId, following the ordering rules of orderRdos
         OrderRdos orderRdos(offlineId, m_pixelReadout);
-        std::sort(rdo_same_it, rdo_same_it_end, orderRdos); 
+        std::sort(rdo_same_it, rdo_same_it_end, std::move(orderRdos)); 
 
         //check:
 #ifdef PIXEL_DEBUG

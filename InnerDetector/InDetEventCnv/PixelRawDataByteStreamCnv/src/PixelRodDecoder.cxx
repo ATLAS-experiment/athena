@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelRodDecoder.h"
@@ -155,8 +155,9 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
 
   // @TODO find better solution for the error counter to avoid complex index computations and hard coded maximum size.
   // The index array is defined in PixelRawDataProviderTool::SizeOfIDCInDetBSErrContainer()
+  // Local variable bsErrWord uses 452048 bytes of stack space
+  //coverity[STACK_USE]
   std::array<uint64_t, PixelRodDecoder::ERROR_CONTAINER_MAX> bsErrWord{};
-  std::fill(bsErrWord.begin(),bsErrWord.end(),0);
   // Check ROD status
   if (robFrag->nstatus()!=0) {
     const uint32_t* rob_status;
@@ -664,7 +665,7 @@ StatusCode PixelRodDecoder::fillCollection( const ROBFragment *robFrag, IPixelRD
                   if (hitDiscCnfg == 2 && IBLtot[1] == 2) IBLtot[1] = 16;
                   if (not m_checkDuplicatedPixel or thisRdoIsUnique(pixelId, foundPixels)) {
                     // Insert the first part of the ToT info in the collection
-                    coll->push_back(new RDO(pixelId, IBLtot[0], mBCID, mLVL1ID, mLVL1A));
+                    if (coll) coll->push_back(new RDO(pixelId, IBLtot[0], mBCID, mLVL1ID, mLVL1A));
                   } 
                   else {
                     m_numDuplicatedPixels++;
