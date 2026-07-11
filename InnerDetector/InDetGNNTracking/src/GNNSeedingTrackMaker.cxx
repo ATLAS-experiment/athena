@@ -126,6 +126,8 @@ StatusCode InDet::GNNSeedingTrackMaker::execute(const EventContext& ctx) const {
 
   // loop over all track candidates
   // and perform track fitting for each.
+  //Local variable data uses 813712 bytes
+  //coverity[STACK_USE]
   SiCombinatorialTrackFinderData_xk data;
   if (not data.isInitialized())
     initializeCombinatorialData(ctx, data);
