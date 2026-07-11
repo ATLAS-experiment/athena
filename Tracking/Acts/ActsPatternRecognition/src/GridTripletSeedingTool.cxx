@@ -518,11 +518,16 @@ StatusCode GridTripletSeedingTool::createSeeds(
     SG::ReadHandle<xAOD::VertexContainer> inputHoughVtx = SG::makeHandle(m_inputHoughVtxKey, ctx);
     ATH_CHECK(inputHoughVtx.isValid());
 
-    if(inputHoughVtx->size() == 1) {
-      bottomDoubletFinderCfg.collisionRegionMin = inputHoughVtx->at(0)->z() - m_hvCollisionRegionTolerance;
-      bottomDoubletFinderCfg.collisionRegionMax = inputHoughVtx->at(0)->z() + m_hvCollisionRegionTolerance;
+    for(const auto* vtx: *inputHoughVtx)
+    {
+      if(vtx->vertexType() == xAOD::VxType::PriVtx)
+      {
+        bottomDoubletFinderCfg.collisionRegionMin = vtx->z() - m_hvCollisionRegionTolerance;
+        bottomDoubletFinderCfg.collisionRegionMax = vtx->z() + m_hvCollisionRegionTolerance;
+        break;
+      }
     }
-    // in case HoughVtx is not found, keep the original collision region
+    // in case HoughVtx is not found and inputHoughVtx is empty, keep the original collision region
   }
 
   auto bottomDoubletFinder =
