@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetDetDescrExample_ReadSiDetectorElements_h
@@ -48,26 +48,26 @@ public:
 
  private:
   // Job properties
-  std::string m_managerName;
-  bool m_doLoop;
-  bool m_doInit;
-  bool m_doExec;
-  bool m_useConditionsTools;
+  std::string m_managerName{"Pixel"};
+  bool m_doLoop{true};
+  bool m_doInit{};
+  bool m_doExec{};
+  bool m_useConditionsTools{};
   ToolHandle<ISiliconConditionsTool> m_siConditionsTool{this, "SiConditionsTool", "SCT_SiliconConditionsTool", "Silicon conditions tool"};
   ToolHandle<ISiLorentzAngleTool> m_siLorentzAngleTool{this, "SiLorentzAngleTool", "SiLorentzAngleTool", "Silicon Lorentz anglet tool"};
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_detEleCollKey{this, "DetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection"};
 
   // Other
-  const InDetDD::SiDetectorManager * m_manager;
-  const AtlasDetectorID * m_idHelper;
-  const PixelID * m_pixelIdHelper;
-  const SCT_ID * m_sctIdHelper;
+  const InDetDD::SiDetectorManager * m_manager{};
+  const AtlasDetectorID * m_idHelper{};
+  const PixelID * m_pixelIdHelper{};
+  const SCT_ID * m_sctIdHelper{};
 
-  bool m_first;
-  bool m_printProbePositions;
-  bool m_printTransforms;
-  bool m_printDirections;
+  bool m_first{true};
+  bool m_printProbePositions{};
+  bool m_printTransforms{};
+  bool m_printDirections{};
 
 };
 
