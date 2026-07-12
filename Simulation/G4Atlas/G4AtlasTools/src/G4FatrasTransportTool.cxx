@@ -18,13 +18,14 @@
 thread_local std::unique_ptr<G4PropagatorInField, G4FatrasTransportTool::Deleter> G4FatrasTransportTool::s_propagator;
 
 void G4FatrasTransportTool::Deleter::operator()(G4PropagatorInField* ptr) const {
-  if (!ptr) {
-     return;
-  }
   delete ptr->GetNavigatorForPropagating();
   delete ptr;
 }
 
+G4FatrasTransportTool::G4FatrasTransportTool(const std::string& type,
+                                         const std::string& name,
+                                         const IInterface* parent)
+    : base_class(type, name, parent) {}
 
 StatusCode G4FatrasTransportTool::finalize() {
 
@@ -111,7 +112,7 @@ G4PropagatorInField* G4FatrasTransportTool::makePropagator() {
   return propagator;
 }
 
-void G4FatrasTransportTool::doStep(G4FieldTrack& fieldTrack) const {
+void G4FatrasTransportTool::doStep(G4FieldTrack& fieldTrack) {
 
   // Get the propagator and navigator for the current thread
   auto navigator = s_propagator->GetNavigatorForPropagating();
@@ -149,7 +150,7 @@ void G4FatrasTransportTool::doStep(G4FieldTrack& fieldTrack) const {
 }
 
 std::vector<G4FieldTrack> G4FatrasTransportTool::transport(
-    const G4Track& G4InputTrack) const {
+    const G4Track& G4InputTrack) {
 
   // Get the PDG ID of the particle
   int pdgId = G4InputTrack.GetDefinition()->GetPDGEncoding();

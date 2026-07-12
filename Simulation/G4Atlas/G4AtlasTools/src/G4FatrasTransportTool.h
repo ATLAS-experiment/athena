@@ -26,14 +26,14 @@ class G4FatrasTransportTool : virtual public extends<AthAlgTool, IG4FatrasTransp
 
   public:
 
-    using base_class::base_class;
+    G4FatrasTransportTool(const std::string&, const std::string&, const IInterface*);
 
     // Algorithm finalize at begin of job
     virtual StatusCode finalize() override final;
     // Initialize propagator for the current thread
     StatusCode initializePropagator() override final;
     // Transport input track through the geometry
-    virtual std::vector<G4FieldTrack> transport(const G4Track& G4InputTrack) const override final;
+    virtual std::vector<G4FieldTrack> transport(const G4Track& G4InputTrack) override final;
 
   private:
     // Deleter for the unique_ptr managing the G4PropagatorInField
@@ -46,7 +46,7 @@ class G4FatrasTransportTool : virtual public extends<AthAlgTool, IG4FatrasTransp
     // Create and return a new propagator
     G4PropagatorInField* makePropagator();
     // Advance track by single Geant4 step in geometry
-    void doStep(G4FieldTrack& fieldTrack) const;
+    void doStep(G4FieldTrack& fieldTrack);
     // Pointer to the physical volume of the world (either simplified or full geometry)
     G4VPhysicalVolume* m_worldVolume{};
 

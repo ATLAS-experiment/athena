@@ -16,7 +16,7 @@
 
 class G4VPhysicalVolume;
 
-DeclareInterfaceID(IG4FatrasTransportTool,1 ,0);
+static const InterfaceID IID_IG4FatrasTransportTool("IG4FatrasTransportTool", 1, 0);
 
 class IG4FatrasTransportTool : virtual public IAlgTool
 {
@@ -24,7 +24,7 @@ class IG4FatrasTransportTool : virtual public IAlgTool
     /** AlgTool interface methods */
     static const InterfaceID& interfaceID() { return IID_IG4FatrasTransportTool; }
 
-    virtual std::vector<G4FieldTrack> transport(const G4Track& G4InputTrack) const = 0;
+    virtual std::vector<G4FieldTrack> transport(const G4Track& G4InputTrack) = 0;
     virtual StatusCode initializePropagator() = 0;
 };
 
