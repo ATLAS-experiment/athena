@@ -2,13 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "AsyncgRPCComputeAlg.h"
-
-AsyncgRPCComputeAlg::AsyncgRPCComputeAlg(const std::string& name,
-                                       ISvcLocator* pSvcLocator)
-    : AthAsynchronousAlgorithm(name, pSvcLocator) {}
-
-AsyncgRPCComputeAlg::~AsyncgRPCComputeAlg() {}
+#include "AsyncgRPCComputeAlg.h"  
 
 StatusCode AsyncgRPCComputeAlg::initialize() {
   ATH_MSG_DEBUG("Setting up gRPC channel");
@@ -47,6 +41,8 @@ void fillEventInfo(const EventIDBase& input, ::EventInfo* ei) {
 }
 
 StatusCode AsyncgRPCComputeAlg::execute(const EventContext& context) const {
+  ATH_MSG_ALWAYS("Invoking");
+
   OffloadMessage outMsg;
   OffloadMessage inMsg;
 
@@ -56,7 +52,7 @@ StatusCode AsyncgRPCComputeAlg::execute(const EventContext& context) const {
   fillEventInfo(context.eventID(), ei);
   ATH_MSG_DEBUG("Prepared input data, event number "
                 << context.eventID().event_number());
-
+  this->restoreAfterSuspend().ignore();
   auto gRPCClientContext = std::make_unique<grpc::ClientContext>();
   m_stub->async()->doComputation(
       gRPCClientContext.get(), &outMsg, &inMsg, [this, &outMsg, &inMsg](grpc::Status status) {

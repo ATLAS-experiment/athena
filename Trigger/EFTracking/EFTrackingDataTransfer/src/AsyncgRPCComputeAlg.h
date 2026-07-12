@@ -25,8 +25,8 @@ using grpc::Status;
  **/
 class AsyncgRPCComputeAlg : public AthAsynchronousAlgorithm {
  public:
-  AsyncgRPCComputeAlg(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~AsyncgRPCComputeAlg() override;
+ // Inherit the base class's constructor(s).
+      using AthAsynchronousAlgorithm::AthAsynchronousAlgorithm;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;

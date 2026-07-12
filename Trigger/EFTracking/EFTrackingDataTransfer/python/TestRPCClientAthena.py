@@ -10,6 +10,7 @@ from AthenaCommon.Constants import DEBUG
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.RDO_RUN4 # this is completely dummy input to get event loop going
 flags.Exec.MaxEvents = 10
+flags.Exec.OutputLevel=DEBUG
 flags.Concurrency.NumThreads=3
 flags.lock()
 acc = MainServicesCfg(flags)
@@ -21,9 +22,6 @@ acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("A1",
 
 acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("A2",
     OutputLevel=DEBUG ))
-
-
-
 
 # ------------------------------------------------------------
 # 5. Run
