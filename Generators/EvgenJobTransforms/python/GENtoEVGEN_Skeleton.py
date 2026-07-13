@@ -181,6 +181,8 @@ def fromRunArgs(runArgs):
 
     # Determine maximum number of events to generate
     requested_max_events = flags.Exec.MaxEvents
+    # Event generation is not using standard event counting
+    flags.Exec.MaxEvents = -1
 
     # Create an instance of the Sample(EvgenCAConfig) and update global flags accordingly
     sample = setupSample(flags)
@@ -206,6 +208,9 @@ def fromRunArgs(runArgs):
 
     # Setup the main flags
     flags.Exec.FirstEvent = flags.Generator.firstEvent
+
+    # We are always doing MC
+    flags.Input.isMC = True
 
     # If no inputEVNT_PreFile was provided clear transform placeholder input files 
     # and set RunNumber/TimeStamp based on DSID. 
@@ -264,9 +269,14 @@ def fromRunArgs(runArgs):
     # Sort the list of generator names into standard form
     from GeneratorConfig.GenConfigHelpers import gen_sortkey
     from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
-    generators = sorted(cfg.getService("GeneratorInfoSvc").Generators, key=gen_sortkey)
-    gendict = generatorsGetInitialVersionedDictionary(generators)
-    generatorsWithVersion = generatorsVersionedStringList(gendict)
+    if not flags.Input.Files:
+        generators = sorted(cfg.getService("GeneratorInfoSvc").Generators, key=gen_sortkey)
+        gendict = generatorsGetInitialVersionedDictionary(generators)
+        generatorsWithVersion = generatorsVersionedStringList(gendict)
+    else:
+        # TODO: read from metadata
+        generators = []
+        generatorsWithVersion = []
 
     # Check if the setup requires steering
     from GeneratorConfig.GenConfigHelpers import gen_require_steering
@@ -365,13 +375,16 @@ def fromRunArgs(runArgs):
         f"AtlasRelease_{runArgs.trfSubstepName}": flags.Input.Release or "n/a",
         "beam_energy": str(int(flags.Beam.Energy)),
         "beam_type": flags.Beam.Type.value,
-        "generators": '+'.join(generatorsWithVersion),
-        "tune":  cfg.getService("GeneratorInfoSvc").Tune,
         "hepmc_version": f"HepMC{os.environ['HEPMCVER']}",
         "keywords": ", ".join(sample.keywords).lower(),
         "lhefGenerator": '+'.join(filter(gen_lhef, generators)),
         "mc_channel_number": str(flags.Generator.DSID),
     }
+    if not flags.Input.Files:
+        metadata.update({
+            "generators": '+'.join(generatorsWithVersion),
+            "tune": cfg.getService("GeneratorInfoSvc").Tune
+        })
     if hasattr(sample, "process"): metadata.update({"evgenProcess": sample.process})
     if hasattr(sample, "specialConfig"): metadata.update({"specialConfiguration": sample.specialConfig})
     if hasattr(sample, "hardPDF"): metadata.update({"hardPDF": sample.hardPDF})
@@ -381,7 +394,8 @@ def fromRunArgs(runArgs):
 
     # Print metadata in the log
     evgenLog.info(f"HepMC version {os.environ['HEPMCVER']}")
-    evgenLog.info(f"MetaData: generatorTune = {cfg.getService('GeneratorInfoSvc').Tune}")
+    if not flags.Input.Files:
+        evgenLog.info(f"MetaData: generatorTune = {cfg.getService('GeneratorInfoSvc').Tune}")
     evgenLog.info("MetaData: generatorName = {}".format(generatorsWithVersion))
     if nEventsLHE is not None:
         print(f"MetaData: Number of input LHE events = {nEventsLHE}")
@@ -396,13 +410,19 @@ def fromRunArgs(runArgs):
             print(f"MetaData: Number of produced LHE events = {nEventsTXT}")
 
     if output_pool_file:
+        # Count all events that are written
+        from EventBookkeeperTools.EventBookkeeperToolsConfig import AllWrittenEventsCounterAlgCfg
+        cfg.merge(AllWrittenEventsCounterAlgCfg(flags))
+
         # Configure output stream
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         cfg.merge(OutputStreamCfg(flags, "EVNT", ["McEventCollection#*"]))
 
         # Add in-file MetaData
+        from AthenaConfiguration.Enums import MetadataCategory
         from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-        cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT"))
+        cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT",
+                                            createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
@@ -413,6 +433,10 @@ def fromRunArgs(runArgs):
     # Write AMI tag into in-file MetaData
     from PyUtils.AMITagHelperConfig import AMITagCfg
     cfg.merge(AMITagCfg(flags, runArgs))
+
+    # Hack the main sequence to not ignore filters
+    # TODO: figure out if we can do it in a more elegant way without another nested sequence
+    cfg.getSequence("AthAlgSeq").IgnoreFilterPassed = False
 
     # Print ComponentAccumulator components
     cfg.printConfig(prefix="Gen_tf", printSequenceTreeOnly=not runArgs.VERBOSE)
