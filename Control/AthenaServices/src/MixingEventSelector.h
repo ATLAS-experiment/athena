@@ -116,7 +116,7 @@ public:
   virtual StatusCode setDataProvider(IDataProviderSvc* pService) override;
   virtual SmartIF<IDataProviderSvc>& dataProvider() const override;
   virtual StatusCode setConversionSvc(IConversionSvc* pService) override;
-  virtual SmartIF<IConversionSvc>& conversionSvc()    const override;
+  virtual SmartIF<IConversionSvc> conversionSvc() override;
   virtual StatusCode setAddressCreator(IAddressCreator* creator) override;
   virtual SmartIF<IAddressCreator>& addressCreator()    const override;
   virtual StatusCode fillObjRefs(IOpaqueAddress* pAddress, DataObject* pObject) override;
