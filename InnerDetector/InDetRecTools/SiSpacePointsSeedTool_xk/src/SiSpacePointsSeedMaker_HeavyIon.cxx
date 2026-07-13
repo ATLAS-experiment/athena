@@ -114,7 +114,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
   float irstep = 1./m_r_rstep;
   int   irmax  = m_r_size-1  ;
 
-  /// read the prd to track map, in case we want to use it. 
+  /// read the prd to track map, in case we want to use it.
   const Trk::PRDtoTrackMap *prd_to_track_map_cptr = nullptr;
   if (not m_prdToTrackMap.key().empty()) {
     SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map = SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
@@ -130,13 +130,15 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
 
     SG::ReadHandle<SpacePointContainer> spacepointsPixel{m_spacepointsPixel, ctx};
     if (spacepointsPixel.isValid()) {
-
+      std::size_t nOriginalSpacePoints = 0;
+      std::size_t nSpacePoints = 0;
       for (const SpacePointCollection* spc: *spacepointsPixel) {
+	nOriginalSpacePoints += spc->size();
         for (const Trk::SpacePoint* sp: *spc) {	  
 	  float r = sp->r();
           if (r < 43. || r>=m_r_rmax) continue;
 	  if (prd_to_track_map_cptr and isUsed(sp,*prd_to_track_map_cptr)) continue;
-	  
+	  ++nSpacePoints;
 	  InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
 	  int ir = static_cast<int>(sps->radius()*irstep);
           if (ir>irmax) ir = irmax;
@@ -146,6 +148,8 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::newEvent(const EventContext& ctx, E
 	  ++data.ns;
 	}
       }
+      // ATH_MSG_INFO("Pixel space Points from SG: " << nOriginalSpacePoints);
+      // ATH_MSG_INFO("  \\_ After selection: " << nSpacePoints);
     }
   }
 

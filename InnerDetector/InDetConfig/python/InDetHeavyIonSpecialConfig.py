@@ -67,6 +67,7 @@ def lowPtPassCfg(flags):
     ClusterSplitProbContainer = "InDetAmbiguityProcessorSplitProbHeavyIon"
     result, ClusterSplitProbContainer = TrackRecoPassCfg(flags,
                                                          extension="HeavyIonLowPt",
+                                                         InputExtendedInDetTracks=["CombinedInDetTracks"],
                                                          doTrackingSiPattern=True,
                                                          ClusterSplitProbContainer=ClusterSplitProbContainer)
     acc.merge(result)

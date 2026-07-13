@@ -275,6 +275,9 @@ namespace InDet {
   bool SiSpacePointsSeedMaker_HeavyIon::isUsed(const Trk::SpacePoint* sp, const Trk::PRDtoTrackMap &prd_to_track_map) const
   {
     const Trk::PrepRawData* d = sp->clusterList().first;
+    if (!d and prd_to_track_map.isUsed(*d)) {
+      std::cout << "MEASUREMENT IS USED" << std::endl;
+    }
     if (!d || !prd_to_track_map.isUsed(*d)) return false;
     d = sp->clusterList().second;
     if (!d || prd_to_track_map.isUsed(*d)) return true;
