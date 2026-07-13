@@ -347,6 +347,20 @@ class GridTripletSeedingTool
   Gaudi::Property<bool> m_useExperimentCuts{this, "useExperimentCuts", false,
                                             ""};
 
+  // per-pair azimuthal-swing doublet cut (displaced-aware, same physics as
+  // the GBTS phi window): independent of useExperimentCuts so that the
+  // pixel-specific experiment cuts stay off for strip instances
+  Gaudi::Property<bool> m_doubletDPhiCut{this, "doubletDPhiCut", false,
+      "apply the per-pair azimuthal-swing doublet cut"};
+  Gaudi::Property<float> m_doubletDPhiD0Max{this, "doubletDPhiD0Max", -1.,
+      "impact parameter bounding the doublet phi swing; negative uses impactMax"};
+  Gaudi::Property<float> m_doubletDPhiCap{this, "doubletDPhiCap", 10.,
+      "cap on the displaced phi-swing term [rad]"};
+  Gaudi::Property<float> m_doubletDPhiConst{this, "doubletDPhiConst", 0.015,
+      "constant term of the prompt doublet phi window [rad]"};
+  Gaudi::Property<float> m_doubletDPhiSlope{this, "doubletDPhiSlope", 2.0e-4,
+      "curvature term of the prompt doublet phi window [rad/mm]"};
+
   Gaudi::Property<int> m_stateVectorReserveSize{
       this, "stateVectorReserveSize", 500,
       "Size of the initial Seeding State internal vectors"};
