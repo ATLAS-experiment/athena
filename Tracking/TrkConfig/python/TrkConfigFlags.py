@@ -60,6 +60,8 @@ class TrackingComponent(FlagEnum):
 def createTrackingConfigFlags():
     icf = AthConfigFlags()
 
+    icf.addFlag("Tracking.SpecialHiConfiguration", False)
+    
     # Turn running of truth matching on and off (by default on for MC off for data)
     icf.addFlag("Tracking.doTruth", lambda prevFlags: prevFlags.Input.isMC or 
         (prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and prevFlags.Overlay.DataOverlay))

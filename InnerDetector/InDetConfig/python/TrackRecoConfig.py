@@ -805,12 +805,16 @@ def ExtendedPRDInfoCfg(flags):
 #####################     Main ID tracking config       #####################
 ##############################################################################
 
-def InDetTrackRecoCfg(flags):
+def InDetTrackRecoCfg(flags,
+                      doSpecial: bool = True):
 
     # Bypass to ITk config
     if flags.Detector.GeometryITk:
         from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
         return ITkTrackRecoCfg(flags)
+    if flags.Tracking.SpecialHiConfiguration and doSpecial:
+        from InDetConfig.InDetHeavyIonSpecialConfig import InDetHeavyIonSpecialCfg
+        return InDetHeavyIonSpecialCfg(flags)
 
     """Configures complete ID tracking """
     result = ComponentAccumulator()
