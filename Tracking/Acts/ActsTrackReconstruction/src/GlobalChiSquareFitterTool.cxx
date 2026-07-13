@@ -115,7 +115,7 @@ GlobalChiSquareFitterTool::Gx2FitterOptions_t
     propagationOption.maxTargetSkipping = m_option_maxNavSurfaces;
     // Set the Gx2Fitter options
     return Gx2FitterOptions_t{tgContext, mfContext, calContext, 
-                              m_gx2fExtensions[Acts::toUnderlying(slType)], 
+                              m_gx2fExtensions.at(Acts::toUnderlying(slType)), //slType can be 3
                               std::move(propagationOption),
                               surface, m_option_includeScat, 
                               m_option_includeELoss,

@@ -123,7 +123,12 @@ StatusCode LArR4ElecCalibCalculator::stop() {
   for (const HWIdentifier hwid : symIDs) {
     const Identifier id = (*cablingHdl)->cnvToIdentifier(hwid);
     const auto sampling = (CaloSampling::CaloSample)m_caloCellID->calo_sample(id);
-    const double mARange = dynRange.find(sampling)->second;
+    const auto rangeIt = dynRange.find(sampling);
+    if (rangeIt == dynRange.end())[[unlikely]]{
+      ATH_MSG_WARNING("LArR4ElecCalibCalculator::stop: sampling not found in dynRange.");
+      continue;
+    }
+    const double mARange = rangeIt->second;
     const double uAperADC = 1000 * mARange / nUsableBits;
     const double dac2uA = (*DAC2uAHdl)->DAC2UA(hwid);  // uA/DAC
     const double ADC2DAC = uAperADC / dac2uA;
