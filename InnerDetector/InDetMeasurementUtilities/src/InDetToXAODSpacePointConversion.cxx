@@ -135,7 +135,7 @@ namespace InDet {
     for (const ::SpacePointCollection *spc : *pixel_container) {
       for (const Trk::SpacePoint *sp : *spc) {
 	const InDet::PixelSpacePoint *indetSP = dynamic_cast<const InDet::PixelSpacePoint *>(sp);
-
+  if (!indetSP)[[unlikely]] continue;
         xAOD::SpacePoint* pixel_sp = pixel_xaod_container->at (isp++);
 	ATH_CHECK( TrackingUtilities::convertTrkToXaodPixelSpacePoint(*indetSP, *pixel_sp) );
 
@@ -302,7 +302,9 @@ namespace InDet {
 
     for (const Trk::SpacePoint *sp : *strip_overlap_container) {
       const InDet::SCT_SpacePoint *indetSP = dynamic_cast<const InDet::SCT_SpacePoint *>(sp);
-      
+      if (not indetSP)[[unlikely]] {
+        continue;
+      }
       strip_overlap_xaod_container->push_back( new xAOD::SpacePoint() );
       ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, vertex, *strip_overlap_xaod_container->back()) );
 
@@ -312,7 +314,7 @@ namespace InDet {
 	const InDet::SCT_Cluster* theCluster1 = dynamic_cast<const InDet::SCT_Cluster*>(clusterList.first);
 	const InDet::SCT_Cluster* theCluster2 = dynamic_cast<const InDet::SCT_Cluster*>(clusterList.second);
 	if (theCluster1 == nullptr or
-	    theCluster2 == nullptr) {
+	    theCluster2 == nullptr) [[unlikely]]{
 	  ATH_MSG_FATAL("Cannot cast InDet::SCT_Cluster");
 	}
 	
