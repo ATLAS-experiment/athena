@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 baseFileName="trig_edmr3_repr_test_"
 rm -f ${baseFileName}*
 
 for i in `seq 3`; do
-  python -c "from TrigEDMConfig.testEDMRun3 import dumpListToJson; dumpListToJson('${baseFileName}${i}.json')"
+  python -c "from TrigEDMConfig.TriggerEDM import dumpListToJson; dumpListToJson('${baseFileName}${i}.json',runVersion=3)"
 done
 
 diff ${baseFileName}1.json ${baseFileName}2.json >${baseFileName}diff1.txt
