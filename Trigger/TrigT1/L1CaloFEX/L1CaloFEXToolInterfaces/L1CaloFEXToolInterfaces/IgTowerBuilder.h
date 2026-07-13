@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -29,13 +29,6 @@ Interface definition for gTowerBuilder
     virtual void BuildFCALgTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const = 0;
     virtual void BuildAllTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const = 0;
     virtual void BuildSingleTower(std::unique_ptr<gTowerContainer> & gTowerContainerRaw, int eta, int phi, int nphi, int keybase, int posneg) const = 0;
-
-
-    virtual void init(std::unique_ptr<gTowerContainer> & gTowerContainer) = 0;
-    virtual void execute(std::unique_ptr<gTowerContainer> & gTowerContainer) const = 0;
-    virtual void reset() = 0;
-
-
 
 
   private:
