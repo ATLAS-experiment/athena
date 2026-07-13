@@ -17,11 +17,11 @@
 
 namespace {
 
-std::vector<std::pair<int, double> > makeSortedTruthPairs(
-    const std::unordered_map<int, double>& truthMap,
+std::vector<std::pair<unsigned int, double> > makeSortedTruthPairs(
+    const std::unordered_map<unsigned int, double>& truthMap,
     unsigned int maxTruthParticles)
 {
-  std::vector<std::pair<int, double> > truthPairs;
+  std::vector<std::pair<unsigned int, double> > truthPairs;
   truthPairs.reserve(truthMap.size());
   for (const auto& [pid, energy] : truthMap) {
     truthPairs.emplace_back(pid, energy);
@@ -76,7 +76,7 @@ StatusCode CaloCalibClusterDecoratorToolDM::execute(
     xAOD::CaloClusterContainer* theClusColl) const
 {
   SG::WriteDecorHandle<xAOD::CaloClusterContainer,
-                       std::vector<std::pair<int, double> > >
+                       std::vector<std::pair<unsigned int, double> > >
     caloClusterWriteDecorHandleNLeadingTruthParticlesDM(
         m_caloClusterWriteDecorHandleKeyNLeadingTruthParticlesDM, ctx);
 
@@ -180,7 +180,7 @@ StatusCode CaloCalibClusterDecoratorToolDM::execute(
     pClusList = &clusLists[2];
   }
 
-  std::vector<std::unordered_map<int, double> > engCalibDeadByTruth(theClusColl->size());
+  std::vector<std::unordered_map<unsigned int, double> > engCalibDeadByTruth(theClusColl->size());
 
   if (pClusList != nullptr) {
     accumulateDeadMaterialEnergy(
@@ -189,7 +189,7 @@ StatusCode CaloCalibClusterDecoratorToolDM::execute(
         clusInfoVec,
         *pClusList,
         useParticleID,
-        [&engCalibDeadByTruth](int iClus, int uniqueID, int /*nDmArea*/, double energy) {
+        [&engCalibDeadByTruth](int iClus, unsigned int uniqueID, int /*nDmArea*/, double energy) {
           engCalibDeadByTruth[iClus][uniqueID] += energy;
         });
   }
@@ -212,7 +212,7 @@ StatusCode CaloCalibClusterDecoratorToolDM::execute(
   int clusIdx = -1;
   for (const xAOD::CaloCluster* thisCaloCluster : *theClusColl) {
     ++clusIdx;
-    const std::unordered_map<int, double>& truthMap = engCalibDeadByTruth[clusIdx];
+    const std::unordered_map<unsigned int, double>& truthMap = engCalibDeadByTruth[clusIdx];
     if (!truthMap.empty()) {
       caloClusterWriteDecorHandleNLeadingTruthParticlesDM(*thisCaloCluster) =
           makeSortedTruthPairs(truthMap, m_numTruthParticles);
