@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -18,15 +18,15 @@ DECLARE_NAMED_TPCNV_FACTORY(TrackRecordCollectionCnv_p1,
                             AtlasHitsVector<TrackRecord>,
                             TrackRecordCollection_p1,
                             Athena::TPCnvVers::Old)
-                      
+
 DECLARE_NAMED_TPCNV_FACTORY(TrackRecordCollectionCnv_p2,
                             TrackRecordCollectionCnv_p2,
                             AtlasHitsVector<TrackRecord>,
                             TrackRecordCollection_p2,
-                            Athena::TPCnvVers::Current)
-                      
+                            Athena::TPCnvVers::Old)
+
 DECLARE_NAMED_TPCNV_FACTORY(TrackRecordCollectionCnv_p3,
                             TrackRecordCollectionCnv_p3,
                             AtlasHitsVector<TrackRecord>,
                             TrackRecordCollection_p3,
-                            Athena::TPCnvVers::Old)
+                            Athena::TPCnvVers::Current)

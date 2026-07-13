@@ -1,18 +1,17 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4SIM_TRACKRECORDCOLLECTIONCNV
 #define G4SIM_TRACKRECORDCOLLECTIONCNV
 
 #include "TrackRecord/TrackRecordCollection.h"
-#include "G4SimTPCnv/TrackRecordCollection_p1.h"
-#include "G4SimTPCnv/TrackRecordCollection_p2.h"
+#include "G4SimTPCnv/TrackRecordCollection_p3.h"
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
 // typedef to the latest persistent version
-typedef TrackRecordCollection_p2  TrackRecordCollection_PERS;
+typedef TrackRecordCollection_p3  TrackRecordCollection_PERS;
 
 class TrackRecordCollectionCnv  : public T_AthenaPoolCustomCnv<TrackRecordCollection, TrackRecordCollection_PERS > {
   friend class CnvFactory<TrackRecordCollectionCnv>;
