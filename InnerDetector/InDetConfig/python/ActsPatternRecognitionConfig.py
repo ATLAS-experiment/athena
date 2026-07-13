@@ -8,8 +8,8 @@ def ActsTrackReconstructionCfg(flags,
 
     # Vertex reconstruction using spacepoints
     if flags.Tracking.ActiveConfig.useHoughVertexFilter:
-        from HIGlobal.HIHoughVtxFinderConfig import HIHoughVtxRecoCfg
-        acc.merge(HIHoughVtxRecoCfg(flags,
+        from InDetPriVxFinder.HoughVtxFinderConfig import HoughVtxFinderCfg
+        acc.merge(HoughVtxFinderCfg(flags,
                                     inputPixelSpacePoints = "PixelSpacePoints"))
 
     # Seeding

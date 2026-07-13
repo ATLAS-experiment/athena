@@ -7,7 +7,7 @@ atlas_subdir( InDetPriVxFinder )
 atlas_add_component( InDetPriVxFinder
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel xAODTracking InDetRecToolInterfaces TrkParticleBase TrkTrack VxVertex TrkVertexFitterInterfaces AthenaMonitoringKernelLib BeamSpotConditionsData )
+                     LINK_LIBRARIES ActsVertexReconstructionLib AthenaBaseComps AthenaMonitoringKernelLib BeamSpotConditionsData GaudiKernel InDetRecToolInterfaces TrkParticleBase TrkTrack TrkVertexFitterInterfaces VxVertex xAODInDetMeasurement xAODTracking )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

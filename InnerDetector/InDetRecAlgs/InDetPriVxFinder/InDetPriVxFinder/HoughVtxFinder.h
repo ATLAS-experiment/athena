@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef HIGLOBAL__HIHOUGHVTXRECO_H
-#define HIGLOBAL__HIHOUGHVTXRECO_H
+#ifndef INDETPRIVXFINDER__HOUGHVTXFINDER_H
+#define INDETPRIVXFINDER__HOUGHVTXFINDER_H
 
 #include "ActsVertexReconstruction/HoughVtxFinderTool.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -15,10 +15,10 @@
 #include <memory> // unique_ptr
 #include <utility> // pair
 
-class HIHoughVtxReco : public AthReentrantAlgorithm {
+class HoughVtxFinder : public AthReentrantAlgorithm {
  public:
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
-  ~HIHoughVtxReco() = default;
+  ~HoughVtxFinder() = default;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) const override;
@@ -30,4 +30,4 @@ class HIHoughVtxReco : public AthReentrantAlgorithm {
   ToolHandle<ActsTrk::HoughVtxFinderTool> m_VertexFinderTool{this, "HoughVtxFinderTool", "", "Hough vertex finder tool"};
 };
 
-#endif  // HIGLOBAL__HIHOUGHVTXRECO_H
+#endif  // INDETPRIVXFINDER__HOUGHVTXFINDER_H
