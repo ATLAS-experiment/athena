@@ -838,3 +838,9 @@ def testEDMList(edm_list, error_on_edmdetails = True):
                 log.warning(msg)
 
     return return_code
+
+def dumpListToJson(fileName,runVersion):
+  import json
+  edmDict = dict([(fmt, getTriggerEDMList(flags=None, key=fmt, runVersion=runVersion)) for fmt in AllowedOutputFormats])
+  with open(fileName,'w') as f:
+    json.dump(edmDict, f)

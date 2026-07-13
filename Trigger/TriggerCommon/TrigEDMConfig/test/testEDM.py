@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from CLIDComps.clidGenerator import clidGenerator
 log = logging.getLogger('testEDM')
 
-from TriggerEDM import (TriggerL2List, TriggerEFList, TriggerResultsList, TriggerResultsRun1List,
+from TrigEDMConfig.TriggerEDM import (TriggerL2List, TriggerEFList, TriggerResultsList, TriggerResultsRun1List,
                         TriggerLvl1List, TriggerIDTruth, TriggerHLTList, _addExtraCollectionsToEDMList, isCLIDDefined)
-from TriggerEDMRun2 import EDMDetails
+from TrigEDMConfig.TriggerEDMRun2 import EDMDetails
 from TrigEDMConfig.TriggerEDMDefs import InViews, allowTruncation
-import TriggerEDMRun1
+from TrigEDMConfig import TriggerEDMRun1
 
 def main():
   import re
