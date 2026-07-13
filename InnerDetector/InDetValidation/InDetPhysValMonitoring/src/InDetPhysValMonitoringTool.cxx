@@ -632,7 +632,7 @@ InDetPhysValMonitoringTool::fillHistograms(const EventContext& ctx) {
       }
     }
     
-    if (m_fillTruthToRecoNtuple) {
+    if (m_fillTruthToRecoNtuple && thisTruth) {
       // Skip if already filled in track loop
       if (hasTruthFilled(*thisTruth)) continue;
 
@@ -819,7 +819,7 @@ InDetPhysValMonitoringTool::getTruthParticles(const EventContext& ctx) const {
   return tempVec;
 }
 
-std::pair<const std::vector<const xAOD::TruthVertex*>, const std::vector<const xAOD::TruthVertex*>>
+std::pair<std::vector<const xAOD::TruthVertex*>, std::vector<const xAOD::TruthVertex*>>
 InDetPhysValMonitoringTool::getTruthVertices(const EventContext& ctx) const {
 
   std::vector<const xAOD::TruthVertex*> truthHSVertices = {};
@@ -889,8 +889,7 @@ InDetPhysValMonitoringTool::getTruthVertices(const EventContext& ctx) const {
     }
   }
 
-  return std::make_pair<const std::vector<const xAOD::TruthVertex*>, const std::vector<const xAOD::TruthVertex*>>((const std::vector<const xAOD::TruthVertex*>)truthHSVertices, (const std::vector<const xAOD::TruthVertex*>)truthPUVertices);
-
+  return {std::move(truthHSVertices), std::move(truthPUVertices)};
 }
 
 void
