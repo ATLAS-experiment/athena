@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IDPERFMON_ELECTRONSELECTOR_H
@@ -10,7 +10,7 @@
 //==============================================================================
 #include "InDetPerformanceMonitoring/EventAnalysis.h"
 
-#include <map>
+
 #include "TH1.h"
 
 #include "xAODMuon/Muon.h"
@@ -22,7 +22,7 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "ElectronPhotonSelectorTools/AsgElectronLikelihoodTool.h"
-
+#include <map>
 #include <atomic>
 //==============================================================================
 // Forward class declarations...
@@ -64,16 +64,16 @@ class ElectronSelector : public EventAnalysis
   MsgStream * m_msgStream;
 
   // Class variables
-  const xAOD::Muon*           m_pxElectron;
+  const xAOD::Muon*           m_pxElectron{};
   std::vector<const xAOD::TrackParticle*>  m_pxElTrackList; 
   std::vector<const xAOD::TrackParticle*>  m_goodElecNegTrackParticleList; 
   std::vector<const xAOD::TrackParticle*>  m_goodElecPosTrackParticleList; 
 
   // 
-  bool m_doDebug;
+  bool m_doDebug{};
   // 
-  float m_ptCut;
-  float m_etaCut;
+  float m_ptCut{};
+  float m_etaCut{};
 
   // Electron likelihood tool:
   AsgElectronLikelihoodTool* m_LHTool2015 = nullptr; //!

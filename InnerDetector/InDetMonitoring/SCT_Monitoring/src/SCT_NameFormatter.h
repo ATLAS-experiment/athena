@@ -13,16 +13,18 @@
 #define SCT_NameFormatter_H
 
 #include <string>
+#include <string_view>
 
 namespace SCT_Monitoring {
   ///format an element index (e.g. in looping through barrels, this goes from 0->(2*(nbarrels)) - 1 into layer and side
   ///for use in both the histogram title and its name
   class LayerSideFormatter {
   private:
-    const unsigned int m_element;
+    const unsigned int m_element{};
     const std::string m_layerStr;
     const std::string m_sideStr;
-    unsigned int m_region;
+    unsigned int m_region{};
+    
   public:
   LayerSideFormatter(const unsigned int i) : m_element(i), m_layerStr(std::to_string(i / 2)), m_sideStr(std::to_string(
                                                                                                                        i % 2)),
@@ -69,8 +71,9 @@ namespace SCT_Monitoring {
     }
 
     std::string
-      name(const std::string &delimiter = "_") const {
-      return m_layerStr + delimiter + m_sideStr;
+      name(std::string_view delimiter = "_") const {
+      std::string result{m_layerStr};
+      return result.append(delimiter).append(m_sideStr);
     }
   };
 }// end of SCT_Monitoring namespace

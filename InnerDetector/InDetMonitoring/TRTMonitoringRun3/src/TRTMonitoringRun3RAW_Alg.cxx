@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define FILLEVENTNORMALIZATION(NBINS, MIN, WIDTH, VALUE, VARPASSED, VAR, HISTGROUP) \
@@ -237,15 +237,15 @@ std::vector<std::vector<std::vector<int>>> TRTMonitoringRun3RAW_Alg::initScaleVe
         scale_EC_Ar.push_back(32);
     }
 
-    scale_hHitWMap_B.push_back(scale_B_Xe);
-    scale_hHitWMap_B.push_back(scale_B_Ar);
-    scale_hHitWMap_EA.push_back(scale_EA_Xe);
-    scale_hHitWMap_EA.push_back(scale_EA_Ar);
-    scale_hHitWMap_EC.push_back(scale_EC_Xe);
-    scale_hHitWMap_EC.push_back(scale_EC_Ar);
-    scale_hHitWMap.push_back(scale_hHitWMap_B);
-    scale_hHitWMap.push_back(scale_hHitWMap_EA);
-    scale_hHitWMap.push_back(scale_hHitWMap_EC);
+    scale_hHitWMap_B.push_back(std::move(scale_B_Xe));
+    scale_hHitWMap_B.push_back(std::move(scale_B_Ar));
+    scale_hHitWMap_EA.push_back(std::move(scale_EA_Xe));
+    scale_hHitWMap_EA.push_back(std::move(scale_EA_Ar));
+    scale_hHitWMap_EC.push_back(std::move(scale_EC_Xe));
+    scale_hHitWMap_EC.push_back(std::move(scale_EC_Ar));
+    scale_hHitWMap.push_back(std::move(scale_hHitWMap_B));
+    scale_hHitWMap.push_back(std::move(scale_hHitWMap_EA));
+    scale_hHitWMap.push_back(std::move(scale_hHitWMap_EC));
 
 // m_flagforscale = 0;
     return scale_hHitWMap;
