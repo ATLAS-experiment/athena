@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gTowerBuilder - Builds gTowers (readout elements of gFEX)
@@ -28,24 +28,21 @@ gTowerBuilder::gTowerBuilder(const std::string& type,const std::string& name,con
 }
 
 
-void gTowerBuilder::init(std::unique_ptr<gTowerContainer> & gTowerContainerRaw)
+
+ void gTowerBuilder::BuildAllTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const
 {
-  execute(gTowerContainerRaw);
-  gTowerContainerRaw->clearContainerMap();
+  gTowerContainerRaw->reserve(1152);
+
+  BuildEMBgTowers(gTowerContainerRaw);
+  BuildTransEMBgTowers(gTowerContainerRaw);
+  BuildEMEgTowers(gTowerContainerRaw);
+  BuildFwdEMECgTowers(gTowerContainerRaw);
+  BuildFCALgTowers(gTowerContainerRaw);
+
   gTowerContainerRaw->fillContainerMap();
 }
 
-
-void gTowerBuilder::reset()
-{
-}
-
-
-void gTowerBuilder::execute(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const
-{
-  BuildAllTowers(gTowerContainerRaw);
-}
-
+  
   // TOWER IDs FOR CLARITY (updated Jan 21, 2022)
   // EM Calorimeter
   // EMB region (gFEX Eta [0.0, 1.4])= 100000 + X (left); 200000 + X (right)
@@ -84,7 +81,6 @@ void gTowerBuilder::BuildTransEMBgTowers(std::unique_ptr<gTowerContainer> & gTow
       BuildSingleTower(gTowerContainerRaw, ieta, iphi, nphi, 300000, -1);
       BuildSingleTower(gTowerContainerRaw, ieta, iphi, nphi, 400000, 1);
     }
-    TRANSEMB_MODIFIER++;
   }
 
 }
@@ -100,7 +96,6 @@ void gTowerBuilder::BuildEMEgTowers(std::unique_ptr<gTowerContainer> & gTowerCon
       BuildSingleTower(gTowerContainerRaw, ieta, iphi, nphi, 500000, -1);
       BuildSingleTower(gTowerContainerRaw, ieta, iphi, nphi, 600000, 1);
     }
-    EME_MODIFIER++;
   }
 
 }
@@ -116,11 +111,9 @@ void gTowerBuilder::BuildFwdEMECgTowers(std::unique_ptr<gTowerContainer> & gTowe
       BuildSingleTower(gTowerContainerRaw, ieta, iphi, nphi, 700000, -1);
       BuildSingleTower(gTowerContainerRaw, ieta, iphi, nphi, 800000, 1);
     }
-    TRANSFCAL_MODIFIER++;
   }
 
 }
-
 
 void gTowerBuilder::BuildFCALgTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const
 {
@@ -133,25 +126,13 @@ void gTowerBuilder::BuildFCALgTowers(std::unique_ptr<gTowerContainer> & gTowerCo
       BuildSingleTower(gTowerContainerRaw, ieta, iphi, nphi, 900000, -1);
       BuildSingleTower(gTowerContainerRaw, ieta, iphi, nphi, 1000000, 1);
     }
-    FCAL_MODIFIER++;
   }
-
 }
-
-
 
   void gTowerBuilder::BuildSingleTower(std::unique_ptr<gTowerContainer> & gTowerContainerRaw, int ieta, int iphi, int nphi, int keybase, int posneg) const
 {
   gTowerContainerRaw->push_back(ieta, iphi, nphi, keybase, posneg);
 }
 
-  void gTowerBuilder::BuildAllTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const
-{
-  BuildEMBgTowers(gTowerContainerRaw);
-  BuildTransEMBgTowers(gTowerContainerRaw);
-  BuildEMEgTowers(gTowerContainerRaw);
-  BuildFwdEMECgTowers(gTowerContainerRaw);
-  BuildFCALgTowers(gTowerContainerRaw);
-}
 
 } // end of LVL1 namespace
