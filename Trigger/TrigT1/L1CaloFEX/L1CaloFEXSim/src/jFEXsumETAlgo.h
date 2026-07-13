@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXsumETAlgo - Algorithm for Sum Et Algorithm in jFEX
@@ -14,14 +14,10 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXsumETAlgo.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h" 
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h" 
-#include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 
@@ -43,7 +39,7 @@ namespace LVL1 {
     virtual StatusCode safetyTest() override;
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) override;
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) override;
-    virtual int getTTowerET(unsigned int TTID=0) override; // arguments 2,2 to get the central TT from m_TTwindow[5][5]
+    virtual int getTTowerET(unsigned int TTID=0) const override; // arguments 2,2 to get the central TT from m_TTwindow[5][5]
 
     virtual void buildBarrelSumET()  override;
     virtual void buildFWDSumET()  override;

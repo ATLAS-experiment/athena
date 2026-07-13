@@ -98,7 +98,7 @@ void LVL1::jFEXSmallRJetAlgo::buildSeeds()
 }
 
 
-bool LVL1::jFEXSmallRJetAlgo::CalculateLM(int mymatrix[5][5]) {
+bool LVL1::jFEXSmallRJetAlgo::CalculateLM(int mymatrix[5][5]) const {
 
     //here put the 24 conditions to determine if the TT seed is a local maxima.
     int central_seed = mymatrix[2][2];

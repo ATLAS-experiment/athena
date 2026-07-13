@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -16,7 +16,6 @@
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 #include "CaloIdentifier/CaloIdManager.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/jFEXOutputCollection.h"
 
 #include "L1CaloFEXSim/jFEXTOB.h"
@@ -38,12 +37,12 @@ Interface definition for jFEXSim
 
     virtual void reset() = 0;
 
-    virtual int ID() = 0;
+    virtual int ID() const = 0;
     virtual void SetTowersAndCells_SG(int tmp[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) = 0;
     virtual void SetTowersAndCells_SG(int tmp[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) = 0;
 
 
-    virtual std::vector<std::vector<std::vector<uint32_t>>> getFwdElTOBs() =0;
+    virtual const std::vector<std::vector<std::vector<uint32_t>>>& getFwdElTOBs() const =0;
     
     virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getTauTOBs() =0;
     virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getSmallRJetTOBs() =0;
