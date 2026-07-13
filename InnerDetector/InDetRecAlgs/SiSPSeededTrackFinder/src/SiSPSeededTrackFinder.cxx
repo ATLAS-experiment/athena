@@ -200,7 +200,7 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
 
     if (primaryVertex == nullptr) {
       ATH_MSG_ERROR("Could not find the primary vertex");
-      return StatusCode::FAILURE;
+      primaryVertex = vertices->front();
     }
 
     seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
@@ -311,7 +311,7 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
 
     if (primaryVertex == nullptr) {
       ATH_MSG_ERROR("Could not find the primary vertex");
-      return StatusCode::FAILURE;
+      primaryVertex = vertices->front();
     }
     
     seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
