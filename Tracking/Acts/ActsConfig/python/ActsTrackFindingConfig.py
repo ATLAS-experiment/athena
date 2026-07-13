@@ -331,7 +331,7 @@ def ActsTrackFindingCfg(flags,
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
         trackColl = kwargs['ACTSTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
@@ -471,7 +471,7 @@ def ActsAmbiguityResolutionCfg(flags,
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
         trackColl = kwargs['ResolvedTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
@@ -484,71 +484,4 @@ def ActsAmbiguityResolutionCfg(flags,
 
     return acc
 
-def ActsTrackToTrackParticleCnvToolCfg(flags,
-                                       name: str = "ActsTrackToTrackParticleCnvTool",
-                                       **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
 
-    # To produce AtlasFieldCacheCondObj
-    from MagFieldServices.MagFieldServicesConfig import (
-        AtlasFieldCacheCondAlgCfg)
-    acc.merge(AtlasFieldCacheCondAlgCfg(flags))
-
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    kwargs.setdefault('FirstAndLastParameterOnly',True)
-    kwargs.setdefault('ComputeExpectedLayerPattern',True)
-    kwargs.setdefault('HgtdDecorationLevel', 0 if not flags.Acts.useHGTDClusterInTrackFinding else 1 if not flags.PhysVal.IDPVM.doExpertOutput else 200 )
-
-    acc.setPrivateTools(CompFactory.ActsTrk.TrackToTrackParticleCnvTool(name, **kwargs))
-    return acc
-
-
-def ActsTrackToTrackParticleCnvAlgCfg(flags,
-                                      name: str = "ActsTrackToTrackParticleCnvAlg",
-                                      **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    # Beam Spot Cond is a requirement
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    acc.merge(BeamSpotCondAlgCfg(flags))
-
-    # Configure TrackToTrackParticleConvTool
-    tool_kwargs = {}
-    if "ExtrapolationTool" in kwargs:
-        tool_kwargs["ExtrapolationTool"] = kwargs.pop("ExtrapolationTool")
-    if "FirstAndLastParameterOnly" in kwargs:
-        tool_kwargs["FirstAndLastParameterOnly"] = kwargs.pop("FirstAndLastParameterOnly")
-    if "ComputeExpectedLayerPattern" in kwargs:
-        tool_kwargs["ComputeExpectedLayerPattern"] = kwargs.pop("ComputeExpectedLayerPattern")
-    if "MuonSummaryTool" in kwargs:
-        tool_kwargs["MuonSummaryTool"] = kwargs.pop("MuonSummaryTool")
-    if 'TrackToTrackParticleCnvTool' not in kwargs:
-        kwargs['TrackToTrackParticleCnvTool'] = acc.popToolsAndMerge(
-            ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))
-
-    kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
-    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
-    kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
-
-    acc.addEventAlgo(
-        CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
-
-    return acc
-
-def ActsToXAODTrackConverterAlgCfg(flags,
-                                   name: str = "ActsToXAODTrackConverterAlg",
-                                   **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault('InputActsTracksLocation', '')
-    kwargs.setdefault('OutputActsTracksLocation', '')
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-    
-    acc.addEventAlgo(CompFactory.ActsTrk.ActsToXAODTrackConverterAlg(name, **kwargs))    
-    return acc

@@ -33,13 +33,21 @@ def ITkActsTrackParticleCreationCfg(flags,
 
     prefix = "ActsCombined" if not flags.hasCategory("Tracking.ActiveConfig") else flags.Tracking.ActiveConfig.extension
     prefix += f"To{TrackParticleContainer}"
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg, xAODtoTrkConverterAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags,
                                                 name = f"{prefix}TrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation = TrackContainers,
                                                 TrackParticlesOutKey = TrackParticleContainer,
                                                 PerigeeExpression = PerigeeExpression))
-    
+    ### Do not convert Temporary track particles from the heavy ion chain
+    ### or TrackContainer made up of ITk track seeds (No track parameters)
+    if "Temporary" not in TrackParticleContainer and \
+       "Seed" not in TrackParticleContainer:
+        acc.merge(xAODtoTrkConverterAlgCfg(flags,
+                                       name=f"{prefix}TrackParticleToTrkCnvAlg",
+                                       TrackParticles = TrackParticleContainer,
+                                       OutTrackContainer="Combined{tracks}Tracks".format(tracks = 
+                                                        TrackParticleContainer[:TrackParticleContainer.rfind("Track")]) ))
     if flags.Tracking.doTruth :
         from AthenaCommon.Constants import WARNING, INFO
         track_to_truth_maps = []

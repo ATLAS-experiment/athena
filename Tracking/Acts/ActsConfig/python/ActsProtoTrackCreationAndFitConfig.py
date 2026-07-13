@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
     prefix = flags.Tracking.ActiveConfig.extension
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     top_acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedProtoTrackToAltTrackParticleCnvAlg",
                                                        ACTSTracksLocation=[ACTSProtoTrackChainTrackKey,],
                                                        TrackParticlesOutKey=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))

@@ -7,13 +7,6 @@ def MsTrkRecoChainConfig(flags):
     ### Acts -> Trk track conversion
     from MuonTrackFindingAlgs.TrackFindingConfig import MuonActsToTrkConvCfg
     result.merge(MuonActsToTrkConvCfg(flags))
-
-    ### Convert Trk -> xAOD
-    from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
-    result.merge(MuonStandaloneTrackParticleCnvAlgCfg(flags,"MuonTrkToxAODTrackParticleCnvR4",
-                                                   TrackContainerName="MsTracksTrkCnv",
-                                                   xAODTrackParticlesFromTracksContainerName="MsTrackParticlesFromTrkR4"))
-
     return result
     ### Schedule the back extrapolation to the  IP
     from MuonCombinedConfig.MuonCombinedReconstructionConfig import  MuonCombinedMuonCandidateAlgCfg

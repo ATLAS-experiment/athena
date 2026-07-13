@@ -30,6 +30,7 @@ namespace InDet {
     ATH_CHECK( m_inputPixelClusterContainerKey.initialize(m_processPixel) );
     ATH_CHECK( m_pixelClusterContainerLinkKey.initialize(m_processPixel) );
     ATH_CHECK( m_outputPixelClusterContainerKey.initialize(m_processPixel) );
+    ATH_CHECK(m_pixelClusterOffSetKey.initialize(m_processPixel));
     ATH_CHECK( m_pixelClusterLinkKey.initialize(m_processPixel));
 
     // Strip Clusters
@@ -40,6 +41,7 @@ namespace InDet {
     ATH_CHECK( m_inputStripClusterContainerKey.initialize(m_processStrip) );
     ATH_CHECK( m_stripClusterContainerLinkKey.initialize(m_processStrip) );
     ATH_CHECK( m_outputStripClusterContainerKey.initialize(m_processStrip) );
+    ATH_CHECK( m_stripClusterOffSetKey.initialize(m_processStrip));
     ATH_CHECK( m_stripClusterLinkKey.initialize(m_processStrip));
 
     ATH_CHECK( m_lorentzAngleTool.retrieve(EnableTool{not m_lorentzAngleTool.empty()}) );
@@ -58,8 +60,7 @@ namespace InDet {
 
   StatusCode XAODToInDetClusterConversion::execute(const EventContext& ctx) const
   {
-    ATH_MSG_DEBUG( "Executing " << name() << " ... " );
-
+    ATH_MSG_DEBUG( "Executing " << name() << " ... ");
     if (m_processPixel) {
       ATH_MSG_DEBUG("Converting Pixel Clusters: xAOD -> InDet");
       ATH_CHECK( convertPixelClusters(ctx) );
@@ -133,6 +134,16 @@ namespace InDet {
     } // loop on hashIds
 
     ATH_CHECK( outputPixelClusterContainer.setConst() );
+    auto offsets = std::make_unique<std::vector<unsigned int>>(outputPixelClusterContainer->size(), 0);
+    unsigned idx{1};
+    for (const auto coll : *outputPixelClusterContainer) {
+        if (idx < offsets->size()) {
+          offsets->at(idx) = offsets->at(idx -1) + coll->size();
+        }
+        ++idx;
+    }
+    SG::WriteHandle offSetHandle{m_pixelClusterOffSetKey ,ctx};
+    ATH_CHECK(offSetHandle.record(std::move(offsets)));
 
     return StatusCode::SUCCESS;
   }
@@ -198,6 +209,19 @@ namespace InDet {
     }
 
     ATH_CHECK( outputStripClusterContainer.setConst() );
+
+    auto offsets = std::make_unique<std::vector<unsigned int>>(outputStripClusterContainer->size(), 0);
+    unsigned idx{1};
+    for (const auto* coll : *outputStripClusterContainer) {
+        if (idx < offsets->size()) {
+          offsets->at(idx) = offsets->at(idx -1) + coll->size();
+        }
+        ++idx;
+    }
+
+    SG::WriteHandle offSetHandle{m_stripClusterOffSetKey ,ctx};
+    ATH_CHECK(offSetHandle.record(std::move(offsets)));
+
 
     return StatusCode::SUCCESS;
   }

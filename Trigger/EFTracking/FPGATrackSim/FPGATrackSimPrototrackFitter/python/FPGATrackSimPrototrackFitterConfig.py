@@ -101,7 +101,7 @@ def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPro
     ################################################################################
     # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
     prefix = flags.Tracking.ActiveConfig.extension
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedProtoTrackToAltTrackParticleCnvAlg",
                                                 ACTSTracksLocation=[ACTSProtoTrackChainTrackKey,],
                                                 TrackParticlesOutKey=f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"))

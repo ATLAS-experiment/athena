@@ -60,6 +60,8 @@ class XAODToInDetClusterConversion
 
   SG::WriteHandleKey<InDet::PixelClusterContainer> m_outputPixelClusterContainerKey {this, "OutputPixelClustersName", "ITkPixelClusters", "name of the output InDet pixel cluster container"};
   SG::WriteHandleKey< InDet::SiClusterContainer > m_pixelClusterContainerLinkKey {this, "PixelClustersLinkName", "ITkPixelClusters"};
+  SG::WriteHandleKey<std::vector<unsigned int>> m_pixelClusterOffSetKey{this, "PixelClusterOffSetKey", "ITkPixelClustersOffsets"};
+
   SG::WriteDecorHandleKey<xAOD::PixelClusterContainer> m_pixelClusterLinkKey{this, "PixelClusterLinkKey", m_inputPixelClusterContainerKey, "pixelClusterLink", "Decoration to link Trk object to xAOD"  };
  
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {this, "StripDetEleCollKey", "ITkStripDetectorElementCollection", "Key of SiDetectorElementCollection for Strip"};
@@ -67,6 +69,7 @@ class XAODToInDetClusterConversion
 
   SG::WriteHandleKey<InDet::SCT_ClusterContainer> m_outputStripClusterContainerKey {this, "OutputStripClustersName", "ITkStripClusters", "name of the output InDet pixel cluster container"};
   SG::WriteHandleKey< InDet::SiClusterContainer > m_stripClusterContainerLinkKey {this, "StripClustersLinkName", "ITkStripClusters"};
+  SG::WriteHandleKey<std::vector<unsigned int>> m_stripClusterOffSetKey{this, "StripClusterOffSetKey", "ITkStripClustersOffsets"};
   SG::WriteDecorHandleKey<xAOD::StripClusterContainer> m_stripClusterLinkKey{this, "StripClusterLinkKey", m_inputStripClusterContainerKey, "sctClusterLink", "Decoration to link Trk object to xAOD"  };
 
   SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_HGTDDetEleCollKey{this, "HGTDDetEleCollKey", "HGTD_DetectorElementCollection", "Key of HGTD_DetectorElementCollection for HGTD"};
