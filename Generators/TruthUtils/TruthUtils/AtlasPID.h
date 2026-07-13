@@ -355,10 +355,12 @@ template<> inline bool isHadron(const int& p){ auto value_digits = DecodedPID(p)
 
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
-/// of states in QCD areassigned codes 990, 9990, and 110 respectively
+/// of states in QCD are assigned codes 990, 9990, and 110 respectively
+/// TODO Check whether negative values are valid here. (PIDUtils isReggeon only returns true for positive values)
 template<class T> inline bool isTrajectory(const T& p){return isTrajectory(p->pdg_id());}
 template<> inline bool isTrajectory(const int& p){ return std::abs(p) == POMERON || std::abs(p) == ODDERON || std::abs(p) == REGGEON; }
 
+template<class T> inline bool isReggeon(const T& p){return isTrajectory(p);}
 
 /// PDG rule 9:
 /// Two-digit numbers in the range 21–30 are provided for the Standard
@@ -366,6 +368,7 @@ template<> inline bool isTrajectory(const int& p){ return std::abs(p) == POMERON
 /// PDG rule 11b:
 /// The graviton and the boson content of a two-Higgs-doublet scenario
 /// and of additional SU(2)×U(1) groups are found in the range 31–40.
+// APID: includes 38 and 40 -  not included by any helper functions in PIDUtils.h
 template<class T> inline bool isBoson(const T& p){return isBoson(p->pdg_id());}
 template<> inline bool isBoson(const int& p){ auto sp = std::abs(p); return sp > 20 && sp < 41; }
 template<> inline bool isBoson(const DecodedPID& p){ return isBoson(p.pid()); }
@@ -386,7 +389,7 @@ template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
 template<class T> inline bool isHeavyBoson(const T& p){return isHeavyBoson(p->pdg_id());}
 template<> inline bool isHeavyBoson(const int& p){ return p == ZPRIME || p == ZDBLPRIME || std::abs(p) == WPLUSPRIME; }
 
-/// APID: HIGGS boson is only one particle.
+/// APID: HIGGS boson is only one particle. (PIDUtils.h also returns true for pdg_id 26)
 template<class T> inline bool isHiggs(const T& p){return isHiggs(p->pdg_id());}
 template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
 
@@ -394,10 +397,13 @@ template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
 template<class T> inline bool isMSSMHiggs(const T& p){return isMSSMHiggs(p->pdg_id());}
 template<> inline bool isMSSMHiggs(const int& p){ return p == HIGGS2 || p == HIGGS3 || std::abs(p) == HIGGSPLUS; }
 
+template<class T> inline bool isBSMBoson(const T& p){return isHeavyBoson(p) || isMSSMHiggs(p);}
+
 template<class T> inline bool isGraviton(const T& p) {return isGraviton(p->pdg_id());}
 template<> inline bool isGraviton(const int& p){ return p == GRAVITON; }
 
-template<class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p) || isHiggs(p) || isTop(p); } // APID: not including t' (pdg_id=8), Z', Z'' and W'+ or BSM Higgs bosons
+// APID: not including t' (pdg_id=8), Z', Z'' and W'+ or BSM Higgs bosons
+template<class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p) || isHiggs(p) || isTop(p); }
 
 /// PDG rule 11c:
 /// “One-of-a-kind” exotic particles are assigned numbers in the range
@@ -542,6 +548,12 @@ inline bool isExcited(const DecodedPID& p) {
 }
 template<> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
 
+
+template<class T> inline bool isExcitedLepton(const T& p) { return isExcitedLepton(p->pdg_id()); }
+template<> inline bool isExcitedLepton(const DecodedPID& p){ auto pp = p.shift(1); return (p.ndigits() == 7 && (p(0) == 4 && p(1) == 0) && isSMLepton(pp));}
+template<> inline bool isExcitedLepton(const int& p){ auto value_digits = DecodedPID(p); return isExcitedLepton(value_digits);}
+
+
 /// PDG rule 11g:
 /// Within several scenarios of new physics, it is possible to have colored particles suﬃciently long-lived for color-singlet hadronic
 /// states to form around them. In the context of supersymmetric scenarios, these states are called R-hadrons, since they carry odd
@@ -638,7 +650,7 @@ template<> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); re
 
 /// PDG rule 11i
 /// Magnetic monopoles and dyons are assumed to have one unit of Dirac monopole charge
-/// and a variable integer number nq1nq2 nq3 units of electric charge. Codes 411nq1nq2 nq3 0
+/// and a variable integer number nq1 nq2 nq3 units of electric charge. Codes 411nq1nq2 nq3 0
 /// are then used when the magnetic and electrical charge sign agree and 412nq1nq2 nq3 0
 /// when they disagree, with the overall sign of the particle set by the magnetic charge. For
 /// now no spin information is provided.
@@ -774,6 +786,7 @@ template<class T> inline double baryonNumber(const T& p) {return baryonNumber(p-
 template<> inline double baryonNumber(const DecodedPID& p){ return static_cast<double>(baryonNumber3(p))/3.0;}
 template<> inline double baryonNumber(const int& p){ auto value_digits = DecodedPID(p);  return static_cast<double>(baryonNumber3(value_digits))/3.0;}
 
+template<class T> inline int nucleusA(const T& p) {return isNucleus(p) ? static_cast<int>(baryonNumber(p)) : 0;}
 
 // APID: The strangeness of a particle is defined as:
 // S = − ( n_s − n_{sbar} )
@@ -870,6 +883,7 @@ template<> inline bool isBSM(const int& p){
   auto value_digits = DecodedPID(p); return isBSM(value_digits);
 }
 
+/// Check the PID for usability in transport codes like Geant4
 template<class T> inline bool isTransportable(const T& p){return isTransportable(p->pdg_id());}
 template<> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.pid()) || isGeantino(p.pid()) || isHadron(p) || isLepton(p.pid()) || p.pid() == DARKPHOTON;}
 template<> inline bool isTransportable(const int& p){ auto value_digits = DecodedPID(p); return isTransportable(value_digits);}
