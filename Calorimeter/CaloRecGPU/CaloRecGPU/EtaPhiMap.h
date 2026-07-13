@@ -381,7 +381,7 @@ namespace CaloRecGPU
 
       int grid_list[2][s_max_cells]{};
       int counter[2]{};
-      bool select;
+      bool select{};
       char added[s_max_cells]{};
 
       constexpr const int & get_counter() const
