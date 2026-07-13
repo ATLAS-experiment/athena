@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGOUTPUTHANDLING_TRIGGEREDMSERIALISERTOOL_H
 #define TRIGOUTPUTHANDLING_TRIGGEREDMSERIALISERTOOL_H
@@ -93,6 +93,7 @@ class TriggerEDMSerialiserTool: public extends<AthAlgTool, HLTResultMTMakerTool>
     enum class Truncation { Error, Allowed };
     std::string transType;
     std::string persType; // actual versioned type
+    RootType classDesc;
     CLID clid;
     std::string key;
     std::vector<uint16_t> moduleIdVec{};
