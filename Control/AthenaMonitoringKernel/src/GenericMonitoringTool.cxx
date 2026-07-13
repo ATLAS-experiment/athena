@@ -240,10 +240,10 @@ void GenericMonitoringTool::invokeFillers(const std::vector<std::reference_wrapp
   }
 }
 
-uint32_t GenericMonitoringTool::runNumber() {
+uint32_t GenericMonitoringTool::runNumber() const {
   return Gaudi::Hive::currentContext().eventID().run_number();
 }
 
-uint32_t GenericMonitoringTool::lumiBlock() {
+uint32_t GenericMonitoringTool::lumiBlock() const {
   return Gaudi::Hive::currentContext().eventID().lumi_block();
 }
