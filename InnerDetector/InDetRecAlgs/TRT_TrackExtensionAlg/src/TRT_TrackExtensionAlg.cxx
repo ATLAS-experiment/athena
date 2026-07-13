@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_TrackExtensionAlg/TRT_TrackExtensionAlg.h"
@@ -87,11 +87,18 @@ StatusCode InDet::TRT_TrackExtensionAlg::execute(const EventContext& ctx) const 
 ///////////////////////////////////////////////////////////////////
 
 StatusCode InDet::TRT_TrackExtensionAlg::finalize() {
-        if (msgLvl(MSG::INFO)) {
-           dumpEvent(msg(MSG::INFO), m_totalCounts);
-           dumpConditions(msg(MSG::INFO));
-        }
-	return StatusCode::SUCCESS;
+  if (msgLvl(MSG::INFO)) {
+    Counter_t totalCounts;
+    {
+      std::lock_guard<std::mutex> lock(m_counterMutex);
+      totalCounts = m_totalCounts;
+    }
+
+    dumpEvent(msg(MSG::INFO), totalCounts);
+    dumpConditions(msg(MSG::INFO));
+  }
+
+  return StatusCode::SUCCESS;
 }
 
 
