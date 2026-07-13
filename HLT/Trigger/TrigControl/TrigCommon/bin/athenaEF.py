@@ -802,6 +802,7 @@ def arg_sor_time(s) -> str:
    elif s.isdigit():   return dt.fromtimestamp(float(s)/1e9).strftime(fmt)
    else:               return s
 
+
 def arg_detector_mask(s):
    """Convert detector mask to format expected by eformat"""
    if s=='all':
@@ -809,12 +810,6 @@ def arg_detector_mask(s):
    dmask = hex(int(s,16))                                    # Normalize input to hex-string
    dmask = dmask.lower().replace('0x', '').replace('l', '')  # remove markers
    return '0' * (32 - len(dmask)) + dmask                    # (pad with 0s)
-
-def arg_log_level(s):
-   """Argument handler for log levels"""
-   lvls = s.split(',')
-   if len(lvls)==1: lvls.append('ERROR')
-   return lvls
 
 
 def check_args(parser, args):
@@ -1020,7 +1015,7 @@ def main():
    g.add_argument('jobOptions', nargs='?', help='job options: CA module (package.module:function), pickle file (.pkl), or JSON file (.json)')
    g.add_argument('--threads', metavar='N', type=int, default=1, help='number of threads')
    g.add_argument('--concurrent-events', metavar='N', type=int, help='number of concurrent events if different from --threads')
-   g.add_argument('--log-level', '-l', metavar='LVL', type=arg_log_level, default='INFO,ERROR', help='OutputLevel of athena,POOL')
+   g.add_argument('--log-level', '-l', metavar='LVL', default='INFO', help='OutputLevel of athena')
    g.add_argument('--precommand', '-c', metavar='CMD', action='append', default=[],
                   help='Python commands executed before job options')
    g.add_argument('--postcommand', '-C', metavar='CMD', action='append', default=[],
@@ -1113,9 +1108,9 @@ def main():
    import ROOT
    ROOT.ROOT.EnableThreadSafety()
 
-   # set default OutputLevels and file inclusion
+   # set default Python OutputLevel and file inclusion
    import AthenaCommon.Logging
-   AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level[0]))
+   AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level))
    AthenaCommon.Logging.log.setFormat("%(asctime)s  Py:%(name)-31s %(levelname)7s %(message)s")
    if args.show_includes:
       from AthenaCommon.Include import include
@@ -1131,6 +1126,10 @@ def main():
    
    # Get flags with online defaults (same as athenaHLT)
    flags = defaultOnlineFlags()
+
+   # set MessageSvc OutputLevel
+   from AthenaCommon import Constants
+   flags.Exec.OutputLevel = getattr(Constants, args.log_level)
 
    # Enable WebdaqHistSvc for online histogram publishing if requested
    if args.oh_monitoring:
