@@ -783,12 +783,12 @@ std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getTauTOBs()
     return tauTOBs;    
 }
 
-std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getFwdElTOBs(){
+const std::vector<std::vector<std::vector<uint32_t>>>& jFEXSim::getFwdElTOBs() const {
     
     return m_fwdEl_tobWords;    
 }
   
-std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getSumEtTOBs(){
+std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getSumEtTOBs() {
     
     std::vector<std::unique_ptr<jFEXTOB>> sumetTOBs;
     
@@ -802,7 +802,7 @@ std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getSumEtTOBs(){
     return sumetTOBs;        
 }
 
-std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getMetTOBs(){
+std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getMetTOBs() {
     
     std::vector<std::unique_ptr<jFEXTOB>> metTOBs;
     

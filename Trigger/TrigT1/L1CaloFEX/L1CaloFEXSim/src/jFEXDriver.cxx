@@ -2,15 +2,9 @@
     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#undef NDEBUG
-
 #include "jFEXDriver.h"
 #include "L1CaloFEXSim/jFEXOutputCollection.h"
 #include "StoreGate/WriteHandle.h"
-#include "SGTools/TestStore.h"
-
-
-#define DEBUG_VHB 1
 
 
 namespace LVL1 {
@@ -26,7 +20,6 @@ jFEXDriver::jFEXDriver(const std::string& name, ISvcLocator* pSvcLocator):  AthA
 
 StatusCode jFEXDriver::initialize()
 {
-
   ATH_CHECK( m_jFEXSysSimTool.retrieve() );
   ATH_CHECK( m_jFEXOutputCollectionSGKey.initialize() );
   
@@ -42,8 +35,7 @@ StatusCode jFEXDriver::finalize()
 }
 
 
-StatusCode jFEXDriver::execute(const EventContext& ctx) {
-    
+StatusCode jFEXDriver::execute(const EventContext& ctx) {   
     
     // STEP 1 - Set up the jFEXSysSim
     m_jFEXSysSimTool->init();

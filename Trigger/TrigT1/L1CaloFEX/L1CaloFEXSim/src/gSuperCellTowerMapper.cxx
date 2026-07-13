@@ -91,9 +91,6 @@ StatusCode gSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<gTowe
   return StatusCode::SUCCESS;
 }
 
-void gSuperCellTowerMapper::reset(){
-  return;
-}
 
 // works for real supercells from MC
 StatusCode gSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<gTowerContainer> & my_gTowerContainerRaw) const

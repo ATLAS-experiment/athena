@@ -7,9 +7,7 @@
 //     begin                : 12 05 2021
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
-#include <iostream>
 #include <vector>
-#include <stdio.h>
 #include <math.h>
 #include "jFEXsumETAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
@@ -180,7 +178,7 @@ bool LVL1::jFEXsumETAlgo::getTTowerSat(unsigned int TTID ) {
 }
 
 //Gets the ET for the TT. This ET is EM + HAD
-int LVL1::jFEXsumETAlgo::getTTowerET(unsigned int TTID ) {
+int LVL1::jFEXsumETAlgo::getTTowerET(unsigned int TTID ) const {
     if(TTID == 0) {
         return 0;
     } 

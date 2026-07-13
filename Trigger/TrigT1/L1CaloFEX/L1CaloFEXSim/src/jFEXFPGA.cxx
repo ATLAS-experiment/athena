@@ -497,12 +497,14 @@ void jFEXFPGA::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[][FEXAlgoSpaceDefs
   
   std::copy(&tmp_jTowersIDs_subset[0][0], &tmp_jTowersIDs_subset[0][0]+(rows*cols),&m_jTowersIDs_Wide[0][0]);
 
-  ATH_MSG_DEBUG("\n==== jFEXFPGA ========= FPGA (" << m_id << ") [on jFEX " << m_jfexid << "] IS RESPONSIBLE FOR jTOWERS :");
+  if (msgLvl(MSG::DEBUG)) {
+    ATH_MSG_DEBUG("\n==== jFEXFPGA ========= FPGA (" << m_id << ") [on jFEX " << m_jfexid << "] IS RESPONSIBLE FOR jTOWERS :");
 
-  for (int thisRow=rows-1; thisRow>=0; thisRow--){
-    for (int thisCol=0; thisCol<cols; thisCol++){
-      if(thisCol != cols-1){ ATH_MSG_DEBUG("|  " << m_jTowersIDs_Wide[thisRow][thisCol] << "  "); }
-      else { ATH_MSG_DEBUG("|  " << m_jTowersIDs_Wide[thisRow][thisCol] << "  |"); }
+    for (int thisRow=rows-1; thisRow>=0; thisRow--){
+      for (int thisCol=0; thisCol<cols; thisCol++){
+	if(thisCol != cols-1){ ATH_MSG_DEBUG("|  " << m_jTowersIDs_Wide[thisRow][thisCol] << "  "); }
+	else { ATH_MSG_DEBUG("|  " << m_jTowersIDs_Wide[thisRow][thisCol] << "  |"); }
+      }
     }
   }
   
@@ -515,18 +517,20 @@ void jFEXFPGA::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[][FEXAlgoSpaceDefs
 
     std::copy(&tmp_jTowersIDs_subset[0][0], &tmp_jTowersIDs_subset[0][0]+(rows*cols),&m_jTowersIDs_Thin[0][0]);
 
-    //this prints out the jTower IDs that each FPGA is responsible for
-    ATH_MSG_DEBUG("\n==== jFEXFPGA ========= FPGA (" << m_id << ") [on jFEX " << m_jfexid << "] IS RESPONSIBLE FOR jTOWERS :");
-
-    for (int thisRow=rows-1; thisRow>=0; thisRow--) {
+    if (msgLvl(MSG::DEBUG)) {
+      //this prints out the jTower IDs that each FPGA is responsible for
+      ATH_MSG_DEBUG("\n==== jFEXFPGA ========= FPGA (" << m_id << ") [on jFEX " << m_jfexid << "] IS RESPONSIBLE FOR jTOWERS :");
+      
+      for (int thisRow=rows-1; thisRow>=0; thisRow--) {
         for (int thisCol=0; thisCol<cols; thisCol++) {
-            if(thisCol != cols-1) {
-                ATH_MSG_DEBUG("|  " << m_jTowersIDs_Thin[thisRow][thisCol] << "  ");
-            }
-            else {
-                ATH_MSG_DEBUG("|  " << m_jTowersIDs_Thin[thisRow][thisCol] << "  |");
-            }
+	  if(thisCol != cols-1) {
+	    ATH_MSG_DEBUG("|  " << m_jTowersIDs_Thin[thisRow][thisCol] << "  ");
+	  }
+	  else {
+	    ATH_MSG_DEBUG("|  " << m_jTowersIDs_Thin[thisRow][thisCol] << "  |");
+	  }
         }
+      }
     }
 
 }
@@ -611,10 +615,10 @@ std::vector<std::unique_ptr<jFEXTOB>> jFEXFPGA::getMetTOBs() {
 
 
 //Returns the Electromagnetic energy for Jet Algos (NOT MET/SumET)
-int jFEXFPGA::getTTowerET_EM(unsigned int TTID) {
+int jFEXFPGA::getTTowerET_EM(unsigned int TTID) const {
     
     if(m_map_EM_Etvalues_FPGA.find(TTID) != m_map_EM_Etvalues_FPGA.end()){
-        return m_map_EM_Etvalues_FPGA[TTID][0];
+      return m_map_EM_Etvalues_FPGA.at(TTID)[0];
     }
     
     ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_EM, TTower ID not found in map: " << TTID );
@@ -623,10 +627,10 @@ int jFEXFPGA::getTTowerET_EM(unsigned int TTID) {
 
 
 //Returns the Hadronic energy for Jet Algos (NOT MET/SumET)
-int jFEXFPGA::getTTowerET_HAD(unsigned int TTID) {
+int jFEXFPGA::getTTowerET_HAD(unsigned int TTID) const {
     
     if(m_map_HAD_Etvalues_FPGA.find(TTID) != m_map_HAD_Etvalues_FPGA.end()){
-        return m_map_HAD_Etvalues_FPGA[TTID][0];
+      return m_map_HAD_Etvalues_FPGA.at(TTID)[0];
     }
     
     ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_HAD, TTower ID not found in map: " << TTID );
@@ -635,18 +639,18 @@ int jFEXFPGA::getTTowerET_HAD(unsigned int TTID) {
 
 
 //Returns the Total TT energy for Jet Algos (NOT MET/SumET)
-int jFEXFPGA::getTTowerET(unsigned int TTID) {
+int jFEXFPGA::getTTowerET(unsigned int TTID) const {
 
     return getTTowerET_EM(TTID)+getTTowerET_HAD(TTID);
 }
 
 
 //Returns the Total TT energy for MET/SumÉT Algos
-int jFEXFPGA::getTTowerET_forMET(unsigned int TTID) {
+int jFEXFPGA::getTTowerET_forMET(unsigned int TTID) const {
 
     int tmp_EM = 0;
     if(m_map_EM_Etvalues_FPGA.find(TTID) != m_map_EM_Etvalues_FPGA.end()){
-        tmp_EM = m_map_EM_Etvalues_FPGA[TTID][1];
+      tmp_EM = m_map_EM_Etvalues_FPGA.at(TTID)[1];
     }
     else{
         ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_forMET (EM energy), TTower ID not found in map: " << TTID );
@@ -656,7 +660,7 @@ int jFEXFPGA::getTTowerET_forMET(unsigned int TTID) {
 
     int tmp_HAD = 0;
     if(m_map_HAD_Etvalues_FPGA.find(TTID) != m_map_HAD_Etvalues_FPGA.end()){
-        tmp_HAD = m_map_HAD_Etvalues_FPGA[TTID][1];
+      tmp_HAD = m_map_HAD_Etvalues_FPGA.at(TTID)[1];
     }
     else{
         ATH_MSG_DEBUG("In jFEXFPGA::getTTowerET_forMET (HAD energy), TTower ID not found in map: " << TTID );
