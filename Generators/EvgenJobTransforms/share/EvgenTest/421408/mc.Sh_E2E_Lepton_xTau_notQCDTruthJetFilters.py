@@ -7,14 +7,14 @@ from EvgenJobTransforms.EvgenCAConfig import EvgenConfig
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
 
 
-def xAODLeptonFilter(flags, **kwargs):
+def xAODLeptonFilterCfg(flags, **kwargs):
     kwargs.setdefault("Ptcut", 13 * GeV)
 
     from GeneratorFilters.GeneratorFiltersConfig import xAODLeptonFilterCommonCfg
     return xAODLeptonFilterCommonCfg(flags, **kwargs)
 
 
-def xAODTauFilter(flags, **kwargs):
+def xAODTauFilterCfg(flags, **kwargs):
     kwargs.setdefault("Ntaus", 2)
     kwargs.setdefault("EtaMaxe", 2.7)
     kwargs.setdefault("EtaMaxmu", 2.7)
@@ -26,7 +26,7 @@ def xAODTauFilter(flags, **kwargs):
     return xAODTauFilterCommonCfg(flags, **kwargs)
 
 
-def QCDTruthJetFilter(flags, **kwargs):
+def QCDTruthJetFilterCfg(flags, **kwargs):
     kwargs.setdefault("MinPt", 53 * GeV)
 
     from GeneratorFilters.GeneratorFiltersConfig import QCDTruthJetFilterCommonCfg
@@ -48,11 +48,11 @@ class Sample(EvgenConfig):
 
         # by default filters are joined with AND
         # add lepton filter
-        acc.merge(xAODLeptonFilter(flags))
+        acc.merge(xAODLeptonFilterCfg(flags))
         # add QCD jet filter
-        acc.merge(QCDTruthJetFilter(flags), sequenceName="InvertQCD")
+        acc.merge(QCDTruthJetFilterCfg(flags), sequenceName="InvertQCD")
         # add tau filter
-        acc.merge(xAODTauFilter(flags))
+        acc.merge(xAODTauFilterCfg(flags))
 
         # TODO:
         # postSeq.CountHepMC.CorrectRunNumber = True
