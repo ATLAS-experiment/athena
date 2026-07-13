@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // AthCnvSvc.h 
@@ -149,7 +149,7 @@ public:
 
   /// Implementation of IConverter: Get conversion service the converter is connected to
   virtual 
-  SmartIF<IConversionSvc>& conversionSvc() const override;
+  SmartIF<IConversionSvc> conversionSvc() override;
 
   /// Set address creator facility
   virtual
@@ -310,8 +310,6 @@ protected:
   SmartIF<IDataProviderSvc>   m_dataSvc;
   /// Pointer to the address creation service interface
   SmartIF<IAddressCreator>    m_addressCreator;
-  /// Pointer to the IConversionSvc interface of this
-  SmartIF<IConversionSvc>     m_cnvSvc;
   /// Conversion service type
   long                m_type;
   /// List of conversion workers
