@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 // $Id$
 /**
@@ -85,6 +85,11 @@ void AthAlgorithmDHUpdate::handle (CLID clid, const std::string& key)
   for (CLID clid2 : bib->get_bases()) {
     if (clid2 != clid) {
       m_linkedObjs.emplace (clid2, key);
+    }
+  }
+  for (CLID copy_clid : bib->get_copy_conversions()) {
+    if (copy_clid != clid) {
+      m_linkedObjs.emplace (copy_clid, key);
     }
   }
 }
