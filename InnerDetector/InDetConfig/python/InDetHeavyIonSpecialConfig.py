@@ -2,42 +2,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
-def preProcessing(flags):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    acc = ComponentAccumulator()
-
-    from AthenaConfiguration.Enums import Format
-    if flags.Input.Format is Format.BS:
-        return acc
-
-    if "PixelRDOs" in flags.Input.Collections:
-        if "EventInfo" not in flags.Input.Collections:
-            from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-            acc.merge(EventInfoCnvAlgCfg(flags))
-            
-        if flags.Input.isMC:
-            from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-            acc.merge(GEN_AOD2xAODCfg(flags))
-
-        return acc
-
-    if flags.Tracking.doTruth :
-        from xAODTruthCnv.RedoTruthLinksConfig import RedoTruthLinksAlgCfg
-        acc.merge( RedoTruthLinksAlgCfg(flags) )
-    return acc
-
-
-def mainPassCfg(flags):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    acc = ComponentAccumulator()
-
-    from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-    acc.merge(InDetTrackRecoCfg(flags,
-                                doSpecial=False))
-
-    return acc
-
-
 def PesistifyTrackParticles(flags,
                             *,
                             trackParticleCollections: list[str]):
@@ -154,7 +118,11 @@ def InDetHeavyIonSpecialCfg(flags,
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
 
-    acc.merge(mainPassCfg(flags))
+    # Scheduling main pass as usual
+    from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+    acc.merge(InDetTrackRecoCfg(flags,
+                                doSpecial=False))
+    # Scheduling low pt pass for heavy ion
     acc.merge(lowPtPassCfg(flags))
 
     acc.printConfig(withDetails=False,
