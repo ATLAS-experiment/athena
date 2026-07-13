@@ -80,7 +80,6 @@ StatusCode InDet::SiSPSeededTrackFinder::initialize()
   ATH_CHECK(m_outputTracksKey.initialize());
 
   ATH_CHECK(m_vertices.initialize(m_useVertexPosition));
-  ATH_MSG_INFO("m_useVertexPosition is " << m_useVertexPosition);
   
   /// optional PRD to track association map
   ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty() ) );
@@ -148,7 +147,6 @@ StatusCode InDet::SiSPSeededTrackFinder::execute(const EventContext& ctx) const
   * For example, run-3 central offline Si tracking has m_useNewStrategy=false, 
   * but m_useZBoundaryFinding true --> newStrategy
   **/
-  ATH_MSG_INFO("IS THIS NEW STRATEGY? " << (m_useNewStrategy?"YES":"NO"));
   if (m_ITKGeometry and m_doFastTracking) return itkFastTrackingStrategy(ctx);
   else if (m_useITkConvSeeded) return itkConvStrategy(ctx);
   else if (not m_useNewStrategy and not m_useZBoundaryFinding and not m_ITKGeometry) {
@@ -201,8 +199,8 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
     }
 
     if (primaryVertex == nullptr) {
-      ATH_MSG_WARNING("Could not find the primary vertex");
-      primaryVertex = vertices->front();
+      ATH_MSG_ERROR("Could not find the primary vertex");
+      return StatusCode::FAILURE;
     }
 
     seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;
@@ -286,7 +284,6 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
 
 StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) const
 {
-  ATH_MSG_INFO("NEW STRATEGY IS USED");
   SG::WriteHandle<TrackCollection> outputTracks{m_outputTracksKey, ctx};
   ATH_CHECK(outputTracks.record(std::make_unique<TrackCollection>()));
   /// For HI events we can use MBTS information from calorimeter
@@ -313,8 +310,8 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
     }
 
     if (primaryVertex == nullptr) {
-      ATH_MSG_WARNING("Could not find the primary vertex");
-      primaryVertex = vertices->front();
+      ATH_MSG_ERROR("Could not find the primary vertex");
+      return StatusCode::FAILURE;
     }
     
     seedEventData.zCollisionMinimum = primaryVertex->z() - m_collisionTollerance;

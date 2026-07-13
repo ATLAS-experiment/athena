@@ -1421,7 +1421,6 @@ bool InDet::SiSpacePointsSeedMaker_HeavyIon::isZCompatible
 (EventData& data, float& Zv, float& R, float& T) const
 {
   if (m_useVertexPosition) {
-    ATH_MSG_INFO("Using vertex position for constraint: " << data.zCollisionMinimum << ", " << data.zCollisionMaximum);
     if (Zv < data.zCollisionMinimum || Zv > data.zCollisionMaximum) return false;
   }
   else {
