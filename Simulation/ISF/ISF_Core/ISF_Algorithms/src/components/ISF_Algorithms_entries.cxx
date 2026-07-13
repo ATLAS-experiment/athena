@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "../SimKernel.h"
 #include "../SimKernelMT.h"
 #include "../CollectionMerger.h"
@@ -6,6 +10,7 @@
 #include "../SimEventFilter.h"
 #endif // SimEventFilter currently will not compile in the AthSimulation Project
 #include "../RenameHitCollectionsAlg.h"
+#include "../SimHitTimeManipulator.h"
 
 DECLARE_COMPONENT( ISF::SimKernel )
 DECLARE_COMPONENT( ISF::SimKernelMT )
@@ -15,3 +20,4 @@ DECLARE_COMPONENT( ISF::SimHitTreeCreator )
 DECLARE_COMPONENT( ISF::SimEventFilter )
 #endif // SimEventFilter currently will not compile in the AthSimulation Project
 DECLARE_COMPONENT( ISF::RenameHitCollectionsAlg )
+DECLARE_COMPONENT( ISF::SimHitTimeManipulator )
