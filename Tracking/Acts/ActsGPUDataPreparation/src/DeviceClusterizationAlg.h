@@ -97,8 +97,8 @@ private:
     /// @}
 
     // Device buffers — retrieved from detStore
-    const traccc::detector_design_description::const_view* m_deviceDesign;
-    const traccc::detector_conditions_description::const_view* m_deviceCond;
+    const traccc::detector_design_description::const_view* m_deviceDesign{};
+    const traccc::detector_conditions_description::const_view* m_deviceCond{};
 
 };
 
