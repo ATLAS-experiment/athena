@@ -95,8 +95,10 @@ def ITkActsTrackParticlePersistificationCfg(flags) -> ComponentAccumulator:
         # If we do not want the track collection to be merged with another collection
         # then we immediately create the track particles from it
         # Naming convention for track particles: InDet{extension}TrackParticles
+        # (unless the pass overrides it via storedTrackParticlesExtension)
         acts_tracks = f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
-        TrackParticles = f'InDet{flags.Tracking.ActiveConfig.extension}TrackParticles'
+        from InDetConfig.ITkActsHelpers import separateTrackParticleContainerName
+        TrackParticles = separateTrackParticleContainerName(flags)
         acc.merge(ITkActsTrackParticleCreationCfg(flags,
                                                   TrackContainers = [acts_tracks],
                                                   TrackParticleContainer = TrackParticles))

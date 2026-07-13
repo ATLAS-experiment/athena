@@ -167,7 +167,9 @@ def ITkActsTrackRecoCfg(flags) -> ComponentAccumulator:
                 # on the presence of the ambiguity resolution algorithm
                 # but the track particle collection remains the same
                 # name: InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles
-                TrackParticleCollectionForMsos = f'InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles'
+                # (unless the pass overrides it via storedTrackParticlesExtension)
+                from InDetConfig.ITkActsHelpers import separateTrackParticleContainerName
+                TrackParticleCollectionForMsos = separateTrackParticleContainerName(currentFlags)
                 acc.merge(ActsTrackStateOnSurfaceDecoratorAlgCfg(currentFlags,
                                                                  name=f"{TrackParticleCollectionForMsos}StateOnSurfaceDecoratorAlg",
                                                                  TrackParticles=TrackParticleCollectionForMsos,

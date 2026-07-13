@@ -78,12 +78,12 @@ activate_all_collections="\"InDet\" \
         \"SiSPSeedSegmentsActsLegacyPixel\" \
         \"SiSPSeedSegmentsActsLegacyStrip\" \
         \"SiSPSeedSegmentsActsConversionStrip\" \
-        \"SiSPSeedSegmentsLargeD0Strip\" \
+        \"SiSPSeedSegmentsActsLargeRadiusStrip\" \
 	\"SiSPSeedSegmentsActsLowPt\" \
         \"SiSPSeedSegmentsActsLowPtPixel\" \
         \"SiSPSeedSegmentsActsLowPtStrip\" \
         \"SiSPSeededTracksActsLegacy\" \
-        \"SiSPSeededTracksLargeD0\" \
+        \"SiSPSeededTracksActsLargeRadius\" \
         \"SiSPSeededTracksActsConversion\" \
         \"SiSPSeededTracksActsLowPt\" \
 	"
