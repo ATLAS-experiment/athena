@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,7 +15,7 @@
 #ifndef TRT_TrackExtensionAlg_H
 #define TRT_TrackExtensionAlg_H
 
-#include <string>
+
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "InDetRecToolInterfaces/ITRT_TrackExtensionTool.h"
@@ -28,7 +28,8 @@
 #include "TrkTrack/TrackCollection.h"
 
 #include "CxxUtils/checker_macros.h"
-#include <atomic>
+#include <mutex>
+#include <string>
 
 namespace InDet {
 

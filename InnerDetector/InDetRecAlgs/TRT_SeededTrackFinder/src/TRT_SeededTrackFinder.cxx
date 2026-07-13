@@ -134,6 +134,8 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
     ATH_MSG_DEBUG ("TRT track container size huge; will process event partially if number of max segments reached !!!");
   }
   // Event dependent data of SiCombinatorialTrackFinder_xk
+  //Total stack use for this function is 828640 bytes.
+  //coverity[STACK_USE]
   InDet::ExtendedSiCombinatorialTrackFinderData_xk combinatorialData(m_prdToTrackMap);
   std::unique_ptr<InDet::ITRT_SeededTrackFinder::IEventData> event_data_p;
   if(m_caloSeededRoI ) {
@@ -539,6 +541,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
   //Careful refitting at the end
   if (m_doRefit) {
     newTrack=m_fitterTool->fit(Gaudi::Hive::currentContext(),*newTrack, false, Trk::pion);
+    //coverity[REVERSE_INULL:FALSE]
     if (!newTrack) {
       ATH_MSG_DEBUG ("Refit of TRT+Si track segment failed!");
       return nullptr;
@@ -596,6 +599,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::segToTrack(const EventContext& ctx, co
   // Careful refitting of the TRT stand alone track
   if (m_doRefit) {
     newTrack = m_fitterTool->fit(ctx,*newTrack, false, Trk::pion);
+    //coverity[REVERSE_INULL:FALSE]
     if (!newTrack) {
       ATH_MSG_DEBUG ("Refit of TRT track segment failed!");
       return nullptr;
@@ -643,6 +647,7 @@ mergeExtension(const Trk::Track& tT, std::vector<const Trk::MeasurementBase*>& t
   //Careful refitting at the end
   if (m_doRefit) {
     newTrack = (m_fitterTool->fit(Gaudi::Hive::currentContext(),*newTrack, false, Trk::pion) ) ;
+    //coverity[REVERSE_INULL:FALSE]
     if (!newTrack) {
       ATH_MSG_DEBUG ("Refit of TRT+Si track segment failed!");
       return nullptr;
