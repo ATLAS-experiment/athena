@@ -233,7 +233,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       //skipping outliers
       ATH_MSG_DEBUG(" --> testing if hit " << nTSOS << "/" << trksItr->trackStateOnSurfaces()->size() << " is a track measurement");
       if(!tsos->type(Trk::TrackStateOnSurface::Measurement)) {
-	ATH_MSG_DEBUG("Skipping TSOS " << nTSOS << " because it is an outlier (or the first TSOS on the track)");
+	ATH_MSG_INFO("Skipping TSOS " << nTSOS << " because it is an outlier (or the first TSOS on the track)");
 	continue;
       }
       
@@ -255,7 +255,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       const Trk::TrackParameters* trackParameter = tsos->trackParameters();
       if(trackParameter==nullptr) {
 	//if no TrackParameters for TSOS we cannot define residuals
-	ATH_MSG_DEBUG(" Skipping TSOS " << nTSOS << " because it does not have TrackParameters");
+	ATH_MSG_INFO(" Skipping TSOS " << nTSOS << " because it does not have TrackParameters");
 	continue;
       }
        
@@ -264,7 +264,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       if(TrackParCovariance==nullptr) {
         //if no MeasuredTrackParameters the hit will not have associated convariance error matrix and will not
         //be able to define a pull or unbiased residual (errors needed for propagation)
-        ATH_MSG_DEBUG("Skipping TSOS " << nTSOS << " because does not have MeasuredTrackParameters");
+        ATH_MSG_INFO("Skipping TSOS " << nTSOS << " because does not have MeasuredTrackParameters");
         continue;
       }
       
@@ -482,17 +482,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       }//end-Pixel and SCT hits
       
       
-      ATH_MSG_INFO("DEBUG_USE_ITK_GEOMETRY = " << m_useITkGeometry
-             << " detType=" << detType
-             << " barrelEC=" << barrelEC
-             << " layerDisk=" << layerDisk
-             << " modEta=" << modEta
-             << " modPhi=" << modPhi);
-
-      if (m_useITkGeometry) {
-      ATH_MSG_INFO("DEBUG_ITK_SKIP_ALL_OLD_FILL");
-      continue;
-      }
+            
       
       //--------------------------------------------
       //
@@ -570,6 +560,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           fill(m_tools[m_pixPullY[layerDisk]], pix_b_pullsy_m);
 
           //Residuals vs Eta and Phi
+          ATH_MSG_INFO("DEBUG_RESIDUAL_FILL_PIXEL layerDisk=" << layerDisk << " Residual = " << residualX_m);
           fill(m_tools[m_pixResidualXvsEta[layerDisk]], modEta_m, residualX_m );
           fill(m_tools[m_pixResidualYvsEta[layerDisk]], modEta_m, residualY_m );
           fill(m_tools[m_pixResidualXvsPhi[layerDisk]], modPhi_m, residualX_m );

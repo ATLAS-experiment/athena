@@ -126,7 +126,6 @@ def ITkAlignTrackCollSplitterCfg(flags, name="ITkAlignTrackCollSplitter", **kwar
     cfg.addEventAlgo(CompFactory.Trk.AlignTrackCollSplitter(name, **kwargs))
     return cfg
 
-
 def ITkAccumulateCfg(flags, **kwargs):
 
     cfg = ITkAlignAlgCfg(flags)
@@ -136,6 +135,9 @@ def ITkAccumulateCfg(flags, **kwargs):
     if flags.ITk.Align.doMonitoring:
 
         print("Insideeeeeeeeeeeeee")
+
+        # Must be set before building monitoring config.
+        # Ideally this should be set in the top-level config before flags.lock().
 
         from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import (
             InDetAlignmentMonitoringRun3Config)
