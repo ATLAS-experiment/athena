@@ -318,7 +318,7 @@ def createITkFTFLargeD0PassFlags():
 def createITkLargeD0TrackingPassFlags():
 
     icf = createITkTrackingPassFlags()
-    icf.extension             = "LegacyLargeD0"
+    icf.extension             = "LargeD0"
     icf.usePrdAssociationTool = True
     icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container
 

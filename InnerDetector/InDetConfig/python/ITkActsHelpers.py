@@ -32,6 +32,17 @@ def primaryPassExtension(flags) -> str:
     # equal to ITk{extension}
     return flags.Tracking.ITkPrimaryPassConfig.value.replace("ITk", "")
 
+def separateTrackParticleContainerName(flags) -> str:
+    # Name of the persistified track particle container for tracking passes
+    # that store their tracks in a separate container (storeSeparateContainer).
+    # This follows the InDet{extension}TrackParticles convention, unless the
+    # pass requests a different name via the storedTrackParticlesExtension flag
+    # (e.g. the ActsLargeRadius pass writes to InDetLargeD0TrackParticles so that
+    # downstream LRT clients can rely on the Run-3 container name)
+    extension = flags.Tracking.ActiveConfig.storedTrackParticlesExtension or \
+        flags.Tracking.ActiveConfig.extension
+    return f"InDet{extension}TrackParticles"
+
 def extractTrackingPasses(flags) -> list:
     # Function for extracting the requested tracking passes that need to be scheduled
     trackingPasses = []
@@ -134,7 +145,7 @@ def getListOfGeneratedTrackParticles(flags) -> list[str]:
             # this is necessary only if ambiguity resolution is run and we
             # store track particles in a separate container w.r.t InDetTrackParticles
             if currentFlags.Acts.doAmbiguityResolution and currentFlags.Tracking.ActiveConfig.storeSeparateContainer:
-                generateTrackCollections += [f'InDet{currentFlags.Tracking.ActiveConfig.extension}TrackParticles']
+                generateTrackCollections += [separateTrackParticleContainerName(currentFlags)]
 
     print('Here is the list of generated track particle collections:')
     for collection in generateTrackCollections:
