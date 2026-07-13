@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/XAODToInDetClusterConversion.h"
@@ -119,6 +119,7 @@ namespace InDet {
 
           InDet::PixelCluster* cluster = nullptr;
           ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *m_pixelID, cluster) );
+          //coverity[FORWARD_NULL:FALSE]
           cluster->setHashAndIndex(hashId, collection->size());
 
           // Add to Collection
@@ -183,6 +184,7 @@ namespace InDet {
 
           InDet::SCT_Cluster* cluster = nullptr;
           ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *m_stripID, cluster, shift) );
+          //coverity[FORWARD_NULL:FALSE]
           cluster->setHashAndIndex(hashId, collection->size());
 
 
@@ -237,6 +239,8 @@ namespace InDet {
           const xAOD::HGTDCluster* in_cluster = *start;
 
           ::HGTD_Cluster* cluster = nullptr;
+          //cluster is overwritten, but it is saved in 'collection' and later moved
+          //coverity[RESOURCE_LEAK]
           ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, cluster) );
           cluster->setHashAndIndex(hashId, collection->size());
 

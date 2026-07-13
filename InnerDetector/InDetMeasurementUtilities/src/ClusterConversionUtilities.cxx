@@ -64,7 +64,8 @@ namespace TrackingUtilities {
     localCovariance.setZero();
     localCovariance(0, 0) = localCov(0, 0);
     localCovariance(1, 1) = localCov(1, 1);
-
+    //cid 23274
+    //coverity[UNINIT:FALSE]
     return {localPosition, localCovariance}; 
   }
   
