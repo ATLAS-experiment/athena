@@ -33,6 +33,13 @@ namespace xAOD {
         std::vector<float> deltaTheta {};
         std::vector<uint32_t> nswSegment {};
         std::vector<xAOD::ICandData_v1::Quality> candQuality {};
+        std::vector<uint8_t> tcId {};
+        std::vector<uint8_t> passedPtThresholdIndex {};
+        std::vector<uint8_t> estimatedPtValueIndex {};
+        std::vector<uint8_t> estimatedPtValueValid {};
+        std::vector<uint8_t> side {};
+        std::vector<uint8_t> endcapFlag {};
+        std::vector<uint8_t> sector {};
 
     };
 }
