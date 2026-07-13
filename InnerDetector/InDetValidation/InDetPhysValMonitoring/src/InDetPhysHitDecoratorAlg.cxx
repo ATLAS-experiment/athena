@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -405,29 +405,29 @@ InDetPhysHitDecoratorAlg::decorateTrack(const xAOD::TrackParticle &particle,
                 result_surfaceID.push_back(std::get<18>(single_result));
             }
 
-            int_decor[kDecorRegion](particle) = result_r;
-            int_decor[kDecorDet](particle) = result_det;
-            int_decor[kDecorILayer](particle) = result_iLayer;
-            int_decor[kDecorPhiWidth](particle) = result_phiWidth;
-            int_decor[kDecorEtaWidth](particle) = result_etaWidth;
-            int_decor[kDecorType](particle) = result_measureType;
+            int_decor[kDecorRegion](particle) = std::move(result_r);
+            int_decor[kDecorDet](particle) = std::move(result_det);
+            int_decor[kDecorILayer](particle) = std::move(result_iLayer);
+            int_decor[kDecorPhiWidth](particle) = std::move(result_phiWidth);
+            int_decor[kDecorEtaWidth](particle) = std::move(result_etaWidth);
+            int_decor[kDecorType](particle) = std::move(result_measureType);
 
-            float_decor[kDecorResidualLocX](particle) = result_residualLocX;
-            float_decor[kDecorPullLocX](particle) = result_pullLocX;
-            float_decor[kDecorMeasLocX](particle) = result_measurementLocX;
-            float_decor[kDecorTrkParamLocX](particle) = result_trackParamLocX;
-            float_decor[kDecorMeasLocCovX](particle) = result_measurementLocCovX;
+            float_decor[kDecorResidualLocX](particle) = std::move(result_residualLocX);
+            float_decor[kDecorPullLocX](particle) = std::move(result_pullLocX);
+            float_decor[kDecorMeasLocX](particle) = std::move(result_measurementLocX);
+            float_decor[kDecorTrkParamLocX](particle) = std::move(result_trackParamLocX);
+            float_decor[kDecorMeasLocCovX](particle) = std::move(result_measurementLocCovX);
 
-            float_decor[kDecorResidualLocY](particle) = result_residualLocY;
-            float_decor[kDecorPullLocY](particle) = result_pullLocY;
-            float_decor[kDecorMeasLocY](particle) = result_measurementLocY;
-            float_decor[kDecorTrkParamLocY](particle) = result_trackParamLocY;
-            float_decor[kDecorMeasLocCovY](particle) = result_measurementLocCovY;
+            float_decor[kDecorResidualLocY](particle) = std::move(result_residualLocY);
+            float_decor[kDecorPullLocY](particle) = std::move(result_pullLocY);
+            float_decor[kDecorMeasLocY](particle) = std::move(result_measurementLocY);
+            float_decor[kDecorTrkParamLocY](particle) = std::move(result_trackParamLocY);
+            float_decor[kDecorMeasLocCovY](particle) = std::move(result_measurementLocCovY);
 
-            float_decor[kDecorAngle](particle) = result_angle;
-            float_decor[kDecorEtaLoc](particle) = result_etaloc;
+            float_decor[kDecorAngle](particle) = std::move(result_angle);
+            float_decor[kDecorEtaLoc](particle) = std::move(result_etaloc);
 
-            uint64_decor[kDecorID](particle) = result_surfaceID;
+            uint64_decor[kDecorID](particle) = std::move(result_surfaceID);
 
             return true;
       } else {

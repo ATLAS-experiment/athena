@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -678,6 +678,10 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
         }
 
         //Calculating the local PU density around the true HS vertex
+        if (!truthHSVtx){
+          ATH_MSG_INFO("No truthHSVtx vertex - not filling vertex truth matching.");
+          return;
+        }
         float localPUDensity = getLocalPUDensity(truthHSVtx, truthHSVertices, truthPUVertices);
         fillHisto(m_vx_PUdensity, localPUDensity, weight);
         fillHisto(m_vx_nTruth_vs_PUdensity, nTruthVertices, localPUDensity, weight);
