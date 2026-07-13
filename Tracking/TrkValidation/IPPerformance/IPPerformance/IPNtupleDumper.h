@@ -16,11 +16,6 @@
 
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 #include "TrackVertexAssociationTool/TrackVertexAssociationTool.h"
-#include "InDetTrackSystematicsTools/InDetTrackTruthFilterTool.h"
-#include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
-#include "InDetTrackSystematicsTools/JetTrackFilterTool.h"
-#include "InDetTrackSystematicsTools/InDetTrackBiasingTool.h"
-//#include "JetJvtEfficiency/NNJvtSelectionTool.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -63,24 +58,10 @@ class IPNtupleDumper : public AthAlgorithm
 
 private:
   PublicToolHandle<Trig::TrigDecisionTool>        m_trigDecTool{this, "trigDecTool", "Trig::TrigDecisionTool/TrigDecisionTool"};
-  //FOR TEST-----
-  int m_numEvent;
-  int m_totalJets = 0;
-  int m_totalGhostTracks = 0;
   // put your configuration variables here as public variables.
   // that way they can be set directly from CINT and python.
 public:
  
-  //ToolHandle<CP::NNJvtSelectionTool> m_nnjvtTool{this, "NNJvtTool", "CP::NNJvtSelectionTool/NNJvt", "NNJvt tool"};
-  //cutflow
-  TH1D* m_ip_cutflowHist;
-  int   m_ip_cutflowHist_1;
-  int   m_ip_cutflowHist_2;
-  int   m_ip_cutflowHist_3;
-  int   m_ip_cutflowHist_4;
-  int   m_ip_cutflowHist_5;
-  int   m_ip_cutflowHist_6;
-  int   m_ip_cutflowHist_7;
   //Config variables
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackKey{this, "TrackParticlesKey", "InDetTrackParticles"};
   std::string m_vtxContainer;                     //! vtx container name
@@ -104,7 +85,6 @@ public:
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_PVz0Sigma_IDTIDE1_key{this, "PVz0SigmaIDTIDE1Key", m_trackKey, "IDTIDE1_unbiased_PVz0Sigma", ""};
   bool m_useIDTIDE = false;
 
-  std::string derivationName;                   //! derivation name for the IP decorations
   Gaudi::Property<float> m_TruthPtCut{this, "TruthPtCut", 500, "Limit to do track-jet association"};
   Gaudi::Property<float> m_TruthEtaCut{this, "TruthEtaCut", 2.5, "Limit to do track-jet association"};
   Gaudi::Property<float> m_TruthMatchProb{this, "TruthMatchProb", 0.5, "Limit to do track-jet association"};
@@ -261,10 +241,6 @@ public:
   std::vector<float> trk_truth_d0; //!
   std::vector<float> trk_truth_z0; //!
 
-  //For the systematics
-  ToolHandle<InDet::InDetTrackTruthFilterTool>    m_truthFilterTool{this,"truthFilterTool","InDet::InDetTrackTruthFilterTool"};
-  //===================================
-  
   
 };
 

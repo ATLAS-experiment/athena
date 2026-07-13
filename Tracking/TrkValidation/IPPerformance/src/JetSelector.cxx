@@ -24,6 +24,8 @@
 #include "AthContainers/ConstDataVector.h"
 #include "PATInterfaces/SystematicVariation.h"
 #include "PATInterfaces/SystematicRegistry.h"
+#include <StoreGate/StoreGateSvc.h>
+#include <GaudiKernel/ServiceHandle.h>
 
 // package include(s):
 #include "xAODEventInfo/EventInfo.h"
@@ -44,7 +46,6 @@ JetSelector :: JetSelector (const std::string& name,ISvcLocator* pSvcLocator):At
   // the most basic initialization here, since this method will be
   // initialization code will go into histInitialize() and
   // initialize().
-  ATH_MSG_INFO("JetSelector(): Calling constructor");
 
 }
 
@@ -62,12 +63,8 @@ StatusCode JetSelector :: initialize ()
   // you create here won't be available in the output if you have no
   // input events.
   ATH_MSG_INFO("initialize(): Calling initialize");
-  //FOR TEST--------------
-  m_numEvent =0;
+
    // *****CUTFLOW**********
-    //
-  TFile *file =TFile::Open("ctflow","RECREATE");
-  file->cd();
   ServiceHandle<ITHistSvc> histSvc ("THistSvc", "JetSelector");
   ATH_CHECK( histSvc.retrieve() );
   m_jet_cutflowHist  = new TH1D("cutflow_jets", "cutflow_jets", 1, 1, 2);
@@ -97,7 +94,7 @@ StatusCode JetSelector :: initialize ()
 
   ATH_MSG_INFO("initialize(): JetSelector Interface succesfully initialized!" );
 
-  ATH_CHECK(service("StoreGateSvc", m_storeGate));
+  ATH_CHECK(m_storeGate.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -117,7 +114,6 @@ StatusCode JetSelector :: finalize ()
   // gets called on worker nodes that processed input events.
 
   ATH_MSG_INFO("finalize():"<< name());
-  ATH_MSG_INFO("JetSelector: Processed events = " << m_numEvent);
 
   return StatusCode::SUCCESS;
 }
@@ -132,17 +128,13 @@ StatusCode JetSelector :: execute ()
 
   // retrieve event
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  //FOR TEST------
   const xAOD::EventInfo* eventInfo = 0;
   ATH_CHECK (evtStore()->retrieve (eventInfo, "EventInfo"));
-  m_numEvent++;
   SG::ReadHandle<xAOD::JetContainer> inJets{m_jetKey, ctx};
   if (!inJets.isValid()) {
     ATH_MSG_ERROR ("Couldn't retrieve xAOD::Jet with key: " << m_jetKey.key() );
     return StatusCode::FAILURE;
   }
-  //FOR TEST----------
-  ATH_MSG_INFO("1: JetSelector input container size = " << inJets->size());
     // create output container (if requested)
   ConstDataVector<xAOD::JetContainer>* selectedJets(nullptr);
   if ( m_createSelectedContainer ) {
@@ -163,11 +155,7 @@ StatusCode JetSelector :: execute ()
   static SG::AuxElement::Accessor< char > isCleanAcc("cleanJet");
   static SG::AuxElement::Decorator< char > passSelDecor( m_decor );
   
-  //FOR TEST-----------------
-  ATH_MSG_INFO("2: JetSelector input container size = " << inJets->size());
-  int nPassCutsCalls = 0;
   for ( auto jet_itr : *inJets.cptr() ) { 
-    nPassCutsCalls++;
     int passSel = this->PassCuts( jet_itr );
     if ( m_decorateSelectedObjects ) {
       passSelDecor( *jet_itr ) = passSel;
@@ -179,7 +167,6 @@ StatusCode JetSelector :: execute ()
       }
     }
   } // end jet loop
-  ATH_MSG_INFO("3: Number of PassCuts calls = " << nPassCutsCalls);
 
   // add ConstDataVector to TStore
   if ( m_createSelectedContainer ) {
@@ -230,14 +217,14 @@ int JetSelector::PassCuts( const xAOD::Jet* jet ) {
   return 1;
 }
 
-void JetSelector::CleanJets(const xAOD::JetContainer* cleanJetcopy , JetCleaningTool* m_jetCleaning) {
+void JetSelector::CleanJets(const xAOD::JetContainer* cleanJetcopy , JetCleaningTool* jetCleaning) {
 
   for ( auto jet_itr : *cleanJetcopy ) {
 
     static SG::AuxElement::Decorator< char > isCleanDecor( "cleanJet" );
     const xAOD::Jet* jetToClean = jet_itr;
 
-    isCleanDecor(*jet_itr) = bool( m_jetCleaning->accept(*jetToClean) );
+    isCleanDecor(*jet_itr) = bool( jetCleaning->accept(*jetToClean) );
 
   } //end cleaning decision
 

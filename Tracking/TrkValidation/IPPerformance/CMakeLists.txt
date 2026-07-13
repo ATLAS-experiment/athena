@@ -23,11 +23,10 @@ atlas_add_library( IPPerformanceLib
                    JetCalibToolsLib
                    JetSelectorToolsLib AthContainers
                    AsgTools
-                   JetUncertaintiesLib
                    TrigConfxAODLib
                    TrigDecisionToolLib xAODCutFlow JetMomentToolsLib
                    AnaAlgorithmLib EventBookkeeperToolsLib
-		   TrackVertexAssociationToolLib InDetTrackSystematicsToolsLib 
+		   TrackVertexAssociationToolLib
                    ${release_libs}
                    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} AsgMessagingLib
 )

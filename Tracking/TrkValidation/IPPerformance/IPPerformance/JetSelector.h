@@ -36,10 +36,7 @@ public:
 private:
 
   int m_pvLocation;       //!
-  //FOR TEST-------
-  int m_numEvent;
-  // obtain StoreGateSvc
-  StoreGateSvc* m_storeGate = nullptr;
+  ServiceHandle<StoreGateSvc> m_storeGate{this,"StoreGateSvc","StoreGateSvc"};
 
    // cutflow
   TH1D* m_jet_cutflowHist;  //!

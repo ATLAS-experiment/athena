@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaCommon.Logging import logging
 from AthenaCommon.CFElements import seqAND
 #from AthenaConfiguration.Enums import LHCPeriod
 
@@ -17,9 +16,9 @@ def EventStatusSelection_And_VertexSelectionCfg(flags):
     acc.addEventAlgo(vertexSelectionAlg)
     return acc
 
-def JetCalibrationAlgCfg(flags):
+
+def JetCalibratorAlgCfg(flags):
     acc = ComponentAccumulator()
-    acc.addService(CompFactory.CP.SystematicsSvc("SystematicsSvc"))
     from JetCalibTools.JetCalibToolsConfig import defineJetCalibTool
     config = "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"
     if flags.Input.isMC:
@@ -31,48 +30,10 @@ def JetCalibrationAlgCfg(flags):
         CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
     jct = defineJetCalibTool(jetcollection="AntiKt4EMTopo",context="AnalysisLatest",configfile=config,calibarea="00-04-82",calibseq=CalibSequence,data_type = "mc" if flags.Input.isMC else "data",
           rhoname="auto", pvname="PrimaryVertices", gscdepth="auto")
-    jetCalibrationAlg = CompFactory.CP.JetCalibrationAlg("JetCalibrationAlg")
-    jetCalibrationAlg.calibrationTool = jct    
-    jetCalibrationAlg.jets = "AntiKt4EMTopoJets"
-    acc.addEventAlgo(jetCalibrationAlg)
-    #acc.addEventAlgo(CompFactory.CP.JetCalibrationAlg("JetCalibrationAlg"))
+    jetCalibratorAlg = CompFactory.JetCalibratorAlg("JetCalibratorAlg")
+    jetCalibratorAlg.calibrationTool = jct
+    acc.addEventAlgo(jetCalibratorAlg)
     return acc
-
-def JetCalibratorCfg(flags, name="JetCalibrator", **kwargs):
-    acc = ComponentAccumulator()
-    from JetCalibTools.JetCalibToolsConfig import defineJetCalibTool
-    config = "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config"
-    if flags.Input.isMC:
-        if not flags.Sim.ISF.Simulator.isFullSim():
-            config = "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config"
-    if flags.Input.isMC:
-        CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
-    else:
-        CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
-    jct = defineJetCalibTool(jetcollection="AntiKt4EMTopo",context="AnalysisLatest",configfile=config,calibarea="00-04-82",calibseq=CalibSequence,data_type = "mc" if flags.Input.isMC else "data",rhoname="auto", pvname="PrimaryVertices", gscdepth="auto")
-
-    from JetSelectorTools.JetSelectorToolsConfig import JetCleaningToolCfg
-    jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(flags,name="JetCleaningTool",jetdef="AntiKt4EMTopoJets",cleaningLevel="LooseBad",useDecorations=True))
-
-    jetUncertaintiesTool = CompFactory.JetUncertaintiesTool()
-    #the following parameters have to be configured here 
-    jetUncertaintiesTool.ConfigFile = "rel21/Summer2019/R4_GlobalReduction_SimpleJER.config"  
-    jetUncertaintiesTool.JetDefinition = "AntiKt4EMTopo"  
-    jetUncertaintiesTool.MCType = "MC16"  
-    jetUncertaintiesTool.IsData = not flags.Input.isMC
-    jetUncertaintiesTool.OutputLevel = logging.ERROR
-   
-
-    jetCalibrator = CompFactory.JetCalibrator("JetCalibrator", **kwargs)
-    jetCalibrator.isMC = flags.Input.isMC
-    jetCalibrator.isFullSim = flags.Sim.ISF.Simulator.isFullSim()
-    jetCalibrator.jetCalibration = jct
-    jetCalibrator.JESUncertTool = jetUncertaintiesTool 
-    jetCalibrator.jetCleaning = jetCleaningTool 
-
-    acc.addEventAlgo(jetCalibrator)
-    return acc
-
 
 def JetSelectorCfg(flags,name="JetSelector", **kwargs):
     acc = ComponentAccumulator()
@@ -135,8 +96,8 @@ def IPPerformanceCfg(flags,name="IPPerformance", **kwargs):
     from IPPerformance.IPPerformanceConfig import EventStatusSelection_And_VertexSelectionCfg
     acc.merge(EventStatusSelection_And_VertexSelectionCfg(flags),sequenceName=seqName)
 
-    from IPPerformance.IPPerformanceConfig import JetCalibrationAlgCfg
-    acc.merge(JetCalibrationAlgCfg(flags),sequenceName=seqName)
+    from IPPerformance.IPPerformanceConfig import JetCalibratorAlgCfg
+    acc.merge(JetCalibratorAlgCfg(flags),sequenceName=seqName)
 
     from IPPerformance.IPPerformanceConfig import JetSelectorCfg
     acc.merge(JetSelectorCfg(flags),sequenceName=seqName)
