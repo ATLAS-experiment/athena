@@ -18,7 +18,12 @@ public:
                    OffloadMessage* response) override {
 
         std::cout << "... TestServiceImpl::Received request of ID: " << request->identifier() << "\n";
-        
+        if ( request->identifier() == "Enterprise to Starfleet Command.") {
+            response->set_identifier("Starfleet Command here. Go ahead, Enterprise.");
+            return Status::OK;
+        }
+
+
         // Copy context
         *response->mutable_event() = request->event();
 

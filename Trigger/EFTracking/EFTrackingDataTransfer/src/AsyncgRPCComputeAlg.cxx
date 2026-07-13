@@ -23,6 +23,12 @@ StatusCode AsyncgRPCComputeAlg::initialize() {
   }
 
   m_stub = std::make_unique<UniversalOffloadService::Stub>(channel);
+  OffloadMessage requestMsg;
+  OffloadMessage responseMsg;
+  requestMsg.set_identifier("Enterprise to Starfleet Command.");
+  auto gRPCClientContext = std::make_unique<grpc::ClientContext>();
+  auto status = m_stub->doComputation(gRPCClientContext.get(), requestMsg, &responseMsg);
+  ATH_MSG_INFO("Service responded with: " << responseMsg.identifier());
 
   return StatusCode::SUCCESS;
 }
@@ -43,23 +49,23 @@ void fillEventInfo(const EventIDBase& input, ::EventInfo* ei) {
 StatusCode AsyncgRPCComputeAlg::execute(const EventContext& context) const {
   ATH_MSG_ALWAYS("Invoking");
 
-  OffloadMessage outMsg;
-  OffloadMessage inMsg;
+  OffloadMessage requestMsg;
+  OffloadMessage responseMsg;
 
-  outMsg.mutable_identifier()->assign("do_increment");
+  requestMsg.mutable_identifier()->assign("do_increment");
 
-  auto* ei = outMsg.mutable_event();
+  auto* ei = requestMsg.mutable_event();
   fillEventInfo(context.eventID(), ei);
   ATH_MSG_DEBUG("Prepared input data, event number "
                 << context.eventID().event_number());
   this->restoreAfterSuspend().ignore();
   auto gRPCClientContext = std::make_unique<grpc::ClientContext>();
   m_stub->async()->doComputation(
-      gRPCClientContext.get(), &outMsg, &inMsg, [this, &outMsg, &inMsg](grpc::Status status) {
+      gRPCClientContext.get(), &requestMsg, &responseMsg, [this, &requestMsg, &responseMsg](grpc::Status status) {
         if (status.ok()) {
           ATH_MSG_ALWAYS("Response received for request "
-                         << outMsg.identifier() << " id of response "
-                         << inMsg.identifier());
+                         << requestMsg.identifier() << " id of response "
+                         << responseMsg.identifier());
         }
         this->restoreAfterSuspend().ignore();
       });
@@ -74,27 +80,27 @@ StatusCode AsyncgRPCComputeAlg::restoreAfterSuspend() const {
   return StatusCode::SUCCESS;
 }
 
-void AsyncgRPCComputeAlg::encodeMessage(OffloadMessage& outMsg) const {
+void AsyncgRPCComputeAlg::encodeMessage(OffloadMessage& requestMsg) const {
   // a test message
-  outMsg.mutable_float_branches()->at("x").add_values(0.0);
-  outMsg.mutable_float_branches()->at("x").add_values(1.0);
-  outMsg.mutable_float_branches()->at("y").add_values(2.0);
-  outMsg.mutable_float_branches()->at("y").add_values(5.0);
-  outMsg.mutable_int_branches()->at("n").add_values(4);
-  outMsg.mutable_int_branches()->at("n").add_values(5);
+  requestMsg.mutable_float_branches()->at("x").add_values(0.0);
+  requestMsg.mutable_float_branches()->at("x").add_values(1.0);
+  requestMsg.mutable_float_branches()->at("y").add_values(2.0);
+  requestMsg.mutable_float_branches()->at("y").add_values(5.0);
+  requestMsg.mutable_int_branches()->at("n").add_values(4);
+  requestMsg.mutable_int_branches()->at("n").add_values(5);
 }
 
-void AsyncgRPCComputeAlg::decodeMessage(const OffloadMessage& inMsg) const {
-  auto x = inMsg.float_branches().at("x");
-  // for ( auto el: inMsg.float_branches()["x"]) {
+void AsyncgRPCComputeAlg::decodeMessage(const OffloadMessage& responseMsg) const {
+  auto x = responseMsg.float_branches().at("x");
+  // for ( auto el: responseMsg.float_branches()["x"]) {
   //   ATH_MSG_INFO("float x: " << el);
   // }
 
-  // for ( auto el: inMsg.float_branches()["y"]) {
+  // for ( auto el: responseMsg.float_branches()["y"]) {
   //   ATH_MSG_INFO("float y: " << el);
   // }
 
-  // for ( auto el: inMsg.int_branches()["y"]) {
+  // for ( auto el: responseMsg.int_branches()["y"]) {
   //   ATH_MSG_INFO("int n: " << el);
   // }
 }

@@ -17,10 +17,10 @@ acc = MainServicesCfg(flags)
 
 acc.merge(PoolReadCfg(flags))
 
-acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("A1",
+acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("CompAlg1",
     OutputLevel=DEBUG ))
 
-acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("A2",
+acc.addEventAlgo(CompFactory.AsyncgRPCComputeAlg("CompAlg2",
     OutputLevel=DEBUG ))
 
 # ------------------------------------------------------------
