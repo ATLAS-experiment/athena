@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -56,7 +56,7 @@ StatusCode IDAlignMonPVBiasesAlg::fillHistograms( const EventContext& ctx ) cons
   using namespace Monitored;
 
   // For histogram naming
-  auto pvGroup = getGroup("PVBiases");
+  const auto & pvGroup = getGroup("PVBiases");
 
   /******************************************************************
   ** Retrieve Trackparticles
