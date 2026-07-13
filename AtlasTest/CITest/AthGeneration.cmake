@@ -38,6 +38,12 @@ atlas_add_citest( Generation_PhPy8_14TeV
 atlas_add_citest( Generation_P8B_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid 421439 )
 
+atlas_add_citest( Generation_Filters_13TeV
+   SCRIPT RunWorkflowTests_Run2.py --CI -g --dsid 421408 -e '--inputEVNT_PreFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Evgen_E2E/mc15_13TeV/EVNT.25508216._000003.pool.root.1,/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Evgen_E2E/mc15_13TeV/EVNT.25508216._000001.pool.root.1' )
+
 # CA Config
 atlas_add_citest( Generation_CA_ParticleGun_13p6TeV
    SCRIPT RunWorkflowTests_Run3.py --CI -g --dsid Test950555 -e '--CA True' )
+
+atlas_add_citest( Generation_CA_Filters_13TeV
+   SCRIPT RunWorkflowTests_Run2.py --CI -g --dsid Test421408 -e '--CA True --inputEVNT_PreFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Evgen_E2E/mc15_13TeV/EVNT.25508216._000003.pool.root.1,/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Evgen_E2E/mc15_13TeV/EVNT.25508216._000001.pool.root.1' )
