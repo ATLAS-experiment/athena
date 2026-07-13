@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -45,6 +45,7 @@ StatusCode TopoAutomatonClustering::initialize_non_CUDA()
   auto get_sampling_from_string = [](const std::string & str, bool & failed)
   {
     failed = false;
+    //cppcheck-suppress syntaxError
     CRGPU_RECURSIVE_MACRO(
             CRGPU_CHEAP_STRING_TO_ENUM( str, CaloCell_ID,
                                         PreSamplerB,
