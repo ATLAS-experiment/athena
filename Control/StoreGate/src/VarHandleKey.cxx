@@ -60,7 +60,7 @@ VarHandleKey::VarHandleKey (CLID clid,
 /**
  * @brief Change the key of the object to which we're referring.
  * @param sgkey The StoreGate key for the object.
- * 
+ *
  * The provided key may actually start with the name of the store,
  * separated by a "+":  "MyStore+Obj".  If no "+" is present
  * the store is not changed.  A key name that starts with a slash
@@ -83,7 +83,7 @@ VarHandleKey& VarHandleKey::operator= (const std::string& sgkey)
 /**
  * @brief Change the key of the object to which we're referring.
  * @param sgkey The StoreGate key for the object.
- * 
+ *
  * The provided key may actually start with the name of the store,
  * separated by a "+":  "MyStore+Obj".  If no "+" is present
  * the store is not changed.  A key name that starts with a slash
@@ -144,13 +144,18 @@ StatusCode VarHandleKey::initialize (bool used /*= true*/)
   CLID this_clid = clid();
   m_hashedKey = m_storeHandle->stringToKey (m_sgKey, this_clid);
 
-  // Make sure we also register hashes for base classes at this point,
+  // Make sure we also register hashes for base and copy classes at this point,
   // to prevent collisions with transient keys.
   const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (this_clid);
   if (bib) {
     for (CLID base_clid : bib->get_bases()) {
       if (base_clid != this_clid) {
          m_storeHandle->stringToKey (m_sgKey, base_clid);
+      }
+    }
+    for (CLID copy_clid : bib->get_copy_conversions()) {
+      if (copy_clid != this_clid) {
+         m_storeHandle->stringToKey (m_sgKey, copy_clid);
       }
     }
   }
@@ -214,7 +219,7 @@ void VarHandleKey::updateKey(std::string /*key*/)
  * with a slash is interpreted as a hierarchical key name,
  * not an empty store name.
  *
- * we also have to check that if the key contains the store name, 
+ * we also have to check that if the key contains the store name,
  * it matches the store name that they Handle was constructed with
  *
  * blank keys result in blank DataObjIDs
@@ -262,9 +267,9 @@ void VarHandleKey::parseKey (const std::string& key,
 
   if (st != StoreID::CONDITION_STORE && st != StoreID::METADATA_STORE) {
     if (m_sgKey.find('/') != std::string::npos) {
-      throw SG::ExcBadHandleKey("key \"" + key 
+      throw SG::ExcBadHandleKey("key \"" + key
                                 + "\": keys with \"/\" only allowed for "
-                                + StoreID::storeName(StoreID::CONDITION_STORE) 
+                                + StoreID::storeName(StoreID::CONDITION_STORE)
                                 + " - store is \""
                                 + sn + "\"");
     }
@@ -277,12 +282,12 @@ void VarHandleKey::parseKey (const std::string& key,
         m_sgKey.clear();
         m_hashedKey = 0;
       } else if ( sp == m_sgKey.length()-1) {
-        throw SG::ExcBadHandleKey("key \"" + key 
+        throw SG::ExcBadHandleKey("key \"" + key
                                   + "\": must not end with a \"/\"");
       }
     }
   }
-  
+
   if (m_sgKey.empty()) {
     Gaudi::DataHandle::updateKey("");
   } else {
