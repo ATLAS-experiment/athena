@@ -775,6 +775,58 @@ class TestEgammaCalibrationAndSmearingTool(unittest.TestCase):
             e_es2015c_summer = tool_es2015c_summer.getEnergy(ph, ei)
             self.assertGreater(e_es2015c_summer, 0)
 
+    def test_es2022_R21_Precision_lowmu_data(self):
+        """
+        check that energy > 0
+        """
+        tool_precisionLowmu = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_precisionLowmu")
+        tool_precisionLowmu.setProperty("ESModel", "es2022_R21_Precision_lowmu") 
+        tool_precisionLowmu.setProperty(
+            "decorrelationModel", "1NPCOR_PLUS_UNCOR").ignore()
+        tool_precisionLowmu.setProperty("useIntermoduleCorrection",0)
+        tool_precisionLowmu.setProperty("randomRunNumber", 341294).ignore()
+
+        tool_precisionLowmu.msg().setLevel(ROOT.MSG.INFO)
+        tool_precisionLowmu.initialize() 
+
+        ei = self.factory.create_eventinfo(False, 341294)  # data
+
+        for el in self.generator_electron(eta_range=arange(-2.00, 2.00, 0.2)):
+            e_lowmu = tool_precisionLowmu.getEnergy(el, ei)
+            print("electron eta=%.2f, energy=%.2f" % (el.eta(), e_lowmu))
+            self.assertGreater(e_lowmu, -1.0)
+        for ph in self.generator_photon():
+            e_lowmu = tool_precisionLowmu.getEnergy(ph, ei)
+            print("data photon eta=%.2f, energy=%.2f" % (ph.eta(), e_lowmu))
+            self.assertGreater(e_lowmu, -1.0)
+
+
+
+    def test_es2022_R21_Precision_lowmu(self):
+        """
+        check that energy > 0
+        """
+        tool_precisionLowmuMC = ROOT.CP.EgammaCalibrationAndSmearingTool("tool_precisionLowmuMC")
+        tool_precisionLowmuMC.setProperty("ESModel", "es2022_R21_Precision_lowmu") 
+        tool_precisionLowmuMC.setProperty(
+            "decorrelationModel", "1NPCOR_PLUS_UNCOR").ignore()
+        tool_precisionLowmuMC.setProperty("useIntermoduleCorrection",0)
+        tool_precisionLowmuMC.setProperty("randomRunNumber", 341294).ignore()
+
+        tool_precisionLowmuMC.msg().setLevel(ROOT.MSG.INFO)
+        tool_precisionLowmuMC.initialize() 
+
+        ei = self.factory.create_eventinfo(True, 341294)  # MC
+
+        for el in self.generator_electron(eta_range=arange(-2.00, 2.00, 0.2)):
+            e_lowmu = tool_precisionLowmuMC.getEnergy(el, ei)
+            print("MC electron eta=%.2f, energy=%.2f" % (el.eta(), e_lowmu))
+            self.assertGreater(e_lowmu, 0.0)
+        for ph in self.generator_photon():
+            e_lowmu = tool_precisionLowmuMC.getEnergy(ph, ei)
+            print("MC photon eta=%.2f, energy=%.2f" % (ph.eta(), e_lowmu))
+            self.assertGreater(e_lowmu, 0.0)
+
 
 if __name__ == '__main__':
     ROOT.PyConfig.IgnoreCommandLineOptions = True
