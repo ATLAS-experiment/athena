@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IDPERFMON_MUONSELECTOR_H
@@ -55,7 +55,7 @@ class MuonSelector : public EventAnalysis
   inline double GetPtCut ()                         {return m_combPtCut;}
   virtual bool  Reco();
   void          SetMuonQualityRequirement (std::string newname);
-  void          SetCustomMuonSelectionTool (ToolHandle<CP::IMuonSelectionTool> mst) { m_muonSelectionTool = mst; };
+  void          SetCustomMuonSelectionTool (const ToolHandle<CP::IMuonSelectionTool> & mst) { m_muonSelectionTool = mst; };
 
  protected:
   virtual void BookHistograms();

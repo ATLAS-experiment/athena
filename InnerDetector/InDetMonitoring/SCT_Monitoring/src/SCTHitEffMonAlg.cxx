@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTHitEffMonAlg.h"
@@ -399,8 +399,8 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
     int pixelNHoles{0};
     int trtNHits{0};
 
-    int sctNHitsPerRegion[N_LAYERS_TOTAL*N_SIDES] = {0};
-    int sctNHolesPerRegion[N_LAYERS_TOTAL*N_SIDES] = {0};
+    std::array<int, N_LAYERS_TOTAL*N_SIDES> sctNHitsPerRegion{};
+    std::array<int, N_LAYERS_TOTAL*N_SIDES> sctNHolesPerRegion{};
     // Above two variables hold the number of hits for each SCT disk / layer.
     // [N_LAYERS_TOTAL*N_SIDES(= 44)] indicates the waferIndex defined as below.
     //  0- 7: B3 side0, B3 side1, B4 side0, ... B6 side1
@@ -443,7 +443,7 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
         if (m_sctId->is_sct(surfaceID)) {
           NHits[bec2Index(m_sctId->barrel_ec(surfaceID))]++;
           mapOfTrackHitResiduals[surfaceID] = getResidual(surfaceID, tsos->trackParameters(), &*p_sctclcontainer);
-          sctNHitsPerRegion[waferIndex]++;
+          sctNHitsPerRegion.at(waferIndex)++;
         }
       } else if (tsos->type(Trk::TrackStateOnSurface::Hole)) {
         if (m_pixelId->is_pixel(surfaceID)) {
