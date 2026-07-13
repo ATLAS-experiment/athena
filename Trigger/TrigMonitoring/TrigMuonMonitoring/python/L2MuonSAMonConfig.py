@@ -14,8 +14,13 @@ def L2MuonSAMonConfig(helper):
                                  MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)),
                                  MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
 
+    # Check wheter we are running the phase-2 menu
+    from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess, getHLTMenuAccess
+    isRun4Menu = (getHLTMenuAccess(helper.flags).name()).find("run4") != -1
+    if not isRun4Menu:
+        monAlg.EFFastRecoSAContainerName = ""
+
     ### monitorig groups
-    from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
     monAlg.MonitoredChains = [c for c in Chains if ('mu24_ivarmedium' in c) or ('2mu14' in c)] 

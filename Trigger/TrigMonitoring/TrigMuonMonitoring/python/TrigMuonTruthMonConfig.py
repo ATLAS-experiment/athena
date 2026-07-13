@@ -101,4 +101,29 @@ def TrigMuonTruthMonConfig(helper):
         histGroupChain.defineHistogram(chain+'_MatchedL1truthIntPerBC', 
                                        title = 'Matched L1 muon average interactions ber bunch crossing ' + chain,
                                        type = 'TH1F', path='', xbins=60, xmin=30, xmax=90)
+    
+    # Matched L2 to truth variables
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthEta', 
+                                       title = 'Matched L2 CB muon truth eta ' + chain,
+                                       type = 'TH1F', path='', xbins=50, xmin=-2.7, xmax=2.7)
+        
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthPhi', 
+                                       title = 'Matched L2 CB muon truth phi ' + chain,
+                                       type = 'TH1F', path='', xbins=50, xmin=-3.14, xmax=3.14)
+                            
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthPt', 
+                                        title = 'Matched L2 CB muon truth pt ' + chain,
+                                        type = 'TH1F', path='', xbins=[0.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,80.0,90.0,100.0,120.0,200.0], xmin=0.0, xmax=200.0)
+
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthEndcapPt', 
+                                        title = 'Matched L2 CB muon truth pt ' + chain,
+                                        type = 'TH1F', path='', xbins=[0.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,80.0,90.0,100.0,120.0,200.0], xmin=0.0, xmax=200.0)
+
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthBarrelPt', 
+                                        title = 'Matched L2 CB muon truth pt ' + chain,
+                                        type = 'TH1F', path='', xbins=[0.0,20.0,25.0,30.0,35.0,40.0,45.0,50.0,55.0,60.0,65.0,70.0,80.0,90.0,100.0,120.0,200.0], xmin=0.0, xmax=200.0)
+
+        histGroupChain.defineHistogram(chain+'_MatchedL2CBtruthIntPerBC', 
+                                       title = 'Matched L2 CB muon average interactions ber bunch crossing ' + chain,
+                                       type = 'TH1F', path='', xbins=60, xmin=30, xmax=90)
 
