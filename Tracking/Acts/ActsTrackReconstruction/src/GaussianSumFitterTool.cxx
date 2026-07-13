@@ -115,6 +115,8 @@ StatusCode GaussianSumFitterTool::initialize() {
 
     FitterExtension_t& configureMe = m_gsfExtensions[Acts::toUnderlying(detail::SourceLinkType::TrkMeasurement)];
     configureMe = gsfExtensionsTemplate;
+    //coverity has hard time matching arguments to these passed parameters
+    //coverity[RW.NO_MATCHING_FUNCTION:FALSE]
     configureMe.calibrator.connect<&detail::TrkMeasurementCalibrator::calibrate<TrackState_t>>(&m_trkCalibrator);
     configureMe.surfaceAccessor.connect<&detail::TrkMeasSurfaceAccessor::operator()>(&m_trkSurfAcc);
   }
@@ -125,6 +127,7 @@ StatusCode GaussianSumFitterTool::initialize() {
 
      FitterExtension_t& configureMe = m_gsfExtensions[Acts::toUnderlying(detail::SourceLinkType::TrkPrepRawData)];
      configureMe = gsfExtensionsTemplate;
+     //coverity[RW.NO_MATCHING_FUNCTION:FALSE]
      configureMe.calibrator.connect<&detail::TrkPrepRawDataCalibrator::calibrate<TrackState_t>>(&m_prdCalibrator);
      configureMe.surfaceAccessor.connect<&detail::TrkPrepRawDataSurfaceAcc::operator()>(&m_prdSurfAcc);
   }
@@ -167,14 +170,15 @@ GaussianSumFitterTool::configureFit(const Acts::GeometryContext& tgContext,
 				      const Acts::PerigeeSurface& surface,
               detail::SourceLinkType slType) const
 { 
-  const auto& gsfExtensions = m_gsfExtensions[Acts::toUnderlying(slType)];
+  //slType can be 3
+  const auto& gsfExtensions = m_gsfExtensions.at(Acts::toUnderlying(slType));
 
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
 
   FitterOptions_t gsfOptions(tgContext, mfContext, calContext);
   gsfOptions.extensions=gsfExtensions;
-  gsfOptions.propagatorPlainOptions=propagationOption;
+  gsfOptions.propagatorPlainOptions=std::move(propagationOption);
   gsfOptions.referenceSurface = &surface;
 
   // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
