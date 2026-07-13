@@ -1,6 +1,7 @@
 #!/bin/bash
 # art-description: Run 4 configuration, ITK only recontruction with ACTS and legacy athena, electron events with pt=100 GeV
 # art-type: grid
+# art-memory: 4096
 # art-include: main/Athena
 # art-output: *.root
 # art-output: *.xml
