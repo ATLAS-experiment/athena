@@ -4,6 +4,9 @@
 
 #include "src/GridTripletSeedingTool.h"
 
+#include <cmath>
+#include <numbers>
+
 namespace ActsTrk {
 
 GridTripletSeedingTool::GridTripletSeedingTool(const std::string& type,
@@ -220,7 +223,7 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_bottomDoubletFinderCfg.cotThetaMax = m_cotThetaMax;
   m_bottomDoubletFinderCfg.minPt = m_minPt;
   m_bottomDoubletFinderCfg.helixCutTolerance = 1.;
-  if (m_useExperimentCuts) {
+  if (m_useExperimentCuts || m_doubletDPhiCut) {
     m_bottomDoubletFinderCfg.experimentCuts
         .connect<&ActsTrk::GridTripletSeedingTool::doubletSelectionFunction>(
             this);
@@ -345,6 +348,46 @@ bool GridTripletSeedingTool::doubletSelectionFunction(
     const Acts::ConstSpacePointProxy2& middle,
     const Acts::ConstSpacePointProxy2& other, float cotTheta,
     bool isBottomCandidate) const {
+  if (m_doubletDPhiCut) {
+    // per-pair azimuthal-swing bound: the hit azimuth of a track with impact
+    // parameter d0 swings between two radii by asin(d0/rInner) -
+    // asin(d0/rOuter) on top of the curvature rotation. The grid phi-bin
+    // widening only knows the full radial span; this applies the exact
+    // per-pair bound before the doublet enters the triplet stage.
+    // NB: this container only fills the packed coordinate columns, so the
+    // packed accessors xy()/zr() must be used here.
+    const float rM = middle.zr()[1];
+    const float rO = other.zr()[1];
+    const float rInner = std::min(rM, rO);
+    const float rOuter = std::max(rM, rO);
+    const float d0 =
+        m_doubletDPhiD0Max < 0.f ? m_impactMax.value() : m_doubletDPhiD0Max.value();
+
+    const std::array<float, 2>& xyM = middle.xy();
+    const std::array<float, 2>& xyO = other.xy();
+    float dPhi = std::atan2(xyO[1], xyO[0]) - std::atan2(xyM[1], xyM[0]);
+    if (dPhi > std::numbers::pi_v<float>) {
+      dPhi -= 2.f * std::numbers::pi_v<float>;
+    } else if (dPhi < -std::numbers::pi_v<float>) {
+      dPhi += 2.f * std::numbers::pi_v<float>;
+    }
+
+    const float swing =
+        std::asin(std::min(1.f, d0 / std::max(rInner, 1.f))) -
+        std::asin(std::min(1.f, d0 / std::max(rOuter, 1.f)));
+    const float bound = m_doubletDPhiConst +
+                        m_doubletDPhiSlope * (rOuter - rInner) +
+                        std::min(m_doubletDPhiCap.value(), swing);
+
+    if (std::abs(dPhi) > bound) {
+      return false;
+    }
+  }
+
+  if (!m_useExperimentCuts) {
+    return true;
+  }
+
   // We remove some doublets that have the middle space point in some specific
   // areas This should eventually be moved inside ACTS and allow a veto
   // mechanism according to the user desire. As of now we cannot really do this
