@@ -89,7 +89,7 @@ def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
 
 
 def StandaloneTrackPartCnvCfg(flags, name="MuonMsTrackParticleCnvR4", **kwargs):
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     kwargs.setdefault("BeamSpotKey", "")
     kwargs.setdefault("VertexContainerKey", "")
     kwargs.setdefault("ACTSTracksLocation" ,["MsTracks"])
@@ -99,12 +99,11 @@ def StandaloneTrackPartCnvCfg(flags, name="MuonMsTrackParticleCnvR4", **kwargs):
 
 def MuonActsToTrkConvCfg(flags, name="MuonActsToTrkConverterAlg", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault('ACTSTracksLocation', "MsTracks")
-    kwargs.setdefault('TracksLocation', 'MsTracksTrkCnv')
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault("ATLASConverterTool", result.popToolsAndMerge(ActsToTrkConverterToolCfg(flags, setupMuon = True)))
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
-    result.merge(ActsToTrkConvertorAlgCfg(flags, name=name, **kwargs))
+    kwargs.setdefault('TrackParticles', "MsTrackParticlesR4")
+    kwargs.setdefault('OutTrackContainer', 'MsTracksTrkCnv')
+    from ActsConfig.ActsEventCnvConfig import xAODtoTrkConverterAlgCfg
+    result.merge(xAODtoTrkConverterAlgCfg(flags, name=name, 
+                                          setupMuon = True, setupITk=False, **kwargs))
     return result 
 
 def MuidSaTagMakerAlgCfg(flags, name="MuonMuidTagSaAlg", **kwargs):

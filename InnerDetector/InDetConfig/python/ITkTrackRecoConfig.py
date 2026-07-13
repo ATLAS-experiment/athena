@@ -176,7 +176,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
             AssociationMapName=""))
     else:
         # Workflows that use Acts Tracks
-        from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
         # The following few lines will disappear once we have imposed a proper nomenclature for our algorithms and collection
         prefix = flags.Tracking.ActiveConfig.extension
         from InDetConfig.ITkActsHelpers import separateTrackParticleContainerName
@@ -306,7 +306,7 @@ def ITkActsTrackFinalCfg(flags,
         return acc
     
     # Schedule Track particle creation
-    from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsCombinedTrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation=InputCombinedITkTracks,
                                                 TrackParticlesOutKey=ActsTrackContainerName))

@@ -24,7 +24,7 @@ def ActsEMBremCollectionBuilderCfg(flags,
         )
 
     if 'TrackToTrackParticleCnvTool' not in kwargs:
-        from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvToolCfg
+        from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvToolCfg
         kwargs.setdefault("TrackToTrackParticleCnvTool", acc.popToolsAndMerge(
             ActsTrackToTrackParticleCnvToolCfg(flags)))
 
@@ -82,7 +82,7 @@ def TrigActsEMBremCollectionBuilderCfg(flags,
       )
 
   if 'TrackToTrackParticleCnvTool' not in kwargs:
-      from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvToolCfg
+      from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvToolCfg
       kwargs.setdefault("TrackToTrackParticleCnvTool", acc.popToolsAndMerge(
           ActsTrackToTrackParticleCnvToolCfg(flags)))
 

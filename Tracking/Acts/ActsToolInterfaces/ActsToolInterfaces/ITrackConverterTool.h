@@ -7,6 +7,7 @@
 
 // ATHENA
 #include <memory>
+#include <variant>
 
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/IInterface.h"
@@ -42,7 +43,10 @@ namespace ActsTrk {
 class ITrackConverterTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(ITrackConverterTool, 1, 0);
-  
+  /** @brief Abrivate the Track Proxy */
+  using ConstTrack_t = TrackContainer::ConstTrackProxy;
+  using Track_t = MutableTrackContainer::TrackProxy;
+  using TrackFitResult_t = Acts::Result<Track_t, std::error_code>;
   /** @brief Converts the Trk measurement track states into a vector of Acts::Source links. The 
    *         source links don't take ownership over the measurement states.
    *  @param track: Reference to the track to convert */ 
@@ -56,12 +60,20 @@ class ITrackConverterTool : virtual public IAlgTool {
   virtual std::unique_ptr<Trk::Track> convertActsToTrk(const EventContext& ctx,
                                                        const ActsTrack_t& actsTrack,
                                                        const Trk::TrackInfo::TrackFitter fitAuthor) const = 0;
-  /** @brief Convert the passed Trk::TrackCollection into an Acts Track object
-   *         and appends the result to the passed 
-   */
+  /** @brief Converts a const Acts::Track into
+    * @param ctx: EventContext to access the current conditions (alignment, calibrations, etc.)
+    * @param trackProxy: The acts track for conversion */
+  virtual std::unique_ptr<Trk::Track> convertTrack(const EventContext& ctx, 
+                                                   const ConstTrack_t& trackProxy) const = 0;
+  /** @brief Convert the `Trk::Track` in the passed TrackCollection into Acts tracks and appends the
+   *         result to the passed mutable track container
+   *  @param ctx: EventContext to access the current conditions (alignment, calibrations, etc.)
+   *  @param trackColl: The Trk::Track container to be converted
+   *  @param outTrackColl: Reference to the mutable track container to which the converted
+   *                       tracks are appended. */
   virtual void convertTrkToActsContainer(const EventContext& ctx,
                                          const TrackCollection& trackColl,
-                                         ActsTrk::MutableTrackContainer& outTrackcoll) const = 0;
+                                         ActsTrk::MutableTrackContainer& outTrackColl) const = 0;
 
   /** @brief Converts the Acts track container to a Trk::Track collection
    *  @param ctx: EventContext to access the current conditions (alignment, calibration, etc.)
