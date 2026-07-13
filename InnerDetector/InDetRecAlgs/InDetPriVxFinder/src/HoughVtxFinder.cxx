@@ -2,11 +2,11 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "HIGlobal/HIHoughVtxReco.h"
+#include "InDetPriVxFinder/HoughVtxFinder.h"
 
 
-StatusCode HIHoughVtxReco::initialize() {
-  ATH_MSG_DEBUG("Inside HIHoughVtxReco::initialize()");
+StatusCode HoughVtxFinder::initialize() {
+  ATH_MSG_DEBUG("Inside HoughVtxFinder::initialize()");
 
   ATH_CHECK(m_inputPixelSpacePoints.initialize());
   ATH_CHECK(m_outputHoughVtx.initialize());
@@ -16,7 +16,7 @@ StatusCode HIHoughVtxReco::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode HIHoughVtxReco::execute(const EventContext &ctx) const {
+StatusCode HoughVtxFinder::execute(const EventContext &ctx) const {
   const xAOD::SpacePointContainer* inputPixelSP{};
   ATH_CHECK(SG::get(inputPixelSP, m_inputPixelSpacePoints, ctx));
 

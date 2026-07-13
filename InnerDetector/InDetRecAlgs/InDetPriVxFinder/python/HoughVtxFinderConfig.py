@@ -15,8 +15,8 @@ def HoughVtxFinderToolCfg(flags, name="HoughVtxFinderTool", **kwargs):
     acc.setPrivateTools(CompFactory.ActsTrk.HoughVtxFinderTool(name, **kwargs))
     return acc
 
-def HIHoughVtxRecoCfg(flags, name="HIHoughVtxReco", **kwargs):
-    """Configures HIHoughVtxReco"""
+def HoughVtxFinderCfg(flags, name="HoughVtxFinder", **kwargs):
+    """Configures HoughVtxFinder"""
     acc = ComponentAccumulator()
 
     if "HoughVtxFinderTool" not in kwargs:
@@ -26,14 +26,14 @@ def HIHoughVtxRecoCfg(flags, name="HIHoughVtxReco", **kwargs):
     kwargs.setdefault("inputPixelSpacePoints", "PixelSpacePoints")
     kwargs.setdefault("outputHoughVtx", "HoughVertices")
 
-    acc.addEventAlgo(CompFactory.HIHoughVtxReco(name, **kwargs))
+    acc.addEventAlgo(CompFactory.HoughVtxFinder(name, **kwargs))
     return acc
 
-def HIHoughVtxFinderCfg(flags):
-    """Configures Heavy Ion Global quantities """
+def HoughVtxCfg(flags):
+    """Configures HoughVtxFinder and output containers """
     acc = ComponentAccumulator()
 
-    acc.merge(HIHoughVtxRecoCfg(flags))
+    acc.merge(HoughVtxFinderCfg(flags))
     output = [ "xAOD::VertexContainer#HoughVertices", "xAOD::VertexAuxContainer#HoughVerticesAux."]
 
     acc.merge(addToESD(flags, output))
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     flags.Output.ESDFileName = "myESD.pool.root"
 
     # enable to pass flags from command line, e.g.: 
-    ## python -m HIGlobal.HIHoughVtxFinderConfig Exec.FPE=100
+    ## python -m InDetPriVxFinder.HoughVtxFinderConfig Exec.FPE=100
     flags.fillFromArgs() 
     
     flags.lock()
@@ -89,7 +89,7 @@ if __name__ == "__main__":
     acc.merge(IDInDetToXAODSpacePointConversionCfg(flags))
 
     # main algorithm
-    acc.merge(HIHoughVtxFinderCfg(flags))
+    acc.merge(HoughVtxCfg(flags))
 
     # output
     from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
