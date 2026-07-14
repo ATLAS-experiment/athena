@@ -15,9 +15,6 @@
 class EventContext;
 class TObject;
 
-namespace MuonR4{
-   class MsTrackSeeder;
-}
 
 namespace ActsTrk{
     class GeometryContext;
@@ -37,25 +34,15 @@ namespace MuonValR4{
             /** @brief Displays all segments on the representative cylinder in the R-Z & X-Y plane
              *         and draws the markers of the successfully built seeds & truth segments
              *  @param ctx: EventContext to access store gate & conditions
-             *  @param seederObj: Configured instance of the track seeder which actually constructed 
-             *                    the seeds.
-             *  @param segments: Container of all MS segments in the event
              *  @param seeds: The constructed track seeds from the event */
             virtual void displaySeeds(const EventContext& ctx,
-                                      const MuonR4::MsTrackSeeder& seederObj,
-                                      const xAOD::MuonSegmentContainer& segments,
                                       const MuonR4::MsTrackSeedContainer& seeds) const = 0;
             /** @brief Displays all segments on the representative cylinder in the R-Z & X-Y plane
              *         and draws the markers of the successfully built seeds & truth segments
              *  @param ctx: EventContext to access store gate & conditions
-             *  @param seederObj: Configured instance of the track seeder which actually constructed 
-             *                    the seeds.
-             *  @param segments: Container of all MS segments in the event
              *  @param seeds: The constructed track seeds from the event
              *  @param extPrimitives: Extra TObjects that should be additionally painted onto the Canvases */
             virtual void displaySeeds(const EventContext& ctx,
-                                      const MuonR4::MsTrackSeeder& seederObj,
-                                      const xAOD::MuonSegmentContainer& segments,
                                       const MuonR4::MsTrackSeedContainer& seeds,
                                       PrimitivesVec_t && extPrimitives) const = 0;
  

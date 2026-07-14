@@ -64,13 +64,27 @@ def TrackSummaryLockCfg(flags,inContainer="", fillHoles = True, fillOutliers = T
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def MsTrackSeedingToolCfg(flags, name="MsTrackSeedingTool", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, 
+                                                                                            MaxSteps=10000,
+                                                                                            InteractionEloss = flags.Muon.trackGeometryPassiveMaterial,
+                                                                                            InteractionMultiScatering = flags.Muon.trackGeometryPassiveMaterial  )))
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+
+    the_tool = CompFactory.MuonR4.MsTrackSeederTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
 
 def MSTrackFinderAlgCfg(flags, name="MSTrackFinderAlg", **kwargs):
     result = ComponentAccumulator()
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     result.merge(AtlasFieldCacheCondAlgCfg(flags))
  
-    kwargs.setdefault("SegmentSelectionTool", result.popToolsAndMerge(SegmentSelectorCfg(flags)))
+    kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
     kwargs.setdefault("FittingTool", result.popToolsAndMerge(MSTrackFitterCfg(flags)))       
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, 
