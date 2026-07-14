@@ -65,14 +65,15 @@ StatusCode PEBInfoWriterToolBase::decide(const EventContext& ctx, std::vector<In
     // Create new PEB Info for this input (empty if max RoIs limit is reached)
     PEBInfo pebInfo = maxRoIsReached ? PEBInfo{} : createPEBInfo(ctx, input);
 
-    //output RoIs only if haven't reached maximum number, and if not MET RoI (which should have 0 robs in list)
+    //output RoIs only if haven't reached maximum number, and if not MET RoI (which is a FS RoI)
     ElementLink<TrigRoiDescriptorCollection> outputRoI = input.roiEL;
-    if(!maxRoIsReached && pebInfo.robs.size()>0){ ATH_CHECK(input.decision->setDetail("outputRoIs", outputRoI)); ATH_MSG_INFO("ADDING ROI");}
+    if(!maxRoIsReached && !(*input.roiEL)->isFullscan()) ATH_CHECK(input.decision->setDetail("outputRoIs", outputRoI));
 
     // Merge with previous ROBs    
     std::vector<uint32_t> previousRobs;
     ATH_CHECK(input.decision->getDetail(robListKey(), previousRobs));
     pebInfo.robs.insert(previousRobs.begin(), previousRobs.end());
+
 
     // Merge with previous SubDets
     std::vector<uint32_t> previousSubDets;
@@ -85,6 +86,7 @@ StatusCode PEBInfoWriterToolBase::decide(const EventContext& ctx, std::vector<In
       ATH_MSG_ERROR("Failed to attach the detail " << robListKey() << " to the decision");
       return StatusCode::FAILURE;
     }
+
     std::vector<uint32_t> subDetVec(pebInfo.subdets.begin(), pebInfo.subdets.end());
     if (not input.decision->setDetail(subDetListKey(), subDetVec)) {
       ATH_MSG_ERROR("Failed to attach the detail " << subDetListKey() << " to the decision");

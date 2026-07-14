@@ -131,7 +131,7 @@ StatusCode PEBInfoWriterAlg::execute(const EventContext& eventContext) const {
     for(auto input : toolInputs){
       ATH_CHECK(input.decision->getDetail("outputRoIs", roi));
       if(roi.isValid()){
-	superRoI->push_back(new TrigRoiDescriptor(*roi));
+	superRoI->push_back(new TrigRoiDescriptor(*(*roi)));
 	superRoI->manageConstituents(true);
       }
     }

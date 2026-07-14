@@ -33,13 +33,15 @@ def configureFlags(runArgs):
     if hasattr(runArgs, 'outputDAOD_TLAFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAFile
         log.info("---------- Configured DAOD_TLA output")
-        flags.Trigger.AODEDMSet=dstype
+        if not flags.Input.isMC:
+            flags.Trigger.AODEDMSet=dstype
         from AthenaConfiguration.DetectorConfigFlags import allDetectors
         disabled_detectors = allDetectors
     elif hasattr(runArgs, 'outputDAOD_TLAFTAGPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAFTAGPEBFile
         log.info("---------- Configured DAOD_TLAFTAGPEB output")
-        flags.Trigger.AODEDMSet=dstype
+        if not flags.Input.isMC:
+            flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'TRT',
             'LAr', 'Tile', 'MBTS',
@@ -50,7 +52,8 @@ def configureFlags(runArgs):
     elif hasattr(runArgs, 'outputDAOD_TLADJETPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLADJETPEBFile
         log.info("---------- Configured DAOD_TLADJETPEB output")
-        flags.Trigger.AODEDMSet=dstype
+        if not flags.Input.isMC:
+            flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'MBTS',
             'Lucid', 'ZDC', 'ALFA', 'AFP',
@@ -58,7 +61,8 @@ def configureFlags(runArgs):
     elif hasattr(runArgs, 'outputDAOD_TLAEGAMPEBFile'):
         flags.Output.AODFileName = runArgs.outputDAOD_TLAEGAMPEBFile
         log.info("---------- Configured DAOD_TLAEGAMPEB output")
-        flags.Trigger.AODEDMSet=dstype
+        if not flags.Input.isMC:
+            flags.Trigger.AODEDMSet=dstype
         disabled_detectors = [
             'MBTS',
             'CSC', 'MDT', 'RPC', 'TGC',
@@ -102,6 +106,10 @@ def configureFlags(runArgs):
     # process pre-include/exec
     processPreInclude(runArgs, flags)
     processPreExec(runArgs, flags)
+
+    if flags.Input.isMC and "TLA" not in flags.Trigger.AODEDMSet:
+        log.error("Need to specify EDM type explicitly for MC!")
+        return
 
     # To respect --athenaopts 
     flags.fillFromArgs()
@@ -154,20 +162,20 @@ def fromRunArgs(runArgs):
     ebType=flags.Trigger.AODEDMSet
     if flags.Input.isMC:
         if flags.Detector.GeometryMDT:
-            cfg.getEventAlgo('MdtRdoToMdtPrepData').DoSeededDecoding=True
-            cfg.getEventAlgo('MdtRdoToMdtPrepData').RoIs='HLT_Roi_Selected_'+ebType
+            cfg.getEventAlgo('MuonMdtRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonMdtRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
         if flags.Detector.GeometryRPC:
-            cfg.getEventAlgo('RpcRdoToRpcPrepData').DoSeededDecoding=True
-            cfg.getEventAlgo('RpcRdoToRpcPrepData').RoIs='HLT_Roi_Selected_'+ebType
+            cfg.getEventAlgo('MuonRpcRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonRpcRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
         if flags.Detector.GeometryTGC:
-            cfg.getEventAlgo('TgcRdoToTgcPrepData').DoSeededDecoding=True
-            cfg.getEventAlgo('TgcRdoToTgcPrepData').RoIs='HLT_Roi_Selected_'+ebType
+            cfg.getEventAlgo('MuonTgcRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonTgcRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
         if flags.Detector.GeometryMM:
-            cfg.getEventAlgo('MM_RdoToMM_PrepData').DoSeededDecoding=True
-            cfg.getEventAlgo('MM_RdoToMM_PrepData').RoIs='HLT_Roi_Selected_'+ebType
+            cfg.getEventAlgo('MuonMmRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonMmRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
         if flags.Detector.GeometrysTGC:
-            cfg.getEventAlgo('StgcRdoToStgcPrepData').DoSeededDecoding=True
-            cfg.getEventAlgo('StgcRdoToStgcPrepData').RoIs='HLT_Roi_Selected_'+ebType
+            cfg.getEventAlgo('MuonStgcRdoToPrdConv').DoSeededDecoding=True
+            cfg.getEventAlgo('MuonStgcRdoToPrdConv').RoIs='HLT_Roi_Selected_'+ebType
 
         if flags.Detector.GeometryPixel:
             cfg.getEventAlgo('InDetPixelClusterization').isRoI_Seeded=True
@@ -187,7 +195,7 @@ def fromRunArgs(runArgs):
 
         if flags.Detector.GeometryCalo:
             from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
-            cfg.merge(hltCaloCellMakerCfg(flags,name='RoICaloCellmaker', roisKey='HLT_Roi_Selected_'+ebType, CellsName='AllCalo'))
+            cfg.merge(hltCaloCellMakerCfg(flags,name='RoICaloCellmaker', roisKey='HLT_Roi_Selected_'+ebType, CellsName='AllCalo', doTau=True))
         else:
             #needed to read SCell container in RDO files (maybe could get away with a more minimal set of algorithms)
             from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg
