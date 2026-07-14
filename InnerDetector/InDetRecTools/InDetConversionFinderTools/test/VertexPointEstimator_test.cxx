@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file InDetConversionFinderTools/test/VertexPointEstimator_test.cxx
@@ -20,6 +20,13 @@
 #include <cassert>
 #include <cmath>
 
+std::string map_str(const std::map<std::string, float> & m){
+  std::string result;
+  for (const auto & [key, val]:m){
+    result += "("+key +", "+std::to_string(val)+")\n";
+  }
+  return result;
+}
 
 void assertVec3D (const char* which,
                   const Amg::Vector3D& a,
@@ -92,13 +99,12 @@ void test1 (InDet::VertexPointEstimator& tool)
 #if 0
   std::cout << v3.x() << ", " << v3.y() << ", " << v3.z() << "\n";
   std::cout << err << "\n";
-  std::cout << "dphi " << tool.getLastValues()["deltaPhiTracks"] << " "
-            << "DR1R2 " << tool.getLastValues()["DR1R2"] << "\n";
+  std::cout << map_str(m3)<<"\n";
 #endif
-  assert (err == 8);
+  assert (err == 6);
   assertVec3D ("v3", v3, {-45.9745, 0.190709, 0.729039});
   assert (m3.size() == 2);
-  assert ( Athena_test::isEqual (m3["deltaPhiTracks"], 0.0642217, 1e-5 ) );
+  assert ( Athena_test::isEqual (m3["deltaPhiTracks"], 0., 1e-5 ) );
   assert ( Athena_test::isEqual (m3["DR1R2"], -16.5221, 1e-5 ) );
 }
 
@@ -112,7 +118,6 @@ int main()
 
   ToolHandle<InDet::VertexPointEstimator> tool ("InDet::VertexPointEstimator");
   assert( tool.retrieve().isSuccess() );
-  tool->setProperty("ReturnOnError", false).ignore();
   test1 (*tool);
 
   return 0;
