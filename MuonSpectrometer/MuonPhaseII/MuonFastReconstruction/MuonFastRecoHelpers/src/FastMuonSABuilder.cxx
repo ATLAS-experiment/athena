@@ -90,18 +90,12 @@ FastMuonSABuilder::FastMuonSABuilder(const std::string& name, Config&& config) :
         genCfg.busyLayerLimit = 3.;
         genCfg.startWithPattern = false;
         m_mdtSeeder = std::make_unique<MdtSegmentSeeder>(std::move(genCfg), makeActsAthenaLogger(this, name));
-
-        /** Initialize the track seeder */
-        MsTrackSeeder::Config trackCfg{};
-        trackCfg.nFieldSteps = m_cfg.nFieldSteps;
-        m_trackSeeder = std::make_unique<MsTrackSeeder>(name, std::move(trackCfg));
-
+  
     }
 
 xAOD::Muon*
 FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx, 
                                       const ActsTrk::GeometryContext& gctx,
-                                      const AtlasFieldCacheCondObj& magField,
                                       const GlobalPattern& pattern,
                                       MuonCont_t& outMuons) const {
     ATH_MSG_VERBOSE(__func__<<"() Start processing " << pattern);
@@ -215,18 +209,24 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
     const Amg::Vector3D planeNorm {Acts::makeDirectionFromPhiTheta(pattern.phi() + 90._degree, 90._degree)};
     auto point = [&planeNorm, this](const Segment_t& seg) {
         int sector {seg->measurements().back()->spacePoint()->msSector()->sector()};
-        return std::make_pair(m_trackSeeder->segPosOntoPhiPlane(planeNorm, sector, seg->position()),
-                              m_trackSeeder->segDirOntoPhiPlane(planeNorm, seg->direction()));
+        Amg::Vector3D projDir {
+            ExpandedSector{static_cast<unsigned>(sector), 
+                           ExpandedSector::SectorProjector::center}.normalDir()};
+        return std::make_pair(Acts::PlanarHelper::intersectPlane(seg->position(), projDir, 
+                                                                 planeNorm, Amg::Vector3D::Zero()).position(),
+                              Amg::projectDirOntoPlane(seg->direction(), planeNorm));
     };
-    
+    std::vector<std::pair<Amg::Vector3D,Amg::Vector3D>> circlePoints{};
+    for (const auto& segment : muonSegments) {
+        if (segment){
+            circlePoints.emplace_back(point(segment));
+        }
+    }
     assert(muonSegments.size() <= 3);
-    const double qtimesP {muonSegments.size() == 3
-        ? m_trackSeeder->estimateQtimesP(magField, planeNorm, point(muonSegments[0]), point(muonSegments[1]), point(muonSegments[2]))
-        : m_trackSeeder->estimateQtimesP(magField, planeNorm, point(muonSegments[0]), point(muonSegments[1]))};
-
-    const double theta {muonSegments[0]->position().theta()};
-    const double eta   {-std::log(std::tan(theta/2.))};
-    const double pt    {std::abs(qtimesP) * std::sin(theta)};
+    const double qtimesP = m_cfg.trackSeeder->estimateQtimesP(ctx, planeNorm, circlePoints);
+   
+    const double eta   {muonSegments[0]->position().eta()};
+    const double pt    {std::abs(qtimesP) / std::cosh(eta)};
 
     xAOD::Muon* newMuon = outMuons->push_back(std::make_unique<xAOD::Muon>());
     newMuon->setAuthor(xAOD::Muon::Author::MuidSA);

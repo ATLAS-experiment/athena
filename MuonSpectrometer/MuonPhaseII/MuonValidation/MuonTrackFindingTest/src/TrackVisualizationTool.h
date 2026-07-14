@@ -7,15 +7,14 @@
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonRecToolInterfacesR4/ITrackVisualizationTool.h>
 #include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
+#include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
+#include <MuonRecToolInterfacesR4/ITrackSeedingDiagnosticsTool.h>
 #include <ActsGeometryInterfaces/IExtrapolationTool.h>
 
 #include "TColor.h"
 
 #include <TLegend.h>
 
-namespace MuonR4{
-    class MsTrackSeeder;
-}
 
 namespace MuonValR4{
     class TrackVisualizationTool : public extends<AthAlgTool, ITrackVisualizationTool> {
@@ -26,41 +25,15 @@ namespace MuonValR4{
             virtual ~TrackVisualizationTool() = default;
             
             virtual StatusCode initialize() override final;
-            /** @brief Displays all segments on the representative cylinder in the R-Z & X-Y plane
-             *         and draws the markers of the successfully built seeds & truth segments
-             *  @param ctx: EventContext to access store gate & conditions
-             *  @param seederObj: Configured instance of the track seeder which actually constructed 
-             *                    the seeds.
-             *  @param segments: Container of all MS segments in the event
-             *  @param seeds: The constructed track seeds from the event */
+            /** @copydoc ITrackVisualizationTool::displaySeeds */
             virtual void displaySeeds(const EventContext& ctx,
-                                      const MuonR4::MsTrackSeeder& seederObj,
-                                      const xAOD::MuonSegmentContainer& segments,
                                       const MuonR4::MsTrackSeedContainer& seeds) const override final;
-            /** @brief Displays all segments on the representative cylinder in the R-Z & X-Y plane
-            *         and draws the markers of the successfully built seeds & truth segments
-            *  @param ctx: EventContext to access store gate & conditions
-            *  @param seederObj: Configured instance of the track seeder which actually constructed 
-            *                    the seeds.
-            *  @param segments: Container of all MS segments in the event
-            *  @param extPrimitives: Extra TObjects that should be additionally painted onto the Canvases */
+            /** @copydoc ITrackVisualizationTool::displaySeeds */
             virtual void displaySeeds(const EventContext& ctx,
-                                      const MuonR4::MsTrackSeeder& seederObj,
-                                      const xAOD::MuonSegmentContainer& segments,
                                       const MuonR4::MsTrackSeedContainer& seeds,
                                       PrimitivesVec_t && extPrimitives) const override final;
 
-
-
-
-            /** @brief Visualizes the measurements of the segments on the track seed together
-             *         with their predicted local line parameters as an obj file. If parameters
-             *         to extrapolate are parsed, then they're extrapolated to the end of the world
-             *         and the trajectory is added to the obj
-             * @param ctx: EventContext to fetch the conditions data & the event information
-             * @param seed: MsTrack to visualize
-             * @param parsToExt: Parameters to extrapolate on top
-             * @param objName: Extra token to be added to the file name */
+            /** @copydoc ITrackVisualizationTool::displayTrackSeedObj */
             virtual void displayTrackSeedObj(const EventContext& ctx,
                                              const MuonR4::MsTrackSeed& seed,
                                              const OptBoundPars_t& parsToExt,
@@ -100,29 +73,24 @@ namespace MuonValR4{
             enum class DisplayView{RZ, XY};
             /** @brief Actual implementation of the display seeds method with the augmentation to define the view
             *  @param ctx: EventContext to access store gate & conditions
-            *  @param seederObj: Configured instance of the track seeder which actually constructed the seeds.
             *  @param view: Actual view to display
             *  @param segments: Container of all MS segments in the event
             *  @param seeds: The constructed track seeds from the event
             *  @param extPrimitives: Extra TObjects that should be additionally painted onto the Canvases */
             void displaySeeds(const EventContext& ctx,
-                              const MuonR4::MsTrackSeeder& seederObj,
                               const DisplayView view,
                               const xAOD::MuonSegmentContainer& segments,
                               const MuonR4::MsTrackSeedContainer& seeds,
                               PrimitivesVec_t&& extPrimitives) const;
             /** @brief Add the truth segments to the canvas
              *  @param ctx: EventContext to access store gate
-             *  @param seederObj: Configured instance of the track seeder which actually constructed the seeds.
              *  @param view: Actual view to display
              *  @param legend: Reference to the legend object to add the marker / truth legends
              *  @param canvas: Reference to the canvas to which the drawn markers are appended to */
             void fillTruthSeedPoints(const EventContext& ctx,
-                                     const MuonR4::MsTrackSeeder& seeder,
                                      const DisplayView view,
                                      PlotLegend& legend, 
                                      Canvas_t& canvas) const;
-
 
             void displaySeedSegmentsGlobalWithTruth(const EventContext& ctx,
                                                     const DisplayView view,
@@ -145,6 +113,12 @@ namespace MuonValR4{
             IRootVisualizationService::ClientToken m_clientToken{};
             /** @brief Key to the truth segment selection to draw the segment parameters */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegkey", "MuonTruthSegments"};
+            /** @brief The track seeding tool to construct the seed candidates and to estimate the initial parameters */
+            ToolHandle<MuonR4::ITrackSeedingDiagnosticsTool> m_seedingTool{this, "SeedingTool", ""};
+            /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
+             *         & on the NSW segment container */
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
+
             /** @brief Dependency on the geometry alignment */
             ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Maximum canvases to draw */

@@ -31,7 +31,6 @@ StatusCode FastReconstructionAlg::initialize() {
             m_outSpacePoints.emplace_back(key.key() + m_outSpacePointSuffix);
         }
     }
-    ATH_CHECK(m_fieldCacheCondObjInputKey.initialize());
     ATH_CHECK(m_inSpacePoints.initialize());
     ATH_CHECK(m_outSpacePoints.initialize());
     ATH_CHECK(m_outPatterns.initialize());
@@ -42,6 +41,7 @@ StatusCode FastReconstructionAlg::initialize() {
     ATH_CHECK(m_calibTool.retrieve());
     ATH_CHECK(m_patVisionTool.retrieve(EnableTool{!m_patVisionTool.empty()}));
     ATH_CHECK(m_segVisionTool.retrieve(EnableTool{!m_segVisionTool.empty()}));
+    ATH_CHECK(m_seedingTool.retrieve());
 
     GlobalPatternFinder::Config patCfg{};
     patCfg.useMdtHits = m_useMdtHits;
@@ -82,6 +82,7 @@ StatusCode FastReconstructionAlg::initialize() {
     saCfg.calibrator = m_calibTool.get();
     saCfg.visionTool = m_segVisionTool.get();
     saCfg.idHelperSvc = m_idHelperSvc.get();
+    saCfg.trackSeeder = m_seedingTool.get();
     m_saBuilder = std::make_unique<FastMuonSABuilder>(name(), std::move(saCfg));
 
     //Print Configuration
@@ -160,11 +161,7 @@ StatusCode FastReconstructionAlg::execute(const EventContext& ctx) const {
         patWriteHandle->push_back(std::make_unique<GlobalPattern>(std::move(pat)));
     }
     ATH_MSG_DEBUG("Written "<<patWriteHandle->size()<<" GlobalPatterns into StoreGate.");
-
-    /** Retrieve magnetic field */
-    const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
-    ATH_CHECK(SG::get(fieldCondObj, m_fieldCacheCondObjInputKey, ctx));
-
+ 
     /* Build Fast Reco SA muons */
     FastMuonSABuilder::MuonCont_t fillMuons;
     ATH_CHECK(fillMuons.record(m_outMuons, ctx));
@@ -173,7 +170,7 @@ StatusCode FastReconstructionAlg::execute(const EventContext& ctx) const {
     SG::Accessor<Patternlink> acc{patternLinkStr};
     for (const GlobalPattern* pat : *patWriteHandle) {
 
-        xAOD::Muon* newMuon {m_saBuilder->buildMuonCandidate(ctx, *gctx, *fieldCondObj, *pat, fillMuons)};
+        xAOD::Muon* newMuon {m_saBuilder->buildMuonCandidate(ctx, *gctx, *pat, fillMuons)};
         if (!newMuon) {
             ATH_MSG_DEBUG("No muon candidate could be built for pattern " << *pat);
             patIdx++;

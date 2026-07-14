@@ -12,7 +12,7 @@ atlas_add_component( MuonFastRecoAlgs
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES MuonVisualizationHelpersR4 AthenaKernel StoreGateLib xAODMuon 
                                     xAODMuonPrepData MuonSpacePoint MuonRecToolInterfacesR4 xAODMuonViews 
-                                    ActsToolInterfacesLib  MuonTrackFindingToolsLib MuonDetDescrUtils
+                                    ActsToolInterfacesLib MuonDetDescrUtils
                                     ActsEventLib MuonFastRecoEvent MuonFastRecoHelpers)
 
 # Install files from the package:
