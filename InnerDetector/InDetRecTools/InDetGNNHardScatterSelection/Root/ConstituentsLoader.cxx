@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/ConstituentsLoader.h"
@@ -30,13 +30,12 @@ namespace {
     ConstituentsInputConfig config;
     config.name = name;
     config.order = ConstituentsSortOrder::PT_DESCENDING;
+    const std::string matchName{"iparticle type matching"};
     for (const auto& varname: input_variables) {
       InputVariableConfig input;
       input.name = varname;
-      input.type = FlavorTagInference::str::match_first(type_regexes, input.name,
-                                "iparticle type matching");
-
-      config.inputs.push_back(input);
+      input.type = FlavorTagInference::str::match_first(type_regexes, input.name, matchName);
+      config.inputs.push_back(std::move(input));
     }
     return config;
   }
