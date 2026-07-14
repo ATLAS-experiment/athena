@@ -142,8 +142,8 @@ QString VP1ParticleData::particleName( const int& pdgcode, bool& ok )
   case   13: name = "mu-"; break;
   case  -15: name = "tau+"; break;
   case   15: name = "tau-"; break;
-  case -211: name = "M_PI-"; break;
-  case  211: name = "M_PI+"; break;
+  case -211: name = "pi-"; break;
+  case  211: name = "pi+"; break;
   case    1: name = "d"  ; break;
   case    2: name = "u"  ; break;
   case    3: name = "s"  ; break;
