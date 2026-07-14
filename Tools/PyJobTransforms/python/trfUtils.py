@@ -1595,12 +1595,12 @@ def ValgrindCommand(
     # Access Valgrind suppressions files by finding the paths from
     # environment variables. Append the files to the Valgrind suppressions
     # options.
+    project_dir = os.environ["AtlasProject"] + "_DIR" #e.g. Athena_DIR for Athena
     suppressionFilesAndCorrespondingPathEnvironmentVariables = {
-        "etc/valgrind-root.supp": "ROOTSYS",
-        "Gaudi.supp":             "DATAPATH",
-        "oracleDB.supp":          "DATAPATH",
-        "valgrindRTT.supp":       "DATAPATH",
-        "root.supp":              "DATAPATH"
+        "data/Valkyrie/valgrind-python.supp": project_dir,
+        "data/Valkyrie/valgrind-atlas.supp":  project_dir,
+        "etc/valgrind-root.supp":                 "ROOTSYS",
+        "etc/valgrind-root-python.supp":          "ROOTSYS"
     }
     optionsList = ["valgrind"]
     # If default options are not suppressed, use them.
@@ -1609,6 +1609,7 @@ def ValgrindCommand(
         optionsList.append("--tool=memcheck")
         optionsList.append("--leak-check=full")
         optionsList.append("--smc-check=all")
+        optionsList.append("--enable-debuginfod=no")
     # If extra options are specified, append them to the existing options.
     if extraOptionsList:
         for option in extraOptionsList:
@@ -1619,9 +1620,9 @@ def ValgrindCommand(
         if suppFile:
             optionsList.append("--suppressions=" + suppFile)
         else:
-            msg.warning("Bad path to suppression file: {sfile}, {path} not defined".format(
-                sfile = suppressionFile, path = pathEnvironmentVariable)
-            )
+            errMsg="Bad path to suppression file: {sfile}, {path} not defined".format(sfile = suppressionFile, path = pathEnvironmentVariable)
+            msg.error(errMsg)
+            raise trfExceptions.TransformSetupException(trfExit.nameToCode('TRF_SETUP'), errMsg)
     optionsList.append("$(which python)")
     optionsList.append("$(which athena.py)")
     optionsList.append(AthenaSerialisedConfigurationFile)

@@ -47,6 +47,7 @@
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
++ Control/Valkyrie
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
 #+ Database/.*
