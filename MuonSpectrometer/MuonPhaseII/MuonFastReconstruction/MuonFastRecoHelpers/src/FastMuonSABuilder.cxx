@@ -207,7 +207,7 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
         [](const Segment_t& seg) { return seg->position().perp(); });
     
     const Amg::Vector3D planeNorm {Acts::makeDirectionFromPhiTheta(pattern.phi() + 90._degree, 90._degree)};
-    auto point = [&planeNorm, this](const Segment_t& seg) {
+    auto point = [&planeNorm](const Segment_t& seg) {
         int sector {seg->measurements().back()->spacePoint()->msSector()->sector()};
         Amg::Vector3D projDir {
             ExpandedSector{static_cast<unsigned>(sector), 
