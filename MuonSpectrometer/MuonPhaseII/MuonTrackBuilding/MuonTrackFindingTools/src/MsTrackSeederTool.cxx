@@ -88,7 +88,7 @@ namespace MuonR4{
                  *  to use a non-NSW segments with enough phi hits. If we don't find any segment with enough phi hits 
                  *  we will use the NSW segment as reference as long as it passes the seeding quality criteria.  */
                 if (!isNswSegment(*segment) &&  
-                    m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
+                    m_segSelector->passSeedingQuality(ctx, *segment)) {
                     refSeg = segment;
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Set reference segment to "<<::print(*segment));
                     break;
@@ -98,7 +98,7 @@ namespace MuonR4{
             if(!refSeg){
                 for (const xAOD::MuonSegment* segment : seed.segments()) {
                     if (isNswSegment(*segment) && 
-                        m_segSelector->passSeedingQuality(ctx, *detailedSegment(*segment))) {
+                        m_segSelector->passSeedingQuality(ctx, *segment)) {
                         refSeg = segment;
                         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - NSW is the best what we have apparently....");
                         break;
@@ -583,8 +583,7 @@ namespace MuonR4{
         for (const auto& [coords, seedCandidate] : orderedSegs) {
             /** Bad segment not suitable for track seeding or the segment coordinates are
              *  just mirrored at the overlap between sector 1 -> 16 */
-            const Segment* recoSeedCandidate = detailedSegment(*seedCandidate);
-             if (!m_segSelector->passSeedingQuality(ctx, *recoSeedCandidate)){
+             if (!m_segSelector->passSeedingQuality(ctx, *seedCandidate)){
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment "<<::print(*seedCandidate)<<" does not pass the seeding quality.");
                 continue;
             }
@@ -609,8 +608,7 @@ namespace MuonR4{
                     const SearchTree_t::coordinate_t& /*coords*/,
                     const xAOD::MuonSegment* extendWithMe) {
                         /** Ensure that the sector overlap and momentum vectors are compatible with a MS trajectory */
-                        const Segment* extendCandidate = detailedSegment(*extendWithMe);
-                        if (!m_segSelector->compatibleForTrack(ctx, *recoSeedCandidate, *extendCandidate)) {
+                        if (!m_segSelector->compatibleForTrack(ctx, *seedCandidate, *extendWithMe)) {
                             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment "<<::print(*extendWithMe)<<" is not compatible.");
                             return;
                         }

@@ -272,6 +272,10 @@ namespace MuonR4{
         truthSegment->setT0Error(locPars[Acts::toUnderlying(ParamDefs::t0)], 0.);
                 
         truthSegment->setNHits(nPrecisionHits, nPhiLayers, nTgcEta + nRpcEta);
+        truthSegment->setNOutliers(0, 0, 0);
+        truthSegment->setNHoles(0, 0, 0);
+        
+        
         truthSegment->setIdentifier(m_idHelperSvc->sector(segId), 
                                     m_idHelperSvc->chamberIndex(segId),
                                     m_idHelperSvc->stationEta(segId),

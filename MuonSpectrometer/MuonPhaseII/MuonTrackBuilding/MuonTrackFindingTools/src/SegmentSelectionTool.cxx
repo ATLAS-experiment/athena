@@ -1,65 +1,67 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "SegmentSelectionTool.h"
-#include "xAODMuonPrepData/sTgcMeasurement.h"
+
+#include "MuonTrackEvent/ExpandedSector.h"
 
 namespace {
-    using LayIdx_t = Muon::MuonStationIndex::LayerIndex;
-
-    // std::string print(0)
+    using namespace Muon::MuonStationIndex;
 }
 
 
 namespace MuonR4{
 
-    StatusCode SegmentSelectionTool::initialize(){
+    StatusCode SegmentSelectionTool::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         return StatusCode::SUCCESS;
     } 
     bool SegmentSelectionTool::passSeedingQuality(const EventContext& /* ctx*/,
-                                                  const Segment& segment) const {
-        const HitSummary& summary = segment.summary();
+                                                  const xAOD::MuonSegment& segment) const {
 
-        switch (summary.tech) {
-            case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                if (summary.nPrecHits < m_nMdtSeedHitCut || summary.nPrecOutlier > m_nMdtSeedOutlierCut){
+        switch (segment.technology()) {
+            using enum TechnologyIndex;
+            case MDT: {
+                if (segment.nPrecisionHits() < m_nMdtSeedHitCut || 
+                    segment.nPrecisionOutliers() > m_nMdtSeedOutlierCut){
                     return false;
                 }
-                const LayIdx_t layIdx {Muon::MuonStationIndex::toLayerIndex(segment.msSector()->chamberIndex())};
+                const LayerIndex layIdx {toLayerIndex(segment.chamberIndex())};
                 /** @brief Apply a minimal threshold on the rpc phi trigger hits */
-                if (segment.msSector()->barrel()) {
-                    switch (layIdx) {
-                        case LayIdx_t::Inner:
-                        case LayIdx_t::BarrelExtended:
-                            return summary.nPhiHits >= m_nRpcPhiSeedHitCutBI;
-                        case LayIdx_t::Middle:
-                            return summary.nPhiHits >= m_nRpcPhiSeedHitCutBM;
-                        case LayIdx_t::Outer:
-                            return summary.nPhiHits >= m_nRpcPhiSeedHitCutBO;
+                if (isBarrel(segment.chamberIndex())) {
+                    switch (toLayerIndex(segment.chamberIndex())) {
+                        using enum LayerIndex;
+                        case Inner:
+                        case BarrelExtended:
+                            return segment.nPhiLayers() >= m_nRpcPhiSeedHitCutBI;
+                        case Middle:
+                            return segment.nPhiLayers() >= m_nRpcPhiSeedHitCutBM;
+                        case Outer:
+                            return segment.nPhiLayers() >= m_nRpcPhiSeedHitCutBO;
                         default:
                             break;
                     }
                 } else {
                     /** Apply another threshold on the TGC trigger hits */
                     switch (layIdx) {
-                        case LayIdx_t::Extended:
+                        using enum LayerIndex;
+                        case Extended:
                             return true;
-                        case LayIdx_t::Inner:
-                            return summary.nPhiHits >= m_nTgcPhiSeedHitCutEI;
-                        case LayIdx_t::Middle:
-                            return summary.nPhiHits >= m_nTgcPhiSeedHitCutEM;
+                        case Inner:
+                            return segment.nPhiLayers() >= m_nTgcPhiSeedHitCutEI;
+                        case Middle:
+                            return segment.nPhiLayers() >= m_nTgcPhiSeedHitCutEM;
                         default:
                             break;
                     }
                 }
                 break;
             }
-            case xAOD::UncalibMeasType::MMClusterType: {
-                return summary.nPrecHits >= m_nMmSeedMinHitCut;
+            case MM: {
+                return segment.nPrecisionHits() >= m_nMmSeedMinHitCut;
             }
-            case xAOD::UncalibMeasType::sTgcStripType:{
-                return summary.nPrecHits >= m_nStgcSeedMinHitCut;
+            case STGC: {
+                return segment.nPrecisionHits() >= m_nStgcSeedMinHitCut;
             }
             default:
                 break;
@@ -68,15 +70,15 @@ namespace MuonR4{
     }
 
     bool SegmentSelectionTool::passTrackQuality(const EventContext& /*ctx*/,
-                                                const Segment& segment) const {
-        const HitSummary& summary = segment.summary();
-        switch (summary.tech) {
-            case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                return summary.nPrecHits >= m_nMdtMinHitCut;
+                                                const xAOD::MuonSegment& segment) const {
+        switch (segment.technology()) {
+            using enum TechnologyIndex;
+            case MDT: {
+                return segment.nPrecisionHits() >= m_nMdtMinHitCut;
             }
-            case xAOD::UncalibMeasType::MMClusterType:
-            case xAOD::UncalibMeasType::sTgcStripType:{
-                return summary.nPrecHits >= m_nMdtMinHitCut;
+            case MM:
+            case STGC:{
+                return segment.nPrecisionHits() >= m_nMdtMinHitCut;
             }
             default:
                 break;
@@ -84,26 +86,27 @@ namespace MuonR4{
         return false;
     }
     bool SegmentSelectionTool::compatibleForTrack(const EventContext& /*ctx*/,
-                                                  const Segment& segA,
-                                                  const Segment& segB) const {
+                                                  const xAOD::MuonSegment& segA,
+                                                  const xAOD::MuonSegment& segB) const {
         /** Segment is on the same spectrometer layer */
-        if(segA.msSector() == segB.msSector()) {
+        if(segA.chamberIndex() == segB.chamberIndex() ||
+           segA.etaIndex() * segB.etaIndex() < 0) {
             return false;
         }
-        const HitSummary& sumA = segA.summary();
-        const HitSummary& sumB = segB.summary();
         /** If both segments don't have phi information, then they may be compatible */
-        if (!sumA.nPhiHits && !sumB.nPhiHits) {
+        if (!segA.nPhiLayers() && !segB.nPhiLayers()) {
             return true;
         } 
         /** If one segment has phi information and the other doesn't then just check
          *  whether it's possible that the segment with phi is also in the same sector as the other */
-        else if (sumA.nPhiHits && !sumB.nPhiHits) {
-            if (!m_sectorMap.insideSector(segB.msSector()->sector(), segA.position().phi())){
+        else if (segA.nPhiLayers() && !segB.nPhiLayers()) {
+            if (!ExpandedSector{segA.position().phi()}.isNeighbour(
+                 ExpandedSector{static_cast<unsigned>(segB.sector()), ExpandedSector::SectorProjector::center})){
                 return false;
             }
-        } else if (!sumA.nPhiHits && sumB.nPhiHits) {
-            if (!m_sectorMap.insideSector(segA.msSector()->sector(), segB.position().phi())) {
+        } else if (!segA.nPhiLayers() && segB.nPhiLayers()) {
+            if (!ExpandedSector{segB.position().phi()}.isNeighbour(
+                 ExpandedSector{static_cast<unsigned>(segA.sector()), ExpandedSector::SectorProjector::center})){
                 return false;
             }
         } 

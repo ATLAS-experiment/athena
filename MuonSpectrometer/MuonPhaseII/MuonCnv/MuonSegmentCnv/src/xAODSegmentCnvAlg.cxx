@@ -237,13 +237,16 @@ namespace MuonR4{
                 convertedSeg->setPosition(pos.x(), pos.y(), pos.z());
                 convertedSeg->setDirection(dir.x(), dir.y(), dir.z());
             
+                const auto& summary = inSegment->summary();
 
                 convertedSeg->setIdentifier(sector->sector(), sector->chamberIndex(), sector->side(), 
-                                            xAOD::toTechnologyIndex(inSegment->summary().tech));
+                                            xAOD::toTechnologyIndex(summary.tech));
                 convertedSeg->setFitQuality(inSegment->chi2(), inSegment->nDoF());
-                convertedSeg->setNHits(inSegment->summary().nPrecHits, inSegment->summary().nPhiHits,
-                                       inSegment->summary().nEtaTrigHits);
-           
+                convertedSeg->setNHits(summary.nPrecHits, summary.nPhiHits, summary.nEtaTrigHits);
+                /** @todo Add the hole count to the segment summary */
+                convertedSeg->setNOutliers(summary.nPrecOutlier, 0, 0);
+                convertedSeg->setNHoles(0, 0, 0);
+
                 using enum ParamDefs;
                 convertedSeg->setT0Error(inSegment->segementT0(), 
                                          Amg::error(inSegment->covariance(), Acts::toUnderlying(t0)));
