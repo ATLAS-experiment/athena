@@ -23,7 +23,6 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
     if flags.Tracking.ActiveConfig.extension == "HeavyIonLowPt":
         kwargs.setdefault("pTmax", flags.Tracking.ActiveConfig.maxPT)
 
-    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
     kwargs.setdefault("maxdImpact",
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
@@ -55,7 +54,6 @@ def SiSpacePointsSeedMaker_LowMomentumCfg(
     kwargs.setdefault("maxRadius2",
                       flags.Tracking.ActiveConfig.radMax)
     kwargs.setdefault("pTmax", flags.Tracking.ActiveConfig.maxPT)
-    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
     kwargs.setdefault("mindRadius", 4.0)
 
     acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_LowMomentum(
