@@ -34,10 +34,13 @@
 #include "TH2F.h"
 #include "TMarker.h"
 #include "TColor.h"
+
+
 namespace {
     constexpr int truthColor = kOrange +2;
     constexpr int parLineColor = kRed;
     using SpacePointSet = std::unordered_set<const MuonR4::SpacePoint*>;
+
 }
 
 
@@ -81,7 +84,7 @@ namespace MuonValR4 {
         return StatusCode::SUCCESS;
     }
     bool PatternVisualizationTool::isLabeled(const MuonR4::SpacePoint& hit) const {
-        return isLabeled(*hit.primaryMeasurement()) || 
+        return isLabeled(*hit.primaryMeasurement()) ||
               (hit.secondaryMeasurement() && isLabeled(*hit.secondaryMeasurement()));
     }
     bool PatternVisualizationTool::isLabeled(const xAOD::UncalibratedMeasurement& hit) const {
@@ -132,6 +135,9 @@ namespace MuonValR4 {
         if (m_plotsDone) {
             return;
         }
+
+        ATH_MSG_VERBOSE("Visualize accumulator");
+
         if (accumulator.getNonEmptyBins().empty()) {
             ATH_MSG_WARNING("Hough accumulator is empty");
             return;
@@ -152,36 +158,80 @@ namespace MuonValR4 {
      
         const LabeledSegmentSet truthSegs{getLabeledSegments(spacePointsInAcc)};
         if (truthSegs.empty() && m_displayOnlyTruth) {
+            ATH_MSG_VERBOSE("visualizeAccumulator skipped: no truth segments found and displayOnlyTruth=true");
             return;
         }
+
         auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, extraLabel);
         if (!canvas){
             m_plotsDone = true;
             return;
         }
+
+
+        const double maxBins = std::max(accumulator.nBinsX(), accumulator.nBinsY());
+        double markerTextSize = 0.035;
+        // Scale down for large accumulators
+        markerTextSize *= 25. / std::max(25., maxBins);
+        // Avoid absurdly tiny/large text
+        markerTextSize = std::clamp(markerTextSize, 0.006, 0.035);
+        accHisto->SetMarkerSize(markerTextSize);
+        accHisto->SetMarkerColor(kBlack);
+        accHisto->SetMinimum(0.);
+
         canvas->expandPad(axisRanges.xMin, axisRanges.yMin);
         canvas->expandPad(axisRanges.xMax, axisRanges.yMax);
         canvas->setAxisTitles(std::format("tan#{}", m_accumlIsEta ? "beta" : "#alpha"),
                               std::format("{:}_{{0}} [mm]", m_accumlIsEta ? "y" : "x"));        
         canvas->add(std::move(accHisto), "HIST SAME");
+
+        // Draw explicit bin labels at bin centers. This is more robust than TH2 TEXT
+        // when plotting into the visualization service's prebuilt frame.
+        const double binLabelPx = std::clamp(1.2 * 500. / maxBins, 7.0, 18.0);
+        for (const std::size_t bin : accumulator.getNonEmptyBins()) {
+            const auto [xBin, yBin] = accumulator.axisBins(bin);
+            const double xCenter = axisRanges.xMin + (xBin + 0.5) * (axisRanges.xMax - axisRanges.xMin) / accumulator.nBinsX();
+            const double yCenter = axisRanges.yMin + (yBin + 0.5) * (axisRanges.yMax - axisRanges.yMin) / accumulator.nBinsY();
+
+            //Extract number of entries in the bin with no decimal precision just int
+            std::string binLabel = std::format("{:0}", int(accumulator.nHits(bin)));
+
+            auto binTxt = drawLabel(binLabel, xCenter, yCenter, binLabelPx, false, kBlack);
+            binTxt->SetTextAlign(22);
+            canvas->add(std::move(binTxt));
+        }
  
+        int iseg = 0;
         for (const xAOD::MuonSegment* segment : truthSegs) {
             const auto [pos, dir] = makeLine(localSegmentPars(*segment));
             const double tan = m_accumlIsEta ? houghTanBeta(dir) : houghTanAlpha(dir);
             const double icept = pos[m_accumlIsEta ? objViewEta : objViewPhi];
             auto truthMarker = std::make_unique<TMarker>(tan, icept, kFullCrossX);
             truthMarker->SetMarkerColor(truthColor);
-            truthMarker->SetMarkerSize(8);
+            truthMarker->SetMarkerSize(4);
             canvas->add(std::move(truthMarker));
             canvas->add(drawLabel(std::format("true parameters: {:}",
-                                              makeLabel(localSegmentPars(*segment))),0.2, 0.9));
+                                              makeLabel(localSegmentPars(*segment))),0.2, 0.9 - 0.05*iseg));
+            iseg += 1;
         }
         for (const auto& maximum : maxima) {
             auto maxMarker = std::make_unique<TMarker>(maximum.x, maximum.y, kFullTriangleUp);
             maxMarker->SetMarkerColor(parLineColor);
-            maxMarker->SetMarkerSize(8);
+            maxMarker->SetMarkerSize(4);
             canvas->add(std::move(maxMarker));
+
+            // Draw a bounding box around the maximum island center (x,y) and widths (wx,wy).
+            const double xMin = maximum.x - maximum.wx;
+            const double xMax = maximum.x + maximum.wx;
+            const double yMin = maximum.y - maximum.wy;
+            const double yMax = maximum.y + maximum.wy;
+
+            auto maxBox = drawBox(xMin, yMin, xMax, yMax, parLineColor, hollowFilling);
+            maxBox->SetLineStyle(kDashed);
+            maxBox->SetLineWidth(2);
+            canvas->add(std::move(maxBox));
         }
+
         canvas->add(std::move(primitives));
     }
     void PatternVisualizationTool::paintSimHits(const EventContext& ctx,
@@ -219,12 +269,15 @@ namespace MuonValR4 {
                                                  const std::string& extraLabel,
                                                  PrimitiveVec&& primitives) const {
         
+        ATH_MSG_VERBOSE("Visualizing seed with " << seed.getHitsInMax().size() << " hits");
         /** Check whether the canvas limit has been reached */
         if (m_plotsDone) {
+            ATH_MSG_VERBOSE("visualizeSeed skipped: canvas quota already exhausted for " << extraLabel);
             return;
         }
         const LabeledSegmentSet truthSegs{getLabeledSegments(seed.getHitsInMax())};
         if (truthSegs.empty() && m_displayOnlyTruth) {
+            ATH_MSG_VERBOSE("visualizeSeed skipped: no truth segments found and displayOnlyTruth=true");
             return;
         }
 
@@ -233,6 +286,7 @@ namespace MuonValR4 {
             m_plotsDone = true;
             return;
         }
+
         canvas->add(std::move(primitives));
        
 
@@ -263,7 +317,7 @@ namespace MuonValR4 {
                                                   view ==objViewEta ? "eta" : "phi",
                                                   extraLabel);
             canvas->add(drawLabel(legendLabel, 0.1, 0.96));
-            canvas->add(drawLabel(makeLabel(seed.parameters()),0.25, 0.89));
+            canvas->add(drawLabel( "Seed parameters: " + makeLabel(seed.parameters()),0.25, 0.89));
         }
     }
 
@@ -281,9 +335,11 @@ namespace MuonValR4 {
         if (m_plotsDone) {
             return;
         }
+        ATH_MSG_VERBOSE("visualizeBucket called for " << extraLabel);
 
         LabeledSegmentSet truthSegs{getLabeledSegments(Acts::unpackConstSmartPointers(bucket))};
         if (truthSegs.empty() && m_displayOnlyTruth) {
+            ATH_MSG_VERBOSE("visualizeBucket skipped: no truth segments found and displayOnlyTruth=true");
             return;
         }
        auto canvas = m_visualSvc->prepareCanvas(ctx, m_clientToken, extraLabel);
@@ -291,6 +347,7 @@ namespace MuonValR4 {
             m_plotsDone = true;
             return;
         }
+
         canvas->add(std::move(primitives));
        
         for (const int view : {objViewEta, objViewPhi}) {
@@ -339,6 +396,8 @@ namespace MuonValR4 {
         if (m_plotsDone) {
             return;
         }
+
+        ATH_MSG_VERBOSE("Visualizing segment with " << segment.measurements().size() << " hits");
 
         const LabeledSegmentSet truthSegs{getLabeledSegments(segment.parent()->getHitsInMax())};
         if (truthSegs.empty() && m_displayOnlyTruth) {
@@ -414,54 +473,82 @@ namespace MuonValR4 {
             underlyingSp = &hit;
             if (hit.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
                 const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(hit.primaryMeasurement());
-                if (dc->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
+                if (dc && dc->status() != Muon::MdtDriftCircleStatus::MdtStatusDriftTime) {
                     fillStyle = invalidCalibFill;
                 }
             }
         } else if constexpr(std::is_same_v<SpacePointType, CalibratedSpacePoint>) {
             underlyingSp = hit.spacePoint();
-            if (hit.fitState() == CalibratedSpacePoint::State::Valid) {
-                fillStyle  = fullFilling;
-            } else if (hit.fitState() == CalibratedSpacePoint::State::FailedCalib) {
-                fillStyle = invalidCalibFill;
-            } else  {
-                fillStyle = hatchedFilling;
-            }
+                if (hit.fitState() == CalibratedSpacePoint::State::Valid) {
+                    fillStyle  = fullFilling;
+                } else if (hit.fitState() == CalibratedSpacePoint::State::FailedCalib) {
+                    fillStyle = invalidCalibFill;
+                } else  {
+                    fillStyle = hatchedFilling;
+                }
         }
+
+        //TODO: investigate MuonSegmentFittingAlg.PatternVisualizationTool throws seg fault without check but the calibrated space point should have reference space point no?
+        if (!underlyingSp){
+            ATH_MSG_VERBOSE("Underlying space point not found, skipping hit");
+            return nullptr;
+        }
+
+        const auto* primaryMeas = underlyingSp->primaryMeasurement();
         switch(hit.type()) {
             case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(underlyingSp->primaryMeasurement());
+                const auto* dc = static_cast<const xAOD::MdtDriftCircle*>(primaryMeas);
                 canvas.add(drawDriftCircle(hit.localPosition(), dc->readoutElement()->innerTubeRadius(), 
-                                                     kBlack, hollowFilling));
-
-                const int circColor = isLabeled(*dc) ? truthColor : kBlue;                    
-                canvas.add(drawDriftCircle(hit.localPosition(), hit.driftRadius(), circColor, fillStyle));
+                                           kBlack, hollowFilling));
+                auto driftCircle = drawDriftCircle(hit.localPosition(), hit.driftRadius(), kBlue, fillStyle);
+                //In case the hit is also a truth hit, change the line colour to indicate that
+                if (isLabeled(*dc)) {
+                    driftCircle->SetLineColor(truthColor);
+                    driftCircle->SetLineWidth(1);
+                }
+                canvas.add(std::move(driftCircle));
                 break;
             } case xAOD::UncalibMeasType::RpcStripType: {
-                const auto* meas{static_cast<const xAOD::RpcMeasurement*>(underlyingSp->primaryMeasurement())};
-                const int boxColor = isLabeled(*meas) ? truthColor : kGreen +2;
+                const auto* meas{static_cast<const xAOD::RpcMeasurement*>(primaryMeas)};
                 const double boxWidth = 0.5*std::sqrt(12)*std::sqrt(underlyingSp->covariance()[view]);
-                canvas.add(drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
-                                   boxColor, fillStyle));
+                auto rpcBox = drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
+                                   kGreen + 2, fillStyle);
+                if(isLabeled(*meas)) {
+                    rpcBox->SetLineColor(truthColor);
+                    rpcBox->SetLineWidth(1);
+                }
+                canvas.add(std::move(rpcBox)); 
                 break; 
             } case xAOD::UncalibMeasType::TgcStripType: {
-                const auto* meas{static_cast<const xAOD::TgcStrip*>(underlyingSp->primaryMeasurement())};
-                const int boxColor = isLabeled(*meas) ? truthColor : kCyan + 2;
+                const auto* meas{static_cast<const xAOD::TgcStrip*>(primaryMeas)};
                 const double boxWidth = 0.5*std::sqrt(12)*std::sqrt(underlyingSp->covariance()[view]);
-                canvas.add(drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
-                                   boxColor, fillStyle));
+                auto tgcBox = drawBox(hit.localPosition(), boxWidth, 0.5*meas->readoutElement()->gasGapPitch(),
+                                   kCyan + 2, fillStyle);
+                if(isLabeled(*meas)) {
+                    tgcBox->SetLineColor(truthColor);
+                    tgcBox->SetLineWidth(1);
+                }
+                canvas.add(std::move(tgcBox));
                 break; 
             } case xAOD::UncalibMeasType::MMClusterType: {
-                const int boxColor = isLabeled(*underlyingSp->primaryMeasurement()) ? truthColor : kAquamarine;
                 const double boxWidth = 5*Gaudi::Units::mm;
-                canvas.add(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm, boxColor, fillStyle));
+                auto mmBox = drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm, kAquamarine, fillStyle);
+                if(isLabeled(*primaryMeas)) {
+                    mmBox->SetLineColor(truthColor);
+                    mmBox->SetLineWidth(1);
+                }
+                canvas.add(std::move(mmBox));
                 break; 
             }  case xAOD::UncalibMeasType::Other: {
                 break;
             }  case xAOD::UncalibMeasType::sTgcStripType: {
-                const int boxColor = isLabeled(*underlyingSp->primaryMeasurement()) ? truthColor : kTeal;
                 const double boxWidth = 5*Gaudi::Units::mm;
-                canvas.add(drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm, boxColor, fillStyle));
+                auto stgcBox = drawBox(hit.localPosition(), boxWidth, 10.*Gaudi::Units::mm, kTeal, fillStyle);
+                if(isLabeled(*primaryMeas)) {
+                    stgcBox->SetLineColor(truthColor);
+                    stgcBox->SetLineWidth(1);
+                }
+                canvas.add(std::move(stgcBox));
                 break;
             } default: {
                 ATH_MSG_WARNING("Please implement proper drawings of the new small wheel.. "<<__FILE__<<":"<<__LINE__);    
@@ -478,6 +565,7 @@ namespace MuonValR4 {
                                                 unsigned int view) const {
 
         SpacePointSet drawnPoints{};
+
         for (const SpacePointType& hit : hitsToDraw) {            
             drawnPoints.insert(drawHit(*hit, canvas, view, fullFilling));
         }
@@ -487,6 +575,7 @@ namespace MuonValR4 {
                 if (drawnPoints.count(hit.get())) {
                     continue;
                 }
+
                 drawHit(*hit, canvas, view, hollowFilling);
             } 
         }
@@ -563,4 +652,5 @@ namespace MuonValR4 {
             }
         }
     }
+
 }
