@@ -108,12 +108,12 @@ namespace MuonValR4 {
             "Segments_passSeedQual",[this](const SG::AuxElement* aux){
             const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
             return m_segSelector->passSeedingQuality(Gaudi::Hive::currentContext(),
-                                                     *MuonR4::detailedSegment(*seg)); }));
+                                                     *seg); }));
         m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
                                 "Segments_passTrackQual",[this](const SG::AuxElement* aux){
             const auto* seg = static_cast<const xAOD::MuonSegment*>(aux);
             return m_segSelector->passTrackQuality(Gaudi::Hive::currentContext(),
-                                                   *MuonR4::detailedSegment(*seg)); 
+                                                   *seg); 
         }));
 
 
