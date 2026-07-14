@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetGNNHardScatterSelection/DataPrepUtilities.h"
@@ -177,7 +177,7 @@ for (const auto& el: constituent_names){
         if (input.type != EDMType::CUSTOM_GETTER) {
           auto filler = internal::get::varFromVertex(input.name, input.type,
                                          input.default_flag);
-          varsFromVertex.push_back(filler);
+          varsFromVertex.push_back(std::move(filler));
         } else {
           varsFromVertex.push_back(getter_utils::customGetterAndName(input.name));
         }
