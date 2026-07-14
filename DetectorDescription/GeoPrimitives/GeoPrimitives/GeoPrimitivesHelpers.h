@@ -234,44 +234,25 @@ inline Amg::Vector3D getTranslationVectorFromTransform(const Amg::Transform3D& t
  * to replace the CLHEP constructor:
  * CLHEP::Rotate3D::Rotate3D(double a, cconst Vector3D< double > & v)
  */
-inline Amg::Rotation3D getRotation3DfromAngleAxis(double angle, Amg::Vector3D& axis)
-{
-    AngleAxis3D t;
-    t = Eigen::AngleAxis<double>(angle,axis);
-
-    Amg::Rotation3D rot;
-    rot = t;
-
-    return rot;
+inline Amg::Rotation3D getRotation3DfromAngleAxis(double angle, Amg::Vector3D& axis) {
+    return Amg::Rotation3D{Amg::AngleAxis3D{angle, axis}};
 }
 
 
-/**
- * get a rotation transformation around X-axis
- */
+/** @brief Rotate the coordinate system by an angle around the x-axis
+ *  @param angle: The roation angle around x. */
 inline Amg::Transform3D getRotateX3D(double angle) {
-    Amg::Transform3D transf;
-    Amg::AngleAxis3D angleaxis(angle, Amg::Vector3D::UnitX());
-    transf = angleaxis;
-    return transf;
+    return Amg::Transform3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitX()}};
 }
-/**
- * get a rotation transformation around Y-axis
- */
+/** @brief Rotate the coordinate system by an angle around the z-axis
+ *  @param angle: The roation angle around y. */
 inline Amg::Transform3D getRotateY3D(double angle) {
-    Amg::Transform3D transf;
-    Amg::AngleAxis3D angleaxis(angle, Amg::Vector3D::UnitY());
-    transf = angleaxis;
-    return transf;
+    return Amg::Transform3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitY()}};
 }
-/**
- * get a rotation transformation around Z-axis
- */
+/** @brief Rotate the coordinate system by an angle around the z-axis
+ *  @param angle: The roation angle around z. */
 inline Amg::Transform3D getRotateZ3D(double angle) {
-    Amg::Transform3D transf;
-    Amg::AngleAxis3D angleaxis(angle, Amg::Vector3D::UnitZ());
-    transf = angleaxis;
-    return transf;
+    return Amg::Transform3D{Amg::AngleAxis3D{angle, Amg::Vector3D::UnitZ()}};
 }
 /** @brief: Returns a shift transformation along the x-axis*/
 inline Amg::Transform3D getTranslateX3D(const double X) {
@@ -300,6 +281,16 @@ inline Amg::Vector3D dirFromAngles(const double phi, const double theta) {
     const CxxUtils::sincos thetaCS{theta}, phiCS{phi};
     return Amg::Vector3D{phiCS.cs * thetaCS.sn, phiCS.sn* thetaCS.sn, thetaCS.cs};
 }
+
+/** @brief Project the direction vector onto the plane and renormalize
+  *         to unity
+  * @param direction: The direction vector to project
+  * @param planeNorm: The normal vector representing the plane */
+inline Amg::Vector3D projectDirOntoPlane(const Amg::Vector3D& direction,
+                                         const Amg::Vector3D& planeNorm) {
+    return (direction - planeNorm.dot(direction) * planeNorm).unit();
+}
+
 /** @brief: Calculates the shortest distance between two lines
     @param posA: offset point of line A
     @param dirA: orientation of line A (unit length)
