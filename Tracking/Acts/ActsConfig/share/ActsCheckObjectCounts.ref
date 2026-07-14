@@ -40,6 +40,7 @@ ActsTrackFindingAlg                                               INFO statistic
 | Duplicate seeds                   |      31114 |      31114 |
 | Initial param estimation failed   |          0 |          0 |
 | CKF tracks                        |       9501 |       9501 |
+| Seed refit Kalman fit failure     |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |       8447 |       8447 |
 | Stopped tracks reaching max holes |       6873 |       6873 |
@@ -169,6 +170,7 @@ ActsConversionTrackFindingAlg                                     INFO statistic
 | Duplicate seeds                   |          2 |          2 |
 | Initial param estimation failed   |          5 |          5 |
 | CKF tracks                        |         26 |         26 |
+| Seed refit Kalman fit failure     |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |          2 |          2 |
 | Stopped tracks reaching max holes |         26 |         26 |
@@ -303,6 +305,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Duplicate seeds                   |        504 |        504 |
 | Initial param estimation failed   |          0 |          0 |
 | CKF tracks                        |       2300 |       2300 |
+| Seed refit Kalman fit failure     |       1585 |       1585 |
 | Rejected refined parameters       |       9378 |       9378 |
 | selected tracks                   |        993 |        993 |
 | Stopped tracks reaching max holes |      11589 |      11589 |
@@ -447,6 +450,7 @@ ActsLowPtTrackFindingAlg                                          INFO statistic
 | Duplicate seeds                   |      57311 |       7673 |      64984 |
 | Initial param estimation failed   |          0 |       1148 |       1148 |
 | CKF tracks                        |      21506 |       6294 |      27800 |
+| Seed refit Kalman fit failure     |          0 |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |          0 |
 | selected tracks                   |      13230 |       1917 |      15147 |
 | Stopped tracks reaching max holes |     142414 |      10666 |     153080 |

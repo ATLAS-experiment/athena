@@ -50,6 +50,7 @@ ActsLegacyTrackFindingAlg                                         INFO statistic
 | Duplicate seeds                   |      51098 |      10755 |      61853 |
 | Initial param estimation failed   |          0 |        745 |        745 |
 | CKF tracks                        |      12404 |       4935 |      17339 |
+| Seed refit Kalman fit failure     |          0 |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |          0 |
 | selected tracks                   |       9794 |       1233 |      11027 |
 | Stopped tracks reaching max holes |      51500 |       7171 |      58671 |
@@ -190,6 +191,7 @@ ActsConversionTrackFindingAlg                                     INFO statistic
 | Duplicate seeds                   |          1 |          1 |
 | Initial param estimation failed   |          4 |          4 |
 | CKF tracks                        |         25 |         25 |
+| Seed refit Kalman fit failure     |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |          1 |          1 |
 | Stopped tracks reaching max holes |         26 |         26 |
@@ -335,6 +337,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Duplicate seeds                   |        432 |        432 |
 | Initial param estimation failed   |          0 |          0 |
 | CKF tracks                        |       2138 |       2138 |
+| Seed refit Kalman fit failure     |       1552 |       1552 |
 | Rejected refined parameters       |       8967 |       8967 |
 | selected tracks                   |        874 |        874 |
 | Stopped tracks reaching max holes |      11333 |      11333 |
@@ -490,6 +493,7 @@ ActsLowPtTrackFindingAlg                                          INFO statistic
 | Duplicate seeds                   |      50111 |       7337 |      57448 |
 | Initial param estimation failed   |          0 |       1124 |       1124 |
 | CKF tracks                        |      18536 |       6068 |      24604 |
+| Seed refit Kalman fit failure     |          0 |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |          0 |
 | selected tracks                   |      11964 |       1822 |      13786 |
 | Stopped tracks reaching max holes |     150058 |      10436 |     160494 |
