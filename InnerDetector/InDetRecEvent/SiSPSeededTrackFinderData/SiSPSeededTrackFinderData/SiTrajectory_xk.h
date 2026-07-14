@@ -25,6 +25,7 @@
 #include <iosfwd>
 #include <map>
 #include <memory>
+#include <array>
 
 namespace InDet{
 
@@ -174,19 +175,19 @@ namespace InDet{
       int                               m_nclusters{}       ; /// Number of clusters on trajectory
       int                               m_nclustersNoAdd{}  ; // (NCL)
       int                               m_difference{}      ; // forward-bacward diff 
-      int                               m_nHolesBefore{}         ; // holes before
-      int                               m_nHolesAfter{}         ; // holes after
+      int                               m_nHolesBefore{}    ; // holes before
+      int                               m_nHolesAfter{}     ; // holes after
       int                               m_nholes{}          ; // holes
       int                               m_dholes{}          ; // dholes
-      int                               m_nActiveElements{}      ; /// count active elements 
+      int                               m_nActiveElements{} ; /// count active elements 
       int                               m_nElements{}       ; // index 
-      int                               m_elementsMap[300]{}; // index
+      std::array<int, 300>              m_elementsMap{}     ; // index
       int                               m_ndfcut{}          ; //
       int                               m_ndf{}             ; //
       int                               m_ntos{}            ; //
       int                               m_atos[100]{}       ; //
       int                               m_itos[100]{}       ; //
-      SiTrajectoryElement_xk            m_elements   [300]{}; /// Trajectory elements on this trajectory. 
+      std::array<SiTrajectoryElement_xk, 300> m_elements{}  ; /// Trajectory elements on this trajectory. 
                                                             /// Each one corresponds to one detector element on
                                                             /// the search road 
       const InDet::SiTools_xk*          m_tools{}           ; //

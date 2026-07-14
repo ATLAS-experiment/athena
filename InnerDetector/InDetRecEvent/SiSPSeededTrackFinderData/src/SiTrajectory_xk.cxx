@@ -1069,7 +1069,9 @@ bool InDet::SiTrajectory_xk::globalPositionsToClusters
 
       pv[0]     = dx*Ax[0]+dy*Ax[1]+dz*Ax[2];
       pv[1]     = dx*Ay[0]+dy*Ay[1]+dz*Ay[2];
-
+      //setParametersWithCovariance detects whether su is 'owned' elsewhere
+      //the ownership patterns could be improved, though.
+      //coverity[MULTIPLE_INIT_SMART_PTRS]
       Tp.setParametersWithCovariance(su,pv,cv);
 
       if (!sct) m_elements[0].CloseClusterSeach(Tp, (*iter_boundaryLink), pib, pie);
@@ -1193,6 +1195,8 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
   int                     TE    [100]         ;
   const InDet::SiCluster* CL    [100]         ;
   double                  XI2B  [100]         ;
+  //Local variable PUB uses 27200 bytes of stack space
+  //coverity[STACK_USE]
   Trk::PatternTrackParameters PUB[100]        ;
   Trk::PatternTrackParameters  PA             ;
  
@@ -1305,7 +1309,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
 	      ndfbest += Ei.ndf();
 	      if (l<0) l=lbest;
             }
-            m_elementsMap[lbest] = m_elementsMap[i];
+            m_elementsMap.at(lbest) = m_elementsMap.at(i);
           }
    
         }
@@ -1315,7 +1319,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
         if (dn!=0) {
 
           for (int i=L; i!= m_nElements; ++i) {
-            m_elementsMap[i-dn]=m_elementsMap[i];
+            m_elementsMap.at(i-dn)=m_elementsMap.at(i);
           }
 
           L            -=dn;
@@ -1754,7 +1758,7 @@ bool InDet::SiTrajectory_xk::forwardExtension(bool smoother,int itmax, const Eve
     if (index_currentElement < 0 ) break;
     /// if we are not in the last iteration, final preparation for iterating by making our new start 
     /// point skip the cluster used there so far. 
-    if (iteration!=itm && !m_elements[m_elementsMap[index_currentElement]].addNextClusterF()) break;
+    if (iteration!=itm && !m_elements.at(m_elementsMap.at(index_currentElement)).addNextClusterF()) break;
   }
 
   /// if reaching max iterations, reset iteration counter to the last iteration that was run 
