@@ -37,6 +37,12 @@ atlas_add_component( Herwig7_i
    ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
    GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
 
+# Suppress ABI warning on ARM (AGENE-2423)
+if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64" )
+   target_compile_options( powhegHerwig PRIVATE -Wno-psabi )
+   target_compile_options( Herwig7_i PRIVATE -Wno-psabi )
+endif()
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/common/*.py )
