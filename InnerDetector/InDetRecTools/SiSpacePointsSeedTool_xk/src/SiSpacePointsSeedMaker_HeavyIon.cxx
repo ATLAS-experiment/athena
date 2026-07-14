@@ -453,6 +453,9 @@ MsgStream& InDet::SiSpacePointsSeedMaker_HeavyIon::dumpConditions(EventData& dat
   out<<"| pTmin  (mev)            | "
      <<std::setw(12)<<std::setprecision(5)<<m_ptmin
      <<"                              |"<<endmsg;
+  out <<"| pTmax  (mev)            | "
+    <<std::setw(12)<<std::setprecision(5)<<m_ptmax
+    <<"                              |"<<endmsg;
   out<<"| |eta|          <=  | " 
      <<std::setw(12)<<std::setprecision(5)<<m_etamax
      <<"                              |"<<endmsg;
@@ -606,6 +609,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::buildFrameWork()
   m_dzdrmin   =-m_dzdrmax                      ;
   m_COF       =  134*.05*9.                    ;
   m_ipt       = 1.f/std::abs(.9f*m_ptmin)            ;
+  m_iptmax  = 1.f/std::abs(1.1f*m_ptmax);
   m_ipt2      = m_ipt*m_ipt                    ;
 
   // Build radius sorted containers
@@ -948,7 +952,10 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production2Sp(EventData& data) cons
 	    float UR = Ut*R+1.              ; if (UR == 0.) continue;
 	    float A  = Vt*R/UR              ;
 	    float B  = Vt-A*Ut              ;
+	    // min pt cut
 	    if (std::abs(B*data.K) > m_ipt*std::sqrt(1.f+A*A)) continue;
+	    // max pt cut
+	    if (std::abs(B*data.K) < m_iptmax*std::sqrt(1.f+A*A)) continue;
             ++nseed;
 	    newSeed(data, (*r)->spacepoint, (*r0)->spacepoint,Zo);
 	  }
@@ -1132,10 +1139,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
  
     float imc   = m_diver   ;
     float ipt2  = m_ipt2    ;
+    float ipt2max = m_iptmax * m_iptmax;
     float K     = data.K       ;
     float K2    = K*K       ;
     float COF   = m_COF     ;
     float ipt2K = ipt2/K2   ;
+    float ipt2Kmax = ipt2max/K2;
     float ipt2C = ipt2*COF  ;
     float COFK  = COF*K2    ;
     covr0      *= 2.        ;
@@ -1168,7 +1177,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp
 	float S2  = 1.f+A*A                           ;
 	float B   = Vb-A*Ub                          ;
 	float B2  = B*B                              ;
-	if (B2  > ipt2K*S2 || dT*S2 > B2*CSA) continue;
+	if (B2  > ipt2K*S2 || B2 < ipt2Kmax*S2 || dT*S2 > B2*CSA) continue;
 	float Im  = std::abs((A-B*R)*R)                  ;
 
 	if ( Im > imc ) continue;
@@ -1309,10 +1318,12 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
     float imc   = m_diver   ;
     float imcs  = m_diverpps;
     float ipt2  = m_ipt2    ;
+    float ipt2max = m_iptmax * m_iptmax;
     float K     = data.K       ;
     float K2    = K*K       ;
     float COF   = m_COF     ;
     float ipt2K = ipt2/K2   ;
+    float ipt2Kmax = ipt2max/K2;
     float ipt2C = ipt2*COF  ;
     float COFK  = COF*K2    ;
     covr0      *= 2.        ;
@@ -1345,7 +1356,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
 	float S2  = 1.f+A*A                           ;
 	float B   = Vb-A*Ub                          ;
 	float B2  = B*B                              ;
-	if (B2  > ipt2K*S2 || dT*S2 > B2*CSA) continue;
+	if (B2  > ipt2K*S2 || B2 < ipt2Kmax*S2 || dT*S2 > B2*CSA) continue;
 	float Im  = std::abs((A-B*R)*R)                  ;
 	
 	if (pix) {

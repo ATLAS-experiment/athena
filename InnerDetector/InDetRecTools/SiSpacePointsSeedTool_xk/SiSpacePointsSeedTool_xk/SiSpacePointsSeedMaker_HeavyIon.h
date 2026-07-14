@@ -178,6 +178,7 @@ namespace InDet {
     //@{
     FloatProperty m_etamax{this, "etaMax", 2.7};
     FloatProperty m_ptmin{this, "pTmin", 500.};
+    FloatProperty m_ptmax{this, "pTmax", std::numeric_limits<float>::max()};
     FloatProperty m_fieldScale{this, "fieldScale", 1.};
    //@}
 
@@ -202,6 +203,7 @@ namespace InDet {
     float m_dzdrmin{0.};
     float m_dzdrmax{0.};
     float m_ipt{0.};
+    float m_iptmax{0.};
     float m_ipt2{0.};
     float m_COF{0.};
     float m_sF{0.};
@@ -275,9 +277,6 @@ namespace InDet {
   bool SiSpacePointsSeedMaker_HeavyIon::isUsed(const Trk::SpacePoint* sp, const Trk::PRDtoTrackMap &prd_to_track_map) const
   {
     const Trk::PrepRawData* d = sp->clusterList().first;
-    if (!d and prd_to_track_map.isUsed(*d)) {
-      std::cout << "MEASUREMENT IS USED" << std::endl;
-    }
     if (!d || !prd_to_track_map.isUsed(*d)) return false;
     d = sp->clusterList().second;
     if (!d || prd_to_track_map.isUsed(*d)) return true;

@@ -284,6 +284,8 @@
      <TDirectory name="Efficiency">
       <graph name="efficiency_vs_eta" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_pt" plotopts="" type="TEfficiency"/>
+      <graph name="efficiency_vs_pt_low" plotopts="" type="TEfficiency"/>
+      <graph name="efficiency_vs_lowpt" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_phi" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_d0" plotopts="" type="TEfficiency"/>
       <graph name="efficiency_vs_z0" plotopts="" type="TEfficiency"/>

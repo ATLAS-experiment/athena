@@ -1072,8 +1072,13 @@ const InDet::SiSpacePointsSeed* InDet::SiSpacePointsSeedMaker_LowMomentum::next(
 bool InDet::SiSpacePointsSeedMaker_LowMomentum::isZCompatible  
 (EventData& data, float& Zv, float& R, float& T) const
 {
-  if (Zv < m_zmin || Zv > m_zmax) return false;
-
+  if (m_useVertexPosition) {
+    if (Zv < data.zCollisionMinimum || Zv > data.zCollisionMaximum) return false;
+  }
+  else {
+    if (Zv < m_zmin || Zv > m_zmax) return false;
+  }
+  
   if (data.l_vertex.empty()) return true;
 
   float dZmin = std::numeric_limits<float>::max();
