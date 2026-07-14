@@ -438,7 +438,6 @@ namespace MissingEtDQA
     }
      ATH_MSG_INFO("Physics objects");
     //Physics Objects
-
     //Muons
     const xAOD::MuonContainer* muons = nullptr;
     ATH_CHECK( evtStore()->retrieve(muons,m_muonColl) );
@@ -448,13 +447,11 @@ namespace MissingEtDQA
       return StatusCode::FAILURE;
     }
     ConstDataVector<MuonContainer> metMuons(SG::VIEW_ELEMENTS);
-    bool is_muon = 0;
     for(const auto mu : *muons) 
     {
       if(Accept(mu)) 
       {
         metMuons.push_back(mu);
-        is_muon = 1;
       }
     }
 
@@ -467,13 +464,11 @@ namespace MissingEtDQA
       return StatusCode::FAILURE;
     }
    ConstDataVector<ElectronContainer> metElectrons(SG::VIEW_ELEMENTS);
-   bool is_electron = 0;
    for(const auto el : *electrons) 
    {
      if(Accept(el)) 
      {
        metElectrons.push_back(el);
-       is_electron = 1;
      }
    }
 
@@ -510,115 +505,17 @@ namespace MissingEtDQA
         metTaus.push_back(tau);
       }
     }
-     ATH_MSG_INFO("OR");
 //////////Overlap removal///////
     // Overlap removal
 
-    ConstDataVector<PhotonContainer>::iterator pho_itr;
-    ConstDataVector<ElectronContainer>::iterator ele_itr;
-    ConstDataVector<TauJetContainer>::iterator taujet_itr;
-    ConstDataVector<MuonContainer>::iterator mu_itr;
-    ConstDataVector<JetContainer>::iterator jetc_itr;
- 
-    //Photons OR
-    bool is_photon = 0;
-    ConstDataVector<PhotonContainer> metPhotonsOR(SG::VIEW_ELEMENTS);
-    for(pho_itr = metPhotons.begin(); pho_itr != metPhotons.end(); ++pho_itr ) 
-    {
-      TLorentzVector phtlv = (*pho_itr)->p4();
-      bool passOR = 1;
-      for(ele_itr = metElectrons.begin(); ele_itr != metElectrons.end(); ++ele_itr) 
-      {
-        if(phtlv.DeltaR((*ele_itr)->p4()) < 0.2) 
-        {
-          passOR = 0;
-          break;
-        }
-      }
-      if(passOR)
-      {
-        metPhotonsOR.push_back(*pho_itr);
-        is_photon = 1;
-      }
-    }
-     ATH_MSG_INFO("Tau OR");
-    //TauJets OR
-    ConstDataVector<TauJetContainer> metTausOR(SG::VIEW_ELEMENTS);
-    bool is_tau = 0;
-    for(taujet_itr = metTaus.begin(); taujet_itr != metTaus.end(); ++taujet_itr ) 
-    {
-      TLorentzVector tautlv = (*taujet_itr)->p4();
-      bool passOR = 1;
-      for(ele_itr = metElectrons.begin(); ele_itr != metElectrons.end(); ++ele_itr) 
-      {
-        if(tautlv.DeltaR((*ele_itr)->p4()) < 0.2) 
-        {
-          passOR = 0;
-          break;
-        }
-      }
-      for(pho_itr = metPhotonsOR.begin(); pho_itr != metPhotonsOR.end(); ++pho_itr) 
-      {
-        if(tautlv.DeltaR((*pho_itr)->p4()) < 0.2) 
-        {
-          passOR = 0;
-          break;
-        }
-      }
-      if(passOR)
-      {
-        metTausOR.push_back(*taujet_itr);
-        is_tau = 1;
-      }
-    }
-
-    //Sum up the pT's of the objects
-    
-    //electron
-    TLorentzVector el_tlv;
-    double sum_el = 0;
-    for(ele_itr = metElectrons.begin(); ele_itr != metElectrons.end(); ++ele_itr ) 
-    {
-      el_tlv += (*ele_itr)->p4();
-      sum_el += (*ele_itr)->pt();
-    }
-    
-    //muon
-    TLorentzVector mu_tlv;
-    double sum_mu = 0;
-    for(mu_itr = metMuons.begin(); mu_itr != metMuons.end(); ++mu_itr ) 
-    {
-      mu_tlv += (*mu_itr)->p4();
-      sum_mu += (*mu_itr)->pt();
-    }
-
-    //Tau
-    TLorentzVector tau_tlv;
-    double sum_tau = 0;
-    for(taujet_itr = metTausOR.begin(); taujet_itr != metTausOR.end(); ++taujet_itr ) 
-    {
-      tau_tlv += (*taujet_itr)->p4();
-      sum_tau += (*taujet_itr)->pt();
-    }
-  
-    //photon
-    TLorentzVector photon_tlv;
-    double sum_photon = 0;
-    for(pho_itr = metPhotonsOR.begin(); pho_itr != metPhotonsOR.end(); ++pho_itr ) 
-    {
-      photon_tlv += (*pho_itr)->p4();
-      sum_photon += (*pho_itr)->pt();
-    }
      ATH_MSG_INFO("JVT and OR for jets");
     //JVT and OR on jets
     for (const auto& jet_type : m_types)
     {
       ToolHandle<IJetUpdateJvt>* jvtTool(nullptr);
-      double JvtCut = 0.59;
       //Get jvt cut and tool
       if (jet_type == "AntiKt4EMPFlow") //EMPFlow
       {
-        JvtCut = 0.2;
         jvtTool = &m_jvtToolPFlow;
       }
       else if (jet_type == "AntiKt4EMTopo") //EMTopo
@@ -653,52 +550,6 @@ namespace MissingEtDQA
         metJets.push_back(jet);
       }
 
-      //Overlap Removal for jets
-      ConstDataVector<JetContainer> metJetsOR(SG::VIEW_ELEMENTS);
-      bool is_jet = 0;
-      for(jetc_itr = metJets.begin(); jetc_itr != metJets.end(); ++jetc_itr ) 
-      {
-        TLorentzVector jettlv = (*jetc_itr)->p4();
-        bool passOR = 1;
-        for(ele_itr = metElectrons.begin(); ele_itr != metElectrons.end(); ++ele_itr) 
-        {
-          if(jettlv.DeltaR((*ele_itr)->p4()) < 0.2) 
-          {
-            passOR = 0;
-            break;
-          }
-        }
-        for(pho_itr = metPhotonsOR.begin(); pho_itr != metPhotonsOR.end(); ++pho_itr) 
-        {
-          if(jettlv.DeltaR((*pho_itr)->p4()) < 0.2) 
-          {
-            passOR = 0;
-            break;
-          }
-        }
-        for(taujet_itr = metTausOR.begin(); taujet_itr != metTausOR.end(); ++taujet_itr) 
-        {
-          if(jettlv.DeltaR((*taujet_itr)->p4()) < 0.2) 
-          {
-            passOR = 0;
-            break;
-          }
-        }
-        if(passOR)
-        {
-          metJetsOR.push_back(*jetc_itr);
-          is_jet = 1;
-        }
-      }
-
-      TLorentzVector jet_tlv; //Jet Transverse Lorentz Vector
-      double sum_jet = 0;
-      //loop over Jets that passed OR
-      for(jetc_itr = metJetsOR.begin(); jetc_itr != metJetsOR.end(); ++jetc_itr ) 
-      {
-        jet_tlv += (*jetc_itr)->p4();
-        sum_jet += (*jetc_itr)->pt();
-      }
 
       //Prepare Rebuilding MET
       ATH_MSG_INFO( "  Rebuilding MET_" << jet_type );
@@ -742,9 +593,7 @@ namespace MissingEtDQA
       if( jet_type.find("PFlow") != std::string::npos) m_metmaker = &m_metmakerPFlow;
       else m_metmaker = &m_metmakerTopo;
 
-       ATH_MSG_INFO("building terms");
       //See if we ca build terms
-
       // Electrons
       if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met_Reb, metElectrons.asDataVector(), metHelper).isFailure() ) 
       {
@@ -770,7 +619,6 @@ namespace MissingEtDQA
       {
         ATH_MSG_WARNING("Failed to build jet and soft terms.");
       }
-
       MissingETBase::Types::bitmask_t trksource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track);
       if((*met_Reb)["PVSoftTrk"]) trksource = (*met_Reb)["PVSoftTrk"]->source();
       if( met::buildMETSum("FinalTrk", met_Reb, trksource).isFailure() )
@@ -782,51 +630,91 @@ namespace MissingEtDQA
       else clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::UnknownSignal);
       std::cout<<"___SoftClus___"<<std::endl;
       if((*met_Reb)["SoftClus"]) clsource = (*met_Reb)["SoftClus"]->source();
-      if( met::buildMETSum("FinalClus", met_Reb, clsource).isFailure() ) 
+      if( met::buildMETSum("FinalClus", met_Reb, clsource).isFailure() )
       {
         ATH_MSG_WARNING("Building MET FinalClus sum failed.");
       }
-       ATH_MSG_INFO("Particle test");
-
       ///////
       //Testing Particles
       //doing METMaker particles
-      std::string str_ele = "RefEle"; 
+      std::string str_ele = "RefEle";
       std::string str_gam = "RefGamma";
       std::string str_tau = "RefTau";
       std::string str_mu = "Muons";
       std::string str_jet = "RefJet";
       // This will be the output MET.
-      auto met_MetMaker = std::make_unique<xAOD::MissingETContainer>();
-      auto aux = std::make_unique<xAOD::MissingETAuxContainer>();
-      met_MetMaker->setStore(aux.get());
-
-      // Build the hard terms. The string argument is arbitrary, it's the name you're giving to the term for later lookup.
-      ATH_CHECK((*m_metmaker)->rebuildMET(str_ele, xAOD::Type::Electron, met_MetMaker.get(), metElectrons.asDataVector(), metHelper));
-      ATH_CHECK((*m_metmaker)->rebuildMET(str_gam, xAOD::Type::Photon, met_MetMaker.get(), metPhotons.asDataVector(), metHelper));
-      ATH_CHECK((*m_metmaker)->rebuildMET(str_tau, xAOD::Type::Tau, met_MetMaker.get(), metTaus.asDataVector(),metHelper));
-      ATH_CHECK((*m_metmaker)->rebuildMET(str_mu, xAOD::Type::Muon, met_MetMaker.get(), metMuons.asDataVector(), metHelper));
-      ATH_CHECK((*m_metmaker)->rebuildJetMET(str_jet, "SoftClus", "PVSoftTrk", met_MetMaker.get(), jets, coreMet, metHelper, true));
-
-      for (const xAOD::MissingET* met : *met_MetMaker) {
-        ATH_MSG_INFO("_W_W_W_W_W_W_W_W_W_W_W_W_W_W");
-        ATH_MSG_INFO( met->name());
-      }
 
       // If the specific object interfaces are needed
-      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met_MetMaker)[str_ele]);
-      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met_MetMaker)[str_gam]);
-      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met_MetMaker)[str_tau]);
-      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met_MetMaker)[str_mu]);
-      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met_MetMaker)[str_jet]);
-/*
-      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met_MetMaker)[str_ele]);
-      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met_MetMaker)[str_gam]);
-      std::vector<const xAOD::Tau*> ta_elems = met::getMETElements<xAOD::Tau>(*(*met_MetMaker)[str_tau]);
-      >std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met_MetMaker)[str_mu]);
-      std::vector<const xAOD::JetContainer*> jet_elems = met::getMETElements<xAOD::JetContainer>(*(*met_MetMaker)[str_jet]);
-*/
-      ATH_MSG_INFO("Comparing particle numbers" );
+      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met_Reb)[str_ele]);
+      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met_Reb)[str_gam]);
+      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met_Reb)[str_tau]);
+      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met_Reb)[str_mu]);
+      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met_Reb)[str_jet]);
+
+      /////
+      //Sum up the pT's of the objects
+
+      //electron
+      TLorentzVector el_tlv;
+      double sum_el = 0;
+      for(const auto p : el_elems)
+      {
+        el_tlv += p->p4();
+        sum_el += p->pt();
+      }
+
+      //muon
+      TLorentzVector mu_tlv;
+      double sum_mu = 0;
+      for(const auto p : mu_elems)
+      {
+        mu_tlv += p->p4();
+        sum_mu += p->pt();
+      }
+
+      //Tau
+      TLorentzVector tau_tlv;
+      double sum_tau = 0;
+      for(const auto p : ta_elems)
+      {
+        tau_tlv += p->p4();
+        sum_tau += p->pt();
+      }
+
+      //photon
+      TLorentzVector photon_tlv;
+      double sum_photon = 0;
+      for(const auto p : ph_elems)
+      {
+        photon_tlv += p->p4();
+        sum_photon += p->pt();
+      }
+
+      //Setup is_particle flags
+      bool is_muon = 0;
+      bool is_electron = 0;
+      bool is_photon = 0;
+      bool is_tau = 0;
+      bool is_jet = 0;
+
+      for(const auto p : el_elems){
+        is_electron = 1;
+      }
+      for(const auto p : ph_elems){
+        is_photon = 1;
+      }
+      for(const auto p : ta_elems){
+        is_tau = 1;
+      }
+      for(const auto p : mu_elems){
+        is_muon = 1;
+      }
+      for(const auto p : jet_elems){
+        is_jet = 1;
+      }
+
+      ///////
+      /*ATH_MSG_INFO("Comparing particle numbers" );
       ATH_MSG_INFO("---METMaker---" );
       for(const auto p : el_elems){
         ATH_MSG_INFO("Electron " << p->pt() << " " << p->eta() << " " << p->phi());
@@ -860,7 +748,7 @@ namespace MissingEtDQA
         if(Accept(p, JvtCut, jvtTool)){
           ATH_MSG_INFO("Jet " << p->pt() << " " << p->eta() << " " << p->phi());
         }
-      }
+      }*/
       //////
 
       std::cout<<"___Fill MET Reb___"<<std::endl;
@@ -952,14 +840,14 @@ namespace MissingEtDQA
       //for Jets find leading and subleading jet
       for (auto jet_itr = jets->begin(); jet_itr != jets->end(); ++jet_itr) 
       {
-        if ((*jet_itr)->pt() > leadPt && Accept(*jet_itr,JvtCut,jvtTool)) 
+        if ((*jet_itr)->pt() > leadPt) 
         {
           subleadPt = leadPt;
           subleadPhi = leadPhi;
           leadPt = (*jet_itr)->pt();
           leadPhi = (*jet_itr)->phi();
         }
-        else if ((*jet_itr)->pt() > subleadPt && Accept(*jet_itr,JvtCut,jvtTool)) 
+        else if ((*jet_itr)->pt() > subleadPt) 
         {
           subleadPt = (*jet_itr)->pt();
           subleadPhi = (*jet_itr)->phi();
@@ -1063,13 +951,13 @@ namespace MissingEtDQA
       // For rebuilt MET add only jets with pT>20e3 and JVT cut
       TLorentzVector jetReb_tlv;
       double sum_jetReb = 0;
-      for(const auto jet : metJetsOR) 
+      for(const auto jet : jet_elems) 
       {
-        if(Accept(jet, JvtCut, jvtTool)) 
-        {
+        //if(Accept(jet, JvtCut, jvtTool)) 
+        //{
           jetReb_tlv += jet->p4();
           sum_jetReb += jet->pt();
-        }
+        //}
       }
 
       for(const auto it : *met_Reb) 
