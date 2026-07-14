@@ -9,8 +9,6 @@
 
 //Hit classes
 #include "HitManagement/TimedHitCollection.h"
-//Particle Table
-#include "HepPDT/ParticleDataTable.hh"
 
 #include "InDetIdentifier/TRT_ID.h"
 
@@ -48,6 +46,7 @@ namespace InDetDD {
 }
 
 class TRTDigSettings;
+class GenData;
 
 /**
  * TRT Digitization: Processing of a TRT Straws. @n
@@ -64,7 +63,6 @@ public:
                         TRTElectronicsProcessing * ep,
                         TRTNoise * noise,
                         TRTDigCondBase* digcond,
-                        const HepPDT::ParticleDataTable*,
                         const TRT_ID*,
                         ITRT_PAITool* = nullptr,
                         ITRT_PAITool* = nullptr,
@@ -149,7 +147,7 @@ private:
   TRTNoise*                 m_pNoise;
   TRTDigCondBase*           m_pDigConditions;
 
-  const HepPDT::ParticleDataTable* m_pParticleTable;
+  std::unique_ptr<GenData> m_genData;
 
   /** Primary ionisation cluster */
   class cluster {

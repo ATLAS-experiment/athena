@@ -37,8 +37,6 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     """Return ComponentAccumulator with common TRT digitization tool config"""
     acc = TRT_ReadoutGeometryCfg(flags)
     acc.merge(AtlasFieldCacheCondAlgCfg(flags))
-    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    kwargs.setdefault('PartPropSvc', acc.getPrimaryAndMerge(PartPropSvcCfg(flags))) # Property from GenBase
     # default arguments
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
     kwargs.setdefault("InDetTRTStrawStatusSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
