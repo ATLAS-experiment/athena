@@ -54,7 +54,7 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_classifierParticleTypeKey.initialize() );
     // ATLASRECTS-8290: this is for backward compatability, remove eventually
     if (m_use_barcode) {
-      m_uidKey = "TruthParticles.barcode";
+      m_uidKey = "barcode";
     }
     ATH_CHECK( m_uidKey.initialize() );
 
