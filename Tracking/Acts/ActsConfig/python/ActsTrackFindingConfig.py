@@ -125,6 +125,8 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
+    if not flags.Tracking.ActiveConfig.isLargeD0:   # consider seedRefitPtMinFactor later, with other LRT optimisations
+        kwargs.setdefault("seedRefitPtMinFactor", 0.9)
 
     # Loosen the requirement on the minimum number of measurements on track candidate
     # during track finding for tracks above a certain eta

@@ -13,6 +13,7 @@
 // ACTS
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
 #include "Acts/TrackFitting/MbfSmoother.hpp"
 #include "Acts/Utilities/Logger.hpp"
@@ -531,18 +532,25 @@ namespace ActsTrk
         ++event_stat[category_i][kNUsedSeeds];
 
         // Optional refit track parameters to get more refined value
-        std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;
+        std::unique_ptr<Acts::BoundTrackParameters> refitSeedParameters;  // owner if refit used
         if (refitSeeds) {
-          refitSeedParameters = doRefit(seed, *initialParameters, detContext, reverseSearch);
-          if (refitSeedParameters.get() == nullptr) {
-            ++event_stat[category_i][kNRejectedRefinedSeeds];
-            if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
-            continue;
-          }
-          if (refitSeedParameters.get() != initialParameters) {
-            initialParameters = refitSeedParameters.get();
-            printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType, true);
-          }
+          bool rejectedRefinedSeed = false;
+          std::visit(
+              Acts::overloaded{
+                  [&](std::unique_ptr<Acts::BoundTrackParameters> refitResult) {
+                    refitSeedParameters = std::move(refitResult);
+                    initialParameters = refitSeedParameters.get();
+                    printSeed(iseed, detContext, seeds, *initialParameters, measurementIndex, nPrinted, seedType, true);
+                  },
+                  [&](EStat refitError) {
+                    ++event_stat[category_i][refitError];
+                    if (refitError == kNRejectedRefinedSeeds) {
+                      if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
+                      rejectedRefinedSeed = true;  // skip seed
+                    }
+                  }},
+              doRefit(seed, *initialParameters, detContext, reverseSearch));
+          if (rejectedRefinedSeed) continue;
         }
 
         auto measurementRangesForced =

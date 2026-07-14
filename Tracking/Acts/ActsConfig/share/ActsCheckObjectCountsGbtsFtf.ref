@@ -40,6 +40,7 @@ ActsTrackFindingAlg                                               INFO statistic
 | Duplicate seeds                   |       2400 |       2400 |
 | Initial param estimation failed   |          0 |          0 |
 | CKF tracks                        |      12025 |      12025 |
+| Seed refit Kalman fit failure     |          0 |          0 |
 | Rejected refined parameters       |          0 |          0 |
 | selected tracks                   |      10134 |      10134 |
 | Stopped tracks reaching max holes |       3632 |       3632 |
@@ -174,6 +175,7 @@ ActsLargeRadiusTrackFindingAlg                                    INFO statistic
 | Duplicate seeds                   |        499 |        499 |
 | Initial param estimation failed   |          0 |          0 |
 | CKF tracks                        |       2403 |       2403 |
+| Seed refit Kalman fit failure     |       1565 |       1565 |
 | Rejected refined parameters       |       9158 |       9158 |
 | selected tracks                   |        999 |        999 |
 | Stopped tracks reaching max holes |      11724 |      11724 |
