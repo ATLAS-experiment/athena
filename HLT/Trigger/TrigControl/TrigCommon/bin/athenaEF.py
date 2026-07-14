@@ -1265,7 +1265,7 @@ def main():
       # Load from CA module - follow the same pattern as athenaHLT/TrigPSCPythonCASetup:
       # 1. Build the full configuration with services
       # 2. Dump to JSON file
-      # 3. Use TrigConf::JobOptionsSvc to load from JSON
+      # 3. Use AthHLT.reload_from_json to re-exec and reload from JSON
       # This preserves the ability to use the same JobOptionsSvc as athenaHLT
       log.info("Loading CA configuration from: %s", jobOptions)
       
@@ -1313,17 +1313,12 @@ def main():
       if args.dump_config_exit:
          log.info("Configuration dumped to %s.json. Exiting...", fname)
          sys.exit(0)
+
+      # Re-exec from the JSON (same as athenaHLT TrigPSCPythonCASetup -> AthHLT.reload_from_json -> os.execvp). 
+      # This replaces the process image freeing up the configuration heap 
+      log.info("Configuration dumped to %s.json. Re-exec...", fname)
+      AthHLT.reload_from_json(f"{fname}.json", suppress_args=PscConfig.unparsedArguments + ['--dump-config'], jobOptions=args.jobOptions)
       
-      # Now load the JSON using JsonConfigRunner with TrigConf::JobOptionsSvc
-      log.info("Loading configuration from %s.json via TrigConf::JobOptionsSvc", fname)
-      # Get run parameters for prepareForStart
-      run_params = get_run_params(args).to_dict()
-      acc = load_from_json(f"{fname}.json", run_params,
-                           num_threads=args.threads, num_slots=args.concurrent_events,
-                           ef_files=ef_files)
-      
-      log.info("Configuration loaded with HLT online services")
-   
    # Execute postcommands
    if args.postcommand:
       log.info("Executing postcommand(s)")
