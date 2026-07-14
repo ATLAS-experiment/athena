@@ -65,6 +65,10 @@ IDAlignMonGenericTracksAlg::IDAlignMonGenericTracksAlg( const std::string & name
   declareProperty("NTracksRange"         , m_NTracksRange);
   declareProperty("doIP"                 , m_doIP = false);
   declareProperty("ApplyTrackSelection"  , m_applyTrkSel = true);
+  // ITk has no TRT.  When DoTRT is false the algorithm skips the
+  // TRT_ID retrieval in initialize() and the TRT branches in the
+  // hit-loop in fillHistograms().
+  declareProperty("DoTRT"                , m_doTRT = true);
 }
 
 
@@ -88,8 +92,12 @@ StatusCode IDAlignMonGenericTracksAlg::initialize()
   ATH_MSG_DEBUG("Initialized SCTIDHelper");
 
   m_trtID = nullptr;
-  ATH_CHECK(detStore()->retrieve(m_trtID, "TRT_ID"));
-  ATH_MSG_DEBUG("Initialized TRTIDHelper");
+  if (m_doTRT) {
+    ATH_CHECK(detStore()->retrieve(m_trtID, "TRT_ID"));
+    ATH_MSG_DEBUG("Initialized TRTIDHelper");
+  } else {
+    ATH_MSG_INFO("DoTRT disabled (ITk geometry?); skipping TRT_ID retrieval");
+  }
 
   ATH_CHECK(m_trackSelection.retrieve());
   ATH_MSG_DEBUG("Retrieved tool " << m_trackSelection);
@@ -434,7 +442,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
           else if(m_sctID->barrel_ec(surfaceID) == -2) nhsctECC++;
         }
         // --- trt hit count
-        if (m_idHelper->is_trt(surfaceID)){
+        if (m_doTRT && m_trtID && m_idHelper->is_trt(surfaceID)){
           int barrel_ec      = m_trtID->barrel_ec(surfaceID);
           if(barrel_ec == 1 || barrel_ec == -1 ) {
             nhtrtB++;

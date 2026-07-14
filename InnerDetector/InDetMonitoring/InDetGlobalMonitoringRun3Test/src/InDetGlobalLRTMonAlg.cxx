@@ -37,10 +37,17 @@ InDetGlobalLRTMonAlg::~InDetGlobalLRTMonAlg() {}
 
 
 StatusCode InDetGlobalLRTMonAlg::initialize() {
-  ATH_CHECK( m_IBLParameterSvc.retrieve() ); 
-  
-  m_doIBL = m_IBLParameterSvc->containsIBL();
-  
+  // IBLParameterSvc is only present for the Run 1-3 InnerDetector.
+  // For ITk (Run 4) the service handle is set to an empty string by
+  // the python configuration; in that case respect the explicit DoIBL
+  // property instead of querying the service.
+  if ( !m_IBLParameterSvc.empty() ) {
+    ATH_CHECK( m_IBLParameterSvc.retrieve() );
+    m_doIBL = m_IBLParameterSvc->containsIBL();
+  } else {
+    ATH_MSG_INFO("IBLParameterSvc not configured (ITk geometry?); using DoIBL=" << m_doIBL);
+  }
+
   if (!m_trackSelTool.empty() )      ATH_CHECK( m_trackSelTool.retrieve() );
 
   ATH_CHECK( m_trackParticleName.initialize() );

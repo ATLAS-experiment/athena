@@ -11,16 +11,22 @@
 
 from math import pi as M_PI
 
-def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
+def IDAlignMonGenericTracksAlgCfg(helper, alg, flags=None, **kwargs):
+
+    # ITk extends |eta| acceptance to 4.0 and Phase II reco delivers
+    # many more tracks per event than Run 1-3.  Widen the relevant
+    # axes when the ITk geometry is active.  Pixel hits per track also
+    # grow because ITk has more pixel layers (5 barrel + endcap rings).
+    isITk = bool(flags) and flags.Detector.GeometryITk
 
     # values
     m_pTRange = 100
-    m_NTracksRange = 100
-    m_rangePixHits = 10
+    m_NTracksRange = 5000 if isITk else 100
+    m_rangePixHits = 20 if isITk else 10
     m_rangeSCTHits = 20
     m_rangeTRTHits = 60
-    m_etaRange = 2.7
-    m_etaBins = 40
+    m_etaRange = 4.0 if isITk else 2.7
+    m_etaBins = 80 if isITk else 40
     m_phiBins = 80
     m_d0BsNbins = 100
     m_d0Range = 2

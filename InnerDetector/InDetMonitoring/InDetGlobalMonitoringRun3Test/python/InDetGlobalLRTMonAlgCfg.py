@@ -12,14 +12,18 @@
 from math import pi as M_PI
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HistoInDetGlobalLRTMonAlgCfg(helper, alg):
+def HistoInDetGlobalLRTMonAlgCfg(helper, alg, flags=None):
+
+    # ITk extends tracking acceptance to |eta|<4.0; widen the eta axes
+    # when the ITk geometry is active.
+    isITk = bool(flags) and flags.Detector.GeometryITk
 
     # values
-    m_nBinsEta = 50
+    m_nBinsEta = 80 if isITk else 50
     m_nBinsPhi = 50
     m_trackBin = 200
-    m_c_etaRange = 3
-    m_c_etaRangeTRT = 2.0
+    m_c_etaRange = 4.0 if isITk else 3
+    m_c_etaRangeTRT = 2.0  # TRT-specific; not used when ITk
     m_c_range_LB = 3000
 
     # this creates a "lrtGroup" called "alg" which will put its histograms into the subdirectory "Track"
@@ -204,10 +208,17 @@ def InDetGlobalLRTMonAlgCfg(helper, acc,
     from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
     from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
 
+    # IBLParameterSvc only exists for the Run 1-3 InnerDetector geometry.
+    # For ITk blank out the service handle so the algorithm does not try
+    # to retrieve it.
+    if flags.Detector.GeometryITk:
+        kwargs.setdefault("IBLParameterSvc", "")
+        kwargs.setdefault("DoIBL", False)
+
     monAlg = helper.addAlgorithm(
         CompFactory.InDetGlobalLRTMonAlg, name,
         addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
         **kwargs)
 
-    HistoInDetGlobalLRTMonAlgCfg(helper, monAlg)
+    HistoInDetGlobalLRTMonAlgCfg(helper, monAlg, flags)
     return

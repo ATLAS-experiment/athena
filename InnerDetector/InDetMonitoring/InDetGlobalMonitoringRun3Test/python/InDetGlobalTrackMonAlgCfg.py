@@ -13,16 +13,22 @@ from math import pi as M_PI
 from AthenaConfiguration.Enums import BeamType
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HistoInDetGlobalTrackMonAlgCfg(helper, alg):
+def HistoInDetGlobalTrackMonAlgCfg(helper, alg, flags=None):
+
+    # ITk extends tracking acceptance from |eta|<2.5 (Run 1-3 ID) to
+    # |eta|<4.0; phase-II pile-up (mu=200) also drives much higher
+    # baseline track multiplicities per event.  Widen the relevant
+    # axes when the ITk geometry is active.
+    isITk = bool(flags) and flags.Detector.GeometryITk
 
     # values
-    m_nBinsEta = 50
+    m_nBinsEta = 80 if isITk else 50
     m_nBinsPhi = 50
-    m_trackBin = 150
-    m_c_etaRange = 2.5
-    m_c_etaRangeTRT = 2.0
+    m_trackBin = 300 if isITk else 150
+    m_c_etaRange = 4.0 if isITk else 2.5
+    m_c_etaRangeTRT = 2.0  # TRT-specific; not used when ITk
     m_c_range_LB = 3000
-    m_trackMax = 150
+    m_trackMax = 3000 if isITk else 150
 
     # this creates a "trackGroup" called "alg" which will put its histograms into the subdirectory "Track"
     trackGroup = helper.addGroup(alg, 'Track')
@@ -228,10 +234,19 @@ def InDetGlobalTrackMonAlgCfg(helper, acc,
     from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
     from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
 
+    # IBLParameterSvc only exists for the Run 1-3 InnerDetector geometry.
+    # For ITk (Run 4) blank out the service handle and disable IBL-specific
+    # logic; the algorithm tolerates an empty IBLParameterSvc handle.
+    if flags.Detector.GeometryITk:
+        kwargs.setdefault("IBLParameterSvc", "")
+        kwargs.setdefault("DoIBL", False)
+        # TIDE relies on Pixel split-hit info via ghost-associated tracks
+        # in jets; keep enabled (Phase II reco does provide pixel splits).
+
     monAlg = helper.addAlgorithm(
         CompFactory.InDetGlobalTrackMonAlg, name,
         addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
         **kwargs)
 
-    HistoInDetGlobalTrackMonAlgCfg(helper, monAlg)
+    HistoInDetGlobalTrackMonAlgCfg(helper, monAlg, flags)
     return

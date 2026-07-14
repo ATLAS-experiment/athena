@@ -100,6 +100,10 @@ private:
   bool  m_doIP{};
   bool  m_doHitQuality{false};
   bool  m_applyTrkSel{};
+  // For ITk geometry: skip retrieval of TRT_ID and skip all TRT-related
+  // hit/identifier handling in fillHistograms().  Defaults to true so
+  // the Run 1-3 InnerDetector behaviour is preserved.
+  bool  m_doTRT{true};
   
   SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimContainerName{this,"vxPrimContainerName","PrimaryVertices","Primary Vertices for Alignment Monitoring"};
   SG::ReadHandleKey<TrackCollection> m_tracksKey  {this, "TrackName2", "ExtendedTracks", "track data key"};
