@@ -22,6 +22,7 @@
 #include "SGCore/ILockable.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IOpaqueAddress.h"
+#include "GaudiKernel/SmartIF.h"
 #include <vector>
 #include <algorithm>
 #include <chrono>
@@ -91,7 +92,7 @@ public:
   { std::cout << "dataProvider\n"; std::abort(); }
   virtual StatusCode setConversionSvc(IConversionSvc* /*pService*/) override
   { std::cout << "setConversionSvc\n"; std::abort(); }
-  virtual SmartIF<IConversionSvc>& conversionSvc()    const override
+  virtual SmartIF<IConversionSvc> conversionSvc() override
   { std::cout << "conversionSvc\n"; std::abort(); }
   virtual StatusCode setAddressCreator(IAddressCreator* /*creator*/) override
   { std::cout << "setAddressCreator\n"; std::abort(); }

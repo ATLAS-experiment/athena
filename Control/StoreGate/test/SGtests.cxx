@@ -478,7 +478,7 @@ namespace Athena_test
     virtual StatusCode setDataProvider(IDataProviderSvc*) override { abort(); }
     virtual SmartIF<IDataProviderSvc>& dataProvider() const override { abort(); }
     virtual StatusCode setConversionSvc(IConversionSvc*) override { abort(); }
-    virtual SmartIF<IConversionSvc>& conversionSvc()    const override { abort(); }
+    virtual SmartIF<IConversionSvc> conversionSvc() override { abort(); }
     virtual StatusCode setAddressCreator(IAddressCreator*) override { abort(); }
     virtual SmartIF<IAddressCreator>& addressCreator()    const override { abort(); }
     virtual StatusCode fillObjRefs(IOpaqueAddress*, DataObject*) override { abort(); }
