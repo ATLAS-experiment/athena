@@ -57,11 +57,6 @@ namespace LVL1 {
    }
 
 
-
-  void gFEXSysSim::cleanup()   {
-  }
-
-
    int gFEXSysSim::calcTowerID(int eta, int phi, int nphi, int mod) const {
 
       return ((nphi*eta) + phi + mod);
@@ -202,7 +197,7 @@ namespace LVL1 {
          }
       }
 
-      ATH_CHECK(m_gFEXSimTool->executegFEXSim(tmp_gTowersIDs_subset, gFEXOutputs));
+      ATH_CHECK(m_gFEXSimTool->execute(ctx, tmp_gTowersIDs_subset, gFEXOutputs));
       
       const std::vector<uint32_t>& allgRhoTobs = m_gFEXSimTool->getgRhoTOBs();
       const std::vector<uint32_t>& allgBlockTobs = m_gFEXSimTool->getgBlockTOBs();
@@ -217,8 +212,6 @@ namespace LVL1 {
       const std::vector<uint32_t>& allgMETComponentsRmsTobs = m_gFEXSimTool->getgMETComponentsRmsTOBs();
       const std::vector<uint32_t>& allgScalarENoiseCutTobs = m_gFEXSimTool->getgScalarENoiseCutTOBs();
       const std::vector<uint32_t>& allgScalarERmsTobs = m_gFEXSimTool->getgScalarERmsTOBs();
-
-      m_gFEXSimTool->reset();
 
       //Makes containers for different gFEX Jet objects
       std::unique_ptr< xAOD::gFexJetRoIContainer > gRhoContainer = std::make_unique<xAOD::gFexJetRoIContainer> ();

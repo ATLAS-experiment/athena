@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jTowerMakerFromJfexTowers_H
 #define jTowerMakerFromJfexTowers_H
-
-// STL
-#include <string>
 
 // Athena/Gaudi
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -14,7 +11,8 @@
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
 #include "jSuperCellTowerMapper.h"
 #include "jTowerBuilder.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
+
+#include <string>
 
 class CaloIdManager;
 

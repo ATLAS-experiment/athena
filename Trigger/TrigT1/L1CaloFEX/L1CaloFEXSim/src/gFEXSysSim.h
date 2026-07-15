@@ -47,8 +47,6 @@ namespace LVL1 {
 
     virtual StatusCode execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs) override ;
 
-    virtual void cleanup() override;
-
     virtual int calcTowerID(int eta, int phi, int nphi, int mod) const override ;
 
     /**Create and fill a new gFexJetRoI object, and return a pointer to it*/

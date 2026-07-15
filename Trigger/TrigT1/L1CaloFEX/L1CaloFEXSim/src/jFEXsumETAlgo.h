@@ -43,8 +43,8 @@ namespace LVL1 {
 
     virtual void buildBarrelSumET()  override;
     virtual void buildFWDSumET()  override;
-    virtual std::tuple<int, bool> getETlowerEta(uint bin)  override;
-    virtual std::tuple<int, bool> getETupperEta(uint bin)  override;
+    virtual std::tuple<int, bool> getETlowerEta(uint bin) const override;
+    virtual std::tuple<int, bool> getETupperEta(uint bin) const override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
 protected:
@@ -57,10 +57,6 @@ protected:
         std::vector<std::vector<int>> m_FPGA_fcal;
         std::vector<int> m_SumET;
         std::vector<bool> m_SumETSat;
-        int  m_SumlowEta =0;
-        bool m_SumlowEtaSat =0;
-        int  m_SumhighEta=0;
-        bool m_SumhighEtaSat=0;
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
         

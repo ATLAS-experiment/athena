@@ -30,8 +30,8 @@ class IjFEXsumETAlgo : virtual public IAlgTool {
         
         virtual void buildBarrelSumET()  =0;
         virtual void buildFWDSumET()  =0;
-        virtual std::tuple<int, bool> getETlowerEta(uint )  =0;
-        virtual std::tuple<int, bool> getETupperEta(uint )  =0;
+        virtual std::tuple<int, bool> getETlowerEta(uint ) const =0;
+        virtual std::tuple<int, bool> getETupperEta(uint ) const =0;
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  =0;
         
     private:

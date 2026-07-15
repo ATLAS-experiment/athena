@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSim - Simulation of the gFEX module
@@ -45,13 +45,9 @@ namespace LVL1 {
     /** Destructor */
     virtual ~gFEXSim();
 
-    virtual void reset () override ;
-
-    virtual void execute() override ;
-
     virtual StatusCode initialize() override ;
 
-    virtual StatusCode executegFEXSim(const gTowersIDs& tmp, gFEXOutputCollection* gFEXOutputs) override;
+    virtual StatusCode execute(const EventContext& ctx, const gTowersIDs& tmp, gFEXOutputCollection* gFEXOutputs) override;
 
     virtual const std::vector<uint32_t>& getgRhoTOBs() const override;
 
@@ -79,10 +75,6 @@ namespace LVL1 {
 
     /** Internal data */
   private:
-
-    gTowersIDs m_gTowersIDs;
-
-    CaloCellContainer m_sCellsCollection;
 
     std::vector<uint32_t>  m_gRhoTobWords;
 

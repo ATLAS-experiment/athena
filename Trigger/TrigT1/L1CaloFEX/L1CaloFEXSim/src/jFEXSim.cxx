@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -741,7 +741,6 @@ void jFEXSim::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[FEXAlgoSpaceDefs::j
 std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getSmallRJetTOBs()
 { 
     std::vector< std::vector<std::unique_ptr<jFEXTOB>>> sjTOBs;
-    sjTOBs.clear();
     sjTOBs.resize(m_smallRJet_tobWords.size());
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
