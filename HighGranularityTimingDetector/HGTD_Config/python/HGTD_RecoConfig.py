@@ -29,6 +29,12 @@ def HGTD_RecoCfg(flags):
         result.merge(ActsHGTDTrackExtensionAlgCfg(flags))
 
         if flags.Tracking.doTruth:
+
+            # HGTD clusters to truth matching
+            from ActsConfig.ActsTruthConfig import ActsHgtdClusterToTruthAssociationAlgCfg
+            result.merge(ActsHgtdClusterToTruthAssociationAlgCfg(flags,DepositedEnergyMin=0))
+
+            # Extensions to truth matching
             from ActsConfig.ActsHGTDTrackExtensionAlgConfig import HGTDTruthTrackDecorationAlgCfg
             result.merge(HGTDTruthTrackDecorationAlgCfg(flags))
         
