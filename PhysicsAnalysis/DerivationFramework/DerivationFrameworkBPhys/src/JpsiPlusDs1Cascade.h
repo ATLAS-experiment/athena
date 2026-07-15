@@ -11,17 +11,14 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
+#include "GeneratorModules/GenData.h"
 #include <vector>
+#include <memory>
 #include "xAODEventInfo/EventInfo.h"
 // dummy EventContext for AnalysisBase
 #include "AsgTools/CurrentContext.h"
-
-namespace HepPDT{
-  class ParticleDataTable;
-}
 
 namespace Trk {
     class IVertexFitter;
@@ -77,7 +74,6 @@ namespace DerivationFramework {
         double m_vtx2Daug1MassHypo; // mass hypothesis of 1st daughter from vertex 2
         double m_vtx2Daug2MassHypo; // mass hypothesis of 2nd daughter from vertex 2
 
-        const HepPDT::ParticleDataTable* m_particleDataTable;
         double m_mass_jpsi;
         int    m_Dx_pid;
         bool   m_constrD0;
@@ -90,8 +86,6 @@ namespace DerivationFramework {
         PublicToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
         PublicToolHandle < Trk::V0Tools >                      m_V0Tools;
         PublicToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
-        ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
-
         bool        m_refitPV;
         std::string m_refPVContainerName;
         std::string m_hypoName;               //!< name of the mass hypothesis. E.g. Jpsi, Upsi, etc. Will be used as a prefix for decorations

@@ -13,7 +13,7 @@
 #include "xAODTracking/VertexAuxContainer.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
-#include "HepPDT/ParticleDataTable.hh"
+#include "GeneratorModules/GenData.h"
 #include "VxVertex/RecVertex.h"
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
 #include "TruthUtils/HepMCHelpers.h"
@@ -240,20 +240,18 @@ namespace DerivationFramework {
     ATH_CHECK( m_RelinkContainers.initialize() );
     ATH_CHECK( m_v0VtxOutputKey.initialize(SG::AllowEmpty) );
 
-    ATH_CHECK( m_partPropSvc.retrieve() );
-    auto pdt = m_partPropSvc->PDT();
+    auto gendata = std::make_shared<GenData>();
 
-    // https://gitlab.cern.ch/atlas/athena/-/blob/main/Generators/TruthUtils/TruthUtils/AtlasPID.h
-    m_mass_e = BPhysPVCascadeTools::getParticleMass(pdt, MC::ELECTRON);
-    m_mass_mu = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
-    m_mass_pion = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS);
-    m_mass_proton = BPhysPVCascadeTools::getParticleMass(pdt, MC::PROTON);
-    m_mass_Lambda = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDA0);
-    m_mass_Lambdab = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDAB0);
-    m_mass_BCPLUS = BPhysPVCascadeTools::getParticleMass(pdt, MC::BCPLUS);
-    m_mass_Ks = BPhysPVCascadeTools::getParticleMass(pdt, MC::K0S);
-    m_mass_Bpm = BPhysPVCascadeTools::getParticleMass(pdt, 521);
-    m_mass_phi = BPhysPVCascadeTools::getParticleMass(pdt, 333);
+    m_mass_e = gendata->particleMass(MC::ELECTRON).value();
+    m_mass_mu = gendata->particleMass(MC::MUON).value();
+    m_mass_pion = gendata->particleMass(MC::PIPLUS).value();
+    m_mass_proton = gendata->particleMass(MC::PROTON).value();
+    m_mass_Lambda = gendata->particleMass(MC::LAMBDA0).value();
+    m_mass_Lambdab = gendata->particleMass(MC::LAMBDAB0).value();
+    m_mass_BCPLUS = gendata->particleMass(MC::BCPLUS).value();
+    m_mass_Ks = gendata->particleMass(MC::K0S).value();
+    m_mass_Bpm = gendata->particleMass(521).value();
+    m_mass_phi = gendata->particleMass(333).value();
 
     m_massesV0_ppi.push_back(m_mass_proton);
     m_massesV0_ppi.push_back(m_mass_pion);
@@ -263,8 +261,8 @@ namespace DerivationFramework {
     m_massesV0_pipi.push_back(m_mass_pion);
 
     // retrieve particle masses
-    if(m_constrJpsi && m_massJpsi<0) m_massJpsi = BPhysPVCascadeTools::getParticleMass(pdt, MC::JPSI);
-    if(m_jxDaug_num>=3 && m_constrJX && m_massJX<0) m_massJX = BPhysPVCascadeTools::getParticleMass(pdt, MC::PSI2S);
+    if(m_constrJpsi && m_massJpsi<0) m_massJpsi = gendata->particleMass(MC::JPSI).value();
+    if(m_jxDaug_num>=3 && m_constrJX && m_massJX<0) m_massJX = gendata->particleMass(MC::PSI2S).value();
     if(m_jxDaug_num==4 && m_constrX && m_massX<0) m_massX = m_mass_phi;
     if(m_constrV01 || m_constrV02) {
       if(m_massLd<0) m_massLd = m_mass_Lambda;

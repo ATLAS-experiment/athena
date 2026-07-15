@@ -25,10 +25,6 @@ namespace Analysis{
   class PrimaryVertexRefitter;
 }
 
-namespace HepPDT{
-  class ParticleDataTable;
-}
-
 namespace DerivationFramework {
   
   class BPhysPVCascadeTools : public AthMessaging {
@@ -118,7 +114,6 @@ namespace DerivationFramework {
        static bool uniqueCollection(const std::vector<const xAOD::TrackParticle*>&, const std::vector<const xAOD::TrackParticle*>&);
        static bool LinkVertices(SG::AuxElement::Decorator<VertexLinkVector> &decor, const std::vector<const xAOD::Vertex*>& vertices,
                                                  const xAOD::VertexContainer* vertexContainer, const xAOD::Vertex* vert);
-       static double getParticleMass(const HepPDT::ParticleDataTable* pdt, int pdg);
   }; // class BPhysPVCascadeTools
 
 } // namespace DerivationFramework
