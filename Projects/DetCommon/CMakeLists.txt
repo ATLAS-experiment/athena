@@ -8,7 +8,7 @@ project( DetCommon VERSION ${_version} LANGUAGES C CXX )
 unset( _version )
 
 # Set the version of tdaq-common to use for the build:
-set( TDAQ-COMMON_VERSION "13-00-00" CACHE STRING
+set( TDAQ-COMMON_VERSION "14-00-00" CACHE STRING
    "The version of tdaq-common to use for the build" )
 set( TDAQ-COMMON_ATROOT
    "$ENV{TDAQ_RELEASE_BASE}/tdaq-common/tdaq-common-${TDAQ-COMMON_VERSION}"
@@ -22,9 +22,9 @@ find_package( AtlasCMake )
 atlas_set_compiler_defaults()
 
 # Build the project against LCG:
-set( LCG_VERSION_POSTFIX "a"   # Needs to match tdaq release (NO layer, ATLINFR-3977)
+set( LCG_VERSION_POSTFIX ""   # Needs to match tdaq release (NO layer, ATLINFR-3977)
    CACHE STRING "Version postfix for the LCG release to use" )
-set( LCG_VERSION_NUMBER 109
+set( LCG_VERSION_NUMBER 110
    CACHE STRING "Version number for the LCG release to use" )
 # Reduced set of LCG components (i.e. no generators):
 set( LCG_COMPONENTS "externals"
@@ -39,7 +39,6 @@ find_package( tdaq-common )
 find_package( XercesC )
 find_package( libffi )
 find_package( gl2ps )
-find_package( Vc )
 
 # Set up the build/runtime environment:
 set( DetCommonReleaseEnvironment_DIR ${CMAKE_SOURCE_DIR}/cmake CACHE PATH

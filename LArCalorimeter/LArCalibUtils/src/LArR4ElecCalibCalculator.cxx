@@ -236,6 +236,13 @@ StatusCode LArR4ElecCalibCalculator::stop() {
   //used for data-processing also in run 2 and 3.
   if (!m_crestDBStr.value().empty()) {
 
+    chai::Tag::Metadata chaiMD{.iovType=chai::Tag::IovType::RunNumberLumiBlock, 
+        .objectType="crest-json-single-iov",
+        .synchronization=chai::Tag::Synchronization::All, 
+        .status=chai::Tag::Status::Unlocked,
+        .nodeDescription = chai::Tag::buildNodeDescription(chai::Tag::IovType::RunNumberLumiBlock, "CondAttrListCollection", 1238547719u)
+       };
+
     std::vector<float> rampsHG, rampsMG, noiseHG, noiseMG, ped, pedRMS;
     const LArRampSym* rampsIn = nullptr;
     ATH_CHECK(detStore()->retrieve(rampsIn, "LArRampSym"));
@@ -273,15 +280,15 @@ StatusCode LArR4ElecCalibCalculator::stop() {
 
     // Pedestals
     {
-      chai::PayloadSpec spec(chai::FieldSpec({{"Pedestal", chai::Type::Blob}, {"PedestalRMS", chai::Type::Blob}, {"version", chai::Type::Uint32}}),
+      chai::PayloadSpec spec(chai::FieldSpec({{"Pedestal", chai::Type::Blob}, {"PedestalRMS", chai::Type::Blob}, {"version", chai::Type::UInt32}}),
 
                              chai::ChannelSpec({
                                  {0, "HIGHGain"},
                                  {1, "MEDGain"},
                              }));
 
-      auto tag = db.createTag("LARElecCalibPedestal-R4-00", "Pedestal of FEB 2", spec, chai::Tag::IovType::RunNumberLumiBlock, "crest-json-single-iov",
-                              chai::Tag::Synchronization::All, chai::Tag::Status::Unlocked);
+      auto tag = db.createTag("LARElecCalibPedestal-R4-00", "Pedestal of FEB 2", spec, chaiMD);
+       
 
       chai::Container container = tag->buildContainer();
       for (size_t g = 0; g < 2; ++g) {
@@ -293,15 +300,14 @@ StatusCode LArR4ElecCalibCalculator::stop() {
     }
     // Ramps
     {
-      chai::PayloadSpec spec(chai::FieldSpec({{"RampVec", chai::Type::Blob}, {"nPoints", chai::Type::Uint32}, {"version", chai::Type::Uint32}}),
+      chai::PayloadSpec spec(chai::FieldSpec({{"RampVec", chai::Type::Blob}, {"nPoints", chai::Type::UInt32}, {"version", chai::Type::UInt32}}),
 
                              chai::ChannelSpec({
                                  {0, "HIGHGain"},
                                  {1, "MEDGain"},
                              }));
 
-      auto tag = db.createTag("LARElecCalibRamp-R4-00", "Electronic gain of FEB 2", spec, chai::Tag::IovType::RunNumberLumiBlock, "crest-json-single-iov",
-                              chai::Tag::Synchronization::All, chai::Tag::Status::Unlocked);
+      auto tag = db.createTag("LARElecCalibRamp-R4-00", "Electronic gain of FEB 2", spec, chaiMD);
 
       chai::Container container = tag->buildContainer();
       container[0].push(std::move(vecToBlobData(rampsHG)));
@@ -316,16 +322,14 @@ StatusCode LArR4ElecCalibCalculator::stop() {
     }
     // Noise
     {
-      chai::PayloadSpec spec(chai::FieldSpec({{"Noise", chai::Type::Blob}, {"version", chai::Type::Uint32}}),
+      chai::PayloadSpec spec(chai::FieldSpec({{"Noise", chai::Type::Blob}, {"version", chai::Type::UInt32}}),
 
                              chai::ChannelSpec({
                                  {0, "HIGHGain"},
                                  {1, "MEDGain"},
                              }));
 
-      auto tag = db.createTag("LARElecCalibNoise-R4-00", "Noise of FEB 2 (in ADC counts)", spec, chai::Tag::IovType::RunNumberLumiBlock,
-                              "crest-json-single-iov", chai::Tag::Synchronization::All, chai::Tag::Status::Unlocked);
-
+      auto tag = db.createTag("LARElecCalibNoise-R4-00", "Noise of FEB 2 (in ADC counts)", spec, chaiMD);
       chai::Container container = tag->buildContainer();
 
       container[0].push(std::move(vecToBlobData(noiseHG)));
