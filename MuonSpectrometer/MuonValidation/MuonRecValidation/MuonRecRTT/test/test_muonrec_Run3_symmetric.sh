@@ -20,13 +20,14 @@
 # the input RDO was produced from /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/EVNT_DiMuon_10k__AbsEta_09_28__Pt_10_1000GeV.root
 # simulation/digitisation was executed in Athena,22.0.34 
 
-Reco_tf.py --CA True \
-           --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run3/RDO/RDO_DiMuon_Endcap_R3LatestLayout_sym_v1.root \
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+
+Reco_tf.py --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run3/RDO/RDO_DiMuon_Endcap_R3LatestLayout_sym_v1.root \
            --autoConfiguration everything \
            --preExec "flags.Detector.GeometryMM = True;flags.Detector.EnableMM = True" \
            --imf False \
            --postInclude MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg \
-           --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-11' \
+           --conditionsTag $conditions \
            --outputESDFile OUT_ESD.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf.py"

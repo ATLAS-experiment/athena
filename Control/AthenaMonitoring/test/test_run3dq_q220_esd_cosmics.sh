@@ -9,10 +9,11 @@
 # art-output: log*
 # art-athena-mt: 8
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+
 Reco_tf.py \
---CA \
 --AMI=q220 \
---conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' \
+--conditionsTag "all:$conditions" \
 --athenaopts='--threads=8' \
 --preExec='pass' \
 --maxEvents=100 \

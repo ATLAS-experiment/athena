@@ -22,13 +22,15 @@
 
 # Run each Reco_tf in a seperate directory
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+
 mkdir Serial
 cd Serial
 
 #####################################################################
-Reco_tf.py \
-           --CA 'True' \
-           --AMI q442 \
+
+Reco_tf.py --AMI q442 \
+           --conditionsTag $conditions \
            --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --postInclude "MuonPRDTest.HitValAlgReco.HitValAlgRecoCfg" \
            --postExec 'cfg.getEventAlgo("RecoValidAlg").doCSCSDO=False;cfg.getEventAlgo("RecoValidAlg").doMuEntry=False;cfg.getEventAlgo("RecoValidAlg").doMDTSDO=False;cfg.getEventAlgo("RecoValidAlg").doRPCSDO=False;cfg.getEventAlgo("RecoValidAlg").doTGCSDO=False;cfg.getEventAlgo("RecoValidAlg").doTruth=False' \
@@ -51,8 +53,8 @@ cd 1thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
-Reco_tf.py --CA 'all:True' \
-           --AMI q442 \
+Reco_tf.py --AMI q442 \
+           --conditionsTag $conditions \
            --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --imf False \
            --athenaopts="--threads=1" \
