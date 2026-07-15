@@ -4,17 +4,15 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
-
-# Jet config imports
-#from BoostedJetTaggers.BoostedJetTaggerConfig import BJTToolCfg
+from AthenaCommon.Constants import DEBUG 
 
 
-class JetBJTAnalysisConfig (ConfigBlock) :
+class BoostedJetTaggerAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the Boosted Jet Tagger tool sequence"""
 
     def __init__ (self) :
-        super (JetBJTAnalysisConfig, self).__init__ ()
-        self.setBlockName('BJT')
+        super (BoostedJetTaggerAnalysisConfig, self).__init__ ()
+        self.setBlockName('BoostedJetTagger')
 
         self.addOption ('containerName', '', type=str,
             noneAction='error',
@@ -35,7 +33,7 @@ class JetBJTAnalysisConfig (ConfigBlock) :
 
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.containerName + '_testBJT_' # + self.postfix
+        return self.containerName + '_BoostedJetTagger_'
 
     def makeAlgs (self, config) :
 
@@ -44,23 +42,15 @@ class JetBJTAnalysisConfig (ConfigBlock) :
         # Set up the per-event jet efficiency scale factor calculation algorithm
         alg = config.createAlgorithm('BJT::BoostedJetTaggerAlg', 'BoostedJetTaggerAlg')
 
-        # configure tool
-        #ConfigFile = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/WTagger/WTagger_AntiKt10UFOSoftDrop_ParT_FixSigEff50.dat'
-        #tool = BJTToolCfg(config.flags, 
-        #                  #ConfigFile=self.ConfigFile, 
-        #                  ConfigFile=ConfigFile, 
-        #                  ContainerName=self.containerName)
-
+        # configure the tool
         config.addPrivateTool( 'tagger', 'SmoothedWZTagger' )
         alg.tagger.ConfigFile = self.ConfigFile
         alg.tagger.CalibArea = self.CalibArea
-        alg.tagger.IsMC = self.IsMC
+        alg.tagger.IsMC = self.IsMC ### to adjust
+        alg.tagger.OutputLevel = DEBUG ### to remove
 
         # configure algorithm
-        #alg.jets = self.containerName
         alg.jets = config.readName(self.containerName)
 
-        #alg.tagger = tool
-
         # output info
-        #config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_jvt_effSF' + postfix)
+        config.addOutputVar(self.containerName, 'WTransformer_Tagged', 'WTransformer_Tagged', auxType='char') # harmonise the decoration tag with the cfg file
