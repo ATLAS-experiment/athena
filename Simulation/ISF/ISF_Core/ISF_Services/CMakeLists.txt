@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_Services )
@@ -48,7 +48,9 @@ atlas_add_test( InputConverter_test
                 TruthUtils
                 ENVIRONMENT
                 "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"
-                POST_EXEC_SCRIPT nopost.sh
+                # Intentional error.
+                LOG_IGNORE_PATTERN "missing production vertex"
+                POST_EXEC_SCRIPT noerror.sh
                 )
 # Needed for the plugin service to see the test components
 # defined in the test binary.
@@ -80,13 +82,13 @@ atlas_add_test( TruthSvc_test
                   TruthUtils
                 ENVIRONMENT
                   "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
                 )
 
 #test ISF_ServicesConfig
 atlas_add_test( ISF_ServicesConfig_test
                 SCRIPT test/ISF_ServicesConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh
+                POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 300 )
 
 # Needed for the plugin service to see the test components
