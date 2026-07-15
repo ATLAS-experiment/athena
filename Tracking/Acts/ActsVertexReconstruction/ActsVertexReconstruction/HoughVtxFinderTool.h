@@ -17,8 +17,8 @@
 
 #include "ActsInterop/Logger.h"
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/Vertexing/HoughVertexFinder2.hpp"
-#include "Acts/EventData/SpacePointContainer2.hpp"
+#include "Acts/Vertexing/HoughVertexFinder.hpp"
+#include "Acts/EventData/SpacePointContainer.hpp"
 
 #include <cmath>
 #include <memory> // unique_ptr
@@ -53,7 +53,7 @@ private:
   std::unique_ptr<const Acts::Logger> m_logger{nullptr};
   const Acts::Logger &logger() const { return *m_logger; }
 
-  using VertexFinder = Acts::HoughVertexFinder2;
+  using VertexFinder = Acts::HoughVertexFinder;
   VertexFinder::Config m_finderCfg;
 
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
