@@ -8,9 +8,11 @@
 # art-output: log*
 # art-athena-mt: 3
 
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+
 Reco_tf.py --athenaopts='--threads=1' \
 --AMI=q442 \
---CA "True" \
+--conditionsTag "$conditions" \
 --preExec "all:flags.DQ.Steering.doHLTMon=False" \
 --imf False
 
