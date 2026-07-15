@@ -14,11 +14,11 @@
 #include "xAODTracking/VertexContainer.h"
 
 // ACTS CORE
-#include "Acts/EventData/SeedContainer2.hpp"
-#include "Acts/EventData/SpacePointContainer2.hpp"
-#include "Acts/Seeding2/BroadTripletSeedFilter.hpp"
-#include "Acts/Seeding2/CylindricalSpacePointGrid2.hpp"
-#include "Acts/Seeding2/TripletSeeder.hpp"
+#include "Acts/EventData/SeedContainer.hpp"
+#include "Acts/EventData/SpacePointContainer.hpp"
+#include "Acts/Seeding/BroadTripletSeedFilter.hpp"
+#include "Acts/Seeding/CylindricalSpacePointGrid.hpp"
+#include "Acts/Seeding/TripletSeeder.hpp"
 
 // Other
 #include <memory>
@@ -369,7 +369,7 @@ class GridTripletSeedingTool
                                       45. * Acts::UnitConstants::mm};
 
  private:
-  Acts::CylindricalSpacePointGrid2::Config m_gridCfg;
+  Acts::CylindricalSpacePointGrid::Config m_gridCfg;
   Acts::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
   Acts::DoubletSeedFinder::Config m_topDoubletFinderCfg;
   Acts::TripletSeedFinder::Config m_tripletFinderCfg;
@@ -388,12 +388,12 @@ class GridTripletSeedingTool
 
   bool spacePointSelectionFunction(const xAOD::SpacePoint* sp, float r) const;
 
-  bool doubletSelectionFunction(const Acts::ConstSpacePointProxy2& middle,
-                                const Acts::ConstSpacePointProxy2& other,
+  bool doubletSelectionFunction(const Acts::ConstSpacePointProxy& middle,
+                                const Acts::ConstSpacePointProxy& other,
                                 float cotTheta, bool isBottomCandidate) const;
 
   std::pair<float, float> retrieveRadiusRangeForMiddle(
-      const Acts::ConstSpacePointProxy2& spM,
+      const Acts::ConstSpacePointProxy& spM,
       const Acts::Range1D<float>& rMiddleSpRange) const;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{this, "inputHoughVtx", "", "input vertex container"};

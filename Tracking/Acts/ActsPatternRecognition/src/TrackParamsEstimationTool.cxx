@@ -6,7 +6,7 @@
 #include "xAODInDetMeasurement/SpacePoint.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "Acts/Seeding/EstimateTrackParamsFromSeed.hpp"
-#include "Acts/SpacePointFormation2/StripSpacePointCalibration.hpp"
+#include "Acts/SpacePointFormation/StripSpacePointCalibration.hpp"
 #include "Acts/EventData/StripSpacePointCalibrationDetails.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
 

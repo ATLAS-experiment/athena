@@ -137,11 +137,20 @@ std::shared_ptr<BlueprintNode> ActsTrk::CaloBlueprintNodeBuilder::buildBlueprint
 
   CylinderContainerBlueprintNode& caloEndCapDiscNegativeZNode = caloNode->addCylinderContainer("CaloEndCapDiscNegativeZ", AxisDirection::AxisZ);
   caloEndCapDiscNegativeZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
-  caloEndCapDiscNegativeZNode.setResizeStrategy(ResizeStrategy::Gap);
+  // The -z end of this container defines the calorimeter's global minZ, so the
+  // enclosing envelope's -z edge coincides with this container's own -z edge to
+  // within floating-point rounding. With ResizeStrategy::Gap on that side, the
+  // resize mints a degenerate (~1e-13 mm) end-gap volume whose two disc faces
+  // coincide, which CylinderNavigationPolicy cannot resolve. Expand the
+  // outermost wheel on the boundary (-z) side instead; keep Gap on the interior
+  // (+z) side. NOTE: (inner, outer) map to (minZ, maxZ) for an AxisZ stack.
+  caloEndCapDiscNegativeZNode.setResizeStrategies(ResizeStrategy::Expand, ResizeStrategy::Gap);
 
   CylinderContainerBlueprintNode& caloEndCapDiscPositiveZNode = caloNode->addCylinderContainer("CaloEndCapDiscPositiveZ", AxisDirection::AxisZ);
   caloEndCapDiscPositiveZNode.setAttachmentStrategy(VolumeAttachmentStrategy::Gap);
-  caloEndCapDiscPositiveZNode.setResizeStrategy(ResizeStrategy::Gap);
+  // Mirror of the negative endcap: the +z (maxZ, outer) end is the global maxZ
+  // boundary, so Expand there and keep Gap on the interior (-z) side.
+  caloEndCapDiscPositiveZNode.setResizeStrategies(ResizeStrategy::Gap, ResizeStrategy::Expand);
   
   for (unsigned int sampleIndex = 0; sampleIndex < m_caloDiscSampleList.size(); ++sampleIndex) {
     auto& sampleName = m_caloDiscSampleList.at(sampleIndex).first;
