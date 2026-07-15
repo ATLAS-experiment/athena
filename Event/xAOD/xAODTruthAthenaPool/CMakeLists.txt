@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODTruthAthenaPool )
@@ -35,8 +35,11 @@ find_package( AthenaPoolUtilitiesTest )
 if( ATHENAPOOLUTILITIESTEST_FOUND AND NOT SIMULATIONBASE
    AND NOT GENERATIONBASE )
    set( XAODTRUTHATHENAPOOL_REFERENCE_TAG
-      xAODTruthAthenaPoolReference-01-01-00 )
+      xAODTruthAthenaPoolReference-01-02-00 )
    run_tpcnv_test( xAODTruthAthenaPool_21.0.79   AOD-21.0.79-full
+      REQUIRED_LIBRARIES xAODTruthAthenaPoolPoolCnv
+      REFERENCE_TAG ${XAODTRUTHATHENAPOOL_REFERENCE_TAG} )
+   run_tpcnv_test( xAODTruthAthenaPool_FUTURE   EVNT_FUTURE
       REQUIRED_LIBRARIES xAODTruthAthenaPoolPoolCnv
       REFERENCE_TAG ${XAODTRUTHATHENAPOOL_REFERENCE_TAG} )
 elseif( NOT ATHENAPOOLUTILITIESTEST_FOUND )
