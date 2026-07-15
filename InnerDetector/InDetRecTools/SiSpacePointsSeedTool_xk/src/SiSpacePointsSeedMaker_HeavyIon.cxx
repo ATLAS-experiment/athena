@@ -609,7 +609,9 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::buildFrameWork()
   m_dzdrmin   =-m_dzdrmax                      ;
   m_COF       =  134*.05*9.                    ;
   m_ipt       = 1.f/std::abs(.9f*m_ptmin)            ;
-  m_iptmax  = 1.f/std::abs(1.1f*m_ptmax);
+  m_iptmax  = m_ptmax == std::numeric_limits<float>::max()
+    ? 0.f
+    : 1.f/std::abs(1.1f*m_ptmax);
   m_ipt2      = m_ipt*m_ipt                    ;
 
   // Build radius sorted containers
@@ -955,7 +957,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production2Sp(EventData& data) cons
 	    // min pt cut
 	    if (std::abs(B*data.K) > m_ipt*std::sqrt(1.f+A*A)) continue;
 	    // max pt cut
-	    if (std::abs(B*data.K) < m_iptmax*std::sqrt(1.f+A*A)) continue;
+	    if (std::abs(B * data.K) < m_iptmax * std::sqrt(1.f + A * A)) continue;
             ++nseed;
 	    newSeed(data, (*r)->spacepoint, (*r0)->spacepoint,Zo);
 	  }
