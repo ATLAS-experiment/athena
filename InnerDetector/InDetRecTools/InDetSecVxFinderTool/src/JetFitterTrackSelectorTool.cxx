@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 */
 #include "InDetSecVxFinderTool/JetFitterTrackSelectorTool.h"
 #include <cassert>
@@ -69,6 +69,8 @@ using namespace InDet;
 	//  0: extrapolation of MeasuredPerigee failed
 	//  1: primary
 	//  2: secondary
+	//'tmp' is checked in dbg builds, should be enough; _could_ probably use static_cast there
+	//coverity[FORWARD_NULL]
 	int type = computeTrackCompatibility( primaryVertex,jetMomentum,*tmp );
 
 	// Create Trk::ITrackLink collections to be given to selected tracks
