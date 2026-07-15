@@ -11,7 +11,6 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IPartPropSvc.h"
 
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
@@ -70,7 +69,6 @@ namespace DerivationFramework {
     PublicToolHandle < Analysis::PrimaryVertexRefitter > m_pvRefitter{this, "PVRefitter", "Analysis::PrimaryVertexRefitter"}; // private tool
     PublicToolHandle < Trk::V0Tools > m_V0Tools{this, "V0Tools", "Trk::V0Tools"};
     PublicToolHandle < DerivationFramework::CascadeTools > m_CascadeTools{this, "CascadeTools", "DerivationFramework::CascadeTools"};
-    ServiceHandle<IPartPropSvc> m_partPropSvc{this, "PartPropSvc", "PartPropSvc"};
 
     Gaudi::Property<int> m_jpsi_trk_pdg{this, "JpsiTrackPDGID", 13}; // PDG ID for J/psi tracks, can be either 11 or 13
     Gaudi::Property<bool> m_refitPV{this, "RefitPV",  true};

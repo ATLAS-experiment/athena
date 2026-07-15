@@ -8,7 +8,6 @@
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
 #include "BPhysPVCascadeTools.h"
 #include "xAODTracking/VertexAuxContainer.h"
@@ -24,11 +23,6 @@ namespace DerivationFramework {
     typedef std::vector<VertexLink> VertexLinkVector;
     typedef std::vector<const xAOD::TrackParticle*> TrackBag;
 
-    double JpsiPlusDs1Cascade::getParticleMass(int pdgcode) const{
-       auto ptr = m_particleDataTable->particle( pdgcode );
-       return ptr ? ptr->mass() : 0.;
-    }
-
     StatusCode JpsiPlusDs1Cascade::initialize() {
 
         // retrieving vertex Fitter
@@ -43,22 +37,18 @@ namespace DerivationFramework {
         // Get the beam spot service
         ATH_CHECK(m_eventInfo_key.initialize());
 
-        ATH_CHECK( m_partPropSvc.retrieve() );
-        m_particleDataTable = m_partPropSvc->PDT();
-
-        // retrieve particle masses
-        if(m_mass_jpsi < 0. ) m_mass_jpsi = getParticleMass(MC::JPSI);
-        if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = getParticleMass(MC::BCPLUS);
-        if(m_vtx1MassHypo < 0.) m_vtx1MassHypo = getParticleMass(MC::D0);
-        if(m_vtx2MassHypo < 0.) m_vtx2MassHypo = getParticleMass(MC::K0S);
-
-        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = getParticleMass(MC::MUON);
-        if(m_vtx0Daug2MassHypo < 0.) m_vtx0Daug2MassHypo = getParticleMass(MC::MUON);
-        if(m_vtx0Daug3MassHypo < 0.) m_vtx0Daug3MassHypo = getParticleMass(MC::PIPLUS);
-        if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = getParticleMass(MC::PIPLUS);
-        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = getParticleMass(MC::KPLUS);
-        if(m_vtx2Daug1MassHypo < 0.) m_vtx2Daug1MassHypo = getParticleMass(MC::PIPLUS);
-        if(m_vtx2Daug2MassHypo < 0.) m_vtx2Daug2MassHypo = getParticleMass(MC::PIPLUS);
+        auto gendata = std::make_unique<GenData>();
+        if(m_mass_jpsi < 0. ) m_mass_jpsi = gendata->particleMass(MC::JPSI).value();
+        if(m_vtx0MassHypo < 0.) m_vtx0MassHypo = gendata->particleMass(MC::BCPLUS).value();
+        if(m_vtx1MassHypo < 0.) m_vtx1MassHypo = gendata->particleMass(MC::D0).value();
+        if(m_vtx2MassHypo < 0.) m_vtx2MassHypo = gendata->particleMass(MC::K0S).value();
+        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = gendata->particleMass(MC::MUON).value();
+        if(m_vtx0Daug2MassHypo < 0.) m_vtx0Daug2MassHypo = gendata->particleMass(MC::MUON).value();
+        if(m_vtx0Daug3MassHypo < 0.) m_vtx0Daug3MassHypo = gendata->particleMass(MC::PIPLUS).value();
+        if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = gendata->particleMass(MC::PIPLUS).value();
+        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = gendata->particleMass(MC::KPLUS).value();
+        if(m_vtx2Daug1MassHypo < 0.) m_vtx2Daug1MassHypo = gendata->particleMass(MC::PIPLUS).value();
+        if(m_vtx2Daug2MassHypo < 0.) m_vtx2Daug2MassHypo = gendata->particleMass(MC::PIPLUS).value();
 
         return StatusCode::SUCCESS;
     }
@@ -529,7 +519,6 @@ namespace DerivationFramework {
     m_vtx1Daug2MassHypo(-1),
     m_vtx2Daug1MassHypo(-1),
     m_vtx2Daug2MassHypo(-1),
-    m_particleDataTable(nullptr),
     m_mass_jpsi(-1),
     m_Dx_pid(421),
     m_constrD0(true),
