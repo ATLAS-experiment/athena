@@ -189,6 +189,10 @@ namespace MuonR4::SegmentFit{
                                       HitVec_t&& calibHits) const {
         
         const Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
+        if (!checkPrecHitCount(calibHits) ) {
+            ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Not enough degree of freedom available. What shall be fitted?!");
+            return nullptr;
+        }
         if (m_cfg.visionTool) {
             Result_t preFit{};
             preFit.parameters = startPars;
@@ -627,9 +631,11 @@ namespace MuonR4::SegmentFit{
             }
             /** Check whether there is at least one of each micromega strip type.
              *  To have a sane topology we need to have at least 2 strips from one kind. */
-            const std::size_t nEtaOrientations = 
-                std::ranges::count_if(nStrips, [](std::size_t n){ return n > 0; }) +
-                std::ranges::any_of(  nStrips, [](std::size_t n){ return n > 1; });
+            std::size_t nEtaOrientations = 
+                std::ranges::count_if(nStrips, [](std::size_t n){ return n > 0; });
+            if (nEtaOrientations == 3u) {
+                nEtaOrientations += std::ranges::any_of(  nStrips, [](std::size_t n){ return n > 1; });
+            }
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<":  nHits: "<<candidateHits.size()
                 <<", nPhiHits: "<<nPhiHits<<", nEtaOrientations: "<<nEtaOrientations
                 <<", N X-strips: "<<nStrips[0]<<", U-strips: "<<nStrips[1]<<", V-strips: "<<nStrips[2]);
