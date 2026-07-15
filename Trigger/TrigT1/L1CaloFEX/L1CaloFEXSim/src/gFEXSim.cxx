@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSim - Simulation of the gFEX module
@@ -25,19 +25,6 @@ namespace LVL1 {
    }
 
 
-   void gFEXSim::reset()
-   {
-      int rows = m_gTowersIDs.size();
-      int cols = m_gTowersIDs[0].size();
-
-      for (int i=0; i<rows; i++){
-         for (int j=0; j<cols; j++){
-            m_gTowersIDs[i][j] = 0;
-         }
-      }
-
-   }
-
    /** Destructor */
    gFEXSim::~gFEXSim(){
    }
@@ -52,21 +39,13 @@ namespace LVL1 {
       return StatusCode::SUCCESS;
    }
 
- void gFEXSim::execute(){
 
- }
-
-StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEXOutputCollection* gFEXOutputs){
+ StatusCode gFEXSim::execute(const EventContext& ctx, const gTowersIDs& tmp_gTowersIDs_subset, gFEXOutputCollection* gFEXOutputs){
 
    // Container to save gTowers
-   SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey);
+   SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey, ctx);
    ATH_CHECK(gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
    ATH_MSG_DEBUG("Recorded gFexTriggerTower container with key " << gTowersContainer.key());
-
-   int rows = tmp_gTowersIDs_subset.size();
-   int cols = tmp_gTowersIDs_subset[0].size();
-
-   std::copy(&tmp_gTowersIDs_subset[0][0], &tmp_gTowersIDs_subset[0][0]+(rows*cols),&m_gTowersIDs[0][0]);
 
    gTowersType Atwr = {{{0}}};
    gTowersType Btwr = {{{0}}};
@@ -81,7 +60,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    gTowersType Csat = {{{0}}};
 
 
-   //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
+   //FPGA A
    gTowersCentral tmp_gTowersIDs_subset_centralFPGA;
    memset(&tmp_gTowersIDs_subset_centralFPGA, 0, sizeof tmp_gTowersIDs_subset_centralFPGA);
    for (int myrow = 0; myrow<FEXAlgoSpaceDefs::centralNphi; myrow++){
@@ -89,13 +68,10 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
          tmp_gTowersIDs_subset_centralFPGA[myrow][mycol] = tmp_gTowersIDs_subset[myrow][mycol+8];
       }
    }
-   ATH_CHECK(m_gFEXFPGA_Tool->init(0));
-   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA, Atwr, Atwr50, Asat);
-   m_gFEXFPGA_Tool->reset();
 
-   //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(ctx, gTowersContainer, 0, tmp_gTowersIDs_subset_centralFPGA, Atwr, Atwr50, Asat);
 
-   //FPGA B----------------------------------------------------------------------------------------------------------------------------------------------
+   //FPGA B
    gTowersCentral tmp_gTowersIDs_subset_centralFPGA_B;
    memset(&tmp_gTowersIDs_subset_centralFPGA_B, 0, sizeof tmp_gTowersIDs_subset_centralFPGA_B);
    for (int myrow = 0; myrow<FEXAlgoSpaceDefs::centralNphi; myrow++){
@@ -103,14 +79,10 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
          tmp_gTowersIDs_subset_centralFPGA_B[myrow][mycol] = tmp_gTowersIDs_subset[myrow][mycol+20];
       }
    }
-   ATH_CHECK(m_gFEXFPGA_Tool->init(1));
-   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer, tmp_gTowersIDs_subset_centralFPGA_B,  Btwr, Btwr50, Bsat);
-   m_gFEXFPGA_Tool->reset();
 
-   //FPGA B----------------------------------------------------------------------------------------------------------------------------------------------
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(ctx, gTowersContainer, 1, tmp_gTowersIDs_subset_centralFPGA_B,  Btwr, Btwr50, Bsat);
 
-
-   //FPGA C ----------------------------------------------------------------------------------------------------------------------------------------------
+   //FPGA C
 
    // C-N
    //Use a matrix with 32 rows, even if FPGA-N (negative) also deals with regions of 16 bins in phi (those connected to FCAL).
@@ -146,15 +118,11 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
       }
    }
 
-   ATH_CHECK(m_gFEXFPGA_Tool->init(2));
-   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, tmp_gTowersIDs_subset_forwardFPGA_N, tmp_gTowersIDs_subset_forwardFPGA_P, Ctwr, Ctwr50, Csat);
-   m_gFEXFPGA_Tool->reset();
+   m_gFEXFPGA_Tool->FillgTowerEDMForward(ctx, gTowersContainer, 2, tmp_gTowersIDs_subset_forwardFPGA_N, tmp_gTowersIDs_subset_forwardFPGA_P, Ctwr, Ctwr50, Csat);
 
-
-   //FPGA C----------------------------------------------------------------------------------------------------------------------------------------------
 
    // Retrieve the L1 menu configuration
-   SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
+   SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey, ctx);
    ATH_CHECK(l1Menu.isValid());
 
    //Parameters related to gLJ (large-R jet objects - gJet)

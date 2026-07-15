@@ -25,8 +25,6 @@ Interface definition for gFEXSysSim
 
     virtual StatusCode execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs) = 0;
 
-    virtual void cleanup() = 0;
-
     virtual int calcTowerID(int eta, int phi, int nphi, int mod) const = 0 ;
 
     virtual StatusCode fillgRhoEDM(xAOD::gFexJetRoIContainer* gRhoContainer, uint32_t tobWord, int scale) const = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXaltMetAlgo - Noise cut and Rho+RMS algorithm for gFEX MET
@@ -13,7 +13,6 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IgFEXaltMetAlgo.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 

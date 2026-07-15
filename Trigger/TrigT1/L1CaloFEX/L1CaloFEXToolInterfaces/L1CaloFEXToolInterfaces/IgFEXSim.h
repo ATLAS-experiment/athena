@@ -23,11 +23,7 @@ Interface definition for gFEXSim
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual void reset() = 0;
-
-    virtual void execute() = 0;
-
-    virtual StatusCode executegFEXSim(const gTowersIDs& tmp, gFEXOutputCollection* gFEXOutputs) = 0;
+    virtual StatusCode execute(const EventContext& ctx, const gTowersIDs& tmp, gFEXOutputCollection* gFEXOutputs) = 0;
 
     virtual const std::vector<uint32_t>& getgRhoTOBs() const =0;
 

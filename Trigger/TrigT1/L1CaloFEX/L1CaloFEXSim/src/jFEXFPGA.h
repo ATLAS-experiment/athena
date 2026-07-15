@@ -113,17 +113,8 @@ namespace LVL1 {
     int m_jTowersIDs_Wide [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width] = {{0}};
     int m_jTowersIDs_Thin [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width] = {{0}};
     
-    std::unordered_map<int,jTower> m_jTowersColl;
-    std::unordered_map<int,std::vector<int> > m_map_Etvalues_FPGA;
     std::unordered_map<int,std::vector<int> > m_map_HAD_Etvalues_FPGA;
     std::unordered_map<int,std::vector<int> > m_map_EM_Etvalues_FPGA;
-    
-
-    std::unordered_map<int, jFEXForwardJetsInfo> m_FCALJets; 
-    std::unordered_map<uint, jFEXForwardElecInfo> m_ForwardElecs;
-
-    int m_SRJetET{};
-    int m_LRJetET{};
 
     SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyETowers", "jTowerContainer", "Input container for jTowers"};
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 
