@@ -8,8 +8,7 @@
 # 2012-12-05 Peter Onyisi
 
 def getmodule(modname):
-    import six
-    assert isinstance(modname, six.string_types), 'Argument to getmodule must be a string'
+    assert isinstance(modname, str), 'Argument to getmodule must be a string'
 
     # Local file?
     try:

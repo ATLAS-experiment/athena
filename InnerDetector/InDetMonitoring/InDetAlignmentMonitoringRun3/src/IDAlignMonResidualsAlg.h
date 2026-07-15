@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -21,6 +21,7 @@
 #include "TrkExInterfaces/IPropagator.h"
 #include "TrkToolInterfaces/IResidualPullCalculator.h"
 #include "InDetAlignGenTools/IInDetAlignHitQualSelTool.h"
+#include "TrkTrack/TrackCollection.h"
 
 #include <memory>
 #include <string>
@@ -84,7 +85,7 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
 
   std::string m_Pixel_Manager;
   std::string m_SCT_Manager;
-  bool m_extendedPlots;
+  bool m_extendedPlots{};
   bool m_doHitQuality{false};
   int  m_checkrate {};
   bool m_doPulls {};

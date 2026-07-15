@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -56,7 +56,7 @@ StatusCode IDAlignMonPVBiasesAlg::fillHistograms( const EventContext& ctx ) cons
   using namespace Monitored;
 
   // For histogram naming
-  auto pvGroup = getGroup("PVBiases");
+  const auto & pvGroup = getGroup("PVBiases");
 
   /******************************************************************
   ** Retrieve Trackparticles
@@ -86,7 +86,7 @@ StatusCode IDAlignMonPVBiasesAlg::fillHistograms( const EventContext& ctx ) cons
   /******************************************************************
   ** Trackparticle Loop
   *******************************************************************/
-  for (const auto& trackPart: *trackParticles) {
+  for (const auto trackPart: *trackParticles) {
     if ( !trackPart )
       {
 	ATH_MSG_DEBUG( "InDetAlignPVBiasesAlg: NULL track pointer in collection" );
@@ -110,7 +110,7 @@ StatusCode IDAlignMonPVBiasesAlg::fillHistograms( const EventContext& ctx ) cons
     // require at least 10 tracks associated
     if (foundVertex->nTrackParticles() < 10) continue;
 
-    std::unique_ptr<const Trk::ImpactParametersAndSigma> myIPandSigma(m_trackToVertexIPEstimator->estimate(trackPart, foundVertex, true));
+    std::unique_ptr<const Trk::ImpactParametersAndSigma> myIPandSigma(m_trackToVertexIPEstimator->estimate(ctx, trackPart, foundVertex, true));
 
     // require d0_pv to be smaller than 4
     if(myIPandSigma.get()==nullptr || std::abs(myIPandSigma->IPd0) > 4.0) continue;

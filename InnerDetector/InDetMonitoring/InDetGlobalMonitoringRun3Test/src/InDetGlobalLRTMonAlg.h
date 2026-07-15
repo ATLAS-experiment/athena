@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,7 +21,7 @@
 
 #include "GaudiKernel/EventContext.h"
 
-#include "PixelGeoModel/IBLParameterSvc.h"
+#include "PixelGeoModel/IIBLParameterSvc.h"
 
 #include "StoreGate/ReadHandleKey.h"
 
@@ -59,7 +59,7 @@ class InDetGlobalLRTMonAlg : public AthMonitorAlgorithm {
 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleName{this, "TrackParticleContainerName", "InDetLargeD0TrackParticles","TrackParticle Collection for Global Monitoring"};
 
-  ServiceHandle <IBLParameterSvc> m_IBLParameterSvc;
+  ServiceHandle <IIBLParameterSvc> m_IBLParameterSvc;
 
   bool m_doIBL;
   

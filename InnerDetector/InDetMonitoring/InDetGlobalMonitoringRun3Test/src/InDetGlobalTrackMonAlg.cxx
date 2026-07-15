@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -65,7 +65,7 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
   ATH_MSG_DEBUG("Filling InDetGlobalTrackMonAlg");
   
   // For histogram naming
-  auto trackGroup = getGroup("Track");
+  const auto & trackGroup = getGroup("Track");
   
   // m_manager->lumiBlockNumber() // not used anymore, now use
   int lb       = GetEventInfo(ctx)->lumiBlock();
@@ -91,7 +91,7 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
 
   uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
   
-  for (const auto& trackPart: *trackParticles) {
+  for (const auto trackPart: *trackParticles) {
     const Trk::Track * track = trackPart->track();
     if ( !track )
       {
@@ -339,7 +339,7 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
 		    } 
 		    if ( foundVertex )
 		      {
-			std::unique_ptr<const Trk::ImpactParametersAndSigma>myIPandSigma(m_trackToVertexIPEstimator->estimate(trackPart,foundVertex));
+			std::unique_ptr<const Trk::ImpactParametersAndSigma>myIPandSigma(m_trackToVertexIPEstimator->estimate(ctx, trackPart,foundVertex));
 			
 			if ( myIPandSigma )
 			  {
