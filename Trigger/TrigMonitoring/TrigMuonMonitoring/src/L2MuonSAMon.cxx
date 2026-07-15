@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L2MuonSAMon.h"
@@ -471,13 +471,13 @@ StatusCode L2MuonSAMon :: fillVariablesPerOfflineMuon(const EventContext &ctx, c
 
   if(!m_L2MuonSAContainerKey.empty()) {
     ATH_CHECK( fillVariablesRatioPlots<xAOD::L2StandAloneMuon>(ctx, mu, "L2SA", xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle,
-                                                              [this](const EventContext &ctx, const xAOD::Muon *mu){ return m_matchTool->matchL2SAReadHandle(ctx,mu); }
+                                                              [this](const EventContext &ctx, const xAOD::Muon *m){ return m_matchTool->matchL2SAReadHandle(ctx,m); }
                                                               ));
   }
 
   if (!m_EFFastRecoContainerKey.empty()) {
     ATH_CHECK( fillVariablesRatioPlots<xAOD::Muon>(ctx, mu, "L2SA", xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle,
-                                                   [this](const EventContext &ctx, const xAOD::Muon *mu){ return m_matchTool->matchFastRecoSAReadHandle(ctx,mu); }
+                                                   [this](const EventContext &ctx, const xAOD::Muon *m){ return m_matchTool->matchFastRecoSAReadHandle(ctx,m); }
                                                    ));
   }
   
