@@ -986,7 +986,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3Sp(EventData& data) cons
   std::vector<InDet::SiSpacePointForSeed*>::iterator rt[9],rte[9],rb[9],rbe[9];
   int nseed = 0;
 
-  // Loop thorugh all azimuthal regions
+  // Loop through all azimuthal regions
   //
   for (int f=data.fNmin; f<=m_fNmax; ++f) {    
     // For each azimuthal region loop through all Z regions
@@ -1346,7 +1346,7 @@ void InDet::SiSpacePointsSeedMaker_HeavyIon::production3SpNoVertex
       float  Tzb2 = (1.f+Tzb*Tzb) ;
       float  CSA  = Tzb2*COFK    ;
       float ICSA  = Tzb2*ipt2C   ;
-
+      
       for (int t=Nb; t<Nt; ++t) {
 	float Ts  = .5f*(Tzb+data.Tz[t])                          ;
 	float dt  =     Tzb-data.Tz[t]                           ;
