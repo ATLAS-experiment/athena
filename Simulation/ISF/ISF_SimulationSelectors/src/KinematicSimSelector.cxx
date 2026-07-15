@@ -1,23 +1,16 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// KinematicSimSelector.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class include
 #include "KinematicSimSelector.h"
 
-#include "HepPDT/ParticleDataTable.hh"
-#include "HepPDT/ParticleData.hh"
-
+#include "GeneratorModules/GenData.h"
 
 /** Constructor **/
 ISF::KinematicSimSelector::KinematicSimSelector(const std::string& t, const std::string& n, const IInterface* p)
   : BaseSimulationSelector(t,n,p)
   , KinematicParticleCuts()
-  , m_partPropSvc("PartPropSvc", name())
 {
   declareProperty("MinPosEta",            m_cut_minPosEta  , "Minimum Position Pseudorapidity" );
   declareProperty("MaxPosEta",            m_cut_maxPosEta  , "Maximum Position Pseudorapidity" );
@@ -39,22 +32,8 @@ ISF::KinematicSimSelector::~KinematicSimSelector()
 StatusCode  ISF::KinematicSimSelector::initialize()
 {
   ATH_MSG_VERBOSE("Initializing ...");
-  ATH_CHECK(m_partPropSvc.retrieve()); 
-
-   HepPDT::ParticleDataTable* particleDataTable; 
-   particleDataTable = (HepPDT::ParticleDataTable*) m_partPropSvc->PDT();
-
-   if(particleDataTable == 0) 
-   {
-    ATH_MSG_ERROR("PDG table not found");
-    return StatusCode::FAILURE;
-    }
-
-  const HepPDT::ParticleData* data = particleDataTable->particle(HepPDT::ParticleID(abs(m_cut_pdg))); 
-
-  double mass = 0; 
-  if(data) mass = data->mass().value(); 
-
+  auto gendata = std::make_unique<GenData>();
+  double mass = gendata->particleMass(abs(m_cut_pdg)).value_or(0.0);
 
   // compute and store the square of the momentum cuts (faster comparisons)
   if ( !(m_cut_minMom2<0.)) m_cut_minMom2 *= m_cut_minMom2;

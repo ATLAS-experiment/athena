@@ -155,6 +155,7 @@
 + Generators/AtlasHepMC
 + Generators/GenInterfaces
 + Generators/GeneratorConfig
++ Generators/GeneratorModules
 + Generators/GeneratorObjects
 + Generators/GeneratorObjectsAthenaPool
 + Generators/GeneratorObjectsTPCnv
