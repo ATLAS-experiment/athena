@@ -160,8 +160,10 @@ private:
   SG::ReadHandleKey<xAODTruthParticleLinkVector> m_truthParticleLinks
      {this,"InputTruthParticleLinks","","The key for the truth particle link collection."};
 
-  SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key;
-  SG::WriteHandleKey<std::vector<unsigned int>> m_write_offsets;
+  SG::WriteHandleKey<xAOD::TrackMeasurementValidationContainer> m_write_xaod_key
+    {this, "OutputClusterContainer", "PixelClusters"};
+  SG::WriteHandleKey<std::vector<unsigned int>> m_write_offsets
+    {this, "PixelxAodOffset", "PixelClustersOffsets"};
 };
 
 
