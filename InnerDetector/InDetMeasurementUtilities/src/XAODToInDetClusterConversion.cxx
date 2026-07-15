@@ -134,14 +134,11 @@ namespace InDet {
 
     } // loop on hashIds
 
-    ATH_CHECK( outputPixelClusterContainer.setConst() );
-    auto offsets = std::make_unique<std::vector<unsigned int>>(outputPixelClusterContainer->size(), 0);
-    unsigned idx{1};
+    auto offsets = std::make_unique<std::vector<unsigned int>>(m_pixelID->wafer_hash_max(), 0);
+    unsigned int counter(0);
     for (const auto coll : *outputPixelClusterContainer) {
-        if (idx < offsets->size()) {
-          offsets->at(idx) = offsets->at(idx -1) + coll->size();
-        }
-        ++idx;
+      (*offsets)[coll->identifyHash()] = counter;
+      counter += coll->size();
     }
     SG::WriteHandle offSetHandle{m_pixelClusterOffSetKey ,ctx};
     ATH_CHECK(offSetHandle.record(std::move(offsets)));
@@ -210,20 +207,14 @@ namespace InDet {
 
     }
 
-    ATH_CHECK( outputStripClusterContainer.setConst() );
-
-    auto offsets = std::make_unique<std::vector<unsigned int>>(outputStripClusterContainer->size(), 0);
-    unsigned idx{1};
-    for (const auto* coll : *outputStripClusterContainer) {
-        if (idx < offsets->size()) {
-          offsets->at(idx) = offsets->at(idx -1) + coll->size();
-        }
-        ++idx;
+    auto offsets = std::make_unique<std::vector<unsigned int>>(m_stripID->wafer_hash_max(), 0);
+    unsigned int counter(0);
+    for (const auto coll : *outputStripClusterContainer) {
+      (*offsets)[coll->identifyHash()] = counter;
+      counter += coll->size();
     }
-
     SG::WriteHandle offSetHandle{m_stripClusterOffSetKey ,ctx};
     ATH_CHECK(offSetHandle.record(std::move(offsets)));
-
 
     return StatusCode::SUCCESS;
   }

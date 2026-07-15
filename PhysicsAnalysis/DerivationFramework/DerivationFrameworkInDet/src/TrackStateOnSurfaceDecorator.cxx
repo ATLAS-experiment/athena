@@ -142,9 +142,9 @@ namespace DerivationFramework {
        createDecoratorKeys(*this,m_containerName, m_sgName, names, m_trackTRTFloatDecorKeys);
     }
     ATH_CHECK( m_trtPhaseKey.initialize(m_addExtraEventInfo) );
-    ATH_CHECK( m_pixelMapName.initialize(false && m_storePixel && m_addPRD) );
-    ATH_CHECK( m_sctMapName.initialize(false && m_storeSCT && m_addPRD) );
-    ATH_CHECK( m_trtMapName.initialize(false && m_storeTRT && m_addPRD) );
+    ATH_CHECK( m_pixelMapName.initialize(m_storePixel && m_addPRD) );
+    ATH_CHECK( m_sctMapName.initialize(m_storeSCT && m_addPRD) );
+    ATH_CHECK( m_trtMapName.initialize(m_storeTRT && m_addPRD) );
 
     ATH_CHECK( m_pixelClustersName.initialize(m_storePixel && m_addPRD) );
     ATH_CHECK( m_sctClustersName.initialize(m_storeSCT && m_addPRD) );
