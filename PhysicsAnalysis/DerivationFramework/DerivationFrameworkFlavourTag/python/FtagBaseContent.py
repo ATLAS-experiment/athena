@@ -18,9 +18,9 @@ from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDeta
 from DerivationFrameworkFlavourTag.FlowEnergyDecoratorConfig import FlowEnergyDecoratorCfg
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
     ParentDecoratorCfg,
-    trackTruthDecorator,
-    truthVertexDecorator,
+    TrackTruthDecoratorCfg,
 )
+from ParticleJetTools.TruthVertexDecoratorConfig import TruthVertexDecoratorsCfg
 from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
 from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
     AddRun2TriggerMatchingToSlimmingHelper,
@@ -298,7 +298,7 @@ def add_truth_vertex_decorations(
         jet_collections.append((large_r_jet_collection, 1.0))
     jet_collections += extra_jet_collections
 
-    acc.merge(truthVertexDecorator(flags, jet_collections=jet_collections))
+    acc.merge(TruthVertexDecoratorsCfg(flags, jet_collections=jet_collections))
 
     # TruthParticles is in AllVariables so its decorations are saved automatically
     slimming_helper.ExtraVariables += [
@@ -345,7 +345,7 @@ def add_common_augmentation(
     if not flags.Input.isMC:
         return
 
-    acc.merge(trackTruthDecorator(flags))
+    acc.merge(TrackTruthDecoratorCfg(flags))
     if not flags.HeavyIon.isDerivation:
         acc.merge(
             ParentDecoratorCfg(
