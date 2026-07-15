@@ -384,16 +384,12 @@ bool ClustersMeanSecondLambda(const xAOD::TauJet &tau, float &out){
 
 // Extension - Variables for GNTau-eVeto
 bool TauChargedTrk_eProbNN(const xAOD::TauJet &tau, float &out){
-    float TauChargedTrk_eProbNN = 0.0f;
+    float TauChargedTrk_eProbNN = 0.f;
+    static const SG::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
     const xAOD::TauTrack* tauTrack = tau.track(0); // Grab the Charged track of the tau
     const xAOD::TrackParticle* track = tauTrack ? tauTrack->track() : nullptr;
-    if (track) {
-        // Check if eProbabilityNN is available before accessing
-        if (track->isAvailable<float>("eProbabilityNN")) { TauChargedTrk_eProbNN = track->auxdataConst<float>("eProbabilityNN"); }
-        else { TauChargedTrk_eProbNN = 0.0f; }
-    } 
-    else {
-        TauChargedTrk_eProbNN = 0.0f;
+    if (track) { 
+        TauChargedTrk_eProbNN = acc_eProbabilityNN(*track); 
     }
     out = std::max(0.f, TauChargedTrk_eProbNN);
     return true;
