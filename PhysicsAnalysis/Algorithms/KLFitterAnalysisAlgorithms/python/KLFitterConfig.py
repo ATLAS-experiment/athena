@@ -187,73 +187,76 @@ class KLFitterBlock(ConfigBlock):
         finalizeAlg.resultContainerToCheck = self.containerName + "_%SYS%"
         finalizeAlg.resultContainerToWrite = self.containerName + "_%SYS%"
 
-        config.setSourceName(self.containerName, self.containerName)
-        config.addOutputContainer(self.containerName, self.containerName + "_%SYS%")
+        config.writeName(self.containerName)
 
-        config.addOutputVar(self.containerName, "eventProbability", "eventProbability")
-        config.addOutputVar(self.containerName, "logLikelihood", "logLikelihood")
+        config.addOutputVar(self.containerName, "eventProbability", "eventProbability", auxType="float")
+        config.addOutputVar(self.containerName, "logLikelihood", "logLikelihood", auxType="float")
         if self.saveAllPermutations:
-            config.addOutputVar(self.containerName, "selected", "selected")
+            config.addOutputVar(self.containerName, "selected", "selected", auxType="char")
 
         if self.likelihoodType != "ttbar_AllHad":
             config.addOutputVar(
-                self.containerName, "model_bhad_jetIndex", "bhad_jetIndex"
+                self.containerName, "model_bhad_jetIndex", "bhad_jetIndex", auxType="unsigned_int"
             )
             config.addOutputVar(
-                self.containerName, "model_blep_jetIndex", "blep_jetIndex"
+                self.containerName, "model_blep_jetIndex", "blep_jetIndex", auxType="unsigned_int"
             )
             config.addOutputVar(
-                self.containerName, "model_lq1_jetIndex", "lq1_jetIndex"
+                self.containerName, "model_lq1_jetIndex", "lq1_jetIndex", auxType="unsigned_int"
             )
             if self.likelihoodType != "ttbar_BoostedLJets":
                 config.addOutputVar(
-                    self.containerName, "model_lq2_jetIndex", "lq2_jetIndex"
+                    self.containerName, "model_lq2_jetIndex", "lq2_jetIndex", auxType="unsigned_int"
                 )
             if self.likelihoodType == "ttH":
                 config.addOutputVar(
-                    self.containerName, "model_Higgs_b1_jetIndex", "Higgs_b1_jetIndex"
+                    self.containerName, "model_Higgs_b1_jetIndex", "Higgs_b1_jetIndex", auxType="unsigned_int"
                 )
                 config.addOutputVar(
-                    self.containerName, "model_Higgs_b2_jetIndex", "Higgs_b2_jetIndex"
+                    self.containerName, "model_Higgs_b2_jetIndex", "Higgs_b2_jetIndex", auxType="unsigned_int"
                 )
 
-            config.addOutputVar(self.containerName, "model_nu_pt", "nu_pt")
-            config.addOutputVar(self.containerName, "model_nu_eta", "nu_eta")
-            config.addOutputVar(self.containerName, "model_nu_phi", "nu_phi")
-            config.addOutputVar(self.containerName, "model_nu_E", "nu_E")
+            config.addOutputVar(self.containerName, "model_nu_pt", "nu_pt", auxType="float")
+            config.addOutputVar(self.containerName, "model_nu_eta", "nu_eta", auxType="float")
+            config.addOutputVar(self.containerName, "model_nu_phi", "nu_phi", auxType="float")
+            config.addOutputVar(self.containerName, "model_nu_E", "nu_E", auxType="float")
 
             if self.likelihoodType == "ttZTrilepton":
-                config.addOutputVar(self.containerName, "model_lep_index", "lep_index")
+                config.addOutputVar(self.containerName, "model_lep_index", "lep_index", auxType="unsigned_int")
                 config.addOutputVar(
-                    self.containerName, "model_lepZ1_index", "lepZ1_index"
+                    self.containerName, "model_lepZ1_index", "lepZ1_index", auxType="unsigned_int"
                 )
                 config.addOutputVar(
-                    self.containerName, "model_lepZ2_index", "lepZ2_index"
+                    self.containerName, "model_lepZ2_index", "lepZ2_index", auxType="unsigned_int"
                 )
         else:
             config.addOutputVar(
-                self.containerName, "model_b_from_top1_jetIndex", "b_from_top1_jetIndex"
+                self.containerName, "model_b_from_top1_jetIndex", "b_from_top1_jetIndex", auxType="unsigned_int"
             )
             config.addOutputVar(
-                self.containerName, "model_b_from_top2_jetIndex", "b_from_top2_jetIndex"
+                self.containerName, "model_b_from_top2_jetIndex", "b_from_top2_jetIndex", auxType="unsigned_int"
             )
             config.addOutputVar(
                 self.containerName,
                 "model_lj1_from_top1_jetIndex",
                 "lj1_from_top1_jetIndex",
+                auxType="unsigned_int"
             )
             config.addOutputVar(
                 self.containerName,
                 "model_lj2_from_top1_jetIndex",
                 "lj2_from_top1_jetIndex",
+                auxType="unsigned_int"
             )
             config.addOutputVar(
                 self.containerName,
                 "model_lj1_from_top2_jetIndex",
                 "lj1_from_top2_jetIndex",
+                auxType="unsigned_int"
             )
             config.addOutputVar(
                 self.containerName,
                 "model_lj2_from_top2_jetIndex",
                 "lj2_from_top2_jetIndex",
+                auxType="unsigned_int"
             )
