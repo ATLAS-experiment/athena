@@ -68,7 +68,7 @@ const Trk::TwoTrackVerticesInJet* JetFitterTwoTrackVtxFinderTool::doVertexFindin
       std::vector< const Trk::ITrackLink* > associatedTracksAtVertex;
       associatedTracksAtVertex.push_back( trackA );
       associatedTracksAtVertex.push_back( trackB );
-      m_tracksDecorator ( *myCandidate ) = associatedTracksAtVertex;
+      m_tracksDecorator ( *myCandidate ) = std::move(associatedTracksAtVertex);
 
       VtxCandidates.push_back( myCandidate );
     }
@@ -77,7 +77,7 @@ const Trk::TwoTrackVerticesInJet* JetFitterTwoTrackVtxFinderTool::doVertexFindin
 
   ATH_MSG_DEBUG( "Found " << VtxCandidates.size() <<" 2-trk vertex candidates!" );
 
-  const Trk::TwoTrackVerticesInJet *twoTrackVerticesInJet = new Trk::TwoTrackVerticesInJet ( VtxCandidates,
+  const Trk::TwoTrackVerticesInJet *twoTrackVerticesInJet = new Trk::TwoTrackVerticesInJet ( std::move(VtxCandidates),
                                                                                              std::vector< const Trk::TrackParticleBase* >() );
   return twoTrackVerticesInJet;
 }

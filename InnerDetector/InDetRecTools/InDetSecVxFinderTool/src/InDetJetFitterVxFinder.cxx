@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -118,7 +118,7 @@ namespace InDet
       }
     }
 
-    bunchesOfTracks.push_back(tracksToAdd);
+    bunchesOfTracks.push_back(std::move(tracksToAdd));
 
     std::vector<std::vector<const Trk::TrackParticleBase*> >::const_iterator BunchesBegin=bunchesOfTracks.begin();
     std::vector<std::vector<const Trk::TrackParticleBase*> >::const_iterator BunchesEnd=bunchesOfTracks.end();
@@ -128,17 +128,17 @@ namespace InDet
     std::vector<const Trk::TrackParticleBase*>::const_iterator tracksToAddIter;
 
 
-    Trk::VxJetCandidate* myJetCandidate=nullptr;
+    std::unique_ptr<Trk::VxJetCandidate> myJetCandidate;
 
     for (std::vector<std::vector<const Trk::TrackParticleBase*> >::const_iterator BunchesIter=BunchesBegin;
 	 BunchesIter!=BunchesEnd;++BunchesIter) {
       
       if (BunchesIter==BunchesBegin) {
         if (msgLvl(MSG::VERBOSE)) msg() <<  " initial fit with  " << (*BunchesIter).size() << " tracks " << endmsg;
-	myJetCandidate=m_initializationHelper->initializeJetCandidate(*BunchesIter,&primaryVertex,&myDirection);
-	m_routines->initializeToMinDistancesToJetAxis(myJetCandidate);
-	doTheFit(myJetCandidate);
-      } else {
+	myJetCandidate.reset(m_initializationHelper->initializeJetCandidate(*BunchesIter,&primaryVertex,&myDirection));
+	m_routines->initializeToMinDistancesToJetAxis(myJetCandidate.get());
+	doTheFit(myJetCandidate.get());
+      } else if (myJetCandidate){
         if (msgLvl(MSG::VERBOSE)) msg() << " other fit with " << (*BunchesIter).size() << " tracks " << endmsg;
 	std::vector<Trk::VxVertexOnJetAxis*> setOfVertices=myJetCandidate->getVerticesOnJetAxis();
 	std::vector<Trk::VxTrackAtVertex*>* setOfTracks=myJetCandidate->vxTrackAtVertex();
@@ -151,20 +151,19 @@ namespace InDet
 	  Trk::LinkToTrackParticleBase * linkTT = new Trk::LinkToTrackParticleBase(link);
 	  Trk::VxTrackAtVertex* newVxTrack=new Trk::VxTrackAtVertex(linkTT);
 	  temp_vector_tracksAtVertex.push_back(newVxTrack);
-	  setOfTracks->push_back(newVxTrack);
+	  setOfTracks->push_back(std::move(newVxTrack));
 	  setOfVertices.push_back(new Trk::VxVertexOnJetAxis(temp_vector_tracksAtVertex));
 	}
         if (msgLvl(MSG::VERBOSE)) msg() << " new overall number of tracks to fit : " << setOfVertices.size() << endmsg;
 	myJetCandidate->setVerticesOnJetAxis(setOfVertices);
-	Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);
-	doTheFit(myJetCandidate);
+	Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate.get());
+	doTheFit(myJetCandidate.get());
       }
     }
     
     std::vector<Trk::VxCandidate*> myCandidates;
-    myCandidates.push_back(myJetCandidate);
-    
-//    return new Trk::VxSecVertexInfo(myCandidates);//ownership of the single objects is taken over!
+    myCandidates.push_back(myJetCandidate.get());
+    //this function has no useful output?
     return nullptr;
     
   }
@@ -221,20 +220,20 @@ namespace InDet
     std::vector<const Trk::TrackParticleBase*>::const_iterator tracksToAddIter;
 
 
-    Trk::VxJetCandidate* myJetCandidate=nullptr;
+    std::unique_ptr<Trk::VxJetCandidate> myJetCandidate;
 
     for (std::vector<std::vector<const Trk::TrackParticleBase*> >::const_iterator BunchesIter=BunchesBegin;
 	 BunchesIter!=BunchesEnd;++BunchesIter) {
       
       if (BunchesIter==BunchesBegin) {
         if (msgLvl(MSG::VERBOSE)) msg() << " initial fit with  " << (*BunchesIter).size() << " tracks " << endmsg;
-	myJetCandidate=m_initializationHelper->initializeJetCandidate(*BunchesIter,&primaryVertex,&myDirection,&vtxSeedDirection);
-	m_routines->initializeToMinDistancesToJetAxis(myJetCandidate);
+	myJetCandidate.reset(m_initializationHelper->initializeJetCandidate(*BunchesIter,&primaryVertex,&myDirection,&vtxSeedDirection));
+	m_routines->initializeToMinDistancesToJetAxis(myJetCandidate.get());
         if (!(*BunchesIter).empty()) 
         {
-          doTheFit(myJetCandidate,true);
+          doTheFit(myJetCandidate.get(),true); //will not delete myJetCandidate
         }
-      } else {
+      } else if (myJetCandidate){
         if (msgLvl(MSG::VERBOSE)) msg() <<  " other fit with " << (*BunchesIter).size() << " tracks " << endmsg;
 	std::vector<Trk::VxVertexOnJetAxis*> setOfVertices=myJetCandidate->getVerticesOnJetAxis();
 	std::vector<Trk::VxTrackAtVertex*>* setOfTracks=myJetCandidate->vxTrackAtVertex();
@@ -248,20 +247,19 @@ namespace InDet
 	  Trk::VxTrackAtVertex* newVxTrack=new Trk::VxTrackAtVertex(linkTT);
 	  temp_vector_tracksAtVertex.push_back(newVxTrack);
 	  setOfTracks->push_back(newVxTrack);
-	  setOfVertices.push_back(new Trk::VxVertexOnJetAxis(temp_vector_tracksAtVertex));
+	  setOfVertices.push_back(new Trk::VxVertexOnJetAxis(std::move(temp_vector_tracksAtVertex)));
 	}
         if (msgLvl(MSG::VERBOSE)) msg() << " new overall number of tracks to fit : " << setOfVertices.size() << endmsg;
 	myJetCandidate->setVerticesOnJetAxis(setOfVertices);
-	Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);
-	m_routines->initializeToMinDistancesToJetAxis(myJetCandidate);
-	doTheFit(myJetCandidate);
+	Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate.get());
+	m_routines->initializeToMinDistancesToJetAxis(myJetCandidate.get());
+	doTheFit(myJetCandidate.get());
       }
     }
     
     std::vector<Trk::VxCandidate*> myCandidates;
-    myCandidates.push_back(myJetCandidate);
-    
-//    return new Trk::VxSecVertexInfo(myCandidates);//ownership of the single objects is taken over!
+    myCandidates.push_back(myJetCandidate.release());//pass ownership to myCandidates
+    //this function, finally, has no useful output?
     return nullptr;
     
   }
@@ -304,9 +302,8 @@ namespace InDet
 	    }
 	  }
 	}
-	if (max_prob<m_vertexProbCut) {
+	if ((max_prob<m_vertexProbCut) && worseVertex) {
 	  if (msgLvl(MSG::DEBUG)) msg() << "Deleted vertex " << worseVertex->getNumVertex() << " with probability " << max_prob << endmsg;
-	  //	  std::cout << "Deleted vertex " << worseVertex->getNumVertex() << " with probability " << max_prob << std::endl;
 	  if (worseVertex==myJetCandidate->getPrimaryVertex()) {
             if (msgLvl(MSG::INFO)) msg() << " The most incompatible vertex is the primary vertex. Please check..." << endmsg;
 	  }
