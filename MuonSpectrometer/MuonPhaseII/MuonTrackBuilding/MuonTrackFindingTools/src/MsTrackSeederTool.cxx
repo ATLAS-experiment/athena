@@ -56,7 +56,7 @@ namespace MuonR4{
         ATH_CHECK(m_segSelector.retrieve());
         ATH_CHECK(m_trackingGeometryTool.retrieve());
         ATH_CHECK(m_extrapolationTool.retrieve());
-        ATH_CHECK(m_segmentKey.initialize());
+        ATH_CHECK(m_segmentKey.initialize(!m_segmentKey.empty()));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
         if (m_nFieldSteps == 0) {

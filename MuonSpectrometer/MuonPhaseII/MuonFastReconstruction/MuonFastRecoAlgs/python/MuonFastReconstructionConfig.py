@@ -19,7 +19,7 @@ def MuonFastReconstructionAlgCfg(flags, name = "MuonFastReconstructionAlg", **kw
     kwargs.setdefault("MinPhiLayers", 1)
 
     from MuonTrackFindingAlgs.TrackFindingConfig import MsTrackSeedingToolCfg
-    kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags)))
+    kwargs.setdefault("SeedingTool", result.popToolsAndMerge(MsTrackSeedingToolCfg(flags, SegmentContainer="")))
 
     theAlg = CompFactory.MuonR4.FastReconstructionAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
