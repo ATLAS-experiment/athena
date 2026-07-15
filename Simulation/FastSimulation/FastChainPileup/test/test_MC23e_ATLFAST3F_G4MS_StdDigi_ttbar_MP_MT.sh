@@ -11,6 +11,7 @@
 # art-output: AOD.pool.root
 # art-architecture: '#x86_64-intel'
 # art-athena-mt: 8
+# art-memory: 4096
 
 events=50
 
