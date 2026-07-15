@@ -110,9 +110,11 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
     });
 
     std::vector<Segment_t> muonSegments{};
+    muonSegments.reserve(3u);
     for (const StIndex st : stations) {
-        /** If we already have 3 segments, we don't try to fit more segments in other stations */
-        if (muonSegments.size() > 2) {
+        /** If we already have 3 segments, we don't try to fit more segments in other stations.
+         *  Same if we are at the last station and haven't found any segments yet */
+        if (muonSegments.size() > 2 || (st == stations.back() && muonSegments.size() == 0.)) {
             break;
         }
         // If we already have a segment in the layer, we don't try to fit another one
@@ -144,6 +146,7 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
                 return hitsPerSector[s].size(); });
 
         std::vector<Segment_t> stSegments{};
+        stSegments.reserve(sectorsInStation.size());
         /** Try to fit a segment using the first sector. If it fails or the segment has
          *  poor quality, try other sectors if any */
         for (const MuonGMR4::SpectrometerSector* sector : sectorsInStation) {
@@ -207,20 +210,20 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
         [](const Segment_t& seg) { return seg->position().perp(); });
     
     const Amg::Vector3D planeNorm {Acts::makeDirectionFromPhiTheta(pattern.phi() + 90._degree, 90._degree)};
-    auto point = [&planeNorm](const Segment_t& seg) {
-        int sector {seg->measurements().back()->spacePoint()->msSector()->sector()};
-        Amg::Vector3D projDir {
-            ExpandedSector{static_cast<unsigned>(sector), 
-                           ExpandedSector::SectorProjector::center}.normalDir()};
-        return std::make_pair(Acts::PlanarHelper::intersectPlane(seg->position(), projDir, 
-                                                                 planeNorm, Amg::Vector3D::Zero()).position(),
-                              Amg::projectDirOntoPlane(seg->direction(), planeNorm));
-    };
-    std::vector<std::pair<Amg::Vector3D,Amg::Vector3D>> circlePoints{};
-    for (const auto& segment : muonSegments) {
-        if (segment){
-            circlePoints.emplace_back(point(segment));
+
+    std::vector<ITrackSeedingTool::PosMomPair_t> circlePoints{};
+    for (const Segment_t& seg : muonSegments) {
+        if (!seg){
+            continue;
         }
+        int sector {seg->measurements().back()->spacePoint()->msSector()->sector()};
+        Amg::Vector3D projDir {ExpandedSector{static_cast<unsigned>(sector), 
+                                ExpandedSector::SectorProjector::center}.normalDir()};
+                                
+        Amg::Vector3D projPos {Acts::PlanarHelper::intersectPlane(seg->position(), projDir, 
+            planeNorm, Amg::Vector3D::Zero()).position()};
+
+        circlePoints.emplace_back(std::move(projPos), Amg::projectDirOntoPlane(seg->direction(), planeNorm));
     }
     assert(muonSegments.size() <= 3);
     const double qtimesP = m_cfg.trackSeeder->estimateQtimesP(ctx, planeNorm, circlePoints);
