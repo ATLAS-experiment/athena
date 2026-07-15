@@ -249,8 +249,8 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="TriggerMatching", alg=TriggerAnalysisSFBlock)
 
         # HSTP filter for dijet MC
-        #from AsgAnalysisAlgorithms.HSTPFilterConfig import HSTPFilterBlock
-        #self.addAlgConfigBlock(algName="HSTPFilter", alg=HSTPFilterBlock)
+        from AsgAnalysisAlgorithms.HSTPFilterConfig import HSTPFilterBlock
+        self.addAlgConfigBlock(algName="HSTPFilter", alg=HSTPFilterBlock)
 
         # jets
         from JetAnalysisAlgorithms.JetAnalysisConfig import Jets
@@ -269,10 +269,6 @@ class ConfigFactory():
         from JetAnalysisAlgorithms.JetBJTAnalysisConfig import JetBJTAnalysisConfig
         self.addAlgConfigBlock(algName="BJT", alg=JetBJTAnalysisConfig,
             superBlocks="Jets")
-
-        #from JetAnalysisAlgorithms.JetAnalysisConfig import BoostedJetTagger
-        #self.addAlgConfigBlock(algName="BJT", alg=BoostedJetTagger,
-        #    superBlocks="Jets")
 
         from JetAnalysisAlgorithms.BJetCalibAnalysisConfig import BJetCalibAnalysisConfig
         self.addAlgConfigBlock(algName="BJetCalib", alg=BJetCalibAnalysisConfig,

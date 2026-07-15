@@ -690,12 +690,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('maxMass', 600.*GeV, type=float,
             info="the maximum mass cut (in MeV) to apply to calibrated large-R jets.")
 
-        ### bjt
-        #self.addOption ('runBoostedJetTagger', False, type=bool,
-        #    info="whether to run the BJT.")
-
-
-
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName
@@ -962,32 +956,6 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                  preselection=True)
-            
-
-        ### bjt
-        """
-        if self.runBoostedJetTagger:
-            alg = config.createAlgorithm( 'BJT::BoostedJetTaggerAlgAna', 'BoostedJetTaggerAlgAnaaaaa' )
-            
-            config.addPrivateTool( 'tagger', 'SmoothedWZTagger' )
-
-            alg.tagger.ContainerName = self.jetCollection
-            alg.tagger.CalibArea = 'Local'
-            alg.tagger.IsMC = True
-
-            #from BoostedJetTaggers.BoostedJetTaggerConfig import BJTToolCfg
-            ConfigFile = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/WTagger/WTagger_AntiKt10UFOSoftDrop_ParT_FixSigEff50.dat'
-            #tool = BJTToolCfg(config.flags, 
-            #                  #ConfigFile=self.ConfigFile, 
-            #                  ConfigFile=ConfigFile, 
-            #                  ContainerName=self.containerName)
-            #alg.tagger = tool
-
-            alg.tagger.ConfigFile = ConfigFile
-
-            alg.jets = config.readName(self.containerName)
-        """
-
 
         config.addOutputVar (self.containerName, 'm', 'm')
 
@@ -1289,8 +1257,3 @@ def FJvtWorkingPoint(seq):
     seq.append(FJvtWorkingPointSelectionConfig())
     seq.append(FJvtWorkingPointEfficiencyConfig())
     seq.append(FJvtWorkingPointEventEfficiencyConfig())
-
-#@groupBlocks
-#def BoostedJetTagger(seq):
-#    from JetAnalysisAlgorithms.JetBJTAnalysisConfig import JetBJTAnalysisConfig
-#    seq.append(JetBJTAnalysisConfig())
