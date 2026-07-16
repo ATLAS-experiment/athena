@@ -109,7 +109,7 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
     # --------------------
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
-    
+
     ### Basic muon selection
     diMuonSelAcc = Muon5MumuSelectionCfg(flags,
                                      MuonContainer= kwargs["MuonContainer"], 
@@ -162,7 +162,14 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
         TrackCollection="InDetTrackParticles",
         PrimaryVertexCollectionName="PrimaryVertices"
     ))
-
+        
+    ### FTAG truth decorations for InDetTrackParticles (ftagTruthTypeLabel, ftagTruthOriginLabel, )
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import TrackTruthDecoratorCfg
+    acc.merge(TrackTruthDecoratorCfg(flags))
+    # For TruthVertexIndex
+    from ParticleJetTools.TruthVertexDecoratorConfig import TruthVertexDecoratorsCfg
+    acc.merge(TruthVertexDecoratorsCfg(flags))
+    
     # --------
     # Skimming
     # --------
