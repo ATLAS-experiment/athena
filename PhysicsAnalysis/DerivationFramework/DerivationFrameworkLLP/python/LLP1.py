@@ -973,9 +973,11 @@ def LLP1Cfg(flags):
     # they'll be merged when both formats are used together.
     acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = False,
                                 stream_name = 'StreamDAOD_LLP1'))
+
     contNames = [ MergedMuonContainer, MergedElectronContainer, "Photons" ] 
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_LRTMerged",
                                 isPhysLite = False, containerNames = contNames,
+                                depContainerNames = ["Muons","MuonsLRT","Electrons","LRTElectrons","Photons"],
                                 useSelTools = True, stream_name = 'StreamDAOD_LLP1',
                                 isoDecSuffix = "CloseByCorr_LRT",
                                 caloDecSuffix = '_LRT',
@@ -983,6 +985,7 @@ def LLP1Cfg(flags):
     contNames = [ "ZeroPixelHitMuons" ]
     acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1_ZeroPixelHitsMuons",
                                 isPhysLite = False, containerNames = contNames,
+                                depContainerNames = ["Muons"],
                                 stream_name = 'StreamDAOD_LLP1',
                                 isoDecSuffix = "CloseByCorr_ZPH"))
 
