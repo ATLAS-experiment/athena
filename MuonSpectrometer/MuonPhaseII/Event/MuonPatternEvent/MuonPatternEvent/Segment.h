@@ -58,28 +58,14 @@ namespace MuonR4{
             bool hasTimeFit() const { return m_t0 != std::nullopt; }
             /** @brief Returns the fitted segment time, if there's any */
             double segementT0() const { return m_t0.value_or(0); }
-            /** @brief Helper struct to summarize the hit count  */
-            struct HitSummary{
-                /** @brief Number of good Mdt / Mm / sTgc eta hits */
-                unsigned nPrecHits{0};
-                /** @brief Number of good Rpc / Tgc eta hits */
-                unsigned nEtaTrigHits{0};
-                /** @brief Number of good Rpc / Tgc / sTgc phi hits */
-                unsigned nPhiHits{0};
-                /** @brief Number of Mdt / Mm / sTGC eta outliers */
-                unsigned nPrecOutlier{0};
-                /** @brief Precision technology */
-                xAOD::UncalibMeasType tech{xAOD::UncalibMeasType::Other};
-            };   
-            /** @brief Returns the hit summary */
-            const HitSummary& summary() const { return m_summary; }
-            
             /** @brief Sets the fitted segment time */
             void setSegmentT0(double t0);
             /** @brief Set how many iteration the fitter needed to reach convergence */
             void setCallsToConverge(unsigned int nCalls);
             /** @brief Set the uncertainties from the fit */
             void setParUncertainties(SegmentFit::Covariance&& cov);
+            /** @brief Returns the technology index of the first precision hit */
+            Muon::MuonStationIndex::TechnologyIndex technology() const;
         private: 
             /** @brief Global position of the segment at the chamber centre */
             Amg::Vector3D m_globPos{Amg::Vector3D::Zero()};
@@ -99,8 +85,6 @@ namespace MuonR4{
             unsigned int m_nCalls{0};
             /** @brief Covariance matrix of the fit  */
             SegmentFit::Covariance m_cov{SegmentFit::Covariance::Identity()};
-            /** @brief Calculate the hit summary */
-            HitSummary m_summary{};
     };
 }
 

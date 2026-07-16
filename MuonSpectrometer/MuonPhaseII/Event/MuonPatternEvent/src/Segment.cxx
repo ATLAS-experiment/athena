@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonPatternEvent/Segment.h"
-#include "xAODMuonPrepData/sTgcMeasurement.h"
+#include "xAODMuonPrepData/UtilFunctions.h"
+#include "MuonSpacePoint/SpacePointHelpers.h"
 
 namespace MuonR4{
+    using namespace Muon::MuonStationIndex;
     Segment::Segment(Amg::Vector3D&& globPos, Amg::Vector3D&& globDir,
                      const SegmentSeed* parent, MeasVec&& constMeas,
                      double chi2, unsigned int nDoF):
@@ -13,67 +15,27 @@ namespace MuonR4{
         m_parent{parent},
         m_measurements{std::move(constMeas)},
         m_chi2{chi2}, 
-        m_nDoF{nDoF}{
-        
-        for (const MeasType& meas : m_measurements) {
-            switch(meas->type()) {
-                case xAOD::UncalibMeasType::MMClusterType:
-                case xAOD::UncalibMeasType::MdtDriftCircleType:
-                    m_summary.nPrecHits += meas->fitState() == CalibratedSpacePoint::State::Valid;
-                    m_summary.nPrecOutlier += (meas->fitState() != CalibratedSpacePoint::State::Valid);
-                    m_summary.tech = meas->type();
-                    break;
-                case xAOD::UncalibMeasType::Other:
-                case xAOD::UncalibMeasType::RpcStripType:
-                case xAOD::UncalibMeasType::TgcStripType:
-                    if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
-                        m_summary.nPhiHits += meas->measuresPhi();
-                        m_summary.nEtaTrigHits += meas->measuresEta();
-                    }
-                    break;
-                case xAOD::UncalibMeasType::sTgcStripType: {
-                    auto* prd = static_cast<const xAOD::sTgcMeasurement*>(meas->spacePoint()->primaryMeasurement());
-                    switch (prd->channelType()) {
-                        case sTgcIdHelper::sTgcChannelTypes::Strip:
-                            m_summary.nPrecHits += meas->fitState() == CalibratedSpacePoint::State::Valid;
-                            m_summary.nPrecOutlier += (meas->fitState() != CalibratedSpacePoint::State::Valid);
-                            m_summary.tech = meas->type();
-                            break;
-                        case sTgcIdHelper::sTgcChannelTypes::Pad:
-                            if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
-                                ++m_summary.nEtaTrigHits;
-                                ++m_summary.nPhiHits;
-                            }
-                            break;
-                        case sTgcIdHelper::sTgcChannelTypes::Wire:
-                            if (meas->fitState() == CalibratedSpacePoint::State::Valid) {
-                                ++m_summary.nPhiHits;
-                            }
-                            break;
-                    }
-                    if (meas->spacePoint()->secondaryMeasurement() && 
-                        meas->fitState() == CalibratedSpacePoint::State::Valid) {
-                        ++m_summary.nPhiHits;
-                    }
-                }
-                default:
-                    break;
-            }
-        }
-    }
+        m_nDoF{nDoF}{}
 
-    /** @brief Sets the fitted segment time */
     void Segment::setSegmentT0(double t0) {
         m_t0 = std::make_optional<double>(t0);             
     }
-    /** @brief Set how many iteration the fitter needed to reach convergence */
+
     void Segment::setCallsToConverge(unsigned int nCalls) {
         m_nCalls = nCalls;
     }
-    /** @brief Set the uncertainties from the fit */
+
     void Segment::setParUncertainties(SegmentFit::Covariance&& cov){
         m_cov = std::move(cov);
     }
-    
+
+    TechnologyIndex Segment::technology() const { 
+        for (const MeasType& meas : m_measurements) {
+            if (isPrecisionHit(*meas)) {
+                return xAOD::toTechnologyIndex(meas->type());
+            }
+        }
+        return TechnologyIndex::TechnologyUnknown;
+    }
 
 }
