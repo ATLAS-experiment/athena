@@ -54,6 +54,7 @@ public:
 
   /// Convert RoIBResult to ByteStream
   virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                 const xAOD::TrigCompositeContainer* tc,
                                  const EventContext& eventContext) override;
 
   /// Vector of ROB IDs corresponding to the modules configured for decoding

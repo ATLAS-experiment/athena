@@ -372,7 +372,25 @@ def L1TriggerByteStreamEncoderCfg(flags):
         ))
     acc.addPublicTool(eFexTool)
 
-  # TODO: Run-3 L1Calo, L1Topo
+  # jFex encoding
+  if flags.Trigger.L1.dojFex:
+    jFexTool = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
+          flags,
+          'jFexBSEncoderTool',
+          writeBS=True
+        ))
+    acc.addPublicTool(jFexTool)
+
+  # gFex encoding
+  if flags.Trigger.L1.dogFex:
+    gFexTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(
+          flags,
+          'gFexBSEncoderTool',
+          writeBS=True
+        ))
+    acc.addPublicTool(gFexTool)
+
+  # TODO: Run-3 L1Topo
 
   return acc
 

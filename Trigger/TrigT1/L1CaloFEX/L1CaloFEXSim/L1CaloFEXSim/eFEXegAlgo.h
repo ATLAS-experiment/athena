@@ -41,7 +41,7 @@ namespace LVL1 {
     /** Destructor */
     virtual ~eFEXegAlgo();
 
-    virtual StatusCode safetyTest() const;
+    virtual StatusCode safetyTest(const EventContext& ctx);
     virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta);
 
     virtual void getReta(std::vector<unsigned int> & );
@@ -85,6 +85,7 @@ namespace LVL1 {
 
     // Key for input towers
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
+    const LVL1::eTowerContainer* m_eTowers = nullptr;
 
     // Key for reading dm corrections
     SG::ReadCondHandleKey<CondAttrListCollection> m_dmCorrectionsKey{this,"DMCorrectionsKey","",

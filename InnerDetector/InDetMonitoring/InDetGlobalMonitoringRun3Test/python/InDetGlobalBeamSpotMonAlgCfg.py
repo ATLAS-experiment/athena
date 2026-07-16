@@ -11,17 +11,9 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=True, flags=None):
+def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=True):
     '''Function to configures some algorithms in the monitoring system.'''
-
-    # ITk has |eta|<4.0 acceptance, and Phase II pile-up (mu=200) drives
-    # vertex / per-event track multiplicities far above Run 3 values.
-    isITk = bool(flags) and flags.Detector.GeometryITk
-    m_nVtxMax = 300 if isITk else 100
-    m_nTrkPerEventMax = 5000 if isITk else 1000
-    m_etaMax = 4.0 if isITk else 3.0
-    m_pvNTracksMax = 1000 if isITk else 500
-
+    
     # Values set by default here
     m_useBeamspot = useBeamSpot
     expert = True
@@ -41,7 +33,7 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=True, flags=None)
         varName = 'm_trkPt;trkPt'
         bsGroup.defineHistogram(varName, type="TH1F", title="Track Pt;p_{T} (GeV)",path=pathbs,xbins=100,xmin=0,xmax=20)
         varName = 'm_trkNPt;trkNPt'
-        bsGroup.defineHistogram(varName, type="TH1F", title="Number of Tracks per event (after p_{T} cut);Number of tracks", path=pathbs, xbins=200, xmin=0, xmax=m_nTrkPerEventMax)
+        bsGroup.defineHistogram(varName, type="TH1F", title="Number of Tracks per event (after p_{T} cut);Number of tracks", path=pathbs, xbins=100, xmin=0, xmax=1000)
     
     #Histograms of assumed beam spot position
     if (m_useBeamspot):
@@ -91,11 +83,11 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=True, flags=None)
 
     if (expert):
             varName = 'm_pvN;pvN'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Number of primary vertices;Number of vertices", path=pathbs, xbins=m_nVtxMax,xmin=0,xmax=m_nVtxMax)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Number of primary vertices;Number of vertices", path=pathbs, xbins=100,xmin=0,xmax=100)
             varName = 'm_pvNPriVtx;pvNPriVtx'
             bsGroup.defineHistogram(varName, type="TH1F", title="Number of primary vertices;Number of vertices", path=pathbs, xbins=3,xmin=0,xmax=3)
             varName = 'm_pvNPileupVtx;pvNPileupVtx'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Number of pileup vertices;Number of vertices", path=pathbs, xbins=m_nVtxMax,xmin=0,xmax=m_nVtxMax)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Number of pileup vertices;Number of vertices", path=pathbs, xbins=100,xmin=0,xmax=100)
             varName = 'm_pvErrX;pvErrX'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: #sigma_{x}; #sigma_{x} (mm)",path=pathbs,xbins=100,xmin=0,xmax=0.5)
             varName = 'm_pvErrY;pvErrY'
@@ -103,11 +95,11 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=True, flags=None)
             varName = 'm_pvErrZ;pvErrZ'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: #sigma_{z}; #sigma_{z} (mm)",path=pathbs,xbins=100,xmin=0,xmax=0.5)
             varName = 'm_pvNTracks;pvNTracks'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Number of tracks in primary vertex;Number of tracks",path=pathbs,xbins=200,xmin=0,xmax=m_pvNTracksMax)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Number of tracks in primary vertex;Number of tracks",path=pathbs,xbins=100,xmin=0,xmax=500)
             varName = 'm_pvTrackPt;pvTrackPt'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: original track p_{t};p_{t} (GeV)",path=pathbs,xbins=100,xmin=0,xmax=20)
             varName = 'm_pvTrackEta;pvTrackEta'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: original track #eta; #eta",path=pathbs,xbins=100,xmin=-m_etaMax,xmax=m_etaMax)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: original track #eta; #eta",path=pathbs,xbins=100,xmin=-3,xmax=3)
 
 # end histograms
 
@@ -132,5 +124,5 @@ def InDetGlobalBeamSpotMonAlgCfg(helper, acc,
         addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
         **kwargs)
 
-    HistoInDetGlobalBeamSpotMonAlgCfg(helper, monAlg, useBeamSpot, flags)
+    HistoInDetGlobalBeamSpotMonAlgCfg(helper, monAlg, useBeamSpot)
     return

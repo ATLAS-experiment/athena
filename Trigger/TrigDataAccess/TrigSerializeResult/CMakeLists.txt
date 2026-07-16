@@ -33,4 +33,4 @@ atlas_add_test( remap_test
                 SOURCES
                 test/remap_test.cxx
                 LINK_LIBRARIES TrigSerializeResultLib
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )

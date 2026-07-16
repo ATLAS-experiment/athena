@@ -36,11 +36,22 @@ def DQHistogramMerge( listFileName, outFileName, runPostProcessing, directoryReg
     mf.setCompressionLevel(compressionLevel)
     if (doTiming): mf.doTiming()
     
-    stat=mf.mergeFiles( outFileName, listFileName )
+    stat=-1
+    try:
+        stat=mf.mergeFiles( outFileName, listFileName )
+    except Exception as e: 
+        print(f"Exception of type {type(e)} during MonitoringFile::MergeFile: {e}")
     if stat: sys.exit(stat)
-    mf.mergeLBintervals( outFileName )
+
+    try:
+        stat=mf.mergeLBintervals( outFileName )
+    except Exception as e: 
+        print(f"Exception of type {type(e)} during MonitoringFile::mergeLBInterval: {e}")
     if stat: sys.exit(stat)
   
     if runPostProcessing:
         from . import DQPostProcessMod
-        DQPostProcessMod.DQPostProcess( outFileName, isIncremental )
+        try:
+            DQPostProcessMod.DQPostProcess( outFileName, isIncremental )
+        except Exception as e: 
+            print(f"Exception of type {type(e)} during MonitoringFile::mergeLBInterval: {e}")   

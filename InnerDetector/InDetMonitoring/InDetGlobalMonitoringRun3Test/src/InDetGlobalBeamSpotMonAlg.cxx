@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -64,7 +64,7 @@ StatusCode InDetGlobalBeamSpotMonAlg::fillHistograms( const EventContext& ctx ) 
   ATH_MSG_DEBUG("Filling InDetGlobalBeamSpotMonAlg");
   
   // For histogram naming
-  const auto & bsGroup = getGroup("BeamSpot");
+  auto bsGroup = getGroup("BeamSpot");
   
   // Get beamspot information, if available
   float beamSpotX = 0.;
@@ -213,7 +213,7 @@ StatusCode InDetGlobalBeamSpotMonAlg::fillHistograms( const EventContext& ctx ) 
     int nPriVtx = 0;
     int nPileupVtx = 0;
     
-    for(const auto vtx : *vertexContainer) {
+    for(const auto & vtx : *vertexContainer) {
       
       if ( !vtx ) continue;
       

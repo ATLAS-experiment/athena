@@ -12,13 +12,8 @@ def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False,
 
   if writeBS:
     # write BS == read xAOD
-    # Note: this is currently unsupported!!!
-    if TOBs:
-      tool.eEMContainerReadKeys  += ["L1_eEMRoI"]
-      tool.eTAUContainerReadKeys  += ["L1_eTauRoI"]
-    if xTOBs:
-      tool.eEMContainerReadKeys += ["L1_eEMxRoI"]
-      tool.eTAUContainerReadKeys += ["L1_eTauxRoI"]
+    # Input RoI containers come from the TrigCompositeContainer passed by the
+    # Cnv at runtime, so no read-handle properties are needed here.
     tool.eEMContainerWriteKey  = ""
     tool.eTAUContainerWriteKey = ""
     efex_roi_moduleids = [0x1000,0x1100]
@@ -97,13 +92,8 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in jfex_roi_moduleids]
   if writeBS:
     # write BS == read xAOD
-    tool.jJRoIContainerReadKey   = "L1_jFexSRJetxRoI" if xTOBs else "L1_jFexSRJetRoI"
-    tool.jLJRoIContainerReadKey  = "L1_jFexLRJetxRoI" if xTOBs else "L1_jFexLRJetRoI"
-    tool.jTauRoIContainerReadKey = "L1_jFexTauxRoI"   if xTOBs else "L1_jFexTauRoI"
-    tool.jEMRoIContainerReadKey  = "L1_jFexFwdElxRoI" if xTOBs else "L1_jFexFwdElRoI"
-    tool.jTERoIContainerReadKey  = "L1_jFexSumETxRoI" if xTOBs else "L1_jFexSumETRoI"
-    tool.jXERoIContainerReadKey  = "L1_jFexMETxRoI"   if xTOBs else "L1_jFexMETRoI"
-
+    # Input RoI containers come from the TrigCompositeContainer passed by the
+    # Cnv at runtime, so no read-handle properties are needed here.
     tool.jJRoIContainerWriteKey  =""
     tool.jLJRoIContainerWriteKey =""
     tool.jTauRoIContainerWriteKey=""
@@ -112,13 +102,6 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
     tool.jXERoIContainerWriteKey =""
   else:
     # read BS == write xAOD
-    tool.jJRoIContainerReadKey   =""
-    tool.jLJRoIContainerReadKey  =""
-    tool.jTauRoIContainerReadKey =""
-    tool.jEMRoIContainerReadKey  =""
-    tool.jTERoIContainerReadKey  =""
-    tool.jXERoIContainerReadKey  =""
-
     tool.jJRoIContainerWriteKey  = "L1_jFexSRJetxRoI" if xTOBs else "L1_jFexSRJetRoI"
     tool.jLJRoIContainerWriteKey = "L1_jFexLRJetxRoI" if xTOBs else "L1_jFexLRJetRoI"
     tool.jTauRoIContainerWriteKey= "L1_jFexTauxRoI"   if xTOBs else "L1_jFexTauRoI"
@@ -156,22 +139,9 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False, TOBs=
   gfex_roi_moduleids = [0x3000]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in gfex_roi_moduleids]
   if writeBS:
-    # write BS == read xAOD
-    tool.gFexRhoOutputContainerReadKey                  ="L1_gFexRhoRoI"
-    tool.gFexSRJetOutputContainerReadKey                ="L1_gFexSRJetRoI"
-    tool.gFexLRJetOutputContainerReadKey                ="L1_gFexLRJetRoI"
-    tool.gScalarEJwojOutputContainerReadKey             ="L1_gScalarEJwoj"
-    tool.gEspressoOutputContainerReadKey                ="L1_gEspresso"
-    tool.gRistrettoOutputContainerReadKey               ="L1_gRistretto"
-    tool.gMETComponentsJwojOutputContainerReadKey       ="L1_gMETComponentsJwoj"
-    tool.gMHTComponentsJwojOutputContainerReadKey       ="L1_gMHTComponentsJwoj"
-    tool.gMSTComponentsJwojOutputContainerReadKey       ="L1_gMSTComponentsJwoj"
-    tool.gMETComponentsNoiseCutOutputContainerReadKey   ="L1_gMETComponentsNoiseCut"
-    tool.gMETComponentsRmsOutputContainerReadKey        ="L1_gMETComponentsRms"
-    tool.gScalarENoiseCutOutputContainerReadKey         ="L1_gScalarENoiseCut"
-    tool.gScalarERmsOutputContainerReadKey              ="L1_gScalarERms"
-    
-    
+    # write BS == read xAOD; encoder consumes RoIs from the TrigCompositeContainer
+    # pushed in by L1TriggerResultByteStreamCnv, so no per-container ReadHandleKeys
+    # are needed and the WriteHandleKeys are forced empty.
     tool.gFexRhoOutputContainerWriteKey                 =""
     tool.gFexSRJetOutputContainerWriteKey               =""
     tool.gFexLRJetOutputContainerWriteKey               =""
@@ -187,20 +157,6 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False, TOBs=
     tool.gScalarERmsOutputContainerWriteKey             =""
   else:
     # read BS == write xAOD
-    tool.gFexRhoOutputContainerReadKey                  =""
-    tool.gFexSRJetOutputContainerReadKey                =""
-    tool.gFexLRJetOutputContainerReadKey                =""
-    tool.gScalarEJwojOutputContainerReadKey             =""
-    tool.gEspressoOutputContainerReadKey                =""
-    tool.gRistrettoOutputContainerReadKey               =""
-    tool.gMETComponentsJwojOutputContainerReadKey       =""
-    tool.gMHTComponentsJwojOutputContainerReadKey       =""
-    tool.gMSTComponentsJwojOutputContainerReadKey       =""
-    tool.gMETComponentsNoiseCutOutputContainerReadKey   =""
-    tool.gMETComponentsRmsOutputContainerReadKey        =""
-    tool.gScalarENoiseCutOutputContainerReadKey         =""
-    tool.gScalarERmsOutputContainerReadKey              =""
-    
     # When TOBs=False, standard L1A containers are disabled (empty write keys).
     # They are already provided by the HLT result deserialiser.
     # Only gEspresso, gRistretto and multi-slice (OutOfTime) containers are decoded.

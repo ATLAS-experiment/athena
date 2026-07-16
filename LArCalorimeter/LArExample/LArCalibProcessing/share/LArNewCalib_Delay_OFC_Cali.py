@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -37,6 +37,9 @@ if __name__=='__main__':
    parser.add_argument('--FW6', dest='fw6', default=False, help='Is it for fw v. 6', action='store_true')
    parser.add_argument('--EMF', dest='emf', default=False, help='Is it for EMF', action='store_true')
    parser.add_argument('--pulseAll', dest='pulseall', default=False, help='Is it PulseAll run ?', action='store_true')
+   parser.add_argument('--pattdir', dest='pdir', default="", help='Full input pattern dir string', type=str)
+   parser.add_argument('--noValid', dest='novalid', default=False, action="store_true", help='stop the validation ?')
+   parser.add_argument('--nopatch', dest='nopatch', default=False, action="store_true", help='stop the patching ?')
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -191,7 +194,8 @@ if __name__=='__main__':
                pfile = pdir + 'barrel/Delay_' + args.partition[:-4] + '/parameters.dat'
  
          else:   
-            pdir += 'Delay/'
+            pdir=args.pdir
+            pfile = pdir + '/parameters.dat'
             #FIXME create search also for main readout
       pass
       flags.LArCalib.Input.paramsFile = pfile
@@ -212,6 +216,11 @@ if __name__=='__main__':
       flags.IOVDb.SqliteFolders = ("/LAR/BadChannelsOfl/BadChannelsSC","/LAR/BadChannels/BadChannelsSC","/LAR/Identifier/OnOffIdMap","/LAR/BadChannelsOfl/MissingFEBs","/LAR/BadChannelsOfl/KnownMNBFEBs","/LAR/BadChannelsOfl/KnownBADFEBs","/LAR/BadChannelsOfl/BadChannels",)
       flags.LArCalib.CorrectBadChannels=False
       flags.LArCalib.doValidation=False
+
+   if args.novalid:
+      flags.LArCalib.doValidation=False
+   if args.nopatch:
+      flags.LArCalib.CorrectBadChannels=False
 
    flags.lock()
    flags.dump(evaluate=True)
@@ -266,7 +275,8 @@ if __name__=='__main__':
 
    cfg.getService("IOVDbSvc").DBInstance=""
 
-   cfg.getService("MessageSvc").defaultLimit=2000000 #more messages
+   cfg.getService("MessageSvc").defaultLimit=200 #less messages
+   #cfg.getService("MessageSvc").OutputLevel=2
    #cfg.getEventAlgo("LArCalibDigitMaker").OutputLevel=2
    #cfg.getEventAlgo("LArCalibDigitsAccumulator").OutputLevel=2
    #cfg.getEventAlgo("LArCaliWaveBuilder").OutputLevel=2
@@ -276,12 +286,15 @@ if __name__=='__main__':
    cfg.run() 
 
    #build tag hierarchy in output sqlite file
+   script = "/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py"
+   if not os.path.isfile(script): script = "/det/lar/project/athena/BuildTagHierarchy.py"
    import subprocess
-   cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
+   cmdline = [script,
+              f"{args.outpdir}/{args.outsql}" if args.outsql[0]!="/" else args.outsql,
+              flags.IOVDb.GlobalTag]
    print(cmdline)
    try:
       subprocess.run(cmdline, check=True)
    except Exception as e:
       print('Could not create tag hierarchy in output sqlite file !!!!')
       sys.exit(-1)
-

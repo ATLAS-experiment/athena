@@ -480,6 +480,6 @@ lArDQGlobals.CNFN_tot = 80
 lArDQGlobals.CNFXmin_tot = -400.
 lArDQGlobals.CNFXmax_tot = 400.
 lArDQGlobals.CNFN_ncoh = 120
-lArDQGlobals.CNFXmin_ncoh = -40.
-lArDQGlobals.CNFXmax_ncoh = 200.
+lArDQGlobals.CNFXmin_ncoh = -20.
+lArDQGlobals.CNFXmax_ncoh = 400.
 

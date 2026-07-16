@@ -1804,7 +1804,9 @@ StatusCode gFexInputByteStreamTool::ReadFibersfromFile(const std::string& fileNa
     }
 
 /// xAOD->BS conversion
-StatusCode gFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {
+StatusCode gFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/,
+                                                const xAOD::TrigCompositeContainer* /*tc*/,
+                                                const EventContext& /*eventContext*/) {
     
     return StatusCode::SUCCESS;
 }

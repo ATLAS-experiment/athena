@@ -5,27 +5,29 @@
 #ifndef  TRIGL2MUONSA_CLUSTERPATFINDER_H
 #define  TRIGL2MUONSA_CLUSTERPATFINDER_H
 
+
+
+#include "AthenaBaseComps/AthAlgTool.h"
 #include <string> 
 #include <list> 
 #include <vector>
-
-#include "AthenaBaseComps/AthAlgTool.h"
+#include <map>
 
 namespace TrigL2MuonSA {
 
 struct ClusterPattern
 {
   std::multimap<int, int> groupCand;
-  int group;
-  double dMM;
-  double dMO;
-  double aw[3];
-  double bw[3];
-  int clustersID[8];
-  bool isGoodFit;
-  double phi_middle;
-  double phi_outer;
-  int nclusters;
+  int group{};
+  double dMM{};
+  double dMO{};
+  double aw[3]{};
+  double bw[3]{};
+  int clustersID[8]{};
+  bool isGoodFit{};
+  double phi_middle{};
+  double phi_outer{};
+  int nclusters{};
 
   void Clear(){
     groupCand.clear();

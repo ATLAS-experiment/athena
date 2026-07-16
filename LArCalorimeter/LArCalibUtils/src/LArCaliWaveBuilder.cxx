@@ -42,7 +42,9 @@ LArCaliWaveBuilder::LArCaliWaveBuilder(const std::string& name, ISvcLocator* pSv
  declareProperty("RecAllCells",            m_recAll=false);
  declareProperty("UsePattern",             m_usePatt=-1);
  declareProperty("UseParams",              m_useParams=false); // Read LArCalibParams from DetStore ?
+ declareProperty("UseParamsSel",           m_useParamsSel=false); // Use LArCalibParams from DetStore for event selection ?
  declareProperty("isSC",                   m_isSC=false);
+ declareProperty("NumSubStep",             m_NSubStep=1);
 
 
  m_dt = m_SamplingPeriod/m_NStep;
@@ -103,12 +105,12 @@ StatusCode LArCaliWaveBuilder::initialize()
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_cablingKeySC.initialize(m_isSC) );
 
-  if(m_usePatt >= 0 && !m_useParams) {
+  if(m_usePatt >= 0 && !m_useParamsSel) {
      ATH_MSG_ERROR("Inconsistent configuration, for UsePattern > 0 the  UseParams must be true");
      return StatusCode::FAILURE;
   }
   
-  ATH_CHECK( m_calibMapKey.initialize(m_useParams) );
+  ATH_CHECK( m_calibMapKey.initialize(m_useParams || m_useParamsSel) );
 
   return StatusCode::SUCCESS;
 }
@@ -118,23 +120,37 @@ StatusCode LArCaliWaveBuilder::execute()
 {
  // using EvtId
  const EventContext& ctx = getContext();
- m_event_counter=ctx.eventID().event_number();
+ m_event_counter=ctx.eventID().event_number()+1;// evt. starts from 0
 
  const LArCalibParams* calibParams = nullptr;
  const LArCalibLineMapping *clcabling=nullptr;
- if(m_useParams) { // we have to check in which event we are, reading only ones corresponding
+ if(m_useParamsSel || m_useParams) { // we have to check in which event we are, reading only ones corresponding
                       // to our pattern
     ATH_CHECK(detStore()->retrieve(calibParams,"LArCalibParams"));
     unsigned numPatt=calibParams->getNumberPatterns(HWIdentifier(0));
 
-    int counter=m_event_counter;
-    if(m_useAccumulatedDigits) counter /= calibParams->NTrigger(HWIdentifier(1007091712));
-    if(m_usePatt >= 0 && static_cast<int>(counter % numPatt) != m_usePatt) {
-       return StatusCode::SUCCESS;
+    unsigned counter=m_event_counter;
+    if(m_useAccumulatedDigits) {
+       if (static_cast<int>(counter % calibParams->NTrigger(HWIdentifier(1007091712))) != 0) return StatusCode::SUCCESS;
     }
-    ATH_MSG_DEBUG("Good event "<<m_event_counter<<" for pattern " << m_usePatt << " out of " << numPatt << " patterns " << calibParams->NTrigger(HWIdentifier(1007091712)) <<" triggers ");
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+    counter /= calibParams->NTrigger(HWIdentifier(1007091712));     
+    unsigned iDAC;
+    unsigned iDel;
+    for(iDAC=1; iDAC<=calibParams->getNumberDACs(HWIdentifier(0)); ++iDAC) {
+       for(iDel=0; iDel<calibParams->getNumberDelays(HWIdentifier(0)); ++iDel) {
+          if(counter <= m_NSubStep*iDAC*iDel*numPatt + m_NSubStep*m_usePatt && counter > m_NSubStep*iDAC*iDel*numPatt+ m_NSubStep*(m_usePatt-1) ) {
+             break;
+          }
+       }
+       if(iDel<calibParams->getNumberDelays(HWIdentifier(0))) break;
+    }
+    if(iDAC>calibParams->getNumberDACs(HWIdentifier(0))) return StatusCode::SUCCESS;
+
+    ATH_MSG_DEBUG("Good event "<<m_event_counter<<" : "<<counter<<" for pattern " << m_usePatt << " out of " << numPatt << " patterns " << calibParams->NTrigger(HWIdentifier(1007091712)) <<" triggers "<<iDAC<<" iDAC "<<iDel<<" iDel");
+    ATH_MSG_DEBUG("Good event "<<m_NSubStep*iDAC*iDel*numPatt+ m_NSubStep*(m_usePatt-1) <<" : " << m_NSubStep*iDAC*iDel*numPatt + m_NSubStep*m_usePatt);
+
+
     SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_calibMapKey, ctx};
     clcabling =*clHdl;
     if(!clcabling) {
@@ -275,7 +291,7 @@ StatusCode LArCaliWaveBuilder::executeWithAccumulatedDigits(const LArCalibParams
         delay = calibParams->Delay(m_event_counter,calibLineLeg[0]);
         for (unsigned i=0; i<calibLineLeg.size(); ++i) {// loop calib lines
            if(calibParams->isPulsed(m_event_counter,calibLineLeg[i])){
-	      ATH_MSG_DEBUG("GR: line pulsed true, line="<<i+1);
+	      ATH_MSG_DEBUG((*it)->hardwareID().get_identifier32().get_compact() << " GR: line pulsed true, line="<<i+1);
 	      dacPulsed=(dacPulsed | (0x1 << (15+i+1)));
               pulsed=(pulsed | (0x1 << (15+i+1)));
            }
@@ -285,7 +301,7 @@ StatusCode LArCaliWaveBuilder::executeWithAccumulatedDigits(const LArCalibParams
         dacPulsed=(*it)->DAC();
         for(int iLine=1;iLine<5;iLine++){
            if((*it)->isPulsed(iLine)){
-	      ATH_MSG_DEBUG("GR: line pulsed true, line="<<iLine);
+	      ATH_MSG_DEBUG((*it)->hardwareID().get_identifier32().get_compact() <<" GRAV: line pulsed true, line="<<iLine);
 	      dacPulsed=(dacPulsed | (0x1 << (15+iLine)));
               pulsed=(pulsed | (0x1 << (15+iLine)));
            }
@@ -298,8 +314,8 @@ StatusCode LArCaliWaveBuilder::executeWithAccumulatedDigits(const LArCalibParams
        index = dac;
      } 
 
-     ATH_MSG_DEBUG( "Pulsed cell " << m_onlineID->channel_name(chid) << " gain: "<<gain ); 
-     ATH_MSG_DEBUG( "with " << (*it)->sampleSum().size() << " samples " << index << " DAC " << delay << " delay " << dacPulsed << " dacPulsed " ); 
+     ATH_MSG_DEBUG( "Cell " << m_onlineID->channel_name(chid) << " gain: "<<gain ); 
+     ATH_MSG_DEBUG( "with " << (*it)->sampleSum().size() << " samples " << index << " DAC " << delay << " delay " << dacPulsed << " dacPulsed " << pulsed << " pulsed"); 
 
      WaveMap::iterator itm = waveMap.find(index);
      

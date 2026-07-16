@@ -17,7 +17,7 @@
 #include "xAODTrigL1Calo/eFexTowerAuxContainer.h"
 
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-
+#include "StoreGate/WriteDecorHandle.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -39,6 +39,9 @@ StatusCode eFexTowerBuilder::initialize() {
     CHECK( m_outKey.initialize(true) );
     CHECK( m_eiKey.initialize(true) );
     CHECK( m_LArLatomeHeaderContainerKey.initialize(SG::AllowEmpty) );
+
+    // initialise any tower decorations
+    ATH_CHECK( m_tauTimingDecorKey.initialize(SG::AllowEmpty) );
 
     if(!m_mappingFile.empty()) {
         if (auto fileName = PathResolverFindCalibFile(m_mappingFile); !fileName.empty()) {
@@ -93,20 +96,44 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
     }
     bool isMC = ei->eventType(xAOD::EventInfo::IS_SIMULATION); // currently only used to decide if should set a saturation code or not
     
-
-    std::map<std::pair<int,int>,std::array<int,11>> towers;
+    std::map<std::pair<int,int>, std::pair<std::array<int,11>, std::vector<float>>> towers;
 
     constexpr int INVALID_VALUE = -99999; // use this value to indicate invalid
     constexpr int MASKED_VALUE = std::numeric_limits<int>::max(); // use this value to indicate masked
     constexpr int SATURATED_VALUE = std::numeric_limits<int>::max()-1; // use this value to indicate saturation
     constexpr int MISSING_VALUE = -99998; // use this value to indicate missing supercell
 
+
+
     for (auto digi: *scells) {
         const auto itr = m_scMap.find(digi->ID().get_compact());
         if (itr == m_scMap.end()) { continue; } // not in map so not mapping to a tower
         int val =  std::round(digi->energy()/(12.5*std::cosh(digi->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
         // note: a val of < -99998 is what is produced if efex was sent an invalid code of 1022 (see LArRawtoSuperCell)
-        if (isMC && m_applyTimingCut && !((digi)->provenance()&0x200)) val = 0; // apply timing cut to MC (already present in Data)
+        auto elem = ddm->get_element(digi->ID());
+
+        // timing cut except HEC stuff
+        bool isHEC = false;
+        if (elem) {
+            int sampling = elem->getSampling();
+            isHEC = (sampling >= 8 && sampling <= 11);
+        }
+
+        // decide whether to apply timing cut
+        bool applyTiming = false;
+
+        if (m_applyTimingCutAll) {
+            applyTiming = true;  // apply everywhere
+        }
+        else if (m_applyTimingCut) {
+            applyTiming = !isHEC;  // apply everywhere except HEC
+        }
+
+        // apply cut
+        if (isMC && applyTiming && !((digi)->provenance() & 0x200)) {
+            val = 0;
+        }
+
         bool isSaturated = (!isMC) ? (digi->quality()) : false; // not applying saturation codes in MC until the changes to trigger counts has been investigated
         bool isMasked = ((digi)->provenance()&0x80);
         bool isInvalid = m_applyMasking ? ((digi)->provenance()&0x40) : false;
@@ -118,39 +145,47 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
             val = SATURATED_VALUE;
         }
 
-        auto towerItr = towers.emplace(itr->second.first,std::array<int,11>{}); // returns pair<itr,bool> with bool indicating if emplaced
-        if(towerItr.second) { // did an emplace
-            towerItr.first->second.fill(MISSING_VALUE); // ensure all slots initialize with missing value
+	    // fill the Et
+        auto [towerItr, inserted] = towers.try_emplace(itr->second.first);
+
+        if (inserted) {
+            towerItr->second.first.fill(MISSING_VALUE);
+            towerItr->second.second.assign(11, -6000.0f);
         }
-        auto& tower = (towerItr.first->second);
+
+        auto& counts = towerItr->second.first;
+        auto& timing = towerItr->second.second;
+
+        if (itr->second.second.second == 11) {
+            timing.at(itr->second.second.first) = digi->time();
+        }
         if (itr->second.second.second<11) {
             // doing an energy split between slots ... don't include a masked channel (or invalid channel)
             if (!isMasked && val!=INVALID_VALUE) {
                 if(isSaturated) {
                     // mark both as saturated
-                    tower.at(itr->second.second.first) = SATURATED_VALUE;
-                    tower.at(itr->second.second.second) = SATURATED_VALUE;
+                    counts.at(itr->second.second.first) = SATURATED_VALUE;
+                    counts.at(itr->second.second.second) = SATURATED_VALUE;
                 }
-                if(tower.at(itr->second.second.first)!=(SATURATED_VALUE)) { // don't override saturation
+                if(counts.at(itr->second.second.first)!=(SATURATED_VALUE)) { // don't override saturation
                     // if the other contribution was masked or invalid or missing, revert to 0 before adding this contribution
-                    if (tower.at(itr->second.second.first)==MASKED_VALUE || tower.at(itr->second.second.first)==INVALID_VALUE  || tower.at(itr->second.second.first)==MISSING_VALUE) {
-                        tower.at(itr->second.second.first)=0;
+                    if (counts.at(itr->second.second.first)==MASKED_VALUE || counts.at(itr->second.second.first)==INVALID_VALUE  || counts.at(itr->second.second.first)==MISSING_VALUE) {
+                        counts.at(itr->second.second.first)=0;
                     }
-                    tower.at(itr->second.second.first) += val >> 1;
+                    counts.at(itr->second.second.first) += val >> 1;
                 }
-                if(tower.at(itr->second.second.second)!=(SATURATED_VALUE)) { // don't override saturation
+                if(counts.at(itr->second.second.second)!=(SATURATED_VALUE)) { // don't override saturation
                     // if the other contribution was masked or invalid or missing, revert to 0 before adding this contribution
-                    if (tower.at(itr->second.second.second)==MASKED_VALUE || tower.at(itr->second.second.second)==INVALID_VALUE || tower.at(itr->second.second.second)==MISSING_VALUE) {
-                        tower.at(itr->second.second.second)=0;
+                    if (counts.at(itr->second.second.second)==MASKED_VALUE || counts.at(itr->second.second.second)==INVALID_VALUE || counts.at(itr->second.second.second)==MISSING_VALUE) {
+                        counts.at(itr->second.second.second)=0;
                     }
-                    tower.at(itr->second.second.second) += (val - (val >> 1)); // HW seems fixed now!
+                    counts.at(itr->second.second.second) += (val - (val >> 1)); // HW seems fixed now!
                 }
             }
             // hw is incorrectly ignoring masking on the second part
             // so always add the 2nd bit
-            //tower.at(itr->second.second.second) += (val - (val >> 1)); // Removed b.c. of fix above - leaving this comment here until resolved!
         } else {
-            auto& v = tower.at(itr->second.second.first);
+	  auto& v = counts.at(itr->second.second.first);
             if (isMasked) {
                 // dont mark it masked if it already has a contribution
                 if(v==MISSING_VALUE) v = MASKED_VALUE;
@@ -162,7 +197,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
             }
         }
 
-    }
+    } // Scells
 
     // add tile energies from TriggerTowers
     static const auto etaIndex = [](float eta) { return int( eta*10 ) + ((eta<0) ? -1 : 1); };
@@ -171,11 +206,15 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         if (std::abs(tTower->eta()) > 1.5) continue;
         if (tTower->sampling() != 1) continue;
         double phi = tTower->phi(); if(phi > M_PI) phi -= 2.*M_PI;
-        auto towerItr = towers.emplace(std::pair(etaIndex(tTower->eta()),phiIndex(phi)),std::array<int,11>{}); // returns pair<itr,bool> with bool indicating if emplaced
-        if(towerItr.second) { // did an emplace
-            towerItr.first->second.fill(MISSING_VALUE); // ensure all slots initialize with missing value
+        auto coord = std::pair(etaIndex(tTower->eta()), phiIndex(phi));
+
+        auto [towerItr, inserted] = towers.try_emplace(coord);
+
+        if (inserted) {
+            towerItr->second.first.fill(MISSING_VALUE);
+            towerItr->second.second.assign(11, -6000.0f);
         }
-        (towerItr.first->second).at(10) = tTower->cpET();
+        towerItr->second.first.at(10) = tTower->cpET();
     }
 
 
@@ -198,18 +237,34 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
     // inputs, depending on which sources are present in the run (e.g. if tile is present but not LAr).
     // This is different to e.g. jFex, which creates a separate tower for each source at each location
     // so jFex doesn't need a "missing" input code.
-    for(auto& [coord,counts] : towers) {
-        size_t ni = (std::abs(coord.first)<=15) ? 10 : 11; // ensures we skip the tile towers for next line
-        for(size_t i=0;i<ni;++i) counts[i] = (scells->empty() ? 1025 : calToFex(counts[i])); // do latome energy scaling to non-tile towers - if had no cells will use code "1025" to indicate
-        eTowers->push_back( std::make_unique<xAOD::eFexTower>() );
-        eTowers->back()->initialize( ( (coord.first<0 ? 0.5:-0.5) + coord.first)*0.1 ,
-                                 ( (coord.second<0 ? 0.5:-0.5) + coord.second)*M_PI/32,
-                                     std::vector<uint16_t>(counts.begin(), counts.end()),
-                                 -1, /* module number */
-                                 -1, /* fpga number */
-                                 0,0 /* status flags ... could use to indicate which cells were actually present?? */);
-    }
+    for (auto& [coord, towerData] : towers) {
+        auto& counts = towerData.first;
+        auto& timingvec = towerData.second;
 
+        size_t ni = (std::abs(coord.first) <= 15) ? 10 : 11;
+
+        for (size_t i = 0; i < ni; ++i) {
+            counts[i] = scells->empty() ? 1025 : calToFex(counts[i]);
+        }
+        
+        eTowers->push_back(std::make_unique<xAOD::eFexTower>());
+        eTowers->back()->initialize(
+            ((coord.first < 0 ? 0.5 : -0.5) + coord.first) * 0.1,
+            ((coord.second < 0 ? 0.5 : -0.5) + coord.second) * M_PI / 32,
+            std::vector<uint16_t>(counts.begin(), counts.end()),
+            -1, /* module number */
+            -1, /* fpga number */
+            0,0 /* status flags ... could use to indicate which cells were actually present?? */
+        );
+        // fill timing decorator
+        if (!m_tauTimingDecorKey.empty()) {
+            SG::WriteDecorHandle<xAOD::eFexTowerContainer, std::vector<float>> eTowerTiming(
+                m_tauTimingDecorKey, ctx
+            );
+
+            eTowerTiming(*eTowers->back()) = timingvec;
+        }
+    }
     return StatusCode::SUCCESS;
 
 }

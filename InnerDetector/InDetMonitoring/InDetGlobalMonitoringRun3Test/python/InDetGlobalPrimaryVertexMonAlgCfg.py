@@ -11,14 +11,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, alg, flags=None):
-
-    # Run 4/ITk: |eta| acceptance grows from 2.5 to 4.0 and Phase II
-    # pile-up dramatically increases the per-event vertex / track
-    # multiplicity ranges.
-    isITk = bool(flags) and flags.Detector.GeometryITk
-    m_etaMax = 4.0 if isITk else 3.0
-    m_pvNTracksMax = 1000 if isITk else 300
+def HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, alg):
 
     # this creates a "pvGroup" called "alg" which will put its histograms into the subdirectory "PrimaryVertex"
     pvGroup = helper.addGroup(alg, 'PrimaryVertex')
@@ -37,13 +30,9 @@ def HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, alg, flags=None):
     title = 'Primary vertex: z;z (mm);Events'
     pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=-200., xmax=200.)
 
-    # Run 4/ITk: Phase II pileup (mu=200) produces many more reconstructed
-    # vertices than Run 1-3, so the original 60/50-bin axes overflow on
-    # every event.  Widen to 300 bins covering 0..300 to accommodate the
-    # Phase II range while remaining compatible with Run 3 sizes.
     varName = 'm_PvN;pvN' #done
     title = 'Total number of vertices (primary and pile up);Total number of vertices;Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=300, xmin=-0.5, xmax=299.5)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=60, xmin=-0.5, xmax=59.5)
 
     varName = 'm_nPriVtx;pvNPriVtx' #done
     title = 'Number of primary vertices;Number of primary vertices;Events'
@@ -51,7 +40,7 @@ def HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, alg, flags=None):
 
     varName = 'm_nPileupVtx;pvNPileupVtx' #done
     title   = 'Number of pileup vertices;Number of pile up vertices;Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=300, xmin=-0.5, xmax=299.5)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=50, xmin=-0.5, xmax=49.5)
     
     varName = 'm_PvErrX;pvErrX'  #done
     title   = 'Primary vertex: #sigma_{x}; #sigma_{x} (mm);Events'
@@ -69,13 +58,9 @@ def HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, alg, flags=None):
     title   = 'Primary vertex: #Chi^{2}/DoF of vertex fit;#Chi^{2}/DoF;Events'
     pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=0., xmax=5.)
 
-    # NB: filled from Monitored::Scalar("m_PvNTracks", ...) in the C++
-    # algorithm; the Run 3 code accidentally bound this histogram to
-    # "m_PvN" which produced (size-1) fills instead of per-vertex track
-    # multiplicities.
-    varName = 'm_PvNTracks;pvNTracks'  #done
+    varName = 'm_PvN;pvNTracks'  #done
     title = 'Number of tracks in primary vertex;Number of tracks;Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=200, xmin=0., xmax=m_pvNTracksMax)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=300, xmin=0., xmax=300.)
 
     varName = 'm_PvTrackPt;pvTrackPt'  #done
     title   = 'Primary vertex: original track p_{t};p_{t} (GeV);Events'
@@ -83,7 +68,7 @@ def HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, alg, flags=None):
 
     varName = 'm_PvTrackEta;pvTrackEta'  #done
     title   = 'Primary vertex: original track #eta; #eta;Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=-m_etaMax, xmax=m_etaMax)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=-3, xmax=3)
 
 # end histograms
 
@@ -101,5 +86,5 @@ def InDetGlobalPrimaryVertexMonAlgCfg(helper, acc,
         addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
         **kwargs)
 
-    HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, monAlg, flags)
+    HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, monAlg)
     return

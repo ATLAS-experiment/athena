@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -11,7 +11,7 @@ def TRTAlignCondAlgCfg(flags, name="TRTAlignCondAlg", **kwargs):
     acc = TRT_GeoModelCfg(flags)
     acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/DX", "/TRT/Calib/DX"))
 
-    if flags.GeoModel.Align.Dynamic:
+    if flags.GeoModel.Align.Dynamic and flags.Overlay.DynamicAlignTRT:
         acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/AlignL1/TRT", "/TRT/AlignL1/TRT", className="CondAttrListCollection"))
         acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/AlignL2", "/TRT/AlignL2", className="AlignableTransformContainer"))
         kwargs.setdefault("ReadKeyDynamicGlobal", "/TRT/AlignL1/TRT")
@@ -19,7 +19,7 @@ def TRTAlignCondAlgCfg(flags, name="TRTAlignCondAlg", **kwargs):
     else:
         acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Align", "/TRT/Align", className="AlignableTransformContainer"))
 
-    kwargs.setdefault("UseDynamicFolders", flags.GeoModel.Align.Dynamic)
+    kwargs.setdefault("UseDynamicFolders", flags.GeoModel.Align.Dynamic and flags.Overlay.DynamicAlignTRT)
     kwargs.setdefault("WriteKeyAlignStore", "")  # currently unused
 
     acc.addCondAlgo(CompFactory.TRTAlignCondAlg(name, **kwargs))

@@ -2541,5 +2541,9 @@ HLT_noalg_mb_L1MBTS_2:
   eventCount: 0
 HLT_noalg_mb_L1RD0_UNPAIRED_ISO:
   eventCount: 0
+HLT_noalg_mb_L1jJ55:
+  eventCount: 19
+HLT_noalg_mb_L1jTE600:
+  eventCount: 0
 HLT_noalg_zb_L1ZeroBias:
   eventCount: 0

@@ -7,16 +7,18 @@
 @brief Adapted from LArNoiseCorrelationMonAlg by M. Spalla 
 '''
 
-def LArCoherentNoisefractionConfig(inputFlags, groupsToMonitor=[]):
+def LArCoherentNoisefractionConfig(inputFlags, groupsToMonitor=[], doTrigSel=False):
     
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'LArCoherentNoisefractionMonAlgCfg')
+    helper = AthMonitorCfgHelper(inputFlags,'LArCoherentNoisefractionMonAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    return LArCoherentNoisefractionConfigCore(helper, CompFactory.LArCoherentNoisefractionMonAlg,inputFlags,groupsToMonitor)
+    return LArCoherentNoisefractionConfigCore(helper, CompFactory.LArCoherentNoisefractionMonAlg(CheckTrigger=doTrigSel),inputFlags,groupsToMonitor)
 
 def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsToMonitor):
     from LArMonitoring.GlobalVariables import lArDQGlobals
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('LArCoherentNoisefractionConfigCore ')
 
     larCoherentNoisefractionMonAlg = helper.addAlgorithm(algoinstance,'larCoherentNoisefractionMonAlg')
 
@@ -47,6 +49,7 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsT
        else:      
              customGroupstoMonitor = groupsToMonitor   
     larCoherentNoisefractionMonAlg.GroupsToMonitor = customGroupstoMonitor   
+    log.info("GroupsToMonitor: ",customGroupstoMonitor)
 
     try:
        customFEBStoMonitor = inputFlags.LArMon.customFEBsToMonitor
@@ -59,7 +62,6 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsT
     customFEBStoMonitor=[larStrHelp.fixFEBname(nm) for nm in customFEBStoMonitor]
 
 
-    # adding BadChan masker private tool
     larCoherentNoisefractionMonAlg.TriggerChain = "HLT_noalg_zb_L1ZB, HLT_noalg_cosmiccalo_L1RD1_EMPTY" #turn off for calibration run
 
 
@@ -70,8 +72,8 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsT
     febsToMonitorEndcapC=list(setCustomFEBS.intersection(lArDQGlobals.febsEndcapC))
 
     if len(febsToMonitorBarrelA)==0 and len(febsToMonitorEndcapA)==0 and len(febsToMonitorBarrelC)==0 and len(febsToMonitorEndcapC)==0:
-        print("LArCoherentNoisefractionMonAlg:WARNING. None of the following FEBs were recognised, no plot will be produced")
-        print(customFEBStoMonitor)
+        log.warning(" None of the following FEBs were recognised, no plot will be produced")
+        log.warning(customFEBStoMonitor)
         larCoherentNoisefractionMonAlg.PlotsOFF=True #lets protect ourselves against poor writing
         larCoherentNoisefractionMonAlg.PlotCustomFEBSset=False
         larCoherentNoisefractionMonAlg.FEBlist=[]
@@ -90,7 +92,7 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsT
 
        hist_path='/LAr/CNF/'
     
-       tot_plot_name="cnf_tot"
+       tot_plot_name=allGroups[grp]+"_cnf_tot"
        tot_var_and_name="SumDev;"+tot_plot_name
        cnfArray.defineHistogram(tot_var_and_name,
                                 title=tot_plot_name,
@@ -106,7 +108,6 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsT
                                 xbins=lArDQGlobals.CNFN_tot, xmin=lArDQGlobals.CNFXmin_tot, xmax=lArDQGlobals.CNFXmax_tot,
                                 pattern=febsToMonitorBarrelC)
 
-       print(lArDQGlobals.CNFN_tot)
        cnfArray.defineHistogram(tot_var_and_name,
                                 title=tot_plot_name,
                                 type='TH1F',
@@ -123,7 +124,7 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsT
                                 pattern=febsToMonitorEndcapC)
 
 
-       noncoh_plot_name="cnf_noncoh"
+       noncoh_plot_name=allGroups[grp]+"_cnf_noncoh"
        noncoh_var_and_name="Dev;"+noncoh_plot_name
 
        cnfArray.defineHistogram(noncoh_var_and_name,
@@ -154,9 +155,10 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsT
                                 xbins=lArDQGlobals.CNFN_ncoh, xmin=lArDQGlobals.CNFXmin_ncoh, xmax=lArDQGlobals.CNFXmax_ncoh,
                                 pattern=febsToMonitorEndcapC)
 
+       log.info(cnfArray.toolList())
 
-    print(cnfArray.toolList())
-
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    cfg=ComponentAccumulator()
     cfg.merge(helper.result())
     return cfg
 

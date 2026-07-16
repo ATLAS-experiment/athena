@@ -11,26 +11,20 @@
 
 from math import pi as M_PI
 
-def IDAlignMonGenericTracksAlgCfg(helper, alg, flags=None, **kwargs):
-
-    # ITk extends |eta| acceptance to 4.0 and Phase II reco delivers
-    # many more tracks per event than Run 1-3.  Widen the relevant
-    # axes when the ITk geometry is active.  Pixel hits per track also
-    # grow because ITk has more pixel layers (5 barrel + endcap rings).
-    isITk = bool(flags) and flags.Detector.GeometryITk
+def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     # values
     m_pTRange = 100
-    m_NTracksRange = 5000 if isITk else 100
-    m_rangePixHits = 20 if isITk else 10
+    m_NTracksRange = 100
+    m_rangePixHits = 10
     m_rangeSCTHits = 20
     m_rangeTRTHits = 60
-    m_etaRange = 4.0 if isITk else 2.7
-    m_etaBins = 80 if isITk else 40
+    m_etaRange = 2.7
+    m_etaBins = 40
     m_phiBins = 80
     m_d0BsNbins = 100
     m_d0Range = 2
-    m_z0Range = 90.
+    m_z0Range = 70.
     m_d0BsRange = 0.05
 
     m_EtaModulesPix = [20, 13, 13, 13]
@@ -194,7 +188,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, flags=None, **kwargs):
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_z0Range, xmax=m_z0Range)
 
     varName = 'm_errZ0;err_z0'
-    title = 'z_{0} error; z_{0} error [mm];Tracks'
+    title = 'z_{0} error; z_{0} error [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=50, xmin=0, xmax=0.3)
 
     varName = 'm_z0_bscorr;z0'
@@ -202,11 +196,11 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, flags=None, **kwargs):
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_z0Range, xmax=m_z0Range)
 
     varName = 'm_z0sintheta;z0sintheta'
-    title = 'z_{0}sin#theta; z_{0}sin#theta [mm];Tracks'
+    title = 'z_{0}sin#theta; z_{0}sin#theta [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_z0Range, xmax=m_z0Range)
 
     varName = 'm_d0;d0_origin'
-    title = 'd_{0} (computed vs origin);d_{0} (origin) [mm];Tracks'
+    title = 'd_{0} (computed vs origin);d_{0} (origin) [mm]; Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_d0Range, xmax=m_d0Range)
 
     varName = 'm_errD0;errD0'
@@ -265,11 +259,6 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, flags=None, **kwargs):
     title = 'd_{0} (BS) Vs #phi_{0} (ECC);Track #phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange, cutmask='isTrackECC')
    
-    # d0_origin 
-    varName = 'm_pT,m_d0;D0orVsPt'
-    title = 'd_{0} (origin) Vs p_{T};Signed track p_{T} [GeV];d_{0} (origin) [mm]'
-    genericTrackGroup.defineHistogram( varName, type='TH2F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange )
-
     ## Eta-ID vs Phi-ID vs hits 
     ### Pixel barrel and endcap
     layersPix = ['0', '1', '2', '3']

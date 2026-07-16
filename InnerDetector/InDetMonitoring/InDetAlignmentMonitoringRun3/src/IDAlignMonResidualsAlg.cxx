@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************************
@@ -47,11 +47,15 @@
 IDAlignMonResidualsAlg::IDAlignMonResidualsAlg( const std::string & name, ISvcLocator* pSvcLocator ) :
   AthMonitorAlgorithm(name, pSvcLocator),
   m_trtcaldbTool("TRT_CalDbTool", this),
-  m_iUpdator ("Trk::KalmanUpdator"),
-  m_propagator ("Trk::RungeKuttaPropagator"),
-  m_residualPullCalculator( "Trk::ResidualPullCalculator/ResidualPullCalculator"),
   m_trackSelection( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this),
-  m_hitQualityTool(""){ 
+  m_extendedPlots(false)
+{
+  m_iUpdator = ToolHandle<Trk::IUpdator>("Trk::KalmanUpdator");
+  m_propagator = ToolHandle<Trk::IPropagator>("Trk::RungeKuttaPropagator");
+  m_residualPullCalculator = ToolHandle<Trk::IResidualPullCalculator>(
+								      "Trk::ResidualPullCalculator/ResidualPullCalculator");
+  m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
+  
   declareProperty("CheckRate"                 , m_checkrate=1000);
   declareProperty("ITRT_CalDbTool"            , m_trtcaldbTool);
   declareProperty("iUpdator"                  , m_iUpdator);
@@ -151,16 +155,22 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
   ATH_MSG_DEBUG("fillHistograms() -- dealing with track collection: " << m_tracksName.key());
   
   // For histogram naming
-  const auto & residualGroup = getGroup("Residuals");
+  auto residualGroup = getGroup("Residuals");
   
   //counters
+  bool hasBeenCalledThisEvent=false;
   float mu = 0.;
   int nTracks = 0;
-  //recreates original behaviour...but...
-  //calls this every time
+  
   mu = lbAverageInteractionsPerCrossing(ctx);
   auto mu_m = Monitored::Scalar<float>("mu_m", 0.0);
-  mu_m = mu;
+  if (!hasBeenCalledThisEvent){
+    mu = lbAverageInteractionsPerCrossing(ctx);
+    mu_m = mu;
+    hasBeenCalledThisEvent=true;
+  }
+  else
+    mu = -999;
   
   if (m_extendedPlots){
     fill("residualGroup", mu_m);
@@ -231,22 +241,22 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       
       //Trk::RIO_OnTrack object contains information on the hit used to fit the track at this surface
       const Trk::RIO_OnTrack* hit = dynamic_cast <const Trk::RIO_OnTrack*>(mesh);
-      ATH_MSG_DEBUG(" --> Going to retrieve the Trk::RIO_OnTrack for hit " << nTSOS);
+      ATH_MSG_DEBUG(" --> Going to retrive the Trk::RIO_OnTrack for hit " << nTSOS);
       if (hit== nullptr) {
 	//for some reason the first tsos has no associated hit - maybe because this contains the defining parameters?
 	if (nHits >0) ATH_MSG_DEBUG("No hit associated with TSOS " << nTSOS);
 	continue;
       }
       
-      ATH_MSG_DEBUG(" --> Going to retrieve the track parameters of this TSOS: " << nTSOS);
+      ATH_MSG_DEBUG(" --> Going to retrive the track parameters of this TSOS: " << nTSOS);
       const Trk::TrackParameters* trackParameter = tsos->trackParameters();
       if(trackParameter==nullptr) {
-        //if no TrackParameters for TSOS we cannot define residuals
-        ATH_MSG_DEBUG(" Skipping TSOS " << nTSOS << " because it does not have TrackParameters");
-        continue;
+	//if no TrackParameters for TSOS we cannot define residuals
+	ATH_MSG_DEBUG(" Skipping TSOS " << nTSOS << " because it does not have TrackParameters");
+	continue;
       }
-      //trackParameter cannot be nullptr here
-      const AmgSymMatrix(5)* TrackParCovariance = trackParameter->covariance();
+      
+      const AmgSymMatrix(5)* TrackParCovariance = trackParameter ? trackParameter->covariance() : nullptr;
       
       if(TrackParCovariance==nullptr) {
         //if no MeasuredTrackParameters the hit will not have associated convariance error matrix and will not
@@ -291,11 +301,6 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         ATH_MSG_DEBUG("** IDAlignMonResidualsAlg::fillHistograms() ** Hit is from the TRT, finding residuals... ");
         bool isTubeHit = (mesh->localCovariance()(Trk::locX, Trk::locX) > 1.0);
         const Trk::TrackParameters* trackParameter = tsos->trackParameters();
-        //finding residuals
-        if (!trackParameter) {
-          ATH_MSG_WARNING("No TrackParameters associated with TRT TrkSurface " << nTSOS);
-          continue;
-        }
         float hitR = hit->localParameters()[Trk::driftRadius];
         float trketa = tsos->trackParameters()->eta();
         float pullR = -9.9;
@@ -305,7 +310,11 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         layer_or_wheel = m_trtID->layer_or_wheel(id);
         int phi_module = m_trtID->phi_module(id);
 	
-        
+        //finding residuals
+        if (!trackParameter) {
+          ATH_MSG_WARNING("No TrackParameters associated with TRT TrkSurface " << nTSOS);
+          continue;
+        }
         ATH_MSG_DEBUG("Found Trk::TrackParameters for hit " << nTSOS << " --> TRT hit (detType= " << detType << ")" );
 	
         //getting unbiased track parameters by removing the hit from the track and refitting
@@ -469,7 +478,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	fill(residualGroup, si_residualx_m);
 	
 	if(barrelEC==0){//filling pixel barrel histograms
-	  int ModEtaShift[4] = {12, 38, 60, 82};
+	  int ModEtaShift[4] = {0, 30, 53, 76};
           int ModPhiShift[4] = {0, 24, 56, 104};
 	  
           //common Si plots
@@ -584,7 +593,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         
         if(barrelEC==0){//filling SCT barrel histograms
           int ModPhiShift[4] = {0, 42, 92, 150};
-          int ModEtaShift[4] = {12, 34, 54, 78};
+          int ModEtaShift[4] = {0, 23, 46, 69};
           
           //common Si plots
           si_b_residualx_m = residualX;

@@ -10,7 +10,7 @@
 
 from math import pi as M_PI
 
-def IDAlignMonPVBiasesAlgCfg(helper, alg, TrackCollectionName='ExtendedTracks', **kwargs):
+def IDAlignMonPVBiasesAlgCfg(helper, alg, **kwargs):
     '''Function to configures some algorithms in the monitoring system.'''
 
     #Values
@@ -22,11 +22,8 @@ def IDAlignMonPVBiasesAlgCfg(helper, alg, TrackCollectionName='ExtendedTracks', 
     m_maxD0 = 5
     
     # this creates a "pvGroup" called "alg" which will put its histograms into the subdirectory "PVBiases"
-    # The intermediate folder name follows the active Trk::Track collection
-    # so that ITk reco (CombinedITkTracks) is not mis-labelled as Run 1-3
-    # ExtendedTracks.
     pvGroup = helper.addGroup(alg, 'PVBiases')
-    pathPVBiases = '/IDAlignMon/' + TrackCollectionName + '/PVBiases'
+    pathPVBiases = '/IDAlignMon/ExtendedTracks/PVBiases'
 
     # Histograms for the Alignment PVBiases monitoring:    
     #400-600MeV

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TriggerMatchingTool_MatchFromCompositeTool_H
@@ -49,7 +49,7 @@ namespace Trig {
        */
       bool match(
           const xAOD::IParticle& recoObject,
-          const std::string& chain,
+          std::string_view chain,
           double=0.1, bool=false) const override;
 
       /**
@@ -64,7 +64,7 @@ namespace Trig {
        */
       bool match(
           const std::vector<const xAOD::IParticle*>& recoObject,
-          const std::string& chain,
+          std::string_view chain,
           double=0.1, bool=false) const override;
 
     protected:

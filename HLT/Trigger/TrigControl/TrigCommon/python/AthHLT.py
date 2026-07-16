@@ -2,6 +2,7 @@
 #
 # Utilities used in athenaHLT.py
 #
+from typing import Any
 from AthenaCommon.Logging import logging
 log = logging.getLogger('athenaHLT')
 
@@ -25,14 +26,14 @@ class CondDB:
          return '/TDAQ/RunCtrl/SOR_Params'
 
 @cache
-def get_sor_params(run_number):
+def get_sor_params(run_number) -> dict[str, Any] | None:
    from CoolConvUtilities import AtlCoolLib
 
    log.info('Reading SOR record for run %s from COOL', run_number)
 
    cdb = CondDB(run_number)
    dbcon = AtlCoolLib.readOpen('COOLONL_TDAQ/%s' % cdb.db_instance())
-   folder = dbcon.getFolder(cdb.sor_folder())
+   folder = dbcon.getFolder(cdb.sor_folder())   # type: ignore
 
    # need to keep sor variable while using payload (cannot do the following in
    # one single line nor overwrite sor). Otherwise: 1) GC comes into play;
@@ -46,7 +47,6 @@ def get_sor_params(run_number):
    payload = sor.payload()
    d = {k: payload[k] for k in payload}
    return d
-
 
 @cache
 def get_trigconf_keys(run_number, lb_number):
@@ -71,7 +71,6 @@ def get_trigconf_keys(run_number, lb_number):
    d['HLTPSK'] = findKey(TriggerCoolUtil.getHLTPrescaleKeys(db, run_range)[run_number]['HLTPSK2'])
 
    return d
-
 
 def getCACfg(jopath):
    """Return the CA Cfg function based on joboptions path.
@@ -137,12 +136,16 @@ if __name__=='__main__':
 
    # Unit testing case:
    d = get_sor_params(327265)  # Run-2
-   print(d)
-   assert(d['DetectorMask']=='0000000000000000c10069fffffffff7')
+   assert(d is not None)
+   if d is not None:
+      print(d)
+      assert(d['DetectorMask']=='0000000000000000c10069fffffffff7')
 
    d = get_sor_params(216416)  # Run-1
-   print(d)
-   assert(d['DetectorMask']==281474976710647)
+   assert(d is not None)
+   if d is not None:
+      print(d)
+      assert(d['DetectorMask']==281474976710647)
 
    # Config keys
    d = get_trigconf_keys(360026, 1)

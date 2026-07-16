@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
@@ -20,22 +21,29 @@ def LArDelay_OFCCaliCfg(flags):
 
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    tagResolver=FolderTagResolver()
-    pedestalTag=tagResolver.getFolderTag(flags.LArCalib.Pedestal.Folder)
+    tagResolver=FolderTagResolver(dbname=flags.LArCalib.Input.CoolOflP1Replica)
     caliWaveTag=tagResolver.getFolderTag(flags.LArCalib.CaliWave.Folder)
     caliOFCTag=tagResolver.getFolderTag(flags.LArCalib.OFCCali.Folder)
-    acTag=tagResolver.getFolderTag(flags.LArCalib.AutoCorr.Folder)
+    if (flags.LArCalib.Input.Database == "LAR_OFL" and flags.LArCalib.Input.Database2 == "LAR_OFL"):
+        pedestalTag=tagResolver.getFolderTag(flags.LArCalib.Pedestal.Folder)
+        acTag=tagResolver.getFolderTag(flags.LArCalib.AutoCorr.Folder)
+    else:
+        pedestalTag=None
+        acTag=None
+
     del tagResolver
-    
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=pedestalTag, modifiers=chanSelStr(flags),
                             className="LArPedestalComplete"))
     result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=acTag,modifiers=chanSelStr(flags)))
-    
 
     if not flags.LArCalib.isSC:
        if flags.LArCalib.Input.isRawData:
-          result.addEventAlgo(CompFactory.LArRawDataReadingAlg(LArRawChannelKey="", LArDigitKey=digKey, LArFebHeaderKey="LArFebHeader"))
+          result.addEventAlgo(CompFactory.LArRawDataReadingAlg(LArRawChannelKey="", LArDigitKey=digKey, LArFebHeaderKey="LArFebHeader",
+                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
+                                                              PosNegPreselection=flags.LArCalib.Preselection.Side,
+                                                              BEPreselection=flags.LArCalib.Preselection.BEC,
+                                                              FTNumPreselection=flags.LArCalib.Preselection.FT))
           from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
           result.merge(LArCalibDigitsMakerCfg(flags,digKey))
        else:
@@ -87,6 +95,7 @@ def LArDelay_OFCCaliCfg(flags):
     theLArCaliWaveBuilder.NBaseline        = 0 # to avoid the use of the baseline when Pedestal are missing
     theLArCaliWaveBuilder.UseDacAndIsPulsedIndex = False # should have an impact only for HEC
     theLArCaliWaveBuilder.RecAllCells      = False
+    theLArCaliWaveBuilder.CheckEmptyPhases     = False
     theLArCaliWaveBuilder.isSC             = flags.LArCalib.isSC
     result.addEventAlgo(theLArCaliWaveBuilder)
     
@@ -230,15 +239,6 @@ def LArDelay_OFCCaliCfg(flags):
         result.setAppProperty("HistogramPersistency","ROOT")
         pass # end if ROOT ntuple writing
 
-
-    #Get the current folder tag by interrogating the database:
-    from LArCalibProcessing.utils import FolderTagResolver
-    tagResolver=FolderTagResolver()
-    caliWaveTag=tagResolver.getFolderTag(flags.LArCalib.CaliWave.Folder)
-    caliOFCTag=tagResolver.getFolderTag(flags.LArCalib.OFCCali.Folder)
-    del tagResolver
-
-
     #Output (POOL + sqlite) file writing:
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
     result.merge(OutputConditionsAlgCfg(flags,
@@ -332,14 +332,127 @@ def LArDelay_OFCCali_PoolDumpCfg(flags):
 
     return result
 
+def LArXtalkDelayCfg(flags):
+
+    #Get basic services and cond-algos
+    from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
+    result=LArCalibBaseCfg(flags)
+
+    #Add ByteStream reading
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    result.merge(ByteStreamReadCfg(flags))
+
+    #Calibration runs are taken in fixed gain. 
+    #The SG key of the digit-container is name of the gain
+    gainStrMap={0:"HIGH",1:"MEDIUM",2:"LOW"}
+    digKey=gainStrMap[flags.LArCalib.Gain]
+
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if "ONL" in flags.LArCalib.Input.Database:
+       result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, className="CondAttrListCollection", db="CONDBR2"))
+       LArPedestalCondAlg =  CompFactory.getComp("LArFlatConditionsAlg<LArPedestalFlat>")
+       result.addCondAlgo(LArPedestalCondAlg(ReadKey=flags.LArCalib.Pedestal.Folder, WriteKey="Pedestal"))
+    else:
+       from LArCalibProcessing.utils import FolderTagResolver
+       FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
+       tagResolver=FolderTagResolver()
+       pedestalTag=tagResolver.getFolderTag(flags.LArCalib.Pedestal.Folder)
+       result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=pedestalTag, modifiers=chanSelStr(flags),
+                            className="LArPedestalComplete"))
+    
+
+    from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
+    result.merge(LArCalibDigitsMakerCfg(flags,DigitsKey=digKey,ntrigg=flags.LArCalib.OFC.Ncoll,notrun=True))
+
+    if not flags.LArCalib.isSC:
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawDataReadingAlg(LArRawChannelKey="", LArDigitKey=digKey, LArFebHeaderKey="LArFebHeader"))
+       else:
+          result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
+                                                              LArFebHeaderKey="LArFebHeader",
+                                                              SubCaloPreselection=flags.LArCalib.Input.SubDet,
+                                                              PosNegPreselection=flags.LArCalib.Preselection.Side,
+                                                              BEPreselection=flags.LArCalib.Preselection.BEC,
+                                                              FTNumPreselection=flags.LArCalib.Preselection.FT))
+    
+       from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
+       result.merge(LArFebErrorSummaryMakerCfg(flags))
+       result.getEventAlgo("LArFebErrorSummaryMaker").CheckAllFEB=False
+
+    else:
+       digKey="SC"
+       theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder")
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
+                                                               etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
+          from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
+          result.merge(LArCalibDigitsMakerCfg(flags,digKey))
+
+       else:   
+          # this needs also legacy  maps
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          result.merge(LArOnOffIdMappingCfg(flags))
+          result.merge(LArCalibIdMappingCfg(flags))
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, 
+                                                                      CalibCablingKeyLeg="LArCalibLineMap",
+                                                                      OnOffMapLeg="LArOnOffIdMap",
+                                                                      LATOMEDecoder = theLArLATOMEDecoder, ))
+
+    bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
+
+    theLArCaliWaveBuilder = CompFactory.LArCaliWaveBuilder()
+    theLArCaliWaveBuilder.KeyList= [digKey,]
+    theLArCaliWaveBuilder.KeyOutput="LArCaliWave"
+    theLArCaliWaveBuilder.GroupingType     = flags.LArCalib.GroupingType
+    theLArCaliWaveBuilder.SubtractPed      = True
+    theLArCaliWaveBuilder.NSteps           = flags.LArCalib.CaliWave.Nsteps
+    theLArCaliWaveBuilder.CheckEmptyPhases = False
+    theLArCaliWaveBuilder.NBaseline        = 0 # to avoid the use of the baseline when Pedestal are missing
+    theLArCaliWaveBuilder.UseDacAndIsPulsedIndex = False # should have an impact only for HEC
+    theLArCaliWaveBuilder.RecAllCells      = True
+    theLArCaliWaveBuilder.UseParamsSel     = True
+    theLArCaliWaveBuilder.UsePattern       = flags.LArCalib.OFC.Nsamples
+    theLArCaliWaveBuilder.NumSubStep       = flags.LArCalib.CaliWave.NSubSteps
+    theLArCaliWaveBuilder.isSC             = flags.LArCalib.isSC
+    result.addEventAlgo(theLArCaliWaveBuilder)
+    
+
+
+    #ROOT ntuple writing:
+    rootfile=flags.LArCalib.Output.ROOTFile
+    if rootfile != "":
+        result.addEventAlgo(CompFactory.LArCaliWaves2Ntuple(KeyList = ["LArCaliWave",],
+                                                            NtupleName  = "CALIWAVE",
+                                                            AddFEBTempInfo = False,
+                                                            RealGeometry = True,
+                                                            SaveDerivedInfo = True,
+                                                            ApplyCorrection = False,
+                                                            isSC = flags.LArCalib.isSC,
+                                                            BadChanKey = bcKey,
+                                                            OffId=True,
+                                                            AddCalib=True,
+                                                            SaveJitter=True if flags.LArCalib.CaliWave.Nsteps >= 24 else False
+                                                        ))
+
+        import os
+        if os.path.exists(rootfile):
+            os.remove(rootfile)
+        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
+        result.setAppProperty("HistogramPersistency","ROOT")
+        pass # end if ROOT ntuple writing
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+
+    return result
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    import sys
     ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
-
     ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Delay"
     ConfigFlags.LArCalib.Input.RunNumbers=[441251,]
@@ -365,5 +478,5 @@ if __name__ == "__main__":
     cfg.merge(LArDelay_OFCCaliCfg(ConfigFlags))
     cfg.getService("IOVDbSvc").DBInstance=""
     print("Start running...")
-    cfg.run()
+    sys.exit(cfg.run().isFailure())
 

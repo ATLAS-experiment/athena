@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,7 +44,12 @@ InDetGlobalPrimaryVertexMonAlg::~InDetGlobalPrimaryVertexMonAlg() {}
 
 
 StatusCode InDetGlobalPrimaryVertexMonAlg::initialize() {
-  ATH_CHECK( m_vxContainerName.initialize() );  
+
+  
+  ATH_CHECK( m_vxContainerName.initialize() );
+  //ATH_CHECK( m_vxContainerNameSplit.initialize() );
+  
+  
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -59,7 +64,7 @@ StatusCode InDetGlobalPrimaryVertexMonAlg::fillHistograms( const EventContext& c
   ATH_MSG_DEBUG("Filling InDetGlobalPrimaryVertexMonAlg");
   
   // For histogram naming
-  const auto & pvGroup = getGroup("PrimaryVertex");
+  auto pvGroup = getGroup("PrimaryVertex");
   
   // retrieving vertices
   auto handle_vxContainer = SG::makeHandle(m_vxContainerName, ctx);   // another way to access ??
@@ -84,7 +89,7 @@ StatusCode InDetGlobalPrimaryVertexMonAlg::fillHistograms( const EventContext& c
   int nPriVtx = 0;
   int nPileupVtx = 0;
  
-  for(const auto vtx : *vertexContainer) {
+  for(const auto & vtx : *vertexContainer) {
       
       if ( !vtx ) continue;
       

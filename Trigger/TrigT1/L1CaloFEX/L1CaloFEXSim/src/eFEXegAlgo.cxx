@@ -40,13 +40,14 @@ namespace LVL1 {
     }
 
 
-    StatusCode eFEXegAlgo::safetyTest() const {
+    StatusCode eFEXegAlgo::safetyTest(const EventContext& ctx) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
+        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey, ctx);
         if(!eTowerContainer.isValid()){
             ATH_MSG_FATAL("Could not retrieve container " << m_eTowerContainerKey.key() );
             return StatusCode::FAILURE;
         }
+        m_eTowers = eTowerContainer.cptr();
 
         return StatusCode::SUCCESS;
     }
@@ -65,32 +66,25 @@ namespace LVL1 {
 
     void LVL1::eFEXegAlgo::getCoreEMTowerET(unsigned int & et) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
-        const LVL1::eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1]);
+        const LVL1::eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1]);
         et = tmpTower->getLayerTotalET(0) + tmpTower->getLayerTotalET(1) + tmpTower->getLayerTotalET(2) + tmpTower->getLayerTotalET(3);
     }
 
     void LVL1::eFEXegAlgo::getCoreHADTowerET(unsigned int & et) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
-        const LVL1::eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1]);
+        const LVL1::eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1]);
         et = tmpTower->getLayerTotalET(4);
     }
 
     void LVL1::eFEXegAlgo::getRealPhi(float & phi) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-        phi = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1])->phi();
+        phi = m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1])->phi();
 
     }
 
     void LVL1::eFEXegAlgo::getRealEta(float & eta) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
-        eta = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1])->eta() * eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1])->getPosNeg();
+        eta = m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1])->eta() * m_eTowers->findTower(m_eFEXegAlgoTowerID[1][1])->getPosNeg();
 
     }
 
@@ -153,8 +147,6 @@ namespace LVL1 {
         int iCoreStart  = m_seedID-1;
         int iCoreEnd    = m_seedID+1;
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
-
         if(m_algoVersion==0) {
             // 3x3 Towers Had ; 1x3 L0 + 1x3 L3 EM
             for (int i=0; i<3; ++i) { // phi
@@ -162,7 +154,7 @@ namespace LVL1 {
                     if (((m_efexid%3 == 0) && (m_fpgaid == 0) && (m_central_eta == 0) && (j == 0)) || ((m_efexid%3 == 2) && (m_fpgaid == 3) && (m_central_eta == 5) && (j == 2))) {
                         continue;
                     } else {
-                        const eTower * tTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[i][j]);
+                        const eTower * tTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[i][j]);
                         hadsum += tTower->getLayerTotalET(4);
                         if (j==1) {
                             emsum += ( tTower->getLayerTotalET(0) + tTower->getLayerTotalET(3) );
@@ -195,7 +187,7 @@ namespace LVL1 {
                         ((m_efexid % 3 == 2) && (m_fpgaid == 3) && (m_central_eta == 5) && (j == 2))) {
                         continue;
                     } else {
-                        const eTower *tTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[i][j]);
+                        const eTower *tTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[i][j]);
                         hadsum += tTower->getLayerTotalET(4) + (((i==0&&j==0)||(i==2&&j==2)||(i==0&&j==2)||(i==2&&j==0)) ? 0 : tTower->getLayerTotalET(3));
                         // For PS add central tower + UnD phi neighbour
                         if (j == 1 && (i == 1 || i == phi2)) {
@@ -438,14 +430,14 @@ namespace LVL1 {
 
     void LVL1::eFEXegAlgo::getWindowET(int layer, int jPhi, int SCID, unsigned int & outET) {
 
-        SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
+        //SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
 
         if (SCID<0) { // left towers in eta
             if ((m_efexid%3 == 0) && (m_fpgaid == 0) && (m_central_eta == 0)) {
                 outET = 0;
             } else {
                 int etaID = 4+SCID;
-                const eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[jPhi][0]);
+                const eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[jPhi][0]);
                 if (layer==1 || layer==2) {
                     outET = tmpTower->getET(layer,etaID);
                 } else if (layer==0 || layer==3 || layer==4) {
@@ -453,7 +445,7 @@ namespace LVL1 {
                 }
             }
         } else if (SCID>=0 && SCID<4) { // central towers in eta
-            const eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[jPhi][1]);
+            const eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[jPhi][1]);
             if (layer==1 || layer==2) {
                 outET = tmpTower->getET(layer,SCID);
             } else if (layer==0 || layer==3 || layer==4) {
@@ -464,7 +456,7 @@ namespace LVL1 {
                 outET = 0;
             } else {
                 int etaID = SCID-4;
-                const eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[jPhi][2]);
+                const eTower * tmpTower = m_eTowers->findTower(m_eFEXegAlgoTowerID[jPhi][2]);
                 if (layer==1 || layer==2) {
                     outET = tmpTower->getET(layer,etaID);
                 } else if (layer==0 || layer==3 || layer==4) {

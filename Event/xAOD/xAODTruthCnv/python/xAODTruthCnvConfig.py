@@ -28,10 +28,16 @@ def GEN_AOD2xAODCfg(flags, name="GEN_AOD2xAOD", **kwargs):
     algo = CompFactory.xAODMaker.xAODTruthCnvAlg(name, **kwargs)
     acc.addEventAlgo(algo, primary = True)
 
+    # exclude IDTIDE decorations
+    from DerivationFrameworkInDet.IDTIDE import IDTIDE_AOD_EXCLUDED_AUXDATA_TRUTH
+    excludedAuxData = '.-'.join(IDTIDE_AOD_EXCLUDED_AUXDATA_TRUTH)
+    if excludedAuxData:
+        excludedAuxData = f'-{excludedAuxData}'
+
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD,addToAOD
     toAOD = ["xAOD::TruthEventContainer#TruthEvents", "xAOD::TruthEventAuxContainer#TruthEventsAux.",
              "xAOD::TruthVertexContainer#TruthVertices", "xAOD::TruthVertexAuxContainer#TruthVerticesAux.",
-             "xAOD::TruthParticleContainer#TruthParticles", "xAOD::TruthParticleAuxContainer#TruthParticlesAux.",
+             "xAOD::TruthParticleContainer#TruthParticles", f"xAOD::TruthParticleAuxContainer#TruthParticlesAux.{excludedAuxData}",
     ]
 
     if "xAOD::TruthParticleContainer#TruthPileupParticles" in flags.Input.TypedCollections:

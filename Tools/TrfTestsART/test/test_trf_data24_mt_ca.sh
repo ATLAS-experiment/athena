@@ -6,7 +6,7 @@
 # art-include: 24.0/Athena
 # art-athena-mt: 8
 
-conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA)")
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_DATA24)")
 timeout 64800 Reco_tf.py \
   --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data24/RAW/data24_13p6TeV.00484909.physics_Main.daq.RAW/1627events_data24_13p6TeV.00484909.physics_Main.daq.RAW._lb0098._SFO-16._0001.data \
   --outputAODFile="myAOD.pool.root" \

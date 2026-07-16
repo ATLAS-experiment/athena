@@ -16,7 +16,7 @@ class CaloMenuDefs(object):
 #
 
 @AccumulatorCache
-def fastCaloSequenceGenCfg(flags, name, doRinger=True, is_probe_leg=False, doRingerCalib=False):
+def fastCaloSequenceGenCfg(flags, name, doRinger=True, is_probe_leg=False):
     """ Creates Egamma Fast Calo  MENU sequence
     The Hypo name changes depending on name, so for different implementations (Electron, Gamma,....)
     """
@@ -31,7 +31,7 @@ def fastCaloSequenceGenCfg(flags, name, doRinger=True, is_probe_leg=False, doRin
     reco = InViewRecoCA("EMCalo",InViewRoIs=InViewRoIs,isProbe=is_probe_leg)
     reco.mergeReco(fastCaloVDVCfg(flags,InViewRoIs=InViewRoIs))
     robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+'_probe' if is_probe_leg else InViewRoIs)
-    reco.mergeReco(fastCaloRecoSequenceCfg(flags, inputEDM=InViewRoIs,ClustersName=output, doRingerCalib=doRingerCalib))
+    reco.mergeReco(fastCaloRecoSequenceCfg(flags, inputEDM=InViewRoIs,ClustersName=output,))
     selAcc.mergeReco(reco, robPrefetchCA=robPrefetchAlg)
 
     # hypo # The Alg will ALWAYS configure photons and electrons for ringer
@@ -44,6 +44,5 @@ def fastCaloSequenceGenCfg(flags, name, doRinger=True, is_probe_leg=False, doRin
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
     return MenuSequence(flags,selAcc,HypoToolGen=TrigEgammaFastCaloHypoToolFromDict)
 
-def fastCaloCalibSequenceGenCfg(flags, name, doRinger=True, is_probe_leg=False):
-    return fastCaloSequenceGenCfg(flags,name,doRinger=doRinger,is_probe_leg=is_probe_leg, doRingerCalib=True)
+
 

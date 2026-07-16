@@ -258,6 +258,12 @@ def ITkTrigL2LayerNumberToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAcc
   kwargs.setdefault("UseNewLayerScheme", True)
   acc.setPrivateTools(CompFactory.TrigL2LayerNumberToolITk(**kwargs))
   return acc
+
+def GBTSTrigL2LayerNumberToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
+  acc = ComponentAccumulator()
+  kwargs.setdefault("UseNewLayerScheme", True)
+  acc.setPrivateTools(CompFactory.GBTSTrigL2LayerNumberTool(**kwargs))
+  return acc
   
 def TrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -286,6 +292,35 @@ def TrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> Componen
   acc.setPrivateTools(CompFactory.TrigSpacePointConversionTool(**kwargs))
 
   return acc
+
+def GBTSTrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
+  acc = ComponentAccumulator()
+
+  kwargs.setdefault("UseNewLayerScheme", True)
+
+  if "layerNumberTool" not in kwargs:
+    ntargs = {"UseNewLayerScheme" : kwargs.get("UseNewLayerScheme")}
+    kwargs.setdefault("layerNumberTool",acc.popToolsAndMerge(GBTSTrigL2LayerNumberToolCfg(flags,**ntargs)))
+  
+  kwargs.setdefault("DoPhiFiltering", flags.Tracking.ActiveConfig.DoPhiFiltering)
+  kwargs.setdefault("UseBeamTilt", False)
+  kwargs.setdefault("PixelSP_ContainerName", "PixelTrigSpacePoints")
+  kwargs.setdefault("SCT_SP_ContainerName", "SCT_TrigSpacePoints")
+  kwargs.setdefault("UsePixelSpacePoints",flags.Tracking.ActiveConfig.UsePixelSpacePoints)
+
+  from RegionSelector.RegSelToolConfig import regSelTool_SCT_Cfg, regSelTool_Pixel_Cfg
+
+  if "RegSelTool_Pixel" not in kwargs:
+    kwargs.setdefault("RegSelTool_Pixel", acc.popToolsAndMerge( regSelTool_Pixel_Cfg( flags)))
+
+  if "RegSelTool_SCT" not in kwargs:
+    kwargs.setdefault("RegSelTool_SCT", acc.popToolsAndMerge( regSelTool_SCT_Cfg( flags)))
+
+  # Spacepoint conversion
+  acc.setPrivateTools(CompFactory.TrigSpacePointConversionTool(**kwargs))
+
+  return acc
+
 
 def ITkTrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
@@ -322,7 +357,7 @@ def TrigR3SeedingToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulato
   
   if "layerNumberTool" not in kwargs:
       ntargs = {"UseNewLayerScheme" : True}
-      kwargs.setdefault("layerNumberTool",acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags,**ntargs)))
+      kwargs.setdefault("layerNumberTool",acc.popToolsAndMerge(GBTSTrigL2LayerNumberToolCfg(flags,**ntargs)))
   
   kwargs.setdefault("DoPhiFiltering", flags.Tracking.ActiveConfig.DoPhiFiltering)
   kwargs.setdefault("UseBeamTilt", False)
@@ -409,9 +444,9 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   
     if flags.Tracking.ActiveConfig.useGBTSeedingTool:
 
-      spTool = acc.popToolsAndMerge(TrigSpacePointConversionToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
+      spTool = acc.popToolsAndMerge(GBTSTrigSpacePointConversionToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
 
-      numberingTool = acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags))
+      numberingTool = acc.popToolsAndMerge(GBTSTrigL2LayerNumberToolCfg(flags))
 
       seedingTool = acc.popToolsAndMerge(TrigR3SeedingToolCfg(flags))
 
@@ -490,6 +525,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
     
     if useGBTSeedingTool:
       ConnectionFileName = "binTables_Run3.txt"
+
     
     ftf = CompFactory.TrigFastTrackFinder(
         name = name,
@@ -565,9 +601,10 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
     ftf.doFastZVertexSeeding = True
 
   if inputTracksName:
-    ftf.inputTracksName = inputTracksName
+    ftf.inputTracksName = inputTracksName 
     
   acc.addEventAlgo(ftf)
+
   return acc
     
 

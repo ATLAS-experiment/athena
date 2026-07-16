@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,17 +37,10 @@ InDetGlobalLRTMonAlg::~InDetGlobalLRTMonAlg() {}
 
 
 StatusCode InDetGlobalLRTMonAlg::initialize() {
-  // IBLParameterSvc is only present for the Run 1-3 InnerDetector.
-  // For ITk (Run 4) the service handle is set to an empty string by
-  // the python configuration; in that case respect the explicit DoIBL
-  // property instead of querying the service.
-  if ( !m_IBLParameterSvc.empty() ) {
-    ATH_CHECK( m_IBLParameterSvc.retrieve() );
-    m_doIBL = m_IBLParameterSvc->containsIBL();
-  } else {
-    ATH_MSG_INFO("IBLParameterSvc not configured (ITk geometry?); using DoIBL=" << m_doIBL);
-  }
-
+  ATH_CHECK( m_IBLParameterSvc.retrieve() ); 
+  
+  m_doIBL = m_IBLParameterSvc->containsIBL();
+  
   if (!m_trackSelTool.empty() )      ATH_CHECK( m_trackSelTool.retrieve() );
 
   ATH_CHECK( m_trackParticleName.initialize() );
@@ -66,7 +59,7 @@ StatusCode InDetGlobalLRTMonAlg::fillHistograms( const EventContext& ctx ) const
   ATH_MSG_DEBUG("Filling InDetGlobalLRTMonAlg");
   
   // For histogram naming
-  const auto & lrtGroup = getGroup("LRT");
+  auto lrtGroup = getGroup("LRT");
   
   int lb       = GetEventInfo(ctx)->lumiBlock();
   auto lb_m    = Monitored::Scalar<int>( "m_lb", lb );
@@ -95,7 +88,7 @@ StatusCode InDetGlobalLRTMonAlg::fillHistograms( const EventContext& ctx ) const
   
   uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
 
-  for (const auto trackPart: *LRT_trackParticles) {
+  for (const auto& trackPart: *LRT_trackParticles) {
     const Trk::Track * track = trackPart->track();
     if ( !track )
       {

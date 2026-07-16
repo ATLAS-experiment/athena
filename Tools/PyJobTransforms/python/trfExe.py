@@ -756,9 +756,12 @@ class scriptExecutor(transformExecutor):
                     self._memMonitor = False
             
             while p.poll() is None:
-                line = p.stdout.readline()
-                if line:
-                    self._echologger.info(line.rstrip())
+                try:
+                    line = p.stdout.readline()
+                    if line:
+                        self._echologger.info(line.rstrip())
+                except UnicodeDecodeError as e:
+                    msg.warning('Exception raised processing athena log: {0}'.format(e))
             # Hoover up remaining buffered output lines
             for line in p.stdout:
                 self._echologger.info(line.rstrip())

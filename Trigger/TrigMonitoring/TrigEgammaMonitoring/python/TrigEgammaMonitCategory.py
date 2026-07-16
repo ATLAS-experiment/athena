@@ -5,6 +5,7 @@
 
 from AthenaMonitoring.DQConfigFlags import DQDataType
 
+
 def mongroupsCfg(moniAccess, data_type):
 
         shifter_eg = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["shifter"])
@@ -14,7 +15,39 @@ def mongroupsCfg(moniAccess, data_type):
         monitoring_electron = list(filter(lambda x: ('HLT_e' in x and 'L1eEM28' not in x), shifter_eg)) # etcut chains
         monitoring_tags = []
         monitoringTP_electron = list(filter(lambda x: ('L1eEM28' not in x), shifter_tp))
+
+        monitoringTP_tag = [
+            'HLT_2e17_lhvloose_L12eEM18M',
+            'HLT_2e24_lhvloose_L12eEM24L',
+        ]
+
+        monitoringTP_zrad = [
+                'HLT_2e17_lhvloose_g22_tight_probe_L12eEM18M',
+                'HLT_2e17_lhvloose_g25_medium_probe_L12eEM18M',
+                'HLT_2e17_lhvloose_g50_loose_probe_L12eEM18M',
+                'HLT_2e17_lhvloose_g35_medium_probe_L12eEM18M',
+                'HLT_2e24_lhvloose_g22_tight_probe_L12eEM24L',
+                'HLT_2e24_lhvloose_g25_medium_probe_L12eEM24L',
+                'HLT_2e24_lhvloose_g50_loose_probe_L12eEM24L',
+                'HLT_2e24_lhvloose_g35_medium_probe_L12eEM24L',
+        ]
+
+        monitoringTP_Matching = {
+            'HLT_2e17_lhvloose_L12eEM18M': [
+                'HLT_2e17_lhvloose_g22_tight_probe_L12eEM18M',
+                'HLT_2e17_lhvloose_g25_medium_probe_L12eEM18M',
+                'HLT_2e17_lhvloose_g35_medium_probe_L12eEM18M',
+                'HLT_2e17_lhvloose_g50_loose_probe_L12eEM18M'
+            ],
         
+            'HLT_2e24_lhvloose_L12eEM24L': [
+                'HLT_2e24_lhvloose_g22_tight_probe_L12eEM24L',
+                'HLT_2e24_lhvloose_g25_medium_probe_L12eEM24L',
+                'HLT_2e24_lhvloose_g35_medium_probe_L12eEM24L',
+                'HLT_2e24_lhvloose_g50_loose_probe_L12eEM24L'
+            ]
+        }
+
         monitoring_photon = list(filter(lambda x: ('HLT_g' in x and 'noringer' not in x), shifter_eg))
 
         monitoring_bootstrap = {
@@ -37,7 +70,10 @@ def mongroupsCfg(moniAccess, data_type):
                 'monitoring_electron'           : monitoring_electron,
                 'monitoring_photon'             : monitoring_photon ,
                 'monitoring_bootstrap'          : monitoring_bootstrap,
-                'monitoringTP_electron'         : monitoringTP_electron + validationTP_electron_DNN,
+                'monitoringTP_electron'         : monitoringTP_electron,
+                'monitoringTP_tag'              : monitoringTP_tag,
+                'monitoringTP_probe'            : monitoringTP_zrad,
+                'monitoringTP_Matching'         : monitoringTP_Matching,
                 'monitoring_tags'               : monitoring_tags,
                 'monitoring_topo'               : monitoring_topo,
         }

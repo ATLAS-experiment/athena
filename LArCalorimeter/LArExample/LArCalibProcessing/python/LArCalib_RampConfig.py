@@ -19,14 +19,11 @@ def LArRampCfg(flags):
 
     from LArCalibProcessing.utils import FolderTagResolver
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
-    tagResolver=FolderTagResolver()
+    tagResolver=FolderTagResolver(flags.LArCalib.Input.CoolOflP1Replica)
     pedestalTag=tagResolver.getFolderTag(flags.LArCalib.Pedestal.Folder)
     caliOFCTag=tagResolver.getFolderTag(flags.LArCalib.OFCCali.Folder)
-
     rampTag=tagResolver.getFolderTag(flags.LArCalib.Ramp.Folder)
     del tagResolver
-    
-    print("pedestalTag",pedestalTag)
     print("rampTag",rampTag)
 
 
@@ -37,8 +34,19 @@ def LArRampCfg(flags):
     
 
     if not flags.LArCalib.isSC:
-       result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
+       if flags.LArCalib.Input.isRawData:
+          result.addEventAlgo(CompFactory.LArRawDataReadingAlg(LArRawChannelKey="", LArDigitKey=digKey, LArFebHeaderKey="LArFebHeader",
+                                                               #OutputLevel=2,
+                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
+                                                               PosNegPreselection=flags.LArCalib.Preselection.Side,
+                                                               BEPreselection=flags.LArCalib.Preselection.BEC,
+                                                               FTNumPreselection=flags.LArCalib.Preselection.FT))
+          from LArCalibProcessing.LArCalib_CalibDigitsMakerConfig import LArCalibDigitsMakerCfg
+          result.merge(LArCalibDigitsMakerCfg(flags,DigitsKey=digKey,ntrigg=flags.LArCalib.OFC.Ncoll))
+       else:
+          result.addEventAlgo(CompFactory.LArRawCalibDataReadingAlg(LArAccCalibDigitKey=digKey,
                                                               LArFebHeaderKey="LArFebHeader",
+                                                              #OutputLevel = 2,
                                                               SubCaloPreselection=flags.LArCalib.Input.SubDet,
                                                               PosNegPreselection=flags.LArCalib.Preselection.Side,
                                                               BEPreselection=flags.LArCalib.Preselection.BEC,
@@ -107,7 +115,7 @@ def LArRampCfg(flags):
     if "HEC" in flags.LArCalib.Input.SubDet:
         theLArRampBuilder.isHEC = True
         theLArRampBuilder.HECKey = "LArHEC_PAmap"
-        result.merge(addFolders(flags,'/LAR/ElecCalibOfl/HecPAMap','LAR_OFL'))
+        result.merge(addFolders(flags,'/LAR/ElecCalibOfl/HecPAMap',flags.LArCalib.Input.CoolOflP1Replica))
     
     result.addEventAlgo(theLArRampBuilder)
 

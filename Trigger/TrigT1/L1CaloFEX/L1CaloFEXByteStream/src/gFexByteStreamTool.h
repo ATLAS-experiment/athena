@@ -35,6 +35,8 @@
 
 // STL includes
 #include <array>
+#include <cstdint> //for uint32_t etc
+#include <vector>
 
 /** @class gFEXRoIByteStreamTool
  *  @brief Implementation of a tool for L1 RoI conversion from BS to xAOD and from xAOD to BS
@@ -54,7 +56,9 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         virtual StatusCode convertFromBS(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vrobf, const EventContext& eventContext)const override;
 
         /// xAOD->BS conversion
-        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf, const EventContext& eventContext) override;
+        virtual StatusCode convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf,
+                                       const xAOD::TrigCompositeContainer* tc,
+                                       const EventContext& eventContext) override;
 
         /// Declare ROB IDs for conversion
         virtual const std::vector<uint32_t>& robIds() const override {
@@ -126,23 +130,16 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gMETComponentsRmsOOTDecorKey   {this,"gMETComponentsRmsOOTDecorKey",m_gMETComponentsRmsSliceWriteKey,"sliceNumber","Slice number decoration for gMETComponentsRms out-of-time"};
         SG::WriteDecorHandleKey<xAOD::gFexGlobalRoIContainer> m_gScalarERmsOOTDecorKey         {this,"gScalarERmsOOTDecorKey",m_gScalarERmsSliceWriteKey,"sliceNumber","Slice number decoration for gScalarERms out-of-time"};
 
-        // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
-        SG::ReadHandleKey< xAOD::gFexJetRoIContainer    > m_gFexRhoReadKey                {this,"gFexRhoOutputContainerReadKey","L1_gFexRhoRoI","Read gFEX EDM gFexRho container"};
-        SG::ReadHandleKey< xAOD::gFexJetRoIContainer    > m_gFexBlockReadKey              {this,"gFexSRJetOutputContainerReadKey","L1_gFexSRJetRoI","Read gFEX EDM gFexBlock container"};
-        SG::ReadHandleKey< xAOD::gFexJetRoIContainer    > m_gFexJetReadKey                {this,"gFexLRJetOutputContainerReadKey","L1_gFexLRJetRoI","Read gFEX EDM gFexJet container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarEJwojReadKey           {this,"gScalarEJwojOutputContainerReadKey","L1_gScalarEJwoj","Read gFEX EDM Scalar MET and SumET (JwoJ) container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gEspressoReadKey              {this,"gEspressoOutputContainerReadKey","L1_gEspresso","Read gFEX EDM gEspresso container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gRistrettoReadKey             {this,"gRistrettoOutputContainerReadKey","L1_gRistretto","Read gFEX EDM gRistretto container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsJwojReadKey     {this,"gMETComponentsJwojOutputContainerReadKey","L1_gMETComponentsJwoj","Read gFEX EDM total MET components (JwoJ) container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gMHTComponentsJwojReadKey     {this,"gMHTComponentsJwojOutputContainerReadKey","L1_gMHTComponentsJwoj","Read gFEX EDM hard MET components (JwoJ) container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gMSTComponentsJwojReadKey     {this,"gMSTComponentsJwojOutputContainerReadKey","L1_gMSTComponentsJwoj","Read gFEX EDM soft MET components (JwoJ) container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsNoiseCutReadKey {this,"gMETComponentsNoiseCutOutputContainerReadKey","L1_gMETComponentsNoiseCut","Read gFEX EDM total MET components (NoiseCut) container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gMETComponentsRmsReadKey      {this,"gMETComponentsRmsOutputContainerReadKey","L1_gMETComponentsRms","Read gFEX EDM total MET components (RMS) container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarENoiseCutReadKey       {this,"gScalarENoiseCutOutputContainerReadKey","L1_gScalarENoiseCut","Read gFEX EDM Scalar MET and SumET (NoiseCut) container"};
-        SG::ReadHandleKey< xAOD::gFexGlobalRoIContainer > m_gScalarERmsReadKey            {this,"gScalarERmsOutputContainerReadKey","L1_gScalarERms","Read gFEX EDM Scalar MET and SumET (RMS) container"};
+        // xAOD->BS mode reads RoI containers via ElementLinks inside the TrigCompositeContainer
+        // passed to convertToBS(), so no ReadHandleKey is required for the encoder side.
 
         //Read handle key for the L1Menu
-        SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey   {this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 
+        SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey   {this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"};
+
+        // Encoder-side helper: build the 1-word block header
+        // bits 31..28 = blockType, bits 23..22 = headerSize (=1), bit 12 = errorFlag (=0),
+        // bits 11..0 = dataSize (= numSlices * WORDS_PER_SLICE).
+        uint32_t buildBlockHeader(uint32_t blockType, uint32_t numSlices) const;
 
         void decodeGfexTobSlice( const uint32_t dataArray[], uint32_t blockType) const;
         

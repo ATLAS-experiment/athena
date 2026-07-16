@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -48,9 +48,9 @@ IDAlignMonGenericTracksAlg::IDAlignMonGenericTracksAlg( const std::string & name
    m_etaRange(3.0),
    m_NTracksRange(200),
    m_barrelEta(0.8), //Tracks between -0.8 & 0.8 are considered as Barrel Tracks, otherwise are End-Caps
-   m_trackSelection( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this),
-   m_hitQualityTool("")
+   m_trackSelection( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this)
 {
+  m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
   declareProperty("Pixel_Manager"        , m_Pixel_Manager);
   declareProperty("SCT_Manager"          , m_SCT_Manager);
   declareProperty("TRT_Manager"          , m_TRT_Manager);
@@ -65,10 +65,6 @@ IDAlignMonGenericTracksAlg::IDAlignMonGenericTracksAlg( const std::string & name
   declareProperty("NTracksRange"         , m_NTracksRange);
   declareProperty("doIP"                 , m_doIP = false);
   declareProperty("ApplyTrackSelection"  , m_applyTrkSel = true);
-  // ITk has no TRT.  When DoTRT is false the algorithm skips the
-  // TRT_ID retrieval in initialize() and the TRT branches in the
-  // hit-loop in fillHistograms().
-  declareProperty("DoTRT"                , m_doTRT = true);
 }
 
 
@@ -92,12 +88,8 @@ StatusCode IDAlignMonGenericTracksAlg::initialize()
   ATH_MSG_DEBUG("Initialized SCTIDHelper");
 
   m_trtID = nullptr;
-  if (m_doTRT) {
-    ATH_CHECK(detStore()->retrieve(m_trtID, "TRT_ID"));
-    ATH_MSG_DEBUG("Initialized TRTIDHelper");
-  } else {
-    ATH_MSG_INFO("DoTRT disabled (ITk geometry?); skipping TRT_ID retrieval");
-  }
+  ATH_CHECK(detStore()->retrieve(m_trtID, "TRT_ID"));
+  ATH_MSG_DEBUG("Initialized TRTIDHelper");
 
   ATH_CHECK(m_trackSelection.retrieve());
   ATH_MSG_DEBUG("Retrieved tool " << m_trackSelection);
@@ -150,7 +142,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   using namespace Monitored;
  
   // For histogram naming
-  const auto & genericTrackGroup = getGroup("IDA_Tracks");
+  auto genericTrackGroup = getGroup("IDA_Tracks");
 
   //counters
   int ntrkMax=0;
@@ -187,7 +179,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   }
 
   const auto *vertexContainer = handle_vxContainer.cptr();
-  for(const auto vtx : *vertexContainer) {
+  for(const auto & vtx : *vertexContainer) {
     if ( !vtx ) continue;
     if ( !vtx->vxTrackAtVertexAvailable() ) continue;
     
@@ -334,7 +326,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     if (m_doIP){
 
       //Get unbiased impact parameter
-      if (pvtx) myIPandSigma = m_trackToVertexIPEstimator->estimate(ctx, trksItr->perigeeParameters(), pvtx, true);
+      if (pvtx) myIPandSigma = m_trackToVertexIPEstimator->estimate(trksItr->perigeeParameters(), pvtx, true);
     } 
     
     if (covariance == nullptr) {
@@ -442,7 +434,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
           else if(m_sctID->barrel_ec(surfaceID) == -2) nhsctECC++;
         }
         // --- trt hit count
-        if (m_doTRT && m_trtID && m_idHelper->is_trt(surfaceID)){
+        if (m_idHelper->is_trt(surfaceID)){
           int barrel_ec      = m_trtID->barrel_ec(surfaceID);
           if(barrel_ec == 1 || barrel_ec == -1 ) {
             nhtrtB++;
@@ -559,7 +551,9 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
 
     //d0
     auto d0_m = Monitored::Scalar<float>( "m_d0", trkd0 );
+    fill(genericTrackGroup, d0_m);
     auto errD0_m = Monitored::Scalar<float>( "m_errD0", Err_d0 );
+    fill(genericTrackGroup, errD0_m);
     auto d0_bscorr_m = Monitored::Scalar<float>( "m_d0_bscorr", d0bscorr );
 
     // Phi
@@ -575,19 +569,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     float pT = charge*trkpt;
     auto pT_m = Monitored::Scalar<float>( "m_pT", pT );
     auto errPt_m = Monitored::Scalar<float>( "m_errPt", Err_Pt );
-    if (qOverP == 0.){
-      ATH_MSG_ERROR("qOverP denominator is zero");
-      return StatusCode::FAILURE;
-    }
     auto pTRes_m = Monitored::Scalar<float>( "m_pTRes", std::fabs(Err_qOverP / qOverP) );
 
     //d0 (BS) vs Eta, vs Phi (Phi, Barrel, EndCap A, EndCap C), vs pT // Eta vs Npixhits_per_track, SCT, TRT // Eta for positive and negative tracks 
-    fill( genericTrackGroup, npixelhits_per_track_m, nscthits_per_track_m, ntrthits_per_track_m,
-	  pT_m, errPt_m, pTRes_m,
-	  eta_m, 
-	  d0_m, errD0_m, d0_bscorr_m,
-	  phi_m, errPhi_m,
-	  isTrkPositive, isTrkNegative,isTrackBarrel, isTrackECA, isTrackECC );
+    fill(genericTrackGroup, npixelhits_per_track_m, nscthits_per_track_m, ntrthits_per_track_m, eta_m, isTrkPositive, isTrkNegative, d0_bscorr_m, phi_m, isTrackBarrel, isTrackECA, isTrackECC, errPhi_m, pT_m, errPt_m, pTRes_m);
     
     auto p_m = Monitored::Scalar<float>( "m_p", trkP );
     fill(genericTrackGroup, p_m);
@@ -663,7 +648,7 @@ bool IDAlignMonGenericTracksAlg::fillVertexInformation(std::map<const xAOD::Trac
 
   const auto *vertexContainer = handle_vxContainer.cptr();
     
-  for(const auto vtx : *vertexContainer) {
+  for(const auto & vtx : *vertexContainer) {
       auto tpLinks = vtx->trackParticleLinks();
       ATH_MSG_DEBUG("tpLinks size " << tpLinks.size());
 

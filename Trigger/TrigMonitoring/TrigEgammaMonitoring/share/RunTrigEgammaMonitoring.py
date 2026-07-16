@@ -68,9 +68,11 @@ if __name__=='__main__':
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   flags = initConfigFlags()
 
+
+  from AthenaConfiguration.AutoConfigFlags import GetFileMD
   if args.inputFiles is not None:
     flags.Input.Files = args.inputFiles.split(',')
-  flags.Input.isMC = True
+  flags.Input.isMC = "IS_SIMULATION" in GetFileMD(flags.Input.Files).get("eventTypes", [])
   flags.Output.HISTFileName = args.outputFile
 
 
@@ -115,13 +117,14 @@ if __name__=='__main__':
     exec(args.postExec)
 
   # If you want to turn on more detailed messages ...
-  if args.debug:
-    trigEgammaMonitorAcc.getEventAlgo('EgammaEmulation').OutputLevel = 2 # DEBUG
+  #if args.debug:
+  #  trigEgammaMonitorAcc.getEventAlgo('TrigEgammaMonitorTagAndProbeAlgorithm_Zeeg').OutputLevel = 2 # DEBUG
 
 
 
-  cfg.printConfig(withDetails=False) # set True for exhaustive info
+  cfg.printConfig(withDetails=True) # set True for exhaustive info
   sc = cfg.run(args.numberOfEvents) #use cfg
 
   sys.exit(0 if sc.isSuccess() else 1)
+
 
