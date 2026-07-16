@@ -81,10 +81,13 @@ namespace ActsTrk::detail {
             if (measurement_to_summary_type.at(Acts::toUnderlying(uncalibMeas->type())) <  
                 xAOD::numberOfTrackSummaryTypes ) {
                HitSummaryData::EHitSelection hit_selection = (flag.isOutlier()
-                                                           ? HitSummaryData::Outlier
-                                                           : HitSummaryData::Hit);
+                                                           ? HitSummaryData::OutlierFlag
+                                                           : HitSummaryData::HitFlag);
                if (flag.isSharedHit()) {
-                  hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHit);
+                  hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHitFlag);
+               }
+               if (flag.isSplitHit()) {
+                  hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SplitHitFlag);
                }
                if (const auto* idDetEl = getActsDetectorElement(state.referenceSurface()); idDetEl != nullptr) {
                   const auto* siDet = dynamic_cast<const InDetDD::SolidStateDetectorElementBase*>(idDetEl->upstreamDetectorElement());
