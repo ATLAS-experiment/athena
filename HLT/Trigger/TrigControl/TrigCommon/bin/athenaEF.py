@@ -143,6 +143,8 @@ class RunParams:
          sor_time=args.sor_time,
          solenoid_current=getattr(args, 'solenoid_current', None),
          toroids_current=getattr(args, 'toroids_current', None),
+         beam_type=getattr(args, 'beam_type', None),
+         beam_energy=getattr(args, 'beam_energy', None),
          conditions_run=getattr(args, 'conditions_run', None),
          T0_project_tag=getattr(args, 'T0_project_tag', ''),
          stream=getattr(args, 'stream', ''),
@@ -677,6 +679,9 @@ class ConfigRunner:
          sor_time = self.run_params['sor_time']
          solenoid_current = self.run_params['solenoid_current']
          toroids_current = self.run_params['toroids_current']
+         beam_type = self.run_params['beam_type']
+         beam_energy = self.run_params['beam_energy']
+         lb_number = self.run_params['lb_number']
          
          log.info("Calling prepareForStart with run=%d, det_mask=0x%s, sor_time=%s",
                   run_number, det_mask, sor_time)
@@ -685,6 +690,9 @@ class ConfigRunner:
             run_number=run_number,
             det_mask=det_mask,
             sor_time=sor_time,
+            lb_number=lb_number,
+            beam_type=beam_type,
+            beam_energy=beam_energy,
             solenoid_current=solenoid_current,
             toroids_current=toroids_current
          )
@@ -859,6 +867,8 @@ def update_run_params(args, flags):
       # Update magnet currents from IS (run_params already has command-line overrides if provided)
       args.solenoid_current = run_params.solenoid_current
       args.toroids_current = run_params.toroids_current
+      args.beam_type = run_params.beam_type
+      args.beam_energy = run_params.beam_energy
 
    if (args.run_number is not None and args.lb_number is None) or (args.run_number is None and args.lb_number is not None):
       log.error("Both or neither of the options -R (--run-number) and -L (--lb-number) have to be specified")
