@@ -13,6 +13,7 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include <sstream>
 #include <stdexcept>
 #include <limits>
+#include <bit>
 
 
 ITkPixelCsvWaferIdAlg::ITkPixelCsvWaferIdAlg(const std::string& name,
@@ -75,7 +76,13 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
         ss >> n;
         std::bitset<32> b(n);
         b <<= 2; //shift left by two bits, to add FE bits
+        // Check bit position
+        bitcheck(b, 2, 25, "DetResID: Wafer ID");
+
         std::bitset<32> febits = std::bitset<32>(fe);
+        // Check bit position
+        bitcheck(febits, 0, 1, "DetResID: Front-End ID");
+
         b |= febits;
 
         if (msgLvl(MSG::DEBUG)) {
@@ -102,8 +109,13 @@ StatusCode ITkPixelCsvWaferIdAlg::execute(const EventContext& ctx) const {
                 << sID.to_ulong() << "\n";
 
     }
-
+    output.close();
     ATH_MSG_INFO("Wrote " << m_rows.size() << " wafer IDs to " << m_outputFile.value());
+
+    // Perform sanity checks 
+    ATH_MSG_INFO("Performing sanity checks of " << m_outputFile.value());
+    ATH_CHECK( sanityCheck(m_outputFile.value()) );
+
     return StatusCode::SUCCESS;
 }
 
@@ -230,7 +242,6 @@ std::vector<std::string> ITkPixelCsvWaferIdAlg::splitCsvLine(const std::string& 
     while (std::getline(ss, field, ',')) {
         fields.push_back(field);
     }
-
     return fields;
 }
 
@@ -515,6 +526,9 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::onlineId(const std::vector<std::string>& 
     }
     //add the chip ID ON/OFF (1b) and RD53c (1b) bits
     febits |= std::bitset<32>("00001100000000000000000000000000");
+
+    bitcheck(febits, 26, 31, "DetResID: Online ID");
+
     return febits;
 }
 
@@ -525,7 +539,6 @@ std::vector<int> ITkPixelCsvWaferIdAlg::DmaBuffer() const {
 
     size_t i = 0;
     while (i < m_rows.size()) {
-        // find contiguous block for the same felix card device -- NOT CORRECT 
         const std::string& card = m_rows[i].flx_card_device;
         size_t j = i;
         unsigned int minFiber = std::numeric_limits<unsigned int>::max();
@@ -537,6 +550,7 @@ std::vector<int> ITkPixelCsvWaferIdAlg::DmaBuffer() const {
                 minFiber = m_rows[j].fiber;
             }
         }
+        
         if (minFiber == std::numeric_limits<unsigned int>::max()) {
             // no valid fiber found in this block, assign 9
             for (size_t k = i; k < j; ++k){
@@ -565,11 +579,12 @@ std::vector<int> ITkPixelCsvWaferIdAlg::DmaBuffer() const {
                 ATH_MSG_WARNING("Assigned DMA buffer goes negative: " << dma);
             }
             if (dma > 3){
-                ATH_MSG_WARNING("Assigned DMA buffer goes higher than 3: " << dma);
+                ATH_MSG_WARNING("Assigned DMA buffer goes higher than 3: for card "
+                    << card << " ; nDMAs =" << dma << ", line " << k );
+
             }
             dmaNumbers.push_back(std::move(dma));
         }
-
         i = j;
     }
     return dmaNumbers;
@@ -585,15 +600,22 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::sourceID(const std::vector<std::string>& 
     std::bitset<32> b(0);
     std::bitset<32> subdet = subDetID(b_ec, ld); 
     subdet <<= 16 ; //shift left by 16 bits
+    
+    bitcheck(subdet, 16, 23, "SourceID : SubDetectorID " );
 
     std::vector<std::string> flx_card_device = splitFLX_card_device(flx);
-
-    std::bitset<32> flxCard = std::bitset<32>(std::stoi(flx_card_device[0])); 
+    unsigned int hostIndex = flxHost((unsigned int) std::stoi(flx_card_device[0]));
+    std::bitset<32> flxCard = std::bitset<32>(hostIndex); 
     flxCard <<= 8; //shift left by 8 bits
-    std::bitset<32> flxDev = std::bitset<32>(std::stoi(flx_card_device[1]) - 1 ); 
+    bitcheck(flxCard, 8, 15, "SourceID : FELIX host " );
+
+
+    std::bitset<32> flxDev = std::bitset<32>(std::stoi(flx_card_device[1]) - 1 );
     flxDev <<= 7; //shift left by 7 bits
+    bitcheck(flxDev, 7, 7, "SourceID : card device " ); 
     std::bitset<32> dma_b = std::bitset<32>(dma);
     dma_b <<= 5; //shift left by 5 bits
+    bitcheck(dma_b, 5, 6, "SourceID : DMA buffer index " ); 
     b = subdet | flxCard | flxDev | dma_b;
     return b;
 }
@@ -639,4 +661,168 @@ std::bitset<32> ITkPixelCsvWaferIdAlg::subDetID(int barrel_endcap, int layer_dis
         return std::bitset<32>(0);
     }
 
+}
+
+
+const StatusCode ITkPixelCsvWaferIdAlg::sanityCheck(std::string s) const {
+
+    std::ifstream fcheck(s);
+    if (!fcheck.good()) {
+        ATH_MSG_FATAL("Could not open output file: " << s);
+        return StatusCode::FAILURE;
+    }
+
+    // Read all rows, fill a vector with the full info
+
+    std::string line;
+    bool firstLine = true;
+    std::vector < OutputCsvRow > rowVec;
+    while (std::getline(fcheck, line)) {
+        if (line.empty()) {
+            continue;
+        }
+        if (firstLine) {
+            firstLine = false;
+            continue;
+        }
+        const std::vector<std::string> fields = splitCsvLine(line);
+        if (fields.size() < 6) {
+            ATH_MSG_WARNING("Skipping malformed Chips CSV line: " << line);
+            continue;
+        }
+        OutputCsvRow row;
+
+        const auto parseHex = [](const std::string& value) -> unsigned int {
+            std::istringstream iss(value);
+            iss >> std::hex;
+            unsigned int parsed = 0;
+            iss >> parsed;
+            return parsed;
+        };
+
+        row.detResId = std::bitset<32>(parseHex(fields[0]));
+        row.tdetResId = std::bitset<32>(parseHex(fields[1]));
+        row.card_dev = fields[2];
+        row.fiber = parseHex(fields[3]);
+        row.dma = std::stoi(fields[4]);
+        row.sourceId = std::bitset<32>(parseHex(fields[5]));
+        rowVec.push_back(std::move(row));
+        line = "";
+    }
+
+    // Now, perform the checks
+    size_t i = 0;
+    std::vector<std::string > cards;
+    while (i < rowVec.size()) {
+        const std::string& card = rowVec[i].card_dev;
+        if(std::find(cards.begin(), cards.end(), card) != cards.end()) {
+            continue; // already checked that FELIX device
+        }  
+        cards.push_back(card);
+        
+
+        std::map < int, float> fiber_links_map ;
+        std::map < int, int> fiber_dma_map ;
+        int dma_nfiber[4] = {};
+
+        size_t j = i;
+        for (; j < rowVec.size() ; ++j) {
+            if(rowVec[j].card_dev != card){
+                continue;
+            }
+
+            fiber_dma_map[rowVec[j].fiber] =  rowVec[j].dma ;
+            // 1. Check that there are <= 12 fibers for one device
+            if(rowVec[j].fiber > 12){
+                ATH_MSG_WARNING("Sanity check of file " << s << "  :   Bad number of fibers, line: " << j );
+                ATH_MSG_WARNING("Nfiber = " << rowVec[j].fiber);
+            }
+
+            if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0xf0000000) ){
+                fiber_links_map[rowVec[j].fiber] += 0.25;
+            }
+            else if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0xc0000000) ||
+                (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x30000000)) {
+                fiber_links_map[rowVec[j].fiber] += 0.5;
+            }
+            else if( (rowVec[j].detResId & std::bitset<32>(0xf0000000)) == std::bitset<32>(0x00000000)) {
+                fiber_links_map[rowVec[j].fiber] += 1;
+            }
+            else{
+                ATH_MSG_WARNING("Sanity check of file " << s << "  :   Bad Chip ID value in DetResID, line: " << j );
+            }
+        }
+
+        // 2. Check that there are <= 6 lpGBT links per fiber
+        for ( const auto & p : fiber_links_map ) {
+            if(ceilf(p.second) !=  p.second){
+                ATH_MSG_WARNING("Sanity check of file " << s << " : Card.device = "
+                    << card << " ; Fiber " << p.first <<  "N links = " << p.second );
+            }
+            if( p.second > 6){
+                ATH_MSG_WARNING("More than 6 physical lpGBT links, file " << s << " : Card.device = "
+                    << card << " ; Fiber " << p.first <<  " ; N links = " << p.second );
+            }
+        }
+        // 3. Check that there are <= 3 fibers per DMA buffer
+
+        for ( const auto & p : fiber_dma_map ) {
+
+            if( p.second > 3){
+                ATH_MSG_WARNING("DMA buffer index higher than 3, file " << s << " : Card.device = "
+                    << card << " ; DMA " << p.second <<  " ; fiber = " << p.first );
+                continue;
+            }
+            dma_nfiber[p.second] ++;
+        }
+        for (std::size_t g = 0; g < std::size(dma_nfiber); ++g) {
+            if(dma_nfiber[g] > 3){
+                ATH_MSG_WARNING("More than 3 fibers, file " << s << " : Card.device = "
+                    << card << " ; DMA " << g <<  " ; N fibers = " << dma_nfiber[g] );
+            }
+        }
+        i = j;
+    }
+
+    fcheck.close();
+    return StatusCode::SUCCESS;
+
+}
+
+
+
+
+void ITkPixelCsvWaferIdAlg::bitcheck(std::bitset<32> b, uint32_t lsb_lim, uint32_t msb_lim , const std::string& s) const {
+
+    uint32_t x = static_cast<uint32_t> (b.to_ulong());
+    if(x!=0){
+        uint32_t lsb_used = std::countr_zero(x);
+        uint32_t msb_used  = std::bit_width(x) - 1;
+
+        if( (msb_used >  msb_lim) || (lsb_used < lsb_lim) ){
+            ATH_MSG_WARNING("Bits used for this ID (" << s <<  ") are not correctly set");
+            ATH_MSG_WARNING("    MSB used = " << msb_used << "   MSB allowed = " << msb_lim);
+            ATH_MSG_WARNING("    LSB used = " << lsb_used << "   LSB allowed = " << lsb_lim);
+            ATH_MSG_WARNING("Full bitset = " << b.to_string());
+        }
+    }
+}
+
+
+unsigned int ITkPixelCsvWaferIdAlg::flxHost(unsigned int card) const {
+    auto it = std::find_if(m_felix_rows.begin(), m_felix_rows.end(),
+    [card](const FelixCsvRow& p) {
+        return (p.card1 == card) || (p.card2 == card);
+    });
+    if (it != m_felix_rows.end()) {
+        std::size_t index = it - m_felix_rows.begin();   
+        std::string s= m_felix_rows[index].host;
+        //Ex: pc-tdq-ro-pix-is-a-15, need to return 15
+        std::size_t pos = s.rfind('-');
+        return (pos == std::string::npos) ? 0 : std::stoi(s.substr(pos + 1));
+    }
+    else{
+        ATH_MSG_WARNING("Couldn't find a host for card number " << card << ", returning 0");
+        return 0;
+    }
 }
