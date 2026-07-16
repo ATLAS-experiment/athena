@@ -365,8 +365,8 @@ namespace InDet {
       struct WrkVrt 
      {   bool Good=true;
          std::deque<long int> selTrk;
-         Amg::Vector3D     vertex;
-         TLorentzVector    vertexMom;
+         Amg::Vector3D     vertex{0., 0. ,0.};
+         TLorentzVector    vertexMom{};
          long int   vertexCharge{};
          std::vector<double> vertexCov;
          std::vector<double> chi2PerTrk;
@@ -598,7 +598,7 @@ namespace InDet {
     { 
       std::vector<int> new_clique(0);
       for(auto i = clq.begin(); i != clq.end(); ++i) new_clique.push_back(*i);
-      m_allCliques.push_back(new_clique);
+      m_allCliques.push_back(std::move(new_clique));
     }
 
     std::vector< std::vector<int> > & m_allCliques;
