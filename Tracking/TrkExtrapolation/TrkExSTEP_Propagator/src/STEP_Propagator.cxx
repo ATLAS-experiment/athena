@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1392,7 +1392,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::STEP_Propagator::propagateT(
                                   magneticFieldProperties, particle, solutions, path, returnCurv);
   }
   // update material path
-  if (cache.m_matPropOK && cache.m_material->x0() > 0. && path > 0.) {
+  if (cache.m_matPropOK && cache.m_material->x0() > 0. && path > 0. && cache.m_material->averageZ() != 0) {
     pathLim.updateMat(path / cache.m_material->x0(), cache.m_material->averageZ(), 0.);
   }
   // return value
