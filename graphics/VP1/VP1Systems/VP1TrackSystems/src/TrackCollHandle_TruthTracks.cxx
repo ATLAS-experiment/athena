@@ -53,9 +53,6 @@
 //____________________________________________________________________
 class TrackCollHandle_TruthTracks::Imp {
 public:
-  static double mag(const HepMC::FourVector& v) {
-    return std::sqrt( v.x()*v.x() + v.y()*v.y() + v.z()*v.z() );
-  }
 
   TrackCollHandle_TruthTracks * theclass = nullptr;
   bool loadHitLists(std::map<SimBarCode,SimHitList> & hitLists);
@@ -753,7 +750,7 @@ bool TrackCollHandle_TruthTracks::Imp::fixMomentumInfoInSimHits(HepMC::ConstGenP
   if (p) {
     HepMC::ConstGenVertexPtr v = p->production_vertex();
     if (v) {
-      mom = mag(p->momentum());
+      mom = p->momentum().length();
       time = v->position().t()/CLHEP::c_light;
       //       theclass->messageDebug("fixMomentumInfoInSimHits genparticle "+str(mom/GeV)+" GeV, time = "+str(time/ns)+" ns");
     }
