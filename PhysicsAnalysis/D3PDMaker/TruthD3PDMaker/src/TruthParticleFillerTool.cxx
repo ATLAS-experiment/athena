@@ -11,7 +11,6 @@
 
 #include "TruthParticleFillerTool.h"
 #include "AthenaKernel/errorcheck.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/HepMCHelpers.h"
 
@@ -27,12 +26,9 @@ namespace D3PD {
 TruthParticleFillerTool::TruthParticleFillerTool (const std::string& type,
                                                   const std::string& name,
                                                   const IInterface* parent)
-  : Base (type, name, parent),
-    m_ppsvc ("PartPropSvc", name)
+  : Base (type, name, parent)
 {
   declareProperty ("PDGIDVariable",  m_PDGIDVariable = "pdgId");
-  declareProperty ("PartPropSvc", m_ppsvc,
-                   "Particle property service.");
 
   book().ignore(); // Avoid coverity warnings.
 }
@@ -43,7 +39,6 @@ TruthParticleFillerTool::TruthParticleFillerTool (const std::string& type,
  */
 StatusCode TruthParticleFillerTool::initialize()
 {
-  CHECK( m_ppsvc.retrieve() );
   return StatusCode::SUCCESS;
 }
 

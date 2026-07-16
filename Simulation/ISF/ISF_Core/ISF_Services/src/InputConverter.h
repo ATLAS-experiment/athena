@@ -21,7 +21,6 @@
 #include "TruthUtils/MagicNumbers.h"
 #include "GeneratorModules/GenData.h"
 
-class IPartPropSvc;
 class McEventCollection;
 namespace ISFTesting {
   class InputConverter_test;

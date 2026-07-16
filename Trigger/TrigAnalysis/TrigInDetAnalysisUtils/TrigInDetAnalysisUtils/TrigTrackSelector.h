@@ -33,7 +33,6 @@
 
 ///// FrameWork includes
 /// #include "GaudiKernel/ServiceHandle.h"
-/// #include "GaudiKernel/IPartPropSvc.h"
 /// absolutely pathetic!! write my own class
 
 #include "TrigInDetAnalysisUtils/particleType.h"
