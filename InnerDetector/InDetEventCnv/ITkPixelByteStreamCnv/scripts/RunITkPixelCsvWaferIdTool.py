@@ -21,6 +21,8 @@ from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
 
 from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelCsvWaferIdAlgCfg
 
+import csv, json, sys
+
 parser = ArgumentParser("RunITkPixelCsvWaferIdAlg.py")
 parser.add_argument(
     "--csv-file",
@@ -74,3 +76,12 @@ print(f"  Input CSV file: {args.csv_file}")
 print(f"  Output file: {args.output_file}")
 print("  Note: the algorithm execution writes one front end per line to the output file.")
 print("  32-bit waferID+feID, 32-bit waferID+feID, FELIX Card Name, Uplink Pin, DMA buffer, SourceID")
+
+
+print("  Converting to json....")
+f = open(args.output_file+".json", "x")
+with open(args.output_file, newline='') as csvfile:
+    f.write(json.dumps([dict(r) for r in csv.DictReader(csvfile)]))
+f.close()
+
+print("  Done !!")
