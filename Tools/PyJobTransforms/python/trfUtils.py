@@ -1595,12 +1595,11 @@ def ValgrindCommand(
     # Access Valgrind suppressions files by finding the paths from
     # environment variables. Append the files to the Valgrind suppressions
     # options.
-    project_dir = os.environ["AtlasProject"] + "_DIR" #e.g. Athena_DIR for Athena
     suppressionFilesAndCorrespondingPathEnvironmentVariables = {
-        "data/Valkyrie/valgrind-python.supp": project_dir,
-        "data/Valkyrie/valgrind-atlas.supp":  project_dir,
-        "etc/valgrind-root.supp":                 "ROOTSYS",
-        "etc/valgrind-root-python.supp":          "ROOTSYS"
+        "Valkyrie/valgrind-python.supp": "DATAPATH",
+        "Valkyrie/valgrind-atlas.supp":  "DATAPATH",
+        "etc/valgrind-root.supp":        "ROOTSYS",
+        "etc/valgrind-root-python.supp": "ROOTSYS"
     }
     optionsList = ["valgrind"]
     # If default options are not suppressed, use them.
