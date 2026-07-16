@@ -14,11 +14,11 @@
 #include "xAODTracking/VertexContainer.h"
 
 // ACTS CORE
-#include "Acts/EventData/SeedContainer2.hpp"
-#include "Acts/EventData/SpacePointContainer2.hpp"
-#include "Acts/Seeding2/BroadTripletSeedFilter.hpp"
-#include "Acts/Seeding2/CylindricalSpacePointGrid2.hpp"
-#include "Acts/Seeding2/TripletSeeder.hpp"
+#include "Acts/EventData/SeedContainer.hpp"
+#include "Acts/EventData/SpacePointContainer.hpp"
+#include "Acts/Seeding/BroadTripletSeedFilter.hpp"
+#include "Acts/Seeding/CylindricalSpacePointGrid.hpp"
+#include "Acts/Seeding/TripletSeeder.hpp"
 
 // Other
 #include <memory>
@@ -347,6 +347,20 @@ class GridTripletSeedingTool
   Gaudi::Property<bool> m_useExperimentCuts{this, "useExperimentCuts", false,
                                             ""};
 
+  // per-pair azimuthal-swing doublet cut (displaced-aware, same physics as
+  // the GBTS phi window): independent of useExperimentCuts so that the
+  // pixel-specific experiment cuts stay off for strip instances
+  Gaudi::Property<bool> m_doubletDPhiCut{this, "doubletDPhiCut", false,
+      "apply the per-pair azimuthal-swing doublet cut"};
+  Gaudi::Property<float> m_doubletDPhiD0Max{this, "doubletDPhiD0Max", -1.,
+      "impact parameter bounding the doublet phi swing; negative uses impactMax"};
+  Gaudi::Property<float> m_doubletDPhiCap{this, "doubletDPhiCap", 10.,
+      "cap on the displaced phi-swing term [rad]"};
+  Gaudi::Property<float> m_doubletDPhiConst{this, "doubletDPhiConst", 0.015,
+      "constant term of the prompt doublet phi window [rad]"};
+  Gaudi::Property<float> m_doubletDPhiSlope{this, "doubletDPhiSlope", 2.0e-4,
+      "curvature term of the prompt doublet phi window [rad/mm]"};
+
   Gaudi::Property<int> m_stateVectorReserveSize{
       this, "stateVectorReserveSize", 500,
       "Size of the initial Seeding State internal vectors"};
@@ -355,7 +369,7 @@ class GridTripletSeedingTool
                                       45. * Acts::UnitConstants::mm};
 
  private:
-  Acts::CylindricalSpacePointGrid2::Config m_gridCfg;
+  Acts::CylindricalSpacePointGrid::Config m_gridCfg;
   Acts::DoubletSeedFinder::Config m_bottomDoubletFinderCfg;
   Acts::DoubletSeedFinder::Config m_topDoubletFinderCfg;
   Acts::TripletSeedFinder::Config m_tripletFinderCfg;
@@ -374,12 +388,12 @@ class GridTripletSeedingTool
 
   bool spacePointSelectionFunction(const xAOD::SpacePoint* sp, float r) const;
 
-  bool doubletSelectionFunction(const Acts::ConstSpacePointProxy2& middle,
-                                const Acts::ConstSpacePointProxy2& other,
+  bool doubletSelectionFunction(const Acts::ConstSpacePointProxy& middle,
+                                const Acts::ConstSpacePointProxy& other,
                                 float cotTheta, bool isBottomCandidate) const;
 
   std::pair<float, float> retrieveRadiusRangeForMiddle(
-      const Acts::ConstSpacePointProxy2& spM,
+      const Acts::ConstSpacePointProxy& spM,
       const Acts::Range1D<float>& rMiddleSpRange) const;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_inputHoughVtxKey{this, "inputHoughVtx", "", "input vertex container"};

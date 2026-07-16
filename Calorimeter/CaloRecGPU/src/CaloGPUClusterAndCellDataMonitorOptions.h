@@ -135,7 +135,7 @@ namespace impl
     template <class T, class TupleT>
     static T t2s(const TupleT &, T &) { }
   };
-
+  //cppcheck-suppress unknownMacro
   CRGPU_RECURSIVE_MACRO(CRGPU_MACRO_EXPANSION(CALORECGPU_VARSB_EXPANDER, _, 9, 8, 7, 6, 5, 4, 3, 2, 1))
   //If we needed structs with more than 9 elements, just add more numbers to the left in descending order...
 

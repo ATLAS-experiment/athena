@@ -18,7 +18,6 @@
 #include <mutex>
 #include <string>
 #include <TH2.h>
-#include <TRandom3.h>
 
 namespace InDet {
 
@@ -68,7 +67,8 @@ namespace InDet {
   private:
 
     // Property: random seed
-    Gaudi::Property<int> m_seed{this, "Seed", 42, "Seed used to initialize the RNG"};
+    Gaudi::Property<int> m_seed{this, "Seed", 3,
+      "Seed offset mixed with per-track phi/eta hash for deterministic RNG"};
 
     // Property: parameter to artificially scale up/down the effect of the tool
     Gaudi::Property<float> m_trkEffSystScale{this, "trkEffSystScale", 1.0, "Option to scale the effect of the systematic (default 1)"};
@@ -80,9 +80,8 @@ namespace InDet {
     Gaudi::Property<std::string> m_calibHistLRTEff{this, "calibHistLRTEff", "OneMinusRatioEfficiencyVSRadiusOfFirstHitEta_Nominal", "Name of the efficiency histogram (expert only)"};
 
 
-    std::unique_ptr<TRandom3> m_rnd  = nullptr; //!
     std::unique_ptr<TH2> m_trkLRTEff = nullptr; //!
-    mutable std::mutex m_rndMutex; //!
+    mutable std::mutex m_sysLock; //!
 
   }; // class InclusiveTrackFilterTool
 

@@ -9,6 +9,7 @@
 
 #include <MuonRecToolInterfacesR4/IPatternVisualizationTool.h>
 #include <MuonRecToolInterfacesR4/IFastRecoVisualizationTool.h>
+#include <MuonRecToolInterfacesR4/ITrackSeedingTool.h>
 
 #include "MuonFastRecoHelpers/GlobalPatternFinder.h"
 #include "MuonFastRecoHelpers/FastMuonSABuilder.h"
@@ -44,8 +45,6 @@ namespace MuonR4{
             /** @brief Abrivation for a vector of global patterns */
             using PatternVec = FastReco::GlobalPatternFinder::PatternVec;
 
-            /** @brief Handle to the magnetic field conditions object */
-            SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
             /** @brief Keys of SpacePoint containers to read */
             SG::ReadHandleKeyArray<SpacePointContainer> m_inSpacePoints{this, "InSpacePoints", {"MuonSpacePoints"}, "List of space point containers to read"};
             /** @brief Write handle key for the output buckets */
@@ -66,6 +65,8 @@ namespace MuonR4{
             ToolHandle<MuonValR4::IFastRecoVisualizationTool> m_patVisionTool{this, "VisualizationTool", ""};
             /** @brief Handle to the visualization tool for segments */
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_segVisionTool{this, "SegmentVisualizationTool", ""};
+            /** @brief The track seeding tool to construct the seed candidates and to estimate the initial parameters */
+            ToolHandle<ITrackSeedingTool> m_seedingTool{this, "SeedingTool", ""};
 
             /** ----------------- Configuration options for the global pattern finder ----------------- */
             /** @brief Toggle the utilization of MDT hits to build patterns */

@@ -30,6 +30,10 @@ def setActsDefaultTunings(icf):
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
     icf.addFlag("autoReverseSearch", False)
+    # Extension used to name the persistified track particle container
+    # (InDet{extension}TrackParticles) when storeSeparateContainer is
+    # requested. If empty, the pass extension is used.
+    icf.addFlag("storedTrackParticlesExtension", "")
     
     # Custom values for config flags
     icf.Xi2max = [25]
@@ -88,10 +92,14 @@ def createActsHeavyIonTrackingPassFlags():
 # Secondary ACTS Tracking pass for Large Radius Tracking
 def createActsLargeRadiusTrackingPassFlags():
     icf = createITkLargeD0TrackingPassFlags()
-    icf.extension = "LargeD0"
+    icf.extension = "ActsLargeRadius"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
     setActsDefaultTunings(icf)
+    # Store the output track particles in InDetLargeD0TrackParticles
+    # (instead of InDetActsLargeRadiusTrackParticles) so that downstream
+    # LRT clients can rely on the same container name as in Run 3
+    icf.storedTrackParticlesExtension = "LargeD0"
 
     # Override acts default values
     icf.Xi2max = [75]
@@ -154,6 +162,8 @@ def createActsValidateLargeRadiusStandaloneTrackingPassFlags():
     icf.extension = "ActsValidateLargeRadiusStandalone"
     icf.isSecondaryPass = False
     icf.isLargeD0 = True
+    # Validation pass keeps the default InDet{extension}TrackParticles name
+    icf.storedTrackParticlesExtension = ""
     return icf
 
 def createActsValidateTracksTrackingPassFlags():

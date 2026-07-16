@@ -36,12 +36,17 @@ class NNinput {
     totalSize = theta + 1
   };
   NNinput() : m_payload(static_cast<index_t>(Index::totalSize), {}) {}
+
   std::vector<payload_t>& payload() { return m_payload; }
+
+  const std::vector<payload_t>& payload() const { return m_payload; }
+
   float totCharge() const {
     return std::accumulate(
         std::begin(m_payload) + static_cast<index_t>(Index::chargeOffset),
         std::begin(m_payload) + static_cast<index_t>(Index::chargeEnd), 0.0f);
   }
+
   void setPixelCharge(index_t x, index_t y, payload_t charge) {
     checkRange(x, "x of coordinate of the charge");
     checkRange(y, "x of coordinate of the charge");
@@ -121,7 +126,7 @@ class NNinput {
       value -= centerValue;
     }
 
-    const double coordsIdx = coord + static_cast<double>(Index::center) ;
+    const double coordsIdx = coord + static_cast<double>(Index::center);
     const double floorValue = std::floor(coordsIdx);
     const double frac = floorValue - coordsIdx;
     const long intIdx = static_cast<long>(floorValue);
@@ -184,18 +189,19 @@ class NNinput {
 };
 
 struct NumberNNoutput {
-  using payload_t = NNinput::payload_t; ///! payload from NN
+  using payload_t = NNinput::payload_t;  ///! payload from NN
 
   /***
    * @brief given number network output finds how many clusters there is
    * the numbers network resurns probabilities and we decide picking
-   * highest probability outcome (position of highest probability +1 == nnumber of clusters)
+   * highest probability outcome (position of highest probability +1 == nnumber
+   * of clusters)
    * TODO check if in case of small differences in prob, we should not preffer
    * smaller number of clusters
    */
-  static unsigned int maxProbIndex(const std::vector<payload_t>& prob) {
-    return std::distance(std::begin(prob),
-                         std::max_element(std::begin(prob), std::end(prob)));
+  static unsigned int maxProbIndex(const std::array<payload_t, 3>& prob) {
+    return std::ranges::distance(std::begin(prob),
+                                 std::ranges::max_element(prob));
   }
 };
 
@@ -220,6 +226,8 @@ class PositionNNoutput {
 
   PositionNNoutput(const float* begin, const float* end)
       : m_payload(begin, end) {}
+  PositionNNoutput(int /*nPos*/)
+      : m_payload(static_cast<index_t>(Index::outputUnitSize)) {}
 
   std::vector<payload_t>& payload() { return m_payload; }
 

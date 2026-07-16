@@ -10,9 +10,10 @@ set -x
 
 echo "List of files = " ${ArtInFile}
 
-Reco_tf.py --CA True \
-           --maxEvents=9000 \
-           --conditionsTag CONDBR2-BLKPA-RUN2-11 \
+conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN2_DATA)")
+
+Reco_tf.py --maxEvents=9000 \
+           --conditionsTag $conditions \
            --geometryVersion ATLAS-R2-2016-01-00-01 \
            --inputBSFile='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/MuonCosmic/data17_cos.00342172.physics_CosmicMuons.merge.RAW._lb0006._SFO-ALL._0001.1' \
            --outputAODFile MuonCosmic_Reco.AOD.pool.root \

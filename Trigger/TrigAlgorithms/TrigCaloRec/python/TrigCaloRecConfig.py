@@ -206,7 +206,7 @@ def CaloL0RingerCfg(flags,DoNoiseThrRings=True):
     from AthenaCommon.CFElements import parOR
     if (flags.Output.doWriteRDO):
        accSeq = ComponentAccumulator(parOR("HLTBeginSeq"))
-       accSeq.merge(hltCaloCellSeedlessMakerCfg(flags, sequenceName="HLTBeginSeq"))
+       accSeq.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey='', sequenceName="HLTBeginSeq"))
        accSeq.merge(L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=DoNoiseThrRings))
        acc.merge(accSeq)
 

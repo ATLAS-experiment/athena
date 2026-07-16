@@ -304,7 +304,7 @@ def ActsInDetTrackFindingCfg(flags,
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
         trackColl = kwargs['ACTSTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,
@@ -403,7 +403,7 @@ def ActsInDetAmbiguityResolutionCfg(flags,
     # Persistification
     if flags.Acts.EDM.PersistifyTracks:
         trackColl = kwargs['ResolvedTracksLocation']
-        from ActsConfig.ActsTrackFindingConfig import ActsToXAODTrackConverterAlgCfg
+        from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         acc.merge(ActsToXAODTrackConverterAlgCfg(flags,
                                                  name = f'{trackColl}ToXAODConverterAlg',
                                                  InputActsTracksLocation = trackColl,

@@ -69,11 +69,9 @@ StatusCode RecoverZeroPixelHitMuons::execute(const EventContext& context) const
       matchedMuons.push_back(muMatch);
       const xAOD::Muon &muon_match = *muMatch;
       xAOD::Muon *zeroPixelHitMuon = outputMuons->push_back(std::make_unique<xAOD::Muon>(muon_match));
-      outputMuons->push_back(zeroPixelHitMuon);      
       zeroPixelHitMuon->setP4(muon_match.pt(), t->eta(), t->phi());
       zeroPixelHitMuon->setCharge(muon_match.charge());
-      // Set to not assigned Muon Type to distinguish from other muons, will need to properly define in MuonType enum later
-      zeroPixelHitMuon->setMuonType((xAOD::Muon::MuonType)10);
+      zeroPixelHitMuon->setMuonType(xAOD::Muon::MuonType::ZeroPixelHit);
       ElementLink<xAOD::TrackParticleContainer> link( *inputTracks, t->index() );
       zeroPixelHitMuon->setTrackParticleLink(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle, link);
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -35,6 +35,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 // HepMC
 #include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/Operators.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -327,9 +328,9 @@ TEST_F(InputConverter_test, passesFilters_one_pass_filter) {
   ASSERT_EQ (genParticleFilters.size(), expectedSize);
   MockFilterTool* filterTool = dynamic_cast<MockFilterTool*>(&*(genParticleFilters[0]));
   ASSERT_TRUE( filterTool );
-  HepMC::ConstGenParticlePtr genPart{};
   HepMC::FourVector mom(12.3, 45.6, 78.9, 0.12);
-  HepMC::GenParticle genPart2(mom,
+  HepMC::ConstGenParticlePtr genPart =
+    HepMC::newGenParticlePtr (mom,
                               11, // pdg id (e-)
                               1 // status
                               );
@@ -351,9 +352,9 @@ TEST_F(InputConverter_test, passesFilters_one_nonpass_filter) {
   MockFilterTool* filterTool = dynamic_cast<MockFilterTool*>(&*(genParticleFilters[0]));
   ASSERT_TRUE( filterTool );
 
-  HepMC::ConstGenParticlePtr genPart{};
   HepMC::FourVector mom(12.3, 45.6, 78.9, 0.12);
-  HepMC::GenParticle genPart2(mom,
+  HepMC::ConstGenParticlePtr genPart =
+    HepMC::newGenParticlePtr (mom,
                               11, // pdg id (e-)
                               1 // status
                               );
@@ -377,9 +378,9 @@ TEST_F(InputConverter_test, passesFilters_two_filters) {
   MockFilterTool* filterTool2 = dynamic_cast<MockFilterTool*>(&*(genParticleFilters[1]));
   ASSERT_TRUE( filterTool2 );
 
-  HepMC::ConstGenParticlePtr genPart{};
   HepMC::FourVector mom(12.3, 45.6, 78.9, 0.12);
-  HepMC::GenParticle genPart2(mom,
+  HepMC::ConstGenParticlePtr genPart =
+    HepMC::newGenParticlePtr (mom,
                               11, // pdg id (e-)
                               1 // status
                               );

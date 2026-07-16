@@ -23,7 +23,10 @@ def main():
     tests_to_run = []
     if options.generation:
         dsid = "421356" if not options.dsid else options.dsid
-        tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
+        if "inputEVNT_PreFile" in options.extra_args:
+            tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["afterburn"], setup, options.extra_args))
+        else:
+            tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
     elif options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
             tests_to_run.append(SimulationTest("s4005", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))

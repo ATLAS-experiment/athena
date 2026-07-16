@@ -47,8 +47,7 @@ run "Reconstruction" \
     --outputAODFile AOD.pool.root \
     --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
-    --preExec "flags.Tracking.doTruth=False; \
-               flags.DQ.useTrigger=False; \
+    --preExec "flags.DQ.useTrigger=False; \
 	       flags.Acts.doAnalysis=True; \
                flags.Output.HISTFileName=\"ActsMonitoringOutput.root\";" \
     --perfmon fullmonmt \

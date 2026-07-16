@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: athenaHLT test of partial event building and data scouting
+# art-description: athenaEF test of partial event building and data scouting
 # art-type: build                                                                  
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena                                                       

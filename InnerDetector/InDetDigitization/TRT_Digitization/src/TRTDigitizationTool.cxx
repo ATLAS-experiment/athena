@@ -123,10 +123,6 @@ StatusCode TRTDigitizationTool::initialize()
   // Get Random Service
   ATH_CHECK(m_rndmSvc.retrieve());
 
-  // Get the Particle Properties Service
-  ATH_CHECK(m_ppSvc.retrieve());
-  m_particleTable = m_ppSvc->PDT();
-
   //locate the PileUpMergeSvc and initialize our local ptr
   if (m_onlyUseContainerName) {
     ATH_CHECK(m_mergeSvc.retrieve());
@@ -294,7 +290,6 @@ StatusCode TRTDigitizationTool::lateInitialize(const EventContext& ctx) {
                               m_pElectronicsProcessing,
                               m_pNoise,
                               m_pDigConditions,
-                              m_particleTable,
                               m_trt_id,
                               TRTpaiToolAr,
                               TRTpaiToolKr,

@@ -11,9 +11,7 @@
 #include <memory>
 #include "AtlasHepMC/GenEvent.h"
 
-namespace HepPDT {
-  class ParticleDataTable;
-}
+class GenData;
 namespace CLHEP {
   class HepRandomEngine;
 }
@@ -32,7 +30,7 @@ class BeamHaloParticleBuffer;
 class BeamHaloGenerator {
  public:
 
-  BeamHaloGenerator(const HepPDT::ParticleDataTable* particleTable,
+  BeamHaloGenerator(
 		    const std::string& inputFile,
 		    const std::vector<std::string>& generatorSettings);
 
@@ -102,8 +100,8 @@ class BeamHaloGenerator {
                    HepMC::GenEvent* evt,
                    CLHEP::HepRandomEngine* engine);
 
-  /** A pointer to the particle data table. */
-  const HepPDT::ParticleDataTable* m_particleTable;
+  /** A shared pointer to the GenData helper object. */
+  std::shared_ptr<GenData> m_gendata;
 
   /** Input file name */
   std::string m_inputFile;

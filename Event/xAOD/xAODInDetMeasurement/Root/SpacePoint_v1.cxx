@@ -20,7 +20,7 @@ void xAOD::SpacePoint_v1::setElementIdList(std::vector< xAOD::DetectorIDHashType
    acc( *this ) = std::move(value);
 }
 
-static const SG::AuxElement::Accessor< std::array< float, 3 > > globalPosAcc("globalPosition");
+static const SG::AuxElement::Accessor< xAOD::ArrayFloat3 > globalPosAcc("globalPosition");
 
 xAOD::SpacePoint_v1::ConstVectorMap xAOD::SpacePoint_v1::globalPosition() const {
   const auto& values = globalPosAcc(*this);

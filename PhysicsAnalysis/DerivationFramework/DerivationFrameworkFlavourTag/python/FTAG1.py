@@ -31,6 +31,13 @@ from DerivationFrameworkFlavourTag.FtagBaseContent import (
 from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
     HLTJetFTagDecorationCfg,
 )
+from DerivationFrameworkFlavourTag.FtagVRJetConfig import (
+    VR_JET_APPEND_TO_DICTIONARY,
+    VR_JET_TRUTH_VERTEX_DR,
+    VR_JETS,
+    VRFtagJetsCfg,
+    add_vr_jet_truth_augmentation,
+)
 from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
 from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 from InDetConfig.InDetPoolReadConfig import InDetPoolReadCfg
@@ -108,11 +115,20 @@ def FTAG1CoreCfg(
     )
 
     # Truth vertex labeling for Maskformer (see https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/AnalysisCommon/ParticleJetTools/docs/TruthVertexLabelling.md?ref_type=heads)
+    # The VR jets are summarised at their Rmax, which over-associates the high-pT jets whose
+    # real radius has shrunk to Rmin; a shrinking-cone-aware summary is left to a follow-up.
     add_truth_vertex_decorations(
         flags=flags,
         acc=acc,
         slimming_helper=ftag1_slimming_helper,
         large_r_jet_collection="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+        extra_jet_collections=[(VR_JETS, VR_JET_TRUTH_VERTEX_DR)],
+    )
+
+    add_vr_jet_truth_augmentation(
+        flags=flags,
+        acc=acc,
+        slimming_helper=ftag1_slimming_helper,
     )
 
     # FTAG1-specific smart collections
@@ -124,6 +140,7 @@ def FTAG1CoreCfg(
     # FTAG1-specific all-variable content
     ftag1_slimming_helper.AllVariables += [
         "AntiKt4EMPFlowJets",
+        VR_JETS,
         "AntiKt4LCTopoJets",
         "CaloCalFwdTopoTowers",
         "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -229,6 +246,7 @@ def FTAG1CoreCfg(
     update_append_to_dictionary_in_slimming_helper(
         flags=flags,
         slimming_helper=ftag1_slimming_helper,
+        extra_append_to_dictionary=VR_JET_APPEND_TO_DICTIONARY,
     )
 
     # Trigger content
@@ -289,6 +307,9 @@ def FTAG1ExtraContentCfg(flags: AthConfigFlags) -> ComponentAccumulator:
     jet_list = [AntiKt4LCTopo]
     for jet_def in jet_list:
         acc.merge(JetRecCfg(flags, jet_def))
+
+    # Variable-R EMPFlow jets (low-pT-wide, shrinking to 0.4) + soft-lepton association
+    acc.merge(VRFtagJetsCfg(flags))
 
     return acc
 

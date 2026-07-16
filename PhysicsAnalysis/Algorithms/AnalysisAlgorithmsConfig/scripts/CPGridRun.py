@@ -52,7 +52,6 @@ class CPGridRun:
 
         ioGroup = parser.add_argument_group('Input/Output file configuration')
         ioGroup.add_argument('-i','--input-list', dest='input_list', help='Path to the text file containing list of containers on the panda grid. Each container will be passed to prun as --inDS and is run individually')
-        ioGroup.add_argument('--bulk-submission', dest='bulk_submission', action='store_true', help='Submit all containers in the input list as one task.')
         ioGroup.add_argument('--output-files', dest='output_files', nargs='+', default=['output.root'],
                              help='The output files of the grid job. Example: --output-files A.root B.txt B.root results in A/A.root, B/B.txt, B/B.root in the output directory. No need to specify if using CPRun.py')
         ioGroup.add_argument('--destSE', dest='destSE', default='', type=str, help='Destination storage element (PanDA)')
@@ -75,12 +74,17 @@ class CPGridRun:
                                     )
 
         submissionGroup = parser.add_argument_group('Submission configuration')
-        submissionGroup.add_argument('-y', '--agreeAll', dest='agreeAll', action='store_true', help='Agree to all the submission details without asking for confirmation. Use with caution!')
         submissionGroup.add_argument('--noSubmit', dest='noSubmit', action='store_true', help='Do not submit the job to the grid (PanDA). Useful to inspect the prun command')
         submissionGroup.add_argument('--testRun', dest='testRun', action='store_true', help='Will submit job to the grid but greatly limit the number of files per job (10) and number of events (300)')
-        submissionGroup.add_argument('--checkInputDS', dest='checkInputDS', action='store_true', help='Check if the input datasets are available on the AMI.')
         submissionGroup.add_argument('--recreateTar', dest='recreateTar', action='store_true', help='Re-compress the source code. Source code are compressed by default in submission, this is useful when the source code is updated')
         submissionGroup.add_argument('--useCentralPackage', dest='useCentralPackage', action='store_true', help='Use central package instead of custom packages')
+        submissionGroup.add_argument('--bulk-submission', dest='bulk_submission', action='store_true', help='Submit all containers in the input list as one task.')
+        
+        miscGroup = parser.add_argument_group('Miscellaneous configuration')
+        miscGroup.add_argument('-y', '--agreeAll', dest='agreeAll', action='store_true', help='Agree to all the submission details without asking for confirmation. Use with caution!')
+        miscGroup.add_argument('--checkInputDS', dest='checkInputDS', action='store_true', help='Check if the input datasets are available on the AMI.')
+        miscGroup.add_argument('--framework', dest='framework', default='CPGridRun', type=str, help='Declaring a name for your submission for PanDA team to collect statistics. Default is CPGridRun')
+        
         self.args, self.unknown_args = parser.parse_known_args()
         self.outputFilesParsing()
         return parser
@@ -156,6 +160,7 @@ class CPGridRun:
             'exec': self.execFormatter(),
             'memory': "2000", # MB
             'addNthFieldOfInDSToLFN': '2,3,6',
+            'framework': self.args.framework,
         }
         if self.args.noSubmit:
             config['noSubmit'] = True

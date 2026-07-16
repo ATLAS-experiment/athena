@@ -13,10 +13,10 @@
 
 #include "CLHEP/Units/PhysicalConstants.h"
 
-MarsHaloGenerator::MarsHaloGenerator(const HepPDT::ParticleDataTable* particleTable,
+MarsHaloGenerator::MarsHaloGenerator(
 				     const std::string& inputFile,
 				     const std::vector<std::string>& generatorSettings):
-  BeamHaloGenerator(particleTable, inputFile, generatorSettings) {
+  BeamHaloGenerator(inputFile, generatorSettings) {
 }
 
 //------------------------------------------------------------------
@@ -136,7 +136,7 @@ int MarsHaloGenerator::readParticle(BeamHaloParticle *beamHaloParticle) {
   }
 
   // Fill the BeamHaloParticle with the data in the MarsParticle
-  if(beamHaloParticle->fill(m_particleTable, &marsParticle)) {
+  if(beamHaloParticle->fill(&marsParticle)) {
     std::cout << "Warning: Conversion from MarsParticle to BeamHaloParticle failed." << std::endl;
     return 1;
   }

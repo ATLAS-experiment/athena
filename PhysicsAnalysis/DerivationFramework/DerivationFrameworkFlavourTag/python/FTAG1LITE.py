@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAG1LITE.py
 # Minimal derivation for producing GN3/GN3X training samples via TDD.
@@ -221,7 +221,7 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
         ParentDecoratorCfg,
-        trackTruthDecorator,
+        TrackTruthDecoratorCfg,
     )
 
     # ── NearestJet matching (reco-to-reco) ──
@@ -271,7 +271,7 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         pt_priority_with_delta_r=0.3,
     ))
 
-    acc.merge(trackTruthDecorator(flags))
+    acc.merge(TrackTruthDecoratorCfg(flags))
     acc.merge(ParentDecoratorCfg(
         flags, targetContainer=JETS, prefix="PFlow", matchDeltaR=0.3,
     ))

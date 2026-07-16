@@ -104,9 +104,10 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
      *  @param hit The hit to check
      *  @param coords The coordinates of the hit
      *  @return The number of existing patterns containing the hit */
-    auto countPatterns = [&outPatterns, this](const HitPayload& hit,
-                                              const SearchTree_t::coordinate_t& coords) -> uint8_t {
-        return std::ranges::count_if(outPatterns, [&](const PatternState& pattern){
+    auto countPatterns = [this](const PatternStateVec& patterns,
+                                const HitPayload& hit,
+                                const SearchTree_t::coordinate_t& coords) -> uint8_t {
+        return std::ranges::count_if(patterns, [&](const PatternState& pattern){
             const double patSeedTheta {pattern.seedHit->position.theta()};
             if (std::abs(patSeedTheta - coords[thetaIdx]) > 2.*m_cfg.thetaSearchWindow ||
                 !pattern.expSect.isNeighbour(ExpandedSector{static_cast<std::int8_t>(coords[sectorIdx])})) {
@@ -126,12 +127,12 @@ GlobalPatternFinder::findPatternsInEta(const SearchTree_t& orderedSpacepoints,
             }
             ATH_MSG_VERBOSE(__func__<<"() New seed hit "<<*seed<<", coordinates "<<seedCoords);
             /** check how many existing patterns contain this hit */
-            uint8_t nExistingPatterns {countPatterns(seed, seedCoords)};
+            uint8_t nExistingPatterns {countPatterns(outPatterns, seed, seedCoords)};
             if (nExistingPatterns >= m_cfg.maxSeedAttempts) {
                 // Try first to resolve overlaps and re-count the number of patterns containing the seed
                 outPatterns = resolveOverlaps(outPatterns, visualInfo);
-                nExistingPatterns = countPatterns(seed, seedCoords);
-                if (nExistingPatterns > m_cfg.maxSeedAttempts) {
+                nExistingPatterns = countPatterns(outPatterns,seed, seedCoords);
+                if (nExistingPatterns >= m_cfg.maxSeedAttempts) {
                     ATH_MSG_VERBOSE(__func__<<"() Seed has already been used in "<<nExistingPatterns<<" patterns, which is above the limit - skip this seed.");
                     continue;
                 }   

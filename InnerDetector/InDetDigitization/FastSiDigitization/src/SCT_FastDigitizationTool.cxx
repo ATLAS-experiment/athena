@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FastSiDigitization/SCT_FastDigitizationTool.h"
@@ -722,6 +722,10 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
           //
           // the Cluster Parameters -----------------------------
           // normalize cluster position && get identifier
+          if (totalWeight == 0.)[[unlikely]]{
+            ATH_MSG_WARNING("totalWeight is zero.");
+            continue;
+          }
           potentialClusterPosition *= 1./totalWeight;
           /*const */Identifier potentialClusterId = hitSiDetElement->identifierOfPosition(potentialClusterPosition);
           if (!potentialClusterId.is_valid()) {continue;}
@@ -817,7 +821,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
                 potentialClusterUniq = std::make_unique<InDet::SCT_Cluster>(
                     m_clusterMaker->sctCluster(
                         potentialClusterId, potentialClusterPosition,
-                        std::vector<Identifier>(potentialClusterRDOList), siWidth, hitSiDetElement,
+                        std::move(potentialClusterRDOList), siWidth, hitSiDetElement,
                         m_sctErrorStrategy));
             }
           else

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -107,14 +107,14 @@ InDet::CompetingSCT_ClustersOnTrack::dump(MsgStream& out) const
 {
   using std::ios;
   out << "Trk::CompetingSCT_ClustersOnTrack with [" << numberOfContainedROTs()
-      << "] competing RIO_OnTrack objects" << std::endl;
+      << "] competing RIO_OnTrack objects\n" ;
   out << "  - "
       << (this->ROTsHaveCommonSurface(true) ? "on common surface" : "over different surfaces")
-      << "  (given prob>cut)" << std::endl;
+      << "  (given prob>cut)\n";
   Trk::CompetingRIOsOnTrack::dump(out);
   out << "  - GlobalPosition        : ";
   if (not m_globalPosition)
-    out << "null pointer" << endmsg;
+    out << "null pointer\n";
   else
     out << *m_globalPosition << endmsg;
   return out;
@@ -125,14 +125,14 @@ InDet::CompetingSCT_ClustersOnTrack::dump(std::ostream& out) const
 {
   using std::ios;
   out << "Trk::CompetingSCT_ClustersOnTrack with [" << numberOfContainedROTs()
-      << "] competing RIO_OnTrack objects" << std::endl;
+      << "] competing RIO_OnTrack objects\n" ;
   out << "  - "
       << (this->ROTsHaveCommonSurface(true) ? "on common surface" : "over different surfaces")
-      << "  (given prob>cut)" << std::endl;
+      << "  (given prob>cut)\n" ;
   Trk::CompetingRIOsOnTrack::dump(out);
   out << "  - GlobalPosition        : ";
   if (not m_globalPosition)
-    out << "null pointer" << std::endl;
+    out << "null pointer\n";
   else
     out << *m_globalPosition << std::endl;
   return out;
@@ -200,6 +200,9 @@ InDet::CompetingSCT_ClustersOnTrack::setLocalParametersAndErrorMatrix()
           // x coord has smaller uncert (use smaller eigenvalue):
           meanMeasX += assignProb / lambda1 * rioOnTrack(i).localParameters()[Trk::locX];
           meanMeasY += assignProb / lambda2 * rioOnTrack(i).localParameters()[Trk::locY];
+        }
+        if ((sumAssignProb == 0.) or (meanEigen1 == 0.) or (meanEigen2 == 0.))[[unlikely]]{
+          throw std::runtime_error("InDet::CompetingSCT_ClustersOnTrack::setLocalParametersAndErrorMatrix: denominator zero in division.");
         }
         meanTheta /= sumAssignProb;
         meanMeasX /= meanEigen1;

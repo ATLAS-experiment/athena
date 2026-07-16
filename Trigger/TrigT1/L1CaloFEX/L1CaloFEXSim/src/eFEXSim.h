@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -18,7 +18,6 @@
 #include "eFEXFPGA.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
-#include "CaloEvent/CaloCellContainer.h"
 
 namespace LVL1 {
   
@@ -66,7 +65,6 @@ namespace LVL1 {
   private:
     int m_id{};
     int m_eTowersIDs [10][18]{};
-    CaloCellContainer m_sCellsCollection;
     std::vector<eFEXFPGA*> m_eFEXFPGACollection;
 
     std::vector<std::vector<std::unique_ptr<eFEXegTOB>> > m_emTobObjects;

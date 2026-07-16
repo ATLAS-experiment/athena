@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelAthClusterMonAlg.cxx
@@ -190,7 +190,7 @@ StatusCode PixelAthClusterMonAlg::fillHistograms(const EventContext& ctx) const 
   VecAccumulator2DMap MissIBLhit(*this, "MissIBLhit");
   VecAccumulator2DMap MissIBLpresentBLhit(*this, "MissIBLpresentBLhit");
   VecAccumulator2DMap MissHitsRatio(*this, "MissHitsRatio");
-  auto trackGroup = getGroup("Track");
+  const auto & trackGroup = getGroup("Track");
 
   auto tracks = SG::makeHandle(m_tracksKey, ctx);
 
@@ -464,8 +464,8 @@ StatusCode PixelAthClusterMonAlg::fillHistograms(const EventContext& ctx) const 
   VecAccumulator2DMap Cluster_FE_Occupancy(*this, "ClusterFEOccupancy");
   VecAccumulator2DMap Cluster_FE_Occupancy_OnTrack(*this, "ClusterFEOccupancyOnTrack");
 
-  auto clusterGroup = getGroup("Cluster");
-  auto clusterGroup_OnTrack = getGroup("Cluster_OnTrack");
+  const auto & clusterGroup = getGroup("Cluster");
+  const auto & clusterGroup_OnTrack = getGroup("Cluster_OnTrack");
 
   auto pixel_clcontainer = SG::makeHandle(m_clustersKey, ctx);
 

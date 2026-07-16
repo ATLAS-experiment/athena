@@ -73,6 +73,36 @@ class MuonMatchingTool : public AthAlgTool {
   const xAOD::L2StandAloneMuon* matchL2SA(const EventContext& ctx, const xAOD::Muon *mu, const std::string& trigger, bool &pass) const;
 
   /**
+   * @brief Function that searches for a EF fast reco muon (PhaseII) candidate and judges if it is matched to a given offline muon.
+   * @param mu Offline muon around which L2MuonSA candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_newfast_ivarmedium_L1MU20, etc.
+   * @param pass True if the matched candidate passed the hypothesis step.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const xAOD::Muon* matchFastRecoSA(const EventContext& ctx, const xAOD::Muon *mu, const std::string& trigger, bool &pass) const;
+
+  /**
+   * @brief Function that searches for an L2 standalone muon (L2MuonSA) candidate and judges if it is matched to a given truth particle.
+   * @param mu Truth particle around which L2MuonSA candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
+   * @param pass True if the matched candidate passed the hypothesis step.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const xAOD::L2StandAloneMuon* matchL2SA(const xAOD::TruthParticle *mu, const std::string& trigger, bool &pass) const;
+
+  /**
+   * @brief Function that searches for a EF fast reco standalone muon (PhaseII) candidate and judges if it is matched to a given truth particle.
+   * @param mu Truth particle around which the candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_newfast_ivarmedium_L1MU20, etc.
+   * @param pass True if the matched candidate passed the hypothesis step.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
+   */
+  const xAOD::Muon* matchFastRecoSA(const xAOD::TruthParticle *mu, const std::string& trigger, bool &pass) const;
+
+  /**
    * @brief Function that searches for the L2 standalone muon (L2MuonSA) candidate closest to a given offline muon.
    * @param mu Offline muon around which L2MuonSA candidates are searched.
    * @param trigger Considered chain name, e.g. HLT_mu26_ivarmedium_L1MU20, etc.
@@ -84,11 +114,29 @@ class MuonMatchingTool : public AthAlgTool {
   const TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> searchL2SALinkInfo(const xAOD::Muon *mu, std::string trigger) const;
 
   /**
+   * @brief Function that searches for the EF fast reco standalone candidate closest to a given offline muon.
+   * @param mu Offline muon around which L2MuonSA candidates are searched.
+   * @param trigger Considered chain name, e.g. HLT_mu26_newfast_ivarmedium_L1MU20, etc.
+   * @return LinkInfo to the found candidate. This is inValid link when there is no candidate found.
+   * Important: a valid pointer doesn't mean that it passed the hypothesis and matched,
+   * users should check @c pass for the decision and @c pass for knowing if it is really matched.
+   * @todo Consider improving the argument list.
+   */
+  const TrigCompositeUtils::LinkInfo<xAOD::MuonContainer> searchFastRecoSALinkInfo(const xAOD::Muon *mu, std::string trigger) const;
+
+  /**
    * @brief Function that searches for an L2 standalone muon (L2MuonSA) candidate by ReadHandle and judges if it is matched to a given offlineSA muon.
    * @param mu Offline muon around which L2MuonSA candidates are searched.
    * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
    */
   const xAOD::L2StandAloneMuon* matchL2SAReadHandle(const EventContext& ctx, const xAOD::Muon *mu) const;
+  
+  /**
+   * @brief Function that searches for a EF fast reco standalone muon (PhaseII) candidate by ReadHandle and judges if it is matched to a given offlineSA muon.
+   * @param mu Offline muon around which L2MuonSA candidates are searched.
+   * @return Pointer to the matched candidate. This is @c nullptr when there is no candidate found.
+   */
+  const xAOD::Muon* matchFastRecoSAReadHandle(const EventContext& ctx, const xAOD::Muon *mu) const;
 
   /**
    * @brief Function that searches for an L2 combined muon (L2muComb) candidate and judges if it is matched to a given offline muon.
@@ -99,6 +147,8 @@ class MuonMatchingTool : public AthAlgTool {
    * Important: a valid pointer doesn't mean that it passed the hypothesis, users should check @c pass for the decision.
    */
   const xAOD::L2CombinedMuon* matchL2CB(const xAOD::Muon *mu, std::string trigger, bool &pass) const;
+
+  const xAOD::L2CombinedMuon* matchL2CB(const xAOD::TruthParticle *mu, std::string trigger, bool &pass) const;
 
   /**
    * @brief Function that searches for the L2 combined muon (L2muComb) candidate closest to a given offline muon.
@@ -310,6 +360,14 @@ class MuonMatchingTool : public AthAlgTool {
   const xAOD::Muon* matchL2SAtoOff(const EventContext& ctx, const xAOD::L2StandAloneMuon* samu) const;
 
   /**
+   * @brief Function that searches for an offline muon matched to EF Fast Reco SA muon
+   * @param ctx Reference to the @c EventContext needed for accessing the @c Muons container.
+   * @param samu the given online muon
+   * @return Pointer to the matched offline muon. This is @c nullptr when there is no muon found.
+   */
+  const xAOD::Muon* matchFastRecoSAtoOff(const EventContext& ctx, const xAOD::Muon* samu) const;
+
+  /**
    * @brief Function that searches for an offline muon matched to L2CB muon
    * @param ctx Reference to the @c EventContext needed for accessing the @c Muons container.
    * @param cbmu the given online muon
@@ -441,6 +499,7 @@ class MuonMatchingTool : public AthAlgTool {
   SG::ReadHandleKey<xAOD::MuonRoIContainer> m_MuonRoIContainerKey {this, "MuonRoIContainerName", "LVL1MuonRoIs", "Level 1 muon container"};
   SG::ReadHandleKey<xAOD::MuonContainer> m_MuonContainerKey {this, "MuonContainerName", "Muons", "Offline muon container"};
   SG::ReadHandleKey<xAOD::L2StandAloneMuonContainer> m_L2MuonSAContainerKey {this, "L2StandAloneMuonContainerName", "HLT_MuonL2SAInfo", "L2MuonSA container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFFastRecoContainerKey {this, "EFFastRecoSAContainerName", "HLT_FastMuonsInfo", "EFFastRecoSA container (Phase2)"};
   SG::ReadHandleKey<xAOD::L2CombinedMuonContainer> m_L2muCombContainerKey {this, "L2CombinedMuonContainerName", "HLT_MuonL2CBInfo", "L2muComb container"};
   SG::ReadHandleKey<xAOD::MuonContainer> m_EFSAMuonContainerKey {this, "EFSAMuonContainerName", "HLT_Muons_RoI", "EFSAMuon container"};
   SG::ReadHandleKey<xAOD::MuonContainer> m_EFCBMuonContainerKey {this, "EFCBMuonContainerName", "HLT_MuonsCB_RoI", "EFCBMuon container"};

@@ -89,7 +89,12 @@ StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const Ev
   if(L1pass){
     if(m_doL2SA){
       bool activestate = false;
-      m_matchTool->matchL2SA(ctx, mu, chain, activestate);
+      const bool isPh2FastReco = chain.find("newFast") != std::string::npos;
+      if (isPh2FastReco) {
+        m_matchTool->matchFastRecoSA(ctx, mu, chain, activestate);
+      } else {
+        m_matchTool->matchL2SA(ctx, mu, chain, activestate);
+      }
       L2SApass = activestate;
     } else {
       L2SApass = true;
@@ -241,7 +246,7 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
     
     if(pass1){
       if(std::find(probes.begin(), probes.end(), dimu.second)==probes.end()){
-	if(m_BarrelOnly){
+	      if(m_BarrelOnly){
           if( std::abs( dimu.second->eta() ) > 0. && std::abs( dimu.second->eta() ) < 1.05 ) probes.push_back(dimu.second);
         }
         else probes.push_back(dimu.second);
@@ -249,7 +254,7 @@ StatusCode TrigMuonEfficiencyMon :: selectMuonsTagAndProbe(const EventContext& c
     }
     if(pass2){
       if(std::find(probes.begin(), probes.end(), dimu.first)==probes.end()){
-	if(m_BarrelOnly){
+	      if(m_BarrelOnly){
           if( std::abs( dimu.first->eta() ) > 0. && std::abs( dimu.first->eta() ) < 1.05 ) probes.push_back(dimu.first);
         }
         else probes.push_back(dimu.first);

@@ -41,44 +41,38 @@ namespace LVL1
       return StatusCode::SUCCESS;
    }
 
-   StatusCode gFEXFPGA::init(int id)
-   {
-      m_fpgaId = id;
-
-      return StatusCode::SUCCESS;
-   }
-
-   void gFEXFPGA::reset()
-   {
-
-      m_fpgaId = -1;
-   }
-
-   void gFEXFPGA::FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &gTowersContainer, // output
-                                       gTowersCentral &gTowersIDs_central,                          // input, IDs
-                                                                                                    // int fpga,                                                     // input fpga (A=0, B=1)
+  void gFEXFPGA::FillgTowerEDMCentral( const EventContext& ctx,
+				       SG::WriteHandle<xAOD::gFexTowerContainer> &gTowersContainer, // output
+				       int fpgaId,                                                  // input fpga (A=0, B=1)
+                                       const gTowersCentral &gTowersIDs_central,                    // input, IDs
                                        gTowersType &output_gTower_energies,                         // output, 200 MeV
                                        gTowersType &output_gTower50_energies,                       // output, 50 MeV
-                                       gTowersType &output_saturation)
+                                       gTowersType &output_saturation) const
    { // output, saturation
-      SG::ReadCondHandle<gFEXDBCondData> myDBTool = SG::ReadCondHandle<gFEXDBCondData>(m_DBToolKey);
+     SG::ReadCondHandle<gFEXDBCondData> myDBTool = SG::ReadCondHandle<gFEXDBCondData>(m_DBToolKey, ctx);
       if (!myDBTool.isValid())
       {
          ATH_MSG_ERROR("Could not retrieve DB tool " << m_DBToolKey);
       }
-      gFEXFPGA::calExpand(m_offsetsDefaultA, m_noiseCutsDefaultA, m_slopesDefaultA, 48, myDBTool->get_AnoiseCuts(), myDBTool->get_Aslopes());
-      gFEXFPGA::calExpand(m_offsetsDefaultB, m_noiseCutsDefaultB, m_slopesDefaultB, 48, myDBTool->get_BnoiseCuts(), myDBTool->get_Bslopes());
+
+      gTowersType offsetsDefaultA   = {{{0}}};
+      gTowersType noiseCutsDefaultA = {{{0}}};
+      gTowersType slopesDefaultA    = {{{0}}};
+      gTowersType offsetsDefaultB  = {{{0}}};
+      gTowersType noiseCutsDefaultB= {{{0}}};
+      gTowersType slopesDefaultB   = {{{0}}};
+      gFEXFPGA::calExpand(offsetsDefaultA, noiseCutsDefaultA, slopesDefaultA, 48, myDBTool->get_AnoiseCuts(), myDBTool->get_Aslopes());
+      gFEXFPGA::calExpand(offsetsDefaultB, noiseCutsDefaultB, slopesDefaultB, 48, myDBTool->get_BnoiseCuts(), myDBTool->get_Bslopes());
 
       float Eta = 99;
       float Phi = 99;
       int TowerEt = -99;
-      int Fpga = m_fpgaId;
       char IsSaturated = 0;
 
       float etaSum = 0;
 
-      SG::ReadHandle<gTowerContainer> gFEXFPGA_gTowerContainer(m_gFEXFPGA_gTowerContainerKey /*,ctx*/);     // 200 MeV
-      SG::ReadHandle<gTowerContainer> gFEXFPGA_gTower50Container(m_gFEXFPGA_gTower50ContainerKey /*,ctx*/); // 50 MeV
+      SG::ReadHandle<gTowerContainer> gFEXFPGA_gTowerContainer(m_gFEXFPGA_gTowerContainerKey, ctx);     // 200 MeV
+      SG::ReadHandle<gTowerContainer> gFEXFPGA_gTower50Container(m_gFEXFPGA_gTower50ContainerKey, ctx); // 50 MeV
 
       bool is_mc = false;
       if (!gFEXFPGA_gTower50Container.isValid())
@@ -123,7 +117,7 @@ namespace LVL1
             IsSaturated = tmpTower->isSaturated();
             std::unique_ptr<xAOD::gFexTower> gTowerEDM(new xAOD::gFexTower());
             gTowersContainer->push_back(std::move(gTowerEDM));
-            gTowersContainer->back()->initialize(iEtaFW, iPhiFW, Eta, Phi, TowerEt, Fpga, IsSaturated, gFEXtowerID);
+            gTowersContainer->back()->initialize(iEtaFW, iPhiFW, Eta, Phi, TowerEt, fpgaId, IsSaturated, gFEXtowerID);
 
             output_gTower_energies[myrow][mycol] = tmpTower->getET();
             output_gTower50_energies[myrow][mycol] = is_mc ? tmpTower50->getET() * 4. : tmpTower50->getET();
@@ -133,39 +127,46 @@ namespace LVL1
 
       // apply defualt slopes set in initialization.
       // In the future these values will be read from the online COOL data base
-      // Note the unforutnate hack used to figure out if we are in FPGA A or B.
+      // Note the unfortunate hack used to figure out if we are in FPGA A or B.
       // 
 
       if (etaSum < 0)
       {
          // FPGA A
-         gFEXFPGA::gtCalib(output_gTower_energies, m_offsetsDefaultA, m_noiseCutsDefaultA, m_slopesDefaultA);
+         gFEXFPGA::gtCalib(output_gTower_energies, offsetsDefaultA, noiseCutsDefaultA, slopesDefaultA);
       }
       else
       {
          // FPGA B
-         gFEXFPGA::gtCalib(output_gTower_energies, m_offsetsDefaultB, m_noiseCutsDefaultB, m_slopesDefaultB);
+         gFEXFPGA::gtCalib(output_gTower_energies, offsetsDefaultB, noiseCutsDefaultB, slopesDefaultB);
       }
    }
 
-   void gFEXFPGA::FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &gTowersContainer,
-                                       gTowersForward &gTowersIDs_forward_n,
-                                       gTowersForward &gTowersIDs_forward_p,
-                                       gTowersType &output_gTower_energies,
+  void gFEXFPGA::FillgTowerEDMForward( const EventContext& ctx,
+				       SG::WriteHandle<xAOD::gFexTowerContainer> &gTowersContainer,
+				       int fpgaId,
+                                       const gTowersForward &gTowersIDs_forward_n,
+                                       const gTowersForward &gTowersIDs_forward_p,
+				       gTowersType &output_gTower_energies,
                                        gTowersType &output_gTower50_energies,
-                                       gTowersType &output_saturation)
+                                       gTowersType &output_saturation) const
    {
-      SG::ReadCondHandle<gFEXDBCondData> myDBTool = SG::ReadCondHandle<gFEXDBCondData>(m_DBToolKey);
+     SG::ReadCondHandle<gFEXDBCondData> myDBTool = SG::ReadCondHandle<gFEXDBCondData>(m_DBToolKey, ctx);
       if (!myDBTool.isValid())
       {
          ATH_MSG_ERROR("Could not retrieve DB tool " << m_DBToolKey);
       }
-      gFEXFPGA::calExpand(m_offsetsDefaultC, m_noiseCutsDefaultC, m_slopesDefaultC, 48, myDBTool->get_CnoiseCuts(), myDBTool->get_Cslopes());
+
+      gTowersType offsetsDefaultC   = {{{0}}};
+      gTowersType noiseCutsDefaultC = {{{0}}};
+      gTowersType slopesDefaultC    = {{{0}}};
+
+      gFEXFPGA::calExpand(offsetsDefaultC, noiseCutsDefaultC, slopesDefaultC, 48, myDBTool->get_CnoiseCuts(), myDBTool->get_Cslopes());
 
       char IsSaturated = 0;
 
-      SG::ReadHandle<gTowerContainer> gFEXFPGA_gTowerContainer(m_gFEXFPGA_gTowerContainerKey /*,ctx*/);
-      SG::ReadHandle<gTowerContainer> gFEXFPGA_gTower50Container(m_gFEXFPGA_gTower50ContainerKey /*,ctx*/);
+      SG::ReadHandle<gTowerContainer> gFEXFPGA_gTowerContainer(m_gFEXFPGA_gTowerContainerKey, ctx);
+      SG::ReadHandle<gTowerContainer> gFEXFPGA_gTower50Container(m_gFEXFPGA_gTower50ContainerKey, ctx);
 
       bool is_mc = false;
       if (!gFEXFPGA_gTower50Container.isValid())
@@ -201,13 +202,12 @@ namespace LVL1
             int TowerEt = tmpTower->getET();
             float Eta = tmpTower->eta();
             float Phi = tmpTower->phi();
-            int Fpga = m_fpgaId;
             int iPhiFW, iEtaFW;
             uint32_t gFEXtowerID = tmpTower->getFWID(iPhiFW, iEtaFW);
             IsSaturated = tmpTower->isSaturated();
             std::unique_ptr<xAOD::gFexTower> gTowerEDM(new xAOD::gFexTower());
             gTowersContainer->push_back(std::move(gTowerEDM));
-            gTowersContainer->back()->initialize(iEtaFW, iPhiFW, Eta, Phi, TowerEt, Fpga, IsSaturated, gFEXtowerID);
+            gTowersContainer->back()->initialize(iEtaFW, iPhiFW, Eta, Phi, TowerEt, fpgaId, IsSaturated, gFEXtowerID);
 
             output_gTower_energies[iPhiFW][iEtaFW - 2] = tmpTower->getET();
             output_gTower50_energies[iPhiFW][iEtaFW - 2] = is_mc ? tmpTower50->getET() * 4. : tmpTower50->getET();
@@ -243,13 +243,12 @@ namespace LVL1
             int TowerEt = tmpTower->getET();
             float Eta = tmpTower->eta();
             float Phi = tmpTower->phi();
-            int Fpga = m_fpgaId;
             int iPhiFW, iEtaFW;
             uint32_t gFEXtowerID = tmpTower->getFWID(iPhiFW, iEtaFW);
             IsSaturated = tmpTower->isSaturated();
             std::unique_ptr<xAOD::gFexTower> gTowerEDM(new xAOD::gFexTower());
             gTowersContainer->push_back(std::move(gTowerEDM));
-            gTowersContainer->back()->initialize(iEtaFW, iPhiFW, Eta, Phi, TowerEt, Fpga, IsSaturated, gFEXtowerID);
+            gTowersContainer->back()->initialize(iEtaFW, iPhiFW, Eta, Phi, TowerEt, fpgaId, IsSaturated, gFEXtowerID);
 
             output_gTower_energies[iPhiFW][iEtaFW - 32 + 6] = tmpTower->getET();
             output_gTower50_energies[iPhiFW][iEtaFW - 32 + 6] = is_mc ? tmpTower50->getET() * 4. : tmpTower50->getET();
@@ -257,10 +256,10 @@ namespace LVL1
          }
       }
 
-      // apply defualt slopes set in initialization.
+      // apply default slopes set in initialization.
       // In the future these values will be read from the online COOL data base
 
-      gFEXFPGA::gtCalib(output_gTower_energies, m_offsetsDefaultC, m_noiseCutsDefaultC, m_slopesDefaultC);
+      gFEXFPGA::gtCalib(output_gTower_energies, offsetsDefaultC, noiseCutsDefaultC, slopesDefaultC);
    }
 
    void gFEXFPGA::gtCalib(gTowersType &twrs, const gTowersType &offsets, const gTowersType &noiseCuts, const gTowersType &slopes) const

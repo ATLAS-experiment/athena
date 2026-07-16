@@ -26,6 +26,13 @@ namespace xAOD {
       PRD_AUXVARIABLE(deltaPhi);
       PRD_AUXVARIABLE(deltaTheta);
       PRD_AUXVARIABLE(nswSegment);
+      PRD_AUXVARIABLE(tcId);
+      PRD_AUXVARIABLE(passedPtThresholdIndex);
+      PRD_AUXVARIABLE(estimatedPtValueIndex);
+      PRD_AUXVARIABLE(estimatedPtValueValid);
+      PRD_AUXVARIABLE(side);
+      PRD_AUXVARIABLE(endcapFlag);
+      PRD_AUXVARIABLE(sector);
 
     }
 }

@@ -7,14 +7,16 @@
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
+#include "CxxUtils/FastReseededPRNG.h"
+#include "InDetTrackSystematicsTools/getEventNumber.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "PathResolver/PathResolver.h"
 
 #include "CxxUtils/checker_macros.h"
 
 #include <TH2.h>
-#include <TRandom3.h>
 #include <TFile.h>
+#include <random>
 #include <stdexcept>
 #include <utility>
 
@@ -39,8 +41,6 @@ namespace InDet {
 
   StatusCode JetTrackFilterTool::initialize()
   {
-
-    m_rnd = std::make_unique<TRandom3>(m_seed);
 
     ATH_CHECK( initObject<TH2>( m_trkNomEff,
                m_calibFileNomEff, 
@@ -68,6 +68,12 @@ namespace InDet {
       return true;
     }
 
+    FastReseededPRNG prng(
+        m_seed,
+        static_cast<uint32_t>(std::abs(track->phi()) * 1e6),
+        static_cast<uint32_t>(std::abs(track->eta()) * 1e3),
+        InDet::getEventNumber(evtStore()));
+
     // Uncertainties are only applicable inside high pT jets
     if (jet->pt() < m_minJetPt) return true;
 
@@ -81,14 +87,14 @@ namespace InDet {
       float probDrop = std::fabs(m_trkEffSystScale); // default is one; adjust this parameter to increase / decrease the effect
       probDrop *= m_effUncertTIDE;
       probDrop *= getNomTrkEff( track );
-      if ( m_rnd->Uniform(0, 1) < probDrop ) return false;
+      if ( std::uniform_real_distribution<double>(0, 1)(prng) < probDrop ) return false;
     }
 
     int origin = m_trackOriginTool->getTrackOrigin(track);
 
     if( isActive( TRK_FAKE_RATE_LOOSE_TIDE ) ){
       if ( InDet::TrkOrigin::isFake(origin) ) {
-        if(m_rnd->Uniform(0, 1) <  m_fakeUncertTIDE) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) <  m_fakeUncertTIDE) return false;
       }
     }
 
@@ -151,7 +157,7 @@ namespace InDet {
       const xAOD::JetContainer* jets,
       const CP::SystematicSet& syst) const
   {
-    std::lock_guard<std::mutex> lock(m_rndMutex);
+    std::lock_guard<std::mutex> lock(m_sysLock);
     JetTrackFilterTool* nc_this ATLAS_THREAD_SAFE =
         const_cast<JetTrackFilterTool*>(this);
     if (nc_this->applySystematicVariation(syst).isFailure())

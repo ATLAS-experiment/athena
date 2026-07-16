@@ -465,20 +465,20 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
   outerPixel.setAttachmentStrategy(AttachmentStrategy::Gap);
   outerPixel.setResizeStrategy(ResizeStrategy::Gap);
 
-  outerPixel.addMaterial("OuterPixelMaterial", [&](auto& mat) {
-    mat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
-    mat.configureFace(InnerCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
+  outerPixel.addMaterial("OuterPixelMaterial", [&](auto& opmat) {
+    opmat.configureFace(OuterCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
+    opmat.configureFace(InnerCylinder, {AxisRPhi, Bound, 20}, {AxisZ, Bound, 20});
 
-    auto& outerPixelContainer = mat.addCylinderContainer("OuterPixel", AxisZ);
+    auto& outerPixelContainer = opmat.addCylinderContainer("OuterPixel", AxisZ);
 
     auto& barrelGeoId = outerPixelContainer.withGeometryIdentifier();
     barrelGeoId.setAllVolumeIdsTo(s_outerPixelVolumeId).incrementLayerIds(1);
 
     auto& brl_mat =
-        barrelGeoId.addMaterial("OuterPixel_Material", [&](auto& mat) {
-          mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+        barrelGeoId.addMaterial("OuterPixel_Material", [&](auto& bmat) {
+          bmat.configureFace(NegativeDisc, {AxisR, Bound, 10},
                             {AxisPhi, Closed, 10});
-          mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+          bmat.configureFace(PositiveDisc, {AxisR, Bound, 10},
                             {AxisPhi, Closed, 10});
         });
     auto& barrel = brl_mat.addCylinderContainer("OuterPixel_Brl", AxisR);
@@ -623,10 +623,8 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
                            "_" + std::to_string(i);
 
           ec_stack.addMaterial(layerName + "_Material", [&](auto& mat) {
-            mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
-                              {AxisPhi, Closed, 40});
-            mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
-                              {AxisPhi, Closed, 40});
+            mat.configureFace(PositiveDisc, {AxisR, Bound, 10}, {AxisPhi, Closed, 40});
+            mat.configureFace(NegativeDisc, {AxisR, Bound, 10}, {AxisPhi, Closed, 40});
             addEndcapLayer(mat, layerName, surfaces);
           });
         }
@@ -683,10 +681,10 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
     stripContainer.withGeometryIdentifier([this, &elements](auto& geoId) {
       geoId.setAllVolumeIdsTo(s_stripVolumeId).incrementLayerIds(1);
 
-      auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& mat) {
-        mat.configureFace(NegativeDisc, {AxisR, Bound, 10},
+      auto& brl_mat = geoId.addMaterial("Strip_Brl_Material", [&](auto& thisMat) {
+        thisMat.configureFace(NegativeDisc, {AxisR, Bound, 10},
                           {AxisPhi, Closed, 10});
-        mat.configureFace(PositiveDisc, {AxisR, Bound, 10},
+        thisMat.configureFace(PositiveDisc, {AxisR, Bound, 10},
                           {AxisPhi, Closed, 10});
       });
       brl_mat.addCylinderContainer(

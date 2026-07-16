@@ -223,20 +223,20 @@ namespace GlobalSim {
 
     //Setup variables
     Identifier CellID;
-    float eta = roi->eta();
-    float phi = roi->phi();
+    float etaCheck = roi->eta();
+    float phiCheck = roi->phi();
     bool found = false;
     int strip = 0;
 
     //Tower position to find strip granularity
     int iEta = roi->iEta();
     int iPhi = roi->iPhi();
-    ATH_MSG_DEBUG("Where is this RoI? eta: " << eta << " phi: " << phi << " iEta" << iEta << " iPhi " << iPhi);
+    ATH_MSG_DEBUG("Where is this RoI? eta: " << etaCheck << " phi: " << phiCheck << " iEta" << iEta << " iPhi " << iPhi);
     //There are 1 strips per 0.025 supercell at the edge.
     //Shouldn't need to shift these?
     if(iEta == -25 || iEta == 24) {
       //Just use the eta/phi as is, becasue there is only one strip here.
-      found = findSeedCell(eta, phi, cells, CellID);
+      found = findSeedCell(etaCheck, phiCheck, cells, CellID);
     }
     //There are 4 strips per 0.025 in these towers
     else if((iEta > -25 && iEta <= -21) || (iEta < 24 && iEta >= 20)){
@@ -252,12 +252,12 @@ namespace GlobalSim {
       strip = 8;
     } else {
       //We shouldn't get here, but just in case...
-      ATH_MSG_WARNING("Where are we? eta " << eta << " phi " << phi);
+      ATH_MSG_WARNING("Where are we? eta " << etaCheck << " phi " << phiCheck);
     }
     //
     if(strip != 0){
       //Send the number of strips information along with the eta/phi supercell.
-      found = findHalfStrips(strip, eta, phi, cells, CellID);
+      found = findHalfStrips(strip, etaCheck, phiCheck, cells, CellID);
     }
 
     //If we successfully found the seed cell, then continue.
@@ -274,13 +274,13 @@ namespace GlobalSim {
       IdentifierHash hashId=m_calocell_id->calo_cell_hash(CellID);
       IdentifierHash hashIdMax=hashId;
       //Find the initial 17x3 eta/phi window
-      ATH_CHECK(findWindow(hashId, cells, window));
+      ATH_CHECK(findWindow(hashId, etaCheck, cells, window));
       //Find the maxima in the window (only once!)
       ATH_CHECK(findMaxima(hashIdMax, window));
       /*Find the new 17x3 eta/phi window around this maxima
         Don't need to if the max is the seed already */
       if(hashIdMax != hashId){
-	ATH_CHECK(findWindow(hashIdMax, cells, window));
+	ATH_CHECK(findWindow(hashIdMax, etaCheck, cells, window));
       }
       
       //Rediscover the maximum energy cell
@@ -401,6 +401,7 @@ namespace GlobalSim {
   // Function to draw a window around a seed cell starting from the hashID of the seed cell
   // and a container of all known GlobalLArCells. Returns the window.
   StatusCode Egamma1_OnlineMapNbhood::findWindow(IdentifierHash hashId,
+						 float eta,
 						 const GlobalSim::GlobalLArCellContainer& cells,
 						 std::vector<std::vector<std::shared_ptr<const GlobalLArCell>>>& window) const {
 
@@ -417,7 +418,7 @@ namespace GlobalSim {
     //Position of the cell in each 17 long eta row. Defined by position in loop.
     int shift = 0;
     //Check if we have hit the edge of the detector.
-    float etaMax = 0;
+    float etaMax = eta;
 
     ATH_MSG_DEBUG("Seed Hash: " << hashId);
     //Start loop to fill the central row of the 17x3 eta/phi window.

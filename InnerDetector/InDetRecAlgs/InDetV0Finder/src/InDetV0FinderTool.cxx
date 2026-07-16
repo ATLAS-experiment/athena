@@ -753,9 +753,9 @@ bool InDetV0FinderTool::pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex
         pass = true;
       }
   }
-  else if (v0lxy/v0lxyError > m_vert_lxy_sig && cos > m_vert_cos_cut &&
-      std::abs(v0a0xy) < m_vert_a0xy_cut && std::abs(v0a0z) < m_vert_a0z_cut &&
-      v0lxy < m_vert_lxy_cut) pass = true;
+  else if ((v0lxyError != 0.) && (v0lxy/v0lxyError > m_vert_lxy_sig) && (cos > m_vert_cos_cut) &&
+      (std::abs(v0a0xy) < m_vert_a0xy_cut) && (std::abs(v0a0z) < m_vert_a0z_cut) &&
+      (v0lxy < m_vert_lxy_cut)) pass = true;
   return pass;
 }
 
@@ -863,7 +863,7 @@ ElementLink<xAOD::TrackParticleContainer> InDetV0FinderTool::makeLink(const xAOD
     Link.setElement(tp);
     bool elementSet = false;
     if(trackcols.empty()){
-       Link.setStorableObject( *dynamic_cast<const xAOD::TrackParticleContainer*>( tp->container()  ) );
+       Link.setStorableObject( *static_cast<const xAOD::TrackParticleContainer*>( tp->container()  ) );
        elementSet = true;
     } else {
       for(const xAOD::TrackParticleContainer* trkcol : trackcols){

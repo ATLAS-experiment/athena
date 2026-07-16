@@ -49,7 +49,6 @@ public:
   
   virtual ~Associator_TruthMatcher() { }
 
-  virtual TrackAssociator* clone() override { return new Associator_TruthMatcher(*this); }
 
   virtual std::unique_ptr<TrackAssociator> uclone() const override { return std::make_unique<Associator_TruthMatcher>(*this); }
   

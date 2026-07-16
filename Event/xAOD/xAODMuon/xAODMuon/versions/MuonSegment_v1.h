@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUON_VERSIONS_MUONSEGMENT_V1_H
 #define XAODMUON_VERSIONS_MUONSEGMENT_V1_H
@@ -23,13 +23,13 @@
 
 namespace xAOD {
 
-  /// Class describing a MuonSegment.
-  ///
-  /// @author Niels Van Eldik <niels.van.eldik@cern.ch>
-  /// @author Edward Moyse <Edward.Moyse@cern.ch>
-  /// @author Heberth Torres <htorres@cern.ch>
-  /// @nosubgrouping
-  ///
+  /** @brief Class to describe a Segment reconstructed in 
+   *         the MuonSpectrometer. A segment is a straight
+   *         line approximation of the muon trajectory within
+   *         a MS station. The segment carries a reference posiiton,
+   *         and a direction. Further is provides information about the
+   *         fit quality and the number of precision and trigger hits 
+   *         involved in the fit */
   class MuonSegment_v1 : public SG::AuxElement {
 
   public:
@@ -100,22 +100,58 @@ namespace xAOD {
     int etaIndex() const;
     /// Returns the main technology of the segment.
     ::Muon::MuonStationIndex::TechnologyIndex technology() const;
-    /// Set the identifier
-    void setIdentifier(int sector, ::Muon::MuonStationIndex::ChIndex chamberIndex, int etaIndex, ::Muon::MuonStationIndex::TechnologyIndex technology);
+    /** @brief Set the Identifier fields of the Segment
+      * @param sector: Phi sector in which the segment was constructed [1-6]
+      * @param chamberIndex: Chamber index in which the constructed (e.g BIL)
+      * @param etaIndex: The eta index of the asociated muon station 
+      * @param technology: Technolgy of the precision hits making up the 
+      *                    segment. */
+    void setIdentifier(const std::uint8_t sector, 
+                       const ::Muon::MuonStationIndex::ChIndex chamberIndex, 
+                       const std::int8_t etaIndex, 
+                       const ::Muon::MuonStationIndex::TechnologyIndex technology);
     /// @}
 
-    /// @name Hit counts functions
-    /// Returns the number of hits
-    /// @{
-    /// Returns the number of precision hits
-    int nPrecisionHits() const;
-    /// Returns the number of phi layers
-    int nPhiLayers() const;
-    /// Returns the number of trigger eta layers
-    int nTrigEtaLayers() const;
-    /// Set the number of hits/layers
-    void setNHits(int nPrecisionHits, int nPhiLayers, int nTrigEtaLayers);
-    /// @}
+    /** @brief Returns the number of precision hits */
+    std::uint8_t nPrecisionHits() const;
+    /** @brief Returns the number of trigger phi hits */
+    std::uint8_t nPhiLayers() const;
+    /** @brief Returns the number of trigger eta hits */
+    std::uint8_t nTrigEtaLayers() const;
+    /** @brief Assign the segment hit summary
+     *  @param nPrecisionHits: The number of contributin precision hits
+     *  @param nPhiLayers: The number of trigger phi hits
+     *  @param nTrigEtaLayers: The number of complementary eta trigger hits */
+    void setNHits(const std::uint8_t nPrecisionHits, 
+                  const std::uint8_t nPhiLayers,
+                  const std::uint8_t nTrigEtaLayers);
+    /** @brief Assign the number of hits with a large pull per hit category
+     *  @param nPrecOutliers: Number of precision outliers
+     *  @param nTrigPhiOutliers: Number of trigger phi outliers
+     *  @param nTrigEtaOutliers: Number of trigger eta outliers */
+    void setNOutliers(const std::uint8_t nPrecOutliers,
+                      const std::uint8_t nTrigPhiOutliers,
+                      const std::uint8_t nTrigEtaOutliers);
+    /** @brief Returns the number of precision outliers */
+    std::uint8_t nPrecisionOutliers() const;
+    /** @brief Returns the number of trigger phi outliers */
+    std::uint8_t nTriggerPhiOutliers() const;
+    /** @brief Returns the number of trigger eta outliers */
+    std::uint8_t nTriggerEtaOutliers() const;
+
+    /** @brief Assign the number of expected but missing hits
+     *  @param nPrecHoles: Number of precision holes
+     *  @param nTrigPhiHoles: Number of trigger phi holes
+     *  @param nTrigEtaHoles: Number of trigger eta holes */
+    void setNHoles(const std::uint8_t nPrecHoles,
+                      const std::uint8_t nTrigPhiHoles,
+                      const std::uint8_t nTrigEtaHoles);
+    /** @brief Returns the number of precision holes */
+    std::uint8_t nPrecisionHoles() const;
+    /** @brief Returns the number of trigger phi holes */
+    std::uint8_t nTriggerPhiHoles() const;
+    /** @brief Returns the number of trigger eta holes */
+    std::uint8_t nTriggerEtaHoles() const;
 
 #if !(defined(GENERATIONBASE) || defined(XAOD_ANALYSIS))
     const ElementLink< ::Trk::SegmentCollection >& muonSegment() const;

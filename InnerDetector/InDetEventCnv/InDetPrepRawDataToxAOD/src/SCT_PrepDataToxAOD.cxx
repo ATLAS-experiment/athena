@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -264,15 +264,13 @@ StatusCode SCT_PrepDataToxAOD::execute(const EventContext& ctx) const
                    ++missing_truth_particle;
                 }
              }
-             // @TODO provide possibility to move tp_indices to its final destination
-             AUXDATA(xprd, std::vector<unsigned int>, truth_index) = tp_indices;
+             AUXDATA(xprd, std::vector<unsigned int>, truth_index) = std::move(tp_indices);
           }
           std::vector<int> uniqueIDs;
           for (auto& i{range.first}; i!=range.second; ++i) {
             uniqueIDs.push_back(HepMC::uniqueID(i->second));
           }
-          // @TODO move vector
-          AUXDATA(xprd, std::vector<int>, truth_barcode) = uniqueIDs; // TODO rename variable to be consistent?
+          AUXDATA(xprd, std::vector<int>, truth_barcode) = std::move(uniqueIDs); // TODO rename variable to be consistent?
         }
       }
 
@@ -322,12 +320,12 @@ void SCT_PrepDataToxAOD::addSDOInformation(xAOD::TrackMeasurementValidation* xpr
       sdoDepEnergy[nDepos] = deposit.second;
       nDepos++;
     }
-    sdo_depositsUniqueID.push_back(sdoDepUniqueID);
-    sdo_depositsEnergy.push_back(sdoDepEnergy);
+    sdo_depositsUniqueID.push_back(std::move(sdoDepUniqueID));
+    sdo_depositsEnergy.push_back(std::move(sdoDepEnergy));
   }
-  AUXDATA(xprd, std::vector<int>, sdo_words) = sdo_word;
-  AUXDATA(xprd, std::vector<std::vector<int>>, sdo_depositsBarcode) = sdo_depositsUniqueID; // TODO rename variable to be consistent?
-  AUXDATA(xprd, std::vector<std::vector<float>>, sdo_depositsEnergy) = sdo_depositsEnergy;
+  AUXDATA(xprd, std::vector<int>, sdo_words) = std::move(sdo_word);
+  AUXDATA(xprd, std::vector<std::vector<int>>, sdo_depositsBarcode) = std::move(sdo_depositsUniqueID); // TODO rename variable to be consistent?
+  AUXDATA(xprd, std::vector<std::vector<float>>, sdo_depositsEnergy) = std::move(sdo_depositsEnergy);
 }
 
 
@@ -377,17 +375,17 @@ void SCT_PrepDataToxAOD::addSiHitInformation(xAOD::TrackMeasurementValidation* x
     }
   }
 
-  AUXDATA(xprd, std::vector<float>, sihit_energyDeposit) = sihit_energyDeposit;
-  AUXDATA(xprd, std::vector<float>, sihit_meanTime) = sihit_meanTime;
-  AUXDATA(xprd, std::vector<int>, sihit_barcode) = sihit_uniqueID; // TODO rename variable to be consistent?
+  AUXDATA(xprd, std::vector<float>, sihit_energyDeposit) = std::move(sihit_energyDeposit);
+  AUXDATA(xprd, std::vector<float>, sihit_meanTime) = std::move(sihit_meanTime);
+  AUXDATA(xprd, std::vector<int>, sihit_barcode) = std::move(sihit_uniqueID); // TODO rename variable to be consistent?
   
-  AUXDATA(xprd, std::vector<float>, sihit_startPosX) = sihit_startPosX;
-  AUXDATA(xprd, std::vector<float>, sihit_startPosY) = sihit_startPosY;
-  AUXDATA(xprd, std::vector<float>, sihit_startPosZ) = sihit_startPosZ;
+  AUXDATA(xprd, std::vector<float>, sihit_startPosX) = std::move(sihit_startPosX);
+  AUXDATA(xprd, std::vector<float>, sihit_startPosY) = std::move(sihit_startPosY);
+  AUXDATA(xprd, std::vector<float>, sihit_startPosZ) = std::move(sihit_startPosZ);
 
-  AUXDATA(xprd, std::vector<float>, sihit_endPosX) = sihit_endPosX;
-  AUXDATA(xprd, std::vector<float>, sihit_endPosY) = sihit_endPosY;
-  AUXDATA(xprd, std::vector<float>, sihit_endPosZ) = sihit_endPosZ;
+  AUXDATA(xprd, std::vector<float>, sihit_endPosX) = std::move(sihit_endPosX);
+  AUXDATA(xprd, std::vector<float>, sihit_endPosY) = std::move(sihit_endPosY);
+  AUXDATA(xprd, std::vector<float>, sihit_endPosZ) = std::move(sihit_endPosZ);
 }
 
 void SCT_PrepDataToxAOD::findAllHitsCompatibleWithCluster(const InDet::SCT_Cluster* prd, 
@@ -508,19 +506,21 @@ void SCT_PrepDataToxAOD::addRDOInformation(xAOD::TrackMeasurementValidation* xpr
     auto result{idToRAWDataMap.find(hitIdentifier)};
     if (result != idToRAWDataMap.end()) {
       const SCT_RDORawData* sctRdo{result->second};
-      strip[nRDOs] = m_SCTHelper->strip(sctRdo->identify());
-      const SCT3_RawData* rdo3{dynamic_cast<const SCT3_RawData*>(sctRdo)};
-      if (rdo3) {
-        timebin[nRDOs] = rdo3->getTimeBin();
-        groupsize[nRDOs] = rdo3->getGroupSize();
+      if (sctRdo){
+        strip[nRDOs] = m_SCTHelper->strip(sctRdo->identify());
+        const SCT3_RawData* rdo3{dynamic_cast<const SCT3_RawData*>(sctRdo)};
+        if (rdo3) {
+          timebin[nRDOs] = rdo3->getTimeBin();
+          groupsize[nRDOs] = rdo3->getGroupSize();
+        }
       }
     }
     nRDOs++;
   }
   
-  AUXDATA(xprd, std::vector<int>, rdo_strip) = strip;
-  AUXDATA(xprd, std::vector<int>, rdo_timebin) = timebin;
-  AUXDATA(xprd, std::vector<int>, rdo_groupsize) = groupsize;
+  AUXDATA(xprd, std::vector<int>, rdo_strip) = std::move(strip);
+  AUXDATA(xprd, std::vector<int>, rdo_timebin) = std::move(timebin);
+  AUXDATA(xprd, std::vector<int>, rdo_groupsize) = std::move(groupsize);
 }
 
 /////////////////////////////////////////////////////////////////////

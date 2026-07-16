@@ -428,9 +428,13 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                                      'Reco_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
 
+
+            campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20" 
+
             # TauEfficiencyCorrectionTool for Identification, use only in case TauID is requested in TauSelectionTool
             if self.quality not in ('VeryLoose','Baseline','BaselineForFakes'):
-                if not self.useGNTau: # current recommendations are for RNN ID, so don't use in case of GNTau
+                # current recommendations are for RNN ID Run2/Run3 or GNTAU for Run3, 
+                if (not self.useGNTau or (self.useGNTau and campaign == "mc23")): 
 
                     alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                    'TauEfficiencyCorrectionsAlgID' )
@@ -448,7 +452,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
 
                     alg.efficiencyCorrectionsTool.JetIDLevel = JetIDLevel
                     alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
-                    alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+                    alg.efficiencyCorrectionsTool.Campaign = campaign
                     alg.scaleFactorDecoration = 'tau_ID_effSF' + selectionPostfix + '_%SYS%'
                     alg.outOfValidity = 2 #silent
                     alg.outOfValidityDeco = 'bad_ID_eff' + selectionPostfix
@@ -461,7 +465,8 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
 
             # TauEfficiencyCorrectionTool for eVeto both on true tau and fake tau, use only in case eVeto is requested in TauSelectionTool
             if self.use_eVeto:
-                if not self.useGNTau: # eVeto correction for fake tau are for RNN ID, so don't use them for GNTau
+                # eVeto correction for fake tau are for RNN ID Run2/Run3, or for GNTau for Run3   
+                if (not self.useGNTau or (self.useGNTau and campaign == "mc23")):
                     # correction for fake tau
                     alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                        'TauEfficiencyCorrectionsAlgEvetoFakeTau' )
@@ -477,7 +482,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                         alg.efficiencyCorrectionsTool.EleIDLevel = 3
                         
                     alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
-                    alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
+                    alg.efficiencyCorrectionsTool.Campaign = campaign
                     alg.scaleFactorDecoration = 'tau_EvetoFakeTau_effSF' + selectionPostfix + '_%SYS%'
                     # for 2025-prerec, eVeto recommendations are given separately for Loose and Medium RNN 
                     if self.quality=="Loose" or self.manual_sel_rnnwp == "loose":

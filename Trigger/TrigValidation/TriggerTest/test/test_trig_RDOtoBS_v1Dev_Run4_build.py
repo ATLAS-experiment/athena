@@ -35,7 +35,14 @@ ex.input = ''
 ex.args += '--filesInput created.BS'
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run4_v1"', 'Trigger.doLVL1=True', 'Trigger.EDMVersion=4',
             'Trigger.enabledSignatures=[]', f'IOVDb.GlobalTag="{defaultConditionsTags.RUN4_MC}"',
-            f'GeoModel.AtlasVersion="{defaultGeometryTags.RUN4}"', 'GeoModel.Align.Dynamic=False', 'Input.isMC=True']
+            f'GeoModel.AtlasVersion="{defaultGeometryTags.RUN4}"', 'GeoModel.Align.Dynamic=False',
+            'Input.isMC=True',
+            'Trigger.L1.doGlobal=False',
+            'Trigger.L1.dogFex=False',
+            'Trigger.L1.doMuon=False',
+            'Trigger.enableL1MuonPhase1=False',
+            'Trigger.enableL1CaloLegacy=False',
+            ]
 
 test = Test.Test()
 test.art_type = 'build'

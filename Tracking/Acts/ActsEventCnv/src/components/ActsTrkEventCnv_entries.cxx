@@ -5,16 +5,23 @@
 #include "../TrkToActsConvertorAlg.h"
 #include "../ActsToTrkConvertorAlg.h"
 #include "../SeedToTrackCnvAlg.h"
+#include "../xAODtoTrkConverterAlg.h"
 #include "../ActsToXAODTrackConverterAlg.h"
 #include "../TrackToTrackParticleCnvAlg.h"
 #include "../TrackToTrackParticleCnvTool.h"
 #include "../GeometryRealmConvTool.h"
+#include "../ActsToTrkFitterWrapTool.h"
 
 DECLARE_COMPONENT( ActsTrk::TrkToActsConvertorAlg )
 DECLARE_COMPONENT( ActsTrk::ActsToTrkConvertorAlg )
 DECLARE_COMPONENT( ActsTrk::SeedToTrackCnvAlg )
 DECLARE_COMPONENT( ActsTrk::ActsToXAODTrackConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
+
+DECLARE_COMPONENT( ActsTrk::xAODtoTrkConverterAlg)
+
+DECLARE_COMPONENT( ActsTrk::ActsToTrkFitterWrapTool)
+
 
 DECLARE_COMPONENT( ActsTrk::ActsToTrkConverterTool )
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvTool)

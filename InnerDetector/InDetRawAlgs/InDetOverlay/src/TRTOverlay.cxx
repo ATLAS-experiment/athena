@@ -223,6 +223,7 @@ StatusCode TRTOverlay::overlayContainer(const EventContext &ctx,
         ATH_MSG_ERROR("Adding background Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
+        //coverity[RESOURCE_LEAK]
         (void)bkgCollection.release();
       }
     } else {

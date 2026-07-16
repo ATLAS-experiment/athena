@@ -91,7 +91,9 @@ namespace ActsTrk {
 
     static constexpr int s_expertLevel = 200;
     Gaudi::Property<int> m_hgtdDecorationLevel
-       {this, "HgtdDecorationLevel", false, "HGTD specific decorations: 0 = none, >0 time and hits, >200 mean time, chi2." };
+       {this, "HgtdDecorationLevel", false, "HGTD specific decorations: 0 = none, >0 time and hits, >=200 mean time, chi2." };
+    Gaudi::Property<int> m_itkDecorationLevel
+       {this, "ITkDecorationLevel", 1, ">=200 split counts for inclined and flat barrel." };
 
     std::unique_ptr<Propagator> m_propagator;
   };

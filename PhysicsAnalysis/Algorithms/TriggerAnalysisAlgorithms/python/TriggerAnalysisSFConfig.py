@@ -243,7 +243,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
         alg.matchingDecoration = f"trigMatched{self.postfix}"
         alg.trigSingleMatchingList = [trig for trig in trig_chains if trig_string in trig]
         alg.trigSingleMatchingListDummy = [trig for trig in trig_chains_dummy if trig_string in trig]
-        alg.particles, alg.particleSelection = config.readNameAndSelection(particles)
+        alg.particles, _ = config.readNameAndSelection(particles)
 
         for trig in list(alg.trigSingleMatchingList) + list(alg.trigSingleMatchingListDummy):
             trig = trig.replace(".", "p").replace("-", "_").replace(" ", "")

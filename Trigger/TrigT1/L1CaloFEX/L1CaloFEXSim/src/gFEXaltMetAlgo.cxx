@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXaltMetAlgo - Noise cut and Rho+RMS algorithm for gFEX MET
@@ -8,12 +8,12 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
-#include <cmath>
-#include <vector>
-
 #include "gFEXaltMetAlgo.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/gTower.h"
+
+#include <cmath>
+#include <vector>
 
 namespace LVL1 {
 
@@ -23,22 +23,32 @@ base_class(type, name, parent)
 
 StatusCode gFEXaltMetAlgo::initialize(){
 
+  ATH_CHECK(m_l1MenuKey.initialize());
+
   return StatusCode::SUCCESS;
 
 }
 
-void gFEXaltMetAlgo::setAlgoConstant(std::vector<int>&& A_thr,
-                                     std::vector<int>&& B_thr,
-                                     std::vector<int>&& C_thr,
-                                     const int rhoPlusThr) {
-    m_etaThr[0] = std::move(A_thr);
-    m_etaThr[1] = std::move(B_thr);
-    m_etaThr[2] = std::move(C_thr);   // <-- NEW
-    m_rhoPlusThr = rhoPlusThr;
-}
-
-void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral &Btwr, const gTowersCentral &Ctwr,
+void gFEXaltMetAlgo::altMetAlgo(const EventContext& ctx, const gTowersCentral &Atwr, const gTowersCentral &Btwr, const gTowersCentral &Ctwr,
                                 std::array<uint32_t, 4> & outTOB) const {
+
+  // Retrieve the L1 menu configuration
+  SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey, ctx);
+
+  //Parameters related to altMet (noise cut and rho+RMS algorithms)
+  const auto & thr_gXE_altMet = l1Menu->thrExtraInfo().gXE();
+  int noiseCutThrA = thr_gXE_altMet.noiseCutThr('A');
+  int noiseCutThrB = thr_gXE_altMet.noiseCutThr('B');
+  int noiseCutThrC = thr_gXE_altMet.noiseCutThr('C');
+
+  std::vector<int> thr_A(12, noiseCutThrA);
+  std::vector<int> thr_B(12, noiseCutThrB);
+  std::vector<int> thr_C(16, noiseCutThrC);
+
+  std::array<std::vector<int>, 3> etaThr;   // A, B, C
+  etaThr[0] = std::move(thr_A);
+  etaThr[1] = std::move(thr_B);
+  etaThr[2] = std::move(thr_C);
 
   //FPGA A observables
   int A_MET_x_nc = 0x0;
@@ -79,9 +89,9 @@ void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral
   int total_sumEt_nc = 0x0;
   int total_sumEt_rms = 0x0;
 
-  metFPGA(Atwr, A_MET_x_nc, A_MET_y_nc, 0);
-  metFPGA(Btwr, B_MET_x_nc, B_MET_y_nc, 1);
-  metFPGA(Ctwr, C_MET_x_nc, C_MET_y_nc, 2);   // FPGA_NO = 2
+  metFPGA(Atwr, A_MET_x_nc, A_MET_y_nc, 0, etaThr);
+  metFPGA(Btwr, B_MET_x_nc, B_MET_y_nc, 1, etaThr);
+  metFPGA(Ctwr, C_MET_x_nc, C_MET_y_nc, 2, etaThr);
 
   metTotal(A_MET_x_nc, A_MET_y_nc, B_MET_x_nc, B_MET_y_nc, C_MET_x_nc, C_MET_y_nc, MET_x_nc, MET_y_nc, MET_nc);
 
@@ -98,9 +108,9 @@ void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral
 
   metTotal(A_MET_x_rms, A_MET_y_rms, B_MET_x_rms, B_MET_y_rms, C_MET_x_rms, C_MET_y_rms, MET_x_rms, MET_y_rms, MET_rms);  
 
-  A_sumEt_nc = sumEtFPGAnc(Atwr, 0);
-  B_sumEt_nc = sumEtFPGAnc(Btwr, 1);
-  C_sumEt_nc = sumEtFPGAnc(Ctwr, 2);
+  A_sumEt_nc = sumEtFPGAnc(Atwr, 0, etaThr);
+  B_sumEt_nc = sumEtFPGAnc(Btwr, 1, etaThr);
+  C_sumEt_nc = sumEtFPGAnc(Ctwr, 2, etaThr);
   total_sumEt_nc = sumEt(A_sumEt_nc, B_sumEt_nc, C_sumEt_nc);
   total_sumEt_nc = total_sumEt_nc/4;
 
@@ -151,7 +161,7 @@ void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral
 
 }
 
-void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO) const {
+ void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO, const std::array<std::vector<int>, 3>& etaThr) const {
     static const int s_cosLUT[32] = {
          31, 30, 29, 26, 22, 17, 12,  6,
           0, -6,-12,-17,-22,-26,-29,-30,
@@ -172,7 +182,7 @@ void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_
         int etasum = 0;
         for (int jcolumn = 0; jcolumn < cols; jcolumn++) {
 	    int tower_et = twrs[irow][jcolumn] & ~3;  // Clear 2 LSBs
-	    int scaled_thr = m_etaThr[FPGA_NO][jcolumn] * 4; // factor of 4 converts threshold from 800 MeV/count (fw) to 200 MeV/count (sim)
+	    int scaled_thr = etaThr[FPGA_NO][jcolumn] * 4; // factor of 4 converts threshold from 800 MeV/count (fw) to 200 MeV/count (sim)
             if (tower_et > scaled_thr) {
                 etasum += tower_et;
             }
@@ -258,14 +268,14 @@ void gFEXaltMetAlgo::rho_MET(const gTowersCentral &twrs, int & MET_x, int & MET_
     }
 }
 
-int gFEXaltMetAlgo::sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short FPGA_NO) const {
+ int gFEXaltMetAlgo::sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short FPGA_NO, const std::array<std::vector<int>, 3>& etaThr) const {
 
     int partial_sumEt = 0;
     const int rows = twrs.size();
     const int cols = twrs[0].size();
     for( int irow = 0; irow < rows; irow++ ){
         for(int jcolumn = 0; jcolumn<cols; jcolumn++){
-            partial_sumEt += twrs[irow][jcolumn] > m_etaThr[FPGA_NO][jcolumn] * 4 ? twrs[irow][jcolumn] : 0; // factor of 4 converts threshold from 800 MeV/count (fw) to 200 MeV/count (sim)
+            partial_sumEt += twrs[irow][jcolumn] > etaThr[FPGA_NO][jcolumn] * 4 ? twrs[irow][jcolumn] : 0; // factor of 4 converts threshold from 800 MeV/count (fw) to 200 MeV/count (sim)
         }
     }
     return partial_sumEt;

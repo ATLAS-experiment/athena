@@ -169,9 +169,12 @@ DerivationFramework::MaxCellDecorator::addBranches(const EventContext& ctx) cons
     for (const auto* tau : *importedTaus) {
       DerivationFramework::MaxCellDecorator::calculation res;
       res.maxEcell_energy = -9999.;
-      for (size_t i = 0;i<tau->nClusters();++i) {
-        // get particle
-        const xAOD::IParticle* part = tau->cluster(i);
+      for (const auto& link : tau->clusterLinks()) {
+        if ( !link.isValid() ) {
+          ATH_MSG_WARNING("Tau particle link invalid");
+          continue;
+        }
+        const xAOD::IParticle* part = *link;
         if ( not part ) {
           ATH_MSG_WARNING("Tau particle link invalid");
           continue;
@@ -231,7 +234,10 @@ DerivationFramework::MaxCellDecorator::addBranches(const EventContext& ctx) cons
       xAOD::Type::ObjectType ctype = jet->rawConstituent( 0 )->type();
 
       if (ctype  == xAOD::Type::FlowElement) {
-        // Particle Flow jets
+        // Particle Flow jets.
+        const static SG::AuxElement::ConstAccessor< ElementLink<xAOD::IParticleContainer> >
+          originalObjectAcc("originalObjectLink");
+
         for (size_t i=0;i<jet->numConstituents();++i) {
           if(jet->rawConstituent(i)->type() != xAOD::Type::FlowElement) {
             ATH_MSG_WARNING("Tried to call fillEperSamplingFE with a jet constituent that is not a FlowElement!");
@@ -239,14 +245,23 @@ DerivationFramework::MaxCellDecorator::addBranches(const EventContext& ctx) cons
           }
 
           const xAOD::FlowElement* constit = static_cast<const xAOD::FlowElement*>(jet->rawConstituent(i));
-          if (constit) {
-            const SG::AuxElement::ConstAccessor< ElementLink<xAOD::IParticleContainer> > originalObject("originalObjectLink");
-            auto originalFE = dynamic_cast<const xAOD::FlowElement*>(*originalObject(*constit));
-            if(originalFE && !originalFE->isCharged()){
-              const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>(originalFE->otherObject(0));
-              if (cluster) {
-                clusterList.push_back(cluster);
-              }
+          if (!constit) continue;
+
+          if ( !originalObjectAcc.isAvailable(*constit) ) {
+            ATH_MSG_WARNING("FlowElement constituent has no originalObjectLink decoration");
+            continue;
+          }
+          const ElementLink<xAOD::IParticleContainer>& origLink = originalObjectAcc(*constit);
+          if ( !origLink.isValid() ) {
+            ATH_MSG_WARNING("FlowElement constituent originalObjectLink is invalid");
+            continue;
+          }
+
+          auto originalFE = dynamic_cast<const xAOD::FlowElement*>(*origLink);
+          if(originalFE && !originalFE->isCharged()){
+            const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>(originalFE->otherObject(0));
+            if (cluster) {
+              clusterList.push_back(cluster);
             }
           }
         }

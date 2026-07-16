@@ -54,9 +54,16 @@ StatusCode TrigMuonTruthMon :: fillVariablesPerChain(const EventContext &ctx, co
   auto MatchedL1truthEndcapPt = Monitored::Scalar<float>(chain+"_MatchedL1truthEndcapPt",-999.);
   auto MatchedL1truthBarrelPt = Monitored::Scalar<float>(chain+"_MatchedL1truthBarrelPt",-999.);
   auto MatchedL1truthIntPerBC = Monitored::Scalar<float>(chain+"_MatchedL1truthIntPerBC",-999.);
+  auto MatchedL2CBtruthEta = Monitored::Scalar<float>(chain+"_MatchedL2CBtruthEta",-999.); // Names need to match those in the config.py file
+  auto MatchedL2CBtruthPhi = Monitored::Scalar<float>(chain+"_MatchedL2CBtruthPhi",-999.);
+  auto MatchedL2CBtruthPt = Monitored::Scalar<float>(chain+"_MatchedL2CBtruthPt",-999.);
+  auto MatchedL2CBtruthEndcapPt = Monitored::Scalar<float>(chain+"_MatchedL2CBtruthEndcapPt",-999.);
+  auto MatchedL2CBtruthBarrelPt = Monitored::Scalar<float>(chain+"_MatchedL2CBtruthBarrelPt",-999.);
+  auto MatchedL2CBtruthIntPerBC = Monitored::Scalar<float>(chain+"_MatchedL2CBtruthIntPerBC",-999.);
 
   bool passed_EF = false;
   bool passed_L1 = false;
+  bool passed_L2CB = false;
 
   // Find pT cut from chain name
   double pT_cut = 0.0; 
@@ -71,76 +78,54 @@ StatusCode TrigMuonTruthMon :: fillVariablesPerChain(const EventContext &ctx, co
   pT_cut = pT_cut + 1.0;
 
   for (const auto truthMu : *truthMuons) {
-
     // Fill truth histograms
-    double eta = 0.0; // Check eta to split pT into endcap barrel
-    eta = truthMu->eta();
+    double eta = truthMu->eta();
     if(std::abs(eta) > 2.5) continue; // cut on eta to only fill with muons inside detector geometry
-    
-    truthPt = truthMu->pt()/1e3;
-    fill(m_group+"_"+chain,truthPt);
-    if(std::abs(eta) < 1.05){ 
-      truthBarrelPt = truthMu->pt()/1e3;
-      fill(m_group+"_"+chain, truthBarrelPt);
-    }
-    else{ // 1.05 < |eta| < 2.5 
-      truthEndcapPt = truthMu->pt()/1e3;
-      fill(m_group+"_"+chain, truthEndcapPt); 
-    }
-    if (pT_cut < truthPt){ // Apply pT cut to eta and phi distributions only
-      truthEta = truthMu->eta();
-      truthPhi = truthMu->phi();
-      truthIntPerBC = eventInfo->actualInteractionsPerCrossing();
-      fill(m_group+"_"+chain, truthEta, truthPhi, truthIntPerBC);
-    }
+
+    using var_t = Monitored::Scalar<float>;
+    auto fillTruthVars = [&] (var_t& truthEtaVar, var_t& truthPhiVar, var_t& truthPtVar, 
+                                        var_t& truthEndcapPtVar, var_t& truthBarrelPtVar, var_t& truthIntPerBCVar) {
+      truthPtVar = truthMu->pt()/1e3;
+      fill(m_group+"_"+chain,truthPtVar);
+      if(std::abs(eta) < 1.05){ 
+        truthBarrelPtVar = truthMu->pt()/1e3;
+        fill(m_group+"_"+chain, truthBarrelPtVar);
+      }
+      else{ // 1.05 < |eta| < 2.5 
+        truthEndcapPtVar = truthMu->pt()/1e3;
+        fill(m_group+"_"+chain, truthEndcapPtVar); 
+      }
+      if (pT_cut < truthPt){ // Apply pT cut to eta and phi distributions only
+        truthEtaVar = truthMu->eta();
+        truthPhiVar = truthMu->phi();
+        truthIntPerBCVar = eventInfo->actualInteractionsPerCrossing();
+        fill(m_group+"_"+chain, truthEtaVar, truthPhiVar, truthIntPerBCVar);
+      }
+    };
+
+    fillTruthVars(truthEta, truthPhi, truthPt, 
+      truthEndcapPt, truthBarrelPt, truthIntPerBC);
 
     // Find match truth muons - EFSA matching for msonly chains, otherwise EFCB matching
-    std::string msonly = "msonly";
     const xAOD::Muon* efmuon;
-    if(chain.find(msonly) != std::string::npos){ // Find EFCB muons
+    if(chain.find("msonly") != std::string::npos){ // Find EFCB muons
       efmuon = m_matchTool->matchEFSA(truthMu, chain, passed_EF);
     }
     else{ // Find EFCB muons
       efmuon = m_matchTool->matchEFCB(truthMu, chain, passed_EF);  
     }
-    const xAOD::MuonRoI* l1muon = m_matchTool->matchL1(ctx, truthMu, chain, passed_L1);    // Find L1 muons
 
-    if(efmuon && passed_EF){  // Fill matched muon histograms
-      MatchedEFCBtruthPt = truthMu->pt()/1e3;
-      fill(m_group+"_"+chain, MatchedEFCBtruthPt);
-      if(std::abs(eta) < 1.05){ 
-        MatchedEFCBtruthBarrelPt = truthMu->pt()/1e3;
-        fill(m_group+"_"+chain, MatchedEFCBtruthBarrelPt);
-      }
-      else{ // 1.05 < |eta| < 2.5 
-        MatchedEFCBtruthEndcapPt = truthMu->pt()/1e3;
-        fill(m_group+"_"+chain, MatchedEFCBtruthEndcapPt);
-      } 
-      if (pT_cut < truthPt){ 
-        MatchedEFCBtruthEta = truthMu->eta();
-        MatchedEFCBtruthPhi = truthMu->phi();
-        MatchedEFCBtruthIntPerBC = eventInfo->actualInteractionsPerCrossing();
-        fill(m_group+"_"+chain, MatchedEFCBtruthEta, MatchedEFCBtruthPhi, MatchedEFCBtruthIntPerBC);
-      }
+    if(efmuon && passed_EF){
+      fillTruthVars(MatchedEFCBtruthEta, MatchedEFCBtruthPhi, MatchedEFCBtruthPt, 
+        MatchedEFCBtruthEndcapPt, MatchedEFCBtruthBarrelPt, MatchedEFCBtruthIntPerBC);
     }
-    
+
+    // Find L1 muons
+    const xAOD::MuonRoI* l1muon = m_matchTool->matchL1(ctx, truthMu, chain, passed_L1);
+
     if(l1muon && passed_L1){ // Fill L1 muon matched histograms
-      MatchedL1truthPt = truthMu->pt()/1e3;
-      fill(m_group+"_"+chain, MatchedL1truthPt);
-      if(std::abs(eta) < 1.05){ 
-        MatchedL1truthBarrelPt = truthMu->pt()/1e3;
-        fill(m_group+"_"+chain, MatchedL1truthBarrelPt);
-      }
-      else{ // 1.05 < |eta| < 2.5 
-        MatchedL1truthEndcapPt = truthMu->pt()/1e3;
-        fill(m_group+"_"+chain, MatchedL1truthEndcapPt);
-      } 
-      if (pT_cut < truthPt){ 
-        MatchedL1truthEta = truthMu->eta();
-        MatchedL1truthPhi = truthMu->phi();
-        MatchedL1truthIntPerBC = eventInfo->actualInteractionsPerCrossing();
-        fill(m_group+"_"+chain, MatchedL1truthEta, MatchedL1truthPhi, MatchedL1truthIntPerBC);
-      }
+      fillTruthVars(MatchedL1truthEta, MatchedL1truthPhi, MatchedL1truthPt, 
+        MatchedL1truthEndcapPt, MatchedL1truthBarrelPt, MatchedL1truthIntPerBC);
     }
     
     if((l1muon && passed_L1) && !(passed_EF && efmuon)){
@@ -151,8 +136,27 @@ StatusCode TrigMuonTruthMon :: fillVariablesPerChain(const EventContext &ctx, co
       ATH_MSG_DEBUG("MuonTruthMon: passed HLT but not L1");
     }
 
+    const bool isPh2FastReco = chain.find("newFast") != std::string::npos;
+    bool isFound = false;
+    // PhaseII fast reco CB is not yet implemented, so for now we will use the L2SA matching for these chains
+    if(chain.find("msonly") != std::string::npos || isPh2FastReco){ // Find L2SA muons
+      isFound = isPh2FastReco 
+        ? m_matchTool->matchFastRecoSA(truthMu, chain, passed_L2CB) != nullptr
+        : m_matchTool->matchL2SA(truthMu, chain, passed_L2CB) != nullptr;
+
+    } else{ // Find EFCB muons
+      isFound = m_matchTool->matchL2CB(truthMu, chain, passed_L2CB) != nullptr;
+    }
+    ATH_MSG_VERBOSE("L2CB matching: passed: " << passed_L2CB << ", found:" << isFound);
+
+    if (isFound && passed_L2CB) {
+      fillTruthVars(MatchedL2CBtruthEta, MatchedL2CBtruthPhi, MatchedL2CBtruthPt, 
+        MatchedL2CBtruthEndcapPt, MatchedL2CBtruthBarrelPt, MatchedL2CBtruthIntPerBC);
+    }
+
     passed_L1 = false;
     passed_EF = false;
+    passed_L2CB = false;
     
   }
 

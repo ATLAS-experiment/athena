@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FakeBkgTools/BaseFakeBkgTool.h"
@@ -211,7 +211,7 @@ StatusCode BaseFakeBkgTool::addEventImpl(const C& iparticles, float mcWeight)
         if(m_useDB)
         {
             std::string error;
-            if(!m_database->fillEfficiencies(d, p, *eventInfo, error))
+            if(!m_database->fillEfficiencies(d, p, eventInfo, error))
             {
                 ATH_MSG_ERROR("unable to retrieve efficiencies: " << error);
                 return StatusCode::FAILURE;

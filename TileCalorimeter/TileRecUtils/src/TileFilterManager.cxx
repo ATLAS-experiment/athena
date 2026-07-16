@@ -15,8 +15,8 @@
 #include <CLHEP/Matrix/Matrix.h>
 #include <CLHEP/Matrix/Vector.h>
 #include <algorithm>
+#include <format>
 #include <iostream>
-#include "boost/io/ios_state.hpp"
 
 // =======================================================================================
 
@@ -93,14 +93,18 @@ TileFilterManager::TileFilterManager(int mode, int level, int &npMax, int &nSam,
   }
   /* Print out the Shape Matrix. */
   if (m_debug) {
-    boost::io::ios_base_all_saver coutsave(std::cout);
-    std::cout << " TileFilterManager: ShapingMatrix.   Nshape=" << m_nShape << ", InTshape=" << m_inTshape << ", Ndig="
-        << m_nDig << ", InTdig=" << m_inTdig << ", Ncross=" << m_nCross << std::endl;
+    std::cout << std::format(
+        " TileFilterManager: ShapingMatrix.   Nshape={}, InTshape={}, Ndig={}, InTdig={}, Ncross={}\n",
+        m_nShape,
+        m_inTshape,
+        m_nDig,
+        m_inTdig,
+        m_nCross);
     for (int ind = 0; ind < m_nCross; ind++) {
       double * Xshape = m_crossShape[ind];
-      std::cout << " ind=" << ind << " Shape=";
+      std::cout << std::format(" ind={} Shape=", ind);
       for (int idig = 0; idig < m_nDig; idig++) {
-        std::cout << " " << std::setw(6) << std::setprecision(3) << Xshape[idig];
+        std::cout << std::format(" {:>6.3g}", Xshape[idig]);
       }
       std::cout << std::endl;
     }
@@ -280,11 +284,10 @@ int TileFilterManager::fitDigits2(TileFilterResult &tResult, bool lDebug) {
   std::vector<int>& vcross = tResult.getVcrossRef();
   int& iFitIndex = tResult.getFitIndexRef();
   if (m_debug) {
-    boost::io::ios_base_all_saver coutsave(std::cout);
     //    tResult.SnapShot(0);
     std::cout << " digits=";
     for (int i = 0; i < m_nDig; i++) {
-      std::cout << " " << std::setw(6) << std::setprecision(2) << digits[i];
+      std::cout << std::format(" {:>6.2g}", digits[i]);
     }
     std::cout << std::endl;
   }

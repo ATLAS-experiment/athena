@@ -68,12 +68,14 @@ def addMCSignatures(chains):
         # Single Muon Run-3 primaries
         ChainProp(name='HLT_mu24_ivarmedium_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
         ChainProp(name='HLT_mu24_msonly_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
-        ChainProp(name='HLT_mu24_msonly_newFast_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
         ChainProp(name='HLT_mu50_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
         ChainProp(name='HLT_mu60_0eta105_msonly_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
         ChainProp(name='HLT_mu60_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu80_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu80_msonly_3layersEC_L1MU14FCH', groups=PrimaryL1MuGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu10_msonly_L1MU8F', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_2mu10_msonly_L12MU8F', groups=SupportGroup+MultiMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu4_msonly_L1MU3V', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
 
         # Multi muon Run-3 primaries
         ChainProp(name='HLT_2mu14_L12MU8F', groups=PrimaryL1MuGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
@@ -124,6 +126,12 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
         ChainProp(name='HLT_2mu14_mlbkt_L12MU8F', groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
         ChainProp(name='HLT_3mu6_mlbkt_L13MU5VF', l1SeedThresholds=['MU5VF'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online']),
+
+        # Chains implementing the new fast reconstruction for Phase-II
+        ChainProp(name='HLT_mu24_msonly_newFast_L1MU14FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu10_msonly_newFast_L1MU8F', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_2mu10_msonly_newFast_L12MU8F', groups=SupportGroup+MultiMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu4_msonly_newFast_L1MU3V', groups=SupportGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
 
         # HL-LHC TDR inspired chains
         ChainProp(name="HLT_mu3vtx_L12MU8F", groups=PrimaryPhIGroup+SingleTauGroup),

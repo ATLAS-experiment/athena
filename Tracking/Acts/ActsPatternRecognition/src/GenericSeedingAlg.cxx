@@ -6,8 +6,8 @@
 
 // ACTS
 #include "Acts/Definitions/Units.hpp"
-#include "Acts/EventData/SeedContainer2.hpp"
-#include "Acts/EventData/SpacePointContainer2.hpp"
+#include "Acts/EventData/SeedContainer.hpp"
+#include "Acts/EventData/SpacePointContainer.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Seeding/BinnedGroup.hpp"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"

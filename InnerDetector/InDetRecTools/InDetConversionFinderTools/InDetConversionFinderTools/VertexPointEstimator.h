@@ -102,7 +102,6 @@ namespace InDet {
     DoubleArrayProperty m_maxPhi
       {this, "MaxPhi", {0.05, 0.1, 0.1},
        "maximum DPhi at the estimated vertex position"};
-    BooleanProperty m_returnOnError{this, "ReturnOnError", true};
   };
   
 }

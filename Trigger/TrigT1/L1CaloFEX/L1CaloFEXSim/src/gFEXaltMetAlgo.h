@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXaltMetAlgo - Noise cut and Rho+RMS algorithm for gFEX MET
@@ -13,10 +13,9 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IgFEXaltMetAlgo.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-
+#include "TrigConfData/L1Menu.h"
 
 
 namespace LVL1 {
@@ -31,23 +30,20 @@ namespace LVL1 {
     virtual StatusCode initialize() override;
 
                                  
-    virtual void setAlgoConstant(std::vector<int>&& A_thr,
-                             std::vector<int>&& B_thr,
-                             std::vector<int>&& C_thr,
-                             const int rhoPlusThr) override;
-
-    virtual void altMetAlgo(const gTowersCentral &Atwr,
-                        const gTowersCentral &Btwr,
-                        const gTowersCentral &Ctwr,
-                        std::array<uint32_t, 4> & outTOB) const override;
+    virtual void altMetAlgo(const EventContext& ctx,
+			    const gTowersCentral &Atwr,
+			    const gTowersCentral &Btwr,
+			    const gTowersCentral &Ctwr,
+			    std::array<uint32_t, 4> & outTOB) const override;
 
   private:
 
-    std::array<std::vector<int>, 3> m_etaThr;   // A, B, C
-    int m_rhoPlusThr{};
+    SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"};
+
+    // make this configurable if needed
+    const int m_rhoPlusThr = 10000/200;
     
-    
-    void metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO) const;
+    void metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO, const std::array<std::vector<int>, 3>& etaThr) const;
 
     void metTotal(const int A_MET_x, const int A_MET_y,
               const int B_MET_x, const int B_MET_y,
@@ -60,7 +56,7 @@ namespace LVL1 {
 
     void rho_MET(const gTowersCentral &twrs, int & MET_x, int & MET_y, const int rho, const int sigma) const;
 
-    int sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short FPGA_NO) const;
+    int sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short FPGA_NO, const std::array<std::vector<int>, 3>& etaThr) const;
 
     int sumEtFPGArms(const gTowersCentral &twrs, const int sigma) const;
 

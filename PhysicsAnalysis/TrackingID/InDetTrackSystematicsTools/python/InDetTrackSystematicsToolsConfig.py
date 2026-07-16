@@ -27,8 +27,10 @@ def InDetTrackTruthOriginToolCfg(flags, name="InDetTrackTruthOriginTool", **kwar
         CompFactory.InDet.InDetTrackTruthOriginTool(name, **kwargs))
     return acc
 
-def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool", **kwargs):
+def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool",
+                                   seed=1, **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("Seed", seed)
 
     if "trackOriginTool" not in kwargs:
         kwargs.setdefault("trackOriginTool", acc.popToolsAndMerge(
@@ -51,8 +53,9 @@ def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool", **kwar
         CompFactory.InDet.InDetTrackTruthFilterTool(name, **kwargs))
     return acc
 
-def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", **kwargs):
+def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", seed=2, **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("Seed", seed)
 
     if "trackOriginTool" not in kwargs:
         kwargs.setdefault("trackOriginTool", acc.popToolsAndMerge(
@@ -84,8 +87,10 @@ def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", **kwargs):
     acc.setPrivateTools(CompFactory.InDet.JetTrackFilterTool(name, **kwargs))
     return acc
 
-def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool", **kwargs):
+def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool",
+                                 seed=3, **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("Seed", seed)
 
     # 2022 recommendations (MC23a)
     if flags.Input.MCCampaign is Campaign.MC23a:
@@ -104,8 +109,10 @@ def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool", **kwargs
         CompFactory.InDet.InclusiveTrackFilterTool(name, **kwargs))
     return acc
 
-def InDetTrackSmearingToolCfg(flags, name="InDetTrackSmearingTool", **kwargs):
+def InDetTrackSmearingToolCfg(flags, name="InDetTrackSmearingTool",
+                               seed=4, **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("Seed", seed)
 
     # 2022 recommendations (MC23a)
     if flags.Input.MCCampaign is Campaign.MC23a:
@@ -232,7 +239,7 @@ def TrackSystematicsAlgCfg(flags, name="InDetTrackSystematicsAlg", **kwargs):
 
 
 def TrackSmearingAlgCfg(flags, syst, input_tracks, output_tracks,
-                        bias_kwargs={}):
+                        seed=4, bias_kwargs={}):
     """Shallow-copy input_tracks and apply smearing/biasing for one syst.
 
     syst is a single smearing variation string (TRK_RES_*, TRK_BIAS_*), or
@@ -246,7 +253,7 @@ def TrackSmearingAlgCfg(flags, syst, input_tracks, output_tracks,
     """
     ca = ComponentAccumulator()
 
-    smearingTool = ca.popToolsAndMerge(InDetTrackSmearingToolCfg(flags))
+    smearingTool = ca.popToolsAndMerge(InDetTrackSmearingToolCfg(flags, seed=seed))
     ca.addPublicTool(smearingTool)
 
     # Only configure the biasing tool for TRK_BIAS_* systematics.
@@ -278,13 +285,17 @@ def TrackSmearingAlgCfg(flags, syst, input_tracks, output_tracks,
 
 def JetTrackFilteringAlgCfg(
         flags, syst, jet_collection,
-        in_ghost_tracks, out_ghost_tracks):
+        in_ghost_tracks, out_ghost_tracks,
+        seed=None):
     """Filter ghost-track links on jets for one filter systematic.
 
     syst is a single filter variation string (TRK_EFF_*, TRK_FAKE_RATE_*).
     Reads in_ghost_tracks decoration from jet_collection, applies filter
     tools per-track (dispatching LRT vs STD by patternRecoInfo bit 49),
     and writes surviving links to out_ghost_tracks.
+
+    seed overrides the Seed property on all filter tools.  If None (default),
+    each tool uses its own default seed (1 STD, 2 TIDE, 3 LRT).
     """
     assert syst, "JetTrackFilteringAlgCfg called with empty syst"
 
@@ -300,19 +311,22 @@ def JetTrackFilteringAlgCfg(
         OutGhostTracks=out_ghost_tracks,
         SystematicVariation=syst,
     )
+    std_kwargs = {} if seed is None else {"seed": seed}
+    lrt_kwargs = {} if seed is None else {"seed": seed}
+    tide_kwargs = {} if seed is None else {"seed": seed}
     if not is_larged0:
         alg.STDFilterTool = ca.popToolsAndMerge(
-            InDetTrackTruthFilterToolCfg(flags)
+            InDetTrackTruthFilterToolCfg(flags, **std_kwargs)
         )
         ca.addPublicTool(alg.STDFilterTool)
     if is_larged0:
         alg.LRTFilterTool = ca.popToolsAndMerge(
-            InclusiveTrackFilterToolCfg(flags)
+            InclusiveTrackFilterToolCfg(flags, **lrt_kwargs)
         )
         ca.addPublicTool(alg.LRTFilterTool)
     if is_tide:
         alg.JetFilterTool = ca.popToolsAndMerge(
-            JetTrackFilterToolCfg(flags)
+            JetTrackFilterToolCfg(flags, **tide_kwargs)
         )
         ca.addPublicTool(alg.JetFilterTool)
 

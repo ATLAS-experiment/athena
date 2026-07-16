@@ -143,6 +143,8 @@ class RunParams:
          sor_time=args.sor_time,
          solenoid_current=getattr(args, 'solenoid_current', None),
          toroids_current=getattr(args, 'toroids_current', None),
+         beam_type=getattr(args, 'beam_type', None),
+         beam_energy=getattr(args, 'beam_energy', None),
          conditions_run=getattr(args, 'conditions_run', None),
          T0_project_tag=getattr(args, 'T0_project_tag', ''),
          stream=getattr(args, 'stream', ''),
@@ -677,6 +679,9 @@ class ConfigRunner:
          sor_time = self.run_params['sor_time']
          solenoid_current = self.run_params['solenoid_current']
          toroids_current = self.run_params['toroids_current']
+         beam_type = self.run_params['beam_type']
+         beam_energy = self.run_params['beam_energy']
+         lb_number = self.run_params['lb_number']
          
          log.info("Calling prepareForStart with run=%d, det_mask=0x%s, sor_time=%s",
                   run_number, det_mask, sor_time)
@@ -685,6 +690,9 @@ class ConfigRunner:
             run_number=run_number,
             det_mask=det_mask,
             sor_time=sor_time,
+            lb_number=lb_number,
+            beam_type=beam_type,
+            beam_energy=beam_energy,
             solenoid_current=solenoid_current,
             toroids_current=toroids_current
          )
@@ -802,6 +810,7 @@ def arg_sor_time(s) -> str:
    elif s.isdigit():   return dt.fromtimestamp(float(s)/1e9).strftime(fmt)
    else:               return s
 
+
 def arg_detector_mask(s):
    """Convert detector mask to format expected by eformat"""
    if s=='all':
@@ -809,12 +818,6 @@ def arg_detector_mask(s):
    dmask = hex(int(s,16))                                    # Normalize input to hex-string
    dmask = dmask.lower().replace('0x', '').replace('l', '')  # remove markers
    return '0' * (32 - len(dmask)) + dmask                    # (pad with 0s)
-
-def arg_log_level(s):
-   """Argument handler for log levels"""
-   lvls = s.split(',')
-   if len(lvls)==1: lvls.append('ERROR')
-   return lvls
 
 
 def check_args(parser, args):
@@ -864,6 +867,8 @@ def update_run_params(args, flags):
       # Update magnet currents from IS (run_params already has command-line overrides if provided)
       args.solenoid_current = run_params.solenoid_current
       args.toroids_current = run_params.toroids_current
+      args.beam_type = run_params.beam_type
+      args.beam_energy = run_params.beam_energy
 
    if (args.run_number is not None and args.lb_number is None) or (args.run_number is None and args.lb_number is not None):
       log.error("Both or neither of the options -R (--run-number) and -L (--lb-number) have to be specified")
@@ -1020,7 +1025,7 @@ def main():
    g.add_argument('jobOptions', nargs='?', help='job options: CA module (package.module:function), pickle file (.pkl), or JSON file (.json)')
    g.add_argument('--threads', metavar='N', type=int, default=1, help='number of threads')
    g.add_argument('--concurrent-events', metavar='N', type=int, help='number of concurrent events if different from --threads')
-   g.add_argument('--log-level', '-l', metavar='LVL', type=arg_log_level, default='INFO,ERROR', help='OutputLevel of athena,POOL')
+   g.add_argument('--log-level', '-l', metavar='LVL', default='INFO', help='OutputLevel of athena')
    g.add_argument('--precommand', '-c', metavar='CMD', action='append', default=[],
                   help='Python commands executed before job options')
    g.add_argument('--postcommand', '-C', metavar='CMD', action='append', default=[],
@@ -1113,9 +1118,9 @@ def main():
    import ROOT
    ROOT.ROOT.EnableThreadSafety()
 
-   # set default OutputLevels and file inclusion
+   # set default Python OutputLevel and file inclusion
    import AthenaCommon.Logging
-   AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level[0]))
+   AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level))
    AthenaCommon.Logging.log.setFormat("%(asctime)s  Py:%(name)-31s %(levelname)7s %(message)s")
    if args.show_includes:
       from AthenaCommon.Include import include
@@ -1131,6 +1136,10 @@ def main():
    
    # Get flags with online defaults (same as athenaHLT)
    flags = defaultOnlineFlags()
+
+   # set MessageSvc OutputLevel
+   from AthenaCommon import Constants
+   flags.Exec.OutputLevel = getattr(Constants, args.log_level)
 
    # Enable WebdaqHistSvc for online histogram publishing if requested
    if args.oh_monitoring:
@@ -1266,7 +1275,7 @@ def main():
       # Load from CA module - follow the same pattern as athenaHLT/TrigPSCPythonCASetup:
       # 1. Build the full configuration with services
       # 2. Dump to JSON file
-      # 3. Use TrigConf::JobOptionsSvc to load from JSON
+      # 3. Use AthHLT.reload_from_json to re-exec and reload from JSON
       # This preserves the ability to use the same JobOptionsSvc as athenaHLT
       log.info("Loading CA configuration from: %s", jobOptions)
       
@@ -1314,17 +1323,12 @@ def main():
       if args.dump_config_exit:
          log.info("Configuration dumped to %s.json. Exiting...", fname)
          sys.exit(0)
+
+      # Re-exec from the JSON (same as athenaHLT TrigPSCPythonCASetup -> AthHLT.reload_from_json -> os.execvp). 
+      # This replaces the process image freeing up the configuration heap 
+      log.info("Configuration dumped to %s.json. Re-exec...", fname)
+      AthHLT.reload_from_json(f"{fname}.json", suppress_args=PscConfig.unparsedArguments + ['--dump-config'], jobOptions=args.jobOptions)
       
-      # Now load the JSON using JsonConfigRunner with TrigConf::JobOptionsSvc
-      log.info("Loading configuration from %s.json via TrigConf::JobOptionsSvc", fname)
-      # Get run parameters for prepareForStart
-      run_params = get_run_params(args).to_dict()
-      acc = load_from_json(f"{fname}.json", run_params,
-                           num_threads=args.threads, num_slots=args.concurrent_events,
-                           ef_files=ef_files)
-      
-      log.info("Configuration loaded with HLT online services")
-   
    # Execute postcommands
    if args.postcommand:
       log.info("Executing postcommand(s)")

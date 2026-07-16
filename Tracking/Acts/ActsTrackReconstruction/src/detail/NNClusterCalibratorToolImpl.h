@@ -26,7 +26,7 @@ class NNClusterCalibrator;
 /// calibrator
 template <typename calib_data_t, typename traj_t>
 struct NNClusterCalibratorOptions {
-  int m_minClusterSizeForNN;  ///! minimum number of hits to run NN
+  int m_minClusterSizeForNN = 0;  ///! minimum number of hits to run NN
   const OnnxNNCollection* m_models =
       nullptr;  ///! set of models for inference (non owning pointer)
   std::unique_ptr<AnalogueClusteringCalibrator<calib_data_t, traj_t>>
@@ -89,17 +89,13 @@ class NNClusterCalibrator
   /// @brief obtain probabilities of number of particles using numbers NN
   /// @param  the network input
   /// @return vector of size 3 with probabilities
-  std::vector<float> predictNumberOfClusters(NNinput& nn) const;
+  std::array<float, 3> predictNumberOfClusters(NNinput& nn) const;
 
   /// @brief run position inference
   PositionNNoutput predictPositions(NNinput& nn, int number) const;
 
   /// @brief returns network appropriate for the number of sub-clusters
   Ort::Session& selectPositionNetwork(int number) const;
-
-  /// @brief scale
-  typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Pos computeOutputPostion(const PositionNNoutput& positions, int bestIndex, const NNinput& input) const;
-  typename NNClusterCalibrator<calib_data_t, traj_t>::BASE::Cov computeOutputCovariance(const PositionNNoutput& positions, int bestIndex, const NNinput& input) const;
 
   NNClusterCalibratorOptions<calib_data_t, traj_t> m_options;
 };

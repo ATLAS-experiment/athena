@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/XAODToInDetClusterConversion.h"
@@ -30,6 +30,7 @@ namespace InDet {
     ATH_CHECK( m_inputPixelClusterContainerKey.initialize(m_processPixel) );
     ATH_CHECK( m_pixelClusterContainerLinkKey.initialize(m_processPixel) );
     ATH_CHECK( m_outputPixelClusterContainerKey.initialize(m_processPixel) );
+    ATH_CHECK(m_pixelClusterOffSetKey.initialize(m_processPixel));
     ATH_CHECK( m_pixelClusterLinkKey.initialize(m_processPixel));
 
     // Strip Clusters
@@ -40,6 +41,7 @@ namespace InDet {
     ATH_CHECK( m_inputStripClusterContainerKey.initialize(m_processStrip) );
     ATH_CHECK( m_stripClusterContainerLinkKey.initialize(m_processStrip) );
     ATH_CHECK( m_outputStripClusterContainerKey.initialize(m_processStrip) );
+    ATH_CHECK( m_stripClusterOffSetKey.initialize(m_processStrip));
     ATH_CHECK( m_stripClusterLinkKey.initialize(m_processStrip));
 
     ATH_CHECK( m_lorentzAngleTool.retrieve(EnableTool{not m_lorentzAngleTool.empty()}) );
@@ -58,8 +60,7 @@ namespace InDet {
 
   StatusCode XAODToInDetClusterConversion::execute(const EventContext& ctx) const
   {
-    ATH_MSG_DEBUG( "Executing " << name() << " ... " );
-
+    ATH_MSG_DEBUG( "Executing " << name() << " ... ");
     if (m_processPixel) {
       ATH_MSG_DEBUG("Converting Pixel Clusters: xAOD -> InDet");
       ATH_CHECK( convertPixelClusters(ctx) );
@@ -119,6 +120,7 @@ namespace InDet {
 
           InDet::PixelCluster* cluster = nullptr;
           ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *m_pixelID, cluster) );
+          //coverity[FORWARD_NULL:FALSE]
           cluster->setHashAndIndex(hashId, collection->size());
 
           // Add to Collection
@@ -132,7 +134,14 @@ namespace InDet {
 
     } // loop on hashIds
 
-    ATH_CHECK( outputPixelClusterContainer.setConst() );
+    auto offsets = std::make_unique<std::vector<unsigned int>>(m_pixelID->wafer_hash_max(), 0);
+    unsigned int counter(0);
+    for (const auto coll : *outputPixelClusterContainer) {
+      (*offsets)[coll->identifyHash()] = counter;
+      counter += coll->size();
+    }
+    SG::WriteHandle offSetHandle{m_pixelClusterOffSetKey ,ctx};
+    ATH_CHECK(offSetHandle.record(std::move(offsets)));
 
     return StatusCode::SUCCESS;
   }
@@ -183,6 +192,7 @@ namespace InDet {
 
           InDet::SCT_Cluster* cluster = nullptr;
           ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, *m_stripID, cluster, shift) );
+          //coverity[FORWARD_NULL:FALSE]
           cluster->setHashAndIndex(hashId, collection->size());
 
 
@@ -197,7 +207,14 @@ namespace InDet {
 
     }
 
-    ATH_CHECK( outputStripClusterContainer.setConst() );
+    auto offsets = std::make_unique<std::vector<unsigned int>>(m_stripID->wafer_hash_max(), 0);
+    unsigned int counter(0);
+    for (const auto coll : *outputStripClusterContainer) {
+      (*offsets)[coll->identifyHash()] = counter;
+      counter += coll->size();
+    }
+    SG::WriteHandle offSetHandle{m_stripClusterOffSetKey ,ctx};
+    ATH_CHECK(offSetHandle.record(std::move(offsets)));
 
     return StatusCode::SUCCESS;
   }
@@ -237,6 +254,8 @@ namespace InDet {
           const xAOD::HGTDCluster* in_cluster = *start;
 
           ::HGTD_Cluster* cluster = nullptr;
+          //cluster is overwritten, but it is saved in 'collection' and later moved
+          //coverity[RESOURCE_LEAK]
           ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, cluster) );
           cluster->setHashAndIndex(hashId, collection->size());
 

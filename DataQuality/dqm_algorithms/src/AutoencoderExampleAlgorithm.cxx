@@ -72,7 +72,7 @@ session_options()
 
   // Load the model.
   // eos does not have guaranteed availability, so we use PathResolver to find asg-calib/dev for non-production algorithms.
-  const std::string model_path = PathResolverFindCalibFile("dev/ONNXfiles/autoencoder_model.onnx");
+  const std::string model_path = PathResolverFindCalibFile("ONNXfiles/autoencoder_model.onnx");
   session = std::make_unique<Ort::Session>(env, model_path.c_str(), session_options);
 
   // Prepare and, if desired, print the input node names.
@@ -82,7 +82,6 @@ session_options()
   {
       std::unique_ptr<char, Ort::detail::AllocatedFree> input_name_ptr = session->GetInputNameAllocated(i, allocator);
       char* input_name = input_name_ptr.get();
-      std::cout << "Input " << i << ": name=" << input_name << std::endl;
       input_names.push_back(input_name);
   }
 
@@ -92,7 +91,6 @@ session_options()
   {
       std::unique_ptr<char, Ort::detail::AllocatedFree> output_name_ptr = session->GetOutputNameAllocated(i, allocator);
       char* output_name = output_name_ptr.get();
-      std::cout << "Output " << i << ": name=" << output_name << std::endl;
       output_names.push_back(output_name);
   }
 
@@ -216,15 +214,11 @@ dqm_algorithms::AutoencoderExampleAlgorithm::execute(const std::string& name,
     resulthisto->Reset();
 
     // Loop through anomalies to set result, print, etc.
-    std::cout << "Anomalies:" << std::endl;
     for (size_t i = 0; i < anomalies.size(); ++i) {
         if (anomalies[i])
         {
             // Set the resulting histogram to the bin content
             resulthisto->SetBinContent(hist_data[i][0], hist_data[i][1], hist_data[i][2]);
-            std::cout << "Input (" << hist_data[i][0] << ", " << hist_data[i][1] << ", " <<  hist_data[i][2] << "): ";
-            std::cout << "Output (" << output_data[i][0] << ", " << output_data[i][1] << ", " << output_data[i][2] << ")";
-            std::cout << " Reconstruction Error: " << reconstruction_errors[i] << std::endl;
         }
     }
 

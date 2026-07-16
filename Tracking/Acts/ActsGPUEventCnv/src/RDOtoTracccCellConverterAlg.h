@@ -13,17 +13,21 @@
 #include "ActsGPUEvent/TracccDetectorConditionsDescription.h"
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "AthDeviceInterfaces/ICopyTool.h"
-#include "InDetIdentifier/PixelID.h"
-#include "InDetIdentifier/SCT_ID.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "PixelReadoutGeometry/PixelDetectorManager.h"
-#include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
+
 #include "Identifier/Identifier.h"
 
 #include "ActsGPUInterfaces/IDeviceDetectorDescriptionProviderSvc.h"
 
 #include <unordered_map>
 #include <cstdint>
+#include <atomic>
+
+class PixelID;
+class SCT_ID;
+namespace InDetDD{
+  class PixelDetectorManager;
+  class SCT_DetectorManager;
+}
 
 namespace ActsTrk {
 
@@ -71,7 +75,7 @@ private:
   const traccc::detector_conditions_description::host* m_hostCond{nullptr};
 
   // Geometry conversion maps
-  const std::unordered_map<Identifier, uint64_t>* m_athenaToDetray;
+  const std::unordered_map<Identifier, uint64_t>* m_athenaToDetray{};
   std::unordered_map<uint64_t, unsigned int> m_DetrayIdToDetDescrIndexMap;
 };
 

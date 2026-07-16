@@ -214,7 +214,7 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
       SG::WriteDecorHandle< xAOD::TrackParticleContainer, std::vector<float> > trackWriteDecorHandleTCTScore (m_trackWriteDecorKeyTCTScore, ctx);
       SG::WriteDecorHandle< xAOD::TrackParticleContainer, ElementLink<xAOD::JetContainer> > trackWriteDecorHandleJetLink (m_trackWriteDecorKeyJetLink, ctx);
       std::vector<float> v_tctScore = trkTypeWgts(ctx,trk,PV,curjet->p4());
-      trackWriteDecorHandleTCTScore(*trk) = v_tctScore;
+      trackWriteDecorHandleTCTScore(*trk) = std::move(v_tctScore);
       ElementLink< xAOD::JetContainer> linkJet;
       linkJet.toContainedElement(jets, curjet);
       trackWriteDecorHandleJetLink(*trk) = linkJet;
@@ -230,7 +230,7 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
     for(const auto *itrk : trks)
     {
       std::vector<float> v_tctScore = trkTypeWgts(ctx,itrk,PV,curjet->p4());
-      jetWriteDecorHandleTCTScore(*curjet).push_back(v_tctScore);
+      jetWriteDecorHandleTCTScore(*curjet).push_back(std::move(v_tctScore));
       //adapted from https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/JetTagging/JetTagAlgs/BTagging/src/JetBTaggingAlg.cxx
       //line 253-255
       ElementLink< xAOD::TrackParticleContainer> linkTrack;

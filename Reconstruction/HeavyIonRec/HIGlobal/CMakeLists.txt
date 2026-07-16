@@ -8,7 +8,7 @@ atlas_add_library( HIGlobalLib
                    HIGlobal/*.h
                    INTERFACE
                    PUBLIC_HEADERS HIGlobal
-                   LINK_LIBRARIES ActsVertexReconstructionLib AsgTools AthenaBaseComps CaloEvent GaudiKernel xAODInDetMeasurement xAODTracking HIEventUtilsLib NavFourMom StoreGateLib xAODCaloEvent xAODHIEvent )
+                   LINK_LIBRARIES AsgTools AthenaBaseComps CaloEvent GaudiKernel xAODTracking HIEventUtilsLib NavFourMom StoreGateLib xAODCaloEvent xAODHIEvent )
 
 atlas_add_component( HIGlobal
                      src/*.cxx

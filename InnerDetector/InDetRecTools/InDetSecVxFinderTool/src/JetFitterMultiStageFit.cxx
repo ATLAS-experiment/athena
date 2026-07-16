@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "InDetSecVxFinderTool/JetFitterMultiStageFit.h"
@@ -87,25 +87,25 @@ Trk::VxJetCandidate* JetFitterMultiStageFit::doTwoStageFit(const Trk::RecVertex 
     std::vector<const Trk::ITrackLink*>::const_iterator tracksToAddIter;
 
 
-    Trk::VxJetCandidate* myJetCandidate=nullptr;
+    std::unique_ptr<Trk::VxJetCandidate> myJetCandidate;
 
     for (std::vector<std::vector<const Trk::ITrackLink*> >::const_iterator BunchesIter=BunchesBegin;
          BunchesIter!=BunchesEnd;++BunchesIter) {
 
         if (BunchesIter == BunchesBegin) { // this simply means we are only using tracksToUseInFirstFit
             ATH_MSG_VERBOSE(" initial fit with  " << (*BunchesIter).size() << " tracks ");
-            myJetCandidate = m_initializationHelper->initializeJetCandidate(*BunchesIter, &primaryVertex, &myDirection,
-                                                                            &vtxSeedDirection);
-            m_routines->initializeToMinDistancesToJetAxis(myJetCandidate);
+            myJetCandidate.reset(m_initializationHelper->initializeJetCandidate(*BunchesIter, &primaryVertex, &myDirection,
+                                                                            &vtxSeedDirection));
+            m_routines->initializeToMinDistancesToJetAxis(myJetCandidate.get());
             if (!(*BunchesIter).empty()) {
-                doTheFit(myJetCandidate, true);
+                doTheFit(myJetCandidate.get(), true);
                 // Im confused, didnt the comment above say no clustering done in first iteration?
                 // yet performClustering = true in the call above??
             }
         }
 
         // second stage using all tracks, why is it done this way with an if-else in a for loop...
-        else {
+        else if (myJetCandidate){
             ATH_MSG_VERBOSE(" other fit with " << (*BunchesIter).size() << " tracks ");
             std::vector<Trk::VxVertexOnJetAxis*> setOfVertices=myJetCandidate->getVerticesOnJetAxis();
             std::vector<Trk::VxTrackAtVertex*>* setOfTracks=myJetCandidate->vxTrackAtVertex();
@@ -118,24 +118,24 @@ Trk::VxJetCandidate* JetFitterMultiStageFit::doTwoStageFit(const Trk::RecVertex 
                 temp_vector_tracksAtVertex.push_back(newVxTrack);
                 setOfTracks->push_back(newVxTrack);
                 //add the new tracks to the candidate's track collection
-                setOfVertices.push_back(new Trk::VxVertexOnJetAxis(temp_vector_tracksAtVertex));
+                setOfVertices.push_back(new Trk::VxVertexOnJetAxis(std::move(temp_vector_tracksAtVertex)));
                 //add new vertex with all the *BunchesIter tracks attached to it
             }
 
             ATH_MSG_VERBOSE(" new overall number of tracks (vertices?) to fit : " << setOfVertices.size());
             myJetCandidate->setVerticesOnJetAxis(setOfVertices);
-            Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate);
+            Trk::JetFitterInitializationHelper::updateTrackNumbering(myJetCandidate.get());
             //question: should this be done???
-            m_routines->initializeToMinDistancesToJetAxis(myJetCandidate);
+            m_routines->initializeToMinDistancesToJetAxis(myJetCandidate.get());
             // we re-initialize, is this wise? We've merged vertices in the previous iteration...
-            doTheFit(myJetCandidate);
+            doTheFit(myJetCandidate.get());
         }
     }
 
 
 
     ATH_MSG_DEBUG(" returning jet candidate");
-    return myJetCandidate;
+    return myJetCandidate.release(); //pass ownership
 }
 
 
@@ -175,7 +175,7 @@ void JetFitterMultiStageFit::doTheFit(Trk::VxJetCandidate* myJetCandidate,
                     }
                 }
             }
-            if (max_prob < m_vertexProbCut) {
+            if ((max_prob < m_vertexProbCut) && worseVertex) {
                     ATH_MSG_DEBUG("Deleted vertex " << worseVertex->getNumVertex() << " with probability " << max_prob);
                 //	  std::cout << "Deleted vertex " << worseVertex->getNumVertex() << " with probability " << max_prob << std::endl;
                 if (worseVertex == myJetCandidate->getPrimaryVertex()) {

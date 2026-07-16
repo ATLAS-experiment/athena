@@ -273,7 +273,7 @@ def StreamToolCfg(flags, **kwargs):
     return result
 
 
-def CopyToolCfg(flags, **kwargs):
+def SyncCopyToolCfg(flags, **kwargs):
     '''Synchronous copy object provider tool
     '''
 
@@ -300,6 +300,58 @@ def AsyncCopyToolCfg(flags, **kwargs):
     copyTool.StreamTool = streamTool.getPrimary()
     result.merge(streamTool)
     result.setPrivateTools(copyTool)
+
+    # Return the CA.
+    return result
+
+
+def CopyToolCfg(flags, **kwargs):
+    '''Default tool providing the ICopyTool interface for CUDA
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Set up the device copy tool according to the received flags.
+    if flags.Device.Copy.Async:
+        result.setPrivateTools(result.popToolsAndMerge(
+            AsyncCopyToolCfg(flags, **kwargs)))
+    else:
+        result.setPrivateTools(result.popToolsAndMerge(
+            SyncCopyToolCfg(flags, **kwargs)))
+        pass
+
+    # Return the CA.
+    return result
+
+
+def CopiesToolCfg(flags, **kwargs):
+    '''Default tool providing the ICopiesTool interface for CUDA
+    '''
+
+    # Create an accumulator to hold the configuration.
+    result = ComponentAccumulator()
+
+    # Create the main tool that would provide the AthDevice::ICopiesTool
+    # interface.
+    tool = CompFactory.AthDevice.CopiesAdaptorTool(**kwargs)
+
+    # Set up the "host" copy tool. Which is always the same in our current code.
+    from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg
+    tool.HostCopyTool = \
+        result.popToolsAndMerge(HostCopyToolCfg(flags, **kwargs))
+
+    # Set up the device copy tool according to the received flags.
+    if flags.Device.Copy.Async:
+        tool.DeviceCopyTool = \
+            result.popToolsAndMerge(AsyncCopyToolCfg(flags, **kwargs))
+    else:
+        tool.DeviceCopyTool = \
+            result.popToolsAndMerge(SyncCopyToolCfg(flags, **kwargs))
+        pass
+
+    # Return the adaptor tool as the main component of the CA.
+    result.setPrivateTools(tool)
 
     # Return the CA.
     return result

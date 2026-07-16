@@ -50,7 +50,7 @@ namespace ActsTrk::detail {
          SharedHit,
          NCountTypes
       };
- 
+
       constexpr static unsigned short LAYER_REGION_MASK   = 0xFF;  // bits 0-7
       constexpr static unsigned short REGION_BITS = 4;             // bits 0-3
       constexpr static unsigned short REGION_MASK = 0xF;           // 4 bits
@@ -198,6 +198,7 @@ namespace ActsTrk::detail {
             m_layers.at(s_type.at(region_i)) += m_layers[region_i];
             m_layers.at(Total) += m_layers[region_i];
          }
+         m_layers.at(pixelBarrel) += m_layers.at(pixelBarrelFlat) + m_layers.at(pixelBarrelInclined);
          for (unsigned int count_type_i=0; count_type_i<static_cast<unsigned int>(CountType::NCountTypes);++count_type_i) {
             assert( pixelBarrelFlat < m_hits[count_type_i].size() && pixelBarrelInclined < m_hits[count_type_i].size());
             m_hits[count_type_i].at(pixelBarrel) = m_hits[count_type_i][pixelBarrelFlat]+m_hits[count_type_i][pixelBarrelInclined];

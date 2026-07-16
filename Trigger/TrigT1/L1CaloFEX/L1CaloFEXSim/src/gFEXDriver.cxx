@@ -13,7 +13,7 @@
 namespace LVL1 {
 
   gFEXDriver::gFEXDriver(const std::string& name, ISvcLocator* pSvcLocator)
-    :  AthAlgorithm(name, pSvcLocator)
+    :  AthReentrantAlgorithm(name, pSvcLocator)
   {
 
   }
@@ -39,7 +39,7 @@ StatusCode gFEXDriver::initialize()
 }
 
 
-  StatusCode gFEXDriver::execute(const EventContext& ctx) //const
+  StatusCode gFEXDriver::execute(const EventContext& ctx) const
 {
   // STEP 1 - Do some monitoring
   gFEXOutputCollection* my_gFEXOutputCollection = new gFEXOutputCollection();
@@ -48,10 +48,7 @@ StatusCode gFEXDriver::initialize()
   // STEP 2 - Run the gFEXSysSim
   ATH_CHECK(m_gFEXSysSimTool->execute(ctx, my_gFEXOutputCollection));
 
-  // STEP 3 - Close and clean the event
-  m_gFEXSysSimTool->cleanup();
-
-  // STEP 4 - Write the completed gFEXOutputCollection into StoreGate (move the local copy in memory)
+  // STEP 3 - Write the completed gFEXOutputCollection into StoreGate (move the local copy in memory)
   std::unique_ptr<gFEXOutputCollection> local_gFEXOutputCollection = std::unique_ptr<gFEXOutputCollection>(my_gFEXOutputCollection);
   SG::WriteHandle<LVL1::gFEXOutputCollection> gFEXOutputCollectionSG(m_gFEXOutputCollectionSGKey, ctx);
   ATH_CHECK(gFEXOutputCollectionSG.record(std::move(local_gFEXOutputCollection)));

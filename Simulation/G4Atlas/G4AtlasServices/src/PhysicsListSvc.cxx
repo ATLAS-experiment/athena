@@ -135,6 +135,24 @@ void PhysicsListSvc::CreatePhysicsList()
 
   m_physicsList->RegisterPhysics(m_fastSimulationConstructor->GetPhysicsOption().release());
 
+  if(m_generalCut.value() > 0.)
+    {
+      m_physicsList->SetDefaultCutValue(m_generalCut.value());
+    }
+
+  G4EmParameters* emp = G4EmParameters::Instance();
+  if (m_emMaxEnergy.value()>=0) emp->SetMaxEnergy(m_emMaxEnergy.value());
+  if (m_emNumberOfBinsPerDecade.value()>=0) emp->SetNumberOfBinsPerDecade(m_emNumberOfBinsPerDecade.value());
+  if (m_emMinEnergy.value()>=0) emp->SetMinEnergy(m_emMinEnergy.value());
+  if (m_applyEMCuts.value())
+    {
+      emp->SetApplyCuts(true);
+    }
+
+  if (m_unstableAntiNeutrons) {
+    G4AntiNeutron::Definition()->SetPDGStable(false);
+  }
+
   //ConstructProcess();
   ATH_MSG_DEBUG("end of PhysicsListSvc::CreatePhysicsList()");
 }
@@ -166,11 +184,6 @@ void PhysicsListSvc::SetPhysicsOptions()
       return;
     }
 
-  if(m_generalCut.value() > 0. && std::abs(m_generalCut.value())>std::numeric_limits<double>::epsilon())
-    {
-      m_physicsList->SetDefaultCutValue(m_generalCut.value());
-    }
-
   std::vector<std::string> g4commands;
   if (m_neutronTimeCut.value() > 0. && std::abs(m_neutronTimeCut.value())>std::numeric_limits<double>::epsilon())
     {
@@ -194,19 +207,6 @@ void PhysicsListSvc::SetPhysicsOptions()
       int returnCode = ui->ApplyCommand( g4command );
       CommandLog(returnCode, g4command);
     }
-  }
-
-  G4EmParameters* emp = G4EmParameters::Instance();
-  if (m_emMaxEnergy.value()>=0) emp->SetMaxEnergy(m_emMaxEnergy.value());
-  if (m_emNumberOfBinsPerDecade.value()>=0) emp->SetNumberOfBinsPerDecade(m_emNumberOfBinsPerDecade.value());
-  if (m_emMinEnergy.value()>=0) emp->SetMinEnergy(m_emMinEnergy.value());
-  if (m_applyEMCuts.value())
-    {
-      emp->SetApplyCuts(true);
-    }
-
-  if (m_unstableAntiNeutrons) {
-    G4AntiNeutron::Definition()->SetPDGStable(false);
   }
 
   return;

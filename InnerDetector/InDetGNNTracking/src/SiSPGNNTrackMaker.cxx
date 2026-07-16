@@ -2,16 +2,16 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <memory>
-#include <fstream>
-#include <tuple>
-#include <utility>
-
 #include "SiSPGNNTrackMaker.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
+
+#include <memory>
+#include <fstream>
+#include <tuple>
+#include <utility>
 
 InDet::SiSPGNNTrackMaker::SiSPGNNTrackMaker(
   const std::string& name, ISvcLocator* pSvcLocator)
@@ -163,7 +163,7 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
       outputTracks->push_back(track.release());
       if (m_saveEdgeScore){
         std::vector<float> edges = getEdgeScores(sortedID, edgeMap);
-        outputEdgeScores->push_back(edges);
+        outputEdgeScores->push_back(std::move(edges));
       }
     }
 

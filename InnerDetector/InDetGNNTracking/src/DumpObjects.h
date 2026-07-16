@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETGNNTRACKING_DUMPOBJECTS_H
@@ -22,14 +22,9 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 
-
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "InDetIdentifier/PixelID.h"
-#include "InDetIdentifier/SCT_ID.h"
-#include "Identifier/IdentifierHash.h"
-#include "PixelReadoutGeometry/PixelDetectorManager.h"
-#include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
+
 
 class PixelID;
 class SCT_ID;

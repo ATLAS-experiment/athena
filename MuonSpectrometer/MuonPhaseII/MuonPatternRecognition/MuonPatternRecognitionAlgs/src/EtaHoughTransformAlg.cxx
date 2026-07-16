@@ -284,7 +284,76 @@ bool EtaHoughTransformAlg::passSeedQuality (const HoughSetupForBucket& currentBu
     ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": "<<currentBucket.bucket->msSector()->identString()<< 
                   ", seen prec: "<<seenPrecisionChambers<<", required: "<<minSeenPrecisionChambers
             <<" -- layers: "<<seenLayers.size()<<", required: "<<minLayers);
+
+
     return seenPrecisionChambers >= minSeenPrecisionChambers && (int)seenLayers.size() >= minLayers; 
+}
+
+void EtaHoughTransformAlg::visualizeBucketSeed(const EventContext& ctx, HoughSetupForBucket& bucket, const SegmentSeed& seed, bool seedPassedSelection) const {
+    ATH_MSG_DEBUG("Visualising seed with  hits");
+    MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{}; 
+    for (auto & chamber : bucket.bucket->chamberLocations()){
+        primitives.push_back(MuonValR4::drawBox(chamber.minY(), chamber.minZ(), chamber.maxY(), chamber.maxZ(), kGray+2)); 
+
+        //This part was only for rejected seeds? probably to check why the seed failed and the crossing of chambers in Mdt
+        const Identifier detId{chamber.readoutEle()->identify()};
+        const int eta = m_idHelperSvc->stationEta(detId);
+        std::string chLabel = std::format("{:}{:1d}{:}{:2d}", m_idHelperSvc->stationNameString(detId), 
+                                          std::abs(eta), eta > 0? 'A' : 'C', m_idHelperSvc->stationPhi(detId));
+        switch (chamber.readoutEle()->detectorType()) {
+            case ActsTrk::DetectorType::Mdt: {
+                chLabel += std::format("M{:1d}", m_idHelperSvc->mdtIdHelper().multilayer(detId));
+            } default:
+                break;
+        }
+        primitives.push_back(MuonValR4::drawLabel(chLabel, chamber.minY(), chamber.maxZ() + 0.02,8));
+    }
+
+    //Information on the seed weighted hits are already in the accumulator, here keep only if rejected or accepted 
+    primitives.push_back(MuonValR4::drawLabel(std::format("{} Segment seed", (seedPassedSelection) ? "Accepted" : "Rejected"),0.05,0.03,12)); 
+    m_visionTool->visualizeSeed(ctx, seed, "#eta-HoughSeed", std::move(primitives));
+}
+    
+void EtaHoughTransformAlg::visualizeBucketAccumulator(const EventContext& ctx, HoughEventData& data, HoughSetupForBucket& bucket, const std::vector<ActsPeakFinderForMuon::Maximum>& maxima) const {
+    ATH_MSG_DEBUG("Visualising accumulator for bucket: " << bucket.bucket->msSector()->identString()
+                  << " with " << maxima.size() << " maxima found");
+    //Visualise all maxima together if any
+    MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};  
+    primitivesForAcc.push_back(MuonValR4::drawLabel( std::format("Event: {:}, chamber : {:} nMaximaFound : {:}", ctx.eventID().event_number(), bucket.bucket->msSector()->identString(), maxima.size() ),0.05,0.06,12));
+
+    //Loop over all maxima and retrieve the number of hits vs precision hits for each maximum and add to the visualisation
+    unsigned iMax{0};
+    for (const auto& max : maxima) {
+        unsigned nPrec{0}, nTotal{0};
+        unsigned nPrecCentreBin{0}, nTotalCentreBin{0};
+
+        //This first counter gives us idea on weighted hit counts that are used to when forming maxima seeds 
+        for (const HoughHitType& hit : max.hitIdentifiers) {
+            nPrec += isPrecisionHit(hit);
+            ++nTotal;
+        }
+
+        //This second count is later on used for number of precision hit cuts (currently implemented only for the centre bin of the maximum)
+        auto toBins = [&data](double x, double y){
+            return std::make_pair(
+                Acts::HoughTransformUtils::binIndex(data.currAxisRanges.xMin, data.currAxisRanges.xMax, data.houghPlane->nBinsX(), x), 
+                Acts::HoughTransformUtils::binIndex(data.currAxisRanges.yMin, data.currAxisRanges.yMax, data.houghPlane->nBinsY(), y)
+            );
+        };
+
+        auto accumulatorBins = toBins(max.x,max.y);
+        for (const HoughHitType& hit : data.houghPlane->hitIds(accumulatorBins.first, accumulatorBins.second)) {
+            nPrecCentreBin += isPrecisionHit(hit);
+            ++nTotalCentreBin;
+        } 
+
+        primitivesForAcc.push_back(MuonValR4::drawLabel(std::format("Maximum at (tanTheta, y0) = ({:.2f}, {:.1f}) with {}/{} (precWIsland/totalWIsland) and {}/{} (precWCentre/totalWCentre)", max.x, max.y, nPrec, nTotal, nPrecCentreBin, nTotalCentreBin),0.05,0.03 - iMax*0.01,10));
+        ++iMax;
+    }
+
+    m_visionTool->visualizeAccumulator(ctx, *data.houghPlane, data.currAxisRanges, maxima,
+                                           "EtaHoughAccumulator", std::move(primitivesForAcc));
+
 }
 
 
@@ -292,6 +361,15 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
                                          HoughEventData& data, 
                                          HoughSetupForBucket& bucket) const {
     /// tune the search space
+    ATH_MSG_VERBOSE("Processing bucket for station "<<bucket.bucket->msSector()->identString()
+        <<", with hits in the bucket in "<< bucket.bucket->coveredMin() 
+        <<" - "<<bucket.bucket->coveredMax() 
+        <<". The bucket found a search range of ("
+        <<bucket.searchWindowTanAngle.first<<" - "
+        <<bucket.searchWindowTanAngle.second<<") and ("
+        <<bucket.searchWindowIntercept.first<<" - "
+        <<bucket.searchWindowIntercept.second 
+        <<")");
 
     double chamberCenter = 0.5 * (bucket.searchWindowIntercept.first +
                                   bucket.searchWindowIntercept.second);
@@ -322,13 +400,8 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
     for (const SpacePointBucket::value_type& hit : *(bucket.bucket)) {
         fillFromSpacePoint(data, hit.get());
     }
-    auto maxima = data.peakFinder->findPeaks(*(data.houghPlane), data.currAxisRanges);
-    if (m_visionTool.isEnabled()) {
-        m_visionTool->visualizeAccumulator(ctx, *data.houghPlane, data.currAxisRanges, maxima,
-                                           "#eta Hough accumulator");
-    }
-    if (maxima.empty()) {
-        ATH_MSG_DEBUG("Station "<<bucket.bucket->msSector()->identString()
+
+        ATH_MSG_VERBOSE("Station "<<bucket.bucket->msSector()->identString()
             <<":\n     Mean tanBeta was "<<tanThetaMean 
             << " and my intercept "<<chamberCenter 
             <<", with hits in the bucket in "<< bucket.bucket->coveredMin() 
@@ -343,6 +416,17 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
             <<"] and ["<<searchStart<<" - "<<searchEnd
             <<"] with "<<m_nBinsTanTheta<<" and "
             <<m_nBinsIntercept<<" bins.");  
+
+
+    auto maxima = data.peakFinder->findPeaks(*(data.houghPlane), data.currAxisRanges);
+
+    if (m_visionTool.isEnabled()) {
+        visualizeBucketAccumulator(ctx,  data,  bucket,  maxima);
+    }
+    
+
+    if (maxima.empty()) {
+        ATH_MSG_VERBOSE("No maxima found for the bucket in question");
         return;
     }
 
@@ -352,8 +436,11 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
 
     // now clean up and potentially write the maxima
     for (const auto& max : maxima) {
+        ATH_MSG_VERBOSE("Found maximum at (tanTheta, y0) = (" << max.x << ", " << max.y
+                      << ") with " << max.hitIdentifiers.size() << " hits");
 
-        // precision hit cut, using only the measurements on the hough maximum
+        //Should this be really accepting just the centre bin of the maximum?
+        bool maxPassSelection = true;
         unsigned int nPrec{0};
         auto toBins = [&data](double x, double y){
             return std::make_pair(
@@ -361,6 +448,7 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
                 Acts::HoughTransformUtils::binIndex(data.currAxisRanges.yMin, data.currAxisRanges.yMax, data.houghPlane->nBinsY(), y)
             );
         };
+
         auto accumulatorBins = toBins(max.x,max.y); 
         for (const HoughHitType& hit : data.houghPlane->hitIds(accumulatorBins.first, accumulatorBins.second)) {
             auto res = seenHits.emplace(hit); 
@@ -368,74 +456,47 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
                 nPrec += isPrecisionHit(hit);
             }
         }
-        if (nPrec < m_nPrecHitCut) {
-            ATH_MSG_VERBOSE("The maximum did not pass the precision hit cut");
-            continue;
-        }      
 
-        // convert the set of hit identifiers from ACTS to the vector we need later 
+        // convert the set of hit identifiers from ACTS to the vector we need later, the counts are weighted already 
         std::vector<HoughHitType> hitList{max.hitIdentifiers.begin(), max.hitIdentifiers.end()};
 
-        // apply a seed quality cut. 
-        if (!passSeedQuality(bucket, max)) {
-            // if seed visualisation is enabled, draw the rejected seed 
-            if (m_visionTool.isEnabled()) {
-                const HoughMaximum& houghMax{max.x, max.y, 1. *hitList.size(), std::move(hitList), bucket.bucket};
-                const SegmentSeed seed{houghMax};
-                MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};  
-                MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};  
-                for (auto & chamber : bucket.bucket->chamberLocations()) {
-                    primitives.push_back(MuonValR4::drawBox(chamber.minY(), chamber.minZ(), 
-                                                            chamber.maxY(), chamber.maxZ(), kGray+2)); 
-                    const Identifier detId{chamber.readoutEle()->identify()};
-                    const int eta = m_idHelperSvc->stationEta(detId);
-                    std::string chLabel = std::format("{:}{:1d}{:}{:2d}", m_idHelperSvc->stationNameString(detId), 
-                                                      std::abs(eta), eta > 0? 'A' : 'C', m_idHelperSvc->stationPhi(detId));
-                    switch (chamber.readoutEle()->detectorType()) {
-                        case ActsTrk::DetectorType::Mdt: {
-                            chLabel += std::format("M{:1d}", m_idHelperSvc->mdtIdHelper().multilayer(detId));
-                        } default:
-                            break;
-                    }
-                    primitives.push_back(MuonValR4::drawLabel(chLabel, chamber.minY(), chamber.maxZ() + 0.02,8));
-                }
-       
-                primitives.push_back(MuonValR4::drawLabel(std::format("Missed seed - score {}, layer score {}, comprising {} measurements ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size()),0.05,0.03,12)); 
-       
-                primitivesForAcc.push_back(MuonValR4::drawLabel(std::format("Missed seed - score {}, layer score {}, comprising {} measurements ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size()),0.05,0.03,12)); 
-                m_visionTool->visualizeAccumulator(ctx, *data.houghPlane, data.currAxisRanges, {max},
-                                "MissedAccumulator", std::move(primitivesForAcc));
-                m_visionTool->visualizeSeed(ctx, seed, "Missed seed",std::move(primitives));
-            }
+        // Apply a seed quality cut. 
+        if ( (nPrec < m_nPrecHitCut) || !passSeedQuality(bucket, max)) {
+            ATH_MSG_VERBOSE("Did not pass nPrecisionHit cuts or seedQuality cuts. Number of precision hits in the centre bin of maxima " << nPrec << " (required " << m_nPrecHitCut << ")");
+            maxPassSelection = false;
+        }
+
+        //Continue only if maximum passes selection or visionTool is enabled to investigate the rejected seeds
+        if (!maxPassSelection && !m_visionTool.isEnabled()) {
             continue;
         }
-        
+
         // this seed looks good! Let's finalise it 
         size_t nHits = hitList.size();
-        // add phi measurements - will be filtered for compatibility in separate algorithm
+        // add phi measurements - will be filtered for compatibility in separate algorithm (keep this only for passed seed?)
         extendWithPhiHits(hitList, bucket, max.x, max.y);
+
         // sort hits by layer 
         const SpacePointPerLayerSorter sorter{};
         std::ranges::stable_sort(hitList, sorter);
         // create hough maximum instance and add it to the event data for later writing! 
-        const HoughMaximum& houghMax{data.maxima.emplace_back(max.x, max.y, nHits, std::move(hitList), bucket.bucket)};
+        //The third par expects weighted count in the maxima, which the tool currently does not retrieve, so for now here we provide just unweighted total count in the maxima
+        HoughMaximum houghMax{max.x, max.y, double(nHits), std::move(hitList), bucket.bucket};
 
+        //Only add maxima that pass the selection criteria to the output container
+        if (maxPassSelection) data.maxima.emplace_back(houghMax);
+
+        //The rest here is only for visualisation purposes, so we can keep it even if the seed is rejected
         // if desired, visualise the result 
         if (m_visionTool.isEnabled()) {
             const SegmentSeed seed{houghMax};
-            MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{}; 
-            MuonValR4::IPatternVisualizationTool::PrimitiveVec primitivesForAcc{};   
-            for (auto & chamber : bucket.bucket->chamberLocations()){
-                primitives.push_back(MuonValR4::drawBox(chamber.minY(), chamber.minZ(), chamber.maxY(), chamber.maxZ(), kGray+2)); 
-            }
-            primitives.push_back(MuonValR4::drawLabel(std::format("score {}, layer score {}, comprising {} measurements. wx = {:.2f}, wy = {:.1f} ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size(), max.wx, max.wy),0.05,0.03,12)); 
-            primitivesForAcc.push_back(MuonValR4::drawLabel(std::format("score {}, layer score {}, comprising {} measurements. wx = {:.2f}, wy = {:.1f} ",data.houghPlane->nHits(accumulatorBins.first, accumulatorBins.second),data.houghPlane->nLayers(accumulatorBins.first, accumulatorBins.second),hitList.size(), max.wx / m_targetResoTanTheta, max.wy / m_targetResoIntercept),0.05,0.03,12)); 
-
-            m_visionTool->visualizeAccumulator(ctx, *data.houghPlane, data.currAxisRanges, {max},"#eta Hough accumulator", std::move(primitivesForAcc));
-            m_visionTool->visualizeSeed(ctx, seed, "#eta-HoughSeed", std::move(primitives));
+            visualizeBucketSeed(ctx, bucket, seed, maxPassSelection);
         }
-    }
+    } //end loop over maxima
+
+    ATH_MSG_DEBUG("Found " << data.maxima.size() << " maxima for bucket: " << bucket.bucket->msSector()->identString());
 }
+
 void EtaHoughTransformAlg::fillFromSpacePoint(HoughEventData& data, const HoughHitType& SP) const {
 
     using namespace std::placeholders; 

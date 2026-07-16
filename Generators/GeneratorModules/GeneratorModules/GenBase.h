@@ -34,7 +34,6 @@
 ///
 /// The common behavior currently consists of:
 ///   - Standard access to the event collection and its first member
-///   - Providing access to the HepPDT ParticleProperties Table
 ///   - Including standard HepMC and Athena framework headers and CMT uses
 ///
 /// The following virtual methods should be overloaded in the child class:

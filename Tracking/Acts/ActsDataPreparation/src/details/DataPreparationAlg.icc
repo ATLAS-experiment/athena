@@ -144,9 +144,20 @@ namespace ActsTrk {
 	      continue;
 	    }
 	  } else {
-	    if ( inputPrdMap and inputPrdMap->isUsed((*firstElement)->measurements()[0]->identifier()) ) {
-              ++nRejected;
-	      continue;
+	    // a space point is unusable if ANY of its measurements (two
+	    // clusters for strip space points) was consumed by a previous pass
+	    if ( inputPrdMap ) {
+	      bool used = false;
+	      for (const xAOD::UncalibratedMeasurement* meas : (*firstElement)->measurements()) {
+	        if ( inputPrdMap->isUsed(meas->identifier()) ) {
+	          used = true;
+	          break;
+	        }
+	      }
+	      if ( used ) {
+	        ++nRejected;
+	        continue;
+	      }
 	    }
 	  }
 	  outputCollection.push_back(*firstElement);
@@ -203,9 +214,20 @@ namespace ActsTrk {
               continue;
             }
           } else {
-            if ( inputPrdMap and inputPrdMap->isUsed(ce->container->at(i)->measurements()[0]->identifier()) ) {
-              ++nRejected;
-              continue;
+            // a space point is unusable if ANY of its measurements (two
+            // clusters for strip space points) was consumed by a previous pass
+            if ( inputPrdMap ) {
+              bool used = false;
+              for (const xAOD::UncalibratedMeasurement* meas : ce->container->at(i)->measurements()) {
+                if ( inputPrdMap->isUsed(meas->identifier()) ) {
+                  used = true;
+                  break;
+                }
+              }
+              if ( used ) {
+                ++nRejected;
+                continue;
+              }
             }
           }
 	  

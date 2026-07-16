@@ -14,11 +14,10 @@
 #include <MuonRecToolInterfacesR4/ISpacePointCalibrator.h>
 #include <MuonPatternHelpers/SegmentLineFitter.h>
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
-#include <MuonTrackFindingTools/MsTrackSeeder.h>
 #include "MuonSpacePoint/SpacePointPerLayerSorter.h"
-#include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 
 #include <MuonRecToolInterfacesR4/IPatternVisualizationTool.h>
+#include <MuonRecToolInterfacesR4/ITrackSeedingTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 
 
@@ -73,14 +72,15 @@ namespace MuonR4::FastReco{
                 bool ignoreFailedPreFit{false};
                 /** @brief Maximum number of iterations in the fit */
                 unsigned maxIter{50};
-                /** @brief Steps between two segments to integrate the magnetic field */
-                unsigned nFieldSteps{30};
                 /** @brief Pointer to the calibrator */
                 const ISpacePointCalibrator* calibrator{nullptr};
                 /** @brief Pointer to the visualization tool */
                 const MuonValR4::IPatternVisualizationTool* visionTool{nullptr};
                 /** @brief Pointer to the idHelperSvc */
                 const Muon::IMuonIdHelperSvc* idHelperSvc{nullptr};
+                /** @brief Pointer to the track seeder for momentum estimate */
+                const ITrackSeedingTool* trackSeeder{};
+
             };
 
             /** @brief Standard constructor
@@ -93,13 +93,11 @@ namespace MuonR4::FastReco{
              *         it fits segments in each station and use them to estimate the muon momentum.
              *  @param ctx: Event context
              *  @param gctx: Geometry context
-             *  @param magField: Magnetic field
              *  @param pattern: Global pattern
              *  @param outMuons: Output muon container to be filled
              *  @return: Pointer to the built muon candidate if successful, otherwise nullptr */
             xAOD::Muon* buildMuonCandidate(const EventContext& ctx,
                                            const ActsTrk::GeometryContext& gctx,
-                                           const AtlasFieldCacheCondObj& magField,
                                            const GlobalPattern& pattern,
                                            MuonCont_t& outMuons) const;
         private:
@@ -138,8 +136,6 @@ namespace MuonR4::FastReco{
             std::unique_ptr<LineFitter> m_nswFitter{};
             /** @brief Pointer to the L-R segment seeder */
             std::unique_ptr<MdtSegmentSeeder> m_mdtSeeder{};
-            /** @brief Pointer to the track seeder for momentum estimate */
-            std::unique_ptr<MsTrackSeeder> m_trackSeeder{};
     };
 }
 

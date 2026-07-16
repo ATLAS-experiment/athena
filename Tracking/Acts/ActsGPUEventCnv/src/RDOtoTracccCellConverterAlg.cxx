@@ -5,6 +5,11 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "PixelReadoutGeometry/PixelDetectorManager.h"
+#include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "InDetRawData/PixelRDORawData.h"
 #include "InDetRawData/SCT_RDORawData.h"
 #include "traccc/io/csv/cell.hpp"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,26 +21,10 @@
 #include "GaudiKernel/ITHistSvc.h"
 
 
-// constructor
-Trk::GeometryJsonDumper::GeometryJsonDumper(const std::string& t, const std::string& n, const IInterface* p) : 
-  Trk::RecursiveGeometryProcessor(t,n,p),
-  m_outputFileName("TrackingGeometry.json"),
-  m_outputPrecision(6),
-  m_firstLayerWritten(false)
-{
-    declareProperty("OutputFileName",  m_outputFileName);
-    declareProperty("OutputPrecision", m_outputPrecision);
-}
-
-// destructor
-Trk::GeometryJsonDumper::~GeometryJsonDumper()
-= default;
-
-
 StatusCode Trk::GeometryJsonDumper::initialize()
 {
     // open the file for writing
-    m_outputFile.open(m_outputFileName.c_str());
+    m_outputFile.open(m_outputFileName.value().c_str());
     m_outputFile << "[";
     m_outputFile << std::setiosflags(std::ios::fixed);
     m_outputFile << std::setprecision(3);        

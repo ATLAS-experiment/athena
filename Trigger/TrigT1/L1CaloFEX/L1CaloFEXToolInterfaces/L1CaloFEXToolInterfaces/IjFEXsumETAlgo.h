@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //             Interface for jFEXsumETAlgo - Algorithm for Sum ET Algorithm in jFEX
@@ -26,12 +26,12 @@ class IjFEXsumETAlgo : virtual public IAlgTool {
         virtual StatusCode reset() =0;
         virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) = 0;
         virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) = 0;
-        virtual int getTTowerET(unsigned int ) =0;
+        virtual int getTTowerET(unsigned int ) const =0;
         
         virtual void buildBarrelSumET()  =0;
         virtual void buildFWDSumET()  =0;
-        virtual std::tuple<int, bool> getETlowerEta(uint )  =0;
-        virtual std::tuple<int, bool> getETupperEta(uint )  =0;
+        virtual std::tuple<int, bool> getETlowerEta(uint ) const =0;
+        virtual std::tuple<int, bool> getETupperEta(uint ) const =0;
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  =0;
         
     private:

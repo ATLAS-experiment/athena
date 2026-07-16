@@ -40,5 +40,23 @@ namespace ActsTrk {
         }
         return xAOD::UncalibMeasType::nTypes;
     }
+    Trk::TrackInfo::TrackFitter toTrkFitterType(const xAOD::TrackFitter fType) {
+        switch (fType) {
+            using enum xAOD::TrackFitter;
+            case Unknown: return Trk::TrackInfo::TrackFitter::Unknown;
+            case iPatTrackFitter: return Trk::TrackInfo::TrackFitter::iPatTrackFitter;
+            case xKalman: return Trk::TrackInfo::TrackFitter::xKalman;
+            case GaussianSumFilter: return Trk::TrackInfo::TrackFitter::GaussianSumFilter;
+            case GlobalChi2Fitter: return Trk::TrackInfo::TrackFitter::GlobalChi2Fitter;
+            case DistributedKalmanFilter: return Trk::TrackInfo::TrackFitter::DistributedKalmanFilter;
+            case DeterministicAnnealingFilter: return Trk::TrackInfo::TrackFitter::DeterministicAnnealingFilter;
+            case KalmanFitter: return Trk::TrackInfo::TrackFitter::KalmanFitter;
+            case KalmanDNAFitter: return Trk::TrackInfo::TrackFitter::KalmanDNAFitter;
+            case MuonboyFitter: return Trk::TrackInfo::TrackFitter::MuonboyFitter;
+
+            default: 
+                throw std::runtime_error("toTrkFitterType() - Unsupported type parsed");
+        }
+    }
 
 }

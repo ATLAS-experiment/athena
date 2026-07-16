@@ -109,6 +109,8 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   // check for <noover> - disables using tag override read from input file
   m_notagoverride=folderprop.noTagOverride();
 
+
+  //Override of CREST reading location for this folder
   std::string dbconn;
   folderprop.getKey("db", "",dbconn);
   if (dbconn.find("crest")!=std::string::npos) {
@@ -118,14 +120,16 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
     const std::string fsPrefix("crest_fs:");
     if (dbconn.starts_with(fsPrefix)) dbconn=dbconn.substr(fsPrefix.size());
     ATH_MSG_INFO("Crest server for folder " << m_foldername << " overridden to " << dbconn);
-    m_crestServer=dbconn;  
-    if (!m_jotag.empty()) {
-      ATH_MSG_INFO("Crest Tag " << m_crestTag << " overridden by job options to " << m_jotag);
-      m_crestTag=m_jotag;
-    }
+    m_crestServer=dbconn;
   }
 
-
+  //Override of the crest-tag for this folder
+  std::string crestFldrTag;
+  if (folderprop.getKey("ctag","",crestFldrTag)) {
+      ATH_MSG_INFO("Crest Tag " << m_crestTag << " overridden by job options to " << crestFldrTag <<  " for folder " << m_foldername);
+      m_crestTag=crestFldrTag;
+  }
+  
   if (m_source == "CREST"){
     m_crest_mng.emplace(CoralCrestManager(m_crestServer,m_crestTag));
   }

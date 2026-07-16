@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelRDORetriever.h"
 
 #include "InDetIdentifier/PixelID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
-//#include "TrkEventPrimitives/LocalPosition.h"
-//#include "GaudiKernel/SystemOfUnits.h"
+
 
 #include "JiveXML/IFormatTool.h"
 
@@ -99,12 +98,12 @@ namespace JiveXML {
     //Create a data map
     DataMap dataMap;
     //Add the data vectors to our map
-    dataMap["id"]=idVec;
-    dataMap["x"]=xVec;
-    dataMap["y"]=yVec;
-    dataMap["z"]=zVec;
-    dataMap["phiModule"]=phiModuleVec;
-    dataMap["etaModule"]=etaModuleVec;
+    dataMap["id"]=std::move(idVec);
+    dataMap["x"]=std::move(xVec);
+    dataMap["y"]=std::move(yVec);
+    dataMap["z"]=std::move(zVec);
+    dataMap["phiModule"]=std::move(phiModuleVec);
+    dataMap["etaModule"]=std::move(etaModuleVec);
 
     /**
      * NOTE: This is a temporary fix. Using rdoContainer.key() results in a segfault!

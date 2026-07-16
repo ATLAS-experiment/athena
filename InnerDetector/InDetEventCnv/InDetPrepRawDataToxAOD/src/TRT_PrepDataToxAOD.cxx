@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -276,7 +276,7 @@ StatusCode TRT_PrepDataToxAOD::execute(const EventContext& ctx)
 	  for (auto i = range.first; i != range.second; ++i) {
 	    uniqueIDs.push_back( HepMC::uniqueID(i->second) );
 	  }
-	  AUXDATA(xprd,  std::vector<int> , truth_barcode) = uniqueIDs; // TODO rename variable to be consistent?
+	  AUXDATA(xprd,  std::vector<int> , truth_barcode) = std::move(uniqueIDs); // TODO rename variable to be consistent?
 	}
       }
       if (m_writeSDOs) {

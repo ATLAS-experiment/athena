@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,7 +6,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # Sum of weights algorithm
 def SumOfWeightsAlgCfg(flags, name, **kwargs):
     """ Get the sum of weights algorithm """
-    acc = ComponentAccumulator()
+    from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+    acc = CutFlowSvcCfg( flags )
     SumOfWeightsAlg = CompFactory.SumOfWeightsAlg
     acc.addEventAlgo( SumOfWeightsAlg(name=name, **kwargs) )
     return acc

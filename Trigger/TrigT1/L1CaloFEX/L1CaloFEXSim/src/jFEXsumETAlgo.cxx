@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXsumETAlgo - Algorithm for Sum ET Algorithm in jFEX
@@ -7,9 +7,7 @@
 //     begin                : 12 05 2021
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
-#include <iostream>
 #include <vector>
-#include <stdio.h>
 #include <math.h>
 #include "jFEXsumETAlgo.h"
 #include "L1CaloFEXSim/jTower.h"
@@ -142,30 +140,30 @@ void LVL1::jFEXsumETAlgo::buildFWDSumET()
 
 }
 
-std::tuple<int, bool> LVL1::jFEXsumETAlgo::getETlowerEta(uint bin)
+std::tuple<int, bool> LVL1::jFEXsumETAlgo::getETlowerEta(uint bin) const
 {
     uint max = m_SumET.size() > (bin + 1) ? bin : m_SumET.size();
-    m_SumlowEta = 0;
-    m_SumlowEtaSat = 0;
+    int SumlowEta = 0;
+    bool SumlowEtaSat = false;
     for(uint ieta=0;ieta<max;ieta++){
-        m_SumlowEta+=m_SumET.at(ieta);
-        m_SumlowEtaSat = m_SumlowEtaSat || m_SumETSat.at(ieta);
+      SumlowEta += m_SumET.at(ieta);
+      SumlowEtaSat = SumlowEtaSat || m_SumETSat.at(ieta);
     }
-    return {m_SumlowEta,m_SumlowEtaSat};
+    return {SumlowEta, SumlowEtaSat};
 }
 
 
 
-std::tuple<int, bool> LVL1::jFEXsumETAlgo::getETupperEta(uint bin)
+std::tuple<int, bool> LVL1::jFEXsumETAlgo::getETupperEta(uint bin) const
 {
     uint min = m_SumET.size() > (bin + 1) ? bin : m_SumET.size();
-    m_SumhighEta = 0;
-    m_SumhighEtaSat = 0;
+    int SumhighEta = 0;
+    bool SumhighEtaSat = false;
     for(uint ieta=min;ieta<m_SumET.size();ieta++){
-        m_SumhighEta+=m_SumET.at(ieta);
-        m_SumhighEtaSat = m_SumhighEtaSat || m_SumETSat.at(ieta);
+      SumhighEta += m_SumET.at(ieta);
+      SumhighEtaSat = SumhighEtaSat || m_SumETSat.at(ieta);
     }
-    return {m_SumhighEta,m_SumhighEtaSat};
+    return {SumhighEta, SumhighEtaSat};
 }
 
 
@@ -180,7 +178,7 @@ bool LVL1::jFEXsumETAlgo::getTTowerSat(unsigned int TTID ) {
 }
 
 //Gets the ET for the TT. This ET is EM + HAD
-int LVL1::jFEXsumETAlgo::getTTowerET(unsigned int TTID ) {
+int LVL1::jFEXsumETAlgo::getTTowerET(unsigned int TTID ) const {
     if(TTID == 0) {
         return 0;
     } 

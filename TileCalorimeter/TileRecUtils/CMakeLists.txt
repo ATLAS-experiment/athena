@@ -4,7 +4,6 @@
 atlas_subdir( TileRecUtils )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 
 # Component(s) in the package:
@@ -12,14 +11,13 @@ atlas_add_library( TileRecUtilsLib
                    src/Tile*.cxx
                    PUBLIC_HEADERS TileRecUtils
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloIdentifier AthenaBaseComps AthenaKernel Identifier GaudiKernel TileEvent TileIdentifier TileConditionsLib CaloInterfaceLib CaloUtilsLib StoreGateLib xAODEventInfo LumiBlockData
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AthAllocators CaloDetDescrLib CaloEvent CxxUtils EventContainers GeoModelInterfaces PathResolver TileCalibBlobObjs TileDetDescr TileSimEvent )
+                   PRIVATE_LINK_LIBRARIES AthAllocators CaloDetDescrLib CaloEvent CxxUtils EventContainers GeoModelInterfaces PathResolver TileCalibBlobObjs TileDetDescr TileSimEvent )
 
 atlas_add_component( TileRecUtils
                      src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES TileRecUtilsLib )
 
 # Install files from the package:

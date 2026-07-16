@@ -14,7 +14,7 @@
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 
 #include <algorithm>
-#include "HepPDT/ParticleDataTable.hh"
+#include "GeneratorModules/GenData.h"
 
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/VertexContainer.h"
@@ -62,8 +62,7 @@ namespace DerivationFramework {
 
         ATH_CHECK( m_eventInfo_key.initialize() );
 
-        ATH_CHECK( m_partPropSvc.retrieve() );
-        auto pdt = m_partPropSvc->PDT();
+        auto gendata = std::make_shared<GenData>();
         
         // Ds+/-        : K K π
         // D+/-         : K π π
@@ -71,22 +70,22 @@ namespace DerivationFramework {
 
         // retrieve particle masses
         if(m_vtx0MassHypo < 0.)
-          m_vtx0MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::BCPLUS);
+          m_vtx0MassHypo = gendata->particleMass(MC::BCPLUS).value();
         if(m_vtx1MassHypo < 0.) {
-          if(std::abs(m_Dx_pid) == 411) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::DPLUS);
-          if(std::abs(m_Dx_pid) == 431) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::DSPLUS);
-          if(std::abs(m_Dx_pid) == 4122) m_vtx1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDACPLUS);
+          if(std::abs(m_Dx_pid) == 411) m_vtx1MassHypo = gendata->particleMass(MC::DPLUS).value();
+          if(std::abs(m_Dx_pid) == 431) m_vtx1MassHypo = gendata->particleMass(MC::DSPLUS).value();
+          if(std::abs(m_Dx_pid) == 4122) m_vtx1MassHypo = gendata->particleMass(MC::LAMBDACPLUS).value();
         }
 
-        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::MUON);
+        if(m_vtx0Daug1MassHypo < 0.) m_vtx0Daug1MassHypo = gendata->particleMass(MC::MUON).value();
         if(m_vtx1Daug1MassHypo < 0.) {
-           if(std::abs(m_Dx_pid) == 431) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::KPLUS); //Ds+
-           else m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS); //D+, Lambda_c+
+           if(std::abs(m_Dx_pid) == 431) m_vtx1Daug1MassHypo = gendata->particleMass(MC::KPLUS).value(); //Ds+
+           else m_vtx1Daug1MassHypo = gendata->particleMass(MC::PIPLUS).value(); //D+, Lambda_c+
         }
-        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::KPLUS);
+        if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = gendata->particleMass(MC::KPLUS).value();
         if(m_vtx1Daug3MassHypo < 0.) {
-            if(std::abs(m_Dx_pid) == 4122) m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PROTON); //Lambda_c+
-            else m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, MC::PIPLUS); //Ds+, D+
+            if(std::abs(m_Dx_pid) == 4122) m_vtx1Daug3MassHypo = gendata->particleMass(MC::PROTON).value(); //Lambda_c+
+            else m_vtx1Daug3MassHypo = gendata->particleMass(MC::PIPLUS).value(); //Ds+, D+
         }
         return StatusCode::SUCCESS;
     }

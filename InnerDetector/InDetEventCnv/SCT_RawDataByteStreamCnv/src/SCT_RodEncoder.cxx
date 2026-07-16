@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_RodEncoder.h" 
@@ -213,6 +213,7 @@ void SCT_RodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
     else { // Expanded mode
       vecTimeBins.clear();
       const SCT_RDORawData* rdo{vecRDOs.at(iRDO)};
+      //coverity[UNUSED_VALUE:FALSE]
       strip = getStrip(rdo);
       timeBin = getTimeBin(rdo);
       groupSize = rdo->getGroupSize();

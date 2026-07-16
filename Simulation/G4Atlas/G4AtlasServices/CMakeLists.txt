@@ -24,12 +24,12 @@ set_target_properties( G4AtlasServices PROPERTIES INTERPROCEDURAL_OPTIMIZATION $
 #test G4AtlasFieldServices
 atlas_add_test( G4AtlasFieldServices_test
                 SCRIPT test/G4AtlasFieldServices_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 #test G4AtlasServicesConfig
 atlas_add_test( G4AtlasServicesConfig_test
                 SCRIPT test/G4AtlasServicesConfig_test.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py

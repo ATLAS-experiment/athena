@@ -46,7 +46,6 @@ def ITkMaterialMappingCfg(flags, name="ITkMaterialMapping", **kwargs):
       
   if 'LayerMaterialAnalysers' not in kwargs :
       BinnedLayerMaterialAnalyser = CompFactory.Trk.LayerMaterialAnalyser(name="BinnedLayerMaterialAnalyser")
-      BinnedLayerMaterialAnalyser.LayerMaterialName         =  LayerMaterialName
       BinnedLayerMaterialAnalyser.ValidationTreeName        = 'BinnedLayerMaterialAnalyser'
       BinnedLayerMaterialAnalyser.ValidationTreeDescription = 'Output of the BinnedLayerMaterialAnalyser'
       BinnedLayerMaterialAnalyser.ValidationTreeFolder      = '/val/BinnedLayerMaterialAnalyser'

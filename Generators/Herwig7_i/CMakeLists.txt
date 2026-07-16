@@ -37,6 +37,12 @@ atlas_add_component( Herwig7_i
    ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${OPENLOOPS_LIBRARIES}
    GeneratorModulesLib xAODEventInfo GaudiKernel PathResolver AtlasHepMCLib powhegHerwig )
 
+# Suppress ABI warning on ARM (AGENE-2423)
+if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64" )
+   target_compile_options( powhegHerwig PRIVATE -Wno-psabi )
+   target_compile_options( Herwig7_i PRIVATE -Wno-psabi )
+endif()
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/common/*.py )
@@ -45,27 +51,27 @@ atlas_install_runtime( share/file/*.pdt )
 add_library( HwShower SHARED IMPORTED )
 set_target_properties( HwShower PROPERTIES IMPORTED_LOCATION ${HERWIG3_LCGROOT}/lib/Herwig/HwShower.so)
 
-add_library( powhegSOforHerwig SHARED IMPORTED )
-set_target_properties( powhegSOforHerwig
-   PROPERTIES IMPORTED_LOCATION 
-   ${COMPILEBOX_LCGROOT}/POWHEG-BOX-RES/b_bbar_4l_modified/lib64/libpowhegSOforHerwig.so
-)
+set( POWHEG_BB4L_LIBRARY ${COMPILEBOX_LCGROOT}/POWHEG-BOX-RES/b_bbar_4l_modified/lib64/libpowhegSOforHerwig.so)
 
-atlas_add_library ( powhegHerwigBB4L
-  BB4LHerwig/BB4LPowhegLesHouchesFileReader.cc
-  BB4LHerwig/BB4LPowhegLesHouchesFileReader.h
-  BB4LHerwig/bb4lFullShowerVeto.cc
-  BB4LHerwig/bb4lFullShowerVeto.h
-  BB4LHerwig/herwig7_interface.f
-  BB4LHerwig/herwig7_interface.h
-  BB4LHerwig/herwigsettings.inc
-  BB4LHerwig/powhegAnalysis.cc
-  BB4LHerwig/powhegAnalysis.h
-  NO_PUBLIC_HEADERS
-  SHARED
-  INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} BB4LHerwig
-  LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
+if( EXISTS "${POWHEG_BB4L_LIBRARY}" )
+  add_library( powhegSOforHerwig SHARED IMPORTED )
+  set_target_properties( powhegSOforHerwig PROPERTIES IMPORTED_LOCATION  ${POWHEG_BB4L_LIBRARY} )
 
+  atlas_add_library ( powhegHerwigBB4L
+    BB4LHerwig/BB4LPowhegLesHouchesFileReader.cc
+    BB4LHerwig/BB4LPowhegLesHouchesFileReader.h
+    BB4LHerwig/bb4lFullShowerVeto.cc
+    BB4LHerwig/bb4lFullShowerVeto.h
+    BB4LHerwig/herwig7_interface.f
+    BB4LHerwig/herwig7_interface.h
+    BB4LHerwig/herwigsettings.inc
+    BB4LHerwig/powhegAnalysis.cc
+    BB4LHerwig/powhegAnalysis.h
+    NO_PUBLIC_HEADERS
+    SHARED
+    INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS} ${HERWIG3_INCLUDE_DIRS} BB4LHerwig
+    LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} ${HERWIG3_LIBRARIES} ${ZLIB_LIBRARIES} CxxUtils HwShower powhegSOforHerwig )
+endif()
 
 # Set up some environment variables for Herwig.
 set( Herwig7Environment_DIR ${CMAKE_CURRENT_SOURCE_DIR}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************************
@@ -156,22 +156,16 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
   ATH_MSG_DEBUG("fillHistograms() -- dealing with track collection: " << m_tracksName.key());
   
   // For histogram naming
-  auto residualGroup = getGroup("Residuals");
+  const auto & residualGroup = getGroup("Residuals");
   
   //counters
-  bool hasBeenCalledThisEvent=false;
   float mu = 0.;
   int nTracks = 0;
-  
+  //recreates original behaviour...but...
+  //calls this every time
   mu = lbAverageInteractionsPerCrossing(ctx);
   auto mu_m = Monitored::Scalar<float>("mu_m", 0.0);
-  if (!hasBeenCalledThisEvent){
-    mu = lbAverageInteractionsPerCrossing(ctx);
-    mu_m = mu;
-    hasBeenCalledThisEvent=true;
-  }
-  else
-    mu = -999;
+  mu_m = mu;
   
   if (m_extendedPlots){
     fill("residualGroup", mu_m);
@@ -254,12 +248,12 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       ATH_MSG_DEBUG(" --> Going to retrieve the track parameters of this TSOS: " << nTSOS);
       const Trk::TrackParameters* trackParameter = tsos->trackParameters();
       if(trackParameter==nullptr) {
-	//if no TrackParameters for TSOS we cannot define residuals
-	ATH_MSG_DEBUG(" Skipping TSOS " << nTSOS << " because it does not have TrackParameters");
-	continue;
+        //if no TrackParameters for TSOS we cannot define residuals
+        ATH_MSG_DEBUG(" Skipping TSOS " << nTSOS << " because it does not have TrackParameters");
+        continue;
       }
-       
-      const AmgSymMatrix(5)* TrackParCovariance = trackParameter ? trackParameter->covariance() : nullptr;
+      //trackParameter cannot be nullptr here
+      const AmgSymMatrix(5)* TrackParCovariance = trackParameter->covariance();
       
       if(TrackParCovariance==nullptr) {
         //if no MeasuredTrackParameters the hit will not have associated convariance error matrix and will not

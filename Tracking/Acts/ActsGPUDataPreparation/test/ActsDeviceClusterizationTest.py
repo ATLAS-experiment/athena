@@ -10,8 +10,9 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthCUDAServices.AthCUDAServicesConfig import HostMemoryResourceToolCfg, DeviceMemoryResourceToolCfg, CopyToolCfg, StreamToolCfg
 
-from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import JSONDeviceDetectorDescriptionProviderSvcCfg, CUDAClusterizerToolCfg,  DeviceClusterizationAlgCfg
+from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import CUDAClusterizerToolCfg,  DeviceClusterizationAlgCfg
 from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg, TracccMeasurementConverterAlgCfg
+from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
 
 def GPUClusterizationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
@@ -51,37 +52,32 @@ def GPUClusterizationCfg(flags) -> ComponentAccumulator:
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     flags = initConfigFlags()
 
     # ---- Input ----
-    flags.Input.Files = [
-        "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14697/RDO.33629020._000001.pool.root.1"
-    ]
+    flags.Input.Files = defaultTestFiles.RDO_RUN4
+
     flags.fillFromArgs()
 
-
-    # ---- Conditions and geometry ----
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags
-    flags.IOVDb.GlobalTag    = defaultConditionsTags.RUN4_MC
-    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-03-00-00"
-    flags.GeoModel.Align.Dynamic = False
-
-    flags.Detector.GeometryITkPixel = True
-    flags.Detector.GeometryITkStrip = True
-
-    # ---- Scheduler ----
-    flags.Concurrency.NumThreads          = 1
-    flags.Concurrency.NumConcurrentEvents = 1
-    flags.Concurrency.NumProcs            = 0
-    flags.Scheduler.ShowDataDeps          = True
-    flags.Scheduler.ShowDataFlow          = True
-    flags.Scheduler.CheckDependencies     = True
-
     flags.lock()
-    flags.dump()
 
-    acc = GPUClusterizationCfg(flags)
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    acc = MainServicesCfg(flags)
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    acc.merge(PoolReadCfg(flags))
+
+    msg_svc = acc.getService('MessageSvc')
+    msg_svc.Format = "%t % F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)
+
+    # Needed for PixelID and SCT_ID
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
+    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
+
+    acc.merge(GPUClusterizationCfg(flags))
     acc.printConfig(withDetails=True, summariseProps=True)
 
     statusCode = acc.run(flags.Exec.MaxEvents)

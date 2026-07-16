@@ -12,6 +12,7 @@
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/Identifier.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "xAODInDetMeasurement/ArrayFloat3.h"
 
 namespace xAOD {
   /// Auxiliary store for space point
@@ -26,7 +27,7 @@ namespace xAOD {
     /// @{
 
     std::vector < std::vector< DetectorIDHashType > > elementIdList;
-    std::vector < std::array < float, 3 > > globalPosition;
+    std::vector < xAOD::ArrayFloat3 > globalPosition;
     std::vector < float > radius;
     std::vector < float > varianceR;
     std::vector < float > varianceZ;

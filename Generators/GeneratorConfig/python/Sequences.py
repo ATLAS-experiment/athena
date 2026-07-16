@@ -17,19 +17,18 @@ class EvgenSequence(Enum):
 
 def EvgenSequenceFactory(sequence):
     """Factory function to return the AthSequencer instance based on the enum value."""
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    AthSequencer = CompFactory.AthSequencer
+    from AthenaCommon.CFElements import seqAND, parAND
     if sequence is EvgenSequence.Main:
-        return AthSequencer(EvgenSequence.Main.value, Sequential=True)
+        return seqAND(EvgenSequence.Main.value)
     if sequence is EvgenSequence.Generator:
-        return AthSequencer(EvgenSequence.Generator.value)
+        return seqAND(EvgenSequence.Generator.value)
     if sequence is EvgenSequence.Fix:
-        return AthSequencer(EvgenSequence.Fix.value)
+        return parAND(EvgenSequence.Fix.value)
     if sequence is EvgenSequence.PreFilter:
-        return AthSequencer(EvgenSequence.PreFilter.value)
+        return parAND(EvgenSequence.PreFilter.value)
     if sequence is EvgenSequence.Test:
-        return AthSequencer(EvgenSequence.Test.value)
+        return parAND(EvgenSequence.Test.value)
     if sequence is EvgenSequence.Filter:
-        return AthSequencer(EvgenSequence.Filter.value)
+        return parAND(EvgenSequence.Filter.value)
     if sequence is EvgenSequence.Post:
-        return AthSequencer(EvgenSequence.Post.value)
+        return parAND(EvgenSequence.Post.value)

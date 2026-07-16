@@ -51,6 +51,12 @@ namespace ActsTrk::detail {
                det_type = toMeasType(placement->detectorType());
             }
 
+            if (flag.hasNoExpectedHit()) {
+               // @TODO includes holes at sensor edges
+               ++special_hit_counts_out.at(Acts::toUnderlying(det_type)).at(Acts::toUnderlying(HitCategory::DeadSensor));
+               return;
+
+            }
             if (flag.isHole()) {
                const Amg::Vector2D localPos{state.parameters()[Acts::eBoundLoc0],
                                             state.parameters()[Acts::eBoundLoc1]};

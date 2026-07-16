@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,38 +14,10 @@
 
 // constructor
 Trk::VertexMapper::VertexMapper(const std::string& t, const std::string& n, const IInterface* p)
-: AthAlgTool(t,n,p),
-  m_trackingGeometry(nullptr),
-  m_trackingGeometryName("AtlasTrackingGeometry")
+: AthAlgTool(t,n,p)
 {
     declareInterface<IVertexMapper>(this);
-
-    // The TrackingGeometry
-    declareProperty("TrackingGeometry"                      , m_trackingGeometryName);
-
-
 }
-
-// destructor
-Trk::VertexMapper::~VertexMapper()
-= default;
-
-// Athena standard methods
-// initialize
-StatusCode Trk::VertexMapper::initialize()
-{
-
-
-    return StatusCode::SUCCESS;
-}
-
-// finalize
-StatusCode Trk::VertexMapper::finalize()
-{
-    ATH_MSG_INFO(  "finalize() successful" );
-    return StatusCode::SUCCESS;
-}
-
 
 StatusCode Trk::VertexMapper::updateTrackingGeometry() const {
     // retrieve the TrackingGeometry from the detector store

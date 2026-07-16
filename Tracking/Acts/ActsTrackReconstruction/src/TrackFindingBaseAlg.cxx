@@ -62,6 +62,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_maxSharedHits);
     ATH_MSG_DEBUG("   " << m_maxChi2);
     ATH_MSG_DEBUG("   " << m_branchStopperPtMinFactor);
+    ATH_MSG_DEBUG("   " << m_seedRefitPtMinFactor);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMaxExtra);
     ATH_MSG_DEBUG("   " << m_branchStopperMeasCutReduce);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMeasCut);
@@ -590,6 +591,7 @@ namespace ActsTrk {
                                           std::make_pair(kNDuplicateSeeds, "Duplicate seeds"),
                                           std::make_pair(kNNoEstimatedParams, "Initial param estimation failed"),
                                           std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),
+                                          std::make_pair(kNSeedRefitFailure, "Seed refit Kalman fit failure"),
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
                                           std::make_pair(kNResolvedTracks, "resolved tracks"),

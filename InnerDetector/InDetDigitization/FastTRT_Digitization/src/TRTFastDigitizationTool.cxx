@@ -519,12 +519,14 @@ StatusCode TRTFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx, 
     std::pair< DriftCircleMapItr, DriftCircleMapItr > hitsInOneStraw = m_driftCircleMap.equal_range( trtid );
     unsigned int numberOfHitsInOneStraw = m_driftCircleMap.count( itr->first );
     InDet::TRT_DriftCircle *trtDriftCircle = ( hitsInOneStraw.first )->second;
+    if (!trtDriftCircle) continue;
     IdentifierHash hash = trtDriftCircle->detectorElement()->identifyHash();
 
     // delete all driftCircles in TRT straw excert the first one, see ATLPHYSVAL-395
     bool isHT=false;
     for ( DriftCircleMapItr itr2 = ++( hitsInOneStraw.first ); itr2 != hitsInOneStraw.second; ++itr2 ) {
       InDet::TRT_DriftCircle *trtDriftCircle2 = itr2->second;
+      if (!trtDriftCircle2) continue;
       if(trtDriftCircle2->getWord() & maskHT) isHT = true;
       delete trtDriftCircle2;
     }

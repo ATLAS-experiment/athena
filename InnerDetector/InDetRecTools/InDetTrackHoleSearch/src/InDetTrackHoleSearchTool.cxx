@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -69,14 +69,7 @@ void InDet::InDetTrackHoleSearchTool::countHoles(const Trk::Track& track,
                                                  const Trk::ParticleHypothesis partHyp) const {
   std::vector<const Trk::TrackStateOnSurface*>* listOfHoles = nullptr;
   searchForHoles(track,&information,listOfHoles,partHyp);
-  if (listOfHoles) {
-    ATH_MSG_ERROR("listOfHoles is leaking in countHoles !!!");
-    for (const auto *listOfHole : *listOfHoles) {
-      delete listOfHole;
-    }
-    delete listOfHoles;
-    listOfHoles = nullptr;
-  }
+  //listOfHoles _must_ be nullptr
   }
 
 //============================================================================================

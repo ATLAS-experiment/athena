@@ -66,6 +66,17 @@ class LogicalExpressionFilter( PyAthena.Alg ):
        return super(LogicalExpressionFilter,self).__setattr__(name,value)
 
     def initialize(self):
+        import cppyy
+        cppyy.cppdef("""
+        #include "GaudiKernel/IAlgManager.h"
+        IAlgorithm* py_createAlgorithm(IAlgManager* mgr,
+                                    const std::string& type,
+                                    const std::string& name) {
+            IAlgorithm* alg = nullptr;
+            mgr->createAlgorithm(type, name, alg).ignore();
+            return alg;
+        }
+        """)
         self.algdict = {}
         filterNames = []
         # go through filters, creating if necessary 
@@ -83,9 +94,8 @@ class LogicalExpressionFilter( PyAthena.Alg ):
               error = 'could not retrieve IAlgManager/ApplicationMgr'
               self.msg.error (error)
               raise RuntimeError (error)
-           import cppyy
-           _alg = cppyy.bind_object(0, "IAlgorithm")
-           if algmgr.createAlgorithm(filterType,filterName,_alg).isFailure() or not _alg:
+           _alg = cppyy.gbl.py_createAlgorithm(algmgr, filterType, filterName)
+           if not _alg:
               self.msg.error ('could not create alg: ' + filterTypeAndName)
               raise RuntimeError ('could not create alg: ' + filterTypeAndName)
            #we are responsible for initializing it too 

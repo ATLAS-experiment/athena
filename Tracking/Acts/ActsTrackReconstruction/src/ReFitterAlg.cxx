@@ -113,7 +113,8 @@ StatusCode ReFitterAlg::execute(const EventContext &ctx) const {
     }
 
     else { //Fit from Rio_OnTrack measurments
-      auto newtrack = m_actsFitter->fit(ctx, (**track));
+      bool runOutlierRemoval = false;
+      auto newtrack = m_actsFitter->fit(ctx, (**track), runOutlierRemoval, Trk::pion);
 
       if (newtrack) {
         if (msgLvl(MSG::VERBOSE)) {

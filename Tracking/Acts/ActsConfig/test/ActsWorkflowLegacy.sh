@@ -11,10 +11,17 @@ n_events=5
 
 ignore_pattern=""
 
+export ATHENA_CORE_NUMBER=1
+
 Reco_tf.py \
+  --multithreaded True \
   --preExec "flags.Exec.FPE=-1; \
 	     flags.Acts.doLargeRadius=True; \
 	     flags.Acts.doLowPt=True; \
+	     flags.Scheduler.CheckDependencies=True; \
+	     flags.Scheduler.ShowDataDeps=True; \
+	     flags.Scheduler.ShowDataFlow=True; \
+	     flags.Scheduler.ShowControlFlow = True; \
 	     flags.Detector.EnableCalo=True;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --outputDAOD_IDTRKVALIDFile DAOD.IDTRKVALID.pool.root \

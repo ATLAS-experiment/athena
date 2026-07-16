@@ -36,6 +36,10 @@ Reco_tf.py \
     --maxEvents ${n_events} \
     --conditionsTag "${default_condition}" \
     --geometryVersion "${default_geometry}" \
+    --preExec "all:flags.Scheduler.CheckDependencies=True; \
+               flags.Scheduler.ShowDataDeps=True; \
+               flags.Scheduler.ShowDataFlow=True; \
+               flags.Scheduler.ShowControlFlow = True;" \
     --preInclude "Campaigns.PhaseIINoPileUp,InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "PyJobTransforms.UseFrontier" \
     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg; \
@@ -63,7 +67,11 @@ Reco_tf.py \
     --outputAODFile AOD.pool.root \
     --maxEvents ${n_events} \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-    	       flags.Tracking.doTIDE_AmbiTrackMonitoring=True;" \
+    	       flags.Tracking.doTIDE_AmbiTrackMonitoring=True;\
+               flags.Scheduler.CheckDependencies=True; \
+               flags.Scheduler.ShowDataDeps=True; \
+               flags.Scheduler.ShowDataFlow=True; \
+               flags.Scheduler.ShowControlFlow = True;" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
     --multithreaded
 

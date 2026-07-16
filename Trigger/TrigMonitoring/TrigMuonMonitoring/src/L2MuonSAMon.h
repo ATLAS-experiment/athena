@@ -26,6 +26,7 @@ class L2MuonSAMon : public TrigMuonMonitorAlgorithm{
 
  private:
   SG::ReadHandleKey<xAOD::L2StandAloneMuonContainer> m_L2MuonSAContainerKey {this, "L2StandAloneMuonContainerName", "HLT_MuonL2SAInfo", "L2MuonSA container"};
+  SG::ReadHandleKey<xAOD::MuonContainer> m_EFFastRecoContainerKey {this, "EFFastRecoSAContainerName", "HLT_FastMuonsInfo", "EFFastRecoSA container (Phase2)"};
 
 };
 

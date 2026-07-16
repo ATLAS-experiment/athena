@@ -58,6 +58,8 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
                                                  std::move(trackStateBackend) );
   
   if constexpr (enableBenchmark) m_chrono->chronoStart("FPGATrackSimPrototrackFitterAlg: ACTS KF");
+
+  bool initializedColumns = false;
   // now we fit each of the proto tracks
   for (auto & proto : *myProtoTracks){
     auto res = m_actsFitter->fit(proto.measurements, *proto.parameters,
@@ -72,6 +74,11 @@ StatusCode FPGATrackSim::FPGATrackSimPrototrackFitterAlg::execute(const EventCon
       ATH_MSG_INFO("There is not reference surface for this track");
       continue;
     }
+    if (!initializedColumns) {
+      trackContainer.ensureDynamicColumns(*res);
+      initializedColumns = true;
+    }
+
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
     destProxy.copyFrom(trackProxy);
   }

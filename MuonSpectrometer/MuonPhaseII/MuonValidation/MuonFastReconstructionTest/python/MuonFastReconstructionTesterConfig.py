@@ -16,10 +16,17 @@ def FastRecoVisualizationToolCfg(flags, name="FastRecoVisualizationTool", **kwar
     result.setPrivateTools(the_tool)
     return result
 
-def MuonFastRecoTesterCfg(flags, name = "MuonFastRecoTester", **kwargs):
+def MuonFastRecoTesterCfg(flags, name = "MuonFastRecoTester", outFile="FastRecoTester.root", **kwargs):
     result = ComponentAccumulator()
+
+    cfg.merge(setupHistSvcCfg(flags,outFile=outFile,
+                              outStream="FastRecoTester"))
+    
     kwargs.setdefault("isMC", flags.Input.isMC)
     kwargs.setdefault("isSeededReco", flags.Trigger.doHLT) 
+
+    if not flags.Input.isMC:
+        kwargs.setdefault("TruthSegmentKey", "")
 
     if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
         kwargs.setdefault("SpacePointKey", "MuonSpacePoints")
@@ -57,7 +64,7 @@ if __name__=="__main__":
 
     parser.set_defaults(outRootFile="FastRecoTester.root")
     from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
-    parser.set_defaults(inputFile = MuonPhaseIITestDefaults.HITS_PG_R3)
+    parser.set_defaults(inputFile = MuonPhaseIITestDefaults.RDO_R3)
     parser.set_defaults(eventPrintoutLevel = 50)
    
     args = parser.parse_args()
@@ -82,19 +89,19 @@ if __name__=="__main__":
     # Schedule fast reconstruction alg & the Fast Reco Tester Alg
     from MuonFastRecoAlgs.MuonFastReconstructionConfig import MuonFastReconstructionAlgCfg, PatternRecognitionFromFastRecoCfg
     cfg.merge(MuonFastReconstructionAlgCfg(flags))
-    cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
-                              outStream="FastRecoTester"))
-    cfg.merge(MuonFastRecoTesterCfg(flags, 
-                                    name = "MuonFastRecoTester",
-                                    writeSpacePoints = args.writeSpacePoints))
+    cfg.merge(MuonFastRecoTesterCfg(flags, outFile = args.outRootFile,
+                                           writeSpacePoints = args.writeSpacePoints))
 
-    # Schedule the pattern recognition algs either on the space points from the fast reco or from the standard space point maker
     if args.runHoughTest or args.runMSTrackTest:
+        # Schedule pattern recognition either on space points from fast reco or from standard space point maker
         if args.useFastRecoSpacePoints:
             cfg.merge(PatternRecognitionFromFastRecoCfg(flags))
         else:
             from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
             cfg.merge(MuonPatternRecognitionCfg(flags))
+        # Shedule truth algs
+        from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonToTruthAssocAlgCfg, MuonTruthAlgsCfg
+        cfg.merge(MuonTruthAlgsCfg(flags))
 
     # If desired, schedule the hough transform test
     if args.runHoughTest:
@@ -108,14 +115,17 @@ if __name__=="__main__":
         
     # If desired, schedule the MS Track Finding test
     if args.runMSTrackTest:
-        cfg.merge(setupHistSvcCfg(flags,outFile="MsTrackTester.root",
-                                  outStream="MuonTrackTester"))
-        from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
+        from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg, MuonCreatorAlgCfg, StandaloneTrackPartCnvCfg, MuidSaTagMakerAlgCfg
         cfg.merge(MSTrackFinderAlgCfg(flags))
+        cfg.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg",
+                                           TagKeys = ["MuonTagsSA"]))
+        cfg.merge(StandaloneTrackPartCnvCfg(flags))
+        cfg.merge(MuidSaTagMakerAlgCfg(flags))
+        cfg.merge(MuonToTruthAssocAlgCfg(flags))
         from MuonTrackFindingTest.MsTrackFindingTester import MsTrackTesterCfg
-        cfg.merge(MsTrackTesterCfg(flags, LegacyTrackKey="", LegacyMuonKey="", LegacySegmentKey=""))
+        cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy=False))
+        
     
-
     if flags.Input.isMC:
         ## Keep them to manually exchange the map
         # "MDTTwinMapping_compactFormat_allBO", "MDTTwinMapping_compactFormat_fullSpectrometer",  

@@ -562,6 +562,9 @@ class ConfigAccumulator :
         the correct name of the current copy.  Optionally one can pass
         in the name of the container before the first copy.
         """
+        if containerName in self._outputContainers:
+            return f"{containerName}_%SYS%"
+
         if containerName not in self._containerConfig :
             raise Exception ("no source container for: " + containerName)
         return self._containerConfig[containerName].currentName(nominal=nominal)
@@ -849,11 +852,6 @@ class ConfigAccumulator :
         self._outputContainers[outputContainerName] = containerName
 
 
-    def checkOutputContainer (self, containerName) :
-        """check whether a given container has been registered in outputs"""
-        return containerName in self._outputContainers.values()
-
-
     def getOutputContainerOrigin (self, outputContainerName) :
         """Get the name of the actual container, for which an output is registered"""
         try:
@@ -869,6 +867,9 @@ class ConfigAccumulator :
                       *, noSys=False, enabled=True, auxType=None) :
         """add an output variable for the given container to the output
         """
+        if containerName in self._outputContainers:
+            self.addOutputVar(self.getOutputContainerOrigin(containerName), variableName, outputName, noSys=noSys, enabled=enabled, auxType=auxType)
+            return
 
         if containerName not in self._containerConfig :
             raise KeyError ("container unknown: " + containerName)

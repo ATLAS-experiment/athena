@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "xAODTracking/TrackStateValidationContainer.h"
 #include "xAODTracking/TrackStateValidationAuxContainer.h"
 
+#include "xAODMuonViews/FillContainer.h"
 
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
@@ -59,6 +60,11 @@
 
 #include <vector>
 #include <string>
+
+namespace {
+  using StateContainer_t = xAOD::FillContainer<xAOD::TrackStateValidationContainer,
+                                               xAOD::TrackStateValidationAuxContainer>;
+}
 
 namespace DerivationFramework {
 
@@ -184,30 +190,42 @@ namespace DerivationFramework {
   {
     ATH_MSG_DEBUG("Adding TSOS decorations the track particles");
 
+    
+    // --- Retrieve track container (absolutely needed for decoration)
+    const xAOD::TrackParticleContainer* tracks{};
+    ATH_CHECK(SG::get(tracks, m_containerName, ctx));
+    
+    size_t nTracks = tracks->size();
     SG::WriteDecorHandle<xAOD::TrackParticleContainer,std::vector< ElementLink< xAOD::TrackStateValidationContainer >  > > dectsos_msosLink(m_trackTSOSMOSLinkDecorKey, ctx);
 
-    // --- Retrieve track container (absolutely needed for decoration)
-    SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_containerName,ctx);
-    if( ! tracks.isValid() ) {
-        ATH_MSG_ERROR ("Couldn't retrieve TrackParticles with key: " << m_containerName.key() );
-        return StatusCode::FAILURE;
-    }
-    size_t nTracks = tracks->size();
 
+    const std::vector<unsigned int>* pixelClusterOffsets{};
+    const std::vector<unsigned int>* sctClusterOffsets{};
+    const std::vector<unsigned int>* trtDCOffsets{};
 
-    SG::ReadHandle<std::vector<unsigned int> > pixelClusterOffsets;
-    SG::ReadHandle<std::vector<unsigned int> > sctClusterOffsets;
-    SG::ReadHandle<std::vector<unsigned int> > trtDCOffsets;
+    ATH_CHECK(SG::get(pixelClusterOffsets, m_pixelMapName, ctx));
+    ATH_CHECK(SG::get(sctClusterOffsets, m_sctMapName, ctx));
+    ATH_CHECK(SG::get(trtDCOffsets, m_trtMapName, ctx));
 
-    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> pixelClusters;
-    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> sctClusters;
-    SG::ReadHandle<xAOD::TrackMeasurementValidationContainer> trtDCs;
+    const xAOD::TrackMeasurementValidationContainer* pixelClusters{};
+    const xAOD::TrackMeasurementValidationContainer* sctClusters{};
+    const xAOD::TrackMeasurementValidationContainer* trtDCs{};
 
+    ATH_CHECK(SG::get(pixelClusters, m_pixelClustersName, ctx));
+    ATH_CHECK(SG::get(sctClusters, m_sctClustersName, ctx));
+    ATH_CHECK(SG::get(trtDCs, m_trtDCName, ctx));
+
+    const xAOD::EventInfo* eventInfo{};
+    ATH_CHECK(SG::get(eventInfo, m_eventInfoKey,ctx));
 
     // Create the xAOD container and its auxiliary store
-    SG::WriteHandle<xAOD::TrackStateValidationContainer>    msosPixel;
-    SG::WriteHandle<xAOD::TrackStateValidationContainer>    msosSCT;
-    SG::WriteHandle<xAOD::TrackStateValidationContainer>    msosTRT;
+    StateContainer_t msosPixel{};
+    StateContainer_t msosSCT{};
+    StateContainer_t msosTRT{};
+
+    ATH_CHECK(msosPixel.record(m_pixelMsosName,ctx));
+    ATH_CHECK(msosSCT.record(m_sctMsosName,ctx));
+    ATH_CHECK(msosTRT.record(m_trtMsosName,ctx));
 
     int nPixelMSOS(0);
     int nSCT_MSOS(0);
@@ -216,12 +234,7 @@ namespace DerivationFramework {
     // --- Add event-level information
     if (m_addExtraEventInfo) {
       ATH_MSG_DEBUG("Adding EventInfo decorations");
-      SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey,ctx);
-      if (!eventInfo.isValid()) {
-        ATH_MSG_ERROR(" Cannot access to event info.");
-        return StatusCode::FAILURE;
-      }
-
+  
       //Add TRT event phase
       SG::ReadHandle<ComTime> trtPhase(m_trtPhaseKey, ctx);
       float trtPhase_time=0.;
@@ -235,56 +248,8 @@ namespace DerivationFramework {
     } //extra event info
 
     // --- Add track states containers
-    if(m_addPRD){
-      // Get clusters and the mapping between xAOD::PRD and Trk::PRD
-      // Store the MSOS's in a conatiner based on the type of the detector
-      if(m_storePixel){
-        ATH_MSG_DEBUG("Creating Pixel track state container");
-        pixelClusterOffsets=SG::ReadHandle<std::vector<unsigned int> >(m_pixelMapName,ctx);
-        pixelClusters=SG::ReadHandle<xAOD::TrackMeasurementValidationContainer >(m_pixelClustersName,ctx);
-
-        msosPixel = SG::WriteHandle<xAOD::TrackStateValidationContainer>(m_pixelMsosName,ctx);
-        if (msosPixel.record(std::make_unique<xAOD::TrackStateValidationContainer>(),
-                             std::make_unique<xAOD::TrackStateValidationAuxContainer>()).isFailure()) {
-           ATH_MSG_ERROR("Failed to record " << m_pixelMsosName.key() );
-           return StatusCode::FAILURE;
-        }
-      }
-      if(m_storeSCT){
-        ATH_MSG_DEBUG("Creating SCT track state container");
-        sctClusterOffsets=SG::ReadHandle<std::vector<unsigned int> >(m_sctMapName,ctx);
-        sctClusters=SG::ReadHandle<xAOD::TrackMeasurementValidationContainer >(m_sctClustersName,ctx);
-
-        msosSCT = SG::WriteHandle<xAOD::TrackStateValidationContainer>(m_sctMsosName,ctx);
-        if (msosSCT.record(std::make_unique<xAOD::TrackStateValidationContainer>(),
-                             std::make_unique<xAOD::TrackStateValidationAuxContainer>()).isFailure()) {
-           ATH_MSG_ERROR("Failed to record " << m_sctMsosName.key() );
-           return StatusCode::FAILURE;
-        }
-      }
-      if(m_storeTRT){
-        ATH_MSG_DEBUG("Creating TRT track state container");
-        trtDCOffsets=SG::ReadHandle<std::vector<unsigned int> >(m_trtMapName,ctx);
-        trtDCs=SG::ReadHandle<xAOD::TrackMeasurementValidationContainer >(m_trtDCName,ctx);
-
-        msosTRT = SG::WriteHandle<xAOD::TrackStateValidationContainer>(m_trtMsosName,ctx);
-        if (msosTRT.record(std::make_unique<xAOD::TrackStateValidationContainer>(),
-                             std::make_unique<xAOD::TrackStateValidationAuxContainer>()).isFailure()) {
-           ATH_MSG_ERROR("Failed to record " << m_trtMsosName.key() );
-           return StatusCode::FAILURE;
-        }
-      }
-    }
-
-    SG::ReadHandle<Trk::PRDtoTrackMap>  prd_to_track_map;
     const Trk::PRDtoTrackMap *prd_to_track_map_cptr{};
-    if (!m_prdToTrackMap.key().empty()) {
-      prd_to_track_map=SG::ReadHandle<Trk::PRDtoTrackMap>(m_prdToTrackMap, ctx);
-       if (!prd_to_track_map.isValid()) {
-          ATH_MSG_ERROR("Failed to read PRD to track association map: " << m_prdToTrackMap.key());
-       }
-       prd_to_track_map_cptr = prd_to_track_map.cptr();
-    }
+    ATH_CHECK(SG::get(prd_to_track_map_cptr, m_prdToTrackMap, ctx));
 
     // Set up a mask with the same entries as the full TrackParticle collection
     std::vector<bool> mask;
@@ -718,9 +683,9 @@ namespace DerivationFramework {
 
         if(!measurement) { continue; }
 
-        if (isTRT && !trtDCOffsets.isValid() && !trtDCs.isValid()) { continue; }
-        if (isSCT && !sctClusterOffsets.isValid() && !sctClusters.isValid()) { continue; }
-        if (isPixel && !pixelClusterOffsets.isValid() && !pixelClusters.isValid()) { continue; }
+        if (isTRT && ( !trtDCOffsets || !trtDCs)) { continue; }
+        if (isSCT && ( !sctClusterOffsets || !sctClusters)) { continue; }
+        if (isPixel && (!pixelClusterOffsets || !pixelClusters)) { continue; }
 
         const Trk::RIO_OnTrack* hit = measurement ? dynamic_cast<const Trk::RIO_OnTrack*>(measurement) : nullptr;
 
@@ -736,11 +701,11 @@ namespace DerivationFramework {
           const Trk::PrepRawData* prd = hit->prepRawData();
           if(prd && prd->getHashAndIndex().isValid() ){
             if(isTRT){
-              msos->setTrackMeasurementValidationLink( buildElementLink( prd, trtDCOffsets.cptr(), trtDCs.cptr()) );
+              msos->setTrackMeasurementValidationLink( buildElementLink( prd, trtDCOffsets, trtDCs));
             }else if(isSCT){
-              msos->setTrackMeasurementValidationLink( buildElementLink( prd, sctClusterOffsets.cptr(), sctClusters.cptr()) );
+              msos->setTrackMeasurementValidationLink( buildElementLink( prd, sctClusterOffsets, sctClusters));
             }else if(isPixel){
-              msos->setTrackMeasurementValidationLink( buildElementLink( prd, pixelClusterOffsets.cptr(), pixelClusters.cptr()) );
+              msos->setTrackMeasurementValidationLink( buildElementLink( prd, pixelClusterOffsets, pixelClusters) );
             }
           }
         }
@@ -752,7 +717,8 @@ namespace DerivationFramework {
 	  static const SG::Accessor<int> firstStripAcc("first_strip");
 	  static const SG::Accessor<std::vector<int>> rdoStripAcc("rdo_strip");
 
-	  if(  msos->trackMeasurementValidationLink().isValid() && *(msos->trackMeasurementValidationLink()) ){
+	  if(  msos->trackMeasurementValidationLink().isValid() && *(msos->trackMeasurementValidationLink()) 
+        && rdoStripAcc.isAvailable(**msos->trackMeasurementValidationLink())){
 	    const xAOD::TrackMeasurementValidation* sctCluster =  *(msos->trackMeasurementValidationLink());
 	    SiWidthAcc(*msos) = SiWidthAcc(*sctCluster);
 	    firstStripAcc(*msos) = (rdoStripAcc(*sctCluster)).at(0);
@@ -835,7 +801,6 @@ namespace DerivationFramework {
 
       ++i_track;
     } // end of loop over tracks
-
     return StatusCode::SUCCESS;
   }
 
@@ -846,6 +811,7 @@ namespace DerivationFramework {
   {
 
     const IdentContIndex& contIndex = prd->getHashAndIndex();
+ 
     if( contIndex.collHash() >= offsets->size() ){
       ATH_MSG_ERROR(" Offsets are incorrect " <<  contIndex.collHash() << " " <<  offsets->size() <<" "<< contIndex.objIndex());
       return {0,0};

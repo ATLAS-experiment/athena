@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelAthMVAMonAlg.cxx
@@ -588,7 +588,7 @@ StatusCode PixelAthMVAMonAlg::fillHistograms( const EventContext& ctx ) const {
   fill1DModProfAccum( BDT_Weights, lb );
  
   if (m_dumpTree) {
-    auto mvaGroup = getGroup("MVA");
+    const auto & mvaGroup = getGroup("MVA");
     auto mon_status_vec           = Monitored::Collection("status_vec", status); 
     auto mon_h_vec                = Monitored::Collection("holes_vec", holes);
     auto mon_o_vec                = Monitored::Collection("outliers_vec", outliers);

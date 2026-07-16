@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPrepRawData/TRT_DriftCircle.h"
@@ -74,8 +74,6 @@ void TRT_DriftCircleContainerCnv_p2::transToPers(const InDet::TRT_DriftCircleCon
     persCont->m_rawdata.resize(totSize);
     persCont->m_prdDeltaId.resize(totSize);
 
-    //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " Preparing " << persCont->m_collections.size() << "Collections" << endmsg;
-    //    for (collIndex = 0; it_Coll != it_CollEnd; ++collIndex, it_Coll++)  {
     for (collIndex = 0, it_Coll=transCont->begin(); it_Coll != it_CollEnd; ++collIndex, ++it_Coll)  {
         // Add in new collection
         const InDet::TRT_DriftCircleCollection& collection = (**it_Coll);
@@ -83,30 +81,19 @@ void TRT_DriftCircleContainerCnv_p2::transToPers(const InDet::TRT_DriftCircleCon
         chanEnd   += collection.size();
         InDet::InDetPRD_Collection_p2& pcollection = persCont->m_collections[collIndex];
 	unsigned int deltaId = (collection.identifyHash()-idLast);
-        // if(deltaId*IDJUMP != collection.identify().get_compact()-idLast ) 
-        //   log << MSG::FATAL << "THere is a mistake in Identifiers of the collection" << endmsg;
-        // if(deltaId > 0xFFFF) {
-        //   log << MSG::FATAL << "Fixme!!! This is too big, something needs to be done " << endmsg;
-        // }
-        // pcollection.m_idDelta = (unsigned short) deltaId;
-        // idLast = collection.identify().get_compact(); // then update the last identifier 
-	//        pcollection.m_hashId = (unsigned short) collection.identifyHash();
+       
         pcollection.m_hashId = deltaId;
 	idLast = collection.identifyHash();
         pcollection.m_size = collection.size();
         // Add in channels
-        //persCont->m_rawdata.resize(chanEnd);
-        //persCont->m_prdDeltaId.resize(chanEnd);
-	//        if (log.level() <= MSG::VERBOSE) log << MSG::VERBOSE << "Reading collections with " <<  collection.size() << "PRDs " << endmsg;
+        
         for (unsigned int i = 0; i < collection.size(); ++i) {
             InDet::TRT_DriftCircle_p2* pchan = &(persCont->m_rawdata[i + chanBegin]);
-            const InDet::TRT_DriftCircle* chan = dynamic_cast<const InDet::TRT_DriftCircle*>(collection[i]);
+            const InDet::TRT_DriftCircle* chan = static_cast<const InDet::TRT_DriftCircle*>(collection[i]);
             chanCnv.transToPers(chan, pchan, log);
-	    //persCont->m_prdDeltaId[i+chanBegin]=chan->m_clusId.get_compact()-collection.identify().get_compact(); 
 	    persCont->m_prdDeltaId[i+chanBegin]=chan->identify().get_identifier32().get_compact()-collection.identify().get_identifier32().get_compact();
 	}
     }
-    //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " ***  Writing InDet::TRT_DriftCircleContainer" << endmsg;
 }
 
 void  TRT_DriftCircleContainerCnv_p2::persToTrans(const InDet::TRT_DriftCircleContainer_p2* persCont, InDet::TRT_DriftCircleContainer* transCont, MsgStream &log) 

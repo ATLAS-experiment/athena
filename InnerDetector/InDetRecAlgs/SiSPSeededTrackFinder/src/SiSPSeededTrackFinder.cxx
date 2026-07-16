@@ -17,6 +17,7 @@
 
 #include <set>
 #include <fstream>
+#include <stdexcept>
 
 namespace {
 /** \brief assign a quality score to track candidates.
@@ -200,6 +201,8 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
 
   const bool PIX = true;
   const bool SCT = true;
+  //Total stack use for this function is 831124 bytes
+  //coverity[STACK_USE]
   InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap);
   m_trackmaker->newEvent(ctx, trackEventData, PIX, SCT);
 
@@ -299,6 +302,8 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
 
   const bool PIX = true ;
   const bool SCT = true ;
+  //Total stack use for this function is 831736 bytes.
+  //coverity[STACK_USE]
   InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap);
   /// set up the track maker 
   m_trackmaker->newEvent(ctx, trackEventData, PIX, SCT);
@@ -462,6 +467,8 @@ StatusCode InDet::SiSPSeededTrackFinder::itkFastTrackingStrategy(const EventCont
 
   const bool PIX = true ;
   const bool STRIP = true ;
+  // Local variable trackEventData uses 814592 bytes of stack space
+  //coverity[STACK_USE]
   InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap);
   /// set up the track maker
   m_trackmaker->newTrigEvent(ctx, trackEventData, PIX, STRIP);
@@ -628,6 +635,8 @@ StatusCode InDet::SiSPSeededTrackFinder::itkConvStrategy(const EventContext& ctx
 
   const bool PIX = true ;
   const bool STRIP = true ;
+  //Local variable trackEventData uses 814592 bytes of stack space
+  //coverity[STACK_USE]
   InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap);
   /// set up the track maker
   m_trackmaker->newEvent(ctx, trackEventData, PIX, STRIP);
@@ -1220,7 +1229,7 @@ void InDet::SiSPSeededTrackFinder::collectGBTSTrainingData(const Trk::Track* tra
         vlm.emplace_back(new_vol, new_lay, mod_id, pos.x(), pos.y(), pos.z());
     }
 
-    if (dynamic_cast<const InDet::SCT_Cluster*>(si)) {  // SCT
+    if (IDs && dynamic_cast<const InDet::SCT_Cluster*>(si)) {  // SCT
 
       Identifier id = si->identify();
 
@@ -1312,6 +1321,9 @@ void InDet::SiSPSeededTrackFinder::dumpGBTSTrainingData() const {
       nTotalDst += n;
     }
     nTotal += nTotalDst;
+    if (nTotalDst == 0) [[unlikely]] {
+      throw std::runtime_error("InDet::SiSPSeededTrackFinder::dumpGBTSTrainingData: nTotalDst divisor is zero");
+    }
     for (const auto& [dst, n] : conns) {
       double prob = double(n) / double(nTotalDst);
       tableFile << src << ", " << dst << ", " << std::fixed << std::setprecision(6) << prob << ", " << prob << '\n';

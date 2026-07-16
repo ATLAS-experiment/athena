@@ -9,17 +9,17 @@
 #include <utility>
 #include <vector>
 
-#include "Acts/EventData/SeedContainer2.hpp"
+#include "Acts/EventData/SeedContainer.hpp"
 #include "xAODInDetMeasurement/SpacePoint.h"
 
 namespace ActsTrk {
 
-// This is similar to Acts::SeedContainer2 but stores pointers to
-// xAOD::SpacePoints instead of indices into an Acts::SpacePointContainer2.
+// This is similar to Acts::SeedContainer but stores pointers to
+// xAOD::SpacePoints instead of indices into an Acts::SpacePointContainer.
 //
 // Having a separate container is beneficial as there is not too much overlap
-// with Acts::SeedContainer2 and the implementation is rather simple. This
-// decouples us from the implementation of Acts::SeedContainer2 and allows us to
+// with Acts::SeedContainer and the implementation is rather simple. This
+// decouples us from the implementation of Acts::SeedContainer and allows us to
 // link directly to the xAOD::SpacePoints without needing to convert back and
 // forth between indices and pointers.
 
@@ -41,7 +41,7 @@ struct SpacePointRange final : public std::span<const xAOD::SpacePoint* const> {
 struct SeedContainer;
 
 struct Seed final {
-  using Index = Acts::SeedIndex2;
+  using Index = Acts::SeedIndex;
 
   Seed(const SeedContainer& container, Index index)
       : m_container(&container), m_index(index) {}
@@ -64,7 +64,7 @@ struct Seed final {
 };
 
 struct SeedContainer final {
-  using Index = Acts::SeedIndex2;
+  using Index = Acts::SeedIndex;
   using value_type = Seed;
 
   std::size_t size() const noexcept { return m_size; }
@@ -128,12 +128,12 @@ struct SeedContainer final {
   }
 
   Seed push_back(SpacePointRange spacePoints,
-                 const Acts::ConstSeedProxy2& seed) {
+                 const Acts::ConstSeedProxy& seed) {
     return push_back(spacePoints, seed.quality(), seed.vertexZ());
   }
 
   template <typename xaod_sp_ptr_projector_t>
-  Seed push_back(const Acts::ConstSeedProxy2& seed,
+  Seed push_back(const Acts::ConstSeedProxy& seed,
                  const xaod_sp_ptr_projector_t& xAODspProjector) {
     return push_back(seed.spacePointIndices(), xAODspProjector, seed);
   }
@@ -141,7 +141,7 @@ struct SeedContainer final {
   template <typename arbitrary_sp_range_t, typename xaod_sp_ptr_projector_t>
   Seed push_back(const arbitrary_sp_range_t& arbitrarySpacePoints,
                  const xaod_sp_ptr_projector_t& xAODspProjector,
-                 const Acts::ConstSeedProxy2& seed) {
+                 const Acts::ConstSeedProxy& seed) {
     return push_back(arbitrarySpacePoints, xAODspProjector, seed.quality(),
                      seed.vertexZ());
   }

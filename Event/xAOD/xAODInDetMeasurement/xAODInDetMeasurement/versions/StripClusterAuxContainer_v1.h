@@ -13,6 +13,7 @@
 #include "xAODCore/JaggedVec.h"
 #include "AthContainers/JaggedVecAccessor.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "xAODInDetMeasurement/ArrayFloat3.h"
 
 namespace xAOD {
 /// Auxiliary store for strip clusters
@@ -33,7 +34,7 @@ class StripClusterAuxContainer_v1 : public AuxContainerBase {
 
     /// @name Defining strip cluster parameters
     /// @{
-    std::vector<PosAccessor<3>::element_type> globalPosition;
+    std::vector<xAOD::ArrayFloat3> globalPosition;
     AUXVAR_JAGGEDVEC_DECL(Identifier::value_type,rdoList);
     std::vector<int> channelsInPhi;
     /// @}

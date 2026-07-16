@@ -21,53 +21,84 @@
 #include "vecmem/utils/cuda/copy.hpp"
 
 namespace ActsTrk {
-
+/**
+ * @class DeviceClusterizationAlg
+ *
+ * @brief Algorithm executing traccc clusterization and measurement
+ *        sorting on the GPU.
+ *
+ * The backend-specific clusterization and sorting algorithms are provided by
+ * dedicated tools, together with the device memory resource and the
+ * vecmem copy object (only needed for debugging).
+ *
+ * The algorithm retrieves the device resident traccc cell collection from the event
+ * store and the detector description from the detector store, passes
+ * them to the device clusterization algorithm, and records the
+ * resulting device resident traccc measurement collection back into the event store.
+ *
+ * @param m_retrieveClusterCells perform disjoint clusterization
+ *
+ * If required (e.g. for truth matching), it instead runs the
+ * so-called disjoint clusterization, which returns the measurements
+ * together with a cluster collection holding the association between
+ * cell indices and the produced measurements.
+ *
+ * @author Neža Ribarič <neza.ribaric@cern.ch>
+ */
 class DeviceClusterizationAlg : public AthReentrantAlgorithm {
 public:
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
+  /// Function initializing the algorithm
   virtual StatusCode initialize() override;
+  /// Function executing the algorithm
   virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
 
-   // ---------- configuration ----------
-   Gaudi::Property<bool> m_retrieveClusterCells{
-      this, "RetrieveClusterCells", true,
-      "Whether to retrieve cell indices associated to the clusters."};
-  Gaudi::Property<std::string> m_deviceDesignObjectName{
-      this, "DeviceDigitizationObjectName", "TracccDeviceDigitizationConfig",
-      "Traccc device digitization object"};
-  Gaudi::Property<std::string> m_deviceCondObjectName{
-      this, "DeviceConditionsObjectName", "TracccDeviceConditionsConfig",
-      "Traccc device conditions object"};
+    Gaudi::Property<bool> m_retrieveClusterCells{
+        this, "RetrieveClusterCells", true,
+        "Whether to retrieve cell indices associated to the clusters."};
+    /// @name Input device resident traccc detector design and condition descriptions
+    /// {@
+    Gaudi::Property<std::string> m_deviceDesignObjectName{
+        this, "DeviceDigitizationObjectName", "TracccDeviceDigitizationConfig",
+        "Traccc device digitization object"};
+    Gaudi::Property<std::string> m_deviceCondObjectName{
+        this, "DeviceConditionsObjectName", "TracccDeviceConditionsConfig",
+        "Traccc device conditions object"};
+    /// @}
 
-  // ---------- tools ----------
-  ToolHandle<IDeviceClusterizationAlgProviderTool> m_clusteringAlgProviderTool{
-      this, "ClusteringAlgProviderTool", "",
-      "Tool providing the appropriate backend device clusterization algorithm"};
+    /// @name The tool that provides backend-specific traccc clusterization algorithms
+    ToolHandle<IDeviceClusterizationAlgProviderTool> m_clusteringAlgProviderTool{
+        this, "ClusteringAlgProviderTool", "",
+        "Tool providing the appropriate backend device clusterization algorithm"};
+    /// @name The device memory resource tool to use for memory allocations
+    ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
+        this, "DeviceMR", "",
+        "Device memory resource tool"};
+    /// @name The device copy tool to use for debug printing
+    ToolHandle<AthDevice::ICopyTool> m_copy{
+        this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
-  ToolHandle<AthDevice::IMemoryResourceTool> m_deviceMR{
-      this, "DeviceMR", "",
-      "Device memory resource tool"};
-  // for debugging prints only
-  ToolHandle<AthDevice::ICopyTool> m_copy{
-      this, "CopyProviderTool", "", "Vecmem copy provider tool"};
+    /// @name The name of device resident input traccc cell collection
+    SG::ReadHandleKey<traccc::edm::silicon_cell_collection::const_view> m_inputCellsKey{
+        this, "InputTracccCells", "",
+        "Input traccc cell collection buffer"};
 
-  // ---------- data handles ----------
-  SG::ReadHandleKey<traccc::edm::silicon_cell_collection::const_view> m_inputCellsKey{
-      this, "InputTracccCells", "",
-      "Input traccc cell collection buffer"};
-  SG::WriteHandleKey<traccc::edm::measurement_collection::buffer> m_outputMeasKey{
-      this, "OutputTracccMeasurements", "",
-      "Output uncalibrated traccc measurement collection buffer"};
-  SG::WriteHandleKey<traccc::edm::silicon_cluster_collection::buffer> m_outputClusterKey{
-      this, "OutputTracccClusters", "",
-      "Output uncalibrated traccc cluster collection buffer"};
+    /// @name The name of device resident output traccc measurement collection
+    /// {@
+    SG::WriteHandleKey<traccc::edm::measurement_collection::buffer> m_outputMeasKey{
+        this, "OutputTracccMeasurements", "",
+        "Output uncalibrated traccc measurement collection buffer"};
+    SG::WriteHandleKey<traccc::edm::silicon_cluster_collection::buffer> m_outputClusterKey{
+        this, "OutputTracccClusters", "",
+        "Output uncalibrated traccc cluster collection buffer"};
+    /// @}
 
-  // Device buffers — retrieved from detStore
-  const traccc::detector_design_description::const_view* m_deviceDesign;
-  const traccc::detector_conditions_description::const_view* m_deviceCond;
+    // Device buffers — retrieved from detStore
+    const traccc::detector_design_description::const_view* m_deviceDesign{};
+    const traccc::detector_conditions_description::const_view* m_deviceCond{};
 
 };
 

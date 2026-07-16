@@ -252,10 +252,11 @@ Amg::Transform3D ActsDetectorElement::localToGlobal(const ActsTrk::DetectorAlign
 
 }
 IdentityHelper ActsDetectorElement::identityHelper() const {
-  if (detectorType() == DetectorType::Pixel || detectorType() == DetectorType::Sct) {
-        return IdentityHelper(static_cast<const InDetDD::SiDetectorElement *>(m_detElement));
-  } else {
-    throw std::domain_error("Cannot get IdentityHelper for TRT element");
+  if (detectorType() == DetectorType::Pixel || detectorType() == DetectorType::Sct ||
+      detectorType() == DetectorType::Hgtd) {
+        return IdentityHelper(static_cast<const InDetDD::SolidStateDetectorElementBase  *>(m_detElement));
+  } else  {
+    throw std::domain_error(std::format("Cannot get IdentityHelper for {:} element" ,detectorType()));
   }
 }
 
@@ -289,11 +290,11 @@ Acts::Surface &ActsDetectorElement::surface() {
 
 const Trk::Surface &ActsDetectorElement::atlasSurface() const {
   if (const auto *detElem =
-          dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
+          dynamic_cast<const InDetDD::SolidStateDetectorElementBase*>(m_detElement);
       detElem != nullptr) {
     return detElem->surface();
   } else {
-    throw std::domain_error("Cannot get surface for TRT element");
+    throw std::domain_error(std::format("Cannot get surface for {:} element" , detectorType()));
   }
 }
 

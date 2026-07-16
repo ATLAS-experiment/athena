@@ -57,24 +57,24 @@ constexpr auto y0Idx {Acts::toUnderlying(ParamDefs::y0)};
 constexpr auto etaCovIdx {Acts::toUnderlying(SpacePoint::CovIdx::etaCov)};
 
 FastMuonSABuilder::FastMuonSABuilder(const std::string& name, Config&& config) :
-    AthMessaging{name}, m_cfg{config} {
+    AthMessaging{name}, m_cfg{std::move(config)} {
         /** Initialize the segment line fitter */
         SegmentLineFitter::Config fitCfg{};
-        fitCfg.calibrator = config.calibrator;
-        fitCfg.visionTool = config.visionTool;
-        fitCfg.idHelperSvc = config.idHelperSvc;
+        fitCfg.calibrator = m_cfg.calibrator;
+        fitCfg.visionTool = m_cfg.visionTool;
+        fitCfg.idHelperSvc = m_cfg.idHelperSvc;
         fitCfg.fitT0 = false;
         fitCfg.calcAlongStrip = false;
-        fitCfg.recalibrate = config.recalibInFit;
-        fitCfg.useFastFitter = config.useFastFitter;
-        fitCfg.fastPreFitter = config.fastPreFitter;
-        fitCfg.ignoreFailedPreFit = config.ignoreFailedPreFit;
-        fitCfg.useHessian = config.useHessianResidual;
+        fitCfg.recalibrate = m_cfg.recalibInFit;
+        fitCfg.useFastFitter = m_cfg.useFastFitter;
+        fitCfg.fastPreFitter = m_cfg.fastPreFitter;
+        fitCfg.ignoreFailedPreFit = m_cfg.ignoreFailedPreFit;
+        fitCfg.useHessian = m_cfg.useHessianResidual;
         fitCfg.doBeamSpot = false;
-        fitCfg.outlierRemovalCut = config.outlierRemovalCut;
-        fitCfg.recoveryPull = config.recoveryPull;
-        fitCfg.nPrecHitCut = config.precHitCut;
-        fitCfg.maxIter = config.maxIter;
+        fitCfg.outlierRemovalCut = m_cfg.outlierRemovalCut;
+        fitCfg.recoveryPull = m_cfg.recoveryPull;
+        fitCfg.nPrecHitCut = m_cfg.precHitCut;
+        fitCfg.maxIter = m_cfg.maxIter;
         fitCfg.parsToUse = {ParamDefs::y0, ParamDefs::theta};
 
         /** Initialize the NSW segment fitter */
@@ -86,22 +86,16 @@ FastMuonSABuilder::FastMuonSABuilder(const std::string& name, Config&& config) :
 
         /** Initialize the L-R segment seeder */
         MdtSegmentSeeder::Config genCfg{};
-        genCfg.hitPullCut = config.seedHitChi2;
+        genCfg.hitPullCut = m_cfg.seedHitChi2;
         genCfg.busyLayerLimit = 3.;
         genCfg.startWithPattern = false;
         m_mdtSeeder = std::make_unique<MdtSegmentSeeder>(std::move(genCfg), makeActsAthenaLogger(this, name));
-
-        /** Initialize the track seeder */
-        MsTrackSeeder::Config trackCfg{};
-        trackCfg.nFieldSteps = config.nFieldSteps;
-        m_trackSeeder = std::make_unique<MsTrackSeeder>(name, std::move(trackCfg));
-
+  
     }
-//coverity[RW.ROUTINE_NOT_EMITTED:FALSE]
+
 xAOD::Muon*
 FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx, 
                                       const ActsTrk::GeometryContext& gctx,
-                                      const AtlasFieldCacheCondObj& magField,
                                       const GlobalPattern& pattern,
                                       MuonCont_t& outMuons) const {
     ATH_MSG_VERBOSE(__func__<<"() Start processing " << pattern);
@@ -116,9 +110,11 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
     });
 
     std::vector<Segment_t> muonSegments{};
+    muonSegments.reserve(3u);
     for (const StIndex st : stations) {
-        /** If we already have 3 segments, we don't try to fit more segments in other stations */
-        if (muonSegments.size() > 2) {
+        /** If we already have 3 segments, we don't try to fit more segments in other stations.
+         *  Same if we are at the last station and haven't found any segments yet */
+        if (muonSegments.size() > 2 || (st == stations.back() && muonSegments.size() == 0.)) {
             break;
         }
         // If we already have a segment in the layer, we don't try to fit another one
@@ -150,6 +146,7 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
                 return hitsPerSector[s].size(); });
 
         std::vector<Segment_t> stSegments{};
+        stSegments.reserve(sectorsInStation.size());
         /** Try to fit a segment using the first sector. If it fails or the segment has
          *  poor quality, try other sectors if any */
         for (const MuonGMR4::SpectrometerSector* sector : sectorsInStation) {
@@ -213,20 +210,26 @@ FastMuonSABuilder::buildMuonCandidate(const EventContext& ctx,
         [](const Segment_t& seg) { return seg->position().perp(); });
     
     const Amg::Vector3D planeNorm {Acts::makeDirectionFromPhiTheta(pattern.phi() + 90._degree, 90._degree)};
-    auto point = [&planeNorm, this](const Segment_t& seg) {
-        int sector {seg->measurements().back()->spacePoint()->msSector()->sector()};
-        return std::make_pair(m_trackSeeder->segPosOntoPhiPlane(planeNorm, sector, seg->position()),
-                              m_trackSeeder->segDirOntoPhiPlane(planeNorm, seg->direction()));
-    };
-    
-    assert(muonSegments.size() <= 3);
-    const double qtimesP {muonSegments.size() == 3
-        ? m_trackSeeder->estimateQtimesP(magField, planeNorm, point(muonSegments[0]), point(muonSegments[1]), point(muonSegments[2]))
-        : m_trackSeeder->estimateQtimesP(magField, planeNorm, point(muonSegments[0]), point(muonSegments[1]))};
 
-    const double theta {muonSegments[0]->position().theta()};
-    const double eta   {-std::log(std::tan(theta/2.))};
-    const double pt    {std::abs(qtimesP) * std::sin(theta)};
+    std::vector<ITrackSeedingTool::PosMomPair_t> circlePoints{};
+    for (const Segment_t& seg : muonSegments) {
+        if (!seg){
+            continue;
+        }
+        int sector {seg->measurements().back()->spacePoint()->msSector()->sector()};
+        Amg::Vector3D projDir {ExpandedSector{static_cast<unsigned>(sector), 
+                                ExpandedSector::SectorProjector::center}.normalDir()};
+                                
+        Amg::Vector3D projPos {Acts::PlanarHelper::intersectPlane(seg->position(), projDir, 
+            planeNorm, Amg::Vector3D::Zero()).position()};
+
+        circlePoints.emplace_back(std::move(projPos), Amg::projectDirOntoPlane(seg->direction(), planeNorm));
+    }
+    assert(muonSegments.size() <= 3);
+    const double qtimesP = m_cfg.trackSeeder->estimateQtimesP(ctx, planeNorm, circlePoints);
+   
+    const double eta   {muonSegments[0]->position().eta()};
+    const double pt    {std::abs(qtimesP) / std::cosh(eta)};
 
     xAOD::Muon* newMuon = outMuons->push_back(std::make_unique<xAOD::Muon>());
     newMuon->setAuthor(xAOD::Muon::Author::MuidSA);

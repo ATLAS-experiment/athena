@@ -11,8 +11,8 @@
 #include <utility>
 
 // EDM include(s):
-#include "xAODEventInfo/EventInfo.h"
 #include "CxxUtils/FastReseededPRNG.h"
+#include "InDetTrackSystematicsTools/getEventNumber.h"
 //#include "AthenaBaseComps/AthCheckMacros.h"
 
 #include "PathResolver/PathResolver.h"
@@ -127,14 +127,11 @@ namespace InDet {
 CP::CorrectionCode InDetTrackSmearingTool::applyCorrectionImpl(
     xAOD::TrackParticle& track, const CP::SystematicSet& filtered) const
   {
-    const xAOD::EventInfo* event_info {nullptr};
-    if (evtStore()->retrieve(event_info, "EventInfo").isFailure()) {
-      ATH_MSG_ERROR("No EventInfo object could be retrieved");
-      return CP::CorrectionCode::Error;
-    }
-
-    int seed = std::abs(track.phi()) * 1e6 + std::abs(track.eta()) * 1e3 + event_info->eventNumber();
-    FastReseededPRNG prng = FastReseededPRNG(seed);
+    FastReseededPRNG prng(
+        m_seed,
+        static_cast<uint32_t>(std::abs(track.phi()) * 1e6),
+        static_cast<uint32_t>(std::abs(track.eta()) * 1e3),
+        InDet::getEventNumber(evtStore()));
 
     float sigmaD0 = GetSmearD0Sigma( track, filtered );
     float sigmaZ0 = GetSmearZ0Sigma( track, filtered );
