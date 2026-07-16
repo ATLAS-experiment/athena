@@ -5,7 +5,6 @@ atlas_subdir( ISF_Services )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( HepPDT )
 find_package( GTest )
 find_package( GMock )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
@@ -16,8 +15,9 @@ atlas_add_library( ISF_Services
                    src/components/*.cxx
                    OBJECT
                    NO_PUBLIC_HEADERS
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AtlasHepMCLib ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} GaudiKernel BarcodeInterfacesLib AthenaBaseComps StoreGateLib SubDetectorEnvelopesLib AtlasDetDescr CxxUtils GeneratorObjects MCTruth ISF_Event ISF_HepMC_Interfaces ISF_InterfacesLib PmbCxxUtils TruthUtils )
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} GeneratorModulesLib AtlasHepMCLib ${CLHEP_LIBRARIES} GaudiKernel BarcodeInterfacesLib AthenaBaseComps StoreGateLib SubDetectorEnvelopesLib AtlasDetDescr CxxUtils GeneratorObjects MCTruth ISF_Event ISF_HepMC_Interfaces ISF_InterfacesLib PmbCxxUtils TruthUtils 
+                   )
 
 # Tests in the package:
 atlas_add_test( InputConverter_test
@@ -26,19 +26,18 @@ atlas_add_test( InputConverter_test
                 src/InputConverter.cxx
                 INCLUDE_DIRS
                 ${CLHEP_INCLUDE_DIRS}
-                ${HEPPDT_INCLUDE_DIRS}
                 ${GTEST_INCLUDE_DIRS}
                 ${GMOCK_INCLUDE_DIRS}
                 LINK_LIBRARIES
                 ${CLHEP_LIBRARIES}
                 ${GMOCK_LIBRARIES}
                 ${GTEST_LIBRARIES}
-                ${HEPPDT_LIBRARIES}
                 AthenaBaseComps
                 AtlasHepMCLib
                 CxxUtils
                 GaudiKernel
                 GeneratorObjects
+                GeneratorModulesLib
                 GeoPrimitives
                 GoogleTestTools
                 ISF_Event
