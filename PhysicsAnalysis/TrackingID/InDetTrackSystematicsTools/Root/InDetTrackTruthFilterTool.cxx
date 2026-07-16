@@ -6,7 +6,6 @@
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
 
-#include "xAODEventInfo/EventInfo.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
@@ -17,9 +16,11 @@
 
 #include "CxxUtils/checker_macros.h"
 
+#include "CxxUtils/FastReseededPRNG.h"
+#include "InDetTrackSystematicsTools/getEventNumber.h"
 #include <TH2.h>
-#include <TRandom3.h>
 #include <TFile.h>
+#include <random>
 #include <stdexcept>
 
 namespace InDet {
@@ -55,8 +56,6 @@ namespace InDet {
   StatusCode InDetTrackTruthFilterTool::initialize() {
 
     ATH_CHECK ( m_trackOriginTool.retrieve() );
-
-    m_rnd = std::make_unique<TRandom3>(m_seed);
 
     ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
            m_trkEffHistLooseGlobal,
@@ -111,6 +110,12 @@ namespace InDet {
 
   bool InDetTrackTruthFilterTool::accept(const xAOD::TrackParticle* track) const {
 
+    FastReseededPRNG prng(
+        m_seed,
+        static_cast<uint32_t>(std::abs(track->phi()) * 1e6),
+        static_cast<uint32_t>(std::abs(track->eta()) * 1e3),
+        InDet::getEventNumber(evtStore()));
+
     // these checks shouldn't occur because the config should prevent this from being reached -- but just in case!
     bool anyEffSystActive = isActive(TRK_EFF_LOOSE_GLOBAL) || isActive(TRK_EFF_LOOSE_IBL) || isActive(TRK_EFF_LOOSE_PP0) || 
                 isActive(TRK_EFF_LOOSE_PHYSMODEL) || isActive(TRK_EFF_TIGHT_GLOBAL) || isActive(TRK_EFF_TIGHT_IBL) || 
@@ -154,45 +159,45 @@ namespace InDet {
       }
       if ( isActiveLoose ) {
         // there is no fake-rate histogram - just a flat uncertainty
-        if(m_rnd->Uniform(0, 1) < m_fFakeLoose) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < m_fFakeLoose) return false;
       }
       if ( isActiveTight ) {
-        if(m_rnd->Uniform(0, 1) < m_fFakeTight) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < m_fFakeTight) return false;
       }
     }
 
     if ( InDet::TrkOrigin::isPrimary(origin) ) {
       if ( isActive( TRK_EFF_LOOSE_GLOBAL ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistLooseGlobal, pt, eta);
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
       if ( isActive( TRK_EFF_LOOSE_IBL ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistLooseIBL, pt, eta);
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
       if ( isActive( TRK_EFF_LOOSE_PP0 ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistLoosePP0, pt, eta);
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
       if ( isActive( TRK_EFF_LOOSE_PHYSMODEL ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistLoosePhysModel, pt, eta);
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
       if ( isActive( TRK_EFF_TIGHT_GLOBAL ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistTightGlobal, pt, eta);
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
       if ( isActive( TRK_EFF_TIGHT_IBL ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistTightIBL, pt, eta);
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
       if ( isActive( TRK_EFF_TIGHT_PP0 ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistTightPP0, pt, eta);
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
       if ( isActive( TRK_EFF_TIGHT_PHYSMODEL ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistTightPhysModel, pt, eta);
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
 
       // combined systematics represent the sum in quadrature of the individual systematics
@@ -201,14 +206,14 @@ namespace InDet {
                                   pow(getFractionDropped(1, m_trkEffHistLooseIBL, pt, eta), 2) +
                                   pow(getFractionDropped(1, m_trkEffHistLoosePP0, pt, eta), 2) +
                                   pow(getFractionDropped(1, m_trkEffHistLoosePhysModel, pt, eta), 2) );
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
       if ( isActive( TRK_EFF_TIGHT_COMBINED ) ) {
         float fTrkEffSyst = sqrt( pow(getFractionDropped(1, m_trkEffHistTightGlobal, pt, eta), 2) +
                                   pow(getFractionDropped(1, m_trkEffHistTightIBL, pt, eta), 2) +
                                   pow(getFractionDropped(1, m_trkEffHistTightPP0, pt, eta), 2) +
                                   pow(getFractionDropped(1, m_trkEffHistTightPhysModel, pt, eta), 2) );
-        if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        if(std::uniform_real_distribution<double>(0, 1)(prng) < fTrkEffSyst) return false;
       }
     }
 
@@ -306,7 +311,7 @@ namespace InDet {
       const xAOD::TrackParticle* track,
       const CP::SystematicSet& syst) const
   {
-    std::lock_guard<std::mutex> lock(m_rndMutex);
+    std::lock_guard<std::mutex> lock(m_sysLock);
     InDetTrackTruthFilterTool* nc_this ATLAS_THREAD_SAFE =
         const_cast<InDetTrackTruthFilterTool*>(this);
     if (nc_this->applySystematicVariation(syst).isFailure())
