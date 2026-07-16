@@ -102,7 +102,7 @@ namespace MuonR4::SegmentFit {
                                                                             SeederStateBase::HitVec, 
                                                                             SeederStateBase::CalibCont_t>);
 
-
+    static_assert(Acts::Experimental::detail::CompositeSpacePointSeedSelector<SeederStateBase>);
     /** @brief Helper class to generate valid seeds for the segment fit. The generator first returns a seed
      *         directly made from the patten recogntion. Afterwards it builds seeds by lying tangent lines
      *         to a pair of drift circles. The pairing starts from the innermost & outermost layers with tubes.
