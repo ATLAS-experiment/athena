@@ -16,7 +16,6 @@ namespace MuonR4 {
     class SegmentSelectionTool : public extends <AthAlgTool, ISegmentSelectionTool> {
         public:
             using base_class::base_class;
-            using HitSummary = Segment::HitSummary;
 
             virtual StatusCode initialize() override final;
             /** @copydoc ISegmentSelectionTool::passSeedingQuality */

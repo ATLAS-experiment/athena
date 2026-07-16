@@ -30,6 +30,8 @@ namespace xAOD{
     const Identifier& identify(const UncalibratedMeasurement* meas);
     /** @brief Returns whether the measurement is a NSW measurement */
     bool isNSW(const UncalibMeasType aodType);
+    /** @brief Returns whether the measurement is a precision hit */
+    bool isPrecisionHit(const UncalibratedMeasurement* meas);
     /** @brief Transforms the uncalibrated measurement type to a technology index
         @param aodType Uncalibrated measurement type */
     ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType);

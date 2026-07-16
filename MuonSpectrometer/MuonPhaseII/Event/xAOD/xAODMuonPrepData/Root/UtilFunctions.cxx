@@ -97,6 +97,21 @@ namespace xAOD{
                 return TechnologyUnknown;
         }
     }
+
+    bool isPrecisionHit(const UncalibratedMeasurement* meas) {
+        switch (meas->type()) {
+            using enum UncalibMeasType;
+            case MdtDriftCircleType:
+            case MMClusterType:
+                return true;
+            case sTgcStripType:
+                /// Combined muon strip is made up out of a strip + X
+                return meas->numDimensions() == 0 || 
+                       static_cast<const sTgcMeasurement*>(meas)->channelType() == sTgcMeasurement::sTgcChannelTypes::Strip;
+            default:
+                return false;
+        }
+    }
     
     
     std::pair<Amg::Vector2D, AmgSymMatrix(2)> positionAndCovariance(const MuonMeasurement* oneDimMeas) {
