@@ -38,7 +38,6 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/DataSvc.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
 

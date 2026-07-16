@@ -13,7 +13,6 @@
 #include <sstream>
 
 // FrameWork includes
-#include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
 // CLHEP/HepMC includes

@@ -9,9 +9,6 @@
 #include <sstream>
 #include <fstream>
 
-// FrameWork includes
-#include "GaudiKernel/IPartPropSvc.h"
-
 // CLHEP/HepMC includes
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
