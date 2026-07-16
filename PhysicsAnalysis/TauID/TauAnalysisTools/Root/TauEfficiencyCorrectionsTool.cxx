@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -133,100 +133,111 @@ void TauEfficiencyCorrectionsTool::printConfig() const
 
 //______________________________________________________________________________
 CP::CorrectionCode TauEfficiencyCorrectionsTool::getEfficiencyScaleFactor( const xAOD::TauJet& xTau,
-    double& eff, unsigned int /*iRunNumber*/)
+		double& eff, unsigned int /*iRunNumber*/)
 {
-  eff = 1.;
+	eff = 1.;
 
-  if (m_bIsData)
-    return CP::CorrectionCode::Ok;
+	if (m_bIsData)
+		return CP::CorrectionCode::Ok;
 
-  ANA_CHECK_SET_TYPE (CP::CorrectionCode);
-  ANA_CHECK(readRandomRunNumber());
+	ANA_CHECK_SET_TYPE (CP::CorrectionCode);
+	ANA_CHECK(readRandomRunNumber());
 
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-  {
-    if ( !(**it)->isSupportedRunNumber(m_iRunNumber) )
-      continue;
-    double dToolEff = 1.;
-    CP::CorrectionCode tmpCorrectionCode = (**it)->getEfficiencyScaleFactor(xTau, dToolEff, m_iRunNumber);
-    if (tmpCorrectionCode != CP::CorrectionCode::Ok)
-      return tmpCorrectionCode;
-    eff *= dToolEff;
-  }
-  return CP::CorrectionCode::Ok;
+	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
+	{
+		if ( !(**it)->isSupportedRunNumber(m_iRunNumber) )
+			continue;
+		double dToolEff = 1.;
+		CP::CorrectionCode tmpCorrectionCode = (**it)->getEfficiencyScaleFactor(xTau, dToolEff, m_iRunNumber);
+		if (tmpCorrectionCode != CP::CorrectionCode::Ok)
+			return tmpCorrectionCode;
+		eff *= dToolEff;
+	}
+	return CP::CorrectionCode::Ok;
 }
 
 //______________________________________________________________________________
 CP::CorrectionCode TauEfficiencyCorrectionsTool::applyEfficiencyScaleFactor( const xAOD::TauJet& xTau, unsigned int /*iRunNumber*/)
 {
-  if (m_bIsData)
-    return CP::CorrectionCode::Ok;
+	if (m_bIsData)
+		return CP::CorrectionCode::Ok;
 
-  ANA_CHECK_SET_TYPE (CP::CorrectionCode);
-  ANA_CHECK(readRandomRunNumber());
+	ANA_CHECK_SET_TYPE (CP::CorrectionCode);
+	ANA_CHECK(readRandomRunNumber());
 
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-  {
-    CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xTau, m_iRunNumber);
-    if (tmpCorrectionCode != CP::CorrectionCode::Ok)
-      return tmpCorrectionCode;
-  }
-  return CP::CorrectionCode::Ok;
+	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
+	{
+		CP::CorrectionCode tmpCorrectionCode = (**it)->applyEfficiencyScaleFactor(xTau, m_iRunNumber);
+		if (tmpCorrectionCode != CP::CorrectionCode::Ok)
+			return tmpCorrectionCode;
+	}
+	return CP::CorrectionCode::Ok;
 }
 
 /// returns: whether this tool is affected by the given systematics
 //______________________________________________________________________________
 bool TauEfficiencyCorrectionsTool::isAffectedBySystematic( const CP::SystematicVariation& systematic ) const
 {
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-    if ((**it)->isAffectedBySystematic(systematic))
-      return true;
-  return false;
+	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
+		if ((**it)->isAffectedBySystematic(systematic))
+			return true;
+	return false;
 }
 
 /// returns: the list of all systematics this tool can be affected by
 //______________________________________________________________________________
 CP::SystematicSet TauEfficiencyCorrectionsTool::affectingSystematics() const
 {
-  CP::SystematicSet sAffectingSystematics;
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-    sAffectingSystematics.insert((**it)->affectingSystematics());
-  return sAffectingSystematics;
+	CP::SystematicSet sAffectingSystematics;
+	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
+		sAffectingSystematics.insert((**it)->affectingSystematics());
+	return sAffectingSystematics;
 }
 
 /// returns: the list of all systematics this tool recommends to use
 //______________________________________________________________________________
 CP::SystematicSet TauEfficiencyCorrectionsTool::recommendedSystematics() const
 {
-  CP::SystematicSet sRecommendedSystematics;
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-    sRecommendedSystematics.insert((**it)->recommendedSystematics());
-  return sRecommendedSystematics;
+	CP::SystematicSet sRecommendedSystematics;
+	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
+		sRecommendedSystematics.insert((**it)->recommendedSystematics());
+	return sRecommendedSystematics;
 }
 
 //______________________________________________________________________________
 StatusCode TauEfficiencyCorrectionsTool::applySystematicVariation ( const CP::SystematicSet& sSystematicSet)
 {
-  for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
-    if ((**it)->applySystematicVariation(sSystematicSet) == StatusCode::FAILURE)
-      return StatusCode::FAILURE;
-  return StatusCode::SUCCESS;
+	for (auto it = m_vCommonEfficiencyTools.begin(); it != m_vCommonEfficiencyTools.end(); it++)
+		if ((**it)->applySystematicVariation(sSystematicSet) == StatusCode::FAILURE)
+			return StatusCode::FAILURE;
+	return StatusCode::SUCCESS;
 }
 
 //=================================PRIVATE-PART=================================
 StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 {
-  std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
+	std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
   for (auto iEfficiencyCorrectionType : m_vEfficiencyCorrectionTypes){
 
     if (iEfficiencyCorrectionType == SFJetIDHadTau)
     {
       if (m_sInputFilePathJetIDHadTau.empty()) {
-	if(m_sCampaign=="mc23"){
-	    m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "RNNID_TrueHadTau_mc23_v2_incl_AF3.root" :  sDirectory + "RNNID_TrueHadTau_mc23_v2.root";  	
-        } else if (m_sCampaign=="mc20"){
-	    m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "RNNID_TrueHadTau_mc20_v1_incl_AF3.root" :  sDirectory + "RNNID_TrueHadTau_mc20_v1.root";   	
-        }
+        
+	if(m_useGNTau){
+          if(m_sCampaign=="mc23"){
+              m_sInputFilePathJetIDHadTau = sDirectory + "GNTauID_TrueHadTau_Run3.root";  		  
+	  } else {  
+              ATH_MSG_ERROR("GNTau ID correction not supported for campaign "<< m_sCampaign);
+	      return StatusCode::FAILURE;
+	  }		  
+	} else { 	
+
+      	  if(m_sCampaign=="mc23"){
+	      m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "RNNID_TrueHadTau_mc23_v2_incl_AF3.root" :  sDirectory + "RNNID_TrueHadTau_mc23_v2.root";  	
+          } else if (m_sCampaign=="mc20"){
+	      m_sInputFilePathJetIDHadTau = m_useFastSim ? sDirectory + "RNNID_TrueHadTau_mc20_v1_incl_AF3.root" :  sDirectory + "RNNID_TrueHadTau_mc20_v1.root";   	
+          }
+	}
       }
       m_sVarName = "TauScaleFactorJetIDHadTau";
 
@@ -285,25 +296,42 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         }
 
         if(m_sCampaign=="mc23"){
-            if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2022_looseRNNTauID_1p.root"; 
-            } else if( m_iJetIDLevel == static_cast<int>(JETIDRNNMEDIUM)){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2022_mediumRNNTauID_1p.root";
-            }
-            else {
-                ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
-		return StatusCode::FAILURE;
-            }
+            if(m_useGNTau){
+              if( m_iJetIDLevel == static_cast<int>(JETIDGNTAULOOSE)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2026_looseGNTauID_1p.root";
+              } else if( m_iJetIDLevel == static_cast<int>(JETIDGNTAUMEDIUM)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2026_mediumGNTauID_1p.root";
+              }
+              else {
+                  ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
+                  return StatusCode::FAILURE;
+              }
+            } else {
+              if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2022_looseRNNTauID_1p.root"; 
+              } else if( m_iJetIDLevel == static_cast<int>(JETIDRNNMEDIUM)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_2022_mediumRNNTauID_1p.root";
+              }
+              else {
+                  ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
+	  	  return StatusCode::FAILURE;
+              }
+	    }
         } else if(m_sCampaign=="mc20"){
-            if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseRNNTauID_1p.root";
-            } else if( m_iJetIDLevel == static_cast<int>(JETIDRNNMEDIUM)){
-                m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_mediumRNNTauID_1p_v1.root";
-            }
-            else {
-                ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
-                return StatusCode::FAILURE;
-            }
+            if(m_useGNTau){
+              ATH_MSG_ERROR("Eveto with GNTau ID correction not supported for campaign "<< m_sCampaign);
+	      return StatusCode::FAILURE;
+	    } else {
+              if( m_iJetIDLevel == static_cast<int>(JETIDRNNLOOSE)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_looseRNNTauID_1p.root";
+              } else if( m_iJetIDLevel == static_cast<int>(JETIDRNNMEDIUM)){
+                  m_sInputFilePathEleIDElectron = sDirectory + "EleRNN_TrueElectron_Run2_mediumRNNTauID_1p_v1.root";
+              }
+              else {
+                  ATH_MSG_ERROR("SFEleIDElectron correction not supported for JetIDLevel="<<m_iJetIDLevel);
+                  return StatusCode::FAILURE;
+              }
+	   }
         }
       }
       m_sVarName = "TauScaleFactorEleIDElectron";
@@ -426,6 +454,15 @@ std::string TauEfficiencyCorrectionsTool::ConvertJetIDToString(const int iLevel)
       return "jetrnnsigmedium";
     case JETIDRNNTIGHT: 
       return "jetrnnsigtight";
+    case JETIDGNTAUVERYLOOSE:
+      ATH_MSG_WARNING("Efficiency corrections for JETIDGNTAUVERYLOOSE working point are not supported.");
+      return "";
+    case JETIDGNTAULOOSE:
+      return "jetgntausigloose";
+    case JETIDGNTAUMEDIUM:
+      return "jetgntausigmedium";
+    case JETIDGNTAUTIGHT:
+      return "jetgntausigtight";  
     default:
       ATH_MSG_WARNING("No valid JetID level passed.");
       return "";
