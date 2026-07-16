@@ -7,15 +7,10 @@
 #   source `which valgrind-atlas-opts.sh`
 #
 
-target_var="${AtlasProject}_DIR" #e.g. Athena_DIR
-# no common way to expand in bash and zsh
-if [ -n "$ZSH_VERSION" ]; then
-    project_DIR="${(P)target_var}"  # zsh
-else
-    project_DIR="${!target_var}"    # bash
-fi
-_vgopts=("--suppressions=${project_DIR}/data/Valkyrie/valgrind-python.supp"
-         "--suppressions=${project_DIR}/data/Valkyrie/valgrind-atlas.supp"
+_vg_python_supp=`find_data.py Valkyrie/valgrind-python.supp`
+_vg_atlas_supp=`find_data.py Valkyrie/valgrind-atlas.supp`
+_vgopts=("--suppressions=${_vg_python_supp}"
+         "--suppressions=${_vg_atlas_supp}"
          "--suppressions=${ROOTSYS}/etc/valgrind-root.supp"
          "--suppressions=${ROOTSYS}/etc/valgrind-root-python.supp"
          "--smc-check=all")
@@ -28,3 +23,5 @@ for o in ${_vgopts[@]}; do
 done
 
 unset _vgopts
+unset _vg_atlas_supp
+unset _vg_python_supp
