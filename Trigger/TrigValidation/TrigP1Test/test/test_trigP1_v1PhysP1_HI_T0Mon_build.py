@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Test of HI data 2023 workflow, runs athenaHLT with HI menu followed by filtering of HP stream, and offline reco with monitoring
+# art-description: Test of HI data 2023 workflow, runs athenaEF with HI menu followed by filtering of HP stream, and offline reco with monitoring
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-include: 24.0/Athena
@@ -16,7 +16,7 @@ triggermenu = 'PhysicsP1_HI_run3_v1'
 
 
 hlt = ExecStep.ExecStep()
-hlt.type = 'athenaHLT'
+hlt.type = 'athenaEF'
 hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.input = 'data_hi_2023'
 hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
