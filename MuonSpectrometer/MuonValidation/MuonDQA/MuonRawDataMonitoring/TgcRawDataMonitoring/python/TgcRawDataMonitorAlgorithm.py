@@ -26,11 +26,11 @@ def TgcRawDataMonitoringConfig(inputFlags):
 
     tgcRawDataMonitorTool = CompFactory.TgcRawDataMonitorTool("TgcRawDataMonitorTool")
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     tgcRawDataMonAlg = helper.addAlgorithm(CompFactory.TgcRawDataMonitorAlgorithm,'TgcRawDataMonAlg',
                                            TrackExtrapolator = extrapolator,
                                            TgcRawDataMonitorTool = tgcRawDataMonitorTool,
-                                           MuonSelectionTool = result.popToolsAndMerge(MuonSelectionToolCfg(inputFlags, 
+                                           MuonSelectionTool = result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(inputFlags, 
                                                                                                             MuQuality=1,
                                                                                                             MaxEta=2.7)),
                                            doExpressProcessing = inputFlags.Common.doExpressProcessing )

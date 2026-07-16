@@ -70,11 +70,11 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
         tagandprobe_chain = singlemu_chains_sorted[0]
         log.info(f'Using {tagandprobe_chain} as tag and event trigger in ttbar tag&probe')        
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ttbar_'+chain,
-                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)),
+                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, MuQuality=1)),
                                      MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
 
         monAlg.EventTrigger = tagandprobe_chain
@@ -120,11 +120,11 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
         log.info(f'Using {tagandprobe_chain} as tag and event trigger in Z tag&probe')
 
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ZTP_'+chain,
-                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)),
+                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, MuQuality=1)),
                                      MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
 
         monAlg.EventTrigger = tagandprobe_chain
