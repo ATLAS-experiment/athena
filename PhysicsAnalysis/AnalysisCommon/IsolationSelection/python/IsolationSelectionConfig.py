@@ -38,10 +38,9 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingA
                                                                            quality = LikeEnum.VeryLoose,
                                                                            menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, 
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, 
                                                                 MaxEta=2.7,
-                                                                DisablePtCuts=True,
                                                                 MuQuality=2, ### Select the loose working point
                                                                 )))
     kwargs.setdefault("IsoCloseByCorrectionTool", result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags)))
@@ -85,10 +84,9 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite 
                                                                            PhoContainers = [ x for x in depNames if x.find("Pho") != -1])))  
     
     # Need muon selection tool to apply Loose - no pt cuts
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, 
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, 
                                                                 MaxEta        = 2.7,
-                                                                DisablePtCuts = True,
                                                                 MuQuality     = 2, ### Select the loose working point
                                                                 UseLRT        = hasLRT,
                                                                 )))  
@@ -140,10 +138,9 @@ def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", suff = "", **kw
                                                                            quality = LikeEnum.VeryLoose,
                                                                            menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, 
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
+    kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags, 
                                                                 MaxEta=2.7,
-                                                                DisablePtCuts=True,
                                                                 MuQuality=2, ### Select the loose working point
                                                                 )))  
     the_alg = CompFactory.CP.TestIsolationCloseByCorrAlg(name + suff, **kwargs)

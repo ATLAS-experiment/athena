@@ -8,10 +8,10 @@ def L2OverlapRemoverMonConfig(helper):
 
     GroupName = 'OR'
 
-    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
     from .MuonMatchingToolConfig import MuonMatchingToolConfig
     monAlg = helper.addAlgorithm(CompFactory.L2OverlapRemoverMon,'L2OverlapRemoverMon',
-                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)),
+                                 MuonSelectionTool = helper.result().popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(helper.flags, MuQuality=1)),
                                  MuonMatchingTool = helper.result().popToolsAndMerge(MuonMatchingToolConfig(helper.flags)))
 
     ### monitorig groups

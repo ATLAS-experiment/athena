@@ -17,9 +17,9 @@ def BJetCalibrationAlgCfg(flags, name="BJetCalibrationAlg", doPtCorr=True, **kwa
 
     if "muonSelectionTool" not in kwargs:
         # MuQuality=1, Medium muons, see Event/xAOD/xAODMuon/xAODMuon/versions/Muon_v1.h
-        from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+        from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
         kwargs.setdefault("muonSelectionTool", cfg.popToolsAndMerge(
-            MuonSelectionToolCfg(flags, MaxEta=2.5, MuQuality=1)))
+            MuonLoosenedNonCalibratedSelectionToolCfg(flags, MaxEta=2.5, MuQuality=1)))
 
     if doPtCorr and "bJetTool" not in kwargs:
         kwargs.setdefault("bJetTool", CompFactory.BJetCorrectionTool())

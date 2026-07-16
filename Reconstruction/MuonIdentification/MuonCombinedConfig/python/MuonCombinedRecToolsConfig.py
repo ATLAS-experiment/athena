@@ -187,9 +187,9 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
         kwargs.setdefault("UseCaloCells", False)
         kwargs.setdefault("CopyUInt8SummaryKeys", [])
     else:
-        from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
+        from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
         kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(
-            MuonSelectionToolCfg(flags, name='MuonRecoSelTool')))
+            MuonLoosenedNonCalibratedSelectionToolCfg(flags, name='MuonRecoSelTool')))
     kwargs.setdefault("RequireMSOEforSA", flags.Beam.Type is BeamType.Collisions)
     kwargs.setdefault("RequireCaloForSA", flags.Beam.Type is BeamType.Collisions)
  
