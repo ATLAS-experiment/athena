@@ -12,19 +12,19 @@
 #include "Acts/Utilities/HashedString.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
+#include "Acts/Utilities/VectorHelpers.hpp"
 
 #include "xAODMuonViews/FillContainer.h"
 #include "MuonTrackEvent/ExpandedSector.h"
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonReadoutGeometryR4/SpectrometerSector.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
+#include "ActsEvent/CaloExtension.h"
 
 using namespace MuonR4::SegmentFit;
+using namespace Acts::VectorHelpers;
 
 namespace {
-    inline double eta(const Acts::BoundTrackParameters& pars) {
-        return -std::log(std::tan(pars.theta() / 2.));
-    }
     inline std::string print(const xAOD::TrackParticle& idTrack) {
         std::stringstream ostr{};
         ostr<<"track with pt: "<<(idTrack.pt() / Gaudi::Units::GeV)
@@ -48,6 +48,7 @@ namespace MuonCombinedR4 {
 
     StatusCode InDetTrackSelectionAlg::initialize() {
         ATH_CHECK(m_idTrkKey.initialize());
+        ATH_CHECK(m_extensionDecorKey.initialize(m_useCaloExtension));
         ATH_CHECK(m_msTrkKey.initialize());
         ATH_CHECK(m_selectionTool.retrieve(EnableTool{!m_selectionTool.empty()}));
         ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -130,35 +131,44 @@ namespace MuonCombinedR4 {
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolate ID "<<print(idTrack)<<"\n to the calorimeter exit.\n"
                         <<msEntrance->volumeBounds()<<", id: "<<msEntrance->geometryId());
         /** Retrieve the last state of the track to extrapolate into the MS  */
-        auto lastState = lastMeasurementState(idTrack);
-        if (!lastState) {
+        auto idExitPars = lastTrackParameters(idTrack);
+        if (!idExitPars) {
             ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - The ID track has no valid last state");
             return std::nullopt;
         }
-        /** Construct the track parameter from it  */
-        const Acts::BoundTrackParameters idExitPars = getActsTrack(idTrack)->createParametersFromState(*lastState);
-        /** @todo We need to check whether we can retrieve the track parameters from the 
-                 calo extension provided by the Egamma / Jet ETmiss group. */
+        if (m_useCaloExtension) {
+            const ActsTrk::CaloExtension* extension = ActsTrk::getCaloExtension(idTrack);
+            if (extension != nullptr){
+                auto lastExtensionPars = extension->lastParameters();
+                if (lastExtensionPars->referenceSurface().geometryId().withBoundary(0) == 
+                    msEntrance->geometryId()) {
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Calo extension is on the MS entrance");
+                    return lastExtensionPars;
+                }
+                idExitPars = lastExtensionPars;
+            }
+        }
+       
         const Acts::GeometryIdentifier barrelId = msEntrance->geometryId().withBoundary(1 + cylinderFace);
         const Acts::GeometryIdentifier endcapId = msEntrance->geometryId().withBoundary(1 + (idTrack.eta() > 0 ? faceSideA : faceSideC));        
         const Acts::Surface* barrelEntance = trackingGeometry->findSurface(barrelId);
         const Acts::Surface* endcapDisc = trackingGeometry->findSurface(endcapId);
-        
+
         const Acts::Surface* target = std::abs(idTrack.eta()) < 1.1 ? barrelEntance : endcapDisc;
 
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Target: "<<target->toString(tgContext)
             <<", "<<target->geometryId()<<", alignable: "<<target->isAlignable()<<".");
-        auto caloPars = m_extrapolationTool->propagate(ctx, idExitPars, *target);
+        auto caloPars = m_extrapolationTool->propagate(ctx, *idExitPars, *target);
         if (caloPars.ok()) {
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolation successful "<<(*caloPars));
             return *caloPars;
         }
         if (std::abs(idTrack.eta()) > 0.9 && (target == barrelEntance)){
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" -  Track is in the transition region. Try the endcap as target.");
-            caloPars = m_extrapolationTool->propagate(ctx, idExitPars, *endcapDisc);
+            caloPars = m_extrapolationTool->propagate(ctx, *idExitPars, *endcapDisc);
         } else if (std::abs(idTrack.eta()) < 1.2 && (target == endcapDisc)) {
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" -  Track is in the transition region. Try the barrel as target.");
-            caloPars = m_extrapolationTool->propagate(ctx, idExitPars, *barrelEntance);
+            caloPars = m_extrapolationTool->propagate(ctx, *idExitPars, *barrelEntance);
         }
         if (caloPars.ok()) {
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Transition recovery succeeded.");
