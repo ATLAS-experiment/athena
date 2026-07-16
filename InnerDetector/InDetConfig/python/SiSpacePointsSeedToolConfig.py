@@ -22,6 +22,9 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
     kwargs.setdefault("useVertexPosition", flags.Tracking.ActiveConfig.useVertexPositionDuringSeeding)
     if flags.Tracking.ActiveConfig.extension == "HeavyIonLowPt":
         kwargs.setdefault("pTmax", flags.Tracking.ActiveConfig.maxPT)
+        kwargs.setdefault("maxSeedsForSpacePoint", 4)
+    else:
+        kwargs.setdefault("maxSeedsForSpacePoint", 5)
 
     kwargs.setdefault("maxdImpact",
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
