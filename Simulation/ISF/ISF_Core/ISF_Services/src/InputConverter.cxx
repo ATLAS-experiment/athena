@@ -9,7 +9,6 @@
 
 // framework
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include "GaudiKernel/IPartPropSvc.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
 // ISF_HepMC include
@@ -41,17 +40,12 @@
 #include "CLHEP/Geometry/Point3D.h"
 #include "CLHEP/Geometry/Vector3D.h"
 #include "CLHEP/Units/SystemOfUnits.h"
-// HepPDT
-#include "HepPDT/ParticleID.hh"
-#include "HepPDT/DecayData.hh"
-#include "HepPDT/ParticleDataTable.hh"
+
 #include "TruthUtils/HepMCHelpers.h"
 
 /** Constructor **/
 ISF::InputConverter::InputConverter(const std::string& name, ISvcLocator* svc)
   : base_class(name, svc)
-  , m_particlePropSvc("PartPropSvc",name)
-  , m_particleDataTable(nullptr)
   , m_useGeneratedParticleMass(false)
   , m_genParticleFilters(this)
   , m_quasiStableParticlesIncluded(false)
@@ -64,10 +58,6 @@ ISF::InputConverter::InputConverter(const std::string& name, ISvcLocator* svc)
   declareProperty("GenParticleFilters",
                   m_genParticleFilters,
                   "Tools for filtering out GenParticles.");
-  // the particle property service
-  declareProperty("ParticlePropertyService",
-                  m_particlePropSvc,
-                  "ParticlePropertyService to retrieve the PDT.");
   declareProperty("QuasiStableParticlesIncluded", m_quasiStableParticlesIncluded);
 }
 
@@ -84,14 +74,8 @@ ISF::InputConverter::initialize()
 {
   ATH_MSG_VERBOSE("initialize() begin");
 
-  // setup PDT if requested (to get particle masses later on)
   if (!m_useGeneratedParticleMass) {
-    ATH_CHECK(m_particlePropSvc.retrieve());
-    m_particleDataTable = m_particlePropSvc->PDT();
-    if (!m_particleDataTable) {
-      ATH_MSG_FATAL( "Could not get ParticleDataTable from " << m_particlePropSvc << ". Abort" );
-      return StatusCode::FAILURE;
-    }
+	m_gendata = std::make_shared<GenData>();
   }
 
   if (!m_genParticleFilters.empty()) {
@@ -328,11 +312,9 @@ ISF::InputConverter::getParticleMass(const HepMC::ConstGenParticlePtr& part) con
   // 1. use PDT mass?
   if ( !m_useGeneratedParticleMass ) {
     const int absPDG = std::abs(part->pdg_id());
-    HepPDT::ParticleData const *pData = (m_particleDataTable)
-      ? m_particleDataTable->particle(absPDG)
-      : nullptr;
+   auto pData = m_gendata->particleMass(absPDG);
     if (pData) {
-      mass = pData->mass();
+      mass = pData.value();
       ATH_MSG_VERBOSE("using pData mass, mass="<<mass);
     }
     else {

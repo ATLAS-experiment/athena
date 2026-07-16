@@ -127,7 +127,7 @@ iFatras::PDGToG4Particle::listOfParticles() const
   for( PDGG4ParticleMap::const_iterator it = m_pdgG4ParticleMap.begin();
        it != m_pdgG4ParticleMap.end(); ++it)
     {
-      // Only return matter particles (for consistency with HepPDT)
+      // Only return matter particles 
       if( it->first > 0)
         {
           ret.push_back( std::make_pair( it->first, it->second->GetParticleName()));
