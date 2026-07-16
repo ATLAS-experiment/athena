@@ -20,7 +20,7 @@ atlas_add_root_dictionary( ISF_FastCaloSimParametrizationLib
                            ISF_FastCaloSimParametrization/CaloGeometry.h
                            ISF_FastCaloSimParametrization/CaloGeometryLookup.h
                            Root/LinkDef.h
-                           EXTERNAL_PACKAGES ROOT HepPDT CLHEP Geant4 )
+                           EXTERNAL_PACKAGES ROOT CLHEP Geant4 )
 
 atlas_add_library( ISF_FastCaloSimParametrizationLib
                    Root/*.cxx src/lib/CaloGeometryFromCaloDDM.cxx src/lib/CaloGeometryLookup.cxx src/lib/CaloGeometry.cxx
