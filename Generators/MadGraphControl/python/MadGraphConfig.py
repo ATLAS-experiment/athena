@@ -55,10 +55,13 @@ def _prepare_lhe_for_shower(produced_output, lhe_file):
         elif produced_output.endswith(".tgz"):
             root = produced_output[:-4]
         elif produced_output.endswith(".gz"):
+
             root = produced_output[:-3]
+
         else:
             root, _ = os.path.splitext(produced_output)
-        primary_output = f"{root}.events"
+        #primary_output = f"{root}.events"
+        primary_output = f"{root}"
     
     # If the transform requested a specific TXT output name, symlink the 
     # produced output to the filename that the transform expects
@@ -82,6 +85,9 @@ def _symlink_first_existing(link_name, candidates, overwrite=False):
     """
     Helper function to symlink the first existing file in candidates to link_name.
     """
+    print("nnnnnnnn")
+    print(link_name)
+    print(candidates)
     if os.path.exists(link_name) and not overwrite:
         return True
 
@@ -93,6 +99,8 @@ def _symlink_first_existing(link_name, candidates, overwrite=False):
             print(os.path.abspath(link_name))
             return True
         if os.path.lexists(link_name):
+            print("qqqqqqq")
+
             os.remove(link_name)
         os.symlink(os.path.abspath(candidate), link_name)
         return True
