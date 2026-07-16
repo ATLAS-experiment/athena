@@ -16,8 +16,8 @@ namespace NSWL1 {
     ATH_MSG_DEBUG(" " << std::setw(32) << std::setfill('.') << std::setiosflags(std::ios::left) << m_doNtuple.name() << ((m_doNtuple)? "[True]":"[False]")
                       << std::setfill(' ') << std::setiosflags(std::ios::right) );
 
-    ATH_CHECK(m_keyMcEventCollection.initialize(m_isMC));
-    ATH_CHECK(m_keyMuonEntryLayer.initialize(m_isMC));
+    ATH_CHECK(m_keyMcEventCollection.initialize(m_isMC and m_doTruth));
+    ATH_CHECK(m_keyMuonEntryLayer.initialize(m_isMC and m_doTruth));
     ATH_CHECK(m_keyMmDigitContainer.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_detectorManagerKey.initialize());
@@ -133,19 +133,19 @@ namespace NSWL1 {
 
     const McEventCollection* ptrMcEventCollection = nullptr;
     const TrackRecordCollection* ptrMuonEntryLayer = nullptr;
-    if(m_isMC){
+    if(m_isMC and m_doTruth){
       SG::ReadHandle<McEventCollection> readMcEventCollection( m_keyMcEventCollection, ctx );
       if( !readMcEventCollection.isValid() ){
         ATH_MSG_ERROR("Cannot retrieve McEventCollection");
         return StatusCode::FAILURE;
       }
-      if(m_doTruth) ptrMcEventCollection = readMcEventCollection.cptr();
       SG::ReadHandle<TrackRecordCollection> readMuonEntryLayer( m_keyMuonEntryLayer, ctx );
       if( !readMuonEntryLayer.isValid() ){
         ATH_MSG_ERROR("Cannot retrieve MuonEntryLayer");
         return StatusCode::FAILURE;
       }
-      if(m_doTruth and m_doNtuple) {
+      if(m_doNtuple) {
+        ptrMcEventCollection = readMcEventCollection.cptr();
         ptrMuonEntryLayer = readMuonEntryLayer.cptr();
         MMLoadVariables load = MMLoadVariables();
         std::map<std::pair<uint64_t, unsigned int>,evInf_entry> Event_Info;
