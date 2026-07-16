@@ -17,20 +17,24 @@ def ITkGlobalMonitoringConfig(flags):
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(flags, "ITkGlobalMonitoring")
 
-    # In addition to the Run 3 tier0 environments, also run in the
-    # offline MC reconstruction path (DQ.Environment == 'tier0ESD' or
-    # 'AOD') used to develop and validate the ITk monitoring, since no
-    # ITk data exists yet.
-    _trackEnvs = ('online', 'tier0', 'tier0Raw', 'tier0ESD', 'AOD')
+    # The environment gate exists for the data Tier-0 processing,
+    # which splits monitoring across the RAW and ESD steps.  MC
+    # reconstruction is a single RAWtoALL step (DQ.Environment
+    # resolves to 'tier0ESD' there) and is currently the only way to
+    # run the ITk monitoring, so on MC run whenever InDet DQ is
+    # enabled instead of relying on the environment value.
+    _runTrackMon = (flags.Input.isMC
+                    or flags.DQ.Environment in ('online', 'tier0', 'tier0Raw'))
 
-    # Track monitoring (uses xAOD::TrackParticle, ITk-friendly)
-    if flags.DQ.Environment in _trackEnvs:
+    # Track monitoring (uses xAOD::TrackParticle)
+    if _runTrackMon:
         from ITkGlobalMonitoring.ITkGlobalTrackMonAlgCfg import (
             ITkGlobalTrackMonAlgCfg)
         ITkGlobalTrackMonAlgCfg(helper, acc, flags)
 
-    # Large radius tracking monitoring
-    if (flags.DQ.Environment in _trackEnvs and
+    # Large radius tracking monitoring (the Acts-based ITk LRT flag
+    # only exists on main; check the legacy flags too for 24.0)
+    if (_runTrackMon and
         (flags.Tracking.doLargeD0 or flags.Tracking.doLowPtLargeD0)):
         from ITkGlobalMonitoring.ITkGlobalLRTMonAlgCfg import (
             ITkGlobalLRTMonAlgCfg)

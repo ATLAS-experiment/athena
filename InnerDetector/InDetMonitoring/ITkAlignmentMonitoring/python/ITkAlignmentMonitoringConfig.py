@@ -24,12 +24,13 @@ def ITkAlignmentMonitoringConfig(flags, TrackCollectionName = None):
     if TrackCollectionName is None:
         TrackCollectionName = "CombinedITkTracks"
 
-    # In addition to the Run 3 tier0 environments, also run in the
-    # offline MC reconstruction path (DQ.Environment == 'tier0ESD' or
-    # 'AOD') used to develop and validate the ITk monitoring, since no
-    # ITk data exists yet.
-    _envs = ('online', 'tier0', 'tier0Raw', 'tier0ESD', 'AOD')
-    if flags.DQ.Environment in _envs:
+    # The environment gate exists for the data Tier-0 processing,
+    # which splits monitoring across the RAW and ESD steps.  MC
+    # reconstruction is a single RAWtoALL step (DQ.Environment
+    # resolves to 'tier0ESD' there) and is currently the only way to
+    # run the ITk monitoring, so on MC run whenever InDet DQ is
+    # enabled instead of relying on the environment value.
+    if flags.Input.isMC or flags.DQ.Environment in ('online', 'tier0', 'tier0Raw'):
 
         ########### here begins ITkAlignMonGenericTracksAlg ###########
         kwargsITkAlignMonGenericTracksAlg = {
