@@ -15,10 +15,8 @@ def BPHY18Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
-    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
 
     acc = ComponentAccumulator()
-    PartPropSvcName = acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
     acc.merge(EGammaCommonCfg(flags))
     isSimulation = flags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
@@ -80,8 +78,7 @@ def BPHY18Cfg(flags):
                              TrkVertexFitterTool         = vkalvrt,
                              TrackSelectorTool           = trackselect,
                              VertexPointEstimator        = vpest,
-                             ElectronSelection             = "d0_or_nod0",
-                             PartPropSvc = PartPropSvcName
+                             ElectronSelection             = "d0_or_nod0"
                              )
     extraTools = [BPHY18DiElectronFinder]
     BPHY18DiElectronSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
