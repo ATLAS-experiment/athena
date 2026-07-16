@@ -1,3 +1,4 @@
+
 #Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
@@ -1028,7 +1029,7 @@ def createHeavyIonLowPtTrackingPassFlags():
     icf.maxPixelHoles    = 1
     icf.maxSctHoles      = 2
     icf.maxDoubleHoles   = 1
-    icf.radMax           = 600. * Units.mm
+    icf.radMax           = 380. * Units.mm
     icf.nHolesMax        = icf.maxHoles
     icf.nHolesGapMax     = icf.maxHoles # not as tight as 2*maxDoubleHoles
     icf.maxPrimaryImpact = lambda pcf: (
