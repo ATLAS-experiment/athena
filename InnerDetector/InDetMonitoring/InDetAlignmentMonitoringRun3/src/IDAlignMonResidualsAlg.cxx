@@ -296,14 +296,6 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       layerDisk = m_pixelID->layer_disk(id);
       modEta    = m_pixelID->eta_module(id);
       modPhi    = m_pixelID->phi_module(id);
-
-      ATH_MSG_INFO("DEBUG_PIXEL_DECODE:"
-               << " hitId=" << hitId
-               << " waferId=" << id
-               << " barrelEC=" << barrelEC
-               << " layerDisk=" << layerDisk
-               << " modEta=" << modEta
-               << " modPhi=" << modPhi);
       }
       else {
       const Identifier id = m_sctID->wafer_id(hitId);
@@ -313,15 +305,6 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       modEta    = m_sctID->eta_module(id);
       modPhi    = m_sctID->phi_module(id);
       sctSide   = m_sctID->side(id);
-
-      ATH_MSG_INFO("DEBUG_SCT_DECODE:"
-               << " hitId=" << hitId
-               << " waferId=" << id
-               << " barrelEC=" << barrelEC
-               << " layerDisk=" << layerDisk
-               << " modEta=" << modEta
-               << " modPhi=" << modPhi
-               << " side=" << sctSide);
       }
 
       if (m_idHelper->is_trt(hitId)) detType = 2;
@@ -560,7 +543,6 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
           fill(m_tools[m_pixPullY[layerDisk]], pix_b_pullsy_m);
 
           //Residuals vs Eta and Phi
-          ATH_MSG_INFO("DEBUG_RESIDUAL_FILL_PIXEL layerDisk=" << layerDisk << " Residual = " << residualX_m);
           fill(m_tools[m_pixResidualXvsEta[layerDisk]], modEta_m, residualX_m );
           fill(m_tools[m_pixResidualYvsEta[layerDisk]], modEta_m, residualY_m );
           fill(m_tools[m_pixResidualXvsPhi[layerDisk]], modPhi_m, residualX_m );

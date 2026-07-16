@@ -25,7 +25,6 @@ def InDetAlignmentMonitoringRun3Config(flags, **kwargs):
     trackCollectionName2 = "NONE"
     if ("TrackName" in kwargs):
         trackCollectionName = kwargs["TrackName"]
-        print ("TrackName!!!!!!!!!", trackCollectionName)
     if ("TrackName2" in kwargs):
         trackCollectionName2 = kwargs["TrackName2"]
     

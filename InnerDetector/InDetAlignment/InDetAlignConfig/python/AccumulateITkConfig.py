@@ -133,45 +133,12 @@ def ITkAccumulateCfg(flags, **kwargs):
     cfg.merge(ITkAlignTrackCollSplitterCfg(flags))
 
     if flags.ITk.Align.doMonitoring:
-
-        print("Insideeeeeeeeeeeeee")
-
-        # Must be set before building monitoring config.
-        # Ideally this should be set in the top-level config before flags.lock().
-
-        from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import (
-            InDetAlignmentMonitoringRun3Config)
+        from InDetAlignmentMonitoringRun3.InDetAlignmentMonitoringRun3Config import (InDetAlignmentMonitoringRun3Config)
 
         monCfg = InDetAlignmentMonitoringRun3Config(
             flags,
             TrackName=flags.ConstrainedTrackProvider.InputTracksCollection,
             UseITkGeometry=flags.Detector.GeometryITk,
         )
-
-        print("DEBUG monCfg was built")
-
-        monCfg.printConfig(
-            withDetails=True,
-            summariseProps=True,
-            onlyComponents=[
-                "IDAlignMonResidualsAlg",
-                "GenericTracksAlg",
-                "InDetAlignmentMonitoringRun3"
-            ],
-        )
-
         cfg.merge(monCfg)
-
-        print("DEBUG after merge monitoring")
-
-        cfg.printConfig(
-            withDetails=True,
-            summariseProps=True,
-            onlyComponents=[
-                "IDAlignMonResidualsAlg",
-                "GenericTracksAlg",
-                "InDetAlignmentMonitoringRun3"
-            ],
-        )
-
     return cfg

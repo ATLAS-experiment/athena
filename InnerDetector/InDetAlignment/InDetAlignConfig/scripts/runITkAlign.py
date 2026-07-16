@@ -75,8 +75,7 @@ flags.Exec.MaxEvents = kwargs["maxEvents"] if not kwargs["solve"] else 1
 flags.IOVDb.GlobalTag = kwargs["globalTag"]
     
 flags.addFlag("ConstrainedTrackProvider.InputTracksCollection", kwargs["inputTracksCollection"])
-
-flags.DQ.useTrigger = False
+flags.Output.HISTFileName = "IDAlignMon.root"
 flags.GeoModel.Align.Dynamic = False
 flags.GeoModel.AtlasVersion = kwargs["atlasVersion"]
 
