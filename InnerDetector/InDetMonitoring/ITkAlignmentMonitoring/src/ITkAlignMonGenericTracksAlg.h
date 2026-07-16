@@ -1,0 +1,117 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef ITkAlignMonGenericTracksAlg_H
+#define ITkAlignMonGenericTracksAlg_H
+
+// **********************************************************************
+// ITkAlignMonGenericTracksAlg.h
+// AUTHORS: Beate Heinemann, Tobias Golling
+// Adapted to AthenaMT 2021 by Per Johansson
+// **********************************************************************
+
+#include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
+
+#include "GaudiKernel/StatusCode.h"
+#include "GaudiKernel/EventContext.h"
+
+#include "AthenaMonitoring/AthMonitorAlgorithm.h"
+#include "AthenaMonitoringKernel/Monitored.h"
+#include "EventPrimitives/EventPrimitives.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h"
+
+#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/Vertex.h"
+#include "xAODTracking/VertexContainer.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
+#include "StoreGate/ReadHandleKey.h"
+
+//------------TrackMon------------
+#include "TrkToolInterfaces/ITrackHoleSearchTool.h"
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "TrkTrack/Track.h"
+#include "TrkTrack/TrackCollection.h"
+
+#include "TrkTrackSummary/TrackSummary.h"
+#include "TrkToolInterfaces/ITrackSummaryTool.h"
+
+#include <map>
+#include <string>
+#include <vector>
+
+class AtlasDetectorID;
+class PixelID;
+class SCT_ID;
+
+namespace Trk  { 
+  class Track;
+  class VxTrackAtVertex;
+}
+
+class IInDetAlignHitQualSelTool; 
+
+class ITkAlignMonGenericTracksAlg : public AthMonitorAlgorithm {
+
+public:
+
+  ITkAlignMonGenericTracksAlg( const std::string & name, ISvcLocator* pSvcLocator ); 
+  virtual ~ITkAlignMonGenericTracksAlg();
+  virtual StatusCode initialize() override;
+  virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
+
+protected:
+
+ bool m_hasBeamCondSvc = false;
+
+private:
+
+  bool fillVertexInformation(std::map<const xAOD::TrackParticle*, const xAOD::Vertex*>& trackVertexMapTP, const EventContext& ctx ) const;
+  static const Trk::Track*   getTrkTrack(const Trk::VxTrackAtVertex*);
+  const xAOD::Vertex* findAssociatedVertexTP(const std::map<const xAOD::TrackParticle*, const xAOD::Vertex*>& trackVertexMapTP, const xAOD::TrackParticle *) const;
+
+  const AtlasDetectorID*                m_idHelper{};
+  const PixelID*                        m_pixelID{};
+  const SCT_ID*                         m_stripID{}; 
+
+  // Building Tool Maps for the Hit Maps 
+  // ITk numerology (ATLAS-P2-RUN4-03); must match the histogram
+  // groups booked by ITkAlignMonGenericTracksAlgCfg.py
+  static const int m_nPixBlayers{5};
+  static const int m_nStripBlayers{4};
+  static const int m_nStripEClayers{6};
+  std::vector<int> m_measurements_vs_Eta_Phi_pix_b;
+  std::vector<int> m_measurements_vs_Eta_Phi_pix_ec;
+  std::vector<int> m_measurements_vs_Eta_Phi_strip_b_s0;
+  std::vector<int> m_measurements_vs_Eta_Phi_strip_b_s1;
+  std::vector<int> m_measurements_vs_Eta_Phi_strip_eca_s0;
+  std::vector<int> m_measurements_vs_Eta_Phi_strip_eca_s1;
+  std::vector<int> m_measurements_vs_Eta_Phi_strip_ecc_s0;
+  std::vector<int> m_measurements_vs_Eta_Phi_strip_ecc_s1;
+  
+  bool  m_extendedPlots{};
+  float m_d0Range{};
+  float m_d0BsRange{};
+  float m_pTRange{0.0F};
+  float m_z0Range{};
+  float m_etaRange{};
+  int   m_NTracksRange{};
+  float m_barrelEta{};
+  bool  m_doIP{};
+  bool  m_doHitQuality{false};
+  bool  m_applyTrkSel{};
+  SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimContainerName{this,"vxPrimContainerName","PrimaryVertices","Primary Vertices for Alignment Monitoring"};
+  SG::ReadHandleKey<TrackCollection> m_tracksKey  {this, "TrackName2", "CombinedITkTracks", "track data key"};
+  SG::ReadHandleKey<TrackCollection> m_tracksName {this, "TrackName",  "CombinedITkTracks", "track data key"};
+  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+
+  ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelection; // baseline
+  ToolHandle<IInDetAlignHitQualSelTool>  m_hitQualityTool;
+  ToolHandle< Trk::ITrackToVertexIPEstimator >  m_trackToVertexIPEstimator
+     {this,"TrackToVertexIPEstimator","Trk::TrackToVertexIPEstimator",""};
+  
+
+};
+
+#endif
