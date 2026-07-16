@@ -11,23 +11,13 @@
 //main header
 #include "ITkAlignMonPVBiasesAlg.h"
 
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "InDetIdentifier/PixelID.h"
-#include "InDetIdentifier/SCT_ID.h"
 
-#include "InDetRIO_OnTrack/SiClusterOnTrack.h"
-#include "InDetPrepRawData/SiCluster.h"
 
 #include "Particle/TrackParticle.h"
-#include "TrkParticleBase/LinkToTrackParticleBase.h"
-
-#include "TrkEventPrimitives/FitQuality.h"
-#include "TrkEventPrimitives/LocalParameters.h"
 
 
-#include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
 
-#include "InDetAlignGenTools/IInDetAlignHitQualSelTool.h"
+
 
 #include <cmath>
 #include <memory>

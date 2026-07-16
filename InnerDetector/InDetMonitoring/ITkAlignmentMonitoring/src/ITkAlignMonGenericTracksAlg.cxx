@@ -13,11 +13,9 @@
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "InDetIdentifier/PixelID.h"
-#include "InDetIdentifier/SCT_ID.h"
+#include "InDetIdentifier/SCT_ID.h"  // NB: the ITk strip identifier helper is still class SCT_ID
 
 #include "TrkTrack/TrackCollection.h"
-#include "InDetRIO_OnTrack/SiClusterOnTrack.h"
-#include "InDetPrepRawData/SiCluster.h"
 
 #include "Particle/TrackParticle.h"
 #include "TrkParticleBase/LinkToTrackParticleBase.h"

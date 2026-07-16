@@ -14,15 +14,14 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def HistoITkGlobalLRTMonAlgCfg(helper, alg, flags=None):
 
-    # ITk extends tracking acceptance to |eta|<4.0; widen the eta axes
-    # when the ITk geometry is active.
-    isITk = bool(flags) and flags.Detector.GeometryITk
+    # ITk values: tracking acceptance |eta| < 4.0, Phase-II pile-up
+    # (mu=200) track multiplicities.
 
     # values
-    m_nBinsEta = 80 if isITk else 50
+    m_nBinsEta = 80
     m_nBinsPhi = 50
     m_trackBin = 200
-    m_c_etaRange = 4.0 if isITk else 3
+    m_c_etaRange = 4.0
     m_c_range_LB = 3000
 
     # this creates a "lrtGroup" called "alg" which will put its histograms into the subdirectory "Track"

@@ -15,19 +15,16 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def HistoITkGlobalTrackMonAlgCfg(helper, alg, flags=None):
 
-    # ITk extends tracking acceptance from |eta|<2.5 (Run 1-3 ID) to
-    # |eta|<4.0; phase-II pile-up (mu=200) also drives much higher
-    # baseline track multiplicities per event.  Widen the relevant
-    # axes when the ITk geometry is active.
-    isITk = bool(flags) and flags.Detector.GeometryITk
+    # ITk values: tracking acceptance |eta| < 4.0, Phase-II pile-up
+    # (mu=200) track multiplicities.
 
     # values
-    m_nBinsEta = 80 if isITk else 50
+    m_nBinsEta = 80
     m_nBinsPhi = 50
-    m_trackBin = 300 if isITk else 150
-    m_c_etaRange = 4.0 if isITk else 2.5
+    m_trackBin = 300
+    m_c_etaRange = 4.0
     m_c_range_LB = 3000
-    m_trackMax = 3000 if isITk else 150
+    m_trackMax = 3000
 
     # this creates a "trackGroup" called "alg" which will put its histograms into the subdirectory "Track"
     trackGroup = helper.addGroup(alg, 'Track')

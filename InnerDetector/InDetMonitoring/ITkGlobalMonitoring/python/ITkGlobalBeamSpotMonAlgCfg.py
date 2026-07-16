@@ -16,11 +16,10 @@ def HistoITkGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=True, flags=None):
 
     # ITk has |eta|<4.0 acceptance, and Phase II pile-up (mu=200) drives
     # vertex / per-event track multiplicities far above Run 3 values.
-    isITk = bool(flags) and flags.Detector.GeometryITk
-    m_nVtxMax = 300 if isITk else 100
-    m_nTrkPerEventMax = 5000 if isITk else 1000
-    m_etaMax = 4.0 if isITk else 3.0
-    m_pvNTracksMax = 1000 if isITk else 500
+    m_nVtxMax = 300
+    m_nTrkPerEventMax = 5000
+    m_etaMax = 4.0
+    m_pvNTracksMax = 1000
 
     # Values set by default here
     m_useBeamspot = useBeamSpot

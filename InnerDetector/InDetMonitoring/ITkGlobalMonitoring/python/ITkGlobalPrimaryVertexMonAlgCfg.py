@@ -16,9 +16,8 @@ def HistoITkGlobalPrimaryVertexMonAlgCfg(helper, alg, flags=None):
     # Run 4/ITk: |eta| acceptance grows from 2.5 to 4.0 and Phase II
     # pile-up dramatically increases the per-event vertex / track
     # multiplicity ranges.
-    isITk = bool(flags) and flags.Detector.GeometryITk
-    m_etaMax = 4.0 if isITk else 3.0
-    m_pvNTracksMax = 1000 if isITk else 300
+    m_etaMax = 4.0
+    m_pvNTracksMax = 1000
 
     # this creates a "pvGroup" called "alg" which will put its histograms into the subdirectory "PrimaryVertex"
     pvGroup = helper.addGroup(alg, 'PrimaryVertex')

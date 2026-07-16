@@ -43,7 +43,7 @@
 
 class AtlasDetectorID;
 class PixelID;
-class SCT_ID;
+class SCT_ID;   // NB: the ITk strip identifier helper is still class SCT_ID
 
 namespace Trk  { 
   class Track;

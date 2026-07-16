@@ -16,15 +16,12 @@
 #include <sstream>
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "InDetIdentifier/PixelID.h"
-#include "InDetIdentifier/SCT_ID.h"
-#include "InDetRIO_OnTrack/SiClusterOnTrack.h"
-#include "InDetPrepRawData/SiCluster.h"
-#include "InDetPrepRawData/PixelCluster.h"
-#include "InDetPrepRawData/SCT_Cluster.h"
+#include "InDetIdentifier/SCT_ID.h"  // NB: the ITk strip identifier helper is still class SCT_ID
 
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkEventPrimitives/ResidualPull.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
 
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkGeometry/TrackingVolume.h"
