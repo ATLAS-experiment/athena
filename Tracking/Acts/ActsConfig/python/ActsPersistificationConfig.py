@@ -121,11 +121,12 @@ def PersistifyTrackParticles(flags,
         trackparticles_shortlist = ['-clusterAssociation',
                                     '-TTVA_AMVFVertices_forReco',
                                     '-AssoClustersUFO',
-                                    '-TTVA_AMVFWeights_forReco']
-        trackparticles_shortlist += ['-trackParameterCovarianceMatrices',
+                                    '-TTVA_AMVFWeights_forReco',
+                                    '-trackParameterCovarianceMatrices',
                                      '-parameterX', '-parameterY', '-parameterZ',
                                      '-parameterPX', '-parameterPY', '-parameterPZ',
                                      '-parameterPosition']
+
         # exclude TTVA decorations
         trackparticles_shortlist += ['-TTVA_AMVFVertices',
                                      '-TTVA_AMVFWeights']

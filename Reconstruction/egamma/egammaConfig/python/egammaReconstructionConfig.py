@@ -28,9 +28,11 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
                     egammaSelectedTrackCopyCfg)
                 acc.merge(egammaSelectedTrackCopyCfg(flags))
             else:
+                from ActsConfig.CaloExtensionBuilderConfig import ActsCaloExtensionBuilderCfg
                 from egammaAlgs.ActsEgammaSelectedTrackCopyConfig import (
                     ActsEgammaSelectedTrackCopyCfg)
                 acc.merge(ActsEgammaSelectedTrackCopyCfg(flags))
+                acc.merge(ActsCaloExtensionBuilderCfg(flags))
 
             from egammaAlgs.ActsEMBremCollectionBuilderConfig import (
                 ActsEMBremCollectionBuilderCfg)

@@ -7,8 +7,9 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "StoreGate/ReadHandle.h"
-#include "StoreGate/WriteHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "ActsEvent/TrackContainer.h"
@@ -61,6 +62,8 @@ namespace MuonCombinedR4 {
                                        const std::span<const xAOD::MuonSegment*> candidateSegs) const;
             /** @brief The input key for the ID / ITk track particles */
             SG::ReadHandleKey<xAOD::TrackParticleContainer> m_idTrkKey{this, "IdTrackKey", "InDetTrackParticles"};
+            /** @brief Optional dependency on the calo extension container. */
+            SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionDecorKey{this, "CaloExtensionDecorKey", m_idTrkKey, "caloExtensionLink"};
             /** @brief Input key for the MS track particles. ID tracks are only considered if they can be
                       roughly matched to a MS track */
             SG::ReadHandleKey<MuonR4::MuonTagContainer> m_msTrkKey{this, "MsTrackKey", "MuonTagsSA"};
@@ -76,6 +79,9 @@ namespace MuonCombinedR4 {
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
             /** @brief Track extrapolation tool */
             ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            /** @brief Flag toggling whether the last track parameters shall be retrieved 
+             *          from the calo extension linked to the ID tracks */
+            Gaudi::Property<bool> m_useCaloExtension{this, "useCaloExtension", true};
             /** @brief The minimum momentum cut applied on the ID tracks to be considered */
             Gaudi::Property<float> m_trackPt{this, "minPt", 2.5*Gaudi::Units::GeV};
             /** @brief Apply a maximum eta cut to stay within the MS acceptance */
