@@ -1431,7 +1431,7 @@ void gFEXJetAlgo::jetOutAB(const gTowersType & jets,
 }
 
 
-void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp, int &PUC_JWJ /*, int &PUChres*/) const {
+void gFEXJetAlgo::pileUpCalculation(const gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp, int &PUC_JWJ /*, int &PUChres*/) const {
   // input are 50 MeV "fine" scale towers (i.e. inputScale = 1)
   // to use 200 MeV towers use inputScale = 4  
   // PUCp output is the pileup correction for 69 towers at 200 MeV energy scale 

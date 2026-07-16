@@ -23,7 +23,7 @@ Interface definition for gFEXSysSim
   public:
     DeclareInterfaceID(IgFEXSysSim, 1, 0);
 
-    virtual StatusCode execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs) = 0;
+    virtual StatusCode execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs) const = 0;
 
     virtual int calcTowerID(int eta, int phi, int nphi, int mod) const = 0 ;
 

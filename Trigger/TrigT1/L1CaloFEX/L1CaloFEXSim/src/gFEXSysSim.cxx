@@ -63,7 +63,7 @@ namespace LVL1 {
    }
 
 
-   StatusCode gFEXSysSim::execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs) {
+   StatusCode gFEXSysSim::execute(const EventContext& ctx, gFEXOutputCollection* gFEXOutputs) const {
 
       SG::ReadHandle<LVL1::gTowerContainer> this_gTowerContainer(m_gTowerContainerSGKey,ctx);
       if(!this_gTowerContainer.isValid()){
@@ -197,22 +197,35 @@ namespace LVL1 {
          }
       }
 
-      ATH_CHECK(m_gFEXSimTool->execute(ctx, tmp_gTowersIDs_subset, gFEXOutputs));
+      std::vector<uint32_t> allgRhoTobs;
+      std::vector<uint32_t> allgBlockTobs;
+      std::vector<uint32_t> allgJetTobs;
+
+      std::vector<int32_t>  allgScalarEJwojTobs;
+      std::vector<uint32_t> allgMETComponentsJwojTobs;
+      std::vector<uint32_t> allgMHTComponentsJwojTobs;
+      std::vector<uint32_t> allgMSTComponentsJwojTobs;
+
+      std::vector<uint32_t> allgMETComponentsNoiseCutTobs;
+      std::vector<uint32_t> allgMETComponentsRmsTobs;
+      std::vector<uint32_t> allgScalarENoiseCutTobs;
+      std::vector<uint32_t> allgScalarERmsTobs;
+
+      ATH_CHECK(m_gFEXSimTool->execute(ctx,
+				       tmp_gTowersIDs_subset,
+				       gFEXOutputs,
+				       allgRhoTobs,
+				       allgBlockTobs,
+				       allgJetTobs,
+				       allgScalarEJwojTobs,
+				       allgMETComponentsJwojTobs,
+				       allgMHTComponentsJwojTobs,
+				       allgMSTComponentsJwojTobs,
+				       allgMETComponentsNoiseCutTobs,
+				       allgMETComponentsRmsTobs,
+				       allgScalarENoiseCutTobs,
+				       allgScalarERmsTobs));
       
-      const std::vector<uint32_t>& allgRhoTobs = m_gFEXSimTool->getgRhoTOBs();
-      const std::vector<uint32_t>& allgBlockTobs = m_gFEXSimTool->getgBlockTOBs();
-      const std::vector<uint32_t>& allgJetTobs = m_gFEXSimTool->getgJetTOBs();
-       
-      const std::vector<int32_t>& allgScalarEJwojTobs = m_gFEXSimTool->getgScalarEJwojTOBs();
-      const std::vector<uint32_t>& allgMETComponentsJwojTobs = m_gFEXSimTool->getgMETComponentsJwojTOBs();
-      const std::vector<uint32_t>& allgMHTComponentsJwojTobs = m_gFEXSimTool->getgMHTComponentsJwojTOBs();
-      const std::vector<uint32_t>& allgMSTComponentsJwojTobs = m_gFEXSimTool->getgMSTComponentsJwojTOBs();
-
-      const std::vector<uint32_t>& allgMETComponentsNoiseCutTobs = m_gFEXSimTool->getgMETComponentsNoiseCutTOBs();
-      const std::vector<uint32_t>& allgMETComponentsRmsTobs = m_gFEXSimTool->getgMETComponentsRmsTOBs();
-      const std::vector<uint32_t>& allgScalarENoiseCutTobs = m_gFEXSimTool->getgScalarENoiseCutTOBs();
-      const std::vector<uint32_t>& allgScalarERmsTobs = m_gFEXSimTool->getgScalarERmsTOBs();
-
       //Makes containers for different gFEX Jet objects
       std::unique_ptr< xAOD::gFexJetRoIContainer > gRhoContainer = std::make_unique<xAOD::gFexJetRoIContainer> ();
       std::unique_ptr< xAOD::gFexJetRoIAuxContainer > gRhoAuxContainer = std::make_unique<xAOD::gFexJetRoIAuxContainer> ();

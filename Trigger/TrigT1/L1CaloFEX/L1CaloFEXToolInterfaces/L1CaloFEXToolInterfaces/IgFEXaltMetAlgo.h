@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -23,12 +23,8 @@ Interface definition for eFEXegAlgo
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual void setAlgoConstant(std::vector<int>&& A_thr,
-                             std::vector<int>&& B_thr,
-                             std::vector<int>&& C_thr,
-                             const int rhoPlusThr) = 0;
-
-    virtual void altMetAlgo(const gTowersCentral &Atwr,
+    virtual void altMetAlgo(const EventContext& ctx,
+			    const gTowersCentral &Atwr,
                             const gTowersCentral &Btwr,
                             const gTowersCentral &Ctwr,
                             std::array<uint32_t, 4> & outTOB) const = 0;

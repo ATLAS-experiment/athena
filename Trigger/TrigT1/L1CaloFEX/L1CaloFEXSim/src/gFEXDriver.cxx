@@ -13,7 +13,7 @@
 namespace LVL1 {
 
   gFEXDriver::gFEXDriver(const std::string& name, ISvcLocator* pSvcLocator)
-    :  AthAlgorithm(name, pSvcLocator)
+    :  AthReentrantAlgorithm(name, pSvcLocator)
   {
 
   }
@@ -39,7 +39,7 @@ StatusCode gFEXDriver::initialize()
 }
 
 
-  StatusCode gFEXDriver::execute(const EventContext& ctx) //const
+  StatusCode gFEXDriver::execute(const EventContext& ctx) const
 {
   // STEP 1 - Do some monitoring
   gFEXOutputCollection* my_gFEXOutputCollection = new gFEXOutputCollection();
