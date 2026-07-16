@@ -5,6 +5,7 @@ from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
 from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
 
 import os
+import time
 
 from MadGraphControl.MadGraphPDFSettings import MadGraphPDFSets, get_pdf_set
 
@@ -29,7 +30,6 @@ def _get_nevents(flags, safety):
 
     return int(base_events * sf)
 
-
 def _prepare_lhe_for_shower(produced_output, lhe_file):
     # The supported lhe file formats are .lhe, .lhe.gz, .tar.gz, and .tgz.
     # .tar.gz and .tgz are tarballs that contain a single .lhe file
@@ -48,15 +48,20 @@ def _prepare_lhe_for_shower(produced_output, lhe_file):
         )
 
     primary_output = None
+
     if produced_output:
         if produced_output.endswith(".tar.gz"):
             root = produced_output[:-7]
         elif produced_output.endswith(".tgz"):
             root = produced_output[:-4]
+        elif produced_output.endswith(".gz"):
+
+            root = produced_output[:-3]
+
         else:
             root, _ = os.path.splitext(produced_output)
         primary_output = f"{root}.events"
-
+    
     # If the transform requested a specific TXT output name, symlink the 
     # produced output to the filename that the transform expects
     candidates = [candidate 
@@ -64,8 +69,13 @@ def _prepare_lhe_for_shower(produced_output, lhe_file):
                                     "tmp_LHE_events.events", 
                                     "events.events") 
                   if candidate]
+    print("mmmmmmm")
+    print(lhe_file)
+    print(candidates)
+
     if _symlink_first_existing(lhe_file, candidates, overwrite=True):
         return
+
 
     raise RuntimeError(
         "Could not prepare LHE file for showering. "
@@ -77,15 +87,24 @@ def _symlink_first_existing(link_name, candidates, overwrite=False):
     """
     Helper function to symlink the first existing file in candidates to link_name.
     """
+    print("nnnnnnnn")
+    print(link_name)
+    print(candidates)
     if os.path.exists(link_name) and not overwrite:
         return True
 
     for candidate in candidates:
         if not candidate or not os.path.exists(candidate):
+            print("ooooooooo")
+            print(os.path.exists(candidate))
             continue
         if os.path.abspath(candidate) == os.path.abspath(link_name):
+            print("pppppppp")
+            print(os.path.abspath(link_name))
             return True
         if os.path.lexists(link_name):
+            print("qqqqqqq")
+
             os.remove(link_name)
         os.symlink(os.path.abspath(candidate), link_name)
         return True
@@ -239,8 +258,7 @@ def MadGraphCfg(
     # If requested, prepare the produced LHE file for showering
     # by symlinking it to the filename that pythia expects, 
     # by default "events.lhe".
-    if prepare_lhe_for_shower:
-        _prepare_lhe_for_shower(produced_output, lhe_file)
+
 
     # If the transform requested a specific TXT output name, symlink the 
     # produced output to the filename that the transform expects
@@ -250,5 +268,7 @@ def MadGraphCfg(
         root, _ = os.path.splitext(requested_output)
         candidates = [candidate for candidate in (produced_output, f"{root}.events", "events.events") if candidate]
         _symlink_first_existing(requested_output, candidates, overwrite=True)
-
+    
+    if prepare_lhe_for_shower:
+        _prepare_lhe_for_shower(produced_output, lhe_file)
     return ca
