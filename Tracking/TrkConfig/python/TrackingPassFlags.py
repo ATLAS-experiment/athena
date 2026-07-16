@@ -1004,7 +1004,7 @@ def createHeavyIonTrackingPassFlags():
     icf.maxDoubleHoles   = 0    
     icf.Xi2max           = lambda pcf: 9. if pcf.Tracking.cutLevel in [4, 5] else 6.
     icf.Xi2maxNoAdd      = lambda pcf: 25. if pcf.Tracking.cutLevel in [4, 5] else 10.
-    icf.radMax           = 600. * Units.mm # restrict to pixels + first SCT layer
+    icf.radMax           = 380. * Units.mm # restrict to pixels + first SCT layer
     icf.useTRT           = False
     icf.doBremRecoverySi = False
 
