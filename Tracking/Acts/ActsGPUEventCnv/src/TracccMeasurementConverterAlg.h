@@ -92,7 +92,7 @@ private:
   /// @}
 
 
-  const std::unordered_map<uint64_t, Identifier>* m_detrayToAthena;
+  const std::unordered_map<uint64_t, Identifier>* m_detrayToAthena{};
 
   const PixelID* m_pixelID{nullptr};
   const SCT_ID*  m_stripID{nullptr};
