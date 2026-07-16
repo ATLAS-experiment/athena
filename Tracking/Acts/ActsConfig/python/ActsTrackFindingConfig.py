@@ -182,11 +182,11 @@ def ActsMainTrackFindingAlgCfg(flags,
         from AthenaConfiguration.Enums import BeamType
 
         if flags.Beam.Type is not BeamType.Cosmics and flags.Acts.PixelCalibrationStrategy.usesCalibration():
-            from ActsConfig.ActsMeasurementCalibrationConfig import ActsAnalogueClusteringToolCfg
+            from ActsConfig.ActsMeasurementCalibrationConfig import ActsPixelCalibrationToolCfg
 
             kwargs.setdefault(
                 'PixelCalibrator',
-                acc.popToolsAndMerge(ActsAnalogueClusteringToolCfg(flags))
+                acc.popToolsAndMerge(ActsPixelCalibrationToolCfg(flags))
             )
 
     if 'StripCalibrator' not in kwargs:
