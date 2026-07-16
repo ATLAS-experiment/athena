@@ -96,6 +96,10 @@ namespace MissingEtDQA
     m_MET_dPhi.clear();
     m_MET_CorrFinalTrk.clear();
     m_MET_CorrFinalClus.clear();
+    m_MET_Kine_pt.clear();
+    m_MET_Kine_eta.clear();
+    m_MET_Kine_phi.clear();
+    m_MET_multi.clear();
   }
    
   // Athena algtool's Hooks
@@ -166,7 +170,11 @@ namespace MissingEtDQA
     m_MET_dPhi.clear();
     m_MET_CorrFinalTrk.clear();
     m_MET_CorrFinalClus.clear();
-    
+    m_MET_Kine_pt.clear();
+    m_MET_Kine_eta.clear();
+    m_MET_Kine_phi.clear();
+    m_MET_multi.clear(); 
+   
     return StatusCode::SUCCESS;
   }
   
@@ -247,7 +255,10 @@ namespace MissingEtDQA
           std::vector<TH1D*> v_MET_Diff_y;
           std::vector<TH1D*> v_MET_Diff_phi;
           std::vector<TH1D*> v_MET_Diff_sum;
-
+          std::vector<TH1D*> v_MET_Kine_pt;
+          std::vector<TH1D*> v_MET_Kine_eta;
+          std::vector<TH1D*> v_MET_Kine_phi;
+          std::vector<TH1D*> v_MET_multi;
           //Create histograms
           for(const auto& term : m_terms) 
           {
@@ -367,11 +378,11 @@ namespace MissingEtDQA
           //Create Diff histograms
           for(const auto& it : sum_names) 
           {
-            v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + m_names[it] + " in " + name_met +"; E_{T}^{miss} - #Sigma p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, -150, 150));
-            v_MET_Diff_x.push_back( new  TH1D((name_met + "_Diff_" + it +"_x").c_str(), ("MET_Diff x " + m_names[it] + " in " + name_met +"; E_{x}^{miss} - #Sigma p_{x} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, -150, 150) );
-            v_MET_Diff_y.push_back( new  TH1D((name_met + "_Diff_" + it +"_y").c_str(), ("MET_Diff y " + m_names[it] + " in " + name_met +"; E_{y}^{miss} - #Sigma p_{y} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, -150, 150) );
-            v_MET_Diff_phi.push_back( new  TH1D((name_met + "_Diff_" + it +"_phi").c_str(), ("MET_Diff phi " + m_names[it] + " in " + name_met +"; #Delta#Phi(E_{T}^{miss},#Sigma p_{T}); Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
-            v_MET_Diff_sum.push_back( new  TH1D((name_met + "_Diff_" + it +"_sum").c_str(), ("MET_Diff sumet " + m_names[it] + " in " + name_met +"; E_{T}^{sum} - #Sigma |p_{T}| [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -250, 250) );
+            v_MET_Diff.push_back( new  TH1D((name_met + "_Diff_" + it).c_str(), ("MET_Diff " + m_names[it] + " in " + name_met +"; #Sigma p_{T}^{Val} - #Sigma p_{T}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200));
+            v_MET_Diff_x.push_back( new  TH1D((name_met + "_Diff_" + it +"_x").c_str(), ("MET_Diff x " + m_names[it] + " in " + name_met +"; #Sigma p_{x}^{Val} - #Sigma p_{x}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
+            v_MET_Diff_y.push_back( new  TH1D((name_met + "_Diff_" + it +"_y").c_str(), ("MET_Diff y " + m_names[it] + " in " + name_met +"; #Sigma p_{y}^{Val} - #Sigma p_{y}^{No Val} [GeV]; Entries / 4 GeV").c_str(), nbinpxy, -200, 200) );
+            v_MET_Diff_phi.push_back( new  TH1D((name_met + "_Diff_" + it +"_phi").c_str(), ("MET_Diff phi " + m_names[it] + " in " + name_met +"; #Delta#Phi(#Sigma p_{T}^{Val},#Sigma p_{T}^{No Val}); Entries / 0.1").c_str(), nbinphi,-binphi,binphi) );
+            v_MET_Diff_sum.push_back( new  TH1D((name_met + "_Diff_" + it +"_sum").c_str(), ("MET_Diff sumet " + m_names[it] + " in " + name_met +"; E_{T}^{sum Val} - #Sigma |p_{T}^{No Val}| [GeV]; Entries / 6 GeV").c_str(), nbinpxy, -300, 300) );
             m_dir_met.push_back("MET/" + name_met + "/Differences/" + it + "/");
           }
         
@@ -390,6 +401,29 @@ namespace MissingEtDQA
             ATH_CHECK(regHist(m_MET_Diff_phi[name_met].at(i),m_dir_met[i],all));
             ATH_CHECK(regHist(m_MET_Diff_sum[name_met].at(i),m_dir_met[i],all));
           }
+          m_dir_met.clear();
+        //Kin histos
+          for(const auto& it : sum_names)
+          {
+            v_MET_Kine_pt.push_back( new  TH1D((name_met + "_Kine_" + it+"_pt").c_str(), ("MET_Kine pt" + m_names[it] + " in " + name_met +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
+            v_MET_Kine_eta.push_back( new  TH1D((name_met + "_Kine_" + it +"_eta").c_str(), ("MET_Kine eta " + m_names[it] + " in " + name_met +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
+            v_MET_Kine_phi.push_back( new  TH1D((name_met + "_Kine_" + it +"_phi").c_str(), ("MET_Kine phi " + m_names[it] + " in " + name_met +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
+            v_MET_multi.push_back( new  TH1D((name_met + "_multi_" + it).c_str(), ("MET_multi " + m_names[it] + " in " + name_met +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
+            m_dir_met.push_back("MET/" + name_met + "/Kinematics/" + it + "/");                                      }
+            m_MET_Kine_pt[name_met] = v_MET_Kine_pt;
+            m_MET_Kine_eta[name_met] = v_MET_Kine_eta;
+            m_MET_Kine_phi[name_met] = v_MET_Kine_phi;
+            m_MET_multi[name_met] = v_MET_multi;
+
+          //Register Diff histograms
+          for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Kine_pt.size(); ++i)
+          {
+            ATH_CHECK(regHist(m_MET_Kine_pt[name_met].at(i),m_dir_met[i],all));
+            ATH_CHECK(regHist(m_MET_Kine_eta[name_met].at(i),m_dir_met[i],all));
+            ATH_CHECK(regHist(m_MET_Kine_phi[name_met].at(i),m_dir_met[i],all));
+            ATH_CHECK(regHist(m_MET_multi[name_met].at(i),m_dir_met[i],all));
+          }
+
         // End of loop
         }
       }  
@@ -593,6 +627,8 @@ namespace MissingEtDQA
       if( jet_type.find("PFlow") != std::string::npos) m_metmaker = &m_metmakerPFlow;
       else m_metmaker = &m_metmakerTopo;
 
+      auto m_metmaker2 = m_metmaker;
+
       //See if we ca build terms
       // Electrons
       if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met_Reb, metElectrons.asDataVector(), metHelper).isFailure() ) 
@@ -651,13 +687,20 @@ namespace MissingEtDQA
       std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met_Reb)[str_mu]);
       std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met_Reb)[str_jet]);
 
-      /////
+      //Jets for Diff
+      auto met = std::make_unique<xAOD::MissingETContainer>();
+      auto aux = std::make_unique<xAOD::MissingETAuxContainer>();
+      met->setStore(aux.get());
+
+      (*m_metmaker2)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met.get(), jets, coreMet, metHelper, true);
+      std::vector<const xAOD::Jet*> only_jet_elems = met::getMETElements<xAOD::Jet>(*(*met)[str_jet]);
+
       //Sum up the pT's of the objects
 
       //electron
       TLorentzVector el_tlv;
       double sum_el = 0;
-      for(const auto p : el_elems)
+      for(const auto p : metElectrons)
       {
         el_tlv += p->p4();
         sum_el += p->pt();
@@ -666,7 +709,7 @@ namespace MissingEtDQA
       //muon
       TLorentzVector mu_tlv;
       double sum_mu = 0;
-      for(const auto p : mu_elems)
+      for(const auto p : metMuons)
       {
         mu_tlv += p->p4();
         sum_mu += p->pt();
@@ -675,7 +718,7 @@ namespace MissingEtDQA
       //Tau
       TLorentzVector tau_tlv;
       double sum_tau = 0;
-      for(const auto p : ta_elems)
+      for(const auto p : metTaus)
       {
         tau_tlv += p->p4();
         sum_tau += p->pt();
@@ -684,7 +727,7 @@ namespace MissingEtDQA
       //photon
       TLorentzVector photon_tlv;
       double sum_photon = 0;
-      for(const auto p : ph_elems)
+      for(const auto p : metPhotons)
       {
         photon_tlv += p->p4();
         sum_photon += p->pt();
@@ -712,44 +755,6 @@ namespace MissingEtDQA
       for(const auto p : jet_elems){
         is_jet = 1;
       }
-
-      ///////
-      /*ATH_MSG_INFO("Comparing particle numbers" );
-      ATH_MSG_INFO("---METMaker---" );
-      for(const auto p : el_elems){
-        ATH_MSG_INFO("Electron " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      for(const auto p : ph_elems){
-        ATH_MSG_INFO("Photon " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      for(const auto p : ta_elems){
-        ATH_MSG_INFO("Tau " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      for(const auto p : mu_elems){
-        ATH_MSG_INFO("Muon " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      for(const auto p : jet_elems){
-        ATH_MSG_INFO("Jet " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      ATH_MSG_INFO("---MET PhysVal Default---" );
-      for(const auto p : metElectrons){
-        ATH_MSG_INFO("Electron " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      for(const auto p : metPhotonsOR){
-        ATH_MSG_INFO("Photon " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      for(const auto p : metTausOR){
-        ATH_MSG_INFO("Tau " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      for(const auto p : metMuons){
-        ATH_MSG_INFO("Muon " << p->pt() << " " << p->eta() << " " << p->phi());
-      }
-      for(const auto p : metJetsOR){
-        if(Accept(p, JvtCut, jvtTool)){
-          ATH_MSG_INFO("Jet " << p->pt() << " " << p->eta() << " " << p->phi());
-        }
-      }*/
-      //////
 
       std::cout<<"___Fill MET Reb___"<<std::endl;
       // Fill MET_Reb hists
@@ -951,13 +956,11 @@ namespace MissingEtDQA
       // For rebuilt MET add only jets with pT>20e3 and JVT cut
       TLorentzVector jetReb_tlv;
       double sum_jetReb = 0;
-      for(const auto jet : jet_elems) 
+      for(const auto jet : only_jet_elems) 
+
       {
-        //if(Accept(jet, JvtCut, jvtTool)) 
-        //{
-          jetReb_tlv += jet->p4();
-          sum_jetReb += jet->pt();
-        //}
+        jetReb_tlv += jet->p4();
+        sum_jetReb += jet->pt();
       }
 
       for(const auto it : *met_Reb) 
@@ -1024,6 +1027,45 @@ namespace MissingEtDQA
           }
         }
       }
+
+      float n_jet = 0.0, n_el = 0.0, n_mu = 0.0 , n_ta = 0.0, n_ph = 0.0;
+      for(const auto p : el_elems){
+          n_el ++;
+          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(0)->Fill((p->pt())/1000., weight);
+          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->eta(), weight);
+          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(0)->Fill(p->phi(), weight);
+      }
+      for(const auto p : ph_elems){
+          n_ph ++;
+          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(1)->Fill((p->pt())/1000., weight);
+          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(1)->Fill(p->eta(), weight);
+          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(1)->Fill(p->phi(), weight);
+      }
+      for(const auto p : ta_elems){
+          n_ta ++;
+          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(2)->Fill((p->pt())/1000., weight);
+          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(2)->Fill(p->eta(), weight);
+          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(2)->Fill(p->phi(), weight);
+      }
+      for(const auto p : mu_elems){
+          n_mu ++;
+          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(3)->Fill((p->pt())/1000., weight);
+          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(3)->Fill(p->eta(), weight);
+          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(3)->Fill(p->phi(), weight);
+      }
+      for(const auto p : jet_elems){
+          n_jet ++;
+          (m_MET_Kine_pt["MET_Rebuilt_"+jet_type]).at(4)->Fill((p->pt())/1000., weight);
+          (m_MET_Kine_eta["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->eta(), weight);
+          (m_MET_Kine_phi["MET_Rebuilt_"+jet_type]).at(4)->Fill(p->phi(), weight);
+      }
+
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(0)->Fill(n_el, weight);
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(1)->Fill(n_ph, weight);
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(2)->Fill(n_ta, weight);
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(3)->Fill(n_mu, weight);
+      (m_MET_multi["MET_Rebuilt_"+jet_type]).at(4)->Fill(n_ph, weight);
+
 
       //EMTopo
       if(jet_type == "AntiKt4EMTopo") 
