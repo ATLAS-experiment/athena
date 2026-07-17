@@ -3,12 +3,14 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthDeviceComps.AthDeviceCompsConfig import (
-    HostMemoryResourceToolCfg,
-    DeviceMemoryResourceToolCfg,
-    CopyToolCfg,
-    CopiesToolCfg,
+      HostMemoryResourceToolCfg
+    , DeviceMemoryResourceToolCfg
+    , MemoryResourcesToolCfg
+    , CopyToolCfg
+    , CopiesToolCfg
 )
 from AthenaConfiguration.Enums import BeamType
+from AthCUDAServices.AthCUDAServicesConfig import StreamToolCfg
 
 # ============================================================
 # Algorithm configurations
@@ -108,3 +110,27 @@ def TracccSeedConverterAlgCfg(flags,
     acc.addEventAlgo(
         CompFactory.ActsTrk.TracccSeedConverterAlg(name, **kwargs))
     return acc    
+
+def TracccMeasurementDeviceConverterAlgCfg(flags,
+        name="TracccMeasurementDeviceConverterAlg",
+        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    kwargs.setdefault("InputMeasurements",   "TracccMeasurements")
+    kwargs.setdefault("OutputPixelClusters", "ITkTracccPixelClusters")
+    kwargs.setdefault("OutputStripClusters", "ITkTracccStripClusters")
+    kwargs.setdefault("CopiesProviderTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+    kwargs.setdefault("DeviceConditionsObjectName", "TracccDeviceCondConfig")
+    kwargs.setdefault("DeviceDetectorName", "TracccDeviceDetectorGeometry")
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccMeasurementDeviceConverterAlg(name, **kwargs))
+    return acc
+
+def ClusterValidationAlgCfg(flags,
+        name="ClusterValidationAlgCfg",
+        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.ClusterValidationAlg(name, **kwargs))
+    return acc
