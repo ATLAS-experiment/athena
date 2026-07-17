@@ -27,28 +27,17 @@
 #include <set>
 #include <map>
 
-/// Definiton of a branch descriptor from RootTreeContainer
-struct BranchDesc {
-public:
-   TClass* clazz;
-   using dummy_ptr_t = std::unique_ptr<void, std::function<void(void*)> >;
-   std::unique_ptr<void, std::function<void(void*)> > dummyptr;
-   void* dummy = 0;
+void* getCachedDummyAddress(TClass* cl, std::unordered_map<TClass*, void*>& cache) 
+{
+   if (!cl) return nullptr;
 
-   BranchDesc(TClass* cl) : clazz(cl) {}
-
-   void*     dummyAddr()
-   {
-      if (clazz) {
-         void(TClass::*dxtor)(void*, Bool_t) = &TClass::Destructor;
-         std::function<void(void*)> del = std::bind(dxtor, clazz, std::placeholders::_1, false);
-         dummyptr = std::unique_ptr<void, std::function<void(void*)> >(clazz->New(), std::move(del));
-         dummy = dummyptr.get();
-         return &dummy;
-      }
-      return nullptr;
+   void*& map_ptr = cache[cl];
+   if (!map_ptr) {
+      map_ptr = cl->New();
    }
-};
+   
+   return &map_ptr;
+}
 
 /* Code from ROOT tutorials/net/parallelMergeServer.C, reduced to handle TTrees only */
 
@@ -56,8 +45,10 @@ struct ParallelFileMerger : public TObject
 {
    TString       fFilename;
    TFileMerger   fMerger;
+   std::unordered_map<TClass*, void*> *m_cache;
 
-   ParallelFileMerger(const char *filename, int compress = ROOT::RCompressionSetting::EDefaults::kUseCompiledDefault) : fFilename(filename), fMerger(kFALSE, kTRUE)
+   ParallelFileMerger(const char *filename, std::unordered_map<TClass*, void*>* cache, int compress = ROOT::RCompressionSetting::EDefaults::kUseCompiledDefault
+         ) : fFilename(filename), fMerger(kFALSE, kTRUE), m_cache(cache)
    {
       fMerger.OutputFile(filename, "RECREATE", compress);
    }
@@ -83,35 +74,37 @@ struct ParallelFileMerger : public TObject
       const TObjArray* fromBranches = fromTree->GetListOfBranches();
       const TObjArray* toBranches = toTree->GetListOfBranches();
       int nBranches = fromBranches->GetEntriesFast();
+      int nEntries = toTree->GetEntries();
       for (int k = 0; k < nBranches; ++k) {
          TBranch* branch = static_cast<TBranch*>(fromBranches->UncheckedAt(k));
          if (toBranches->FindObject(branch->GetName()) == nullptr) {
             TBranch* newBranch = nullptr;
             TClass* cl = TClass::GetClass(branch->GetClassName());
-            BranchDesc desc(cl);
-            void* empty = desc.dummyAddr();
-            if (strlen(branch->GetClassName()) > 0) {
+            if (cl != nullptr) {
                newBranch = toTree->Branch(branch->GetName(), branch->GetClassName(), nullptr, branch->GetBasketSize(), branch->GetSplitLevel());
+               void* empty = getCachedDummyAddress(cl, *m_cache);
                newBranch->SetAddress(empty);
             } else {
                TObjArray* outLeaves = branch->GetListOfLeaves();
                TLeaf* leaf = static_cast<TLeaf*>(outLeaves->UncheckedAt(0));
-               std::string type = leaf->GetTypeName();
-               std::string attr = leaf->GetName();
-               if (type == "Int_t") type = attr + "/I";
-               else if (type == "Short_t") type = attr + "/S";
-               else if (type == "Long_t") type = attr + "/L";
-               else if (type == "UInt_t") type = attr + "/i";
-               else if (type == "UShort_t") type = attr + "/s";
-               else if (type == "ULong_t") type = attr + "/l";
-               else if (type == "Float_t") type = attr + "/F";
-               else if (type == "Double_t") type = attr + "/D";
-               else if (type == "Char_t") type = attr + "/B";
-               else if (type == "UChar_t") type = attr + "/b";
-               else if (type == "Bool_t") type = attr + "/O";
-               newBranch = toTree->Branch(branch->GetName(), static_cast<void*>(nullptr), type.c_str(), 2048);
+               std::string_view attr = leaf->GetName();
+               std::string_view type = leaf->GetTypeName();
+               std::string branchSpec(attr);
+               branchSpec += '/';
+               if (type == "Int_t")        branchSpec += 'I';
+               else if (type == "Short_t") branchSpec += 'S';
+               else if (type == "Long_t")  branchSpec += 'L';
+               else if (type == "UInt_t")  branchSpec +='i';
+               else if (type == "UShort_t") branchSpec+='s';
+               else if (type == "ULong_t") branchSpec +='l';
+               else if (type == "Float_t") branchSpec +='F';
+               else if (type == "Double_t") branchSpec+='D';
+               else if (type == "Char_t")  branchSpec +='B';
+               else if (type == "UChar_t") branchSpec +='b';
+               else if (type == "Bool_t")  branchSpec +='O';
+               else                       { branchSpec += type; }// fallback
+               newBranch = toTree->Branch(branch->GetName(), static_cast<void*>(nullptr), branchSpec.c_str(), 2048);
             }
-            int nEntries = toTree->GetEntries();
             for (int m = 0; m < nEntries; ++m) {
                newBranch->BackFill();
             }
@@ -288,7 +281,7 @@ StatusCode AthenaRootSharedWriterSvc::share(int numClients, bool motherClient) {
                   message->SetBufferOffset(message->Length() + length);
                   ParallelFileMerger* info = static_cast<ParallelFileMerger*>(m_rootMergers.FindObject(filename));
                   if (!info) {
-                     info = new ParallelFileMerger(filename, transient->GetCompressionSettings());
+                     info = new ParallelFileMerger(filename, &m_dummyCache, transient->GetCompressionSettings());
                      m_rootMergers.Add(info);
                      ATH_MSG_INFO("ROOT Monitor ParallelFileMerger: " << info << ", for: " << filename);
                   }
@@ -325,5 +318,11 @@ StatusCode AthenaRootSharedWriterSvc::finalize() {
    ATH_MSG_INFO("in finalize()");
    delete m_rootMonitor; m_rootMonitor = nullptr;
    delete m_rootServerSocket; m_rootServerSocket = nullptr;
+   for (auto& [cl, ptr] : m_dummyCache) {
+      if (cl && ptr) {
+         cl->Destructor(ptr, false);
+      }
+   }
+   m_dummyCache.clear();
    return StatusCode::SUCCESS;
 }
