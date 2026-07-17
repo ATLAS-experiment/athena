@@ -130,6 +130,13 @@ public:
         result.append(lhs_view).append(rhs);
         return result;
     }
+
+    // Needed to prevent ambiguities.
+    friend constexpr std::string operator+(const BasicHexString& lhs, std::string&& rhs) {
+        const std::string& rhs_l = rhs;
+        return lhs + rhs_l;
+    }
+
     friend constexpr std::string operator+(const char* lhs, const BasicHexString& rhs) {
         return std::string(lhs) + rhs;
     }
