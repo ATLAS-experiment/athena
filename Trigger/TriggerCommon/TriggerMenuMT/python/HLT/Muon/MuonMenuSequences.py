@@ -406,8 +406,8 @@ def mul2mtCBOvlpRmSequenceGenCfg(flags, is_probe_leg=False, trackingMode = "FTF"
 ###  EFSA step ###
 ######################
 
-def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False, useNewFast=False):
-    suffix = f'{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
+def muEFSAAlgSequenceCfg(flags, suffix="", is_probe_leg=False, useBucketFilter=False, useNewFast=False):
+    
     selAccMS = SelectionCA(f'EFMuMSSel_RoI{suffix}', isProbe=is_probe_leg)
     
     viewName=f"EFMuMSReco_RoI{suffix}"
@@ -442,7 +442,9 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False, useNe
     #Run decoding again since we are using updated RoIs
     recoMS.mergeReco(muonDecodeCfg(muonflags,RoIs=viewName+"RoIs"))
     ### get EF reco sequence ###    
-    muEFSARecoSequenceAcc, sequenceOut = muEFSARecoSequenceCfg(muonflags, viewName+'RoIs', f'RoI{suffix}', useBucketFilter=useBucketFilter)
+    muEFSARecoSequenceAcc, sequenceOut = muEFSARecoSequenceCfg(muonflags, RoIs = viewName+'RoIs', 
+                                                                          suffix = f'RoI{suffix}', 
+                                                                          useBucketFilter=useBucketFilter)
     recoMS.mergeReco(muEFSARecoSequenceAcc)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
@@ -455,10 +457,17 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False, useNe
 @AccumulatorCache
 def muEFSASequenceGenCfg(flags, is_probe_leg=False, useBucketFilter=False, useNewFast=False):
 
-    (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, is_probe_leg, useBucketFilter=useBucketFilter, useNewFast=useNewFast)
+    if flags.Trigger.Offline.SA.Muon.scheduleActsReco and flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup:
+        suffix = f'PhII{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
+    else:
+        suffix=""
+        
+    (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, suffix=suffix, 
+                                                        is_probe_leg=is_probe_leg, 
+                                                        useBucketFilter=useBucketFilter, 
+                                                        useNewFast=useNewFast)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFMSonlyHypoToolFromDict
-    suffix = f'{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
     efmuMSHypo = TrigMuonEFHypoAlgCfg( flags,
                               name = f'TrigMuonEFMSonlyHypo_RoI{suffix}',
                               MuonDecisions = sequenceOut,
