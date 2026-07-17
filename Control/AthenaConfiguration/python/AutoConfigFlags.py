@@ -15,6 +15,7 @@ class DynamicallyLoadMetadata:
         self.filename = filename
         self.currentAccessLevel = 'lite'
         self.maxAccessLevel = maxLevel
+        self.skipped = False
         thisFileMD = read_metadata(filename, None, 'lite')
         self.metadata.update(thisFileMD[self.filename])
         msg.debug("Loaded using 'lite' %s", str(self.metadata))
@@ -61,8 +62,12 @@ class DynamicallyLoadMetadata:
 
     def keys(self):
         return self.metadata.keys()
+    
+    def __len__(self):
+        return len(self.metadata)
 
-def GetFileMD(filenames, allowEmpty=True, maxLevel='peeker'):
+
+def GetFileMD(filenames, allowEmpty=True, maxLevel='peeker', disableMultiFileValidation=False):
     if not filenames or '_ATHENA_GENERIC_INPUTFILE_NAME_' in filenames:
         if allowEmpty:
             msg.info("Running an input-less job. Will have empty metadata.")
@@ -72,16 +77,28 @@ def GetFileMD(filenames, allowEmpty=True, maxLevel='peeker'):
         filenames = [filenames]
     for filename in filenames:
         if filename not in _fileMetaData:
-            msg.info("Obtaining metadata of auto-configuration by peeking into '%s'", filename)
+            msg.info("Obtaining metadata for auto-configuration by peeking into '%s'", filename)
             _fileMetaData[filename] = DynamicallyLoadMetadata(filename, maxLevel)
+            msg.debug("Keys: %s", _fileMetaData[filename].keys())
         if _fileMetaData[filename].maxAccessLevel != maxLevel:
             _fileMetaData[filename].maxAccessLevel = maxLevel
-        if _fileMetaData[filename]['nentries'] not in [None, 0]: 
-            return _fileMetaData[filename]
-        else:
-            msg.info("The file: %s has no entries, going to the next one for harvesting the metadata", filename)
+        if _fileMetaData[filename]['nentries'] in [None, 0]:
+            _fileMetaData[filename].skipped = True
+        if disableMultiFileValidation:
+            if not _fileMetaData[filename].skipped: 
+                return _fileMetaData[filename]
+            else:
+                msg.info("The file: %s has no entries, going to the next one for harvesting the metadata", filename)
+    if not disableMultiFileValidation:
+        # Take the dictionary with the most keys after the lite mode that is not skipped
+        currentMetaDict = {filename: _fileMetaData[filename] for filename in filenames if not _fileMetaData[filename].skipped}
+        bestMeta = max(currentMetaDict.values(), key=len, default=None)
+        if bestMeta is not None:
+            return bestMeta
+
     msg.info("No file with events found, returning anyways metadata associated to the first file %s", filenames[0])
     return _fileMetaData[filenames[0]]
+
 
 def _initializeGeometryParameters(geoTag,sqliteDB,sqliteDBFullPath):
     """Read geometry database for all detectors"""
