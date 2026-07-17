@@ -163,12 +163,13 @@ def MUON5KernelCfg(flags, name='MUON5Kernel', **kwargs):
         PrimaryVertexCollectionName="PrimaryVertices"
     ))
         
-    ### FTAG truth decorations for InDetTrackParticles (ftagTruthTypeLabel, ftagTruthOriginLabel, )
-    from DerivationFrameworkFlavourTag.FtagDerivationConfig import TrackTruthDecoratorCfg
-    acc.merge(TrackTruthDecoratorCfg(flags))
-    # For TruthVertexIndex
-    from ParticleJetTools.TruthVertexDecoratorConfig import TruthVertexDecoratorsCfg
-    acc.merge(TruthVertexDecoratorsCfg(flags))
+    if flags.Input.isMC:
+        ### FTAG truth decorations for InDetTrackParticles (ftagTruthTypeLabel, ftagTruthOriginLabel, )
+        from DerivationFrameworkFlavourTag.FtagDerivationConfig import TrackTruthDecoratorCfg
+        acc.merge(TrackTruthDecoratorCfg(flags))
+        # For TruthVertexIndex
+        from ParticleJetTools.TruthVertexDecoratorConfig import TruthVertexDecoratorsCfg
+        acc.merge(TruthVertexDecoratorsCfg(flags))
     
     # --------
     # Skimming
