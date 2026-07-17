@@ -48,8 +48,8 @@ atlas_install_python_modules( python/*.py )
 # Test(s) in the package:
 atlas_add_test( Tool
    SCRIPT TrigGlobEffCorrValidation --quiet --fast --skip-if-athena
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( CPTools
    SCRIPT TrigGlobEffCorrExample4 --quiet
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
