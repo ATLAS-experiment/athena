@@ -80,10 +80,6 @@ class MuonChainConfiguration(ChainConfigurationBase):
                 muCombStep = 'getmuMSEmpty'
                 efCBStep = None
 
-        useNewFast = 'newFast' in self.chainPart['l2AlgInfo']
-        if useNewFast:
-            muCombStep = 'getmuMSEmpty'
-
         stepDictionary = {            
             "":['getmuFast', muCombStep, 'getmuEFSA',efCBStep, isoStep], #RoI-based triggers
             "noL1":['getFSmuEFSA'] if doMSonly else ['getFSmuEFSA', 'getFSmuEFCB'], #full scan triggers
@@ -100,9 +96,8 @@ class MuonChainConfiguration(ChainConfigurationBase):
     def getmuFast(self, flags, is_probe_leg=False):
 
         # useNewFast only if we are in PhaseII and ACTS reco is scheduled
-        useNewFast = ('newFast' in self.chainPart['l2AlgInfo'] and 
-                      flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and 
-                      flags.Trigger.Offline.SA.Muon.scheduleActsReco)
+        isPhaseII = flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and flags.Trigger.Offline.SA.Muon.scheduleActsReco
+        useNewFast = isPhaseII and 'newFast' in self.chainPart['l2AlgInfo']
 
         if 'muoncalib' in self.chainPart['extra']:
            return self.getStep(flags, "mufastcalib", [muFastCalibSequenceGenCfg], is_probe_leg=is_probe_leg )
@@ -149,8 +144,10 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     # --------------------
     def getmuEFSA(self, flags, is_probe_leg=False):
-        useBucketFilter = 'mlbkt' in self.chainPart['addInfo']
-        useNewFast = 'newFast' in self.chainPart['l2AlgInfo']
+        isPhaseII = flags.Trigger.Offline.SA.Muon.usePhaseIIGeoSetup and flags.Trigger.Offline.SA.Muon.scheduleActsReco
+        useBucketFilter = isPhaseII and 'mlbkt' in self.chainPart['addInfo'] 
+        useNewFast = isPhaseII and 'newFast' in self.chainPart['l2AlgInfo']
+
         step_name = f'muEFSA{"_newFast" if useNewFast else ""}{"_mlbkt" if useBucketFilter else ""}'
         return self.getStep(flags, step_name, [muEFSASequenceGenCfg], is_probe_leg=is_probe_leg, useBucketFilter=useBucketFilter, useNewFast=useNewFast)
 
