@@ -6,7 +6,6 @@
 // needed here to get the ATLAS eigen plugins in before the ACTS eigen plugins
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
 
-#include "ActsGeometry/ExtrapolationTool.h"
 
 
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
@@ -19,6 +18,8 @@
 #include "../WriteTrackingGeometry.h"
 #include "../TrackingGeometryTool.h"
 #include "../TrackingGeometrySvc.h"
+#include "../ExtrapolationTool.h"
+
 
 DECLARE_COMPONENT(ActsWriteTrackingGeometryTransforms)
 

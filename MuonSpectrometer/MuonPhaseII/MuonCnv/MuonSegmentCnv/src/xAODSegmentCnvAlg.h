@@ -14,6 +14,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPatternEvent/MuonPatternContainer.h"
@@ -24,10 +25,6 @@
 
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h" 
 #include "ActsEvent/AuxiliaryMeasurementHandler.h"
-
-#include <Acts/Propagator/StraightLineStepper.hpp>
-#include <Acts/Propagator/Propagator.hpp>
-#include <Acts/Propagator/Navigator.hpp>
 
 namespace MuonR4{
     /** @brief The xAODSegmentCnvAlg takes MuonR4::Segments and  converts them 
@@ -123,13 +120,13 @@ namespace MuonR4{
               *        to the target surface + some margin using the Acts::Propagator. The propaator
               *        records every surface crossing. The associated SurfacePlacements are then used
               *        to determine the ATLAS identifier and then to assign whether there's a hole or not.
-              * @param tgContext: The ATLAS geometry context to align the surfaces during propagation
+              * @param ctx: EventContext to be passed to the extrapolation tool
               * @param startPars: The start parameters from which the propagation starts. The surface is the 
               *                    bottom boundary surface of the volume where's the first segment measurement.
               * @param target: The top boundary surface of the volume with the last segment measurement.
               * @param geoIdsWithHits: The list of ATLAS identifiers with segmen measurements (outlier + hit)
               * @param holeCounter: Mutable reference to the segment hole counter.  */                   
-            void findHoles(const Acts::GeometryContext& tgContext,
+            void findHoles(const EventContext& ctx,
                            const Acts::BoundTrackParameters& startPars,
                            const Acts::Surface* target,
                            const std::unordered_set<Identifier>& geoIdsWithHits,
@@ -146,7 +143,9 @@ namespace MuonR4{
             ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /** @brief Tracking geometry tool to search for holes  */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
- 
+             /** @brief Acts extrapolation tool to search for holes */
+            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+
             /** @brief Abrivation of the extra declared auxVariables  */
             using DecorKey_t = SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer>;
             /** @brief Decoration to the links to the associated Uncalibrated measurements */
@@ -167,10 +166,8 @@ namespace MuonR4{
             Gaudi::Property<bool> m_convertBeamSpot{this, "convertBeamSpot", false};
             /** @brief Flag to tell whether the hole summary shall be written */
             Gaudi::Property<bool> m_estimateHoles{this, "estimateHoles", true};
-            /** @brief Abrivation for the straight line propagator to detect the holes */
-            using Propagator_t = Acts::Propagator<Acts::StraightLineStepper, Acts::Navigator>;
-            /** @brief Straight line propagtor needed for hole search  */
-            std::unique_ptr<Propagator_t> m_propagator{};
+            /** @brief Extra path length for the propagation after the last surface was crossed. */
+            Gaudi::Property<double> m_extraHolePath{this, "extraHolePath", 20.*Gaudi::Units::cm};
     };
 }
 #endif

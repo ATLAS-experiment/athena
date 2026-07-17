@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSEXTRAPOLATIONTOOL_H
@@ -54,47 +54,46 @@ namespace ActsTrk {
 class ExtrapolationTool : public extends<AthAlgTool, IExtrapolationTool>
 {
 public:
+  /** @copydoc AthAlgTool::initialize */
   virtual StatusCode initialize() override;
 
-  ExtrapolationTool(const std::string& type, 
-                    const std::string& name,
-                    const IInterface* parent);
-
-
+  /** @brief Explicitly define the constrcutor due to the variant forward declaration */
+  ExtrapolationTool(const std::string& type, const std::string& name, const IInterface* parent);
+  /** @brief Destructor needs to implemented due to the variant */
   ~ExtrapolationTool();
+  /** @copydoc IExtrapolationTool::propagationSteps */
+  virtual Acts::Result<PropagationOutput> 
+          propagationSteps(const EventContext& ctx,
+                           const Acts::BoundTrackParameters& startParameters,
+                           Acts::Direction navDir, double pathLimit) const override final;
 
+  /** @copydoc IExtrapolationTool::propagate */
+  virtual Acts::Result<Acts::BoundTrackParameters>
+          propagate(const EventContext& ctx,
+                    const Acts::BoundTrackParameters& startParameters,
+                    Acts::Direction navDir, double pathLimit) const override final;
+
+  /** @copydoc IExtrapolationTool::propagationSteps */
   virtual Acts::Result<PropagationOutput>
-  propagationSteps(const EventContext& ctx,
-                   const Acts::BoundTrackParameters& startParameters,
-                   Acts::Direction navDir = Acts::Direction::Forward(),
-                   double pathLimit = std::numeric_limits<double>::max()) const override;
-
-  virtual
-  Acts::Result<Acts::BoundTrackParameters>
-  propagate(const EventContext& ctx,
-            const Acts::BoundTrackParameters& startParameters,
-            Acts::Direction navDir = Acts::Direction::Forward(),
-            double pathLimit = std::numeric_limits<double>::max()) const override;
-
-  virtual Acts::Result<PropagationOutput>
-  propagationSteps(const EventContext& ctx,
+          propagationSteps(const EventContext& ctx,
+                           const Acts::BoundTrackParameters& startParameters,
+                           const Acts::Surface& target,
+                           Acts::Direction navDir, double pathLimit) const override;
+ 
+  /** @copydoc IExtrapolationTool::propagate */
+ virtual Acts::Result<Acts::BoundTrackParameters>
+         propagate(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
-                   Acts::Direction navDir = Acts::Direction::Forward(),
-                   double pathLimit = std::numeric_limits<double>::max()) const override;
-
-  virtual
-  Acts::Result<Acts::BoundTrackParameters>
-  propagate(const EventContext& ctx,
-            const Acts::BoundTrackParameters& startParameters,
-            const Acts::Surface& target,
-            Acts::Direction navDir = Acts::Direction::Forward(),
-            double pathLimit = std::numeric_limits<double>::max()) const override;
-
-
-  virtual
-  Acts::MagneticFieldContext
-  getMagneticFieldContext(const EventContext& ctx) const override;
+                   Acts::Direction navDir, double pathLimit) const override;
+         
+  /** @copydoc IExtrapolationTool::getMagneticFieldContext */
+  virtual Acts::MagneticFieldContext getMagneticFieldContext(const EventContext& ctx) const override;
+  
+  /** @copydoc IExtrapolationTool::propagateAndRecord */
+  virtual Acts::Result<BoundParamVec_t> propagateAndRecord(const EventContext& ctx,
+                                                           const Acts::BoundTrackParameters& startParameters,
+                                                           const SurfaceRecordOptions& recordOpts) const override;
 
  private:
   const Acts::Logger& logger() const { return *m_logger; }
@@ -115,7 +114,6 @@ public:
   Gaudi::Property<unsigned> m_maxSurfSkip{this, "MaxSurfaceSkip" ,100, "Maximum number of surfaces to be tried by the navigator"};
   Gaudi::Property<double> m_surfTolerance{this, "OnSurfaceTolerance", Acts::s_onSurfaceTolerance, 
                                           "Tolerance to consider track parameters on surface"};
-  Gaudi::Property<unsigned> m_pathLimit{this, "PathLimit", 50, "Maximum path length to be considered during propagation in Acts m unit"};
   // Material inteaction option
   Gaudi::Property<bool> m_interactionMultiScatering{this, "InteractionMultiScatering", false, "Whether to consider multiple scattering in the interactor"};
   Gaudi::Property<bool> m_interactionEloss{this, "InteractionEloss", false, "Whether to consider energy loss in the interactor"};
@@ -126,7 +124,7 @@ public:
   prepareOptions( const Acts::GeometryContext& gctx,
                   const Acts::MagneticFieldContext& mctx,
                   const Acts::BoundTrackParameters& startParameters,
-                  Acts::Direction navDir, 
+                  Acts::Direction navDir,
                   double pathLimit) const;
 };
 }
