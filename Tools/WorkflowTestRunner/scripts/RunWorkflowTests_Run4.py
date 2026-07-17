@@ -41,7 +41,8 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q456", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.reco:
-        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} --steering doRDO_TRIG {options.extra_args}"))
+        # Disable MMPrepDataContainer in ESD output due to ATEAM-1167
+        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} --steering doRDO_TRIG {options.extra_args} --postExec 'RAWtoALL:stream = cfg.getEventAlgo(\"StreamESD\"); stream.ItemList=[item for item in stream.ItemList if not item.startswith(\"Muon::MMPrepDataContainer#\")];'"))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"
