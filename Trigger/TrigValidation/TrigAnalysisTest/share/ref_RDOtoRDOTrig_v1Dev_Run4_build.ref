@@ -1652,6 +1652,94 @@ HLT_g20_tight_j35_0eta290_020jvt_bgn277_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jM
     4: 27
     5: 442
     6: 8
+HLT_g25_loose_tau12_mediumGNTau_03dRAB_L1eEM26M:
+  eventCount: 5
+  stepCounts:
+    0: 10
+    1: 10
+    2: 10
+    3: 10
+    4: 10
+    5: 10
+    6: 10
+    7: 10
+    8: 5
+  stepFeatures:
+    0: 11
+    1: 11
+    2: 11
+    3: 10
+    4: 66
+    5: 66
+    6: 66
+    7: 66
+    8: 14
+HLT_g25_loose_tau15_mediumGNTau_03dRAB_L1eEM26M:
+  eventCount: 5
+  stepCounts:
+    0: 10
+    1: 10
+    2: 10
+    3: 10
+    4: 10
+    5: 10
+    6: 10
+    7: 10
+    8: 5
+  stepFeatures:
+    0: 11
+    1: 11
+    2: 11
+    3: 10
+    4: 64
+    5: 64
+    6: 64
+    7: 64
+    8: 14
+HLT_g25_loose_tau18_mediumGNTau_03dRAB_L1eEM26M:
+  eventCount: 4
+  stepCounts:
+    0: 10
+    1: 10
+    2: 10
+    3: 10
+    4: 10
+    5: 10
+    6: 10
+    7: 10
+    8: 4
+  stepFeatures:
+    0: 11
+    1: 11
+    2: 11
+    3: 10
+    4: 57
+    5: 57
+    6: 57
+    7: 57
+    8: 13
+HLT_g25_loose_tau20_mediumGNTau_03dRAB_L1eEM26M:
+  eventCount: 3
+  stepCounts:
+    0: 10
+    1: 10
+    2: 10
+    3: 10
+    4: 10
+    5: 10
+    6: 10
+    7: 10
+    8: 3
+  stepFeatures:
+    0: 11
+    1: 11
+    2: 11
+    3: 10
+    4: 48
+    5: 48
+    6: 48
+    7: 48
+    8: 12
 HLT_g25_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   eventCount: 0
   stepCounts:
