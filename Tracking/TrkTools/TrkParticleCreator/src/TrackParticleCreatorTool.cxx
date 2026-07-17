@@ -161,9 +161,11 @@ TrackParticleCreatorTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  if (detStore()->retrieve(m_trtID, "TRT_ID").isFailure()) {
-    ATH_MSG_FATAL("Could not get TRT_ID ");
-    return StatusCode::FAILURE;
+  if (m_doSharedTRTHits) {
+    if (detStore()->retrieve(m_trtID, "TRT_ID").isFailure()) {
+      ATH_MSG_FATAL("Could not get TRT_ID ");
+      return StatusCode::FAILURE;
+    }
   }
 
   if (!m_IBLParameterSvc.empty()) {
