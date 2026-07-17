@@ -372,7 +372,7 @@ template <typename Proxy_t>
     ActsToTrkConverterTool::convertActsToTrkContainer(const EventContext& ctx,
                                                       const ActsTrk::TrackContainer& trackCont) const {
       auto outColl = std::make_unique<TrackCollection>();
-      for (const ActsTrk::TrackContainer::ConstTrackProxy& trk : trackCont) {
+      for (const ActsTrk::TrackContainer::ConstTrackProxy trk : trackCont) {
           outColl->push_back(convertActsTrack(ctx, trk, m_fitAuthor));
       }
       return outColl;

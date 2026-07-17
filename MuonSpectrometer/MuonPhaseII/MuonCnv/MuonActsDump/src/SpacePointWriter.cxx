@@ -48,7 +48,7 @@ namespace {
       for (const SG::ReadHandleKey<MuonR4::SpacePointContainer>& key : m_spacePointKeys) {
          const MuonR4::SpacePointContainer* container{nullptr};
          ATH_CHECK(SG::get(container,key, ctx));
-         for (const auto& bucket : *container) {
+         for (const MuonR4::SpacePointBucket* bucket : *container) {
             std::vector<std::uint32_t> layNumbers{};
             for (const auto& spacePoint : *bucket) {
                const std::uint32_t layNum = layerSorter.sectorLayerNum(*spacePoint);
