@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -56,8 +56,9 @@ def RoIBResultToxAODCfg(flags):
             (alg.xAODKeyJetEt.Type, alg.xAODKeyJetEt.Path),
             (alg.xAODKeyJet.Type,   alg.xAODKeyJet.Path)
         ]
-        from  TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
-        acc.merge(L1ConfigSvcCfg(flags))
+
+    from  TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
+    acc.merge(L1ConfigSvcCfg(flags))
 
     acc.addEventAlgo(alg)
 
