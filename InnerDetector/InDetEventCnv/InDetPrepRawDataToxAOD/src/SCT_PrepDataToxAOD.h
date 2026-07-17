@@ -45,7 +45,7 @@ class SCT_PrepDataToxAOD : public AthReentrantAlgorithm {
 
  public:
   // Constructor with parameters:
-  SCT_PrepDataToxAOD(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   // Basic algorithm methods:
   virtual StatusCode initialize() override;

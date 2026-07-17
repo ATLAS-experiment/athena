@@ -33,15 +33,6 @@
 #define AUXDATA(OBJ, TYP, NAME) \
   static const SG::AuxElement::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
 
-/////////////////////////////////////////////////////////////////////
-//
-//         Constructor with parameters:
-//
-/////////////////////////////////////////////////////////////////////
-TRT_PrepDataToxAOD::TRT_PrepDataToxAOD(const std::string &name, ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator)
-{
-}
 
 /////////////////////////////////////////////////////////////////////
 //

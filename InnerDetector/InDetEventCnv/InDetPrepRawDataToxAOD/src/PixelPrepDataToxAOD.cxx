@@ -44,35 +44,6 @@ namespace {
    using std::numbers::pi;
 }
 
-/////////////////////////////////////////////////////////////////////
-//
-//         Constructor with parameters:
-//
-/////////////////////////////////////////////////////////////////////
-PixelPrepDataToxAOD::PixelPrepDataToxAOD(const std::string &name, ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_PixelHelper(nullptr),
-  m_useSiHitsGeometryMatching(true),
-  m_firstEventWarnings(true),
-  m_need_sihits{false}
-{ 
-  // --- Steering and configuration flags
- 
-  declareProperty("UseTruthInfo", m_useTruthInfo=false);
-  declareProperty("UseSiHitsGeometryMatching", m_useSiHitsGeometryMatching=true);
-  declareProperty("WriteSDOs", m_writeSDOs = false);
-  declareProperty("WriteSiHits", m_writeSiHits = false);
-  declareProperty("WriteNNinformation", m_writeNNinformation = true);
-  declareProperty("WriteRDOinformation", m_writeRDOinformation = true);
-  declareProperty("WriteExtendedPRDinformation", m_writeExtendedPRDinformation = false);
-
-  // --- Configuration keys
-  declareProperty("SiClusterContainer",  m_clustercontainer_key = "PixelClusters");
-  declareProperty("MC_SDOs", m_SDOcontainer_key = "PixelSDO_Map");
-  declareProperty("MC_Hits", m_sihitContainer_key = "PixelHits");
-  declareProperty("PRD_MultiTruth", m_multiTruth_key = "PRD_MultiTruthPixel");
-
-}
 
 /////////////////////////////////////////////////////////////////////
 //
