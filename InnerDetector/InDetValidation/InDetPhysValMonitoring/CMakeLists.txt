@@ -16,6 +16,11 @@ atlas_add_library( InDetPhysValMonitoringLib
 		   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib AtlasDetDescr BeamSpotConditionsData CxxUtils GaudiKernel InDetIdentifier InDetTrackSelectionToolLib InDetTruthVertexValidationLib MCTruthClassifierLib TrkValHistUtils TRT_ReadoutGeometry xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrkTruthTrackInterfaces FourMomUtils
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${XercesC_LIBRARIES} AsgAnalysisInterfaces AsgTools AthContainers EventPrimitives GeoPrimitives InDetPrepRawData InDetRIO_OnTrack PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack TruthUtils )
 
+if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
+  # Work around gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122197
+  set_target_properties( InDetPhysValMonitoringLib PROPERTIES COMPILE_FLAGS " --param max-devirt-targets=1 " )
+endif()
+
 atlas_add_component( InDetPhysValMonitoring
                      src/components/*.cxx
                      LINK_LIBRARIES InDetPhysValMonitoringLib )

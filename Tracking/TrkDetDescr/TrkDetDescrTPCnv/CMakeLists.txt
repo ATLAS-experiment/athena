@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkDetDescrTPCnv )
@@ -14,6 +14,10 @@ if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
   # Don't allow clang to make optimizations that may introduce FPEs.
   # Fixes some FPEs observed in the clang15 build.
   set_target_properties( TrkDetDescrTPCnv PROPERTIES COMPILE_FLAGS "-ffp-exception-behavior=strict" )
+endif()
+if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
+  # Work around gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122197
+  set_target_properties( TrkDetDescrTPCnv PROPERTIES COMPILE_FLAGS " --param max-devirt-targets=1 " )
 endif()
 
 atlas_add_tpcnv_library( TrkDetDescrTPCnvFactories
