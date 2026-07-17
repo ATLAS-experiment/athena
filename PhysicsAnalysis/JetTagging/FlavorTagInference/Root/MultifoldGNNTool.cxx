@@ -1,6 +1,11 @@
 /*
-+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
++  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#if __GNUC__ >= 16
+// Suppress false-positive warning seen with gcc16.
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
 #include "FlavorTagInference/MultifoldGNNTool.h"
 #include "FlavorTagInference/MultifoldGNN.h"
