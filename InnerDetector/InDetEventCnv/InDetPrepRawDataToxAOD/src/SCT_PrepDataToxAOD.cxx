@@ -26,15 +26,6 @@
 #define AUXDATA(OBJ, TYP, NAME)                                         \
   static const SG::AuxElement::Accessor<TYP> acc_##NAME (#NAME);  acc_##NAME(*(OBJ))
 
-/////////////////////////////////////////////////////////////////////
-//
-//         Constructor with parameters:
-//
-/////////////////////////////////////////////////////////////////////
-SCT_PrepDataToxAOD::SCT_PrepDataToxAOD(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name, pSvcLocator)
-{ 
-}
 
 /////////////////////////////////////////////////////////////////////
 //
