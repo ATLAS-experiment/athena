@@ -16,7 +16,7 @@
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
-#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 
 #include "egammaInterfaces/IegammaCaloClusterSelector.h"
 
@@ -82,11 +82,9 @@ namespace ActsTrk{
              *         records all surface crossings between as @ref Acts::BoundTrackParameters. If one
              *         record happened, the result is packed into a @ref CaloExtension object and returned.
              *         A nullptr is given back otherwise. 
-             * @param mfContext: The ATLAS magnetic field conditions
-             * @param tgContext: The ATLAS geometry context to align the surfaces in space
+             * @param ctx: The ATLAS event context to access geometry & magnetic field
              * @param track: The ID track particle to be propagated to the exit */
-            std::unique_ptr<CaloExtension> propagateToCaloExit(const Acts::MagneticFieldContext& mfContext,
-                                                               const Acts::GeometryContext& tgContext,
+            std::unique_ptr<CaloExtension> propagateToCaloExit(const EventContext& ctx,
                                                                const xAOD::TrackParticle* track) const;
 
             /** @brief Match the selected calorimeter clusters to the calo extension
@@ -121,7 +119,10 @@ namespace ActsTrk{
                                                                                 "Tool that makes the cluster selection"};
             /** @brief Tracking geometry tool */
             PublicToolHandle<ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
-            
+
+            /** @brief Acts extrapolation tool to record the surface intersections */
+            ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+
             /** @brief The input calorimeter cluster collection */
             SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterContainerKey {this,  "ClusterContainerName", "CaloCalTopoClusters"};
             /** @brief The input track particle collection */
@@ -130,8 +131,6 @@ namespace ActsTrk{
             /** @brief Decorate the link to the associated CaloExtension directly onto the ID / ITk track */
             SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extensionDecorKey{this, "ExtensionDecoration", m_trackParticleContainerKey, 
                                                                                      "caloExtensionLink"};
-            /** @brief Dependency on the ATLAS magnetic field needed to propagate the tracks */
-            SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
             /** @brief Calo description manager */
             SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey {this, "CaloDetDescrManager", "CaloDetDescrManager"};
 

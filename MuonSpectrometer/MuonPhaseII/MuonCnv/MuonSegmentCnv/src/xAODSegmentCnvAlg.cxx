@@ -20,51 +20,18 @@
 #include "Acts/Utilities/Enumerate.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Surfaces/LineBounds.hpp"
-#include "Acts/Definitions/Units.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
 
-#include "Acts/Propagator/ActorList.hpp"
-#include "Acts/Propagator/SurfaceCollector.hpp"
-
-#include "ActsInterop/Logger.h"
 #include "ActsInterop/UnitConverters.h"
 
 using namespace Acts::UnitLiterals;
 
 namespace {
-    /** @brief Actor which aborts if the surface has been surpassed by the
-     *         propagator by an distance X */
-    struct PassedSurface {
-        /** @brief Target surface that needs to be surpassed */
-        const Acts::Surface* targetSurface = nullptr;
-        /** @brief The distance that the propagation needs to be at least away */
-        double surpassedDistance{20._cm};
-        /** @brief Default constructor */
-        explicit PassedSurface() = default;
- 
-        /** @brief Implementation of the actor interface to check whether the
-         *         propagation shall be aborted. True means abort. */
-        template <typename propagator_state_t, typename stepper_t,
-                    typename navigator_t>
-        bool checkAbort(propagator_state_t& state, const stepper_t& stepper,
-                        const navigator_t& /*navigator*/, const Acts::Logger& logger) const {
-            if (targetSurface == nullptr) {
-                ACTS_WARNING("PassedSurface aborter | Target surface not set.");
-                return true;
-            }
-
-            const Acts::MultiIntersection3D multiIntersection = targetSurface->intersect(state.geoContext, 
-                                                                                   stepper.position(state.stepping),
-                                                                                   state.options.direction * stepper.direction(state.stepping),
-                                                                                   Acts::BoundaryTolerance::Infinite());
-                                                                            
-            const Acts::Intersection3D closestIntersection = multiIntersection.closest();
-            ACTS_VERBOSE("PassedSurface aborter | Propagation is "<<closestIntersection.pathLength()
-                    <<" away from target surface "
-                    <<targetSurface->toString(state.geoContext)<<". Abort if distance is "
-                    <<std::copysign(surpassedDistance, -1.)<<".");
-            return closestIntersection.pathLength() < std::copysign(surpassedDistance, -1.);
-        }
-    };
+    /** @brief Returns the last parent volume that is alignable */
+    const Acts::TrackingVolume* highestAlignable(const Acts::TrackingVolume* volume){
+        return !volume || !volume->motherVolume() || !volume->motherVolume()->isAlignable()
+            ? volume : highestAlignable(volume->motherVolume());
+    }
 }
 
 namespace MuonR4{
@@ -88,12 +55,7 @@ namespace MuonR4{
         ATH_CHECK(m_prdStateKey.initialize());
         ATH_CHECK(m_auxMeasProv.initialize(m_writeKey.key(), m_convertBeamSpot));
         ATH_CHECK(m_trackingGeometryTool.retrieve(EnableTool{m_estimateHoles}));
-        if (m_estimateHoles) {
-            Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
-            Acts::Navigator navigator{std::move(navConfig), makeActsAthenaLogger(this, name())};
-            m_propagator = std::make_unique<Propagator_t>(Acts::StraightLineStepper{}, std::move(navigator),
-                                                          makeActsAthenaLogger(this, name()));
-        }
+        ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_estimateHoles}));
         return StatusCode::SUCCESS;
     }
     StatusCode xAODSegmentCnvAlg::execute(const EventContext& ctx) const {
@@ -368,10 +330,12 @@ namespace MuonR4{
             crossedSurfaces.insert( muonMeas->type() != xAOD::UncalibMeasType::MdtDriftCircleType ? 
                                     m_idHelperSvc->gasGapId(muonMeas->identify()) :
                                     muonMeas->identify());
+            const auto* volume = highestAlignable(trackingGeo->findVolume(volumeId(surface)));
+            assert(volume != nullptr);
             if (!startSurface) {
-                startSurface = MuonGMR4::bottomBoundary(*trackingGeo->findVolume(volumeId(surface)));
+                startSurface = MuonGMR4::bottomBoundary(*volume);
             } else if (m +1 == nMeas) {
-                lastSurface = MuonGMR4::topBoundary(*trackingGeo->findVolume(volumeId(surface)));
+                lastSurface = MuonGMR4::topBoundary(*volume);
             }
         }
         /// Calculate the segment start parameters
@@ -385,7 +349,7 @@ namespace MuonR4{
                                                                 segment.direction(), 1./ 5._TeV, std::nullopt,
                                                                 Acts::ParticleHypothesis::muon());
             if (startPars.ok()) {
-                findHoles(tgContext, *startPars, lastSurface, crossedSurfaces, holes);
+                findHoles(ctx, *startPars, lastSurface, crossedSurfaces, holes);
             } else {
                 ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Start parameters not defined.");
             }
@@ -394,47 +358,27 @@ namespace MuonR4{
         segment.setNOutliers(outliers.precision, outliers.triggerPhi, outliers.triggerEta);
         segment.setNHoles(holes.precision, holes.triggerPhi, holes.triggerEta);
     }
-    void xAODSegmentCnvAlg::findHoles(const Acts::GeometryContext& tgContext,
+    void xAODSegmentCnvAlg::findHoles(const EventContext& ctx,
                                       const Acts::BoundTrackParameters& startPars,
                                       const Acts::Surface* target,
                                       const std::unordered_set<Identifier>& layersWithHits,
                                       Counter& holeCounter) const {
         
-        using ParamRecorder_t = Acts::BoundParameterRecorder<Acts::SurfaceSelector>;
-        using ActorList_t = Acts::ActorList<ParamRecorder_t, PassedSurface>;
-        
-        using Options_t = Propagator_t::Options<ActorList_t>;
 
-        const Acts::MagneticFieldContext mfContext{};
-        Options_t options{tgContext, mfContext};
-        options.direction = Acts::Direction::Forward();
-        options.surfaceTolerance = Acts::s_onSurfaceTolerance;
-        options.stepping.maxStepSize = 10._m;
-        options.pathLimit = 50._m;
-        options.maxSteps = 100000;
-        options.maxTargetSkipping = 1000;
-        /// Only record the sensitive surfaces
-        auto& surfaceRecorder = options.actorList.template get<ParamRecorder_t>();
-        surfaceRecorder.selector.selectSensitive = true;
-        surfaceRecorder.selector.selectMaterial = false;
-        surfaceRecorder.selector.selectPassive = false;
+        using SurfaceRecordOptions = ActsTrk::IExtrapolationTool::SurfaceRecordOptions;
+        SurfaceRecordOptions propOpts{target, m_extraHolePath};
+        propOpts.recordMaterial = false;
+        propOpts.recordPassive = false;
+        propOpts.recordSensitive = true;
 
-        /// Find the last valid measurement to define the surface that needs to
-        /// be passed to abort the propagation
-        auto& aborter = options.actorList.template get<PassedSurface>();
-        aborter.targetSurface = target;
-        if (!aborter.targetSurface) {
-            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" No exit surface defined");
-            return;
-        }
         
-        auto propResult = m_propagator->propagate(startPars, options);
+        auto propResult = m_extrapolationTool->propagateAndRecord(ctx, startPars, propOpts);
         if (!propResult.ok()) {
             return;
         }
-       
+
         /* Loop over the track record to filter out the holes*/
-        for (Acts::BoundTrackParameters& record : (*propResult).template get<ParamRecorder_t::result_type>()) {
+        for (Acts::BoundTrackParameters& record : (*propResult)) {
             const auto* placement = dynamic_cast<const ActsTrk::SurfacePlacement*>(record.referenceSurface().surfacePlacement());
             assert(placement != nullptr);
             const auto* detEl = static_cast<const MuonGMR4::MuonReadoutElement*>(placement->detectorElement());

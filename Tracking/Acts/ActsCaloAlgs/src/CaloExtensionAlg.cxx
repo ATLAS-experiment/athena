@@ -50,9 +50,9 @@ namespace ActsTrk{
         ATH_CHECK(m_clusterSelector.retrieve(EnableTool{!m_clusterSelector.empty()}));
         ATH_CHECK(m_trackSelector.retrieve(EnableTool{!m_trackSelector.empty()}));
         ATH_CHECK(m_trackingGeometryTool.retrieve());
+        ATH_CHECK(m_extrapolationTool.retrieve());
 
         ATH_CHECK(m_clusterContainerKey.initialize());
-        ATH_CHECK(m_fieldCacheCondObjInputKey.initialize());
         ATH_CHECK(m_trackParticleContainerKey.initialize());
         ATH_CHECK(m_extensionDecorKey.initialize());
         ATH_CHECK(m_caloDetDescrMgrKey.initialize(m_clusterSelector.isEnabled()));
@@ -82,16 +82,8 @@ namespace ActsTrk{
                      <<"volume: "<<vol->volumeName()<<", to "<<smpItr->second<<".");
             }
         });
+      
        
-        /// Setup the propagator
-        Acts::Navigator::Config navConfig{m_trackingGeometryTool->trackingGeometry()};
-        auto logger = makeActsAthenaLogger(this, name());
-        Acts::Navigator navigator{std::move(navConfig), logger->clone()};
-
-        CurvedStepper_t stepper{std::make_shared<ATLASMagneticFieldWrapper>()};
-        m_propagator = std::make_unique<CurvedPropagator_t>(std::move(stepper), std::move(navigator), std::move(logger));
-
-        
         return StatusCode::SUCCESS;
     }
     CaloExtensionAlg::SortedCluster_t 
@@ -120,58 +112,32 @@ namespace ActsTrk{
         return grid;   
     }
 
-    std::unique_ptr<CaloExtension> CaloExtensionAlg::propagateToCaloExit(const Acts::MagneticFieldContext& mfContext,
-                                                                         const Acts::GeometryContext& tgContext,
+    std::unique_ptr<CaloExtension> CaloExtensionAlg::propagateToCaloExit(const EventContext& ctx,
                                                                          const xAOD::TrackParticle* track) const{
-        using ParamRecorder_t = Acts::BoundParameterRecorder<Acts::SurfaceSelector>;
-        using ActorList_t = Acts::ActorList<ParamRecorder_t,
-                                            Acts::MaterialInteractor, 
-                                            Acts::VolumeConstraintAborter>;
-        
-        using Options_t = CurvedPropagator_t::Options<ActorList_t>;
-
+  
         const Acts::TrackingVolume* caloExit = m_trackingGeometryTool->getEnvelope(SystemEnvelope::CaloExit);
        
-         auto extension = std::make_unique<CaloExtension>(track);
-         /// Retrieve the last track parameters with a measurement state
-         auto lastTrackPars = extension->lastParameters();
-            
-        // Setup the propagation towards the calorimeter exit
-        Options_t options{tgContext, mfContext};
-        options.direction = Acts::Direction::Forward();
-        options.surfaceTolerance = Acts::s_onSurfaceTolerance;
-        options.stepping.maxStepSize = 10._m;
-        options.pathLimit = 50._m;
-        options.maxSteps = 100000;
-        options.maxTargetSkipping = 1000;
-        /// The calorimeter is fully embedde in the world or in the MS. As soon
-        /// as the propagation reaches the mothervolume it should abort
-        options.endOfWorldVolumeIds.push_back(caloExit->motherVolume()->geometryId().volume());
-        /// Switch on the material interactions
-        auto& mInteractor = options.actorList.template get<Acts::MaterialInteractor>();
-        mInteractor.multipleScattering = true;
-        mInteractor.energyLoss = true;
-        /// Define the surface recorder
-        auto& surfaceRecorder = options.actorList.template get<ParamRecorder_t>();
-        surfaceRecorder.selector.selectSensitive = true;
-        surfaceRecorder.selector.selectMaterial = true;
-        surfaceRecorder.selector.selectPassive = true;
+        auto extension = std::make_unique<CaloExtension>(track);
+        /// Retrieve the last track parameters with a measurement state
+        auto lastTrackPars = extension->lastParameters();
+        using SurfaceRecordOptions = IExtrapolationTool::SurfaceRecordOptions;
+        SurfaceRecordOptions propOpts{caloExit, SurfaceRecordOptions::VolumeAbort::atExit};
+        propOpts.recordMaterial = true;
+        propOpts.recordPassive = true;
+        propOpts.recordSensitive = true;
 
-        /// Propagate everything
-        auto propResult = m_propagator->propagate(*lastTrackPars, options);
-        if (!propResult.ok()) {
+        auto surfaceRecord = m_extrapolationTool->propagateAndRecord(ctx, *lastTrackPars, propOpts);
+        if (!surfaceRecord.ok()) {
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Propagation through calorimeter did not succeed");
             return nullptr;
         }
-
-        auto& result = *propResult;
-
         /// Loop over the recorded bound track parameters to append them onto the surface
-        for (Acts::BoundTrackParameters& record : result.template get<ParamRecorder_t::result_type>()) {
+        for (Acts::BoundTrackParameters& record : *surfaceRecord) {
             if (&record.referenceSurface()  == &(lastTrackPars->referenceSurface())) {
                 continue;
             }
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Append calorimeter parameters: "
-                <<record<<",\n surface:"<<record.referenceSurface().toString(tgContext));
+                <<record<<",\n surface: "<<record.referenceSurface().bounds()<<".");
             extension->appendParameters(std::move(record));
         }
         if (extension->empty()){
@@ -184,14 +150,11 @@ namespace ActsTrk{
         const xAOD::TrackParticleContainer* idTracks{nullptr};
         const xAOD::CaloClusterContainer* caloClusters{nullptr};
         const CaloDetDescrManager* detMgr{nullptr};
-        const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
         /** Retrieve the input */
         ATH_CHECK(SG::get(idTracks, m_trackParticleContainerKey,ctx));
         ATH_CHECK(SG::get(caloClusters, m_clusterContainerKey, ctx));
         ATH_CHECK(SG::get(detMgr, m_caloDetDescrMgrKey, ctx));
-        ATH_CHECK(SG::get(fieldCondObj,m_fieldCacheCondObjInputKey, ctx));
         
-        const Acts::MagneticFieldContext mfContext{fieldCondObj};
         const Acts::GeometryContext tgContext = m_trackingGeometryTool->getGeometryContext(ctx).context();
         /** Prepare the clusters to match */
         const SortedCluster_t coneClusters = selectAndSort(*caloClusters, detMgr);   
@@ -209,7 +172,7 @@ namespace ActsTrk{
                 (m_trackSelector.isEnabled() && !m_trackSelector->accept(*track))){
                 continue;
             }
-            auto extension = propagateToCaloExit(mfContext, tgContext, track);
+            auto extension = propagateToCaloExit(ctx, track);
             if (!extension) {
                 continue;
             }
