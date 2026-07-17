@@ -21,7 +21,7 @@ ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--argJSON', '--asetup',
 '--dumpJSON', '--dumpPickle', '--ecmEnergy', '--env', '--eventAcceptanceEfficiency', 
 '--evgenJobOpts', '--execOnly', '--fileValidation', '--firstEvent', '--ignoreErrors', 
 '--ignoreFiles', '--ignorePatterns', '--imf', '--inputEVNT_PreFile', '--inputFileValidation', 
-'--inputGenConfFile', '--inputGeneratorFile', '--jobConfig', '--jobid', '--maxEvents', '--orphanKiller', '--outputEVNTFile', '--outputEVNT_PreFile', '--outputHEPMCFile', '--outputFileValidation', '--outputNTUP_TRUTHFile', '--outputTXTFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--wprintEvts', '--randomSeed', '--reportName', '--reportType', '--rivetAnas', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--steering', '--taskid', '--tcmalloc', '--valgrind', '--valgrindbasicopts', '--valgrindextraopts', '--lheOnly', '--localPath', '--cleanOut', '--saveList']
+'--inputGenConfFile', '--inputGeneratorFile', '--jobConfig', '--jobid', '--maxEvents', '--orphanKiller', '--outputEVNTFile', '--outputEVNT_PreFile', '--outputHEPMCFile', '--outputFileValidation', '--outputNTUP_TRUTHFile', '--outputTXTFile', '--parallelFileValidation', '--postExec', '--postInclude', '--preExec', '--preInclude', '--wprintEvts', '--randomSeed', '--reportName', '--reportType', '--rivetAnas', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--steering', '--taskid', '--tcmalloc', '--valgrind', '--valgrindbasicopts', '--valgrindextraopts', '--lheOnly', '--localPath', '--cleanOut', '--saveList', '--avoidExtracting']
 
 class EvgenExecutor(athenaExecutor):
   "Specialised trf executor class for event generation jobs"
@@ -48,11 +48,17 @@ class EvgenExecutor(athenaExecutor):
                 zf.extractall()
                 zf.close()
             elif ".gz" in filename:
-                import gzip
-                with gzip.open(filename, 'rb') as f_in:
-                    lfilename=os.path.basename(filename)
-                    with open(lfilename[:-3], 'wb') as f_out:
-                        shutil.copyfileobj(f_in, f_out)
+                shouldExtract = True
+                if "avoidExtracting" in self._trf.argdict:
+                    shouldExtract = not self._trf.argdict["avoidExtracting"].value
+                if shouldExtract:
+                    import gzip
+                    with gzip.open(filename, 'rb') as f_in:
+                       lfilename=os.path.basename(filename)
+                       with open(lfilename[:-3], 'wb') as f_out:
+                           shutil.copyfileobj(f_in, f_out)
+                else:
+                    msg.info("Avoid extracting gz input generator file.")
         def get_immediate_subdirectories(a_dir):
             return [name for name in os.listdir(a_dir)
                     if os.path.isdir(os.path.join(a_dir, name))]

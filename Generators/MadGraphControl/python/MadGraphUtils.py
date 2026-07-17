@@ -1232,9 +1232,9 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
     if outputDS is None:
         outputDS = 'tmp_LHE_events.tar.gz'
         if flags is not None and hasattr(flags, 'Generator') and hasattr(flags.Generator, 'avoidExtracting') and flags.Generator.avoidExtracting:
-            outputDS = 'tmp_LHE_events.gz'
+            outputDS = 'tmp_LHE_events.events.gz'
         elif runArgs is not None and hasattr(runArgs, 'avoidExtracting') and runArgs.avoidExtracting:
-            outputDS = 'tmp_LHE_events.gz'
+            outputDS = 'tmp_LHE_events.events.gz'
 
     outputStem = outputDS
     if '.tar.gz' in outputDS:
@@ -1246,7 +1246,8 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
     else:
         mglog.warning(f'Could not figure out what output file type {outputDS} refers to')
         outputStem = outputDS.split('.')[0]
-    outputStem += '.events'
+    if not outputStem.endswith('.events'):
+        outputStem += '.events'
 
     mglog.info('Moving file over to '+outputStem)
     shutil.move(os.getcwd()+'/events.lhe',outputStem)
@@ -1259,7 +1260,9 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
         mglog.info('Re-zipping into dataset name '+outputDS)
         rezip = stack_subprocess(['gzip',outputStem])
         rezip.wait()
-        shutil.move(outputStem+'.gz',outputDS)
+        compressedOutput = outputStem+'.gz'
+        if compressedOutput != outputDS:
+            shutil.move(compressedOutput,outputDS)
     else:
         mglog.info(f'Could not understand output type for {outputDS} - will leave uncompressed')
 
