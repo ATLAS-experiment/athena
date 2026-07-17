@@ -5,15 +5,38 @@ atlas_subdir( EFTrackingDataTransfer )
 # Make use of the SYCL support in VecMem for building this package.
 find_package( vecmem COMPONENTS LANGUAGE )
 
-find_package(Protobuf REQUIRED)
-find_package(OpenSSL)
 find_package(gRPC REQUIRED)
-message(STATUS "gRPC_DIR = ${gRPC_DIR}")
+#find_package(Protobuf REQUIRED)
+find_package(OpenSSL)
+
+message(STATUS "Protobuf version: ${Protobuf_VERSION}")
+message(STATUS "Protobuf includes: ${Protobuf_INCLUDE_DIRS}")
 
 atlas_add_library(EFTrackingDataTransferLib
   src/*.cxx EFTrackingDataTransfer/*.pb.cc
   NO_PUBLIC_HEADERS
-  LINK_LIBRARIES AnaAlgorithmLib protobuf::libprotobuf gRPC::grpc++)
+  LINK_LIBRARIES AnaAlgorithmLib ByteStreamData ByteStreamCnvSvcBaseLib protobuf::libprotobuf gRPC::grpc++)
+
+
+# tried that to generate c++ binding on the fly, failed
+# 
+# target_include_directories(EFTrackingDataTransferLib PRIVATE
+#  ${CMAKE_CURRENT_BINARY_DIR})
+
+# protobuf_generate(TARGET EFTrackingDataTransferLib
+#   LANGUAGE cpp
+#   PROTOS EFTrackingDataTransfer/Message.proto
+#   APPEND_PATH EFTrackingDataTransfer
+# )
+
+# protobuf_generate(
+#   TARGET EFTrackingDataTransferLib
+#   LANGUAGE grpc
+#   PROTOS EFTrackingDataTransfer/Message.proto
+#   APPEND_PATH EFTrackingDataTransfer
+#   GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
+#   PLUGIN "protoc-gen-grpc=\$<TARGET_FILE:gRPC::grpc_cpp_plugin>"
+# )
 
 atlas_add_component(EFTrackingDataTransfer
         src/components/*.cxx

@@ -101,7 +101,7 @@ struct FloatVectorDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FloatVectorDefaultTypeInternal _FloatVector_default_instance_;
 
-inline constexpr EventInfo::Impl_::Impl_(
+inline constexpr EventInfoMessage::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : eventnumber_{::uint64_t{0u}},
         runnumber_{0u},
@@ -113,7 +113,7 @@ inline constexpr EventInfo::Impl_::Impl_(
         _cached_size_{0} {}
 
 template <typename>
-PROTOBUF_CONSTEXPR EventInfo::EventInfo(::_pbi::ConstantInitialized)
+PROTOBUF_CONSTEXPR EventInfoMessage::EventInfoMessage(::_pbi::ConstantInitialized)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(_class_data_.base()),
 #else   // PROTOBUF_CUSTOM_VTABLE
@@ -121,16 +121,16 @@ PROTOBUF_CONSTEXPR EventInfo::EventInfo(::_pbi::ConstantInitialized)
 #endif  // PROTOBUF_CUSTOM_VTABLE
       _impl_(::_pbi::ConstantInitialized()) {
 }
-struct EventInfoDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR EventInfoDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~EventInfoDefaultTypeInternal() {}
+struct EventInfoMessageDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR EventInfoMessageDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~EventInfoMessageDefaultTypeInternal() {}
   union {
-    EventInfo _instance;
+    EventInfoMessage _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 EventInfoDefaultTypeInternal _EventInfo_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 EventInfoMessageDefaultTypeInternal _EventInfoMessage_default_instance_;
 
 inline constexpr DoubleVector::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -268,20 +268,20 @@ const ::uint32_t
     TableStruct_Message_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
         protodesc_cold) = {
         ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::EventInfo, _internal_metadata_),
+        PROTOBUF_FIELD_OFFSET(::EventInfoMessage, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
         ~0u,  // no _weak_field_map_
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::EventInfo, _impl_.runnumber_),
-        PROTOBUF_FIELD_OFFSET(::EventInfo, _impl_.eventnumber_),
-        PROTOBUF_FIELD_OFFSET(::EventInfo, _impl_.lumiblock_),
-        PROTOBUF_FIELD_OFFSET(::EventInfo, _impl_.timestamp_),
-        PROTOBUF_FIELD_OFFSET(::EventInfo, _impl_.timestampnsoffset_),
-        PROTOBUF_FIELD_OFFSET(::EventInfo, _impl_.bcid_),
-        PROTOBUF_FIELD_OFFSET(::EventInfo, _impl_.extendedlevel1id_),
+        PROTOBUF_FIELD_OFFSET(::EventInfoMessage, _impl_.runnumber_),
+        PROTOBUF_FIELD_OFFSET(::EventInfoMessage, _impl_.eventnumber_),
+        PROTOBUF_FIELD_OFFSET(::EventInfoMessage, _impl_.lumiblock_),
+        PROTOBUF_FIELD_OFFSET(::EventInfoMessage, _impl_.timestamp_),
+        PROTOBUF_FIELD_OFFSET(::EventInfoMessage, _impl_.timestampnsoffset_),
+        PROTOBUF_FIELD_OFFSET(::EventInfoMessage, _impl_.bcid_),
+        PROTOBUF_FIELD_OFFSET(::EventInfoMessage, _impl_.extendedlevel1id_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::UIntVector, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -390,7 +390,7 @@ const ::uint32_t
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-        {0, -1, -1, sizeof(::EventInfo)},
+        {0, -1, -1, sizeof(::EventInfoMessage)},
         {15, -1, -1, sizeof(::UIntVector)},
         {24, -1, -1, sizeof(::IntVector)},
         {33, -1, -1, sizeof(::FloatVector)},
@@ -402,7 +402,7 @@ static const ::_pbi::MigrationSchema
         {99, 113, -1, sizeof(::OffloadMessage)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
-    &::_EventInfo_default_instance_._instance,
+    &::_EventInfoMessage_default_instance_._instance,
     &::_UIntVector_default_instance_._instance,
     &::_IntVector_default_instance_._instance,
     &::_FloatVector_default_instance_._instance,
@@ -415,36 +415,37 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_Message_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\rMessage.proto\"\234\001\n\tEventInfo\022\021\n\trunNumb"
-    "er\030\001 \001(\r\022\023\n\013eventNumber\030\002 \001(\004\022\021\n\tlumiBlo"
-    "ck\030\003 \001(\r\022\021\n\ttimeStamp\030\004 \001(\r\022\031\n\021timeStamp"
-    "NSOffset\030\005 \001(\r\022\014\n\004bcid\030\006 \001(\r\022\030\n\020extended"
-    "Level1ID\030\007 \001(\r\"\034\n\nUIntVector\022\016\n\006values\030\001"
-    " \003(\r\"\033\n\tIntVector\022\016\n\006values\030\001 \003(\021\"\035\n\013Flo"
-    "atVector\022\016\n\006values\030\001 \003(\002\"\036\n\014DoubleVector"
-    "\022\016\n\006values\030\001 \003(\001\"\267\004\n\016OffloadMessage\022\022\n\ni"
-    "dentifier\030\001 \001(\t\022\031\n\005event\030\002 \001(\0132\n.EventIn"
-    "fo\0228\n\ruint_branches\030\n \003(\0132!.OffloadMessa"
-    "ge.UintBranchesEntry\0226\n\014int_branches\030\013 \003"
-    "(\0132 .OffloadMessage.IntBranchesEntry\022:\n\016"
-    "float_branches\030\014 \003(\0132\".OffloadMessage.Fl"
-    "oatBranchesEntry\022<\n\017double_branches\030\r \003("
-    "\0132#.OffloadMessage.DoubleBranchesEntry\032@"
-    "\n\021UintBranchesEntry\022\013\n\003key\030\001 \001(\t\022\032\n\005valu"
-    "e\030\002 \001(\0132\013.UIntVector:\0028\001\032>\n\020IntBranchesE"
-    "ntry\022\013\n\003key\030\001 \001(\t\022\031\n\005value\030\002 \001(\0132\n.IntVe"
-    "ctor:\0028\001\032B\n\022FloatBranchesEntry\022\013\n\003key\030\001 "
-    "\001(\t\022\033\n\005value\030\002 \001(\0132\014.FloatVector:\0028\001\032D\n\023"
-    "DoubleBranchesEntry\022\013\n\003key\030\001 \001(\t\022\034\n\005valu"
-    "e\030\002 \001(\0132\r.DoubleVector:\0028\0012N\n\027UniversalO"
-    "ffloadService\0223\n\rdoComputation\022\017.Offload"
-    "Message\032\017.OffloadMessage\"\000b\006proto3"
+    "\n\rMessage.proto\"\243\001\n\020EventInfoMessage\022\021\n\t"
+    "runNumber\030\001 \001(\r\022\023\n\013eventNumber\030\002 \001(\004\022\021\n\t"
+    "lumiBlock\030\003 \001(\r\022\021\n\ttimeStamp\030\004 \001(\r\022\031\n\021ti"
+    "meStampNSOffset\030\005 \001(\r\022\014\n\004bcid\030\006 \001(\r\022\030\n\020e"
+    "xtendedLevel1ID\030\007 \001(\r\"\034\n\nUIntVector\022\016\n\006v"
+    "alues\030\001 \003(\r\"\033\n\tIntVector\022\016\n\006values\030\001 \003(\021"
+    "\"\035\n\013FloatVector\022\016\n\006values\030\001 \003(\002\"\036\n\014Doubl"
+    "eVector\022\016\n\006values\030\001 \003(\001\"\276\004\n\016OffloadMessa"
+    "ge\022\022\n\nidentifier\030\001 \001(\t\022 \n\005event\030\002 \001(\0132\021."
+    "EventInfoMessage\0228\n\ruint_branches\030\n \003(\0132"
+    "!.OffloadMessage.UintBranchesEntry\0226\n\014in"
+    "t_branches\030\013 \003(\0132 .OffloadMessage.IntBra"
+    "nchesEntry\022:\n\016float_branches\030\014 \003(\0132\".Off"
+    "loadMessage.FloatBranchesEntry\022<\n\017double"
+    "_branches\030\r \003(\0132#.OffloadMessage.DoubleB"
+    "ranchesEntry\032@\n\021UintBranchesEntry\022\013\n\003key"
+    "\030\001 \001(\t\022\032\n\005value\030\002 \001(\0132\013.UIntVector:\0028\001\032>"
+    "\n\020IntBranchesEntry\022\013\n\003key\030\001 \001(\t\022\031\n\005value"
+    "\030\002 \001(\0132\n.IntVector:\0028\001\032B\n\022FloatBranchesE"
+    "ntry\022\013\n\003key\030\001 \001(\t\022\033\n\005value\030\002 \001(\0132\014.Float"
+    "Vector:\0028\001\032D\n\023DoubleBranchesEntry\022\013\n\003key"
+    "\030\001 \001(\t\022\034\n\005value\030\002 \001(\0132\r.DoubleVector:\0028\001"
+    "2N\n\027UniversalOffloadService\0223\n\rdoComputa"
+    "tion\022\017.OffloadMessage\032\017.OffloadMessage\"\000"
+    "b\006proto3"
 };
 static ::absl::once_flag descriptor_table_Message_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_Message_2eproto = {
     false,
     false,
-    954,
+    968,
     descriptor_table_protodef_Message_2eproto,
     "Message.proto",
     &descriptor_table_Message_2eproto_once,
@@ -459,30 +460,30 @@ PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_Message_2eprot
 };
 // ===================================================================
 
-class EventInfo::_Internal {
+class EventInfoMessage::_Internal {
  public:
 };
 
-EventInfo::EventInfo(::google::protobuf::Arena* arena)
+EventInfoMessage::EventInfoMessage(::google::protobuf::Arena* arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
     : ::google::protobuf::Message(arena, _class_data_.base()) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : ::google::protobuf::Message(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:EventInfo)
+  // @@protoc_insertion_point(arena_constructor:EventInfoMessage)
 }
-EventInfo::EventInfo(
-    ::google::protobuf::Arena* arena, const EventInfo& from)
-    : EventInfo(arena) {
+EventInfoMessage::EventInfoMessage(
+    ::google::protobuf::Arena* arena, const EventInfoMessage& from)
+    : EventInfoMessage(arena) {
   MergeFrom(from);
 }
-inline PROTOBUF_NDEBUG_INLINE EventInfo::Impl_::Impl_(
+inline PROTOBUF_NDEBUG_INLINE EventInfoMessage::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
       : _cached_size_{0} {}
 
-inline void EventInfo::SharedCtor(::_pb::Arena* arena) {
+inline void EventInfoMessage::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, eventnumber_),
@@ -491,12 +492,12 @@ inline void EventInfo::SharedCtor(::_pb::Arena* arena) {
                offsetof(Impl_, eventnumber_) +
                sizeof(Impl_::extendedlevel1id_));
 }
-EventInfo::~EventInfo() {
-  // @@protoc_insertion_point(destructor:EventInfo)
+EventInfoMessage::~EventInfoMessage() {
+  // @@protoc_insertion_point(destructor:EventInfoMessage)
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-inline void EventInfo::SharedDtor() {
+inline void EventInfoMessage::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
   _impl_.~Impl_();
 }
@@ -504,33 +505,33 @@ inline void EventInfo::SharedDtor() {
 PROTOBUF_CONSTINIT
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
 const ::google::protobuf::MessageLite::ClassDataFull
-    EventInfo::_class_data_ = {
+    EventInfoMessage::_class_data_ = {
         ::google::protobuf::Message::ClassData{
-            &_EventInfo_default_instance_._instance,
+            &_EventInfoMessage_default_instance_._instance,
             &_table_.header,
             nullptr,  // OnDemandRegisterArenaDtor
             nullptr,  // IsInitialized
-            &EventInfo::MergeImpl,
+            &EventInfoMessage::MergeImpl,
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-            ::google::protobuf::Message::GetDeleteImpl<EventInfo>(),
-            ::google::protobuf::Message::GetNewImpl<EventInfo>(),
-            ::google::protobuf::Message::GetClearImpl<EventInfo>(), &EventInfo::ByteSizeLong,
-                &EventInfo::_InternalSerialize,
+            ::google::protobuf::Message::GetDeleteImpl<EventInfoMessage>(),
+            ::google::protobuf::Message::GetNewImpl<EventInfoMessage>(),
+            ::google::protobuf::Message::GetClearImpl<EventInfoMessage>(), &EventInfoMessage::ByteSizeLong,
+                &EventInfoMessage::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-            PROTOBUF_FIELD_OFFSET(EventInfo, _impl_._cached_size_),
+            PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_._cached_size_),
             false,
         },
-        &EventInfo::kDescriptorMethods,
+        &EventInfoMessage::kDescriptorMethods,
         &descriptor_table_Message_2eproto,
         nullptr,  // tracker
 };
-const ::google::protobuf::MessageLite::ClassData* EventInfo::GetClassData() const {
+const ::google::protobuf::MessageLite::ClassData* EventInfoMessage::GetClassData() const {
   ::google::protobuf::internal::PrefetchToLocalCache(&_class_data_);
   ::google::protobuf::internal::PrefetchToLocalCache(_class_data_.tc_table);
   return _class_data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 7, 0, 0, 2> EventInfo::_table_ = {
+const ::_pbi::TcParseTable<3, 7, 0, 0, 2> EventInfoMessage::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
@@ -545,54 +546,54 @@ const ::_pbi::TcParseTable<3, 7, 0, 0, 2> EventInfo::_table_ = {
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::EventInfo>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::EventInfoMessage>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
     // uint32 runNumber = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfo, _impl_.runnumber_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.runnumber_)}},
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfoMessage, _impl_.runnumber_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.runnumber_)}},
     // uint64 eventNumber = 2;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(EventInfo, _impl_.eventnumber_), 63>(),
-     {16, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.eventnumber_)}},
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(EventInfoMessage, _impl_.eventnumber_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.eventnumber_)}},
     // uint32 lumiBlock = 3;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfo, _impl_.lumiblock_), 63>(),
-     {24, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.lumiblock_)}},
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfoMessage, _impl_.lumiblock_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.lumiblock_)}},
     // uint32 timeStamp = 4;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfo, _impl_.timestamp_), 63>(),
-     {32, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.timestamp_)}},
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfoMessage, _impl_.timestamp_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.timestamp_)}},
     // uint32 timeStampNSOffset = 5;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfo, _impl_.timestampnsoffset_), 63>(),
-     {40, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.timestampnsoffset_)}},
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfoMessage, _impl_.timestampnsoffset_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.timestampnsoffset_)}},
     // uint32 bcid = 6;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfo, _impl_.bcid_), 63>(),
-     {48, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.bcid_)}},
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfoMessage, _impl_.bcid_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.bcid_)}},
     // uint32 extendedLevel1ID = 7;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfo, _impl_.extendedlevel1id_), 63>(),
-     {56, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.extendedlevel1id_)}},
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(EventInfoMessage, _impl_.extendedlevel1id_), 63>(),
+     {56, 63, 0, PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.extendedlevel1id_)}},
   }}, {{
     65535, 65535
   }}, {{
     // uint32 runNumber = 1;
-    {PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.runnumber_), 0, 0,
+    {PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.runnumber_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUInt32)},
     // uint64 eventNumber = 2;
-    {PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.eventnumber_), 0, 0,
+    {PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.eventnumber_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUInt64)},
     // uint32 lumiBlock = 3;
-    {PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.lumiblock_), 0, 0,
+    {PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.lumiblock_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUInt32)},
     // uint32 timeStamp = 4;
-    {PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.timestamp_), 0, 0,
+    {PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.timestamp_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUInt32)},
     // uint32 timeStampNSOffset = 5;
-    {PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.timestampnsoffset_), 0, 0,
+    {PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.timestampnsoffset_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUInt32)},
     // uint32 bcid = 6;
-    {PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.bcid_), 0, 0,
+    {PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.bcid_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUInt32)},
     // uint32 extendedLevel1ID = 7;
-    {PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.extendedlevel1id_), 0, 0,
+    {PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.extendedlevel1id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUInt32)},
   }},
   // no aux_entries
@@ -600,8 +601,8 @@ const ::_pbi::TcParseTable<3, 7, 0, 0, 2> EventInfo::_table_ = {
   }},
 };
 
-PROTOBUF_NOINLINE void EventInfo::Clear() {
-// @@protoc_insertion_point(message_clear_start:EventInfo)
+PROTOBUF_NOINLINE void EventInfoMessage::Clear() {
+// @@protoc_insertion_point(message_clear_start:EventInfoMessage)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
@@ -614,17 +615,17 @@ PROTOBUF_NOINLINE void EventInfo::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-        ::uint8_t* EventInfo::_InternalSerialize(
+        ::uint8_t* EventInfoMessage::_InternalSerialize(
             const MessageLite& base, ::uint8_t* target,
             ::google::protobuf::io::EpsCopyOutputStream* stream) {
-          const EventInfo& this_ = static_cast<const EventInfo&>(base);
+          const EventInfoMessage& this_ = static_cast<const EventInfoMessage&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-        ::uint8_t* EventInfo::_InternalSerialize(
+        ::uint8_t* EventInfoMessage::_InternalSerialize(
             ::uint8_t* target,
             ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-          const EventInfo& this_ = *this;
+          const EventInfoMessage& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          // @@protoc_insertion_point(serialize_to_array_start:EventInfo)
+          // @@protoc_insertion_point(serialize_to_array_start:EventInfoMessage)
           ::uint32_t cached_has_bits = 0;
           (void)cached_has_bits;
 
@@ -682,18 +683,18 @@ PROTOBUF_NOINLINE void EventInfo::Clear() {
                 ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
                     this_._internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
           }
-          // @@protoc_insertion_point(serialize_to_array_end:EventInfo)
+          // @@protoc_insertion_point(serialize_to_array_end:EventInfoMessage)
           return target;
         }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-        ::size_t EventInfo::ByteSizeLong(const MessageLite& base) {
-          const EventInfo& this_ = static_cast<const EventInfo&>(base);
+        ::size_t EventInfoMessage::ByteSizeLong(const MessageLite& base) {
+          const EventInfoMessage& this_ = static_cast<const EventInfoMessage&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
-        ::size_t EventInfo::ByteSizeLong() const {
-          const EventInfo& this_ = *this;
+        ::size_t EventInfoMessage::ByteSizeLong() const {
+          const EventInfoMessage& this_ = *this;
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          // @@protoc_insertion_point(message_byte_size_start:EventInfo)
+          // @@protoc_insertion_point(message_byte_size_start:EventInfoMessage)
           ::size_t total_size = 0;
 
           ::uint32_t cached_has_bits = 0;
@@ -742,10 +743,10 @@ PROTOBUF_NOINLINE void EventInfo::Clear() {
                                                      &this_._impl_._cached_size_);
         }
 
-void EventInfo::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<EventInfo*>(&to_msg);
-  auto& from = static_cast<const EventInfo&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:EventInfo)
+void EventInfoMessage::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<EventInfoMessage*>(&to_msg);
+  auto& from = static_cast<const EventInfoMessage&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:EventInfoMessage)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
@@ -774,26 +775,26 @@ void EventInfo::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::googl
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void EventInfo::CopyFrom(const EventInfo& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:EventInfo)
+void EventInfoMessage::CopyFrom(const EventInfoMessage& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:EventInfoMessage)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
 
-void EventInfo::InternalSwap(EventInfo* PROTOBUF_RESTRICT other) {
+void EventInfoMessage::InternalSwap(EventInfoMessage* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.extendedlevel1id_)
-      + sizeof(EventInfo::_impl_.extendedlevel1id_)
-      - PROTOBUF_FIELD_OFFSET(EventInfo, _impl_.eventnumber_)>(
+      PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.extendedlevel1id_)
+      + sizeof(EventInfoMessage::_impl_.extendedlevel1id_)
+      - PROTOBUF_FIELD_OFFSET(EventInfoMessage, _impl_.eventnumber_)>(
           reinterpret_cast<char*>(&_impl_.eventnumber_),
           reinterpret_cast<char*>(&other->_impl_.eventnumber_));
 }
 
-::google::protobuf::Metadata EventInfo::GetMetadata() const {
+::google::protobuf::Metadata EventInfoMessage::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
@@ -2060,7 +2061,7 @@ OffloadMessage::OffloadMessage(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
   ::uint32_t cached_has_bits = _impl_._has_bits_[0];
-  _impl_.event_ = (cached_has_bits & 0x00000001u) ? ::google::protobuf::Message::CopyConstruct<::EventInfo>(
+  _impl_.event_ = (cached_has_bits & 0x00000001u) ? ::google::protobuf::Message::CopyConstruct<::EventInfoMessage>(
                               arena, *from._impl_.event_)
                         : nullptr;
 
@@ -2139,7 +2140,7 @@ const ::_pbi::TcParseTable<1, 6, 9, 87, 2> OffloadMessage::_table_ = {
     ::_pbi::TcParser::GetTable<::OffloadMessage>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // .EventInfo event = 2;
+    // .EventInfoMessage event = 2;
     {::_pbi::TcParser::FastMtS1,
      {18, 0, 0, PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.event_)}},
     // string identifier = 1;
@@ -2151,7 +2152,7 @@ const ::_pbi::TcParseTable<1, 6, 9, 87, 2> OffloadMessage::_table_ = {
     // string identifier = 1;
     {PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.identifier_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
-    // .EventInfo event = 2;
+    // .EventInfoMessage event = 2;
     {PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.event_), _Internal::kHasBitsOffset + 0, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
     // map<string, .UIntVector> uint_branches = 10;
@@ -2167,7 +2168,7 @@ const ::_pbi::TcParseTable<1, 6, 9, 87, 2> OffloadMessage::_table_ = {
     {PROTOBUF_FIELD_OFFSET(OffloadMessage, _impl_.double_branches_), -1, 7,
     (0 | ::_fl::kFcRepeated | ::_fl::kMap)},
   }}, {{
-    {::_pbi::TcParser::GetTable<::EventInfo>()},
+    {::_pbi::TcParser::GetTable<::EventInfoMessage>()},
     {::_pbi::TcParser::GetMapAuxInfo<
         decltype(OffloadMessage()._impl_.uint_branches_)>(
         1, 0, 0, 9,
@@ -2244,7 +2245,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
           }
 
           cached_has_bits = this_._impl_._has_bits_[0];
-          // .EventInfo event = 2;
+          // .EventInfoMessage event = 2;
           if (cached_has_bits & 0x00000001u) {
             target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
                 2, *this_._impl_.event_, this_._impl_.event_->GetCachedSize(), target,
@@ -2433,7 +2434,7 @@ PROTOBUF_NOINLINE void OffloadMessage::Clear() {
             }
           }
            {
-            // .EventInfo event = 2;
+            // .EventInfoMessage event = 2;
             cached_has_bits =
                 this_._impl_._has_bits_[0];
             if (cached_has_bits & 0x00000001u) {
@@ -2466,7 +2467,7 @@ void OffloadMessage::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::
     ABSL_DCHECK(from._impl_.event_ != nullptr);
     if (_this->_impl_.event_ == nullptr) {
       _this->_impl_.event_ =
-          ::google::protobuf::Message::CopyConstruct<::EventInfo>(arena, *from._impl_.event_);
+          ::google::protobuf::Message::CopyConstruct<::EventInfoMessage>(arena, *from._impl_.event_);
     } else {
       _this->_impl_.event_->MergeFrom(*from._impl_.event_);
     }

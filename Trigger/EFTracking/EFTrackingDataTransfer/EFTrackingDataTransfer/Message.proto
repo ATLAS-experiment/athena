@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 
-message EventInfo {
+message EventInfoMessage {
    uint32  runNumber         = 1;
    uint64  eventNumber       = 2;
    uint32  lumiBlock         = 3;
@@ -32,11 +32,11 @@ message DoubleVector {
 
 message OffloadMessage {
   string identifier = 1;
-  EventInfo event = 2;
-  map<string, UIntVector> uint_branches  = 10;
-  map<string, IntVector>  int_branches   = 11;
-  map<string, FloatVector> float_branches = 12;
-  map<string, DoubleVector> double_branches = 13;
+  EventInfoMessage event = 2;
+  map<string, UIntVector> uint_branches  = 3;
+  map<string, IntVector>  int_branches   = 4;
+  map<string, FloatVector> float_branches = 5;
+  map<string, DoubleVector> double_branches = 6;
 }
 
 service UniversalOffloadService {

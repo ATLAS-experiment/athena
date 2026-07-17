@@ -18,6 +18,7 @@ using grpc::ClientContext;
 using grpc::Status;
 
 #include "EFTrackingDataTransfer/Message.grpc.pb.h"
+#include "IPackagingTool.h"
 
 /**
  * @class AsyncgRPCComputeAlg
@@ -25,8 +26,8 @@ using grpc::Status;
  **/
 class AsyncgRPCComputeAlg : public AthAsynchronousAlgorithm {
  public:
- // Inherit the base class's constructor(s).
-      using AthAsynchronousAlgorithm::AthAsynchronousAlgorithm;
+  // Inherit the base class's constructor(s).
+  using AthAsynchronousAlgorithm::AthAsynchronousAlgorithm;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& context) const override;
@@ -34,14 +35,13 @@ class AsyncgRPCComputeAlg : public AthAsynchronousAlgorithm {
   virtual StatusCode finalize() override;
 
  private:
-  // the end goal is that this message is actually provided/fille by a tool
-  // for now it has a dummy implementation
-  void encodeMessage(OffloadMessage&) const;
-
-  // the end goal is that decoding is done by a tool
-  // for now it has a dummy implementation
-  void decodeMessage(const OffloadMessage&) const;
-
+  ToolHandle<IPackagingTool> m_packingTool{
+      this,
+      "PackagingTool",
+      {},
+      "Tool that fetches data from current context and encodes it into probuf "
+      "for sending"};
+  // there will be a tool to decode the data back
   mutable std::unique_ptr<UniversalOffloadService::Stub> m_stub;
 };
 
