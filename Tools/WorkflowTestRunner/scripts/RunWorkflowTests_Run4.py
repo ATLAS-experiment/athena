@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
@@ -41,8 +41,7 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
             tests_to_run.append(QTest("q456", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.reco:
-        # Disable MMPrepDataContainer in ESD output due to ATEAM-1167
-        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} --steering doRDO_TRIG {options.extra_args} --postExec 'RAWtoALL:stream = cfg.getEventAlgo(\"StreamESD\"); stream.ItemList=[item for item in stream.ItemList if not item.startswith(\"Muon::MMPrepDataContainer#\")];'"))
+        tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, f"--geometryVersion {defaultGeometryTags.RUN4} --conditionsTag default:{defaultConditionsTags.RUN4_MC} --steering doRDO_TRIG {options.extra_args}"))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"
