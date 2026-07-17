@@ -217,6 +217,9 @@ class TileROD_Decoder: public AthAlgTool {
       return m_hid2re;
     }
 
+    const std::vector<int>& getDemoChannelMapLB() { return m_demoChanLB;}
+    const std::vector<int>& getDemoChannelMapEB() { return m_demoChanEB;}
+
     void setUseFrag0 (bool f) { m_useFrag0 = f; }
     void setUseFrag1 (bool f) { m_useFrag1 = f; }
     void setUseFrag4 (bool f) { m_useFrag4 = f; }
@@ -1132,9 +1135,6 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
 
               rChUnit = (TileRawChannelUnit::UNIT) (unit); // Offline units in simulated data
 
-              if (!m_demoFragIDs.empty()) {
-                ATH_MSG_WARNING("DemoFragIDs is not supported in MC"); // No demonstator cabling in MC
-              }
             }
 
             unpack_frag4(version, sizeOverhead, unit, rawchannelMetaData, p, pChannel, frag_id, drawer_type);

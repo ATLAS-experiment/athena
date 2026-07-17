@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaKernel/errorcheck.h"
 #include "StoreGate/ReadCondHandle.h"
 
 #include "TileByteStream/TileRawChannelContByteStreamTool.h"
+#include "TileByteStream/TileHid2RESrcID.h"
 #include "TileByteStream/TileROD_Encoder.h"
 
 #include "TileEvent/TileRawChannelCollection.h"
@@ -21,6 +23,11 @@
 #include "TileConditions/TileCablingService.h"
 #include "TileByteStream/TileROD_Decoder.h"
 
+#include <Gaudi/Property.h>
+#include <GaudiKernel/IProperty.h>
+#include <GaudiKernel/SmartIF.h>
+
+#include <functional>
 #include <map> 
 #include <stdint.h>
 
@@ -55,6 +62,53 @@ StatusCode TileRawChannelContByteStreamTool::initialize() {
 
   ToolHandle<TileROD_Decoder> dec("TileROD_Decoder");
   ATH_CHECK( dec.retrieve() );
+
+  const Gaudi::Details::PropertyBase& demoFragIDsProperty = SmartIF<IProperty>(dec.get())->getProperty("DemoFragIDs");
+  const IntegerArrayProperty& demoFragIDs = dynamic_cast<const IntegerArrayProperty&>(demoFragIDsProperty);
+
+  m_demoFragIDs.reserve(demoFragIDs.size());
+  for (const auto fragID : demoFragIDs.value()) {
+    m_demoFragIDs.push_back(fragID);
+  }
+
+  if ( !m_demoFragIDs.empty() ) {
+    std::ostringstream os;
+    std::sort(m_demoFragIDs.begin(),m_demoFragIDs.end());
+    os << " (frag IDs):";
+    for (int fragID : m_demoFragIDs) {
+      if (fragID > 0)
+        os << " 0x" << std::hex << fragID << std::dec;
+      else
+        os << " " << fragID;
+    }
+    ATH_MSG_INFO("Enable channel remapping for demonstrator modules" << os.str());
+  }
+
+
+  // Prepare legacy to Demonstrator channel mapping for LB and EB
+  // (vice versa to the one in the Tile ROD Decoder)
+  std::vector<std::pair<std::reference_wrapper<std::vector<int>>,
+                        std::reference_wrapper<const std::vector<int>>>>
+    legacyAndDemoChanMaps{{m_legacy2DemoChannelLB, dec->getDemoChannelMapLB()},
+                          {m_legacy2DemoChannelEB, dec->getDemoChannelMapEB()}};
+
+  for (std::pair<std::reference_wrapper<std::vector<int>>,
+         std::reference_wrapper<const std::vector<int>>>
+         legacyAndDemoChanMap : legacyAndDemoChanMaps) {
+
+    std::vector<int>& legacy2DemoChannel = legacyAndDemoChanMap.first;
+    const std::vector<int>& demoChanMap = legacyAndDemoChanMap.second;
+    if (!demoChanMap.empty()) {
+      legacy2DemoChannel.resize(m_maxChannels);
+      for (unsigned int demoChannel = 0; demoChannel < demoChanMap.size(); ++demoChannel) {
+        int legacyChannel = demoChanMap[demoChannel];
+        if ((legacyChannel >= 0) && (legacyChannel < m_maxChannels)) {
+          legacy2DemoChannel[legacyChannel] = demoChannel;
+        }
+      }
+    }
+  }
+
 
   // get TileCondToolEmscale
   ATH_CHECK( m_tileToolEmscale.retrieve() );
@@ -114,7 +168,14 @@ StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContai
     int drawer = m_tileHWID->drawer(drawer_id);
     int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
 
+    const std::vector<uint32_t> & drawer_info = hid2re->getDrawerInfo(frag_id);
+    int drawer_type = drawer_info.size() > 2 ? static_cast<int>(drawer_info[2]) : -1;
+    bool remap = (drawer_type > 0) || std::binary_search(m_demoFragIDs.begin(), m_demoFragIDs.end(), frag_id);
+    const std::vector<int>& legacy2DemoChannel = (ros < 3) ? m_legacy2DemoChannelLB : m_legacy2DemoChannelEB;
+
     int nChannels = 0;
+    std::vector<std::reference_wrapper<TileFastRawChannel>> drawerChannels;
+    drawerChannels.reserve(rawChannelCollection->size());
 
     for (const TileRawChannel* rawChannel : *rawChannelCollection) {
 
@@ -132,12 +193,31 @@ StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContai
           if (m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc).isBad()) quality += 16.;
         }
         //amplitude = m_tileToolEmscale->channelCalib(drawerIdx, channel, adc, amplitude, inputUnit, outputUnit);
+
+        if (remap && (channel >= 0) && (channel < m_maxChannels)) {
+          ATH_MSG_VERBOSE("Change channel [" << TileCalibUtils::getDrawerString(ros, drawer) << "]: "
+                          << channel << " -> " << legacy2DemoChannel[channel]);
+          channel = legacy2DemoChannel[channel];
+        }
+
         channels.emplace_back (frag_id, channel, adc, amplitude, time, quality);
+        drawerChannels.push_back(channels.back());
       }
 
-      // Don't need to worry about these moving due to the reserve() above.
-      encoder.add(&channels.back());
       ++nChannels;
+    }
+
+    if (remap) {
+      std::sort(drawerChannels.begin(), drawerChannels.end(),
+                [] (const TileFastRawChannel& a, const TileFastRawChannel& b ) {
+                  return a.channel() < b.channel();
+                });
+
+      }
+
+    for (const TileFastRawChannel& channel : drawerChannels){
+      // Don't need to worry about these moving due to the reserve() above.
+      encoder.add(&channel);
     }
 
     ATH_MSG_DEBUG( " Collection " << MSG::hex << "0x" << frag_id

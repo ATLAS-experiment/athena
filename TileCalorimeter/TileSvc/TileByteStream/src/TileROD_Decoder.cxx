@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of TileROD_Decoder class
@@ -3528,9 +3528,6 @@ uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
               DQfragMissing = false;
               correctAmplitude = false;
               rChUnit = (TileRawChannelUnit::UNIT) (unit); // Offline units in simulated data
-              if (!m_demoFragIDs.empty()) {
-                ATH_MSG_WARNING("DemoFragIDs is not supported in MC"); // No demonstator cabling in MC
-              }
             }
             
             unpack_frag4HLT(version, sizeOverhead, unit, p, pChannel, frag_id, drawer_type);
